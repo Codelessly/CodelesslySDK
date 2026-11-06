@@ -215,6 +215,24 @@ class AppToast {
     return true;
   }
 
+  /// The barriers of the dialogs and sheets open over the toast, newest
+  /// last (see [ToastBelowRoute]). The toast lives in the root overlay,
+  /// above every route the layout's navigator shows, and a navigator puts
+  /// entries that aren't its routes back on top whenever it rearranges, so
+  /// the toast can't sit under a dialog in paint order. Instead it paints
+  /// each barrier's colour over itself, as the barrier would if it covered
+  /// it, and stops taking taps while one is up.
+  static final ValueNotifier<List<ModalRoute<Object?>>> covers =
+      ValueNotifier<List<ModalRoute<Object?>>>(const []);
+
+  static void _cover(ModalRoute<Object?> route) =>
+      covers.value = [...covers.value, route];
+
+  static void _uncover(ModalRoute<Object?> route) => covers.value = [
+    for (final r in covers.value)
+      if (r != route) r,
+  ];
+
   /// The message's text style: [base] in [ShowToastAction.fontFamily] (a
   /// Google font or one the project loaded) and [ShowToastAction.fontWeight]
   /// when set. Without a weight it is semibold.
@@ -225,8 +243,13 @@ class AppToast {
     if (family.isEmpty) return base.copyWith(fontWeight: weight);
     if (GoogleFonts.asMap().containsKey(family)) {
       // The SDK's font resolver selects the loaded face for the requested
-      // weight (including the semibold face) rather than just a family name.
-      final TextStyle? resolved = fontOf(family);
+      // weight (semibold unless the action sets one) rather than just a
+      // family name: a face loaded for another weight would draw at that
+      // weight whatever [TextStyle.fontWeight] says.
+      final TextStyle? resolved = fontOf(
+        family,
+        weight: action.fontWeight ?? FontWeightNumeric.w600,
+      );
       return base.copyWith(
         fontFamily: resolved?.fontFamily,
         fontFamilyFallback: resolved?.fontFamilyFallback,
@@ -291,10 +314,13 @@ class AppToast {
 
   /// The font of [family], e.g. `Barlow`: a Google font or one the app
   /// loaded. Null when [family] is null or empty.
-  static TextStyle? fontOf(String? family) {
+  static TextStyle? fontOf(
+    String? family, {
+    FontWeightNumeric weight = FontWeightNumeric.w600,
+  }) {
     if (family == null || family.trim().isEmpty) return null;
     final TextStyle style = TextUtils.retrieveTextStyle(
-      fontName: FontName(family: family.trim(), weight: FontWeightNumeric.w600),
+      fontName: FontName(family: family.trim(), weight: weight),
     );
     return TextStyle(
       fontFamily: style.fontFamily,
@@ -673,7 +699,10 @@ class _ToastViewState extends State<_ToastView> {
                 ),
               ],
       ),
-      child: ClipRRect(borderRadius: radius, child: toast),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: _UnderBarriers(child: toast),
+      ),
     );
     toast = Semantics(
       liveRegion: true,
@@ -731,9 +760,13 @@ class _ToastViewState extends State<_ToastView> {
           ? null
           : widget.offset ?? action.bottomOffsetFor(media.size.width),
       // Only a toast with a button takes taps; the rest passes them through.
-      child: IgnorePointer(
-        ignoring: !(hasButton || hasClose) || _closing,
+      child: ValueListenableBuilder<List<ModalRoute<Object?>>>(
+        valueListenable: AppToast.covers,
         child: toast,
+        builder: (context, covers, toast) => IgnorePointer(
+          ignoring: !(hasButton || hasClose) || _closing || covers.isNotEmpty,
+          child: toast,
+        ),
       ),
     );
   }
@@ -751,4 +784,91 @@ Widget _styledAction(Widget button, ShowToastAction action, double radius) {
     ),
     child: button,
   );
+}
+
+/// Paints the barriers of [AppToast.covers] over [child] (the toast's
+/// card), each in its colour as far as its route's animation has faded it
+/// in, so the toast looks as it would under them.
+class _UnderBarriers extends StatelessWidget {
+  const _UnderBarriers({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder<List<ModalRoute<Object?>>>(
+        valueListenable: AppToast.covers,
+        child: child,
+        builder: (context, covers, child) {
+          Widget result = child!;
+          for (final ModalRoute<Object?> route in covers) {
+            final Color? color = route.barrierColor;
+            final Animation<double>? animation = route.animation;
+            if (color == null || color.a == 0) continue;
+            result = AnimatedBuilder(
+              animation: animation ?? kAlwaysCompleteAnimation,
+              child: result,
+              builder: (context, child) => DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  color: color.withValues(
+                    alpha: color.a * (animation?.value ?? 1),
+                  ),
+                ),
+                child: child,
+              ),
+            );
+          }
+          return result;
+        },
+      );
+}
+
+/// The content of a dialog or sheet the layout opens: while it is up, a
+/// toast already on screen is covered by its barrier (see
+/// [AppToast.covers]), as an app's own toast layer under its dialogs is.
+class ToastBelowRoute extends StatefulWidget {
+  /// Creates a [ToastBelowRoute] around [child].
+  const ToastBelowRoute({super.key, required this.child});
+
+  /// The route's content.
+  final Widget child;
+
+  @override
+  State<ToastBelowRoute> createState() => _ToastBelowRouteState();
+}
+
+class _ToastBelowRouteState extends State<ToastBelowRoute> {
+  ModalRoute<Object?>? _route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ModalRoute<Object?>? route = ModalRoute.of(context);
+    if (route == _route) return;
+    if (_route != null) AppToast._uncover(_route!);
+    _route = route;
+    if (route != null && route.barrierColor != null) {
+      // Not while building: the toast rebuilds on the change.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _route == route) AppToast._cover(route);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    final ModalRoute<Object?>? route = _route;
+    if (route != null) {
+      // The toast may be building in this frame too.
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => AppToast._uncover(route),
+      );
+      WidgetsBinding.instance.scheduleFrame();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
