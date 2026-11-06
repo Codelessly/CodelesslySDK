@@ -461,6 +461,156 @@ void main() {
     // Let the double-tap recognizer's timer run out.
     await tester.pump(const Duration(seconds: 1));
   });
+
+  testWidgets('a relative line is measured in the node\'s own size', (
+    tester,
+  ) async {
+    // A full-width transparent thumb (300 wide) whose track runs one width
+    // to the right: it scrubs across whatever width it is laid out at.
+    const scrubber = DragTrackModel(
+      variable: 'minute',
+      min: 0,
+      max: 1440,
+      step: 5,
+      x2: 1,
+      y2: 0,
+      relative: true,
+      jumpOnTap: true,
+    );
+    value = 720;
+    await tester.pumpWidget(
+      plate(scrubber, size: const Size(300, 20), at: const Offset(0, 300)),
+    );
+    // Rest centre (150, 310), moved half of its 300px width.
+    expect(tester.getCenter(find.text('cap')), const Offset(300, 310));
+    value = 0;
+    await tester.pumpWidget(
+      plate(scrubber, size: const Size(300, 20), at: const Offset(0, 300)),
+    );
+    // Tapped 200px right of the rest centre, off the node: two thirds.
+    await tester.tapAt(const Offset(350, 310));
+    await tester.pump();
+    expect(value, 960);
+    // Let the double-tap recognizer's timer run out.
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('tapping round an orbiting dial jumps the knob there', (
+    tester,
+  ) async {
+    // A 24-hour dial: the knob rests at the top, a full turn is 1440.
+    const dial = DragTrackModel(
+      shape: DragTrackShape.arc,
+      variable: 'minute',
+      min: 0,
+      max: 1440,
+      step: 5,
+      startAngle: 0,
+      endAngle: 360,
+      pivotY: 100,
+      jumpOnTap: true,
+    );
+    value = 0;
+    await tester.pumpWidget(
+      plate(dial, size: const Size(20, 20), at: const Offset(190, 90)),
+    );
+    // Pivot (200, 200): tapping straight right of it is a quarter turn,
+    // straight left three quarters.
+    await tester.tapAt(const Offset(300, 200));
+    await tester.pump();
+    expect(value, 360);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tapAt(const Offset(100, 200));
+    await tester.pump();
+    expect(value, 1080);
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  test('a partial arc takes taps outside it to the nearer end', () {
+    final g = DragTrackGeometry(
+      const DragTrackModel(
+        shape: DragTrackShape.arc,
+        variable: 'v',
+        startAngle: -135,
+        endAngle: 135,
+      ),
+    );
+    expect(
+      g.progressAtAngle(g.angleOf(const Offset(0, -10)))!,
+      closeTo(0.5, 1e-9),
+    );
+    expect(
+      g.progressAtAngle(g.angleOf(const Offset(10, 0)))!,
+      closeTo(225 / 270, 1e-9),
+    );
+    // Straight down is in the 90° gap; just left of it is nearer the start.
+    expect(g.progressAtAngle(g.angleOf(const Offset(-1, 10)))!, 0);
+    expect(g.progressAtAngle(g.angleOf(const Offset(1, 10)))!, 1);
+  });
+
+  testWidgets('a relative line is posed by its size on the design canvas', (
+    tester,
+  ) async {
+    const scrubber = DragTrackModel(
+      variable: 'minute',
+      min: 0,
+      max: 1440,
+      x2: 1,
+      y2: 0,
+      relative: true,
+    );
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: [
+            Positioned(
+              left: 0,
+              top: 0,
+              width: 300,
+              height: 20,
+              child: TrackPose(
+                track: scrubber,
+                progress: 0.25,
+                child: SizedBox.expand(child: Text('thumb')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+    // A quarter of its 300px width to the right of its rest centre.
+    expect(tester.getCenter(find.text('thumb')), const Offset(225, 10));
+  });
+
+  testWidgets('a relative scrub area maps a tap to that fraction across', (
+    tester,
+  ) async {
+    // A 300-wide scrub area on a track from half a width left to half a
+    // width right of its centre: its centre (where a knob sits) is at the
+    // value's fraction across, and a tap 3/4 across jumps to 3/4.
+    const scrubber = DragTrackModel(
+      variable: 'minute',
+      min: 0,
+      max: 1440,
+      step: 5,
+      x1: -0.5,
+      x2: 0.5,
+      y2: 0,
+      relative: true,
+      jumpOnTap: true,
+    );
+    value = 360;
+    await tester.pumpWidget(
+      plate(scrubber, size: const Size(300, 20), at: const Offset(0, 300)),
+    );
+    expect(tester.getCenter(find.text('cap')), const Offset(75, 310));
+    await tester.tapAt(const Offset(225, 310));
+    await tester.pump();
+    expect(value, 1080);
+    expect(tester.getCenter(find.text('cap')), const Offset(225, 310));
+    await tester.pump(const Duration(seconds: 1));
+  });
 }
 
 double _sin(double r) => math.sin(r);

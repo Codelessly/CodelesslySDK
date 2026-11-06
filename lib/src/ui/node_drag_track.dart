@@ -90,6 +90,17 @@ class DragTrackGeometry {
   Offset _scale = const Offset(1, 1);
   Offset _rest = Offset.zero;
 
+  /// The node's size: a [DragTrackModel.relative] line is measured in it.
+  Size size = Size.zero;
+
+  /// The ends of a line track, in pixels relative to the rest centre.
+  Offset get _lineStart => track.relative
+      ? Offset(track.x1 * size.width, track.y1 * size.height)
+      : Offset(track.x1, track.y1);
+  Offset get _lineEnd => track.relative
+      ? Offset(track.x2 * size.width, track.y2 * size.height)
+      : Offset(track.x2, track.y2);
+
   /// Places a viewBox track in a frame of [frameSize] where the node's rest
   /// centre is at [rest]. Returns whether anything changed.
   bool setFrame(Size frameSize, Offset rest) {
@@ -146,11 +157,7 @@ class DragTrackGeometry {
     final double p = progress.clamp(0.0, 1.0);
     switch (track.shape) {
       case DragTrackShape.line:
-        return Offset.lerp(
-          Offset(track.x1, track.y1),
-          Offset(track.x2, track.y2),
-          p,
-        )!;
+        return Offset.lerp(_lineStart, _lineEnd, p)!;
       case DragTrackShape.arc:
         // The node turns around the pivot: its centre moves on a circle
         // through rest, from where it stands at angle 0.
@@ -231,8 +238,8 @@ class DragTrackGeometry {
   double nearest(Offset p) {
     switch (track.shape) {
       case DragTrackShape.line:
-        final Offset a = Offset(track.x1, track.y1);
-        final Offset d = Offset(track.x2, track.y2) - a;
+        final Offset a = _lineStart;
+        final Offset d = _lineEnd - a;
         final double len2 = d.distanceSquared;
         if (len2 == 0) return 0;
         final Offset ap = p - a;
@@ -509,7 +516,9 @@ class _NodeDragTrackState extends State<NodeDragTrack>
     }
     _from = _drawn;
     _to = target;
-    _snap.duration = Duration(milliseconds: _fine ? (_track.snapMs / 2).round() : _track.snapMs);
+    _snap.duration = Duration(
+      milliseconds: _fine ? (_track.snapMs / 2).round() : _track.snapMs,
+    );
     _snap.forward(from: 0);
   }
 
@@ -550,7 +559,10 @@ class _NodeDragTrackState extends State<NodeDragTrack>
           _raw = _progress;
           _emit(jump);
         }
-      } else if (!onNode) {
+      } else if (!onNode ||
+          // A relative line's node is usually a scrub area as wide as its
+          // track (a transparent thumb over a chart): a tap on it jumps too.
+          (_track.relative && _track.shape == DragTrackShape.line)) {
         // Tapped the track off the node: jump there, then drag from there.
         _raw = _progress;
         _emit(_geometry.nearest(_rel(local)));
@@ -738,6 +750,7 @@ class _TrackArea extends SingleChildRenderObjectWidget {
 class _RenderTrackArea extends RenderProxyBox {
   late DragTrackGeometry _geometry;
   set geometry(DragTrackGeometry g) {
+    if (hasSize) g.size = size;
     _geometry = g;
     markNeedsPaint();
   }
@@ -782,6 +795,7 @@ class _RenderTrackArea extends RenderProxyBox {
   @override
   void performLayout() {
     super.performLayout();
+    _geometry.size = size;
     onSize(size);
   }
 
@@ -824,6 +838,89 @@ class _RenderTrackArea extends RenderProxyBox {
       onWheel(event);
     }
   }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child == null) return;
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      _transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer : null,
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    transform.multiply(_transform);
+  }
+}
+
+/// Draws [child] where its track puts it at [progress], without making it
+/// draggable (the design canvas). The pose is worked out from the child's
+/// laid-out size, so relative lines ([DragTrackModel.relative]) move by
+/// their share of it.
+class TrackPose extends SingleChildRenderObjectWidget {
+  /// Creates a [TrackPose].
+  const TrackPose({
+    super.key,
+    required this.track,
+    required this.progress,
+    required super.child,
+  });
+
+  /// The track.
+  final DragTrackModel track;
+
+  /// Where along the track to draw the child, 0 to 1.
+  final double progress;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderTrackPose(DragTrackGeometry(track), progress);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    final _RenderTrackPose r = renderObject as _RenderTrackPose;
+    if (r._geometry.track != track) r.geometry = DragTrackGeometry(track);
+    r.progress = progress;
+  }
+}
+
+class _RenderTrackPose extends RenderProxyBox {
+  _RenderTrackPose(this._geometry, this._progress);
+
+  DragTrackGeometry _geometry;
+  set geometry(DragTrackGeometry g) {
+    if (hasSize) g.size = size;
+    _geometry = g;
+    markNeedsPaint();
+  }
+
+  double _progress;
+  set progress(double p) {
+    if (p == _progress) return;
+    _progress = p;
+    markNeedsPaint();
+  }
+
+  Matrix4 get _transform => _geometry.transformAt(_progress, size);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _geometry.size = size;
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) =>
+      result.addWithPaintTransform(
+        transform: _transform,
+        position: position,
+        hitTest: (result, position) =>
+            super.hitTestChildren(result, position: position),
+      );
 
   @override
   void paint(PaintingContext context, Offset offset) {
