@@ -1,3 +1,17 @@
+## 9.3.1
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A node with a bound `visible` and a transition time animates its size
+  only when it shows or hides. A shown text whose data changes takes its
+  new width at once; it used to ease there with an overshoot that clipped
+  the text for a moment ("Weekdays" drew as "Weekday").
+- Layouts load the SVGs of their toast icons when they load
+  (`AppToast.precacheIcons`, `SvgIcon.precache`), so the first toast of a
+  session shows its icon.
+
 ## 9.3.0
 
 Requires codelessly_api 9.3.0.
@@ -66,11 +80,6 @@ Requires codelessly_api 9.3.0.
   longer draw overflow stripes.
 - `stretchItems` measures content, so hidden children take no height.
 - Aspect-ratio boxes keep their ratio; icon baselines align to pixels.
-- A node with a bound `visible` and a transition time animates its size
-  only when it shows or hides; a shown text whose data changes takes its
-  new width at once (it eased with an overshoot and clipped its text).
-- Layouts load the SVGs of their toast icons when they load, so the first
-  toast of a session shows its icon.
 - Shadows on rounded boxes with a spread shadow paint in order.
 - Single-line text in a row that runs short of space keeps its width.
 - Paths and path-drawn rectangles take taps only on their stroke or fill.
