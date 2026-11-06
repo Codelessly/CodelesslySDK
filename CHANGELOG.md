@@ -11,6 +11,10 @@ Requires codelessly_api 9.3.0.
 - Layouts load the SVGs of their toast icons when they load
   (`AppToast.precacheIcons`, `SvgIcon.precache`), so the first toast of a
   session shows its icon.
+- A node that clips its content keeps its own stroke outside the clip, as
+  Flutter's Container paints its border outside the clip of its child: a
+  rounded card's border was cut (or anti-aliased twice), leaving a light
+  seam between it and its shadow.
 
 ## 9.3.0
 
