@@ -572,7 +572,9 @@ class FunctionsRepository {
   }
 
   /// Runs the nested actions of [action] once per item of its list, with
-  /// `${result.item}` and `${result.index}` set.
+  /// `${loop.item}` and `${loop.index}` set for the whole turn (and
+  /// `${result.item}` / `${result.index}` until an action replaces the
+  /// result).
   static Future<bool> runForEach(
     BuildContext context,
     ForEachAction action,
@@ -598,9 +600,14 @@ class FunctionsRepository {
     }
     final List snapshot = List.of(items);
     for (int index = 0; index < snapshot.length; index++) {
+      final Map<String, Object?> turn = {
+        'item': snapshot[index],
+        'index': index,
+      };
       await ActionChain.run(
         () => runActions(context, action.actions),
-        result: {'item': snapshot[index], 'index': index},
+        result: turn,
+        loop: turn,
       );
     }
     return true;
