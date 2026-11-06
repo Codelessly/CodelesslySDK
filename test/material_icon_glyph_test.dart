@@ -29,7 +29,9 @@ void main() {
           builder: (context) {
             // Inspect the returned widget without mounting it: widget tests block
             // HTTP requests, and the SVG loader would otherwise fetch the CDN.
-            final box = const SvgIcon(
+            // Snapped to the pixel grid as Icon's glyph is (see
+            // PixelSnappedBaseline).
+            final snapped = const SvgIcon(
               icon: MaterialIcon(
                 codepoint: 0xe037,
                 name: 'play_arrow',
@@ -38,7 +40,8 @@ void main() {
               ),
               color: Colors.red,
               size: 32,
-            ).build(context) as SizedBox;
+            ).build(context) as PixelSnappedBaseline;
+            final box = snapped.child! as SizedBox;
             final picture = box.child! as SvgPicture;
             expect(box.width, 32);
             expect(box.height, 32);
