@@ -557,6 +557,15 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       );
     }
 
+    // A row that doesn't clip its content lets a child that hugs or has a
+    // fixed height overflow it, as the editor lays it out: a gridline's
+    // label, 15 tall, on a row 1 tall (moved up by its motion to sit on the
+    // line) keeps its height instead of being squeezed into the row and
+    // clipped by its own paragraph.
+    if (mainAxis == AxisC.horizontal) {
+      childWidget = overflowRowCrossAxis(node, parentRowColumn, childWidget);
+    }
+
     // A parent that stretches its children across gives each one the full
     // cross axis, like the editor's solver, except a child that hugs on that
     // axis: the solver keeps its own size there and places it at the start.
@@ -685,6 +694,48 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     }
 
     return childWidget;
+  }
+
+  /// Lets [childWidget], a child of [row] that hugs its height or has a
+  /// fixed one, be as tall as it is designed (a hugging text: as its lines)
+  /// when the row is shorter and
+  /// doesn't clip its content ([ClipMixin.clipsContent]): it is laid out
+  /// with at least its design height as its maximum and placed by the row's
+  /// cross axis alignment, the row's layout taking only the part that fits
+  /// (see [RowCrossOverflow]). The editor lays such a child out at its own
+  /// height over the row's edges; squeezed to the row's height a text would
+  /// clip itself. A stretching or baseline row, or one that hugs its height
+  /// (as tall as its children already), is left as it is.
+  static Widget overflowRowCrossAxis(
+    BaseNode child,
+    BaseNode row,
+    Widget childWidget,
+  ) {
+    if (row is ClipMixin && (row as ClipMixin).clipsContent) {
+      return childWidget;
+    }
+    if (row.verticalFit == SizeFit.shrinkWrap) return childWidget;
+    if (child is SpacerNode || child.verticalFit.isFlex) return childWidget;
+    if (child.alignment != AlignmentModel.none) return childWidget;
+    final double? y = switch ((row as RowColumnMixin).crossAxisAlignment) {
+      CrossAxisAlignmentC.start => -1,
+      CrossAxisAlignmentC.center => 0,
+      CrossAxisAlignmentC.end => 1,
+      _ => null,
+    };
+    // A text that hugs its height takes its lines' height, whatever the
+    // fonts measure at runtime; anything else at least its design height
+    // (a subtree that fills its height needs a bound).
+    final double height =
+        child is TextNode && child.verticalFit == SizeFit.shrinkWrap
+        ? double.infinity
+        : child.outerBoxLocal.height;
+    if (y == null || height.isNaN || height <= 0) return childWidget;
+    return RowCrossOverflow(
+      minMaxHeight: height,
+      alignment: Alignment(0, y),
+      child: childWidget,
+    );
   }
 
   /// Sizes a child of a wrapping row/column ([rowColumnWraps]) for its [CodelesslyWrap] run.
@@ -1057,6 +1108,100 @@ class RenderHugCrossFollower extends RenderProxyBox {
       crossAxis == Axis.vertical
           ? Size(box.size.width, 0)
           : Size(0, box.size.height),
+    );
+  }
+}
+
+/// Lays its child out with a maximum height of at least [minMaxHeight] (its
+/// design height), so a child of a row shorter than it keeps its height and
+/// overflows the row, which doesn't clip it. It takes the height that fits
+/// the incoming constraints and places the child in it by [alignment].
+/// Painting isn't clipped and there is no overflow indicator.
+class RowCrossOverflow extends SingleChildRenderObjectWidget {
+  /// Creates a [RowCrossOverflow].
+  const RowCrossOverflow({
+    super.key,
+    required this.minMaxHeight,
+    required this.alignment,
+    required Widget super.child,
+  });
+
+  /// The least maximum height the child gets.
+  final double minMaxHeight;
+
+  /// Where the child sits across the space taken.
+  final Alignment alignment;
+
+  @override
+  RenderRowCrossOverflow createRenderObject(BuildContext context) =>
+      RenderRowCrossOverflow(minMaxHeight: minMaxHeight, alignment: alignment);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderRowCrossOverflow renderObject,
+  ) {
+    renderObject
+      ..minMaxHeight = minMaxHeight
+      ..alignment = alignment;
+  }
+}
+
+/// The render object of [RowCrossOverflow].
+class RenderRowCrossOverflow extends RenderShiftedBox {
+  /// Creates a [RenderRowCrossOverflow].
+  RenderRowCrossOverflow({
+    required double minMaxHeight,
+    required Alignment alignment,
+  }) : _minMaxHeight = minMaxHeight,
+       _alignment = alignment,
+       super(null);
+
+  double _minMaxHeight;
+
+  /// See [RowCrossOverflow.minMaxHeight].
+  double get minMaxHeight => _minMaxHeight;
+  set minMaxHeight(double value) {
+    if (_minMaxHeight == value) return;
+    _minMaxHeight = value;
+    markNeedsLayout();
+  }
+
+  Alignment _alignment;
+
+  /// See [RowCrossOverflow.alignment].
+  Alignment get alignment => _alignment;
+  set alignment(Alignment value) {
+    if (_alignment == value) return;
+    _alignment = value;
+    markNeedsLayout();
+  }
+
+  BoxConstraints _childConstraints(BoxConstraints constraints) =>
+      constraints.copyWith(
+        maxHeight: math.max(constraints.maxHeight, minMaxHeight),
+      );
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    final RenderBox? child = this.child;
+    if (child == null) return constraints.smallest;
+    return constraints.constrain(
+      child.getDryLayout(_childConstraints(constraints)),
+    );
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    child.layout(_childConstraints(constraints), parentUsesSize: true);
+    size = constraints.constrain(child.size);
+    (child.parentData! as BoxParentData).offset = alignment.alongOffset(
+      size - child.size as Offset,
     );
   }
 }

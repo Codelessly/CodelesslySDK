@@ -29,7 +29,7 @@ void main() {
       basicBoxLocal: NodeBox(0, 0, 1, 1),
       children: ['fb'],
     )..parentID = kRootNode..visible = false;
-    final TextNode fb = text('fb', 'holder', 'Feedback!', brandRegular)
+    final TextNode fb = text('fb', 'missing', 'Feedback!', brandRegular)
       ..visible = false;
     final registry = NodeRegistry()
       ..setNodes({'pin': pin, 'holder': holder, 'fb': fb});
