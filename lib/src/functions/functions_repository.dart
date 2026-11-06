@@ -865,7 +865,11 @@ class FunctionsRepository {
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
-      final bool popped = await Navigator.maybePop(context, parsedParams);
+      // The screen's own pop leaves even while it blocks back.
+      final bool popped = await BackInterceptor.allowPop(
+        context,
+        () => Navigator.maybePop(context, parsedParams),
+      );
       // Nothing to go back to (the screen was opened directly): a pop with a
       // destination goes there instead.
       if (!popped && action.destinationId.isNotEmpty && context.mounted) {
@@ -1006,7 +1010,10 @@ class FunctionsRepository {
       // A dialog or sheet over the screen closes first.
       final ModalRoute<Object?>? modal = ModalRoute.of(context);
       if (modal != null && (!modal.isCurrent || modal.settings is! Page)) {
-        await Navigator.maybePop(context, params);
+        await BackInterceptor.allowPop(
+          context,
+          () => Navigator.maybePop(context, params),
+        );
         return;
       }
       final bool fallsBack =

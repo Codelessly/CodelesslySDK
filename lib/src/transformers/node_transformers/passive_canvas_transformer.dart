@@ -1327,7 +1327,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   Widget build(BuildContext context) {
     final Brightness brightness = widget.node.properties.brightness
         .toFlutterBrightness(context);
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+    Widget screen = AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: brightness == Brightness.light
             ? Colors.black
@@ -1347,5 +1347,15 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
               child: Builder(builder: widget.builder),
             ),
     );
+    // While its `blockBack` binding holds, back keeps the user on the
+    // screen and runs its "Back pressed" reactions. The overlay screen is
+    // above navigation: back is not its own.
+    if (!widget.settings.isPreview &&
+        widget.settings.withReactions &&
+        BackInterceptor.blocksBackOf(widget.node) &&
+        !OverlayScreenScope.of(context)) {
+      screen = BackInterceptor(node: widget.node, child: screen);
+    }
+    return screen;
   }
 }
