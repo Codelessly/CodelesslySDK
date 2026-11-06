@@ -14,8 +14,8 @@ dependencies:
     sdk: flutter
   a2ui_core: ^0.5.0
   a2ui_flutter: ^0.1.0
-  codelessly_api: ^9.0.3
-  codelessly_sdk: ^9.1.9
+  codelessly_api: ^10.0.0
+  codelessly_sdk: ^10.0.0
   provider: ^6.1.2
   google_fonts: ^9.0.0
   json_schema_builder: ^0.1.7
