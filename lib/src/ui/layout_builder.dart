@@ -440,11 +440,27 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
 }
 
 /// [variable] holding the link param of its name, when [params] has a
-/// non-empty one; the raw text is read as the variable's type.
+/// non-empty one, read the way [Codelessly.setVariablesFromRoute] reads it:
+/// `?ids=3,7` or `?ids=[3,7]` sets a list to `[3, 7]`, `?done=1` a boolean to
+/// true, `?goal=6000` a number.
+///
+/// A param that can't be read as the variable's type (`?goal=lots` for a
+/// number, `?filters=x` for a map) leaves the variable alone; it used to put
+/// the raw text in it, so `?feed=3` turned a `feed` list into the text "3"
+/// here while the other link path made it `[3]`.
 VariableData withLinkParam(VariableData variable, Map<String, dynamic> params) {
   final Object? param = params[variable.name];
   if (param == null) return variable;
-  final String value = param is String ? param : jsonEncode(param);
-  if (value.isEmpty) return variable;
-  return variable.copyWith(value: value);
+  final String text = param is String ? param : jsonEncode(param);
+  if (text.isEmpty) return variable;
+  final Object typed = Codelessly.linkValueFor(variable.type, text);
+  return switch (variable.type) {
+    VariableType.list || VariableType.map =>
+      typed is String ? variable : variable.copyWith(value: jsonEncode(typed)),
+    VariableType.integer ||
+    VariableType.decimal ||
+    VariableType.boolean =>
+      typed is String ? variable : variable.copyWith(value: '$typed'),
+    _ => variable.copyWith(value: text),
+  };
 }
