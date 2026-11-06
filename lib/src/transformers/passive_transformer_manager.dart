@@ -71,6 +71,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'audioPlayer': PassiveAudioPlayerTransformer(getNode, this),
       'divider': PassiveDividerTransformer(getNode, this),
       'barcode': PassiveBarcodeTransformer(getNode, this),
+      'pagination': PassivePaginationTransformer(getNode, this),
+      'tableView': PassiveTableViewTransformer(getNode, this),
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
@@ -328,6 +330,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       // The design canvas (isPreview) shows motion at rest: an entrance
       // from opacity 0 would otherwise wait there for frames an idle canvas
       // never draws, leaving the node invisible.
+      widget = applyFlip(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+        animate: !settings.isPreview,
+      );
+      widget = applyTilt(
+        context,
+        styled,
+        widget,
+        enabled: settings.withReactions && !settings.isPreview,
+      );
       widget = applyWidgetMotion(
         context,
         styled,
@@ -346,6 +361,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (!settings.withReactions) {
       widget = applyTrackPose(context, styled, widget, scopedValues: preview);
     }
+    // A face of a flip card hides when turned away; the back one is turned
+    // over in advance.
+    widget = applyFlipFace(context, styled, widget);
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
     }

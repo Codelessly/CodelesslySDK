@@ -151,6 +151,14 @@ class ConditionVariablesVisitor
   Set<String>? visitControlDragAction(ControlDragAction action) => {};
 
   @override
+  Set<String>? visitPaginateAction(PaginateAction action) => {
+    ...variablePathRegex
+        .allMatches('${action.page} ${action.pageSize}')
+        .map((match) => match.namedGroup('value'))
+        .nonNulls,
+  };
+
+  @override
   Set<String>? visitAnimateVariableAction(AnimateVariableAction action) => {};
 
   @override
@@ -278,6 +286,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitControlDragAction(ControlDragAction action) => null;
+
+  @override
+  String? visitPaginateAction(PaginateAction action) => null;
 
   @override
   String? visitAnimateVariableAction(AnimateVariableAction action) => null;
