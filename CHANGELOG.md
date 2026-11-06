@@ -21,6 +21,16 @@
   - Tilt and parallax (`NodeTilt`).
   - Page view `pageMotion` for coverflow, cube and 3D carousel (`PageMotionItem`).
   - New predefined variables: `flip`, `tilt` and `pageOffset`.
+- `motion.arc`: bound positions move along a curve (a formation change
+  sweeping every player to their new spot).
+- An entrance replays from values it names at their defaults
+  (`enterFrom: {opacity: 1}`): fade-out trails on replay.
+- Impossible days (`2013-02-30`) are not read as dates.
+- Quoted formula text reads `\n`, `\t` and `\r`.
+- Text fields use standard visual density on every platform: desktop's
+  compact density (also the web's) took 8 px off a padded field that hugs
+  its height, so the editor's canvas and desktop browsers drew it shorter
+  than phones did.
 
 ## 9.3.1
 
