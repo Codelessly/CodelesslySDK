@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' hide log;
 import 'dart:ui' show ImageFilter, lerpDouble;
@@ -230,7 +231,13 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
-    if (visible) return widget;
+    // A node shown and hidden by a binding keeps the same Visibility around
+    // it either way: its build switching between the node and a Visibility
+    // threw the whole subtree away on each toggle, scroll offsets and all,
+    // and with maintainState the state kept while hidden was lost as the
+    // node showed (a page body hidden while loading came back scrolled to
+    // the start).
+    if (visible && runtimeVisible == null) return widget;
 
     // A node hidden by a condition or variable at runtime gives up its space,
     // so alternative content (a sign-in or sign-up title, an error line) can
@@ -308,6 +315,9 @@ abstract class WidgetNodeTransformerManager
     bool animate = true,
   }) {
     MotionModel? motion = node.motion;
+    // Values bound to a number: they still apply when a bound loop is
+    // switched off (a frozen loop shows the bound pose, not rest).
+    final Map<String, double> bound = {};
     for (final String property in MotionModel.properties) {
       final String key = MotionModel.variableKey(property);
       final String? raw = node.variables[key];
@@ -327,6 +337,7 @@ abstract class WidgetNodeTransformerManager
         _ => null,
       };
       if (number == null || !number.isFinite) continue;
+      if (raw.contains(r'${')) bound[property] = number;
       motion = (motion ?? MotionModel.none).withValue(property, number);
     }
     final String pathKey = MotionModel.variableKey(MotionModel.pathProperty);
@@ -340,6 +351,19 @@ abstract class WidgetNodeTransformerManager
       motion = (motion ?? MotionModel.none).copyWith(
         path: data,
         clearPath: data.isEmpty,
+      );
+    }
+    final String keyframesKey = MotionModel.variableKey(
+      MotionModel.keyframesProperty,
+    );
+    if (node.variables.containsKey(keyframesKey)) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        keyframesKey,
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).copyWith(
+        keyframes: motionKeyframesOf(value),
       );
     }
     // The transition's duration, delay and curve, e.g. a slow spring in
@@ -378,6 +402,32 @@ abstract class WidgetNodeTransformerManager
         clearPulseKey: value == null,
       );
     }
+    final String pausedKey = MotionModel.variableKey(
+      MotionModel.pausedProperty,
+    );
+    if (node.variables.containsKey(pausedKey)) {
+      final String raw = node.variables[pausedKey]!;
+      final Object? value = raw.contains(r'${')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              pausedKey,
+              scopedValues: scopedValues,
+            )
+          : raw;
+      final bool? paused = switch (value) {
+        bool b => b,
+        num n => n != 0,
+        String s => switch (s.trim().toLowerCase()) {
+          'true' || 'on' || '1' || 'paused' => true,
+          'false' || 'off' || '0' || '' => false,
+          _ => null,
+        },
+        _ => null,
+      };
+      if (paused != null) {
+        motion = (motion ?? MotionModel.none).copyWith(paused: paused);
+      }
+    }
     final String loopKey = MotionModel.variableKey(MotionModel.loopProperty);
     if (animate && node.variables.containsKey(loopKey)) {
       final MotionModel base = motion ?? MotionModel.none;
@@ -396,13 +446,49 @@ abstract class WidgetNodeTransformerManager
       if (loop == MotionLoop.none) {
         // A loop's values are where it swings to; switched off, the node
         // eases back to rest (or to its values, when enterFrom gives the
-        // loop's start).
-        motion = base.loopOff;
+        // loop's start), except values bound by formulas, which hold: a
+        // plane frozen on its looping path at `pathProgress: ${= freeze ?
+        // 0.36 : 1}` stays at 0.36.
+        MotionModel off = base.loopOff;
+        for (final MapEntry<String, double> entry in bound.entries) {
+          off = off.withValue(entry.key, entry.value);
+        }
+        motion = off;
       } else if (loop != null) {
         motion = base.copyWith(loop: loop);
       }
     }
     return motion;
+  }
+
+  /// The keyframes a `motion.keyframes` binding's [value] gives: a list of
+  /// maps (`{t, translateX, translateY, scale, ...}`) or that list as JSON
+  /// text. Entries that aren't maps with a number `t` are skipped; anything
+  /// else gives no keyframes.
+  static List<MotionKeyframe> motionKeyframesOf(Object? value) {
+    Object? list = value;
+    if (list is String) {
+      try {
+        list = jsonDecode(list);
+      } catch (_) {
+        return const [];
+      }
+    }
+    if (list is! List) return const [];
+    double? num_(Object? v) => switch (v) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return [
+      for (final Object? item in list)
+        if (item is Map && num_(item['t']) != null)
+          MotionKeyframe.fromJson({
+            for (final MapEntry entry in item.entries)
+              if (num_(entry.value) case final double v when v.isFinite)
+                entry.key.toString(): v,
+          }),
+    ];
   }
 
   /// The loop a `motion.loop` binding's [value] asks for: `none`, `restart`
@@ -418,6 +504,7 @@ abstract class WidgetNodeTransformerManager
         'none' || 'off' || 'false' || '0' || '' => MotionLoop.none,
         'restart' || 'loop' => MotionLoop.restart,
         'reverse' || 'pulse' => MotionLoop.reverse,
+        'swing' => MotionLoop.swing,
         'true' || 'on' || '1' => on,
         _ => null,
       },
@@ -998,6 +1085,32 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: value);
   }
 
+  /// [track] with its [DragTrackModel.defaultValue] read from the node's
+  /// `track.defaultValue` binding when it has one that gives a number (the
+  /// list item's own default), else [track] as it is.
+  static DragTrackModel trackWithBoundDefault(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    if (!node.variables.containsKey(DragTrackModel.defaultValueVariable)) {
+      return track;
+    }
+    final Object? raw = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      DragTrackModel.defaultValueVariable,
+      scopedValues: scopedValues,
+    );
+    final double? value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return value == null || !value.isFinite
+        ? track
+        : track.copyWith(defaultValue: value);
+  }
+
   /// Writes a drag's live [values] into the variable named [name], so nodes
   /// outside the dragged one can follow it (see [DragModel.shareAs]).
   static void shareDragValues(
@@ -1010,6 +1123,106 @@ abstract class WidgetNodeTransformerManager
         ?.findVariableByName(name);
     if (variable == null) return;
     variable.value = variable.value.copyWith(value: values.toMap());
+  }
+
+  /// [node]'s drag track with the settings its bindings give
+  /// (`track.min`, `track.max`, `track.step`, and `track.defaultValue` via
+  /// [trackWithBoundDefault]), e.g. a countdown arc as long as the stage,
+  /// after any `dragTrack.<name>` bindings (see [DragTrackModel.bindable]:
+  /// angles, pivot, path, ends...), e.g. a dial whose turn is a setting.
+  static DragTrackModel resolvedTrack(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    double? bound(String key) {
+      if (!node.variables.containsKey(key)) return null;
+      final Object? v = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      return switch (v) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      };
+    }
+
+    final double? min = bound(DragTrackModel.minVariableKey);
+    final double? max = bound(DragTrackModel.maxVariableKey);
+    final double? step = bound(DragTrackModel.stepVariableKey);
+    final DragTrackModel base = withDragTrackBindings(node, track, scopedValues);
+    final DragTrackModel ranged =
+        min == null && max == null && step == null
+        ? base
+        : base.copyWith(
+            min: min,
+            max: max,
+            step: step == null ? null : (step < 0 ? 0 : step),
+          );
+    // Behaviour flags (Reduce motion turns off a dial's coast) and line
+    // ends under `track.*` keys (`track.x2: ${= parent.width - 26}`).
+    double? at(String key) => bound(key);
+    bool? flag(String key) {
+      if (!node.variables.containsKey(key)) return null;
+      final Object? v = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      return switch (v) {
+        bool b => b,
+        num n => n != 0,
+        String s => s.trim().toLowerCase() == 'true',
+        _ => null,
+      };
+    }
+
+    final bool? momentum = flag(DragTrackModel.momentumVariableKey);
+    final bool? smooth = flag(DragTrackModel.smoothVariableKey);
+    final double? x1 = at(DragTrackModel.x1VariableKey);
+    final double? y1 = at(DragTrackModel.y1VariableKey);
+    final double? x2 = at(DragTrackModel.x2VariableKey);
+    final double? y2 = at(DragTrackModel.y2VariableKey);
+    final DragTrackModel flagged =
+        momentum == null &&
+            smooth == null &&
+            x1 == null &&
+            y1 == null &&
+            x2 == null &&
+            y2 == null
+        ? ranged
+        : ranged.copyWith(
+            momentum: momentum,
+            smooth: smooth,
+            x1: x1,
+            y1: y1,
+            x2: x2,
+            y2: y2,
+          );
+    return trackWithBoundDefault(node, flagged, scopedValues);
+  }
+
+  /// [track] with the settings [node] binds through `dragTrack.<name>`
+  /// variables (see [DragTrackModel.bindable]) read from [scopedValues].
+  static DragTrackModel withDragTrackBindings(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    DragTrackModel out = track;
+    for (final String setting in DragTrackModel.bindable) {
+      final String key = DragTrackModel.variableKey(setting);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      out = out.withBinding(setting, value);
+    }
+    return out;
   }
 
   /// Draws [node] where its drag track puts it for its variable's value,
@@ -1029,18 +1242,12 @@ abstract class WidgetNodeTransformerManager
         scopedValues ?? ScopedValues.of(context),
         measured,
       );
-      final DragTrackModel track = resolveDragTrack(
-        saved,
-        bound: trackBindings(node, scope),
-        parentSize: parent,
-      );
+      final DragTrackModel track = resolveNodeTrack(node, saved, scope, parent);
       final double value = trackValueOf(node, track, scope);
-      return Transform(
-        alignment: Alignment.center,
-        transform: DragTrackGeometry(
-          track,
-          scale: trackPathScale(track, parent),
-        ).poseAt(track.progressOf(value)),
+      return TrackPose(
+        track: track,
+        progress: track.progressOf(value),
+        pathScale: trackPathScale(track, parent),
         child: widget,
       );
     }
@@ -1051,6 +1258,22 @@ abstract class WidgetNodeTransformerManager
       builder: pose,
     );
   }
+
+  /// [node]'s drag track [saved] with every binding it has resolved in
+  /// [scope]: the `dragTrack.<name>` and `track.min/max/step/...` settings
+  /// ([resolvedTrack]), then the `track.<field>` geometry
+  /// ([trackBindings]), and for [DragTrackUnits.parent] its line and pivot
+  /// scaled to the [parent] size ([resolveDragTrack]).
+  static DragTrackModel resolveNodeTrack(
+    BaseNode node,
+    DragTrackModel saved,
+    ScopedValues scope,
+    Size? parent,
+  ) => resolveDragTrack(
+    resolvedTrack(node, saved, scope),
+    bound: trackBindings(node, scope),
+    parentSize: parent,
+  );
 
   /// Whether [node]'s track depends on its parent's size: it is measured
   /// in [DragTrackUnits.parent] or binds its geometry (which may read
@@ -1092,17 +1315,31 @@ abstract class WidgetNodeTransformerManager
     ScopedValues scopedValues,
     Size? measured,
   ) {
-    final ScopedValues scope = measured == null
-        ? scopedValues
-        : ScopedValues.withParentSize(
-            scopedValues,
-            parentVariableValue(measured.width, measured.height),
-          );
-    if (node.drag?.track?.units != DragTrackUnits.parent) return (scope, null);
-    if (measured != null) return (scope, measured);
     final BaseNode? parent = node.parentID.isEmpty
         ? null
         : tryGetNode(node.parentID);
+    // `${parent}` is the size the parent gives its children (a freeform
+    // container's content box, see [FreeformContentSizeScope]) when there is
+    // one, else the parent's measured box, else (before it is measured, the
+    // first frame) its design content box.
+    final ScopedValues scope = scopedValues.parentSize != null
+        ? scopedValues
+        : measured != null
+        ? ScopedValues.withParentSize(
+            scopedValues,
+            parentVariableValue(measured.width, measured.height),
+          )
+        : parent != null
+        ? ScopedValues.withParentSize(
+            scopedValues,
+            parentVariableValue(
+              parent.innerBoxLocal.width,
+              parent.innerBoxLocal.height,
+            ),
+          )
+        : scopedValues;
+    if (node.drag?.track?.units != DragTrackUnits.parent) return (scope, null);
+    if (measured != null) return (scope, measured);
     return (
       scope,
       Size(
@@ -1203,27 +1440,42 @@ abstract class WidgetNodeTransformerManager
       };
     }
 
+    double? gain(BuildContext context) {
+      if (!node.variables.containsKey(DragTrackModel.gainVariableKey)) {
+        return null;
+      }
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        DragTrackModel.gainVariableKey,
+        scopedValues: ScopedValues.of(context),
+      );
+      return switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      };
+    }
+
     Widget buildMeasured(BuildContext context, Size? measured) {
       final (ScopedValues scope, Size? parent) = trackScope(
         node,
         ScopedValues.of(context),
         measured,
       );
-      final DragTrackModel track = resolveDragTrack(
-        saved,
-        bound: trackBindings(node, scope),
-        parentSize: parent,
-      );
+      final DragTrackModel track = resolveNodeTrack(node, saved, scope, parent);
       return NodeDragTrack(
         track: track,
         value: trackValueOf(node, track, scope),
+        nodeId: node.id,
+        gain: gain(context),
         enabled: enabled(context),
         pathScale: trackPathScale(track, parent),
         hitAreaBox: parentBox,
         onChanged: (v) {
-          // A variable the track writes; a computed one (or none) is left to
-          // the reactions, which read the value as ${result.value}.
-          if (variable != null && !variable.value.isComputed) {
+          // A variable the track writes ([DragTrackModel.write]); a computed
+          // one (or none) is left to the reactions, which read the value as
+          // ${result.value}.
+          if (track.write && variable != null && !variable.value.isComputed) {
             final bool whole = variable.value.type == VariableType.integer;
             // Scrubbing a variable that is being animated pauses it.
             if (codelesslyContext != null) {
@@ -1234,19 +1486,33 @@ abstract class WidgetNodeTransformerManager
               whole ? v.round() : v,
             );
           }
-          FunctionsRepository.triggerAction(
-            context,
-            TriggerType.changed,
-            reactions: reactions,
-            result: {'value': v},
-          );
         },
+        // `changed` reads the new value, the one before, the direction and
+        // every step crossed (a fast spin crosses several in one frame).
+        onChange: (change) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.changed,
+          reactions: reactions,
+          result: change.toMap(),
+        ),
         onEnd: (v) => FunctionsRepository.triggerAction(
           context,
           TriggerType.dragEnd,
           reactions: reactions,
           result: {'value': v},
         ),
+        // `changeEnd` once it has come to rest: after a coast and the snap.
+        onSettled: (v) => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.changeEnd,
+          reactions: reactions,
+          result: {'value': v},
+        ),
+        onFine: switch (track.fineVariable?.trim()) {
+          final String name? when name.isNotEmpty =>
+            (bool fine) => codelesslyContext?.updateVariable(name, fine),
+          _ => null,
+        },
         child: child,
       );
     }
@@ -1255,15 +1521,20 @@ abstract class WidgetNodeTransformerManager
         ? TrackParentMeasure(parentBox: parentBox, builder: buildMeasured)
         : buildMeasured(context, null);
 
-    // The track follows its variable and whatever its bindings read
-    // (`track.value` over a computed variable, the geometry): the node's own
-    // listeners rebuild only the node inside the track.
+    // Rebuilt when its variable changes, and when anything else it reads
+    // does: a bound `drag.enabled` (a volume slider off while sound is off),
+    // `track.value` over a computed variable, or bound geometry
+    // (`dragTrack.x2`, `track.x2`). The node's own listeners rebuild only
+    // the node inside the track.
     final WidgetNodeTransformerManager self = this;
     final List<Listenable> listenables = [
       ?variable,
       if (self is PassiveNodeTransformerManager &&
           node.variables.keys.any(
-            (key) => key.startsWith(DragTrackModel.bindingPrefix),
+            (key) =>
+                key == DragModel.enabledVariableKey ||
+                key.startsWith('dragTrack.') ||
+                key.startsWith(DragTrackModel.bindingPrefix),
           ))
         ...self.listenablesFor(context, node),
     ];
@@ -1276,7 +1547,55 @@ abstract class WidgetNodeTransformerManager
   }
 
   /// Convenience method to handle widget reactions.
+  ///
+  /// A rectangle drawn from SVG path data takes pointer events only on its
+  /// shape (see [SvgPathHitRegion]), so overlapping shapes can each be
+  /// tapped where they show.
   Widget wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
+    final Widget wrapped = _wrapWithReaction(context, node, widget);
+    if (node is RectangleNode && node.hasPath) {
+      final Path? path = parseSvgPath(node.path);
+      if (path != null) {
+        return SvgPathHitRegion(
+          path: path,
+          filled: node.fills.any((paint) => paint.visible),
+          stroked:
+              node.strokeWeight > 0 &&
+              node.strokes.any((paint) => paint.visible),
+          strokeWidth: node.strokeWeight,
+          child: wrapped,
+        );
+      }
+    }
+    if (node is PathNode) {
+      // A list item's path is usually bound (`pathData`).
+      final String data = node.variables.containsKey('pathData')
+          ? PropertyValueDelegate.getPropertyValue<String>(
+                  node,
+                  'pathData',
+                  scopedValues: ScopedValues.of(context),
+                ) ??
+                node.pathData
+          : node.pathData;
+      final Path? path = parseSvgPath(data);
+      if (path != null) {
+        final double? w = node.viewBoxWidth, h = node.viewBoxHeight;
+        return SvgPathHitRegion(
+          path: path,
+          filled: node.fills.any((paint) => paint.visible),
+          stroked:
+              node.strokeWeight > 0 &&
+              node.strokes.any((paint) => paint.visible),
+          strokeWidth: node.strokeWeight,
+          viewBox: w != null && h != null && w > 0 && h > 0 ? Size(w, h) : null,
+          child: wrapped,
+        );
+      }
+    }
+    return wrapped;
+  }
+
+  Widget _wrapWithReaction(BuildContext context, BaseNode node, Widget widget) {
     Widget tappable = _wrapWithTapReactions(context, node, widget);
     if (node is! ReactionMixin || node is CanvasNode || node is SpacerNode) {
       return tappable;

@@ -119,11 +119,41 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     return TextNodeBox(
       node: widget.node,
       // A design canvas shows the final text.
-      child: countUp == null || widget.settings.isPreview
-          ? eased
-          : CountUpText(text: text, countUp: countUp),
+      child: withGradientText(
+        widget.node,
+        countUp == null || widget.settings.isPreview
+            ? eased
+            : CountUpText(text: text, countUp: countUp),
+      ),
     );
   }
+}
+
+/// The gradient a text node paints its glyphs with: the first visible fill
+/// of its text, when that is a gradient (engraved brass lettering, a sunset
+/// title). Null for solid text. A gradient spans the text's box.
+Gradient? gradientTextOf(TextNode node) {
+  if (node.textMixedProps.isEmpty) return null;
+  for (final TextProp prop in node.textMixedProps) {
+    final PaintModel? fill = prop.fills.where((f) => f.visible).firstOrNull;
+    if (fill == null || fill.type == PaintType.solid || fill.type == PaintType.image) {
+      return null;
+    }
+  }
+  final PaintModel fill = node.textMixedProps.first.fills.firstWhere((f) => f.visible);
+  return retrieveGradient(fill);
+}
+
+/// [child] (a text node's text) painted with the node's gradient fill, if
+/// it has one ([gradientTextOf]).
+Widget withGradientText(TextNode node, Widget child) {
+  final Gradient? gradient = gradientTextOf(node);
+  if (gradient == null) return child;
+  return ShaderMask(
+    blendMode: BlendMode.srcIn,
+    shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+    child: child,
+  );
 }
 
 /// Sizes a text node's box and places its text inside it.
@@ -144,6 +174,20 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
 /// The text sits inside that box per its horizontal and vertical text
 /// alignment, so a text box larger than its text (pinned on all sides,
 /// expanded, or a fixed size) shows it centered, at the bottom, and so on.
+/// The gradient a text is filled with: the first visible gradient paint of
+/// its first style range, or null for a solid colour.
+Gradient? gradientTextFill(TextNode node) {
+  if (node.textMixedProps.isEmpty) return null;
+  for (final PaintModel paint in node.textMixedProps.first.fills) {
+    if (!paint.visible) continue;
+    if (paint.type == PaintType.solid || paint.type == PaintType.image) {
+      return null;
+    }
+    return retrieveGradient(paint);
+  }
+  return null;
+}
+
 class TextNodeBox extends StatelessWidget {
   final TextNode node;
   final Widget child;
@@ -187,13 +231,23 @@ class TextNodeBox extends StatelessWidget {
 
     // Scale-down text stays on its lines and shrinks as a whole to fit the
     // width it is given.
-    final Widget content = node.overflow == TextOverflowC.scaleDown
+    Widget content = node.overflow == TextOverflowC.scaleDown
         ? FittedBox(
             fit: BoxFit.scaleDown,
             alignment: alignmentOf(node),
             child: child,
           )
         : child;
+    // A gradient fill (a steel wordmark) paints the glyphs with the
+    // gradient across the text's own box.
+    final Gradient? gradient = gradientTextFill(node);
+    if (gradient != null) {
+      content = ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+        child: content,
+      );
+    }
     Widget box = Align(
       alignment: alignmentOf(node, TextUtils.textAlignOf(node, context)),
       // Hug the text on an axis that does not fill its parent, so a loose
@@ -205,7 +259,16 @@ class TextNodeBox extends StatelessWidget {
     if (minHeight) {
       box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
     }
-    if (hFit == SizeFit.shrinkWrap) box = TextIntrinsicSlack(child: box);
+    if (hFit == SizeFit.shrinkWrap) {
+      box = TextIntrinsicSlack(
+        // A text that stays on one line can't be squeezed below it without
+        // clipping its last words, like CSS white-space: nowrap; one that
+        // may shrink says so with squeezable (a Flexible).
+        singleLine:
+            !node.softWrap && node.overflow != TextOverflowC.scaleDown,
+        child: box,
+      );
+    }
     box = RemeasureOnFontsChange(child: box);
     return SizedBox(
       width: switch (hFit) {
@@ -227,18 +290,52 @@ class TextNodeBox extends StatelessWidget {
 /// narrower than the width it needs to lay out on one line, so its last
 /// word wrapped away: `Bluebird Coffee` drew as `Bluebird`, with the space
 /// for `Coffee` left empty.
+///
+/// With [singleLine] (a text that doesn't wrap), its minimum intrinsic width
+/// is that whole width too: Flutter's paragraph reports its longest word
+/// whatever softWrap says, so a row short of room (CodelesslyFlex's shrink
+/// pass) squeezed a one-line `Try again` to `Try agai` where Flutter's own
+/// Row lets it overflow.
 class TextIntrinsicSlack extends SingleChildRenderObjectWidget {
-  const TextIntrinsicSlack({super.key, super.child});
+  const TextIntrinsicSlack({super.key, this.singleLine = false, super.child});
+
+  /// Whether the text stays on one line (softWrap off).
+  final bool singleLine;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      RenderTextIntrinsicSlack();
+      RenderTextIntrinsicSlack(singleLine: singleLine);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderTextIntrinsicSlack renderObject,
+  ) {
+    renderObject.singleLine = singleLine;
+  }
 }
 
 class RenderTextIntrinsicSlack extends RenderProxyBox {
+  RenderTextIntrinsicSlack({bool singleLine = false})
+    : _singleLine = singleLine;
+
+  /// See [TextIntrinsicSlack.singleLine].
+  bool get singleLine => _singleLine;
+  bool _singleLine;
+  set singleLine(bool value) {
+    if (_singleLine == value) return;
+    _singleLine = value;
+    markNeedsLayout();
+  }
+
   /// [width] rounded up to a whole pixel.
   static double slackWidth(double width) =>
       width <= 0 || !width.isFinite ? width : width.ceilToDouble();
+
+  @override
+  double computeMinIntrinsicWidth(double height) => _singleLine
+      ? computeMaxIntrinsicWidth(height)
+      : super.computeMinIntrinsicWidth(height);
 
   @override
   double computeMaxIntrinsicWidth(double height) =>
