@@ -76,15 +76,12 @@ void main() {
   });
 
   test('markdownSpans reads the text and style of resolved spans', () {
-    final spans = markdownSpans(
-      [
-        TextSpan(
-          style: base,
-          children: const [TextSpan(text: 'a **b**')],
-        ),
-      ],
-      const MarkdownStyle(),
-    );
+    final spans = markdownSpans([
+      TextSpan(
+        style: base,
+        children: const [TextSpan(text: 'a **b**')],
+      ),
+    ], const MarkdownStyle());
     expect(plain(spans), 'a b');
     expect(spanOf(spans, 'b').style!.fontSize, 13);
   });

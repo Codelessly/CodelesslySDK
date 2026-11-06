@@ -115,4 +115,26 @@ void main() {
       isNull,
     );
   });
+
+  test('a plain hex colour for `iconColor` colours the icon', () {
+    for (final String hex in ['#3A3530', '#FF3A3530']) {
+      expect(
+        PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+          iconNode({'iconColor': hex}),
+          'iconColor',
+          scopedValues: scope(),
+        ),
+        ColorRGBA.fromHex('#FF3A3530'),
+      );
+    }
+    // Not a colour: still a (missing) variable.
+    expect(
+      PropertyValueDelegate.getPropertyValue<ColorRGBA>(
+        iconNode({'iconColor': '#3A35'}),
+        'iconColor',
+        scopedValues: scope(),
+      ),
+      isNull,
+    );
+  });
 }

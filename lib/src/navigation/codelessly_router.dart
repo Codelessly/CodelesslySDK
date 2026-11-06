@@ -87,9 +87,14 @@ class CodelesslyRouter {
           historyGo: _historyGo,
           // A reload starts with the address and the state the browser
           // kept with its history entry: the stack of screens it showed.
+          // `runApp(MaterialApp.router(routerConfig: router.config()))`
+          // calls this before runApp creates the binding, so make sure there
+          // is one (runApp then reuses it).
           initialRouteInformation: RouteInformation(
             uri: Uri.parse(
-              WidgetsBinding.instance.platformDispatcher.defaultRouteName,
+              WidgetsFlutterBinding.ensureInitialized()
+                  .platformDispatcher
+                  .defaultRouteName,
             ),
             state: _historyState(),
           ),
@@ -551,7 +556,10 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
       // location no route matches (see [_buildNotFoundPage]).
       if (path != null &&
           !CanvasLocation.segmentsOf(path).any(CanvasLocation.isCatchAll)) {
-        add(path, layoutId);
+        // `sheet/:id?` is two routes: `sheet/:id` and `sheet`.
+        for (final String variant in CanvasLocation.expandOptional(path)) {
+          add(variant, layoutId);
+        }
       }
     }
     for (final String layoutId in layoutIds) {

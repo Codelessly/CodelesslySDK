@@ -205,7 +205,7 @@ void main() {
       final Hero hero = tester.widget<Hero>(find.byType(Hero));
       expect(
         hero.createRectTween!(Rect.zero, const Rect.fromLTWH(0, 0, 1, 1)),
-        isA<MaterialRectArcTween>(),
+        isA<HeroArcRectTween>(),
       );
       expect(hero.transitionOnUserGestures, isTrue);
       await tester.pumpWidget(
