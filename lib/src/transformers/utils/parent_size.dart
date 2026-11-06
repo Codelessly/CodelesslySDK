@@ -51,6 +51,44 @@ class ParentSizeScope extends InheritedWidget {
       width != oldWidget.width || height != oldWidget.height;
 }
 
+/// The content box of a freeform container ([parentId]: a frame, a stack,
+/// a canvas body), for its children that read `parent`: a child of fixed
+/// size there is laid out with tight constraints of its own size, so
+/// `${parent.width}` must come from the container itself (a slider thumb
+/// whose track is `parent.width - 28` long).
+class FreeformContentSizeScope extends InheritedWidget {
+  /// The container these sizes belong to.
+  final String parentId;
+
+  /// Its content width, or null when unbounded.
+  final double? width;
+
+  /// Its content height, or null when unbounded.
+  final double? height;
+
+  /// Creates a [FreeformContentSizeScope].
+  const FreeformContentSizeScope({
+    super.key,
+    required this.parentId,
+    required this.width,
+    required this.height,
+    required super.child,
+  });
+
+  /// The scope of the container [parentId] at [context], or null.
+  static FreeformContentSizeScope? of(BuildContext context, String parentId) {
+    final FreeformContentSizeScope? scope = context
+        .dependOnInheritedWidgetOfExactType<FreeformContentSizeScope>();
+    return scope?.parentId == parentId ? scope : null;
+  }
+
+  @override
+  bool updateShouldNotify(FreeformContentSizeScope oldWidget) =>
+      width != oldWidget.width ||
+      height != oldWidget.height ||
+      parentId != oldWidget.parentId;
+}
+
 /// The value of the `parent` variable for a parent that gives [width] and
 /// [height]: `width` and `height`, each null when unbounded.
 Map<String, dynamic> parentVariableValue(double? width, double? height) => {

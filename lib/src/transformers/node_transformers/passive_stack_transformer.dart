@@ -41,6 +41,39 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       child: child,
     );
 
+    // A bound size that reads `parent` (a fill `18 + (parent.width - 28) *
+    // v` wide) is worked out here, where the child is placed: give it the
+    // container's content box.
+    if (readsParentSize(node)) {
+      // Looked up below the container's scope, inside its layout.
+      return Builder(
+        builder: (inside) {
+          final FreeformContentSizeScope? box = FreeformContentSizeScope.of(
+            inside,
+            parent.id,
+          );
+          if (box == null) {
+            return _placedChild(inside, node, manager, placed);
+          }
+          return ParentSizeScope(
+            width: box.width,
+            height: box.height,
+            child: Builder(
+              builder: (scope) => _placedChild(scope, node, manager, placed),
+            ),
+          );
+        },
+      );
+    }
+    return _placedChild(context, node, manager, placed);
+  }
+
+  static Widget _placedChild(
+    BuildContext context,
+    BaseNode node,
+    WidgetNodeTransformerManager? manager,
+    Widget Function(BuildContext) placed,
+  ) {
     // The child widget already listens to its bindings, but its parent data
     // belongs to the freeform slot. Rebuild that slot as well when a bound
     // position, size or size fraction changes, using the mounted scope
@@ -396,6 +429,28 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           ),
       ],
     );
+    // Children that read `parent` read this container's content box.
+    if (children.any(readsParentSize)) {
+      final Widget laidOut = content;
+      content = contentFit != null
+          ? FreeformContentSizeScope(
+              parentId: node.id,
+              width: designSize.width,
+              height: designSize.height,
+              child: laidOut,
+            )
+          : MeasurableLayoutBuilder(
+              fallbackSize: designSize,
+              builder: (context, constraints) => FreeformContentSizeScope(
+                parentId: node.id,
+                width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+                height: constraints.hasBoundedHeight
+                    ? constraints.maxHeight
+                    : null,
+                child: laidOut,
+              ),
+            );
+    }
     if (contentFit != null) {
       content = ScaledContent(
         designSize: designSize,
