@@ -190,6 +190,8 @@ abstract final class ComputedVariables {
     Map<String, VariableData> variables, {
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
+    ComputedPreviewCache? cache,
+    Duration? budget,
     Size? screenSize,
     Brightness? platformBrightness,
     Map<String, Map<String, Object?>>? predefinedOverrides,
@@ -207,14 +209,93 @@ abstract final class ComputedVariables {
       platformBrightness: platformBrightness,
       predefinedOverrides: predefinedOverrides,
     );
+    // What every formula may read besides variables: the screen it is
+    // previewed on and the predefined variables' preview values.
+    final String context = cache == null
+        ? ''
+        : '$screenSize|$platformBrightness|${jsonEncode(predefinedOverrides ?? const {}, toEncodable: (o) => '$o')}';
     for (final String name in evaluationOrder(variables)) {
       final VariableData variable = resolved[name]!;
-      resolved[name] = withResult(
+      if (cyclic.contains(name)) {
+        resolved[name] = withResult(variable, null);
+        continue;
+      }
+      // What the formula reads, through other computed variables and
+      // functions, as it stands now: the same as last time reuses the
+      // result.
+      final String? key = cache == null
+          ? null
+          : _inputKey(variable, variables, resolved, routeParams, context);
+      final ({String key, VariableData result, bool slow})? previous =
+          cache?._results[variable.id];
+      if (key != null && previous != null && previous.key == key) {
+        resolved[name] = previous.result;
+        continue;
+      }
+      final ({Object? result, bool exceeded}) run = budget == null
+          ? (result: evaluate(variable, scopedValues: scope), exceeded: false)
+          : FormulaEvaluator.withinBudget(
+              budget,
+              () => evaluate(variable, scopedValues: scope),
+            );
+      final VariableData result = withResult(
         variable,
-        cyclic.contains(name) ? null : evaluate(variable, scopedValues: scope),
+        run.exceeded ? null : run.result,
       );
+      resolved[name] = result;
+      if (cache != null && key != null) {
+        cache._results[variable.id] = (
+          key: key,
+          result: result,
+          slow: run.exceeded,
+        );
+        if (run.exceeded) {
+          cache.slow.add(name);
+        } else {
+          cache.slow.remove(name);
+        }
+      }
     }
     return resolved;
+  }
+
+  /// The values [variable]'s formula reads, directly or through other
+  /// computed variables and functions, joined into one comparable key.
+  static String _inputKey(
+    VariableData variable,
+    Map<String, VariableData> variables,
+    Map<String, VariableData> resolved,
+    Map<String, dynamic>? routeParams,
+    String context,
+  ) {
+    final deps = PropertyValueDelegate.computedDependencies(
+      variable.name,
+      variables,
+    );
+    final List<String> names = {
+      for (final String path in deps.paths)
+        if (VariableMatch.parse(path.wrapWithVariableSyntax())
+            case final VariableMatch match)
+          match.name,
+    }.toList()..sort();
+    final StringBuffer key = StringBuffer(formulaOf(variable) ?? '')
+      ..write('\u0000')
+      ..write(context);
+    for (final String name in names) {
+      final VariableData? input = resolved[name];
+      key
+        ..write('\u0000')
+        ..write(name)
+        ..write('=')
+        ..write(input?.value ?? '')
+        ..write(input?.formula ?? '');
+      if (name == 'route') key.write(jsonEncode(routeParams ?? const {}));
+    }
+    // Formulas that read the clock are worked out every time.
+    if (deps.readsClock || deps.readsFrameClock) {
+      key.write('\u0000${DateTime.now().microsecondsSinceEpoch}');
+    }
+    return key.toString();
   }
 
   static bool _fits(Object result, VariableType type) => switch (type) {
@@ -286,4 +367,22 @@ abstract final class ComputedVariables {
       extra: variable.extra,
     ),
   };
+}
+
+/// Results of computed variables a design canvas worked out, kept while
+/// the values their formulas read stay the same, so editing one node
+/// doesn't work out every heavy formula again; and which of them ran past
+/// their time budget ([slow]), shown empty until what they read changes.
+class ComputedPreviewCache {
+  final Map<String, ({String key, VariableData result, bool slow})> _results =
+      {};
+
+  /// Names of the computed variables whose last preview ran out of time.
+  final Set<String> slow = {};
+
+  /// Forgets every result.
+  void clear() {
+    _results.clear();
+    slow.clear();
+  }
 }

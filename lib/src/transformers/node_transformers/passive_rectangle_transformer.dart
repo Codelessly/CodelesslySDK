@@ -210,6 +210,7 @@ class PassiveRectangleWidget extends StatelessWidget {
         clipBehavior: clip,
         tapThrough: TapThroughScope.of(context),
         notches: notchesOf(node),
+        pathShape: pathShadowShapeOf(node),
         child: child,
       ),
     );
@@ -230,6 +231,10 @@ class _TapThroughDecoration extends BoxDecoration {
 /// (all of them, keeping their order), so a spread shadow's corners grow
 /// with it as in CSS and design tools; [BoxDecoration] keeps the box's
 /// radius, which turns a spread glow around a dot into a square.
+///
+/// A rectangle drawn as an SVG path ([pathShape], see [pathShadowShapeOf])
+/// casts its shadows along the path (its fill and its stroke) instead of
+/// the box, through a [PathShadowPainter].
 Widget decorateWithShadows({
   required List<BoxShadow> boxShadow,
   required BorderRadius? borderRadius,
@@ -237,7 +242,18 @@ Widget decorateWithShadows({
   required Widget child,
   bool tapThrough = false,
   List<NotchModel> notches = const [],
+  PathShadowShape? pathShape,
 }) {
+  if (pathShape != null) {
+    return CustomPaint(
+      painter: boxShadow.isEmpty
+          ? null
+          : PathShadowPainter(shape: pathShape, shadows: boxShadow),
+      child: clipBehavior == Clip.none
+          ? child
+          : ClipRect(clipBehavior: clipBehavior, child: child),
+    );
+  }
   if (notches.isNotEmpty) {
     final BorderRadius radius = borderRadius ?? BorderRadius.zero;
     final Widget box = clipBehavior == Clip.none
@@ -340,34 +356,46 @@ List<Widget> wrapWithInkWell(
       .where((reaction) => reaction.trigger.type == TriggerType.longPress)
       .toList();
 
+  // Where the tap landed, for the click's result (see
+  // [FunctionsRepository.pointerResult]).
+  Map<String, double>? tapAt;
   final widget = Material(
     type: MaterialType.transparency,
-    child: InkWell(
-      onTap: onClickReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.click,
-              reactions: onClickReactions,
-            ),
-      onLongPress: onLongPressReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.longPress,
-              reactions: onLongPressReactions,
-            ),
-      borderRadius: getBorderRadius(node),
-      overlayColor: inkWell.overlayColor != null
-          ? WidgetStatePropertyAll<Color>(
-              inkWell.overlayColor!.toFlutterColor(),
-            )
-          : null,
-      splashColor: inkWell.splashColor?.toFlutterColor(),
-      highlightColor: inkWell.highlightColor?.toFlutterColor(),
-      hoverColor: inkWell.hoverColor?.toFlutterColor(),
-      focusColor: inkWell.focusColor?.toFlutterColor(),
-      child: Stack(alignment: alignment, children: children),
+    child: Builder(
+      builder: (tapContext) => InkWell(
+        onTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+          details.localPosition,
+          details.globalPosition,
+          FunctionsRepository.boxSizeOf(tapContext),
+        ),
+        onTap: onClickReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.click,
+                reactions: onClickReactions,
+                result: tapAt,
+              ),
+        onLongPress: onLongPressReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.longPress,
+                reactions: onLongPressReactions,
+                result: tapAt,
+              ),
+        borderRadius: getBorderRadius(node),
+        overlayColor: inkWell.overlayColor != null
+            ? WidgetStatePropertyAll<Color>(
+                inkWell.overlayColor!.toFlutterColor(),
+              )
+            : null,
+        splashColor: inkWell.splashColor?.toFlutterColor(),
+        highlightColor: inkWell.highlightColor?.toFlutterColor(),
+        hoverColor: inkWell.hoverColor?.toFlutterColor(),
+        focusColor: inkWell.focusColor?.toFlutterColor(),
+        child: Stack(alignment: alignment, children: children),
+      ),
     ),
   );
 
@@ -530,8 +558,8 @@ List<Widget> wrapWithPaddingAndScroll(
 
 List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
   if (node is! DefaultShapeNode) return [];
-  // A box shadow would outline the box, not the path.
-  if (node is RectangleNode && node.hasPath) return [];
+  // A rectangle drawn as a path casts these along the path: see
+  // [decorateWithShadows] and [pathShadowShapeOf].
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map((effect) {

@@ -400,7 +400,7 @@ abstract class WidgetNodeTransformerManager
     final String pausedKey = MotionModel.variableKey(
       MotionModel.pausedProperty,
     );
-    if (node.variables.containsKey(pausedKey)) {
+    if (animate && node.variables.containsKey(pausedKey)) {
       final String raw = node.variables[pausedKey]!;
       final Object? value = raw.contains(r'${')
           ? PropertyValueDelegate.getPropertyValue<Object>(
@@ -413,7 +413,7 @@ abstract class WidgetNodeTransformerManager
         bool b => b,
         num n => n != 0,
         String s => switch (s.trim().toLowerCase()) {
-          'true' || 'on' || '1' || 'paused' => true,
+          'true' || 'on' || '1' || 'yes' || 'paused' => true,
           'false' || 'off' || '0' || '' => false,
           _ => null,
         },
@@ -1332,7 +1332,9 @@ abstract class WidgetNodeTransformerManager
   }
 
   /// [node]'s drag track with the settings its bindings give
-  /// (`track.min`, `track.max`, `track.step`, and `track.defaultValue` via
+  /// (`track.min`, `track.max`, `track.step`, `track.pixelsPerRange`, e.g. a
+  /// deck whose last card follows the data, `track.max` =
+  /// `${= hive.frames - 1}`, and `track.defaultValue` via
   /// [trackWithBoundDefault]), e.g. a countdown arc as long as the stage,
   /// after any `dragTrack.<name>` bindings (see [DragTrackModel.bindable]:
   /// angles, pivot, path, ends...), e.g. a dial whose turn is a setting.
@@ -1343,32 +1345,44 @@ abstract class WidgetNodeTransformerManager
   ) {
     double? bound(String key) {
       if (!node.variables.containsKey(key)) return null;
-      final Object? v = PropertyValueDelegate.getPropertyValue<Object>(
-        node,
-        key,
-        scopedValues: scopedValues,
-      );
-      return switch (v) {
+      final Object? v =
+          PropertyValueDelegate.getPropertyValue<Object>(
+            node,
+            key,
+            scopedValues: scopedValues,
+          ) ??
+          // A number written as is: `"track.step": "0.5"`.
+          PropertyValueDelegate.literalNumber<double>(node.variables[key]!);
+      final double? n = switch (v) {
         num n => n.toDouble(),
         String s => double.tryParse(s.trim()),
         _ => null,
       };
+      return n == null || !n.isFinite ? null : n;
     }
 
     final double? min = bound(DragTrackModel.minVariableKey);
     final double? max = bound(DragTrackModel.maxVariableKey);
     final double? step = bound(DragTrackModel.stepVariableKey);
+    final double? pixelsPerRange = bound(
+      DragTrackModel.pixelsPerRangeVariableKey,
+    );
     final DragTrackModel base = withDragTrackBindings(
       node,
       track,
       scopedValues,
     );
-    final DragTrackModel ranged = min == null && max == null && step == null
+    final DragTrackModel ranged =
+        min == null && max == null && step == null && pixelsPerRange == null
         ? base
         : base.copyWith(
             min: min,
             max: max,
             step: step == null ? null : (step < 0 ? 0 : step),
+            // 0 or less keeps the saved throw.
+            pixelsPerRange: pixelsPerRange == null || pixelsPerRange <= 0
+                ? null
+                : pixelsPerRange,
           );
     // Behaviour flags (Reduce motion turns off a dial's coast) and line
     // ends under `track.*` keys (`track.x2: ${= parent.width - 26}`).
@@ -1436,7 +1450,9 @@ abstract class WidgetNodeTransformerManager
 
   /// Draws [node] where its drag track puts it for its variable's value,
   /// without making it draggable: how the design canvas shows a knob or a
-  /// fader cap. Returns [widget] for a node without a track.
+  /// fader cap. The node and its children read the pose as the `track`
+  /// variable, as they do at runtime. Returns [widget] for a node without
+  /// a track.
   Widget applyTrackPose(
     BuildContext context,
     BaseNode node,
@@ -1453,11 +1469,17 @@ abstract class WidgetNodeTransformerManager
       );
       final DragTrackModel track = resolveNodeTrack(node, saved, scope, parent);
       final double value = trackValueOf(node, track, scope);
+      // Parked when out of range or empty ([DragTrackModel.parkedProgress]).
+      final double progress = track.restProgressOf(value);
       return TrackPose(
         track: track,
-        progress: track.progressOf(value),
+        progress: progress,
         pathScale: trackPathScale(track, parent),
-        child: widget,
+        // The nodes inside read the pose as `track`, as they do at runtime.
+        child: TrackScope(
+          values: TrackValues(value: value, progress: progress),
+          child: widget,
+        ),
       );
     }
 
@@ -1578,7 +1600,8 @@ abstract class WidgetNodeTransformerManager
 
   /// The value [node]'s [track] is drawn at: its `track.value` binding (a
   /// computed or per-item value), else its variable's value, else the
-  /// track's default or start.
+  /// track's default or start; NaN (empty) for a track that parks such a
+  /// value ([DragTrackModel.parkedProgress]).
   static double trackValueOf(
     BaseNode node,
     DragTrackModel track,
@@ -1605,13 +1628,16 @@ abstract class WidgetNodeTransformerManager
       String s => double.tryParse(s.trim()),
       _ => null,
     };
-    return value ?? track.defaultValue ?? track.min;
+    if (value != null) return value;
+    if (track.parkedProgress != null) return double.nan;
+    return track.defaultValue ?? track.min;
   }
 
   /// A node with a [DragTrackModel] is a value control: it is drawn at its
   /// variable's place along the track and dragging it writes the variable,
   /// running its `changed` reactions on each change and `dragEnd` on release
-  /// (both with `${result.value}`). See [NodeDragTrack].
+  /// (both with `${result.value}`); a wheel or key step runs both. See
+  /// [NodeDragTrack].
   Widget _wrapWithTrack(
     BuildContext context,
     BaseNode node,
@@ -1700,11 +1726,17 @@ abstract class WidgetNodeTransformerManager
           reactions: reactions,
           result: change.toMap(),
         ),
-        onEnd: (v) => FunctionsRepository.triggerAction(
+        // `dragEnd` reads the value let go at, the one the drag started at
+        // and the speed it was let go with (see [DragTrackModel.endValues]).
+        onRelease: (v, start, velocity) => FunctionsRepository.triggerAction(
           context,
           TriggerType.dragEnd,
           reactions: reactions,
-          result: {'value': v},
+          result: {
+            'value': v,
+            'startValue': start.isNaN ? null : start,
+            'velocity': velocity,
+          },
         ),
         // `changeEnd` once it has come to rest: after a coast and the snap.
         onSettled: (v) => FunctionsRepository.triggerAction(
@@ -1829,18 +1861,33 @@ abstract class WidgetNodeTransformerManager
     if (onSecondary.isNotEmpty) {
       // A right click opens the app's menu, not the browser's.
       if (kIsWeb) BrowserContextMenu.disableContextMenu();
-      tappable = GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onSecondaryTapUp: (details) => FunctionsRepository.triggerAction(
-          context,
-          TriggerType.secondaryClick,
-          reactions: onSecondary,
-          result: {
-            'x': details.globalPosition.dx,
-            'y': details.globalPosition.dy,
+      final Widget inner = tappable;
+      tappable = Builder(
+        builder: (tapContext) => GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          // `x`, `y` are on screen (where a context menu opens); `localX`,
+          // `localY`, `fx`, `fy` in the node.
+          onSecondaryTapUp: (details) {
+            final Map<String, double> at = FunctionsRepository.pointerResult(
+              details.localPosition,
+              details.globalPosition,
+              FunctionsRepository.boxSizeOf(tapContext),
+            );
+            FunctionsRepository.triggerAction(
+              context,
+              TriggerType.secondaryClick,
+              reactions: onSecondary,
+              result: {
+                ...at,
+                'x': details.globalPosition.dx,
+                'y': details.globalPosition.dy,
+                'localX': details.localPosition.dx,
+                'localY': details.localPosition.dy,
+              },
+            );
           },
+          child: inner,
         ),
-        child: tappable,
       );
     }
     if (onDrag.isEmpty &&
@@ -1983,47 +2030,49 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
 
-    // A click's result says where it landed: `x`, `y` in the node and
-    // `globalX`, `globalY` on screen (one cell can tell which slot of a
-    // timeline was tapped).
+    // A click's (and long press's) result says where it landed: `x`, `y`
+    // in the node, `globalX`, `globalY` on screen, and `fx`, `fy` as a share
+    // of the node's `width` and `height` (one cell can tell which slot of a
+    // timeline was tapped; a map places a pin at the tapped spot at any
+    // size). See [FunctionsRepository.pointerResult].
     Map<String, double>? tapAt;
-    Map<String, double> where(Offset local, Offset global) => {
-      'x': local.dx,
-      'y': local.dy,
-      'globalX': global.dx,
-      'globalY': global.dy,
-    };
 
     if (inkWell != null) {
       return Material(
         type: MaterialType.transparency,
-        child: InkWell(
-          onTapDown: (details) =>
-              tapAt = where(details.localPosition, details.globalPosition),
-          onTap: () => FunctionsRepository.triggerAction(
-            context,
-            TriggerType.click,
-            reactions: onClickReactions,
-            result: tapAt,
+        child: Builder(
+          builder: (tapContext) => InkWell(
+            onTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+              details.localPosition,
+              details.globalPosition,
+              FunctionsRepository.boxSizeOf(tapContext),
+            ),
+            onTap: () => FunctionsRepository.triggerAction(
+              context,
+              TriggerType.click,
+              reactions: onClickReactions,
+              result: tapAt,
+            ),
+            onLongPress: onLongPressReactions.isEmpty
+                ? null
+                : () => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.longPress,
+                    reactions: onLongPressReactions,
+                    result: tapAt,
+                  ),
+            borderRadius: getBorderRadius(node),
+            overlayColor: inkWell.overlayColor != null
+                ? WidgetStatePropertyAll<Color>(
+                    inkWell.overlayColor!.toFlutterColor(),
+                  )
+                : null,
+            splashColor: inkWell.splashColor?.toFlutterColor(),
+            highlightColor: inkWell.highlightColor?.toFlutterColor(),
+            hoverColor: inkWell.hoverColor?.toFlutterColor(),
+            focusColor: inkWell.focusColor?.toFlutterColor(),
+            child: widget,
           ),
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.longPress,
-                  reactions: onLongPressReactions,
-                ),
-          borderRadius: getBorderRadius(node),
-          overlayColor: inkWell.overlayColor != null
-              ? WidgetStatePropertyAll<Color>(
-                  inkWell.overlayColor!.toFlutterColor(),
-                )
-              : null,
-          splashColor: inkWell.splashColor?.toFlutterColor(),
-          highlightColor: inkWell.highlightColor?.toFlutterColor(),
-          hoverColor: inkWell.hoverColor?.toFlutterColor(),
-          focusColor: inkWell.focusColor?.toFlutterColor(),
-          child: widget,
         ),
       );
     } else {
@@ -2034,24 +2083,35 @@ abstract class WidgetNodeTransformerManager
       return MouseRegion(
         cursor: SystemMouseCursors.click,
         hitTestBehavior: HitTestBehavior.opaque,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapUp: onClickReactions.isEmpty
-              ? null
-              : (details) => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.click,
-                  reactions: onClickReactions,
-                  result: where(details.localPosition, details.globalPosition),
-                ),
-          onLongPress: onLongPressReactions.isEmpty
-              ? null
-              : () => FunctionsRepository.triggerAction(
-                  context,
-                  TriggerType.longPress,
-                  reactions: onLongPressReactions,
-                ),
-          child: widget,
+        child: Builder(
+          builder: (tapContext) => GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: onClickReactions.isEmpty
+                ? null
+                : (details) => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.click,
+                    reactions: onClickReactions,
+                    result: FunctionsRepository.pointerResult(
+                      details.localPosition,
+                      details.globalPosition,
+                      FunctionsRepository.boxSizeOf(tapContext),
+                    ),
+                  ),
+            onLongPressStart: onLongPressReactions.isEmpty
+                ? null
+                : (details) => FunctionsRepository.triggerAction(
+                    context,
+                    TriggerType.longPress,
+                    reactions: onLongPressReactions,
+                    result: FunctionsRepository.pointerResult(
+                      details.localPosition,
+                      details.globalPosition,
+                      FunctionsRepository.boxSizeOf(tapContext),
+                    ),
+                  ),
+            child: widget,
+          ),
         ),
       );
     }
@@ -2133,14 +2193,23 @@ abstract class WidgetNodeTransformerManager
         )
         .toList();
     if (reactions.isEmpty) return widget;
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onDoubleTap: () => FunctionsRepository.triggerAction(
-        context,
-        TriggerType.doubleTap,
-        reactions: reactions,
+    Map<String, double>? tapAt;
+    return Builder(
+      builder: (tapContext) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onDoubleTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+          details.localPosition,
+          details.globalPosition,
+          FunctionsRepository.boxSizeOf(tapContext),
+        ),
+        onDoubleTap: () => FunctionsRepository.triggerAction(
+          context,
+          TriggerType.doubleTap,
+          reactions: reactions,
+          result: tapAt,
+        ),
+        child: widget,
       ),
-      child: widget,
     );
   }
 
@@ -2965,10 +3034,11 @@ class _ReactionDragDetectorState extends State<ReactionDragDetector> {
         widget.onWheel.isNotEmpty ||
         pinches) {
       Map<String, Object> pointer(PointerEvent event) => {
-        'x': event.localPosition.dx,
-        'y': event.localPosition.dy,
-        'globalX': event.position.dx,
-        'globalY': event.position.dy,
+        ...FunctionsRepository.pointerResult(
+          event.localPosition,
+          event.position,
+          context.size,
+        ),
         'button': switch (event.buttons) {
           kSecondaryMouseButton => 'secondary',
           kMiddleMouseButton => 'middle',

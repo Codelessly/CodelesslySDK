@@ -132,6 +132,36 @@ class AppToast {
     return identical(named, base) ? action.icon : named;
   }
 
+  /// The widget of a toast's [icon], [size] square. A glyph takes its own
+  /// color, else [textColor]. An image shows as is, e.g. a stamp or a
+  /// colored check, unless the icon has a visible color of its own (or the
+  /// toast's iconColor, already in [icon]) to tint it with. It loads like
+  /// any image of the app ([UltimateImageBuilder]): on the web from hosts
+  /// without CORS headers too, which an [ImageIcon] can't.
+  static Widget? iconWidget(
+    MultiSourceIconModel icon,
+    double size,
+    Color textColor,
+  ) {
+    if (!icon.show) return null;
+    if (!icon.isImageIcon) return retrieveIconWidget(icon, size, textColor);
+    final String? url = icon.iconImage?.trim();
+    if (url == null || url.isEmpty) return null;
+    final Color? tint = icon.color?.toFlutterColor();
+    return SizedBox.square(
+      key: const ValueKey('codelessly-toast-icon-image'),
+      dimension: size,
+      child: UltimateImageBuilder(
+        url: url,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        color: tint != null && tint.a > 0 ? tint : null,
+        errorBuilder: (context) => SizedBox.square(dimension: size),
+      ),
+    );
+  }
+
   /// Shows [action]'s message. Returns false when there is no overlay to
   /// show it in.
   static bool show(BuildContext context, ShowToastAction action) {
@@ -473,7 +503,7 @@ class _ToastViewState extends State<_ToastView> {
         bound['iconDiscColor'] ?? action.iconDiscColor?.toFlutterColor();
     Widget? icon = iconModel == null
         ? null
-        : retrieveIconWidget(
+        : AppToast.iconWidget(
             iconModel,
             // A toast icon size of its own wins over the icon's.
             action.iconSize != 18 ? action.iconSize : iconModel.size ?? 18,
