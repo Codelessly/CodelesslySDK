@@ -223,7 +223,13 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
-    if (visible) return widget;
+    // A node shown and hidden by a binding keeps the same Visibility around
+    // it either way: its build switching between the node and a Visibility
+    // threw the whole subtree away on each toggle, scroll offsets and all,
+    // and with maintainState the state kept while hidden was lost as the
+    // node showed (a page body hidden while loading came back scrolled to
+    // the start).
+    if (visible && runtimeVisible == null) return widget;
 
     // A node hidden by a condition or variable at runtime gives up its space,
     // so alternative content (a sign-in or sign-up title, an error line) can

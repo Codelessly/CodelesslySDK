@@ -204,7 +204,7 @@ class FunctionsRepository {
       case ActionType.speak:
         return speak(context, action as SpeakAction);
       case ActionType.scrollTo:
-        return ScrollTargets.scrollTo(action as ScrollToAction);
+        return ScrollTargets.scrollTo(action as ScrollToAction, near: context);
       case ActionType.playSound:
         return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
