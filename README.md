@@ -193,6 +193,8 @@ On the web scripts run in a Web Worker, with nothing to add. On Android, iOS, ma
 codelessly_quickjs: ^latest_version
 ```
 
+The engine is its own package, [codelessly_quickjs](https://github.com/Codelessly/CodelesslyQuickJS), so apps without scripts don't carry it.
+
 See [docs/scripting.md](docs/scripting.md).
 
 ## CodelesslyWidget Options

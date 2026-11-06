@@ -95,6 +95,13 @@ dev_dependencies:
   build_runner: ^2.4.14
   flutter_lints: ^6.0.0
   video_player_platform_interface: ^6.9.0
+  # The script engine, for the scripting tests on the Dart VM
+  # (tool/build_quickjs.sh builds its C sources for this machine). Apps add
+  # it themselves; the SDK doesn't depend on it.
+  codelessly_quickjs:
+    git:
+      url: https://github.com/Codelessly/CodelesslyQuickJS.git
+      ref: main
 
 flutter:
   uses-material-design: true
