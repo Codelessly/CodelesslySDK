@@ -16,16 +16,17 @@ Future<List<Listenable>> listenables(
   WidgetTester tester, {
   required bool frozen,
 }) async {
-  final manager = PassiveNodeTransformerManager((id) => clockText, (_, _, _, _, _) => const SizedBox());
+  final manager = PassiveNodeTransformerManager(
+    (id) => clockText,
+    (_, _, _, _, _) => const SizedBox(),
+  );
   final context = CodelesslyContext(
     data: {},
     functions: {},
     externalComponentBuilders: {},
     nodeValues: {},
     variables: {
-      'v': Observable(
-        VariableData(id: 'v', name: 'nowAt', formula: 'now()'),
-      ),
+      'v': Observable(VariableData(id: 'v', name: 'nowAt', formula: 'now()')),
     },
     conditions: {},
     layoutID: null,

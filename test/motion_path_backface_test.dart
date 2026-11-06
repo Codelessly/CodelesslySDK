@@ -91,6 +91,46 @@ void main() {
     });
   });
 
+  testWidgets('a nose on its path turns with a gust that pushes it off', (
+    tester,
+  ) async {
+    Widget at(double p) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: NodeMotion(
+        motion: MotionModel(
+          path: 'M0 0 L1000 0',
+          pathProgress: p,
+          durationMs: 1000,
+          curve: MotionCurve.linear,
+          orientToPath: true,
+          keyframes: const [
+            MotionKeyframe(t: 0.2, translateY: 0),
+            MotionKeyframe(t: 0.5, translateY: -300),
+            MotionKeyframe(t: 0.8, translateY: 0),
+          ],
+        ),
+        child: const SizedBox(width: 10, height: 10),
+      ),
+    );
+    double angleNow() {
+      final Matrix4 m = tester.widget<Transform>(find.byType(Transform)).transform;
+      return math.atan2(m.storage[1], m.storage[0]) * 180 / math.pi;
+    }
+
+    await tester.pumpWidget(at(0));
+    await tester.pumpWidget(at(1));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 16));
+    // Climbing: the nose points up and right, not straight along the path.
+    expect(angleNow(), lessThan(-20));
+    await tester.pump(const Duration(milliseconds: 334));
+    await tester.pump(const Duration(milliseconds: 16));
+    // Falling back to the path: the nose points down and right.
+    expect(angleNow(), greaterThan(20));
+    await tester.pumpAndSettle();
+    expect(angleNow(), closeTo(0, 0.01));
+  });
+
   group('backface', () {
     test('a box faces the viewer until turned past 90°', () {
       Matrix4 turned(double degrees) => Matrix4.identity()
