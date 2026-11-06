@@ -5,6 +5,8 @@
 - A list whose item template has a fixed height (width, in a horizontal
   list) and no bound size or visibility gives every item that extent, so a
   10,000 item list lays out any offset without building the items before it.
+  A bound `widthFactor`, `heightFactor` or `aspectRatio` keeps the items
+  measured.
 - A list with separators keeps its fixed item extent (items and separators
   interleave with known extents) instead of measuring every item.
 - Data list rows count duplicate ids once per build instead of once per

@@ -135,4 +135,11 @@ void main() {
     await pumpList(tester, itemVariables: {'height': r'${item.h}'});
     expect(find.byType(SliverFixedExtentList), findsNothing);
   });
+
+  testWidgets('a bound width or height factor keeps the items measured', (
+    tester,
+  ) async {
+    await pumpList(tester, itemVariables: {'heightFactor': r'${= 1 / 7}'});
+    expect(find.byType(SliverFixedExtentList), findsNothing);
+  });
 }
