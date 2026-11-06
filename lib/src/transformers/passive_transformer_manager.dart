@@ -452,6 +452,15 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         patch['cornerRadius'] = radius.toJson();
       }
     }
+    if (node is RectangleNode && node.variables.containsKey('path')) {
+      // SVG path data that follows data, e.g. a dashed sun path across a
+      // sky of any width: `${= sunPath(parent.width, parent.height)}`. A
+      // binding that gives nothing keeps the saved path.
+      final String? path = value<String>('path');
+      if (path != null && path.trim().isNotEmpty && path != node.path) {
+        patch['path'] = path;
+      }
+    }
     if (node is BlendMixin) {
       final double? opacity = value<double>('opacity');
       if (opacity != null && opacity != node.opacity) {

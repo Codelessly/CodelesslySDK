@@ -32,6 +32,7 @@ export 'src/functions/functions_repository.dart';
 export 'src/functions/app_confirm_dialog.dart';
 export 'src/functions/app_toast.dart';
 export 'src/functions/action_color_bindings.dart';
+export 'src/functions/variable_animator.dart';
 export 'src/logging/debug_logger.dart';
 export 'src/logging/error_logger.dart';
 export 'src/model/asset_model.dart';

@@ -1020,23 +1020,150 @@ abstract class WidgetNodeTransformerManager
     Widget widget, {
     ScopedValues? scopedValues,
   }) {
-    final DragTrackModel? track = node.drag?.track;
-    if (track == null) return widget;
-    final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
-      track.variable,
-      scopedValues: scopedValues ?? ScopedValues.of(context),
-    );
-    final double value = switch (raw) {
-      num n => n.toDouble(),
-      String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
-      _ => track.defaultValue ?? track.min,
-    };
-    return Transform(
-      alignment: Alignment.center,
-      transform: DragTrackGeometry(track).poseAt(track.progressOf(value)),
-      child: widget,
+    final DragTrackModel? saved = node.drag?.track;
+    if (saved == null) return widget;
+    Widget pose(BuildContext context, Size? measured) {
+      final (ScopedValues scope, Size? parent) = trackScope(
+        node,
+        scopedValues ?? ScopedValues.of(context),
+        measured,
+      );
+      final DragTrackModel track = resolveDragTrack(
+        saved,
+        bound: trackBindings(node, scope),
+        parentSize: parent,
+      );
+      final double value = trackValueOf(node, track, scope);
+      return Transform(
+        alignment: Alignment.center,
+        transform: DragTrackGeometry(
+          track,
+          scale: trackPathScale(track, parent),
+        ).poseAt(track.progressOf(value)),
+        child: widget,
+      );
+    }
+
+    if (!measuresTrackParent(node)) return pose(context, null);
+    return TrackParentMeasure(
+      parentBox: () => trackParentBox(context, node),
+      builder: pose,
     );
   }
+
+  /// Whether [node]'s track depends on its parent's size: it is measured
+  /// in [DragTrackUnits.parent] or binds its geometry (which may read
+  /// `${parent}`).
+  static bool measuresTrackParent(BaseNode node) {
+    final DragTrackModel? track = node.drag?.track;
+    if (track == null) return false;
+    if (track.units == DragTrackUnits.parent) return true;
+    return node.variables.keys.any(
+      (key) =>
+          key.startsWith(DragTrackModel.bindingPrefix) &&
+          key != DragTrackModel.valueBindingKey,
+    );
+  }
+
+  /// The render box of the node [node] sits in (the nearest node built
+  /// around [context] other than [node] itself), or null.
+  static RenderBox? trackParentBox(BuildContext context, BaseNode node) {
+    if (!context.mounted) return null;
+    RenderObject? found;
+    context.visitAncestorElements((element) {
+      final Widget widget = element.widget;
+      if (widget is NodeStateProviderWidget && widget.node.id != node.id) {
+        found = element.findRenderObject();
+        return false;
+      }
+      return true;
+    });
+    final RenderObject? box = found;
+    return box is RenderBox ? box : null;
+  }
+
+  /// The scoped values a track's bindings read, with `${parent}` its
+  /// parent's [measured] size, and the size a [DragTrackUnits.parent]
+  /// track measures against (the measured size, else the parent's design
+  /// size; null in pixels).
+  (ScopedValues, Size?) trackScope(
+    BaseNode node,
+    ScopedValues scopedValues,
+    Size? measured,
+  ) {
+    final ScopedValues scope = measured == null
+        ? scopedValues
+        : ScopedValues.withParentSize(
+            scopedValues,
+            parentVariableValue(measured.width, measured.height),
+          );
+    if (node.drag?.track?.units != DragTrackUnits.parent) return (scope, null);
+    if (measured != null) return (scope, measured);
+    final BaseNode? parent = node.parentID.isEmpty
+        ? null
+        : tryGetNode(node.parentID);
+    return (
+      scope,
+      Size(
+        parent?.innerBoxLocal.width ?? 0,
+        parent?.innerBoxLocal.height ?? 0,
+      ),
+    );
+  }
+
+  /// The resolved `track.<field>` geometry bindings of [node] (see
+  /// [DragTrackModel.bindableFields]), by field name.
+  static Map<String, Object?> trackBindings(
+    BaseNode node,
+    ScopedValues scopedValues,
+  ) => {
+    for (final String field in DragTrackModel.bindableFields)
+      if (field != 'value' &&
+          node.variables.containsKey('${DragTrackModel.bindingPrefix}$field'))
+        field:
+            PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              '${DragTrackModel.bindingPrefix}$field',
+              scopedValues: scopedValues,
+            ) ??
+            // A number written as is: `"track.x2": "240"`.
+            PropertyValueDelegate.literalNumber<double>(
+              node.variables['${DragTrackModel.bindingPrefix}$field']!,
+            ),
+  };
+
+  /// The value [node]'s [track] is drawn at: its `track.value` binding (a
+  /// computed or per-item value), else its variable's value, else the
+  /// track's default or start.
+  static double trackValueOf(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    final Object? raw =
+        node.variables.containsKey(DragTrackModel.valueBindingKey)
+        ? PropertyValueDelegate.getPropertyValue<Object>(
+                node,
+                DragTrackModel.valueBindingKey,
+                scopedValues: scopedValues,
+              ) ??
+              PropertyValueDelegate.literalNumber<double>(
+                node.variables[DragTrackModel.valueBindingKey]!,
+              )
+        : track.hasVariable
+        ? PropertyValueDelegate.getVariableValueFromPath<Object>(
+            track.variable,
+            scopedValues: scopedValues,
+          )
+        : null;
+    final double? value = switch (raw) {
+      num n when n.isFinite => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return value ?? track.defaultValue ?? track.min;
+  }
+
 
   /// A node with a [DragTrackModel] is a value control: it is drawn at its
   /// variable's place along the track and dragging it writes the variable,
@@ -1046,15 +1173,18 @@ abstract class WidgetNodeTransformerManager
     BuildContext context,
     BaseNode node,
     DragModel drag,
-    DragTrackModel track,
+    DragTrackModel saved,
     List<Reaction> reactions,
     Widget child,
   ) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
-    final Observable<VariableData>? variable = codelesslyContext?.findVariable(
-      name: track.variable,
-    );
+    final Observable<VariableData>? variable = saved.hasVariable
+        ? codelesslyContext?.findVariable(name: saved.variable)
+        : null;
+    // The parent's box, for a track that takes the pointer anywhere in it
+    // or measures against its size.
+    RenderBox? parentBox() => trackParentBox(context, node);
     bool enabled(BuildContext context) {
       if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
         return drag.enabled;
@@ -1072,27 +1202,37 @@ abstract class WidgetNodeTransformerManager
       };
     }
 
-    Widget build(BuildContext context) {
-      final Object? raw =
-          PropertyValueDelegate.getVariableValueFromPath<Object>(
-            track.variable,
-            scopedValues: ScopedValues.of(context),
-          );
-      final double value = switch (raw) {
-        num n => n.toDouble(),
-        String s => double.tryParse(s.trim()) ?? track.min,
-        _ => track.defaultValue ?? track.min,
-      };
+    Widget buildMeasured(BuildContext context, Size? measured) {
+      final (ScopedValues scope, Size? parent) = trackScope(
+        node,
+        ScopedValues.of(context),
+        measured,
+      );
+      final DragTrackModel track = resolveDragTrack(
+        saved,
+        bound: trackBindings(node, scope),
+        parentSize: parent,
+      );
       return NodeDragTrack(
         track: track,
-        value: value,
+        value: trackValueOf(node, track, scope),
         enabled: enabled(context),
+        pathScale: trackPathScale(track, parent),
+        hitAreaBox: parentBox,
         onChanged: (v) {
-          final bool whole = variable?.value.type == VariableType.integer;
-          codelesslyContext?.updateVariable(
-            track.variable,
-            whole ? v.round() : v,
-          );
+          // A variable the track writes; a computed one (or none) is left to
+          // the reactions, which read the value as ${result.value}.
+          if (variable != null && !variable.value.isComputed) {
+            final bool whole = variable.value.type == VariableType.integer;
+            // Scrubbing a variable that is being animated pauses it.
+            if (codelesslyContext != null) {
+              VariableAnimator.pause(codelesslyContext, track.variable);
+            }
+            codelesslyContext?.updateVariable(
+              track.variable,
+              whole ? v.round() : v,
+            );
+          }
           FunctionsRepository.triggerAction(
             context,
             TriggerType.changed,
@@ -1110,10 +1250,27 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
-    if (variable == null) return Builder(builder: build);
-    return ValueListenableBuilder<VariableData>(
-      valueListenable: variable,
-      builder: (context, _, _) => build(context),
+    Widget build(BuildContext context) => measuresTrackParent(node)
+        ? TrackParentMeasure(parentBox: parentBox, builder: buildMeasured)
+        : buildMeasured(context, null);
+
+    // The track follows its variable and whatever its bindings read
+    // (`track.value` over a computed variable, the geometry): the node's own
+    // listeners rebuild only the node inside the track.
+    final WidgetNodeTransformerManager self = this;
+    final List<Listenable> listenables = [
+      ?variable,
+      if (self is PassiveNodeTransformerManager &&
+          node.variables.keys.any(
+            (key) => key.startsWith(DragTrackModel.bindingPrefix),
+          ))
+        ...self.listenablesFor(context, node),
+    ];
+    if (listenables.isEmpty) return Builder(builder: build);
+    return ManagedListenableBuilder(
+      key: ValueKey('${node.id}-track'),
+      listenables: listenables,
+      builder: build,
     );
   }
 
