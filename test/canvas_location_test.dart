@@ -101,4 +101,19 @@ void main() {
       expect(CanvasLocation.locationOf(model, 'notFound', {}), isNull);
     });
   });
+
+  test('an optional trailing param matches with or without its segment', () {
+    final List<String> pattern = CanvasLocation.segmentsOf('sheet/:id?');
+    expect(CanvasLocation.matchPattern(pattern, ['sheet']), <String, String>{});
+    expect(CanvasLocation.matchPattern(pattern, ['sheet', 'doom']), {
+      'id': 'doom',
+    });
+    expect(CanvasLocation.matchPattern(pattern, ['sheet', 'a', 'b']), isNull);
+    expect(CanvasLocation.matchPattern(pattern, ['patches']), isNull);
+    expect(CanvasLocation.expandOptional('sheet/:id?'), ['sheet/:id', 'sheet']);
+    expect(CanvasLocation.expandOptional('guide/:id'), ['guide/:id']);
+    expect(CanvasLocation.fill('sheet/:id?', {'id': 'doom'}), 'sheet/doom');
+    expect(CanvasLocation.fill('sheet/:id?', {'id': ''}), 'sheet');
+    expect(CanvasLocation.fill('sheet/:id?', {}), 'sheet');
+  });
 }

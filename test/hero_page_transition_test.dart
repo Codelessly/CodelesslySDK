@@ -118,6 +118,8 @@ Reaction _tap(NavigationAction action) => Reaction(
 Future<GlobalKey<NavigatorState>> _app(
   WidgetTester tester, {
   required NavigationAction open,
+  HeroFlight walletFlight = HeroFlight.morphCorners,
+  HeroFlight? detailFlight,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(390, 844);
@@ -137,7 +139,7 @@ Future<GlobalKey<NavigatorState>> _app(
       box: NodeBox(0, 0, 200, 120),
       corners: const CornerRadius.all(RadiusModel.circular(20)),
       heroTag: 'pass-1',
-      heroFlight: HeroFlight.morphCorners,
+      heroFlight: walletFlight,
       reactions: [_tap(open)],
     ),
     _screen(
@@ -151,6 +153,7 @@ Future<GlobalKey<NavigatorState>> _app(
         br: RadiusModel.zero,
       ),
       heroTag: 'pass-1',
+      heroFlight: detailFlight,
       reactions: [_tap(NavigationAction(navigationType: NavigationType.pop))],
     ),
   ]) {
@@ -284,6 +287,38 @@ void main() {
       (fromData as CodelesslyTransitionPage<dynamic>).routeTransition?.preset,
       RouteTransitionPreset.iosPush,
     );
+  });
+
+  testWidgets('an arc flight curves, turns upright and glows on the way', (
+    tester,
+  ) async {
+    await _app(
+      tester,
+      open: NavigationAction(
+        destinationId: 'detail',
+        transition: PageTransition.fade,
+        transitionMs: 800,
+      ),
+      walletFlight: HeroFlight.arc,
+      detailFlight: HeroFlight.arc,
+    );
+    // Both ends fly on the arc tween.
+    expect(_enabledHeroes(tester).single.createRectTween, isNotNull);
+    await tester.tap(_content('wallet'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    final Element shuttle = find
+        .byType(NodeHeroChild, skipOffstage: false)
+        .evaluate()
+        .firstWhere((element) => ModalRoute.of(element) == null);
+    final Transform? turn = shuttle.findAncestorWidgetOfExactType<Transform>();
+    expect(turn, isNotNull, reason: 'the flying node turns');
+    final DecoratedBox? glow = shuttle
+        .findAncestorWidgetOfExactType<DecoratedBox>();
+    expect((glow!.decoration as BoxDecoration).boxShadow, isNotEmpty);
+    await tester.pumpAndSettle();
+    expect(_content('detail'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('a fade-up push uses a page route with its durations, and the '
