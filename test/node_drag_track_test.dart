@@ -535,11 +535,17 @@ void main() {
         endAngle: 135,
       ),
     );
-    expect(g.arcProgressOf(const Offset(0, -10)), closeTo(0.5, 1e-9));
-    expect(g.arcProgressOf(const Offset(10, 0)), closeTo(225 / 270, 1e-9));
+    expect(
+      g.progressAtAngle(g.angleOf(const Offset(0, -10)))!,
+      closeTo(0.5, 1e-9),
+    );
+    expect(
+      g.progressAtAngle(g.angleOf(const Offset(10, 0)))!,
+      closeTo(225 / 270, 1e-9),
+    );
     // Straight down is in the 90° gap; just left of it is nearer the start.
-    expect(g.arcProgressOf(const Offset(-1, 10)), 0);
-    expect(g.arcProgressOf(const Offset(1, 10)), 1);
+    expect(g.progressAtAngle(g.angleOf(const Offset(-1, 10)))!, 0);
+    expect(g.progressAtAngle(g.angleOf(const Offset(1, 10)))!, 1);
   });
 
   testWidgets('a relative line is posed by its size on the design canvas', (

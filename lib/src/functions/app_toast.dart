@@ -517,19 +517,33 @@ class _ToastViewState extends State<_ToastView> {
           if (stretch) Expanded(child: texts) else Flexible(child: texts),
           if (hasButton) ...[
             const SizedBox(width: 8),
-            TextButton(
-              key: const ValueKey('codelessly-toast-action'),
-              onPressed: _onActionPressed,
-              style: TextButton.styleFrom(
-                foregroundColor: actionColor,
-                minimumSize: const Size(48, 36),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                textStyle: actionStyle.copyWith(fontSize: fontSize),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(buttonRadius),
+            _styledAction(
+              TextButton(
+                key: const ValueKey('codelessly-toast-action'),
+                onPressed: _onActionPressed,
+                style: TextButton.styleFrom(
+                  foregroundColor: actionColor,
+                  backgroundColor: action.actionBackgroundColor
+                      ?.toFlutterColor(),
+                  minimumSize: const Size(48, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  // The action's own font size wins over the message's.
+                  textStyle: action.actionStyle?.fontSize != null
+                      ? actionStyle
+                      : actionStyle.copyWith(fontSize: fontSize),
+                  side: action.actionBorder == null
+                      ? null
+                      : borderSideOf(action.actionBorder!),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      action.actionCornerRadius ?? buttonRadius,
+                    ),
+                  ),
                 ),
+                child: Text(widget.actionLabel),
               ),
-              child: Text(widget.actionLabel),
+              action,
+              action.actionCornerRadius ?? buttonRadius,
             ),
           ],
           if (hasClose) ...[
@@ -619,4 +633,19 @@ class _ToastViewState extends State<_ToastView> {
       ),
     );
   }
+}
+
+
+/// Puts [action]'s [ShowToastAction.actionShadows] under the toast's
+/// action [button] (a hard offset shadow under a poster button).
+Widget _styledAction(Widget button, ShowToastAction action, double radius) {
+  final List<Effect>? shadows = action.actionShadows;
+  if (shadows == null || shadows.isEmpty) return button;
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(radius),
+      boxShadow: boxShadowsOf(shadows),
+    ),
+    child: button,
+  );
 }

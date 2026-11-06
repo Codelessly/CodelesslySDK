@@ -1991,6 +1991,9 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.playAnimation:
         return _namesIn(strings, includePredefined);
+      case ActionType.haptic:
+        strings.add((this as HapticAction).when);
+        return _namesIn(strings, includePredefined);
       case ActionType.focus:
         return {};
       case ActionType.editText:

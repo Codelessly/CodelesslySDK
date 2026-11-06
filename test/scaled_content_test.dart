@@ -197,4 +197,31 @@ void main() {
     expect(plain.containsKey('contentFit'), isFalse);
     expect(plain.containsKey('contentAlignment'), isFalse);
   });
+
+  testWidgets('children of a frame scaled from its contentSize are placed in '
+      'the design space, not the frame box', (tester) async {
+    // A 1200x720 trail map drawn into a 390x234 frame: a chair at (300,
+    // 300) in the map lands at 0.325 of that. Placing it by its share of
+    // the frame's own free space (390 - 60) sent it to x 1036 of the map.
+    final RectangleNode chair = RectangleNode(
+      id: 'chair',
+      name: 'chair',
+      basicBoxLocal: NodeBox(300, 300, 60, 60),
+      positioningMode: PositioningMode.align,
+      edgePins: const EdgePinsModel(left: 300, top: 300, right: null, bottom: null),
+    )..parentID = 'map';
+    final FrameNode map = FrameNode(
+      id: 'map',
+      name: 'map',
+      basicBoxLocal: NodeBox(0, 0, 390, 234),
+      children: ['chair'],
+      contentFit: Fit.contain,
+      contentSize: const SizeC(1200, 720),
+    )..parentID = kRootNode;
+    await _pump(tester, [map, chair], box: const Size(390, 234));
+    final Rect rect = tester.getRect(_of('chair'));
+    expect(rect.left, moreOrLessEquals(97.5, epsilon: 0.01));
+    expect(rect.top, moreOrLessEquals(97.5, epsilon: 0.01));
+    expect(rect.width, moreOrLessEquals(19.5, epsilon: 0.01));
+  });
 }
