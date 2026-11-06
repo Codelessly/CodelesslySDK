@@ -16,20 +16,25 @@ const FontName _serif = FontName(
   style: 'Regular',
 );
 
-TextNode _title(double fontSize, double percent) => TextNode(
+TextNode _title(
+  double fontSize,
+  double percent, {
+  LeadingDistributionEnum leading = LeadingDistributionEnum.proportional,
+  String data = 'Settings',
+}) => TextNode(
   id: 'title',
   name: 'title',
   basicBoxLocal: NodeBox(0, 0, 300, fontSize * percent / 100),
-  data: 'Settings',
+  data: data,
   horizontalFit: SizeFit.shrinkWrap,
   verticalFit: SizeFit.shrinkWrap,
   textMixedProps: [
     StartEndProp(
       start: 0,
-      end: 8,
+      end: data.length,
       fontSize: fontSize,
       fontName: _serif,
-      lineHeight: LineHeight.percent(percent),
+      lineHeight: LineHeight.percent(percent, leading),
     ),
   ],
 )..parentID = kRootNode;
@@ -148,6 +153,88 @@ void main() {
           reason: material ? 'inside a Scaffold' : 'without Material',
         );
         expect(tester.getSize(sdk).height, closeTo(referenceHeight, 0.01));
+      }
+    });
+  }
+
+  test('a line height\'s even leading distribution reaches the text style '
+      'and survives JSON', () {
+    const even = LineHeight.percent(115, LeadingDistributionEnum.even);
+    expect(
+      TextUtils.retrieveTextStyle(
+        fontSize: 22,
+        fontName: _serif,
+        lineHeight: even,
+      ).leadingDistribution,
+      TextLeadingDistribution.even,
+    );
+    expect(even.toJson(), {
+      'value': 115.0,
+      'unit': 'percent',
+      'leadingDistribution': 'even',
+    });
+    expect(LineHeight.fromJson(even.toJson()), even);
+    // The default stays out of the JSON.
+    expect(
+      const LineHeight.percent(115).toJson().containsKey('leadingDistribution'),
+      isFalse,
+    );
+  });
+
+  for (final (double size, double percent) in [(40, 105), (22, 115)]) {
+    testWidgets('a ${size.toInt()}px text at $percent% line height with even '
+        'leading sits where a Text in a Material 3 Scaffold does', (
+      tester,
+    ) async {
+      // The Flutter reference: a Text with a height inside a Scaffold, whose
+      // Material default text style (M3 bodyMedium) brings even leading.
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(useMaterial3: true),
+          home: Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                'Hangar',
+                style: TextStyle(
+                  fontFamily: family,
+                  fontSize: size,
+                  height: percent / 100,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final double reference = _baselineIn(tester, find.text('Hangar'));
+      // A different word from the tests above: the engine's paragraph cache
+      // doesn't key on the leading distribution, so the same text and style
+      // laid out proportionally there would be reused here.
+      // Even: half the lost (or added) leading above the ascent.
+      final double line = size * percent / 100;
+      expect(
+        reference,
+        closeTo((line - size * (1.036 + 0.335)) / 2 + size * 1.036, 0.5),
+      );
+
+      for (final material in [false, true]) {
+        await tester.pumpWidget(
+          _sdkText(
+            _title(
+              size,
+              percent,
+              leading: LeadingDistributionEnum.even,
+              data: 'Hangar',
+            ),
+            material: material,
+          ),
+        );
+        expect(tester.takeException(), isNull);
+        expect(
+          _baselineIn(tester, find.text('Hangar')),
+          closeTo(reference, 0.01),
+          reason: material ? 'inside a Scaffold' : 'without Material',
+        );
       }
     });
   }
