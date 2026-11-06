@@ -1035,10 +1035,30 @@ BoxDecoration? _foregroundDecoration(
 List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
   if (node is RectangleNode && node.hasPath) {
     if (fills.isEmpty) return fills;
+    // A path may reach past its box (a band drawn above its baseline):
+    // fill the box and the path's bounds together, so the part outside is
+    // filled too and a gradient spans the whole shape.
+    final Rect box = Offset.zero & node.basicBoxLocal.size.flutterSize;
+    final Rect bounds = parseSvgPath(node.path)?.getBounds() ?? box;
+    final Rect area = box.expandToInclude(bounds);
+    if (area == box) {
+      return [
+        Positioned.fill(
+          child: ClipPath(
+            clipper: SvgPathClipper(node.path!),
+            child: Stack(children: fills),
+          ),
+        ),
+      ];
+    }
     return [
-      Positioned.fill(
+      Positioned(
+        left: area.left,
+        top: area.top,
+        width: area.width,
+        height: area.height,
         child: ClipPath(
-          clipper: SvgPathClipper(node.path!),
+          clipper: SvgPathClipper(node.path!, offset: -area.topLeft),
           child: Stack(children: fills),
         ),
       ),

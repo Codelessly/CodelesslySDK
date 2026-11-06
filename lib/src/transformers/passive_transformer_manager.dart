@@ -205,12 +205,18 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       },
     );
     // A node a Scroll To action targets records where it is built.
-    return ScrollTargets.wrap(
+    final Widget wrapped = ScrollTargets.wrap(
       node,
       settings.withReactions
           ? wrapWithInteractionScopes(context, node, built)
           : built,
     );
+    // A node motion draws elsewhere takes taps where it is drawn, through
+    // its interaction states' mouse region and the boxes around it.
+    if (!settings.isPreview && movesByMotion(node)) {
+      return HitBeyondBounds(child: wrapped);
+    }
+    return wrapped;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -1180,6 +1186,14 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
   }
 
   if (node is TextNode) collect(node.data);
+  // An image fill named by a variable or formula (`${item.image}`, a play /
+  // pause icon) follows it.
+  if (node is GeometryMixin) {
+    for (final PaintModel fill in node.fills) {
+      collect(fill.downloadUrl);
+      collect(fill.croppedImageURL);
+    }
+  }
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
   if (node case final QueryableMixin queryable) {
     collect(queryable.collectionPath);

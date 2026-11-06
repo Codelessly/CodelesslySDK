@@ -343,7 +343,17 @@ class FunctionsRepository {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ActionChain.scopedValuesOf(context),
     );
-    await Clipboard.setData(ClipboardData(text: text));
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+    } catch (error) {
+      // A browser that denies clipboard access throws here. The copy is a
+      // side effect: the actions after it (the "Link copied" toast) still
+      // run, as they would in an app that doesn't wait for the clipboard.
+      DebugLogger.instance.printInfo(
+        'Copy to clipboard failed: $error',
+        name: 'FunctionsRepository',
+      );
+    }
     return true;
   }
 
