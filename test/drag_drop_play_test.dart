@@ -56,6 +56,7 @@ void main() {
           'exit',
           'dropped',
           'rejected',
+          'full',
         ])
           name: (context, reference, params) {
             calls.add(name);
@@ -72,8 +73,10 @@ void main() {
     WidgetTester tester,
     List<BaseNode> nodes, {
     Map<String, Object?> data = const {},
+    List<BaseNode> others = const [],
   }) async {
-    final registry = NodeRegistry()..setNodes({for (final n in nodes) n.id: n});
+    final registry = NodeRegistry()
+      ..setNodes({for (final n in [...nodes, ...others]) n.id: n});
     final manager = PassiveNodeTransformerManager(
       registry.getNodeByID,
       (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
@@ -223,20 +226,92 @@ void main() {
     expect(from.topLeft.dy, closeTo(95, 1));
   });
 
-  testWidgets('a full target takes nothing', (tester) async {
+  testWidgets('a full target takes nothing but says it is full', (
+    tester,
+  ) async {
     final RectangleNode full = slot()
-      ..dropTarget = const DropTargetModel(fullIf: 'true');
+      ..dropTarget = const DropTargetModel(
+        accepts: ['letters'],
+        key: 'A2',
+        fullIf: 'true',
+      )
+      ..reactions.add(call('full', TriggerType.dropFull));
     await pumpNodes(tester, [tile('A'), full]);
     final TestGesture gesture = await tester.startGesture(const Offset(50, 50));
     await gesture.moveBy(const Offset(0, 20));
     await tester.pump();
     await gesture.moveBy(const Offset(0, 80));
     await tester.pump();
+
+    // Over it: drag.over names it and drag.full is set, so a binding can
+    // say why it won't take the drop; it isn't entered.
+    final DragAndDropController controller = codelesslyContext.dragAndDrop;
+    expect(controller.value['over'], 'A2');
+    expect(controller.value['full'], isTrue);
+    expect(controller.value['accepted'], isFalse);
+    expect(calls, isNot(contains('enter')));
+
     await gesture.up();
     await tester.pumpAndSettle();
-    expect(calls, isNot(contains('enter')));
     expect(calls, isNot(contains('dropped')));
-    expect(calls, contains('canceled'));
+    expect(calls, isNot(contains('rejected')));
+    expect(calls, containsAllInOrder(['full', 'canceled']));
+    final Map drop = seen['full'] as Map;
+    expect(drop['key'], 'A2');
+    expect(drop['data'], 'A');
+    expect(drop['full'], isTrue);
+    expect(controller.value['over'], '');
+  });
+
+  testWidgets('a hidden feedback node shows, its hidden children stay hidden', (
+    tester,
+  ) async {
+    // The packet drawn under the pointer is hidden where it is designed;
+    // its "out of seed" stamp hides by its own binding.
+    final RectangleNode stamp = box('stamp', variables: {'visible': r'${= 1 > 2}'})
+      ..parentID = 'feedback';
+    final RectangleNode label = box('label')..parentID = 'feedback';
+    final AutoPlaceholderNode feedback = AutoPlaceholderNode(
+      id: 'feedback',
+      name: 'feedback',
+      basicBoxLocal: NodeBox(0, 0, 100, 100),
+      children: ['label', 'stamp'],
+    )
+      ..parentID = kRootNode
+      ..variables['visible'] = r'${= false}';
+    final RectangleNode source = box(
+      'tile',
+      draggable: const DraggableModel(
+        data: 'A',
+        group: 'letters',
+        start: DragStart.press,
+        feedbackNodeId: 'feedback',
+      ),
+    );
+    await pumpNodes(tester, [source, slot()], others: [feedback, label, stamp]);
+    final TestGesture gesture = await tester.startGesture(const Offset(50, 50));
+    await gesture.moveBy(const Offset(0, 20));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 40));
+    await tester.pump();
+    bool shown(RectangleNode node) {
+      final Finder f = find.byKey(
+        ValueKey('Rectangle Transformer of ${node.debugLabel}'),
+      );
+      if (f.evaluate().isEmpty) return false;
+      return find
+          .ancestor(
+            of: f,
+            matching: find.byWidgetPredicate((w) => w is Visibility && !w.visible),
+          )
+          .evaluate()
+          .isEmpty;
+    }
+
+    expect(shown(label), isTrue);
+    expect(shown(stamp), isFalse);
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('an effect replays when its play key changes', (tester) async {

@@ -155,7 +155,7 @@ class DragTrackGeometry {
   }
 
   /// The progress of the point on a line or path nearest to [p] (relative
-  /// to the rest centre).
+  /// to the rest centre), or of the angle [p] makes around an arc's pivot.
   double nearest(Offset p) {
     switch (track.shape) {
       case DragTrackShape.line:
