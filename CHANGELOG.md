@@ -10,7 +10,9 @@ Requires codelessly_api 10.0.0.
   `vars`, `nodes` and `app.navigate`/`back`/`callApi`/`cloudData`/
   `runAction`/`toast`/`delay`.
 - On Android, iOS, macOS and Linux scripts run in QuickJS through the new
-  `codelessly_quickjs` package, which an app with scripts adds. On the web
+  `codelessly_quickjs` package
+  ([Codelessly/CodelesslyQuickJS](https://github.com/Codelessly/CodelesslyQuickJS)),
+  which an app with scripts adds. On the web
   they run in a Web Worker. The same driver runs in both, so the same
   script gives the same result everywhere: UTC dates, a seeded
   `Math.random`, the clock only when granted, and fixed number formatting.

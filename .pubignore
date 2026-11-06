@@ -81,5 +81,3 @@ coverage/
 # Golden test failure images (flutter test writes them next to the goldens)
 test/failures/
 
-# The QuickJS plugin is published as its own package.
-codelessly_quickjs/

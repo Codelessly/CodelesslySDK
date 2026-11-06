@@ -44,5 +44,5 @@ Scripts come with a layout in `SDKLayoutVariables.scripts`: project scripts unde
 ## Testing
 
 `test/scripting/` runs the same tests on the Dart VM, where scripts run in QuickJS (`flutter test test/scripting`), and in Chrome, where they run in a Web Worker (`flutter test --platform chrome test/scripting`).
-- The VM run needs QuickJS built for the machine. The tests build it with `tool/build_quickjs.sh`, which needs CMake and a C compiler.
+- The VM run needs QuickJS built for the machine. The tests build it with `tool/build_quickjs.sh`, from the `codelessly_quickjs` dev dependency ([Codelessly/CodelesslyQuickJS](https://github.com/Codelessly/CodelesslyQuickJS)); it needs CMake and a C compiler.
 - The suite covers the host bindings, capabilities, sandbox escapes, limits, errors, the "Run script" action, formulas, and a determinism corpus whose output must be identical on both engines.
