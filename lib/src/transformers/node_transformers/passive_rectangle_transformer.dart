@@ -118,39 +118,76 @@ class PassiveRectangleWidget extends StatelessWidget {
       }
     }
 
-    Widget child = Stack(
-      clipBehavior: Clip.none,
+    final List<Widget> fills = clipFillsToNotches(
+      node,
+      buildFills(
+        node,
+        useInk: false,
+        obscureImages: settings.obscureImages,
+        settings: settings,
+        scopedValues: scopedValues,
+      ),
+    );
+    final List<Widget> strokes = buildStrokes(node, scopedValues);
+    final List<Widget> content = wrapWithInkWell(
+      context,
+      node,
+      wrapWithPaddingAndScroll(
+        node,
+        [...children, ?portalWidget],
+        stackAlignment: stackAlignment,
+        applyPadding: applyPadding,
+        getNode: manager.getNode,
+        isPlaceholder: isPlaceholder,
+      ),
       alignment:
           stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-      children: [
-        ...clipFillsToNotches(
-          node,
-          buildFills(
-            node,
-            useInk: false,
-            obscureImages: settings.obscureImages,
-            settings: settings,
-            scopedValues: scopedValues,
-          ),
-        ),
-        ...buildStrokes(node, scopedValues),
-        ...wrapWithInkWell(
-          context,
-          node,
-          wrapWithPaddingAndScroll(
-            node,
-            [...children, ?portalWidget],
-            stackAlignment: stackAlignment,
-            applyPadding: applyPadding,
-            getNode: manager.getNode,
-            isPlaceholder: isPlaceholder,
-          ),
-          alignment:
-              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        ),
-        ...buildForegroundFills(node, scopedValues),
-      ],
     );
+    final List<Widget> foreground = buildForegroundFills(node, scopedValues);
+    final AlignmentGeometry alignment =
+        stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart;
+
+    // A node that clips its content clips its fills and children, not its
+    // own stroke, as Flutter's Container clips its child but paints its
+    // border outside the clip: clipped too, the stroke's edge was cut (or
+    // anti-aliased twice), leaving a light seam between a card's border and
+    // its shadow.
+    Clip clip = getClipBehavior(node);
+    final bool strokeOutsideClip =
+        clip != Clip.none && strokes.isNotEmpty && notchesOf(node).isEmpty;
+    final Widget child0;
+    if (strokeOutsideClip) {
+      final BorderRadius radius = getBorderRadius(node) ?? BorderRadius.zero;
+      Widget clipped(Widget layer) =>
+          ClipRRect(borderRadius: radius, clipBehavior: clip, child: layer);
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [
+          if (fills.isNotEmpty)
+            Positioned.fill(
+              child: clipped(Stack(fit: StackFit.expand, children: fills)),
+            ),
+          ...strokes,
+          clipped(
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: alignment,
+              children: content,
+            ),
+          ),
+          ...foreground,
+        ],
+      );
+      clip = Clip.none;
+    } else {
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [...fills, ...strokes, ...content, ...foreground],
+      );
+    }
+    Widget child = child0;
 
     bool hasComplexRendering =
         node is GeometryMixin &&
@@ -170,9 +207,10 @@ class PassiveRectangleWidget extends StatelessWidget {
       child: decorateWithShadows(
         boxShadow: retrieveBoxShadow(node, scopedValues),
         borderRadius: getBorderRadius(node),
-        clipBehavior: getClipBehavior(node),
+        clipBehavior: clip,
         tapThrough: TapThroughScope.of(context),
         notches: notchesOf(node),
+        pathShape: pathShadowShapeOf(node),
         child: child,
       ),
     );
@@ -193,6 +231,10 @@ class _TapThroughDecoration extends BoxDecoration {
 /// (all of them, keeping their order), so a spread shadow's corners grow
 /// with it as in CSS and design tools; [BoxDecoration] keeps the box's
 /// radius, which turns a spread glow around a dot into a square.
+///
+/// A rectangle drawn as an SVG path ([pathShape], see [pathShadowShapeOf])
+/// casts its shadows along the path (its fill and its stroke) instead of
+/// the box, through a [PathShadowPainter].
 Widget decorateWithShadows({
   required List<BoxShadow> boxShadow,
   required BorderRadius? borderRadius,
@@ -200,7 +242,18 @@ Widget decorateWithShadows({
   required Widget child,
   bool tapThrough = false,
   List<NotchModel> notches = const [],
+  PathShadowShape? pathShape,
 }) {
+  if (pathShape != null) {
+    return CustomPaint(
+      painter: boxShadow.isEmpty
+          ? null
+          : PathShadowPainter(shape: pathShape, shadows: boxShadow),
+      child: clipBehavior == Clip.none
+          ? child
+          : ClipRect(clipBehavior: clipBehavior, child: child),
+    );
+  }
   if (notches.isNotEmpty) {
     final BorderRadius radius = borderRadius ?? BorderRadius.zero;
     final Widget box = clipBehavior == Clip.none
@@ -303,34 +356,46 @@ List<Widget> wrapWithInkWell(
       .where((reaction) => reaction.trigger.type == TriggerType.longPress)
       .toList();
 
+  // Where the tap landed, for the click's result (see
+  // [FunctionsRepository.pointerResult]).
+  Map<String, double>? tapAt;
   final widget = Material(
     type: MaterialType.transparency,
-    child: InkWell(
-      onTap: onClickReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.click,
-              reactions: onClickReactions,
-            ),
-      onLongPress: onLongPressReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.longPress,
-              reactions: onLongPressReactions,
-            ),
-      borderRadius: getBorderRadius(node),
-      overlayColor: inkWell.overlayColor != null
-          ? WidgetStatePropertyAll<Color>(
-              inkWell.overlayColor!.toFlutterColor(),
-            )
-          : null,
-      splashColor: inkWell.splashColor?.toFlutterColor(),
-      highlightColor: inkWell.highlightColor?.toFlutterColor(),
-      hoverColor: inkWell.hoverColor?.toFlutterColor(),
-      focusColor: inkWell.focusColor?.toFlutterColor(),
-      child: Stack(alignment: alignment, children: children),
+    child: Builder(
+      builder: (tapContext) => InkWell(
+        onTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+          details.localPosition,
+          details.globalPosition,
+          FunctionsRepository.boxSizeOf(tapContext),
+        ),
+        onTap: onClickReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.click,
+                reactions: onClickReactions,
+                result: tapAt,
+              ),
+        onLongPress: onLongPressReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.longPress,
+                reactions: onLongPressReactions,
+                result: tapAt,
+              ),
+        borderRadius: getBorderRadius(node),
+        overlayColor: inkWell.overlayColor != null
+            ? WidgetStatePropertyAll<Color>(
+                inkWell.overlayColor!.toFlutterColor(),
+              )
+            : null,
+        splashColor: inkWell.splashColor?.toFlutterColor(),
+        highlightColor: inkWell.highlightColor?.toFlutterColor(),
+        hoverColor: inkWell.hoverColor?.toFlutterColor(),
+        focusColor: inkWell.focusColor?.toFlutterColor(),
+        child: Stack(alignment: alignment, children: children),
+      ),
     ),
   );
 
@@ -493,8 +558,8 @@ List<Widget> wrapWithPaddingAndScroll(
 
 List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
   if (node is! DefaultShapeNode) return [];
-  // A box shadow would outline the box, not the path.
-  if (node is RectangleNode && node.hasPath) return [];
+  // A rectangle drawn as a path casts these along the path: see
+  // [decorateWithShadows] and [pathShadowShapeOf].
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map((effect) {
@@ -1195,16 +1260,50 @@ List<Widget> buildFills(
 bool _hasChildren(GeometryMixin node) =>
     node is ChildrenMixin && (node as ChildrenMixin).children.isNotEmpty;
 
+/// A colour or gradient fill under [node]'s border, inset by half the
+/// border's inset into the box, as Flutter's BoxDecoration paints its
+/// background inside a uniform border: drawn to the edge, the fill's
+/// anti-aliased rim showed through the border's, a light seam between a
+/// card's border and its shadow.
+Widget _underBorder(GeometryMixin node, Widget fill) {
+  final double inset = fillInsetUnderBorder(node);
+  if (inset <= 0) return Positioned.fill(child: fill);
+  return Positioned(
+    left: inset,
+    top: inset,
+    right: inset,
+    bottom: inset,
+    child: fill,
+  );
+}
+
+/// How far a colour or gradient fill of [node] sits inside its box: half
+/// the inset of a solid stroke on every side (the whole width inside, half
+/// of it centred, none outside), else 0.
+double fillInsetUnderBorder(GeometryMixin node) {
+  final double width = node.strokeWeight;
+  if (width <= 0 ||
+      node.strokeSide != StrokeSide.all ||
+      node.dashPattern.isNotEmpty ||
+      !node.strokes.any((paint) => paint.visible) ||
+      (node is RectangleNode && node.hasPath) ||
+      notchesOf(node as BaseNode).isNotEmpty) {
+    return 0;
+  }
+  final double align = node.strokeAlign.alignment;
+  return width * (1 - (1 + align) / 2) / 2;
+}
+
 Widget wrapFillWithPositioned({
   required GeometryMixin node,
   required Widget fill,
   required PaintModel paint,
 }) => switch (paint.type) {
-  PaintType.solid => Positioned.fill(child: fill),
+  PaintType.solid ||
   PaintType.gradientLinear ||
   PaintType.gradientRadial ||
   PaintType.gradientAngular ||
-  PaintType.gradientDiamond => Positioned.fill(child: fill),
+  PaintType.gradientDiamond => _underBorder(node, fill),
   // A node that hugs its size and has nothing else in it takes the image's
   // size (a `Positioned` with no offsets sizes the stack). A node with
   // children hugs them, and the image fills it behind them, as at design

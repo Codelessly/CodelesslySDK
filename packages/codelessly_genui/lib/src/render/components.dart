@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import '../functions/calc_function.dart';
 import '../mapping/node_mapping.dart';
 import 'codelessly_node_view.dart';
+import 'genui_material_theme.dart';
 import 'genui_theme.dart';
 import 'visualization.dart';
 
@@ -61,17 +62,19 @@ String _label(ComponentProps props, String key) => props.string(key) ?? '';
 TextStyle _style(BuildContext context, String? variant) {
   final GenUiTheme theme = GenUiThemeScope.of(context);
   final s = CodelesslyNodes.textStyle(variant, theme);
-  return TextStyle(
-    fontFamily: theme.fontFamily,
-    fontSize: s.size,
-    height: 1.35,
-    fontWeight: switch (s.weight) {
-      'w700' => FontWeight.w700,
-      'w600' => FontWeight.w600,
-      'w500' => FontWeight.w500,
-      _ => FontWeight.w400,
-    },
-    color: Color(variant == 'caption' ? theme.mutedText : theme.text),
+  return genUiTextStyle(
+    theme,
+    TextStyle(
+      fontSize: s.size,
+      height: 1.35,
+      fontWeight: switch (s.weight) {
+        'w700' => FontWeight.w700,
+        'w600' => FontWeight.w600,
+        'w500' => FontWeight.w500,
+        _ => FontWeight.w400,
+      },
+      color: Color(variant == 'caption' ? theme.mutedText : theme.text),
+    ),
   );
 }
 
@@ -404,14 +407,6 @@ Widget buildChoicePicker(
           label: ComponentProps.asString(o['label']) ?? o['value'] as String,
         ),
   ];
-  // A search field is the one thing the option chips do not offer.
-  if (props.boolean('filterable') == true && fallback != null) {
-    return CommitOnUserChange(
-      value: props.value('value'),
-      onCommit: _actionOf(props),
-      child: fallback(context, node, props, buildChild),
-    );
-  }
   final bool multi = props.string('variant') == 'multipleSelection';
   final List<String> selected = [
     for (final Object? v in props.list('value')) '$v',
@@ -425,13 +420,39 @@ Widget buildChoicePicker(
     if (write == null) return;
     final List<String> next = multi
         ? (selected.contains(value)
-              ? [for (final v in selected) if (v != value) v]
+              ? [
+                  for (final v in selected)
+                    if (v != value) v,
+                ]
               : [...selected, value])
         : [value];
     if (!multi && selected.length == 1 && selected.first == value) return;
     write(next);
     commit?.call();
   }
+
+  Widget chips(List<({String value, String label})> shown) => Wrap(
+    spacing: 8,
+    runSpacing: 8,
+    children: [
+      for (final o in options)
+        Semantics(
+          button: true,
+          selected: selected.contains(o.value),
+          label: o.label,
+          child: CodelesslyNodeView(
+            key: ValueKey('${node.instanceId}_${o.value}'),
+            nodeJson: CodelesslyNodes.optionChip(
+              id: '${node.componentId}_${o.value}',
+              label: o.label,
+              selected: selected.contains(o.value),
+              theme: theme,
+            ),
+            onTap: write == null ? null : () => pick(o.value),
+          ),
+        ),
+    ],
+  );
 
   return Column(
     mainAxisSize: MainAxisSize.min,
@@ -440,41 +461,152 @@ Widget buildChoicePicker(
       if (label.isNotEmpty) _fieldLabel(context, label),
       Padding(
         padding: const EdgeInsets.only(top: 4),
-        child: Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final o in options)
-              Semantics(
-                button: true,
-                selected: selected.contains(o.value),
-                label: o.label,
-                child: CodelesslyNodeView(
-                  key: ValueKey('${node.instanceId}_${o.value}'),
-                  nodeJson: CodelesslyNodes.optionChip(
-                    id: '${node.componentId}_${o.value}',
-                    label: o.label,
-                    selected: selected.contains(o.value),
-                    theme: theme,
-                  ),
-                  onTap: write == null ? null : () => pick(o.value),
-                ),
-              ),
-          ],
-        ),
+        child: props.boolean('filterable') == true
+            ? _FilterableOptions(
+                options: options,
+                selected: selected,
+                build: chips,
+              )
+            : chips(options),
       ),
       if (error != null)
         Padding(
           padding: const EdgeInsets.only(top: 4),
           child: Text(
             error,
-            style: _style(context, 'caption').copyWith(
-              color: Color(theme.negative),
-            ),
+            style: _style(
+              context,
+              'caption',
+            ).copyWith(color: Color(theme.negative)),
           ),
         ),
     ],
   );
+}
+
+/// A search field over a ChoicePicker's options (`filterable`). Selected
+/// options stay listed while they are filtered out, so the choice stays
+/// visible.
+class _FilterableOptions extends StatefulWidget {
+  const _FilterableOptions({
+    required this.options,
+    required this.selected,
+    required this.build,
+  });
+
+  final List<({String value, String label})> options;
+  final List<String> selected;
+  final Widget Function(List<({String value, String label})>) build;
+
+  @override
+  State<_FilterableOptions> createState() => _FilterableOptionsState();
+}
+
+class _FilterableOptionsState extends State<_FilterableOptions> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final String q = _query.trim().toLowerCase();
+    final shown = [
+      for (final o in widget.options)
+        if (q.isEmpty ||
+            o.label.toLowerCase().contains(q) ||
+            widget.selected.contains(o.value))
+          o,
+    ];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        TextField(
+          onChanged: (v) => setState(() => _query = v),
+          style: Theme.of(context).textTheme.bodyMedium,
+          decoration: const InputDecoration(
+            hintText: 'Search',
+            prefixIcon: Icon(Icons.search, size: 18),
+          ),
+        ),
+        if (shown.isEmpty)
+          Text('No matches', style: Theme.of(context).textTheme.bodySmall)
+        else
+          widget.build(shown),
+      ],
+    );
+  }
+}
+
+/// A2UI `Image`, rounded, with a themed placeholder while it loads and when
+/// it fails. Sizes follow the basic catalog's variants.
+Widget buildImage(
+  BuildContext context,
+  ComponentNode<ComponentImplementation> node,
+  ComponentProps props,
+  ChildWidgetBuilder buildChild,
+) {
+  final GenUiTheme theme = GenUiThemeScope.of(context);
+  final String url = props.string('url') ?? '';
+  final String description = props.string('description') ?? '';
+  final String? variant = props.string('variant');
+  final BoxFit fit =
+      BoxFit.values.asNameMap()[props.string('fit')] ??
+      (variant == 'avatar' || variant == 'icon' ? BoxFit.cover : BoxFit.cover);
+  final double radius = switch (variant) {
+    'avatar' => 999,
+    'icon' => 6,
+    _ => 12,
+  };
+  final double? height = switch (variant) {
+    'icon' => 24,
+    'avatar' => 40,
+    'smallFeature' => 72,
+    'mediumFeature' => 160,
+    'largeFeature' => 240,
+    'header' => 200,
+    _ => null,
+  };
+  final double? width = switch (variant) {
+    'icon' => 24,
+    'avatar' => 40,
+    'smallFeature' => 96,
+    _ => null,
+  };
+  Widget placeholder(IconData? icon) => Container(
+    color: Color(theme.surfaceAlt),
+    alignment: Alignment.center,
+    child: icon == null || (height != null && height < 40)
+        ? null
+        : Icon(icon, color: Color(theme.mutedText), size: 22),
+  );
+  final bool network = url.startsWith('https://') || url.startsWith('http://');
+  final Widget image = !network
+      ? placeholder(Icons.image_not_supported_outlined)
+      : Image.network(
+          url,
+          fit: fit,
+          semanticLabel: description.isEmpty ? null : description,
+          excludeFromSemantics: description.isEmpty,
+          loadingBuilder: (context, child, progress) =>
+              progress == null ? child : placeholder(null),
+          errorBuilder: (context, error, stack) =>
+              placeholder(Icons.broken_image_outlined),
+        );
+  final Widget clipped = ClipRRect(
+    borderRadius: BorderRadius.circular(radius),
+    child: SizedBox(
+      width: width,
+      height: height ?? (network ? null : 160),
+      child: image,
+    ),
+  );
+  return width != null
+      ? Align(
+          alignment: AlignmentDirectional.centerStart,
+          widthFactor: 1,
+          child: clipped,
+        )
+      : clipped;
 }
 
 /// Runs [onCommit] when [value] changes soon after the user touched
@@ -985,8 +1117,8 @@ Widget buildTable(
     // The first text column (usually the item name) takes the spare width
     // and wraps; the other columns keep their natural width.
     for (int i = 0; i < columns.length; i++)
-      i + offset: !numeric(columns[i]) &&
-              i == columns.indexWhere((c) => !numeric(c))
+      i + offset:
+          !numeric(columns[i]) && i == columns.indexWhere((c) => !numeric(c))
           ? const FlexColumnWidth()
           : const IntrinsicColumnWidth(),
   };

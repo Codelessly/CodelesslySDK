@@ -57,7 +57,7 @@ void main() {
     expect(tester.takeException(), isNull);
   }
 
-  List<BaseNode> knob() => [
+  List<BaseNode> knob({String source = 'bpm', String? value, List<Reaction> reactions = const []}) => [
     FrameNode(
       id: 'plate',
       name: 'plate',
@@ -73,16 +73,19 @@ void main() {
         children: ['pointer'],
       )
       ..parentID = 'plate'
-      ..drag = const DragModel(
+      ..drag = DragModel(
         track: DragTrackModel(
           shape: DragTrackShape.arc,
-          variable: 'bpm',
+          variable: value == null ? source : '',
+          write: value == null,
           min: 30,
           max: 250,
           step: 1,
           defaultValue: 120,
         ),
-      ),
+      )
+      ..variables.addAll({if (value != null) DragTrackModel.valueBindingKey: value})
+      ..reactions = reactions,
     TextNode(
       id: 'pointer',
       name: 'pointer',
@@ -232,6 +235,37 @@ void main() {
     // A quarter turn of the 270° sweep: +73 BPM.
     expect(bpm, inInclusiveRange(205, 216));
     expect(rotationOf(tester), greaterThan(60));
+  });
+
+  testWidgets('a track reading a formula is drawn at it and only reports the drag', (tester) async {
+    final VariableData ms = variable('ms', VariableType.integer, 140000);
+    await pump(
+      tester,
+      knob(
+        value: r'${= ms / 1000}',
+        reactions: [
+          Reaction(
+            name: 'set',
+            trigger: TriggerModel(type: TriggerType.changed),
+            action: SetVariableAction(variable: ms, newValue: r'${= round(result.value) * 1000}'),
+          ),
+        ],
+      ),
+      runtime: true,
+      variables: [ms],
+    );
+    expect(rotationOf(tester), closeTo(0, 0.5), reason: '140 of 30..250 is the middle');
+    final gesture = await tester.startGesture(const Offset(110, 150));
+    for (double a = -90; a <= 0; a += 10) {
+      final double r = a * 3.141592653589793 / 180;
+      await gesture.moveTo(Offset(150 + 40 * _sin(r), 150 - 40 * _cos(r)));
+    }
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+    // The track wrote nothing itself; the reaction moved the value's source.
+    final Object? value = codelesslyContext.findVariableByName('ms')!.value.getValue();
+    expect(value, inInclusiveRange(205000, 216000));
+    expect(rotationOf(tester), greaterThan(60), reason: 'drawn at the new formula value');
   });
 
   // Knobs in a data list, as on a pedal: each reads its own item's value,

@@ -538,5 +538,50 @@ void paintStrokeBand(
     bottomRight: grow(base.brRadius, -inset.right, -inset.bottom),
     bottomLeft: grow(base.blRadius, -inset.left, -inset.bottom),
   );
-  canvas.drawDRRect(outer, inner, paint);
+  if (side == StrokeSide.all) {
+    canvas.drawDRRect(outer, inner, paint);
+    return;
+  }
+  // On one side, the outer and inner edges of the other three coincide.
+  // GPU backends (CanvasKit, Impeller) antialias the two rounded rects of a
+  // drawDRRect each on its own, so a shared edge at a fractional position
+  // (a shrink-wrapped row's right edge) keeps coverage f·(1-f) and draws a
+  // faint line there. Paint only the band itself, which has no such edge.
+  if (outer.isRect && inner.isRect) {
+    canvas.drawRect(switch (side) {
+      StrokeSide.top => Rect.fromLTRB(
+        outer.left,
+        outer.top,
+        outer.right,
+        inner.top,
+      ),
+      StrokeSide.bottom => Rect.fromLTRB(
+        outer.left,
+        inner.bottom,
+        outer.right,
+        outer.bottom,
+      ),
+      StrokeSide.left => Rect.fromLTRB(
+        outer.left,
+        outer.top,
+        inner.left,
+        outer.bottom,
+      ),
+      StrokeSide.right || StrokeSide.all => Rect.fromLTRB(
+        inner.right,
+        outer.top,
+        outer.right,
+        outer.bottom,
+      ),
+    }, paint);
+    return;
+  }
+  canvas.drawPath(
+    Path.combine(
+      PathOperation.difference,
+      Path()..addRRect(outer),
+      Path()..addRRect(inner),
+    ),
+    paint,
+  );
 }

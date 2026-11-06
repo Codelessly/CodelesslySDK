@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -332,6 +333,14 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// data.
   static const String reverseTransitionMsKey = 'codelessly.reverseTransitionMs';
 
+  /// The key of [NavigationAction.routeTransition] (as JSON) in a route's
+  /// global data.
+  static const String routeTransitionKey = 'codelessly.routeTransition';
+
+  /// The key of the [RevealAnchor] a screen opened from, in a route's
+  /// global data (not saved in the browser's history).
+  static const String anchorKey = 'codelessly.anchor';
+
   /// The page of a screen: a [MaterialPage], or a
   /// [CodelesslyTransitionPage] when the screen was opened with another
   /// [NavigationTransition].
@@ -342,6 +351,21 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     Map<String, dynamic> globalData,
     Object? arguments,
   ) {
+    final Object? customJson = globalData[routeTransitionKey];
+    if (customJson is Map || customJson is String) {
+      return CodelesslyTransitionPage<dynamic>(
+        key: key,
+        name: name,
+        arguments: arguments,
+        transition: NavigationTransition.none,
+        routeTransition: RouteTransition.fromJson(customJson!),
+        anchor: switch (globalData[anchorKey]) {
+          RevealAnchor anchor => anchor,
+          _ => const RevealAnchor(),
+        },
+        child: child,
+      );
+    }
     final NavigationTransition transition = FunctionsRepository.webTransition(
       NavigationTransition.values.asNameMap()[globalData[transitionKey]] ??
           NavigationTransition.platform,
@@ -368,6 +392,22 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         _ => null,
       },
       child: child,
+    );
+  }
+
+  HeroController? _heroController;
+
+  /// Shared elements fly between this router's screens even when it is
+  /// nested under another navigator (a Codelessly app inside a host app's
+  /// screen, or inside a tab): a nested [Navigator] has no hero controller
+  /// of its own, so one is given when no free one is above it.
+  @override
+  Widget build(BuildContext context) {
+    final Widget navigator = super.build(context);
+    if (HeroControllerScope.maybeOf(context) != null) return navigator;
+    return HeroControllerScope(
+      controller: _heroController ??= MaterialApp.createMaterialHeroController(),
+      child: navigator,
     );
   }
 
@@ -753,6 +793,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     NavigationTransition transition = NavigationTransition.platform,
     int? transitionMs,
     int? reverseTransitionMs,
+    RouteTransition? routeTransition,
+    RevealAnchor? anchor,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: openerHosts, chain: null);
     _change = const CodelesslyHistoryPush();
@@ -770,6 +812,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         transition,
         transitionMs: transitionMs,
         reverseTransitionMs: reverseTransitionMs,
+        routeTransition: routeTransition,
+        anchor: anchor,
       ),
     );
   }
@@ -787,6 +831,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     NavigationTransition transition = NavigationTransition.platform,
     int? transitionMs,
     int? reverseTransitionMs,
+    RouteTransition? routeTransition,
+    RevealAnchor? anchor,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: const [], chain: chain);
     _change = const CodelesslyHistoryPush();
@@ -800,6 +846,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         transition,
         transitionMs: transitionMs,
         reverseTransitionMs: reverseTransitionMs,
+        routeTransition: routeTransition,
+        anchor: anchor,
       ),
     );
   }
@@ -809,8 +857,12 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     NavigationTransition transition, {
     int? transitionMs,
     int? reverseTransitionMs,
+    RouteTransition? routeTransition,
+    RevealAnchor? anchor,
   }) => {
     paramsKey: params,
+    if (routeTransition != null) routeTransitionKey: routeTransition.toJson(),
+    if (routeTransition != null && anchor != null) anchorKey: anchor,
     if (transition != NavigationTransition.platform)
       transitionKey: transition.name,
     if (transition != NavigationTransition.platform && transitionMs != null)
@@ -848,6 +900,57 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
 
   /// Whether the browser has reported a location yet.
   bool _reportedLocation = false;
+
+  /// The screens shown that can block going back (see [BackInterceptor]).
+  final List<BackGuard> _backGuards = [];
+
+  /// Lets [guard] keep the browser's back button from leaving its screen.
+  void addBackGuard(BackGuard guard) => _backGuards.add(guard);
+
+  /// Undoes [addBackGuard].
+  void removeBackGuard(BackGuard guard) => _backGuards.remove(guard);
+
+  /// Keeps the top screen when the browser went back (or elsewhere) from it
+  /// to a stack without it while the screen blocks back (see
+  /// [BackInterceptor]): the browser gets the screen's entry again and the
+  /// screen's "Back pressed" reactions run. Returns whether it did.
+  bool _keepsBlockedTop(List<String> stack) {
+    if (routes.isEmpty) return false;
+    final List<String> target = [
+      for (final location in stack) _canonical(location),
+    ];
+    final List<String> current = [
+      for (final route in routes) locationOfRoute(route),
+    ];
+    // The top screen stays when the new stack keeps every screen below and
+    // including it (a screen opened above it, a reload).
+    final bool keepsTop =
+        target.length >= current.length &&
+        const ListEquality<String>().equals(
+          target.sublist(0, current.length),
+          current,
+        );
+    if (keepsTop) return false;
+    final BackGuard? guard = _backGuards.lastWhereOrNull(
+      (guard) => guard.isOnTop,
+    );
+    if (guard == null || !guard.blocksBack) return false;
+    // The browser shows the entry it went to; a new entry for the stack
+    // shown puts the screen's address back, one entry above that one.
+    final bool wentBelow = const ListEquality<String>().equals(
+      target,
+      current.sublist(0, current.length - 1),
+    );
+    _back = wentBelow ? -1 : null;
+    _change = const CodelesslyHistoryPush();
+    // Reports the stack (in a post-frame callback) before the reactions
+    // change it, e.g. open a confirm above the screen.
+    notifyListeners();
+    SchedulerBinding.instance
+      ..addPostFrameCallback((_) => guard.backPressed())
+      ..ensureVisualUpdate();
+    return true;
+  }
 
   /// Whether the app can go back from its top screen.
   bool get canGoBack => routes.length > 1;
@@ -887,6 +990,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         : null;
     final String location = _canonical(locationOfRoute(configuration));
     if (entry != null && _canonical(entry.stack.last) == location) {
+      if (_keepsBlockedTop(entry.stack)) return;
       _back = entry.back;
       _restore(entry.stack, fromLink: true);
       return;
@@ -911,6 +1015,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         seedsHome: location != '/',
       );
     } else if (index != -1) {
+      if (_keepsBlockedTop(current.sublist(0, index + 1))) return;
       _restore(current.sublist(0, index + 1), fromLink: true);
     } else {
       _restore(
@@ -1189,6 +1294,12 @@ class CodelesslyTransitionPage<T> extends Page<T> {
   /// duration.
   final int? reverseTransitionMs;
 
+  /// A custom transition that replaces [transition] when set.
+  final RouteTransition? routeTransition;
+
+  /// Where the [routeTransition]'s reveals grow from.
+  final RevealAnchor anchor;
+
   /// Creates a [CodelesslyTransitionPage].
   const CodelesslyTransitionPage({
     super.key,
@@ -1197,6 +1308,8 @@ class CodelesslyTransitionPage<T> extends Page<T> {
     required this.transition,
     this.transitionMs,
     this.reverseTransitionMs,
+    this.routeTransition,
+    this.anchor = const RevealAnchor(),
     required this.child,
   });
 
@@ -1208,8 +1321,20 @@ class CodelesslyTransitionPage<T> extends Page<T> {
   );
 
   @override
-  Route<T> createRoute(BuildContext context) =>
-      _CodelesslyTransitionRoute<T>(this);
+  Route<T> createRoute(BuildContext context) {
+    final RouteTransition? custom = routeTransition;
+    if (custom == null) return _CodelesslyTransitionRoute<T>(this);
+    late final CodelesslyRouteTransitionRoute<T> route;
+    // The page can be updated in place with a new child: build the
+    // route's current page.
+    route = CodelesslyRouteTransitionRoute<T>(
+      transition: custom,
+      settings: this,
+      anchor: anchor,
+      builder: (_) => (route.settings as CodelesslyTransitionPage<T>).child,
+    );
+    return route;
+  }
 }
 
 class _CodelesslyTransitionRoute<T> extends PageRoute<T> {
