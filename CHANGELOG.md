@@ -95,6 +95,11 @@ Requires the unreleased codelessly_api gesture models.
   scrolls both ways, builds only the visible cells and pins its header row
   and column.
 
+### Fixed
+
+- A fixed-size child of a row or column is clamped to the row or column's
+  cross-axis size, as in Flutter, instead of overflowing it.
+
 ## 9.3.3
 
 Requires codelessly_api 9.3.0. Rendering fixes found matching the Chairlift
