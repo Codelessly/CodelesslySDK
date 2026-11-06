@@ -1,3 +1,35 @@
+## 9.2.0
+
+Requires codelessly_api 9.1.0. Fixes and features from recreating the
+Lamplight reference app (CodelesslyEditor `references/lamplight/blockers.md`):
+
+### Fixes
+
+- `CodelesslyRouter.config()` works before `runApp` (release builds
+  crashed with a null check and never rendered).
+- Text measures like Flutter's `Text` (no Material `bodySmall` height);
+  dense hugging text fields keep one line.
+- Actions, conditions and list data never read the editor's design
+  values inside a running app; computed variables resolve everywhere.
+- Freeform children see their parent's size and are placed at bound x/y;
+  `widthFactor` resolves in horizontal lists and rows.
+- Cross-axis overflow is placed like Flutter's flex; clipped flexes never
+  draw overflow stripes.
+- `stretchItems` wraps measure content (hidden children take no height).
+- Aspect-ratio boxes keep their ratio; icon baselines snap to pixels.
+
+### Features
+
+- OpenType `fontFeatures`; bound gradient stops on any paint; gradient
+  path strokes; bound rectangle `path`.
+- `transitionMs` eases bound text, icon, gradient and stroke colours.
+- Drag tracks bound to values, with hit area, combined input, wheel/key
+  steps and double-tap values; `animateVariable` and
+  `${animating.<variable>}`.
+- Animated stacked-list positions; pulse phase; confirm dialog styling
+  and layout; switch thumb shadow; colour literals in bindings; formula
+  `alpha(c)`, colour values in colour functions, `without(list, value)`.
+
 ## 9.1.8
 
 Requires codelessly_api 9.0.1.
