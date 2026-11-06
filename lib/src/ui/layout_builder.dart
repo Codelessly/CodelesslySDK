@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -198,6 +199,8 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     final List<BaseNode> allNodes = nodeRegistry.getNodes().values.toList();
     // Nodes Scroll To actions target record where they are built.
     ScrollTargets.addTargetsIn(allNodes);
+    // Toasts show for a moment: have their icons ready before the first.
+    unawaited(AppToast.precacheIcons(allNodes));
 
     // Populate node values for nodes with internal values.
     codelesslyContext.nodeValues.clear();
@@ -457,9 +460,7 @@ VariableData withLinkParam(VariableData variable, Map<String, dynamic> params) {
   return switch (variable.type) {
     VariableType.list || VariableType.map =>
       typed is String ? variable : variable.copyWith(value: jsonEncode(typed)),
-    VariableType.integer ||
-    VariableType.decimal ||
-    VariableType.boolean =>
+    VariableType.integer || VariableType.decimal || VariableType.boolean =>
       typed is String ? variable : variable.copyWith(value: '$typed'),
     _ => variable.copyWith(value: text),
   };
