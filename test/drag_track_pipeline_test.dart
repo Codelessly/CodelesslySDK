@@ -163,6 +163,50 @@ void main() {
     expect(track.track.momentum, isFalse); // bound off (reduce motion)
   });
 
+  testWidgets('a slider throw follows its groove: track.x2 from parent.width', (
+    tester,
+  ) async {
+    List<BaseNode> slider(double grooveWidth) => [
+      FrameNode(
+        id: 'plate',
+        name: 'plate',
+        basicBoxLocal: NodeBox(0, 0, grooveWidth, 40),
+        children: ['cap'],
+      )..parentID = kRootNode,
+      FrameNode(
+          id: 'cap',
+          name: 'cap',
+          basicBoxLocal: NodeBox(0, 10, 20, 20),
+          horizontalFit: SizeFit.fixed,
+          verticalFit: SizeFit.fixed,
+          children: ['pointer'],
+        )
+        ..parentID = 'plate'
+        ..drag = const DragModel(
+          track: DragTrackModel(variable: 'volume', min: 0, max: 1, x2: 100, y2: 0),
+        )
+        ..variables[DragTrackModel.x2VariableKey] = r'${= parent.width - 20}',
+      TextNode(
+        id: 'pointer',
+        name: 'pointer',
+        basicBoxLocal: NodeBox(0, 0, 20, 20),
+        data: 'P',
+        textMixedProps: [StartEndProp(start: 0, end: 1, fontSize: 12)],
+      )..parentID = 'cap',
+    ];
+    for (final double width in [300, 500]) {
+      await pump(
+        tester,
+        slider(width),
+        runtime: true,
+        variables: [variable('volume', VariableType.decimal, 1.0)],
+      );
+      final double x = tester.getTopLeft(find.text('P', findRichText: true)).dx;
+      // At the top of the range the cap sits at the groove's right end.
+      expect(x, closeTo(width - 20, 1), reason: 'groove $width');
+    }
+  });
+
   testWidgets('at runtime dragging the knob writes its variable', (
     tester,
   ) async {

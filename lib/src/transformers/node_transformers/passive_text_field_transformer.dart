@@ -1202,11 +1202,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       focusColor: decoration.focusColor.toFlutterColor(),
       hoverColor: decoration.hoverColor.toFlutterColor(),
       errorBorder: getInputBorder(decoration.errorBorder),
+      // An error (flag or message) wins over bound border colours: a field
+      // in error stays red when focused.
       focusedBorder: getInputBorder(
         errorFlag && !hasError
             ? decoration.focusedErrorBorder
             : decoration.focusedBorder,
-        color: focusedBorderColor,
+        color: errorFlag || hasError ? null : focusedBorderColor,
       ),
       focusedErrorBorder: getInputBorder(decoration.focusedErrorBorder),
       disabledBorder: getInputBorder(decoration.disabledBorder),
@@ -1214,7 +1216,7 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
         errorFlag && !hasError
             ? decoration.errorBorder
             : decoration.enabledBorder,
-        color: borderColor,
+        color: errorFlag || hasError ? null : borderColor,
       ),
       border: getInputBorder(decoration.border, color: borderColor),
       enabled: decoration.enabled,
