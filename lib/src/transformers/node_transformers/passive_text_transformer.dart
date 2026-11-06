@@ -199,7 +199,16 @@ class TextNodeBox extends StatelessWidget {
     if (minHeight) {
       box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
     }
-    if (hFit == SizeFit.shrinkWrap) box = TextIntrinsicSlack(child: box);
+    if (hFit == SizeFit.shrinkWrap) {
+      box = TextIntrinsicSlack(
+        // A text that stays on one line can't be squeezed below it without
+        // clipping its last words, like CSS white-space: nowrap; one that
+        // may shrink says so with squeezable (a Flexible).
+        singleLine:
+            !node.softWrap && node.overflow != TextOverflowC.scaleDown,
+        child: box,
+      );
+    }
     box = RemeasureOnFontsChange(child: box);
     return SizedBox(
       width: switch (hFit) {
@@ -221,18 +230,52 @@ class TextNodeBox extends StatelessWidget {
 /// narrower than the width it needs to lay out on one line, so its last
 /// word wrapped away: `Bluebird Coffee` drew as `Bluebird`, with the space
 /// for `Coffee` left empty.
+///
+/// With [singleLine] (a text that doesn't wrap), its minimum intrinsic width
+/// is that whole width too: Flutter's paragraph reports its longest word
+/// whatever softWrap says, so a row short of room (CodelesslyFlex's shrink
+/// pass) squeezed a one-line `Try again` to `Try agai` where Flutter's own
+/// Row lets it overflow.
 class TextIntrinsicSlack extends SingleChildRenderObjectWidget {
-  const TextIntrinsicSlack({super.key, super.child});
+  const TextIntrinsicSlack({super.key, this.singleLine = false, super.child});
+
+  /// Whether the text stays on one line (softWrap off).
+  final bool singleLine;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      RenderTextIntrinsicSlack();
+      RenderTextIntrinsicSlack(singleLine: singleLine);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderTextIntrinsicSlack renderObject,
+  ) {
+    renderObject.singleLine = singleLine;
+  }
 }
 
 class RenderTextIntrinsicSlack extends RenderProxyBox {
+  RenderTextIntrinsicSlack({bool singleLine = false})
+    : _singleLine = singleLine;
+
+  /// See [TextIntrinsicSlack.singleLine].
+  bool get singleLine => _singleLine;
+  bool _singleLine;
+  set singleLine(bool value) {
+    if (_singleLine == value) return;
+    _singleLine = value;
+    markNeedsLayout();
+  }
+
   /// [width] rounded up to a whole pixel.
   static double slackWidth(double width) =>
       width <= 0 || !width.isFinite ? width : width.ceilToDouble();
+
+  @override
+  double computeMinIntrinsicWidth(double height) => _singleLine
+      ? computeMaxIntrinsicWidth(height)
+      : super.computeMinIntrinsicWidth(height);
 
   @override
   double computeMaxIntrinsicWidth(double height) =>
