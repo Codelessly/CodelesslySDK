@@ -28,18 +28,29 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    Widget placed(BuildContext scope) => FreeformChild(
-      key: ValueKey(
-        'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
-      ),
-      placement: placementFor(
+    Widget placed(BuildContext scope) {
+      final FreeformPlacement placement = placementFor(
         withBoundSize(scope, node),
         parent,
         scrollAxis: scrollAxis,
         scopedValues: ScopedValues.of(scope),
-      ),
-      child: child,
-    );
+      );
+      return FreeformChild(
+        key: ValueKey(
+          'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
+        ),
+        placement: placement,
+        // Tells the child that this slot already puts it at its bound x/y,
+        // so it isn't moved there a second time (see
+        // PassiveNodeTransformerManager.applyBoundOffset).
+        child: FreeformBoundPlacement(
+          nodeId: node.id,
+          x: placement.horizontal.boundStart != null,
+          y: placement.vertical.boundStart != null,
+          child: child,
+        ),
+      );
+    }
 
     // The child widget already listens to its bindings, but its parent data
     // belongs to the freeform slot. Rebuild that slot as well when a bound
@@ -49,9 +60,12 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     if (manager is PassiveNodeTransformerManager &&
         (node.variables.containsKey('positionX') ||
             node.variables.containsKey('positionY') ||
+            node.variables.containsKey('x') ||
+            node.variables.containsKey('y') ||
             node.variables.containsKey('width') ||
             node.variables.containsKey('height') ||
-            hasFractionalSize(node))) {
+            hasFractionalSize(node) ||
+            _hasPositionCondition(context, node))) {
       final listenables = manager.listenablesFor(context, node);
       if (listenables.isNotEmpty) {
         return AnimatedBuilder(
@@ -160,7 +174,60 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         vertical = vertical.withSizeFactor(factor, node.margin.vertical);
       }
     }
+    // A bound x/y places the child there in the container's runtime box,
+    // whatever its alignment or pins would do there: they only gave the
+    // design place, which moves (or not) when the container's runtime size
+    // differs from its design size, so translating the child by its design
+    // offset put it off (an aligned hill in a sky 64 px narrower at runtime
+    // than designed). A position fraction (positionX/Y) wins.
+    if (scopedValues != null) {
+      if (horizontal.mode != FreeformAxisMode.fraction) {
+        if (boundPositionOf(node, 'x', scopedValues) case final double x) {
+          horizontal = horizontal.withBoundStart(x);
+        }
+      }
+      if (vertical.mode != FreeformAxisMode.fraction) {
+        if (boundPositionOf(node, 'y', scopedValues) case final double y) {
+          vertical = vertical.withBoundStart(y);
+        }
+      }
+    }
     return FreeformPlacement(horizontal: horizontal, vertical: vertical);
+  }
+
+  /// The distance from the parent's padded start edge to [node]'s outer box
+  /// that [node]'s bound [property] (`x` or `y`: a variable, formula or
+  /// condition) gives it, or null when it isn't bound or gives no finite
+  /// number.
+  static double? boundPositionOf(
+    BaseNode node,
+    String property,
+    ScopedValues scopedValues,
+  ) {
+    if (!node.variables.containsKey(property) &&
+        scopedValues.codelesslyContext?.conditions.findByNodeProperty(
+              node.id,
+              property,
+            ) ==
+            null) {
+      return null;
+    }
+    final num? value = PropertyValueDelegate.getPropertyValue<num>(
+      node,
+      property,
+      scopedValues: scopedValues,
+    );
+    return value != null && value.isFinite ? value.toDouble() : null;
+  }
+
+  static bool _hasPositionCondition(BuildContext context, BaseNode node) {
+    final CodelesslyContext? codelesslyContext = ScopedValues.of(
+      context,
+    ).codelesslyContext;
+    if (codelesslyContext == null) return false;
+    return codelesslyContext.conditions.findByNodeProperty(node.id, 'x') !=
+            null ||
+        codelesslyContext.conditions.findByNodeProperty(node.id, 'y') != null;
   }
 
   static FreeformAxisPlacement _axisPlacement(
