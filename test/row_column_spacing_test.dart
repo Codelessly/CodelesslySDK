@@ -375,4 +375,29 @@ void main() {
       expect(tester.getSize(find.byType(CodelesslyFlex)).width, 40);
     });
   });
+
+  testWidgets('a collapsed child stops ticking; a shown one ticks', (
+    tester,
+  ) async {
+    final RectangleNode shown = rect('shown');
+    final RectangleNode gone = hidden(rect('gone'));
+    final RowColumnNode column = flex(
+      'column',
+      [shown, gone],
+      type: RowColumnType.column,
+      spacing: 8,
+    );
+    await pump(tester, column, [shown, gone]);
+    bool ticks(String id) => TickerMode.valuesOf(
+      tester.element(
+        find.byKey(
+          ValueKey('Rectangle Transformer of $id [$id]'),
+          skipOffstage: false,
+        ),
+      ),
+    ).enabled;
+    // A loop on a hidden panel (the loading chair) waits until it shows.
+    expect(ticks('gone'), isFalse);
+    expect(ticks('shown'), isTrue);
+  });
 }
