@@ -1031,6 +1031,42 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: values.toMap());
   }
 
+  /// [node]'s drag track with the settings its bindings give
+  /// (`track.min`, `track.max`, `track.step`, and `track.defaultValue` via
+  /// [trackWithBoundDefault]), e.g. a countdown arc as long as the stage.
+  static DragTrackModel resolvedTrack(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    double? bound(String key) {
+      if (!node.variables.containsKey(key)) return null;
+      final Object? v = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      return switch (v) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      };
+    }
+
+    final double? min = bound(DragTrackModel.minVariableKey);
+    final double? max = bound(DragTrackModel.maxVariableKey);
+    final double? step = bound(DragTrackModel.stepVariableKey);
+    final DragTrackModel ranged =
+        min == null && max == null && step == null
+        ? track
+        : track.copyWith(
+            min: min,
+            max: max,
+            step: step == null ? null : (step < 0 ? 0 : step),
+          );
+    return trackWithBoundDefault(node, ranged, scopedValues);
+  }
+
   /// Draws [node] where its drag track puts it for its variable's value,
   /// without making it draggable: how the design canvas shows a knob or a
   /// fader cap. Returns [widget] for a node without a track.
@@ -1040,11 +1076,13 @@ abstract class WidgetNodeTransformerManager
     Widget widget, {
     ScopedValues? scopedValues,
   }) {
-    final DragTrackModel? track = node.drag?.track;
-    if (track == null) return widget;
+    final DragTrackModel? model = node.drag?.track;
+    if (model == null) return widget;
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
+    final DragTrackModel track = resolvedTrack(node, model, scope);
     final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
       track.variable,
-      scopedValues: scopedValues ?? ScopedValues.of(context),
+      scopedValues: scope,
     );
     final double value = switch (raw) {
       num n => n.toDouble(),
@@ -1066,15 +1104,11 @@ abstract class WidgetNodeTransformerManager
     BuildContext context,
     BaseNode node,
     DragModel drag,
-    DragTrackModel boundTrack,
+    DragTrackModel model,
     List<Reaction> reactions,
     Widget child,
   ) {
-    final DragTrackModel track = trackWithBoundDefault(
-      node,
-      boundTrack,
-      ScopedValues.of(context),
-    );
+    final DragTrackModel track = model;
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
@@ -1098,6 +1132,11 @@ abstract class WidgetNodeTransformerManager
     }
 
     Widget build(BuildContext context) {
+      final DragTrackModel track = resolvedTrack(
+        node,
+        model,
+        ScopedValues.of(context),
+      );
       final Object? raw =
           PropertyValueDelegate.getVariableValueFromPath<Object>(
             track.variable,
@@ -1113,11 +1152,13 @@ abstract class WidgetNodeTransformerManager
         value: value,
         enabled: enabled(context),
         onChanged: (v) {
-          final bool whole = variable?.value.type == VariableType.integer;
-          codelesslyContext?.updateVariable(
-            track.variable,
-            whole ? v.round() : v,
-          );
+          if (track.write) {
+            final bool whole = variable?.value.type == VariableType.integer;
+            codelesslyContext?.updateVariable(
+              track.variable,
+              whole ? v.round() : v,
+            );
+          }
           FunctionsRepository.triggerAction(
             context,
             TriggerType.changed,
@@ -1131,6 +1172,11 @@ abstract class WidgetNodeTransformerManager
           reactions: reactions,
           result: {'value': v},
         ),
+        onFine: switch (track.fineVariable?.trim()) {
+          final String name? when name.isNotEmpty =>
+            (bool fine) => codelesslyContext?.updateVariable(name, fine),
+          _ => null,
+        },
         child: child,
       );
     }
