@@ -29,6 +29,7 @@ export 'src/mapping/a2ui_codelessly_mapping.dart';
 export 'src/mapping/node_mapping.dart';
 export 'src/prompt/system_prompt.dart';
 export 'src/render/codelessly_node_view.dart';
+export 'src/render/components.dart' show kSliderCommitDelay, CommitOnUserChange;
 export 'src/render/genui_surface_view.dart';
 export 'src/render/genui_theme.dart';
 export 'src/render/visualization.dart' show GenUiDisplayMode;
