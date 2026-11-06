@@ -132,6 +132,36 @@ class AppToast {
     return identical(named, base) ? action.icon : named;
   }
 
+  /// The widget of a toast's [icon], [size] square. A glyph takes its own
+  /// color, else [textColor]. An image shows as is, e.g. a stamp or a
+  /// colored check, unless the icon has a visible color of its own (or the
+  /// toast's iconColor, already in [icon]) to tint it with. It loads like
+  /// any image of the app ([UltimateImageBuilder]): on the web from hosts
+  /// without CORS headers too, which an [ImageIcon] can't.
+  static Widget? iconWidget(
+    MultiSourceIconModel icon,
+    double size,
+    Color textColor,
+  ) {
+    if (!icon.show) return null;
+    if (!icon.isImageIcon) return retrieveIconWidget(icon, size, textColor);
+    final String? url = icon.iconImage?.trim();
+    if (url == null || url.isEmpty) return null;
+    final Color? tint = icon.color?.toFlutterColor();
+    return SizedBox.square(
+      key: const ValueKey('codelessly-toast-icon-image'),
+      dimension: size,
+      child: UltimateImageBuilder(
+        url: url,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        color: tint != null && tint.a > 0 ? tint : null,
+        errorBuilder: (context) => SizedBox.square(dimension: size),
+      ),
+    );
+  }
+
   /// Shows [action]'s message. Returns false when there is no overlay to
   /// show it in.
   static bool show(BuildContext context, ShowToastAction action) {
@@ -473,19 +503,37 @@ class _ToastViewState extends State<_ToastView> {
         bound['iconDiscColor'] ?? action.iconDiscColor?.toFlutterColor();
     Widget? icon = iconModel == null
         ? null
-        : retrieveIconWidget(
+        : AppToast.iconWidget(
             iconModel,
             // A toast icon size of its own wins over the icon's.
             action.iconSize != 18 ? action.iconSize : iconModel.size ?? 18,
             textColor,
           );
+    final List<BoxShadow> iconShadows = action.iconShadows == null
+        ? const <BoxShadow>[]
+        : boxShadowsOf(action.iconShadows);
     if (icon != null && iconDisc != null) {
       icon = Container(
         key: const ValueKey('codelessly-toast-icon-disc'),
         width: action.iconDiscSize,
         height: action.iconDiscSize,
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: iconDisc, shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          color: iconDisc,
+          shape: BoxShape.circle,
+          boxShadow: iconShadows.isEmpty ? null : iconShadows,
+        ),
+        child: icon,
+      );
+    } else if (icon != null && iconShadows.isNotEmpty) {
+      // A halo round the icon itself: a small round icon becomes a lit
+      // lamp.
+      icon = DecoratedBox(
+        key: const ValueKey('codelessly-toast-icon-glow'),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: iconShadows,
+        ),
         child: icon,
       );
     }

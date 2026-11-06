@@ -24,11 +24,13 @@ void main() {
   test('a path fills with a gradient over its box', () async {
     final painter = PathNodePainter(
       data: square,
-      gradients: const [
-        LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFFF0000), Color(0xFF0000FF)],
+      fills: const [
+        PathFill.gradient(
+          LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFFF0000), Color(0xFF0000FF)],
+          ),
         ),
       ],
     );
@@ -41,19 +43,23 @@ void main() {
   test('solid fills still paint, and gradients count for repaint', () async {
     final solid = PathNodePainter(
       data: square,
-      fills: const [Color(0xFF00FF00)],
+      fills: const [PathFill.color(Color(0xFF00FF00))],
     );
     expect((await pixel(solid, const Offset(50, 50))).g, closeTo(1, 0.01));
     final a = PathNodePainter(
       data: square,
-      gradients: const [
-        LinearGradient(colors: [Color(0xFF000000), Color(0xFFFFFFFF)]),
+      fills: const [
+        PathFill.gradient(
+          LinearGradient(colors: [Color(0xFF000000), Color(0xFFFFFFFF)]),
+        ),
       ],
     );
     final b = PathNodePainter(
       data: square,
-      gradients: const [
-        LinearGradient(colors: [Color(0xFF000000), Color(0xFF00FF00)]),
+      fills: const [
+        PathFill.gradient(
+          LinearGradient(colors: [Color(0xFF000000), Color(0xFF00FF00)]),
+        ),
       ],
     );
     expect(a.shouldRepaint(b), isTrue);

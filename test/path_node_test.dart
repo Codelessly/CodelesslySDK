@@ -37,8 +37,10 @@ void main() {
   test('fills with gradients across the box, not just solid colors', () async {
     final PathNodePainter painter = PathNodePainter(
       data: 'M0 0 L40 0 L40 10 L0 10 Z',
-      gradients: const [
-        LinearGradient(colors: [Color(0xFFFF0000), Color(0xFF0000FF)]),
+      fills: const [
+        PathFill.gradient(
+          LinearGradient(colors: [Color(0xFFFF0000), Color(0xFF0000FF)]),
+        ),
       ],
     );
     final List<int> rgba = await pixelsOf(painter, const Size(40, 10));
@@ -53,7 +55,7 @@ void main() {
   test('casts drop shadows in the path shape', () async {
     final PathNodePainter painter = PathNodePainter(
       data: 'M0 0 L10 0 L10 10 L0 10 Z',
-      fills: const [Color(0xFFFFFFFF)],
+      fills: const [PathFill.color(Color(0xFFFFFFFF))],
       shadows: const [
         BoxShadow(color: Color(0xFF000000), offset: Offset(10, 10)),
       ],
@@ -199,7 +201,12 @@ void main() {
           ..variables['trimMs'] = r'${= 1000}'
           ..variables['trimCurve'] = 'linear';
     final Observable<VariableData> goal = Observable(
-      VariableData(id: 'goal', name: 'goal', type: VariableType.decimal, value: 0.0),
+      VariableData(
+        id: 'goal',
+        name: 'goal',
+        type: VariableType.decimal,
+        value: 0.0,
+      ),
     );
     final CodelesslyContext codelessly = CodelesslyContext.empty()
       ..variables['goal'] = goal;
@@ -234,7 +241,7 @@ void main() {
                 )
                 .painter!
             as PathNodePainter;
-    expect(painter().strokes.single, const Color(0xFFE8473F));
+    expect(painter().strokes.single.color, const Color(0xFFE8473F));
     expect(painter().dashes, [14, 10]);
     goal.set(goal.value.copyWith(value: 1.0));
     await tester.pump();

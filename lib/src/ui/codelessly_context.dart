@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
@@ -10,6 +11,45 @@ import '../../codelessly_sdk.dart';
 /// Holds data passed from the Codelessly instance down the widget tree where
 /// all of the [WidgetNodeTransformer]s have access to it.
 class CodelesslyContext with ChangeNotifier, Equatable {
+  /// The listeners added and not yet removed, in debug builds: a count that
+  /// only grows as screens come and go means a widget left one behind (and
+  /// with it, its screen).
+  final List<VoidCallback> _debugListeners = [];
+
+  /// How many listeners are registered (debug builds; 0 in release).
+  int get debugListenerCount => _debugListeners.length;
+
+  /// Contexts that have had a listener, held weakly (debug builds).
+  static final List<WeakReference<CodelesslyContext>> _debugInstances = [];
+
+  /// The listener counts of the contexts still alive that have had a
+  /// listener (debug builds).
+  static List<int> get debugLiveListenerCounts {
+    _debugInstances.removeWhere((ref) => ref.target == null);
+    return [
+      for (final ref in _debugInstances)
+        if (ref.target case final CodelesslyContext c) c.debugListenerCount,
+    ];
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+    if (kDebugMode) {
+      if (_debugListeners.isEmpty &&
+          !_debugInstances.any((ref) => identical(ref.target, this))) {
+        _debugInstances.add(WeakReference(this));
+      }
+      _debugListeners.add(listener);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (kDebugMode) _debugListeners.remove(listener);
+  }
+
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
   Map<String, dynamic> _data;

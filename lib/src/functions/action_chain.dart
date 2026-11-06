@@ -207,6 +207,10 @@ class ActionChain {
 
   /// Every [ActionChainHost] mounted now, oldest first.
   static final List<BuildContext> _mountedHosts = <BuildContext>[];
+
+  /// Hosts still listed but no longer mounted (leaks).
+  static int get debugStaleHostCount =>
+      _mountedHosts.where((BuildContext c) => !c.mounted).length;
 }
 
 /// Marks the widget whose context runs an action chain's remaining actions
