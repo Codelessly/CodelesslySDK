@@ -114,6 +114,7 @@ class PathNodePainter extends CustomPainter {
     required this.data,
     this.viewBox,
     this.fills = const [],
+    this.gradients = const [],
     this.strokes = const [],
     this.shadows = const [],
     this.strokeWeight = 2,
@@ -130,6 +131,9 @@ class PathNodePainter extends CustomPainter {
   /// Fills and strokes, each a [Color] or a [Gradient].
   final List<Object> fills;
   final List<Object> strokes;
+
+  /// More gradient fills, painted over [fills] across the node's box.
+  final List<Gradient> gradients;
 
   /// Drop shadows of the filled shape, drawn under it.
   final List<BoxShadow> shadows;
@@ -233,7 +237,7 @@ class PathNodePainter extends CustomPainter {
               : null,
       );
     }
-    for (final Object fill in fills) {
+    for (final Object fill in [...fills, ...gradients]) {
       canvas.drawPath(path, painted(fill));
     }
     if (strokes.isEmpty || strokeWeight <= 0) return;
@@ -258,6 +262,7 @@ class PathNodePainter extends CustomPainter {
       old.data != data ||
       old.viewBox != viewBox ||
       !_samePaints(old.fills, fills) ||
+      !_samePaints(old.gradients, gradients) ||
       !_samePaints(old.strokes, strokes) ||
       !_samePaints(old.shadows, shadows) ||
       old.strokeWeight != strokeWeight ||

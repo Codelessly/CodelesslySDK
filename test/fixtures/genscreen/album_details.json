@@ -1,0 +1,35 @@
+{
+  "title": "Album details",
+  "pattern": "detail",
+  "appBar": {"title": "Album", "leading": "back", "actions": [{"icon": "share", "label": "Share", "action": {"type": "toast", "message": "Link copied"}}]},
+  "data": {
+    "album": {"title": "Midnight Atlas", "artist": "Nova Lane", "year": 2024, "cover": "https://picsum.photos/seed/atlas/600/600", "tracks": 3, "length": "38 min"},
+    "tracks": [
+      {"n": 1, "title": "Northbound", "length": "3:42"},
+      {"n": 2, "title": "Glass Harbor", "length": "4:05"},
+      {"n": 3, "title": "Low Tide Lights", "length": "5:11"}
+    ]
+  },
+  "variables": [{"name": "liked", "type": "boolean", "value": false}, {"name": "tab", "type": "text", "value": "Tracks"}],
+  "sections": [
+    {"id": "hero", "area": "aside", "children": [
+      {"type": "image", "kind": "cover", "src": "${album.cover}"},
+      {"type": "heading", "eyebrow": "Album · ${album.year}", "title": "${album.title}", "subtitle": "${album.artist}"},
+      {"type": "buttonRow", "buttons": [
+        {"type": "button", "label": "Play", "icon": "play_arrow", "variant": "primary", "action": {"type": "toast", "message": "Playing"}},
+        {"type": "button", "label": "Save", "icon": "favorite_border", "variant": "outline", "action": {"type": "toggle", "variable": "liked"}}
+      ]}
+    ]},
+    {"id": "tracks", "title": "Tracks", "area": "main", "children": [
+      {"type": "tabs", "tabs": ["Tracks", "About"], "bind": "tab"},
+      {"type": "list", "items": "${tracks}", "item": {"type": "listRow", "leading": {"text": "${item.n}"}, "title": "${item.title}", "trailing": {"text": "${item.length}"}, "action": {"type": "toast", "message": "Playing ${item.title}"}}},
+      {"type": "chips", "items": ["Synthwave", "Night drive", "Focus"]},
+      {"type": "stat", "label": "Plays", "value": "1.2M", "delta": "+12% this week"}
+    ]}
+  ],
+  "states": {
+    "loading": {"style": "skeleton"},
+    "empty": {"icon": "library_music", "title": "No tracks yet", "message": "This album has no tracks."},
+    "error": {"title": "Couldn't load the album", "message": "Check your connection and try again.", "action": {"label": "Try again", "action": {"type": "retry"}}}
+  }
+}
