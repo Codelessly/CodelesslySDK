@@ -1159,10 +1159,15 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
                 controller.text,
               ),
               iconModel: decoration.prefixIcon,
+              padding: decoration.prefixIconPadding?.flutterEdgeInsets,
             ),
       // Unset constraints keep Flutter's 48 px icon slot.
+      // With a padding of its own the icon sits at that inset, so unset
+      // constraints drop the 48 px minimum instead of centring it in one.
       prefixIconConstraints: decoration.prefixIconConstraints.isEmpty
-          ? null
+          ? (decoration.prefixIconPadding != null
+                ? const BoxConstraints()
+                : null)
           : decoration.prefixIconConstraints.flutterConstraints,
       prefix: prefixText,
       prefixStyle: TextUtils.retrieveTextStyleFromProp(decoration.prefixStyle),
@@ -1176,12 +1181,17 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
                 controller.text,
               ),
               iconModel: decoration.suffixIcon,
+              padding: decoration.suffixIconPadding?.flutterEdgeInsets,
             ),
       suffix: suffixText,
       suffixStyle: TextUtils.retrieveTextStyleFromProp(decoration.suffixStyle),
       // Unset constraints keep Flutter's 48 px icon slot.
+      // With a padding of its own the icon sits at that inset, so unset
+      // constraints drop the 48 px minimum instead of centring it in one.
       suffixIconConstraints: decoration.suffixIconConstraints.isEmpty
-          ? null
+          ? (decoration.suffixIconPadding != null
+                ? const BoxConstraints()
+                : null)
           : decoration.suffixIconConstraints.flutterConstraints,
       counter: decoration.showCounter
           ? decoration.counterText?.isNotEmpty == true
@@ -1258,8 +1268,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     required ScopedValues scopedValues,
     required WidgetBuildSettings settings,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     final newValue = PropertyValueDelegate.substituteVariables(
       value,
@@ -1288,8 +1303,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     TextAlignHorizontalEnum? textAlignHorizontal,
     int? maxLines,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     // A text that is only variables, like an error message from a formula,
     // shows nothing when they come out empty: an empty error text would
@@ -1327,15 +1347,25 @@ class _ReactiveIcon extends StatelessWidget {
   final VoidCallback onTap;
   final ReactiveIconModel iconModel;
 
-  const _ReactiveIcon({required this.onTap, required this.iconModel});
+  /// Space round the icon in its slot (the decoration's icon padding).
+  final EdgeInsets? padding;
+
+  const _ReactiveIcon({
+    required this.onTap,
+    required this.iconModel,
+    this.padding,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final icon = Align(
+    Widget icon = Align(
       widthFactor: 1,
       heightFactor: 1,
       child: retrieveIconWidget(iconModel.icon, null)!,
     );
+    if (padding case final EdgeInsets padding) {
+      icon = Padding(padding: padding, child: icon);
+    }
 
     if (iconModel.reactions.isEmpty) return icon;
 
