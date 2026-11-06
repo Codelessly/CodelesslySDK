@@ -1258,8 +1258,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     required ScopedValues scopedValues,
     required WidgetBuildSettings settings,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     final newValue = PropertyValueDelegate.substituteVariables(
       value,
@@ -1288,8 +1293,13 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
     TextAlignHorizontalEnum? textAlignHorizontal,
     int? maxLines,
   }) {
+    // A value set at runtime wins, then a binding of the property in the
+    // node's variables (e.g. a hint that follows a form's mode), then the
+    // design's own text.
     final String? value =
-        context.getNodeValue(node.id, property) ?? defaultValue;
+        context.getNodeValue(node.id, property) ??
+        node.variables[property] ??
+        defaultValue;
     if (value == null || value.isEmpty) return null;
     // A text that is only variables, like an error message from a formula,
     // shows nothing when they come out empty: an empty error text would
