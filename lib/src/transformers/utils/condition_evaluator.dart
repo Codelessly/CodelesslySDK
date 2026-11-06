@@ -336,6 +336,9 @@ class ConditionEvaluator<R extends Object>
   R? visitControlDragAction(ControlDragAction action) => null;
 
   @override
+  R? visitAnimateVariableAction(AnimateVariableAction action) => null;
+
+  @override
   R? visitSpeakAction(SpeakAction action) => null;
 
   @override
@@ -544,6 +547,14 @@ class ConditionPrinter
   void visitControlDragAction(ControlDragAction action) {
     _buffer.writeln(
       '\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}',
+    );
+  }
+
+  @override
+  void visitAnimateVariableAction(AnimateVariableAction action) {
+    _buffer.writeln(
+      '\tAnimate variable ${action.variable}: ${action.mode.name} to '
+      '${action.to} over ${action.duration ?? action.durationMs} ms',
     );
   }
 

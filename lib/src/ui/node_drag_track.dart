@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'node_motion.dart';
@@ -57,11 +58,91 @@ class TrackScope extends InheritedWidget {
   bool updateShouldNotify(TrackScope oldWidget) => values != oldWidget.values;
 }
 
+/// [track] with its node's bindings ([bound], the resolved `track.<field>`
+/// values, see [DragTrackModel.bindableFields]) applied and, for
+/// [DragTrackUnits.parent], its line and pivot scaled from fractions of
+/// [parentSize] to pixels. A path's coordinates are scaled by the
+/// geometry ([DragTrackGeometry.scale], see [trackPathScale]).
+DragTrackModel resolveDragTrack(
+  DragTrackModel track, {
+  Map<String, Object?> bound = const {},
+  Size? parentSize,
+}) {
+  final DragTrackModel t = bound.isEmpty ? track : track.withBound(bound);
+  if (t.units != DragTrackUnits.parent || parentSize == null) return t;
+  final double w = parentSize.width.isFinite ? parentSize.width : 0;
+  final double h = parentSize.height.isFinite ? parentSize.height : 0;
+  return t.copyWith(
+    x1: t.x1 * w,
+    x2: t.x2 * w,
+    pivotX: t.pivotX * w,
+    y1: t.y1 * h,
+    y2: t.y2 * h,
+    pivotY: t.pivotY * h,
+  );
+}
+
+/// How much a [DragTrackUnits.parent] track's path is scaled to pixels for
+/// a parent of [parentSize]; (1, 1) otherwise.
+Size trackPathScale(DragTrackModel track, Size? parentSize) {
+  if (track.units != DragTrackUnits.parent || parentSize == null) {
+    return const Size(1, 1);
+  }
+  return Size(
+    parentSize.width.isFinite ? parentSize.width : 0,
+    parentSize.height.isFinite ? parentSize.height : 0,
+  );
+}
+
+/// Builds a drag track with the size of its node's parent, measured from
+/// [parentBox] after layout: a playhead whose line spans its parent at any
+/// width ([DragTrackUnits.parent], or a `track.x2` binding reading
+/// `${parent.width}`). The first frame builds with null (the caller falls
+/// back to the parent's design size); a changed size rebuilds.
+///
+/// A freeform parent gives its children their own box as constraints, so
+/// the `parent` a node normally reads there is not its parent's size.
+class TrackParentMeasure extends StatefulWidget {
+  /// Creates a [TrackParentMeasure].
+  const TrackParentMeasure({
+    super.key,
+    required this.parentBox,
+    required this.builder,
+  });
+
+  /// The parent's render box, or null when there is none.
+  final RenderBox? Function() parentBox;
+
+  /// Builds the track with the parent's measured size.
+  final Widget Function(BuildContext context, Size? parentSize) builder;
+
+  @override
+  State<TrackParentMeasure> createState() => _TrackParentMeasureState();
+}
+
+class _TrackParentMeasureState extends State<TrackParentMeasure> {
+  Size? _size;
+
+  void _measure(Duration _) {
+    if (!mounted) return;
+    final RenderBox? box = widget.parentBox();
+    if (box == null || !box.attached || !box.hasSize) return;
+    if (box.size != _size) setState(() => _size = box.size);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback(_measure);
+    return widget.builder(context, _size);
+  }
+}
+
 /// Geometry of a [DragTrackModel], in the node's own coordinates with the
 /// origin at the node's rest centre.
 class DragTrackGeometry {
-  /// Creates the geometry of [track].
-  DragTrackGeometry(this.track) {
+  /// Creates the geometry of [track]; a path's coordinates are multiplied by
+  /// [scale] (see [trackPathScale]).
+  DragTrackGeometry(this.track, {this.scale = const Size(1, 1)}) {
     final String? data = track.path;
     if (track.shape == DragTrackShape.path && data != null) {
       // Samples for finding the nearest point to the pointer.
@@ -69,14 +150,27 @@ class DragTrackGeometry {
       for (int i = 0; i <= n; i++) {
         final (Offset, double)? point = pointOnMotionPath(data, i / n);
         if (point == null) break;
-        _samples.add(point.$1);
+        _samples.add(_scaled(point.$1));
       }
     }
   }
 
   /// The track.
   final DragTrackModel track;
+
+  /// What a path's coordinates are multiplied by.
+  final Size scale;
   final List<Offset> _samples = [];
+
+  Offset _scaled(Offset o) => Offset(o.dx * scale.width, o.dy * scale.height);
+
+  /// [angle] (radians) of a path direction once scaled.
+  double _scaledAngle(double angle) => scale.width == scale.height
+      ? angle
+      : math.atan2(
+          math.sin(angle) * scale.height,
+          math.cos(angle) * scale.width,
+        );
 
   /// Where the node's centre sits at [progress], relative to rest.
   Offset offsetAt(double progress) {
@@ -103,7 +197,7 @@ class DragTrackGeometry {
       case DragTrackShape.path:
         final String? data = track.path;
         if (data == null) return Offset.zero;
-        return pointOnMotionPath(data, p)?.$1 ?? Offset.zero;
+        return _scaled(pointOnMotionPath(data, p)?.$1 ?? Offset.zero);
     }
   }
 
@@ -118,7 +212,7 @@ class DragTrackGeometry {
         final String? data = track.path;
         if (!track.orientToPath || data == null) return 0;
         final (Offset, double)? point = pointOnMotionPath(data, progress);
-        return point == null ? 0 : point.$2 * 180 / math.pi;
+        return point == null ? 0 : _scaledAngle(point.$2) * 180 / math.pi;
     }
   }
 
@@ -176,6 +270,29 @@ class DragTrackGeometry {
     return math.atan2(v.dx, -v.dy) * 180 / math.pi;
   }
 
+  /// The progress along an arc at the pointer's angle round its pivot: the
+  /// angle is taken within half a turn of the arc's middle, so a point in
+  /// the gap of an open arc goes to the nearer end.
+  double arcProgressAt(Offset p) {
+    final double sweep = track.endAngle - track.startAngle;
+    if (sweep == 0) return 0;
+    final double mid = (track.startAngle + track.endAngle) / 2;
+    double a = angleOf(p);
+    while (a - mid > 180) {
+      a -= 360;
+    }
+    while (a - mid < -180) {
+      a += 360;
+    }
+    return ((a - track.startAngle) / sweep).clamp(0.0, 1.0);
+  }
+
+  /// The progress at pointer [p] for a jump: its angle on an arc, its
+  /// nearest point on a line or path.
+  double jumpProgressAt(Offset p) => track.shape == DragTrackShape.arc
+      ? arcProgressAt(p)
+      : nearest(p);
+
   /// The area the node can be found in anywhere along the track, inflated
   /// by the node's own box, in coordinates relative to the rest centre.
   Rect bounds(Size size) {
@@ -192,9 +309,16 @@ class DragTrackGeometry {
 
 /// Makes [child] a value control that moves along [track]: it is drawn at
 /// [value]'s place on the track, and dragging it (or, with
-/// [DragTrackModel.jumpOnTap], tapping along the track) reports new values
-/// through [onChanged]. Double tap resets to [DragTrackModel.defaultValue];
-/// the mouse wheel steps the value.
+/// [DragTrackModel.jumpOnTap], pressing along the track) reports new values
+/// through [onChanged]. While dragged the node follows the pointer; once
+/// let go it is drawn at [value] again (which the reactions may have
+/// changed). Double tap moves through [DragTrackModel.doubleTapValues] (or
+/// resets to [DragTrackModel.defaultValue]), the mouse wheel steps the
+/// value by [DragTrackModel.effectiveWheelStep], and with a
+/// [DragTrackModel.keyStep] the arrow keys step it while focused.
+///
+/// With [DragTrackHitArea.parent] the pointer is taken anywhere in the box
+/// [hitAreaBox] gives (the node's parent).
 class NodeDragTrack extends StatefulWidget {
   /// Creates a [NodeDragTrack].
   const NodeDragTrack({
@@ -205,10 +329,20 @@ class NodeDragTrack extends StatefulWidget {
     required this.child,
     this.onEnd,
     this.enabled = true,
+    this.pathScale = const Size(1, 1),
+    this.hitAreaBox,
   });
 
-  /// The track.
+  /// The track, its bindings resolved (see [resolveDragTrack]).
   final DragTrackModel track;
+
+  /// What a path track's coordinates are multiplied by (see
+  /// [trackPathScale]).
+  final Size pathScale;
+
+  /// The box whose area takes the pointer for [DragTrackHitArea.parent]: an
+  /// ancestor's render box. Null takes it on the node only.
+  final RenderBox? Function()? hitAreaBox;
 
   /// The variable's current value.
   final double value;
@@ -230,7 +364,17 @@ class NodeDragTrack extends StatefulWidget {
 }
 
 class _NodeDragTrackState extends State<NodeDragTrack> {
-  late DragTrackGeometry _geometry = DragTrackGeometry(widget.track);
+  late DragTrackGeometry _geometry = DragTrackGeometry(
+    widget.track,
+    scale: widget.pathScale,
+  );
+
+  /// Takes the arrow keys when the track has a [DragTrackModel.keyStep].
+  final FocusNode _focus = FocusNode(debugLabel: 'drag track');
+
+  /// Whether this drag maps the pointer straight to the track (an arc with
+  /// [DragTrackModel.jumpOnTap]) rather than by how far it moved.
+  bool _absolute = false;
 
   /// The unsnapped progress while dragging.
   double _raw = 0;
@@ -253,8 +397,9 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   @override
   void didUpdateWidget(NodeDragTrack oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.track != widget.track) {
-      _geometry = DragTrackGeometry(widget.track);
+    if (oldWidget.track != widget.track ||
+        oldWidget.pathScale != widget.pathScale) {
+      _geometry = DragTrackGeometry(widget.track, scale: widget.pathScale);
     }
   }
 
@@ -262,6 +407,7 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   void dispose() {
     _pan.dispose();
     _doubleTap.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
@@ -283,13 +429,15 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
 
   void _pointerDown(PointerDownEvent event, Offset local, bool onNode) {
     if (!widget.enabled) return;
-    if (!onNode &&
-        _track.jumpOnTap &&
-        _track.input == DragTrackInput.follow &&
-        _track.shape != DragTrackShape.arc) {
-      // Tapped the track off the node: jump there, then drag from there.
+    if (_track.effectiveKeyStep != null) _focus.requestFocus();
+    final bool jumps =
+        _track.jumpOnTap && _track.input == DragTrackInput.follow;
+    _absolute = jumps && _track.shape == DragTrackShape.arc;
+    if (jumps && (!onNode || _absolute)) {
+      // Pressed the track off the node (or anywhere round an arc): jump
+      // there, then drag from there.
       _raw = _progress;
-      _emit(_geometry.nearest(_rel(local)));
+      _emit(_geometry.jumpProgressAt(_rel(local)));
     }
     _pan.addPointer(event);
     _doubleTap.addPointer(event);
@@ -298,7 +446,7 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   void _onStart(DragStartDetails d) {
     final Offset p = _rel(d.localPosition);
     setState(() {
-      _dragValue = widget.value;
+      _dragValue = _shownValue;
       _raw = _progress;
     });
     _lastAngle = _geometry.angleOf(p);
@@ -312,8 +460,12 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
         _emit(_raw - d.delta.dy / _track.pixelsPerRange);
       case DragTrackInput.horizontal:
         _emit(_raw + d.delta.dx / _track.pixelsPerRange);
+      case DragTrackInput.both:
+        _emit(_raw + (d.delta.dx - d.delta.dy) / _track.pixelsPerRange);
       case DragTrackInput.follow:
-        if (_track.shape == DragTrackShape.arc) {
+        if (_absolute) {
+          _emit(_geometry.arcProgressAt(p));
+        } else if (_track.shape == DragTrackShape.arc) {
           final Offset fromPivot = p - Offset(_track.pivotX, _track.pivotY);
           if (fromPivot.distance < _size.shortestSide * 0.12) {
             // Too close to the pivot for a steady angle: use vertical travel.
@@ -342,63 +494,111 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
   }
 
   void _onDoubleTap() {
-    final double? reset = _track.defaultValue;
-    if (reset == null || !widget.enabled) return;
-    final double v = _track.snap(reset);
+    if (!widget.enabled) return;
+    final double? v = _track.doubleTapTarget(widget.value);
+    if (v == null) return;
+    _set(v);
+  }
+
+  /// Reports [v] as a whole change: a wheel notch, a key, a double tap.
+  void _set(double v) {
+    if (v == widget.value) return;
     widget.onChanged(v);
     widget.onEnd?.call(v);
+  }
+
+  /// The value [steps] steps of [size] toward [DragTrackModel.max].
+  double _stepped(double size, int steps) {
+    final double up = _track.max >= _track.min ? 1 : -1;
+    return _track.snap(widget.value + steps * up * size);
   }
 
   void _onWheel(PointerScrollEvent event) {
     if (!_track.wheel || !widget.enabled) return;
     GestureBinding.instance.pointerSignalResolver.register(event, (e) {
       final PointerScrollEvent s = e as PointerScrollEvent;
-      final double dir = s.scrollDelta.dy < 0 ? 1 : -1;
-      final double up = _track.max >= _track.min ? 1 : -1;
-      final double v = _track.snap(widget.value + dir * up * _track.wheelStep);
-      if (v != widget.value) {
-        widget.onChanged(v);
-        widget.onEnd?.call(v);
-      }
+      if (s.scrollDelta.dy == 0) return;
+      _set(
+        _stepped(_track.effectiveWheelStep, s.scrollDelta.dy < 0 ? 1 : -1),
+      );
     });
+  }
+
+  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+    final double? step = _track.effectiveKeyStep;
+    if (step == null || !widget.enabled) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final LogicalKeyboardKey key = event.logicalKey;
+    final double? v = switch (key) {
+      LogicalKeyboardKey.arrowUp ||
+      LogicalKeyboardKey.arrowRight => _stepped(step, 1),
+      LogicalKeyboardKey.arrowDown ||
+      LogicalKeyboardKey.arrowLeft => _stepped(step, -1),
+      LogicalKeyboardKey.pageUp => _stepped(step, 10),
+      LogicalKeyboardKey.pageDown => _stepped(step, -10),
+      LogicalKeyboardKey.home => _track.snap(_track.min),
+      LogicalKeyboardKey.end => _track.snap(_track.max),
+      _ => null,
+    };
+    if (v == null) return KeyEventResult.ignored;
+    _set(v);
+    return KeyEventResult.handled;
   }
 
   @override
   Widget build(BuildContext context) {
     final double progress = _progress;
+    Widget node = MouseRegion(
+      cursor: widget.enabled
+          ? (_dragValue != null
+                ? SystemMouseCursors.grabbing
+                : SystemMouseCursors.grab)
+          : MouseCursor.defer,
+      child: widget.child,
+    );
+    if (_track.effectiveKeyStep != null) {
+      // Inside the track area, whose hit test reaches past the node's box.
+      node = Focus(
+        focusNode: _focus,
+        canRequestFocus: widget.enabled,
+        onKeyEvent: _onKey,
+        child: node,
+      );
+    }
+    final Widget area = _TrackArea(
+      geometry: _geometry,
+      progress: progress,
+      jumpOnTap: _track.jumpOnTap,
+      hitAreaBox: _track.hitArea == DragTrackHitArea.parent
+          ? widget.hitAreaBox
+          : null,
+      onSize: (size) => _size = size,
+      onPointerDown: _pointerDown,
+      onWheel: _onWheel,
+      child: node,
+    );
     return TrackScope(
       values: TrackValues(
         value: _shownValue,
         progress: progress,
         dragging: _dragValue != null,
       ),
-      child: _TrackArea(
-        geometry: _geometry,
-        progress: progress,
-        jumpOnTap: _track.jumpOnTap,
-        onSize: (size) => _size = size,
-        onPointerDown: _pointerDown,
-        onWheel: _onWheel,
-        child: MouseRegion(
-          cursor: widget.enabled
-              ? (_dragValue != null
-                    ? SystemMouseCursors.grabbing
-                    : SystemMouseCursors.grab)
-              : MouseCursor.defer,
-          child: widget.child,
-        ),
-      ),
+      child: area,
     );
   }
 }
 
 /// Draws its child moved along the track and takes pointer events on the
-/// moved child, or anywhere along the track when [jumpOnTap].
+/// moved child, anywhere along the track when [jumpOnTap], and anywhere in
+/// the box [hitAreaBox] gives when set.
 class _TrackArea extends SingleChildRenderObjectWidget {
   const _TrackArea({
     required this.geometry,
     required this.progress,
     required this.jumpOnTap,
+    required this.hitAreaBox,
     required this.onSize,
     required this.onPointerDown,
     required this.onWheel,
@@ -408,6 +608,7 @@ class _TrackArea extends SingleChildRenderObjectWidget {
   final DragTrackGeometry geometry;
   final double progress;
   final bool jumpOnTap;
+  final RenderBox? Function()? hitAreaBox;
   final ValueChanged<Size> onSize;
   final void Function(PointerDownEvent event, Offset local, bool onNode)
   onPointerDown;
@@ -418,6 +619,7 @@ class _TrackArea extends SingleChildRenderObjectWidget {
     ..geometry = geometry
     ..progress = progress
     ..jumpOnTap = jumpOnTap
+    ..hitAreaBox = hitAreaBox
     ..onSize = onSize
     ..onPointerDown = onPointerDown
     ..onWheel = onWheel;
@@ -427,6 +629,7 @@ class _TrackArea extends SingleChildRenderObjectWidget {
     ..geometry = geometry
     ..progress = progress
     ..jumpOnTap = jumpOnTap
+    ..hitAreaBox = hitAreaBox
     ..onSize = onSize
     ..onPointerDown = onPointerDown
     ..onWheel = onWheel;
@@ -447,6 +650,7 @@ class _RenderTrackArea extends RenderProxyBox {
   }
 
   bool jumpOnTap = false;
+  RenderBox? Function()? hitAreaBox;
   late ValueChanged<Size> onSize;
   late void Function(PointerDownEvent, Offset, bool) onPointerDown;
   late ValueChanged<PointerScrollEvent> onWheel;
@@ -471,11 +675,29 @@ class _RenderTrackArea extends RenderProxyBox {
             .bounds(size)
             .shift(size.center(Offset.zero))
             .contains(position);
-    if (_hitNode || onTrack) {
+    if (_hitNode || onTrack || _inHitArea(position)) {
       result.add(BoxHitTestEntry(this, position));
       return true;
     }
     return false;
+  }
+
+  /// Whether [position] (in this box) lies in the [hitAreaBox]'s box.
+  bool _inHitArea(Offset position) {
+    final RenderBox? area = hitAreaBox?.call();
+    if (area == null || !area.attached || !area.hasSize || !attached) {
+      return false;
+    }
+    try {
+      final Offset inArea = MatrixUtils.transformPoint(
+        getTransformTo(area),
+        position,
+      );
+      return (Offset.zero & area.size).contains(inArea);
+    } catch (_) {
+      // Not an ancestor (the tree moved): the node only.
+      return false;
+    }
   }
 
   @override

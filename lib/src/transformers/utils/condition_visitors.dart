@@ -151,6 +151,9 @@ class ConditionVariablesVisitor
   Set<String>? visitControlDragAction(ControlDragAction action) => {};
 
   @override
+  Set<String>? visitAnimateVariableAction(AnimateVariableAction action) => {};
+
+  @override
   Set<String>? visitSpeakAction(SpeakAction action) => {};
 
   @override
@@ -272,6 +275,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitControlDragAction(ControlDragAction action) => null;
+
+  @override
+  String? visitAnimateVariableAction(AnimateVariableAction action) => null;
 
   @override
   String? visitSpeakAction(SpeakAction action) => null;

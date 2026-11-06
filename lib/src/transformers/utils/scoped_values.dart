@@ -195,6 +195,28 @@ class ScopedValues {
       parentSize = base.parentSize,
       predefinedOverrides = base.predefinedOverrides;
 
+  /// [base] with `${parent}` reading [parentSize] (a map of `width` and
+  /// `height`, see [parentVariableValue]): what a drag track's geometry
+  /// bindings read, with its parent's measured box.
+  ScopedValues.withParentSize(ScopedValues base, this.parentSize)
+    : _codelesslyContextRef = base._codelesslyContextRef,
+      _instanceRef = base._instanceRef,
+      _variablesOverrides = base._variablesOverrides,
+      _dataOverrides = base._dataOverrides,
+      _previewVariables = base._previewVariables,
+      _appUser = base._appUser,
+      indexedItem = base.indexedItem,
+      parentIndexedItem = base.parentIndexedItem,
+      nodeState = base.nodeState,
+      holdProgress = base.holdProgress,
+      dragValues = base.dragValues,
+      trackValues = base.trackValues,
+      _givenRouteParams = base._givenRouteParams,
+      _routePath = base._routePath,
+      screenSize = base.screenSize,
+      platformBrightness = base.platformBrightness,
+      predefinedOverrides = base.predefinedOverrides;
+
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
     BuildContext context, {

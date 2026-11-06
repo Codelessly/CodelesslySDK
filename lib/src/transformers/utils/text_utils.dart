@@ -233,6 +233,8 @@ class TextUtils {
 
     return Text.rich(
       TextSpan(children: spans),
+      // See [rootTextStyle].
+      style: rootTextStyle,
       textAlign: textAlignHorizontal?.toFlutter(),
       maxLines: maxLines,
       overflow: overflow?.flutterOverflow,
@@ -291,6 +293,10 @@ class TextUtils {
         : InlineCode.apply(colored, inlineCode);
 
     return Text.rich(
+      // A host's default text style (a Scaffold's Material 3 bodyMedium, 14 px
+      // at 1.43) would set the paragraph's line height under every span
+      // without one of its own. See [rootTextStyle].
+      style: rootTextStyle,
       TextSpan(
         children: language != SyntaxLanguage.none
             ? CodeHighlighter.highlightSpans(
@@ -384,6 +390,7 @@ class TextUtils {
 
     return Text.rich(
       TextSpan(children: [span]),
+      style: rootTextStyle,
       textAlign: textAlignHorizontal?.toFlutter(),
       maxLines: maxLines,
       overflow: overflow?.flutterOverflow,
@@ -614,6 +621,13 @@ class TextUtils {
     // doesn't change where the text sits either.
     return baseTextStyle.merge(style);
   }
+
+  /// The style of the text widgets the SDK builds for its spans: theirs
+  /// alone, never the default text style around them. The paragraph takes
+  /// its line height from it, so a host's Material 3 default (a Scaffold's
+  /// bodyMedium, 1.43) made every span whose line height is auto 43% taller
+  /// than Flutter's `Text` with the same style.
+  static const TextStyle rootTextStyle = baseTextStyle;
 
   /// What [retrieveTextStyle] merges every text style over.
   static const TextStyle baseTextStyle = TextStyle(

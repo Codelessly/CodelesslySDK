@@ -64,7 +64,11 @@ bool readsParentSize(BaseNode node) {
   if (hasFractionalSize(node)) return true;
   bool isParent(String path) =>
       VariableMatch.parse(path.wrapWithVariableSyntax())?.name == 'parent';
-  for (final String path in node.variables.values) {
+  for (final MapEntry(key: String key, value: String path)
+      in node.variables.entries) {
+    // A drag track's bindings read its parent's measured box instead (see
+    // TrackParentMeasure).
+    if (key.startsWith(DragTrackModel.bindingPrefix)) continue;
     final String? expression = FormulaEvaluator.exactExpression(path);
     if (expression != null) {
       if (FormulaEvaluator.referencedPaths(expression).any(isParent)) {

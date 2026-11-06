@@ -212,6 +212,70 @@ class PassiveTextFieldWidget extends StatefulWidget {
   /// The key in [BaseNode.variables] that binds the colour of the cursor.
   static const String cursorColor = 'cursorColor';
 
+  /// [decoration] of a one-line field [height] tall, with its line placed
+  /// in that height per [alignment] (the field's `textAlignVertical`).
+  ///
+  /// Flutter's InputDecorator is only as tall as its content (padding plus
+  /// one line, or 48 px when not dense), whatever height it is given, so a
+  /// dense 52 px field with no content padding showed its text at the top
+  /// even when centered. The space left over goes into the content padding:
+  /// above the line by the alignment's share (half for center), below it
+  /// the rest, so the decorator fills the height and the line sits where
+  /// `textAlignVertical` asks. A decoration with a label, helper, error or
+  /// counter (which take their own room), or a non-dense field no taller
+  /// than 48 px (which Flutter centers itself), is returned unchanged.
+  static InputDecoration alignedVertically(
+    BuildContext context,
+    InputDecoration decoration, {
+    required double height,
+    required TextStyle inputStyle,
+    required TextAlignVerticalEnum alignment,
+  }) {
+    final bool dense = decoration.isDense ?? false;
+    if (!height.isFinite ||
+        (decoration.isCollapsed ?? false) ||
+        (!dense && height <= kMinInteractiveDimension) ||
+        decoration.label != null ||
+        decoration.labelText != null ||
+        decoration.helperText != null ||
+        decoration.helper != null ||
+        decoration.error != null ||
+        decoration.errorText != null ||
+        decoration.counter != null ||
+        (decoration.counterText?.isNotEmpty ?? false)) {
+      return decoration;
+    }
+    final TextScaler scaler = MediaQuery.maybeTextScalerOf(context) ??
+        TextScaler.noScaling;
+    double lineOf(TextStyle? style) {
+      final TextPainter painter = TextPainter(
+        text: TextSpan(text: ' ', style: style),
+        textDirection: TextDirection.ltr,
+        textScaler: scaler,
+      );
+      final double line = painter.preferredLineHeight;
+      painter.dispose();
+      return line;
+    }
+
+    final double line = [
+      lineOf(inputStyle),
+      if (decoration.hintText != null) lineOf(decoration.hintStyle),
+    ].reduce((a, b) => a > b ? a : b);
+    final EdgeInsets padding =
+        decoration.contentPadding?.resolve(Directionality.maybeOf(context)) ??
+        EdgeInsets.zero;
+    final double extra = height - padding.vertical - line;
+    if (extra <= 0.5) return decoration;
+    final double above = extra * (alignment.flutterTextAlignVertical.y + 1) / 2;
+    return decoration.copyWith(
+      contentPadding: padding.copyWith(
+        top: padding.top + above,
+        bottom: padding.bottom + extra - above,
+      ),
+    );
+  }
+
   /// The colour that the binding [property] of [node] gives, evaluated with
   /// [scopedValues] (or a condition on it), or null when it is missing or
   /// isn't a colour.
@@ -883,15 +947,22 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
               // must not change it: desktop's compact density took 8 px off
               // the outline, leaving a strip of the box's background below
               // the border.
+              if (!constraints.hasBoundedHeight) return buildField(decoration);
               return buildField(
-                constraints.hasBoundedHeight
-                    ? decoration.copyWith(
-                        constraints: BoxConstraints.tightFor(
-                          height: constraints.maxHeight,
-                        ),
-                        visualDensity: VisualDensity.standard,
-                      )
-                    : decoration,
+                PassiveTextFieldWidget.alignedVertically(
+                  context,
+                  decoration.copyWith(
+                    constraints: BoxConstraints.tightFor(
+                      height: constraints.maxHeight,
+                    ),
+                    visualDensity: VisualDensity.standard,
+                  ),
+                  height: constraints.maxHeight,
+                  inputStyle: TextUtils.retrieveTextStyleFromProp(
+                    properties.inputStyle,
+                  ),
+                  alignment: properties.textAlignVertical,
+                ),
               );
             },
           )

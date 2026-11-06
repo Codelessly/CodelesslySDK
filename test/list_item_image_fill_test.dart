@@ -107,8 +107,9 @@ void main() {
   }
 
   testWidgets('each row of a data list hugs its own content', (t) async {
-    expect(await heights(t, scroll: true), [106.0, 53.0]);
-    expect(await heights(t, scroll: false), [106.0, 53.0]);
+    // Two lines and one of 40 px text at the test font's own line height.
+    expect(await heights(t, scroll: true), [80.0, 40.0]);
+    expect(await heights(t, scroll: false), [80.0, 40.0]);
   });
 
   testWidgets('an image fill behind a hugging card does not set its height', (
@@ -116,6 +117,6 @@ void main() {
   ) async {
     // The image fills the card behind its content, so the short row stays
     // short, instead of every row taking the texture's (or design) height.
-    expect(await heights(t, scroll: true, image: true), [106.0, 53.0]);
+    expect(await heights(t, scroll: true, image: true), [80.0, 40.0]);
   });
 }
