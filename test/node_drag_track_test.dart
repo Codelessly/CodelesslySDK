@@ -453,27 +453,32 @@ void main() {
     expect(tester.getCenter(find.text('thumb')), const Offset(225, 10));
   });
 
-  testWidgets('tapping a relative scrub area on the node jumps there', (
+  testWidgets('a relative scrub area maps a tap to that fraction across', (
     tester,
   ) async {
+    // A 300-wide scrub area on a track from half a width left to half a
+    // width right of its centre: its centre (where a knob sits) is at the
+    // value's fraction across, and a tap 3/4 across jumps to 3/4.
     const scrubber = DragTrackModel(
       variable: 'minute',
       min: 0,
       max: 1440,
       step: 5,
-      x2: 1,
+      x1: -0.5,
+      x2: 0.5,
       y2: 0,
       relative: true,
       jumpOnTap: true,
     );
-    value = 720;
+    value = 360;
     await tester.pumpWidget(
       plate(scrubber, size: const Size(300, 20), at: const Offset(0, 300)),
     );
-    // The node now covers 150..450; the tap lands on it, 3/4 along.
-    await tester.tapAt(const Offset(375, 310));
+    expect(tester.getCenter(find.text('cap')), const Offset(75, 310));
+    await tester.tapAt(const Offset(225, 310));
     await tester.pump();
     expect(value, 1080);
+    expect(tester.getCenter(find.text('cap')), const Offset(225, 310));
     await tester.pump(const Duration(seconds: 1));
   });
 }
