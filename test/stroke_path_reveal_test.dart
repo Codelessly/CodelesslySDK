@@ -158,12 +158,12 @@ void main() {
           ..transitionMs = 280
           ..variables['visible'] = r'${= false}';
     await _pump(tester, node);
-    expect(find.byType(AnimatedSize), findsOneWidget);
-    final AnimatedOpacity fade = tester.widget<AnimatedOpacity>(
-      find.descendant(
-        of: find.byType(AnimatedSize),
-        matching: find.byType(AnimatedOpacity),
-      ),
+    final Finder transition = find.byType(VisibilitySizeTransition);
+    expect(transition, findsOneWidget);
+    expect(tester.widget<VisibilitySizeTransition>(transition).visible, false);
+    // Hidden from the start: nothing of the node.
+    final Opacity fade = tester.widget<Opacity>(
+      find.descendant(of: transition, matching: find.byType(Opacity)),
     );
     expect(fade.opacity, 0);
     expect(fade.child, isA<SizedBox>());

@@ -237,7 +237,11 @@ class _PassivePageViewWidgetState extends State<PassivePageViewWidget> {
 
     final List? data = PropertyValueDelegate.getVariableValueFromPath<List>(
       widget.node.variables['data'] ?? '',
-      scopedValues: ScopedValues.of(context),
+      scopedValues: VariablePreview.bindingScopeOf(
+        widget.node,
+        context,
+        widget.settings,
+      ),
     );
 
     final int? itemCount;
