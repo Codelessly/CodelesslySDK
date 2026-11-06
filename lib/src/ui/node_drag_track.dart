@@ -143,7 +143,7 @@ class DragTrackGeometry {
   }
 
   /// The progress of the point on a line or path nearest to [p] (relative
-  /// to the rest centre).
+  /// to the rest centre), or of the angle [p] makes around an arc's pivot.
   double nearest(Offset p) {
     switch (track.shape) {
       case DragTrackShape.line:
@@ -166,7 +166,22 @@ class DragTrackGeometry {
         }
         return best / (_samples.length - 1);
       case DragTrackShape.arc:
-        return 0;
+        // The pointer's angle around the pivot, as a fraction of the sweep;
+        // of the angle's turns (±360°), the one nearest the arc counts.
+        final double sweep = track.endAngle - track.startAngle;
+        if (sweep == 0) return 0;
+        final double angle = angleOf(p);
+        double best = 0;
+        double bestOff = double.infinity;
+        for (int turn = -2; turn <= 2; turn++) {
+          final double t = (angle + 360 * turn - track.startAngle) / sweep;
+          final double off = t < 0 ? -t : (t > 1 ? t - 1 : 0);
+          if (off < bestOff) {
+            bestOff = off;
+            best = t;
+          }
+        }
+        return best.clamp(0.0, 1.0);
     }
   }
 
@@ -285,8 +300,7 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
     if (!widget.enabled) return;
     if (!onNode &&
         _track.jumpOnTap &&
-        _track.input == DragTrackInput.follow &&
-        _track.shape != DragTrackShape.arc) {
+        _track.input == DragTrackInput.follow) {
       // Tapped the track off the node: jump there, then drag from there.
       _raw = _progress;
       _emit(_geometry.nearest(_rel(local)));
