@@ -1,7 +1,10 @@
 ## 9.3.0
 
-Requires codelessly_api 9.2.0. Fixes and features from recreating the
-Lamplight reference app (CodelesslyEditor `references/lamplight/blockers.md`):
+Requires codelessly_api 9.3.0. The first release since 9.1.9: it also
+publishes the 9.2.0 and 9.1.10 changes below, which were versioned but
+never published.
+
+Fixes and features from recreating the Lamplight reference app (CodelesslyEditor `references/lamplight/blockers.md`):
 
 ### Fixes
 
@@ -30,11 +33,11 @@ Lamplight reference app (CodelesslyEditor `references/lamplight/blockers.md`):
   and layout; switch thumb shadow; colour literals in bindings; formula
   `alpha(c)`, colour values in colour functions, `without(list, value)`.
 
-## 9.2.0
+### 9.2.0 (not published)
 
 Requires codelessly_api 9.1.0.
 
-### Features
+#### Features
 
 - Formula functions for curves: `spline(points)` (SVG path data of a smooth
   curve through `{x, y}` points), `pathPoints(path, n)` (n points equally
@@ -52,7 +55,7 @@ Requires codelessly_api 9.1.0.
   switch widths.
 - Toasts can be tilted and come in on any curve.
 
-### Fixes
+#### Fixes
 
 - Computed variables whose formulas read `storage`, `route`, `screen` or
   `auth` (directly or through other computed variables) are cached again,
@@ -66,7 +69,7 @@ Requires codelessly_api 9.1.0.
 - A frozen loop (`motion.loop` bound off) keeps the values its formulas give.
 - An image paint without a URL draws nothing instead of throwing.
 
-## 9.1.10
+### 9.1.10 (not published)
 
 - `SDKPublishModel.appIdentity`: the project's `AppIdentity` (name, title
   template, description, icons, colors, manifest, splash, mobile) ships in
@@ -112,7 +115,7 @@ Requires codelessly_api 9.1.0.
 Requires codelessly_api 9.0.4. Found recreating Chairlift (a ski-resort
 status board) in the editor:
 
-### Layout and drawing
+#### Layout and drawing
 
 - Children of a frame scaled from its `contentSize` are placed in the design
   space; small children (map pins, chairs) landed far off the map.
@@ -120,14 +123,14 @@ status board) in the editor:
   `pathData` included), take taps only on their line or fill, so
   overlapping shapes can each be tapped.
 
-### Motion and controls
+#### Motion and controls
 
 - `motion.paused` freezes a loop in place; `motion.phase` starts it part-way
   round its cycle.
 - Path drag tracks with a view box follow their frame's size; arc tracks
   jump to the tapped angle with `jumpOnTap`.
 
-### Actions and runtime
+#### Actions and runtime
 
 - Interval and timer reactions wait while their screen is covered by
   another one (a deep link over the entry screen ticked twice as fast).
