@@ -201,7 +201,16 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final double extent = horizontal
         ? node.outerBoxLocal.width
         : node.outerBoxLocal.height;
-    final double parentExtent = horizontal
+    // A frame that scales a content box of its own design size
+    // ([FrameNode.contentSize]) lays its children out in that space, from
+    // its origin: the frame's padding is outside it, not an offset in it.
+    final SizeC? design = parent is FrameNode && parent.contentFit != null
+        ? parent.contentSize
+        : null;
+    double edge(double e) => design != null ? 0 : e;
+    final double parentExtent = design != null
+        ? (horizontal ? design.width : design.height)
+        : horizontal
         ? parent.innerBoxLocal.width
         : parent.innerBoxLocal.height;
     final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
@@ -220,17 +229,21 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final double? startPin = switch (horizontal ? pins.left : pins.top) {
       final double pin =>
         pin -
-            (horizontal
-                ? parent.innerBoxLocal.edgeLeft
-                : parent.innerBoxLocal.edgeTop),
+            edge(
+              horizontal
+                  ? parent.innerBoxLocal.edgeLeft
+                  : parent.innerBoxLocal.edgeTop,
+            ),
       null => null,
     };
     final double? endPin = switch (horizontal ? pins.right : pins.bottom) {
       final double pin =>
         pin -
-            (horizontal
-                ? parent.innerBoxLocal.edgeRight
-                : parent.innerBoxLocal.edgeBottom),
+            edge(
+              horizontal
+                  ? parent.innerBoxLocal.edgeRight
+                  : parent.innerBoxLocal.edgeBottom,
+            ),
       null => null,
     };
     final bool pinnedStart = startPin != null;
@@ -250,8 +263,8 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
       start = parentExtent - endPin - extent;
     } else {
       start = horizontal
-          ? node.outerBoxLocal.x - parent.innerBoxLocal.edgeLeft
-          : node.outerBoxLocal.y - parent.innerBoxLocal.edgeTop;
+          ? node.outerBoxLocal.x - edge(parent.innerBoxLocal.edgeLeft)
+          : node.outerBoxLocal.y - edge(parent.innerBoxLocal.edgeTop);
     }
 
     FreeformAxisPlacement placement(
