@@ -15,12 +15,6 @@ jobs:
           channel: stable
           flutter-version: 3.47.7
           cache: true
-      # The SDK builds on the API's unreleased master: resolve it from git,
-      # as the site does, until it is published.
-      - name: Use the API from its master
-        run: |
-          printf 'dependency_overrides:\n  codelessly_api:\n    git:\n      url: https://github.com/Codelessly/CodelesslyAPI.git\n      ref: master\n' > pubspec_overrides.yaml
-          cp pubspec_overrides.yaml example/pubspec_overrides.yaml
       - run: flutter pub get
       - run: dart format --set-exit-if-changed --output=none lib test tool
       - run: flutter analyze
