@@ -780,7 +780,9 @@ class SDKPublishUpdates with Equatable {
   final Map<String, Set<String>> layoutCanvases;
 
   /// A map of canvas ids -> the canvas's URL path pattern, such as
-  /// `guide/:id`, for canvases that have one.
+  /// `guide/:id`, for canvases that have one: their own, or (every screen
+  /// but the entry screen) one the editor made from the screen's name
+  /// ([CanvasLocation.defaultPathOf]).
   ///
   /// This lets the SDK route a URL to its screen before the screen's layout
   /// is downloaded, e.g. when a link to a deep screen opens the app.
