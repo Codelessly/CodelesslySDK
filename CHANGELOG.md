@@ -43,6 +43,9 @@
 - Impossible days (`2013-02-30`) are not read as dates.
 - A text field's `error` flag draws the error border in its own color.
 - Quoted formula text reads `\n`, `\t` and `\r`.
+- Text fields use standard visual density on every platform: desktop's
+  compact density (also the web's) took 8 px off a field that hugs its
+  height.
 
 ## 9.1.9
 
