@@ -40,6 +40,7 @@ class ActionChain {
   /// Creates an [ActionChain] that starts with [result].
   ActionChain({
     this.result,
+    this.loop,
     this.scopedValues,
     this._context,
     this._hosts = const [],
@@ -58,6 +59,13 @@ class ActionChain {
 
   /// What `${result}` resolves to.
   Object? result;
+
+  /// What `${loop}` resolves to while a for-each runs its nested actions:
+  /// `{item, index}` of the current turn. Unlike [result], which every
+  /// action replaces with what it produced, it stays the same for the whole
+  /// turn, so every action of the body (and of conditionals inside it) can
+  /// read `${loop.item}`. Nested chains inherit it.
+  final Object? loop;
 
   /// The scope captured when the chain's trigger fired, which the chain's
   /// actions read variables from. Null for a chain that was started without
@@ -96,8 +104,9 @@ class ActionChain {
   }
 
   /// A chain nested in this one: same scope and contexts, its own result.
-  ActionChain _nested(Object? result) => ActionChain(
+  ActionChain _nested(Object? result, {Object? loop}) => ActionChain(
     result: result,
+    loop: loop ?? this.loop,
     scopedValues: scopedValues,
     context: _context,
     hosts: _hosts,
@@ -109,10 +118,16 @@ class ActionChain {
   /// With [context], the chain starts at a trigger: it captures the scope and
   /// hosts of [context]. Without it, the chain nests in the current one (a
   /// for-each's or an upload's actions) and keeps its scope and contexts.
-  static R run<R>(R Function() body, {Object? result, BuildContext? context}) {
+  static R run<R>(
+    R Function() body, {
+    Object? result,
+    Object? loop,
+    BuildContext? context,
+  }) {
     final ActionChain chain = context != null
         ? ActionChain.capture(context, result: result)
-        : current?._nested(result) ?? ActionChain(result: result);
+        : current?._nested(result, loop: loop) ??
+              ActionChain(result: result, loop: loop);
     return runZoned(body, zoneValues: {_zoneKey: chain});
   }
 

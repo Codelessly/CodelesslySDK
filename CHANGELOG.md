@@ -1,4 +1,4 @@
-## Unreleased
+## 9.1.10
 
 - `SDKPublishModel.appIdentity`: the project's `AppIdentity` (name, title
   template, description, icons, colors, manifest, splash, mobile) ships in
@@ -41,6 +41,47 @@
 - An action chain whose screens have all gone finishes on the screen the app
   shows now (a toast's delayed hide after the screen was replaced).
 
+Requires codelessly_api 9.0.4. Found recreating Chairlift (a ski-resort
+status board) in the editor:
+
+### Layout and drawing
+
+- Children of a frame scaled from its `contentSize` are placed in the design
+  space; small children (map pins, chairs) landed far off the map.
+- Rectangles drawn from a `path`, and path nodes (view box and bound
+  `pathData` included), take taps only on their line or fill, so
+  overlapping shapes can each be tapped.
+
+### Motion and controls
+
+- `motion.paused` freezes a loop in place; `motion.phase` starts it part-way
+  round its cycle.
+- Path drag tracks with a view box follow their frame's size; arc tracks
+  jump to the tapped angle with `jumpOnTap`.
+
+### Actions and runtime
+
+- Interval and timer reactions wait while their screen is covered by
+  another one (a deep link over the entry screen ticked twice as fast).
+- For-each turns expose `${loop.item}` / `${loop.index}`; `${result.item}`
+  was gone after the first action of the turn.
+- A screen whose link params set its variables reads them as the router
+  does: `?ids=3,7` sets a list to `[3, 7]`; a param that can't be read as the
+  variable's type leaves it alone (`?feed=3` used to put the text "3" in a
+  list).
+- Scroll To takes an `axis`, waits up to 60 frames for its target, and
+  scrolls the node on its own screen (a link to the entry screen opens it
+  over itself, building the node twice).
+- A loop built where tickers don't run (a page body kept alive while
+  hidden) starts once they do, so its `phase` applies; a held chair sat at
+  the start of its cable.
+- A binding that is a number written as is (`"172.28"`) reads as that
+  number: a stacked list item's constant `x`/`y` used to fall back to its
+  design offset.
+- A node shown and hidden by a binding keeps its state across toggles; each
+  toggle used to rebuild its whole subtree (a page body came back scrolled
+  to the start).
+- The toast's action can be a styled button and keeps its own font size.
 
 ## 9.1.9
 

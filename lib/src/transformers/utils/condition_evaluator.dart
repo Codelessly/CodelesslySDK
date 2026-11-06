@@ -339,6 +339,9 @@ class ConditionEvaluator<R extends Object>
   R? visitSpeakAction(SpeakAction action) => null;
 
   @override
+  R? visitHapticAction(HapticAction action) => null;
+
+  @override
   R? visitScrollToAction(ScrollToAction action) => null;
 
   @override
@@ -533,6 +536,11 @@ class ConditionPrinter
   @override
   void visitSpeakAction(SpeakAction action) {
     _buffer.writeln('\tSpeak: ${action.stop ? 'stop' : action.text}');
+  }
+
+  @override
+  void visitHapticAction(HapticAction action) {
+    _buffer.writeln('\tHaptic: ${action.kind.name}');
   }
 
   @override
