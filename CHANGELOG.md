@@ -95,6 +95,25 @@ Requires the unreleased codelessly_api gesture models.
   scrolls both ways, builds only the visible cells and pins its header row
   and column.
 
+## 9.3.3
+
+Requires codelessly_api 9.3.0. Rendering fixes found matching the Chairlift
+reference app pixel for pixel.
+
+### Fixed
+
+- A colour or gradient fill sits inside its node's solid border by half the
+  border's inset, as Flutter's BoxDecoration paints a background under a
+  uniform border: drawn to the edge, the fill's anti-aliased rim showed
+  through the border's (a light seam between a card's border and shadow).
+- A node that clips its content keeps its own stroke outside the clip, as
+  Flutter's Container paints its border outside the clip of its child: a
+  rounded card's border was cut (or anti-aliased twice), leaving a light
+  seam between it and its shadow.
+- A stroke on one side paints only its band. It was the difference of two
+  rounded rects whose other three edges coincide, and at a fractional
+  position the GPU backend left faint lines along them.
+
 ## 9.3.2
 
 Requires codelessly_api 9.3.0.
@@ -127,14 +146,6 @@ Requires codelessly_api 9.3.0.
 - Layouts load the SVGs of their toast icons when they load
   (`AppToast.precacheIcons`, `SvgIcon.precache`), so the first toast of a
   session shows its icon.
-- A colour or gradient fill sits inside its node's solid border by half the
-  border's inset, as Flutter's BoxDecoration paints a background under a
-  uniform border: drawn to the edge, the fill's anti-aliased rim showed
-  through the border's (a light seam between a card's border and shadow).
-- A node that clips its content keeps its own stroke outside the clip, as
-  Flutter's Container paints its border outside the clip of its child: a
-  rounded card's border was cut (or anti-aliased twice), leaving a light
-  seam between it and its shadow.
 
 ## 9.3.0
 
