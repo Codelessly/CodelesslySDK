@@ -190,10 +190,18 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       spacing: rowColumnNode.spacing,
       // A row/column that clips its content cuts an overflow off at its
       // edge, with no debug stripes (a row of skeleton chips wider than
-      // its slot), as the app shows it.
+      // its slot), as the app shows it: children placed past its box on
+      // either axis are clipped ([clipsOverflow]), and the Flex itself
+      // clips only when it overflows ([clipBehavior]), so shadows of
+      // children that fit are drawn as before.
       clipsOverflow:
           rowColumnNode is ClipMixin &&
           (rowColumnNode as ClipMixin).clipsContent,
+      clipBehavior:
+          rowColumnNode is ClipMixin &&
+              (rowColumnNode as ClipMixin).clipsContent
+          ? Clip.hardEdge
+          : Clip.none,
       key: ValueKey(rowColumnNode.id),
       children: childrenWidgets,
     );
@@ -214,6 +222,20 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         children: childrenNodes,
         fallbackSize: rowColumnNode.innerBoxLocal.size.flutterSize,
         child: (_) => flex,
+      );
+    }
+
+    // Children sized by a fraction of this row/column measure it by its
+    // content size (see [FlexContentScope]) where [ParentExtentScope] gives
+    // none.
+    if (!measureCross && childrenNodes.any(hasFractionalSize)) {
+      final Widget flex = res;
+      res = LayoutBuilder(
+        builder: (context, constraints) => FlexContentScope(
+          width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+          height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
+          child: flex,
+        ),
       );
     }
 

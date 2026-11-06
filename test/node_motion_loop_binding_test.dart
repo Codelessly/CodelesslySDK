@@ -63,6 +63,18 @@ void main() {
     expect(resolve(dot('restart'))!.loop, MotionLoop.restart);
   });
 
+  test('A frozen loop holds the values its formulas give', () {
+    final RectangleNode plane = dot(r"${= 'none'}", motion: const MotionModel(
+      path: 'M 0 0 L 100 0',
+      pathProgress: 1,
+      loop: MotionLoop.restart,
+    ))
+      ..variables['motion.pathProgress'] = r'${= 0.36}';
+    final MotionModel m = resolve(plane)!;
+    expect(m.loop, MotionLoop.none);
+    expect(m.pathProgress, 0.36);
+  });
+
   test('true and false keep the saved loop or turn it off', () {
     expect(resolve(dot(r'${= 1 > 0}'))!.loop, MotionLoop.reverse);
     expect(resolve(dot(r'${= 1 < 0}'))!.loop, MotionLoop.none);

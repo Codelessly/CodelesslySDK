@@ -172,6 +172,19 @@ class SDKPublishModel extends PrivacyBase {
   /// A list of layout ids that are explicitly disabled from the server's side.
   final List<String> disabledLayouts;
 
+  /// The project's identity as a web app and a mobile app: name, title,
+  /// description, icons, social card, manifest, colors and splash. Null for
+  /// projects published before it existed, or with none set.
+  @JsonKey(
+    fromJson: AppIdentity.maybeFromJson,
+    toJson: serializeAppIdentity,
+    includeIfNull: false,
+  )
+  final AppIdentity? appIdentity;
+
+  static Map<String, dynamic>? serializeAppIdentity(AppIdentity? identity) =>
+      identity?.toJson();
+
   static Map<String, dynamic> serializeLookupMapFonts(
     LookupMap<SDKPublishFont> map,
   ) => map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
@@ -266,6 +279,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    this.appIdentity,
 
     // Privacy
     required super.owner,
@@ -323,6 +337,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    this.appIdentity,
 
     // Privacy
     required super.privacy,
@@ -367,6 +382,27 @@ class SDKPublishModel extends PrivacyBase {
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
 
+  /// A copy with [identity] as its [appIdentity].
+  SDKPublishModel withAppIdentity(AppIdentity? identity) =>
+      SDKPublishModel.private(
+        projectId: projectId,
+        layoutIDMap: layoutIDMap,
+        pages: pages,
+        updates: updates,
+        fonts: fonts.dataMap,
+        layouts: layouts.dataMap,
+        apis: apis,
+        variables: variables.dataMap,
+        conditions: conditions.dataMap,
+        entryLayoutId: entryLayoutId,
+        entryPageId: entryPageId,
+        entryCanvasId: entryCanvasId,
+        lastUpdated: lastUpdated,
+        disabledLayouts: disabledLayouts,
+        appIdentity: identity,
+        privacy: this,
+      );
+
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishModel copyWith({
     String? projectId,
@@ -402,6 +438,9 @@ class SDKPublishModel extends PrivacyBase {
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       disabledLayouts: disabledLayouts ?? this.disabledLayouts,
+      // Not a copyWith parameter: subclasses override copyWith, and a new
+      // parameter would break them. Set it with withAppIdentity.
+      appIdentity: appIdentity,
 
       // Privacy
       privacy: privacy ?? this,
@@ -425,6 +464,7 @@ class SDKPublishModel extends PrivacyBase {
     entryCanvasId,
     lastUpdated,
     disabledLayouts,
+    appIdentity,
   ];
 }
 
