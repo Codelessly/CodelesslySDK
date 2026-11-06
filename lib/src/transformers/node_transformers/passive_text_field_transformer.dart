@@ -295,6 +295,32 @@ class PassiveTextFieldWidget extends StatefulWidget {
     );
   }
 
+  /// [padding] grown by the width of the border [decoration] draws in this
+  /// state when it has `paddingIncludesBorder`, as a container's border adds
+  /// to its padding: an outline on every side, an underline below. Disabled,
+  /// then error (focused or not), then focused, then enabled.
+  static EdgeInsets paddingWithBorder(
+    EdgeInsets padding,
+    InputDecorationModel decoration, {
+    required bool error,
+    required bool focused,
+  }) {
+    if (!decoration.paddingIncludesBorder) return padding;
+    final InputBorderModel border = !decoration.enabled
+        ? decoration.disabledBorder
+        : error
+        ? (focused ? decoration.focusedErrorBorder : decoration.errorBorder)
+        : focused
+        ? decoration.focusedBorder
+        : decoration.enabledBorder;
+    final double w = border.borderSide.width;
+    if (border.borderType.isNone || w <= 0) return padding;
+    if (border.borderType.isUnderline) {
+      return padding.copyWith(bottom: padding.bottom + w);
+    }
+    return padding + EdgeInsets.all(w);
+  }
+
   /// The colour that the binding [property] of [node] gives, evaluated with
   /// [scopedValues] (or a condition on it), or null when it is missing or
   /// isn't a colour.
@@ -634,9 +660,11 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       widget.onEditingComplete?.call(context, controller.text);
     }
     if (!mounted) return;
-    // The focus ring follows focus (its width may be bound).
+    // The focus ring follows focus (its width may be bound), and so does a
+    // padding that includes the (focused) border.
     if (widget.node.properties.focusRingWidth > 0 ||
-        widget.node.variables.containsKey('focusRingWidth')) {
+        widget.node.variables.containsKey('focusRingWidth') ||
+        widget.node.properties.decoration.paddingIncludesBorder) {
       setState(() {});
     }
     if (focusNode.hasFocus && widget.node.properties.selectAllOnFocus) {
@@ -1275,8 +1303,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       visualDensity: VisualDensity.standard,
       // The decoration's own content padding wins over the node's padding,
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
-      contentPadding:
-          (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
+      contentPadding: PassiveTextFieldWidget.paddingWithBorder(
+        (decoration.contentPadding ?? node.padding).flutterEdgeInsets,
+        decoration,
+        error: hasError || errorFlag,
+        focused: focusNode.hasFocus,
+      ),
       prefixIcon: alwaysAffixes && prefixText != null
           ? _affix(prefixIconWidget, prefixText, before: true)
           : prefixIconWidget,
