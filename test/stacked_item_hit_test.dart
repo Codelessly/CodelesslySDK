@@ -139,12 +139,12 @@ void main() {
     tester,
   ) async {
     final last = await pump(tester);
-    // a's pin: 45..85 x 0..40; b's slot: 60..190 x 20..95, its pin
-    // 105..145 x 20..60.
-    expect(await tapAt(tester, last, const Offset(50, 10)), 'a');
+    // a's pin (centred in its slot): 45..85 x 17.5..57.5; b's slot:
+    // 60..190 x 20..95, its pin 105..145 x 37.5..77.5.
+    expect(await tapAt(tester, last, const Offset(50, 25)), 'a');
     // Under b's empty slot area.
     expect(await tapAt(tester, last, const Offset(75, 30)), 'a');
-    expect(await tapAt(tester, last, const Offset(125, 40)), 'b');
+    expect(await tapAt(tester, last, const Offset(125, 50)), 'b');
     // b's empty slot area over the map.
     expect(await tapAt(tester, last, const Offset(170, 85)), 'map');
     expect(await tapAt(tester, last, const Offset(300, 150)), 'map');
@@ -154,7 +154,7 @@ void main() {
     tester,
   ) async {
     final last = await pump(tester, slotReactions: [tap('slot')]);
-    expect(await tapAt(tester, last, const Offset(125, 40)), 'b');
+    expect(await tapAt(tester, last, const Offset(125, 50)), 'b');
     expect(await tapAt(tester, last, const Offset(75, 30)), 'slot');
     expect(await tapAt(tester, last, const Offset(170, 85)), 'slot');
   });
@@ -166,8 +166,9 @@ void main() {
         PaintModel.solid(id: 'f', color: ColorRGB.fromHex('#FFFFFF')),
       ],
     );
-    // b's filled slot covers a's pin.
-    expect(await tapAt(tester, last, const Offset(75, 30)), isNot('a'));
-    expect(await tapAt(tester, last, const Offset(170, 85)), isNot('map'));
+    // b's filled slot covers a's pin; the tap goes to the map (an
+    // ancestor), not to a beneath.
+    expect(await tapAt(tester, last, const Offset(75, 30)), 'map');
+    expect(await tapAt(tester, last, const Offset(125, 50)), 'b');
   });
 }

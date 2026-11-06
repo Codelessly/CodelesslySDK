@@ -1040,10 +1040,15 @@ class StackedListItems extends StatelessWidget {
                               scope,
                             )) ??
                       offsetOf(item, node, 'y', scope),
-                  child: manager.buildWidgetByID(
-                    item.id,
-                    context,
-                    settings: settings,
+                  // Items overlap (pins on a map): an item's empty area,
+                  // where it has no fill, stroke or reaction of its own,
+                  // lets taps through to the items and the list beneath.
+                  child: TapThroughScope(
+                    child: manager.buildWidgetByID(
+                      item.id,
+                      context,
+                      settings: settings,
+                    ),
                   ),
                 );
               },
