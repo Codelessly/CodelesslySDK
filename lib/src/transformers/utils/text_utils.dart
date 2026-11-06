@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../utils/legacy_google_fonts.dart';
 
 // const Color _kDefaultColor = Colors.black;
 // const double _kDefaultFontSize = 18.0;
@@ -573,8 +576,21 @@ class TextUtils {
         shadows: shadows,
       );
     } else {
+      final bool isLegacyGoogleFont =
+          fontName != null && LegacyGoogleFonts.has(fontName.family);
+      if (isLegacyGoogleFont) {
+        unawaited(
+          LegacyGoogleFonts.ensure(
+            fontName.family,
+            weight: (fontWeightProp ?? FontWeight.w400).value,
+            italic: fontStyle == FontStyle.italic,
+          ),
+        );
+      }
       final String? fontFamily = fontName == null
           ? null
+          : isLegacyGoogleFont
+          ? fontName.family
           : getFontFamilyNameAndVariant(fontName);
 
       // Enable this for fonts debugging.
