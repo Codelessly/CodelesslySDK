@@ -76,6 +76,20 @@ void main() {
       expect(find.text('first', findRichText: true), findsOneWidget);
     });
 
+    testWidgets('a slider shows its prefix and unit around the value', (tester) async {
+      final session = GenUiSession(catalog: genUiCatalog(theme: testTheme));
+      addTearDown(session.dispose);
+      session.apply([
+        create('p'),
+        data('p', {'price': 400000}),
+        components('p', [
+          {'id': 'root', 'component': 'Slider', 'label': 'Home price', 'prefix': r'$', 'min': 100000, 'max': 1000000, 'step': 5000, 'value': {'path': '/price'}},
+        ]),
+      ]);
+      await pumpSurfaces(tester, session);
+      expect(find.text(r'$400,000'), findsOneWidget);
+    });
+
     testWidgets('a calc formula recomputes on the device when its input changes', (tester) async {
       final session = GenUiSession(catalog: genUiCatalog(theme: testTheme));
       addTearDown(session.dispose);
