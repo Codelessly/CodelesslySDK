@@ -131,9 +131,12 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   /// parts, so they reach what is below it.
   Widget _canvasMaterial(BuildContext context, CanvasNode node, Widget body) {
     final Color? background = canvasBackground(context, node);
+    // A canvas without a background is see-through in a dialog, sheet or
+    // popover however it was opened (a confirm's dialog canvas showed a
+    // white box, the theme's surface, behind its tilted card).
     final bool transparent =
         (background == null || background.a == 0) &&
-        TapThroughScope.of(context);
+        (TapThroughScope.of(context) || ModalRoute.of(context) is PopupRoute);
     return Material(
       type: transparent ? MaterialType.transparency : MaterialType.canvas,
       color: transparent ? null : background,

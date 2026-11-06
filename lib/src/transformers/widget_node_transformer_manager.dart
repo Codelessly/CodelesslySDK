@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' hide log;
 import 'dart:ui' show ImageFilter, lerpDouble;
@@ -307,6 +308,9 @@ abstract class WidgetNodeTransformerManager
     bool animate = true,
   }) {
     MotionModel? motion = node.motion;
+    // Values bound to a number: they still apply when a bound loop is
+    // switched off (a frozen loop shows the bound pose, not rest).
+    final Map<String, double> bound = {};
     for (final String property in MotionModel.properties) {
       final String key = MotionModel.variableKey(property);
       final String? raw = node.variables[key];
@@ -326,6 +330,7 @@ abstract class WidgetNodeTransformerManager
         _ => null,
       };
       if (number == null || !number.isFinite) continue;
+      if (raw.contains(r'${')) bound[property] = number;
       motion = (motion ?? MotionModel.none).withValue(property, number);
     }
     final String pathKey = MotionModel.variableKey(MotionModel.pathProperty);
@@ -339,6 +344,19 @@ abstract class WidgetNodeTransformerManager
       motion = (motion ?? MotionModel.none).copyWith(
         path: data,
         clearPath: data.isEmpty,
+      );
+    }
+    final String keyframesKey = MotionModel.variableKey(
+      MotionModel.keyframesProperty,
+    );
+    if (node.variables.containsKey(keyframesKey)) {
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        keyframesKey,
+        scopedValues: scopedValues,
+      );
+      motion = (motion ?? MotionModel.none).copyWith(
+        keyframes: motionKeyframesOf(value),
       );
     }
     // The transition's duration, delay and curve, e.g. a slow spring in
@@ -421,13 +439,49 @@ abstract class WidgetNodeTransformerManager
       if (loop == MotionLoop.none) {
         // A loop's values are where it swings to; switched off, the node
         // eases back to rest (or to its values, when enterFrom gives the
-        // loop's start).
-        motion = base.loopOff;
+        // loop's start), except values bound by formulas, which hold: a
+        // plane frozen on its looping path at `pathProgress: ${= freeze ?
+        // 0.36 : 1}` stays at 0.36.
+        MotionModel off = base.loopOff;
+        for (final MapEntry<String, double> entry in bound.entries) {
+          off = off.withValue(entry.key, entry.value);
+        }
+        motion = off;
       } else if (loop != null) {
         motion = base.copyWith(loop: loop);
       }
     }
     return motion;
+  }
+
+  /// The keyframes a `motion.keyframes` binding's [value] gives: a list of
+  /// maps (`{t, translateX, translateY, scale, ...}`) or that list as JSON
+  /// text. Entries that aren't maps with a number `t` are skipped; anything
+  /// else gives no keyframes.
+  static List<MotionKeyframe> motionKeyframesOf(Object? value) {
+    Object? list = value;
+    if (list is String) {
+      try {
+        list = jsonDecode(list);
+      } catch (_) {
+        return const [];
+      }
+    }
+    if (list is! List) return const [];
+    double? num_(Object? v) => switch (v) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return [
+      for (final Object? item in list)
+        if (item is Map && num_(item['t']) != null)
+          MotionKeyframe.fromJson({
+            for (final MapEntry entry in item.entries)
+              if (num_(entry.value) case final double v when v.isFinite)
+                entry.key.toString(): v,
+          }),
+    ];
   }
 
   /// The loop a `motion.loop` binding's [value] asks for: `none`, `restart`
@@ -1164,7 +1218,6 @@ abstract class WidgetNodeTransformerManager
     List<Reaction> reactions,
     Widget child,
   ) {
-    final DragTrackModel track = model;
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
@@ -1237,10 +1290,23 @@ abstract class WidgetNodeTransformerManager
       );
     }
 
-    if (variable == null) return Builder(builder: build);
-    return ValueListenableBuilder<VariableData>(
-      valueListenable: variable,
-      builder: (context, _, _) => build(context),
+    // Rebuilt when its value changes, and when anything else it reads does:
+    // a bound `drag.enabled` (a volume slider off while sound is off) or
+    // bound geometry (`dragTrack.x2`).
+    final List<Listenable> others =
+        this is PassiveNodeTransformerManager &&
+            node.variables.keys.any(
+              (k) =>
+                  k == DragModel.enabledVariableKey ||
+                  k.startsWith('dragTrack.'),
+            )
+        ? (this as PassiveNodeTransformerManager).listenablesFor(context, node)
+        : const [];
+    final List<Listenable> listenables = [?variable, ...others];
+    if (listenables.isEmpty) return Builder(builder: build);
+    return AnimatedBuilder(
+      animation: Listenable.merge(listenables),
+      builder: (context, _) => build(context),
     );
   }
 

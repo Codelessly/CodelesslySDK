@@ -7,6 +7,7 @@ import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
 
 import 'formula_clock.dart';
+import 'formula_paths.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
@@ -696,6 +697,26 @@ class FormulaEvaluator {
       'distance',
       "distance(lat1, lng1, lat2, lng2, 'km' or 'mi')",
       "distance(a.lat, a.lng, b.lat, b.lng, 'mi') → 362.4",
+    ),
+    FormulaFunctionDoc(
+      'spline',
+      'spline(points)',
+      'spline([start, pin, mailbox]) → "M 80 300 C ..." (a motion path)',
+    ),
+    FormulaFunctionDoc(
+      'pathPoints',
+      'pathPoints(path, count)',
+      'pathPoints(route, 3) → [{x: 80, y: 300, angle: 0, t: 0}, ...]',
+    ),
+    FormulaFunctionDoc(
+      'pathPoint',
+      'pathPoint(path, t)',
+      'pathPoint(route, 0.5).x → 480',
+    ),
+    FormulaFunctionDoc(
+      'pathLength',
+      'pathLength(path)',
+      "pathLength('M 0 0 L 30 40') → 50",
     ),
     FormulaFunctionDoc('first', 'first(list)', 'first(stops) → the first stop'),
     FormulaFunctionDoc('last', 'last(list)', 'last(stops) → the last stop'),
@@ -2827,6 +2848,16 @@ final Map<String, _Function> _functions = {
   'clamp': (a) =>
       _tidy(_num(_arg(a, 0)).clamp(_num(_arg(a, 1)), _num(_arg(a, 2)))),
   'distance': _distance,
+  'spline': (a) => splinePath(
+    _arg(a, 0) is List ? _arg(a, 0) as List<Object?> : a,
+  ),
+  'pathLength': (a) => pathLength(FormulaEvaluator.stringify(_arg(a, 0))),
+  'pathPoint': (a) =>
+      pathPoint(FormulaEvaluator.stringify(_arg(a, 0)), _num(_arg(a, 1)).toDouble()),
+  'pathPoints': (a) => pathPoints(
+    FormulaEvaluator.stringify(_arg(a, 0)),
+    _num(_arg(a, 1)).isNaN ? 0 : _num(_arg(a, 1)).round(),
+  ),
   'first': (a) => _values(_arg(a, 0), null).firstOrNull,
   'last': (a) => _values(_arg(a, 0), null).lastOrNull,
   'range': _range,
