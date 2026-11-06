@@ -1,3 +1,4 @@
+import 'builtin_functions.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -2597,8 +2598,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
+    // The host's functions first, then the ones every app has (listen).
     final CodelesslyFunction? function =
-        codelesslyContext.functions[action.name];
+        codelesslyContext.functions[action.name] ??
+        builtinFunctions[action.name];
 
     // Substitute variables in params.
     final Map<String, dynamic> parsedParams = substituteVariablesInMap(
