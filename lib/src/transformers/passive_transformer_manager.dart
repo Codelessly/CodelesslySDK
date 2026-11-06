@@ -178,12 +178,18 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       },
     );
     // A node a Scroll To action targets records where it is built.
-    return ScrollTargets.wrap(
+    final Widget wrapped = ScrollTargets.wrap(
       node,
       settings.withReactions
           ? wrapWithInteractionScopes(context, node, built)
           : built,
     );
+    // A node motion draws elsewhere takes taps where it is drawn, through
+    // its interaction states' mouse region and the boxes around it.
+    if (!settings.isPreview && movesByMotion(node)) {
+      return HitBeyondBounds(child: wrapped);
+    }
+    return wrapped;
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -303,12 +309,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = FloatingNode(child: widget);
     }
 
-    widget = decorate(context, styled, widget, NodeBuildLayer.margin);
-    // A node motion draws elsewhere takes taps where it is drawn.
-    if (!settings.isPreview && movesByMotion(styled)) {
-      widget = HitBeyondBounds(child: widget);
-    }
-    return widget;
+    return decorate(context, styled, widget, NodeBuildLayer.margin);
   }
 
   /// Makes [widget] draggable and/or a drop target, as [node]'s
