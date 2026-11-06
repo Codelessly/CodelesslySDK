@@ -21,6 +21,31 @@ import 'action_chain.dart';
 /// [ShowToastAction.iconDiscColor]). Colors bound in
 /// [ShowToastAction.variables] are read when the toast shows (see
 /// [ActionColorBindings]) and win over the action's own.
+/// Names the overlay toasts of the app below it show in, instead of the
+/// root overlay: an app embedded in another (the editor's run preview)
+/// keeps its toasts in its own window.
+class ToastOverlayScope extends InheritedWidget {
+  /// Creates a [ToastOverlayScope] showing toasts in [overlay].
+  const ToastOverlayScope({
+    super.key,
+    required this.overlay,
+    required super.child,
+  });
+
+  /// The overlay toasts show in.
+  final GlobalKey<OverlayState> overlay;
+
+  /// The overlay of the nearest [ToastOverlayScope] above [context], or null.
+  static OverlayState? maybeOf(BuildContext context) => context
+      .getInheritedWidgetOfExactType<ToastOverlayScope>()
+      ?.overlay
+      .currentState;
+
+  @override
+  bool updateShouldNotify(ToastOverlayScope oldWidget) =>
+      oldWidget.overlay != overlay;
+}
+
 class AppToast {
   AppToast._();
 
@@ -52,7 +77,9 @@ class AppToast {
   /// Shows [action]'s message. Returns false when there is no overlay to
   /// show it in.
   static bool show(BuildContext context, ShowToastAction action) {
-    final OverlayState? overlay = Overlay.maybeOf(context, rootOverlay: true);
+    final OverlayState? overlay =
+        ToastOverlayScope.maybeOf(context) ??
+        Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return false;
 
     // Read variables and the look now: the action that follows may navigate

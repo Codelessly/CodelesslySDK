@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +10,16 @@ import 'action_chain.dart';
 
 /// How a [ConfirmAction]'s dialog closed.
 typedef ConfirmOutcome = ({bool confirmed, Map<String, dynamic>? values});
+
+/// The size of a built-in confirm dialog (see [AppConfirmDialog.layoutOf]);
+/// a null field takes the default.
+typedef ConfirmDialogLayout = ({
+  double? width,
+  double? maxWidth,
+  EdgeInsets? insets,
+  EdgeInsets? padding,
+  double? buttonHeight,
+});
 
 /// Shows a [ConfirmAction]'s dialog.
 ///
@@ -42,6 +54,61 @@ class AppConfirmDialog {
         action.icon ?? MultiSourceIconModel.icon(size: action.iconSize);
     final MultiSourceIconModel named = iconWithName(base, name);
     return identical(named, base) ? action.icon : named;
+  }
+
+  /// The size of [action]'s built-in dialog: its width, max width, insets,
+  /// padding and button height, each from its [ConfirmAction.variables]
+  /// binding (see [ConfirmAction.bindableSizes]) when that gives a value,
+  /// else the action's own field (null for the default).
+  static ConfirmDialogLayout layoutOf(
+    ConfirmAction action,
+    ScopedValues scopedValues,
+  ) {
+    Object? bound(String key) {
+      final String? binding = action.variables[key]?.trim();
+      if (binding == null || binding.isEmpty) return null;
+      final bool single =
+          FormulaEvaluator.exactExpression(binding) != null ||
+          RegExp(r'^\$\{[^{}]+\}$').hasMatch(binding);
+      final Object? value = single
+          ? PropertyValueDelegate.getVariableValueFromPath<Object>(
+              binding,
+              scopedValues: scopedValues,
+            )
+          : PropertyValueDelegate.substituteVariables(
+              binding,
+              scopedValues: scopedValues,
+              nullSubstitutionMode: NullSubstitutionMode.emptyString,
+            );
+      return value is String && value.trim().isEmpty ? null : value;
+    }
+
+    double? number(String key, double? own) {
+      final Object? value = bound(key);
+      final num? n = value is num
+          ? value
+          : value is String
+          ? num.tryParse(value.trim())
+          : null;
+      return n != null && n.isFinite && n >= 0 ? n.toDouble() : own;
+    }
+
+    EdgeInsets? insets(String key, EdgeInsetsModel? own) {
+      final Object? value = bound(key);
+      final EdgeInsetsModel? model =
+          (value is String ? num.tryParse(value.trim()) ?? value : value)
+              ?.toEdgeInsetsModel() ??
+          own;
+      return model?.flutterEdgeInsets;
+    }
+
+    return (
+      width: number('width', action.width),
+      maxWidth: number('maxWidth', action.maxWidth),
+      insets: insets('insets', action.insets),
+      padding: insets('padding', action.padding),
+      buttonHeight: number('buttonHeight', action.buttonHeight),
+    );
   }
 
   /// Shows [action]'s dialog and completes with whether the user confirmed.
@@ -135,8 +202,14 @@ class AppConfirmDialog {
     }
 
     final Color? barrierColor = color('barrierColor', action.barrierColor);
+    final ConfirmDialogLayout layout = layoutOf(action, scopedValues);
 
     Widget buildDialog(BuildContext context) => ThemedConfirmDialog(
+      width: layout.width,
+      maxWidth: layout.maxWidth,
+      insets: layout.insets,
+      padding: layout.padding,
+      buttonHeight: layout.buttonHeight,
       theme: theme,
       presentation: action.presentation.resolveFor(context),
       title: title,
@@ -248,7 +321,29 @@ class ThemedConfirmDialog extends StatelessWidget {
     this.iconDiscBorder,
     this.centered = false,
     this.expandButtons = false,
+    this.width,
+    this.maxWidth,
+    this.insets,
+    this.padding,
+    this.buttonHeight,
   });
+
+  /// Width of a centered dialog, within [maxWidth] and the screen less
+  /// [insets]; null hugs the content.
+  final double? width;
+
+  /// The widest a centered dialog gets; null is 400.
+  final double? maxWidth;
+
+  /// Space between a centered dialog and the screen's edges; null is 24.
+  final EdgeInsets? insets;
+
+  /// Space between the dialog's edge and its content; null is 24 on top
+  /// and the sides, 16 at the bottom.
+  final EdgeInsets? padding;
+
+  /// Height of the buttons; null is 44.
+  final double? buttonHeight;
 
   /// Outline of the confirm button, over [buttonBorder].
   final BorderSide? confirmBorder;
@@ -382,7 +477,11 @@ class ThemedConfirmDialog extends StatelessWidget {
         ResolvedFeedbackTheme.onColor(confirmFill);
     final Color onCancel =
         buttonStyle?.color?.toFlutterColor() ?? cancelTextColor ?? onSurface;
-    const Size buttonSize = Size(64, 44);
+    // A set height is the buttons' height exactly, not just their least.
+    final Size buttonSize = Size(64, buttonHeight ?? 44);
+    final Size? buttonMaxSize = buttonHeight == null
+        ? null
+        : Size(double.infinity, buttonHeight!);
     const EdgeInsets buttonPadding = EdgeInsets.symmetric(horizontal: 18);
     final BorderSide? dialogSide = border ?? theme.border;
     final List<BoxShadow>? dialogShadows = shadows ?? theme.shadows;
@@ -407,6 +506,10 @@ class ThemedConfirmDialog extends StatelessWidget {
         shape: buttonShape,
         side: cancelBorder ?? buttonSide,
         minimumSize: buttonSize,
+        maximumSize: buttonMaxSize,
+        tapTargetSize: buttonHeight == null
+            ? null
+            : MaterialTapTargetSize.shrinkWrap,
         padding: buttonPadding,
       ),
       child: Text(cancelLabel),
@@ -421,6 +524,10 @@ class ThemedConfirmDialog extends StatelessWidget {
         shape: buttonShape,
         side: confirmBorder ?? buttonSide,
         minimumSize: buttonSize,
+        maximumSize: buttonMaxSize,
+        tapTargetSize: buttonHeight == null
+            ? null
+            : MaterialTapTargetSize.shrinkWrap,
         padding: buttonPadding,
       ),
       child: Text(confirmLabel),
@@ -462,7 +569,7 @@ class ThemedConfirmDialog extends StatelessWidget {
       explicitChildNodes: true,
       label: title.isEmpty ? null : title,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        padding: padding ?? const EdgeInsets.fromLTRB(24, 24, 24, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: centered
@@ -550,9 +657,12 @@ class ThemedConfirmDialog extends StatelessWidget {
 
     // Shadows of its own replace the dialog's elevation: they are drawn
     // around a box that carries its fill and outline.
+    final double widest = maxWidth ?? 400;
     Widget dialogBody = ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 400),
-      child: content,
+      constraints: BoxConstraints(maxWidth: widest),
+      child: width == null
+          ? content
+          : SizedBox(width: math.min(width!, widest), child: content),
     );
     if (dialogShadows != null) {
       dialogBody = DecoratedBox(
@@ -577,10 +687,8 @@ class ThemedConfirmDialog extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
           shadowColor: dialogShadows != null ? Colors.transparent : null,
           elevation: dialogShadows != null ? 0 : 8,
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 24,
-          ),
+          insetPadding:
+              insets ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radius),
             side: dialogShadows == null

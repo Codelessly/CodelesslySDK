@@ -894,20 +894,32 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
                   .toFlutterColor()
             : null);
     if (gradient == null && color == null) continue;
+    // With a transition the stroke's colour, or its gradient's stops, ease
+    // to new values (an outline following a palette), as a solid fill
+    // does; where tickers are off it jumps.
+    Widget eased(Widget Function(Color? color, Gradient? gradient) build) =>
+        EasedPaint(
+          ms: node.transitionMs,
+          color: color,
+          gradient: gradient,
+          builder: build,
+        );
     if (path != null) {
       strokeWidgets.add(
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: SvgPathStrokePainter(
-                path: path,
-                color: color ?? gradient!.colors.first,
-                gradient: gradient,
-                strokeWidth: node.strokeWeight,
-                strokeCap: node.strokeCap,
-                strokeJoin: (node as RectangleNode).strokeJoin,
-                strokeMiterLimit: node.strokeMiterLimit,
-                dashPattern: node.dashPattern,
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: SvgPathStrokePainter(
+                  path: path,
+                  color: color ?? gradient!.colors.first,
+                  gradient: gradient,
+                  strokeWidth: node.strokeWeight,
+                  strokeCap: node.strokeCap,
+                  strokeJoin: (node as RectangleNode).strokeJoin,
+                  strokeMiterLimit: node.strokeMiterLimit,
+                  dashPattern: node.dashPattern,
+                ),
               ),
             ),
           ),
@@ -920,16 +932,18 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
       strokeWidgets.add(
         Positioned.fill(
           child: IgnorePointer(
-            child: CustomPaint(
-              painter: NotchedStrokePainter(
-                color: color ?? gradient!.colors.first,
-                gradient: gradient,
-                strokeWidth: node.strokeWeight,
-                borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
-                notches: notches,
-                strokeAlign: node.strokeAlign,
-                dashPattern: node.dashPattern,
-                strokeCap: node.strokeCap,
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: NotchedStrokePainter(
+                  color: color ?? gradient!.colors.first,
+                  gradient: gradient,
+                  strokeWidth: node.strokeWeight,
+                  borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                  notches: notches,
+                  strokeAlign: node.strokeAlign,
+                  dashPattern: node.dashPattern,
+                  strokeCap: node.strokeCap,
+                ),
               ),
             ),
           ),
@@ -944,13 +958,15 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
         node.strokeSide == StrokeSide.all) {
       strokeWidgets.add(
         Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: getBorderRadius(node),
-              border: Border.all(
-                strokeAlign: node.strokeAlign.alignment,
-                color: color!,
-                width: node.strokeWeight,
+          child: eased(
+            (color, _) => DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: getBorderRadius(node),
+                border: Border.all(
+                  strokeAlign: node.strokeAlign.alignment,
+                  color: color!,
+                  width: node.strokeWeight,
+                ),
               ),
             ),
           ),
@@ -959,18 +975,20 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     } else {
       strokeWidgets.add(
         Positioned.fill(
-          child: CustomPaint(
-            painter: StrokePainter(
-              color: color ?? const Color(0xFF000000),
-              gradient: gradient,
-              borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
-              dashPattern: node.dashPattern,
-              strokeWidth: node.strokeWeight,
-              strokeMiterLimit: node.strokeMiterLimit,
-              strokeCap: node.strokeCap,
-              strokeAlign: node.strokeAlign,
-              strokeSide: node.strokeSide,
-              boxShape: getBoxShape(node),
+          child: eased(
+            (color, gradient) => CustomPaint(
+              painter: StrokePainter(
+                color: color ?? const Color(0xFF000000),
+                gradient: gradient,
+                borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                dashPattern: node.dashPattern,
+                strokeWidth: node.strokeWeight,
+                strokeMiterLimit: node.strokeMiterLimit,
+                strokeCap: node.strokeCap,
+                strokeAlign: node.strokeAlign,
+                strokeSide: node.strokeSide,
+                boxShape: getBoxShape(node),
+              ),
             ),
           ),
         ),
@@ -1230,13 +1248,25 @@ Widget buildFill(
     case PaintType.gradientRadial:
     case PaintType.gradientAngular:
     case PaintType.gradientDiamond:
-      final decoration = BoxDecoration(
-        borderRadius: borderRadius,
+      Widget gradientFill(Gradient? gradient) {
+        final decoration = BoxDecoration(
+          borderRadius: borderRadius,
+          gradient: gradient,
+        );
+        return useInk
+            ? Ink(decoration: decoration)
+            : DecoratedBox(decoration: decoration);
+      }
+
+      // With a transition its stops ease to new colours (bound stops
+      // following a palette), as a solid fill does; where tickers are off
+      // it jumps.
+      return EasedPaint(
+        ms: (node as BaseNode).transitionMs,
+        color: null,
         gradient: retrieveGradient(paint),
+        builder: (_, gradient) => gradientFill(gradient),
       );
-      return useInk
-          ? Ink(decoration: decoration)
-          : DecoratedBox(decoration: decoration);
     case PaintType.image:
       final TypedBytes? bytes = imageBytes[index];
       final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
