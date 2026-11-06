@@ -177,6 +177,23 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       key: ValueKey(rowColumnNode.id),
       children: childrenWidgets,
     );
+    // Children sized by a fraction share the row's or column's own size
+    // (see FlexExtentScope).
+    if (childrenNodes.any(hasFractionalSize)) {
+      final Widget flex = res;
+      res = MeasurableLayoutBuilder(
+        key: ValueKey('${rowColumnNode.id}-flex-extent'),
+        fallbackSize: Size(
+          rowColumnNode.basicBoxLocal.width,
+          rowColumnNode.basicBoxLocal.height,
+        ),
+        builder: (context, constraints) => FlexExtentScope(
+          width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+          height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
+          child: flex,
+        ),
+      );
+    }
 
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
