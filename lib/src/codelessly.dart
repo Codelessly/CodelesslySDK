@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import '../codelessly_sdk.dart';
 import 'functions/app_auth.dart';
 import 'logging/stat_tracker.dart';
+import 'ui/layout_fonts.dart';
 import 'utils/codelessly_http_client.dart';
 
 typedef NavigationListener = void Function(
@@ -933,6 +934,9 @@ class Codelessly {
     }
 
     status = CStatus.loading(CLoadingState.initializing);
+
+    // So the first screen's fonts are fetched the moment it asks for them.
+    LayoutFonts.warmUp();
 
     if (config != null) {
       _config = config;
