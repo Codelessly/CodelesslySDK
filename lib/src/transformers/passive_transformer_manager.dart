@@ -398,6 +398,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     ScopedValues? scopedValues,
   }) {
     final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
+    // A state in effect may bind properties itself (its patch's
+    // `variables`, e.g. a hovered card's border `${= overdue ? red :
+    // honey}`): they replace the node's own bindings of the same keys and
+    // are evaluated with them below.
+    if (PropertyOverrideScope.patchFor(context, node.id) case {
+      'variables': final Map stateVariables,
+    } when stateVariables.isNotEmpty) {
+      final BaseNode? bound = NodeJsonConverter().fromJson(
+        PropertyOverridePatch.apply(node.toJson(), {
+          'variables': stateVariables,
+        }),
+      );
+      if (bound != null) node = bound..parentID = node.parentID;
+    }
     T? value<T extends Object>(String property) =>
         PropertyValueDelegate.getPropertyValue<T>(
           node,

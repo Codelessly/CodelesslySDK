@@ -172,6 +172,33 @@ void main() {
     expect(card.fills.first.color, ColorRGB.fromHex('#FFFFFF'));
   });
 
+  testWidgets('a state can bind properties itself; they beat the node\'s '
+      'own bindings while it is on', (tester) async {
+    final (:card, :dot) = cardWithDot();
+    // The card is red by a binding; hovered, a binding of the state's own
+    // turns it blue (a formula, as an overdue card's border stays red).
+    card.variables['fill'] = r"${= 1 > 0 ? '#FF0000' : '#FFFFFF'}";
+    card.interactionStates = {
+      InteractionState.hovered: {
+        'card': {
+          'variables': {'fill': r"${= 2 > 1 ? '#0000FF' : '#00FF00'}"},
+        },
+      },
+    };
+    await Harness().pump(tester, [card, dot]);
+    expect(colorOf(tester, 200), red);
+    final TestGesture mouse = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await mouse.addPointer(location: const Offset(500, 500));
+    await mouse.moveTo(const Offset(150, 50));
+    await tester.pump();
+    expect(colorOf(tester, 200), blue);
+    await mouse.moveTo(const Offset(500, 500));
+    await tester.pump();
+    expect(colorOf(tester, 200), red);
+  });
+
   testWidgets('selected and disabled follow bound variables; disabled runs '
       'no actions', (tester) async {
     final (:card, :dot) = cardWithDot();

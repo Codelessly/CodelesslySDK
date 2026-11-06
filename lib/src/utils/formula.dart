@@ -3336,6 +3336,40 @@ class _Call extends _Node {
   }
 }
 
+/// A call of whatever [target] evaluates to: a lambda written in place,
+/// `(k => k == 'x' ? 1 : 2)(s.kind)`, or a function held in a value.
+class _Invoke extends _Node {
+  final _Node target;
+  final List<_Node> args;
+
+  const _Invoke(this.target, this.args);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) {
+    FormulaEvaluator._spend();
+    final Object? function = target.eval(resolve);
+    final List<Object?> values = [for (final arg in args) arg.eval(resolve)];
+    if (function is FormulaFunction) return function.call(values);
+    // A closure made here keeps what it captured (`x => y => x + y`).
+    if (function is _Closure) return function.callWith(values);
+    if (_userFunction(function, resolve) case final _Closure closure) {
+      return closure.callWith(values);
+    }
+    throw StateError('Not a function');
+  }
+
+  @override
+  Iterable<_Node> get children => [target, ...args];
+
+  @override
+  void collectPaths(Set<String> paths) {
+    target.collectPaths(paths);
+    for (final arg in args) {
+      arg.collectPaths(paths);
+    }
+  }
+}
+
 /// A lambda, `param => body`, `(param, index) => body`, or with more
 /// parameters for a user function. Evaluates to a [_Closure].
 class _Lambda extends _Node {
@@ -3523,7 +3557,7 @@ class _Parser {
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
   static final RegExp _lambdaHead = RegExp(
     r'(?:([a-zA-Z_][a-zA-Z0-9_]*)'
-    r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)\s*\))'
+    r'|\(\s*((?:[a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)?)\s*\))'
     r'\s*=>',
   );
 
@@ -3570,8 +3604,11 @@ class _Parser {
     pos = head.end;
     final List<String> params = head[1] != null
         ? [head[1]!]
+        : head[2]!.trim().isEmpty
+        ? <String>[]
         : head[2]!.split(',').map((name) => name.trim()).toList();
-    final _Node body = _ternary();
+    // The body may itself be a lambda: `x => y => x + y`.
+    final _Node body = _argument();
     return _Lambda(params, body, source.substring(start, pos).trim());
   }
 
@@ -3655,6 +3692,17 @@ class _Parser {
         if (name == null) throw FormatException('Expected a name', source, pos);
         pos = name.end;
         node = _Member(node, _Literal(name[0]));
+      } else if (_eat('(')) {
+        // Calling what an expression gives: a lambda written in place,
+        // `(k => k * 2)(n)`, or a function a list or map holds.
+        final List<_Node> args = [];
+        if (!_eat(')')) {
+          do {
+            args.add(_argument());
+          } while (_eat(','));
+          _expect(')');
+        }
+        node = _Invoke(node, args);
       } else {
         return node;
       }
@@ -3705,7 +3753,9 @@ class _Parser {
 
     if (char == '(') {
       pos++;
-      final _Node node = _ternary();
+      // A lambda may stand in parentheses, to be called at once:
+      // `(k => k * 2)(n)`.
+      final _Node node = _argument();
       _expect(')');
       return node;
     }
