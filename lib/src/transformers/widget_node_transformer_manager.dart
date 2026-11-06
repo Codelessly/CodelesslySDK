@@ -1045,6 +1045,32 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: value);
   }
 
+  /// [track] with its [DragTrackModel.defaultValue] read from the node's
+  /// `track.defaultValue` binding when it has one that gives a number (the
+  /// list item's own default), else [track] as it is.
+  static DragTrackModel trackWithBoundDefault(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    if (!node.variables.containsKey(DragTrackModel.defaultValueVariable)) {
+      return track;
+    }
+    final Object? raw = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      DragTrackModel.defaultValueVariable,
+      scopedValues: scopedValues,
+    );
+    final double? value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return value == null || !value.isFinite
+        ? track
+        : track.copyWith(defaultValue: value);
+  }
+
   /// Writes a drag's live [values] into the variable named [name], so nodes
   /// outside the dragged one can follow it (see [DragModel.shareAs]).
   static void shareDragValues(
@@ -1059,71 +1085,82 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: values.toMap());
   }
 
-  /// Draws [node] where its drag track puts it for its variable's value,
-  /// without making it draggable: how the design canvas shows a knob or a
-  /// fader cap. Returns [widget] for a node without a track.
-  /// [track] with the geometry and range bound through `dragTrack.<field>`
-  /// keys of [node]'s variables: `x1`, `y1`, `x2`, `y2`, `startAngle`,
-  /// `endAngle`, `pivotX`, `pivotY`, `min`, `max`, `step`, and `path` (the
-  /// SVG data of a path track). A fader whose throw follows its slot's width
-  /// binds `dragTrack.x2` to `${= parent.width - 28}`.
-  static DragTrackModel resolveTrack(
+  /// [node]'s drag track with the settings its bindings give
+  /// (`track.min`, `track.max`, `track.step`, and `track.defaultValue` via
+  /// [trackWithBoundDefault]), e.g. a countdown arc as long as the stage,
+  /// after any `dragTrack.<name>` bindings (see [DragTrackModel.bindable]:
+  /// angles, pivot, path, ends...), e.g. a dial whose turn is a setting.
+  static DragTrackModel resolvedTrack(
     BaseNode node,
     DragTrackModel track,
     ScopedValues scopedValues,
   ) {
-    const String prefix = 'dragTrack.';
-    if (!node.variables.keys.any((k) => k.startsWith(prefix))) return track;
-    final Map<String, dynamic> json = Map<String, dynamic>.from(track.toJson());
-    bool changed = false;
-    for (final String key in node.variables.keys) {
-      if (!key.startsWith(prefix)) continue;
-      final String field = key.substring(prefix.length);
-      final String raw = node.variables[key]!;
-      // A plain value ("0.5") is read as it is.
-      final Object? value = raw.contains(r'${')
-          ? PropertyValueDelegate.getPropertyValue<Object>(
-              node,
-              key,
-              scopedValues: scopedValues,
-            )
-          : raw;
-      if (field == 'path') {
-        if (value != null) {
-          json['path'] = value.toString();
-          changed = true;
-        }
-        continue;
-      }
-      final double? n = switch (value) {
-        num v => v.toDouble(),
-        String t => double.tryParse(t.trim()),
+    double? bound(String key) {
+      if (!node.variables.containsKey(key)) return null;
+      final Object? v = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      return switch (v) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
         _ => null,
       };
-      if (n != null && n.isFinite) {
-        json[field] = n;
-        changed = true;
-      }
     }
-    return changed ? DragTrackModel.fromJson(json) : track;
+
+    final double? min = bound(DragTrackModel.minVariableKey);
+    final double? max = bound(DragTrackModel.maxVariableKey);
+    final double? step = bound(DragTrackModel.stepVariableKey);
+    final DragTrackModel base = withDragTrackBindings(node, track, scopedValues);
+    final DragTrackModel ranged =
+        min == null && max == null && step == null
+        ? base
+        : base.copyWith(
+            min: min,
+            max: max,
+            step: step == null ? null : (step < 0 ? 0 : step),
+          );
+    return trackWithBoundDefault(node, ranged, scopedValues);
   }
 
+  /// [track] with the settings [node] binds through `dragTrack.<name>`
+  /// variables (see [DragTrackModel.bindable]) read from [scopedValues].
+  static DragTrackModel withDragTrackBindings(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    DragTrackModel out = track;
+    for (final String setting in DragTrackModel.bindable) {
+      final String key = DragTrackModel.variableKey(setting);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      out = out.withBinding(setting, value);
+    }
+    return out;
+  }
+
+  /// Draws [node] where its drag track puts it for its variable's value,
+  /// without making it draggable: how the design canvas shows a knob or a
+  /// fader cap. Returns [widget] for a node without a track.
   Widget applyTrackPose(
     BuildContext context,
     BaseNode node,
     Widget widget, {
     ScopedValues? scopedValues,
   }) {
-    final DragTrackModel? saved = node.drag?.track;
-    if (saved == null) return widget;
-    final DragTrackModel track = resolveTrack(
-      node,
-      saved,
-      scopedValues ?? ScopedValues.of(context),
-    );
+    final DragTrackModel? model = node.drag?.track;
+    if (model == null) return widget;
+    final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
+    final DragTrackModel track = resolvedTrack(node, model, scope);
     final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
       track.variable,
-      scopedValues: scopedValues ?? ScopedValues.of(context),
+      scopedValues: scope,
     );
     final double value = switch (raw) {
       num n => n.toDouble(),
@@ -1145,15 +1182,15 @@ abstract class WidgetNodeTransformerManager
     BuildContext context,
     BaseNode node,
     DragModel drag,
-    DragTrackModel savedTrack,
+    DragTrackModel model,
     List<Reaction> reactions,
     Widget child,
   ) {
-    final DragTrackModel track = savedTrack;
+    final DragTrackModel track = model;
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
-      name: track.variable,
+      name: model.variable,
     );
     bool enabled(BuildContext context) {
       if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
@@ -1173,9 +1210,9 @@ abstract class WidgetNodeTransformerManager
     }
 
     Widget build(BuildContext context) {
-      final DragTrackModel track = resolveTrack(
+      final DragTrackModel track = resolvedTrack(
         node,
-        savedTrack,
+        model,
         ScopedValues.of(context),
       );
       final Object? raw =
@@ -1193,11 +1230,13 @@ abstract class WidgetNodeTransformerManager
         value: value,
         enabled: enabled(context),
         onChanged: (v) {
-          final bool whole = variable?.value.type == VariableType.integer;
-          codelesslyContext?.updateVariable(
-            track.variable,
-            whole ? v.round() : v,
-          );
+          if (track.write) {
+            final bool whole = variable?.value.type == VariableType.integer;
+            codelesslyContext?.updateVariable(
+              track.variable,
+              whole ? v.round() : v,
+            );
+          }
           FunctionsRepository.triggerAction(
             context,
             TriggerType.changed,
@@ -1211,6 +1250,11 @@ abstract class WidgetNodeTransformerManager
           reactions: reactions,
           result: {'value': v},
         ),
+        onFine: switch (track.fineVariable?.trim()) {
+          final String name? when name.isNotEmpty =>
+            (bool fine) => codelesslyContext?.updateVariable(name, fine),
+          _ => null,
+        },
         child: child,
       );
     }

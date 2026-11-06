@@ -1,3 +1,4 @@
+import 'builtin_functions.dart';
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -342,7 +343,17 @@ class FunctionsRepository {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ActionChain.scopedValuesOf(context),
     );
-    await Clipboard.setData(ClipboardData(text: text));
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+    } catch (error) {
+      // A browser that denies clipboard access throws here. The copy is a
+      // side effect: the actions after it (the "Link copied" toast) still
+      // run, as they would in an app that doesn't wait for the clipboard.
+      DebugLogger.instance.printInfo(
+        'Copy to clipboard failed: $error',
+        name: 'FunctionsRepository',
+      );
+    }
     return true;
   }
 
@@ -2587,8 +2598,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
+    // The host's functions first, then the ones every app has (listen).
     final CodelesslyFunction? function =
-        codelesslyContext.functions[action.name];
+        codelesslyContext.functions[action.name] ??
+        builtinFunctions[action.name];
 
     // Substitute variables in params.
     final Map<String, dynamic> parsedParams = substituteVariablesInMap(
