@@ -177,13 +177,22 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         return _buildDecorated(context, node, settings);
       },
     );
+    Widget wrapped = settings.withReactions
+        ? wrapWithInteractionScopes(context, node, built)
+        : built;
+    // A draggable node moved by bound x/y (a pin placed from variables) is
+    // moved with its drag handling, so it is grabbed where it is drawn, not
+    // where it was designed.
+    if (_offsetsOutside(node, settings)) {
+      final Widget inner = wrapped;
+      wrapped = _wrapWithListener(
+        context,
+        node: node,
+        builder: (context) => applyBoundOffset(context, node, inner),
+      );
+    }
     // A node a Scroll To action targets records where it is built.
-    return ScrollTargets.wrap(
-      node,
-      settings.withReactions
-          ? wrapWithInteractionScopes(context, node, built)
-          : built,
-    );
+    return ScrollTargets.wrap(node, wrapped);
   }
 
   /// Whether [node] has interaction states, or its `selected` or `disabled`
@@ -270,7 +279,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         animate: !settings.isPreview,
       );
       widget = applyNodePlay(context, styled, widget);
-      widget = applyBoundOffset(context, styled, widget);
+      if (!_offsetsOutside(node, settings)) {
+        widget = applyBoundOffset(context, styled, widget);
+      }
     }
     // Without reactions (the design canvas) a knob or fader cap is drawn
     // where its drag track puts it; with them NodeDragTrack draws it there
@@ -632,6 +643,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       child: widget,
     );
   }
+
+  /// Whether [node]'s bound `x`/`y` move it from outside its drag
+  /// handling (see [_buildNode]) rather than inside its decoration.
+  bool _offsetsOutside(BaseNode node, WidgetBuildSettings settings) =>
+      settings.withReactions &&
+      settings.withRotation &&
+      node.drag != null &&
+      (node.variables.containsKey('x') || node.variables.containsKey('y'));
 
   bool _hasPositionCondition(BuildContext context, BaseNode node) {
     final CodelesslyContext? codelesslyContext = ScopedValues.of(context)

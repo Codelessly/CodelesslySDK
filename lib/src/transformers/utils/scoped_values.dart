@@ -151,6 +151,7 @@ class ScopedValues {
     this.screenSize,
     this.platformBrightness,
     this.parentSize,
+    this.breakpointWidths,
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
   }) : _codelesslyContextRef = codelesslyContext == null
