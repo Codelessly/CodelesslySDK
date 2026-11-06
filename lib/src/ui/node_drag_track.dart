@@ -307,7 +307,13 @@ class _NodeDragTrackState extends State<NodeDragTrack> {
 
   void _pointerDown(PointerDownEvent event, Offset local, bool onNode) {
     if (!widget.enabled) return;
-    if (!onNode && _track.jumpOnTap && _track.input == DragTrackInput.follow) {
+    // A relative line's node is usually a scrub area as wide as its track
+    // (a transparent thumb over a chart), so a tap on it jumps too.
+    final bool scrubArea =
+        _track.relative && _track.shape == DragTrackShape.line;
+    if ((!onNode || scrubArea) &&
+        _track.jumpOnTap &&
+        _track.input == DragTrackInput.follow) {
       // Tapped the track off the node: jump there, then drag from there.
       _raw = _progress;
       _emit(_geometry.nearest(_rel(local)));
