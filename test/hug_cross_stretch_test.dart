@@ -86,8 +86,9 @@ void main() {
     ]);
     final Rect hello = tester.getRect(find.text('ABCDE FGHIJ'));
     final Rect under = tester.getRect(find.text('X'));
-    // 200 wide: the 220-wide phrase wraps onto a second line.
-    expect(hello.height, closeTo(54, 1));
+    // 200 wide: the 220-wide phrase wraps onto a second line (two lines
+    // of 20 px at the font's own line height).
+    expect(hello.height, closeTo(40, 1));
     expect(under.top, closeTo(hello.bottom, 0.5));
     final Rect artBox = tester.getRect(
       find.byKey(ValueKey('Rectangle Transformer of ${art().debugLabel}')),
