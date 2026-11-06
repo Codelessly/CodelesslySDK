@@ -25,7 +25,15 @@ class PassivePathTransformer extends NodeWidgetTransformer<PathNode> {
     BuildContext context,
     WidgetBuildSettings settings,
   ) {
-    final ScopedValues scope = ScopedValues.of(context);
+    // On the design canvas (no reactions) bindings read the editor's preview
+    // values, as the node's bound `stroke` and `fill` do (see
+    // `PassiveNodeTransformerManager.applyStyleOverrides`), so a
+    // `stroke-paint-<id>` or `pathData` binding previews the same way.
+    final ScopedValues scope =
+        (settings.withReactions
+            ? null
+            : VariablePreview.scopeOf(node, context: context)) ??
+        ScopedValues.of(context);
     T? bound<T extends Object>(String property) =>
         node.variables.containsKey(property)
         ? PropertyValueDelegate.getPropertyValue<T>(

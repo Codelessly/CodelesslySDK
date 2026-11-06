@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -841,6 +842,57 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// Whether the browser has reported a location yet.
   bool _reportedLocation = false;
 
+  /// The screens shown that can block going back (see [BackInterceptor]).
+  final List<BackGuard> _backGuards = [];
+
+  /// Lets [guard] keep the browser's back button from leaving its screen.
+  void addBackGuard(BackGuard guard) => _backGuards.add(guard);
+
+  /// Undoes [addBackGuard].
+  void removeBackGuard(BackGuard guard) => _backGuards.remove(guard);
+
+  /// Keeps the top screen when the browser went back (or elsewhere) from it
+  /// to a stack without it while the screen blocks back (see
+  /// [BackInterceptor]): the browser gets the screen's entry again and the
+  /// screen's "Back pressed" reactions run. Returns whether it did.
+  bool _keepsBlockedTop(List<String> stack) {
+    if (routes.isEmpty) return false;
+    final List<String> target = [
+      for (final location in stack) _canonical(location),
+    ];
+    final List<String> current = [
+      for (final route in routes) locationOfRoute(route),
+    ];
+    // The top screen stays when the new stack keeps every screen below and
+    // including it (a screen opened above it, a reload).
+    final bool keepsTop =
+        target.length >= current.length &&
+        const ListEquality<String>().equals(
+          target.sublist(0, current.length),
+          current,
+        );
+    if (keepsTop) return false;
+    final BackGuard? guard = _backGuards.lastWhereOrNull(
+      (guard) => guard.isOnTop,
+    );
+    if (guard == null || !guard.blocksBack) return false;
+    // The browser shows the entry it went to; a new entry for the stack
+    // shown puts the screen's address back, one entry above that one.
+    final bool wentBelow = const ListEquality<String>().equals(
+      target,
+      current.sublist(0, current.length - 1),
+    );
+    _back = wentBelow ? -1 : null;
+    _change = const CodelesslyHistoryPush();
+    // Reports the stack (in a post-frame callback) before the reactions
+    // change it, e.g. open a confirm above the screen.
+    notifyListeners();
+    SchedulerBinding.instance
+      ..addPostFrameCallback((_) => guard.backPressed())
+      ..ensureVisualUpdate();
+    return true;
+  }
+
   /// Whether the app can go back from its top screen.
   bool get canGoBack => routes.length > 1;
 
@@ -879,6 +931,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         : null;
     final String location = _canonical(locationOfRoute(configuration));
     if (entry != null && _canonical(entry.stack.last) == location) {
+      if (_keepsBlockedTop(entry.stack)) return;
       _back = entry.back;
       _restore(entry.stack, fromLink: true);
       return;
@@ -903,6 +956,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         seedsHome: location != '/',
       );
     } else if (index != -1) {
+      if (_keepsBlockedTop(current.sublist(0, index + 1))) return;
       _restore(current.sublist(0, index + 1), fromLink: true);
     } else {
       _restore(
