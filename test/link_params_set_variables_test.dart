@@ -49,4 +49,23 @@ void main() {
       isTrue,
     );
   });
+
+  test('a link param that does not fit the variable type leaves it alone', () {
+    final VariableData feed = VariableData(
+      id: 'feed',
+      name: 'feed',
+      value: '[{"t": 1}, {"t": 2}]',
+      type: VariableType.list,
+    );
+    expect(withLinkParam(feed, {'feed': '3'}).value, feed.value);
+    expect(withLinkParam(feed, {'feed': '[1]'}).value, '[1]');
+    final VariableData goal = VariableData(
+      id: 'g',
+      name: 'goal',
+      value: 10000,
+      type: VariableType.integer,
+    );
+    expect(withLinkParam(goal, {'goal': 'lots'}).getValue(), 10000);
+    expect(withLinkParam(goal, {'goal': '6000'}).getValue(), 6000);
+  });
 }
