@@ -196,6 +196,99 @@ List<NodeHeroChild> _flying(WidgetTester tester) => find
     .toList();
 
 void main() {
+  testWidgets('a custom route transition opens a transition route; the '
+      'shared element flies and the covered screen moves', (tester) async {
+    final navigator = await _app(
+      tester,
+      open: NavigationAction(
+        destinationId: 'detail',
+        routeTransition: const RouteTransition(
+          preset: RouteTransitionPreset.sharedAxisZ,
+        ),
+      ),
+    );
+    await tester.tap(_content('wallet'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    Route<dynamic>? top;
+    navigator.currentState!.popUntil((route) {
+      top = route;
+      return true;
+    });
+    expect(top, isA<CodelesslyRouteTransitionRoute<void>>());
+    expect(
+      (top! as CodelesslyRouteTransitionRoute<void>).transitionDuration,
+      const Duration(milliseconds: 300),
+    );
+    expect(_flying(tester).map((child) => child.node.id), ['detail-content']);
+    // The wallet (covered) grows and fades: shared axis Z's exit side.
+    // (The wallet's own node is hidden while it flies, so look for the
+    // side by its values.)
+    final Iterable<TransitionSideView> sides = tester
+        .widgetList<TransitionSideView>(
+          find.byType(TransitionSideView, skipOffstage: false),
+        );
+    final TransitionSideView exit = sides.singleWhere(
+      (side) => side.side.motion.scale == 1.1,
+    );
+    expect(exit.amount, inExclusiveRange(0, 1));
+    final TransitionSideView enter = sides.singleWhere(
+      (side) => side.side.motion.scale == 0.8,
+    );
+    expect(enter.amount, inExclusiveRange(0, 1));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(_content('detail'));
+    await tester.pumpAndSettle();
+    expect(_content('wallet'), findsOneWidget);
+    expect(_content('detail'), findsNothing);
+  });
+
+  testWidgets('a router page with a custom transition makes a transition '
+      'route that reads the page\'s current child', (tester) async {
+    final CodelesslyTransitionPage<void> page = CodelesslyTransitionPage<void>(
+      key: const ValueKey('p'),
+      transition: PageTransition.none,
+      routeTransition: const RouteTransition(
+        preset: RouteTransitionPreset.cube,
+      ),
+      child: const SizedBox(key: Key('child')),
+    );
+    late Route<void> route;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            route = page.createRoute(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(route, isA<CodelesslyRouteTransitionRoute<void>>());
+    expect(
+      (route as CodelesslyRouteTransitionRoute<void>).transition.enter!.motion
+          .rotateY,
+      90,
+    );
+    final Page<dynamic> fromData = CodelesslyRouterDelegate.pageFor(
+      const ValueKey('x'),
+      'x',
+      const SizedBox(),
+      {
+        CodelesslyRouterDelegate.routeTransitionKey: const RouteTransition(
+          preset: RouteTransitionPreset.iosPush,
+        ).toJson(),
+      },
+      null,
+    );
+    expect(fromData, isA<CodelesslyTransitionPage<dynamic>>());
+    expect(
+      (fromData as CodelesslyTransitionPage<dynamic>).routeTransition?.preset,
+      RouteTransitionPreset.iosPush,
+    );
+  });
+
   testWidgets('an arc flight curves, turns upright and glows on the way', (
     tester,
   ) async {
