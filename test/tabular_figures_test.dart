@@ -13,9 +13,8 @@ void main() {
     tabularFigures: tabular,
   );
 
-  /// Every font feature the spans built for [node] carry.
-  List<FontFeature> featuresOf(TextNode node) {
-    final List<FontFeature> features = [];
+  /// The font features of each text span built for [node].
+  List<List<FontFeature>?> featuresOf(TextNode node) => [
     for (final InlineSpan span in TextUtils.buildTextSpansForProps(
       null,
       node.data,
@@ -24,22 +23,15 @@ void main() {
       variablesOverrides: const [],
       nullSubstitutionMode: NullSubstitutionMode.noChange,
       replaceVariablesWithSymbol: false,
-    )) {
-      // visitChildren skips a span without text of its own, like a wrapper.
-      features.addAll(span.style?.fontFeatures ?? const []);
-      span.visitChildren((InlineSpan child) {
-        features.addAll(child.style?.fontFeatures ?? const []);
-        return true;
-      });
-    }
-    return features;
-  }
+    ))
+      span.style?.fontFeatures,
+  ];
 
   test('a text with tabular figures sets the font feature on its spans', () {
     expect(featuresOf(clock(tabular: true)), [
-      const FontFeature.tabularFigures(),
+      [const FontFeature.tabularFigures()],
     ]);
-    expect(featuresOf(clock(tabular: false)), isEmpty);
+    expect(featuresOf(clock(tabular: false)), [null]);
   });
 
   test('tabular figures keep the span\'s own size and text', () {
@@ -53,7 +45,7 @@ void main() {
       replaceVariablesWithSymbol: false,
     ).single;
     expect(span.toPlainText(), '1:48:00');
-    final TextSpan inner = span.children!.single as TextSpan;
-    expect(inner.style?.fontSize, 32);
+    expect(span.style?.fontSize, 32);
+    expect(span.style?.fontFeatures, [const FontFeature.tabularFigures()]);
   });
 }

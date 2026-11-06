@@ -1,3 +1,5 @@
+import 'builtin_functions.dart';
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -8,6 +10,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' show AudioPlayer;
@@ -133,11 +136,14 @@ class FunctionsRepository {
         setVariant(context, action as SetVariantAction, notify: notify);
         return true;
       case ActionType.setVariable:
-        return setVariableFromAction(
-          context,
-          action as SetVariableAction,
-          notify: notify,
-        );
+        final SetVariableAction set = action as SetVariableAction;
+        final int animateMs = _animateMsOf(context, set);
+        if (animateMs > 0) return glideVariable(context, set, animateMs);
+        // A plain set stops a glide on the same variable.
+        if (_glides.containsKey(set.variable.name)) {
+          _glides[set.variable.name] = _glides[set.variable.name]! + 1;
+        }
+        return setVariableFromAction(context, set, notify: notify);
       case ActionType.callFunction:
         final result = callFunction(context, action as CallFunctionAction);
         // Blocking actions wait for the app's function to finish.
@@ -204,16 +210,111 @@ class FunctionsRepository {
       case ActionType.speak:
         return speak(context, action as SpeakAction);
       case ActionType.scrollTo:
-        return ScrollTargets.scrollTo(action as ScrollToAction);
+        return ScrollTargets.scrollTo(action as ScrollToAction, near: context);
       case ActionType.playSound:
         return playSound(context, action as PlaySoundAction);
       case ActionType.controlDrag:
         final ControlDragAction drag = action as ControlDragAction;
+        if (drag.command == DragCommand.step) {
+          final String steps = PropertyValueDelegate.substituteVariables(
+            drag.steps,
+            scopedValues: ActionChain.scopedValuesOf(context),
+            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          ).trim();
+          return NodeDragTrack.step(
+            drag.nodeId,
+            double.tryParse(steps)?.round() ?? 0,
+          );
+        }
         return NodeDrag.control(
           drag.nodeId,
           drag.command,
           drag.direction,
         ).then((_) => true);
+      case ActionType.haptic:
+        return haptic(context, action as HapticAction);
+      case ActionType.animateVariable:
+        return animateVariable(context, action as AnimateVariableAction);
+    }
+  }
+
+  /// Runs an [AnimateVariableAction] on its variable (see
+  /// [VariableAnimator]). A play or a resume completes when the animation
+  /// ends (true at its end, false when stopped or replaced; a pause keeps
+  /// both waiting); the other modes at once. False when the variable isn't found, is computed
+  /// or the values aren't numbers.
+  static FutureOr<bool> animateVariable(
+    BuildContext context,
+    AnimateVariableAction action, {
+    bool fromCurrentPlace = false,
+  }) {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final ValueNotifier<VariableData>? variable = context
+        .read<CodelesslyContext>()
+        .findVariableByName(action.variable.trim());
+    if (variable == null || variable.value.isComputed) {
+      DebugLogger.instance.printInfo(
+        'Animate variable: no settable variable "${action.variable}".',
+        name: name,
+      );
+      return false;
+    }
+    double? number(String text) {
+      if (text.trim().isEmpty) return null;
+      final String value = PropertyValueDelegate.substituteVariables(
+        text,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim();
+      final double? n = double.tryParse(value);
+      return n != null && n.isFinite ? n : null;
+    }
+
+    switch (action.mode) {
+      case AnimateVariableMode.resume:
+        // Resuming (or finding it playing) waits, like a play, for the
+        // animation to end: a blocking resume holds the actions after it
+        // until then, as the play it carries on does (that play's pending
+        // action completes at the same moment).
+        if (VariableAnimator.resume(variable) ||
+            VariableAnimator.isPlaying(variable)) {
+          final Future<bool>? done = VariableAnimator.completionOf(variable);
+          if (done != null) return done;
+          return true;
+        }
+        // Nothing to resume: play from where the value is, along the
+        // timeline from `from` (or from the value itself) to `to`.
+        return animateVariable(
+          context,
+          action.copyWith(mode: AnimateVariableMode.play),
+          fromCurrentPlace: true,
+        );
+      case AnimateVariableMode.play:
+        final double? to = number(action.to);
+        if (to == null) return false;
+        int ms = action.durationMs;
+        if (action.duration case final String duration
+            when duration.trim().isNotEmpty) {
+          final double? bound = number(duration);
+          if (bound != null && bound >= 0) ms = bound.round();
+        }
+        return VariableAnimator.play(
+          variable,
+          from: number(action.from),
+          to: to,
+          duration: Duration(milliseconds: ms),
+          curve: flutterCurveOf(action.curve),
+          fromCurrentPlace: fromCurrentPlace,
+        );
+      case AnimateVariableMode.pause:
+        return VariableAnimator.pauseVariable(variable);
+      case AnimateVariableMode.stop:
+        return VariableAnimator.stop(variable);
+      case AnimateVariableMode.seek:
+        final double? to = number(action.to);
+        if (to == null) return false;
+        VariableAnimator.seek(variable, to);
+        return true;
     }
   }
 
@@ -342,7 +443,17 @@ class FunctionsRepository {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ActionChain.scopedValuesOf(context),
     );
-    await Clipboard.setData(ClipboardData(text: text));
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+    } catch (error) {
+      // A browser that denies clipboard access throws here. The copy is a
+      // side effect: the actions after it (the "Link copied" toast) still
+      // run, as they would in an app that doesn't wait for the clipboard.
+      DebugLogger.instance.printInfo(
+        'Copy to clipboard failed: $error',
+        name: 'FunctionsRepository',
+      );
+    }
     return true;
   }
 
@@ -572,7 +683,9 @@ class FunctionsRepository {
   }
 
   /// Runs the nested actions of [action] once per item of its list, with
-  /// `${result.item}` and `${result.index}` set.
+  /// `${loop.item}` and `${loop.index}` set for the whole turn (and
+  /// `${result.item}` / `${result.index}` until an action replaces the
+  /// result).
   static Future<bool> runForEach(
     BuildContext context,
     ForEachAction action,
@@ -598,9 +711,14 @@ class FunctionsRepository {
     }
     final List snapshot = List.of(items);
     for (int index = 0; index < snapshot.length; index++) {
+      final Map<String, Object?> turn = {
+        'item': snapshot[index],
+        'index': index,
+      };
       await ActionChain.run(
         () => runActions(context, action.actions),
-        result: {'item': snapshot[index], 'index': index},
+        result: turn,
+        loop: turn,
       );
     }
     return true;
@@ -1557,6 +1675,9 @@ class FunctionsRepository {
     double enterScale = 1,
     double sheetBelowWidth = 600,
   }) {
+    // A toast already up goes under the dialog, which opens above it.
+    final WidgetBuilder dialogContent = builder;
+    builder = (context) => ToastBelowRoute(child: dialogContent(context));
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
         context: context,
@@ -2198,6 +2319,36 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
+  /// Buzzes the device as [action] says, unless its `when` formula is false.
+  static bool haptic(BuildContext context, HapticAction action) {
+    if (action.when.trim().isNotEmpty) {
+      final String on = PropertyValueDelegate.substituteVariables(
+        action.when,
+        scopedValues: ActionChain.scopedValuesOf(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim().toLowerCase();
+      if (on.isEmpty || on == 'false' || on == '0' || on == 'null') return true;
+    }
+    lastHaptic = action.kind;
+    switch (action.kind) {
+      case HapticKind.selection:
+        HapticFeedback.selectionClick();
+      case HapticKind.light:
+        HapticFeedback.lightImpact();
+      case HapticKind.medium:
+        HapticFeedback.mediumImpact();
+      case HapticKind.heavy:
+        HapticFeedback.heavyImpact();
+      case HapticKind.vibrate:
+        HapticFeedback.vibrate();
+    }
+    return true;
+  }
+
+  /// The last buzz [haptic] gave (tests).
+  @visibleForTesting
+  static HapticKind? lastHaptic;
+
   /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
   /// its sound file.
   /// Its fields are values or formulas (`${result.at}`, `${voice}`).
@@ -2210,11 +2361,21 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     ).trim();
     double? number(String value) => double.tryParse(text(value));
     final String url = text(action.url);
+    final String at = text(action.at);
     if (url.isNotEmpty) {
-      unawaited(_playFile(url, (number(action.volume) ?? 1).clamp(0, 1)));
+      // Decoded once and kept where the engine can (the web), so a tick on
+      // every detent of a dial plays at once; a media player elsewhere.
+      final double volume = number(action.volume) ?? 1;
+      if (!Sound.playFile(
+        url,
+        time: at.isEmpty ? null : double.tryParse(at),
+        volume: volume,
+        pitch: number(action.pitch) ?? 1,
+      )) {
+        unawaited(_playFile(url, volume.clamp(0, 1).toDouble()));
+      }
       return true;
     }
-    final String at = text(action.at);
     Sound.play(
       Sound.voiceNamed(text(action.sound)),
       time: at.isEmpty ? null : double.tryParse(at),
@@ -2313,6 +2474,91 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
 
     variableNotifier.set(updatedVariable, notify: notify);
     return true;
+  }
+
+  /// [action]'s glide time in ms (its `animateMs`, a value or formula).
+  static int _animateMsOf(BuildContext context, SetVariableAction action) {
+    final String raw = action.animateMs.trim();
+    if (raw.isEmpty || raw == '0') return 0;
+    final String text = PropertyValueDelegate.substituteVariables(
+      raw,
+      scopedValues: ActionChain.scopedValuesOf(context),
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    return (double.tryParse(text) ?? 0).round();
+  }
+
+  /// The glide each variable is on now, by name (a newer one stops it).
+  static final Map<String, int> _glides = {};
+
+  /// Sets a number variable as [action] says, gliding there over [ms]
+  /// milliseconds along [SetVariableAction.curve], every frame, and
+  /// completes when it arrives (or when a newer glide or set takes over).
+  /// Anything but a number is set at once.
+  static Future<bool> glideVariable(
+    BuildContext context,
+    SetVariableAction action,
+    int ms,
+  ) async {
+    final CodelesslyContext codelessly = context.read<CodelesslyContext>();
+    final variable = codelessly.findVariable(
+      id: action.variable.id,
+      name: action.variable.name,
+    );
+    if (variable == null) return false;
+    final VariableType type = variable.value.type;
+    final Object? start = variable.value.getValue();
+    if ((type != VariableType.integer && type != VariableType.decimal) ||
+        start is! num) {
+      return setVariableFromAction(context, action);
+    }
+    // Work out the end value the usual way, then glide to it from [start].
+    if (!setVariableFromAction(context, action, notify: false)) return false;
+    final Object? end = variable.value.getValue();
+    variable.set(variable.value.copyWith(value: start), notify: false);
+    if (end is! num || end == start) {
+      variable.set(variable.value.copyWith(value: end));
+      return true;
+    }
+    final String key = variable.value.name;
+    final int glide = (_glides[key] ?? 0) + 1;
+    _glides[key] = glide;
+    final Curve curve = flutterCurveOf(action.curve);
+    // Timed by the frames' own clock (the one animations run on).
+    Duration? begin;
+    final Completer<bool> done = Completer<bool>();
+    void frame(Duration now) {
+      // A newer set took over.
+      if (_glides[key] != glide) {
+        done.complete(true);
+        return;
+      }
+      // The screen that started it has closed: stop, don't run on.
+      if (!context.mounted) {
+        _glides.remove(key);
+        done.complete(false);
+        return;
+      }
+      begin ??= now;
+      final double t =
+          ((now - begin!).inMicroseconds / 1000 / ms).clamp(0.0, 1.0);
+      final double v = start + (end - start) * curve.transform(t);
+      variable.set(
+        variable.value.copyWith(
+          value: t >= 1 ? end : (type == VariableType.integer ? v.round() : v),
+        ),
+      );
+      if (t >= 1) {
+        done.complete(true);
+      } else {
+        SchedulerBinding.instance.scheduleFrameCallback(frame);
+        SchedulerBinding.instance.scheduleFrame();
+      }
+    }
+
+    SchedulerBinding.instance.scheduleFrameCallback(frame);
+    SchedulerBinding.instance.scheduleFrame();
+    return done.future;
   }
 
   /// Sets given [value] for given [id] to a variable from
@@ -2587,8 +2833,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
+    // The host's functions first, then the ones every app has (listen).
     final CodelesslyFunction? function =
-        codelesslyContext.functions[action.name];
+        codelesslyContext.functions[action.name] ??
+        builtinFunctions[action.name];
 
     // Substitute variables in params.
     final Map<String, dynamic> parsedParams = substituteVariablesInMap(

@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -181,7 +182,7 @@ void main() {
           type == BadgeType.count ? findsOneWidget : findsNothing,
         );
         expect(
-          find.byType(Icon),
+          find.byType(SvgIcon),
           childID == 'icon' ? findsOneWidget : findsNothing,
           reason: '$type $childID',
         );
