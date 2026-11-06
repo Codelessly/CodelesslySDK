@@ -118,39 +118,76 @@ class PassiveRectangleWidget extends StatelessWidget {
       }
     }
 
-    Widget child = Stack(
-      clipBehavior: Clip.none,
+    final List<Widget> fills = clipFillsToNotches(
+      node,
+      buildFills(
+        node,
+        useInk: false,
+        obscureImages: settings.obscureImages,
+        settings: settings,
+        scopedValues: scopedValues,
+      ),
+    );
+    final List<Widget> strokes = buildStrokes(node, scopedValues);
+    final List<Widget> content = wrapWithInkWell(
+      context,
+      node,
+      wrapWithPaddingAndScroll(
+        node,
+        [...children, ?portalWidget],
+        stackAlignment: stackAlignment,
+        applyPadding: applyPadding,
+        getNode: manager.getNode,
+        isPlaceholder: isPlaceholder,
+      ),
       alignment:
           stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-      children: [
-        ...clipFillsToNotches(
-          node,
-          buildFills(
-            node,
-            useInk: false,
-            obscureImages: settings.obscureImages,
-            settings: settings,
-            scopedValues: scopedValues,
-          ),
-        ),
-        ...buildStrokes(node, scopedValues),
-        ...wrapWithInkWell(
-          context,
-          node,
-          wrapWithPaddingAndScroll(
-            node,
-            [...children, ?portalWidget],
-            stackAlignment: stackAlignment,
-            applyPadding: applyPadding,
-            getNode: manager.getNode,
-            isPlaceholder: isPlaceholder,
-          ),
-          alignment:
-              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        ),
-        ...buildForegroundFills(node, scopedValues),
-      ],
     );
+    final List<Widget> foreground = buildForegroundFills(node, scopedValues);
+    final AlignmentGeometry alignment =
+        stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart;
+
+    // A node that clips its content clips its fills and children, not its
+    // own stroke, as Flutter's Container clips its child but paints its
+    // border outside the clip: clipped too, the stroke's edge was cut (or
+    // anti-aliased twice), leaving a light seam between a card's border and
+    // its shadow.
+    Clip clip = getClipBehavior(node);
+    final bool strokeOutsideClip =
+        clip != Clip.none && strokes.isNotEmpty && notchesOf(node).isEmpty;
+    final Widget child0;
+    if (strokeOutsideClip) {
+      final BorderRadius radius = getBorderRadius(node) ?? BorderRadius.zero;
+      Widget clipped(Widget layer) =>
+          ClipRRect(borderRadius: radius, clipBehavior: clip, child: layer);
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [
+          if (fills.isNotEmpty)
+            Positioned.fill(
+              child: clipped(Stack(fit: StackFit.expand, children: fills)),
+            ),
+          ...strokes,
+          clipped(
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: alignment,
+              children: content,
+            ),
+          ),
+          ...foreground,
+        ],
+      );
+      clip = Clip.none;
+    } else {
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [...fills, ...strokes, ...content, ...foreground],
+      );
+    }
+    Widget child = child0;
 
     bool hasComplexRendering =
         node is GeometryMixin &&
@@ -170,7 +207,7 @@ class PassiveRectangleWidget extends StatelessWidget {
       child: decorateWithShadows(
         boxShadow: retrieveBoxShadow(node, scopedValues),
         borderRadius: getBorderRadius(node),
-        clipBehavior: getClipBehavior(node),
+        clipBehavior: clip,
         tapThrough: TapThroughScope.of(context),
         notches: notchesOf(node),
         child: child,
