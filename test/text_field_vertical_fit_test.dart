@@ -139,15 +139,17 @@ void main() {
     // 8 px off the intrinsic height it hugs: 10 px for one line of 18.
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('a dense field keeps the compact density its padding allows', (
+  testWidgets('a dense field keeps all its padding on desktop', (
     tester,
   ) async {
+    // A design is the same on every platform: desktop's compact density
+    // (the web's and the editor canvas's) takes nothing off.
     final double oneLine = await line(tester);
     for (final (double padding, double height) in [
       (0, oneLine),
-      (2, oneLine),
-      (6, oneLine + 12 - 8),
-      (10, oneLine + 20 - 8),
+      (2, oneLine + 4),
+      (6, oneLine + 12),
+      (10, oneLine + 20),
     ]) {
       final TextFieldNode node = _field(SizeFit.shrinkWrap, height: 12);
       node.properties.decoration = node.properties.decoration.copyWith(
