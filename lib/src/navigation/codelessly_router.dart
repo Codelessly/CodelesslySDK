@@ -332,6 +332,14 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// data.
   static const String reverseTransitionMsKey = 'codelessly.reverseTransitionMs';
 
+  /// The key of [NavigationAction.routeTransition] (as JSON) in a route's
+  /// global data.
+  static const String routeTransitionKey = 'codelessly.routeTransition';
+
+  /// The key of the [RevealAnchor] a screen opened from, in a route's
+  /// global data (not saved in the browser's history).
+  static const String anchorKey = 'codelessly.anchor';
+
   /// The page of a screen: a [MaterialPage], or a
   /// [CodelesslyTransitionPage] when the screen was opened with another
   /// [NavigationTransition].
@@ -342,6 +350,21 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     Map<String, dynamic> globalData,
     Object? arguments,
   ) {
+    final Object? customJson = globalData[routeTransitionKey];
+    if (customJson is Map || customJson is String) {
+      return CodelesslyTransitionPage<dynamic>(
+        key: key,
+        name: name,
+        arguments: arguments,
+        transition: NavigationTransition.none,
+        routeTransition: RouteTransition.fromJson(customJson!),
+        anchor: switch (globalData[anchorKey]) {
+          RevealAnchor anchor => anchor,
+          _ => const RevealAnchor(),
+        },
+        child: child,
+      );
+    }
     final NavigationTransition transition = FunctionsRepository.webTransition(
       NavigationTransition.values.asNameMap()[globalData[transitionKey]] ??
           NavigationTransition.platform,
@@ -368,6 +391,22 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         _ => null,
       },
       child: child,
+    );
+  }
+
+  HeroController? _heroController;
+
+  /// Shared elements fly between this router's screens even when it is
+  /// nested under another navigator (a Codelessly app inside a host app's
+  /// screen, or inside a tab): a nested [Navigator] has no hero controller
+  /// of its own, so one is given when no free one is above it.
+  @override
+  Widget build(BuildContext context) {
+    final Widget navigator = super.build(context);
+    if (HeroControllerScope.maybeOf(context) != null) return navigator;
+    return HeroControllerScope(
+      controller: _heroController ??= MaterialApp.createMaterialHeroController(),
+      child: navigator,
     );
   }
 
@@ -753,6 +792,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     NavigationTransition transition = NavigationTransition.platform,
     int? transitionMs,
     int? reverseTransitionMs,
+    RouteTransition? routeTransition,
+    RevealAnchor? anchor,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: openerHosts, chain: null);
     _change = const CodelesslyHistoryPush();
@@ -770,6 +811,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         transition,
         transitionMs: transitionMs,
         reverseTransitionMs: reverseTransitionMs,
+        routeTransition: routeTransition,
+        anchor: anchor,
       ),
     );
   }
@@ -787,6 +830,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     NavigationTransition transition = NavigationTransition.platform,
     int? transitionMs,
     int? reverseTransitionMs,
+    RouteTransition? routeTransition,
+    RevealAnchor? anchor,
   }) {
     _handoffs[_canonical(location)] = (openerHosts: const [], chain: chain);
     _change = const CodelesslyHistoryPush();
@@ -800,6 +845,8 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
         transition,
         transitionMs: transitionMs,
         reverseTransitionMs: reverseTransitionMs,
+        routeTransition: routeTransition,
+        anchor: anchor,
       ),
     );
   }
@@ -809,8 +856,12 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     NavigationTransition transition, {
     int? transitionMs,
     int? reverseTransitionMs,
+    RouteTransition? routeTransition,
+    RevealAnchor? anchor,
   }) => {
     paramsKey: params,
+    if (routeTransition != null) routeTransitionKey: routeTransition.toJson(),
+    if (routeTransition != null && anchor != null) anchorKey: anchor,
     if (transition != NavigationTransition.platform)
       transitionKey: transition.name,
     if (transition != NavigationTransition.platform && transitionMs != null)
@@ -1189,6 +1240,12 @@ class CodelesslyTransitionPage<T> extends Page<T> {
   /// duration.
   final int? reverseTransitionMs;
 
+  /// A custom transition that replaces [transition] when set.
+  final RouteTransition? routeTransition;
+
+  /// Where the [routeTransition]'s reveals grow from.
+  final RevealAnchor anchor;
+
   /// Creates a [CodelesslyTransitionPage].
   const CodelesslyTransitionPage({
     super.key,
@@ -1197,6 +1254,8 @@ class CodelesslyTransitionPage<T> extends Page<T> {
     required this.transition,
     this.transitionMs,
     this.reverseTransitionMs,
+    this.routeTransition,
+    this.anchor = const RevealAnchor(),
     required this.child,
   });
 
@@ -1208,8 +1267,20 @@ class CodelesslyTransitionPage<T> extends Page<T> {
   );
 
   @override
-  Route<T> createRoute(BuildContext context) =>
-      _CodelesslyTransitionRoute<T>(this);
+  Route<T> createRoute(BuildContext context) {
+    final RouteTransition? custom = routeTransition;
+    if (custom == null) return _CodelesslyTransitionRoute<T>(this);
+    late final CodelesslyRouteTransitionRoute<T> route;
+    // The page can be updated in place with a new child: build the
+    // route's current page.
+    route = CodelesslyRouteTransitionRoute<T>(
+      transition: custom,
+      settings: this,
+      anchor: anchor,
+      builder: (_) => (route.settings as CodelesslyTransitionPage<T>).child,
+    );
+    return route;
+  }
 }
 
 class _CodelesslyTransitionRoute<T> extends PageRoute<T> {

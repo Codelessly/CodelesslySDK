@@ -81,6 +81,53 @@ void main() {
     await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/extensions.png'));
   });
 
+  testWidgets('Material-drawn components use the GenUI theme', (tester) async {
+    final session = sessionWith([
+      create('m'),
+      data('m', {'date': '2026-11-06', 'time': '18:30:00', 'country': ['ca']}),
+      components('m', [
+        {'id': 'root', 'component': 'Card', 'child': 'col'},
+        {'id': 'col', 'component': 'Column', 'children': ['tabs', 'icons', 'date', 'time', 'img', 'country', 'modal']},
+        {'id': 'tabs', 'component': 'Tabs', 'tabs': [
+          {'title': 'Overview', 'child': 't1'},
+          {'title': 'Details', 'child': 't2'},
+          {'title': 'Reviews', 'child': 't3'},
+        ]},
+        {'id': 't1', 'component': 'Text', 'text': 'Overview content'},
+        {'id': 't2', 'component': 'Text', 'text': 'Details content'},
+        {'id': 't3', 'component': 'Text', 'text': 'Reviews content'},
+        {'id': 'icons', 'component': 'Row', 'children': ['i1', 'i2', 'i3', 'iText']},
+        {'id': 'i1', 'component': 'Icon', 'name': 'calendarToday'},
+        {'id': 'i2', 'component': 'Icon', 'name': 'locationOn'},
+        {'id': 'i3', 'component': 'Icon', 'name': 'star'},
+        {'id': 'iText', 'component': 'Text', 'text': 'Fri, Nov 6 · Toronto', 'variant': 'caption'},
+        {'id': 'date', 'component': 'DateTimeInput', 'label': 'Date', 'enableDate': true, 'value': {'path': '/date'}},
+        {'id': 'time', 'component': 'DateTimeInput', 'label': 'Time', 'enableTime': true, 'value': {'path': '/time'}},
+        {'id': 'img', 'component': 'Image', 'url': 'local/photo.png', 'variant': 'mediumFeature', 'description': 'Venue'},
+        {'id': 'country', 'component': 'ChoicePicker', 'label': 'Country', 'filterable': true,
+         'options': [for (final c in ['ca:Canada', 'us:United States', 'mx:Mexico', 'fr:France', 'jp:Japan', 'br:Brazil']) {'label': c.split(':')[1], 'value': c.split(':')[0]}],
+         'value': {'path': '/country'}},
+        {'id': 'modal', 'component': 'Modal', 'trigger': 'open', 'content': 'sheet'},
+        {'id': 'open', 'component': 'Button', 'child': 'openL', 'action': {'event': {'name': 'noop'}}},
+        {'id': 'openL', 'component': 'Text', 'text': 'Show details'},
+        {'id': 'sheet', 'component': 'Column', 'children': ['sheetTitle', 'sheetBody']},
+        {'id': 'sheetTitle', 'component': 'Text', 'text': 'Venue details', 'variant': 'h3'},
+        {'id': 'sheetBody', 'component': 'Text', 'text': 'Doors open at 6:30 pm. The dining room is on the second floor.'},
+      ]),
+    ]);
+    addTearDown(session.dispose);
+    await pumpSurfaces(tester, session, size: const Size(440, 900));
+    await expectLater(find.byType(Scaffold), matchesGoldenFile('goldens/material_components.png'));
+    await tester.tap(find.text('Show details'));
+    await tester.pumpAndSettle();
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/material_modal.png'));
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Date'));
+    await tester.pumpAndSettle();
+    await expectLater(find.byType(MaterialApp), matchesGoldenFile('goldens/material_date_picker.png'));
+  });
+
   testWidgets('visualization expands to fullscreen, keeps state, and collapses back', (tester) async {
     final session = sessionWith(fixture('weight_loss'));
     addTearDown(session.dispose);

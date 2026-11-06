@@ -1199,6 +1199,27 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
 
   /// Takes the route's params and runs the load actions.
   void _load() {
+    // Load actions read and set the screen's variables: a screen shown
+    // before they arrive (a cached model without them, while the publish
+    // bundle downloads) waits for them. The layout reloads with them first.
+    final Codelessly? codelessly = context.read<Codelessly?>();
+    final String? pendingLayout =
+        context.read<CodelesslyContext?>()?.layoutID ??
+        codelessly?.layoutIdOfCanvas(widget.node.id);
+    final Future<void>? variables = pendingLayout == null
+        ? null
+        : codelessly?.maybeDataManager?.variablesPending(pendingLayout);
+    if (variables != null) {
+      variables.whenComplete(() {
+        if (!mounted) return;
+        if (_isCurrentRoute) {
+          _load();
+        } else {
+          _loadWaitsForRoute = true;
+        }
+      });
+      return;
+    }
     // The overlay screen isn't the screen the app is on: the route is not
     // its own.
     if (!OverlayScreenScope.of(context)) {

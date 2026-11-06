@@ -17,6 +17,7 @@ dependencies:
   codelessly_api: ^9.0.3
   codelessly_sdk: ^9.1.9
   provider: ^6.1.2
+  google_fonts: ^9.0.0
   json_schema_builder: ^0.1.7
   intl: ^0.20.2
 

@@ -2,10 +2,11 @@ import 'package:a2ui_core/a2ui_core.dart';
 import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:a2ui_flutter/v0_9/basic_catalog.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../functions/calc_function.dart';
 import '../render/components.dart' as c;
+import '../render/genui_material_theme.dart';
 import '../render/genui_theme.dart';
 import '../render/visualization.dart';
 import 'catalog_spec.dart';
@@ -20,10 +21,19 @@ CatalogApi genUiCatalogApi() => Catalog.fromJson(
 /// The Codelessly GenUI catalog with its renderers: a2ui_flutter
 /// [CatalogImplementation] whose components render with the Codelessly SDK.
 ///
-/// Layout containers (Row, Column, List), media and dialogs (Image, Icon,
-/// Tabs, Modal, DateTimeInput) and the many-option ChoicePicker reuse the
-/// a2ui_flutter basic implementations; everything else draws Codelessly
-/// nodes.
+/// Layout containers (Row, Column, List), Icon, Tabs, Modal and
+/// DateTimeInput reuse the a2ui_flutter basic implementations, drawn under
+/// the GenUI Material theme ([genUiMaterialTheme]) so they match the rest;
+/// everything else draws Codelessly nodes or GenUI widgets.
+final Map<(GenUiTheme, Brightness), ThemeData> _materialThemes = {};
+
+/// The GenUI Material theme for [theme], built once per theme.
+ThemeData _materialTheme(ThemeData base, GenUiTheme theme) =>
+    _materialThemes[(theme, base.brightness)] ??= genUiMaterialTheme(
+      base,
+      theme,
+    );
+
 CatalogImplementation genUiCatalog({
   GenUiTheme theme = const GenUiTheme(),
   String locale = 'en-US',
@@ -49,18 +59,17 @@ CatalogImplementation genUiCatalog({
     'Row': BasicComponents.row.builder,
     'Column': BasicComponents.column.builder,
     'List': BasicComponents.list.builder,
-    'Image': BasicComponents.image.builder,
+    'Image': c.buildImage,
     'Icon': BasicComponents.icon.builder,
     'Tabs': BasicComponents.tabs.builder,
     'Modal': BasicComponents.modal.builder,
-    'DateTimeInput': (context, node, props, buildChild) =>
-        c.buildDateTimeInput(
-          context,
-          node,
-          props,
-          buildChild,
-          basic: BasicComponents.dateTimeInput.builder,
-        ),
+    'DateTimeInput': (context, node, props, buildChild) => c.buildDateTimeInput(
+      context,
+      node,
+      props,
+      buildChild,
+      basic: BasicComponents.dateTimeInput.builder,
+    ),
     'CodelesslyChart': c.buildChart,
     'CodelesslyGauge': c.buildGauge,
     'CodelesslyProgress': c.buildProgress,
@@ -82,7 +91,10 @@ CatalogImplementation genUiCatalog({
         : theme;
     return GenUiThemeScope(
       theme: resolved,
-      child: Builder(builder: build),
+      child: Theme(
+        data: _materialTheme(Theme.of(context), resolved),
+        child: Builder(builder: build),
+      ),
     );
   }
 
