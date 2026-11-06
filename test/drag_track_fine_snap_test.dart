@@ -22,7 +22,11 @@ void main() {
 
   /// A [size] node with [track] at (180, 180) in a 400x400 box, optionally
   /// inside a vertical scroll view 2000px tall.
-  Widget host(DragTrackModel track, {bool scroll = false, Size size = const Size(40, 40)}) {
+  Widget host(
+    DragTrackModel track, {
+    bool scroll = false,
+    Size size = const Size(40, 40),
+  }) {
     final Widget plate = StatefulBuilder(
       builder: (context, setState) => SizedBox(
         width: 400,
@@ -80,39 +84,53 @@ void main() {
     defaultValue: 20,
   );
 
-  testWidgets('a vertical knob inside a scroll view turns instead of scrolling', (tester) async {
-    await tester.pumpWidget(host(temp, scroll: true));
-    final ScrollableState scroll = tester.state(find.byType(Scrollable));
-    await tester.drag(find.text('cap'), const Offset(0, -64), touchSlopY: 0);
-    await tester.pumpAndSettle();
-    expect(value, greaterThan(20));
-    expect((value * 2).roundToDouble(), value * 2, reason: 'snapped to 0.5° detents');
-    expect(scroll.position.pixels, 0);
-  });
+  testWidgets(
+    'a vertical knob inside a scroll view turns instead of scrolling',
+    (tester) async {
+      await tester.pumpWidget(host(temp, scroll: true));
+      final ScrollableState scroll = tester.state(find.byType(Scrollable));
+      await tester.drag(find.text('cap'), const Offset(0, -64), touchSlopY: 0);
+      await tester.pumpAndSettle();
+      expect(value, greaterThan(20));
+      expect(
+        (value * 2).roundToDouble(),
+        value * 2,
+        reason: 'snapped to 0.5° detents',
+      );
+      expect(scroll.position.pixels, 0);
+    },
+  );
 
-  testWidgets('press and hold, then drag: fine steps, the fine variable and track.fine', (tester) async {
-    await tester.pumpWidget(host(temp));
-    final TestGesture g = await tester.startGesture(tester.getCenter(find.text('cap')));
-    await tester.pump(const Duration(milliseconds: 450));
-    expect(fines, [true]);
-    expect(seen.last.fine, isTrue);
-    for (int i = 0; i < 3; i++) {
-      await g.moveBy(const Offset(0, -10));
+  testWidgets(
+    'press and hold, then drag: fine steps, the fine variable and track.fine',
+    (tester) async {
+      await tester.pumpWidget(host(temp));
+      final TestGesture g = await tester.startGesture(
+        tester.getCenter(find.text('cap')),
+      );
+      await tester.pump(const Duration(milliseconds: 450));
+      expect(fines, [true]);
+      expect(seen.last.fine, isTrue);
+      for (int i = 0; i < 3; i++) {
+        await g.moveBy(const Offset(0, -10));
+        await tester.pump();
+      }
+      // 30px up in fine mode: three 0.1° steps (the first move's slop aside).
+      expect(value, closeTo(20.2, 0.11));
+      expect(value * 10, closeTo((value * 10).roundToDouble(), 1e-9));
+      await g.up();
       await tester.pump();
-    }
-    // 30px up in fine mode: three 0.1° steps (the first move's slop aside).
-    expect(value, closeTo(20.2, 0.11));
-    expect(value * 10, closeTo((value * 10).roundToDouble(), 1e-9));
-    await g.up();
-    await tester.pump();
-    expect(fines.last, isFalse);
-    expect(seen.last.fine, isFalse);
-  });
+      expect(fines.last, isFalse);
+      expect(seen.last.fine, isFalse);
+    },
+  );
 
   testWidgets('Shift turns fine mode on while dragging', (tester) async {
     await tester.pumpWidget(host(temp));
     await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-    final TestGesture g = await tester.startGesture(tester.getCenter(find.text('cap')));
+    final TestGesture g = await tester.startGesture(
+      tester.getCenter(find.text('cap')),
+    );
     await g.moveBy(const Offset(0, -5));
     await g.moveBy(const Offset(0, -20));
     await tester.pump();
@@ -128,7 +146,9 @@ void main() {
   testWidgets('Shift + wheel steps by the fine step', (tester) async {
     await tester.pumpWidget(host(temp));
     final pointer = TestPointer(1, PointerDeviceKind.mouse);
-    await tester.sendEventToBinding(pointer.hover(tester.getCenter(find.text('cap'))));
+    await tester.sendEventToBinding(
+      pointer.hover(tester.getCenter(find.text('cap'))),
+    );
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, -20)));
     await tester.pump();
     expect(value, 20.5);
@@ -166,7 +186,9 @@ void main() {
     expect(mid, isNot(equals(after)));
   });
 
-  testWidgets('tapping a curved slider\'s arc jumps its orbiting thumb there', (tester) async {
+  testWidgets('tapping a curved slider\'s arc jumps its orbiting thumb there', (
+    tester,
+  ) async {
     // A thumb orbiting a point 100px below it, -60° to 60°, 15–120 s.
     const every = DragTrackModel(
       shape: DragTrackShape.arc,

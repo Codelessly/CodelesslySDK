@@ -1,12 +1,27 @@
 import 'dart:async';
 
+import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 /// Goldens differ by a fraction of a percent between machines (font hinting
 /// and antialiasing), so they compare with a small tolerance: a moved or
 /// resized widget still fails.
+///
+/// Icons are hosted SVGs (icons.codelessly.com, fonts.gstatic.com), and a
+/// widget test answers every real HTTP request with 400, which reports an
+/// exception and fails the test. Icons load from a stand-in client that
+/// serves a square glyph instead; a test can still set its own.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+  SvgIcon.httpClient ??= MockClient(
+    (request) async => http.Response(
+      _iconSvg,
+      200,
+      headers: const {'content-type': 'image/svg+xml'},
+    ),
+  );
   final GoldenFileComparator current = goldenFileComparator;
   if (current is LocalFileComparator) {
     goldenFileComparator = TolerantGoldenComparator(
@@ -39,3 +54,8 @@ class TolerantGoldenComparator extends LocalFileComparator {
     throw FlutterError(error);
   }
 }
+
+/// A square glyph, the stand-in for every hosted icon in tests.
+const String _iconSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+    '<path d="M4 4h16v16H4z"/></svg>';

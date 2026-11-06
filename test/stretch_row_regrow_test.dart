@@ -7,22 +7,26 @@ import 'package:provider/provider.dart';
 /// Cards in a stretching row (the Power screen's supplies) are as tall as
 /// the tallest; when a card's hidden line shows, the row grows with it.
 void main() {
-  testWidgets('a stretch row of expanded cards grows when a card grows', (tester) async {
-    final VariableData more = VariableData(id: 'm', name: 'more', type: VariableType.boolean, value: false);
+  testWidgets('a stretch row of expanded cards grows when a card grows', (
+    tester,
+  ) async {
+    final VariableData more = VariableData(
+      id: 'm',
+      name: 'more',
+      type: VariableType.boolean,
+      value: false,
+    );
     RowColumnNode card(String id, List<String> kids) => RowColumnNode(
-          id: id,
-          name: id,
-          basicBoxLocal: NodeBox(0, 0, 100, 40),
-          children: kids,
-          rowColumnType: RowColumnType.column,
-          horizontalFit: SizeFit.expanded,
-          verticalFit: SizeFit.expanded,
-        )..parentID = 'row';
-    RectangleNode line(String id, String parent, {String? visible}) => RectangleNode(
-          id: id,
-          name: id,
-          basicBoxLocal: NodeBox(0, 0, 100, 20),
-        )
+      id: id,
+      name: id,
+      basicBoxLocal: NodeBox(0, 0, 100, 40),
+      children: kids,
+      rowColumnType: RowColumnType.column,
+      horizontalFit: SizeFit.expanded,
+      verticalFit: SizeFit.expanded,
+    )..parentID = 'row';
+    RectangleNode line(String id, String parent, {String? visible}) =>
+        RectangleNode(id: id, name: id, basicBoxLocal: NodeBox(0, 0, 100, 20))
           ..parentID = parent
           ..variables.addAll({if (visible != null) 'visible': visible});
     final RowColumnNode row = RowColumnNode(
@@ -73,12 +77,18 @@ void main() {
         ),
       ),
     );
-    Rect of(String id) => tester.getRect(find.byKey(ValueKey('Rectangle Transformer of $id [$id]')));
+    Rect of(String id) => tester.getRect(
+      find.byKey(ValueKey('Rectangle Transformer of $id [$id]')),
+    );
     final double before = of('b1').top;
     expect(tester.takeException(), isNull);
     v.set(more.copyWith(value: true));
     await tester.pump();
-    expect(tester.takeException(), isNull, reason: 'no overflow when the card grows');
+    expect(
+      tester.takeException(),
+      isNull,
+      reason: 'no overflow when the card grows',
+    );
     // A's second line shows, below its first.
     expect(of('a2').top, greaterThanOrEqualTo(of('a1').bottom - 0.5));
     expect(of('b1').top, before);
