@@ -17,6 +17,11 @@ Lamplight reference app (CodelesslyEditor `references/lamplight/blockers.md`):
   draw overflow stripes.
 - `stretchItems` wraps measure content (hidden children take no height).
 - Aspect-ratio boxes keep their ratio; icon baselines snap to pixels.
+- A node with a bound `visible` and a transition time animates its size
+  only when it shows or hides; a shown text whose data changes takes its
+  new width at once (it eased with an overshoot and clipped its text).
+- Layouts load the SVGs of their toast icons when they load, so the first
+  toast of a session shows its icon.
 
 ### Features
 

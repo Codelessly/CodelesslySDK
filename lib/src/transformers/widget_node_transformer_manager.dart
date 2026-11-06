@@ -219,15 +219,10 @@ abstract class WidgetNodeTransformerManager
         ? implicitTransitionDuration(context, node.transitionMs)
         : Duration.zero;
     if (runtimeVisible != null && duration > Duration.zero) {
-      return AnimatedSize(
+      return VisibilitySizeTransition(
+        visible: visible,
         duration: duration,
-        curve: Curves.easeOutBack,
-        alignment: Alignment.topLeft,
-        child: AnimatedOpacity(
-          duration: duration,
-          opacity: visible ? 1 : 0,
-          child: visible ? widget : const SizedBox.shrink(),
-        ),
+        child: widget,
       );
     }
 
@@ -1152,9 +1147,12 @@ abstract class WidgetNodeTransformerManager
     final double? min = bound(DragTrackModel.minVariableKey);
     final double? max = bound(DragTrackModel.maxVariableKey);
     final double? step = bound(DragTrackModel.stepVariableKey);
-    final DragTrackModel base = withDragTrackBindings(node, track, scopedValues);
-    final DragTrackModel ranged =
-        min == null && max == null && step == null
+    final DragTrackModel base = withDragTrackBindings(
+      node,
+      track,
+      scopedValues,
+    );
+    final DragTrackModel ranged = min == null && max == null && step == null
         ? base
         : base.copyWith(
             min: min,
@@ -1342,10 +1340,7 @@ abstract class WidgetNodeTransformerManager
     if (measured != null) return (scope, measured);
     return (
       scope,
-      Size(
-        parent?.innerBoxLocal.width ?? 0,
-        parent?.innerBoxLocal.height ?? 0,
-      ),
+      Size(parent?.innerBoxLocal.width ?? 0, parent?.innerBoxLocal.height ?? 0),
     );
   }
 
@@ -1401,7 +1396,6 @@ abstract class WidgetNodeTransformerManager
     };
     return value ?? track.defaultValue ?? track.min;
   }
-
 
   /// A node with a [DragTrackModel] is a value control: it is drawn at its
   /// variable's place along the track and dragging it writes the variable,
@@ -1509,8 +1503,9 @@ abstract class WidgetNodeTransformerManager
           result: {'value': v},
         ),
         onFine: switch (track.fineVariable?.trim()) {
-          final String name? when name.isNotEmpty =>
-            (bool fine) => codelesslyContext?.updateVariable(name, fine),
+          final String name? when name.isNotEmpty => (
+            bool fine,
+          ) => codelesslyContext?.updateVariable(name, fine),
           _ => null,
         },
         child: child,
@@ -2128,6 +2123,103 @@ class AdaptiveSizeFitBox extends StatelessWidget {
   }
 }
 
+/// A node shown and hidden by a binding, with a transition time: it grows
+/// open and shrinks closed (fading too) when [visible] changes, like
+/// Flutter's AnimatedSize.
+///
+/// Only the show or hide is animated. A node that stays shown and changes
+/// size (a summary line whose bound text goes from "Mon, Tue, Wed, Thu, Fri,
+/// Sun" to "Weekdays") takes its new size at once, as its Flutter
+/// counterpart (`if (shown) Text(...)`) does: easing it, with the overshoot
+/// of [Curves.easeOutBack], clipped the new text for a moment ("Weekday").
+class VisibilitySizeTransition extends StatefulWidget {
+  /// Whether the node shows.
+  final bool visible;
+
+  /// How long showing or hiding takes.
+  final Duration duration;
+
+  /// The node.
+  final Widget child;
+
+  /// Creates a [VisibilitySizeTransition].
+  const VisibilitySizeTransition({
+    super.key,
+    required this.visible,
+    required this.duration,
+    required this.child,
+  });
+
+  @override
+  State<VisibilitySizeTransition> createState() =>
+      _VisibilitySizeTransitionState();
+}
+
+class _VisibilitySizeTransitionState extends State<VisibilitySizeTransition>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: widget.duration,
+    value: widget.visible ? 1 : 0,
+  )..addStatusListener(_statusChanged);
+  late final CurvedAnimation _size = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutBack,
+    reverseCurve: Curves.easeInCubic,
+  );
+
+  /// Drops a closed node's content once it has shrunk away.
+  void _statusChanged(AnimationStatus status) {
+    if (status.isDismissed && mounted) setState(() {});
+  }
+
+  @override
+  void didUpdateWidget(covariant VisibilitySizeTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _controller.duration = widget.duration;
+    if (oldWidget.visible == widget.visible) return;
+    if (widget.visible) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _size.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _controller,
+    // A node closing keeps its content until it has shrunk away.
+    child: widget.visible || !_controller.isDismissed
+        ? widget.child
+        : const SizedBox.shrink(),
+    builder: (context, child) {
+      // Shown and at rest, the node is its own size, following its content
+      // as it changes, and its shadows aren't clipped.
+      final bool resting = _controller.isCompleted;
+      final double factor = resting ? 1 : max(0, _size.value);
+      return ClipRect(
+        clipBehavior: resting ? Clip.none : Clip.hardEdge,
+        child: Align(
+          alignment: Alignment.topLeft,
+          widthFactor: factor,
+          heightFactor: factor,
+          child: Opacity(
+            opacity: resting ? 1 : _controller.value.clamp(0.0, 1.0),
+            child: child,
+          ),
+        ),
+      );
+    },
+  );
+}
+
 /// Renders Material icons and symbols as on-demand vectors from Google's
 /// prebuilt SVG CDN. Cupertino vectors use the configured static icon CDN.
 class SvgIcon extends StatelessWidget {
@@ -2146,6 +2238,41 @@ class SvgIcon extends StatelessWidget {
   /// set it: their binding answers every request with a 400.
   @visibleForTesting
   static http.Client? httpClient;
+
+  /// Whether [precache] fetches anything. On by default on the web, where
+  /// icons come from the CDN; off in widget tests, whose HTTP answers 400
+  /// (a failed load stays in flutter_svg's cache).
+  @visibleForTesting
+  static bool precacheEnabled = kIsWeb;
+
+  /// Starts loading [icon]'s SVG into flutter_svg's cache, with the axes
+  /// [SvgIcon] would use, so an icon that shows for a moment (a toast's)
+  /// draws at once instead of after its fetch. Returns when it is loaded
+  /// (errors are swallowed: the icon leaves its space empty, as before).
+  static Future<void> precache(
+    IconModel icon, {
+    double? fill,
+    double? weight,
+    double? grade,
+    double? opticalSize,
+  }) async {
+    if (!precacheEnabled) return;
+    final String? url = icon is CupertinoIcon
+        ? cupertinoSvgUrl(icon)
+        : icon.toSvgUrl(
+            fill: fill,
+            weight: weight,
+            grade: grade,
+            opticalSize: opticalSize,
+          );
+    if (url == null) return;
+    try {
+      // The same loader (and so cache key) SvgPicture.network makes.
+      await SvgNetworkLoader(url, httpClient: httpClient).loadBytes(null);
+    } catch (_) {
+      // Offline or unavailable: nothing to show early.
+    }
+  }
 
   const SvgIcon({
     super.key,
@@ -2283,8 +2410,7 @@ class RenderPixelSnappedBaseline extends RenderProxyBox {
   // `crossAxisAlignment: baseline` row places it bottom on the baseline,
   // where the SVG alone (no baseline) would be top-aligned.
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
-      size.height;
+  double? computeDistanceToActualBaseline(TextBaseline baseline) => size.height;
 
   @override
   double? computeDryBaseline(
