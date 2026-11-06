@@ -303,7 +303,12 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       widget = FloatingNode(child: widget);
     }
 
-    return decorate(context, styled, widget, NodeBuildLayer.margin);
+    widget = decorate(context, styled, widget, NodeBuildLayer.margin);
+    // A node motion draws elsewhere takes taps where it is drawn.
+    if (!settings.isPreview && movesByMotion(styled)) {
+      widget = HitBeyondBounds(child: widget);
+    }
+    return widget;
   }
 
   /// Makes [widget] draggable and/or a drop target, as [node]'s
@@ -1134,6 +1139,14 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
   }
 
   if (node is TextNode) collect(node.data);
+  // An image fill named by a variable or formula (`${item.image}`, a play /
+  // pause icon) follows it.
+  if (node is GeometryMixin) {
+    for (final PaintModel fill in node.fills) {
+      collect(fill.downloadUrl);
+      collect(fill.croppedImageURL);
+    }
+  }
   if (node is CustomPropertiesMixin) collect(node.properties.toJson());
   if (node case final QueryableMixin queryable) {
     collect(queryable.collectionPath);
