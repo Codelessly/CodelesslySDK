@@ -154,10 +154,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
           // An axis the parent lays its children out unbounded on (a
           // horizontal list, a row's main axis) reads the parent's own
           // extent there, as on the design canvas.
-          final ParentExtentScope? extent = ParentExtentScope.of(
-            context,
-            node,
-          );
+          final ParentExtentScope? extent = ParentExtentScope.of(context, node);
           return ParentSizeScope(
             width: constraints.hasBoundedWidth
                 ? constraints.maxWidth
@@ -806,6 +803,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
+          case 'animating':
+            listenables.add(VariableAnimator.changes);
         }
       }
 
@@ -853,6 +852,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
             listenables.add(codelesslyContext.dragAndDrop);
           case 'speech':
             listenables.add(Speech.instance);
+          case 'animating':
+            listenables.add(VariableAnimator.changes);
         }
       }
 
@@ -903,6 +904,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
               listenables.add(codelesslyContext.dragAndDrop);
             case 'speech':
               listenables.add(Speech.instance);
+            case 'animating':
+              listenables.add(VariableAnimator.changes);
           }
           continue;
         }
