@@ -879,17 +879,14 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
                   child: buildField(decoration),
                 );
               }
-              // The node's box sets the height here, so the theme's density
-              // must not change it: desktop's compact density took 8 px off
-              // the outline, leaving a strip of the box's background below
-              // the border.
+              // The node's box sets the height here (the decoration's
+              // standard density keeps the outline at that height).
               return buildField(
                 constraints.hasBoundedHeight
                     ? decoration.copyWith(
                         constraints: BoxConstraints.tightFor(
                           height: constraints.maxHeight,
                         ),
-                        visualDensity: VisualDensity.standard,
                       )
                     : decoration,
               );
@@ -1140,11 +1137,15 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
       isCollapsed: isCollapsed,
       isDense: isDense,
-      // A collapsed decoration is the bare input: desktop's compact density
-      // must not shrink it. Flutter's layout already ignores the density
-      // there, but the intrinsic height (which sizes a field that hugs its
-      // height) subtracts it, cutting 8 px off a multi-line field.
-      visualDensity: isCollapsed ? VisualDensity.standard : null,
+      // The design sets the field's size through its content padding, text
+      // style and line limits, so the platform's density must not change it:
+      // desktop's (and so the web app's and the design canvas's) compact
+      // density took 8 px off every field, a hugging one-line field with
+      // 11 px padding around 16 px x 1.35 text measuring 35.6 instead of
+      // 43.6. Flutter's layout ignores the density for a collapsed field, but
+      // its intrinsic height (which sizes a field that hugs its height) still
+      // subtracts it.
+      visualDensity: VisualDensity.standard,
       // The decoration's own content padding wins over the node's padding,
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
       contentPadding:
