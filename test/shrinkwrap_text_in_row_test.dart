@@ -114,4 +114,50 @@ void main() {
     expect(identical(paragraph(), before), isFalse);
     expect(paragraph().size.width, 15 * 14);
   });
+
+  for (final bool softWrap in [false, true]) {
+    testWidgets('a row short of room ${softWrap ? 'wraps' : 'keeps whole'} '
+        'a text that ${softWrap ? 'wraps' : 'stays on one line'}', (
+      tester,
+    ) async {
+      // A crayon button face: an icon and a one-line label that together
+      // are wider than the face (as the reference's 'Try again' in a
+      // two-button row): Flutter's Row lets the label overflow whole.
+      final label = TextNode(
+        id: 'label',
+        name: 'label',
+        basicBoxLocal: NodeBox(0, 0, 126, 14),
+        data: 'Try again',
+        softWrap: softWrap,
+        horizontalFit: SizeFit.shrinkWrap,
+        verticalFit: SizeFit.shrinkWrap,
+        textMixedProps: [StartEndProp(start: 0, end: 9, fontSize: 14)],
+      );
+      final icon = rect('icon', 'face', width: 22, height: 22);
+      final face = flex(
+        'face',
+        kRootNode,
+        [icon, label],
+        type: RowColumnType.row,
+        width: 100,
+        height: 50,
+      );
+      await pump(
+        tester,
+        face,
+        [icon, label],
+        screen: const Size(1440, 900),
+        host: Host.tight,
+        overflows: !softWrap,
+      );
+      // Ahem: every glyph is as wide as the font size. A text that wraps
+      // shares the squeeze with the icon, down to its longest word at most.
+      final double width = paragraphWidth(tester, 'Try again');
+      if (softWrap) {
+        expect(width, inInclusiveRange(5 * 14, 9 * 14 - 1));
+      } else {
+        expect(width, 9 * 14);
+      }
+    });
+  }
 }

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -603,16 +604,35 @@ class _ToastViewState extends State<_ToastView> {
         alwaysIncludeSemantics: true,
         duration: _fade,
         child: AnimatedSlide(
-          offset: _visible ? Offset.zero : Offset(0, top ? -0.25 : 0.25),
+          offset: _visible
+              ? Offset.zero
+              : Offset(0, top ? -action.enterOffset : action.enterOffset),
           duration: _fade,
-          curve: Curves.easeOutCubic,
+          // Coming in on the action's curve (a sticky note dropping in on
+          // easeOutBack); going out eases as before.
+          curve: _visible
+              ? flutterCurveOf(
+                  MotionCurve.values
+                          .where((c) => c.name == action.enterCurve)
+                          .firstOrNull ??
+                      MotionCurve.easeOutCubic,
+                )
+              : Curves.easeOutCubic,
           child: Align(
             alignment: switch (alignment) {
               'start' => Alignment.centerLeft,
               'end' => Alignment.centerRight,
               _ => Alignment.center,
             },
-            child: Material(type: MaterialType.transparency, child: toast),
+            child: Material(
+              type: MaterialType.transparency,
+              child: action.rotation == 0
+                  ? toast
+                  : Transform.rotate(
+                      angle: action.rotation * math.pi / 180,
+                      child: toast,
+                    ),
+            ),
           ),
         ),
       ),
