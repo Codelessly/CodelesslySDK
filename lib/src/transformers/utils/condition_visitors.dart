@@ -160,6 +160,9 @@ class ConditionVariablesVisitor
   Set<String>? visitHapticAction(HapticAction action) => {};
 
   @override
+  Set<String>? visitPaginateAction(PaginateAction action) => {};
+
+  @override
   Set<String>? visitScrollToAction(ScrollToAction action) => {};
 
   @override
@@ -290,6 +293,9 @@ class ConditionNodesVisitor
 
   @override
   String? visitHapticAction(HapticAction action) => null;
+
+  @override
+  String? visitPaginateAction(PaginateAction action) => null;
 
   @override
   String? visitScrollToAction(ScrollToAction action) => null;

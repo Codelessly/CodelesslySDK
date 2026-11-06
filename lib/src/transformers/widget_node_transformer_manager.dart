@@ -551,6 +551,68 @@ abstract class WidgetNodeTransformerManager
     return NodeMotion(motion: motion, animate: animate, child: widget);
   }
 
+  /// Makes [node] a two-sided card when it has a [BaseNode.flip] (see
+  /// [NodeFlip]): reads `flip.flipped` from its bindings and follows the
+  /// flip's variable. Faces are drawn by [applyFlipFace].
+  Widget applyFlip(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    ScopedValues? scopedValues,
+    bool animate = true,
+  }) {
+    final FlipModel? flip = node.flip;
+    if (flip == null) return widget;
+    final ScopedValues values = scopedValues ?? ScopedValues.of(context);
+    bool flipped = flip.flipped;
+    if (node.variables.containsKey(FlipModel.flippedKey)) {
+      final Object? bound = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        FlipModel.flippedKey,
+        scopedValues: values,
+      );
+      flipped = bound is bool
+          ? bound
+          : '$bound'.trim().toLowerCase() == 'true';
+    }
+    final ValueNotifier<VariableData>? variable = flip.variable.isEmpty
+        ? null
+        : context.read<CodelesslyContext?>()?.findVariableByName(
+            flip.variable,
+          );
+    final List<String> faces = node is ChildrenMixin
+        ? node.children
+        : const [];
+    return NodeFlip(
+      nodeId: node.id,
+      faces: faces,
+      flip: flip,
+      motion: node.motion,
+      flipped: flipped,
+      variable: variable,
+      animate: animate,
+      child: widget,
+    );
+  }
+
+  /// Draws [node] as the front (its first child) or the back (its second)
+  /// of the flip card it is in, if any.
+  Widget applyFlipFace(BuildContext context, BaseNode node, Widget widget) =>
+      FlipFaceScope.wrapFace(context, node, widget);
+
+  /// Tilts [node] toward the pointer when it has a [BaseNode.tilt] (see
+  /// [NodeTilt]).
+  Widget applyTilt(
+    BuildContext context,
+    BaseNode node,
+    Widget widget, {
+    bool enabled = true,
+  }) {
+    final TiltModel? tilt = node.tilt;
+    if (tilt == null) return widget;
+    return NodeTilt(tilt: tilt, enabled: enabled, child: widget);
+  }
+
   /// Wraps [widget] in a [Hero] when [node] is a shared element: it has a
   /// hero tag ([BaseNode.heroTag] or a `heroTag` binding) that resolves to
   /// non-empty text with [scopedValues] (by default those of [context]),
