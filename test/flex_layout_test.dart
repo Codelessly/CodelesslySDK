@@ -82,7 +82,8 @@ List<BaseNode> collect(BaseNode root, Map<String, BaseNode> byId) => [
 ];
 
 /// Pumps [root] (whose descendants are [nodes]) at [screen] in [host] and
-/// returns each node's size. Fails on any Flutter error.
+/// returns each node's size. Fails on any Flutter error but, with
+/// [overflows], a Row/Column overflow (as Flutter's own Row reports).
 Future<Map<String, Size>> pump(
   WidgetTester tester,
   BaseNode root,
@@ -91,6 +92,7 @@ Future<Map<String, Size>> pump(
   required Host host,
   CodelesslyContext? codelesslyContext,
   NodeBuildDecorator? decorator,
+  bool overflows = false,
 }) async {
   tester.view.physicalSize = screen;
   tester.view.devicePixelRatio = 1;
@@ -130,7 +132,11 @@ Future<Map<String, Size>> pump(
     ),
   );
   final Object? error = tester.takeException();
-  expect(error, isNull, reason: '$host at $screen: $error');
+  if (overflows) {
+    expect('$error', contains('overflowed'), reason: '$host at $screen');
+  } else {
+    expect(error, isNull, reason: '$host at $screen: $error');
+  }
   return {
     for (final node in [root, ...nodes])
       if (rectOf(node.id).evaluate().isNotEmpty)

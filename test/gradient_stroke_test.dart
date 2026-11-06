@@ -24,8 +24,9 @@ void main() {
     );
     final widgets = buildStrokes(node, ScopedValues.empty());
     expect(widgets, hasLength(1));
-    final painter = ((widgets.single as Positioned).child as CustomPaint)
-        .painter as StrokePainter;
+    final painter =
+        ((widgets.single as Positioned).child as CustomPaint).painter
+            as StrokePainter;
     expect(painter.gradient, isA<SweepGradient>());
   });
 }

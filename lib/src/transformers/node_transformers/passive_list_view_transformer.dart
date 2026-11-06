@@ -167,6 +167,21 @@ class PassiveListViewWidget extends StatelessWidget {
         fit: OverflowBoxFit.deferToChild,
         child: flex,
       );
+      // Items laid out unbounded along the scroll axis still read the
+      // list's extent there as `${parent}`, and a `widthFactor` item takes
+      // a fraction of it, as on the design canvas.
+      final Widget unbounded = flex;
+      final NodeTransformerManager manager = this.manager;
+      final BaseNode? template =
+          node.children.isEmpty || manager is! WidgetNodeTransformerManager
+          ? null
+          : manager.tryGetNode(node.children.first);
+      flex = ParentExtentScope.around(
+        parent: node,
+        children: [?template],
+        fallbackSize: node.innerBoxLocal.size.flutterSize,
+        child: (_) => unbounded,
+      );
     }
     flex = Padding(padding: node.padding.flutterEdgeInsets, child: flex);
     return FitBox(
@@ -225,6 +240,16 @@ class PassiveListViewWidget extends StatelessWidget {
         : math.max(0, bound.toDouble());
   }
 
+  /// The axis a wrapping list's items flow along: its scroll direction,
+  /// except that a vertical list whose height hugs its content flows in rows.
+  /// A vertical run with no height limit never wraps, so `wrap` did nothing
+  /// and the items (chips, say) stood in one column.
+  Axis get wrapAxis =>
+      node.scrollDirection == AxisC.vertical &&
+          node.verticalFit == SizeFit.shrinkWrap
+      ? Axis.horizontal
+      : node.scrollDirection.flutterAxis;
+
   Widget wrappedList(
     BuildContext context,
     int itemCount,
@@ -239,7 +264,7 @@ class PassiveListViewWidget extends StatelessWidget {
       padding: node.padding.flutterEdgeInsets,
       child: stretchesItems
           ? RunStretchWrap(
-              direction: node.scrollDirection.flutterAxis,
+              direction: wrapAxis,
               spacing: wrapSpacingOf(context, listWrapSpacing(node)),
               runSpacing: math.max(0, node.properties.runSpacing),
               alignment: wrapAlignmentOf(context),
@@ -247,7 +272,7 @@ class PassiveListViewWidget extends StatelessWidget {
               children: ordered,
             )
           : Wrap(
-              direction: node.scrollDirection.flutterAxis,
+              direction: wrapAxis,
               alignment: wrapAlignmentOf(context),
               spacing: wrapSpacingOf(context, listWrapSpacing(node)),
               runSpacing: math.max(0, node.properties.runSpacing),
@@ -376,6 +401,7 @@ class PassiveListViewWidget extends StatelessWidget {
         item: item,
         scrollDirection: node.scrollDirection,
         itemExtent: node.properties.itemExtent,
+        stretch: stretchesItems,
         child: child,
       );
     }
@@ -403,7 +429,7 @@ class PassiveListViewWidget extends StatelessWidget {
       node,
       count: count,
       values: values,
-      scope: ScopedValues.of(context),
+      scope: VariablePreview.bindingScopeOf(node, context, settings),
       firstOnTop: firstOnTop,
     );
   }
@@ -416,7 +442,7 @@ class PassiveListViewWidget extends StatelessWidget {
   ) => WrappedItems(
     itemCount: itemCount,
     itemBuilder: builder,
-    direction: node.scrollDirection.flutterAxis,
+    direction: wrapAxis,
     spacing: wrapSpacingOf(context, node.properties.wrapSpacing),
     runSpacing: node.properties.wrapRunSpacing,
     alignment: wrapAlignmentOf(context),
@@ -707,7 +733,7 @@ class PassiveListViewWidget extends StatelessWidget {
     final List? data =
         PropertyValueDelegate.getVariableValueFromPath<List>(
           node.variables['data'] ?? '',
-          scopedValues: ScopedValues.of(context),
+          scopedValues: VariablePreview.bindingScopeOf(node, context, settings),
         ) ??
         (node.variables['data'] != null ? [] : null);
 
@@ -779,6 +805,7 @@ class PassiveListViewWidget extends StatelessWidget {
                   index: index,
                   value: data?.elementAtOrNull(index),
                   axis: node.scrollDirection.flutterAxis,
+                  wraps: listWraps(node),
                   child: child,
                 );
               }
@@ -803,22 +830,37 @@ class PassiveListViewWidget extends StatelessWidget {
     // item changes index (a list reuses items by index, and the dragged item
     // must keep its state), or after the last item.
     final int? slotAt = target?.slotBefore?.clamp(0, itemCount ?? 0);
+    final bool wraps = listWraps(node);
     Widget slot(BuildContext context) => target!.buildSlot(
       context,
       node.scrollDirection.flutterAxis,
-      (context, id) => manager.buildWidgetByID(
-        id,
-        context,
-        settings: const WidgetBuildSettings(
-          debugLabel: 'drop slot',
-          withReactions: false,
-          withVisibility: false,
+      (context, id) => ShownAnyway(
+        nodeId: id,
+        child: Builder(
+          builder: (context) => manager.buildWidgetByID(
+            id,
+            context,
+            settings: const WidgetBuildSettings(
+              debugLabel: 'drop slot',
+              withReactions: false,
+            ),
+          ),
         ),
       ),
+      wraps: wraps,
     );
+    // The data's own count: [itemCount] grows by one below for a slot after
+    // the last item, and this closure must not see that.
+    final int? dataCount = itemCount;
     Widget itemBuilder(BuildContext context, int index) {
       if (slotAt == null) return dataItemBuilder(context, index);
-      if (index == itemCount) return slot(context);
+      // A wrapping list builds every item up front by its data index, so
+      // the slot can be a cell of its own that the lines reflow around.
+      if (wraps) {
+        if (index == slotAt) return slot(context);
+        return dataItemBuilder(context, index > slotAt ? index - 1 : index);
+      }
+      if (index == dataCount) return slot(context);
       if (index != slotAt) return dataItemBuilder(context, index);
       return Flex(
         direction: node.scrollDirection.flutterAxis,
@@ -862,7 +904,7 @@ class PassiveListViewWidget extends StatelessWidget {
       itemBuilder: builder,
     );
 
-    if (slotAt != null && itemCount != null && slotAt == itemCount) {
+    if (slotAt != null && itemCount != null && (wraps || slotAt == itemCount)) {
       itemCount = itemCount + 1;
     }
 
@@ -1086,9 +1128,18 @@ class PassiveListViewWidget extends StatelessWidget {
 
     // Nested in another scroll view, the list is bounded by its own fit or
     // shrink-wraps; see [ViewportLayout].
+    // Items are laid out unbounded along the scroll axis; they read the
+    // list's padded extent there as `${parent}`, and a `widthFactor` item
+    // (a chart's bar slot) takes a fraction of it, as on the design canvas.
     return box(
       canShrinkWrap: itemCount != null,
-      (context, shrinkWrap) => list(shrinkWrap, itemCount, itemBuilder),
+      (context, shrinkWrap) => ParentExtentScope.around(
+        parent: node,
+        children: [item],
+        fallbackSize: node.outerBoxLocal.size.flutterSize,
+        padding: node.padding.flutterEdgeInsets,
+        child: (_) => list(shrinkWrap, itemCount, itemBuilder),
+      ),
     );
   }
 }
@@ -1179,6 +1230,28 @@ class StackedListItems extends StatelessWidget {
     return fraction.toDouble().clamp(0, 1) * extent - anchor * size;
   }
 
+  /// How an item of a stacked list eases to a new place when its bound
+  /// position changes: its [BaseNode.sizeTransition] (which also eases its
+  /// size), else its style [BlendMixin.transition], else its
+  /// [BaseNode.transitionMs] with an ease-out cubic. Null jumps.
+  static NodeTransition? positionTransitionOf(BaseNode item) {
+    for (final NodeTransition? transition in [
+      item.sizeTransition,
+      if (item case final BlendMixin blend) blend.transition,
+    ]) {
+      if (transition != null && transition.duration > Duration.zero) {
+        return transition;
+      }
+    }
+    if (item.transitionMs > 0) {
+      return NodeTransition(
+        durationMillis: item.transitionMs,
+        curve: TransitionCurve.easeOutCubic,
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Items placed by a fraction of the list need its size.
@@ -1208,7 +1281,7 @@ class StackedListItems extends StatelessWidget {
             node,
             count: values.length,
             values: (index) => values[index],
-            scope: ScopedValues.of(context),
+            scope: VariablePreview.bindingScopeOf(node, context, settings),
           )
         : null;
     final Widget stack = Stack(
@@ -1228,36 +1301,63 @@ class StackedListItems extends StatelessWidget {
             child: _StackedItem(
               listenables: listenables,
               builder: (context) {
-                final ScopedValues scope = ScopedValues.of(context);
-                return Positioned(
-                  key: arrangement == null
-                      ? ValueKey('stacked item $index')
-                      : listItemKey(arrangement.keyOf(index), 'positioned'),
-                  left:
-                      (size == null
-                          ? null
-                          : fractionOffsetOf(
-                              item,
-                              'positionX',
-                              size.width,
-                              scope,
-                            )) ??
-                      offsetOf(item, node, 'x', scope),
-                  top:
-                      (size == null
-                          ? null
-                          : fractionOffsetOf(
-                              item,
-                              'positionY',
-                              size.height,
-                              scope,
-                            )) ??
-                      offsetOf(item, node, 'y', scope),
-                  child: manager.buildWidgetByID(
-                    item.id,
-                    context,
-                    settings: settings,
-                  ),
+                final ScopedValues scope = VariablePreview.bindingScopeOf(
+                  item,
+                  context,
+                  settings,
+                );
+                final NodeTransition? move = positionTransitionOf(item);
+                final Key key = arrangement == null
+                    ? ValueKey('stacked item $index')
+                    : listItemKey(arrangement.keyOf(index), 'positioned');
+                final double left =
+                    (size == null
+                        ? null
+                        : fractionOffsetOf(
+                            item,
+                            'positionX',
+                            size.width,
+                            scope,
+                          )) ??
+                    offsetOf(item, node, 'x', scope);
+                final double top =
+                    (size == null
+                        ? null
+                        : fractionOffsetOf(
+                            item,
+                            'positionY',
+                            size.height,
+                            scope,
+                          )) ??
+                    offsetOf(item, node, 'y', scope);
+                final Widget child = manager.buildWidgetByID(
+                  item.id,
+                  context,
+                  settings: settings,
+                );
+                if (move == null) {
+                  return Positioned(
+                    key: key,
+                    left: left,
+                    top: top,
+                    child: child,
+                  );
+                }
+                // An item with a transition eases to its new place (a lamp
+                // moved to another spot); where motion is off (the design
+                // canvas, its captures) it jumps.
+                return AnimatedPositioned(
+                  key: key,
+                  duration: NodeMotionScope.animatesAt(context)
+                      ? implicitTransitionDuration(
+                          context,
+                          move.duration.inMilliseconds,
+                        )
+                      : Duration.zero,
+                  curve: move.curve.flutterCurve,
+                  left: left,
+                  top: top,
+                  child: child,
                 );
               },
             ),
