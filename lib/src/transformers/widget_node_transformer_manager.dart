@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
@@ -1885,7 +1886,7 @@ class SvgIcon extends StatelessWidget {
       return SizedBox.square(dimension: dimension);
     }
 
-    final Widget svg = SizedBox.square(
+    Widget svg = SizedBox.square(
       dimension: dimension,
       child: SvgPicture.network(
         url,
@@ -1896,6 +1897,15 @@ class SvgIcon extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
       ),
     );
+    // Flutter's Icon draws a Material icon as a glyph of the MaterialIcons
+    // font, whose baseline (the box's bottom: the font's ascent is its em,
+    // its descent 0) the rasterizer rounds to a whole device pixel; the SVG
+    // would sit where its box is, half a pixel off (higher) wherever the
+    // box lands between pixels. Snapped the same way, an icon node of size
+    // S paints like Icon(size: S).
+    if (icon is MaterialIcon) {
+      svg = PixelSnappedBaseline(child: svg);
+    }
     // A directional icon (arrow_back, chevron_right, ...) points the other
     // way in a right-to-left layout, as Flutter's glyph of the same name
     // does, so an icon drawn from its SVG agrees with one drawn from the font.
@@ -1903,6 +1913,61 @@ class SvgIcon extends StatelessWidget {
             Directionality.maybeOf(context) == TextDirection.rtl
         ? Transform.flip(flipX: true, child: svg)
         : svg;
+  }
+}
+
+/// Paints [child] moved down (or up) by less than a device pixel so that its
+/// bottom edge lands on a whole device pixel, as text rasterization places a
+/// glyph's baseline (Skia rounds it to the pixel grid on axis-aligned text):
+/// a vector drawn in place of a font glyph whose baseline is the box's
+/// bottom (a Material icon) then paints where the glyph would. Layout and
+/// hit testing are unchanged. Under a rotation or skew, where glyphs aren't
+/// snapped, it paints in place.
+class PixelSnappedBaseline extends SingleChildRenderObjectWidget {
+  const PixelSnappedBaseline({super.key, super.child});
+
+  @override
+  RenderPixelSnappedBaseline createRenderObject(BuildContext context) =>
+      RenderPixelSnappedBaseline();
+}
+
+/// The render object of [PixelSnappedBaseline].
+class RenderPixelSnappedBaseline extends RenderProxyBox {
+  RenderPixelSnappedBaseline();
+
+  /// How far (in this box's logical pixels, down positive) the child is
+  /// painted from its place so that this box's [bottom] edge, mapped to
+  /// device pixels by [transform] (this box's paint transform to the
+  /// screen, the device pixel ratio included), lands on a whole device
+  /// pixel: the nearest one, a half rounding down the screen as Skia rounds
+  /// a glyph's baseline. 0 under a rotation, skew or perspective.
+  @visibleForTesting
+  static double snapShift(Matrix4 transform, double bottom) {
+    if (transform.entry(0, 1) != 0 ||
+        transform.entry(1, 0) != 0 ||
+        transform.entry(3, 0) != 0 ||
+        transform.entry(3, 1) != 0 ||
+        transform.entry(3, 3) != 1) {
+      return 0;
+    }
+    final double scale = transform.entry(1, 1);
+    if (scale <= 0 || !scale.isFinite) return 0;
+    final double y = scale * bottom + transform.entry(1, 3);
+    if (!y.isFinite) return 0;
+    final double shift = (y + 0.5).floorToDouble() - y;
+    return shift / scale;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final RenderBox? child = this.child;
+    if (child == null) return;
+    // Where the bottom edge is on the screen: this box's transform to the
+    // root, which includes every layer offset above it and the device
+    // pixel ratio.
+    double shift = snapShift(getTransformTo(null), size.height);
+    if (shift.abs() < 1e-6) shift = 0;
+    context.paintChild(child, offset + Offset(0, shift));
   }
 }
 

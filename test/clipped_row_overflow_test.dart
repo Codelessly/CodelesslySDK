@@ -13,12 +13,16 @@ import 'package:provider/provider.dart';
 // edge, as the reference does (4 chips of 96 px, 10 px apart), with no yellow "RIGHT OVERFLOWED" stripes
 // (debug builds, and so the editor's captures) and no overflow error.
 
-RowColumnNode _chips({required bool clips, required String parentID}) =>
-    RowColumnNode(
+RowColumnNode _chips({
+  required bool clips,
+  required String parentID,
+  MainAxisAlignmentC main = MainAxisAlignmentC.center,
+}) => RowColumnNode(
       id: 'chips',
       name: 'Chips',
       basicBoxLocal: NodeBox(0, 0, 350, 30),
       rowColumnType: RowColumnType.row,
+      mainAxisAlignment: main,
       horizontalFit: SizeFit.expanded,
       verticalFit: SizeFit.fixed,
       spacing: 10,
@@ -58,12 +62,13 @@ RowColumnNode _slot() => RowColumnNode(
 Future<(ByteData, int)> _paint(
   WidgetTester tester, {
   required bool clips,
+  MainAxisAlignmentC main = MainAxisAlignmentC.center,
 }) async {
   final RowColumnNode slot = _slot();
   final registry = NodeRegistry()
     ..setNodes({
       slot.id: slot,
-      'chips': _chips(clips: clips, parentID: slot.id),
+      'chips': _chips(clips: clips, parentID: slot.id, main: main),
       for (int i = 0; i < 4; i++) ...{'chip$i': _chip(i), 'pulse$i': _pulse(i)},
     });
   final manager = PassiveNodeTransformerManager(
@@ -152,12 +157,37 @@ void main() {
     expect(at(355), greaterThan(200), reason: 'white past the row');
   });
 
-  testWidgets('a row that does not clip still reports its overflow', (
+  late WidgetTester current;
+  Rect chip(int i) => current.getRect(
+    find.byKey(ValueKey('Rectangle Transformer of chip$i [chip$i]')),
+  );
+
+  // As in Flutter's RenderFlex, the main axis' free space is clamped at 0:
+  // whatever the alignment, an overflow starts at the leading edge, and a
+  // row that doesn't clip reports it.
+  for (final MainAxisAlignmentC main in [
+    MainAxisAlignmentC.start,
+    MainAxisAlignmentC.center,
+    MainAxisAlignmentC.end,
+  ]) {
+    testWidgets('a ${main.name} row that does not clip overflows from its '
+        'start and reports it', (tester) async {
+      current = tester;
+      await _paint(tester, clips: false, main: main);
+      final Object? error = tester.takeException();
+      expect(error, isNotNull);
+      expect('$error', contains('overflowed'));
+      expect(chip(0).left, 0);
+      expect(chip(3).right, 414);
+    });
+  }
+
+  testWidgets('a centred row that clips keeps its children at its start', (
     tester,
   ) async {
-    await _paint(tester, clips: false);
-    final Object? error = tester.takeException();
-    expect(error, isNotNull);
-    expect('$error', contains('overflowed'));
+    current = tester;
+    await _paint(tester, clips: true);
+    expect(tester.takeException(), isNull);
+    expect(chip(0).left, 0);
   });
 }
