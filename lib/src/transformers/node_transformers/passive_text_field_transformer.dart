@@ -1259,22 +1259,12 @@ class _PassiveTextFieldWidgetState extends State<PassiveTextFieldWidget>
       floatingLabelBehavior: decoration.floatingLabelBehavior.toFlutter(),
       isCollapsed: isCollapsed,
       isDense: isDense,
-      // A collapsed decoration is the bare input: desktop's compact density
-      // must not shrink it. Flutter's layout already ignores the density
-      // there, but the intrinsic height (which sizes a field that hugs its
-      // height) subtracts it, cutting 8 px off a multi-line field.
-      // Nor any other field: the design sets its size through its
-      // content padding, text style and line limits, so desktop's (and so
-      // the web app's and the design canvas's) compact density took 8 px
-      // off every field, a hugging one-line field with 11 px padding around
-      // 16 px x 1.35 text measuring 35.6 instead of 43.6. A dense, unlabeled
-      // field keeps only the theme's horizontal density.
-      visualDensity: !isCollapsed && isDense && labelText == null
-          ? VisualDensity(
-              horizontal: Theme.of(context).visualDensity.horizontal,
-              vertical: 0,
-            )
-          : VisualDensity.standard,
+      // A design is the same on every platform, so desktop's compact
+      // density (the default on desktop and the web) must not shrink a
+      // field: it took 8 px off a field that hugs its height (a 44 px field
+      // drew 36 on the web and on the editor's canvas), and from the
+      // intrinsic height of a collapsed multi-line one.
+      visualDensity: VisualDensity.standard,
       // The decoration's own content padding wins over the node's padding,
       // which defaults to 12 x 16 for text fields: zero makes a bare input.
       contentPadding:

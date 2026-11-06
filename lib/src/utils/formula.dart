@@ -2119,6 +2119,16 @@ class _Closure {
 // Dates
 // ---------------------------------------------------------------------------
 
+/// Whether ISO text [text] names the year, month and day [parsed] has (it
+/// may not, when its day or month is out of range).
+bool _sameCalendarDay(String text, DateTime parsed) {
+  final RegExpMatch? m = RegExp(r'^([+-]?\d{4,6})-?(\d{2})-?(\d{2})').firstMatch(text);
+  if (m == null) return true;
+  // Text with a zone (Z, +02:00) is converted to local time: compare in UTC.
+  final DateTime d = RegExp(r'(Z|[+-]\d{2}:?\d{2})$').hasMatch(text) ? parsed.toUtc() : parsed;
+  return int.parse(m[1]!) == d.year && int.parse(m[2]!) == d.month && int.parse(m[3]!) == d.day;
+}
+
 /// Reads [value] as a date: a [DateTime], ISO 8601 text, epoch milliseconds,
 /// a Firestore timestamp (anything with `toDate()`), or a timestamp written
 /// as JSON (`{seconds, nanoseconds}` or `{_seconds, _nanoseconds}`).
@@ -2138,9 +2148,11 @@ DateTime? _toDate(Object? value) {
       if (millis != null && text.length > 8) {
         return DateTime.fromMillisecondsSinceEpoch(millis);
       }
-      final DateTime? iso = DateTime.tryParse(text);
-      if (iso != null) return _realIsoDate(text, iso) ? iso : null;
-      return _typedDate(text);
+      final DateTime? parsed = DateTime.tryParse(text);
+      // DateTime.parse rolls an impossible day over ("2013-02-30" is March
+      // 2): such text is no date, so it never equals a real one.
+      if (parsed != null && !_sameCalendarDay(text, parsed)) return null;
+      return parsed ?? _typedDate(text);
     case Map():
       final Object? seconds = value['seconds'] ?? value['_seconds'];
       if (seconds is! num) return null;
@@ -2223,20 +2235,6 @@ bool _isDateLike(Object? value) {
   } catch (_) {
     return false;
   }
-}
-
-/// Whether [parsed] (what [DateTime.tryParse] made of [text]) is the date
-/// [text] names: `2026-02-30` parses, rolled over to 2 March, but is no
-/// real date, so it doesn't equal `2026-03-02`.
-bool _realIsoDate(String text, DateTime parsed) {
-  final RegExpMatch? m = RegExp(r'^[+-]?(\d{4,6})-?(\d\d)-?(\d\d)')
-      .firstMatch(text);
-  if (m == null) return true;
-  final int month = int.parse(m[2]!);
-  final int day = int.parse(m[3]!);
-  if (month < 1 || month > 12 || day < 1) return false;
-  final int lastDay = DateTime.utc(int.parse(m[1]!), month + 1, 0).day;
-  return day <= lastDay;
 }
 
 /// [a] and [b] as dates when one is a date (see [_isDateLike]) and the other
@@ -3812,17 +3810,30 @@ class _Parser {
   }
 
   /// The quoted text at [pos], without its quotes: a backslash before the
-  /// quote (`'Won\'t'`) keeps the quote in the text; other backslashes are
-  /// kept as written.
+  /// quote (`'Won\'t'`) keeps the quote in the text; `\n`, `\t` and `\r`
+  /// are a newline, a tab and a carriage return (multi-line text such as a
+  /// lineup to paste into a chat); a doubled backslash and other
+  /// backslashes are kept as written, so regex patterns (`'\d+'`) read as
+  /// before.
   String _quotedText() {
     final String quote = source[pos];
     final StringBuffer text = StringBuffer();
     int i = pos + 1;
     while (i < source.length && source[i] != quote) {
-      if (source[i] == r'\' &&
-          i + 1 < source.length &&
-          source[i + 1] == quote) {
-        i++;
+      if (source[i] == r'\' && i + 1 < source.length) {
+        final String next = source[i + 1];
+        if (next == quote) {
+          i++;
+        } else if (next == r'\') {
+          text.write(r'\\');
+          i += 2;
+          continue;
+        } else if (const {'n': '\n', 't': '\t', 'r': '\r'}[next]
+            case final String control) {
+          text.write(control);
+          i += 2;
+          continue;
+        }
       }
       text.write(source[i]);
       i++;
