@@ -108,18 +108,16 @@ void main() {
     );
   });
 
-  testWidgets('a dense field that is not collapsed keeps the theme density '
-      'but what its padding can not give', (tester) async {
+  testWidgets('a dense field that is not collapsed is not shrunk by the '
+      'theme density', (tester) async {
     await _pump(tester, _note(collapsed: false), VisualDensity.compact);
-    // No content padding to take the compact -8 px from: Flutter lays the
-    // field out at its lines anyway, and its intrinsic height (which it
-    // hugs) now says so too.
+    // A design is the same on every platform: no density on desktop.
     expect(
       tester
           .widget<TextField>(find.byType(TextField))
           .decoration!
           .visualDensity,
-      const VisualDensity(horizontal: -2, vertical: 0),
+      VisualDensity.standard,
     );
     expect(
       tester.getSize(find.byType(TextField)).height,
@@ -127,7 +125,7 @@ void main() {
     );
   });
 
-  testWidgets('a field that is not dense keeps the theme density', (
+  testWidgets('a field that is not dense is not shrunk by the theme density either', (
     tester,
   ) async {
     final TextFieldNode note = _note(collapsed: false);
@@ -140,7 +138,7 @@ void main() {
           .widget<TextField>(find.byType(TextField))
           .decoration!
           .visualDensity,
-      isNull,
+      VisualDensity.standard,
     );
   });
 }

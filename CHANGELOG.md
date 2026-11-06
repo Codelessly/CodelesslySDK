@@ -1,3 +1,37 @@
+## Unreleased
+
+- Transitions (needs the unreleased `codelessly_api` with `RouteTransition`; see `CodelesslyEditor/docs/transitions_api.md`):
+  - `CodelesslyRouteTransitionRoute` plays a `RouteTransition` on both screens.
+    - The screen it covers moves through Flutter's `delegatedTransition`.
+    - Pops reverse, or play the pop sides.
+    - Reveals grow from the tap point or the tapped node.
+  - Modals (dialogs, sheets, full screen) opened with a `routeTransition` are page routes, so shared elements fly into and out of them. The route's barrier colour applies.
+  - A drag can close a route interactively:
+    - `dismiss` (swipe down to dismiss);
+    - iOS swipe back (`swipeBack`).
+    The drag moves the route's progress, heroes follow the finger, and the release completes or cancels with a spring. It goes through the provisional `TransitionPhysics` adapter until the Gestures shared physics model lands.
+  - Hero fixes and new flights:
+    - Heroes fly during back gestures (`transitionOnUserGestures`).
+    - New flights: `morph`, `fadeThrough` and `containerTransform`; `arc` flights also arrive from a drag.
+    - A destination network image that hasn't loaded yet flies over its source instead of as an empty box.
+    - `heroPlaceholder: source` keeps the source drawn until the destination loads.
+    - Heroes in a hidden cloud-list variant don't fly.
+    - A router nested under another navigator gets its own hero controller.
+  - Flip cards (`NodeFlip`): tap, a variable, a `flip.flipped` binding, or a drag that settles on the nearer face.
+  - Tilt and parallax (`NodeTilt`).
+  - Page view `pageMotion` for coverflow, cube and 3D carousel (`PageMotionItem`).
+  - New predefined variables: `flip`, `tilt` and `pageOffset`.
+- `motion.arc`: bound positions move along a curve (a formation change
+  sweeping every player to their new spot).
+- An entrance replays from values it names at their defaults
+  (`enterFrom: {opacity: 1}`): fade-out trails on replay.
+- Impossible days (`2013-02-30`) are not read as dates.
+- Quoted formula text reads `\n`, `\t` and `\r`.
+- Text fields use standard visual density on every platform: desktop's
+  compact density (also the web's) took 8 px off a padded field that hugs
+  its height, so the editor's canvas and desktop browsers drew it shorter
+  than phones did.
+
 ## 9.3.2
 
 Requires codelessly_api 9.3.0.

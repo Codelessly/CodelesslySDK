@@ -27,6 +27,9 @@ const Set<String> predefinedVariableNames = {
   'track',
   'speech',
   'initial',
+  'flip',
+  'tilt',
+  'pageOffset',
   // Which variables an Animate variable action is playing now:
   // `${animating.sunriseT}` (see VariableAnimator.playingIn).
   'animating',
@@ -85,6 +88,9 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'track', type: VariableType.map),
   PredefinedVariableData(name: 'speech', type: VariableType.map),
   PredefinedVariableData(name: 'initial', type: VariableType.map),
+  PredefinedVariableData(name: 'flip', type: VariableType.map),
+  PredefinedVariableData(name: 'tilt', type: VariableType.map),
+  PredefinedVariableData(name: 'pageOffset', type: VariableType.decimal),
   PredefinedVariableData(name: 'animating', type: VariableType.map),
 };
 
