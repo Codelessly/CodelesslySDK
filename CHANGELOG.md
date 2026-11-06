@@ -1,3 +1,11 @@
+## Unreleased
+
+### Fixed
+
+- A project variable named like a built-in added in a later release
+  (`animating`, `script`, `speech`, `initial`, `hold`) is read as the
+  project's own variable, not the built-in.
+
 ## 10.0.1
 
 ### Fixed

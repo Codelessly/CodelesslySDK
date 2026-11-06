@@ -883,7 +883,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       final Set<String> expanded = {...paths};
       for (final String path in paths) {
         final match = VariableMatch.parse(path.wrapWithVariableSyntax());
-        if (match == null || match.isPredefinedVariable) continue;
+        if (match == null || _readsBuiltin(match, codelesslyContext)) continue;
         final deps = PropertyValueDelegate.computedDependencies(
           match.name,
           variablesByName,
@@ -900,7 +900,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
-      if (match.isPredefinedVariable) {
+      if (_readsBuiltin(match, codelesslyContext)) {
         // If variable is not listenable or doesn't need to create a listenable,
         // skip it.
         if (!predefinedListenableVariableNames.contains(match.name)) continue;
@@ -949,7 +949,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       final match = VariableMatch.parse(variablePath.wrapWithVariableSyntax());
       if (match == null) continue;
 
-      if (match.isPredefinedVariable) {
+      if (_readsBuiltin(match, codelesslyContext)) {
         // If variable is not listenable or doesn't need to create a listenable,
         // skip it.
         if (!predefinedListenableVariableNames.contains(match.name)) continue;
@@ -1083,7 +1083,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       final VariableMatch? match = VariableMatch.parse(
         path.wrapWithVariableSyntax(),
       );
-      if (match == null || match.isPredefinedVariable) continue;
+      if (match == null || _readsBuiltin(match, codelesslyContext)) continue;
       yield* variableListenables(codelesslyContext, match.name, seen);
     }
   }
@@ -1348,3 +1348,11 @@ List<String> inlineTextTemplatesOf(BaseNode node) {
   }
   return templates;
 }
+
+/// Whether [match] reads a built-in variable rather than a project variable
+/// of the same name (see [PropertyValueDelegate.shadowableBuiltins]): a
+/// node bound to a project's own `animating` listens to that variable.
+bool _readsBuiltin(VariableMatch match, CodelesslyContext codelesslyContext) =>
+    match.isPredefinedVariable &&
+    !(PropertyValueDelegate.shadowableBuiltins.contains(match.name) &&
+        codelesslyContext.findVariableByName(match.name) != null);
