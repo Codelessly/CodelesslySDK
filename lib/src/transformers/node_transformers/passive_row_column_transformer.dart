@@ -178,6 +178,23 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       children: childrenWidgets,
     );
 
+    // A child sized by a share of the row/column or reading `parent` (a
+    // progress fill bound to `widthFactor`) would see its own constraints,
+    // unbounded along the main axis, so the row/column gives its content
+    // box itself. A main axis that hugs its children has no box to give.
+    if (mainFit != SizeFit.shrinkWrap &&
+        childrenNodes.any(readsParentSize)) {
+      final Widget flex = res;
+      res = LayoutBuilder(
+        builder: (context, constraints) => FreeformContentSizeScope(
+          parentId: rowColumnNode.id,
+          width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+          height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
+          child: flex,
+        ),
+      );
+    }
+
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
     } else if (hugStretch) {
