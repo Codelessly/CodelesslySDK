@@ -1045,14 +1045,18 @@ abstract class WidgetNodeTransformerManager
       track.variable,
       scopedValues: scopedValues ?? ScopedValues.of(context),
     );
+    // Empty or not a number: parked when the track parks such a value.
+    final double fallback = track.parkedProgress != null
+        ? double.nan
+        : track.defaultValue ?? track.min;
     final double value = switch (raw) {
       num n => n.toDouble(),
-      String s => double.tryParse(s.trim()) ?? track.defaultValue ?? track.min,
-      _ => track.defaultValue ?? track.min,
+      String s => double.tryParse(s.trim()) ?? fallback,
+      _ => fallback,
     };
     return Transform(
       alignment: Alignment.center,
-      transform: DragTrackGeometry(track).poseAt(track.progressOf(value)),
+      transform: DragTrackGeometry(track).poseAt(track.restProgressOf(value)),
       child: widget,
     );
   }
@@ -1060,7 +1064,8 @@ abstract class WidgetNodeTransformerManager
   /// A node with a [DragTrackModel] is a value control: it is drawn at its
   /// variable's place along the track and dragging it writes the variable,
   /// running its `changed` reactions on each change and `dragEnd` on release
-  /// (both with `${result.value}`). See [NodeDragTrack].
+  /// (both with `${result.value}`); a wheel or key step runs both. See
+  /// [NodeDragTrack].
   Widget _wrapWithTrack(
     BuildContext context,
     BaseNode node,
@@ -1097,10 +1102,13 @@ abstract class WidgetNodeTransformerManager
             track.variable,
             scopedValues: ScopedValues.of(context),
           );
+      // Empty or not a number: parked when the track parks such a value.
+      final bool parks = track.parkedProgress != null;
       final double value = switch (raw) {
         num n => n.toDouble(),
-        String s => double.tryParse(s.trim()) ?? track.min,
-        _ => track.defaultValue ?? track.min,
+        String s =>
+          double.tryParse(s.trim()) ?? (parks ? double.nan : track.min),
+        _ => parks ? double.nan : track.defaultValue ?? track.min,
       };
       return NodeDragTrack(
         track: track,
@@ -1123,7 +1131,11 @@ abstract class WidgetNodeTransformerManager
           context,
           TriggerType.dragEnd,
           reactions: reactions,
-          result: {'value': v, 'startValue': start, 'velocity': velocity},
+          result: {
+            'value': v,
+            'startValue': start.isNaN ? null : start,
+            'velocity': velocity,
+          },
         ),
         child: child,
       );
