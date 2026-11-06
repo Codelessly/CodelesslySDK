@@ -159,8 +159,13 @@ class AppToast {
     if (family.isEmpty) return base.copyWith(fontWeight: weight);
     if (GoogleFonts.asMap().containsKey(family)) {
       // The SDK's font resolver selects the loaded face for the requested
-      // weight (including the semibold face) rather than just a family name.
-      final TextStyle? resolved = fontOf(family);
+      // weight (semibold unless the action sets one) rather than just a
+      // family name: a face loaded for another weight would draw at that
+      // weight whatever [TextStyle.fontWeight] says.
+      final TextStyle? resolved = fontOf(
+        family,
+        weight: action.fontWeight ?? FontWeightNumeric.w600,
+      );
       return base.copyWith(
         fontFamily: resolved?.fontFamily,
         fontFamilyFallback: resolved?.fontFamilyFallback,
@@ -225,10 +230,13 @@ class AppToast {
 
   /// The font of [family], e.g. `Barlow`: a Google font or one the app
   /// loaded. Null when [family] is null or empty.
-  static TextStyle? fontOf(String? family) {
+  static TextStyle? fontOf(
+    String? family, {
+    FontWeightNumeric weight = FontWeightNumeric.w600,
+  }) {
     if (family == null || family.trim().isEmpty) return null;
     final TextStyle style = TextUtils.retrieveTextStyle(
-      fontName: FontName(family: family.trim(), weight: FontWeightNumeric.w600),
+      fontName: FontName(family: family.trim(), weight: weight),
     );
     return TextStyle(
       fontFamily: style.fontFamily,
