@@ -1,9 +1,36 @@
-## 9.1.10
+## Unreleased
 
-Requires codelessly_api 9.0.4.
-
-- Path nodes paint gradient fills and strokes (across the node's box) and
-  drop shadows that follow their outline; they painted solid colors only.
+- `SDKPublishModel.appIdentity`: the project's `AppIdentity` (name, title
+  template, description, icons, colors, manifest, splash, mobile) ships in
+  the publish bundle. Bundles without one load as before (null).
+- `CodelesslyAppIdentity` resolves a screen's title and description from
+  the identity (per-page overrides, screen names, the app name), parses its
+  colors and status bar style, and sets the title through
+  `SystemChrome.setApplicationSwitcherDescription` (document.title on web).
+- `CodelesslyAppIdentityUpdater` keeps the title in step with the screen a
+  `CodelesslyRouter` shows, with a callback for the meta description.
+- `SDKPublishModel.withAppIdentity` sets the identity; `copyWith` keeps it
+  (its signature is unchanged, so subclasses that override it still build).
+- Requires the unreleased codelessly_api `AppIdentity`.
+- New package `packages/codelessly_genui`: renders A2UI (agent-generated UI) with the SDK's node transformers. It is not published yet; apps depend on it from git.
+- Requires the unreleased codelessly_api with `genscreen.dart` (for the
+  runtime screen generator below).
+- Runtime screen generation: `RuntimeScreenGenerator` registers the
+  `generateScreen` app function (Call function with `prompt` and `kit`),
+  gets a plan from a `ScreenPlanSource` (`HttpScreenPlanSource` for a host
+  endpoint that holds the key, `ClaudeScreenPlanSource` for trusted
+  builds), validates it with one fix round, compiles it with the kit and
+  opens it (`GeneratedScreenPage`, `GeneratedScreenView`). Plans are cached
+  per prompt and kit fingerprint (`GeneratedScreenCache`, optionally
+  persisted by the host).
+- Speech recognition: built-in `listen` and `stopListening` app functions
+  (Call function; a host function of the same name wins). The `speech`
+  variable gains `canListen`, `listening`, `heard`, `score` (0-100 against
+  the expected text, null until scored), `confidence` and `error`. Web uses
+  the Web Speech API's SpeechRecognition; other platforms report
+  `canListen: false` until the host sets `Speech.recognizer`.
+  `pronunciationScore` is exported.
+- Path nodes also paint gradient strokes (across the node's box).
 - `motion.arc`: bound positions move along a curve (a formation change
   sweeping every player to their new spot).
 - An entrance replays from values it names at their defaults
@@ -15,8 +42,6 @@ Requires codelessly_api 9.0.4.
   controlled: drawn at that value, it only reports drags to its reactions.
 - Impossible days (`2013-02-30`) are not read as dates.
 - A text field's `error` flag draws the error border in its own color.
-- A fractional child of a row or column (along its main axis) takes its
-  share of the row's own size.
 - Quoted formula text reads `\n`, `\t` and `\r`.
 
 ## 9.1.9

@@ -1,0 +1,30 @@
+name: codelessly_genui
+description: Renders A2UI (agent-to-UI) surfaces with the Codelessly SDK, with a Codelessly component catalog for LLM agents and typed user-action events.
+version: 0.1.0
+publish_to: none
+homepage: https://codelessly.com/
+repository: https://github.com/Codelessly/CodelesslySDK/tree/master/packages/codelessly_genui
+
+environment:
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  a2ui_core: ^0.5.0
+  a2ui_flutter: ^0.1.0
+  codelessly_api: ^9.0.3
+  codelessly_sdk: ^9.1.9
+  provider: ^6.1.2
+  json_schema_builder: ^0.1.7
+  intl: ^0.20.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  assets:
+    - catalog/
