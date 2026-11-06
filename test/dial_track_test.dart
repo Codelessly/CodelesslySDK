@@ -134,6 +134,17 @@ void main() {
     expect(settled, [16]);
   });
 
+  testWidgets('a second turn after resting turns again', (t) async {
+    await t.pumpWidget(plate(dial));
+    await arc(t, 0, 144, steps: 40, ms: 40);
+    await t.pumpAndSettle();
+    expect(value, 16);
+    await t.pump(const Duration(seconds: 1));
+    await arc(t, 0, 144, steps: 40, ms: 40);
+    await t.pumpAndSettle();
+    expect(value, 32);
+  });
+
   testWidgets('gain: half the gain turns half as far', (t) async {
     await t.pumpWidget(plate(dial.copyWith(momentum: false), gain: 0.5));
     await arc(t, 0, 144, steps: 40, ms: 40);

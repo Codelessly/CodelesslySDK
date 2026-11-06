@@ -142,7 +142,7 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
 
     // A node that reads `parent` is built with the size its parent gives
     // it, so its bindings can lay it out by that size.
-    if (readsParentSize(node)) {
+    if (readsParentSize(node) && !_parentGivesSize(node)) {
       // Measurable, so a row or column that measures its children (an
       // IntrinsicHeight around a stretching row) can have it inside.
       return MeasurableLayoutBuilder(
@@ -157,6 +157,21 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       );
     }
     return _buildNode(context, node, settings);
+  }
+
+  /// Whether [node]'s parent is a frame or stack, which gives the nodes in
+  /// it its own content box as their `parent` size (a child is placed there
+  /// at its own size, so its constraints would be just that).
+  bool _parentGivesSize(BaseNode node) {
+    if (node.parentID == kRootNode || node.parentID.isEmpty) return false;
+    try {
+      final String type = getNode(node.parentID).type;
+      if (const {'frame', 'stack'}.contains(type)) return true;
+      // A row or column gives its fractional children its content box.
+      return const {'row', 'column'}.contains(type) && hasFractionalSize(node);
+    } catch (_) {
+      return false;
+    }
   }
 
   Widget _buildNode(

@@ -1048,11 +1048,19 @@ abstract class WidgetNodeTransformerManager
     final double? step = read(DragTrackModel.stepVariableKey);
     final bool? momentum = flag(DragTrackModel.momentumVariableKey);
     final bool? smooth = flag(DragTrackModel.smoothVariableKey);
+    final double? x1 = read(DragTrackModel.x1VariableKey);
+    final double? y1 = read(DragTrackModel.y1VariableKey);
+    final double? x2 = read(DragTrackModel.x2VariableKey);
+    final double? y2 = read(DragTrackModel.y2VariableKey);
     if (min == null &&
         max == null &&
         step == null &&
         momentum == null &&
-        smooth == null) {
+        smooth == null &&
+        x1 == null &&
+        y1 == null &&
+        x2 == null &&
+        y2 == null) {
       return track;
     }
     return track.copyWith(
@@ -1061,6 +1069,10 @@ abstract class WidgetNodeTransformerManager
       step: step,
       momentum: momentum,
       smooth: smooth,
+      x1: x1,
+      y1: y1,
+      x2: x2,
+      y2: y2,
     );
   }
 
