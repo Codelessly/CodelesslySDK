@@ -227,7 +227,7 @@ void main() {
       // F alone: the reactions for `f` and for `F`, not Shift+F.
       await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
       await tester.pumpAndSettle();
-      expect('${count0.value.value}', '11');
+      expect(count0.value.value.toString(), '11');
 
       // Shift+F: `f` and `F` again, and Shift+F.
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
@@ -235,8 +235,8 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       await tester.pumpAndSettle();
       expect(
-        '${count0.value.value}',
-        type == TriggerType.keyDown ? '${11 + 111}' : '${11 + 11}',
+        count0.value.value.toString(),
+        type == TriggerType.keyDown ? '122' : '22',
       );
     });
   }
