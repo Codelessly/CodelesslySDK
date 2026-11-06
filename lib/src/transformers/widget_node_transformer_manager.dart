@@ -1030,20 +1030,64 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: values.toMap());
   }
 
+  /// [track], the drag track of [node], with the settings bound in the
+  /// node's variables (`track.min`, `track.max`, `track.step`,
+  /// `track.pixelsPerRange`, line ends `track.x1`..`track.y2`, see
+  /// [DragTrackModel.bindableProperties]) resolved from [scopedValues]: a
+  /// deck whose last card follows the data, `track.max` =
+  /// `${= hive.frames - 1}`. A binding that isn't a finite number keeps the
+  /// saved value.
+  static DragTrackModel resolveTrack(
+    BaseNode node,
+    DragTrackModel track, {
+    required ScopedValues scopedValues,
+  }) {
+    DragTrackModel resolved = track;
+    for (final String property in DragTrackModel.bindableProperties) {
+      final String key = DragTrackModel.variableKey(property);
+      final String? raw = node.variables[key];
+      if (raw == null) continue;
+      // A plain value ("4") is read as it is.
+      final Object? value = raw.contains(r'${')
+          ? PropertyValueDelegate.getPropertyValue<Object>(
+              node,
+              key,
+              scopedValues: scopedValues,
+            )
+          : raw;
+      final double? number = switch (value) {
+        num n => n.toDouble(),
+        String s => double.tryParse(s.trim()),
+        _ => null,
+      };
+      if (number == null || !number.isFinite) continue;
+      resolved = resolved.withValue(property, number);
+    }
+    return resolved;
+  }
+
   /// Draws [node] where its drag track puts it for its variable's value,
   /// without making it draggable: how the design canvas shows a knob or a
-  /// fader cap. Returns [widget] for a node without a track.
+  /// fader cap. The node and its children read the pose as the `track`
+  /// variable, as they do at runtime. Returns [widget] for a node without
+  /// a track.
   Widget applyTrackPose(
     BuildContext context,
     BaseNode node,
     Widget widget, {
     ScopedValues? scopedValues,
   }) {
-    final DragTrackModel? track = node.drag?.track;
-    if (track == null) return widget;
+    final DragTrackModel? saved = node.drag?.track;
+    if (saved == null) return widget;
+    final ScopedValues values = scopedValues ?? ScopedValues.of(context);
+    final DragTrackModel track = resolveTrack(
+      node,
+      saved,
+      scopedValues: values,
+    );
     final Object? raw = PropertyValueDelegate.getVariableValueFromPath<Object>(
       track.variable,
-      scopedValues: scopedValues ?? ScopedValues.of(context),
+      scopedValues: values,
     );
     // Empty or not a number: parked when the track parks such a value.
     final double fallback = track.parkedProgress != null
@@ -1054,10 +1098,14 @@ abstract class WidgetNodeTransformerManager
       String s => double.tryParse(s.trim()) ?? fallback,
       _ => fallback,
     };
+    final double progress = track.restProgressOf(value);
     return Transform(
       alignment: Alignment.center,
-      transform: DragTrackGeometry(track).poseAt(track.restProgressOf(value)),
-      child: widget,
+      transform: DragTrackGeometry(track).poseAt(progress),
+      child: TrackScope(
+        values: TrackValues(value: value, progress: progress),
+        child: widget,
+      ),
     );
   }
 
@@ -1070,14 +1118,14 @@ abstract class WidgetNodeTransformerManager
     BuildContext context,
     BaseNode node,
     DragModel drag,
-    DragTrackModel track,
+    DragTrackModel saved,
     List<Reaction> reactions,
     Widget child,
   ) {
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
-      name: track.variable,
+      name: saved.variable,
     );
     bool enabled(BuildContext context) {
       if (!node.variables.containsKey(DragModel.enabledVariableKey)) {
@@ -1097,10 +1145,17 @@ abstract class WidgetNodeTransformerManager
     }
 
     Widget build(BuildContext context) {
+      final ScopedValues values = ScopedValues.of(context);
+      // Its range may follow data (`track.max` and the like).
+      final DragTrackModel track = resolveTrack(
+        node,
+        saved,
+        scopedValues: values,
+      );
       final Object? raw =
           PropertyValueDelegate.getVariableValueFromPath<Object>(
             track.variable,
-            scopedValues: ScopedValues.of(context),
+            scopedValues: values,
           );
       // Empty or not a number: parked when the track parks such a value.
       final bool parks = track.parkedProgress != null;
