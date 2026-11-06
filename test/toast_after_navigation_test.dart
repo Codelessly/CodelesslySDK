@@ -1,6 +1,4 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'codelessly_router_test.dart' show FakeBrowser, pumpRouterApp, tap;
@@ -46,9 +44,7 @@ void main() {
           'guide': {
             'Save': _save(before ? [toast, replace] : [replace, toast]),
           },
-          'tides': {
-            'ToGuide': _nav(NavigationType.push, 'guide'),
-          },
+          'tides': {'ToGuide': _nav(NavigationType.push, 'guide')},
         },
       );
       final browser = FakeBrowser(tester);
@@ -66,7 +62,9 @@ void main() {
       final NavigationAction pop = _nav(NavigationType.pop, 'tides');
       final model = tidepoolModel(
         buttons: {
-          'guide': {'Save': _save(before ? [toast, pop] : [pop, toast])},
+          'guide': {
+            'Save': _save(before ? [toast, pop] : [pop, toast]),
+          },
           'tides': {'ToGuide': _nav(NavigationType.push, 'guide')},
         },
       );
@@ -85,7 +83,9 @@ void main() {
       final NavigationAction pop = _nav(NavigationType.pop, 'tides');
       final model = tidepoolModel(
         buttons: {
-          'journal': {'Save': _save(before ? [toast, pop] : [pop, toast])},
+          'journal': {
+            'Save': _save(before ? [toast, pop] : [pop, toast]),
+          },
         },
       );
       final browser = FakeBrowser(tester, url: '/journal');
