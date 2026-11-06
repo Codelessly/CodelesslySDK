@@ -10,6 +10,10 @@ const Set<String> kItemExtentProperties = {
   'visible',
   'width',
   'height',
+  // A share of the parent's extent (`${= 1 / 7}` of the list's width).
+  'widthFactor',
+  'heightFactor',
+  'aspectRatio',
   'margin',
   'padding',
   'horizontalFit',
