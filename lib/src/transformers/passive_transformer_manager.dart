@@ -148,12 +148,24 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       return MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
         fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
-        builder: (context, constraints) => ParentSizeScope.fromConstraints(
-          constraints,
-          child: Builder(
-            builder: (context) => _buildNode(context, node, settings),
-          ),
-        ),
+        builder: (context, constraints) {
+          // A fractional child of a row along its main axis gets no bound
+          // from the row: its share is of the row's own size.
+          final FlexExtentScope? flex = hasFractionalSize(node)
+              ? FlexExtentScope.maybeOf(context)
+              : null;
+          return ParentSizeScope(
+            width: constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : flex?.width,
+            height: constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : flex?.height,
+            child: Builder(
+              builder: (context) => _buildNode(context, node, settings),
+            ),
+          );
+        },
       );
     }
     return _buildNode(context, node, settings);

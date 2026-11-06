@@ -51,6 +51,35 @@ class ParentSizeScope extends InheritedWidget {
       width != oldWidget.width || height != oldWidget.height;
 }
 
+/// The size a row or column gives its children to share: a child sized by a
+/// fraction along the row's main axis (a progress fill in a row, 63% wide)
+/// takes that share of the row's own width, as a percentage width does in
+/// CSS, since the row itself gives such a child no bounded width. Null on
+/// an axis the row/column has no bound on.
+class FlexExtentScope extends InheritedWidget {
+  /// The row's or column's width, or null when unbounded.
+  final double? width;
+
+  /// The row's or column's height, or null when unbounded.
+  final double? height;
+
+  /// Creates a [FlexExtentScope].
+  const FlexExtentScope({
+    super.key,
+    required this.width,
+    required this.height,
+    required super.child,
+  });
+
+  /// The nearest scope, or null.
+  static FlexExtentScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<FlexExtentScope>();
+
+  @override
+  bool updateShouldNotify(FlexExtentScope oldWidget) =>
+      width != oldWidget.width || height != oldWidget.height;
+}
+
 /// The value of the `parent` variable for a parent that gives [width] and
 /// [height]: `width` and `height`, each null when unbounded.
 Map<String, dynamic> parentVariableValue(double? width, double? height) => {
