@@ -311,6 +311,7 @@ class PassiveListViewWidget extends StatelessWidget {
         item: item,
         scrollDirection: node.scrollDirection,
         itemExtent: node.properties.itemExtent,
+        stretch: stretchesItems,
         child: child,
       );
     }
