@@ -991,6 +991,32 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: value);
   }
 
+  /// [track] with its [DragTrackModel.defaultValue] read from the node's
+  /// `track.defaultValue` binding when it has one that gives a number (the
+  /// list item's own default), else [track] as it is.
+  static DragTrackModel trackWithBoundDefault(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    if (!node.variables.containsKey(DragTrackModel.defaultValueVariable)) {
+      return track;
+    }
+    final Object? raw = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      DragTrackModel.defaultValueVariable,
+      scopedValues: scopedValues,
+    );
+    final double? value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return value == null || !value.isFinite
+        ? track
+        : track.copyWith(defaultValue: value);
+  }
+
   /// Writes a drag's live [values] into the variable named [name], so nodes
   /// outside the dragged one can follow it (see [DragModel.shareAs]).
   static void shareDragValues(
@@ -1006,8 +1032,8 @@ abstract class WidgetNodeTransformerManager
   }
 
   /// [node]'s drag track with the settings its bindings give
-  /// (`drag.track.min`, `drag.track.max`, `drag.track.step`,
-  /// `drag.track.defaultValue`), e.g. a countdown arc as long as the stage.
+  /// (`track.min`, `track.max`, `track.step`, and `track.defaultValue` via
+  /// [trackWithBoundDefault]), e.g. a countdown arc as long as the stage.
   static DragTrackModel resolvedTrack(
     BaseNode node,
     DragTrackModel track,
@@ -1030,16 +1056,15 @@ abstract class WidgetNodeTransformerManager
     final double? min = bound(DragTrackModel.minVariableKey);
     final double? max = bound(DragTrackModel.maxVariableKey);
     final double? step = bound(DragTrackModel.stepVariableKey);
-    final double? reset = bound(DragTrackModel.defaultValueVariableKey);
-    if (min == null && max == null && step == null && reset == null) {
-      return track;
-    }
-    return track.copyWith(
-      min: min,
-      max: max,
-      step: step == null ? null : (step < 0 ? 0 : step),
-      defaultValue: reset,
-    );
+    final DragTrackModel ranged =
+        min == null && max == null && step == null
+        ? track
+        : track.copyWith(
+            min: min,
+            max: max,
+            step: step == null ? null : (step < 0 ? 0 : step),
+          );
+    return trackWithBoundDefault(node, ranged, scopedValues);
   }
 
   /// Draws [node] where its drag track puts it for its variable's value,
