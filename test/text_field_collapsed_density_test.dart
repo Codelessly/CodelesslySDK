@@ -108,7 +108,7 @@ void main() {
     );
   });
 
-  testWidgets('a field that is not collapsed keeps the theme density', (
+  testWidgets('a field that is not collapsed is not shrunk by the theme density either', (
     tester,
   ) async {
     await _pump(tester, _note(collapsed: false), VisualDensity.compact);
@@ -117,7 +117,7 @@ void main() {
           .widget<TextField>(find.byType(TextField))
           .decoration!
           .visualDensity,
-      isNull,
+      VisualDensity.standard,
     );
   });
 }
