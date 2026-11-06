@@ -452,6 +452,30 @@ void main() {
     // A quarter of its 300px width to the right of its rest centre.
     expect(tester.getCenter(find.text('thumb')), const Offset(225, 10));
   });
+
+  testWidgets('tapping a relative scrub area on the node jumps there', (
+    tester,
+  ) async {
+    const scrubber = DragTrackModel(
+      variable: 'minute',
+      min: 0,
+      max: 1440,
+      step: 5,
+      x2: 1,
+      y2: 0,
+      relative: true,
+      jumpOnTap: true,
+    );
+    value = 720;
+    await tester.pumpWidget(
+      plate(scrubber, size: const Size(300, 20), at: const Offset(0, 300)),
+    );
+    // The node now covers 150..450; the tap lands on it, 3/4 along.
+    await tester.tapAt(const Offset(375, 310));
+    await tester.pump();
+    expect(value, 1080);
+    await tester.pump(const Duration(seconds: 1));
+  });
 }
 
 double _sin(double r) => math.sin(r);
