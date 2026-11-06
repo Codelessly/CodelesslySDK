@@ -501,12 +501,24 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
               'stack',
               'freeformPlaceholder',
             }.contains(parent.type));
+    // A row or column leaves its main axis unbounded for a child that
+    // doesn't flex; a bound factor takes its fraction of the row/column's
+    // content box there, as on the design canvas, which gives `parent` that
+    // box (see [FlexContentSizeScope]).
+    final ({double? width, double? height})? flexContent =
+        hasFractionalSize(node) && !placedByParent
+        ? FlexContentSizeScope.of(context, node.id)
+        : null;
     final fractional = hasFractionalSize(node) && !placedByParent
         ? fractionalBoxOf(
             node,
             scopedValues: scope,
-            parentWidth: (scope.parentSize?['width'] as num?)?.toDouble(),
-            parentHeight: (scope.parentSize?['height'] as num?)?.toDouble(),
+            parentWidth:
+                (scope.parentSize?['width'] as num?)?.toDouble() ??
+                flexContent?.width,
+            parentHeight:
+                (scope.parentSize?['height'] as num?)?.toDouble() ??
+                flexContent?.height,
           )
         : (width: null, height: null);
     final double? width = node.variables.containsKey('width')
