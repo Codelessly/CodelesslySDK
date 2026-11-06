@@ -264,8 +264,8 @@ class PassiveTextFieldWidget extends StatefulWidget {
         (decoration.counterText?.isNotEmpty ?? false)) {
       return decoration;
     }
-    final TextScaler scaler = MediaQuery.maybeTextScalerOf(context) ??
-        TextScaler.noScaling;
+    final TextScaler scaler =
+        MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
     double lineOf(TextStyle? style) {
       final TextPainter painter = TextPainter(
         text: TextSpan(text: ' ', style: style),

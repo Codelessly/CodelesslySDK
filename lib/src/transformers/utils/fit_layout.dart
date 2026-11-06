@@ -507,8 +507,19 @@ class RenderCodelesslyFlex extends RenderFlex {
     return false;
   }
 
+  /// Whether the children run past the main axis by less than
+  /// [overflowTolerance]: a fit, painted as one.
+  bool get _subPixelOverflow =>
+      _overflow > precisionErrorTolerance && _overflow < overflowTolerance;
+
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (_subPixelOverflow) {
+      // As [RenderFlex] paints children that fit: no stripe, no clip.
+      _overflowClipLayer.layer = null;
+      defaultPaint(context, offset);
+      return;
+    }
     // A flex that clips its overflow cuts it off at its edge, without
     // RenderFlex's debug stripes and overflow report.
     if (_clipsOverflow && !size.isEmpty && _childrenOverflow) {
@@ -526,8 +537,9 @@ class RenderCodelesslyFlex extends RenderFlex {
   }
 
   @override
-  Rect? describeApproximatePaintClip(RenderObject child) =>
-      _clipsOverflow && _childrenOverflow
+  Rect? describeApproximatePaintClip(RenderObject child) => _subPixelOverflow
+      ? null
+      : _clipsOverflow && _childrenOverflow
       ? Offset.zero & size
       : super.describeApproximatePaintClip(child);
 
@@ -705,8 +717,29 @@ class RenderCodelesslyFlex extends RenderFlex {
     return false;
   }
 
+  /// How far the children run past the main axis after layout (the
+  /// overflow [RenderFlex] warns about), or zero.
+  double _overflow = 0;
+
+  /// Overflow below this is taken as fitting: [paint] neither clips nor
+  /// paints the overflow warning. Text heights from fonts are fractional, so
+  /// children made to fit a fixed box (a 75 px column with padding 3 and
+  /// 16.7) can come out a fraction of a pixel over it, which no one sees.
+  static const double overflowTolerance = 1;
+
   @override
   void performLayout() {
+    _layOut();
+    double used = _gaps;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      used += _mainExtent(child.size);
+      child = childAfter(child);
+    }
+    _overflow = math.max(0, used - _mainExtent(size));
+  }
+
+  void _layOut() {
     if (!_mainAxisBounded(constraints)) {
       if (_hasFlexChild) {
         _inflexible(_layOutWithGaps);

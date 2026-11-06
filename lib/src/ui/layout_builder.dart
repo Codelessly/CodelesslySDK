@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
 import '../data/persisted_variables.dart';
+import 'layout_fonts.dart';
 
 /// A widget that retrieves a layout from a [CodelesslyWidgetController].
 class CodelesslyLayoutRetriever extends StatefulWidget {
@@ -318,10 +319,21 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         value: codelesslyContext.data[variable.name],
       );
       final Observable<VariableData>? kept = previousVariables[variable.id];
-      final notifier =
-          kept != null && previousPublished[variable.name] == published
-          ? kept
-          : Observable(withLinkParam(published, linkParams));
+      final Observable<VariableData> notifier;
+      if (kept != null && previousPublished[variable.name] == published) {
+        notifier = kept;
+      } else {
+        // A persisting screen variable starts with its saved value too.
+        notifier = persistedVariable(
+          published,
+          published.persists
+              ? codelessly.dataManager.localDatabaseOrNull
+              : null,
+        );
+        if (linkParams.containsKey(variable.name)) {
+          notifier.value = withLinkParam(notifier.value, linkParams);
+        }
+      }
       codelesslyContext.variables[variable.id] = notifier;
       codelesslyContext.initialVariables[variable.name] = published;
     }
@@ -339,6 +351,30 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     loadApisAndItsVariables(context);
 
     setCloudStorageVariables(context);
+
+    preloadFonts();
+  }
+
+  /// Whether this layout waits for its fonts before it is first shown,
+  /// decided once so the widget tree keeps its shape.
+  late final bool gatesFonts = LayoutFonts.enabled;
+
+  /// The load of the fonts the layout first showed, while they load.
+  Future<void>? firstFonts;
+
+  /// Starts loading every font variant the canvas's text is drawn in, so
+  /// they arrive together and before the text is first shown instead of
+  /// one by one as each text builds. See [LayoutFonts].
+  void preloadFonts() {
+    if (!gatesFonts) return;
+    final Set<FontName> fonts = LayoutFonts.fontsIn(
+      nodeRegistry.getNodes().values,
+    );
+    if (fonts.every(LayoutFonts.isLoaded)) return;
+    final Future<void> load = LayoutFonts.load(fonts);
+    // Fonts of a canvas loaded later (another breakpoint's) replace the
+    // fallback as they arrive, without hiding the layout again.
+    firstFonts ??= load;
   }
 
   /// This loads all the apis for the layout as variables to be available
@@ -439,6 +475,14 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   Widget build(BuildContext context) {
     final CodelesslyConfig config = widget.controller.config;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final Widget content = transformerManager.buildWidgetFromNode(
+      canvasNode,
+      context,
+      settings: const WidgetBuildSettings(
+        debugLabel: 'layout builder',
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ),
+    );
     return MediaQuery(
       data: mediaQuery.copyWith(
         textScaler: config.maxTextScaleFactor <= 1
@@ -451,14 +495,13 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         data: config.useHostTheme ? Theme.of(context) : ThemeData(),
         child: FeedbackThemeScope(
           theme: feedbackTheme,
-          child: transformerManager.buildWidgetFromNode(
-            canvasNode,
-            context,
-            settings: const WidgetBuildSettings(
-              debugLabel: 'layout builder',
-              nullSubstitutionMode: NullSubstitutionMode.emptyString,
-            ),
-          ),
+          child: gatesFonts
+              ? FontsGate(
+                  fonts: firstFonts,
+                  timeout: LayoutFonts.firstPaintTimeout,
+                  child: content,
+                )
+              : content,
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'dart:ui' show ImageFilter, PathMetric, Tangent;
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -103,7 +104,10 @@ class _MeasuredPath {
       double swept = 0;
       double done = 0;
       for (final PathMetric metric in metrics) {
-        final int n = math.max(8, (_areaSamples * metric.length / length).round());
+        final int n = math.max(
+          8,
+          (_areaSamples * metric.length / length).round(),
+        );
         for (int i = 0; i <= n; i++) {
           final double d = metric.length * i / n;
           final Offset? point = metric.getTangentForOffset(d)?.position;
@@ -195,6 +199,18 @@ _MeasuredPath? _measure(String data) => _pathCache.putIfAbsent(data, () {
   MotionPathPacing pacing = MotionPathPacing.length,
   Offset focus = Offset.zero,
 }) => _measure(data)?.at(progress, pacing: pacing, focus: focus);
+
+/// A path's direction [radians] (clockwise from the positive x axis, as
+/// [pointOnMotionPath] gives it) folded into -90 to 90 degrees, turned half
+/// round where the path heads left: the turn that keeps a node following
+/// the path from reading upside down (see [MotionModel.orientUpright]).
+double uprightPathAngle(double radians) {
+  double a = radians % (2 * math.pi);
+  if (a > math.pi) a -= 2 * math.pi;
+  if (a > math.pi / 2) return a - math.pi;
+  if (a < -math.pi / 2) return a + math.pi;
+  return a;
+}
 
 /// Turns animation of node motion off for the nodes below it: a design
 /// canvas or an editor capture, which show every node at rest.
@@ -339,6 +355,9 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// Whether a counted loop has played all its times: the node rests.
   bool _rested = false;
 
+  /// Whether the motion is held in place ([MotionModel.paused]).
+  bool _paused = false;
+
   /// Whether the node holds at its entrance start until it scrolls into
   /// view; see [MotionModel.revealOnScroll].
   bool _awaitingReveal = false;
@@ -383,6 +402,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
       _run(motionTransitionMs(motion));
     }
     _syncSpin();
+    _syncPause();
   }
 
   /// Whether [motion] waits to scroll into view before its entrance.
@@ -588,6 +608,35 @@ class _NodeMotionState extends State<_NodeMotionBody>
       _to = next;
     }
     _syncSpin();
+    _syncPause();
+  }
+
+  /// Holds every running animation where it is while the motion is
+  /// paused, and carries each on from there when it isn't.
+  void _syncPause() {
+    final bool paused = _animates && widget.motion.paused;
+    if (paused) {
+      // Anything started since (a value change, a replay) holds too.
+      _delay?.cancel();
+      if (_transition.isAnimating) _transition.stop(canceled: false);
+      if (_spring.isAnimating) _spring.stop(canceled: false);
+      // The spin winds down by itself (see [_onSpinTick]).
+      _paused = true;
+      return;
+    }
+    if (!_paused) return;
+    _paused = false;
+    if (_loops && !_rested) {
+      final bool reverse = widget.motion.loop == MotionLoop.reverse;
+      // Carries on from where it stopped; a counted loop counts afresh.
+      _transition.repeat(reverse: reverse);
+    } else if (_spring.value != 1) {
+      _spring.animateWith(
+        SpringSimulation(motionSpring(widget.motion), _spring.value, 1, 0),
+      );
+    } else if (_transition.value > 0 && _transition.value < 1) {
+      _transition.forward();
+    }
   }
 
   static bool _sameTransform(MotionModel a, MotionModel b) =>
@@ -609,6 +658,7 @@ class _NodeMotionState extends State<_NodeMotionBody>
       a.pathProgress == b.pathProgress &&
       a.path == b.path &&
       a.orientToPath == b.orientToPath &&
+      a.orientUpright == b.orientUpright &&
       a.backfaceHidden == b.backfaceHidden;
 
   /// Whether a transition is running or waiting out its delay.
@@ -644,7 +694,9 @@ class _NodeMotionState extends State<_NodeMotionBody>
     }
     if (!_moving && _transition.value == 0 && !spring) {
       // A loop paused before it started sits at its start.
-      return _loops && widget.motion.paused ? _from : _to;
+      if (_loops && widget.motion.paused) return _from;
+      // A transition paused before it started holds where it is.
+      if (!_paused) return _to;
     }
     // A spring runs on real physics (and may overshoot past 1); a curve on
     // the transition's time.
@@ -768,7 +820,9 @@ class _NodeMotionState extends State<_NodeMotionBody>
         : _rested && _loops
         ? _to.atRest
         // A paused loop holds wherever it stopped.
-        : (_moving || _loops && widget.motion.paused ? _current : _to);
+        : (_moving || _paused || _loops && widget.motion.paused
+              ? _current
+              : _to);
     final Widget drawn = _draw(m);
     if (still || !widget.animate || !widget.motion.revealOnScroll) {
       return drawn;
@@ -789,6 +843,13 @@ class _NodeMotionState extends State<_NodeMotionBody>
   /// The node's widget drawn with the values of [m].
   Widget _draw(MotionModel m) {
     Widget child = KeyedSubtree(key: _childKey, child: widget.child);
+    if (m.shimmer case final MotionShimmer shimmer) {
+      child = ShimmerBand(
+        shimmer: shimmer,
+        running: widget.animate,
+        child: child,
+      );
+    }
     if (!m.hasTransform && _turns == 0) return child;
     if (m.backfaceHidden) child = BackfaceHidden(child: child);
     if (m.opacity < 1) {
@@ -842,9 +903,12 @@ class _NodeMotionState extends State<_NodeMotionBody>
         // plane sideways) turn it too: while it moves, the nose follows
         // where it actually goes, not just the path's direction.
         double heading = angle;
-        final bool pushed = m.orientToPath &&
+        final bool pushed =
+            m.orientToPath &&
             _moving &&
-            m.keyframes.any((k) => k.translateX != null || k.translateY != null);
+            m.keyframes.any(
+              (k) => k.translateX != null || k.translateY != null,
+            );
         if (pushed) {
           final Offset? previous = _lastPathPosition;
           if (previous != null && (total - previous).distance > 0.25) {
@@ -859,7 +923,12 @@ class _NodeMotionState extends State<_NodeMotionBody>
         shown = m.copyWith(
           translateX: total.dx,
           translateY: total.dy,
-          rotate: m.orientToPath ? m.rotate + heading * 180 / math.pi : null,
+          rotate: m.orientToPath
+              ? m.rotate +
+                    (m.orientUpright ? uprightPathAngle(heading) : heading) *
+                        180 /
+                        math.pi
+              : null,
         );
       }
     }
@@ -939,6 +1008,114 @@ Duration implicitTransitionDuration(BuildContext context, int ms) =>
     TickerMode.valuesOf(context).enabled
     ? Duration(milliseconds: ms)
     : Duration.zero;
+
+/// [hex] (`#RRGGBB` or `#AARRGGBB`) as a colour; white when it isn't one.
+Color shimmerColorOf(String hex) {
+  String h = hex.trim().replaceFirst('#', '');
+  if (h.length == 6) h = 'FF$h';
+  final int? v = h.length == 8 ? int.tryParse(h, radix: 16) : null;
+  return v == null ? const Color(0xFFFFFFFF) : Color(v);
+}
+
+/// Sweeps [MotionShimmer]'s band of light across [child]'s painted pixels,
+/// over and over while [running]; still, halfway across, otherwise (the
+/// design canvas).
+class ShimmerBand extends StatefulWidget {
+  /// Creates a [ShimmerBand].
+  const ShimmerBand({
+    super.key,
+    required this.shimmer,
+    required this.child,
+    this.running = true,
+  });
+
+  /// The band.
+  final MotionShimmer shimmer;
+
+  /// Whether the band sweeps.
+  final bool running;
+
+  /// What the band lights up.
+  final Widget child;
+
+  @override
+  State<ShimmerBand> createState() => _ShimmerBandState();
+}
+
+class _ShimmerBandState extends State<ShimmerBand>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _sweep = AnimationController(vsync: this);
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(ShimmerBand oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.shimmer.durationMs != widget.shimmer.durationMs ||
+        oldWidget.running != widget.running) {
+      _sync();
+    }
+  }
+
+  void _sync() {
+    final int ms = math.max(1, widget.shimmer.durationMs);
+    _sweep.duration = Duration(milliseconds: ms);
+    if (widget.running) {
+      _sweep.repeat();
+    } else {
+      _sweep
+        ..stop()
+        ..value = 0.5;
+    }
+  }
+
+  @override
+  void dispose() {
+    _sweep.dispose();
+    super.dispose();
+  }
+
+  /// The shader for the band at [t] (0 to 1 across) over [bounds].
+  Shader shaderAt(double t, Rect bounds) {
+    final MotionShimmer s = widget.shimmer;
+    final Color color = shimmerColorOf(s.color);
+    final Color glow = color.withValues(
+      alpha: color.a * s.strength.clamp(0.0, 1.0),
+    );
+    final Color clear = color.withValues(alpha: 0);
+    final double half = math.max(0.001, s.width / 2);
+    // The band travels from fully off one side to fully off the other.
+    final double centre = -half + t * (1 + 2 * half);
+    final double a = s.angle * math.pi / 180;
+    final Offset dir = Offset(math.cos(a), math.sin(a));
+    // Project the box onto the sweep direction.
+    final double extent =
+        (bounds.width * dir.dx).abs() + (bounds.height * dir.dy).abs();
+    final Offset mid = bounds.center;
+    Offset at(double f) => mid + dir * ((f - 0.5) * extent);
+    return ui.Gradient.linear(
+      at(centre - half),
+      at(centre + half),
+      [clear, glow, clear],
+      const [0, 0.5, 1],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _sweep,
+    child: widget.child,
+    builder: (context, child) => ShaderMask(
+      blendMode: BlendMode.srcATop,
+      shaderCallback: (bounds) => shaderAt(_sweep.value, bounds),
+      child: child,
+    ),
+  );
+}
 
 /// A paint's colour and gradient, eased together by [EasedPaint].
 @immutable
