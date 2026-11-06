@@ -336,6 +336,9 @@ class ConditionEvaluator<R extends Object>
   R? visitControlDragAction(ControlDragAction action) => null;
 
   @override
+  R? visitPaginateAction(PaginateAction action) => null;
+
+  @override
   R? visitAnimateVariableAction(AnimateVariableAction action) => null;
 
   @override
@@ -556,6 +559,11 @@ class ConditionPrinter
     _buffer.writeln(
       '\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}',
     );
+  }
+
+  @override
+  void visitPaginateAction(PaginateAction action) {
+    _buffer.writeln('\tPaginate ${action.controller} ${action.command.name}');
   }
 
   @override
