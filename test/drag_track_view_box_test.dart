@@ -29,7 +29,11 @@ void main() {
 
   test('without a viewBox the path is relative pixels, as before', () {
     final g = DragTrackGeometry(
-      DragTrackModel(shape: DragTrackShape.path, variable: 'v', path: 'M0 0 L100 0'),
+      DragTrackModel(
+        shape: DragTrackShape.path,
+        variable: 'v',
+        path: 'M0 0 L100 0',
+      ),
     );
     expect(g.setFrame(const Size(500, 150), const Offset(10, 135)), isFalse);
     expect(g.offsetAt(1), const Offset(100, 0));

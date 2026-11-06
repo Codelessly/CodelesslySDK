@@ -9,16 +9,31 @@ void main() {
   test('computed variables over nowMs() are not cached', () async {
     final ScopedValues scope = ScopedValues.preview(
       variables: {
-        'start': VariableData(id: 'start', name: 'start', type: VariableType.decimal,
-            value: '${DateTime.now().millisecondsSinceEpoch}'),
-        'livePos': VariableData(id: 'livePos', name: 'livePos', type: VariableType.decimal,
-            formula: '(nowMs() - start) / 1000'),
-        'rRight': VariableData(id: 'rRight', name: 'rRight', type: VariableType.decimal,
-            formula: 'sqrt(1 + 5.76 * livePos / 1800)'),
+        'start': VariableData(
+          id: 'start',
+          name: 'start',
+          type: VariableType.decimal,
+          value: '${DateTime.now().millisecondsSinceEpoch}',
+        ),
+        'livePos': VariableData(
+          id: 'livePos',
+          name: 'livePos',
+          type: VariableType.decimal,
+          formula: '(nowMs() - start) / 1000',
+        ),
+        'rRight': VariableData(
+          id: 'rRight',
+          name: 'rRight',
+          type: VariableType.decimal,
+          formula: 'sqrt(1 + 5.76 * livePos / 1800)',
+        ),
       },
     );
     double read(String n) =>
-        (PropertyValueDelegate.getVariableValueFromPath<Object>(n, scopedValues: scope) as num).toDouble();
+        (PropertyValueDelegate.getVariableValueFromPath<Object>(
+          n,
+          scopedValues: scope,
+        ) as num).toDouble();
     final double a = read('livePos'), ra = read('rRight');
     await Future<void>.delayed(const Duration(milliseconds: 60));
     expect(read('livePos'), greaterThan(a));

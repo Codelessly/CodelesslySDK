@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-const InputBorderModel _none = InputBorderModel(borderType: BorderTypeEnum.none);
+const InputBorderModel _none = InputBorderModel(
+  borderType: BorderTypeEnum.none,
+);
 
 /// Darkroom's notes fields: four or six lines in a fixed box, collapsed
 /// decoration, text starting at the top (textAlignVertical top), as a
@@ -32,7 +34,10 @@ TextFieldNode _notes(TextAlignVerticalEnum align) => TextFieldNode(
   ),
 );
 
-Future<double> _hintTop(WidgetTester tester, TextAlignVerticalEnum align) async {
+Future<double> _hintTop(
+  WidgetTester tester,
+  TextAlignVerticalEnum align,
+) async {
   final node = _notes(align);
   final registry = NodeRegistry()..setNodes({node.id: node});
   final manager = PassiveNodeTransformerManager(
@@ -67,11 +72,17 @@ Future<double> _hintTop(WidgetTester tester, TextAlignVerticalEnum align) async 
 }
 
 void main() {
-  testWidgets('a multi-line collapsed field in a taller box starts at the top', (tester) async {
-    expect(await _hintTop(tester, TextAlignVerticalEnum.top), lessThan(4));
-  });
+  testWidgets(
+    'a multi-line collapsed field in a taller box starts at the top',
+    (tester) async {
+      expect(await _hintTop(tester, TextAlignVerticalEnum.top), lessThan(4));
+    },
+  );
 
   testWidgets('and is centred when asked', (tester) async {
-    expect(await _hintTop(tester, TextAlignVerticalEnum.center), greaterThan(20));
+    expect(
+      await _hintTop(tester, TextAlignVerticalEnum.center),
+      greaterThan(20),
+    );
   });
 }

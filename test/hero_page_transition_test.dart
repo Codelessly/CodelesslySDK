@@ -196,10 +196,16 @@ List<NodeHeroChild> _flying(WidgetTester tester) => find
     .toList();
 
 void main() {
-  testWidgets('an arc flight curves, turns upright and glows on the way', (tester) async {
+  testWidgets('an arc flight curves, turns upright and glows on the way', (
+    tester,
+  ) async {
     await _app(
       tester,
-      open: NavigationAction(destinationId: 'detail', transition: PageTransition.fade, transitionMs: 800),
+      open: NavigationAction(
+        destinationId: 'detail',
+        transition: PageTransition.fade,
+        transitionMs: 800,
+      ),
       walletFlight: HeroFlight.arc,
       detailFlight: HeroFlight.arc,
     );
@@ -214,7 +220,8 @@ void main() {
         .firstWhere((element) => ModalRoute.of(element) == null);
     final Transform? turn = shuttle.findAncestorWidgetOfExactType<Transform>();
     expect(turn, isNotNull, reason: 'the flying node turns');
-    final DecoratedBox? glow = shuttle.findAncestorWidgetOfExactType<DecoratedBox>();
+    final DecoratedBox? glow = shuttle
+        .findAncestorWidgetOfExactType<DecoratedBox>();
     expect((glow!.decoration as BoxDecoration).boxShadow, isNotEmpty);
     await tester.pumpAndSettle();
     expect(_content('detail'), findsOneWidget);
