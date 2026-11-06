@@ -529,7 +529,14 @@ abstract class WidgetNodeTransformerManager
       String s => double.tryParse(s.trim()) ?? node.drawScale,
       _ => node.drawScale,
     };
-    if (scale.isFinite && scale != 1) {
+    // A scale that can change while the node is on screen (bound, or set by
+    // an interaction state such as pressed: `drawScale: 0.97`) keeps its
+    // wrapper at 1 too: adding it mid-press would rebuild the node's tree
+    // and drop the tap in progress.
+    final bool mayScale =
+        node.variables.containsKey('drawScale') ||
+        PropertyOverrideScope.maybeOf(context) != null;
+    if (scale.isFinite && (scale != 1 || mayScale)) {
       widget = animate && node.transitionMs > 0
           ? AnimatedScale(
               scale: scale,
