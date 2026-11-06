@@ -1920,8 +1920,9 @@ class SvgIcon extends StatelessWidget {
 /// bottom edge lands on a whole device pixel, as text rasterization places a
 /// glyph's baseline (Skia rounds it to the pixel grid on axis-aligned text):
 /// a vector drawn in place of a font glyph whose baseline is the box's
-/// bottom (a Material icon) then paints where the glyph would. Layout and
-/// hit testing are unchanged. Under a rotation or skew, where glyphs aren't
+/// bottom (a Material icon) then paints where the glyph would. It reports
+/// that baseline (the box's bottom) as the glyph does, so a baseline row
+/// aligns it like Flutter's Icon. Size and hit testing are unchanged. Under a rotation or skew, where glyphs aren't
 /// snapped, it paints in place.
 class PixelSnappedBaseline extends SingleChildRenderObjectWidget {
   const PixelSnappedBaseline({super.key, super.child});
@@ -1957,6 +1958,20 @@ class RenderPixelSnappedBaseline extends RenderProxyBox {
     final double shift = (y + 0.5).floorToDouble() - y;
     return shift / scale;
   }
+
+  // The glyph's baseline is the box's bottom: Flutter's Icon of size S (a
+  // MaterialIcons glyph, height 1.0) reports a baseline of S, so a
+  // `crossAxisAlignment: baseline` row places it bottom on the baseline,
+  // where the SVG alone (no baseline) would be top-aligned.
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) =>
+      size.height;
+
+  @override
+  double? computeDryBaseline(
+    BoxConstraints constraints,
+    TextBaseline baseline,
+  ) => getDryLayout(constraints).height;
 
   @override
   void paint(PaintingContext context, Offset offset) {
