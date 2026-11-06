@@ -28,18 +28,29 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         childWidget ??
         manager!.buildWidgetFromNode(node, context, settings: settings);
 
-    Widget placed(BuildContext scope) => FreeformChild(
-      key: ValueKey(
-        'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
-      ),
-      placement: placementFor(
+    Widget placed(BuildContext scope) {
+      final FreeformPlacement placement = placementFor(
         withBoundSize(scope, node),
         parent,
         scrollAxis: scrollAxis,
         scopedValues: ScopedValues.of(scope),
-      ),
-      child: child,
-    );
+      );
+      return FreeformChild(
+        key: ValueKey(
+          'Static Stack child [${node.id}](${node.name})<${node.type}> on parent [${parent.id}](${parent.name})<${parent.type}>',
+        ),
+        placement: placement,
+        // Tells the child that this slot already puts it at its bound x/y,
+        // so it isn't moved there a second time (see
+        // PassiveNodeTransformerManager.applyBoundOffset).
+        child: FreeformBoundPlacement(
+          nodeId: node.id,
+          x: placement.horizontal.boundStart != null,
+          y: placement.vertical.boundStart != null,
+          child: child,
+        ),
+      );
+    }
 
     // A bound size that reads `parent` (a fill `18 + (parent.width - 28) *
     // v` wide) is worked out here, where the child is placed: give it the
@@ -82,9 +93,12 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     if (manager is PassiveNodeTransformerManager &&
         (node.variables.containsKey('positionX') ||
             node.variables.containsKey('positionY') ||
+            node.variables.containsKey('x') ||
+            node.variables.containsKey('y') ||
             node.variables.containsKey('width') ||
             node.variables.containsKey('height') ||
-            hasFractionalSize(node))) {
+            hasFractionalSize(node) ||
+            _hasPositionCondition(context, node))) {
       final listenables = manager.listenablesFor(context, node);
       if (listenables.isNotEmpty) {
         return AnimatedBuilder(
@@ -193,7 +207,60 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
         vertical = vertical.withSizeFactor(factor, node.margin.vertical);
       }
     }
+    // A bound x/y places the child there in the container's runtime box,
+    // whatever its alignment or pins would do there: they only gave the
+    // design place, which moves (or not) when the container's runtime size
+    // differs from its design size, so translating the child by its design
+    // offset put it off (an aligned hill in a sky 64 px narrower at runtime
+    // than designed). A position fraction (positionX/Y) wins.
+    if (scopedValues != null) {
+      if (horizontal.mode != FreeformAxisMode.fraction) {
+        if (boundPositionOf(node, 'x', scopedValues) case final double x) {
+          horizontal = horizontal.withBoundStart(x);
+        }
+      }
+      if (vertical.mode != FreeformAxisMode.fraction) {
+        if (boundPositionOf(node, 'y', scopedValues) case final double y) {
+          vertical = vertical.withBoundStart(y);
+        }
+      }
+    }
     return FreeformPlacement(horizontal: horizontal, vertical: vertical);
+  }
+
+  /// The distance from the parent's padded start edge to [node]'s outer box
+  /// that [node]'s bound [property] (`x` or `y`: a variable, formula or
+  /// condition) gives it, or null when it isn't bound or gives no finite
+  /// number.
+  static double? boundPositionOf(
+    BaseNode node,
+    String property,
+    ScopedValues scopedValues,
+  ) {
+    if (!node.variables.containsKey(property) &&
+        scopedValues.codelesslyContext?.conditions.findByNodeProperty(
+              node.id,
+              property,
+            ) ==
+            null) {
+      return null;
+    }
+    final num? value = PropertyValueDelegate.getPropertyValue<num>(
+      node,
+      property,
+      scopedValues: scopedValues,
+    );
+    return value != null && value.isFinite ? value.toDouble() : null;
+  }
+
+  static bool _hasPositionCondition(BuildContext context, BaseNode node) {
+    final CodelesslyContext? codelesslyContext = ScopedValues.of(
+      context,
+    ).codelesslyContext;
+    if (codelesslyContext == null) return false;
+    return codelesslyContext.conditions.findByNodeProperty(node.id, 'x') !=
+            null ||
+        codelesslyContext.conditions.findByNodeProperty(node.id, 'y') != null;
   }
 
   /// The extent [parent] lays its children out in at design size: its
@@ -435,9 +502,11 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final Size designSize = contentFit != null
         ? (node as FrameNode).contentDesignSize.flutterSize
         : node.innerBoxLocal.size.flutterSize;
-    Widget content = FreeformLayout(
-      wrapsWidth: contentFit == null && node.isHorizontalWrap,
-      wrapsHeight: contentFit == null && node.isVerticalWrap,
+    final bool wrapsWidth = contentFit == null && node.isHorizontalWrap;
+    final bool wrapsHeight = contentFit == null && node.isVerticalWrap;
+    Widget layout(BuildContext context) => FreeformLayout(
+      wrapsWidth: wrapsWidth,
+      wrapsHeight: wrapsHeight,
       designSize: designSize,
       children: [
         for (final BaseNode childNode in children)
@@ -451,9 +520,21 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           ),
       ],
     );
-    // Children that read `parent` read this container's content box.
+    // Children that read `parent` (`${parent.width}` in an x, a width or a
+    // path) read this container's content box, as the design canvas does,
+    // not the box each child is placed in (its own size): each such child
+    // looks it up (see [buildStackChild] and [freeformContainerTypes]). A
+    // frame that scales its content gives its design size; otherwise a
+    // hugging axis is its design size and a scrolling axis has none.
+    Widget content = layout(context);
     if (children.any(readsParentSize)) {
       final Widget laidOut = content;
+      double? side(bool hugs, bool scrolls, double max, double design) =>
+          scrolls
+          ? null
+          : hugs || !max.isFinite
+          ? design
+          : max;
       content = contentFit != null
           ? FreeformContentSizeScope(
               parentId: node.id,
@@ -462,13 +543,22 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
               child: laidOut,
             )
           : MeasurableLayoutBuilder(
+              key: ValueKey('${node.id}-freeform-parent-size'),
               fallbackSize: designSize,
               builder: (context, constraints) => FreeformContentSizeScope(
                 parentId: node.id,
-                width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
-                height: constraints.hasBoundedHeight
-                    ? constraints.maxHeight
-                    : null,
+                width: side(
+                  wrapsWidth,
+                  scrollAxis == AxisC.horizontal,
+                  constraints.maxWidth,
+                  designSize.width,
+                ),
+                height: side(
+                  wrapsHeight,
+                  scrollAxis == AxisC.vertical,
+                  constraints.maxHeight,
+                  designSize.height,
+                ),
                 child: laidOut,
               ),
             );

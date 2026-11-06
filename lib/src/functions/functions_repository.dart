@@ -137,7 +137,7 @@ class FunctionsRepository {
       case ActionType.setVariable:
         final SetVariableAction set = action as SetVariableAction;
         final int animateMs = _animateMsOf(context, set);
-        if (animateMs > 0) return animateVariable(context, set, animateMs);
+        if (animateMs > 0) return glideVariable(context, set, animateMs);
         // A plain set stops a glide on the same variable.
         if (_glides.containsKey(set.variable.name)) {
           _glides[set.variable.name] = _glides[set.variable.name]! + 1;
@@ -232,6 +232,88 @@ class FunctionsRepository {
         ).then((_) => true);
       case ActionType.haptic:
         return haptic(context, action as HapticAction);
+      case ActionType.animateVariable:
+        return animateVariable(context, action as AnimateVariableAction);
+    }
+  }
+
+  /// Runs an [AnimateVariableAction] on its variable (see
+  /// [VariableAnimator]). A play or a resume completes when the animation
+  /// ends (true at its end, false when stopped or replaced; a pause keeps
+  /// both waiting); the other modes at once. False when the variable isn't found, is computed
+  /// or the values aren't numbers.
+  static FutureOr<bool> animateVariable(
+    BuildContext context,
+    AnimateVariableAction action, {
+    bool fromCurrentPlace = false,
+  }) {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final ValueNotifier<VariableData>? variable = context
+        .read<CodelesslyContext>()
+        .findVariableByName(action.variable.trim());
+    if (variable == null || variable.value.isComputed) {
+      DebugLogger.instance.printInfo(
+        'Animate variable: no settable variable "${action.variable}".',
+        name: name,
+      );
+      return false;
+    }
+    double? number(String text) {
+      if (text.trim().isEmpty) return null;
+      final String value = PropertyValueDelegate.substituteVariables(
+        text,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim();
+      final double? n = double.tryParse(value);
+      return n != null && n.isFinite ? n : null;
+    }
+
+    switch (action.mode) {
+      case AnimateVariableMode.resume:
+        // Resuming (or finding it playing) waits, like a play, for the
+        // animation to end: a blocking resume holds the actions after it
+        // until then, as the play it carries on does (that play's pending
+        // action completes at the same moment).
+        if (VariableAnimator.resume(variable) ||
+            VariableAnimator.isPlaying(variable)) {
+          final Future<bool>? done = VariableAnimator.completionOf(variable);
+          if (done != null) return done;
+          return true;
+        }
+        // Nothing to resume: play from where the value is, along the
+        // timeline from `from` (or from the value itself) to `to`.
+        return animateVariable(
+          context,
+          action.copyWith(mode: AnimateVariableMode.play),
+          fromCurrentPlace: true,
+        );
+      case AnimateVariableMode.play:
+        final double? to = number(action.to);
+        if (to == null) return false;
+        int ms = action.durationMs;
+        if (action.duration case final String duration
+            when duration.trim().isNotEmpty) {
+          final double? bound = number(duration);
+          if (bound != null && bound >= 0) ms = bound.round();
+        }
+        return VariableAnimator.play(
+          variable,
+          from: number(action.from),
+          to: to,
+          duration: Duration(milliseconds: ms),
+          curve: flutterCurveOf(action.curve),
+          fromCurrentPlace: fromCurrentPlace,
+        );
+      case AnimateVariableMode.pause:
+        return VariableAnimator.pauseVariable(variable);
+      case AnimateVariableMode.stop:
+        return VariableAnimator.stop(variable);
+      case AnimateVariableMode.seek:
+        final double? to = number(action.to);
+        if (to == null) return false;
+        VariableAnimator.seek(variable, to);
+        return true;
     }
   }
 
@@ -2409,7 +2491,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   /// milliseconds along [SetVariableAction.curve], every frame, and
   /// completes when it arrives (or when a newer glide or set takes over).
   /// Anything but a number is set at once.
-  static Future<bool> animateVariable(
+  static Future<bool> glideVariable(
     BuildContext context,
     SetVariableAction action,
     int ms,
