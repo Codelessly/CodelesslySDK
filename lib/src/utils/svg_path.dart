@@ -1,5 +1,8 @@
+import 'dart:ui' show PathMetric, Tangent;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 
 import '../transformers/utils/dash_path.dart';
 import 'extensions.dart';
@@ -178,14 +181,18 @@ class _SvgPathParser {
   }
 }
 
-/// Strokes [path] with [color], [strokeWidth], [strokeCap] and
-/// [strokeJoin], dashed by [dashPattern] when it has one.
+/// Strokes [path] with [color] (or [gradient]), [strokeWidth], [strokeCap]
+/// and [strokeJoin], dashed by [dashPattern] when it has one.
+///
+/// A [gradient] is laid out over the painted box, as a box's gradient
+/// paint is, so an angular gradient centred in the box runs around an arc.
 class SvgPathStrokePainter extends CustomPainter {
   /// Creates a [SvgPathStrokePainter].
   const SvgPathStrokePainter({
     required this.path,
     required this.color,
     required this.strokeWidth,
+    this.gradient,
     this.strokeCap = StrokeCapEnum.none,
     this.strokeJoin = StrokeJoinEnum.miter,
     this.strokeMiterLimit = 4,
@@ -195,8 +202,12 @@ class SvgPathStrokePainter extends CustomPainter {
   /// The path, in the painted box's coordinates.
   final Path path;
 
-  /// The stroke colour.
+  /// The stroke colour, used when there is no [gradient].
   final Color color;
+
+  /// The gradient the stroke is painted with, over the painted box, or null
+  /// for a solid [color].
+  final Gradient? gradient;
 
   /// The stroke width, centered on [path].
   final double strokeWidth;
@@ -223,6 +234,9 @@ class SvgPathStrokePainter extends CustomPainter {
       ..strokeJoin = strokeJoin.flutterStrokeJoin
       ..strokeMiterLimit = strokeMiterLimit
       ..isAntiAlias = true;
+    if (gradient case final Gradient gradient) {
+      paint.shader = gradient.createShader(Offset.zero & size);
+    }
     final List<double> dashes = dashPattern.where((d) => d > 0).toList();
     canvas.drawPath(
       dashes.isEmpty
@@ -236,6 +250,7 @@ class SvgPathStrokePainter extends CustomPainter {
   bool shouldRepaint(SvgPathStrokePainter oldDelegate) =>
       oldDelegate.path != path ||
       oldDelegate.color != color ||
+      oldDelegate.gradient != gradient ||
       oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.strokeCap != strokeCap ||
       oldDelegate.strokeJoin != strokeJoin ||
@@ -254,14 +269,170 @@ class SvgPathStrokePainter extends CustomPainter {
 /// Clips its child to an SVG [path].
 class SvgPathClipper extends CustomClipper<Path> {
   /// Creates a [SvgPathClipper].
-  const SvgPathClipper(this.data);
+  const SvgPathClipper(this.data, {this.offset = Offset.zero});
 
   /// The SVG path data.
   final String data;
 
-  @override
-  Path getClip(Size size) => parseSvgPath(data) ?? Path();
+  /// Where the path's origin is in the clipped child (a child laid out over
+  /// the path's bounds rather than the node's box).
+  final Offset offset;
 
   @override
-  bool shouldReclip(SvgPathClipper oldClipper) => oldClipper.data != data;
+  Path getClip(Size size) =>
+      (parseSvgPath(data) ?? Path()).shift(offset);
+
+  @override
+  bool shouldReclip(SvgPathClipper oldClipper) =>
+      oldClipper.data != data || oldClipper.offset != offset;
+}
+
+/// Takes pointer events only on its [path]: inside it when [filled], and
+/// within half the [strokeWidth] plus [slop] of its outline when
+/// [stroked]. Everywhere else in its box it lets them through to whatever
+/// is beneath.
+///
+/// A rectangle drawn from SVG path data ([RectangleNode.path]) still has a
+/// rectangular box, often far larger than its shape: every run on a trail
+/// map is a full-map box with one line in it. Without this, the topmost
+/// box took every tap on the map, so no line under it could be tapped.
+class SvgPathHitRegion extends SingleChildRenderObjectWidget {
+  /// Creates a [SvgPathHitRegion].
+  const SvgPathHitRegion({
+    super.key,
+    required this.path,
+    required this.filled,
+    required this.stroked,
+    this.strokeWidth = 0,
+    this.slop = kSvgPathHitSlop,
+    this.viewBox,
+    super.child,
+  });
+
+  /// The box the path's coordinates are in, stretched to this widget's
+  /// size (a [PathNode]'s view box). Null: the coordinates are pixels.
+  final Size? viewBox;
+
+  /// The shape, in the box's own coordinates.
+  final Path path;
+
+  /// Whether taps inside the shape count.
+  final bool filled;
+
+  /// Whether taps on the outline count.
+  final bool stroked;
+
+  /// The outline's width.
+  final double strokeWidth;
+
+  /// How far past the outline's edge a tap still counts.
+  final double slop;
+
+  @override
+  RenderSvgPathHitRegion createRenderObject(BuildContext context) =>
+      RenderSvgPathHitRegion(
+        path: path,
+        filled: filled,
+        stroked: stroked,
+        strokeWidth: strokeWidth,
+        slop: slop,
+        viewBox: viewBox,
+      );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderSvgPathHitRegion renderObject,
+  ) {
+    renderObject
+      ..path = path
+      ..filled = filled
+      ..stroked = stroked
+      ..strokeWidth = strokeWidth
+      ..slop = slop
+      ..viewBox = viewBox;
+  }
+}
+
+/// How far past a path's stroke a tap still hits it, in logical pixels: a
+/// thin line is hard to hit exactly with a finger.
+const double kSvgPathHitSlop = 8;
+
+/// The render object of [SvgPathHitRegion].
+class RenderSvgPathHitRegion extends RenderProxyBox {
+  /// Creates a [RenderSvgPathHitRegion].
+  RenderSvgPathHitRegion({
+    required Path path,
+    required this.filled,
+    required this.stroked,
+    required this.strokeWidth,
+    required this.slop,
+    this.viewBox,
+  }) : _path = path;
+
+  /// See [SvgPathHitRegion.viewBox].
+  Size? viewBox;
+
+  Path _path;
+  List<PathMetric>? _metrics;
+
+  /// The shape.
+  Path get path => _path;
+
+  set path(Path value) {
+    if (identical(value, _path)) return;
+    _path = value;
+    _metrics = null;
+  }
+
+  /// See [SvgPathHitRegion.filled].
+  bool filled;
+
+  /// See [SvgPathHitRegion.stroked].
+  bool stroked;
+
+  /// See [SvgPathHitRegion.strokeWidth].
+  double strokeWidth;
+
+  /// See [SvgPathHitRegion.slop].
+  double slop;
+
+  /// Whether [position] is on the shape.
+  bool hits(Offset position) {
+    if (filled && _path.contains(position)) return true;
+    if (!stroked) return false;
+    final double reach = strokeWidth / 2 + slop;
+    final double reach2 = reach * reach;
+    // Sample the outline every few pixels; close enough for a finger.
+    final double step = (reach / 2).clamp(1.0, 4.0);
+    for (final PathMetric metric in _metrics ??= _path
+        .computeMetrics()
+        .toList()) {
+      for (double d = 0; d <= metric.length; d += step) {
+        final Tangent? t = metric.getTangentForOffset(d);
+        if (t != null && (t.position - position).distanceSquared <= reach2) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final Size? box = viewBox;
+    final bool onPath;
+    if (box != null && hasSize && size.width > 0 && size.height > 0) {
+      // Into the path's own coordinates; the reach scales with them.
+      final double sx = box.width / size.width, sy = box.height / size.height;
+      final double keep = slop;
+      slop = slop * (sx + sy) / 2;
+      onPath = hits(Offset(position.dx * sx, position.dy * sy));
+      slop = keep;
+    } else {
+      onPath = hits(position);
+    }
+    if (!onPath) return false;
+    return super.hitTest(result, position: position);
+  }
 }

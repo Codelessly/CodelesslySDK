@@ -339,7 +339,13 @@ class ConditionEvaluator<R extends Object>
   R? visitPaginateAction(PaginateAction action) => null;
 
   @override
+  R? visitAnimateVariableAction(AnimateVariableAction action) => null;
+
+  @override
   R? visitSpeakAction(SpeakAction action) => null;
+
+  @override
+  R? visitHapticAction(HapticAction action) => null;
 
   @override
   R? visitScrollToAction(ScrollToAction action) => null;
@@ -539,6 +545,11 @@ class ConditionPrinter
   }
 
   @override
+  void visitHapticAction(HapticAction action) {
+    _buffer.writeln('\tHaptic: ${action.kind.name}');
+  }
+
+  @override
   void visitPlaySoundAction(PlaySoundAction action) {
     _buffer.writeln('\tPlay sound: ${action.sound}');
   }
@@ -553,6 +564,14 @@ class ConditionPrinter
   @override
   void visitPaginateAction(PaginateAction action) {
     _buffer.writeln('\tPaginate ${action.controller} ${action.command.name}');
+  }
+
+  @override
+  void visitAnimateVariableAction(AnimateVariableAction action) {
+    _buffer.writeln(
+      '\tAnimate variable ${action.variable}: ${action.mode.name} to '
+      '${action.to} over ${action.duration ?? action.durationMs} ms',
+    );
   }
 
   @override
