@@ -1973,6 +1973,9 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.scrollTo:
         return {};
+      case ActionType.paginate:
+        final PaginateAction action = this as PaginateAction;
+        return _namesIn([action.page, action.pageSize], includePredefined);
       case ActionType.animateVariable:
         final AnimateVariableAction action = this as AnimateVariableAction;
         return {
@@ -2013,8 +2016,7 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.focus:
         return {};
-      case ActionType.paginate:
-        return {};
+
       case ActionType.editText:
         final EditTextAction action = this as EditTextAction;
         strings.addAll([action.text, action.before, ?action.after]);

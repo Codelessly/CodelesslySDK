@@ -71,6 +71,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'audioPlayer': PassiveAudioPlayerTransformer(getNode, this),
       'divider': PassiveDividerTransformer(getNode, this),
       'barcode': PassiveBarcodeTransformer(getNode, this),
+      'pagination': PassivePaginationTransformer(getNode, this),
+      'tableView': PassiveTableViewTransformer(getNode, this),
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),

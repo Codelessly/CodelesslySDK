@@ -336,6 +336,9 @@ class ConditionEvaluator<R extends Object>
   R? visitControlDragAction(ControlDragAction action) => null;
 
   @override
+  R? visitPaginateAction(PaginateAction action) => null;
+
+  @override
   R? visitAnimateVariableAction(AnimateVariableAction action) => null;
 
   @override
@@ -345,7 +348,7 @@ class ConditionEvaluator<R extends Object>
   R? visitHapticAction(HapticAction action) => null;
 
   @override
-  R? visitPaginateAction(PaginateAction action) => null;
+  R? visitRunScriptAction(RunScriptAction action) => null;
 
   @override
   R? visitScrollToAction(ScrollToAction action) => null;
@@ -355,9 +358,6 @@ class ConditionEvaluator<R extends Object>
 
   @override
   R? visitPlayAnimationAction(PlayAnimationAction action) => null;
-
-  @override
-  R? visitRunScriptAction(RunScriptAction action) => null;
 
   @override
   R? visitEditTextAction(EditTextAction action) => null;
@@ -553,8 +553,8 @@ class ConditionPrinter
   }
 
   @override
-  void visitPaginateAction(PaginateAction action) {
-    _buffer.writeln('\tPaginate');
+  void visitRunScriptAction(RunScriptAction action) {
+    _buffer.writeln('\tRun Script ${action.scriptId} with ${action.arguments}');
   }
 
   @override
@@ -570,6 +570,11 @@ class ConditionPrinter
   }
 
   @override
+  void visitPaginateAction(PaginateAction action) {
+    _buffer.writeln('\tPaginate ${action.controller} ${action.command.name}');
+  }
+
+  @override
   void visitAnimateVariableAction(AnimateVariableAction action) {
     _buffer.writeln(
       '\tAnimate variable ${action.variable}: ${action.mode.name} to '
@@ -579,11 +584,6 @@ class ConditionPrinter
 
   @override
   void visitPlayAnimationAction(PlayAnimationAction action) {}
-
-  @override
-  void visitRunScriptAction(RunScriptAction action) {
-    _buffer.writeln('\tRun Script ${action.scriptId} with ${action.arguments}');
-  }
 
   @override
   void visitEditTextAction(EditTextAction action) {}
