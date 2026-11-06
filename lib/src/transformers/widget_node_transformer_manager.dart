@@ -992,6 +992,32 @@ abstract class WidgetNodeTransformerManager
     variable.value = variable.value.copyWith(value: value);
   }
 
+  /// [track] with its [DragTrackModel.defaultValue] read from the node's
+  /// `track.defaultValue` binding when it has one that gives a number (the
+  /// list item's own default), else [track] as it is.
+  static DragTrackModel trackWithBoundDefault(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    if (!node.variables.containsKey(DragTrackModel.defaultValueVariable)) {
+      return track;
+    }
+    final Object? raw = PropertyValueDelegate.getPropertyValue<Object>(
+      node,
+      DragTrackModel.defaultValueVariable,
+      scopedValues: scopedValues,
+    );
+    final double? value = switch (raw) {
+      num n => n.toDouble(),
+      String s => double.tryParse(s.trim()),
+      _ => null,
+    };
+    return value == null || !value.isFinite
+        ? track
+        : track.copyWith(defaultValue: value);
+  }
+
   /// Writes a drag's live [values] into the variable named [name], so nodes
   /// outside the dragged one can follow it (see [DragModel.shareAs]).
   static void shareDragValues(
@@ -1113,10 +1139,15 @@ abstract class WidgetNodeTransformerManager
     BuildContext context,
     BaseNode node,
     DragModel drag,
-    DragTrackModel track,
+    DragTrackModel model,
     List<Reaction> reactions,
     Widget child,
   ) {
+    final DragTrackModel track = trackWithBoundDefault(
+      node,
+      model,
+      ScopedValues.of(context),
+    );
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
