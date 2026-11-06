@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import 'constants.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
@@ -1970,6 +1969,9 @@ extension ActionModelExt on ActionModel {
         return _namesIn(strings, includePredefined);
       case ActionType.scrollTo:
         return {};
+      case ActionType.paginate:
+        final PaginateAction action = this as PaginateAction;
+        return _namesIn([action.page, action.pageSize], includePredefined);
       case ActionType.animateVariable:
         final AnimateVariableAction action = this as AnimateVariableAction;
         return {
@@ -2489,7 +2491,7 @@ extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
 }
 
 extension VariableDataExt on VariableData {
-  bool get isApiVariable => name.startsWith(SDKConstants.apiVariablePrefix);
+  bool get isApiVariable => isApiVariableName(name);
 }
 
 extension TextFieldFormatterExt on TextInputFormatterModel {

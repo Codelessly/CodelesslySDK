@@ -71,6 +71,8 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       'audioPlayer': PassiveAudioPlayerTransformer(getNode, this),
       'divider': PassiveDividerTransformer(getNode, this),
       'barcode': PassiveBarcodeTransformer(getNode, this),
+      'pagination': PassivePaginationTransformer(getNode, this),
+      'tableView': PassiveTableViewTransformer(getNode, this),
       'loadingIndicator': PassiveLoadingIndicatorTransformer(getNode, this),
       'dropdown': PassiveDropdownTransformer(getNode, this),
       'progressBar': PassiveProgressBarTransformer(getNode, this),
@@ -328,6 +330,19 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
       // The design canvas (isPreview) shows motion at rest: an entrance
       // from opacity 0 would otherwise wait there for frames an idle canvas
       // never draws, leaving the node invisible.
+      widget = applyFlip(
+        context,
+        styled,
+        widget,
+        scopedValues: preview,
+        animate: !settings.isPreview,
+      );
+      widget = applyTilt(
+        context,
+        styled,
+        widget,
+        enabled: settings.withReactions && !settings.isPreview,
+      );
       widget = applyWidgetMotion(
         context,
         styled,
@@ -346,6 +361,9 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     if (!settings.withReactions) {
       widget = applyTrackPose(context, styled, widget, scopedValues: preview);
     }
+    // A face of a flip card hides when turned away; the back one is turned
+    // over in advance.
+    widget = applyFlipFace(context, styled, widget);
     if (settings.withConstraints) {
       widget = applyWidgetConstraints(styled, widget);
     }
@@ -419,19 +437,23 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
         // The feedback node is usually hidden where it is designed: it shows
         // anyway, while the nodes inside it keep their own visibility (a
         // pedal's two- and three-knob faces).
-        buildNode: (context, id) => ShownAnyway(
-          nodeId: id,
-          child: Builder(
-            builder: (context) => buildWidgetByID(
-              id,
-              context,
-              settings: const WidgetBuildSettings(
-                debugLabel: 'drag feedback',
-                withReactions: false,
+        // It is built by id from the layout's nodes, so it need not be shown
+        // anywhere; an id the layout doesn't have draws nothing.
+        buildNode: (context, id) => tryGetNode(id) == null
+            ? const SizedBox.shrink()
+            : ShownAnyway(
+                nodeId: id,
+                child: Builder(
+                  builder: (context) => buildWidgetByID(
+                    id,
+                    context,
+                    settings: const WidgetBuildSettings(
+                      debugLabel: 'drag feedback',
+                      withReactions: false,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
         child: widget,
       );
     }
@@ -449,16 +471,14 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
   }
 
   /// Wraps [widget] in a tooltip showing [node]'s tooltip text (its data
-  /// substituted) and, when [node] is zoomable, in a viewer that pinches,
-  /// scrolls and double-taps to zoom.
+  /// substituted).
   Widget applyTooltipAndZoom(
     BuildContext context,
     BaseNode node,
     Widget widget,
   ) {
-    if (node.zoomable) {
-      widget = ZoomableBox(child: widget);
-    }
+    // A zoomable node zooms through its transform gesture
+    // ([BaseNode.effectiveTransformGesture]; see wrapWithTransformGesture).
     if (node.tooltip.trim().isNotEmpty) {
       final String message = PropertyValueDelegate.substituteVariables(
         node.tooltip,
@@ -485,6 +505,20 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     ScopedValues? scopedValues,
   }) {
     final ScopedValues scope = scopedValues ?? ScopedValues.of(context);
+    // A state in effect may bind properties itself (its patch's
+    // `variables`, e.g. a hovered card's border `${= overdue ? red :
+    // honey}`): they replace the node's own bindings of the same keys and
+    // are evaluated with them below.
+    if (PropertyOverrideScope.patchFor(context, node.id)
+        case {'variables': final Map stateVariables}
+        when stateVariables.isNotEmpty) {
+      final BaseNode? bound = NodeJsonConverter().fromJson(
+        PropertyOverridePatch.apply(node.toJson(), {
+          'variables': stateVariables,
+        }),
+      );
+      if (bound != null) node = bound..parentID = node.parentID;
+    }
     T? value<T extends Object>(String property) =>
         PropertyValueDelegate.getPropertyValue<T>(
           node,

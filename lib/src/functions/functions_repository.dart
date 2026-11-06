@@ -1,4 +1,5 @@
 import 'builtin_functions.dart';
+
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
@@ -230,6 +231,8 @@ class FunctionsRepository {
           drag.command,
           drag.direction,
         ).then((_) => true);
+      case ActionType.paginate:
+        return paginate(context, action as PaginateAction);
       case ActionType.haptic:
         return haptic(context, action as HapticAction);
       case ActionType.animateVariable:
@@ -315,6 +318,57 @@ class FunctionsRepository {
         VariableAnimator.seek(variable, to);
         return true;
     }
+  }
+
+  /// Moves the pagination controller [action] names. A controller no list
+  /// has created (its list isn't on screen) is skipped.
+  static Future<bool> paginate(
+    BuildContext context,
+    PaginateAction action,
+  ) async {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    String resolve(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    ).trim();
+    int? number(String text) {
+      final String value = resolve(text);
+      return int.tryParse(value) ?? double.tryParse(value)?.round();
+    }
+
+    final String name = resolve(action.controller);
+    final PaginationController? controller = context
+        .read<CodelesslyContext?>()
+        ?.pagination[name];
+    if (controller == null) {
+      DebugLogger.instance.printInfo(
+        'No pagination controller named "$name" is on screen.',
+        name: 'FunctionsRepository',
+      );
+      return true;
+    }
+    switch (action.command) {
+      case PaginateCommand.next:
+        await controller.next();
+      case PaginateCommand.previous:
+        await controller.previous();
+      case PaginateCommand.goTo:
+        final int? page = number(action.page);
+        if (page != null) await controller.goTo(page);
+      case PaginateCommand.first:
+        await controller.first();
+      case PaginateCommand.last:
+        await controller.last();
+      case PaginateCommand.refresh:
+        await controller.refresh();
+      case PaginateCommand.retry:
+        await controller.retry();
+      case PaginateCommand.setPageSize:
+        final int? size = number(action.pageSize);
+        if (size != null) await controller.setPageSize(size);
+    }
+    return true;
   }
 
   /// Focuses (or unfocuses) the text field [action] names.
@@ -982,7 +1036,11 @@ class FunctionsRepository {
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
-      final bool popped = await Navigator.maybePop(context, parsedParams);
+      // The screen's own pop leaves even while it blocks back.
+      final bool popped = await BackInterceptor.allowPop(
+        context,
+        () => Navigator.maybePop(context, parsedParams),
+      );
       // Nothing to go back to (the screen was opened directly): a pop with a
       // destination goes there instead.
       if (!popped && action.destinationId.isNotEmpty && context.mounted) {
@@ -1042,6 +1100,7 @@ class FunctionsRepository {
           context,
           navigationRoute<void>(
             action,
+            origin: context,
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
@@ -1068,6 +1127,7 @@ class FunctionsRepository {
           action,
           destination: navigationRoute<void>(
             action,
+            origin: context,
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) {
               final Widget page = CodelesslyWidget(
@@ -1093,6 +1153,7 @@ class FunctionsRepository {
             context,
             navigationRoute<void>(
               action,
+              origin: context,
               settings: RouteSettings(arguments: parsedParams),
               builder: (context) {
                 final Widget page = CodelesslyWidget(
@@ -1123,7 +1184,10 @@ class FunctionsRepository {
       // A dialog or sheet over the screen closes first.
       final ModalRoute<Object?>? modal = ModalRoute.of(context);
       if (modal != null && (!modal.isCurrent || modal.settings is! Page)) {
-        await Navigator.maybePop(context, params);
+        await BackInterceptor.allowPop(
+          context,
+          () => Navigator.maybePop(context, params),
+        );
         return;
       }
       final bool fallsBack =
@@ -1160,6 +1224,8 @@ class FunctionsRepository {
           transition: action.transition,
           transitionMs: action.transitionMs,
           reverseTransitionMs: action.reverseTransitionMs,
+          routeTransition: action.routeTransition,
+          anchor: RevealAnchor.of(context),
         );
       case NavigationType.replace || NavigationType.pop:
         // The new screen takes over the chain: the actions after this one
@@ -1173,6 +1239,8 @@ class FunctionsRepository {
             transition: action.transition,
             transitionMs: action.transitionMs,
             reverseTransitionMs: action.reverseTransitionMs,
+            routeTransition: action.routeTransition,
+            anchor: RevealAnchor.of(context),
           ),
         );
       case NavigationType.reset:
@@ -1222,11 +1290,24 @@ class FunctionsRepository {
   /// [NavigationAction.transition] over [NavigationAction.resolvedTransitionMs]
   /// (and back over [NavigationAction.resolvedReverseTransitionMs]).
   /// Shared elements fly with every transition, as long as it lasts.
+  ///
+  /// An action with a [NavigationAction.routeTransition] opens a
+  /// [CodelesslyRouteTransitionRoute] instead, whose reveals grow from the
+  /// last tap or from [origin]'s box (the node that navigated).
   static PageRoute<T> navigationRoute<T>(
     NavigationAction action, {
     required RouteSettings settings,
     required WidgetBuilder builder,
+    BuildContext? origin,
   }) {
+    if (action.routeTransition case final RouteTransition custom?) {
+      return CodelesslyRouteTransitionRoute<T>(
+        transition: custom,
+        settings: settings,
+        anchor: RevealAnchor.of(origin),
+        builder: builder,
+      );
+    }
     final PageTransition transition = webTransition(action.transition);
     if (transition == PageTransition.platform) {
       return MaterialPageRoute<T>(settings: settings, builder: builder);
@@ -1379,6 +1460,7 @@ class FunctionsRepository {
       barrierBlur: action.barrierBlur,
       enterScale: action.enterScale,
       sheetBelowWidth: action.sheetBelowWidth,
+      routeTransition: action.routeTransition,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
@@ -1392,6 +1474,37 @@ class FunctionsRepository {
     final Object? x = result['x'], y = result['y'];
     if (x is! num || y is! num) return null;
     return Offset(x.toDouble(), y.toDouble());
+  }
+
+  /// What a click, long press, double tap, right click or pointer trigger
+  /// reports of where it landed: `x`, `y` in the node, `globalX`, `globalY`
+  /// on screen, the node's `width` and `height`, and `fx`, `fy`, where it
+  /// landed as a share (0 to 1) of the node's width and height: a tap on a
+  /// map that resizes with the screen places a pin at the same spot on any
+  /// size.
+  static Map<String, double> pointerResult(
+    Offset local,
+    Offset global,
+    Size? size,
+  ) {
+    final double width = size?.width ?? 0, height = size?.height ?? 0;
+    return {
+      'x': local.dx,
+      'y': local.dy,
+      'globalX': global.dx,
+      'globalY': global.dy,
+      'fx': width > 0 ? (local.dx / width).clamp(0.0, 1.0) : 0.0,
+      'fy': height > 0 ? (local.dy / height).clamp(0.0, 1.0) : 0.0,
+      'width': width,
+      'height': height,
+    };
+  }
+
+  /// The laid out size of the box [context] builds, or null.
+  static Size? boxSizeOf(BuildContext context) {
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.size;
   }
 
   /// The rect of the node that [context] belongs to, relative to its
@@ -1469,6 +1582,7 @@ class FunctionsRepository {
     double barrierBlur = 0,
     double enterScale = 1,
     double sheetBelowWidth = 600,
+    RouteTransition? routeTransition,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -1567,6 +1681,7 @@ class FunctionsRepository {
             barrierBlur: barrierBlur,
             enterScale: enterScale,
             sheetBelowWidth: sheetBelowWidth,
+            routeTransition: routeTransition,
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
@@ -1673,7 +1788,11 @@ class FunctionsRepository {
     double barrierBlur = 0,
     double enterScale = 1,
     double sheetBelowWidth = 600,
+    RouteTransition? routeTransition,
   }) {
+    // A toast already up goes under the dialog, which opens above it.
+    final WidgetBuilder dialogContent = builder;
+    builder = (context) => ToastBelowRoute(child: dialogContent(context));
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
         context: context,
@@ -1758,6 +1877,52 @@ class FunctionsRepository {
       );
     }
 
+    Widget dialogBody(BuildContext context) => Padding(
+      padding: insets,
+      child: maxHeightFactor == null
+          ? content(context, CanvasSizing.design)
+          : ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight:
+                    MediaQuery.sizeOf(context).height *
+                    maxHeightFactor.clamp(0, 1),
+              ),
+              child: content(context, CanvasSizing.design),
+            ),
+    );
+
+    // A custom transition: a page route, so shared elements fly into and
+    // out of the modal, with its own entrance, the screen behind it moving
+    // and a drag that dismisses it.
+    if (routeTransition != null) {
+      final bool fullScreen = presentation == DialogPresentation.fullScreen;
+      return Navigator.of(context).push<T>(
+        CodelesslyRouteTransitionRoute<T>(
+          modal: true,
+          transition: routeTransition,
+          settings: routeSettings,
+          anchor: RevealAnchor.of(context),
+          dismissibleBarrier: barrierDismissible,
+          fallbackBarrierColor: fullScreen
+              ? (barrierColor ?? Colors.black)
+              : (barrierColor ?? Colors.black54),
+          builder: (context) {
+            if (asSheet) {
+              final Widget sheet = sheetContent(context);
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: showDragHandle
+                    ? LayoutPresentationRoute.withDragHandle(sheet)
+                    : sheet,
+              );
+            }
+            if (fullScreen) return content(context, CanvasSizing.fill);
+            return SafeArea(child: dialogBody(context));
+          },
+        ),
+      );
+    }
+
     if (asSheet) {
       return showModalBottomSheet<T>(
         context: context,
@@ -1797,19 +1962,6 @@ class FunctionsRepository {
         pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
       );
     }
-    Widget dialogBody(BuildContext context) => Padding(
-      padding: insets,
-      child: maxHeightFactor == null
-          ? content(context, CanvasSizing.design)
-          : ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight:
-                    MediaQuery.sizeOf(context).height *
-                    maxHeightFactor.clamp(0, 1),
-              ),
-              child: content(context, CanvasSizing.design),
-            ),
-    );
     if (barrierBlur > 0 || enterScale != 1) {
       // A frosted scrim: the page behind blurs while the dialog fades and
       // grows in, both following the route's animation.

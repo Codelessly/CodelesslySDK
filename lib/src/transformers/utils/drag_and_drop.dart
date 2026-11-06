@@ -95,8 +95,20 @@ class DragSession {
   /// The size of the dragged node.
   final Size size;
 
-  /// Where the pointer holds the dragged node, from its top left.
+  /// Where the pointer holds the dragged node, from its top left: where it
+  /// was grabbed, or its centre ([FeedbackAnchor.center]).
   Offset grab = Offset.zero;
+
+  /// Where the drag's feedback is held from its top left (the drag anchor):
+  /// [grab], or zero for a copy centred on the pointer, which is shifted by
+  /// half its own size instead.
+  Offset feedbackAnchor = Offset.zero;
+
+  /// The global top left of the dragged node's box for a drag whose
+  /// feedback is at [feedbackOffset]: so its centre, where `drag.x` and
+  /// `drag.y` are measured, is the pointer for a centred copy.
+  Offset nodeTopLeft(Offset feedbackOffset) =>
+      feedbackOffset + feedbackAnchor - grab;
 
   /// The drop target under the pointer, or null.
   Object? overTarget;
@@ -114,6 +126,15 @@ class DragSession {
 
   /// Whether [overTarget] accepts the drop (its `acceptIf`).
   bool accepted = false;
+
+  /// Where the centre of the dragged node is over [overTarget], in logical
+  /// pixels from the target's top left ([x], [y]) and as a share of the
+  /// target's size, 0 to 1 ([fx], [fy]): the spot a pin dropped on a map
+  /// lands on. 0 while over no target.
+  double x = 0;
+  double y = 0;
+  double fx = 0;
+  double fy = 0;
 
   /// Whether [overTarget] is full ([DropTargetModel.fullIf]): it takes no
   /// drop, but still reports itself in [over] so a binding can say why.
@@ -142,6 +163,10 @@ class DragSession {
     'beforeId': beforeId,
     'before': before,
     'accepted': accepted,
+    'x': x,
+    'y': y,
+    'fx': fx,
+    'fy': fy,
     'full': full,
     'width': size.width,
     'height': size.height,
@@ -171,6 +196,10 @@ class DragAndDropController extends ChangeNotifier {
     'beforeId': '',
     'before': null,
     'accepted': false,
+    'x': 0.0,
+    'y': 0.0,
+    'fx': 0.0,
+    'fy': 0.0,
     'full': false,
     'width': 0.0,
     'height': 0.0,
@@ -243,6 +272,56 @@ Object? evaluateDragValue(String text, BuildContext context) {
     scopedValues: scopedValues,
     nullSubstitutionMode: NullSubstitutionMode.emptyString,
   );
+}
+
+/// [child] with what a node built at [from] reads, for a node drawn in the
+/// app's overlay (the copy that follows the pointer while dragging, or the
+/// node it shows instead): the Codelessly providers
+/// ([reprovideCodelessly]), the list items around [from] (its own and the
+/// outer list's), its screen's route parameters, the drag and track values
+/// of a node it is in, and the text direction.
+Widget reprovideNodeScope(BuildContext from, Widget child) {
+  Widget result = child;
+  final IndexedItem? item = IndexedItemProvider.maybeOf(from);
+  if (item != null) {
+    result = IndexedItemProvider(item: item, child: result);
+    final IndexedItem? parent = IndexedItemProvider.parentOf(from);
+    if (parent != null) {
+      result = IndexedItemProvider(item: parent, child: result);
+    }
+  }
+  final DragValues? drag = DragScope.maybeOf(from);
+  if (drag != null) result = DragScope(values: drag, child: result);
+  final TrackValues? track = TrackScope.maybeOf(from);
+  if (track != null) result = TrackScope(values: track, child: result);
+  final CodelesslyRouteScope? route = CodelesslyRouteScope.maybeOf(from);
+  if (route != null) {
+    result = CodelesslyRouteScope(
+      layoutId: route.layoutId,
+      location: route.location,
+      params: route.params,
+      fromLink: route.fromLink,
+      child: result,
+    );
+  } else {
+    final Map<String, dynamic>? params =
+        RouteParamsScope.maybeOf(from) ??
+        switch (ModalRoute.of(from)?.settings.arguments) {
+          final Map<String, dynamic> arguments => arguments,
+          _ => null,
+        };
+    if (params != null) {
+      result = RouteParamsScope(params: params, child: result);
+    }
+  }
+  result = Directionality(
+    textDirection: Directionality.maybeOf(from) ?? TextDirection.ltr,
+    child: result,
+  );
+  // A layout without an app (a test, a standalone tree) reads `Codelessly?`.
+  final Codelessly? codelessly = from.read<Codelessly?>();
+  result = Provider<Codelessly?>.value(value: codelessly, child: result);
+  return reprovideCodelessly(from, result);
 }
 
 /// Makes [child] (a node's widget) draggable as [model] says.
@@ -413,27 +492,18 @@ class _DragSourceBoxState extends State<DragSourceBox>
   }
 
   /// Flies the node back from where it was let go to its place, on the
-  /// model's spring ([DraggableModel.returnSpring]).
+  /// model's spring ([DraggableModel.effectivePhysics]: its physics, or
+  /// the first [DraggableModel.returnSpring] settings).
   void _springBack(Offset offset) {
     final RenderObject? box = context.findRenderObject();
-    if (!widget.model.returnSpring || box is! RenderBox || !box.attached) {
+    final PhysicsModel? physics = widget.model.effectivePhysics;
+    if (physics == null || box is! RenderBox || !box.attached) {
       return;
     }
     _returnFrom = offset - box.localToGlobal(Offset.zero);
     _return
       ..value = 0
-      ..animateWith(
-        SpringSimulation(
-          SpringDescription(
-            mass: 1,
-            stiffness: widget.model.springStiffness,
-            damping: widget.model.springDamping,
-          ),
-          0,
-          1,
-          0,
-        ),
-      );
+      ..animateWith(SpringSimulation(springOf(physics), 0, 1, 0));
   }
 
   /// The node drawn under the pointer, in the app's overlay. What the node
@@ -442,16 +512,10 @@ class _DragSourceBoxState extends State<DragSourceBox>
   Widget _feedback(BuildContext overlayContext) {
     final BuildContext context = this.context;
     final DraggableModel model = widget.model;
-    final CodelesslyContext codelesslyContext = context
-        .read<CodelesslyContext>();
-    final Codelessly? codelessly = context.read<Codelessly?>();
-    final IndexedItem? item = IndexedItemProvider.maybeOf(context);
     final CapturedThemes themes = InheritedTheme.capture(
       from: context,
       to: Navigator.maybeOf(context, rootNavigator: true)?.context,
     );
-    final TextDirection direction =
-        Directionality.maybeOf(context) ?? TextDirection.ltr;
     final Widget content =
         model.feedbackNodeId.isNotEmpty && widget.buildNode != null
         // Drawn in the overlay, nothing around the feedback node gives it its
@@ -499,23 +563,9 @@ class _DragSourceBoxState extends State<DragSourceBox>
     }
     // The feedback is drawn in the app's overlay, outside this layout:
     // take what the node reads along.
-    feedback = MultiProvider(
-      providers: [
-        ChangeNotifierProvider<CodelesslyContext>.value(
-          value: codelesslyContext,
-        ),
-        if (codelessly != null) Provider<Codelessly>.value(value: codelessly),
-        Provider<Codelessly?>.value(value: codelessly),
-      ],
-      child: Directionality(
-        textDirection: direction,
-        child: Material(
-          type: MaterialType.transparency,
-          child: item == null
-              ? feedback
-              : IndexedItemProvider(item: item, child: feedback),
-        ),
-      ),
+    feedback = reprovideNodeScope(
+      context,
+      Material(type: MaterialType.transparency, child: feedback),
     );
     if (model.feedbackAnchor == FeedbackAnchor.center) {
       feedback = FractionalTranslation(
@@ -526,6 +576,9 @@ class _DragSourceBoxState extends State<DragSourceBox>
     return themes.wrap(IgnorePointer(child: feedback));
   }
 
+  /// Where the feedback is held from its top left: where the pointer
+  /// grabbed the node, or the node's centre
+  /// ([DraggableModel.feedbackAnchor]).
   Offset _anchor(
     Draggable<Object> draggable,
     BuildContext context,
@@ -533,14 +586,18 @@ class _DragSourceBoxState extends State<DragSourceBox>
   ) {
     final RenderBox box = context.findRenderObject()! as RenderBox;
     _size = box.size;
-    final Offset grab = box.globalToLocal(position);
-    _payload = _start(grab);
+    final bool centred = widget.model.feedbackAnchor == FeedbackAnchor.center;
+    _payload = _start(box.globalToLocal(position));
+    // A centred copy is held by the centre of what is dragged (the feedback
+    // node at its own size): `drag.x` and `drag.y` are then the pointer.
+    final DragSession session = _payload!.session;
+    if (centred) session.grab = session.size.center(Offset.zero);
+    final Offset grab = session.grab;
     // Held by its centre, the copy is drawn from the pointer and shifted
     // back by half its own size (see [_feedback]), whatever size it is.
-    if (widget.model.feedbackAnchor == FeedbackAnchor.center) {
-      return Offset.zero;
-    }
-    return grab;
+    final Offset anchor = centred ? Offset.zero : grab;
+    session.feedbackAnchor = anchor;
+    return anchor;
   }
 
   @override
@@ -927,8 +984,34 @@ class DropTargetBoxState extends State<DropTargetBox> {
     return value == true || value == 'true';
   }
 
-  void _move(CodelesslyDragPayload payload, Offset position) {
+  /// Sets where the dragged node's centre is over this target, from the
+  /// global position of its top left.
+  bool _locate(DragSession session, Offset topLeft) {
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) return false;
+    final Offset local = box.globalToLocal(
+      topLeft + session.size.center(Offset.zero),
+    );
+    final Size size = box.size;
+    final double x = local.dx, y = local.dy;
+    final double fx = size.width > 0 ? (x / size.width).clamp(0.0, 1.0) : 0;
+    final double fy = size.height > 0 ? (y / size.height).clamp(0.0, 1.0) : 0;
+    final bool changed =
+        x != session.x ||
+        y != session.y ||
+        fx != session.fx ||
+        fy != session.fy;
+    session
+      ..x = x
+      ..y = y
+      ..fx = fx
+      ..fy = fy;
+    return changed;
+  }
+
+  void _move(CodelesslyDragPayload payload, Offset position, Offset topLeft) {
     final DragSession session = payload.session;
+    final bool moved = _locate(session, topLeft);
     final String oldOver = session.over;
     final int? oldBefore = session.rawBefore;
     final bool oldAccepted = session.accepted;
@@ -947,6 +1030,7 @@ class DropTargetBoxState extends State<DropTargetBox> {
     }
     session.accepted = !session.full && _evaluateAccept();
     if (entering ||
+        moved ||
         oldOver != session.over ||
         oldBefore != session.rawBefore ||
         oldAccepted != session.accepted ||
@@ -983,17 +1067,22 @@ class DropTargetBoxState extends State<DropTargetBox> {
       ..overTarget = null
       ..over = ''
       ..accepted = false
+      ..x = 0
+      ..y = 0
+      ..fx = 0
+      ..fy = 0
       ..full = false
       ..rawBefore = null;
     payload.controller.changed();
     if (wasEntered) _fire(TriggerType.dragExit, session.toMap());
   }
 
-  void _drop(CodelesslyDragPayload payload) {
+  void _drop(CodelesslyDragPayload payload, Offset topLeft) {
     _hoverTimer?.cancel();
     _entered = false;
     DropTargetBox.stopAutoScroll();
     final DragSession session = payload.session;
+    _locate(session, topLeft);
     // Let go before a move reached this target: judge the drop now.
     if (!identical(session.overTarget, this)) {
       session
@@ -1060,12 +1149,20 @@ class DropTargetBoxState extends State<DropTargetBox> {
         onMove: (details) {
           final CodelesslyDragPayload payload = details.data;
           if (!_takes(payload.session.group)) return;
-          _move(payload, details.offset + payload.session.grab);
+          final DragSession session = payload.session;
+          _move(
+            payload,
+            details.offset + session.feedbackAnchor,
+            session.nodeTopLeft(details.offset),
+          );
         },
         onLeave: (payload) {
           if (payload != null) _leave(payload);
         },
-        onAcceptWithDetails: (details) => _drop(details.data),
+        onAcceptWithDetails: (details) => _drop(
+          details.data,
+          details.data.session.nodeTopLeft(details.offset),
+        ),
         builder: (context, _, _) => widget.child,
       ),
     );

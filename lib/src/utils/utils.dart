@@ -25,8 +25,12 @@ const Set<String> predefinedVariableNames = {
   'hold',
   'drag',
   'track',
+  'transform',
   'speech',
   'initial',
+  'flip',
+  'tilt',
+  'pageOffset',
   // Which variables an Animate variable action is playing now:
   // `${animating.sunriseT}` (see VariableAnimator.playingIn).
   'animating',
@@ -83,8 +87,12 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'hold', type: VariableType.decimal),
   PredefinedVariableData(name: 'drag', type: VariableType.map),
   PredefinedVariableData(name: 'track', type: VariableType.map),
+  PredefinedVariableData(name: 'transform', type: VariableType.map),
   PredefinedVariableData(name: 'speech', type: VariableType.map),
   PredefinedVariableData(name: 'initial', type: VariableType.map),
+  PredefinedVariableData(name: 'flip', type: VariableType.map),
+  PredefinedVariableData(name: 'tilt', type: VariableType.map),
+  PredefinedVariableData(name: 'pageOffset', type: VariableType.decimal),
   PredefinedVariableData(name: 'animating', type: VariableType.map),
 };
 
@@ -423,6 +431,13 @@ AlignmentModel retrieveCommonStackAlignment(
 
   return bestAlignment ?? AlignmentModel.none;
 }
+
+/// Whether [name] is the name of an API's response variable: the
+/// [SDKConstants.apiVariablePrefix] followed by a capitalised name, as
+/// [apiNameToVariableName] makes them (`apiGetUsers`). Other names that
+/// happen to start with "api" (`apiary`, `apiece`) are ordinary variables.
+bool isApiVariableName(String name) =>
+    RegExp('^${SDKConstants.apiVariablePrefix}([A-Z0-9_]|\$)').hasMatch(name);
 
 String apiNameToVariableName(String name) {
   if (name.startsWith(RegExp(r'\d+'))) {

@@ -2,9 +2,14 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import 'gesture_physics.dart';
 import 'node_motion.dart';
+import 'node_transform_gesture.dart';
 
 /// The live state of a drag, as the `drag` variable shows it.
 @immutable
@@ -21,6 +26,13 @@ class DragValues {
   /// Whether the node has flown off.
   final bool dismissed;
 
+  /// Whether the node is flinging or springing on its own after release
+  /// ([DragModel.physics]).
+  final bool settling;
+
+  /// The [SnapModel.points] index the last release settles on; −1 for none.
+  final int snapIndex;
+
   /// Creates [DragValues].
   const DragValues({
     this.offset = Offset.zero,
@@ -30,6 +42,8 @@ class DragValues {
     this.down = 0,
     this.dragging = false,
     this.dismissed = false,
+    this.settling = false,
+    this.snapIndex = -1,
   });
 
   /// At rest.
@@ -60,6 +74,8 @@ class DragValues {
     'direction': direction,
     'dragging': dragging,
     'dismissed': dismissed,
+    'settling': settling,
+    'snapIndex': snapIndex,
   };
 
   @override
@@ -71,11 +87,22 @@ class DragValues {
       other.up == up &&
       other.down == down &&
       other.dragging == dragging &&
-      other.dismissed == dismissed;
+      other.dismissed == dismissed &&
+      other.settling == settling &&
+      other.snapIndex == snapIndex;
 
   @override
-  int get hashCode =>
-      Object.hash(offset, left, right, up, down, dragging, dismissed);
+  int get hashCode => Object.hash(
+    offset,
+    left,
+    right,
+    up,
+    down,
+    dragging,
+    dismissed,
+    settling,
+    snapIndex,
+  );
 }
 
 /// Shares the drag of the nearest [NodeDrag] with the nodes inside it, which
@@ -176,7 +203,14 @@ class NodeDrag extends StatefulWidget {
       if (_pendingReturns.remove(nodeId) == null) return;
     }
     final NodeDragState? target = instanceOf(nodeId);
-    if (target == null) return;
+    if (target == null) {
+      // A node with a transform gesture instead: reset brings it back to
+      // its rest pose.
+      if (command == DragCommand.reset) {
+        await NodeTransformGesture.reset(nodeId);
+      }
+      return;
+    }
     switch (command) {
       case DragCommand.fling:
         await target.fling(direction);
@@ -215,6 +249,11 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
   bool _active = false;
   late final AnimationController _anim = AnimationController(vsync: this)
     ..addListener(_onTick);
+  late final Ticker _physicsTicker = createTicker(_onPhysicsTick);
+  final SimulationGroup _sims = SimulationGroup();
+  int _snapIndex = -1;
+  int _pointers = 0;
+  int _maxPointers = 0;
   Offset _from = Offset.zero;
   Offset _to = Offset.zero;
   Curve _curve = Curves.linear;
@@ -270,6 +309,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
   void dispose() {
     NodeDrag._instances[widget.nodeId]?.remove(this);
     _anim.dispose();
+    _physicsTicker.dispose();
     super.dispose();
   }
 
@@ -298,6 +338,13 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
   double _spinFrom = 0;
 
   Future<void> _animateTo(Offset to, int ms, Curve curve) async {
+    _stopPhysics();
+    final PhysicsModel? physics = _model.physics;
+    if (physics != null && !_dismissed && to == widget.rest && _spin == 0) {
+      // A spring back with physics springs, at any speed it already has.
+      _settle(_springSims(physics, to, Offset.zero));
+      return;
+    }
     _shake = 0;
     if (_spinTo == 0 && _spin != 0) {
       // Unwind any turn left over (a returning card).
@@ -341,7 +388,192 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       down: p(_offset.dy, DragDirection.down),
       dragging: _dragging,
       dismissed: _dismissed,
+      settling: _physicsTicker.isActive,
+      snapIndex: _snapIndex,
     );
+  }
+
+  // ---- Physics ------------------------------------------------------------
+
+  /// The offsets the node may take, from its bounds and limits.
+  Rect get _range {
+    final DragModel m = _model;
+    double left = double.negativeInfinity, right = double.infinity;
+    double top = double.negativeInfinity, bottom = double.infinity;
+    if (m.bounds != GestureBounds.none) {
+      final Rect? view = _viewport();
+      final Size size = _size;
+      if (view != null) {
+        (left, right) = boundsRange(
+          bounds: m.bounds,
+          center: size.width / 2,
+          half: size.width / 2,
+          viewLo: view.left,
+          viewHi: view.right,
+        );
+        (top, bottom) = boundsRange(
+          bounds: m.bounds,
+          center: size.height / 2,
+          half: size.height / 2,
+          viewLo: view.top,
+          viewHi: view.bottom,
+        );
+      }
+    }
+    final Offset rest = widget.rest;
+    if (m.minX != null) left = math.max(left, rest.dx + m.minX!);
+    if (m.maxX != null) right = math.min(right, rest.dx + m.maxX!);
+    if (m.minY != null) top = math.max(top, rest.dy + m.minY!);
+    if (m.maxY != null) bottom = math.min(bottom, rest.dy + m.maxY!);
+    if (left > right) left = right = (left + right) / 2;
+    if (top > bottom) top = bottom = (top + bottom) / 2;
+    return Rect.fromLTRB(left, top, right, bottom);
+  }
+
+  /// The parent's layout box, in the node's layout coordinates.
+  Rect? _viewport() {
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    RenderObject? ancestor = box.parent;
+    while (ancestor != null && ancestor is! ContainerRenderObjectMixin) {
+      ancestor = ancestor.parent;
+    }
+    if (ancestor is! RenderBox || !ancestor.hasSize) return null;
+    final Matrix4? back = Matrix4.tryInvert(box.getTransformTo(ancestor));
+    if (back == null) return null;
+    return MatrixUtils.transformRect(back, Offset.zero & ancestor.size);
+  }
+
+  /// The offsets that put the node flush with each of its parent's edges,
+  /// for [SnapKind.edges].
+  Rect? get _edges {
+    final Rect? view = _viewport();
+    if (view == null) return null;
+    final Size size = _size;
+    return Rect.fromLTRB(
+      view.left,
+      view.top,
+      view.right - size.width,
+      view.bottom - size.height,
+    );
+  }
+
+  /// [offset] held back past the range like a rubber band.
+  Offset _band(Offset offset) {
+    final PhysicsModel? physics = _model.physics;
+    if (physics == null || !_model.hasBounds) return offset;
+    final Rect r = _range;
+    return Offset(
+      rubberBand(offset.dx, r.left, r.right, physics.overscroll),
+      rubberBand(offset.dy, r.top, r.bottom, physics.overscroll),
+    );
+  }
+
+  Map<String, Simulation> _springSims(
+    PhysicsModel physics,
+    Offset to,
+    Offset velocity,
+  ) => {
+    'x': AxisSettleSimulation.spring(
+      physics: physics,
+      position: _offset.dx,
+      velocity: velocity.dx,
+      target: to.dx,
+    ),
+    'y': AxisSettleSimulation.spring(
+      physics: physics,
+      position: _offset.dy,
+      velocity: velocity.dy,
+      target: to.dy,
+    ),
+  };
+
+  /// What a release at [velocity] settles on, as simulations of x and y,
+  /// and where they end and the snap index.
+  ({Map<String, Simulation> sims, Offset target, int snap}) _releaseSims(
+    PhysicsModel physics,
+    Offset velocity,
+  ) {
+    final Offset v = switch (_model.axis) {
+      DragAxis.free => velocity,
+      DragAxis.horizontal => Offset(velocity.dx, 0),
+      DragAxis.vertical => Offset(0, velocity.dy),
+    };
+    if (_model.release != DragRelease.stay) {
+      return (
+        sims: _springSims(physics, widget.rest, v),
+        target: widget.rest,
+        snap: -1,
+      );
+    }
+    final Rect range = _range;
+    final SnapTarget? snap = snapTargetOf(
+      physics: physics,
+      position: _offset - widget.rest,
+      velocity: v,
+      range: range.shift(-widget.rest),
+      edges: _edges?.shift(-widget.rest),
+      axis: _model.axis,
+    );
+    if (snap != null) {
+      final Offset target = widget.rest + snap.offset;
+      return (
+        sims: _springSims(physics, target, v),
+        target: target,
+        snap: snap.index,
+      );
+    }
+    final AxisSettleSimulation x = AxisSettleSimulation.release(
+      physics: physics,
+      position: _offset.dx,
+      velocity: v.dx,
+      lo: range.left,
+      hi: range.right,
+    );
+    final AxisSettleSimulation y = AxisSettleSimulation.release(
+      physics: physics,
+      position: _offset.dy,
+      velocity: v.dy,
+      lo: range.top,
+      hi: range.bottom,
+    );
+    return (
+      sims: {'x': x, 'y': y},
+      target: Offset(x.finalX, y.finalX),
+      snap: -1,
+    );
+  }
+
+  void _stopPhysics() {
+    if (_physicsTicker.isActive) _physicsTicker.stop();
+    _sims.clear();
+  }
+
+  void _settle(Map<String, Simulation> sims) {
+    _stopPhysics();
+    sims.forEach(_sims.set);
+    if (_sims.isDone(0)) {
+      _sims.clear();
+      return;
+    }
+    _active = true;
+    _physicsTicker.start();
+  }
+
+  void _onPhysicsTick(Duration elapsed) {
+    final double t = elapsed.inMicroseconds / Duration.microsecondsPerSecond;
+    setState(() {
+      _offset = Offset(
+        _sims.x('x', t) ?? _offset.dx,
+        _sims.x('y', t) ?? _offset.dy,
+      );
+    });
+    if (_sims.isDone(t)) {
+      setState(() => _offset = Offset(_sims.finalOf('x'), _sims.finalOf('y')));
+      _stopPhysics();
+      _active = false;
+      setState(() {});
+    }
   }
 
   /// Whether the pointer may pull toward [direction] freely.
@@ -388,6 +620,7 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
   // ---- Gestures -----------------------------------------------------------
 
   Offset _raw = Offset.zero;
+  Offset? _lastGlobal;
 
   /// Whether the current drag is of a disabled node, which only follows by
   /// [DragModel.disabledFollow] and always springs back.
@@ -406,25 +639,36 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       return;
     }
     _anim.stop();
+    _stopPhysics();
+    _active = false;
     _shake = 0;
     _raw = _offset;
+    _lastGlobal = details.globalPosition;
+    _maxPointers = math.max(1, _pointers);
     setState(() => _dragging = true);
   }
 
   void _onUpdate(DragUpdateDetails details) {
     if (!_dragging) return;
-    _raw += details.delta;
+    // Moves in screen space: the node's own tilt doesn't turn them.
+    final Offset delta =
+        details.globalPosition -
+        (_lastGlobal ?? details.globalPosition - details.delta);
+    _lastGlobal = details.globalPosition;
+    _raw += delta;
     final Offset before = _offset;
     setState(
       () => _offset = _blocked
           ? _raw * _model.disabledFollow.clamp(0, 1).toDouble()
-          : _resist(_raw),
+          : _band(_resist(_raw)),
     );
+    _maxPointers = math.max(_maxPointers, _pointers);
     widget.onUpdate?.call({
       'dx': _offset.dx - widget.rest.dx,
       'dy': _offset.dy - widget.rest.dy,
       'deltaX': _offset.dx - before.dx,
       'deltaY': _offset.dy - before.dy,
+      'pointerCount': _maxPointers,
     });
   }
 
@@ -452,6 +696,12 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       return;
     }
     final DragDirection? direction = _dismissDirection(velocity);
+    final PhysicsModel? physics = _model.physics;
+    final ({Map<String, Simulation> sims, Offset target, int snap})? settle =
+        direction == null && physics != null
+        ? _releaseSims(physics, velocity)
+        : null;
+    _snapIndex = settle?.snap ?? -1;
     widget.onEnd?.call({
       'dx': _offset.dx,
       'dy': _offset.dy,
@@ -460,9 +710,17 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       'dismissed': direction != null,
       'direction': direction?.name ?? '',
       'blocked': false,
+      'pointerCount': _maxPointers,
+      if (settle != null) ...{
+        'targetX': settle.target.dx - widget.rest.dx,
+        'targetY': settle.target.dy - widget.rest.dy,
+        'snapIndex': settle.snap,
+      },
     });
     if (direction != null) {
       _flyOff(direction, velocity);
+    } else if (settle != null) {
+      _settle(settle.sims);
     } else if (_model.release != DragRelease.stay) {
       _animateTo(
         widget.rest,
@@ -650,27 +908,72 @@ class NodeDragState extends State<NodeDrag> with TickerProviderStateMixin {
       });
     }
     Widget child = DragScope(values: current, child: widget.child);
-    // A drag that doesn't follow only reports: the node stays put.
-    if (_model.follow && (_offset != Offset.zero || angle != 0)) {
-      child = Transform(
-        alignment: Alignment(_model.originX, _model.originY),
-        transform: Matrix4.translationValues(_offset.dx, _offset.dy, 0)
-          ..rotateZ(angle * math.pi / 180),
-        child: child,
-      );
-    }
     if (_dismissed) {
       child = IgnorePointer(child: Opacity(opacity: 0, child: child));
     }
-    return GestureDetector(
+    void cancel() {
+      if (_dragging) _onEnd(DragEndDetails());
+    }
+
+    // A drag locked to one axis only claims moves along it, so a scroll
+    // across it (a vertical list around a horizontal swipe card) still
+    // scrolls; see docs/gestures_api.md, rule 1.
+    final Widget detector = switch (_model.axis) {
+      DragAxis.horizontal => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        // Moves from where the finger went down: the node keeps up
+        // with it instead of lagging by the touch slop.
+        dragStartBehavior: DragStartBehavior.down,
+        onHorizontalDragStart: _onStart,
+        onHorizontalDragUpdate: _onUpdate,
+        onHorizontalDragEnd: _onEnd,
+        onHorizontalDragCancel: cancel,
+        child: child,
+      ),
+      DragAxis.vertical => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        // Moves from where the finger went down: the node keeps up
+        // with it instead of lagging by the touch slop.
+        dragStartBehavior: DragStartBehavior.down,
+        onVerticalDragStart: _onStart,
+        onVerticalDragUpdate: _onUpdate,
+        onVerticalDragEnd: _onEnd,
+        onVerticalDragCancel: cancel,
+        child: child,
+      ),
+      DragAxis.free => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        // Moves from where the finger went down: the node keeps up
+        // with it instead of lagging by the touch slop.
+        dragStartBehavior: DragStartBehavior.down,
+        onPanStart: _onStart,
+        onPanUpdate: _onUpdate,
+        onPanEnd: _onEnd,
+        onPanCancel: cancel,
+        child: child,
+      ),
+    };
+    // Counts the fingers on the node, for `pointerCount`.
+    final Widget listener = Listener(
       behavior: HitTestBehavior.translucent,
-      onPanStart: _onStart,
-      onPanUpdate: _onUpdate,
-      onPanEnd: _onEnd,
-      onPanCancel: () {
-        if (_dragging) _onEnd(DragEndDetails());
-      },
-      child: child,
+      onPointerDown: (_) => _pointers++,
+      onPointerUp: (_) => _pointers = math.max(0, _pointers - 1),
+      onPointerCancel: (_) => _pointers = math.max(0, _pointers - 1),
+      child: detector,
+    );
+    // The detector is inside the transform, so the node is grabbed where it
+    // is drawn: an open sheet by its visible top, not where it was laid
+    // out. The transform is always there (identity at rest), so the
+    // detector isn't rebuilt mid-drag. A drag that doesn't follow only
+    // reports: the node stays put.
+    final bool moved = _model.follow && (_offset != Offset.zero || angle != 0);
+    return Transform(
+      alignment: Alignment(_model.originX, _model.originY),
+      transform: moved
+          ? (Matrix4.translationValues(_offset.dx, _offset.dy, 0)
+              ..rotateZ(angle * math.pi / 180))
+          : Matrix4.identity(),
+      child: listener,
     );
   }
 }

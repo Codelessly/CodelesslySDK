@@ -56,16 +56,20 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       expect(tester.widget<Tooltip>(find.byType(Tooltip)).message, 'By Ana');
-      expect(tester.getSize(find.byType(ZoomableBox)), const Size(200, 150));
-
-      final TransformationController controller = tester
-          .widget<InteractiveViewer>(find.byType(InteractiveViewer))
-          .transformationController!;
+      // A zoomable node zooms through its transform gesture
+      // (TransformGestureModel.zoomable), its content inside its own box.
+      expect(
+        tester.getSize(find.byType(NodeTransformGesture)),
+        const Size(200, 150),
+      );
+      NodeTransformGestureState gesture() => tester.state(
+        find.byType(NodeTransformGesture),
+      );
       await tester.tapAt(const Offset(100, 75));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(const Offset(100, 75));
       await tester.pumpAndSettle();
-      expect(controller.value.getMaxScaleOnAxis(), greaterThan(1));
+      expect(gesture().pose.scale, greaterThan(1));
     });
   }
 }
