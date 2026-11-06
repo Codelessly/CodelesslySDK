@@ -1065,7 +1065,9 @@ abstract class WidgetNodeTransformerManager
 
   /// [node]'s drag track with the settings its bindings give
   /// (`track.min`, `track.max`, `track.step`, and `track.defaultValue` via
-  /// [trackWithBoundDefault]), e.g. a countdown arc as long as the stage.
+  /// [trackWithBoundDefault]), e.g. a countdown arc as long as the stage,
+  /// after any `dragTrack.<name>` bindings (see [DragTrackModel.bindable]:
+  /// angles, pivot, path, ends...), e.g. a dial whose turn is a setting.
   static DragTrackModel resolvedTrack(
     BaseNode node,
     DragTrackModel track,
@@ -1088,15 +1090,37 @@ abstract class WidgetNodeTransformerManager
     final double? min = bound(DragTrackModel.minVariableKey);
     final double? max = bound(DragTrackModel.maxVariableKey);
     final double? step = bound(DragTrackModel.stepVariableKey);
+    final DragTrackModel base = withDragTrackBindings(node, track, scopedValues);
     final DragTrackModel ranged =
         min == null && max == null && step == null
-        ? track
-        : track.copyWith(
+        ? base
+        : base.copyWith(
             min: min,
             max: max,
             step: step == null ? null : (step < 0 ? 0 : step),
           );
     return trackWithBoundDefault(node, ranged, scopedValues);
+  }
+
+  /// [track] with the settings [node] binds through `dragTrack.<name>`
+  /// variables (see [DragTrackModel.bindable]) read from [scopedValues].
+  static DragTrackModel withDragTrackBindings(
+    BaseNode node,
+    DragTrackModel track,
+    ScopedValues scopedValues,
+  ) {
+    DragTrackModel out = track;
+    for (final String setting in DragTrackModel.bindable) {
+      final String key = DragTrackModel.variableKey(setting);
+      if (!node.variables.containsKey(key)) continue;
+      final Object? value = PropertyValueDelegate.getPropertyValue<Object>(
+        node,
+        key,
+        scopedValues: scopedValues,
+      );
+      out = out.withBinding(setting, value);
+    }
+    return out;
   }
 
   /// Draws [node] where its drag track puts it for its variable's value,
@@ -1144,7 +1168,7 @@ abstract class WidgetNodeTransformerManager
     final ScopedValues scopedValues = ScopedValues.of(context);
     final CodelesslyContext? codelesslyContext = scopedValues.codelesslyContext;
     final Observable<VariableData>? variable = codelesslyContext?.findVariable(
-      name: track.variable,
+      name: model.variable,
     );
     bool enabled(BuildContext context) {
       if (!node.variables.containsKey(DragModel.enabledVariableKey)) {

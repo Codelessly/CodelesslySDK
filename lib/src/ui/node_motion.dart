@@ -62,10 +62,25 @@ class _MeasuredPath {
   final Offset start;
   final double length;
 
-  /// Position (relative to the path's start) and direction at [progress].
-  (Offset, double)? at(double progress) {
+  /// Samples of the cumulative area swept about each focus asked for, as
+  /// (distance along the path, swept area so far), for area pacing.
+  final Map<Offset, List<(double, double)>> _areas = {};
+
+  static const int _areaSamples = 1440;
+
+  /// Position (relative to the path's start) and direction at [progress],
+  /// by length or, with [pacing] area, by area swept about [focus] (in the
+  /// path's coordinates).
+  (Offset, double)? at(
+    double progress, {
+    MotionPathPacing pacing = MotionPathPacing.length,
+    Offset focus = Offset.zero,
+  }) {
     if (length <= 0) return null;
-    double distance = progress.clamp(0, 1).toDouble() * length;
+    final double p = progress.clamp(0, 1).toDouble();
+    double distance = pacing == MotionPathPacing.area
+        ? _distanceForArea(p, focus)
+        : p * length;
     for (final PathMetric metric in metrics) {
       if (distance <= metric.length || metric == metrics.last) {
         final Tangent? tangent = metric.getTangentForOffset(
@@ -78,6 +93,58 @@ class _MeasuredPath {
     }
     return null;
   }
+
+  /// The distance along the path at which a line from [focus] has swept
+  /// [share] of the whole area it sweeps over the path.
+  double _distanceForArea(double share, Offset focus) {
+    final List<(double, double)> table = _areas.putIfAbsent(focus, () {
+      final List<(double, double)> out = [(0, 0)];
+      Offset? last;
+      double swept = 0;
+      double done = 0;
+      for (final PathMetric metric in metrics) {
+        final int n = math.max(8, (_areaSamples * metric.length / length).round());
+        for (int i = 0; i <= n; i++) {
+          final double d = metric.length * i / n;
+          final Offset? point = metric.getTangentForOffset(d)?.position;
+          if (point == null) continue;
+          if (last != null) {
+            final Offset a = last - focus, b = point - focus;
+            swept += (a.dx * b.dy - a.dy * b.dx).abs() / 2;
+          }
+          last = point;
+          out.add((done + d, swept));
+        }
+        done += metric.length;
+      }
+      return out;
+    });
+    final double total = table.last.$2;
+    if (total <= 0) return share * length;
+    final double target = share * total;
+    int lo = 0, hi = table.length - 1;
+    while (hi - lo > 1) {
+      final int mid = (lo + hi) >> 1;
+      if (table[mid].$2 < target) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    final (double d0, double a0) = table[lo];
+    final (double d1, double a1) = table[hi];
+    final double f = a1 == a0 ? 0 : (target - a0) / (a1 - a0);
+    return d0 + (d1 - d0) * f;
+  }
+}
+
+/// [progress] as a node on a [MotionModel.pathWrap] path reads it: modulo
+/// 1, with exactly 1 kept as the end.
+double wrapPathProgress(double progress) {
+  if (!progress.isFinite) return 0;
+  if (progress >= 0 && progress <= 1) return progress;
+  final double r = progress % 1;
+  return r < 0 ? r + 1 : r;
 }
 
 class _PathBuilder extends PathProxy {
@@ -122,8 +189,12 @@ _MeasuredPath? _measure(String data) => _pathCache.putIfAbsent(data, () {
 /// Where a node moving along SVG path [data] is at [progress] (0 to 1, by
 /// arc length), relative to the path's start, and the path's direction
 /// there in radians. Null when the path can't be read or is empty.
-(Offset, double)? pointOnMotionPath(String data, double progress) =>
-    _measure(data)?.at(progress);
+(Offset, double)? pointOnMotionPath(
+  String data,
+  double progress, {
+  MotionPathPacing pacing = MotionPathPacing.length,
+  Offset focus = Offset.zero,
+}) => _measure(data)?.at(progress, pacing: pacing, focus: focus);
 
 /// Turns animation of node motion off for the nodes below it: a design
 /// canvas or an editor capture, which show every node at rest.
@@ -584,8 +655,17 @@ class _NodeMotionState extends State<_NodeMotionBody>
       rotateX: lerp('rotateX'),
       rotateY: lerp('rotateY'),
       blur: math.max(0, lerp('blur')),
-      pathProgress: lerp('pathProgress'),
+      pathProgress: _to.pathWrap ? _wrapLerp(t) : lerp('pathProgress'),
     );
+  }
+
+  /// A wrapping path's progress between two values, the short way round.
+  double _wrapLerp(double t) {
+    final double from = wrapPathProgress(_from.pathProgress);
+    double to = wrapPathProgress(_to.pathProgress);
+    if (to - from > 0.5) to -= 1;
+    if (from - to > 0.5) to += 1;
+    return wrapPathProgress(from + (to - from) * t);
   }
 
   void _syncSpin() {
@@ -701,7 +781,9 @@ class _NodeMotionState extends State<_NodeMotionBody>
     if (m.hasPath) {
       final (Offset, double)? point = pointOnMotionPath(
         m.path!,
-        m.pathProgress,
+        m.pathWrap ? wrapPathProgress(m.pathProgress) : m.pathProgress,
+        pacing: m.pathPacing,
+        focus: Offset(m.pathFocusX, m.pathFocusY),
       );
       if (point != null) {
         final (Offset offset, double angle) = point;
