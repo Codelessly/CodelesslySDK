@@ -141,22 +141,52 @@ class PassiveNodeTransformerManager extends WidgetNodeTransformerManager {
     }
 
     // A node that reads `parent` is built with the size its parent gives
-    // it, so its bindings can lay it out by that size.
-    if (readsParentSize(node)) {
+    // it, so its bindings can lay it out by that size. A freeform
+    // container (a frame) gives its children its content box itself: the
+    // box a child is placed in is the child's own size.
+    if (readsParentSize(node) && !_inFreeformParent(node)) {
       // Measurable, so a row or column that measures its children (an
       // IntrinsicHeight around a stretching row) can have it inside.
       return MeasurableLayoutBuilder(
         key: ValueKey('${node.id}-parent-size'),
         fallbackSize: Size(node.outerBoxLocal.width, node.outerBoxLocal.height),
-        builder: (context, constraints) => ParentSizeScope.fromConstraints(
-          constraints,
-          child: Builder(
-            builder: (context) => _buildNode(context, node, settings),
-          ),
-        ),
+        builder: (context, constraints) {
+          // An axis the parent lays its children out unbounded on (a
+          // horizontal list, a row's main axis) reads the parent's own
+          // extent there, as on the design canvas.
+          final ParentExtentScope? extent = ParentExtentScope.of(
+            context,
+            node,
+          );
+          return ParentSizeScope(
+            width: constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : extent?.width,
+            height: constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : extent?.height,
+            child: Builder(
+              builder: (context) => _buildNode(context, node, settings),
+            ),
+          );
+        },
       );
     }
     return _buildNode(context, node, settings);
+  }
+
+  /// Whether [node]'s parent is a freeform container that gives its
+  /// children the `parent` size (see
+  /// [PassiveStackTransformer.buildWidgetForChildren]).
+  bool _inFreeformParent(BaseNode node) {
+    if (node.parentID.isEmpty) return false;
+    final BaseNode? parent = tryGetNode(node.parentID);
+    if (parent == null || !freeformContainerTypes.contains(parent.type)) {
+      return false;
+    }
+    // A frame that scales its content lays it out at its design size and
+    // gives no parent size of its own.
+    return !(parent is FrameNode && parent.contentFit != null);
   }
 
   Widget _buildNode(

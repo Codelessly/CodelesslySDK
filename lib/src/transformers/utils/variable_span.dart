@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 
 import '../../../codelessly_sdk.dart';
+import '../../functions/action_chain.dart';
 
 /// Resolves the values a design canvas shows for variables in place of their
 /// live runtime values.
@@ -18,6 +19,20 @@ abstract final class VariablePreview {
   /// The values [node] can see on the design canvas when built in [context].
   static ScopedValues? resolve(BaseNode? node, [BuildContext? context]) =>
       scopeOf(node, context: context);
+
+  /// The values [node]'s bindings read where it is built in [context]: on
+  /// the design canvas ([settings] without reactions) the editor's preview
+  /// values, which include previewed predefined values such as `drag`
+  /// ([ScopedValues.predefinedOverrides]), else the app's own. What a list's
+  /// `data` reads, so its rows follow a previewed drag as the bindings on
+  /// the same nodes do.
+  static ScopedValues bindingScopeOf(
+    BaseNode node,
+    BuildContext context,
+    WidgetBuildSettings settings,
+  ) =>
+      (settings.withReactions ? null : scopeOf(node, context: context)) ??
+      ScopedValues.of(context);
 
   /// The values that [node] sees on the design canvas where it is built in
   /// [context], or null to fall back to placeholders.
@@ -36,6 +51,14 @@ abstract final class VariablePreview {
     BuildContext? context,
     IndexedItem? item,
   }) {
+    if (scopeResolver == null) return null;
+    // A running app (a [CodelesslyWidget], or an editor's run window, which
+    // live in the same isolate as the editor's design canvas) reads its own
+    // values: the resolver knows nodes by id only, and would give the
+    // design canvas's defaults for the running copy of a node.
+    if (context != null && ActionChainHost.maybeOf(context) != null) {
+      return null;
+    }
     final ScopedValues? values = scopeResolver?.call(node);
     if (values == null) return values;
     final IndexedItem? row =

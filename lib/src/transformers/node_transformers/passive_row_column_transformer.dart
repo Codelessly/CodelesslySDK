@@ -184,6 +184,25 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       children: childrenWidgets,
     );
 
+    // A child that doesn't flex is laid out unbounded along the main axis;
+    // it still reads the row's (or column's) content extent there as
+    // `${parent}`, and a `widthFactor` child (a fill bar's share of its
+    // track) takes a fraction of it, as on the design canvas. A row that
+    // hugs its children has no extent of its own to give.
+    final bool scrollsMain =
+        withScroll &&
+        rowColumnNode is ScrollableMixin &&
+        (rowColumnNode as ScrollableMixin).isScrollable;
+    if (mainFit != SizeFit.shrinkWrap && !scrollsMain) {
+      final Widget flex = res;
+      res = ParentExtentScope.around(
+        parent: rowColumnNode,
+        children: childrenNodes,
+        fallbackSize: rowColumnNode.innerBoxLocal.size.flutterSize,
+        child: (_) => flex,
+      );
+    }
+
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
     } else if (hugStretch) {

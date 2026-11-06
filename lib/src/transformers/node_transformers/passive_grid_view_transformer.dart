@@ -243,7 +243,7 @@ class PassiveGridViewWidget extends StatelessWidget {
     final List? data =
         PropertyValueDelegate.getVariableValueFromPath<List>(
           node.variables['data'] ?? '',
-          scopedValues: ScopedValues.of(context),
+          scopedValues: VariablePreview.bindingScopeOf(node, context, settings),
         ) ??
         (node.variables['data'] != null ? [] : null);
 

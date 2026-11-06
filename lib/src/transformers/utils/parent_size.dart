@@ -51,6 +51,69 @@ class ParentSizeScope extends InheritedWidget {
       width != oldWidget.width || height != oldWidget.height;
 }
 
+/// The size of the node [parentId] along axes on which it lays its children
+/// out unbounded: a horizontal list's width (its items run on past its end)
+/// or a row's width (a child that doesn't flex). Its children read it as
+/// `${parent.width}`, and a `widthFactor` takes a fraction of it, as on the
+/// design canvas, where a child's constraints would give no width at all.
+/// Only [parentId]'s own children read it.
+class ParentExtentScope extends InheritedWidget {
+  /// The node whose children read this.
+  final String parentId;
+
+  /// The parent's content width, or null to keep the child's own reading.
+  final double? width;
+
+  /// The parent's content height, or null to keep the child's own reading.
+  final double? height;
+
+  /// Creates a [ParentExtentScope].
+  const ParentExtentScope({
+    super.key,
+    required this.parentId,
+    required this.width,
+    required this.height,
+    required super.child,
+  });
+
+  /// The scope [node]'s parent gives above [context], if any.
+  static ParentExtentScope? of(BuildContext context, BaseNode node) {
+    final ParentExtentScope? scope = context
+        .dependOnInheritedWidgetOfExactType<ParentExtentScope>();
+    return scope != null && scope.parentId == node.parentID ? scope : null;
+  }
+
+  /// [child] under a scope with the bounded sides of the constraints its
+  /// builder gets, for the children of [parent], when any of [children]
+  /// reads the parent's size ([readsParentSize]); else [child] built as is.
+  static Widget around({
+    required BaseNode parent,
+    required Iterable<BaseNode> children,
+    required Size fallbackSize,
+    required Widget Function(BuildContext context) child,
+  }) {
+    if (!children.any(readsParentSize)) {
+      return Builder(builder: child);
+    }
+    return MeasurableLayoutBuilder(
+      key: ValueKey('${parent.id}-parent-extent'),
+      fallbackSize: fallbackSize,
+      builder: (context, constraints) => ParentExtentScope(
+        parentId: parent.id,
+        width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+        height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
+        child: Builder(builder: child),
+      ),
+    );
+  }
+
+  @override
+  bool updateShouldNotify(ParentExtentScope oldWidget) =>
+      parentId != oldWidget.parentId ||
+      width != oldWidget.width ||
+      height != oldWidget.height;
+}
+
 /// The value of the `parent` variable for a parent that gives [width] and
 /// [height]: `width` and `height`, each null when unbounded.
 Map<String, dynamic> parentVariableValue(double? width, double? height) => {
@@ -92,6 +155,15 @@ bool readsParentSize(BaseNode node) {
   }
   return false;
 }
+
+/// The node types that place their children freely (a frame, a stack):
+/// they give each child their content box as `${parent}`, since the box a
+/// child is placed in is the child's own size.
+const Set<String> freeformContainerTypes = {
+  'frame',
+  'stack',
+  'freeformPlaceholder',
+};
 
 /// The keys in [BaseNode.variables] that bind [BaseNode.widthFactor] and
 /// [BaseNode.heightFactor].

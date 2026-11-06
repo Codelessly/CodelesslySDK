@@ -754,3 +754,77 @@ Duration implicitTransitionDuration(BuildContext context, int ms) =>
     TickerMode.valuesOf(context).enabled
     ? Duration(milliseconds: ms)
     : Duration.zero;
+
+/// A paint's colour and gradient, eased together by [EasedPaint].
+@immutable
+class _PaintColors {
+  const _PaintColors(this.color, this.gradient);
+
+  final Color? color;
+  final Gradient? gradient;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _PaintColors &&
+      other.color == color &&
+      other.gradient == gradient;
+
+  @override
+  int get hashCode => Object.hash(color, gradient);
+}
+
+class _PaintColorsTween extends Tween<_PaintColors> {
+  _PaintColorsTween({super.end});
+
+  @override
+  _PaintColors lerp(double t) {
+    final _PaintColors? a = begin, b = end;
+    if (a == null || b == null) return (b ?? a)!;
+    return _PaintColors(
+      Color.lerp(a.color, b.color, t),
+      // Same kind of gradient: each stop's colour (and position) eases;
+      // Flutter matches stops of lists of different lengths.
+      Gradient.lerp(a.gradient, b.gradient, t),
+    );
+  }
+}
+
+/// Builds a paint (a stroke or a gradient fill) with [color] and
+/// [gradient], easing both to new values over [ms] milliseconds
+/// (`transitionMs`), as a solid fill eases: a page gradient following a
+/// palette, a card's outline. Where tickers are muted (the design canvas
+/// and its captures) it jumps to the new values; with [ms] 0 it never
+/// eases.
+class EasedPaint extends StatelessWidget {
+  /// Creates an [EasedPaint].
+  const EasedPaint({
+    super.key,
+    required this.ms,
+    required this.color,
+    required this.gradient,
+    required this.builder,
+  });
+
+  /// How long a change eases, in milliseconds.
+  final int ms;
+
+  /// The colour to show.
+  final Color? color;
+
+  /// The gradient to show.
+  final Gradient? gradient;
+
+  /// Builds the paint with the colour and gradient of this frame.
+  final Widget Function(Color? color, Gradient? gradient) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    if (ms <= 0) return builder(color, gradient);
+    return TweenAnimationBuilder<_PaintColors>(
+      tween: _PaintColorsTween(end: _PaintColors(color, gradient)),
+      duration: implicitTransitionDuration(context, ms),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, _) => builder(value.color, value.gradient),
+    );
+  }
+}

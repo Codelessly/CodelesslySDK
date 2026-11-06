@@ -166,6 +166,21 @@ class PassiveListViewWidget extends StatelessWidget {
         fit: OverflowBoxFit.deferToChild,
         child: flex,
       );
+      // Items laid out unbounded along the scroll axis still read the
+      // list's extent there as `${parent}`, and a `widthFactor` item takes
+      // a fraction of it, as on the design canvas.
+      final Widget unbounded = flex;
+      final NodeTransformerManager manager = this.manager;
+      final BaseNode? template =
+          node.children.isEmpty || manager is! WidgetNodeTransformerManager
+          ? null
+          : manager.tryGetNode(node.children.first);
+      flex = ParentExtentScope.around(
+        parent: node,
+        children: [?template],
+        fallbackSize: node.innerBoxLocal.size.flutterSize,
+        child: (_) => unbounded,
+      );
     }
     flex = Padding(padding: node.padding.flutterEdgeInsets, child: flex);
     return FitBox(
@@ -323,7 +338,7 @@ class PassiveListViewWidget extends StatelessWidget {
       node,
       count: count,
       values: values,
-      scope: ScopedValues.of(context),
+      scope: VariablePreview.bindingScopeOf(node, context, settings),
       firstOnTop: firstOnTop,
     );
   }
@@ -608,7 +623,7 @@ class PassiveListViewWidget extends StatelessWidget {
     final List? data =
         PropertyValueDelegate.getVariableValueFromPath<List>(
           node.variables['data'] ?? '',
-          scopedValues: ScopedValues.of(context),
+          scopedValues: VariablePreview.bindingScopeOf(node, context, settings),
         ) ??
         (node.variables['data'] != null ? [] : null);
 
@@ -873,9 +888,18 @@ class PassiveListViewWidget extends StatelessWidget {
 
     // Nested in another scroll view, the list is bounded by its own fit or
     // shrink-wraps; see [ViewportLayout].
+    // Items are laid out unbounded along the scroll axis; they read the
+    // list's padded extent there as `${parent}`, and a `widthFactor` item
+    // (a chart's bar slot) takes a fraction of it, as on the design canvas.
     return box(
       canShrinkWrap: itemCount != null,
-      (context, shrinkWrap) => list(shrinkWrap, itemCount, itemBuilder),
+      (context, shrinkWrap) => ParentExtentScope.around(
+        parent: node,
+        children: [item],
+        fallbackSize: node.outerBoxLocal.size.flutterSize,
+        padding: node.padding.flutterEdgeInsets,
+        child: (_) => list(shrinkWrap, itemCount, itemBuilder),
+      ),
     );
   }
 }
@@ -1017,7 +1041,7 @@ class StackedListItems extends StatelessWidget {
             node,
             count: values.length,
             values: (index) => values[index],
-            scope: ScopedValues.of(context),
+            scope: VariablePreview.bindingScopeOf(node, context, settings),
           )
         : null;
     final Widget stack = Stack(
@@ -1037,7 +1061,11 @@ class StackedListItems extends StatelessWidget {
             child: _StackedItem(
               listenables: listenables,
               builder: (context) {
-                final ScopedValues scope = ScopedValues.of(context);
+                final ScopedValues scope = VariablePreview.bindingScopeOf(
+                  item,
+                  context,
+                  settings,
+                );
                 final NodeTransition? move = positionTransitionOf(item);
                 final Key key = arrangement == null
                     ? ValueKey('stacked item $index')

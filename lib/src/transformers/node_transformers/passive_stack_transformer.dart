@@ -374,9 +374,11 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
     final Size designSize = contentFit != null
         ? (node as FrameNode).contentDesignSize.flutterSize
         : node.innerBoxLocal.size.flutterSize;
-    Widget content = FreeformLayout(
-      wrapsWidth: contentFit == null && node.isHorizontalWrap,
-      wrapsHeight: contentFit == null && node.isVerticalWrap,
+    final bool wrapsWidth = contentFit == null && node.isHorizontalWrap;
+    final bool wrapsHeight = contentFit == null && node.isVerticalWrap;
+    Widget layout(BuildContext context) => FreeformLayout(
+      wrapsWidth: wrapsWidth,
+      wrapsHeight: wrapsHeight,
       designSize: designSize,
       children: [
         for (final BaseNode childNode in children)
@@ -390,6 +392,44 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           ),
       ],
     );
+    // Children that read `parent` (`${parent.width}` in an x, a width or a
+    // path) read this container's content box, as the design canvas does,
+    // not the box each child is placed in (its own size). See
+    // [freeformContainerTypes]. A hugging axis is its design size; a
+    // scrolling axis has none.
+    final bool childrenReadParent =
+        contentFit == null &&
+        manager is PassiveNodeTransformerManager &&
+        children.any(readsParentSize);
+    Widget content = childrenReadParent
+        ? MeasurableLayoutBuilder(
+            key: ValueKey('${node.id}-freeform-parent-size'),
+            fallbackSize: designSize,
+            builder: (context, constraints) {
+              double? side(bool hugs, bool scrolls, double max, double design) =>
+                  scrolls
+                  ? null
+                  : hugs || !max.isFinite
+                  ? design
+                  : max;
+              return ParentSizeScope(
+                width: side(
+                  wrapsWidth,
+                  scrollAxis == AxisC.horizontal,
+                  constraints.maxWidth,
+                  designSize.width,
+                ),
+                height: side(
+                  wrapsHeight,
+                  scrollAxis == AxisC.vertical,
+                  constraints.maxHeight,
+                  designSize.height,
+                ),
+                child: Builder(builder: layout),
+              );
+            },
+          )
+        : layout(context);
     if (contentFit != null) {
       content = ScaledContent(
         designSize: designSize,
