@@ -76,7 +76,9 @@ void main() {
     List<BaseNode> others = const [],
   }) async {
     final registry = NodeRegistry()
-      ..setNodes({for (final n in [...nodes, ...others]) n.id: n});
+      ..setNodes({
+        for (final n in [...nodes, ...others]) n.id: n,
+      });
     final manager = PassiveNodeTransformerManager(
       registry.getNodeByID,
       (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
@@ -268,17 +270,20 @@ void main() {
   ) async {
     // The packet drawn under the pointer is hidden where it is designed;
     // its "out of seed" stamp hides by its own binding.
-    final RectangleNode stamp = box('stamp', variables: {'visible': r'${= 1 > 2}'})
-      ..parentID = 'feedback';
+    final RectangleNode stamp = box(
+      'stamp',
+      variables: {'visible': r'${= 1 > 2}'},
+    )..parentID = 'feedback';
     final RectangleNode label = box('label')..parentID = 'feedback';
-    final AutoPlaceholderNode feedback = AutoPlaceholderNode(
-      id: 'feedback',
-      name: 'feedback',
-      basicBoxLocal: NodeBox(0, 0, 100, 100),
-      children: ['label', 'stamp'],
-    )
-      ..parentID = kRootNode
-      ..variables['visible'] = r'${= false}';
+    final AutoPlaceholderNode feedback =
+        AutoPlaceholderNode(
+            id: 'feedback',
+            name: 'feedback',
+            basicBoxLocal: NodeBox(0, 0, 100, 100),
+            children: ['label', 'stamp'],
+          )
+          ..parentID = kRootNode
+          ..variables['visible'] = r'${= false}';
     final RectangleNode source = box(
       'tile',
       draggable: const DraggableModel(
@@ -302,7 +307,9 @@ void main() {
       return find
           .ancestor(
             of: f,
-            matching: find.byWidgetPredicate((w) => w is Visibility && !w.visible),
+            matching: find.byWidgetPredicate(
+              (w) => w is Visibility && !w.visible,
+            ),
           )
           .evaluate()
           .isEmpty;

@@ -27,6 +27,9 @@ const Set<String> predefinedVariableNames = {
   'track',
   'speech',
   'initial',
+  // Which variables an Animate variable action is playing now:
+  // `${animating.sunriseT}` (see VariableAnimator.playingIn).
+  'animating',
 };
 
 /// The key under which a layout's published variables hold the project's
@@ -58,6 +61,7 @@ const Set<String> predefinedListenableVariableNames = {
   'product',
   'paywall',
   'entitlements',
+  'animating',
 };
 
 final Set<PredefinedVariableData> predefinedVariables = {
@@ -81,6 +85,7 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'track', type: VariableType.map),
   PredefinedVariableData(name: 'speech', type: VariableType.map),
   PredefinedVariableData(name: 'initial', type: VariableType.map),
+  PredefinedVariableData(name: 'animating', type: VariableType.map),
 };
 
 /// Widths at which the `screen` variable's breakpoint changes: below 600 is

@@ -149,30 +149,48 @@ class PropertyValueDelegate {
         literalNumber<R>(variablePath);
   }
 
-  static final RegExp _hexColor = RegExp(r'^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$');
+  static final RegExp _hexColor = RegExp(
+    r'^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$',
+    caseSensitive: false,
+  );
 
-  /// [binding] itself as a colour when it is a hex colour written as is
-  /// (`#3A3530`, `#FF3A3530`) rather than a variable or formula giving one:
-  /// `"variables": {"iconColor": "#3A3530"}` colours the icon, as
-  /// `${= '#3A3530'}` does (no variable can be named `#...`). Null
-  /// otherwise, and for properties that don't take a colour.
+  /// [binding] itself as a color when it is a hex color written as is
+  /// (`#RGB`, `#RRGGBB` or `#AARRGGBB`) rather than a variable or formula
+  /// giving one: `"iconColor": "#7A4520"` paints the icon that color, as
+  /// `${= '#7A4520'}` does (no variable can be named `#...`). Null for
+  /// anything else, and when [R] isn't a color or paint type.
   static R? literalColor<R extends Object>(String binding) {
-    if (R != ColorRGBA) return null;
-    final String hex = binding.trim();
-    if (!_hexColor.hasMatch(hex)) return null;
-    return ColorRGBA.fromHex(hex) as R?;
+    if (R != ColorRGBA && R != ColorRGB && R != PaintModel) return null;
+    final ColorRGBA? color = parseColorLiteral(binding);
+    if (color == null) return null;
+    if (R == ColorRGB) return ColorRGB(r: color.r, g: color.g, b: color.b) as R;
+    if (R == PaintModel) return color.toPaint() as R;
+    return color as R;
+  }
+
+  /// [text] as a color when it is a hex color literal: `#RGB`, `#RRGGBB` or
+  /// `#AARRGGBB`. Null otherwise.
+  static ColorRGBA? parseColorLiteral(String text) {
+    final String trimmed = text.trim();
+    if (!_hexColor.hasMatch(trimmed)) return null;
+    String hex = trimmed.substring(1);
+    if (hex.length == 3) hex = [for (final c in hex.split('')) '$c$c'].join();
+    return ColorRGBA.fromHex(hex);
   }
 
   /// [binding] itself as a number when [R] takes one and the binding is a
-  /// number written as is (`172.28`) rather than a variable or formula: a
-  /// stacked list item's `x`/`y` bound to a constant sits there, as with
-  /// `${= 172.28}`; it used to fall back to the item's design offset. Null
+  /// number written as is (`"17"`, `"17.0"`, `"-4.5"`, `172.28`) rather
+  /// than a variable or formula: a stacked list item's `x`/`y` bound to a
+  /// constant sits there, as with `${= 172.28}`; it used to fall back to
+  /// the item's design offset. An int takes only a whole number. Null
   /// otherwise.
   static R? literalNumber<R extends Object>(String binding) {
     if (R != num && R != double && R != int) return null;
     final num? value = num.tryParse(binding.trim());
     if (value == null || !value.isFinite) return null;
-    if (R == int) return (value is int ? value : null) as R?;
+    if (R == int) {
+      return (value == value.roundToDouble() ? value.round() : null) as R?;
+    }
     if (R == double) return value.toDouble() as R;
     return value as R;
   }
@@ -596,9 +614,25 @@ class PropertyValueDelegate {
         match,
         scopedValues,
       );
+      // `loop` became a predefined name (a for-each turn's item and index)
+      // after projects already had variables called `loop`. Outside a
+      // for-each turn it reads the project's own variable of that name, so
+      // those projects keep working.
+      if (value == null &&
+          match.name == 'loop' &&
+          scopedValues.variables.containsKey('loop')) {
+        return _userVariableValue(match, scopedValues);
+      }
       return value;
     }
+    return _userVariableValue(match, scopedValues);
+  }
 
+  /// The value of the project's own variable [match] names.
+  static Object? _userVariableValue(
+    VariableMatch match,
+    ScopedValues scopedValues,
+  ) {
     final VariableData? variable = scopedValues.variables[match.name];
     if (variable == null) {
       // In a text field's own actions, `inputValue` (the property a field's
@@ -713,12 +747,10 @@ class PropertyValueDelegate {
     );
   }
 
-  @internal
-  static Object? retrievePredefinedVariableValue(
-    VariableMatch match,
-    ScopedValues scopedValues,
-  ) {
-    final Object? variableValue = switch (match.name) {
+  /// What the predefined variable [name] reads in [scopedValues], before
+  /// any [ScopedValues.predefinedOverrides].
+  static Object? _predefinedValueOf(String name, ScopedValues scopedValues) {
+    return switch (name) {
       'data' => scopedValues.data,
       'product' => scopedValues.data['product'],
       'paywall' => scopedValues.data['paywall'],
@@ -761,8 +793,40 @@ class PropertyValueDelegate {
       'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
       'speech' => Speech.instance.value,
       'initial' => InitialValues(scopedValues.initialVariables),
+      // Whether each variable has an Animate variable action playing it.
+      'animating' => VariableAnimator.playingIn(scopedValues.codelesslyContext),
       _ => null,
     };
+  }
+
+  /// [value] (the predefined variable [name]'s) with the keys a design
+  /// canvas previews for it ([ScopedValues.predefinedOverrides]) on top.
+  static Object? _withPredefinedOverrides(
+    String name,
+    Object? value,
+    ScopedValues scopedValues,
+  ) {
+    final Map<String, Object?>? override =
+        scopedValues.predefinedOverrides?[name];
+    if (override == null || override.isEmpty) return value;
+    return <String, Object?>{
+      if (value is Map)
+        for (final MapEntry<dynamic, dynamic> entry in value.entries)
+          '${entry.key}': entry.value,
+      ...override,
+    };
+  }
+
+  @internal
+  static Object? retrievePredefinedVariableValue(
+    VariableMatch match,
+    ScopedValues scopedValues,
+  ) {
+    final Object? variableValue = _withPredefinedOverrides(
+      match.name,
+      _predefinedValueOf(match.name, scopedValues),
+      scopedValues,
+    );
 
     if (variableValue == null) return null;
     final VariableType variableType = VariableType.fromObjectType(

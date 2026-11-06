@@ -80,23 +80,34 @@ void main() {
     );
   });
 
-  testWidgets('a text is measured afresh when a web font loads', (tester) async {
+  testWidgets('a text is measured afresh when a web font loads', (
+    tester,
+  ) async {
     final payee = text('payee', 'Bluebird Coffee');
-    final col = flex('col', kRootNode, [payee],
-        type: RowColumnType.column,
-        horizontalFit: SizeFit.shrinkWrap,
-        verticalFit: SizeFit.shrinkWrap,
-        crossAxisAlignment: CrossAxisAlignmentC.stretch);
-    await pump(tester, col, [payee],
-        screen: const Size(1440, 900), host: Host.loose);
+    final col = flex(
+      'col',
+      kRootNode,
+      [payee],
+      type: RowColumnType.column,
+      horizontalFit: SizeFit.shrinkWrap,
+      verticalFit: SizeFit.shrinkWrap,
+      crossAxisAlignment: CrossAxisAlignmentC.stretch,
+    );
+    await pump(
+      tester,
+      col,
+      [payee],
+      screen: const Size(1440, 900),
+      host: Host.loose,
+    );
     RenderParagraph paragraph() => tester
         .renderObjectList<RenderParagraph>(find.byType(RichText))
         .firstWhere((p) => p.text.toPlainText() == 'Bluebird Coffee');
     final RenderParagraph before = paragraph();
     // What the engine sends when a font finishes loading.
-    await PaintingBinding.instance.handleSystemMessage(
-      const <String, dynamic>{'type': 'fontsChange'},
-    );
+    await PaintingBinding.instance.handleSystemMessage(const <String, dynamic>{
+      'type': 'fontsChange',
+    });
     await tester.pump();
     // A new render paragraph: Flutter's own keeps intrinsics measured with
     // the old font.

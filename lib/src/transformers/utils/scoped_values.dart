@@ -85,6 +85,13 @@ class ScopedValues {
   /// node's parent gives it (see [ParentSizeScope]).
   late final Map<String, dynamic>? parentSize;
 
+  /// Values a design canvas (or a capture) shows for map predefined
+  /// variables, by variable name then key, on top of what they would read:
+  /// e.g. `{'drag': {'active': true, 'over': 'lamp-2'}}` previews a drag
+  /// over a drop target, and `{'screen': {'isDark': true}}` dark mode.
+  /// Null outside a preview.
+  late final Map<String, Map<String, Object?>>? predefinedOverrides;
+
   // private fields.
   late final WeakReference<CodelesslyContext>? _codelesslyContextRef;
   // The Codelessly instance, read live: its cloud database can become
@@ -148,7 +155,8 @@ class ScopedValues {
       screenSize = null,
       breakpointWidths = null,
       platformBrightness = null,
-      parentSize = null;
+      parentSize = null,
+      predefinedOverrides = null;
 
   /// Creates scoped values for a design canvas, where [variables] (by name)
   /// hold their default values and nothing is read from a running app.
@@ -164,6 +172,7 @@ class ScopedValues {
     this.screenSize,
     this.platformBrightness,
     this.parentSize,
+    this.predefinedOverrides,
     this.breakpointWidths,
     Map<String, dynamic>? data,
     Map<String, dynamic>? routeParams,
@@ -203,7 +212,30 @@ class ScopedValues {
       screenSize = base.screenSize,
       breakpointWidths = base.breakpointWidths,
       platformBrightness = base.platformBrightness,
-      parentSize = base.parentSize;
+      parentSize = base.parentSize,
+      predefinedOverrides = base.predefinedOverrides;
+
+  /// [base] with `${parent}` reading [parentSize] (a map of `width` and
+  /// `height`, see [parentVariableValue]): what a drag track's geometry
+  /// bindings read, with its parent's measured box.
+  ScopedValues.withParentSize(ScopedValues base, this.parentSize)
+    : _codelesslyContextRef = base._codelesslyContextRef,
+      _instanceRef = base._instanceRef,
+      _variablesOverrides = base._variablesOverrides,
+      _dataOverrides = base._dataOverrides,
+      _previewVariables = base._previewVariables,
+      _appUser = base._appUser,
+      indexedItem = base.indexedItem,
+      parentIndexedItem = base.parentIndexedItem,
+      nodeState = base.nodeState,
+      holdProgress = base.holdProgress,
+      dragValues = base.dragValues,
+      trackValues = base.trackValues,
+      _givenRouteParams = base._givenRouteParams,
+      _routePath = base._routePath,
+      screenSize = base.screenSize,
+      platformBrightness = base.platformBrightness,
+      predefinedOverrides = base.predefinedOverrides;
 
   /// Creates a new scoped values instance from a given context.
   ScopedValues.of(
@@ -223,6 +255,7 @@ class ScopedValues {
     breakpointWidths = ResponsiveWidthsScope.maybeOf(context);
     platformBrightness = MediaQuery.maybePlatformBrightnessOf(context);
     parentSize = ParentSizeScope.valueOf(context);
+    predefinedOverrides = null;
     nodeState = NodeStateProvider.maybeOf(context)?.state;
     holdProgress = HoldProgressProvider.maybeOf(context);
     dragValues = DragScope.maybeOf(context);
