@@ -95,7 +95,15 @@ void main() {
     );
     final Rect label = tester.getRect(find.text('12'));
     expect(line.height, 1);
-    expect(label.height, 16);
+    // As tall as its line (the font's own measure), not squeezed to the
+    // row's 1 px.
+    final RenderParagraph paragraph =
+        tester.renderObject(find.text('12')) as RenderParagraph;
+    expect(label.height, greaterThan(10));
+    expect(
+      label.height,
+      closeTo(paragraph.getMaxIntrinsicHeight(double.infinity), 0.5),
+    );
     expect(label.top, closeTo(line.top - 7.5, 0.01));
   });
 

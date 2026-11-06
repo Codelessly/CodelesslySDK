@@ -53,4 +53,49 @@ void main() {
     expect(await painterFor(round, 0), isNull);
     expect(await painterFor(null, 3), isNull);
   });
+
+  testWidgets('shadows keep their order when one has a spread', (
+    tester,
+  ) async {
+    // A crayon button's edge: a graphite shadow, then a coloured one inset
+    // by 2 px over it. Both must be painted, graphite first.
+    const BoxShadow edge = BoxShadow(
+      color: Color(0xFF3A3530),
+      offset: Offset(0, 5),
+    );
+    const BoxShadow fill = BoxShadow(
+      color: Color(0xFFC19E3E),
+      offset: Offset(0, 5),
+      spreadRadius: -2,
+    );
+    await tester.pumpWidget(
+      Center(
+        child: decorateWithShadows(
+          boxShadow: const [edge, fill],
+          borderRadius: const BorderRadius.all(Radius.circular(19)),
+          clipBehavior: Clip.none,
+          child: const SizedBox(width: 100, height: 50),
+        ),
+      ),
+    );
+    final SpreadShadowPainter painter = tester
+        .widgetList<CustomPaint>(find.byType(CustomPaint))
+        .map((p) => p.painter)
+        .whereType<SpreadShadowPainter>()
+        .single;
+    expect(painter.shadows, [edge, fill]);
+    final BoxDecoration decoration = tester
+        .widgetList<Container>(find.byType(Container))
+        .map((c) => c.decoration)
+        .whereType<BoxDecoration>()
+        .single;
+    expect(decoration.boxShadow, isEmpty);
+
+    final canvas = _RecordingCanvas();
+    painter.paint(canvas, const Size(100, 50));
+    expect(canvas.rrects.map((r) => r.outerRect).toList(), const [
+      Rect.fromLTRB(0, 5, 100, 55),
+      Rect.fromLTRB(2, 7, 98, 53),
+    ]);
+  });
 }
