@@ -711,9 +711,7 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     BaseNode row,
     Widget childWidget,
   ) {
-    if (row is ClipMixin && (row as ClipMixin).clipsContent) {
-      return childWidget;
-    }
+    if (row is ClipMixin && row.clipsContent) return childWidget;
     if (row.verticalFit == SizeFit.shrinkWrap) return childWidget;
     if (child is SpacerNode || child.verticalFit.isFlex) return childWidget;
     if (child.alignment != AlignmentModel.none) return childWidget;
@@ -1134,7 +1132,7 @@ class RowCrossOverflow extends SingleChildRenderObjectWidget {
 
   @override
   RenderRowCrossOverflow createRenderObject(BuildContext context) =>
-      RenderRowCrossOverflow(minMaxHeight: minMaxHeight, alignment: alignment);
+      RenderRowCrossOverflow(minMaxHeight, alignment);
 
   @override
   void updateRenderObject(
@@ -1150,12 +1148,7 @@ class RowCrossOverflow extends SingleChildRenderObjectWidget {
 /// The render object of [RowCrossOverflow].
 class RenderRowCrossOverflow extends RenderShiftedBox {
   /// Creates a [RenderRowCrossOverflow].
-  RenderRowCrossOverflow({
-    required double minMaxHeight,
-    required Alignment alignment,
-  }) : _minMaxHeight = minMaxHeight,
-       _alignment = alignment,
-       super(null);
+  RenderRowCrossOverflow(this._minMaxHeight, this._alignment) : super(null);
 
   double _minMaxHeight;
 
@@ -1177,10 +1170,8 @@ class RenderRowCrossOverflow extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  BoxConstraints _childConstraints(BoxConstraints constraints) =>
-      constraints.copyWith(
-        maxHeight: math.max(constraints.maxHeight, minMaxHeight),
-      );
+  BoxConstraints _childConstraints(BoxConstraints constraints) => constraints
+      .copyWith(maxHeight: math.max(constraints.maxHeight, minMaxHeight));
 
   @override
   Size computeDryLayout(covariant BoxConstraints constraints) {
