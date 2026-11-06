@@ -270,32 +270,24 @@ class NodeDragTrack extends StatefulWidget {
   State<NodeDragTrack> createState() => _NodeDragTrackState();
 }
 
-/// A pan that wins the gesture arena once its pointer has moved a few
-/// pixels, well before a scroll view around it reaches its own slop, so a
-/// track that follows the pointer turns instead of scrolling the page. Taps
-/// (and double taps) don't move, so they still reach their recognizers.
-class _EagerPanGestureRecognizer extends PanGestureRecognizer {
-  final Map<int, Offset> _downs = <int, Offset>{};
+/// The pan a [NodeDragTrack] turns its value with. It claims the pointer
+/// after half the movement any drag or scroll needs (half a pixel with a
+/// mouse, half the touch slop on touch), so a control wins over what holds
+/// it: a knob on a pedal that can itself be dragged (a draggable starts at
+/// 1px with a mouse), a fader in a scrolling page (a scroll starts at the
+/// touch slop, where a plain pan needs twice that). Holding still is not
+/// claiming, so a double tap still resets the value.
+class TrackPanGestureRecognizer extends PanGestureRecognizer {
+  /// Creates a [TrackPanGestureRecognizer].
+  TrackPanGestureRecognizer({super.debugOwner});
 
   @override
-  void addAllowedPointer(PointerDownEvent event) {
-    _downs[event.pointer] = event.position;
-    super.addAllowedPointer(event);
-  }
-
-  @override
-  void handleEvent(PointerEvent event) {
-    if (event is PointerMoveEvent) {
-      final Offset? down = _downs[event.pointer];
-      if (down != null && (event.position - down).distance > 3) {
-        _downs.remove(event.pointer);
-        resolve(GestureDisposition.accepted);
-      }
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _downs.remove(event.pointer);
-    }
-    super.handleEvent(event);
-  }
+  bool hasSufficientGlobalDistanceToAccept(
+    PointerDeviceKind pointerDeviceKind,
+    double? deviceTouchSlop,
+  ) =>
+      globalDistanceMoved.abs() >
+      computeHitSlop(pointerDeviceKind, gestureSettings) / 2;
 }
 
 /// The curve named by [DragTrackModel.snapCurve].
@@ -342,7 +334,7 @@ class _NodeDragTrackState extends State<NodeDragTrack>
     final DragGestureRecognizer r = switch (widget.track.input) {
       DragTrackInput.vertical => VerticalDragGestureRecognizer(),
       DragTrackInput.horizontal => HorizontalDragGestureRecognizer(),
-      DragTrackInput.follow => _EagerPanGestureRecognizer(),
+      DragTrackInput.follow => TrackPanGestureRecognizer(),
     };
     return r
       ..dragStartBehavior = DragStartBehavior.down
