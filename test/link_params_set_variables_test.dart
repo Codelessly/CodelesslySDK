@@ -1,4 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_sdk/codelessly_sdk.dart' show Codelessly;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/ui/layout_builder.dart' show withLinkParam;
 
@@ -50,15 +51,29 @@ void main() {
     );
   });
 
-  test('a link param that does not fit the variable type leaves it alone', () {
+  test('a link param is read as its variable\'s type, as the router reads it', () {
     final VariableData feed = VariableData(
       id: 'feed',
       name: 'feed',
       value: '[{"t": 1}, {"t": 2}]',
       type: VariableType.list,
     );
-    expect(withLinkParam(feed, {'feed': '3'}).value, feed.value);
-    expect(withLinkParam(feed, {'feed': '[1]'}).value, '[1]');
+    // The same as Codelessly.setVariablesFromRoute: a comma list or JSON.
+    expect(withLinkParam(feed, {'feed': '3'}).getValue(), [3]);
+    expect(withLinkParam(feed, {'feed': '3,7'}).getValue(), [3, 7]);
+    expect(withLinkParam(feed, {'feed': '[1]'}).getValue(), [1]);
+    expect(
+      withLinkParam(feed, {'feed': '3'}).getValue(),
+      Codelessly.linkValueFor(VariableType.list, '3'),
+    );
+    final VariableData filters = VariableData(
+      id: 'm',
+      name: 'filters',
+      value: '{"a": 1}',
+      type: VariableType.map,
+    );
+    expect(withLinkParam(filters, {'filters': 'x'}).value, filters.value);
+    expect(withLinkParam(filters, {'filters': '{"b":2}'}).getValue(), {'b': 2});
     final VariableData goal = VariableData(
       id: 'g',
       name: 'goal',
@@ -67,5 +82,12 @@ void main() {
     );
     expect(withLinkParam(goal, {'goal': 'lots'}).getValue(), 10000);
     expect(withLinkParam(goal, {'goal': '6000'}).getValue(), 6000);
+    final VariableData done = VariableData(
+      id: 'd',
+      name: 'done',
+      value: false,
+      type: VariableType.boolean,
+    );
+    expect(withLinkParam(done, {'done': 'yes'}).getValue(), isTrue);
   });
 }
