@@ -208,8 +208,9 @@ Widget buildSlider(
       : null;
   final void Function(Object?)? write = _writer(context, props, 'value');
   final String unit = props.string('unit') ?? '';
+  final String prefix = props.string('prefix') ?? '';
   final String shown =
-      '${NumberFormat.decimalPattern().format(_snap(value, step))}$unit';
+      '$prefix${NumberFormat.decimalPattern().format(_snap(value, step))}$unit';
   return Column(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
