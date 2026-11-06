@@ -1232,16 +1232,50 @@ List<Widget> buildFills(
 bool _hasChildren(GeometryMixin node) =>
     node is ChildrenMixin && (node as ChildrenMixin).children.isNotEmpty;
 
+/// A colour or gradient fill under [node]'s border, inset by half the
+/// border's inset into the box, as Flutter's BoxDecoration paints its
+/// background inside a uniform border: drawn to the edge, the fill's
+/// anti-aliased rim showed through the border's, a light seam between a
+/// card's border and its shadow.
+Widget _underBorder(GeometryMixin node, Widget fill) {
+  final double inset = fillInsetUnderBorder(node);
+  if (inset <= 0) return Positioned.fill(child: fill);
+  return Positioned(
+    left: inset,
+    top: inset,
+    right: inset,
+    bottom: inset,
+    child: fill,
+  );
+}
+
+/// How far a colour or gradient fill of [node] sits inside its box: half
+/// the inset of a solid stroke on every side (the whole width inside, half
+/// of it centred, none outside), else 0.
+double fillInsetUnderBorder(GeometryMixin node) {
+  final double width = node.strokeWeight;
+  if (width <= 0 ||
+      node.strokeSide != StrokeSide.all ||
+      node.dashPattern.isNotEmpty ||
+      !node.strokes.any((paint) => paint.visible) ||
+      (node is RectangleNode && node.hasPath) ||
+      notchesOf(node as BaseNode).isNotEmpty) {
+    return 0;
+  }
+  final double align = node.strokeAlign.alignment;
+  return width * (1 - (1 + align) / 2) / 2;
+}
+
 Widget wrapFillWithPositioned({
   required GeometryMixin node,
   required Widget fill,
   required PaintModel paint,
 }) => switch (paint.type) {
-  PaintType.solid => Positioned.fill(child: fill),
+  PaintType.solid ||
   PaintType.gradientLinear ||
   PaintType.gradientRadial ||
   PaintType.gradientAngular ||
-  PaintType.gradientDiamond => Positioned.fill(child: fill),
+  PaintType.gradientDiamond => _underBorder(node, fill),
   // A node that hugs its size and has nothing else in it takes the image's
   // size (a `Positioned` with no offsets sizes the stack). A node with
   // children hugs them, and the image fills it behind them, as at design
