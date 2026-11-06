@@ -839,7 +839,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         in collectIntervalActions().entries) {
       _intervalTimers.add(
         Timer.periodic(Duration(milliseconds: group.key), (_) {
-          if (!mounted || _runningIntervals.contains(group.key)) return;
+          if (!mounted ||
+              !_shown ||
+              _runningIntervals.contains(group.key)) {
+            return;
+          }
           _runningIntervals.add(group.key);
           ActionChain.run(
             () => runActions(group.value),
@@ -849,6 +853,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       );
     }
   }
+
+  /// Whether the canvas is on screen: a screen another one fully covers
+  /// (the entry screen under a deep-linked one, a list under its detail)
+  /// stays built, but the navigator's overlay turns its tickers off. Its
+  /// interval and timer reactions wait until it shows again, so two
+  /// screens' timers don't both run (a live feed advancing twice as fast).
+  /// A dialog over the canvas doesn't hide it.
+  bool get _shown => TickerMode.valuesOf(context).enabled;
 
   void stopIntervals() {
     for (final Timer timer in _intervalTimers) {
@@ -1006,7 +1018,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         Timer.periodic(
           Duration(milliseconds: reaction.trigger.effectiveIntervalMs),
           (_) async {
-            if (!mounted || busy) return;
+            if (!mounted || !_shown || busy) return;
             busy = true;
             try {
               await FunctionsRepository.triggerAction(

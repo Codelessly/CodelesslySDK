@@ -145,7 +145,8 @@ class PropertyValueDelegate {
           scopedValues: scopedValues,
         ) ??
         literalIconName<R>(node, property, variablePath) ??
-        literalColor<R>(variablePath);
+        literalColor<R>(variablePath) ??
+        literalNumber<R>(variablePath);
   }
 
   static final RegExp _hexColor = RegExp(r'^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$');
@@ -160,6 +161,20 @@ class PropertyValueDelegate {
     final String hex = binding.trim();
     if (!_hexColor.hasMatch(hex)) return null;
     return ColorRGBA.fromHex(hex) as R?;
+  }
+
+  /// [binding] itself as a number when [R] takes one and the binding is a
+  /// number written as is (`172.28`) rather than a variable or formula: a
+  /// stacked list item's `x`/`y` bound to a constant sits there, as with
+  /// `${= 172.28}`; it used to fall back to the item's design offset. Null
+  /// otherwise.
+  static R? literalNumber<R extends Object>(String binding) {
+    if (R != num && R != double && R != int) return null;
+    final num? value = num.tryParse(binding.trim());
+    if (value == null || !value.isFinite) return null;
+    if (R == int) return (value is int ? value : null) as R?;
+    if (R == double) return value.toDouble() as R;
+    return value as R;
   }
 
   /// The icon properties of an icon node that take an icon's name.
@@ -724,6 +739,7 @@ class PropertyValueDelegate {
       // no app user: read as signed out rather than unknown.
       'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
+      'loop' => ActionChain.current?.loop,
       'screen' => scopedValues.screenSize?.let(
         (Size size) => screenVariableValue(
           size,
