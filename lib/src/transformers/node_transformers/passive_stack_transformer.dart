@@ -390,6 +390,17 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
           ),
       ],
     );
+    // A child that reads `parent` (a slider cap whose throw is its groove's
+    // width) gets this frame's content box, not its own placed size.
+    if (children.any(readsParentSize)) {
+      final Widget layout = content;
+      content = MeasurableLayoutBuilder(
+        key: ValueKey('${node.id}-children-parent-size'),
+        fallbackSize: designSize,
+        builder: (context, constraints) =>
+            ParentSizeScope.fromConstraints(constraints, child: layout),
+      );
+    }
     if (contentFit != null) {
       content = ScaledContent(
         designSize: designSize,
