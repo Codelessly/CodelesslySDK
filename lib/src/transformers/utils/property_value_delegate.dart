@@ -144,7 +144,22 @@ class PropertyValueDelegate {
           variablePath,
           scopedValues: scopedValues,
         ) ??
-        literalIconName<R>(node, property, variablePath);
+        literalIconName<R>(node, property, variablePath) ??
+        literalColor<R>(variablePath);
+  }
+
+  static final RegExp _hexColor = RegExp(r'^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$');
+
+  /// [binding] itself as a colour when it is a hex colour written as is
+  /// (`#3A3530`, `#FF3A3530`) rather than a variable or formula giving one:
+  /// `"variables": {"iconColor": "#3A3530"}` colours the icon, as
+  /// `${= '#3A3530'}` does (no variable can be named `#...`). Null
+  /// otherwise, and for properties that don't take a colour.
+  static R? literalColor<R extends Object>(String binding) {
+    if (R != ColorRGBA) return null;
+    final String hex = binding.trim();
+    if (!_hexColor.hasMatch(hex)) return null;
+    return ColorRGBA.fromHex(hex) as R?;
   }
 
   /// The icon properties of an icon node that take an icon's name.
@@ -1450,7 +1465,6 @@ class InitialValues extends MapBase<String, Object?> {
   Object? remove(Object? key) =>
       throw UnsupportedError('initial values are read-only');
 }
-
 
 /// A screen-wide predefined value (storage, route, screen, auth) a
 /// computed variable reads, compared by value for its cache.
