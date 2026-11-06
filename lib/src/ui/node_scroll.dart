@@ -1,9 +1,13 @@
+// [ScrollTargets.of] only uses an action's context while it is mounted.
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import '../navigation/codelessly_router.dart' show CodelesslyRouteScope;
 import 'node_motion.dart';
 
 /// The nodes Scroll To actions scroll to, and where each is built.
@@ -28,6 +32,11 @@ abstract final class ScrollTargets {
           for (final Reaction reaction in (node as ReactionMixin).reactions)
             reaction.action,
         ]);
+      }
+      // A screen's own reactions (its load actions, say) can scroll to a
+      // node too.
+      if (node is CanvasNode) {
+        addTargetsOf([for (final Reaction r in node.reactions) r.action]);
       }
       if (node is ParentReactionMixin) {
         for (final ReactionMixin child
@@ -57,28 +66,71 @@ abstract final class ScrollTargets {
   static Widget wrap(BaseNode node, Widget child) =>
       isTarget(node.id) ? ScrollTarget(nodeId: node.id, child: child) : child;
 
-  /// Where node [nodeId] is built, or null when it isn't. The latest built
-  /// instance wins when it is built more than once.
-  static BuildContext? of(String nodeId) {
-    final List<BuildContext>? built = _built[nodeId];
-    if (built == null) return null;
-    for (final BuildContext context in built.reversed) {
-      if (context.mounted) return context;
+  /// Where node [nodeId] is built, or null when it isn't.
+  ///
+  /// The same node can be built on more than one screen: a link to the
+  /// entry screen opens it over the entry screen itself. An instance on the
+  /// screen of [near] (the context of the action) wins; when [strict], only
+  /// such an instance does, while that screen has one to wait for. Else an
+  /// instance on a screen that isn't covered, else the latest built.
+  static BuildContext? of(
+    String nodeId, {
+    BuildContext? near,
+    bool strict = false,
+  }) {
+    final List<BuildContext> built = [
+      for (final BuildContext context in _built[nodeId] ?? const [])
+        if (context.mounted) context,
+    ];
+    if (built.isEmpty) return null;
+    final Element? screen = near != null && near.mounted
+        ? _screenOf(near)
+        : null;
+    if (screen != null) {
+      for (final BuildContext context in built.reversed) {
+        if (_screenOf(context) == screen) return context;
+      }
+      if (strict) return null;
     }
-    return null;
+    for (final BuildContext context in built.reversed) {
+      if (TickerMode.getValuesNotifier(context).value.enabled) return context;
+    }
+    return built.last;
   }
+
+  /// The screen [context] is on: its [CodelesslyRouteScope].
+  static Element? _screenOf(BuildContext context) =>
+      context.getElementForInheritedWidgetOfExactType<CodelesslyRouteScope>();
 
   /// Scrolls every scroll view around node [ScrollToAction.nodeId] so it
   /// comes into view, as [action] says. Returns false when the node isn't
   /// built, e.g. an item of a lazy list far off screen.
-  static Future<bool> scrollTo(ScrollToAction action) async {
-    if (_scrollTo(action) case final Future<void> scrolled) {
+  ///
+  /// The node on the screen of [near] (the action's context) is the one
+  /// that scrolls; see [of].
+  static Future<bool> scrollTo(
+    ScrollToAction action, {
+    BuildContext? near,
+  }) async {
+    if (_scrollTo(action, near, strict: true)
+        case final Future<void> scrolled) {
       await scrolled;
       return true;
     }
-    // The screen may not have been laid out yet, e.g. right as it opens.
-    await SchedulerBinding.instance.endOfFrame;
-    if (_scrollTo(action) case final Future<void> scrolled) {
+    // The screen may not have been laid out yet, e.g. right as it opens or
+    // as an earlier action shows the part the node is in (a page body shown
+    // once data has loaded builds over a few frames). Wait for it, up to 60
+    // frames (about a second).
+    for (int frame = 0; frame < 60; frame++) {
+      await SchedulerBinding.instance.endOfFrame;
+      if (_scrollTo(action, near, strict: true)
+          case final Future<void> scrolled) {
+        await scrolled;
+        return true;
+      }
+    }
+    // The action's screen never built it: an instance on another screen.
+    if (_scrollTo(action, near) case final Future<void> scrolled) {
       await scrolled;
       return true;
     }
@@ -87,8 +139,12 @@ abstract final class ScrollTargets {
 
   /// Starts the scrolls of [action], or returns null when its node isn't
   /// built and laid out.
-  static Future<void>? _scrollTo(ScrollToAction action) {
-    final BuildContext? context = of(action.nodeId);
+  static Future<void>? _scrollTo(
+    ScrollToAction action,
+    BuildContext? near, {
+    bool strict = false,
+  }) {
+    final BuildContext? context = of(action.nodeId, near: near, strict: strict);
     if (context == null || !_laidOut(context)) return null;
     final Duration duration = Duration(
       milliseconds: action.durationMs < 0 ? 0 : action.durationMs,
@@ -121,6 +177,9 @@ abstract final class ScrollTargets {
       if (position.hasContentDimensions) {
         to = to.clamp(position.minScrollExtent, position.maxScrollExtent);
       }
+      // A scroll view along the other axis stays where it is.
+      final String? only = action.axis;
+      if (only != null && only != position.axis.name) to = position.pixels;
       final double delta = to - position.pixels;
 
       // Where the target will be in this scroll view once it has scrolled,

@@ -97,6 +97,13 @@ class FreeformAxisPlacement {
   /// The child's margins on this axis, for [sizeFactor].
   final double factorMargin;
 
+  /// The child's outer start from the container's inner start edge that a
+  /// bound `x` or `y` gives it, whatever size the container gets: the child
+  /// sits there instead of where [mode] would put it, unclamped, as on the
+  /// design canvas. Its size still follows [mode]. Null when the axis isn't
+  /// bound.
+  final double? boundStart;
+
   const FreeformAxisPlacement({
     required this.mode,
     required this.start,
@@ -112,7 +119,28 @@ class FreeformAxisPlacement {
     this.minSize = 0,
     this.sizeFactor,
     this.factorMargin = 0,
+    this.boundStart,
   });
+
+  /// This placement with the child's outer start at [start] (see
+  /// [boundStart]).
+  FreeformAxisPlacement withBoundStart(double start) => FreeformAxisPlacement(
+    mode: mode,
+    start: this.start,
+    extent: extent,
+    parentExtent: parentExtent,
+    size: size,
+    alignment: alignment,
+    fraction: fraction,
+    anchor: anchor,
+    clamp: clamp,
+    expands: expands,
+    growsWithContent: growsWithContent,
+    minSize: minSize,
+    sizeFactor: sizeFactor,
+    factorMargin: factorMargin,
+    boundStart: start,
+  );
 
   /// This placement with the child sized as [factor] of the container's
   /// extent, less [margin], plus [margin].
@@ -132,6 +160,7 @@ class FreeformAxisPlacement {
         minSize: minSize,
         sizeFactor: factor,
         factorMargin: margin,
+        boundStart: boundStart,
       );
 
   /// The outer extent of a child sized by [sizeFactor] in a container of
@@ -197,6 +226,8 @@ class FreeformAxisPlacement {
   /// child edge.
   double contribution(double childExtent, {required bool wraps}) =>
       switch (mode) {
+        _ when boundStart != null && mode != FreeformAxisMode.fill =>
+          wraps ? childExtent : math.max(0, boundStart!) + childExtent,
         FreeformAxisMode.fill => 0,
         FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
         _ when wraps => childExtent,
@@ -268,6 +299,7 @@ class FreeformAxisPlacement {
   /// The child's offset on this axis in a container of runtime extent [s],
   /// given the child's laid out [childExtent].
   double offsetIn(double s, double childExtent, {required bool wraps}) {
+    if (boundStart case final double bound) return bound;
     double offset;
     switch (mode) {
       case FreeformAxisMode.fill:
@@ -314,7 +346,8 @@ class FreeformAxisPlacement {
       other.growsWithContent == growsWithContent &&
       other.minSize == minSize &&
       other.sizeFactor == sizeFactor &&
-      other.factorMargin == factorMargin;
+      other.factorMargin == factorMargin &&
+      other.boundStart == boundStart;
 
   @override
   int get hashCode => Object.hash(
@@ -332,6 +365,7 @@ class FreeformAxisPlacement {
     minSize,
     sizeFactor,
     factorMargin,
+    boundStart,
   );
 
   @override
@@ -361,6 +395,41 @@ class FreeformPlacement {
 /// Parent data for children of [RenderFreeformLayout].
 class FreeformParentData extends ContainerBoxParentData<RenderBox> {
   FreeformPlacement? placement;
+}
+
+/// Marks the node [nodeId] as placed by its [FreeformLayout] slot at its
+/// bound `x` ([x]) and `y` ([y]) (see [FreeformAxisPlacement.boundStart]),
+/// so the node's own bound offset doesn't move it there again.
+class FreeformBoundPlacement extends InheritedWidget {
+  /// The node the slot places.
+  final String nodeId;
+
+  /// Whether the slot places the node at its bound x.
+  final bool x;
+
+  /// Whether the slot places the node at its bound y.
+  final bool y;
+
+  const FreeformBoundPlacement({
+    super.key,
+    required this.nodeId,
+    required this.x,
+    required this.y,
+    required super.child,
+  });
+
+  /// The axes (x, y) on which the freeform slot around [context] places the
+  /// node [nodeId] at its bound position; (false, false) when none does.
+  static (bool x, bool y) of(BuildContext context, String nodeId) {
+    final FreeformBoundPlacement? scope = context
+        .dependOnInheritedWidgetOfExactType<FreeformBoundPlacement>();
+    if (scope == null || scope.nodeId != nodeId) return (false, false);
+    return (scope.x, scope.y);
+  }
+
+  @override
+  bool updateShouldNotify(FreeformBoundPlacement oldWidget) =>
+      oldWidget.nodeId != nodeId || oldWidget.x != x || oldWidget.y != y;
 }
 
 /// Gives a child of a [FreeformLayout] its [placement].
