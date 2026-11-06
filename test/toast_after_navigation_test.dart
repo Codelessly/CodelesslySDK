@@ -1,4 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'codelessly_router_test.dart' show FakeBrowser, pumpRouterApp, tap;
@@ -17,16 +18,47 @@ ConditionalAction _always(List<ActionModel> actions) => ConditionalAction(
 
 ActionModel _save(List<ActionModel> chain) => _always([_always(chain)]);
 
+/// As Apiary's screens navigate: fading up over 240 ms (180 back).
 NavigationAction _nav(NavigationType type, [String to = '']) =>
-    NavigationAction(navigationType: type, destinationId: to);
+    NavigationAction(
+      navigationType: type,
+      destinationId: to,
+      transition: PageTransition.fadeUp,
+      transitionMs: 240,
+      reverseTransitionMs: 180,
+    );
 
-Future<void> _expectToast(WidgetTester tester, String message) async {
+/// The paint order of the root overlay's entry [finder] is in.
+int _layer(WidgetTester tester, Finder finder) {
+  RenderObject child = tester.renderObject(finder.first);
+  RenderObject? theater;
+  for (RenderObject? node = child.parent; node != null; node = node.parent) {
+    if (node.runtimeType.toString() == '_RenderTheater') theater = node;
+  }
+  expect(theater, isNotNull);
+  while (child.parent != theater) {
+    child = child.parent!;
+  }
+  final List<RenderObject> order = [];
+  theater!.visitChildren(order.add);
+  return order.indexOf(child);
+}
+
+Future<void> _expectToast(
+  WidgetTester tester,
+  String message,
+  String screen,
+) async {
   // The new screen's transition.
   await tester.pump(const Duration(milliseconds: 400));
   await tester.pump(const Duration(milliseconds: 400));
   expect(find.text(message), findsOneWidget);
-  // Not covered by the screen the navigation showed.
-  expect(find.text(message).hitTestable(), findsOneWidget);
+  // Not covered by the screen the navigation showed: the toast paints
+  // above the screen's text in the root overlay.
+  expect(
+    _layer(tester, find.text(message)),
+    greaterThan(_layer(tester, find.text(screen))),
+  );
   await tester.pump(const Duration(seconds: 10));
   await tester.pumpAndSettle();
 }
@@ -51,8 +83,8 @@ void main() {
       await pumpRouterApp(tester, model, browser);
       await tap(tester, 'ToGuide');
       await tester.tap(find.text('Save'));
-      await _expectToast(tester, 'Added Wren');
-      expect(find.text('Journal'), findsOneWidget);
+      expect(find.text('Journal'), findsNothing);
+      await _expectToast(tester, 'Added Wren', 'Journal');
     });
 
     testWidgets('a toast $order a pop shows on the screen below', (
@@ -72,8 +104,7 @@ void main() {
       await pumpRouterApp(tester, model, browser);
       await tap(tester, 'ToGuide');
       await tester.tap(find.text('Save'));
-      await _expectToast(tester, 'Saved Bramble');
-      expect(find.text('Tides'), findsOneWidget);
+      await _expectToast(tester, 'Saved Bramble', 'Tides');
     });
 
     testWidgets('a toast $order a pop by link (a replace) shows', (
@@ -91,8 +122,7 @@ void main() {
       final browser = FakeBrowser(tester, url: '/journal');
       await pumpRouterApp(tester, model, browser);
       await tester.tap(find.text('Save'));
-      await _expectToast(tester, 'Saved Bramble');
-      expect(find.text('Tides'), findsOneWidget);
+      await _expectToast(tester, 'Saved Bramble', 'Tides');
     });
   }
 }

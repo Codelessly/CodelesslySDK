@@ -7,17 +7,15 @@ import 'package:provider/provider.dart';
 const String _url = 'https://example.com/toast_check.png';
 
 /// Apiary's toast: an ink pill with wax text and an uploaded honey check.
-ShowToastAction _toast(Map<String, dynamic> icon) =>
-    ActionModel.fromJson({
-          'type': 'showToast',
-          'message': 'Logged 12 kg',
-          'duration': 2200,
-          'backgroundColor': {'r': 0.2, 'g': 0.15, 'b': 0.1, 'a': 1},
-          'textColor': {'r': 1, 'g': 0.98, 'b': 0.93, 'a': 1},
-          'icon': icon,
-          'iconSize': 18,
-        })
-        as ShowToastAction;
+ShowToastAction _toast(Map<String, dynamic> icon) => ActionModel.fromJson({
+  'type': 'showToast',
+  'message': 'Logged 12 kg',
+  'duration': 2200,
+  'backgroundColor': {'r': 0.2, 'g': 0.15, 'b': 0.1, 'a': 1},
+  'textColor': {'r': 1, 'g': 0.98, 'b': 0.93, 'a': 1},
+  'icon': icon,
+  'iconSize': 18,
+}) as ShowToastAction;
 
 Future<void> _show(WidgetTester tester, ShowToastAction action) async {
   late BuildContext context;
@@ -53,7 +51,9 @@ void main() {
   ) async {
     await _show(
       tester,
-      _toast({'type': 'image', 'iconImage': _url, 'show': true}),
+      // The toast's iconSize (18) gives way to the icon's own size, which
+      // reads as 24 when left out of the icon's JSON.
+      _toast({'type': 'image', 'iconImage': _url, 'show': true, 'size': 18}),
     );
     final Finder icon = find.byKey(
       const ValueKey('codelessly-toast-icon-image'),
