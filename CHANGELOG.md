@@ -15,6 +15,8 @@ Requires codelessly_api 9.0.4.
   controlled: drawn at that value, it only reports drags to its reactions.
 - Impossible days (`2013-02-30`) are not read as dates.
 - A text field's `error` flag draws the error border in its own color.
+- A fractional child of a row or column (along its main axis) takes its
+  share of the row's own size.
 - Quoted formula text reads `\n`, `\t` and `\r`.
 
 ## 9.1.9
