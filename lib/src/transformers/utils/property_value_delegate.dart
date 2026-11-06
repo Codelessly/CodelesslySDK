@@ -497,6 +497,11 @@ class PropertyValueDelegate {
       // being worked out, and rebuilt, on every read.
       if (FormulaEvaluator.readsClock(expression))
         FormulaClock.now().millisecondsSinceEpoch ~/ 1000,
+      // One that reads the millisecond clock (`nowMs()`, e.g. a tape's
+      // position while it plays) holds only for the millisecond it was
+      // worked out in, so the computed variables built on it move too.
+      if (FormulaEvaluator.readsFrameClock(expression))
+        DateTime.now().millisecondsSinceEpoch,
     ];
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(
