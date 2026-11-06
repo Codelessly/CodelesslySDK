@@ -52,6 +52,63 @@ class AppToast {
 
   static OverlayEntry? _current;
 
+  /// The icons of the showToast actions anywhere in [nodes]' reactions
+  /// (nested in conditions, confirmations, API outcomes and so on), as
+  /// [ShowToastAction.icon] gives them. A bound icon name isn't known
+  /// before the toast shows and isn't included.
+  static List<MultiSourceIconModel> iconsIn(Iterable<BaseNode> nodes) {
+    final List<MultiSourceIconModel> icons = [];
+    void visit(Object? json) {
+      if (json is Map) {
+        final Object? icon = json['icon'];
+        if (json['type'] == ActionType.showToast.name && icon is Map) {
+          try {
+            icons.add(
+              MultiSourceIconModel.fromJson(Map<String, dynamic>.from(icon)),
+            );
+          } catch (_) {
+            // Not an icon this SDK reads.
+          }
+        }
+        json.values.forEach(visit);
+      } else if (json is List) {
+        json.forEach(visit);
+      }
+    }
+
+    for (final BaseNode node in nodes) {
+      if (node is! ReactionMixin) continue;
+      for (final Reaction reaction in (node as ReactionMixin).reactions) {
+        visit(reaction.action.toJson());
+      }
+    }
+    return icons;
+  }
+
+  /// Loads the SVGs of the toast icons in [nodes] ([iconsIn]) ahead of
+  /// time. A toast is on screen for a couple of seconds, and the first one
+  /// of a session showed without its icon while the icon's SVG was still
+  /// being fetched.
+  static Future<void> precacheIcons(Iterable<BaseNode> nodes) async {
+    final List<Future<void>> loads = [];
+    for (final MultiSourceIconModel icon in iconsIn(nodes)) {
+      final IconModel? glyph = icon.icon;
+      if (!icon.show || icon.type != IconTypeEnum.icon || glyph == null) {
+        continue;
+      }
+      loads.add(
+        SvgIcon.precache(
+          glyph,
+          fill: icon.fill,
+          weight: icon.weight,
+          grade: icon.grade,
+          opticalSize: icon.opticalSize,
+        ),
+      );
+    }
+    await Future.wait(loads);
+  }
+
   /// The icon [action] shows with [scopedValues]: its `icon` binding
   /// (`variables: {"icon": "${toastNext.icon}"}`) naming a Material icon,
   /// such as `check_circle` or `info_outlined`, in [ShowToastAction.icon]'s
@@ -681,7 +738,6 @@ class _ToastViewState extends State<_ToastView> {
     );
   }
 }
-
 
 /// Puts [action]'s [ShowToastAction.actionShadows] under the toast's
 /// action [button] (a hard offset shadow under a poster button).
