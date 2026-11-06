@@ -87,9 +87,14 @@ class CodelesslyRouter {
           historyGo: _historyGo,
           // A reload starts with the address and the state the browser
           // kept with its history entry: the stack of screens it showed.
+          // `runApp(MaterialApp.router(routerConfig: router.config()))`
+          // calls this before runApp creates the binding, so make sure there
+          // is one (runApp then reuses it).
           initialRouteInformation: RouteInformation(
             uri: Uri.parse(
-              WidgetsBinding.instance.platformDispatcher.defaultRouteName,
+              WidgetsFlutterBinding.ensureInitialized()
+                  .platformDispatcher
+                  .defaultRouteName,
             ),
             state: _historyState(),
           ),
