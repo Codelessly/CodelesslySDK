@@ -224,6 +224,16 @@ class PassiveListViewWidget extends StatelessWidget {
         : math.max(0, bound.toDouble());
   }
 
+  /// The axis a wrapping list's items flow along: its scroll direction,
+  /// except that a vertical list whose height hugs its content flows in rows.
+  /// A vertical run with no height limit never wraps, so `wrap` did nothing
+  /// and the items (chips, say) stood in one column.
+  Axis get wrapAxis =>
+      node.scrollDirection == AxisC.vertical &&
+          node.verticalFit == SizeFit.shrinkWrap
+      ? Axis.horizontal
+      : node.scrollDirection.flutterAxis;
+
   Widget wrappedList(
     BuildContext context,
     int itemCount,
@@ -238,7 +248,7 @@ class PassiveListViewWidget extends StatelessWidget {
       padding: node.padding.flutterEdgeInsets,
       child: stretchesItems
           ? RunStretchWrap(
-              direction: node.scrollDirection.flutterAxis,
+              direction: wrapAxis,
               spacing: wrapSpacingOf(context, listWrapSpacing(node)),
               runSpacing: math.max(0, node.properties.runSpacing),
               alignment: wrapAlignmentOf(context),
@@ -246,7 +256,7 @@ class PassiveListViewWidget extends StatelessWidget {
               children: ordered,
             )
           : Wrap(
-              direction: node.scrollDirection.flutterAxis,
+              direction: wrapAxis,
               alignment: wrapAlignmentOf(context),
               spacing: wrapSpacingOf(context, listWrapSpacing(node)),
               runSpacing: math.max(0, node.properties.runSpacing),
@@ -336,7 +346,7 @@ class PassiveListViewWidget extends StatelessWidget {
   ) => WrappedItems(
     itemCount: itemCount,
     itemBuilder: builder,
-    direction: node.scrollDirection.flutterAxis,
+    direction: wrapAxis,
     spacing: wrapSpacingOf(context, node.properties.wrapSpacing),
     runSpacing: node.properties.wrapRunSpacing,
     alignment: wrapAlignmentOf(context),
