@@ -108,7 +108,10 @@ void main() {
     );
   });
 
-  testWidgets('a field that is not collapsed keeps the theme density', (
+  // An uncollapsed field is padded by its decoration's content padding, so
+  // the platform's density must not change its height either (see
+  // text_field_hug_height_test.dart).
+  testWidgets('a field that is not collapsed ignores the theme density too', (
     tester,
   ) async {
     await _pump(tester, _note(collapsed: false), VisualDensity.compact);
@@ -117,7 +120,11 @@ void main() {
           .widget<TextField>(find.byType(TextField))
           .decoration!
           .visualDensity,
-      isNull,
+      VisualDensity.standard,
+    );
+    expect(
+      tester.getSize(find.byType(TextField)).height,
+      moreOrLessEquals(threeLines, epsilon: 1),
     );
   });
 }
