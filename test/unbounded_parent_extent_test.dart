@@ -66,13 +66,14 @@ void main() {
       children: ['slot'],
       variables: {'data': r'${days}'},
     )..parentID = kRootNode;
-    final RectangleNode slot = RectangleNode(
-      id: 'slot',
-      name: 'slot',
-      basicBoxLocal: NodeBox(0, 0, 40, 180),
-    )
-      ..parentID = 'bars'
-      ..variables['widthFactor'] = r'${= 1 / 7}';
+    final RectangleNode slot =
+        RectangleNode(
+            id: 'slot',
+            name: 'slot',
+            basicBoxLocal: NodeBox(0, 0, 40, 180),
+          )
+          ..parentID = 'bars'
+          ..variables['widthFactor'] = r'${= 1 / 7}';
     await _pump(tester, [bars, slot]);
     expect(_of('slot'), findsNWidgets(7));
     expect(tester.getSize(_of('slot').first).width, closeTo(50, 0.01));
@@ -93,13 +94,14 @@ void main() {
       basicBoxLocal: NodeBox(0, 0, 300, 8),
       children: ['fill'],
     )..parentID = kRootNode;
-    final RectangleNode fill = RectangleNode(
-      id: 'fill',
-      name: 'fill',
-      basicBoxLocal: NodeBox(0, 0, 100, 8),
-    )
-      ..parentID = 'track'
-      ..widthFactor = 0.4;
+    final RectangleNode fill =
+        RectangleNode(
+            id: 'fill',
+            name: 'fill',
+            basicBoxLocal: NodeBox(0, 0, 100, 8),
+          )
+          ..parentID = 'track'
+          ..widthFactor = 0.4;
     await _pump(tester, [track, fill]);
     expect(tester.getSize(_of('fill')).width, closeTo(120, 0.01));
   });
@@ -113,13 +115,14 @@ void main() {
       horizontalFit: SizeFit.shrinkWrap,
       children: ['fill', 'other'],
     )..parentID = kRootNode;
-    final RectangleNode fill = RectangleNode(
-      id: 'fill',
-      name: 'fill',
-      basicBoxLocal: NodeBox(0, 0, 100, 8),
-    )
-      ..parentID = 'track'
-      ..variables['width'] = r'${= parent.width == null ? 33 : 99}';
+    final RectangleNode fill =
+        RectangleNode(
+            id: 'fill',
+            name: 'fill',
+            basicBoxLocal: NodeBox(0, 0, 100, 8),
+          )
+          ..parentID = 'track'
+          ..variables['width'] = r'${= parent.width == null ? 33 : 99}';
     final RectangleNode other = RectangleNode(
       id: 'other',
       name: 'other',

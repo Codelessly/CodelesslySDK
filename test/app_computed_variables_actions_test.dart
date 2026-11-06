@@ -173,15 +173,12 @@ SDKPublishLayout _layout() => SDKPublishLayout.fromJson(
                 variables: {'data': r'${scenes}'},
               )..parentID = 'homeBody',
               _button('chip', 'scenesList', r'${item.name}', [
-                _when(
-                  r'${= length(placed) > 0 && item.lamps <= lampsOn + 1}',
-                  [
-                    SetVariableAction(
-                      variable: log,
-                      newValue: r"${= item.name + ' on · ' + lampsOn}",
-                    ),
-                  ],
-                ),
+                _when(r'${= length(placed) > 0 && item.lamps <= lampsOn + 1}', [
+                  SetVariableAction(
+                    variable: log,
+                    newValue: r"${= item.name + ' on · ' + lampsOn}",
+                  ),
+                ]),
               ]),
               _text('label', 'homeBody', r'${label}'),
               _text('logText', 'homeBody', r'log: ${log}'),
@@ -365,9 +362,7 @@ void main() {
     expect(find.text('log: Reading on · 1'), findsOneWidget);
   });
 
-  testWidgets('a conditional on a page computed variable runs', (
-    tester,
-  ) async {
+  testWidgets('a conditional on a page computed variable runs', (tester) async {
     await _pump(tester);
     await tester.tap(find.text('Watts'));
     await tester.pumpAndSettle();

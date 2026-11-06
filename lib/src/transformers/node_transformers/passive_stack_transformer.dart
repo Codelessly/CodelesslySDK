@@ -406,8 +406,12 @@ class PassiveStackTransformer extends NodeWidgetTransformer<BaseNode> {
             key: ValueKey('${node.id}-freeform-parent-size'),
             fallbackSize: designSize,
             builder: (context, constraints) {
-              double? side(bool hugs, bool scrolls, double max, double design) =>
-                  scrolls
+              double? side(
+                bool hugs,
+                bool scrolls,
+                double max,
+                double design,
+              ) => scrolls
                   ? null
                   : hugs || !max.isFinite
                   ? design

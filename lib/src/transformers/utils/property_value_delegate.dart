@@ -706,6 +706,8 @@ class PropertyValueDelegate {
       'track' => (scopedValues.trackValues ?? const TrackValues()).toMap(),
       'speech' => Speech.instance.value,
       'initial' => InitialValues(scopedValues.initialVariables),
+      // Whether each variable has an Animate variable action playing it.
+      'animating' => VariableAnimator.playingIn(scopedValues.codelesslyContext),
       _ => null,
     };
   }

@@ -117,14 +117,57 @@ void main() {
     expect(t(), closeTo(0.3, 0.02));
     // The playhead is dragged to 0.8 meanwhile.
     codelesslyContext.updateVariable('t', 0.8);
-    await run(AnimateVariableAction(variable: 't', mode: AnimateVariableMode.resume));
+    // A blocking resume waits for the animation to end, like the play it
+    // carries on: both complete together.
+    bool? resumed;
+    run(
+      AnimateVariableAction(variable: 't', mode: AnimateVariableMode.resume),
+    ).then((v) => resumed = v as bool);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(t(), closeTo(0.9, 0.02));
     expect(done, isNull);
+    expect(resumed, isNull);
     await tester.pump(const Duration(milliseconds: 150));
     expect(t(), 1);
     expect(done, isTrue);
+    expect(resumed, isTrue);
+  });
+
+  testWidgets('animating.<variable> reads whether it plays, and bindings '
+      'follow a pause', (tester) async {
+    await pump(tester);
+    final ScopedValues scope = ScopedValues.of(appContext);
+    bool? playing() =>
+        PropertyValueDelegate.getVariableValueFromPath<bool>(
+          r'${animating.t}',
+          scopedValues: scope,
+        );
+    expect(playing(), isFalse);
+    int changes = 0;
+    void count() => changes++;
+    VariableAnimator.changes.addListener(count);
+    addTearDown(() => VariableAnimator.changes.removeListener(count));
+    run(AnimateVariableAction(variable: 't', from: '0', to: '1', durationMs: 400));
+    await tester.pump();
+    expect(playing(), isTrue);
+    expect(
+      PropertyValueDelegate.evaluateFormula(
+        "animating.t ? 'pause' : 'play_arrow'",
+        scopedValues: scope,
+      ),
+      'pause',
+    );
+    await run(AnimateVariableAction(variable: 't', mode: AnimateVariableMode.pause));
+    expect(playing(), isFalse);
+    expect(changes, greaterThanOrEqualTo(2));
+    run(AnimateVariableAction(variable: 't', mode: AnimateVariableMode.resume));
+    await tester.pump();
+    expect(playing(), isTrue);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(playing(), isFalse);
+    expect(predefinedVariableNames, contains('animating'));
+    expect(predefinedListenableVariableNames, contains('animating'));
   });
 
   testWidgets('resume with nothing paused plays from the current value', (

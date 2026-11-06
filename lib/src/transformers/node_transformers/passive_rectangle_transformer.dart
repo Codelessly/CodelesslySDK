@@ -898,12 +898,14 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     // to new values (an outline following a palette), as a solid fill
     // does; where tickers are off it jumps.
     Widget eased(Widget Function(Color? color, Gradient? gradient) build) =>
-        EasedPaint(
-          ms: node.transitionMs,
-          color: color,
-          gradient: gradient,
-          builder: build,
-        );
+        node.transitionMs <= 0
+        ? build(color, gradient)
+        : EasedPaint(
+            ms: node.transitionMs,
+            color: color,
+            gradient: gradient,
+            builder: build,
+          );
     if (path != null) {
       strokeWidgets.add(
         Positioned.fill(
@@ -1261,8 +1263,10 @@ Widget buildFill(
       // With a transition its stops ease to new colours (bound stops
       // following a palette), as a solid fill does; where tickers are off
       // it jumps.
+      final int fillMs = (node as BaseNode).transitionMs;
+      if (fillMs <= 0) return gradientFill(retrieveGradient(paint));
       return EasedPaint(
-        ms: (node as BaseNode).transitionMs,
+        ms: fillMs,
         color: null,
         gradient: retrieveGradient(paint),
         builder: (_, gradient) => gradientFill(gradient),
