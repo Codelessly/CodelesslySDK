@@ -121,13 +121,18 @@ class NotchedStrokePainter extends CustomPainter {
     required this.strokeWidth,
     required this.borderRadius,
     required this.notches,
+    this.gradient,
     this.strokeAlign = StrokeAlignC.inside,
     this.dashPattern = const [],
     this.strokeCap = StrokeCapEnum.none,
   });
 
-  /// The stroke's colour.
+  /// The stroke's colour, used when there is no [gradient].
   final Color color;
+
+  /// The gradient the stroke is painted with, laid out over the box, or
+  /// null for a solid [color].
+  final Gradient? gradient;
 
   /// The stroke's width.
   final double strokeWidth;
@@ -159,6 +164,9 @@ class NotchedStrokePainter extends CustomPainter {
         StrokeCapEnum.square => StrokeCap.square,
         _ => StrokeCap.butt,
       };
+    if (gradient case final Gradient gradient) {
+      paint.shader = gradient.createShader(Offset.zero & size);
+    }
     final Path path = dashPattern.isEmpty || dashPattern.every((d) => d <= 0)
         ? outline
         : _dashed(outline, dashPattern);
@@ -208,6 +216,7 @@ class NotchedStrokePainter extends CustomPainter {
   @override
   bool shouldRepaint(NotchedStrokePainter oldDelegate) =>
       oldDelegate.color != color ||
+      oldDelegate.gradient != gradient ||
       oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.borderRadius != borderRadius ||
       oldDelegate.strokeAlign != strokeAlign ||

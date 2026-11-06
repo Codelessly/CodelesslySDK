@@ -49,45 +49,48 @@ SDKPublishFont _font(String id) => SDKPublishFont(
 );
 
 void main() {
-  test('a layout\'s font models download together, and a failure is skipped',
-      () async {
-    final network = _SlowNetwork();
-    final model = SDKPublishModel(
-      projectId: 'project',
-      owner: 'owner',
-      teams: const {},
-      users: const {},
-      roles: const {},
-      public: false,
-    );
-    model.fonts['cached'] = _font('cached');
-    final manager = DataManager(
-      'test',
-      config: CodelesslyConfig(authToken: 'token'),
-      cacheManager: _FakeCache(),
-      authManager: _FakeAuthManager(),
-      networkDataRepository: network,
-      localDataRepository: _FakeLocalRepository(),
-      firebaseFirestore: _FakeFirestore(),
-      errorLogger: ErrorLogger.instance,
-      publishModel: model,
-    );
+  test(
+    'a layout\'s font models download together, and a failure is skipped',
+    () async {
+      final network = _SlowNetwork();
+      final model = SDKPublishModel(
+        projectId: 'project',
+        owner: 'owner',
+        teams: const {},
+        users: const {},
+        roles: const {},
+        public: false,
+      );
+      model.fonts['cached'] = _font('cached');
+      final manager = DataManager(
+        'test',
+        config: CodelesslyConfig(authToken: 'token'),
+        cacheManager: _FakeCache(),
+        authManager: _FakeAuthManager(),
+        networkDataRepository: network,
+        localDataRepository: _FakeLocalRepository(),
+        firebaseFirestore: _FakeFirestore(),
+        errorLogger: ErrorLogger.instance,
+        publishModel: model,
+      );
 
-    final Future<Set<SDKPublishFont>> fonts = manager.getOrFetchFontModels(
-      fontIDs: {'cached', 'a', 'b', 'c'},
-    );
-    await Future<void>.delayed(Duration.zero);
+      final Future<Set<SDKPublishFont>> fonts = manager.getOrFetchFontModels(
+        fontIDs: {'cached', 'a', 'b', 'c'},
+      );
+      await Future<void>.delayed(Duration.zero);
 
-    // All three downloads started before any of them finished.
-    expect(network.pending.keys.toSet(), {'a', 'b', 'c'});
+      // All three downloads started before any of them finished.
+      expect(network.pending.keys.toSet(), {'a', 'b', 'c'});
 
-    network.pending['c']!.complete(_font('c'));
-    network.pending['a']!.complete(_font('a'));
-    network.pending['b']!.completeError(Exception('offline'));
+      network.pending['c']!.complete(_font('c'));
+      network.pending['a']!.complete(_font('a'));
+      network.pending['b']!.completeError(Exception('offline'));
 
-    expect(
-      (await fonts).map((SDKPublishFont font) => font.id).toSet(),
-      {'cached', 'a', 'c'},
-    );
-  });
+      expect((await fonts).map((SDKPublishFont font) => font.id).toSet(), {
+        'cached',
+        'a',
+        'c',
+      });
+    },
+  );
 }

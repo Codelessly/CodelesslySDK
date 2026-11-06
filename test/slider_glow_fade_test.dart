@@ -79,7 +79,10 @@ void main() {
     const ColorRGBA glow = ColorRGBA(r: 0.2, g: 0.6, b: 0.8, a: 0.4);
     await pump(
       tester,
-      PassiveSliderWidget(node: mixer(glow: glow), settings: runtime),
+      PassiveSliderWidget(
+        node: mixer(glow: glow),
+        settings: runtime,
+      ),
     );
     expect(tester.takeException(), isNull);
     final SliderComponentShape shape = theme(tester).thumbShape!;

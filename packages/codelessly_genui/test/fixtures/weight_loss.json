@@ -1,0 +1,32 @@
+[
+ {"version":"v0.9.1","createSurface":{"surfaceId":"wl","catalogId":"https://codelessly.com/a2ui/catalogs/genui/v1/catalog.json","sendDataModel":true,"theme":{"primaryColor":"#3D5AFE"}}},
+ {"version":"v0.9.1","updateDataModel":{"surfaceId":"wl","path":"/","value":{"weightKg":90,"heightCm":178,"age":40,"sex":["male"],"activity":["moderate"],"deficit":500,"protein":1.6,"weeks":24,"scrub":24}}},
+ {"version":"v0.9.1","updateComponents":{"surfaceId":"wl","components":[
+  {"id":"root","component":"CodelesslyVisualization","title":"Weight loss vs body fat","subtitle":"Projected from your inputs","child":"body","controls":["weight","height","age","sex","activity","deficit","protein","weeksSlider"],"inlineControls":["deficit","protein"]},
+  {"id":"body","component":"Column","children":["metrics","chart","gaugeRow"]},
+  {"id":"metrics","component":"Row","children":["mWeight","mFat","mLean"]},
+  {"id":"mWeight","component":"CodelesslyMetric","weight":1,"label":"Weight at week end","value":{"call":"calc","args":{"expr":"round(weightKg - weeks * deficit * 7 / (7700 * (1 - ls) + 1800 * ls), 1) + ' kg'","vars":{"ls":{"call":"calc","args":{"expr":"clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3)"}}}},"returnType":"string"},"tone":"accent"},
+  {"id":"mFat","component":"CodelesslyMetric","weight":1,"label":"Fat lost","value":{"call":"calc","args":{"expr":"round(weeks * deficit * 7 / (7700 * (1 - ls) + 1800 * ls) * (1 - ls), 1) + ' kg'","vars":{"ls":{"call":"calc","args":{"expr":"clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3)"}}}},"returnType":"string"},"tone":"positive"},
+  {"id":"mLean","component":"CodelesslyMetric","weight":1,"label":"Lean lost","value":{"call":"calc","args":{"expr":"round(weeks * deficit * 7 / (7700 * (1 - ls) + 1800 * ls) * ls, 1) + ' kg'","vars":{"ls":{"call":"calc","args":{"expr":"clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3)"}}}},"returnType":"string"},"tone":"negative"},
+  {"id":"chart","component":"CodelesslyChart","chartType":"line","xField":"week","height":200,"yLabelSuffix":" kg","selectedIndex":{"path":"/scrub"},
+   "series":[{"field":"weight","name":"Weight"},{"field":"lean","name":"Lean mass"},{"field":"fat","name":"Fat mass","kind":"area"}],
+   "data":{"call":"calc","returnType":"array","args":{"expr":"map(range(0, weeks + 1), w => object('week', 'W' + w, 'weight', round(weightKg - w * rate, 1), 'fat', round(fat0 - w * rate * (1 - ls), 1), 'lean', round(weightKg - fat0 - w * rate * ls, 1)))",
+     "vars":{"ls":{"call":"calc","args":{"expr":"clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3)"}},
+             "rate":{"call":"calc","args":{"expr":"deficit * 7 / (7700 * (1 - clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3)) + 1800 * clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3))"}},
+             "fat0":{"call":"calc","args":{"expr":"weightKg * (1.2 * weightKg / pow(heightCm / 100, 2) + 0.23 * age - 10.8 * if(first(sex) == 'male', 1, 0) - 5.4) / 100"}}}}}},
+  {"id":"gaugeRow","component":"Row","justify":"center","children":["gauge"]},
+  {"id":"gauge","component":"CodelesslyGauge","label":"Body fat at week end","unit":"%","min":5,"max":45,"zones":[{"to":18,"color":"#26A69A"},{"to":25,"color":"#FFB300"},{"to":45,"color":"#EF5350"}],
+   "value":{"call":"calc","returnType":"number","args":{"expr":"round(100 * (fat0 - weeks * rate * (1 - ls)) / (weightKg - weeks * rate), 1)",
+     "vars":{"ls":{"call":"calc","args":{"expr":"clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3)"}},
+             "rate":{"call":"calc","args":{"expr":"deficit * 7 / (7700 * (1 - clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3)) + 1800 * clamp(0.3 - 0.12 * (protein - 0.8), 0.05, 0.3))"}},
+             "fat0":{"call":"calc","args":{"expr":"weightKg * (1.2 * weightKg / pow(heightCm / 100, 2) + 0.23 * age - 10.8 * if(first(sex) == 'male', 1, 0) - 5.4) / 100"}}}}}},
+  {"id":"weight","component":"Slider","label":"Weight","unit":" kg","min":45,"max":160,"step":0.5,"value":{"path":"/weightKg"}},
+  {"id":"height","component":"Slider","label":"Height","unit":" cm","min":140,"max":210,"step":1,"value":{"path":"/heightCm"}},
+  {"id":"age","component":"Slider","label":"Age","min":18,"max":80,"step":1,"value":{"path":"/age"}},
+  {"id":"sex","component":"ChoicePicker","label":"Sex","options":[{"label":"Male","value":"male"},{"label":"Female","value":"female"}],"value":{"path":"/sex"}},
+  {"id":"activity","component":"ChoicePicker","label":"Activity","options":[{"label":"Low","value":"low"},{"label":"Moderate","value":"moderate"},{"label":"High","value":"high"}],"value":{"path":"/activity"}},
+  {"id":"deficit","component":"Slider","label":"Daily calorie deficit","unit":" kcal","min":100,"max":1200,"step":50,"value":{"path":"/deficit"},"action":{"event":{"name":"deficit_changed","context":{"deficit":{"path":"/deficit"}}}}},
+  {"id":"protein","component":"Slider","label":"Protein","unit":" g/kg","min":0.8,"max":2.4,"step":0.1,"value":{"path":"/protein"}},
+  {"id":"weeksSlider","component":"Slider","label":"Weeks","min":4,"max":52,"step":1,"value":{"path":"/weeks"}}
+ ]}}
+]
