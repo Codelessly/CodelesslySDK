@@ -33,7 +33,7 @@ void main() {
     ),
   );
 
-  ({NodeRegistry registry, List<ListViewNode> lists}) build({double slotExtent = 0}) {
+  ({NodeRegistry registry, List<ListViewNode> lists}) build() {
     final Map<String, BaseNode> nodes = {};
     final List<ListViewNode> lists = [];
     for (final lane in ['a', 'b']) {
@@ -62,7 +62,6 @@ void main() {
               accepts: const ['card'],
               key: lane,
               listNodeId: 'list_$lane',
-              slotExtent: slotExtent,
               acceptIf: lane == 'b'
                   ? r"${= count(filter(cards, c => c.lane == 'b' && !contains(drag.ids, c.id))) + drag.count <= 2}"
                   : '',
@@ -74,11 +73,11 @@ void main() {
     return (registry: NodeRegistry()..setNodes(nodes), lists: lists);
   }
 
-  Future<CodelesslyContext> pump(WidgetTester tester, {double slotExtent = 0}) async {
+  Future<CodelesslyContext> pump(WidgetTester tester) async {
     tester.view.physicalSize = const Size(400, 500);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final b = build(slotExtent: slotExtent);
+    final b = build();
     final manager = PassiveNodeTransformerManager(
       b.registry.getNodeByID,
       (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
@@ -222,28 +221,6 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(lane(c, 'a'), ['c3', 'c1', 'c2']);
-  });
-
-  testWidgets('a slot extent opens a thin marker instead of a card-sized gap', (tester) async {
-    Future<double> slotHeight(double extent) async {
-      await pump(tester, slotExtent: extent);
-      final Offset start = tester.getCenter(find.text('Three'));
-      final Offset to = tester.getRect(find.text('One')).topCenter + const Offset(0, 2);
-      final TestGesture gesture = await tester.startGesture(start);
-      await tester.pump();
-      for (int i = 1; i <= 10; i++) {
-        await gesture.moveTo(Offset.lerp(start, to, i / 10)!);
-        await tester.pump();
-      }
-      final double h = tester.getSize(find.byKey(const ValueKey('codelessly-drop-slot'))).height;
-      await gesture.up();
-      await tester.pumpAndSettle();
-      return h;
-    }
-
-    expect(await slotHeight(8), 8);
-    expect(await slotHeight(0), greaterThan(8), reason: 'the dragged card\'s own height');
-    expect(DropTargetModel.fromJson(const DropTargetModel(slotExtent: 8).toJson()).slotExtent, 8);
   });
 
   test('moveItems moves records before another and merges changes', () {

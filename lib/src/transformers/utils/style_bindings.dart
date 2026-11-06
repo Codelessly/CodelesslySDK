@@ -20,6 +20,10 @@ import 'scoped_values.dart';
 ///   offset and spread of every drop and inner shadow.
 /// * [effectsBlur] (number): the blur radius of every effect.
 /// * [strokeWeight] (number): the node's stroke width.
+/// * [pulsePhase] (number 0-1), [pulseDelayMs] (milliseconds): where the
+///   node's `pulse` starts in its loop ([PulseModel.phase],
+///   [PulseModel.delayMs]), e.g. loading dots of a list that ripple in
+///   sequence: `${= index * 0.15}`. Only for a node with a `pulse`.
 /// * [cornerRadius] (number): the radius of every corner. A corner radius
 ///   JSON value (e.g. `[8, true, 'circular']`) is accepted too.
 /// * [fontWeight] (number 100-900, or `w700`, `bold`, `normal`): the weight
@@ -40,6 +44,12 @@ import 'scoped_values.dart';
 /// * [lineHeight] (a multiplier up to 4 such as `1.1`, else pixels such as
 ///   `28`; `"28px"`, `"120%"` or `"1.2x"`; `"auto"`; or a line height JSON
 ///   map): every span's line height.
+/// * [textData] `data` (text): what a text node shows instead of its own
+///   `data`, e.g. `${= applied ? 'Applied' : 'Apply'}` or `${item.label}`.
+///   The binding becomes the text's data, so the text substitutes it as it
+///   substitutes `${...}` in its own data (the design canvas shows the
+///   preview value), and it is measured as painted. The text takes its
+///   first span's style.
 /// * [textAlign] (string): the horizontal alignment of a text node: `left`,
 ///   `center`, `right`, `justified` (or `justify`), `start` or `end`.
 /// * [spacing] (number): the gap between a row's or column's children,
@@ -53,6 +63,13 @@ import 'scoped_values.dart';
 ///   node's first fill when it is a gradient, e.g. a halo whose center
 ///   follows the phase color. A `#RRGGBB` color keeps the stop's own alpha
 ///   (a 35% halo stays 35%); `#AARRGGBB` sets it too.
+/// * [paintStop] `fill-<paint id>-stop-<index>` (color): the color of one
+///   stop of any gradient fill, as [fillStop] does for the first fill;
+///   `stroke-paint-<paint id>-stop-<index>` and
+///   `foreground-<paint id>-stop-<index>` for gradient strokes and
+///   foreground fills. Linear, radial, angular and diamond gradients alike,
+///   e.g. a background whose two stops follow a palette:
+///   `${pal.bg}`, `${pal.bgAlt}`. Wins over [fillStop].
 /// * [notchOffset] (number): the offset of every notch of a node with
 ///   [CornerMixin.notches], in the notch's own unit (pixels, or a fraction
 ///   of the edge when the notch is relative), e.g. a ticket whose tear line
@@ -121,6 +138,9 @@ abstract final class StyleBindings {
   /// The horizontal alignment of a text node.
   static const String textAlign = 'textAlign';
 
+  /// What a text node shows instead of its own data.
+  static const String textData = 'data';
+
   /// The bindable properties of a text node's style, beyond its color.
   static const List<String> textStyle = [
     fontWeight,
@@ -137,8 +157,28 @@ abstract final class StyleBindings {
   /// The color of the shadow [effectId].
   static String shadowColor(String effectId) => 'shadow-color-$effectId';
 
+  /// Where the node's pulse starts in its loop, 0 to 1.
+  static const String pulsePhase = 'pulsePhase';
+
+  /// How far, in milliseconds, the node's pulse runs behind.
+  static const String pulseDelayMs = 'pulseDelayMs';
+
   /// The color of stop [index] of the first fill's gradient.
   static String fillStop(int index) => 'fill-stop-$index';
+
+  /// The color of stop [index] of the gradient paint whose own binding key
+  /// is [paintKey]: `fill-<paint id>`, `stroke-paint-<paint id>` or
+  /// `foreground-<paint id>`, e.g. `fill-g1-stop-0`.
+  static String paintStop(String paintKey, int index) =>
+      ColorStop.bindingKey(paintKey, index);
+
+  /// A rectangle's SVG [RectangleNode.path] (text): an orbit drawn for the
+  /// planet a screen shows, a curve built from data.
+  static const String path = 'path';
+
+  /// A stroke's [GeometryMixin.dashPattern]: a list of numbers or text such
+  /// as `4 2` (dash, gap, ...).
+  static const String dashPattern = 'dashPattern';
 
   /// Adds to [patch], a partial node JSON, the values that the bindings of
   /// these properties give [node], evaluated with [scopedValues]. A property
@@ -167,16 +207,57 @@ abstract final class StyleBindings {
     }
 
     if (node is GeometryMixin) {
-      final List? fills = _fillStops(
-        (patch['fills'] as List?) ??
-            [for (final paint in node.fills) paint.toJson()],
-        node.variables,
-        value,
-      );
-      if (fills != null) patch['fills'] = fills;
+      if (node.variables.keys.any((k) => k.contains('-stop-'))) {
+        for (final (String field, String prefix, List<PaintModel> paints) in [
+          ('fills', 'fill-', node.fills),
+          ('strokes', 'stroke-paint-', node.strokes),
+          if (node case final DefaultShapeNode shape)
+            ('foregroundFills', 'foreground-', shape.foregroundFills),
+        ]) {
+          final List? recolored = _paintStops(
+            (patch[field] as List?) ??
+                [for (final paint in paints) paint.toJson()],
+            prefix,
+            node.variables,
+            value,
+            legacyFirst: field == 'fills',
+          );
+          if (recolored != null) patch[field] = recolored;
+        }
+      }
       final double? weight = value<double>(strokeWeight);
       if (weight != null && weight != node.strokeWeight) {
         patch['strokeWeight'] = weight < 0 ? 0.0 : weight;
+      }
+    }
+
+    if (node.pulse case final PulseModel pulse?) {
+      final num? phase = node.variables.containsKey(pulsePhase)
+          ? value<num>(pulsePhase)
+          : null;
+      final num? delay = node.variables.containsKey(pulseDelayMs)
+          ? value<num>(pulseDelayMs)
+          : null;
+      final PulseModel phased = pulse.copyWith(
+        phase: phase != null && phase.isFinite ? phase.toDouble() : null,
+        delayMs: delay != null && delay.isFinite ? delay.round() : null,
+      );
+      if (phased != pulse) patch['pulse'] = phased.toJson();
+    }
+
+    if (node is RectangleNode && node.variables.containsKey(path)) {
+      final Object? data = value<Object>(path);
+      // Empty text keeps the saved path.
+      if (data is String && data.trim().isNotEmpty && data != node.path) {
+        patch['path'] = data;
+      }
+    }
+
+    if (node is GeometryMixin && node.variables.containsKey(dashPattern)) {
+      final List<double>? dashes = _dashes(value<Object>(dashPattern));
+      if (dashes != null &&
+          !const ListEquality<double>().equals(dashes, node.dashPattern)) {
+        patch['dashPattern'] = dashes;
       }
     }
 
@@ -307,6 +388,25 @@ abstract final class StyleBindings {
       }
     }
 
+    if (node is TextNode) {
+      final String? data = boundTextData(node, scopedValues: scopedValues);
+      if (data != null && data != node.data) {
+        final List spans =
+            patch['textMixedProps'] as List? ??
+            [for (final prop in node.textMixedProps) prop.toJson()];
+        patch['data'] = data;
+        // A span's range is over the old data: the new data takes the first
+        // span's style throughout.
+        patch['textMixedProps'] = [
+          {
+            if (spans.isNotEmpty) ...(spans.first as Map),
+            'start': 0,
+            'end': data.length,
+          },
+        ];
+      }
+    }
+
     if (node is CornerMixin && node.notches.isNotEmpty) {
       final List<NotchModel> notches = boundNotches(node, scopedValues);
       if (!const ListEquality<NotchModel>().equals(notches, node.notches)) {
@@ -333,44 +433,85 @@ abstract final class StyleBindings {
     }
   }
 
-  /// [fills] (paint JSON) with the first gradient's stops recolored by
-  /// their `fill-stop-<index>` bindings, or null when none changes.
-  static List? _fillStops(
-    List fills,
+  /// [paints] (paint JSON) with their gradient stops recolored by their
+  /// [paintStop] bindings (the paint's binding key, `<prefix><paint id>`,
+  /// with `-stop-<index>`), or null when none changes. With [legacyFirst]
+  /// the first paint's stops also follow their [fillStop] bindings, which
+  /// the per-paint keys win over.
+  static List? _paintStops(
+    List paints,
+    String prefix,
     Map<String, String> variables,
-    T? Function<T extends Object>(String property) value,
-  ) {
-    if (fills.isEmpty ||
-        !variables.keys.any((k) => k.startsWith('fill-stop-'))) {
-      return null;
-    }
-    final PaintModel first = PaintModel.fromJson(fills.first as Map);
-    final List<ColorStop>? stops = first.gradientStops;
-    if (stops == null || stops.isEmpty) return null;
+    T? Function<T extends Object>(String property) value, {
+    bool legacyFirst = false,
+  }) {
     bool changed = false;
-    final List<ColorStop> next = [
-      for (final (int i, ColorStop stop) in stops.indexed)
-        if (variables.containsKey(fillStop(i)))
-          switch (value<Object>(fillStop(i))) {
-            final Object raw when raw.toColorRGBA() != null => () {
-              final ColorRGBA bound = raw.toColorRGBA()!;
-              // #RRGGBB names a hue only: keep the stop's transparency.
-              final bool hueOnly =
-                  raw is String &&
-                  RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(raw.trim());
-              final ColorRGBA color = hueOnly
-                  ? bound.copyWith(a: stop.color.a)
-                  : bound;
-              if (color != stop.color) changed = true;
-              return stop.copyWith(color: color);
-            }(),
-            _ => stop,
-          }
-        else
-          stop,
+    final List next = [
+      for (final (int p, Object? json) in paints.indexed)
+        () {
+          if (json is! Map) return json;
+          final PaintModel paint = PaintModel.fromJson(json);
+          final List<ColorStop>? stops = paint.gradientStops;
+          if (stops == null || stops.isEmpty) return json;
+          bool recolored = false;
+          final List<ColorStop> bound = [
+            for (final (int i, ColorStop stop) in stops.indexed)
+              () {
+                final String own = paintStop('$prefix${paint.id}', i);
+                final String? key = variables.containsKey(own)
+                    ? own
+                    : legacyFirst &&
+                          p == 0 &&
+                          variables.containsKey(fillStop(i))
+                    ? fillStop(i)
+                    : null;
+                if (key == null) return stop;
+                final ColorStop next = _boundStop(stop, value<Object>(key));
+                if (next != stop) recolored = true;
+                return next;
+              }(),
+          ];
+          if (!recolored) return json;
+          changed = true;
+          return paint.copyWith(gradientStops: bound).toJson();
+        }(),
     ];
-    if (!changed) return null;
-    return [first.copyWith(gradientStops: next).toJson(), ...fills.skip(1)];
+    return changed ? next : null;
+  }
+
+  /// [stop] colored by [raw], a binding's value: a color (hex text or a
+  /// color model). `#RRGGBB` names a hue only and keeps the stop's
+  /// transparency; anything that isn't a color keeps the stop.
+  static ColorStop _boundStop(ColorStop stop, Object? raw) {
+    final ColorRGBA? bound = raw?.toColorRGBA();
+    if (bound == null) return stop;
+    final bool hueOnly =
+        raw is String && RegExp(r'^#?[0-9a-fA-F]{6}$').hasMatch(raw.trim());
+    final ColorRGBA color = hueOnly ? bound.copyWith(a: stop.color.a) : bound;
+    return color == stop.color ? stop : stop.copyWith(color: color);
+  }
+
+  /// The data a text [node] shows by its [textData] binding (or a
+  /// condition setting `data`): the binding itself when it is a `${...}`
+  /// template, which the text substitutes as its own data, else the
+  /// variable path it names as `${path}`. Null when nothing binds it.
+  static String? boundTextData(
+    TextNode node, {
+    required ScopedValues scopedValues,
+  }) {
+    final Object? fromCondition =
+        PropertyValueDelegate.getPropertyValueFromCondition<Object>(
+          node,
+          textData,
+          scopedValues: scopedValues,
+        );
+    // A condition gives a value, which is shown as is.
+    if (fromCondition != null) {
+      return fromCondition.toString();
+    }
+    final String? binding = node.variables[textData]?.trim();
+    if (binding == null || binding.isEmpty) return null;
+    return binding.contains(r'${') ? binding : '\${$binding}';
   }
 
   /// [node]'s notches with the offsets their [notchOffsetAt] or
@@ -462,6 +603,26 @@ abstract final class StyleBindings {
           );
         }(),
     ];
+  }
+
+  static List<double>? _dashes(Object? value) {
+    final List<Object?>? parts = switch (value) {
+      List list => list,
+      String text => text.trim().isEmpty ? <Object?>[] : text.trim().split(RegExp(r'[\s,]+')),
+      _ => null,
+    };
+    if (parts == null) return null;
+    final List<double> out = [];
+    for (final Object? part in parts) {
+      final double? n = switch (part) {
+        num v => v.toDouble(),
+        String v => double.tryParse(v),
+        _ => null,
+      };
+      if (n == null || n < 0) return null;
+      out.add(n);
+    }
+    return out;
   }
 
   static CornerRadius? _cornerRadius(Object? value) {

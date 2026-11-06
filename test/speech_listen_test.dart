@@ -11,7 +11,10 @@ class FakeRecognizer implements SpeechRecognizer {
   @override
   bool get available => true;
   @override
-  Future<RecognitionResult> listen({required String language, required Duration timeout}) async {
+  Future<RecognitionResult> listen({
+    required String language,
+    required Duration timeout,
+  }) async {
     this.language = language;
     return result;
   }
@@ -24,7 +27,13 @@ void main() {
   scoreNullTests();
   group('pronunciationScore', () {
     test('exact, case and punctuation free', () {
-      expect(pronunciationScore('Although it rained, we went out.', 'although it rained we went out'), 100);
+      expect(
+        pronunciationScore(
+          'Although it rained, we went out.',
+          'although it rained we went out',
+        ),
+        100,
+      );
     });
     test('a missing word costs its share', () {
       expect(pronunciationScore('since you asked', 'since asked'), 67);
@@ -38,25 +47,41 @@ void main() {
       expect(pronunciationScore('despite', ''), 0);
     });
     test('extra words cost a little', () {
-      expect(pronunciationScore('because', 'because because because'), lessThan(100));
+      expect(
+        pronunciationScore('because', 'because because because'),
+        lessThan(100),
+      );
     });
   });
 
-  testWidgets('a listen Call function fills the speech variable', (tester) async {
-    final FakeRecognizer fake = FakeRecognizer(const RecognitionResult('however it was late', confidence: 0.9));
+  testWidgets('a listen Call function fills the speech variable', (
+    tester,
+  ) async {
+    final FakeRecognizer fake = FakeRecognizer(
+      const RecognitionResult('however it was late', confidence: 0.9),
+    );
     Speech.recognizer = fake;
     final CodelesslyContext context = CodelesslyContext.empty();
     late BuildContext inner;
-    await tester.pumpWidget(ChangeNotifierProvider<CodelesslyContext>.value(
-      value: context,
-      child: MaterialApp(home: Builder(builder: (c) {
-        inner = c;
-        return const SizedBox();
-      })),
-    ));
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: context,
+        child: MaterialApp(
+          home: Builder(
+            builder: (c) {
+              inner = c;
+              return const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
     final Object? result = FunctionsRepository.callFunction(
       inner,
-      CallFunctionAction(name: 'listen', params: {'language': 'en-GB', 'expected': 'However, it was late.'}),
+      CallFunctionAction(
+        name: 'listen',
+        params: {'language': 'en-GB', 'expected': 'However, it was late.'},
+      ),
     );
     await tester.runAsync(() async => await (result as Future));
     expect(fake.language, 'en-GB');
@@ -68,15 +93,22 @@ void main() {
 
   testWidgets('a host function of the same name wins', (tester) async {
     bool called = false;
-    final CodelesslyContext context = CodelesslyContext.empty()..functions['listen'] = (c, r, p) => called = true;
+    final CodelesslyContext context = CodelesslyContext.empty()
+      ..functions['listen'] = (c, r, p) => called = true;
     late BuildContext inner;
-    await tester.pumpWidget(ChangeNotifierProvider<CodelesslyContext>.value(
-      value: context,
-      child: MaterialApp(home: Builder(builder: (c) {
-        inner = c;
-        return const SizedBox();
-      })),
-    ));
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: context,
+        child: MaterialApp(
+          home: Builder(
+            builder: (c) {
+              inner = c;
+              return const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
     FunctionsRepository.callFunction(inner, CallFunctionAction(name: 'listen'));
     expect(called, isTrue);
   });
@@ -84,7 +116,9 @@ void main() {
 
 void scoreNullTests() {
   testWidgets('score is null until something is heard', (tester) async {
-    Speech.recognizer = FakeRecognizer(const RecognitionResult('', error: 'no-speech'));
+    Speech.recognizer = FakeRecognizer(
+      const RecognitionResult('', error: 'no-speech'),
+    );
     await tester.runAsync(() => Speech.instance.listen(expected: 'despite'));
     expect(Speech.instance.value['score'], isNull);
     expect(Speech.instance.value['error'], 'no-speech');
