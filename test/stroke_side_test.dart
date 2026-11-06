@@ -91,20 +91,18 @@ void main() {
     await pumpNode(tester, rectangle(side: StrokeSide.top, radius: 8));
     expect(tester.takeException(), isNull);
     expect(borderBox(), findsNothing);
+    // The band alone: the top strip, tapering into the corners, and nothing
+    // along the other edges.
     expect(
       strokePaint(),
-      paints..drrect(
-        outer: RRect.fromLTRBR(0, 0, 100, 40, const Radius.circular(8)),
-        inner: RRect.fromLTRBAndCorners(
-          0,
-          2,
-          100,
-          40,
-          topLeft: const Radius.elliptical(8, 6),
-          topRight: const Radius.elliptical(8, 6),
-          bottomRight: const Radius.circular(8),
-          bottomLeft: const Radius.circular(8),
-        ),
+      paints..path(
+        includes: const [Offset(50, 1), Offset(0.8, 5), Offset(99.2, 5)],
+        excludes: const [
+          Offset(50, 3),
+          Offset(0.5, 20),
+          Offset(99.5, 20),
+          Offset(50, 39.5),
+        ],
       ),
     );
   });
@@ -119,10 +117,7 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(
       strokePaint(),
-      paints..drrect(
-        outer: RRect.fromLTRBR(0, 0, 100, 42, Radius.zero),
-        inner: RRect.fromLTRBR(0, 0, 100, 40, Radius.zero),
-      ),
+      paints..rect(rect: const Rect.fromLTRB(0, 40, 100, 42)),
     );
   });
 
@@ -133,10 +128,7 @@ void main() {
     );
     expect(
       strokePaint(),
-      paints..drrect(
-        outer: RRect.fromLTRBR(0, 0, 101, 40, Radius.zero),
-        inner: RRect.fromLTRBR(0, 0, 99, 40, Radius.zero),
-      ),
+      paints..rect(rect: const Rect.fromLTRB(99, 0, 101, 40)),
     );
   });
 
