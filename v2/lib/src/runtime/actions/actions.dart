@@ -6,6 +6,7 @@ export 'confirm_dialog.dart' show ConfirmRequest, ThemedConfirmDialog, isConfirm
 export 'context.dart';
 export 'feedback_theme.dart' show FeedbackTheme, FeedbackThemeScope, ResolvedFeedbackTheme;
 export 'handlers.dart' show ActionHandler, delayMilliseconds;
+export 'hero_flights.dart' show CodelesslyHeroRoute, HeroArcRectTween, HeroFlights, HeroRoutes;
 export 'node_values.dart';
 export 'presentation_route.dart' show PresentationRoute;
 export 'route_transition.dart';

@@ -17,6 +17,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'behaviours.dart';
+import 'hero.dart';
+import 'play.dart';
 import 'convert.dart';
 import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
@@ -353,6 +355,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     tree.interactions?.attachChanged(this);
   }
 
+  /// Whether it draws (not hidden, collapsed or invisible).
+  bool get drawn => !(_hidden || _collapsed || (_node != null && !_node!.visible));
+
   @override
   void paint(PaintingContext context, Offset offset) {
     tree.observer?.nodePainted(this);
@@ -517,6 +522,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       chain.add(_obtain<RenderConstrainedBox>('constraints', () => RenderConstrainedBox(additionalConstraints: c))
         ..additionalConstraints = c);
     }
+    playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);
     if (n.layout.rotation != 0) {
       final m = n.layout.margin;
@@ -525,6 +531,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
         ..origin = Offset(m.left / 2 - m.right / 2, m.top / 2 - m.bottom / 2)
         ..alignment = Alignment.center);
     }
+    heroLayer(this, n, chain, animates: tree.animates);
     if (tree.animates) tree.interactions?.addLayers(this, n, chain);
     loopLayers(this, n, chain, animates: tree.animates);
     if (n.opacity < 0.99) {

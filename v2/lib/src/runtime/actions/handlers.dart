@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import '../../render/play.dart' show EffectPlayers;
 import '../../services/services.dart';
 import '../expressions/formula.dart';
 import '../expressions/paths.dart';
@@ -129,9 +130,13 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _scrollTo(a, run);
     case PlaySoundAction():
       _playSound(a, run);
-    case ControlDragAction() || PlayAnimationAction():
-      // Draggable cards, drag tracks (a step command) and one-shot
-      // animations aren't rendered by v2 yet.
+    case PlayAnimationAction():
+      // A node's one-shot effect, on every shown instance; the chain waits
+      // for it. (Particles aren't drawn by v2 yet.)
+      await EffectPlayers.play(a.node, a.animation);
+    case ControlDragAction():
+      // Draggable cards and drag tracks (a step command) aren't rendered by
+      // v2 yet.
       break;
     case PaginateAction():
       // TODO(v2): pagination controllers (SDK 8.x's PaginationController and

@@ -8,6 +8,7 @@ import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/actions/feedback_theme.dart';
+import '../runtime/actions/hero_flights.dart';
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
 import '../runtime/actions/ui.dart';
@@ -239,7 +240,7 @@ class CodelesslyWidget extends StatefulWidget {
           onNavigate: template?.onNavigate,
         );
     return transition == null
-        ? MaterialPageRoute<T>(settings: settings, builder: build)
+        ? CodelesslyPageRoute<T>(settings: settings, builder: build)
         : CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
   }
 
@@ -249,7 +250,7 @@ class CodelesslyWidget extends StatefulWidget {
   static RouteFactory onGenerateRoute(Codelessly codelessly, {CodelesslyWidget? template}) => (settings) {
         final name = settings.name ?? '/';
         final params = settings.arguments is Map ? (settings.arguments as Map).cast<String, Object?>() : const <String, Object?>{};
-        return MaterialPageRoute<void>(
+        return CodelesslyPageRoute<void>(
           settings: settings,
           builder: (_) => CodelesslyWidget(
             codelessly: codelessly,
@@ -685,6 +686,8 @@ class _LayoutViewState extends State<_LayoutView> {
   @override
   Widget build(BuildContext context) {
     final config = _codelessly.config;
+    // Its shared elements fly from and to the route it shows in.
+    HeroRoutes.bind(_screen.tree, ModalRoute.of(context));
     // Back on top (the screen above it popped): report it again.
     if (ModalRoute.isCurrentOf(context) ?? true) WidgetsBinding.instance.addPostFrameCallback((_) => _reportRoute());
     Widget content = LayoutBuilder(builder: (context, constraints) {
@@ -757,6 +760,12 @@ class _ScreenUi extends NavigatorActionUi {
   @override
   Future<void> navigate(NavigateAction action, {Json params = const {}, Json baseParams = const {}}) =>
       view._navigate(NavigationRequest.fromAction(action, params: params, baseParams: baseParams));
+}
+
+/// The route a screen opens in: the platform's page transition, flying the
+/// shared elements of the screens it moves between.
+class CodelesslyPageRoute<T> extends MaterialPageRoute<T> with CodelesslyHeroRoute<T> {
+  CodelesslyPageRoute({required super.builder, super.settings, super.fullscreenDialog});
 }
 
 /// What shows while a layout loads.
