@@ -22,6 +22,7 @@ import 'collections_islands.dart';
 import 'collections_list_runtime.dart';
 import 'collections_layout.dart';
 import 'collections_pagination.dart';
+import 'collections_reorder.dart';
 
 /// Recipes for the collections group, by node type.
 final Map<String, WidgetRecipe> collectionsRecipes = {
@@ -147,6 +148,25 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return;
   }
   if (b.tree.animates && usesDataList(n)) return _dataList(b, n, chain, itemId, item);
+  if (b.tree.animates) {
+    final handle = reorderHandleOf(b, itemId);
+    if (reordersItems(n, hasData: ListRuntime(b, n).data != null, handle: handle)) {
+      chain.add(_viewportBox(b, n, canShrinkWrap: true));
+      final itemExtent = n.prop(ListViewProps.itemExtent);
+      final separated = n.prop(ListViewProps.separator) != api.ListSeparator.none;
+      return reorderRecipe(
+        b,
+        n,
+        chain,
+        itemId: itemId,
+        handle: handle,
+        itemMain: listItemMain(item, vertical: n.vertical, itemExtent: itemExtent),
+        itemExtent: listItemExtent(n, item, vertical: n.vertical, itemExtent: itemExtent),
+        stretch: n.prop(ListViewProps.stretchItems),
+        gap: separated ? math.max(0, n.prop(ListViewProps.spacing)) : 0,
+      );
+    }
+  }
   final count = _itemCount(n);
   final layout = n.prop(ListViewProps.layout);
   final vertical = n.vertical;
