@@ -588,6 +588,44 @@ void main() {
     expect(s.center('k').dx, closeTo(300, 0.5));
   });
 
+  testWidgets('Tab reaches it; it is a slider with its value', (tester) async {
+    final handle = tester.ensureSemantics();
+    final s = await plate(tester, fader, variables: [v('accent', -21)]);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pump();
+    expect(s['accent'], -20.5);
+    SemanticsData? data;
+    bool visit(SemanticsNode n) {
+      if (n.getSemanticsData().value.isNotEmpty) data = n.getSemanticsData();
+      n.visitChildren(visit);
+      return true;
+    }
+
+    visit(tester.binding.renderViews.first.owner!.semanticsOwner!.rootSemanticsNode!);
+    data = data!;
+    expect(data!.value, '-20.5');
+    expect(data!.increasedValue, '-20');
+    expect(data!.decreasedValue, '-21');
+    handle.dispose();
+  });
+
+  testWidgets('scrubbing a variable an animation plays pauses it', (tester) async {
+    final s = await plate(tester, fader, variables: [v('accent', -48)]);
+    final done = VariableAnimator.play(s.scope, 'accent', from: -48, to: 6, duration: const Duration(seconds: 10));
+    await tester.pump(const Duration(milliseconds: 100));
+    final gesture = await tester.startGesture(s.center('k'));
+    await gesture.moveBy(const Offset(0, -20));
+    await tester.pump();
+    expect(VariableAnimator.isPlaying(s.scope, 'accent'), isFalse);
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+    VariableAnimator.stop(s.scope, 'accent');
+    await done;
+  });
+
   group('a combination dial', () {
     // 40 numbers a turn, endless, coasting, drawn between numbers while it
     // moves: a 400×400 face round (200, 200).
