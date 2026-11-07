@@ -29,8 +29,8 @@ Map<String, Json> screen({Json? pagination, Json extraList = const {}, Map<Strin
         'children': ['row'],
         'layout': {'width': 300, 'height': 400},
         'bind': {'data': r'${people}'},
-        'props': {'pagination': ?pagination},
         ...extraList,
+        'props': {'pagination': ?pagination, ...?extraList['props'] as Map?},
       },
       'row': {
         'type': 'text',
@@ -314,5 +314,137 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(CustomScrollView), findsNothing);
     expect(find.byType(RefreshIndicator), findsNothing);
+  });
+
+  testWidgets('two-way loading keeps the rows on screen in place', (tester) async {
+    final api = FakeApi(200);
+    final s = await show(
+      tester,
+      screen(
+        pagination: {...apiPagination(pageSize: 20, mode: 'bidirectional'), 'initialPage': 5, 'thresholdItems': 0},
+        extraList: {'bind': <String, String>{}},
+      ),
+      services: api,
+    );
+    await tester.pumpAndSettle();
+    // The anchor page (items 80–99) shows first, at the top.
+    expect(rows(tester).first, 'P80');
+    Offset at(int i) => s.center('row', instance: ProvidedItem('row', null, 'list', i));
+    final before = at(82).dy;
+    // Load the page before it: it goes above, and row 82 doesn't move.
+    await PaginationRegistry.of(s.tree)['contacts']!.loadPrevious();
+    await tester.pumpAndSettle();
+    expect(s['contacts.itemCount'], greaterThanOrEqualTo(40));
+    expect(at(82).dy, before);
+    // Scrolling up shows the earlier rows.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 200));
+    await tester.pumpAndSettle();
+    expect(rows(tester), contains('P78'));
+  });
+
+  testWidgets('sections: the index bar jumps to a section', (tester) async {
+    final contacts = [
+      for (final letter in ['A', 'B', 'C', 'D'])
+        for (var i = 0; i < 10; i++) {'id': '$letter$i', 'name': 'P$letter$i', 'group': letter},
+    ];
+    final s = await show(
+      tester,
+      screen(
+        extraList: {
+          'props': {
+            'sections': {'groupBy': 'group', 'indexBar': true},
+          },
+          'slots': {'sectionHeader': 'header'},
+        },
+        extra: {
+          'header': {'type': 'text', 'layout': {'width': 300, 'height': 30}, 'props': {'text': r'#${item.key}'}},
+        },
+      ),
+      variables: [v('people', contacts, VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(SectionIndexBar), findsOneWidget);
+    final state = tester.state<DataListViewState>(find.byType(DataListView));
+    state.jumpToSection(2);
+    await tester.pumpAndSettle();
+    // Items 40 long, headers 30.
+    expect(state.scrollController.offset, 2 * (30 + 400));
+    expect(texts(tester), contains('PC0'));
+    // Tapping D on the bar; a pinned header stays at the top.
+    final bar = tester.getRect(find.byType(SectionIndexBar));
+    await tester.tapAt(Offset(bar.center.dx, bar.bottom - 5));
+    await tester.pumpAndSettle();
+    final header = s.tree.boxOf('header', instance: const ProvidedItem('section', null, 'list', 'D'))!;
+    expect(header.localToGlobal(Offset.zero).dy, tester.getTopLeft(find.byType(CustomScrollView)).dy);
+  });
+
+  testWidgets('a grid with pagination pages lazily and loads near its end', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'col': {
+          'type': 'column',
+          'children': ['grid'],
+          'layout': {'width': 300, 'height': {'hug': 400}},
+        },
+        'grid': {
+          'type': 'gridView',
+          'children': ['tile'],
+          'layout': {'width': 300, 'height': 400},
+          'bind': {'data': r'${photos}'},
+          'props': {
+            'crossAxisCount': 3,
+            'mainAxisExtent': 100,
+            'pagination': {'name': 'photoPages', 'pageSize': 30},
+          },
+        },
+        'tile': {'type': 'text', 'layout': {'width': 100, 'height': 100}, 'props': {'text': r'T${item.id}'}},
+      },
+      variables: [v('photos', [for (var i = 0; i < 1000; i++) {'id': i}], VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(SliverGrid), findsOneWidget);
+    final pager = PaginationRegistry.of(s.tree)['photoPages']!;
+    expect(pager.items.length, 30);
+    expect(textsUnder(tester.renderObject(find.byType(CustomScrollView))).length, lessThan(40));
+    // Scroll to the end of the first page's 10 rows.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -700));
+    await tester.pumpAndSettle();
+    expect(pager.items.length, 60);
+  });
+
+  testWidgets('a cloud source pages its query by cursor and reports its status', (tester) async {
+    final services = Services();
+    for (var i = 0; i < 12; i++) {
+      await services.cloud.addDocument('people', {'name': 'P$i', 'n': i}, id: 'd${i.toString().padLeft(2, '0')}');
+    }
+    final s = await show(
+      tester,
+      screen(
+        pagination: {'name': 'contacts', 'source': 'cloud', 'pageSize': 5, 'mode': 'pages'},
+        extraList: {
+          'bind': <String, String>{},
+          'props': {
+            'query': {
+              'enabled': true,
+              'collectionPath': 'people',
+              'orderByFilters': [
+                {'field': 'n', 'sortType': 'ascending'},
+              ],
+              'statusVariable': {'name': 'status'},
+            },
+          },
+        },
+      ),
+      services: services,
+      variables: [v('status', '')],
+    );
+    await tester.pumpAndSettle();
+    expect(rows(tester), ['P0', 'P1', 'P2', 'P3', 'P4']);
+    expect(s['contacts.totalCount'], 12);
+    expect(s['status'], 'loaded');
+    await PaginationRegistry.of(s.tree)['contacts']!.goTo(3);
+    await tester.pumpAndSettle();
+    expect(rows(tester), ['P10', 'P11']);
   });
 }
