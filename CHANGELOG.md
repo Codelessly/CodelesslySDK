@@ -1,3 +1,19 @@
+## Unreleased
+
+### Fixed
+
+- A project variable named like a built-in added in a later release
+  (`animating`, `script`, `speech`, `initial`, `hold`) is read as the
+  project's own variable, not the built-in.
+
+## 10.0.1
+
+### Fixed
+
+- A rectangle with no visible fill, such as an outline drawn over a card,
+  no longer blocks taps on what is underneath it. Strokes never take taps;
+  nodes with their own reactions are unaffected.
+
 ## 10.0.0
 
 Requires codelessly_api 10.0.0.
