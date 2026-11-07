@@ -10,13 +10,16 @@ import 'dart:math' as math;
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_api_v2/codelessly_api.dart'
     show Node, SizeFit, CollectionScrollProps, ListViewProps, GridViewProps, PageViewProps, ScrollProps, TableViewProps;
+import 'package:flutter/material.dart' show Divider, VerticalDivider, SizedBox, Widget, SliverGridDelegate, SliverGridDelegateWithFixedCrossAxisCount, SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter/rendering.dart';
 
 import '../render/convert.dart';
 import '../render/layout/fit_box.dart';
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
+import 'collections_data_list.dart';
 import 'collections_islands.dart';
+import 'collections_list_runtime.dart';
 import 'collections_layout.dart';
 import 'collections_pagination.dart';
 
@@ -143,6 +146,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(_viewportBox(b, n, canShrinkWrap: true));
     return;
   }
+  if (b.tree.animates && usesDataList(n)) return _dataList(b, n, chain, itemId, item);
   final count = _itemCount(n);
   final layout = n.prop(ListViewProps.layout);
   final vertical = n.vertical;
@@ -329,12 +333,74 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(view);
 }
 
+/// A running list that pages, groups into sections or swipes: a
+/// [DataListView] island in its viewport box.
+void _dataList(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node item) {
+  chain.add(_viewportBox(b, n, canShrinkWrap: true));
+  final vertical = n.vertical;
+  final separator = n.prop(ListViewProps.separator);
+  final spacing = n.prop(ListViewProps.spacing);
+  final color = n.prop(ListViewProps.dividerColor).flutter;
+  Widget gap() => switch (separator) {
+        api.ListSeparator.divider when vertical => Divider(
+            height: spacing,
+            thickness: n.prop(ListViewProps.dividerThickness),
+            color: color,
+            indent: n.prop(ListViewProps.dividerIndent),
+            endIndent: n.prop(ListViewProps.dividerEndIndent)),
+        api.ListSeparator.divider => VerticalDivider(
+            width: spacing,
+            thickness: n.prop(ListViewProps.dividerThickness),
+            color: color,
+            indent: n.prop(ListViewProps.dividerIndent),
+            endIndent: n.prop(ListViewProps.dividerEndIndent)),
+        _ when spacing < 0 => const SizedBox.shrink(),
+        _ => SizedBox(width: vertical ? null : spacing, height: vertical ? spacing : null),
+      };
+  final itemExtent = n.prop(ListViewProps.itemExtent);
+  dataListRecipe(
+    b,
+    n,
+    chain,
+    itemId: itemId,
+    itemExtent: listItemExtent(n, item, vertical: vertical, itemExtent: itemExtent),
+    itemMain: listItemMain(item, vertical: vertical, itemExtent: itemExtent),
+    stretch: n.prop(ListViewProps.stretchItems),
+    separatorExtent: math.max(0, spacing),
+    separator: separator == api.ListSeparator.none ? null : gap,
+    scrollable: n.prop(ListViewProps.scrollable),
+  );
+}
+
+/// A running grid that pages: a [DataListView] island laying a grid.
+void _pagedGrid(NodeBuilder b, Node n, List<RenderBox> chain, String itemId) {
+  chain.add(_viewportBox(b, n, canShrinkWrap: true));
+  final max = n.prop(GridViewProps.maxCrossAxisExtent);
+  final SliverGridDelegate delegate = max != null
+      ? SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: max,
+          mainAxisSpacing: n.prop(GridViewProps.mainAxisSpacing),
+          crossAxisSpacing: n.prop(GridViewProps.crossAxisSpacing),
+          childAspectRatio: n.prop(GridViewProps.childAspectRatio),
+          mainAxisExtent: n.prop(GridViewProps.mainAxisExtent))
+      : SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: n.prop(GridViewProps.crossAxisCount),
+          mainAxisSpacing: n.prop(GridViewProps.mainAxisSpacing),
+          crossAxisSpacing: n.prop(GridViewProps.crossAxisSpacing),
+          childAspectRatio: n.prop(GridViewProps.childAspectRatio),
+          mainAxisExtent: n.prop(GridViewProps.mainAxisExtent));
+  dataListRecipe(b, n, chain, itemId: itemId, gridDelegate: delegate);
+}
+
 void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final itemId = n.children.firstOrNull;
   final item = itemId == null ? null : b.nodeOf(itemId);
   if (itemId == null || item == null) {
     chain.add(_viewportBox(b, n, canShrinkWrap: true));
     return;
+  }
+  if (b.tree.animates && n.pagination != null && !n.prop(GridViewProps.shrinkWrapRows)) {
+    return _pagedGrid(b, n, chain, itemId);
   }
   final count = _itemCount(n);
   chain.add(_viewportBox(b, n, canShrinkWrap: count != null));
