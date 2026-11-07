@@ -122,6 +122,34 @@ behaviour that gives the nodes inside it names (`drag`) registers in
 (`binder.localScopeOf`). `runTrigger` fires a trigger and waits for its
 chain.
 
+## Runtime (behaviours that take input)
+
+A behaviour that takes the pointer is a render object of the node's chain,
+configured on each apply with the node as shown (bindings applied) and its
+`NodeBox` (render/behaviours.dart creates it; `animates: false`, the
+design canvas, gets the rest pose or no layer, never a recognizer or a
+ticker): `RenderDragTrack` (render/drag_track.dart), `RenderTransformGesture`
+(render/transform_gesture.dart), `RenderFlip` (render/flip_card.dart).
+They read and watch their variables in the node's scope
+(`binder.scopeFor`), write them with `setVariableIn`, and fire the node's
+reactions with `fireTrigger(box, ...)` (`{'result': ...}`).
+
+* **Node scopes** (runtime/expressions/node_scopes.dart): a node whose
+  behaviour declares names (`track`, `transform`, `flip`, `tilt`) gets one
+  `NodeValuesScope` between the scope around it and its nodes'; its render
+  object writes it (`binder.nodeScope(...).update(name, map)`), never while
+  painting (from events and ticks; from `configure` after a microtask). A
+  new kind adds a declarer to `nodeScopeDeclarers` and to
+  `declaresNodeScope`.
+* **Hits beyond the node's box** (a track's area or parent hit area, a
+  moved node, transform handles): set `NodeBox.outsideHitTest` in the
+  layer's configure (reset on each apply).
+* **Actions on a node's live state**: a registry by tree
+  (`DragTracks.step`, `TransformGestures.reset`) the handler reaches
+  through `run.host.tree`.
+* **Focus**: a FocusNode attached to the view's element
+  (`IslandParent.islandContext`), so Tab and the keys reach a track.
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,

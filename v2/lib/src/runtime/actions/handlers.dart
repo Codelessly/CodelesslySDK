@@ -12,6 +12,8 @@ import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import '../../render/drag_track.dart' show DragTracks;
+import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../services/services.dart';
 import '../expressions/formula.dart';
 import '../expressions/paths.dart';
@@ -108,6 +110,14 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _scrollTo(a, run);
     case PlaySoundAction():
       _playSound(a, run);
+    case ControlDragAction(command: DragCommand.step):
+      // Turns a drag track by its steps, as if dragged (render/drag_track.dart).
+      final tree = run.host.tree;
+      final steps = double.tryParse(run.text(a.steps).trim())?.round() ?? 0;
+      if (tree != null) await DragTracks.step(tree, a.node, steps);
+    case ControlDragAction(command: DragCommand.reset) when TransformGestures.hasIn(run.host.tree, a.node):
+      // A node with a transform gesture springs back to its rest pose.
+      await TransformGestures.reset(run.host.tree!, a.node);
     case ControlDragAction() || PlayAnimationAction():
       // Draggable cards, drag tracks (a step command) and one-shot
       // animations aren't rendered by v2 yet.
