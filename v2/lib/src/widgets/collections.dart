@@ -23,6 +23,7 @@ import 'collections_list_runtime.dart';
 import 'collections_layout.dart';
 import 'collections_pagination.dart';
 import 'collections_reorder.dart';
+import 'collections_table.dart';
 
 /// Recipes for the collections group, by node type.
 final Map<String, WidgetRecipe> collectionsRecipes = {
@@ -494,6 +495,7 @@ const int _maxTableSpans = 200;
 /// each a template slot repeated (SDK 8.x's `TableView.builder`). Rows are
 /// [TableViewProps.rowCount] (bound data is a runtime matter).
 void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
+  if (b.tree.animates) return tableViewRuntimeRecipe(b, n, chain);
   final design = Size(n.layout.width.value, n.layout.height.value);
   chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, design));
   String? slot(String name) => n.slots[name].let((id) => id != null && b.nodeOf(id) != null ? id : null);
