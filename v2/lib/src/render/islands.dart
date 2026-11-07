@@ -269,6 +269,11 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
 mixin IslandParent on RenderBox, RenderObjectWithLayoutCallbackMixin {
   IslandOwnerElement? _islandOwner;
 
+  /// The element showing this render object's node boxes (a [NodeView]'s
+  /// or a [NodeChild]'s), for what needs a place in the element tree (a
+  /// drag track's focus node); null before it's mounted.
+  BuildContext? get islandContext => _islandOwner;
+
   @override
   void performLayout() {
     runLayoutCallback();

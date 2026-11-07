@@ -15,6 +15,7 @@ import '../../render/source.dart' show NodeSource;
 import '../contracts.dart';
 import 'engine.dart';
 import 'formula_clock.dart';
+import 'node_scopes.dart';
 import 'paths.dart';
 import 'preview.dart';
 import 'scopes.dart';
@@ -301,14 +302,41 @@ class NodeBinder {
     final root = scope;
     if (root == null) return null;
     String? listId;
+    // The nodes around (and including) [id] below the list it repeats in
+    // that declare names for the nodes inside them (a drag track's
+    // `track`, a flip card's `flip`; node_scopes.dart), innermost first.
+    List<String>? scoped;
+    if (source.node(id) case final Node self when declaresNodeScope(self)) scoped = [id];
     for (var p = source.parentOf(id); p != null; p = source.parentOf(p)) {
       final pn = source.node(p);
       if (pn != null && _repeats(pn)) {
         listId = p;
         break;
       }
+      if (pn != null && declaresNodeScope(pn)) (scoped ??= []).add(p);
     }
-    if (listId == null) return root;
+    final base = listId == null ? root : _itemScope(source, listId, instance, root);
+    if (scoped == null) return base;
+    var out = base;
+    for (final p in scoped.reversed) {
+      out = _nodeScopes[(p, instance)] ??= NodeValuesScope(nodeScopeValues(source.node(p)!, out), out);
+    }
+    return out;
+  }
+
+  final Map<(String, Object?), NodeValuesScope> _nodeScopes = {};
+
+  /// The names node [id] (in [instance]) gives the nodes inside it, which
+  /// its render objects write; null when it declares none, or there's no
+  /// [scope].
+  NodeValuesScope? nodeScope(NodeSource source, String id, {Object? instance}) {
+    final node = source.node(id);
+    if (node == null || !declaresNodeScope(node)) return null;
+    scopeFor(source, id, instance);
+    return _nodeScopes[(id, instance)];
+  }
+
+  ValueScope _itemScope(NodeSource source, String listId, Object? instance, ValueScope root) {
     // The collections give item k > 0 its own instance, ('item', outer,
     // list, k); the first item is the list's own (unscoped).
     final (int index, Object? outer) = switch (instance) {
@@ -338,12 +366,16 @@ class NodeBinder {
     return NodeBindings.of(list).data?.valueIn(engine, s);
   }
 
-  /// Lets go of the item scopes.
+  /// Lets go of the item and node scopes.
   void dispose() {
     for (final s in _items.values) {
       s.dispose();
     }
     _items.clear();
+    for (final s in _nodeScopes.values) {
+      s.dispose();
+    }
+    _nodeScopes.clear();
   }
 }
 
