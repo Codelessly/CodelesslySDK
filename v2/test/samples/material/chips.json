@@ -1,0 +1,414 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "chips"
+   ]
+  },
+  "chips": {
+   "id": "chips",
+   "type": "canvas",
+   "name": "chips",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    420,
+    640
+   ],
+   "properties": {
+    "bodyId": "chips_body"
+   },
+   "children": [
+    "chips_body"
+   ]
+  },
+  "chips_body": {
+   "id": "chips_body",
+   "type": "column",
+   "name": "Body",
+   "parentID": "chips",
+   "basicBoxLocal": [
+    0,
+    0,
+    420,
+    640
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "chip_basic",
+    "chip_action",
+    "chip_choice",
+    "chip_filter",
+    "chip_filter_sel",
+    "chip_filter_nocheck",
+    "chip_input",
+    "chip_fixed",
+    "chip_wide",
+    "chip_row"
+   ],
+   "rowColumnType": "column",
+   "crossAxisAlignment": "start",
+   "spacing": 8,
+   "padding": 16
+  },
+  "chip_basic": {
+   "id": "chip_basic",
+   "type": "chip",
+   "name": "chip_basic",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    80,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "properties": {
+    "chipType": "basic",
+    "label": "Basic"
+   }
+  },
+  "chip_action": {
+   "id": "chip_action",
+   "type": "chip",
+   "name": "chip_action",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    120,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "properties": {
+    "chipType": "action",
+    "label": "With icon",
+    "icon": {
+     "show": true,
+     "icon": {
+      "type": "MATERIAL_ICON",
+      "codepoint": 59448,
+      "name": "star",
+      "style": "filled",
+      "version": 1
+     },
+     "size": 18,
+     "color": "#FF515B92"
+    }
+   }
+  },
+  "chip_choice": {
+   "id": "chip_choice",
+   "type": "chip",
+   "name": "chip_choice",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    110,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "properties": {
+    "chipType": "choice",
+    "label": "Choice",
+    "selected": true,
+    "selectedColor": "#FFE0E1F9"
+   }
+  },
+  "chip_filter": {
+   "id": "chip_filter",
+   "type": "chip",
+   "name": "chip_filter",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    103,
+    30
+   ],
+   "horizontalFit": "shrinkWrap",
+   "properties": {
+    "chipType": "filter",
+    "label": "My albums",
+    "labelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "46464F",
+       "id": "f"
+      }
+     ],
+     "fontSize": 14,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    },
+    "checkmarkColor": "#FF434659",
+    "backgroundColor": "#FFFBF8FF",
+    "borderColor": "#FFC7C5D0",
+    "padding": [
+     8,
+     6
+    ],
+    "selectedColor": "#FFE0E1F9"
+   }
+  },
+  "chip_filter_sel": {
+   "id": "chip_filter_sel",
+   "type": "chip",
+   "name": "chip_filter_sel",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    130,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "properties": {
+    "chipType": "filter",
+    "label": "Selected",
+    "selected": true,
+    "showCheckmark": true
+   }
+  },
+  "chip_filter_nocheck": {
+   "id": "chip_filter_nocheck",
+   "type": "chip",
+   "name": "chip_filter_nocheck",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    130,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "properties": {
+    "chipType": "filter",
+    "label": "No check",
+    "selected": true,
+    "showCheckmark": false
+   }
+  },
+  "chip_input": {
+   "id": "chip_input",
+   "type": "chip",
+   "name": "chip_input",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    120,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "properties": {
+    "chipType": "input",
+    "label": "Input",
+    "deleteIcon": {
+     "show": true,
+     "icon": {
+      "type": "MATERIAL_ICON",
+      "codepoint": 58829,
+      "name": "close",
+      "style": "filled",
+      "version": 1
+     },
+     "size": 18
+    },
+    "deleteIconColor": "#FF000000"
+   }
+  },
+  "chip_fixed": {
+   "id": "chip_fixed",
+   "type": "chip",
+   "name": "chip_fixed",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    200,
+    40
+   ],
+   "properties": {
+    "chipType": "action",
+    "label": "Fixed",
+    "borderWidth": 2,
+    "cornerRadius": 16,
+    "elevation": 2
+   }
+  },
+  "chip_wide": {
+   "id": "chip_wide",
+   "type": "chip",
+   "name": "chip_wide",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    200,
+    36
+   ],
+   "horizontalFit": "expanded",
+   "properties": {
+    "chipType": "basic",
+    "label": "Expanded",
+    "labelPadding": [
+     4,
+     0
+    ],
+    "padding": 4
+   }
+  },
+  "chip_row": {
+   "id": "chip_row",
+   "type": "row",
+   "name": "chip_row",
+   "parentID": "chips_body",
+   "basicBoxLocal": [
+    0,
+    0,
+    388,
+    40
+   ],
+   "rowColumnType": "row",
+   "children": [
+    "rc0",
+    "rc1",
+    "rc2"
+   ],
+   "horizontalFit": "expanded",
+   "spacing": 8,
+   "verticalFit": "shrinkWrap"
+  },
+  "rc0": {
+   "id": "rc0",
+   "type": "chip",
+   "name": "rc0",
+   "parentID": "chip_row",
+   "basicBoxLocal": [
+    0,
+    0,
+    90,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "margin": [
+    0,
+    0,
+    8,
+    0
+   ],
+   "properties": {
+    "chipType": "filter",
+    "label": "All",
+    "labelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "46464F",
+       "id": "f"
+      }
+     ],
+     "fontSize": 14,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    }
+   }
+  },
+  "rc1": {
+   "id": "rc1",
+   "type": "chip",
+   "name": "rc1",
+   "parentID": "chip_row",
+   "basicBoxLocal": [
+    0,
+    0,
+    90,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "margin": [
+    0,
+    0,
+    8,
+    0
+   ],
+   "properties": {
+    "chipType": "choice",
+    "label": "Mine",
+    "labelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "46464F",
+       "id": "f"
+      }
+     ],
+     "fontSize": 14,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    }
+   }
+  },
+  "rc2": {
+   "id": "rc2",
+   "type": "chip",
+   "name": "rc2",
+   "parentID": "chip_row",
+   "basicBoxLocal": [
+    0,
+    0,
+    90,
+    32
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "margin": [
+    0,
+    0,
+    8,
+    0
+   ],
+   "properties": {
+    "chipType": "action",
+    "label": "Shared",
+    "labelStyle": {
+     "fills": [
+      {
+       "type": "solid",
+       "color": "46464F",
+       "id": "f"
+      }
+     ],
+     "fontSize": 14,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Medium",
+      "weight": "w500"
+     }
+    }
+   }
+  }
+ }
+}

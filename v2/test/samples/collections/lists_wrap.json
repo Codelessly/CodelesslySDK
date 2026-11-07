@@ -1,0 +1,522 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c1",
+    "c10",
+    "c16",
+    "c20"
+   ]
+  },
+  "c1": {
+   "id": "c1",
+   "type": "canvas",
+   "name": "Wrap spacing",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    400
+   ],
+   "properties": {
+    "bodyId": "b2"
+   },
+   "children": [
+    "b2"
+   ]
+  },
+  "b2": {
+   "id": "b2",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c1",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    400
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "lv3",
+    "lv5"
+   ]
+  },
+  "lv3": {
+   "id": "lv3",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    10,
+    10,
+    300,
+    120
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 7,
+    "wrap": true,
+    "wrapSpacing": 8,
+    "wrapRunSpacing": 6
+   },
+   "children": [
+    "r4"
+   ],
+   "scrollDirection": "horizontal",
+   "verticalFit": "shrinkWrap",
+   "padding": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "r4": {
+   "id": "r4",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    64,
+    28
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#80CBC4",
+     "id": "f80CBC4"
+    }
+   ],
+   "parentID": "lv3"
+  },
+  "lv5": {
+   "id": "lv5",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    10,
+    200,
+    300,
+    120
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 5,
+    "wrap": true,
+    "wrapSpacing": 10,
+    "wrapRunSpacing": 4,
+    "wrapAlignment": "center",
+    "wrapCrossAlignment": "center"
+   },
+   "children": [
+    "rc6"
+   ],
+   "scrollDirection": "horizontal",
+   "edgePins": {
+    "left": 10,
+    "top": 200
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "rc6": {
+   "id": "rc6",
+   "type": "row",
+   "rowColumnType": "row",
+   "name": "Row",
+   "basicBoxLocal": [
+    0,
+    0,
+    120,
+    40
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "center",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "verticalFit": "shrinkWrap",
+   "spacing": 8,
+   "padding": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "parentID": "lv5",
+   "children": [
+    "r7",
+    "t8"
+   ]
+  },
+  "r7": {
+   "id": "r7",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    24,
+    24
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#42A5F5",
+     "id": "f42A5F5"
+    }
+   ],
+   "parentID": "rc6"
+  },
+  "t8": {
+   "id": "t8",
+   "type": "text",
+   "name": "Text",
+   "data": "Item",
+   "basicBoxLocal": [
+    0,
+    0,
+    48,
+    12
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "textMixedProps": [
+    {
+     "start": 0,
+     "end": 4,
+     "fontSize": 12,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     },
+     "fills": [
+      {
+       "type": "solid",
+       "color": "#222222",
+       "id": "tf9"
+      }
+     ]
+    }
+   ],
+   "parentID": "rc6"
+  },
+  "c10": {
+   "id": "c10",
+   "type": "canvas",
+   "name": "Wrap by separator",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    300
+   ],
+   "properties": {
+    "bodyId": "b11"
+   },
+   "children": [
+    "b11"
+   ]
+  },
+  "b11": {
+   "id": "b11",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c10",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "lv12",
+    "lv14"
+   ]
+  },
+  "lv12": {
+   "id": "lv12",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    10,
+    10,
+    300,
+    100
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 6,
+    "wrap": true,
+    "hasSeparator": true,
+    "separatorSpacing": 12,
+    "runSpacing": 8
+   },
+   "children": [
+    "r13"
+   ],
+   "scrollDirection": "horizontal",
+   "isScrollable": false,
+   "verticalFit": "shrinkWrap",
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b11"
+  },
+  "r13": {
+   "id": "r13",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    80,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFCC80",
+     "id": "fFFCC80"
+    }
+   ],
+   "parentID": "lv12"
+  },
+  "lv14": {
+   "id": "lv14",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    10,
+    150,
+    300,
+    100
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "wrap": true,
+    "hasSeparator": true,
+    "separatorSpacing": 12
+   },
+   "children": [
+    "r15"
+   ],
+   "scrollDirection": "horizontal",
+   "edgePins": {
+    "left": 10,
+    "top": 150
+   },
+   "positioningMode": "pin",
+   "parentID": "b11"
+  },
+  "r15": {
+   "id": "r15",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    80,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#B0BEC5",
+     "id": "fB0BEC5"
+    }
+   ],
+   "parentID": "lv14"
+  },
+  "c16": {
+   "id": "c16",
+   "type": "canvas",
+   "name": "Wrap uncounted",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    300
+   ],
+   "properties": {
+    "bodyId": "b17"
+   },
+   "children": [
+    "b17"
+   ]
+  },
+  "b17": {
+   "id": "b17",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c16",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "lv18"
+   ]
+  },
+  "lv18": {
+   "id": "lv18",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    10,
+    10,
+    300,
+    100
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "wrap": true,
+    "wrapSpacing": 6,
+    "wrapRunSpacing": 6
+   },
+   "children": [
+    "r19"
+   ],
+   "scrollDirection": "horizontal",
+   "verticalFit": "shrinkWrap",
+   "padding": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b17"
+  },
+  "r19": {
+   "id": "r19",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    50,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#E57373",
+     "id": "fE57373"
+    }
+   ],
+   "parentID": "lv18"
+  },
+  "c20": {
+   "id": "c20",
+   "type": "canvas",
+   "name": "Vertical wrap",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    300
+   ],
+   "properties": {
+    "bodyId": "b21"
+   },
+   "children": [
+    "b21"
+   ]
+  },
+  "b21": {
+   "id": "b21",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c20",
+   "basicBoxLocal": [
+    0,
+    0,
+    320,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "lv22"
+   ]
+  },
+  "lv22": {
+   "id": "lv22",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    10,
+    10,
+    280,
+    140
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 7,
+    "wrap": true,
+    "wrapSpacing": 5,
+    "wrapRunSpacing": 10,
+    "wrapAlignment": "spaceBetween"
+   },
+   "children": [
+    "r23"
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b21"
+  },
+  "r23": {
+   "id": "r23",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    60,
+    40
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#A5D6A7",
+     "id": "fA5D6A7"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "parentID": "lv22"
+  }
+ }
+}

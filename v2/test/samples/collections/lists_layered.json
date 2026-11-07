@@ -1,0 +1,221 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c1",
+    "c7"
+   ]
+  },
+  "c1": {
+   "id": "c1",
+   "type": "canvas",
+   "name": "Deck",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    300
+   ],
+   "properties": {
+    "bodyId": "b2"
+   },
+   "children": [
+    "b2"
+   ]
+  },
+  "b2": {
+   "id": "b2",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c1",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "lv3",
+    "lv5"
+   ]
+  },
+  "lv3": {
+   "id": "lv3",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    10,
+    10,
+    200,
+    200
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 3,
+    "stacked": true
+   },
+   "children": [
+    "r4"
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "r4": {
+   "id": "r4",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    120,
+    80
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#EF9A9A",
+     "id": "fEF9A9A"
+    }
+   ],
+   "parentID": "lv3"
+  },
+  "lv5": {
+   "id": "lv5",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    230,
+    10,
+    150,
+    120
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 2,
+    "stacked": true,
+    "reversePaintOrder": true
+   },
+   "children": [
+    "r6"
+   ],
+   "scrollDirection": "horizontal",
+   "edgePins": {
+    "left": 230,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "r6": {
+   "id": "r6",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    60,
+    50
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#90CAF9",
+     "id": "f90CAF9"
+    }
+   ],
+   "parentID": "lv5"
+  },
+  "c7": {
+   "id": "c7",
+   "type": "canvas",
+   "name": "Positional stack",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    300
+   ],
+   "properties": {
+    "bodyId": "b8"
+   },
+   "children": [
+    "b8"
+   ]
+  },
+  "b8": {
+   "id": "b8",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c7",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "lv9"
+   ]
+  },
+  "lv9": {
+   "id": "lv9",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    20,
+    20,
+    300,
+    200
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 3,
+    "layout": "stack"
+   },
+   "children": [
+    "r10"
+   ],
+   "padding": [
+    10,
+    20,
+    10,
+    20
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b8"
+  },
+  "r10": {
+   "id": "r10",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    50,
+    60,
+    30,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFE082",
+     "id": "fFFE082"
+    }
+   ],
+   "parentID": "lv9"
+  }
+ }
+}

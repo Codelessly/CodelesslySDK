@@ -1,0 +1,15 @@
+analyzer:
+  exclude:
+    - build/**
+    # SDK 8.x code, run from a throwaway package (tool/update_samples.sh).
+    - tool/v1_runtime/**
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_relative_imports: true
+    use_super_parameters: true

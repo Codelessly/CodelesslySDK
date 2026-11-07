@@ -1,0 +1,325 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "slots"
+   ]
+  },
+  "slots": {
+   "id": "slots",
+   "type": "canvas",
+   "name": "slots",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    700
+   ],
+   "properties": {
+    "bodyId": "slots-body"
+   },
+   "children": [
+    "slots-body"
+   ]
+  },
+  "slots-body": {
+   "id": "slots-body",
+   "type": "frame",
+   "name": "Body",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    700
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "slots",
+   "children": [
+    "ph",
+    "ph-empty",
+    "sp",
+    "sp-empty",
+    "ext",
+    "ext-none",
+    "scol"
+   ]
+  },
+  "ph": {
+   "id": "ph",
+   "type": "placeholder",
+   "name": "ph",
+   "basicBoxLocal": [
+    20,
+    20,
+    120,
+    60
+   ],
+   "text": "Drop here",
+   "leadingAsset": "assets/x.png",
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "slots-body"
+  },
+  "ph-empty": {
+   "id": "ph-empty",
+   "type": "placeholder",
+   "name": "ph-empty",
+   "basicBoxLocal": [
+    160,
+    20,
+    80,
+    40
+   ],
+   "edgePins": {
+    "left": 160,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "slots-body"
+  },
+  "sp": {
+   "id": "sp",
+   "type": "singlePlaceholder",
+   "name": "sp",
+   "basicBoxLocal": [
+    20,
+    100,
+    200,
+    120
+   ],
+   "allowedTypes": [
+    "rectangle"
+   ],
+   "deniedTypes": [
+    "text"
+   ],
+   "maxAllowedSize": {
+    "width": 400,
+    "height": 300
+   },
+   "ephemeral": true,
+   "edgePins": {
+    "left": 20,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "parentID": "slots-body",
+   "children": [
+    "sp-child"
+   ]
+  },
+  "sp-child": {
+   "id": "sp-child",
+   "type": "rectangle",
+   "name": "sp-child",
+   "basicBoxLocal": [
+    0,
+    0,
+    150,
+    90
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FF0000",
+     "id": "f1"
+    }
+   ],
+   "parentID": "sp"
+  },
+  "sp-empty": {
+   "id": "sp-empty",
+   "type": "singlePlaceholder",
+   "name": "sp-empty",
+   "basicBoxLocal": [
+    240,
+    100,
+    140,
+    80
+   ],
+   "allowedTypes": [],
+   "deniedTypes": [],
+   "edgePins": {
+    "left": 240,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "parentID": "slots-body"
+  },
+  "ext": {
+   "id": "ext",
+   "type": "external",
+   "name": "ext",
+   "basicBoxLocal": [
+    20,
+    240,
+    200,
+    100
+   ],
+   "properties": {
+    "builderID": "map"
+   },
+   "edgePins": {
+    "left": 20,
+    "top": 240
+   },
+   "positioningMode": "pin",
+   "parentID": "slots-body"
+  },
+  "ext-none": {
+   "id": "ext-none",
+   "type": "external",
+   "name": "ext-none",
+   "basicBoxLocal": [
+    240,
+    240,
+    140,
+    100
+   ],
+   "properties": {},
+   "edgePins": {
+    "left": 240,
+    "top": 240
+   },
+   "positioningMode": "pin",
+   "parentID": "slots-body"
+  },
+  "scol": {
+   "id": "scol",
+   "type": "column",
+   "name": "scol",
+   "basicBoxLocal": [
+    20,
+    360,
+    360,
+    320
+   ],
+   "rowColumnType": "column",
+   "spacing": 10,
+   "crossAxisAlignment": "start",
+   "edgePins": {
+    "left": 20,
+    "top": 360
+   },
+   "positioningMode": "pin",
+   "parentID": "slots-body",
+   "children": [
+    "ph-fill",
+    "ext-fill",
+    "sp-hug",
+    "sp-fill"
+   ]
+  },
+  "ph-fill": {
+   "id": "ph-fill",
+   "type": "placeholder",
+   "name": "ph-fill",
+   "basicBoxLocal": [
+    0,
+    0,
+    360,
+    50
+   ],
+   "horizontalFit": "expanded",
+   "parentID": "scol"
+  },
+  "ext-fill": {
+   "id": "ext-fill",
+   "type": "external",
+   "name": "ext-fill",
+   "basicBoxLocal": [
+    0,
+    60,
+    360,
+    80
+   ],
+   "properties": {
+    "builderID": "chart"
+   },
+   "horizontalFit": "expanded",
+   "parentID": "scol"
+  },
+  "sp-hug": {
+   "id": "sp-hug",
+   "type": "singlePlaceholder",
+   "name": "sp-hug",
+   "basicBoxLocal": [
+    0,
+    150,
+    100,
+    60
+   ],
+   "allowedTypes": [],
+   "deniedTypes": [],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "parentID": "scol",
+   "children": [
+    "sp2-child"
+   ]
+  },
+  "sp2-child": {
+   "id": "sp2-child",
+   "type": "rectangle",
+   "name": "sp2-child",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    60
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#00FF00",
+     "id": "f2"
+    }
+   ],
+   "parentID": "sp-hug"
+  },
+  "sp-fill": {
+   "id": "sp-fill",
+   "type": "singlePlaceholder",
+   "name": "sp-fill",
+   "basicBoxLocal": [
+    0,
+    220,
+    360,
+    70
+   ],
+   "allowedTypes": [],
+   "deniedTypes": [],
+   "horizontalFit": "expanded",
+   "parentID": "scol",
+   "children": [
+    "sp3-child"
+   ]
+  },
+  "sp3-child": {
+   "id": "sp3-child",
+   "type": "rectangle",
+   "name": "sp3-child",
+   "basicBoxLocal": [
+    0,
+    0,
+    360,
+    70
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#0000FF",
+     "id": "f3"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "sp-fill"
+  }
+ }
+}

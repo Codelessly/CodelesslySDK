@@ -81,3 +81,5 @@ coverage/
 # Golden test failure images (flutter test writes them next to the goldens)
 test/failures/
 
+# v2 is published from v2/ on its own.
+v2/
