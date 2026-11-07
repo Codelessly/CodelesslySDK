@@ -17,6 +17,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'behaviours.dart';
+import '../runtime/gestures/drag_and_drop.dart' show dragAndDropLayers;
 import '../runtime/gestures/drag_motion.dart' show RenderDragMotion, dragMotionLayers;
 import 'convert.dart';
 import 'layout/design_scroll.dart';
@@ -541,6 +542,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
         ..origin = Offset(m.left / 2 - m.right / 2, m.top / 2 - m.bottom / 2)
         ..alignment = Alignment.center);
     }
+    // Drag and drop around the reactions (gestures/drag_and_drop.dart).
+    dragAndDropLayers(this, n, chain);
     if (tree.animates) tree.interactions?.addLayers(this, n, chain);
     loopLayers(this, n, chain, animates: tree.animates);
     if (n.opacity < 0.99) {
