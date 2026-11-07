@@ -106,6 +106,21 @@ event: {'value': v})` (inputs.dart, material.dart): the runtime writes the
 value to the variable the input's value is bound to and runs the node's
 reactions. A type whose island takes taps itself is in `selfTappedTypes`.
 
+## Runtime (lists)
+
+`lib/src/runtime/lists` is SDK 8.x's pagination (`PaginationController`,
+`PaginationRegistry.of(tree)`, the page sources, the `paginate` action) and
+the reorder helpers. A list's running features are islands built only while
+the tree animates (`collections_data_list.dart`, `collections_reorder.dart`,
+`collections_swipe.dart`, `collections_table.dart`, over
+`collections_list_runtime.dart`'s `ListRuntime`): their repeats are
+`NodeChild` boxes whose instance is a `ProvidedItem`, given its item with
+`NodeBinder.provideItem` (an island's item, unlike a bound list's, isn't
+read from the list's `data` by index). Fire a list's triggers through
+`ListRuntime.fire` (awaits them: pull to refresh shows until they end).
+Node boxes aren't hit themselves: wrap a row that gestures read in an
+opaque `MetaData`.
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,
