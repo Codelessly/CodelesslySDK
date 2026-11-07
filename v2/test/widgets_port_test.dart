@@ -6,6 +6,7 @@ import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:codelessly_sdk_v2/src/render/layout/fit_box.dart';
 import 'package:codelessly_sdk_v2/src/render/paint/path_paint.dart';
 import 'package:codelessly_sdk_v2/src/widgets/collections_layout.dart';
+import 'package:codelessly_sdk_v2/src/widgets/collections_pagination.dart';
 import 'package:codelessly_sdk_v2/src/widgets/inputs_toggle.dart';
 import 'package:codelessly_sdk_v2/src/widgets/inputs.dart';
 import 'package:flutter/material.dart';
@@ -221,6 +222,58 @@ void main() {
       }, 'l');
       expect(tree.boxOf('item')!.rectIn(view), const Rect.fromLTWH(0, 0, 100, 40));
       expect(tree.boxOf('more'), isNull);
+    });
+  });
+
+  group('new widget types', () {
+    testWidgets('a pagination node shows its preview controls', (tester) async {
+      await show(tester, {
+        'p': {
+          'type': 'pagination',
+          'layout': {'width': 600, 'height': 40},
+          'props': {'controller': 'contacts', 'siblingCount': 1},
+        },
+      }, 'p');
+      expect(find.byType(PaginationControls), findsOneWidget);
+      expect(find.text('Showing 1–20 of 200'), findsOneWidget);
+      // Page 1 of 10: 1 2 3 … 10.
+      for (final label in ['1', '2', '…', '10', '«', '‹', '›', '»']) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      expect(find.text('3'), findsNothing);
+    });
+
+    testWidgets('a table view lays its cell templates out at rest', (tester) async {
+      final (tree, view) = await show(tester, {
+        't': {
+          'type': 'tableView',
+          'slots': {'cell': 'cell', 'columnHeader': 'head', 'rowHeader': 'side', 'corner': 'corner'},
+          'layout': {'width': 300, 'height': 130},
+          'props': {
+            'columns': [{'key': 'a', 'width': 80}, {'key': 'b'}, {'key': 'c'}],
+            'rowCount': 10,
+            'rowHeight': 40,
+            'headerHeight': 44,
+            'rowHeaderWidth': 60,
+            'columnWidth': 100,
+            'stripeColor': '#FFEEEEEE',
+          },
+        },
+        'cell': box(50, 20),
+        'head': box(60, 30),
+        'side': box(40, 20),
+        'corner': box(10, 10),
+      }, 't');
+      final table = renderOf<RenderTableItems>(view).single;
+      // Columns that fit 300: 60 + 80 + 100 (+100 starts at 240); rows: 44 + 40 + 40 (+40 at 124).
+      expect(table.columnWidths, [60, 80, 100, 100]);
+      expect(table.rowHeights, [44, 40, 40, 40]);
+      expect(table.childCount, 16);
+      // The first of each template is in the table's own scope.
+      expect(tree.boxOf('corner')!.rectIn(view), const Rect.fromLTWH(0, 17, 10, 10));
+      expect(tree.boxOf('head')!.rectIn(view), const Rect.fromLTWH(60, 7, 60, 30));
+      expect(tree.boxOf('side')!.rectIn(view), const Rect.fromLTWH(0, 54, 40, 20));
+      expect(tree.boxOf('cell')!.rectIn(view), const Rect.fromLTWH(60, 54, 50, 20));
     });
   });
 
