@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:codelessly_api_v2/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../render/node_tree.dart' show NodeTree;
 import '../../render/source.dart';
 import '../../services/services.dart';
 import '../contracts.dart' show ValueScope;
@@ -93,45 +94,46 @@ Object? scriptArgument(String text, ActionRun run) {
   return run.text(text);
 }
 
+/// The variables a script reads in [scope] (and the scopes around it),
+/// computed ones read from [reader]; function variables aren't values.
+Map<String, Object?> scriptVariables(ValueScope? scope, ValueScope reader) {
+  final out = <String, Object?>{};
+  for (ValueScope? s = scope; s != null; s = s.parent) {
+    if (s is! VariableScope) continue;
+    for (final v in s.variables) {
+      if (v.isFunction || out.containsKey(v.name)) continue;
+      out[v.name] = s.valueOf(v.name, reader);
+    }
+  }
+  return out;
+}
+
+/// The values of the inputs on [tree]'s screen, by node id.
+Map<String, Object?> scriptNodeValues(NodeTree? tree) {
+  var source = tree?.source;
+  if (source is NodeValues) source = source.base;
+  if (tree == null || source is! DocumentSource) return const {};
+  final out = <String, Object?>{};
+  for (final id in source.document.nodes.keys) {
+    final node = tree.resolve(id);
+    final path = node == null ? null : TreeReactions.valuePaths[node.type];
+    if (path == null) continue;
+    out[id] = readJsonPath(node!.toJson(), path);
+  }
+  return out;
+}
+
 /// A [ScriptHost] over a running chain.
 class RuntimeScriptHost implements ScriptHost {
   RuntimeScriptHost(this.run);
 
   final ActionRun run;
 
-  Iterable<VariableScope> get _scopes sync* {
-    for (ValueScope? s = run.context.scope; s != null; s = s.parent) {
-      if (s is VariableScope) yield s;
-    }
-  }
+  @override
+  Map<String, Object?> variables() => scriptVariables(run.context.scope, run.scope);
 
   @override
-  Map<String, Object?> variables() {
-    final out = <String, Object?>{};
-    for (final s in _scopes) {
-      for (final v in s.variables) {
-        if (v.isFunction || out.containsKey(v.name)) continue;
-        out[v.name] = s.valueOf(v.name, run.scope);
-      }
-    }
-    return out;
-  }
-
-  @override
-  Map<String, Object?> nodeValues() {
-    final tree = run.host.tree;
-    var source = tree?.source;
-    if (source is NodeValues) source = source.base;
-    if (tree == null || source is! DocumentSource) return const {};
-    final out = <String, Object?>{};
-    for (final id in source.document.nodes.keys) {
-      final node = tree.resolve(id);
-      final path = node == null ? null : TreeReactions.valuePaths[node.type];
-      if (path == null) continue;
-      out[id] = readJsonPath(node!.toJson(), path);
-    }
-    return out;
-  }
+  Map<String, Object?> nodeValues() => scriptNodeValues(run.host.tree);
 
   @override
   void setVariable(String name, Object? value) {
