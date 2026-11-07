@@ -8,8 +8,11 @@
 // cache extent, as a sliver list builds them.
 import 'dart:math' as math;
 
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
+
+import '../render/behaviours.dart' show motionMatrix;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -69,17 +72,16 @@ abstract class RenderCollection extends RenderBox
 
   void _paintChildren(PaintingContext context, Offset offset) {
     paintDecorations(context, offset);
-    if (!_paintReversed) {
-      defaultPaint(context, offset);
-      return;
-    }
-    var child = lastChild;
+    var child = _paintReversed ? lastChild : firstChild;
     while (child != null) {
       final pd = child.parentData! as CollectionParentData;
-      context.paintChild(child, pd.offset + offset);
-      child = pd.previousSibling;
+      paintItem(context, child, pd.offset + offset);
+      child = _paintReversed ? pd.previousSibling : pd.nextSibling;
     }
   }
+
+  /// Paints one item at [offset] (a page view poses its pages).
+  void paintItem(PaintingContext context, RenderBox child, Offset offset) => context.paintChild(child, offset);
 
   /// Paints what goes under the items (dividers).
   void paintDecorations(PaintingContext context, Offset offset) {}
@@ -777,7 +779,117 @@ class RenderPageItems extends RenderCollection {
   int firstIndex = 0;
   int? itemCount;
 
-  void changed() => markNeedsLayout();
+  /// The pose a page has one page after the current one (coverflow, cube,
+  /// carousel); null: flat pages. See [pageMotionAt].
+  api.Motion? pageMotion;
+
+  void changed() {
+    markNeedsLayout();
+    markNeedsPaint();
+  }
+
+  /// The properties a page's motion moves by its distance (SDK 8.x's
+  /// `motionTowards`); the others (origin, perspective) stay the motion's.
+  static const _scaled = [
+    'translateX', 'translateY', 'shiftX', 'shiftY', 'scale', 'scaleX', 'scaleY', 'opacity', 'rotate', //
+    'rotateX', 'rotateY', 'blur',
+  ];
+
+  /// [motion] (the pose one page after the current one) for a page
+  /// [offset] pages from it: at rest at 0, interpolated by the distance (up
+  /// to two pages), mirrored for pages before it; a [vertical] pager turns
+  /// around X and moves along Y (SDK 8.x's `pageMotionAt`, `PageMotionItem`).
+  static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false}) {
+    final distance = offset.abs().clamp(0.0, 2.0);
+    var m = motion;
+    for (final p in _scaled) {
+      final rest = api.Motion.none.valueOf(p);
+      var v = rest + (motion.valueOf(p) - rest) * distance;
+      if (p == 'opacity') v = v.clamp(0.0, 1.0);
+      if (p == 'blur') v = math.max(0, v);
+      m = m.withValue(p, v);
+    }
+    if (offset < 0) {
+      for (final p in const ['translateX', 'shiftX', 'rotate', 'rotateY', 'originX']) {
+        m = m.withValue(p, -m.valueOf(p));
+      }
+    }
+    if (vertical) {
+      m = m
+          .withValue('rotateX', -m.rotateY)
+          .withValue('rotateY', 0)
+          .withValue('translateY', m.translateX)
+          .withValue('translateX', 0)
+          .withValue('shiftY', m.shiftX)
+          .withValue('shiftX', 0)
+          .withValue('originY', m.originX)
+          .withValue('originX', 0);
+    }
+    return m;
+  }
+
+  /// The page at rest: the initial page, within the pages there are.
+  double get _currentPage {
+    final count = itemCount;
+    final p = initialPage.toDouble();
+    return count == null ? p : p.clamp(0, math.max(0, count - 1)).toDouble();
+  }
+
+  /// The transform [child] (page [index]) is painted with, or null.
+  Matrix4? _poseOf(RenderBox child, int index) {
+    final motion = pageMotion;
+    if (motion == null) return null;
+    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical);
+    final o = Alignment(m.originX, m.originY).alongSize(child.size);
+    return Matrix4.translationValues(m.shiftX * child.size.width + o.dx, m.shiftY * child.size.height + o.dy, 0)
+      ..multiply(motionMatrix(m))
+      ..multiply(Matrix4.translationValues(-o.dx, -o.dy, 0));
+  }
+
+  int _indexOf(RenderBox child) {
+    var i = firstIndex;
+    for (var c = firstChild; c != null && c != child; c = childAfter(c)) {
+      i++;
+    }
+    return i;
+  }
+
+  @override
+  void paintItem(PaintingContext context, RenderBox child, Offset offset) {
+    final pose = _poseOf(child, _indexOf(child));
+    if (pose == null) return super.paintItem(context, child, offset);
+    final opacity = pageMotionAt(pageMotion!, _indexOf(child) - _currentPage).opacity;
+    if (opacity <= 0) return;
+    void paintPosed(PaintingContext c, Offset o) =>
+        c.pushTransform(needsCompositing, o, pose, (c, o) => c.paintChild(child, o));
+    if (opacity >= 1) {
+      paintPosed(context, offset);
+    } else {
+      context.pushOpacity(offset, (opacity * 255).round(), (c, o) => paintPosed(c, o));
+    }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+    final pose = _poseOf(child, _indexOf(child));
+    if (pose != null) transform.multiply(pose);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    if (pageMotion == null) return super.hitTestChildren(result, position: position);
+    var i = firstIndex + childCount - 1;
+    for (var child = lastChild; child != null; child = childBefore(child), i--) {
+      final pd = child.parentData! as CollectionParentData;
+      final pose = Matrix4.translationValues(pd.offset.dx, pd.offset.dy, 0)..multiply(_poseOf(child, i)!);
+      final c = child;
+      if (result.addWithPaintTransform(transform: pose, position: position, hitTest: (r, p) => c.hitTest(r, position: p))) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /// The scroll offset at rest, in viewports, and the leading padding.
   static ({double offset, double pad}) restOf({

@@ -391,6 +391,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..initialPage = initial
     ..firstIndex = first
     ..itemCount = count
+    ..pageMotion = n.prop(PageViewProps.pageMotion)
     ..changed();
   _syncItems(b, n, view, itemId, last - first + 1, first: first);
   chain.add(view);
