@@ -9,6 +9,7 @@ import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
+import '../runtime/actions/script_host.dart' show scriptNodeValues;
 import '../runtime/actions/ui.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
@@ -16,7 +17,8 @@ import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/scopes.dart';
-import '../services/services.dart' show Services;
+import '../scripting/formula_scripts.dart';
+import '../services/services.dart' show NoScriptRunner, Services;
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
@@ -461,6 +463,7 @@ class _ScreenState {
     bound?.dispose();
     nodeValues.dispose();
     scope.dispose();
+    if (scope.parent case final ScriptsScope scripts) scripts.dispose();
     values.dispose();
   }
 }
@@ -505,7 +508,15 @@ class _LayoutViewState extends State<_LayoutView> {
       'route': widget.params,
       if (widget.data.isNotEmpty) 'data': {...appData, ...widget.data},
     }, _codelessly.data);
-    final scope = VariableScope(const [], parent: values);
+    // `script.name(args)` in formulas reads the layout's scripts.
+    final services = _codelessly.services;
+    final scripts = ScriptsScope(
+      scripts: widget.layout.document.scripts,
+      runner: services is Services ? services.scripts : const NoScriptRunner(),
+      parent: values,
+    );
+    final scope = VariableScope(const [], parent: scripts);
+    scripts.reader = scope;
     final nodeValues = NodeValues(DocumentSource(widget.layout.document));
     final engine = config.expressions;
     NodeBinder? binder;
@@ -517,6 +528,7 @@ class _LayoutViewState extends State<_LayoutView> {
       source = bound = BoundSource(nodeValues, engine, scope);
     }
     final tree = NodeTree(source, binder: binder);
+    scripts.nodeValues = () => scriptNodeValues(tree);
     final context = ScreenActionContext(
       scope: scope,
       expressions: engine,

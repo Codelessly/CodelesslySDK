@@ -83,6 +83,7 @@ export 'src/render/source.dart';
 export 'src/widgets/media.dart' show ExternalComponents;
 export 'src/services/services.dart';
 // The script engine (Services.scripts' default) and what scripts can call.
+export 'src/scripting/formula_scripts.dart';
 export 'src/scripting/script_catalog.dart';
 export 'src/scripting/script_runner.dart';
 export 'src/scripting/sandbox/script_sandbox.dart';

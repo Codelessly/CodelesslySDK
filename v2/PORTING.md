@@ -106,6 +106,17 @@ event: {'value': v})` (inputs.dart, material.dart): the runtime writes the
 value to the variable the input's value is bound to and runs the node's
 reactions. A type whose island takes taps itself is in `selfTappedTypes`.
 
+Scripts (`lib/src/scripting`, SDK 8.x's `scripting/` ported as is): the
+driver (`script_driver.dart`, the JS host API and lockdown) runs in
+`QuickJsSandbox` (FFI to `codelessly_quickjs`'s library) or `WorkerSandbox`
+(web), picked by conditional import; `SandboxScriptRunner` speaks its
+protocol over a `ScriptHost` (`RuntimeScriptHost` for a chain,
+`SampleScriptHost` for the editor's console) and runs a script's test cases
+(`runScriptTests`). `ScriptsScope` (between a screen's fixed values and its
+variables) answers `script.name(args)` in formulas. Tests run real scripts:
+`test/scripting/support/engine_setup.dart` builds the library with
+`tool/build_quickjs.sh` (CMake, a C compiler) on first use.
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,
