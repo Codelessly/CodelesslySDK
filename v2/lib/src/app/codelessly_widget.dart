@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
+import '../runtime/actions/feedback_theme.dart';
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
 import '../runtime/actions/ui.dart';
@@ -564,6 +565,9 @@ class _LayoutViewState extends State<_LayoutView> {
 
   final List<PersistedVariable> _persisted = [];
 
+  late final FeedbackTheme _feedbackTheme = FeedbackTheme.fromTokens(widget.layout.theme ?? _codelessly.publishModel?.theme)
+      .merge(FeedbackTheme.fromDocument(widget.layout.document));
+
   /// Whether canvas [canvasId] keeps the user on it when they go back now:
   /// its `blockBack`, read through its bindings.
   bool _blocksBack(String canvasId) => _screen.tree.resolve(canvasId)?.props.get(CanvasProps.blockBack) ?? false;
@@ -708,6 +712,9 @@ class _LayoutViewState extends State<_LayoutView> {
       }
       return view;
     });
+    // The look of the runtime's own toasts and dialogs: the project's
+    // tokens, then what the layout's nodes show.
+    content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
       if (theme != null) content = Theme(data: themeDataOf(theme), child: content);
