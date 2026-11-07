@@ -571,7 +571,7 @@ class _LayoutViewState extends State<_LayoutView> {
   /// Back was pressed while blocked: the canvas's back pressed reactions.
   void _backPressed(String canvasId) {
     final box = _screen.tree.boxOf(canvasId);
-    if (box != null) return _screen.reactions.fire(box, TriggerType.backPressed.name);
+    if (box != null) return unawaited(_screen.reactions.fire(box, TriggerType.backPressed.name));
     final node = _screen.tree.source.node(canvasId);
     if (node != null) unawaited(_screen.actions.trigger(node, TriggerType.backPressed.name, _screen.context));
   }

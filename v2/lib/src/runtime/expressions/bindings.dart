@@ -295,9 +295,61 @@ class NodeBinder {
       (n.bind.containsKey(BindPaths.data) ||
           (_conditions.byNode[n.id]?.any((t) => t.path == BindPaths.data) ?? false));
 
-  /// The scope node [id] (in [instance]) reads from: [scope], or the item
-  /// scope of the data-bound list it repeats in.
+  /// The names a node gives itself and the nodes inside it, by what gives
+  /// them: a node that follows the pointer shares its drag as `drag`
+  /// ([api.DragMotion], not a track or a list's reorder handle). Each such
+  /// node reads from a [LocalScope] of its own ([localScopeOf]), which the
+  /// behaviour sets.
+  static final Map<String, bool Function(Node n)> localNames = {
+    'drag': (n) => switch (n.behaviours.drag) {
+          final api.DragMotion d => d.track == null && !d.reorder,
+          null => false,
+        },
+  };
+
+  static Set<String> _localNamesOf(Node n) => {
+        for (final e in localNames.entries)
+          if (e.value(n)) e.key,
+      };
+
+  final Map<(String, Object?), LocalScope> _locals = {};
+
+  /// The [LocalScope] node [id] (in [instance]) gives itself and the nodes
+  /// inside it, or null when it gives none ([localNames]) or nothing binds.
+  LocalScope? localScopeOf(NodeSource source, String id, Object? instance) {
+    final n = source.node(id);
+    if (n == null || scope == null) return null;
+    final names = _localNamesOf(n);
+    if (names.isEmpty) return null;
+    final existing = _locals[(id, instance)];
+    if (existing != null && setEquals(existing.names, names)) return existing;
+    existing?.dispose();
+    final parentId = source.parentOf(id);
+    final parentNode = parentId == null ? null : source.node(parentId);
+    // An item's root reads around it what the item does.
+    final around = parentId == null || parentNode == null || _repeats(parentNode)
+        ? _itemScopeFor(source, id, instance)
+        : scopeFor(source, parentId, instance);
+    return _locals[(id, instance)] = LocalScope(names, parent: around);
+  }
+
+  /// The scope node [id] (in [instance]) reads from: [scope], the item scope
+  /// of the data-bound list it repeats in, or the [LocalScope] of the
+  /// nearest node around it (or itself) that gives one ([localNames]).
   ValueScope? scopeFor(NodeSource source, String id, Object? instance) {
+    final base = _itemScopeFor(source, id, instance);
+    if (base == null || localNames.isEmpty) return base;
+    for (String? p = id; p != null; p = source.parentOf(p)) {
+      final pn = source.node(p);
+      if (pn == null) break;
+      // Past the list it repeats in, the item scope reads what's around.
+      if (p != id && _repeats(pn)) break;
+      if (_localNamesOf(pn).isNotEmpty) return localScopeOf(source, p, instance) ?? base;
+    }
+    return base;
+  }
+
+  ValueScope? _itemScopeFor(NodeSource source, String id, Object? instance) {
     final root = scope;
     if (root == null) return null;
     String? listId;
@@ -338,12 +390,16 @@ class NodeBinder {
     return NodeBindings.of(list).data?.valueIn(engine, s);
   }
 
-  /// Lets go of the item scopes.
+  /// Lets go of the item and local scopes.
   void dispose() {
     for (final s in _items.values) {
       s.dispose();
     }
     _items.clear();
+    for (final s in _locals.values) {
+      s.dispose();
+    }
+    _locals.clear();
   }
 }
 
