@@ -19,6 +19,7 @@ import 'package:flutter/scheduler.dart';
 
 import 'convert.dart';
 import 'drag_track.dart';
+import 'transform_gesture.dart';
 import 'node_tree.dart' show NodeBox;
 import 'paint/svg_path.dart';
 import 'recipe.dart';
@@ -45,6 +46,16 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
       chain.add(
         b.obtain<RenderDragTrack>('trackPose', RenderDragTrack.new)
           ..configure(box, track, enabled: be.drag!.enabled, interactive: animates),
+      );
+    }
+  }
+  // Pinch, pan and rotate in a running app (render/transform_gesture.dart),
+  // inside the track as SDK 8.x's sat inside the drag.
+  if (animates && n.type != 'canvas') {
+    if (be.effectiveTransformGesture case final api.TransformGesture gesture) {
+      chain.add(
+        b.obtain<RenderTransformGesture>('transformGesture', RenderTransformGesture.new)
+          ..configure(b is NodeBox ? b : null, gesture),
       );
     }
   }

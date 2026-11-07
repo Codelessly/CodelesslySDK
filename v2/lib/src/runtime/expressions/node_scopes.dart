@@ -138,6 +138,6 @@ Map<String, Object?>? transformScopeValues(Node node, ValueScope parent) {
   final be = node.behaviours;
   if (be.transformGesture == null && !be.zoomable) return null;
   return const {
-    'transform': {'x': 0.0, 'y': 0.0, 'scale': 1.0, 'rotation': 0.0, 'active': false},
+    'transform': {'x': 0, 'y': 0, 'scale': 1, 'rotation': 0, 'scaleX': 1, 'scaleY': 1, 'active': false, 'selected': true},
   };
 }
