@@ -21,9 +21,10 @@ const Map<String, Object?> swipeCard = {
 };
 
 class Shown {
-  Shown(this.tree, this.scope);
+  Shown(this.tree, this.scope, this.context);
   final NodeTree tree;
   final VariableScope scope;
+  final RuntimeActionContext context;
 
   RenderDragMotion drag([String id = 'card']) {
     RenderDragMotion? found;
@@ -96,7 +97,7 @@ Future<Shown> show(
   await tester.pumpWidget(MaterialApp(
     home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's', interactive: true)),
   ));
-  return Shown(tree, scope);
+  return Shown(tree, scope, context);
 }
 
 Json react(String trigger, List<Json> actions) => {'trigger': {'type': trigger}, 'actions': actions};
@@ -247,6 +248,35 @@ void main() {
     await tester.pump(const Duration(milliseconds: 40));
     expect(s.values().offset.dx, isNot(0));
     await tester.pumpAndSettle();
+    expect(s.values().offset, Offset.zero);
+  });
+
+  testWidgets('the controlDrag action flings and resets the card', (tester) async {
+    final s = await show(tester, actions: [react('swipeRight', [record('swiped', 'right')])], variables: [
+      const Variable(name: 'swiped', type: VariableType.text, value: ''),
+    ]);
+    Future<void> control(String command) => const CodelesslyActions().run(
+          api.Node.fromJson({
+            'type': 'box',
+            'actions': [
+              react('click', [
+                {'type': 'controlDrag', 'node': 'other, card', 'command': command, 'direction': 'right'},
+              ]),
+            ],
+          }, id: 'button')!,
+          'click',
+          s.context,
+        );
+    final flung = control('fling');
+    await tester.pumpAndSettle();
+    await flung;
+    expect(s.scope.read('swiped'), 'right');
+    final shaken = control('shake');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(s.values().offset.dx, isNot(0));
+    await tester.pumpAndSettle();
+    await shaken;
     expect(s.values().offset, Offset.zero);
   });
 
