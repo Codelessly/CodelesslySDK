@@ -278,6 +278,61 @@ class ValuesScope extends NamedScope {
   }
 }
 
+/// Names a node gives itself and the nodes inside it (a dragged node's
+/// `drag`): set by the behaviour that owns them, read before the scopes
+/// around. A name whose value here and around is a map reads both, merged
+/// (the node's own keys over the ones around: a drag's live values over the
+/// layout's drag and drop session).
+class LocalScope extends NamedScope {
+  LocalScope(this.names, {super.parent});
+
+  /// The names this scope declares.
+  final Set<String> names;
+  final Map<String, Object?> _values = {};
+
+  @override
+  bool declares(String name) => names.contains(name);
+
+  @override
+  Object? valueOf(String name, ValueScope reader) {
+    final own = _values[name];
+    final around = readPath(parent, name);
+    if (own is Map && around is Map) return {...around, ...own};
+    return own ?? around;
+  }
+
+  /// This scope's own value of [name] (not merged).
+  Object? operator [](String name) => _values[name];
+
+  /// Sets [name] (one of [names]) and notifies its readers when it changed.
+  void set(String name, Object? value) {
+    if (_values.containsKey(name) && _deepEquals(_values[name], value)) return;
+    _values[name] = value;
+    changed([name]);
+  }
+
+  static bool _deepEquals(Object? a, Object? b) {
+    if (a is Map && b is Map) {
+      if (a.length != b.length) return false;
+      for (final e in a.entries) {
+        if (!b.containsKey(e.key) || !_deepEquals(e.value, b[e.key])) return false;
+      }
+      return true;
+    }
+    return a == b;
+  }
+
+  final Map<String, Listenable> _merged = {};
+
+  /// Notifies when this scope's [name] changes, or the one around it.
+  @override
+  Listenable watch(String name) => _merged[name] ??= () {
+        final own = super.watch(name);
+        final around = watchName(parent, name);
+        return around == null ? own : Listenable.merge([own, around]);
+      }();
+}
+
 /// One item of a repeating widget (a list, grid or page view built from
 /// data): `item`, `index`, and `parent` (the item around it: `parent.item`,
 /// `parent.index`).

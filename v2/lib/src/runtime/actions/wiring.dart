@@ -65,6 +65,9 @@ class TreeReactions implements NodeInteractions {
     state.update(n, types);
     final pointer = types.intersection(TriggerType.pointer);
     if (selfTappedTypes.contains(n.type)) pointer.remove(TriggerType.click);
+    // A node with a drag drags itself: it fires its swipes when it flies
+    // off, and its drag and drag end (gestures/drag_motion.dart).
+    if (n.behaviours.drag != null) pointer.removeAll({...TriggerType.swipes, TriggerType.drag, TriggerType.dragEnd});
     final viewport = types.contains(TriggerType.enterViewport) || types.contains(TriggerType.exitViewport);
     if (pointer.isEmpty && !viewport) return;
     chain.add(box.obtain<RenderReactions>('reactions', RenderReactions.new)
@@ -77,7 +80,7 @@ class TreeReactions implements NodeInteractions {
   static bool _isViewport(TriggerType t) => t == TriggerType.enterViewport || t == TriggerType.exitViewport;
 
   @override
-  void fire(NodeBox box, String trigger, {Json event = const {}}) {
+  Future<void> fire(NodeBox box, String trigger, {Json event = const {}}) async {
     final node = box.node;
     if (node == null) return;
     final ctx = contextFor(box);
@@ -85,11 +88,11 @@ class TreeReactions implements NodeInteractions {
     final state = _boxes[box];
     final r = runner;
     if (r is CodelesslyActions) {
-      unawaited(r.run(node, trigger, ctx, event: event, cancellation: state?.cancellation, instance: box.instance));
+      await r.run(node, trigger, ctx, event: event, cancellation: state?.cancellation, instance: box.instance);
     } else {
-      unawaited(r.trigger(node, trigger, ctx, event: event).catchError((Object e, StackTrace s) {
+      await r.trigger(node, trigger, ctx, event: event).catchError((Object e, StackTrace s) {
         if (ctx is ActionHost) ctx.reportError(e, s, action: trigger);
-      }));
+      });
     }
   }
 
