@@ -5,6 +5,7 @@ library;
 export 'context.dart';
 export 'handlers.dart' show ActionHandler, delayMilliseconds;
 export 'node_values.dart';
+export 'route_transition.dart';
 export 'runner.dart';
 export 'script_host.dart';
 export 'text_fields.dart' show TextFieldHandle;

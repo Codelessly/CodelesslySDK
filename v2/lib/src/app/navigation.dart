@@ -3,7 +3,7 @@
 // navigation actions.
 import 'dart:convert';
 
-import 'package:codelessly_api_v2/codelessly_api.dart' show ActionDef, Json, NavigateAction, PublishModel;
+import 'package:codelessly_api_v2/codelessly_api.dart' show ActionDef, Json, NavigateAction, PublishModel, RouteTransition;
 import 'package:flutter/foundation.dart';
 
 /// A screen of a Codelessly app and the params it was opened with.
@@ -184,6 +184,7 @@ class NavigationRequest {
     this.params = const {},
     this.baseDestinationId,
     this.baseParams = const {},
+    this.routeTransition,
   });
 
   /// [action] with its params (evaluated) [params] and [baseParams].
@@ -193,6 +194,7 @@ class NavigationRequest {
         params: params ?? action.params,
         baseDestinationId: action.base.isEmpty ? null : action.base,
         baseParams: baseParams ?? action.baseParams,
+        routeTransition: action.routeTransition,
       );
 
   /// Reads a navigation action's JSON.
@@ -210,6 +212,9 @@ class NavigationRequest {
   /// For [NavigationType.reset]: the screen left beneath the destination.
   final String? baseDestinationId;
   final Map<String, Object?> baseParams;
+
+  /// The custom transition the destination opens with; null: the platform's.
+  final RouteTransition? routeTransition;
 }
 
 /// How a navigation action moves between screens.
