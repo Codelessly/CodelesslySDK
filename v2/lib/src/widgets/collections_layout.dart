@@ -78,7 +78,11 @@ abstract class RenderCollection extends RenderBox
       paintItem(context, child, pd.offset + offset);
       child = _paintReversed ? pd.previousSibling : pd.nextSibling;
     }
+    paintForeground(context, offset);
   }
+
+  /// Paints what goes over the items (a table's grid lines).
+  void paintForeground(PaintingContext context, Offset offset) {}
 
   /// Paints one item at [offset] (a page view poses its pages).
   void paintItem(PaintingContext context, RenderBox child, Offset offset) => context.paintChild(child, offset);
@@ -957,5 +961,99 @@ class RenderPageItems extends RenderCollection {
       i++;
     }
     return _anyChildOutside;
+  }
+}
+
+/// A table view at rest (SDK 8.x's `TableView.builder` scrolled to 0): its
+/// columns [columnWidths] wide and rows [rowHeights] tall (the header row
+/// and column first, when there are), each cell's template laid out loose
+/// and placed at its start, centred down (`Align.centerLeft`). Children are
+/// the cells in [cells] order, row by row. Header backgrounds and stripes
+/// paint under the cells; a [gridLine] trails each column and row over them.
+class RenderTableItems extends RenderCollection {
+  List<double> columnWidths = const [];
+  List<double> rowHeights = const [];
+
+  /// (row, column) of each child, in child order.
+  List<(int, int)> cells = const [];
+  bool headerRow = false, headerColumn = false;
+  Color? headerColor, stripeColor;
+
+  /// The lines between cells, or null.
+  BorderSide? gridLine;
+
+  void changed() {
+    markNeedsLayout();
+    markNeedsPaint();
+  }
+
+  double _start(List<double> extents, int i) {
+    var x = 0.0;
+    for (var k = 0; k < i && k < extents.length; k++) {
+      x += extents[k];
+    }
+    return x;
+  }
+
+  @override
+  bool layoutItems() {
+    final c = constraints;
+    size = c.biggest.isFinite ? c.biggest : c.constrain(Size.zero);
+    var i = 0;
+    for (final it in children) {
+      if (i >= cells.length) {
+        it.layout(const BoxConstraints.tightFor(width: 0, height: 0));
+        i++;
+        continue;
+      }
+      final (r, col) = cells[i++];
+      final w = columnWidths[col], h = rowHeights[r];
+      it.layout(BoxConstraints.loose(Size(w, h)), parentUsesSize: true);
+      (it.parentData! as CollectionParentData).offset =
+          Offset(_start(columnWidths, col), _start(rowHeights, r) + (h - it.size.height) / 2);
+    }
+    final w = _start(columnWidths, columnWidths.length), h = _start(rowHeights, rowHeights.length);
+    return w > size.width + 0.01 || h > size.height + 0.01 || _anyChildOutside;
+  }
+
+  @override
+  void paintDecorations(PaintingContext context, Offset offset) {
+    final canvas = context.canvas;
+    final width = _start(columnWidths, columnWidths.length);
+    final height = _start(rowHeights, rowHeights.length);
+    if (headerColor case final Color color) {
+      final paint = Paint()..color = color;
+      if (headerColumn && columnWidths.isNotEmpty) {
+        canvas.drawRect(offset & Size(columnWidths.first, height), paint);
+      }
+      if (headerRow && rowHeights.isNotEmpty) canvas.drawRect(offset & Size(width, rowHeights.first), paint);
+    }
+    if (stripeColor case final Color color) {
+      final paint = Paint()..color = color;
+      for (var r = headerRow ? 1 : 0; r < rowHeights.length; r++) {
+        if ((r - (headerRow ? 1 : 0)).isOdd) {
+          canvas.drawRect(Offset(offset.dx, offset.dy + _start(rowHeights, r)) & Size(width, rowHeights[r]), paint);
+        }
+      }
+    }
+  }
+
+  @override
+  void paintForeground(PaintingContext context, Offset offset) {
+    final line = gridLine;
+    if (line == null || line.width <= 0 || line.style == BorderStyle.none) return;
+    final canvas = context.canvas;
+    final paint = Paint()..color = line.color;
+    final width = _start(columnWidths, columnWidths.length);
+    final height = _start(rowHeights, rowHeights.length);
+    // A span's trailing border, inside the span at its end.
+    for (var i = 1; i <= columnWidths.length; i++) {
+      final x = _start(columnWidths, i);
+      canvas.drawRect(Rect.fromLTWH(offset.dx + x - line.width, offset.dy, line.width, height), paint);
+    }
+    for (var i = 1; i <= rowHeights.length; i++) {
+      final y = _start(rowHeights, i);
+      canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy + y - line.width, width, line.width), paint);
+    }
   }
 }
