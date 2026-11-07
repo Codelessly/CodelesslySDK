@@ -831,7 +831,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       ..crossAxisAlignment = crossAlign
       ..textBaseline = crossAlign == CrossAxisAlignment.baseline ? TextBaseline.alphabetic : null
       ..mainAxisSize = mainFit == SizeFit.hug ? MainAxisSize.min : MainAxisSize.max
-      ..gap = n.prop(FlexProps.spacing);
+      ..gap = n.prop(FlexProps.spacing)
+      ..squeeze = n.prop(FlexProps.squeezeChildren);
     _syncChildren(flex, n.children, Slot(SlotKind.flex, n));
     chain.add(flex);
   }
@@ -848,7 +849,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       _ => WrapAlignment.start,
     };
     if (scrolls) {
-      _scrollView(n, chain, const [], contentSized: false, fillViewport: runAlignment != WrapAlignment.start);
+      _scrollView(n, chain, const [],
+          contentSized: false, fillViewport: runAlignment != WrapAlignment.start || n.prop(FlexProps.fillViewport));
     }
     final wrap = _obtain<RenderCodelesslyWrap>('wrap', RenderCodelesslyWrap.new)
       ..direction = n.isRow ? Axis.horizontal : Axis.vertical
@@ -914,7 +916,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       chain.add(_obtain<RenderPadding>('scrollPad', () => RenderPadding(padding: pad, textDirection: TextDirection.ltr))
         ..padding = pad);
     }
-    fillViewport ??= n.isFlex && !contentSized && n.prop(FlexProps.mainAxisAlignment) != api.MainAxisAlignment.start;
+    fillViewport ??= n.isFlex &&
+        !contentSized &&
+        (n.prop(FlexProps.mainAxisAlignment) != api.MainAxisAlignment.start || n.prop(FlexProps.fillViewport));
     final flexContent = n.isFlex && children.any((c) => (n.isRow ? c.hFit : c.vFit) == SizeFit.fill || (n.isRow ? c.hFit : c.vFit) == SizeFit.flexible);
     if (fillViewport || flexContent) {
       final extent = _obtain<RenderScrollContentExtent>(
