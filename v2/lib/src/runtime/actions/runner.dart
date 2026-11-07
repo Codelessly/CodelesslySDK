@@ -97,9 +97,10 @@ class ActionRun {
   }
 
   /// A chain nested in this one (a for-each's body, an API's branch) whose
-  /// `${result}` starts as [result].
-  ActionRun nested(Object? result) =>
-      ActionRun._(context, host, ValuesScope({'result': result}, scope), cancellation, node, value);
+  /// `${result}` starts as [result]; [names] are more names its actions
+  /// read (a for-each turn's `loop`).
+  ActionRun nested(Object? result, {Json names = const {}}) =>
+      ActionRun._(context, host, ValuesScope({...names, 'result': result}, scope), cancellation, node, value);
 
   /// [text] with its `${...}` evaluated (text).
   String text(String text) => expressions.interpolate(text, scope);
