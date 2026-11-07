@@ -135,6 +135,50 @@ void main() {
       expect(CanvasLocation.locationOf(m, 'docs', {'rest': 'a/b', 'q': 1}), 'docs/a/b?q=1');
       expect(CanvasLocation.locationOf(m, 'notFound', {}), isNull);
     });
+
+    test('an optional trailing param matches with or without its segment', () {
+      final pattern = CanvasLocation.segmentsOf('sheet/:id?');
+      expect(CanvasLocation.matchPattern(pattern, ['sheet']), <String, String>{});
+      expect(CanvasLocation.matchPattern(pattern, ['sheet', 'doom']), {'id': 'doom'});
+      expect(CanvasLocation.matchPattern(pattern, ['sheet', 'a', 'b']), isNull);
+      expect(CanvasLocation.matchPattern(pattern, ['patches']), isNull);
+      expect(CanvasLocation.expandOptional('sheet/:id?'), ['sheet/:id', 'sheet']);
+      expect(CanvasLocation.expandOptional('guide/:id'), ['guide/:id']);
+      expect(CanvasLocation.fill('sheet/:id?', {'id': 'doom'}), 'sheet/doom');
+      expect(CanvasLocation.fill('sheet/:id?', {'id': ''}), 'sheet');
+      expect(CanvasLocation.fill('sheet/:id?', {}), 'sheet');
+      final m = tidepool(extra: {'sheet': 'sheet/:id?'});
+      expect(CanvasLocation.match(m, 'sheet')?.canvasId, 'sheet');
+      expect(CanvasLocation.match(m, 'sheet/doom')?.params, {'id': 'doom'});
+    });
+
+    test('a screen\'s path from its name, unique among the others', () {
+      expect(CanvasLocation.defaultPathOf('Log entry'), 'log-entry');
+      expect(CanvasLocation.defaultPathOf('  Café · Menu!  '), 'café-menu');
+      expect(CanvasLocation.defaultPathOf('***'), isNull);
+      expect(CanvasLocation.uniquePath('log-entry', {'log-entry', 'log-entry-2'}), 'log-entry-3');
+      expect(CanvasLocation.uniquePath('home', {}), 'home');
+    });
+
+    test('a link to a screen by its id is at its path', () {
+      final model = tidepool();
+      expect(CanvasLocation.named(model, 'creature?id=kraken'), 'guide/kraken');
+      // The entry screen's id is the root.
+      expect(CanvasLocation.named(model, 'tides'), '');
+      // A param the path needs is missing, or the screen has no path.
+      expect(CanvasLocation.named(model, 'creature'), 'creature');
+      expect(CanvasLocation.named(model, 'settings'), 'settings');
+      expect(CanvasLocation.named(model, 'guide/bat-star'), 'guide/bat-star');
+    });
+
+    test('the layout shown at a location', () {
+      final model = tidepool(withNotFound: true);
+      expect(CodelesslyAppIdentity.layoutIdAt(model, '/'), 'tides');
+      expect(CodelesslyAppIdentity.layoutIdAt(model, '/guide/bat-star'), 'creature');
+      // A screen at /<its id> wins over the catch-all.
+      expect(CodelesslyAppIdentity.layoutIdAt(model, '/settings'), 'settings');
+      expect(CodelesslyAppIdentity.layoutIdAt(model, '/nowhere'), 'lost');
+    });
   });
 
   group('NavigationRequest', () {

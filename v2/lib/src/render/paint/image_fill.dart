@@ -161,6 +161,12 @@ mixin ImageClient on RenderObject {
     if (attached) _sync();
   }
 
+  /// Whether an image it shows is still loading.
+  bool get imagesPending => _wanted.any((u) {
+        final e = _images[u];
+        return e == null || (!e.ready && !e.failed);
+      });
+
   /// The loaded image for [url], or null while it loads (or can't).
   LoadedImage? imageFor(String? url) {
     final e = url == null ? null : _images[url];

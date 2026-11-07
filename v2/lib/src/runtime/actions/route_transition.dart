@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
 import '../../render/behaviours.dart' show motionMatrix;
+import 'hero_flights.dart';
 
 /// The spring a released interactive transition settles with, and whether
 /// a release closes the route.
@@ -170,7 +171,7 @@ double sideAmountAt(TransitionSide side, double time, {required int totalMs, req
 /// A page route that plays a [RouteTransition] (resolved: its preset's
 /// values filled in). A [modal] one shows a modal (see-through, with a
 /// barrier, closed by a close modal action).
-class CodelesslyRouteTransitionRoute<T> extends PageRoute<T> {
+class CodelesslyRouteTransitionRoute<T> extends PageRoute<T> with CodelesslyHeroRoute<T> {
   CodelesslyRouteTransitionRoute({
     required RouteTransition transition,
     required this.builder,
@@ -318,6 +319,7 @@ class CodelesslyRouteTransitionRoute<T> extends PageRoute<T> {
     if (_interactive) return;
     _interactive = true;
     navigator?.didStartUserGesture();
+    startGestureFlights();
   }
 
   void dragTo(double progress) => controller?.value = progress.clamp(0.0, 1.0);
