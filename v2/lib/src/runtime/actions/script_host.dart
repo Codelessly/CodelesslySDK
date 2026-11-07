@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api_v2/codelessly_api.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../render/source.dart';
 import '../../services/services.dart';
@@ -48,6 +49,11 @@ Future<void> runScriptAction(RunScriptAction a, ActionRun run) async {
           scripts: scripts,
           host: RuntimeScriptHost(run),
         );
+  if (kDebugMode) {
+    for (final log in result.logs) {
+      debugPrint('[script ${script?.name ?? a.script}] ${log['level']}: ${log['message']}');
+    }
+  }
   if (result.ok) {
     run.result = result.value;
     final name = a.resultVariable.trim();
