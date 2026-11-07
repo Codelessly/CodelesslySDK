@@ -1,15 +1,9 @@
 // Scripts (API v2 `ScriptDef`, a layout's `scripts`): the service that runs
 // one in a sandbox, and what a script reaches in the app (its host). The run
-// script action asks the app's [ScriptRunner]; the SDK ships the interface
-// and the host, an app plugs in an engine.
-//
-// TODO(scripts): port SDK 8.x's runner (lib/src/scripting: ScriptRunner,
-// the JavaScript driver in script_driver.dart, the QuickJS sandbox via
-// package:codelessly_quickjs on devices and the Web Worker sandbox on the
-// web) as a `SandboxScriptRunner` implementing [ScriptRunner], in its own
-// entry point so apps that run no scripts don't carry an engine. Its wire
-// protocol (`__cl_start` / resume with host call answers) maps onto
-// [ScriptHost] unchanged.
+// script action asks the app's [ScriptRunner]. The engine is
+// `SandboxScriptRunner` (scripting/script_runner.dart: SDK 8.x's driver in
+// QuickJS via package:codelessly_quickjs on devices, a Web Worker on the
+// web), the default; [FunctionScriptRunner] runs Dart instead.
 import 'dart:async';
 
 import 'package:codelessly_api_v2/codelessly_api.dart' show Json, ScriptDef;
@@ -48,7 +42,14 @@ class ScriptHostError implements Exception {
 /// How a script run ended. A failed run is a result with an [error], never
 /// an exception.
 class ScriptRunResult {
-  const ScriptRunResult({this.value, this.error, this.logs = const [], this.writes = const []});
+  const ScriptRunResult({
+    this.value,
+    this.error,
+    this.logs = const [],
+    this.writes = const [],
+    this.cpuMs = 0,
+    this.memory,
+  });
 
   /// A failed result of [type] with [message].
   ScriptRunResult.failure(String type, String message) : this(error: {'type': type, 'message': message});
@@ -56,7 +57,8 @@ class ScriptRunResult {
   /// What the script returned, as JSON data.
   final Object? value;
 
-  /// Why it failed: `{type, message, line?, column?}`; null when it didn't.
+  /// Why it failed: `{type, message, line?, column?, stack?, limit?}`; null
+  /// when it didn't.
   final Json? error;
 
   /// What it logged: `{level, message}`.
@@ -65,7 +67,27 @@ class ScriptRunResult {
   /// The variable writes it made, in order: `{name, value}`.
   final List<Json> writes;
 
+  /// CPU time the script used, in milliseconds.
+  final double cpuMs;
+
+  /// Memory the engine used at the end, in bytes, when known.
+  final int? memory;
+
   bool get ok => error == null;
+
+  /// The result as JSON: what the editor's console and the MCP show.
+  Json toJson() => {
+        'ok': ok,
+        'value': value,
+        'error': ?error,
+        'logs': logs,
+        if (writes.isNotEmpty) 'writes': writes,
+        'cpuMs': cpuMs,
+        'memory': ?memory,
+      };
+
+  @override
+  String toString() => ok ? 'ScriptRunResult($value)' : 'ScriptRunResult(${error!['type']}: ${error!['message']})';
 }
 
 /// Runs scripts: an app service (`Services.scripts`).
@@ -77,7 +99,7 @@ abstract interface class ScriptRunner {
       {Json args = const {}, List<ScriptDef> scripts = const [], ScriptHost? host});
 }
 
-/// The default [ScriptRunner]: no engine, every run fails with an
+/// A [ScriptRunner] with no engine: every run fails with an
 /// `EngineUnavailable` error (a run script action's `onError` runs).
 class NoScriptRunner implements ScriptRunner {
   const NoScriptRunner();
