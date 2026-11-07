@@ -112,6 +112,11 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       // Draggable cards, drag tracks (a step command) and one-shot
       // animations aren't rendered by v2 yet.
       break;
+    case PaginateAction():
+      // TODO(v2): pagination controllers (SDK 8.x's PaginationController and
+      // PaginationRegistry) aren't ported yet; a list shows its bound data
+      // whole.
+      break;
     case UnknownAction():
       break;
   }
