@@ -1,13 +1,25 @@
 import 'dart:async';
 
 import 'package:codelessly_api_v2/codelessly_api.dart'
-    show CanvasProps, Json, LayoutDocumentScripts, NavigateAction, Node, PublishLayout, PublishModel, RouteTransition, TriggerType;
+    show
+        CanvasProps,
+        Json,
+        LayoutDocumentScripts,
+        NavigateAction,
+        Node,
+        PageTransition,
+        PublishLayout,
+        PublishModel,
+        RouteTransition,
+        TriggerType;
 import 'package:flutter/material.dart';
 
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+import '../runtime/actions/feedback_theme.dart';
+import '../runtime/actions/hero_flights.dart';
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
 import '../runtime/actions/script_host.dart' show scriptNodeValues;
@@ -24,6 +36,7 @@ import '../services/services.dart' show NoScriptRunner, Services;
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
+import 'page_transitions.dart';
 import 'persisted_variables.dart';
 import 'runtime.dart';
 import 'theme.dart';
@@ -219,7 +232,8 @@ class CodelesslyWidget extends StatefulWidget {
   /// A route showing layout [layoutId] of [codelessly], as navigation
   /// pushes them. [template] passes its builders and handler along. With
   /// [transition] it plays that custom transition (its reveals growing
-  /// from [anchor]).
+  /// from [anchor]); else [pageTransition] over [transitionMs] (the
+  /// platform's, none on the web).
   static Route<T> route<T>({
     required Codelessly codelessly,
     required String layoutId,
@@ -228,6 +242,9 @@ class CodelesslyWidget extends StatefulWidget {
     String? name,
     RouteTransition? transition,
     RevealAnchor anchor = const RevealAnchor(),
+    PageTransition pageTransition = PageTransition.platform,
+    int? transitionMs,
+    int? reverseTransitionMs,
   }) {
     final settings = RouteSettings(name: name, arguments: params);
     Widget build(BuildContext _) => CodelesslyWidget(
@@ -241,19 +258,34 @@ class CodelesslyWidget extends StatefulWidget {
           layoutBuilder: template?.layoutBuilder ?? template?.controller?.layoutBuilder,
           onNavigate: template?.onNavigate,
         );
-    return transition == null
-        ? MaterialPageRoute<T>(settings: settings, builder: build)
-        : CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
+    if (transition != null) {
+      return CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
+    }
+    final page = webTransition(pageTransition);
+    if (page == PageTransition.platform) return CodelesslyPageRoute<T>(settings: settings, builder: build);
+    return CodelesslyPageTransitionRoute<T>(
+      transition: page,
+      settings: settings,
+      transitionMs: transitionMs,
+      reverseTransitionMs: reverseTransitionMs,
+      builder: build,
+    );
   }
 
   /// Routes for a [Navigator] or `MaterialApp.onGenerateRoute`: `/` opens
   /// the entry screen, any other name the screen it locates
   /// ([initialScreen]): a URL path, a canvas or layout id, or a screen name.
+  ///
+  /// A link to a screen by its id opens at the screen's URL path: the
+  /// route is named `/guide/kraken` for `/creature?id=kraken` (and `/` for
+  /// the entry screen's id), which a browser shows.
   static RouteFactory onGenerateRoute(Codelessly codelessly, {CodelesslyWidget? template}) => (settings) {
         final name = settings.name ?? '/';
         final params = settings.arguments is Map ? (settings.arguments as Map).cast<String, Object?>() : const <String, Object?>{};
-        return MaterialPageRoute<void>(
-          settings: settings,
+        final model = codelessly.publishModel;
+        final named = model == null || name == '/' ? name : '/${CanvasLocation.named(model, name.substring(name.startsWith('/') ? 1 : 0))}';
+        return CodelesslyPageRoute<void>(
+          settings: named == name ? settings : RouteSettings(name: named, arguments: settings.arguments),
           builder: (_) => CodelesslyWidget(
             codelessly: codelessly,
             initialScreen: name == '/' ? null : name,
@@ -582,6 +614,9 @@ class _LayoutViewState extends State<_LayoutView> {
 
   final List<PersistedVariable> _persisted = [];
 
+  late final FeedbackTheme _feedbackTheme = FeedbackTheme.fromTokens(widget.layout.theme ?? _codelessly.publishModel?.theme)
+      .merge(FeedbackTheme.fromDocument(widget.layout.document));
+
   /// Whether canvas [canvasId] keeps the user on it when they go back now:
   /// its `blockBack`, read through its bindings.
   bool _blocksBack(String canvasId) => _screen.tree.resolve(canvasId)?.props.get(CanvasProps.blockBack) ?? false;
@@ -635,7 +670,14 @@ class _LayoutViewState extends State<_LayoutView> {
       if (request.destinationId.isEmpty) return;
       type = NavigationType.replace;
     }
-    Route<void>? routeTo(String destination, Map<String, Object?> params, {RouteTransition? transition}) {
+    Route<void>? routeTo(
+      String destination,
+      Map<String, Object?> params, {
+      RouteTransition? transition,
+      PageTransition pageTransition = PageTransition.platform,
+      int? transitionMs,
+      int? reverseTransitionMs,
+    }) {
       final layoutId = model.resolveLayoutId(destination);
       if (layoutId == null) {
         FlutterError.reportError(FlutterErrorDetails(
@@ -653,10 +695,20 @@ class _LayoutViewState extends State<_LayoutView> {
         name: '/$location',
         transition: transition,
         anchor: transition == null ? const RevealAnchor() : RevealAnchor(tap: RevealAnchor.lastTap),
+        pageTransition: pageTransition,
+        transitionMs: transitionMs,
+        reverseTransitionMs: reverseTransitionMs,
       );
     }
 
-    final route = routeTo(request.destinationId, request.params, transition: request.routeTransition);
+    final route = routeTo(
+      request.destinationId,
+      request.params,
+      transition: request.routeTransition,
+      pageTransition: request.transition,
+      transitionMs: request.transitionMs,
+      reverseTransitionMs: request.reverseTransitionMs,
+    );
     if (route == null) return;
     switch (type) {
       case NavigationType.push:
@@ -699,6 +751,8 @@ class _LayoutViewState extends State<_LayoutView> {
   @override
   Widget build(BuildContext context) {
     final config = _codelessly.config;
+    // Its shared elements fly from and to the route it shows in.
+    HeroRoutes.bind(_screen.tree, ModalRoute.of(context));
     // Back on top (the screen above it popped): report it again.
     if (ModalRoute.isCurrentOf(context) ?? true) WidgetsBinding.instance.addPostFrameCallback((_) => _reportRoute());
     Widget content = LayoutBuilder(builder: (context, constraints) {
@@ -726,6 +780,9 @@ class _LayoutViewState extends State<_LayoutView> {
       }
       return view;
     });
+    // The look of the runtime's own toasts and dialogs: the project's
+    // tokens, then what the layout's nodes show.
+    content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
       if (theme != null) content = Theme(data: themeDataOf(theme), child: content);
@@ -768,6 +825,12 @@ class _ScreenUi extends NavigatorActionUi {
   @override
   Future<void> navigate(NavigateAction action, {Json params = const {}, Json baseParams = const {}}) =>
       view._navigate(NavigationRequest.fromAction(action, params: params, baseParams: baseParams));
+}
+
+/// The route a screen opens in: the platform's page transition, flying the
+/// shared elements of the screens it moves between.
+class CodelesslyPageRoute<T> extends MaterialPageRoute<T> with CodelesslyHeroRoute<T> {
+  CodelesslyPageRoute({required super.builder, super.settings, super.fullscreenDialog});
 }
 
 /// What shows while a layout loads.
