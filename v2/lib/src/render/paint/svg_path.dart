@@ -22,11 +22,19 @@ class MeasuredPath {
     return metrics.isEmpty ? null : MeasuredPath._(metrics, parsed.$2);
   });
 
+  /// Samples of the area swept about each focus asked for, as (distance
+  /// along the path, area swept so far), for area pacing.
+  final Map<Offset, List<(double, double)>> _areas = {};
+
+  static const int _areaSamples = 1440;
+
   /// The offset from the start and the direction (radians) at [progress]
-  /// (0–1) of the length.
-  (Offset, double)? at(double progress) {
+  /// (0–1) of the length, or with [byArea] of the area a line from [focus]
+  /// (in the path's coordinates) sweeps: an orbit's equal areas.
+  (Offset, double)? at(double progress, {bool byArea = false, Offset focus = Offset.zero}) {
     if (length <= 0) return null;
-    var distance = progress.clamp(0.0, 1.0) * length;
+    final p = progress.clamp(0.0, 1.0);
+    var distance = byArea ? _distanceForArea(p, focus) : p * length;
     for (final m in metrics) {
       if (distance <= m.length || identical(m, metrics.last)) {
         final t = m.getTangentForOffset(distance.clamp(0.0, m.length));
@@ -36,6 +44,48 @@ class MeasuredPath {
       distance -= m.length;
     }
     return null;
+  }
+
+  /// The distance along the path at which a line from [focus] has swept
+  /// [share] of the area it sweeps over the whole path.
+  double _distanceForArea(double share, Offset focus) {
+    final table = _areas.putIfAbsent(focus, () {
+      final out = <(double, double)>[(0, 0)];
+      Offset? last;
+      var swept = 0.0, done = 0.0;
+      for (final m in metrics) {
+        final n = (_areaSamples * m.length / length).round().clamp(8, 1 << 20);
+        for (var i = 0; i <= n; i++) {
+          final d = m.length * i / n;
+          final point = m.getTangentForOffset(d)?.position;
+          if (point == null) continue;
+          if (last != null) {
+            final a = last - focus, b = point - focus;
+            swept += (a.dx * b.dy - a.dy * b.dx).abs() / 2;
+          }
+          last = point;
+          out.add((done + d, swept));
+        }
+        done += m.length;
+      }
+      return out;
+    });
+    final total = table.last.$2;
+    if (total <= 0) return share * length;
+    final target = share * total;
+    var lo = 0, hi = table.length - 1;
+    while (hi - lo > 1) {
+      final mid = (lo + hi) >> 1;
+      if (table[mid].$2 < target) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    final (d0, a0) = table[lo];
+    final (d1, a1) = table[hi];
+    final f = a1 == a0 ? 0.0 : (target - a0) / (a1 - a0);
+    return d0 + (d1 - d0) * f;
   }
 }
 

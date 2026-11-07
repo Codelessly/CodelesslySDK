@@ -12,6 +12,7 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_api_v2/codelessly_api.dart' show Node;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -25,14 +26,21 @@ import 'recipe.dart';
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviours;
   if (be.drag?.track case final api.DragTrack track) {
-    // The variable's value comes with bindings; here its default.
-    final p = track.progressOf(track.defaultValue ?? track.min);
-    final pose = trackPose(track, p);
-    if (pose != null) {
+    // At its bound value (`drag.track.value`), else its default or start;
+    // parked there when that's out of range.
+    // TODO(v2-port): read the track's variable, and port SDK 8.x's
+    // NodeDragTrack interaction (follow, detents, fine mode, momentum,
+    // settle, keyboard, wheel, double tap) to a running app.
+    final p = track.restProgressOf(track.value ?? track.defaultValue ?? track.min);
+    final moves = track.relative ||
+        track.units == api.DragTrackUnits.parent ||
+        track.usesViewBox ||
+        trackPose(track, p) != null;
+    if (moves) {
       chain.add(
-        b.obtain<RenderPose>('trackPose', RenderPose.new)
-          ..transform = pose
-          ..origin = Alignment.center,
+        b.obtain<RenderTrackPose>('trackPose', RenderTrackPose.new)
+          ..track = track
+          ..progress = p,
       );
     }
   }
@@ -42,7 +50,15 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
         ..animates = animates
         ..motion = motion,
     );
+    if (motion.shimmer case final api.MotionShimmer shimmer) {
+      chain.add(
+        b.obtain<RenderShimmer>('shimmer', RenderShimmer.new)
+          ..animates = animates
+          ..shimmer = shimmer,
+      );
+    }
   }
+  cardLayers(b, n, chain, animates: animates);
   if (be.scale != 1) {
     chain.add(
       b.obtain<RenderPose>('scale', RenderPose.new)
@@ -180,32 +196,192 @@ class RenderInkOverlay extends RenderBox {
   }
 }
 
-/// Where [track] puts its node at [progress]: a move (and a turn) about its
-/// centre. Null at its place.
-Matrix4? trackPose(api.DragTrack track, double progress) {
-  final p = progress.clamp(0.0, 1.0);
-  Offset offset = Offset.zero;
-  double degrees = 0;
-  switch (track.shape) {
-    case api.DragTrackShape.line:
-      offset = Offset.lerp(Offset(track.x1, track.y1), Offset(track.x2, track.y2), p)!;
-    case api.DragTrackShape.arc:
-      final pivot = Offset(track.pivotX, track.pivotY);
-      final a = track.angleAt(p) * math.pi / 180;
-      if (pivot != Offset.zero) {
-        final r = -pivot;
-        offset = pivot + Offset(r.dx * math.cos(a) - r.dy * math.sin(a), r.dx * math.sin(a) + r.dy * math.cos(a));
-      }
-      if (track.rotate) degrees = track.angleAt(p);
-    case api.DragTrackShape.path:
-      final at = track.path == null ? null : MeasuredPath.of(track.path!)?.at(p);
-      if (at != null) {
-        offset = at.$1;
-        if (track.orientToPath) degrees = at.$2 * 180 / math.pi;
-      }
+/// Where a [api.DragTrack] puts its node, in the node's coordinates with
+/// the origin at its rest centre (SDK 8.x's `DragTrackGeometry`): a line,
+/// an arc about its pivot, or a path, measured in pixels, in the node's own
+/// size ([api.DragTrack.relative]), in its parent's
+/// ([api.DragTrackUnits.parent]) or in a viewBox stretched to the parent
+/// ([api.DragTrack.usesViewBox]).
+class TrackGeometry {
+  TrackGeometry(this.track, {this.size = Size.zero, this.parent, this.rest = Offset.zero});
+
+  final api.DragTrack track;
+
+  /// The node's size, the parent's (null unknown), and the node's rest
+  /// centre in the parent (for a viewBox).
+  final Size size;
+  final Size? parent;
+  final Offset rest;
+
+  bool get _inParent => track.units == api.DragTrackUnits.parent && parent != null;
+  bool get _inViewBox => track.usesViewBox && parent != null;
+
+  /// A length along x or y in pixels.
+  double _x(double v) => _inParent ? v * parent!.width : v;
+  double _y(double v) => _inParent ? v * parent!.height : v;
+
+  Offset get _lineStart => track.relative
+      ? Offset(track.x1 * size.width, track.y1 * size.height)
+      : Offset(_x(track.x1), _y(track.y1));
+  Offset get _lineEnd => track.relative
+      ? Offset(track.x2 * size.width, track.y2 * size.height)
+      : Offset(_x(track.x2), _y(track.y2));
+
+  double _angle(double p) => track.startAngle + (track.endAngle - track.startAngle) * p;
+
+  /// A path point (relative to the path's start) as an offset from rest.
+  Offset _place(Offset point, Offset start) {
+    if (_inViewBox) {
+      final sx = parent!.width / track.viewBoxWidth, sy = parent!.height / track.viewBoxHeight;
+      return Offset((point.dx + start.dx) * sx, (point.dy + start.dy) * sy) - rest;
+    }
+    return Offset(_x(point.dx), _y(point.dy));
   }
-  if (offset == Offset.zero && degrees == 0) return null;
-  return Matrix4.translationValues(offset.dx, offset.dy, 0)..rotateZ(degrees * math.pi / 180);
+
+  /// Where the node's centre sits at [progress], from rest. A line or arc
+  /// goes on past its ends (overscroll, a parked node); a path stops there.
+  Offset offsetAt(double progress) {
+    switch (track.shape) {
+      case api.DragTrackShape.line:
+        return Offset.lerp(_lineStart, _lineEnd, progress)!;
+      case api.DragTrackShape.arc:
+        // Round the pivot, on a circle through rest.
+        final pivot = Offset(_x(track.pivotX), _y(track.pivotY));
+        if (pivot == Offset.zero) return Offset.zero;
+        final a = _angle(progress) * math.pi / 180;
+        final r = -pivot;
+        return pivot + Offset(r.dx * math.cos(a) - r.dy * math.sin(a), r.dx * math.sin(a) + r.dy * math.cos(a));
+      case api.DragTrackShape.path:
+        final path = track.path == null ? null : MeasuredPath.of(track.path!);
+        if (path == null) return Offset.zero;
+        final p = track.clampProgress(progress);
+        if (_inViewBox) return _alongStretched(path, p);
+        return _place(path.at(p)?.$1 ?? Offset.zero, path.start);
+    }
+  }
+
+  /// [p] of the way along the path as stretched into the viewBox, by its
+  /// stretched length.
+  Offset _alongStretched(MeasuredPath path, double p) {
+    const n = 240;
+    final samples = [
+      for (var i = 0; i <= n; i++)
+        if (path.at(i / n) case final at?) _place(at.$1, path.start),
+    ];
+    if (samples.isEmpty) return Offset.zero;
+    var total = 0.0;
+    for (var i = 1; i < samples.length; i++) {
+      total += (samples[i] - samples[i - 1]).distance;
+    }
+    var d = p * total;
+    for (var i = 1; i < samples.length; i++) {
+      final seg = (samples[i] - samples[i - 1]).distance;
+      if (d <= seg && seg > 0) return Offset.lerp(samples[i - 1], samples[i], d / seg)!;
+      d -= seg;
+    }
+    return samples.last;
+  }
+
+  /// How much the node turns at [progress] (degrees).
+  double rotationAt(double progress) {
+    switch (track.shape) {
+      case api.DragTrackShape.line:
+        return 0;
+      case api.DragTrackShape.arc:
+        return track.rotate ? _angle(progress) : 0;
+      case api.DragTrackShape.path:
+        if (!track.orientToPath || track.path == null) return 0;
+        final at = MeasuredPath.of(track.path!)?.at(track.clampProgress(progress));
+        if (at == null) return 0;
+        var angle = at.$2;
+        // A path stretched unevenly turns as drawn.
+        if (_inParent && !_inViewBox && parent!.width != parent!.height) {
+          angle = math.atan2(math.sin(angle) * parent!.height, math.cos(angle) * parent!.width);
+        }
+        return (track.orientUpright ? api.Motion.uprightAngle(angle) : angle) * 180 / math.pi;
+    }
+  }
+
+  /// The move and turn about the node's centre at [progress]; null at rest.
+  Matrix4? poseAt(double progress) {
+    final o = offsetAt(progress);
+    final r = rotationAt(progress);
+    if (o == Offset.zero && r == 0) return null;
+    return Matrix4.translationValues(o.dx, o.dy, 0)..rotateZ(r * math.pi / 180);
+  }
+}
+
+/// Where [track] puts its node at [progress] (in pixels; see
+/// [TrackGeometry] for a track measured in its node or parent): a move (and
+/// a turn) about its centre. Null at its place.
+Matrix4? trackPose(api.DragTrack track, double progress) => TrackGeometry(track).poseAt(progress);
+
+/// A node drawn where its [api.DragTrack] puts it at [progress], worked out
+/// from its laid-out size and its parent's (SDK 8.x's `TrackPose`).
+class RenderTrackPose extends RenderPose {
+  api.DragTrack _track = const api.DragTrack();
+  set track(api.DragTrack v) {
+    if (v == _track) return;
+    _track = v;
+    markNeedsPaint();
+  }
+
+  double _progress = 0;
+  set progress(double v) {
+    if (v == _progress) return;
+    _progress = v;
+    markNeedsPaint();
+  }
+
+  /// Whether the pose needs the parent's size and the node's place in it.
+  bool get _measuresParent => _track.units == api.DragTrackUnits.parent || _track.usesViewBox;
+
+  /// The box this node sits in (its parent's layout), and where this
+  /// node's centre is in it.
+  (Size, Offset)? _frame() {
+    RenderObject? o = parent;
+    while (o != null && o is! NodeBuilder) {
+      o = o.parent;
+    }
+    final frame = o?.parent;
+    if (frame is! RenderBox || !frame.hasSize || !hasSize) return null;
+    try {
+      return (frame.size, MatrixUtils.transformPoint(getTransformTo(frame), size.center(Offset.zero)));
+    } catch (_) {
+      return (frame.size, Offset.zero);
+    }
+  }
+
+  void _pose() {
+    final frame = _measuresParent ? _frame() : null;
+    final geometry = TrackGeometry(
+      _track,
+      size: hasSize ? size : Size.zero,
+      parent: frame?.$1,
+      rest: frame?.$2 ?? Offset.zero,
+    );
+    // Worked out while painting or hit testing: set without marking.
+    _transform = geometry.poseAt(_progress) ?? Matrix4.identity();
+    _origin = Alignment.center;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    _pose();
+    super.paint(context, offset);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    _pose();
+    return super.hitTestChildren(result, position: position);
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    _pose();
+    super.applyPaintTransform(child, transform);
+  }
 }
 
 /// A pose drawn over the layout (Flutter's `Transform`, plus a fractional
@@ -275,7 +451,11 @@ class RenderPose extends RenderProxyBox {
   bool get _faces {
     if (!_backfaceHidden || !attached) return true;
     try {
-      final m = getTransformTo(null).storage;
+      // Through every transform above, and its own (what its child is drawn
+      // with: a card's back turned over in advance).
+      final full = getTransformTo(null);
+      if (_moved) full.multiply(effectiveTransform);
+      final m = full.storage;
       Offset project(double x, double y) {
         final w = m[3] * x + m[7] * y + m[15];
         final d = w == 0 ? 1e-9 : w;
@@ -374,21 +554,14 @@ class RenderPose extends RenderProxyBox {
 /// Runs a [Ticker] while attached and [ticking].
 mixin _Ticking on RenderPose {
   Ticker? _ticker;
-  Duration _elapsed = Duration.zero;
 
   bool get ticking;
   void tick(Duration elapsed);
 
   void syncTicker() {
     if (attached && ticking) {
-      _ticker ??= Ticker((e) {
-        _elapsed = e;
-        tick(e);
-      });
-      if (!_ticker!.isActive) {
-        _elapsed = Duration.zero;
-        _ticker!.start();
-      }
+      _ticker ??= Ticker(tick);
+      if (!_ticker!.isActive) _ticker!.start();
     } else if (_ticker?.isActive ?? false) {
       _ticker!.stop();
     }
@@ -440,12 +613,12 @@ class RenderLoops extends RenderPose with _Ticking {
   @override
   void tick(Duration elapsed) => _show(elapsed);
 
-  /// The run phase (0–1) of [l] [elapsed] after it started.
+  /// The run phase (0–1) of [l] [elapsed] after it started: from its
+  /// [api.LoopAnimation.startFraction] of a whole loop, after its delay.
   static double phase(api.LoopAnimation l, Duration elapsed) {
-    final ms = elapsed.inMicroseconds / 1000 - l.delay;
-    if (ms <= 0) return 0;
+    final ms = math.max(0.0, elapsed.inMicroseconds / 1000 - l.delay);
     final d = math.max(1, l.duration);
-    final runs = ms / d;
+    final runs = ms / d + l.startFraction * (l.reverse ? 2 : 1);
     final f = runs - runs.floorToDouble();
     return l.reverse && runs.floor().isOdd ? 1 - f : f;
   }
@@ -476,16 +649,28 @@ class RenderMotion extends RenderPose with _Ticking {
   bool _entered = false;
 
   /// The running transition: from [_from] to [_to] since [_since] (its
-  /// delay not yet counted).
+  /// delay not yet counted), [_offset] ms into its run (a loop's phase).
   api.Motion? _from;
   api.Motion _to = api.Motion.none;
   Duration _since = Duration.zero;
+  double _offset = 0;
   int _runs = 0;
+
+  /// Whether the loop's current run goes from its values back to its start.
+  bool _backward = false;
+
+  /// The motion's own time: the ticker's, less what it spent paused.
+  Duration _clock = Duration.zero;
 
   /// The pose drawn last (a new transition starts there).
   api.Motion _shown = api.Motion.none;
   double _turns = 0, _speed = 0;
   Duration _lastTick = Duration.zero;
+
+  /// Where the node last was on its path and the way it moved, for
+  /// [api.Motion.orientToPath] under keyframes that push it off the path.
+  Offset? _lastPathPosition;
+  double? _pathHeading;
 
   set animates(bool v) {
     if (v == _animates) return;
@@ -499,35 +684,67 @@ class RenderMotion extends RenderPose with _Ticking {
     if (v == _motion) return;
     final old = _motion;
     _motion = v;
-    _to = v;
-    if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
-      _start(_shown, v, at: _elapsed);
-    } else if (_from != null) {
+    if (_animates && _entered && _loops(v)) {
+      if (!_loops(old) ||
+          old.loop != v.loop ||
+          old.repeat != v.repeat ||
+          old.duration != v.duration ||
+          old.phase != v.phase ||
+          _from == null && !_samePose(old, v)) {
+        _startLoop();
+      } else if (_from != null) {
+        // The loop runs on (or holds, paused) toward the new values.
+        _setLoopEnds();
+      }
+    } else {
       _to = v;
+      if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
+        _start(_shown, v, at: _clock);
+      }
     }
     _show();
     syncTicker();
   }
+
+  static bool _loops(api.Motion m) => m.loop != api.MotionLoop.none && m.duration > 0;
 
   static bool _samePose(api.Motion a, api.Motion b) =>
       api.Motion.properties.every((p) => p == 'spin' || a.valueOf(p) == b.valueOf(p)) && a.path == b.path;
 
   static int _transitionMs(api.Motion m) => m.curve == api.AnimationCurve.spring ? 1 : m.duration;
 
-  void _start(api.Motion from, api.Motion to, {required Duration at}) {
+  void _start(api.Motion from, api.Motion to, {required Duration at, double offset = 0}) {
     _from = from;
     _to = to;
     _since = at;
+    _offset = offset;
+  }
+
+  /// Starts the loop over, at its phase.
+  void _startLoop() {
+    final m = _motion;
+    _runs = 0;
+    _backward = false;
+    final phase = m.phase.isFinite ? m.phase - m.phase.floorToDouble() : 0.0;
+    _start(m.loopStart, m, at: _clock, offset: phase * m.duration);
+  }
+
+  void _setLoopEnds() {
+    final start = _motion.loopStart;
+    _from = _backward ? _motion : start;
+    _to = _backward ? start : _motion;
   }
 
   @override
   void attach(PipelineOwner owner) {
     if (!_entered && _animates) {
       final m = _motion;
-      // Entering (or looping): from the entrance start to the values.
-      final loops = m.loop != api.MotionLoop.none && m.duration > 0;
-      if (loops || m.hasEntrance && _transitionMs(m) > 0) _start(m.entranceStart, m, at: Duration.zero);
-      _runs = 0;
+      // Looping from its start, at its phase; or entering.
+      if (_loops(m)) {
+        _startLoop();
+      } else if (m.hasEntrance && _transitionMs(m) > 0) {
+        _start(m.entranceStart, m, at: _clock);
+      }
     }
     _entered = true;
     super.attach(owner);
@@ -535,23 +752,26 @@ class RenderMotion extends RenderPose with _Ticking {
   }
 
   @override
-  bool get ticking => _animates && (_from != null || _motion.spin != 0 || _speed != 0);
+  bool get ticking => _animates && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
 
   @override
   void tick(Duration elapsed) {
     if (elapsed < _lastTick) _lastTick = Duration.zero;
-    final dt = (elapsed - _lastTick).inMicroseconds / 1e6;
+    final step = elapsed - _lastTick;
+    final dt = step.inMicroseconds / 1e6;
     _lastTick = elapsed;
-    // Spin reaches its speed over its ramp.
-    final target = _motion.spin;
+    // A paused motion holds its time; its spin winds down.
+    if (!_motion.paused) _clock += step;
+    final target = _motion.paused ? 0.0 : _motion.spin;
     if (_speed != target) {
       final perSecond = _motion.spinRamp <= 0
           ? double.infinity
           : math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
-      final step = math.min((target - _speed).abs(), perSecond * dt);
-      _speed += (target - _speed).sign * step;
+      final change = math.min((target - _speed).abs(), perSecond * dt);
+      _speed += (target - _speed).sign * change;
+      if ((target - _speed).abs() < 0.002) _speed = target;
     }
-    _turns += _speed * dt;
+    _turns = (_turns + _speed * dt) % 1;
     _show();
     if (!ticking) _ticker?.stop();
   }
@@ -574,24 +794,32 @@ class RenderMotion extends RenderPose with _Ticking {
   void _show() {
     var m = _motion;
     final from = _from;
+    var moving = false;
     if (_animates && from != null) {
-      final ms = (_elapsed - _since).inMicroseconds / 1000 - m.delay;
-      final t = ms <= 0 ? 0.0 : _eased(ms);
-      final done = ms > 0 && (m.curve == api.AnimationCurve.spring ? t == 1 : ms >= m.duration);
-      m = api.Motion.lerp(from, _to, done ? 1 : t);
+      moving = true;
+      var ms = (_clock - _since).inMicroseconds / 1000 - m.delay;
+      ms = math.max(0.0, ms) + _offset;
+      final bool done;
+      if (m.loop == api.MotionLoop.swing && _loops(m)) {
+        // Around rest on a sine, linear in time.
+        final runs = ms / math.max(1, m.duration);
+        done = runs >= 1;
+        m = swingPose(from, _to, done ? 0 : math.sin(2 * math.pi * runs));
+      } else {
+        final t = ms <= 0 ? 0.0 : _eased(ms);
+        done = ms > 0 && (m.curve == api.AnimationCurve.spring ? t == 1 : ms >= m.duration);
+        m = _between(from, _to, done ? 1 : t);
+      }
       if (done) {
-        final loops = _motion.loop != api.MotionLoop.none && _motion.duration > 0;
-        if (loops && (_motion.repeat == 0 || ++_runs < _motion.repeat)) {
+        if (_loops(_motion) && (_motion.repeat == 0 || ++_runs < _motion.repeat)) {
           // The next run, without the delay: again, or back.
-          final next = _elapsed - Duration(milliseconds: _motion.delay);
-          if (_motion.loop == api.MotionLoop.reverse) {
-            _start(_to, from, at: next);
-          } else {
-            _start(from, _to, at: next);
-          }
+          final next = _clock - Duration(milliseconds: _motion.delay);
+          if (_motion.loop == api.MotionLoop.reverse) _backward = !_backward;
+          _start(_from!, _to, at: next);
+          _setLoopEnds();
         } else {
           // A counted loop that's done rests.
-          if (loops) m = _motion.atRest;
+          if (_loops(_motion)) m = _motion.atRest;
           _from = null;
         }
       }
@@ -599,12 +827,33 @@ class RenderMotion extends RenderPose with _Ticking {
     _shown = m;
     var shown = m;
     if (m.hasPath) {
-      final at = MeasuredPath.of(m.path!)?.at(m.pathProgress);
+      final progress = m.pathWrap ? api.Motion.wrapProgress(m.pathProgress) : m.pathProgress;
+      final at = MeasuredPath.of(m.path!)?.at(
+        progress,
+        byArea: m.pathPacing == api.MotionPathPacing.area,
+        focus: Offset(m.pathFocusX, m.pathFocusY),
+      );
       if (at != null) {
+        final total = Offset(m.translateX + at.$1.dx, m.translateY + at.$1.dy);
+        // Keyframes that push the node off its path turn it too: its nose
+        // follows where it actually goes.
+        var heading = at.$2;
+        final pushed =
+            m.orientToPath && moving && m.keyframes.any((k) => k.translateX != null || k.translateY != null);
+        if (pushed) {
+          final previous = _lastPathPosition;
+          if (previous != null && (total - previous).distance > 0.25) _pathHeading = (total - previous).direction;
+          _lastPathPosition = total;
+          heading = _pathHeading ?? heading;
+        } else {
+          _lastPathPosition = null;
+          _pathHeading = null;
+        }
+        final turn = m.orientUpright ? api.Motion.uprightAngle(heading) : heading;
         shown = shown
-            .withValue('translateX', m.translateX + at.$1.dx)
-            .withValue('translateY', m.translateY + at.$1.dy)
-            .withValue('rotate', m.orientToPath ? m.rotate + at.$2 * 180 / math.pi : m.rotate);
+            .withValue('translateX', total.dx)
+            .withValue('translateY', total.dy)
+            .withValue('rotate', m.orientToPath ? m.rotate + turn * 180 / math.pi : m.rotate);
       }
     }
     transform = motionMatrix(shown, spinTurns: _turns);
@@ -614,6 +863,123 @@ class RenderMotion extends RenderPose with _Ticking {
     blur = shown.blur;
     backfaceHidden = shown.backfaceHidden;
   }
+
+  /// [t] (eased) of the way from [a] to [b]: bent by [api.Motion.arc], the
+  /// short way round a [api.Motion.pathWrap] path.
+  static api.Motion _between(api.Motion a, api.Motion b, double t) {
+    var m = api.Motion.lerp(a, b, t);
+    if (b.arc != 0) {
+      // On a quadratic curve whose middle is `arc` of the distance off the
+      // line, to the right of the way it goes: (-dy, dx) · arc · 2t(1 − t).
+      final bend = b.arc * 2 * t * (1 - t);
+      for (final (x, y) in const [('translateX', 'translateY'), ('shiftX', 'shiftY')]) {
+        if (b.keyframes.any((k) => k.valueOf(x) != null || k.valueOf(y) != null)) continue;
+        final dx = b.valueOf(x) - a.valueOf(x), dy = b.valueOf(y) - a.valueOf(y);
+        m = m.withValue(x, m.valueOf(x) - dy * bend).withValue(y, m.valueOf(y) + dx * bend);
+      }
+    }
+    if (b.pathWrap) {
+      final from = api.Motion.wrapProgress(a.pathProgress);
+      var to = api.Motion.wrapProgress(b.pathProgress);
+      if (to - from > 0.5) to -= 1;
+      if (from - to > 0.5) to += 1;
+      m = m.withValue('pathProgress', api.Motion.wrapProgress(from + (to - from) * t));
+    }
+    return m;
+  }
+}
+
+/// A [api.MotionLoop.swing] at [s] (−1–1 on its sine): [rest] ± ([values] −
+/// [rest]), keyframes aside.
+api.Motion swingPose(api.Motion rest, api.Motion values, double s) {
+  var m = values;
+  for (final p in api.Motion.properties) {
+    if (p == 'spin') continue;
+    m = m.withValue(p, rest.valueOf(p) + (values.valueOf(p) - rest.valueOf(p)) * s);
+  }
+  return m;
+}
+
+/// [api.MotionShimmer]'s band of light swept across what the node paints
+/// (blended over its own pixels only), over and over in a running app;
+/// still, halfway across, on the design canvas.
+class RenderShimmer extends RenderShaderMask {
+  RenderShimmer() : super(shaderCallback: _clear, blendMode: BlendMode.srcATop);
+
+  static Shader _clear(Rect bounds) => ui.Gradient.linear(Offset.zero, const Offset(1, 0), const [
+    Color(0x00000000),
+    Color(0x00000000),
+  ]);
+
+  api.MotionShimmer _shimmer = const api.MotionShimmer();
+  set shimmer(api.MotionShimmer v) {
+    if (v == _shimmer) return;
+    _shimmer = v;
+    _sync();
+  }
+
+  bool _animates = false;
+  set animates(bool v) {
+    if (v == _animates) return;
+    _animates = v;
+    _sync();
+  }
+
+  Ticker? _ticker;
+  double _t = 0.5;
+
+  Shader _shader(Rect bounds) => shimmerShader(_shimmer, _t, bounds);
+
+  void _sync() {
+    shaderCallback = _shader;
+    if (attached && _animates) {
+      _ticker ??= Ticker((e) {
+        final f = e.inMicroseconds / 1000 / math.max(1, _shimmer.duration);
+        _t = f - f.floorToDouble();
+        markNeedsPaint();
+      });
+      if (!_ticker!.isActive) _ticker!.start();
+    } else {
+      _ticker?.stop();
+      _t = 0.5;
+    }
+    markNeedsPaint();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _sync();
+  }
+
+  @override
+  void detach() {
+    _ticker?.stop();
+    super.detach();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.dispose();
+    _ticker = null;
+    super.dispose();
+  }
+}
+
+/// The shader of [s]'s band [t] (0–1) of the way across [bounds]: from
+/// fully off one side to fully off the other, along its angle.
+Shader shimmerShader(api.MotionShimmer s, double t, Rect bounds) {
+  final color = s.color.flutter;
+  final glow = color.withValues(alpha: color.a * s.strength.clamp(0.0, 1.0));
+  final clear = color.withValues(alpha: 0);
+  final half = math.max(0.001, s.width / 2);
+  final centre = -half + t * (1 + 2 * half);
+  final a = s.angle * math.pi / 180;
+  final dir = Offset(math.cos(a), math.sin(a));
+  final extent = (bounds.width * dir.dx).abs() + (bounds.height * dir.dy).abs();
+  final mid = bounds.center;
+  Offset at(double f) => mid + dir * ((f - 0.5) * extent);
+  return ui.Gradient.linear(at(centre - half), at(centre + half), [clear, glow, clear], const [0, 0.5, 1]);
 }
 
 /// The transform [m] draws (without its shift), plus [spinTurns] turns.
@@ -713,4 +1079,264 @@ class StrokePathPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(StrokePathPainter oldDelegate) => oldDelegate.path != path;
+}
+
+// --- 3D: flip cards and tilt ----------------------------------------------------
+
+/// The flip card and tilt of [n], and its face of a flip card around it:
+/// inside the motion.
+void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
+  final be = n.behaviours;
+  // A face of the flip card it sits in: the front hides when turned away,
+  // the back is turned over in advance.
+  final parentId = b.tree.source.parentOf(b.id);
+  final parent = parentId == null ? null : b.tree.source.node(parentId);
+  if (parent?.behaviours.flip case final api.FlipCard card) {
+    final face = parent!.children.indexOf(b.id);
+    if (face == 0 || face == 1) {
+      final back = face == 1;
+      chain.add(
+        b.obtain<RenderPose>('flipFace', RenderPose.new)
+          ..transform = !back
+              ? Matrix4.identity()
+              : card.axis == api.FlipAxis.y
+              ? Matrix4.rotationY(math.pi)
+              : Matrix4.rotationX(math.pi)
+          ..origin = Alignment.center
+          ..backfaceHidden = true,
+      );
+    }
+  }
+  if (be.tilt case final api.Tilt tilt) {
+    final pose = b.obtain<RenderTilt>('tilt', RenderTilt.new)..tilt = tilt;
+    if (animates && tilt.hover) {
+      chain.add(
+        b.obtain<RenderMouseRegion>('tiltHover', RenderMouseRegion.new)
+          ..onHover = ((e) => pose.track(e.localPosition))
+          ..onExit = ((_) => pose.release()),
+      );
+    }
+    if (animates && tilt.drag) {
+      chain.add(
+        b.obtain<RenderPointerListener>('tiltDrag', RenderPointerListener.new)
+          ..onPointerDown = ((e) => pose.track(e.localPosition))
+          ..onPointerMove = ((e) => pose.track(e.localPosition))
+          ..onPointerUp = ((_) => pose.release())
+          ..onPointerCancel = ((_) => pose.release()),
+      );
+    }
+    chain.add(pose..animates = animates);
+  }
+  if (be.flip case final api.FlipCard flip) {
+    chain.add(
+      b.obtain<RenderFlip>('flip', RenderFlip.new)
+        ..animates = animates
+        ..set(flip, be.motion),
+    );
+  }
+}
+
+/// A two-sided card ([api.FlipCard]) turned 0° or 180° about its axis with
+/// its motion's perspective, duration, curve and keyframed scale. A running
+/// app turns it when `flipped` changes, and on a tap with `tapToFlip`.
+// TODO(v2-port): drag to flip with its spring, writing `variable`, and the
+// `${flip.*}` values its children read (SDK 8.x's NodeFlip).
+class RenderFlip extends RenderPose with _Ticking {
+  api.FlipCard _flip = const api.FlipCard();
+  api.Motion? _motion;
+  bool _animates = false;
+  bool? _target;
+
+  /// The turn: 0 front, 1 back; while [_turning], from [_start] since
+  /// [_since] (the first tick after it started).
+  double _progress = 0, _start = 0;
+  bool _turning = false;
+  Duration? _since;
+  TapGestureRecognizer? _tap;
+
+  set animates(bool v) {
+    if (v == _animates) return;
+    _animates = v;
+    if (!v) _settle();
+    syncTicker();
+  }
+
+  void set(api.FlipCard flip, api.Motion? motion) {
+    _flip = flip;
+    _motion = motion;
+    if (_target == null) {
+      _target = flip.flipped;
+      _settle();
+    } else if (flip.flipped != _target) {
+      turnTo(flip.flipped);
+    } else {
+      _show();
+    }
+  }
+
+  void _settle() {
+    _progress = (_target ?? false) ? 1 : 0;
+    _turning = false;
+    _show();
+  }
+
+  /// Turns to the back ([back]) or the front.
+  void turnTo(bool back) {
+    _target = back;
+    if (!_animates || !attached) return _settle();
+    _start = _progress;
+    _turning = true;
+    _since = null;
+    syncTicker();
+  }
+
+  @override
+  bool get ticking => _animates && _turning;
+
+  @override
+  void tick(Duration elapsed) {
+    final since = _since ??= elapsed;
+    final ms = (elapsed - since).inMicroseconds / 1000;
+    final d = api.FlipCard.durationOf(_motion);
+    final curve = _motion?.curve ?? api.AnimationCurve.easeInOutCubic;
+    final to = (_target ?? false) ? 1.0 : 0.0;
+    if (ms >= d) {
+      _progress = to;
+      _turning = false;
+    } else {
+      _progress = _start + (to - _start) * curve.transform(ms / d);
+    }
+    _show();
+    if (!ticking) _ticker?.stop();
+  }
+
+  void _show() {
+    final t = _progress;
+    final keyframes = _motion?.keyframes ?? const <api.MotionKeyframe>[];
+    final scale = api.Motion.keyframed(keyframes, 'scale', 1, 1, t.clamp(0.0, 1.0)) ?? 1;
+    final turn = api.Motion(
+      rotateY: _flip.axis == api.FlipAxis.y ? t * 180 : 0,
+      rotateX: _flip.axis == api.FlipAxis.x ? -t * 180 : 0,
+      perspective: _motion?.perspective ?? 1,
+      scale: scale,
+    );
+    transform = motionMatrix(turn);
+    origin = Alignment.center;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => _animates && _flip.tapToFlip;
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    final hit = super.hitTest(result, position: position);
+    // The card takes a tap anywhere on it, whichever face shows.
+    if (hitTestSelf(position) && size.contains(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return hit;
+  }
+
+  @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is! PointerDownEvent || !_animates || !_flip.tapToFlip) return;
+    (_tap ??= TapGestureRecognizer(debugOwner: this)..onTap = () => turnTo(!(_target ?? false))).addPointer(event);
+  }
+
+  @override
+  void dispose() {
+    _tap?.dispose();
+    super.dispose();
+  }
+}
+
+/// Tilts its node in 3D toward the pointer ([api.Tilt]): the edge under it
+/// tips away, the node lifts while the pointer is over it, and it settles
+/// back over the tilt's reset when the pointer leaves.
+// TODO(v2-port): the `${tilt.*}` values its children read.
+class RenderTilt extends RenderPose with _Ticking {
+  api.Tilt _tilt = const api.Tilt();
+  set tilt(api.Tilt v) {
+    if (v == _tilt) return;
+    _tilt = v;
+    _show();
+  }
+
+  bool _animates = false;
+  set animates(bool v) {
+    if (v == _animates) return;
+    _animates = v;
+    if (!v) {
+      _from = _to = Offset.zero;
+      _activeFrom = _activeTo = 0;
+      _moving = false;
+    }
+    _show();
+    syncTicker();
+  }
+
+  Offset _from = Offset.zero, _to = Offset.zero;
+  double _activeFrom = 0, _activeTo = 0, _t = 1;
+  bool _reset = false, _moving = false;
+  Duration? _since;
+
+  double get _eased => (_reset ? _tilt.curve : api.AnimationCurve.easeOut).transform(_t);
+  Offset get _position => Offset.lerp(_from, _to, _eased)!;
+  double get _active => _activeFrom + (_activeTo - _activeFrom) * _eased;
+
+  void _moveTo(Offset target, double active, {required bool reset}) {
+    _from = _position;
+    _activeFrom = _active;
+    _to = target;
+    _activeTo = active;
+    _reset = reset;
+    _t = 0;
+    _moving = true;
+    _since = null;
+    syncTicker();
+  }
+
+  /// The pointer at [local] in the node's box.
+  void track(Offset local) {
+    if (!hasSize || size.isEmpty) return;
+    _moveTo(
+      Offset(
+        (local.dx / size.width * 2 - 1).clamp(-1.0, 1.0),
+        (local.dy / size.height * 2 - 1).clamp(-1.0, 1.0),
+      ),
+      1,
+      reset: false,
+    );
+  }
+
+  void release() => _moveTo(Offset.zero, 0, reset: true);
+
+  @override
+  bool get ticking => _animates && _moving;
+
+  @override
+  void tick(Duration elapsed) {
+    final since = _since ??= elapsed;
+    final d = _reset ? math.max(1, _tilt.reset) : 90;
+    _t = ((elapsed - since).inMicroseconds / 1000 / d).clamp(0.0, 1.0);
+    if (_t >= 1) _moving = false;
+    _show();
+    if (!ticking) _ticker?.stop();
+  }
+
+  void _show() {
+    final max = _tilt.max, p = _position, active = _active;
+    transform = motionMatrix(
+      api.Motion(
+        rotateX: p.dy * max.rotateX,
+        rotateY: -p.dx * max.rotateY,
+        perspective: max.perspective,
+        scale: 1 + (max.scale - 1) * active,
+        translateX: max.translateX * active,
+        translateY: max.translateY * active,
+      ),
+    );
+    origin = Alignment(max.originX, max.originY);
+  }
 }
