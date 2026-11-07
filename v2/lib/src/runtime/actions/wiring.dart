@@ -65,6 +65,9 @@ class TreeReactions implements NodeInteractions {
     state.update(n, types);
     final pointer = types.intersection(TriggerType.pointer);
     if (selfTappedTypes.contains(n.type)) pointer.remove(TriggerType.click);
+    // A node with a drag track drags itself (render/drag_track.dart fires
+    // its dragEnd).
+    if (n.behaviours.drag?.track != null) pointer.removeAll(const {TriggerType.drag, TriggerType.dragEnd});
     final viewport = types.contains(TriggerType.enterViewport) || types.contains(TriggerType.exitViewport);
     if (pointer.isEmpty && !viewport) return;
     chain.add(box.obtain<RenderReactions>('reactions', RenderReactions.new)

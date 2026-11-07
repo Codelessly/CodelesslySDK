@@ -18,6 +18,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'convert.dart';
+import 'drag_track.dart';
+import 'node_tree.dart' show NodeBox;
 import 'paint/svg_path.dart';
 import 'recipe.dart';
 
@@ -26,21 +28,23 @@ import 'recipe.dart';
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviours;
   if (be.drag?.track case final api.DragTrack track) {
-    // At its bound value (`drag.track.value`), else its default or start;
-    // parked there when that's out of range.
-    // TODO(v2-port): read the track's variable, and port SDK 8.x's
-    // NodeDragTrack interaction (follow, detents, fine mode, momentum,
-    // settle, keyboard, wheel, double tap) to a running app.
+    // At its value (`drag.track.value`, else its variable's, else its
+    // default or start; parked when out of range or empty), and in a
+    // running app dragged along the track (render/drag_track.dart).
+    final box = b is NodeBox ? b : null;
+    final reads = track.value == null && track.hasVariable && box?.tree.binder?.scope != null;
     final p = track.restProgressOf(track.value ?? track.defaultValue ?? track.min);
-    final moves = track.relative ||
+    final moves = animates ||
+        reads ||
+        track.parkedProgress != null ||
+        track.relative ||
         track.units == api.DragTrackUnits.parent ||
         track.usesViewBox ||
         trackPose(track, p) != null;
     if (moves) {
       chain.add(
-        b.obtain<RenderTrackPose>('trackPose', RenderTrackPose.new)
-          ..track = track
-          ..progress = p,
+        b.obtain<RenderDragTrack>('trackPose', RenderDragTrack.new)
+          ..configure(box, track, enabled: be.drag!.enabled, interactive: animates),
       );
     }
   }
@@ -320,6 +324,7 @@ Matrix4? trackPose(api.DragTrack track, double progress) => TrackGeometry(track)
 /// from its laid-out size and its parent's (SDK 8.x's `TrackPose`).
 class RenderTrackPose extends RenderPose {
   api.DragTrack _track = const api.DragTrack();
+  api.DragTrack get track => _track;
   set track(api.DragTrack v) {
     if (v == _track) return;
     _track = v;
@@ -327,6 +332,7 @@ class RenderTrackPose extends RenderPose {
   }
 
   double _progress = 0;
+  double get progress => _progress;
   set progress(double v) {
     if (v == _progress) return;
     _progress = v;
@@ -352,7 +358,9 @@ class RenderTrackPose extends RenderPose {
     }
   }
 
-  void _pose() {
+  /// Works the pose out from the sizes now (while painting or hit
+  /// testing: set without marking), and gives the geometry it used.
+  TrackGeometry pose() {
     final frame = _measuresParent ? _frame() : null;
     final geometry = TrackGeometry(
       _track,
@@ -360,10 +368,12 @@ class RenderTrackPose extends RenderPose {
       parent: frame?.$1,
       rest: frame?.$2 ?? Offset.zero,
     );
-    // Worked out while painting or hit testing: set without marking.
     _transform = geometry.poseAt(_progress) ?? Matrix4.identity();
     _origin = Alignment.center;
+    return geometry;
   }
+
+  void _pose() => pose();
 
   @override
   void paint(PaintingContext context, Offset offset) {

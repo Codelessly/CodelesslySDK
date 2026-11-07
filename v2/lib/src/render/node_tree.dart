@@ -360,9 +360,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     super.paint(context, offset);
   }
 
+  /// Takes a hit outside the box's size (a drag track's area or hit area,
+  /// beyond its node); set by the node's layers on each apply.
+  bool Function(BoxHitTestResult result, Offset position)? outsideHitTest;
+
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return false;
+    final outside = outsideHitTest;
+    if (outside != null && hasSize && !size.contains(position)) return outside(result, position);
     return super.hitTest(result, position: position);
   }
 
@@ -503,6 +509,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     _filledStacks.clear();
 
     _parentSideWrappers(n, chain);
+    outsideHitTest = null;
 
     // Outer layers, outermost first: margin, constraints, motion and scale
     // (render/behaviours.dart), rotation, loops, opacity, blurs and stroke
