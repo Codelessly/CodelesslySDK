@@ -78,6 +78,8 @@ export 'src/render/node_tree.dart' show NodeTree, NodeBox, NodeTreeObserver, Slo
 export 'src/render/convert.dart' show textStyle;
 export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';
+export 'src/render/hero.dart' show HeroMarkPaint, HeroMarks, RenderHeroMark;
+export 'src/render/play.dart' show EffectPlayers, FlightRegistry, RenderEffects, RenderFlightBox, effectTransformAt;
 export 'src/render/recipe.dart' show NodeChild;
 export 'src/render/source.dart';
 export 'src/widgets/media.dart' show ExternalComponents;
