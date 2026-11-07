@@ -9,7 +9,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_api_v2/codelessly_api.dart'
-    show Node, SizeFit, CollectionScrollProps, ListViewProps, GridViewProps, PageViewProps, ScrollProps;
+    show Node, SizeFit, CollectionScrollProps, ListViewProps, GridViewProps, PageViewProps, ScrollProps, TableViewProps;
 import 'package:flutter/rendering.dart';
 
 import '../render/convert.dart';
@@ -18,6 +18,7 @@ import '../render/node_tree.dart';
 import '../render/recipe.dart';
 import 'collections_islands.dart';
 import 'collections_layout.dart';
+import 'collections_pagination.dart';
 
 /// Recipes for the collections group, by node type.
 final Map<String, WidgetRecipe> collectionsRecipes = {
@@ -28,6 +29,8 @@ final Map<String, WidgetRecipe> collectionsRecipes = {
   'tabBar': tabBarRecipe,
   'accordion': accordionRecipe,
   'expansionTile': expansionTileRecipe,
+  'pagination': paginationRecipe,
+  'tableView': _tableView,
 };
 
 typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>;
@@ -394,5 +397,85 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..pageMotion = n.prop(PageViewProps.pageMotion)
     ..changed();
   _syncItems(b, n, view, itemId, last - first + 1, first: first);
+  chain.add(view);
+}
+
+/// The most cells a table builds at rest along an axis beyond its design
+/// size (none past it are shown).
+const int _maxTableSpans = 200;
+
+/// A table view at rest: its fit box → the cells that fit its design size,
+/// each a template slot repeated (SDK 8.x's `TableView.builder`). Rows are
+/// [TableViewProps.rowCount] (bound data is a runtime matter).
+void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
+  final design = Size(n.layout.width.value, n.layout.height.value);
+  chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, design));
+  String? slot(String name) => n.slots[name].let((id) => id != null && b.nodeOf(id) != null ? id : null);
+  final cell = slot(TableViewProps.cell), columnHeader = slot(TableViewProps.columnHeader);
+  final rowHeader = slot(TableViewProps.rowHeader), corner = slot(TableViewProps.corner);
+  final headerRow = columnHeader != null, headerColumn = rowHeader != null;
+  final columns = n.prop(TableViewProps.columns);
+  final rowCount = math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
+
+  // The spans that show in the design size (a cell past it is cut off).
+  List<double> fit(List<double> all, double extent) {
+    final out = <double>[];
+    var at = 0.0;
+    for (final e in all) {
+      if (at >= extent || out.length >= _maxTableSpans) break;
+      out.add(e);
+      at += e;
+    }
+    return out;
+  }
+
+  final columnWidths = fit([
+    if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
+    for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth),
+  ], design.width);
+  final rowHeights = fit([
+    if (headerRow) n.prop(TableViewProps.headerHeight),
+    for (var i = 0; i < math.min(rowCount, _maxTableSpans); i++) n.prop(TableViewProps.rowHeight),
+  ], design.height);
+
+  final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
+  final firsts = <String>{};
+  void add(String? id, int r, int c) {
+    if (id == null) return;
+    ids.add(id);
+    // The first of each template in the table's own scope (what tools
+    // measure), the others in their cell's.
+    instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
+    cells.add((r, c));
+  }
+
+  for (var r = 0; r < rowHeights.length; r++) {
+    for (var c = 0; c < columnWidths.length; c++) {
+      final inHeaderRow = headerRow && r == 0, inHeaderColumn = headerColumn && c == 0;
+      add(
+          inHeaderRow && inHeaderColumn
+              ? corner
+              : inHeaderRow
+                  ? columnHeader
+                  : inHeaderColumn
+                      ? rowHeader
+                      : cell,
+          r,
+          c);
+    }
+  }
+  final lineColor = n.prop(TableViewProps.gridLineColor), lineWidth = n.prop(TableViewProps.gridLineWidth);
+  final view = b.obtain<RenderTableItems>('table', RenderTableItems.new)
+    ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
+    ..columnWidths = columnWidths
+    ..rowHeights = rowHeights
+    ..cells = cells
+    ..headerRow = headerRow
+    ..headerColumn = headerColumn
+    ..headerColor = n.prop(TableViewProps.headerColor)?.flutter
+    ..stripeColor = n.prop(TableViewProps.stripeColor)?.flutter
+    ..gridLine = lineColor.alpha == 0 || lineWidth <= 0 ? null : BorderSide(color: lineColor.flutter, width: lineWidth)
+    ..changed();
+  b.syncChildren(view as _Container, ids, Slot(SlotKind.root, n), instances: instances);
   chain.add(view);
 }
