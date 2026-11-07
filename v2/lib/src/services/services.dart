@@ -17,6 +17,7 @@ import 'cloud/backend.dart';
 import 'cloud/database.dart';
 import 'links.dart';
 import 'purchases.dart';
+import '../scripting/script_runner.dart';
 import 'scripts.dart';
 import 'sound.dart';
 import 'speech.dart';
@@ -70,7 +71,7 @@ class Services implements CodelesslyServices {
         sound = sound ?? SoundService(),
         speech = speech ?? SpeechService(),
         links = links ?? const PlatformLinkOpener(),
-        scripts = scripts ?? const NoScriptRunner();
+        scripts = scripts ?? const SandboxScriptRunner();
 
   /// What the publish model configures (APIs, paywall setup); the app
   /// shell sets it when a publish model loads.
@@ -110,7 +111,8 @@ class Services implements CodelesslyServices {
   final SpeechService speech;
   final LinkOpener links;
 
-  /// Runs scripts (run script actions); none by default.
+  /// Runs scripts (run script actions): the platform's sandbox by default
+  /// (no engine without package:codelessly_quickjs on a device).
   final ScriptRunner scripts;
 
   /// Calls the API [apiId] of [config] with input values [params] (already
