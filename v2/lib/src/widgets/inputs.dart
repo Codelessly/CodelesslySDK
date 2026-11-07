@@ -41,6 +41,7 @@ import '../runtime/actions/text_fields.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
 import 'inputs_shapes.dart';
+import 'inputs_toggle.dart';
 
 /// Recipes for the inputs group, by node type.
 final Map<String, WidgetRecipe> inputsRecipes = {
@@ -692,6 +693,18 @@ class _SwitchIslandState extends State<_SwitchIsland> {
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
+    // Material's switch can't cast a thumb shadow or take a thumb of another
+    // size: a switch that asks for either is a plain toggle.
+    if (drawsPlainToggle(n)) {
+      return PlainToggle(
+        node: n,
+        value: value,
+        onChanged: (v) {
+          setState(() => value = v);
+          _fire(context, 'changed', v);
+        },
+      );
+    }
     final fillTrack = n.prop(SwitchProps.fillTrack);
     final active = _color(n.prop(SwitchProps.activeTrackOutlineColor));
     final inactive = _color(n.prop(SwitchProps.inactiveTrackOutlineColor));
