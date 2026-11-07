@@ -23,6 +23,7 @@ import 'package:flutter/services.dart';
 import '../runtime/actions/context.dart' show setVariableIn, variableOf;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/scopes.dart';
+import '../runtime/gestures/physics.dart';
 import 'behaviours.dart' show RenderPose;
 import 'convert.dart';
 import 'node_tree.dart';
@@ -466,8 +467,8 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     if (view == null) return (none, none);
     final (hw, hh) = _halfExtents(pose);
     final c = _center;
-    final (xlo, xhi) = boundsRange(_model.bounds, c.dx + pose.x, hw, view.left, view.right);
-    final (ylo, yhi) = boundsRange(_model.bounds, c.dy + pose.y, hh, view.top, view.bottom);
+    final (xlo, xhi) = boundsRange(bounds: _model.bounds, center: c.dx + pose.x, half: hw, viewLo: view.left, viewHi: view.right);
+    final (ylo, yhi) = boundsRange(bounds: _model.bounds, center: c.dy + pose.y, half: hh, viewLo: view.top, viewHi: view.bottom);
     return ((pose.x + xlo, pose.x + xhi), (pose.y + ylo, pose.y + yhi));
   }
 
@@ -1107,133 +1108,4 @@ class _Handle {
   final double qx, qy;
   final MouseCursor cursor;
   final bool round;
-}
-
-// --- release physics (SDK 8.x's gesture_physics.dart, the part this uses) --------------
-
-/// The spring [physics] settles on.
-SpringDescription springOf(api.GesturePhysics physics) {
-  if (physics.usesBounce) {
-    return SpringDescription.withDurationAndBounce(
-      duration: Duration(milliseconds: math.max(1, physics.duration ?? 500)),
-      bounce: (physics.bounce ?? 0).clamp(-0.95, 1.0),
-    );
-  }
-  return SpringDescription(
-    mass: physics.mass <= 0 ? 1 : physics.mass,
-    stiffness: physics.stiffness <= 0 ? 380 : physics.stiffness,
-    damping: physics.damping < 0 ? 0 : physics.damping,
-  );
-}
-
-const Tolerance _tolerance = Tolerance(distance: 0.01, velocity: 1);
-
-/// [value] held back past [lo] and [hi] like a rubber band, [overscroll]
-/// (0–1) of the way at first.
-double rubberBand(double value, double lo, double hi, double overscroll) {
-  final k = overscroll.clamp(0.0, 1.0);
-  if (k >= 1) return value;
-  double band(double excess) {
-    if (k <= 0) return 0;
-    const reach = 240.0;
-    return (1 - 1 / (excess * k / reach + 1)) * reach;
-  }
-
-  if (value < lo) return lo - band(lo - value);
-  if (value > hi) return hi + band(value - hi);
-  return value;
-}
-
-/// The offset range a centre at [center] (half extent [half]) may move to
-/// so its box stays inside, or covers, [viewLo]..[viewHi].
-(double, double) boundsRange(api.GestureBounds bounds, double center, double half, double viewLo, double viewHi) {
-  if (bounds == api.GestureBounds.none) return (double.negativeInfinity, double.infinity);
-  final view = viewHi - viewLo;
-  final bigger = half * 2 > view + 0.001;
-  double lo, hi;
-  if (bounds == api.GestureBounds.contain && !bigger) {
-    lo = viewLo + half;
-    hi = viewHi - half;
-  } else if (bigger) {
-    lo = viewHi - half;
-    hi = viewLo + half;
-  } else {
-    lo = hi = (viewLo + viewHi) / 2;
-  }
-  return (lo - center, hi - center);
-}
-
-/// One axis of a release: a fling that slows by friction and springs back
-/// at its bounds, or a spring straight to a target.
-class AxisSettleSimulation extends Simulation {
-  AxisSettleSimulation._(this._first, this._switchAt, this._then, this.finalX) : super(tolerance: _tolerance);
-
-  factory AxisSettleSimulation.spring({
-    required api.GesturePhysics physics,
-    required double position,
-    required double velocity,
-    required double target,
-  }) => AxisSettleSimulation._(
-    SpringSimulation(springOf(physics), position, target, velocity, tolerance: _tolerance),
-    double.infinity,
-    null,
-    target,
-  );
-
-  factory AxisSettleSimulation.release({
-    required api.GesturePhysics physics,
-    required double position,
-    required double velocity,
-    double lo = double.negativeInfinity,
-    double hi = double.infinity,
-  }) {
-    if (lo > hi) lo = hi = (lo + hi) / 2;
-    if (position < lo || position > hi) {
-      return AxisSettleSimulation.spring(physics: physics, position: position, velocity: velocity, target: position < lo ? lo : hi);
-    }
-    final v = velocity.clamp(-physics.maxFlingVelocity, physics.maxFlingVelocity);
-    if (!physics.fling || v.abs() < physics.minFlingVelocity) {
-      return AxisSettleSimulation._(_Still(position), double.infinity, null, position);
-    }
-    final friction = FrictionSimulation(physics.frictionDrag, position, v, tolerance: _tolerance);
-    final end = friction.finalX;
-    if (end >= lo && end <= hi) return AxisSettleSimulation._(friction, double.infinity, null, end);
-    final edge = end < lo ? lo : hi;
-    final at = friction.timeAtX(edge);
-    if (!at.isFinite) return AxisSettleSimulation._(friction, double.infinity, null, end);
-    return AxisSettleSimulation._(
-      friction,
-      at,
-      SpringSimulation(springOf(physics), edge, edge, friction.dx(at), tolerance: _tolerance),
-      edge,
-    );
-  }
-
-  final Simulation _first;
-  final double _switchAt;
-  final Simulation? _then;
-
-  /// Where it comes to rest.
-  final double finalX;
-
-  @override
-  double x(double time) => time < _switchAt || _then == null ? _first.x(time) : _then.x(time - _switchAt);
-
-  @override
-  double dx(double time) => time < _switchAt || _then == null ? _first.dx(time) : _then.dx(time - _switchAt);
-
-  @override
-  bool isDone(double time) =>
-      time < _switchAt || _then == null ? _first.isDone(time) && _then == null : _then.isDone(time - _switchAt);
-}
-
-class _Still extends Simulation {
-  _Still(this.at);
-  final double at;
-  @override
-  double x(double time) => at;
-  @override
-  double dx(double time) => 0;
-  @override
-  bool isDone(double time) => true;
 }
