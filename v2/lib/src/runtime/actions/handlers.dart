@@ -17,6 +17,7 @@ import '../expressions/formula.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
+import 'feedback_theme.dart' show Look;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
@@ -76,15 +77,35 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _cloudFiles(a, run);
     case ShowToastAction():
       final runner = run.nested(run.result);
+      final label = run.text(a.actionLabel);
+      final offset = Look(a.style).string('offset')?.trim() ?? '';
       run.host.ui.showToast(
         a,
         message: run.text(a.message),
         title: run.text(a.title),
-        onAction: a.actions.isEmpty ? null : () => unawaited(_deferred(a.actions, runner)),
+        actionLabel: label,
+        bound: {
+          for (final e in a.variables.entries) e.key: run.evaluate(e.value),
+          if (offset.isNotEmpty) 'offset': run.evaluate(offset),
+        },
+        // The button's actions run on the chain that showed the toast,
+        // whenever it's pressed, with its `${result}` then.
+        onAction: label.trim().isEmpty ? null : () => unawaited(_deferred(a.actions, runner)),
       );
     case ConfirmAction():
-      final outcome = await run.host.ui.confirm(a, title: run.text(a.title), message: run.text(a.message), params: run.json(a.params));
-      if (outcome.values case final Object v) run.result = v;
+      final outcome = await run.host.ui.confirm(
+        a,
+        title: run.text(a.title),
+        message: run.text(a.message),
+        caption: run.text(a.caption),
+        confirmLabel: run.text(a.confirmLabel),
+        cancelLabel: run.text(a.cancelLabel),
+        bound: {for (final e in a.variables.entries) e.key: run.evaluate(e.value)},
+        params: run.json(a.params),
+      );
+      // What a dialog screen gave back (a reason typed into it) is the
+      // `${result}` its confirm actions read.
+      if (outcome.values case final Map<Object?, Object?> v when v.isNotEmpty) run.result = v;
       await run.run(outcome.confirmed ? a.actions : a.cancelActions);
     case DelayAction():
       await run.wait(Duration(milliseconds: delayMilliseconds(a, run)));

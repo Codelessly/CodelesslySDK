@@ -443,11 +443,23 @@ class RecordingUi implements ActionUi {
   }
 
   @override
-  void showToast(ShowToastAction action, {required String message, String title = '', VoidCallback? onAction}) =>
+  void showToast(ShowToastAction action,
+          {required String message,
+          String title = '',
+          String actionLabel = '',
+          Map<String, Object?> bound = const {},
+          VoidCallback? onAction}) =>
       log.add('toast $message');
 
   @override
-  Future<ConfirmOutcome> confirm(ConfirmAction action, {required String title, String message = '', Json params = const {}}) async {
+  Future<ConfirmOutcome> confirm(ConfirmAction action,
+      {required String title,
+      String message = '',
+      String caption = '',
+      String confirmLabel = 'OK',
+      String cancelLabel = 'Cancel',
+      Map<String, Object?> bound = const {},
+      Json params = const {}}) async {
     log.add('confirm $title');
     return ConfirmOutcome(confirmAnswer);
   }
