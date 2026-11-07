@@ -42,9 +42,11 @@ class CodelesslyRouter {
   final CodelesslyRouteInformationParser parser;
 
   /// Creates a router for the app [controller] loads. [basePath] prefixes
-  /// every URL, such as `/my-app` for a site served under it. Screens with
-  /// a URL path are at `[basePath]/[path]`; others at `[basePath]/[canvasId]`;
-  /// the app's entry screen at [basePath].
+  /// every URL, such as `/my-app` for a site served under it. Screens are at
+  /// `[basePath]/[path]`: their own URL path, or the one the editor gives a
+  /// screen from its name when it publishes it (`settings`). A screen with
+  /// neither is at `[basePath]/[canvasId]`, and a link to a screen's id
+  /// opens at its path. The app's entry screen is at [basePath].
   ///
   /// When the router doesn't sync with the browser, it first shows
   /// [initialLocation], such as `/guide/bat-star`, above the entry screen
@@ -314,8 +316,9 @@ class CodelesslyHistoryBack extends CodelesslyHistoryChange {
 
 /// The stack of screens of a Codelessly app, as a NavigationUtils router
 /// delegate. Each screen (layout) of the published app is a route: at its
-/// URL path when it has one (`/guide/:id`), at its canvas id otherwise
-/// (`/<canvasId>`), and the entry screen at `/`. The route's query and path
+/// URL path when it has one (`/guide/:id`, or `/settings` from its name), at
+/// its canvas id otherwise (`/<canvasId>`), and the entry screen at `/`. A
+/// link to a screen's id shows the screen's path in the address. The route's query and path
 /// parameters are the screen's parameters (`${route.name}`).
 class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   /// The key [globalData] holds the parameters a screen was opened with
@@ -732,6 +735,29 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     return _canonical('/$location');
   }
 
+  /// [location] at its screen's URL path when it names the screen by id: a
+  /// link to `/{canvasId}?entryId=l2` (or a layout id) of a screen at
+  /// `log/:entryId` is `/log/l2`, so the address shows the path. Other
+  /// locations, and a screen without a path, as they are.
+  String _named(String location) {
+    final SDKPublishModel? model = _model;
+    if (model == null) return location;
+    final Uri uri = Uri.parse(location);
+    final List<String> segments = CanvasLocation.segmentsOf(uri.path);
+    if (segments.length != 1) return location;
+    final String id = segments.single;
+    if (model.resolveLayoutId(id) == null) return location;
+    final String? path = CanvasLocation.locationOf(
+      model,
+      id,
+      uri.queryParameters,
+    );
+    if (path == null) return location;
+    final String named = _canonical('/$path');
+    // A screen whose path is its id, or a param the path can't take.
+    return Uri.parse(named).path == uri.path ? location : named;
+  }
+
   static String _canonical(String location) {
     final Uri uri = Uri.parse(
       location.startsWith('/') ? location : '/$location',
@@ -917,7 +943,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
   bool _keepsBlockedTop(List<String> stack) {
     if (routes.isEmpty) return false;
     final List<String> target = [
-      for (final location in stack) _canonical(location),
+      for (final location in stack) _named(_canonical(location)),
     ];
     final List<String> current = [
       for (final route in routes) locationOfRoute(route),
@@ -988,8 +1014,9 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     final CodelesslyHistoryEntry? entry = configuration is CodelesslyLinkRoute
         ? configuration.entry
         : null;
-    final String location = _canonical(locationOfRoute(configuration));
-    if (entry != null && _canonical(entry.stack.last) == location) {
+    // A link by a screen's id opens at the screen's path (see [_named]).
+    final String location = _named(_canonical(locationOfRoute(configuration)));
+    if (entry != null && _named(_canonical(entry.stack.last)) == location) {
       if (_keepsBlockedTop(entry.stack)) return;
       _back = entry.back;
       _restore(entry.stack, fromLink: true);
@@ -1037,7 +1064,7 @@ class CodelesslyRouterDelegate extends DefaultRouterDelegate {
     bool seedsHome = false,
   }) {
     final List<String> target = [
-      for (final location in stack) _canonical(location),
+      for (final location in stack) _named(_canonical(location)),
     ];
     final List<String> current = [
       for (final route in routes) locationOfRoute(route),

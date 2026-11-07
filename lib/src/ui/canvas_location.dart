@@ -39,6 +39,28 @@ abstract final class CanvasLocation {
     return node is CanvasNode ? node : null;
   }
 
+  /// The URL path of a screen named [name] that has no path of its own: its
+  /// name's words in lowercase, joined by `-` (`Log entry` is `log-entry`),
+  /// so a published screen's address reads as its name, not its id. Null
+  /// when the name has no letters or digits.
+  static String? defaultPathOf(String? name) {
+    final String slug = (name ?? '')
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^\p{L}\p{N}]+', unicode: true), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    return slug.isEmpty ? null : slug;
+  }
+
+  /// [path], or `path-2`, `path-3`... the first that [taken] lacks.
+  static String uniquePath(String path, Set<String> taken) {
+    String candidate = path;
+    for (int n = 2; taken.contains(candidate); n++) {
+      candidate = '$path-$n';
+    }
+    return candidate;
+  }
+
   /// Whether [segment] of a path pattern is a catch-all: `*name` (or a bare
   /// `*`, named `path`) as the last segment takes the rest of the location,
   /// one segment or more, such as a not-found screen at `*path`.

@@ -370,7 +370,15 @@ Map<String, Object?> _withCommitAction(String name, Map<String, Object?> s) {
         },
         'unit': {
           'type': 'string',
-          'description': 'Codelessly extension: suffix shown after the value.',
+          'description':
+              'Codelessly extension: suffix shown after the value, e.g. " kg" '
+              'or "%".',
+        },
+        'prefix': {
+          'type': 'string',
+          'description':
+              'Codelessly extension: shown before the value, e.g. "\$" for '
+              'money (use this, not unit, for currency symbols).',
         },
       },
     },

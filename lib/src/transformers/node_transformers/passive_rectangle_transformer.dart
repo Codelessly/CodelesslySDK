@@ -208,7 +208,10 @@ class PassiveRectangleWidget extends StatelessWidget {
         boxShadow: retrieveBoxShadow(node, scopedValues),
         borderRadius: getBorderRadius(node),
         clipBehavior: clip,
-        tapThrough: TapThroughScope.of(context),
+        // A box with nothing filled in (an outline drawn over a card) takes
+        // no taps, so what is under it stays tappable; a node with
+        // reactions takes taps over its whole box anyway.
+        tapThrough: TapThroughScope.of(context) || !hasVisibleFill(node),
         notches: notchesOf(node),
         pathShape: pathShadowShapeOf(node),
         child: child,
@@ -216,6 +219,12 @@ class PassiveRectangleWidget extends StatelessWidget {
     );
   }
 }
+
+/// Whether [node] has a fill that paints something (a visible paint with
+/// some opacity). An outline-only or empty box has none.
+bool hasVisibleFill(BaseNode node) =>
+    node is GeometryMixin &&
+    node.fills.any((PaintModel fill) => fill.visible && fill.opacity > 0);
 
 /// A [BoxDecoration] that takes no taps itself.
 class _TapThroughDecoration extends BoxDecoration {
@@ -1022,14 +1031,19 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
         node.strokeSide == StrokeSide.all) {
       strokeWidgets.add(
         Positioned.fill(
-          child: eased(
-            (color, _) => DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: getBorderRadius(node),
-                border: Border.all(
-                  strokeAlign: node.strokeAlign.alignment,
-                  color: color!,
-                  width: node.strokeWeight,
+          // An outline takes no taps (a sketched border laid over a card
+          // leaves its buttons tappable); a node with reactions takes them
+          // over its whole box anyway.
+          child: IgnorePointer(
+            child: eased(
+              (color, _) => DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: getBorderRadius(node),
+                  border: Border.all(
+                    strokeAlign: node.strokeAlign.alignment,
+                    color: color!,
+                    width: node.strokeWeight,
+                  ),
                 ),
               ),
             ),
@@ -1039,19 +1053,21 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     } else {
       strokeWidgets.add(
         Positioned.fill(
-          child: eased(
-            (color, gradient) => CustomPaint(
-              painter: StrokePainter(
-                color: color ?? const Color(0xFF000000),
-                gradient: gradient,
-                borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
-                dashPattern: node.dashPattern,
-                strokeWidth: node.strokeWeight,
-                strokeMiterLimit: node.strokeMiterLimit,
-                strokeCap: node.strokeCap,
-                strokeAlign: node.strokeAlign,
-                strokeSide: node.strokeSide,
-                boxShape: getBoxShape(node),
+          child: IgnorePointer(
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: StrokePainter(
+                  color: color ?? const Color(0xFF000000),
+                  gradient: gradient,
+                  borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                  dashPattern: node.dashPattern,
+                  strokeWidth: node.strokeWeight,
+                  strokeMiterLimit: node.strokeMiterLimit,
+                  strokeCap: node.strokeCap,
+                  strokeAlign: node.strokeAlign,
+                  strokeSide: node.strokeSide,
+                  boxShape: getBoxShape(node),
+                ),
               ),
             ),
           ),
