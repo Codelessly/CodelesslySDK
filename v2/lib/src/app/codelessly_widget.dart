@@ -1,7 +1,17 @@
 import 'dart:async';
 
 import 'package:codelessly_api_v2/codelessly_api.dart'
-    show CanvasProps, Json, LayoutDocumentScripts, NavigateAction, Node, PublishLayout, PublishModel, RouteTransition, TriggerType;
+    show
+        CanvasProps,
+        Json,
+        LayoutDocumentScripts,
+        NavigateAction,
+        Node,
+        PageTransition,
+        PublishLayout,
+        PublishModel,
+        RouteTransition,
+        TriggerType;
 import 'package:flutter/material.dart';
 
 import '../render/node_tree.dart';
@@ -22,6 +32,7 @@ import '../services/services.dart' show Services;
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
+import 'page_transitions.dart';
 import 'persisted_variables.dart';
 import 'runtime.dart';
 import 'theme.dart';
@@ -217,7 +228,8 @@ class CodelesslyWidget extends StatefulWidget {
   /// A route showing layout [layoutId] of [codelessly], as navigation
   /// pushes them. [template] passes its builders and handler along. With
   /// [transition] it plays that custom transition (its reveals growing
-  /// from [anchor]).
+  /// from [anchor]); else [pageTransition] over [transitionMs] (the
+  /// platform's, none on the web).
   static Route<T> route<T>({
     required Codelessly codelessly,
     required String layoutId,
@@ -226,6 +238,9 @@ class CodelesslyWidget extends StatefulWidget {
     String? name,
     RouteTransition? transition,
     RevealAnchor anchor = const RevealAnchor(),
+    PageTransition pageTransition = PageTransition.platform,
+    int? transitionMs,
+    int? reverseTransitionMs,
   }) {
     final settings = RouteSettings(name: name, arguments: params);
     Widget build(BuildContext _) => CodelesslyWidget(
@@ -239,19 +254,34 @@ class CodelesslyWidget extends StatefulWidget {
           layoutBuilder: template?.layoutBuilder ?? template?.controller?.layoutBuilder,
           onNavigate: template?.onNavigate,
         );
-    return transition == null
-        ? CodelesslyPageRoute<T>(settings: settings, builder: build)
-        : CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
+    if (transition != null) {
+      return CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
+    }
+    final page = webTransition(pageTransition);
+    if (page == PageTransition.platform) return CodelesslyPageRoute<T>(settings: settings, builder: build);
+    return CodelesslyPageTransitionRoute<T>(
+      transition: page,
+      settings: settings,
+      transitionMs: transitionMs,
+      reverseTransitionMs: reverseTransitionMs,
+      builder: build,
+    );
   }
 
   /// Routes for a [Navigator] or `MaterialApp.onGenerateRoute`: `/` opens
   /// the entry screen, any other name the screen it locates
   /// ([initialScreen]): a URL path, a canvas or layout id, or a screen name.
+  ///
+  /// A link to a screen by its id opens at the screen's URL path: the
+  /// route is named `/guide/kraken` for `/creature?id=kraken` (and `/` for
+  /// the entry screen's id), which a browser shows.
   static RouteFactory onGenerateRoute(Codelessly codelessly, {CodelesslyWidget? template}) => (settings) {
         final name = settings.name ?? '/';
         final params = settings.arguments is Map ? (settings.arguments as Map).cast<String, Object?>() : const <String, Object?>{};
+        final model = codelessly.publishModel;
+        final named = model == null || name == '/' ? name : '/${CanvasLocation.named(model, name.substring(name.startsWith('/') ? 1 : 0))}';
         return CodelesslyPageRoute<void>(
-          settings: settings,
+          settings: named == name ? settings : RouteSettings(name: named, arguments: settings.arguments),
           builder: (_) => CodelesslyWidget(
             codelessly: codelessly,
             initialScreen: name == '/' ? null : name,
@@ -622,7 +652,14 @@ class _LayoutViewState extends State<_LayoutView> {
       if (request.destinationId.isEmpty) return;
       type = NavigationType.replace;
     }
-    Route<void>? routeTo(String destination, Map<String, Object?> params, {RouteTransition? transition}) {
+    Route<void>? routeTo(
+      String destination,
+      Map<String, Object?> params, {
+      RouteTransition? transition,
+      PageTransition pageTransition = PageTransition.platform,
+      int? transitionMs,
+      int? reverseTransitionMs,
+    }) {
       final layoutId = model.resolveLayoutId(destination);
       if (layoutId == null) {
         FlutterError.reportError(FlutterErrorDetails(
@@ -640,10 +677,20 @@ class _LayoutViewState extends State<_LayoutView> {
         name: '/$location',
         transition: transition,
         anchor: transition == null ? const RevealAnchor() : RevealAnchor(tap: RevealAnchor.lastTap),
+        pageTransition: pageTransition,
+        transitionMs: transitionMs,
+        reverseTransitionMs: reverseTransitionMs,
       );
     }
 
-    final route = routeTo(request.destinationId, request.params, transition: request.routeTransition);
+    final route = routeTo(
+      request.destinationId,
+      request.params,
+      transition: request.routeTransition,
+      pageTransition: request.transition,
+      transitionMs: request.transitionMs,
+      reverseTransitionMs: request.reverseTransitionMs,
+    );
     if (route == null) return;
     switch (type) {
       case NavigationType.push:

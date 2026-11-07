@@ -45,6 +45,23 @@ abstract final class CodelesslyAppIdentity {
     return Color((a << 24) | rgb);
   }
 
+  /// The layout shown at [location] (`/guide/bat-star`): a screen without a
+  /// URL path is at `/<its id>`, which wins over a catch-all (`*path`)
+  /// screen; else the screen whose path matches; else the screen whose id
+  /// is the first segment; the entry screen at `/`.
+  static String? layoutIdAt(PublishModel model, String location) {
+    final path = Uri.parse(location).path;
+    final segments = CanvasLocation.segmentsOf(path);
+    if (segments.isEmpty) return model.resolveLayoutId(model.entryLayoutId ?? '');
+    if (segments.length == 1) {
+      final byId = model.resolveLayoutId(segments.first);
+      if (byId != null) return byId;
+    }
+    final match = CanvasLocation.match(model, location);
+    if (match != null) return match.layoutId;
+    return model.resolveLayoutId(segments.first);
+  }
+
   /// The override for layout [layoutId]: by the layout id, one of its
   /// canvas ids, or its page id.
   static PageIdentity? pageOf(PublishModel model, AppIdentity identity, String layoutId) {
