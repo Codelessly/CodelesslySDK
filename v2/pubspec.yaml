@@ -46,3 +46,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   lints: ^6.0.0
+  # The script engine, for the scripting tests on the Dart VM
+  # (tool/build_quickjs.sh builds its C sources for this machine). Apps add
+  # it themselves; the SDK doesn't depend on it.
+  codelessly_quickjs: ^0.1.0
