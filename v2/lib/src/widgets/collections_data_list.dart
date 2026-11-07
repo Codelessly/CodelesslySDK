@@ -398,7 +398,9 @@ class DataListViewState extends State<DataListView> {
     if (widget.gridDelegate == null) {
       child = ListItemBox(axis: _axis, main: widget.itemMain, stretch: widget.stretch, child: child);
     }
-    child = KeyedSubtree(key: ValueKey(('item', key)), child: child);
+    // Node boxes aren't hit themselves: the row is, so the gestures around
+    // it (a swipe) see pointers on its blank parts too.
+    child = MetaData(key: ValueKey(('item', key)), behavior: HitTestBehavior.opaque, child: child);
     final swipe = _node.swipeActions;
     if (swipe != null && swipe.enabled && _node.swipes) {
       child = SwipeActionsBox(
