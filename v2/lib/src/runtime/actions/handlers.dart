@@ -14,6 +14,7 @@ import 'package:just_audio/just_audio.dart' as audio;
 
 import '../../services/services.dart';
 import '../expressions/formula.dart';
+import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
@@ -113,10 +114,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       // animations aren't rendered by v2 yet.
       break;
     case PaginateAction():
-      // TODO(v2): pagination controllers (SDK 8.x's PaginationController and
-      // PaginationRegistry) aren't ported yet; a list shows its bound data
-      // whole.
-      break;
+      await paginateAction(a, run);
     case UnknownAction():
       break;
   }
