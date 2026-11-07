@@ -59,6 +59,7 @@ export 'package:codelessly_api_v2/codelessly_api.dart'
         TextDirection,
         TextInputAction,
         TextInputType,
+        TextLeadingDistribution,
         TextOverflow,
         TextStyle,
         TileMode,
