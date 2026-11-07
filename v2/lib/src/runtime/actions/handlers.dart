@@ -5,8 +5,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api_v2/codelessly_api.dart';
-import 'package:flutter/services.dart' show Clipboard, ClipboardData, TextEditingValue, TextSelection;
-import 'package:flutter/widgets.dart' show Curves;
+import 'package:flutter/rendering.dart' as rendering show Axis;
+import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
+import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
@@ -16,8 +18,10 @@ import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
 import 'runner.dart';
+import 'script_host.dart';
 import 'text_fields.dart';
 import 'values.dart';
+import 'variable_animator.dart';
 
 /// Runs one action of a chain. Throws to stop the chain.
 typedef ActionHandler = FutureOr<void> Function(ActionDef action, ActionRun run);
@@ -42,7 +46,13 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case SetVariantAction():
       _setValue(a.node, [NodeValue('props.current', value: a.variant)], run);
     case SetVariableAction():
-      _setVariable(a, run);
+      await _setVariable(a, run);
+    case AnimateVariableAction():
+      await _animateVariable(a, run);
+    case HapticAction():
+      _haptic(a.kind);
+    case RunScriptAction():
+      await runScriptAction(a, run);
     case CallFunctionAction():
       final f = run.host.functions[a.name];
       if (f == null) throw StateError('No function named [${a.name}]');
@@ -95,11 +105,12 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case SpeakAction():
       _speak(a, run);
     case ScrollToAction():
-      _scrollTo(a, run);
+      await _scrollTo(a, run);
     case PlaySoundAction():
       _playSound(a, run);
     case ControlDragAction() || PlayAnimationAction():
-      // Draggable cards and one-shot animations aren't rendered by v2 yet.
+      // Draggable cards, drag tracks (a step command) and one-shot
+      // animations aren't rendered by v2 yet.
       break;
     case UnknownAction():
       break;
@@ -137,7 +148,7 @@ int delayMilliseconds(DelayAction a, ActionRun run) {
 
 // --- variables and values ----------------------------------------------------------
 
-void _setVariable(SetVariableAction a, ActionRun run) {
+Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   final name = a.variable.trim();
   if (name.isEmpty) return;
   final found = variableOf(run.context.scope, name);
@@ -158,7 +169,85 @@ void _setVariable(SetVariableAction a, ActionRun run) {
   final next = path.keys.isNotEmpty && a.write.op == WriteOp.set
       ? evaluateValue(a.write.value, run.expressions, run.scope)
       : applyWrite(current, type, a.write, run.expressions, run.scope);
+  // A number glides to its new value over animateMs (SDK 8.x's glide).
+  final ms = a.animateMs.trim().isEmpty ? 0 : (double.tryParse(run.text(a.animateMs).trim()) ?? 0).round();
+  final number = type == VariableType.integer || type == VariableType.decimal;
+  if (ms > 0 && number && path.keys.isEmpty && current is num && next is num) {
+    if (next == current) return;
+    final done = VariableAnimator.play(scope, path.root,
+        from: current.toDouble(), to: next.toDouble(), duration: Duration(milliseconds: ms), curve: a.curve, glide: true);
+    // The chain stops (its node left): so does the glide.
+    final remove = run.cancellation.onCancel(() => VariableAnimator.stopGlide(scope, path.root));
+    await done;
+    remove();
+    return;
+  }
+  // A plain set takes over from a glide.
+  VariableAnimator.stopGlide(scope, path.root);
   setVariableIn(run.context.scope, name, next);
+}
+
+/// Plays, pauses, resumes, stops or seeks a number variable's timeline
+/// (SDK 8.x's animateVariable). A play or a resume completes when the
+/// timeline ends; a variable that isn't there (or is computed) is skipped.
+Future<void> _animateVariable(AnimateVariableAction a, ActionRun run, {bool fromCurrentPlace = false}) async {
+  final found = variableOf(run.context.scope, a.variable.trim());
+  if (found == null || found.$2.isComputed) return;
+  final (scope, variable) = found;
+  final name = variable.name;
+  double? number(String text) {
+    if (text.trim().isEmpty) return null;
+    final n = double.tryParse(run.text(text).trim());
+    return n != null && n.isFinite ? n : null;
+  }
+
+  switch (a.mode) {
+    case AnimateVariableMode.resume:
+      if (VariableAnimator.resume(scope, name) || VariableAnimator.isPlaying(scope, name)) {
+        await VariableAnimator.of(scope, name)?.done.future;
+        return;
+      }
+      // Nothing to resume: play from where the value is.
+      return _animateVariable(
+        AnimateVariableAction(
+            variable: a.variable, from: a.from, to: a.to, durationMs: a.durationMs, duration: a.duration, curve: a.curve),
+        run,
+        fromCurrentPlace: true,
+      );
+    case AnimateVariableMode.play:
+      final to = number(a.to);
+      if (to == null) return;
+      var ms = a.durationMs;
+      if (a.duration.trim().isNotEmpty) {
+        final bound = number(a.duration);
+        if (bound != null && bound >= 0) ms = bound.round();
+      }
+      await VariableAnimator.play(scope, name,
+          from: number(a.from),
+          to: to,
+          duration: Duration(milliseconds: ms),
+          curve: a.curve,
+          fromCurrentPlace: fromCurrentPlace);
+    case AnimateVariableMode.pause:
+      VariableAnimator.pause(scope, name);
+    case AnimateVariableMode.stop:
+      VariableAnimator.stop(scope, name);
+    case AnimateVariableMode.seek:
+      final to = number(a.to);
+      if (to != null) VariableAnimator.seek(scope, name, to);
+  }
+}
+
+// --- haptics -------------------------------------------------------------------------
+
+void _haptic(HapticKind kind) {
+  unawaited(switch (kind) {
+    HapticKind.selection => HapticFeedback.selectionClick(),
+    HapticKind.light => HapticFeedback.lightImpact(),
+    HapticKind.medium => HapticFeedback.mediumImpact(),
+    HapticKind.heavy => HapticFeedback.heavyImpact(),
+    HapticKind.vibrate => HapticFeedback.vibrate(),
+  });
 }
 
 /// Sets node values: a property bound to one variable sets the variable
@@ -390,7 +479,10 @@ Future<void> _forEach(ForEachAction a, ActionRun run) async {
   if (value is! List) return;
   final items = List<Object?>.of(value);
   for (var i = 0; i < items.length; i++) {
-    await run.nested({'item': items[i], 'index': i}).run(a.actions);
+    // `${loop.*}` holds for the whole turn; `${result.*}` until an action
+    // of the turn gives a result of its own.
+    final turn = {'item': items[i], 'index': i};
+    await run.nested(turn, names: {'loop': turn}).run(a.actions);
   }
 }
 
@@ -500,20 +592,50 @@ void _editText(EditTextAction a, ActionRun run) {
   }
 }
 
-void _scrollTo(ScrollToAction a, ActionRun run) {
-  final box = run.host.tree?.boxOf(run.text(a.node));
+/// Scrolls the scroll views around node [ScrollToAction.node] (those
+/// along [ScrollToAction.axis] only, when it's set) so the node sits at
+/// its alignment, less its offset: each view reveals the one inside it.
+Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
+  final box = run.host.tree?.boxOf(run.text(a.node).trim());
   if (box == null || !box.attached) return;
   final target = box.contentBox ?? box;
-  target.showOnScreen(
-    duration: Duration(milliseconds: a.durationMs),
-    curve: switch (AnimationCurve.parse(a.curve)) {
-      AnimationCurve.linear => Curves.linear,
-      AnimationCurve.easeIn => Curves.easeIn,
-      AnimationCurve.easeOut => Curves.easeOut,
-      AnimationCurve.fastOutSlowIn => Curves.fastOutSlowIn,
-      _ => Curves.easeInOut,
-    },
-  );
+  final duration = Duration(milliseconds: a.durationMs);
+  final Curve curve = switch (AnimationCurve.parse(a.curve)) {
+    AnimationCurve.linear => Curves.linear,
+    AnimationCurve.easeIn => Curves.easeIn,
+    AnimationCurve.easeOut => Curves.easeOut,
+    AnimationCurve.fastOutSlowIn => Curves.fastOutSlowIn,
+    AnimationCurve.easeOutCubic => Curves.easeOutCubic,
+    AnimationCurve.easeInOutCubic => Curves.easeInOutCubic,
+    AnimationCurve.decelerate => Curves.decelerate,
+    _ => Curves.easeInOut,
+  };
+  final scrolls = <Future<void>>[];
+  var viewports = 0;
+  RenderObject revealed = target;
+  for (var p = target.parent; p != null; p = p.parent) {
+    if (p is! RenderViewportBase) continue;
+    final position = p.offset;
+    if (position is! ScrollPosition) continue;
+    viewports++;
+    final along = a.axis == null || (p.axis == rendering.Axis.horizontal) == (a.axis == ScrollAxis.horizontal);
+    if (along && position.hasContentDimensions) {
+      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - a.offset)
+          .clamp(position.minScrollExtent, position.maxScrollExtent)
+          .toDouble();
+      if ((to - position.pixels).abs() >= 0.5) {
+        if (a.durationMs <= 0) {
+          position.jumpTo(to);
+        } else {
+          scrolls.add(position.animateTo(to, duration: duration, curve: curve));
+        }
+      }
+    }
+    revealed = p;
+  }
+  // No scroll view of its own around it: as the render tree reveals it.
+  if (viewports == 0 && a.axis == null) target.showOnScreen(duration: duration, curve: curve);
+  await Future.wait(scrolls);
 }
 
 // --- sound, speech, purchases ---------------------------------------------------------------
