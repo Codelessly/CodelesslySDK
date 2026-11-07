@@ -243,6 +243,7 @@ class ScreenActionContext extends RuntimeActionContext {
     super.tree,
     super.nodeValues,
     super.onError,
+    super.scripts,
   }) : super(declareMissing: true);
 }
 
