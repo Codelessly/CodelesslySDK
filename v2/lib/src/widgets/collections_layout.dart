@@ -8,8 +8,11 @@
 // cache extent, as a sliver list builds them.
 import 'dart:math' as math;
 
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
+
+import '../render/behaviours.dart' show motionMatrix;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -69,17 +72,20 @@ abstract class RenderCollection extends RenderBox
 
   void _paintChildren(PaintingContext context, Offset offset) {
     paintDecorations(context, offset);
-    if (!_paintReversed) {
-      defaultPaint(context, offset);
-      return;
-    }
-    var child = lastChild;
+    var child = _paintReversed ? lastChild : firstChild;
     while (child != null) {
       final pd = child.parentData! as CollectionParentData;
-      context.paintChild(child, pd.offset + offset);
-      child = pd.previousSibling;
+      paintItem(context, child, pd.offset + offset);
+      child = _paintReversed ? pd.previousSibling : pd.nextSibling;
     }
+    paintForeground(context, offset);
   }
+
+  /// Paints what goes over the items (a table's grid lines).
+  void paintForeground(PaintingContext context, Offset offset) {}
+
+  /// Paints one item at [offset] (a page view poses its pages).
+  void paintItem(PaintingContext context, RenderBox child, Offset offset) => context.paintChild(child, offset);
 
   /// Paints what goes under the items (dividers).
   void paintDecorations(PaintingContext context, Offset offset) {}
@@ -777,7 +783,117 @@ class RenderPageItems extends RenderCollection {
   int firstIndex = 0;
   int? itemCount;
 
-  void changed() => markNeedsLayout();
+  /// The pose a page has one page after the current one (coverflow, cube,
+  /// carousel); null: flat pages. See [pageMotionAt].
+  api.Motion? pageMotion;
+
+  void changed() {
+    markNeedsLayout();
+    markNeedsPaint();
+  }
+
+  /// The properties a page's motion moves by its distance (SDK 8.x's
+  /// `motionTowards`); the others (origin, perspective) stay the motion's.
+  static const _scaled = [
+    'translateX', 'translateY', 'shiftX', 'shiftY', 'scale', 'scaleX', 'scaleY', 'opacity', 'rotate', //
+    'rotateX', 'rotateY', 'blur',
+  ];
+
+  /// [motion] (the pose one page after the current one) for a page
+  /// [offset] pages from it: at rest at 0, interpolated by the distance (up
+  /// to two pages), mirrored for pages before it; a [vertical] pager turns
+  /// around X and moves along Y (SDK 8.x's `pageMotionAt`, `PageMotionItem`).
+  static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false}) {
+    final distance = offset.abs().clamp(0.0, 2.0);
+    var m = motion;
+    for (final p in _scaled) {
+      final rest = api.Motion.none.valueOf(p);
+      var v = rest + (motion.valueOf(p) - rest) * distance;
+      if (p == 'opacity') v = v.clamp(0.0, 1.0);
+      if (p == 'blur') v = math.max(0, v);
+      m = m.withValue(p, v);
+    }
+    if (offset < 0) {
+      for (final p in const ['translateX', 'shiftX', 'rotate', 'rotateY', 'originX']) {
+        m = m.withValue(p, -m.valueOf(p));
+      }
+    }
+    if (vertical) {
+      m = m
+          .withValue('rotateX', -m.rotateY)
+          .withValue('rotateY', 0)
+          .withValue('translateY', m.translateX)
+          .withValue('translateX', 0)
+          .withValue('shiftY', m.shiftX)
+          .withValue('shiftX', 0)
+          .withValue('originY', m.originX)
+          .withValue('originX', 0);
+    }
+    return m;
+  }
+
+  /// The page at rest: the initial page, within the pages there are.
+  double get _currentPage {
+    final count = itemCount;
+    final p = initialPage.toDouble();
+    return count == null ? p : p.clamp(0, math.max(0, count - 1)).toDouble();
+  }
+
+  /// The transform [child] (page [index]) is painted with, or null.
+  Matrix4? _poseOf(RenderBox child, int index) {
+    final motion = pageMotion;
+    if (motion == null) return null;
+    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical);
+    final o = Alignment(m.originX, m.originY).alongSize(child.size);
+    return Matrix4.translationValues(m.shiftX * child.size.width + o.dx, m.shiftY * child.size.height + o.dy, 0)
+      ..multiply(motionMatrix(m))
+      ..multiply(Matrix4.translationValues(-o.dx, -o.dy, 0));
+  }
+
+  int _indexOf(RenderBox child) {
+    var i = firstIndex;
+    for (var c = firstChild; c != null && c != child; c = childAfter(c)) {
+      i++;
+    }
+    return i;
+  }
+
+  @override
+  void paintItem(PaintingContext context, RenderBox child, Offset offset) {
+    final pose = _poseOf(child, _indexOf(child));
+    if (pose == null) return super.paintItem(context, child, offset);
+    final opacity = pageMotionAt(pageMotion!, _indexOf(child) - _currentPage).opacity;
+    if (opacity <= 0) return;
+    void paintPosed(PaintingContext c, Offset o) =>
+        c.pushTransform(needsCompositing, o, pose, (c, o) => c.paintChild(child, o));
+    if (opacity >= 1) {
+      paintPosed(context, offset);
+    } else {
+      context.pushOpacity(offset, (opacity * 255).round(), (c, o) => paintPosed(c, o));
+    }
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    super.applyPaintTransform(child, transform);
+    final pose = _poseOf(child, _indexOf(child));
+    if (pose != null) transform.multiply(pose);
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    if (pageMotion == null) return super.hitTestChildren(result, position: position);
+    var i = firstIndex + childCount - 1;
+    for (var child = lastChild; child != null; child = childBefore(child), i--) {
+      final pd = child.parentData! as CollectionParentData;
+      final pose = Matrix4.translationValues(pd.offset.dx, pd.offset.dy, 0)..multiply(_poseOf(child, i)!);
+      final c = child;
+      if (result.addWithPaintTransform(transform: pose, position: position, hitTest: (r, p) => c.hitTest(r, position: p))) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   /// The scroll offset at rest, in viewports, and the leading padding.
   static ({double offset, double pad}) restOf({
@@ -845,5 +961,99 @@ class RenderPageItems extends RenderCollection {
       i++;
     }
     return _anyChildOutside;
+  }
+}
+
+/// A table view at rest (SDK 8.x's `TableView.builder` scrolled to 0): its
+/// columns [columnWidths] wide and rows [rowHeights] tall (the header row
+/// and column first, when there are), each cell's template laid out loose
+/// and placed at its start, centred down (`Align.centerLeft`). Children are
+/// the cells in [cells] order, row by row. Header backgrounds and stripes
+/// paint under the cells; a [gridLine] trails each column and row over them.
+class RenderTableItems extends RenderCollection {
+  List<double> columnWidths = const [];
+  List<double> rowHeights = const [];
+
+  /// (row, column) of each child, in child order.
+  List<(int, int)> cells = const [];
+  bool headerRow = false, headerColumn = false;
+  Color? headerColor, stripeColor;
+
+  /// The lines between cells, or null.
+  BorderSide? gridLine;
+
+  void changed() {
+    markNeedsLayout();
+    markNeedsPaint();
+  }
+
+  double _start(List<double> extents, int i) {
+    var x = 0.0;
+    for (var k = 0; k < i && k < extents.length; k++) {
+      x += extents[k];
+    }
+    return x;
+  }
+
+  @override
+  bool layoutItems() {
+    final c = constraints;
+    size = c.biggest.isFinite ? c.biggest : c.constrain(Size.zero);
+    var i = 0;
+    for (final it in children) {
+      if (i >= cells.length) {
+        it.layout(const BoxConstraints.tightFor(width: 0, height: 0));
+        i++;
+        continue;
+      }
+      final (r, col) = cells[i++];
+      final w = columnWidths[col], h = rowHeights[r];
+      it.layout(BoxConstraints.loose(Size(w, h)), parentUsesSize: true);
+      (it.parentData! as CollectionParentData).offset =
+          Offset(_start(columnWidths, col), _start(rowHeights, r) + (h - it.size.height) / 2);
+    }
+    final w = _start(columnWidths, columnWidths.length), h = _start(rowHeights, rowHeights.length);
+    return w > size.width + 0.01 || h > size.height + 0.01 || _anyChildOutside;
+  }
+
+  @override
+  void paintDecorations(PaintingContext context, Offset offset) {
+    final canvas = context.canvas;
+    final width = _start(columnWidths, columnWidths.length);
+    final height = _start(rowHeights, rowHeights.length);
+    if (headerColor case final Color color) {
+      final paint = Paint()..color = color;
+      if (headerColumn && columnWidths.isNotEmpty) {
+        canvas.drawRect(offset & Size(columnWidths.first, height), paint);
+      }
+      if (headerRow && rowHeights.isNotEmpty) canvas.drawRect(offset & Size(width, rowHeights.first), paint);
+    }
+    if (stripeColor case final Color color) {
+      final paint = Paint()..color = color;
+      for (var r = headerRow ? 1 : 0; r < rowHeights.length; r++) {
+        if ((r - (headerRow ? 1 : 0)).isOdd) {
+          canvas.drawRect(Offset(offset.dx, offset.dy + _start(rowHeights, r)) & Size(width, rowHeights[r]), paint);
+        }
+      }
+    }
+  }
+
+  @override
+  void paintForeground(PaintingContext context, Offset offset) {
+    final line = gridLine;
+    if (line == null || line.width <= 0 || line.style == BorderStyle.none) return;
+    final canvas = context.canvas;
+    final paint = Paint()..color = line.color;
+    final width = _start(columnWidths, columnWidths.length);
+    final height = _start(rowHeights, rowHeights.length);
+    // A span's trailing border, inside the span at its end.
+    for (var i = 1; i <= columnWidths.length; i++) {
+      final x = _start(columnWidths, i);
+      canvas.drawRect(Rect.fromLTWH(offset.dx + x - line.width, offset.dy, line.width, height), paint);
+    }
+    for (var i = 1; i <= rowHeights.length; i++) {
+      final y = _start(rowHeights, i);
+      canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy + y - line.width, width, line.width), paint);
+    }
   }
 }

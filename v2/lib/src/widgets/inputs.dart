@@ -41,6 +41,7 @@ import '../runtime/actions/text_fields.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
 import 'inputs_shapes.dart';
+import 'inputs_toggle.dart';
 
 /// Recipes for the inputs group, by node type.
 final Map<String, WidgetRecipe> inputsRecipes = {
@@ -206,17 +207,69 @@ String? previewText(String? text) {
   return s.trim().isEmpty ? null : s;
 }
 
+/// [padding] grown by the width of the border [d] draws in this state when
+/// it has `paddingIncludesBorder` (an outline on every side, an underline
+/// below): disabled, then error (focused or not), then focused, then enabled
+/// (SDK 8.x's `PassiveTextFieldWidget.paddingWithBorder`).
+EdgeInsets paddingWithBorder(EdgeInsets padding, api.InputDecoration d, {bool error = false, bool focused = false}) {
+  if (!d.paddingIncludesBorder) return padding;
+  final border = !d.enabled
+      ? d.disabledBorder
+      : error
+          ? (focused ? d.focusedErrorBorder : d.errorBorder)
+          : focused
+              ? d.focusedBorder
+              : d.enabledBorder;
+  if (border == null || border.type == api.InputBorderType.none) return padding;
+  final w = border.borderSide.width;
+  if (w <= 0) return padding;
+  if (border.type == api.InputBorderType.underline) return padding.copyWith(bottom: padding.bottom + w);
+  return padding + EdgeInsets.all(w);
+}
+
+/// An always-visible prefix or suffix text, beside its icon if it has one,
+/// for an icon slot (SDK 8.x's `_affix`).
+Widget _affix(Widget? icon, Widget text, {required bool before}) {
+  final padded = Padding(
+    padding: before
+        ? const EdgeInsetsDirectional.only(start: 12, end: 4)
+        : const EdgeInsetsDirectional.only(start: 4, end: 12),
+    child: text,
+  );
+  if (icon == null) return padded;
+  return Row(mainAxisSize: MainAxisSize.min, children: before ? [icon, padded] : [padded, icon]);
+}
+
 /// A text field's decoration; [padding] is the node's, the content padding
-/// when the decoration sets none.
-InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding) {
-  Widget? affixIcon(api.InputIcon? icon) {
+/// when the decoration sets none. [focused] and [error] pick the border a
+/// padding that includes it grows by.
+InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
+    {bool focused = false, bool? error}) {
+  Widget? affixIcon(api.InputIcon? icon, api.EdgeInsets? iconPadding) {
     final glyph = _icon(icon);
-    return glyph == null ? null : Align(widthFactor: 1, heightFactor: 1, child: glyph);
+    if (glyph == null) return null;
+    final Widget aligned = Align(widthFactor: 1, heightFactor: 1, child: glyph);
+    return iconPadding == null ? aligned : Padding(padding: iconPadding.flutter, child: aligned);
   }
 
-  final label = previewText(d.labelText), error = previewText(d.errorText);
+  final label = previewText(d.labelText), errorText = previewText(d.errorText);
   final prefix = previewText(d.prefixText), suffix = previewText(d.suffixText);
   final counter = d.counterText == '' ? '' : previewText(d.counterText);
+  // Units that show before anything is typed go in the icon slots, which
+  // Flutter always shows.
+  final always = d.affixesAlwaysVisible;
+  final prefixWidget = prefix == null || prefix.isEmpty ? null : _text(prefix, d.prefixStyle);
+  final suffixWidget = suffix == null || suffix.isEmpty ? null : _text(suffix, d.suffixStyle);
+  final prefixIcon = affixIcon(d.prefixIcon, d.prefixIconPadding);
+  final suffixIcon = affixIcon(d.suffixIcon, d.suffixIconPadding);
+  // Unset constraints keep Flutter's 48 px icon slot, unless the icon has a
+  // padding of its own or the slot holds only an always-visible text.
+  BoxConstraints? iconConstraints(api.BoxConstraints c, api.EdgeInsets? iconPadding, Widget? text, Widget? icon) =>
+      !c.isEmpty
+          ? c.flutter
+          : iconPadding != null || (always && text != null && icon == null)
+              ? const BoxConstraints()
+              : null;
   return InputDecoration(
     icon: _icon(d.icon),
     label: label == null || label.isEmpty ? null : _text(label, d.labelStyle),
@@ -227,7 +280,7 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding) {
     hintText: previewText(d.hintText),
     hintStyle: _styleOrNull(d.hintStyle),
     hintMaxLines: d.hintMaxLines,
-    error: error == null || error.trim().isEmpty ? null : _text(error, d.errorStyle),
+    error: errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle),
     errorStyle: _styleOrNull(d.errorStyle),
     errorMaxLines: d.errorMaxLines,
     floatingLabelBehavior: switch (d.floatingLabelBehavior) {
@@ -239,14 +292,15 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding) {
     // A collapsed decoration is the bare input: a compact density must not
     // shrink its intrinsic height.
     visualDensity: d.isCollapsed ? VisualDensity.standard : null,
-    contentPadding: (d.contentPadding ?? padding).flutter,
-    prefixIcon: affixIcon(d.prefixIcon),
-    prefixIconConstraints: _constraintsOrNull(d.prefixIconConstraints),
-    prefix: prefix == null || prefix.isEmpty ? null : _text(prefix, d.prefixStyle),
+    contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
+        error: error ?? (errorText != null && errorText.trim().isNotEmpty), focused: focused),
+    prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
+    prefixIconConstraints: iconConstraints(d.prefixIconConstraints, d.prefixIconPadding, prefixWidget, prefixIcon),
+    prefix: always ? null : prefixWidget,
     prefixStyle: _styleOrNull(d.prefixStyle),
-    suffixIcon: affixIcon(d.suffixIcon),
-    suffixIconConstraints: _constraintsOrNull(d.suffixIconConstraints),
-    suffix: suffix == null || suffix.isEmpty ? null : _text(suffix, d.suffixStyle),
+    suffixIcon: always && suffixWidget != null ? _affix(suffixIcon, suffixWidget, before: false) : suffixIcon,
+    suffixIconConstraints: iconConstraints(d.suffixIconConstraints, d.suffixIconPadding, suffixWidget, suffixIcon),
+    suffix: always ? null : suffixWidget,
     suffixStyle: _styleOrNull(d.suffixStyle),
     counter: counter == null || counter.isEmpty ? null : _text(counter, d.counterStyle),
     counterText: counter != null && counter.isEmpty ? '' : null,
@@ -370,7 +424,11 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
       _edited = false;
       _fire(context, 'editingComplete', controller.text);
     }
-    if (n.prop(TextFieldProps.focusRingWidth) > 0) setState(() {});
+    // The focus ring follows focus, and so does a padding that includes the
+    // (focused) border.
+    if (n.prop(TextFieldProps.focusRingWidth) > 0 || n.prop(TextFieldProps.decoration).paddingIncludesBorder) {
+      setState(() {});
+    }
     if (focusNode.hasFocus && n.prop(TextFieldProps.selectAllOnFocus)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !focusNode.hasFocus) return;
@@ -403,7 +461,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final expands = fillsHeight && !oneLine;
     final (maxLines, minLines) =
         textFieldLines(maxLines: maxLinesProp == 0 ? null : maxLinesProp, minLines: minLinesProp, expands: expands);
-    final decoration = inputDecoration(d, n.layout.padding);
+    final decoration = inputDecoration(d, n.layout.padding, focused: focusNode.hasFocus);
     final maxLength = n.prop(TextFieldProps.maxLength);
     final style = _styleOrNull(n.prop(TextFieldProps.style));
     final cursorRadius = n.prop(TextFieldProps.cursorRadius);
@@ -635,6 +693,18 @@ class _SwitchIslandState extends State<_SwitchIsland> {
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
+    // Material's switch can't cast a thumb shadow or take a thumb of another
+    // size: a switch that asks for either is a plain toggle.
+    if (drawsPlainToggle(n)) {
+      return PlainToggle(
+        node: n,
+        value: value,
+        onChanged: (v) {
+          setState(() => value = v);
+          _fire(context, 'changed', v);
+        },
+      );
+    }
     final fillTrack = n.prop(SwitchProps.fillTrack);
     final active = _color(n.prop(SwitchProps.activeTrackOutlineColor));
     final inactive = _color(n.prop(SwitchProps.inactiveTrackOutlineColor));
