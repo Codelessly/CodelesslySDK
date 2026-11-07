@@ -12,6 +12,7 @@ import '../convert.dart';
 import '../recipe.dart';
 import 'image_fill.dart';
 import 'node_paint.dart';
+import 'path_shapes.dart';
 
 final Map<String, ui.Path?> _parsed = {};
 
@@ -109,7 +110,7 @@ class RenderShapePath extends RenderBox with ImageClient {
   set node(Node? v) {
     if (identical(v, _node)) return;
     _node = v;
-    showImages(v?.type == 'box' ? v!.decoration.fills.map(imageUrlOf) : const []);
+    showImages(v == null ? const [] : v.decoration.fills.where((p) => p.visible).map(imageUrlOf));
     markNeedsPaint();
   }
 
@@ -138,46 +139,102 @@ class RenderShapePath extends RenderBox with ImageClient {
     canvas.restore();
   }
 
-  /// The `path` widget (PathNodePainter): its data scaled from its view box
-  /// to the size, filled with its solid fills and stroked with its solid
-  /// strokes, trimmed and dashed.
+  /// The `path` widget (SDK 8.x's PathNodePainter): its data scaled from
+  /// its view box to the size; its drop shadows along the outline (fill and
+  /// stroke); its fills in order (solid colors, gradients, images clipped to
+  /// the path), each gradient in every shape with `gradientPerSubpath` and
+  /// the solid ones colored shape by shape with `subpathColors`; its inner
+  /// shadows; its strokes, trimmed and dashed.
   void _paintVector(Canvas canvas, Node n) {
-    var path = parseSvgPath(n.prop(PathProps.data));
+    final data = n.prop(PathProps.data);
+    var path = parseSvgPath(data);
     if (path == null) return;
     final box = n.prop(PathProps.viewBox);
-    if (box != null && box[0] > 0 && box[1] > 0) {
-      path = path.transform((Matrix4.identity()..scaleByDouble(size.width / box[0], size.height / box[1], 1, 1)).storage);
+    final viewBox = box != null && box[0] > 0 && box[1] > 0 ? Size(box[0], box[1]) : null;
+    if (viewBox != null) {
+      path = path.transform(
+          (Matrix4.identity()..scaleByDouble(size.width / viewBox.width, size.height / viewBox.height, 1, 1)).storage);
     }
     final d = n.decoration;
-    for (final p in d.visibleFills) {
-      if (p.type != api.PaintType.solid || p.color == null) continue;
-      canvas.drawPath(path, Paint()..color = p.effectiveColor!.flutter);
-    }
-    final strokes = [for (final p in d.visibleStrokes) if (p.type == api.PaintType.solid && p.color != null) p];
-    if (strokes.isEmpty) return;
+    final bounds = Offset.zero & size;
+    final fills = d.fills.where((p) => p.visible && (p.type != api.PaintType.solid || p.color != null)).toList();
+    final strokes = [for (final p in d.visibleStrokes) if (p.type != api.PaintType.image && (p.isGradient || p.color != null)) p];
+    final stroked = strokes.isNotEmpty && d.strokeWidth > 0;
     final start = n.prop(PathProps.trimStart), end = n.prop(PathProps.trimEnd);
     final whole = start <= 0 && end >= 1 && d.dashPattern.isEmpty;
-    final outline = whole ? path : trimPath(path, start, end, d.dashPattern);
+    final outline = !stroked || whole ? path : trimPath(path, start, end, d.dashPattern);
+    final cap = _cap(d.strokeCap), join = _join(n.prop(PathProps.strokeJoin));
+    final filled = d.fills.any((p) => p.visible);
+    paintPathShadows(canvas, path, _shadows(d, api.EffectType.dropShadow),
+        filled: filled, stroke: outline, strokeWidth: stroked ? d.strokeWidth : 0, cap: cap, join: join);
+
+    PathShapes? shapes() => PathShapes.of(data, viewBox, size);
+    final colors = n.prop(PathProps.subpathColors).map((c) => c?.flutter).toList();
+    // Blending fills blend with the fills under them, not with what is under
+    // the node.
+    final blends = fills.any((f) => f.blendMode != api.BlendMode.srcOver);
+    if (blends) canvas.saveLayer(null, Paint());
+    for (final f in fills) {
+      if (f.type == api.PaintType.image) {
+        canvas.save();
+        canvas.clipPath(path);
+        paintImageFill(canvas, RRect.fromRectAndRadius(bounds, Radius.zero), f, this);
+        canvas.restore();
+      } else if (f.isGradient && f.gradientPerSubpath) {
+        shapes()?.paintEach(canvas, (r) => RenderNodePaint.paintFor(f, r));
+      } else if (!f.isGradient && colors.isNotEmpty) {
+        final base = f.effectiveColor!.flutter;
+        for (final (color, part) in shapes()?.byColor(colors) ?? const <(Color?, ui.Path)>[]) {
+          canvas.drawPath(
+              part,
+              Paint()
+                ..blendMode = blendMode(f.blendMode)
+                ..color = color == null ? base : color.withValues(alpha: color.a * base.a));
+        }
+      } else {
+        canvas.drawPath(path, RenderNodePaint.paintFor(f, bounds));
+      }
+    }
+    if (blends) canvas.restore();
+    if (filled) paintPathInnerShadows(canvas, path, _shadows(d, api.EffectType.innerShadow));
+    if (!stroked) return;
+    Paint strokePaint(api.Paint p, Rect r) => RenderNodePaint.paintFor(p, r)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = d.strokeWidth
+      ..strokeCap = cap
+      ..strokeJoin = join;
     for (final p in strokes) {
-      canvas.drawPath(
-          outline,
-          Paint()
-            ..color = p.effectiveColor!.flutter
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = d.strokeWidth
-            ..strokeCap = _cap(d.strokeCap)
-            ..strokeJoin = _join(n.prop(PathProps.strokeJoin)));
+      // A trimmed or dashed outline is one line along the whole path, so its
+      // gradient spans the box.
+      if (p.isGradient && p.gradientPerSubpath && identical(outline, path)) {
+        shapes()?.paintEach(canvas, (r) => strokePaint(p, r));
+      } else {
+        canvas.drawPath(outline, strokePaint(p, bounds));
+      }
     }
   }
 
-  /// A box drawn as its path (PassiveRectangleWidget with a path): its
-  /// fills (and foreground fills) clipped to the path, its strokes along
-  /// it, centered; no shadows, no clip.
+  /// The visible shadows of [type] in [d], as Flutter's.
+  static List<BoxShadow> _shadows(api.Decoration d, api.EffectType type) =>
+      [for (final e in d.effects) if (e.visible && e.type == type) boxShadow(e)];
+
+  /// A box drawn as its path (PassiveRectangleWidget with a path): its drop
+  /// shadows following the path (its fill and its stroke), its fills (and
+  /// foreground fills) clipped to the path, its strokes along it, centered;
+  /// no clip.
   void _paintBox(Canvas canvas, Node n) {
     final path = parseSvgPath(n.prop(BoxProps.path));
     final d = n.decoration;
     final rect = Offset.zero & size;
     final rrect = d.radius.flutter.toRRect(rect);
+    if (path != null) {
+      final stroked = d.strokeWidth > 0 && d.strokes.any((p) => p.visible);
+      paintPathShadows(canvas, path, _shadows(d, api.EffectType.dropShadow),
+          filled: d.fills.any((p) => p.visible),
+          strokeWidth: stroked ? d.strokeWidth : 0,
+          cap: _cap(d.strokeCap),
+          join: _join(n.prop(BoxProps.strokeJoin)));
+    }
     void fills(Iterable<api.Paint> paints, {required bool images}) {
       final visible = paints.where((p) => p.visible).toList();
       if (visible.isEmpty) return;
