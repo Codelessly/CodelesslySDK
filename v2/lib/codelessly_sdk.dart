@@ -86,6 +86,7 @@ export 'src/runtime/expressions/expressions.dart';
 export 'src/runtime/actions/actions.dart';
 
 // The app shell: Codelessly, CodelesslyWidget, loading, navigation.
+export 'src/app/app_identity.dart';
 export 'src/app/back_guard.dart';
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart';
