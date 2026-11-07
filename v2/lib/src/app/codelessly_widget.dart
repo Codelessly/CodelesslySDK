@@ -1,20 +1,26 @@
 import 'dart:async';
 
-import 'package:codelessly_api_v2/codelessly_api.dart' show Json, NavigateAction, Node, PublishLayout, PublishModel;
+import 'package:codelessly_api_v2/codelessly_api.dart'
+    show CanvasProps, Json, LayoutDocumentScripts, NavigateAction, Node, PublishLayout, PublishModel, RouteTransition, TriggerType;
 import 'package:flutter/material.dart';
 
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/actions/node_values.dart';
+import '../runtime/actions/route_transition.dart';
 import '../runtime/actions/ui.dart';
+import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/scopes.dart';
+import '../services/services.dart' show Services;
+import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
+import 'persisted_variables.dart';
 import 'runtime.dart';
 import 'theme.dart';
 import 'viewport.dart';
@@ -207,17 +213,20 @@ class CodelesslyWidget extends StatefulWidget {
   final CodelesslyNavigationHandler? onNavigate;
 
   /// A route showing layout [layoutId] of [codelessly], as navigation
-  /// pushes them. [template] passes its builders and handler along.
+  /// pushes them. [template] passes its builders and handler along. With
+  /// [transition] it plays that custom transition (its reveals growing
+  /// from [anchor]).
   static Route<T> route<T>({
     required Codelessly codelessly,
     required String layoutId,
     Map<String, Object?> params = const {},
     CodelesslyWidget? template,
     String? name,
-  }) =>
-      MaterialPageRoute<T>(
-        settings: RouteSettings(name: name, arguments: params),
-        builder: (_) => CodelesslyWidget(
+    RouteTransition? transition,
+    RevealAnchor anchor = const RevealAnchor(),
+  }) {
+    final settings = RouteSettings(name: name, arguments: params);
+    Widget build(BuildContext _) => CodelesslyWidget(
           codelessly: codelessly,
           layoutId: layoutId,
           params: params,
@@ -227,8 +236,11 @@ class CodelesslyWidget extends StatefulWidget {
           errorBuilder: template?.errorBuilder ?? template?.controller?.errorBuilder,
           layoutBuilder: template?.layoutBuilder ?? template?.controller?.layoutBuilder,
           onNavigate: template?.onNavigate,
-        ),
-      );
+        );
+    return transition == null
+        ? MaterialPageRoute<T>(settings: settings, builder: build)
+        : CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
+  }
 
   /// Routes for a [Navigator] or `MaterialApp.onGenerateRoute`: `/` opens
   /// the entry screen, any other name the screen it locates
@@ -441,6 +453,7 @@ class _ScreenState {
   final TreeReactions reactions;
 
   void dispose() {
+    VariableAnimator.stopAll(scope);
     reactions.dispose();
     context.dispose();
     tree.dispose();
@@ -512,6 +525,7 @@ class _LayoutViewState extends State<_LayoutView> {
       functions: config.functions,
       tree: tree,
       nodeValues: nodeValues,
+      scripts: widget.layout.document.scripts,
     );
     final reactions = TreeReactions(runner: config.actions, context: context);
     tree.interactions = reactions;
@@ -536,11 +550,30 @@ class _LayoutViewState extends State<_LayoutView> {
   void _seed(String canvasId) {
     if (!_seeded.add(canvasId)) return;
     final scope = _screen.scope;
+    final services = _codelessly.services;
+    final storage = services is Services ? services.storage : null;
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
       scope.define(v);
+      // A persisted variable starts from what it was last time, and keeps
+      // every change.
+      if (v.persists) _persisted.add(PersistedVariable.attach(scope, v, storage));
       if (widget.params.containsKey(v.name)) scope.set(v.name, widget.params[v.name]);
     }
+  }
+
+  final List<PersistedVariable> _persisted = [];
+
+  /// Whether canvas [canvasId] keeps the user on it when they go back now:
+  /// its `blockBack`, read through its bindings.
+  bool _blocksBack(String canvasId) => _screen.tree.resolve(canvasId)?.props.get(CanvasProps.blockBack) ?? false;
+
+  /// Back was pressed while blocked: the canvas's back pressed reactions.
+  void _backPressed(String canvasId) {
+    final box = _screen.tree.boxOf(canvasId);
+    if (box != null) return _screen.reactions.fire(box, TriggerType.backPressed.name);
+    final node = _screen.tree.source.node(canvasId);
+    if (node != null) unawaited(_screen.actions.trigger(node, TriggerType.backPressed.name, _screen.context));
   }
 
   void _shownCanvas(String canvasId) {
@@ -584,7 +617,7 @@ class _LayoutViewState extends State<_LayoutView> {
       if (request.destinationId.isEmpty) return;
       type = NavigationType.replace;
     }
-    Route<void>? routeTo(String destination, Map<String, Object?> params) {
+    Route<void>? routeTo(String destination, Map<String, Object?> params, {RouteTransition? transition}) {
       final layoutId = model.resolveLayoutId(destination);
       if (layoutId == null) {
         FlutterError.reportError(FlutterErrorDetails(
@@ -600,10 +633,12 @@ class _LayoutViewState extends State<_LayoutView> {
         params: params,
         template: widget.host,
         name: '/$location',
+        transition: transition,
+        anchor: transition == null ? const RevealAnchor() : RevealAnchor(tap: RevealAnchor.lastTap),
       );
     }
 
-    final route = routeTo(request.destinationId, request.params);
+    final route = routeTo(request.destinationId, request.params, transition: request.routeTransition);
     if (route == null) return;
     switch (type) {
       case NavigationType.push:
@@ -636,6 +671,9 @@ class _LayoutViewState extends State<_LayoutView> {
   @override
   void dispose() {
     if (identical(widget.controller?._screen, _screen)) widget.controller?._screen = null;
+    for (final p in _persisted) {
+      p.dispose();
+    }
     _screen.dispose();
     super.dispose();
   }
@@ -656,10 +694,19 @@ class _LayoutViewState extends State<_LayoutView> {
       _seed(canvasId);
       _shownCanvas(canvasId);
       final box = CanvasViewport.resolve(canvas, constraints, sizing: widget.sizing);
-      return CanvasViewportBox(
+      Widget view = CanvasViewportBox(
         box: box,
         child: NodeView(tree: _screen.tree, rootId: canvasId, interactive: true),
       );
+      if (canvas.bind.containsKey('props.${CanvasProps.blockBack.key}') || canvas.props.get(CanvasProps.blockBack)) {
+        view = BackGuard(
+          key: ValueKey(canvasId),
+          blocksBack: () => _blocksBack(canvasId),
+          onBackPressed: () => _backPressed(canvasId),
+          child: view,
+        );
+      }
+      return view;
     });
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;

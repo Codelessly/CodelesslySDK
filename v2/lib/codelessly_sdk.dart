@@ -86,12 +86,15 @@ export 'src/runtime/expressions/expressions.dart';
 export 'src/runtime/actions/actions.dart';
 
 // The app shell: Codelessly, CodelesslyWidget, loading, navigation.
+export 'src/app/app_identity.dart';
+export 'src/app/back_guard.dart';
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart';
 export 'src/app/config.dart';
 export 'src/app/fonts.dart';
 export 'src/app/loader.dart';
 export 'src/app/navigation.dart';
+export 'src/app/persisted_variables.dart';
 export 'src/app/runtime.dart';
 export 'src/app/theme.dart' show themeDataOf;
 export 'src/app/viewport.dart';

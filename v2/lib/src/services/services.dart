@@ -17,6 +17,7 @@ import 'cloud/backend.dart';
 import 'cloud/database.dart';
 import 'links.dart';
 import 'purchases.dart';
+import 'scripts.dart';
 import 'sound.dart';
 import 'speech.dart';
 import 'storage.dart';
@@ -32,6 +33,7 @@ export 'cloud/query.dart';
 export 'cloud/resolve.dart';
 export 'links.dart';
 export 'purchases.dart';
+export 'scripts.dart';
 export 'sound.dart';
 export 'speech.dart';
 export 'storage.dart';
@@ -54,6 +56,7 @@ class Services implements CodelesslyServices {
     SoundService? sound,
     SpeechService? speech,
     LinkOpener? links,
+    ScriptRunner? scripts,
   })  : config = config ?? ServiceConfig.empty,
         api = api ?? HttpApiService(),
         cache = cache ?? MemoryKeyValueCache(),
@@ -66,7 +69,8 @@ class Services implements CodelesslyServices {
         purchases = purchases ?? const NoPurchaseService(),
         sound = sound ?? SoundService(),
         speech = speech ?? SpeechService(),
-        links = links ?? const PlatformLinkOpener();
+        links = links ?? const PlatformLinkOpener(),
+        scripts = scripts ?? const NoScriptRunner();
 
   /// What the publish model configures (APIs, paywall setup); the app
   /// shell sets it when a publish model loads.
@@ -105,6 +109,9 @@ class Services implements CodelesslyServices {
   /// Text-to-speech (speak actions, the `speech` value).
   final SpeechService speech;
   final LinkOpener links;
+
+  /// Runs scripts (run script actions); none by default.
+  final ScriptRunner scripts;
 
   /// Calls the API [apiId] of [config] with input values [params] (already
   /// evaluated). Returns its response value ([ApiResponse.toValue]), 2xx or

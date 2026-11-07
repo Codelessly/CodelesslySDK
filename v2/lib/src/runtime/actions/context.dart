@@ -3,7 +3,7 @@
 // the screen's node tree.
 import 'dart:async';
 
-import 'package:codelessly_api_v2/codelessly_api.dart' show ActionDef, Json, NavigateAction, Variable, VariableType;
+import 'package:codelessly_api_v2/codelessly_api.dart' show ActionDef, Json, NavigateAction, ScriptDef, Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart';
@@ -56,6 +56,7 @@ class RuntimeActionContext implements ActionHost {
     this.onError,
     this.declareMissing = false,
     this.paywall,
+    this.scripts = const [],
     List<VoidCallback>? disposers,
   })  : services = services ?? const _NoServices(),
         _disposers = disposers ?? [];
@@ -95,6 +96,9 @@ class RuntimeActionContext implements ActionHost {
   /// The paywall a paywall screen's actions act on.
   final PaywallSession? paywall;
 
+  /// The scripts its run script actions run (the layout's).
+  final List<ScriptDef> scripts;
+
   @override
   RuntimeActionContext withScope(ValueScope scope) => RuntimeActionContext(
         scope: scope,
@@ -107,6 +111,7 @@ class RuntimeActionContext implements ActionHost {
         onError: onError,
         declareMissing: declareMissing,
         paywall: paywall,
+        scripts: scripts,
         disposers: _disposers,
       );
 
