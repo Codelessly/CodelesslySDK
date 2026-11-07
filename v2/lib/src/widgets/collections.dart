@@ -286,7 +286,8 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   final view = b.obtain<RenderListItems>('list', RenderListItems.new)
     ..clipBehavior = _clip(n)
-    ..paintReversed = false;
+    ..paintReversed = false
+    ..dropTarget(b.tree.animates ? b.tree : null, n.id);
   final container = view as _Container;
 
   if (listBuildsAllItems(n)) {

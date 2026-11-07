@@ -13,6 +13,8 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
 
 import '../render/behaviours.dart' show motionMatrix;
+import '../render/node_tree.dart' show NodeTree;
+import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, dropSlotOf;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -234,6 +236,34 @@ class RenderListItems extends RenderCollection {
   }
   double cacheExtent = 250;
 
+  /// While a drag is over the drop target that names this list (its
+  /// `listNodeId`), the list opens the target's slot: room for the dragged
+  /// node before the item it would land before (gestures/drag_and_drop.dart
+  /// `dropSlotOf`). Set in a running tree only.
+  void dropTarget(NodeTree? tree, String listId) {
+    if (identical(tree, _dropTree) && listId == _dropListId) return;
+    if (attached && _dropTree != null) DragAndDrop.of(_dropTree!).removeListener(markNeedsLayout);
+    _dropTree = tree;
+    _dropListId = listId;
+    if (attached && tree != null) DragAndDrop.of(tree).addListener(markNeedsLayout);
+    markNeedsLayout();
+  }
+
+  NodeTree? _dropTree;
+  String _dropListId = '';
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_dropTree case final tree?) DragAndDrop.of(tree).addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    if (_dropTree case final tree?) DragAndDrop.of(tree).removeListener(markNeedsLayout);
+    super.detach();
+  }
+
   void update({
     required Axis axis,
     required bool reverse,
@@ -360,6 +390,15 @@ class RenderListItems extends RenderCollection {
       }
     }
 
+    // An open drop slot: room before raw item [before] (after the last
+    // when it's the count), with a gap on its far side when it's between
+    // items.
+    final slot = _dropTree == null ? null : dropSlotOf(_dropTree!, _dropListId);
+    final slotExtent = slot == null ? 0.0 : RenderCollection.main(slot.size, axis);
+    final slotBefore = slotExtent > 0 ? slot!.before.clamp(0, items.length) : -1;
+    final slotRoom = slotBefore < 0 ? 0.0 : slotExtent + (items.isEmpty ? 0 : gap);
+    if (slotRoom > 0) used += slotRoom;
+
     final contentMain = used;
     final mainSize = hugMain || !maxMain.isFinite
         ? (contentMain + _padMain).clamp(minMain, maxMain).toDouble()
@@ -385,6 +424,9 @@ class RenderListItems extends RenderCollection {
         _addDivider(at, dividerCross, mainSize, gapBefore: true);
         at += gap;
       }
+      // The slot sits where item [slotBefore] was, pushing it (and the
+      // items after it) on.
+      if (i == slotBefore) at += slotRoom;
       logical[i] = at;
       at += advances[i];
     }

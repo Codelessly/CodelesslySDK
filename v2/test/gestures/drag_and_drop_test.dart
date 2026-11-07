@@ -173,6 +173,10 @@ void main() {
     // The slot of column b's list.
     expect(dropSlotOf(b.tree, 'list_b'), const DropSlotSpec(before: 0, size: Size(160, 40)));
     expect(dropSlotOf(b.tree, 'list_a'), isNull);
+    // Column b opens it: the card the drop lands before moves down by the
+    // dragged card's height (and the list's spacing).
+    await tester.pump();
+    expect(textRect(tester, 'Four').top, greaterThanOrEqualTo(four.dy + 40 - 0.5));
 
     await gesture.up();
     await tester.pumpAndSettle();
