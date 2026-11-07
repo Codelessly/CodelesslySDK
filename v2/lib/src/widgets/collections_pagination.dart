@@ -1,21 +1,51 @@
 // The pagination node (SDK 8.x's PassivePaginationWidget): page controls
-// for a list's pagination, as an island in the node's fit box.
-//
-// TODO(v2): pagination controllers (SDK 8.x's PaginationController and
-// PaginationRegistry, data/pagination_controller.dart) aren't ported yet,
-// so the controls always show their preview state (page 1 of 10, 200 items)
-// and are disabled, as SDK 8.x's are with no controller of that name.
+// for a list's pagination, as an island in the node's fit box. Running, it
+// shows and moves the controller its `controller` names (a list on the
+// screen makes it); until one does, and on a design canvas, it shows its
+// preview state (page 1 of 10, 200 items), disabled.
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
-import 'package:codelessly_api_v2/codelessly_api.dart' show Node, PaginationProps;
+import 'package:codelessly_api_v2/codelessly_api.dart' show Node, PaginationProps, TriggerType;
 import 'package:flutter/material.dart';
 
 import '../render/convert.dart';
+import '../render/node_tree.dart';
 import '../render/recipe.dart';
+import '../runtime/lists/pagination.dart';
+import 'collections_list_runtime.dart';
 
 /// The pagination node: fit box → its controls.
 void paginationRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, Size(n.layout.width.value, n.layout.height.value)));
-  chain.add(b.island('pagination', (context) => PaginationControls(node: n)));
+  if (!b.tree.animates) {
+    chain.add(b.island('pagination', (context) => PaginationControls(node: n)));
+    return;
+  }
+  final runtime = ListRuntime(b, n);
+  final name = runtime.text(n.prop(PaginationProps.controller)).trim();
+  final registry = PaginationRegistry.of(b.tree);
+  chain.add(b.island(
+    'pagination',
+    (context) => ListenableBuilder(
+      listenable: registry,
+      builder: (context, _) {
+        final controller = registry[name];
+        if (controller == null) return PaginationControls(node: n);
+        return ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) => PaginationControls(
+            node: n,
+            state: PaginationState.of(controller),
+            controlled: true,
+            summary: runtime.text,
+            onMove: (move) async {
+              await move(controller);
+              if (b is NodeBox) fireTrigger(b, TriggerType.changed.name, event: {'value': controller.page});
+            },
+          ),
+        );
+      },
+    ),
+  ));
 }
 
 /// What a pagination node shows: the controller's state, or the preview's.
@@ -39,20 +69,48 @@ class PaginationState {
 
   /// The preview (no controller).
   static const preview = PaginationState();
+
+  /// What [c] shows.
+  factory PaginationState.of(PaginationController c) => PaginationState(
+        page: c.page,
+        pageCount: c.pageCount,
+        totalCount: c.totalCount,
+        from: c.from,
+        to: c.to,
+        hasMore: c.hasMore,
+        pageSize: c.pageSize,
+        pageSizeOptions: c.model.pageSizeOptions,
+      );
 }
+
+/// A move of a pagination controller (next, go to a page...).
+typedef PaginationMove = Future<void> Function(PaginationController controller);
 
 WrapAlignment _wrapAlignment(api.WrapAlignment a) => WrapAlignment.values.byName(a.name);
 
 /// A pagination node's controls: a summary, first/previous/page numbers/
 /// next/last buttons and a page size select, in a wrap.
 class PaginationControls extends StatelessWidget {
-  const PaginationControls({super.key, required this.node, this.state = PaginationState.preview, this.controlled = false});
+  const PaginationControls({
+    super.key,
+    required this.node,
+    this.state = PaginationState.preview,
+    this.controlled = false,
+    this.onMove,
+    this.summary,
+  });
 
   final Node node;
   final PaginationState state;
 
   /// Whether a controller moves (enables the buttons).
   final bool controlled;
+
+  /// Moves the controller (a button pressed, a page size chosen).
+  final void Function(PaginationMove move)? onMove;
+
+  /// Reads the `${...}` of the summary.
+  final String Function(String text)? summary;
 
   @override
   Widget build(BuildContext context) {
@@ -64,21 +122,25 @@ class PaginationControls extends StatelessWidget {
       fontWeight: FontWeight.values[(n.prop(PaginationProps.fontWeight) ~/ 100 - 1).clamp(0, 8)],
       color: n.prop(PaginationProps.textColor).flutter,
     );
-    Widget button(String label, {required bool canPress, bool active = false, String? semantics}) => PaginationButton(
+    Widget button(String label, {required bool canPress, bool active = false, String? semantics, PaginationMove? move}) =>
+        PaginationButton(
           node: n,
           label: label,
           style: style,
           active: active,
           enabled: enabled && canPress,
           semanticsLabel: semantics,
+          onPressed: move == null || onMove == null ? null : () => onMove!(move),
         );
     final spacing = n.prop(PaginationProps.spacing);
     final pageCount = s.pageCount;
     final buttons = [
       if (n.prop(PaginationProps.showFirstLast))
-        button(n.prop(PaginationProps.firstLabel), semantics: 'First page', canPress: s.page > 1),
+        button(n.prop(PaginationProps.firstLabel),
+            semantics: 'First page', canPress: s.page > 1, move: (c) => c.first()),
       if (n.prop(PaginationProps.showPrevNext))
-        button(n.prop(PaginationProps.previousLabel), semantics: 'Previous page', canPress: s.page > 1),
+        button(n.prop(PaginationProps.previousLabel),
+            semantics: 'Previous page', canPress: s.page > 1, move: (c) => c.previous()),
       if (n.prop(PaginationProps.showPageNumbers))
         for (final number in PaginationProps.pageItems(
           page: s.page,
@@ -91,12 +153,17 @@ class PaginationControls extends StatelessWidget {
                 width: n.prop(PaginationProps.buttonSize) * 0.75,
                 child: Text('…', style: style, textAlign: TextAlign.center))
           else
-            button('$number', semantics: 'Page $number', active: number == s.page, canPress: number != s.page),
+            button('$number',
+                semantics: 'Page $number',
+                active: number == s.page,
+                canPress: number != s.page,
+                move: (c) => c.goTo(number)),
       if (n.prop(PaginationProps.showPrevNext))
-        button(n.prop(PaginationProps.nextLabel), semantics: 'Next page', canPress: s.hasMore),
+        button(n.prop(PaginationProps.nextLabel),
+            semantics: 'Next page', canPress: s.hasMore, move: (c) => c.next()),
       if (n.prop(PaginationProps.showFirstLast))
         button(n.prop(PaginationProps.lastLabel),
-            semantics: 'Last page', canPress: pageCount != null && s.page < pageCount),
+            semantics: 'Last page', canPress: pageCount != null && s.page < pageCount, move: (c) => c.last()),
     ];
     final summary = n
         .prop(PaginationProps.summaryText)
@@ -114,7 +181,7 @@ class PaginationControls extends StatelessWidget {
         spacing: spacing * 3,
         runSpacing: spacing,
         children: [
-          if (n.prop(PaginationProps.showSummary)) Text(summary, style: style),
+          if (n.prop(PaginationProps.showSummary)) Text(this.summary?.call(summary) ?? summary, style: style),
           Wrap(spacing: spacing, runSpacing: spacing, crossAxisAlignment: WrapCrossAlignment.center, children: buttons),
           if (n.prop(PaginationProps.showPageSize))
             Row(mainAxisSize: MainAxisSize.min, children: [
@@ -126,7 +193,11 @@ class PaginationControls extends StatelessWidget {
                 isDense: true,
                 underline: const SizedBox.shrink(),
                 items: [for (final o in options) DropdownMenuItem(value: o, child: Text('$o'))],
-                onChanged: enabled ? (_) {} : null,
+                onChanged: enabled
+                    ? (value) {
+                        if (value != null) onMove?.call((c) => c.setPageSize(value));
+                      }
+                    : null,
               ),
             ]),
         ],
