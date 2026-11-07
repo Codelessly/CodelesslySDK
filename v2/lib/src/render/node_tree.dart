@@ -17,6 +17,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'behaviours.dart';
+import '../runtime/gestures/drag_motion.dart' show RenderDragMotion, dragMotionLayers;
 import 'convert.dart';
 import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
@@ -77,8 +78,9 @@ abstract interface class NodeInteractions {
   void addLayers(NodeBox box, Node n, List<RenderBox> chain);
 
   /// An event of [box]'s node from inside it: an input's `changed` or
-  /// `submitted`, a button's `click` (islands report them).
-  void fire(NodeBox box, String trigger, {Json event = const {}});
+  /// `submitted`, a button's `click` (islands report them). Completes when
+  /// the chain it starts ends.
+  Future<void> fire(NodeBox box, String trigger, {Json event = const {}});
 
   /// [box] left the tree: what it runs stops.
   void released(NodeBox box);
@@ -92,6 +94,12 @@ abstract interface class NodeInteractions {
 /// changed, a button was pressed), when its tree has [NodeTree.interactions].
 void fireTrigger(NodeBuilder b, String trigger, {Json event = const {}}) {
   if (b is NodeBox && b.tree.animates) b.tree.interactions?.fire(b, trigger, event: event);
+}
+
+/// [fireTrigger], completing when the chain it starts ends (a swiped card's
+/// reactions, before it comes back).
+Future<void> runTrigger(NodeBuilder b, String trigger, {Json event = const {}}) async {
+  if (b is NodeBox && b.tree.animates) await b.tree.interactions?.fire(b, trigger, event: event);
 }
 
 /// Hooks for tools (the editor's geometry cache, perf counters).
@@ -363,6 +371,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return false;
+    // A dragged node is hit where it is drawn, outside its layout box.
+    if (child case final RenderDragMotion drag) {
+      if (!drag.hitTest(result, position: position)) return false;
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
     return super.hitTest(result, position: position);
   }
 
@@ -503,6 +517,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     _filledStacks.clear();
 
     _parentSideWrappers(n, chain);
+    // A node that follows the pointer moves with its margin (outermost).
+    dragMotionLayers(this, n, chain);
 
     // Outer layers, outermost first: margin, constraints, motion and scale
     // (render/behaviours.dart), rotation, loops, opacity, blurs and stroke
