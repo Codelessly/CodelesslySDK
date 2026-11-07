@@ -1,7 +1,7 @@
 // A node's behaviours as layers of its render chain (see node_tree.dart's
 // outer layers). Outermost first, as SDK 8.x wrapped a node:
 //
-//   constraints → track pose → motion → scale → rotation → [ignore pointer]
+//   constraints → track pose → transform gesture → motion → scale → rotation → [ignore pointer]
 //   → loops → opacity → blurs → stroke path → content
 //
 // The design canvas (a tree that doesn't animate) draws each at rest: the
@@ -12,12 +12,15 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_api_v2/codelessly_api.dart' show Node;
-import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'convert.dart';
+import 'drag_track.dart';
+import 'flip_card.dart';
+import 'transform_gesture.dart';
+import 'node_tree.dart' show NodeBox;
 import 'paint/svg_path.dart';
 import 'recipe.dart';
 
@@ -26,21 +29,33 @@ import 'recipe.dart';
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviours;
   if (be.drag?.track case final api.DragTrack track) {
-    // At its bound value (`drag.track.value`), else its default or start;
-    // parked there when that's out of range.
-    // TODO(v2-port): read the track's variable, and port SDK 8.x's
-    // NodeDragTrack interaction (follow, detents, fine mode, momentum,
-    // settle, keyboard, wheel, double tap) to a running app.
+    // At its value (`drag.track.value`, else its variable's, else its
+    // default or start; parked when out of range or empty), and in a
+    // running app dragged along the track (render/drag_track.dart).
+    final box = b is NodeBox ? b : null;
+    final reads = track.value == null && track.hasVariable && box?.tree.binder?.scope != null;
     final p = track.restProgressOf(track.value ?? track.defaultValue ?? track.min);
-    final moves = track.relative ||
+    final moves = animates ||
+        reads ||
+        track.parkedProgress != null ||
+        track.relative ||
         track.units == api.DragTrackUnits.parent ||
         track.usesViewBox ||
         trackPose(track, p) != null;
     if (moves) {
       chain.add(
-        b.obtain<RenderTrackPose>('trackPose', RenderTrackPose.new)
-          ..track = track
-          ..progress = p,
+        b.obtain<RenderDragTrack>('trackPose', RenderDragTrack.new)
+          ..configure(box, track, enabled: be.drag!.enabled, interactive: animates),
+      );
+    }
+  }
+  // Pinch, pan and rotate in a running app (render/transform_gesture.dart),
+  // inside the track as SDK 8.x's sat inside the drag.
+  if (animates && n.type != 'canvas') {
+    if (be.effectiveTransformGesture case final api.TransformGesture gesture) {
+      chain.add(
+        b.obtain<RenderTransformGesture>('transformGesture', RenderTransformGesture.new)
+          ..configure(b is NodeBox ? b : null, gesture),
       );
     }
   }
@@ -320,6 +335,7 @@ Matrix4? trackPose(api.DragTrack track, double progress) => TrackGeometry(track)
 /// from its laid-out size and its parent's (SDK 8.x's `TrackPose`).
 class RenderTrackPose extends RenderPose {
   api.DragTrack _track = const api.DragTrack();
+  api.DragTrack get track => _track;
   set track(api.DragTrack v) {
     if (v == _track) return;
     _track = v;
@@ -327,6 +343,7 @@ class RenderTrackPose extends RenderPose {
   }
 
   double _progress = 0;
+  double get progress => _progress;
   set progress(double v) {
     if (v == _progress) return;
     _progress = v;
@@ -352,7 +369,9 @@ class RenderTrackPose extends RenderPose {
     }
   }
 
-  void _pose() {
+  /// Works the pose out from the sizes now (while painting or hit
+  /// testing: set without marking), and gives the geometry it used.
+  TrackGeometry pose() {
     final frame = _measuresParent ? _frame() : null;
     final geometry = TrackGeometry(
       _track,
@@ -360,10 +379,12 @@ class RenderTrackPose extends RenderPose {
       parent: frame?.$1,
       rest: frame?.$2 ?? Offset.zero,
     );
-    // Worked out while painting or hit testing: set without marking.
     _transform = geometry.poseAt(_progress) ?? Matrix4.identity();
     _origin = Alignment.center;
+    return geometry;
   }
+
+  void _pose() => pose();
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -1108,7 +1129,13 @@ void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
     }
   }
   if (be.tilt case final api.Tilt tilt) {
-    final pose = b.obtain<RenderTilt>('tilt', RenderTilt.new)..tilt = tilt;
+    final box = b is NodeBox ? b : null;
+    final pose = b.obtain<RenderTilt>('tilt', RenderTilt.new)
+      ..tilt = tilt
+      // `${tilt.*}` for the nodes inside it, as it moves.
+      ..onValues = box == null
+          ? null
+          : (values) => box.tree.binder?.nodeScope(box.tree.source, box.id, instance: box.instance)?.update('tilt', values);
     if (animates && tilt.hover) {
       chain.add(
         b.obtain<RenderMouseRegion>('tiltHover', RenderMouseRegion.new)
@@ -1128,135 +1155,22 @@ void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
     chain.add(pose..animates = animates);
   }
   if (be.flip case final api.FlipCard flip) {
+    // Turned by its variable, a tap or a drag (render/flip_card.dart).
     chain.add(
       b.obtain<RenderFlip>('flip', RenderFlip.new)
-        ..animates = animates
-        ..set(flip, be.motion),
+        ..configure(b is NodeBox ? b : null, flip, be.motion, animates: animates),
     );
-  }
-}
-
-/// A two-sided card ([api.FlipCard]) turned 0° or 180° about its axis with
-/// its motion's perspective, duration, curve and keyframed scale. A running
-/// app turns it when `flipped` changes, and on a tap with `tapToFlip`.
-// TODO(v2-port): drag to flip with its spring, writing `variable`, and the
-// `${flip.*}` values its children read (SDK 8.x's NodeFlip).
-class RenderFlip extends RenderPose with _Ticking {
-  api.FlipCard _flip = const api.FlipCard();
-  api.Motion? _motion;
-  bool _animates = false;
-  bool? _target;
-
-  /// The turn: 0 front, 1 back; while [_turning], from [_start] since
-  /// [_since] (the first tick after it started).
-  double _progress = 0, _start = 0;
-  bool _turning = false;
-  Duration? _since;
-  TapGestureRecognizer? _tap;
-
-  set animates(bool v) {
-    if (v == _animates) return;
-    _animates = v;
-    if (!v) _settle();
-    syncTicker();
-  }
-
-  void set(api.FlipCard flip, api.Motion? motion) {
-    _flip = flip;
-    _motion = motion;
-    if (_target == null) {
-      _target = flip.flipped;
-      _settle();
-    } else if (flip.flipped != _target) {
-      turnTo(flip.flipped);
-    } else {
-      _show();
-    }
-  }
-
-  void _settle() {
-    _progress = (_target ?? false) ? 1 : 0;
-    _turning = false;
-    _show();
-  }
-
-  /// Turns to the back ([back]) or the front.
-  void turnTo(bool back) {
-    _target = back;
-    if (!_animates || !attached) return _settle();
-    _start = _progress;
-    _turning = true;
-    _since = null;
-    syncTicker();
-  }
-
-  @override
-  bool get ticking => _animates && _turning;
-
-  @override
-  void tick(Duration elapsed) {
-    final since = _since ??= elapsed;
-    final ms = (elapsed - since).inMicroseconds / 1000;
-    final d = api.FlipCard.durationOf(_motion);
-    final curve = _motion?.curve ?? api.AnimationCurve.easeInOutCubic;
-    final to = (_target ?? false) ? 1.0 : 0.0;
-    if (ms >= d) {
-      _progress = to;
-      _turning = false;
-    } else {
-      _progress = _start + (to - _start) * curve.transform(ms / d);
-    }
-    _show();
-    if (!ticking) _ticker?.stop();
-  }
-
-  void _show() {
-    final t = _progress;
-    final keyframes = _motion?.keyframes ?? const <api.MotionKeyframe>[];
-    final scale = api.Motion.keyframed(keyframes, 'scale', 1, 1, t.clamp(0.0, 1.0)) ?? 1;
-    final turn = api.Motion(
-      rotateY: _flip.axis == api.FlipAxis.y ? t * 180 : 0,
-      rotateX: _flip.axis == api.FlipAxis.x ? -t * 180 : 0,
-      perspective: _motion?.perspective ?? 1,
-      scale: scale,
-    );
-    transform = motionMatrix(turn);
-    origin = Alignment.center;
-  }
-
-  @override
-  bool hitTestSelf(Offset position) => _animates && _flip.tapToFlip;
-
-  @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    final hit = super.hitTest(result, position: position);
-    // The card takes a tap anywhere on it, whichever face shows.
-    if (hitTestSelf(position) && size.contains(position)) {
-      result.add(BoxHitTestEntry(this, position));
-      return true;
-    }
-    return hit;
-  }
-
-  @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
-    if (event is! PointerDownEvent || !_animates || !_flip.tapToFlip) return;
-    (_tap ??= TapGestureRecognizer(debugOwner: this)..onTap = () => turnTo(!(_target ?? false))).addPointer(event);
-  }
-
-  @override
-  void dispose() {
-    _tap?.dispose();
-    super.dispose();
   }
 }
 
 /// Tilts its node in 3D toward the pointer ([api.Tilt]): the edge under it
 /// tips away, the node lifts while the pointer is over it, and it settles
 /// back over the tilt's reset when the pointer leaves.
-// TODO(v2-port): the `${tilt.*}` values its children read.
 class RenderTilt extends RenderPose with _Ticking {
   api.Tilt _tilt = const api.Tilt();
+
+  /// Gets `${tilt}` (x, y, active) as the pointer moves it.
+  void Function(Map<String, Object?> values)? onValues;
   set tilt(api.Tilt v) {
     if (v == _tilt) return;
     _tilt = v;
@@ -1322,6 +1236,8 @@ class RenderTilt extends RenderPose with _Ticking {
     _t = ((elapsed - since).inMicroseconds / 1000 / d).clamp(0.0, 1.0);
     if (_t >= 1) _moving = false;
     _show();
+    final p = _position;
+    onValues?.call({'x': p.dx, 'y': p.dy, 'active': _active > 0.5});
     if (!ticking) _ticker?.stop();
   }
 
