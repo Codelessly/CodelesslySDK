@@ -93,6 +93,25 @@ class TreeReactions implements NodeInteractions {
     }
   }
 
+  /// [fire], finishing when the reactions have run (a list's pull to
+  /// refresh shows until then).
+  Future<void> fireAndWait(NodeBox box, String trigger, {Json event = const {}}) async {
+    final node = box.node;
+    if (node == null) return;
+    final ctx = contextFor(box);
+    final state = _boxes[box];
+    final r = runner;
+    try {
+      if (r is CodelesslyActions) {
+        await r.run(node, trigger, ctx, event: event, cancellation: state?.cancellation, instance: box.instance);
+      } else {
+        await r.trigger(node, trigger, ctx, event: event);
+      }
+    } catch (e, s) {
+      if (ctx is ActionHost) ctx.reportError(e, s, action: trigger);
+    }
+  }
+
   /// An input's new value goes to the variable its value is bound to.
   void _writeBack(Node node, Object? value, ActionContext ctx) {
     final path = valuePaths[node.type];
