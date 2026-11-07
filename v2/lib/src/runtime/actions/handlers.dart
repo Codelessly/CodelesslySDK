@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import '../../render/drag_track.dart' show DragTracks;
+import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../services/services.dart';
 import '../expressions/formula.dart';
@@ -119,9 +120,17 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case ControlDragAction(command: DragCommand.reset) when TransformGestures.hasIn(run.host.tree, a.node):
       // A node with a transform gesture springs back to its rest pose.
       await TransformGestures.reset(run.host.tree!, a.node);
-    case ControlDragAction() || PlayAnimationAction():
-      // Draggable cards, drag tracks (a step command) and one-shot
-      // animations aren't rendered by v2 yet.
+    case ControlDragAction():
+      // A node that follows the pointer (gestures/drag_motion.dart): fling it
+      // off, bring it back from a side, or reset or shake it; each of the
+      // comma-separated nodes.
+      final tree = run.host.tree;
+      await Future.wait([
+        for (final id in a.node.split(','))
+          if (id.trim().isNotEmpty) DragMotionControl.control(id.trim(), a.command, a.direction, tree: tree),
+      ]);
+    case PlayAnimationAction():
+      // One-shot animations aren't rendered by v2 yet.
       break;
     case PaginateAction():
       await paginateAction(a, run);
