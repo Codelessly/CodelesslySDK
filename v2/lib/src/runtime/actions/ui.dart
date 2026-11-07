@@ -7,9 +7,21 @@ import 'dart:typed_data';
 
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_api_v2/codelessly_api.dart'
-    show CloseModalAction, ConfirmAction, Json, ModalPresentation, NavigateAction, OpenModalAction, ShowToastAction, ToastPosition, ToastStyle;
+    show
+        CloseModalAction,
+        ConfirmAction,
+        Json,
+        ModalPresentation,
+        NavigateAction,
+        OpenModalAction,
+        RouteTransition,
+        ShowToastAction,
+        ToastPosition,
+        ToastStyle;
 import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:codelessly_api_v2/codelessly_api.dart' show NavigationMode;
+
+import 'route_transition.dart';
 
 /// What a confirm dialog answered: whether the user confirmed, and what a
 /// screen used as the dialog gave back (its close modal action's result).
@@ -148,7 +160,8 @@ class NavigatorActionUi implements ActionUi {
         barrierColor: action.barrierColor,
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
-        sheetBelowWidth: action.sheetBelowWidth);
+        sheetBelowWidth: action.sheetBelowWidth,
+        routeTransition: action.routeTransition);
   }
 
   @override
@@ -156,7 +169,8 @@ class NavigatorActionUi implements ActionUi {
     final c = _context;
     if (c == null) return false;
     final route = ModalRoute.of(c);
-    if (route is! PopupRoute || !route.isCurrent) return false;
+    final modal = route is PopupRoute || (route is CodelesslyRouteTransitionRoute && route.modal);
+    if (route == null || !modal || !route.isCurrent) return false;
     Navigator.of(c).pop(result);
     return true;
   }
@@ -222,7 +236,9 @@ class NavigatorActionUi implements ActionUi {
 }
 
 /// Shows [content] (a screen) over [context]'s navigator as [presentation]
-/// says; completes with what popped it.
+/// says; completes with what popped it. With [routeTransition] it opens in
+/// a page route playing that transition (the screen behind can move, a
+/// drag can dismiss it), placed as [presentation] says.
 Future<Object?> showScreenModal(
   BuildContext context,
   Widget content, {
@@ -232,11 +248,27 @@ Future<Object?> showScreenModal(
   bool showDragHandle = false,
   Alignment alignment = Alignment.center,
   double sheetBelowWidth = 600,
+  RouteTransition? routeTransition,
 }) {
   final scrim = barrierColor == null ? null : Color(barrierColor.value);
   final width = MediaQuery.maybeSizeOf(context)?.width;
   final narrow = width == null || width < sheetBelowWidth;
   final sheet = presentation == ModalPresentation.bottomSheet || (presentation == ModalPresentation.adaptive && narrow);
+  if (routeTransition != null) {
+    final fullScreen = presentation == ModalPresentation.fullScreen;
+    return Navigator.of(context).push<Object?>(CodelesslyRouteTransitionRoute<Object?>(
+      modal: true,
+      transition: routeTransition,
+      anchor: RevealAnchor(tap: RevealAnchor.lastTap),
+      dismissibleBarrier: barrierDismissible,
+      fallbackBarrierColor: scrim ?? (fullScreen ? Colors.black : Colors.black54),
+      builder: (_) {
+        if (sheet) return Align(alignment: Alignment.bottomCenter, child: content);
+        if (fullScreen) return content;
+        return SafeArea(child: Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)));
+      },
+    ));
+  }
   if (sheet) {
     return showModalBottomSheet<Object?>(
       context: context,
