@@ -1,0 +1,239 @@
+import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  final Map<String, Object?> vars = {
+    'qty': 2,
+    'price': 5.25,
+    'name': 'Ava',
+    'shots': '3',
+    'cart': [
+      {'name': 'Cortado', 'qty': 1, 'total': 4.75},
+      {'name': 'Oat latte', 'qty': 2, 'total': 12.9},
+    ],
+    'syrups': ['vanilla', 'honey'],
+    'cells': ['50k', true, false, 'true', 'False', '', 1, 0],
+  };
+  Object? resolve(String path) {
+    final parts = RegExp(r'[a-zA-Z_]\w*|\d+').allMatches(path).toList();
+    Object? value = vars[parts.first[0]];
+    for (final part in parts.skip(1).map((m) => m[0]!)) {
+      value = switch (value) {
+        final List list when part == 'length' => list.length,
+        final List list => list[int.parse(part)],
+        final Map map => map[part],
+        _ => null,
+      };
+    }
+    return value;
+  }
+
+  Object? eval(String expression) =>
+      FormulaEvaluator.evaluate(expression, resolve);
+
+  group('FormulaEvaluator', () {
+    test('object builds records a list can filter and sort', () {
+      expect(eval("object('title', 'Black', 'level', 0.87)"), {
+        'title': 'Black',
+        'level': 0.87,
+      });
+      expect(
+        eval(
+          "map(sortBy(filter([object('n', 'a', 'v', 3), object('n', 'b', "
+          "'v', 1), object('n', 'c', 'v', 0)], r => r.v > 0), 'v'), 'n')",
+        ),
+        ['b', 'a'],
+      );
+      expect(eval("object('k', qty * 2).k"), 4);
+      // A dangling key is dropped.
+      expect(eval("object('a', 1, 'b')"), {'a': 1});
+    });
+
+    test('parses tells well-formed formulas apart', () {
+      expect(FormulaEvaluator.parses('level > limit'), isTrue);
+      expect(FormulaEvaluator.parses('null'), isTrue);
+      expect(FormulaEvaluator.parses('level >'), isFalse);
+      expect(FormulaEvaluator.parses("if(a, 'x'"), isFalse);
+    });
+
+    test('math helpers', () {
+      expect(eval('clamp(1.4, 0, 1)'), 1);
+      expect(eval('clamp(-3, 0, 1)'), 0);
+      expect(eval('round(sin(0), 3)'), 0);
+      expect(eval('cos(0)'), 1);
+      expect(eval('sqrt(16)'), 4);
+      expect(eval('pow(2, 10)'), 1024);
+      expect(eval('pad(5, 2)'), '05');
+      expect(eval("pad(7, 3, ' ')"), '  7');
+      expect(eval('pad(123, 2)'), '123');
+      expect(eval("alpha('#FF4D4F', 0.12)"), '#1FFF4D4F');
+      expect(eval("alpha('#80ff4d4f', 1)"), '#FFFF4D4F');
+      expect(eval("alpha('red', 1)"), null);
+      expect(eval('take([1, 2, 3, 4], 3)'), [1, 2, 3]);
+      expect(eval('take([1], 3)'), [1]);
+      expect(eval('concat([1, 2], [3], 4)'), [1, 2, 3, 4]);
+      expect(eval('concat(take([1, 2, 3], 2), [9])'), [1, 2, 9]);
+      expect(eval('[1, 2] + [3]'), [1, 2, 3]);
+      expect(eval('[1, 2] + 3'), [1, 2, 3]);
+      expect(eval("'a' + 'b'"), 'ab');
+      expect(eval('skip([1, 2, 3], 1)'), [2, 3]);
+      expect(eval("keys(object('a', 1, 'b', 2))"), ['a', 'b']);
+      expect(eval('keys(qty)'), isEmpty);
+      // A map read with a computed key, e.g. a snooze deadline by alert id.
+      expect(
+        eval(
+          "map(filter([object('id', 'a'), object('id', 'b')], r => "
+          "object('a', 900)[r.id] > 880), 'id')",
+        ),
+        ['a'],
+      );
+    });
+
+    test('arithmetic and precedence', () {
+      expect(eval('1 + 2 * 3'), 7);
+      expect(eval('(1 + 2) * 3'), 9);
+      expect(eval('qty * price'), 10.5);
+      expect(eval('10 / 4'), 2.5);
+      expect(eval('10 / 0'), isNull);
+      expect(eval('7 % 3'), 1);
+      expect(eval('-qty + 1'), -1);
+      expect(eval('shots * 0.9'), closeTo(2.7, 1e-9));
+      expect(eval('missing + 1'), 1);
+    });
+
+    test('text', () {
+      expect(eval("'Hi ' + name"), 'Hi Ava');
+      expect(eval('"x" + 2'), 'x2');
+      expect(eval("upper(name) + lower('B')"), 'AVAb');
+      expect(eval("plural(qty, 'drink')"), 'drinks');
+      expect(eval("plural(1, 'drink')"), 'drink');
+      expect(eval("join(syrups, ' · ')"), 'vanilla · honey');
+      expect(eval("join(cart, ', ', 'name')"), 'Cortado, Oat latte');
+    });
+
+    test('comparisons, logic and ternary', () {
+      expect(eval('qty > 1 && price < 6'), true);
+      expect(eval('qty == 2'), true);
+      expect(eval('shots == 3'), true);
+      expect(eval("name != 'Ava'"), false);
+      expect(eval('!qty'), false);
+      expect(eval("qty > 1 ? 'many' : 'one'"), 'many');
+      expect(eval("qty > 5 ? 'a' : qty > 1 ? 'b' : 'c'"), 'b');
+      expect(eval('missing || 4'), 4);
+    });
+
+    test('== compares a boolean by value, not by truthiness', () {
+      // A text cell is no check mark: "50k" equals neither true nor false.
+      expect(eval('cells[0] == true'), false);
+      expect(eval('cells[0] == false'), false);
+      expect(eval('cells[0] != true'), true);
+      expect(eval('true == cells[0]'), false);
+      expect(eval('cells[1] == true'), true);
+      expect(eval('cells[2] == false'), true);
+      expect(eval('cells[1] == false'), false);
+      // Text and numbers that spell a boolean still match it.
+      expect(eval('cells[3] == true'), true);
+      expect(eval('cells[4] == false'), true);
+      expect(eval('cells[5] == false'), true);
+      expect(eval('cells[6] == true'), true);
+      expect(eval('cells[7] == false'), true);
+      expect(eval("'1' == true"), true);
+      // A list or the missing value is not a boolean.
+      expect(eval('syrups == true'), false);
+      expect(eval('missing == false'), false);
+      // Truthiness itself is unchanged.
+      expect(eval("cells[0] ? 'yes' : 'no'"), 'yes');
+    });
+
+    test('functions', () {
+      expect(eval('money(qty * price)'), r'$10.50');
+      expect(eval('money(1234567.891)'), r'$1,234,567.89');
+      expect(eval("money(-3, '€')"), '-€3.00');
+      expect(eval('fixed(price, 1)'), '5.3');
+      expect(eval('round(2.345, 2)'), 2.35);
+      expect(eval('round(2.5)'), 3);
+      expect(eval('floor(2.9) + ceil(2.1)'), 5);
+      expect(eval('min(3, 1, 2)'), 1);
+      expect(eval('max([3, 9, 2])'), 9);
+      expect(eval("sum(cart, 'total')"), 17.65);
+      expect(eval("sum(cart, 'qty')"), 3);
+      expect(eval('count(cart)'), 2);
+      expect(eval("count(cart, 'qty', 2)"), 1);
+      expect(eval('length(syrups)'), 2);
+      expect(eval("contains(syrups, 'honey')"), true);
+      expect(eval("if(qty > 1, 'yes', 'no')"), 'yes');
+      expect(eval('isEmpty(cart)'), false);
+      expect(eval("number('4.5') + 1"), 5.5);
+      expect(eval("where(cart, 'qty', 2)"), [
+        {'name': 'Oat latte', 'qty': 2, 'total': 12.9},
+      ]);
+      expect(eval("length(where(cart, 'qty'))"), 2);
+      expect(eval("without(syrups, ['honey'])"), ['vanilla']);
+    });
+
+    test('member access', () {
+      expect(eval('cart[1].name'), 'Oat latte');
+      expect(eval('cart[qty - 1].total'), 12.9);
+      expect(eval('cart.length'), 2);
+      expect(eval('syrups[5]'), isNull);
+    });
+
+    test('invalid expressions evaluate to null', () {
+      expect(eval('1 +'), isNull);
+      expect(eval('nope(1)'), isNull);
+      expect(eval("'open"), isNull);
+    });
+
+    test('substitute and stringify', () {
+      expect(
+        FormulaEvaluator.substitute(r'Total ${= money(qty * price)}!', resolve),
+        r'Total $10.50!',
+      );
+      expect(FormulaEvaluator.substitute(r'${= 0.1 + 0.2}', resolve), '0.3');
+      expect(FormulaEvaluator.substitute(r'${= 3 * 2.0}', resolve), '6');
+      expect(
+        FormulaEvaluator.substitute(r"${= qty > 1 ? '}' : '{'}", resolve),
+        '}',
+      );
+      expect(FormulaEvaluator.substitute(r'\${= 1}', resolve), r'\${= 1}');
+      expect(FormulaEvaluator.exactExpression(r' ${= a + b} '), ' a + b');
+      expect(FormulaEvaluator.exactExpression(r'${= a} and ${b}'), isNull);
+    });
+
+    test('referenced paths', () {
+      expect(
+        FormulaEvaluator.referencedPaths(
+          "money(sum(storage.cart, 'total')) + item.name + cart[index].qty",
+        ),
+        {'storage.cart', 'item.name', 'cart', 'index'},
+      );
+      expect(
+        FormulaEvaluator.referencedPathsInText(r'${= a + 1} ${b} ${= c}'),
+        {'a', 'c'},
+      );
+    });
+  });
+
+
+
+  group('errorOf', () {
+    test('is null for a valid formula', () {
+      expect(FormulaEvaluator.errorOf('money(price * qty)'), isNull);
+    });
+
+    test('names an unknown function', () {
+      expect(FormulaEvaluator.errorOf('sun(cart)'), contains('"sun"'));
+    });
+
+    test('explains a missing bracket', () {
+      expect(FormulaEvaluator.errorOf('round(price'), isNotNull);
+    });
+  });
+
+  test('every function is documented', () {
+    expect(
+      FormulaEvaluator.functionDocs.map((doc) => doc.name).toSet(),
+      FormulaEvaluator.functions.toSet(),
+    );
+  });
+}
