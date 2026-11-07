@@ -1,13 +1,14 @@
 import 'dart:async';
 
 import 'package:codelessly_api_v2/codelessly_api.dart'
-    show CanvasProps, Json, LayoutDocumentScripts, NavigateAction, Node, PublishLayout, PublishModel, TriggerType;
+    show CanvasProps, Json, LayoutDocumentScripts, NavigateAction, Node, PublishLayout, PublishModel, RouteTransition, TriggerType;
 import 'package:flutter/material.dart';
 
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/actions/node_values.dart';
+import '../runtime/actions/route_transition.dart';
 import '../runtime/actions/ui.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
@@ -212,17 +213,20 @@ class CodelesslyWidget extends StatefulWidget {
   final CodelesslyNavigationHandler? onNavigate;
 
   /// A route showing layout [layoutId] of [codelessly], as navigation
-  /// pushes them. [template] passes its builders and handler along.
+  /// pushes them. [template] passes its builders and handler along. With
+  /// [transition] it plays that custom transition (its reveals growing
+  /// from [anchor]).
   static Route<T> route<T>({
     required Codelessly codelessly,
     required String layoutId,
     Map<String, Object?> params = const {},
     CodelesslyWidget? template,
     String? name,
-  }) =>
-      MaterialPageRoute<T>(
-        settings: RouteSettings(name: name, arguments: params),
-        builder: (_) => CodelesslyWidget(
+    RouteTransition? transition,
+    RevealAnchor anchor = const RevealAnchor(),
+  }) {
+    final settings = RouteSettings(name: name, arguments: params);
+    Widget build(BuildContext _) => CodelesslyWidget(
           codelessly: codelessly,
           layoutId: layoutId,
           params: params,
@@ -232,8 +236,11 @@ class CodelesslyWidget extends StatefulWidget {
           errorBuilder: template?.errorBuilder ?? template?.controller?.errorBuilder,
           layoutBuilder: template?.layoutBuilder ?? template?.controller?.layoutBuilder,
           onNavigate: template?.onNavigate,
-        ),
-      );
+        );
+    return transition == null
+        ? MaterialPageRoute<T>(settings: settings, builder: build)
+        : CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
+  }
 
   /// Routes for a [Navigator] or `MaterialApp.onGenerateRoute`: `/` opens
   /// the entry screen, any other name the screen it locates
@@ -610,7 +617,7 @@ class _LayoutViewState extends State<_LayoutView> {
       if (request.destinationId.isEmpty) return;
       type = NavigationType.replace;
     }
-    Route<void>? routeTo(String destination, Map<String, Object?> params) {
+    Route<void>? routeTo(String destination, Map<String, Object?> params, {RouteTransition? transition}) {
       final layoutId = model.resolveLayoutId(destination);
       if (layoutId == null) {
         FlutterError.reportError(FlutterErrorDetails(
@@ -626,10 +633,12 @@ class _LayoutViewState extends State<_LayoutView> {
         params: params,
         template: widget.host,
         name: '/$location',
+        transition: transition,
+        anchor: transition == null ? const RevealAnchor() : RevealAnchor(tap: RevealAnchor.lastTap),
       );
     }
 
-    final route = routeTo(request.destinationId, request.params);
+    final route = routeTo(request.destinationId, request.params, transition: request.routeTransition);
     if (route == null) return;
     switch (type) {
       case NavigationType.push:
