@@ -17,6 +17,7 @@ import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/scopes.dart';
+import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../services/services.dart' show Services;
 import 'back_guard.dart';
 import 'codelessly.dart';
@@ -563,6 +564,8 @@ class _LayoutViewState extends State<_LayoutView> {
       if (v.persists) _persisted.add(PersistedVariable.attach(scope, v, storage));
       if (widget.params.containsKey(v.name)) scope.set(v.name, widget.params[v.name]);
     }
+    // The state variables of its lists' paginations (`${contacts.page}`).
+    declarePaginationVariables(scope, widget.layout.document.subtree(canvasId));
   }
 
   final List<PersistedVariable> _persisted = [];

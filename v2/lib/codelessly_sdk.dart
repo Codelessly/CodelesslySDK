@@ -85,6 +85,10 @@ export 'src/services/services.dart';
 export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
 export 'src/runtime/actions/actions.dart';
+export 'src/runtime/lists/lists.dart';
+export 'src/widgets/collections_data_list.dart' show DataListView, DataListViewState, ListSection, SectionIndexBar, UndoBar, groupIntoSections, sectionOffset;
+export 'src/widgets/collections_reorder.dart' show GroupReorderList, KeyboardReorderItem, ReorderListView;
+export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
 
 // The app shell: Codelessly, CodelesslyWidget, loading, navigation.
 export 'src/app/app_identity.dart';

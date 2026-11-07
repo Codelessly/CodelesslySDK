@@ -20,6 +20,31 @@ import 'paths.dart';
 import 'preview.dart';
 import 'scopes.dart';
 
+/// The instance of a repeated box whose item its widget gives itself
+/// ([NodeBinder.provideItem]): repeat [key] (a row's item key, a section, a
+/// table cell) of [owner]'s nodes, inside [outer] (the owner's own
+/// instance). Box keys print it, so [key] prints as what tells repeats
+/// apart.
+@immutable
+final class ProvidedItem {
+  const ProvidedItem(this.tag, this.outer, this.owner, this.key);
+
+  final String tag;
+  final Object? outer;
+  final String owner;
+  final Object? key;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ProvidedItem && other.tag == tag && other.outer == outer && other.owner == owner && other.key == key;
+
+  @override
+  int get hashCode => Object.hash(tag, outer, owner, key);
+
+  @override
+  String toString() => '($tag, $outer, $owner, $key)';
+}
+
 /// One bound property: a path of the node and the expression giving it.
 @immutable
 final class BoundProperty {
@@ -354,12 +379,19 @@ class NodeBinder {
     final root = scope;
     if (root == null) return null;
     String? listId;
+    // The item a repeat's widget gives it (a paged list's row, a section
+    // header, a table cell), when [id] is in one.
+    ValueScope? provided;
     // The nodes around (and including) [id] below the list it repeats in
     // that declare names for the nodes inside them (a drag track's
     // `track`, a flip card's `flip`; node_scopes.dart), innermost first.
     List<String>? scoped;
     if (source.node(id) case final Node self when declaresNodeScope(self)) scoped = [id];
     for (var p = source.parentOf(id); p != null; p = source.parentOf(p)) {
+      if (instance is ProvidedItem && instance.owner == p) {
+        provided = _provided[instance] ??= ItemScope(index: 0, parent: scopeFor(source, p, instance.outer) ?? root);
+        break;
+      }
       final pn = source.node(p);
       if (pn != null && _repeats(pn)) {
         listId = p;
@@ -367,7 +399,7 @@ class NodeBinder {
       }
       if (pn != null && declaresNodeScope(pn)) (scoped ??= []).add(p);
     }
-    final base = listId == null ? root : _itemScope(source, listId, instance, root);
+    final base = provided ?? (listId == null ? root : _itemScope(source, listId, instance, root));
     if (scoped == null) return base;
     var out = base;
     for (final p in scoped.reversed) {
@@ -418,9 +450,41 @@ class NodeBinder {
     return NodeBindings.of(list).data?.valueIn(engine, s);
   }
 
+  final Map<ProvidedItem, ItemScope> _provided = {};
+
+  /// Gives repeat [instance] (of a widget whose items it gives itself) its
+  /// [item] at [index]: the scope its nodes read `item` and `index` from,
+  /// made or moved to them (the boxes that read them re-apply).
+  ItemScope? provideItem(NodeSource source, ProvidedItem instance, {required int index, Object? item}) {
+    final root = scope;
+    if (root == null) return null;
+    final existing = _provided[instance];
+    if (existing != null) {
+      existing.update(index: index, item: item);
+      return existing;
+    }
+    return _provided[instance] = ItemScope(
+      index: index,
+      item: item,
+      parent: scopeFor(source, instance.owner, instance.outer) ?? root,
+    );
+  }
+
+  /// Lets go of the scope of repeat [instance] (its widget no longer shows
+  /// it). Not disposed: a box leaving with it may still listen.
+  void forgetItem(ProvidedItem instance) => _provided.remove(instance);
+
+  /// The items node [list] (in [instance]) is bound to: its `data` binding or
+  /// a condition setting it, as a list; null when it has none.
+  List<Object?>? itemsOf(NodeSource source, Node list, Object? instance) {
+    final s = scope == null ? null : scopeFor(source, list.id, instance);
+    if (s == null) return null;
+    return _listOf(_dataOf(list, s));
+  }
+
   /// Lets go of the item, local and node scopes.
   void dispose() {
-    for (final s in _items.values) {
+    for (final s in [..._items.values, ..._provided.values]) {
       s.dispose();
     }
     _items.clear();
@@ -432,6 +496,7 @@ class NodeBinder {
       s.dispose();
     }
     _nodeScopes.clear();
+    _provided.clear();
   }
 }
 
