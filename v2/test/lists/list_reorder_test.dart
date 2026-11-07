@@ -255,7 +255,7 @@ void main() {
 
     // Drag t1 onto the done column, between d0 and d1.
     final start = s.center('todo-card', instance: const ProvidedItem('row', null, 'todo', ('id', 't1')));
-    final d1 = s.center('done-card', instance: ProvidedItem('row', null, 'done', ('id', 'd1')));
+    final d1 = s.center('done-card', instance: const ProvidedItem('row', null, 'done', ('id', 'd1')));
     final drag = await tester.startGesture(start);
     await tester.pump();
     for (var i = 1; i <= 10; i++) {
