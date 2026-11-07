@@ -250,7 +250,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       _valueChanged(oldTrack, oldValue, value);
     }
     _animateTo(_progress);
-    _box?.outsideHitTest = _interactive && (track.jumpOnTap || track.hitArea == api.DragTrackHitArea.parent) ? _hitOutside : null;
+    if (_interactive && (track.jumpOnTap || track.hitArea == api.DragTrackHitArea.parent)) _box?.outsideHitTest = _hitOutside;
     if (attached) _syncRegistration();
     _refresh(later: true);
   }
