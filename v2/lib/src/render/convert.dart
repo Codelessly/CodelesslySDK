@@ -53,6 +53,19 @@ BoxShadow boxShadow(api.Effect e) => BoxShadow(
       spreadRadius: e.spreadRadius,
     );
 
+/// [style]'s OpenType features: its `fontFeatures`, one per tag (the last
+/// wins), plus `tnum` for `tabularFigures` unless they set it (SDK 8.x's
+/// `TextUtils.fontFeaturesOf`).
+List<ui.FontFeature>? fontFeatures(api.TextStyle style) {
+  final tabular = style.tabularFigures == true;
+  if (style.fontFeatures.isEmpty) return tabular ? const [ui.FontFeature.tabularFigures()] : null;
+  final resolved = api.OpenTypeFeature.resolve(style.fontFeatures);
+  return [
+    for (final f in resolved) ui.FontFeature(f.tag, f.value),
+    if (tabular && !resolved.any((f) => f.tag == 'tnum')) const ui.FontFeature.tabularFigures(),
+  ];
+}
+
 /// [style] as Flutter's `TextStyle`, over the v1-compatible base
 /// ([kTextBase]).
 TextStyle textStyle(api.TextStyle style) {
@@ -76,7 +89,10 @@ TextStyle textStyle(api.TextStyle style) {
         ? null
         : TextDecorationStyle.values.byName(style.decorationStyle!.name),
     decorationThickness: style.decorationThickness,
-    fontFeatures: style.tabularFigures == true ? const [ui.FontFeature.tabularFigures()] : null,
+    fontFeatures: fontFeatures(style),
+    leadingDistribution: style.leadingDistribution == api.TextLeadingDistribution.even
+        ? TextLeadingDistribution.even
+        : null,
     shadows: [
       for (final s in style.shadows)
         if (s.visible && s.type == api.EffectType.dropShadow)
