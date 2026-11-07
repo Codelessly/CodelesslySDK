@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
+import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
 import '../runtime/actions/ui.dart';
@@ -504,6 +505,8 @@ class _LayoutViewState extends State<_LayoutView> {
     final values = ValuesScope({
       'route': widget.params,
       if (widget.data.isNotEmpty) 'data': {...appData, ...widget.data},
+      // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
+      'drag': dragIdleValues,
     }, _codelessly.data);
     final scope = VariableScope(const [], parent: values);
     final nodeValues = NodeValues(DocumentSource(widget.layout.document));

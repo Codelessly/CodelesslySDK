@@ -269,6 +269,10 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
 mixin IslandParent on RenderBox, RenderObjectWithLayoutCallbackMixin {
   IslandOwnerElement? _islandOwner;
 
+  /// The element that shows this render object (in the app's element tree),
+  /// or null while none does.
+  BuildContext? get islandOwnerContext => _islandOwner;
+
   @override
   void performLayout() {
     runLayoutCallback();
@@ -278,6 +282,16 @@ mixin IslandParent on RenderBox, RenderObjectWithLayoutCallbackMixin {
   /// Unmounts the islands released since the last layout.
   @override
   void layoutCallback() => _islandOwner?._flushDrops();
+}
+
+/// The element showing the node boxes [object] is in (a [NodeView]'s, or a
+/// [NodeChild]'s inside an island): a context in the app's element tree,
+/// for what a render object shows in the app's overlay. Null outside one.
+BuildContext? islandContextOf(RenderObject object) {
+  for (RenderObject? p = object; p != null; p = p.parent) {
+    if (p is IslandParent) return p._islandOwner;
+  }
+  return null;
 }
 
 /// The element of a widget that shows node boxes ([NodeView], [NodeChild]):

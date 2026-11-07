@@ -106,6 +106,22 @@ event: {'value': v})` (inputs.dart, material.dart): the runtime writes the
 value to the variable the input's value is bound to and runs the node's
 reactions. A type whose island takes taps itself is in `selfTappedTypes`.
 
+## Runtime (gestures)
+
+`lib/src/runtime/gestures`: `physics.dart` is the one release physics
+(API v2 `GesturePhysics`/`GestureSnap`: `springOf`, `rubberBand`,
+`boundsRange`, `AxisSettleSimulation`, `snapTargetOf`, `SimulationGroup`);
+build every gesture's release on it. `drag_motion.dart` is a node that
+follows the pointer (`RenderDragMotion`, the outermost layer;
+`DragMotionControl` for controlDrag), `drag_and_drop.dart` drag sources
+and drop targets (`RenderDragSource`, `RenderDropTarget` before the
+reactions; `DragAndDrop.of(tree)` is the session `${drag}` reads; a list
+opens `dropSlotOf(tree, listId)`). Only an interactive tree adds them. A
+behaviour that gives the nodes inside it names (`drag`) registers in
+`NodeBinder.localNames` and sets its `LocalScope`
+(`binder.localScopeOf`). `runTrigger` fires a trigger and waits for its
+chain.
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,
