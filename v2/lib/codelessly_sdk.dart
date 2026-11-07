@@ -78,6 +78,8 @@ export 'src/render/node_tree.dart' show NodeTree, NodeBox, NodeTreeObserver, Slo
 export 'src/render/convert.dart' show textStyle;
 export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';
+export 'src/render/hero.dart' show HeroMarkPaint, HeroMarks, RenderHeroMark;
+export 'src/render/play.dart' show EffectPlayers, FlightRegistry, RenderEffects, RenderFlightBox, effectTransformAt;
 export 'src/render/recipe.dart' show NodeChild;
 export 'src/render/source.dart';
 export 'src/widgets/media.dart' show ExternalComponents;
@@ -104,6 +106,7 @@ export 'src/app/config.dart';
 export 'src/app/fonts.dart';
 export 'src/app/loader.dart';
 export 'src/app/navigation.dart';
+export 'src/app/page_transitions.dart';
 export 'src/app/persisted_variables.dart';
 export 'src/app/runtime.dart';
 export 'src/app/theme.dart' show themeDataOf;

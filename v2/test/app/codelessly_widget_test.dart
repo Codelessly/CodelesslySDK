@@ -129,6 +129,36 @@ void main() {
     expect(find.byType(CodelesslyWidget), findsOneWidget);
   });
 
+  testWidgets('a navigation plays its page transition; a link by id is named at the screen\'s path', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    final fleet = layoutWithCanvas(bundle, 'Fleet · M');
+    final home = await pumpApp(tester, codelessly, layoutId: today.id);
+    unawaited(home.actionContext!.navigate({
+      'type': 'navigate', 'to': fleet.id, 'transition': 'fade', 'transitionMs': 400, //
+    }));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    final route = ModalRoute.of(tester.element(find.byType(CodelesslyWidget).last))!;
+    expect(route, isA<CodelesslyPageTransitionRoute<void>>());
+    expect((route as CodelesslyPageTransitionRoute).transitionDuration, const Duration(milliseconds: 400));
+    expect(route.animation!.value, closeTo(0.5, 0.05));
+    expect(find.byType(FadeTransition), findsWidgets);
+    await settle(tester);
+    expect(codelessly.route.value?.layoutId, fleet.id);
+    // The platform's on the web is none.
+    expect(webTransition(PageTransition.platform, isWeb: true), PageTransition.none);
+    expect(webTransition(PageTransition.platform, isWeb: false), PageTransition.platform);
+
+    // onGenerateRoute names a link by id at the screen's path.
+    final model = codelessly.publishModel!;
+    final factory = CodelesslyWidget.onGenerateRoute(codelessly);
+    final entry = model.resolveLayoutId(model.entryLayoutId!)!;
+    final entryCanvas = model.layouts[entry]!.canvases.first.id;
+    expect(factory(RouteSettings(name: '/$entryCanvas'))!.settings.name, '/');
+  });
+
   testWidgets('reset clears the history, leaving its base screen beneath', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));

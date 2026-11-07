@@ -40,6 +40,7 @@ import 'package:flutter/services.dart';
 
 import '../../render/islands.dart';
 import '../../render/node_tree.dart';
+import '../../render/play.dart' show FlightRegistry;
 import '../../render/source.dart';
 import '../contracts.dart';
 import '../expressions/formula.dart' show FormulaEvaluator;
@@ -885,6 +886,20 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     if (box == null) return;
     final dnd = DragAndDrop.of(box.tree);
     if (wasAccepted && drag.dropped) {
+      // Where the copy was let go, for the node with the same flight key
+      // that shows the drop next (render/play.dart's FlightRegistry).
+      final key = box.node?.behaviours.flightKey ?? '';
+      if (key.isNotEmpty && box.hasSize) {
+        final dropped = drag.session.size;
+        FlightRegistry.recordDrop(
+          key,
+          Rect.fromCenter(
+            center: drag.offset + box.size.center(Offset.zero),
+            width: dropped.width,
+            height: dropped.height,
+          ),
+        );
+      }
       _fire(api.TriggerType.dragCompleted.name, drag.session.toMap(active: false));
     } else {
       _springBack(drag.offset);

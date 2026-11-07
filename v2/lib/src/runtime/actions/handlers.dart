@@ -15,12 +15,14 @@ import 'package:just_audio/just_audio.dart' as audio;
 import '../../render/drag_track.dart' show DragTracks;
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
+import '../../render/play.dart' show EffectPlayers;
 import '../../services/services.dart';
 import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
+import 'feedback_theme.dart' show Look;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
@@ -80,15 +82,35 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _cloudFiles(a, run);
     case ShowToastAction():
       final runner = run.nested(run.result);
+      final label = run.text(a.actionLabel);
+      final offset = Look(a.style).string('offset')?.trim() ?? '';
       run.host.ui.showToast(
         a,
         message: run.text(a.message),
         title: run.text(a.title),
-        onAction: a.actions.isEmpty ? null : () => unawaited(_deferred(a.actions, runner)),
+        actionLabel: label,
+        bound: {
+          for (final e in a.variables.entries) e.key: run.evaluate(e.value),
+          if (offset.isNotEmpty) 'offset': run.evaluate(offset),
+        },
+        // The button's actions run on the chain that showed the toast,
+        // whenever it's pressed, with its `${result}` then.
+        onAction: label.trim().isEmpty ? null : () => unawaited(_deferred(a.actions, runner)),
       );
     case ConfirmAction():
-      final outcome = await run.host.ui.confirm(a, title: run.text(a.title), message: run.text(a.message), params: run.json(a.params));
-      if (outcome.values case final Object v) run.result = v;
+      final outcome = await run.host.ui.confirm(
+        a,
+        title: run.text(a.title),
+        message: run.text(a.message),
+        caption: run.text(a.caption),
+        confirmLabel: run.text(a.confirmLabel),
+        cancelLabel: run.text(a.cancelLabel),
+        bound: {for (final e in a.variables.entries) e.key: run.evaluate(e.value)},
+        params: run.json(a.params),
+      );
+      // What a dialog screen gave back (a reason typed into it) is the
+      // `${result}` its confirm actions read.
+      if (outcome.values case final Map<Object?, Object?> v when v.isNotEmpty) run.result = v;
       await run.run(outcome.confirmed ? a.actions : a.cancelActions);
     case DelayAction():
       await run.wait(Duration(milliseconds: delayMilliseconds(a, run)));
@@ -130,7 +152,9 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
           if (id.trim().isNotEmpty) DragMotionControl.control(id.trim(), a.command, a.direction, tree: tree),
       ]);
     case PlayAnimationAction():
-      // One-shot animations aren't rendered by v2 yet.
+      // A node's one-shot effect, on every shown instance; the chain waits
+      // for it. (Particles aren't drawn by v2 yet.)
+      await EffectPlayers.play(a.node, a.animation);
       break;
     case PaginateAction():
       await paginateAction(a, run);

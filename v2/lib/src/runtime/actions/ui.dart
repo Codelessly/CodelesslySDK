@@ -15,13 +15,15 @@ import 'package:codelessly_api_v2/codelessly_api.dart'
         NavigateAction,
         OpenModalAction,
         RouteTransition,
-        ShowToastAction,
-        ToastPosition,
-        ToastStyle;
+        ShowToastAction;
 import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:codelessly_api_v2/codelessly_api.dart' show NavigationMode;
 
+import 'confirm_dialog.dart';
+import 'feedback_theme.dart';
+import 'presentation_route.dart';
 import 'route_transition.dart';
+import 'toast.dart';
 
 /// What a confirm dialog answered: whether the user confirmed, and what a
 /// screen used as the dialog gave back (its close modal action's result).
@@ -57,11 +59,26 @@ abstract interface class ActionUi {
   /// doesn't run in one.
   bool closeModal(Object? result);
 
-  /// Shows a toast. [onAction] runs when its button is pressed.
-  void showToast(ShowToastAction action, {required String message, String title = '', VoidCallback? onAction});
+  /// Shows a toast. [onAction] runs when its button ([actionLabel]) is
+  /// pressed. Text and [bound] (the action's `variables` and the look's
+  /// `offset`, evaluated) are read where the action ran.
+  void showToast(ShowToastAction action,
+      {required String message,
+      String title = '',
+      String actionLabel = '',
+      Map<String, Object?> bound = const {},
+      VoidCallback? onAction});
 
-  /// Asks to confirm; [title] and [message] evaluated.
-  Future<ConfirmOutcome> confirm(ConfirmAction action, {required String title, String message = '', Json params = const {}});
+  /// Asks to confirm; text, [params] and [bound] (the action's `variables`)
+  /// evaluated.
+  Future<ConfirmOutcome> confirm(ConfirmAction action,
+      {required String title,
+      String message = '',
+      String caption = '',
+      String confirmLabel = 'OK',
+      String cancelLabel = 'Cancel',
+      Map<String, Object?> bound = const {},
+      Json params = const {}});
 
   /// Lets the user pick files for an upload (none: cancelled).
   Future<List<PickedFile>> pickFiles({bool images = true, bool multiple = true});
@@ -82,10 +99,22 @@ class NoActionUi implements ActionUi {
   bool closeModal(Object? result) => false;
 
   @override
-  void showToast(ShowToastAction action, {required String message, String title = '', VoidCallback? onAction}) {}
+  void showToast(ShowToastAction action,
+      {required String message,
+      String title = '',
+      String actionLabel = '',
+      Map<String, Object?> bound = const {},
+      VoidCallback? onAction}) {}
 
   @override
-  Future<ConfirmOutcome> confirm(ConfirmAction action, {required String title, String message = '', Json params = const {}}) async =>
+  Future<ConfirmOutcome> confirm(ConfirmAction action,
+          {required String title,
+          String message = '',
+          String caption = '',
+          String confirmLabel = 'OK',
+          String cancelLabel = 'Cancel',
+          Map<String, Object?> bound = const {},
+          Json params = const {}}) async =>
       const ConfirmOutcome(false);
 
   @override
@@ -176,58 +205,63 @@ class NavigatorActionUi implements ActionUi {
   }
 
   @override
-  void showToast(ShowToastAction action, {required String message, String title = '', VoidCallback? onAction}) {
+  void showToast(ShowToastAction action,
+      {required String message,
+      String title = '',
+      String actionLabel = '',
+      Map<String, Object?> bound = const {},
+      VoidCallback? onAction}) {
     final c = _context;
-    final messenger = c == null ? null : ScaffoldMessenger.maybeOf(c);
-    if (messenger == null) return;
-    final text = title.isEmpty ? message : '$title\n$message';
-    messenger.showSnackBar(SnackBar(
-      content: Text(text),
-      duration: Duration(milliseconds: action.durationMs),
-      backgroundColor: switch (action.toastStyle) {
-        ToastStyle.success => Colors.green.shade700,
-        ToastStyle.warning => Colors.orange.shade800,
-        ToastStyle.error => Colors.red.shade700,
-        ToastStyle.info => Colors.blue.shade700,
-        ToastStyle.neutral => null,
-      },
-      behavior: action.position == ToastPosition.top ? SnackBarBehavior.floating : null,
-      showCloseIcon: action.showClose,
-      action: action.actionLabel.isEmpty || onAction == null
-          ? null
-          : SnackBarAction(label: action.actionLabel, onPressed: onAction),
-    ));
+    if (c == null) return;
+    CodelesslyToast.show(
+      c,
+      ToastRequest(action, message: message, title: title, actionLabel: actionLabel, bound: bound, onAction: onAction),
+    );
   }
 
   @override
-  Future<ConfirmOutcome> confirm(ConfirmAction action, {required String title, String message = '', Json params = const {}}) async {
+  Future<ConfirmOutcome> confirm(ConfirmAction action,
+      {required String title,
+      String message = '',
+      String caption = '',
+      String confirmLabel = 'OK',
+      String cancelLabel = 'Cancel',
+      Map<String, Object?> bound = const {},
+      Json params = const {}}) async {
     final c = _context;
     if (c == null) return const ConfirmOutcome(false);
-    if (action.dialog.isNotEmpty) {
-      final content = modal?.call(action.dialog, params);
-      if (content != null) {
-        final result = await showScreenModal(c, content,
-            presentation: action.presentation, barrierDismissible: action.barrierDismissible);
-        return ConfirmOutcome(result != null && result != false, result);
-      }
-    }
-    final ok = await showDialog<bool>(
-      context: c,
-      barrierDismissible: action.barrierDismissible,
-      builder: (context) => AlertDialog(
-        title: title.isEmpty ? null : Text(title),
-        content: message.isEmpty ? null : Text(message),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: Text(action.cancelLabel)),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: action.destructive ? TextButton.styleFrom(foregroundColor: Colors.red) : null,
-            child: Text(action.confirmLabel),
-          ),
-        ],
-      ),
+    final request = ConfirmRequest(
+      action,
+      title: title,
+      caption: caption,
+      message: message,
+      confirmLabel: confirmLabel,
+      cancelLabel: cancelLabel,
+      bound: bound,
+      params: params,
     );
-    return ConfirmOutcome(ok ?? false);
+    if (action.dialog.isNotEmpty) {
+      final content = modal?.call(action.dialog, request.dialogParams);
+      if (content != null) {
+        final look = Look(action.style);
+        final barrier = colorValue(bound['barrierColor']) ?? look.color('barrierColor');
+        final result = await showScreenModal(
+          c,
+          content,
+          presentation: action.presentation,
+          barrierDismissible: action.barrierDismissible,
+          barrierColor: barrier == null ? null : api.Color(barrier.toARGB32()),
+          showDragHandle: look.flag('showDragHandle'),
+          sheetWidth: look.number('sheetWidth'),
+          maxHeightFactor: look.number('maxHeightFactor'),
+          barrierBlur: look.numberOr('barrierBlur', 0),
+          enterScale: look.numberOr('enterScale', 1),
+        );
+        return ConfirmOutcome(isConfirmResult(result), confirmValues(result));
+      }
+      debugPrint('Confirm dialog screen [${action.dialog}] was not found. Showing the built-in dialog.');
+    }
+    return ConfirmOutcome(await showConfirmDialog(c, request));
   }
 
   @override
@@ -249,8 +283,14 @@ Future<Object?> showScreenModal(
   Alignment alignment = Alignment.center,
   double sheetBelowWidth = 600,
   RouteTransition? routeTransition,
+  double? sheetWidth,
+  double? maxHeightFactor,
+  double barrierBlur = 0,
+  double enterScale = 1,
 }) {
   final scrim = barrierColor == null ? null : Color(barrierColor.value);
+  // A toast on screen goes under the modal's barrier.
+  content = ToastBelowRoute(child: content);
   final width = MediaQuery.maybeSizeOf(context)?.width;
   final narrow = width == null || width < sheetBelowWidth;
   final sheet = presentation == ModalPresentation.bottomSheet || (presentation == ModalPresentation.adaptive && narrow);
@@ -267,6 +307,26 @@ Future<Object?> showScreenModal(
         if (fullScreen) return content;
         return SafeArea(child: Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)));
       },
+    ));
+  }
+  // Side sheets, sized bottom sheets and frosted or scaled dialogs.
+  final presented = presentation == ModalPresentation.sideSheet ||
+      (sheet && maxHeightFactor != null) ||
+      (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
+  if (presented) {
+    return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
+      context: context,
+      presentation: sheet ? ModalPresentation.bottomSheet : presentation,
+      barrierDismissible: barrierDismissible,
+      barrierColor: scrim ?? Colors.black54,
+      sheetWidth: sheetWidth,
+      maxHeightFactor: maxHeightFactor ?? 1,
+      showDragHandle: showDragHandle,
+      barrierBlur: barrierBlur,
+      enterScale: enterScale,
+      builder: (_) => sheet || presentation == ModalPresentation.sideSheet
+          ? content
+          : Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
     ));
   }
   if (sheet) {

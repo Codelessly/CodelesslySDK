@@ -176,6 +176,38 @@ variables) answers `script.name(args)` in formulas. Tests run real scripts:
 `test/scripting/support/engine_setup.dart` builds the library with
 `tool/build_quickjs.sh` (CMake, a C compiler) on first use.
 
+## Runtime (feedback, shared elements, effects, navigation)
+
+* Toasts and the confirm dialog (`runtime/actions/toast.dart`,
+  `confirm_dialog.dart`) draw the action's `look` over the app's look
+  (`FeedbackTheme`: the app's extension, then the layout's, read by the
+  shell from its tokens and nodes, `FeedbackTheme.fromDocument`). The
+  handler evaluates text and `variables` where the action runs and passes
+  them to `ActionUi.showToast`/`confirm` (`bound`). Modals the runtime opens
+  wrap their content in `ToastBelowRoute`; `ToastOverlayScope` keeps an
+  embedded app's toasts in its own overlay.
+* Heroes: there's no widget per node for Flutter's `Hero`. A
+  `RenderHeroMark` in the node's chain (render/hero.dart, inside rotation
+  and motion) registers per tree; the shell binds each tree to its route
+  (`HeroRoutes.bind`); the shell's routes mix in `CodelesslyHeroRoute`
+  (`CodelesslyPageRoute`, `CodelesslyPageTransitionRoute`,
+  `CodelesslyRouteTransitionRoute`) and fly the matching tags in the
+  navigator's overlay (runtime/actions/hero_flights.dart): both ends hide,
+  a `HeroMarkPaint` paints the borrowed box stretched over the box in
+  between. Unlike SDK 8.x the node isn't laid out again at the in-between
+  size (it's scaled). A host route that isn't one of these doesn't start
+  flights, but can be the screen they fly from or to.
+* `effectAnimations` (render/play.dart, `RenderEffects`, outside motion):
+  `playAnimation` (`EffectPlayers.play`), a changed bound `playKey`, or
+  `playOnAppear`. `flightKey`: `RenderFlightBox` records where it's drawn
+  (`FlightRegistry`, `recordDrop` for a drag let go) and springs in from
+  where another holder was. Particles aren't drawn yet.
+* Navigation (`app/navigation.dart`): optional trailing params (`:id?`),
+  `CanvasLocation.defaultPathOf` (the path the editor publishes for a
+  screen without one), a link by id named at the screen's path
+  (`CanvasLocation.named`, used by `onGenerateRoute`), page transitions
+  (`app/page_transitions.dart`; the platform's is none on the web).
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,
