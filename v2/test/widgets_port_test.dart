@@ -199,6 +199,31 @@ void main() {
     });
   });
 
+  group('lists', () {
+    testWidgets('a list with pagination footers and a section header in slots shows its items', (tester) async {
+      final (tree, view) = await show(tester, {
+        'l': {
+          'type': 'listView',
+          'children': ['item'],
+          'slots': {'loading': 'more', 'sectionHeader': 'header'},
+          'layout': {'width': 100, 'height': 200},
+          'props': {
+            'itemCount': 3,
+            'pagination': {'name': 'p', 'pullToRefresh': true},
+            'sections': {'groupBy': 'letter'},
+            'swipeActions': {'endActions': [{'id': 'delete'}]},
+            'reorder': {},
+          },
+        },
+        'item': box(100, 40),
+        'more': box(100, 20),
+        'header': box(100, 20),
+      }, 'l');
+      expect(tree.boxOf('item')!.rectIn(view), const Rect.fromLTWH(0, 0, 100, 40));
+      expect(tree.boxOf('more'), isNull);
+    });
+  });
+
   group('text and values', () {
     test('font features: last per tag wins, tnum for tabular figures', () {
       final s = textStyle(const api.TextStyle(fontFeatures: ['lnum', 'liga', 'liga=0'], tabularFigures: true));
