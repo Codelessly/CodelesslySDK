@@ -37,6 +37,15 @@ final RegExp exactFormulaRegex = RegExp(
 /// value.
 typedef FormulaPathResolver = Object? Function(String path);
 
+/// Calls the app's scripts from formulas: what the path `script` resolves
+/// to, so `script.loanPayment(amount, rate, years)` runs that script.
+abstract interface class FormulaScripts {
+  /// The result of the script [name] with [args] (its params in order), or
+  /// null when it fails or hasn't finished yet (on the web, where scripts
+  /// run in a worker).
+  Object? callScript(String name, List<Object?> args);
+}
+
 /// Evaluates small expressions used in `${= ...}` formulas.
 ///
 /// Supports:
@@ -187,6 +196,16 @@ class FormulaEvaluator {
     node.collectPaths(paths);
     return paths;
   }
+
+  /// Whether [expression] calls a script (`script.name(...)`), so on the
+  /// web its value arrives after the script runs.
+  static bool callsScript(String expression) => _scriptCallPattern.hasMatch(expression);
+
+  /// Whether a `${= }` formula in [text] calls a script.
+  static bool textCallsScript(String text) =>
+      formulaRegex.allMatches(text).any((m) => callsScript(m.namedGroup('expr') ?? ''));
+
+  static final RegExp _scriptCallPattern = RegExp(r'\bscript\s*\.\s*[a-zA-Z_$][a-zA-Z0-9_$]*\s*\(');
 
   /// Whether [expression] reads the clock (`now()` or `today()`), so its
   /// value changes as time passes.
@@ -3060,6 +3079,36 @@ sealed class _Node {
 
 /// A function written in the app: a [FormulaFunction] variable called by
 /// name, e.g. `legalMoves(board, sq)`.
+/// `script.name(args)`: runs one of the app's scripts ([FormulaScripts]).
+class _ScriptCall extends _Node {
+  final String name;
+  final List<_Node> args;
+
+  const _ScriptCall(this.name, this.args);
+
+  @override
+  Object? eval(FormulaPathResolver resolve) {
+    final Object? scripts = resolve('script');
+    if (scripts is! FormulaScripts) {
+      throw StateError('Scripts are not available here');
+    }
+    return scripts.callScript(name, [for (final arg in args) arg.eval(resolve)]);
+  }
+
+  @override
+  Iterable<_Node> get children => args;
+
+  /// `script` (so a binding re-applies when a result arrives) and what the
+  /// arguments read.
+  @override
+  void collectPaths(Set<String> paths) {
+    paths.add('script');
+    for (final arg in args) {
+      arg.collectPaths(paths);
+    }
+  }
+}
+
 class _UserCall extends _Node {
   final String name;
   final List<_Node> args;
@@ -3454,6 +3503,7 @@ class _Parser {
 
   static final RegExp _number = RegExp(r'\d+(\.\d+)?|\.\d+');
   static final RegExp _identifier = RegExp(r'[a-zA-Z_][a-zA-Z0-9_]*');
+  static final RegExp _scriptCall = RegExp(r'\s*\.\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(');
   static final RegExp _lambdaHead = RegExp(
     r'(?:([a-zA-Z_][a-zA-Z0-9_]*)'
     r'|\(\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\s*,\s*[a-zA-Z_][a-zA-Z0-9_]*)*)\s*\))'
@@ -3691,6 +3741,22 @@ class _Parser {
         return const _Literal(false);
       case 'null':
         return const _Literal(null);
+    }
+
+    // `script.name(args)` runs one of the app's scripts.
+    if (name == 'script') {
+      final Match? call = _scriptCall.matchAsPrefix(source, pos);
+      if (call != null) {
+        pos = call.end;
+        final List<_Node> args = [];
+        if (!_eat(')')) {
+          do {
+            args.add(_argument());
+          } while (_eat(','));
+          _expect(')');
+        }
+        return _ScriptCall(call[1]!, args);
+      }
     }
 
     if (_eat('(')) {
