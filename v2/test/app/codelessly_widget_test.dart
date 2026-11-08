@@ -55,8 +55,15 @@ void main() {
     final controller = await pumpApp(tester, codelessly);
     expect(controller.canvasId, canvasNamed(signIn, 'Sign in · M'));
     expect(codelessly.route.value?.canvasId, controller.canvasId);
+    // `screen` is the device (SDK 8.x's screenVariableValue).
+    Object? screen(String key) => (controller.scope!.read('screen') as Map?)?[key];
+    expect(screen('isMobile'), isTrue);
+    expect(screen('width'), 390);
+    expect(screen('orientation'), 'portrait');
     tester.view.physicalSize = const Size(1280, 800);
     await settle(tester);
+    expect(screen('breakpoint'), 'desktop');
+    expect(screen('isLandscape'), isTrue);
     expect(controller.canvasId, canvasNamed(signIn, 'Sign in · D'));
     expect(codelessly.route.value?.canvasId, controller.canvasId);
     // The same tree: the mobile canvas's boxes are let go.

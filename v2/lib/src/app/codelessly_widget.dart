@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codelessly_api_v2/codelessly_api.dart'
     show
         CanvasProps,
+        jsonEquality,
         Json,
         LayoutDocumentScripts,
         NavigateAction,
@@ -534,6 +535,17 @@ class _LayoutViewState extends State<_LayoutView> {
   String? _shown;
 
   Codelessly get _codelessly => widget.codelessly;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // `screen`: the device's size, breakpoint, orientation and light or
+    // dark mode (SDK 8.x's screenVariableValue), kept as they change.
+    final mq = MediaQuery.maybeOf(context);
+    if (mq == null) return;
+    final screen = screenValues(mq.size.width, mq.size.height, dark: mq.platformBrightness == Brightness.dark);
+    if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
+  }
 
   _ScreenState _create() {
     final config = _codelessly.config;
