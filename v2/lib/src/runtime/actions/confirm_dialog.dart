@@ -182,7 +182,11 @@ Json? confirmIconOf(ConfirmAction action, Map<String, Object?> bound) {
 
 /// Shows [request]'s built-in dialog over [context]; completes with
 /// whether the user confirmed (dismissing it cancels).
-Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request) async {
+///
+/// An adaptive confirm is a sheet below [sheetBelowWidth] (default: the
+/// default breakpoints' [defaultSheetBelowWidth]; the app passes its
+/// project's).
+Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {double? sheetBelowWidth}) async {
   final action = request.action;
   final look = Look(action.style);
   final bound = request.bound;
@@ -207,7 +211,8 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request) asy
 
   final barrierColor = color('barrierColor');
   final layout = confirmLayoutOf(action, bound);
-  final presentation = resolvePresentation(action.presentation, MediaQuery.maybeSizeOf(context)?.width);
+  final presentation = resolvePresentation(action.presentation, MediaQuery.maybeSizeOf(context)?.width,
+      sheetBelowWidth: sheetBelowWidth ?? defaultSheetBelowWidth(api.Breakpoints.defaults));
   Widget buildDialog(BuildContext context) => ToastBelowRoute(
         child: ThemedConfirmDialog(
           width: layout.width,

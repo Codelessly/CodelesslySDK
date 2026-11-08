@@ -19,7 +19,7 @@ import '../app/support.dart';
 typedef Json = Map<String, Object?>;
 
 /// codelessly_v2_storage `encodeGzipJson`.
-String encodeGzipJson(Object? json) => base64Encode(GZipEncoder().encodeBytes(utf8.encode(jsonEncode(json))));
+String encodeGzipJson(Object? json) => base64Encode(const GZipEncoder().encodeBytes(utf8.encode(jsonEncode(json))));
 
 /// codelessly_v2_storage `encodeStoredLayout` (with [compress] forcing what
 /// it does past 900 KiB).

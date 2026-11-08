@@ -208,6 +208,30 @@ variables) answers `script.name(args)` in formulas. Tests run real scripts:
   (`CanvasLocation.named`, used by `onGenerateRoute`), page transitions
   (`app/page_transitions.dart`; the platform's is none on the web).
 
+## App (loading published data, breakpoints)
+
+The reference is SDK 8.x's `lib/src/data` (`FirebaseDataRepository`,
+`NetworkDataRepository`, `DataManager`) and `lib/src/auth`; API v2 DESIGN.md
+§5.4 and §5.3.
+
+* Loading (`app/loader.dart`, `services/firebase/publish_loader.dart`): the
+  publish is read where SDK 8.x read it (`publish/{project}`, its
+  `layouts/{id}`; `publish_preview`, `templates`), in v2 (`schema: 2`,
+  `compressedNodes`: `decodeStoredPublishModel`,
+  `decodeStoredPublishLayout`). `FirestorePublishLoader` authenticates with
+  the project token (`ProjectAuth`, the `verifyProjectAuthToken` backend
+  call) and is a `LivePublishLoader` (v1's model stream);
+  `codelesslyOnFirebase` sets an instance up on it. A slug reads its bundle
+  over HTTP (`publish/{slug}.json`). Tests: `test/services/
+  firestore_publish_loader_test.dart` on `fake_cloud_firestore`, with
+  documents in the conversion job's format.
+* Breakpoints: one project set (`PublishModel.breakpoints`); no local switch
+  points. Variances resolve with `Breakpoints.governing` (v1's nearest rule
+  on the defaults), screens pick canvases by their breakpoints' min widths,
+  `${screen}` is the project's everywhere, an adaptive Open Modal is a sheet
+  below `OpenModalAction.sheetBelowWidthIn(breakpoints)` (an adaptive
+  confirm below `defaultSheetBelowWidth`, the second breakpoint).
+
 ## Rules
 
 * Edit only your group's files (the three above, `test/samples/<group>`,
