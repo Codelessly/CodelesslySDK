@@ -419,7 +419,7 @@ class NodeBinder {
     if (scoped == null) return base;
     var out = base;
     for (final p in scoped.reversed) {
-      out = _nodeScopes[(p, instance)] ??= NodeValuesScope(nodeScopeValues(source.node(p)!, out), out);
+      out = _nodeScopes[(p, instance)] ??= nodeValuesScopeFor(source.node(p)!, out);
     }
     return out;
   }

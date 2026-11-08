@@ -73,7 +73,7 @@ export 'package:codelessly_api_v2/codelessly_api.dart'
 // way: their element is an IslandOwnerElement and their render object mixes
 // in IslandParent.
 export 'src/render/islands.dart' show IslandEnvironment, IslandHost, IslandOwnerElement, IslandParent;
-export 'src/render/node_tree.dart' show NodeTree, NodeBox, NodeTreeObserver, Slot, SlotKind;
+export 'src/render/node_tree.dart' show NodeTree, NodeBox, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
 // Text as the SDK renders it, for a host's own text (an in-place editor).
 export 'src/render/convert.dart' show textStyle;
 export 'src/text_defaults.dart' show kTextBase;

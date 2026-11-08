@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_api_v2/codelessly_api.dart'
     show
+        Breakpoints,
         CanvasProps,
         jsonEquality,
         Json,
@@ -536,6 +537,9 @@ class _LayoutViewState extends State<_LayoutView> {
 
   Codelessly get _codelessly => widget.codelessly;
 
+  /// The project's breakpoints (DESIGN.md §5.3).
+  Breakpoints get _breakpoints => _codelessly.publishModel?.breakpoints ?? Breakpoints.defaults;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -543,7 +547,8 @@ class _LayoutViewState extends State<_LayoutView> {
     // dark mode (SDK 8.x's screenVariableValue), kept as they change.
     final mq = MediaQuery.maybeOf(context);
     if (mq == null) return;
-    final screen = screenValues(mq.size.width, mq.size.height, dark: mq.platformBrightness == Brightness.dark);
+    final screen = screenValues(mq.size.width, mq.size.height,
+        dark: mq.platformBrightness == Brightness.dark, breakpoints: _breakpoints);
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
   }
 
@@ -770,9 +775,15 @@ class _LayoutViewState extends State<_LayoutView> {
     Widget content = LayoutBuilder(builder: (context, constraints) {
       final layout = widget.layout;
       final width = CanvasViewport.breakpointWidth(context, constraints);
+      final breakpoints = _breakpoints;
       final canvasId = widget.canvasId != null && layout.canvasIds.contains(widget.canvasId)
           ? widget.canvasId!
-          : layout.canvasForWidth(width);
+          : layout.canvasForWidth(width, breakpoints);
+      // Responsive layouts follow the screen: the width the layout is shown
+      // at, and in a dialog, sheet or popover (shown at its design size) the
+      // device's (SDK 8.x's CanvasWidthScope / BreakpointWidthScope).
+      _screen.tree.responsive = ResponsiveWidth(
+          breakpoints, widget.sizing == CanvasSizing.design ? MediaQuery.sizeOf(context).width : width);
       final canvas = canvasId == null ? null : layout.document[canvasId];
       if (canvasId == null || canvas == null) return const SizedBox.shrink();
       _seed(canvasId);
@@ -813,7 +824,7 @@ class _LayoutViewState extends State<_LayoutView> {
 /// The UI of a screen's actions: navigation through the app's routes (and
 /// [CodelesslyWidget.onNavigate]), modals showing the app's screens.
 class _ScreenUi extends NavigatorActionUi {
-  _ScreenUi(this.view) : super(context: () => view.mounted ? view.context : null);
+  _ScreenUi(this.view) : super(context: () => view.mounted ? view.context : null, breakpoints: () => view._breakpoints);
 
   final _LayoutViewState view;
 
