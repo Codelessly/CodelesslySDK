@@ -143,6 +143,9 @@ class NavigatorActionUi implements ActionUi {
   /// The project's breakpoints (per-breakpoint toast looks); null: the
   /// defaults.
   final api.Breakpoints? Function()? breakpoints;
+
+  /// The project's breakpoints now ([breakpoints], else the defaults).
+  api.Breakpoints get _breakpoints => breakpoints?.call() ?? api.Breakpoints.defaults;
   final ScreenRouteBuilder? route;
   final ScreenBuilder? modal;
 
@@ -193,7 +196,7 @@ class NavigatorActionUi implements ActionUi {
         barrierColor: action.barrierColor,
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
-        sheetBelowWidth: action.sheetBelowWidth,
+        sheetBelowWidth: action.sheetBelowWidthIn(_breakpoints),
         routeTransition: action.routeTransition);
   }
 
@@ -262,6 +265,7 @@ class NavigatorActionUi implements ActionUi {
           barrierDismissible: action.barrierDismissible,
           barrierColor: barrier == null ? null : api.Color(barrier.toARGB32()),
           showDragHandle: look.flag('showDragHandle'),
+          sheetBelowWidth: defaultSheetBelowWidth(_breakpoints),
           sheetWidth: look.number('sheetWidth'),
           maxHeightFactor: look.number('maxHeightFactor'),
           barrierBlur: look.numberOr('barrierBlur', 0),
@@ -271,7 +275,7 @@ class NavigatorActionUi implements ActionUi {
       }
       debugPrint('Confirm dialog screen [${action.dialog}] was not found. Showing the built-in dialog.');
     }
-    return ConfirmOutcome(await showConfirmDialog(c, request));
+    return ConfirmOutcome(await showConfirmDialog(c, request, sheetBelowWidth: defaultSheetBelowWidth(_breakpoints)));
   }
 
   @override
@@ -291,7 +295,7 @@ Future<Object?> showScreenModal(
   api.Color? barrierColor,
   bool showDragHandle = false,
   Alignment alignment = Alignment.center,
-  double sheetBelowWidth = 600,
+  required double sheetBelowWidth,
   RouteTransition? routeTransition,
   double? sheetWidth,
   double? maxHeightFactor,
