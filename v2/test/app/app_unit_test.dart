@@ -270,7 +270,7 @@ void main() {
       final cache = MemoryPublishCache();
       final first = Codelessly(config: const CodelesslyConfig(projectId: 'p'), loader: MemoryPublishLoader(bundle()), cache: cache, fonts: const NoFontFetcher());
       await first.loadLayout('home');
-      expect(cache.entries.keys, {'publish_v2/p', 'publish_v2/p/layouts/home'});
+      expect(cache.entries.keys, {'publish/p', 'publish/p/layouts/home'});
 
       // Unchanged: served from the cache.
       final same = MemoryPublishLoader(bundle());
