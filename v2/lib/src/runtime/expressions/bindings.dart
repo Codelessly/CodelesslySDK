@@ -178,12 +178,28 @@ final class BoundNode {
 /// [scope] (the variables' defaults, if the editor gives one) has, else a
 /// placeholder (`${user.name}` shows "Name"); nothing ticks.
 class NodeBinder {
-  NodeBinder({this.scope, LayoutLogic logic = LayoutLogic.none, this.engine = const Expressions(), this.preview = false})
-      : _conditions = ConditionIndex(logic);
+  NodeBinder({
+    this.scope,
+    this.scopeOf,
+    LayoutLogic logic = LayoutLogic.none,
+    this.engine = const Expressions(),
+    this.preview = false,
+  }) : _conditions = ConditionIndex(logic);
 
   /// Where names are read; null: no bindings apply (a canvas without
   /// defaults still shows placeholders in [preview]).
   final ValueScope? scope;
+
+  /// Where node `id` reads names, when that depends on the node: a design
+  /// board holds every screen, each with its own variables, so a node reads
+  /// its canvas's scope. Null (or a null result): [scope].
+  final ValueScope? Function(String id)? scopeOf;
+
+  bool get _binds => scope != null || scopeOf != null;
+
+  /// The scope node [id] reads names from, outside its lists and node
+  /// scopes: [scopeOf]'s, else [scope].
+  ValueScope? rootScopeOf(String id) => scopeOf?.call(id) ?? scope;
   final Expressions engine;
   final bool preview;
   ConditionIndex _conditions;
@@ -196,7 +212,7 @@ class NodeBinder {
     final b = NodeBindings.of(node);
     final targets = _conditions.byNode[node.id] ?? const [];
     if (b.isEmpty && targets.isEmpty) return BoundNode(node);
-    final s = scope == null ? null : scopeFor(source, node.id, instance);
+    final s = _binds ? scopeFor(source, node.id, instance) : null;
     final reads = <String>{};
     var clock = false;
     var out = node;
@@ -344,7 +360,7 @@ class NodeBinder {
   /// inside it, or null when it gives none ([localNames]) or nothing binds.
   LocalScope? localScopeOf(NodeSource source, String id, Object? instance) {
     final n = source.node(id);
-    if (n == null || scope == null) return null;
+    if (n == null || !_binds) return null;
     final names = _localNamesOf(n);
     if (names.isEmpty) return null;
     final existing = _locals[(id, instance)];
@@ -376,7 +392,7 @@ class NodeBinder {
   }
 
   ValueScope? _itemScopeFor(NodeSource source, String id, Object? instance) {
-    final root = scope;
+    final root = rootScopeOf(id);
     if (root == null) return null;
     String? listId;
     // The item a repeat's widget gives it (a paged list's row, a section
@@ -456,7 +472,7 @@ class NodeBinder {
   /// [item] at [index]: the scope its nodes read `item` and `index` from,
   /// made or moved to them (the boxes that read them re-apply).
   ItemScope? provideItem(NodeSource source, ProvidedItem instance, {required int index, Object? item}) {
-    final root = scope;
+    final root = rootScopeOf(instance.owner);
     if (root == null) return null;
     final existing = _provided[instance];
     if (existing != null) {
@@ -477,7 +493,7 @@ class NodeBinder {
   /// The items node [list] (in [instance]) is bound to: its `data` binding or
   /// a condition setting it, as a list; null when it has none.
   List<Object?>? itemsOf(NodeSource source, Node list, Object? instance) {
-    final s = scope == null ? null : scopeFor(source, list.id, instance);
+    final s = _binds ? scopeFor(source, list.id, instance) : null;
     if (s == null) return null;
     return _listOf(_dataOf(list, s));
   }

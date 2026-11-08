@@ -138,6 +138,19 @@ class VariableScope extends NamedScope {
     changed([v.name, ...?_dependents[v.name]]);
   }
 
+  /// Removes the variable [name] (an editor deleted it); what read it reads
+  /// the scopes around this one. False when it isn't declared.
+  bool remove(String name) {
+    if (_defs.remove(name) == null) return false;
+    _values.remove(name);
+    final dependents = _dependents[name];
+    _indexDependents();
+    _cache.clear();
+    _version++;
+    changed([name, ...?dependents]);
+    return true;
+  }
+
   /// Sets [name] to [value], read as the variable's type (a number from
   /// `"3"`, a color from `#F00`...). Ignored for an undeclared or computed
   /// variable; false then, or when nothing changed.
