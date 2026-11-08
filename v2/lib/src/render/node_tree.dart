@@ -181,6 +181,17 @@ class NodeTree {
     }
   }
 
+  /// Re-applies the boxes of nodes [ids] (every instance): what they show
+  /// changed outside their node and the names they read (an editor changed
+  /// the conditions that set them).
+  void reapply(Iterable<String> ids) {
+    final set = ids is Set<String> ? ids : ids.toSet();
+    if (set.isEmpty) return;
+    for (final b in _boxes.values.toList()) {
+      if (set.contains(b.id)) b._apply();
+    }
+  }
+
   /// Node [id] as shown: the source's, patched by the active interaction
   /// states that style it, its bindings applied ([binder]).
   Node? resolve(String id, {Object? instance}) => resolveBound(id, instance: instance)?.node;
