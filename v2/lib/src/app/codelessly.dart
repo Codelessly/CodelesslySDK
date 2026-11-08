@@ -66,16 +66,13 @@ class Codelessly extends ChangeNotifier {
   /// Makes [codelessly] the default instance (null clears it).
   static void setDefault(Codelessly? codelessly) => _instance = codelessly;
 
+  /// Without a loader: a slug's bundle from Codelessly's storage. A project
+  /// id or token needs Firestore: `codelesslyOnFirebase` (or a
+  /// FirestorePublishLoader) from package:codelessly_sdk/firebase.dart.
   static PublishLoader _defaultLoader(CodelesslyConfig config) {
-    final key = config.slug ?? config.projectId;
-    if (key == null) {
-      return _NoLoader();
-    }
-    return HttpPublishLoader.firebaseStorage(
-      projectId: key,
-      bucket: kCodelesslyStorageBucket,
-      bundle: config.slug != null,
-    );
+    final slug = config.slug;
+    if (slug == null) return _NoLoader(config.projectId != null || config.authToken != null);
+    return HttpPublishLoader.firebaseStorage(projectId: slug, bucket: kCodelesslyStorageBucket, bundle: true);
   }
 
   final CodelesslyConfig config;
@@ -142,6 +139,7 @@ class Codelessly extends ChangeNotifier {
         rethrow;
       }
     }
+    _watch();
     if (config.preload) {
       await Future.wait([
         for (final id in _model!.layouts.keys)
@@ -150,9 +148,25 @@ class Codelessly extends ChangeNotifier {
     }
   }
 
-  Future<void> _refresh(String key) async {
-    final fresh = await loader.loadModel(publishSource);
+  StreamSubscription<PublishModel>? _watching;
+
+  /// Follows a [LivePublishLoader]'s model ([CodelesslyConfig.liveUpdates]).
+  void _watch() {
+    final l = loader;
+    if (!config.liveUpdates || l is! LivePublishLoader || _watching != null) return;
+    final key = publishSource.modelPath(config.uniqueId);
+    _watching = l.watchModel(publishSource).listen(
+          (fresh) => unawaited(_apply(key, fresh).catchError((Object _) {})),
+          // A failed watch (offline, rules) leaves the loaded model on screen.
+          onError: (Object _) {},
+        );
+  }
+
+  Future<void> _refresh(String key) async => _apply(key, await loader.loadModel(publishSource));
+
+  Future<void> _apply(String key, PublishModel fresh) async {
     final old = _model;
+    if (old != null && jsonEquality.equals(old.toJson(), fresh.toJson())) return;
     _model = fresh;
     _configureServices(fresh);
     await cache.write(key, fresh.toJson());
@@ -240,6 +254,8 @@ class Codelessly extends ChangeNotifier {
   /// Forgets the loaded publish (and, with [clearCache], the cached one);
   /// the next [initialize] loads it again.
   Future<void> reset({bool clearCache = false}) async {
+    await _watching?.cancel();
+    _watching = null;
     _initializing = null;
     _model = null;
     _layouts.clear();
@@ -254,6 +270,8 @@ class Codelessly extends ChangeNotifier {
 
   @override
   void dispose() {
+    _watching?.cancel();
+    _watching = null;
     route.dispose();
     data.dispose();
     if (identical(_instance, this)) _instance = null;
@@ -265,11 +283,19 @@ class Codelessly extends ChangeNotifier {
 const String kCodelesslyStorageBucket = 'codeless-app.appspot.com';
 
 class _NoLoader implements PublishLoader {
-  @override
-  Future<PublishModel> loadModel(PublishSource source) =>
-      Future.error(const PublishLoadException('No project: configure a projectId, a slug or a loader'));
+  _NoLoader(this.hasProject);
+
+  /// Whether the config names a project (by id or token) but no loader.
+  final bool hasProject;
+
+  PublishLoadException get _error => PublishLoadException(hasProject
+      ? 'A project id or token is read from Firestore: create the instance with codelesslyOnFirebase '
+          '(package:codelessly_sdk/firebase.dart), or pass a FirestorePublishLoader'
+      : 'No project: configure a projectId, a slug or a loader');
 
   @override
-  Future<PublishLayout> loadLayout(PublishSource source, String layoutId) =>
-      Future.error(const PublishLoadException('No project: configure a projectId, a slug or a loader'));
+  Future<PublishModel> loadModel(PublishSource source) => Future.error(_error);
+
+  @override
+  Future<PublishLayout> loadLayout(PublishSource source, String layoutId) => Future.error(_error);
 }

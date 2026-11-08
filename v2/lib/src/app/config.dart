@@ -17,6 +17,7 @@ class CodelesslyConfig {
     this.authToken,
     this.publishSource = PublishSource.publish,
     this.preload = false,
+    this.liveUpdates = true,
     this.expressions = const Expressions(),
     this.actions = const CodelesslyActions(),
     this.services,
@@ -43,6 +44,11 @@ class CodelesslyConfig {
   /// Whether [Codelessly.initialize] loads every layout up front (else each
   /// loads when first shown).
   final bool preload;
+
+  /// Whether a loader that watches the publish ([LivePublishLoader], as the
+  /// Firestore one does) brings each new publish (or preview save) to the
+  /// running app, as SDK 8.x did: republished layouts load again when shown.
+  final bool liveUpdates;
 
   /// Evaluates bindings, conditions and formulas: the runtime's
   /// [Expressions] (variables and conditions per screen, `${...}` text). A
@@ -79,8 +85,9 @@ class CodelesslyConfig {
   /// Whether this shows the editor's preview.
   bool get isPreview => publishSource == PublishSource.preview;
 
-  /// The project's key: its slug, else its id.
-  String get uniqueId => slug ?? projectId ?? '';
+  /// The project's key (its cache entries'): its slug, else its id, else
+  /// its project token.
+  String get uniqueId => slug ?? projectId ?? authToken ?? '';
 
   CodelesslyConfig copyWith({
     String? projectId,
@@ -88,6 +95,7 @@ class CodelesslyConfig {
     String? authToken,
     PublishSource? publishSource,
     bool? preload,
+    bool? liveUpdates,
     ExpressionEngine? expressions,
     ActionRunner? actions,
     CodelesslyServices? services,
@@ -103,6 +111,7 @@ class CodelesslyConfig {
         authToken: authToken ?? this.authToken,
         publishSource: publishSource ?? this.publishSource,
         preload: preload ?? this.preload,
+        liveUpdates: liveUpdates ?? this.liveUpdates,
         expressions: expressions ?? this.expressions,
         actions: actions ?? this.actions,
         services: services ?? this.services,

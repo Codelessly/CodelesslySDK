@@ -1,7 +1,8 @@
 // Where published data comes from: a loader interface with network, asset
-// and in-memory implementations, and a cache interface. Firebase (or any
-// backend) plugs in as another [PublishLoader]; the core has no backend
-// dependency.
+// and in-memory implementations, and a cache interface. Firebase plugs in as
+// another [PublishLoader] (FirestorePublishLoader in
+// package:codelessly_sdk/firebase.dart, the default of a Firebase app); the
+// core has no backend dependency.
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -28,6 +29,75 @@ abstract interface class PublishLoader {
 
   /// Layout [layoutId] (a layout id the model lists).
   Future<PublishLayout> loadLayout(PublishSource source, String layoutId);
+}
+
+/// A [PublishLoader] that also watches the publish model: each publish (or
+/// preview save) arrives as a new model, as SDK 8.x streamed
+/// `publish/{projectId}`. [Codelessly] follows it while
+/// [CodelesslyConfig.liveUpdates] is on: layouts republished since are
+/// dropped and load again when shown.
+abstract interface class LivePublishLoader implements PublishLoader {
+  /// The project's publish model, now and on every change.
+  Stream<PublishModel> watchModel(PublishSource source);
+}
+
+/// The stored-document marker of v2 publish data (`schema: 2`): a document
+/// at a publish path without it is v1, written by the classic editor or SDK
+/// 8.x's publish, which this SDK can't read.
+const String kStoredSchemaField = 'schema';
+
+/// Where a stored layout too large for one Firestore document keeps its
+/// nodes: `{"nodes": {...}}` as JSON, gzipped, base64 encoded (as v1 kept
+/// `compressedCanvases`). Written by the v2 editor's publish and the
+/// conversion job (codelessly_v2_storage `encodeStoredLayout`).
+const String kCompressedNodesField = 'compressedNodes';
+
+/// Throws unless [data] (a stored publish document) is v2.
+void _requireV2(Map<String, Object?> data, String what) {
+  final schema = data[kStoredSchemaField];
+  if (schema is num && schema.toInt() >= 2) return;
+  throw PublishLoadException('$what is not v2 (no "schema": 2). The project was published by the classic '
+      'editor and has not been converted: SDK 20 reads v2 publishes only. Convert the project or publish it '
+      'from the v2 editor.');
+}
+
+/// A stored publish model document ([PublishSource.modelPath]) as a
+/// [PublishModel]: v2 only (see [kStoredSchemaField]). [projectId] fills an
+/// empty `projectId`.
+PublishModel decodeStoredPublishModel(Map<String, Object?> data, {String? projectId}) {
+  if (data.isEmpty) throw PublishLoadException('No publish model${projectId == null ? '' : ' for project [$projectId]'}');
+  _requireV2(data, 'The publish model${projectId == null ? '' : ' of project [$projectId]'}');
+  final model = PublishModel.fromJson(data);
+  return model.projectId.isEmpty && projectId != null ? PublishModel.fromJson({...data, 'projectId': projectId}) : model;
+}
+
+/// [stored] (a layout document) with its [kCompressedNodesField] expanded
+/// into `nodes`: `PublishLayout` JSON.
+Map<String, Object?> expandStoredLayout(Map<String, Object?> stored) {
+  final zipped = stored[kCompressedNodesField];
+  if (zipped is! String) return stored;
+  final Object? unzipped;
+  try {
+    unzipped = decodeJsonBytes(base64Decode(zipped));
+  } catch (e) {
+    throw PublishLoadException('Layout [${stored['id']}] has unreadable compressed nodes', e);
+  }
+  return {
+    for (final e in stored.entries)
+      if (e.key != kCompressedNodesField) e.key: e.value,
+    'nodes': unzipped is Map ? unzipped['nodes'] : null,
+  };
+}
+
+/// A stored layout document ([PublishSource.layoutPath]) as a
+/// [PublishLayout]: v2 only, compressed nodes expanded. [layoutId] (the
+/// document's id) fills a missing `id`.
+PublishLayout decodeStoredPublishLayout(Map<String, Object?> data, {String? layoutId}) {
+  if (data.isEmpty) throw PublishLoadException('Layout [${layoutId ?? '?'}] does not exist');
+  _requireV2(data, 'Layout [${layoutId ?? data['id']}]');
+  final json = expandStoredLayout(data);
+  final id = json['id'];
+  return PublishLayout.fromJson(id is String && id.isNotEmpty || layoutId == null ? json : {...json, 'id': layoutId});
 }
 
 /// A [PublishLoader] over bundles in memory: tests, previews, and apps that
@@ -99,11 +169,14 @@ class AssetPublishLoader implements PublishLoader {
   }
 }
 
-/// A [PublishLoader] over HTTP: the publish model and each layout as JSON
-/// files under [baseUrl], at the v2 storage paths ([PublishSource.modelPath],
-/// [PublishSource.layoutPath], with `.json`). With [bundle] set, the whole
-/// publish comes from one file ([PublishSource.bundlePath]) instead: what a
-/// project's slug serves.
+/// A [PublishLoader] over HTTP. With [bundle] set (a slug), the whole
+/// publish is one file ([PublishSource.bundlePath], `publish/{slug}.json`
+/// in Codelessly's storage bucket): what a project's slug serves, as SDK
+/// 8.x's `downloadCompletePublishBundle`. Without it, the publish model and
+/// each layout are JSON files under [baseUrl] at the publish paths
+/// ([PublishSource.modelPath], [PublishSource.layoutPath], with `.json`):
+/// for a self-hosted mirror; Codelessly itself keeps them in Firestore
+/// (FirestorePublishLoader).
 ///
 /// [urlFor] maps a storage path to a URL; the default joins it to
 /// [baseUrl] (a Firebase Storage bucket's `.../o/` endpoint encodes the
