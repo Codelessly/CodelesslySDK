@@ -3,14 +3,21 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:codelessly_api_v2/codelessly_api.dart' show ModalPresentation;
+import 'package:codelessly_api_v2/codelessly_api.dart' show Breakpoints, ModalPresentation;
 import 'package:flutter/material.dart';
 
+/// The width below which an adaptive modal with no breakpoint of its own is
+/// a bottom sheet: the project's second breakpoint's min width (a sheet on
+/// the narrowest breakpoint only; never with one breakpoint). DESIGN.md §5.3.
+double defaultSheetBelowWidth(Breakpoints breakpoints) => breakpoints.length > 1 ? breakpoints.list[1].minWidth : 0;
+
 /// [presentation] for a screen [width] wide: adaptive is a bottom sheet
-/// below [sheetBelowWidth], a dialog otherwise.
-ModalPresentation resolvePresentation(ModalPresentation presentation, double? width, {double sheetBelowWidth = 600}) =>
+/// below [sheetBelowWidth] (the min width of the breakpoint it switches at;
+/// `OpenModalAction.sheetBelowWidthIn`), a dialog otherwise. An unknown
+/// width is a dialog.
+ModalPresentation resolvePresentation(ModalPresentation presentation, double? width, {required double sheetBelowWidth}) =>
     presentation == ModalPresentation.adaptive
-        ? ((width ?? 1024) < sheetBelowWidth ? ModalPresentation.bottomSheet : ModalPresentation.dialog)
+        ? (width != null && width < sheetBelowWidth ? ModalPresentation.bottomSheet : ModalPresentation.dialog)
         : presentation;
 
 /// Presents [builder]'s content as [presentation] says, with a barrier that
@@ -28,8 +35,9 @@ class PresentationRoute<T> extends PopupRoute<T> {
     this.barrierColor = Colors.black54,
     this.barrierBlur = 0,
     this.enterScale = 0.96,
+    double sheetBelowWidth = 0,
     super.settings,
-  })  : presentation = resolvePresentation(presentation, MediaQuery.maybeSizeOf(context)?.width),
+  })  : presentation = resolvePresentation(presentation, MediaQuery.maybeSizeOf(context)?.width, sheetBelowWidth: sheetBelowWidth),
         _barrierLabel = MaterialLocalizations.of(context).modalBarrierDismissLabel,
         _themes = InheritedTheme.capture(from: context, to: Navigator.of(context).context);
 

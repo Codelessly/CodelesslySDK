@@ -3,8 +3,8 @@
 // screen's width, `${screen}` names them, and per-breakpoint toast looks
 // are keyed by them.
 import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+import 'package:codelessly_sdk_v2/src/runtime/actions/presentation_route.dart' show defaultSheetBelowWidth, resolvePresentation;
 import 'package:codelessly_sdk_v2/src/runtime/actions/toast.dart' show perBreakpointValue;
-import 'package:codelessly_sdk_v2/src/runtime/expressions/node_scopes.dart' show nodeValuesScopeFor, ResponsiveScreenScope;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,7 +27,7 @@ Map<String, Object?> _box(String name, {List<String> children = const []}) => {
 /// A screen of two canvases (compact, xl), the compact one holding a
 /// responsive variance with a variant for compact and for medium, and a
 /// text bound to `${screen.breakpoint}` in each.
-PublishBundle bundleWith(Breakpoints breakpoints, {Map<String, num> minWidths = const {}}) {
+PublishBundle bundleWith(Breakpoints breakpoints) {
   final layout = PublishLayout.fromJson({
     'schema': 2,
     'id': 'home',
@@ -46,7 +46,6 @@ PublishBundle bundleWith(Breakpoints breakpoints, {Map<String, num> minWidths = 
             {'id': 'pm', 'name': 'Medium', 'children': ['vm'], 'breakpoint': 'medium'},
           ],
           'current': 'pc',
-          if (minWidths.isNotEmpty) 'minWidths': minWidths,
         },
       },
       'vc': _box('in compact', children: ['tc']),
@@ -109,7 +108,7 @@ void main() {
       expect(e.evaluate(r'${screen.is.compact}', s), isFalse);
     });
 
-    test("inside a responsive layout with its own switch points, screen is the layout's", () {
+    test("inside a responsive layout, screen is the project's (no local switch points)", () {
       final around = ValuesScope({'screen': screenValues(1000, 900)});
       final v = Node.fromJson({
         'type': 'variance',
@@ -117,21 +116,27 @@ void main() {
           'variants': [
             {'id': 'a', 'name': 'A', 'children': [], 'breakpoint': 'tablet'},
           ],
+          // Gone from the API: ignored.
           'minWidths': {'desktop': 900},
         },
       }, id: 'v')!;
       final scope = nodeValuesScopeFor(v, around);
-      expect(scope, isA<ResponsiveScreenScope>());
-      expect(readPath(around, 'screen.breakpoint'), 'tablet');
-      expect(readPath(scope, 'screen.breakpoint'), 'desktop');
-      expect(readPath(scope, 'screen.isDesktop'), isTrue);
-      // Following the screen.
-      var told = 0;
-      watchName(scope, 'screen')!.addListener(() => told++);
-      around.set('screen', screenValues(800, 900));
-      expect(told, 1);
       expect(readPath(scope, 'screen.breakpoint'), 'tablet');
+      expect(readPath(scope, 'screen.isDesktop'), isFalse);
     });
+  });
+
+  test("an adaptive modal is a sheet below its breakpoint's min width", () {
+    expect(defaultSheetBelowWidth(custom), 700, reason: 'the second breakpoint');
+    expect(defaultSheetBelowWidth(Breakpoints([const Breakpoint(id: 'only')])), 0);
+    final atXl = const OpenModalAction(presentation: ModalPresentation.adaptive, sheetBelow: 'xl').sheetBelowWidthIn(custom);
+    expect(atXl, 1300);
+    expect(resolvePresentation(ModalPresentation.adaptive, 1299, sheetBelowWidth: atXl), ModalPresentation.bottomSheet);
+    expect(resolvePresentation(ModalPresentation.adaptive, 1300, sheetBelowWidth: atXl), ModalPresentation.dialog);
+    expect(resolvePresentation(ModalPresentation.adaptive, 650, sheetBelowWidth: defaultSheetBelowWidth(custom)),
+        ModalPresentation.bottomSheet);
+    expect(resolvePresentation(ModalPresentation.adaptive, null, sheetBelowWidth: 700), ModalPresentation.dialog);
+    expect(resolvePresentation(ModalPresentation.sideSheet, 100, sheetBelowWidth: 700), ModalPresentation.sideSheet);
   });
 
   test('a per-breakpoint toast look is keyed by id, else name', () {
@@ -195,17 +200,18 @@ void main() {
       expect(shows(c, 'vc'), isTrue);
     });
 
-    testWidgets("a variance's own switch points move where it switches, and screen inside it", (tester) async {
+    testWidgets('a breakpoint no variant names changes nothing', (tester) async {
       ignoreOverflows();
-      setScreen(tester, const Size(800, 900));
-      final c = await pump(tester, bundleWith(custom, minWidths: const {'medium': 900}));
-      expect(shows(c, 'vc'), isTrue, reason: 'medium from 900 for this variance');
-      expect(textOf(c, 'tc'), 'compact', reason: 'screen inside it agrees');
-      expect(c.read('screen.breakpoint'), 'medium', reason: 'the screen itself is medium');
-      tester.view.physicalSize = const Size(950, 900);
+      // A breakpoint between compact and medium: the compact variant still
+      // shows up to medium; screen names the new one.
+      final more = custom.add(const Breakpoint(id: 'mid', name: 'Mid', minWidth: 500));
+      setScreen(tester, const Size(600, 900));
+      final c = await pump(tester, bundleWith(more));
+      expect(shows(c, 'vc'), isTrue);
+      expect(textOf(c, 'tc'), 'mid');
+      tester.view.physicalSize = const Size(750, 900);
       await settle(tester);
       expect(shows(c, 'vm'), isTrue);
-      expect(textOf(c, 'tm'), 'medium');
     });
   });
 }
