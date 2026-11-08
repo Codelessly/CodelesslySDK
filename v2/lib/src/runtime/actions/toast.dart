@@ -23,9 +23,15 @@ class ToastRequest {
     this.actionLabel = '',
     this.bound = const {},
     this.onAction,
+    this.breakpoints,
   });
 
   final ShowToastAction action;
+
+  /// The project's breakpoints, which per-breakpoint look values
+  /// (`alignments`, `sideMargins`, `bottomOffsets`) are keyed by; null:
+  /// [api.Breakpoints.defaults].
+  final api.Breakpoints? breakpoints;
   final String message, title, actionLabel;
 
   /// [ShowToastAction.variables] evaluated, by key (colors, `icon`,
@@ -65,9 +71,15 @@ const toastBindableColors = [
   'borderColor',
 ];
 
-/// The breakpoint name (`mobile`, `tablet`, `desktop`) of a screen [width]
-/// wide, as per-breakpoint look values are keyed.
-String breakpointNameFor(double width) => width >= 1024 ? 'desktop' : (width >= 600 ? 'tablet' : 'mobile');
+/// The value [values] (a per-breakpoint look value: breakpoint id or name →
+/// value) gives a screen [width] wide, by the project's [breakpoints]
+/// (DESIGN.md §5.3): the entry of its breakpoint's id, else of its name or
+/// name key; null when it has none.
+Object? perBreakpointValue(Map<String, Object?>? values, double width, api.Breakpoints breakpoints) {
+  if (values == null || values.isEmpty) return null;
+  final b = breakpoints.forWidth(width);
+  return values[b.id] ?? values[b.name] ?? values[b.key];
+}
 
 abstract final class CodelesslyToast {
   static OverlayEntry? _current;
@@ -166,6 +178,7 @@ abstract final class CodelesslyToast {
         offset: numberValue(bound['offset']),
         duration: durationOf(action, bound),
         onAction: hasButton ? request.onAction : null,
+        breakpoints: request.breakpoints ?? api.Breakpoints.defaults,
         onDone: () {
           if (_current == entry) _current = null;
           if (entry.mounted) entry.remove();
@@ -198,10 +211,12 @@ class _ToastView extends StatefulWidget {
     required this.offset,
     required this.duration,
     required this.onAction,
+    required this.breakpoints,
     required this.onDone,
   });
 
   final ShowToastAction action;
+  final api.Breakpoints breakpoints;
   final String message, title;
   final Json? icon;
   final Map<String, Color> colors;
@@ -320,8 +335,9 @@ class _ToastViewState extends State<_ToastView> {
     final hasButton = widget.onAction != null;
     final hasClose = action.showClose;
     final media = MediaQuery.of(context);
-    final breakpoint = breakpointNameFor(media.size.width);
-    final alignment = look.map('alignments')?[breakpoint] as String? ?? look.string('alignment') ?? 'center';
+    final breakpoints = widget.breakpoints;
+    final width = media.size.width;
+    final alignment = perBreakpointValue(look.map('alignments'), width, breakpoints) as String? ?? look.string('alignment') ?? 'center';
     final maxWidth = look.numberOr('maxWidth', 560);
     final minWidth = look.numberOr('minWidth', 0);
     // A fixed-width card spreads its row like a stretched toast.
@@ -509,8 +525,9 @@ class _ToastViewState extends State<_ToastView> {
       ),
     );
 
-    final sideMargin = numberValue(look.map('sideMargins')?[breakpoint]) ?? look.numberOr('sideMargin', 16);
-    final bottomOffset = numberValue(look.map('bottomOffsets')?[breakpoint]) ?? look.numberOr('bottomOffset', 104);
+    final sideMargin = numberValue(perBreakpointValue(look.map('sideMargins'), width, breakpoints)) ?? look.numberOr('sideMargin', 16);
+    final bottomOffset =
+        numberValue(perBreakpointValue(look.map('bottomOffsets'), width, breakpoints)) ?? look.numberOr('bottomOffset', 104);
     return Positioned(
       left: sideMargin,
       right: sideMargin,
