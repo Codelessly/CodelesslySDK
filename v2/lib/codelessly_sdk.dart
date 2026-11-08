@@ -93,6 +93,8 @@ export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
 export 'src/runtime/actions/actions.dart';
 export 'src/runtime/lists/lists.dart';
+// What `${drag}` reads when nothing is dragged (a design canvas's default).
+export 'src/runtime/gestures/drag_and_drop.dart' show dragIdleValues;
 export 'src/widgets/collections_data_list.dart' show DataListView, DataListViewState, ListSection, SectionIndexBar, UndoBar, groupIntoSections, sectionOffset;
 export 'src/widgets/collections_reorder.dart' show GroupReorderList, KeyboardReorderItem, ReorderListView;
 export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
