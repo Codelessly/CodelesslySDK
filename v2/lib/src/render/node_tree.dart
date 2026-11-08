@@ -111,6 +111,21 @@ abstract class NodeTreeObserver {
   void nodePainted(NodeBox box);
 }
 
+/// The screen a tree's responsive variances pick their variant for: the
+/// project's [breakpoints] and the screen's [width].
+@immutable
+final class ResponsiveWidth {
+  const ResponsiveWidth(this.breakpoints, this.width);
+  final api.Breakpoints breakpoints;
+  final double width;
+
+  @override
+  bool operator ==(Object other) => other is ResponsiveWidth && other.width == width && other.breakpoints == breakpoints;
+
+  @override
+  int get hashCode => Object.hash(breakpoints, width);
+}
+
 typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>;
 
 /// Owns the boxes built from one [NodeSource].
@@ -177,6 +192,27 @@ class NodeTree {
     if (identical(value, _binder)) return;
     _binder = value;
     for (final b in _boxes.values.toList()) {
+      b._apply();
+    }
+  }
+
+  /// The screen responsive variances pick their variant for (DESIGN.md
+  /// §5.3): the project's breakpoints and the width the layout is shown at
+  /// (a running app sets it); null shows each variance's `current` variant
+  /// (a design canvas, which sets `current` itself).
+  ResponsiveWidth? get responsive => _responsive;
+  ResponsiveWidth? _responsive;
+  set responsive(ResponsiveWidth? value) {
+    if (value == _responsive) return;
+    final before = _responsive;
+    _responsive = value;
+    for (final b in _boxes.values.toList()) {
+      final n = source.node(b.id);
+      if (n == null || !n.isResponsive) continue;
+      // Only the ones that now show another variant.
+      if (before != null && value != null && n.variantForWidth(before.width, before.breakpoints)?['id'] == n.variantForWidth(value.width, value.breakpoints)?['id']) {
+        continue;
+      }
       b._apply();
     }
   }
@@ -998,7 +1034,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _variance(Node n, List<RenderBox> chain) {
     final variants = n.prop(api.VarianceProps.variants);
     final current = n.prop(api.VarianceProps.current);
-    final variant = variants.firstWhere((v) => v['id'] == current, orElse: () => variants.firstOrNull ?? const {});
+    // A responsive one shows the variant for the screen's width.
+    final responsive = tree.responsive;
+    final variant = (responsive != null && n.isResponsive ? n.variantForWidth(responsive.width, responsive.breakpoints) : null) ??
+        variants.firstWhere((v) => v['id'] == current, orElse: () => variants.firstOrNull ?? const {});
     final kids = api.readStrings(variant['children']);
     if (kids.isEmpty) {
       final c = BoxConstraints.tight(n.designSize);

@@ -136,9 +136,13 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
 class NavigatorActionUi implements ActionUi {
-  NavigatorActionUi({required this.context, this.route, this.modal, this.files});
+  NavigatorActionUi({required this.context, this.route, this.modal, this.files, this.breakpoints});
 
   final BuildContext? Function() context;
+
+  /// The project's breakpoints (per-breakpoint toast looks); null: the
+  /// defaults.
+  final api.Breakpoints? Function()? breakpoints;
   final ScreenRouteBuilder? route;
   final ScreenBuilder? modal;
 
@@ -215,7 +219,13 @@ class NavigatorActionUi implements ActionUi {
     if (c == null) return;
     CodelesslyToast.show(
       c,
-      ToastRequest(action, message: message, title: title, actionLabel: actionLabel, bound: bound, onAction: onAction),
+      ToastRequest(action,
+          message: message,
+          title: title,
+          actionLabel: actionLabel,
+          bound: bound,
+          onAction: onAction,
+          breakpoints: breakpoints?.call()),
     );
   }
 
