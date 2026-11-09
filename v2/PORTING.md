@@ -225,12 +225,15 @@ The reference is SDK 8.x's `lib/src/data` (`FirebaseDataRepository`,
   over HTTP (`publish/{slug}.json`). Tests: `test/services/
   firestore_publish_loader_test.dart` on `fake_cloud_firestore`, with
   documents in the conversion job's format.
-* Breakpoints: one project set (`PublishModel.breakpoints`); no local switch
-  points. Variances resolve with `Breakpoints.governing` (v1's nearest rule
-  on the defaults), screens pick canvases by their breakpoints' min widths,
-  `${screen}` is the project's everywhere, an adaptive Open Modal is a sheet
-  below `OpenModalAction.sheetBelowWidthIn(breakpoints)` (an adaptive
-  confirm below `defaultSheetBelowWidth`, the second breakpoint).
+* Breakpoints: one project set (`PublishModel.breakpoints`) and a node's or
+  screen canvas's own switch points (`VarianceProps.minWidths`,
+  `CanvasBreakpoint.minWidth`). Variances resolve with
+  `Breakpoints.forWidth(w, minWidths)` then `Breakpoints.governing` (v1's
+  nearest rule on the defaults), screens pick canvases by their switch
+  points, `${screen}` inside an overriding variance follows its widths
+  (`ResponsiveScreenScope`), an adaptive Open Modal is a sheet below
+  `OpenModalAction.sheetBelowWidthIn(breakpoints)` (an adaptive confirm
+  below `defaultSheetBelowWidth`, the second breakpoint).
 
 ## Rules
 
