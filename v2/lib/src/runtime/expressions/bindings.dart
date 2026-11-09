@@ -310,7 +310,9 @@ class NodeBinder {
   Node _withItems(NodeSource source, Node n, Object? instance, Object? items) {
     final list = _listOf(items);
     if (list == null) return n;
-    for (final e in _items.entries) {
+    // A snapshot: an item's update can rebind nodes that make or drop item
+    // scopes (a list inside the item), changing [_items] mid-loop.
+    for (final e in _items.entries.toList()) {
       if (e.key.$1 == n.id && e.key.$2 == instance) {
         final i = e.key.$3;
         e.value.update(index: i, item: i < list.length ? list[i] : null);
