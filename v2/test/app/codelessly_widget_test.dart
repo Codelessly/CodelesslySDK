@@ -48,6 +48,41 @@ void main() {
     }
   });
 
+  testWidgets('app variables are shared by every screen', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    // The model's (as the v2 editor publishes them) and a converted v1
+    // publish's `app_variables` scope in a layout.
+    final legacy = PublishLayout.fromJson({
+      ...signIn.toJson(),
+      'variables': {
+        'app_variables': [
+          {'id': 'l', 'name': 'legacy', 'value': 'from v1'},
+        ],
+      },
+    });
+    final b = PublishBundle(
+      model: bundle.model.copyWith(variables: {
+        'v': {'id': 'v', 'name': 'appCount', 'type': 'integer', 'value': 7},
+      }),
+      layouts: {...bundle.layouts, signIn.id: legacy},
+    );
+    final codelessly = Codelessly(
+      config: const CodelesslyConfig(projectId: 'rigcheck', actions: NavigationActionRunner()),
+      loader: MemoryPublishLoader(b),
+      fonts: const NoFontFetcher(),
+    );
+    addTearDown(codelessly.dispose);
+    final first = await pumpApp(tester, codelessly, layoutId: signIn.id);
+    expect(first.scope!.read('appCount'), 7);
+    expect(first.scope!.read('legacy'), 'from v1');
+    expect(setVariableIn(first.scope!, 'appCount', 12), isTrue);
+    // Another screen reads what this one set.
+    final second = await pumpApp(tester, codelessly, layoutId: today.id);
+    expect(second.scope!.read('appCount'), 12);
+    expect(second.scope!.read('legacy'), 'from v1');
+  });
+
   testWidgets('switches canvas when the width crosses a breakpoint', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
