@@ -1,6 +1,6 @@
 name: codelessly_sdk_v2
 description: Codelessly CloudUI™ - server-driven UI for Flutter. Renders Codelessly layouts natively, straight into Flutter render objects.
-version: 9.0.0-beta.1
+version: 20.0.2
 homepage: https://codelessly.com/
 repository: https://github.com/Codelessly/CodelesslySDK
 
@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
   archive: ^4.0.7
   barcode: ^2.2.9
-  codelessly_api_v2: ^7.0.0-beta.1
+  codelessly_api_v2: ^20.0.0
   collection: ^1.19.1
   flutter_svg: ^2.0.17
   http: ^1.1.2
