@@ -560,7 +560,7 @@ class _LayoutViewState extends State<_LayoutView> {
       if (widget.data.isNotEmpty) 'data': {...appData, ...widget.data},
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
-    }, _codelessly.data);
+    }, _codelessly.appVariables);
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
     final scripts = ScriptsScope(
@@ -617,6 +617,8 @@ class _LayoutViewState extends State<_LayoutView> {
     final scope = _screen.scope;
     final services = _codelessly.services;
     final storage = services is Services ? services.storage : null;
+    // A converted v1 publish keeps the app's variables with each layout.
+    _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
       scope.define(v);

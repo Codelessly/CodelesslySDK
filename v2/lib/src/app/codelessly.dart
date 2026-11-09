@@ -4,11 +4,13 @@ import 'package:codelessly_api_v2/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 
 import '../runtime/contracts.dart';
+import '../runtime/expressions/scopes.dart';
 import '../services/services.dart';
 import 'config.dart';
 import 'fonts.dart';
 import 'loader.dart';
 import 'navigation.dart';
+import 'persisted_variables.dart';
 import 'runtime.dart';
 
 /// A published Codelessly project: loads and caches its publish model and
@@ -90,6 +92,31 @@ class Codelessly extends ChangeNotifier {
 
   PublishSource get publishSource => config.publishSource;
 
+  /// The app's variables: shared by every screen, over [data] and under
+  /// each screen's own scope, so a value one screen sets the next one reads.
+  /// Declared from the publish model's `variables` (and a converted v1
+  /// publish's `app_variables` scope, [declareAppVariables]).
+  late final VariableScope appVariables = VariableScope(const [], parent: data);
+
+  final List<PersistedVariable> _persistedApp = [];
+
+  /// Declares [variables] in [appVariables], each once: a persisted one
+  /// starts from its last value and keeps every change.
+  void declareAppVariables(Iterable<Variable> variables) {
+    final s = services;
+    final storage = s is Services ? s.storage : null;
+    for (final v in variables) {
+      if (appVariables.declares(v.name)) continue;
+      appVariables.define(v);
+      if (v.persists) _persistedApp.add(PersistedVariable.attach(appVariables, v, storage));
+    }
+  }
+
+  void _declareModelVariables(PublishModel model) => declareAppVariables([
+        for (final json in model.variables.values)
+          if (Variable.fromJson(json) case final Variable v) v,
+      ]);
+
   CStatus _status = const CEmpty();
   CStatus get status => _status;
 
@@ -127,6 +154,7 @@ class Codelessly extends ChangeNotifier {
     if (cached != null) {
       _model = cached;
       _configureServices(cached);
+      _declareModelVariables(cached);
       _setStatus(const CLoaded());
       unawaited(_refresh(key).catchError((Object _) {}));
     } else {
@@ -169,6 +197,7 @@ class Codelessly extends ChangeNotifier {
     if (old != null && jsonEquality.equals(old.toJson(), fresh.toJson())) return;
     _model = fresh;
     _configureServices(fresh);
+    _declareModelVariables(fresh);
     await cache.write(key, fresh.toJson());
     if (old != null) {
       // Layouts republished since: drop them, they reload when shown.
@@ -273,11 +302,19 @@ class Codelessly extends ChangeNotifier {
     _watching?.cancel();
     _watching = null;
     route.dispose();
+    for (final p in _persistedApp) {
+      p.dispose();
+    }
+    appVariables.dispose();
     data.dispose();
     if (identical(_instance, this)) _instance = null;
     super.dispose();
   }
 }
+
+/// The variable scope a converted v1 publish keeps the app's variables
+/// under, in each layout's `variables`.
+const String kV1AppVariablesScope = 'app_variables';
 
 /// The storage bucket Codelessly publishes to.
 const String kCodelesslyStorageBucket = 'codeless-app.appspot.com';
