@@ -96,7 +96,11 @@ class Codelessly extends ChangeNotifier {
   /// each screen's own scope, so a value one screen sets the next one reads.
   /// Declared from the publish model's `variables` (and a converted v1
   /// publish's `app_variables` scope, [declareAppVariables]).
-  late final VariableScope appVariables = VariableScope(const [], parent: data);
+  late final VariableScope appVariables = VariableScope(const [], parent: _storage);
+
+  /// `storage`: what the app keeps on the device ([Services.storage], the
+  /// `setStorage` action's), read live as `storage.<key>`.
+  late final _StorageScope _storage = _StorageScope(services, parent: data);
 
   final List<PersistedVariable> _persistedApp = [];
 
@@ -306,8 +310,34 @@ class Codelessly extends ChangeNotifier {
       p.dispose();
     }
     appVariables.dispose();
+    _storage.dispose();
     data.dispose();
     if (identical(_instance, this)) _instance = null;
+    super.dispose();
+  }
+}
+
+/// `storage` in expressions: the app's [LocalStorage] values by key,
+/// notifying its readers when any changes.
+class _StorageScope extends NamedScope {
+  _StorageScope(CodelesslyServices services, {super.parent})
+      : _store = services is Services ? services.storage : null {
+    _store?.addListener(_storeChanged);
+  }
+
+  final LocalStorage? _store;
+
+  void _storeChanged() => changed(const ['storage']);
+
+  @override
+  bool declares(String name) => name == 'storage';
+
+  @override
+  Object? valueOf(String name, ValueScope reader) => _store?.getAll() ?? const <String, Object?>{};
+
+  @override
+  void dispose() {
+    _store?.removeListener(_storeChanged);
     super.dispose();
   }
 }

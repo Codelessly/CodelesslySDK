@@ -83,6 +83,23 @@ void main() {
     expect(second.scope!.read('legacy'), 'from v1');
   });
 
+  testWidgets('storage reads what the app keeps on the device, live', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final storage = MemoryLocalStorage();
+    await storage.put('stationId', 'pillar');
+    final codelessly = Codelessly(
+      config: CodelesslyConfig(projectId: 'rigcheck', actions: const NavigationActionRunner(), services: Services(storage: storage)),
+      loader: MemoryPublishLoader(bundle),
+      fonts: const NoFontFetcher(),
+    );
+    addTearDown(codelessly.dispose);
+    final controller = await pumpApp(tester, codelessly, layoutId: signIn.id);
+    expect(controller.scope!.read('storage.stationId'), 'pillar');
+    await storage.put('stationId', 'moss');
+    expect(controller.scope!.read('storage.stationId'), 'moss');
+  });
+
   testWidgets('switches canvas when the width crosses a breakpoint', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
