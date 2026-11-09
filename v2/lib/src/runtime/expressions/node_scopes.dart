@@ -8,6 +8,8 @@
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_api_v2/codelessly_api.dart' show Node;
 
+import 'package:flutter/foundation.dart' show Listenable;
+
 import '../contracts.dart';
 import 'scopes.dart';
 
@@ -62,12 +64,45 @@ bool declaresNodeScope(Node node) {
       be.flip != null ||
       be.tilt != null ||
       be.transformGesture != null ||
-      be.zoomable;
+      be.zoomable ||
+      ownSwitchPoints(node).isNotEmpty;
 }
 
+/// A responsive variance's own switch points (DESIGN.md §5.3), which
+/// restate `screen` inside it; empty for any other node.
+Map<String, double> ownSwitchPoints(Node node) =>
+    node.isResponsive ? node.prop(api.VarianceProps.minWidths) : const {};
+
 /// The scope of what [node] declares for the nodes inside it, around
-/// [parent].
-NodeValuesScope nodeValuesScopeFor(Node node, ValueScope parent) => NodeValuesScope(nodeScopeValues(node, parent), parent);
+/// [parent]: a [ResponsiveScreenScope] for a responsive variance with its
+/// own switch points, else a [NodeValuesScope].
+NodeValuesScope nodeValuesScopeFor(Node node, ValueScope parent) {
+  final values = nodeScopeValues(node, parent);
+  final own = ownSwitchPoints(node);
+  return own.isEmpty ? NodeValuesScope(values, parent) : ResponsiveScreenScope(own, values, parent);
+}
+
+/// `screen` inside a responsive layout with its own switch points: the
+/// screen around it with the breakpoint that layout picks (v1's
+/// `ResponsiveWidthsScope`), following the screen as it changes.
+class ResponsiveScreenScope extends NodeValuesScope {
+  ResponsiveScreenScope(this.minWidths, super.values, super.parent);
+
+  final Map<String, double> minWidths;
+
+  @override
+  bool declares(String name) => name == 'screen' || super.declares(name);
+
+  @override
+  Object? valueOf(String name, ValueScope reader) {
+    if (name != 'screen') return super.valueOf(name, reader);
+    final around = readPath(parent, 'screen');
+    return around is Map<String, Object?> ? screenWithMinWidths(around, minWidths) : around;
+  }
+
+  @override
+  Listenable watch(String name) => name == 'screen' ? (watchName(parent, 'screen') ?? super.watch(name)) : super.watch(name);
+}
 
 /// A drag track's `track`: the value it's drawn at and its progress (as
 /// the design canvas draws it), not dragged, fine or focused.

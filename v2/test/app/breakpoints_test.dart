@@ -27,7 +27,7 @@ Map<String, Object?> _box(String name, {List<String> children = const []}) => {
 /// A screen of two canvases (compact, xl), the compact one holding a
 /// responsive variance with a variant for compact and for medium, and a
 /// text bound to `${screen.breakpoint}` in each.
-PublishBundle bundleWith(Breakpoints breakpoints) {
+PublishBundle bundleWith(Breakpoints breakpoints, {Map<String, num> minWidths = const {}}) {
   final layout = PublishLayout.fromJson({
     'schema': 2,
     'id': 'home',
@@ -46,6 +46,7 @@ PublishBundle bundleWith(Breakpoints breakpoints) {
             {'id': 'pm', 'name': 'Medium', 'children': ['vm'], 'breakpoint': 'medium'},
           ],
           'current': 'pc',
+          if (minWidths.isNotEmpty) 'minWidths': minWidths,
         },
       },
       'vc': _box('in compact', children: ['tc']),
@@ -108,7 +109,7 @@ void main() {
       expect(e.evaluate(r'${screen.is.compact}', s), isFalse);
     });
 
-    test("inside a responsive layout, screen is the project's (no local switch points)", () {
+    test("inside a responsive layout with its own switch points, screen is the layout's", () {
       final around = ValuesScope({'screen': screenValues(1000, 900)});
       final v = Node.fromJson({
         'type': 'variance',
@@ -116,13 +117,20 @@ void main() {
           'variants': [
             {'id': 'a', 'name': 'A', 'children': [], 'breakpoint': 'tablet'},
           ],
-          // Gone from the API: ignored.
           'minWidths': {'desktop': 900},
         },
       }, id: 'v')!;
       final scope = nodeValuesScopeFor(v, around);
+      expect(scope, isA<ResponsiveScreenScope>());
+      expect(readPath(around, 'screen.breakpoint'), 'tablet');
+      expect(readPath(scope, 'screen.breakpoint'), 'desktop');
+      expect(readPath(scope, 'screen.isDesktop'), isTrue);
+      // Following the screen.
+      var told = 0;
+      watchName(scope, 'screen')!.addListener(() => told++);
+      around.set('screen', screenValues(800, 900));
+      expect(told, 1);
       expect(readPath(scope, 'screen.breakpoint'), 'tablet');
-      expect(readPath(scope, 'screen.isDesktop'), isFalse);
     });
   });
 
@@ -212,6 +220,18 @@ void main() {
       tester.view.physicalSize = const Size(750, 900);
       await settle(tester);
       expect(shows(c, 'vm'), isTrue);
+    });
+    testWidgets("a variance's own switch points move where it switches, and screen inside it", (tester) async {
+      ignoreOverflows();
+      setScreen(tester, const Size(800, 900));
+      final c = await pump(tester, bundleWith(custom, minWidths: const {'medium': 900}));
+      expect(shows(c, 'vc'), isTrue, reason: 'medium from 900 for this variance');
+      expect(textOf(c, 'tc'), 'compact', reason: 'screen inside it agrees');
+      expect(c.read('screen.breakpoint'), 'medium', reason: 'the screen itself is medium');
+      tester.view.physicalSize = const Size(950, 900);
+      await settle(tester);
+      expect(shows(c, 'vm'), isTrue);
+      expect(textOf(c, 'tm'), 'medium');
     });
   });
 }

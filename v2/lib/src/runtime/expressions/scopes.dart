@@ -400,15 +400,17 @@ class ItemScope extends NamedScope {
 ///   that one or wider (`${screen.is.tablet}`, `${screen.atLeast.tablet}`);
 /// * `is<Key>` for each id and name key (`isMobile`, `isTablet`,
 ///   `isDesktop` for the defaults; the fixed keys win);
-/// * `breakpoints`: the set (`[{id, name, minWidth}]`).
+/// * `breakpoints`: the set (`[{id, name, minWidth}]`), which a responsive
+///   layout with its own switch points reads to restate `screen` inside it
+///   ([screenWithMinWidths]).
 ///
+/// [minWidths] moves switch points (a responsive layout's own);
 /// [breakpointId], when it names one of [breakpoints], is the breakpoint
-/// whatever the width (a design canvas for that breakpoint). There are no
-/// local switch points: inside any node, `screen` is the project's.
+/// whatever the width (a design canvas for that breakpoint).
 Map<String, Object?> screenValues(double width, double height,
-    {bool dark = false, Breakpoints? breakpoints, String? breakpointId}) {
+    {bool dark = false, Breakpoints? breakpoints, Map<String, double> minWidths = const {}, String? breakpointId}) {
   final set = breakpoints ?? Breakpoints.defaults;
-  final current = set.byId(breakpointId) ?? set.forWidth(width);
+  final current = set.byId(breakpointId) ?? set.forWidth(width, minWidths);
   final index = set.indexOf(current.id);
   final portrait = height >= width;
   final generated = <String, Object?>{};
@@ -447,6 +449,18 @@ Map<String, Object?> screenValues(double width, double height,
 Breakpoints breakpointsOfScreen(Object? screen) {
   final list = screen is Map ? screen['breakpoints'] : null;
   return Breakpoints.fromJson(list);
+}
+
+/// [screen] (a [screenValues] value) inside a responsive layout with its own
+/// switch points [minWidths]: its breakpoint as that layout picks it (v1's
+/// `ResponsiveWidthsScope`), so `screen.isTablet` agrees with the layout on
+/// show. [screen] itself without any.
+Map<String, Object?> screenWithMinWidths(Map<String, Object?> screen, Map<String, double> minWidths) {
+  if (minWidths.isEmpty) return screen;
+  final w = screen['width'], h = screen['height'];
+  if (w is! num || h is! num) return screen;
+  return screenValues(w.toDouble(), h.toDouble(),
+      dark: screen['isDark'] == true, breakpoints: breakpointsOfScreen(screen), minWidths: minWidths);
 }
 
 extension<T> on T {
