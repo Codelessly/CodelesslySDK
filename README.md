@@ -1,3 +1,16 @@
+> [!IMPORTANT]
+> **This README describes the legacy SDK, version 10.x (v1).** The code at the root of this repository is kept for
+> apps that have not updated yet and gets no new features.
+>
+> **The current SDK is version 20.x, in [`v2/`](v2/)**: it is what `codelessly_sdk` on pub.dev is, and what the
+> Codelessly Editor publishes for.
+>
+> - [SDK 20 README](v2/README.md) (install and quickstart)
+> - [Developer guide](docs/guide/README.md)
+> - [Migrating from 10.x to 20.x](docs/guide/16-migrating-from-10.md)
+>
+> The API below (`layoutID`, `Codelessly.instance.initialize(config: ...)`, `isPreview: true`) is not the API of 20.x.
+
 ![Codelessly Logo](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/Codelessly-Logo-Text.png)
 
 # Codelessly CloudUI™ SDK
