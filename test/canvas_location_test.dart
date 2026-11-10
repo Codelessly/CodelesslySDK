@@ -53,18 +53,19 @@ TextNode _text(String id, String parent, String characters) => TextNode(
   textMixedProps: [StartEndProp(start: 0, end: characters.length)],
 )..parentID = parent;
 
-ButtonNode _button(String id, String parent, ActionModel action) => ElevatedButtonNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, 0, 160, 44),
-  properties: ButtonProperties(label: id),
-  reactions: [
-    Reaction(
-      action: action,
-      trigger: TriggerModel(type: TriggerType.click),
-    ),
-  ],
-)..parentID = parent;
+ButtonNode _button(String id, String parent, ActionModel action) =>
+    ElevatedButtonNode(
+      id: id,
+      name: id,
+      basicBoxLocal: NodeBox(0, 0, 160, 44),
+      properties: ButtonProperties(label: id),
+      reactions: [
+        Reaction(
+          action: action,
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      ],
+    )..parentID = parent;
 
 /// A layout of one canvas [id] at [path] that shows [children].
 SDKPublishLayout _screen(
@@ -115,7 +116,7 @@ SDKPublishLayout _screen(
 
 /// The Tidepool screens: Tides (the entry, no path), the guide, a creature
 /// and the journal.
-SDKPublishModel _model({ActionModel? tidesAction}) {
+SDKPublishModel _model({ActionModel? tidesAction, bool notFound = false}) {
   final model = SDKPublishModel(
     projectId: 'project',
     owner: 'owner',
@@ -149,6 +150,15 @@ SDKPublishModel _model({ActionModel? tidesAction}) {
     _screen('newCreature', path: 'guide/new'),
     _screen('journal', path: 'journal'),
     _screen('settings'),
+    if (notFound)
+      _screen(
+        'missing',
+        path: '*',
+        children: [
+          (body) =>
+              _text('missingPath', body, r'Nothing lives at /${route.path}'),
+        ],
+      ),
   ]) {
     model.layouts[layout.id] = layout;
   }
@@ -207,6 +217,42 @@ void main() {
       expect(CanvasLocation.match(model, 'kraken'), isNull);
     });
 
+    test('a catch-all path matches what no other path does', () {
+      final SDKPublishModel withMissing = _model(notFound: true);
+      final CanvasLocationMatch? match = CanvasLocation.match(
+        withMissing,
+        'settings/billing?x=1',
+      );
+      expect(match?.canvasId, 'missing');
+      expect(match?.params, {'path': 'settings/billing', 'x': '1'});
+      expect(CanvasLocation.match(withMissing, 'kraken')?.canvasId, 'missing');
+      // Exact paths still win, and a screen id is left to the id link.
+      expect(
+        CanvasLocation.match(withMissing, 'guide/new')?.canvasId,
+        'newCreature',
+      );
+      expect(
+        CanvasLocation.match(withMissing, 'guide/bat-star')?.canvasId,
+        'creature',
+      );
+      expect(CanvasLocation.match(withMissing, 'settings'), isNull);
+      expect(CanvasLocation.match(withMissing, ''), isNull);
+      expect(
+        CanvasLocation.locationOf(withMissing, 'missing', {'path': 'a/b'}),
+        'a/b',
+      );
+    });
+
+    test('a catch-all under a prefix takes only that prefix', () {
+      expect(CanvasLocation.matchPattern(['docs', '*'], ['docs']), {
+        'path': '',
+      });
+      expect(CanvasLocation.matchPattern(['docs', '*'], ['docs', 'a', 'b']), {
+        'path': 'a/b',
+      });
+      expect(CanvasLocation.matchPattern(['docs', '*'], ['blog', 'a']), isNull);
+    });
+
     test('fills a path with params', () {
       expect(
         CanvasLocation.locationOf(model, 'creature', {
@@ -246,6 +292,15 @@ void main() {
         pendingRoute: CodelesslyRoute.tryParse('creature?id=kraken'),
       );
       expect(find.text('id=kraken'), findsOneWidget);
+    });
+
+    testWidgets('an unknown link opens the catch-all screen', (tester) async {
+      await _pumpApp(
+        tester,
+        _model(notFound: true),
+        pendingRoute: CodelesslyRoute.tryParse('settings/billing'),
+      );
+      expect(find.text('Nothing lives at /settings/billing'), findsOneWidget);
     });
 
     testWidgets("the address shows the screen's URL path", (tester) async {

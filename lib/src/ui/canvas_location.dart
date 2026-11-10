@@ -40,28 +40,39 @@ abstract final class CanvasLocation {
   }
 
   /// The params [pattern] takes from [segments], or null when it does not
-  /// match them.
+  /// match them. A last segment `*` matches the rest of the path (none or
+  /// more segments) and passes it as the param `path`.
   static Map<String, String>? matchPattern(
     List<String> pattern,
     List<String> segments,
   ) {
-    if (pattern.length != segments.length) return null;
+    final bool rest = pattern.isNotEmpty && pattern.last == '*';
+    final int fixed = rest ? pattern.length - 1 : pattern.length;
+    if (rest ? segments.length < fixed : segments.length != fixed) return null;
     final Map<String, String> params = {};
-    for (int i = 0; i < pattern.length; i++) {
+    for (int i = 0; i < fixed; i++) {
       if (pattern[i].startsWith(':') && pattern[i].length > 1) {
         params[pattern[i].substring(1)] = segments[i];
       } else if (pattern[i] != segments[i]) {
         return null;
       }
     }
+    if (rest) params['path'] = segments.skip(fixed).join('/');
     return params;
   }
+
+  /// Whether [pattern] ends in the catch-all segment `*`.
+  static bool isCatchAll(List<String> pattern) =>
+      pattern.isNotEmpty && pattern.last == '*';
 
   /// The canvas of [model] whose path matches [location], such as
   /// `guide/bat-star?x=1` for a canvas at `guide/:id`. Its params are the path
   /// params (`id: bat-star`) over the query params (`x: 1`). When several
   /// canvases match, the one with the most literal segments wins, so
-  /// `guide/new` beats `guide/:id`. Null when no canvas matches.
+  /// `guide/new` beats `guide/:id`. A catch-all path (`*`, or `docs/*`)
+  /// matches only when no other path does, and not a lone segment that is a
+  /// screen's id (a link written by [CodelesslyRoute.toPath]), so it can be
+  /// a "page not found" screen. Null when no canvas matches.
   static CanvasLocationMatch? match(SDKPublishModel model, String location) {
     final Uri uri = Uri.parse(location.trim());
     final List<String> segments = uri.pathSegments
@@ -69,19 +80,32 @@ abstract final class CanvasLocation {
         .toList();
     if (segments.isEmpty) return null;
 
+    final bool isScreenId =
+        segments.length == 1 &&
+        model.layouts.values.any(
+          (layout) =>
+              layout.id == segments.single ||
+              layout.canvasIds.contains(segments.single),
+        );
     CanvasLocationMatch? best;
-    int bestLiterals = -1;
+    // Exact paths rank by their literal segments; catch-alls rank below
+    // every exact path, longer prefixes first.
+    int bestScore = -1 << 20;
     for (final SDKPublishLayout layout in model.layouts.values) {
       if (model.disabledLayouts.contains(layout.id)) continue;
       for (final String canvasId in layout.canvasIds) {
         final CanvasNode? canvas = canvasOf(layout, canvasId);
         if (canvas == null || !canvas.properties.hasPath) continue;
         final List<String> pattern = segmentsOf(canvas.properties.path!);
+        final bool catchAll = isCatchAll(pattern);
+        if (catchAll && isScreenId) continue;
         final Map<String, String>? params = matchPattern(pattern, segments);
         if (params == null) continue;
-        final int literals = pattern.length - params.length;
-        if (literals <= bestLiterals) continue;
-        bestLiterals = literals;
+        final int literals = catchAll
+            ? pattern.length - params.length - (1 << 10)
+            : pattern.length - params.length;
+        if (literals <= bestScore) continue;
+        bestScore = literals;
         best = CanvasLocationMatch(
           layoutId: layout.id,
           canvasId: canvasId,
@@ -129,6 +153,9 @@ abstract final class CanvasLocation {
         final String value = _stringOf(query.remove(segment.substring(1)));
         if (value.isEmpty) return null;
         segments.add(value);
+      } else if (segment == '*') {
+        // A catch-all screen shows the path it caught.
+        segments.addAll(segmentsOf(_stringOf(query.remove('path'))));
       } else {
         segments.add(segment);
       }
