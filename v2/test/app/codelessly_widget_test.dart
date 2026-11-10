@@ -1,12 +1,19 @@
 // A migrated real project (rigcheck: screens with mobile, tablet and
 // desktop canvases, navigation between them) shown by CodelesslyWidget.
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
+
+/// The rigcheck fixture's JSON.
+Map<String, Object?> rigcheckJson() =>
+    (jsonDecode(utf8.decode(gzip.decode(File('test/fixtures/publish/rigcheck.json.gz').readAsBytesSync()))) as Map)
+        .cast<String, Object?>();
 
 void main() {
   final bundle = fixture('rigcheck');
@@ -278,6 +285,47 @@ void main() {
     expect(controller.read('data.user.name'), 'Ada');
     controller.setVariable('count', 3);
     expect(controller.read('count'), 3);
+  });
+
+  testWidgets('a variable named like a data key starts at it and follows it (SDK 8.x)', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final canvasId = canvasNamed(today, 'Today · D');
+    // Today's layout with an integer variable `count` on the canvas.
+    final json = rigcheckJson();
+    final layouts = (json['layouts'] as Map).cast<String, Object?>();
+    layouts[today.id] = {
+      ...(layouts[today.id] as Map).cast<String, Object?>(),
+      'variables': {
+        canvasId: [
+          {'id': 'v_count', 'name': 'count', 'type': 'integer', 'value': 0},
+        ],
+      },
+    };
+    final withVariable = decodeBundle(utf8.encode(jsonEncode(json)));
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    Widget app(int value) => MaterialApp(
+          home: CodelesslyWidget(
+            codelessly: codelesslyFor(loader: MemoryPublishLoader(withVariable)),
+            controller: controller,
+            layoutId: today.id,
+            canvasId: canvasId,
+            data: {'count': value},
+          ),
+        );
+    await tester.pumpWidget(app(41));
+    await settle(tester);
+    expect(controller.read('count'), 41);
+    expect(controller.read('data.count'), 41);
+    await tester.pumpWidget(app(42));
+    await settle(tester);
+    expect(controller.read('count'), 42);
+    // Changed on the screen: a data refresh leaves it.
+    controller.setVariable('count', 7);
+    await tester.pumpWidget(app(43));
+    await settle(tester);
+    expect(controller.read('count'), 7);
   });
 
   testWidgets('loading, then an error for a layout that does not exist', (tester) async {

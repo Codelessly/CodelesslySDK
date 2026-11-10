@@ -625,6 +625,9 @@ class _LayoutViewState extends State<_LayoutView> {
       // A persisted variable starts from what it was last time, and keeps
       // every change.
       if (v.persists) _persisted.add(PersistedVariable.attach(scope, v, storage));
+      // As SDK 8.x: a variable named like a key of the widget's data starts
+      // at that value (the route params, below, win).
+      if (widget.data.containsKey(v.name)) scope.set(v.name, widget.data[v.name]);
       if (widget.params.containsKey(v.name)) scope.set(v.name, widget.params[v.name]);
     }
     // The state variables of its lists' paginations (`${contacts.page}`).
@@ -632,6 +635,21 @@ class _LayoutViewState extends State<_LayoutView> {
   }
 
   final List<PersistedVariable> _persisted = [];
+
+  /// The widget's data changed: `data` reads the new values, and a variable
+  /// that started from the data follows it, unless the user changed it
+  /// since (SDK 8.x).
+  void _dataChanged(Map<String, Object?> previous) {
+    final appData = (_codelessly.data.read('data') as Map?)?.cast<String, Object?>() ?? const {};
+    _screen.values.set('data', {...appData, ...widget.data});
+    final scope = _screen.scope;
+    for (final e in widget.data.entries) {
+      final v = scope.variable(e.key);
+      if (v == null) continue;
+      final before = previous.containsKey(e.key) ? previous[e.key] : v.value;
+      if (jsonEquality.equals(scope.values[e.key], before)) scope.set(e.key, e.value);
+    }
+  }
 
   late final FeedbackTheme _feedbackTheme = FeedbackTheme.fromTokens(widget.layout.theme ?? _codelessly.publishModel?.theme)
       .merge(FeedbackTheme.fromDocument(widget.layout.document));
@@ -749,6 +767,7 @@ class _LayoutViewState extends State<_LayoutView> {
   @override
   void didUpdateWidget(_LayoutView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (!jsonEquality.equals(oldWidget.data, widget.data)) _dataChanged(oldWidget.data);
     if (!identical(oldWidget.controller, widget.controller)) {
       if (identical(oldWidget.controller?._screen, _screen)) oldWidget.controller?._screen = null;
       widget.controller?._screen = _screen;
