@@ -304,17 +304,22 @@ void main() {
           'layout': {'width': 300, 'height': 48},
           'bind': {'props.initialValue': r'${name}'},
           'actions': [
-            reaction('changed', [{'type': 'setVariable', 'variable': 'echo', 'value': r'${result}!'}]),
+            reaction('changed', [
+              {'type': 'setVariable', 'variable': 'echo', 'value': r'${result}!'},
+              // SDK 8.x's name for the new text, which migrated actions use.
+              {'type': 'setVariable', 'variable': 'query', 'value': r'${value}'},
+            ]),
             reaction('submitted', [add('sent')]),
           ],
         },
         'label': {'type': 'text', 'layout': {'width': 300, 'height': 20}, 'props': {'text': r'Hi ${name}'}},
       },
-      variables: [v('name', ''), v('echo', ''), v('sent', 0, VariableType.integer)],
+      variables: [v('name', ''), v('echo', ''), v('query', ''), v('sent', 0, VariableType.integer)],
     );
     await tester.enterText(find.byType(TextField), 'Ada');
     await tester.pump();
     expect((s['name'], s['echo']), ('Ada', 'Ada!'));
+    expect(s['query'], 'Ada');
     expect(textOf(s.tree, 'label'), 'Hi Ada');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();

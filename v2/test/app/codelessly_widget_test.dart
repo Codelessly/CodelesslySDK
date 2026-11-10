@@ -262,6 +262,10 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     final unknown = await pumpApp(tester, codelesslyFor(), initialScreen: 'kraken');
     expect(unknown.layout!.id, bundle.model.entryLayoutId);
+    // The root with a query: the entry screen, opened with its params.
+    final rootQuery = await pumpApp(tester, codelesslyFor(), initialScreen: '/?state=empty');
+    expect(rootQuery.layout!.id, bundle.model.entryLayoutId);
+    expect(rootQuery.read('route.state'), 'empty');
   });
 
   testWidgets('a canvas can be forced; data and params reach the scope', (tester) async {

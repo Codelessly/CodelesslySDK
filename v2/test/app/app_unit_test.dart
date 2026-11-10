@@ -327,6 +327,33 @@ void main() {
     expect('$url', 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@1,500');
   });
 
+  test('a Google Font\'s file is its latin subset in a browser, the one file elsewhere', () {
+    const browser = '''
+/* cyrillic */
+@font-face {
+  font-family: 'Geist';
+  src: url(https://fonts.gstatic.com/s/geist/cyr.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Geist';
+  src: url(https://fonts.gstatic.com/s/geist/latin-ext.woff2) format('woff2');
+}
+/* latin */
+@font-face {
+  font-family: 'Geist';
+  src: url(https://fonts.gstatic.com/s/geist/latin.woff2) format('woff2');
+}
+''';
+    expect(HttpFontFetcher.fontFileOf(browser), 'https://fonts.gstatic.com/s/geist/latin.woff2');
+    // No labels: the last file (the base subset comes last).
+    expect(HttpFontFetcher.fontFileOf(browser.replaceAll(RegExp(r'/\*.*\*/'), '')), 'https://fonts.gstatic.com/s/geist/latin.woff2');
+    const tool = "@font-face {\n  font-family: 'Geist';\n  src: url(https://fonts.gstatic.com/s/geist/full.ttf) format('truetype');\n}";
+    expect(HttpFontFetcher.fontFileOf(tool), 'https://fonts.gstatic.com/s/geist/full.ttf');
+    expect(HttpFontFetcher.fontFileOf('nothing'), isNull);
+  });
+
   test('theme tokens make the theme', () {
     final theme = themeDataOf(const api.ThemeTokens(primary: api.Color(0xFF3366FF), fontFamily: 'Barlow'));
     expect(theme.colorScheme.primary, const Color(0xFF3366FF));
