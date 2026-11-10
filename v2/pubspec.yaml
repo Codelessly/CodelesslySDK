@@ -21,6 +21,12 @@ platforms:
   web:
   windows:
 
+# The client options of Codelessly's Firebase project. They are public client
+# identifiers (every app and web page that shows a Codelessly project
+# carries them), not secrets.
+false_secrets:
+  - /lib/src/services/firebase/codelessly_app.dart
+
 environment:
   sdk: ^3.12.0
   flutter: ">=3.35.0"

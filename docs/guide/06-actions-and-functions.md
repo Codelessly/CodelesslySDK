@@ -58,6 +58,7 @@ final codelessly = Codelessly(
         // The result is `${result}` for the next action of the chain.
         return {'ok': true};
       },
+      // `appContext` is a BuildContext of your app, captured where this config is built.
       'signOut': (context, params) => Navigator.of(appContext).popUntil((route) => route.isFirst),
     },
   ),
@@ -69,6 +70,8 @@ The signature is `FutureOr<Object?> Function(ActionContext context, Map<String, 
 - `params` are the action's params with their expressions evaluated: `{'productId': '${item.id}'}` arrives as
   `{'productId': 'sku_123'}`.
 - The return value (awaited, if a future) becomes `${result}` for the next action. Return JSON-like values.
+  Because a returned future is awaited, don't return one that completes late by accident: `=> navigator.push(...)`
+  makes the chain wait until that route is popped.
 - Throwing stops the chain and reports the error.
 - A function the layout names but you didn't register fails the chain with `No function named [name]`.
 
@@ -100,7 +103,7 @@ Both halves of the runtime are plugins on `CodelesslyConfig`.
 
 ```dart
 // Layouts shown as designed: no bindings, no actions.
-final static = Codelessly(
+final asDesigned = Codelessly(
   config: const CodelesslyConfig(
     slug: 'my-project',
     expressions: NoopExpressionEngine(),
@@ -111,7 +114,7 @@ final static = Codelessly(
 
 ```dart
 // Only navigation and links run.
-final browse = Codelessly(
+final browseOnly = Codelessly(
   config: const CodelesslyConfig(slug: 'my-project', actions: NavigationActionRunner()),
 );
 ```
