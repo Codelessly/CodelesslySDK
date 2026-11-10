@@ -5,6 +5,10 @@
 Actions reach the outside world through **services**: one `Services` object per `Codelessly`, set on
 `CodelesslyConfig.services`. Every service has a default that works with no backend, and each can be replaced.
 
+![Services fields with their defaults and their Firebase counterparts: api, storage, auth, cloud, files, analytics and more](images/09-cloud-data-and-services/hero.png)
+
+*Every service has a default that needs no backend.*
+
 ## The services
 
 | Field | Used by | Default | With Codelessly's Firebase |
@@ -26,6 +30,10 @@ With no `services` at all, `Codelessly` uses `Services()`: APIs and links work, 
 memory.
 
 ## Codelessly cloud data, accounts and files
+
+![codelesslyWithToken with cloudServices true wires cloud data, accounts and files in Codelessly's Firebase; slug mode has none by itself](images/09-cloud-data-and-services/cloud-services.png)
+
+*One flag, three services.*
 
 Projects that use Codelessly's cloud data ("Cloud data" actions, lists bound to a collection), app user accounts
 or file uploads keep them in Codelessly's Firebase, under the project. With a project token, one flag sets them
@@ -91,6 +99,10 @@ To use your own database, implement `DocumentBackend` (get, watch, query, write 
 `BackendCloudDatabase`, which adds the rules, owner stamps and relations on top.
 
 ## HTTP APIs
+
+![On the web, callApi posts {url, method, headers, body} to your proxy, which calls the API and returns {statusCode, headers, body}](images/09-cloud-data-and-services/api-proxy.png)
+
+*A proxy you host gets past CORS on the web.*
 
 A project's APIs (made in the Editor's API builder) are published with it. A `callApi` action names one and gives
 its inputs. The response is `${result}` for the next actions: `data` (the body, parsed when it is JSON),

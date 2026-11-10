@@ -1,0 +1,92 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: a widget test with no network -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Widget tests without a network</div><div class="s">No backend, no device: a bundle in memory, and a controller to read and drive the screen.</div></div>
+  <div class="grp" style="left:40px;top:116px;width:720px;height:250px"><span class="gl m">testWidgets</span></div>
+  <div class="dn" id="b" style="left:64px;top:150px;width:150px"><div class="k">Bundle</div><div class="d">In memory, or a fixture file</div></div>
+  <div class="dn blue" id="c" style="left:250px;top:150px;width:180px"><div class="k">Codelessly</div><div class="m" style="font-size:11.5px">fromBundle(...)<br>NoFontFetcher()</div></div>
+  <div class="dn" id="w" style="left:466px;top:150px;width:270px"><div class="k">tester.pumpWidget</div><div class="m" style="font-size:11.5px">MaterialApp(home: CodelesslyWidget(...))</div></div>
+  <div class="dn purple" id="ctl" style="left:466px;top:262px;width:270px"><div class="k">Controller</div><div class="m" style="font-size:11.5px">read · setVariable · trigger · node</div></div>
+  <tut-connector from="#b" to="#c" route="straight"></tut-connector>
+  <tut-connector from="#c" to="#w" route="straight"></tut-connector>
+  <tut-connector from="#ctl" to="#w" route="straight" from-side="top" to-side="bottom" heads="both"></tut-connector>
+  <div class="dn green" style="left:64px;top:262px;width:366px"><div class="k">expect</div><div class="m" style="font-size:11.5px">controller.read('count') == 1</div></div>
+  <div class="at" style="left:40px;top:392px;width:720px;font-size:12.5px;color:var(--fg1);line-height:1.6">The SDK renders nodes as render objects, so <span class="m">find.text</span> doesn't find a layout's text: assert on the model through the controller, or use golden tests for pixels.</div>
+</tut-stage>
+
+<!-- Steps 1 and 2: the test instance -->
+<tut-stage name="step1-bundle" w="800" h="400" bg="solid">
+  <tut-step n="1" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Build the instance from a bundle in memory</div>
+  <tut-code-window class="sm" at="40,84" w="720" file="test/guide_test.dart" highlight="3">
+/// An instance for tests: no network (fonts aren't fetched).
+Codelessly testCodelessly({CodelesslyConfig config = const CodelesslyConfig()}) =>
+    Codelessly.fromBundle(twoScreens(), config: config, fonts: const NoFontFetcher());
+  </tut-code-window>
+  <div class="dn" style="left:40px;top:240px;width:720px"><div class="k">A real project</div><div class="d">Save its bundle under <span class="m">test/fixtures/</span> and read it with <span class="m">decodeBundle(File('test/fixtures/my_project.json.gz').readAsBytesSync())</span>.</div></div>
+</tut-stage>
+
+<tut-stage name="step2-fonts" w="800" h="400" bg="solid">
+  <tut-step n="2" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Don't download fonts</div>
+  <tut-code-window id="code" class="sm" at="40,84" w="720" file="test/guide_test.dart" highlight="3">
+/// An instance for tests: no network (fonts aren't fetched).
+Codelessly testCodelessly({CodelesslyConfig config = const CodelesslyConfig()}) =>
+    Codelessly.fromBundle(twoScreens(), config: config, fonts: const NoFontFetcher());
+  </tut-code-window>
+  <div class="dn" style="left:40px;top:240px;width:720px"><div class="k">fonts: const NoFontFetcher()</div><div class="d">Layouts otherwise fetch their fonts from the project's uploads or Google Fonts.</div></div>
+</tut-stage>
+
+<!-- Step 3: default services -->
+<tut-stage name="step3-services" w="800" h="400" bg="solid">
+  <tut-step n="3" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Keep the default <span class="m" style="font-size:17px">Services()</span></div>
+  <div class="dn green" style="left:40px;top:94px;width:228px"><div class="k">storage</div><div class="d">In memory</div></div>
+  <div class="dn green" style="left:286px;top:94px;width:228px"><div class="k">cloud</div><div class="d">In memory</div></div>
+  <div class="dn green" style="left:532px;top:94px;width:228px"><div class="k">auth</div><div class="d">Signed out</div></div>
+  <div class="dn amber" style="left:40px;top:200px;width:350px"><div class="k">Replace if the layout calls APIs</div><div class="m">api: a fake ApiService</div></div>
+  <div class="dn amber" style="left:410px;top:200px;width:350px"><div class="k">Replace if it opens links</div><div class="m">links: RecordingLinkOpener()</div></div>
+  <div class="at" style="left:40px;top:310px;width:720px;font-size:12.5px;color:var(--fg1)">The SDK ships fakes: <span class="m">MemoryLocalStorage</span>, <span class="m">MemoryAuthService</span>, <span class="m">MemoryDocumentBackend</span>, <span class="m">RecordingAnalytics</span>...</div>
+</tut-stage>
+
+<!-- Step 4: drive through a controller -->
+<tut-stage name="step4-controller" w="800" h="500" bg="solid">
+  <tut-step n="4" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Drive the screen through a controller</div>
+  <tut-code-window class="sm" at="40,84" w="720" file="Assert on the model" lang="dart" highlight="2,6">
+// A value of the screen.
+expect(controller.read('count'), 1);
+expect(controller.read('route.id'), '42');
+
+// A node as rendered: bindings and conditions applied.
+expect(controller.node('title')!.prop(TextProps.text), 'Hello, Ada!');
+expect(controller.node('badge')!.visible, isFalse);
+  </tut-code-window>
+  <tut-code-window class="sm" at="40,310" w="720" file="Fire a node's reactions" lang="dart" highlight="1">
+await controller.trigger('button', 'click');
+await frames(tester);
+  </tut-code-window>
+  <div class="at" style="left:40px;top:440px;width:720px;font-size:12.5px;color:var(--fg1);line-height:1.6">A chain that pushes a screen completes when that screen is popped: don't await <span class="m">trigger</span> then.</div>
+</tut-stage>
+
+<!-- Step 5: pump frames by hand -->
+<tut-stage name="step5-frames" w="800" h="420" bg="solid">
+  <tut-step n="5" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Pump frames by hand</div>
+  <tut-code-window class="sm" at="40,84" w="720" file="test/guide_test.dart" highlight="3-5">
+/// Screens with looping animations never settle: pump a second of frames.
+Future&lt;void&gt; frames(WidgetTester tester) async {
+  for (var i = 0; i &lt; 10; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+  </tut-code-window>
+  <div class="dn red" style="left:40px;top:300px;width:350px"><div class="k">pumpAndSettle</div><div class="d">A screen with a looping animation never settles.</div></div>
+  <div class="dn green" style="left:410px;top:300px;width:350px"><div class="k">frames(tester)</div><div class="d">Ten frames of 100 ms: one second, then carry on.</div></div>
+</tut-stage>
+</body></html>

@@ -5,6 +5,10 @@
 A layout reacts to things. A **reaction** is a **trigger** and the chain of **actions** it runs, in order. They
 are made in the Editor and run by the SDK; your app takes part through **functions**.
 
+![A click trigger runs setVariable, then callFunction, which calls your Dart function, then showToast; each action can read ${result}](images/06-actions-and-functions/hero.png)
+
+*A reaction: a trigger and a chain of actions, with your function in it.*
+
 ## Triggers
 
 | Group | Triggers |
@@ -41,6 +45,10 @@ How a chain runs:
 - A `navigate` push waits for the pushed screen to be popped; the pop's result is the next action's `${result}`.
 
 ## Functions: calling your code
+
+![The addToCart function with its params, context.setVariable and return value highlighted](images/06-actions-and-functions/function.png)
+
+*A function: evaluated params in, a ${result} out.*
 
 A "call function" action names a function and gives it params. You provide the function:
 
@@ -98,6 +106,10 @@ instances, or dispatch inside the function on a param or on `context.scope.read(
 - Links: `Services.links`, a `LinkOpener` ([Custom widgets and extending](12-custom-widgets.md#replacing-a-service)).
 
 ## Turning the runtime down
+
+![CodelesslyActions runs every action, NavigationActionRunner only navigate and openLink, NoopActionRunner nothing](images/06-actions-and-functions/runners.png)
+
+*The three action runners.*
 
 Both halves of the runtime are plugins on `CodelesslyConfig`.
 

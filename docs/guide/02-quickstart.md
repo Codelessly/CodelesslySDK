@@ -4,7 +4,15 @@
 
 Five minutes to a published screen running in a Flutter app.
 
+![A Dart main function creating a Codelessly by slug and showing a CodelesslyWidget, next to a phone showing the published entry screen](images/02-quickstart/hero.png)
+
+*The whole quickstart: one config line and one widget. The screen is an illustration.*
+
 ## 1. Install
+
+![Terminal running flutter pub add codelessly_sdk; requires Dart 3.12 and Flutter 3.35 or newer](images/02-quickstart/step1-install.png)
+
+*Step 1: add the SDK.*
 
 ```sh
 flutter pub add codelessly_sdk
@@ -14,11 +22,19 @@ Dart 3.12 and Flutter 3.35 or newer.
 
 ## 2. Publish a project
 
+![The Editor's Publish & integrate dialog, Publish tab, with the Publish 3 screens button highlighted](images/02-quickstart/step2-publish.png)
+
+*Step 2: Publish & integrate → Publish, then press the publish button.*
+
 In the Codelessly Editor, open a project and press **Publish**. You then need one of:
 
 - the project's **slug**, if it has a public site (`site.codelessly.com/<slug>`); or
 - the project's **SDK token**; or
 - nothing, to try the SDK first with [the example app](../../v2/example), which runs offline.
+
+![The slug field on the Web tab and the SDK token field (redacted) on the Embed in Flutter tab of Publish & integrate](images/02-quickstart/step2-slug-or-token.png)
+
+*Where the slug and the SDK token are. The token is redacted here.*
 
 [Publishing and environments](13-publishing-and-environments.md) says more about each.
 
@@ -27,6 +43,10 @@ In the Codelessly Editor, open a project and press **Publish**. You then need on
 Pick one of the three.
 
 ### A. By slug
+
+![The slug quickstart code with the CodelesslyConfig(slug:) line highlighted: one HTTP request, no Firebase, new publishes on the next start](images/02-quickstart/step3-slug.png)
+
+*Step 3, option A: load by slug.*
 
 ```dart
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -42,6 +62,10 @@ void main() {
 One HTTP request fetches the whole publish. No Firebase. The app gets a new publish the next time it starts.
 
 ### B. By project token
+
+![The token quickstart code with the firebase.dart import and codelesslyWithToken highlighted: Firebase is set up for you, new publishes arrive live, not on Linux](images/02-quickstart/step3-token.png)
+
+*Step 3, option B: load by project token.*
 
 ```dart
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -74,6 +98,10 @@ Platform notes:
 
 ### C. Offline, from a bundle
 
+![A pubspec.yaml asset entry for assets/my_project.json.gz and the Codelessly.asset call that reads it](images/02-quickstart/step3-bundle.png)
+
+*Step 3, option C: ship a bundle and load it offline.*
+
 ```yaml
 # pubspec.yaml
 flutter:
@@ -95,6 +123,10 @@ comes from.
 
 ## 4. Run
 
+![Terminal running flutter run; a phone showing a spinner while the project loads, then the entry screen](images/02-quickstart/step4-run.png)
+
+*Step 4: a spinner while it loads, then the entry screen. Screens are illustrations.*
+
 ```sh
 flutter run
 ```
@@ -103,6 +135,10 @@ You should see the project's entry screen. While it loads there is a spinner; if
 says why ([Troubleshooting](15-troubleshooting.md)).
 
 ## 5. Make it yours
+
+![CodelesslyWidget with layoutId profile-card and data user name Ada; the binding data.user.name resolves to Ada on a profile card](images/02-quickstart/step5-data.png)
+
+*Step 5: your data in a layout. The profile card is an illustration.*
 
 Show one particular layout, with your data, and react to what it does:
 
@@ -126,6 +162,10 @@ Where next:
 - [Navigation](07-navigation.md): a whole project as your app.
 
 ## The example app
+
+![Terminal commands to run the example app offline, by slug or by token](images/02-quickstart/example-app.png)
+
+*The example app, offline or against your project.*
 
 [`v2/example`](../../v2/example) is a complete app:
 

@@ -1,0 +1,81 @@
+/* Shared look for the developer-guide images (SDK and API guides).
+   Scenes use the editor's tutorial toolkit (_toolkit -> tool/docs_images)
+   plus these few classes for staged diagrams. One stage family: 800 wide,
+   500 high (or 400 for short strips); one accent (the toolkit's blue).
+   No coloured left-edge bars anywhere: emphasis is a tinted fill, a full
+   1px border, an icon or a badge. */
+
+tut-stage { font-family: var(--tut-font); }
+.at { position: absolute; }
+
+/* A diagram node: a small card with a kicker, a title and a detail line. */
+.dn {
+  position: absolute; box-sizing: border-box; padding: 12px 14px;
+  background: var(--bg0); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 8px 24px -12px rgba(15, 23, 42, .18);
+  color: var(--fg0); font-size: 13px; line-height: 1.45;
+}
+.dn .k { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--fg2); margin-bottom: 4px; }
+.dn .t { font-size: 15px; font-weight: 650; line-height: 1.3; }
+.dn .d { color: var(--fg1); margin-top: 3px; }
+.dn .m, .m { font-family: var(--tut-mono); font-size: 12.5px; }
+.dn.blue { background: color-mix(in srgb, var(--t-blue) 7%, var(--bg0)); border-color: color-mix(in srgb, var(--t-blue) 40%, var(--line)); }
+.dn.blue .k { color: var(--t-blue); }
+.dn.green { background: color-mix(in srgb, var(--t-green) 7%, var(--bg0)); border-color: color-mix(in srgb, var(--t-green) 40%, var(--line)); }
+.dn.green .k { color: var(--t-green); }
+.dn.purple { background: color-mix(in srgb, var(--t-purple) 7%, var(--bg0)); border-color: color-mix(in srgb, var(--t-purple) 40%, var(--line)); }
+.dn.purple .k { color: var(--t-purple); }
+.dn.amber { background: color-mix(in srgb, var(--t-amber) 8%, var(--bg0)); border-color: color-mix(in srgb, var(--t-amber) 45%, var(--line)); }
+.dn.amber .k { color: var(--t-amber); }
+.dn.red { background: color-mix(in srgb, var(--t-red) 6%, var(--bg0)); border-color: color-mix(in srgb, var(--t-red) 40%, var(--line)); }
+.dn.red .k { color: var(--t-red); }
+.dn.gray { background: var(--bg1); box-shadow: none; }
+.dn.dash { background: transparent; border: 1.5px dashed var(--line2); box-shadow: none; }
+.dn.center { text-align: center; }
+.dn ul { margin: 6px 0 0; padding-left: 16px; }
+.dn li { margin: 2px 0; }
+
+/* A group: a dashed area with a label on its top edge. */
+.grp { position: absolute; box-sizing: border-box; border: 1.5px dashed var(--line2); border-radius: 14px; }
+.grp > .gl { position: absolute; left: 14px; top: -10px; padding: 0 8px; background: var(--canvas); font-size: 12px; font-weight: 600; color: var(--fg1); letter-spacing: .02em; }
+.grp.blue { border-color: color-mix(in srgb, var(--t-blue) 45%, transparent); }
+.grp.blue > .gl { color: var(--t-blue); }
+
+/* Pills and small tags. */
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 600; background: var(--bg2); color: var(--fg1); white-space: nowrap; }
+.pill.blue { background: color-mix(in srgb, var(--t-blue) 12%, var(--bg0)); color: var(--t-blue); }
+.pill.green { background: color-mix(in srgb, var(--t-green) 12%, var(--bg0)); color: var(--t-green); }
+.pill.red { background: color-mix(in srgb, var(--t-red) 12%, var(--bg0)); color: var(--t-red); }
+.pill.amber { background: color-mix(in srgb, var(--t-amber) 14%, var(--bg0)); color: var(--t-amber); }
+.pill.purple { background: color-mix(in srgb, var(--t-purple) 12%, var(--bg0)); color: var(--t-purple); }
+.pill .m { font-size: 12px; }
+
+/* Stage heading: a short title at the top left of a diagram. */
+.hd { position: absolute; left: 40px; top: 28px; right: 40px; }
+.hd .t { font-size: 20px; font-weight: 700; color: var(--fg0); letter-spacing: -.01em; }
+.hd .s { font-size: 13.5px; color: var(--fg1); margin-top: 4px; }
+
+/* "Illustration" marker for staged app screens. */
+.illus { position: absolute; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--fg2); }
+
+/* Mock app screens inside a tut-phone: a staged layout, not a real project. */
+.app { position: absolute; inset: 0; background: #FFFFFF; font-family: var(--tut-font); color: #111827; }
+.app .bar { height: 44px; display: flex; align-items: center; padding: 0 16px; font-size: 16px; font-weight: 650; }
+.app .card { margin: 10px 14px; padding: 14px; border-radius: 14px; background: #F3F4F6; }
+.app .btn { display: inline-flex; align-items: center; justify-content: center; height: 36px; padding: 0 16px; border-radius: 10px; background: #2563EB; color: #fff; font-size: 13.5px; font-weight: 600; }
+.app .row { display: flex; align-items: center; gap: 10px; }
+.app .muted { color: #6B7280; font-size: 12.5px; }
+.app .h { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+
+/* A dashed outline marking where a CodelesslyWidget sits in a host screen. */
+.cw-zone { position: absolute; box-sizing: border-box; border: 2px dashed var(--t-blue); border-radius: 12px; background: color-mix(in srgb, var(--t-blue) 5%, transparent); }
+
+/* JSON / code keys emphasised inside tut-code windows. */
+.tut-code { font-size: 13px; line-height: 21px; }
+
+/* An edge label: small text set above or beside a connector. */
+.el { position: absolute; font-size: 12px; font-weight: 600; color: var(--fg1); background: var(--canvas); padding: 1px 6px; border-radius: 6px; white-space: nowrap; }
+.el.m { font-family: var(--tut-mono); font-weight: 500; }
+.sm .tut-code { font-size: 12px; line-height: 19px; }
+.xs .tut-code { font-size: 11px; line-height: 17px; }
+.xxs .tut-code { font-size: 10.5px; line-height: 16px; }

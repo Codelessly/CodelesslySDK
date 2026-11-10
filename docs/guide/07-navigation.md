@@ -5,6 +5,10 @@
 Layouts navigate with actions: `navigate` (push, pop, replace, reset), `openModal` and `closeModal`. The SDK runs
 them on Flutter's `Navigator`, and you decide how much of the routing is yours.
 
+![Navigation actions and what the SDK does on the Navigator, next to stacked routes named by their URL path](images/07-navigation/hero.png)
+
+*Navigation actions become Navigator calls.*
+
 ## How navigation actions run
 
 A `CodelesslyWidget` uses the nearest `Navigator` above it:
@@ -25,6 +29,10 @@ web the default is no transition.
 Without a `Navigator` above the widget, navigation actions do nothing.
 
 ## A whole project as your app
+
+![MaterialApp with CodelesslyWidget.onGenerateRoute, and a browser at /item/7?tab=specs opening the screen with path item/:id, route.id 7 and route.tab specs](images/07-navigation/whole-app.png)
+
+*URL paths and query parameters become route params. The page is an illustration.*
 
 Give the project's screens to `MaterialApp`:
 
@@ -102,6 +110,10 @@ CodelesslyWidget(
 ```
 
 ## Routing some destinations yourself
+
+![Flowchart: a navigate action goes to onNavigate; true means you handled it, false means the SDK navigates](images/07-navigation/on-navigate.png)
+
+*onNavigate sees every navigation first.*
 
 `onNavigate` sees every navigation action before the SDK acts. Return `true` when you handled it:
 

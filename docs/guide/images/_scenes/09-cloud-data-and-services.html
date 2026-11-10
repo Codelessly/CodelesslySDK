@@ -1,0 +1,48 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: Services, defaults and replacements -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Actions reach the world through services</div><div class="s">One <span class="m">Services</span> per <span class="m">Codelessly</span>. Every service has a default that needs no backend.</div></div>
+  <div class="dn" style="left:40px;top:104px;width:720px;padding:0;overflow:hidden">
+    <table style="border-collapse:collapse;width:100%;font-size:12.5px">
+      <tr style="background:var(--bg1)"><th style="text-align:left;padding:8px 14px;color:var(--fg1);font-weight:600">Field</th><th style="text-align:left;padding:8px 14px;color:var(--fg1);font-weight:600">Default</th><th style="text-align:left;padding:8px 14px;color:var(--fg1);font-weight:600">With Codelessly's Firebase</th></tr>
+      <tr><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">api</td><td style="padding:7px 14px;border-top:1px solid var(--line)"><span class="pill green">real HTTP</span></td><td style="padding:7px 14px;border-top:1px solid var(--line);color:var(--fg1)">Same</td></tr>
+      <tr><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">storage</td><td style="padding:7px 14px;border-top:1px solid var(--line)"><span class="pill amber">in memory</span></td><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">PreferencesLocalStorage</td></tr>
+      <tr><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">auth</td><td style="padding:7px 14px;border-top:1px solid var(--line)"><span class="pill">signed out</span></td><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">FirebaseAuthService</td></tr>
+      <tr><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">cloud</td><td style="padding:7px 14px;border-top:1px solid var(--line)"><span class="pill amber">in memory</span></td><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">FirestoreDocumentBackend</td></tr>
+      <tr><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">files</td><td style="padding:7px 14px;border-top:1px solid var(--line)"><span class="pill amber">in memory</span></td><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">FirebaseFileStorage</td></tr>
+      <tr><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">analytics</td><td style="padding:7px 14px;border-top:1px solid var(--line)"><span class="pill">printed in debug</span></td><td style="padding:7px 14px;border-top:1px solid var(--line);color:var(--fg1)">Yours</td></tr>
+      <tr><td class="m" style="padding:7px 14px;border-top:1px solid var(--line)">links, scripts, sound, speech, ...</td><td style="padding:7px 14px;border-top:1px solid var(--line);color:var(--fg1)">Platform defaults</td><td style="padding:7px 14px;border-top:1px solid var(--line);color:var(--fg1)">Same</td></tr>
+    </table></div>
+  <div class="at" style="left:40px;top:440px;width:720px;font-size:12.5px;color:var(--fg1)">Set them on <span class="m">CodelesslyConfig.services</span>. Each is listed in the table on this page.</div>
+</tut-stage>
+
+<!-- Codelessly cloud: what cloudServices wires -->
+<tut-stage name="cloud-services" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Codelessly cloud data, accounts and files</div><div class="s">With a project token, one flag sets them up, under the project, in Codelessly's Firebase.</div></div>
+  <tut-code-window class="sm" at="40,100" w="720" file="lib/main.dart" highlight="1">
+final codelessly = await codelesslyWithToken('YOUR_PROJECT_TOKEN', cloudServices: true);
+  </tut-code-window>
+  <div class="dn blue" style="left:40px;top:220px;width:228px;height:150px"><div class="k">Cloud data</div><div class="d">Firestore, under <span class="m">data/{projectId}</span>. Data rules followed live.</div></div>
+  <div class="dn blue" style="left:286px;top:220px;width:228px;height:150px"><div class="k">Accounts</div><div class="d">Firebase Auth: email and password, email links, Google, Apple.</div></div>
+  <div class="dn blue" style="left:532px;top:220px;width:228px;height:150px"><div class="k">Files</div><div class="d">Firebase Storage, under <span class="m">data/{projectId}</span>.</div></div>
+  <div class="dn amber" style="left:40px;top:396px;width:720px"><div class="d" style="margin:0"><b>Slug mode has no cloud services by itself.</b> Build them with <span class="m">codelesslyCloudServices</span> (it needs the project id), or use a token.</div></div>
+</tut-stage>
+
+<!-- HTTP APIs on the web: a proxy -->
+<tut-stage name="api-proxy" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">HTTP APIs on the web: CORS and a proxy</div><div class="s">An API that doesn't allow your origin fails in the browser. Give the service a proxy you host.</div></div>
+  <div class="dn" id="app" style="left:40px;top:140px;width:180px"><div class="k">Your web app</div><div class="m">callApi</div></div>
+  <div class="dn blue" id="px" style="left:310px;top:140px;width:180px"><div class="k">Your proxy</div><div class="m" style="font-size:11.5px">example.com/api/proxy</div></div>
+  <div class="dn" id="api" style="left:580px;top:140px;width:180px"><div class="k">The API</div><div class="d">any origin rules</div></div>
+  <tut-connector from="#app" to="#px" route="straight"></tut-connector>
+  <tut-connector from="#px" to="#api" route="straight" heads="both"></tut-connector>
+  <span class="el m" style="left:214px;top:112px">POST {url, method, headers, body}</span>
+  <span class="el m" style="left:214px;top:224px">{statusCode, headers, body}</span>
+  <div class="dn red" style="left:40px;top:280px;width:720px"><div class="d" style="margin:0">API secrets in a published project are in the client. Keep secrets on a server: your proxy, or a function your app registers.</div></div>
+</tut-stage>
+</body></html>

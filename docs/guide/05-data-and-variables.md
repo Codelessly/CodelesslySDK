@@ -5,6 +5,10 @@
 Layouts read values with expressions: `${name}` reads one, `${= formula}` computes one. This chapter is about the
 names a layout can read, and which of them your app controls.
 
+![Nested scopes, inside out: list item, screen variables, route, data and screen, app variables, storage; your app sets data and params](images/05-data-and-variables/hero.png)
+
+*A name is looked up from the inside out.*
+
 ## The names a layout reads
 
 | Name | What it is | Who sets it |
@@ -24,6 +28,10 @@ A name is looked up from the inside out: the list item, then the screen's variab
 ## Passing data in
 
 ### For one widget
+
+![A CodelesslyWidget with data unread, and a phone whose badge is bound to data.unread and shows 3](images/05-data-and-variables/pass-data.png)
+
+*Data passed to one widget, read as ${data.unread}. The screen is an illustration.*
 
 ```dart
 class InboxHeader extends StatelessWidget {
@@ -70,6 +78,10 @@ without its own `data` follows `setData` live. If a screen needs both, pass ever
 widget's `data`.
 
 ### Data and variables of the same name
+
+![Timeline: the email variable starts at the data, follows it when the data changes, then keeps the user's edit when the data changes again](images/05-data-and-variables/data-and-variable.png)
+
+*A variable named like a data key follows it until the screen changes it.*
 
 If a screen declares a variable with the same name as a data key, the variable **starts at the data's value and
 follows it** when the data changes, until the screen changes the variable itself (an input the user edits, a "set
