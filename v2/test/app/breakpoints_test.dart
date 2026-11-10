@@ -101,7 +101,7 @@ void main() {
     });
 
     test('formulas read them', () {
-      final e = Expressions();
+      const e = Expressions();
       final s = ValuesScope({'screen': screenValues(1400, 900, breakpoints: custom)});
       expect(e.evaluate(r'${screen.breakpoint}', s), 'xl');
       expect(e.evaluate(r'${= screen.isLargeDesktop ? 1 : 2}', s), 1);
