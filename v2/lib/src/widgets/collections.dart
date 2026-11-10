@@ -73,8 +73,13 @@ void _syncItems(NodeBuilder b, Node n, _Container container, String? itemId, int
 /// The box SDK 8.x's ViewportNodeBox gave a scroll view: the design extent
 /// across (filling when expanded) and along its axis unless it shrink-wraps
 /// its items (filling when expanded).
+///
+/// At runtime a flexible scroll axis shrink-wraps its items too, within the
+/// room its parent gives it, and scrolls once they outgrow it (as the SDK
+/// 8.x runtime does), so what follows the list sits under its last item. A
+/// design canvas keeps it at its design size, as the editor showed it.
 RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap}) {
-  final shrinkWrap = n.mainFit == SizeFit.hug && canShrinkWrap;
+  final shrinkWrap = _hugsMain(b, n) && canShrinkWrap;
   final main = shrinkWrap ? null : n.designMain;
   final fillMain = n.mainFit == SizeFit.fill;
   final fillCross = n.crossFit == SizeFit.fill;
@@ -87,6 +92,11 @@ RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap}) 
 }
 
 Clip _clip(Node n) => clip(n.prop(CollectionScrollProps.clipBehavior));
+
+/// Whether [n] hugs its items along its scroll axis: it hugs, or it is
+/// flexible (hugs within the room it's given) in a running app.
+bool _hugsMain(NodeBuilder b, Node n) =>
+    n.mainFit == SizeFit.hug || (n.mainFit == SizeFit.flexible && b.tree.animates);
 
 /// The item count a view shows in preview: its set count (bound data is a
 /// runtime matter), null when endless.
@@ -340,7 +350,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       reverse: n.prop(CollectionScrollProps.reverse),
       anchorEnd: true,
       padding: padding,
-      hugMain: n.mainFit == SizeFit.hug && count != null,
+      hugMain: _hugsMain(b, n) && count != null,
       hugCross: false,
       stretch: stretchItems,
       itemMain: itemMain,
