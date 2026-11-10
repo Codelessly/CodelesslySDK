@@ -1,5 +1,5 @@
 // A node that follows the pointer (`drag`, DragMotion): SDK 8.x's
-// node_drag_test and drag_physics_test, ported to the v2 render tree. The
+// node_drag_test and drag_physics_test, ported to the render tree. The
 // node follows, tilts, shares its drag as `${drag}`, writes its variables,
 // fires drag, dragEnd and swipes, and springs back, stays, settles on
 // physics or flies off.

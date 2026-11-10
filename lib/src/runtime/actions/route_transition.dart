@@ -1,4 +1,4 @@
-// Custom route transitions (API v2 `RouteTransition`, on navigate and open
+// Custom route transitions (`RouteTransition`, on navigate and open
 // modal actions): a page route that moves the incoming screen from its
 // enter side to rest and the covered screen to its exit side (3D,
 // shifts, fades, blurs, reveals), the pop sides when closing, with a

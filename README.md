@@ -244,7 +244,7 @@ working code:
 | [Publishing and environments](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/13-publishing-and-environments.md) | Publish, preview, templates, app identity |
 | [Testing](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/14-testing.md) | Widget tests without a network |
 | [Troubleshooting and FAQ](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/15-troubleshooting.md) | Errors and what they mean |
-| [Migrating from 10.x](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/16-migrating-from-10.md) | What changed in 20 |
+| [Migrating from 10.x](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/16-migrating-from-10.md) | What changed in 21 |
 
 The [example app](https://github.com/Codelessly/CodelesslySDK/tree/master/example) runs offline and shows an
 embedded layout with data, a function and a controller, and a whole project as an app.
@@ -263,7 +263,7 @@ model is its own package, [`codelessly_api`](https://pub.dev/packages/codelessly
 
 ## Coming from 10.x?
 
-Version 20 reads projects in the new format (`"schema": 2`). Every Codelessly project has been converted to it, and
+Version 21 reads projects in the new format (`"schema": 2`). Every Codelessly project has been converted to it, and
 SDK 10.x and older can't read it. 10.x is no longer in this repository (it stays on pub.dev). The API changed too (`layoutID` is `layoutId`, instances are explicit,
 functions are plain Dart functions). See
 [Migrating from 10.x](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/16-migrating-from-10.md).

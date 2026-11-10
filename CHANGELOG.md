@@ -1,28 +1,44 @@
-## 20.1.0
+## 21.0.0
 
-- The repository is the 20.x package only: v1 (10.x and older) is removed from the source tree, and the package is
-  developed under its published name, `codelessly_sdk`, at the repository root. 10.x stays available on pub.dev.
-- Dependencies at their latest versions, among them Firebase's new majors (`firebase_core` 5, `firebase_auth` 7,
-  `cloud_firestore` 7, `cloud_functions` 7, `firebase_storage` 14). They build on Firebase's Android BoM 35 and
-  Apple SDK 13: an app that uses `package:codelessly_sdk/firebase.dart` needs Android `minSdk` 24 and macOS 11.
-  Depends on `codelessly_api` ^20.1.0.
+Breaking changes:
+
+- The repository holds this package only. The old 10.x source (v1) is removed from it, and the package is developed
+  under its published name, `codelessly_sdk`, at the repository root (where the 20.x source used to live in a
+  subfolder and was renamed at publish). 10.x stays available on pub.dev. Projects are not affected: they are all in
+  the current format (`"schema": 2`).
+- New major versions of dependencies, which apps resolve together with the SDK:
+  `firebase_core` 4 → 5, `firebase_auth` 6 → 7, `cloud_firestore` 6 → 7, `cloud_functions` 6 → 7,
+  `firebase_storage` 13 → 14. They build on Firebase's Android BoM 35 and Apple SDK 13: an app that uses
+  `package:codelessly_sdk/firebase.dart` needs Android `minSdk` 24 and macOS 11, and its own Firebase dependencies
+  on these majors. The other dependencies are at their latest minor versions.
+- Depends on `codelessly_api` ^21.0.0.
+
+Added:
+
 - `codelesslyWithToken` (`package:codelessly_sdk/firebase.dart`): a `Codelessly` from a project token alone. It opens
   Codelessly's Firebase project as a secondary Firebase app (`codelesslyFirebaseApp`, `CodelesslyFirebaseOptions`),
   so an app needs no Firebase setup of its own; `cloudServices: true` also sets up the project's cloud data,
   accounts and files (`codelesslyCloudServices`).
 - `firebase.dart` exports the Firebase types its functions take (`Firebase`, `FirebaseApp`, `FirebaseOptions`,
   `FirebaseFirestore`, `FirebaseAuth`, `FirebaseStorage`).
-- A README, an example app and a developer guide: https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide
 - Anchored modals: `openModal` honours `anchor`, `placement`, `anchorGap` and `anchorOffset`. A modal anchored to its
   trigger or the pointer opens beside it as a popover, flips to the other side when it doesn't fit and stays on screen.
   They used to open centred.
-- Actions read a trigger's value as `${value}` as well as `${result}`, as SDK 8.x named it, so migrated actions
+
+Fixed:
+
+- Actions read a trigger's value as `${value}` as well as `${result}`, as SDK 8.x named it, so converted actions
   (a search field's changed action) get the value.
 - A link to the app's root with a query (`/?state=empty`) opens the entry screen with those params.
 - A running list whose scroll axis is flexible hugs its items within the room it is given and scrolls past that,
   as the 8.x runtime does. A design canvas keeps the design size.
 - Google Fonts: the font fetcher takes a font's latin subset, not the first subset the CSS lists, so Latin text no
   longer falls back to the platform font.
+
+Docs:
+
+- A README, an example app and a developer guide: https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide
+  (including a migration chapter from 10.x).
 
 ## 20.0.3
 

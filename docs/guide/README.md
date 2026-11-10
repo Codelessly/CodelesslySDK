@@ -1,6 +1,6 @@
 # Codelessly SDK developer guide
 
-For `codelessly_sdk` 20.x (this repository). Every code sample here is compiled with the
+For `codelessly_sdk` 21.x (this repository). Every code sample here is compiled with the
 [example app](../../example) (`lib/snippets.dart`), and the behaviour the chapters describe is covered by its
 tests (`test/guide_test.dart`) or the SDK's own.
 
@@ -29,7 +29,7 @@ New here? Read [Introduction](01-introduction.md), then do the [Quickstart](02-q
 | 13 | [Publishing and environments](13-publishing-and-environments.md) | Understand publish, preview, templates, sites and app identity |
 | 14 | [Testing](14-testing.md) | Write widget tests for screens that show layouts |
 | 15 | [Troubleshooting and FAQ](15-troubleshooting.md) | Decode an error message |
-| 16 | [Migrating from 10.x to 20.x](16-migrating-from-10.md) | Move an app from SDK 10 (v1) to SDK 20 (v2) |
+| 16 | [Migrating from 10.x to 21.x](16-migrating-from-10.md) | Move an app from SDK 10 to SDK 21 |
 
 Related:
 
@@ -49,5 +49,5 @@ Related:
 
   and, where they use Firebase, `import 'package:codelessly_sdk/firebase.dart';`.
 - Package names. The packages are `codelessly_sdk` and `codelessly_api`, the same names on pub.dev and in the
-  repositories. 10.x (v1) is no longer in the repositories; it stays on pub.dev.
+  repositories. 10.x is no longer in the repositories; it stays on pub.dev.
 - `${...}` is the layout's expression syntax, written in the Editor, not Dart.

@@ -1,8 +1,8 @@
-// Drag and drop (API v2 `DragSource` and `DropTarget`, node keys
+// Drag and drop (`DragSource` and `DropTarget`, node keys
 // `draggable` and `dropTarget`): SDK 8.x's transformers/utils/
 // drag_and_drop.dart (DragSourceBox, DropTargetBox, DragSession and
 // DragAndDropController) as render object layers of a running app's nodes,
-// between the rotation and the node's reactions, as v1 wrapped them.
+// between the rotation and the node's reactions, as 10.x wrapped them.
 //
 // * [RenderDragSource] picks the node up (on press, or a long press on
 //   touch), draws a copy of it (or its feedback node) under the pointer in
@@ -22,8 +22,8 @@
 //   (after its `hoverDelay`), `dragExit`, `drop` (with `key`),
 //   `dropRejected` (its `acceptIf` refused) and `dropFull`.
 //
-// Not ported here: v1's auto-scroll of the scroll views around a target
-// (v2 doesn't scroll at runtime yet) and the drop position a flight key
+// Not ported here: 10.x's auto-scroll of the scroll views around a target
+// (this SDK doesn't scroll at runtime yet) and the drop position a flight key
 // records for the hero that shows the drop next.
 import 'dart:async';
 import 'dart:math' as math;

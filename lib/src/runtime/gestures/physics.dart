@@ -1,4 +1,4 @@
-// The physics every gesture's release shares (API v2's GesturePhysics and
+// The physics every gesture's release shares (the API's GesturePhysics and
 // GestureSnap, DESIGN.md §4.1): the spring a settle runs on, friction
 // flings that spring back at their bounds, rubber-banding past the bounds,
 // the range bounds allow, and velocity-projected snapping to points, a grid
