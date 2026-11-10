@@ -354,6 +354,14 @@ class ItemScope extends NamedScope {
 
   int _index;
   Object? _item;
+  double? _pageOffset;
+
+  /// Distance from the viewport page, for page-linked parallax.
+  void setPageOffset(double value) {
+    if (_pageOffset == value) return;
+    _pageOffset = value;
+    changed(['pageOffset']);
+  }
 
   int get index => _index;
   Object? get item => _item;
@@ -361,10 +369,11 @@ class ItemScope extends NamedScope {
   static const _names = {'item', 'index', 'parent'};
 
   @override
-  bool declares(String name) => _names.contains(name);
+  bool declares(String name) => _names.contains(name) || (name == 'pageOffset' && _pageOffset != null);
 
   @override
   Object? valueOf(String name, ValueScope reader) => switch (name) {
+        'pageOffset' => _pageOffset,
         'item' => _item,
         'index' => _index,
         'parent' => _outer()?.let((o) => {'item': o._item, 'index': o._index}) ?? const <String, Object?>{},
