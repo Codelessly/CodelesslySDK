@@ -190,13 +190,35 @@ class NavigatorActionUi implements ActionUi {
     final c = _context;
     final content = modal?.call(action.to, params);
     if (c == null || content == null) return null;
+    final anchor = switch (action.anchor) {
+      api.ModalAnchor.trigger => RevealAnchor.lastTrigger,
+      api.ModalAnchor.pointer => RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero,
+      api.ModalAnchor.none => null,
+    };
+    final sheetBelowWidth = action.sheetBelowWidthIn(_breakpoints);
+    final width = MediaQuery.maybeSizeOf(c)?.width;
+    final sheet = action.presentation == ModalPresentation.bottomSheet ||
+        (action.presentation == ModalPresentation.adaptive && (width == null || width < sheetBelowWidth));
+    // A popover: by the node that opened it, or the pointer.
+    if (anchor != null &&
+        action.routeTransition == null &&
+        !sheet &&
+        (action.presentation == ModalPresentation.dialog || action.presentation == ModalPresentation.adaptive)) {
+      return showAnchoredModal(c, content,
+          anchor: anchor,
+          placement: action.placement,
+          gap: action.anchorGap,
+          offset: action.anchorOffset,
+          barrierDismissible: action.barrierDismissible,
+          barrierColor: action.barrierColor);
+    }
     return showScreenModal(c, content,
         presentation: action.presentation,
         barrierDismissible: action.barrierDismissible,
         barrierColor: action.barrierColor,
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
-        sheetBelowWidth: action.sheetBelowWidthIn(_breakpoints),
+        sheetBelowWidth: sheetBelowWidth,
         routeTransition: action.routeTransition);
   }
 
@@ -363,3 +385,105 @@ Future<Object?> showScreenModal(
     builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
   );
 }
+
+/// Shows [content] as a popover by [anchor] (a global rect: the node that
+/// opened it, or the pointer as an empty rect) at [placement], [gap] away
+/// from it and shifted [offset] along it, as SDK 8.x's anchored dialogs.
+/// It flips to the other side when it doesn't fit and stays on screen.
+Future<Object?> showAnchoredModal(
+  BuildContext context,
+  Widget content, {
+  required Rect anchor,
+  api.PopoverPlacement placement = api.PopoverPlacement.belowStart,
+  double gap = 4,
+  double offset = 0,
+  bool barrierDismissible = true,
+  api.Color? barrierColor,
+}) {
+  final navigator = Navigator.of(context);
+  final overlay = navigator.overlay?.context.findRenderObject();
+  final local = overlay is RenderBox && overlay.attached
+      ? Rect.fromPoints(overlay.globalToLocal(anchor.topLeft), overlay.globalToLocal(anchor.bottomRight))
+      : anchor;
+  return showDialog<Object?>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
+    useSafeArea: false,
+    builder: (_) => CustomSingleChildLayout(
+      delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset),
+      child: Material(type: MaterialType.transparency, child: content),
+    ),
+  );
+}
+
+/// Lays a popover out by its anchor (see [showAnchoredModal]).
+class PopoverLayout extends SingleChildLayoutDelegate {
+  PopoverLayout({required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8});
+
+  final Rect anchor;
+  final api.PopoverPlacement placement;
+  final double gap, offset, margin;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.loose(constraints.biggest).deflate(EdgeInsets.all(margin));
+
+  @override
+  Offset getPositionForChild(Size size, Size child) {
+    final name = placement.name;
+    final vertical = name.startsWith('below') || name.startsWith('above');
+    final side = name.startsWith('below')
+        ? 'below'
+        : name.startsWith('above')
+            ? 'above'
+            : name.startsWith('right')
+                ? 'right'
+                : name.startsWith('left')
+                    ? 'left'
+                    : 'center';
+    final along = name.endsWith('Start')
+        ? -1
+        : name.endsWith('End')
+            ? 1
+            : 0;
+    double x, y;
+    if (side == 'center') {
+      x = anchor.center.dx - child.width / 2;
+      y = anchor.center.dy - child.height / 2;
+    } else if (vertical) {
+      // Below unless it only fits above (and the other way round).
+      var below = side == 'below';
+      final roomBelow = size.height - margin - (anchor.bottom + gap);
+      final roomAbove = anchor.top - gap - margin;
+      if (below && child.height > roomBelow && roomAbove > roomBelow) below = false;
+      if (!below && child.height > roomAbove && roomBelow > roomAbove) below = true;
+      y = below ? anchor.bottom + gap : anchor.top - gap - child.height;
+      x = switch (along) {
+        -1 => anchor.left + offset,
+        1 => anchor.right - child.width - offset,
+        _ => anchor.center.dx - child.width / 2 + offset,
+      };
+    } else {
+      var right = side == 'right';
+      final roomRight = size.width - margin - (anchor.right + gap);
+      final roomLeft = anchor.left - gap - margin;
+      if (right && child.width > roomRight && roomLeft > roomRight) right = false;
+      if (!right && child.width > roomLeft && roomRight > roomLeft) right = true;
+      x = right ? anchor.right + gap : anchor.left - gap - child.width;
+      y = switch (along) {
+        -1 => anchor.top + offset,
+        1 => anchor.bottom - child.height - offset,
+        _ => anchor.center.dy - child.height / 2 + offset,
+      };
+    }
+    double clampTo(double v, double extent, double total) =>
+        v.clamp(margin, (total - margin - extent).clamp(margin, double.infinity)).toDouble();
+    return Offset(clampTo(x, child.width, size.width), clampTo(y, child.height, size.height));
+  }
+
+  @override
+  bool shouldRelayout(PopoverLayout old) =>
+      old.anchor != anchor || old.placement != placement || old.gap != gap || old.offset != offset || old.margin != margin;
+}
+
