@@ -7,6 +7,16 @@
 - `firebase.dart` exports the Firebase types its functions take (`Firebase`, `FirebaseApp`, `FirebaseOptions`,
   `FirebaseFirestore`, `FirebaseAuth`, `FirebaseStorage`).
 - A README, an example app and a developer guide: https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide
+- Anchored modals: `openModal` honours `anchor`, `placement`, `anchorGap` and `anchorOffset`. A modal anchored to its
+  trigger or the pointer opens beside it as a popover, flips to the other side when it doesn't fit and stays on screen.
+  They used to open centred.
+- Actions read a trigger's value as `${value}` as well as `${result}`, as SDK 8.x named it, so migrated actions
+  (a search field's changed action) get the value.
+- A link to the app's root with a query (`/?state=empty`) opens the entry screen with those params.
+- A running list whose scroll axis is flexible hugs its items within the room it is given and scrolls past that,
+  as the 8.x runtime does. A design canvas keeps the design size.
+- Google Fonts: the font fetcher takes a font's latin subset, not the first subset the CSS lists, so Latin text no
+  longer falls back to the platform font.
 
 ## 20.0.3
 
