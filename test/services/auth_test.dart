@@ -3,7 +3,6 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  // Ported from SDK 8.x's auth_default_test and app_auth_profile_test.
   group('the auth value', () {
     test('reads as signed out with no user, or an anonymous one', () {
       for (final user in [null, const AppUser(uid: 'anon', isAnonymous: true)]) {

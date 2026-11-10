@@ -1,5 +1,4 @@
-// A Codelessly instance on Codelessly's Firebase: what SDK 8.x set up by
-// itself from `CodelesslyConfig(authToken:)`.
+// A Codelessly instance on Codelessly's Firebase.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -12,7 +11,7 @@ import 'project_auth.dart';
 import 'publish_loader.dart';
 
 /// A [Codelessly] reading its publish from Firestore ([firestore]: the
-/// Firebase app the project publishes to), as SDK 8.x did:
+/// Firebase app the project publishes to):
 ///
 /// * With [CodelesslyConfig.authToken], the app authenticates with its
 ///   project ([FirebaseProjectAuth] on [auth], unless [projectAuth] is

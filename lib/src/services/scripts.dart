@@ -1,7 +1,7 @@
 // Scripts (`ScriptDef`, a layout's `scripts`): the service that runs
 // one in a sandbox, and what a script reaches in the app (its host). The run
 // script action asks the app's [ScriptRunner]. The engine is
-// `SandboxScriptRunner` (scripting/script_runner.dart: SDK 8.x's driver in
+// `SandboxScriptRunner` (scripting/script_runner.dart: a driver in
 // QuickJS via package:codelessly_quickjs on devices, a Web Worker on the
 // web), the default; [FunctionScriptRunner] runs Dart instead.
 import 'dart:async';

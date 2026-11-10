@@ -1,5 +1,4 @@
 // Firebase types are faked: the Firebase services run here without Firebase.
-// Ported from SDK 8.x's auth_manager_test (now FirebaseProjectAuth).
 // ignore_for_file: subtype_of_sealed_class
 import 'dart:async';
 import 'dart:convert';

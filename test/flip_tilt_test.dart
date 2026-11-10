@@ -1,4 +1,4 @@
-// Flip cards and tilt in a running app (SDK 8.x's NodeFlip and NodeTilt):
+// Flip cards and tilt in a running app:
 // a card follows and writes its variable, turns under a drag, and the nodes
 // inside read `${flip.*}` and `${tilt.*}`.
 import 'package:codelessly_sdk/codelessly_sdk.dart';

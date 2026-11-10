@@ -1,4 +1,4 @@
-// Page sources of a pagination (SDK 8.x's data/page_fetchers.dart): an API
+// Page sources of a pagination: an API
 // call per page, or the list's cloud query a page at a time.
 import 'package:codelessly_api/codelessly_api.dart' show Json, Pagination;
 

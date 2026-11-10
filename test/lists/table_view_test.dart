@@ -1,5 +1,4 @@
-// Ported from SDK 8.x's test/pagination_node_table_test.dart (Table view):
-// a running table builds its rows from bound data, only the cells on
+// Table view: a running table builds its rows from bound data, only the cells on
 // screen, and pins its header row and column while it scrolls.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/rendering.dart';

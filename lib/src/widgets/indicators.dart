@@ -2,8 +2,7 @@
 //
 // Progress bars, gauges, charts and barcodes only lay out and paint: a fit
 // box at the node's size and a painter (indicators_paint.dart,
-// indicators_charts.dart), as SDK 8.x's transformers drew them inside an
-// AdaptiveNodeBox. Spinners animate, so they're islands: an island that
+// indicators_charts.dart). Spinners animate, so they're islands: an island that
 // rebuilds itself becomes its own layer, keeping each frame local.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart'
@@ -53,8 +52,8 @@ void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painte
     ..isComplex = true);
 }
 
-/// SDK 8.x: `Center(SizedBox.square(dimension: innerBoxLocal.shortestSide,
-/// child: CircularProgressIndicator(...)))`, or an arc painter.
+/// A `CircularProgressIndicator` centred in a square of the box's shortest
+/// side, or an arc painter.
 void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
   final l = n.layout;
   final inner = Size(
@@ -93,7 +92,7 @@ void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
   ));
 }
 
-/// SDK 8.x: `CupertinoActivityIndicator`, a square of twice its radius.
+/// A `CupertinoActivityIndicator`, a square of twice its radius.
 void _activityIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
   final radius = n.prop(ActivityIndicatorProps.radius);
   if (radius <= 0) {

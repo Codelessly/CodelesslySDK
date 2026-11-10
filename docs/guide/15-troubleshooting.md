@@ -1,6 +1,6 @@
 # 15. Troubleshooting and FAQ
 
-[Guide](README.md) · Previous: [Testing](14-testing.md) · Next: [Migrating from 10.x](16-migrating-from-10.md)
+[Guide](README.md) · Previous: [Testing](14-testing.md)
 
 ![Triage: an error builder means a Loading message; a spinner forever means await initialize in a try; nothing shown means check the controller; a failing action means read the console](images/15-troubleshooting/hero.png)
 
@@ -19,7 +19,7 @@ A layout that fails to load shows `errorBuilder` with the error. Find its messag
 | `A project id or token is read from Firestore: create the instance with codelesslyWithToken or codelesslyOnFirebase ...` | `Codelessly(config: CodelesslyConfig(authToken: ...))`. The plain constructor never uses Firebase. | `await codelesslyWithToken(token)` from `package:codelessly_sdk/firebase.dart`. |
 | `GET https://firebasestorage.googleapis.com/...publish%2F<slug>.json?alt=media: 404` | No bundle is published for that slug. | Check the slug's spelling; publish the project as a site; or use a token. On a non-production backend, see [Backends](13-publishing-and-environments.md#backends). |
 | `GET ... failed (...)` | The request didn't complete: offline, DNS, a firewall, or CORS on a self-hosted URL. | Check connectivity. For offline starts, see [Caching and offline](04-loading-and-caching.md#caching-and-offline). |
-| `... is not in the current format (no "schema": 2) ...` | The publish is in the 10.x format (a bundle exported from a 10.x app, say). | Publish the project again from the current Editor. See [chapter 13](13-publishing-and-environments.md#projects-made-with-the-classic-editor). |
+| `... is not in the current format (no "schema": 2) ...` | The document isn't a Codelessly publish in the current format (a hand-made or outdated bundle, say). | Publish the project again from the Editor, and export a fresh bundle if you ship one. |
 | `Project [id] has nothing published (publish/<id>)` | The project was never published (or you asked for `preview` and there is no preview). | Publish it. Check `publishSource`. |
 | `Could not authenticate the project token (...)` | The token exchange failed. The cause is in the parentheses: `Failed to authenticate the project token.` means the backend refused the token; a `TimeoutException` means the access claim didn't arrive in 30 seconds; a Firebase error means anonymous sign-in failed. | Check the token (copy it again; it belongs to one project on one backend). Check the network. Check that the app can reach `*.googleapis.com` and `us-central1-codeless-app.cloudfunctions.net`. |
 | `Could not read publish/<id>` | Firestore refused or failed the read: usually permissions (a project id without a token, on a project whose rules need one) or no network. | Use the token. |
@@ -139,5 +139,3 @@ without it. The script engine, when added, is about 0.6 MB per ABI.
 **Where do I report a bug?**
 [github.com/Codelessly/CodelesslySDK/issues](https://github.com/Codelessly/CodelesslySDK/issues). Include the SDK
 version, the platform, the error text, and if you can a bundle of the project that shows it.
-
-Next: [Migrating from 10.x](16-migrating-from-10.md)

@@ -38,16 +38,15 @@ lives. Read the model's design first:
 ## Parity
 
 `test/goldens` + `test/fixtures`: real pages (`static`) and sample pages
-per widget group (`samples-<group>`), with SDK 8.x's rect for every node,
-recorded when 10.x projects were converted. They are frozen: 10.x is gone, so
-they are not regenerated. `flutter test test/parity_test.dart
+per widget group (`samples-<group>`), with the expected rect for every node.
+They are frozen data and are not regenerated. `flutter test test/parity_test.dart
 --dart-define=sets=static --dart-define=types=listView,gridView` reports and
 lists divergences of the given types (a "first divergence" is a node that's
 wrong while its parent is right: the root causes).
 
 ## Runtime (bindings)
 
-`lib/src/runtime/expressions` is the `${...}` language (SDK 8.x's formula
+`lib/src/runtime/expressions` is the `${...}` language (the formula
 evaluator, paths and accessors), the value scopes (`VariableScope`,
 `ItemScope`, `ValuesScope`), conditions, and `NodeBinder`: give a
 `NodeTree` a binder (`NodeTree(source, binder: NodeBinder(scope: ...,
@@ -55,7 +54,7 @@ logic: doc.logic))`) and each node is shown through its bindings; a
 variable change re-applies only the boxes that read it. `preview: true` is
 the design canvas (placeholders for `${...}` in text). A recipe that reads a
 bound prop needs nothing more: it gets the node already bound.
-`samples-bindings` is the runtime golden set (SDK 8.x rendered with the
+`samples-bindings` is the runtime golden set (rendered with the
 pages' variables and conditions).
 
 ## Runtime (actions)
@@ -120,7 +119,7 @@ reactions with `fireTrigger(box, ...)` (`{'result': ...}`).
 
 ## Runtime (lists)
 
-`lib/src/runtime/lists` is SDK 8.x's pagination (`PaginationController`,
+`lib/src/runtime/lists` is pagination (`PaginationController`,
 `PaginationRegistry.of(tree)`, the page sources, the `paginate` action) and
 the reorder helpers. A list's running features are islands built only while
 the tree animates (`collections_data_list.dart`, `collections_reorder.dart`,
@@ -133,7 +132,7 @@ read from the list's `data` by index). Fire a list's triggers through
 Node boxes aren't hit themselves: wrap a row that gestures read in an
 opaque `MetaData`.
 
-Scripts (`lib/src/scripting`, SDK 8.x's `scripting/` ported as is): the
+Scripts (`lib/src/scripting`): the
 driver (`script_driver.dart`, the JS host API and lockdown) runs in
 `QuickJsSandbox` (FFI to `codelessly_quickjs`'s library) or `WorkerSandbox`
 (web), picked by conditional import; `SandboxScriptRunner` speaks its
@@ -162,7 +161,7 @@ variables) answers `script.name(args)` in formulas. Tests run real scripts:
   `CodelesslyRouteTransitionRoute`) and fly the matching tags in the
   navigator's overlay (runtime/actions/hero_flights.dart): both ends hide,
   a `HeroMarkPaint` paints the borrowed box stretched over the box in
-  between. Unlike SDK 8.x the node isn't laid out again at the in-between
+  between. The node isn't laid out again at the in-between
   size (it's scaled). A host route that isn't one of these doesn't start
   flights, but can be the screen they fly from or to.
 * `effectAnimations` (render/play.dart, `RenderEffects`, outside motion):
@@ -181,12 +180,12 @@ variables) answers `script.name(args)` in formulas. Tests run real scripts:
 See the model's DESIGN.md §5.4 and §5.3.
 
 * Loading (`app/loader.dart`, `services/firebase/publish_loader.dart`): the
-  publish is read where SDK 8.x read it (`publish/{project}`, its
+  publish is read from the publish paths (`publish/{project}`, its
   `layouts/{id}`; `publish_preview`, `templates`), in the current format (`schema: 2`,
   `compressedNodes`: `decodeStoredPublishModel`,
   `decodeStoredPublishLayout`). `FirestorePublishLoader` authenticates with
   the project token (`ProjectAuth`, the `verifyProjectAuthToken` backend
-  call) and is a `LivePublishLoader` (10.x's model stream);
+  call) and is a `LivePublishLoader` (it follows the model document);
   `codelesslyOnFirebase` sets an instance up on it. A slug reads its bundle
   over HTTP (`publish/{slug}.json`). Tests: `test/services/
   firestore_publish_loader_test.dart` on `fake_cloud_firestore`, with
@@ -194,8 +193,8 @@ See the model's DESIGN.md §5.4 and §5.3.
 * Breakpoints: one project set (`PublishModel.breakpoints`) and a node's or
   screen canvas's own switch points (`VarianceProps.minWidths`,
   `CanvasBreakpoint.minWidth`). Variances resolve with
-  `Breakpoints.forWidth(w, minWidths)` then `Breakpoints.governing` (10.x's
-  nearest rule on the defaults), screens pick canvases by their switch
+  `Breakpoints.forWidth(w, minWidths)` then `Breakpoints.governing` (the
+  nearest breakpoint on the defaults), screens pick canvases by their switch
   points, `${screen}` inside an overriding variance follows its widths
   (`ResponsiveScreenScope`), an adaptive Open Modal is a sheet below
   `OpenModalAction.sheetBelowWidthIn(breakpoints)` (an adaptive confirm

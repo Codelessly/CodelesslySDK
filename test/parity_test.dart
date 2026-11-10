@@ -15,9 +15,9 @@ const _sets = String.fromEnvironment('sets');
 void main() {
   final sets = _sets.isEmpty ? goldenSets() : _sets.split(',');
   for (final set in sets) {
-    testWidgets('golden set "$set" lays out as SDK 8.x did', (tester) async {
+    testWidgets('golden set "$set" matches its goldens', (tester) async {
       final original = FlutterError.onError;
-      // Content overflows are reported by the layout objects in both SDKs.
+      // Content overflows are reported by the layout objects.
       FlutterError.onError = (d) {
         if (!'${d.exception}'.contains('overflowed by')) original?.call(d);
       };

@@ -1,4 +1,4 @@
-// A switch drawn as a plain toggle (SDK 8.x's PlainToggle): a pill track
+// A switch drawn as a plain toggle: a pill track
 // filling its box with a round thumb that slides between inset gaps from
 // its edges, casting the switch's thumb shadows. Material's Switch has no
 // thumb shadow, and scaling it to the node makes its thumb smaller and oval.

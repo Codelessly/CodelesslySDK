@@ -61,7 +61,7 @@ void main() {
     final tree = NodeTree(DocumentSource(doc));
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'r'))));
     final view = tester.renderObject(find.byType(NodeView));
-    // SDK 8.x: Center(SizedBox.square(13.5)) takes the row's height.
+    // Center(SizedBox.square(13.5)) takes the row's height.
     expect(tree.boxOf('spin')!.rectIn(view), const Rect.fromLTWH(0, 0, 13.5, 48));
     expect(tree.boxOf('ios')!.rectIn(view), const Rect.fromLTWH(13.5, 14, 20, 20));
     await tester.pumpWidget(const SizedBox());

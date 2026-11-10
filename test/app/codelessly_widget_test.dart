@@ -1,4 +1,4 @@
-// A migrated real project (rigcheck: screens with mobile, tablet and
+// A real project (rigcheck: screens with mobile, tablet and
 // desktop canvases, navigation between them) shown by CodelesslyWidget.
 import 'dart:async';
 import 'dart:convert';
@@ -58,13 +58,13 @@ void main() {
   testWidgets('app variables are shared by every screen', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
-    // The model's (as the editor publishes them) and a converted 10.x
-    // publish's `app_variables` scope in a layout.
-    final legacy = PublishLayout.fromJson({
+    // The model's (as the editor publishes them) and a layout's
+    // `app_variables` scope.
+    final scoped = PublishLayout.fromJson({
       ...signIn.toJson(),
       'variables': {
         'app_variables': [
-          {'id': 'l', 'name': 'legacy', 'value': 'from 10.x'},
+          {'id': 'l', 'name': 'scoped', 'value': 'from the layout'},
         ],
       },
     });
@@ -72,7 +72,7 @@ void main() {
       model: bundle.model.copyWith(variables: {
         'v': {'id': 'v', 'name': 'appCount', 'type': 'integer', 'value': 7},
       }),
-      layouts: {...bundle.layouts, signIn.id: legacy},
+      layouts: {...bundle.layouts, signIn.id: scoped},
     );
     final codelessly = Codelessly(
       config: const CodelesslyConfig(projectId: 'rigcheck', actions: NavigationActionRunner()),
@@ -82,12 +82,12 @@ void main() {
     addTearDown(codelessly.dispose);
     final first = await pumpApp(tester, codelessly, layoutId: signIn.id);
     expect(first.scope!.read('appCount'), 7);
-    expect(first.scope!.read('legacy'), 'from 10.x');
+    expect(first.scope!.read('scoped'), 'from the layout');
     expect(setVariableIn(first.scope!, 'appCount', 12), isTrue);
     // Another screen reads what this one set.
     final second = await pumpApp(tester, codelessly, layoutId: today.id);
     expect(second.scope!.read('appCount'), 12);
-    expect(second.scope!.read('legacy'), 'from 10.x');
+    expect(second.scope!.read('scoped'), 'from the layout');
   });
 
   testWidgets('storage reads what the app keeps on the device, live', (tester) async {
@@ -114,7 +114,7 @@ void main() {
     final controller = await pumpApp(tester, codelessly);
     expect(controller.canvasId, canvasNamed(signIn, 'Sign in · M'));
     expect(codelessly.route.value?.canvasId, controller.canvasId);
-    // `screen` is the device (SDK 8.x's screenVariableValue).
+    // `screen` is the device.
     Object? screen(String key) => (controller.scope!.read('screen') as Map?)?[key];
     expect(screen('isMobile'), isTrue);
     expect(screen('width'), 390);
@@ -291,7 +291,7 @@ void main() {
     expect(controller.read('count'), 3);
   });
 
-  testWidgets('a variable named like a data key starts at it and follows it (SDK 8.x)', (tester) async {
+  testWidgets('a variable named like a data key starts at it and follows it', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
     final canvasId = canvasNamed(today, 'Today · D');

@@ -1,4 +1,4 @@
-// A two-sided card (SDK 8.x's NodeFlip): turned 0° or 180° about its axis
+// A two-sided card: turned 0° or 180° about its axis
 // with its motion's perspective, duration, curve and keyframed scale. A
 // running app turns it when its variable (or `flipped`) changes, on a tap
 // with `tapToFlip`, and with `dragToFlip` under the finger, settling on

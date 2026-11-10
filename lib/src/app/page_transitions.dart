@@ -1,6 +1,6 @@
 // A navigation's page transition (NavigateAction.transition): fade, rise,
 // slide or scale in over its duration, or none; the platform's is none on
-// the web. SDK 8.x's FunctionsRepository.navigationRoute.
+// the web.
 import 'package:codelessly_api/codelessly_api.dart' show PageTransition;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';

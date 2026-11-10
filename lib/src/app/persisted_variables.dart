@@ -1,13 +1,13 @@
 // Variables kept on the device (`Variable.persists`): a screen's variable
 // that starts from the value it had last time, from the app's local
-// storage, and saves every change back. SDK 8.x's persistedVariable.
+// storage, and saves every change back.
 import 'package:codelessly_api/codelessly_api.dart' show Variable;
 import 'package:flutter/foundation.dart';
 
 import '../runtime/expressions/scopes.dart';
 import '../services/storage.dart';
 
-/// The local storage key persisted variable [v] is kept under (SDK 8.x's).
+/// The local storage key persisted variable [v] is kept under.
 String persistedVariableKey(Variable v) => 'codelessly.variable.${v.id.isEmpty ? v.name : v.id}';
 
 /// Keeps variable [variable] of [scope] in [storage] while attached.

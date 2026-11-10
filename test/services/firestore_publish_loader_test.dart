@@ -33,7 +33,7 @@ Json encodeStoredLayout(Json layout, {bool compress = false}) {
 
 const privacy = {'owner': 'u1', 'teams': <String>[], 'users': ['u1'], 'roles': {'u1': 'owner'}, 'public': false};
 
-/// Writes [bundle] where the job writes a converted publish ([collection]:
+/// Writes [bundle] where the editor writes a publish ([collection]:
 /// `publish` or `publish_preview`).
 Future<void> writePublish(FakeFirebaseFirestore db, String projectId, PublishBundle bundle,
     {String collection = 'publish', Set<String> compressed = const {}, Json extraModel = const {}}) async {
@@ -122,7 +122,7 @@ void main() {
     expect((await template.loadModel(PublishSource.publish)).layouts, isNotEmpty);
   });
 
-  test('a 10.x publish (not converted) fails, saying so', () async {
+  test('a publish in another format fails, saying so', () async {
     final db = FakeFirebaseFirestore();
     await db.doc('publish/old').set({'projectId': 'old', 'layouts': {}, 'updates': {}});
     await db.doc('publish/old/layouts/l').set({'id': 'l', 'canvases': {}});

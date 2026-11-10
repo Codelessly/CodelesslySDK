@@ -344,7 +344,7 @@ void main() {
           'actions': [
             reaction('changed', [
               {'type': 'setVariable', 'variable': 'echo', 'value': r'${result}!'},
-              // SDK 8.x's name for the new text, which migrated actions use.
+              // The new text's other name, `value`.
               {'type': 'setVariable', 'variable': 'query', 'value': r'${value}'},
             ]),
             reaction('submitted', [add('sent')]),

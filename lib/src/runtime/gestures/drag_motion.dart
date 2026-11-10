@@ -1,7 +1,6 @@
 // A node that follows the pointer (`DragMotion`, node key `drag`):
-// SDK 8.x's ui/node_drag.dart as a render object, the outermost layer of
-// the node's chain (around its margin, as 10.x wrapped the node's whole
-// build). It follows the pointer within its bounds and limits, locked to
+// a render object, the outermost layer of the node's chain (around its
+// margin). It follows the pointer within its bounds and limits, locked to
 // its axis and held back by resistance; tilts by `rotateFactor`; and on
 // release springs back, stays, or flies off past a threshold (a swiped
 // card), with `physics` a fling, a spring settle and snap points. Only a

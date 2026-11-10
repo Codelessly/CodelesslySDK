@@ -32,8 +32,8 @@ abstract interface class PublishLoader {
 }
 
 /// A [PublishLoader] that also watches the publish model: each publish (or
-/// preview save) arrives as a new model, as SDK 8.x streamed
-/// `publish/{projectId}`. [Codelessly] follows it while
+/// preview save) arrives as a new model, as the
+/// `publish/{projectId}` document changes. [Codelessly] follows it while
 /// [CodelesslyConfig.liveUpdates] is on: layouts republished since are
 /// dropped and load again when shown.
 abstract interface class LivePublishLoader implements PublishLoader {
@@ -42,13 +42,12 @@ abstract interface class LivePublishLoader implements PublishLoader {
 }
 
 /// The stored-document marker of publish data (`schema: 2`): a document
-/// at a publish path without it is 10.x, written by the classic editor or SDK
-/// 8.x's publish, which this SDK can't read.
+/// at a publish path without it is in another format, which this SDK
+/// can't read.
 const String kStoredSchemaField = 'schema';
 
 /// Where a stored layout too large for one Firestore document keeps its
-/// nodes: `{"nodes": {...}}` as JSON, gzipped, base64 encoded (as 10.x kept
-/// `compressedCanvases`). Written by the editor's publish
+/// nodes: `{"nodes": {...}}` as JSON, gzipped, base64 encoded. Written by the editor's publish
 /// (the editor's page storage, `encodeStoredLayout`).
 const String kCompressedNodesField = 'compressedNodes';
 
@@ -56,9 +55,8 @@ const String kCompressedNodesField = 'compressedNodes';
 void _requireCurrentFormat(Map<String, Object?> data, String what) {
   final schema = data[kStoredSchemaField];
   if (schema is num && schema.toInt() >= 2) return;
-  throw PublishLoadException('$what is not in the current format (no "schema": 2): SDK 21 reads that format '
-      'only. Publish the '
-      'project again from the Codelessly Editor.');
+  throw PublishLoadException('$what is not in the current format (no "schema": 2). Publish the project '
+      'again from the Codelessly Editor.');
 }
 
 /// A stored publish model document ([PublishSource.modelPath]) as a
@@ -171,8 +169,7 @@ class AssetPublishLoader implements PublishLoader {
 
 /// A [PublishLoader] over HTTP. With [bundle] set (a slug), the whole
 /// publish is one file ([PublishSource.bundlePath], `publish/{slug}.json`
-/// in Codelessly's storage bucket): what a project's slug serves, as SDK
-/// 8.x's `downloadCompletePublishBundle`. Without it, the publish model and
+/// in Codelessly's storage bucket): what a project's slug serves. Without it, the publish model and
 /// each layout are JSON files under [baseUrl] at the publish paths
 /// ([PublishSource.modelPath], [PublishSource.layoutPath], with `.json`):
 /// for a self-hosted mirror; Codelessly itself keeps them in Firestore

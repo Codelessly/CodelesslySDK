@@ -1,6 +1,5 @@
 // SVG paths: the `path` widget (a vector shape) and a box's `path` prop (a
-// box drawn as a shape), painted as SDK 8.x's PathNodePainter and
-// PassiveRectangleWidget did.
+// box drawn as a shape).
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -79,8 +78,7 @@ ui.Path trimPath(ui.Path path, double start, double end, [List<double> dashes = 
   return out;
 }
 
-/// [path] in dashes of [length] and gaps of [gap] (SDK 8.x's `dashPath`:
-/// the distance carries over from one contour to the next).
+/// [path] in dashes of [length] and gaps of [gap] (the distance carries over from one contour to the next).
 ui.Path dashPath(ui.Path path, double length, [double? gap]) {
   gap ??= length;
   final dest = ui.Path();
@@ -139,7 +137,7 @@ class RenderShapePath extends RenderBox with ImageClient {
     canvas.restore();
   }
 
-  /// The `path` widget (SDK 8.x's PathNodePainter): its data scaled from
+  /// The `path` widget: its data scaled from
   /// its view box to the size; its drop shadows along the outline (fill and
   /// stroke); its fills in order (solid colors, gradients, images clipped to
   /// the path), each gradient in every shape with `gradientPerSubpath` and

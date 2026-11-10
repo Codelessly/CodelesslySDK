@@ -1,5 +1,4 @@
-// Ported from SDK 8.x's test/pagination_node_table_test.dart (Pagination
-// node): its controls show and move the controller it names.
+// The pagination node: its controls show and move the controller it names.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

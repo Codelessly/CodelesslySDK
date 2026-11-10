@@ -1,7 +1,6 @@
-// What SDK 8.x's path painter added beyond plain fills and strokes: shadows
-// along a path's outline (utils/path_shadow.dart) and a path split into its
-// shapes, for per-shape gradients and colors (PathShapes in
-// passive_path_transformer.dart).
+// What the path painter adds beyond plain fills and strokes: shadows along
+// a path's outline and a path split into its shapes, for per-shape
+// gradients and colors.
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 

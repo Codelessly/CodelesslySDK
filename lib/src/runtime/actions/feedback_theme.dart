@@ -1,7 +1,6 @@
 // The look of the UI the runtime draws itself (toasts, the confirm dialog):
 // the app's fonts, primary color, surface and corner radii, read from the
-// project's theme tokens and the layout's own nodes. SDK 8.x's
-// FeedbackTheme.
+// project's theme tokens and the layout's own nodes.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show ButtonProps, Json, LayoutDocument, Node, TextProps, TriggerType;
 import 'package:flutter/foundation.dart' show listEquals;
@@ -477,8 +476,7 @@ BorderSide? borderSideOf(api.BorderSide? side) {
   return BorderSide(color: side.color?.flutter ?? const Color(0xFF000000), width: side.width);
 }
 
-/// [base] with [style]'s set values over it (SDK 8.x's
-/// `TextStyleModel.applyTo`).
+/// [base] with [style]'s set values over it.
 TextStyle applyTextStyle(api.TextStyle? style, TextStyle base) {
   if (style == null) return base;
   final weight = style.fontWeight;

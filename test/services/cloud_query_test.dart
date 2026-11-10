@@ -1,4 +1,4 @@
-// Ported from SDK 8.x's cloud_query_test: the planner and the in-app query
+// Cloud queries: the planner and the in-app query
 // must give what Firestore gives.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -1,5 +1,5 @@
 // A running list (or grid) that pages, groups its items into sections or
-// has swipe actions (SDK 8.x's ui/data_list_view.dart), as an island: a
+// has swipe actions, as an island: a
 // CustomScrollView of slivers whose items are the template's node boxes
 // (NodeChild), each in the scope of its item (NodeBinder.provideItem).
 //
@@ -94,8 +94,7 @@ extension ListFeatures on Node {
   bool get swipes => swipeActions != null && (swipeActions!.startActions.isNotEmpty || swipeActions!.endActions.isNotEmpty);
 }
 
-/// Whether a running list [n] is a [DataListView] (SDK 8.x's
-/// `usesDataListView`): it pages, groups into sections or has swipe
+/// Whether a running list [n] is a [DataListView]: it pages, groups into sections or has swipe
 /// actions, and lays its items in a line.
 bool usesDataList(Node n) =>
     (n.pagination != null || n.sectioned || n.swipes) &&

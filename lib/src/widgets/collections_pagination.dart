@@ -1,4 +1,4 @@
-// The pagination node (SDK 8.x's PassivePaginationWidget): page controls
+// The pagination node: page controls
 // for a list's pagination, as an island in the node's fit box. Running, it
 // shows and moves the controller its `controller` names (a list on the
 // screen makes it); until one does, and on a design canvas, it shows its
@@ -206,7 +206,7 @@ class PaginationControls extends StatelessWidget {
   }
 }
 
-/// One button of a pagination node (SDK 8.x's `PaginationButton`).
+/// One button of a pagination node.
 class PaginationButton extends StatelessWidget {
   const PaginationButton({
     super.key,

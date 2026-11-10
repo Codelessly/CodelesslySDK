@@ -1,5 +1,4 @@
-// Ported from SDK 8.x's api_call_result_test and api_call_outcome_test: the
-// request an API definition builds and the value its response leaves.
+// API calls: the request an API definition builds and the value its response leaves.
 import 'dart:convert';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';

@@ -1,5 +1,4 @@
-// Toasts and the confirm dialog: SDK 8.x's AppToast and AppConfirmDialog
-// here (the action's `look`, bound colors and sizes, the button's actions,
+// Toasts and the confirm dialog (the action's `look`, bound colors and sizes, the button's actions,
 // a designed dialog's answer).
 import 'dart:async';
 

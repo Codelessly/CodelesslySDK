@@ -95,7 +95,7 @@ class RenderNodePaint extends RenderBox with ImageClient {
   void _fill(Canvas canvas, RRect rrect, api.Paint p) {
     if (!p.visible) return;
     if (p.type == api.PaintType.image) {
-      // Foreground images aren't drawn (as SDK 8.x).
+      // Foreground images aren't drawn.
       if (!_foreground) paintImageFill(canvas, rrect, p, this);
       return;
     }

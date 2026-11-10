@@ -1,6 +1,5 @@
-// Ported from SDK 8.x: canvas_viewport_test, canvas_location_test,
-// resolve_layout_id_test, initial_screen_test; plus loading, caching and
-// fonts.
+// Canvas viewport and location, layout id resolution and the initial
+// screen; plus loading, caching and fonts.
 import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;

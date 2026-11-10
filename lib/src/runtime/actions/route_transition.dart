@@ -3,7 +3,7 @@
 // enter side to rest and the covered screen to its exit side (3D,
 // shifts, fades, blurs, reveals), the pop sides when closing, with a
 // barrier, see-through screens, a swipe back from the edge and a drag that
-// dismisses. SDK 8.x's ui/route_transition.dart.
+// dismisses.
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 

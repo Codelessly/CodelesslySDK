@@ -1,5 +1,4 @@
-// A wrapping row/column, moved from SDK 8.x (transformers/utils/wrap_layout.dart)
-// unchanged in behaviour.
+// A wrapping row/column.
 //
 // Lays children out like Flutter's Wrap: along [RenderCodelesslyWrap.direction]
 // until the next child doesn't fit the incoming main-axis maximum, then on a

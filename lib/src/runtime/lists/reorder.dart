@@ -1,4 +1,4 @@
-// What a list reorder changes (SDK 8.x's ui/list_reorder.dart helpers):
+// What a list reorder changes:
 // moved lists, the order value between two neighbours, and the
 // `${result}` of a reorder.
 

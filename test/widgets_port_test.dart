@@ -1,4 +1,4 @@
-// Runtime of the 10.x features ported by the widgets area.
+// Runtime of the widgets area's features.
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;

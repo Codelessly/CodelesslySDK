@@ -87,10 +87,9 @@ A published layout is more than a picture:
 Your app joins in through four things: **data** you pass in, **params** a screen opens with, **functions** layouts
 call, and **services** you plug in. The rest of this guide is about those.
 
-## Versions
+## The publish format
 
-SDK 21 reads the format `"schema": 2`. SDK 10.x and older read the previous format, and neither reads the other's.
-The current Editor publishes `"schema": 2`. If you have an app on 10.x, see
-[Migrating from 10.x](16-migrating-from-10.md).
+The Editor publishes in the format `"schema": 2`, and the SDK reads that format. A document without it fails to load
+with a clear error ([Troubleshooting](15-troubleshooting.md)).
 
 Next: [Quickstart](02-quickstart.md)

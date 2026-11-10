@@ -1,5 +1,5 @@
 // A node's behaviours as layers of its render chain (see node_tree.dart's
-// outer layers). Outermost first, as SDK 8.x wrapped a node:
+// outer layers). Outermost first:
 //
 //   constraints → track pose → transform gesture → motion → scale → rotation → [ignore pointer]
 //   → loops → opacity → blurs → stroke path → content
@@ -50,7 +50,7 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     }
   }
   // Pinch, pan and rotate in a running app (render/transform_gesture.dart),
-  // inside the track as SDK 8.x's sat inside the drag.
+  // inside the track.
   if (animates && n.type != 'canvas') {
     if (be.effectiveTransformGesture case final api.TransformGesture gesture) {
       chain.add(
@@ -212,7 +212,7 @@ class RenderInkOverlay extends RenderBox {
 }
 
 /// Where a [api.DragTrack] puts its node, in the node's coordinates with
-/// the origin at its rest centre (SDK 8.x's `DragTrackGeometry`): a line,
+/// the origin at its rest centre: a line,
 /// an arc about its pivot, or a path, measured in pixels, in the node's own
 /// size ([api.DragTrack.relative]), in its parent's
 /// ([api.DragTrackUnits.parent]) or in a viewBox stretched to the parent
@@ -332,7 +332,7 @@ class TrackGeometry {
 Matrix4? trackPose(api.DragTrack track, double progress) => TrackGeometry(track).poseAt(progress);
 
 /// A node drawn where its [api.DragTrack] puts it at [progress], worked out
-/// from its laid-out size and its parent's (SDK 8.x's `TrackPose`).
+/// from its laid-out size and its parent's.
 class RenderTrackPose extends RenderPose {
   api.DragTrack _track = const api.DragTrack();
   api.DragTrack get track => _track;
@@ -609,7 +609,7 @@ mixin _Ticking on RenderPose {
 }
 
 /// A node's [api.LoopAnimation]s, combined. At rest (the design canvas) it
-/// draws each loop's first frame, as SDK 8.x's design canvas did.
+/// draws each loop's first frame.
 class RenderLoops extends RenderPose with _Ticking {
   List<api.LoopAnimation> _loops = const [];
   set loops(List<api.LoopAnimation> v) {

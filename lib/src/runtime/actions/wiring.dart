@@ -448,7 +448,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     } else if (event is PointerScaleEvent && _has(TriggerType.pinch)) {
       _fire(TriggerType.pinch, {'result': {'scale': event.scale}});
     } else if (event is PointerHoverEvent && _has(TriggerType.hover) && _hovering) {
-      // Hover fires on entry (SDK 8.x); moves over the node don't repeat it.
+      // Hover fires on entry; moves over the node don't repeat it.
     }
   }
 

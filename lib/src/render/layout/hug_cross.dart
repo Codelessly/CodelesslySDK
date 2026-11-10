@@ -1,4 +1,3 @@
-// Moved from SDK 8.x unchanged in behaviour.
 import 'package:flutter/rendering.dart';
 
 /// A [Flex] that hugs its cross axis and stretches its children across it:

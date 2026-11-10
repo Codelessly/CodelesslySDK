@@ -2,7 +2,7 @@
 //
 // Buttons, chips, app bars, navigation bars, list tiles and floating action
 // buttons need ink and an element tree: they're islands hosting the real
-// Material widgets (as SDK 8.x built them). A divider and a badge are only
+// Material widgets. A divider and a badge are only
 // layout and paint: render objects. A modal shows its trigger in place.
 import 'dart:math' as math;
 
@@ -56,7 +56,7 @@ final Map<String, WidgetRecipe> materialRecipes = {
 
 Size _design(Node n) => Size(n.layout.width.value, n.layout.height.value);
 
-/// The node's box per its fits (SDK 8.x's AdaptiveNodeBox).
+/// The node's box per its fits.
 void _fit(NodeBuilder b, Node n, List<RenderBox> chain) =>
     chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, _design(n)));
 
@@ -164,7 +164,7 @@ Widget _buildButton(BuildContext context, Node n) {
   final s = n.prop(ButtonProps.style);
   final padding = n.layout.padding.flutter;
   final shape = s.shape == null ? null : _shape(s.shape!);
-  // An empty style is the base text style, as every 10.x label had.
+  // An empty style is the base text style.
   final text = textStyle(s.textStyle);
   final elevation = s.elevation;
   final ButtonStyle style = switch (n.type) {
@@ -745,7 +745,7 @@ void _navigationBar(NodeBuilder b, Node n, List<RenderBox> chain) {
         child: bar,
       );
     }
-    // A bottom app bar needs a Scaffold, as on SDK 8.x's design canvas.
+    // A bottom app bar needs a Scaffold, on the design canvas too.
     return Scaffold(body: SizedBox(width: extent(w), height: extent(h), child: bar));
   }));
 }
@@ -944,8 +944,8 @@ void _modal(NodeBuilder b, Node n, List<RenderBox> chain) {
           alignment: AlignmentDirectional.topStart,
           textDirection: TextDirection.ltr,
           clipBehavior: Clip.none,
-          // The trigger gets the modal's own constraints, as SDK 8.x built
-          // it in the modal's place.
+          // The trigger gets the modal's own constraints, built
+          // in the modal's place.
           fit: StackFit.passthrough));
   final trigger = n.slots['trigger'];
   b.syncChildren(stack, [?trigger], Slot(SlotKind.root, n));

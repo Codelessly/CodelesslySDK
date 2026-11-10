@@ -1,8 +1,5 @@
-// SDK 8.x's variable, path, computed-variable, function and condition tests
-// (variable_paths_test, dynamic_index_path_test, computed_variable(s)_test,
-// formula_functions_test, formula_test / formula_lists_test "through
-// PropertyValueDelegate", condition_is_empty_test, condition_raw_value_test,
-// variable_preview_test, screen_variable_test), on this SDK's scopes.
+// Variables, paths, computed variables, functions, formulas, conditions,
+// variable previews and the screen variable, on the SDK's scopes.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';

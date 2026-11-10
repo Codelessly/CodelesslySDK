@@ -1,4 +1,4 @@
-// The node tree with bindings: SDK 8.x's runtime results for bound
+// The node tree with bindings: runtime results for bound
 // visibility (collapse), size, flex, paints, text interpolation, conditions
 // and data-bound lists, and a design canvas's placeholders.
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -203,7 +203,7 @@ void main() {
       NodeBinder(preview: true, scope: VariableScope([v('count', 2, VariableType.integer)])),
     );
     expect(paragraphText(tree, 't'), 'Hi Display name (3)');
-    expect(tree.boxOf('t')!.collapsed, isTrue, reason: '10.x previewed bound visibility with the defaults');
+    expect(tree.boxOf('t')!.collapsed, isTrue, reason: 'bound visibility previews with the defaults');
   });
 
   testWidgets('conditions win over bindings', (tester) async {

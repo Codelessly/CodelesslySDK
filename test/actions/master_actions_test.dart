@@ -1,4 +1,4 @@
-// SDK 8.x master's actions, ported: the set variable glide, animate
+// Actions: the set variable glide, animate
 // variable, for-each's `loop`, haptics, run script (a pluggable runner),
 // persisted variables and the back block (canvas blockBack and its
 // backPressed reactions).
@@ -257,22 +257,22 @@ void main() {
   });
 
   test('a persisted variable starts from storage and saves its changes; others do not', () async {
-    final storage = MemoryLocalStorage({'codelessly.variable.v1': 'saved'});
+    final storage = MemoryLocalStorage({'codelessly.variable.var1': 'saved'});
     final scope = VariableScope(const [
-      Variable(id: 'v1', name: 'draft', value: 'default', persist: true),
-      Variable(id: 'v2', name: 'plain', value: 'p'),
+      Variable(id: 'var1', name: 'draft', value: 'default', persist: true),
+      Variable(id: 'var2', name: 'plain', value: 'p'),
     ]);
     final draft = PersistedVariable.attach(scope, scope.variable('draft')!, storage);
     final plain = PersistedVariable.attach(scope, scope.variable('plain')!, storage);
     expect(scope.read('draft'), 'saved');
     scope.set('draft', 'typed');
     scope.set('plain', 'q');
-    expect(storage.get('codelessly.variable.v1'), 'typed');
-    expect(storage.containsKey('codelessly.variable.v2'), isFalse);
+    expect(storage.get('codelessly.variable.var1'), 'typed');
+    expect(storage.containsKey('codelessly.variable.var2'), isFalse);
     draft.dispose();
     plain.dispose();
     scope.set('draft', 'later');
-    expect(storage.get('codelessly.variable.v1'), 'typed');
+    expect(storage.get('codelessly.variable.var1'), 'typed');
   });
 
   group('back', () {

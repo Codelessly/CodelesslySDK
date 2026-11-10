@@ -1,6 +1,5 @@
 // Confirm actions' built-in dialog, in the app's look, and the answer of a
-// designed one (a screen named by the action's `dialog`). SDK 8.x's
-// AppConfirmDialog and ThemedConfirmDialog.
+// designed one (a screen named by the action's `dialog`).
 import 'dart:convert';
 import 'dart:math' as math;
 

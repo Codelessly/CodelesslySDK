@@ -1,5 +1,5 @@
-// Shared element flights between the screens a navigation moves between
-// (SDK 8.x's NodeHero over Flutter's HeroController): the app shell's
+// Shared element flights between the screens a navigation moves between:
+// the app shell's
 // routes ([CodelesslyHeroRoute]) find the hero marks (render/hero.dart) with
 // the same tag on the screen below and the screen on top, hide both, and fly
 // a drawing of the node in the navigator's overlay on the route's

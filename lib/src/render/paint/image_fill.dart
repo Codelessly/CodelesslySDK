@@ -198,8 +198,7 @@ mixin ImageClient on RenderObject {
   }
 }
 
-/// A color matrix scaling saturation by [s] (Rec. 709 luminance), as SDK
-/// 8.x's image fills.
+/// A color matrix scaling saturation by [s] (Rec. 709 luminance).
 List<double> saturationMatrix(double s) {
   const r = 0.2126, g = 0.7152, b = 0.0722;
   final i = 1 - s;
@@ -214,8 +213,7 @@ List<double> saturationMatrix(double s) {
 /// The URL an image paint shows.
 String? imageUrlOf(api.Paint p) => p.type == api.PaintType.image ? p.image?.url : null;
 
-/// Paints image fill [p] in [rrect] (the box, its corners rounded), as SDK
-/// 8.x's `buildFill`: placed by its fit and alignment (or its own rect),
+/// Paints image fill [p] in [rrect] (the box, its corners rounded): placed by its fit and alignment (or its own rect),
 /// repeated, scaled, flipped, saturated, tinted and faded, inside the
 /// rounded corners.
 void paintImageFill(Canvas canvas, RRect rrect, api.Paint p, ImageClient client) {

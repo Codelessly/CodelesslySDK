@@ -1,7 +1,6 @@
 // A published app's identity at runtime: each screen's title and
 // description from the publish model's `appIdentity`, and the title
 // applied to the browser tab and the task switcher as screens change.
-// SDK 8.x's CodelessyAppIdentity and CodelesslyAppIdentityUpdater.
 import 'package:codelessly_api/codelessly_api.dart' show AppIdentity, PageIdentity, PublishModel, renderTitle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';

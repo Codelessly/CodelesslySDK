@@ -145,7 +145,7 @@ class ListRuntime {
   }
 }
 
-/// The scroll physics of a list (SDK 8.x's `flutterScrollPhysics`): none
+/// The scroll physics of a list: none
 /// when it doesn't scroll, always scrolling when [alwaysScroll].
 ScrollPhysics? scrollPhysicsOf(Node n, {bool scrollable = true, bool? alwaysScroll}) {
   if (!scrollable) return const NeverScrollableScrollPhysics();
@@ -160,7 +160,7 @@ ScrollPhysics? scrollPhysicsOf(Node n, {bool scrollable = true, bool? alwaysScro
   return parent;
 }
 
-/// Places a list item as the editor lays it out (SDK 8.x's `ListItemBox`):
+/// Places a list item as the editor lays it out:
 /// at [main] along the list when set (a fixed item extent, or the design
 /// extent of an item that fills), at the start of the list and centred
 /// across it unless [stretch].
@@ -193,8 +193,7 @@ double? listItemMain(Node item, {required bool vertical, double? itemExtent}) {
       : item.layout.width.value + item.layout.margin.horizontal;
 }
 
-/// The extent every item of [list] takes along it (SDK 8.x's
-/// `listItemExtent`), or null when items may differ and must be measured:
+/// The extent every item of [list] takes along it, or null when items may differ and must be measured:
 /// the list's `itemExtent`, else the template's outer extent when it isn't
 /// hugged and nothing binds its size or visibility.
 double? listItemExtent(Node list, Node item, {required bool vertical, double? itemExtent}) {

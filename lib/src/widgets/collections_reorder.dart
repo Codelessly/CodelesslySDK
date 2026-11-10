@@ -1,6 +1,5 @@
-// A running list whose items are dragged to a new place (SDK 8.x's
-// ui/list_reorder.dart and the reorderable branch of its list
-// transformer), as islands: a ReorderableListView over the template's node
+// A running list whose items are dragged to a new place, as
+// islands: a ReorderableListView over the template's node
 // boxes, or, for a list of a reorder group, a list whose items are
 // Draggables into any list of the group (a Kanban board).
 //
@@ -39,7 +38,7 @@ String? reorderHandleOf(NodeBuilder b, String id) {
   return null;
 }
 
-/// Whether a running list [n] reorders its items (SDK 8.x's rule): it has
+/// Whether a running list [n] reorders its items: it has
 /// data and lays it in a line, and its reorder is on (with a handle when it
 /// starts from one), or, with no reorder setting, its item has a handle.
 bool reordersItems(Node n, {required bool hasData, required String? handle}) {
@@ -99,7 +98,7 @@ void reorderRecipe(
 }
 
 /// The item key of [item] at [index]: its `id` when no other item shares
-/// it, else its index (SDK 8.x keyed rows so).
+/// it, else its index.
 Object _rowKey(List<Object?> items, int index) {
   final item = items.elementAtOrNull(index);
   final id = item is Map ? item['id'] : null;
@@ -360,8 +359,7 @@ class _ReorderListViewState extends State<ReorderListView> {
 }
 
 /// Starts dragging row [index] of the reorderable list around when a
-/// pointer goes down on its handle node's box (SDK 8.x wrapped the handle
-/// in a `ReorderableDragStartListener`).
+/// pointer goes down on its handle node's box.
 class _HandleDragStart extends StatelessWidget {
   const _HandleDragStart({required this.index, required this.handleBox, required this.child});
 

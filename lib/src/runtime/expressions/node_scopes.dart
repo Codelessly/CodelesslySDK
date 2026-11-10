@@ -1,7 +1,6 @@
 // Names a node gives the nodes inside it (and its own bindings and
 // reactions): a drag track's `track`, a flip card's `flip`, a tilt's
-// `tilt`, a transform gesture's `transform`. SDK 8.x's TrackScope,
-// TransformScope and MotionValuesScope, as value scopes: each such node has
+// `tilt`, a transform gesture's `transform`, as value scopes: each such node has
 // one [NodeValuesScope] (made by [NodeBinder.scopeFor]) between the scope
 // around it and the scopes of the nodes inside it, which its render
 // objects write as the node moves.
@@ -83,8 +82,7 @@ NodeValuesScope nodeValuesScopeFor(Node node, ValueScope parent) {
 }
 
 /// `screen` inside a responsive layout with its own switch points: the
-/// screen around it with the breakpoint that layout picks (10.x's
-/// `ResponsiveWidthsScope`), following the screen as it changes.
+/// screen around it with the breakpoint that layout picks, following the screen as it changes.
 class ResponsiveScreenScope extends NodeValuesScope {
   ResponsiveScreenScope(this.minWidths, super.values, super.parent);
 
@@ -131,7 +129,7 @@ Map<String, Object?> trackValues(api.DragTrack track, double value,
 /// The value [track] is drawn at, read in [scope]: its bound value
 /// (`drag.track.value`), else its variable's, else its default or start;
 /// NaN (empty) for a track that parks such a value
-/// ([api.DragTrack.parkedProgress]). SDK 8.x's `trackValueOf`.
+/// ([api.DragTrack.parkedProgress]).
 double trackValueIn(api.DragTrack track, ValueScope? scope) {
   final Object? raw = track.value ?? (track.hasVariable && scope != null ? readPath(scope, track.variable.trim()) : null);
   final double? value = switch (raw) {

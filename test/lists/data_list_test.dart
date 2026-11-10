@@ -1,5 +1,5 @@
-// A running list that pages, groups into sections or swipes (SDK 8.x's
-// DataListView): its items over bound data, its pagination's variable,
+// A running list that pages, groups into sections or swipes
+// (DataListView): its items over bound data, its pagination's variable,
 // paginate actions, footers, pull to refresh, sections and swipe actions.
 import 'dart:async';
 

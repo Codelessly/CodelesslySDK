@@ -1,7 +1,7 @@
 // What a design canvas shows for `${...}` in a text: the value the
 // variables' defaults give (when the editor provides them as a scope), else
 // a readable placeholder named after the path (`${auth.displayName}` shows
-// "Display name"). SDK 8.x: VariablePreview / VariableSpan.
+// "Display name").
 import 'package:flutter/painting.dart';
 
 import '../contracts.dart';

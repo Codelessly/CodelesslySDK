@@ -1,5 +1,5 @@
 // Shared elements: a node with a `hero` flies between two screens that
-// both show its tag while the navigation plays (SDK 8.x's NodeHero), on the
+// both show its tag while the navigation plays, on the
 // app shell's routes.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
@@ -103,8 +103,8 @@ void main() {
     await tester.pump();
     expect(HeroFlights.flying, isFalse);
     await tester.pumpAndSettle();
-    final (_, c, nav2) = await pump(tester, '', '');
-    nav2.currentState!.push(CodelesslyPageRoute<void>(builder: (_) => show(c)));
+    final (_, c, navB) = await pump(tester, '', '');
+    navB.currentState!.push(CodelesslyPageRoute<void>(builder: (_) => show(c)));
     await tester.pump();
     await tester.pump();
     expect(HeroFlights.flying, isFalse);

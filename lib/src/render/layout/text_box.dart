@@ -1,4 +1,3 @@
-// Moved from SDK 8.x unchanged in behaviour.
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';

@@ -1,5 +1,4 @@
-// A list item swiped sideways to reveal its list's swipe actions (SDK 8.x's
-// ui/swipe_actions_box.dart).
+// A list item swiped sideways to reveal its list's swipe actions.
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' show Json, SwipeAction, SwipeActions;

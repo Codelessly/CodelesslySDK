@@ -1,8 +1,7 @@
 // Widget recipes: collections. See lib/src/render/recipe.dart.
 //
 // List, grid and page views repeat their first child, the item template, as
-// SDK 8.x's ListView, GridView and PageView built it in preview (at rest, no
-// data): one node box per item, the first in the list's own scope (the one
+// a preview at rest with no data: one node box per item, the first in the list's own scope (the one
 // tools measure), the others scoped to their index. Tabs, accordions and
 // expansion tiles are material controls, built as islands.
 import 'dart:math' as math;
@@ -70,13 +69,12 @@ void _syncItems(NodeBuilder b, Node n, _Container container, String? itemId, int
   );
 }
 
-/// The box SDK 8.x's ViewportNodeBox gave a scroll view: the design extent
+/// The box a scroll view takes: the design extent
 /// across (filling when expanded) and along its axis unless it shrink-wraps
 /// its items (filling when expanded).
 ///
 /// At runtime a flexible scroll axis shrink-wraps its items too, within the
-/// room its parent gives it, and scrolls once they outgrow it (as the SDK
-/// 8.x runtime does), so what follows the list sits under its last item. A
+/// room its parent gives it, and scrolls once they outgrow it, so what follows the list sits under its last item. A
 /// design canvas keeps it at its design size, as the editor showed it.
 RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap}) {
   final shrinkWrap = _hugsMain(b, n) && canShrinkWrap;
@@ -108,8 +106,7 @@ int _startCount(RenderCollection view, double designMain, double itemMain) {
   return math.max(estimate, view.childCount).clamp(1, RenderCollection.maxEndlessItems);
 }
 
-/// Whether intrinsic measurement can't see into [node]'s subtree (SDK
-/// 8.x's subtreeBlocksIntrinsics): a viewport, or scrolling content.
+/// Whether intrinsic measurement can't see into [node]'s subtree: a viewport, or scrolling content.
 bool _blocksIntrinsics(NodeBuilder b, Node node) {
   if (node.type == 'listView') {
     if (!listBuildsAllItems(node)) return true;
@@ -130,7 +127,7 @@ bool _knownCount(Node n) => _itemCount(n) != null;
 /// The list flows its items onto runs (a Wrap); only a plain list layout does.
 bool _wraps(Node n) => n.prop(ListViewProps.wrap) && n.prop(ListViewProps.layout) == api.ListLayout.list;
 
-/// SDK 8.x's listBuildsAllItems: the list lays every item out in a Flex (or
+/// Whether the list lays every item out in a Flex (or
 /// a Wrap) rather than a viewport, so it can be measured.
 bool listBuildsAllItems(Node n) {
   if (_wraps(n)) return true;
@@ -503,7 +500,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
 const int _maxTableSpans = 200;
 
 /// A table view at rest: its fit box → the cells that fit its design size,
-/// each a template slot repeated (SDK 8.x's `TableView.builder`). Rows are
+/// each a template slot repeated. Rows are
 /// [TableViewProps.rowCount] (bound data is a runtime matter).
 void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   if (b.tree.animates) return tableViewRuntimeRecipe(b, n, chain);

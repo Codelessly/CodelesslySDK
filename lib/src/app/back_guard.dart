@@ -2,8 +2,7 @@
 // system back button or gesture, the browser's back button and Escape on a
 // dialog (everything that asks the route to `maybePop`) leave the screen
 // where it is and run its `backPressed` reactions instead. A pop from the
-// screen's own actions (`Navigator.pop`) is never blocked. SDK 8.x's
-// BackInterceptor.
+// screen's own actions (`Navigator.pop`) is never blocked.
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
