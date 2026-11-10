@@ -1,3 +1,13 @@
+## 20.1.0
+
+- `codelesslyWithToken` (`package:codelessly_sdk/firebase.dart`): a `Codelessly` from a project token alone. It opens
+  Codelessly's Firebase project as a secondary Firebase app (`codelesslyFirebaseApp`, `CodelesslyFirebaseOptions`),
+  so an app needs no Firebase setup of its own; `cloudServices: true` also sets up the project's cloud data,
+  accounts and files (`codelesslyCloudServices`).
+- `firebase.dart` exports the Firebase types its functions take (`Firebase`, `FirebaseApp`, `FirebaseOptions`,
+  `FirebaseFirestore`, `FirebaseAuth`, `FirebaseStorage`).
+- A README, an example app and a developer guide: https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide
+
 ## 20.0.3
 
 - `CodelesslyWidget.data`: a screen variable named like a data key starts at that value and follows it when the

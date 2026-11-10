@@ -1,8 +1,25 @@
 name: codelessly_sdk_v2
-description: Codelessly CloudUI™ - server-driven UI for Flutter. Renders Codelessly layouts natively, straight into Flutter render objects.
-version: 20.0.3
+description: Server-driven UI for Flutter. Design screens in the Codelessly Editor, publish, and render them natively in your app, with live updates, data, actions and navigation.
+version: 20.1.0
 homepage: https://codelessly.com/
-repository: https://github.com/Codelessly/CodelesslySDK
+repository: https://github.com/Codelessly/CodelesslySDK/tree/master/v2
+issue_tracker: https://github.com/Codelessly/CodelesslySDK/issues
+documentation: https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide
+
+topics:
+  - server-driven-ui
+  - ui
+  - no-code
+  - widget
+  - design
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
 
 environment:
   sdk: ^3.12.0
@@ -51,3 +68,5 @@ dev_dependencies:
   # it themselves; the SDK doesn't depend on it.
   codelessly_quickjs: ^0.1.0
   fake_cloud_firestore: ^4.4.0
+  # Firebase.initializeApp without a platform, for the Firebase app test.
+  firebase_core_platform_interface: ^8.1.1

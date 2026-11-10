@@ -9,6 +9,21 @@ import 'runtime.dart';
 
 /// How a [Codelessly] instance runs: which project and publish it shows, and
 /// the runtime plugins (expressions, actions, services) its layouts use.
+///
+/// One of [slug], [authToken] or [projectId] names the project, unless the
+/// instance is given a loader ([Codelessly.asset], [Codelessly.fromBundle]):
+///
+/// ```dart
+/// const CodelesslyConfig(slug: 'my-project');
+///
+/// CodelesslyConfig(
+///   slug: 'my-project',
+///   preload: true,
+///   functions: {
+///     'addToCart': (context, params) => cart.add(params['productId']),
+///   },
+/// );
+/// ```
 @immutable
 class CodelesslyConfig {
   const CodelesslyConfig({
@@ -28,13 +43,20 @@ class CodelesslyConfig {
     this.debugLog = false,
   }) : assert(maxTextScaleFactor >= 1);
 
-  /// The published project.
+  /// The published project's id. Read from Firestore
+  /// (`codelesslyOnFirebase`), without authenticating unless [authToken] is
+  /// set too.
   final String? projectId;
 
-  /// The project's public slug: the publish comes as one bundle.
+  /// The project's public slug: the publish comes as one bundle, over
+  /// HTTP, without Firebase.
   final String? slug;
 
-  /// The SDK token of the project, for loaders that authenticate.
+  /// The SDK token of the project, for loaders that authenticate:
+  /// `codelesslyWithToken` and `codelesslyOnFirebase` in
+  /// `package:codelessly_sdk/firebase.dart`. A token alone, on an instance
+  /// without such a loader, fails to load with a [PublishLoadException]
+  /// that says so.
   final String? authToken;
 
   /// Which publish to show: the published layouts, the editor's preview, or
@@ -80,6 +102,8 @@ class CodelesslyConfig {
   /// they arrive).
   final Duration fontTimeout;
 
+  /// Reserved: the SDK doesn't read it yet. Errors go to the services'
+  /// analytics ([Services.analytics]; printed in debug builds).
   final bool debugLog;
 
   /// Whether this shows the editor's preview.
