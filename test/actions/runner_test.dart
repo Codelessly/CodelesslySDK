@@ -1,6 +1,5 @@
-// The actions runtime without a render tree: SDK 8.x's actions and chain
-// tests (actions_test, action_chain_*, api_call_*, delay_*,
-// set_list_text_items_test, trigger_debounce_test) as the spec.
+// The actions runtime without a render tree: actions, chains, API calls,
+// delays, list text items and trigger debounce.
 import 'dart:async';
 import 'dart:convert';
 

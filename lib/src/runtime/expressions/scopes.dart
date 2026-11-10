@@ -158,7 +158,7 @@ class VariableScope extends NamedScope {
     final v = _defs[name];
     if (v == null || v.isComputed) return false;
     final next = value == null ? null : (v.type.coerce(value) ?? _loose(v.type, value));
-    // A value the type can't hold leaves the variable as it was (10.x kept it).
+    // A value the type can't hold leaves the variable as it was.
     if (value != null && next == null) return false;
     if (_same(_values[name], next)) return false;
     _values[name] = next;
@@ -452,8 +452,7 @@ Breakpoints breakpointsOfScreen(Object? screen) {
 }
 
 /// [screen] (a [screenValues] value) inside a responsive layout with its own
-/// switch points [minWidths]: its breakpoint as that layout picks it (10.x's
-/// `ResponsiveWidthsScope`), so `screen.isTablet` agrees with the layout on
+/// switch points [minWidths]: its breakpoint as that layout picks it, so `screen.isTablet` agrees with the layout on
 /// show. [screen] itself without any.
 Map<String, Object?> screenWithMinWidths(Map<String, Object?> screen, Map<String, double> minWidths) {
   if (minWidths.isEmpty) return screen;

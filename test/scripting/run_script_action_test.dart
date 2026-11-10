@@ -1,6 +1,6 @@
 // Run script actions on the real engine (QuickJS on the VM), through the
 // runtime's action chain and the app shell; script test cases; the
-// catalog. SDK 8.x's test/scripting/run_script_action_test.dart.
+// catalog.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

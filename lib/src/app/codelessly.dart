@@ -126,8 +126,8 @@ class Codelessly extends ChangeNotifier {
 
   /// The app's variables: shared by every screen, over [data] and under
   /// each screen's own scope, so a value one screen sets the next one reads.
-  /// Declared from the publish model's `variables` (and a converted 10.x
-  /// publish's `app_variables` scope, [declareAppVariables]).
+  /// Declared from the publish model's `variables` (and a publish's
+  /// `app_variables` scope, [declareAppVariables]).
   late final VariableScope appVariables = VariableScope(const [], parent: _storage);
 
   /// `storage`: what the app keeps on the device ([Services.storage], the
@@ -378,7 +378,7 @@ class _StorageScope extends NamedScope {
   }
 }
 
-/// The variable scope a converted 10.x publish keeps the app's variables
+/// The variable scope a publish can keep the app's variables
 /// under, in each layout's `variables`.
 const String kV1AppVariablesScope = 'app_variables';
 

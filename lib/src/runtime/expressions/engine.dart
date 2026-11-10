@@ -1,7 +1,5 @@
 // The expression language: `${path}` reads a value, `${= formula}` computes
 // one, and any other `${...}` in a text is replaced by its value's text.
-// SDK 8.x: PropertyValueDelegate (getVariableValueFromPath,
-// substituteVariables, evaluateFormula) and FormulaEvaluator.
 import 'package:codelessly_api/codelessly_api.dart' show Node, Predicate, Comparison, Junction, Join, ConditionOp,
     ConditionOperand;
 
@@ -93,7 +91,7 @@ class Expressions implements ExpressionEngine {
   /// Whether [p] holds in [scope].
   bool test(Predicate p, ValueScope scope) => switch (p) {
         final Comparison c => compare(operand(c.left, scope), c.op, c.op.takesRight ? operand(c.right, scope) : null),
-        // Every part is evaluated, as 10.x did.
+        // Every part is evaluated.
         Junction(join: Join.and, :final parts) => parts.map((x) => test(x, scope)).toList().every((x) => x),
         Junction(join: Join.or, :final parts) => parts.map((x) => test(x, scope)).toList().any((x) => x),
       };
@@ -115,7 +113,7 @@ class Expressions implements ExpressionEngine {
   }
 
   /// [left] [op] [right], loosely: numbers as numbers, booleans as booleans,
-  /// anything else as case-insensitive text (SDK 8.x ConditionEvaluator).
+  /// anything else as case-insensitive text.
   static bool compare(Object? left, ConditionOp op, Object? right) {
     int? order() {
       if (left is num && right is num) return left.compareTo(right);

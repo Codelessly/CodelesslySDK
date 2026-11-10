@@ -1,6 +1,6 @@
 // `script.name(args)` in formulas, on a screen of the app shell: QuickJS
 // runs it synchronously; another runner's result arrives later and what
-// read it re-applies. SDK 8.x's formula script tests.
+// read it re-applies.
 import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';

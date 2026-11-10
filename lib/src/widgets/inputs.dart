@@ -1,9 +1,9 @@
 // Widget recipes: inputs. See lib/src/render/recipe.dart.
 //
 // Inputs are islands: real Flutter widgets (TextField, Checkbox, Slider...)
-// built from the node's props, inside the box SDK 8.x gave them: a fit box
+// built from the node's props, inside their box: a fit box
 // for the ones that size to their node's fits, the design size for the ones
-// that always took it (checkbox, radio, slider, signature), nothing for the
+// that always take it (checkbox, radio, slider, signature), nothing for the
 // pickers (their button's own size).
 //
 // The widgets keep their own state (typed text, a toggled checkbox) and, in a
@@ -86,13 +86,13 @@ void _fire(BuildContext context, String trigger, Object? value) {
   if (b != null) fireTrigger(b, trigger, event: {'value': value});
 }
 
-/// The node's fit box (SDK 8.x's `AdaptiveNodeBox`) around [build].
+/// The node's fit box around [build].
 void _fitted(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
   chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
   chain.add(_island(b, build));
 }
 
-/// The node's design size (SDK 8.x's `SizedBox`, whatever its fits) around
+/// The node's design size around
 /// [build].
 void _sized(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
   final c = BoxConstraints.tight(_designSize(n));
@@ -115,7 +115,7 @@ void _segmentedButton(NodeBuilder b, Node n, List<RenderBox> chain) {
 /// [s] as Flutter's style, or null when unset (the theme's).
 TextStyle? _styleOrNull(api.TextStyle s) => s.isEmpty ? null : textStyle(s);
 
-/// [text] in [style], as SDK 8.x built a decoration's texts (a span in a
+/// [text] in [style], as a decoration's texts are built (a span in a
 /// `Text.rich`).
 Widget _text(String text, api.TextStyle style, {TextAlign? textAlign, int? maxLines, TextOverflow? overflow}) =>
     Text.rich(TextSpan(children: [TextSpan(text: text, style: _styleOrNull(style))]),
@@ -209,8 +209,7 @@ String? previewText(String? text) {
 
 /// [padding] grown by the width of the border [d] draws in this state when
 /// it has `paddingIncludesBorder` (an outline on every side, an underline
-/// below): disabled, then error (focused or not), then focused, then enabled
-/// (SDK 8.x's `PassiveTextFieldWidget.paddingWithBorder`).
+/// below): disabled, then error (focused or not), then focused, then enabled.
 EdgeInsets paddingWithBorder(EdgeInsets padding, api.InputDecoration d, {bool error = false, bool focused = false}) {
   if (!d.paddingIncludesBorder) return padding;
   final border = !d.enabled
@@ -228,7 +227,7 @@ EdgeInsets paddingWithBorder(EdgeInsets padding, api.InputDecoration d, {bool er
 }
 
 /// An always-visible prefix or suffix text, beside its icon if it has one,
-/// for an icon slot (SDK 8.x's `_affix`).
+/// for an icon slot.
 Widget _affix(Widget? icon, Widget text, {required bool before}) {
   final padded = Padding(
     padding: before

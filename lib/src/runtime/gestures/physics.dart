@@ -4,8 +4,7 @@
 // the range bounds allow, and velocity-projected snapping to points, a grid
 // or the parent's edges. Used by a drag (DragMotion.physics), a drag
 // source's return (DragSource.physics) and a transform gesture
-// (TransformGesture.physics). SDK 8.x's ui/gesture_physics.dart, unchanged
-// in behaviour.
+// (TransformGesture.physics).
 import 'dart:math' as math;
 import 'dart:ui';
 

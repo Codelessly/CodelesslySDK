@@ -1,11 +1,10 @@
 // Nodes → render objects, without a widget or element per node.
 //
 // Each node is one [NodeBox]. Its chain of render objects is, layer by layer,
-// what SDK 8.x built as widgets for the same node (outer decorations, the
-// shell's size, decoration and clip, padding, then the content), configured
-// directly. The layout render objects are SDK 8.x's own (render/layout), so
-// the semantics aren't re-derived. Parity: test/parity_test.dart compares
-// every node's rect with SDK 8.x on real projects.
+// outer decorations, the shell's size, decoration and clip, padding, then the
+// content, configured directly. The layout render objects are in
+// render/layout. Parity: test/parity_test.dart compares every node's rect
+// with stored goldens of real projects.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -372,7 +371,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   }
 
   /// Hidden by a binding or condition (not by its own `visible`): it takes
-  /// no space, as SDK 8.x's `Visibility` without `maintainSize`.
+  /// no space, as Flutter's `Visibility` without `maintainSize`.
   bool get collapsed => _collapsed;
   bool _collapsed = false;
   List<Listenable> _bindingWatch = const [];
@@ -794,7 +793,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     }
     content(inner);
     _innerChains[stack] = inner;
-    // SDK 8.x put the content of a shell with ink in its InkWell, filling
+    // The content of a shell with ink goes in its InkWell, filling
     // the shell (Positioned.fill) when the shell has a size on both axes:
     // its content then sizes nothing (no intrinsic size either).
     if (n.behaviours.inkWell != null && n.hFit != SizeFit.hug && n.vFit != SizeFit.hug) _filledStacks.add(stack);
@@ -917,8 +916,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     chain.add(flex);
   }
 
-  /// A row/column whose children flow onto new runs (SDK 8.x's
-  /// CodelesslyWrap): main-axis alignment within each run, cross-axis
+  /// A row/column whose children flow onto new runs: main-axis alignment within each run, cross-axis
   /// alignment within a run and for the runs; a scrollable one scrolls
   /// through its runs.
   void _wrap(Node n, List<RenderBox> chain, {required bool scrolls}) {
@@ -1187,7 +1185,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     }
   }
 
-  /// A child of a wrapping row/column (SDK 8.x's wrapChildInRun): fills
+  /// A child of a wrapping row/column: fills
   /// and flexes mean nothing in a run, so a flexing axis hugs its content
   /// (measured intrinsically), or takes its design size when its subtree
   /// can't be measured. Its own alignment doesn't apply.

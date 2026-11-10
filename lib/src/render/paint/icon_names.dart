@@ -1,5 +1,4 @@
-// Icons chosen by name at runtime (a toast's or a dialog's `icon` binding):
-// SDK 8.x's `iconWithName`.
+// Icons chosen by name at runtime (a toast's or a dialog's `icon` binding).
 import 'package:codelessly_api/codelessly_api.dart' show Json;
 
 import 'material_icon_versions.dart';

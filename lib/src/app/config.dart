@@ -69,7 +69,7 @@ class CodelesslyConfig {
 
   /// Whether a loader that watches the publish ([LivePublishLoader], as the
   /// Firestore one does) brings each new publish (or preview save) to the
-  /// running app, as SDK 8.x did: republished layouts load again when shown.
+  /// running app: republished layouts load again when shown.
   final bool liveUpdates;
 
   /// Evaluates bindings, conditions and formulas: the runtime's

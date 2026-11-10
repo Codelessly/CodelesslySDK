@@ -1,4 +1,4 @@
-// The paginate action (SDK 8.x's FunctionsRepository.paginate): moves the
+// The paginate action: moves the
 // pagination controller it names on the action's screen.
 import 'package:codelessly_api/codelessly_api.dart' show PaginateAction, PaginateCommand;
 import 'package:flutter/foundation.dart';

@@ -1,7 +1,6 @@
 // The widgets the media recipes host as islands: video, embedded video,
-// audio and web views, and what a design canvas shows for each (SDK 8.x's
-// preview of the same widget, so a node hugging its content has the same
-// size).
+// audio and web views, and what a design canvas shows for each (a preview
+// of the same size, so a node hugging its content keeps its size).
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
@@ -21,7 +20,7 @@ import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import '../render/convert.dart';
 
 /// Whether [url] is a remote HTTPS URL on a public host whose path ends
-/// with one of [extensions] (SDK 8.x's `isRemoteMp4Url` / `isRemoteAudioUrl`).
+/// with one of [extensions].
 bool isRemoteMediaUrl(String url, List<String> extensions) {
   if (url.trim() != url || url.contains('\\') || url.contains(RegExp(r'\s'))) return false;
   final uri = Uri.tryParse(url);
@@ -100,7 +99,7 @@ class _MediaVideoState extends State<MediaVideo> {
     c.initialize().then((_) {
       if (!mounted || generation != _generation) return;
       setState(() => _ready = true);
-      // A remote URL never autoplays (SDK 8.x).
+      // A remote URL never autoplays.
     }, onError: (Object _) {
       if (mounted && generation == _generation) setState(() => _failed = true);
     });
@@ -418,8 +417,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
 
 // --- web view ------------------------------------------------------------------
 
-/// What a design canvas shows for a web view (SDK 8.x's
-/// `WebViewPreviewWidget`): a framed glyph.
+/// What a design canvas shows for a web view: a framed glyph.
 class WebViewPreview extends StatelessWidget {
   const WebViewPreview({super.key, required this.icon});
   final IconData icon;

@@ -1,5 +1,5 @@
 // What a write does to a value (set variable, set storage, a cloud field):
-// SDK 8.x's number, boolean, list and map operations, on typed values.
+// number, boolean, list and map operations, on typed values.
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart' show ValueWrite, VariableType, WriteOp;
@@ -30,7 +30,7 @@ Object? evaluateValue(String text, Expressions e, ValueScope scope) {
 Object? applyWrite(Object? current, VariableType type, ValueWrite write, Expressions e, ValueScope scope) {
   Object? value() => evaluateValue(write.value, e, scope);
   // An item written into a list or map is read loosely (`2` is a number,
-  // `true` a bool), as SDK 8.x read it, unless an expression gave it.
+  // `true` a bool), unless an expression gave it.
   Object? item() {
     final v = value();
     if (v is! String || FormulaEvaluator.exactExpression(write.value) != null || exactPath(write.value) != null) return v;

@@ -1,4 +1,3 @@
-// Moved from SDK 8.x unchanged in behaviour.
 import 'package:collection/collection.dart';
 import 'package:flutter/rendering.dart';
 

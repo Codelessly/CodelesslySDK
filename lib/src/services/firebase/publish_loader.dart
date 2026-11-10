@@ -1,6 +1,5 @@
 // Published apps on Cloud Firestore: the publish model and its layouts at
-// the existing publish paths, as SDK 8.x's FirebaseDataRepository read
-// them, in the current format the editor's publish writes (`schema: 2`; a large layout's nodes gzipped in `compressedNodes`).
+// the publish paths, in the current format the editor's publish writes (`schema: 2`; a large layout's nodes gzipped in `compressedNodes`).
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
@@ -12,7 +11,7 @@ import '../auth.dart';
 /// document [PublishSource.modelPath] (`publish/{projectId}`;
 /// `publish_preview/...` for the editor's preview), each layout
 /// [PublishSource.layoutPath] (`.../layouts/{layoutId}`). [watchModel]
-/// follows the model document, as SDK 8.x streamed it.
+/// follows the model document.
 ///
 /// The project is [projectId], else the one [auth] grants access to: the
 /// app's project token ([CodelesslyConfig.authToken]) resolves to its
@@ -21,8 +20,8 @@ import '../auth.dart';
 /// authenticates before the first read. A template project (its access says
 /// so) reads [PublishSource.template] whatever source is asked.
 ///
-/// A document not in the current format (a project the classic editor published and
-/// nobody converted) fails with a [PublishLoadException] saying so.
+/// A document not in the current format fails with a [PublishLoadException]
+/// saying so.
 class FirestorePublishLoader implements LivePublishLoader {
   FirestorePublishLoader(this.firestore, {this.projectId, this.auth})
       : assert(projectId != null || auth != null, 'A project id or a ProjectAuth is needed');

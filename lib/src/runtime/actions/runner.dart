@@ -188,8 +188,8 @@ class CodelesslyActions implements ActionRunner {
     final run = ActionRun._(
       context,
       host,
-      // `value` too: SDK 8.x named an input's new value so, and migrated
-      // actions (a search field's `query = \${value}`) read it.
+      // `value` too: an input's new value is also read by that name (a
+      // search field's `query = \${value}`).
       ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope),
       cancellation ?? ActionCancellation(),
       node,

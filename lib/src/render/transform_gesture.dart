@@ -1,4 +1,4 @@
-// Pinch, pan and rotate (SDK 8.x's NodeTransformGesture), as one render
+// Pinch, pan and rotate, as one render
 // object of a node's chain in a running app: pinch and ctrl+wheel zoom
 // about the focal point, one finger pans, two rotate, a double tap zooms
 // to a point, and a release flings and settles by the gesture's physics

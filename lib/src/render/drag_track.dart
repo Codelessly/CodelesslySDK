@@ -1,12 +1,11 @@
 // A drag track's interaction: the node is a value control (a fader cap, a
 // knob, a handle on a path) that a running app lets the pointer, the wheel
-// and the keys move. SDK 8.x's NodeDragTrack, as one render object of the
+// and the keys move. One render object of the
 // node's chain (where the design canvas has its static pose): it reads and
 // writes the track's variable, gives the nodes inside it `${track.*}`,
 // and fires the node's `changed`, `dragEnd` and `changeEnd` reactions.
 //
-// The physics are SDK 8.x's own (its coast, glide and snap loops, its
-// thresholds); a settle spring is Flutter's SpringSimulation.
+// The physics are coast, glide and snap loops with fixed thresholds; a settle spring is Flutter's SpringSimulation.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -183,7 +182,7 @@ abstract final class DragTracks {
   }
 
   /// Turns the track of node [nodeId] of [tree] by [steps] steps, as if
-  /// dragged there (SDK 8.x's `NodeDragTrack.step`); false when no such
+  /// dragged there; false when no such
   /// track is on screen. [nodeId] may list several ids separated by commas
   /// (the copies of one control in a screen's layouts).
   static Future<bool> step(NodeTree tree, String nodeId, int steps) async {
@@ -276,7 +275,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     _refresh();
   }
 
-  /// SDK 8.x's didUpdateWidget for a new value [next] (was [old] on
+  /// Moves to a new value [next] (was [old] on
   /// [oldTrack]): a smooth track glides there without reporting the values
   /// it passes; any other glides from where it's drawn now (a spring at the
   /// speed it moves). A change while the pointer holds it waits.

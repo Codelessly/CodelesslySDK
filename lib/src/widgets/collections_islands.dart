@@ -1,6 +1,5 @@
 // Islands of the collections group: tabs, tab bars, accordions and
-// expansion tiles are material controls, built with Flutter's widgets as
-// SDK 8.x built them. Their child nodes go back in as NodeChild boxes.
+// expansion tiles are material controls, built with Flutter's widgets. Their child nodes go back in as NodeChild boxes.
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -15,7 +14,7 @@ import '../render/recipe.dart';
 
 Size _designSize(Node n) => Size(n.layout.width.value, n.layout.height.value);
 
-/// SDK 8.x's AdaptiveNodeBox: the node's fits at its design size.
+/// The node's fits at its design size.
 void _adaptiveBox(NodeBuilder b, Node n, List<RenderBox> chain) =>
     chain.add(b.fitBox('box', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
 
@@ -233,7 +232,7 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
   }
 }
 
-/// A shape by its 10.x name (`CShapeBorder`), rounded by [radius].
+/// A shape by its stored name (`CShapeBorder`), rounded by [radius].
 ShapeBorder _shape(String name, BorderRadius radius, {BorderSide side = BorderSide.none}) => switch (name) {
   'circle' => CircleBorder(side: side),
   'stadium' => StadiumBorder(side: side),
@@ -354,7 +353,7 @@ class _AccordionState extends State<_Accordion> {
 
 // --- expansion tile ---------------------------------------------------------
 
-/// On a design canvas (not interactive), SDK 8.x's placeholder at the
+/// On a design canvas (not interactive), a placeholder at the
 /// node's design size; running, a Flutter `ExpansionTile` whose header is
 /// the `tile` slot's list tile parts.
 void expansionTileRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
@@ -434,7 +433,7 @@ void expansionTileRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   );
 }
 
-/// SDK 8.x's preview placeholder: a tinted box, a dashed inner outline and
+/// The preview placeholder: a tinted box, a dashed inner outline and
 /// the type's name.
 class _PlaceholderPainter extends CustomPainter {
   _PlaceholderPainter({required this.label});

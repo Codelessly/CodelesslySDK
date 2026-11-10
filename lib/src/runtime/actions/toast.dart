@@ -1,6 +1,6 @@
 // Show toast actions: a toast near the bottom or top of the screen that
 // fades and slides in, stays for the action's duration and fades out. A new
-// toast replaces the one on screen. SDK 8.x's AppToast.
+// toast replaces the one on screen.
 import 'dart:async';
 import 'dart:math' as math;
 

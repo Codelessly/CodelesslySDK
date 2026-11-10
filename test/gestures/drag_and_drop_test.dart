@@ -1,5 +1,4 @@
-// Drag and drop (`draggable`, `dropTarget`): SDK 8.x's drag_and_drop_test
-// on the render tree. A two-column board: each column is a list of
+// Drag and drop (`draggable`, `dropTarget`) on the render tree. A two-column board: each column is a list of
 // `cards` filtered by lane and a drop target that owns its list; each card
 // is draggable. Dropping runs `moveItems` on `cards`. Column b takes at
 // most 2 cards (a WIP limit).

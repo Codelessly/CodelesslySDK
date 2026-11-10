@@ -1,5 +1,4 @@
-// Pagination controllers (SDK 8.x's data/pagination_controller.dart and
-// data/pagination_registry.dart): a list's `pagination` loads its items page
+// Pagination controllers: a list's `pagination` loads its items page
 // by page from its bound data, an API or its cloud query, and publishes its
 // state as a map variable named after it (`${contacts.page}`...). Paginate
 // actions move a controller by name.
