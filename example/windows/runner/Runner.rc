@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.codelessly.sdk" "\0"
-            VALUE "FileDescription", "example" "\0"
+            VALUE "CompanyName", "com.codelessly" "\0"
+            VALUE "FileDescription", "codelessly_example" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "example" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.codelessly.sdk. All rights reserved." "\0"
-            VALUE "OriginalFilename", "example.exe" "\0"
-            VALUE "ProductName", "example" "\0"
+            VALUE "InternalName", "codelessly_example" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.codelessly. All rights reserved." "\0"
+            VALUE "OriginalFilename", "codelessly_example.exe" "\0"
+            VALUE "ProductName", "codelessly_example" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

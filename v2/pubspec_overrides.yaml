@@ -1,4 +1,0 @@
-# Development: API v2 from the sibling CodelesslyAPI checkout.
-dependency_overrides:
-  codelessly_api_v2:
-    path: ../../CodelesslyAPI/v2

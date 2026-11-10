@@ -3,7 +3,7 @@
 [Guide](README.md) · Previous: [Publishing and environments](13-publishing-and-environments.md) · Next: [Troubleshooting and FAQ](15-troubleshooting.md)
 
 Screens that show layouts are widget-testable without a network, a backend or a device. The tests in this chapter
-are real: they are in [`v2/example/test/guide_test.dart`](../../v2/example/test/guide_test.dart).
+are real: they are in [`example/test/guide_test.dart`](../../example/test/guide_test.dart).
 
 ![A widget test: a bundle in memory feeds Codelessly.fromBundle with NoFontFetcher, pumped in a MaterialApp, driven and checked through a controller](images/14-testing/hero.png)
 
@@ -56,7 +56,7 @@ Future<void> frames(WidgetTester tester) async {
 ```
 
 `twoScreens()` returns a `PublishBundle` decoded from a JSON literal
-([see it in full](../../v2/example/test/guide_test.dart)). A real project's bundle works the same way: save one
+([see it in full](../../example/test/guide_test.dart)). A real project's bundle works the same way: save one
 ([where a bundle comes from](04-loading-and-caching.md#where-a-bundle-file-comes-from)) under `test/fixtures/` and
 read it with `decodeBundle(File('test/fixtures/my_project.json.gz').readAsBytesSync())`.
 

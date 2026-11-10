@@ -1,7 +1,7 @@
 # Codelessly SDK developer guide
 
-For `codelessly_sdk` 20.x (the code in [`v2/`](../../v2)). Every code sample here is compiled with the
-[example app](../../v2/example) (`lib/snippets.dart`), and the behaviour the chapters describe is covered by its
+For `codelessly_sdk` 20.x (this repository). Every code sample here is compiled with the
+[example app](../../example) (`lib/snippets.dart`), and the behaviour the chapters describe is covered by its
 tests (`test/guide_test.dart`) or the SDK's own.
 
 ![The guide in four groups: Get started, Build, Extend, Ship and maintain](images/index/hero.png)
@@ -35,8 +35,8 @@ Related:
 
 - The data model: [`codelessly_api` guide](https://github.com/Codelessly/CodelesslyAPI/tree/master/docs/guide).
 - The script engine: [`codelessly_quickjs`](https://github.com/Codelessly/CodelesslyQuickJS).
-- For contributors: [`v2/PORTING.md`](../../v2/PORTING.md) (porting a widget type) and the model's
-  [`DESIGN.md`](https://github.com/Codelessly/CodelesslyAPI/blob/master/v2/DESIGN.md).
+- For contributors: [`CONTRIBUTING.md`](../../CONTRIBUTING.md) (widget types and the runtime) and the model's
+  [`DESIGN.md`](https://github.com/Codelessly/CodelesslyAPI/blob/master/DESIGN.md).
 
 ## Conventions
 
@@ -48,7 +48,6 @@ Related:
   ```
 
   and, where they use Firebase, `import 'package:codelessly_sdk/firebase.dart';`.
-- Package names. On pub.dev the packages are `codelessly_sdk` and `codelessly_api`. In this repository the 20.x
-  sources live in `v2/` under the names `codelessly_sdk_v2` and `codelessly_api_v2` (the publish script renames
-  them), so code inside the repository imports `package:codelessly_sdk_v2/...`.
+- Package names. The packages are `codelessly_sdk` and `codelessly_api`, the same names on pub.dev and in the
+  repositories. 10.x (v1) is no longer in the repositories; it stays on pub.dev.
 - `${...}` is the layout's expression syntax, written in the Editor, not Dart.

@@ -1,10 +1,10 @@
+// ignore_for_file: prefer_single_quotes
 // The script runtime's conformance suite. It runs on the Dart VM, where
 // scripts run in QuickJS (`flutter test`), and in Chrome, where they run in
 // a Web Worker (`flutter test --platform chrome`), with the same
 // expectations, so it is also the parity test between the two engines.
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,16 +13,16 @@ import 'support/fake_host.dart';
 
 int _ids = 0;
 
-ScriptModel script(
+ScriptDef script(
   String source, {
   List<String> params = const [],
   List<ScriptCapability> caps = const [],
   int timeoutMs = 1000,
   String? name,
   Map<String, Object?> defaults = const {},
-}) => ScriptModel(
+}) => ScriptDef(
   id: 's${++_ids}',
-  name: name ?? 'test${_ids}',
+  name: name ?? 'test$_ids',
   source: source,
   params: [
     for (final p in params) ScriptParam(name: p, defaultValue: defaults[p]),
@@ -38,10 +38,10 @@ Future<ScriptRunResult> run(
   List<ScriptCapability> caps = const [],
   ScriptHost? host,
   int timeoutMs = 1000,
-  Map<String, ScriptModel> scripts = const {},
+  List<ScriptDef> scripts = const [],
   Map<String, Object?> defaults = const {},
   DateTime? now,
-}) => ScriptRunner.run(
+}) => const SandboxScriptRunner().run(
   script(
     source,
     params: params,
@@ -295,7 +295,7 @@ void main() {
       expect(
         await run(
           'return [await script.cents(1.005 * 3), "cents" in script, "nope" in script]',
-          scripts: {'cents': helper},
+          scripts: [helper],
         ),
         hasValue([3.01, true, false]),
       );
@@ -641,18 +641,18 @@ void main() {
     });
 
     test('check compiles without running', () async {
-      expect(await ScriptRunner.check(script('while (true) {}')), isNull);
-      final Map<String, Object?>? error = await ScriptRunner.check(
+      expect(await const SandboxScriptRunner().check(script('while (true) {}')), isNull);
+      final Map<String, Object?>? error = await const SandboxScriptRunner().check(
         script('let a = 1;\nlet b = ;'),
       );
       expect(error?['type'], 'SyntaxError');
       expect(error?['line'], 2);
       expect(
-        (await ScriptRunner.check(script('return import("x")')))?['type'],
+        (await const SandboxScriptRunner().check(script('return import("x")')))?['type'],
         'SyntaxError',
       );
       expect(
-        await ScriptRunner.check(script('return a + 1', params: ['a'])),
+        await const SandboxScriptRunner().check(script('return a + 1', params: ['a'])),
         isNull,
       );
     });
@@ -683,10 +683,10 @@ void main() {
         params: ['x'],
         args: {'x': 1},
       );
-      final ScriptModel s = script('return Math.random()', params: ['x']);
-      final c1 = await ScriptRunner.run(s, args: {'x': 1});
-      final c2 = await ScriptRunner.run(s, args: {'x': 1});
-      final c3 = await ScriptRunner.run(s, args: {'x': 2});
+      final ScriptDef s = script('return Math.random()', params: ['x']);
+      final c1 = await const SandboxScriptRunner().run(s, args: {'x': 1});
+      final c2 = await const SandboxScriptRunner().run(s, args: {'x': 1});
+      final c3 = await const SandboxScriptRunner().run(s, args: {'x': 2});
       expect(c1.value, c2.value);
       expect(c1.value, isNot(c3.value));
       expect(a.value, isA<List>());
