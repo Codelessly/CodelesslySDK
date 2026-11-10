@@ -5,6 +5,10 @@
 SDK 20 is a rewrite. It reads a new project format, renders differently, and has a smaller, more explicit API.
 This chapter is the checklist for moving an app from `codelessly_sdk` 10.x (or older) to 20.x.
 
+10.x (v1) is no longer in this repository: the repository holds 20.x only. 10.x stays available on pub.dev
+(`codelessly_sdk: ^10.0.0`), but it can't load projects any more (below), so there is nothing to gain from staying
+on it.
+
 ![10.x compared with 20.x: v1 documents and a global instance versus "schema": 2, render objects and explicit instances](images/16-migrating-from-10/hero.png)
 
 *What changes from 10.x to 20.x.*
@@ -20,35 +24,15 @@ This chapter is the checklist for moving an app from `codelessly_sdk` 10.x (or o
 | Model package | `codelessly_api` 10.x (`BaseNode`, json_serializable) | `codelessly_api` 20.x (`Node`, `WidgetSpec`, total decoding) |
 | Dart / Flutter | | Dart 3.12, Flutter 3.35 or newer |
 
-## 1. The project has to be in the new format
+## 1. Projects are already in the new format
 
-![The Editor asking "Publish in the new format?" before replacing a classic publish](images/16-migrating-from-10/step1-format.png)
+SDK 20 reads `"schema": 2` only, and SDK 10 can't read it. Every Codelessly project has already been converted to
+the new format and republished, under the same paths and with the same layout and canvas ids, so the ids in your
+code stay valid. Confirm them with the listing in [Embedding and sizing](03-embedding-and-sizing.md#which-screen).
 
-*Step 1: the Editor asks before replacing a classic publish.*
-
-SDK 20 reads `"schema": 2` only, and SDK 10 can't read it. For each project your app shows:
-
-1. Open it in the current Codelessly Editor. A project made with the classic Editor is converted to the new
-   format.
-2. Publish. The Editor warns before replacing a classic publish: from that moment **apps on SDK 10.x or older stop
-   loading the project** until they update.
-
-So the order matters. A safe rollout:
-
-1. Release the app update on SDK 20 pointing at the converted project, loaded from a **bundle shipped in the
-   app** ([Loading modes](04-loading-and-caching.md#asset-bundle)), or keep a separate copy of the project for
-   the new version.
-2. When enough users are on the new version, publish the converted project and switch the app to a token or slug.
-
-![A safe rollout: release the app on SDK 20 with a bundled project first, then publish the converted project and switch to a token or slug](images/16-migrating-from-10/step1-rollout.png)
-
-*The rollout order.*
-
-If SDK 20 shows `... is not v2 (no "schema": 2)`, the project hasn't been published in the new format yet.
-
-The conversion replaces a project's publish in place, under the same paths, and keeps layout and canvas ids, so
-the ids in your code should stay valid. Confirm with the listing in
-[Embedding and sizing](03-embedding-and-sizing.md#which-screen).
+Apps on SDK 10.x or older no longer load converted projects: update them to 20.x. If SDK 20 shows
+`... is not v2 (no "schema": 2)`, the document was never converted (for example a bundle exported from a 10.x app
+and shipped in the app): export the bundle again from the current Editor.
 
 ## 2. Update the dependency
 
@@ -193,8 +177,7 @@ with `onNavigate`. A project that is the whole app uses
 
 If your code touches the model (`package:codelessly_api`): `BaseNode` and its subclasses are gone. A node is a
 `Node` with a `type` string and typed props (`node.prop(TextProps.text)`). See the
-[codelessly_api guide](https://github.com/Codelessly/CodelesslyAPI/tree/master/docs/guide) and its migration
-chapter.
+[codelessly_api guide](https://github.com/Codelessly/CodelesslyAPI/tree/master/docs/guide).
 
 ## 5. Behaviour to re-check
 
@@ -220,7 +203,7 @@ chapter.
 
 *Step 6: verify.*
 
-- Run the app against the converted project and walk every screen at each breakpoint you support.
+- Run the app against the project and walk every screen at each breakpoint you support.
 - Exercise every function your app registers: a missing one now fails its action chain (`No function named
   [...]`).
 - Add a widget test per embedded layout ([Testing](14-testing.md)); with a bundle fixture it runs in CI without a

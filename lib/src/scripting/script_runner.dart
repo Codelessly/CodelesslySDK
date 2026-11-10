@@ -1,168 +1,80 @@
+// The script engine: SDK 8.x's ScriptRunner (lib/src/scripting) as the
+// default `Services.scripts`. A run is the driver's protocol over the
+// platform's sandbox (QuickJS through package:codelessly_quickjs on devices,
+// a Web Worker on the web): `__cl_start`, then host calls answered and
+// variable writes applied through the [ScriptHost] until the run ends.
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_api/codelessly_api.dart' show Json, ScriptCapability, ScriptDef, ScriptParam, ScriptTest;
 
+import '../services/scripts.dart';
 import 'sandbox/script_sandbox.dart';
 
-/// What a script can reach in the app: implemented by the SDK for a running
-/// layout (see `FlutterScriptHost`), and by tests and the Editor's console
-/// with sample data.
-abstract class ScriptHost {
-  /// The variables the script can read and write, by name.
-  Map<String, Object?> variables();
+/// Runs [ScriptDef]s in the platform's [ScriptSandbox] ([sandbox], or
+/// [ScriptSandbox.instance]). Without an engine (no `codelessly_quickjs` in
+/// the app on a device) every run fails with an `EngineUnavailable` error.
+class SandboxScriptRunner implements ScriptRunner {
+  const SandboxScriptRunner({this.sandbox});
 
-  /// The values of inputs on screen, by node id (and name, when unique).
-  Map<String, Object?> nodeValues();
+  /// The sandbox to run in; null: the platform's.
+  final ScriptSandbox? sandbox;
 
-  /// Sets the variable [name] to [value]. Throws a [ScriptHostError] when
-  /// it can't, e.g. a computed variable.
-  void setVariable(String name, Object? value);
-
-  /// Performs the host call [name] (`navigate`, `back`, `callApi`,
-  /// `cloudData`, `runAction`, `toast` or `delay`) with [args] and returns
-  /// its result as JSON data.
-  Future<Object?> call(String name, List<Object?> args);
-}
-
-/// A host call failed, as data for the script's `catch`.
-class ScriptHostError implements Exception {
-  /// The error's name in the script, e.g. `HostError`.
-  final String type;
-
-  /// What went wrong.
-  final String message;
-
-  /// Creates a [ScriptHostError].
-  const ScriptHostError(this.message, [this.type = 'HostError']);
-
-  @override
-  String toString() => '$type: $message';
-}
-
-/// A "Run script" action's script failed and it had no onError actions.
-class ScriptFailedException implements Exception {
-  /// What failed, e.g. `Script total failed: TypeError: ... (line 3)`.
-  final String message;
-
-  /// The script's error: `{type, message, line?, column?, stack?}`.
-  final Map<String, Object?> error;
-
-  /// Creates a [ScriptFailedException].
-  const ScriptFailedException(this.message, this.error);
-
-  @override
-  String toString() => message;
-}
-
-/// The outcome of a script run. A failed run is a result with an [error],
-/// never an exception.
-class ScriptRunResult {
-  /// What the script returned, as JSON data.
-  final Object? value;
-
-  /// Why the script failed: `{type, message, line?, column?, stack?,
-  /// limit?}`, or null when it succeeded.
-  final Map<String, Object?>? error;
-
-  /// What it logged: `{level, message}` maps.
-  final List<Map<String, Object?>> logs;
-
-  /// The variable writes it made, in order: `{name, value}` maps.
-  final List<Map<String, Object?>> writes;
-
-  /// CPU time the script used, in milliseconds.
-  final double cpuMs;
-
-  /// Memory the engine used at the end, in bytes, when known.
-  final int? memory;
-
-  /// Creates a [ScriptRunResult].
-  const ScriptRunResult({
-    this.value,
-    this.error,
-    this.logs = const [],
-    this.writes = const [],
-    this.cpuMs = 0,
-    this.memory,
-  });
-
-  /// A failed result of [type] with [message].
-  ScriptRunResult.failure(String type, String message)
-    : this(error: {'type': type, 'message': message});
-
-  /// Whether the script finished without an error.
-  bool get ok => error == null;
-
-  /// The result as JSON: what `${result}` is after a failed "Run script"
-  /// action, and what the Editor's console and the MCP show.
-  Map<String, Object?> toJson() => {
-    'ok': ok,
-    'value': value,
-    if (error != null) 'error': error,
-    'logs': logs,
-    if (writes.isNotEmpty) 'writes': writes,
-    'cpuMs': cpuMs,
-    if (memory != null) 'memory': memory,
-  };
-
-  @override
-  String toString() => ok
-      ? 'ScriptRunResult($value)'
-      : 'ScriptRunResult(${error!['type']}: ${error!['message']})';
-}
-
-/// Runs [ScriptModel]s in the platform's [ScriptSandbox].
-abstract final class ScriptRunner {
   static int _runCount = 0;
 
   /// The longest a run may take in all, waits on the host included.
   static Duration wallTimeout = const Duration(minutes: 5);
 
+  ScriptSandbox get _box => sandbox ?? ScriptSandbox.instance;
+
+  /// The other scripts [script] can call, by name: a page script over a
+  /// project one.
+  static Map<String, ScriptDef> callable(ScriptDef script, Iterable<ScriptDef> scripts) {
+    final out = <String, ScriptDef>{};
+    for (final s in scripts) {
+      if (s.name == script.name) continue;
+      final had = out[s.name];
+      if (had == null || (had.isProjectScope && !s.isProjectScope)) out[s.name] = s;
+    }
+    return out;
+  }
+
   /// Builds the request the driver's `__cl_start` takes.
-  static Map<String, Object?> request(
-    ScriptModel script, {
-    Map<String, Object?> args = const {},
-    Map<String, ScriptModel> scripts = const {},
+  static Json request(
+    ScriptDef script, {
+    Json args = const {},
+    Iterable<ScriptDef> scripts = const [],
     ScriptHost? host,
     int? seed,
     DateTime? now,
   }) {
-    final Set<ScriptCapability> grants = script.capabilities.toSet();
-    final bool readsVariables =
-        grants.contains(ScriptCapability.variablesRead) ||
-        grants.contains(ScriptCapability.variablesWrite);
+    final grants = script.capabilities.toSet();
+    final readsVariables = grants.contains(ScriptCapability.variablesRead) || grants.contains(ScriptCapability.variablesWrite);
     return {
       'run': 'r${++_runCount}',
       'source': script.source,
       'paramNames': script.paramNames,
       'params': {
-        for (final ScriptParam p in script.params)
-          p.name: args.containsKey(p.name) ? args[p.name] : p.defaultValue,
+        for (final ScriptParam p in script.params) p.name: args.containsKey(p.name) ? args[p.name] : p.defaultValue,
       },
-      'grants': script.capabilityIds,
-      if (readsVariables && host != null) 'vars': _json(host.variables()),
-      if (grants.contains(ScriptCapability.nodesRead) && host != null)
-        'nodes': _json(host.nodeValues()),
+      'grants': [for (final c in script.capabilities) c.id],
+      if (readsVariables && host != null) 'vars': jsonData(host.variables()),
+      if (grants.contains(ScriptCapability.nodesRead) && host != null) 'nodes': jsonData(host.nodeValues()),
       'seed': seed ?? _seedOf(script, args),
-      if (grants.contains(ScriptCapability.clock))
-        'now': (now ?? DateTime.now()).millisecondsSinceEpoch,
+      if (grants.contains(ScriptCapability.clock)) 'now': (now ?? DateTime.now()).millisecondsSinceEpoch,
       'scripts': {
-        for (final ScriptModel s in scripts.values)
-          if (s.name != script.name)
-            s.name: {'source': s.source, 'paramNames': s.paramNames},
+        for (final s in callable(script, scripts).values) s.name: {'source': s.source, 'paramNames': s.paramNames},
       },
     };
   }
 
   /// A seed derived from the script and its arguments, so the same call
   /// gives the same `Math.random` sequence every time.
-  static int _seedOf(ScriptModel script, Map<String, Object?> args) {
+  static int _seedOf(ScriptDef script, Json args) {
     // FNV-1a over the text, the same on every platform (String.hashCode
     // differs between the VM and the web).
-    int h = 0x811c9dc5;
-    for (final int c
-        in '${script.id}:${script.version}:${_stableText(args)}'.codeUnits) {
+    var h = 0x811c9dc5;
+    for (final c in '${script.id}:${script.version}:${_stableText(args)}'.codeUnits) {
       h ^= c;
       // h * 0x01000193 mod 2^32, without products above 2^53 (the web's
       // integers are doubles).
@@ -173,7 +85,7 @@ abstract final class ScriptRunner {
 
   static String _stableText(Object? v) {
     if (v is Map) {
-      final List<String> keys = [for (final Object? k in v.keys) '$k']..sort();
+      final keys = [for (final k in v.keys) '$k']..sort();
       return '{${keys.map((k) => '$k:${_stableText(v[k])}').join(',')}}';
     }
     if (v is List) return '[${v.map(_stableText).join(',')}]';
@@ -181,91 +93,72 @@ abstract final class ScriptRunner {
   }
 
   /// JSON-safe data: what the host hands the script.
-  static Object? _json(Object? v, [int depth = 0]) {
+  static Object? jsonData(Object? v, [int depth = 0]) {
     if (depth > 64) return null;
     if (v == null || v is bool || v is String) return v;
     if (v is num) return v.isFinite ? v : null;
-    if (v is List) return [for (final Object? e in v) _json(e, depth + 1)];
+    if (v is List) return [for (final e in v) jsonData(e, depth + 1)];
     if (v is Map) {
-      return <String, Object?>{
-        for (final MapEntry e in v.entries)
-          '${e.key}': _json(e.value, depth + 1),
-      };
+      return <String, Object?>{for (final e in v.entries) '${e.key}': jsonData(e.value, depth + 1)};
     }
     if (v is DateTime) return v.toIso8601String();
     try {
-      // Models with toJson, such as ColorRGBA.
-      return _json((v as dynamic).toJson(), depth + 1);
+      // Models with toJson, such as colors.
+      return jsonData((v as dynamic).toJson(), depth + 1);
     } on Object {
       return '$v';
     }
   }
 
-  /// Runs [script] with [args] and returns its result. [scripts] are the
-  /// other scripts it can call as `script.name(...)`. Never throws.
-  static Future<ScriptRunResult> run(
-    ScriptModel script, {
-    Map<String, Object?> args = const {},
-    Map<String, ScriptModel> scripts = const {},
+  @override
+  Future<ScriptRunResult> run(
+    ScriptDef script, {
+    Json args = const {},
+    List<ScriptDef> scripts = const [],
     ScriptHost? host,
     int? seed,
     DateTime? now,
-    ScriptSandbox? sandbox,
   }) async {
     final ScriptSandbox box;
     try {
-      box = sandbox ?? ScriptSandbox.instance;
+      box = _box;
     } on Object catch (e) {
       return ScriptRunResult.failure('EngineUnavailable', '$e');
     }
-    final Map<String, Object?> req = request(
-      script,
-      args: args,
-      scripts: scripts,
-      host: host,
-      seed: seed,
-      now: now,
-    );
-    final String run = req['run'] as String;
-    final Duration budget = Duration(milliseconds: script.timeoutMs);
-    final List<Map<String, Object?>> logs = [];
-    final List<Map<String, Object?>> writes = [];
-    final Stopwatch wall = Stopwatch()..start();
+    final req = request(script, args: args, scripts: scripts, host: host, seed: seed, now: now);
+    final run = req['run'] as String;
+    final budget = Duration(milliseconds: script.timeoutMs);
+    final logs = <Json>[];
+    final writes = <Json>[];
+    final wall = Stopwatch()..start();
     try {
-      Map<String, Object?> state = await box.start(
-        req,
-        cpuBudget: budget,
-        memoryLimit: script.memoryLimitMb << 20,
-      );
+      var state = await box.start(req, cpuBudget: budget, memoryLimit: script.memoryLimitMb << 20);
       while (true) {
         _collectLogs(state, logs);
-        final List<Map<String, Object?>> responses = [];
-        for (final Object? event in state['events'] as List? ?? const []) {
+        final responses = <Json>[];
+        for (final event in state['events'] as List? ?? const []) {
           if (event is! Map) continue;
           if (event['type'] == 'write') {
-            final String name = '${event['name']}';
+            final name = '${event['name']}';
             try {
               host?.setVariable(name, event['value']);
               writes.add({'name': name, 'value': event['value']});
             } on ScriptHostError catch (e) {
-              logs.add({
-                'level': 'error',
-                'message': 'vars.set("$name"): ${e.message}',
-              });
+              logs.add({'level': 'error', 'message': 'vars.set("$name"): ${e.message}'});
             }
           } else if (event['type'] == 'call') {
             responses.add(await _call(host, event));
           }
         }
         if (state['status'] != 'waiting') {
-          final Object? error = state['error'];
+          final error = state['error'];
           return ScriptRunResult(
             value: state['status'] == 'done' ? state['value'] : null,
             error: state['status'] == 'done'
                 ? null
                 : error is Map
-                ? error.cast<String, Object?>()
-                : {'type': 'Error', 'message': 'The script failed'},
+                    ? error.cast<String, Object?>()
+                    : {'type': 'Error', 'message': 'The script failed'},
             logs: logs,
             writes: writes,
             cpuMs: (state['cpuMs'] as num?)?.toDouble() ?? 0,
@@ -279,7 +172,8 @@ abstract final class ScriptRunner {
           return ScriptRunResult(
             error: {
               'type': 'Error',
-              'message': 'The script is waiting on a promise that never settles. Await only app.* calls, script.* calls and promises your own code settles.',
+              'message': 'The script is waiting on a promise that never settles. Await only app.* calls, script.* calls '
+                  'and promises your own code settles.',
             },
             logs: logs,
             writes: writes,
@@ -291,8 +185,7 @@ abstract final class ScriptRunner {
             error: {
               'type': 'LimitError',
               'limit': 'time',
-              'message':
-                  'The script waited on the app for more than ${wallTimeout.inSeconds} s.',
+              'message': 'The script waited on the app for more than ${wallTimeout.inSeconds} s.',
             },
             logs: logs,
             writes: writes,
@@ -303,10 +196,7 @@ abstract final class ScriptRunner {
     } on Object catch (e) {
       box.end(run);
       return ScriptRunResult(
-        error: {
-          'type': e is ScriptEngineUnavailable ? 'EngineUnavailable' : 'Error',
-          'message': '$e',
-        },
+        error: {'type': e is ScriptEngineUnavailable ? 'EngineUnavailable' : 'Error', 'message': '$e'},
         logs: logs,
         writes: writes,
       );
@@ -315,107 +205,76 @@ abstract final class ScriptRunner {
 
   /// Checks [script]'s source compiles, without running it. Returns null,
   /// or the error `{type, message, line?, column?}`. Never throws.
-  static Future<Map<String, Object?>?> check(
-    ScriptModel script, {
-    ScriptSandbox? sandbox,
-  }) async {
+  Future<Json?> check(ScriptDef script) async {
     try {
-      return await (sandbox ?? ScriptSandbox.instance).check(
-        script.source,
-        script.paramNames,
-      );
+      return await _box.check(script.source, script.paramNames);
     } on Object catch (e) {
-      return {
-        'type': e is ScriptEngineUnavailable ? 'EngineUnavailable' : 'Error',
-        'message': '$e',
-      };
+      return {'type': e is ScriptEngineUnavailable ? 'EngineUnavailable' : 'Error', 'message': '$e'};
     }
   }
 
   /// Runs [script] synchronously, for formulas. Returns null when the
-  /// platform can't run scripts synchronously (the web) or the script waits
-  /// on the host (it awaits an `app.*` call); call [run] then.
-  static ScriptRunResult? runSync(
-    ScriptModel script, {
-    Map<String, Object?> args = const {},
-    Map<String, ScriptModel> scripts = const {},
+  /// platform can't run scripts synchronously (the web); call [run] then. A
+  /// script that waits on the host (awaits an `app.*` call) fails.
+  ScriptRunResult? runSync(
+    ScriptDef script, {
+    Json args = const {},
+    List<ScriptDef> scripts = const [],
     ScriptHost? host,
-    ScriptSandbox? sandbox,
   }) {
     final ScriptSandbox box;
     try {
-      box = sandbox ?? ScriptSandbox.instance;
+      box = _box;
     } on Object catch (e) {
       return ScriptRunResult.failure('EngineUnavailable', '$e');
     }
     if (!box.isSynchronous) return null;
-    final Map<String, Object?> req = request(
-      script,
-      args: args,
-      scripts: scripts,
-      host: host,
-    );
+    final req = request(script, args: args, scripts: scripts, host: host);
     try {
-      final FutureOr<Map<String, Object?>> started = box.start(
-        req,
-        cpuBudget: Duration(milliseconds: script.timeoutMs),
-        memoryLimit: script.memoryLimitMb << 20,
-      );
+      final started = box.start(req, cpuBudget: Duration(milliseconds: script.timeoutMs), memoryLimit: script.memoryLimitMb << 20);
       if (started is Future) return null;
-      final Map<String, Object?> state = started;
+      final state = started;
       if (state['status'] == 'waiting') {
         box.end(req['run'] as String);
         return ScriptRunResult.failure(
           'TypeError',
-          'A formula can\'t wait on the app: script.${script.name}() awaits an app.* call. Run it with a "Run script" action instead.',
+          'A formula can\'t wait on the app: script.${script.name}() awaits an app.* call. Run it with a "Run script" '
+              'action instead.',
         );
       }
-      final List<Map<String, Object?>> logs = [];
+      final logs = <Json>[];
       _collectLogs(state, logs);
-      final Object? error = state['error'];
+      final error = state['error'];
       return ScriptRunResult(
         value: state['status'] == 'done' ? state['value'] : null,
-        error: state['status'] == 'done'
-            ? null
-            : (error as Map?)?.cast<String, Object?>(),
+        error: state['status'] == 'done' ? null : (error as Map?)?.cast<String, Object?>(),
         logs: logs,
         cpuMs: (state['cpuMs'] as num?)?.toDouble() ?? 0,
         memory: (state['memory'] as num?)?.toInt(),
       );
     } on Object catch (e) {
-      return ScriptRunResult.failure(
-        e is ScriptEngineUnavailable ? 'EngineUnavailable' : 'Error',
-        '$e',
-      );
+      return ScriptRunResult.failure(e is ScriptEngineUnavailable ? 'EngineUnavailable' : 'Error', '$e');
     }
   }
 
-  static void _collectLogs(
-    Map<String, Object?> state,
-    List<Map<String, Object?>> logs,
-  ) {
-    for (final Object? l in state['logs'] as List? ?? const []) {
+  static void _collectLogs(Json state, List<Json> logs) {
+    for (final l in state['logs'] as List? ?? const []) {
       if (l is Map) logs.add(l.cast<String, Object?>());
     }
   }
 
-  static Future<Map<String, Object?>> _call(ScriptHost? host, Map event) async {
-    final Object? id = event['id'];
+  static Future<Json> _call(ScriptHost? host, Map event) async {
+    final id = event['id'];
     if (host == null) {
       return {
         'id': id,
         'ok': false,
-        'error': {
-          'type': 'HostError',
-          'message': 'There is no app to call here.',
-        },
+        'error': {'type': 'HostError', 'message': 'There is no app to call here.'},
       };
     }
     try {
-      final Object? value = await host.call('${event['name']}', [
-        ...?(event['args'] as List?),
-      ]);
-      return {'id': id, 'ok': true, 'value': _json(value)};
+      final value = await host.call('${event['name']}', [...?(event['args'] as List?)]);
+      return {'id': id, 'ok': true, 'value': jsonData(value)};
     } on ScriptHostError catch (e) {
       return {
         'id': id,
@@ -433,30 +292,26 @@ abstract final class ScriptRunner {
 }
 
 /// A [ScriptHost] with sample data, for running scripts outside a screen:
-/// the Editor's console, the Editor MCP and tests. Variable writes change
-/// [vars]; app calls are recorded in [calls] and answered by [responses]
-/// (by call name), or with null.
+/// the editor's console and tests, the MCP. Variable writes change [vars];
+/// app calls are recorded in [calls] and answered by [responses] (by call
+/// name), or with null.
 class SampleScriptHost implements ScriptHost {
+  SampleScriptHost({Json? vars, Json? nodes, this.responses = const {}})
+      : vars = {...?vars},
+        nodes = {...?nodes};
+
   /// The sample variables, by name.
-  final Map<String, Object?> vars;
+  final Json vars;
 
   /// The sample input values, by node id.
-  final Map<String, Object?> nodes;
+  final Json nodes;
 
   /// What each kind of app call answers, by call name (`callApi`,
   /// `cloudData`, ...).
-  final Map<String, Object?> responses;
+  final Json responses;
 
-  /// The app calls the script made: `{name, args}` maps.
-  final List<Map<String, Object?>> calls = [];
-
-  /// Creates a [SampleScriptHost].
-  SampleScriptHost({
-    Map<String, Object?>? vars,
-    Map<String, Object?>? nodes,
-    this.responses = const {},
-  }) : vars = {...?vars},
-       nodes = {...?nodes};
+  /// The app calls the script made: `{name, args}`.
+  final List<Json> calls = [];
 
   @override
   Map<String, Object?> variables() => Map.of(vars);
@@ -476,10 +331,9 @@ class SampleScriptHost implements ScriptHost {
 
 /// The outcome of one [ScriptTest].
 class ScriptTestResult {
-  /// The case.
-  final ScriptTest test;
+  const ScriptTestResult(this.test, this.run, {required this.passed, this.reason});
 
-  /// The run.
+  final ScriptTest test;
   final ScriptRunResult run;
 
   /// Whether it gave what the case expects.
@@ -488,75 +342,60 @@ class ScriptTestResult {
   /// Why it didn't, when it didn't.
   final String? reason;
 
-  /// Creates a [ScriptTestResult].
-  const ScriptTestResult(
-    this.test,
-    this.run, {
-    required this.passed,
-    this.reason,
-  });
-
-  /// The outcome as JSON.
-  Map<String, Object?> toJson() => {
-    'name': test.name,
-    'passed': passed,
-    if (reason != null) 'reason': reason,
-    'result': run.toJson(),
-  };
+  Json toJson() => {
+        'name': test.name,
+        'passed': passed,
+        'reason': ?reason,
+        'result': run.toJson(),
+      };
 }
 
-/// Runs a script's [ScriptTest]s.
-extension ScriptTests on ScriptModel {
-  /// Runs [cases] (the script's own [ScriptModel.tests] by default), each
-  /// with its sample variables and inputs.
-  Future<List<ScriptTestResult>> runTests({
-    List<ScriptTest>? cases,
-    Map<String, ScriptModel> scripts = const {},
-  }) async {
-    final List<ScriptTestResult> results = [];
-    for (final ScriptTest t in cases ?? tests) {
-      final ScriptRunResult run = await ScriptRunner.run(
-        this,
-        args: t.args,
-        scripts: scripts,
-        host: SampleScriptHost(vars: t.vars, nodes: t.nodes),
-      );
-      final String? expectError = t.expectError;
-      String? reason;
-      if (expectError != null) {
-        if (run.ok) {
-          reason =
-              'Expected a $expectError, but it returned ${_json(run.value)}.';
-        } else if (run.error!['type'] != expectError) {
-          reason =
-              'Expected a $expectError, but it failed with ${run.error!['type']}: ${run.error!['message']}';
-        }
-      } else if (!run.ok) {
-        reason =
-            'It failed: ${run.error!['type']}: ${run.error!['message']}'
-            '${run.error!['line'] != null ? ' (line ${run.error!['line']})' : ''}';
-      } else if (_json(run.value) != _json(t.expect)) {
-        reason = 'Expected ${_json(t.expect)}, got ${_json(run.value)}.';
-      }
-      results.add(
-        ScriptTestResult(t, run, passed: reason == null, reason: reason),
-      );
-    }
-    return results;
+/// Runs [script]'s test cases ([cases], by default its own
+/// [ScriptDef.tests]) with [runner], each with its sample variables and
+/// inputs in a [SampleScriptHost]. [scripts] are the others it can call.
+/// The editor's scripts panel and the MCP's `scripts.test`.
+Future<List<ScriptTestResult>> runScriptTests(
+  ScriptDef script, {
+  List<ScriptTest>? cases,
+  List<ScriptDef> scripts = const [],
+  ScriptRunner runner = const SandboxScriptRunner(),
+}) async {
+  final results = <ScriptTestResult>[];
+  for (final t in cases ?? script.tests) {
+    final run = await runner.run(script, args: t.args, scripts: scripts, host: SampleScriptHost(vars: t.vars, nodes: t.nodes));
+    final reason = scriptTestFailure(t, run);
+    results.add(ScriptTestResult(t, run, passed: reason == null, reason: reason));
   }
+  return results;
+}
 
-  static String _json(Object? v) => jsonEncode(_sorted(v));
-
-  /// [v] with map keys sorted, so key order doesn't fail a comparison; whole
-  /// doubles compare equal to ints.
-  static Object? _sorted(Object? v) {
-    if (v is Map) {
-      final List<String> keys = [for (final k in v.keys) '$k']..sort();
-      return {for (final k in keys) k: _sorted(v[k])};
+/// Why [run] doesn't give what [t] expects, or null when it does. Map key
+/// order doesn't matter; whole doubles equal ints.
+String? scriptTestFailure(ScriptTest t, ScriptRunResult run) {
+  final expectError = t.expectError;
+  if (expectError != null) {
+    if (run.ok) return 'Expected a $expectError, but it returned ${_compared(run.value)}.';
+    if (run.error!['type'] != expectError) {
+      return 'Expected a $expectError, but it failed with ${run.error!['type']}: ${run.error!['message']}';
     }
-    if (v is List) return [for (final e in v) _sorted(e)];
-    if (v is double && v == v.truncateToDouble() && v.abs() < 1e15)
-      return v.toInt();
-    return v;
+    return null;
   }
+  if (!run.ok) {
+    return 'It failed: ${run.error!['type']}: ${run.error!['message']}'
+        '${run.error!['line'] != null ? ' (line ${run.error!['line']})' : ''}';
+  }
+  if (_compared(run.value) != _compared(t.expect)) return 'Expected ${_compared(t.expect)}, got ${_compared(run.value)}.';
+  return null;
+}
+
+String _compared(Object? v) => jsonEncode(_sorted(v));
+
+Object? _sorted(Object? v) {
+  if (v is Map) {
+    final keys = [for (final k in v.keys) '$k']..sort();
+    return {for (final k in keys) k: _sorted(v[k])};
+  }
+  if (v is List) return [for (final e in v) _sorted(e)];
+  if (v is double && v == v.truncateToDouble() && v.abs() < 1e15) return v.toInt();
+  return v;
 }

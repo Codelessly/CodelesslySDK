@@ -292,7 +292,7 @@ script_driver.dart (the same JavaScript in both engines)
 
 ## Testing scripts in the SDK repository
 
-`v2/test/scripting/` runs the same tests on the Dart VM, where scripts run in QuickJS
+`test/scripting/` runs the same tests on the Dart VM, where scripts run in QuickJS
 (`flutter test test/scripting`), and in Chrome, where they run in a Web Worker
 (`flutter test --platform chrome test/scripting`). The VM run builds QuickJS for the machine with
 `tool/build_quickjs.sh` (CMake and a C compiler).

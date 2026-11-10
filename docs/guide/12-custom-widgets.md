@@ -13,7 +13,7 @@ Three ways to extend what a layout can do, from most to least common:
 *Three ways to extend, from most to least common.*
 
 What is **not** supported: registering a new node type with its own renderer from outside the SDK. Widget types
-are part of the SDK ([`v2/PORTING.md`](../../v2/PORTING.md) is the contributor's guide to adding one). A node type
+are part of the SDK ([`CONTRIBUTING.md`](../../CONTRIBUTING.md) is the contributor's guide to adding one). A node type
 this version doesn't know still decodes and round-trips, and renders as an empty box of its size.
 
 ## Your widgets inside a layout

@@ -1,37 +1,43 @@
-# Codelessly SDK Example
+# Codelessly SDK example
 
-This is a runnable example Flutter app that uses the Codelessly SDK with a sample
-auth token and layout id to display a published layout.
-
-## Running
+A complete app that shows published Codelessly projects with `codelessly_sdk`. It runs offline by default.
 
 ```sh
-cd example
-flutter run                                          # legacy backend
-flutter run --dart-define=CODELESSLY_BACKEND=editor  # new Codelessly Editor backend
+flutter create .     # once, to add the platform folders you want (they are not published with the package)
+flutter run          # -d chrome, -d macos, -d linux, -d windows, or a phone
 ```
 
-## macOS
+## What it shows
 
-macOS builds must be signed with an Apple Development team. Ad-hoc signing
-("Sign to Run Locally") is not enough, even with the app sandbox turned off.
+| Screen | What |
+|---|---|
+| **Embedded widget** | One layout inside a Flutter screen. The layout reads the app's data (`${data.name}`) and a route param, its button changes a screen variable and calls a function of the app, and the app resets the variable through a `CodelesslyWidgetController`. The project is a bundle written by hand in [`lib/hello_bundle.dart`](lib/hello_bundle.dart). |
+| **Whole app** | A published project of several screens as an app of its own: `CodelesslyWidget.onGenerateRoute` gives each screen a route, navigation actions move between them, and each screen picks its mobile, tablet or desktop canvas by width. Resize the window to see it. |
 
-The SDK signs in to Firebase Auth, which saves the user in the keychain. On
-macOS that keychain only accepts apps whose signature carries an application
-identifier, which comes from a team-signed build with a provisioning profile.
-An ad-hoc build fails at sign-in with `[firebase_auth/keychain-error]`
-(`errSecMissingEntitlement`, -34018), and the SDK shows an initialization error.
-iOS simulators don't enforce this, so the same code works there unsigned.
+## The three ways to load a project
 
-To run on macOS:
+`openProject` in [`lib/main.dart`](lib/main.dart) has all three:
 
-1. Add an Apple Development certificate in Xcode → Settings → Accounts →
-   Manage Certificates.
-2. Open `macos/Runner.xcworkspace`, select the Runner target → Signing &
-   Capabilities, and pick your team. The project defaults to the Codelessly
-   team (`72KLUSSLV3`). If you use your own team, keep the change local and
-   change the bundle identifier if your team can't register
-   `com.codelessly.sdk.example`.
-3. Keep the Keychain Sharing capability (`keychain-access-groups` in
-   `DebugProfile.entitlements` and `Release.entitlements`).
-4. Run `flutter run -d macos`.
+```sh
+# 1. A bundle shipped with the app (the default): offline.
+flutter run
+
+# 2. A published slug: one HTTP request, no Firebase.
+flutter run --dart-define=CODELESSLY_SLUG=<your project's slug>
+
+# 3. A project token: Codelessly's Firebase, with live updates. Not on Linux desktop.
+flutter run --dart-define=CODELESSLY_TOKEN=<your project's token>
+```
+
+## Files
+
+| File | |
+|---|---|
+| [`lib/main.dart`](lib/main.dart) | The app. |
+| [`lib/hello_bundle.dart`](lib/hello_bundle.dart) | A publish bundle as a JSON literal: what a publish looks like. |
+| [`lib/snippets.dart`](lib/snippets.dart) | Every code sample of the README and the developer guide, so they are analyzed. Not used by the app. |
+| [`test/widget_test.dart`](test/widget_test.dart) | Tests of the app. |
+| [`test/guide_test.dart`](test/guide_test.dart) | The developer guide's testing chapter, as tests. |
+| `assets/rigcheck.json.gz` | The publish bundle of a project, converted from v1 pages by `CodelesslyAPI/migrate/bin/publish_fixture.dart`. |
+
+The developer guide: https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide

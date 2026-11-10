@@ -59,7 +59,7 @@ $ flutter pub add codelessly_sdk
   <tut-base src="shots/publish_embed.png" crop="284,455,750,95" at="40,326" w="720" radius="10" shadow border></tut-base>
   <tut-redact target="@tokenText" mode="bar" radius="4"></tut-redact>
   <tut-box target="@tokenField" pad="2"></tut-box>
-  <div class="at" style="left:40px;top:442px;width:720px;font-size:13px;color:var(--fg1)">No slug or token yet? The example app in <span class="m">v2/example</span> runs offline.</div>
+  <div class="at" style="left:40px;top:442px;width:720px;font-size:13px;color:var(--fg1)">No slug or token yet? The example app in <span class="m">example</span> runs offline.</div>
 </tut-stage>
 
 <!-- Step 3A: by slug -->
@@ -180,8 +180,8 @@ CodelesslyWidget(
 
 <!-- The example app -->
 <tut-stage name="example-app" w="800" h="320" bg="solid">
-  <tut-terminal at="40,40" w="720" title="v2/example">
-$ cd v2/example
+  <tut-terminal at="40,40" w="720" title="example">
+$ cd example
 $ flutter create .   # only if the platform folder you want is missing
 $ flutter run        # offline
 $ flutter run --dart-define=CODELESSLY_SLUG=&lt;slug&gt;

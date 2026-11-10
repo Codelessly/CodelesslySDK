@@ -30,7 +30,7 @@ In the Codelessly Editor, open a project and press **Publish**. You then need on
 
 - the project's **slug**, if it has a public site (`site.codelessly.com/<slug>`); or
 - the project's **SDK token**; or
-- nothing, to try the SDK first with [the example app](../../v2/example), which runs offline.
+- nothing, to try the SDK first with [the example app](../../example), which runs offline.
 
 ![The slug field on the Web tab and the SDK token field (redacted) on the Embed in Flutter tab of Publish & integrate](images/02-quickstart/step2-slug-or-token.png)
 
@@ -167,10 +167,10 @@ Where next:
 
 *The example app, offline or against your project.*
 
-[`v2/example`](../../v2/example) is a complete app:
+[`example`](../../example) is a complete app:
 
 ```sh
-cd v2/example
+cd example
 flutter create .   # only if the platform folder you want is missing
 flutter run        # offline
 flutter run --dart-define=CODELESSLY_SLUG=<slug>
