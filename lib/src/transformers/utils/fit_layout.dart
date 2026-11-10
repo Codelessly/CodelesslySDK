@@ -21,6 +21,12 @@ import 'package:flutter/widgets.dart';
 ///
 /// A `SizedBox(double.infinity)` would throw under an unbounded axis; this
 /// box never does, and at the design size it lays out exactly like one.
+///
+/// With an [aspectRatio] (width / height, [BaseNode.layoutAspectRatio]) one axis
+/// follows the other: the height is the width over the ratio, unless only
+/// the height fills (or the width hugs), when the width is the height times
+/// the ratio. Both stay within the incoming constraints, the ratio kept
+/// where they allow.
 class FitBox extends SingleChildRenderObjectWidget {
   /// The design width, used when the box is sized, or when it fills and the
   /// incoming width is unbounded.
@@ -36,12 +42,16 @@ class FitBox extends SingleChildRenderObjectWidget {
   /// Whether the box takes all of a bounded incoming height.
   final bool fillHeight;
 
+  /// Width divided by height the box keeps, or null for none.
+  final double? aspectRatio;
+
   const FitBox({
     super.key,
     this.width,
     this.height,
     this.fillWidth = false,
     this.fillHeight = false,
+    this.aspectRatio,
     super.child,
   });
 
@@ -53,6 +63,7 @@ class FitBox extends SingleChildRenderObjectWidget {
     required SizeFit? horizontalFit,
     required SizeFit? verticalFit,
     required SizeC size,
+    double? aspectRatio,
     Widget? child,
   }) : this(
          key: key,
@@ -60,6 +71,7 @@ class FitBox extends SingleChildRenderObjectWidget {
          height: verticalFit == SizeFit.shrinkWrap ? null : size.height,
          fillWidth: horizontalFit == SizeFit.expanded,
          fillHeight: verticalFit == SizeFit.expanded,
+         aspectRatio: aspectRatio,
          child: child,
        );
 
@@ -69,6 +81,7 @@ class FitBox extends SingleChildRenderObjectWidget {
     height: height,
     fillWidth: fillWidth,
     fillHeight: fillHeight,
+    aspectRatio: aspectRatio,
   );
 
   @override
@@ -77,7 +90,8 @@ class FitBox extends SingleChildRenderObjectWidget {
       ..width = width
       ..height = height
       ..fillWidth = fillWidth
-      ..fillHeight = fillHeight;
+      ..fillHeight = fillHeight
+      ..aspectRatio = aspectRatio;
   }
 
   @override
@@ -87,9 +101,8 @@ class FitBox extends SingleChildRenderObjectWidget {
       ..add(DoubleProperty('width', width, defaultValue: null))
       ..add(DoubleProperty('height', height, defaultValue: null))
       ..add(FlagProperty('fillWidth', value: fillWidth, ifTrue: 'fillWidth'))
-      ..add(
-        FlagProperty('fillHeight', value: fillHeight, ifTrue: 'fillHeight'),
-      );
+      ..add(FlagProperty('fillHeight', value: fillHeight, ifTrue: 'fillHeight'))
+      ..add(DoubleProperty('aspectRatio', aspectRatio, defaultValue: null));
   }
 }
 
@@ -100,7 +113,16 @@ class RenderFitBox extends RenderProxyBox {
     this._height,
     this._fillWidth = false,
     this._fillHeight = false,
+    this._aspectRatio,
   });
+
+  double? _aspectRatio;
+  double? get aspectRatio => _aspectRatio;
+  set aspectRatio(double? value) {
+    if (_aspectRatio == value) return;
+    _aspectRatio = value;
+    markNeedsLayout();
+  }
 
   double? _width;
   double? get width => _width;
@@ -156,7 +178,50 @@ class RenderFitBox extends RenderProxyBox {
       design: _height,
       max: constraints.maxHeight,
     );
+    final double? ratio = _aspectRatio;
+    if (ratio != null && ratio.isFinite && ratio > 0) {
+      final Size? kept = keepAspectRatio(w, h, ratio, constraints, (
+        fillWidth: _fillWidth,
+        fillHeight: _fillHeight,
+      ));
+      if (kept != null) return BoxConstraints.tight(kept);
+    }
     return BoxConstraints.tightFor(width: w, height: h).enforce(constraints);
+  }
+
+  /// The size a box of [ratio] (width / height) takes from its preferred
+  /// width [w] and height [h] (null where it hugs) within [constraints].
+  /// The width leads unless it hugs or only the height fills. Null when
+  /// both axes hug.
+  @visibleForTesting
+  static Size? keepAspectRatio(
+    double? w,
+    double? h,
+    double ratio,
+    BoxConstraints constraints,
+    ({bool fillWidth, bool fillHeight}) fills,
+  ) {
+    final bool heightLeads =
+        h != null && (w == null || (fills.fillHeight && !fills.fillWidth));
+    if (!heightLeads && w != null) {
+      double width = constraints.constrainWidth(w);
+      double height = width / ratio;
+      if (height > constraints.maxHeight) {
+        height = constraints.maxHeight;
+        width = constraints.constrainWidth(height * ratio);
+      }
+      return Size(width, constraints.constrainHeight(height));
+    }
+    if (h != null) {
+      double height = constraints.constrainHeight(h);
+      double width = height * ratio;
+      if (width > constraints.maxWidth) {
+        width = constraints.maxWidth;
+        height = constraints.constrainHeight(width / ratio);
+      }
+      return Size(constraints.constrainWidth(width), height);
+    }
+    return null;
   }
 
   @override
@@ -194,8 +259,32 @@ class RenderFitBox extends RenderProxyBox {
   double? get _sizedWidth => _fillWidth ? null : _width;
   double? get _sizedHeight => _fillHeight ? null : _height;
 
+  // With an aspect ratio one axis is the other's extent through the ratio,
+  // as RenderAspectRatio reports it: a Row/Column can't squeeze it below
+  // that (Flutter's AspectRatio keeps its ratio and overflows instead).
+  // Without a given extent the design one stands in.
+  double? get _ratio => switch (_aspectRatio) {
+    final double r when r.isFinite && r > 0 => r,
+    _ => null,
+  };
+
+  double? _ratioWidth(double height) {
+    final double? r = _ratio;
+    if (r == null || (_width == null && _height == null)) return null;
+    final double? h = height.isFinite ? height : _height;
+    return h == null ? null : h * r;
+  }
+
+  double? _ratioHeight(double width) {
+    final double? r = _ratio;
+    if (r == null || (_width == null && _height == null)) return null;
+    final double? w = width.isFinite ? width : _width;
+    return w == null ? null : w / r;
+  }
+
   @override
   double computeMinIntrinsicWidth(double height) {
+    if (_ratioWidth(height) case final double w) return w;
     final double content =
         child?.getMinIntrinsicWidth(_sizedHeight ?? height) ?? 0;
     final double? sized = _sizedWidth;
@@ -204,10 +293,14 @@ class RenderFitBox extends RenderProxyBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) =>
-      _sizedWidth ?? child?.getMaxIntrinsicWidth(_sizedHeight ?? height) ?? 0;
+      _ratioWidth(height) ??
+      _sizedWidth ??
+      child?.getMaxIntrinsicWidth(_sizedHeight ?? height) ??
+      0;
 
   @override
   double computeMinIntrinsicHeight(double width) {
+    if (_ratioHeight(width) case final double h) return h;
     final double content =
         child?.getMinIntrinsicHeight(_sizedWidth ?? width) ?? 0;
     final double? sized = _sizedHeight;
@@ -216,7 +309,10 @@ class RenderFitBox extends RenderProxyBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) =>
-      _sizedHeight ?? child?.getMaxIntrinsicHeight(_sizedWidth ?? width) ?? 0;
+      _ratioHeight(width) ??
+      _sizedHeight ??
+      child?.getMaxIntrinsicHeight(_sizedWidth ?? width) ??
+      0;
 }
 
 /// A [Flex] (Row or Column) for node trees, which follows the editor where
@@ -261,6 +357,7 @@ class CodelesslyFlex extends Flex {
     super.clipBehavior,
     super.spacing,
     this.squeeze = true,
+    this.clipsOverflow = false,
     super.children,
   });
 
@@ -268,6 +365,14 @@ class CodelesslyFlex extends Flex {
   /// above). The design canvas turns it off: there children keep the sizes
   /// the layout solver gave them and overflow, as in [RenderFlex].
   final bool squeeze;
+
+  /// Whether content that overflows is clipped to the flex's box, as a
+  /// row/column that clips its content (`clipsContent`) shows it: cut off
+  /// at the edge, like a [ClipRect] around a [SingleChildScrollView], with
+  /// no debug overflow stripes and no overflow error. Otherwise an overflow
+  /// is drawn and reported as [RenderFlex] does (stripes only in debug
+  /// builds).
+  final bool clipsOverflow;
 
   @override
   RenderCodelesslyFlex createRenderObject(BuildContext context) =>
@@ -282,6 +387,7 @@ class CodelesslyFlex extends Flex {
         clipBehavior: clipBehavior,
         spacing: spacing,
         squeeze: squeeze,
+        clipsOverflow: clipsOverflow,
       );
 
   @override
@@ -290,7 +396,9 @@ class CodelesslyFlex extends Flex {
     covariant RenderCodelesslyFlex renderObject,
   ) {
     super.updateRenderObject(context, renderObject);
-    renderObject.squeeze = squeeze;
+    renderObject
+      ..squeeze = squeeze
+      ..clipsOverflow = clipsOverflow;
   }
 }
 
@@ -365,8 +473,81 @@ class RenderCodelesslyFlex extends RenderFlex {
     super.clipBehavior,
     double spacing = 0,
     this._squeeze = true,
+    this._clipsOverflow = false,
   }) : _gap = spacing,
        assert(spacing >= 0);
+
+  /// See [CodelesslyFlex.clipsOverflow].
+  bool get clipsOverflow => _clipsOverflow;
+  bool _clipsOverflow;
+  set clipsOverflow(bool value) {
+    if (_clipsOverflow == value) return;
+    _clipsOverflow = value;
+    markNeedsPaint();
+  }
+
+  final LayerHandle<ClipRectLayer> _overflowClipLayer =
+      LayerHandle<ClipRectLayer>();
+
+  /// Whether a child's box reaches past this flex's box.
+  bool get _childrenOverflow {
+    final Rect bounds = (Offset.zero & size).inflate(precisionErrorTolerance);
+    RenderBox? child = firstChild;
+    while (child != null) {
+      final FlexParentData data = child.parentData! as FlexParentData;
+      final Rect rect = data.offset & child.size;
+      if (rect.left < bounds.left ||
+          rect.top < bounds.top ||
+          rect.right > bounds.right ||
+          rect.bottom > bounds.bottom) {
+        return true;
+      }
+      child = data.nextSibling;
+    }
+    return false;
+  }
+
+  /// Whether the children run past the main axis by less than
+  /// [overflowTolerance]: a fit, painted as one.
+  bool get _subPixelOverflow =>
+      _overflow > precisionErrorTolerance && _overflow < overflowTolerance;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_subPixelOverflow) {
+      // As [RenderFlex] paints children that fit: no stripe, no clip.
+      _overflowClipLayer.layer = null;
+      defaultPaint(context, offset);
+      return;
+    }
+    // A flex that clips its overflow cuts it off at its edge, without
+    // RenderFlex's debug stripes and overflow report.
+    if (_clipsOverflow && !size.isEmpty && _childrenOverflow) {
+      _overflowClipLayer.layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        defaultPaint,
+        oldLayer: _overflowClipLayer.layer,
+      );
+      return;
+    }
+    _overflowClipLayer.layer = null;
+    super.paint(context, offset);
+  }
+
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) => _subPixelOverflow
+      ? null
+      : _clipsOverflow && _childrenOverflow
+      ? Offset.zero & size
+      : super.describeApproximatePaintClip(child);
+
+  @override
+  void dispose() {
+    _overflowClipLayer.layer = null;
+    super.dispose();
+  }
 
   /// The gap between consecutive shown children (the widget's
   /// [Flex.spacing]).
@@ -536,8 +717,29 @@ class RenderCodelesslyFlex extends RenderFlex {
     return false;
   }
 
+  /// How far the children run past the main axis after layout (the
+  /// overflow [RenderFlex] warns about), or zero.
+  double _overflow = 0;
+
+  /// Overflow below this is taken as fitting: [paint] neither clips nor
+  /// paints the overflow warning. Text heights from fonts are fractional, so
+  /// children made to fit a fixed box (a 75 px column with padding 3 and
+  /// 16.7) can come out a fraction of a pixel over it, which no one sees.
+  static const double overflowTolerance = 1;
+
   @override
   void performLayout() {
+    _layOut();
+    double used = _gaps;
+    RenderBox? child = firstChild;
+    while (child != null) {
+      used += _mainExtent(child.size);
+      child = childAfter(child);
+    }
+    _overflow = math.max(0, used - _mainExtent(size));
+  }
+
+  void _layOut() {
     if (!_mainAxisBounded(constraints)) {
       if (_hasFlexChild) {
         _inflexible(_layOutWithGaps);
@@ -764,9 +966,20 @@ class RenderScrollContentExtent extends RenderProxyBox {
     if (!_viewportExtent.isFinite || natExtent >= _viewportExtent) {
       return constraints;
     }
+    // At most the viewport, not exactly it: the content (a Row/Column that
+    // fills its main axis) still takes the whole viewport, but tight
+    // constraints would make it a relayout boundary, so content that grows
+    // later (a form that finishes loading) would never reach this box to be
+    // measured again, and would overflow the viewport instead of scrolling.
     return _axis == Axis.vertical
-        ? constraints.tighten(height: _viewportExtent)
-        : constraints.tighten(width: _viewportExtent);
+        ? constraints.copyWith(
+            minHeight: math.min(constraints.minHeight, _viewportExtent),
+            maxHeight: _viewportExtent,
+          )
+        : constraints.copyWith(
+            minWidth: math.min(constraints.minWidth, _viewportExtent),
+            maxWidth: _viewportExtent,
+          );
   }
 
   @override
@@ -795,4 +1008,20 @@ class RenderScrollContentExtent extends RenderProxyBox {
     if (filled == constraints) return natural;
     return constraints.constrain(child.getDryLayout(filled));
   }
+}
+
+/// Wraps [child], a node's widget, in a box that keeps the node's
+/// [BaseNode.layoutAspectRatio] (see [FitBox.aspectRatio]); [child] as is when the
+/// node has none.
+Widget wrapWithAspectRatio(BaseNode node, Widget child) {
+  final double? ratio = node.layoutAspectRatio;
+  if (ratio == null || !ratio.isFinite || ratio <= 0) return child;
+  return FitBox.fromFits(
+    key: ValueKey('aspect-ratio-${node.id}'),
+    horizontalFit: node.horizontalFit,
+    verticalFit: node.verticalFit,
+    size: node.basicBoxLocal.size,
+    aspectRatio: ratio,
+    child: child,
+  );
 }

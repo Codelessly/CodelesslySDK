@@ -1,0 +1,636 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c1",
+    "c11",
+    "c22"
+   ]
+  },
+  "c1": {
+   "id": "c1",
+   "type": "canvas",
+   "name": "Nested lists",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "properties": {
+    "bodyId": "b2"
+   },
+   "children": [
+    "b2"
+   ]
+  },
+  "b2": {
+   "id": "b2",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c1",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    500
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "lv3"
+   ]
+  },
+  "lv3": {
+   "id": "lv3",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    20,
+    20,
+    360,
+    440
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 3,
+    "hasSeparator": true,
+    "separatorSpacing": 10
+   },
+   "children": [
+    "rc4"
+   ],
+   "padding": [
+    8,
+    8,
+    8,
+    8
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "rc4": {
+   "id": "rc4",
+   "type": "column",
+   "rowColumnType": "column",
+   "name": "Column",
+   "basicBoxLocal": [
+    0,
+    0,
+    344,
+    120
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "start",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "shrinkWrap",
+   "spacing": 6,
+   "padding": [
+    6,
+    6,
+    6,
+    6
+   ],
+   "margin": [
+    4,
+    2,
+    4,
+    2
+   ],
+   "parentID": "lv3",
+   "children": [
+    "t5",
+    "lv7"
+   ]
+  },
+  "t5": {
+   "id": "t5",
+   "type": "text",
+   "name": "Text",
+   "data": "Row of chips",
+   "basicBoxLocal": [
+    0,
+    0,
+    168,
+    14
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "textMixedProps": [
+    {
+     "start": 0,
+     "end": 12,
+     "fontSize": 14,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     },
+     "fills": [
+      {
+       "type": "solid",
+       "color": "#222222",
+       "id": "tf6"
+      }
+     ]
+    }
+   ],
+   "parentID": "rc4"
+  },
+  "lv7": {
+   "id": "lv7",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    0,
+    0,
+    332,
+    40
+   ],
+   "properties": {
+    "dividerProperties": {}
+   },
+   "children": [
+    "rc8"
+   ],
+   "scrollDirection": "horizontal",
+   "horizontalFit": "expanded",
+   "parentID": "rc4"
+  },
+  "rc8": {
+   "id": "rc8",
+   "type": "row",
+   "rowColumnType": "row",
+   "name": "Row",
+   "basicBoxLocal": [
+    0,
+    0,
+    80,
+    32
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "center",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "padding": [
+    8,
+    4,
+    8,
+    4
+   ],
+   "cornerRadius": [
+    16,
+    true,
+    "circular"
+   ],
+   "margin": [
+    0,
+    0,
+    6,
+    0
+   ],
+   "parentID": "lv7",
+   "children": [
+    "t9"
+   ]
+  },
+  "t9": {
+   "id": "t9",
+   "type": "text",
+   "name": "Text",
+   "data": "Chip",
+   "basicBoxLocal": [
+    0,
+    0,
+    48,
+    12
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "textMixedProps": [
+    {
+     "start": 0,
+     "end": 4,
+     "fontSize": 12,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     },
+     "fills": [
+      {
+       "type": "solid",
+       "color": "#222222",
+       "id": "tf10"
+      }
+     ]
+    }
+   ],
+   "parentID": "rc8"
+  },
+  "c11": {
+   "id": "c11",
+   "type": "canvas",
+   "name": "Lists in flex",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "properties": {
+    "bodyId": "b12"
+   },
+   "children": [
+    "b12"
+   ]
+  },
+  "b12": {
+   "id": "b12",
+   "type": "column",
+   "name": "Body",
+   "parentID": "c11",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "rc13",
+    "lv18",
+    "gv20"
+   ],
+   "rowColumnType": "column",
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "stretch",
+   "padding": [
+    8,
+    8,
+    8,
+    8
+   ],
+   "spacing": 8
+  },
+  "rc13": {
+   "id": "rc13",
+   "type": "row",
+   "rowColumnType": "row",
+   "name": "Row",
+   "basicBoxLocal": [
+    0,
+    0,
+    384,
+    120
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "stretch",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "fixed",
+   "spacing": 8,
+   "parentID": "b12",
+   "children": [
+    "lv14",
+    "lv16"
+   ]
+  },
+  "lv14": {
+   "id": "lv14",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    0,
+    0,
+    150,
+    120
+   ],
+   "properties": {
+    "dividerProperties": {}
+   },
+   "children": [
+    "r15"
+   ],
+   "horizontalFit": "flexible",
+   "verticalFit": "expanded",
+   "parentID": "rc13"
+  },
+  "r15": {
+   "id": "r15",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFAB91",
+     "id": "fFFAB91"
+    }
+   ],
+   "parentID": "lv14"
+  },
+  "lv16": {
+   "id": "lv16",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    0,
+    0,
+    150,
+    120
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 2
+   },
+   "children": [
+    "r17"
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "scrollDirection": "horizontal",
+   "parentID": "rc13"
+  },
+  "r17": {
+   "id": "r17",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    50,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#80CBC4",
+     "id": "f80CBC4"
+    }
+   ],
+   "verticalFit": "expanded",
+   "parentID": "lv16"
+  },
+  "lv18": {
+   "id": "lv18",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    0,
+    0,
+    384,
+    100
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 2,
+    "hasSeparator": true,
+    "separatorSpacing": 4
+   },
+   "children": [
+    "r19"
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "flexible",
+   "parentID": "b12"
+  },
+  "r19": {
+   "id": "r19",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    384,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#B39DDB",
+     "id": "fB39DDB"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "parentID": "lv18"
+  },
+  "gv20": {
+   "id": "gv20",
+   "type": "gridView",
+   "name": "Grid",
+   "basicBoxLocal": [
+    0,
+    0,
+    384,
+    100
+   ],
+   "isScrollable": true,
+   "useFlutterListView": false,
+   "properties": {
+    "gridDelegate": {
+     "type": "fixedCrossAxisCount",
+     "crossAxisCount": 4,
+     "mainAxisExtent": 30,
+     "crossAxisSpacing": 4,
+     "mainAxisSpacing": 4
+    }
+   },
+   "children": [
+    "r21"
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "reverse": true,
+   "padding": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "parentID": "b12"
+  },
+  "r21": {
+   "id": "r21",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    40,
+    20
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFE082",
+     "id": "fFFE082"
+    }
+   ],
+   "parentID": "gv20"
+  },
+  "c22": {
+   "id": "c22",
+   "type": "canvas",
+   "name": "Measured static list",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    300
+   ],
+   "properties": {
+    "bodyId": "b23"
+   },
+   "children": [
+    "b23"
+   ]
+  },
+  "b23": {
+   "id": "b23",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c22",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "rc24"
+   ]
+  },
+  "rc24": {
+   "id": "rc24",
+   "type": "row",
+   "rowColumnType": "row",
+   "name": "Row",
+   "basicBoxLocal": [
+    10,
+    10,
+    300,
+    100
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "center",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "spacing": 8,
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "parentID": "b23",
+   "children": [
+    "r25",
+    "lv26"
+   ]
+  },
+  "r25": {
+   "id": "r25",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    20,
+    50
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#EF5350",
+     "id": "fEF5350"
+    }
+   ],
+   "verticalFit": "expanded",
+   "parentID": "rc24"
+  },
+  "lv26": {
+   "id": "lv26",
+   "type": "listView",
+   "name": "List",
+   "basicBoxLocal": [
+    0,
+    0,
+    120,
+    100
+   ],
+   "properties": {
+    "dividerProperties": {},
+    "itemCount": 2,
+    "hasSeparator": true,
+    "separatorSpacing": 6
+   },
+   "children": [
+    "r27"
+   ],
+   "verticalFit": "shrinkWrap",
+   "isScrollable": false,
+   "parentID": "rc24"
+  },
+  "r27": {
+   "id": "r27",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#66BB6A",
+     "id": "f66BB6A"
+    }
+   ],
+   "parentID": "lv26"
+  }
+ }
+}

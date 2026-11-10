@@ -164,6 +164,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
     // Codelessly instance with the provided config.
     if (codelessly == null &&
         config != null &&
+        Codelessly.instance.config != null &&
         Codelessly.instance.config != config) {
       createdIntrinsicCodelessly = true;
       codelessly = Codelessly(config: config);

@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
-import 'constants.dart';
 
 extension FABLocationHelper on FABLocation {
   FloatingActionButtonLocation toFloatingActionButtonLocation() {
@@ -283,6 +282,9 @@ extension TextOverflowHelper on TextOverflowC {
       case TextOverflowC.ellipsis:
         return TextOverflow.ellipsis;
       case TextOverflowC.visible:
+        return TextOverflow.visible;
+      // The text keeps its size and is scaled as a whole (TextNodeBox).
+      case TextOverflowC.scaleDown:
         return TextOverflow.visible;
     }
   }
@@ -610,6 +612,12 @@ extension VecHelper on Vec {
 extension EdgeInsetsHelper on EdgeInsetsModel {
   flutter.EdgeInsets get flutterEdgeInsets =>
       flutter.EdgeInsets.fromLTRB(l, t, r, b);
+
+  /// The insets with left as the start side and right as the end side, so
+  /// they mirror in a right-to-left layout (see `layoutDirection`). The same
+  /// as [flutterEdgeInsets] left to right.
+  flutter.EdgeInsetsDirectional get flutterEdgeInsetsDirectional =>
+      flutter.EdgeInsetsDirectional.fromSTEB(l, t, r, b);
 
   bool get isSymmetric => l == r && r == t && t == b;
 
@@ -976,10 +984,13 @@ extension TextAlignHorizontalEnumExtensions on TextAlignHorizontalEnum {
     switch (this) {
       case TextAlignHorizontalEnum.center:
         return TextAlign.center;
+      // Left and right are the start and end of the line, so text aligned
+      // left in a design lines up with the start edge of a right-to-left
+      // layout. Left to right it is the same.
       case TextAlignHorizontalEnum.left:
-        return TextAlign.left;
+        return TextAlign.start;
       case TextAlignHorizontalEnum.right:
-        return TextAlign.right;
+        return TextAlign.end;
       case TextAlignHorizontalEnum.justified:
         return TextAlign.justify;
       case TextAlignHorizontalEnum.start:
@@ -1159,6 +1170,13 @@ extension BoxWidthStyleEnumExtensions on BoxWidthStyleEnum {
   }
 }
 
+/// The codepoint of [icon] in the MaterialIcons font that ships with
+/// Flutter, found by its name and style, or null when Flutter doesn't have it.
+int? flutterIconCodepoint(MaterialIcon icon) {
+  final String styled = icon.styledName;
+  return flutterIconsDataMap[flutterIconNames[styled] ?? styled];
+}
+
 extension IconModelExt on IconModel {
   /// This icon's glyph swapped for the one called [name] (e.g. `star_border`)
   /// in the same set and style, or this icon when [name] is empty or the set
@@ -1168,8 +1186,10 @@ extension IconModelExt on IconModel {
     if (glyph.isEmpty || glyph == this.name) return this;
     final IconModel icon = this;
     return switch (icon) {
+      // The old glyph's codepoint doesn't name the new one: draw by name.
       MaterialIcon() => icon.copyWith(
         name: glyph,
+        codepoint: 0,
         version: materialIconVersions[glyph] ?? icon.version,
       ),
       MaterialSymbol() => icon.copyWith(name: glyph),
@@ -1231,8 +1251,15 @@ extension IconModelExt on IconModel {
         ' ',
         '',
       );
+      // An icon saved without its version (older documents) reads as v1,
+      // whose SVG exists only for icons that date back to it: such an icon
+      // is served from the version the catalog lists for it instead.
+      final String name = icon.name.toLowerCase();
+      final int version = (icon.version ?? 1) == 1
+          ? materialIconVersions[name] ?? 1
+          : icon.version!;
       return 'https://fonts.gstatic.com/s/i/materialicons$style/'
-          '${icon.name.toLowerCase()}/v${icon.version ?? 1}/24px.svg';
+          '$name/v$version/24px.svg';
     }
     if (icon is MaterialSymbol) {
       // e.g. https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsrounded/home/wght300gradN25fill1/40px.svg
@@ -1263,6 +1290,40 @@ String materialSymbolVariant({double? fill, double? weight, double? grade}) {
 
 int _nearest(double value, List<int> options) =>
     options.reduce((a, b) => (a - value).abs() <= (b - value).abs() ? a : b);
+
+/// The codepoint of [icon] in Flutter's bundled `MaterialIcons` font, or
+/// null when it isn't a Material Icon Flutter ships (Google Fonts'
+/// codepoints, which the model stores, draw other glyphs in that font).
+int? materialIconFlutterCodepoint(IconModel icon) {
+  if (icon is! MaterialIcon) return null;
+  final String? id = icon.flutterID;
+  return id == null ? null : flutterIconsDataMap[id];
+}
+
+/// The codepoint in Flutter's bundled `MaterialIcons` font of the Material
+/// Icon that looks like the Material Symbol [icon] ([fill] is its fill
+/// axis), or null when [icon] isn't a Material Symbol or Flutter ships no
+/// icon of its name.
+///
+/// Material Symbols are drawn from SVGs loaded by name; this glyph stands in
+/// while one loads (a capture right after the editor starts) and when it
+/// can't load (offline), so a symbol isn't left blank. An unfilled outlined
+/// symbol is Flutter's `_outlined` icon, a filled one its plain icon, and
+/// rounded and sharp symbols its `_rounded` and `_sharp` icons.
+int? materialSymbolFlutterCodepoint(IconModel icon, {double? fill}) {
+  if (icon is! MaterialSymbol) return null;
+  final String name = icon.name.trim().toLowerCase();
+  if (name.isEmpty) return null;
+  final bool filled = (fill ?? 0) >= 0.5;
+  final String styled = switch (icon.style) {
+    MaterialSymbolStyle.outlined => filled ? name : '${name}_outlined',
+    MaterialSymbolStyle.rounded => '${name}_rounded',
+    MaterialSymbolStyle.sharp => '${name}_sharp',
+  };
+  return flutterIconsDataMap[styled] ??
+      flutterIconsDataMap[name] ??
+      flutterIconsDataMap['${name}_outlined'];
+}
 
 extension MaterialIconExt on MaterialIcon {
   String? get flutterID => flutterIconNames[styledName];
@@ -1670,6 +1731,12 @@ extension ActionModelExt on ActionModel {
     if (action is SetVariantAction && action.nodeID == oldNodeId) {
       return action.copyWith(nodeID: newNodeId);
     }
+    if (action is PlayAnimationAction && action.nodeId == oldNodeId) {
+      return action.copyWith(nodeId: newNodeId);
+    }
+    if (action is EditTextAction && action.nodeId == oldNodeId) {
+      return action.copyWith(nodeId: newNodeId);
+    }
     if (action is ConditionalAction) {
       return action.copyWith(
         actions: [
@@ -1794,6 +1861,9 @@ extension ActionModelExt on ActionModel {
       case ActionType.callApi:
         final ApiCallAction action = this as ApiCallAction;
         strings.addAll(action.parameters.values);
+      case ActionType.runScript:
+        final RunScriptAction action = this as RunScriptAction;
+        strings.addAll(action.arguments.values);
       case ActionType.setStorage:
         final SetStorageAction action = this as SetStorageAction;
         strings.addAll([
@@ -1879,6 +1949,8 @@ extension ActionModelExt on ActionModel {
           action.message,
           action.confirmLabel,
           action.cancelLabel,
+          // Colour and icon bindings.
+          ...action.variables.values,
           for (final MapEntry(:key, :value) in action.params.entries) ...[
             key,
             if (value is String) value,
@@ -1895,15 +1967,59 @@ extension ActionModelExt on ActionModel {
             ),
         };
       case ActionType.delay:
+      case ActionType.controlDrag:
+        strings.add((this as ControlDragAction).steps);
+        return _namesIn(strings, includePredefined);
+      case ActionType.scrollTo:
         return {};
+      case ActionType.paginate:
+        final PaginateAction action = this as PaginateAction;
+        return _namesIn([action.page, action.pageSize], includePredefined);
+      case ActionType.animateVariable:
+        final AnimateVariableAction action = this as AnimateVariableAction;
+        return {
+          if (action.variable.trim().isNotEmpty) action.variable.trim(),
+          ..._namesIn([
+            action.from,
+            action.to,
+            ?action.duration,
+          ], includePredefined),
+        };
+      case ActionType.playSound:
+        final PlaySoundAction action = this as PlaySoundAction;
+        return _namesIn([
+          action.sound,
+          action.volume,
+          action.pitch,
+          action.at,
+        ], includePredefined);
       case ActionType.paywall:
         final PaywallAction action = this as PaywallAction;
         return _namesIn([?action.slot, ?action.url], includePredefined);
       case ActionType.copyToClipboard:
         strings.add((this as CopyToClipboardAction).text);
         return _namesIn(strings, includePredefined);
+      case ActionType.speak:
+        final SpeakAction action = this as SpeakAction;
+        strings.addAll([
+          action.text,
+          action.language,
+          action.rate,
+          ?action.pitch,
+        ]);
+        return _namesIn(strings, includePredefined);
+      case ActionType.playAnimation:
+        return _namesIn(strings, includePredefined);
+      case ActionType.haptic:
+        strings.add((this as HapticAction).when);
+        return _namesIn(strings, includePredefined);
       case ActionType.focus:
         return {};
+
+      case ActionType.editText:
+        final EditTextAction action = this as EditTextAction;
+        strings.addAll([action.text, action.before, ?action.after]);
+        return _namesIn(strings, includePredefined);
       case ActionType.cloudData:
         final CloudDataAction action = this as CloudDataAction;
         strings.addAll([
@@ -2284,6 +2400,14 @@ extension StrokeCapEnumExt on StrokeCapEnum {
   };
 }
 
+extension StrokeJoinEnumExt on StrokeJoinEnum {
+  StrokeJoin get flutterStrokeJoin => switch (this) {
+    StrokeJoinEnum.miter => StrokeJoin.miter,
+    StrokeJoinEnum.round => StrokeJoin.round,
+    StrokeJoinEnum.bevel => StrokeJoin.bevel,
+  };
+}
+
 extension BlendModeCExt on BlendModeC {
   BlendMode get flutterBlendMode => switch (this) {
     BlendModeC.src => BlendMode.src,
@@ -2371,12 +2495,19 @@ extension LayoutGroupsExt on Map<String, List<Breakpoint>> {
 }
 
 extension VariableDataExt on VariableData {
-  bool get isApiVariable => name.startsWith(SDKConstants.apiVariablePrefix);
+  bool get isApiVariable => isApiVariableName(name);
 }
 
 extension TextFieldFormatterExt on TextInputFormatterModel {
-  TextInputFormatter? toFlutterFormatter() {
+  /// [resolve] turns a bound value (`${account.currency}`) into text.
+  TextInputFormatter? toFlutterFormatter({
+    String Function(String value)? resolve,
+  }) {
     switch (this) {
+      case CurrencyTextInputFormatterModel formatter:
+        final String code =
+            resolve?.call(formatter.currencyCode) ?? formatter.currencyCode;
+        return CurrencyAmountInputFormatter(code);
       case NoneTextInputFormatterModel():
         return null;
       case RegexTextInputFormatterModel formatter:
@@ -2395,6 +2526,31 @@ extension TextFieldFormatterExt on TextInputFormatterModel {
           replacementString: formatter.replacementString,
         );
     }
+  }
+}
+
+/// Groups an amount as it is typed in [currencyCode]'s format (see the
+/// `formatAmount` formula), keeping the caret the same number of characters
+/// from the end.
+class CurrencyAmountInputFormatter extends TextInputFormatter {
+  CurrencyAmountInputFormatter(this.currencyCode);
+
+  final String currencyCode;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String formatted = formatAmountInput(newValue.text, currencyCode);
+    final int fromEnd =
+        newValue.text.length -
+        newValue.selection.extentOffset.clamp(0, newValue.text.length);
+    final int caret = (formatted.length - fromEnd).clamp(0, formatted.length);
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: caret),
+    );
   }
 }
 
@@ -2435,5 +2591,13 @@ extension TransitionCurveExt on TransitionCurve {
     TransitionCurve.easeOut => Curves.easeOut,
     TransitionCurve.easeInOut => Curves.easeInOut,
     TransitionCurve.easeOutCubic => Curves.easeOutCubic,
+    TransitionCurve.easeOutBack => Curves.easeOutBack,
+    TransitionCurve.easeInOutCubic => Curves.easeInOutCubic,
+    TransitionCurve.step => const Threshold(0.5),
+    TransitionCurve.easeInOutSine => Curves.easeInOutSine,
+    TransitionCurve.spring => const SpringCurve(),
+    TransitionCurve.elasticOut => Curves.elasticOut,
+    TransitionCurve.bounceOut => Curves.bounceOut,
+    TransitionCurve.fastOutSlowIn => Curves.fastOutSlowIn,
   };
 }

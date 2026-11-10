@@ -72,6 +72,9 @@ class DataManager {
   //  LocalDatabase.
   CloudDatabase? _cloudDatabase;
 
+  /// The local storage, or null before it is ready.
+  LocalDatabase? get localDatabaseOrNull => _localDatabase;
+
   /// The local storage instance used by this data manager.
   LocalDatabase get localDatabase {
     assert(_localDatabase != null, 'Local storage is not initialized yet.');
@@ -105,6 +108,47 @@ class DataManager {
   /// finish its queue.
   /// We inject the layoutID at the start of this queue to prioritize it.
   final List<String> _downloadQueue = [];
+
+  /// Downloads under way that bring layouts' variables, by layout id, or
+  /// under [_bundleDownload] for a publish bundle (it brings them all). Each
+  /// completes once its result is emitted.
+  final Map<String, Future<void>> _variableDownloads = {};
+
+  static const String _bundleDownload = '*bundle*';
+
+  /// Records that the variables of [key] (a layout id, or [_bundleDownload])
+  /// are downloading until [done] completes.
+  void _trackVariableDownload(String key, Future<void> done) {
+    _variableDownloads[key] = done;
+    done.whenComplete(() {
+      if (identical(_variableDownloads[key], done)) {
+        _variableDownloads.remove(key);
+      }
+    });
+  }
+
+  /// Completes once the published variables of [layoutId] are in the
+  /// publish model, or the downloads that could bring them have finished;
+  /// null when the model has them, the layout has none, or nothing is
+  /// bringing them.
+  ///
+  /// A screen shown before its variables arrive (from a cached model that
+  /// lacked them, while the publish bundle downloads) waits for this before
+  /// running its load actions, which read and set those variables.
+  Future<void>? variablesPending(String layoutId) {
+    final SDKPublishModel? model = _publishModel;
+    if (model == null ||
+        model.variables.containsKey(layoutId) ||
+        !model.updates.variables.containsKey(layoutId)) {
+      return null;
+    }
+    final List<Future<void>> pending = [
+      ?_variableDownloads[layoutId],
+      ?_variableDownloads[_bundleDownload],
+    ];
+    if (pending.isEmpty) return null;
+    return Future.wait(pending);
+  }
 
   /// Creates a new instance of with the given [config].
   DataManager(
@@ -209,6 +253,11 @@ class DataManager {
 
         if (_publishModel == null) {
           await publishBundleFuture;
+          // Nothing cached and nothing downloaded: there is no app to show.
+          // Fail, so the widget shows an error instead of loading forever.
+          if (_publishModel == null) {
+            throw Exception('Could not download the published app "$slug".');
+          }
         } else {
           // Background refresh: report failures instead of leaving them as
           // unhandled async errors.
@@ -1037,88 +1086,100 @@ class DataManager {
       }
     }
 
-    for (final String layoutId in variableUpdates.keys) {
-      final UpdateType updateType = variableUpdates[layoutId]!;
-
-      switch (updateType) {
-        case UpdateType.delete:
-          DebugLogger.instance.printInfo(
-            'DIFF: Deleting variables for layout [$layoutId]...',
-            name: name,
-          );
-          localModel.variables.remove(layoutId);
-          localDataRepository.deletePublishVariables(
-            layoutID: layoutId,
-            source: config.publishSource,
-          );
-        case UpdateType.add:
-        case UpdateType.update:
-          DebugLogger.instance.printInfo(
-            'DIFF: Downloading variables for layout [$layoutId]...',
-            name: name,
-          );
-          final SDKLayoutVariables? layoutVariables =
-              await networkDataRepository.downloadLayoutVariables(
-                projectID: authManager.authData!.projectId,
-                layoutID: layoutId,
-                source: config.publishSource,
-              );
-          if (layoutVariables != null) {
-            localModel.variables[layoutId] = layoutVariables;
-          }
+    // Screens waiting for these layouts' variables run their load actions
+    // once the model with them is emitted.
+    final Completer<void> variablesEmitted = Completer<void>();
+    for (final MapEntry(:key, :value) in variableUpdates.entries) {
+      if (value != UpdateType.delete) {
+        _trackVariableDownload(key, variablesEmitted.future);
       }
     }
+    try {
+      for (final String layoutId in variableUpdates.keys) {
+        final UpdateType updateType = variableUpdates[layoutId]!;
 
-    for (final String layoutID in conditionUpdates.keys) {
-      final UpdateType updateType = conditionUpdates[layoutID]!;
-
-      switch (updateType) {
-        case UpdateType.delete:
-          DebugLogger.instance.printInfo(
-            'DIFF: Deleting conditions for layout [$layoutID]...',
-            name: name,
-          );
-          localModel.variables.remove(layoutID);
-          localDataRepository.deletePublishConditions(
-            layoutID: layoutID,
-            source: config.publishSource,
-          );
-        case UpdateType.add:
-        case UpdateType.update:
-          DebugLogger.instance.printInfo(
-            'DIFF: Downloading conditions for layout [$layoutID]...',
-            name: name,
-          );
-          final SDKLayoutConditions? layoutConditions =
-              await networkDataRepository.downloadLayoutConditions(
-                projectID: authManager.authData!.projectId,
-                layoutID: layoutID,
-                source: config.publishSource,
-              );
-          if (layoutConditions != null) {
-            localModel.conditions[layoutID] = layoutConditions;
-          }
+        switch (updateType) {
+          case UpdateType.delete:
+            DebugLogger.instance.printInfo(
+              'DIFF: Deleting variables for layout [$layoutId]...',
+              name: name,
+            );
+            localModel.variables.remove(layoutId);
+            localDataRepository.deletePublishVariables(
+              layoutID: layoutId,
+              source: config.publishSource,
+            );
+          case UpdateType.add:
+          case UpdateType.update:
+            DebugLogger.instance.printInfo(
+              'DIFF: Downloading variables for layout [$layoutId]...',
+              name: name,
+            );
+            final SDKLayoutVariables? layoutVariables =
+                await networkDataRepository.downloadLayoutVariables(
+                  projectID: authManager.authData!.projectId,
+                  layoutID: layoutId,
+                  source: config.publishSource,
+                );
+            if (layoutVariables != null) {
+              localModel.variables[layoutId] = layoutVariables;
+            }
+        }
       }
+
+      for (final String layoutID in conditionUpdates.keys) {
+        final UpdateType updateType = conditionUpdates[layoutID]!;
+
+        switch (updateType) {
+          case UpdateType.delete:
+            DebugLogger.instance.printInfo(
+              'DIFF: Deleting conditions for layout [$layoutID]...',
+              name: name,
+            );
+            localModel.variables.remove(layoutID);
+            localDataRepository.deletePublishConditions(
+              layoutID: layoutID,
+              source: config.publishSource,
+            );
+          case UpdateType.add:
+          case UpdateType.update:
+            DebugLogger.instance.printInfo(
+              'DIFF: Downloading conditions for layout [$layoutID]...',
+              name: name,
+            );
+            final SDKLayoutConditions? layoutConditions =
+                await networkDataRepository.downloadLayoutConditions(
+                  projectID: authManager.authData!.projectId,
+                  layoutID: layoutID,
+                  source: config.publishSource,
+                );
+            if (layoutConditions != null) {
+              localModel.conditions[layoutID] = layoutConditions;
+            }
+        }
+      }
+
+      DebugLogger.instance.printInfo(
+        'DIFF: Done processing updates.',
+        name: name,
+      );
+      _publishModel = localModel.copyWith(
+        updates: serverModel.updates,
+        entryPageId: serverModel.entryPageId,
+        entryCanvasId: serverModel.entryCanvasId,
+        entryLayoutId: serverModel.entryLayoutId,
+        layoutIDMap: serverModel.layoutIDMap,
+      );
+
+      if (templateChanged) {
+        _publishModel = publishModel?.copyWith();
+      }
+
+      await emitPublishModel();
+      savePublishModel();
+    } finally {
+      variablesEmitted.complete();
     }
-
-    DebugLogger.instance.printInfo(
-      'DIFF: Done processing updates.',
-      name: name,
-    );
-    _publishModel = localModel.copyWith(
-      updates: serverModel.updates,
-      entryPageId: serverModel.entryPageId,
-      entryCanvasId: serverModel.entryCanvasId,
-      entryLayoutId: serverModel.entryLayoutId,
-      layoutIDMap: serverModel.layoutIDMap,
-    );
-
-    if (templateChanged) {
-      _publishModel = publishModel?.copyWith();
-    }
-
-    await emitPublishModel();
-    savePublishModel();
   }
 
   /// Compares the current [localModel] with a newly fetched [serverModel] and
@@ -1578,21 +1639,29 @@ class DataManager {
               name: name,
             );
 
-            for (final SDKPublishFont fontModel in fontModels) {
-              DebugLogger.instance.printInfo(
-                '\t\tFontModel [${fontModel.id}] ready. Fetching bytes & loading...',
-                name: name,
-              );
-
-              model.fonts[fontModel.id] = fontModel;
-
-              await getOrFetchFontBytesAndSaveAndLoad(fontModel).then((_) {
-                DebugLogger.instance.printInfo(
-                  '\t\tFontModel [${fontModel.id}] loaded. Done!\n',
-                  name: name,
-                );
-              });
-            }
+            // All of the layout's fonts at once: one after another, a
+            // font-heavy layout showed fallback text for many seconds, and
+            // one font that failed kept the rest from loading.
+            await Future.wait([
+              for (final SDKPublishFont fontModel in fontModels)
+                () async {
+                  model.fonts[fontModel.id] = fontModel;
+                  try {
+                    await getOrFetchFontBytesAndSaveAndLoad(fontModel);
+                    DebugLogger.instance.printInfo(
+                      '\t\tFontModel [${fontModel.id}] loaded. Done!\n',
+                      name: name,
+                    );
+                  } catch (error) {
+                    DebugLogger.instance.log(
+                      'Font [${fontModel.id}] failed to load: $error',
+                      category: DebugCategory.error,
+                      name: name,
+                      level: Level.WARNING,
+                    );
+                  }
+                }(),
+            ]);
           })
           .catchError((error, stack) {
             DebugLogger.instance.log(
@@ -1622,6 +1691,19 @@ class DataManager {
       name: name,
     );
 
+    final Completer<void> done = Completer<void>();
+    _trackVariableDownload(_bundleDownload, done.future);
+    try {
+      return await _fetchCompletePublishBundle(slug: slug, source: source);
+    } finally {
+      done.complete();
+    }
+  }
+
+  Future<bool> _fetchCompletePublishBundle({
+    required String slug,
+    required PublishSource source,
+  }) async {
     final Stopwatch stopwatch = Stopwatch()..start();
 
     SDKPublishModel? model;
@@ -1735,33 +1817,29 @@ class DataManager {
   }) async {
     final AuthData? auth = authManager.authData;
 
-    final Set<SDKPublishFont> fonts = {};
-    for (final String fontID in fontIDs) {
-      final SDKPublishFont? font = _publishModel?.fonts[fontID];
-      if (font != null) {
-        fonts.add(font);
-      } else {
-        if (auth == null) continue;
-
-        try {
-          final SDKPublishFont? downloadedFont = await networkDataRepository
-              .downloadFontModel(
-                projectID: auth.projectId,
-                fontID: fontID,
-                source: config.publishSource,
-              );
-          if (downloadedFont != null) {
-            fonts.add(downloadedFont);
+    // Downloaded together, not one after another.
+    final List<SDKPublishFont?> found = await Future.wait([
+      for (final String fontID in fontIDs)
+        () async {
+          final SDKPublishFont? font = _publishModel?.fonts[fontID];
+          if (font != null) return font;
+          if (auth == null) return null;
+          try {
+            return await networkDataRepository.downloadFontModel(
+              projectID: auth.projectId,
+              fontID: fontID,
+              source: config.publishSource,
+            );
+          } catch (e) {
+            DebugLogger.instance.printInfo(
+              '\t\tFont [$fontID] could not be downloaded.',
+              name: name,
+            );
+            return null;
           }
-        } catch (e) {
-          DebugLogger.instance.printInfo(
-            '\t\tFont [$fontID] could not be downloaded.',
-            name: name,
-          );
-        }
-      }
-    }
-    return fonts;
+        }(),
+    ]);
+    return found.nonNulls.toSet();
   }
 
   /// Gets all [SDKPublishFont] models of a given set of [fontIDs] either from

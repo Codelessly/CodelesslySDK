@@ -204,6 +204,38 @@ void main() {
     );
   });
 
+  testWidgets('a row\'s spacing follows its binding', (tester) async {
+    final RowColumnNode row = RowColumnNode.fromJson({
+      ...RowColumnNode(
+        id: 'row',
+        name: 'Row',
+        basicBoxLocal: NodeBox(0, 0, 300, 40),
+        children: const [],
+        rowColumnType: RowColumnType.row,
+        spacing: 8,
+      ).toJson(),
+      'variables': {
+        'spacing': r'${= isMobile ? 28 : 56}',
+        'runSpacing': r'${= -4}',
+      },
+    })..parentID = kRootNode;
+    final host = Host(
+      row,
+      variables: {'isMobile': boolVariable('isMobile', true)},
+    );
+    await host.pump(tester, build: false);
+    expect((host.styled as RowColumnNode).spacing, 28);
+    // A negative gap is no gap.
+    expect((host.styled as RowColumnNode).runSpacing, 0);
+    host.context.variables['isMobile']!.value = VariableData(
+      id: 'isMobile',
+      name: 'isMobile',
+      type: VariableType.boolean,
+      value: false,
+    );
+    expect((host.styled as RowColumnNode).spacing, 56);
+  });
+
   group('text', () {
     TextNode text(Map<String, String> variables) => TextNode.fromJson({
       ...TextNode(
@@ -263,6 +295,79 @@ void main() {
       }
       expect(weights, contains(FontWeight.w700));
       expect(weights, isNot(contains(FontWeight.w400)));
+    });
+
+    testWidgets('textDecoration strikes a ticked item through', (tester) async {
+      final ticked = boolVariable('ticked', false);
+      final host = Host(
+        text({'textDecoration': r"${= ticked ? 'lineThrough' : 'none'}"}),
+        variables: {'ticked': ticked},
+      );
+      await host.pump(tester);
+      expect(
+        (host.styled as TextNode).textMixedProps.single.textDecoration,
+        TextDecorationEnum.none,
+      );
+      ticked.set(ticked.value.copyWith(value: true));
+      await tester.pump();
+      expect(
+        (host.styled as TextNode).textMixedProps.single.textDecoration,
+        TextDecorationEnum.strikethrough,
+      );
+    });
+
+    test('parseTextDecoration reads the API and Flutter names', () {
+      expect(
+        StyleBindings.parseTextDecoration('lineThrough'),
+        TextDecorationEnum.strikethrough,
+      );
+      expect(
+        StyleBindings.parseTextDecoration('underline'),
+        TextDecorationEnum.underline,
+      );
+      expect(StyleBindings.parseTextDecoration('nope'), isNull);
+    });
+
+    testWidgets('fontSize follows its formula, with fontWeight', (
+      tester,
+    ) async {
+      final big = boolVariable('big', false);
+      final host = Host(
+        text({
+          'fontSize': r'${= big ? 28 : 14}',
+          'fontWeight': r'${= big ? 700 : 400}',
+        }),
+        variables: {'big': big},
+      );
+      await host.pump(tester);
+      expect((host.styled as TextNode).textMixedProps.single.fontSize, 14);
+
+      big.set(big.value.copyWith(value: true));
+      await tester.pump();
+      final StartEndProp span = (host.styled as TextNode).textMixedProps.single;
+      expect(span.fontSize, 28);
+      expect(span.fontName.weight, FontWeightNumeric.w700);
+
+      final List<double?> sizes = [];
+      for (final RichText text in tester.widgetList<RichText>(
+        find.byType(RichText),
+      )) {
+        text.text.visitChildren((span) {
+          sizes.add(span.style?.fontSize);
+          return true;
+        });
+      }
+      expect(sizes, contains(28));
+      expect(sizes, isNot(contains(14)));
+    });
+
+    test('parseFontSize reads positive numbers and pixel text', () {
+      expect(StyleBindings.parseFontSize(18), 18);
+      expect(StyleBindings.parseFontSize('18.5'), 18.5);
+      expect(StyleBindings.parseFontSize(' 24px '), 24);
+      expect(StyleBindings.parseFontSize(0), isNull);
+      expect(StyleBindings.parseFontSize('big'), isNull);
+      expect(StyleBindings.parseFontSize(null), isNull);
     });
 
     testWidgets('textDecoration follows its formula', (tester) async {
@@ -366,7 +471,7 @@ void main() {
       expect(shown.version, 1);
       expect(
         shown.toSvgUrl(),
-        'https://fonts.gstatic.com/s/i/materialicons/star/v1/24px.svg',
+        'https://fonts.gstatic.com/s/i/materialicons/star/v${materialIconVersions['star']}/24px.svg',
       );
       expect((host.node as IconNode).properties.icon.icon!.name, 'star_border');
     });

@@ -183,6 +183,20 @@ variables, conditions, functions, etc.
 **Note 2:** You can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible
 to all `CodelesslyWidget`s.
 
+## Scripts
+
+Projects can run JavaScript **scripts** for logic that formulas and actions express badly: validation, calculations, data shaping, state machines. A "Run script" action runs one and leaves its result as `${result}`, and formulas call one as `${= script.name(args)}`. Scripts run in a sandbox with no network, files or timers. They reach the app only through the host APIs they're granted, and stop at their time and memory limits instead of crashing the app.
+
+On the web scripts run in a Web Worker, with nothing to add. On Android, iOS, macOS and Linux, add the engine:
+
+```yaml
+codelessly_quickjs: ^latest_version
+```
+
+The engine is its own package, [codelessly_quickjs](https://github.com/Codelessly/CodelesslyQuickJS), so apps without scripts don't carry it.
+
+See [docs/scripting.md](docs/scripting.md).
+
 ## CodelesslyWidget Options
 
 ```dart

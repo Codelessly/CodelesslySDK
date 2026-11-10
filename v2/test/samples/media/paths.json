@@ -1,0 +1,430 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "paths"
+   ]
+  },
+  "paths": {
+   "id": "paths",
+   "type": "canvas",
+   "name": "paths",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    900
+   ],
+   "properties": {
+    "bodyId": "paths-body"
+   },
+   "children": [
+    "paths-body"
+   ]
+  },
+  "paths-body": {
+   "id": "paths-body",
+   "type": "frame",
+   "name": "Body",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    900
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "paths",
+   "children": [
+    "path-heart",
+    "path-line",
+    "path-trim",
+    "path-empty",
+    "prow",
+    "rect-path",
+    "rect-bracket",
+    "rect-gradient-path",
+    "pcol"
+   ]
+  },
+  "path-heart": {
+   "id": "path-heart",
+   "type": "path",
+   "name": "path-heart",
+   "basicBoxLocal": [
+    20,
+    20,
+    96,
+    96
+   ],
+   "pathData": "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z",
+   "viewBoxWidth": 24,
+   "viewBoxHeight": 24,
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#E91E63",
+     "id": "pf1"
+    }
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body"
+  },
+  "path-line": {
+   "id": "path-line",
+   "type": "path",
+   "name": "path-line",
+   "basicBoxLocal": [
+    140,
+    20,
+    200,
+    60
+   ],
+   "pathData": "M0 30 C 50 0, 150 60, 200 30",
+   "strokes": [
+    {
+     "type": "solid",
+     "color": "#000000",
+     "id": "ps1"
+    }
+   ],
+   "strokeWeight": 4,
+   "dashPattern": [
+    8,
+    4
+   ],
+   "edgePins": {
+    "left": 140,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body"
+  },
+  "path-trim": {
+   "id": "path-trim",
+   "type": "path",
+   "name": "path-trim",
+   "basicBoxLocal": [
+    140,
+    100,
+    100,
+    100
+   ],
+   "pathData": "M10 10 L90 10 L90 90 Z",
+   "strokes": [
+    {
+     "type": "solid",
+     "color": "#3F51B5",
+     "id": "ps2"
+    }
+   ],
+   "trimStart": 0.1,
+   "trimEnd": 0.7,
+   "strokeJoin": "miter",
+   "strokeCap": "square",
+   "edgePins": {
+    "left": 140,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body"
+  },
+  "path-empty": {
+   "id": "path-empty",
+   "type": "path",
+   "name": "path-empty",
+   "basicBoxLocal": [
+    260,
+    100,
+    60,
+    60
+   ],
+   "edgePins": {
+    "left": 260,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body"
+  },
+  "prow": {
+   "id": "prow",
+   "type": "row",
+   "name": "prow",
+   "basicBoxLocal": [
+    20,
+    220,
+    360,
+    80
+   ],
+   "rowColumnType": "row",
+   "horizontalFit": "expanded",
+   "edgePins": {
+    "left": 20,
+    "top": 220
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body",
+   "children": [
+    "path-flex",
+    "path-fixed"
+   ]
+  },
+  "path-flex": {
+   "id": "path-flex",
+   "type": "path",
+   "name": "path-flex",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    80
+   ],
+   "pathData": "M0 0 H100 V80 H0 Z",
+   "viewBoxWidth": 100,
+   "viewBoxHeight": 80,
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#4CAF50",
+     "id": "pf2"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "parentID": "prow"
+  },
+  "path-fixed": {
+   "id": "path-fixed",
+   "type": "path",
+   "name": "path-fixed",
+   "basicBoxLocal": [
+    100,
+    10,
+    60,
+    60
+   ],
+   "pathData": "M30 0 L60 60 L0 60 Z",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FF9800",
+     "id": "pf3"
+    }
+   ],
+   "strokes": [
+    {
+     "type": "solid",
+     "color": "#000000",
+     "id": "ps3"
+    }
+   ],
+   "parentID": "prow"
+  },
+  "rect-path": {
+   "id": "rect-path",
+   "type": "rectangle",
+   "name": "rect-path",
+   "basicBoxLocal": [
+    20,
+    320,
+    120,
+    120
+   ],
+   "path": "M0 60 Q60 0 120 60 T120 120 H0 Z",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#2196F3",
+     "id": "rf1"
+    }
+   ],
+   "strokes": [
+    {
+     "type": "solid",
+     "color": "#0D47A1",
+     "id": "rs1"
+    }
+   ],
+   "strokeWeight": 3,
+   "strokeJoin": "round",
+   "strokeCap": "round",
+   "cornerRadius": [
+    12,
+    true,
+    "circular"
+   ],
+   "clipsContent": true,
+   "effects": [
+    {
+     "type": "dropShadow",
+     "id": "e1",
+     "color": "#80000000",
+     "offset": [
+      2,
+      2
+     ],
+     "radius": 4,
+     "spread": 0
+    }
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 320
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body"
+  },
+  "rect-bracket": {
+   "id": "rect-bracket",
+   "type": "rectangle",
+   "name": "rect-bracket",
+   "basicBoxLocal": [
+    160,
+    320,
+    60,
+    60
+   ],
+   "path": "M0 30 V8 Q0 0 8 0 H30",
+   "strokes": [
+    {
+     "type": "solid",
+     "color": "#000000",
+     "id": "rs2"
+    }
+   ],
+   "strokeWeight": 4,
+   "strokeCap": "round",
+   "dashPattern": [
+    6,
+    3
+   ],
+   "edgePins": {
+    "left": 160,
+    "top": 320
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body"
+  },
+  "rect-gradient-path": {
+   "id": "rect-gradient-path",
+   "type": "rectangle",
+   "name": "rect-gradient-path",
+   "basicBoxLocal": [
+    240,
+    320,
+    120,
+    80
+   ],
+   "path": "M0 0 L120 0 L60 80 Z",
+   "fills": [
+    {
+     "type": "gradientLinear",
+     "id": "g1",
+     "gradientStops": [
+      {
+       "position": 0,
+       "color": {
+        "r": 1,
+        "g": 0,
+        "b": 0,
+        "a": 1
+       }
+      },
+      {
+       "position": 1,
+       "color": {
+        "r": 0,
+        "g": 0,
+        "b": 1,
+        "a": 1
+       }
+      }
+     ],
+     "gradientTransform": [
+      1,
+      0,
+      0,
+      0,
+      1,
+      0
+     ]
+    }
+   ],
+   "edgePins": {
+    "left": 240,
+    "top": 320
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body"
+  },
+  "pcol": {
+   "id": "pcol",
+   "type": "column",
+   "name": "pcol",
+   "basicBoxLocal": [
+    20,
+    460,
+    360,
+    300
+   ],
+   "rowColumnType": "column",
+   "crossAxisAlignment": "start",
+   "edgePins": {
+    "left": 20,
+    "top": 460
+   },
+   "positioningMode": "pin",
+   "parentID": "paths-body",
+   "children": [
+    "rect-path-fill",
+    "rect-path-hug"
+   ]
+  },
+  "rect-path-fill": {
+   "id": "rect-path-fill",
+   "type": "rectangle",
+   "name": "rect-path-fill",
+   "basicBoxLocal": [
+    0,
+    0,
+    360,
+    100
+   ],
+   "path": "M0 50 L360 50",
+   "strokes": [
+    {
+     "type": "solid",
+     "color": "#000000",
+     "id": "rs3"
+    }
+   ],
+   "strokeWeight": 2,
+   "horizontalFit": "expanded",
+   "parentID": "pcol"
+  },
+  "rect-path-hug": {
+   "id": "rect-path-hug",
+   "type": "rectangle",
+   "name": "rect-path-hug",
+   "basicBoxLocal": [
+    0,
+    100,
+    80,
+    80
+   ],
+   "path": "M40 0 A40 40 0 1 1 39.9 0 Z",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#9C27B0",
+     "id": "rf2"
+    }
+   ],
+   "parentID": "pcol"
+  }
+ }
+}

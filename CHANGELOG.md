@@ -1,6 +1,510 @@
 ## Unreleased
 
+### Fixed
+
+- A project variable named like a built-in added in a later release
+  (`animating`, `script`, `speech`, `initial`, `hold`) is read as the
+  project's own variable, not the built-in.
+
+## 10.0.1
+
+### Fixed
+
+- A rectangle with no visible fill, such as an outline drawn over a card,
+  no longer blocks taps on what is underneath it. Strokes never take taps;
+  nodes with their own reactions are unaffected.
+
+## 10.0.0
+
+Requires codelessly_api 10.0.0.
+
+- Scripts. A "Run script" action (`RunScriptAction`) runs one of the
+  project's JavaScript scripts in a sandbox. Its result is the chain's
+  `${result}`; its `onError` actions get `{error: {type, message, line,
+  column}, logs}`. Formulas call scripts as `script.name(args)`, read-only.
+  A script reaches the app only through the host APIs it was granted:
+  `vars`, `nodes` and `app.navigate`/`back`/`callApi`/`cloudData`/
+  `runAction`/`toast`/`delay`.
+- On Android, iOS, macOS and Linux scripts run in QuickJS through the new
+  `codelessly_quickjs` package
+  ([Codelessly/CodelesslyQuickJS](https://github.com/Codelessly/CodelesslyQuickJS)),
+  which an app with scripts adds. On the web
+  they run in a Web Worker. The same driver runs in both, so the same
+  script gives the same result everywhere: UTC dates, a seeded
+  `Math.random`, the clock only when granted, and fixed number formatting.
+- Limits: CPU time (`timeoutMs`), memory (`memoryLimitMb`, enforced on
+  devices), recursion depth; a script over a limit stops with a
+  `LimitError` and never crashes the app.
+- `SDKLayoutVariables.scripts` carries a layout's project and page scripts;
+  `CodelesslyContext.scripts` holds them by name.
+- A computed variable can call a script (`script.splitBill(bill, pct)`):
+  widgets that read it rebuild when the result arrives. A computed
+  variable's formula may be stored with or without its `${= }`.
+- Apps published with scripts need this version: earlier ones don't know
+  "Run script" actions (a site on 9.1.9 stays on its loading screen for
+  such a layout).
+- `NodeTransformGesture` runs `BaseNode.transformGesture` (and `zoomable`,
+  which no longer uses `InteractiveViewer`): focal-point pinch zoom, pan,
+  two-finger rotate, double-tap zoom, wheel and trackpad zoom, rubber-band
+  bounds, fling and spring settle, two-way pose variables, `changed` /
+  `changeEnd` / `doubleTap` reactions, `${transform.*}` inside the node, and
+  corner, edge and rotate handles with a selection variable.
+- `gesture_physics.dart`: the shared physics (`springOf`,
+  `AxisSettleSimulation`, `rubberBand`, `boundsRange`, `snapTargetOf`).
+- `NodeDrag` with `DragModel.physics` flings, springs back with the release
+  velocity, rubber-bands past its bounds and limits and settles on snap
+  points; `dragEnd` reads `targetX`, `targetY`, `snapIndex`, and `drag`
+  reads `settling` and `snapIndex`. Without physics it behaves as before.
+- `NodeDrag` is grabbed where it is drawn (an open sheet by its visible
+  top), counts from pointer down instead of after the touch slop, and an
+  axis-locked drag only claims moves along its axis, so a list across it
+  keeps scrolling.
+- `pinch` reactions read `rotation`, `totalRotation` and `pointerCount`;
+  `drag` and `dragEnd` read `pointerCount`.
+- A draggable's return spring uses `DraggableModel.effectivePhysics`.
+- Transitions (see `CodelesslyEditor/docs/transitions_api.md`):
+  - `CodelesslyRouteTransitionRoute` plays a `RouteTransition` on both screens.
+    - The screen it covers moves through Flutter's `delegatedTransition`.
+    - Pops reverse, or play the pop sides.
+    - Reveals grow from the tap point or the tapped node.
+  - Modals (dialogs, sheets, full screen) opened with a `routeTransition` are page routes, so shared elements fly into and out of them. The route's barrier colour applies.
+  - A drag can close a route interactively:
+    - `dismiss` (swipe down to dismiss);
+    - iOS swipe back (`swipeBack`).
+    The drag moves the route's progress, heroes follow the finger, and the release completes or cancels with a spring. It goes through the provisional `TransitionPhysics` adapter until the Gestures shared physics model lands.
+  - Hero fixes and new flights:
+    - Heroes fly during back gestures (`transitionOnUserGestures`).
+    - New flights: `morph`, `fadeThrough` and `containerTransform`; `arc` flights also arrive from a drag.
+    - A destination network image that hasn't loaded yet flies over its source instead of as an empty box.
+    - `heroPlaceholder: source` keeps the source drawn until the destination loads.
+    - Heroes in a hidden cloud-list variant don't fly.
+    - A router nested under another navigator gets its own hero controller.
+  - Flip cards (`NodeFlip`): tap, a variable, a `flip.flipped` binding, or a drag that settles on the nearer face.
+  - Tilt and parallax (`NodeTilt`).
+  - Page view `pageMotion` for coverflow, cube and 3D carousel (`PageMotionItem`).
+  - New predefined variables: `flip`, `tilt` and `pageOffset`.
+- `motion.arc`: bound positions move along a curve (a formation change
+  sweeping every player to their new spot).
+- An entrance replays from values it names at their defaults
+  (`enterFrom: {opacity: 1}`): fade-out trails on replay.
+- Impossible days (`2013-02-30`) are not read as dates.
+- Quoted formula text reads `\n`, `\t` and `\r`.
+- Text fields use standard visual density on every platform: desktop's
+  compact density (also the web's) took 8 px off a padded field that hugs
+  its height, so the editor's canvas and desktop browsers drew it shorter
+  than phones did.
+
+### Lists and pagination
+
+- A list whose item template has a fixed height (width, in a horizontal
+  list) and no bound size or visibility gives every item that extent, so a
+  10,000 item list lays out any offset without building the items before it.
+  A bound `widthFactor`, `heightFactor` or `aspectRatio` keeps the items
+  measured.
+- A list with separators keeps its fixed item extent (items and separators
+  interleave with known extents) instead of measuring every item.
+- Data list rows count duplicate ids once per build instead of once per
+  row, which was quadratic in the list's length.
+- Pagination: a list with `pagination` pages its bound data, its cloud
+  query or an API through a `PaginationController` (`CodelesslyContext.pagination`,
+  by name), shown a page at a time or as an infinite list that loads the
+  next page near its end (once per page however fast it scrolls), and in
+  both directions with the scroll position kept as pages are put in front.
+  Loading, error-with-retry and end-of-list footer nodes, pull to refresh
+  (`refresh` reactions run too), and the state as a map variable
+  (`${name.page}`, `${name.hasMore}`...). The Paginate action moves it.
+- Lists with `sections` group their items under section headers that stay
+  pinned until the next section pushes them out, with an A–Z index bar.
+- Lists with `swipeActions` reveal actions behind an item swiped sideways;
+  a full swipe runs the first action, with an Undo bar for removing ones,
+  then fires `swipeAction` reactions and can remove the item from the bound
+  list or the cloud collection.
+- Lists with a `reorder` model reorder by a handle, a long press or a press
+  anywhere, with proxy elevation, scale and opacity, auto-scroll, per-item
+  `canReorderIf` and per-drop `canDropIf`, Alt+arrow keyboard moves (with
+  screen reader actions and announcements), and an optional built-in apply
+  to the bound list variable or the cloud collection's order field. Lists
+  that share a `group` take each other's items (a Kanban board), with a
+  placeholder where the drop lands. `reorder` reactions run on the list
+  with `${result.from}`, `${result.to}`, `${result.item}`,
+  `${result.fromList}` and `${result.toList}`; a handle's reactions still
+  run too.
+- Grids with `pagination` page and load more like lists.
+- The Pagination node renders page controls (first, previous, page numbers
+  with ellipses, next, last, page size select, summary) for a controller.
+- The Table node renders a `TableView` (two_dimensional_scrollables) that
+  scrolls both ways, builds only the visible cells and pins its header row
+  and column.
+
+### Fixed
+
+- A fixed-size child of a row or column is clamped to the row or column's
+  cross-axis size, as in Flutter, instead of overflowing it.
+
+## 9.3.3
+
+Requires codelessly_api 9.3.0. Rendering fixes found matching the Chairlift
+reference app pixel for pixel.
+
+### Fixed
+
+- A colour or gradient fill sits inside its node's solid border by half the
+  border's inset, as Flutter's BoxDecoration paints a background under a
+  uniform border: drawn to the edge, the fill's anti-aliased rim showed
+  through the border's (a light seam between a card's border and shadow).
+- A node that clips its content keeps its own stroke outside the clip, as
+  Flutter's Container paints its border outside the clip of its child: a
+  rounded card's border was cut (or anti-aliased twice), leaving a light
+  seam between it and its shadow.
+- A stroke on one side paints only its band. It was the difference of two
+  rounded rects whose other three edges coincide, and at a fractional
+  position the GPU backend left faint lines along them.
+
+## 9.3.2
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A screen loaded again while it shows (published again, a fresh publish
+  bundle replacing the cached model, its variables arriving after it) keeps
+  the values of its canvas variables unless their published definition
+  changed. They went back to their published defaults, and the screen's
+  load actions, which run once per screen, didn't fill them again: a form
+  whose load actions filled drafts from the selected item opened right
+  after a republish with an empty name and the default time.
+- Load actions wait for the screen's variables. A screen shown before its
+  published variables are in the model (a cached model without them, while
+  the publish bundle or an update downloads them) runs its load actions,
+  and applies its link parameters, once they arrive
+  (`DataManager.variablesPending`).
+
+## 9.3.1
+
+Requires codelessly_api 9.3.0.
+
+### Fixed
+
+- A node with a bound `visible` and a transition time animates its size
+  only when it shows or hides. A shown text whose data changes takes its
+  new width at once; it used to ease there with an overshoot that clipped
+  the text for a moment ("Weekdays" drew as "Weekday").
+- Layouts load the SVGs of their toast icons when they load
+  (`AppToast.precacheIcons`, `SvgIcon.precache`), so the first toast of a
+  session shows its icon.
+
+## 9.3.0
+
+Requires codelessly_api 9.3.0.
+
+### Added
+
+- App identity: `SDKPublishModel.appIdentity` and `withAppIdentity`;
+  `CodelesslyAppIdentity` resolves each screen's title and description and
+  sets the window title; `CodelesslyAppIdentityUpdater` keeps it in sync
+  with the `CodelesslyRouter`.
+- Runtime screen generation: `RuntimeScreenGenerator` registers the
+  `generateScreen` app function, backed by a `ScreenPlanSource`
+  (`HttpScreenPlanSource`, `ClaudeScreenPlanSource`); generated screens are
+  shown with `GeneratedScreenPage` / `GeneratedScreenView` and cached with
+  `GeneratedScreenCache`.
+- Speech recognition: `listen` and `stopListening` app functions; the
+  `speech` variable gains `canListen`, `listening`, `heard`, `score`,
+  `confidence` and `error`. `pronunciationScore` is exported.
+- Formula functions: `spline`, `pathPoints`, `pathPoint`, `pathLength`,
+  `alpha` and `without`; color functions accept color values.
+- `motion.keyframes`, `motion.paused` and `motion.phase` bindings.
+- `orientToPath` follows a node's actual movement when keyframes move it
+  off its path.
+- `animateVariable` and `${animating.<variable>}`.
+- `transitionMs` animates bound text, icon, gradient and stroke colors.
+- Text: OpenType `fontFeatures` and `LineHeight.leadingDistribution`.
+- Paths: bound stroke and fill colors, `trimMs` / `trimCurve`, bound
+  `dashPattern`, gradient strokes and bindable rectangle `path`.
+- Bound gradient stops on any paint.
+- Drag tracks:
+  - Bindable value, geometry and range (`track.*`, `dragTrack.*`).
+  - Hit area, combined input, wheel and key steps, double-tap values and
+    `write: false`.
+  - Fine adjustment (Shift, press-and-hold, Shift + wheel).
+  - Animated value changes (`snapMs`).
+  - `jumpOnTap` on arc tracks.
+  - Path tracks scale with their frame's view box.
+  - Knobs and sliders inside scroll views no longer scroll the page.
+- Toasts: rotation and entry curve; the action can be a styled button.
+- Confirm dialogs: borders, icon, alignment and sizing options.
+- Scroll To: an `axis` option.
+- Animated positions in stacked lists; pulse `phase`; switch thumb shadow.
+- Bindings accept literal colors (`#3A3530`) and numbers (`172.28`).
+- `screen.breakpoint` and `screen.isMobile` follow a responsive layout's
+  own breakpoints.
+- `codelessly_genui` package (not yet published): renders A2UI surfaces
+  with the SDK.
+
+### Fixed
+
+- `CodelesslyRouter.config()` can be called before `runApp`.
+- Text is measured the same way as Flutter's `Text`; dense text fields that
+  size to their content stay on one line.
+- Actions, conditions and list data use runtime values only, and computed
+  variables resolve everywhere.
+- Computed variables that read `storage`, `route`, `screen` or `auth` are
+  cached, preventing slowdowns.
+- `widthFactor` and `heightFactor` resolve inside rows, columns and
+  horizontal lists.
+- Children of a frame with `contentFit` are placed in its design size.
+- `parent` inside a fixed-size child of a frame reads the frame's content
+  size.
+- Freeform children are placed at bound `x` / `y`; draggable nodes moved
+  by bound `x` / `y` can be grabbed where they are drawn.
+- Cross-axis overflow is placed as in Flutter; clipped flex layouts no
+  longer draw overflow stripes.
+- `stretchItems` measures content, so hidden children take no height.
+- Aspect-ratio boxes keep their ratio; icon baselines align to pixels.
+- Shadows on rounded boxes with a spread shadow paint in order.
+- Single-line text in a row that runs short of space keeps its width.
+- Paths and path-drawn rectangles take taps only on their stroke or fill.
+- A loop stopped by a binding keeps its bound values; a loop created while
+  tickers are paused starts when they resume.
+- An image fill without a URL no longer throws.
+- Interval and timer reactions pause while their screen is covered.
+- `${loop.item}` and `${loop.index}` are available in for-each actions,
+  and `${result.item}` persists through each iteration.
+- Link parameters are parsed by the variable's type (`?ids=3,7` sets a list).
+- Scroll To waits for its target and scrolls it on the current screen.
+- Nodes shown and hidden by a binding keep their state.
+- Action chains finish on the current screen after the original screen
+  is gone.
+
+## 9.1.9
+
+Requires codelessly_api 9.0.3.
+
+- Depends on codelessly_api ^9.0.3, so apps get the API's latest fixes (icon
+  click reactions; padding stored on a text node pads nothing).
+
+## 9.1.8
+
+Requires codelessly_api 9.0.1.
+
+### Fixes
+
+- A node hidden in the design (visible off, shown by a condition or
+  binding) no longer takes taps while hidden. It kept its space and stayed
+  hit-testable, so a hidden full-screen scrim swallowed every tap meant for
+  the buttons under it. Screen readers skip it too.
+- A slug-loaded app whose background authentication fails (its anonymous
+  sign-in can be refused) authenticates again when a user signs in, so its
+  cloud data loads. Lists stayed on their spinner after the user signed in
+  with their own account. See `SignInRetry`.
+
+## 9.1.7
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A row that hugs its height and stretches its children grows when a child
+  grows after it is laid out, as when a formula shows a hidden strip in a
+  card. With its width fixed too (a list item), the row kept its old height
+  and cut the child off.
+
+### Actions
+
+- A bottom sheet's grab handle (`showDragHandle`) lies on the sheet canvas,
+  8 px below its top edge. It sat in a band of its own above the canvas,
+  which the canvas's own fill left see-through, so the handle floated over
+  the screen behind the sheet.
+
+## 9.1.6
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- An aligned child that is expanded on an axis fills its frame on that axis.
+  It kept the overflow its stored box had at design size before, so a
+  full-screen row stored 1768 wide in a 1440 frame rendered 328 wider than
+  any screen: a board's header buttons and its card side panel were pushed
+  off the right edge. Aligned children with a fixed size still keep their
+  design overhang.
+
+## 9.1.5
+
+Requires codelessly_api 9.0.1.
+
+### Text fields
+
+- A one-line text field that fills a fixed height draws its border at that
+  height under desktop's compact visual density. The density took 8 px off
+  the border, so a 44 px field showed a 36 px outline over a strip of its
+  box's background on desktop browsers.
+
+## 9.1.4
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A child that fills the cross axis of a row or column that stretches its
+  children and hugs that axis takes the thickness its siblings give it, as
+  in the editor, instead of its design size. An accent stripe designed
+  beside a two-line message kept a one-line notice card two lines tall.
+
+## 9.1.3
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A breakpoint layout whose root is pinned to the right or bottom edge keeps
+  those distances to the edges of the screen, in a dialog too. It was always
+  placed by its alignment: an account menu pinned above a sidebar's user card
+  opened at the top-left corner. A root pinned only by its left and top keeps
+  its alignment, since those pins are often its place on the design canvas.
+
+### Variables
+
+- A set-variable action writes the variable that bindings read by its name.
+  When two variables share a name (a project holding the same app variable
+  twice, or a screen variable over an app variable), the action wrote the one
+  its id named while text, colors and conditions read the other, so taps
+  seemed to do nothing.
+
+## 9.1.2
+
+Requires codelessly_api 9.0.1.
+
+### Accessibility
+
+- A tappable node with its own tappable nodes inside (a song row that loads
+  its song, with edit and move buttons in it) no longer merges them into one
+  button for screen readers. The inner buttons were read as part of the row
+  and their taps went to the row, so with a screen reader, or on the web once
+  semantics is on, they could not be used. The row now keeps its own text and
+  tap, and each inner button is its own button.
+
+## 9.1.1
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A padded row, column or frame pinned to both sides of its parent (chained
+  sizing) lays its content out at the width the pins give it on a screen
+  wider than its design. Only its background stretched before: a player's
+  side panel kept its rows at their 1440 width, and a console bar kept its
+  controls off centre, on a 1920 wide screen.
+
+## 9.1.0
+
+Requires codelessly_api 9.0.1.
+
+### Breaking
+
+- The formula `range(start, end)` and `range(start, end, step)` now exclude
+  `end`, as Python's `range` does: `range(0, 3)` is `[0, 1, 2]` (it was
+  `[0, 1, 2, 3]`), `range(3, 0)` is `[3, 2, 1]`, and a date range stops
+  before its end time. `range(count)` is unchanged. A formula that relied on
+  the end being included adds one step to `end`, or uses
+  `map(range(count), i => start + i)`, which reads the same in every
+  version.
+
+## 9.0.1
+
+Requires codelessly_api 9.0.1.
+
+### Layout
+
+- A responsive variant designed wider than the variance (a 1440 wide
+  desktop layout in a 390 wide mobile design) takes the screen it is shown
+  on: it was laid out 1050 px too wide, sliding the page under its sidebar.
+- A squeezable child (a section title) next to a sibling that flexes on the
+  main axis (a rule) no longer reserves its flex share of the row: the
+  sibling takes what the title leaves.
+- A row or column pinned to both sides of a frame (chained sizing) fills
+  the slot its pins give it instead of laying its content out at its
+  design width.
+- A freeform child whose width or height is bound (a header that collapses
+  as the page scrolls) moves to its new size as the value changes.
+- Items of a `layout: stack` list bound by `positionX` / `positionY` sit at
+  that fraction of the list, anchored by their alignment.
+
+### Navigation
+
+- On the web, pages switch at once unless a navigation names a transition:
+  the platform's page transition off Apple platforms is Android's zoom.
+
+### Icons
+
+- An icon saved without a version is served from the version the icon
+  catalog lists for it; v1 doesn't exist for most icons, which then didn't
+  draw.
+
+## 9.0.0
+
+Requires codelessly_api 9.0.0. The first release on pub.dev since 8.2.0:
+it includes everything listed below for 8.4.0 and 8.3.0, which were never
+published, and merges the Meridian and Hookline lines into one SDK.
+
+### Breaking changes from 8.2.0
+
+- Navigation goes through `CodelesslyRouter` (see Navigation below).
+  `Codelessly.pendingRoute` and `SDKPublishModel.linkParamsFor` are
+  removed: the router reads links from the address.
+- `DesignCellGridDelegate` is removed.
+
+### Formulas and screen parameters
+
+- `FormulaEvaluator.textErrorOf` finds the first formula in a text that is
+  not closed or doesn't parse, and names the character it starts at.
+- Quoted text in formulas can hold backslash-escaped quotes (`'it\'s'`).
+- `RouteParamsScope` passes a screen's parameters to the nodes under it;
+  `ComputedVariables.resolveAll` takes `routeParams`.
+- A drag no longer rewrites its offset variable on every move when the
+  value is unchanged but stored as text (`"12"` and `12`).
+
+### Navigation
+
+- A Codelessly app navigates like a website: `CodelesslyRouter` shows its
+  screens as pages of a Navigator 2 router built on NavigationUtils
+  (`CodelesslyRouterDelegate`). Every screen has a URL (its path, such as
+  `/guide/:id`, else `/<canvasId>`; the entry screen at `/`), screens the
+  app opens are browser history entries, the browser's back and forward
+  buttons move through them, the app's own back goes back in the browser,
+  and a reload or a shared link opens the same screen with the same back
+  stack (kept in the history entry's state). Use
+  `MaterialApp.router(routerConfig: router.config())`, with `basePath` for
+  an app served under a path, or `config(syncWithBrowser: false)` to embed
+  an app without touching the address.
+- Navigation actions of a screen shown by a router go through it; other
+  hosts keep using their `Navigator`.
+- Screen parameters come from the route's location
+  (`CodelesslyRouteScope`); a link's parameters also set the variables they
+  name.
+- `SDKPublishUpdates.canvasPaths` holds each canvas's URL path, so links
+  resolve before the screen's layout downloads.
+- Removed `Codelessly.pendingRoute` and `SDKPublishModel.linkParamsFor`:
+  the router reads links from the address.
+
 ### Nodes
+
+- A text field with `markdown` shows what's typed as live Markdown
+  (`MarkdownTextEditingController`), markers kept and dimmed; Enter in a
+  list item continues the list, and on an empty item ends it.
+- Text fields run their own Key Down reactions while focused, before their
+  editing keys. Keys may be combinations (`Meta+Enter`, `Shift+Enter`,
+  `Meta+b`) and a trigger's `when` limits a reaction to when a formula is
+  true; only a reaction that matched takes the key. Screens' Key Down
+  reactions take combinations and `when` too.
+- A text field's Changed (and tap) and Key Down reactions read
+  `${result.word}` (the word ending at the cursor), `${result.cursor}`,
+  `${result.selectionStart}` and `${result.selectionEnd}`.
+- Edit Text actions edit a text field on the screen at its cursor (wrap,
+  toggle list, insert, replace the word, set, clear, focus) like typing:
+  its bound variable updates and its Changed reactions run. A toolbar
+  button's tap keeps the field's selection (`TextFieldRegistry`,
+  `TextEdits`).
 
 - Renders `gauge` and `chart` nodes (`PassiveGaugeWidget`,
   `PassiveChartWidget`); taps on a chart select a category and fire its
@@ -40,6 +544,23 @@
   the editor's resolver, so each row previews its data.
 - Gauge, chart, progress bar and dropdown widgets take `scopedValues`, so a
   design canvas can show their bindings with its variable defaults.
+
+### Pan and zoom canvases
+
+- `wheel`, `pinch` and screen `keyUp` reactions; drag, drag end and pointer
+  results carry `globalX`/`globalY` and the `shift`, `alt` and `meta` keys,
+  pointer results the `button`; pointer reactions listen on a node's whole
+  box.
+- Click results carry `x`, `y` (in the node) and `globalX`, `globalY`.
+- Formulas: `exp`, `ln`, `log(value, base?)`, `sign`, `hypot`, and
+  `mix(from, to, amount)` to blend two colors like `Color.lerp`.
+- A node hidden by a binding or condition stops its pulses, motion loops
+  and spins.
+- A published layout too large for one document may be stored with its
+  canvases gzipped (`compressedCanvases`); `SDKPublishLayout.fromJson`
+  expands it.
+- Responsive layouts follow their own tablet/desktop breakpoints
+  (`VarianceProperties.tabletMinWidth` / `desktopMinWidth`).
 
 ## 8.4.0
 

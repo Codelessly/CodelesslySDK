@@ -220,8 +220,11 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
   Widget buildFromUrl({required bool withAlignment}) {
     final String url =
         widget.url ??
-        widget.paint!.croppedImageURL ??
-        widget.paint!.downloadUrl!;
+        widget.paint?.croppedImageURL ??
+        widget.paint?.downloadUrl ??
+        '';
+    // A paint saved without a URL draws nothing rather than failing.
+    if (url.trim().isEmpty) return const SizedBox.shrink();
 
     if (url.containsUncheckedVariablePath) return jsonPathBuilder(url);
 
@@ -273,6 +276,13 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
         // On the web, hosts that don't allow cross-origin reads (no CORS
         // headers) still show their images, drawn by the browser.
         webHtmlElementStrategy: WebHtmlElementStrategy.fallback,
+        // Shared elements keep their source drawn under a destination
+        // image that hasn't loaded yet (see [HeroImageLoadScope]).
+        frameBuilder: (context, child, frame, synchronous) =>
+            HeroImageLoadReporter(
+              loaded: synchronous || frame != null,
+              child: child,
+            ),
         loadingBuilder: widget.loadingBuilder != null
             ? (context, child, loadingProgress) =>
                   widget.loadingBuilder!(context, child)
@@ -340,7 +350,7 @@ class _UltimateImageBuilderState extends State<UltimateImageBuilder> {
   }
 
   Widget jsonPathBuilder(String path) {
-    return LayoutBuilder(
+    return IntrinsicSafeLayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxHeight < 64 || constraints.maxWidth < 64) {
           return const FittedBox(

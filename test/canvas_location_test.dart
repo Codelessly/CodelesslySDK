@@ -1,199 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class _FakeCache extends Fake implements CacheManager {}
-
-class _FakeAuthManager extends Fake implements AuthManager {
-  @override
-  AuthData? get authData => AuthData(
-    authToken: 'token',
-    projectId: 'project',
-    timestamp: DateTime(2026),
-    owner: 'owner',
-    teams: const {},
-    users: const {},
-    roles: const {},
-  );
-}
-
-class _FakeLocalRepository extends Fake implements LocalDataRepository {}
-
-class _FakeNetworkRepository extends Fake implements NetworkDataRepository {}
-
-class _FakeFirestore extends Fake implements FirebaseFirestore {}
-
-class _FakeLocalDatabase extends Fake implements LocalDatabase {}
-
-class _TestDataManager extends DataManager {
-  _TestDataManager(SDKPublishModel model)
-    : super(
-        'test',
-        config: CodelesslyConfig(authToken: 'token'),
-        cacheManager: _FakeCache(),
-        authManager: _FakeAuthManager(),
-        networkDataRepository: _FakeNetworkRepository(),
-        localDataRepository: _FakeLocalRepository(),
-        firebaseFirestore: _FakeFirestore(),
-        errorLogger: ErrorLogger.instance,
-        publishModel: model,
-      );
-
-  @override
-  LocalDatabase get localDatabase => _FakeLocalDatabase();
-}
-
-TextNode _text(String id, String parent, String characters) => TextNode(
-  id: id,
-  name: id,
-  basicBoxLocal: NodeBox(0, 0, 300, 24),
-  data: characters,
-  textMixedProps: [StartEndProp(start: 0, end: characters.length)],
-)..parentID = parent;
-
-ButtonNode _button(String id, String parent, ActionModel action) =>
-    ElevatedButtonNode(
-      id: id,
-      name: id,
-      basicBoxLocal: NodeBox(0, 0, 160, 44),
-      properties: ButtonProperties(label: id),
-      reactions: [
-        Reaction(
-          action: action,
-          trigger: TriggerModel(type: TriggerType.click),
-        ),
-      ],
-    )..parentID = parent;
-
-/// A layout of one canvas [id] at [path] that shows [children].
-SDKPublishLayout _screen(
-  String id, {
-  String? path,
-  List<BaseNode Function(String body)> children = const [],
-}) {
-  final String body = '${id}Body';
-  final List<BaseNode> kids = [for (final child in children) child(body)];
-  final List<BaseNode> nodes = [
-    CanvasNode(
-      id: id,
-      name: id,
-      basicBoxLocal: NodeBox(0, 0, 390, 844),
-      children: [body],
-      properties: CanvasProperties(
-        bodyId: body,
-        safeArea: const SafeAreaModel.all(false),
-        path: path,
-      ),
-    )..parentID = kRootNode,
-    AutoPlaceholderNode(
-      id: body,
-      name: body,
-      basicBoxLocal: NodeBox(0, 0, 390, 844),
-      children: [for (final kid in kids) kid.id],
-      mainAxisAlignment: MainAxisAlignmentC.start,
-      horizontalFit: SizeFit.expanded,
-      verticalFit: SizeFit.expanded,
-    )..parentID = id,
-    ...kids,
-  ];
-  return SDKPublishLayout(
-    id: id,
-    pageId: 'page',
-    projectId: 'project',
-    canvases: {
-      id: {for (final node in nodes) node.id: node},
-    },
-    lastUpdated: DateTime(2026),
-    owner: 'owner',
-    teams: const {},
-    users: const {},
-    roles: const {},
-    public: false,
-  );
-}
-
-/// The Tidepool screens: Tides (the entry, no path), the guide, a creature
-/// and the journal.
-SDKPublishModel _model({ActionModel? tidesAction, bool notFound = false}) {
-  final model = SDKPublishModel(
-    projectId: 'project',
-    owner: 'owner',
-    teams: const {},
-    users: const {},
-    roles: const {},
-    public: false,
-    entryLayoutId: 'tides',
-  );
-  for (final layout in [
-    _screen(
-      'tides',
-      children: [
-        (body) => _text('tidesTitle', body, 'Tides'),
-        if (tidesAction != null) (body) => _button('Go', body, tidesAction),
-      ],
-    ),
-    _screen(
-      'guide',
-      path: 'guide',
-      children: [(body) => _text('guideTitle', body, 'Guide')],
-    ),
-    _screen(
-      'creature',
-      path: '/guide/:id/',
-      children: [
-        (body) => _text('creatureId', body, r'id=${route.id}'),
-        (body) => _text('creatureFrom', body, r'from=${route.from}'),
-      ],
-    ),
-    _screen('newCreature', path: 'guide/new'),
-    _screen('journal', path: 'journal'),
-    _screen('settings'),
-    if (notFound)
-      _screen(
-        'missing',
-        path: '*',
-        children: [
-          (body) =>
-              _text('missingPath', body, r'Nothing lives at /${route.path}'),
-        ],
-      ),
-  ]) {
-    model.layouts[layout.id] = layout;
-  }
-  return model;
-}
-
-/// Opens [model]'s app with [pendingRoute], as a site does for a link.
-Future<Codelessly> _pumpApp(
-  WidgetTester tester,
-  SDKPublishModel model, {
-  CodelesslyRoute? pendingRoute,
-}) async {
-  tester.view.devicePixelRatio = 1;
-  tester.view.physicalSize = const Size(390, 844);
-  addTearDown(tester.view.reset);
-
-  final codelessly = Codelessly(
-    config: CodelesslyConfig(authToken: 'token'),
-    publishDataManager: _TestDataManager(model)..status = CStatus.loaded(),
-  )..status = CStatus.loaded();
-  codelessly.pendingRoute = pendingRoute;
-  await tester.pumpWidget(
-    MaterialApp(
-      home: CodelesslyWidget(
-        controller: CodelesslyWidgetController(codelessly: codelessly),
-      ),
-    ),
-  );
-  await tester.pumpAndSettle();
-  return codelessly;
-}
+import 'support/tidepool.dart';
 
 void main() {
   group('CanvasLocation', () {
-    final SDKPublishModel model = _model();
+    final SDKPublishModel model = tidepoolModel();
 
     test('matches a canvas by its path', () {
       final CanvasLocationMatch? match = CanvasLocation.match(
@@ -217,40 +29,23 @@ void main() {
       expect(CanvasLocation.match(model, 'kraken'), isNull);
     });
 
-    test('a catch-all path matches what no other path does', () {
-      final SDKPublishModel withMissing = _model(notFound: true);
-      final CanvasLocationMatch? match = CanvasLocation.match(
-        withMissing,
-        'settings/billing?x=1',
+    test("an app's not found screen takes every unknown path", () {
+      final SDKPublishModel withLost = tidepoolModel(withNotFound: true);
+      final CanvasLocationMatch? lost = CanvasLocation.match(
+        withLost,
+        '/amp/room?x=1',
       );
-      expect(match?.canvasId, 'missing');
-      expect(match?.params, {'path': 'settings/billing', 'x': '1'});
-      expect(CanvasLocation.match(withMissing, 'kraken')?.canvasId, 'missing');
-      // Exact paths still win, and a screen id is left to the id link.
+      expect(lost?.canvasId, 'lost');
+      expect(lost?.params, {'x': '1', 'path': 'amp/room'});
+      // Known paths still win, and the root is still the entry screen.
       expect(
-        CanvasLocation.match(withMissing, 'guide/new')?.canvasId,
+        CanvasLocation.match(withLost, 'guide/new')?.canvasId,
         'newCreature',
       );
-      expect(
-        CanvasLocation.match(withMissing, 'guide/bat-star')?.canvasId,
-        'creature',
-      );
-      expect(CanvasLocation.match(withMissing, 'settings'), isNull);
-      expect(CanvasLocation.match(withMissing, ''), isNull);
-      expect(
-        CanvasLocation.locationOf(withMissing, 'missing', {'path': 'a/b'}),
-        'a/b',
-      );
-    });
-
-    test('a catch-all under a prefix takes only that prefix', () {
-      expect(CanvasLocation.matchPattern(['docs', '*'], ['docs']), {
-        'path': '',
-      });
-      expect(CanvasLocation.matchPattern(['docs', '*'], ['docs', 'a', 'b']), {
-        'path': 'a/b',
-      });
-      expect(CanvasLocation.matchPattern(['docs', '*'], ['blog', 'a']), isNull);
+      expect(CanvasLocation.match(withLost, 'journal')?.canvasId, 'journal');
+      expect(CanvasLocation.match(withLost, '/'), isNull);
+      // It has no location of its own: it is opened by its id.
+      expect(CanvasLocation.locationOf(withLost, 'lost', {}), isNull);
     });
 
     test('fills a path with params', () {
@@ -272,58 +67,53 @@ void main() {
     });
   });
 
-  group('links', () {
-    testWidgets('a link to a URL path opens that screen with its params', (
-      tester,
-    ) async {
-      await _pumpApp(
-        tester,
-        _model(),
-        pendingRoute: CodelesslyRoute.tryParse('guide/bat-star?from=link'),
+  group('catch-all paths', () {
+    final SDKPublishModel model = tidepoolModel()
+      ..layouts['notFound'] = testScreen('notFound', path: '*path')
+      ..layouts['docs'] = testScreen('docs', path: 'docs/*rest');
+
+    test('take any path no other screen matches, with the rest', () {
+      final CanvasLocationMatch? lost = CanvasLocation.match(
+        model,
+        'kraken/deep?x=1',
       );
-      expect(find.text('id=bat-star'), findsOneWidget);
-      expect(find.text('from=link'), findsOneWidget);
+      expect(lost?.canvasId, 'notFound');
+      expect(lost?.params, {'path': 'kraken/deep', 'x': '1'});
+      expect(CanvasLocation.match(model, 'docs/a/b')?.params, {'rest': 'a/b'});
+      // Too short for docs/*rest: the catch-all takes it.
+      expect(CanvasLocation.match(model, 'docs')?.canvasId, 'notFound');
     });
 
-    testWidgets('a link to a screen id still opens it', (tester) async {
-      await _pumpApp(
-        tester,
-        _model(),
-        pendingRoute: CodelesslyRoute.tryParse('creature?id=kraken'),
-      );
-      expect(find.text('id=kraken'), findsOneWidget);
-    });
-
-    testWidgets('an unknown link opens the catch-all screen', (tester) async {
-      await _pumpApp(
-        tester,
-        _model(notFound: true),
-        pendingRoute: CodelesslyRoute.tryParse('settings/billing'),
-      );
-      expect(find.text('Nothing lives at /settings/billing'), findsOneWidget);
-    });
-
-    testWidgets("the address shows the screen's URL path", (tester) async {
-      final Codelessly codelessly = await _pumpApp(
-        tester,
-        _model(
-          tidesAction: NavigationAction(
-            navigationType: NavigationType.push,
-            destinationId: 'creature',
-            params: {'id': 'kraken', 'from': 'tides'},
-          ),
-        ),
-      );
-      expect(codelessly.pathOf(codelessly.route.value!), '');
-      await tester.tap(find.text('Go'));
-      await tester.pumpAndSettle();
-      expect(find.text('id=kraken'), findsOneWidget);
+    test('lose to every other match', () {
+      expect(CanvasLocation.match(model, 'guide')?.canvasId, 'guide');
       expect(
-        codelessly.pathOf(codelessly.route.value!),
-        'guide/kraken?from=tides',
+        CanvasLocation.match(model, 'guide/bat-star')?.canvasId,
+        'creature',
       );
-      // A screen without a URL path falls back to its id.
-      expect(codelessly.pathOf(const CodelesslyRoute('settings')), 'settings');
+      expect(CanvasLocation.match(model, ''), isNull);
     });
+
+    test('fill a path with the rest', () {
+      expect(
+        CanvasLocation.locationOf(model, 'docs', {'rest': 'a/b', 'q': 1}),
+        'docs/a/b?q=1',
+      );
+      expect(CanvasLocation.locationOf(model, 'notFound', {}), isNull);
+    });
+  });
+
+  test('an optional trailing param matches with or without its segment', () {
+    final List<String> pattern = CanvasLocation.segmentsOf('sheet/:id?');
+    expect(CanvasLocation.matchPattern(pattern, ['sheet']), <String, String>{});
+    expect(CanvasLocation.matchPattern(pattern, ['sheet', 'doom']), {
+      'id': 'doom',
+    });
+    expect(CanvasLocation.matchPattern(pattern, ['sheet', 'a', 'b']), isNull);
+    expect(CanvasLocation.matchPattern(pattern, ['patches']), isNull);
+    expect(CanvasLocation.expandOptional('sheet/:id?'), ['sheet/:id', 'sheet']);
+    expect(CanvasLocation.expandOptional('guide/:id'), ['guide/:id']);
+    expect(CanvasLocation.fill('sheet/:id?', {'id': 'doom'}), 'sheet/doom');
+    expect(CanvasLocation.fill('sheet/:id?', {'id': ''}), 'sheet');
+    expect(CanvasLocation.fill('sheet/:id?', {}), 'sheet');
   });
 }

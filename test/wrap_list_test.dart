@@ -162,6 +162,17 @@ void main() {
     expect(tester.getTopLeft(items().at(2)) - list, const Offset(116, 10));
   });
 
+  testWidgets('a vertical wrapping list as tall as its items wraps in rows', (
+    tester,
+  ) async {
+    // Chips in a column-direction list that hugs its height: with no height
+    // to fill, a vertical run never wraps, so the items flow in rows.
+    await pump(tester, wrapList(scrollDirection: AxisC.vertical));
+    final Offset list = tester.getTopLeft(find.byType(WrapNodeBox));
+    expect(tester.getTopLeft(items().at(1)) - list, const Offset(118, 10));
+    expect(tester.getTopLeft(items().at(3)) - list, const Offset(10, 56));
+  });
+
   testWidgets('a wrapping list shows one item per item of its data', (
     tester,
   ) async {
@@ -218,5 +229,51 @@ void main() {
     expect(tester.getTopLeft(find.text('0')), const Offset(20, 0));
     expect(tester.getTopLeft(find.text('1')), const Offset(130, 0));
     expect(tester.getTopLeft(find.text('2')), const Offset(75, 20));
+  });
+
+  // Switchboard's ticket properties: 20px tag chips on a line with 28px
+  // buttons, centered across it.
+  testWidgets('WrappedItems centers short items across their line', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 300,
+            child: WrappedItems(
+              itemCount: 2,
+              spacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              itemBuilder: (context, index) => SizedBox(
+                key: ValueKey<int>(index),
+                width: 80,
+                height: index == 0 ? 28 : 20,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byKey(const ValueKey<int>(1))).dy, 4);
+  });
+
+  test('wrapCrossAlignment round-trips', () {
+    final ListViewProperties properties = ListViewProperties(
+      wrap: true,
+      wrapCrossAlignment: CrossAxisAlignmentC.center,
+    );
+    final Map<String, dynamic> json = properties.toJson();
+    expect(json['wrapCrossAlignment'], 'center');
+    expect(
+      ListViewProperties.fromJson(json).wrapCrossAlignment,
+      CrossAxisAlignmentC.center,
+    );
+    expect(
+      ListViewProperties().toJson().containsKey('wrapCrossAlignment'),
+      isFalse,
+    );
   });
 }

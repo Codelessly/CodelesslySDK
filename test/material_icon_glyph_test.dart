@@ -1,23 +1,88 @@
+import 'dart:io';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The editor saves Material icons with Google's codepoints; Flutter's
-/// bundled font numbers them differently, so the SDK finds the glyph by name.
 void main() {
-  test("a Material icon is drawn with Flutter's glyph for its name and style", () {
-    MaterialIcon icon(String name, MaterialIconStyle style, int googleCodepoint) => MaterialIcon(
-          name: name,
-          codepoint: googleCodepoint,
-          style: style,
-        );
-    expect(flutterMaterialCodepoint(icon('add', MaterialIconStyle.filled, 0xe145)), Icons.add.codePoint);
-    expect(flutterMaterialCodepoint(icon('search', MaterialIconStyle.filled, 0xe8b6)), Icons.search.codePoint);
-    expect(
-      flutterMaterialCodepoint(icon('calendar_today', MaterialIconStyle.outlined, 0xe935)),
-      Icons.calendar_today_outlined.codePoint,
+  test('catalog icons request styled SVGs by name, not Google codepoint', () {
+    const icon = MaterialIcon(
+      codepoint: 0xe037, // Flutter's font assigns a different glyph here.
+      name: 'play_arrow',
+      style: MaterialIconStyle.rounded,
+      version: 16,
     );
-    expect(flutterMaterialCodepoint(icon('no_such_icon_name', MaterialIconStyle.filled, 1)), isNull);
+    expect(
+      icon.toSvgUrl(),
+      'https://fonts.gstatic.com/s/i/materialiconsround/play_arrow/v16/24px.svg',
+    );
+  });
+
+  testWidgets('renderer requests a vector without mounting a font icon', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            // Inspect the returned widget without mounting it: widget tests block
+            // HTTP requests, and the SVG loader would otherwise fetch the CDN.
+            // Snapped to the pixel grid as Icon's glyph is (see
+            // PixelSnappedBaseline).
+            final snapped = const SvgIcon(
+              icon: MaterialIcon(
+                codepoint: 0xe037,
+                name: 'play_arrow',
+                style: MaterialIconStyle.rounded,
+                version: 16,
+              ),
+              color: Colors.red,
+              size: 32,
+            ).build(context) as PixelSnappedBaseline;
+            final box = snapped.child! as SizedBox;
+            final picture = box.child! as SvgPicture;
+            expect(box.width, 32);
+            expect(box.height, 32);
+            expect(
+              (picture.bytesLoader as SvgNetworkLoader).url,
+              'https://fonts.gstatic.com/s/i/materialiconsround/play_arrow/v16/24px.svg',
+            );
+            expect(
+              picture.colorFilter,
+              const ColorFilter.mode(Colors.red, BlendMode.srcIn),
+            );
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+  });
+
+  test('the SDK never builds a non-constant IconData', () {
+    final RegExp call = RegExp(r'(?<!const )(?<![\w.])IconData\(');
+    final List<String> offenders = [
+      for (final File file in Directory(
+        'lib',
+      ).listSync(recursive: true).whereType<File>())
+        if (file.path.endsWith('.dart'))
+          for (final (int i, String line) in file.readAsLinesSync().indexed)
+            if (!line.trimLeft().startsWith('//') && call.hasMatch(line))
+              '${file.path}:${i + 1}',
+    ];
+    expect(offenders, isEmpty);
+  });
+
+  test('the SDK does not ship a full Material Icons font map', () {
+    expect(
+      File('lib/src/utils/material_icons_by_name.dart').existsSync(),
+      isFalse,
+    );
+    final renderer = File(
+      'lib/src/transformers/widget_node_transformer_manager.dart',
+    ).readAsStringSync();
+    expect(renderer, contains('SvgPicture.network('));
+    expect(renderer, isNot(contains('materialIconsByName[')));
   });
 }

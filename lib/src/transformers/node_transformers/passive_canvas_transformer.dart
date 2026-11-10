@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../../codelessly_sdk.dart';
 import '../../functions/action_chain.dart';
+import '../../functions/beat_clock.dart';
 
 class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
   static const String name = 'PassiveCanvasWidget';
@@ -124,6 +125,25 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
     );
   }
 
+  /// The surface a canvas without a scaffold is drawn on: its background
+  /// colour. Under a [TapThroughScope] (a dialog's canvas, the overlay
+  /// screen) a canvas without a background takes no taps on its empty
+  /// parts, so they reach what is below it.
+  Widget _canvasMaterial(BuildContext context, CanvasNode node, Widget body) {
+    final Color? background = canvasBackground(context, node);
+    // A canvas without a background is see-through in a dialog, sheet or
+    // popover however it was opened (a confirm's dialog canvas showed a
+    // white box, the theme's surface, behind its tilted card).
+    final bool transparent =
+        (background == null || background.a == 0) &&
+        (TapThroughScope.of(context) || ModalRoute.of(context) is PopupRoute);
+    return Material(
+      type: transparent ? MaterialType.transparency : MaterialType.canvas,
+      color: transparent ? null : background,
+      child: body,
+    );
+  }
+
   Widget _wrapInScaffoldForResponsive({
     required CanvasNode node,
     required BuildContext context,
@@ -195,17 +215,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      final Color? background = canvasBackground(context, node);
-      // Under a TapThroughScope, a canvas without a background takes no taps
-      // on its empty parts, so they reach its dialog's barrier.
-      final bool transparent =
-          (background == null || background.a == 0) &&
-          TapThroughScope.of(context);
-      scaffold = Material(
-        type: transparent ? MaterialType.transparency : MaterialType.canvas,
-        color: transparent ? null : background,
-        child: body,
-      );
+      scaffold = _canvasMaterial(context, node, body);
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
@@ -328,17 +338,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
         body: body,
       );
     } else {
-      scaffold = Material(
-        color: canvasBackground(context, node),
-        child: !node.isScrollable
-            // This would make it so auto scale layouts are top-center aligned
-            // in the viewport. But this doesn't work if the layout is inside a
-            // dialog. it will force it to top-center align in the dialog
-            // which is not what we want.
-            // ? Align(alignment: Alignment.topCenter, child: body)
-            ? body
-            : body,
-      );
+      scaffold = _canvasMaterial(context, node, body);
     }
 
     return manager.getTransformer<PassiveRectangleTransformer>().buildRectangle(
@@ -398,9 +398,7 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
       settings: settings,
       builder: (context) => CanvasViewport(
         node: node,
-        followsScreen:
-            node.scaleMode == ScaleMode.responsive &&
-            hasResponsiveLayout(node, getNode),
+        followsScreen: followsScreen(node),
         child: switch (node.scaleMode) {
           ScaleMode.responsive => _wrapInScaffoldForResponsive(
             context: context,
@@ -441,8 +439,16 @@ class PassiveCanvasTransformer extends NodeWidgetTransformer<CanvasNode> {
 
   /// Whether [node], shown with [sizing], fills the screen as a dialog.
   bool showsOverScreen(CanvasSizing sizing, CanvasNode node) =>
-      sizing == CanvasSizing.design &&
+      sizing == CanvasSizing.design && followsScreen(node);
+
+  /// Whether [node] fills the space it is shown in even as a dialog: a
+  /// responsive canvas holding a responsive layout, whose layout draws the
+  /// dialog. A canvas that hugs its content is a card of its own size
+  /// instead (a confirm dialog), centered like any dialog; its layout still
+  /// picks the variant for the screen's width.
+  bool followsScreen(CanvasNode node) =>
       node.scaleMode == ScaleMode.responsive &&
+      !CanvasViewport.sizesToContent(node) &&
       hasResponsiveLayout(node, getNode);
 
   static Color? retrieveBackgroundColor(BuildContext context, CanvasNode node) {
@@ -833,7 +839,11 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         in collectIntervalActions().entries) {
       _intervalTimers.add(
         Timer.periodic(Duration(milliseconds: group.key), (_) {
-          if (!mounted || _runningIntervals.contains(group.key)) return;
+          if (!mounted ||
+              !_shown ||
+              _runningIntervals.contains(group.key)) {
+            return;
+          }
           _runningIntervals.add(group.key);
           ActionChain.run(
             () => runActions(group.value),
@@ -843,6 +853,14 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       );
     }
   }
+
+  /// Whether the canvas is on screen: a screen another one fully covers
+  /// (the entry screen under a deep-linked one, a list under its detail)
+  /// stays built, but the navigator's overlay turns its tickers off. Its
+  /// interval and timer reactions wait until it shows again, so two
+  /// screens' timers don't both run (a live feed advancing twice as fast).
+  /// A dialog over the canvas doesn't hide it.
+  bool get _shown => TickerMode.valuesOf(context).enabled;
 
   void stopIntervals() {
     for (final Timer timer in _intervalTimers) {
@@ -990,6 +1008,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   void _startTimers() {
     _stopTimers();
     _timersStarted = true;
+    _startClocks();
     for (final Reaction reaction in widget.node.reactions.whereTriggerType(
       TriggerType.timer,
     )) {
@@ -999,7 +1018,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
         Timer.periodic(
           Duration(milliseconds: reaction.trigger.effectiveIntervalMs),
           (_) async {
-            if (!mounted || busy) return;
+            if (!mounted || !_shown || busy) return;
             busy = true;
             try {
               await FunctionsRepository.triggerAction(
@@ -1021,6 +1040,89 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       timer.cancel();
     }
     _timers.clear();
+    for (final (BeatClock clock, void Function(int, double, double) onTick)
+        in _clocks) {
+      clock.release(onTick);
+    }
+    _clocks.clear();
+    for (final (Listenable listenable, VoidCallback listener)
+        in _clockWatches) {
+      listenable.removeListener(listener);
+    }
+    _clockWatches.clear();
+  }
+
+  final List<(BeatClock, void Function(int, double, double))> _clocks = [];
+  final List<(Listenable, VoidCallback)> _clockWatches = [];
+
+  /// The variables a clock's run condition [when] reads.
+  Iterable<Listenable> _runConditionVariables(String? when) {
+    if (when == null || when.trim().isEmpty) return const [];
+    final Set<String> names = {
+      if (FormulaEvaluator.exactExpression(when) case final String expression)
+        for (final String path in FormulaEvaluator.referencedPaths(expression))
+          path.split(RegExp(r'[.\[]')).first
+      else
+        for (final Match match in RegExp(
+          r'\$\{\s*([A-Za-z_][A-Za-z0-9_]*)',
+        ).allMatches(when))
+          match.group(1)!,
+    };
+    return context.read<CodelesslyContext>().variables.values.where(
+      (variable) => names.contains(variable.value.name),
+    );
+  }
+
+  /// Runs each Beat Clock reaction on the sound clock while its run
+  /// condition holds (see [BeatClock]), with `${result.tick}`,
+  /// `${result.at}` and `${result.waitMs}`. Screens with the same clock share
+  /// it, so the count carries on from one tab to the next.
+  void _startClocks() {
+    // Reactions on the same clock run in order on each tick (Play Sound,
+    // then a Delay, then Set Variable): one clock for each setting.
+    final Map<String, List<Reaction>> groups = {};
+    for (final Reaction reaction in widget.node.reactions.whereTriggerType(
+      TriggerType.clock,
+    )) {
+      if (!reaction.action.enabled) continue;
+      final TriggerModel t = reaction.trigger;
+      (groups['${t.every}|${t.runWhen}|${t.lookaheadMs}'] ??= []).add(reaction);
+    }
+    for (final List<Reaction> reactions in groups.values) {
+      void onTick(int tick, double at, double waitMs) {
+        if (!mounted) return;
+        FunctionsRepository.triggerAction(
+          context,
+          TriggerType.clock,
+          reactions: reactions,
+          result: {'tick': tick, 'at': at, 'waitMs': waitMs.round()},
+        );
+      }
+
+      final BeatClock clock = BeatClock.acquire(
+        trigger: reactions.first.trigger,
+        evaluate: (String text) => mounted
+            ? PropertyValueDelegate.substituteVariables(
+                text,
+                scopedValues: ScopedValues.of(context),
+                nullSubstitutionMode: NullSubstitutionMode.emptyString,
+              )
+            : '',
+        onTick: onTick,
+        isShown: () => mounted && (ModalRoute.of(context)?.isCurrent ?? true),
+      );
+      _clocks.add((clock, onTick));
+      // The condition is checked when what it reads changes, not only on
+      // the next poll: actions that stop and start the clock in one go
+      // (playing false, then true) restart the count from tick 0.
+      for (final Listenable variable in _runConditionVariables(
+        reactions.first.trigger.runWhen,
+      )) {
+        void listener() => clock.poll();
+        variable.addListener(listener);
+        _clockWatches.add((variable, listener));
+      }
+    }
   }
 
   /// Runs the key press reactions for [event]'s key. Returns whether one
@@ -1029,13 +1131,17 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
       return KeyEventResult.ignored;
     }
-    final String pressed = normalizeKeyLabel(event.logicalKey.keyLabel);
+    // The trigger label names keys without a visible label (Space's label
+    // is " ", which normalizes to nothing).
+    final String pressed = normalizeKeyLabel(keyTriggerLabel(event.logicalKey));
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final List<Reaction> matching = [
       for (final Reaction reaction in widget.node.reactions.whereTriggerType(
         TriggerType.keyPress,
       ))
         if (reaction.action.enabled &&
-            normalizeKeyLabel(reaction.trigger.key ?? '') == pressed)
+            normalizeKeyLabel(reaction.trigger.key ?? '') == pressed &&
+            triggerWhenHolds(reaction.trigger, scopedValues))
           reaction,
     ];
     if (matching.isEmpty) return KeyEventResult.ignored;
@@ -1052,7 +1158,13 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
     super.didChangeDependencies();
     if (widget.settings.isPreview) return;
 
-    if (didPerformOnLoadActions) return;
+    if (didPerformOnLoadActions) {
+      if (_loadWaitsForRoute && _isCurrentRoute) {
+        _loadWaitsForRoute = false;
+        _load();
+      }
+      return;
+    }
     didPerformOnLoadActions = true;
 
     if (widget.node.properties.requiresSignIn) {
@@ -1063,23 +1175,83 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       if (_redirected) return;
     }
 
-    context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
-    triggerOnLoadActions(context);
+    // A screen built beneath another (a link opens its screen above the
+    // entry screen) loads when it is first shown, so its load actions don't
+    // run after, and undo, those of the screen on top.
+    if (_isCurrentRoute) {
+      _load();
+    } else {
+      _loadWaitsForRoute = true;
+    }
     _watchValues(context);
     _startTimers();
     startIntervals();
     _listenToKeys();
   }
 
-  /// The screen's "Key Down" reactions, while it listens to the keyboard.
+  /// Whether the screen's load waits until its route is the one on top.
+  bool _loadWaitsForRoute = false;
+
+  /// Whether this screen is on top of its navigator (true outside one, and
+  /// for the overlay screen). Reading it makes route changes call
+  /// [didChangeDependencies].
+  bool get _isCurrentRoute => ModalRoute.of(context)?.isCurrent ?? true;
+
+  /// Takes the route's params and runs the load actions.
+  void _load() {
+    // Load actions read and set the screen's variables: a screen shown
+    // before they arrive (a cached model without them, while the publish
+    // bundle downloads) waits for them. The layout reloads with them first.
+    final Codelessly? codelessly = context.read<Codelessly?>();
+    final String? pendingLayout =
+        context.read<CodelesslyContext?>()?.layoutID ??
+        codelessly?.layoutIdOfCanvas(widget.node.id);
+    final Future<void>? variables = pendingLayout == null
+        ? null
+        : codelessly?.maybeDataManager?.variablesPending(pendingLayout);
+    if (variables != null) {
+      variables.whenComplete(() {
+        if (!mounted) return;
+        if (_isCurrentRoute) {
+          _load();
+        } else {
+          _loadWaitsForRoute = true;
+        }
+      });
+      return;
+    }
+    // The overlay screen isn't the screen the app is on: the route is not
+    // its own.
+    if (!OverlayScreenScope.of(context)) {
+      context.read<Codelessly?>()?.prepareRoute(context, widget.node.id);
+    }
+    // Another breakpoint canvas of this layout may have run them already.
+    // The context names its layout only when the app asked for one by id
+    // (the site opens its entry screen without), so find the layout that
+    // holds this canvas.
+    final CodelesslyContext? screen = context.read<CodelesslyContext?>();
+    final String? layoutId =
+        screen?.layoutID ??
+        context.read<Codelessly?>()?.layoutIdOfCanvas(widget.node.id);
+    if (screen == null ||
+        layoutId == null ||
+        screen.markLayoutLoaded(layoutId)) {
+      triggerOnLoadActions(context);
+    }
+  }
+
+  /// The screen's "Key Down" and "Key Up" reactions, while it listens to
+  /// the keyboard.
   List<Reaction> _keyReactions = const [];
 
-  /// Runs the screen's "Key Down" actions for keys pressed (and held) while
-  /// it is the screen on top and no text field has focus.
+  /// Runs the screen's "Key Down" actions for keys pressed (and held), and
+  /// its "Key Up" actions for keys released, while it is the screen on top
+  /// and no text field has focus.
   void _listenToKeys() {
     _keyReactions = [
       for (final Reaction reaction in widget.node.reactions)
-        if (reaction.trigger.type == TriggerType.keyDown &&
+        if ((reaction.trigger.type == TriggerType.keyDown ||
+                reaction.trigger.type == TriggerType.keyUp) &&
             reaction.action.enabled)
           reaction,
     ];
@@ -1089,7 +1261,10 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   }
 
   bool _onKeyDown(KeyEvent event) {
-    if (event is KeyUpEvent || !mounted) return false;
+    if (!mounted) return false;
+    final TriggerType type = event is KeyUpEvent
+        ? TriggerType.keyUp
+        : TriggerType.keyDown;
     if (!(ModalRoute.of(context)?.isCurrent ?? true)) return false;
     final BuildContext? focused = FocusManager.instance.primaryFocus?.context;
     final bool typing =
@@ -1107,53 +1282,27 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
       return false;
     }
     // Shift, Control, Alt and Meta alone are modifiers of the next key.
-    if (_modifierKeys.contains(event.logicalKey)) return false;
-    final String key = keyTriggerLabel(event.logicalKey);
+    if (isModifierKey(event.logicalKey)) return false;
+    final ScopedValues scopedValues = ScopedValues.of(context);
     final List<Reaction> reactions = [
       for (final Reaction reaction in _keyReactions)
-        if (reaction.trigger.key == null ||
-            reaction.trigger.key!.isEmpty ||
-            reaction.trigger.key!.toLowerCase() == key.toLowerCase())
+        if (reaction.trigger.type == type &&
+            keyTriggerMatches(reaction.trigger, event.logicalKey) &&
+            triggerWhenHolds(reaction.trigger, scopedValues))
           reaction,
     ];
     if (reactions.isEmpty) return false;
-    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
     FunctionsRepository.triggerAction(
       context,
-      TriggerType.keyDown,
+      type,
       reactions: reactions,
-      result: {
-        'key': key,
-        'shift': keyboard.isShiftPressed,
-        'alt': keyboard.isAltPressed,
-        'meta': keyboard.isMetaPressed || keyboard.isControlPressed,
-        'typing': typing,
-      },
+      result: {...keyTriggerResult(event.logicalKey), 'typing': typing},
     );
     // A reaction for a specific key takes it (an arrow doesn't also scroll
     // the page); a reaction for any key lets it through, so Tab and the
     // browser's shortcuts keep working.
-    return reactions.any(
-      (reaction) => reaction.trigger.key?.isNotEmpty ?? false,
-    );
+    return reactions.any((reaction) => reaction.trigger.keyCombo != null);
   }
-
-  static final Set<LogicalKeyboardKey> _modifierKeys = {
-    LogicalKeyboardKey.shift,
-    LogicalKeyboardKey.shiftLeft,
-    LogicalKeyboardKey.shiftRight,
-    LogicalKeyboardKey.control,
-    LogicalKeyboardKey.controlLeft,
-    LogicalKeyboardKey.controlRight,
-    LogicalKeyboardKey.alt,
-    LogicalKeyboardKey.altLeft,
-    LogicalKeyboardKey.altRight,
-    LogicalKeyboardKey.meta,
-    LogicalKeyboardKey.metaLeft,
-    LogicalKeyboardKey.metaRight,
-    LogicalKeyboardKey.capsLock,
-    LogicalKeyboardKey.fn,
-  };
 
   List<ActionModel> collectOnLoadActions() => widget.node.reactions
       .whereTriggerType(TriggerType.load)
@@ -1214,7 +1363,7 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
   Widget build(BuildContext context) {
     final Brightness brightness = widget.node.properties.brightness
         .toFlutterBrightness(context);
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+    Widget screen = AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: brightness == Brightness.light
             ? Colors.black
@@ -1234,20 +1383,15 @@ class _PassiveCanvasWidgetState extends State<PassiveCanvasWidget> {
               child: Builder(builder: widget.builder),
             ),
     );
+    // While its `blockBack` binding holds, back keeps the user on the
+    // screen and runs its "Back pressed" reactions. The overlay screen is
+    // above navigation: back is not its own.
+    if (!widget.settings.isPreview &&
+        widget.settings.withReactions &&
+        BackInterceptor.blocksBackOf(widget.node) &&
+        !OverlayScreenScope.of(context)) {
+      screen = BackInterceptor(node: widget.node, child: screen);
+    }
+    return screen;
   }
-}
-
-/// A key label in the form key press triggers compare: lower case, without
-/// spaces, so `Arrow Right`, `ArrowRight` and `arrowright` all match.
-String normalizeKeyLabel(String label) =>
-    label.replaceAll(' ', '').toLowerCase();
-
-/// The label a "Key Down" trigger's `${result.key}` reads for [key]: the
-/// character of a character key (`a`, `1`, `/`), else the key's name
-/// without spaces (`ArrowLeft`, `Delete`, `Escape`, `Enter`, `Space`).
-String keyTriggerLabel(LogicalKeyboardKey key) {
-  if (key == LogicalKeyboardKey.space) return 'Space';
-  final String label = key.keyLabel;
-  if (label.length == 1) return label.toLowerCase();
-  return label.replaceAll(' ', '');
 }

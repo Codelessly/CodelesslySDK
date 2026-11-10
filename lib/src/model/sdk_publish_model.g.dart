@@ -52,6 +52,7 @@ SDKPublishModel _$SDKPublishModelFromJson(Map json) => SDKPublishModel(
   disabledLayouts: (json['disabledLayouts'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  appIdentity: AppIdentity.maybeFromJson(json['appIdentity']),
   owner: json['owner'] as String,
   teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
   users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
@@ -85,6 +86,7 @@ Map<String, dynamic> _$SDKPublishModelToJson(
   'lastUpdated': ?const DateTimeConverter().toJson(instance.lastUpdated),
   'layoutIDMap': instance.layoutIDMap,
   'disabledLayouts': instance.disabledLayouts,
+  'appIdentity': ?SDKPublishModel.serializeAppIdentity(instance.appIdentity),
 };
 
 SDKPublishLayout _$SDKPublishLayoutFromJson(Map json) => SDKPublishLayout(
@@ -209,6 +211,11 @@ SDKPublishUpdates _$SDKPublishUpdatesFromJson(Map json) => SDKPublishUpdates(
         ),
       ) ??
       const {},
+  canvasPaths:
+      (json['canvasPaths'] as Map?)?.map(
+        (k, e) => MapEntry(k as String, e as String),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$SDKPublishUpdatesToJson(
@@ -224,6 +231,7 @@ Map<String, dynamic> _$SDKPublishUpdatesToJson(
   'layoutCanvases': instance.layoutCanvases.map(
     (k, e) => MapEntry(k, e.toList()),
   ),
+  'canvasPaths': instance.canvasPaths,
 };
 
 SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
@@ -239,6 +247,16 @@ SDKLayoutVariables _$SDKLayoutVariablesFromJson(Map json) => SDKLayoutVariables(
       ),
     ),
   ),
+  scripts:
+      (json['scripts'] as Map?)?.map(
+        (k, e) => MapEntry(
+          k as String,
+          (e as Map).map(
+            (k, e) => MapEntry(k as String, ScriptModel.fromJson(e as Map)),
+          ),
+        ),
+      ) ??
+      {},
   owner: json['owner'] as String,
   teams: (json['teams'] as List<dynamic>?)?.map((e) => e as String).toSet(),
   users: (json['users'] as List<dynamic>?)?.map((e) => e as String).toSet(),
@@ -257,6 +275,9 @@ Map<String, dynamic> _$SDKLayoutVariablesToJson(SDKLayoutVariables instance) =>
       'public': instance.public,
       'id': instance.id,
       'variables': instance.variables.map(
+        (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))),
+      ),
+      'scripts': instance.scripts.map(
         (k, e) => MapEntry(k, e.map((k, e) => MapEntry(k, e.toJson()))),
       ),
     };

@@ -35,16 +35,29 @@ class PreviewCheckboxWidget extends StatefulWidget {
   State<PreviewCheckboxWidget> createState() => _PreviewCheckboxWidgetState();
 }
 
+/// A design-time checkbox: shows its bound value (or its own), and
+/// can be toggled locally until that value changes.
 class _PreviewCheckboxWidgetState extends State<PreviewCheckboxWidget> {
-  bool? effectiveValue = false;
+  bool? toggled;
+  bool? toggledFrom;
 
   @override
   Widget build(BuildContext context) {
+    final bool? bound =
+        PropertyValueDelegate.getPropertyValue<bool>(
+          widget.node,
+          'value',
+          scopedValues: ScopedValues.of(context),
+        ) ??
+        widget.node.value;
+    if (toggled != null && bound != toggledFrom) toggled = null;
+    final bool? effectiveValue = toggled ?? bound;
     return TransformerCheckbox(
       node: widget.node,
       settings: widget.settings,
       onChanged: (context, value) => setState(() {
-        effectiveValue = value;
+        toggled = value;
+        toggledFrom = bound;
       }),
       value: effectiveValue,
     );

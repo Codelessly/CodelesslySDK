@@ -38,7 +38,6 @@ class PassiveRadialGaugeWidget extends StatelessWidget {
     final values =
         scopedValues ??
         ScopedValues.of(context, variablesOverrides: variablesOverrides);
-    final props = node.properties;
     final value =
         _number(
           PropertyValueDelegate.getPropertyValue<Object>(
@@ -48,6 +47,7 @@ class PassiveRadialGaugeWidget extends StatelessWidget {
           ),
         ) ??
         node.value;
+    final props = boundRadialGaugeProperties(node, values);
     return AdaptiveNodeBox(
       node: node,
       child: TweenAnimationBuilder<double>(
@@ -615,4 +615,40 @@ class GaugePainter extends CustomPainter {
       old.color != color ||
       old.limitColor != limitColor ||
       old.props != props;
+}
+
+/// [node]'s properties with the bound ones (`valueColor`, `trackColor`,
+/// `target`, `showTarget`) resolved, so the dial follows state.
+GaugeProperties boundRadialGaugeProperties(
+  GaugeNode node,
+  ScopedValues scopedValues,
+) {
+  final GaugeProperties props = node.properties;
+  T? bound<T extends Object>(String property) =>
+      node.variables.containsKey(property)
+      ? PropertyValueDelegate.getPropertyValue<T>(
+          node,
+          property,
+          scopedValues: scopedValues,
+        )
+      : null;
+  final ColorRGBA? valueColor = bound<ColorRGBA>('valueColor');
+  final ColorRGBA? trackColor = bound<ColorRGBA>('trackColor');
+  final double? target = _number(bound<Object>('target'));
+  final Object? show = bound<Object>('showTarget');
+  final bool? showTarget = show is bool
+      ? show
+      : (show is String ? bool.tryParse(show.trim()) : null);
+  if (valueColor == null &&
+      trackColor == null &&
+      target == null &&
+      showTarget == null) {
+    return props;
+  }
+  return props.copyWith(
+    valueColor: valueColor,
+    trackColor: trackColor,
+    target: target,
+    showTarget: showTarget,
+  );
 }

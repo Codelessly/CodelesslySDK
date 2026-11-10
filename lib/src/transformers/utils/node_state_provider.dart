@@ -57,6 +57,13 @@ class NodeStateProvider extends InheritedWidget {
     NodeStateWrapper? state,
   }) : _stateWrapper = state ?? NodeStateWrapper();
 
+  /// Creates a [NodeStateProvider] for [child] that shares the node and
+  /// state of [other], e.g. to give a hero flight's copy of a node the
+  /// state of the node it copies.
+  NodeStateProvider.sharing(NodeStateProvider other, {required super.child})
+    : node = other.node,
+      _stateWrapper = other._stateWrapper;
+
   /// Returns the [BaseNode] provided by the closest [NodeStateProvider] ancestor,
   /// if any.
   ///

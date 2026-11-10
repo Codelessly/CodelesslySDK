@@ -168,7 +168,8 @@ class _PassiveSignatureNormalizedWidgetState
     return SizedBox(
       width: node.basicBoxLocal.width,
       height: node.basicBoxLocal.height,
-      child: LayoutBuilder(
+      child: MeasurableLayoutBuilder(
+        fallbackSize: Size(node.basicBoxLocal.width, node.basicBoxLocal.height),
         builder: (context, constraints) {
           final size = constraints.biggest;
           final paint = CustomPaint(

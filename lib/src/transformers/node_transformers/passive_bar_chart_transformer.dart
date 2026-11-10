@@ -108,7 +108,8 @@ class PassiveBarChartWidget extends StatelessWidget {
 
     return AdaptiveNodeBox(
       node: node,
-      child: LayoutBuilder(
+      child: MeasurableLayoutBuilder(
+        fallbackSize: Size(node.basicBoxLocal.width, node.basicBoxLocal.height),
         builder: (context, constraints) {
           final double labelHeight = hasLabels
               ? props.labelFontSize * 1.2 + props.labelGap

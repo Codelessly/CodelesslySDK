@@ -43,4 +43,19 @@ void main() {
     expect(transformer.showsOverScreen(CanvasSizing.sheet, canvas), isFalse);
     expect(transformer.showsOverScreen(CanvasSizing.content, canvas), isFalse);
   });
+
+  test('a dialog canvas that hugs its content is a card, not the screen', () {
+    final CanvasNode card = CanvasNode(
+      id: 'dialog',
+      name: 'Confirm',
+      basicBoxLocal: NodeBox(0, 0, 440, 280),
+      scaleMode: ScaleMode.responsive,
+      verticalFit: SizeFit.shrinkWrap,
+      children: const ['layout'],
+      properties: CanvasProperties(bodyId: 'layout'),
+    );
+    expect(transformer.followsScreen(card), isFalse);
+    expect(transformer.showsOverScreen(CanvasSizing.design, card), isFalse);
+    expect(transformer.followsScreen(canvas), isTrue);
+  });
 }

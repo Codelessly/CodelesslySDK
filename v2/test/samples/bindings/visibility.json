@@ -1,0 +1,248 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c"
+   ]
+  },
+  "c": {
+   "id": "c",
+   "type": "canvas",
+   "name": "Screen",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    300
+   ],
+   "properties": {
+    "bodyId": "b"
+   },
+   "children": [
+    "b"
+   ]
+  },
+  "b": {
+   "id": "b",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "col",
+    "row"
+   ]
+  },
+  "col": {
+   "id": "col",
+   "type": "rowColumn",
+   "rowColumnType": "column",
+   "name": "col",
+   "parentID": "b",
+   "basicBoxLocal": [
+    10,
+    10,
+    100,
+    80
+   ],
+   "children": [
+    "v1",
+    "v2",
+    "v3"
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "start",
+   "spacing": 10,
+   "verticalFit": "shrinkWrap",
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin"
+  },
+  "v1": {
+   "id": "v1",
+   "type": "rectangle",
+   "name": "v1",
+   "parentID": "col",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    20
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pv1",
+     "visible": true,
+     "opacity": 1
+    }
+   ]
+  },
+  "v2": {
+   "id": "v2",
+   "type": "rectangle",
+   "name": "v2",
+   "parentID": "col",
+   "basicBoxLocal": [
+    0,
+    30,
+    100,
+    20
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pv2",
+     "visible": true,
+     "opacity": 1
+    }
+   ],
+   "variables": {
+    "visible": "${showB}"
+   }
+  },
+  "v3": {
+   "id": "v3",
+   "type": "rectangle",
+   "name": "v3",
+   "parentID": "col",
+   "basicBoxLocal": [
+    0,
+    60,
+    100,
+    20
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pv3",
+     "visible": true,
+     "opacity": 1
+    }
+   ]
+  },
+  "row": {
+   "id": "row",
+   "type": "rowColumn",
+   "rowColumnType": "row",
+   "name": "row",
+   "parentID": "b",
+   "basicBoxLocal": [
+    10,
+    200,
+    280,
+    30
+   ],
+   "children": [
+    "r1",
+    "r2",
+    "r3"
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "start",
+   "spacing": 10,
+   "edgePins": {
+    "left": 10,
+    "top": 200
+   },
+   "positioningMode": "pin"
+  },
+  "r1": {
+   "id": "r1",
+   "type": "rectangle",
+   "name": "r1",
+   "parentID": "row",
+   "basicBoxLocal": [
+    0,
+    0,
+    135,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pr1",
+     "visible": true,
+     "opacity": 1
+    }
+   ],
+   "horizontalFit": "expanded"
+  },
+  "r2": {
+   "id": "r2",
+   "type": "rectangle",
+   "name": "r2",
+   "parentID": "row",
+   "basicBoxLocal": [
+    145,
+    0,
+    135,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pr2",
+     "visible": true,
+     "opacity": 1
+    }
+   ],
+   "horizontalFit": "expanded",
+   "variables": {
+    "visible": "${= count > 5}"
+   }
+  },
+  "r3": {
+   "id": "r3",
+   "type": "rectangle",
+   "name": "r3",
+   "parentID": "row",
+   "basicBoxLocal": [
+    290,
+    0,
+    0,
+    30
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pr3",
+     "visible": true,
+     "opacity": 1
+    }
+   ]
+  }
+ },
+ "variables": {
+  "c": {
+   "a": {
+    "id": "a",
+    "name": "showB",
+    "type": "boolean",
+    "value": "false"
+   },
+   "n": {
+    "id": "n",
+    "name": "count",
+    "type": "integer",
+    "value": "3"
+   }
+  }
+ }
+}

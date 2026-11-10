@@ -37,18 +37,31 @@ class PreviewSliderWidget extends StatefulWidget {
   State<PreviewSliderWidget> createState() => _PreviewSliderWidgetState();
 }
 
+/// A design-time slider: it shows what its bindings give (value, min, max,
+/// marker, track color), as the runtime does, and can be dragged without
+/// running any actions. A drag holds until the bound value changes.
 class _PreviewSliderWidgetState extends State<PreviewSliderWidget> {
-  double effectiveValue = 0;
+  double? dragged;
+  Object? draggedFrom;
 
   @override
   Widget build(BuildContext context) {
-    return TransformerSlider(
+    final Object? bound = widget.node.variables['value'] == null
+        ? widget.node.value
+        : PropertyValueDelegate.getPropertyValue<double>(
+            widget.node,
+            'value',
+            scopedValues: ScopedValues.of(context),
+          );
+    if (dragged != null && bound != draggedFrom) dragged = null;
+    return PassiveSliderWidget(
       node: widget.node,
       settings: widget.settings,
-      onChanged: (value) => setState(() {
-        effectiveValue = value;
+      valueOverride: dragged,
+      onPreviewChanged: (value) => setState(() {
+        dragged = value;
+        draggedFrom = bound;
       }),
-      value: effectiveValue,
     );
   }
 }
@@ -62,15 +75,28 @@ class PassiveSliderWidget extends StatelessWidget {
   /// When null, bindings use the build context and [variablesOverrides].
   final ScopedValues? scopedValues;
 
+  /// Shown instead of the bound value (a design-time drag).
+  final double? valueOverride;
+
+  /// When set, a drag calls this instead of updating state and running
+  /// actions: the design canvas's slider.
+  final ValueChanged<double>? onPreviewChanged;
+
   const PassiveSliderWidget({
     super.key,
     required this.node,
     required this.settings,
     this.variablesOverrides = const [],
     this.scopedValues,
+    this.valueOverride,
+    this.onPreviewChanged,
   });
 
   void onChanged(BuildContext context, double internalValue) {
+    if (onPreviewChanged case final ValueChanged<double> preview) {
+      preview(internalValue);
+      return;
+    }
     NodeStateProvider.setState(context, internalValue);
 
     FunctionsRepository.setPropertyValue(
@@ -103,6 +129,7 @@ class PassiveSliderWidget extends StatelessWidget {
         this.scopedValues ??
         ScopedValues.of(context, variablesOverrides: variablesOverrides);
     final double value =
+        valueOverride ??
         PropertyValueDelegate.getPropertyValue<double>(
           node,
           'value',
@@ -128,10 +155,22 @@ class PassiveSliderWidget extends StatelessWidget {
       'markerValue',
       scopedValues: scopedValues,
     );
-    final ColorRGBA? activeTrackColor =
+    // Colours and the track fade are bindable through node.variables (and
+    // settable by actions); each falls back to the node's own property.
+    ColorRGBA? color(String property) =>
         PropertyValueDelegate.getPropertyValue<ColorRGBA>(
           node,
-          'activeTrackColor',
+          property,
+          scopedValues: scopedValues,
+        );
+    final ColorRGBA? activeTrackColor = color('activeTrackColor');
+    final ColorRGBA? inactiveTrackColor = color('inactiveTrackColor');
+    final ColorRGBA? thumbColor = color('thumbColor');
+    final ColorRGBA? thumbGlowColor = color('thumbGlowColor');
+    final double? activeTrackStartOpacity =
+        PropertyValueDelegate.getPropertyValue<double>(
+          node,
+          'activeTrackStartOpacity',
           scopedValues: scopedValues,
         );
 
@@ -140,7 +179,9 @@ class PassiveSliderWidget extends StatelessWidget {
       settings: settings,
       variablesOverrides: variablesOverrides,
       onChanged: (value) => onChanged(context, value),
-      onChangeEnd: (value) => onChangeEnd(context, value),
+      onChangeEnd: onPreviewChanged == null
+          ? (value) => onChangeEnd(context, value)
+          : null,
       value: value,
       min: min,
       max: max,
@@ -150,6 +191,10 @@ class PassiveSliderWidget extends StatelessWidget {
         _ => node.variables['markerValue'] == null ? node.markerValue : null,
       },
       activeTrackColor: activeTrackColor?.toFlutterColor(),
+      inactiveTrackColor: inactiveTrackColor?.toFlutterColor(),
+      thumbColor: thumbColor?.toFlutterColor(),
+      thumbGlowColor: thumbGlowColor?.toFlutterColor(),
+      activeTrackStartOpacity: activeTrackStartOpacity,
     );
   }
 }
@@ -164,6 +209,10 @@ class TransformerSlider extends StatelessWidget {
     this.onChangeEnd,
     this.markerValue,
     this.activeTrackColor,
+    this.inactiveTrackColor,
+    this.thumbColor,
+    this.thumbGlowColor,
+    this.activeTrackStartOpacity,
     this.variablesOverrides = const [],
     this.min,
     this.max,
@@ -187,6 +236,18 @@ class TransformerSlider extends StatelessWidget {
 
   /// Overrides [SliderProperties.activeTrackColor] (from a binding).
   final Color? activeTrackColor;
+
+  /// Overrides [SliderProperties.inactiveTrackColor] (from a binding).
+  final Color? inactiveTrackColor;
+
+  /// Overrides [SliderProperties.thumbColor] (from a binding).
+  final Color? thumbColor;
+
+  /// Overrides [SliderProperties.thumbGlowColor] (from a binding).
+  final Color? thumbGlowColor;
+
+  /// Overrides [SliderProperties.activeTrackStartOpacity] (from a binding).
+  final double? activeTrackStartOpacity;
 
   /// [v] kept within the selectable part of the effective track.
   double _selectable(double v, double min, double max) {
@@ -212,11 +273,16 @@ class TransformerSlider extends StatelessWidget {
         const RoundedRectSliderTrackShape(),
       SliderTrackShapeEnum.gapped => const GappedSliderTrackShape(),
     };
-    // Filling from the end or drawing a marker needs our own track painter;
-    // otherwise the Material shapes stay as they were.
-    final SliderTrackShape trackShape = p.fillFromEnd || markerFraction != null
+    final double startOpacity =
+        (activeTrackStartOpacity ?? p.activeTrackStartOpacity).clamp(0.0, 1.0);
+    // Filling from the end, drawing a marker or fading the active track in
+    // needs our own track painter; otherwise the Material shapes stay as
+    // they were.
+    final SliderTrackShape trackShape =
+        p.fillFromEnd || markerFraction != null || startOpacity < 1
         ? IndustrialSliderTrackShape(
             fillFromEnd: p.fillFromEnd,
+            activeStartOpacity: startOpacity,
             markerFraction: markerFraction,
             markerColor: p.markerColor.toFlutterColor(),
             markerWidth: p.markerWidth,
@@ -229,7 +295,7 @@ class TransformerSlider extends StatelessWidget {
     // Preserve the existing stroked/rounded PR79 thumbs. The industrial
     // rectangle adds its optional border and grip without changing the
     // historically serialized roundedRect style.
-    final SliderComponentShape thumbShape =
+    final SliderComponentShape baseThumbShape =
         p.thumbShape == SliderThumbShapeEnum.rectangle
         ? RectSliderThumbShape(
             width: !p.showThumb
@@ -264,6 +330,20 @@ class TransformerSlider extends StatelessWidget {
             strokeColor: p.thumbStrokeColor?.toFlutterColor(),
             strokeWidth: p.thumbStrokeWidth,
           );
+    // A soft glow behind the thumb, when it has a visible colour.
+    final Color? glow = thumbGlowColor ?? p.thumbGlowColor?.toFlutterColor();
+    final SliderComponentShape thumbShape =
+        p.showThumb && glow != null && glow.a > 0
+        ? GlowSliderThumbShape(
+            thumb: baseThumbShape,
+            color: glow,
+            blur: p.thumbGlowBlur,
+            spread: p.thumbGlowSpread,
+            cornerRadius: p.thumbShape == SliderThumbShapeEnum.circle
+                ? null
+                : p.thumbCornerRadius,
+          )
+        : baseThumbShape;
 
     final SliderComponentShape valueIndicatorShape = switch (node
         .properties
@@ -302,15 +382,19 @@ class TransformerSlider extends StatelessWidget {
       child: SliderTheme(
         data: SliderThemeData(
           trackHeight: node.properties.trackHeight,
-          overlayColor: node.properties.showThumb
-              ? node.properties.overlayColor.toFlutterColor()
-              : Colors.transparent,
+          overlayColor: !node.properties.showThumb
+              ? Colors.transparent
+              : thumbColor != null &&
+                    node.properties.deriveOverlayColorFromThumb
+              ? thumbColor!.withValues(alpha: kSliderDefaultOverlayOpacity)
+              : node.properties.overlayColor.toFlutterColor(),
           activeTrackColor:
               activeTrackColor ??
               node.properties.activeTrackColor.toFlutterColor(),
-          inactiveTrackColor: node.properties.inactiveTrackColor
-              .toFlutterColor(),
-          thumbColor: node.properties.thumbColor.toFlutterColor(),
+          inactiveTrackColor:
+              inactiveTrackColor ??
+              node.properties.inactiveTrackColor.toFlutterColor(),
+          thumbColor: thumbColor ?? node.properties.thumbColor.toFlutterColor(),
           thumbShape: thumbShape,
           trackShape: trackShape,
           // GappedSliderTrackShape requires a gap; 6 is the Material 3
@@ -394,6 +478,93 @@ class TransformerSlider extends StatelessWidget {
       width: node.basicBoxLocal.width,
       height: node.basicBoxLocal.height,
       child: RotatedBox(quarterTurns: 3, child: directed),
+    );
+  }
+}
+
+/// Paints a soft, blurred glow of [color] behind another [thumb] shape, like
+/// a lit knob. The glow is the thumb's outline grown by [spread] and blurred
+/// by [blur] (a sigma); it does not change the thumb's size.
+class GlowSliderThumbShape extends SliderComponentShape {
+  /// Creates a [GlowSliderThumbShape].
+  const GlowSliderThumbShape({
+    required this.thumb,
+    required this.color,
+    this.blur = kSliderDefaultThumbGlowBlur,
+    this.spread = kSliderDefaultThumbGlowSpread,
+    this.cornerRadius,
+  });
+
+  /// The thumb drawn over the glow.
+  final SliderComponentShape thumb;
+
+  /// Color of the glow.
+  final Color color;
+
+  /// Blur sigma of the glow; a hard edge when 0.
+  final double blur;
+
+  /// How far the glow reaches past the thumb's edge, before blur.
+  final double spread;
+
+  /// Corner radius of a rectangular [thumb]; null for a round one.
+  final double? cornerRadius;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) =>
+      thumb.getPreferredSize(isEnabled, isDiscrete);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final Size size = thumb.getPreferredSize(true, isDiscrete);
+    if (!size.isEmpty) {
+      final Paint paint = Paint()..color = color;
+      if (blur > 0) paint.maskFilter = MaskFilter.blur(BlurStyle.normal, blur);
+      final double grow = math.max(0, spread);
+      if (cornerRadius == null) {
+        context.canvas.drawCircle(center, size.shortestSide / 2 + grow, paint);
+      } else {
+        final Rect rect = Rect.fromCenter(
+          center: center,
+          width: size.width + grow * 2,
+          height: size.height + grow * 2,
+        );
+        final double radius = math.min(
+          math.max(0, cornerRadius!) + grow,
+          rect.shortestSide / 2,
+        );
+        context.canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, Radius.circular(radius)),
+          paint,
+        );
+      }
+    }
+    thumb.paint(
+      context,
+      center,
+      activationAnimation: activationAnimation,
+      enableAnimation: enableAnimation,
+      isDiscrete: isDiscrete,
+      labelPainter: labelPainter,
+      parentBox: parentBox,
+      sliderTheme: sliderTheme,
+      textDirection: textDirection,
+      value: value,
+      textScaleFactor: textScaleFactor,
+      sizeWithOverflow: sizeWithOverflow,
     );
   }
 }
@@ -542,12 +713,14 @@ class RoundedRectSliderThumbShape extends SliderComponentShape {
   }
 }
 
-/// A slider track that can fill from the thumb to the end and draw a thin
-/// marker at [markerFraction] of its length.
+/// A slider track that can fill from the thumb to the end, fade its active
+/// part in from [activeStartOpacity] and draw a thin marker at
+/// [markerFraction] of its length.
 class IndustrialSliderTrackShape extends SliderTrackShape
     with BaseSliderTrackShape {
   const IndustrialSliderTrackShape({
     required this.fillFromEnd,
+    this.activeStartOpacity = 1,
     required this.markerFraction,
     required this.markerColor,
     required this.markerWidth,
@@ -556,6 +729,11 @@ class IndustrialSliderTrackShape extends SliderTrackShape
   });
 
   final bool fillFromEnd;
+
+  /// Opacity of the active track at its far end from the thumb, fading in to
+  /// the full active colour at the thumb. 1 paints it solid.
+  final double activeStartOpacity;
+
   final double? markerFraction;
   final Color markerColor;
   final double markerWidth;
@@ -588,14 +766,27 @@ class IndustrialSliderTrackShape extends SliderTrackShape
       RRect.fromRectAndRadius(track, r),
       Paint()..color = sliderTheme.inactiveTrackColor ?? Colors.grey,
     );
-    final Rect active = fillFromEnd
+    // The track starts at the right in right-to-left (an inverted slider).
+    final bool activeOnRight =
+        fillFromEnd != (textDirection == TextDirection.rtl);
+    final Rect active = activeOnRight
         ? Rect.fromLTRB(thumbCenter.dx, track.top, track.right, track.bottom)
         : Rect.fromLTRB(track.left, track.top, thumbCenter.dx, track.bottom);
     if (active.width > 0) {
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(active, r),
-        Paint()..color = sliderTheme.activeTrackColor ?? Colors.black,
-      );
+      final Color color = sliderTheme.activeTrackColor ?? Colors.black;
+      final Paint paint = Paint()..color = color;
+      if (activeStartOpacity < 1) {
+        // Faint at the far end, full at the thumb.
+        final Color faint = color.withValues(
+          alpha: color.a * activeStartOpacity.clamp(0.0, 1.0),
+        );
+        paint.shader = LinearGradient(
+          begin: activeOnRight ? Alignment.centerRight : Alignment.centerLeft,
+          end: activeOnRight ? Alignment.centerLeft : Alignment.centerRight,
+          colors: <Color>[faint, color],
+        ).createShader(active);
+      }
+      canvas.drawRRect(RRect.fromRectAndRadius(active, r), paint);
     }
     if (markerFraction != null) {
       final double x = track.left + track.width * markerFraction!;

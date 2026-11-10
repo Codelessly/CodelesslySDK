@@ -1,0 +1,418 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c1"
+   ]
+  },
+  "c1": {
+   "id": "c1",
+   "type": "canvas",
+   "name": "Progress",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    420,
+    700
+   ],
+   "properties": {
+    "bodyId": "b2"
+   },
+   "children": [
+    "b2"
+   ]
+  },
+  "b2": {
+   "id": "b2",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c1",
+   "basicBoxLocal": [
+    0,
+    0,
+    420,
+    700
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "n3",
+    "n4",
+    "n5",
+    "n6",
+    "n7",
+    "n8",
+    "n9",
+    "n10",
+    "n14"
+   ]
+  },
+  "n3": {
+   "id": "n3",
+   "parentID": "b2",
+   "type": "progressBar",
+   "properties": {},
+   "basicBoxLocal": [
+    10,
+    10,
+    150,
+    10
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "name": "progressBar"
+  },
+  "n4": {
+   "id": "n4",
+   "parentID": "b2",
+   "type": "progressBar",
+   "properties": {
+    "progressColor": "#FF2D6CDF",
+    "backgroundColor": "#FFDEDBD4",
+    "cornerRadius": [
+     6,
+     false,
+     "circular"
+    ]
+   },
+   "currentValue": 35,
+   "basicBoxLocal": [
+    10,
+    30,
+    200,
+    12
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 30
+   },
+   "positioningMode": "pin",
+   "name": "progressBar"
+  },
+  "n5": {
+   "id": "n5",
+   "parentID": "b2",
+   "type": "progressBar",
+   "properties": {
+    "maxValue": 50,
+    "progressColor": "#FF2E9E5B"
+   },
+   "currentValue": 80,
+   "basicBoxLocal": [
+    10,
+    50,
+    200,
+    8
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 50
+   },
+   "positioningMode": "pin",
+   "name": "progressBar"
+  },
+  "n6": {
+   "id": "n6",
+   "parentID": "b2",
+   "type": "progressBar",
+   "properties": {
+    "isVertical": true,
+    "progressColor": "#FFE8780C",
+    "cornerRadius": [
+     4,
+     false,
+     "circular"
+    ]
+   },
+   "currentValue": 60,
+   "basicBoxLocal": [
+    230,
+    10,
+    12,
+    120
+   ],
+   "edgePins": {
+    "left": 230,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "name": "progressBar"
+  },
+  "n7": {
+   "id": "n7",
+   "parentID": "b2",
+   "type": "progressBar",
+   "properties": {
+    "shape": "arc",
+    "arcStrokeWidth": 14,
+    "needleColor": "#FF15171A",
+    "tickCount": 10,
+    "bands": [
+     {
+      "start": 0,
+      "end": 0.7,
+      "color": "#FF2E9E5B"
+     },
+     {
+      "start": 0.7,
+      "end": 1,
+      "color": "#FFE8780C"
+     }
+    ],
+    "progressColor": "#FF15171A",
+    "backgroundColor": "#FFDEDBD4"
+   },
+   "currentValue": 55,
+   "basicBoxLocal": [
+    260,
+    10,
+    140,
+    120
+   ],
+   "edgePins": {
+    "left": 260,
+    "top": 10
+   },
+   "positioningMode": "pin",
+   "name": "progressBar"
+  },
+  "n8": {
+   "id": "n8",
+   "parentID": "b2",
+   "type": "progressBar",
+   "properties": {
+    "shape": "arc",
+    "arcFit": "circle",
+    "arcStartAngle": -90,
+    "arcSweepAngle": 360,
+    "arcRoundCaps": true,
+    "progressEndColor": "#FFFF4A3D",
+    "arcGlow": 6,
+    "arcHeadDot": true,
+    "progressColor": "#FF2D6CDF"
+   },
+   "currentValue": 70,
+   "basicBoxLocal": [
+    10,
+    150,
+    120,
+    120
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 150
+   },
+   "positioningMode": "pin",
+   "name": "progressBar"
+  },
+  "n9": {
+   "id": "n9",
+   "parentID": "b2",
+   "type": "progressBar",
+   "properties": {
+    "shape": "arc",
+    "arcStartAngle": 180,
+    "arcSweepAngle": 180,
+    "arcStrokeWidth": 10
+   },
+   "currentValue": 40,
+   "basicBoxLocal": [
+    150,
+    150,
+    160,
+    90
+   ],
+   "edgePins": {
+    "left": 150,
+    "top": 150
+   },
+   "positioningMode": "pin",
+   "name": "progressBar"
+  },
+  "n10": {
+   "id": "n10",
+   "parentID": "b2",
+   "type": "column",
+   "rowColumnType": "column",
+   "verticalFit": "shrinkWrap",
+   "spacing": 8,
+   "crossAxisAlignment": "start",
+   "padding": [
+    12,
+    12,
+    12,
+    12
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF7F7F7"
+    }
+   ],
+   "basicBoxLocal": [
+    10,
+    300,
+    400,
+    120
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 300
+   },
+   "positioningMode": "pin",
+   "name": "column",
+   "children": [
+    "n11",
+    "n12",
+    "n13"
+   ]
+  },
+  "n11": {
+   "id": "n11",
+   "parentID": "n10",
+   "type": "progressBar",
+   "properties": {
+    "progressColor": "#FF2D6CDF"
+   },
+   "basicBoxLocal": [
+    0,
+    0,
+    376,
+    10
+   ],
+   "horizontalFit": "expanded",
+   "currentValue": 25,
+   "name": "progressBar"
+  },
+  "n12": {
+   "id": "n12",
+   "parentID": "n10",
+   "type": "progressBar",
+   "properties": {},
+   "basicBoxLocal": [
+    0,
+    0,
+    200,
+    6
+   ],
+   "currentValue": 90,
+   "name": "progressBar"
+  },
+  "n13": {
+   "id": "n13",
+   "parentID": "n10",
+   "type": "progressBar",
+   "properties": {},
+   "basicBoxLocal": [
+    0,
+    0,
+    150,
+    4
+   ],
+   "margin": [
+    0,
+    8,
+    0,
+    0
+   ],
+   "horizontalFit": "expanded",
+   "currentValue": 50,
+   "name": "progressBar"
+  },
+  "n14": {
+   "id": "n14",
+   "parentID": "b2",
+   "type": "row",
+   "rowColumnType": "row",
+   "crossAxisAlignment": "center",
+   "spacing": 10,
+   "basicBoxLocal": [
+    10,
+    460,
+    400,
+    20
+   ],
+   "edgePins": {
+    "left": 10,
+    "top": 460
+   },
+   "positioningMode": "pin",
+   "name": "row",
+   "children": [
+    "n15",
+    "n16",
+    "n17",
+    "n18"
+   ]
+  },
+  "n15": {
+   "id": "n15",
+   "parentID": "n14",
+   "type": "rectangle",
+   "basicBoxLocal": [
+    0,
+    0,
+    40,
+    14
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#DDDDDD"
+    }
+   ],
+   "name": "rectangle"
+  },
+  "n16": {
+   "id": "n16",
+   "parentID": "n14",
+   "type": "progressBar",
+   "properties": {
+    "progressColor": "#FFFF4A3D"
+   },
+   "basicBoxLocal": [
+    0,
+    0,
+    200,
+    8
+   ],
+   "horizontalFit": "expanded",
+   "currentValue": 66,
+   "name": "progressBar"
+  },
+  "n17": {
+   "id": "n17",
+   "parentID": "n14",
+   "type": "progressBar",
+   "properties": {},
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    8
+   ],
+   "horizontalFit": "flexible",
+   "currentValue": 10,
+   "name": "progressBar"
+  },
+  "n18": {
+   "id": "n18",
+   "parentID": "n14",
+   "type": "progressBar",
+   "properties": {},
+   "basicBoxLocal": [
+    0,
+    0,
+    50,
+    20
+   ],
+   "verticalFit": "expanded",
+   "currentValue": 10,
+   "name": "progressBar"
+  }
+ }
+}

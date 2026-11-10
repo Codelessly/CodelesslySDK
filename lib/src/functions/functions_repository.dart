@@ -1,13 +1,19 @@
+import 'builtin_functions.dart';
+
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'package:provider/provider.dart';
 import 'package:rfc_6901/rfc_6901.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -55,6 +61,14 @@ enum ApiRequestType {
   }
 }
 
+/// What a [SpeakAction] speaks, its bindings resolved.
+typedef ResolvedSpeech = ({
+  String text,
+  String language,
+  double rate,
+  double pitch,
+});
+
 class FunctionsRepository {
   static const String name = 'FunctionsRepository';
 
@@ -87,8 +101,21 @@ class FunctionsRepository {
         return showDialogAction(context, action as ShowDialogAction);
       case ActionType.closeModal:
         final route = ModalRoute.of(context);
-        if (route is DialogRoute && route.isCurrent) {
-          Navigator.of(context).pop();
+        // Every dialog presentation is a popup route: a dialog's DialogRoute,
+        // and the RawDialogRoute that full-screen and popover dialogs open
+        // with showGeneralDialog, which a DialogRoute check missed.
+        if (route is PopupRoute && route.isCurrent) {
+          // Its params are the `${result}` of the chain that showed it.
+          final Map<String, dynamic> params =
+              (action as CloseModalAction).params;
+          Navigator.of(context).pop(
+            params.isEmpty
+                ? null
+                : substituteVariablesInMap(
+                    params,
+                    ActionChain.scopedValuesOf(context),
+                  ),
+          );
           return true;
         }
         return false;
@@ -109,11 +136,14 @@ class FunctionsRepository {
         setVariant(context, action as SetVariantAction, notify: notify);
         return true;
       case ActionType.setVariable:
-        return setVariableFromAction(
-          context,
-          action as SetVariableAction,
-          notify: notify,
-        );
+        final SetVariableAction set = action as SetVariableAction;
+        final int animateMs = _animateMsOf(context, set);
+        if (animateMs > 0) return glideVariable(context, set, animateMs);
+        // A plain set stops a glide on the same variable.
+        if (_glides.containsKey(set.variable.name)) {
+          _glides[set.variable.name] = _glides[set.variable.name]! + 1;
+        }
+        return setVariableFromAction(context, set, notify: notify);
       case ActionType.callFunction:
         final result = callFunction(context, action as CallFunctionAction);
         // Blocking actions wait for the app's function to finish.
@@ -165,11 +195,182 @@ class FunctionsRepository {
         return runCloudBatch(context, action as CloudBatchAction);
       case ActionType.copyToClipboard:
         return copyToClipboard(context, action as CopyToClipboardAction);
+      case ActionType.playAnimation:
+        final PlayAnimationAction play = action as PlayAnimationAction;
+        return NodePlayRegistry.play(
+          play.nodeId,
+          play.animation,
+        ).then((_) => true);
+      case ActionType.editText:
+        return editText(context, action as EditTextAction);
       case ActionType.paywall:
         return performPaywallAction(context, action as PaywallAction);
       case ActionType.focus:
         return runFocus(action as FocusAction, near: context);
+      case ActionType.speak:
+        return speak(context, action as SpeakAction);
+      case ActionType.scrollTo:
+        return ScrollTargets.scrollTo(action as ScrollToAction, near: context);
+      case ActionType.playSound:
+        return playSound(context, action as PlaySoundAction);
+      case ActionType.runScript:
+        return runScript(context, action as RunScriptAction);
+      case ActionType.controlDrag:
+        final ControlDragAction drag = action as ControlDragAction;
+        if (drag.command == DragCommand.step) {
+          final String steps = PropertyValueDelegate.substituteVariables(
+            drag.steps,
+            scopedValues: ActionChain.scopedValuesOf(context),
+            nullSubstitutionMode: NullSubstitutionMode.emptyString,
+          ).trim();
+          return NodeDragTrack.step(
+            drag.nodeId,
+            double.tryParse(steps)?.round() ?? 0,
+          );
+        }
+        return NodeDrag.control(
+          drag.nodeId,
+          drag.command,
+          drag.direction,
+        ).then((_) => true);
+      case ActionType.paginate:
+        return paginate(context, action as PaginateAction);
+      case ActionType.haptic:
+        return haptic(context, action as HapticAction);
+      case ActionType.animateVariable:
+        return animateVariable(context, action as AnimateVariableAction);
     }
+  }
+
+  /// Runs an [AnimateVariableAction] on its variable (see
+  /// [VariableAnimator]). A play or a resume completes when the animation
+  /// ends (true at its end, false when stopped or replaced; a pause keeps
+  /// both waiting); the other modes at once. False when the variable isn't found, is computed
+  /// or the values aren't numbers.
+  static FutureOr<bool> animateVariable(
+    BuildContext context,
+    AnimateVariableAction action, {
+    bool fromCurrentPlace = false,
+  }) {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final ValueNotifier<VariableData>? variable = context
+        .read<CodelesslyContext>()
+        .findVariableByName(action.variable.trim());
+    if (variable == null || variable.value.isComputed) {
+      DebugLogger.instance.printInfo(
+        'Animate variable: no settable variable "${action.variable}".',
+        name: name,
+      );
+      return false;
+    }
+    double? number(String text) {
+      if (text.trim().isEmpty) return null;
+      final String value = PropertyValueDelegate.substituteVariables(
+        text,
+        scopedValues: scopedValues,
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim();
+      final double? n = double.tryParse(value);
+      return n != null && n.isFinite ? n : null;
+    }
+
+    switch (action.mode) {
+      case AnimateVariableMode.resume:
+        // Resuming (or finding it playing) waits, like a play, for the
+        // animation to end: a blocking resume holds the actions after it
+        // until then, as the play it carries on does (that play's pending
+        // action completes at the same moment).
+        if (VariableAnimator.resume(variable) ||
+            VariableAnimator.isPlaying(variable)) {
+          final Future<bool>? done = VariableAnimator.completionOf(variable);
+          if (done != null) return done;
+          return true;
+        }
+        // Nothing to resume: play from where the value is, along the
+        // timeline from `from` (or from the value itself) to `to`.
+        return animateVariable(
+          context,
+          action.copyWith(mode: AnimateVariableMode.play),
+          fromCurrentPlace: true,
+        );
+      case AnimateVariableMode.play:
+        final double? to = number(action.to);
+        if (to == null) return false;
+        int ms = action.durationMs;
+        if (action.duration case final String duration
+            when duration.trim().isNotEmpty) {
+          final double? bound = number(duration);
+          if (bound != null && bound >= 0) ms = bound.round();
+        }
+        return VariableAnimator.play(
+          variable,
+          from: number(action.from),
+          to: to,
+          duration: Duration(milliseconds: ms),
+          curve: flutterCurveOf(action.curve),
+          fromCurrentPlace: fromCurrentPlace,
+        );
+      case AnimateVariableMode.pause:
+        return VariableAnimator.pauseVariable(variable);
+      case AnimateVariableMode.stop:
+        return VariableAnimator.stop(variable);
+      case AnimateVariableMode.seek:
+        final double? to = number(action.to);
+        if (to == null) return false;
+        VariableAnimator.seek(variable, to);
+        return true;
+    }
+  }
+
+  /// Moves the pagination controller [action] names. A controller no list
+  /// has created (its list isn't on screen) is skipped.
+  static Future<bool> paginate(
+    BuildContext context,
+    PaginateAction action,
+  ) async {
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    String resolve(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    ).trim();
+    int? number(String text) {
+      final String value = resolve(text);
+      return int.tryParse(value) ?? double.tryParse(value)?.round();
+    }
+
+    final String name = resolve(action.controller);
+    final PaginationController? controller = context
+        .read<CodelesslyContext?>()
+        ?.pagination[name];
+    if (controller == null) {
+      DebugLogger.instance.printInfo(
+        'No pagination controller named "$name" is on screen.',
+        name: 'FunctionsRepository',
+      );
+      return true;
+    }
+    switch (action.command) {
+      case PaginateCommand.next:
+        await controller.next();
+      case PaginateCommand.previous:
+        await controller.previous();
+      case PaginateCommand.goTo:
+        final int? page = number(action.page);
+        if (page != null) await controller.goTo(page);
+      case PaginateCommand.first:
+        await controller.first();
+      case PaginateCommand.last:
+        await controller.last();
+      case PaginateCommand.refresh:
+        await controller.refresh();
+      case PaginateCommand.retry:
+        await controller.retry();
+      case PaginateCommand.setPageSize:
+        final int? size = number(action.pageSize);
+        if (size != null) await controller.setPageSize(size);
+    }
+    return true;
   }
 
   /// Focuses (or unfocuses) the text field [action] names.
@@ -227,6 +428,66 @@ class FunctionsRepository {
     return true;
   }
 
+  /// Scrolls every scrollable around the node [ScrollToAction.nodeId]
+  /// (variables in it substituted) so the node shows at the top, the
+  /// action's offset below the edge: the nearest scrollable brings the node
+  /// there, each one further out brings the scrollable inside it there.
+  /// Returns false when the node isn't shown or nothing around it scrolls.
+  static Future<bool> scrollToNode(
+    BuildContext context,
+    ScrollToAction action,
+  ) async {
+    final String nodeId = PropertyValueDelegate.substituteVariables(
+      action.nodeId,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: ActionChain.scopedValuesOf(context),
+    ).trim();
+    final BuildContext? target = NodeContextRegistry.find(
+      nodeId,
+      from: context,
+    );
+    if (target == null) {
+      DebugLogger.instance.printInfo(
+        'Scroll to: node "$nodeId" is not shown.',
+        name: name,
+      );
+      return false;
+    }
+    final List<Future<void>> scrolls = [];
+    RenderObject? object = target.findRenderObject();
+    ScrollableState? scrollable = Scrollable.maybeOf(target);
+    while (scrollable != null && object != null && object.attached) {
+      final RenderAbstractViewport? viewport = RenderAbstractViewport.maybeOf(
+        object,
+      );
+      if (viewport == null) break;
+      final ScrollPosition position = scrollable.position;
+      if (position.hasContentDimensions) {
+        final double offset =
+            (viewport.getOffsetToReveal(object, 0).offset - action.offset)
+                .clamp(position.minScrollExtent, position.maxScrollExtent)
+                .toDouble();
+        if ((offset - position.pixels).abs() >= 0.5) {
+          if (action.durationMs <= 0) {
+            position.jumpTo(offset);
+          } else {
+            scrolls.add(
+              position.animateTo(
+                offset,
+                duration: Duration(milliseconds: action.durationMs),
+                curve: flutterCurveOf(action.curve),
+              ),
+            );
+          }
+        }
+      }
+      object = scrollable.context.findRenderObject();
+      scrollable = Scrollable.maybeOf(scrollable.context);
+    }
+    await Future.wait(scrolls);
+    return true;
+  }
+
   /// Copies the text of [action], its variables substituted.
   static Future<bool> copyToClipboard(
     BuildContext context,
@@ -237,8 +498,102 @@ class FunctionsRepository {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
       scopedValues: ActionChain.scopedValuesOf(context),
     );
-    await Clipboard.setData(ClipboardData(text: text));
+    try {
+      await Clipboard.setData(ClipboardData(text: text));
+    } catch (error) {
+      // A browser that denies clipboard access throws here. The copy is a
+      // side effect: the actions after it (the "Link copied" toast) still
+      // run, as they would in an app that doesn't wait for the clipboard.
+      DebugLogger.instance.printInfo(
+        'Copy to clipboard failed: $error',
+        name: 'FunctionsRepository',
+      );
+    }
     return true;
+  }
+
+  /// Speaks the text of [action] in its language at its rate, its variables
+  /// and formulas resolved, replacing anything being spoken; or stops any
+  /// speech when [SpeakAction.stop] is set. Speech runs on [Speech.instance],
+  /// whose state the `speech` variable reads.
+  static bool speak(BuildContext context, SpeakAction action) {
+    if (action.stop) {
+      Speech.instance.stop();
+      return true;
+    }
+    final ResolvedSpeech speech = resolveSpeech(
+      action,
+      ActionChain.scopedValuesOf(context),
+    );
+    if (speech.text.trim().isEmpty) {
+      Speech.instance.stop();
+      return true;
+    }
+    Speech.instance.speak(
+      speech.text,
+      language: speech.language,
+      rate: speech.rate,
+      pitch: speech.pitch,
+    );
+    return true;
+  }
+
+  /// The text, language, rate and pitch [action] speaks with, its variables
+  /// and formulas resolved. A rate or pitch that is not a number falls back
+  /// to `1`; rates are kept within 0.1-10 and pitches within 0-2, the Web
+  /// Speech API's ranges.
+  static ResolvedSpeech resolveSpeech(
+    SpeakAction action,
+    ScopedValues scopedValues,
+  ) {
+    String resolve(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    double number(String? text, double min, double max) {
+      if (text == null || text.trim().isEmpty) return 1;
+      final num? value = num.tryParse(resolve(text).trim());
+      if (value == null || value.isNaN) return 1;
+      return value.toDouble().clamp(min, max);
+    }
+
+    return (
+      text: resolve(action.text),
+      language: resolve(action.language).trim(),
+      rate: number(action.rate, 0.1, 10),
+      pitch: number(action.pitch, 0, 2),
+    );
+  }
+
+  /// Edits the text field [action] names, on the screen [context] is on, at
+  /// its cursor (see [EditTextOperation]); its text, before and after have
+  /// their variables substituted. Returns whether the field was found.
+  static bool editText(BuildContext context, EditTextAction action) {
+    final EditableTextField? field = TextFieldRegistry.find(
+      context,
+      action.nodeId,
+    );
+    if (field == null) {
+      DebugLogger.instance.printInfo(
+        'Edit text: no text field ${action.nodeId} on screen.',
+        name: name,
+      );
+      return false;
+    }
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    String substitute(String text) => PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    return field.editText(
+      action.operation,
+      text: substitute(action.text),
+      before: substitute(action.before),
+      after: action.after == null ? null : substitute(action.after!),
+      numbered: action.numbered,
+    );
   }
 
   /// How long [action] waits: its [DelayAction.duration] formula when that
@@ -308,6 +663,113 @@ class FunctionsRepository {
       scopedValues: scopedValues,
     ).runBatch(action);
     return true;
+  }
+
+  /// Runs the script [action] names with its arguments.
+  ///
+  /// On success the script's result is the chain's `${result}` (and is
+  /// stored in [RunScriptAction.resultVariable] if set). On failure the
+  /// [RunScriptAction.onError] actions run with `${result}` set to
+  /// `{error: {type, message, line, column}, logs}`. Like a Call API
+  /// action, a failure with onError actions doesn't stop the chain; one
+  /// without them is reported and stops it.
+  static Future<bool> runScript(
+    BuildContext context,
+    RunScriptAction action,
+  ) async {
+    final CodelesslyContext codelessly = context.read<CodelesslyContext>();
+    final ScriptModel? script = codelessly.findScript(action.scriptId);
+    final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
+    final ScriptRunResult result = script == null
+        ? ScriptRunResult.failure(
+            'ReferenceError',
+            'There is no script "${action.scriptId}".',
+          )
+        : await ScriptRunner.run(
+            script,
+            args: {
+              for (final MapEntry<String, String> e in action.arguments.entries)
+                e.key: scriptArgument(e.value, scopedValues),
+            },
+            scripts: codelessly.scripts,
+            host: FlutterScriptHost(context),
+          );
+    for (final Map<String, Object?> log in result.logs) {
+      DebugLogger.instance.printInfo(
+        '[script ${script?.name ?? action.scriptId}] ${log['level']}: ${log['message']}',
+        name: name,
+      );
+    }
+    if (result.ok) {
+      ActionChain.setResult(result.value);
+      final String? variableName = action.resultVariable;
+      if (variableName != null && variableName.isNotEmpty) {
+        final Observable<VariableData>? variable = codelessly.findVariable(
+          name: variableName,
+        );
+        if (variable != null && !variable.value.isComputed) {
+          variable.value = variable.value.copyWith(value: result.value);
+        }
+      }
+      return true;
+    }
+    final Map<String, Object?> failure = {
+      'error': result.error,
+      'logs': result.logs,
+    };
+    final String message =
+        'Script ${script?.name ?? action.scriptId} failed: ${result.error!['type']}: ${result.error!['message']}'
+        '${result.error!['line'] != null ? ' (line ${result.error!['line']})' : ''}';
+    if (action.onError.isNotEmpty) {
+      DebugLogger.instance.printInfo(message, name: name);
+      ActionChain.setResult(failure);
+      // ignore: use_build_context_synchronously
+      await runActions(
+        ActionChain.contextFor(context) ?? context,
+        action.onError,
+      );
+      return true;
+    }
+    throw ScriptFailedException(message, result.error!);
+  }
+
+  /// The value an argument of a "Run script" action passes: the value of a
+  /// text that is exactly one variable or formula (`${cart.items}` passes
+  /// the list), else the text with its variables filled in, read as JSON
+  /// when it is JSON (`30` passes a number, `true` a boolean).
+  static Object? scriptArgument(String text, ScopedValues scopedValues) {
+    final String trimmed = text.trim();
+    final RegExpMatch? match = variableSyntaxIdentifierRegex.firstMatch(
+      trimmed,
+    );
+    final bool exact =
+        match != null && match.start == 0 && match.end == trimmed.length;
+    if (exact) {
+      return PropertyValueDelegate.getVariableValueFromPath<Object>(
+        trimmed,
+        scopedValues: scopedValues,
+      );
+    }
+    final String filled = PropertyValueDelegate.substituteVariables(
+      text,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      scopedValues: scopedValues,
+    );
+    final String t = filled.trim();
+    if (t.isNotEmpty &&
+        (num.tryParse(t) != null ||
+            t == 'true' ||
+            t == 'false' ||
+            t == 'null' ||
+            (t.startsWith('[') && t.endsWith(']')) ||
+            (t.startsWith('{') && t.endsWith('}')))) {
+      try {
+        return jsonDecode(t);
+      } on FormatException {
+        // Not JSON: the text.
+      }
+    }
+    return filled;
   }
 
   /// Runs [actions] in order, like a trigger's reactions: blocking actions
@@ -383,7 +845,9 @@ class FunctionsRepository {
   }
 
   /// Runs the nested actions of [action] once per item of its list, with
-  /// `${result.item}` and `${result.index}` set.
+  /// `${loop.item}` and `${loop.index}` set for the whole turn (and
+  /// `${result.item}` / `${result.index}` until an action replaces the
+  /// result).
   static Future<bool> runForEach(
     BuildContext context,
     ForEachAction action,
@@ -409,9 +873,14 @@ class FunctionsRepository {
     }
     final List snapshot = List.of(items);
     for (int index = 0; index < snapshot.length; index++) {
+      final Map<String, Object?> turn = {
+        'item': snapshot[index],
+        'index': index,
+      };
       await ActionChain.run(
         () => runActions(context, action.actions),
-        result: {'item': snapshot[index], 'index': index},
+        result: turn,
+        loop: turn,
       );
     }
     return true;
@@ -636,13 +1105,17 @@ class FunctionsRepository {
     Codelessly? codelessly,
     CodelesslyWidgetController? codelesslyController,
     ScopedValues? scopedValues,
+    bool literalParams = false,
   }) async {
     final ScopedValues effectiveScopedValues =
         scopedValues ?? ActionChain.scopedValuesOf(context);
-    final parsedParams = substituteVariablesInMap(
-      action.params,
-      effectiveScopedValues,
-    );
+    // A link's parameters are text the visitor typed: they are passed as
+    // they are, as the first screen reads them, never evaluated (a
+    // `${...}` in a URL is not a formula) or parsed (`?validate=1` stays
+    // the text '1', not the number 1).
+    final Map<String, dynamic> parsedParams = literalParams
+        ? {...action.params}
+        : substituteVariablesInMap(action.params, effectiveScopedValues);
 
     DebugLogger.instance.printInfo(
       'Performing navigation action with params: $parsedParams',
@@ -651,11 +1124,32 @@ class FunctionsRepository {
 
     final Codelessly effectiveCodelessly =
         codelessly ?? context.read<Codelessly>();
+
+    // A screen shown by a Codelessly router navigates through it, so the
+    // browser's address and history follow the app's screens.
+    final CodelesslyRouterDelegate? router = CodelesslyRouterDelegate.maybeOf(
+      context,
+    );
+    if (router != null) {
+      return _navigateWithRouter(
+        context,
+        router,
+        action,
+        params: parsedParams,
+        codelessly: effectiveCodelessly,
+        scopedValues: effectiveScopedValues,
+      );
+    }
+
     final String? myLayoutId = effectiveCodelessly.currentNavigatedLayoutId;
     final String? myCanvasId = effectiveCodelessly.currentNavigatedCanvasId;
 
     if (action.navigationType == NavigationType.pop) {
-      final bool popped = await Navigator.maybePop(context, parsedParams);
+      // The screen's own pop leaves even while it blocks back.
+      final bool popped = await BackInterceptor.allowPop(
+        context,
+        () => Navigator.maybePop(context, parsedParams),
+      );
       // Nothing to go back to (the screen was opened directly): a pop with a
       // destination goes there instead.
       if (!popped && action.destinationId.isNotEmpty && context.mounted) {
@@ -665,6 +1159,7 @@ class FunctionsRepository {
           codelessly: codelessly,
           codelesslyController: codelesslyController,
           scopedValues: scopedValues,
+          literalParams: literalParams,
         );
       }
     } else {
@@ -712,7 +1207,9 @@ class FunctionsRepository {
         );
         await Navigator.push(
           context,
-          MaterialPageRoute(
+          navigationRoute<void>(
+            action,
+            origin: context,
             settings: RouteSettings(arguments: parsedParams),
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
@@ -731,13 +1228,23 @@ class FunctionsRepository {
           );
         }
       } else if (action.navigationType == NavigationType.reset) {
+        // The destination takes over the chain, as with a replace: actions
+        // it set up to run later (a toast's Undo) run with it.
+        final ActionChain? chain = ActionChain.current;
         await _resetTo(
           context,
           action,
-          destination: MaterialPageRoute(
+          destination: navigationRoute<void>(
+            action,
+            origin: context,
             settings: RouteSettings(arguments: parsedParams),
-            builder: (context) =>
-                CodelesslyWidget(controller: effectiveController),
+            builder: (context) {
+              final Widget page = CodelesslyWidget(
+                controller: effectiveController,
+              );
+              if (chain == null) return page;
+              return ActionChainAdopter(chain: chain, child: page);
+            },
           ),
           codelessly: effectiveCodelessly,
           parentController: parentController,
@@ -753,7 +1260,9 @@ class FunctionsRepository {
         unawaited(
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
+            navigationRoute<void>(
+              action,
+              origin: context,
               settings: RouteSettings(arguments: parsedParams),
               builder: (context) {
                 final Widget page = CodelesslyWidget(
@@ -766,6 +1275,223 @@ class FunctionsRepository {
           ),
         );
       }
+    }
+  }
+
+  /// [navigate] for a screen shown by [router]: its stack of screens is the
+  /// browser's history, so screens opened are entries the browser's back
+  /// and forward buttons move through.
+  static Future<void> _navigateWithRouter(
+    BuildContext context,
+    CodelesslyRouterDelegate router,
+    NavigationAction action, {
+    required Map<String, dynamic> params,
+    required Codelessly codelessly,
+    required ScopedValues scopedValues,
+  }) async {
+    if (action.navigationType == NavigationType.pop) {
+      // A dialog or sheet over the screen closes first.
+      final ModalRoute<Object?>? modal = ModalRoute.of(context);
+      if (modal != null && (!modal.isCurrent || modal.settings is! Page)) {
+        await BackInterceptor.allowPop(
+          context,
+          () => Navigator.maybePop(context, params),
+        );
+        return;
+      }
+      final bool fallsBack =
+          action.destinationId.isNotEmpty && router.backIsOnlySeededHome;
+      if (router.canGoBack && !fallsBack) {
+        router.pop(params);
+        return;
+      }
+      // Nothing to go back to (the screen was opened directly): a pop with
+      // a destination goes there instead.
+      if (action.destinationId.isEmpty || !context.mounted) return;
+      action = action.copyWith(navigationType: NavigationType.replace);
+    }
+
+    final String? location = router.locationFor(action.destinationId, params);
+    if (location == null) {
+      codelessly.errorLogger.captureException(
+        'Layout not found',
+        message:
+            'Could not find a layout with a canvas id of [${action.destinationId}]',
+        type: 'layout_not_found',
+      );
+      return;
+    }
+
+    switch (action.navigationType) {
+      case NavigationType.push:
+        // A chain triggered on the new screen can finish on this layout
+        // after the screen closes.
+        await router.pushLocation(
+          location,
+          params: params,
+          openerHosts: ActionChainOpener.hostsFor(context),
+          transition: action.transition,
+          transitionMs: action.transitionMs,
+          reverseTransitionMs: action.reverseTransitionMs,
+          routeTransition: action.routeTransition,
+          anchor: RevealAnchor.of(context),
+        );
+      case NavigationType.replace || NavigationType.pop:
+        // The new screen takes over the chain: the actions after this one
+        // (e.g. a toast) run with it once this screen unmounts. Its result
+        // only comes when the new screen closes, so it isn't awaited.
+        unawaited(
+          router.replaceLocation(
+            location,
+            params: params,
+            chain: ActionChain.current,
+            transition: action.transition,
+            transitionMs: action.transitionMs,
+            reverseTransitionMs: action.reverseTransitionMs,
+            routeTransition: action.routeTransition,
+            anchor: RevealAnchor.of(context),
+          ),
+        );
+      case NavigationType.reset:
+        final String? baseId = action.baseDestinationId;
+        if (baseId == null || baseId.isEmpty) {
+          router.resetTo(
+            [location],
+            params: [params],
+            chain: ActionChain.current,
+          );
+          return;
+        }
+        final Map<String, dynamic> baseParams = substituteVariablesInMap(
+          action.baseParams ?? const {},
+          scopedValues,
+        );
+        final String? baseLocation = router.locationFor(baseId, baseParams);
+        if (baseLocation == null) {
+          codelessly.errorLogger.captureException(
+            'Layout not found',
+            message: 'Could not find a layout with a canvas id of [$baseId]',
+            type: 'layout_not_found',
+          );
+          return;
+        }
+        router.resetTo(
+          [baseLocation, location],
+          params: [baseParams, params],
+          chain: ActionChain.current,
+        );
+    }
+  }
+
+  /// [transition], except that on the web the platform's transition is
+  /// none: a website switches pages at once, where Flutter's default page
+  /// transition off Apple platforms is Android's zoom.
+  static PageTransition webTransition(
+    PageTransition transition, {
+    bool isWeb = kIsWeb,
+  }) => isWeb && transition == PageTransition.platform
+      ? PageTransition.none
+      : transition;
+
+  /// The route a push, replace or reset [action] opens its screen with,
+  /// built by [builder]: a [MaterialPageRoute] for
+  /// [PageTransition.platform], otherwise a [PageRouteBuilder] that plays
+  /// [NavigationAction.transition] over [NavigationAction.resolvedTransitionMs]
+  /// (and back over [NavigationAction.resolvedReverseTransitionMs]).
+  /// Shared elements fly with every transition, as long as it lasts.
+  ///
+  /// An action with a [NavigationAction.routeTransition] opens a
+  /// [CodelesslyRouteTransitionRoute] instead, whose reveals grow from the
+  /// last tap or from [origin]'s box (the node that navigated).
+  static PageRoute<T> navigationRoute<T>(
+    NavigationAction action, {
+    required RouteSettings settings,
+    required WidgetBuilder builder,
+    BuildContext? origin,
+  }) {
+    if (action.routeTransition case final RouteTransition custom?) {
+      return CodelesslyRouteTransitionRoute<T>(
+        transition: custom,
+        settings: settings,
+        anchor: RevealAnchor.of(origin),
+        builder: builder,
+      );
+    }
+    final PageTransition transition = webTransition(action.transition);
+    if (transition == PageTransition.platform) {
+      return MaterialPageRoute<T>(settings: settings, builder: builder);
+    }
+    return PageRouteBuilder<T>(
+      settings: settings,
+      transitionDuration: Duration(milliseconds: action.resolvedTransitionMs),
+      reverseTransitionDuration: Duration(
+        milliseconds: action.resolvedReverseTransitionMs,
+      ),
+      pageBuilder: (context, _, _) => builder(context),
+      transitionsBuilder: (context, animation, _, child) =>
+          buildPageTransition(context, transition, animation, child),
+    );
+  }
+
+  /// Draws [child], a screen coming in, with [transition] at [animation]'s
+  /// value (0 hidden, 1 shown; it runs back when the screen leaves).
+  static Widget buildPageTransition(
+    BuildContext context,
+    PageTransition transition,
+    Animation<double> animation,
+    Widget child,
+  ) {
+    final Animation<double> eased = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    switch (transition) {
+      case PageTransition.platform:
+      case PageTransition.none:
+        return child;
+      case PageTransition.fade:
+        return FadeTransition(opacity: eased, child: child);
+      case PageTransition.fadeUp:
+        // Fades in over the first 60% while rising 3% of its height.
+        return FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0, 0.6),
+          ),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.03),
+              end: Offset.zero,
+            ).animate(eased),
+            child: child,
+          ),
+        );
+      case PageTransition.slideUp:
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 1),
+            end: Offset.zero,
+          ).animate(eased),
+          child: child,
+        );
+      case PageTransition.slideLeft:
+        final bool rtl = Directionality.maybeOf(context) == TextDirection.rtl;
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: Offset(rtl ? -1 : 1, 0),
+            end: Offset.zero,
+          ).animate(eased),
+          child: child,
+        );
+      case PageTransition.scale:
+        return FadeTransition(
+          opacity: eased,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.9, end: 1).animate(eased),
+            child: child,
+          ),
+        );
     }
   }
 
@@ -796,7 +1522,8 @@ class FunctionsRepository {
       }
       final CodelesslyWidgetController baseController = parentController
           .copyWith(layoutID: baseLayoutId, codelessly: codelessly);
-      base = MaterialPageRoute(
+      base = navigationRoute<void>(
+        action,
         settings: RouteSettings(
           arguments: substituteVariablesInMap(
             action.baseParams ?? const {},
@@ -839,6 +1566,10 @@ class FunctionsRepository {
       anchorGap: action.anchorGap,
       anchorOffset: action.anchorOffset,
       fullHeight: action.fullHeight,
+      barrierBlur: action.barrierBlur,
+      enterScale: action.enterScale,
+      sheetBelowWidth: action.sheetBelowWidth,
+      routeTransition: action.routeTransition,
     );
     if (result case final Map values when values.isNotEmpty) {
       ActionChain.setResult(values);
@@ -852,6 +1583,37 @@ class FunctionsRepository {
     final Object? x = result['x'], y = result['y'];
     if (x is! num || y is! num) return null;
     return Offset(x.toDouble(), y.toDouble());
+  }
+
+  /// What a click, long press, double tap, right click or pointer trigger
+  /// reports of where it landed: `x`, `y` in the node, `globalX`, `globalY`
+  /// on screen, the node's `width` and `height`, and `fx`, `fy`, where it
+  /// landed as a share (0 to 1) of the node's width and height: a tap on a
+  /// map that resizes with the screen places a pin at the same spot on any
+  /// size.
+  static Map<String, double> pointerResult(
+    Offset local,
+    Offset global,
+    Size? size,
+  ) {
+    final double width = size?.width ?? 0, height = size?.height ?? 0;
+    return {
+      'x': local.dx,
+      'y': local.dy,
+      'globalX': global.dx,
+      'globalY': global.dy,
+      'fx': width > 0 ? (local.dx / width).clamp(0.0, 1.0) : 0.0,
+      'fy': height > 0 ? (local.dy / height).clamp(0.0, 1.0) : 0.0,
+      'width': width,
+      'height': height,
+    };
+  }
+
+  /// The laid out size of the box [context] builds, or null.
+  static Size? boxSizeOf(BuildContext context) {
+    final RenderObject? box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.size;
   }
 
   /// The rect of the node that [context] belongs to, relative to its
@@ -926,6 +1688,10 @@ class FunctionsRepository {
     double anchorGap = 6,
     double anchorOffset = 0,
     bool fullHeight = false,
+    double barrierBlur = 0,
+    double enterScale = 1,
+    double sheetBelowWidth = 600,
+    RouteTransition? routeTransition,
   }) async {
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final parsedParams = substituteVariablesInMap(params, scopedValues);
@@ -975,8 +1741,8 @@ class FunctionsRepository {
             DialogPlacement.bottomSheet => DialogPresentation.bottomSheet,
             DialogPlacement.adaptive => DialogPresentation.adaptive,
             _ => presentation,
-          }
-        : presentation;
+          }.resolveFor(context, sheetBelowWidth: sheetBelowWidth)
+        : presentation.resolveFor(context, sheetBelowWidth: sheetBelowWidth);
     final bool wantsAnchor =
         effectivePresentation == DialogPresentation.dialog &&
         (anchorToTrigger || placement == DialogPlacement.anchored);
@@ -1021,6 +1787,10 @@ class FunctionsRepository {
             maxHeightFactor: maxHeightFactor,
             showDragHandle: showDragHandle,
             fullHeight: fullHeight,
+            barrierBlur: barrierBlur,
+            enterScale: enterScale,
+            sheetBelowWidth: sheetBelowWidth,
+            routeTransition: routeTransition,
             anchor: effectivePresentation == DialogPresentation.popover
                 ? anchorRectOf(context)
                 : null,
@@ -1042,7 +1812,12 @@ class FunctionsRepository {
             gap: anchorGap,
             offset: anchorOffset,
             barrierDismissible: barrierDismissible,
-            barrierColor: barrierColor,
+            // An adaptive menu tints the screen behind its sheet on phones;
+            // anchored to its trigger on wider screens it is a popover
+            // menu, which leaves the screen as it is.
+            barrierColor: presentation == DialogPresentation.adaptive
+                ? Colors.transparent
+                : barrierColor,
             routeSettings: routeSettings,
             builder: (context) => ActionChainOpener(
               openerHosts: openerHosts,
@@ -1066,6 +1841,40 @@ class FunctionsRepository {
     return result;
   }
 
+  /// The transition of a dialog with a frosted scrim: the page behind blurs
+  /// up to [barrierBlur] (a Gaussian sigma) while the dialog fades in and
+  /// scales from [enterScale] to 1, all eased by [animation].
+  static Widget frostedDialogTransition({
+    required Animation<double> animation,
+    required double barrierBlur,
+    required double enterScale,
+    required Widget child,
+  }) {
+    final Animation<double> eased = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+    );
+    Widget dialog = FadeTransition(
+      opacity: eased,
+      child: ScaleTransition(
+        scale: Tween<double>(begin: enterScale, end: 1).animate(eased),
+        child: child,
+      ),
+    );
+    if (barrierBlur <= 0) return dialog;
+    return AnimatedBuilder(
+      animation: eased,
+      child: dialog,
+      builder: (context, child) {
+        final double sigma = barrierBlur * eased.value;
+        return BackdropFilter(
+          filter: ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+          child: child,
+        );
+      },
+    );
+  }
+
   /// Opens a canvas as a dialog, sheet or anchored popover. The canvas draws
   /// its own surface; sheets may use their design height or hug content.
   static Future<T?> presentCanvas<T>(
@@ -1085,7 +1894,14 @@ class FunctionsRepository {
     bool showDragHandle = false,
     Rect? anchor,
     bool fullHeight = false,
+    double barrierBlur = 0,
+    double enterScale = 1,
+    double sheetBelowWidth = 600,
+    RouteTransition? routeTransition,
   }) {
+    // A toast already up goes under the dialog, which opens above it.
+    final WidgetBuilder dialogContent = builder;
+    builder = (context) => ToastBelowRoute(child: dialogContent(context));
     if (presentation == DialogPresentation.popover) {
       return showGeneralDialog<T>(
         context: context,
@@ -1131,7 +1947,7 @@ class FunctionsRepository {
       DialogPresentation.sideSheet ||
       DialogPresentation.popover => false,
       DialogPresentation.bottomSheet => true,
-      DialogPresentation.adaptive => (screen?.width ?? 1024) < 600,
+      DialogPresentation.adaptive => (screen?.width ?? 1024) < sheetBelowWidth,
     };
     Widget content(BuildContext context, CanvasSizing sizing) =>
         asSheet && fullHeight
@@ -1144,9 +1960,79 @@ class FunctionsRepository {
             builder: builder,
           );
 
+    // As wide as the screen and as tall as its content, up to 90% of the
+    // screen; the canvas draws its own background and corners.
+    Widget sheetContent(BuildContext context) {
+      final Size screen = MediaQuery.sizeOf(context);
+      final double cap =
+          CodelesslyDialogWidget.maxHeightFor(maxHeightFactor, screen.height) ??
+          screen.height * 0.88;
+      if (fullHeight) return content(context, CanvasSizing.sheet);
+      if (hugsContent) {
+        return CanvasSizingScope(
+          sizing: CanvasSizing.design,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: screen.width, maxHeight: cap),
+            child: Builder(builder: builder),
+          ),
+        );
+      }
+      return CanvasSizingScope(
+        sizing: CanvasSizing.fill,
+        child: SizedBox(
+          height: math.min(designSize?.height ?? double.infinity, cap),
+          child: Builder(builder: builder),
+        ),
+      );
+    }
+
+    Widget dialogBody(BuildContext context) => Padding(
+      padding: insets,
+      child: maxHeightFactor == null
+          ? content(context, CanvasSizing.design)
+          : ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight:
+                    MediaQuery.sizeOf(context).height *
+                    maxHeightFactor.clamp(0, 1),
+              ),
+              child: content(context, CanvasSizing.design),
+            ),
+    );
+
+    // A custom transition: a page route, so shared elements fly into and
+    // out of the modal, with its own entrance, the screen behind it moving
+    // and a drag that dismisses it.
+    if (routeTransition != null) {
+      final bool fullScreen = presentation == DialogPresentation.fullScreen;
+      return Navigator.of(context).push<T>(
+        CodelesslyRouteTransitionRoute<T>(
+          modal: true,
+          transition: routeTransition,
+          settings: routeSettings,
+          anchor: RevealAnchor.of(context),
+          dismissibleBarrier: barrierDismissible,
+          fallbackBarrierColor: fullScreen
+              ? (barrierColor ?? Colors.black)
+              : (barrierColor ?? Colors.black54),
+          builder: (context) {
+            if (asSheet) {
+              final Widget sheet = sheetContent(context);
+              return Align(
+                alignment: Alignment.bottomCenter,
+                child: showDragHandle
+                    ? LayoutPresentationRoute.withDragHandle(sheet)
+                    : sheet,
+              );
+            }
+            if (fullScreen) return content(context, CanvasSizing.fill);
+            return SafeArea(child: dialogBody(context));
+          },
+        ),
+      );
+    }
+
     if (asSheet) {
-      // As wide as the screen and as tall as its content, up to 90% of the
-      // screen; the canvas draws its own background and corners.
       return showModalBottomSheet<T>(
         context: context,
         useRootNavigator: false,
@@ -1157,37 +2043,16 @@ class FunctionsRepository {
         // The canvas draws the sheet: its fill, corners and grab handle.
         backgroundColor: Colors.transparent,
         elevation: 0,
-        showDragHandle: showDragHandle,
+        // The handle goes on the canvas (see
+        // [LayoutPresentationRoute.withDragHandle]); Flutter's would sit in a
+        // see-through band above it.
         constraints: const BoxConstraints(),
         routeSettings: routeSettings,
         builder: (context) {
-          final Size screen = MediaQuery.sizeOf(context);
-          final double cap =
-              CodelesslyDialogWidget.maxHeightFor(
-                maxHeightFactor,
-                screen.height,
-              ) ??
-              screen.height * 0.88;
-          if (fullHeight) return content(context, CanvasSizing.sheet);
-          if (hugsContent) {
-            return CanvasSizingScope(
-              sizing: CanvasSizing.design,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: screen.width,
-                  maxHeight: cap,
-                ),
-                child: Builder(builder: builder),
-              ),
-            );
-          }
-          return CanvasSizingScope(
-            sizing: CanvasSizing.fill,
-            child: SizedBox(
-              height: math.min(designSize?.height ?? double.infinity, cap),
-              child: Builder(builder: builder),
-            ),
-          );
+          final Widget sheet = sheetContent(context);
+          return showDragHandle
+              ? LayoutPresentationRoute.withDragHandle(sheet)
+              : sheet;
         },
       );
     }
@@ -1206,25 +2071,35 @@ class FunctionsRepository {
         pageBuilder: (context, _, _) => content(context, CanvasSizing.fill),
       );
     }
+    if (barrierBlur > 0 || enterScale != 1) {
+      // A frosted scrim: the page behind blurs while the dialog fades and
+      // grows in, both following the route's animation.
+      return showGeneralDialog<T>(
+        context: context,
+        useRootNavigator: false,
+        barrierDismissible: barrierDismissible,
+        barrierLabel: MaterialLocalizations.of(context)
+            .modalBarrierDismissLabel,
+        barrierColor: barrierColor ?? Colors.black54,
+        routeSettings: routeSettings,
+        transitionDuration: const Duration(milliseconds: 280),
+        transitionBuilder: (context, animation, _, child) =>
+            frostedDialogTransition(
+              animation: animation,
+              barrierBlur: barrierBlur,
+              enterScale: enterScale,
+              child: child,
+            ),
+        pageBuilder: (context, _, _) => SafeArea(child: dialogBody(context)),
+      );
+    }
     return showDialog<T>(
       context: context,
       useRootNavigator: false,
       barrierDismissible: barrierDismissible,
       barrierColor: barrierColor,
       routeSettings: routeSettings,
-      builder: (context) => Padding(
-        padding: insets,
-        child: maxHeightFactor == null
-            ? content(context, CanvasSizing.design)
-            : ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight:
-                      MediaQuery.sizeOf(context).height *
-                      maxHeightFactor.clamp(0, 1),
-                ),
-                child: content(context, CanvasSizing.design),
-              ),
-      ),
+      builder: dialogBody,
     );
   }
 
@@ -1701,6 +2576,86 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     );
   }
 
+  /// Buzzes the device as [action] says, unless its `when` formula is false.
+  static bool haptic(BuildContext context, HapticAction action) {
+    if (action.when.trim().isNotEmpty) {
+      final String on = PropertyValueDelegate.substituteVariables(
+        action.when,
+        scopedValues: ActionChain.scopedValuesOf(context),
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ).trim().toLowerCase();
+      if (on.isEmpty || on == 'false' || on == '0' || on == 'null') return true;
+    }
+    lastHaptic = action.kind;
+    switch (action.kind) {
+      case HapticKind.selection:
+        HapticFeedback.selectionClick();
+      case HapticKind.light:
+        HapticFeedback.lightImpact();
+      case HapticKind.medium:
+        HapticFeedback.mediumImpact();
+      case HapticKind.heavy:
+        HapticFeedback.heavyImpact();
+      case HapticKind.vibrate:
+        HapticFeedback.vibrate();
+    }
+    return true;
+  }
+
+  /// The last buzz [haptic] gave (tests).
+  @visibleForTesting
+  static HapticKind? lastHaptic;
+
+  /// Plays [action]'s sound, now or at its `at` time on the sound clock, or
+  /// its sound file.
+  /// Its fields are values or formulas (`${result.at}`, `${voice}`).
+  static bool playSound(BuildContext context, PlaySoundAction action) {
+    final ScopedValues scope = ActionChain.scopedValuesOf(context);
+    String text(String value) => PropertyValueDelegate.substituteVariables(
+      value,
+      scopedValues: scope,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    double? number(String value) => double.tryParse(text(value));
+    final String url = text(action.url);
+    final String at = text(action.at);
+    if (url.isNotEmpty) {
+      // Decoded once and kept where the engine can (the web), so a tick on
+      // every detent of a dial plays at once; a media player elsewhere.
+      final double volume = number(action.volume) ?? 1;
+      if (!Sound.playFile(
+        url,
+        time: at.isEmpty ? null : double.tryParse(at),
+        volume: volume,
+        pitch: number(action.pitch) ?? 1,
+      )) {
+        unawaited(_playFile(url, volume.clamp(0, 1).toDouble()));
+      }
+      return true;
+    }
+    Sound.play(
+      Sound.voiceNamed(text(action.sound)),
+      time: at.isEmpty ? null : double.tryParse(at),
+      volume: number(action.volume) ?? 1,
+      pitch: number(action.pitch) ?? 1,
+    );
+    return true;
+  }
+
+  /// Plays the sound file at [url] once, at [volume] (0 to 1).
+  static Future<void> _playFile(String url, double volume) async {
+    final AudioPlayer player = AudioPlayer();
+    try {
+      await player.setUrl(url);
+      await player.setVolume(volume);
+      await player.play();
+    } catch (e) {
+      DebugLogger.instance.printInfo('Could not play $url: $e', name: name);
+    } finally {
+      await player.dispose();
+    }
+  }
+
   /// Sets given [action.newValue] for given [action.variable] to a variable
   /// from [CodelesslyContext.variables].
   /// Returns `true` if variable was found and updated, `false` otherwise.
@@ -1778,6 +2733,91 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     return true;
   }
 
+  /// [action]'s glide time in ms (its `animateMs`, a value or formula).
+  static int _animateMsOf(BuildContext context, SetVariableAction action) {
+    final String raw = action.animateMs.trim();
+    if (raw.isEmpty || raw == '0') return 0;
+    final String text = PropertyValueDelegate.substituteVariables(
+      raw,
+      scopedValues: ActionChain.scopedValuesOf(context),
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    return (double.tryParse(text) ?? 0).round();
+  }
+
+  /// The glide each variable is on now, by name (a newer one stops it).
+  static final Map<String, int> _glides = {};
+
+  /// Sets a number variable as [action] says, gliding there over [ms]
+  /// milliseconds along [SetVariableAction.curve], every frame, and
+  /// completes when it arrives (or when a newer glide or set takes over).
+  /// Anything but a number is set at once.
+  static Future<bool> glideVariable(
+    BuildContext context,
+    SetVariableAction action,
+    int ms,
+  ) async {
+    final CodelesslyContext codelessly = context.read<CodelesslyContext>();
+    final variable = codelessly.findVariable(
+      id: action.variable.id,
+      name: action.variable.name,
+    );
+    if (variable == null) return false;
+    final VariableType type = variable.value.type;
+    final Object? start = variable.value.getValue();
+    if ((type != VariableType.integer && type != VariableType.decimal) ||
+        start is! num) {
+      return setVariableFromAction(context, action);
+    }
+    // Work out the end value the usual way, then glide to it from [start].
+    if (!setVariableFromAction(context, action, notify: false)) return false;
+    final Object? end = variable.value.getValue();
+    variable.set(variable.value.copyWith(value: start), notify: false);
+    if (end is! num || end == start) {
+      variable.set(variable.value.copyWith(value: end));
+      return true;
+    }
+    final String key = variable.value.name;
+    final int glide = (_glides[key] ?? 0) + 1;
+    _glides[key] = glide;
+    final Curve curve = flutterCurveOf(action.curve);
+    // Timed by the frames' own clock (the one animations run on).
+    Duration? begin;
+    final Completer<bool> done = Completer<bool>();
+    void frame(Duration now) {
+      // A newer set took over.
+      if (_glides[key] != glide) {
+        done.complete(true);
+        return;
+      }
+      // The screen that started it has closed: stop, don't run on.
+      if (!context.mounted) {
+        _glides.remove(key);
+        done.complete(false);
+        return;
+      }
+      begin ??= now;
+      final double t =
+          ((now - begin!).inMicroseconds / 1000 / ms).clamp(0.0, 1.0);
+      final double v = start + (end - start) * curve.transform(t);
+      variable.set(
+        variable.value.copyWith(
+          value: t >= 1 ? end : (type == VariableType.integer ? v.round() : v),
+        ),
+      );
+      if (t >= 1) {
+        done.complete(true);
+      } else {
+        SchedulerBinding.instance.scheduleFrameCallback(frame);
+        SchedulerBinding.instance.scheduleFrame();
+      }
+    }
+
+    SchedulerBinding.instance.scheduleFrameCallback(frame);
+    SchedulerBinding.instance.scheduleFrame();
+    return done.future;
+  }
+
   /// Sets given [value] for given [id] to a variable from
   /// [CodelesslyContext.variables].
   /// Returns `true` if variable was found and updated, `false` otherwise.
@@ -1788,7 +2828,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
   }) {
     final CodelesslyContext payload = context.read<CodelesslyContext>();
 
-    final ValueNotifier<VariableData>? variableNotifier = payload.variables[id];
+    // The variable bindings read with this one's name (see findVariable).
+    final ValueNotifier<VariableData>? variableNotifier = payload.findVariable(
+      id: id,
+    );
     if (variableNotifier == null) return false;
     if (variableNotifier.value.isComputed) return false;
 
@@ -1933,9 +2976,11 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // A click reads the modifier keys held, as `${result.meta}` (Command
     // on macOS, Control elsewhere), `${result.shift}` and `${result.alt}`,
     // for multi-select (⌘-click) and range select (⇧-click).
-    if (type == TriggerType.click && result == null) {
+    // Beside where it landed (`x`, `y`, `globalX`, `globalY`), when known.
+    if (type == TriggerType.click && (result == null || result is Map)) {
       final HardwareKeyboard keys = HardwareKeyboard.instance;
       result = {
+        ...?(result as Map?),
         'meta': keys.isMetaPressed || keys.isControlPressed,
         'shift': keys.isShiftPressed,
         'alt': keys.isAltPressed,
@@ -2045,8 +3090,10 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     final ScopedValues scopedValues = ActionChain.scopedValuesOf(context);
     final CodelesslyContext codelesslyContext = context
         .read<CodelesslyContext>();
+    // The host's functions first, then the ones every app has (listen).
     final CodelesslyFunction? function =
-        codelesslyContext.functions[action.name];
+        codelesslyContext.functions[action.name] ??
+        builtinFunctions[action.name];
 
     // Substitute variables in params.
     final Map<String, dynamic> parsedParams = substituteVariablesInMap(
@@ -2338,8 +3385,7 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
     // Perform list operations.
     switch (action.listOperation) {
       case ListOperation.add:
-        final parsedValue = newValue.toList<List>() ?? [];
-        currentValue.addAll(parsedValue);
+        currentValue.addAll(_listFromValue(newValue));
       case ListOperation.insert:
         currentValue.insert(index, newValue.parsedValue());
       case ListOperation.insertAll:
@@ -2358,10 +3404,20 @@ ${response.body.contains('{') ? const JsonEncoder.withIndent('  ').convert(json.
         }
       case ListOperation.set:
       case ListOperation.replace:
-        final parsedValue = newValue.toList<List>() ?? [];
-        return parsedValue;
+        return _listFromValue(newValue);
     }
     return currentValue;
+  }
+
+  /// The list [newValue] holds. A JSON list (what a `${= ...}` formula
+  /// giving a list is written as) keeps its items as they are: `''` stays
+  /// empty text and `"12"` stays text, where [TypedValueExt.toList] would
+  /// read them as null and 12. Anything else is read by
+  /// [TypedValueExt.toList].
+  static List _listFromValue(String newValue) {
+    final Object? decoded = tryJsonDecode(newValue.trim());
+    if (decoded is List) return decoded;
+    return newValue.toList<List>() ?? [];
   }
 
   static Future<bool> setCloudDatabaseFromAction(

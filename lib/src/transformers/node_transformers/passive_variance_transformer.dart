@@ -56,6 +56,20 @@ class PassiveVarianceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget built = _build(context);
+    final VarianceProperties? widths = node.isResponsive ? node.properties : null;
+    if (widths == null ||
+        (widths.tabletMinWidth == null && widths.desktopMinWidth == null)) {
+      return built;
+    }
+    return ResponsiveWidthsScope(
+      tabletMinWidth: widths.tabletMinWidth,
+      desktopMinWidth: widths.desktopMinWidth,
+      child: built,
+    );
+  }
+
+  Widget _build(BuildContext context) {
     if (!settings.isPreview && node.isResponsive) {
       final double? canvasWidth =
           BreakpointWidthScope.maybeOf(context) ??
@@ -65,7 +79,8 @@ class PassiveVarianceWidget extends StatelessWidget {
       }
       // Outside of a canvas: the width this node is given, by the rule
       // breakpoints are picked with.
-      return LayoutBuilder(
+      return MeasurableLayoutBuilder(
+        fallbackSize: Size(node.basicBoxLocal.width, node.basicBoxLocal.height),
         builder: (context, constraints) => _buildVariant(
           context,
           node.variantForWidth(
@@ -96,9 +111,14 @@ class PassiveVarianceWidget extends StatelessWidget {
         Offstage(
           key: const ValueKey('loaded'),
           offstage: ownChildren,
-          child: Skeleton(
-            enabled: variant.skeleton,
-            child: _buildChildren(context, loaded.children),
+          // Hidden shared elements don't fly (or clash with the status
+          // variant's).
+          child: HeroMode(
+            enabled: !ownChildren,
+            child: Skeleton(
+              enabled: variant.skeleton,
+              child: _buildChildren(context, loaded.children),
+            ),
           ),
         ),
         if (ownChildren)
@@ -124,9 +144,78 @@ class PassiveVarianceWidget extends StatelessWidget {
     );
   }
 
+  /// The pins a responsive variant's [root] is placed by, or null when it is
+  /// placed by its alignment. Only a root in pin mode that is pinned to the
+  /// right or bottom edge is placed by its pins: a breakpoint root's start
+  /// pins are often its offset on the design canvas (negative, or the
+  /// variant's x there), so on their own they keep meaning top-start. A
+  /// negative start pin is dropped for the same reason.
+  @visibleForTesting
+  static EdgePinsModel? responsiveRootPins(BaseNode root) {
+    if (root.positioningMode != PositioningMode.pin) return null;
+    final EdgePinsModel pins = root.edgePins;
+    double? valid(double? pin) => pin != null && pin >= 0 ? pin : null;
+    final double? right = valid(pins.right);
+    final double? bottom = valid(pins.bottom);
+    if (right == null && bottom == null) return null;
+    return EdgePinsModel(
+      left: valid(pins.left),
+      top: valid(pins.top),
+      right: right,
+      bottom: bottom,
+    );
+  }
+
   Widget _buildChildren(BuildContext context, List<String> children) {
     if (children.isNotEmpty) {
       final childNode = getNode(children.first);
+
+      // A breakpoint variant is designed at its breakpoint's size, not at
+      // the variance's (the mobile design), so its root takes the space the
+      // variance is given: placed in a Stack at its design insets, a root
+      // wider than the variance's design stretched past the screen by the
+      // difference. A root with an alignment (a centered card) is placed by
+      // it.
+      if (!settings.isPreview && node.isResponsive) {
+        final Widget built = manager.buildWidgetFromNode(
+          childNode,
+          context,
+          settings: settings,
+        );
+        final Widget aligned = Align(
+          alignment:
+              childNode.alignment.flutterAlignment ??
+              AlignmentDirectional.topStart,
+          child: built,
+        );
+        final EdgePinsModel? pins = responsiveRootPins(childNode);
+        if (pins == null) return aligned;
+        // A root pinned to the right or bottom edge (a menu above a bottom
+        // bar) keeps those distances to the edges of the space it is given.
+        return MeasurableLayoutBuilder(
+          fallbackSize: Size(
+            childNode.basicBoxLocal.width,
+            childNode.basicBoxLocal.height,
+          ),
+          builder: (context, constraints) {
+            if (!constraints.hasBoundedWidth || !constraints.hasBoundedHeight) {
+              return aligned;
+            }
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned(
+                  left: pins.left,
+                  top: pins.top,
+                  right: pins.right,
+                  bottom: pins.bottom,
+                  child: built,
+                ),
+              ],
+            );
+          },
+        );
+      }
 
       return manager
           .getTransformer<PassiveStackTransformer>()

@@ -21,4 +21,4 @@ jobs:
       - run: flutter test
       - name: Build the example for the web (WebAssembly)
         working-directory: example
-        run: flutter build web --wasm
+        run: flutter build web --wasm --no-tree-shake-icons

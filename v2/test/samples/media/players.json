@@ -1,0 +1,332 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "players"
+   ]
+  },
+  "players": {
+   "id": "players",
+   "type": "canvas",
+   "name": "players",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    1200
+   ],
+   "properties": {
+    "bodyId": "players-body"
+   },
+   "children": [
+    "players-body"
+   ]
+  },
+  "players-body": {
+   "id": "players-body",
+   "type": "frame",
+   "name": "Body",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    1200
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "players",
+   "children": [
+    "video-fixed",
+    "video-empty",
+    "yt",
+    "vimeo",
+    "audio",
+    "audio-bg",
+    "col"
+   ]
+  },
+  "video-fixed": {
+   "id": "video-fixed",
+   "type": "video",
+   "name": "video-fixed",
+   "basicBoxLocal": [
+    20,
+    20,
+    320,
+    180
+   ],
+   "properties": {
+    "url": "https://cdn.example.com/a.mp4"
+   },
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "players-body"
+  },
+  "video-empty": {
+   "id": "video-empty",
+   "type": "video",
+   "name": "video-empty",
+   "basicBoxLocal": [
+    20,
+    210,
+    160,
+    90
+   ],
+   "properties": {
+    "autoPlay": true,
+    "showControls": false
+   },
+   "edgePins": {
+    "left": 20,
+    "top": 210
+   },
+   "positioningMode": "pin",
+   "parentID": "players-body"
+  },
+  "yt": {
+   "id": "yt",
+   "type": "embeddedVideo",
+   "name": "yt",
+   "basicBoxLocal": [
+    200,
+    210,
+    180,
+    100
+   ],
+   "properties": {
+    "source": "youtube",
+    "url": "https://www.youtube.com/watch?v=abc",
+    "videoId": "abc",
+    "mute": true,
+    "loop": true,
+    "startAt": 5,
+    "endAt": 30,
+    "showCaptions": true,
+    "captionLanguage": "fr"
+   },
+   "edgePins": {
+    "left": 200,
+    "top": 210
+   },
+   "positioningMode": "pin",
+   "parentID": "players-body"
+  },
+  "vimeo": {
+   "id": "vimeo",
+   "type": "embeddedVideo",
+   "name": "vimeo",
+   "basicBoxLocal": [
+    200,
+    320,
+    180,
+    100
+   ],
+   "properties": {
+    "source": "vimeo",
+    "url": "https://vimeo.com/123",
+    "videoId": "123",
+    "autoPlay": true,
+    "showFullscreenButton": false
+   },
+   "edgePins": {
+    "left": 200,
+    "top": 320
+   },
+   "positioningMode": "pin",
+   "parentID": "players-body"
+  },
+  "audio": {
+   "id": "audio",
+   "type": "audioPlayer",
+   "name": "audio",
+   "basicBoxLocal": [
+    20,
+    320,
+    170,
+    64
+   ],
+   "properties": {
+    "url": "https://cdn.example.com/a.mp3",
+    "description": "Episode 1",
+    "loop": true,
+    "volume": 0.5
+   },
+   "edgePins": {
+    "left": 20,
+    "top": 320
+   },
+   "positioningMode": "pin",
+   "parentID": "players-body"
+  },
+  "audio-bg": {
+   "id": "audio-bg",
+   "type": "audioPlayer",
+   "name": "audio-bg",
+   "basicBoxLocal": [
+    20,
+    400,
+    40,
+    40
+   ],
+   "properties": {
+    "background": true,
+    "autoPlay": true
+   },
+   "edgePins": {
+    "left": 20,
+    "top": 400
+   },
+   "positioningMode": "pin",
+   "parentID": "players-body"
+  },
+  "col": {
+   "id": "col",
+   "type": "column",
+   "name": "col",
+   "basicBoxLocal": [
+    20,
+    450,
+    360,
+    600
+   ],
+   "rowColumnType": "column",
+   "crossAxisAlignment": "start",
+   "spacing": 10,
+   "edgePins": {
+    "left": 20,
+    "top": 450
+   },
+   "positioningMode": "pin",
+   "parentID": "players-body",
+   "children": [
+    "video-fill",
+    "yt-fill",
+    "audio-fill",
+    "row",
+    "video-hug"
+   ]
+  },
+  "video-fill": {
+   "id": "video-fill",
+   "type": "video",
+   "name": "video-fill",
+   "basicBoxLocal": [
+    0,
+    0,
+    360,
+    160
+   ],
+   "properties": {},
+   "horizontalFit": "expanded",
+   "parentID": "col"
+  },
+  "yt-fill": {
+   "id": "yt-fill",
+   "type": "embeddedVideo",
+   "name": "yt-fill",
+   "basicBoxLocal": [
+    0,
+    170,
+    360,
+    120
+   ],
+   "properties": {
+    "source": "youtube"
+   },
+   "horizontalFit": "expanded",
+   "parentID": "col"
+  },
+  "audio-fill": {
+   "id": "audio-fill",
+   "type": "audioPlayer",
+   "name": "audio-fill",
+   "basicBoxLocal": [
+    0,
+    300,
+    360,
+    64
+   ],
+   "properties": {
+    "showControls": false
+   },
+   "horizontalFit": "expanded",
+   "margin": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "parentID": "col"
+  },
+  "row": {
+   "id": "row",
+   "type": "row",
+   "name": "row",
+   "basicBoxLocal": [
+    0,
+    380,
+    360,
+    120
+   ],
+   "rowColumnType": "row",
+   "horizontalFit": "expanded",
+   "spacing": 8,
+   "parentID": "col",
+   "children": [
+    "video-flex",
+    "vimeo-flex"
+   ]
+  },
+  "video-flex": {
+   "id": "video-flex",
+   "type": "video",
+   "name": "video-flex",
+   "basicBoxLocal": [
+    0,
+    0,
+    176,
+    120
+   ],
+   "properties": {},
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "row"
+  },
+  "vimeo-flex": {
+   "id": "vimeo-flex",
+   "type": "embeddedVideo",
+   "name": "vimeo-flex",
+   "basicBoxLocal": [
+    184,
+    0,
+    176,
+    100
+   ],
+   "properties": {
+    "source": "vimeo"
+   },
+   "horizontalFit": "expanded",
+   "flex": 2,
+   "parentID": "row"
+  },
+  "video-hug": {
+   "id": "video-hug",
+   "type": "video",
+   "name": "video-hug",
+   "basicBoxLocal": [
+    0,
+    510,
+    200,
+    80
+   ],
+   "properties": {},
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "parentID": "col"
+  }
+ }
+}

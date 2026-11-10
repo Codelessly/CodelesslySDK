@@ -61,6 +61,33 @@ void main() {
     expect(find.text('You can join again later.'), findsOneWidget);
   });
 
+  testWidgets('a caption shows above the title', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => AppConfirmDialog.show(
+              context,
+              ConfirmAction(
+                caption: 'RESET PROGRESS',
+                title: 'Clear your record?',
+                confirmLabel: 'Clear record',
+              ),
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final Rect caption = tester.getRect(find.text('RESET PROGRESS'));
+    final Rect title = tester.getRect(find.text('Clear your record?'));
+    expect(caption.bottom, lessThanOrEqualTo(title.top));
+    // A confirm without one has no caption line.
+    expect(ConfirmAction(title: 'Sure?').caption, isEmpty);
+  });
+
   Future<void> open(
     WidgetTester tester,
     ConfirmAction action,
@@ -323,4 +350,37 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(Dialog), findsNothing);
   });
+
+  testWidgets(
+    'a dialog canvas receives the action text as params, its own params winning',
+    (tester) async {
+      late Map<String, dynamic> params;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              params = AppConfirmDialog.dialogParams(
+                context,
+                ConfirmAction(
+                  title: 'Clear the board?',
+                  message: 'Every pedal comes off the board.',
+                  confirmLabel: 'Clear board',
+                  cancelLabel: 'Cancel',
+                  dialogId: 'confirm',
+                  params: const {'tone': 'danger', 'cancelLabel': 'Keep it'},
+                ),
+              );
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      expect(params['title'], 'Clear the board?');
+      expect(params['message'], 'Every pedal comes off the board.');
+      expect(params['confirmLabel'], 'Clear board');
+      expect(params['cancelLabel'], 'Keep it');
+      expect(params['tone'], 'danger');
+      expect(params.containsKey('caption'), isFalse);
+    },
+  );
 }

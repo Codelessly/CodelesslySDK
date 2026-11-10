@@ -63,38 +63,40 @@ void main() {
   });
 
   testWidgets(
-    'A link to the screen shown first applies before its load actions',
+    "A link's parameters set variables before the screen's load actions",
     (tester) async {
       final Codelessly codelessly = Codelessly();
-      codelessly.pendingRoute = const CodelesslyRoute(
-        'crates',
-        <String, String>{'loadState': 'loading', 'debugHold': '1'},
-      );
       final CodelesslyContext c = CodelesslyContext.empty()
         ..variables['s'] = Observable(
           VariableData(id: 's', name: 'loadState', value: 'ready'),
         );
       late BuildContext captured;
-      await tester.pumpWidget(
-        ChangeNotifierProvider<CodelesslyContext>.value(
-          value: c,
-          child: Builder(
-            builder: (context) {
-              captured = context;
-              return const SizedBox();
-            },
-          ),
-        ),
-      );
+      Widget screen({required bool fromLink}) =>
+          ChangeNotifierProvider<CodelesslyContext>.value(
+            value: c,
+            child: CodelesslyRouteScope(
+              layoutId: 'crates',
+              location: '/crates?loadState=loading',
+              params: const {'loadState': 'loading'},
+              fromLink: fromLink,
+              child: Builder(
+                builder: (context) {
+                  captured = context;
+                  return const SizedBox();
+                },
+              ),
+            ),
+          );
 
+      // Opened by the app: the parameters are only route parameters.
+      await tester.pumpWidget(screen(fromLink: false));
       codelessly.prepareRoute(captured, 'crates');
-      expect(codelessly.route.value?.params['debugHold'], '1');
-      expect(c.findVariableByName('loadState')!.value.value, 'loading');
+      expect(c.findVariableByName('loadState')!.value.value, 'ready');
 
-      // Another screen gets its own (empty) route.
-      codelessly.prepareRoute(captured, 'ledger');
-      expect(codelessly.route.value?.canvasId, 'ledger');
-      expect(codelessly.route.value?.params, isEmpty);
+      // Opened by a link (the browser's address).
+      await tester.pumpWidget(screen(fromLink: true));
+      codelessly.prepareRoute(captured, 'crates');
+      expect(c.findVariableByName('loadState')!.value.value, 'loading');
     },
   );
 }

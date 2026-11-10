@@ -38,6 +38,10 @@ class StrokePainter extends CustomPainter {
   /// The color of the stroke.
   final Color color;
 
+  /// A gradient to paint the stroke with instead of [color], spanning the
+  /// painted box.
+  final Gradient? gradient;
+
   /// The border radius of the box.
   final BorderRadius borderRadius;
 
@@ -61,6 +65,7 @@ class StrokePainter extends CustomPainter {
   StrokePainter({
     this.strokeWidth = 1,
     this.color = Colors.black,
+    this.gradient,
     this.strokeMiterLimit = 4,
     this.dashPattern = const [],
     this.boxShape = BoxShape.rectangle,
@@ -85,6 +90,9 @@ class StrokePainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = strokeCap.flutterStrokeCap
       ..strokeMiterLimit = strokeMiterLimit;
+    if (gradient != null) {
+      paint.shader = gradient!.createShader(Offset.zero & size);
+    }
 
     // If the stroke is dotted, we take a completely different rendering
     // route.
@@ -409,6 +417,7 @@ class StrokePainter extends CustomPainter {
       oldDelegate.borderRadius != borderRadius ||
       oldDelegate.boxShape != boxShape ||
       oldDelegate.color != color ||
+      oldDelegate.gradient != gradient ||
       oldDelegate.dashPattern != dashPattern ||
       oldDelegate.strokeWidth != strokeWidth ||
       oldDelegate.strokeAlign != strokeAlign ||
@@ -529,5 +538,50 @@ void paintStrokeBand(
     bottomRight: grow(base.brRadius, -inset.right, -inset.bottom),
     bottomLeft: grow(base.blRadius, -inset.left, -inset.bottom),
   );
-  canvas.drawDRRect(outer, inner, paint);
+  if (side == StrokeSide.all) {
+    canvas.drawDRRect(outer, inner, paint);
+    return;
+  }
+  // On one side, the outer and inner edges of the other three coincide.
+  // GPU backends (CanvasKit, Impeller) antialias the two rounded rects of a
+  // drawDRRect each on its own, so a shared edge at a fractional position
+  // (a shrink-wrapped row's right edge) keeps coverage f·(1-f) and draws a
+  // faint line there. Paint only the band itself, which has no such edge.
+  if (outer.isRect && inner.isRect) {
+    canvas.drawRect(switch (side) {
+      StrokeSide.top => Rect.fromLTRB(
+        outer.left,
+        outer.top,
+        outer.right,
+        inner.top,
+      ),
+      StrokeSide.bottom => Rect.fromLTRB(
+        outer.left,
+        inner.bottom,
+        outer.right,
+        outer.bottom,
+      ),
+      StrokeSide.left => Rect.fromLTRB(
+        outer.left,
+        outer.top,
+        inner.left,
+        outer.bottom,
+      ),
+      StrokeSide.right || StrokeSide.all => Rect.fromLTRB(
+        inner.right,
+        outer.top,
+        outer.right,
+        outer.bottom,
+      ),
+    }, paint);
+    return;
+  }
+  canvas.drawPath(
+    Path.combine(
+      PathOperation.difference,
+      Path()..addRRect(outer),
+      Path()..addRRect(inner),
+    ),
+    paint,
+  );
 }

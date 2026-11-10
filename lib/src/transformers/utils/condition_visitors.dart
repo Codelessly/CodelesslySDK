@@ -148,6 +148,41 @@ class ConditionVariablesVisitor
   Set<String>? visitFocusAction(FocusAction action) => {};
 
   @override
+  Set<String>? visitControlDragAction(ControlDragAction action) => {};
+
+  @override
+  Set<String>? visitPaginateAction(PaginateAction action) => {
+    ...variablePathRegex
+        .allMatches('${action.page} ${action.pageSize}')
+        .map((match) => match.namedGroup('value'))
+        .nonNulls,
+  };
+
+  @override
+  Set<String>? visitAnimateVariableAction(AnimateVariableAction action) => {};
+
+  @override
+  Set<String>? visitSpeakAction(SpeakAction action) => {};
+
+  @override
+  Set<String>? visitHapticAction(HapticAction action) => {};
+
+  @override
+  Set<String>? visitRunScriptAction(RunScriptAction action) => {};
+
+  @override
+  Set<String>? visitScrollToAction(ScrollToAction action) => {};
+
+  @override
+  Set<String>? visitPlaySoundAction(PlaySoundAction action) => {};
+
+  @override
+  Set<String>? visitPlayAnimationAction(PlayAnimationAction action) => {};
+
+  @override
+  Set<String>? visitEditTextAction(EditTextAction action) => {};
+
+  @override
   Set<String>? visitPaywallAction(PaywallAction action) => {};
 
   @override
@@ -251,6 +286,36 @@ class ConditionNodesVisitor
 
   @override
   String? visitFocusAction(FocusAction action) => null;
+
+  @override
+  String? visitControlDragAction(ControlDragAction action) => null;
+
+  @override
+  String? visitPaginateAction(PaginateAction action) => null;
+
+  @override
+  String? visitAnimateVariableAction(AnimateVariableAction action) => null;
+
+  @override
+  String? visitSpeakAction(SpeakAction action) => null;
+
+  @override
+  String? visitHapticAction(HapticAction action) => null;
+
+  @override
+  String? visitRunScriptAction(RunScriptAction action) => null;
+
+  @override
+  String? visitScrollToAction(ScrollToAction action) => null;
+
+  @override
+  String? visitPlaySoundAction(PlaySoundAction action) => null;
+
+  @override
+  String? visitPlayAnimationAction(PlayAnimationAction action) => null;
+
+  @override
+  String? visitEditTextAction(EditTextAction action) => action.nodeId;
 
   @override
   String? visitPaywallAction(PaywallAction action) => null;
