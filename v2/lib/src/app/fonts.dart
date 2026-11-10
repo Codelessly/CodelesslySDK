@@ -38,6 +38,25 @@ class HttpFontFetcher implements FontFetcher {
   Uri googleFontsUrl(PublishFont font) => Uri.parse(
       '$googleFontsApi?family=${Uri.encodeQueryComponent(font.family).replaceAll('%20', '+')}:ital,wght@${font.italic ? 1 : 0},${font.weight}');
 
+  /// The font file of Google Fonts [css]. Without a browser's user agent it
+  /// names one TrueType file; in a browser it names one file per Unicode
+  /// subset (`/* cyrillic */`, ..., `/* latin */`), each holding only that
+  /// subset's glyphs: the `latin` one, else the last (the base subset comes
+  /// last), else the only one. Taking the first drew Latin text in the
+  /// platform's font. Null when the CSS names no file.
+  static String? fontFileOf(String css) {
+    String? clean(String? u) => u?.replaceAll(RegExp(r'''['"]'''), '').trim();
+    final blocks = RegExp(r'(?:/\*\s*([\w-]+)\s*\*/\s*)?@font-face\s*\{([^}]*)\}').allMatches(css).toList();
+    String? urlIn(String body) => clean(RegExp(r'url\(([^)]+)\)').firstMatch(body)?.group(1));
+    for (final b in blocks) {
+      if (b.group(1) == 'latin') return urlIn(b.group(2)!);
+    }
+    for (final b in blocks.reversed) {
+      if (urlIn(b.group(2)!) case final String u) return u;
+    }
+    return clean(RegExp(r'url\(([^)]+)\)').firstMatch(css)?.group(1));
+  }
+
   Future<http.Response> _get(Uri url) async {
     final client = _client ?? http.Client();
     try {
@@ -55,9 +74,9 @@ class HttpFontFetcher implements FontFetcher {
         // Without a browser's user agent, the API serves TrueType files.
         final css = await _get(googleFontsUrl(font));
         if (css.statusCode != 200) return null;
-        final match = RegExp(r'url\(([^)]+)\)').firstMatch(css.body);
-        if (match == null) return null;
-        url = Uri.tryParse(match.group(1)!.replaceAll(RegExp(r'''['"]'''), ''));
+        final file = fontFileOf(css.body);
+        if (file == null) return null;
+        url = Uri.tryParse(file);
         if (url == null) return null;
       }
       final res = await _get(url);
