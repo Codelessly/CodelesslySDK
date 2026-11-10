@@ -82,6 +82,55 @@ void main() {
     expect(r.containsKey(3), isFalse);
   });
 
+  testWidgets('a running flexible list hugs its items within its room, then scrolls', (tester) async {
+    // A column: the list (flexible), then a box that follows its last item.
+    Future<(Rect list, Rect after)> layout(int count, {bool interactive = true}) async {
+      final doc = LayoutDocument.fromJson({
+        'roots': ['c'],
+        'nodes': {
+          'c': {
+            'type': 'column',
+            'children': ['v', 'after'],
+            'layout': {'width': 300, 'height': 400},
+          },
+          'v': {
+            'type': 'listView',
+            'children': ['it'],
+            'layout': {'width': {'fill': 300}, 'height': {'flexible': 360}},
+            'props': {'itemCount': count},
+          },
+          'it': _box,
+          'after': {
+            'type': 'box',
+            'layout': {'width': 300, 'height': 40},
+          },
+        },
+      });
+      final tree = NodeTree(DocumentSource(doc));
+      addTearDown(tree.dispose);
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(300, 400);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(home: NodeView(tree: tree, rootId: 'c', interactive: interactive), key: ValueKey('$count $interactive')),
+      );
+      await tester.pump();
+      final root = tester.renderObject(find.byType(NodeView));
+      return (tree.boxOf('v')!.rectIn(root)!, tree.boxOf('after')!.rectIn(root)!);
+    }
+
+    final (few, afterFew) = await layout(3);
+    expect(few.height, 120);
+    expect(afterFew.top, 120);
+    // More than fits: the list takes the room left and the box stays below.
+    final (many, afterMany) = await layout(20);
+    expect(many.height, 360);
+    expect(afterMany.top, 360);
+    // A design canvas shows it at its design size, as the editor did.
+    final (design, _) = await layout(3, interactive: false);
+    expect(design.height, 360);
+  });
+
   testWidgets('a reversed list starts at its end', (tester) async {
     final r = await _items(tester, {
       'type': 'listView',
