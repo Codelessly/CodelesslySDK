@@ -480,6 +480,12 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     }
     if (match != null) return (match.layoutId, match.params);
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    // The app's root with a query (`/?state=empty`): the entry screen,
+    // opened with those params.
+    if (segments.isEmpty && uri.queryParameters.isNotEmpty) {
+      final entry = model.entryLayoutId;
+      return entry == null ? null : (entry, {...uri.queryParameters});
+    }
     final id = model.layoutIdForScreen(segments.isEmpty ? screen.trim() : Uri.encodeComponent(segments.last));
     return id == null ? null : (id, {...uri.queryParameters});
   }
