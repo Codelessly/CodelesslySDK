@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -101,18 +102,58 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
     if (widget.node.data.contains(r'${data.')) {
       context.watch<CodelesslyContext>();
     }
+    final Text text = TextUtils.buildTextForTextNode(
+      context,
+      widget.node,
+      tapGestureRecognizers: tapGestureRecognizerRegistry,
+      variablesOverrides: widget.variablesOverrides,
+      nullSubstitutionMode: widget.settings.nullSubstitutionMode,
+      replaceVariablesWithSymbol: widget.settings.isPreview,
+    );
+    final CountUpModel? countUp = widget.node.countUp;
+    // With a transition the text eases to new colors (a bound textColor or
+    // fill following a palette), as a solid fill does.
+    final Widget eased = widget.node.transitionMs > 0
+        ? TextColorTransition(text: text, ms: widget.node.transitionMs)
+        : text;
     return TextNodeBox(
       node: widget.node,
-      child: TextUtils.buildTextForTextNode(
-        context,
+      // A design canvas shows the final text.
+      child: withGradientText(
         widget.node,
-        tapGestureRecognizers: tapGestureRecognizerRegistry,
-        variablesOverrides: widget.variablesOverrides,
-        nullSubstitutionMode: widget.settings.nullSubstitutionMode,
-        replaceVariablesWithSymbol: widget.settings.isPreview,
+        countUp == null || widget.settings.isPreview
+            ? eased
+            : CountUpText(text: text, countUp: countUp),
       ),
     );
   }
+}
+
+/// The gradient a text node paints its glyphs with: the first visible fill
+/// of its text, when that is a gradient (engraved brass lettering, a sunset
+/// title). Null for solid text. A gradient spans the text's box.
+Gradient? gradientTextOf(TextNode node) {
+  if (node.textMixedProps.isEmpty) return null;
+  for (final TextProp prop in node.textMixedProps) {
+    final PaintModel? fill = prop.fills.where((f) => f.visible).firstOrNull;
+    if (fill == null || fill.type == PaintType.solid || fill.type == PaintType.image) {
+      return null;
+    }
+  }
+  final PaintModel fill = node.textMixedProps.first.fills.firstWhere((f) => f.visible);
+  return retrieveGradient(fill);
+}
+
+/// [child] (a text node's text) painted with the node's gradient fill, if
+/// it has one ([gradientTextOf]).
+Widget withGradientText(TextNode node, Widget child) {
+  final Gradient? gradient = gradientTextOf(node);
+  if (gradient == null) return child;
+  return ShaderMask(
+    blendMode: BlendMode.srcIn,
+    shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+    child: child,
+  );
 }
 
 /// Sizes a text node's box and places its text inside it.
@@ -133,26 +174,45 @@ class _PassiveTextWidgetState extends State<PassiveTextWidget> {
 /// The text sits inside that box per its horizontal and vertical text
 /// alignment, so a text box larger than its text (pinned on all sides,
 /// expanded, or a fixed size) shows it centered, at the bottom, and so on.
+/// The gradient a text is filled with: the first visible gradient paint of
+/// its first style range, or null for a solid colour.
+Gradient? gradientTextFill(TextNode node) {
+  if (node.textMixedProps.isEmpty) return null;
+  for (final PaintModel paint in node.textMixedProps.first.fills) {
+    if (!paint.visible) continue;
+    if (paint.type == PaintType.solid || paint.type == PaintType.image) {
+      return null;
+    }
+    return retrieveGradient(paint);
+  }
+  return null;
+}
+
 class TextNodeBox extends StatelessWidget {
   final TextNode node;
   final Widget child;
 
   const TextNodeBox({super.key, required this.node, required this.child});
 
-  /// Where text sits in its box for [node]'s text alignment. Start and end
-  /// follow the text direction, like [TextAlign.start] and [TextAlign.end].
-  static AlignmentGeometry alignmentOf(TextNode node) {
+  /// Where text sits in its box for [node]'s text alignment. Left and start,
+  /// right and end follow the text direction, like the lines do.
+  static AlignmentGeometry alignmentOf(
+    TextNode node, [
+    TextAlignHorizontalEnum? horizontal,
+  ]) {
     final double y = switch (node.textAlignVertical) {
       TextAlignVerticalEnum.top => -1,
       TextAlignVerticalEnum.center => 0,
       TextAlignVerticalEnum.bottom => 1,
     };
-    return switch (node.textAlignHorizontal) {
+    return switch (horizontal ?? node.textAlignHorizontal) {
+      // Left and right are the start and end edges, as for the lines
+      // (TextAlign.start / end), so a right-to-left layout mirrors both.
       TextAlignHorizontalEnum.left ||
-      TextAlignHorizontalEnum.justified => Alignment(-1, y),
-      TextAlignHorizontalEnum.center => Alignment(0, y),
-      TextAlignHorizontalEnum.right => Alignment(1, y),
+      TextAlignHorizontalEnum.justified ||
       TextAlignHorizontalEnum.start => AlignmentDirectional(-1, y),
+      TextAlignHorizontalEnum.center => Alignment(0, y),
+      TextAlignHorizontalEnum.right ||
       TextAlignHorizontalEnum.end => AlignmentDirectional(1, y),
     };
   }
@@ -161,23 +221,58 @@ class TextNodeBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final SizeFit hFit = node.horizontalFit;
     final SizeFit vFit = node.verticalFit;
+    // A flexible width is the text's own width, capped by the space its
+    // Flexible parent offers (min(flex share, content), as in the editor):
+    // a label followed by a badge keeps the badge right after it.
+    final bool hugsWidth =
+        hFit == SizeFit.shrinkWrap || hFit == SizeFit.flexible;
     final bool minHeight =
         vFit != SizeFit.shrinkWrap && vFit != SizeFit.expanded;
 
+    // Scale-down text stays on its lines and shrinks as a whole to fit the
+    // width it is given.
+    Widget content = node.overflow == TextOverflowC.scaleDown
+        ? FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: alignmentOf(node),
+            child: child,
+          )
+        : child;
+    // A gradient fill (a steel wordmark) paints the glyphs with the
+    // gradient across the text's own box.
+    final Gradient? gradient = gradientTextFill(node);
+    if (gradient != null) {
+      content = ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (Rect bounds) => gradient.createShader(bounds),
+        child: content,
+      );
+    }
     Widget box = Align(
-      alignment: alignmentOf(node),
+      alignment: alignmentOf(node, TextUtils.textAlignOf(node, context)),
       // Hug the text on an axis that does not fill its parent, so a loose
       // parent does not stretch the box; tight constraints still size it.
-      widthFactor: hFit == SizeFit.shrinkWrap ? 1 : null,
+      widthFactor: hugsWidth ? 1 : null,
       heightFactor: vFit == SizeFit.expanded ? null : 1,
-      child: child,
+      child: content,
     );
     if (minHeight) {
       box = TextMinHeight(minHeight: node.basicBoxLocal.height, child: box);
     }
+    if (hFit == SizeFit.shrinkWrap) {
+      box = TextIntrinsicSlack(
+        // A text that stays on one line can't be squeezed below it without
+        // clipping its last words, like CSS white-space: nowrap; one that
+        // may shrink says so with squeezable (a Flexible).
+        singleLine:
+            !node.softWrap && node.overflow != TextOverflowC.scaleDown,
+        child: box,
+      );
+    }
+    box = RemeasureOnFontsChange(child: box);
     return SizedBox(
       width: switch (hFit) {
-        SizeFit.shrinkWrap => null,
+        SizeFit.shrinkWrap || SizeFit.flexible => null,
         SizeFit.expanded => double.infinity,
         _ => node.basicBoxLocal.width,
       },
@@ -185,6 +280,109 @@ class TextNodeBox extends StatelessWidget {
       child: box,
     );
   }
+}
+
+/// Rounds a text's maximum intrinsic width up to a whole pixel.
+///
+/// A row or column that sizes its children by their intrinsic width (a
+/// shrink-wrapped column that stretches them) gives the text exactly that
+/// width. On the web a paragraph's intrinsic width can come out a fraction
+/// narrower than the width it needs to lay out on one line, so its last
+/// word wrapped away: `Bluebird Coffee` drew as `Bluebird`, with the space
+/// for `Coffee` left empty.
+///
+/// With [singleLine] (a text that doesn't wrap), its minimum intrinsic width
+/// is that whole width too: Flutter's paragraph reports its longest word
+/// whatever softWrap says, so a row short of room (CodelesslyFlex's shrink
+/// pass) squeezed a one-line `Try again` to `Try agai` where Flutter's own
+/// Row lets it overflow.
+class TextIntrinsicSlack extends SingleChildRenderObjectWidget {
+  const TextIntrinsicSlack({super.key, this.singleLine = false, super.child});
+
+  /// Whether the text stays on one line (softWrap off).
+  final bool singleLine;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      RenderTextIntrinsicSlack(singleLine: singleLine);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderTextIntrinsicSlack renderObject,
+  ) {
+    renderObject.singleLine = singleLine;
+  }
+}
+
+class RenderTextIntrinsicSlack extends RenderProxyBox {
+  RenderTextIntrinsicSlack({bool singleLine = false})
+    : _singleLine = singleLine;
+
+  /// See [TextIntrinsicSlack.singleLine].
+  bool get singleLine => _singleLine;
+  bool _singleLine;
+  set singleLine(bool value) {
+    if (_singleLine == value) return;
+    _singleLine = value;
+    markNeedsLayout();
+  }
+
+  /// [width] rounded up to a whole pixel.
+  static double slackWidth(double width) =>
+      width <= 0 || !width.isFinite ? width : width.ceilToDouble();
+
+  @override
+  double computeMinIntrinsicWidth(double height) => _singleLine
+      ? computeMaxIntrinsicWidth(height)
+      : super.computeMinIntrinsicWidth(height);
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      slackWidth(super.computeMaxIntrinsicWidth(height));
+}
+
+/// Rebuilds [child]'s render objects when the system fonts change (a web
+/// font such as a Google Font finished loading).
+///
+/// Flutter's RenderParagraph measures its intrinsic sizes with a second
+/// TextPainter that a font change doesn't invalidate: only the painter it
+/// lays out with is. So a row or column that sizes text by its intrinsic
+/// width (a shrink-wrapped column stretching its children) kept the width
+/// measured with the fallback font after the real one loaded, and on the
+/// published web app one-line texts lost their last word (`Bluebird Coffee`
+/// drew as `Bluebird`). New render objects measure afresh.
+class RemeasureOnFontsChange extends StatefulWidget {
+  const RemeasureOnFontsChange({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<RemeasureOnFontsChange> createState() => _RemeasureOnFontsChangeState();
+}
+
+class _RemeasureOnFontsChangeState extends State<RemeasureOnFontsChange> {
+  int _generation = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    PaintingBinding.instance.systemFonts.addListener(_fontsChanged);
+  }
+
+  @override
+  void dispose() {
+    PaintingBinding.instance.systemFonts.removeListener(_fontsChanged);
+    super.dispose();
+  }
+
+  void _fontsChanged() {
+    if (mounted) setState(() => _generation++);
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      KeyedSubtree(key: ValueKey<int>(_generation), child: widget.child);
 }
 
 /// Gives text a minimum height, its design height, that it may grow past.
@@ -253,4 +451,156 @@ class RenderTextMinHeight extends RenderProxyBox {
   @override
   double computeMaxIntrinsicHeight(double width) =>
       math.max(minHeight, super.computeMaxIntrinsicHeight(width));
+}
+
+/// [text] whose span colors ease from the colors it showed before to its
+/// own over [ms] milliseconds whenever they change, e.g. a text whose
+/// `textColor` binding follows a palette: the implicit animation a node's
+/// `transitionMs` gives a solid fill, for a text's colors. Where tickers are
+/// off (the design canvas, its captures) the colors change at once.
+///
+/// Span colors are matched in order. When the spans change in number, the
+/// new colors show at once.
+class TextColorTransition extends StatefulWidget {
+  /// The text as it ends up.
+  final Text text;
+
+  /// The transition's length in milliseconds.
+  final int ms;
+
+  /// Creates a [TextColorTransition].
+  const TextColorTransition({super.key, required this.text, required this.ms});
+
+  @override
+  State<TextColorTransition> createState() => _TextColorTransitionState();
+
+  /// The colors of [span]'s spans that hold text, depth first, in order.
+  static List<Color?> spanColors(InlineSpan? span) {
+    final List<Color?> colors = [];
+    // Visits the spans that hold text (and widget spans), in pre-order.
+    span?.visitChildren((child) {
+      if (child is TextSpan) colors.add(child.style?.color);
+      return true;
+    });
+    return colors;
+  }
+
+  /// [span] with its spans that hold text colored by [colors], in the
+  /// order of [spanColors].
+  static InlineSpan withSpanColors(InlineSpan span, Iterator<Color?> colors) {
+    if (span is! TextSpan) return span;
+    final Color? color = span.text != null && colors.moveNext()
+        ? colors.current
+        : null;
+    return TextSpan(
+      text: span.text,
+      style: color == null
+          ? span.style
+          : (span.style ?? const TextStyle()).copyWith(color: color),
+      recognizer: span.recognizer,
+      semanticsLabel: span.semanticsLabel,
+      mouseCursor: span.mouseCursor,
+      onEnter: span.onEnter,
+      onExit: span.onExit,
+      locale: span.locale,
+      spellOut: span.spellOut,
+      children: span.children
+          ?.map((child) => withSpanColors(child, colors))
+          .toList(),
+    );
+  }
+}
+
+class _TextColorTransitionState extends State<TextColorTransition>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    value: 1,
+  );
+  late final CurvedAnimation _curve = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOutCubic,
+  );
+
+  /// The colors the transition starts from, null when it shows the text's
+  /// own colors.
+  List<Color?>? _from;
+
+  /// The colors of [TextColorTransition.text]'s spans, in order.
+  late List<Color?> _to;
+
+  @override
+  void initState() {
+    super.initState();
+    _to = TextColorTransition.spanColors(widget.text.textSpan);
+  }
+
+  @override
+  void didUpdateWidget(covariant TextColorTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final List<Color?> to = TextColorTransition.spanColors(widget.text.textSpan);
+    if (listEquals(to, _to)) return;
+    // Start from what shows now, mid-transition included.
+    final List<Color?> shown = _shown();
+    _to = to;
+    final Duration duration = implicitTransitionDuration(context, widget.ms);
+    if (duration == Duration.zero || shown.length != to.length) {
+      _from = null;
+      _controller.value = 1;
+      return;
+    }
+    _from = shown;
+    _controller
+      ..duration = duration
+      ..forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _curve.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  List<Color?> _shown() {
+    final List<Color?>? from = _from;
+    if (from == null || _controller.value >= 1) return _to;
+    final double t = _curve.value;
+    return [
+      for (int i = 0; i < _to.length; i++)
+        from[i] == null || _to[i] == null
+            ? _to[i]
+            : Color.lerp(from[i], _to[i], t),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _controller,
+    builder: (context, _) {
+      final Text text = widget.text;
+      final InlineSpan? span = text.textSpan;
+      if (_from == null || _controller.value >= 1 || span == null) {
+        return text;
+      }
+      final Iterator<Color?> colors = _shown().iterator;
+      return Text.rich(
+        TextColorTransition.withSpanColors(span, colors),
+        key: text.key,
+        style: text.style,
+        strutStyle: text.strutStyle,
+        textAlign: text.textAlign,
+        textDirection: text.textDirection,
+        locale: text.locale,
+        softWrap: text.softWrap,
+        overflow: text.overflow,
+        textScaler: text.textScaler,
+        maxLines: text.maxLines,
+        semanticsLabel: text.semanticsLabel,
+        textWidthBasis: text.textWidthBasis,
+        textHeightBehavior: text.textHeightBehavior,
+        selectionColor: text.selectionColor,
+      );
+    },
+  );
 }

@@ -704,5 +704,57 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('a toast\'s Undo runs on the screen a reset opened after '
+        'the screen that showed it is gone', (tester) async {
+      final ButtonNode delete = button(
+        'delete',
+        'mainBody',
+        'Delete',
+        ShowToastAction(
+          message: 'Deleted',
+          actionLabel: 'Undo',
+          duration: 4000,
+          actions: [ShowToastAction(message: 'Restored')],
+        ),
+      );
+      delete.reactions.add(
+        Reaction(
+          action: NavigationAction(
+            navigationType: NavigationType.reset,
+            destinationId: 'other',
+          ),
+          trigger: TriggerModel(type: TriggerType.click),
+        ),
+      );
+      await pumpLayouts(tester, [
+        layoutOf('main', [
+          canvas('main', 'mainBody', fill: ColorRGBA.white),
+          body('mainBody', 'main', ['delete']),
+          delete,
+        ]),
+        layoutOf('other', [
+          canvas('other', 'otherBody', fill: ColorRGBA.white),
+          body('otherBody', 'other', ['otherTitle']),
+          text('otherTitle', 'otherBody', 'Collections', brandRegular),
+        ]),
+      ]);
+
+      await tester.tap(find.text('Delete'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle(const Duration(milliseconds: 100));
+      expect(find.text('Delete'), findsNothing);
+      expect(find.text('Collections'), findsOneWidget);
+      expect(find.text('Undo'), findsOneWidget);
+
+      await tester.tap(find.text('Undo'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Restored'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
   });
 }

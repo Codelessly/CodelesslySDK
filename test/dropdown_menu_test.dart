@@ -202,6 +202,46 @@ void main() {
     expect(changes, hasLength(1));
   });
 
+  testWidgets('the check mark can lead the selected row', (tester) async {
+    await pumpDropdown(
+      tester,
+      dropdown(
+        style: {...menuStyle, 'checkPosition': 'leading'},
+        value: species[1],
+      ),
+    );
+    await tester.tap(find.byType(PassiveDropdownWidget));
+    await tester.pumpAndSettle();
+    final Finder menu = find.byKey(const ValueKey('codelessly-dropdown-menu'));
+    final Finder check = find.byKey(
+      const ValueKey('codelessly-dropdown-check'),
+    );
+    expect(check, findsOneWidget);
+    final Finder row = find.byKey(const ValueKey('codelessly-dropdown-item-1'));
+    final Rect checkRect = tester.getRect(check);
+    final Rect label = tester.getRect(
+      find.descendant(of: menu, matching: find.text('Giant green anemone')),
+    );
+    final Rect image = tester.getRect(
+      find.descendant(of: row, matching: find.byType(Image)),
+    );
+    expect(checkRect.right, lessThanOrEqualTo(image.left));
+    expect(image.right, lessThanOrEqualTo(label.left));
+
+    // Trailing (the default) keeps it after the label.
+    expect(
+      DropdownMenuStyleModel.fromJson(menuStyle).checkPosition,
+      DropdownCheckPosition.trailing,
+    );
+    expect(
+      DropdownMenuStyleModel.fromJson({
+        ...menuStyle,
+        'checkPosition': 'leading',
+      }).toJson()['checkPosition'],
+      'leading',
+    );
+  });
+
   testWidgets('a dropdown without a menu style keeps the platform menu', (
     tester,
   ) async {

@@ -87,6 +87,26 @@ class LayoutPresentationRoute<T> extends PopupRoute<T> {
   /// Color of a bottom sheet's grab handle.
   static const Color dragHandleColor = Color(0xFFA9ADA5);
 
+  /// Lays a bottom sheet's grab handle over the top of [sheet], the canvas
+  /// that draws the sheet, [dragHandleTop] below its top edge.
+  ///
+  /// The handle sits on the canvas, not in a band of its own above it: a
+  /// sheet canvas draws its own fill and corners, so a band above it would
+  /// be see-through and the handle would float over the screen behind.
+  static Widget withDragHandle(Widget sheet) => Stack(
+    // The sheet keeps the constraints the route gives it.
+    fit: StackFit.passthrough,
+    children: [
+      sheet,
+      const Positioned(
+        top: dragHandleTop,
+        left: 0,
+        right: 0,
+        child: Center(child: _DragHandle()),
+      ),
+    ],
+  );
+
   @override
   final bool barrierDismissible;
 
@@ -357,9 +377,11 @@ class _SideSheet extends StatelessWidget {
 extension DialogPresentationResolve on DialogPresentation {
   /// A bottom sheet on phones (narrower than 600 px) and a dialog otherwise
   /// for [DialogPresentation.adaptive]; any other presentation as is.
-  DialogPresentation resolveFor(BuildContext context) =>
-      this == DialogPresentation.adaptive
-      ? (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < 600
+  DialogPresentation resolveFor(
+    BuildContext context, {
+    double sheetBelowWidth = 600,
+  }) => this == DialogPresentation.adaptive
+      ? (MediaQuery.maybeSizeOf(context)?.width ?? 1024) < sheetBelowWidth
             ? DialogPresentation.bottomSheet
             : DialogPresentation.dialog
       : this;

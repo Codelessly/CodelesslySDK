@@ -1,0 +1,31 @@
+name: codelessly_example
+description: Shows migrated Codelessly projects with the Codelessly SDK v2.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  codelessly_sdk_v2:
+    path: ..
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+# Development: API v2 from the sibling CodelesslyAPI checkout.
+dependency_overrides:
+  codelessly_api_v2:
+    path: ../../../CodelesslyAPI/v2
+
+flutter:
+  uses-material-design: true
+  assets:
+    # Publish bundles migrated from v1 projects
+    # (CodelesslyAPI/v2/migrate/bin/publish_fixture.dart).
+    - assets/rigcheck.json.gz
+    - assets/linewatch.json.gz

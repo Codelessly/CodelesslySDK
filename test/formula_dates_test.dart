@@ -63,6 +63,16 @@ void main() {
       expect(eval('parseDate(empty)'), isNull);
       expect(eval('parseDate(missing)'), isNull);
     });
+
+    test('is null for a day or month that does not exist', () {
+      expect(eval('parseDate("2026-02-30")'), isNull);
+      expect(eval('parseDate("2026-13-01")'), isNull);
+      expect(eval('parseDate("2024-02-29")'), '2024-02-29T00:00:00.000');
+      // Two rolled-over texts are not the same date as a real one.
+      expect(eval("'2026-03-02' == '2026-02-30'"), isFalse);
+      expect(eval("'2026-03-02' == '2026-03-02'"), isTrue);
+      expect(eval("'2026-03-02T00:00:00.000' == '2026-03-02'"), isTrue);
+    });
   });
 
   group('formatDate', () {

@@ -20,9 +20,21 @@ const Set<String> predefinedVariableNames = {
   'route',
   'auth',
   'result',
+  'loop',
   'screen',
   'hold',
   'drag',
+  'track',
+  'transform',
+  'speech',
+  'initial',
+  'flip',
+  'tilt',
+  'pageOffset',
+  // Which variables an Animate variable action is playing now:
+  // `${animating.sunriseT}` (see VariableAnimator.playingIn).
+  'animating',
+  'script',
 };
 
 /// The key under which a layout's published variables hold the project's
@@ -50,9 +62,11 @@ const Set<String> predefinedListenableVariableNames = {
   'storage',
   'drag',
   'auth',
+  'speech',
   'product',
   'paywall',
   'entitlements',
+  'animating',
 };
 
 final Set<PredefinedVariableData> predefinedVariables = {
@@ -68,10 +82,19 @@ final Set<PredefinedVariableData> predefinedVariables = {
   PredefinedVariableData(name: 'route', type: VariableType.map),
   PredefinedVariableData(name: 'auth', type: VariableType.map),
   PredefinedVariableData(name: 'result'),
+  PredefinedVariableData(name: 'loop'),
   PredefinedVariableData(name: 'screen', type: VariableType.map),
   PredefinedVariableData(name: 'parent', type: VariableType.map),
   PredefinedVariableData(name: 'hold', type: VariableType.decimal),
   PredefinedVariableData(name: 'drag', type: VariableType.map),
+  PredefinedVariableData(name: 'track', type: VariableType.map),
+  PredefinedVariableData(name: 'transform', type: VariableType.map),
+  PredefinedVariableData(name: 'speech', type: VariableType.map),
+  PredefinedVariableData(name: 'initial', type: VariableType.map),
+  PredefinedVariableData(name: 'flip', type: VariableType.map),
+  PredefinedVariableData(name: 'tilt', type: VariableType.map),
+  PredefinedVariableData(name: 'pageOffset', type: VariableType.decimal),
+  PredefinedVariableData(name: 'animating', type: VariableType.map),
 };
 
 /// Widths at which the `screen` variable's breakpoint changes: below 600 is
@@ -83,9 +106,25 @@ const double kDesktopMinWidth = 1024;
 /// The value of the `screen` variable for a screen of [size]: its `width`,
 /// `height`, `breakpoint` (mobile, tablet or desktop), `isMobile`,
 /// `isTablet`, `isDesktop`, `orientation` (portrait or landscape),
-/// `isPortrait` and `isLandscape`.
-Map<String, dynamic> screenVariableValue(Size size) {
-  final String breakpoint = ScreenBreakpoint.forWidth(size.width).name;
+/// `isPortrait` and `isLandscape`, and the device's light or dark mode as
+/// `brightness` (`light` or `dark`) and `isDark`, for a theme that follows
+/// the system.
+///
+/// Inside a responsive layout with its own switch widths
+/// ([tabletMinWidth], [desktopMinWidth]; see [ResponsiveWidthsScope]) the
+/// breakpoint is the one that layout shows, so `screen.isMobile` agrees with
+/// the layout on show.
+Map<String, dynamic> screenVariableValue(
+  Size size, {
+  Brightness? brightness,
+  double? tabletMinWidth,
+  double? desktopMinWidth,
+}) {
+  final String breakpoint = ScreenBreakpoint.forWidth(
+    size.width,
+    tabletMinWidth: tabletMinWidth,
+    desktopMinWidth: desktopMinWidth,
+  ).name;
   final bool portrait = size.height >= size.width;
   return {
     'width': size.width,
@@ -97,6 +136,8 @@ Map<String, dynamic> screenVariableValue(Size size) {
     'orientation': portrait ? 'portrait' : 'landscape',
     'isPortrait': portrait,
     'isLandscape': !portrait,
+    'brightness': (brightness ?? Brightness.light).name,
+    'isDark': brightness == Brightness.dark,
   };
 }
 
@@ -391,6 +432,13 @@ AlignmentModel retrieveCommonStackAlignment(
 
   return bestAlignment ?? AlignmentModel.none;
 }
+
+/// Whether [name] is the name of an API's response variable: the
+/// [SDKConstants.apiVariablePrefix] followed by a capitalised name, as
+/// [apiNameToVariableName] makes them (`apiGetUsers`). Other names that
+/// happen to start with "api" (`apiary`, `apiece`) are ordinary variables.
+bool isApiVariableName(String name) =>
+    RegExp('^${SDKConstants.apiVariablePrefix}([A-Z0-9_]|\$)').hasMatch(name);
 
 String apiNameToVariableName(String name) {
   if (name.startsWith(RegExp(r'\d+'))) {

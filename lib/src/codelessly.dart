@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,6 +16,7 @@ import 'package:provider/provider.dart';
 import '../codelessly_sdk.dart';
 import 'functions/app_auth.dart';
 import 'logging/stat_tracker.dart';
+import 'ui/layout_fonts.dart';
 import 'utils/codelessly_http_client.dart';
 
 typedef NavigationListener = void Function(
@@ -330,6 +332,9 @@ class Codelessly {
   };
 
   /// [dataManager], or null before it's set up.
+  DataManager? get maybeDataManager => _maybeDataManager;
+
+  /// [dataManager], or null before it's set up.
   DataManager? get _maybeDataManager => switch (config?.publishSource) {
     PublishSource.publish => _publishDataManager,
     PublishSource.preview => _previewDataManager,
@@ -484,55 +489,10 @@ class Codelessly {
 
   final Map<String, NavigationListener> _navigationListeners = {};
 
-  /// The screen shown and its parameters, for the browser's address: a host
-  /// listens and writes [pathOf] it to the URL. Dialogs don't change it.
+  /// The screen shown and its parameters. A [CodelesslyRouter] keeps it in
+  /// step with its top screen, and with the browser's address; dialogs
+  /// don't change it.
   final ValueNotifier<CodelesslyRoute?> route = ValueNotifier(null);
-
-  /// A screen to open once the app's first screen shows, e.g. the one a
-  /// reloaded URL names. Set it before the first screen loads.
-  CodelesslyRoute? get pendingRoute => _pendingRoute;
-
-  set pendingRoute(CodelesslyRoute? value) {
-    _pendingRoute = value;
-    _link = value;
-  }
-
-  CodelesslyRoute? _pendingRoute;
-
-  /// The route the app was opened with, kept after [pendingRoute] is used.
-  CodelesslyRoute? _link;
-
-  /// The parameters the app's link gives the screen of layout [layoutId]
-  /// when the link names a screen of that layout: the first screen shows in
-  /// the host's own route, which carries no parameters, so a link to it
-  /// would otherwise lose them. Null when the link names another screen.
-  Map<String, String>? linkParamsFor(String? layoutId) {
-    return _maybeDataManager?.publishModel?.linkParamsFor(
-      _resolveLink(_link),
-      layoutId,
-    );
-  }
-
-  /// [link] with its URL path, if it has one, matched against the screens'
-  /// URL paths: the screen it names and the parameters the path and query
-  /// give. A path no screen's URL path matches is read as a screen id.
-  CodelesslyRoute? _resolveLink(CodelesslyRoute? link) {
-    final String? path = link?.path;
-    final SDKPublishModel? model = _maybeDataManager?.publishModel;
-    if (link == null || path == null || model == null) return link;
-    final CanvasLocationMatch? match = CanvasLocation.match(
-      model,
-      Uri(
-        path: path,
-        queryParameters: link.params.isEmpty ? null : link.params,
-      ).toString(),
-    );
-    if (match == null) return link;
-    return CodelesslyRoute(match.canvasId, {
-      for (final MapEntry<String, dynamic> param in match.params.entries)
-        param.key: '${param.value}',
-    });
-  }
 
   final Map<String, BreakpointsListener> _breakpointsListeners = {};
 
@@ -584,6 +544,63 @@ class Codelessly {
     }
   }
 
+  /// Runs background authentication again when a user signs in, if it
+  /// failed.
+  SignInRetry? _backgroundAuth;
+
+  /// Authenticates a slug-loaded app in the background, then opens the
+  /// project's cloud database and listens to its publish model. If that
+  /// fails (the anonymous sign-in it starts with can be refused), it runs
+  /// again when a user signs in, so the app's data loads once the user signs
+  /// in with their own account. See [SignInRetry].
+  void _authenticateInBackground() {
+    final AuthManager? authManager = _authManager;
+    final FirebaseAuth? auth = _firebaseAuth;
+    if (authManager == null || auth == null) return;
+    _backgroundAuth?.dispose();
+    _backgroundAuth = SignInRetry(
+      auth: auth,
+      step: () async {
+        await authManager.init();
+        if (_authManager != authManager) return true;
+        final AuthData? authData = authManager.authData;
+        if (authData == null) return false;
+
+        StatTracker.instance.init(
+          projectId: authData.projectId,
+          serverUrl: Uri.parse(
+            '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest',
+          ),
+        );
+
+        DebugLogger.instance.printInfo(
+          '[POST-INIT] Background authentication succeeded. Initializing layout storage.',
+          name: name,
+        );
+        await dataManager.onPublishModelLoaded(authData.projectId);
+
+        DebugLogger.instance.printInfo(
+          '[POST-INIT] Layout storage initialized. Listening to publish model.',
+          name: name,
+        );
+        dataManager.listenToPublishModel(authData.projectId);
+        return true;
+      },
+      onError: (error, stackTrace) {
+        DebugLogger.instance.printInfo(
+          '[POST-INIT] Background authentication failed. Retrying when a user signs in.',
+          name: name,
+        );
+        ErrorLogger.instance.captureException(
+          error,
+          message: 'Failed to authenticate',
+          type: 'authentication_failed',
+          stackTrace: stackTrace,
+        );
+      },
+    )..run();
+  }
+
   /// Disposes this instance of the SDK permanently along with all of its
   /// managers.
   ///
@@ -603,6 +620,8 @@ class Codelessly {
       _cacheManager?.dispose();
     }
     _authManager?.dispose();
+    _backgroundAuth?.dispose();
+    _backgroundAuth = null;
     _appUserSubscription?.cancel();
     _publishDataManager?.dispose();
     _previewDataManager?.dispose();
@@ -916,6 +935,9 @@ class Codelessly {
 
     status = CStatus.loading(CLoadingState.initializing);
 
+    // So the first screen's fonts are fetched the moment it asks for them.
+    LayoutFonts.warmUp();
+
     if (config != null) {
       _config = config;
     }
@@ -1091,48 +1113,7 @@ class Codelessly {
           'Since a slug was provided & data manager finished, authenticating in the background...',
           name: name,
         );
-        _authManager!
-            .init()
-            .then((_) async {
-              if (_authManager!.authData == null) return;
-
-              if (_authManager?.authData?.projectId case String projectId) {
-                StatTracker.instance.init(
-                  projectId: projectId,
-                  serverUrl: Uri.parse(
-                    '${_config!.firebaseCloudFunctionsBaseURL}/api/trackStatsRequest',
-                  ),
-                );
-              }
-
-              DebugLogger.instance.printInfo(
-                '[POST-INIT] Background authentication succeeded. Initializing layout storage.',
-                name: name,
-              );
-              await dataManager.onPublishModelLoaded(
-                _authManager!.authData!.projectId,
-              );
-
-              DebugLogger.instance.printInfo(
-                '[POST-INIT] Layout storage initialized. Listening to publish model.',
-                name: name,
-              );
-              dataManager.listenToPublishModel(
-                _authManager!.authData!.projectId,
-              );
-            })
-            .catchError((e, str) {
-              DebugLogger.instance.printInfo(
-                '[POST-INIT] Background authentication failed.',
-                name: name,
-              );
-              ErrorLogger.instance.captureException(
-                e,
-                message: 'Failed to authenticate',
-                type: 'authentication_failed',
-                stackTrace: str,
-              );
-            });
+        _authenticateInBackground();
         status = CStatus.loading(CLoadingState.initializedSlug);
       }
 
@@ -1173,36 +1154,53 @@ class Codelessly {
     _currentNavigatedLayoutId = layoutId;
     _currentNavigatedCanvasId = canvasId;
     final ModalRoute? modal = ModalRoute.of(context);
-    if (canvasId != null && modal is! PopupRoute) {
-      route.value = _routeOf(canvasId, modal);
-      _openPendingRoute(context, canvasId);
+    // A router sets [route] for the screens it shows.
+    if (canvasId != null &&
+        modal is! PopupRoute &&
+        CodelesslyRouteScope.maybeOf(context) == null) {
+      route.value = CodelesslyRoute.of(canvasId, modal?.settings.arguments);
     }
     for (final listener in [..._navigationListeners.values]) {
       listener(context, layoutId, canvasId);
     }
   }
 
-  /// The route of screen [canvasId] shown by [modal]: the link that opened
-  /// the app when it names this screen, or the parameters it was opened
-  /// with.
-  CodelesslyRoute _routeOf(String canvasId, ModalRoute? modal) {
-    final CodelesslyRoute? pending = _resolveLink(pendingRoute);
-    if (pending != null && pending.canvasId == canvasId) return pending;
-    return CodelesslyRoute.of(canvasId, modal?.settings.arguments);
+  /// Applies the link that opened screen [canvasId] before its load actions
+  /// run: when a router shows the screen at a link (the browser's address
+  /// on a reload or a shared link), the link's parameters set the variables
+  /// they name, so `/<screen>?selectedId=kind-of-blue` opens with
+  /// `selectedId` set.
+  void prepareRoute(BuildContext context, String canvasId) {
+    final CodelesslyRouteScope? scope = CodelesslyRouteScope.maybeOf(context);
+    if (scope == null || !scope.fromLink) return;
+    // Only the screen itself, not the layouts embedded in it.
+    final CodelesslyContext? codelesslyContext =
+        Provider.of<CodelesslyContext?>(context, listen: false);
+    final String? layoutId = codelesslyContext?.layoutID;
+    final SDKPublishModel? model = _maybeDataManager?.publishModel;
+    if (layoutId != null &&
+        model != null &&
+        model.resolveLayoutId(layoutId) != scope.layoutId) {
+      return;
+    }
+    setVariablesFromRoute(
+      context,
+      CodelesslyRoute(canvasId, {
+        for (final MapEntry(:key, :value) in scope.params.entries)
+          key: CanvasLocation.stringOf(value),
+      }),
+    );
   }
 
-  /// Makes [route] screen [canvasId]'s before its load actions run, so they
-  /// can read `${route.name}`, and applies the link that opened the app to
-  /// it when the link names this screen (navigation listeners only hear of
-  /// a screen after its first frame).
-  void prepareRoute(BuildContext context, String canvasId) {
-    final ModalRoute? modal = ModalRoute.of(context);
-    if (modal is PopupRoute) return;
-    route.value = _routeOf(canvasId, modal);
-    final CodelesslyRoute? pending = _resolveLink(pendingRoute);
-    if (pending != null && pending.canvasId == canvasId) {
-      setVariablesFromRoute(context, pending);
+  /// The id of the published layout that holds canvas [canvasId], or null
+  /// before the publish model has loaded.
+  String? layoutIdOfCanvas(String canvasId) {
+    final SDKPublishModel? model = _maybeDataManager?.publishModel;
+    if (model == null) return null;
+    for (final SDKPublishLayout layout in model.layouts.values) {
+      if (layout.canvases.containsKey(canvasId)) return layout.id;
     }
+    return null;
   }
 
   /// Sets the variables a link's parameters name to their values, so
@@ -1218,10 +1216,64 @@ class Codelessly {
         Provider.of<CodelesslyContext?>(context, listen: false);
     if (codelesslyContext == null) return;
     for (final MapEntry<String, String> param in route.params.entries) {
-      if (codelesslyContext.findVariableByName(param.key) == null) continue;
-      codelesslyContext.updateVariable(param.key, param.value);
+      final VariableData? variable = codelesslyContext
+          .findVariableByName(param.key)
+          ?.value;
+      if (variable == null) continue;
+      codelesslyContext.updateVariable(
+        param.key,
+        linkValueFor(variable.type, param.value),
+      );
     }
   }
+
+  /// A link parameter's text as the value of a variable of [type]: `?done=1`
+  /// sets a boolean to true (also `true`, `yes`, `on`; `0`, `false`, `no`,
+  /// `off` and empty to false) and numbers are read as numbers. A link only
+  /// carries text, and `"1"` in a boolean read as false.
+  static Object linkValueFor(VariableType type, String text) {
+    final String t = text.trim();
+    switch (type) {
+      case VariableType.boolean:
+        final String lower = t.toLowerCase();
+        if (const {'1', 'true', 'yes', 'on'}.contains(lower)) return true;
+        if (const {'0', 'false', 'no', 'off', ''}.contains(lower)) return false;
+        return text;
+      case VariableType.integer:
+        return int.tryParse(t) ?? double.tryParse(t)?.round() ?? text;
+      case VariableType.decimal:
+        return double.tryParse(t) ?? text;
+      case VariableType.list:
+        // JSON (`["Tired","Wired"]`) when it is a JSON list, else the
+        // comma-separated items (`Tired,Wired`); empty is an empty list.
+        if (t.startsWith('[')) {
+          try {
+            final Object? decoded = jsonDecode(t);
+            if (decoded is List) return decoded;
+          } catch (_) {}
+        }
+        if (t.isEmpty) return <Object>[];
+        return <Object>[
+          for (final String item in t.split(','))
+            if (item.trim().isNotEmpty) linkValueOf(item.trim()),
+        ];
+      case VariableType.map:
+        if (t.startsWith('{')) {
+          try {
+            final Object? decoded = jsonDecode(t);
+            if (decoded is Map) return decoded;
+          } catch (_) {}
+        }
+        return text;
+      default:
+        return text;
+    }
+  }
+
+  /// One comma-separated item of a list link parameter: a whole number or
+  /// decimal as a number (`?ids=3,7`), anything else as text.
+  static Object linkValueOf(String item) =>
+      int.tryParse(item) ?? double.tryParse(item) ?? item;
 
   /// The link for [route]: the screen's URL path with its parameters filled
   /// in when it has one (`guide/bat-star` for a screen at `guide/:id`; the
@@ -1233,26 +1285,6 @@ class Codelessly {
             ? null
             : CanvasLocation.locationOf(model, route.canvasId, route.params)) ??
         route.toPath();
-  }
-
-  /// Opens [pendingRoute] over the first screen shown, unless it is that
-  /// screen. A link's path is matched against the screens' URL paths first,
-  /// then read as a screen id.
-  void _openPendingRoute(BuildContext context, String canvasId) {
-    final CodelesslyRoute? pending = _pendingRoute;
-    if (pending == null) return;
-    _pendingRoute = null;
-    final CodelesslyRoute? link = _resolveLink(pending);
-    if (link == null) return;
-    setVariablesFromRoute(context, link);
-    if (link.canvasId == canvasId) return;
-    unawaited(
-      FunctionsRepository.navigate(
-        context,
-        NavigationAction(destinationId: link.canvasId, params: link.params),
-        codelessly: this,
-      ),
-    );
   }
 
   /// Adds a global listener for navigation.

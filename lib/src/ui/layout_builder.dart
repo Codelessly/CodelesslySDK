@@ -1,9 +1,14 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../codelessly_sdk.dart';
+import '../data/persisted_variables.dart';
+import 'layout_fonts.dart';
 
 /// A widget that retrieves a layout from a [CodelesslyWidgetController].
 class CodelesslyLayoutRetriever extends StatefulWidget {
@@ -158,6 +163,9 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   SDKLayoutVariables? loadedVariables;
   SDKLayoutConditions? loadedConditions;
 
+  /// The layout and canvas [loadLayout] last loaded, as `layoutId/canvasId`.
+  String? _loadedCanvasKey;
+
   @override
   void didUpdateWidget(covariant CodelesslyLayoutBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -193,6 +201,10 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     nodeRegistry.clear();
     nodeRegistry.setNodes(widget.layout.canvases[widget.canvasId]!);
     final List<BaseNode> allNodes = nodeRegistry.getNodes().values.toList();
+    // Nodes Scroll To actions target record where they are built.
+    ScrollTargets.addTargetsIn(allNodes);
+    // Toasts show for a moment: have their icons ready before the first.
+    unawaited(AppToast.precacheIcons(allNodes));
 
     // Populate node values for nodes with internal values.
     codelesslyContext.nodeValues.clear();
@@ -246,32 +258,94 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     final Map<String, VariableData> variablesMap =
         layoutVariables[widget.canvasId] ?? {};
 
+    // The same screen loaded again (published again while it shows, its
+    // variables arriving after it, a fresh publish bundle replacing the
+    // cached one): its canvas variables keep what they hold — values its
+    // load actions or the user set — unless their published definition
+    // changed. The load actions run once per screen and don't fill them
+    // again.
+    final String canvasKey = '${widget.layout.id}/${widget.canvasId}';
+    final bool reloading = canvasKey == _loadedCanvasKey;
+    _loadedCanvasKey = canvasKey;
+    final Map<String, Observable<VariableData>> previousVariables = reloading
+        ? Map.of(codelesslyContext.variables)
+        : const {};
+    final Map<String, VariableData> previousPublished = reloading
+        ? Map.of(codelesslyContext.initialVariables)
+        : const {};
+
     // Clear all the variables that are not api variables. We persist api
     // variables across canvases from the same layout group so that the
     // api request is not made again.
     codelesslyContext.variables.removeWhere(
       (key, value) => !value.value.isApiVariable,
     );
+    codelesslyContext.initialVariables.clear();
     // App, then page variables, so a screen's own variable of the same name
     // wins. Their notifiers are shared by every layout of this instance.
     final Codelessly codelessly = context.read<Codelessly>();
+    // A screen whose link params set its variables: `?month=2026-09`.
+    final Map<String, dynamic> linkParams =
+        canvasNode.properties.paramsSetVariables
+        ? {
+            // Where ScopedValues reads `${route.…}` from.
+            ...?(CodelesslyRouteScope.maybeOf(context)?.params ??
+                (ModalRoute.of(context)?.settings.arguments as Map?)
+                    ?.cast<String, dynamic>()),
+          }
+        : const {};
     for (final String scope in [kAppVariablesScope, kPageVariablesScope]) {
       for (final variable in (layoutVariables[scope] ?? {}).values) {
-        codelesslyContext.variables[variable.id] = codelessly.sharedVariables
+        final Observable<VariableData> shared = codelessly.sharedVariables
             .putIfAbsent(
               variable.id,
-              () => Observable(
+              () => persistedVariable(
                 variable.copyWith(value: codelesslyContext.data[variable.name]),
+                codelessly.localDatabase,
               ),
             );
+        if (linkParams.containsKey(variable.name)) {
+          shared.value = withLinkParam(shared.value, linkParams);
+        }
+        codelesslyContext.variables[variable.id] = shared;
+        codelesslyContext.initialVariables[variable.name] = variable.copyWith(
+          value: codelesslyContext.data[variable.name],
+        );
       }
     }
     for (final variable in variablesMap.values) {
       // Override default values of variables with values provided in data.
-      final notifier = Observable(
-        variable.copyWith(value: codelesslyContext.data[variable.name]),
+      final VariableData published = variable.copyWith(
+        value: codelesslyContext.data[variable.name],
       );
+      final Observable<VariableData>? kept = previousVariables[variable.id];
+      final Observable<VariableData> notifier;
+      if (kept != null && previousPublished[variable.name] == published) {
+        notifier = kept;
+      } else {
+        // A persisting screen variable starts with its saved value too.
+        notifier = persistedVariable(
+          published,
+          published.persists
+              ? codelessly.dataManager.localDatabaseOrNull
+              : null,
+        );
+        if (linkParams.containsKey(variable.name)) {
+          notifier.value = withLinkParam(notifier.value, linkParams);
+        }
+      }
       codelesslyContext.variables[variable.id] = notifier;
+      codelesslyContext.initialVariables[variable.name] = published;
+    }
+
+    // Project scripts, then the page's, so a page script wins by name.
+    codelesslyContext.scripts.clear();
+    final Map<String, Map<String, ScriptModel>> layoutScripts =
+        publishModel.variables[widget.layout.id]?.scripts ?? {};
+    for (final String scope in [kAppVariablesScope, kPageVariablesScope]) {
+      for (final ScriptModel script in (layoutScripts[scope] ?? {}).values) {
+        codelesslyContext.scripts[script.name] = script;
+      }
     }
 
     final conditions =
@@ -287,6 +361,30 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
     loadApisAndItsVariables(context);
 
     setCloudStorageVariables(context);
+
+    preloadFonts();
+  }
+
+  /// Whether this layout waits for its fonts before it is first shown,
+  /// decided once so the widget tree keeps its shape.
+  late final bool gatesFonts = LayoutFonts.enabled;
+
+  /// The load of the fonts the layout first showed, while they load.
+  Future<void>? firstFonts;
+
+  /// Starts loading every font variant the canvas's text is drawn in, so
+  /// they arrive together and before the text is first shown instead of
+  /// one by one as each text builds. See [LayoutFonts].
+  void preloadFonts() {
+    if (!gatesFonts) return;
+    final Set<FontName> fonts = LayoutFonts.fontsIn(
+      nodeRegistry.getNodes().values,
+    );
+    if (fonts.every(LayoutFonts.isLoaded)) return;
+    final Future<void> load = LayoutFonts.load(fonts);
+    // Fonts of a canvas loaded later (another breakpoint's) replace the
+    // fallback as they arrive, without hiding the layout again.
+    firstFonts ??= load;
   }
 
   /// This loads all the apis for the layout as variables to be available
@@ -387,6 +485,14 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
   Widget build(BuildContext context) {
     final CodelesslyConfig config = widget.controller.config;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
+    final Widget content = transformerManager.buildWidgetFromNode(
+      canvasNode,
+      context,
+      settings: const WidgetBuildSettings(
+        debugLabel: 'layout builder',
+        nullSubstitutionMode: NullSubstitutionMode.emptyString,
+      ),
+    );
     return MediaQuery(
       data: mediaQuery.copyWith(
         textScaler: config.maxTextScaleFactor <= 1
@@ -399,16 +505,39 @@ class _CodelesslyLayoutBuilderState extends State<CodelesslyLayoutBuilder> {
         data: config.useHostTheme ? Theme.of(context) : ThemeData(),
         child: FeedbackThemeScope(
           theme: feedbackTheme,
-          child: transformerManager.buildWidgetFromNode(
-            canvasNode,
-            context,
-            settings: const WidgetBuildSettings(
-              debugLabel: 'layout builder',
-              nullSubstitutionMode: NullSubstitutionMode.emptyString,
-            ),
-          ),
+          child: gatesFonts
+              ? FontsGate(
+                  fonts: firstFonts,
+                  timeout: LayoutFonts.firstPaintTimeout,
+                  child: content,
+                )
+              : content,
         ),
       ),
     );
   }
+}
+
+/// [variable] holding the link param of its name, when [params] has a
+/// non-empty one, read the way [Codelessly.setVariablesFromRoute] reads it:
+/// `?ids=3,7` or `?ids=[3,7]` sets a list to `[3, 7]`, `?done=1` a boolean to
+/// true, `?goal=6000` a number.
+///
+/// A param that can't be read as the variable's type (`?goal=lots` for a
+/// number, `?filters=x` for a map) leaves the variable alone; it used to put
+/// the raw text in it, so `?feed=3` turned a `feed` list into the text "3"
+/// here while the other link path made it `[3]`.
+VariableData withLinkParam(VariableData variable, Map<String, dynamic> params) {
+  final Object? param = params[variable.name];
+  if (param == null) return variable;
+  final String text = param is String ? param : jsonEncode(param);
+  if (text.isEmpty) return variable;
+  final Object typed = Codelessly.linkValueFor(variable.type, text);
+  return switch (variable.type) {
+    VariableType.list || VariableType.map =>
+      typed is String ? variable : variable.copyWith(value: jsonEncode(typed)),
+    VariableType.integer || VariableType.decimal || VariableType.boolean =>
+      typed is String ? variable : variable.copyWith(value: '$typed'),
+    _ => variable.copyWith(value: text),
+  };
 }

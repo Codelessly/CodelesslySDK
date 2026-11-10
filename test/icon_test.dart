@@ -2,6 +2,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -70,23 +71,27 @@ void main() {
     });
   });
 
-  testWidgets('Cupertino icons render from the cupertino_icons font', (
-    tester,
-  ) async {
+  testWidgets('Cupertino icons render from their hosted SVG', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: SvgIcon(
-          icon: CupertinoIcon(
-            codepoint: CupertinoIcons.heart.codePoint,
-            name: 'heart',
+        home: Center(
+          child: SvgIcon(
+            icon: CupertinoIcon(
+              codepoint: CupertinoIcons.heart.codePoint,
+              name: 'heart',
+            ),
+            size: 30,
           ),
-          size: 30,
         ),
       ),
     );
-    final Icon icon = tester.widget(find.byType(Icon));
-    expect(icon.icon, CupertinoIcons.heart);
-    expect(icon.size, 30);
+    await tester.pumpAndSettle();
+    final SvgPicture picture = tester.widget(find.byType(SvgPicture));
+    expect(
+      (picture.bytesLoader as SvgNetworkLoader).url,
+      '$cupertinoSvgBaseUrl/cupertino/1.0.9/f442.svg',
+    );
+    expect(tester.getSize(find.byType(SvgPicture)), const Size(30, 30));
   });
 
   testWidgets('Icons without a source render an empty box', (tester) async {
@@ -102,5 +107,22 @@ void main() {
     );
     expect(find.byType(Icon), findsNothing);
     expect(tester.getSize(find.byType(SizedBox).last), const Size(20, 20));
+  });
+
+  test('rounded Material icons load the Round SVG by name', () {
+    // The editor stores Google's codepoint (0xe8b6 is search there); the
+    // icon is drawn from its SVG by name, never from Flutter's font, where
+    // that number is another glyph (and a runtime IconData breaks release
+    // builds).
+    expect(
+      const MaterialIcon(
+        codepoint: 0xe8b6,
+        fontFamily: 'MaterialIcons',
+        name: 'search',
+        style: MaterialIconStyle.rounded,
+        version: 17,
+      ).toSvgUrl(),
+      'https://fonts.gstatic.com/s/i/materialiconsround/search/v17/24px.svg',
+    );
   });
 }

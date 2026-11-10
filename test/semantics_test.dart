@@ -239,4 +239,85 @@ void main() {
     expect(calls, ['tap']);
     handle.dispose();
   });
+
+  testWidgets('buttons inside a tappable node stay their own buttons', (
+    tester,
+  ) async {
+    // A map that clears the selection when tapped, with a pad that selects
+    // its site: merged into one button, the pad's tap ran the map's.
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final List<String> calls = [];
+    Reaction record(String fn) => Reaction(
+      action: CallFunctionAction(name: fn),
+      trigger: TriggerModel(type: TriggerType.click),
+    );
+    TextNode label(String id, String parent, String chars) =>
+        TextNode.fromJson({
+          'id': id,
+          'name': id,
+          'type': 'text',
+          'basicBoxLocal': [0, 0, 30, 20],
+          'data': chars,
+          'textMixedProps': [
+            {'start': 0, 'end': chars.length},
+          ],
+        })..parentID = parent;
+    RowColumnNode pad(String id, String text) => RowColumnNode(
+      id: id,
+      name: id,
+      basicBoxLocal: NodeBox(0, 0, 40, 30),
+      children: [text],
+      rowColumnType: RowColumnType.row,
+      reactions: [record(id)],
+    )..parentID = 'map';
+    final map = RowColumnNode(
+      id: 'map',
+      name: 'Map',
+      basicBoxLocal: NodeBox(0, 0, 200, 40),
+      children: const ['padA1', 'padA2'],
+      rowColumnType: RowColumnType.row,
+      reactions: [record('map')],
+    )..parentID = kRootNode;
+    final registry = NodeRegistry()
+      ..setNodes({
+        'map': map,
+        'padA1': pad('padA1', 'a1'),
+        'padA2': pad('padA2', 'a2'),
+        'a1': label('a1', 'padA1', 'A1'),
+        'a2': label('a2', 'padA2', 'A2'),
+      });
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final CodelesslyContext codelessly = CodelesslyContext.empty();
+    for (final String fn in ['map', 'padA1', 'padA2']) {
+      codelessly.functions[fn] = (context, reference, params) => calls.add(fn);
+    }
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: codelessly,
+        child: MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: Builder(
+              builder: (context) => manager.buildWidgetFromNode(
+                map,
+                context,
+                settings: const WidgetBuildSettings(debugLabel: 'test'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('A1')),
+      matchesSemantics(label: 'A1', isButton: true, hasTapAction: true),
+    );
+    tester.semantics.tap(find.semantics.byLabel('A1'));
+    await tester.pump();
+    expect(calls, ['padA1']);
+    handle.dispose();
+  });
 }

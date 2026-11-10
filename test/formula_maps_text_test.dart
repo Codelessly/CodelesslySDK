@@ -52,9 +52,9 @@ void main() {
   group('lists', () {
     test('range counts up to, not including, the end', () {
       expect(eval('range(4)'), [0, 1, 2, 3]);
-      expect(eval('range(2, 5)'), [2, 3, 4, 5]);
+      expect(eval('range(2, 5)'), [2, 3, 4]);
       expect(eval('range(0, 10, 3)'), [0, 3, 6, 9]);
-      expect(eval('range(3, 0)'), [3, 2, 1, 0]);
+      expect(eval('range(3, 0)'), [3, 2, 1]);
       expect(eval('range(0)'), isEmpty);
     });
 
@@ -102,6 +102,18 @@ void main() {
     test('coalesce picks the first value that is set', () {
       expect(eval("coalesce(missing, '', 'fallback')"), 'fallback');
       expect(eval('coalesce(meter, 1)'), 2481.6);
+      // Nothing set: the fallback, even when it is empty text.
+      expect(eval("coalesce(missing, '')"), '');
+      expect(eval("coalesce(missing, '') == ''"), isTrue);
+      expect(eval('coalesce(missing, null)'), isNull);
+    });
+
+    test('coalesce falls back to its last value, even empty text', () {
+      // `coalesce(gate, '') != ''` must be false when gate is missing.
+      expect(eval("coalesce(missing, '')"), '');
+      expect(eval("coalesce(missing, '') != ''"), false);
+      expect(eval("coalesce('', '')"), '');
+      expect(eval('coalesce(missing, null)'), isNull);
     });
   });
 

@@ -148,4 +148,71 @@ void main() {
     expect(resolved.replayKey, '7');
     expect(resolved.enterFrom, record.enterFrom);
   });
+
+  Widget mutedTree(MotionModel motion) => Directionality(
+    textDirection: TextDirection.ltr,
+    child: TickerMode(
+      enabled: false,
+      child: Center(
+        child: NodeMotion(
+          motion: motion,
+          child: const SizedBox(width: 100, height: 100),
+        ),
+      ),
+    ),
+  );
+
+  testWidgets('Under a disabled TickerMode an entrance shows at rest', (
+    tester,
+  ) async {
+    // The design canvas mutes tickers: an entrance that can't tick would
+    // otherwise hold at enterFrom (invisible).
+    await tester.pumpWidget(mutedTree(record));
+    expect(opacityOf(tester), 1);
+    expect(scaleOf(tester), 1);
+    await tester.pump(const Duration(seconds: 1));
+    expect(opacityOf(tester), 1);
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('A delayed entrance under a disabled TickerMode shows at rest', (
+    tester,
+  ) async {
+    await tester.pumpWidget(mutedTree(record.copyWith(delayMs: 300)));
+    expect(opacityOf(tester), 1);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(opacityOf(tester), 1);
+  });
+
+  testWidgets('Value changes and replays jump under a disabled TickerMode', (
+    tester,
+  ) async {
+    await tester.pumpWidget(mutedTree(record.copyWith(replayKey: 'a')));
+    await tester.pumpWidget(
+      mutedTree(record.copyWith(replayKey: 'b', opacity: 0.5)),
+    );
+    expect(opacityOf(tester), 0.5);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(opacityOf(tester), 0.5);
+  });
+
+  testWidgets('Muting tickers mid-entrance settles at rest', (tester) async {
+    Widget tree(bool enabled) => Directionality(
+      textDirection: TextDirection.ltr,
+      child: TickerMode(
+        enabled: enabled,
+        child: const Center(
+          child: NodeMotion(
+            motion: record,
+            child: SizedBox(width: 100, height: 100),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(tree(true));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(opacityOf(tester), lessThan(1));
+    await tester.pumpWidget(tree(false));
+    expect(opacityOf(tester), 1);
+  });
 }

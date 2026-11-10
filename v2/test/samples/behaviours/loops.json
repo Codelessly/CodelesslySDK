@@ -1,0 +1,677 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c"
+   ]
+  },
+  "c": {
+   "id": "c",
+   "type": "canvas",
+   "name": "Canvas",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    600
+   ],
+   "properties": {
+    "bodyId": "b"
+   },
+   "children": [
+    "b"
+   ]
+  },
+  "b": {
+   "id": "b",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    600
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "r1",
+    "r3",
+    "r5",
+    "r7",
+    "r9",
+    "r11",
+    "r13",
+    "r15",
+    "r17",
+    "r19",
+    "r21",
+    "r23",
+    "r25",
+    "r27",
+    "r29",
+    "fr31",
+    "r37"
+   ]
+  },
+  "r1": {
+   "id": "r1",
+   "type": "rectangle",
+   "name": "draw scale",
+   "basicBoxLocal": [
+    20,
+    20,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f2",
+     "color": "#3366FF"
+    }
+   ],
+   "drawScale": 1.15,
+   "parentID": "b"
+  },
+  "r3": {
+   "id": "r3",
+   "type": "rectangle",
+   "name": "scale and motion",
+   "basicBoxLocal": [
+    100,
+    20,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 100,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f4",
+     "color": "#3366FF"
+    }
+   ],
+   "drawScale": 0.5,
+   "motion": {
+    "rotate": 30
+   },
+   "parentID": "b"
+  },
+  "r5": {
+   "id": "r5",
+   "type": "rectangle",
+   "name": "scale and rotation",
+   "basicBoxLocal": [
+    180,
+    20,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 180,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f6",
+     "color": "#3366FF"
+    }
+   ],
+   "drawScale": 1.2,
+   "rotation": 20,
+   "parentID": "b"
+  },
+  "r7": {
+   "id": "r7",
+   "type": "rectangle",
+   "name": "halo",
+   "basicBoxLocal": [
+    20,
+    100,
+    50.267,
+    50.267
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f8",
+     "color": "#3366FF"
+    }
+   ],
+   "opacity": 0.35,
+   "cornerRadius": [
+    25.133,
+    true,
+    "circular"
+   ],
+   "loopAnimation": {
+    "type": "pulse",
+    "opacityFrom": 0.35,
+    "opacityTo": 0,
+    "scaleFrom": 0.6551724137931035,
+    "durationMs": 1400
+   },
+   "parentID": "b"
+  },
+  "r9": {
+   "id": "r9",
+   "type": "rectangle",
+   "name": "scale loop",
+   "basicBoxLocal": [
+    100,
+    100,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 100,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f10",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "scale",
+    "scaleFrom": 0.5,
+    "scaleTo": 1.1,
+    "durationMs": 900,
+    "reverse": true,
+    "curve": "easeInOut"
+   },
+   "parentID": "b"
+  },
+  "r11": {
+   "id": "r11",
+   "type": "rectangle",
+   "name": "spin loop",
+   "basicBoxLocal": [
+    180,
+    100,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 180,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f12",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "spin",
+    "turns": 1
+   },
+   "parentID": "b"
+  },
+  "r13": {
+   "id": "r13",
+   "type": "rectangle",
+   "name": "bob loop",
+   "basicBoxLocal": [
+    260,
+    100,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 260,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f14",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "bob",
+    "durationMs": 1600
+   },
+   "parentID": "b"
+  },
+  "r15": {
+   "id": "r15",
+   "type": "rectangle",
+   "name": "sway loop",
+   "basicBoxLocal": [
+    330,
+    100,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 330,
+    "top": 100
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f16",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "sway",
+    "durationMs": 2600,
+    "angle": 10
+   },
+   "parentID": "b"
+  },
+  "r17": {
+   "id": "r17",
+   "type": "rectangle",
+   "name": "fade loop",
+   "basicBoxLocal": [
+    20,
+    180,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 180
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f18",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "fade",
+    "opacityFrom": 0.45,
+    "reverse": true,
+    "durationMs": 900
+   },
+   "parentID": "b"
+  },
+  "r19": {
+   "id": "r19",
+   "type": "rectangle",
+   "name": "disabled loop",
+   "basicBoxLocal": [
+    100,
+    180,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 100,
+    "top": 180
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f20",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "scale",
+    "scaleFrom": 0.4,
+    "enabled": false
+   },
+   "parentID": "b"
+  },
+  "r21": {
+   "id": "r21",
+   "type": "rectangle",
+   "name": "delayed loop",
+   "basicBoxLocal": [
+    180,
+    180,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 180,
+    "top": 180
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f22",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "pulse",
+    "scaleFrom": 0.7,
+    "delayMs": 500
+   },
+   "parentID": "b"
+  },
+  "r23": {
+   "id": "r23",
+   "type": "rectangle",
+   "name": "motion pulse",
+   "basicBoxLocal": [
+    20,
+    260,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 260
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f24",
+     "color": "#3366FF"
+    }
+   ],
+   "pulse": {
+    "pulseKind": "motion",
+    "opacityFrom": 0.55,
+    "opacityTo": 0,
+    "periodMs": 1400,
+    "scaleTo": 1.267
+   },
+   "parentID": "b"
+  },
+  "r25": {
+   "id": "r25",
+   "type": "rectangle",
+   "name": "scale pulse",
+   "basicBoxLocal": [
+    100,
+    260,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 100,
+    "top": 260
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f26",
+     "color": "#3366FF"
+    }
+   ],
+   "pulse": {
+    "pulseKind": "motion",
+    "scaleFrom": 0.8,
+    "scaleTo": 1.2
+   },
+   "parentID": "b"
+  },
+  "r27": {
+   "id": "r27",
+   "type": "rectangle",
+   "name": "relative pulse",
+   "basicBoxLocal": [
+    180,
+    260,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 180,
+    "top": 260
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f28",
+     "color": "#3366FF"
+    }
+   ],
+   "pulse": {
+    "pulseKind": "relative"
+   },
+   "opacity": 0.8,
+   "parentID": "b"
+  },
+  "r29": {
+   "id": "r29",
+   "type": "rectangle",
+   "name": "pulse and loop",
+   "basicBoxLocal": [
+    260,
+    260,
+    50,
+    50
+   ],
+   "edgePins": {
+    "left": 260,
+    "top": 260
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f30",
+     "color": "#3366FF"
+    }
+   ],
+   "pulse": {
+    "pulseKind": "relative",
+    "minOpacity": 0.15,
+    "durationMillis": 600
+   },
+   "loopAnimation": {
+    "type": "scale",
+    "scaleFrom": 0.9
+   },
+   "parentID": "b"
+  },
+  "fr31": {
+   "id": "fr31",
+   "type": "frame",
+   "name": "looping frame",
+   "basicBoxLocal": [
+    20,
+    340,
+    200,
+    120
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 340
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f32",
+     "color": "#EEEEEE"
+    }
+   ],
+   "loopAnimation": {
+    "type": "pulse",
+    "scaleFrom": 0.8,
+    "opacityFrom": 0.5
+   },
+   "parentID": "b",
+   "children": [
+    "r33",
+    "t35"
+   ]
+  },
+  "r33": {
+   "id": "r33",
+   "type": "rectangle",
+   "name": "scaled child",
+   "basicBoxLocal": [
+    20,
+    20,
+    60,
+    40
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f34",
+     "color": "#3366FF"
+    }
+   ],
+   "drawScale": 1.5,
+   "parentID": "fr31"
+  },
+  "t35": {
+   "id": "t35",
+   "type": "text",
+   "name": "Text",
+   "basicBoxLocal": [
+    100,
+    30,
+    80,
+    20
+   ],
+   "edgePins": {
+    "left": 100,
+    "top": 30
+   },
+   "positioningMode": "pin",
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "data": "Pulse",
+   "textMixedProps": [
+    {
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     },
+     "start": 0,
+     "end": 5,
+     "fontSize": 14,
+     "fills": [
+      {
+       "type": "solid",
+       "id": "f36",
+       "color": "#111111"
+      }
+     ]
+    }
+   ],
+   "pulse": {
+    "pulseKind": "motion",
+    "scaleFrom": 0.9
+   },
+   "parentID": "fr31"
+  },
+  "r37": {
+   "id": "r37",
+   "type": "row",
+   "rowColumnType": "row",
+   "name": "row",
+   "basicBoxLocal": [
+    20,
+    480,
+    300,
+    60
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 480
+   },
+   "positioningMode": "pin",
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "center",
+   "horizontalFit": "fixed",
+   "verticalFit": "fixed",
+   "spacing": 10,
+   "parentID": "b",
+   "children": [
+    "r38",
+    "r40"
+   ]
+  },
+  "r38": {
+   "id": "r38",
+   "type": "rectangle",
+   "name": "scaled in row",
+   "basicBoxLocal": [
+    0,
+    0,
+    40,
+    40
+   ],
+   "edgePins": {},
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f39",
+     "color": "#3366FF"
+    }
+   ],
+   "drawScale": 1.3,
+   "parentID": "r37"
+  },
+  "r40": {
+   "id": "r40",
+   "type": "rectangle",
+   "name": "loop in row",
+   "basicBoxLocal": [
+    0,
+    0,
+    40,
+    40
+   ],
+   "edgePins": {},
+   "positioningMode": "pin",
+   "fills": [
+    {
+     "type": "solid",
+     "id": "f41",
+     "color": "#3366FF"
+    }
+   ],
+   "loopAnimation": {
+    "type": "scale",
+    "scaleFrom": 0.5
+   },
+   "parentID": "r37"
+  }
+ }
+}

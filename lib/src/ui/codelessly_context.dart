@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../codelessly_sdk.dart';
@@ -10,6 +11,45 @@ import '../../codelessly_sdk.dart';
 /// Holds data passed from the Codelessly instance down the widget tree where
 /// all of the [WidgetNodeTransformer]s have access to it.
 class CodelesslyContext with ChangeNotifier, Equatable {
+  /// The listeners added and not yet removed, in debug builds: a count that
+  /// only grows as screens come and go means a widget left one behind (and
+  /// with it, its screen).
+  final List<VoidCallback> _debugListeners = [];
+
+  /// How many listeners are registered (debug builds; 0 in release).
+  int get debugListenerCount => _debugListeners.length;
+
+  /// Contexts that have had a listener, held weakly (debug builds).
+  static final List<WeakReference<CodelesslyContext>> _debugInstances = [];
+
+  /// The listener counts of the contexts still alive that have had a
+  /// listener (debug builds).
+  static List<int> get debugLiveListenerCounts {
+    _debugInstances.removeWhere((ref) => ref.target == null);
+    return [
+      for (final ref in _debugInstances)
+        if (ref.target case final CodelesslyContext c) c.debugListenerCount,
+    ];
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    super.addListener(listener);
+    if (kDebugMode) {
+      if (_debugListeners.isEmpty &&
+          !_debugInstances.any((ref) => identical(ref.target, this))) {
+        _debugInstances.add(WeakReference(this));
+      }
+      _debugListeners.add(listener);
+    }
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (kDebugMode) _debugListeners.remove(listener);
+  }
+
   /// A map of data that is passed to loaded layouts for nodes to replace their
   /// values with.
   Map<String, dynamic> _data;
@@ -55,15 +95,44 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   /// The key is the variable's id.
   final Map<String, Observable<VariableData>> variables;
 
+  /// The variables as published (name -> variable, with any value given in
+  /// [data]), before any action changed them: `${initial.<name>}` reads
+  /// them, so a Set variable action can put a variable back.
+  final Map<String, VariableData> initialVariables = {};
+
   /// A map that holds the current state of all conditions.
   /// The key is the condition's id.
   final Map<String, BaseCondition> conditions;
+
+  /// The scripts this layout can run, by name: the project's scripts, then
+  /// its Editor page's, which win over a project script of the same name.
+  /// "Run script" actions and `script.name(args)` in formulas use them.
+  final Map<String, ScriptModel> scripts = {};
+
+  /// The script with id or name [idOrName], or null.
+  ScriptModel? findScript(String idOrName) =>
+      scripts[idOrName] ??
+      scripts.values.where((s) => s.id == idOrName).firstOrNull;
 
   /// A notifier that is used to rebuild individual nodes.
   final ValueNotifier<String> nodeRebuildNotifier = ValueNotifier('');
 
   /// The drag in progress in this layout, which `${drag}` reads.
   final DragAndDropController dragAndDrop = DragAndDropController();
+
+  /// The pagination controllers of this layout, by name; each writes its
+  /// state into the map variable of that name (`${contacts.page}`).
+  final PaginationRegistry pagination = PaginationRegistry();
+
+  /// The layouts of this screen whose load actions have run. A layout's
+  /// breakpoint canvases are one screen: the canvas shown for a new width
+  /// (or the first one replaced by the right one at start-up) doesn't run
+  /// them again. A copy starts empty, as a new screen does.
+  final Set<String> _loadedLayouts = <String>{};
+
+  /// Records that the load actions of [layoutId] run now, and whether this
+  /// is the first time for this screen.
+  bool markLayoutLoaded(String layoutId) => _loadedLayouts.add(layoutId);
 
   /// Creates a [CodelesslyContext] with the given [_data], [functions], and
   /// [nodeValues].
@@ -75,11 +144,19 @@ class CodelesslyContext with ChangeNotifier, Equatable {
     required this.variables,
     required this.conditions,
     required this.layoutID,
+    this.freezesClock = false,
   }) : _externalComponentBuilders = externalComponentBuilders ?? {};
+
+  /// Whether nodes leave the clock alone: formulas that read `now()` keep
+  /// the time they were built at instead of rebuilding every second. A
+  /// design canvas shows values at rest, like its motion; rebuilding a
+  /// whole screen every second there also makes the editor unusable.
+  final bool freezesClock;
 
   /// Creates a [CodelesslyContext] with empty an empty map of each property.
   CodelesslyContext.empty({String? layoutID})
-    : _data = {},
+    : freezesClock = false,
+      _data = {},
       functions = {},
       _externalComponentBuilders = {},
       nodeValues = {},
@@ -89,6 +166,7 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   @override
   void dispose() {
     nodeRebuildNotifier.dispose();
+    pagination.dispose();
     super.dispose();
   }
 
@@ -118,6 +196,7 @@ class CodelesslyContext with ChangeNotifier, Equatable {
       variables: variables ?? this.variables,
       layoutID: forceLayoutID ? layoutID : layoutID ?? this.layoutID,
       conditions: conditions ?? this.conditions,
+      freezesClock: freezesClock,
     );
   }
 
@@ -214,9 +293,20 @@ class CodelesslyContext with ChangeNotifier, Equatable {
   Observable<VariableData>? findVariableByName(String? name) => variables.values
       .lastWhereOrNull((variable) => variable.value.name == name);
 
-  /// The variable with [id], or else the one in use with [name].
-  Observable<VariableData>? findVariable({String? id, String? name}) =>
-      (id == null ? null : variables[id]) ?? findVariableByName(name);
+  /// The variable an action naming [id] and [name] writes: the one in use
+  /// with the name of the variable with [id], or else the one in use with
+  /// [name].
+  ///
+  /// Bindings read a variable by its name (see [findVariableByName]), so a
+  /// write goes to the variable they read. When two variables share a name
+  /// (a screen variable over an app variable, or a project that holds the
+  /// same app variable twice), writing the variable with [id] would change
+  /// one that nothing shows.
+  Observable<VariableData>? findVariable({String? id, String? name}) {
+    final Observable<VariableData>? byId = id == null ? null : variables[id];
+    if (byId == null) return findVariableByName(name);
+    return findVariableByName(byId.value.name) ?? byId;
+  }
 
   /// Allows to easily [value] of a variable with a given [name].
   /// Returns false if the variable does not exist.
