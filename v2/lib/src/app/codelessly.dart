@@ -21,7 +21,30 @@ import 'runtime.dart';
 /// and pass it to the widgets, or put it above them with a
 /// [CodelesslyScope]. [Codelessly.instance] is an optional default, for apps
 /// with one project.
+///
+/// ```dart
+/// // A published slug, over HTTP.
+/// final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+///
+/// // A bundle shipped with the app, offline.
+/// final offline = Codelessly.asset('assets/my_project.json.gz');
+/// ```
+///
+/// A project token is read from Firebase: `codelesslyWithToken` in
+/// `package:codelessly_sdk/firebase.dart`.
+///
+/// Nothing loads until [initialize] is called; a [CodelesslyWidget] calls
+/// it when first built. It notifies its listeners when [status] changes
+/// and when a new publish arrives.
+///
+/// Call [dispose] when the app is done with it.
 class Codelessly extends ChangeNotifier {
+  /// A project loaded by [loader]; without one, [config]'s
+  /// [CodelesslyConfig.slug] is fetched from Codelessly's storage.
+  ///
+  /// [cache] keeps the publish (default: in memory, for this run), [fonts]
+  /// fetches the layouts' fonts (default: over HTTP), and [data] is what
+  /// layouts read as `data.<key>`.
   Codelessly({
     this.config = const CodelesslyConfig(),
     PublishLoader? loader,
@@ -69,27 +92,36 @@ class Codelessly extends ChangeNotifier {
   static void setDefault(Codelessly? codelessly) => _instance = codelessly;
 
   /// Without a loader: a slug's bundle from Codelessly's storage. A project
-  /// id or token needs Firestore: `codelesslyOnFirebase` (or a
-  /// FirestorePublishLoader) from package:codelessly_sdk/firebase.dart.
+  /// id or token needs Firestore: `codelesslyWithToken`, `codelesslyOnFirebase`
+  /// (or a FirestorePublishLoader) from package:codelessly_sdk/firebase.dart.
   static PublishLoader _defaultLoader(CodelesslyConfig config) {
     final slug = config.slug;
     if (slug == null) return _NoLoader(config.projectId != null || config.authToken != null);
     return HttpPublishLoader.firebaseStorage(projectId: slug, bucket: kCodelesslyStorageBucket, bundle: true);
   }
 
+  /// How this instance runs: its project and its runtime plugins.
   final CodelesslyConfig config;
 
   /// The services the layouts use: [CodelesslyConfig.services], else
   /// [Services] with their defaults. A [Services]' config follows the
   /// publish model (its APIs).
   late final CodelesslyServices services = config.services ?? Services();
+
+  /// Where the publish model and the layouts come from.
   final PublishLoader loader;
+
+  /// Where they're kept once loaded; [initialize] opens on a cached model
+  /// and refreshes it in the background.
   final PublishCache cache;
+
+  /// Registers the layouts' fonts with the engine.
   final CodelesslyFonts fonts;
 
   /// The app's data, read by layouts as `data.<key>`. [setData] changes it.
   final MapValueScope data;
 
+  /// Which publish this shows ([CodelesslyConfig.publishSource]).
   PublishSource get publishSource => config.publishSource;
 
   /// The app's variables: shared by every screen, over [data] and under
@@ -122,6 +154,9 @@ class Codelessly extends ChangeNotifier {
       ]);
 
   CStatus _status = const CEmpty();
+
+  /// Where loading the publish model is: [CEmpty], [CLoading], [CLoaded]
+  /// or [CError]. Listeners are notified when it changes.
   CStatus get status => _status;
 
   PublishModel? _model;
@@ -213,7 +248,6 @@ class Codelessly extends ChangeNotifier {
     }
   }
 
-  /// The layout [id] names (a layout id, custom id or canvas id), or null.
   void _configureServices(PublishModel model) {
     final s = services;
     if (s is Services && model.apis.isNotEmpty) {
@@ -221,6 +255,8 @@ class Codelessly extends ChangeNotifier {
     }
   }
 
+  /// The id of the layout [id] names (a layout id, custom id or canvas
+  /// id); null when it names none, or before the model is loaded.
   String? resolveLayoutId(String? id) => _model?.resolveLayoutId(id);
 
   /// Layout [layoutId], if loaded.
@@ -356,8 +392,8 @@ class _NoLoader implements PublishLoader {
   final bool hasProject;
 
   PublishLoadException get _error => PublishLoadException(hasProject
-      ? 'A project id or token is read from Firestore: create the instance with codelesslyOnFirebase '
-          '(package:codelessly_sdk/firebase.dart), or pass a FirestorePublishLoader'
+      ? 'A project id or token is read from Firestore: create the instance with codelesslyWithToken or '
+          'codelesslyOnFirebase (package:codelessly_sdk/firebase.dart), or pass a FirestorePublishLoader'
       : 'No project: configure a projectId, a slug or a loader');
 
   @override

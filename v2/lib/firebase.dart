@@ -1,34 +1,47 @@
-/// Codelessly services on Firebase: the published app (Cloud Firestore,
-/// [FirestorePublishLoader]; [codelesslyOnFirebase] sets a [Codelessly] up
-/// on it, live updates included), app user accounts (Firebase Auth), the
-/// project's access, cloud data (Cloud Firestore), cloud files (Firebase
-/// Storage) and the paywall server (Cloud Functions). The rest of the SDK
-/// never imports Firebase.
+/// Codelessly on Firebase. The rest of the SDK never imports Firebase.
+///
+/// **A project token is all an app needs** ([codelesslyWithToken]): it opens
+/// Codelessly's Firebase project as a secondary app
+/// ([codelesslyFirebaseApp], [CodelesslyFirebaseOptions]), authenticates
+/// the token and reads the publish from Cloud Firestore, with live updates.
 ///
 /// ```dart
-/// final codelessly = codelesslyOnFirebase(
-///   firestore: FirebaseFirestore.instanceFor(app: codelesslyApp),
-///   config: const CodelesslyConfig(authToken: '<project token>'),
-/// );
+/// import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+/// import 'package:codelessly_sdk_v2/firebase.dart';
+///
+/// final codelessly = await codelesslyWithToken('<project token>');
+/// runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
 /// ```
 ///
+/// The pieces, for apps that assemble them themselves (another Firebase
+/// project, their own auth): the published app ([FirestorePublishLoader];
+/// [codelesslyOnFirebase] sets a [Codelessly] up on it), the project's
+/// access ([FirebaseProjectAuth]), app user accounts
+/// ([FirebaseAuthService]), cloud data ([FirestoreDocumentBackend]), cloud
+/// files ([FirebaseFileStorage]) and the paywall server
+/// ([FirebasePaywallBackend]). [codelesslyCloudServices] builds the
+/// services of a project:
+///
 /// ```dart
-/// final firestore = FirebaseFirestore.instance;
-/// final auth = FirebaseAuth.instance;
-/// final services = Services(
-///   auth: FirebaseAuthService(auth),
-///   cloud: BackendCloudDatabase(
-///     backend: FirestoreDocumentBackend(firestore),
-///     root: firestoreRoot(projectId),
-///     rulesSource: firestoreDataRules(firestore, projectId),
-///     userId: () => auth.currentUser?.uid,
-///   ),
-///   files: FirebaseFileStorage(FirebaseStorage.instance, root: firestoreRoot(projectId)),
+/// final app = await codelesslyFirebaseApp();
+/// final services = codelesslyCloudServices(
+///   projectId: projectId,
+///   firestore: FirebaseFirestore.instanceFor(app: app),
+///   auth: FirebaseAuth.instanceFor(app: app),
+///   storage: FirebaseStorage.instanceFor(app: app),
 /// );
 /// ```
 library;
 
+// The Firebase types the functions here take, so an app that only uses
+// Codelessly's Firebase needs no Firebase package of its own.
+export 'package:cloud_firestore/cloud_firestore.dart' show FirebaseFirestore;
+export 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
+export 'package:firebase_core/firebase_core.dart' show Firebase, FirebaseApp, FirebaseOptions;
+export 'package:firebase_storage/firebase_storage.dart' show FirebaseStorage;
+
 export 'src/services/firebase/auth.dart';
+export 'src/services/firebase/codelessly_app.dart';
 export 'src/services/firebase/codelessly_firebase.dart';
 export 'src/services/firebase/firestore.dart';
 export 'src/services/firebase/paywall.dart';

@@ -1,4 +1,43 @@
-/// Codelessly SDK: renders Codelessly layouts natively.
+/// The Codelessly SDK: shows the screens a project publishes from the
+/// Codelessly Editor as real Flutter UI, rendered natively (straight into
+/// render objects) and running: variables, conditions, actions, navigation,
+/// data, APIs and scripts.
+///
+/// A [Codelessly] is one published project; a [CodelesslyWidget] shows one
+/// of its screens.
+///
+/// ```dart
+/// import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
+/// import 'package:flutter/material.dart';
+///
+/// void main() {
+///   final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+///   runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+/// }
+/// ```
+///
+/// Where the publish comes from:
+///
+/// * a public slug, over HTTP: `Codelessly(config: CodelesslyConfig(slug: ...))`;
+/// * a project token, from Firebase with live updates: `codelesslyWithToken`
+///   in `package:codelessly_sdk_v2/firebase.dart`;
+/// * a bundle shipped with the app, offline: [Codelessly.asset] and
+///   [Codelessly.fromBundle];
+/// * anywhere else: a [PublishLoader] of the app's.
+///
+/// What an app gives its layouts: data ([CodelesslyWidget.data],
+/// [Codelessly.setData]), route params ([CodelesslyWidget.params]), functions
+/// ([CodelesslyConfig.functions]) and services ([CodelesslyConfig.services],
+/// [Services]). A [CodelesslyWidgetController] reads and changes a shown
+/// screen from outside.
+///
+/// This library also exports the model (`package:codelessly_api`) without
+/// the value types that share Flutter's names (`Color`, `EdgeInsets`,
+/// `TextStyle`...): import `package:codelessly_api_v2/codelessly_api.dart`
+/// with a prefix for those.
+///
+/// Other libraries: `firebase.dart` (Codelessly on Firebase) and
+/// `store.dart` (in-app purchases).
 library;
 
 // The model, without the value types and enums that share Flutter's names

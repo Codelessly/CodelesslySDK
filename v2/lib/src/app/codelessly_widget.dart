@@ -69,6 +69,22 @@ class CodelesslyScope extends InheritedWidget {
 
 /// Controls a [CodelesslyWidget]: which layout it shows and what it was
 /// opened with, and reads and changes the shown screen's state.
+///
+/// ```dart
+/// final controller = CodelesslyWidgetController(layoutId: 'cart');
+///
+/// CodelesslyWidget(codelessly: codelessly, controller: controller);
+///
+/// controller.read('count');               // a variable of the screen
+/// controller.setVariable('count', 0);
+/// controller.trigger('checkout', 'click'); // a node's reactions
+/// controller.layoutId = 'checkout';        // show another layout
+/// ```
+///
+/// It notifies its listeners when the layout loads or fails ([isLoaded],
+/// [error]), when the canvas shown changes ([canvasId]) and when
+/// [layoutId] is set. One controller is for one widget; [dispose] it with
+/// the state that made it.
 class CodelesslyWidgetController extends ChangeNotifier {
   CodelesslyWidgetController({
     String? layoutId,
@@ -91,8 +107,13 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Data over the [Codelessly]'s (`data.<key>`).
   final Map<String, Object?> data;
 
+  /// What shows while the layout loads, when the widget has none.
   final WidgetBuilder? loadingBuilder;
+
+  /// What shows when the layout fails to load, when the widget has none.
   final CodelesslyWidgetErrorBuilder? errorBuilder;
+
+  /// Wraps the loaded layout, when the widget has none.
   final CodelesslyWidgetLayoutBuilder? layoutBuilder;
 
   String? _layoutId;
@@ -120,6 +141,7 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Why the layout failed to load, if it did.
   Object? get error => _error;
 
+  /// Whether a layout is loaded and shown.
   bool get isLoaded => _layout != null && _error == null;
 
   /// The shown screen's value scope: its variables, over the route's params
@@ -144,7 +166,9 @@ class CodelesslyWidgetController extends ChangeNotifier {
   /// Sets variable [name] of the shown screen.
   void setVariable(String name, Object? value) => _screen?.context.setVariable(name, value);
 
-  /// Runs node [nodeId]'s reactions to [trigger] (`click`...).
+  /// Runs node [nodeId]'s reactions to [trigger] (`click`...), with
+  /// [event] as their first `${result}`. Completes when the chain does: a
+  /// chain that pushes a screen completes when that screen is popped.
   Future<void> trigger(String nodeId, String trigger, {Json event = const {}}) async {
     final screen = _screen;
     final node = screen?.tree.resolve(nodeId);
@@ -180,6 +204,25 @@ class CodelesslyWidgetController extends ChangeNotifier {
 ///
 /// The [Codelessly] it uses is [codelessly], else [controller]'s, else a
 /// [CodelesslyScope]'s above it, else [Codelessly.instance].
+///
+/// ```dart
+/// CodelesslyWidget(
+///   codelessly: codelessly,
+///   layoutId: 'profile-card',
+///   data: {'user': {'name': 'Ada'}},   // ${data.user.name}
+///   params: {'userId': 'u_42'},        // ${route.userId}
+///   loadingBuilder: (context) => const CircularProgressIndicator(),
+///   errorBuilder: (context, error) => Text('$error'),
+/// )
+/// ```
+///
+/// Without a [layoutId] it shows the project's entry screen (or
+/// [initialScreen]). Navigation actions push routes on the nearest
+/// [Navigator]; [onNavigate] handles them first. For a project that is the
+/// whole app, give `MaterialApp.onGenerateRoute` [onGenerateRoute].
+///
+/// Navigation actions need a [Navigator] above it (a `MaterialApp` gives
+/// one); without one they do nothing.
 class CodelesslyWidget extends StatefulWidget {
   const CodelesslyWidget({
     super.key,
@@ -211,21 +254,36 @@ class CodelesslyWidget extends StatefulWidget {
   /// Unknown screens open the entry screen.
   final String? initialScreen;
 
+  /// Reads and changes the shown screen, and names the layout when
+  /// [layoutId] is null.
   final CodelesslyWidgetController? controller;
+
+  /// The project. Null: [controller]'s, else the [CodelesslyScope]'s above,
+  /// else [Codelessly.instance].
   final Codelessly? codelessly;
 
   /// Params the screen opens with: `route.<name>` in the layout, and the
   /// start value of its variables of the same name.
   final Map<String, Object?> params;
 
-  /// Data over the [Codelessly]'s (`data.<key>`).
+  /// Data over the [Codelessly]'s (`data.<key>`). A screen variable named
+  /// like a key starts at its value and follows it until the screen
+  /// changes the variable itself. Rebuilding with other data updates the
+  /// screen in place.
   final Map<String, Object?> data;
 
   /// How the canvas sizes itself in the space it's given.
   final CanvasSizing sizing;
 
+  /// What shows while the layout loads (default: [CodelesslyLoadingScreen]).
   final WidgetBuilder? loadingBuilder;
+
+  /// What shows when the layout fails to load (default:
+  /// [CodelesslyErrorScreen]). The error is usually a
+  /// [PublishLoadException].
   final CodelesslyWidgetErrorBuilder? errorBuilder;
+
+  /// Wraps the loaded layout (a `SafeArea`, an overlay).
   final CodelesslyWidgetLayoutBuilder? layoutBuilder;
 
   /// Handles navigation actions first (an app routing screens itself).
