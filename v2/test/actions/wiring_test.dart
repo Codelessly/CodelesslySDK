@@ -1,6 +1,7 @@
 // Triggers in the render tree: nodes tapped (pressed, hovered, swiped...)
 // in a NodeView(interactive: true) run their reactions; a variable they set
 // re-applies only the boxes that read it.
+import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -248,6 +249,43 @@ void main() {
     await tester.tapAt(s.center('button'));
     await tester.pump();
     expect(ui.log, ['navigate push details {n: 3}', 'modal sheet bottomSheet']);
+  });
+
+  testWidgets('a modal anchored to its trigger or the pointer opens by it', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 80),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'menu', 'anchor': 'trigger', 'placement': 'rightStart', 'anchorGap': 6},
+      ]),
+      reaction('secondaryClick', [
+        {'type': 'openModal', 'to': 'pointerMenu', 'anchor': 'pointer'},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    final box = s.tree.boxOf('button')!;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // Right of the button, its top edges aligned.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('menu'))), Offset(rect.right + 6, rect.top));
+    Navigator.of(appContext).pop();
+    await tester.pumpAndSettle();
+
+    // At the pointer: below it, starting at it.
+    final at = rect.center + const Offset(10, 5);
+    await tester.tapAt(at, buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(const ValueKey('pointerMenu'))), Offset(at.dx, at.dy + 4));
+  });
+
+  testWidgets('a popover flips above when there is no room below and stays on screen', (tester) async {
+    final layout = PopoverLayout(anchor: const Rect.fromLTWH(700, 560, 80, 30), placement: api.PopoverPlacement.belowStart);
+    // 600 tall: 200 doesn't fit below 594, so above; 800 wide keeps it in.
+    expect(layout.getPositionForChild(const Size(800, 600), const Size(232, 200)), const Offset(560, 356));
   });
 
   testWidgets('set value and set variant change nodes at runtime', (tester) async {
