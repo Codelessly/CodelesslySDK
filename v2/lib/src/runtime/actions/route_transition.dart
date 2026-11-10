@@ -50,6 +50,10 @@ class RevealAnchor {
 
   /// The last pointer down anywhere (tracked once a transition is built).
   static Offset? lastTap;
+
+  /// The box (global) of the node whose trigger fired last: what a modal
+  /// anchored to its trigger sits by.
+  static Rect? lastTrigger;
   static bool _tracking = false;
 
   static void track() {
