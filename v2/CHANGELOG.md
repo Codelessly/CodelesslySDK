@@ -1,3 +1,8 @@
+## 20.0.3
+
+- `CodelesslyWidget.data`: a screen variable named like a data key starts at that value and follows it when the
+  data changes (unless the user changed it since), as in 10.x. Data stays readable as `data.<key>` too.
+
 ## 20.0.2
 
 - `storage.<key>` in expressions reads what the app keeps on the device (`setStorage`), live. It read null.
