@@ -1,6 +1,6 @@
 // The run script action: a layout's script run by the app's ScriptRunner,
 // with a host over the running chain (its variables, the screen's inputs,
-// navigation, APIs, actions). SDK 8.x's runScript and FlutterScriptHost.
+// navigation, APIs, actions).
 import 'dart:async';
 import 'dart:convert';
 

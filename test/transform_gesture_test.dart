@@ -1,5 +1,4 @@
-// Transform gestures in a running app (SDK 8.x's NodeTransformGesture,
-// ported from its tests): a 200×200 node laid out at (100, 100) in a
+// Transform gestures in a running app: a 200×200 node laid out at (100, 100) in a
 // 400×400 parent, so global and parent coordinates are the same.
 import 'dart:math' as math;
 

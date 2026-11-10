@@ -1,5 +1,5 @@
 // Node values: properties set at runtime by set value and set variant
-// actions (SDK 8.x's node values), over the nodes a source gives. Only the
+// actions, over the nodes a source gives. Only the
 // nodes they set re-apply.
 import 'package:codelessly_api/codelessly_api.dart' show BindPaths, Node;
 import 'package:flutter/foundation.dart';

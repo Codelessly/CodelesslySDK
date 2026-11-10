@@ -160,7 +160,7 @@ final class BoundNode {
 
   final Node node;
 
-  /// Hidden by a binding or condition: takes no space (SDK 8.x's
+  /// Hidden by a binding or condition: takes no space (Flutter's
   /// `Visibility` without `maintainSize`). A node hidden in its own data
   /// keeps its space.
   final bool collapsed;
@@ -233,7 +233,7 @@ class NodeBinder {
         clock |= d.readsClock;
         out = _withItems(source, out, instance, d.valueIn(engine, s));
       }
-      // Conditions win over bindings (10.x's precedence).
+      // Conditions win over bindings.
       for (final t in targets) {
         reads.addAll(t.reads);
         final v = t.valueIn(engine, s);

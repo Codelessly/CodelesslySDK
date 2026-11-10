@@ -1,5 +1,4 @@
-// Ported from SDK 8.x's paywall_controller_test, purchase_retry_test and
-// store_product_metadata_test.
+// Paywall controller, purchase retries and store product metadata.
 import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';

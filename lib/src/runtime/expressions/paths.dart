@@ -1,7 +1,6 @@
 // The `${...}` syntax and value paths (`user.name`, `cart[0].qty`,
 // `title.length`): how an expression names a value and how a path walks
-// into it. SDK 8.x: PropertyValueDelegate's paths, accessors and computed
-// properties.
+// into it.
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart' show StringCharacters;
@@ -21,8 +20,7 @@ const String _body1 = '(?:$_atom|\\{$_body0\\})*';
 const String _body2 = '(?:$_atom|\\{$_body1\\})*';
 const String _formulaBody = '(?:$_atom|\\{$_body2\\})*';
 
-/// A `${path}`: a name, then `[n]` indices and `.key`s (SDK 8.x's
-/// `variablePathPattern`).
+/// A `${path}`: a name, then `[n]` indices and `.key`s.
 final RegExp pathSyntax = RegExp(
   r'(?<!\\)\$\{(?<value>(?<name>[a-zA-Z][a-zA-Z0-9_]*)((?<accessor>(?:\[\d+\])+)?(?:\.(?<path>[a-zA-Z]+[a-zA-Z0-9_]*(?:\[\d+\])*))*)?)\}',
 );
@@ -129,7 +127,7 @@ Object? member(Object? value, Object key) {
   return computedProperty(value, key);
 }
 
-/// The computed properties a value has (SDK 8.x `getVariableProperties`).
+/// The computed properties a value has.
 Object? computedProperty(Object value, String name) => switch (value) {
       final String s => switch (name) {
           'length' => s.length,

@@ -1,6 +1,6 @@
 // One typed handler per action type, over an ActionRun (the chain's scope
-// and result, its context's services, UI and node tree). SDK 8.x's
-// FunctionsRepository, without BuildContext.
+// and result, its context's services, UI and node tree), without
+// BuildContext.
 import 'dart:async';
 import 'dart:convert';
 
@@ -215,7 +215,7 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   final next = path.keys.isNotEmpty && a.write.op == WriteOp.set
       ? evaluateValue(a.write.value, run.expressions, run.scope)
       : applyWrite(current, type, a.write, run.expressions, run.scope);
-  // A number glides to its new value over animateMs (SDK 8.x's glide).
+  // A number glides to its new value over animateMs.
   final ms = a.animateMs.trim().isEmpty ? 0 : (double.tryParse(run.text(a.animateMs).trim()) ?? 0).round();
   final number = type == VariableType.integer || type == VariableType.decimal;
   if (ms > 0 && number && path.keys.isEmpty && current is num && next is num) {
@@ -233,8 +233,8 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   setVariableIn(run.context.scope, name, next);
 }
 
-/// Plays, pauses, resumes, stops or seeks a number variable's timeline
-/// (SDK 8.x's animateVariable). A play or a resume completes when the
+/// Plays, pauses, resumes, stops or seeks a number variable's timeline.
+/// A play or a resume completes when the
 /// timeline ends; a variable that isn't there (or is computed) is skipped.
 Future<void> _animateVariable(AnimateVariableAction a, ActionRun run, {bool fromCurrentPlace = false}) async {
   final found = variableOf(run.context.scope, a.variable.trim());
@@ -296,8 +296,8 @@ void _haptic(HapticKind kind) {
   });
 }
 
-/// Sets node values: a property bound to one variable sets the variable
-/// (SDK 8.x), others go in the context's node values.
+/// Sets node values: a property bound to one variable sets the variable;
+/// others go in the context's node values.
 void _setValue(String nodeId, List<NodeValue> values, ActionRun run) {
   final tree = run.host.tree;
   final node = tree?.resolve(nodeId) ?? tree?.source.node(nodeId);

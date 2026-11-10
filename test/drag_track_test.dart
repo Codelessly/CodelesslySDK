@@ -1,5 +1,4 @@
-// Drag tracks in a running app (SDK 8.x's NodeDragTrack, ported from its
-// tests): a node is a value control that the pointer, the wheel and the
+// Drag tracks in a running app: a node is a value control that the pointer, the wheel and the
 // keys move along its track, writing its variable and firing its
 // reactions; inside it `${track.*}` can be read.
 import 'dart:math' as math;

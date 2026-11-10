@@ -1,4 +1,4 @@
-// Custom route transitions (SDK 8.x's ui/route_transition.dart): the sides'
+// Custom route transitions: the sides'
 // timing, the route a navigate or open modal action opens, closing it.
 import 'dart:async';
 

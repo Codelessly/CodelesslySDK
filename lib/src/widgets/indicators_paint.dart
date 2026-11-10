@@ -1,6 +1,5 @@
 // Painters of the indicators group: progress bars, gauges, the bar chart and
-// barcodes. Each paints one node from its props, as SDK 8.x's painters (and
-// widget layouts, for the bar chart) drew it in preview.
+// barcodes. Each paints one node from its props.
 import 'dart:math' as math;
 
 import 'package:barcode/barcode.dart' as bc;
@@ -410,7 +409,7 @@ class RadialGaugePainter extends NodePainter {
   }
 }
 
-/// A number as 10.x printed a double label (`60.0`).
+/// A number printed as a double label (`60.0`).
 String _numberText(double v) => v.toString();
 
 // --- gauge meter ----------------------------------------------------------------
@@ -641,7 +640,7 @@ class GaugeMeterPainter extends NodePainter {
 
 // --- bar chart ------------------------------------------------------------------
 
-/// A bar chart, laid out as SDK 8.x's widgets placed it: the bars in equal
+/// A bar chart: the bars in equal
 /// columns over a baseline, grid lines with labels in a right gutter, and a
 /// row of labels under the baseline.
 class BarChartPainter extends NodePainter {

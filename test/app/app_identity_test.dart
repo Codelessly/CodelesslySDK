@@ -1,4 +1,4 @@
-// The app identity's screen titles (SDK 8.x's app_identity_runtime).
+// The app identity's screen titles.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -1,6 +1,5 @@
 // A node's one-shot effects (shake, wiggle, jelly... on cue) and its fly-in
-// by flight key, as layers of its chain outside its motion. SDK 8.x's
-// NodePlayBox and FlightBox. A design canvas draws them at rest.
+// by flight key, as layers of its chain outside its motion. A design canvas draws them at rest.
 import 'dart:async';
 import 'dart:math' as math;
 

@@ -1,4 +1,4 @@
-// Ported from SDK 8.x's cloud_data_test: written values follow the schema.
+// Cloud data: written values follow the schema.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 

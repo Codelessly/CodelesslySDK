@@ -1,4 +1,4 @@
-// Ported from SDK 8.x's test/list_reorder_test.dart: reorderable lists
+// Reorderable lists
 // (press, long press, a handle, conditions, keys) and moving cards between
 // the lists of a reorder group.
 import 'package:codelessly_sdk/codelessly_sdk.dart';

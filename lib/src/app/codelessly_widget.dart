@@ -608,7 +608,7 @@ class _LayoutViewState extends State<_LayoutView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // `screen`: the device's size, breakpoint, orientation and light or
-    // dark mode (SDK 8.x's screenVariableValue), kept as they change.
+    // dark mode, kept as they change.
     final mq = MediaQuery.maybeOf(context);
     if (mq == null) return;
     final screen = screenValues(mq.size.width, mq.size.height,
@@ -681,7 +681,7 @@ class _LayoutViewState extends State<_LayoutView> {
     final scope = _screen.scope;
     final services = _codelessly.services;
     final storage = services is Services ? services.storage : null;
-    // A converted 10.x publish keeps the app's variables with each layout.
+    // A publish can keep the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
@@ -689,7 +689,7 @@ class _LayoutViewState extends State<_LayoutView> {
       // A persisted variable starts from what it was last time, and keeps
       // every change.
       if (v.persists) _persisted.add(PersistedVariable.attach(scope, v, storage));
-      // As SDK 8.x: a variable named like a key of the widget's data starts
+      // A variable named like a key of the widget's data starts
       // at that value (the route params, below, win).
       if (widget.data.containsKey(v.name)) scope.set(v.name, widget.data[v.name]);
       if (widget.params.containsKey(v.name)) scope.set(v.name, widget.params[v.name]);
@@ -702,7 +702,7 @@ class _LayoutViewState extends State<_LayoutView> {
 
   /// The widget's data changed: `data` reads the new values, and a variable
   /// that started from the data follows it, unless the user changed it
-  /// since (SDK 8.x).
+  /// since.
   void _dataChanged(Map<String, Object?> previous) {
     final appData = (_codelessly.data.read('data') as Map?)?.cast<String, Object?>() ?? const {};
     _screen.values.set('data', {...appData, ...widget.data});
@@ -866,7 +866,7 @@ class _LayoutViewState extends State<_LayoutView> {
           : layout.canvasForWidth(width, breakpoints);
       // Responsive layouts follow the screen: the width the layout is shown
       // at, and in a dialog, sheet or popover (shown at its design size) the
-      // device's (SDK 8.x's CanvasWidthScope / BreakpointWidthScope).
+      // device's.
       _screen.tree.responsive = ResponsiveWidth(
           breakpoints, widget.sizing == CanvasSizing.design ? MediaQuery.sizeOf(context).width : width);
       final canvas = canvasId == null ? null : layout.document[canvasId];

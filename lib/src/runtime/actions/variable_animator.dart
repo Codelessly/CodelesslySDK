@@ -1,6 +1,6 @@
 // Number variables moving over time: a set variable action's glide
 // (`animateMs`) and the animate variable action's timelines (play, pause,
-// resume, stop, seek). SDK 8.x's VariableAnimator, over a VariableScope:
+// resume, stop, seek), over a VariableScope:
 // every frame writes the variable, so everything bound to it follows.
 import 'dart:async';
 

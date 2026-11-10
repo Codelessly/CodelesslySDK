@@ -1,5 +1,5 @@
-// Layout render objects of the collections group: what SDK 8.x's ListView,
-// GridView, PageView, Wrap and Stack built for a list, grid or page view, at
+// Layout render objects of the collections group: what Flutter's ListView,
+// GridView, PageView, Wrap and Stack build for a list, grid or page view, at
 // rest (scroll offset 0), laid out directly over the items' node boxes.
 //
 // Each lays out the boxes it holds, one per item (the item template repeated,
@@ -193,7 +193,7 @@ class ListDivider {
 }
 
 /// A list's items one after another along [axis], as a `ListView` at rest
-/// (viewport: [anchorEnd] when reversed) or as SDK 8.x's `Flex` of every
+/// (viewport: [anchorEnd] when reversed) or as a `Flex` of every
 /// item (a list that builds all its items).
 ///
 /// * Main axis: each item takes [itemMain] when set (a fixed item extent,
@@ -224,7 +224,7 @@ class RenderListItems extends RenderCollection {
   /// Null: endless (builds items to cover the viewport and [cacheExtent]).
   int? itemCount;
 
-  /// False for a scroll view (SDK 8.x's ListView): a viewport has no
+  /// False for a scroll view: a viewport has no
   /// intrinsic size, so it reports none (a row squeezing it can take it to
   /// nothing). True when every item is laid out in a Flex.
   bool _measurable = true;
@@ -543,8 +543,8 @@ class RenderWrapItems extends RenderCollection {
   bool hugWidth = false, hugHeight = false;
   bool stretch = false;
 
-  /// With [stretch], a run is as thick as its items' intrinsic thickness
-  /// (SDK 8.x's RunStretchWrap); else as their laid-out thickness.
+  /// With [stretch], a run is as thick as its items' intrinsic thickness;
+  /// else as their laid-out thickness.
   bool measure = true;
   double? itemWidth, itemHeight;
 
@@ -834,8 +834,7 @@ class RenderPageItems extends RenderCollection {
     markNeedsPaint();
   }
 
-  /// The properties a page's motion moves by its distance (SDK 8.x's
-  /// `motionTowards`); the others (origin, perspective) stay the motion's.
+  /// The properties a page's motion moves by its distance; the others (origin, perspective) stay the motion's.
   static const _scaled = [
     'translateX', 'translateY', 'shiftX', 'shiftY', 'scale', 'scaleX', 'scaleY', 'opacity', 'rotate', //
     'rotateX', 'rotateY', 'blur',
@@ -844,7 +843,7 @@ class RenderPageItems extends RenderCollection {
   /// [motion] (the pose one page after the current one) for a page
   /// [offset] pages from it: at rest at 0, interpolated by the distance (up
   /// to two pages), mirrored for pages before it; a [vertical] pager turns
-  /// around X and moves along Y (SDK 8.x's `pageMotionAt`, `PageMotionItem`).
+  /// around X and moves along Y.
   static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false}) {
     final distance = offset.abs().clamp(0.0, 2.0);
     var m = motion;
@@ -1006,7 +1005,7 @@ class RenderPageItems extends RenderCollection {
   }
 }
 
-/// A table view at rest (SDK 8.x's `TableView.builder` scrolled to 0): its
+/// A table view at rest: its
 /// columns [columnWidths] wide and rows [rowHeights] tall (the header row
 /// and column first, when there are), each cell's template laid out loose
 /// and placed at its start, centred down (`Align.centerLeft`). Children are

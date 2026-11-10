@@ -388,7 +388,7 @@ Future<Object?> showScreenModal(
 
 /// Shows [content] as a popover by [anchor] (a global rect: the node that
 /// opened it, or the pointer as an empty rect) at [placement], [gap] away
-/// from it and shifted [offset] along it, as SDK 8.x's anchored dialogs.
+/// from it and shifted [offset] along it.
 /// It flips to the other side when it doesn't fit and stays on screen.
 Future<Object?> showAnchoredModal(
   BuildContext context,

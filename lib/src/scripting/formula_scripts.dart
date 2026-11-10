@@ -1,5 +1,4 @@
-// `script.name(args)` in formulas: SDK 8.x's ScriptFormulaCalls and
-// ScriptResults, as a value scope declaring `script` above a screen's
+// `script.name(args)` in formulas, as a value scope declaring `script` above a screen's
 // variables.
 import 'dart:collection';
 import 'dart:convert';

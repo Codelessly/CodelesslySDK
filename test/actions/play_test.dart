@@ -1,6 +1,6 @@
 // One-shot effects (shake, wiggle, jelly... with their cycles), played by a
 // playAnimation action, a bound cue or on appear; and the fly-in by flight
-// key. SDK 8.x's NodePlayBox and FlightBox.
+// key.
 import 'dart:async';
 import 'dart:math' as math;
 

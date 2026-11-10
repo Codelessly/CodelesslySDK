@@ -1,5 +1,4 @@
-// The script engine: SDK 8.x's ScriptRunner (lib/src/scripting) as the
-// default `Services.scripts`. A run is the driver's protocol over the
+// The script engine, the default `Services.scripts`. A run is the driver's protocol over the
 // platform's sandbox (QuickJS through package:codelessly_quickjs on devices,
 // a Web Worker on the web): `__cl_start`, then host calls answered and
 // variable writes applied through the [ScriptHost] until the run ends.

@@ -1,6 +1,6 @@
 // An icon, painted at its box's size: Material Icons, Material Symbols and
 // Cupertino icons drawn from their published SVGs, and image icons (SVG or
-// raster), as SDK 8.x's `retrieveIconWidget` drew them.
+// raster).
 import 'package:codelessly_api/codelessly_api.dart' show Json, readDouble, readInt, readString;
 import 'package:flutter/rendering.dart';
 
@@ -95,7 +95,7 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   @override
   bool get sizedByParent => true;
 
-  /// As SDK 8.x's icon box: the size its fit box gives it, nothing of its
+  /// The icon box: the size its fit box gives it, nothing of its
   /// own (so a row out of room can squeeze it).
   @override
   Size computeDryLayout(BoxConstraints constraints) => constraints.smallest;

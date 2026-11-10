@@ -58,7 +58,7 @@ List<T> _find<T extends RenderObject>(RenderObject root) {
 String _text(RenderObject root) => _find<RenderParagraph>(root).map((p) => p.text.toPlainText()).join();
 
 void main() {
-  test('symbol, material and cupertino icon URLs follow SDK 8.x', () {
+  test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
         'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),

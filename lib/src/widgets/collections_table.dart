@@ -1,4 +1,4 @@
-// A running table view (SDK 8.x's PassiveTableViewWidget): a TableView
+// A running table view: a TableView
 // (two_dimensional_scrollables) that scrolls along both axes, builds only
 // the cells on screen and pins its header row and column. Its rows are its
 // bound data (else `rowCount` indexes) and its columns its `columns`; each

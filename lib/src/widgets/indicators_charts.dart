@@ -1,6 +1,6 @@
 // Chart painters of the indicators group: the series chart (bars, lines,
 // areas, timeline, donut), the plot chart and the line chart, each painting
-// one node from its props as SDK 8.x's painters did.
+// one node from its props.
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 

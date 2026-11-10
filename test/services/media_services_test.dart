@@ -24,7 +24,6 @@ class _Voice implements SpeechEngine {
 }
 
 void main() {
-  // Ported from SDK 8.x's sound_clock_test.
   test('the sound clock stays continuous when audio starts and stops', () {
     final clock = SoundClock();
     expect(clock.now(wall: 5, running: false, audio: 0), 5);

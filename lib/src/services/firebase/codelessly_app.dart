@@ -1,7 +1,6 @@
 // Codelessly's own Firebase project (codeless-app), where the Codelessly
 // Editor publishes: its client options, the Firebase app an SDK instance
-// uses for it, and a Codelessly instance from a project token alone. What
-// SDK 10.x set up by itself from `CodelesslyConfig(authToken:)`.
+// uses for it, and a Codelessly instance from a project token alone.
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';

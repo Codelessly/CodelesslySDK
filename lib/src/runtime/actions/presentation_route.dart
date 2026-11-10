@@ -1,5 +1,5 @@
 // The route a dialog or sheet is presented in: a centered dialog, a bottom
-// sheet or a side sheet. SDK 8.x's LayoutPresentationRoute.
+// sheet or a side sheet.
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
