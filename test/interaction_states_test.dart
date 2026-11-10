@@ -53,6 +53,7 @@ class Harness {
     WidgetBuildSettings settings = const WidgetBuildSettings(
       debugLabel: 'test',
     ),
+    Widget Function(Widget child)? wrap,
   }) async {
     final registry = NodeRegistry()..setNodes({for (final n in nodes) n.id: n});
     final manager = PassiveNodeTransformerManager(
@@ -69,11 +70,13 @@ class Harness {
           home: Material(
             child: Align(
               alignment: Alignment.topLeft,
-              child: Builder(
-                builder: (context) => manager.buildWidgetFromNode(
-                  root ?? nodes.first,
-                  context,
-                  settings: settings,
+              child: (wrap ?? (Widget child) => child)(
+                Builder(
+                  builder: (context) => manager.buildWidgetFromNode(
+                    root ?? nodes.first,
+                    context,
+                    settings: settings,
+                  ),
                 ),
               ),
             ),
@@ -111,6 +114,21 @@ Color? colorOf(WidgetTester tester, double width) {
 }
 
 void main() {
+  testWidgets('a row being dragged shows its dragged state', (tester) async {
+    final (:card, :dot) = cardWithDot();
+    card.interactionStates = {
+      InteractionState.dragged: {'card': fillPatch('#FF0000')},
+    };
+    await Harness().pump(tester, [card, dot]);
+    expect(colorOf(tester, 200), isNot(red));
+    // The copy of a row that a reorder handle drags.
+    await Harness().pump(tester, [
+      card,
+      dot,
+    ], wrap: (child) => DraggedScope(child: child));
+    expect(colorOf(tester, 200), red);
+  });
+
   testWidgets('hover and pressed apply their overrides, pressed wins', (
     tester,
   ) async {
@@ -152,6 +170,33 @@ void main() {
     expect(colorOf(tester, 200), white);
     // The node itself never changes.
     expect(card.fills.first.color, ColorRGB.fromHex('#FFFFFF'));
+  });
+
+  testWidgets('a state can bind properties itself; they beat the node\'s '
+      'own bindings while it is on', (tester) async {
+    final (:card, :dot) = cardWithDot();
+    // The card is red by a binding; hovered, a binding of the state's own
+    // turns it blue (a formula, as an overdue card's border stays red).
+    card.variables['fill'] = r"${= 1 > 0 ? '#FF0000' : '#FFFFFF'}";
+    card.interactionStates = {
+      InteractionState.hovered: {
+        'card': {
+          'variables': {'fill': r"${= 2 > 1 ? '#0000FF' : '#00FF00'}"},
+        },
+      },
+    };
+    await Harness().pump(tester, [card, dot]);
+    expect(colorOf(tester, 200), red);
+    final TestGesture mouse = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await mouse.addPointer(location: const Offset(500, 500));
+    await mouse.moveTo(const Offset(150, 50));
+    await tester.pump();
+    expect(colorOf(tester, 200), blue);
+    await mouse.moveTo(const Offset(500, 500));
+    await tester.pump();
+    expect(colorOf(tester, 200), red);
   });
 
   testWidgets('selected and disabled follow bound variables; disabled runs '
@@ -321,6 +366,27 @@ void main() {
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
     expect(patch, isNull);
+  });
+
+  testWidgets('the design canvas draws a node its binding disables faded', (
+    tester,
+  ) async {
+    final (:card, :dot) = cardWithDot();
+    card.variables = {'disabled': r'${= true}'};
+    await Harness().pump(
+      tester,
+      [card, dot],
+      settings: const WidgetBuildSettings(debugLabel: 'test', isPreview: true),
+    );
+    expect(find.byType(InteractionStatesBox), findsNothing);
+    final Opacity faded = tester.widget(
+      find.byWidgetPredicate(
+        (w) =>
+            w is Opacity &&
+            w.opacity == InteractionStatesBox.defaultDisabledOpacity,
+      ),
+    );
+    expect(faded.opacity, InteractionStatesBox.defaultDisabledOpacity);
   });
 
   testWidgets('the design canvas shows the node without its states', (

@@ -40,6 +40,7 @@ class ActionChain {
   /// Creates an [ActionChain] that starts with [result].
   ActionChain({
     this.result,
+    this.loop,
     this.scopedValues,
     this._context,
     this._hosts = const [],
@@ -58,6 +59,13 @@ class ActionChain {
 
   /// What `${result}` resolves to.
   Object? result;
+
+  /// What `${loop}` resolves to while a for-each runs its nested actions:
+  /// `{item, index}` of the current turn. Unlike [result], which every
+  /// action replaces with what it produced, it stays the same for the whole
+  /// turn, so every action of the body (and of conditionals inside it) can
+  /// read `${loop.item}`. Nested chains inherit it.
+  final Object? loop;
 
   /// The scope captured when the chain's trigger fired, which the chain's
   /// actions read variables from. Null for a chain that was started without
@@ -96,8 +104,9 @@ class ActionChain {
   }
 
   /// A chain nested in this one: same scope and contexts, its own result.
-  ActionChain _nested(Object? result) => ActionChain(
+  ActionChain _nested(Object? result, {Object? loop}) => ActionChain(
     result: result,
+    loop: loop ?? this.loop,
     scopedValues: scopedValues,
     context: _context,
     hosts: _hosts,
@@ -109,10 +118,16 @@ class ActionChain {
   /// With [context], the chain starts at a trigger: it captures the scope and
   /// hosts of [context]. Without it, the chain nests in the current one (a
   /// for-each's or an upload's actions) and keeps its scope and contexts.
-  static R run<R>(R Function() body, {Object? result, BuildContext? context}) {
+  static R run<R>(
+    R Function() body, {
+    Object? result,
+    Object? loop,
+    BuildContext? context,
+  }) {
     final ActionChain chain = context != null
         ? ActionChain.capture(context, result: result)
-        : current?._nested(result) ?? ActionChain(result: result);
+        : current?._nested(result, loop: loop) ??
+              ActionChain(result: result, loop: loop);
     return runZoned(body, zoneValues: {_zoneKey: chain});
   }
 
@@ -181,8 +196,21 @@ class ActionChain {
     ]) {
       if (candidate != null && candidate.mounted) return candidate;
     }
+    // Every screen the chain knew is gone (it was opened directly and then
+    // replaced, say): finish on the screen the app shows now, so a pending
+    // toast hide or app-state update after a delay still runs.
+    for (final BuildContext host in _mountedHosts.reversed) {
+      if (host.mounted) return host;
+    }
     return null;
   }
+
+  /// Every [ActionChainHost] mounted now, oldest first.
+  static final List<BuildContext> _mountedHosts = <BuildContext>[];
+
+  /// Hosts still listed but no longer mounted (leaks).
+  static int get debugStaleHostCount =>
+      _mountedHosts.where((BuildContext c) => !c.mounted).length;
 }
 
 /// Marks the widget whose context runs an action chain's remaining actions
@@ -255,8 +283,15 @@ class _ActionChainHostElement extends InheritedElement {
   _ActionChainHostElement(super.widget);
 
   @override
+  void unmount() {
+    ActionChain._mountedHosts.remove(this);
+    super.unmount();
+  }
+
+  @override
   void mount(Element? parent, Object? newSlot) {
     super.mount(parent, newSlot);
+    ActionChain._mountedHosts.add(this);
     final Widget? adopter =
         getElementForInheritedWidgetOfExactType<ActionChainAdopter>()?.widget;
     if (adopter is ActionChainAdopter) adopter.chain.adoptHost(this);

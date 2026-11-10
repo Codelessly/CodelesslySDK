@@ -38,7 +38,7 @@ void main() {
     final LinearGradient gradient =
         retrieveGradient(stripes())! as LinearGradient;
     expect(gradient.tileMode, TileMode.clamp);
-    expect(gradient.transform, isA<GradientRotation>());
+    expect(gradient.transform, isA<SpanningGradientRotation>());
   });
 
   testWidgets('paints even stripes at any width', (tester) async {

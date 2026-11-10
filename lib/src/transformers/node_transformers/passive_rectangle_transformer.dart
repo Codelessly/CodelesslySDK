@@ -118,35 +118,76 @@ class PassiveRectangleWidget extends StatelessWidget {
       }
     }
 
-    Widget child = Stack(
-      clipBehavior: Clip.none,
+    final List<Widget> fills = clipFillsToNotches(
+      node,
+      buildFills(
+        node,
+        useInk: false,
+        obscureImages: settings.obscureImages,
+        settings: settings,
+        scopedValues: scopedValues,
+      ),
+    );
+    final List<Widget> strokes = buildStrokes(node, scopedValues);
+    final List<Widget> content = wrapWithInkWell(
+      context,
+      node,
+      wrapWithPaddingAndScroll(
+        node,
+        [...children, ?portalWidget],
+        stackAlignment: stackAlignment,
+        applyPadding: applyPadding,
+        getNode: manager.getNode,
+        isPlaceholder: isPlaceholder,
+      ),
       alignment:
           stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-      children: [
-        ...buildFills(
-          node,
-          useInk: false,
-          obscureImages: settings.obscureImages,
-          settings: settings,
-          scopedValues: scopedValues,
-        ),
-        ...buildStrokes(node, scopedValues),
-        ...wrapWithInkWell(
-          context,
-          node,
-          wrapWithPaddingAndScroll(
-            node,
-            [...children, ?portalWidget],
-            stackAlignment: stackAlignment,
-            applyPadding: applyPadding,
-            getNode: manager.getNode,
-            isPlaceholder: isPlaceholder,
-          ),
-          alignment:
-              stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart,
-        ),
-      ],
     );
+    final List<Widget> foreground = buildForegroundFills(node, scopedValues);
+    final AlignmentGeometry alignment =
+        stackAlignment.flutterAlignment ?? AlignmentDirectional.topStart;
+
+    // A node that clips its content clips its fills and children, not its
+    // own stroke, as Flutter's Container clips its child but paints its
+    // border outside the clip: clipped too, the stroke's edge was cut (or
+    // anti-aliased twice), leaving a light seam between a card's border and
+    // its shadow.
+    Clip clip = getClipBehavior(node);
+    final bool strokeOutsideClip =
+        clip != Clip.none && strokes.isNotEmpty && notchesOf(node).isEmpty;
+    final Widget child0;
+    if (strokeOutsideClip) {
+      final BorderRadius radius = getBorderRadius(node) ?? BorderRadius.zero;
+      Widget clipped(Widget layer) =>
+          ClipRRect(borderRadius: radius, clipBehavior: clip, child: layer);
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [
+          if (fills.isNotEmpty)
+            Positioned.fill(
+              child: clipped(Stack(fit: StackFit.expand, children: fills)),
+            ),
+          ...strokes,
+          clipped(
+            Stack(
+              clipBehavior: Clip.none,
+              alignment: alignment,
+              children: content,
+            ),
+          ),
+          ...foreground,
+        ],
+      );
+      clip = Clip.none;
+    } else {
+      child0 = Stack(
+        clipBehavior: Clip.none,
+        alignment: alignment,
+        children: [...fills, ...strokes, ...content, ...foreground],
+      );
+    }
+    Widget child = child0;
 
     bool hasComplexRendering =
         node is GeometryMixin &&
@@ -166,13 +207,24 @@ class PassiveRectangleWidget extends StatelessWidget {
       child: decorateWithShadows(
         boxShadow: retrieveBoxShadow(node, scopedValues),
         borderRadius: getBorderRadius(node),
-        clipBehavior: getClipBehavior(node),
-        tapThrough: TapThroughScope.of(context),
+        clipBehavior: clip,
+        // A box with nothing filled in (an outline drawn over a card) takes
+        // no taps, so what is under it stays tappable; a node with
+        // reactions takes taps over its whole box anyway.
+        tapThrough: TapThroughScope.of(context) || !hasVisibleFill(node),
+        notches: notchesOf(node),
+        pathShape: pathShadowShapeOf(node),
         child: child,
       ),
     );
   }
 }
+
+/// Whether [node] has a fill that paints something (a visible paint with
+/// some opacity). An outline-only or empty box has none.
+bool hasVisibleFill(BaseNode node) =>
+    node is GeometryMixin &&
+    node.fills.any((PaintModel fill) => fill.visible && fill.opacity > 0);
 
 /// A [BoxDecoration] that takes no taps itself.
 class _TapThroughDecoration extends BoxDecoration {
@@ -183,47 +235,84 @@ class _TapThroughDecoration extends BoxDecoration {
       false;
 }
 
-/// A box with [borderRadius] and [boxShadow] around [child]. A shadow with a
-/// spread on a rounded box is painted by [SpreadShadowPainter], so its
-/// corners grow with it as in CSS and design tools; [BoxDecoration] keeps the
-/// box's radius, which turns a spread glow around a dot into a square.
+/// A box with [borderRadius] and [boxShadow] around [child]. The shadows of a
+/// rounded box with a spread shadow are painted by [SpreadShadowPainter]
+/// (all of them, keeping their order), so a spread shadow's corners grow
+/// with it as in CSS and design tools; [BoxDecoration] keeps the box's
+/// radius, which turns a spread glow around a dot into a square.
+///
+/// A rectangle drawn as an SVG path ([pathShape], see [pathShadowShapeOf])
+/// casts its shadows along the path (its fill and its stroke) instead of
+/// the box, through a [PathShadowPainter].
 Widget decorateWithShadows({
   required List<BoxShadow> boxShadow,
   required BorderRadius? borderRadius,
   required Clip clipBehavior,
   required Widget child,
   bool tapThrough = false,
+  List<NotchModel> notches = const [],
+  PathShadowShape? pathShape,
 }) {
+  if (pathShape != null) {
+    return CustomPaint(
+      painter: boxShadow.isEmpty
+          ? null
+          : PathShadowPainter(shape: pathShape, shadows: boxShadow),
+      child: clipBehavior == Clip.none
+          ? child
+          : ClipRect(clipBehavior: clipBehavior, child: child),
+    );
+  }
+  if (notches.isNotEmpty) {
+    final BorderRadius radius = borderRadius ?? BorderRadius.zero;
+    final Widget box = clipBehavior == Clip.none
+        ? child
+        : ClipPath(
+            clipper: NotchedClipper(borderRadius: radius, notches: notches),
+            clipBehavior: Clip.antiAlias,
+            child: child,
+          );
+    if (boxShadow.isEmpty) return box;
+    return CustomPaint(
+      painter: NotchedShadowPainter(
+        shadows: boxShadow,
+        borderRadius: radius,
+        notches: notches,
+      ),
+      child: box,
+    );
+  }
   final bool rounded =
       borderRadius != null && borderRadius != BorderRadius.zero;
-  final List<BoxShadow> spread = [
-    if (rounded)
-      for (final BoxShadow shadow in boxShadow)
-        if (shadow.spreadRadius != 0) shadow,
-  ];
+  // Once one shadow needs the painter, it paints them all: shadows stack in
+  // list order (the first at the bottom), and the painter paints before the
+  // decoration, so splitting them would put every spread shadow under the
+  // others (a button's 'edge' drawn as a graphite shadow with a coloured,
+  // inset shadow over it lost the colour).
+  final List<BoxShadow> spread =
+      rounded && boxShadow.any((shadow) => shadow.spreadRadius != 0)
+      ? boxShadow
+      : const [];
+  final List<BoxShadow> decorated = spread.isEmpty ? boxShadow : const [];
   final Widget box = Container(
     clipBehavior: clipBehavior,
     decoration: tapThrough
         ? _TapThroughDecoration(
-            boxShadow: [
-              for (final BoxShadow shadow in boxShadow)
-                if (!spread.contains(shadow)) shadow,
-            ],
+            boxShadow: decorated,
             borderRadius: borderRadius,
           )
-        : BoxDecoration(
-            boxShadow: [
-              for (final BoxShadow shadow in boxShadow)
-                if (!spread.contains(shadow)) shadow,
-            ],
-            borderRadius: borderRadius,
-          ),
+        : BoxDecoration(boxShadow: decorated, borderRadius: borderRadius),
     child: child,
   );
-  // Only a rounded box has spread shadows here, so it has a radius.
-  if (spread.isEmpty) return box;
+  // Always a CustomPaint, painting nothing without spread shadows: a ring
+  // that comes and goes (a focused state) must not change the tree, or
+  // everything inside is rebuilt from scratch and a text field in the box
+  // loses focus as it gains it. Only a rounded box has spread shadows here,
+  // so it has a radius.
   return CustomPaint(
-    painter: SpreadShadowPainter(shadows: spread, borderRadius: borderRadius!),
+    painter: spread.isEmpty
+        ? null
+        : SpreadShadowPainter(shadows: spread, borderRadius: borderRadius!),
     child: box,
   );
 }
@@ -276,34 +365,46 @@ List<Widget> wrapWithInkWell(
       .where((reaction) => reaction.trigger.type == TriggerType.longPress)
       .toList();
 
+  // Where the tap landed, for the click's result (see
+  // [FunctionsRepository.pointerResult]).
+  Map<String, double>? tapAt;
   final widget = Material(
     type: MaterialType.transparency,
-    child: InkWell(
-      onTap: onClickReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.click,
-              reactions: onClickReactions,
-            ),
-      onLongPress: onLongPressReactions.isEmpty
-          ? null
-          : () => FunctionsRepository.triggerAction(
-              context,
-              TriggerType.longPress,
-              reactions: onLongPressReactions,
-            ),
-      borderRadius: getBorderRadius(node),
-      overlayColor: inkWell.overlayColor != null
-          ? WidgetStatePropertyAll<Color>(
-              inkWell.overlayColor!.toFlutterColor(),
-            )
-          : null,
-      splashColor: inkWell.splashColor?.toFlutterColor(),
-      highlightColor: inkWell.highlightColor?.toFlutterColor(),
-      hoverColor: inkWell.hoverColor?.toFlutterColor(),
-      focusColor: inkWell.focusColor?.toFlutterColor(),
-      child: Stack(alignment: alignment, children: children),
+    child: Builder(
+      builder: (tapContext) => InkWell(
+        onTapDown: (details) => tapAt = FunctionsRepository.pointerResult(
+          details.localPosition,
+          details.globalPosition,
+          FunctionsRepository.boxSizeOf(tapContext),
+        ),
+        onTap: onClickReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.click,
+                reactions: onClickReactions,
+                result: tapAt,
+              ),
+        onLongPress: onLongPressReactions.isEmpty
+            ? null
+            : () => FunctionsRepository.triggerAction(
+                context,
+                TriggerType.longPress,
+                reactions: onLongPressReactions,
+                result: tapAt,
+              ),
+        borderRadius: getBorderRadius(node),
+        overlayColor: inkWell.overlayColor != null
+            ? WidgetStatePropertyAll<Color>(
+                inkWell.overlayColor!.toFlutterColor(),
+              )
+            : null,
+        splashColor: inkWell.splashColor?.toFlutterColor(),
+        highlightColor: inkWell.highlightColor?.toFlutterColor(),
+        hoverColor: inkWell.hoverColor?.toFlutterColor(),
+        focusColor: inkWell.focusColor?.toFlutterColor(),
+        child: Stack(alignment: alignment, children: children),
+      ),
     ),
   );
 
@@ -341,13 +442,15 @@ List<Widget> wrapWithPadding(
   required AlignmentModel stackAlignment,
   bool applyPadding = true,
   bool isPlaceholder = false,
+  BaseNode? parent,
 }) {
   if (children.isEmpty || !applyPadding) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
-  if (resolvedPadding == EdgeInsets.zero) {
+  if (resolvedPadding == EdgeInsetsDirectional.zero) {
     return children;
   }
 
@@ -356,10 +459,12 @@ List<Widget> wrapWithPadding(
     // associated [node]. Without it, the Stack can produce cases where it
     // wraps around its concrete child tightly instead of expanding from a
     // SizeFit.expand.
-    // A canvas body hugs, like its rectangle.
+    // A canvas body hugs, like its rectangle. A fixed axis stretched by
+    // pins on both sides (chained sizing) lays its padded content out at the
+    // stretched extent, not at its design size.
     FitBox.fromFits(
-      horizontalFit: isPlaceholder ? SizeFit.shrinkWrap : node.horizontalFit,
-      verticalFit: isPlaceholder ? SizeFit.shrinkWrap : node.verticalFit,
+      horizontalFit: _paddedFit(node, parent, isPlaceholder, horizontal: true),
+      verticalFit: _paddedFit(node, parent, isPlaceholder, horizontal: false),
       size: node.basicBoxLocal.size,
       child: Padding(
         padding: resolvedPadding,
@@ -374,6 +479,26 @@ List<Widget> wrapWithPadding(
   ];
 }
 
+/// How the padded content of a rectangle sizes on an axis: as the rectangle
+/// does, except that an axis pinned to both sides of a freeform parent
+/// (chained sizing) fills the extent the pins give it.
+SizeFit _paddedFit(
+  BaseNode node,
+  BaseNode? parent,
+  bool isPlaceholder, {
+  required bool horizontal,
+}) {
+  if (isPlaceholder) return SizeFit.shrinkWrap;
+  final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
+  return PassiveRowColumnTransformer.chainedOnAxis(
+        node,
+        parent,
+        horizontal: horizontal,
+      )
+      ? SizeFit.expanded
+      : fit;
+}
+
 List<Widget> wrapWithPaddingAndScroll(
   BaseNode node,
   List<Widget> children, {
@@ -384,8 +509,9 @@ List<Widget> wrapWithPaddingAndScroll(
 }) {
   if (children.isEmpty) return children;
 
-  final EdgeInsets resolvedPadding =
-      node.innerBoxLocal.edgeInsets.flutterEdgeInsets;
+  // Directional, so padding mirrors in a right-to-left layout.
+  final EdgeInsetsDirectional resolvedPadding =
+      node.innerBoxLocal.edgeInsets.flutterEdgeInsetsDirectional;
 
   if (node is FrameNode && node.isScrollable) {
     // The content reaches the farthest child along the scroll axis, and at
@@ -435,11 +561,14 @@ List<Widget> wrapWithPaddingAndScroll(
     stackAlignment: stackAlignment,
     applyPadding: applyPadding,
     isPlaceholder: isPlaceholder,
+    parent: node.parentID == kRootNode ? null : getNode?.call(node.parentID),
   );
 }
 
 List<BoxShadow> retrieveBoxShadow(BaseNode node, ScopedValues scopedValues) {
   if (node is! DefaultShapeNode) return [];
+  // A rectangle drawn as a path casts these along the path: see
+  // [decorateWithShadows] and [pathShadowShapeOf].
   return node.effects
       .where((effect) => effect.type == EffectType.dropShadow && effect.visible)
       .map((effect) {
@@ -479,6 +608,8 @@ BorderRadius? getBorderRadius(BaseNode node) {
 }
 
 Clip defaultGetClipBehavior(BaseNode node) {
+  // A path is drawn whole: its round caps reach past the box at its edges.
+  if (node is RectangleNode && node.hasPath) return Clip.none;
   if (node is ClipMixin) {
     if (node.clipsContent) {
       return Clip.hardEdge;
@@ -510,6 +641,14 @@ double nearestValue(double goal, List<double> array) {
 
 void getLinearGradientAlignment(double rotationDeg) {}
 
+/// The centre of a radial or angular [paint]: its
+/// [PaintModel.gradientCenterX] and [PaintModel.gradientCenterY] as an
+/// alignment in the box, the centre when unset.
+Alignment gradientCenterOf(PaintModel paint) {
+  double read(double? value) => value == null || !value.isFinite ? 0 : value;
+  return Alignment(read(paint.gradientCenterX), read(paint.gradientCenterY));
+}
+
 Gradient? retrieveGradient(PaintModel paint) {
   try {
     final RelativeTransform relative = decomposeRelativeTransform(
@@ -528,6 +667,24 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     final radians = rotation * pi / 180;
 
+    if (paint.type == PaintType.gradientLinear && paint.hasGradientHandles) {
+      // Between its handles, as authored: begin (-1, -1) to end (1, 1) runs
+      // corner to corner whatever the box's proportions, where a rotation
+      // about the centre would miss the corners of a wide box.
+      double read(double? value) =>
+          value == null || !value.isFinite ? 0 : value;
+      return LinearGradient(
+        transform: GradientHandlesTransform(
+          Alignment(read(paint.gradientBeginX), read(paint.gradientBeginY)),
+          Alignment(read(paint.gradientEndX), read(paint.gradientEndY)),
+        ),
+        colors: gradientStops
+            .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
+            .toList(),
+        stops: gradientStops.map((e) => e.position).toList(),
+        tileMode: tileMode,
+      );
+    }
     if (paint.type == PaintType.gradientLinear) {
       final double? repeatEvery = paint.gradientRepeatEvery;
       final bool repeats = repeatEvery != null && repeatEvery > 0;
@@ -547,19 +704,27 @@ Gradient? retrieveGradient(PaintModel paint) {
         tileMode: repeats ? TileMode.repeated : tileMode,
         transform: repeats
             ? RepeatingGradientTransform(radians, repeatEvery)
-            : GradientRotation(radians),
+            : SpanningGradientRotation(radians),
       );
     } else if (paint.type == PaintType.gradientRadial) {
+      final double radius = paint.gradientRadius;
       return RadialGradient(
+        center: gradientCenterOf(paint),
+        radius: radius.isFinite && radius > 0 ? radius : 0.5,
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
         stops: gradientStops.map((e) => e.position).toList(),
         tileMode: tileMode,
-        transform: GradientRotation(radians),
+        // Turning a circle about the box centre only moves an off-centre
+        // one away from where it was placed.
+        transform: paint.gradientCenterX == 0 && paint.gradientCenterY == 0
+            ? GradientRotation(radians)
+            : null,
       );
     } else if (paint.type == PaintType.gradientAngular) {
       return SweepGradient(
+        center: gradientCenterOf(paint),
         colors: gradientStops
             .map((e) => e.color.multiplyAlpha(paint.opacity).toFlutterColor())
             .toList(),
@@ -577,6 +742,86 @@ Gradient? retrieveGradient(PaintModel paint) {
     );
     return null;
   }
+}
+
+/// Rotates a linear gradient by [radians] about the box center and stretches
+/// it to span the whole box along its new direction: the box's extent along
+/// the axis, `w·|cos| + h·|sin|`, as a CSS angled gradient does.
+///
+/// [GradientRotation] alone keeps a run as long as the box is wide, so a
+/// gradient turned 90° in a tall box covered only `w` pixels of its height,
+/// centred, and held its end colours above and below that band.
+class SpanningGradientRotation extends GradientTransform {
+  const SpanningGradientRotation(this.radians);
+
+  final double radians;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    final double extent =
+        bounds.width * cos(radians).abs() + bounds.height * sin(radians).abs();
+    final double scale = bounds.width <= 0 ? 1 : extent / bounds.width;
+    final double cx = bounds.center.dx, cy = bounds.center.dy;
+    return Matrix4.identity()
+      ..translateByDouble(cx, cy, 0, 1)
+      ..rotateZ(radians)
+      ..scaleByDouble(scale, scale, 1, 1)
+      ..translateByDouble(-cx, -cy, 0, 1);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SpanningGradientRotation && other.radians == radians;
+
+  @override
+  int get hashCode => radians.hashCode;
+}
+
+/// Places a default linear gradient (left edge to right edge) between the
+/// handles [begin] and [end], alignments in the box, the way design tools
+/// do: the gradient is laid out in the box's normalized space and stretched
+/// with it, so its bands stay perpendicular to the handles there. Begin
+/// (-1, -1) and end (1, 1) then run corner to corner on any box, with the
+/// other diagonal on the middle band. On a square box this is Flutter's
+/// `LinearGradient(begin: begin, end: end)`.
+class GradientHandlesTransform extends GradientTransform {
+  const GradientHandlesTransform(this.begin, this.end);
+
+  final Alignment begin;
+  final Alignment end;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+    final double w = bounds.width, h = bounds.height;
+    if (w <= 0 || h <= 0) return Matrix4.identity();
+    // Handles and the axis between them in normalized space (0..1).
+    final double x0 = (begin.x + 1) / 2, y0 = (begin.y + 1) / 2;
+    final double dx = (end.x - begin.x) / 2, dy = (end.y - begin.y) / 2;
+    if (dx == 0 && dy == 0) return Matrix4.identity();
+    // The default gradient runs along (w, 0) from the left middle, with
+    // bands along (0, w). Map those onto the axis and its normal in
+    // normalized space, then into the box.
+    final double a = dx, b = dy * h / w;
+    final double c = -dy, d = dx * h / w;
+    final double fromX = bounds.left, fromY = bounds.center.dy;
+    final double toX = bounds.left + x0 * w, toY = bounds.top + y0 * h;
+    return Matrix4.identity()
+      ..setEntry(0, 0, a)
+      ..setEntry(1, 0, b)
+      ..setEntry(0, 1, c)
+      ..setEntry(1, 1, d)
+      ..setEntry(0, 3, toX - (a * fromX + c * fromY))
+      ..setEntry(1, 3, toY - (b * fromX + d * fromY));
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is GradientHandlesTransform &&
+      other.begin == begin &&
+      other.end == end;
+
+  @override
+  int get hashCode => Object.hash(begin, end);
 }
 
 /// Rotates a linear gradient by [radians] about the box center, like
@@ -694,24 +939,112 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     return [];
   }
   final List<Widget> strokeWidgets = [];
+  final List<NotchModel> notches = notchesOf(node);
+  // A rectangle with a path strokes the path (open shapes included).
+  final Path? path = node is RectangleNode && node.hasPath
+      ? parseSvgPath(node.path)
+      : null;
   for (final paint in node.strokes.where((paint) => paint.visible)) {
     final paintValue = PropertyValueDelegate.getPropertyValue<PaintModel>(
       node,
       'stroke-paint-${paint.id}',
       scopedValues: scopedValues,
     );
-    // A solid stroke on every side is Flutter's own border. A stroke on one
-    // side, or a dashed one, is painted by [StrokePainter].
-    if (node.dashPattern.isEmpty && node.strokeSide == StrokeSide.all) {
+    final PaintModel effective = paintValue ?? paint;
+    // Gradient strokes (e.g. an angular spinner ring) are painted with a
+    // shader; they have no single color.
+    final Gradient? gradient = effective.type == PaintType.solid
+        ? null
+        : retrieveGradient(effective);
+    // A gradient Flutter can't draw (diamond) falls back to its first stop.
+    final Color? color =
+        effective.toFlutterColor() ??
+        (gradient == null
+            ? effective.gradientStops?.firstOrNull?.color
+                  .multiplyAlpha(effective.opacity)
+                  .toFlutterColor()
+            : null);
+    if (gradient == null && color == null) continue;
+    // With a transition the stroke's colour, or its gradient's stops, ease
+    // to new values (an outline following a palette), as a solid fill
+    // does; where tickers are off it jumps.
+    Widget eased(Widget Function(Color? color, Gradient? gradient) build) =>
+        node.transitionMs <= 0
+        ? build(color, gradient)
+        : EasedPaint(
+            ms: node.transitionMs,
+            color: color,
+            gradient: gradient,
+            builder: build,
+          );
+    if (path != null) {
       strokeWidgets.add(
         Positioned.fill(
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: getBorderRadius(node),
-              border: Border.all(
-                strokeAlign: node.strokeAlign.alignment,
-                color: (paintValue ?? paint).toFlutterColor()!,
-                width: node.strokeWeight,
+          child: IgnorePointer(
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: SvgPathStrokePainter(
+                  path: path,
+                  color: color ?? gradient!.colors.first,
+                  gradient: gradient,
+                  strokeWidth: node.strokeWeight,
+                  strokeCap: node.strokeCap,
+                  strokeJoin: (node as RectangleNode).strokeJoin,
+                  strokeMiterLimit: node.strokeMiterLimit,
+                  dashPattern: node.dashPattern,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      continue;
+    }
+    // A notched outline is stroked along its notches.
+    if (notches.isNotEmpty) {
+      strokeWidgets.add(
+        Positioned.fill(
+          child: IgnorePointer(
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: NotchedStrokePainter(
+                  color: color ?? gradient!.colors.first,
+                  gradient: gradient,
+                  strokeWidth: node.strokeWeight,
+                  borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                  notches: notches,
+                  strokeAlign: node.strokeAlign,
+                  dashPattern: node.dashPattern,
+                  strokeCap: node.strokeCap,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      continue;
+    }
+    // A solid stroke on every side is Flutter's own border. A stroke on one
+    // side, a dashed one, or a gradient one is painted by [StrokePainter].
+    if (gradient == null &&
+        node.dashPattern.isEmpty &&
+        node.strokeSide == StrokeSide.all) {
+      strokeWidgets.add(
+        Positioned.fill(
+          // An outline takes no taps (a sketched border laid over a card
+          // leaves its buttons tappable); a node with reactions takes them
+          // over its whole box anyway.
+          child: IgnorePointer(
+            child: eased(
+              (color, _) => DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: getBorderRadius(node),
+                  border: Border.all(
+                    strokeAlign: node.strokeAlign.alignment,
+                    color: color!,
+                    width: node.strokeWeight,
+                  ),
+                ),
               ),
             ),
           ),
@@ -720,17 +1053,22 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
     } else {
       strokeWidgets.add(
         Positioned.fill(
-          child: CustomPaint(
-            painter: StrokePainter(
-              color: (paintValue ?? paint).toFlutterColor()!,
-              borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
-              dashPattern: node.dashPattern,
-              strokeWidth: node.strokeWeight,
-              strokeMiterLimit: node.strokeMiterLimit,
-              strokeCap: node.strokeCap,
-              strokeAlign: node.strokeAlign,
-              strokeSide: node.strokeSide,
-              boxShape: getBoxShape(node),
+          child: IgnorePointer(
+            child: eased(
+              (color, gradient) => CustomPaint(
+                painter: StrokePainter(
+                  color: color ?? const Color(0xFF000000),
+                  gradient: gradient,
+                  borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+                  dashPattern: node.dashPattern,
+                  strokeWidth: node.strokeWeight,
+                  strokeMiterLimit: node.strokeMiterLimit,
+                  strokeCap: node.strokeCap,
+                  strokeAlign: node.strokeAlign,
+                  strokeSide: node.strokeSide,
+                  boxShape: getBoxShape(node),
+                ),
+              ),
             ),
           ),
         ),
@@ -739,6 +1077,113 @@ List<Widget> buildStrokes(BaseNode node, ScopedValues scopedValues) {
   }
 
   return strokeWidgets;
+}
+
+/// [fills] clipped to [node]'s notched outline when it has notches (fills
+/// are clipped even when the node doesn't clip its children), else [fills].
+///
+/// A rectangle with a path ([RectangleNode.path]) fills the path instead.
+/// The [DefaultShapeNode.foregroundFills] of [node], painted over its
+/// children inside its corners and notches (Flutter's
+/// `foregroundDecoration`): a translucent solid dims the whole box, text
+/// included. A solid's colour can be bound as `foreground-<paint id>`.
+/// They take no taps. Empty when the node has none.
+List<Widget> buildForegroundFills(BaseNode node, ScopedValues scopedValues) {
+  if (node is! DefaultShapeNode || node.foregroundFills.isEmpty) return [];
+  final BorderRadius? borderRadius = getBorderRadius(node);
+  final List<Widget> layers = [
+    for (final PaintModel paint in node.foregroundFills)
+      if (paint.visible)
+        if (_foregroundDecoration(node, paint, borderRadius, scopedValues)
+            case final BoxDecoration decoration)
+          Positioned.fill(child: DecoratedBox(decoration: decoration)),
+  ];
+  if (layers.isEmpty) return [];
+  return [
+    Positioned.fill(
+      child: IgnorePointer(
+        child: Stack(children: clipFillsToNotches(node, layers)),
+      ),
+    ),
+  ];
+}
+
+BoxDecoration? _foregroundDecoration(
+  DefaultShapeNode node,
+  PaintModel paint,
+  BorderRadius? borderRadius,
+  ScopedValues scopedValues,
+) {
+  switch (paint.type) {
+    case PaintType.solid:
+      final PaintModel? bound =
+          PropertyValueDelegate.getPropertyValue<PaintModel>(
+            node,
+            'foreground-${paint.id}',
+            scopedValues: scopedValues,
+          );
+      final Color? color = (bound ?? paint).toFlutterColor();
+      if (color == null) return null;
+      return BoxDecoration(borderRadius: borderRadius, color: color);
+    case PaintType.gradientLinear:
+    case PaintType.gradientRadial:
+    case PaintType.gradientAngular:
+    case PaintType.gradientDiamond:
+      return BoxDecoration(
+        borderRadius: borderRadius,
+        gradient: retrieveGradient(paint),
+      );
+    case PaintType.image:
+    case PaintType.emoji:
+      return null;
+  }
+}
+
+List<Widget> clipFillsToNotches(BaseNode node, List<Widget> fills) {
+  if (node is RectangleNode && node.hasPath) {
+    if (fills.isEmpty) return fills;
+    // A path may reach past its box (a band drawn above its baseline):
+    // fill the box and the path's bounds together, so the part outside is
+    // filled too and a gradient spans the whole shape.
+    final Rect box = Offset.zero & node.basicBoxLocal.size.flutterSize;
+    final Rect bounds = parseSvgPath(node.path)?.getBounds() ?? box;
+    final Rect area = box.expandToInclude(bounds);
+    if (area == box) {
+      return [
+        Positioned.fill(
+          child: ClipPath(
+            clipper: SvgPathClipper(node.path!),
+            child: Stack(children: fills),
+          ),
+        ),
+      ];
+    }
+    return [
+      Positioned(
+        left: area.left,
+        top: area.top,
+        width: area.width,
+        height: area.height,
+        child: ClipPath(
+          clipper: SvgPathClipper(node.path!, offset: -area.topLeft),
+          child: Stack(children: fills),
+        ),
+      ),
+    ];
+  }
+  final List<NotchModel> notches = notchesOf(node);
+  if (notches.isEmpty || fills.isEmpty) return fills;
+  return [
+    Positioned.fill(
+      child: ClipPath(
+        clipper: NotchedClipper(
+          borderRadius: getBorderRadius(node) ?? BorderRadius.zero,
+          notches: notches,
+        ),
+        child: Stack(children: fills),
+      ),
+    ),
+  ];
 }
 
 typedef ImageFillBuilder = Widget Function(
@@ -828,18 +1273,59 @@ List<Widget> buildFills(
   return raster.reversed.toList();
 }
 
+bool _hasChildren(GeometryMixin node) =>
+    node is ChildrenMixin && (node as ChildrenMixin).children.isNotEmpty;
+
+/// A colour or gradient fill under [node]'s border, inset by half the
+/// border's inset into the box, as Flutter's BoxDecoration paints its
+/// background inside a uniform border: drawn to the edge, the fill's
+/// anti-aliased rim showed through the border's, a light seam between a
+/// card's border and its shadow.
+Widget _underBorder(GeometryMixin node, Widget fill) {
+  final double inset = fillInsetUnderBorder(node);
+  if (inset <= 0) return Positioned.fill(child: fill);
+  return Positioned(
+    left: inset,
+    top: inset,
+    right: inset,
+    bottom: inset,
+    child: fill,
+  );
+}
+
+/// How far a colour or gradient fill of [node] sits inside its box: half
+/// the inset of a solid stroke on every side (the whole width inside, half
+/// of it centred, none outside), else 0.
+double fillInsetUnderBorder(GeometryMixin node) {
+  final double width = node.strokeWeight;
+  if (width <= 0 ||
+      node.strokeSide != StrokeSide.all ||
+      node.dashPattern.isNotEmpty ||
+      !node.strokes.any((paint) => paint.visible) ||
+      (node is RectangleNode && node.hasPath) ||
+      notchesOf(node as BaseNode).isNotEmpty) {
+    return 0;
+  }
+  final double align = node.strokeAlign.alignment;
+  return width * (1 - (1 + align) / 2) / 2;
+}
+
 Widget wrapFillWithPositioned({
   required GeometryMixin node,
   required Widget fill,
   required PaintModel paint,
 }) => switch (paint.type) {
-  PaintType.solid => Positioned.fill(child: fill),
+  PaintType.solid ||
   PaintType.gradientLinear ||
   PaintType.gradientRadial ||
   PaintType.gradientAngular ||
-  PaintType.gradientDiamond => Positioned.fill(child: fill),
+  PaintType.gradientDiamond => _underBorder(node, fill),
+  // A node that hugs its size and has nothing else in it takes the image's
+  // size (a `Positioned` with no offsets sizes the stack). A node with
+  // children hugs them, and the image fills it behind them, as at design
+  // time: otherwise every card of a list would be as tall as its texture.
   PaintType.image =>
-    node.isHorizontalWrap || node.isVerticalWrap
+    (node.isHorizontalWrap || node.isVerticalWrap) && !_hasChildren(node)
         ? Positioned(child: fill)
         : Positioned.fill(child: fill),
   PaintType.emoji => fill,
@@ -879,12 +1365,16 @@ Widget buildFill(
       }
 
       // With a transition a fill eases to its new color (a hovered row).
+      // Where tickers are off (the design canvas, its captures) it jumps.
       if ((node as BaseNode).transitionMs > 0) {
-        return TweenAnimationBuilder<Color?>(
-          tween: ColorTween(end: color),
-          duration: Duration(milliseconds: (node as BaseNode).transitionMs),
-          curve: Curves.easeOutCubic,
-          builder: (context, color, _) => solid(color),
+        final int ms = (node as BaseNode).transitionMs;
+        return Builder(
+          builder: (context) => TweenAnimationBuilder<Color?>(
+            tween: ColorTween(end: color),
+            duration: implicitTransitionDuration(context, ms),
+            curve: Curves.easeOutCubic,
+            builder: (context, color, _) => solid(color),
+          ),
         );
       }
       return solid(color);
@@ -892,20 +1382,35 @@ Widget buildFill(
     case PaintType.gradientRadial:
     case PaintType.gradientAngular:
     case PaintType.gradientDiamond:
-      final decoration = BoxDecoration(
-        borderRadius: borderRadius,
+      Widget gradientFill(Gradient? gradient) {
+        final decoration = BoxDecoration(
+          borderRadius: borderRadius,
+          gradient: gradient,
+        );
+        return useInk
+            ? Ink(decoration: decoration)
+            : DecoratedBox(decoration: decoration);
+      }
+
+      // With a transition its stops ease to new colours (bound stops
+      // following a palette), as a solid fill does; where tickers are off
+      // it jumps.
+      final int fillMs = (node as BaseNode).transitionMs;
+      if (fillMs <= 0) return gradientFill(retrieveGradient(paint));
+      return EasedPaint(
+        ms: fillMs,
+        color: null,
         gradient: retrieveGradient(paint),
+        builder: (_, gradient) => gradientFill(gradient),
       );
-      return useInk
-          ? Ink(decoration: decoration)
-          : DecoratedBox(decoration: decoration);
     case PaintType.image:
       final TypedBytes? bytes = imageBytes[index];
       final double modifiedOpacity = (imageOpacity ?? 1) * paint.opacity;
 
       // Substitute URL value from [CodelesslyContext]'s [data] map if
       // [imageURL] represents a JSON path.
-      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl!;
+      // A paint saved without a URL draws nothing rather than failing.
+      String? imageURL = paint.croppedImageURL ?? paint.downloadUrl ?? '';
       final imageURLValue =
           PropertyValueDelegate.getPropertyValue<String>(
             node,
@@ -977,6 +1482,7 @@ Widget buildFill(
           child: child,
         );
       }
+      child = tintImage(paint, child);
       if (modifiedOpacity != 1) {
         child = Opacity(opacity: modifiedOpacity, child: child);
       }
@@ -993,6 +1499,16 @@ Widget buildFill(
       return const SizedBox.shrink();
   }
 }
+
+/// [image] drawn with [paint]'s image tint: every pixel in that one color,
+/// keeping its transparency. Unchanged without a tint.
+Widget tintImage(PaintModel paint, Widget image) => switch (paint.imageTint) {
+  null => image,
+  final ColorRGBA tint => ColorFiltered(
+    colorFilter: ColorFilter.mode(tint.toFlutterColor(), BlendMode.srcIn),
+    child: image,
+  ),
+};
 
 /// A color matrix that scales color saturation by [saturation]: 1 keeps the
 /// colors, 0 leaves grey at each pixel's luminance (Rec. 709 weights).
@@ -1056,7 +1572,7 @@ class ImageFillPlaceholder extends StatelessWidget {
         color: const Color(0xFFE9ECEF),
         borderRadius: borderRadius,
       ),
-      child: LayoutBuilder(
+      child: IntrinsicSafeLayoutBuilder(
         builder: (context, constraints) {
           final double side = constraints.biggest.shortestSide;
           if (!side.isFinite || side < 12) return const SizedBox.expand();

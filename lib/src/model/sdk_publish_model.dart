@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:archive/archive.dart' show GZipDecoder, GZipEncoder;
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:equatable/equatable.dart';
 
-import '../ui/codelessly_route.dart';
 import 'model_http_request.dart';
 import 'privacy_base.dart';
 
@@ -171,6 +172,19 @@ class SDKPublishModel extends PrivacyBase {
   /// A list of layout ids that are explicitly disabled from the server's side.
   final List<String> disabledLayouts;
 
+  /// The project's identity as a web app and a mobile app: name, title,
+  /// description, icons, social card, manifest, colors and splash. Null for
+  /// projects published before it existed, or with none set.
+  @JsonKey(
+    fromJson: AppIdentity.maybeFromJson,
+    toJson: serializeAppIdentity,
+    includeIfNull: false,
+  )
+  final AppIdentity? appIdentity;
+
+  static Map<String, dynamic>? serializeAppIdentity(AppIdentity? identity) =>
+      identity?.toJson();
+
   static Map<String, dynamic> serializeLookupMapFonts(
     LookupMap<SDKPublishFont> map,
   ) => map.dataMap.map((key, value) => MapEntry(key, value.toJson()));
@@ -265,6 +279,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    this.appIdentity,
 
     // Privacy
     required super.owner,
@@ -322,6 +337,7 @@ class SDKPublishModel extends PrivacyBase {
     this.entryCanvasId,
     DateTime? lastUpdated,
     List<String>? disabledLayouts,
+    this.appIdentity,
 
     // Privacy
     required super.privacy,
@@ -366,6 +382,27 @@ class SDKPublishModel extends PrivacyBase {
   /// Converts this instance to a JSON map.
   Map<String, dynamic> toFullJson() => _$SDKPublishModelToJson(this);
 
+  /// A copy with [identity] as its [appIdentity].
+  SDKPublishModel withAppIdentity(AppIdentity? identity) =>
+      SDKPublishModel.private(
+        projectId: projectId,
+        layoutIDMap: layoutIDMap,
+        pages: pages,
+        updates: updates,
+        fonts: fonts.dataMap,
+        layouts: layouts.dataMap,
+        apis: apis,
+        variables: variables.dataMap,
+        conditions: conditions.dataMap,
+        entryLayoutId: entryLayoutId,
+        entryPageId: entryPageId,
+        entryCanvasId: entryCanvasId,
+        lastUpdated: lastUpdated,
+        disabledLayouts: disabledLayouts,
+        appIdentity: identity,
+        privacy: this,
+      );
+
   /// Creates a copy of this instance with the provided parameters.
   SDKPublishModel copyWith({
     String? projectId,
@@ -401,6 +438,9 @@ class SDKPublishModel extends PrivacyBase {
       entryCanvasId: entryCanvasId ?? this.entryCanvasId,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       disabledLayouts: disabledLayouts ?? this.disabledLayouts,
+      // Not a copyWith parameter: subclasses override copyWith, and a new
+      // parameter would break them. Set it with withAppIdentity.
+      appIdentity: appIdentity,
 
       // Privacy
       privacy: privacy ?? this,
@@ -424,6 +464,7 @@ class SDKPublishModel extends PrivacyBase {
     entryCanvasId,
     lastUpdated,
     disabledLayouts,
+    appIdentity,
   ];
 }
 
@@ -509,7 +550,43 @@ class SDKPublishLayout extends PrivacyBase {
 
   /// Creates a new instance of [SDKPublishLayout] from a JSON map.
   factory SDKPublishLayout.fromJson(Map<String, dynamic> json) =>
-      _$SDKPublishLayoutFromJson(json);
+      _$SDKPublishLayoutFromJson(expandCompressedCanvases(json));
+
+  /// The key a layout too large for one Firestore document (1 MiB) keeps its
+  /// canvases under, gzipped and base64 encoded, in place of `canvases`.
+  static const String compressedCanvasesKey = 'compressedCanvases';
+
+  /// [json] with its `canvases` gzipped into [compressedCanvasesKey]: a
+  /// screen's layout with every breakpoint and its logic can exceed the
+  /// document limit, while its JSON compresses about tenfold.
+  static Map<String, dynamic> compressCanvases(Map<String, dynamic> json) {
+    final Object? canvases = json['canvases'];
+    if (canvases == null) return json;
+    final List<int> zipped = const GZipEncoder().encodeBytes(
+      utf8.encode(jsonEncode(canvases)),
+    );
+    return <String, dynamic>{
+      for (final MapEntry<String, dynamic> e in json.entries)
+        if (e.key != 'canvases') e.key: e.value,
+      compressedCanvasesKey: base64Encode(zipped),
+    };
+  }
+
+  /// [json] with [compressedCanvasesKey] expanded back into `canvases`.
+  static Map<String, dynamic> expandCompressedCanvases(
+    Map<String, dynamic> json,
+  ) {
+    final Object? zipped = json[compressedCanvasesKey];
+    if (zipped is! String) return json;
+    final List<int> bytes = const GZipDecoder().decodeBytes(
+      base64Decode(zipped),
+    );
+    return <String, dynamic>{
+      for (final MapEntry<String, dynamic> e in json.entries)
+        if (e.key != compressedCanvasesKey) e.key: e.value,
+      'canvases': jsonDecode(utf8.decode(bytes)),
+    };
+  }
 
   /// Converts this instance to a JSON map.
   @override
@@ -702,6 +779,15 @@ class SDKPublishUpdates with Equatable {
   /// navigation or dialog action) before the layout itself is downloaded.
   final Map<String, Set<String>> layoutCanvases;
 
+  /// A map of canvas ids -> the canvas's URL path pattern, such as
+  /// `guide/:id`, for canvases that have one: their own, or (every screen
+  /// but the entry screen) one the editor made from the screen's name
+  /// ([CanvasLocation.defaultPathOf]).
+  ///
+  /// This lets the SDK route a URL to its screen before the screen's layout
+  /// is downloaded, e.g. when a link to a deep screen opens the app.
+  final Map<String, String> canvasPaths;
+
   /// Creates a new instance of [SDKPublishUpdates].
   SDKPublishUpdates({
     this.fonts = const {},
@@ -712,6 +798,7 @@ class SDKPublishUpdates with Equatable {
     this.layoutFonts = const {},
     this.layoutApis = const {},
     this.layoutCanvases = const {},
+    this.canvasPaths = const {},
   });
 
   /// Creates a copy of this instance with the provided parameters.
@@ -724,6 +811,7 @@ class SDKPublishUpdates with Equatable {
     Map<String, Set<String>>? layoutFonts,
     Map<String, Set<String>>? layoutApis,
     Map<String, Set<String>>? layoutCanvases,
+    Map<String, String>? canvasPaths,
   }) {
     return SDKPublishUpdates(
       fonts: fonts ?? this.fonts,
@@ -734,6 +822,7 @@ class SDKPublishUpdates with Equatable {
       layoutFonts: layoutFonts ?? this.layoutFonts,
       layoutApis: layoutApis ?? this.layoutApis,
       layoutCanvases: layoutCanvases ?? this.layoutCanvases,
+      canvasPaths: canvasPaths ?? this.canvasPaths,
     );
   }
 
@@ -766,6 +855,13 @@ class SDKPublishUpdates with Equatable {
             layoutId: canvases.difference(movedCanvases),
         ...newer.layoutCanvases,
       }..removeWhere((_, Set<String> canvases) => canvases.isEmpty),
+      // A republished canvas takes its path from [newer], or loses it.
+      canvasPaths: {
+        for (final MapEntry(key: String canvasId, value: String path)
+            in canvasPaths.entries)
+          if (!movedCanvases.contains(canvasId)) canvasId: path,
+        ...newer.canvasPaths,
+      },
     );
   }
 
@@ -789,6 +885,7 @@ class SDKPublishUpdates with Equatable {
     layoutFonts,
     layoutApis,
     layoutCanvases,
+    canvasPaths,
   ];
 
   /// Creates a new instance of [SDKPublishUpdates] from a JSON map.
@@ -809,10 +906,18 @@ class SDKLayoutVariables extends PrivacyBase {
   /// CanvasID -> (VariableID -> VariableData)
   final Map<String, Map<String, VariableData>> variables;
 
+  /// The scripts the layout can run, by scope and then by script id. The
+  /// scopes are [kAppVariablesScope] for project scripts and
+  /// [kPageVariablesScope] for the scripts of the layout's Editor page, as
+  /// for [variables]. A page script of the same name wins.
+  @JsonKey(defaultValue: <String, Map<String, ScriptModel>>{})
+  final Map<String, Map<String, ScriptModel>> scripts;
+
   /// Creates a new instance of [SDKLayoutVariables].
   const SDKLayoutVariables({
     required this.id,
     required this.variables,
+    this.scripts = const {},
 
     // Privacy
     required super.owner,
@@ -827,6 +932,7 @@ class SDKLayoutVariables extends PrivacyBase {
   SDKLayoutVariables.private({
     required this.id,
     required this.variables,
+    this.scripts = const {},
 
     // Privacy
     required super.privacy,
@@ -836,6 +942,7 @@ class SDKLayoutVariables extends PrivacyBase {
   SDKLayoutVariables copyWith({
     String? id,
     Map<String, Map<String, VariableData>>? variables,
+    Map<String, Map<String, ScriptModel>>? scripts,
 
     // Privacy
     PrivacyBase? privacy,
@@ -843,13 +950,14 @@ class SDKLayoutVariables extends PrivacyBase {
     return SDKLayoutVariables.private(
       id: id ?? this.id,
       variables: variables ?? this.variables,
+      scripts: scripts ?? this.scripts,
       // Privacy
       privacy: privacy ?? this,
     );
   }
 
   @override
-  List<Object?> get props => [...super.props, id, variables];
+  List<Object?> get props => [...super.props, id, variables, scripts];
 
   /// Creates a new instance of [SDKLayoutVariables] from a JSON map.
   factory SDKLayoutVariables.fromJson(Map<String, dynamic> json) =>
@@ -934,15 +1042,5 @@ extension SDKPublishModelLayouts on SDKPublishModel {
       if (layout.canvasIds.contains(id)) return layout.id;
     }
     return updates.layoutIdForCanvas(id);
-  }
-
-  /// The parameters [link] gives a screen of layout [layoutId] (the entry
-  /// layout when null, as for a widget that shows the app's first screen):
-  /// its own when it names a screen of that layout, else null.
-  Map<String, String>? linkParamsFor(CodelesslyRoute? link, String? layoutId) {
-    if (link == null || link.params.isEmpty) return null;
-    final String? layout = resolveLayoutId(layoutId) ?? entryLayoutId;
-    if (layout == null) return null;
-    return resolveLayoutId(link.canvasId) == layout ? link.params : null;
   }
 }

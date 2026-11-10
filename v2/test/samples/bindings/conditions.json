@@ -1,0 +1,237 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c"
+   ]
+  },
+  "c": {
+   "id": "c",
+   "type": "canvas",
+   "name": "Screen",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    300
+   ],
+   "properties": {
+    "bodyId": "b"
+   },
+   "children": [
+    "b"
+   ]
+  },
+  "b": {
+   "id": "b",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c",
+   "basicBoxLocal": [
+    0,
+    0,
+    300,
+    300
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "col"
+   ]
+  },
+  "col": {
+   "id": "col",
+   "type": "rowColumn",
+   "rowColumnType": "column",
+   "name": "col",
+   "parentID": "b",
+   "basicBoxLocal": [
+    10,
+    10,
+    120,
+    100
+   ],
+   "children": [
+    "k1",
+    "k2",
+    "k3"
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "start",
+   "spacing": 10,
+   "verticalFit": "shrinkWrap",
+   "edgePins": {
+    "left": 10,
+    "top": 10
+   },
+   "positioningMode": "pin"
+  },
+  "k1": {
+   "id": "k1",
+   "type": "rectangle",
+   "name": "k1",
+   "parentID": "col",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    20
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pk1",
+     "visible": true,
+     "opacity": 1
+    }
+   ]
+  },
+  "k2": {
+   "id": "k2",
+   "type": "rectangle",
+   "name": "k2",
+   "parentID": "col",
+   "basicBoxLocal": [
+    0,
+    30,
+    100,
+    20
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pk2",
+     "visible": true,
+     "opacity": 1
+    }
+   ]
+  },
+  "k3": {
+   "id": "k3",
+   "type": "rectangle",
+   "name": "k3",
+   "parentID": "col",
+   "basicBoxLocal": [
+    0,
+    60,
+    100,
+    20
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#3366FF",
+     "id": "pk3",
+     "visible": true,
+     "opacity": 1
+    }
+   ]
+  }
+ },
+ "variables": {
+  "c": {
+   "s": {
+    "id": "s",
+    "name": "stock",
+    "type": "integer",
+    "value": "2"
+   }
+  }
+ },
+ "conditions": {
+  "c": {
+   "g1": {
+    "id": "g1",
+    "type": "ConditionGroup",
+    "name": "Stock",
+    "ifCondition": {
+     "id": "i1",
+     "type": "Condition",
+     "mode": "ifMode",
+     "expression": {
+      "type": "Expression",
+      "leftPart": {
+       "type": "Variable",
+       "valueString": "${stock}"
+      },
+      "operator": "lessThan",
+      "rightPart": {
+       "type": "RawValue",
+       "value": "5"
+      }
+     },
+     "actions": [
+      {
+       "type": "setValue",
+       "nodeID": "k2",
+       "values": [
+        {
+         "name": "visible",
+         "type": "bool",
+         "value": false
+        }
+       ]
+      }
+     ]
+    },
+    "elseIfConditions": [],
+    "elseCondition": {
+     "id": "e1",
+     "type": "ElseCondition",
+     "actions": [
+      {
+       "type": "setValue",
+       "nodeID": "k2",
+       "values": [
+        {
+         "name": "visible",
+         "type": "bool",
+         "value": true
+        }
+       ]
+      }
+     ]
+    }
+   },
+   "g2": {
+    "id": "g2",
+    "type": "ConditionGroup",
+    "name": "Wide",
+    "ifCondition": {
+     "id": "i2",
+     "type": "Condition",
+     "mode": "ifMode",
+     "expression": {
+      "type": "Expression",
+      "leftPart": {
+       "type": "Variable",
+       "valueString": "${stock}"
+      },
+      "operator": "greaterThan",
+      "rightPart": {
+       "type": "RawValue",
+       "value": "1"
+      }
+     },
+     "actions": [
+      {
+       "type": "setValue",
+       "nodeID": "k1",
+       "values": [
+        {
+         "name": "opacity",
+         "type": "double",
+         "value": 0.5
+        }
+       ]
+      }
+     ]
+    },
+    "elseIfConditions": []
+   }
+  }
+ }
+}

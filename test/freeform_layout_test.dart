@@ -262,6 +262,119 @@ void main() {
     expect(current().topLeft, const Offset(40, 132));
   });
 
+  // A page drawn at 1280: a column pinned all around its frame, its sections
+  // stretching across it. On a wider screen the pins (chained sizing), not
+  // the column's fixed design width, decide how wide it lays them out.
+  testWidgets('a column pinned to both sides lays out at its slot width', (
+    tester,
+  ) async {
+    final section = rect(
+      'section',
+      NodeBox(0, 0, 400, 50),
+      parent: 'column',
+      horizontalFit: SizeFit.expanded,
+    );
+    final column = RowColumnNode(
+      id: 'column',
+      name: 'column',
+      basicBoxLocal: NodeBox(0, 0, 400, 300),
+      rowColumnType: RowColumnType.column,
+      crossAxisAlignment: CrossAxisAlignmentC.stretch,
+      edgePins: const EdgePinsModel(left: 0, top: 0, right: 0, bottom: 0),
+      positioningMode: PositioningMode.pin,
+      children: ['section'],
+    )..parentID = 'frame';
+    final root = frame('frame', NodeBox(0, 0, 400, 300), [column]);
+    final boxes = await pump(tester, root, [
+      column,
+      section,
+    ], screen: const Size(600, 300));
+    expect(boxes['column']!.width, 600);
+    expect(boxes['section']!.width, 600);
+  });
+
+  // A player's side panel: a padded column pinned to both sides of its frame,
+  // its rows stretching across it. On a wider screen the padded content, not
+  // just the panel's background, takes the width the pins give it.
+  testWidgets('a padded column pinned to both sides fills its slot', (
+    tester,
+  ) async {
+    final row = rect(
+      'row',
+      NodeBox(21, 21, 614, 48),
+      parent: 'panel',
+      horizontalFit: SizeFit.expanded,
+    );
+    final panel = RowColumnNode(
+      id: 'panel',
+      name: 'panel',
+      basicBoxLocal: NodeBox(760, 24, 656, 852),
+      rowColumnType: RowColumnType.column,
+      mainAxisAlignment: MainAxisAlignmentC.start,
+      crossAxisAlignment: CrossAxisAlignmentC.start,
+      padding: const EdgeInsetsModel.all(21),
+      edgePins: const EdgePinsModel(left: 760, top: 24, right: 24, bottom: 24),
+      positioningMode: PositioningMode.pin,
+      children: ['row'],
+    )..parentID = 'frame';
+    final root = frame('frame', NodeBox(0, 0, 1440, 900), [panel]);
+    final boxes = await pump(tester, root, [
+      panel,
+      row,
+    ], screen: const Size(1920, 1080));
+    expect(boxes['panel']!.width, 1136);
+    expect(boxes['row']!.width, 1136 - 42);
+  });
+
+  // A header whose height follows the scroll: `${= max(64, 372 - scroll)}`.
+  testWidgets('mounted size binding updates its freeform parent slot', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 300);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final header = rect('header', NodeBox(0, 0, 400, 200))
+      ..variables['height'] = r'${= max(64, 200 - scroll)}';
+    final root = frame('frame', NodeBox(0, 0, 400, 300), [header]);
+    final registry = NodeRegistry()
+      ..setNodes({root.id: root, header.id: header});
+    final manager = PassiveNodeTransformerManager(
+      registry.getNodeByID,
+      (context, bounds, pageID, layoutID, canvasID) => const SizedBox(),
+    );
+    final scroll = Observable(
+      VariableData(
+        id: 'scroll',
+        name: 'scroll',
+        type: VariableType.decimal,
+        value: 0,
+      ),
+    );
+    final scope = CodelesslyContext.empty()..variables['scroll'] = scroll;
+    await tester.pumpWidget(
+      ChangeNotifierProvider<CodelesslyContext>.value(
+        value: scope,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => manager.buildWidgetFromNode(
+              root,
+              context,
+              settings: const WidgetBuildSettings(debugLabel: 'test'),
+            ),
+          ),
+        ),
+      ),
+    );
+    Rect current() => tester.getRect(rectOf(header));
+    expect(current().height, 200);
+    scroll.set(scroll.value.copyWith(value: 100));
+    await tester.pump();
+    expect(current().height, 100);
+    scroll.set(scroll.value.copyWith(value: 500));
+    await tester.pump();
+    expect(current().height, 64);
+  });
+
   testWidgets('mounted fractional parent slot follows a changed variable', (
     tester,
   ) async {
@@ -998,6 +1111,109 @@ void main() {
         // Centred between equal pins on both axes, whatever size the font
         // gives it.
         expect(r.center.dy, closeTo(screen.height / 2, 0.01));
+      });
+    }
+  });
+
+  group('an aligned child larger than its frame', () {
+    // Decorative blobs 1.5x the screen, placed by alignment values outside
+    // [-1, 1]. The editor's solver keeps their fixed size and places them at
+    // Alignment.inscribe's offset, (parent - child) / 2 * (1 + a), so they
+    // must not be squashed to the frame at design size.
+    const Map<String, AlignmentData> blobs = {
+      'aqua': AlignmentData(-1.6, -1.15),
+      'lilac': AlignmentData(-0.6, 1.5),
+      'peach': AlignmentData(1.7, 0.1),
+    };
+    double inscribe(double parent, double child, double a) =>
+        (parent - child) / 2 * (1 + a);
+
+    for (final (Size screen, double size) in const [
+      (Size(390, 844), 585.0),
+      (Size(834, 1112), 1251.0),
+    ]) {
+      testWidgets('keeps its size and overflows at the Align offset on '
+          '$screen', (tester) async {
+        final children = <BaseNode>[
+          for (final MapEntry(:key, :value) in blobs.entries)
+            FrameNode(
+              id: key,
+              name: key,
+              basicBoxLocal: NodeBox(0, 0, size, size),
+              children: const [],
+              alignment: AlignmentModel(value),
+              edgePins: const EdgePinsModel(
+                left: 0,
+                top: 0,
+                right: null,
+                bottom: null,
+              ),
+              clipsContent: false,
+            )..parentID = 'sky',
+        ];
+        final sky = frame(
+          'sky',
+          NodeBox(0, 0, screen.width, screen.height),
+          children,
+        );
+        final rects = await pump(tester, sky, children, screen: screen);
+        expect(rects['sky'], Offset.zero & screen);
+        for (final MapEntry(:key, :value) in blobs.entries) {
+          final Rect r = rects[key]!;
+          expect(r.size, Size(size, size), reason: key);
+          expect(
+            r.left,
+            closeTo(inscribe(screen.width, size, value.x), 0.1),
+            reason: '$key left',
+          );
+          expect(
+            r.top,
+            closeTo(inscribe(screen.height, size, value.y), 0.1),
+            reason: '$key top',
+          );
+        }
+        if (screen.width == 390) {
+          expect(rects['aqua']!.left, closeTo(58.5, 0.1));
+          expect(rects['aqua']!.top, closeTo(-19.425, 0.1));
+        }
+      });
+    }
+
+    testWidgets('designed wider than a smaller screen it still shrinks', (
+      tester,
+    ) async {
+      // No overhang at design size: shown on a narrower screen the aligned
+      // child is limited to the frame, as before.
+      final child = rect(
+        'card',
+        NodeBox(270, 100, 900, 200),
+        alignment: AlignmentModel.center,
+      );
+      final root = frame('frame', NodeBox(0, 0, 1440, 900), [child]);
+      final rects = await pump(tester, root, [
+        child,
+      ], screen: const Size(390, 844));
+      expect(rects['card']!.width, 390);
+      expect(rects['card']!.left, 0);
+    });
+
+    for (final Size screen in const [Size(1440, 900), Size(1920, 1080)]) {
+      testWidgets('an expanded one fills the frame on $screen instead of '
+          'keeping its design overflow', (tester) async {
+        // A full-screen row aligned top-left and expanded on both axes,
+        // stored 1768 wide in a 1440 frame because its content was wider at
+        // design time. Expanded means fill the frame: it must not stay 328
+        // wider than the screen.
+        final child = rect(
+          'content',
+          NodeBox(0, 0, 1768, 900),
+          alignment: const AlignmentModel(AlignmentData(-1, -1)),
+          horizontalFit: SizeFit.expanded,
+          verticalFit: SizeFit.expanded,
+        );
+        final root = frame('frame', NodeBox(0, 0, 1440, 900), [child]);
+        final rects = await pump(tester, root, [child], screen: screen);
+        expect(rects['content'], Offset.zero & screen);
       });
     }
   });

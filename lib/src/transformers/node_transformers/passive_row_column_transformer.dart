@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../../codelessly_sdk.dart';
 
@@ -68,6 +69,18 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         ? rowColumnNode.resolvedPadding()
         : EdgeInsetsModel.zero;
 
+    // A box with a layoutAspectRatio is sized by it around this widget
+    // (wrapWithAspectRatio): its content fills that box on both axes, so an
+    // expanded child fills the ratio's height instead of the 100 px the
+    // editor stored for the row/column.
+    final double? ratio = rowColumnNode.layoutAspectRatio;
+    // (Hugging both ways, the ratio box sizes nothing: the content does.)
+    final bool keepsRatio =
+        ratio != null &&
+        ratio.isFinite &&
+        ratio > 0 &&
+        !(rowColumnNode.horizontalFit == SizeFit.shrinkWrap &&
+            rowColumnNode.verticalFit == SizeFit.shrinkWrap);
     final FitBox outerBox = FitBox(
       width: contentSized && isRow
           ? null
@@ -78,10 +91,13 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
               max: rowColumnNode.constraints.maxWidth,
               inset: padding.horizontal,
             ),
-      fillWidth: _fillsAxis(
-        rowColumnNode.horizontalFit,
-        max: rowColumnNode.constraints.maxWidth,
-      ),
+      fillWidth:
+          keepsRatio ||
+          _fillsAxis(
+            rowColumnNode.horizontalFit,
+            max: rowColumnNode.constraints.maxWidth,
+          ) ||
+          chainedOnAxis(rowColumnNode, parent, horizontal: true),
       height: contentSized && !isRow
           ? null
           : isPlaceholder && rowColumnNode.verticalFit.isFlex
@@ -95,10 +111,12 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             ),
       fillHeight:
           !(isPlaceholder && rowColumnNode.verticalFit.isFlex) &&
-          _fillsAxis(
-            rowColumnNode.verticalFit,
-            max: rowColumnNode.constraints.maxHeight,
-          ),
+          (keepsRatio ||
+              _fillsAxis(
+                rowColumnNode.verticalFit,
+                max: rowColumnNode.constraints.maxHeight,
+              ) ||
+              chainedOnAxis(rowColumnNode, parent, horizontal: false)),
     );
 
     final bool wrapsChildren = rowColumnWraps(rowColumnNode);
@@ -135,12 +153,17 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         rowColumnNode.crossAxisAlignment == CrossAxisAlignmentC.stretch;
     bool measureCross = false;
     bool stretchFallsBack = false;
+    // A stretch is laid out twice instead (see [HugCross]): no intrinsic
+    // pass, which text measures differently on the web (a wrapped CJK line
+    // was cut off) and which a viewport or LayoutBuilder can't answer.
+    bool hugStretch = false;
     if (!wrapsChildren && crossMin == null && crossWraps) {
       final bool anyChildNeedsAlignment = childrenNodes.any(
         (child) => child.alignment != AlignmentModel.none,
       );
-      if (stretches ||
-          anyChildNeedsAlignment ||
+      if (stretches) {
+        hugStretch = true;
+      } else if (anyChildNeedsAlignment ||
           fillsAcrossWrappingRowColumn(rowColumnNode, childrenNodes)) {
         final bool blocked = childrenNodes.any(
           (child) => subtreeBlocksIntrinsics(child, getNode),
@@ -165,12 +188,67 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
           ? MainAxisSize.min
           : MainAxisSize.max,
       spacing: rowColumnNode.spacing,
+      // Children that overflow shrink to fit, unless the row/column lets
+      // them run past its end as a Flutter Row/Column does.
+      squeeze: switch (rowColumnNode) {
+        final RowColumnNode node => node.squeezeChildren,
+        _ => true,
+      },
+      // A row/column that clips its content cuts an overflow off at its
+      // edge, with no debug stripes (a row of skeleton chips wider than
+      // its slot), as the app shows it: children placed past its box on
+      // either axis are clipped ([clipsOverflow]), and the Flex itself
+      // clips only when it overflows ([clipBehavior]), so shadows of
+      // children that fit are drawn as before.
+      clipsOverflow:
+          rowColumnNode is ClipMixin &&
+          (rowColumnNode as ClipMixin).clipsContent,
+      clipBehavior:
+          rowColumnNode is ClipMixin &&
+              (rowColumnNode as ClipMixin).clipsContent
+          ? Clip.hardEdge
+          : Clip.none,
       key: ValueKey(rowColumnNode.id),
       children: childrenWidgets,
     );
 
+    // A child that doesn't flex is laid out unbounded along the main axis;
+    // it still reads the row's (or column's) content extent there as
+    // `${parent}`, and a `widthFactor` child (a fill bar's share of its
+    // track) takes a fraction of it, as on the design canvas. A row that
+    // hugs its children has no extent of its own to give.
+    final bool scrollsMain =
+        withScroll &&
+        rowColumnNode is ScrollableMixin &&
+        (rowColumnNode as ScrollableMixin).isScrollable;
+    if (mainFit != SizeFit.shrinkWrap && !scrollsMain) {
+      final Widget flex = res;
+      res = ParentExtentScope.around(
+        parent: rowColumnNode,
+        children: childrenNodes,
+        fallbackSize: rowColumnNode.innerBoxLocal.size.flutterSize,
+        child: (_) => flex,
+      );
+    }
+
+    // Children sized by a fraction of this row/column measure it by its
+    // content size (see [FlexContentScope]) where [ParentExtentScope] gives
+    // none.
+    if (!measureCross && childrenNodes.any(hasFractionalSize)) {
+      final Widget flex = res;
+      res = LayoutBuilder(
+        builder: (context, constraints) => FlexContentScope(
+          width: constraints.hasBoundedWidth ? constraints.maxWidth : null,
+          height: constraints.hasBoundedHeight ? constraints.maxHeight : null,
+          child: flex,
+        ),
+      );
+    }
+
     if (measureCross) {
       res = isRow ? IntrinsicHeight(child: res) : IntrinsicWidth(child: res);
+    } else if (hugStretch) {
+      res = HugCross(child: res);
     }
 
     // A wrapping row/column puts its children on new runs instead of
@@ -180,14 +258,16 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         rowColumnNode is ScrollableMixin &&
         (rowColumnNode as ScrollableMixin).isScrollable) {
       res = wrapWithPaddedScrollable(
-        padding: rowColumnNode.resolvedPadding().flutterEdgeInsets,
+        padding: rowColumnNode.resolvedPadding().flutterEdgeInsetsDirectional,
         node: (rowColumnNode as ScrollableMixin),
         // Sized by its content, there is no free space to align it in.
         fillViewport:
             !contentSized &&
-            rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start,
+            (rowColumnNode.mainAxisAlignment != MainAxisAlignmentC.start ||
+                fillsViewport(rowColumnNode)),
         flexContent: hasMainAxisFlexChild(rowColumnNode, childrenNodes),
         contentSizedOnScrollAxis: contentSized,
+        clipBehavior: scrollClipBehavior(rowColumnNode),
         child: res,
       );
     }
@@ -286,15 +366,28 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
       final ScrollableMixin scrollable = node as ScrollableMixin;
       if (scrollable.isScrollable) {
         res = wrapWithPaddedScrollable(
-          padding: node.resolvedPadding().flutterEdgeInsets,
+          padding: node.resolvedPadding().flutterEdgeInsetsDirectional,
           node: scrollable,
-          fillViewport: runAlignment != WrapAlignment.start,
+          fillViewport:
+              runAlignment != WrapAlignment.start ||
+              fillsViewport(node as BaseNode),
+          clipBehavior: scrollClipBehavior(node),
           child: res,
         );
       }
     }
     return res;
   }
+
+  /// How the scroll view of a scrolling row/column clips its content:
+  /// [Clip.hardEdge], as every scroll view does, unless the row/column
+  /// turns [RowColumnNode.clipsScrollContent] off and doesn't clip its
+  /// content ([ClipMixin.clipsContent]): then [Clip.none], so its children's
+  /// shadows paint past its edges.
+  static Clip scrollClipBehavior(BaseNode node) =>
+      node is RowColumnNode && !node.clipsScrollContent && !node.clipsContent
+      ? Clip.none
+      : Clip.hardEdge;
 
   /// Whether [node] is a Row/Column that scrolls along its main axis and is
   /// flexible on it: it is as long as its content, capped by its [Flexible]
@@ -311,6 +404,11 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     }
     return (isRow ? node.horizontalFit : node.verticalFit) == SizeFit.flexible;
   }
+
+  /// Whether [node] is a scrolling row/column set to make its content at
+  /// least as long as its viewport ([RowColumnNode.fillViewport]).
+  static bool fillsViewport(BaseNode node) =>
+      node is RowColumnNode && node.isScrollable && node.fillViewport;
 
   /// Whether [node] is a row/column whose children flow onto new runs when
   /// they don't fit ([RowColumnMixin.wrap]), built as a [CodelesslyWrap].
@@ -385,6 +483,33 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
   static bool _fillsAxis(SizeFit fit, {required double? max}) =>
       fit == SizeFit.expanded && max == null;
 
+  /// Whether [node] is pinned to both edges of an axis of a freeform
+  /// [parent] (a frame or stack): the editor's chained sizing, where the
+  /// pins, not the node's fixed size, decide its extent on that axis, so it
+  /// fills the slot its parent gives it. A Scroller pinned all around a
+  /// 1280 wide page otherwise laid its content out at 1280 on a wider
+  /// screen. A node that hugs that axis sizes itself.
+  static bool chainedOnAxis(
+    BaseNode node,
+    BaseNode? parent, {
+    required bool horizontal,
+  }) {
+    if (parent == null ||
+        !const {
+          'frame',
+          'stack',
+          'freeformPlaceholder',
+        }.contains(parent.type)) {
+      return false;
+    }
+    final EdgePinsModel pins = node.edgePins;
+    final bool chained = horizontal
+        ? pins.left != null && pins.right != null
+        : pins.top != null && pins.bottom != null;
+    final SizeFit fit = horizontal ? node.horizontalFit : node.verticalFit;
+    return chained && fit != SizeFit.shrinkWrap;
+  }
+
   /// Whether any of [children] flexes along [rowColumnNode]'s main axis
   /// (expanded, flexible, or a flex spacer).
   static bool hasMainAxisFlexChild(
@@ -396,6 +521,31 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     return children.any(
       (child) => (isRow ? child.horizontalFit : child.verticalFit).isFlex,
     );
+  }
+
+  /// Whether a sibling of [node] in [parentRowColumn] flexes on its main
+  /// axis.
+  static bool _hasFlexingSibling(
+    BaseNode node,
+    BaseNode parentRowColumn,
+    GetNode? getNode,
+  ) {
+    if (getNode == null || parentRowColumn is! ChildrenMixin) return false;
+    final bool isRow =
+        (parentRowColumn as RowColumnMixin).rowColumnType == RowColumnType.row;
+    for (final String id in parentRowColumn.children) {
+      if (id == node.id) continue;
+      final BaseNode sibling;
+      try {
+        sibling = getNode(id);
+      } catch (_) {
+        continue;
+      }
+      if ((isRow ? sibling.horizontalFit : sibling.verticalFit).isFlex) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static Widget wrapChildWithSizeFits(
@@ -443,6 +593,34 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         ? node.verticalFit
         : node.horizontalFit);
 
+    // A child that fills the cross axis of a stretching row/column that hugs
+    // that axis takes the thickness its siblings give it, as the editor
+    // solves it: it doesn't decide that thickness. Measured on its own it
+    // would take its design size there (an accent stripe drawn beside a
+    // two-line card kept every card two lines tall).
+    if (parent.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
+        crossAxisFit == SizeFit.expanded &&
+        (mainAxis == AxisC.horizontal
+                ? parentRowColumn.verticalFit
+                : parentRowColumn.horizontalFit) ==
+            SizeFit.shrinkWrap) {
+      childWidget = HugCrossFollower(
+        crossAxis: mainAxis == AxisC.horizontal
+            ? Axis.vertical
+            : Axis.horizontal,
+        child: childWidget,
+      );
+    }
+
+    // A row that doesn't clip its content lets a child that hugs its height
+    // overflow it (a fixed one, below), as the editor lays it out: a gridline's
+    // label, 15 tall, on a row 1 tall (moved up by its motion to sit on the
+    // line) keeps its height instead of being squeezed into the row and
+    // clipped by its own paragraph.
+    if (mainAxis == AxisC.horizontal) {
+      childWidget = overflowRowCrossAxis(node, parentRowColumn, childWidget);
+    }
+
     // A parent that stretches its children across gives each one the full
     // cross axis, like the editor's solver, except a child that hugs on that
     // axis: the solver keeps its own size there and places it at the start.
@@ -462,6 +640,10 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             ? AlignmentDirectional.topStart
             : null);
     final bool hasAlignment = childAlignment != null;
+
+    // A child of a fixed size across the row/column is clamped to it when
+    // the row/column is thinner, as Flutter's Row/Column clamps a SizedBox
+    // (a 360 px card in a 350 px column is 350 px wide).
 
     final double? mainAxisMaxConstraint = (mainAxis == AxisC.horizontal
         ? node.constraints.maxWidth
@@ -555,12 +737,64 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
     }
 
     // A squeezable node that wraps its content hugs it while it fits and
-    // shrinks to the room the Row/Column has left when it doesn't.
-    if (mainAxisFit == SizeFit.shrinkWrap && node.squeezable) {
+    // shrinks to the room the Row/Column has left when it doesn't. Next to
+    // a sibling that flexes on the main axis, a loose Flexible would hold on
+    // to its flex share of the free space even where its content is short,
+    // leaving the sibling only the rest (an expanded rule beside a title got
+    // a ninth of the row). There it is laid out like any non-flex child,
+    // which CodelesslyFlex squeezes down to its content when the row runs
+    // out of room, and the sibling takes what is left. A scroll view can't
+    // be laid out unbounded, so it stays Flexible.
+    if (mainAxisFit == SizeFit.shrinkWrap &&
+        node.squeezable &&
+        !(_hasFlexingSibling(node, parentRowColumn, getNode) &&
+            !(node is ScrollableMixin && node.isScrollable))) {
       childWidget = Flexible(flex: flex, child: childWidget);
     }
 
     return childWidget;
+  }
+
+  /// Lets [childWidget], a child of [row] that hugs its height, be as tall
+  /// as it is designed (a hugging text: as its lines) when the row is
+  /// shorter and doesn't clip its content ([ClipMixin.clipsContent]): it is
+  /// laid out with at least its design height as its maximum and placed by
+  /// the row's cross axis alignment, the row's layout taking only the part
+  /// that fits (see [CrossAxisOverflow]). The editor lays such a child out at its own
+  /// height over the row's edges; squeezed to the row's height a text would
+  /// clip itself. A stretching or baseline row, or one that hugs its height
+  /// (as tall as its children already), is left as it is.
+  static Widget overflowRowCrossAxis(
+    BaseNode child,
+    BaseNode row,
+    Widget childWidget,
+  ) {
+    if (row is ClipMixin && row.clipsContent) return childWidget;
+    if (row.verticalFit == SizeFit.shrinkWrap) return childWidget;
+    if (child is SpacerNode || child.verticalFit != SizeFit.shrinkWrap) {
+      return childWidget;
+    }
+    if (child.alignment != AlignmentModel.none) return childWidget;
+    final double? y = switch ((row as RowColumnMixin).crossAxisAlignment) {
+      CrossAxisAlignmentC.start => -1,
+      CrossAxisAlignmentC.center => 0,
+      CrossAxisAlignmentC.end => 1,
+      _ => null,
+    };
+    // A text that hugs its height takes its lines' height, whatever the
+    // fonts measure at runtime; anything else at least its design height
+    // (a subtree that fills its height needs a bound).
+    final double height =
+        child is TextNode && child.verticalFit == SizeFit.shrinkWrap
+        ? double.infinity
+        : child.outerBoxLocal.height;
+    if (y == null || height.isNaN || height <= 0) return childWidget;
+    return CrossAxisOverflow(
+      axis: Axis.vertical,
+      alignment: y,
+      extent: height,
+      child: childWidget,
+    );
   }
 
   /// Sizes a child of a wrapping row/column ([rowColumnWraps]) for its [CodelesslyWrap] run.
@@ -768,4 +1002,338 @@ class PassiveRowColumnWidget extends StatelessWidget {
       return child;
     }
   }
+}
+
+/// A [Flex] that hugs its cross axis and stretches its children across it:
+/// as thick as its thickest child, every stretching child that thick.
+///
+/// Flutter stretches only to a bounded cross axis. This lays the flex out
+/// once with its children unstretched to find its natural thickness, then
+/// again with that thickness fixed and the stretch back on, instead of an
+/// [IntrinsicHeight] / [IntrinsicWidth]: no intrinsic pass (which a viewport
+/// or LayoutBuilder can't answer, and which can measure text differently
+/// from how it lays out), and the same result.
+class HugCross extends SingleChildRenderObjectWidget {
+  /// Creates a [HugCross] around a [Flex] [child].
+  const HugCross({super.key, required Widget super.child});
+
+  @override
+  RenderHugCross createRenderObject(BuildContext context) => RenderHugCross();
+}
+
+/// The render object of [HugCross].
+class RenderHugCross extends RenderProxyBox {
+  /// Whether this is measuring its flex's natural thickness, during which a
+  /// [HugCrossFollower] child takes none of it.
+  bool get measuring => _measuring;
+  bool _measuring = false;
+
+  /// The followers that left themselves out of the last measure.
+  final List<RenderObject> _skipped = [];
+
+  /// Called by a [RenderHugCrossFollower] that took no thickness while
+  /// this measured.
+  void skipped(RenderObject follower) => _skipped.add(follower);
+
+  @override
+  void performLayout() {
+    final RenderBox? box = child;
+    if (box is! RenderFlex) {
+      super.performLayout();
+      return;
+    }
+    final CrossAxisAlignment wanted = box.crossAxisAlignment;
+    final bool row = box.direction == Axis.horizontal;
+    // Unbounded across, as hugging means: children that fill that axis take
+    // their own (design) size instead of all the room the parent offers.
+    final BoxConstraints loose = row
+        ? constraints.copyWith(minHeight: 0, maxHeight: double.infinity)
+        : constraints.copyWith(minWidth: 0, maxWidth: double.infinity);
+    // Switching the flex's alignment mid-layout is a mutation of a
+    // descendant, allowed inside a layout callback (as LayoutBuilder does).
+    invokeLayoutCallback<BoxConstraints>(
+      // Any non-stretching alignment measures the same; center needs no
+      // text direction for a column's cross axis.
+      (_) => box.crossAxisAlignment = CrossAxisAlignment.center,
+    );
+    // Children that only follow the thickness are left out of it; when all
+    // of them follow, there is nothing else to size it, so they count.
+    _skipped.clear();
+    _measuring = true;
+    box.layout(loose, parentUsesSize: true);
+    _measuring = false;
+    if ((row ? box.size.height : box.size.width) == 0 && _skipped.isNotEmpty) {
+      // Same constraints as the pass before: the followers must be laid out
+      // again to report their own thickness this time.
+      invokeLayoutCallback<BoxConstraints>((_) {
+        for (final RenderObject follower in _skipped) {
+          follower.markNeedsLayout();
+        }
+      });
+      box.layout(loose, parentUsesSize: true);
+    }
+    _skipped.clear();
+    final double natural = row ? box.size.height : box.size.width;
+    final double cross = row
+        ? constraints.constrainHeight(natural)
+        : constraints.constrainWidth(natural);
+    invokeLayoutCallback<BoxConstraints>(
+      (_) => box.crossAxisAlignment = wanted,
+    );
+    box.layout(
+      row
+          ? constraints.copyWith(minHeight: cross, maxHeight: cross)
+          : constraints.copyWith(minWidth: cross, maxWidth: cross),
+      parentUsesSize: true,
+    );
+    size = box.size;
+    // The stretched pass lays the flex and its stretched children out with
+    // boxes fixed in both axes, which makes them relayout boundaries: a
+    // child that grows later (a strip a formula shows) would be laid out
+    // again in its old box and cut off, without this measuring again.
+    // Reading the baseline records that this layout depends on them past
+    // their boxes, as an intrinsic measure does, so a change in any of them
+    // lays this out again (see [RenderBox.markNeedsLayout]).
+    box.getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+  }
+}
+
+/// Marks a child of a [HugCross] flex that fills its cross axis, so it
+/// takes the thickness its siblings give the flex instead of deciding it.
+///
+/// While the [HugCross] measures, this reports no extent across (its child
+/// is still laid out, at its own size); otherwise it is a plain proxy.
+class HugCrossFollower extends SingleChildRenderObjectWidget {
+  /// The flex's cross axis.
+  final Axis crossAxis;
+
+  /// Creates a [HugCrossFollower] for a flex whose cross axis is [crossAxis].
+  const HugCrossFollower({
+    super.key,
+    required this.crossAxis,
+    required Widget super.child,
+  });
+
+  @override
+  RenderHugCrossFollower createRenderObject(BuildContext context) =>
+      RenderHugCrossFollower(crossAxis);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderHugCrossFollower renderObject,
+  ) => renderObject.crossAxis = crossAxis;
+}
+
+/// The render object of [HugCrossFollower].
+class RenderHugCrossFollower extends RenderProxyBox {
+  /// Creates a follower across [crossAxis].
+  RenderHugCrossFollower(this._crossAxis);
+
+  /// The flex's cross axis.
+  Axis get crossAxis => _crossAxis;
+  Axis _crossAxis;
+  set crossAxis(Axis value) {
+    if (value == _crossAxis) return;
+    _crossAxis = value;
+    markNeedsLayout();
+  }
+
+  /// The [RenderHugCross] around the flex holding this, while it measures.
+  RenderHugCross? get _measuringHug {
+    RenderObject? node = parent;
+    // The flex holds this directly; HugCross holds the flex.
+    for (int i = 0; i < 3 && node != null; i++) {
+      if (node is RenderHugCross) return node.measuring ? node : null;
+      node = node.parent;
+    }
+    return null;
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? box = child;
+    final bool unbounded = crossAxis == Axis.vertical
+        ? !constraints.hasBoundedHeight
+        : !constraints.hasBoundedWidth;
+    final RenderHugCross? hug = unbounded ? _measuringHug : null;
+    if (box == null || hug == null) {
+      super.performLayout();
+      return;
+    }
+    hug.skipped(this);
+    box.layout(constraints, parentUsesSize: true);
+    size = constraints.constrain(
+      crossAxis == Axis.vertical
+          ? Size(box.size.width, 0)
+          : Size(0, box.size.height),
+    );
+  }
+}
+
+/// Lets [child] be larger than the row/column it's in across its [axis]
+/// (the row/column's cross axis), as Flutter's Row/Column lets a child that
+/// ignores its constraints be: the child may be up to [extent] (its own
+/// fixed size) on that axis whatever the row/column allows, this box takes
+/// the size the row/column allows, and the child
+/// is painted (and hit tested) where [alignment] puts it in this box, -1 at
+/// the start, 0 centred, 1 at the end, overflowing it as
+/// `CrossAxisAlignment.start`, `center` and `end` place a larger child. A
+/// horizontal axis follows the ambient [Directionality]. A child that fits
+/// is laid out and placed as without this box.
+class CrossAxisOverflow extends SingleChildRenderObjectWidget {
+  /// The axis across which [child] may overflow.
+  final Axis axis;
+
+  /// Where [child] goes when it overflows: -1 start, 0 centre, 1 end.
+  final double alignment;
+
+  /// The most [child] may be across [axis] beyond what the row/column
+  /// allows: its fixed size there.
+  final double extent;
+
+  const CrossAxisOverflow({
+    super.key,
+    required this.axis,
+    required this.alignment,
+    required this.extent,
+    super.child,
+  });
+
+  @override
+  RenderCrossAxisOverflow createRenderObject(BuildContext context) =>
+      RenderCrossAxisOverflow(
+        axis: axis,
+        alignment: alignment,
+        extent: extent,
+        textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
+      );
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    RenderCrossAxisOverflow renderObject,
+  ) {
+    renderObject
+      ..axis = axis
+      ..alignment = alignment
+      ..extent = extent
+      ..textDirection = Directionality.maybeOf(context) ?? TextDirection.ltr;
+  }
+}
+
+/// The render object of [CrossAxisOverflow].
+class RenderCrossAxisOverflow extends RenderShiftedBox {
+  RenderCrossAxisOverflow({
+    required Axis axis,
+    required double alignment,
+    required double extent,
+    required TextDirection textDirection,
+    RenderBox? child,
+  }) : _axis = axis,
+       _alignment = alignment,
+       _extent = extent,
+       _textDirection = textDirection,
+       super(child);
+
+  Axis _axis;
+  Axis get axis => _axis;
+  set axis(Axis value) {
+    if (value == _axis) return;
+    _axis = value;
+    markNeedsLayout();
+  }
+
+  double _alignment;
+  double get alignment => _alignment;
+  set alignment(double value) {
+    if (value == _alignment) return;
+    _alignment = value;
+    markNeedsLayout();
+  }
+
+  double _extent;
+  double get extent => _extent;
+  set extent(double value) {
+    if (value == _extent) return;
+    _extent = value;
+    markNeedsLayout();
+  }
+
+  TextDirection _textDirection;
+  TextDirection get textDirection => _textDirection;
+  set textDirection(TextDirection value) {
+    if (value == _textDirection) return;
+    _textDirection = value;
+    markNeedsLayout();
+  }
+
+  // The row/column's maximum, or the child's own size when that's more: a
+  // child that fits reads the row/column's extent as before (a
+  // `${parent.width}` binding).
+  BoxConstraints _childConstraints(BoxConstraints constraints) {
+    // Infinite for a child that takes whatever height it needs (a hugging
+    // text's lines).
+    final double extent = _extent.isNaN ? 0 : _extent;
+    return _axis == Axis.horizontal
+        ? constraints.copyWith(maxWidth: math.max(constraints.maxWidth, extent))
+        : constraints.copyWith(
+            maxHeight: math.max(constraints.maxHeight, extent),
+          );
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? child = this.child;
+    if (child == null) {
+      size = constraints.smallest;
+      return;
+    }
+    child.layout(_childConstraints(constraints), parentUsesSize: true);
+    size = constraints.constrain(child.size);
+    final double free = _axis == Axis.horizontal
+        ? size.width - child.size.width
+        : size.height - child.size.height;
+    double factor = (_alignment + 1) / 2;
+    if (_axis == Axis.horizontal && _textDirection == TextDirection.rtl) {
+      factor = 1 - factor;
+    }
+    // Only an overflowing child moves: one that fits fills this box.
+    final double shift = free < 0 ? free * factor : 0;
+    (child.parentData! as BoxParentData).offset = _axis == Axis.horizontal
+        ? Offset(shift, 0)
+        : Offset(0, shift);
+  }
+
+  @override
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    final RenderBox? child = this.child;
+    if (child == null) return constraints.smallest;
+    return constraints.constrain(
+      child.getDryLayout(_childConstraints(constraints)),
+    );
+  }
+
+  @override
+  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+    final double? b = child?.getDistanceToActualBaseline(baseline);
+    if (b == null) return null;
+    return b + (child!.parentData! as BoxParentData).offset.dy;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) =>
+      child?.getMinIntrinsicWidth(height) ?? 0;
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      child?.getMaxIntrinsicWidth(height) ?? 0;
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      child?.getMinIntrinsicHeight(width) ?? 0;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      child?.getMaxIntrinsicHeight(width) ?? 0;
 }

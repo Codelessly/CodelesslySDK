@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
@@ -139,9 +141,82 @@ class PropertyValueDelegate {
     if (variablePath == null) return null;
 
     return getVariableValueFromPath<R>(
-      variablePath,
-      scopedValues: scopedValues,
-    );
+          variablePath,
+          scopedValues: scopedValues,
+        ) ??
+        literalIconName<R>(node, property, variablePath) ??
+        literalColor<R>(variablePath) ??
+        literalNumber<R>(variablePath);
+  }
+
+  static final RegExp _hexColor = RegExp(
+    r'^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$',
+    caseSensitive: false,
+  );
+
+  /// [binding] itself as a color when it is a hex color written as is
+  /// (`#RGB`, `#RRGGBB` or `#AARRGGBB`) rather than a variable or formula
+  /// giving one: `"iconColor": "#7A4520"` paints the icon that color, as
+  /// `${= '#7A4520'}` does (no variable can be named `#...`). Null for
+  /// anything else, and when [R] isn't a color or paint type.
+  static R? literalColor<R extends Object>(String binding) {
+    if (R != ColorRGBA && R != ColorRGB && R != PaintModel) return null;
+    final ColorRGBA? color = parseColorLiteral(binding);
+    if (color == null) return null;
+    if (R == ColorRGB) return ColorRGB(r: color.r, g: color.g, b: color.b) as R;
+    if (R == PaintModel) return color.toPaint() as R;
+    return color as R;
+  }
+
+  /// [text] as a color when it is a hex color literal: `#RGB`, `#RRGGBB` or
+  /// `#AARRGGBB`. Null otherwise.
+  static ColorRGBA? parseColorLiteral(String text) {
+    final String trimmed = text.trim();
+    if (!_hexColor.hasMatch(trimmed)) return null;
+    String hex = trimmed.substring(1);
+    if (hex.length == 3) hex = [for (final c in hex.split('')) '$c$c'].join();
+    return ColorRGBA.fromHex(hex);
+  }
+
+  /// [binding] itself as a number when [R] takes one and the binding is a
+  /// number written as is (`"17"`, `"17.0"`, `"-4.5"`, `172.28`) rather
+  /// than a variable or formula: a stacked list item's `x`/`y` bound to a
+  /// constant sits there, as with `${= 172.28}`; it used to fall back to
+  /// the item's design offset. An int takes only a whole number. Null
+  /// otherwise.
+  static R? literalNumber<R extends Object>(String binding) {
+    if (R != num && R != double && R != int) return null;
+    final num? value = num.tryParse(binding.trim());
+    if (value == null || !value.isFinite) return null;
+    if (R == int) {
+      return (value == value.roundToDouble() ? value.round() : null) as R?;
+    }
+    if (R == double) return value.toDouble() as R;
+    return value as R;
+  }
+
+  /// The icon properties of an icon node that take an icon's name.
+  static const Set<String> iconNameProperties = {'icon', 'iconName'};
+
+  static final RegExp _iconName = RegExp(r'^[a-z0-9_]+$');
+
+  /// [binding] itself as the value of [property] when it is an icon name
+  /// written as is (`block_rounded`) rather than a variable or formula
+  /// giving one: an icon node's `icon` or `iconName` bound to a plain name
+  /// that no variable has shows that icon, as `${= 'block_rounded'}` does.
+  /// Null otherwise, and for any other property.
+  static R? literalIconName<R extends Object>(
+    BaseNode node,
+    String property,
+    String binding,
+  ) {
+    if (node is! IconNode || !iconNameProperties.contains(property)) {
+      return null;
+    }
+    if (R != String && R != Object) return null;
+    final String name = binding.trim();
+    if (!_iconName.hasMatch(name)) return null;
+    return name as R;
   }
 
   /// Substitutes variables & data paths used in given [text] with their values.
@@ -275,12 +350,27 @@ class PropertyValueDelegate {
   ) {
     final String? expression = computedExpressionOf(variable);
     if (expression == null) return variable.getValue();
+    // A variable with parameters is a function: its value is the function,
+    // which formulas call with arguments. Its body reads the other
+    // variables of this scope.
+    if (variable.isFunction) {
+      return FormulaFunction(
+        variable.parameters,
+        expression,
+        (path) =>
+            getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
+      );
+    }
     if (_computedDepth >= 16 || !_computing.add(variable.name)) return null;
     _computedDepth++;
     try {
       // Cache only formulas whose inputs are immutable variables, not row,
       // parent, screen, or other predefined values that vary with scope.
-      final List<Object?>? inputs = _computedInputs(expression, scopedValues);
+      // Not formulas that call scripts: on the web a script's result
+      // arrives later (ScriptFormulaCalls keeps results itself).
+      final List<Object?>? inputs = FormulaEvaluator.callsScript(expression)
+          ? null
+          : _computedInputs(expression, scopedValues);
       final _ComputedResult? cached = _computedCache[variable.id];
       if (inputs != null &&
           cached != null &&
@@ -319,6 +409,19 @@ class PropertyValueDelegate {
         getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
   );
 
+  /// The expression in [path] when it is a `${...}` path that indexes by a
+  /// variable, such as `${pal[item.statusKey]}` or `${rows[index]}`; null
+  /// for any other path (literal keys like `${a['b']}` or `${a[0]}` stay
+  /// plain paths).
+  static String? _dynamicIndexPath(String path) {
+    final RegExpMatch? match = _dynamicIndexRegex.firstMatch(path.trim());
+    return match?.group(1);
+  }
+
+  static final RegExp _dynamicIndexRegex = RegExp(
+    r'^\$\{\s*([A-Za-z_][\w.]*\[\s*[A-Za-z_][\w.]*\s*\][\w.\[\]]*)\s*\}$',
+  );
+
   /// Retrieves the value of a variable [path]. This also supports predefined
   /// variables such as data, index, and item.
   ///
@@ -333,7 +436,11 @@ class PropertyValueDelegate {
     String path, {
     required ScopedValues scopedValues,
   }) {
-    final String? expression = FormulaEvaluator.exactExpression(path);
+    // A path that indexes by another variable, e.g. `${pal[item.statusKey]}`,
+    // is read as the formula `pal[item.statusKey]`: a plain path only takes
+    // literal keys and indices.
+    final String? expression =
+        FormulaEvaluator.exactExpression(path) ?? _dynamicIndexPath(path);
     if (expression != null) {
       final Object? value = evaluateFormula(
         expression,
@@ -354,7 +461,8 @@ class PropertyValueDelegate {
     if (segments.isEmpty) return value?.typedValue<R>();
     if (value == null) return null;
 
-    final variable = match.isPredefinedVariable
+    final bool builtin = readsBuiltin(match, scopedValues);
+    final variable = builtin
         ? predefinedVariables.findByNameOrNull(match.name)
         : scopedValues.variables.values.findByNameOrNull(match.name);
 
@@ -364,12 +472,10 @@ class PropertyValueDelegate {
     // variable, so read accessors for the value they hold (an item can be a
     // string, a map, ...).
     VariableType accessorType =
-        match.hasAccessor ||
-            match.isPredefinedVariable ||
-            computedExpressionOf(variable) != null
+        match.hasAccessor || builtin || computedExpressionOf(variable) != null
         ? VariableType.fromObjectType(value)
         : variable.type;
-    List<Accessor> accessors = variable.name.startsWith('api')
+    List<Accessor> accessors = isApiVariableName(variable.name)
         ? getApiResponseAccessorsForType(VariableType.map)
         : getAccessorsForType(accessorType);
 
@@ -413,20 +519,54 @@ class PropertyValueDelegate {
   static List<Object?>? _computedInputs(
     String expression,
     ScopedValues scopedValues,
-  ) => _inputsOf(expression, scopedValues.variables, <String>{});
+  ) => _inputsOf(expression, scopedValues.variables, <String>{}, scopedValues);
+
+  /// Predefined values that are the same wherever they are read on a
+  /// screen (unlike item, index, parent...): a formula reading them can
+  /// still be cached, keyed by their current value.
+  static const Set<String> _screenWideValues = {
+    'storage',
+    'route',
+    'screen',
+    'auth',
+  };
 
   static List<Object?>? _inputsOf(
     String expression,
     Map<String, VariableData> variables,
     Set<String> seen,
+    ScopedValues scopedValues,
   ) {
-    final List<Object?> inputs = [];
+    final List<Object?> inputs = [
+      // A formula that reads the clock changes as time passes: its value
+      // holds for the current second (the clock ticks once a second), so a
+      // list computed from it stays the same list until then instead of
+      // being worked out, and rebuilt, on every read.
+      if (FormulaEvaluator.readsClock(expression))
+        FormulaClock.now().millisecondsSinceEpoch ~/ 1000,
+      // One that reads the millisecond clock (`nowMs()`, e.g. a tape's
+      // position while it plays) holds only for the millisecond it was
+      // worked out in, so the computed variables built on it move too.
+      if (FormulaEvaluator.readsFrameClock(expression))
+        DateTime.now().millisecondsSinceEpoch,
+    ];
     for (final String path in FormulaEvaluator.referencedPaths(expression)) {
       final VariableMatch? match = VariableMatch.parse(
         path.wrapWithVariableSyntax(),
       );
       if (match == null) continue;
-      if (match.isPredefinedVariable) return null;
+      if (readsBuiltin(match, scopedValues)) {
+        // Saved data (storage) read through a computed chain made every
+        // formula after it uncached: a game's whole simulation ran again
+        // on each read.
+        if (!_screenWideValues.contains(match.name)) return null;
+        if (seen.add('\u0000${match.name}')) {
+          inputs.add(
+            _ValueInput(retrievePredefinedVariableValue(match, scopedValues)),
+          );
+        }
+        continue;
+      }
       final VariableData? input = variables[match.name];
       inputs.add(input);
       // A computed input changes when its own inputs do, so they count too;
@@ -434,7 +574,12 @@ class PropertyValueDelegate {
       if (input != null && input.isComputed && seen.add(input.name)) {
         final String? inner = computedExpressionOf(input);
         if (inner == null) continue;
-        final List<Object?>? nested = _inputsOf(inner, variables, seen);
+        final List<Object?>? nested = _inputsOf(
+          inner,
+          variables,
+          seen,
+          scopedValues,
+        );
         if (nested == null) return null;
         inputs.addAll(nested);
       }
@@ -445,7 +590,16 @@ class PropertyValueDelegate {
   static bool _sameInputs(List<Object?> a, List<Object?> b) {
     if (a.length != b.length) return false;
     for (int i = 0; i < a.length; i++) {
-      if (!identical(a[i], b[i])) return false;
+      final Object? x = a[i], y = b[i];
+      // Variables by identity (they are immutable); the clock's second by
+      // value.
+      if (x is _ValueInput && y is _ValueInput) {
+        if (!const DeepCollectionEquality().equals(x.value, y.value)) {
+          return false;
+        }
+        continue;
+      }
+      if (!identical(x, y) && !(x is int && x == y)) return false;
     }
     return true;
   }
@@ -458,22 +612,78 @@ class PropertyValueDelegate {
     final match = VariableMatch.parse(path.wrapWithVariableSyntax());
     if (match == null) return null;
 
-    if (match.isPredefinedVariable) {
+    if (readsBuiltin(match, scopedValues)) {
       final Object? value = retrievePredefinedVariableValue(
         match,
         scopedValues,
       );
+      // `loop` became a predefined name (a for-each turn's item and index)
+      // after projects already had variables called `loop`. Outside a
+      // for-each turn it reads the project's own variable of that name, so
+      // those projects keep working.
+      if (value == null &&
+          match.name == 'loop' &&
+          scopedValues.variables.containsKey('loop')) {
+        return _userVariableValue(match, scopedValues);
+      }
       return value;
     }
+    return _userVariableValue(match, scopedValues);
+  }
 
+  /// Built-in names the SDK added after projects could already have
+  /// variables called that: a project's own variable of such a name wins
+  /// over the built-in, so a published app keeps meaning what it meant (a
+  /// game's `animating` flag read the built-in map of playing animations,
+  /// which is never false).
+  static const Set<String> shadowableBuiltins = {
+    'animating',
+    'script',
+    'speech',
+    'initial',
+    'hold',
+  };
+
+  /// Whether [match] reads a built-in variable at [scopedValues]: a
+  /// predefined name the project hasn't taken for a variable of its own
+  /// (see [shadowableBuiltins]).
+  static bool readsBuiltin(VariableMatch match, ScopedValues scopedValues) =>
+      match.isPredefinedVariable &&
+      !(shadowableBuiltins.contains(match.name) &&
+          scopedValues.variables.containsKey(match.name));
+
+  /// The value of the project's own variable [match] names.
+  static Object? _userVariableValue(
+    VariableMatch match,
+    ScopedValues scopedValues,
+  ) {
     final VariableData? variable = scopedValues.variables[match.name];
-    if (variable == null) return null;
+    if (variable == null) {
+      // In a text field's own actions, `inputValue` (the property a field's
+      // text is bound by) reads its text, like `value`, unless an app
+      // variable has that name.
+      if (match.name == 'inputValue' &&
+          !match.hasPath &&
+          !match.hasAccessor &&
+          scopedValues.nodeState is String) {
+        return scopedValues.nodeState;
+      }
+      return null;
+    }
     final bool computed = isComputedVariable(variable);
     final Object? variableValue = variableValueOf(variable, scopedValues);
+    // A function has no members: it is only called.
+    if (variableValue is FormulaFunction) {
+      return match.hasAccessor || match.hasPath ? null : variableValue;
+    }
     // A computed variable's type is whatever its formula returns.
-    final VariableType type = computed && variableValue != null
-        ? VariableType.fromObjectType(variableValue)
-        : variable.type;
+    // A user function (a lambda) has no variable type; it keeps its own.
+    VariableType type = variable.type;
+    if (computed && variableValue != null) {
+      try {
+        type = VariableType.fromObjectType(variableValue);
+      } catch (_) {}
+    }
     if (match.hasAccessor) {
       if (type.isText) {
         // A computed text whose formula gives nothing has no characters.
@@ -512,20 +722,29 @@ class PropertyValueDelegate {
   /// is written once and read everywhere. Null for other variables.
   static String? computedExpressionOf(VariableData variable) {
     if (!variable.isComputed) return null;
+    // A formula is stored bare (`a + b`) or wrapped (`\${= a + b}`).
     return variable.formula.trim().isNotEmpty
-        ? variable.formula
+        ? FormulaEvaluator.exactExpression(variable.formula.trim()) ??
+              variable.formula
         : FormulaEvaluator.exactExpression(variable.value);
   }
 
   /// The variable paths a computed variable's formula reads, followed
   /// through other computed variables, and whether any of them reads the
-  /// clock. Widgets bound to [name] listen to these too.
-  static ({Set<String> paths, bool readsClock}) computedDependencies(
-    String name,
-    Map<String, VariableData> variables,
-  ) {
+  /// clock (`now()`) or the millisecond clock (`nowMs()`), or calls a script
+  /// (`script.name()`, whose result arrives later on the web). Widgets bound
+  /// to [name] listen to these too.
+  static ({
+    Set<String> paths,
+    bool readsClock,
+    bool readsFrameClock,
+    bool callsScript,
+  })
+  computedDependencies(String name, Map<String, VariableData> variables) {
     final Set<String> paths = {};
     bool readsClock = false;
+    bool readsFrameClock = false;
+    bool callsScript = false;
     final Set<String> seen = {};
     void visit(String variableName) {
       if (!seen.add(variableName)) return;
@@ -534,7 +753,18 @@ class PropertyValueDelegate {
       final String? expression = computedExpressionOf(variable);
       if (expression == null) return;
       readsClock = readsClock || FormulaEvaluator.readsClock(expression);
-      for (final String path in FormulaEvaluator.referencedPaths(expression)) {
+      readsFrameClock =
+          readsFrameClock || FormulaEvaluator.readsFrameClock(expression);
+      callsScript = callsScript || FormulaEvaluator.callsScript(expression);
+      // A function's parameters aren't variables.
+      final Iterable<String> read = variable.isFunction
+          ? FormulaFunction(
+              variable.parameters,
+              expression,
+              (_) => null,
+            ).externalPaths
+          : FormulaEvaluator.referencedPaths(expression);
+      for (final String path in read) {
         paths.add(path);
         final VariableMatch? match = VariableMatch.parse(
           path.wrapWithVariableSyntax(),
@@ -544,15 +774,18 @@ class PropertyValueDelegate {
     }
 
     visit(name);
-    return (paths: paths, readsClock: readsClock);
+    return (
+      paths: paths,
+      readsClock: readsClock,
+      readsFrameClock: readsFrameClock,
+      callsScript: callsScript,
+    );
   }
 
-  @internal
-  static Object? retrievePredefinedVariableValue(
-    VariableMatch match,
-    ScopedValues scopedValues,
-  ) {
-    final Object? variableValue = switch (match.name) {
+  /// What the predefined variable [name] reads in [scopedValues], before
+  /// any [ScopedValues.predefinedOverrides].
+  static Object? _predefinedValueOf(String name, ScopedValues scopedValues) {
+    return switch (name) {
       'data' => scopedValues.data,
       'product' => scopedValues.data['product'],
       'paywall' => scopedValues.data['paywall'],
@@ -573,16 +806,78 @@ class PropertyValueDelegate {
       // no app user: read as signed out rather than unknown.
       'auth' => scopedValues.appUser ?? AppAuth.userToMap(null),
       'result' => ActionChain.current?.result,
-      'screen' => scopedValues.screenSize?.let(screenVariableValue),
+      'loop' => ActionChain.current?.loop,
+      // `script.name(args)` in formulas.
+      'script' => ScriptFormulaCalls(scopedValues),
+      'screen' => scopedValues.screenSize?.let(
+        (Size size) => screenVariableValue(
+          size,
+          brightness: scopedValues.platformBrightness,
+          tabletMinWidth: scopedValues.breakpointWidths?.$1,
+          desktopMinWidth: scopedValues.breakpointWidths?.$2,
+        ),
+      ),
       'hold' => scopedValues.holdProgress ?? 0.0,
-      'drag' =>
-        scopedValues.codelesslyContext?.dragAndDrop.value ??
-            DragAndDropController.preview ??
-            DragAndDropController.idle,
+      // A drag track's pose of this node (dx, dy, progress, dragging...) and
+      // the app's drag and drop session (active, over, accepted...).
+      'drag' => {
+        ...(scopedValues.dragValues ?? DragValues.rest).toMap(),
+        ...?(scopedValues.codelesslyContext?.dragAndDrop.value ??
+                DragAndDropController.preview ??
+                DragAndDropController.idle)
+            as Map?,
+      },
+      // Null outside a drag track: nothing to read.
+      'track' => scopedValues.trackValues?.toMap(),
+      // The pose of the nearest transform gesture (x, y, scale, rotation...);
+      // null outside one.
+      'transform' => scopedValues.transformValues?.toMap(),
+      // A flip card's side, a tilt's pointer and a page's offset from the
+      // current page, around this node.
+      'flip' || 'tilt' || 'pageOffset' =>
+        scopedValues.motionValues[name] ?? MotionValuesScope.defaults[name],
+      'speech' => Speech.instance.value,
+      'initial' => InitialValues(scopedValues.initialVariables),
+      // Whether each variable has an Animate variable action playing it.
+      'animating' => VariableAnimator.playingIn(scopedValues.codelesslyContext),
       _ => null,
     };
+  }
+
+  /// [value] (the predefined variable [name]'s) with the keys a design
+  /// canvas previews for it ([ScopedValues.predefinedOverrides]) on top.
+  static Object? _withPredefinedOverrides(
+    String name,
+    Object? value,
+    ScopedValues scopedValues,
+  ) {
+    final Map<String, Object?>? override =
+        scopedValues.predefinedOverrides?[name];
+    if (override == null || override.isEmpty) return value;
+    return <String, Object?>{
+      if (value is Map)
+        for (final MapEntry<dynamic, dynamic> entry in value.entries)
+          '${entry.key}': entry.value,
+      ...override,
+    };
+  }
+
+  @internal
+  static Object? retrievePredefinedVariableValue(
+    VariableMatch match,
+    ScopedValues scopedValues,
+  ) {
+    final Object? variableValue = _withPredefinedOverrides(
+      match.name,
+      _predefinedValueOf(match.name, scopedValues),
+      scopedValues,
+    );
 
     if (variableValue == null) return null;
+    // `script` is only called (`script.name(args)`); it has no members.
+    if (variableValue is FormulaScripts) {
+      return match.hasPath || match.hasAccessor ? null : variableValue;
+    }
     final VariableType variableType = VariableType.fromObjectType(
       variableValue,
     );
@@ -1273,4 +1568,41 @@ class _ComputedResult {
   final Object? value;
 
   const _ComputedResult(this.variable, this.inputs, this.value);
+}
+
+/// The value of `${initial}`: variable name -> its published value. Values
+/// are read when asked for, so `${initial.txns}` parses only that list.
+class InitialValues extends MapBase<String, Object?> {
+  InitialValues(this._variables);
+
+  final Map<String, VariableData> _variables;
+  final Map<String, Object?> _cache = {};
+
+  @override
+  Object? operator [](Object? key) {
+    final VariableData? variable = _variables[key];
+    if (variable == null) return null;
+    return _cache.putIfAbsent(key as String, variable.getValue);
+  }
+
+  @override
+  Iterable<String> get keys => _variables.keys;
+
+  @override
+  void operator []=(String key, Object? value) =>
+      throw UnsupportedError('initial values are read-only');
+
+  @override
+  void clear() => throw UnsupportedError('initial values are read-only');
+
+  @override
+  Object? remove(Object? key) =>
+      throw UnsupportedError('initial values are read-only');
+}
+
+/// A screen-wide predefined value (storage, route, screen, auth) a
+/// computed variable reads, compared by value for its cache.
+class _ValueInput {
+  const _ValueInput(this.value);
+  final Object? value;
 }

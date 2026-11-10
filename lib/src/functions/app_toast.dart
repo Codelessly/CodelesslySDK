@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -15,15 +16,158 @@ import 'action_chain.dart';
 /// color of its [ShowToastAction.style]. The action's own colors, fonts,
 /// radius, border and shadows override that look. It can carry a button,
 /// e.g. Undo, that runs [ShowToastAction.actions], and a close (×) button.
+///
+/// With a [ShowToastAction.title] the toast is a card: the bold title over
+/// the message, after the icon (in a filled disc with
+/// [ShowToastAction.iconDiscColor]). Colors bound in
+/// [ShowToastAction.variables] are read when the toast shows (see
+/// [ActionColorBindings]) and win over the action's own.
+/// Names the overlay toasts of the app below it show in, instead of the
+/// root overlay: an app embedded in another (the editor's run preview)
+/// keeps its toasts in its own window.
+class ToastOverlayScope extends InheritedWidget {
+  /// Creates a [ToastOverlayScope] showing toasts in [overlay].
+  const ToastOverlayScope({
+    super.key,
+    required this.overlay,
+    required super.child,
+  });
+
+  /// The overlay toasts show in.
+  final GlobalKey<OverlayState> overlay;
+
+  /// The overlay of the nearest [ToastOverlayScope] above [context], or null.
+  static OverlayState? maybeOf(BuildContext context) => context
+      .getInheritedWidgetOfExactType<ToastOverlayScope>()
+      ?.overlay
+      .currentState;
+
+  @override
+  bool updateShouldNotify(ToastOverlayScope oldWidget) =>
+      oldWidget.overlay != overlay;
+}
+
 class AppToast {
   AppToast._();
 
   static OverlayEntry? _current;
 
+  /// The icons of the showToast actions anywhere in [nodes]' reactions
+  /// (nested in conditions, confirmations, API outcomes and so on), as
+  /// [ShowToastAction.icon] gives them. A bound icon name isn't known
+  /// before the toast shows and isn't included.
+  static List<MultiSourceIconModel> iconsIn(Iterable<BaseNode> nodes) {
+    final List<MultiSourceIconModel> icons = [];
+    void visit(Object? json) {
+      if (json is Map) {
+        final Object? icon = json['icon'];
+        if (json['type'] == ActionType.showToast.name && icon is Map) {
+          try {
+            icons.add(
+              MultiSourceIconModel.fromJson(Map<String, dynamic>.from(icon)),
+            );
+          } catch (_) {
+            // Not an icon this SDK reads.
+          }
+        }
+        json.values.forEach(visit);
+      } else if (json is List) {
+        json.forEach(visit);
+      }
+    }
+
+    for (final BaseNode node in nodes) {
+      if (node is! ReactionMixin) continue;
+      for (final Reaction reaction in (node as ReactionMixin).reactions) {
+        visit(reaction.action.toJson());
+      }
+    }
+    return icons;
+  }
+
+  /// Loads the SVGs of the toast icons in [nodes] ([iconsIn]) ahead of
+  /// time. A toast is on screen for a couple of seconds, and the first one
+  /// of a session showed without its icon while the icon's SVG was still
+  /// being fetched.
+  static Future<void> precacheIcons(Iterable<BaseNode> nodes) async {
+    final List<Future<void>> loads = [];
+    for (final MultiSourceIconModel icon in iconsIn(nodes)) {
+      final IconModel? glyph = icon.icon;
+      if (!icon.show || icon.type != IconTypeEnum.icon || glyph == null) {
+        continue;
+      }
+      loads.add(
+        SvgIcon.precache(
+          glyph,
+          fill: icon.fill,
+          weight: icon.weight,
+          grade: icon.grade,
+          opticalSize: icon.opticalSize,
+        ),
+      );
+    }
+    await Future.wait(loads);
+  }
+
+  /// The icon [action] shows with [scopedValues]: its `icon` binding
+  /// (`variables: {"icon": "${toastNext.icon}"}`) naming a Material icon,
+  /// such as `check_circle` or `info_outlined`, in [ShowToastAction.icon]'s
+  /// size and colour, else [ShowToastAction.icon]. A binding that gives no
+  /// name keeps the action's icon (or none).
+  static MultiSourceIconModel? iconOf(
+    ShowToastAction action,
+    ScopedValues scopedValues,
+  ) {
+    final String? binding = action.variables['icon'];
+    if (binding == null) return action.icon;
+    final String name = PropertyValueDelegate.substituteVariables(
+      binding,
+      scopedValues: scopedValues,
+      nullSubstitutionMode: NullSubstitutionMode.emptyString,
+    ).trim();
+    if (name.isEmpty) return action.icon;
+    final MultiSourceIconModel base =
+        action.icon ?? const MultiSourceIconModel.icon(size: 18);
+    final MultiSourceIconModel named = iconWithName(base, name);
+    return identical(named, base) ? action.icon : named;
+  }
+
+  /// The widget of a toast's [icon], [size] square. A glyph takes its own
+  /// color, else [textColor]. An image shows as is, e.g. a stamp or a
+  /// colored check, unless the icon has a visible color of its own (or the
+  /// toast's iconColor, already in [icon]) to tint it with. It loads like
+  /// any image of the app ([UltimateImageBuilder]): on the web from hosts
+  /// without CORS headers too, which an [ImageIcon] can't.
+  static Widget? iconWidget(
+    MultiSourceIconModel icon,
+    double size,
+    Color textColor,
+  ) {
+    if (!icon.show) return null;
+    if (!icon.isImageIcon) return retrieveIconWidget(icon, size, textColor);
+    final String? url = icon.iconImage?.trim();
+    if (url == null || url.isEmpty) return null;
+    final Color? tint = icon.color?.toFlutterColor();
+    return SizedBox.square(
+      key: const ValueKey('codelessly-toast-icon-image'),
+      dimension: size,
+      child: UltimateImageBuilder(
+        url: url,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        color: tint != null && tint.a > 0 ? tint : null,
+        errorBuilder: (context) => SizedBox.square(dimension: size),
+      ),
+    );
+  }
+
   /// Shows [action]'s message. Returns false when there is no overlay to
   /// show it in.
   static bool show(BuildContext context, ShowToastAction action) {
-    final OverlayState? overlay = Overlay.maybeOf(context, rootOverlay: true);
+    final OverlayState? overlay =
+        ToastOverlayScope.maybeOf(context) ??
+        Overlay.maybeOf(context, rootOverlay: true);
     if (overlay == null) return false;
 
     // Read variables and the look now: the action that follows may navigate
@@ -35,6 +179,13 @@ class AppToast {
       nullSubstitutionMode: NullSubstitutionMode.emptyString,
     );
     final String message = text(action.message);
+    final String title = action.hasTitle ? text(action.title) : '';
+    final Map<String, Color> colors = ActionColorBindings.resolve(
+      action.variables,
+      scopedValues,
+      keys: ShowToastAction.bindableColors,
+    );
+    final MultiSourceIconModel? icon = iconOf(action, scopedValues);
     final String actionLabel = action.hasAction ? text(action.actionLabel) : '';
     final ResolvedFeedbackTheme theme = FeedbackTheme.of(context);
     // Without a font of its own, the toast takes the app's text style at
@@ -53,6 +204,7 @@ class AppToast {
         : theme.bodyStyle;
     final TextStyle font = fontForAction(action, appFont);
     final double? offset = offsetOf(action, scopedValues);
+    final int duration = durationOf(action, scopedValues);
     // The button's actions run on the chain that showed the toast, whenever
     // it is pressed: with its captured scope (the `${item}` of a row that has
     // since left the list) and its `${result}` then (e.g. the id of the item
@@ -73,10 +225,14 @@ class AppToast {
       builder: (context) => _ToastView(
         action: action,
         message: message,
+        title: title,
+        icon: icon,
+        colors: colors,
         actionLabel: actionLabel,
         theme: theme,
         font: font,
         offset: offset,
+        duration: duration,
         onAction: onAction,
         onDone: () {
           if (_current == entry) _current = null;
@@ -89,6 +245,24 @@ class AppToast {
     return true;
   }
 
+  /// The barriers of the dialogs and sheets open over the toast, newest
+  /// last (see [ToastBelowRoute]). The toast lives in the root overlay,
+  /// above every route the layout's navigator shows, and a navigator puts
+  /// entries that aren't its routes back on top whenever it rearranges, so
+  /// the toast can't sit under a dialog in paint order. Instead it paints
+  /// each barrier's colour over itself, as the barrier would if it covered
+  /// it, and stops taking taps while one is up.
+  static final ValueNotifier<List<ModalRoute<Object?>>> covers =
+      ValueNotifier<List<ModalRoute<Object?>>>(const []);
+
+  static void _cover(ModalRoute<Object?> route) =>
+      covers.value = [...covers.value, route];
+
+  static void _uncover(ModalRoute<Object?> route) => covers.value = [
+    for (final r in covers.value)
+      if (r != route) r,
+  ];
+
   /// The message's text style: [base] in [ShowToastAction.fontFamily] (a
   /// Google font or one the project loaded) and [ShowToastAction.fontWeight]
   /// when set. Without a weight it is semibold.
@@ -99,8 +273,13 @@ class AppToast {
     if (family.isEmpty) return base.copyWith(fontWeight: weight);
     if (GoogleFonts.asMap().containsKey(family)) {
       // The SDK's font resolver selects the loaded face for the requested
-      // weight (including the semibold face) rather than just a family name.
-      final TextStyle? resolved = fontOf(family);
+      // weight (semibold unless the action sets one) rather than just a
+      // family name: a face loaded for another weight would draw at that
+      // weight whatever [TextStyle.fontWeight] says.
+      final TextStyle? resolved = fontOf(
+        family,
+        weight: action.fontWeight ?? FontWeightNumeric.w600,
+      );
       return base.copyWith(
         fontFamily: resolved?.fontFamily,
         fontFamilyFallback: resolved?.fontFamilyFallback,
@@ -138,6 +317,24 @@ class AppToast {
     return value.toDouble();
   }
 
+  /// How long [action]'s toast stays, in milliseconds: its `duration`
+  /// binding (`variables: {"duration": "${= toast.sticky ? 0 : 6000}"}`)
+  /// read with [scopedValues], else [ShowToastAction.duration]. Zero or less
+  /// keeps the toast up until it is closed or replaced.
+  static int durationOf(ShowToastAction action, ScopedValues scopedValues) {
+    final String? binding = action.variables['duration'];
+    if (binding == null || binding.trim().isEmpty) return action.duration;
+    final Object? value =
+        FormulaEvaluator.exactExpression(binding) != null ||
+            RegExp(r'^\$\{[^{}]+\}$').hasMatch(binding)
+        ? PropertyValueDelegate.getVariableValueFromPath<Object>(
+            binding,
+            scopedValues: scopedValues,
+          )
+        : binding;
+    return value.toDouble()?.round() ?? action.duration;
+  }
+
   /// Removes the toast on screen, if any.
   static void hide() {
     final OverlayEntry? entry = _current;
@@ -147,10 +344,13 @@ class AppToast {
 
   /// The font of [family], e.g. `Barlow`: a Google font or one the app
   /// loaded. Null when [family] is null or empty.
-  static TextStyle? fontOf(String? family) {
+  static TextStyle? fontOf(
+    String? family, {
+    FontWeightNumeric weight = FontWeightNumeric.w600,
+  }) {
     if (family == null || family.trim().isEmpty) return null;
     final TextStyle style = TextUtils.retrieveTextStyle(
-      fontName: FontName(family: family.trim(), weight: FontWeightNumeric.w600),
+      fontName: FontName(family: family.trim(), weight: weight),
     );
     return TextStyle(
       fontFamily: style.fontFamily,
@@ -188,20 +388,37 @@ class _ToastView extends StatefulWidget {
   const _ToastView({
     required this.action,
     required this.message,
+    required this.title,
+    required this.icon,
+    required this.colors,
     required this.actionLabel,
     required this.theme,
     required this.font,
     required this.offset,
+    required this.duration,
     required this.onAction,
     required this.onDone,
   });
 
   final ShowToastAction action;
   final String message;
+
+  /// The bold line above [message]; empty for none.
+  final String title;
+
+  /// The icon before the message: [ShowToastAction.icon], or the one its
+  /// `icon` binding names.
+  final MultiSourceIconModel? icon;
+
+  /// Colors bound in [ShowToastAction.variables], by field name.
+  final Map<String, Color> colors;
   final String actionLabel;
   final ResolvedFeedbackTheme theme;
   final TextStyle font;
   final double? offset;
+
+  /// Milliseconds the toast stays; zero or less keeps it until closed.
+  final int duration;
   final VoidCallback? onAction;
   final VoidCallback onDone;
 
@@ -226,7 +443,9 @@ class _ToastViewState extends State<_ToastView> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() => _visible = true);
     });
-    _timer = Timer(Duration(milliseconds: widget.action.duration), _close);
+    if (widget.duration > 0) {
+      _timer = Timer(Duration(milliseconds: widget.duration), _close);
+    }
   }
 
   void _close() {
@@ -258,41 +477,82 @@ class _ToastViewState extends State<_ToastView> {
       action.style,
       theme,
     );
-    final Color background =
-        action.backgroundColor?.toFlutterColor() ?? styleBackground;
+    final Map<String, Color> bound = widget.colors;
+    final Color? ownBackground =
+        bound['backgroundColor'] ?? action.backgroundColor?.toFlutterColor();
+    final Color background = ownBackground ?? styleBackground;
     final Color textColor =
+        bound['textColor'] ??
         action.textColor?.toFlutterColor() ??
-        (action.backgroundColor == null
+        (ownBackground == null
             ? styleForeground
             : ResolvedFeedbackTheme.onColor(background));
-    final Color? accent = action.accentColor?.toFlutterColor();
+    final bool hasTitle = widget.title.trim().isNotEmpty;
+    final Color? ownMessageColor =
+        bound['messageColor'] ?? action.messageColor?.toFlutterColor();
+    final Color? accent =
+        bound['accentColor'] ?? action.accentColor?.toFlutterColor();
     // The icon's own color, unless [ShowToastAction.iconColor] is set, else
     // the message color.
-    final MultiSourceIconModel? iconModel = action.iconColor == null
-        ? action.icon
-        : action.icon?.copyWith(color: action.iconColor);
-    final Widget? icon = iconModel == null
+    final Color? iconColor =
+        bound['iconColor'] ?? action.iconColor?.toFlutterColor();
+    final MultiSourceIconModel? iconModel = iconColor == null
+        ? widget.icon
+        : widget.icon?.copyWith(color: iconColor.toColorRGBA());
+    final Color? iconDisc =
+        bound['iconDiscColor'] ?? action.iconDiscColor?.toFlutterColor();
+    Widget? icon = iconModel == null
         ? null
-        : retrieveIconWidget(
+        : AppToast.iconWidget(
             iconModel,
             // A toast icon size of its own wins over the icon's.
             action.iconSize != 18 ? action.iconSize : iconModel.size ?? 18,
             textColor,
           );
+    final List<BoxShadow> iconShadows = action.iconShadows == null
+        ? const <BoxShadow>[]
+        : boxShadowsOf(action.iconShadows);
+    if (icon != null && iconDisc != null) {
+      icon = Container(
+        key: const ValueKey('codelessly-toast-icon-disc'),
+        width: action.iconDiscSize,
+        height: action.iconDiscSize,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: iconDisc,
+          shape: BoxShape.circle,
+          boxShadow: iconShadows.isEmpty ? null : iconShadows,
+        ),
+        child: icon,
+      );
+    } else if (icon != null && iconShadows.isNotEmpty) {
+      // A halo round the icon itself: a small round icon becomes a lit
+      // lamp.
+      icon = DecoratedBox(
+        key: const ValueKey('codelessly-toast-icon-glow'),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: iconShadows,
+        ),
+        child: icon,
+      );
+    }
     final bool hasButton = widget.onAction != null;
     final Map<dynamic, dynamic> options = action.toJson();
     final bool hasClose =
         action.showClose || options['showCloseButton'] == true;
-    final String alignment = '${options['alignment'] ?? 'center'}'
-        .split('.')
-        .last;
-    final bool stretch = alignment == 'stretch';
-    final bool top = action.position == ToastPosition.top;
     final MediaQueryData media = MediaQuery.of(context);
+    final String alignment = action.alignmentFor(media.size.width).name;
+    // A fixed-width card (minWidth up to maxWidth) spreads its row like a
+    // stretched toast: the button and close sit at its end.
+    final bool stretch =
+        alignment == 'stretch' ||
+        (action.minWidth > 0 && action.minWidth >= action.maxWidth);
+    final bool top = action.position == ToastPosition.top;
     final double fontSize =
         action.fontSize ?? (options['fontSize'] as num?)?.toDouble() ?? 14;
     final TextStyle font = widget.font;
-    final TextStyle messageStyle = action.messageStyle
+    final TextStyle textStyle = action.messageStyle
         .applyTo(
           font.copyWith(
             color: textColor,
@@ -306,8 +566,23 @@ class _ToastViewState extends State<_ToastView> {
               ? font.fontFamily
               : null,
         );
+    // Under a title the message is a fainter body line.
+    final TextStyle messageStyle = ownMessageColor != null
+        ? textStyle.copyWith(color: ownMessageColor)
+        : hasTitle && action.messageStyle?.color == null
+        ? textStyle.copyWith(color: textColor.withValues(alpha: 0.72))
+        : textStyle;
+    final TextStyle titleStyle = action.titleStyle.applyTo(
+      textStyle.copyWith(
+        color: textColor,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+      ),
+    );
     final Color actionColor =
-        action.actionColor?.toFlutterColor() ?? messageStyle.color!;
+        bound['actionColor'] ??
+        action.actionColor?.toFlutterColor() ??
+        textStyle.color!;
     final TextStyle actionStyle = action.actionStyle.applyTo(
       theme.buttonStyle
           .merge(font)
@@ -319,13 +594,45 @@ class _ToastViewState extends State<_ToastView> {
           ),
     );
     final Color closeColor =
-        action.closeColor?.toFlutterColor() ?? messageStyle.color!;
+        bound['closeColor'] ??
+        action.closeColor?.toFlutterColor() ??
+        textStyle.color!;
     final double buttonRadius = action.cornerRadius != null
         ? (action.cornerRadius! / 2).clamp(0, theme.buttonRadius).toDouble()
         : theme.buttonRadius;
-    final BorderSide? outline = action.border == null
+    BorderSide? outline = action.border == null
         ? null
         : borderSideOf(action.border!);
+    final Color? borderColor = bound['borderColor'];
+    if (borderColor != null) {
+      outline = outline == null || outline == BorderSide.none
+          ? BorderSide(color: borderColor)
+          : outline.copyWith(color: borderColor);
+    }
+
+    final Widget texts = !hasTitle
+        ? Text(widget.message, style: messageStyle)
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.title,
+                key: const ValueKey('codelessly-toast-title'),
+                style: titleStyle,
+              ),
+              if (widget.message.trim().isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Text(
+                  widget.message,
+                  key: const ValueKey('codelessly-toast-message'),
+                  style: messageStyle,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ],
+          );
 
     final BorderRadius radius = BorderRadius.circular(
       action.cornerRadius ??
@@ -333,7 +640,11 @@ class _ToastViewState extends State<_ToastView> {
     );
     Widget toast = Container(
       key: const ValueKey('codelessly-toast'),
-      constraints: BoxConstraints(minHeight: 44, maxWidth: action.maxWidth),
+      constraints: BoxConstraints(
+        minHeight: 44,
+        minWidth: action.minWidth.clamp(0, action.maxWidth).toDouble(),
+        maxWidth: action.maxWidth,
+      ),
       padding:
           action.padding?.flutterEdgeInsets ??
           EdgeInsets.fromLTRB(
@@ -358,26 +669,40 @@ class _ToastViewState extends State<_ToastView> {
       child: Row(
         mainAxisSize: stretch ? MainAxisSize.max : MainAxisSize.min,
         children: [
-          if (icon != null) ...[icon, const SizedBox(width: 8)],
-          if (stretch)
-            Expanded(child: Text(widget.message, style: messageStyle))
-          else
-            Flexible(child: Text(widget.message, style: messageStyle)),
+          if (icon != null) ...[
+            icon,
+            SizedBox(width: iconDisc != null || hasTitle ? 12 : 8),
+          ],
+          if (stretch) Expanded(child: texts) else Flexible(child: texts),
           if (hasButton) ...[
             const SizedBox(width: 8),
-            TextButton(
-              key: const ValueKey('codelessly-toast-action'),
-              onPressed: _onActionPressed,
-              style: TextButton.styleFrom(
-                foregroundColor: actionColor,
-                minimumSize: const Size(48, 36),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                textStyle: actionStyle.copyWith(fontSize: fontSize),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(buttonRadius),
+            _styledAction(
+              TextButton(
+                key: const ValueKey('codelessly-toast-action'),
+                onPressed: _onActionPressed,
+                style: TextButton.styleFrom(
+                  foregroundColor: actionColor,
+                  backgroundColor: action.actionBackgroundColor
+                      ?.toFlutterColor(),
+                  minimumSize: const Size(48, 36),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  // The action's own font size wins over the message's.
+                  textStyle: action.actionStyle?.fontSize != null
+                      ? actionStyle
+                      : actionStyle.copyWith(fontSize: fontSize),
+                  side: action.actionBorder == null
+                      ? null
+                      : borderSideOf(action.actionBorder!),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                      action.actionCornerRadius ?? buttonRadius,
+                    ),
+                  ),
                 ),
+                child: Text(widget.actionLabel),
               ),
-              child: Text(widget.actionLabel),
+              action,
+              action.actionCornerRadius ?? buttonRadius,
             ),
           ],
           if (hasClose) ...[
@@ -422,44 +747,176 @@ class _ToastViewState extends State<_ToastView> {
                 ),
               ],
       ),
-      child: ClipRRect(borderRadius: radius, child: toast),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: _UnderBarriers(child: toast),
+      ),
     );
     toast = Semantics(
       liveRegion: true,
       container: true,
-      label: widget.message,
+      label: hasTitle && widget.message.trim().isNotEmpty
+          ? '${widget.title}. ${widget.message}'
+          : hasTitle
+          ? widget.title
+          : widget.message,
       child: AnimatedOpacity(
         opacity: _visible ? 1 : 0,
         alwaysIncludeSemantics: true,
         duration: _fade,
         child: AnimatedSlide(
-          offset: _visible ? Offset.zero : Offset(0, top ? -0.25 : 0.25),
+          offset: _visible
+              ? Offset.zero
+              : Offset(0, top ? -action.enterOffset : action.enterOffset),
           duration: _fade,
-          curve: Curves.easeOutCubic,
+          // Coming in on the action's curve (a sticky note dropping in on
+          // easeOutBack); going out eases as before.
+          curve: _visible
+              ? flutterCurveOf(
+                  MotionCurve.values
+                          .where((c) => c.name == action.enterCurve)
+                          .firstOrNull ??
+                      MotionCurve.easeOutCubic,
+                )
+              : Curves.easeOutCubic,
           child: Align(
             alignment: switch (alignment) {
               'start' => Alignment.centerLeft,
               'end' => Alignment.centerRight,
               _ => Alignment.center,
             },
-            child: Material(type: MaterialType.transparency, child: toast),
+            child: Material(
+              type: MaterialType.transparency,
+              child: action.rotation == 0
+                  ? toast
+                  : Transform.rotate(
+                      angle: action.rotation * math.pi / 180,
+                      child: toast,
+                    ),
+            ),
           ),
         ),
       ),
     );
 
+    final double sideMargin = action.sideMarginFor(media.size.width);
     return Positioned(
-      left: (options['sideMargin'] as num?)?.toDouble() ?? 16,
-      right: (options['sideMargin'] as num?)?.toDouble() ?? 16,
+      left: sideMargin,
+      right: sideMargin,
       top: top ? media.padding.top + (widget.offset ?? 16) : null,
       bottom: top
           ? null
           : widget.offset ?? action.bottomOffsetFor(media.size.width),
       // Only a toast with a button takes taps; the rest passes them through.
-      child: IgnorePointer(
-        ignoring: !(hasButton || hasClose) || _closing,
+      child: ValueListenableBuilder<List<ModalRoute<Object?>>>(
+        valueListenable: AppToast.covers,
         child: toast,
+        builder: (context, covers, toast) => IgnorePointer(
+          ignoring: !(hasButton || hasClose) || _closing || covers.isNotEmpty,
+          child: toast,
+        ),
       ),
     );
   }
+}
+
+/// Puts [action]'s [ShowToastAction.actionShadows] under the toast's
+/// action [button] (a hard offset shadow under a poster button).
+Widget _styledAction(Widget button, ShowToastAction action, double radius) {
+  final List<Effect>? shadows = action.actionShadows;
+  if (shadows == null || shadows.isEmpty) return button;
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(radius),
+      boxShadow: boxShadowsOf(shadows),
+    ),
+    child: button,
+  );
+}
+
+/// Paints the barriers of [AppToast.covers] over [child] (the toast's
+/// card), each in its colour as far as its route's animation has faded it
+/// in, so the toast looks as it would under them.
+class _UnderBarriers extends StatelessWidget {
+  const _UnderBarriers({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder<List<ModalRoute<Object?>>>(
+        valueListenable: AppToast.covers,
+        child: child,
+        builder: (context, covers, child) {
+          Widget result = child!;
+          for (final ModalRoute<Object?> route in covers) {
+            final Color? color = route.barrierColor;
+            final Animation<double>? animation = route.animation;
+            if (color == null || color.a == 0) continue;
+            result = AnimatedBuilder(
+              animation: animation ?? kAlwaysCompleteAnimation,
+              child: result,
+              builder: (context, child) => DecoratedBox(
+                position: DecorationPosition.foreground,
+                decoration: BoxDecoration(
+                  color: color.withValues(
+                    alpha: color.a * (animation?.value ?? 1),
+                  ),
+                ),
+                child: child,
+              ),
+            );
+          }
+          return result;
+        },
+      );
+}
+
+/// The content of a dialog or sheet the layout opens: while it is up, a
+/// toast already on screen is covered by its barrier (see
+/// [AppToast.covers]), as an app's own toast layer under its dialogs is.
+class ToastBelowRoute extends StatefulWidget {
+  /// Creates a [ToastBelowRoute] around [child].
+  const ToastBelowRoute({super.key, required this.child});
+
+  /// The route's content.
+  final Widget child;
+
+  @override
+  State<ToastBelowRoute> createState() => _ToastBelowRouteState();
+}
+
+class _ToastBelowRouteState extends State<ToastBelowRoute> {
+  ModalRoute<Object?>? _route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final ModalRoute<Object?>? route = ModalRoute.of(context);
+    if (route == _route) return;
+    if (_route != null) AppToast._uncover(_route!);
+    _route = route;
+    if (route != null && route.barrierColor != null) {
+      // Not while building: the toast rebuilds on the change.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _route == route) AppToast._cover(route);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    final ModalRoute<Object?>? route = _route;
+    if (route != null) {
+      // The toast may be building in this frame too.
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => AppToast._uncover(route),
+      );
+      WidgetsBinding.instance.scheduleFrame();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

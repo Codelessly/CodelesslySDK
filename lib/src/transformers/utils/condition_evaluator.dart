@@ -333,6 +333,36 @@ class ConditionEvaluator<R extends Object>
   R? visitFocusAction(FocusAction action) => null;
 
   @override
+  R? visitControlDragAction(ControlDragAction action) => null;
+
+  @override
+  R? visitPaginateAction(PaginateAction action) => null;
+
+  @override
+  R? visitAnimateVariableAction(AnimateVariableAction action) => null;
+
+  @override
+  R? visitSpeakAction(SpeakAction action) => null;
+
+  @override
+  R? visitHapticAction(HapticAction action) => null;
+
+  @override
+  R? visitRunScriptAction(RunScriptAction action) => null;
+
+  @override
+  R? visitScrollToAction(ScrollToAction action) => null;
+
+  @override
+  R? visitPlaySoundAction(PlaySoundAction action) => null;
+
+  @override
+  R? visitPlayAnimationAction(PlayAnimationAction action) => null;
+
+  @override
+  R? visitEditTextAction(EditTextAction action) => null;
+
+  @override
   R? visitPaywallAction(PaywallAction action) => null;
 
   @override
@@ -501,11 +531,62 @@ class ConditionPrinter
   void visitCopyToClipboardAction(CopyToClipboardAction action) {}
 
   @override
+  void visitScrollToAction(ScrollToAction action) {
+    _buffer.writeln('\tScroll to: ${action.nodeId}');
+  }
+
+  @override
   void visitFocusAction(FocusAction action) {
     _buffer.writeln(
       '\t${action.unfocus ? 'Unfocus' : 'Focus'} ${action.nodeId}',
     );
   }
+
+  @override
+  void visitSpeakAction(SpeakAction action) {
+    _buffer.writeln('\tSpeak: ${action.stop ? 'stop' : action.text}');
+  }
+
+  @override
+  void visitHapticAction(HapticAction action) {
+    _buffer.writeln('\tHaptic: ${action.kind.name}');
+  }
+
+  @override
+  void visitRunScriptAction(RunScriptAction action) {
+    _buffer.writeln('\tRun Script ${action.scriptId} with ${action.arguments}');
+  }
+
+  @override
+  void visitPlaySoundAction(PlaySoundAction action) {
+    _buffer.writeln('\tPlay sound: ${action.sound}');
+  }
+
+  @override
+  void visitControlDragAction(ControlDragAction action) {
+    _buffer.writeln(
+      '\tControl drag ${action.command.name} ${action.direction.name} on ${action.nodeId}',
+    );
+  }
+
+  @override
+  void visitPaginateAction(PaginateAction action) {
+    _buffer.writeln('\tPaginate ${action.controller} ${action.command.name}');
+  }
+
+  @override
+  void visitAnimateVariableAction(AnimateVariableAction action) {
+    _buffer.writeln(
+      '\tAnimate variable ${action.variable}: ${action.mode.name} to '
+      '${action.to} over ${action.duration ?? action.durationMs} ms',
+    );
+  }
+
+  @override
+  void visitPlayAnimationAction(PlayAnimationAction action) {}
+
+  @override
+  void visitEditTextAction(EditTextAction action) {}
 
   @override
   void visitPaywallAction(PaywallAction action) {

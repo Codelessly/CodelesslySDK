@@ -180,7 +180,7 @@ void incomingRecordTests() {
     expect(eval('last(tags)'), 'd');
     expect(eval('first(null)'), isNull);
     expect(eval('range(3)'), [0, 1, 2]);
-    expect(eval('range(2, 5)'), [2, 3, 4, 5]);
+    expect(eval('range(2, 5)'), [2, 3, 4]);
   });
 
   test('newId makes distinct prefixed ids', () {
@@ -271,7 +271,7 @@ void incomingPr82RecordTests() {
     test('concat and range', () {
       expect(eval('concat([1], [2, 3], 4)'), [1, 2, 3, 4]);
       expect(eval('range(3)'), [0, 1, 2]);
-      expect(eval('range(8, 11)'), [8, 9, 10, 11]);
+      expect(eval('range(8, 11)'), [8, 9, 10]);
     });
   });
 

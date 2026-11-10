@@ -1,0 +1,391 @@
+{
+ "document": {
+  "rootNode": {
+   "children": [
+    "c1",
+    "c7"
+   ]
+  },
+  "c1": {
+   "id": "c1",
+   "type": "canvas",
+   "name": "Page view",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "properties": {
+    "bodyId": "b2"
+   },
+   "children": [
+    "b2"
+   ]
+  },
+  "b2": {
+   "id": "b2",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c1",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "pv3",
+    "pv5"
+   ]
+  },
+  "pv3": {
+   "id": "pv3",
+   "type": "pageView",
+   "name": "Pages",
+   "basicBoxLocal": [
+    20,
+    20,
+    300,
+    200
+   ],
+   "deniedTypes": [
+    "pageView"
+   ],
+   "isScrollable": true,
+   "useFlutterListView": true,
+   "properties": {},
+   "children": [
+    "r4"
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "r4": {
+   "id": "r4",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    200,
+    100
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#80CBC4",
+     "id": "f80CBC4"
+    }
+   ],
+   "parentID": "pv3"
+  },
+  "pv5": {
+   "id": "pv5",
+   "type": "pageView",
+   "name": "Pages",
+   "basicBoxLocal": [
+    20,
+    250,
+    300,
+    120
+   ],
+   "deniedTypes": [
+    "pageView"
+   ],
+   "isScrollable": true,
+   "useFlutterListView": true,
+   "properties": {
+    "viewportFraction": 0.8
+   },
+   "children": [
+    "r6"
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 250
+   },
+   "positioningMode": "pin",
+   "parentID": "b2"
+  },
+  "r6": {
+   "id": "r6",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    200,
+    100
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFCC80",
+     "id": "fFFCC80"
+    }
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "parentID": "pv5"
+  },
+  "c7": {
+   "id": "c7",
+   "type": "canvas",
+   "name": "Initial page",
+   "parentID": "rootNode",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "properties": {
+    "bodyId": "b8"
+   },
+   "children": [
+    "b8"
+   ]
+  },
+  "b8": {
+   "id": "b8",
+   "type": "frame",
+   "name": "Body",
+   "parentID": "c7",
+   "basicBoxLocal": [
+    0,
+    0,
+    400,
+    400
+   ],
+   "horizontalFit": "expanded",
+   "verticalFit": "expanded",
+   "children": [
+    "pv9",
+    "pv11",
+    "pv16"
+   ]
+  },
+  "pv9": {
+   "id": "pv9",
+   "type": "pageView",
+   "name": "Pages",
+   "basicBoxLocal": [
+    20,
+    20,
+    300,
+    150
+   ],
+   "deniedTypes": [
+    "pageView"
+   ],
+   "isScrollable": true,
+   "useFlutterListView": true,
+   "properties": {
+    "itemCount": 3,
+    "initialPage": 1,
+    "viewportFraction": 0.5,
+    "padEnds": false
+   },
+   "children": [
+    "r10"
+   ],
+   "edgePins": {
+    "left": 20,
+    "top": 20
+   },
+   "positioningMode": "pin",
+   "parentID": "b8"
+  },
+  "r10": {
+   "id": "r10",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    100,
+    100
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#CE93D8",
+     "id": "fCE93D8"
+    }
+   ],
+   "parentID": "pv9"
+  },
+  "pv11": {
+   "id": "pv11",
+   "type": "pageView",
+   "name": "Pages",
+   "basicBoxLocal": [
+    20,
+    200,
+    200,
+    180
+   ],
+   "deniedTypes": [
+    "pageView"
+   ],
+   "isScrollable": true,
+   "useFlutterListView": true,
+   "properties": {
+    "itemCount": 4
+   },
+   "children": [
+    "rc12"
+   ],
+   "scrollDirection": "vertical",
+   "edgePins": {
+    "left": 20,
+    "top": 200
+   },
+   "positioningMode": "pin",
+   "parentID": "b8"
+  },
+  "rc12": {
+   "id": "rc12",
+   "type": "row",
+   "rowColumnType": "row",
+   "name": "Row",
+   "basicBoxLocal": [
+    0,
+    0,
+    120,
+    40
+   ],
+   "mainAxisAlignment": "start",
+   "crossAxisAlignment": "center",
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#FFF3E0",
+     "id": "fFFF3E0"
+    }
+   ],
+   "verticalFit": "shrinkWrap",
+   "spacing": 8,
+   "padding": [
+    4,
+    4,
+    4,
+    4
+   ],
+   "parentID": "pv11",
+   "children": [
+    "r13",
+    "t14"
+   ]
+  },
+  "r13": {
+   "id": "r13",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    24,
+    24
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#42A5F5",
+     "id": "f42A5F5"
+    }
+   ],
+   "parentID": "rc12"
+  },
+  "t14": {
+   "id": "t14",
+   "type": "text",
+   "name": "Text",
+   "data": "Item",
+   "basicBoxLocal": [
+    0,
+    0,
+    48,
+    12
+   ],
+   "horizontalFit": "shrinkWrap",
+   "verticalFit": "shrinkWrap",
+   "textMixedProps": [
+    {
+     "start": 0,
+     "end": 4,
+     "fontSize": 12,
+     "fontName": {
+      "family": "Roboto",
+      "style": "Regular",
+      "weight": "w400"
+     },
+     "fills": [
+      {
+       "type": "solid",
+       "color": "#222222",
+       "id": "tf15"
+      }
+     ]
+    }
+   ],
+   "parentID": "rc12"
+  },
+  "pv16": {
+   "id": "pv16",
+   "type": "pageView",
+   "name": "Pages",
+   "basicBoxLocal": [
+    260,
+    200,
+    120,
+    100
+   ],
+   "deniedTypes": [
+    "pageView"
+   ],
+   "isScrollable": true,
+   "useFlutterListView": true,
+   "properties": {
+    "viewportFraction": 0.6
+   },
+   "children": [
+    "r17"
+   ],
+   "reverse": true,
+   "edgePins": {
+    "left": 260,
+    "top": 200
+   },
+   "positioningMode": "pin",
+   "parentID": "b8"
+  },
+  "r17": {
+   "id": "r17",
+   "type": "rectangle",
+   "name": "Rect",
+   "basicBoxLocal": [
+    0,
+    0,
+    50,
+    50
+   ],
+   "fills": [
+    {
+     "type": "solid",
+     "color": "#A5D6A7",
+     "id": "fA5D6A7"
+    }
+   ],
+   "parentID": "pv16"
+  }
+ }
+}

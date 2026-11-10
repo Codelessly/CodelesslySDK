@@ -51,6 +51,10 @@ class FreeformAxisPlacement {
   /// The child's outer extent at design size.
   final double extent;
 
+  /// Whether this axis is the container's scroll axis: children are content
+  /// there and never clamped ([clamp] is false only along it).
+  bool get isScroll => !clamp;
+
   /// The container's inner extent at design size.
   final double parentExtent;
 
@@ -85,6 +89,21 @@ class FreeformAxisPlacement {
   /// [size] only as a minimum, so the content grows and stays reachable.
   final bool growsWithContent;
 
+  /// The fraction of the container's runtime extent the child takes (its
+  /// `widthFactor` or `heightFactor`), its margins on this axis taken off
+  /// first; null when the child isn't sized by a fraction.
+  final double? sizeFactor;
+
+  /// The child's margins on this axis, for [sizeFactor].
+  final double factorMargin;
+
+  /// The child's outer start from the container's inner start edge that a
+  /// bound `x` or `y` gives it, whatever size the container gets: the child
+  /// sits there instead of where [mode] would put it, unclamped, as on the
+  /// design canvas. Its size still follows [mode]. Null when the axis isn't
+  /// bound.
+  final double? boundStart;
+
   const FreeformAxisPlacement({
     required this.mode,
     required this.start,
@@ -98,7 +117,56 @@ class FreeformAxisPlacement {
     this.expands = false,
     this.growsWithContent = false,
     this.minSize = 0,
+    this.sizeFactor,
+    this.factorMargin = 0,
+    this.boundStart,
   });
+
+  /// This placement with the child's outer start at [start] (see
+  /// [boundStart]).
+  FreeformAxisPlacement withBoundStart(double start) => FreeformAxisPlacement(
+    mode: mode,
+    start: this.start,
+    extent: extent,
+    parentExtent: parentExtent,
+    size: size,
+    alignment: alignment,
+    fraction: fraction,
+    anchor: anchor,
+    clamp: clamp,
+    expands: expands,
+    growsWithContent: growsWithContent,
+    minSize: minSize,
+    sizeFactor: sizeFactor,
+    factorMargin: factorMargin,
+    boundStart: start,
+  );
+
+  /// This placement with the child sized as [factor] of the container's
+  /// extent, less [margin], plus [margin].
+  FreeformAxisPlacement withSizeFactor(double factor, double margin) =>
+      FreeformAxisPlacement(
+        mode: mode,
+        start: start,
+        extent: extent,
+        parentExtent: parentExtent,
+        size: size,
+        alignment: alignment,
+        fraction: fraction,
+        anchor: anchor,
+        clamp: clamp,
+        expands: false,
+        growsWithContent: false,
+        minSize: minSize,
+        sizeFactor: factor,
+        factorMargin: margin,
+        boundStart: boundStart,
+      );
+
+  /// The outer extent of a child sized by [sizeFactor] in a container of
+  /// runtime extent [s].
+  double factorExtentIn(double s) =>
+      math.max(0, (s - factorMargin) * sizeFactor!) + factorMargin;
 
   /// Distance from the child's outer end edge to the container's inner end
   /// edge at design size.
@@ -158,6 +226,8 @@ class FreeformAxisPlacement {
   /// child edge.
   double contribution(double childExtent, {required bool wraps}) =>
       switch (mode) {
+        _ when boundStart != null && mode != FreeformAxisMode.fill =>
+          wraps ? childExtent : math.max(0, boundStart!) + childExtent,
         FreeformAxisMode.fill => 0,
         FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
         _ when wraps => childExtent,
@@ -178,6 +248,14 @@ class FreeformAxisPlacement {
   /// (it is sized from its children); [incomingMax] is then the most it may
   /// grow to.
   (double min, double max) constraintsIn(double? s, double incomingMax) {
+    if (sizeFactor != null) {
+      final double? container =
+          s ?? (incomingMax.isFinite ? incomingMax : null);
+      final double v = container == null
+          ? math.max(0, extent)
+          : factorExtentIn(container);
+      return (v, v);
+    }
     switch (mode) {
       case FreeformAxisMode.fill:
         final double v = s ?? extent;
@@ -186,6 +264,19 @@ class FreeformAxisPlacement {
         final double v = s == null ? math.max(0, extent) : stretchIn(s).$2;
         return (v, v);
       case FreeformAxisMode.align:
+        // Like Flutter's Align, but a child larger than the container at
+        // design size keeps that overhang (see [room]), as the editor's
+        // solver keeps a fixed size: a 585 wide decoration aligned in a 390
+        // wide frame stays 585 wide and sits at the Alignment.inscribe
+        // offset instead of being squashed to the frame. An expanded child
+        // fills the container instead: its stored extent is only what its
+        // content needed at design time, not a size to keep.
+        final double designOverflow = expands
+            ? 0
+            : math.max(0, extent - parentExtent);
+        final double max = s == null ? incomingMax : s + designOverflow;
+        if (expands && max.isInfinite) return (extent, extent);
+        return (0, max);
       case FreeformAxisMode.fraction:
         final double max = s ?? incomingMax;
         if (expands && max.isInfinite) return (extent, extent);
@@ -208,6 +299,7 @@ class FreeformAxisPlacement {
   /// The child's offset on this axis in a container of runtime extent [s],
   /// given the child's laid out [childExtent].
   double offsetIn(double s, double childExtent, {required bool wraps}) {
+    if (boundStart case final double bound) return bound;
     double offset;
     switch (mode) {
       case FreeformAxisMode.fill:
@@ -252,7 +344,10 @@ class FreeformAxisPlacement {
       other.clamp == clamp &&
       other.expands == expands &&
       other.growsWithContent == growsWithContent &&
-      other.minSize == minSize;
+      other.minSize == minSize &&
+      other.sizeFactor == sizeFactor &&
+      other.factorMargin == factorMargin &&
+      other.boundStart == boundStart;
 
   @override
   int get hashCode => Object.hash(
@@ -268,6 +363,9 @@ class FreeformAxisPlacement {
     expands,
     growsWithContent,
     minSize,
+    sizeFactor,
+    factorMargin,
+    boundStart,
   );
 
   @override
@@ -297,6 +395,41 @@ class FreeformPlacement {
 /// Parent data for children of [RenderFreeformLayout].
 class FreeformParentData extends ContainerBoxParentData<RenderBox> {
   FreeformPlacement? placement;
+}
+
+/// Marks the node [nodeId] as placed by its [FreeformLayout] slot at its
+/// bound `x` ([x]) and `y` ([y]) (see [FreeformAxisPlacement.boundStart]),
+/// so the node's own bound offset doesn't move it there again.
+class FreeformBoundPlacement extends InheritedWidget {
+  /// The node the slot places.
+  final String nodeId;
+
+  /// Whether the slot places the node at its bound x.
+  final bool x;
+
+  /// Whether the slot places the node at its bound y.
+  final bool y;
+
+  const FreeformBoundPlacement({
+    super.key,
+    required this.nodeId,
+    required this.x,
+    required this.y,
+    required super.child,
+  });
+
+  /// The axes (x, y) on which the freeform slot around [context] places the
+  /// node [nodeId] at its bound position; (false, false) when none does.
+  static (bool x, bool y) of(BuildContext context, String nodeId) {
+    final FreeformBoundPlacement? scope = context
+        .dependOnInheritedWidgetOfExactType<FreeformBoundPlacement>();
+    if (scope == null || scope.nodeId != nodeId) return (false, false);
+    return (scope.x, scope.y);
+  }
+
+  @override
+  bool updateShouldNotify(FreeformBoundPlacement oldWidget) =>
+      oldWidget.nodeId != nodeId || oldWidget.x != x || oldWidget.y != y;
 }
 
 /// Gives a child of a [FreeformLayout] its [placement].
@@ -342,11 +475,17 @@ class FreeformLayout extends MultiChildRenderObjectWidget {
   /// The container's inner size at design size.
   final Size designSize;
 
+  /// The direction children are placed in. Null takes the ambient
+  /// [Directionality]: right to left, every child is mirrored across the
+  /// container, so a design made left to right reads from the right edge.
+  final TextDirection? textDirection;
+
   const FreeformLayout({
     super.key,
     required this.wrapsWidth,
     required this.wrapsHeight,
     required this.designSize,
+    this.textDirection,
     super.children,
   });
 
@@ -356,6 +495,10 @@ class FreeformLayout extends MultiChildRenderObjectWidget {
         wrapsWidth: wrapsWidth,
         wrapsHeight: wrapsHeight,
         designSize: designSize,
+        textDirection:
+            textDirection ??
+            Directionality.maybeOf(context) ??
+            TextDirection.ltr,
       );
 
   @override
@@ -366,7 +509,9 @@ class FreeformLayout extends MultiChildRenderObjectWidget {
     renderObject
       ..wrapsWidth = wrapsWidth
       ..wrapsHeight = wrapsHeight
-      ..designSize = designSize;
+      ..designSize = designSize
+      ..textDirection =
+          textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr;
   }
 }
 
@@ -379,10 +524,23 @@ class RenderFreeformLayout extends RenderBox
     required bool wrapsWidth,
     required bool wrapsHeight,
     required Size designSize,
+    TextDirection textDirection = TextDirection.ltr,
   }) {
     _wrapsWidth = wrapsWidth;
     _wrapsHeight = wrapsHeight;
     _designSize = designSize;
+    _textDirection = textDirection;
+  }
+
+  late TextDirection _textDirection;
+
+  /// Right to left, children are mirrored across the container.
+  TextDirection get textDirection => _textDirection;
+
+  set textDirection(TextDirection value) {
+    if (value == _textDirection) return;
+    _textDirection = value;
+    markNeedsLayout();
   }
 
   late bool _wrapsWidth;
@@ -536,15 +694,20 @@ class RenderFreeformLayout extends RenderBox
     }
     final Map<RenderBox, double> pushX = _flowPushes(sizes, true);
     final Map<RenderBox, double> pushY = _flowPushes(sizes, false);
+    final bool rtl = _textDirection == TextDirection.rtl;
     sizes.forEach((child, childSize) {
       final FreeformPlacement placement = _placementOf(child);
+      final double x =
+          placement.horizontal.offsetIn(
+            size.width,
+            childSize.width,
+            wraps: wrapsWidth,
+          ) +
+          (pushX[child] ?? 0);
       positions[child] = Offset(
-        placement.horizontal.offsetIn(
-              size.width,
-              childSize.width,
-              wraps: wrapsWidth,
-            ) +
-            (pushX[child] ?? 0),
+        // Right to left the child keeps its distance from the end edge
+        // instead of the start edge: its box mirrored across the container.
+        rtl ? size.width - x - childSize.width : x,
         placement.vertical.offsetIn(
               size.height,
               childSize.height,

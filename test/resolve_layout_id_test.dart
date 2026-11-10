@@ -62,24 +62,4 @@ void main() {
     expect(model.resolveLayoutId(''), isNull);
     expect(model.resolveLayoutId(null), isNull);
   });
-
-  // The first screen shows in the host's route, which has no arguments: it
-  // reads the link's parameters when the link names it.
-  test('link parameters reach the screen the link names', () {
-    const CodelesslyRoute link = CodelesslyRoute('canvas-trips', {
-      'state': 'loading',
-    });
-    expect(model.linkParamsFor(link, 'layout-trips'), {'state': 'loading'});
-    expect(model.linkParamsFor(link, 'layout-route'), isNull);
-    expect(
-      model.linkParamsFor(
-        const CodelesslyRoute('canvas-trips'),
-        'layout-trips',
-      ),
-      isNull,
-    );
-    expect(model.linkParamsFor(null, 'layout-trips'), isNull);
-    // A widget showing the first screen may not know its layout yet.
-    expect(model.linkParamsFor(link, null), {'state': 'loading'});
-  });
 }

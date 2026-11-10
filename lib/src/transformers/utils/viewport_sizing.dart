@@ -4,6 +4,8 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../utils/measurable_layout_builder.dart';
+import 'fit_layout.dart';
 import 'parent_size.dart';
 
 /// Builds a scroll view. [shrinkWrap] says whether the view must size itself
@@ -155,20 +157,30 @@ class ViewportNodeBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final ViewportLayout layout = ViewportLayout.resolve(
-          node: node,
-          scrollDirection: scrollDirection,
-          canShrinkWrap: canShrinkWrap,
-          constraints: constraints,
-        );
-        return SizedBox(
-          width: layout.width,
-          height: layout.height,
-          child: builder(context, layout.shrinkWrap),
-        );
-      },
+    // The box is the one [ViewportLayout.resolve] gives, decided at layout
+    // time by a [FitBox] rather than a LayoutBuilder: whether the view
+    // shrink-wraps doesn't depend on the constraints, only whether an
+    // expanded axis has anything to fill does. So the box can be measured
+    // (the viewport inside still can't).
+    final bool vertical = scrollDirection == AxisC.vertical;
+    final SizeFit mainFit = vertical ? node.verticalFit : node.horizontalFit;
+    final SizeFit crossFit = vertical ? node.horizontalFit : node.verticalFit;
+    final double designMain = vertical
+        ? node.basicBoxLocal.height
+        : node.basicBoxLocal.width;
+    final double designCross = vertical
+        ? node.basicBoxLocal.width
+        : node.basicBoxLocal.height;
+    final bool shrinkWrap = mainFit == SizeFit.shrinkWrap && canShrinkWrap;
+    final double? main = shrinkWrap ? null : designMain;
+    final bool fillMain = mainFit == SizeFit.expanded;
+    final bool fillCross = crossFit == SizeFit.expanded;
+    return FitBox(
+      width: vertical ? designCross : main,
+      height: vertical ? main : designCross,
+      fillWidth: vertical ? fillCross : fillMain,
+      fillHeight: vertical ? fillMain : fillCross,
+      child: builder(context, shrinkWrap),
     );
   }
 }
@@ -204,6 +216,11 @@ class ListItemBox extends StatelessWidget {
   /// Whether the item is a child of a wrapping list's [Wrap].
   final bool inWrap;
 
+  /// Whether the list places the item across its axis itself, so the item
+  /// is not aligned here: the list stretches its items (see
+  /// [ListViewProperties.stretchItems]) or hugs and centres them.
+  final bool stretch;
+
   /// Creates a [ListItemBox].
   const ListItemBox({
     super.key,
@@ -212,6 +229,7 @@ class ListItemBox extends StatelessWidget {
     required this.itemExtent,
     required this.child,
     this.inWrap = false,
+    this.stretch = false,
   });
 
   @override
@@ -232,7 +250,7 @@ class ListItemBox extends StatelessWidget {
         child: result,
       );
     }
-    if (inWrap) return result;
+    if (inWrap || stretch) return result;
     return Align(
       alignment: vertical ? Alignment.topCenter : Alignment.centerLeft,
       child: result,
@@ -274,27 +292,18 @@ class WrapNodeBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double? width = extent(
-          node.horizontalFit,
-          node.basicBoxLocal.width,
-          constraints.hasBoundedWidth,
-        );
-        final double? height = extent(
-          node.verticalFit,
-          node.basicBoxLocal.height,
-          constraints.hasBoundedHeight,
-        );
-        final double? cross = node.scrollDirection == AxisC.horizontal
-            ? height
-            : width;
-        return SizedBox(
-          width: width,
-          height: height,
-          child: builder(context, cross != null),
-        );
-      },
+    // [extent] decided at layout time by a [FitBox] rather than a
+    // LayoutBuilder, so a row or column around the list can measure it: an
+    // axis only sizes to the runs when it shrink-wraps, whatever the
+    // constraints.
+    final SizeFit crossFit = node.scrollDirection == AxisC.horizontal
+        ? node.verticalFit
+        : node.horizontalFit;
+    return FitBox.fromFits(
+      horizontalFit: node.horizontalFit,
+      verticalFit: node.verticalFit,
+      size: node.basicBoxLocal.size,
+      child: builder(context, crossFit != SizeFit.shrinkWrap),
     );
   }
 }
@@ -303,6 +312,12 @@ class WrapNodeBox extends StatelessWidget {
 /// on both axes. An expanded or flexible item, which has nothing to fill in
 /// a run, takes its design size; with [itemExtent] the item takes that
 /// extent along the wrap direction.
+///
+/// With [stretch] (the list's [ListViewProperties.stretchItems]) an item
+/// that fills the cross axis is as thick as its run: the
+/// [RunStretchWrap] measures it from its content, so its design extent
+/// there (solved by the editor for one set of values, e.g. with a list in
+/// it that a binding hides at runtime) is not imposed.
 class WrapItemBox extends StatelessWidget {
   /// The item node.
   final BaseNode item;
@@ -312,6 +327,9 @@ class WrapItemBox extends StatelessWidget {
 
   /// The list's fixed item extent, if any.
   final double? itemExtent;
+
+  /// Whether the list stretches its items across the wrap direction.
+  final bool stretch;
 
   /// The built item.
   final Widget child;
@@ -323,6 +341,7 @@ class WrapItemBox extends StatelessWidget {
     required this.scrollDirection,
     required this.itemExtent,
     required this.child,
+    this.stretch = false,
   });
 
   static bool _fills(SizeFit fit) =>
@@ -331,10 +350,10 @@ class WrapItemBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool vertical = scrollDirection == AxisC.vertical;
-    double? width = _fills(item.horizontalFit)
+    double? width = _fills(item.horizontalFit) && !(stretch && vertical)
         ? item.outerBoxLocal.width
         : null;
-    double? height = _fills(item.verticalFit)
+    double? height = _fills(item.verticalFit) && !(stretch && !vertical)
         ? item.outerBoxLocal.height
         : null;
     if (itemExtent != null) {
@@ -365,17 +384,34 @@ bool listWraps(ListViewNode node) =>
 
 /// Whether list [node] builds all its items up front, as a plain [Flex] or a
 /// [Wrap] rather than a viewport: it wraps (see [listWraps]), or it doesn't
-/// scroll, hugs its items along its axis and has a known item count (bound
-/// data or a set count). Such a list builds every item either way, so it
-/// needs no viewport.
+/// scroll, has a known item count (bound data or a set count) and either
+/// hugs its items along its axis or stretches them across a cross axis it
+/// hugs (see [listStretchesHuggedCross]). Such a list builds every item
+/// either way, so it needs no viewport.
 bool listBuildsAllItems(ListViewNode node) {
   if (listWraps(node)) return true;
   final SizeFit mainFit = node.scrollDirection == AxisC.vertical
       ? node.verticalFit
       : node.horizontalFit;
   return !node.isScrollable &&
-      mainFit == SizeFit.shrinkWrap &&
+      (mainFit == SizeFit.shrinkWrap || listStretchesHuggedCross(node)) &&
       listHasKnownItemCount(node);
+}
+
+/// Whether list [node] stretches its items ([ListViewProperties.stretchItems])
+/// across a cross axis it shrink-wraps. Its cross extent is then that of its
+/// thickest item, which only laying out every item tells: a viewport could
+/// only take the design size, which the editor solves from the item
+/// template alone (the first item's data), so a thicker item further on
+/// overflowed.
+bool listStretchesHuggedCross(ListViewNode node) {
+  final SizeFit crossFit = node.scrollDirection == AxisC.vertical
+      ? node.horizontalFit
+      : node.verticalFit;
+  return node.properties.stretchItems &&
+      !node.properties.stacked &&
+      node.properties.layout == ListLayout.list &&
+      crossFit == SizeFit.shrinkWrap;
 }
 
 /// The gap between consecutive items of a wrapping list: the separator's
@@ -385,14 +421,19 @@ double listWrapSpacing(ListViewNode node) => node.properties.hasSeparator
     : 0;
 
 /// Whether [node] or any node below it builds a widget that cannot report
-/// intrinsic sizes: a list, grid or page view (a viewport behind a
-/// [LayoutBuilder]), a scrolling row, column or frame (a [LayoutBuilder]
-/// when it fills its viewport), or a web view.
+/// intrinsic sizes: a list, grid or page view that scrolls (a viewport), a
+/// scrolling row, column or frame, or a web view.
 ///
 /// Wrapping such a subtree in [IntrinsicHeight] or [IntrinsicWidth] throws
-/// ("LayoutBuilder does not support returning intrinsic dimensions",
-/// "RenderViewport does not support returning intrinsic dimensions"), so a
+/// ("RenderViewport does not support returning intrinsic dimensions"), so a
 /// caller that adds an intrinsic wrapper must skip it when this is true.
+///
+/// Everything else a node tree builds can be measured. Boxes that depend on
+/// the constraints they get are [FitBox]es (list, grid, wrap and scaled
+/// frame boxes) or [MeasurableLayoutBuilder]s (nodes reading their parent's
+/// size, responsive variants, charts, text fields), never a plain
+/// [LayoutBuilder]; a node that reads its parent's size still counts as
+/// blocking, as its size there would depend on itself.
 bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
   if ((node is ListViewNode && !listBuildsAllItems(node)) ||
       node is GridViewNode ||
@@ -400,12 +441,15 @@ bool subtreeBlocksIntrinsics(BaseNode node, GetNode getNode) {
       node is WebViewNode) {
     return true;
   }
-  if (node is ScrollableMixin && node is! CanvasNode && node.isScrollable) {
+  // A list that builds all its items never scrolls, whatever its scroll
+  // settings (see [listBuildsAllItems]); one that doesn't returned above.
+  if (node is ScrollableMixin &&
+      node is! CanvasNode &&
+      node is! ListViewNode &&
+      node.isScrollable) {
     return true;
   }
-  // Scaled content and nodes that read their parent's size are built with
-  // a LayoutBuilder.
-  if (node is FrameNode && node.contentFit != null) return true;
+  // A node that reads its parent's size would be measured by itself.
   if (readsParentSize(node)) return true;
   if (node is ChildrenMixin) {
     for (final String id in node.children) {

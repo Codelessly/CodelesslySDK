@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../codelessly_sdk.dart';
 
@@ -15,8 +16,9 @@ import '../../codelessly_sdk.dart';
 /// out every computed variable at once for the design canvas.
 ///
 /// Semantics:
-///  - It reads other variables, including other computed ones, and the
-///    `data` passed to the layout.
+///  - It reads other variables, including other computed ones, the
+///    `data` passed to the layout, and the predefined values bindings read
+///    (`screen`, `route`, `auth`, `drag`, ...).
 ///  - Computed variables that read themselves, directly or through others,
 ///    form a cycle and evaluate to null.
 ///  - Set variable actions, two-way bindings and
@@ -51,11 +53,15 @@ abstract final class ComputedVariables {
     return formula.trim();
   }
 
-  /// Why [formula] can't be evaluated, or null when it parses.
-  static String? errorOf(String formula) {
+  /// Why [formula] can't be evaluated, or null when it parses. Calls to
+  /// [functionNames] (function variables) are allowed.
+  static String? errorOf(
+    String formula, {
+    Iterable<String> functionNames = const [],
+  }) {
     final String? expression = expressionOf(formula);
     if (expression == null) return null;
-    return FormulaEvaluator.errorOf(expression);
+    return FormulaEvaluator.errorOf(expression, functionNames: functionNames);
   }
 
   /// The names of the variables [variable]'s formula reads, e.g. `records`
@@ -66,6 +72,13 @@ abstract final class ComputedVariables {
     final String? path = _exactPathOf(formula);
     final Set<String> paths = path != null
         ? {path}
+        : variable.isFunction
+        // A function's parameters aren't variables.
+        ? FormulaFunction(
+            variable.parameters,
+            expressionOf(formula)!,
+            (_) => null,
+          ).externalPaths
         : FormulaEvaluator.referencedPaths(expressionOf(formula)!);
     return {
       for (final String path in paths)
@@ -108,12 +121,15 @@ abstract final class ComputedVariables {
   /// themselves, directly or through other computed variables.
   static Set<String> cyclicNames(Map<String, VariableData> variables) {
     final Set<String> cyclic = {};
+    // Functions can call themselves, and are worked out when called, so
+    // they take no part in cycles.
+    bool isValue(VariableData? v) => v != null && v.isComputed && !v.isFunction;
     final Map<String, Set<String>> edges = {
       for (final VariableData variable in variables.values)
-        if (variable.isComputed)
+        if (isValue(variable))
           variable.name: {
             for (final String input in inputsOf(variable))
-              if (variables[input]?.isComputed ?? false) input,
+              if (isValue(variables[input])) input,
           },
     };
     // A computed variable is cyclic when it can reach itself.
@@ -142,7 +158,9 @@ abstract final class ComputedVariables {
     void visit(String name) {
       if (!visited.add(name)) return;
       final VariableData? variable = variables[name];
-      if (variable == null || !variable.isComputed) return;
+      if (variable == null || !variable.isComputed || variable.isFunction) {
+        return;
+      }
       for (final String input in inputsOf(variable)) {
         if (!cyclic.contains(input)) visit(input);
       }
@@ -150,7 +168,9 @@ abstract final class ComputedVariables {
     }
 
     for (final VariableData variable in variables.values) {
-      if (variable.isComputed && !cyclic.contains(variable.name)) {
+      if (variable.isComputed &&
+          !variable.isFunction &&
+          !cyclic.contains(variable.name)) {
         visit(variable.name);
       }
     }
@@ -159,10 +179,25 @@ abstract final class ComputedVariables {
 
   /// [variables] (by name) with every computed variable holding its
   /// formula's result over the others, as a design canvas previews them with
-  /// default values. [data] is what the formulas read as `data`.
+  /// default values. [data] is what the formulas read as `data`, and
+  /// [routeParams] what they read as `route` (a screen's sample params).
+  /// [screenSize] and [platformBrightness] are what they read as `screen`
+  /// (a canvas is its own screen), and [predefinedOverrides] the preview
+  /// values of predefined variables such as `drag` (see
+  /// [ScopedValues.predefinedOverrides]), as bindings on that canvas read
+  /// them.
+  /// [codelesslyContext] gives formulas the screen's scripts, for
+  /// `script.name(args)`.
   static Map<String, VariableData> resolveAll(
     Map<String, VariableData> variables, {
     Map<String, dynamic>? data,
+    Map<String, dynamic>? routeParams,
+    ComputedPreviewCache? cache,
+    Duration? budget,
+    Size? screenSize,
+    Brightness? platformBrightness,
+    Map<String, Map<String, Object?>>? predefinedOverrides,
+    CodelesslyContext? codelesslyContext,
   }) {
     if (!variables.values.any((variable) => variable.isComputed)) {
       return variables;
@@ -172,15 +207,99 @@ abstract final class ComputedVariables {
     final ScopedValues scope = ScopedValues.preview(
       variables: resolved,
       data: data,
+      routeParams: routeParams,
+      screenSize: screenSize,
+      platformBrightness: platformBrightness,
+      predefinedOverrides: predefinedOverrides,
+      codelesslyContext: codelesslyContext,
     );
+    // What every formula may read besides variables: the screen it is
+    // previewed on and the predefined variables' preview values.
+    final String context = cache == null
+        ? ''
+        : '$screenSize|$platformBrightness|${jsonEncode(predefinedOverrides ?? const {}, toEncodable: (o) => '$o')}';
     for (final String name in evaluationOrder(variables)) {
       final VariableData variable = resolved[name]!;
-      resolved[name] = withResult(
+      if (cyclic.contains(name)) {
+        resolved[name] = withResult(variable, null);
+        continue;
+      }
+      // What the formula reads, through other computed variables and
+      // functions, as it stands now: the same as last time reuses the
+      // result.
+      final String? key = cache == null
+          ? null
+          : _inputKey(variable, variables, resolved, routeParams, context);
+      final ({String key, VariableData result, bool slow})? previous =
+          cache?._results[variable.id];
+      if (key != null && previous != null && previous.key == key) {
+        resolved[name] = previous.result;
+        continue;
+      }
+      final ({Object? result, bool exceeded}) run = budget == null
+          ? (result: evaluate(variable, scopedValues: scope), exceeded: false)
+          : FormulaEvaluator.withinBudget(
+              budget,
+              () => evaluate(variable, scopedValues: scope),
+            );
+      final VariableData result = withResult(
         variable,
-        cyclic.contains(name) ? null : evaluate(variable, scopedValues: scope),
+        run.exceeded ? null : run.result,
       );
+      resolved[name] = result;
+      if (cache != null && key != null) {
+        cache._results[variable.id] = (
+          key: key,
+          result: result,
+          slow: run.exceeded,
+        );
+        if (run.exceeded) {
+          cache.slow.add(name);
+        } else {
+          cache.slow.remove(name);
+        }
+      }
     }
     return resolved;
+  }
+
+  /// The values [variable]'s formula reads, directly or through other
+  /// computed variables and functions, joined into one comparable key.
+  static String _inputKey(
+    VariableData variable,
+    Map<String, VariableData> variables,
+    Map<String, VariableData> resolved,
+    Map<String, dynamic>? routeParams,
+    String context,
+  ) {
+    final deps = PropertyValueDelegate.computedDependencies(
+      variable.name,
+      variables,
+    );
+    final List<String> names = {
+      for (final String path in deps.paths)
+        if (VariableMatch.parse(path.wrapWithVariableSyntax())
+            case final VariableMatch match)
+          match.name,
+    }.toList()..sort();
+    final StringBuffer key = StringBuffer(formulaOf(variable) ?? '')
+      ..write('\u0000')
+      ..write(context);
+    for (final String name in names) {
+      final VariableData? input = resolved[name];
+      key
+        ..write('\u0000')
+        ..write(name)
+        ..write('=')
+        ..write(input?.value ?? '')
+        ..write(input?.formula ?? '');
+      if (name == 'route') key.write(jsonEncode(routeParams ?? const {}));
+    }
+    // Formulas that read the clock are worked out every time.
+    if (deps.readsClock || deps.readsFrameClock) {
+      key.write('\u0000${DateTime.now().microsecondsSinceEpoch}');
+    }
+    return key.toString();
   }
 
   static bool _fits(Object result, VariableType type) => switch (type) {
@@ -252,4 +371,22 @@ abstract final class ComputedVariables {
       extra: variable.extra,
     ),
   };
+}
+
+/// Results of computed variables a design canvas worked out, kept while
+/// the values their formulas read stay the same, so editing one node
+/// doesn't work out every heavy formula again; and which of them ran past
+/// their time budget ([slow]), shown empty until what they read changes.
+class ComputedPreviewCache {
+  final Map<String, ({String key, VariableData result, bool slow})> _results =
+      {};
+
+  /// Names of the computed variables whose last preview ran out of time.
+  final Set<String> slow = {};
+
+  /// Forgets every result.
+  void clear() {
+    _results.clear();
+    slow.clear();
+  }
 }

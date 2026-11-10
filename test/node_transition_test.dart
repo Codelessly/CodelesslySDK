@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:codelessly_sdk/codelessly_sdk.dart' show TransitionCurveExt;
 
 import 'feedback_actions_test.dart'
     show body, brandRegular, button, canvas, layoutOf, pumpLayouts, text;
@@ -81,5 +82,15 @@ void main() {
           .first,
     );
     expect(opacity.opacity, 0.45);
+  });
+
+  test('every motion curve is a transition curve', () {
+    for (final MotionCurve curve in MotionCurve.values) {
+      final TransitionCurve transition = TransitionCurve.values.byName(
+        curve.name,
+      );
+      expect(transition.flutterCurve, isNotNull);
+    }
+    expect(TransitionCurve.easeOutBack.flutterCurve, Curves.easeOutBack);
   });
 }
