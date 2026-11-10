@@ -2,6 +2,10 @@
 
 [Guide](README.md) · Previous: [Testing](14-testing.md) · Next: [Migrating from 10.x](16-migrating-from-10.md)
 
+![Triage: an error builder means a Loading message; a spinner forever means await initialize in a try; nothing shown means check the controller; a failing action means read the console](images/15-troubleshooting/hero.png)
+
+*Where to look first.*
+
 ## Error messages
 
 A layout that fails to load shows `errorBuilder` with the error. Find its message here.

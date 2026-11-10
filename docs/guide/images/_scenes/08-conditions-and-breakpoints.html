@@ -1,0 +1,53 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: breakpoints and which canvas shows -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">One canvas per breakpoint</div><div class="s">The widget shows the canvas whose breakpoint matches the width it is laid out in.</div></div>
+  <div class="at" style="left:40px;top:150px;width:720px;height:2px;background:var(--line2)"></div>
+  <div class="at" style="left:40px;top:142px;width:2px;height:18px;background:var(--fg1)"></div>
+  <div class="at" style="left:280px;top:142px;width:2px;height:18px;background:var(--fg1)"></div>
+  <div class="at" style="left:450px;top:142px;width:2px;height:18px;background:var(--fg1)"></div>
+  <div class="at m" style="left:40px;top:118px;font-size:12px;color:var(--fg1)">0</div>
+  <div class="at m" style="left:280px;top:118px;font-size:12px;color:var(--fg1)">600</div>
+  <div class="at m" style="left:450px;top:118px;font-size:12px;color:var(--fg1)">1024</div>
+  <div class="at m" style="left:700px;top:118px;font-size:12px;color:var(--fg2)">width →</div>
+  <div class="dn blue" style="left:40px;top:180px;width:220px;height:260px"><div class="k">mobile</div><div class="m">390 × 844</div>
+    <div style="margin:14px auto 0;width:70px;height:140px;border:2px solid var(--t-blue);border-radius:12px;background:var(--bg0)"></div></div>
+  <div class="dn" style="left:280px;top:180px;width:150px;height:260px"><div class="k">tablet</div><div class="m">834 × 1112</div>
+    <div style="margin:14px auto 0;width:100px;height:134px;border:2px solid var(--line2);border-radius:10px;background:var(--bg0)"></div></div>
+  <div class="dn" style="left:450px;top:180px;width:310px;height:260px"><div class="k">desktop</div><div class="m">1440 × 900</div>
+    <div style="margin:14px auto 0;width:220px;height:138px;border:2px solid var(--line2);border-radius:10px;background:var(--bg0)"></div></div>
+  <div class="at" style="left:40px;top:454px;width:720px;font-size:12.5px;color:var(--fg1)">The defaults. A project can define its own; the SDK takes them from the publish model.</div>
+</tut-stage>
+
+<!-- Conditions precedence -->
+<tut-stage name="conditions" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">What sets a property</div><div class="s">For each property, the first branch that holds and sets it wins.</div></div>
+  <div class="dn blue" style="left:40px;top:110px;width:228px;height:160px"><div class="k">1 · Wins</div><div class="t">A condition</div><div class="d m" style="font-size:12px">if ${count} greater than 5<br>else if ...<br>else</div></div>
+  <div class="dn" style="left:286px;top:110px;width:228px;height:160px"><div class="k">2</div><div class="t">The node's binding</div><div class="d"><span class="m">${...}</span> on that property</div></div>
+  <div class="dn gray" style="left:532px;top:110px;width:228px;height:160px"><div class="k">3</div><div class="t">The designed value</div><div class="d">What the Editor saved</div></div>
+  <div class="at" style="left:40px;top:296px;width:720px;font-size:12.5px;color:var(--fg1);line-height:1.6">Conditions are re-evaluated when a value they read changes: your <span class="m">data</span>, the screen's variables, <span class="m">route</span> and <span class="m">screen</span>. A node whose <span class="m">visible</span> is false takes no space.</div>
+</tut-stage>
+
+<!-- Scale modes -->
+<tut-stage name="scale-modes" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Scale modes</div><div class="s">Set per canvas in the Editor. The same 390 wide design, shown 600 wide.</div></div>
+  <div class="dn" style="left:40px;top:104px;width:350px;height:270px;padding:22px 30px">
+      <div style="font-size:14px;font-weight:650;margin-bottom:12px">Responsive <span style="font-weight:400;color:var(--fg2)">(default)</span></div>
+      <div style="height:50px;border-radius:10px;background:linear-gradient(135deg,#DBEAFE,#EDE9FE)"></div>
+      <div style="display:flex;gap:10px;margin-top:12px"><span style="display:inline-block;height:28px;width:90px;border-radius:7px;background:#2563EB"></span></div>
+      <div style="height:7px;width:90%;background:var(--bg2);border-radius:4px;margin-top:14px"></div>
+      <div style="font-size:12px;color:var(--fg1);margin-top:14px">Lays out at the given size: fill children stretch, fixed ones don't.</div>
+    </div>
+  <div class="dn" style="left:410px;top:104px;width:350px;height:270px;padding:22px 30px">
+      <div style="font-size:14px;font-weight:650;margin-bottom:12px">Auto scale</div>
+      <div style="height:62px;border-radius:12px;background:linear-gradient(135deg,#DBEAFE,#EDE9FE)"></div>
+      <div style="display:flex;gap:10px;margin-top:14px"><span style="display:inline-block;height:34px;width:150px;border-radius:9px;background:#2563EB"></span></div>
+      <div style="font-size:12px;color:var(--fg1);margin-top:16px">Lays out at the design width, then scales uniformly to fit.</div>
+    </div>
+</tut-stage>
+</body></html>

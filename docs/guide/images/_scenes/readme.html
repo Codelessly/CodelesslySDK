@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- README hero: server-driven UI for Flutter, three ways to load -->
+<tut-stage name="hero" w="800" h="440" bg="solid">
+  <div class="hd"><div class="t">Server-driven UI for Flutter</div><div class="s">Design in the Codelessly Editor, publish, and show it in your app with one widget.</div></div>
+  <tut-code-window class="sm" at="40,100" w="720" file="lib/main.dart" highlight="1,3">
+final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+  </tut-code-window>
+  <div class="dn" style="left:40px;top:236px;width:228px;height:150px"><div class="k">Slug</div><div class="t">The project's public slug</div><div class="d" style="margin-top:8px">One HTTP request.</div><div class="d">New publishes on the next start.</div></div>
+  <div class="dn green" style="left:286px;top:236px;width:228px;height:150px"><div class="k">Project token</div><div class="t">The project's SDK token</div><div class="d" style="margin-top:8px">Firebase, set up by the SDK.</div><div class="d">New publishes while the app runs.</div></div>
+  <div class="dn" style="left:532px;top:236px;width:228px;height:150px"><div class="k">Bundle</div><div class="t">A bundle file in your assets</div><div class="d" style="margin-top:8px">No network for the project.</div><div class="d">New publishes with an app release.</div></div>
+  <div class="at" style="left:40px;top:404px;width:720px;font-size:12.5px;color:var(--fg1)">Android, iOS, web, macOS, Windows and Linux. A token can't be used on Linux desktop.</div>
+</tut-stage>
+
+<!-- CodelesslyWidget essentials, annotated -->
+<tut-stage name="widget-essentials" w="800" h="560" bg="solid">
+  <tut-code-window class="sm" at="40,24" w="720" file="CodelesslyWidget essentials" lang="dart" highlight="6,8,10-12">
+CodelesslyWidget(
+  codelessly: codelessly,
+  controller: controller,
+  // A layout id, a custom id, or the id of one of its canvases.
+  // Without it: the project's entry screen.
+  layoutId: 'profile-card',
+  // `${route.userId}` in the layout.
+  params: const {'userId': 'u_42'},
+  // `${data.user.name}` in the layout.
+  data: const {
+    'user': {'name': 'Ada', 'plan': 'pro'},
+  },
+  sizing: CanvasSizing.fill,
+  loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+  errorBuilder: (context, error) => Center(child: Text('Could not load: $error')),
+  layoutBuilder: (context, layout) => SafeArea(child: layout),
+  onNavigate: (context, request) => false,
+)
+  </tut-code-window>
+  <tut-step-letter l="A" target="40,165,720,19" side="right" offset="-26"></tut-step-letter>
+  <tut-step-letter l="B" target="40,203,720,19" side="right" offset="-26"></tut-step-letter>
+  <tut-step-letter l="C" target="40,241,720,57" side="right" offset="-26"></tut-step-letter>
+  <div class="at" style="left:40px;top:490px;width:720px;display:flex;gap:18px;font-size:12.5px;color:var(--fg1)">
+    <span><b style="color:var(--fg0)">A</b> which screen</span><span><b style="color:var(--fg0)">B</b> read as <span class="m">${route.*}</span></span><span><b style="color:var(--fg0)">C</b> read as <span class="m">${data.*}</span>; new data updates in place</span>
+  </div>
+</tut-stage>
+</body></html>

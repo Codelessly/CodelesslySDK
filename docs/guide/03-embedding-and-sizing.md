@@ -4,7 +4,15 @@
 
 `CodelesslyWidget` is an ordinary widget. Put it anywhere a widget goes: as a whole screen, in a card, in a list.
 
+![A ListView with a CodelesslyWidget between two ListTiles, and a phone showing the promo-banner layout between two Flutter widgets](images/03-embedding-and-sizing/hero.png)
+
+*A layout among your own widgets. The screen is an illustration.*
+
 ## Which project
+
+![Lookup order: the codelessly parameter, the controller, a CodelesslyScope, then Codelessly.instance; with none, an error](images/03-embedding-and-sizing/which-project.png)
+
+*The first Codelessly found wins.*
 
 A `CodelesslyWidget` finds its `Codelessly` in this order:
 
@@ -71,11 +79,19 @@ for (final layout in codelessly.publishModel!.layouts.values) {
 
 ## Canvases and breakpoints
 
+![A wide app window with a 390 wide side panel holding a CodelesslyWidget that shows its mobile canvas](images/03-embedding-and-sizing/canvas-by-width.png)
+
+*The widget's width picks the canvas, not the window's.*
+
 A layout can hold several canvases, one per project breakpoint. The widget shows the canvas for **the width it is
 laid out in**, not the window's: a layout in a 390 wide panel of a 1440 wide window shows its mobile canvas. When
 the width crosses a breakpoint, the canvas switches. See [Conditions and breakpoints](08-conditions-and-breakpoints.md).
 
 ## Sizing
+
+![Three boxes: fill takes the whole space, design keeps the design size, fillWidth takes the width and the design height](images/03-embedding-and-sizing/sizing.png)
+
+*The three CanvasSizing values.*
 
 `sizing` decides the box the canvas takes in the space its parent gives it:
 
@@ -126,6 +142,10 @@ ListView(
 
 ## Loading, error and layout builders
 
+![Three phones: a spinner from loadingBuilder, an error message from errorBuilder, and a wrapped layout from layoutBuilder](images/03-embedding-and-sizing/builders.png)
+
+*What each builder shows. Screens are illustrations.*
+
 ```dart
 CodelesslyWidget(
   codelessly: codelessly,
@@ -156,6 +176,10 @@ ListenableBuilder(
 ```
 
 ## The controller
+
+![Your code talks to a CodelesslyWidgetController (layoutId, isLoaded, canvasId, read, setVariable, trigger, node), which talks to the shown screen](images/03-embedding-and-sizing/controller.png)
+
+*A controller is your handle on one shown screen.*
 
 A `CodelesslyWidgetController` is your handle on a shown screen.
 

@@ -1,0 +1,44 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: external components -->
+<tut-stage name="hero" w="800" h="600" bg="solid">
+  <div class="hd"><div class="t">Your widgets inside a layout</div><div class="s">An external component node reserves a box and names a builder. Your app fills it.</div></div>
+  <tut-phone at="80,350" w="170" h="360" allow-overflow>
+    <div class="app" style="background:#F9FAFB">
+      <div style="height:42px"></div>
+      <div class="bar" style="font-size:14px;height:30px;padding:0 12px">Stores</div>
+      <div id="map" style="margin:6px 10px;height:150px;border-radius:12px;background:repeating-linear-gradient(45deg,#E0F2FE 0 10px,#F0F9FF 10px 20px);outline:2px dashed #9333EA;outline-offset:2px;display:grid;place-items:center;font-size:11px;color:#7E22CE;font-weight:600">your map widget</div>
+      <div style="margin:10px;height:8px;width:70%;background:#E5E7EB;border-radius:4px"></div>
+      <div style="margin:6px 10px;height:8px;width:50%;background:#E5E7EB;border-radius:4px"></div>
+    </div>
+  </tut-phone>
+  <tut-code-window id="code" class="xs" at="40,90" w="720" file="lib/main.dart" highlight="5">
+MaterialApp(
+  // Above the navigator, so every screen the project pushes has them.
+  builder: (context, child) => ExternalComponents(
+    builders: {
+      'map': (context) => const Placeholder(), // your map widget
+      'ad-banner': (context) => const SizedBox(height: 50, child: Center(child: Text('Ad'))),
+    },
+    child: child!,
+  ),
+  home: CodelesslyWidget(codelessly: codelessly),
+)
+  </tut-code-window>
+  <tut-arrow-curved from="470,480" target="#map" side="right" label="The node's builderId: map" label-style="soft"></tut-arrow-curved>
+  <span class="illus" style="left:290px;top:560px">Illustration</span>
+  <div class="at" style="left:420px;top:530px;width:340px;font-size:12px;color:var(--fg1)">Laid out in the node's box. No builder for an id: a <span class="m">Placeholder</span>.</div>
+</tut-stage>
+
+<!-- Three ways to extend -->
+<tut-stage name="ways" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Three ways to extend a layout</div><div class="s">From most to least common. Registering a new node type from outside the SDK is not supported.</div></div>
+  <div class="dn purple" style="left:40px;top:110px;width:228px;height:200px"><div class="k">1 · Inside</div><div class="t">Your Flutter widgets</div><div class="d"><span class="m">ExternalComponents</span>: maps, ads, camera previews, charts, platform views.</div></div>
+  <div class="dn blue" style="left:286px;top:110px;width:228px;height:200px"><div class="k">2 · Behind</div><div class="t">Your code</div><div class="d">Functions, native scripts, and your own services (<span class="m">AnalyticsService</span>, <span class="m">LinkOpener</span>, <span class="m">AuthService</span>...).</div></div>
+  <div class="dn" style="left:532px;top:110px;width:228px;height:200px"><div class="k">3 · Around</div><div class="t">Wrapping</div><div class="d"><span class="m">layoutBuilder</span>: a <span class="m">SafeArea</span>, an overlay, a <span class="m">RefreshIndicator</span>, a banner.</div></div>
+</tut-stage>
+</body></html>

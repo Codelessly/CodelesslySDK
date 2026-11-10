@@ -5,6 +5,10 @@
 SDK 20 is a rewrite. It reads a new project format, renders differently, and has a smaller, more explicit API.
 This chapter is the checklist for moving an app from `codelessly_sdk` 10.x (or older) to 20.x.
 
+![10.x compared with 20.x: v1 documents and a global instance versus "schema": 2, render objects and explicit instances](images/16-migrating-from-10/hero.png)
+
+*What changes from 10.x to 20.x.*
+
 ## What changed, in short
 
 | | 10.x (v1) | 20.x (v2) |
@@ -17,6 +21,10 @@ This chapter is the checklist for moving an app from `codelessly_sdk` 10.x (or o
 | Dart / Flutter | | Dart 3.12, Flutter 3.35 or newer |
 
 ## 1. The project has to be in the new format
+
+![The Editor asking "Publish in the new format?" before replacing a classic publish](images/16-migrating-from-10/step1-format.png)
+
+*Step 1: the Editor asks before replacing a classic publish.*
 
 SDK 20 reads `"schema": 2` only, and SDK 10 can't read it. For each project your app shows:
 
@@ -32,6 +40,10 @@ So the order matters. A safe rollout:
    the new version.
 2. When enough users are on the new version, publish the converted project and switch the app to a token or slug.
 
+![A safe rollout: release the app on SDK 20 with a bundled project first, then publish the converted project and switch to a token or slug](images/16-migrating-from-10/step1-rollout.png)
+
+*The rollout order.*
+
 If SDK 20 shows `... is not v2 (no "schema": 2)`, the project hasn't been published in the new format yet.
 
 The conversion replaces a project's publish in place, under the same paths, and keeps layout and canvas ids, so
@@ -39,6 +51,10 @@ the ids in your code should stay valid. Confirm with the listing in
 [Embedding and sizing](03-embedding-and-sizing.md#which-screen).
 
 ## 2. Update the dependency
+
+![pubspec.yaml with codelessly_sdk ^20.1.0](images/16-migrating-from-10/step2-dependency.png)
+
+*Step 2: the dependency.*
 
 ```yaml
 dependencies:
@@ -49,6 +65,10 @@ If you depend on `codelessly_api` directly, it must be `^20.0.0` too. Apps with 
 `codelessly_quickjs`.
 
 ## 3. Initialization
+
+![10.x initialization with Codelessly.instance.initialize, and the 20.x version with codelesslyWithToken and an optional setDefault](images/16-migrating-from-10/step3-initialization.png)
+
+*Step 3: initialization, before and after.*
 
 ```dart
 // 10.x
@@ -81,6 +101,10 @@ runApp(MaterialApp(home: CodelesslyWidget(layoutId: layoutId)));
 - A slug needs no Firebase: `Codelessly(config: const CodelesslyConfig(slug: 'my-project'))`.
 
 ## 4. API changes
+
+![A 10.x CodelesslyFunction and the same function in 20.x as a plain closure with an ActionContext](images/16-migrating-from-10/step4-functions.png)
+
+*Step 4: functions are plain Dart functions now.*
 
 ### `CodelesslyConfig`
 
@@ -174,6 +198,10 @@ chapter.
 
 ## 5. Behaviour to re-check
 
+![Behaviour to re-check: offline start, storage, cloud services, the signed-in user, preload, crash reports, Linux, Windows scripts, rendering](images/16-migrating-from-10/step5-behaviour.png)
+
+*Step 5: what behaves differently.*
+
 | Area | 10.x | 20.x |
 |---|---|---|
 | Offline start | A disk cache (Hive) | The default cache is in memory: add a persistent `PublishCache` or ship a bundle ([chapter 4](04-loading-and-caching.md#caching-and-offline)). |
@@ -187,6 +215,10 @@ chapter.
 | Rendering | | Pixel parity with 10.x is tested on a corpus of real projects, to within 1 px per node. Check your own screens, especially custom fonts and text at edge sizes. |
 
 ## 6. Verify
+
+![Checklist: walk every screen at each breakpoint, exercise every function, add a widget test per embedded layout](images/16-migrating-from-10/step6-verify.png)
+
+*Step 6: verify.*
 
 - Run the app against the converted project and walk every screen at each breakpoint you support.
 - Exercise every function your app registers: a missing one now fails its action chain (`No function named

@@ -5,6 +5,10 @@
 A `Codelessly` gets its publish from a `PublishLoader` and keeps it in a `PublishCache`. This chapter covers the
 loaders that ship with the SDK, what is cached, and how to run offline.
 
+![Decision flowchart: live updates lead to a project token; opening with no network leads to a bundle; your own server leads to a self-hosted HttpPublishLoader; otherwise a slug](images/04-loading-and-caching/hero.png)
+
+*Which loading mode, at a glance. The table below has every mode.*
+
 ## The modes at a glance
 
 | Mode | Create it with | Loader | Firebase | Live updates | Offline |
@@ -18,6 +22,10 @@ loaders that ship with the SDK, what is cached, and how to run offline.
 | Your own | `Codelessly(loader: MyLoader())` | A `PublishLoader` you write | Up to you | If it is a `LivePublishLoader` | Up to you |
 
 ## What loading does
+
+![Three stages: initialize loads the publish model, each layout loads when first shown, a live loader delivers new publishes; status goes CEmpty, CLoading, then CLoaded or CError](images/04-loading-and-caching/what-loading-does.png)
+
+*The three stages below, and the status they report.*
 
 1. `initialize()` loads the **publish model**: the list of layouts, the entry screen, fonts, theme, APIs, app
    variables and breakpoints. A `CodelesslyWidget` calls it when it first builds, and calling it again is free.
@@ -58,6 +66,10 @@ is fetched when the instance initializes, so the app gets a new publish the next
 `reset()`).
 
 ## Project token
+
+![Sequence: your app creates a secondary Firebase app named codelessly, signs in anonymously and exchanges the token with the backend, then reads publish/{projectId} from Firestore](images/04-loading-and-caching/token-sequence.png)
+
+*The three steps under "What happens", as a sequence.*
 
 ```dart
 final codelessly = await codelesslyWithToken('YOUR_PROJECT_TOKEN');
@@ -101,6 +113,10 @@ project's publish.
 Not supported: Linux desktop (no Firebase there).
 
 ## Asset bundle
+
+![A bundle file with "model" and "layouts" keys, and its four sources: a published slug, a loaded instance, the Editor's automation API, code](images/04-loading-and-caching/bundle.png)
+
+*A bundle is the whole publish in one file.*
 
 ```dart
 final codelessly = Codelessly.asset('assets/my_project.json.gz');
@@ -148,6 +164,10 @@ final codelessly = Codelessly.fromBundle(bundle);
 
 ## Self-hosted
 
+![The URLs HttpPublishLoader requests with bundle true (one file) and bundle false (the model, then each layout)](images/04-loading-and-caching/self-hosted.png)
+
+*What a self-hosted loader requests.*
+
 `HttpPublishLoader` reads a publish from any HTTP server.
 
 ```dart
@@ -186,6 +206,10 @@ abstract interface class LivePublishLoader implements PublishLoader {
 Throw a `PublishLoadException` on failure; its message reaches the error builder.
 
 ## Caching and offline
+
+![Flowchart: initialize reads the cache first; if the model is cached the instance is ready at once and refreshes in the background, otherwise it waits for the loader](images/04-loading-and-caching/caching.png)
+
+*Cache first, then the loader. The default cache is in memory.*
 
 Everything loaded goes through the instance's `PublishCache`:
 

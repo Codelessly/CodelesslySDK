@@ -1,0 +1,24 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: what a layout's look comes from -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">What a layout's look comes from</div><div class="s">Almost everything is designed. A <span class="m">Theme</span> matters only for what the design leaves to Material.</div></div>
+  <div class="dn" style="left:40px;top:110px;width:340px;height:220px"><div class="k">Designed, on each node</div><div class="d">Colors, text styles, radii, shadows. They render the same wherever the layout is embedded.</div>
+    <div style="display:flex;gap:8px;margin-top:14px"><span style="width:34px;height:34px;border-radius:8px;background:#2563EB"></span><span style="width:34px;height:34px;border-radius:17px;background:#F59E0B"></span><span style="width:34px;height:34px;border-radius:4px;background:#111827"></span><span style="font-size:22px;font-weight:700;font-family:Georgia,serif;margin-left:6px">Aa</span></div></div>
+  <div class="dn blue" style="left:420px;top:110px;width:340px;height:220px"><div class="k">From a Theme</div><div class="d">Material widgets that keep default colors and shapes; the runtime's toasts, confirm dialogs and pickers.</div>
+    <div class="d" style="margin-top:12px">Default: the project's theme tokens (<span class="m">primary</span>, <span class="m">surface</span>, <span class="m">radius</span>...).</div>
+    <div class="d">With <span class="m">useHostTheme: true</span>: your app's <span class="m">Theme</span>.</div></div>
+  <div class="dn gray" style="left:40px;top:356px;width:720px"><div class="k">Dark mode</div><div class="d">The SDK does not restyle a layout. A layout can adapt with <span class="m">${screen.isDark}</span> in conditions, bindings and variants.</div></div>
+</tut-stage>
+
+<!-- Fonts: wait up to fontTimeout -->
+<tut-stage name="fonts" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Fonts</div><div class="s">When a layout loads, the SDK fetches and registers its fonts, then shows it.</div></div>
+  <tut-timeline at="60,180" w="680" items="Layout loaded|Fetching fonts|Shown with fallbacks|Fonts arrive: re-render" times="0 s|...|fontTimeout (2 s)|later" current="2"></tut-timeline>
+  <div class="at" style="left:40px;top:290px;width:720px;font-size:12.5px;color:var(--fg1);line-height:1.6">Fonts come from the project's uploads or Google Fonts, once per run, not cached on disk. For offline apps ship them: <span class="m">NoFontFetcher</span> if they are declared in your pubspec, or a <span class="m">FontFetcher</span> of your own.</div>
+</tut-stage>
+</body></html>

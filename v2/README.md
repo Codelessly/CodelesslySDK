@@ -7,6 +7,10 @@ them in your app with one widget. The SDK renders a published layout natively, s
 and runs it: variables, conditions, actions, navigation, data, APIs and scripts. A new publish reaches running apps
 without an app release.
 
+![A Codelessly created by slug and a CodelesslyWidget, with the three ways to load a project: slug, project token, bundle](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/readme/hero.png)
+
+*One widget, three ways to load a project.*
+
 ```dart
 final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
 
@@ -43,6 +47,10 @@ A `Codelessly` is one published project. A `CodelesslyWidget` shows one of its s
 
 ### 1. A published slug (HTTP)
 
+![The slug quickstart code: one HTTP request, no Firebase, new publishes on the next start](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/02-quickstart/step3-slug.png)
+
+*Load by slug.*
+
 A project with a public slug (the name in `site.codelessly.com/<slug>`) publishes one bundle file. The SDK fetches
 it over HTTP; there is nothing else to set up.
 
@@ -58,6 +66,10 @@ void main() {
 ```
 
 ### 2. A project token (Firebase, live updates)
+
+![The token quickstart code with codelesslyWithToken: Firebase set up for you, live updates, not on Linux](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/02-quickstart/step3-token.png)
+
+*Load by project token.*
 
 A project's SDK token gives an app access to its publish in Codelessly's backend. Each new publish reaches the
 running app. The token is all you need: `codelesslyWithToken` opens Codelessly's Firebase project as a secondary
@@ -83,6 +95,10 @@ If the project uses Codelessly cloud data, accounts or file uploads, pass `cloud
 
 ### 3. A bundle shipped with the app (offline)
 
+![A pubspec asset entry and Codelessly.asset reading the bundle offline](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/02-quickstart/step3-bundle.png)
+
+*Load a bundle offline.*
+
 A bundle is a publish in one JSON file (gzipped or not). Ship it as an asset and the project loads with no
 network.
 
@@ -106,6 +122,10 @@ A bundle already in memory works the same way: `Codelessly.fromBundle(PublishBun
 says where a bundle file comes from.
 
 ## `CodelesslyWidget` essentials
+
+![CodelesslyWidget with every essential parameter; layoutId picks the screen, params are read as route, data as data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/readme/widget-essentials.png)
+
+*The essentials, annotated.*
 
 ```dart
 CodelesslyWidget(

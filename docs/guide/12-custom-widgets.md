@@ -8,11 +8,19 @@ Three ways to extend what a layout can do, from most to least common:
 2. [Your code behind a layout](#your-code-behind-a-layout) (functions, services).
 3. [Wrapping a layout](#wrapping-a-layout) (`layoutBuilder`).
 
+![Three ways to extend: your Flutter widgets inside a layout, your code behind it, and wrapping it with layoutBuilder](images/12-custom-widgets/ways.png)
+
+*Three ways to extend, from most to least common.*
+
 What is **not** supported: registering a new node type with its own renderer from outside the SDK. Widget types
 are part of the SDK ([`v2/PORTING.md`](../../v2/PORTING.md) is the contributor's guide to adding one). A node type
 this version doesn't know still decodes and round-trips, and renders as an empty box of its size.
 
 ## Your widgets inside a layout
+
+![ExternalComponents in MaterialApp.builder maps the builder id map to your widget, which fills the external component's box in the layout](images/12-custom-widgets/hero.png)
+
+*An external component node, filled by your widget. The screen is an illustration.*
 
 In the Editor, an **external component** node reserves a box in the layout and names a builder (its
 `builderId`). In your app, `ExternalComponents` maps builder ids to widgets:
