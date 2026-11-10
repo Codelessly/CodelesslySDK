@@ -1,0 +1,58 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: the names a layout reads, inside out -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">The names a layout reads</div><div class="s">A name is looked up from the inside out. Your app sets <span class="m">data</span> and <span class="m">route</span>.</div></div>
+  <div class="at" style="left:40px;top:110px;width:440px;height:360px;border-radius:16px;background:var(--bg2);border:1px solid var(--line)"></div>
+  <div class="at" style="left:60px;top:140px;width:400px;height:310px;border-radius:14px;background:var(--bg1);border:1px solid var(--line)"></div>
+  <div class="at" style="left:80px;top:170px;width:360px;height:260px;border-radius:12px;background:color-mix(in srgb,var(--t-blue) 9%,var(--bg0));border:1.5px solid color-mix(in srgb,var(--t-blue) 45%,var(--line))"></div>
+  <div class="at" style="left:100px;top:226px;width:320px;height:120px;border-radius:10px;background:var(--bg0);border:1px solid var(--line)"></div>
+  <div class="at" style="left:120px;top:296px;width:280px;height:38px;border-radius:8px;background:var(--bg2);border:1px solid var(--line)"></div>
+  <div class="at m" style="left:56px;top:116px;font-size:12px;color:var(--fg1)">5 · storage.&lt;key&gt;</div>
+  <div class="at m" style="left:76px;top:146px;font-size:12px;color:var(--fg1)">4 · app variables</div>
+  <div class="at m" style="left:96px;top:178px;font-size:12px;color:var(--t-blue);font-weight:600">3 · route.* · data.* · screen.*</div>
+  <div class="at m" style="left:116px;top:234px;font-size:12px;color:var(--fg1)">2 · screen variables</div>
+  <div class="at m" style="left:136px;top:306px;font-size:12px;color:var(--fg1)">1 · item, index, parent (lists)</div>
+  <div class="dn" id="w" style="left:520px;top:120px;width:240px"><div class="k">You</div><div class="m" style="line-height:1.8">CodelesslyWidget.data<br>Codelessly(data:)<br>codelessly.setData<br>CodelesslyWidget.params</div></div>
+  <div class="dn" style="left:520px;top:300px;width:240px"><div class="k">In the Editor</div><div class="d">Screen and app variables are declared there; actions, scripts and your controller change them.</div></div>
+  <tut-connector from="#w" to="440,186,1,1" to-side="right" from-side="left"></tut-connector>
+</tut-stage>
+
+<!-- Passing data in, for one widget -->
+<tut-stage name="pass-data" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Passing data in, for one widget</div><div class="s">Rebuilding with new data updates the layout in place.</div></div>
+  <tut-code-window class="sm" at="40,100" w="520" file="lib/inbox_header.dart" highlight="6">
+  @override
+  Widget build(BuildContext context) => CodelesslyWidget(
+        codelessly: codelessly,
+        layoutId: 'inbox-header',
+        // Rebuilding with new data updates the layout in place.
+        data: {'unread': unread},
+      );
+  </tut-code-window>
+  <tut-phone at="590,90" w="170" h="350" allow-overflow>
+    <div class="app" style="background:#F9FAFB">
+      <div style="height:44px"></div>
+      <div style="margin:6px 12px;padding:12px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.06)"><div style="font-size:15px;font-weight:700">Inbox</div><span id="badge" style="min-width:24px;height:22px;border-radius:11px;background:#DC2626;color:#fff;font-size:11.5px;font-weight:700;display:inline-grid;place-items:center;padding:0 7px">3</span></div>
+      <div style="margin:10px 12px;height:8px;width:70%;background:#E5E7EB;border-radius:4px"></div>
+      <div style="margin:8px 12px;height:8px;width:50%;background:#E5E7EB;border-radius:4px"></div>
+    </div>
+  </tut-phone>
+  <tut-binding id="b1" at="330,326" expr="data.unread" value="3"></tut-binding>
+  <tut-binding id="b2" at="40,326" expr="= data.unread > 0" value="true"></tut-binding>
+  <tut-arrow-curved from="478,343" target="#badge" side="bottom" curve="0.2"></tut-arrow-curved>
+  <div class="at" style="left:40px;top:390px;width:500px;font-size:12.5px;color:var(--fg1);line-height:1.55">Bind a text to <span class="m">${data.unread}</span> and its visibility to <span class="m">${= data.unread &gt; 0}</span>. Data is JSON-like: maps, lists, strings, numbers, booleans, null.</div>
+  <span class="illus" style="left:618px;top:470px">Illustration</span>
+</tut-stage>
+
+<!-- A variable named like a data key -->
+<tut-stage name="data-and-variable" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">A variable named like a data key</div><div class="s">It starts at the data's value and follows it, until the screen changes the variable itself.</div></div>
+  <tut-timeline at="60,170" w="680" items="Screen opens|Data changes|User edits the field|Data changes again" times="email = a (data)|email = b (data)|email = c|email stays c" current="3"></tut-timeline>
+  <div class="at" style="left:40px;top:320px;width:720px;font-size:12.5px;color:var(--fg1);line-height:1.55">The data is always readable as <span class="m">data.email</span>. This is how you prefill a form: pass <span class="m">data: {'email': user.email}</span> to a screen with an <span class="m">email</span> variable.</div>
+</tut-stage>
+</body></html>

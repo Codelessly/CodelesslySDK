@@ -5,7 +5,15 @@
 Both are authored in the Editor and need no code. This chapter explains what the SDK does with them, so you can
 predict what a layout shows in your app.
 
+![Default breakpoints on a width axis: mobile from 0 (390 × 844), tablet from 600 (834 × 1112), desktop from 1024 (1440 × 900)](images/08-conditions-and-breakpoints/hero.png)
+
+*The default breakpoints, one canvas each.*
+
 ## Conditions
+
+![Precedence for a property: a condition first, then the node's binding, then the designed value](images/08-conditions-and-breakpoints/conditions.png)
+
+*What sets a property, in order.*
 
 A condition is an ordered list of branches: `if`, `else if`, ..., `else`. Each branch has a test (a comparison such
 as `${count} greater than 5`, or several joined by and/or) and a list of node properties it sets.
@@ -79,6 +87,10 @@ Modals (dialogs, sheets, popovers) opened by actions show at their design size a
 breakpoint.
 
 ## Scale modes
+
+![The same design shown wider: responsive reflows at the given size; auto scale lays out at the design width and scales up](images/08-conditions-and-breakpoints/scale-modes.png)
+
+*Responsive and auto scale.*
 
 Each canvas has a scale mode, set in the Editor:
 

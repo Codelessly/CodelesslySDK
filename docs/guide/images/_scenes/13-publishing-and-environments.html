@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: what Publish writes, and who reads it -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">What "Publish" writes, and who reads it</div><div class="s">In Codelessly's backend. Every document carries <span class="m">"schema": 2</span>.</div></div>
+  <div class="dn blue" id="ed" style="left:40px;top:200px;width:150px;height:90px"><div class="k">Editor</div><div class="t">Publish</div></div>
+  <div class="dn" id="m" style="left:230px;top:110px;width:300px"><div class="k">Firestore</div><div class="m">publish/{projectId}</div><div class="d">The publish model</div></div>
+  <div class="dn" id="l" style="left:230px;top:210px;width:300px"><div class="k">Firestore</div><div class="m" style="font-size:11.5px">publish/{projectId}/layouts/{layoutId}</div><div class="d">Each layout</div></div>
+  <div class="dn" id="b" style="left:230px;top:320px;width:300px"><div class="k">Storage, with a slug</div><div class="m">publish/{slug}.json</div><div class="d">The bundle: model and every layout</div></div>
+  <div class="dn green" id="tok" style="left:570px;top:160px;width:190px"><div class="k">Token, project id</div><div class="d">Picked up live while the app runs</div></div>
+  <div class="dn" id="slug" style="left:570px;top:320px;width:190px"><div class="k">Slug</div><div class="d">On the next start; and the site at <span class="m">site.codelessly.com</span></div></div>
+  <tut-connector from="#ed" to="#m" route="elbow" from-side="right" to-side="left"></tut-connector>
+  <tut-connector from="#ed" to="#l" route="straight" from-side="right" to-side="left"></tut-connector>
+  <tut-connector from="#ed" to="#b" route="elbow" from-side="right" to-side="left"></tut-connector>
+  <tut-connector from="#l" to="#tok" route="elbow" from-side="right" to-side="left" dashed></tut-connector>
+  <tut-connector from="#b" to="#slug" route="straight" dashed></tut-connector>
+</tut-stage>
+
+<!-- Publish, preview, template -->
+<tut-stage name="sources" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Publish, preview and template</div><div class="s"><span class="m">CodelesslyConfig.publishSource</span> chooses which copy an instance reads. Layout ids are the same in each.</div></div>
+  <div class="dn green" style="left:40px;top:110px;width:228px;height:160px"><div class="k">publish (default)</div><div class="m">publish/...</div><div class="d" style="margin-top:8px">What was published. Release builds.</div></div>
+  <div class="dn blue" style="left:286px;top:110px;width:228px;height:160px"><div class="k">preview</div><div class="m">publish_preview/...</div><div class="d" style="margin-top:8px">The Editor's unpublished changes. Debug builds.</div></div>
+  <div class="dn" style="left:532px;top:110px;width:228px;height:160px"><div class="k">template</div><div class="m">templates/...</div><div class="d" style="margin-top:8px">Template projects.</div></div>
+  <div class="at" style="left:40px;top:296px;width:720px;font-size:12.5px;color:var(--fg1);line-height:1.6">Preview and template are read from Firestore, so they need a token (or a project id). A slug's bundle is the publish.</div>
+</tut-stage>
+
+<!-- Release checklist -->
+<tut-stage name="release-checklist" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Release checklist</div></div>
+  <tut-checklist at="40,84" w="720" title="Before you ship">
+    <item>The release build reads PublishSource.publish</item>
+    <item>errorBuilder and loadingBuilder are your own</item>
+    <item>Services.analytics sends errors to your crash reporter</item>
+    <item>Services.storage persists, if the project uses storage</item>
+    <item>codelessly_quickjs is added, if the project uses scripts</item>
+    <item>A persistent PublishCache or a bundled asset, to open offline</item>
+    <item>Web: your Content Security Policy allows the SDK's hosts</item>
+  </tut-checklist>
+</tut-stage>
+</body></html>

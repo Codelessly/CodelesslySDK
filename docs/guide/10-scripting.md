@@ -6,10 +6,18 @@ A Codelessly project can include **scripts**: JavaScript that "Run script" actio
 They are for logic that formulas and actions express badly: validation across fields, multi-step calculations,
 data shaping, small state machines.
 
+![Formula, action and script compared: what each is, when it runs, whether it changes the app, and what it suits](images/10-scripting/hero.png)
+
+*Start with a formula; reach for a script for logic with steps.*
+
 This chapter has two parts: what an **app developer** does (add an engine), and a reference to the **language and
 host API** for whoever writes the scripts.
 
 ## Adding the engine to your app
+
+![Script engines by platform: a Web Worker on the web, QuickJS through dart:ffi on Android, iOS, macOS and Linux, none yet on Windows](images/10-scripting/engines.png)
+
+*Which engine runs where.*
 
 | Platform | Engine | What the app needs |
 |---|---|---|
@@ -124,6 +132,10 @@ Scripts are published inside each layout's document (`scripts`), so they update 
 - **`Math.pow(x, n)` with a whole `n`** is computed the same way on every engine. Prefer it over `**` for money.
 
 ## Host APIs
+
+![The sandbox and the capabilities that grant host APIs: variables, nodes, navigation, api, cloud, actions, clock](images/10-scripting/capabilities.png)
+
+*Each host API needs a capability.*
 
 Each host API needs a **capability** granted to the script. Calling one without it throws a `CapabilityError`.
 
@@ -250,6 +262,10 @@ A script never crashes the app. Every failure is data: `{type, message, line?, c
 | Script calls | 32 deep | `script.a()` calling `script.b()`... |
 
 ## How it works
+
+![A run script action or formula goes to the ScriptRunner, then to QuickJsSandbox on devices or WorkerSandbox on the web, both running the same driver](images/10-scripting/architecture.png)
+
+*One driver, two engines.*
 
 ```
 RunScriptAction / script.name() in a formula

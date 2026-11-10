@@ -1,0 +1,109 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: which loading mode? -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Which loading mode?</div><div class="s">A <span class="m">Codelessly</span> gets its publish from a loader and keeps it in a cache.</div></div>
+  <tut-flow at="30,92" w="740" h="390">
+    <node id="q1" at="0,40" w="180" h="70" kind="decision">Need live updates?</node>
+    <node id="tok" at="250,40" w="220">Project token</node>
+    <node id="q2" at="0,160" w="180" h="70" kind="decision">Open with no network?</node>
+    <node id="bun" at="250,160" w="220">Asset or in-memory bundle</node>
+    <node id="q3" at="0,280" w="180" h="70" kind="decision">From your own server?</node>
+    <node id="self" at="250,280" w="220">Self-hosted <span class="m">HttpPublishLoader</span></node>
+    <node id="slug" at="520,280" w="200" kind="end">Slug</node>
+    <edge from="q1" to="tok" label="Yes"></edge>
+    <edge from="q1" to="q2" label="No"></edge>
+    <edge from="q2" to="bun" label="Yes"></edge>
+    <edge from="q2" to="q3" label="No"></edge>
+    <edge from="q3" to="self" label="Yes"></edge>
+    <edge from="q3" to="slug" from-side="bottom" to-side="bottom" label="No"></edge>
+  </tut-flow>
+  <div class="at" style="left:530px;top:132px;width:230px;font-size:12px;color:var(--fg1);line-height:1.5">Firebase, set up by the SDK.<br>Not on Linux desktop.</div>
+  <div class="at" style="left:530px;top:252px;width:230px;font-size:12px;color:var(--fg1);line-height:1.5">Always offline; new publishes need a new bundle.</div>
+  <div class="at" style="left:530px;top:318px;width:220px;font-size:12px;color:var(--fg1);line-height:1.5;text-align:center">One HTTP GET at start. No Firebase.</div>
+</tut-stage>
+
+<!-- What loading does: 1-2-3 -->
+<tut-stage name="what-loading-does" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">What loading does</div><div class="s">The model first, then each layout when it is first shown.</div></div>
+  <div class="dn blue" id="m" style="left:40px;top:120px;width:220px;height:170px"><div class="k">1 · initialize()</div><div class="t">The publish model</div><div class="d">Layouts, entry screen, fonts, theme, APIs, app variables, breakpoints. Free to call again.</div></div>
+  <div class="dn" id="l" style="left:290px;top:120px;width:220px;height:170px"><div class="k">2 · First shown</div><div class="t">Each layout</div><div class="d">Then its fonts. <span class="m">preload: true</span> loads them all in <span class="m">initialize()</span>.</div></div>
+  <div class="dn green" id="u" style="left:540px;top:120px;width:220px;height:170px"><div class="k">3 · Live loader</div><div class="t">A new publish</div><div class="d">Republished layouts are dropped; widgets showing one reload it. Needs <span class="m">liveUpdates</span> (on).</div></div>
+  <tut-connector from="#m" to="#l" route="straight"></tut-connector>
+  <tut-connector from="#l" to="#u" route="straight" dashed></tut-connector>
+  <div class="at" style="left:40px;top:330px;font-size:13px;font-weight:600">codelessly.status</div>
+  <div class="at" style="left:40px;top:358px;display:flex;gap:10px;align-items:center">
+    <span class="pill m">CEmpty</span><span style="color:var(--fg2)">→</span><span class="pill blue m">CLoading</span><span style="color:var(--fg2)">→</span><span class="pill green m">CLoaded</span><span style="color:var(--fg2)">or</span><span class="pill red m">CError</span>
+  </div>
+  <div class="at" style="left:40px;top:400px;width:720px;font-size:12.5px;color:var(--fg1)">The instance notifies its listeners when the status changes.</div>
+</tut-stage>
+
+<!-- Token mode: what happens -->
+<tut-stage name="token-sequence" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Project token: what happens</div><div class="s">Your app's own Firebase app is not used or changed.</div></div>
+  <div class="dn" id="app" style="left:40px;top:110px;width:170px;height:70px"><div class="k">Your app</div><div class="m">codelesslyWithToken</div></div>
+  <div class="dn purple" id="fb" style="left:250px;top:110px;width:170px;height:70px"><div class="k">Secondary app</div><div class="m">"codelessly"</div></div>
+  <div class="dn" id="be" style="left:460px;top:110px;width:140px;height:70px"><div class="k">Backend</div><div class="d">token exchange</div></div>
+  <div class="dn" id="fs" style="left:640px;top:110px;width:120px;height:70px"><div class="k">Firestore</div><div class="m">publish/…</div></div>
+  <div class="at" style="left:124px;top:180px;width:2px;height:290px;background:var(--line2)"></div>
+  <div class="at" style="left:334px;top:180px;width:2px;height:290px;background:var(--line2)"></div>
+  <div class="at" style="left:529px;top:180px;width:2px;height:290px;background:var(--line2)"></div>
+  <div class="at" style="left:699px;top:180px;width:2px;height:290px;background:var(--line2)"></div>
+  <tut-arrow from="128,230" to="330,230"></tut-arrow>
+  <tut-step n="1" at="128,208" size="sm"></tut-step>
+  <div class="at" style="left:144px;top:238px;width:180px;font-size:11.5px;color:var(--fg1)">created once, from options that ship with the SDK</div>
+  <tut-arrow from="338,310" to="525,310"></tut-arrow>
+  <tut-step n="2" at="338,288" size="sm"></tut-step>
+  <div class="at" style="left:354px;top:318px;width:170px;font-size:11.5px;color:var(--fg1)">signs in anonymously, sends the token; gets a claim for the project</div>
+  <tut-arrow from="338,410" to="695,410"></tut-arrow>
+  <tut-step n="3" at="338,388" size="sm"></tut-step>
+  <div class="at" style="left:354px;top:418px;width:330px;font-size:11.5px;color:var(--fg1)">reads <span class="m">publish/{projectId}</span> and its layouts, and watches the model</div>
+</tut-stage>
+
+<!-- A bundle and where it comes from -->
+<tut-stage name="bundle" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">A bundle: the whole publish in one file</div><div class="s">JSON or gzipped JSON, detected by its first bytes. It holds the project, not its media.</div></div>
+  <tut-code-window id="b" at="420,120" w="340" file="my_project.json" lang="json">
+{
+  "model": {...},
+  "layouts": {
+    "&lt;layoutId&gt;": {...}
+  }
+}
+  </tut-code-window>
+  <div class="dn" id="s1" style="left:40px;top:110px;width:320px;padding:10px 14px"><div class="k">A published slug</div><div class="d">Download it with <span class="m">curl</span></div></div>
+  <div class="dn" id="s2" style="left:40px;top:192px;width:320px;padding:10px 14px"><div class="k">A loaded instance</div><div class="d"><span class="m">PublishBundle(model:, layouts:)</span></div></div>
+  <div class="dn" id="s3" style="left:40px;top:274px;width:320px;padding:10px 14px"><div class="k">The Editor's automation API</div><div class="d"><span class="m">publish.export</span> (MCP)</div></div>
+  <div class="dn" id="s4" style="left:40px;top:356px;width:320px;padding:10px 14px"><div class="k">Code</div><div class="d">Built with <span class="m">codelessly_api</span></div></div>
+  <tut-bracket target="40,110,320,312" side="right"></tut-bracket>
+  <tut-arrow from="382,215" to="414,215"></tut-arrow>
+  <div class="at" style="left:420px;top:350px;width:340px;font-size:12.5px;color:var(--fg1);line-height:1.55">Read with <span class="m">Codelessly.asset(path)</span>, or <span class="m">Codelessly.fromBundle(bundle)</span> for one your app downloaded.</div>
+</tut-stage>
+
+<!-- Self-hosted requests -->
+<tut-stage name="self-hosted" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t"><span class="m" style="font-size:18px">HttpPublishLoader</span>: what it requests</div><div class="s">From any HTTP server, with your headers.</div></div>
+  <div class="dn blue" style="left:40px;top:110px;width:720px"><div class="k">bundle: true</div><div class="m">GET &lt;baseUrl&gt;/publish/&lt;projectId&gt;.json</div><div class="d">The whole publish in one file.</div></div>
+  <div class="dn" style="left:40px;top:220px;width:720px"><div class="k">bundle: false</div><div class="m">GET &lt;baseUrl&gt;/publish/&lt;projectId&gt;.json</div><div class="m">GET &lt;baseUrl&gt;/publish/&lt;projectId&gt;/layouts/&lt;layoutId&gt;.json</div><div class="d">The model first; each layout when it is first shown.</div></div>
+</tut-stage>
+
+<!-- Caching -->
+<tut-stage name="caching" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Caching and offline</div><div class="s">Everything loaded goes through the instance's <span class="m">PublishCache</span>.</div></div>
+  <tut-flow at="40,100" w="720" h="250">
+    <node id="s" at="0,90" w="140" kind="start">initialize()</node>
+    <node id="d" at="190,80" w="160" h="70" kind="decision">Model in the cache?</node>
+    <node id="y" at="420,0" w="300">Ready at once; refreshed from the loader in the background</node>
+    <node id="n" at="420,180" w="300">Waits for the loader</node>
+    <edge from="s" to="d"></edge>
+    <edge from="d" to="y" from-side="top" to-side="left" label="Yes"></edge>
+    <edge from="d" to="n" from-side="bottom" to-side="left" label="No"></edge>
+  </tut-flow>
+  <div class="dn amber" style="left:40px;top:376px;width:340px"><div class="k">The default cache is in memory</div><div class="d">It lasts for the run. The SDK ships no disk cache.</div></div>
+  <div class="dn green" style="left:420px;top:376px;width:340px"><div class="k">Open instantly, offline</div><div class="d">Give <span class="m">Codelessly(cache:)</span> a cache that persists.</div></div>
+</tut-stage>
+</body></html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: where to look first -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Where to look first</div><div class="s">Find the message, or the symptom, in the tables on this page.</div></div>
+  <tut-flow at="30,96" w="740" h="380">
+    <node id="s" at="0,150" w="130" kind="start">The screen</node>
+    <node id="d1" at="170,140" w="170" h="70" kind="decision">What does it show?</node>
+    <node id="e" at="410,0" w="320">The error builder: find its message under <b>Loading</b></node>
+    <node id="sp" at="410,100" w="320">A spinner forever: <span class="m">await codelessly.initialize()</span> in a <span class="m">try</span></node>
+    <node id="n" at="410,200" w="320">Nothing, or a wrong size: check <span class="m">controller.error</span>, <span class="m">isLoaded</span>, <span class="m">canvasId</span></node>
+    <node id="r" at="410,300" w="320">Runs, but an action fails: read the debug console (<b>While running</b>)</node>
+    <edge from="s" to="d1"></edge>
+    <edge from="d1" to="e" from-side="top" to-side="left"></edge>
+    <edge from="d1" to="sp" from-side="right" to-side="left"></edge>
+    <edge from="d1" to="n" from-side="right" to-side="left"></edge>
+    <edge from="d1" to="r" from-side="bottom" to-side="left"></edge>
+  </tut-flow>
+</tut-stage>
+</body></html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: formula, action or script? -->
+<tut-stage name="hero" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Formula, action or script?</div><div class="s">Start with a formula. Use actions for what happens, in order. Reach for a script for logic with steps.</div></div>
+  <div class="dn" style="left:40px;top:112px;width:228px;height:250px"><div class="k">Formula</div><div class="t m" style="font-size:14px">${= price * qty}</div>
+    <div class="d" style="margin-top:12px"><b>Runs</b> whenever what it reads changes.</div><div class="d"><b>Changes the app</b> never: it computes a value.</div><div class="d" style="margin-top:10px;color:var(--fg2)">Text, colors, visibility, totals, filtering, formatting</div></div>
+  <div class="dn" style="left:286px;top:112px;width:228px;height:250px"><div class="k">Action</div><div class="t">click → setVariable → callApi</div>
+    <div class="d" style="margin-top:12px"><b>Runs</b> when its trigger fires, in order.</div><div class="d"><b>Changes the app</b> yes.</div><div class="d" style="margin-top:10px;color:var(--fg2)">Flow: what happens on a tap, in what order</div></div>
+  <div class="dn purple" style="left:532px;top:112px;width:228px;height:250px"><div class="k">Script</div><div class="t">JavaScript in a sandbox</div>
+    <div class="d" style="margin-top:12px"><b>Runs</b> from a "Run script" action, or <span class="m">script.name()</span> in a formula.</div><div class="d"><b>Changes the app</b> with granted capabilities.</div><div class="d" style="margin-top:10px;color:var(--fg2)">Logic with steps, branches or loops</div></div>
+</tut-stage>
+
+<!-- Engines per platform -->
+<tut-stage name="engines" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Adding the engine to your app</div><div class="s">The SDK finds it when a script first runs. You don't import it.</div></div>
+  <div class="dn green" style="left:40px;top:110px;width:228px;height:200px"><div class="k">Web</div><div class="t">A Web Worker</div><div class="d">Nothing to add. A CSP must allow <span class="m">worker-src blob:</span> and <span class="m">script-src 'unsafe-eval'</span>.</div></div>
+  <div class="dn blue" style="left:286px;top:110px;width:228px;height:200px"><div class="k">Android · iOS · macOS · Linux</div><div class="t">QuickJS 2025-04-26</div><div class="d">Through <span class="m">dart:ffi</span>:</div><div class="m" style="margin-top:6px;font-size:11.5px">flutter pub add codelessly_quickjs</div><div class="d" style="margin-top:6px">About 0.6 MB per ABI.</div></div>
+  <div class="dn red" style="left:532px;top:110px;width:228px;height:200px"><div class="k">Windows</div><div class="t">None yet</div><div class="d">Scripts fail with <span class="m">EngineUnavailable</span>: the action's <span class="m">onError</span> runs, a formula is null.</div></div>
+  <div class="at" style="left:40px;top:330px;width:720px;font-size:12.5px;color:var(--fg1)">An app whose projects have no scripts doesn't add the engine and pays nothing.</div>
+</tut-stage>
+
+<!-- Capabilities -->
+<tut-stage name="capabilities" w="800" h="560" bg="solid">
+  <div class="hd"><div class="t">Host APIs need capabilities</div><div class="s">No network, files, timers, storage or DOM. Calling a host API without its capability throws a <span class="m">CapabilityError</span>.</div></div>
+  <div class="grp blue" style="left:40px;top:120px;width:300px;height:280px"><span class="gl">The sandbox</span></div>
+  <tut-code-window at="40,420" w="720" file="script.js" lang="js">
+const r = await app.callApi("Weather", { city });
+vars.set("forecast", r.body.daily.slice(0, 5));
+await app.toast("Updated");
+  </tut-code-window>
+  <div class="at" style="left:60px;top:146px;width:260px;font-size:13px;color:var(--fg1);line-height:1.7">Modern JavaScript (ES2023), strict mode.<br>Only standard ECMAScript globals.<br>Built-ins are frozen.<br>No <span class="m">eval</span>, <span class="m">new Function</span> or <span class="m">import()</span>.<br><span class="m">fetch</span>, <span class="m">setTimeout</span>, <span class="m">window</span> are <span class="m">undefined</span>: use the <span class="m">app.*</span> host APIs.</div>
+  <div class="dn" style="left:380px;top:120px;width:380px;padding:0;overflow:hidden">
+    <table style="border-collapse:collapse;width:100%;font-size:12px">
+      <tr style="background:var(--bg1)"><th style="text-align:left;padding:7px 12px;color:var(--fg1);font-weight:600">Capability</th><th style="text-align:left;padding:7px 12px;color:var(--fg1);font-weight:600">Grants</th></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">variables.read</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">vars.get, has, all</td></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">variables.write</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">vars.set</td></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">nodes.read</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">nodes.value, all</td></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">navigation</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">app.navigate, back</td></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">api</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">app.callApi</td></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">cloud</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">app.cloudData</td></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">actions</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">app.runAction, toast, delay</td></tr>
+      <tr><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">clock</td><td class="m" style="padding:6px 12px;border-top:1px solid var(--line)">Date.now(), new Date()</td></tr>
+    </table></div>
+</tut-stage>
+
+<!-- How it works -->
+<tut-stage name="architecture" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">How it works</div><div class="s">The same JavaScript driver runs first in both engines, so a script gives the same result everywhere.</div></div>
+  <div class="dn" id="src" style="left:40px;top:110px;width:720px;padding:10px 14px"><div class="k">From</div><div class="m">RunScriptAction · script.name() in a formula</div></div>
+  <div class="dn blue" id="run" style="left:40px;top:186px;width:720px;padding:10px 14px"><div class="k">ScriptRunner</div><div class="d">Builds the request <span class="m">{source, params, grants, vars, nodes, seed, now, scripts}</span>, applies writes, never throws.</div></div>
+  <div class="dn" id="qj" style="left:40px;top:290px;width:350px"><div class="k">QuickJsSandbox</div><div class="d">FFI, synchronous. Devices.</div></div>
+  <div class="dn" id="ww" style="left:410px;top:290px;width:350px"><div class="k">WorkerSandbox</div><div class="d">A Web Worker, asynchronous. The web.</div></div>
+  <div class="dn purple" id="drv" style="left:40px;top:390px;width:720px;padding:10px 14px"><div class="k">script_driver</div><div class="d">Deletes non-standard globals, freezes intrinsics, makes dates, <span class="m">Math.random</span> and formatting deterministic, exposes the granted host APIs.</div></div>
+  <tut-connector from="#src" to="#run" route="straight"></tut-connector>
+  <tut-connector from="#run" to="#qj" route="straight"></tut-connector>
+  <tut-connector from="#run" to="#ww" route="straight"></tut-connector>
+</tut-stage>
+</body></html>

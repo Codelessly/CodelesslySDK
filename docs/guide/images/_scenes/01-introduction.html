@@ -1,0 +1,87 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: Editor -> publish -> SDK -> Flutter UI -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">From the Editor to your app</div><div class="s">The UI is data: a publish changes what running apps show, without an app release.</div></div>
+  <div class="dn blue" id="ed" style="left:40px;top:150px;width:150px">
+    <div class="k">Editor</div><div class="t">Design and logic</div>
+    <div class="d">Screens, variables, actions, scripts</div></div>
+  <div class="dn" id="pub" style="left:250px;top:150px;width:150px">
+    <div class="k">Publish</div><div class="t">JSON data</div>
+    <div class="d"><span class="m">"schema": 2</span></div></div>
+  <div class="dn purple" id="sdk" style="left:460px;top:150px;width:130px">
+    <div class="k">SDK</div><div class="t">Render + run</div>
+    <div class="d">In your app</div></div>
+  <tut-connector from="#ed" to="#pub" route="straight" label="publish" label-style="soft" size="sm"></tut-connector>
+  <tut-connector from="#pub" to="#sdk" route="straight" label="load" label-style="soft" size="sm"></tut-connector>
+  <tut-phone id="ph" at="650,110" w="120" h="250" allow-overflow>
+    <div class="app">
+      <div style="height:30px"></div>
+      <div class="bar" style="font-size:12px;height:28px;padding:0 10px">Home</div>
+      <div class="card" style="margin:6px 8px;padding:8px;border-radius:10px"><div style="height:44px;border-radius:7px;background:linear-gradient(135deg,#BFDBFE,#DDD6FE)"></div><div style="font-size:10px;font-weight:650;margin-top:6px">Welcome</div><div style="height:5px;width:70%;background:#E5E7EB;border-radius:3px;margin-top:4px"></div></div>
+      <div style="margin:6px 8px"><span class="btn" style="height:22px;font-size:9.5px;padding:0 10px;border-radius:6px">Get started</span></div>
+    </div>
+  </tut-phone>
+  <tut-connector from="#sdk" to="#ph" route="straight" to-side="left"></tut-connector>
+  <div class="dn gray" style="left:40px;top:330px;width:550px">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="pill blue">Edit</span><span style="color:var(--fg2)">→</span>
+      <span class="pill blue">Publish</span><span style="color:var(--fg2)">→</span>
+      <span class="pill green">Running apps show it</span>
+    </div>
+    <div class="d" style="margin-top:8px">With a project token, a running app picks the publish up live.</div>
+  </div>
+  <span class="illus" style="left:666px;top:380px">Illustration</span>
+</tut-stage>
+
+<!-- The model: publish -> layout -> canvas -> node -->
+<tut-stage name="model" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">The model in one picture</div><div class="s">A publish lists layouts; a layout holds canvases; a canvas is a tree of nodes.</div></div>
+  <div class="dn" id="pm" style="left:40px;top:118px;width:200px">
+    <div class="k">Publish</div><div class="t">Publish model</div>
+    <ul><li>layouts, entry screen</li><li>fonts, theme, APIs</li><li>app variables, breakpoints</li></ul></div>
+  <div class="dn" style="left:40px;top:292px;width:200px"><div class="k">Bundle</div><div class="d">A publish in one file: the model and every layout.</div></div>
+  <div class="dn blue" id="lay" style="left:290px;top:118px;width:220px">
+    <div class="k">Layout</div><div class="t">One screen, per breakpoint</div>
+    <div style="display:flex;gap:8px;align-items:flex-end;margin-top:10px">
+      <div style="text-align:center"><div style="width:30px;height:52px;border:1.5px solid var(--t-blue);border-radius:6px;background:var(--bg0)"></div><div class="m" style="font-size:10.5px;margin-top:3px">mobile</div></div>
+      <div style="text-align:center"><div style="width:48px;height:62px;border:1.5px solid var(--line2);border-radius:6px;background:var(--bg0)"></div><div class="m" style="font-size:10.5px;margin-top:3px">tablet</div></div>
+      <div style="text-align:center"><div style="width:84px;height:52px;border:1.5px solid var(--line2);border-radius:6px;background:var(--bg0)"></div><div class="m" style="font-size:10.5px;margin-top:3px">desktop</div></div>
+    </div>
+    <div class="d" style="margin-top:8px">Each canvas is a <span class="m">canvas</span> node: a Scaffold.</div></div>
+  <div class="dn" id="node" style="left:560px;top:118px;width:200px">
+    <div class="k">Node</div><div class="t m" style="font-size:14px">type: "text"</div>
+    <ul class="m" style="font-size:12px;line-height:1.6;padding-left:14px">
+      <li>layout</li><li>decoration</li><li>props</li><li>bind <span style="color:var(--fg2)">(${...})</span></li><li>actions</li><li>behaviours</li></ul></div>
+  <tut-connector from="#pm" to="#lay" route="straight" from-side="right" to-side="left"></tut-connector>
+  <tut-connector from="#lay" to="#node" route="straight" from-side="right" to-side="left"></tut-connector>
+  <tut-callout at="290,380" w="470" type="info" title="Details in the model's own guide">The <code>codelessly_api</code> guide covers nodes, layouts and the JSON format.</tut-callout>
+</tut-stage>
+
+<!-- The SDK in one page: two classes, two layers, four ways in -->
+<tut-stage name="sdk" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">The SDK in one picture</div><div class="s">Two classes do most of the work. Your app joins in through four things.</div></div>
+  <div class="grp blue" style="left:210px;top:108px;width:380px;height:362px"><span class="gl">codelessly_sdk</span></div>
+  <div class="dn blue" id="cl" style="left:230px;top:130px;width:164px;height:118px">
+    <div class="k">Codelessly</div><div class="t">One project</div>
+    <div class="d">Loads, caches, fonts, data</div></div>
+  <div class="dn blue" id="cw" style="left:406px;top:130px;width:164px;height:118px">
+    <div class="k">CodelesslyWidget</div><div class="t">One screen</div>
+    <div class="d">Picks the canvas, lays out, runs</div></div>
+  <div class="dn" style="left:230px;top:266px;width:340px"><div class="k">Renderer</div><div class="d">Nodes become render objects: one box per node. Text fields, video and lists are islands.</div></div>
+  <div class="dn" style="left:230px;top:370px;width:340px"><div class="k">Runtime</div><div class="d">Variables, conditions, <span class="m">${...}</span>, actions, navigation, services.</div></div>
+  <div class="dn" id="i1" style="left:40px;top:130px;width:140px"><div class="t">data</div><div class="d">your app's values</div></div>
+  <div class="dn" id="i3" style="left:40px;top:250px;width:140px"><div class="t">functions</div><div class="d">layouts call</div></div>
+  <div class="dn" id="i4" style="left:40px;top:370px;width:140px"><div class="t">services</div><div class="d">you plug in</div></div>
+  <div class="dn" id="i2" style="left:620px;top:130px;width:140px"><div class="t">params</div><div class="d">a screen opens with</div></div>
+  <tut-connector from="#i1" to="#cl" route="elbow" from-side="right" to-side="left"></tut-connector>
+  <tut-connector from="#i3" to="#cl" route="elbow" from-side="right" to-side="left"></tut-connector>
+  <tut-connector from="#i4" to="#cl" route="elbow" from-side="right" to-side="left"></tut-connector>
+  <tut-connector from="#i2" to="#cw" route="straight" from-side="left" to-side="right"></tut-connector>
+  <div class="at" style="left:620px;top:250px;width:150px;font-size:12.5px;color:var(--fg1);line-height:1.5"><span class="m">data</span> can also be given per widget, and functions and services go on <span class="m">CodelesslyConfig</span>.</div>
+</tut-stage>
+</body></html>

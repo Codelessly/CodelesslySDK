@@ -5,14 +5,42 @@
 Screens that show layouts are widget-testable without a network, a backend or a device. The tests in this chapter
 are real: they are in [`v2/example/test/guide_test.dart`](../../v2/example/test/guide_test.dart).
 
+![A widget test: a bundle in memory feeds Codelessly.fromBundle with NoFontFetcher, pumped in a MaterialApp, driven and checked through a controller](images/14-testing/hero.png)
+
+*A layout in a widget test, with no network.*
+
 ## The recipe
 
 1. Build the instance from a **bundle in memory** (or a fixture file), so nothing is fetched.
+
+   ![testCodelessly builds a Codelessly with Codelessly.fromBundle](images/14-testing/step1-bundle.png)
+
+   *Step 1: a bundle in memory.*
+
 2. Pass **`fonts: const NoFontFetcher()`**, so fonts aren't downloaded.
+
+   ![testCodelessly passes fonts: const NoFontFetcher()](images/14-testing/step2-fonts.png)
+
+   *Step 2: no font downloads.*
+
 3. Keep the default **`Services()`**: memory storage, memory cloud data, signed out. Replace `api` and `links`
    with fakes if the layout calls APIs or opens links.
+
+   ![Default services: storage and cloud in memory, auth signed out; replace api and links with fakes when needed](images/14-testing/step3-services.png)
+
+   *Step 3: the default services, with fakes where needed.*
+
 4. Drive the screen through a **`CodelesslyWidgetController`**: read values, set variables, fire triggers.
+
+   ![Assertions with controller.read and controller.node, and controller.trigger firing a click](images/14-testing/step4-controller.png)
+
+   *Step 4: read, assert and trigger through the controller.*
+
 5. **Pump frames by hand** instead of `pumpAndSettle`: a screen with a looping animation never settles.
+
+   ![The frames helper pumps ten frames of 100 ms instead of pumpAndSettle](images/14-testing/step5-frames.png)
+
+   *Step 5: pump a second of frames.*
 
 ```dart
 /// An instance for tests: no network (fonts aren't fetched).

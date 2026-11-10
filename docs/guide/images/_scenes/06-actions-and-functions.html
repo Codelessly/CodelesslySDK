@@ -1,0 +1,56 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: a reaction is a trigger and a chain of actions -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">A reaction: a trigger and its chain of actions</div><div class="s">Made in the Editor, run by the SDK. Your app takes part through functions.</div></div>
+  <div class="dn amber" id="t" style="left:40px;top:150px;width:130px"><div class="k">Trigger</div><div class="t m" style="font-size:14px">click</div></div>
+  <div class="dn" id="a1" style="left:220px;top:150px;width:150px"><div class="k">Action 1</div><div class="t m" style="font-size:13px">setVariable</div></div>
+  <div class="dn blue" id="a2" style="left:420px;top:150px;width:150px"><div class="k">Action 2</div><div class="t m" style="font-size:13px">callFunction</div></div>
+  <div class="dn" id="a3" style="left:620px;top:150px;width:140px"><div class="k">Action 3</div><div class="t m" style="font-size:13px">showToast</div></div>
+  <tut-connector from="#t" to="#a1" route="straight"></tut-connector>
+  <tut-connector from="#a1" to="#a2" route="straight"></tut-connector>
+  <tut-connector from="#a2" to="#a3" route="straight"></tut-connector>
+  <span class="el m" style="left:580px;top:128px">${result}</span>
+  <div class="dn purple" id="fn" style="left:330px;top:300px;width:330px"><div class="k">Your Dart function</div><div class="m">'addToCart': (context, params) async { ... }</div><div class="d">Its return value is <span class="m">${result}</span> for the next action.</div></div>
+  <tut-connector from="#a2" to="#fn" from-side="bottom" to-side="top" heads="both"></tut-connector>
+  <div class="at" style="left:40px;top:300px;width:260px;font-size:12.5px;color:var(--fg1);line-height:1.6">
+    Actions run in order.<br>An action that fails stops its chain.<br>A chain stops when its node leaves the screen.</div>
+</tut-stage>
+
+<!-- A function, annotated -->
+<tut-stage name="function" w="800" h="560" bg="solid">
+  <tut-code-window id="code" class="sm" at="40,16" w="720" file="lib/main.dart" highlight="5,10,12">
+final codelessly = Codelessly(
+  config: CodelesslyConfig(
+    slug: 'my-project',
+    functions: {
+      // A "call function" action named `addToCart`, with its params already evaluated.
+      'addToCart': (context, params) async {
+        final id = params['productId'] as String?;
+        debugPrint('add $id to the cart');
+        // Change a variable of the screen that called.
+        context.setVariable('cartCount', 3);
+        // The result is `${result}` for the next action of the chain.
+        return {'ok': true};
+      },
+    },
+  ),
+);
+  </tut-code-window>
+  <div class="dn" style="left:40px;top:452px;width:228px"><div class="k">params</div><div class="d"><span class="m">'${item.id}'</span> arrives as <span class="m">'sku_123'</span>.</div></div>
+  <div class="dn" style="left:286px;top:452px;width:228px"><div class="k">ActionContext</div><div class="d">Read and set the calling screen's values. No <span class="m">BuildContext</span>.</div></div>
+  <div class="dn" style="left:532px;top:452px;width:228px"><div class="k">Return</div><div class="d">Awaited, then <span class="m">${result}</span>. Throwing stops the chain.</div></div>
+</tut-stage>
+
+<!-- Turning the runtime down -->
+<tut-stage name="runners" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Turning the runtime down</div><div class="s"><span class="m">CodelesslyConfig.actions</span> decides which actions run.</div></div>
+  <div class="dn green" style="left:40px;top:120px;width:228px;height:150px"><div class="k">Default</div><div class="t m" style="font-size:13px">CodelesslyActions()</div><div class="d">Every action type.</div></div>
+  <div class="dn" style="left:286px;top:120px;width:228px;height:150px"><div class="t m" style="font-size:13px;margin-top:20px">NavigationActionRunner()</div><div class="d"><span class="m">navigate</span> and <span class="m">openLink</span> only.</div></div>
+  <div class="dn gray" style="left:532px;top:120px;width:228px;height:150px"><div class="t m" style="font-size:13px;margin-top:20px">NoopActionRunner()</div><div class="d">Nothing. With <span class="m">NoopExpressionEngine</span>, layouts show as designed.</div></div>
+</tut-stage>
+</body></html>

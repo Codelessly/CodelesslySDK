@@ -1,0 +1,106 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: a CodelesslyWidget is an ordinary widget inside your screen -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">An ordinary widget, anywhere a widget goes</div><div class="s">A whole screen, a card, or one item in a list of your own widgets.</div></div>
+  <tut-code-window id="code" class="sm" at="40,110" w="560" file="lib/inbox.dart" highlight="4">
+ListView(
+  children: [
+    const ListTile(title: Text('A Flutter widget')),
+    CodelesslyWidget(codelessly: codelessly, layoutId: 'promo-banner'),
+    const ListTile(title: Text('Another Flutter widget')),
+  ],
+)
+  </tut-code-window>
+  <tut-phone at="620,100" w="150" h="330" allow-overflow>
+    <div class="app" style="background:#F9FAFB">
+      <div style="height:40px"></div>
+      <div class="bar" style="font-size:14px;height:30px;padding:0 12px">Inbox</div>
+      <div style="margin:4px 8px;padding:8px 10px;background:#fff;border-radius:10px;font-size:10px">A Flutter widget</div>
+      <div id="z1" style="margin:8px 8px;height:84px;border-radius:12px;background:linear-gradient(135deg,#DBEAFE,#EDE9FE);padding:10px;font-size:11px;font-weight:650;outline:2px dashed #2563EB;outline-offset:3px">Upgrade to Pro<div style="margin-top:22px"><span class="btn" style="height:22px;font-size:9.5px;padding:0 10px;border-radius:6px">See plans</span></div></div>
+      <div style="margin:4px 8px;padding:8px 10px;background:#fff;border-radius:10px;font-size:10px">Another Flutter widget</div>
+    </div>
+  </tut-phone>
+  <tut-arrow-curved from="420,330" target="#z1" side="left" label="The layout promo-banner" label-style="soft"></tut-arrow-curved>
+  <div class="at" style="left:40px;top:380px;width:340px;font-size:12.5px;color:var(--fg1);line-height:1.5">In a scroll view the canvas takes the full width and its own height.</div>
+  <span class="illus" style="left:648px;top:446px">Illustration</span>
+</tut-stage>
+
+<!-- Which project: lookup order -->
+<tut-stage name="which-project" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Which project a widget shows</div><div class="s">A <span class="m">CodelesslyWidget</span> takes the first <span class="m">Codelessly</span> it finds, in this order.</div></div>
+  <div class="dn blue" id="a" style="left:40px;top:120px;width:160px;height:110px"><div class="k">1</div><div class="t m" style="font-size:13px">codelessly:</div><div class="d">its own parameter</div></div>
+  <div class="dn" id="b" style="left:225px;top:120px;width:160px;height:110px"><div class="k">2</div><div class="t m" style="font-size:13px">controller</div><div class="d">its controller's <span class="m">codelessly</span></div></div>
+  <div class="dn" id="c" style="left:410px;top:120px;width:160px;height:110px"><div class="k">3</div><div class="t m" style="font-size:13px">CodelesslyScope</div><div class="d">a scope above it</div></div>
+  <div class="dn" id="d" style="left:595px;top:120px;width:165px;height:110px"><div class="k">4</div><div class="t m" style="font-size:13px">Codelessly.instance</div><div class="d">set with <span class="m">setDefault</span></div></div>
+  <tut-connector from="#a" to="#b" route="straight" heads="end"></tut-connector>
+  <tut-connector from="#b" to="#c" route="straight"></tut-connector>
+  <tut-connector from="#c" to="#d" route="straight"></tut-connector>
+  <div class="dn red" id="err" style="left:440px;top:300px;width:320px"><div class="k">None of them</div><div class="d">The widget shows an error: <span class="m">No default Codelessly instance...</span></div></div>
+  <tut-connector from="#d" to="#err" from-side="bottom" to-side="top" dashed></tut-connector>
+  <div class="dn gray" style="left:40px;top:300px;width:360px"><div class="k">Create each instance once</div><div class="d">In a <span class="m">State</span> or your dependency injection, never in <span class="m">build</span>. Call <span class="m">dispose()</span> when done.</div></div>
+</tut-stage>
+
+<!-- Canvases follow the widget's width -->
+<tut-stage name="canvas-by-width" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">The canvas follows the widget's width</div><div class="s">Not the window's: a layout in a 390 wide panel shows its mobile canvas on a 1440 wide window.</div></div>
+  <tut-browser at="40,110" w="720" h="340" url="your app">
+    <div style="position:absolute;inset:0;background:var(--bg1)"></div>
+    <div style="position:absolute;left:16px;top:16px;width:420px;bottom:16px;border-radius:10px;background:var(--bg0);border:1px solid var(--line);padding:14px;font-size:13px;color:var(--fg1)">Your Flutter page<div style="height:8px;width:70%;background:var(--bg2);border-radius:4px;margin-top:12px"></div><div style="height:8px;width:55%;background:var(--bg2);border-radius:4px;margin-top:8px"></div></div>
+    <div id="panel" style="position:absolute;right:16px;top:16px;width:236px;bottom:16px;border-radius:10px;background:#fff;border:2px dashed var(--t-blue);padding:12px">
+      <div style="font-size:11px;font-weight:600;color:var(--t-blue)">CodelesslyWidget</div>
+      <div style="margin-top:10px;height:70px;border-radius:10px;background:linear-gradient(135deg,#DBEAFE,#EDE9FE)"></div>
+      <div style="height:7px;width:80%;background:#E5E7EB;border-radius:4px;margin-top:10px"></div>
+      <div style="height:7px;width:60%;background:#E5E7EB;border-radius:4px;margin-top:6px"></div>
+    </div>
+  </tut-browser>
+  <span class="pill blue at" style="left:548px;top:350px">390 wide: the mobile canvas</span>
+  <div class="at" style="left:40px;top:462px;font-size:12.5px;color:var(--fg1)">Crossing a breakpoint switches the canvas. <span class="m">canvasId</span> forces one.</div>
+</tut-stage>
+
+<!-- Sizing -->
+<tut-stage name="sizing" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t"><span class="m" style="font-size:19px">sizing</span>: the box the canvas takes</div><div class="s">In the space its parent gives it (the dashed outline).</div></div>
+  <div class="grp" style="left:40px;top:130px;width:220px;height:260px"><span class="gl m">CanvasSizing.fill</span></div>
+  <div class="at" style="left:52px;top:142px;width:196px;height:236px;border-radius:9px;background:color-mix(in srgb,var(--t-blue) 14%,var(--bg0));border:1.5px solid var(--t-blue)"></div>
+  <div class="grp" style="left:290px;top:130px;width:220px;height:260px"><span class="gl m">CanvasSizing.design</span></div>
+  <div class="at" style="left:335px;top:200px;width:130px;height:120px;border-radius:9px;background:color-mix(in srgb,var(--t-blue) 14%,var(--bg0));border:1.5px solid var(--t-blue)"></div>
+  <div class="grp" style="left:540px;top:130px;width:220px;height:260px"><span class="gl m">CanvasSizing.fillWidth</span></div>
+  <div class="at" style="left:552px;top:200px;width:196px;height:120px;border-radius:9px;background:color-mix(in srgb,var(--t-blue) 14%,var(--bg0));border:1.5px solid var(--t-blue)"></div>
+  <div class="at" style="left:40px;top:404px;width:220px;font-size:12.5px;color:var(--fg1);line-height:1.5"><b style="color:var(--fg0)">Default.</b> The space's width and height: screens, panels.</div>
+  <div class="at" style="left:290px;top:404px;width:220px;font-size:12.5px;color:var(--fg1);line-height:1.5">The design width and height: a card or dialog.</div>
+  <div class="at" style="left:540px;top:404px;width:220px;font-size:12.5px;color:var(--fg1);line-height:1.5">The space's width, the design height: a sheet or banner.</div>
+</tut-stage>
+
+<!-- Loading, error and layout builders -->
+<tut-stage name="builders" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Loading, error and layout builders</div><div class="s">What the widget shows before, instead of, and around the layout.</div></div>
+  <tut-phone at="60,110" w="150" h="300" allow-overflow><div class="app" style="display:grid;place-items:center"><div style="width:28px;height:28px;border-radius:50%;border:3.5px solid #DBEAFE;border-top-color:#2563EB"></div></div></tut-phone>
+  <tut-phone at="325,110" w="150" h="300" allow-overflow><div class="app" style="display:grid;place-items:center;padding:16px;text-align:center"><div style="font-size:11px;color:#B91C1C;line-height:1.4">Could not load: PublishLoadException ...</div></div></tut-phone>
+  <tut-phone at="590,110" w="150" h="300" allow-overflow><div class="app"><div style="position:absolute;left:0;right:0;top:34px;bottom:0;margin:4px;border:2px dashed #9333EA;border-radius:16px"></div><div style="position:absolute;left:12px;right:12px;top:56px;height:70px;border-radius:10px;background:linear-gradient(135deg,#DBEAFE,#EDE9FE)"></div><div style="position:absolute;left:12px;top:136px;width:90px;height:7px;background:#E5E7EB;border-radius:4px"></div></div></tut-phone>
+  <div class="at m" style="left:40px;top:424px;width:190px;text-align:center;font-size:12.5px;font-weight:600">loadingBuilder</div>
+  <div class="at" style="left:40px;top:444px;width:190px;text-align:center;font-size:12px;color:var(--fg1)">until the model and layout load</div>
+  <div class="at m" style="left:305px;top:424px;width:190px;text-align:center;font-size:12.5px;font-weight:600">errorBuilder</div>
+  <div class="at" style="left:305px;top:444px;width:190px;text-align:center;font-size:12px;color:var(--fg1)">gets the error</div>
+  <div class="at m" style="left:570px;top:424px;width:190px;text-align:center;font-size:12.5px;font-weight:600">layoutBuilder</div>
+  <div class="at" style="left:570px;top:444px;width:190px;text-align:center;font-size:12px;color:var(--fg1)">wraps the loaded layout (SafeArea)</div>
+  <span class="illus" style="left:40px;top:96px">Illustration</span>
+</tut-stage>
+
+<!-- The controller -->
+<tut-stage name="controller" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">The controller: your handle on a shown screen</div><div class="s">One <span class="m">CodelesslyWidgetController</span> per widget.</div></div>
+  <div class="dn" id="app" style="left:40px;top:150px;width:200px;height:200px"><div class="k">Your code</div><div class="t">State, tests, buttons</div><div class="d">Holds the controller and disposes it.</div></div>
+  <div class="dn blue" id="ctl" style="left:300px;top:130px;width:200px;height:240px"><div class="k">Controller</div>
+    <div class="m" style="line-height:1.9;margin-top:6px">layoutId<br>isLoaded, error<br>canvasId<br>read(path)<br>setVariable(name, v)<br>trigger(nodeId, t)<br>node(id)</div></div>
+  <tut-phone id="ph" at="590,100" w="150" h="300" allow-overflow><div class="app"><div style="height:40px"></div><div class="bar" style="font-size:13px;height:28px;padding:0 12px">Cart</div><div class="card" style="margin:6px 10px;padding:10px;font-size:11px">count: <b>3</b></div><div style="margin:8px 10px"><span class="btn" style="height:24px;font-size:10px;padding:0 10px;border-radius:6px">Checkout</span></div></div></tut-phone>
+  <tut-connector from="#app" to="#ctl" route="straight" heads="both"></tut-connector>
+  <tut-connector from="#ctl" to="#ph" route="straight" heads="both" to-side="left"></tut-connector>
+  <div class="at" style="left:40px;top:410px;width:460px;font-size:12.5px;color:var(--fg1);line-height:1.5">Its listeners hear when the layout loads, fails, or its canvas changes. Setting <span class="m">layoutId</span> shows another layout in the same widget.</div>
+  <span class="illus" style="left:618px;top:414px">Illustration</span>
+</tut-stage>
+</body></html>

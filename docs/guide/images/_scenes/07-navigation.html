@@ -1,0 +1,69 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: navigation actions run on Flutter's Navigator -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Navigation actions run on Flutter's Navigator</div><div class="s">A <span class="m">CodelesslyWidget</span> uses the nearest <span class="m">Navigator</span> above it.</div></div>
+  <div class="dn" style="left:40px;top:110px;width:330px;padding:0;overflow:hidden">
+    <table style="border-collapse:collapse;width:100%;font-size:12.5px">
+      <tr style="background:var(--bg1)"><th style="text-align:left;padding:8px 12px;font-weight:600;color:var(--fg1)">Action</th><th style="text-align:left;padding:8px 12px;font-weight:600;color:var(--fg1)">The SDK does</th></tr>
+      <tr><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">navigate push</td><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">Navigator.push</td></tr>
+      <tr><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">navigate pop</td><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">Navigator.pop</td></tr>
+      <tr><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">navigate replace</td><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">pushReplacement</td></tr>
+      <tr><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">navigate reset</td><td style="padding:7px 12px;border-top:1px solid var(--line)">clears history</td></tr>
+      <tr><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">openModal</td><td style="padding:7px 12px;border-top:1px solid var(--line)">dialog, sheet, popover</td></tr>
+      <tr><td class="m" style="padding:7px 12px;border-top:1px solid var(--line)">closeModal</td><td style="padding:7px 12px;border-top:1px solid var(--line)">closes it</td></tr>
+    </table></div>
+  <div class="at" style="left:470px;top:150px;width:240px;height:270px;border-radius:14px;background:var(--bg0);border:1px solid var(--line);box-shadow:var(--tut-shadow-card);opacity:.55"></div>
+  <div class="at" style="left:490px;top:130px;width:240px;height:270px;border-radius:14px;background:var(--bg0);border:1px solid var(--line);box-shadow:var(--tut-shadow-card);opacity:.8"></div>
+  <div class="at" id="top" style="left:510px;top:110px;width:240px;height:270px;border-radius:14px;background:var(--bg0);border:1.5px solid var(--t-blue);box-shadow:var(--tut-shadow-card);padding:14px">
+    <div class="m" style="font-size:12px;color:var(--t-blue)">/guide/kraken</div>
+    <div style="font-size:16px;font-weight:700;margin-top:8px">Kraken</div>
+    <div style="height:80px;border-radius:10px;background:linear-gradient(135deg,#DBEAFE,#EDE9FE);margin-top:10px"></div>
+    <div style="height:7px;width:80%;background:var(--bg2);border-radius:4px;margin-top:12px"></div>
+    <div style="height:7px;width:60%;background:var(--bg2);border-radius:4px;margin-top:6px"></div>
+  </div>
+  <div class="at" style="left:470px;top:420px;width:290px;font-size:12.5px;color:var(--fg1);line-height:1.5">Pushed routes are named by the screen's URL path, so a browser shows it.</div>
+  <div class="at" style="left:40px;top:420px;width:330px;font-size:12.5px;color:var(--fg1);line-height:1.5">Without a <span class="m">Navigator</span> above the widget, navigation actions do nothing.</div>
+</tut-stage>
+
+<!-- A whole project as your app: URL paths -->
+<tut-stage name="whole-app" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">A whole project as your app</div><div class="s">Route names match the screens' URL paths; path and query params become <span class="m">route</span> params.</div></div>
+  <tut-code-window at="40,104" w="720" file="lib/main.dart" highlight="2">
+MaterialApp(
+  onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+)
+  </tut-code-window>
+  <tut-browser at="40,236" w="440" h="230" url="localhost/item/7?tab=specs">
+    <div style="position:absolute;inset:0;background:#fff;padding:16px;font-family:var(--tut-font)">
+      <div style="font-size:16px;font-weight:700;color:#111827">Item 7</div>
+      <div style="display:flex;gap:8px;margin-top:10px"><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;background:#F3F4F6;color:#4B5563">Overview</span><span style="font-size:11.5px;padding:3px 10px;border-radius:999px;background:#DBEAFE;color:#2563EB;font-weight:600">Specs</span></div>
+      <div style="height:7px;width:80%;background:#E5E7EB;border-radius:4px;margin-top:16px"></div>
+      <div style="height:7px;width:60%;background:#E5E7EB;border-radius:4px;margin-top:6px"></div>
+    </div>
+  </tut-browser>
+  <div class="dn" style="left:500px;top:236px;width:260px"><div class="k">Screen path</div><div class="m">item/:id</div>
+    <div class="m" style="margin-top:8px;line-height:1.7">route.id  = <b>7</b><br>route.tab = <b>specs</b></div></div>
+  <div class="at" style="left:500px;top:380px;width:260px;font-size:12px;color:var(--fg1);line-height:1.6"><span class="m">/</span> opens the entry screen. On the web the address bar follows; deep links and reloads work.</div>
+  <span class="illus" style="left:40px;top:474px">Illustration</span>
+</tut-stage>
+
+<!-- onNavigate -->
+<tut-stage name="on-navigate" w="800" h="400" bg="solid">
+  <div class="hd"><div class="t">Routing some destinations yourself</div><div class="s"><span class="m">onNavigate</span> sees every navigation action before the SDK acts.</div></div>
+  <tut-flow at="40,100" w="720" h="270">
+    <node id="a" at="0,95" w="150" kind="start">navigate action</node>
+    <node id="h" at="200,85" w="170" h="70" kind="decision">onNavigate returns</node>
+    <node id="y" at="440,10" w="280">Yours: go_router, pushNamed, ...</node>
+    <node id="n" at="440,170" w="280">The SDK navigates</node>
+    <edge from="a" to="h"></edge>
+    <edge from="h" to="y" from-side="top" to-side="left" label="true"></edge>
+    <edge from="h" to="n" from-side="bottom" to-side="left" label="false"></edge>
+  </tut-flow>
+  <div class="at" style="left:480px;top:180px;width:280px;font-size:12px;color:var(--fg1)">The request has <span class="m">type</span>, <span class="m">destinationId</span>, <span class="m">params</span>.</div>
+</tut-stage>
+</body></html>

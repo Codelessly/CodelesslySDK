@@ -2,6 +2,10 @@
 
 [Guide](README.md) · Next: [Quickstart](02-quickstart.md)
 
+![Diagram: the Codelessly Editor publishes JSON data with "schema": 2, which the SDK loads, renders and runs inside a Flutter app](images/01-introduction/hero.png)
+
+*A publish changes what running apps show, without an app release.*
+
 ## What Codelessly is
 
 Codelessly is a canvas editor, like Figma, whose canvas nodes are Flutter widgets. What you design is a real
@@ -28,6 +32,10 @@ The SDK exports the model, so most apps only depend on `codelessly_sdk`.
 
 ## The model in one page
 
+![Diagram: a publish model lists layouts; a layout holds one canvas per breakpoint; a canvas is a tree of nodes with layout, decoration, props, bind, actions and behaviours](images/01-introduction/model.png)
+
+*A publish lists layouts; a layout holds canvases; a canvas is a tree of nodes.*
+
 - A **node** is one widget: a `type` (`row`, `text`, `filledButton`, ...), a `layout` (how it sizes and sits in its
   parent), a `decoration` (fills, strokes, radius, shadows), the widget's own `props` (Flutter's parameter names
   and defaults), bindings (`bind`), reactions (`actions`) and behaviours (motion, transitions, gestures).
@@ -41,6 +49,10 @@ The model's own guide has the details:
 [codelessly_api guide](https://github.com/Codelessly/CodelesslyAPI/tree/master/docs/guide).
 
 ## The SDK in one page
+
+![Diagram: Codelessly loads one project and CodelesslyWidget shows one screen, over a renderer and a runtime; your app joins in through data, params, functions and services](images/01-introduction/sdk.png)
+
+*Two classes, two layers, and the four ways your app joins in.*
 
 Two classes do most of the work:
 

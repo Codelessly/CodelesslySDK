@@ -2,6 +2,10 @@
 
 [Guide](README.md) · Previous: [Scripting](10-scripting.md) · Next: [Custom widgets and extending](12-custom-widgets.md)
 
+![Designed colors, text styles, radii and shadows on each node, versus a Theme for Material defaults and the runtime's own UI](images/11-theming-and-fonts/hero.png)
+
+*Most of a layout's look is designed; a Theme covers the rest.*
+
 ## What a layout's look comes from
 
 Almost everything you see in a layout is designed: each node carries its own colors, text styles, radii and
@@ -44,6 +48,10 @@ theme is built with light brightness; use `useHostTheme` if the layout's Materia
 app's dark theme.
 
 ## Fonts
+
+![Timeline: a layout loads, fetches its fonts, shows with fallbacks after fontTimeout (2 seconds), and re-renders when they arrive](images/11-theming-and-fonts/fonts.png)
+
+*Fonts wait up to fontTimeout, then apply when they arrive.*
 
 Each layout lists the fonts its text uses. When a layout loads, the SDK fetches and registers them, then shows the
 layout. If they take longer than `CodelesslyConfig.fontTimeout` (2 seconds by default), the layout shows with

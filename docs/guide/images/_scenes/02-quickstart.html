@@ -1,0 +1,192 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script>
+<link rel="stylesheet" href="docs.css"></head>
+<body style="margin:0">
+
+<!-- Hero: one config line, one widget, a running screen -->
+<tut-stage name="hero" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Five minutes to a published screen</div><div class="s">Install the SDK, point a <span class="m">Codelessly</span> at your publish, show a <span class="m">CodelesslyWidget</span>.</div></div>
+  <tut-code-window id="code" at="40,100" w="720" file="lib/main.dart" highlight="2,4">
+void main() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+}
+  </tut-code-window>
+  <tut-phone id="ph" at="610,284" w="150" h="300" allow-overflow>
+    <div class="app">
+      <div style="height:36px"></div>
+      <div class="bar" style="font-size:14px;height:30px;padding:0 12px">Home</div>
+      <div class="card" style="margin:6px 10px;padding:10px;border-radius:12px"><div style="height:62px;border-radius:8px;background:linear-gradient(135deg,#BFDBFE,#DDD6FE)"></div><div style="font-size:11.5px;font-weight:650;margin-top:8px">Welcome back</div><div style="height:6px;width:80%;background:#E5E7EB;border-radius:3px;margin-top:6px"></div></div>
+    </div>
+  </tut-phone>
+  <span class="illus" style="left:520px;top:470px">Illustration</span>
+  <tut-arrow from="470,330" to="#ph" side="left" label="flutter run" label-style="soft"></tut-arrow>
+  <div class="at" style="left:40px;top:290px;display:flex;flex-wrap:wrap;gap:8px;width:360px">
+    <span class="pill blue">1 · Install</span><span class="pill blue">2 · Publish</span><span class="pill blue">3 · Create and show</span><span class="pill blue">4 · Run</span><span class="pill blue">5 · Make it yours</span>
+  </div>
+  <div class="at" style="left:40px;top:380px;width:380px;font-size:13px;color:var(--fg1);line-height:1.55">Load by slug (above), by project token, or offline from a bundle: one line changes, the widget stays the same.</div>
+</tut-stage>
+
+<!-- Step 1: install -->
+<tut-stage name="step1-install" w="800" h="320" bg="solid">
+  <tut-step n="1" at="60,60"></tut-step>
+  <div class="at" style="left:84px;top:47px;font-size:18px;font-weight:700">Install the SDK</div>
+  <tut-terminal at="40,100" w="460" title="Terminal">
+$ flutter pub add codelessly_sdk
+  </tut-terminal>
+  <div class="dn" style="left:540px;top:100px;width:220px">
+    <div class="k">Requires</div><div class="t">Dart 3.12</div><div class="t">Flutter 3.35</div><div class="d">or newer</div></div>
+  <div class="at" style="left:40px;top:220px;width:460px;font-size:13px;color:var(--fg1);line-height:1.55">The SDK exports the model (<span class="m">codelessly_api</span>), so most apps need only this one package.</div>
+</tut-stage>
+
+<!-- Step 2: publish in the editor (real screenshot) -->
+<tut-stage name="step2-publish" w="800" h="600" bg="solid">
+  <tut-base src="shots/publish_publish.png" crop="160,70,960,720" at="0,0" w="800"></tut-base>
+  <tut-box target="@publishButton" pad="3"></tut-box>
+  <tut-step n="2" target="@publishButton" side="tl" offset="4"></tut-step>
+  <tut-arrow-curved from="560,470" target="@publishButton" side="top" label="Press Publish"></tut-arrow-curved>
+</tut-stage>
+
+<!-- Step 2: where the slug and the token are -->
+<tut-stage name="step2-slug-or-token" w="800" h="500" bg="solid">
+  <div class="hd"><div class="t">Then copy one of these</div><div class="s">Both are under Publish &amp; integrate in the Editor.</div></div>
+  <div class="at pill" style="left:40px;top:104px">Web tab: the slug</div>
+  <tut-base src="shots/publish_web.png" crop="260,240,760,110" at="40,140" w="720" radius="10" shadow border></tut-base>
+  <tut-box target="@slugField" pad="2"></tut-box>
+  <div class="at pill" style="left:40px;top:290px">Embed in Flutter tab: the SDK token</div>
+  <tut-base src="shots/publish_embed.png" crop="284,455,750,95" at="40,326" w="720" radius="10" shadow border></tut-base>
+  <tut-redact target="@tokenText" mode="bar" radius="4"></tut-redact>
+  <tut-box target="@tokenField" pad="2"></tut-box>
+  <div class="at" style="left:40px;top:442px;width:720px;font-size:13px;color:var(--fg1)">No slug or token yet? The example app in <span class="m">v2/example</span> runs offline.</div>
+</tut-stage>
+
+<!-- Step 3A: by slug -->
+<tut-stage name="step3-slug" w="800" h="500" bg="solid">
+  <tut-step n="3" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">A. By slug</div>
+  <tut-code-window at="40,84" w="720" file="lib/main.dart" highlight="5">
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+}
+  </tut-code-window>
+  <div class="dn" style="left:40px;top:360px;width:228px"><div class="k">Network</div><div class="d">One HTTP request fetches the whole publish.</div></div>
+  <div class="dn" style="left:286px;top:360px;width:228px"><div class="k">Firebase</div><div class="d">None.</div></div>
+  <div class="dn" style="left:532px;top:360px;width:228px"><div class="k">New publishes</div><div class="d">On the app's next start.</div></div>
+</tut-stage>
+
+<!-- Step 3B: by token -->
+<tut-stage name="step3-token" w="800" h="500" bg="solid">
+  <tut-step n="3" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">B. By project token</div>
+  <tut-code-window at="40,84" w="720" file="lib/main.dart" highlight="2,7">
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/firebase.dart';
+import 'package:flutter/material.dart';
+
+Future&lt;void&gt; main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final codelessly = await codelesslyWithToken('YOUR_PROJECT_TOKEN');
+
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+}
+  </tut-code-window>
+  <div class="dn" style="left:40px;top:362px;width:228px"><div class="k">Firebase</div><div class="d">Set up for you: no <span class="m">google-services.json</span>.</div></div>
+  <div class="dn green" style="left:286px;top:362px;width:228px"><div class="k">New publishes</div><div class="d">Reach the running app live.</div></div>
+  <div class="dn amber" style="left:532px;top:362px;width:228px"><div class="k">Not on Linux</div><div class="d">Firebase has no Linux support: use a slug or a bundle.</div></div>
+</tut-stage>
+
+<!-- Step 3C: offline bundle -->
+<tut-stage name="step3-bundle" w="800" h="500" bg="solid">
+  <tut-step n="3" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">C. Offline, from a bundle</div>
+  <tut-code-window id="yaml" at="40,84" w="360" file="pubspec.yaml" highlight="4">
+# pubspec.yaml
+flutter:
+  assets:
+    - assets/my_project.json.gz
+  </tut-code-window>
+  <div class="dn green" style="left:430px;top:84px;width:330px"><div class="k">No network for the project</div><div class="d">The bundle is the whole publish in one JSON file (gzipped or not).</div></div>
+  <tut-code-window id="dart" at="40,250" w="720" file="lib/main.dart" highlight="2">
+void main() {
+  final codelessly = Codelessly.asset('assets/my_project.json.gz');
+
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+}
+  </tut-code-window>
+  <div class="dn amber" style="left:430px;top:176px;width:330px;padding:8px 14px"><div class="d" style="margin:0">Images, icons and web fonts still load from their URLs.</div></div>
+</tut-stage>
+
+<!-- Step 4: run -->
+<tut-stage name="step4-run" w="800" h="500" bg="solid">
+  <tut-step n="4" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Run</div>
+  <tut-terminal at="40,90" w="300" title="Terminal">
+$ flutter run
+  </tut-terminal>
+  <tut-phone id="p1" at="400,80" w="160" h="330" allow-overflow>
+    <div class="app" style="display:grid;place-items:center"><div style="width:30px;height:30px;border-radius:50%;border:3.5px solid #DBEAFE;border-top-color:#2563EB"></div></div>
+  </tut-phone>
+  <tut-phone id="p2" at="600,80" w="160" h="330" allow-overflow>
+    <div class="app">
+      <div style="height:38px"></div>
+      <div class="bar" style="font-size:14px;height:30px;padding:0 12px">Home</div>
+      <div class="card" style="margin:6px 10px;padding:10px;border-radius:12px"><div style="height:66px;border-radius:8px;background:linear-gradient(135deg,#BFDBFE,#DDD6FE)"></div><div style="font-size:11.5px;font-weight:650;margin-top:8px">Welcome back</div><div style="height:6px;width:80%;background:#E5E7EB;border-radius:3px;margin-top:6px"></div></div>
+      <div style="margin:8px 10px"><span class="btn" style="height:26px;font-size:10.5px;padding:0 12px;border-radius:7px">Get started</span></div>
+    </div>
+  </tut-phone>
+  <div class="at" style="left:400px;top:424px;width:160px;text-align:center;font-size:12.5px;color:var(--fg1)">While it loads: a spinner</div>
+  <div class="at" style="left:600px;top:424px;width:160px;text-align:center;font-size:12.5px;color:var(--fg1)">Then the entry screen</div>
+  <tut-then at="580,245"></tut-then>
+  <div class="dn gray" style="left:40px;top:200px;width:300px"><div class="k">If it fails</div><div class="d">The widget shows a message that says why. The Troubleshooting chapter lists each one.</div></div>
+  <span class="illus" style="left:40px;top:440px">Screens: illustration</span>
+</tut-stage>
+
+<!-- Step 5: make it yours -->
+<tut-stage name="step5-data" w="800" h="500" bg="solid">
+  <tut-step n="5" at="60,48"></tut-step>
+  <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Make it yours: one layout, your data</div>
+  <tut-code-window id="code" at="40,90" w="420" file="lib/profile.dart" highlight="3,5">
+CodelesslyWidget(
+  codelessly: codelessly,
+  layoutId: 'profile-card',
+  data: const {
+    'user': {'name': 'Ada', 'plan': 'pro'},
+  },
+)
+  </tut-code-window>
+  <tut-phone at="580,80" w="190" h="370" allow-overflow>
+    <div class="app" style="background:#F9FAFB">
+      <div style="height:44px"></div>
+      <div id="card" style="margin:14px 12px;padding:16px;border-radius:16px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+        <div style="display:flex;align-items:center;gap:10px"><div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#93C5FD,#C4B5FD)"></div>
+        <div><div id="name" style="font-size:17px;font-weight:700">Ada</div><div style="font-size:11px;color:#6B7280">Plan: pro</div></div></div>
+        <div style="height:6px;width:85%;background:#E5E7EB;border-radius:3px;margin-top:14px"></div>
+        <div style="height:6px;width:60%;background:#E5E7EB;border-radius:3px;margin-top:6px"></div>
+      </div>
+    </div>
+  </tut-phone>
+  <tut-binding id="bnd" at="300,326" expr="data.user.name" value="Ada"></tut-binding>
+  <tut-arrow-curved from="#bnd" target="#name" side="left" curve="0.25"></tut-arrow-curved>
+  <div class="at" style="left:40px;top:370px;width:440px;font-size:13px;color:var(--fg1);line-height:1.55">In the Editor, a text bound to <span class="m">${data.user.name}</span> shows "Ada". The layout <span class="m">profile-card</span> is an example id.</div>
+  <span class="illus" style="left:40px;top:460px">Illustration</span>
+</tut-stage>
+
+<!-- The example app -->
+<tut-stage name="example-app" w="800" h="320" bg="solid">
+  <tut-terminal at="40,40" w="720" title="v2/example">
+$ cd v2/example
+$ flutter create .   # only if the platform folder you want is missing
+$ flutter run        # offline
+$ flutter run --dart-define=CODELESSLY_SLUG=&lt;slug&gt;
+$ flutter run --dart-define=CODELESSLY_TOKEN=&lt;token&gt;
+  </tut-terminal>
+  <div class="at" style="left:40px;top:250px;width:720px;font-size:13px;color:var(--fg1)">A complete app: it runs offline, or against your project by slug or token.</div>
+</tut-stage>
+</body></html>

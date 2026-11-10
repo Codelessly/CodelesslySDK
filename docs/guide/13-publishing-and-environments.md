@@ -2,6 +2,10 @@
 
 [Guide](README.md) · Previous: [Custom widgets and extending](12-custom-widgets.md) · Next: [Testing](14-testing.md)
 
+![Publish writes publish/{projectId} and its layouts to Firestore, read live by token apps, and publish/{slug}.json to Storage, read by slug apps on start](images/13-publishing-and-environments/hero.png)
+
+*Where a publish goes, and who reads it.*
+
 ## What "Publish" does
 
 Pressing **Publish** in the Codelessly Editor writes the project's screens where the SDK reads them:
@@ -19,10 +23,14 @@ A running app on a token picks a publish up live. An app on a slug gets it on it
 
 ## What you need from the Editor
 
+![The slug field on the Web tab and the SDK token field (redacted) on the Embed in Flutter tab of Publish & integrate](images/02-quickstart/step2-slug-or-token.png)
+
+*The slug and the token, in Publish & integrate. The token is redacted here.*
+
 | To load by | You need | Notes |
 |---|---|---|
-| Slug | The project's slug | The name in the project's site address, `site.codelessly.com/<slug>`. Only projects published as a site have one. |
-| Token | The project's SDK token | One per project, shown with the project's publish and integration settings in the Editor. |
+| Slug | The project's slug | The name in the project's site address, `site.codelessly.com/<slug>`. Only projects published as a site have one. Set in the Editor under **Publish & integrate → Web**. |
+| Token | The project's SDK token | One per project, under **Publish & integrate → Embed in Flutter** in the Editor. |
 | Layout | A layout id, custom id or canvas id | Optional: without one a widget shows the entry screen, and `initialScreen` opens a screen by its name or path. |
 
 To list a project's layouts and canvases from code, see
@@ -32,6 +40,10 @@ A token is not a secret in the way a server key is: it ships inside your app. It
 project's publish (and, through the project's data rules, to its cloud data).
 
 ## Publish, preview and template
+
+![publish reads publish/..., preview reads publish_preview/..., template reads templates/...](images/13-publishing-and-environments/sources.png)
+
+*The three copies of a project.*
 
 `CodelesslyConfig.publishSource` chooses which copy of the project an instance reads:
 
@@ -130,6 +142,10 @@ SDK 20 reads `"schema": 2` only.
   ([Migrating from 10.x](16-migrating-from-10.md)).
 
 ## Release checklist
+
+![The release checklist as a list of seven checks](images/13-publishing-and-environments/release-checklist.png)
+
+*The checklist below, at a glance.*
 
 - [ ] The release build reads `PublishSource.publish`.
 - [ ] `errorBuilder` and `loadingBuilder` are your own.
