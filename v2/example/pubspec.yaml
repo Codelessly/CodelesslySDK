@@ -1,5 +1,5 @@
 name: codelessly_example
-description: Shows migrated Codelessly projects with the Codelessly SDK v2.
+description: Shows published Codelessly projects with the Codelessly SDK, offline by default.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -25,7 +25,5 @@ dependency_overrides:
 flutter:
   uses-material-design: true
   assets:
-    # Publish bundles migrated from v1 projects
-    # (CodelesslyAPI/v2/migrate/bin/publish_fixture.dart).
+    # Publish bundles (see README.md).
     - assets/rigcheck.json.gz
-    - assets/linewatch.json.gz

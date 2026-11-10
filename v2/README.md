@@ -39,7 +39,7 @@ A `Codelessly` is one published project. A `CodelesslyWidget` shows one of its s
 |---|---|---|---|
 | [Slug](#1-a-published-slug-http) | The project's public slug | One HTTP request | On the next start |
 | [Project token](#2-a-project-token-firebase-live-updates) | The project's SDK token | Firebase (set up by the SDK) | While the app runs |
-| [Bundle](#3-a-bundle-shipped-with-the-app-offline) | A bundle file in your assets | None | With an app release |
+| [Bundle](#3-a-bundle-shipped-with-the-app-offline) | A bundle file in your assets | None for the project | With an app release |
 
 ### 1. A published slug (HTTP)
 
@@ -83,7 +83,8 @@ If the project uses Codelessly cloud data, accounts or file uploads, pass `cloud
 
 ### 3. A bundle shipped with the app (offline)
 
-A bundle is a publish in one JSON file (gzipped or not). Ship it as an asset and the app runs with no network.
+A bundle is a publish in one JSON file (gzipped or not). Ship it as an asset and the project loads with no
+network.
 
 ```yaml
 # pubspec.yaml

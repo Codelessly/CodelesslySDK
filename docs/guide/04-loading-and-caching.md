@@ -107,8 +107,8 @@ final codelessly = Codelessly.asset('assets/my_project.json.gz');
 ```
 
 The asset is a bundle: `{"model": {...}, "layouts": {"<layoutId>": {...}}}`, as JSON or gzipped JSON (detected by
-its first bytes, not its name). It is read once. Fonts still download unless you say otherwise
-([Theming and fonts](11-theming-and-fonts.md)).
+its first bytes, not its name). It is read once. The bundle holds the project, not its media: fonts, icons and
+images still load from their URLs ([Theming and fonts](11-theming-and-fonts.md) covers shipping fonts).
 
 ### Where a bundle file comes from
 

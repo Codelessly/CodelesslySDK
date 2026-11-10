@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:codelessly_sdk_v2/firebase.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -561,3 +562,92 @@ void mirrorAuth(Codelessly codelessly) {
     services.watchAuth().listen((auth) => codelessly.setData('auth', auth));
   }
 }
+
+// ---------------------------------------------------------------------
+// More of the guide's samples.
+// ---------------------------------------------------------------------
+
+/// A project's layouts and canvases.
+Future<void> listLayouts(Codelessly codelessly) async {
+  await codelessly.initialize();
+  for (final layout in codelessly.publishModel!.layouts.values) {
+    debugPrint('${layout.id}: ${[for (final c in layout.canvases) '${c.name} (${c.id}, path ${c.path})']}');
+  }
+}
+
+/// Save what an instance loaded as a bundle.
+Future<String> saveBundle() async {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project', preload: true));
+  await codelessly.initialize();
+  final bundle = PublishBundle(model: codelessly.publishModel!, layouts: codelessly.layouts);
+  final json = jsonEncode(bundle.toJson()); // write it to a file
+  return json;
+}
+
+/// Debug builds follow the Editor's preview.
+Future<Codelessly> previewInDebug() => codelesslyWithToken(
+      'YOUR_PROJECT_TOKEN',
+      config: const CodelesslyConfig(
+        publishSource: kDebugMode ? PublishSource.preview : PublishSource.publish,
+      ),
+    );
+
+/// Another Codelessly backend.
+Future<Codelessly> stagingBackend(FirebaseOptions stagingOptions) async {
+  final app = await codelesslyFirebaseApp(name: 'codelessly-staging', options: stagingOptions);
+  return codelesslyWithToken(
+    'YOUR_PROJECT_TOKEN',
+    app: app,
+    functionsBaseUrl: 'https://us-central1-<firebase-project>.cloudfunctions.net',
+  );
+}
+
+Codelessly stagingSlug() => Codelessly(
+      loader: HttpPublishLoader.firebaseStorage(projectId: 'my-project', bucket: '<bucket>', bundle: true),
+    );
+
+/// The project's theme, for the app's own widgets.
+ThemeData projectTheme(Codelessly codelessly) => themeDataOf(codelessly.publishModel!.theme);
+
+/// API calls through a CORS proxy (the web).
+Codelessly apiProxy() => Codelessly(
+      config: CodelesslyConfig(
+        slug: 'my-project',
+        services: Services(api: HttpApiService(proxy: Uri.parse('https://example.com/api/proxy'))),
+      ),
+    );
+
+/// A layout under an overlay.
+Widget layoutOverlay(Codelessly codelessly) => CodelesslyWidget(
+      codelessly: codelessly,
+      layoutId: 'home',
+      layoutBuilder: (context, layout) => Stack(
+        children: [
+          Positioned.fill(child: layout),
+          const Positioned(right: 12, bottom: 12, child: Text('beta')),
+        ],
+      ),
+    );
+
+/// Recording a function's calls (tests).
+Codelessly recordingFunctions(List<Map<String, Object?>> calls) => Codelessly(
+      config: CodelesslyConfig(slug: 'my-project', functions: {'onTap': (context, params) => calls.add(params)}),
+    );
+
+/// A function reading the screen that called it.
+Codelessly functionReadingScope() => Codelessly(
+      config: CodelesslyConfig(
+        slug: 'my-project',
+        functions: {
+          'track': (context, params) {
+            final screen = context.scope.read('route.id');
+            debugPrint('called from $screen with $params');
+            return null;
+          },
+        },
+      ),
+    );
+
+/// The URL path of a navigation's destination, for the app's own router.
+String? locationOfRequest(Codelessly codelessly, NavigationRequest request) =>
+    CanvasLocation.locationOf(codelessly.publishModel!, request.destinationId, request.params);

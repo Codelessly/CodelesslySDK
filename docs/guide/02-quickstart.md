@@ -89,7 +89,8 @@ void main() {
 }
 ```
 
-No network at all. [Loading modes](04-loading-and-caching.md#where-a-bundle-file-comes-from) says where the file
+The project loads with no network. (Images, icons and web fonts that its layouts use still come from their URLs;
+see [Theming and fonts](11-theming-and-fonts.md).) [Loading modes](04-loading-and-caching.md#where-a-bundle-file-comes-from) says where the file
 comes from.
 
 ## 4. Run

@@ -5,7 +5,9 @@ on:
   pull_request:
 
 jobs:
+  # SDK 10.x (v1), at the repository root: legacy.
   check:
+    name: SDK 10 (v1, legacy)
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -22,3 +24,43 @@ jobs:
       - name: Build the example for the web (WebAssembly)
         working-directory: example
         run: flutter build web --wasm --no-tree-shake-icons
+
+  # SDK 20.x (v2), in v2/: what codelessly_sdk on pub.dev is.
+  v2:
+    name: SDK 20 (v2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: CodelesslySDK
+      # v2 develops against the model in a sibling checkout
+      # (v2/pubspec_overrides.yaml: ../../CodelesslyAPI/v2).
+      - uses: actions/checkout@v7
+        with:
+          repository: Codelessly/CodelesslyAPI
+          path: CodelesslyAPI
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+      - name: Get dependencies
+        working-directory: CodelesslySDK/v2
+        run: flutter pub get
+      - name: Analyze
+        working-directory: CodelesslySDK/v2
+        run: flutter analyze
+      # The scripting tests build QuickJS for the machine
+      # (tool/build_quickjs.sh: CMake and a C compiler, both on the runner).
+      - name: Test
+        working-directory: CodelesslySDK/v2
+        run: flutter test
+      # The example holds the README's and the guide's code samples
+      # (lib/snippets.dart) and the guide's tests (test/guide_test.dart).
+      - name: Analyze the example
+        working-directory: CodelesslySDK/v2/example
+        run: flutter analyze
+      - name: Test the example
+        working-directory: CodelesslySDK/v2/example
+        run: flutter test
