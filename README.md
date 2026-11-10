@@ -1,357 +1,273 @@
-> [!IMPORTANT]
-> **This README describes the legacy SDK, version 10.x (v1).** The code at the root of this repository is kept for
-> apps that have not updated yet and gets no new features.
->
-> **The current SDK is version 20.x, in [`v2/`](v2/)**: it is what `codelessly_sdk` on pub.dev is, and what the
-> Codelessly Editor publishes for.
->
-> - [SDK 20 README](v2/README.md) (install and quickstart)
-> - [Developer guide](docs/guide/README.md)
-> - [Migrating from 10.x to 20.x](docs/guide/16-migrating-from-10.md)
->
-> The API below (`layoutID`, `Codelessly.instance.initialize(config: ...)`, `isPreview: true`) is not the API of 20.x.
+![Codelessly](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/Codelessly-Logo-Text.png)
 
-![Codelessly Logo](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/Codelessly-Logo-Text.png)
+# Codelessly SDK
 
-# Codelessly CloudUI™ SDK
+Server-driven UI for Flutter. Design screens in the [Codelessly Editor](https://codelessly.com), publish, and show
+them in your app with one widget. The SDK renders a published layout natively, straight into Flutter render objects,
+and runs it: variables, conditions, actions, navigation, data, APIs and scripts. A new publish reaches running apps
+without an app release.
 
-[![Pub release](https://img.shields.io/pub/v/codelessly_sdk.svg?style=flat-square)](https://pub.dev/packages/codelessly_sdk) [![GitHub Release Date](https://img.shields.io/github/release-date/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK) [![GitHub issues](https://img.shields.io/github/issues/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK/issues) [![GitHub top language](https://img.shields.io/github/languages/top/Codelessly/CodelesslySDK.svg?style=flat-square)](https://github.com/Codelessly/CodelesslySDK)
+![A Codelessly created by slug and a CodelesslyWidget, with the three ways to load a project: slug, project token, bundle](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/readme/hero.png)
 
-> ### Dynamic UI and real-time updates for Flutter apps
-
-![Codelessly Publish UI](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/Codelessly-Cover.png)
-
-Supercharge your Flutter apps with dynamic UI and real-time updates. Build and publish UI without code!
-
-- **Real-Time UI Updates:** Adjust your UI as often as you need, all in real-time. Adapt to trends, feedback, and
-  business needs on the fly.
-- **Intuitive UI Editor:** Easily create and update UI with our user-friendly Codelessly Editor.
-- **Empower Non-Technical Team Members:** Enable anyone on your team to build UI without learning how to code.
-
-## Quickstart
-
-[![Pub release](https://img.shields.io/pub/v/codelessly_sdk.svg?style=flat-square)](https://pub.dev/packages/codelessly_sdk)
-
-#### **Step 1: Import Library**
-
-```yaml
-codelessly_sdk: ^latest_version
-```
-
-#### **Step 2: Initialize the SDK**
-
-Initialize Codelessly before calling `runApp()`.
+*One widget, three ways to load a project.*
 
 ```dart
-void main() {
-  WidgetsFlutterBinding.ensureInitialized();
+final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
 
-  // Initialize SDK.
-  Codelessly.instance.initialize(
-    config: CodelesslyConfig(
-      authToken: AUTH_TOKEN,
-      isPreview: kDebugMode,
-    ),
-  );
-
-  runApp(const MyApp());
-}
+runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
 ```
 
-The `authToken`can be found for each project under `Publish > Settings > Settings`.
+- [Install](#install)
+- [Quickstart](#quickstart): by [slug](#1-a-published-slug-http), by [project token](#2-a-project-token-firebase-live-updates), or [offline](#3-a-bundle-shipped-with-the-app-offline)
+- [`CodelesslyWidget` essentials](#codelesslywidget-essentials)
+- [Developer guide](#developer-guide)
+- [Coming from 10.x?](#coming-from-10x)
 
-#### **Step 3: Embed the CodelesslyWidget**
+## Install
 
-Easily embed any design from the Codelessly Editor into your app using the `layoutID`.
-
-```dart
-CodelesslyWidget(
-  layoutID: LAYOUT_ID,
-)
+```sh
+flutter pub add codelessly_sdk
 ```
 
-**How to obtain a Layout ID**
-
-1. In the Codelessly Editor, select the **canvas** of your layout.
-2. Press the **Preview Icon** in the toolbar. ![CloudUI Preview Icon](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/preview_icon.png)
-3. Copy the **layoutID**.
-
-![Codelessly Widget Code](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/codelessly_widget_code.png)
-
-### Complete Example
-
-Here is a complete example:
+Requires Dart 3.12 and Flutter 3.35 or newer. Runs on Android, iOS, web, macOS, Windows and Linux.
 
 ```dart
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+```
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+## Quickstart
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Codelessly SDK Example',
-      home: CodelesslyWidget(
-        layoutID: LAYOUT_ID,
-      ),
-    );
-  }
+A `Codelessly` is one published project. A `CodelesslyWidget` shows one of its screens. Pick how the project loads:
+
+| | You need | Network | Live updates |
+|---|---|---|---|
+| [Slug](#1-a-published-slug-http) | The project's public slug | One HTTP request | On the next start |
+| [Project token](#2-a-project-token-firebase-live-updates) | The project's SDK token | Firebase (set up by the SDK) | While the app runs |
+| [Bundle](#3-a-bundle-shipped-with-the-app-offline) | A bundle file in your assets | None for the project | With an app release |
+
+### 1. A published slug (HTTP)
+
+![The slug quickstart code: one HTTP request, no Firebase, new publishes on the next start](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/02-quickstart/step3-slug.png)
+
+*Load by slug.*
+
+A project with a public slug (the name in `site.codelessly.com/<slug>`) publishes one bundle file. The SDK fetches
+it over HTTP; there is nothing else to set up.
+
+```dart
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
 }
 ```
 
-The `CodelesslyWidget` can be used like any other widget and embedded anywhere in your app. It can even be used to
-render entire pages as the root widget!
+### 2. A project token (Firebase, live updates)
 
-From dynamic forms to constantly changing sales and marketing pages, any design or layout can be streamed to your app
-via the `CodelesslyWidget`.
+![The token quickstart code with codelesslyWithToken: Firebase set up for you, live updates, not on Linux](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/02-quickstart/step3-token.png)
 
-To learn how to use the Codelessly editor to publish layouts, check out
-our [3-minute Quickstart Guide](https://docs.codelessly.com/getting-started/3-minute-quick-start).
+*Load by project token.*
 
-## Injecting Data
-
-Customize Codelessly CloudUI™ widgets by passing data values into your layout. The UI will dynamically replace any
-variables defined in the Codelessly editor with the provided values.
+A project's SDK token gives an app access to its publish in Codelessly's backend. Each new publish reaches the
+running app. The token is all you need: `codelesslyWithToken` opens Codelessly's Firebase project as a secondary
+Firebase app, in Dart. No `google-services.json`, no `flutterfire configure`, and your own Firebase project (if you
+have one) is not touched.
 
 ```dart
-CodelesslyWidget(
-  layoutID: LAYOUT_ID,
-  data: {
-    // A map of variables, Map<String, dynamic>
-  },
-),
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/firebase.dart';
+import 'package:flutter/material.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final codelessly = await codelesslyWithToken('YOUR_PROJECT_TOKEN');
+
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+}
 ```
 
-#### **Step 1:** Define variables in the Codelessly Editor
+Firebase has no Linux support, so a token can't be used on Linux desktop: load by slug or from a bundle there.
+If the project uses Codelessly cloud data, accounts or file uploads, pass `cloudServices: true`
+([Cloud data and services](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/09-cloud-data-and-services.md)).
 
-Use the `${}` templating syntax in input fields to link data from the Codelessly editor to layouts as shown below.
+### 3. A bundle shipped with the app (offline)
 
-![Data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/ui_with_data_linking.png)
+![A pubspec asset entry and Codelessly.asset reading the bundle offline](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/02-quickstart/step3-bundle.png)
 
-To link the title of a text widget to the `title` variable in the Codelessly editor, put `${title}` in the text widget’s
-text field.
+*Load a bundle offline.*
 
-> **Note:** All data passed into the Codelessly widget is stored in the `data` object.
->
-> You can access the `title` variable with `${title}` or `${data.title}`.
->
-> Use `data` to reference nested JSON payloads. Example: ${data.productData.nested.json.path}
-
-#### **Step 2:** Pass data to the layout from your app.
-
-```dart
-CodelesslyWidget(
-  layoutID: LAYOUT_ID,
-  data: {
-    'title': 'Fast Performance',
-    'description': 'Complete projects on time and easily with our APIs. Get blazing fast performance!',
-  },
-),
-```
-
-Here, `data` parameter is a map of type `Map<String, dynamic>` which is used to populate information in the layout UI
-where `data`
-variable is used from the Codelessly editor. The layout UI will automatically update to reflect the new data whenever
-the `data` is updated.
-
-This how it looks with populated data:
-
-![Data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/ui_with_populated_data.png)
-
-## Functions
-
-Codelessly SDK also supports calling functions for user actions such as onClick, onLongPress, etc.
-
-```dart
-CodelesslyWidget(
-  layoutID: LAYOUT_ID,
-  functions: {
-    'functionName': (context, reference, params) {
-      // TODO: Implement your function here
-    },
-  },
-),
-```
-
-#### **Step 1:** Add a "Call Function" Action in the Codelessly Editor
-
-Here, we tell the button to call the native `onNextButtonClicked` function when pressed.
-
-![Defining call function action](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/defining_call_function_action.png)
-
-In the Codelessly Editor, you can easily add an Action to a widget. Use the `Call Function` action to invoke
-`onNextButtonClicked`.
-
-1. Switch to the `Develop` tab.
-2. Select a widget to open the `Actions` panel.
-2. Click on the `+` button to add a new action.
-3. Select `Call Function` from the list of actions.
-4. Click on the `Settings` button to bring up the `Action Settings` popup.
-5. Reference the function name in the `Function Name` field. For example, `onNextButtonClicked`.
-
-**Note:** The `CodelesslyFunction` provides a `CodelesslyContext` which provides internal access to the widget's data,
-variables, conditions, functions, etc.
-
-**Note 2:** You can declare `data` and `functions` in the global `Codelessly` instance to make them globally accessible
-to all `CodelesslyWidget`s.
-
-## Scripts
-
-Projects can run JavaScript **scripts** for logic that formulas and actions express badly: validation, calculations, data shaping, state machines. A "Run script" action runs one and leaves its result as `${result}`, and formulas call one as `${= script.name(args)}`. Scripts run in a sandbox with no network, files or timers. They reach the app only through the host APIs they're granted, and stop at their time and memory limits instead of crashing the app.
-
-On the web scripts run in a Web Worker, with nothing to add. On Android, iOS, macOS and Linux, add the engine:
+A bundle is a publish in one JSON file (gzipped or not). Ship it as an asset and the project loads with no
+network.
 
 ```yaml
-codelessly_quickjs: ^latest_version
+# pubspec.yaml
+flutter:
+  assets:
+    - assets/my_project.json.gz
 ```
 
-The engine is its own package, [codelessly_quickjs](https://github.com/Codelessly/CodelesslyQuickJS), so apps without scripts don't carry it.
+```dart
+void main() {
+  final codelessly = Codelessly.asset('assets/my_project.json.gz');
 
-See [docs/scripting.md](docs/scripting.md).
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+}
+```
 
-## CodelesslyWidget Options
+A bundle already in memory works the same way: `Codelessly.fromBundle(PublishBundle.fromJson(json))`.
+[Loading modes and caching](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/04-loading-and-caching.md)
+says where a bundle file comes from.
+
+## `CodelesslyWidget` essentials
+
+![CodelesslyWidget with every essential parameter; layoutId picks the screen, params are read as route, data as data](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/docs/guide/images/readme/widget-essentials.png)
+
+*The essentials, annotated.*
 
 ```dart
 CodelesslyWidget(
-  layoutID: LAYOUT_ID,
-  publishSource: kDebugMode ? PublishSource.preview : PublishSource.publish,
-  config: CodelesslyConfig(
-    authToken: AUTH_TOKEN,
-  ),
+  codelessly: codelessly,
+  controller: controller,
+  // A layout id, a custom id, or the id of one of its canvases.
+  // Without it: the project's entry screen.
+  layoutId: 'profile-card',
+  // `${route.userId}` in the layout.
+  params: const {'userId': 'u_42'},
+  // `${data.user.name}` in the layout.
+  data: const {
+    'user': {'name': 'Ada', 'plan': 'pro'},
+  },
+  sizing: CanvasSizing.fill,
+  loadingBuilder: (context) => const Center(child: CircularProgressIndicator()),
+  errorBuilder: (context, error) => Center(child: Text('Could not load: $error')),
+  layoutBuilder: (context, layout) => SafeArea(child: layout),
+  onNavigate: (context, request) => false,
 )
 ```
 
-- `layoutID`: The ID of the published canvas. The ID can be found in Quick Preview or under
-  `Publish > Settings > Published Layouts`.
+**Which screen.** `layoutId` names a layout by its id, its custom id, or the id of one of its canvases. A layout
+can hold one canvas per breakpoint (mobile, tablet, desktop); the widget shows the one for the width it is given.
+`canvasId` forces one. With no `layoutId`, `initialScreen` opens a screen by its URL path (`'/guide/42'`), id or
+name (`'record-form'` opens "Record form"); with neither, the project's entry screen shows.
 
-![Codelessly Published Layout ID](https://raw.githubusercontent.com/Codelessly/CodelesslySDK/master/packages/codelessly_published_layout_id.png)
+**Which project.** Pass `codelessly`, or put a `CodelesslyScope(codelessly: ..., child: ...)` above the widgets, or
+call `Codelessly.setDefault(codelessly)` once.
 
-- `publishSource`: Whether the layout loads from preview or production. Preview mode is meant for debugging the layout
-  and syncs with the changes made in the editor. Widgets in production mode are only updated when published using the
-  Publish button. Defaults to the global config's setting.
-- `config`: An optional `CodelesslyConfig` that holds the information required to authenticate your layout from the
-  server.
+**Data.** `data` is read in the layout as `${data.<key>}`. Rebuild the widget with new data and the layout updates
+in place. `Codelessly(data: ...)` and `codelessly.setData(key, value)` set data for every screen. `params` are read
+as `${route.<name>}`.
 
-**Note:** Setting a `CodelesslyConfig` on a CodelesslyWidget overrides the global Codelessly instance settings. This
-lets you embed layouts from other projects with different auth tokens.
+**Sizing.** `CanvasSizing.fill` (the default) makes the canvas fill the space it is given: use it for screens.
+`CanvasSizing.design` keeps the canvas's design size (a card, a dialog). `CanvasSizing.fillWidth` fills the width
+and keeps the design height (a sheet). In a scroll view, where the height is unbounded, a canvas takes its own
+height.
 
-## Environment Configuration
+**Loading and errors.** `loadingBuilder` and `errorBuilder` replace the default spinner and error text.
+`layoutBuilder` wraps the loaded layout.
 
-The CodelesslyWidget supports **Preview** and **Published** environments, set globally with `isPreview` or per widget
-with `publishSource`.
+**Functions.** A "call function" action calls a function of your app, by name:
 
 ```dart
-// Global config.
-Codelessly.instance.initialize(
+final codelessly = Codelessly(
   config: CodelesslyConfig(
-    isPreview: true,
+    slug: 'my-project',
+    functions: {
+      'addToCart': (context, params) async {
+        final id = params['productId'] as String?;
+        debugPrint('add $id to the cart');
+        // Change a variable of the screen that called.
+        context.setVariable('cartCount', 3);
+        // The result is `${result}` for the next action of the chain.
+        return {'ok': true};
+      },
+    },
   ),
 );
+```
 
-// Widget level. Overrides global settings for this widget.
+**Navigation.** Navigation actions push the project's screens on the nearest `Navigator`. A project that is the
+whole app gives its screens to `MaterialApp`, so each has its URL path:
+
+```dart
+MaterialApp(onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly))
+```
+
+To route some destinations yourself, return `true` from `onNavigate`:
+
+```dart
 CodelesslyWidget(
-  layoutID: LAYOUT_ID,
-  publishSource: PublishSource.preview,
-);
-```
-
-### Preview Mode
-
-> Realtime UI updates - edits made in the Codelessly Editor are mirrored immediately to the app.
-
-When `isPreview` is set to true, the CodelesslyWidget will stream UI updates from the Codelessly Editor in realtime. Any
-edits to the UI in the editor will update in the app immediately. We think this is a pretty amazing feature so give it a
-try!
-
-Use preview mode to test and prototype UI quickly.
-
-#### Flavor Support
-
-A common request is to enable Preview mode in QA environments to support updating the UI on test user's devices. That
-can be done by setting the `isPreview` value based on the flavor or runtime environment.
-
-```dart
-// Global config.
-Codelessly.instance.initialize(
-  config: CodelesslyConfig(
-    isPreview: FlavorConfig.flavor != "prod",
-  ),
-);
-```
-
-This enables realtime updates on release devices in a test environment, excluding production.
-
-### Production Mode
-
-> Publish UIs with absolute control over updates and versioning.
-
-`isPreview` should be set to false for production environments to prevent the UI from changing. When running in
-Publish (aka Production) mode, UI changes must be explicitly published to update the UI. This makes working in the
-editor safe and prevents undesired changes from reaching end users.
-
-**Note:** You do not need to change layoutIDs when switching from Preview to Production. Canvases have a single unique
-layoutID that the system uses to identify layouts with. Codelessly Servers will automatically handle loading the correct
-layout when moving from Preview to Production.
-
-## Configuration Options
-
-### CodelesslyConfig
-
-```dart
-Codelessly.instance.initialize(
-  config: CodelesslyConfig(
-    authToken: AUTH_TOKEN,
-    isPreview: kDebugMode,
-    preload: true,
-    automaticallySendCrashReports: true,
-  ),
-);
-```
-
-CodelesslyConfig supports the following configuration capabilities.
-
-* `isPreview`: Global enable or disable preview-mode setting.
-* `preload`: Preload layouts to improve performance. When layouts are preloaded, they load instantly and behave like
-  local widgets. `true` by default.
-* `automaticallySendCrashReports`: Report SDK crashes to Codelessly. `false` by default. Only the error and stack trace
-  are sent, no device data.
-* `useHostTheme`: Render layouts with your app's `Theme` instead of a default `ThemeData`. Layouts are styled in the
-  editor, so they use a default theme by default to look exactly as designed.
-* `maxTextScaleFactor`: The largest system text scale layouts follow. `1` by default, which keeps layouts at their
-  designed size; raise it to let text grow with the user's accessibility settings.
-
-### Global Data and Functions
-
-Data and functions registered in the global `Codelessly.instance` are available to all CodelesslyWidgets.
-
-```dart
-Codelessly.instance.initialize(
-  data: {'username': 'Sample User', 'paid': false},
-  functions: {
-    'openPurchasePage': (context, reference, params) =>
-        Navigator.pushNamed(context, 'PurchasePage'),
+  codelessly: codelessly,
+  layoutId: 'home',
+  onNavigate: (context, request) {
+    if (request.type == NavigationType.push && request.destinationId == 'settings') {
+      Navigator.of(context).pushNamed('/settings', arguments: request.params);
+      return true; // Handled: the SDK does nothing more.
+    }
+    return false; // The SDK navigates.
   },
-);
+)
 ```
 
-## Platform Notes
+**Controller.** A `CodelesslyWidgetController` reads and changes the shown screen from outside:
 
-### macOS
+```dart
+final controller = CodelesslyWidgetController(layoutId: 'cart');
 
-The SDK uses Firebase Auth, which stores its user in the keychain. macOS apps
-must be signed with an Apple Development team and have the Keychain Sharing
-capability (`keychain-access-groups` entitlement). Ad-hoc signed builds fail to
-sign in with `[firebase_auth/keychain-error]`, even with the app sandbox off.
-The sandboxed entitlements also need `com.apple.security.network.client`.
+controller.read('count');                 // a variable, `route.id`, `data.user.name`
+controller.setVariable('count', 0);
+controller.trigger('checkout-button', 'click');
+controller.layoutId = 'checkout';         // show another layout
+```
 
-## Additional Resources
+## Developer guide
 
-Additional resources and tutorials are on
-our [documentation website](https://docs.codelessly.com/getting-started/3-minute-quick-start).
+The [developer guide](https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide) covers each topic with
+working code:
 
-If you have any questions or run into any issues, please open an issue or email us
-at [codelessly@gmail.com](mailto:codelessly@gmail.com).
+| | |
+|---|---|
+| [Introduction and concepts](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/01-introduction.md) | Editor, publish, SDK; the model and the renderer |
+| [Quickstart](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/02-quickstart.md) | Five minutes to a running screen |
+| [Embedding and sizing](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/03-embedding-and-sizing.md) | Layout ids, canvases, sizing, builders, the controller |
+| [Loading modes and caching](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/04-loading-and-caching.md) | Slug, token, bundles, self-hosting, offline |
+| [Data and variables](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/05-data-and-variables.md) | `data`, `route`, `storage`, screen and app variables |
+| [Actions and functions](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/06-actions-and-functions.md) | Triggers, the action list, your functions |
+| [Navigation](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/07-navigation.md) | Routes, deep links, `onNavigate` |
+| [Conditions and breakpoints](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/08-conditions-and-breakpoints.md) | Conditions, `${screen}`, responsive canvases |
+| [Cloud data and services](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/09-cloud-data-and-services.md) | Firebase, auth, APIs, storage, analytics |
+| [Scripting](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/10-scripting.md) | JavaScript in a sandbox; the QuickJS engine |
+| [Theming and fonts](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/11-theming-and-fonts.md) | Project theme, host theme, fonts, text scale |
+| [Custom widgets](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/12-custom-widgets.md) | Your widgets inside a layout; your own services |
+| [Publishing and environments](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/13-publishing-and-environments.md) | Publish, preview, templates, app identity |
+| [Testing](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/14-testing.md) | Widget tests without a network |
+| [Troubleshooting and FAQ](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/15-troubleshooting.md) | Errors and what they mean |
+| [Migrating from 10.x](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/16-migrating-from-10.md) | What changed in 20 |
 
-For the latest information on releases and product updates, subscribe to our newsletter on
-the [Codelessly Website](https://codelessly.com/).
+The [example app](https://github.com/Codelessly/CodelesslySDK/tree/master/example) runs offline and shows an
+embedded layout with data, a function and a controller, and a whole project as an app.
+
+## Libraries
+
+| Import | What |
+|---|---|
+| `package:codelessly_sdk/codelessly_sdk.dart` | `Codelessly`, `CodelesslyWidget`, loaders, services. Never imports Firebase. |
+| `package:codelessly_sdk/firebase.dart` | `codelesslyWithToken`, and Codelessly's services on Firebase (publish, accounts, cloud data, files, paywalls). |
+| `package:codelessly_sdk/store.dart` | In-app purchases through the App Store and Google Play. |
+
+Scripts need an engine on devices: add
+[`codelessly_quickjs`](https://pub.dev/packages/codelessly_quickjs) to apps whose projects use scripts. The data
+model is its own package, [`codelessly_api`](https://pub.dev/packages/codelessly_api).
+
+## Coming from 10.x?
+
+Version 20 reads projects in the new format (`"schema": 2`). Every Codelessly project has been converted to it, and
+SDK 10.x and older can't read it. 10.x is no longer in this repository (it stays on pub.dev). The API changed too (`layoutID` is `layoutId`, instances are explicit,
+functions are plain Dart functions). See
+[Migrating from 10.x](https://github.com/Codelessly/CodelesslySDK/blob/master/docs/guide/16-migrating-from-10.md).
+
+## License
+
+BSD 3-Clause. See [LICENSE](https://github.com/Codelessly/CodelesslySDK/blob/master/LICENSE).

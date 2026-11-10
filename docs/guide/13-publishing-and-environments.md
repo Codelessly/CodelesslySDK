@@ -135,10 +135,10 @@ them. The SDK doesn't set icons, the manifest or meta tags: those belong to the 
 SDK 20 reads `"schema": 2` only.
 
 - A project created in the current Editor publishes `"schema": 2`.
-- A project last published by the classic Editor is in the old format until it is converted and published again.
-  Loading it with SDK 20 fails with a `PublishLoadException` saying it "is not v2".
-- Once a project publishes in the new format, apps on SDK 10.x or older can no longer load it. The Editor asks
-  before replacing an old publish for this reason. Update the app to SDK 20 first, or together
+- Every project made with the classic Editor has been converted to the new format and republished. A document
+  that isn't (a bundle exported from a 10.x app, say) fails to load with a `PublishLoadException` saying it
+  "is not v2".
+- Apps on SDK 10.x or older can't load projects in the new format: update them to SDK 20
   ([Migrating from 10.x](16-migrating-from-10.md)).
 
 ## Release checklist

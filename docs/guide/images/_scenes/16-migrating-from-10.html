@@ -15,24 +15,6 @@
   <div class="at" style="left:40px;top:380px;width:720px;font-size:12.5px;color:var(--fg1)">Neither version reads the other's format. Dart 3.12 and Flutter 3.35 or newer.</div>
 </tut-stage>
 
-<!-- Step 1: the project has to be in the new format (real screenshot) -->
-<tut-stage name="step1-format" w="800" h="560" bg="solid">
-  <tut-step n="1" at="60,40"></tut-step>
-  <div class="at" style="left:84px;top:27px;font-size:18px;font-weight:700">Publish the project in the new format</div>
-  <tut-base src="shots/publish_replace_classic.png" crop="300,250,680,380" at="40,74" w="720" radius="10" shadow border></tut-base>
-  <tut-box target="@confirm" pad="2" radius="14"></tut-box>
-  <tut-callout at="40,490" w="720" type="warning">From that publish on, apps on SDK 10.x or older stop loading the project until they update.</tut-callout>
-</tut-stage>
-
-<!-- Step 1: a safe rollout -->
-<tut-stage name="step1-rollout" w="800" h="400" bg="solid">
-  <div class="hd"><div class="t">A safe rollout</div><div class="s">The order matters: the app update first, the new-format publish second.</div></div>
-  <div class="dn blue" style="left:40px;top:116px;width:340px;height:170px"><div class="k">1 · Release the app on SDK 20</div><div class="d">Pointing at the converted project, loaded from a <b>bundle shipped in the app</b>, or a separate copy of the project.</div></div>
-  <div class="dn green" style="left:420px;top:116px;width:340px;height:170px"><div class="k">2 · When enough users have it</div><div class="d">Publish the converted project and switch the app to a token or slug.</div></div>
-  <tut-arrow from="384,200" to="416,200"></tut-arrow>
-  <div class="at" style="left:40px;top:310px;width:720px;font-size:12.5px;color:var(--fg1);line-height:1.6">The conversion keeps layout and canvas ids, so the ids in your code should stay valid.</div>
-</tut-stage>
-
 <!-- Step 2: dependency -->
 <tut-stage name="step2-dependency" w="800" h="320" bg="solid">
   <tut-step n="2" at="60,48"></tut-step>

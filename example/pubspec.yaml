@@ -1,20 +1,16 @@
-name: example
-description: A flutter project demonstrating how to use the CodelesslySDK.
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+name: codelessly_example
+description: Shows published Codelessly projects with the Codelessly SDK, offline by default.
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.13.0
-  flutter: ">=3.47.0"
+  sdk: ^3.12.0
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^4.15.0
   codelessly_sdk:
-    path: ../
+    path: ..
 
 dev_dependencies:
   flutter_test:
@@ -23,3 +19,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    # Publish bundles (see README.md).
+    - assets/rigcheck.json.gz

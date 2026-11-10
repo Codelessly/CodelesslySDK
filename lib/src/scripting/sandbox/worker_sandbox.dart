@@ -137,7 +137,7 @@ class WorkerSandbox implements ScriptSandbox {
     worker.onerror = ((web.Event e) {
       e.preventDefault();
       _killWorker(
-        'The script engine failed: ${e is web.ErrorEvent ? e.message : e.type}',
+        'The script engine failed: ${e.isA<web.ErrorEvent>() ? (e as web.ErrorEvent).message : e.type}',
       );
     }).toJS;
     return _worker = worker;
@@ -372,9 +372,10 @@ class WorkerSandbox implements ScriptSandbox {
 
     worker.onerror = ((web.Event e) {
       e.preventDefault();
-      if (e is web.ErrorEvent) {
-        final int line = e.lineno;
-        int column = e.colno;
+      if (e.isA<web.ErrorEvent>()) {
+        final web.ErrorEvent error = e as web.ErrorEvent;
+        final int line = error.lineno;
+        int column = error.colno;
         if (line == 1) column -= head.length;
         finish((line, column < 1 ? 1 : column));
       } else {

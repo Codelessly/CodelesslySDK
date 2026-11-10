@@ -1,125 +1,154 @@
+/// The Codelessly SDK: shows the screens a project publishes from the
+/// Codelessly Editor as real Flutter UI, rendered natively (straight into
+/// render objects) and running: variables, conditions, actions, navigation,
+/// data, APIs and scripts.
+///
+/// A [Codelessly] is one published project; a [CodelesslyWidget] shows one
+/// of its screens.
+///
+/// ```dart
+/// import 'package:codelessly_sdk/codelessly_sdk.dart';
+/// import 'package:flutter/material.dart';
+///
+/// void main() {
+///   final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+///   runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+/// }
+/// ```
+///
+/// Where the publish comes from:
+///
+/// * a public slug, over HTTP: `Codelessly(config: CodelesslyConfig(slug: ...))`;
+/// * a project token, from Firebase with live updates: `codelesslyWithToken`
+///   in `package:codelessly_sdk/firebase.dart`;
+/// * a bundle shipped with the app, offline: [Codelessly.asset] and
+///   [Codelessly.fromBundle];
+/// * anywhere else: a [PublishLoader] of the app's.
+///
+/// What an app gives its layouts: data ([CodelesslyWidget.data],
+/// [Codelessly.setData]), route params ([CodelesslyWidget.params]), functions
+/// ([CodelesslyConfig.functions]) and services ([CodelesslyConfig.services],
+/// [Services]). A [CodelesslyWidgetController] reads and changes a shown
+/// screen from outside.
+///
+/// This library also exports the model (`package:codelessly_api`) without
+/// the value types that share Flutter's names (`Color`, `EdgeInsets`,
+/// `TextStyle`...): import `package:codelessly_api/codelessly_api.dart`
+/// with a prefix for those.
+///
+/// Other libraries: `firebase.dart` (Codelessly on Firebase) and
+/// `store.dart` (in-app purchases).
 library;
 
-export 'src/auth/auth_manager.dart';
-export 'src/auth/sign_in_retry.dart';
-export 'src/cache/cache_manager.dart';
-export 'src/cache/codelessly_cache_manager.dart';
-export 'src/codelessly.dart';
-export 'src/navigation/codelessly_router.dart';
-export 'src/navigation/app_identity_runtime.dart';
-export 'src/paywall/paywall_controller.dart';
-export 'src/paywall/paywall_widget.dart';
-export 'src/paywall/in_app_purchase_service.dart';
-export 'src/paywall/store_product_metadata.dart';
-export 'src/paywall/firebase_paywall_backend.dart';
-export 'src/paywall/paywall_runtime.dart';
-export 'src/paywall/paywall_fallback.dart';
-export 'src/paywall/paywall_placement_view.dart';
-export 'src/paywall/paywall_analytics.dart';
-export 'src/codelessly_config.dart';
-export 'src/constants.dart';
-export 'src/data/cloud_data.dart';
-export 'src/data/cloud_database.dart';
-export 'src/data/cloud_query.dart';
-export 'src/data/data_manager.dart';
-export 'src/data/data_rules.dart';
-export 'src/data/firebase_data_repository.dart';
-export 'src/data/local_data_repository.dart';
-export 'src/data/local_database.dart';
-export 'src/data/page_fetchers.dart';
-export 'src/data/pagination_controller.dart';
-export 'src/data/pagination_registry.dart';
-export 'src/data/network_data_repository.dart';
-export 'src/data/web_data_repository.dart';
-export 'src/functions/functions.dart';
-export 'src/functions/functions_repository.dart';
-export 'src/scripting/flutter_script_host.dart';
+// The model, without the value types and enums that share Flutter's names
+// (apps import both): use `import 'package:codelessly_api/codelessly_api.dart'
+// as api;` for those.
+export 'package:codelessly_api/codelessly_api.dart'
+    hide
+        Alignment,
+        AutovalidateMode,
+        Axis,
+        BlendMode,
+        BorderRadius,
+        BorderSide,
+        BorderStyle,
+        BottomNavigationBarLandscapeLayout,
+        BottomNavigationBarType,
+        BoxConstraints,
+        BoxFit,
+        BoxHeightStyle,
+        BoxWidthStyle,
+        ButtonSegment,
+        ButtonStyle,
+        Clip,
+        Color,
+        ColorStop,
+        CrossAxisAlignment,
+        Decoration,
+        FieldValue,
+        EdgeInsets,
+        FloatingActionButtonLocation,
+        FloatingLabelBehavior,
+        FontStyle,
+        IconAlignment,
+        ImageRepeat,
+        InputBorder,
+        InputDecoration,
+        ListTileControlAffinity,
+        ListTileTitleAlignment,
+        MainAxisAlignment,
+        MainAxisSize,
+        NavigationDestination,
+        NavigationDestinationLabelBehavior,
+        Offset,
+        Paint,
+        ShapeBorder,
+        ShowValueIndicator,
+        SliderTrackShape,
+        StrokeAlign,
+        StrokeCap,
+        StrokeJoin,
+        TabAlignment,
+        TabBarIndicatorSize,
+        TextAlign,
+        TextAlignVertical,
+        TextCapitalization,
+        TextDecoration,
+        TextDecorationStyle,
+        TextDirection,
+        TextInputAction,
+        TextInputType,
+        TextLeadingDistribution,
+        TextOverflow,
+        TextStyle,
+        TileMode,
+        VerticalDirection,
+        VisualDensity,
+        WidgetState,
+        WrapAlignment,
+        WrapCrossAlignment;
+
+// Hosts other than NodeView (an editor's board) show node boxes the same
+// way: their element is an IslandOwnerElement and their render object mixes
+// in IslandParent.
+export 'src/render/islands.dart' show IslandEnvironment, IslandHost, IslandOwnerElement, IslandParent;
+export 'src/render/node_tree.dart' show NodeTree, NodeBox, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
+// Text as the SDK renders it, for a host's own text (an in-place editor).
+export 'src/render/convert.dart' show textStyle;
+export 'src/text_defaults.dart' show kTextBase;
+export 'src/render/node_view.dart';
+export 'src/render/hero.dart' show HeroMarkPaint, HeroMarks, RenderHeroMark;
+export 'src/render/play.dart' show EffectPlayers, FlightRegistry, RenderEffects, RenderFlightBox, effectTransformAt;
+export 'src/render/recipe.dart' show NodeChild;
+export 'src/render/source.dart';
+export 'src/widgets/media.dart' show ExternalComponents;
+export 'src/services/services.dart';
+// The script engine (Services.scripts' default) and what scripts can call.
+export 'src/scripting/formula_scripts.dart';
 export 'src/scripting/script_catalog.dart';
-export 'src/scripting/sandbox/script_sandbox.dart';
-export 'src/scripting/script_driver.dart';
-export 'src/scripting/script_formula_calls.dart';
 export 'src/scripting/script_runner.dart';
-export 'src/functions/app_confirm_dialog.dart';
-export 'src/functions/app_toast.dart';
-export 'src/functions/action_color_bindings.dart';
-export 'src/functions/variable_animator.dart';
-export 'src/logging/debug_logger.dart';
-export 'src/logging/error_logger.dart';
-export 'src/model/asset_model.dart';
-export 'src/model/auth_data.dart';
-export 'src/model/custom_component.dart';
-export 'src/model/font_family.dart';
-export 'src/model/font_file_data.dart';
-export 'src/model/model_http_request.dart';
-export 'src/model/privacy_base.dart';
-export 'src/model/publish_source.dart';
-export 'src/model/sdk_publish_model.dart';
-export 'src/transformers/transformers.dart';
-export 'src/transformers/utils/blend_mask.dart';
-export 'src/transformers/utils/drag_and_drop.dart';
-export 'src/transformers/utils/cloud_list_items.dart';
-export 'src/transformers/utils/query_status.dart';
-export 'src/ui/back_interceptor.dart';
-export 'src/ui/canvas_location.dart';
-export 'src/ui/codelessly_context.dart';
-export 'src/ui/codelessly_node_tree_view.dart';
-export 'src/ui/codelessly_route.dart';
-export 'src/ui/codelessly_widget.dart';
-export 'src/ui/data_list_view.dart';
-export 'src/ui/list_reorder.dart';
-export 'src/ui/swipe_actions_box.dart';
-export 'src/ui/overlay_screen.dart';
-export 'src/ui/intrinsic_safe_layout_builder.dart';
-export 'src/ui/codelessly_widget_controller.dart';
-export 'src/ui/feedback_theme.dart';
-export 'src/ui/material_localizations_scope.dart';
-export 'src/ui/related_documents.dart';
-export 'src/ui/show_more.dart';
-export 'src/ui/zoomable_box.dart';
-export 'src/ui/skeleton.dart';
-export 'src/audio/sound.dart' show Sound, SoundEngine, SilentSoundEngine;
-export 'src/speech/speech.dart' show Speech, SpeechEngine;
-export 'src/ui/node_drag.dart';
-export 'src/ui/node_drag_track.dart';
-export 'src/ui/gesture_physics.dart';
-export 'src/ui/node_transform_gesture.dart';
-export 'src/ui/node_motion.dart';
-export 'src/ui/hit_beyond_bounds.dart';
-export 'src/ui/node_play.dart';
-export 'src/ui/node_path_reveal.dart';
-export 'src/ui/node_scroll.dart';
-export 'src/ui/scroll_end_detector.dart';
-export 'src/ui/node_context_registry.dart';
-export 'src/ui/node_size_transition.dart';
-export 'src/ui/viewport_visibility.dart';
-export 'src/ui/route_params_scope.dart';
-export 'src/ui/swipe_detector.dart';
-export 'src/ui/stripe_painter.dart';
-export 'src/utils/code_highlighter.dart';
-export 'src/utils/computed_variables.dart';
-export 'src/utils/cupertino_svg_url.dart';
-export 'src/utils/directional_icons.dart';
-export 'src/ui/node_hero.dart';
-export 'src/ui/route_transition.dart';
-export 'src/ui/node_3d.dart';
-export 'src/utils/notched_shape.dart';
-export 'src/utils/path_shadow.dart';
-export 'src/utils/svg_path.dart';
-export 'src/utils/cupertino_icons_by_codepoint.dart';
-export 'src/utils/material_icon_versions.dart';
-export 'src/utils/extensions.dart';
-export 'src/utils/measurable_layout_builder.dart';
-export 'src/utils/flutter_icons_data_map.dart';
-export 'src/ui/floating_node.dart';
-export 'src/utils/flutter_icons_names_map.dart';
-export 'src/utils/font_parser.dart';
-export 'src/utils/formula.dart';
-export 'src/utils/formula_clock.dart';
-export 'src/utils/image_builder.dart';
-export 'src/utils/observable.dart';
-export 'src/utils/rgb_to_color.dart';
-export 'src/utils/typed_image_bytes.dart';
-export 'src/utils/utils.dart';
-export 'src/genscreen/runtime_screen_generator.dart';
-export 'src/functions/builtin_functions.dart';
-export 'src/speech/recognition.dart';
+export 'src/scripting/sandbox/script_sandbox.dart';
+export 'src/runtime/contracts.dart';
+export 'src/runtime/expressions/expressions.dart';
+export 'src/runtime/actions/actions.dart';
+export 'src/runtime/lists/lists.dart';
+// What `${drag}` reads when nothing is dragged (a design canvas's default).
+export 'src/runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+export 'src/widgets/collections_data_list.dart' show DataListView, DataListViewState, ListSection, SectionIndexBar, UndoBar, groupIntoSections, sectionOffset;
+export 'src/widgets/collections_reorder.dart' show GroupReorderList, KeyboardReorderItem, ReorderListView;
+export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
+
+// The app shell: Codelessly, CodelesslyWidget, loading, navigation.
+export 'src/app/app_identity.dart';
+export 'src/app/back_guard.dart';
+export 'src/app/codelessly.dart';
+export 'src/app/codelessly_widget.dart';
+export 'src/app/config.dart';
+export 'src/app/fonts.dart';
+export 'src/app/loader.dart';
+export 'src/app/navigation.dart';
+export 'src/app/page_transitions.dart';
+export 'src/app/persisted_variables.dart';
+export 'src/app/runtime.dart';
+export 'src/app/theme.dart' show themeDataOf;
+export 'src/app/viewport.dart';
