@@ -1,8 +1,8 @@
-// SDK 20 against SDK 8.x: every node's rect on every fixture canvas.
+// SDK 21 against SDK 8.x: every node's rect on every fixture canvas.
 //
-// test/fixtures: the fixture pages, converted to v2 when v1 projects were.
+// test/fixtures: the fixture pages, converted when 10.x projects were.
 // test/goldens: SDK 8.x's rect for each node, per canvas, recorded when the
-// fixtures were converted. Both are frozen data: v1 and its exporters are
+// fixtures were converted. Both are frozen data: 10.x and its exporters are
 // gone, so they are not regenerated.
 import 'dart:convert';
 import 'dart:io';
@@ -105,7 +105,7 @@ Future<ParityReport> parity(WidgetTester tester, {String project = '', String se
             String fits(Node n) => '${n.layout.width}/${n.layout.height}';
             final want = (r.value as List).cast<num>();
             report.divergences.add('$name ${node.type} "${node.name}" [${node.id}] (${fits(node)}) in ${pn?.type} '
-                '"${pn?.name}" (${pn == null ? '' : fits(pn)}): v1 (${want.join(', ')}) got ${got[r.key] == null ? 'nothing' : _r(got[r.key]!)}');
+                '"${pn?.name}" (${pn == null ? '' : fits(pn)}): 10.x (${want.join(', ')}) got ${got[r.key] == null ? 'nothing' : _r(got[r.key]!)}');
           }
         }
       }

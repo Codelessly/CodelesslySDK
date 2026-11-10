@@ -153,7 +153,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       ]);
     case PlayAnimationAction():
       // A node's one-shot effect, on every shown instance; the chain waits
-      // for it. (Particles aren't drawn by v2 yet.)
+      // for it. (Particles aren't drawn yet.)
       await EffectPlayers.play(a.node, a.animation);
       break;
     case PaginateAction():

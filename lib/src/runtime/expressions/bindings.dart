@@ -233,7 +233,7 @@ class NodeBinder {
         clock |= d.readsClock;
         out = _withItems(source, out, instance, d.valueIn(engine, s));
       }
-      // Conditions win over bindings (v1's precedence).
+      // Conditions win over bindings (10.x's precedence).
       for (final t in targets) {
         reads.addAll(t.reads);
         final v = t.valueIn(engine, s);

@@ -4,12 +4,12 @@
 <link rel="stylesheet" href="docs.css"></head>
 <body style="margin:0">
 
-<!-- Hero: 10.x vs 20.x -->
+<!-- Hero: 10.x vs 21.x -->
 <tut-stage name="hero" w="800" h="420" bg="solid">
-  <div class="hd"><div class="t">From 10.x (v1) to 20.x (v2)</div><div class="s">A rewrite: a new project format, a new renderer, a smaller and more explicit API.</div></div>
+  <div class="hd"><div class="t">From 10.x to 21.x</div><div class="s">A rewrite: a new project format, a new renderer, a smaller and more explicit API.</div></div>
   <div class="dn gray" style="left:40px;top:110px;width:340px;height:250px"><div class="k">10.x</div>
-    <ul style="line-height:1.9;color:var(--fg1)"><li>v1 documents</li><li>A widget tree per node</li><li>A global <span class="m">Codelessly.instance</span></li><li>Firebase always initialized</li><li><span class="m">BaseNode</span> classes</li><li><span class="m">layoutID</span></li></ul></div>
-  <div class="dn blue" style="left:420px;top:110px;width:340px;height:250px"><div class="k">20.x</div>
+    <ul style="line-height:1.9;color:var(--fg1)"><li>10.x documents</li><li>A widget tree per node</li><li>A global <span class="m">Codelessly.instance</span></li><li>Firebase always initialized</li><li><span class="m">BaseNode</span> classes</li><li><span class="m">layoutID</span></li></ul></div>
+  <div class="dn blue" style="left:420px;top:110px;width:340px;height:250px"><div class="k">21.x</div>
     <ul style="line-height:1.9"><li><span class="m">"schema": 2</span></li><li>Render objects, one box per node</li><li>Explicit instances; a default only if you set one</li><li>Firebase only with <span class="m">firebase.dart</span></li><li><span class="m">Node</span>, <span class="m">WidgetSpec</span>, total decoding</li><li><span class="m">layoutId</span></li></ul></div>
   <tut-arrow from="384,235" to="416,235"></tut-arrow>
   <div class="at" style="left:40px;top:380px;width:720px;font-size:12.5px;color:var(--fg1)">Neither version reads the other's format. Dart 3.12 and Flutter 3.35 or newer.</div>
@@ -21,9 +21,9 @@
   <div class="at" style="left:84px;top:35px;font-size:18px;font-weight:700">Update the dependency</div>
   <tut-code-window at="40,84" w="360" file="pubspec.yaml" highlight="2">
 dependencies:
-  codelessly_sdk: ^20.1.0
+  codelessly_sdk: ^21.0.0
   </tut-code-window>
-  <div class="dn" style="left:430px;top:84px;width:330px"><div class="k">Also</div><div class="d"><span class="m">codelessly_api</span>, if you depend on it directly: <span class="m">^20.0.0</span>. Apps with scripts keep <span class="m">codelessly_quickjs</span>.</div></div>
+  <div class="dn" style="left:430px;top:84px;width:330px"><div class="k">Also</div><div class="d"><span class="m">codelessly_api</span>, if you depend on it directly: <span class="m">^21.0.0</span>. Apps with scripts keep <span class="m">codelessly_quickjs</span>.</div></div>
 </tut-stage>
 
 <!-- Step 3: initialization, before and after -->
@@ -37,7 +37,7 @@ Codelessly.instance.initialize(
 );
 runApp(MaterialApp(home: CodelesslyWidget(layoutID: layoutID)));
   </tut-code-window>
-  <span class="pill green at" style="left:40px;top:236px">20.x</span>
+  <span class="pill green at" style="left:40px;top:236px">21.x</span>
   <tut-code-window class="xs" at="40,266" w="720" file="lib/main.dart" highlight="4,10">
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/firebase.dart';
@@ -65,7 +65,7 @@ functions: {
   }),
 }
   </tut-code-window>
-  <span class="pill green at" style="left:40px;top:262px">20.x</span>
+  <span class="pill green at" style="left:40px;top:262px">21.x</span>
   <tut-code-window class="sm" at="40,292" w="720" file="lib/main.dart" highlight="3,4">
 CodelesslyConfig(
   functions: {

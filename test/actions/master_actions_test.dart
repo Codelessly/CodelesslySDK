@@ -1,4 +1,4 @@
-// SDK 8.x master's actions on v2: the set variable glide, animate
+// SDK 8.x master's actions, ported: the set variable glide, animate
 // variable, for-each's `loop`, haptics, run script (a pluggable runner),
 // persisted variables and the back block (canvas blockBack and its
 // backPressed reactions).

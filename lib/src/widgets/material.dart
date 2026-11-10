@@ -164,7 +164,7 @@ Widget _buildButton(BuildContext context, Node n) {
   final s = n.prop(ButtonProps.style);
   final padding = n.layout.padding.flutter;
   final shape = s.shape == null ? null : _shape(s.shape!);
-  // An empty style is the base text style, as every v1 label had.
+  // An empty style is the base text style, as every 10.x label had.
   final text = textStyle(s.textStyle);
   final elevation = s.elevation;
   final ButtonStyle style = switch (n.type) {
