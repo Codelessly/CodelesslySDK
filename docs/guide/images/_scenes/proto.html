@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<script src="_toolkit/annotate.js"></script></head>
+<body style="margin:0">
+<tut-stage name="p1" w="800" h="500" bg="gradient">
+  <tut-code-window id="cw" at="40,40" w="720" file="lib/main.dart" highlight="5">
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/material.dart';
+
+void main() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
+}
+  </tut-code-window>
+  <tut-callout at="40,330" w="340" type="info" title="One HTTP request">Fetches the whole publish. No Firebase.</tut-callout>
+  <tut-arrow-curved from="560,380" to="560,160" label="Your project's slug"></tut-arrow-curved>
+</tut-stage>
+<tut-stage name="p2" w="800" h="500" bg="dots">
+  <tut-flow at="30,60" w="740" h="380">
+    <node id="e" at="0,150" w="150" kind="start">Codelessly Editor</node>
+    <node id="p" at="210,150" w="150">Published project</node>
+    <node id="s" at="420,150" w="150">Codelessly SDK</node>
+    <node id="u" at="610,150" w="130" kind="end">Flutter UI</node>
+    <edge from="e" to="p" label="publish"></edge><edge from="p" to="s" label="load"></edge><edge from="s" to="u"></edge>
+  </tut-flow>
+</tut-stage>
+</body></html>
