@@ -72,7 +72,7 @@ dev_dependencies:
   # The script engine, for the scripting tests on the Dart VM
   # (tool/build_quickjs.sh builds its C sources for this machine). Apps add
   # it themselves; the SDK doesn't depend on it.
-  codelessly_quickjs: ^0.1.0
+  codelessly_quickjs: ^1.0.0
   fake_cloud_firestore: ^4.5.0
   # Firebase.initializeApp without a platform, for the Firebase app test.
   firebase_core_platform_interface: ^8.1.1
