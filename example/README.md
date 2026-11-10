@@ -38,6 +38,6 @@ flutter run --dart-define=CODELESSLY_TOKEN=<your project's token>
 | [`lib/snippets.dart`](lib/snippets.dart) | Every code sample of the README and the developer guide, so they are analyzed. Not used by the app. |
 | [`test/widget_test.dart`](test/widget_test.dart) | Tests of the app. |
 | [`test/guide_test.dart`](test/guide_test.dart) | The developer guide's testing chapter, as tests. |
-| `assets/rigcheck.json.gz` | The publish bundle of a project, converted from v1 pages by `CodelesslyAPI/migrate/bin/publish_fixture.dart`. |
+| `assets/rigcheck.json.gz` | The publish bundle of a project (Rigcheck), as the editor exports it. |
 
 The developer guide: https://github.com/Codelessly/CodelesslySDK/tree/master/docs/guide

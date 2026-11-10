@@ -93,7 +93,7 @@ class Expressions implements ExpressionEngine {
   /// Whether [p] holds in [scope].
   bool test(Predicate p, ValueScope scope) => switch (p) {
         final Comparison c => compare(operand(c.left, scope), c.op, c.op.takesRight ? operand(c.right, scope) : null),
-        // Every part is evaluated, as v1 did.
+        // Every part is evaluated, as 10.x did.
         Junction(join: Join.and, :final parts) => parts.map((x) => test(x, scope)).toList().every((x) => x),
         Junction(join: Join.or, :final parts) => parts.map((x) => test(x, scope)).toList().any((x) => x),
       };

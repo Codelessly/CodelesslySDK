@@ -1,5 +1,5 @@
 // Layout render objects, moved from SDK 8.x (transformers/utils/fit_layout.dart)
-// unchanged in behaviour: the semantics every v1 layout was built with.
+// unchanged in behaviour: the semantics every 10.x layout was built with.
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';

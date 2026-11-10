@@ -58,13 +58,13 @@ void main() {
   testWidgets('app variables are shared by every screen', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
-    // The model's (as the v2 editor publishes them) and a converted v1
+    // The model's (as the editor publishes them) and a converted 10.x
     // publish's `app_variables` scope in a layout.
     final legacy = PublishLayout.fromJson({
       ...signIn.toJson(),
       'variables': {
         'app_variables': [
-          {'id': 'l', 'name': 'legacy', 'value': 'from v1'},
+          {'id': 'l', 'name': 'legacy', 'value': 'from 10.x'},
         ],
       },
     });
@@ -82,12 +82,12 @@ void main() {
     addTearDown(codelessly.dispose);
     final first = await pumpApp(tester, codelessly, layoutId: signIn.id);
     expect(first.scope!.read('appCount'), 7);
-    expect(first.scope!.read('legacy'), 'from v1');
+    expect(first.scope!.read('legacy'), 'from 10.x');
     expect(setVariableIn(first.scope!, 'appCount', 12), isTrue);
     // Another screen reads what this one set.
     final second = await pumpApp(tester, codelessly, layoutId: today.id);
     expect(second.scope!.read('appCount'), 12);
-    expect(second.scope!.read('legacy'), 'from v1');
+    expect(second.scope!.read('legacy'), 'from 10.x');
   });
 
   testWidgets('storage reads what the app keeps on the device, live', (tester) async {

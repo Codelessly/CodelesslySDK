@@ -83,7 +83,7 @@ NodeValuesScope nodeValuesScopeFor(Node node, ValueScope parent) {
 }
 
 /// `screen` inside a responsive layout with its own switch points: the
-/// screen around it with the breakpoint that layout picks (v1's
+/// screen around it with the breakpoint that layout picks (10.x's
 /// `ResponsiveWidthsScope`), following the screen as it changes.
 class ResponsiveScreenScope extends NodeValuesScope {
   ResponsiveScreenScope(this.minWidths, super.values, super.parent);

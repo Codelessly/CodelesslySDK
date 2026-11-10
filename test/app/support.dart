@@ -4,7 +4,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// The migrated publish fixtures (CodelesslyAPI/migrate/bin/publish_fixture.dart).
+/// The publish fixtures (bundles of converted projects).
 PublishBundle fixture(String name) => decodeBundle(File('test/fixtures/publish/$name.json.gz').readAsBytesSync());
 
 /// Content overflows are reported by the layout objects (test fonts are

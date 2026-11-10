@@ -14,7 +14,7 @@ lives. Read the model's design first:
    same file or a `<group>_models.dart` next to it. Never import Flutter.
    Prefer a Flutter name for the type (`textField`, `slider`, `listView`).
 2. **Recipe** (this package): `lib/src/widgets/<group>.dart`, a
-   `WidgetRecipe` per v2 type in `<group>Recipes`. See
+   `WidgetRecipe` per type in `<group>Recipes`. See
    `lib/src/render/recipe.dart` for the `NodeBuilder` API:
    * `b.fitBox`, `b.shell`, `b.flex`, `b.freeform`, `b.syncChildren` build
      with render objects, like the core types in `lib/src/render/node_tree.dart`.
@@ -39,7 +39,7 @@ lives. Read the model's design first:
 
 `test/goldens` + `test/fixtures`: real pages (`static`) and sample pages
 per widget group (`samples-<group>`), with SDK 8.x's rect for every node,
-recorded when v1 projects were converted. They are frozen: v1 is gone, so
+recorded when 10.x projects were converted. They are frozen: 10.x is gone, so
 they are not regenerated. `flutter test test/parity_test.dart
 --dart-define=sets=static --dart-define=types=listView,gridView` reports and
 lists divergences of the given types (a "first divergence" is a node that's
@@ -60,7 +60,7 @@ pages' variables and conditions).
 
 ## Runtime (actions)
 
-`lib/src/runtime/actions` runs reactions (API v2 `Reaction`, `ActionDef`;
+`lib/src/runtime/actions` runs reactions (`Reaction`, `ActionDef`;
 DESIGN.md §5.2): `CodelesslyActions` is the `ActionRunner`, with one typed
 handler per action type (handlers.dart) over an `ActionContext`
 (`RuntimeActionContext`: scope, expressions, services, an `ActionUi`, the
@@ -77,7 +77,7 @@ reactions. A type whose island takes taps itself is in `selfTappedTypes`.
 ## Runtime (gestures)
 
 `lib/src/runtime/gestures`: `physics.dart` is the one release physics
-(API v2 `GesturePhysics`/`GestureSnap`: `springOf`, `rubberBand`,
+(`GesturePhysics`/`GestureSnap`: `springOf`, `rubberBand`,
 `boundsRange`, `AxisSettleSimulation`, `snapTargetOf`, `SimulationGroup`);
 build every gesture's release on it. `drag_motion.dart` is a node that
 follows the pointer (`RenderDragMotion`, the outermost layer;
@@ -182,11 +182,11 @@ See the model's DESIGN.md §5.4 and §5.3.
 
 * Loading (`app/loader.dart`, `services/firebase/publish_loader.dart`): the
   publish is read where SDK 8.x read it (`publish/{project}`, its
-  `layouts/{id}`; `publish_preview`, `templates`), in v2 (`schema: 2`,
+  `layouts/{id}`; `publish_preview`, `templates`), in the current format (`schema: 2`,
   `compressedNodes`: `decodeStoredPublishModel`,
   `decodeStoredPublishLayout`). `FirestorePublishLoader` authenticates with
   the project token (`ProjectAuth`, the `verifyProjectAuthToken` backend
-  call) and is a `LivePublishLoader` (v1's model stream);
+  call) and is a `LivePublishLoader` (10.x's model stream);
   `codelesslyOnFirebase` sets an instance up on it. A slug reads its bundle
   over HTTP (`publish/{slug}.json`). Tests: `test/services/
   firestore_publish_loader_test.dart` on `fake_cloud_firestore`, with
@@ -194,7 +194,7 @@ See the model's DESIGN.md §5.4 and §5.3.
 * Breakpoints: one project set (`PublishModel.breakpoints`) and a node's or
   screen canvas's own switch points (`VarianceProps.minWidths`,
   `CanvasBreakpoint.minWidth`). Variances resolve with
-  `Breakpoints.forWidth(w, minWidths)` then `Breakpoints.governing` (v1's
+  `Breakpoints.forWidth(w, minWidths)` then `Breakpoints.governing` (10.x's
   nearest rule on the defaults), screens pick canvases by their switch
   points, `${screen}` inside an overriding variance follows its widths
   (`ResponsiveScreenScope`), an adaptive Open Modal is a sheet below

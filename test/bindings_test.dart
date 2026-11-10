@@ -203,7 +203,7 @@ void main() {
       NodeBinder(preview: true, scope: VariableScope([v('count', 2, VariableType.integer)])),
     );
     expect(paragraphText(tree, 't'), 'Hi Display name (3)');
-    expect(tree.boxOf('t')!.collapsed, isTrue, reason: 'v1 previewed bound visibility with the defaults');
+    expect(tree.boxOf('t')!.collapsed, isTrue, reason: '10.x previewed bound visibility with the defaults');
   });
 
   testWidgets('conditions win over bindings', (tester) async {

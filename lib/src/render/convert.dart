@@ -1,4 +1,4 @@
-// v2 values → Flutter values.
+// Model values → Flutter values.
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -66,7 +66,7 @@ List<ui.FontFeature>? fontFeatures(api.TextStyle style) {
   ];
 }
 
-/// [style] as Flutter's `TextStyle`, over the v1-compatible base
+/// [style] as Flutter's `TextStyle`, over the 10.x-compatible base
 /// ([kTextBase]).
 TextStyle textStyle(api.TextStyle style) {
   final weight = style.fontWeight;

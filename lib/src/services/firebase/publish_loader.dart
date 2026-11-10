@@ -1,6 +1,6 @@
 // Published apps on Cloud Firestore: the publish model and its layouts at
 // the existing publish paths, as SDK 8.x's FirebaseDataRepository read
-// them, in the v2 format the editor's publish writes (`schema: 2`; a large layout's nodes gzipped in `compressedNodes`).
+// them, in the current format the editor's publish writes (`schema: 2`; a large layout's nodes gzipped in `compressedNodes`).
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
@@ -21,7 +21,7 @@ import '../auth.dart';
 /// authenticates before the first read. A template project (its access says
 /// so) reads [PublishSource.template] whatever source is asked.
 ///
-/// A document that isn't v2 (a project the classic editor published and
+/// A document not in the current format (a project the classic editor published and
 /// nobody converted) fails with a [PublishLoadException] saying so.
 class FirestorePublishLoader implements LivePublishLoader {
   FirestorePublishLoader(this.firestore, {this.projectId, this.auth})

@@ -681,7 +681,7 @@ class _LayoutViewState extends State<_LayoutView> {
     final scope = _screen.scope;
     final services = _codelessly.services;
     final storage = services is Services ? services.storage : null;
-    // A converted v1 publish keeps the app's variables with each layout.
+    // A converted 10.x publish keeps the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;

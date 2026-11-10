@@ -41,31 +41,32 @@ abstract interface class LivePublishLoader implements PublishLoader {
   Stream<PublishModel> watchModel(PublishSource source);
 }
 
-/// The stored-document marker of v2 publish data (`schema: 2`): a document
-/// at a publish path without it is v1, written by the classic editor or SDK
+/// The stored-document marker of publish data (`schema: 2`): a document
+/// at a publish path without it is 10.x, written by the classic editor or SDK
 /// 8.x's publish, which this SDK can't read.
 const String kStoredSchemaField = 'schema';
 
 /// Where a stored layout too large for one Firestore document keeps its
-/// nodes: `{"nodes": {...}}` as JSON, gzipped, base64 encoded (as v1 kept
+/// nodes: `{"nodes": {...}}` as JSON, gzipped, base64 encoded (as 10.x kept
 /// `compressedCanvases`). Written by the editor's publish
-/// (codelessly_v2_storage `encodeStoredLayout`).
+/// (the editor's page storage, `encodeStoredLayout`).
 const String kCompressedNodesField = 'compressedNodes';
 
-/// Throws unless [data] (a stored publish document) is v2.
-void _requireV2(Map<String, Object?> data, String what) {
+/// Throws unless [data] (a stored publish document) is in the current format.
+void _requireCurrentFormat(Map<String, Object?> data, String what) {
   final schema = data[kStoredSchemaField];
   if (schema is num && schema.toInt() >= 2) return;
-  throw PublishLoadException('$what is not v2 (no "schema": 2): SDK 20 reads v2 publishes only. Publish the '
+  throw PublishLoadException('$what is not in the current format (no "schema": 2): SDK 21 reads that format '
+      'only. Publish the '
       'project again from the Codelessly Editor.');
 }
 
 /// A stored publish model document ([PublishSource.modelPath]) as a
-/// [PublishModel]: v2 only (see [kStoredSchemaField]). [projectId] fills an
+/// [PublishModel]: current format only (see [kStoredSchemaField]). [projectId] fills an
 /// empty `projectId`.
 PublishModel decodeStoredPublishModel(Map<String, Object?> data, {String? projectId}) {
   if (data.isEmpty) throw PublishLoadException('No publish model${projectId == null ? '' : ' for project [$projectId]'}');
-  _requireV2(data, 'The publish model${projectId == null ? '' : ' of project [$projectId]'}');
+  _requireCurrentFormat(data, 'The publish model${projectId == null ? '' : ' of project [$projectId]'}');
   final model = PublishModel.fromJson(data);
   return model.projectId.isEmpty && projectId != null ? PublishModel.fromJson({...data, 'projectId': projectId}) : model;
 }
@@ -89,11 +90,11 @@ Map<String, Object?> expandStoredLayout(Map<String, Object?> stored) {
 }
 
 /// A stored layout document ([PublishSource.layoutPath]) as a
-/// [PublishLayout]: v2 only, compressed nodes expanded. [layoutId] (the
+/// [PublishLayout]: current format only, compressed nodes expanded. [layoutId] (the
 /// document's id) fills a missing `id`.
 PublishLayout decodeStoredPublishLayout(Map<String, Object?> data, {String? layoutId}) {
   if (data.isEmpty) throw PublishLoadException('Layout [${layoutId ?? '?'}] does not exist');
-  _requireV2(data, 'Layout [${layoutId ?? data['id']}]');
+  _requireCurrentFormat(data, 'Layout [${layoutId ?? data['id']}]');
   final json = expandStoredLayout(data);
   final id = json['id'];
   return PublishLayout.fromJson(id is String && id.isNotEmpty || layoutId == null ? json : {...json, 'id': layoutId});

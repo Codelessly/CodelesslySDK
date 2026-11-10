@@ -440,7 +440,7 @@ class FeedbackThemeScope extends InheritedWidget {
   bool updateShouldNotify(FeedbackThemeScope oldWidget) => theme != oldWidget.theme;
 }
 
-// --- reading an action's look (v2 JSON) ---------------------------------------
+// --- reading an action's look (JSON) ---------------------------------------
 
 /// The visible drop shadows of [effects].
 List<BoxShadow> boxShadowsOf(Iterable<api.Effect> effects) => [

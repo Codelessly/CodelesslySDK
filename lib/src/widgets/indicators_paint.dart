@@ -410,7 +410,7 @@ class RadialGaugePainter extends NodePainter {
   }
 }
 
-/// A number as v1 printed a double label (`60.0`).
+/// A number as 10.x printed a double label (`60.0`).
 String _numberText(double v) => v.toString();
 
 // --- gauge meter ----------------------------------------------------------------

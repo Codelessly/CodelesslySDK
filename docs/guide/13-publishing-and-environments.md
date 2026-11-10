@@ -130,15 +130,15 @@ updater.detach();
 `CodelesslyAppIdentity.resolve(model, layoutId: ...)` gives a screen's title and description without applying
 them. The SDK doesn't set icons, the manifest or meta tags: those belong to the host page or app.
 
-## Version 20 and projects made before it
+## Projects made with the classic Editor
 
-SDK 20 reads `"schema": 2` only.
+SDK 21 reads `"schema": 2` only.
 
 - A project created in the current Editor publishes `"schema": 2`.
 - Every project made with the classic Editor has been converted to the new format and republished. A document
   that isn't (a bundle exported from a 10.x app, say) fails to load with a `PublishLoadException` saying it
-  "is not v2".
-- Apps on SDK 10.x or older can't load projects in the new format: update them to SDK 20
+  "is not in the current format".
+- Apps on SDK 10.x or older can't load projects in the new format: update them to SDK 21
   ([Migrating from 10.x](16-migrating-from-10.md)).
 
 ## Release checklist

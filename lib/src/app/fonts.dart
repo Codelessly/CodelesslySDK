@@ -1,7 +1,7 @@
 // Fonts of published layouts, registered with the engine (FontLoader).
 //
 // Every font of one family registers under the family's name, so a text
-// style naming the family and a weight (as v2 text styles do) picks the
+// style naming the family and a weight (as text styles do) picks the
 // matching file. Uploaded fonts come from their URL; a font without one is
 // a Google Font, fetched by family, weight and style.
 import 'dart:async';

@@ -1261,7 +1261,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     return null;
   }
 
-  /// Where a freeform child sits, from its v2 position (DESIGN.md §3).
+  /// Where a freeform child sits, from its position (DESIGN.md §3).
   static FreeformPlacement placementFor(Node n, Node parent, {Axis? scrollAxis}) {
     FreeformAxisPlacement axis(bool horizontal) {
       final pos = horizontal ? n.layout.x : n.layout.y;

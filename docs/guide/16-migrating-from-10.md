@@ -1,56 +1,56 @@
-# 16. Migrating from 10.x (v1) to 20.x (v2)
+# 16. Migrating from 10.x to 21.x
 
 [Guide](README.md) · Previous: [Troubleshooting and FAQ](15-troubleshooting.md)
 
-SDK 20 is a rewrite. It reads a new project format, renders differently, and has a smaller, more explicit API.
-This chapter is the checklist for moving an app from `codelessly_sdk` 10.x (or older) to 20.x.
+SDK 21 is a rewrite. It reads a new project format, renders differently, and has a smaller, more explicit API.
+This chapter is the checklist for moving an app from `codelessly_sdk` 10.x (or older) to 21.x.
 
-10.x (v1) is no longer in this repository: the repository holds 20.x only. 10.x stays available on pub.dev
+10.x is no longer in this repository: the repository holds 21.x only. 10.x stays available on pub.dev
 (`codelessly_sdk: ^10.0.0`), but it can't load projects any more (below), so there is nothing to gain from staying
 on it.
 
-![10.x compared with 20.x: v1 documents and a global instance versus "schema": 2, render objects and explicit instances](images/16-migrating-from-10/hero.png)
+![10.x compared with 21.x: 10.x documents and a global instance versus "schema": 2, render objects and explicit instances](images/16-migrating-from-10/hero.png)
 
-*What changes from 10.x to 20.x.*
+*What changes from 10.x to 21.x.*
 
 ## What changed, in short
 
-| | 10.x (v1) | 20.x (v2) |
+| | 10.x | 21.x |
 |---|---|---|
-| Project format | v1 documents | `"schema": 2` |
+| Project format | 10.x documents | `"schema": 2` |
 | Rendering | A widget tree per node | Render objects, one box per node |
 | Instances | A global `Codelessly.instance`, configured in place | Explicit instances; a default only if you set one |
 | Firebase | Always initialized by the SDK | Only with `package:codelessly_sdk/firebase.dart` |
-| Model package | `codelessly_api` 10.x (`BaseNode`, json_serializable) | `codelessly_api` 20.x (`Node`, `WidgetSpec`, total decoding) |
+| Model package | `codelessly_api` 10.x (`BaseNode`, json_serializable) | `codelessly_api` 21.x (`Node`, `WidgetSpec`, total decoding) |
 | Dart / Flutter | | Dart 3.12, Flutter 3.35 or newer |
 
 ## 1. Projects are already in the new format
 
-SDK 20 reads `"schema": 2` only, and SDK 10 can't read it. Every Codelessly project has already been converted to
+SDK 21 reads `"schema": 2` only, and SDK 10 can't read it. Every Codelessly project has already been converted to
 the new format and republished, under the same paths and with the same layout and canvas ids, so the ids in your
 code stay valid. Confirm them with the listing in [Embedding and sizing](03-embedding-and-sizing.md#which-screen).
 
-Apps on SDK 10.x or older no longer load converted projects: update them to 20.x. If SDK 20 shows
-`... is not v2 (no "schema": 2)`, the document was never converted (for example a bundle exported from a 10.x app
+Apps on SDK 10.x or older no longer load converted projects: update them to 21.x. If SDK 21 shows
+`... is not in the current format (no "schema": 2)`, the document was never converted (for example a bundle exported from a 10.x app
 and shipped in the app): export the bundle again from the current Editor.
 
 ## 2. Update the dependency
 
-![pubspec.yaml with codelessly_sdk ^20.1.0](images/16-migrating-from-10/step2-dependency.png)
+![pubspec.yaml with codelessly_sdk ^21.0.0](images/16-migrating-from-10/step2-dependency.png)
 
 *Step 2: the dependency.*
 
 ```yaml
 dependencies:
-  codelessly_sdk: ^20.1.0
+  codelessly_sdk: ^21.0.0
 ```
 
-If you depend on `codelessly_api` directly, it must be `^20.0.0` too. Apps with scripts keep
+If you depend on `codelessly_api` directly, it must be `^21.0.0` too. Apps with scripts keep
 `codelessly_quickjs`.
 
 ## 3. Initialization
 
-![10.x initialization with Codelessly.instance.initialize, and the 20.x version with codelesslyWithToken and an optional setDefault](images/16-migrating-from-10/step3-initialization.png)
+![10.x initialization with Codelessly.instance.initialize, and the 21.x version with codelesslyWithToken and an optional setDefault](images/16-migrating-from-10/step3-initialization.png)
 
 *Step 3: initialization, before and after.*
 
@@ -63,7 +63,7 @@ runApp(MaterialApp(home: CodelesslyWidget(layoutID: layoutID)));
 ```
 
 ```dart
-// 20.x
+// 21.x
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/firebase.dart';
 
@@ -86,13 +86,13 @@ runApp(MaterialApp(home: CodelesslyWidget(layoutId: layoutId)));
 
 ## 4. API changes
 
-![A 10.x CodelesslyFunction and the same function in 20.x as a plain closure with an ActionContext](images/16-migrating-from-10/step4-functions.png)
+![A 10.x CodelesslyFunction and the same function in 21.x as a plain closure with an ActionContext](images/16-migrating-from-10/step4-functions.png)
 
 *Step 4: functions are plain Dart functions now.*
 
 ### `CodelesslyConfig`
 
-| 10.x | 20.x |
+| 10.x | 21.x |
 |---|---|
 | `authToken` (required) | `authToken` (optional; or `slug`, or `projectId`, or a loader) |
 | `isPreview: true` | `publishSource: PublishSource.preview` (`isPreview` is now a read-only getter) |
@@ -106,7 +106,7 @@ runApp(MaterialApp(home: CodelesslyWidget(layoutId: layoutId)));
 
 ### `Codelessly`
 
-| 10.x | 20.x |
+| 10.x | 21.x |
 |---|---|
 | `Codelessly.instance` (always exists) | `Codelessly.instance` after `Codelessly.setDefault(...)`; `Codelessly.maybeInstance` |
 | `Codelessly()`, then `configure(...)` / `initialize(config:, data:, functions:, ...)` | `Codelessly(config:, loader:, cache:, fonts:, data:)`, then `initialize()` |
@@ -117,7 +117,7 @@ runApp(MaterialApp(home: CodelesslyWidget(layoutId: layoutId)));
 
 ### `CodelesslyWidget`
 
-| 10.x | 20.x |
+| 10.x | 21.x |
 |---|---|
 | `layoutID` | `layoutId` |
 | | New: `canvasId`, `params`, `sizing`, `onNavigate` |
@@ -143,7 +143,7 @@ functions: {
 ```
 
 ```dart
-// 20.x
+// 21.x
 CodelesslyConfig(
   functions: {
     'onNextButtonClicked': (context, params) {
@@ -161,7 +161,7 @@ CodelesslyConfig(
 
 ### Controller
 
-| 10.x | 20.x |
+| 10.x | 21.x |
 |---|---|
 | `CodelesslyWidgetController(layoutID:, config:, ...)` | `CodelesslyWidgetController(layoutId:, codelessly:, params:, data:, builders)` |
 | `controller.dataManager`, `publishSource`, `initialize()` | Removed: the instance loads. |
@@ -169,7 +169,7 @@ CodelesslyConfig(
 
 ### Navigation
 
-20.x pushes real routes on the nearest `Navigator`, names them by the screens' URL paths, and lets you intercept
+21.x pushes real routes on the nearest `Navigator`, names them by the screens' URL paths, and lets you intercept
 with `onNavigate`. A project that is the whole app uses
 `CodelesslyWidget.onGenerateRoute(codelessly)` ([Navigation](07-navigation.md)).
 
@@ -185,7 +185,7 @@ If your code touches the model (`package:codelessly_api`): `BaseNode` and its su
 
 *Step 5: what behaves differently.*
 
-| Area | 10.x | 20.x |
+| Area | 10.x | 21.x |
 |---|---|---|
 | Offline start | A disk cache (Hive) | The default cache is in memory: add a persistent `PublishCache` or ship a bundle ([chapter 4](04-loading-and-caching.md#caching-and-offline)). |
 | `storage` and persisted variables | | In memory by default: kept only with a persistent `LocalStorage` ([chapter 5](05-data-and-variables.md#keeping-values-between-runs)). |

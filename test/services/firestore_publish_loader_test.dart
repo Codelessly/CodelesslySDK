@@ -1,6 +1,6 @@
 // FirestorePublishLoader over fake_cloud_firestore, with documents written
 // in the editor's exact format
-// (CodelesslyEditor/packages/codelessly_v2_storage, publish.dart): the model
+// (the editor's page storage package, publish.dart): the model
 // at `publish/{p}` with `schema: 2` and privacy fields, each layout at
 // `publish/{p}/layouts/{id}` with `schema: 2`, a large one with its nodes
 // gzipped in `compressedNodes`.
@@ -18,10 +18,10 @@ import '../app/support.dart';
 
 typedef Json = Map<String, Object?>;
 
-/// codelessly_v2_storage `encodeGzipJson`.
+/// the editor's page storage `encodeGzipJson`.
 String encodeGzipJson(Object? json) => base64Encode(const GZipEncoder().encodeBytes(utf8.encode(jsonEncode(json))));
 
-/// codelessly_v2_storage `encodeStoredLayout` (with [compress] forcing what
+/// the editor's page storage `encodeStoredLayout` (with [compress] forcing what
 /// it does past 900 KiB).
 Json encodeStoredLayout(Json layout, {bool compress = false}) {
   final out = {...layout, 'schema': 2};
@@ -122,14 +122,14 @@ void main() {
     expect((await template.loadModel(PublishSource.publish)).layouts, isNotEmpty);
   });
 
-  test('a v1 publish (not converted) fails, saying so', () async {
+  test('a 10.x publish (not converted) fails, saying so', () async {
     final db = FakeFirebaseFirestore();
     await db.doc('publish/old').set({'projectId': 'old', 'layouts': {}, 'updates': {}});
     await db.doc('publish/old/layouts/l').set({'id': 'l', 'canvases': {}});
     final loader = FirestorePublishLoader(db, projectId: 'old');
     await expectLater(
         loader.loadModel(PublishSource.publish),
-        throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('not v2'))));
+        throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('not in the current format'))));
     await expectLater(loader.loadLayout(PublishSource.publish, 'l'), throwsA(isA<PublishLoadException>()));
     await expectLater(loader.loadLayout(PublishSource.publish, 'missing'),
         throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('does not exist'))));

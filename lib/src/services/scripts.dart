@@ -1,4 +1,4 @@
-// Scripts (API v2 `ScriptDef`, a layout's `scripts`): the service that runs
+// Scripts (`ScriptDef`, a layout's `scripts`): the service that runs
 // one in a sandbox, and what a script reaches in the app (its host). The run
 // script action asks the app's [ScriptRunner]. The engine is
 // `SandboxScriptRunner` (scripting/script_runner.dart: SDK 8.x's driver in

@@ -1,4 +1,4 @@
-// The behaviours v1 master added, at rest and running: motion swing,
+// The behaviours 10.x master added, at rest and running: motion swing,
 // phase, pause, arc, wrapping and paced paths, upright orientation and
 // shimmer; loop phases; drag tracks parked, relative and in their parent.
 import 'dart:math' as math;

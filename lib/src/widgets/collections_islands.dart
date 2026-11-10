@@ -233,7 +233,7 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
   }
 }
 
-/// A shape by its v1 name (`CShapeBorder`), rounded by [radius].
+/// A shape by its 10.x name (`CShapeBorder`), rounded by [radius].
 ShapeBorder _shape(String name, BorderRadius radius, {BorderSide side = BorderSide.none}) => switch (name) {
   'circle' => CircleBorder(side: side),
   'stadium' => StadiumBorder(side: side),
