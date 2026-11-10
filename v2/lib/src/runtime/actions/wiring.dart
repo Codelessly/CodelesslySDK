@@ -23,13 +23,17 @@ import '../expressions/formula.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
+import 'route_transition.dart' show RevealAnchor;
 import 'runner.dart';
 
 /// Wires the reactions of a [NodeTree]'s nodes ([NodeTree.interactions]):
 /// each runs with [runner] in [context] (a list item's node in its item's
 /// scope), and stops when its box leaves the tree.
 class TreeReactions implements NodeInteractions {
-  TreeReactions({required this.runner, required this.context});
+  TreeReactions({required this.runner, required this.context}) {
+    // A modal anchored to the pointer needs the press that fired it.
+    RevealAnchor.track();
+  }
 
   final ActionRunner runner;
 
@@ -88,6 +92,9 @@ class TreeReactions implements NodeInteractions {
   Future<void> fire(NodeBox box, String trigger, {Json event = const {}}) async {
     final node = box.node;
     if (node == null) return;
+    // What a modal anchored to its trigger (or the pointer) sits by.
+    RevealAnchor.track();
+    RevealAnchor.lastTrigger = box.attached && box.hasSize ? box.localToGlobal(Offset.zero) & box.size : null;
     final ctx = contextFor(box);
     if (trigger == 'changed' && event.containsKey('value')) _writeBack(node, event['value'], ctx);
     final state = _boxes[box];
