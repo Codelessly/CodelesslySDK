@@ -75,6 +75,7 @@ A project published from another Codelessly backend (a staging Editor) is read b
 app and functions URL:
 
 ```dart
+// stagingOptions: the FirebaseOptions of that backend.
 final app = await codelesslyFirebaseApp(name: 'codelessly-staging', options: stagingOptions);
 final codelessly = await codelesslyWithToken(
   'YOUR_PROJECT_TOKEN',

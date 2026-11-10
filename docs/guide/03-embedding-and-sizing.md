@@ -160,6 +160,15 @@ ListenableBuilder(
 A `CodelesslyWidgetController` is your handle on a shown screen.
 
 ```dart
+class Cart extends StatefulWidget {
+  const Cart({super.key, required this.codelessly});
+
+  final Codelessly codelessly;
+
+  @override
+  State<Cart> createState() => _CartState();
+}
+
 class _CartState extends State<Cart> {
   final controller = CodelesslyWidgetController(layoutId: 'cart');
 

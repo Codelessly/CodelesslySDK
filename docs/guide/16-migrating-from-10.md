@@ -138,7 +138,10 @@ functions: {
 // 20.x
 CodelesslyConfig(
   functions: {
-    'onNextButtonClicked': (context, params) => navigatorKey.currentState!.pushNamed('/next'),
+    'onNextButtonClicked': (context, params) {
+      navigatorKey.currentState!.pushNamed('/next'); // a GlobalKey<NavigatorState> of your app
+      return null;
+    },
   },
 )
 ```

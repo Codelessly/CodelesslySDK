@@ -651,3 +651,16 @@ Codelessly functionReadingScope() => Codelessly(
 /// The URL path of a navigation's destination, for the app's own router.
 String? locationOfRequest(Codelessly codelessly, NavigationRequest request) =>
     CanvasLocation.locationOf(codelessly.publishModel!, request.destinationId, request.params);
+
+/// A function that opens a route of the app without making the chain wait for it.
+Codelessly functionOpeningRoute(GlobalKey<NavigatorState> navigatorKey) => Codelessly(
+      config: CodelesslyConfig(
+        slug: 'my-project',
+        functions: {
+          'onNextButtonClicked': (context, params) {
+            navigatorKey.currentState!.pushNamed('/next'); // a GlobalKey<NavigatorState> of your app
+            return null;
+          },
+        },
+      ),
+    );
