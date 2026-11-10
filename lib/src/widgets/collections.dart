@@ -21,6 +21,7 @@ import 'collections_islands.dart';
 import 'collections_list_runtime.dart';
 import 'collections_layout.dart';
 import 'collections_pagination.dart';
+import 'collections_page_runtime.dart';
 import 'collections_reorder.dart';
 import 'collections_table.dart';
 
@@ -474,6 +475,10 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
   }
   // A page view can't size itself to its pages.
   chain.add(_viewportBox(b, n, canShrinkWrap: false));
+  if (b.tree.animates) {
+    chain.add(b.island('pageView', (_) => RuntimePageView(runtime: ListRuntime(b, n), itemId: itemId)));
+    return;
+  }
   final count = _itemCount(n);
   final fraction = n.prop(PageViewProps.viewportFraction);
   final padEnds = n.prop(PageViewProps.padEnds);
