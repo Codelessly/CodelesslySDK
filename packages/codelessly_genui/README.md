@@ -1,5 +1,8 @@
 # codelessly_genui
 
+> Built on the legacy Codelessly SDK and API, 10.x (the code at this repository's root), not on SDK 20.x
+> ([`v2/`](../../v2)).
+
 Renders [A2UI](https://a2ui.org) v0.9.1 surfaces, the declarative UI that AI agents send, with the Codelessly SDK. It also includes the component catalog an LLM is prompted with.
 
 - **Protocol**: built on the official `a2ui_core` 0.5 (messages, data model, bindings, validation) and `a2ui_flutter` 0.1 (per-component reactive views).

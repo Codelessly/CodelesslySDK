@@ -200,6 +200,8 @@ instantly and work offline after the first run, give the instance a cache that p
 methods:
 
 ```dart
+import 'dart:convert';
+
 /// A PublishCache that keeps the last publish between runs, in the platform's preferences.
 class PreferencesPublishCache implements PublishCache {
   PreferencesPublishCache(this.storage);
