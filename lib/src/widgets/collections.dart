@@ -161,6 +161,8 @@ double? _itemMain(Node list, Node item) {
   final extent = list.prop(ListViewProps.itemExtent);
   if (extent != null) return extent;
   final fit = list.vertical ? item.layout.height.fit : item.layout.width.fit;
+  // An item binding its size along the list sizes itself, item by item.
+  if (item.bind.containsKey(list.vertical ? 'layout.height' : 'layout.width')) return null;
   if (fit == SizeFit.fill || fit == SizeFit.flexible) return list.vertical ? item.outerHeight : item.outerWidth;
   return null;
 }
