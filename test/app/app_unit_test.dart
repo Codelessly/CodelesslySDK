@@ -397,6 +397,26 @@ void main() {
     ]);
   });
 
+  test('a weight the family lacks falls back in a browser too, where the 400 fails the request', () async {
+    final asked = <String>[];
+    final fetcher = HttpFontFetcher(client: MockClient((request) async {
+      asked.add('${request.url}');
+      // The browser: Google's 400 has no CORS header, so the request throws.
+      if ('${request.url}'.contains('wght@0,600')) throw http.ClientException('XMLHttpRequest error.', request.url);
+      if ('${request.url}'.contains('css2')) {
+        return http.Response("@font-face { src: url(https://fonts.gstatic.com/s/anton/a.ttf) format('truetype'); }", 200);
+      }
+      return http.Response.bytes([1, 2, 3], 200);
+    }));
+    final bytes = await fetcher.fetch(const PublishFont(id: 'a', family: 'Anton', weight: 600));
+    expect(bytes, [1, 2, 3]);
+    expect(asked, [
+      'https://fonts.googleapis.com/css2?family=Anton:ital,wght@0,600',
+      'https://fonts.googleapis.com/css2?family=Anton',
+      'https://fonts.gstatic.com/s/anton/a.ttf',
+    ]);
+  });
+
   test('Google Fonts are fetched by family, weight and style', () {
     final url = HttpFontFetcher().googleFontsUrl(const PublishFont(id: 'x', family: 'IBM Plex Mono', weight: 500, italic: true));
     expect('$url', 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@1,500');
