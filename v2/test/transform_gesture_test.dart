@@ -136,6 +136,20 @@ Future<(TestGesture, TestGesture)> twoFingers(
 }
 
 void main() {
+  testWidgets('authored tiny minimum is respected by wheel zoom and its variable', (tester) async {
+    final b = await board(tester, {
+      'bounds': 'none', 'wheel': 'zoom', 'minScale': .0002, 'maxScale': 4,
+      'scaleVariable': 'zoom', 'physics': {'fling': false, 'overscroll': 0},
+    }, variables: [v('zoom', 1)]);
+    final mouse = TestPointer(1, PointerDeviceKind.mouse);
+    await tester.sendEventToBinding(mouse.hover(const Offset(200, 200)));
+    await tester.sendEventToBinding(mouse.scroll(const Offset(0, 10000)));
+    await tester.pump();
+    expect(b.pose.scale, closeTo(.0002, 1e-10));
+    expect(b['zoom'], closeTo(.0002, 1e-10));
+    await tester.pump(const Duration(milliseconds: 300));
+  });
+
   testWidgets('a pinch zooms around the point between the fingers', (tester) async {
     final b = await board(tester, {'bounds': 'none'}, variables: [v('zoom', 1)]);
     await twoFingers(tester, const Offset(125, 150), const Offset(175, 150), const Offset(100, 150), const Offset(200, 150));
