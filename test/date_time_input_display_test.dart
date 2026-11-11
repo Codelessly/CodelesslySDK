@@ -84,6 +84,23 @@ Future<void> _field(WidgetTester tester, Map<String, Object?> props) => show(tes
     });
 
 void _master() {
+  testWidgets('its own picker: a tap runs the node\'s click reactions', (tester) async {
+    final s = await show(tester, {
+      'col': {'type': 'column', 'children': ['d'], 'layout': {'width': 300, 'height': 100}},
+      'd': {
+        'type': 'dateTimeInput',
+        'layout': {'width': 300, 'height': 34},
+        'props': {'mode': 'date', 'value': '2026-12-01', 'format': 'MMM d, y', 'bare': true, 'picker': 'none'},
+        'actions': [reaction('click', [{'type': 'setVariable', 'variable': 'opened', 'value': true}])],
+      },
+    }, variables: [v('opened', false, VariableType.boolean)]);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dec 1, 2026'));
+    await tester.pumpAndSettle();
+    expect(s['opened'], isTrue);
+    expect(find.byType(DatePickerDialog), findsNothing);
+  });
+
   testWidgets('a pattern formats the date and the time', (tester) async {
     await _field(tester, {'mode': 'date', 'value': '2026-12-01', 'format': 'MMM d, y', 'bare': true});
     await tester.pumpAndSettle();
