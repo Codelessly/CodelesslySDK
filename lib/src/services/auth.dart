@@ -3,7 +3,7 @@
 // package:codelessly_sdk/firebase.dart.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show CollectionSchema;
+import 'package:codelessly_api/codelessly_api.dart' show CollectionSchema, DataRules;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 
@@ -395,6 +395,82 @@ abstract final class AuthProfiles {
   /// [user]'s profile, now and on every change (null signed out).
   static Stream<Map<String, Object?>?> watch(CloudDatabase database, AppUser? user) =>
       hasProfile(user) ? database.watchDocument(collection, user!.uid) : Stream.value(null);
+}
+
+/// What the signed-in user of [users] matches in an `audience` list, for
+/// [BackendCloudDatabase.audience]: everyone, the user, the role in their
+/// profile ([AuthProfiles], `user` without one, as the database's rules
+/// read it) and, when not anonymous, signed-in users. [changes] fires when
+/// the user or their role changes (give it to
+/// [BackendCloudDatabase.userChanges]), so live audience queries follow
+/// both.
+class AuthAudience {
+  AuthAudience({required this.users, required this.currentUser, required this.profile});
+
+  /// The user, on every change ([AuthService.userChanges]).
+  final Stream<AppUser?> users;
+  final AppUser? Function() currentUser;
+
+  /// The profile of the user with this uid, now and on every change.
+  final Stream<Map<String, Object?>?> Function(String uid) profile;
+
+  /// The role a user without a profile role has.
+  static const defaultRole = 'user';
+
+  String? _uid;
+  String _role = defaultRole;
+  StreamSubscription<AppUser?>? _users;
+  StreamSubscription<Map<String, Object?>?>? _profile;
+  late final StreamController<void> _changes = StreamController<void>.broadcast(
+    onListen: _start,
+    onCancel: _stop,
+  );
+
+  /// Fires when the user or their role changes.
+  Stream<void> get changes => _changes.stream;
+
+  /// The role read from the current user's profile.
+  String get role => currentUser()?.uid == _uid ? _role : defaultRole;
+
+  /// The entries of an `audience` list the current user matches.
+  List<String> call() {
+    final user = currentUser();
+    if (user == null || user.uid.isEmpty) return const [];
+    return DataRules.audienceOf(user.uid, role: user.isAnonymous ? defaultRole : role, signedIn: !user.isAnonymous);
+  }
+
+  void _start() {
+    _users = users.listen(_onUser, onError: (Object error, StackTrace stack) {
+      if (!_changes.isClosed) _changes.addError(error, stack);
+    });
+  }
+
+  void _onUser(AppUser? user) {
+    final uid = user == null || user.isAnonymous ? null : user.uid;
+    if (uid != _uid) {
+      _profile?.cancel();
+      _profile = null;
+      _uid = uid;
+      _role = defaultRole;
+      if (uid != null) {
+        _profile = profile(uid).listen((p) {
+          final role = '${p?['role'] ?? ''}'.trim();
+          final next = role.isEmpty ? defaultRole : role;
+          if (next == _role) return;
+          _role = next;
+          if (!_changes.isClosed) _changes.add(null);
+        }, onError: (Object _) {});
+      }
+    }
+    if (!_changes.isClosed) _changes.add(null);
+  }
+
+  Future<void> _stop() async {
+    await _profile?.cancel();
+    await _users?.cancel();
+    _profile = null;
+    _users = null;
+  }
 }
 
 /// Access to a Codelessly project's published data, granted for the app's

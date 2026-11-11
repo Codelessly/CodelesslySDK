@@ -484,6 +484,97 @@ Codelessly memoryCloud() => Codelessly(
       ),
     );
 
+/// Live cloud data in a layout, as the reactions a screen's canvas `load`
+/// runs: a list of `cards` with each user's `card_state` joined in, at most
+/// `${shown}` of them; and an unread count, without loading the cards.
+/// A "Mark all read" button's batch and a card's impression are below.
+const List<Map<String, Object?>> liveCloudLoads = [
+  {
+    'type': 'loadCloudData',
+    'variable': 'cards',
+    'single': false,
+    'limit': r'${shown}',
+    'query': {
+      'enabled': true,
+      'collectionPath': 'cards',
+      'orderByFilters': [
+        {'field': 'sentAt', 'sortOrder': 'descending'},
+      ],
+      'joins': [
+        {'collection': 'card_state', 'as': 'state', 'id': r'${auth.uid}_${item.id}'},
+      ],
+    },
+  },
+  {
+    'type': 'loadCloudData',
+    'variable': 'unread',
+    'single': false,
+    'aggregate': 'count',
+    'query': {
+      'enabled': true,
+      'collectionPath': 'cards',
+      'whereFilters': [
+        {'field': 'read', 'operator': 'equal', 'value': 'false'},
+      ],
+    },
+  },
+];
+
+/// "Mark all read": one write per loaded card, all in one commit.
+const Map<String, Object?> markAllRead = {
+  'type': 'cloudBatch',
+  'forEach': r'${cards}',
+  'steps': [
+    {
+      'type': 'cloudData',
+      'operation': 'update',
+      'collection': 'cards',
+      'id': r'${loop.item.id}',
+      'fields': [
+        {'field': 'read', 'value': 'true'},
+      ],
+    },
+  ],
+};
+
+/// A card's impression: once per card per session, after it has been half
+/// in view for a second.
+const Map<String, Object?> cardImpression = {
+  'trigger': {'type': 'enterViewport', 'visibleFraction': 0.5, 'visibleMs': 1000, 'onceKey': r'${item.id}'},
+  'actions': [
+    {
+      'type': 'cloudData',
+      'operation': 'update',
+      'collection': 'cards',
+      'id': r'${item.id}',
+      'fields': [
+        {'field': 'views', 'operation': 'increment', 'value': '1'},
+      ],
+    },
+  ],
+};
+
+/// Data the app reads but only the project (or its server) writes: a
+/// user's own notes (`ownerRead`, the owner may flip `read`), posts to an
+/// audience checked at read time (`audience`), and an expiry on both. The
+/// rules come live from `data_rules/{projectId}` with Codelessly's cloud;
+/// here they are given, in memory.
+BackendCloudDatabase serverWrittenData({required String uid, String role = 'user', DateTime Function()? now}) =>
+    BackendCloudDatabase(
+      backend: MemoryDocumentBackend(),
+      rules: DataRules.fromJson({
+        'collections': {'notes': 'ownerRead', 'news': 'audience'},
+        'ownerFields': {
+          'notes': ['read'],
+        },
+        'expiry': {'notes': 'expiresAt', 'news': 'expiresAt'},
+      }),
+      userId: () => uid,
+      // What this user matches in a document's `audience` list.
+      audience: () => DataRules.audienceOf(uid, role: role, signedIn: true),
+      now: now,
+    );
+
 // ---------------------------------------------------------------------
 // Scripting.
 // ---------------------------------------------------------------------
@@ -753,3 +844,80 @@ class MyPurchases implements PurchaseService {
 Codelessly ownPurchases() => Codelessly(
       config: CodelesslyConfig(slug: 'my-project', services: Services(purchases: MyPurchases())),
     );
+
+// ---------------------------------------------------------------------
+// Presenting layouts, app events and automations.
+// ---------------------------------------------------------------------
+
+/// The presenter's overlay around the app: `codelessly.present` and the
+/// project's automations show their layouts above any screen, and a
+/// screenshot action can capture the whole app.
+Widget appWithOverlay(Codelessly codelessly) => MaterialApp(
+      builder: (context, child) => CodelesslyPresenterHost(codelessly: codelessly, child: child!),
+      home: const Scaffold(body: Center(child: Text('Your app'))),
+    );
+
+/// A layout shown from anywhere (no CodelesslyWidget on the screen), with
+/// params its variables start from, and what its close modal action gave.
+Future<int?> askForRating(Codelessly codelessly, int orders) async {
+  final answer = await codelessly.present(
+    'rate-us',
+    presentation: ModalPresentation.bottomSheet,
+    params: {'orders': orders},
+  );
+  // `{"type": "closeModal", "result": {"stars": "${stars}"}}` in the layout;
+  // null when the user dismissed it.
+  return switch (answer) {
+    {'stars': final Object stars} => int.tryParse('$stars'),
+    _ => null,
+  };
+}
+
+/// A banner along the top that the app keeps working under.
+Future<void> showNotice(Codelessly codelessly) =>
+    codelessly.present('maintenance-notice', presentation: ModalPresentation.banner, priority: 10);
+
+/// App events: the project's automations listening for one run (a popup
+/// after the third order), and your code hears the layouts' `emitEvent`s.
+void appEvents(Codelessly codelessly) {
+  codelessly.emit('order_completed', {'total': 42.5, 'items': 3});
+  codelessly.events.listen((event) {
+    if (event.name == 'onboarding_done') debugPrint('plan: ${event.props['plan']}');
+  });
+}
+
+/// Host features a layout calls by name and branches on (`callFunction`
+/// with `${result.granted}`), registered where you have what they need.
+class PermissionHandlers extends StatefulWidget {
+  const PermissionHandlers({super.key, required this.codelessly, required this.child});
+
+  final Codelessly codelessly;
+  final Widget child;
+
+  @override
+  State<PermissionHandlers> createState() => _PermissionHandlersState();
+}
+
+class _PermissionHandlersState extends State<PermissionHandlers> {
+  @override
+  void initState() {
+    super.initState();
+    widget.codelessly.registerFunction('requestPermission', (context, params) async {
+      // Ask the OS with your permission plugin; answer what the layout reads.
+      final granted = await requestOsPermission('${params['kind']}');
+      return {'granted': granted};
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.codelessly.unregisterFunction('requestPermission');
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Stands for your permission plugin's call.
+Future<bool> requestOsPermission(String kind) async => kind == 'notifications';

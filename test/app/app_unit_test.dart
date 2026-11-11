@@ -186,6 +186,15 @@ void main() {
       expect(CodelesslyAppIdentity.layoutIdAt(model, '/nowhere'), 'lost');
     });
 
+    test("a link's escapes are read once, and its raw characters encoded", () {
+      final model = tidepool(withNotFound: true);
+      final (_, p) = CodelesslyWidget.resolveScreen(model, '/settings?q=%5B%5D&s=a b&t=50%25&u=%')!;
+      expect(p['q'], '[]');
+      expect(p['s'], 'a b');
+      expect(p['t'], '50%');
+      expect(p['u'], '%');
+    });
+
     test('an app opens a screen by its id or name before its catch-all', () {
       final model = tidepool(withNotFound: true);
       // 'settings' has no path: the catch-all used to take it.
@@ -200,6 +209,19 @@ void main() {
       expect(CodelesslyWidget.resolveScreen(model, '/settings/deep')?.$1, 'lost');
       // Paths still win: 'guide/new' is newCreature's own path.
       expect(CodelesslyWidget.resolveScreen(model, 'guide/bat-star')?.$1, 'creature');
+    });
+
+    // Petri v2: `?toast=Loaded%20%E2%80%9CAcorn%20bloom%E2%80%9D` showed its
+    // escapes: the location (already encoded, as a link's is) was encoded
+    // again, so the params decoded to `Loaded%20%E2%80%9C...`.
+    test('a link\'s encoded query decodes once; a typed raw one still works', () {
+      final model = tidepool();
+      expect(CodelesslyWidget.resolveScreen(model, 'settings?toast=Loaded%20%E2%80%9CAcorn%20bloom%E2%80%9D')?.$2,
+          {'toast': 'Loaded “Acorn bloom”'});
+      expect(CodelesslyWidget.resolveScreen(model, 'settings?q=Tom%20%26%20Jerry&n=1')?.$2, {'q': 'Tom & Jerry', 'n': '1'});
+      expect(CodelesslyWidget.resolveScreen(model, 'settings?q=a+b')?.$2, {'q': 'a b'});
+      expect(CodelesslyWidget.resolveScreen(model, 'settings?label=50% off · now')?.$2, {'label': '50% off · now'});
+      expect(CodelesslyWidget.encodeRawLocation('guide/bat star?x=%2F'), 'guide/bat%20star?x=%2F');
     });
   });
 
@@ -354,6 +376,25 @@ void main() {
     expect(calls, 0);
     await fetcher.fetch(const PublishFont(id:'uploaded', family:'Arial', url:'https://example.com/arial.ttf'));
     expect(calls, 1);
+  });
+
+  test('a weight the family lacks falls back to the family\'s default file', () async {
+    final asked = <String>[];
+    final fetcher = HttpFontFetcher(client: MockClient((request) async {
+      asked.add('${request.url}');
+      if ('${request.url}'.contains('wght@0,700')) return http.Response('bad weight', 400);
+      if ('${request.url}'.contains('css2')) {
+        return http.Response("@font-face { src: url(https://fonts.gstatic.com/s/anton/a.ttf) format('truetype'); }", 200);
+      }
+      return http.Response.bytes([1, 2, 3], 200);
+    }));
+    final bytes = await fetcher.fetch(const PublishFont(id: 'a', family: 'Anton', weight: 700));
+    expect(bytes, [1, 2, 3]);
+    expect(asked, [
+      'https://fonts.googleapis.com/css2?family=Anton:ital,wght@0,700',
+      'https://fonts.googleapis.com/css2?family=Anton',
+      'https://fonts.gstatic.com/s/anton/a.ttf',
+    ]);
   });
 
   test('Google Fonts are fetched by family, weight and style', () {
