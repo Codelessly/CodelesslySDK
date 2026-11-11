@@ -759,11 +759,23 @@ class RenderLoops extends RenderPose with _Ticking {
     syncTicker();
   }
 
-  @override
-  bool get ticking => _animates && _loops.any((l) => l.enabled);
+  /// The platform asks for no animation (the web's prefers-reduced-motion,
+  /// a device's "remove animations"): loops rest at their first frame, as
+  /// the design canvas draws them.
+  static bool get reducedMotion => SchedulerBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
 
   @override
-  void tick(Duration elapsed) => _show(elapsed);
+  bool get ticking => _animates && !reducedMotion && _loops.any((l) => l.enabled);
+
+  @override
+  void tick(Duration elapsed) {
+    if (reducedMotion) {
+      _show(Duration.zero);
+      syncTicker();
+      return;
+    }
+    _show(elapsed);
+  }
 
   /// The run phase (0–1) of [l] [elapsed] after it started: from its
   /// [api.LoopAnimation.startFraction] of a whole loop, after its delay.
