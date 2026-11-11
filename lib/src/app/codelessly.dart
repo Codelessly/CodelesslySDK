@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert' show jsonEncode;
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:collection/collection.dart' show CombinedMapView;
@@ -470,7 +471,10 @@ class Codelessly extends ChangeNotifier {
       for (final f in layout.fonts) ?model.fonts[f],
     };
     if (fontsOf.isNotEmpty) {
-      await fonts.load(fontsOf).timeout(config.fontTimeout, onTimeout: () {});
+      // The layout's characters: on the web those beyond a Google Font's
+      // `latin` subset come in a file of their own.
+      final text = kIsWeb ? jsonEncode(layout.toJson()) : '';
+      await fonts.load(fontsOf, text: text).timeout(config.fontTimeout, onTimeout: () {});
     }
     return layout;
   }
