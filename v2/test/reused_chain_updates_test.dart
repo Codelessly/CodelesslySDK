@@ -8,6 +8,7 @@ void main() {
     'several bound updates before a frame keep reused render chains dirty through their parent',
     (tester) async {
       final scope = VariableScope([
+        const api.Variable(name: 'fade', type: api.VariableType.decimal, value: 1),
         const api.Variable(
           name: 'width',
           type: api.VariableType.integer,
@@ -44,7 +45,7 @@ void main() {
               ],
               'radius': 4,
             },
-            'bind': {'layout.width': r'${width}'},
+            'bind': {'layout.width': r'${width}', 'opacity': r'${fade}'},
           },
           'label': {
             'type': 'text',
@@ -70,6 +71,7 @@ void main() {
       for (var i = 0; i < 8; i++) {
         scope.set('width', 150 + i * 10);
         scope.set('count', 64 + i);
+        scope.set('fade', i.isEven ? .4 : 1.0);
       }
       await tester.pump();
       expect(tester.takeException(), isNull);
