@@ -102,6 +102,9 @@ void main() {
     test('parent reads the item around a nested item', () {
       final inner = ItemScope(index: 3, item: 'x', parent: ItemScope(index: 1, item: {'cur': 'EUR'}, parent: vars));
       expect(e.evaluate(r'${parent.item.cur}', inner), 'EUR');
+      // The outer item's own fields read on parent too.
+      expect(e.evaluate(r'${parent.cur}', inner), 'EUR');
+      expect(e.evaluate(r'${parent.index}', inner), 1);
       expect(e.evaluate(r'${parent.index}', inner), 1);
       expect(e.evaluate(r'${index}', inner), 3);
     });

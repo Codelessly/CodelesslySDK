@@ -408,7 +408,15 @@ class ItemScope extends NamedScope {
         'pageOffset' => _pageOffset,
         'item' => _item,
         'index' => _index,
-        'parent' => _outer()?.let((o) => {'item': o._item, 'index': o._index}) ?? const <String, Object?>{},
+        // The outer item: `parent.item`, `parent.index`, and the item's own
+        // fields too (`parent.id` reads `parent.item.id`) unless one is
+        // called item or index.
+        'parent' => _outer()?.let((o) => {
+              if (o._item is Map) ...(o._item as Map).cast<String, Object?>(),
+              'item': o._item,
+              'index': o._index,
+            }) ??
+            const <String, Object?>{},
         _ => null,
       };
 
