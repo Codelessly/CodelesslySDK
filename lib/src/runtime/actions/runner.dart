@@ -194,7 +194,8 @@ class CodelesslyActions implements ActionRunner {
     final reactions = [
       for (final r in node.actions)
         if (_matchesReaction(r, trigger, event) && _allowed(r, context, event) &&
-            (trigger != 'valueChanged' || event['changedVariable'] == null || r.trigger.variable.trim() == event['changedVariable'])) r,
+            (trigger != 'valueChanged' || event['changedVariable'] == null || r.trigger.variable.trim() == event['changedVariable']) &&
+            _firstForKey(node, r, context, event)) r,
     ];
     if (reactions.isEmpty) return Future.value();
     final debounce = reactions.fold<int>(0, (m, r) => r.trigger.debounceMs > m ? r.trigger.debounceMs : m);
@@ -234,6 +235,29 @@ class CodelesslyActions implements ActionRunner {
     } finally {
       scope.dispose();
     }
+  }
+
+  /// The `onceKey`s reactions ran for, by node and reaction, for as long as
+  /// the app runs.
+  static final Set<String> _ranOnce = {};
+
+  /// Forgets which keys ran (tests, a sign out that should count again).
+  static void resetOnceKeys() => _ranOnce.clear();
+
+  /// Whether [reaction] may run: always without a `onceKey`, else the first
+  /// time for its key (evaluated in the reaction's scope, a list item's).
+  static bool _firstForKey(Node node, Reaction reaction, ActionContext context, Json event) {
+    final template = reaction.trigger.onceKey.trim();
+    if (template.isEmpty) return true;
+    final result = event.containsKey('result') ? event['result'] : (event.containsKey('value') ? event['value'] : null);
+    final scope = ValuesScope({'result': result}, context.scope);
+    final String key;
+    try {
+      key = context.expressions.interpolate(template, scope).trim();
+    } finally {
+      scope.dispose();
+    }
+    return _ranOnce.add('${node.id}\u0000${reaction.id}\u0000${reaction.trigger.type.name}\u0000$key');
   }
 
   bool _matchesReaction(Reaction reaction, String trigger, Json event) {

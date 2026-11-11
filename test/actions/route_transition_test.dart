@@ -95,6 +95,26 @@ void main() {
     expect(find.byType(BottomSheet), findsOneWidget);
   });
 
+  testWidgets('a bottom sheet with a radius rounds its top corners and hugs a short screen', (tester) async {
+    late BuildContext home;
+    await tester.pumpWidget(MaterialApp(home: Builder(builder: (c) {
+      home = c;
+      return const Text('home');
+    })));
+    const panelKey = ValueKey('short-sheet');
+    final ui = NavigatorActionUi(
+      context: () => home,
+      modal: (_, params) => const SizedBox(key: panelKey, height: 200, width: double.infinity),
+    );
+    unawaited(ui.openModal(const OpenModalAction(to: 'sheet', presentation: ModalPresentation.bottomSheet, sheetRadius: 24)));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
+    final clip = tester.widget<ClipRRect>(find.byKey(const ValueKey('Codelessly bottom sheet')));
+    expect(clip.borderRadius, const BorderRadius.vertical(top: Radius.circular(24)));
+    expect(tester.getSize(find.byKey(panelKey)).height, 200);
+    expect(tester.getBottomLeft(find.byKey(panelKey)).dy, 600);
+  });
+
   testWidgets('a modal with a transition is see-through, closes with a close modal action, and gives its result', (tester) async {
     late BuildContext home;
     late BuildContext inModal;

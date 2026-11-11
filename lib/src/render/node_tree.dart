@@ -1051,7 +1051,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// The shell (PassiveRectangleWidget): fit box → shadows → decoration →
   /// stroke → clip → stack [paint layers, (padding) content].
   void _shell(Node n, List<RenderBox> chain, {void Function(List<RenderBox> inner)? content, bool padded = true}) {
-    final isPlaceholder = _isPlaceholder;
+    // A canvas body hugs its content; one without content (a plain box)
+    // keeps its own size, else it would have none: nothing to paint or tap.
+    final isPlaceholder = _isPlaceholder && content != null;
     final contentSized = _scrollsFlexiblyOnMainAxis(n);
     final hFit = isPlaceholder || (contentSized && n.isRow) ? SizeFit.hug : n.hFit;
     final vFit = isPlaceholder || (contentSized && !n.isRow) ? SizeFit.hug : n.vFit;

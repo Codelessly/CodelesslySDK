@@ -326,7 +326,27 @@ class SignaturePainter extends CustomPainter {
     required this.signLineColor,
     required this.textDirection,
     this.normalized = false,
+    this.signLineMark = true,
+    this.signLineInset = 20,
+    this.signLineBottom,
+    this.placeholderBelowLine = false,
+    this.placeholderFontWeight = 600,
+    this.placeholderLetterSpacing,
   });
+
+  /// The × at the line's start.
+  final bool signLineMark;
+  final double signLineInset;
+
+  /// From the bottom (null: a quarter of the height).
+  final double? signLineBottom;
+
+  /// The placeholder under the line at its start, not centered.
+  final bool placeholderBelowLine;
+  final int placeholderFontWeight;
+  final double? placeholderLetterSpacing;
+
+  double _lineY(Size size) => size.height - (signLineBottom ?? size.height * 0.24);
 
   final List<List<Offset>> strokes;
   final Color inkColor;
@@ -375,12 +395,13 @@ class SignaturePainter extends CustomPainter {
   }
 
   void _signLine(Canvas canvas, Size size) {
-    const inset = 20.0;
-    final y = size.height - size.height * 0.24;
+    final inset = signLineInset;
+    final y = _lineY(size);
     if (size.width <= inset * 2 || y <= 0) return;
     canvas.drawLine(Offset(inset, y), Offset(size.width - inset, y), Paint()
       ..color = signLineColor
       ..strokeWidth = 1);
+    if (!signLineMark) return;
     final cross = TextPainter(
       text: TextSpan(text: '×', style: TextStyle(color: signLineColor, fontSize: 16, height: 1)),
       textDirection: textDirection,
@@ -396,16 +417,23 @@ class SignaturePainter extends CustomPainter {
         style: TextStyle(
           color: placeholderColor,
           fontSize: placeholderFontSize,
-          fontWeight: FontWeight.w600,
-          letterSpacing: placeholderFontSize * 0.12,
+          fontWeight: FontWeight.values[((placeholderFontWeight ~/ 100) - 1).clamp(0, 8)],
+          letterSpacing: placeholderLetterSpacing ?? placeholderFontSize * 0.12,
         ),
       ),
-      textAlign: TextAlign.center,
+      textAlign: placeholderBelowLine ? TextAlign.start : TextAlign.center,
       textDirection: textDirection,
       maxLines: 1,
       ellipsis: '…',
     )..layout(maxWidth: size.width);
-    text.paint(canvas, Offset((size.width - text.width) / 2, (size.height - text.height) / 2));
+    if (placeholderBelowLine) {
+      // Its top a little under the line, at the line's start.
+      final top = showSignLine ? _lineY(size) + 5 : size.height - text.height - 8;
+      final x = textDirection == TextDirection.rtl ? size.width - signLineInset - text.width : signLineInset;
+      text.paint(canvas, Offset(x, top));
+    } else {
+      text.paint(canvas, Offset((size.width - text.width) / 2, (size.height - text.height) / 2));
+    }
     text.dispose();
   }
 
