@@ -32,6 +32,7 @@ import '../runtime/actions/runner.dart' show CodelesslyActions, ActionCancellati
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
+import '../runtime/expressions/perf_scope.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
@@ -587,6 +588,7 @@ class _ScreenState {
     nodeValues.dispose();
     scope.dispose();
     if (scope.parent case final ScriptsScope scripts) scripts.dispose();
+    if (values.parent case final PerfScope perf) perf.dispose();
     values.dispose();
   }
 }
@@ -659,7 +661,8 @@ class _LayoutViewState extends State<_LayoutView> {
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
       ..._paywallValues(),
-    }, _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope)));
+      // `perf` (frame timings) sits between the page's variables and these.
+    }, PerfScope(parent: _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope))));
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
     final scripts = ScriptsScope(
