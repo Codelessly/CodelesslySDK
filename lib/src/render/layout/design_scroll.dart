@@ -2,7 +2,9 @@
 // a running app. Keeps scrolling in the render tree without one widget per
 // node, with wheel arbitration, axis gestures, clamped fling and semantics.
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
@@ -11,7 +13,7 @@ import 'package:flutter/physics.dart';
 
 import '../view_scroll.dart' show RenderSticky;
 
-class RenderDesignScroll extends RenderProxyBox {
+class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotation {
   RenderDesignScroll({
     required this._axis,
     this._reverse = false,
@@ -181,7 +183,85 @@ class RenderDesignScroll extends RenderProxyBox {
     markNeedsPaint();
     markNeedsSemanticsUpdate();
     _notifyScroll();
+    if (showsScrollbar) _showThumbWhileScrolling();
   }
+
+  // --- the scrollbar ------------------------------------------------------
+  //
+  // On a desktop platform a running scroll view shows Flutter's default
+  // scrollbar (ScrollBehavior.buildScrollbar's RawScrollbar): a 6 px,
+  // square-ended thumb on its far edge, shown while a mouse hovers its
+  // track and for a moment after it scrolls.
+
+  /// Whether it shows a scrollbar: running, on a desktop platform, with
+  /// content to scroll.
+  bool get showsScrollbar =>
+      _interactive &&
+      maxScrollExtent > 0 &&
+      switch (defaultTargetPlatform) {
+        TargetPlatform.linux || TargetPlatform.macOS || TargetPlatform.windows => true,
+        _ => false,
+      };
+
+  static const double scrollbarThickness = 6;
+  static const Color scrollbarColor = Color(0x66BCBCBC);
+  static const double _minThumbLength = 18;
+  static const Duration _thumbFade = Duration(milliseconds: 600);
+
+  bool _hover = false;
+  bool _scrolling = false;
+  Timer? _scrollingTimer;
+
+  /// Whether the thumb shows now.
+  bool get thumbShown => showsScrollbar && (_hover || _scrolling);
+
+  set _hoverThumb(bool on) {
+    if (on == _hover) return;
+    _hover = on;
+    markNeedsPaint();
+  }
+
+  void _showThumbWhileScrolling() {
+    _scrollingTimer?.cancel();
+    if (!_scrolling) {
+      _scrolling = true;
+      markNeedsPaint();
+    }
+    _scrollingTimer = Timer(_thumbFade, () {
+      _scrolling = false;
+      if (attached) markNeedsPaint();
+    });
+  }
+
+  /// The track: the scroll view's far edge, [scrollbarThickness] thick.
+  Rect get _track => _axis == Axis.vertical
+      ? Rect.fromLTWH(size.width - scrollbarThickness, 0, scrollbarThickness, size.height)
+      : Rect.fromLTWH(0, size.height - scrollbarThickness, size.width, scrollbarThickness);
+
+  bool _overTrack(Offset local) => hasSize && _track.contains(local);
+
+  /// The thumb, as Flutter's ScrollbarPainter places it.
+  Rect get thumbRect {
+    final track = _track;
+    final trackExtent = _axis == Axis.vertical ? track.height : track.width;
+    final max = maxScrollExtent;
+    final fraction = (viewportExtent / (max + viewportExtent)).clamp(0.0, 1.0);
+    final extent = math.min(trackExtent, math.max(trackExtent * fraction, _minThumbLength));
+    var at = max <= 0 ? 0.0 : (trackExtent - extent) * (_pixels / max).clamp(0.0, 1.0);
+    if (_reverse) at = trackExtent - extent - at;
+    return _axis == Axis.vertical
+        ? Rect.fromLTWH(track.left, at, scrollbarThickness, extent)
+        : Rect.fromLTWH(at, track.top, extent, scrollbarThickness);
+  }
+
+  @override
+  MouseCursor get cursor => MouseCursor.defer;
+  @override
+  PointerEnterEventListener? get onEnter => null;
+  @override
+  PointerExitEventListener? get onExit => (_) => _hoverThumb = false;
+  @override
+  bool get validForMouseTracker => attached;
 
   Future<void> animateTo(
     double value, {
@@ -247,6 +327,10 @@ class RenderDesignScroll extends RenderProxyBox {
   bool hitTestSelf(Offset position) => _interactive;
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (event is PointerHoverEvent) {
+      _hoverThumb = showsScrollbar && event.kind == PointerDeviceKind.mouse && _overTrack(event.localPosition);
+      return;
+    }
     if (!_interactive || !_userScrollable || maxScrollExtent <= 0) return;
     if (event is PointerDownEvent) {
       _ensureDrag();
@@ -338,6 +422,9 @@ class RenderDesignScroll extends RenderProxyBox {
 
   @override
   void detach() {
+    _scrollingTimer?.cancel();
+    _scrolling = false;
+    _hover = false;
     _stop();
     _scrollEnd?.cancel();
     _drag?.dispose();
@@ -479,10 +566,12 @@ class RenderDesignScroll extends RenderProxyBox {
       _clipLayer.layer = null;
       paintContent(context, offset);
     }
+    if (thumbShown) context.canvas.drawRect(thumbRect.shift(offset), Paint()..color = scrollbarColor);
   }
 
   @override
   void dispose() {
+    _scrollingTimer?.cancel();
     _stop();
     _scrollEnd?.cancel();
     _drag?.dispose();
