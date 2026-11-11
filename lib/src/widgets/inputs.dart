@@ -525,7 +525,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final style = _styleOrNull(n.prop(TextFieldProps.style));
     final cursorRadius = n.prop(TextFieldProps.cursorRadius);
 
+    // Where tickers are off (a design canvas) the decorator can't animate a
+    // border or fill change: it would keep painting the old one. A new
+    // decorator shows the current decoration.
+    final atRest = !TickerMode.valuesOf(context).enabled;
     Widget field(InputDecoration decoration) => TextField(
+          key: atRest ? ValueKey<InputDecoration>(decoration) : null,
           controller: controller,
           focusNode: focusNode,
           decoration: decoration,
