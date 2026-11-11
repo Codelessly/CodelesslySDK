@@ -492,11 +492,9 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
       _edited = false;
       _fire(context, 'editingComplete', controller.text);
     }
-    // The focus ring follows focus, and so does a padding that includes the
-    // (focused) border.
-    if (n.prop(TextFieldProps.focusRingWidth) > 0 || n.prop(TextFieldProps.decoration).paddingIncludesBorder) {
-      setState(() {});
-    }
+    // The focus ring, a padding that includes the (focused) border and a
+    // fixed-height field's border (painted by its box) follow focus.
+    setState(() {});
     if (focusNode.hasFocus && n.prop(TextFieldProps.selectAllOnFocus)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !focusNode.hasFocus) return;
