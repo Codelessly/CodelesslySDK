@@ -13,6 +13,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         BadgeProps,
         ButtonProps,
         ChipProps,
+        ChipVariant,
         DividerProps,
         FloatingActionButtonProps,
         IconButtonProps,
@@ -453,6 +454,23 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
           if (states.contains(WidgetState.selected)) return selectedColor ?? background;
           return background;
         });
+  if (n.prop(ChipProps.variant) == ChipVariant.plain) {
+    return _plainChip(context, n,
+        label: n.prop(ChipProps.label),
+        labelStyle: labelStyle,
+        avatar: avatarGlyph.isEmpty ? null : avatar,
+        selected: selected,
+        selectable: n.type == 'choiceChip' || n.type == 'filterChip' || n.type == 'inputChip',
+        showCheckmark: showCheckmark,
+        checkmarkColor: checkmarkColor,
+        background: background,
+        selectedColor: selectedColor,
+        side: side,
+        shape: shape,
+        padding: padding,
+        enabled: enabled,
+        onSelected: onSelected);
+  }
   final Widget chip = switch (n.type) {
     'actionChip' => ActionChip(
         label: label,
@@ -555,6 +573,58 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
   // included), only the chip's colours show.
   if (background == null) return chip;
   return Theme(data: Theme.of(context).copyWith(canvasColor: Colors.transparent), child: chip);
+}
+
+/// [ChipVariant.plain]: exactly its padding around a check (selected), a
+/// gap and the label, in its fill, side and shape; no Material spacing.
+Widget _plainChip(
+  BuildContext context,
+  Node n, {
+  required String label,
+  required TextStyle labelStyle,
+  required Widget? avatar,
+  required bool selected,
+  required bool selectable,
+  required bool showCheckmark,
+  required Color? checkmarkColor,
+  required Color? background,
+  required Color? selectedColor,
+  required BorderSide? side,
+  required ShapeBorder? shape,
+  required EdgeInsetsGeometry? padding,
+  required bool enabled,
+  required ValueChanged<bool> onSelected,
+}) {
+  final on = selectable && selected;
+  final checkSize = n.prop(ChipProps.avatarSize) ?? 13;
+  final lead = on && showCheckmark
+      ? Icon(Icons.check_rounded, size: checkSize, color: checkmarkColor ?? labelStyle.color)
+      : avatar;
+  final outline = shape is OutlinedBorder ? shape.copyWith(side: side ?? BorderSide.none) : shape;
+  final Widget face = Container(
+    padding: padding ?? const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: ShapeDecoration(
+      color: on ? (selectedColor ?? background) : background,
+      shape: outline ?? RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: side ?? BorderSide.none),
+    ),
+    child: Row(mainAxisSize: MainAxisSize.min, children: [
+      if (lead != null) ...[lead, SizedBox(width: n.prop(ChipProps.spacing))],
+      Text(label, style: labelStyle),
+    ]),
+  );
+  if (!enabled) return face;
+  return Semantics(
+    button: true,
+    selected: selectable ? on : null,
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: selectable ? () => onSelected(!selected) : _press(context),
+        child: face,
+      ),
+    ),
+  );
 }
 
 // --- badge --------------------------------------------------------------------
