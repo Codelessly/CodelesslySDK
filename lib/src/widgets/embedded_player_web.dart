@@ -104,9 +104,9 @@ class _EmbeddedPlayerState extends State<EmbeddedPlayer> {
       frame.style.border = '0';
       frame.style.width = '100%';
       frame.style.height = '100%';
-      frame.allow = 'autoplay; fullscreen; picture-in-picture';
-      frame.title = 'Embedded video';
-      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      for (final a in embeddedFrameAttributes.entries) {
+        frame.setAttribute(a.key, a.value);
+      }
       _loadListener = ((web.Event _) => _connect()).toJS;
       frame.addEventListener('load', _loadListener);
       frame.src = _url(widget.node);
