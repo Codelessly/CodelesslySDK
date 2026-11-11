@@ -2,6 +2,7 @@
 // and result, its context's services, UI and node tree), without
 // BuildContext.
 import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
@@ -41,6 +42,7 @@ import 'text_fields.dart';
 import 'values.dart';
 import 'variable_animator.dart';
 import 'printing.dart';
+import '../../app/fonts.dart' show CodelesslyFonts;
 
 /// Runs one action of a chain. Throws to stop the chain.
 typedef ActionHandler = FutureOr<void> Function(ActionDef action, ActionRun run);
@@ -896,6 +898,15 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final item = run.text(a.item).trim();
   final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
   if (box == null || !box.attached) return;
+  // Fonts still loading (a layout shows after waiting a while for them)
+  // re-measure the text above the target when they arrive: wait for them,
+  // so a jump from a screen's `load` lands where it means.
+  if (CodelesslyFonts.loading) {
+    await CodelesslyFonts.settled.timeout(const Duration(seconds: 10), onTimeout: () {});
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+    if (!box.attached) return;
+  }
   // Run from a screen's `load`, the views around it may not have their
   // content's extent yet: give layout a few frames.
   for (var i = 0; i < 4 && !_scrollsLaidOut(box); i++) {
