@@ -129,6 +129,11 @@ typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentDat
 
 /// Owns the boxes built from one [NodeSource].
 class NodeTree {
+  bool _preservingActions = false;
+
+  /// Conditional hiding retains the node: pause its screen triggers, but
+  /// let the reaction that hid it finish. Removing a view still cancels it.
+  bool get preservingActions => _preservingActions;
   NodeTree(this.source,
       {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder, NodeInteractions? interactions})
       : islands = IslandManager(environment) {
@@ -548,7 +553,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       // Retain cached layers, but take a collapsed subtree out of the
       // pipeline. Skipping its layout while leaving it attached gives its
       // dirty descendants a clean relayout boundary after this box lays out.
-      if (_collapsed) child = null;
+      if (_collapsed) {
+        final previous = tree._preservingActions;
+        tree._preservingActions = true;
+        try {
+          child = null;
+        } finally {
+          tree._preservingActions = previous;
+        }
+      }
       markNeedsLayout();
       _applyParentData();
     }

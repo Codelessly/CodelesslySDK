@@ -149,8 +149,8 @@ class TreeReactions implements NodeInteractions {
   @override
   void released(NodeBox box) => _boxes.remove(box)?.dispose();
 
-  /// A box out of the render tree (its view went) stops its chains and
-  /// timers; they start again when it's back.
+  /// A removed view stops its chains and timers. Conditional hiding only
+  /// pauses screen triggers: the reaction that hid the node may finish.
   @override
   void attachChanged(NodeBox box) {
     final state = _boxes[box];
@@ -158,7 +158,7 @@ class TreeReactions implements NodeInteractions {
     if (box.attached) {
       state.resume();
     } else {
-      state.pause();
+      state.pause(cancelActions: !box.tree.preservingActions);
     }
   }
 
@@ -180,11 +180,13 @@ class _BoxReactions {
   final NodeBox box;
   ActionCancellation cancellation = ActionCancellation();
 
-  /// Out of the render tree: cancels the running chains (later ones run
-  /// on) and stops the timer.
-  void pause() {
-    cancellation.cancel();
-    cancellation = ActionCancellation();
+  /// Stops screen timers; a retained conditional subtree keeps its active
+  /// reactions, whereas a removed view cancels them.
+  void pause({bool cancelActions = true}) {
+    if (cancelActions) {
+      cancellation.cancel();
+      cancellation = ActionCancellation();
+    }
     _timer?.cancel();
     _timer = null;
     _intervalMs = null;
