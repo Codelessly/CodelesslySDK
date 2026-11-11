@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'convert.dart';
+import 'layout/design_scroll.dart';
 
 /// Types out the [RenderParagraph] below it. On the design canvas (and when
 /// it doesn't type) it paints the paragraph as is.
@@ -131,26 +132,20 @@ class RenderTypewriter extends RenderProxyBox {
     }
   }
 
-  /// Lays out again the ancestors that sized themselves around this box.
-  /// Those its old height left with a tight height (a hugging column that
-  /// measured it at 0 gives its content exactly 0) are relayout boundaries
-  /// that stop the change: past them, the first ancestor free to change
-  /// height lays out again, and the change spreads from there as usual.
+  /// Lays out again every ancestor up to the scroll view it's in (or the
+  /// root): each sized itself around this box's old height, and one that
+  /// measured it before a change (a binding turning typing off mid-layout, a
+  /// hugging column that gave its content a tight height, a list placing
+  /// its items) is a relayout boundary the change would stop at.
   void _relayoutAncestors() {
     if (!attached) return;
     markNeedsLayout();
     RenderObject? o = parent;
-    var depth = 0;
-    while (o is RenderBox && depth++ < 64 && !(o.hasSize && o.constraints.hasTightHeight)) {
+    for (var depth = 0; o != null && depth < 200; depth++) {
+      o.markNeedsLayout();
+      if (o is RenderDesignScroll || o is RenderViewportBase) break;
       o = o.parent;
     }
-    // Only a tight height now too short for this box is a stale measure (a
-    // box sized on purpose clips or scrolls its content).
-    if (o is! RenderBox || depth >= 64 || o.size.height >= size.height) return;
-    while (o is RenderBox && o.hasSize && o.constraints.hasTightHeight) {
-      o = o.parent;
-    }
-    o?.markNeedsLayout();
   }
 
   void _growToTypedLines() {
