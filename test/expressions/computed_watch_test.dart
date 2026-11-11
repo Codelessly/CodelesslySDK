@@ -147,4 +147,34 @@ void main() {
     reader.dispose();
     vars.dispose();
   });
+
+  test('settled waits for formula scripts, including the ones their results start', () async {
+    final vars = VariableScope([
+      const Variable(name: 'n', type: VariableType.integer, value: 1),
+      const Variable(name: 'a', type: VariableType.integer, formula: 'script.slow(n)'),
+      const Variable(name: 'b', type: VariableType.integer, formula: 'script.slow(a)'),
+    ]);
+    final reader = ScriptsScope(
+      parent: vars,
+      scripts: [ScriptDef.fromJson({'id': 'slow', 'name': 'slow', 'params': [{'name': 'x'}], 'source': ''})!],
+      runner: FunctionScriptRunner({
+        'slow': (args, host) async {
+          await Future<void>.delayed(const Duration(milliseconds: 15));
+          return ((args['x'] as num?) ?? 0) + 1;
+        },
+      }),
+    );
+    reader.reader = reader;
+    // b reads a, which isn't there yet: b's own call starts once a answers.
+    final w = watchName(reader, 'b')!;
+    void reread() => reader.read('b');
+    w.addListener(reread);
+    expect(reader.read('b'), isNull);
+    await reader.settled();
+    expect(reader.read('a'), 2);
+    expect(reader.read('b'), 3);
+    w.removeListener(reread);
+    reader.dispose();
+    vars.dispose();
+  });
 }
