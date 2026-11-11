@@ -217,6 +217,24 @@ void main() {
       expect(find.text('Saved'), findsOneWidget);
     });
 
+    testWidgets('a toast\'s time counts from its first frame, not from when it was asked for', (tester) async {
+      final h = Host([]);
+      await h.pump(tester);
+      await h.run([
+        {'type': 'showToast', 'message': 'Split at 00:09.12', 'durationMs': 2000},
+      ]);
+      // A long first build: time passes before the toast is drawn.
+      await tester.binding.delayed(const Duration(seconds: 3));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Split at 00:09.12'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 1500));
+      expect(find.text('Split at 00:09.12'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text('Split at 00:09.12'), findsNothing);
+    });
+
     testWidgets('the action pill\'s background binds like the other toast colors', (tester) async {
       final h = Host([v('pill', '#FF123456')]);
       await h.pump(tester);
