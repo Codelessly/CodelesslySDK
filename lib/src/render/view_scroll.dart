@@ -293,3 +293,76 @@ class RenderSticky extends RenderProxyBox with _FollowsScroll {
     return result.addWithPaintTransform(transform: m, position: position, hitTest: (r, p) => c.hitTest(r, position: p));
   }
 }
+
+/// Writes where its node is laid out ([api.Measure]) to a variable after
+/// each layout: `{x, y, width, height, centerX, centerY}` in the box of the
+/// ancestor node `relativeTo` (else the screen), rounded to 0.5 px.
+class RenderMeasure extends RenderProxyBox {
+  api.Measure _model = const api.Measure();
+  NodeBox? _node;
+  bool _scheduled = false;
+  Map<String, double>? _last;
+
+  void configure(NodeBox? node, api.Measure model) {
+    if (model != _model) _last = null;
+    _node = node;
+    _model = model;
+    _schedule();
+  }
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    _schedule();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _last = null;
+    _schedule();
+  }
+
+  void _schedule() {
+    if (_scheduled || !attached) return;
+    _scheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
+      if (attached && hasSize) _write();
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
+  /// The ancestor node box named [api.Measure.relativeTo], else null (the
+  /// screen).
+  RenderBox? _ancestor() {
+    final id = _model.relativeTo.trim();
+    if (id.isEmpty) return null;
+    for (var p = parent; p != null; p = p.parent) {
+      if (p is NodeBox && p.id == id) return p.contentBox ?? p;
+    }
+    return null;
+  }
+
+  void _write() {
+    final node = _node;
+    final name = _model.variable.trim();
+    if (node == null || name.isEmpty) return;
+    final rect = MatrixUtils.transformRect(getTransformTo(_ancestor()), Offset.zero & size);
+    double r(double v) => (v * 2).roundToDouble() / 2;
+    final value = <String, double>{
+      'x': r(rect.left),
+      'y': r(rect.top),
+      'width': r(rect.width),
+      'height': r(rect.height),
+      'centerX': r(rect.center.dx),
+      'centerY': r(rect.center.dy),
+    };
+    if (mapEquals(value, _last)) return;
+    _last = value;
+    final scope = node.tree.binder?.scopeFor(node.tree.source, node.id, node.instance);
+    if (scope == null) return;
+    final key = _model.key.trim();
+    setVariableIn(scope, key.isEmpty ? name : '$name.$key', value);
+  }
+}
