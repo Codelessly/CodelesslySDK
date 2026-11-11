@@ -250,6 +250,7 @@ class CodelesslyPresenter {
           placement: p.action.placement,
           gap: p.action.anchorGap,
           offset: p.action.anchorOffset,
+          reserve: p.action.anchorReserve,
           barrierDismissible: p.action.barrierDismissible,
           barrierColor: p.action.barrierColor);
     }

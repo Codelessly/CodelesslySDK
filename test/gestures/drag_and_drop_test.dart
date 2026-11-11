@@ -155,25 +155,56 @@ Future<Board> pump(WidgetTester tester,
 /// A board whose columns are one column repeated over `lanes` (a horizontal
 /// list), each the drop target of the card list inside it, which draws
 /// `slot` in its slot.
-Future<Board> pumpRepeated(WidgetTester tester) async {
+Future<Board> pumpRepeated(WidgetTester tester, {bool tabs = false}) async {
   tester.view.physicalSize = const Size(400, 500);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final doc = api.LayoutDocument.fromJson({
     'roots': ['board'],
     'nodes': {
-      'board': {'type': 'column', 'children': ['lanes', 'slot'], 'layout': {'width': 320, 'height': 400}},
+      'board': {
+        'type': 'column',
+        'children': [if (tabs) 'tabs', 'lanes', 'slot'],
+        'layout': {'width': 320, 'height': 400},
+      },
+      // A tab per lane, beside the columns: dropping on one adds to the end
+      // of its column.
+      'tabs': {
+        'type': 'listView',
+        'children': ['tab'],
+        'layout': {'width': 320, 'height': 30},
+        'props': {'scrollDirection': 'horizontal', 'scrollable': false},
+        'bind': {'data': r'${lanes}'},
+      },
+      'tab': {
+        'type': 'text',
+        'layout': {'width': 160, 'height': 30},
+        'props': {'text': r'Tab ${item}'},
+        'dropTarget': {'accepts': ['card'], 'key': r'${item}', 'listNodeId': 'list', 'slot': 'node', 'slotNodeId': 'slot'},
+        'actions': [
+          {
+            'trigger': {'type': 'drop'},
+            'actions': [
+              {
+                'type': 'setVariable',
+                'variable': 'cards',
+                'value': r"${= moveItems(cards, result.ids, result.beforeId, object('lane', result.key))}",
+              },
+            ],
+          },
+        ],
+      },
       'lanes': {
         'type': 'listView',
         'children': ['col'],
-        'layout': {'width': 320, 'height': 400},
+        'layout': {'width': 320, 'height': 370},
         'props': {'scrollDirection': 'horizontal', 'scrollable': false},
         'bind': {'data': r'${lanes}'},
       },
       'col': {
         'type': 'column',
         'children': ['list'],
-        'layout': {'width': 160, 'height': 400},
+        'layout': {'width': 160, 'height': 370},
         'dropTarget': {'accepts': ['card'], 'key': r'${item}', 'listNodeId': 'list', 'slot': 'node', 'slotNodeId': 'slot'},
         'actions': [
           {
@@ -191,7 +222,7 @@ Future<Board> pumpRepeated(WidgetTester tester) async {
       'list': {
         'type': 'listView',
         'children': ['card'],
-        'layout': {'width': 160, 'height': 400},
+        'layout': {'width': 160, 'height': 370},
         'bind': {'data': r'${= filter(cards, c => c.lane == item)}'},
       },
       'card': {
@@ -363,6 +394,36 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(b.lane('b'), ['c1', 'c4']);
+  });
+
+  testWidgets('the first tab opens the slot at the end of the first column', (tester) async {
+    final b = await pumpRepeated(tester, tabs: true);
+    final gesture = await dragTo(tester, textRect(tester, 'Four').center, textRect(tester, 'Tab a').center, release: false);
+    expect(b.drag['over'], 'a');
+    await tester.pump();
+    // After One and Two.
+    expect(textRect(tester, 'Drop here').center, offsetMoreOrLessEquals(const Offset(80, 30 + 80 + 20), epsilon: 1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(b.lane('a'), ['c1', 'c2', 'c4']);
+  });
+
+  testWidgets('a tab beside the columns opens the slot at the end of its column', (tester) async {
+    final b = await pumpRepeated(tester, tabs: true);
+    final four = textRect(tester, 'Four');
+    final gesture = await dragTo(tester, textRect(tester, 'One').center, textRect(tester, 'Tab b').center, release: false);
+    expect(b.drag['over'], 'b');
+    await tester.pump();
+    expect(paragraphs(tester, 'Drop here'), 1);
+    final slot = textRect(tester, 'Drop here');
+    expect(slot.center.dx, closeTo(240, 1));
+    // After Four, which stays put.
+    expect(textRect(tester, 'Four').top, closeTo(four.top, 0.5));
+    // Four's card is 40 tall; the slot (40) right after it.
+    expect(slot.center.dy, closeTo(four.top + 60, 1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(b.lane('b'), ['c4', 'c1']);
   });
 
   testWidgets('a feedback node that hugs takes its content\'s size, not its design size', (tester) async {

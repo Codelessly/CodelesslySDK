@@ -97,7 +97,9 @@ TextStyle textStyle(api.TextStyle style) {
   if (style.fontFamily case final String family) {
     FontDemand.need(family, ((weight ?? 400) ~/ 100 * 100).clamp(100, 900), style.fontStyle == api.FontStyle.italic);
   }
-  return kTextBase.merge(TextStyle(
+  // No height and naturalHeight: the font's own line height, not the base's.
+  final natural = style.height == null && style.naturalHeight == true;
+  return (natural ? kTextBaseNatural : kTextBase).merge(TextStyle(
     fontFamily: style.fontFamily,
       fontFamilyFallback: style.fontFamilyFallback,
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
