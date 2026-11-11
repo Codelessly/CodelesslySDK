@@ -35,6 +35,17 @@ class RenderNodePaint extends RenderBox with ImageClient {
     markNeedsPaint();
   }
 
+  /// The node clips itself to its shape, anti-aliased: the fills paint the
+  /// whole box and the clip rounds them, once (as a ClipRRect around a
+  /// filled box). Rounded again here, their edge would be anti-aliased
+  /// twice and come out fainter at a fractional position.
+  bool _clipped = false;
+  set clipped(bool v) {
+    if (v == _clipped) return;
+    _clipped = v;
+    markNeedsPaint();
+  }
+
   @override
   bool get sizedByParent => true;
 
@@ -49,14 +60,15 @@ class RenderNodePaint extends RenderBox with ImageClient {
     final canvas = context.canvas;
     final rect = offset & size;
     final rrect = decoration.radius.flutter.toRRect(rect);
+    final fillShape = _clipped ? RRect.fromRectAndRadius(rect, Radius.zero) : rrect;
     if (_foreground) {
       for (final p in decoration.foregroundFills) {
-        _fill(canvas, rrect, p);
+        _fill(canvas, fillShape, p);
       }
       return;
     }
     for (final p in decoration.visibleFills) {
-      _fill(canvas, rrect, p);
+      _fill(canvas, fillShape, p);
     }
     final strokes = decoration.visibleStrokes.toList();
     if (strokes.isEmpty) return;
