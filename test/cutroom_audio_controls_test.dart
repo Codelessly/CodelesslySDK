@@ -114,6 +114,7 @@ void main() {
       null,
     );
   });
+  final statuses = <Map<String, Object?>>[];
   Future<void> show(WidgetTester tester, Map<String, Object?> props) async {
     final node = api.Node.fromJson({
       'type': 'audioPlayer',
@@ -121,7 +122,7 @@ void main() {
     })!;
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: MediaAudioPlayer(node: node, preview: false)),
+        home: Scaffold(body: MediaAudioPlayer(node: node, preview: false, onStatus: statuses.add)),
       ),
     );
     for (var i = 0; i < 5; i++) {
@@ -144,5 +145,29 @@ void main() {
     for (var i = 0; i < 10; i++) {
       await tester.pump();
     }
+  });
+
+  testWidgets('the changed status reports ready, playing and the end of the track', (tester) async {
+    statuses.clear();
+    await show(tester, {'playing': true});
+    expect(statuses.first['ready'], true);
+    expect(statuses.any((s) => s['playing'] == true), true);
+    platform.player!.events.add(PlaybackEventMessage(
+      processingState: ProcessingStateMessage.completed,
+      updateTime: DateTime.now(),
+      updatePosition: const Duration(seconds: 10),
+      bufferedPosition: const Duration(seconds: 10),
+      duration: const Duration(seconds: 10),
+      icyMetadata: null,
+      currentIndex: 0,
+      androidAudioSessionId: null,
+    ));
+    for (var i = 0; i < 3; i++) {
+      await tester.pump();
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 30)));
+    }
+    expect(statuses.last['completed'], true);
+    expect(statuses.last['playing'], false);
+    await tester.pumpWidget(const SizedBox());
   });
 }

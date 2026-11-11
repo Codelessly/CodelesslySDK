@@ -68,6 +68,8 @@ Set<String> _seriesFields(Node n) {
     for (final s in series) s.field,
     for (final s in series)
       if (s.fillTo != null) s.fillTo!,
+    if (n.prop(ChartProps.chartType) == ChartType.line)
+      if (n.prop(ChartProps.xField) case final String x) x,
   };
 }
 
@@ -77,19 +79,26 @@ List<Json> _rowsFrame(
   Set<String> fields,
   Object? Function(Json row, int index) oldKey,
   Object? Function(Json row, int index) newKey,
-  double t,
-) {
+  double t, {
+  bool growFromPrevious = false,
+}) {
   final previous = {for (final e in _keyed(from, oldKey)) e.$1: e.$2};
+  final keyed = _keyed(to, newKey);
+  // A line's new point grows out of the point before it (the last row that
+  // was already there), not up from zero.
+  Json? before;
   return [
-    for (final (key, row) in _keyed(to, newKey))
-      {
-        ...row,
-        for (final field in fields)
-          if (_number(row[field]) case final target?)
-            field:
-                (_number(previous[key]?[field]) ?? 0) +
-                (target - (_number(previous[key]?[field]) ?? 0)) * t,
-      },
+    for (final (key, row) in keyed)
+      (() {
+        final old = previous[key] ?? (growFromPrevious ? before : null);
+        if (previous[key] != null) before = previous[key];
+        return {
+          ...row,
+          for (final field in fields)
+            if (_number(row[field]) case final target?)
+              field: (_number(old?[field]) ?? 0) + (target - (_number(old?[field]) ?? 0)) * t,
+        };
+      })(),
   ];
 }
 
@@ -206,7 +215,8 @@ double _plotValue(Node n, double x) {
   return values[i] + (values[i + 1] - values[i]) * (at - i);
 }
 
-/// Keeps the target's topology and metadata. Entering values grow from zero,
+/// Keeps the target's topology and metadata. Entering values grow from zero
+/// (a line chart's new point grows out of the point before it),
 /// removed rows leave immediately, and null/missing values stay gaps. Plot
 /// samples use the old curve at each target x, so resampling never pairs
 /// unrelated indices. Target domain/style values are never interpolated.
@@ -224,6 +234,7 @@ Node chartDataFrame(Node from, Node to, double t) {
           (row, i) => _category(row, label, i),
           (row, i) => _category(row, label, i),
           t,
+          growFromPrevious: to.prop(ChartProps.chartType) == ChartType.line,
         ),
       );
     case 'lineChart':

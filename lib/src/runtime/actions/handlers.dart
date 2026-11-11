@@ -210,8 +210,25 @@ Services _require(ActionRun run, String what) =>
 /// its fixed time.
 int delayMilliseconds(DelayAction a, ActionRun run) {
   if (a.duration.trim().isEmpty) return a.ms;
-  final v = num.tryParse(run.text(a.duration).trim());
+  final v = numberOfExpression(a.duration, run);
   return v == null || v < 0 ? a.ms : v.round();
+}
+
+/// The number [text] gives: a `${...}` expression's value as it is (a
+/// number stays a number, never formatted text such as "24,000"), else the
+/// interpolated text read as a number. Null when it gives none.
+double? numberOfExpression(String text, ActionRun run) {
+  final t = text.trim();
+  if (t.isEmpty) return null;
+  if (t.startsWith(r'${') && t.endsWith('}') && t.indexOf(r'${', 2) < 0) {
+    try {
+      final v = run.evaluate(t);
+      if (v is num) return v.isFinite ? v.toDouble() : null;
+      if (v is String) return double.tryParse(v.trim());
+    } catch (_) {}
+  }
+  final n = double.tryParse(run.text(t).trim());
+  return n != null && n.isFinite ? n : null;
 }
 
 // --- variables and values ----------------------------------------------------------
@@ -269,11 +286,7 @@ Future<void> _animateVariable(AnimateVariableAction a, ActionRun run, {bool from
   if (found == null || found.$2.isComputed) return;
   final (scope, variable) = found;
   final name = variable.name;
-  double? number(String text) {
-    if (text.trim().isEmpty) return null;
-    final n = double.tryParse(run.text(text).trim());
-    return n != null && n.isFinite ? n : null;
-  }
+  double? number(String text) => numberOfExpression(text, run);
 
   switch (a.mode) {
     case AnimateVariableMode.resume:

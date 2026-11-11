@@ -161,6 +161,8 @@ double? _itemMain(Node list, Node item) {
   final extent = list.prop(ListViewProps.itemExtent);
   if (extent != null) return extent;
   final fit = list.vertical ? item.layout.height.fit : item.layout.width.fit;
+  // An item binding its size along the list sizes itself, item by item.
+  if (item.bind.containsKey(list.vertical ? 'layout.height' : 'layout.width')) return null;
   if (fit == SizeFit.fill || fit == SizeFit.flexible) return list.vertical ? item.outerHeight : item.outerWidth;
   return null;
 }
@@ -178,7 +180,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     if (reordersItems(n, hasData: ListRuntime(b, n).data != null, handle: handle)) {
       chain.add(_viewportBox(b, n, canShrinkWrap: true));
       final itemExtent = n.prop(ListViewProps.itemExtent);
-      final separated = n.prop(ListViewProps.separator) != api.ListSeparator.none;
+      final separated = listSeparator(n) != api.ListSeparator.none;
       return reorderRecipe(
         b,
         n,
@@ -230,16 +232,18 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
         );
       })
       ..placeAt = ((_, _) => origin)
-      // Each item at its own x/y (bound per item: a map's rooms), else at
-      // the list's itemPosition.
+      // Each item at its own x/y (bound per item: a map's rooms, a
+      // timeline's clips), else at the list's itemPosition. An item placed
+      // on one axis is at 0 on the other: a clip at x 0 isn't moved by the
+      // list's itemPosition.
       ..placeChild = ((child, box, item) {
         final node = child is NodeBox ? child.node : null;
         if (node == null) return null;
         final x = node.layout.x, y = node.layout.y;
         if (x == api.AxisPosition.zero && y == api.AxisPosition.zero) return null;
         return Offset(
-          padding.left + _stackAxis(x, box.width - padding.horizontal, item.width, at?.dx ?? 0),
-          padding.top + _stackAxis(y, box.height - padding.vertical, item.height, at?.dy ?? 0),
+          padding.left + _stackAxis(x, box.width - padding.horizontal, item.width, 0),
+          padding.top + _stackAxis(y, box.height - padding.vertical, item.height, 0),
         );
       })
       ..onNeedItems = null
@@ -274,7 +278,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return;
   }
 
-  final separator = n.prop(ListViewProps.separator);
+  final separator = listSeparator(n);
   final spacing = n.prop(ListViewProps.spacing);
   final stretchItems = n.prop(ListViewProps.stretchItems);
 
@@ -429,7 +433,7 @@ void _dataList(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node
           ? item.outerWidth + pad.horizontal
           : item.outerHeight + pad.vertical;
   chain.add(_viewportBox(b, n, canShrinkWrap: true, crossExtent: crossExtent));
-  final separator = n.prop(ListViewProps.separator);
+  final separator = listSeparator(n);
   final spacing = n.prop(ListViewProps.spacing);
   final color = n.prop(ListViewProps.dividerColor).flutter;
   Widget gap() => switch (separator) {
@@ -692,4 +696,13 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..changed();
   b.syncChildren(view as _Container, ids, Slot(SlotKind.root, n), instances: instances);
   chain.add(view);
+}
+
+/// What [n] (a list) draws between its items: its separator, or empty space
+/// when it has none but a [ListViewProps.spacing] (spacing alone spaces the
+/// items, as a row's or column's does).
+api.ListSeparator listSeparator(Node n) {
+  final separator = n.prop(ListViewProps.separator);
+  if (separator == api.ListSeparator.none && n.prop(ListViewProps.spacing) != 0) return api.ListSeparator.space;
+  return separator;
 }

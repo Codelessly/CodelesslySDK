@@ -6,6 +6,8 @@ import 'package:intl/date_symbols.dart';
 import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
 
+import 'package:meta/meta.dart' show visibleForTesting;
+
 import 'formula_clock.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
@@ -170,7 +172,12 @@ class FormulaEvaluator {
   static final Map<String, _Node?> _cache = {};
 
   /// Evaluates [expression], resolving variable paths with [resolve].
+  /// Called on every [evaluate] (tests count evaluations with it).
+  @visibleForTesting
+  static void Function()? debugOnEvaluate;
+
   static Object? evaluate(String expression, FormulaPathResolver resolve) {
+    debugOnEvaluate?.call();
     final _Node? node = _parse(expression);
     if (node == null) return null;
     try {
@@ -706,8 +713,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'without',
-      'without(list, other or item)',
-      'without(held, 64)',
+      'without(list, other or item) or without(map, keys)',
+      'without(held, 64) or without(task, ["draft", "tmp"])',
     ),
     FormulaFunctionDoc(
       'concat',
@@ -2988,13 +2995,19 @@ final Map<String, _Function> _functions = {
     for (final value in a)
       if (value is Iterable) ...value else ?value,
   ],
-  // `other` is a list of items to leave out, or one item (`without(held,
-  // 64)`), as concat and append take either.
+  // A list: `other` is a list of items to leave out, or one item
+  // (`without(held, 64)`), as concat and append take either. A map: the map
+  // without those keys (one key, or a list of keys).
   'without': (a) {
+    final from = _arg(a, 0);
     final other = _arg(a, 1);
+    if (from is Map) {
+      final drop = other is String ? {other} : {for (final k in _values(other, null)) '$k'};
+      return {for (final e in from.entries) if (!drop.contains('${e.key}')) '${e.key}': e.value};
+    }
     final out = other is Iterable ? other : [other];
     return [
-      for (final item in _values(_arg(a, 0), null))
+      for (final item in _values(from, null))
         if (!out.any((o) => _looseEquals(item, o))) item,
     ];
   },
@@ -3368,7 +3381,7 @@ class FormulaFunction {
     if (node == null || _depth >= maxDepth) return null;
     _depth++;
     try {
-      return node.eval((path) {
+      final Object? value = node.eval((path) {
         for (int i = 0; i < parameters.length; i++) {
           final String name = parameters[i];
           if (!path.startsWith(name)) continue;
@@ -3386,6 +3399,12 @@ class FormulaFunction {
         }
         return scope(path);
       });
+      // A body written as the lambda itself, `(a, b) => ...`, with the
+      // same parameters declared: call it rather than return it.
+      if (value is _Closure && value.params.length == parameters.length) {
+        return value.callWith(arguments);
+      }
+      return value;
     } catch (_) {
       return null;
     } finally {

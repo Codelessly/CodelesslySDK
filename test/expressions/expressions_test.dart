@@ -359,6 +359,10 @@ void main() {
       final row = ItemScope(index: 2, item: {'label': 'Orange County'}, parent: s);
       expect(VariablePreview.textFor(r'${item.label}', scope: row), 'Orange County');
       expect(VariablePreview.textFor(r'${= index + 1}', scope: row), '3');
+      // A path whose value is empty text shows nothing, not a placeholder.
+      final blank = ItemScope(index: 0, item: {'mark': ''}, parent: s);
+      expect(VariablePreview.textFor(r'${item.mark}', scope: blank), '');
+      expect(VariablePreview.textFor(r'${item.other}', scope: blank), 'Other');
     });
 
     test('a fixed-width text too narrow for its placeholder shows a marker', () {
