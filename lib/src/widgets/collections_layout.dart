@@ -524,6 +524,10 @@ class RenderListItems extends RenderCollection {
       );
       if (slot.ownSize) slotExtent = RenderCollection.main(slotBox.size, axis);
     }
+    // In the gap: drawn between the items, taking no room.
+    final inGap = slotBox != null && slot != null && slot.inGap;
+    final gapBefore = inGap ? slot.before.clamp(0, items.length) : -1;
+    if (inGap) slotExtent = 0;
     final slotBefore = slotExtent > 0 ? slot!.before.clamp(0, items.length) : -1;
     final slotRoom = slotBefore < 0 ? 0.0 : slotExtent + (items.isEmpty ? 0 : gap);
     if (slotRoom > 0) used += slotRoom;
@@ -576,7 +580,29 @@ class RenderListItems extends RenderCollection {
       final crossPos = _padCrossStart + (stretch ? 0 : (crossInner - itemCross) / 2);
       (it.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(mainPos, crossPos, axis);
     }
-    if (slotBox != null) {
+    if (inGap) {
+      // Centred in the gap before item [gapBefore]: between the item
+      // before it and it, in the leading padding before the first, after
+      // the last one gap on.
+      double startOf(int i) {
+        final o = (items[i].parentData! as CollectionParentData).offset;
+        return axis == Axis.vertical ? o.dy : o.dx;
+      }
+      double endOf(int i) => startOf(i) + RenderCollection.main(items[i].size, axis);
+      final double centre;
+      if (items.isEmpty) {
+        centre = _leading(_padMainStart, mainSize) / 2;
+      } else if (gapBefore == 0) {
+        centre = startOf(0) / 2;
+      } else if (gapBefore >= items.length) {
+        centre = endOf(items.length - 1) + gap / 2;
+      } else {
+        centre = (endOf(gapBefore - 1) + startOf(gapBefore)) / 2;
+      }
+      final extent = RenderCollection.main(slotBox.size, axis);
+      final crossPos = _padCrossStart + (crossInner - RenderCollection.cross(slotBox.size, axis)) / 2;
+      (slotBox.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(centre - extent / 2, crossPos, axis);
+    } else if (slotBox != null) {
       final mainPos = reverse && anchorEnd
           ? mainSize - _leading(_padMainEnd, mainSize) - slotLogical - slotExtent
           : _leading(_padMainStart, mainSize) + slotLogical;
