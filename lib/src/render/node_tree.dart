@@ -634,7 +634,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _prepareLayoutChanges();
     if (collapsed != _collapsed) {
       _collapsed = collapsed;
-      if (_collapsed) {
+      // Runtime hiding detaches timers and islands. Design previews retain
+      // their placeholder subtree so tooling can inspect its default text.
+      if (_collapsed && tree.animates) {
         final previous = tree._preservingActions;
         tree._preservingActions = true;
         try { child = null; } finally { tree._preservingActions = previous; }
@@ -1556,7 +1558,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       }
     }
     if (next.isNotEmpty) _detachFromAnyParent(next.first);
-    child = _collapsed || next.isEmpty ? null : next.first;
+    child = (_collapsed && tree.animates) || next.isEmpty ? null : next.first;
     _finishWire(next);
   }
 
