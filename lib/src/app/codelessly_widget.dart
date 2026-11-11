@@ -733,8 +733,14 @@ class _LayoutViewState extends State<_LayoutView> {
     // dark mode, kept as they change.
     final mq = MediaQuery.maybeOf(context);
     if (mq == null) return;
-    final screen = screenValues(mq.size.width, mq.size.height,
-        dark: mq.platformBrightness == Brightness.dark, breakpoints: _breakpoints);
+    final screen = {
+      ...screenValues(mq.size.width, mq.size.height,
+          dark: mq.platformBrightness == Brightness.dark, breakpoints: _breakpoints),
+      // How the screen is shown: as a modal (dialog or sheet), and as a
+      // bottom sheet, whose drag handle sits over its top edge.
+      'modal': widget.sizing != CanvasSizing.fill,
+      'sheet': widget.sizing == CanvasSizing.fillWidth,
+    };
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
     _updateTheme();
   }
