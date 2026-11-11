@@ -43,6 +43,16 @@ class CodelesslyPaywalls {
     if (s is! Services) return null;
     final runtime = s.paywalls;
     if (runtime != null) {
+      // The paywall server's callables run as the session: on Codelessly's
+      // user store one is made (anonymous) on first use, before the account
+      // scope is taken, so the placement isn't discarded when it appears.
+      if (s.auth case final CodelesslyAuthService store) {
+        try {
+          await store.ensureSession();
+        } catch (error, stack) {
+          s.analytics.logError(error, stackTrace: stack, message: 'Could not start a session', type: 'auth');
+        }
+      }
       runtime.scopeToUser(s.auth.currentUser?.uid);
       return runtime.resolve(placement, locale: locale, appVersion: appVersion);
     }

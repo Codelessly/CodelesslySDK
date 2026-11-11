@@ -129,8 +129,9 @@ AuthFailure _failure(AppAuthException e) => AuthFailure(appAuthMessage(e), code:
 
 /// [AuthService] on Codelessly's user store for [projectId].
 ///
-/// * Sessions are lazy: [ensureSession] (the cloud services call it on first use) signs
-///   in anonymously when nobody is; reading the publish needs none.
+/// * Sessions are lazy: [ensureSession] (the cloud data, files and server paywalls
+///   call it on first use) signs in anonymously when nobody is; reading the publish
+///   needs none.
 /// * [signInAsGuest] (the `signInAnonymously` auth action, `codelessly.auth.signInAnonymously`)
 ///   marks the session ([ensureSession]'s, or a new one) as a guest ([AppUser.isGuest]),
 ///   by its uid in [storage], as [AuthService] guest sessions are.

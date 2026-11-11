@@ -239,8 +239,8 @@ Future<Codelessly> codelesslyWithToken(
 /// The [Services] of project [projectId] on Firebase: its cloud data on
 /// [firestore] (under `data/{projectId}`, with the project's data rules),
 /// app user accounts on [auth] (Firebase Auth accounts) or [userStore]
-/// (Codelessly accounts, [codelesslyUserStore]: the cloud data and files then
-/// make an anonymous session on first use), cloud files on [storage] and
+/// (Codelessly accounts, [codelesslyUserStore]: the cloud data, files and
+/// paywalls then make an anonymous session on first use), cloud files on [storage] and
 /// managed paywalls on [functions] ([codelesslyPaywalls]), each only when
 /// given.
 /// [localStorage] is where the app keeps `storage` values (default:

@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import '../app/northstar_paywall_test.dart' show Backend, Store, bundle;
+
 /// The `appAuth` function in memory: users, passwords, claims and the same answers
 /// and error codes. A custom token is `ct:{uid}`; an ID token is `id:{uid}`.
 class FakeAppAuthBackend implements AppAuthClient {
@@ -445,6 +447,62 @@ void main() {
     });
   });
 
+  group('Codelessly accounts in an app', () {
+    test('`auth.status` is loading until the session is restored, from the one auth subscription', () async {
+      await service().signUp(email: 'ev@x.dev', password: 'ev password', displayName: 'Ev');
+      final auth = service();
+      final codelessly = Codelessly(config: CodelesslyConfig(slug: 'x', services: Services(auth: auth)));
+      addTearDown(codelessly.dispose);
+      expect(codelessly.appVariables.read('auth.status'), 'loading');
+      expect(codelessly.appVariables.read('auth.isSignedIn'), false);
+      await auth.ready;
+      await pumpEventQueue();
+      expect(codelessly.appVariables.read('auth.status'), 'signedIn');
+      expect(codelessly.appVariables.read('auth.displayName'), 'Ev');
+      await codelessly.auth.signOut();
+      await pumpEventQueue();
+      expect(codelessly.appVariables.read('auth.status'), 'signedOut');
+      final anonymous = await auth.ensureSession();
+      await pumpEventQueue();
+      expect(codelessly.appVariables.read('auth.status'), 'anonymous');
+      expect(codelessly.appVariables.read('auth.isAnonymous'), true);
+      expect(codelessly.appVariables.read('auth.uid'), '');
+      await codelessly.auth.signInAnonymously();
+      await pumpEventQueue();
+      expect(codelessly.appVariables.read('auth.isGuest'), true);
+      expect(codelessly.appVariables.read('auth.uid'), anonymous, reason: 'the guest is the same session');
+      expect(codelessly.appVariables.read('auth.role'), 'guest');
+    });
+
+    test('a server paywall makes the session before its callables run, keeping the placement', () async {
+      final auth = service();
+      String? caller;
+      final backend = _SessionBackend(() => caller = session.uid);
+      final runtime = PaywallRuntime(backend: backend, purchases: Store.new, platform: 'ios');
+      final codelessly = Codelessly(
+        config: CodelesslyConfig(
+            services: Services(auth: auth, paywalls: runtime, analytics: const NoAnalytics())),
+        loader: MemoryPublishLoader(bundle()),
+      );
+      addTearDown(() {
+        codelessly.dispose();
+        runtime.dispose();
+      });
+      await auth.ready;
+      expect(auth.currentUser, isNull);
+      final resolved = await codelessly.paywall.resolve('onboarding');
+      expect(resolved, isNotNull, reason: 'the new session does not discard the placement');
+      expect(caller, isNotNull);
+      expect(caller, auth.currentUser!.uid);
+      expect(auth.currentUser!.isAnonymous, isTrue);
+      await pumpEventQueue();
+      expect(codelessly.appVariables.read('auth.status'), 'anonymous');
+      expect(store.calls.where((c) => c.contains('anonymous')), hasLength(1));
+      expect(await codelessly.paywall.resolve('onboarding'), isNotNull);
+      expect(store.calls.where((c) => c.contains('anonymous')), hasLength(1));
+    });
+  });
+
   group('the backend', () {
     test('codeless-editor where it has an app for the platform, else codeless-app', () {
       expect(CodelesslyEditorFirebaseOptions.web.projectId, 'codeless-editor');
@@ -458,4 +516,18 @@ void main() {
       expect(CodelesslyBackend.app.options(TargetPlatform.android)!.projectId, 'codeless-app');
     });
   });
+}
+
+/// A paywall server that sees who calls it.
+class _SessionBackend extends Backend {
+  _SessionBackend(this.onCall);
+
+  final void Function() onCall;
+
+  @override
+  Future<ResolvedPaywall> resolve(String placement,
+      {required String locale, required String platform, required String appVersion}) {
+    onCall();
+    return super.resolve(placement, locale: locale, platform: platform, appVersion: appVersion);
+  }
 }

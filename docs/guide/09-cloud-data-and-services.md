@@ -110,7 +110,7 @@ Future<void> accounts(Codelessly codelessly) async {
 | `onAuthStateChange` | `AuthState`s: `initialSession`, `signedIn`, `signedOut`, `userUpdated`, `tokenRefreshed`, `merged` |
 | `signUp(email:, password:, data:)` | Creates the account and signs it in. `data['displayName']` names the user; the rest of `data` goes in their profile |
 | `signInWithPassword(email:, password:)` | Signs in. Five wrong passwords lock the account for a minute, then longer |
-| `signInAnonymously()` | A guest session (as the `signInAnonymously` auth action): the anonymous session, made now when there is none, marked `isGuest`, so `${auth.uid}` shows it. A signed-in user is signed out first. Works on Firebase Auth accounts too |
+| `signInAnonymously()` | A guest session (as the `signInAnonymously` auth action): the anonymous session, made now when there is none, marked `isGuest`, so `${auth.uid}` shows it. A signed-in user is signed out first. Works on Firebase Auth accounts too. Cloud data, files and server paywalls make an anonymous session when first used |
 | `updateUser(UserAttributes(...))` | Name, photo, password (with `currentPassword`, or within 5 minutes of signing in) |
 | `signOut(scope:)` | This device (`SignOutScope.local`), or every session of the user (`SignOutScope.global`) |
 | `refreshSession()`, `deleteUser()` | A fresh token; deletes the account (needs a recent sign-in) |
