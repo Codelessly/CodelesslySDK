@@ -177,8 +177,10 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   }
   // Ordinary bound lists need the same live viewport as paginated lists.
   // The render-only collection below is the design canvas's at-rest view.
-  // Keep reorder, wrap and layered lists on their dedicated paths.
-  if (b.tree.animates && n.prop(ListViewProps.scrollable) && !_wraps(n) &&
+  // Counted design templates and lists with drag/drop slots retain their
+  // render-object path, which owns item cleanup, shrink wrapping and gaps.
+  if (b.tree.animates && n.bind.containsKey('data') && n.behaviours.dropTarget == null &&
+      n.prop(ListViewProps.scrollable) && !_wraps(n) &&
       n.prop(ListViewProps.layout) == api.ListLayout.list && ListRuntime(b, n).data != null) {
     return _dataList(b, n, chain, itemId, item);
   }
