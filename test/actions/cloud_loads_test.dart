@@ -3,6 +3,7 @@
 // loads with a truthful hasMore, live aggregates, joins without N reads,
 // reloads, batches over a list, and reactions that run once per key.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/material.dart' hide Node;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/counting_backend.dart';
@@ -285,5 +286,53 @@ void main() {
     await seen('a');
     await seen('b');
     expect(scope.read('runs'), 2);
+  });
+
+  testWidgets('an app-scoped load keeps a live count too, without a document listener', (tester) async {
+    final layout = PublishLayout.fromJson({
+      'schema': 2,
+      'id': 'home',
+      'roots': ['home-canvas'],
+      'nodes': {
+        'home-canvas': {
+          'type': 'canvas',
+          'layout': {'width': 390, 'height': 300},
+          'actions': [
+            {
+              'trigger': {'type': 'load'},
+              'actions': [
+                {..._load('unread', 'cards', aggregate: 'count'), 'scope': 'app'},
+              ],
+            },
+          ],
+        },
+      },
+    });
+    final appBackend = CountingBackend();
+    final cloud = BackendCloudDatabase(backend: appBackend);
+    appBackend.seed('data/default/cards', {'a': {'n': 1}, 'b': {'n': 2}});
+    final app = Codelessly.fromBundle(
+      PublishBundle(
+        model: PublishModel(projectId: 'p', entryLayoutId: 'home', layouts: {'home': PublishLayoutInfo.of(layout)}),
+        layouts: {'home': layout},
+      ),
+      config: CodelesslyConfig(services: Services(cloud: cloud, analytics: const NoAnalytics())),
+      fonts: const NoFontFetcher(),
+    );
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app, layoutId: 'home')));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    expect(app.appVariables.read('unread.data'), 2);
+    await cloud.addDocument('cards', {'n': 3});
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    expect(app.appVariables.read('unread.data'), 3);
+    expect(appBackend.opened['data/default/cards'], isNull);
+    await tester.pumpWidget(const SizedBox());
+    app.dispose();
+    await tester.pump();
+    cloud.dispose();
   });
 }
