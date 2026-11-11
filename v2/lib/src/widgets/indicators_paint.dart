@@ -659,7 +659,10 @@ class BarChartPainter extends NodePainter {
     final hasLabels = labels.any((l) => l.isNotEmpty);
     final gridLabels = p(BarChartProps.gridLabels);
     final gridLabelWidth = p(BarChartProps.gridLabelWidth);
-    final right = gridLabels.isNotEmpty ? gridLabelWidth : 0.0;
+    final labelsLeft = p(BarChartProps.gridLabelsLeft);
+    final right = gridLabels.isNotEmpty && !labelsLeft ? gridLabelWidth : 0.0;
+    // With the grid labels on the left, the plot starts after them.
+    final plotLeft = gridLabels.isNotEmpty && labelsLeft ? gridLabelWidth : 0.0;
     final fontSize = p(BarChartProps.labelFontSize);
     final labelGap = p(BarChartProps.labelGap);
     final style = textStyle(api.TextStyle(
@@ -669,14 +672,20 @@ class BarChartPainter extends NodePainter {
       color: p(BarChartProps.labelColor),
     )).copyWith(height: 1.2);
     final labelHeight = hasLabels ? fontSize * 1.2 + labelGap : 0.0;
+    final showValues = p(BarChartProps.showValues);
+    // Room above the tallest bar for its value.
+    final valueRoom = showValues ? fontSize * 1.2 + 4 : 0.0;
     final height = math.max(0.0, size.height - labelHeight - 1);
-    final width = math.max(0.0, size.width - right);
+    final plotHeight = math.max(0.0, height - valueRoom);
+    final width = math.max(0.0, size.width - right - plotLeft);
+    canvas.save();
+    canvas.translate(plotLeft, 0);
 
     // Grid lines and their labels.
     final gridLines = p(BarChartProps.gridLines);
     final gridPaint = Paint()..color = p(BarChartProps.gridColor).flutter;
     for (var g = 1; g <= gridLines; g++) {
-      final bottom = height * g / gridLines - 0.5;
+      final bottom = plotHeight * g / gridLines - 0.5;
       canvas.drawRect(Rect.fromLTWH(0, height - bottom - 1, width, 1), gridPaint);
       if (gridLabels.isNotEmpty && g - 1 < gridLabels.length) {
         final tp = TextPainter(
@@ -684,8 +693,8 @@ class BarChartPainter extends NodePainter {
           textDirection: TextDirection.ltr,
           maxLines: 1,
         )..layout(maxWidth: math.max(0, gridLabelWidth - 6));
-        final labelBottom = height * g / gridLines - fontSize / 2;
-        tp.paint(canvas, Offset(size.width - (gridLabelWidth - 6), height - labelBottom - tp.height));
+        final labelBottom = plotHeight * g / gridLines - fontSize / 2;
+        tp.paint(canvas, Offset(labelsLeft ? -plotLeft : size.width - plotLeft - (gridLabelWidth - 6), height - labelBottom - tp.height));
         tp.dispose();
       }
     }
@@ -697,21 +706,38 @@ class BarChartPainter extends NodePainter {
     final emptyHeight = p(BarChartProps.emptyHeight);
     final barRadius = Radius.circular(p(BarChartProps.barRadius));
     final dimmed = p(BarChartProps.dimmedOpacity);
+    final maxBar = p(BarChartProps.maxBarWidth);
+    final bar = maxBar == null ? column : math.min(column, maxBar);
     for (var i = 0; i < count; i++) {
-      final left = i * (column + barGap);
+      final left = i * (column + barGap) + (column - bar) / 2;
       final value = values[i];
       if (value == null) {
-        canvas.drawRect(Rect.fromLTWH(left, height - emptyHeight, column, emptyHeight),
+        canvas.drawRect(Rect.fromLTWH(left, height - emptyHeight, bar, emptyHeight),
             Paint()..color = p(BarChartProps.emptyColor).flutter);
         continue;
       }
-      final h = max <= 0 ? 0.0 : (height * (value / max).clamp(0.0, 1.0)).clamp(emptyHeight, height).toDouble();
+      final h = max <= 0 ? 0.0 : (plotHeight * (value / max).clamp(0.0, 1.0)).clamp(emptyHeight, height).toDouble();
       final barColor =
           highlight == null || highlight < 0 || i == highlight ? color : color.withValues(alpha: color.a * dimmed);
       canvas.drawRRect(
-        RRect.fromRectAndCorners(Rect.fromLTWH(left, height - h, column, h), topLeft: barRadius, topRight: barRadius),
+        RRect.fromRectAndCorners(Rect.fromLTWH(left, height - h, bar, h), topLeft: barRadius, topRight: barRadius),
         Paint()..color = barColor,
       );
+      if (showValues) {
+        final text = value == value.roundToDouble() ? value.round().toString() : value.toStringAsFixed(1);
+        final tp = TextPainter(
+          text: TextSpan(
+            text: text,
+            style: style.copyWith(
+                fontWeight: FontWeight.w600,
+                color: i == highlight ? p(BarChartProps.highlightLabelColor).flutter : null),
+          ),
+          textDirection: TextDirection.ltr,
+          maxLines: 1,
+        )..layout();
+        tp.paint(canvas, Offset(left + (bar - tp.width) / 2, height - h - tp.height - 2));
+        tp.dispose();
+      }
     }
 
     // Baseline.
@@ -737,6 +763,7 @@ class BarChartPainter extends NodePainter {
         tp.dispose();
       }
     }
+    canvas.restore();
   }
 }
 
