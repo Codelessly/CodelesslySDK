@@ -20,45 +20,73 @@ const _sky = Color(0xFF0A1B6C);
 /// A one-canvas layout [id]: a full-screen stack holding a 390×100 box at
 /// the top. A backdrop's canvas is filled with [_sky]; a screen's canvas
 /// has [fill] (none by default: it shows the backdrop through).
-PublishLayout _screen(String id, {bool backdrop = false, String? fill}) => PublishLayout.fromJson({
-      'schema': 2,
-      'id': id,
-      'roots': ['${id}C'],
-      'nodes': {
-        '${id}C': {
-          'type': 'canvas',
-          'name': id,
-          'slots': {'body': '${id}Body'},
-          'layout': {'width': 390, 'height': 844},
-          if (backdrop) 'props': {'backdrop': true},
-          if (backdrop)
-            'decoration': {
-              'fills': [{'color': '#FF0A1B6C'}]
-            }
-          else if (fill != null)
-            'decoration': {
-              'fills': [{'color': fill}]
-            },
+PublishLayout _screen(
+  String id, {
+  bool backdrop = false,
+  String? fill,
+  Map<String, String>? boxBind,
+  String boxColor = '#FF334455',
+}) => PublishLayout.fromJson({
+  'schema': 2,
+  'id': id,
+  'roots': ['${id}C'],
+  'nodes': {
+    '${id}C': {
+      'type': 'canvas',
+      'name': id,
+      'slots': {'body': '${id}Body'},
+      'layout': {'width': 390, 'height': 844},
+      if (backdrop) 'props': {'backdrop': true},
+      if (backdrop)
+        'decoration': {
+          'fills': [
+            {'color': '#FF0A1B6C'},
+          ],
+        }
+      else if (fill != null)
+        'decoration': {
+          'fills': [
+            {'color': fill},
+          ],
         },
-        '${id}Body': {
-          'type': 'stack',
-          'children': ['${id}Box'],
-          'layout': {'width': {'fill': 390}, 'height': {'fill': 844}},
-        },
-        '${id}Box': {
-          'type': 'box',
-          'decoration': {
-            'fills': [{'color': '#FF334455'}]
-          },
-          'layout': {'width': 390, 'height': 100, 'x': {'start': 0}, 'y': {'start': 0}},
-        },
+    },
+    '${id}Body': {
+      'type': 'stack',
+      'children': ['${id}Box'],
+      'layout': {
+        'width': {'fill': 390},
+        'height': {'fill': 844},
       },
-    });
+    },
+    '${id}Box': {
+      'type': 'box',
+      'decoration': {
+        'fills': [
+          {'color': boxColor},
+        ],
+      },
+      'layout': {
+        'width': 390,
+        'height': 100,
+        'x': {'start': 0},
+        'y': {'start': 0},
+      },
+      'bind': ?boxBind,
+    },
+  },
+});
 
-PublishBundle _bundle({bool withBackdrop = true, String? homeFill}) {
+PublishBundle _bundle({bool withBackdrop = true, String? homeFill, bool homeHides = false}) {
   final layouts = {
     for (final l in [
-      _screen('home', fill: homeFill),
+      // A screen keeping its own background for the design board: its box
+      // shows only where no backdrop is drawn beneath it.
+      _screen(
+        'home',
+        fill: homeFill,
+        boxBind: homeHides ? {'visible': r'${= !screen.backdrop}'} : null,
+        boxColor: homeHides ? '#FF55AA33' : '#FF334455',
+      ),
       _screen('detail'),
       _screen('sky', backdrop: true),
     ])
@@ -108,18 +136,20 @@ void main() {
     addTearDown(app.dispose);
     final controller = CodelesslyWidgetController();
     addTearDown(controller.dispose);
-    await tester.pumpWidget(RepaintBoundary(
-      key: screenshot,
-      child: MaterialApp(
-        theme: ThemeData(
-          pageTransitionsTheme: transitions == null
-              ? const PageTransitionsTheme()
-              : PageTransitionsTheme(builders: {for (final p in TargetPlatform.values) p: transitions}),
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: screenshot,
+        child: MaterialApp(
+          theme: ThemeData(
+            pageTransitionsTheme: transitions == null
+                ? const PageTransitionsTheme()
+                : PageTransitionsTheme(builders: {for (final p in TargetPlatform.values) p: transitions}),
+          ),
+          builder: (context, child) => CodelesslyBackdropHost(codelessly: app, child: child!),
+          home: CodelesslyWidget(codelessly: app, controller: controller),
         ),
-        builder: (context, child) => CodelesslyBackdropHost(codelessly: app, child: child!),
-        home: CodelesslyWidget(codelessly: app, controller: controller),
       ),
-    ));
+    );
     await settle(tester);
     return controller;
   }
@@ -162,8 +192,9 @@ void main() {
     expect(await pixel(tester, const Offset(195, 400)), const Color(0xFFFFFFFF));
   });
 
-  testWidgets('the backdrop stays the same element, unmoved, across a push with a route transition and a pop',
-      (tester) async {
+  testWidgets('the backdrop stays the same element, unmoved, across a push with a route transition and a pop', (
+    tester,
+  ) async {
     final controller = await pumpApp(tester);
     final element = tester.element(backdrops());
     final state = backdropState(tester);
@@ -210,7 +241,11 @@ void main() {
   }
 
   testWidgets('without backdrops, the platform transition is the theme\'s, as before', (tester) async {
-    final controller = await pumpApp(tester, bundle: _bundle(withBackdrop: false), transitions: const ZoomPageTransitionsBuilder());
+    final controller = await pumpApp(
+      tester,
+      bundle: _bundle(withBackdrop: false),
+      transitions: const ZoomPageTransitionsBuilder(),
+    );
     expect(backdrops(), findsNothing);
     unawaited(controller.actionContext!.navigate({'type': 'navigate', 'to': 'detail'}));
     await tester.pump();
@@ -250,10 +285,12 @@ void main() {
     setScreen(tester, const Size(390, 844));
     app = Codelessly.fromBundle(_bundle());
     addTearDown(app.dispose);
-    await tester.pumpWidget(MaterialApp(
-      builder: (context, child) => CodelesslyPresenterHost(codelessly: app, automations: false, child: child!),
-      home: CodelesslyWidget(codelessly: app),
-    ));
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => CodelesslyPresenterHost(codelessly: app, automations: false, child: child!),
+        home: CodelesslyWidget(codelessly: app),
+      ),
+    );
     await settle(tester);
     expect(backdrops(), findsOneWidget);
     expect(ModalRoute.of(tester.element(backdrops())), isNull);
@@ -261,17 +298,27 @@ void main() {
   });
 
   test('seeThroughPageTransitions keeps the builders, transparent', () {
-    final see = seeThroughPageTransitions(const PageTransitionsTheme(builders: {
-      TargetPlatform.android: ZoomPageTransitionsBuilder(allowSnapshotting: false),
-      TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
-      TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
-    }));
+    final see = seeThroughPageTransitions(
+      const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(allowSnapshotting: false),
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
+        },
+      ),
+    );
     expect(see.builders[TargetPlatform.android], isA<SeeThroughZoomPageTransitionsBuilder>());
     expect(see.builders[TargetPlatform.iOS], isA<FadeUpwardsPageTransitionsBuilder>());
-    expect((see.builders[TargetPlatform.linux]! as FadeForwardsPageTransitionsBuilder).backgroundColor, Colors.transparent);
+    expect(
+      (see.builders[TargetPlatform.linux]! as FadeForwardsPageTransitionsBuilder).backgroundColor,
+      Colors.transparent,
+    );
     // A platform without a builder zooms (iOS: Cupertino, left to the default).
     expect(see.builders[TargetPlatform.windows], isA<SeeThroughZoomPageTransitionsBuilder>());
-    expect(seeThroughPageTransitions(const PageTransitionsTheme(builders: {})).builders.containsKey(TargetPlatform.iOS), isFalse);
+    expect(
+      seeThroughPageTransitions(const PageTransitionsTheme(builders: {})).builders.containsKey(TargetPlatform.iOS),
+      isFalse,
+    );
   });
 
   test('the model lists published, enabled backdrops; an overlay is not one', () {
@@ -280,5 +327,22 @@ void main() {
     expect(model.copyWith(disabledLayouts: ['sky']).backdrops, isEmpty);
     expect(model.copyWith(backdropLayoutIds: ['gone']).backdrops, isEmpty);
     expect(model.copyWith(overlayLayoutIds: ['sky']).backdrops, isEmpty);
+  });
+
+  testWidgets('screen.backdrop: a screen hides its own background where a backdrop is drawn beneath it', (
+    tester,
+  ) async {
+    await pumpApp(tester, bundle: _bundle(homeHides: true));
+    // Hidden: what's beneath shows (the backdrop's own box, at the same place).
+    expect(await pixel(tester, const Offset(195, 50)), const Color(0xFF334455), reason: 'the box is hidden');
+    await tester.pumpWidget(const SizedBox());
+    await pumpApp(tester, bundle: _bundle(homeHides: true, withBackdrop: false));
+    expect(await pixel(tester, const Offset(195, 50)), const Color(0xFF55AA33), reason: 'no backdrop: its own');
+    // A backdrop itself never reads true (it'd hide its own sky).
+    await tester.pumpWidget(const SizedBox());
+    await pumpApp(tester);
+    final inBackdrop = tester.element(find.descendant(of: backdrops(), matching: find.byType(CodelesslyWidget)));
+    expect(CodelesslyBackdropHost.showsBackdrop(inBackdrop), isTrue, reason: 'it is inside the host');
+    expect(BackdropScreenScope.of(inBackdrop), isTrue, reason: 'so screen.backdrop is false there');
   });
 }

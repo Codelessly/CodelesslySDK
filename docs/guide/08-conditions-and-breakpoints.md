@@ -80,6 +80,7 @@ Layouts read the size class in expressions:
 | `screen.brightness`, `screen.isDark` | The platform's brightness (`screen.dark` is the same as `screen.isDark`). For the mode the layout's colors follow, read `theme.isDark` ([chapter 11](11-theming-and-fonts.md#dark-mode)) |
 | `screen.breakpoints` | The project's breakpoints: `[{id, name, minWidth}]` |
 | `screen.modal`, `screen.sheet` | Whether the screen is shown as a modal (dialog or sheet), and as a bottom sheet: leave room for a sheet's drag handle with `${= screen.sheet ? 28 : 14}` |
+| `screen.backdrop` | Whether the app draws backdrop screens right beneath this screen (`canvas.setRoute backdrop`): hide the screen's own background there with `${= !screen.backdrop}` and keep it for the design board |
 
 Note the difference: the *canvas* is picked by the widget's width, while `${screen.width}` and
 `${screen.breakpoint}` describe the window (the `MediaQuery`). For a full-screen widget they agree.

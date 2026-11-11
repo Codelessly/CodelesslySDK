@@ -741,6 +741,14 @@ class _LayoutViewState extends State<_LayoutView> {
       // bottom sheet, whose drag handle sits over its top edge.
       'modal': widget.sizing != CanvasSizing.fill,
       'sheet': widget.sizing == CanvasSizing.fillWidth,
+      // Whether the app draws backdrop screens right beneath this one: a
+      // screen can then hide its own background (`${= !screen.backdrop}`)
+      // and keep it for the design board, where no backdrop is drawn. Not
+      // in a backdrop itself, nor in a dialog or sheet (over another
+      // screen).
+      'backdrop': widget.sizing == CanvasSizing.fill &&
+          !BackdropScreenScope.of(context) &&
+          CodelesslyBackdropHost.showsBackdrop(context),
     };
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
     _updateTheme();
