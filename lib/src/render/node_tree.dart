@@ -322,6 +322,10 @@ class NodeTree {
   bool _sweepScheduled = false;
 
   NodeBox? boxOf(String id, {Object? instance}) => _boxes[keyOf(id, instance)];
+
+  /// Every box of node [id]: one per copy a list (or grid, page view...)
+  /// repeats it in, and the single one of a node that doesn't repeat.
+  Iterable<NodeBox> boxesOf(String id) => _boxes.values.where((b) => b.id == id);
   int get length => _boxes.length;
 
   NodeBox obtain(String id, Slot slot, {Object? instance}) {

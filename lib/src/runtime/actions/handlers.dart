@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
+import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
@@ -782,11 +783,35 @@ void _editText(EditTextAction a, ActionRun run) {
   }
 }
 
+/// The copy of repeated node [id] that a list built for its item [item]:
+/// the one whose `${item.id}` (or `${item.key}`, or the item itself, as
+/// text) reads [item], else the one whose `${index}` is [item]. Each copy is
+/// asked in its own scope, so a node inside an item template matches too.
+NodeBox? repeatOf(NodeTree tree, String id, String item) {
+  final binder = tree.binder;
+  if (binder == null) return null;
+  NodeBox? byIndex;
+  final index = int.tryParse(item);
+  for (final b in tree.boxesOf(id)) {
+    if (!b.attached) continue;
+    final scope = binder.scopeFor(tree.source, b.id, b.instance);
+    if (scope == null) continue;
+    final value = readPath(scope, 'item');
+    final key = value is Map ? (value['id'] ?? value['key']) : value;
+    if (key != null && '$key' == item) return b;
+    if (index != null && byIndex == null && readPath(scope, 'index') == index) byIndex = b;
+  }
+  return byIndex;
+}
+
 /// Scrolls the scroll views around node [ScrollToAction.node] (those
 /// along [ScrollToAction.axis] only, when it's set) so the node sits at
 /// its alignment, less its offset: each view reveals the one inside it.
 Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
-  final box = run.host.tree?.boxOf(run.text(a.node).trim());
+  final tree = run.host.tree;
+  final id = run.text(a.node).trim();
+  final item = run.text(a.item).trim();
+  final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
   if (box == null || !box.attached) return;
   final target = box.contentBox ?? box;
   final duration = Duration(milliseconds: a.durationMs);

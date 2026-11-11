@@ -28,6 +28,10 @@ class ScrollHost {
     for (var p = from.parent; p != null; p = p.parent) {
       if (p is RenderDesignScroll && p.interactive) return ScrollHost._(p, p.axis, null, p);
       if (p is RenderViewportBase && p.offset is ScrollPosition) {
+        // A list laid out whole inside a scrolling column (shrink-wrapped,
+        // nothing to scroll) isn't the view: look further out.
+        final pos = p.offset as ScrollPosition;
+        if (pos.hasContentDimensions && pos.maxScrollExtent <= pos.minScrollExtent && p is RenderShrinkWrappingViewport) continue;
         return ScrollHost._(p, p.axis, p.offset, null);
       }
     }
