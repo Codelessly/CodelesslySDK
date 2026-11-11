@@ -228,8 +228,8 @@ class ChartSeriesPainter extends NodePainter {
     final total = values.fold(0.0, (a, b) => a + b);
     final diameter = math.min(size.width, size.height);
     final stroke = diameter * p(ChartProps.donutThickness).clamp(0.02, 0.5);
-    // Room for the selected slice, drawn thicker.
-    final r = diameter / 2 - stroke / 2 - 4;
+    // Room for a selected slice, drawn thicker.
+    final r = diameter / 2 - stroke / 2 - (selectedIndex >= 0 ? 4 : 0);
     final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: r);
     final paint = Paint()..style = PaintingStyle.stroke;
     if (total <= 0) {
@@ -303,7 +303,9 @@ class ChartSeriesPainter extends NodePainter {
       );
     }
 
-    // Bars.
+    // Bars. While a category is selected the others can fade.
+    final dim = p(ChartProps.dimUnselected) && selected >= 0 && selected < n;
+    final stackGap = p(ChartProps.stackGap);
     final groups = _groups;
     final barGap = p(ChartProps.barGap);
     final total = math.min(p(ChartProps.maxBarWidth) * math.max(1, groups.length), catW * p(ChartProps.barWidthFraction));
@@ -339,8 +341,9 @@ class ChartSeriesPainter extends NodePainter {
             final v = chartNumber(item, s.field);
             if (v == null || v == 0) continue;
             final colorField = s.colorField;
-            final color = chartColor(colorField == null ? null : item[colorField]) ?? s.color.flutter;
-            final r = Rect.fromLTRB(left, y(base + v), left + groupW, y(base));
+            final full = chartColor(colorField == null ? null : item[colorField]) ?? s.color.flutter;
+            final color = dim && i != selected ? full.withValues(alpha: full.a * 0.45) : full;
+            final r = Rect.fromLTRB(left, y(base + v), left + groupW, y(base) - (base > 0 ? stackGap : 0));
             final top = s == groups[g].last;
             canvas.drawRRect(
               RRect.fromRectAndCorners(
@@ -356,9 +359,33 @@ class ChartSeriesPainter extends NodePainter {
       }
     }
 
+    // Totals above the bar groups.
+    if (!isLine && p(ChartProps.showTotals)) {
+      final color = p(ChartProps.totalsColor)?.flutter ?? p(ChartProps.axisLabelColor).flutter;
+      final selectedColor = p(ChartProps.totalsSelectedColor)?.flutter ?? color;
+      final base = _labelStyle(p(ChartProps.axisFontFamily)).copyWith(fontWeight: FontWeight.w700);
+      for (var i = 0; i < n; i++) {
+        double sum = 0;
+        for (final g in groups) {
+          for (final s in g) {
+            sum += chartNumber(data[i], s.field) ?? 0;
+          }
+        }
+        if (sum <= 0) continue;
+        _label(canvas, compactNumber(sum), Offset(cx(i), y(sum) - 10),
+            style: base.copyWith(color: i == selected ? selectedColor : color));
+      }
+    }
+
     // Reference lines.
     for (final line in p(ChartProps.referenceLines)) {
       final ly = y(line.value);
+      if (line.label.isNotEmpty) {
+        final style = _labelStyle(p(ChartProps.axisFontFamily))
+            .copyWith(color: (line.labelColor ?? line.color).flutter, fontWeight: FontWeight.w700);
+        _label(canvas, line.label, Offset(plot.right, ly + (line.labelBelow ? 10 : -10)),
+            align: TextAlign.right, style: style);
+      }
       final paint = Paint()
         ..color = line.color.flutter
         ..strokeWidth = line.strokeWidth;
@@ -454,17 +481,75 @@ class ChartSeriesPainter extends NodePainter {
 
     // X labels.
     if (p(ChartProps.showXAxis)) {
-      final style = _axisStyle;
-      final selectedStyle = style.copyWith(color: selection.withValues(alpha: 1));
+      final xColor = p(ChartProps.xAxisLabelColor)?.flutter;
+      final base = xColor == null ? _axisStyle : _axisStyle.copyWith(color: xColor);
+      final highlight = p(ChartProps.highlightIndex);
+      final highlightColor = p(ChartProps.highlightColor)?.flutter;
+      final selectedStyle = base.copyWith(color: selection.withValues(alpha: 1));
       final every = math.max(1, p(ChartProps.xLabelEvery));
       final labelField = p(ChartProps.labelField);
       for (var i = 0; i < n; i += every) {
         final label = data[i][labelField];
         if (label == null) continue;
+        final style = i == highlight && highlightColor != null ? base.copyWith(color: highlightColor) : base;
         _label(canvas, '$label', Offset(cx(i), plot.bottom + _xAxisHeight / 2 + 2),
-            style: i == selected && !isLine ? selectedStyle : style);
+            style: i == selected && !isLine && !p(ChartProps.tooltip) ? selectedStyle : style);
       }
     }
+
+    if (p(ChartProps.tooltip) && selected >= 0 && selected < n) _paintTooltip(canvas, size, plot, data[selected], cx(selected));
+  }
+
+  /// The selected category's box: its title, then a row per series with a
+  /// value there (a dot in the series' color, its name, the value).
+  void _paintTooltip(Canvas canvas, Size size, Rect plot, Map<String, Object?> item, double centerX) {
+    final text = p(ChartProps.tooltipTextColor).flutter;
+    final family = p(ChartProps.axisFontFamily);
+    final titleField = p(ChartProps.tooltipTitleField);
+    final title = '${item[titleField.isEmpty ? p(ChartProps.labelField) : titleField] ?? ''}';
+    final rows = <(Color, String, String)>[
+      for (final s in series)
+        if (chartNumber(item, s.field) case final double v when v != 0)
+          (
+            chartColor(s.colorField == null ? null : item[s.colorField!]) ?? s.color.flutter,
+            s.name.isEmpty ? s.field : s.name,
+            compactNumber(v),
+          ),
+    ];
+    const w = 190.0, pad = 14.0, rowH = 18.0, titleH = 20.0;
+    final h = pad * 2 + titleH + rows.length * rowH;
+    final left = (centerX - w / 2).clamp(0.0, math.max(0.0, size.width - w)).toDouble();
+    final box = RRect.fromRectAndRadius(Rect.fromLTWH(left, plot.top, w, h), const Radius.circular(12));
+    canvas.drawRRect(box.shift(const Offset(0, 4)), Paint()
+      ..color = const Color(0x88000000)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10));
+    canvas.drawRRect(box, Paint()..color = p(ChartProps.tooltipColor).flutter);
+    final titleStyle = TextStyle(fontFamily: family, fontSize: 12, fontWeight: FontWeight.w700, color: text);
+    _label(canvas, title, Offset(left + pad, plot.top + pad + titleH / 2 - 2), align: TextAlign.left, style: titleStyle);
+    final rowStyle = TextStyle(fontFamily: family, fontSize: 13, fontWeight: FontWeight.w600, color: text);
+    for (var k = 0; k < rows.length; k++) {
+      final (color, name, value) = rows[k];
+      final cy = plot.top + pad + titleH + rowH * k + rowH / 2;
+      canvas.drawCircle(Offset(left + pad + 5, cy), 5, Paint()..color = color);
+      canvas.drawCircle(Offset(left + pad + 5, cy), 5, Paint()
+        ..style = PaintingStyle.stroke
+        ..color = const Color(0x33000000));
+      _label(canvas, name, Offset(left + pad + 18, cy), align: TextAlign.left, style: rowStyle);
+      _label(canvas, value, Offset(left + w - pad, cy), align: TextAlign.right,
+          style: rowStyle.copyWith(fontWeight: FontWeight.w700));
+    }
+  }
+
+  /// The category under [local] (the painter's coordinates), or -1.
+  int categoryAt(Offset local, Size size) {
+    if (chartType == ChartType.donut || chartType == ChartType.timeline) return -1;
+    final plot = plotRect(size);
+    final n = data.length;
+    if (n == 0 || local.dx < plot.left || local.dx > plot.right) return -1;
+    if (chartType == ChartType.line) {
+      return ((local.dx - plot.left) / plot.width * _slots).round().clamp(0, n - 1);
+    }
+    return ((local.dx - plot.left) / (plot.width / n)).floor().clamp(0, n - 1);
   }
 
   void _paintTimeline(Canvas canvas, Size size) {

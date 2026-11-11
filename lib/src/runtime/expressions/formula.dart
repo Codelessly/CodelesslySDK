@@ -93,6 +93,8 @@ abstract interface class FormulaReadStatus {
 ///    a built-in function, `fraction(qty * scale, 0.25)`, from any formula
 ///    that can read the variable. Calling any other unknown name makes the
 ///    formula null.
+///  - random() (0–1), random(n) (0 to n - 1), random(a, b) (a to b) and
+///    pick(list), a random item: for actions (a simulated arrival).
 ///  - left(text, n), right(text, n) and toMap (a map built from a list,
 ///    `toMap(items, i => i.id, i => "pass")`).
 ///  - math: sqrt, pow, sin, cos, tan, asin, acos, atan, atan2 (radians),
@@ -2827,6 +2829,18 @@ final Map<String, _Function> _functions = {
       if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
         item,
   ],
+  // random() is 0–1; random(n) a whole number from 0 to n - 1; random(a, b)
+  // one from a to b. pick(list) is a random item (null when empty).
+  'random': (a) => switch (a.length) {
+        0 => _idRandom.nextDouble(),
+        1 => _num(_arg(a, 0)) < 1 ? 0 : _idRandom.nextInt(_num(_arg(a, 0)).floor()),
+        _ => _num(_arg(a, 0)).ceil() +
+            _idRandom.nextInt(math.max(1, _num(_arg(a, 1)).floor() - _num(_arg(a, 0)).ceil() + 1)),
+      },
+  'pick': (a) {
+    final items = _values(_arg(a, 0), null).toList();
+    return items.isEmpty ? null : items[_idRandom.nextInt(items.length)];
+  },
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
   'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
