@@ -53,6 +53,35 @@ Json setVar(String name, String value, {String? op, String? index, String? mapKe
     };
 
 void main() {
+  group('trigger guards', () {
+    test('a timer stops updating after its reveal limit', () async {
+      final h = Harness(variables: [v('reveal', 0, VariableType.integer)]);
+      final node = clickNode([setVar('reveal', '3', op: 'add')], trigger: 'timer', extra: {
+        'when': r'${= reveal < 5}',
+      });
+      for (var i = 0; i < 10; i++) {
+        await h.actions.run(node, 'timer', h.context);
+      }
+      expect(h['reveal'], 6);
+      h.scope.set('reveal', 100000);
+      await h.actions.run(node, 'timer', h.context);
+      expect(h['reveal'], 100000);
+    });
+    test('guards can read the triggering result or a boolean variable', () async {
+      final h = Harness(variables: [v('n', 0, VariableType.integer), v('on', false, VariableType.boolean)]);
+      final byEvent = clickNode([setVar('n', '1', op: 'add')], extra: {'when': r'${= result.allow}'});
+      await h.actions.run(byEvent, 'click', h.context, event: {'result': {'allow': false}});
+      await h.actions.run(byEvent, 'click', h.context, event: {'result': {'allow': true}});
+      expect(h['n'], 1);
+      final byPath = clickNode([setVar('n', '10', op: 'add')], trigger: 'changed', extra: {'when': 'on'});
+      await h.actions.run(byPath, 'changed', h.context);
+      expect(h['n'], 1);
+      h.scope.set('on', true);
+      await h.actions.run(byPath, 'changed', h.context);
+      expect(h['n'], 11);
+    });
+  });
+
   group('chains', () {
     test('blocking functions run in order and are awaited', () async {
       final calls = <String>[];
