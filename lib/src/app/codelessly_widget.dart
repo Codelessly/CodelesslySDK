@@ -383,12 +383,24 @@ class CodelesslyWidget extends StatefulWidget {
         );
       };
 
+  /// [location] with what can't stand in a URL as is (spaces, non-ASCII
+  /// characters, a `%` that starts no escape) percent-encoded, and its
+  /// escapes (`%20`) and URL punctuation kept.
+  @visibleForTesting
+  static String encodeRawLocation(String location) => location.replaceAllMapped(
+        RegExp(r"%(?![0-9A-Fa-f]{2})|[^A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]"),
+        (m) => Uri.encodeComponent(m[0]!),
+      );
+
   /// The layout and params [screen] opens.
   @visibleForTesting
   static (String, Map<String, Object?>)? resolveScreen(PublishModel model, String? screen) {
     if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
+    // Encode what a typed location may hold raw (spaces, `·`, a lone `%`),
+    // keeping its escapes: a link's location is already encoded, and
+    // encoding it again turned `?toast=Loaded%20%E2%80%9C...` into a toast
+    // reading `Loaded%20%E2%80%9C...`.
+    final location = encodeRawLocation(screen.trim());
     final CanvasLocationMatch? match;
     final Uri? uri;
     try {
@@ -805,6 +817,15 @@ class _LayoutViewState extends State<_LayoutView> {
     final storage = services is Services ? services.storage : null;
     // A publish can keep the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
+    // A link's query parameters set the app variables they name too (not
+    // only this screen's), so app-wide state can come from a URL
+    // (`/edit/p1?t=2.5&sel=clip:c2`). Computed variables can't be set.
+    final app = _codelessly.appVariables;
+    for (final e in widget.params.entries) {
+      final v = app.variable(e.key);
+      if (v == null || v.formula.isNotEmpty || widget.layout.variablesOf(canvasId).any((c) => c.name == e.key)) continue;
+      app.set(e.key, v.type.coerce(e.value) ?? e.value);
+    }
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
       scope.define(v);
