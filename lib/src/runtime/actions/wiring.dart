@@ -48,6 +48,8 @@ class TreeReactions implements NodeInteractions {
     'textField': 'props.initialValue',
     'radio': 'props.groupValue',
     'segmentedButton': 'props.selected',
+    'choiceChip': 'props.selected',
+    'filterChip': 'props.selected',
     'checkbox': 'props.value',
     'switch': 'props.value',
     'slider': 'props.value',
