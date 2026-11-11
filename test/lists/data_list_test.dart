@@ -101,6 +101,17 @@ Map<String, Json> footers() => {
 List<String> texts(WidgetTester tester) => textsUnder(tester.renderObject(find.byType(CustomScrollView)));
 
 void main() {
+  testWidgets('ordinary bound lists scroll without pagination or sections', (tester) async {
+    await show(tester, screen(), variables: [Variable(name:'people',type:VariableType.list,value:people(30))]);
+    final view=find.byType(CustomScrollView);
+    expect(view, findsOneWidget);
+    final state=tester.state<ScrollableState>(find.descendant(of:view,matching:find.byType(Scrollable)));
+    expect(state.position.maxScrollExtent,greaterThan(0));
+    await tester.drag(view,const Offset(0,-240));
+    await tester.pumpAndSettle();
+    expect(state.position.pixels,greaterThan(0));
+  });
+
   testWidgets('infinite: the first page shows, the next loads near the end', (tester) async {
     final s = await show(tester, screen(pagination: {'name': 'contacts', 'pageSize': 10}),
         variables: [v('people', people(25), VariableType.list)]);

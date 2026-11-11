@@ -175,6 +175,13 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       );
     }
   }
+  // Ordinary bound lists need the same live viewport as paginated lists.
+  // The render-only collection below is the design canvas's at-rest view.
+  // Keep reorder, wrap and layered lists on their dedicated paths.
+  if (b.tree.animates && n.prop(ListViewProps.scrollable) && !_wraps(n) &&
+      n.prop(ListViewProps.layout) == api.ListLayout.list && ListRuntime(b, n).data != null) {
+    return _dataList(b, n, chain, itemId, item);
+  }
   final count = _itemCount(n);
   final layout = n.prop(ListViewProps.layout);
   final vertical = n.vertical;
