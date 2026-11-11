@@ -693,6 +693,7 @@ class RenderGridItems extends RenderCollection {
   double mainAxisSpacing = 0, crossAxisSpacing = 0, childAspectRatio = 1;
   double? mainAxisExtent;
   bool shrinkWrapRows = false;
+  bool masonry = false;
 
   /// With [shrinkWrapRows]: cells stretch to their row's longest item.
   bool intrinsicRows = true;
@@ -726,6 +727,50 @@ class RenderGridItems extends RenderCollection {
     final cols = _columns(crossInner);
     final cellCross = math.max(0.0, crossInner - crossAxisSpacing * (cols - 1)) / cols;
     final viewportMain = hugMain || !maxMain.isFinite ? double.infinity : math.max(0.0, maxMain - padMain);
+
+    if (masonry) {
+      final lanes = List<double>.filled(cols, 0);
+      final offsets = <double>[];
+      for (final (i, it) in children.indexed) {
+        final lane = i % cols;
+        it.layout(
+          RenderCollection.constraintsOf(
+            minMain: 0,
+            maxMain: double.infinity,
+            minCross: cellCross,
+            maxCross: cellCross,
+            axis: axis,
+          ),
+          parentUsesSize: true,
+        );
+        offsets.add(lanes[lane]);
+        lanes[lane] += RenderCollection.main(it.size, axis) + mainAxisSpacing;
+      }
+      final used = math.max(
+        0.0,
+        lanes.fold<double>(0, math.max) -
+            (children.isEmpty ? 0 : mainAxisSpacing),
+      );
+      final mainSize = hugMain || !maxMain.isFinite
+          ? (used + padMain).clamp(minMain, maxMain).toDouble()
+          : maxMain;
+      size = RenderCollection.sizeOf(mainSize, crossSize, axis);
+      for (final (i, it) in children.indexed) {
+        final pos = reverse
+            ? mainSize -
+                  padMainEnd -
+                  offsets[i] -
+                  RenderCollection.main(it.size, axis)
+            : padMainStart + offsets[i];
+        (it.parentData! as CollectionParentData).offset =
+            RenderCollection.offsetOf(
+              pos,
+              padCrossStart + (i % cols) * (cellCross + crossAxisSpacing),
+              axis,
+            );
+      }
+      return _anyChildOutside;
+    }
 
     final fixedRow = mainAxisExtent ?? cellCross / childAspectRatio;
     final endless = itemCount == null && viewportMain.isFinite;

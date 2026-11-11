@@ -190,6 +190,12 @@ class NavigatorActionUi implements ActionUi {
     final c = _context;
     final content = modal?.call(action.to, params);
     if (c == null || content == null) return null;
+    // Preserve inherited localizations and themes across both modal routes.
+    final inherited = InheritedTheme.captureAll(c, Localizations.override(context: c, child: content));
+    final modalContent = Padding(
+      padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
+      child: inherited,
+    );
     final anchor = switch (action.anchor) {
       api.ModalAnchor.trigger => RevealAnchor.lastTrigger,
       api.ModalAnchor.pointer => RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero,
@@ -204,7 +210,7 @@ class NavigatorActionUi implements ActionUi {
         action.routeTransition == null &&
         !sheet &&
         (action.presentation == ModalPresentation.dialog || action.presentation == ModalPresentation.adaptive)) {
-      return showAnchoredModal(c, content,
+      return showAnchoredModal(c, modalContent,
           anchor: anchor,
           placement: action.placement,
           gap: action.anchorGap,
@@ -212,13 +218,19 @@ class NavigatorActionUi implements ActionUi {
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor);
     }
-    return showScreenModal(c, content,
+    return showScreenModal(c, modalContent,
+
         presentation: action.presentation,
         barrierDismissible: action.barrierDismissible,
         barrierColor: action.barrierColor,
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
+        sheetWidth: action.sheetWidth,
+        maxHeightFactor: action.maxHeightFactor,
+        barrierBlur: action.barrierBlur,
+        enterScale: action.enterScale,
         sheetBelowWidth: sheetBelowWidth,
+
         routeTransition: action.routeTransition);
   }
 
