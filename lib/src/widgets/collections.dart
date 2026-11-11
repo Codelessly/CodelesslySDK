@@ -90,14 +90,17 @@ void _syncItems(NodeBuilder b, Node n, _Container container, String? itemId, int
 /// At runtime a flexible scroll axis shrink-wraps its items too, within the
 /// room its parent gives it, and scrolls once they outgrow it, so what follows the list sits under its last item. A
 /// design canvas keeps it at its design size, as the editor showed it.
-RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap}) {
+RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap, bool hugCross = false, double? crossExtent}) {
   final shrinkWrap = _hugsMain(b, n) && canShrinkWrap;
   final main = shrinkWrap ? null : n.designMain;
+  // Hugging across: as thick as its items (a row of chips that scrolls),
+  // measured, or the item's own extent where a scroll view needs a bound.
+  final cross = crossExtent ?? (hugCross ? null : n.designCross);
   final fillMain = n.mainFit == SizeFit.fill;
   final fillCross = n.crossFit == SizeFit.fill;
   return b.obtain<RenderFitBox>('viewport', RenderFitBox.new)
-    ..width = n.vertical ? n.designCross : main
-    ..height = n.vertical ? main : n.designCross
+    ..width = n.vertical ? cross : main
+    ..height = n.vertical ? main : cross
     ..fillWidth = n.vertical ? fillCross : fillMain
     ..fillHeight = n.vertical ? fillMain : fillCross
     ..aspectRatio = null;
@@ -372,7 +375,9 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   // A ListView: endless without a count (it builds what covers its
   // viewport), shrink-wrapping its items when it hugs them and can.
-  final box = _viewportBox(b, n, canShrinkWrap: count != null);
+  // Hugging across needs its items measured: not for a stretched list.
+  final hugCross = n.crossFit == SizeFit.hug && !stretchItems;
+  final box = _viewportBox(b, n, canShrinkWrap: count != null, hugCross: hugCross);
   chain.add(box);
   view
     ..measurable = false
@@ -383,7 +388,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       anchorEnd: true,
       padding: padding,
       hugMain: _hugsMain(b, n) && count != null,
-      hugCross: false,
+      hugCross: hugCross,
       stretch: stretchItems,
       itemMain: itemMain,
       gap: gap,
@@ -400,8 +405,16 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
 /// A running list that pages, groups into sections or swipes: a
 /// [DataListView] island in its viewport box.
 void _dataList(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node item) {
-  chain.add(_viewportBox(b, n, canShrinkWrap: true));
   final vertical = n.vertical;
+  // A scroll view needs a bounded cross axis: hugging, it is the item's.
+  final pad = n.layout.padding.flutter;
+  final hugCross = n.crossFit == SizeFit.hug && !n.prop(ListViewProps.stretchItems);
+  final crossExtent = !hugCross
+      ? null
+      : vertical
+          ? item.outerWidth + pad.horizontal
+          : item.outerHeight + pad.vertical;
+  chain.add(_viewportBox(b, n, canShrinkWrap: true, crossExtent: crossExtent));
   final separator = n.prop(ListViewProps.separator);
   final spacing = n.prop(ListViewProps.spacing);
   final color = n.prop(ListViewProps.dividerColor).flutter;
@@ -482,6 +495,7 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..mainAxisExtent = n.prop(GridViewProps.mainAxisExtent)
     ..shrinkWrapRows = n.prop(GridViewProps.shrinkWrapRows)
     ..masonry = n.prop(GridViewProps.masonry)
+    ..masonryShortest = n.prop(GridViewProps.masonryPlacement) == api.MasonryPlacement.shortest
     ..intrinsicRows = !_blocksIntrinsics(b, item)
     ..hugMain = n.mainFit == SizeFit.hug && count != null
     ..itemCount = count

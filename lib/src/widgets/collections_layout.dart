@@ -699,6 +699,10 @@ class RenderGridItems extends RenderCollection {
   bool shrinkWrapRows = false;
   bool masonry = false;
 
+  /// With [masonry]: each item in the shortest lane so far instead of in
+  /// turn.
+  bool masonryShortest = false;
+
   /// With [shrinkWrapRows]: cells stretch to their row's longest item.
   bool intrinsicRows = true;
   bool hugMain = false;
@@ -735,8 +739,17 @@ class RenderGridItems extends RenderCollection {
     if (masonry) {
       final lanes = List<double>.filled(cols, 0);
       final offsets = <double>[];
+      final laneOf = <int>[];
       for (final (i, it) in children.indexed) {
-        final lane = i % cols;
+        var lane = i % cols;
+        if (masonryShortest) {
+          // The shortest lane; the first of lanes within half a pixel.
+          lane = 0;
+          for (var l = 1; l < cols; l++) {
+            if (lanes[l] < lanes[lane] - 0.5) lane = l;
+          }
+        }
+        laneOf.add(lane);
         it.layout(
           RenderCollection.constraintsOf(
             minMain: 0,
@@ -769,7 +782,7 @@ class RenderGridItems extends RenderCollection {
         (it.parentData! as CollectionParentData).offset =
             RenderCollection.offsetOf(
               pos,
-              padCrossStart + (i % cols) * (cellCross + crossAxisSpacing),
+              padCrossStart + laneOf[i] * (cellCross + crossAxisSpacing),
               axis,
             );
       }
