@@ -150,6 +150,11 @@ class VariableScope extends NamedScope {
   final Map<String, Variable> _defs = {};
   final Map<String, Object?> _values = {};
 
+  /// Bumps whenever a value or definition changes in any variable scope:
+  /// a computed value that reads only variable scopes (this one and the
+  /// ones around it) is cached against it.
+  static int _globalVersion = 0;
+
   /// Computed variable → the names its formula reads.
   final Map<String, Set<String>> _reads = {};
 
@@ -173,6 +178,7 @@ class VariableScope extends NamedScope {
     _indexDependents();
     _cache.clear();
     _version++;
+    _globalVersion++;
     changed([v.name, ...?_dependents[v.name]]);
   }
 
@@ -185,6 +191,7 @@ class VariableScope extends NamedScope {
     _indexDependents();
     _cache.clear();
     _version++;
+    _globalVersion++;
     changed([name, ...?dependents]);
     return true;
   }
@@ -201,6 +208,7 @@ class VariableScope extends NamedScope {
     if (_same(_values[name], next)) return false;
     _values[name] = next;
     _version++;
+    _globalVersion++;
     changed([name, ...?_dependents[name]]);
     return true;
   }
@@ -240,15 +248,60 @@ class VariableScope extends NamedScope {
       final cached = _cache[v.name];
       if (cached != null && cached.$1 == _version) return cached.$2;
     }
+    // One that also reads the variable scopes around this one (app data, a
+    // page's state) gives the same value to every reader too: worked out
+    // once per change anywhere in the variable scopes.
+    final shared = !local && _readsOnlyVariableScopes(v.name);
+    if (shared) {
+      final cached = _sharedCache[v.name];
+      if (cached != null && cached.$1 == _globalVersion) return cached.$2;
+    }
     if (!_computing.add(v.name)) return null;
     try {
-      final value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local ? this : reader, p));
+      final value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local || shared ? this : reader, p));
       // Only a top-level read: one inside a cycle saw a partial value.
       if (local && _computing.length == 1) _cache[v.name] = (_version, value);
+      if (shared && _computing.length == 1) _sharedCache[v.name] = (_globalVersion, value);
       return value;
     } finally {
       _computing.remove(v.name);
     }
+  }
+
+  final Map<String, (int, Object?)> _sharedCache = {};
+
+  @visibleForTesting
+  Iterable<String> get debugSharedCacheKeys => _sharedCache.keys;
+
+  /// Whether [name] (a computed variable) reads only variables declared by
+  /// this scope or variable scopes around it, and no clock: then whoever
+  /// reads it (an item, a nested scope) gets the same value.
+  bool _readsOnlyVariableScopes(String name) {
+    if (_readsClock(name, {})) return false;
+    for (final foreign in foreignReads(name)) {
+      ValueScope? s = parent;
+      var found = false;
+      while (s != null) {
+        if (s is NamedScope && s.declares(foreign)) {
+          // A computed one there must itself depend on variables only.
+          found = s is VariableScope &&
+              (!(s._defs[foreign]?.isComputed ?? false) ||
+                  (!s._readsClock(foreign, {}) &&
+                      (s._isLocal(foreign, {}) || s._readsOnlyVariableScopes(foreign))));
+          break;
+        }
+        s = s.parent;
+      }
+      if (!found) return false;
+    }
+    return true;
+  }
+
+  bool _readsClock(String name, Set<String> seen) {
+    final v = _defs[name];
+    if (v == null || !v.isComputed || !seen.add(name)) return false;
+    if (FormulaEvaluator.readsClock(v.formula) || FormulaEvaluator.readsFrameClock(v.formula)) return true;
+    return (_reads[name] ?? const {}).any((r) => _readsClock(r, seen));
   }
 
   bool _isLocal(String name, Set<String> seen) {

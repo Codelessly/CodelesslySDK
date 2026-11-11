@@ -194,8 +194,31 @@ class NodeTree {
         for (final box in pending) {
           if (identical(_boxes[box.key], box)) box._apply();
         }
+        remeasure();
       });
     });
+  }
+
+  /// Lays every box out again from scratch, as after an edit: what fonts
+  /// changed (a family that loaded after the first layout) is measured
+  /// again. Paragraphs inside stretched children of a hugging row/column
+  /// sit behind relayout boundaries, and islands (chips, buttons) cache the
+  /// intrinsic sizes they measured, so every render object below each box
+  /// is marked, then the hugging layouts above it.
+  void remeasure() {
+    void markAll(RenderObject o) {
+      o.markNeedsLayout();
+      o.visitChildren(markAll);
+    }
+
+    for (final box in _boxes.values.toList()) {
+      if (!box.attached) continue;
+      // Applied again as after an edit: islands rebuild their widgets
+      // (a chip measures its label anew).
+      box._apply();
+      markAll(box);
+      box._relayoutHuggingAncestors();
+    }
   }
 
   final NodeSource source;
@@ -1650,7 +1673,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
           );
       if (pos.align case final double a) return at(FreeformAxisMode.align, alignment: a);
       final relative = pos.relative;
-      if (expands) return at(FreeformAxisMode.fill);
+      // A fill child pinned to both edges fills the space between its
+      // insets; pinned to one edge (or none) it fills the container.
+      if (expands && !(pos.isStretch && !isScrollAxis)) return at(FreeformAxisMode.fill);
       if (isScrollAxis) return at(FreeformAxisMode.start);
       if (pos.isStretch && !wraps) {
         final min = horizontal ? c.minWidth : c.minHeight;
