@@ -330,6 +330,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final overlap = count != null && separator == api.ListSeparator.space && spacing < 0 ? -spacing : 0.0;
 
   final view = b.obtain<RenderListItems>('list', RenderListItems.new)
+    ..shareFill = !n.prop(ListViewProps.scrollable)
     ..clipBehavior = _clip(n)
     ..paintReversed = false
     ..dropTarget(b.tree.animates ? b.tree : null, n.id);
