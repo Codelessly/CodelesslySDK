@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderBox, RenderObject, RenderViewportBase;
-import 'package:flutter/scheduler.dart' show SchedulerBinding;
+import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
@@ -141,7 +141,9 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       if (outcome.values case final Map<Object?, Object?> v when v.isNotEmpty) run.result = v;
       await run.run(outcome.confirmed ? a.actions : a.cancelActions);
     case DelayAction():
-      await run.wait(Duration(milliseconds: delayMilliseconds(a, run)));
+      // On the animation clock, as the motion it's usually timed against:
+      // slowed animations (timeDilation) slow the chain with them.
+      await run.wait(Duration(milliseconds: delayMilliseconds(a, run)) * timeDilation);
     case CloudDataAction():
       await _cloudData(a, run);
     case CloudBatchAction():

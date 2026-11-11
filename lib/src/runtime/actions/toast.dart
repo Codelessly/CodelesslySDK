@@ -253,10 +253,14 @@ class _ToastViewState extends State<_ToastView> {
   @override
   void initState() {
     super.initState();
+    // The time on screen counts from the toast's first frame: shown while
+    // a screen's first frame is still being built (a load action), it would
+    // otherwise run out before anyone saw it.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _visible = true);
+      if (!mounted) return;
+      setState(() => _visible = true);
+      if (widget.duration > 0 && !_closing) _timer = Timer(Duration(milliseconds: widget.duration), _close);
     });
-    if (widget.duration > 0) _timer = Timer(Duration(milliseconds: widget.duration), _close);
   }
 
   void _close() {
