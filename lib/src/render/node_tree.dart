@@ -136,6 +136,41 @@ class NodeTree {
     _interactions = interactions;
   }
 
+  // Font loading defers RenderParagraph's relayout to the next frame. Flutter
+  // forbids detaching it before that callback drains. Source edits normally
+  // apply synchronously; hold only those arriving during a font notification.
+  Listenable? _fontNotifications;
+  bool _fontsPending = false;
+  int _fontGeneration = 0;
+  bool _disposed = false;
+  final Set<NodeBox> _afterFonts = {};
+
+  void _listenForFonts() {
+    if (_fontNotifications != null || _disposed) return;
+    _fontNotifications = PaintingBinding.instance.systemFonts;
+    _fontNotifications!.addListener(_fontsChanged);
+  }
+
+  void _fontsChanged() {
+    if (_disposed) return;
+    _fontsPending = true;
+    final generation = ++_fontGeneration;
+    SchedulerBinding.instance.scheduleFrameCallback((_) {
+      // Our listener precedes paragraphs' listeners. Wait until all of their
+      // transient callbacks have run, including callbacks registered later
+      // in the font notification. A newer font event restarts this wait.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (_disposed || generation != _fontGeneration) return;
+        _fontsPending = false;
+        final pending = _afterFonts.toList();
+        _afterFonts.clear();
+        for (final box in pending) {
+          if (identical(_boxes[box.key], box)) box._apply();
+        }
+      });
+    });
+  }
+
   final NodeSource source;
   NodeTreeObserver? observer;
 
@@ -261,6 +296,7 @@ class NodeTree {
   int get length => _boxes.length;
 
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
+    _listenForFonts();
     final key = keyOf(id, instance);
     final existing = _boxes[key];
     if (existing != null) {
@@ -300,6 +336,9 @@ class NodeTree {
   }
 
   void dispose() {
+    _disposed = true;
+    _fontNotifications?.removeListener(_fontsChanged);
+    _afterFonts.clear();
     for (final b in _boxes.values.toList()) {
       b._unsubscribe();
     }
@@ -535,6 +574,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   Node? _applied;
 
   void _apply() {
+    if (tree._fontsPending) {
+      tree._afterFonts.add(this);
+      return;
+    }
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
     final bound = tree.resolveBound(id, instance: instance);
     final resolved = bound?.node;
