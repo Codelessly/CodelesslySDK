@@ -257,6 +257,30 @@ class NodeTree {
   final Set<NodeBox> _orphans = {};
   bool _sweepScheduled = false;
 
+  final Set<RenderObject> _retired = {};
+  bool _retirementScheduled = false;
+
+  void _retire(RenderObject object) {
+    if (object is IslandHost) return;
+    _retired.add(object);
+    if (_retirementScheduled) return;
+    _retirementScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _retirementScheduled = false;
+      _disposeRetired();
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
+  void _disposeRetired() {
+    final objects = _retired.toList();
+    _retired.clear();
+    for (final object in objects) {
+      assert(!object.attached);
+      object.dispose();
+    }
+  }
+
   NodeBox? boxOf(String id, {Object? instance}) => _boxes[keyOf(id, instance)];
   int get length => _boxes.length;
 
@@ -300,11 +324,36 @@ class NodeTree {
   }
 
   void dispose() {
-    for (final b in _boxes.values.toList()) {
-      b._unsubscribe();
+    final owned = <RenderObject>{};
+    void collect(RenderObject object) {
+      if (object is IslandHost || !owned.add(object)) return;
+      object.visitChildren(collect);
+    }
+
+    for (final box in _boxes.values.toList()) {
+      box._unsubscribe();
+      collect(box);
+      for (final object in box._objects.values) {
+        collect(object);
+      }
+    }
+    final hosts = islands.hosts.toList();
+    islands.dispose();
+    for (final host in hosts) {
+      NodeBox._detachFromAnyParent(host);
+    }
+    for (final box in _boxes.values.toList()) {
+      // A host may already have disposed its external render wrapper.
+      if (box.attached || owned.contains(box.parent)) box.detachFromParent();
     }
     _boxes.clear();
-    islands.dispose();
+    _orphans.clear();
+    _disposeRetired();
+    // There is no RenderObjectElement per node to dispose these objects.
+    // Island descendants belong to their elements and are released there.
+    for (final object in owned.toList().reversed) {
+      object.dispose();
+    }
   }
 }
 
@@ -552,6 +601,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   T _obtain<T extends RenderBox>(String key, T Function() create) {
     final existing = _objects[key];
     if (existing is T) return existing;
+    if (existing != null) tree._retire(existing);
     final made = create();
     _objects[key] = made;
     return made;
@@ -1494,7 +1544,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         if (next.contains(e.key)) ...[...e.value.$1, ...e.value.$2],
     };
     _stackExtras.removeWhere((stack, _) => !next.contains(stack));
-    _objects.removeWhere((k, v) => !keep.contains(v));
+    if (_container != null && !keep.contains(_container as RenderBox)) _releaseContainerChildren();
+    _objects.removeWhere((k, v) {
+      if (keep.contains(v)) return false;
+      tree._retire(v);
+      return true;
+    });
     _chain = next;
     _innerChains.removeWhere((stack, _) => !next.contains(stack));
   }
@@ -1588,9 +1643,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     tree.interactions?.released(this);
     for (final h in _islands.values) {
       h.release();
+      _detachFromAnyParent(h);
     }
     _islands.clear();
     if (identical(tree._boxes[key], this)) tree._boxes.remove(key);
+    for (final object in _objects.values) {
+      tree._retire(object);
+    }
+    _objects.clear();
+    tree._retire(this);
   }
 }
 
