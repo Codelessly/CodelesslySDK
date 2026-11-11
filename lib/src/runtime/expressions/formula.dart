@@ -3400,8 +3400,10 @@ class FormulaFunction {
         return scope(path);
       });
       // A body written as the lambda itself, `(a, b) => ...`, with the
-      // same parameters declared: call it rather than return it.
-      if (value is _Closure && value.params.length == parameters.length) {
+      // same parameters declared: call it rather than return it. A lambda
+      // over other names (`(m) => n * m` declared with `n`) is a function
+      // the call returns.
+      if (value is _Closure && _sameNames(value.params, parameters)) {
         return value.callWith(arguments);
       }
       return value;
@@ -3410,6 +3412,14 @@ class FormulaFunction {
     } finally {
       _depth--;
     }
+  }
+
+  static bool _sameNames(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   /// The paths [body] reads that aren't its parameters: the variables a
