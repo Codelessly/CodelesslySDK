@@ -101,9 +101,7 @@ class MemoryEngageHost implements EngageHost {
        _identity = identity,
        storage = storage ?? MemoryLocalStorage(),
        clock = clock ?? DateTime.utc(2026),
-       handlers = handlers ?? {} {
-    _identity = identity;
-  }
+       handlers = handlers ?? {};
 
   @override
   final String projectId;
@@ -128,7 +126,7 @@ class MemoryEngageHost implements EngageHost {
 
   final _identities = StreamController<EngageIdentity>.broadcast(sync: true);
   final _events = StreamController<EngageEvent>.broadcast(sync: true);
-  late EngageIdentity _identity;
+  EngageIdentity _identity;
 
   @override
   EngageIdentity get identity => _identity;
