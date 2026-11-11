@@ -256,8 +256,14 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
 
   @override
   MouseCursor get cursor => MouseCursor.defer;
+  /// A pointer that comes to rest over the track without moving (content
+  /// laid out under a parked mouse) arrives as an enter, not a hover.
   @override
-  PointerEnterEventListener? get onEnter => null;
+  PointerEnterEventListener? get onEnter => (e) {
+        if (attached && hasSize) {
+          _hoverThumb = showsScrollbar && e.kind == PointerDeviceKind.mouse && _overTrack(globalToLocal(e.position));
+        }
+      };
   @override
   PointerExitEventListener? get onExit => (_) => _hoverThumb = false;
   @override
