@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:http/http.dart' as http;
 
+import '../render/convert.dart' show FontDemand;
+
 /// Gets the file of a font.
 abstract interface class FontFetcher {
   /// The font file's bytes (TTF/OTF), or null when it can't be had.
@@ -104,7 +106,15 @@ class CodelesslyFonts {
   CodelesslyFonts({
     this.fetcher = const NoFontFetcher(),
     Future<void> Function(String family, List<Uint8List> files)? register,
-  }) : _register = register ?? _registerWithEngine;
+  }) : _register = register ?? _registerWithEngine {
+    // Families only bindings reach are fetched when first drawn (Google
+    // Fonts by name; a project's uploaded fonts are in the publish).
+    if (fetcher is! NoFontFetcher) {
+      FontDemand.handler ??= (family, weight, italic) => load([
+            PublishFont(id: 'demand:$family/$weight/$italic', family: family, weight: weight, italic: italic),
+          ]);
+    }
+  }
 
   final FontFetcher fetcher;
   final Future<void> Function(String family, List<Uint8List> files) _register;
