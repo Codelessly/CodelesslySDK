@@ -2,6 +2,7 @@
 // `path` widget and a box's path), icons, and the players' islands.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart';
+import 'package:codelessly_sdk/src/render/paint/material_icon_versions.dart';
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
 import 'package:codelessly_sdk/src/widgets/media_players.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,18 @@ void main() {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'CUPERTINO_ICON', 'codepoint': 61708}),
         'https://icons.codelessly.com/cupertino/1.0.9/f10c.svg');
     expect(IconSources.urlOf({'source': 'image', 'image': 'https://x.com/a.png'}), 'https://x.com/a.png');
+  });
+
+  test('a Material icon saved without its version falls back to its latest SVG', () {
+    const week = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'calendar_view_week', 'style': 'rounded'};
+    // The first try stays v1 (what every saved icon has drawn from)...
+    expect(IconSources.urlOf(week), 'https://fonts.gstatic.com/s/i/materialiconsround/calendar_view_week/v1/24px.svg');
+    // ...and when that fails, the version the icon has today.
+    expect(IconSources.fallbackUrlOf(week),
+        'https://fonts.gstatic.com/s/i/materialiconsround/calendar_view_week/v${materialIconVersions['calendar_view_week']}/24px.svg');
+    expect(IconSources.fallbackUrlOf({...week, 'version': 6}), isNull);
+    expect(IconSources.fallbackUrlOf({'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star'}), isNull);
+    expect(IconSources.fallbackUrlOf({'source': 'image', 'image': 'https://x.com/a.png'}), isNull);
   });
 
   test('SVG paths parse, trim and dash', () {
