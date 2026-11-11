@@ -21,6 +21,7 @@ import 'play.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragAndDropLayers;
 import '../runtime/gestures/drag_motion.dart' show RenderDragMotion, dragMotionLayers;
 import 'convert.dart';
+import 'count_up.dart';
 import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
 import 'layout/freeform.dart';
@@ -1252,9 +1253,29 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..alignment = Alignment(x, y)
       ..widthFactor = hugsWidth ? 1 : null
       ..heightFactor = vFit == SizeFit.fill ? null : 1);
-    final span = _textSpan(n);
-    final paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: TextDirection.ltr))
-      ..text = span
+    final countUp = n.prop(TextProps.countUp);
+    final RenderParagraph paragraph;
+    if (countUp) {
+      paragraph = _obtain<RenderCountUpParagraph>('paragraph', RenderCountUpParagraph.new);
+    } else {
+      final span = _textSpan(n);
+      paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: TextDirection.ltr))
+        ..text = span;
+    }
+    if (paragraph is RenderCountUpParagraph) {
+      // Counts in a running app; a design canvas (or TickerMode off) and a
+      // text without countUp show the final text.
+      paragraph.count(
+        n.prop(TextProps.text),
+        (text) => _textSpan(n.withProp(TextProps.text, text)),
+        animates: countUp && tree.animates && tree.runtimeVisible,
+        durationMs: n.prop(TextProps.countUpDuration),
+        curve: n.prop(TextProps.countUpCurve),
+        onShow: n.prop(TextProps.countUpOnShow),
+        visible: () => tree.runtimeVisible,
+      );
+    }
+    paragraph
       ..textAlign = flutterTextAlign(textAlign)
       ..maxLines = n.prop(TextProps.maxLines)
       ..overflow = textOverflow(n.prop(TextProps.overflow));
