@@ -23,7 +23,10 @@ abstract final class IconSources {
   static String? urlOf(Json icon) {
     if (readString(icon['source']) == 'image') return readString(icon['image']);
     var name = (readString(icon['name']) ?? '').toLowerCase();
-    switch (readString(icon['type'])) {
+    // A feedback icon written `{"source": "icon", "name": "check_rounded"}`
+    // (as a toast's default is) names a Material icon; it drew nothing.
+    final type = readString(icon['type']) ?? (readString(icon['source']) == 'icon' && name.isNotEmpty ? 'MATERIAL_ICON' : null);
+    switch (type) {
       case 'MATERIAL_ICON':
         if (name.isEmpty) return null;
         // Flutter's names carry the style (`download_rounded`, `Icons.
@@ -147,6 +150,11 @@ class RenderIconGlyph extends RenderBox with ImageClient {
 
   @override
   bool get sizedByParent => true;
+
+  /// An icon is solid to the pointer, as Flutter's `Icon` is: a drag handle
+  /// or a button that is only an icon takes the press, not what lies under.
+  @override
+  bool hitTestSelf(Offset position) => true;
 
   /// The icon box: the size its fit box gives it, nothing of its
   /// own (so a row out of room can squeeze it).

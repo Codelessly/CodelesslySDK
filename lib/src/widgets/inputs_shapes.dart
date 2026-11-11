@@ -392,7 +392,11 @@ class SignaturePainter extends CustomPainter {
     this.placeholderBelowLine = false,
     this.placeholderFontWeight = 600,
     this.placeholderLetterSpacing,
+    this.smooth = true,
   });
+
+  /// Curves through the points; false: straight segments between them.
+  final bool smooth;
 
   /// The × at the line's start (with [showMark]: either off hides it).
   final bool signLineMark;
@@ -512,8 +516,17 @@ class SignaturePainter extends CustomPainter {
         canvas.drawCircle(stroke.first, inkWidth / 2, Paint()..color = inkColor);
         continue;
       }
-      canvas.drawPath(smoothPath(stroke), ink);
+      canvas.drawPath(smooth ? smoothPath(stroke) : linePath(stroke), ink);
     }
+  }
+
+  /// [points] joined by straight segments.
+  static Path linePath(List<Offset> points) {
+    final path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (final p in points.skip(1)) {
+      path.lineTo(p.dx, p.dy);
+    }
+    return path;
   }
 
   static Path smoothPath(List<Offset> points) {

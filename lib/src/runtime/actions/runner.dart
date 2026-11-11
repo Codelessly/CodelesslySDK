@@ -85,6 +85,10 @@ class ActionRun {
 
   final ActionCancellation _stopped;
 
+  /// The repeat (a list item) of [node] whose trigger fired, if any: what a
+  /// focus or edit action prefers among the repeats of the node it names.
+  Object? instance;
+
   /// Stops only this invocation and nested actions, preserving later retries.
   void stop() => _stopped.cancel();
 
@@ -132,7 +136,8 @@ class ActionRun {
   /// `${result}` starts as [result]; [names] are more names its actions
   /// read (a for-each turn's `loop`).
   ActionRun nested(Object? result, {Json names = const {}}) =>
-      ActionRun._(context, host, ValuesScope({...names, 'result': result}, scope), cancellation, node, value, _stopped);
+      ActionRun._(context, host, ValuesScope({...names, 'result': result}, scope), cancellation, node, value, _stopped)
+        ..instance = instance;
 
   /// [text] with its `${...}` evaluated (text).
   String text(String text) => expressions.interpolate(text, scope);
@@ -208,13 +213,13 @@ class CodelesslyActions implements ActionRunner {
       final timer = Timer(Duration(milliseconds: debounce), () {
         _debounced[owner]?.remove(key);
         if (cancellation?.isCanceled ?? false) return done.complete();
-        done.complete(_run(node, reactions, context, event, cancellation));
+        done.complete(_run(node, reactions, context, event, cancellation, instance));
       });
       (_debounced[owner] ??= {})[key] = (timer, done);
       cancellation?.onCancel(timer.cancel);
       return done.future;
     }
-    return _run(node, reactions, context, event, cancellation);
+    return _run(node, reactions, context, event, cancellation, instance);
   }
 
 
@@ -274,7 +279,8 @@ class CodelesslyActions implements ActionRunner {
 
   static final Expando<Map<Object, (Timer, Completer<void>)>> _debounced = Expando('debounce');
 
-  Future<void> _run(Node node, List<Reaction> reactions, ActionContext context, Json event, ActionCancellation? cancellation) async {
+  Future<void> _run(Node node, List<Reaction> reactions, ActionContext context, Json event, ActionCancellation? cancellation,
+      [Object? instance]) async {
     final host = context is ActionHost ? context : _BareHost(context);
     final result = event.containsKey('result') ? event['result'] : (event.containsKey('value') ? event['value'] : (event.isEmpty ? null : event));
     final run = ActionRun._(
@@ -291,7 +297,7 @@ class CodelesslyActions implements ActionRunner {
       cancellation ?? ActionCancellation(),
       node,
       event['value'],
-    );
+    )..instance = instance;
     // A clock can share its node with other clocks: gate each reaction,
     // rather than the whole trigger chain, against the current scope.
     bool clockRuns(Reaction reaction) {

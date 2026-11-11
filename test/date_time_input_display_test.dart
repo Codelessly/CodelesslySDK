@@ -89,6 +89,10 @@ void _master() {
     await tester.pumpAndSettle();
     expect(find.text('Dec 1, 2026'), findsOneWidget);
     expect(find.byType(InputDecorator), findsNothing);
+    // The value sits in the middle of the 34 px box.
+    final box = tester.getRect(find.byType(NodeView).first);
+    final text = tester.getRect(find.text('Dec 1, 2026'));
+    expect(text.center.dy - box.top, closeTo(17, 1.5));
     await _field(tester, {'mode': 'time', 'value': '10:30', 'format': 'h:mm a', 'bare': true});
     await tester.pumpAndSettle();
     expect(find.text('10:30 AM'), findsOneWidget);

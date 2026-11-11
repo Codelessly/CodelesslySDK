@@ -217,4 +217,30 @@ void main() {
     visit(tester.renderObject(find.byType(NodeView)));
     expect(shown, containsAll(['Col 0', 'R0', 'r0c0', 'r5c0']));
   });
+
+  testWidgets('at rest a table\'s cells follow its bound data when it changes', (tester) async {
+    final small = v('rows', [
+      for (var r = 0; r < 3; r++) {for (var c = 0; c < 3; c++) 'c$c': 'r${r}c$c'},
+    ], VariableType.list);
+    final s = await show(tester, table(), root: 'table', variables: [small], interactive: false);
+    Set<String> shown() {
+      final out = <String>{};
+      void visit(RenderObject o) {
+        if (o is RenderParagraph && o.attached) out.add(o.text.toPlainText());
+        o.visitChildren(visit);
+      }
+
+      visit(tester.renderObject(find.byType(NodeView)));
+      return out;
+    }
+
+    expect(shown(), contains('r0c0'));
+    // New rows (a capture's values, a variable edit): the cells show them.
+    s.scope.set('rows', [
+      for (var r = 0; r < 3; r++) {for (var c = 0; c < 3; c++) 'c$c': 'new${r}c$c'},
+    ]);
+    await tester.pumpAndSettle();
+    expect(shown(), containsAll(['new0c0', 'new2c2']));
+    expect(shown(), isNot(contains('r0c0')));
+  });
 }
