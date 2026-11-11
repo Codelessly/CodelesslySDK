@@ -789,7 +789,9 @@ class PlotChartPainter extends NodePainter {
     final span = xMax - xMin;
     // A gutter on the left holds the y lines' axis labels.
     final gutter = math.max(0.0, p(PlotChartProps.yAxisWidth));
-    double x(double value) => gutter + (span == 0 ? 0 : (value - xMin) / span * (size.width - gutter));
+    final plotPadding = p(PlotChartProps.plotPadding);
+    final plotRight = size.width - (plotPadding?.right ?? 0);
+    double x(double value) => gutter + (span == 0 ? 0 : (value - xMin) / span * (plotRight - gutter));
     final points = this.points;
     final series = p(PlotChartProps.series);
     var low = p(PlotChartProps.yMin) ?? _extent(points, series, math.min) ?? 0;
@@ -799,7 +801,8 @@ class PlotChartPainter extends NodePainter {
       high += 1;
     }
     final inset = p(PlotChartProps.plotInset);
-    double y(double value) => inset + (1 - (value - low) / (high - low)) * (chartHeight - inset * 2);
+    final plotTop = plotPadding?.top ?? inset, plotBottom = chartHeight - (plotPadding?.bottom ?? inset);
+    double y(double value) => plotTop + (1 - (value - low) / (high - low)) * (plotBottom - plotTop);
     final labelStyle = _style(p(PlotChartProps.labelStyle));
     final zeroAnchored = p(PlotChartProps.gridAnchor) == PlotChartGridAnchor.zero;
 
@@ -891,11 +894,13 @@ class PlotChartPainter extends NodePainter {
     }
 
     for (final range in p(PlotChartProps.ranges)) {
-      canvas.drawRect(Rect.fromLTRB(x(range.from), 0, x(range.to), chartHeight), Paint()..color = range.color.flutter);
+      // A set plot padding bounds the range to the plot; otherwise it fills the chart.
+      final rangeTop = plotPadding == null ? 0.0 : plotTop, rangeBottom = plotPadding == null ? chartHeight : plotBottom;
+      canvas.drawRect(Rect.fromLTRB(x(range.from), rangeTop, x(range.to), rangeBottom), Paint()..color = range.color.flutter);
       if (range.label.isNotEmpty) {
         final text = _text(range.label,
             _style(p(PlotChartProps.markerLabelStyle), color: range.labelColor?.flutter ?? labelStyle.color, weight: 800));
-        text.paint(canvas, Offset(x(range.from) + 5, 4));
+        text.paint(canvas, Offset(x(range.from) + 5, rangeTop + 4));
         text.dispose();
       }
     }
@@ -908,11 +913,11 @@ class PlotChartPainter extends NodePainter {
         ..color = line.color.flutter
         ..strokeWidth = line.width;
       if (line.dashed) {
-        for (double dx = gutter; dx < size.width; dx += 10) {
-          canvas.drawLine(Offset(dx, ly), Offset(math.min(size.width, dx + 6), ly), paint);
+        for (double dx = gutter; dx < plotRight; dx += 10) {
+          canvas.drawLine(Offset(dx, ly), Offset(math.min(plotRight, dx + 6), ly), paint);
         }
       } else {
-        canvas.drawLine(Offset(gutter, ly), Offset(size.width, ly), paint);
+        canvas.drawLine(Offset(gutter, ly), Offset(plotRight, ly), paint);
       }
       if (line.axisLabel.isNotEmpty && gutter > 0) {
         final text = _text(line.axisLabel, labelStyle);

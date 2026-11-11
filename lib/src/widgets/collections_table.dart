@@ -100,8 +100,10 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
         });
 
     // A table needs a bounded box; where it gets none (in a scroll view), it
-    // takes its design size.
-    return LayoutBuilder(
+    // takes its design size. Its padding (a bordered frame's inset) holds
+    // the cells in from the edge, so they don't paint over the border.
+    final padding = n.layout.padding.flutter;
+    final Widget table = LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.hasBoundedWidth ? constraints.maxWidth : n.layout.width.value;
         final headerWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0.0;
@@ -217,6 +219,7 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
       );
       },
     );
+    return padding == EdgeInsets.zero ? table : Padding(padding: padding, child: table);
   }
 }
 

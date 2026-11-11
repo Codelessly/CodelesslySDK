@@ -163,6 +163,28 @@ void main() {
     expect(tree.boxOf('u')!.rectIn(view)!, rectMoreOrLessEquals(const Rect.fromLTWH(150, 100, 20, 20), epsilon: 0.01));
   });
 
+  testWidgets('the Lineworks train: length pacing gives even speed over straight and diagonal track', (tester) async {
+    // A route of 100 px straight then 100 px on the diagonal (60, 80): with
+    // the train's pacing (length) a quarter of the progress is 50 px of track
+    // on either part.
+    const route = 'M0 0 L100 0 L160 80';
+    Future<Offset> at(double progress) async {
+      final (tree, view, _) = await show(tester, {
+        't': box({'motion': {'path': route, 'pathPacing': 'length', 'pathProgress': progress}}, x: 100, y: 100),
+      });
+      final c = tree.boxOf('t')!.rectIn(view)!.center;
+      await tester.pumpWidget(const SizedBox());
+      return c - const Offset(110, 110);
+    }
+
+    expect(await at(0.25), offsetMoreOrLessEquals(const Offset(50, 0), epsilon: 0.5));
+    expect(await at(0.5), offsetMoreOrLessEquals(const Offset(100, 0), epsilon: 0.5));
+    expect(await at(0.75), offsetMoreOrLessEquals(const Offset(130, 40), epsilon: 0.5));
+    expect(await at(1), offsetMoreOrLessEquals(const Offset(160, 80), epsilon: 0.5));
+
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('upright and mirrored: heading left, the node faces left (its front leads)', (tester) async {
     // A 40×20 carriage with its nose (n, 10×10) at the right end.
     Map<String, Map<String, Object?>> carriage(String path, {required bool mirror}) => {

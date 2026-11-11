@@ -72,14 +72,13 @@ class RenderNodePaint extends RenderBox with ImageClient {
       path.addRRect(rrect.deflate(inset));
     } else {
       final r = rect.deflate(inset);
-      final lines = switch (decoration.strokeSides) {
-        api.StrokeSides.left => [(r.topLeft, r.bottomLeft)],
-        api.StrokeSides.top => [(r.topLeft, r.topRight)],
-        api.StrokeSides.right => [(r.topRight, r.bottomRight)],
-        api.StrokeSides.topBottom => [(r.topLeft, r.topRight), (r.bottomLeft, r.bottomRight)],
-        api.StrokeSides.leftRight => [(r.topLeft, r.bottomLeft), (r.topRight, r.bottomRight)],
-        _ => [(r.bottomLeft, r.bottomRight)],
-      };
+      final sides = decoration.strokeSides.sides;
+      final lines = [
+        if (sides.contains('top')) (r.topLeft, r.topRight),
+        if (sides.contains('right')) (r.topRight, r.bottomRight),
+        if (sides.contains('bottom')) (r.bottomLeft, r.bottomRight),
+        if (sides.contains('left')) (r.topLeft, r.bottomLeft),
+      ];
       for (final (a, b) in lines) {
         path
           ..moveTo(a.dx, a.dy)
@@ -135,9 +134,10 @@ class RenderNodePaint extends RenderBox with ImageClient {
     paint.shader = switch (p.type) {
       api.PaintType.linear => ui.Gradient.linear(at(0, 0.5), at(1, 0.5), colors, stops, tile),
       // A radius given as a share of the shortest side (Flutter's
-      // RadialGradient), else the transform's: to the box's edge.
+      // RadialGradient), centered where the transform puts the center (the
+      // box's without one); else the transform's: to the box's edge.
       api.PaintType.radial when p.radius != null =>
-        ui.Gradient.radial(rect.center, p.radius! * rect.shortestSide, colors, stops, tile),
+        ui.Gradient.radial(at(0.5, 0.5), p.radius! * rect.shortestSide, colors, stops, tile),
       api.PaintType.radial || api.PaintType.diamond =>
         ui.Gradient.radial(at(0.5, 0.5), (at(1, 0.5) - at(0.5, 0.5)).distance, colors, stops, tile),
       _ => ui.Gradient.sweep(at(0.5, 0.5), colors, stops, tile, 0, math.pi * 2),

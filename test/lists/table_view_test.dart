@@ -130,6 +130,20 @@ void main() {
     expect(at['r0c1']!.dx - at['r0c0']!.dx, 100);
   });
 
+  testWidgets('a table with a padding (a bordered frame) lays its cells inside it', (tester) async {
+    final t = table();
+    final node = Map<String, Object?>.from(t['table']!);
+    node['layout'] = {'width': 600, 'height': 400, 'padding': [1, 1, 1, 1]};
+    node['decoration'] = {'radius': 14, 'strokes': [{'color': '#FFD3CDC0'}], 'strokeWidth': 1};
+    t['table'] = node;
+    final screen = await show(tester, t, root: 'table', variables: [rows]);
+    await tester.pumpAndSettle();
+    final origin = screen.tree.boxOf('table')!.localToGlobal(Offset.zero);
+    final view = tester.getRect(find.byType(TableView));
+    expect(view.topLeft - origin, const Offset(1, 1));
+    expect(view.size, const Size(598, 398));
+  });
+
   testWidgets('a design canvas keeps the table at rest, showing its bound rows', (tester) async {
     await show(tester, table(), root: 'table', variables: [rows], interactive: false);
     expect(find.byType(TableView), findsNothing);
