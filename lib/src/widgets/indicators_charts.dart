@@ -1335,6 +1335,15 @@ class LineChartPainter extends NodePainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Values outside the domain (yMin/yMax set) would draw beyond the box,
+    // over whatever sits below: the chart stays in its box.
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+    _paintChart(canvas, size);
+    canvas.restore();
+  }
+
+  void _paintChart(Canvas canvas, Size size) {
     final pad = p(LineChartProps.plotPadding);
     final plot = Rect.fromLTRB(
       pad.left,
