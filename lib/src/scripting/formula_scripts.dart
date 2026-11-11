@@ -123,6 +123,20 @@ class ScriptsScope extends NamedScope implements FormulaScripts, FormulaReadStat
     return earlier != null && earlier.ok ? earlier.value : null;
   }
 
+  /// Completes once no script call a formula started is still running (calls
+  /// started meanwhile, by what re-applied, included), or after [timeout]:
+  /// what a capture waits for before it draws.
+  Future<void> settled({Duration timeout = const Duration(seconds: 10)}) async {
+    final end = DateTime.now().add(timeout);
+    while (_pending.isNotEmpty && !_disposed) {
+      final left = end.difference(DateTime.now());
+      if (left <= Duration.zero) return;
+      await Future.wait(_pending.values.toList()).timeout(left, onTimeout: () => const []);
+      // Readers re-apply on the results and may start more calls.
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
   /// Resolves the script calls an action reads before it writes their value.
   /// UI formulas remain synchronous and repaint when their worker completes.
   Future<T> resolve<T>(T Function() evaluate) async {
