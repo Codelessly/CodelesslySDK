@@ -22,6 +22,7 @@ import '../expressions/engine.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
 import 'handlers.dart';
+import 'key_matching.dart';
 import 'ui.dart';
 
 /// Cancels the chains it's given to: [cancel] stops them between actions.
@@ -157,7 +158,7 @@ class CodelesslyActions implements ActionRunner {
       {Json event = const {}, ActionCancellation? cancellation, Object? instance}) {
     final reactions = [
       for (final r in node.actions)
-        if (r.trigger.type.name == trigger) r,
+        if (_matchesReaction(r, trigger, context, event)) r,
     ];
     if (reactions.isEmpty) return Future.value();
     final debounce = reactions.fold<int>(0, (m, r) => r.trigger.debounceMs > m ? r.trigger.debounceMs : m);
@@ -178,6 +179,35 @@ class CodelesslyActions implements ActionRunner {
       return done.future;
     }
     return _run(node, reactions, context, event, cancellation);
+  }
+
+  bool _matchesReaction(
+    Reaction reaction,
+    String trigger,
+    ActionContext context,
+    Json event,
+  ) {
+    final t = reaction.trigger;
+    if (t.type.name != trigger) return false;
+    if (t.type != TriggerType.keyDown && t.type != TriggerType.keyUp)
+      return true;
+    final value = event['result'] is Map ? event['result'] as Map : event;
+    final combo = t.keyCombo;
+    if (!runtimeKeyMatches(combo,
+          '${value['key'] ?? ''}',
+          meta: value['meta'] == true,
+          shift: value['shift'] == true,
+          alt: value['alt'] == true,
+        ))
+      return false;
+    final when = t.when.trim();
+    if (when.isEmpty) return true;
+    final expression = when.startsWith(r'${') ? when : '\${= $when}';
+    return context.expressions.evaluate(
+          expression,
+          ValuesScope({'result': value}, context.scope),
+        ) ==
+        true;
   }
 
   static final Expando<Map<Object, (Timer, Completer<void>)>> _debounced = Expando('debounce');
