@@ -185,6 +185,22 @@ void main() {
       expect(CodelesslyAppIdentity.layoutIdAt(model, '/settings'), 'settings');
       expect(CodelesslyAppIdentity.layoutIdAt(model, '/nowhere'), 'lost');
     });
+
+    test('an app opens a screen by its id or name before its catch-all', () {
+      final model = tidepool(withNotFound: true);
+      // 'settings' has no path: the catch-all used to take it.
+      expect(CodelesslyWidget.resolveScreen(model, '/settings')?.$1, 'settings');
+      final withQuery = CodelesslyWidget.resolveScreen(model, 'settings?tab=b')!;
+      expect(withQuery.$1, 'settings');
+      expect(withQuery.$2, {'tab': 'b'});
+      // A name, loosely: 'new-creature' is the screen named "newCreature".
+      expect(CodelesslyWidget.resolveScreen(model, 'new-creature')?.$1, 'newCreature');
+      // What names no screen still lands on the catch-all, with the path.
+      expect(CodelesslyWidget.resolveScreen(model, '/nowhere')?.$2, <String, Object?>{'path': 'nowhere'});
+      expect(CodelesslyWidget.resolveScreen(model, '/settings/deep')?.$1, 'lost');
+      // Paths still win: 'guide/new' is newCreature's own path.
+      expect(CodelesslyWidget.resolveScreen(model, 'guide/bat-star')?.$1, 'creature');
+    });
   });
 
   group('NavigationRequest', () {

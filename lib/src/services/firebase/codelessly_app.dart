@@ -218,7 +218,7 @@ Services codelesslyCloudServices({
     storage: local,
     paywalls: managed?.paywalls,
     purchases: managed?.purchases,
-    auth: auth == null ? null : FirebaseAuthService(auth),
+    auth: auth == null ? null : FirebaseAuthService(auth, storage: local),
     cloud: BackendCloudDatabase(
       backend: FirestoreDocumentBackend(firestore),
       root: root,

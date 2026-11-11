@@ -6,6 +6,7 @@ import 'package:codelessly_api/codelessly_api.dart' show Node, Predicate, Compar
 import '../contracts.dart';
 import 'bindings.dart';
 import 'formula.dart';
+import 'formula_clock.dart';
 import 'paths.dart';
 import 'scopes.dart';
 
@@ -151,12 +152,9 @@ class Expressions implements ExpressionEngine {
           final Map m => m.isEmpty,
           _ => false,
         },
-      ConditionOp.isNotEmpty => switch (left) {
-          final List l => l.isNotEmpty,
-          final String s => s.isNotEmpty,
-          final Map m => m.isNotEmpty,
-          _ => false,
-        },
+      // A number or a boolean (an operand like `${route.offset}` = "900" is
+      // read as 900) has a value: not empty.
+      ConditionOp.isNotEmpty => !compare(left, ConditionOp.isEmpty, right),
       ConditionOp.contains => switch (left) {
           final List l => l.contains(right),
           final String s when right != null => s.contains(right.toString()),
@@ -195,6 +193,20 @@ class Expressions implements ExpressionEngine {
   static bool readsClock(String expression) =>
       expression.contains(r'${=') &&
       (FormulaEvaluator.textReadsClock(expression) || FormulaEvaluator.textReadsFrameClock(expression));
+
+  /// How often [expression]'s formulas change as time passes (null: they
+  /// don't read the clock). See [ClockTick].
+  static ClockTick? clockTick(String expression) =>
+      expression.contains(r'${=') ? FormulaEvaluator.textClockTick(expression) : null;
+
+  /// The finest [clockTick] of [p]'s operands.
+  static ClockTick? clockTickOfPredicate(Predicate p) {
+    ClockTick? out;
+    for (final o in p.operands) {
+      if (!o.raw) out = clockTick(o.text)?.finer(out) ?? out;
+    }
+    return out;
+  }
 
   /// The paths [p]'s operands read.
   static Set<String> readsOfPredicate(Predicate p) => {

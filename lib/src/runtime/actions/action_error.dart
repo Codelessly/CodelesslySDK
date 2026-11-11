@@ -11,7 +11,29 @@ class ActionFailed implements Exception {
   String toString() => 'Action $action failed: $error';
 }
 
-/// Stable, JSON-only event for the canvas's actionError reaction.
+/// A failure with a stable [code] (`file-too-large`) that layouts branch on
+/// as `${result.error.code}`, and a readable [message].
+class CodedFailure implements Exception {
+  const CodedFailure(this.code, this.message);
+  final String code;
+  final String message;
+  @override
+  String toString() => message;
+}
+
+/// The stable code of [error]: an [AuthFailure]'s (`wrong-password`), a
+/// Firebase exception's (`permission-denied`), a [CodedFailure]'s; else ''.
+String errorCodeOf(Object error) {
+  try {
+    final code = (error as dynamic).code;
+    return code is String ? code : (code == null ? '' : '$code');
+  } catch (_) {
+    return '';
+  }
+}
+
+/// Stable, JSON-only event for the canvas's actionError reaction:
+/// `{error: {type, code, message, action, nodeId}}`.
 Json actionErrorEvent(Object error, {String? action}) {
   String? nodeId;
   while (error is ActionFailed) {
@@ -21,6 +43,7 @@ Json actionErrorEvent(Object error, {String? action}) {
   }
   return Map.unmodifiable({'error': Map<String, Object?>.unmodifiable({
     'type': error.runtimeType.toString(),
+    'code': errorCodeOf(error),
     'message': '$error',
     'action': action ?? '',
     'nodeId': nodeId ?? '',

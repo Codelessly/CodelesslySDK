@@ -233,6 +233,9 @@ mixin ImageClient on RenderObject {
         return e == null || (!e.ready && !e.failed);
       });
 
+  /// Whether [url] couldn't be loaded.
+  bool imageFailed(String? url) => url != null && _images[url]?.failed == true;
+
   /// The loaded image for [url], or null while it loads (or can't).
   LoadedImage? imageFor(String? url) {
     final e = url == null ? null : _images[url];

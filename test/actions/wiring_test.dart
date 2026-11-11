@@ -101,6 +101,25 @@ String textOf(NodeTree tree, String id) {
 }
 
 void main() {
+  testWidgets('a button with press feedback (a pressed state) still clicks', (tester) async {
+    final nodes = counter(actions: [reaction('click', [add('count')])]);
+    nodes['button'] = {
+      ...nodes['button']!,
+      'states': {
+        'pressed': {'button': {'scale': 0.97, 'opacity': 0.82}},
+        'hovered': {'button': {'scale': 1.012}},
+      },
+      'transitions': {'style': {'duration': 180, 'curve': 'easeOut'}},
+    };
+    final s = await show(tester, nodes, variables: [v('count', 0, VariableType.integer)]);
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    expect(s['count'], 1, reason: 'the pressed state re-applies the box mid-tap; the tap must survive');
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    expect(s['count'], 2);
+  });
+
   for (final expression in ['period', r'${period}']) {
     testWidgets('clock interval reads $expression and clamps tiny periods', (tester) async {
       final s=await show(tester,counter(actions:[reaction('clock',[add('count')],extra:{'every':expression})]),variables:[v('count',0,VariableType.integer),v('period',80,VariableType.decimal)]);
@@ -183,6 +202,50 @@ void main() {
     await tester.pump();
     expect(engine.notes, isEmpty);
     expect(s['cancelled'], isTrue);
+  });
+
+  testWidgets('a key plays an instrument voice by MIDI note; a duration releases it', (tester) async {
+    final engine = SilentSoundEngine();
+    final s = await show(tester, counter(actions: [
+      reaction('pointerDown', [
+        {'type': 'playSound', 'operation': 'start', 'voiceId': 'k60', 'note': r'${midi}', 'waveform': 'felt'},
+        {'type': 'playSound', 'operation': 'start', 'voiceId': 'tick', 'frequency': '1760', 'duration': '50'},
+      ]),
+      reaction('pointerUp', [
+        {'type': 'playSound', 'operation': 'stop', 'voiceId': 'k60'},
+      ]),
+    ]), services: Services(sound: SoundService(engine: engine)), variables: [
+      v('count', 0, VariableType.integer), v('midi', 60, VariableType.integer),
+    ]);
+    final g = await tester.startGesture(s.center('button'));
+    await tester.pump();
+    expect(engine.notes['k60']!.$1, closeTo(261.63, 0.01));
+    expect(engine.waveforms['k60'], 'felt');
+    expect(engine.notes.containsKey('tick'), isTrue);
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(engine.notes.containsKey('tick'), isFalse, reason: 'released after its duration');
+    expect(engine.notes.containsKey('k60'), isTrue, reason: 'no duration: held until stop');
+    await g.up();
+    await tester.pump();
+    expect(engine.notes, isEmpty);
+    expect(midiToHz(69), 440);
+  });
+
+  testWidgets('a restarted voice is not released by an earlier start\'s duration', (tester) async {
+    final engine = SilentSoundEngine();
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'playSound', 'operation': 'start', 'voiceId': 'g0', 'note': r'${= 60 + count}', 'waveform': 'pluck', 'duration': r'${= count == 0 ? 100 : 400}'},
+        add('count'),
+      ]),
+    ]), services: Services(sound: SoundService(engine: engine)), variables: [v('count', 0, VariableType.integer)]);
+    await tester.tapAt(s.center('button'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(s.center('button'));
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(engine.waveforms['g0'], 'pluck', reason: 'the second start outlives the first one\'s 100 ms');
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(engine.notes, isEmpty);
   });
 
   testWidgets('pointer down and up expose local and global coordinates', (tester) async {
@@ -282,6 +345,33 @@ void main() {
     expect(s['count'], 111);
   });
 
+  testWidgets('a double tap reports where it landed; a drag its step and position', (tester) async {
+    Json set(String name, String value) => {'type': 'setVariable', 'variable': name, 'value': value};
+    final s = await show(tester, counter(actions: [
+      reaction('doubleTap', [set('tapX', r'${result.x}'), set('tapY', r'${result.y}')]),
+      reaction('drag', [set('stepX', r'${result.deltaX}'), set('atX', r'${result.x}')]),
+    ]), variables: [
+      v('tapX', 0, VariableType.decimal), v('tapY', 0, VariableType.decimal),
+      v('stepX', 0, VariableType.decimal), v('atX', 0, VariableType.decimal),
+    ]);
+    final box = s.tree.boxOf('button')!;
+    final topLeft = box.localToGlobal(Offset.zero);
+    await tester.tapAt(topLeft + const Offset(7, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(topLeft + const Offset(7, 5));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect((s['tapX'], s['tapY']), (7.0, 5.0));
+    final g = await tester.startGesture(topLeft + const Offset(4, 4));
+    for (var i = 0; i < 6; i++) {
+      await g.moveBy(const Offset(10, 0));
+      await tester.pump();
+    }
+    await g.up();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(s['stepX'], 10.0);
+    expect(s['atX'], 64.0);
+  });
+
   testWidgets('hover: the cursor, and enter and exit', (tester) async {
     final s = await show(tester, counter(actions: [
       reaction('click', []),
@@ -377,6 +467,32 @@ void main() {
     expect(ui.log, ['navigate push details {n: 3}', 'modal sheet bottomSheet']);
   });
 
+  testWidgets('a popover opens by the node that opened it, above it, and answers its result', (tester) async {
+    late BuildContext appContext;
+    late NavigatorActionUi ui;
+    ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 40),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'picker', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'aboveStart', 'anchorGap': 8},
+        {'type': 'setVariable', 'variable': 'count', 'value': r'${result.n}'},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    final box = s.tree.boxOf('button')!;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // By the button, left edges aligned, 8 px off: no room above it at
+    // the top of the screen, so below.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('picker'))), Offset(rect.left, rect.bottom + 8));
+    Navigator.of(tester.element(find.byKey(const ValueKey('picker')))).pop({'n': 7});
+    await tester.pumpAndSettle();
+    expect(s['count'], 7);
+  });
+
   testWidgets('a modal anchored to its trigger or the pointer opens by it', (tester) async {
     late BuildContext appContext;
     final ui = NavigatorActionUi(
@@ -406,6 +522,55 @@ void main() {
     await tester.tapAt(at, buttons: kSecondaryButton);
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(const ValueKey('pointerMenu'))), Offset(at.dx, at.dy + 4));
+  });
+
+  testWidgets('a popover presentation opens by its trigger, not centered', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 80),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'menu', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'belowStart', 'anchorGap': 6},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    final box = s.tree.boxOf('button')!;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // Below the button, its start edges aligned.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('menu'))), Offset(rect.left, rect.bottom + 6));
+  });
+
+  testWidgets('a modal shown as a bottom sheet is as wide as the sheet; a dialog keeps its design width', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey('dialog $to'), width: 120, height: 80),
+      sheetModal: (to, params) => SizedBox(key: ValueKey('sheet $to'), width: double.infinity, height: 80),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet'},
+      ]),
+      reaction('secondaryClick', [
+        {'type': 'openModal', 'to': 'newCard'},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
+    expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // No tinted Material surface behind the screen's own.
+    expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
+    Navigator.of(appContext).pop();
+    await tester.pumpAndSettle();
+    await tester.tapAt(s.center('button'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byKey(const ValueKey('dialog newCard'))).width, 120);
   });
 
   testWidgets('a popover flips above when there is no room below and stays on screen', (tester) async {
@@ -456,6 +621,102 @@ void main() {
     await tester.tapAt(top + const Offset(100, 75));
     await tester.pump();
     expect(s['picked'], 'c:2');
+  });
+
+  testWidgets('a running page view swipes, follows its bound page and reports the page shown', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'pages': {
+          'type': 'pageView',
+          'children': ['page'],
+          'layout': {'width': 300, 'height': 200},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}', 'props.initialPage': r'${lanePage}'},
+          'actions': [reaction('changed', [{'type': 'setVariable', 'variable': 'lanePage', 'value': r'${value}'}])],
+        },
+        'page': {
+          'type': 'text',
+          'layout': {'width': 300, 'height': 200},
+          'props': {'text': r'Lane ${item}'},
+        },
+      },
+      root: 'pages',
+      variables: [v('lanes', const ['todo', 'doing', 'done'], VariableType.list), v('lanePage', 0, VariableType.integer)],
+    );
+    // The texts of the pages on screen.
+    List<String> shown() {
+      final view = s.tree.boxOf('pages')!;
+      final area = view.localToGlobal(Offset.zero) & view.size;
+      final out = <String>[];
+      void visit(RenderObject o) {
+        if (o is RenderParagraph && o.hasSize && area.overlaps(o.localToGlobal(Offset.zero) & o.size)) {
+          out.add(o.text.toPlainText());
+        }
+        o.visitChildren(visit);
+      }
+
+      visit(view);
+      return out;
+    }
+
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane todo']);
+    // The app moves the page (a tab, a link).
+    s.scope.set('lanePage', 2);
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane done']);
+    // A swipe back shows the page before and sets the variable.
+    await tester.timedDrag(find.byType(PageView), const Offset(200, 0), const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane doing']);
+    expect(s['lanePage'], 1);
+  });
+
+  testWidgets('a flexible list in a running page view hugs its items', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'pages': {
+          'type': 'pageView',
+          'children': ['page'],
+          'layout': {'width': 300, 'height': 400},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}'},
+        },
+        'page': {
+          'type': 'column',
+          'children': ['cards', 'add'],
+          'layout': {'width': {'fill': 300}, 'height': {'fill': 400}},
+        },
+        'cards': {
+          'type': 'listView',
+          'children': ['card'],
+          'layout': {'width': {'fill': 300}, 'height': {'flexible': 360}},
+          'bind': {'data': r'${item.cards}'},
+        },
+        'card': {'type': 'box', 'layout': {'width': 300, 'height': 40}},
+        'add': {'type': 'box', 'layout': {'width': 300, 'height': 30}},
+      },
+      root: 'pages',
+      variables: [
+        v('lanes', const [
+          {'id': 'todo', 'cards': [1, 2]},
+        ], VariableType.list),
+      ],
+    );
+    await tester.pumpAndSettle();
+    final view = s.tree.boxOf('pages')!;
+    RenderBox? add;
+    void find(RenderObject o) {
+      if (o is NodeBox && o.id == 'add' && o.hasSize) add ??= o;
+      o.visitChildren(find);
+    }
+
+    find(view);
+    expect(add, isNotNull);
+    final top = add!.localToGlobal(Offset.zero).dy - view.localToGlobal(Offset.zero).dy;
+    expect(top, 80, reason: 'under the two cards');
   });
 
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
