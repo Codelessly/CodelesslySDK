@@ -283,7 +283,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
   /// writes variables back and runs reactions).
   void _onGiven() {
     final given = _given();
-    if (given.isEmpty || _gestureActive) return;
+    if (_writing || given.isEmpty || _gestureActive) return;
     if (_written != null && _matches(_written!, given)) return;
     if (_matches(_pose, given)) return;
     final changed = {
@@ -370,7 +370,8 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
   bool _writing = false;
 
   void _writeEach(ValueScope scope, TransformPose pose) {
-    for (final e in _variables.entries) {
+    // A write can synchronously reconfigure this node through its bindings.
+    for (final e in _variables.entries.toList()) {
       final found = variableOf(scope, e.value);
       if (found == null || found.$2.isComputed) continue;
       final value = TransformPose.rounded(e.key, pose[e.key]);

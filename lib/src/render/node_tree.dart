@@ -762,9 +762,27 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     final under = <RenderBox>[], over = <RenderBox>[];
     final canStack = content != null || (hFit != SizeFit.hug && vFit != SizeFit.hug);
     if (canStack && !plan.native) {
-      under.add(_obtain<RenderNodePaint>('under', RenderNodePaint.new)
-        ..decoration = d
-        ..foreground = false);
+      under.add(
+        _obtain<RenderNodePaint>('under', RenderNodePaint.new)
+          ..onImageState = tree.animates
+              ? (status, url) {
+                  final trigger = switch (status) {
+                    'loaded' => 'imageLoaded',
+                    'error' => 'imageError',
+                    _ => 'imageLoading',
+                  };
+                  tree.interactions?.fire(
+                    this,
+                    trigger,
+                    event: {
+                      'result': {'status': status, 'url': url},
+                    },
+                  );
+                }
+              : null
+          ..decoration = d
+          ..foreground = false,
+      );
     }
     if (canStack && plan.foreground) {
       over.add(_obtain<RenderNodePaint>('over', RenderNodePaint.new)
@@ -1361,10 +1379,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _wire(List<RenderBox> next) {
     final relink = _alreadyWired(next);
     if (relink != null) {
+      // A skipped (collapsed) subtree can still contain dirty layers. Mark
+      // its owner first so their relayout boundary is dirty before a layer
+      // is marked again while the subtree is being restored.
+      markNeedsLayout();
       for (final o in relink) {
         o.markNeedsLayout();
       }
-      markNeedsLayout();
       _previousInner = const [];
       _finishWire(next);
       return;
