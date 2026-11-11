@@ -33,7 +33,10 @@ abstract final class IconSources {
           'twoTone' => 'twotone',
           _ => '',
         };
-        return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v${readInt(icon['version']) ?? 1}/24px.svg';
+        // The version that serves this name: a name bound at runtime (props.icon.name)
+        // keeps the version stored for the design's icon, which 404s for another.
+        final version = materialIconVersions[name] ?? readInt(icon['version']) ?? 1;
+        return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v$version/24px.svg';
       case 'MATERIAL_SYMBOL':
         if (name.isEmpty) return null;
         final style = readString(icon['style']) ?? 'outlined';
@@ -60,7 +63,8 @@ abstract final class IconSources {
     final name = (readString(icon['name']) ?? '').toLowerCase();
     final latest = materialIconVersions[name];
     if (latest == null || latest <= 1) return null;
-    return urlOf({...icon, 'version': latest});
+    final url = urlOf({...icon, 'version': latest});
+    return url == urlOf(icon) ? null : url;
   }
 
   /// The Material Symbols SVG variant nearest the axes (`wght700grad200fill1`,

@@ -422,15 +422,46 @@ class _TextFieldIsland extends StatefulWidget {
 }
 
 class _TextFieldIslandState extends State<_TextFieldIsland> {
-  late final TextEditingController controller = TextEditingController(text: widget.node.prop(TextFieldProps.initialValue));
+  late final HighlightTextController controller = HighlightTextController(text: widget.node.prop(TextFieldProps.initialValue))
+    ..highlight = _highlight(widget.node);
   late final FocusNode focusNode = FocusNode()..addListener(_focusChanged);
+
+  /// The texts this field reported as changed, newest last: a value bound
+  /// to `initialValue` that comes back from them (an action, a script or a
+  /// formula fed by `changed`, which can lag behind the keyboard) is an
+  /// echo, not a new value, and must not overwrite what was typed since.
+  final List<String> _sent = [];
+
+  static (int, int, TextStyle?)? _highlight(Node n) {
+    final start = n.prop(TextFieldProps.highlightStart), end = n.prop(TextFieldProps.highlightEnd);
+    if (start == null || end == null || end <= start) return null;
+    return (start, end, _styleOrNull(n.prop(TextFieldProps.highlightStyle)));
+  }
 
   @override
   void didUpdateWidget(covariant _TextFieldIsland oldWidget) {
     super.didUpdateWidget(oldWidget);
+    controller.highlight = _highlight(widget.node);
     final initial = widget.node.prop(TextFieldProps.initialValue);
     if (initial != oldWidget.node.prop(TextFieldProps.initialValue) && controller.text != initial) {
-      controller.text = initial;
+      final echo = _sent.indexOf(initial);
+      if (echo >= 0) {
+        // The newer edits are still on their way back.
+        _sent.removeRange(0, echo + 1);
+        return;
+      }
+      _sent.clear();
+      // A new value from outside (a slider rewrote the line): keep the caret
+      // where it was, within the new text.
+      final selection = controller.selection;
+      controller.value = TextEditingValue(
+        text: initial,
+        selection: selection.isValid
+            ? TextSelection(
+                baseOffset: selection.baseOffset.clamp(0, initial.length),
+                extentOffset: selection.extentOffset.clamp(0, initial.length))
+            : TextSelection.collapsed(offset: initial.length),
+      );
     }
   }
 
@@ -526,6 +557,8 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
           readOnly: n.prop(TextFieldProps.readOnly),
           onChanged: (v) {
             _edited = true;
+            _sent.add(v);
+            if (_sent.length > 64) _sent.removeAt(0);
             _fire(context, 'changed', v);
           },
           onSubmitted: (v) => _fire(context, 'submitted', v),
@@ -881,9 +914,18 @@ class _SliderIslandState extends State<_SliderIsland> {
       api.SliderTrackShape.rectangle => const RectangularSliderTrackShape(),
       api.SliderTrackShape.roundedRectangle => const RoundedRectSliderTrackShape(),
       api.SliderTrackShape.gapped => const GappedSliderTrackShape(),
+      api.SliderTrackShape.ruler => RulerSliderTrackShape(
+          ticks: n.prop(SliderProps.rulerTicks),
+          majorEvery: n.prop(SliderProps.rulerMajorEvery),
+          tickColor: _color(n.prop(SliderProps.rulerTickColor)) ?? const Color(0xFF000000),
+          minorTickColor: _color(n.prop(SliderProps.rulerMinorTickColor)) ??
+              _color(n.prop(SliderProps.rulerTickColor)) ??
+              const Color(0xFF000000),
+          zeroFraction: range <= 0 || min > 0 || max < 0 ? 0 : (0 - min) / range,
+        ),
     };
-    final trackShape = fillFromEnd || markerFraction != null || startOpacity < 1
-        ? MarkedSliderTrackShape(
+    final trackShape = trackShapeKind != api.SliderTrackShape.ruler && (fillFromEnd || markerFraction != null || startOpacity < 1
+) ? MarkedSliderTrackShape(
             fillFromEnd: fillFromEnd,
             activeStartOpacity: startOpacity,
             markerFraction: markerFraction,
@@ -917,6 +959,8 @@ class _SliderIslandState extends State<_SliderIsland> {
           strokeColor: _color(n.prop(SliderProps.thumbStrokeColor)),
           strokeWidth: n.prop(SliderProps.thumbStrokeWidth),
         ),
+      api.SliderThumbShape.pointer =>
+        PointerSliderThumbShape(strokeColor: _color(n.prop(SliderProps.thumbStrokeColor)) ?? const Color(0xFF000000)),
     };
     final glow = _color(n.prop(SliderProps.thumbGlowColor));
     final thumbShape = showThumb && glow != null && glow.a > 0
@@ -1739,6 +1783,7 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         selectedForegroundColor: _color(n.prop(SegmentedButtonProps.selectedForegroundColor)),
         side: side == null ? null : _side(side),
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
+        padding: n.prop(SegmentedButtonProps.padding)?.flutter,
       ),
     );
   }
@@ -1863,5 +1908,34 @@ class _EagerPanGestureRecognizer extends PanGestureRecognizer {
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
     resolvePointer(event.pointer, GestureDisposition.accepted);
+  }
+}
+
+
+/// A text field's controller that draws a range of its text in another
+/// style ([TextFieldProps.highlightStart] to `highlightEnd`).
+class HighlightTextController extends TextEditingController {
+  HighlightTextController({super.text});
+
+  (int, int, TextStyle?)? _highlight;
+  (int, int, TextStyle?)? get highlight => _highlight;
+  set highlight((int, int, TextStyle?)? value) {
+    if (value == _highlight) return;
+    _highlight = value;
+    notifyListeners();
+  }
+
+  @override
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+    final h = _highlight;
+    final composing = withComposing && value.isComposingRangeValid;
+    if (h == null || composing) return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
+    final start = h.$1.clamp(0, text.length), end = h.$2.clamp(0, text.length);
+    if (end <= start) return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
+    return TextSpan(style: style, children: [
+      TextSpan(text: text.substring(0, start)),
+      TextSpan(text: text.substring(start, end), style: h.$3),
+      TextSpan(text: text.substring(end)),
+    ]);
   }
 }

@@ -62,8 +62,18 @@ void main() {
   test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
         'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
+    // Without a version (an icon named in data): its latest version, since
+    // gstatic doesn't keep v1 of every icon.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),
-        'https://fonts.gstatic.com/s/i/materialicons/home/v1/24px.svg');
+        'https://fonts.gstatic.com/s/i/materialicons/home/v16/24px.svg');
+    expect(IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': 'auto_awesome', 'style': 'rounded'}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/auto_awesome/v14/24px.svg');
+    // A name bound at runtime keeps the design icon's version: the name's own is used.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'bolt', 'style': 'rounded', 'version': 18}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/bolt/v10/24px.svg');
+    // A name the table doesn't know keeps its stored version.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'brand_new_icon', 'version': 3}),
+        'https://fonts.gstatic.com/s/i/materialicons/brand_new_icon/v3/24px.svg');
     expect(
         IconSources.urlOf({
           'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star', 'style': 'rounded', //
@@ -77,14 +87,13 @@ void main() {
     expect(IconSources.urlOf({'source': 'image', 'image': 'https://x.com/a.png'}), 'https://x.com/a.png');
   });
 
-  test('a Material icon saved without its version falls back to its latest SVG', () {
+  test('a Material icon saved without its version is drawn from its current SVG', () {
     const week = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'calendar_view_week', 'style': 'rounded'};
-    // The first try stays v1 (what every saved icon has drawn from)...
-    expect(IconSources.urlOf(week), 'https://fonts.gstatic.com/s/i/materialiconsround/calendar_view_week/v1/24px.svg');
-    // ...and when that fails, the version the icon has today.
-    expect(IconSources.fallbackUrlOf(week),
+    // Icons added after Material's first release have no v1 SVG.
+    expect(IconSources.urlOf(week),
         'https://fonts.gstatic.com/s/i/materialiconsround/calendar_view_week/v${materialIconVersions['calendar_view_week']}/24px.svg');
-    expect(IconSources.fallbackUrlOf({...week, 'version': 6}), isNull);
+    // urlOf already gives the current version: no second try.
+    expect(IconSources.fallbackUrlOf(week), isNull);
     expect(IconSources.fallbackUrlOf({'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star'}), isNull);
     expect(IconSources.fallbackUrlOf({'source': 'image', 'image': 'https://x.com/a.png'}), isNull);
   });
