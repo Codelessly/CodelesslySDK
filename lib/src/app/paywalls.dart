@@ -25,6 +25,13 @@ import 'codelessly_widget.dart';
 /// purchase grants its entitlement only once Codelessly's server verified
 /// it. Without them, the placement comes from the publish model and the
 /// purchases from [Services.purchases] (your own [PurchaseService]).
+///
+/// On the web, where there is no store, a paywall published with
+/// `"testStore": true` (or any, with `Services(testStore:
+/// TestStoreMode.force)`) runs on the test store ([TestStore]): its products,
+/// trial, purchase, restore, cancel and decline come from the slots' test
+/// data, nothing is charged, and its grants are test grants that never
+/// reach the paywall server.
 class CodelesslyPaywalls {
   CodelesslyPaywalls(this.codelessly);
 
@@ -154,6 +161,8 @@ class CodelesslyPaywalls {
       'placement': paywall.placement.id,
       if (paywall.variant.isNotEmpty) 'variant': paywall.variant,
       'slot': ?slot,
+      // The test store's events are never mistaken for real ones.
+      if (s.usesTestStore) 'test': true,
     });
     final runtime = s.paywalls;
     if (runtime == null) return;

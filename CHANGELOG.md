@@ -2,6 +2,18 @@
 
 **New**
 
+- Paywall test store, for web preview and demo sites: on the web (no store), a paywall published with
+  `"testStore": true` (or any, with `Services(testStore: TestStoreMode.force)` for the editor's run preview) runs its
+  whole flow — products, trial, purchase, restore, cancel and decline — from its slots' test data
+  (`ProductSlot.test`) without charging and without real entitlements. `TestPurchaseService`, `TestPaywallBackend`
+  (never contacts the paywall server), `TestPurchaseLedger` (test purchases per user, in `Services.storage`),
+  `TestStore`, `TestStoreMode` (`auto`, `force`, `off`); `Services.testStore`, `web`, `usesTestStore` and
+  `paywallsChanged` (`Services.paywalls` and `purchases` are the test store's while it's on);
+  `codelesslyCloudServices(testStore:)`, `codelesslyWithToken(testStore:)`. `PaywallProduct.test` (`test` in its
+  value, false for real products). Never on iOS, Android or desktop by the published flag, nor forced in their
+  release builds. See the guide's [Paywalls](docs/guide/16-paywalls.md#test-store-web-previews-and-demos).
+- `PaywallRuntime.open` adds a verified purchase's entitlement to `entitlements` before disposing its session (it
+  could be dropped when the session was disposed before its result's listener ran).
 - Backdrop screens: a project's backdrop canvases (`CanvasProps.backdrop`, `PublishModel.backdrops`) are drawn once
   beneath every screen, outside navigation, by `CodelesslyBackdropHost(codelessly:, child:)` as
   `MaterialApp.builder` (a `CodelesslyPresenterHost` there draws them too; `backdrops: false` leaves them out).
