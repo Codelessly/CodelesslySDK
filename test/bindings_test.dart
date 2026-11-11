@@ -104,6 +104,30 @@ void main() {
     expect(tree.boxOf('col')!.rectIn(view)!.height, 80);
   });
 
+  testWidgets('collapsed text stays layout-safe across font and repeated binding updates', (tester) async {
+    final vars = VariableScope([v('shown', true, VariableType.boolean), v('message', 'First')]);
+    final nodes = column(bindB: {'visible': r'${shown}'});
+    nodes['b'] = {...nodes['b']!, 'type': 'text', 'props': {'text': r'${message}'}};
+    final (tree, _) = await show(tester, page(nodes), NodeBinder(scope: vars));
+    RenderParagraph? paragraph;
+    void visit(RenderObject object) {
+      if (object is RenderParagraph) paragraph = object;
+      object.visitChildren(visit);
+    }
+    visit(tree.boxOf('b')!);
+    vars.set('shown', false);
+    await tester.pump();
+    for (var i = 0; i < 3; i++) {
+      paragraph!.systemFontsDidChange();
+      vars.set('message', 'Update $i');
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    }
+    vars.set('shown', true);
+    await tester.pump();
+    expect(paragraphText(tree, 'b'), 'Update 2');
+  });
+
   testWidgets('a node hidden in its own data keeps its space', (tester) async {
     final (tree, view) = await show(tester, page(column(bVisible: false)), NodeBinder(scope: VariableScope(const [])));
     expect(tree.boxOf('b')!.collapsed, isFalse);
