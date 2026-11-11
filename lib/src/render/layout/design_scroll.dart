@@ -268,6 +268,9 @@ class RenderDesignScroll extends RenderProxyBox {
     if (!interactive) return;
     config
       ..isSemanticBoundary = true
+      // Each text and control inside is its own node (as Flutter's scroll
+      // views give them), not one label merging the whole content.
+      ..explicitChildNodes = true
       ..hasImplicitScrolling = true
       ..scrollPosition = pixels
       ..scrollExtentMin = 0
