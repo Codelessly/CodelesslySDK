@@ -10,7 +10,8 @@ import 'scopes.dart';
 
 /// Declares `perf`: `{frameMs, buildMs, rasterMs, fps}` over the frames the
 /// engine reported last (an average of their build + raster time, and how
-/// many frames a second were drawn). All 0 until the first report.
+/// many frames a second are drawn while drawing: pauses longer than 250 ms
+/// between frames, an idle screen's, don't count). All 0 until the first report.
 ///
 /// It listens to frame timings only while a binding or reaction watches
 /// `perf`, so a screen that doesn't read it pays nothing. A new value is set
@@ -22,6 +23,9 @@ class PerfScope extends NamedScope {
   static const Map<String, Object?> idle = {'frameMs': 0.0, 'buildMs': 0.0, 'rasterMs': 0.0, 'fps': 0.0};
 
   final double threshold;
+
+  /// A longer gap between frames is a pause, not a frame time.
+  static const int _pauseUs = 250000;
   Map<String, Object?> _value = idle;
   bool _listening = false;
   bool _disposed = false;
@@ -50,10 +54,17 @@ class PerfScope extends NamedScope {
       raster += t.rasterDuration.inMicroseconds / 1000;
     }
     final n = timings.length;
-    final first = timings.first.timestampInMicroseconds(FramePhase.vsyncStart);
-    final last = timings.last.timestampInMicroseconds(FramePhase.vsyncStart);
-    final seconds = (last - first) / 1e6;
-    final fps = n > 1 && seconds > 0 ? (n - 1) / seconds : 0.0;
+    // The rate while drawing: the spacing of consecutive frames, leaving out
+    // the pauses of an idle screen (it draws only when something changes).
+    var gaps = 0, spanUs = 0;
+    for (var i = 1; i < n; i++) {
+      final gap = timings[i].timestampInMicroseconds(FramePhase.vsyncStart) -
+          timings[i - 1].timestampInMicroseconds(FramePhase.vsyncStart);
+      if (gap <= 0 || gap > _pauseUs) continue;
+      gaps++;
+      spanUs += gap;
+    }
+    final fps = gaps > 0 ? gaps / (spanUs / 1e6) : (identical(_value, idle) ? 0.0 : (_value['fps'] as num).toDouble());
     final next = {'frameMs': (build + raster) / n, 'buildMs': build / n, 'rasterMs': raster / n, 'fps': fps};
     if (!_moved(next)) return;
     _value = Map.unmodifiable(next);
