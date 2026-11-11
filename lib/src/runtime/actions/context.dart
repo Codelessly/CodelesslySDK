@@ -3,7 +3,7 @@
 // the screen's node tree.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, NavigateAction, ScriptDef, Variable, VariableType;
+import 'package:codelessly_api/codelessly_api.dart' show ActionDef, AuthOperation, Json, NavigateAction, ScriptDef, Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart';
@@ -13,6 +13,7 @@ import '../expressions/engine.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'node_values.dart';
+import 'action_error.dart';
 import 'ui.dart';
 import 'values.dart';
 
@@ -54,6 +55,8 @@ class RuntimeActionContext implements ActionHost {
     this.tree,
     this.nodeValues,
     this.onError,
+    this.onActionErrorEvent,
+    this.refreshAuthValues,
     this.declareMissing = false,
     this.paywall,
     this.openPaywall,
@@ -92,6 +95,14 @@ class RuntimeActionContext implements ActionHost {
   /// declared variables.
   final bool declareMissing;
 
+  /// Authored canvas error reactions; separate from the host's raw error
+  /// callback. Omitted while running an error reaction to prevent recursion.
+  final void Function(Json event)? onActionErrorEvent;
+
+  /// Synchronizes host-owned auth values after a completed native operation,
+  /// before the next authored action reads them. Expression reads stay pure.
+  final void Function(AuthOperation operation)? refreshAuthValues;
+
   final List<VoidCallback> _disposers;
 
   /// The paywall a paywall screen's actions act on.
@@ -104,7 +115,13 @@ class RuntimeActionContext implements ActionHost {
   final List<ScriptDef> scripts;
 
   @override
-  RuntimeActionContext withScope(ValueScope scope) => RuntimeActionContext(
+  RuntimeActionContext withScope(ValueScope scope) => _copy(scope);
+
+  /// An error reaction keeps the same services, variables and host error
+  /// callback, but cannot recursively dispatch more authored error events.
+  RuntimeActionContext withoutActionErrorEvents() => _copy(scope, suppressErrorEvents: true);
+
+  RuntimeActionContext _copy(ValueScope scope, {bool suppressErrorEvents = false}) => RuntimeActionContext(
         scope: scope,
         expressions: expressions,
         services: services,
@@ -113,6 +130,8 @@ class RuntimeActionContext implements ActionHost {
         tree: tree,
         nodeValues: nodeValues,
         onError: onError,
+        onActionErrorEvent: suppressErrorEvents ? null : onActionErrorEvent,
+        refreshAuthValues: refreshAuthValues,
         declareMissing: declareMissing,
         paywall: paywall,
         openPaywall: openPaywall,
@@ -145,7 +164,24 @@ class RuntimeActionContext implements ActionHost {
 
   @override
   void reportError(Object error, StackTrace stack, {String? action}) {
-    if (onError != null) return onError!(error, stack, action);
+    try {
+      if (onError != null) {
+        onError!(error, stack, action);
+      } else {
+        _logError(error, stack, action);
+      }
+    } catch (callbackError, callbackStack) {
+      // Reporting must not break another gesture or recursively report itself.
+      _logError(callbackError, callbackStack, 'host_error_callback');
+    }
+    try {
+      onActionErrorEvent?.call(actionErrorEvent(error, action: action));
+    } catch (callbackError, callbackStack) {
+      _logError(callbackError, callbackStack, 'action_error_callback');
+    }
+  }
+
+  void _logError(Object error, StackTrace stack, String? action) {
     final s = services;
     if (s is Services) {
       s.analytics.logError(error, stackTrace: stack, message: 'Action ${action ?? ''} failed', type: 'action_failed');

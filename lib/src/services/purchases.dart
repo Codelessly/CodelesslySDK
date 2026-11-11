@@ -27,10 +27,13 @@ class PaywallProduct {
     this.eligibleForTrial = false,
     this.pricePerMonth,
     this.savingsPercent,
+    this.availableOffers = const [],
+    this.basePlanId,
   });
 
   final String slot;
   final String storeId;
+  final String? basePlanId;
 
   /// The localized price (`$4.99`).
   final String price;
@@ -42,6 +45,9 @@ class PaywallProduct {
   final String? introOffer;
   final double? rawPrice;
   final String? currencySymbol;
+
+  /// Explicit choices supported by this product for the current account.
+  final List<PurchaseOfferPreference> availableOffers;
   final bool eligibleForTrial;
   final String? pricePerMonth;
   final int? savingsPercent;
@@ -57,13 +63,24 @@ class PaywallProduct {
         rawPrice: rawPrice,
         currencySymbol: currencySymbol,
         eligibleForTrial: eligibleForTrial,
+        availableOffers: availableOffers,
+        basePlanId: basePlanId,
         savingsPercent: savingsPercent ?? this.savingsPercent,
         pricePerMonth: pricePerMonth ?? this.pricePerMonth,
       );
 
+  PaywallProduct copyWithOffers(List<PurchaseOfferPreference> offers) => PaywallProduct(
+    slot: slot, storeId: storeId, price: price, currency: currency, period: period,
+    trial: trial, introOffer: introOffer, rawPrice: rawPrice, currencySymbol: currencySymbol,
+    eligibleForTrial: eligibleForTrial, pricePerMonth: pricePerMonth, savingsPercent: savingsPercent,
+    availableOffers: List.unmodifiable(offers), basePlanId: basePlanId,
+  );
+
   /// The `product` value bindings read.
   Map<String, Object?> toValue() => {
         'slot': slot,
+        'availableOffers': [for (final offer in availableOffers) offer.name],
+        'supportsTrialOptOut': availableOffers.contains(PurchaseOfferPreference.trial) && availableOffers.contains(PurchaseOfferPreference.standard),
         'price': price,
         'currency': currency,
         'period': period,
@@ -142,6 +159,17 @@ abstract interface class PurchaseService {
   Future<void> dispose();
 }
 
+/// An explicit purchase choice. A toggle must not silently fall back to a
+/// different offer. The default keeps existing store-controlled behaviour.
+enum PurchaseOfferPreference { storeDefault, trial, standard }
+
+/// Opt-in seam for adapters that can honor explicit trial/standard choices.
+/// Older PurchaseService implementations remain source-compatible; a session
+/// rejects explicit choices if this capability is absent.
+abstract interface class OfferPurchaseService implements PurchaseService {
+  Future<void> purchaseWithOffer(PaywallProduct product, PurchaseOfferPreference offer);
+}
+
 /// No store: products fail to load. The default.
 class NoPurchaseService implements PurchaseService {
   const NoPurchaseService();
@@ -166,7 +194,7 @@ class NoPurchaseService implements PurchaseService {
 /// The [PurchaseService] [create] makes, made when first used: a store
 /// adapter connects to the store when made, which an app that never shows
 /// a paywall shouldn't.
-class LazyPurchaseService implements PurchaseService {
+class LazyPurchaseService implements OfferPurchaseService {
   LazyPurchaseService(this.create);
 
   final PurchaseService Function() create;
@@ -182,6 +210,14 @@ class LazyPurchaseService implements PurchaseService {
 
   @override
   Future<void> purchase(PaywallProduct product) => service.purchase(product);
+
+  @override
+  Future<void> purchaseWithOffer(PaywallProduct product, PurchaseOfferPreference offer) {
+    final adapter = service;
+    if (offer == PurchaseOfferPreference.storeDefault) return adapter.purchase(product);
+    if (adapter is OfferPurchaseService) return adapter.purchaseWithOffer(product, offer);
+    return Future.error(UnsupportedError('This store adapter cannot select an explicit offer'));
+  }
 
   @override
   Future<void> restore() => service.restore();
@@ -367,7 +403,7 @@ class PaywallSession extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> purchase({String? slot}) async {
+  Future<void> purchase({String? slot, PurchaseOfferPreference offer = PurchaseOfferPreference.storeDefault}) async {
     if (_disposed || _completion.isCompleted) throw StateError('Paywall session is closed');
     if (purchasing || restoring) return;
     if (slot != null) selectProduct(slot);
@@ -378,7 +414,13 @@ class PaywallSession extends ChangeNotifier {
     onEvent?.call('purchase_start', product.slot);
     notifyListeners();
     try {
-      await service.purchase(product);
+      if (offer == PurchaseOfferPreference.storeDefault) {
+        await service.purchase(product);
+      } else if (service case final OfferPurchaseService adapter) {
+        await adapter.purchaseWithOffer(product, offer);
+      } else {
+        throw UnsupportedError('This store adapter cannot select an explicit offer');
+      }
     } catch (failure) {
       _onResult(PaywallResult(PaywallOutcome.failed, productId: product.storeId, error: '$failure'));
     }
@@ -401,7 +443,8 @@ class PaywallSession extends ChangeNotifier {
 
   /// Waits for the store's verified outcome, cancellation or error, rather
   /// than just purchase initiation. Native action chains use this boundary.
-  Future<PaywallResult> purchaseAndWait({String? slot}) => _waitForAttempt(() => purchase(slot: slot));
+  Future<PaywallResult> purchaseAndWait({String? slot, PurchaseOfferPreference offer = PurchaseOfferPreference.storeDefault}) =>
+      _waitForAttempt(() => purchase(slot: slot, offer: offer));
 
   Future<PaywallResult> restoreAndWait() => _waitForAttempt(restore);
 

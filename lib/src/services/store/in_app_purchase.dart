@@ -61,7 +61,7 @@ PendingPurchase pendingPurchaseOf(PurchaseDetails purchase) => PendingPurchase(
 /// purchase, journals each transaction ([queue]) before [verify] checks it
 /// on the server, completes it with the store only once verified, and
 /// replays unverified transactions when started ([ready]).
-class StorePurchaseService implements PurchaseService {
+class StorePurchaseService implements OfferPurchaseService {
   StorePurchaseService({
     required this.verify,
     required this.queue,
@@ -74,8 +74,8 @@ class StorePurchaseService implements PurchaseService {
     _subscription = this.store.purchaseStream.listen(
       (purchases) => _serial = _serial
           .then((_) => _handle(purchases))
-          .catchError((Object error) => _events.add(PaywallResult(PaywallOutcome.failed, error: '$error'))),
-      onError: (Object error) => _events.add(PaywallResult(PaywallOutcome.failed, error: '$error')),
+          .catchError((Object error) => _emit(PaywallResult(PaywallOutcome.failed, error: '$error'))),
+      onError: (Object error) => _emit(PaywallResult(PaywallOutcome.failed, error: '$error')),
     );
     ready = replayPending();
   }
@@ -99,6 +99,11 @@ class StorePurchaseService implements PurchaseService {
   late final Future<void> ready;
   Future<void> _serial = Future.value();
 
+  bool _disposed = false;
+  Future<void>? _disposing;
+  void _checkActive() { if (_disposed) throw StateError('Store adapter is disposed'); }
+  void _emit(PaywallResult result) { if (!_disposed) _events.add(result); }
+
   bool get _apple => platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
 
   @override
@@ -116,32 +121,91 @@ class StorePurchaseService implements PurchaseService {
 
   @override
   Future<List<PaywallProduct>> products(List<ProductSlot> slots) async {
+    _checkActive();
     if (!await store.isAvailable()) throw StateError('App Store / Play Billing unavailable');
     String idOf(ProductSlot slot) => _apple ? slot.iosProductId : slot.androidProductId;
     final response = await store.queryProductDetails({for (final s in slots) idOf(s)});
+    _checkActive();
     if (response.error != null) throw StateError(response.error!.message);
-    final products = <PaywallProduct>[
-      for (final slot in slots)
-        for (final detail in response.productDetails.where((d) => d.id == idOf(slot)))
-          await metadata.fromDetails(slot.id, detail),
-    ];
+    final products = <PaywallProduct>[];
+    for (final slot in slots) {
+      final details = response.productDetails.where((d) => d.id == idOf(slot)).toList();
+      if (details.isEmpty) continue;
+      final choices = <(ProductDetails, PaywallProduct)>[];
+      for (final detail in details) {
+        choices.add((detail, await metadata.fromDetails(slot.id, detail)));
+      }
+      // Prefer the eligible trial for display, while preserving both explicit
+      // choices. Purchase re-queries and validates the user's selected choice.
+      final selected = choices.firstWhere((item) => item.$2.eligibleForTrial && item.$2.trial != null,
+          orElse: () => choices.first);
+      final offers = <PurchaseOfferPreference>{};
+      for (final choice in choices) {
+        if (choice.$2.basePlanId != selected.$2.basePlanId) continue;
+        if (choice.$2.eligibleForTrial && choice.$2.trial != null) offers.add(PurchaseOfferPreference.trial);
+        if (await _isStandard(choice.$1)) offers.add(PurchaseOfferPreference.standard);
+      }
+      products.add(selected.$2.copyWithOffers(offers.toList()));
+    }
     return PaywallProduct.withSavings(products);
   }
 
   @override
-  Future<void> purchase(PaywallProduct product) async {
-    await ready;
-    final response = await store.queryProductDetails({product.storeId});
-    if (response.error != null || response.productDetails.isEmpty) {
-      throw StateError('Store product not found: ${product.storeId}');
+  Future<void> purchase(PaywallProduct product) => purchaseWithOffer(product, PurchaseOfferPreference.storeDefault);
+
+  /// Introductory offers are store/account data. Explicit opt-out is allowed
+  /// only when the selected native purchase API can prove a standard offer.
+  Future<bool> _isStandard(ProductDetails detail) async {
+    if (detail is GooglePlayProductDetails && detail.subscriptionIndex != null) {
+      final phases = detail.productDetails.subscriptionOfferDetails![detail.subscriptionIndex!].pricingPhases;
+      return phases.length == 1 && phases.single.priceAmountMicros > 0;
     }
-    final started = await store.buyNonConsumable(purchaseParam: PurchaseParam(productDetails: response.productDetails.first));
-    if (!started) _events.add(PaywallResult(PaywallOutcome.canceled, productId: product.storeId));
+    final hasIntro = detail is AppStoreProduct2Details
+        ? (detail.sk2Product.subscription?.promotionalOffers.any((o) => o.type == SK2SubscriptionOfferType.introductory) ?? false)
+        : detail is AppStoreProductDetails && detail.skProduct.introductoryPrice != null;
+    if (!hasIntro) return true;
+    final eligibility = metadata.appleTrialEligibility;
+    // The current StoreKit PurchaseParam has no intro-offer opt-out. Only a
+    // verified ineligible account (or a distinct product) can use standard.
+    return eligibility != null && !await eligibility(detail.id);
+  }
+
+  @override
+  Future<void> purchaseWithOffer(PaywallProduct product, PurchaseOfferPreference offer) async {
+    _checkActive();
+    await ready;
+    _checkActive();
+    final response = await store.queryProductDetails({product.storeId});
+    if (response.error != null) throw StateError(response.error!.message);
+    _checkActive();
+    final candidates = response.productDetails.where((d) => d.id == product.storeId).toList();
+    if (candidates.isEmpty) throw StateError('Store product not found: ${product.storeId}');
+    ProductDetails? selected;
+    for (final candidate in candidates) {
+      final value = await metadata.fromDetails(product.slot, candidate);
+      if (value.basePlanId != product.basePlanId) continue;
+      if (value.currency != product.currency || value.rawPrice != product.rawPrice || value.price != product.price) continue;
+      final matches = switch (offer) {
+        PurchaseOfferPreference.storeDefault => product.trial == null || (value.eligibleForTrial && value.trial != null),
+        PurchaseOfferPreference.trial => value.eligibleForTrial && value.trial != null,
+        PurchaseOfferPreference.standard => await _isStandard(candidate),
+      };
+      if (matches) { selected = candidate; break; }
+    }
+    if (selected == null) throw StateError('The requested ${offer.name} offer is unavailable for this account');
+    final parameter = selected is GooglePlayProductDetails
+        ? GooglePlayPurchaseParam(productDetails: selected, offerToken: selected.offerToken)
+        : PurchaseParam(productDetails: selected);
+    _checkActive();
+    final started = await store.buyNonConsumable(purchaseParam: parameter);
+    if (!started) _emit(PaywallResult(PaywallOutcome.canceled, productId: product.storeId));
   }
 
   @override
   Future<void> restore() async {
+    _checkActive();
     await ready;
+    _checkActive();
     var sawRestored = false;
     final watcher = store.purchaseStream.listen((purchases) {
       if (purchases.any((p) => p.status == PurchaseStatus.restored)) sawRestored = true;
@@ -150,7 +214,7 @@ class StorePurchaseService implements PurchaseService {
       await store.restorePurchases();
       // The store's restore can complete before the stream delivers.
       await Future<void>.delayed(Duration.zero);
-      if (!sawRestored) _events.add(const PaywallResult(PaywallOutcome.restoreNothing));
+      if (!sawRestored) _emit(const PaywallResult(PaywallOutcome.restoreNothing));
     } finally {
       await watcher.cancel();
     }
@@ -162,7 +226,7 @@ class StorePurchaseService implements PurchaseService {
         case PurchaseStatus.pending:
           continue;
         case PurchaseStatus.error || PurchaseStatus.canceled:
-          _events.add(PaywallResult(
+          _emit(PaywallResult(
             purchase.status == PurchaseStatus.canceled ? PaywallOutcome.canceled : PaywallOutcome.failed,
             productId: purchase.productID,
             error: purchase.error?.message,
@@ -177,7 +241,7 @@ class StorePurchaseService implements PurchaseService {
           } catch (error) {
             // Never complete here: the store keeps redelivering until the
             // journal is durable and the server verified the grant.
-            _events.add(PaywallResult(PaywallOutcome.failed, productId: purchase.productID, error: '$error'));
+            _emit(PaywallResult(PaywallOutcome.failed, productId: purchase.productID, error: '$error'));
           }
       }
     }
@@ -191,21 +255,25 @@ class StorePurchaseService implements PurchaseService {
       // A replay has no live store object to complete: the journal keeps the
       // entry until the store redelivers the unfinished transaction.
       if (live != null) await queue.write([...(await queue.read()).where((p) => p.key != entry.key)]);
-      _events.add(PaywallResult(
+      _emit(PaywallResult(
         entry.restored ? PaywallOutcome.restored : PaywallOutcome.purchased,
         productId: entry.productId,
         entitlementId: entitlementId,
       ));
     } catch (error) {
-      _events.add(PaywallResult(PaywallOutcome.failed, productId: entry.productId, error: '$error'));
+      _emit(PaywallResult(PaywallOutcome.failed, productId: entry.productId, error: '$error'));
     }
   }
 
   @override
-  Future<void> dispose() async {
-    await _subscription.cancel();
-    await _serial;
-    await _events.close();
+  Future<void> dispose() {
+    if (_disposing != null) return _disposing!;
+    _disposed = true;
+    return _disposing = () async {
+      await _subscription.cancel();
+      await _serial;
+      await _events.close();
+    }();
   }
 }
 
@@ -222,6 +290,10 @@ class StoreProductMetadata {
     ProductDetails details,
   ) async {
     String period = '';
+    String? basePlanId;
+    var price = details.price;
+    var rawPrice = details.rawPrice;
+    var currency = details.currencyCode;
     String? trial;
     String? introOffer;
     var eligible = false;
@@ -278,6 +350,10 @@ class StoreProductMetadata {
           .subscriptionOfferDetails![details.subscriptionIndex!];
       if (offer.pricingPhases.isNotEmpty) {
         final recurring = offer.pricingPhases.last;
+        basePlanId = offer.basePlanId;
+        price = recurring.formattedPrice;
+        rawPrice = recurring.priceAmountMicros / 1000000;
+        currency = recurring.priceCurrencyCode;
         period = _isoPeriod(recurring.billingPeriod);
         final introductory = offer.pricingPhases.first;
         if (offer.pricingPhases.length > 1) {
@@ -292,13 +368,14 @@ class StoreProductMetadata {
     return PaywallProduct(
       slot: slot,
       storeId: details.id,
-      price: details.price,
-      currency: details.currencyCode,
+      price: price,
+      currency: currency,
+      basePlanId: basePlanId,
       period: period,
       introOffer: introOffer,
       trial: trial,
-      eligibleForTrial: eligible,
-      rawPrice: details.rawPrice,
+      eligibleForTrial: eligible && trial != null,
+      rawPrice: rawPrice,
       currencySymbol: details.currencySymbol,
     );
   }

@@ -84,7 +84,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case CloudDocumentsAction():
       await _cloudDocuments(a, run);
     case LoadCloudDataAction():
-      _loadCloudData(a, run);
+      await _loadCloudData(a, run);
     case AuthAction():
       await _auth(a, run);
     case IfAction():
@@ -239,7 +239,7 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   }
   final scripts = readPath(run.scope, 'script');
   final (current, type, next) = scripts is ScriptsScope ? await scripts.resolve(calculate) : calculate();
-  if (run.cancellation.isCanceled) return;
+  if (run.isCanceled) return;
   // A number glides to its new value over animateMs.
   final ms = a.animateMs.trim().isEmpty ? 0 : (double.tryParse(run.text(a.animateMs).trim()) ?? 0).round();
   final number = type == VariableType.integer || type == VariableType.decimal;
@@ -248,7 +248,7 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
     final done = VariableAnimator.play(scope, path.root,
         from: current.toDouble(), to: next.toDouble(), duration: Duration(milliseconds: ms), curve: a.curve, glide: true);
     // The chain stops (its node left): so does the glide.
-    final remove = run.cancellation.onCancel(() => VariableAnimator.stopGlide(scope, path.root));
+    final remove = run.onCancel(() => VariableAnimator.stopGlide(scope, path.root));
     await done;
     remove();
     return;
@@ -473,7 +473,7 @@ Future<void> _cloudDocuments(CloudDocumentsAction a, ActionRun run) async {
 
 /// Streams [a]'s document or query into its variable until the screen goes:
 /// `{status, isLoading, data, error}`.
-void _loadCloudData(LoadCloudDataAction a, ActionRun run) {
+Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
   final db = _require(run, 'Cloud data').cloud;
   final scope = run.context.scope;
   final variable = a.variable.trim();
@@ -485,15 +485,66 @@ void _loadCloudData(LoadCloudDataAction a, ActionRun run) {
         'error': ?error,
       });
   put('loading');
-  final path = resolveCollectionPath(a.query, run.expressions, run.scope);
-  final Stream<Object?> stream = a.single
-      ? db.watchDocument(path, run.text(a.id).trim())
-      : db.watchQuery(path, resolveCloudQuery(a.query, run.expressions, run.scope), loadRelated: a.query.loadRelated);
-  final sub = stream.listen(
-    (data) => put('loaded', data: data),
-    onError: (Object e) => put('error', error: '$e'),
-  );
-  run.host.onDispose(sub.cancel);
+  late final Stream<Object?> stream;
+  try {
+    final path = resolveCollectionPath(a.query, run.expressions, run.scope);
+    stream = a.single
+        ? db.watchDocument(path, run.text(a.id).trim())
+        : db.watchQuery(path, resolveCloudQuery(a.query, run.expressions, run.scope), loadRelated: a.query.loadRelated);
+  } catch (error) {
+    put('error', error: '$error');
+    rethrow;
+  }
+  final first = Completer<void>();
+  var active = true;
+  late final StreamSubscription<Object?> sub;
+  try {
+    sub = stream.listen(
+    (data) {
+      if (!active) return;
+      put('loaded', data: data);
+      if (!first.isCompleted) first.complete();
+    },
+    onError: (Object error, StackTrace stack) {
+      if (!active) return;
+      active = false;
+      put('error', error: '$error');
+      if (!first.isCompleted) {
+        first.completeError(error, stack);
+      } else {
+        // A later subscription error has no awaited action to throw through.
+        // Stop this invocation's remaining actions, report once and close it.
+        run.stop();
+        run.host.reportError(ActionFailed(a.type, error, nodeId: run.node?.id), stack, action: a.type);
+      }
+    },
+    onDone: () {
+      if (active && !first.isCompleted) {
+        active = false;
+        final error = StateError('Cloud data stream closed before a value');
+        put('error', error: '$error');
+        first.completeError(error);
+      }
+    },
+    cancelOnError: true,
+    );
+  } catch (error) {
+    active = false;
+    put('error', error: '$error');
+    rethrow;
+  }
+  void cancel() {
+    active = false;
+    unawaited(sub.cancel());
+    if (!first.isCompleted) first.completeError(const ActionsCanceled());
+  }
+  final removeCancellation = run.onCancel(cancel);
+  run.host.onDispose(cancel);
+  try {
+    await first.future;
+  } finally {
+    removeCancellation();
+  }
 }
 
 // --- auth -----------------------------------------------------------------------------
@@ -511,7 +562,12 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.signOut:
         await auth.signOut();
       case AuthOperation.updateProfile:
-        await auth.updateProfile(displayName: run.text(a.displayName), photoUrl: run.text(a.photoUrl));
+        // Empty authored fields are omitted, not destructive updates. A
+        // supplied expression resolving to empty still explicitly clears it.
+        await auth.updateProfile(
+          displayName: a.displayName.isEmpty ? null : run.text(a.displayName),
+          photoUrl: a.photoUrl.isEmpty ? null : run.text(a.photoUrl),
+        );
       case AuthOperation.updatePhoto:
         await auth.updateProfile(photoUrl: run.text(a.photoUrl));
       case AuthOperation.sendPasswordResetEmail:
@@ -531,6 +587,8 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.completeSignInLink:
         run.result = (await auth.signInWithLink(email, Uri.base.toString())).uid;
     }
+    final host = run.host;
+    if (host is RuntimeActionContext) host.refreshAuthValues?.call(a.operation);
   } catch (error) {
     if (a.errorVariable.isNotEmpty) {
       setVariableIn(run.context.scope, a.errorVariable, error is AuthFailure ? error.message : '$error');
@@ -634,7 +692,7 @@ Future<void> _submitLocalForm(SubmitFormAction a, ActionRun run) async {
     if (payload is! Map) throw const _FormSubmissionFailure('invalid_payload', 'The submission payload must be a JSON object.');
     // Copy at the boundary: the response is a snapshot, not an alias of answers.
     final snapshot = (jsonDecode(jsonEncode(payload)) as Map).cast<String, Object?>();
-    if (run.cancellation.isCanceled) return;
+    if (run.isCanceled) return;
     if (destination.isNotEmpty) {
       final current = run.context.scope.read(destination);
       final rows = current is List ? [...current] : <Object?>[];
@@ -798,7 +856,7 @@ void _playSound(PlaySoundAction a, ActionRun run) {
   final service = _require(run, 'Sound').sound;
   switch (a.operation) {
     case 'start':
-      service.startNote(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1);
+      service.startNoteWithWaveform(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1, waveform:run.text(a.waveform));
       return;
     case 'stop':
       service.stopNote(run.text(a.voiceId).trim());
@@ -859,7 +917,10 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
   if (session == null) throw StateError('Paywall action outside a paywall');
   switch (a.operation) {
     case PaywallOperation.purchase:
-      final result = await session.purchaseAndWait(slot: a.slot);
+      final preference = run.text(a.offer ?? 'storeDefault').trim();
+      final offer = PurchaseOfferPreference.values.where((value) => value.name == preference).firstOrNull;
+      if (offer == null) throw StateError('Unknown purchase offer preference');
+      final result = await session.purchaseAndWait(slot: a.slot, offer: offer);
       _paywallOutcome(result, run);
     case PaywallOperation.restore:
       final result = await session.restoreAndWait();
