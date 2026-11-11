@@ -7,6 +7,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'runner_test.dart' show RecordingUi;
@@ -828,6 +829,57 @@ void main() {
     expect(s['filter'], 'draft');
     expect(deco('Draft').boxShadow, hasLength(1));
     expect(deco('All').boxShadow, isNull);
+  });
+
+  testWidgets('focus reaches the field in the same list item, even one the same tap reveals', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'lanes': {
+          'type': 'listView',
+          'children': ['lane'],
+          'layout': {'width': 400, 'height': 200},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}'},
+        },
+        'lane': {
+          'type': 'column',
+          'children': ['add', 'field'],
+          'layout': {'width': 200, 'height': 200},
+        },
+        'add': {
+          'type': 'box',
+          'layout': {'width': 200, 'height': 40},
+          'decoration': {'fills': [{'color': '#FF2196F3'}]},
+          'actions': [
+            reaction('click', [
+              {'type': 'setVariable', 'variable': 'adding', 'value': r'${item}'},
+              {'type': 'focus', 'node': 'field'},
+            ]),
+          ],
+        },
+        'field': {
+          'type': 'textField',
+          'layout': {'width': 200, 'height': 48},
+          'visible': true,
+          'bind': {'visible': r'${= adding == item}'},
+        },
+      },
+      root: 'lanes',
+      variables: [v('lanes', const ['todo', 'doing'], VariableType.list), v('adding', '')],
+    );
+    await tester.pumpAndSettle();
+    // The second column's button.
+    final adds = s.tree.boxesOf('add').toList()..sort((a, b) => a.localToGlobal(Offset.zero).dx.compareTo(b.localToGlobal(Offset.zero).dx));
+    final second = adds.last;
+    await tester.tapAt(second.localToGlobal(second.size.center(Offset.zero)));
+    await tester.pumpAndSettle();
+    expect(s['adding'], 'doing');
+    // The second column's field has the focus, the first column's doesn't.
+    expect(TextFieldHandle.near(s.tree, 'field', second.instance)!.focusNode.hasFocus, isTrue);
+    expect(FocusManager.instance.primaryFocus, TextFieldHandle.near(s.tree, 'field', second.instance)!.focusNode);
+    expect(TextFieldHandle.near(s.tree, 'field', adds.first.instance), isNull,
+        reason: 'the first column\'s field is hidden, so not built');
   });
 
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
