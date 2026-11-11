@@ -232,6 +232,7 @@ const String scriptDriver = r'''
       runAction: (action) => hostCall(run, 'runAction', [action], 'actions', 'app.runAction()'),
       toast: (message) => hostCall(run, 'toast', [String(message)], 'actions', 'app.toast()'),
       delay: (ms) => hostCall(run, 'delay', [Number(ms) || 0], 'actions', 'app.delay()'),
+      yield: (ms) => hostCall(run, 'yield', [Number(ms) || 0], 'actions', 'app.yield()'),
     });
   }
 
