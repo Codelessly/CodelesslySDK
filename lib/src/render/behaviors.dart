@@ -532,16 +532,27 @@ class RenderPose extends RenderProxyBox {
   double _opacity = 1;
   set opacity(double v) {
     if (v == _opacity) return;
+    final composited = alwaysNeedsCompositing;
     _opacity = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
   double _blur = 0;
   set blur(double v) {
     if (v == _blur) return;
+    final composited = alwaysNeedsCompositing;
     _blur = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
+
+  /// A partly transparent or blurred pose paints its child into a layer
+  /// (an opacity or image filter layer), so what's above it must composite
+  /// too: an ancestor that scales or clips with the canvas alone (a fitted
+  /// board, a clip) would otherwise leave the layer unscaled and unclipped.
+  @override
+  bool get alwaysNeedsCompositing => child != null && ((_opacity > 0 && _opacity < 1) || _blur > 0);
 
   /// Hidden while its back faces the viewer (through every transform above).
   bool _backfaceHidden = false;
