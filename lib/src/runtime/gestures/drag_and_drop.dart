@@ -1287,6 +1287,15 @@ class RenderDropTarget extends RenderProxyBox {
   /// Places the pointer at [position] among the items of the target's list.
   void _place(DragSession session, Offset position) {
     final items = _listItems();
+    // Over a target beside the list (a column's tab): at the end.
+    if (_ownList == null && _remoteList != null) {
+      session
+        ..index = items.where((i) => !session.ids.contains(dragItemId(i.value))).length
+        ..before = null
+        ..beforeId = ''
+        ..rawBefore = items.isEmpty ? 0 : items.map((e) => e.index).reduce(math.max) + 1;
+      return;
+    }
     final list = _box!.tree.source.node(_model.listNodeId);
     final axis = list == null
         ? Axis.vertical
@@ -1313,16 +1322,46 @@ class RenderDropTarget extends RenderProxyBox {
     session.rawBefore = before?.index ?? (items.isEmpty ? 0 : items.map((e) => e.index).reduce(math.max) + 1);
   }
 
-  /// The items of the target's list as laid out: their index, value and
-  /// global rect, in index order.
   /// The box of the list this target drops into: the copy in its own list
-  /// item, else the list's only one.
-  NodeBox? get _listBox {
+  /// item; else, for a target outside the list's repeat (a column's tab),
+  /// the copy whose own target has this one's key ([_remoteList]); else the
+  /// list's only one.
+  NodeBox? get _listBox => _ownList ?? _remoteList ?? _box?.tree.boxOf(_model.listNodeId);
+
+  NodeBox? get _ownList {
     final box = _box;
-    if (box == null) return null;
-    return box.tree.boxOf(_model.listNodeId, instance: box.instance) ?? box.tree.boxOf(_model.listNodeId);
+    if (box == null || _model.listNodeId.isEmpty || !_holdsList) return null;
+    return box.tree.boxOf(_model.listNodeId, instance: box.instance);
   }
 
+  /// Whether the list is inside this target (or is it) in the design, so
+  /// a copy of it is in this target's own list item.
+  bool get _holdsList {
+    final box = _box!;
+    final source = box.tree.source;
+    for (String? id = _model.listNodeId; id != null; id = source.parentOf(id)) {
+      if (id == box.id) return true;
+    }
+    return false;
+  }
+
+  /// The copy of the list another target with the same key drops into, for
+  /// a target that names a list outside its own repeat.
+  NodeBox? get _remoteList {
+    final box = _box;
+    final dnd = _registered;
+    if (box == null || dnd == null || _model.listNodeId.isEmpty || _ownList != null) return null;
+    final key = this.key;
+    for (final t in dnd._targets) {
+      if (identical(t, this) || t._model.listNodeId != _model.listNodeId) continue;
+      final own = t._ownList;
+      if (own != null && own.attached && t.key == key) return own;
+    }
+    return null;
+  }
+
+  /// The items of the target's list as laid out: their index, value and
+  /// global rect, in index order.
   List<_ListItem> _listItems() {
     final box = _box!;
     final tree = box.tree;
