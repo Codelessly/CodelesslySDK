@@ -28,6 +28,7 @@ class RenderDesignScroll extends RenderProxyBox {
       _drag?.dispose();
       _drag = null;
       _pixels = 0;
+      _wanted = 0;
     }
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -53,6 +54,13 @@ class RenderDesignScroll extends RenderProxyBox {
   double get offset => _pixels;
   void jumpBy(double delta) { if (interactive) jumpTo(_pixels + delta); }
   double _pixels = 0;
+
+  /// Where it was last scrolled to. A layout that measures the content
+  /// with room for all of it (a hugging scroll view asked its full height)
+  /// shows it at the clamped [_pixels] but keeps this, so the next real
+  /// layout puts it back where the person scrolled, as Flutter's viewports
+  /// keep their position through a measuring pass.
+  double _wanted = 0;
   double get maxScrollExtent {
     final c = child;
     if (!hasSize || c == null || !c.hasSize) return 0;
@@ -169,6 +177,7 @@ class RenderDesignScroll extends RenderProxyBox {
     final next = value.clamp(0.0, maxScrollExtent);
     if (next == _pixels) return;
     _pixels = next;
+    _wanted = next;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
     _notifyScroll();
@@ -393,7 +402,7 @@ class RenderDesignScroll extends RenderProxyBox {
     }
     child.layout(_contentConstraints(constraints), parentUsesSize: true);
     size = constraints.constrain(child.size);
-    _pixels = _pixels.clamp(0, maxScrollExtent);
+    _pixels = _wanted.clamp(0, maxScrollExtent);
   }
 
   @override
