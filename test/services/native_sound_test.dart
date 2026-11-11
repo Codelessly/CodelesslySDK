@@ -25,8 +25,9 @@ void main() {
     expect(data.getUint32(24, Endian.little), 48000);
     expect(data.getUint16(22, Endian.little), 1);
     expect(data.getUint32(40, Endian.little), bytes.length - 44);
-    for (var i = 44; i < bytes.length; i += 2)
+    for (var i = 44; i < bytes.length; i += 2) {
       expect(data.getInt16(i, Endian.little).abs(), lessThanOrEqualTo(6554));
+    }
   });
   test(
     'release during load prevents playback; same-pitch voices release independently',

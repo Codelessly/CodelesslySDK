@@ -1,6 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/src/render/particles.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 

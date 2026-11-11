@@ -1,5 +1,4 @@
 import 'package:codelessly_sdk/src/widgets/indicators_charts.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
