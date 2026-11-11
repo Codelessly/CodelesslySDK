@@ -35,6 +35,7 @@ export 'cloud/query.dart';
 export 'cloud/resolve.dart';
 export 'links.dart';
 export 'media_export.dart';
+export 'media_probe.dart';
 export 'purchases.dart';
 export 'scripts.dart';
 export 'sound.dart';
