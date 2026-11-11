@@ -19,6 +19,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         CheckboxProps,
         DatePickerProps,
         DateTimeInputMode,
+        DateTimeInputPicker,
         DateTimeInputProps,
         DropdownProps,
         Node,
@@ -37,6 +38,7 @@ import 'package:flutter/services.dart';
 
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
+import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 import '../runtime/actions/text_fields.dart';
 import '../runtime/actions/feedback_theme.dart';
 import '../render/paint/icon_glyph.dart';
@@ -562,9 +564,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
-            return field(constraints.hasBoundedHeight
-                ? decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))
-                : decoration);
+            // A fixed height is known without layout (a design board may
+            // lay islands out loosely); a filling one takes the room given.
+            final double? height = vFit == SizeFit.fixed
+                ? n.layout.height.value
+                : (constraints.hasBoundedHeight ? constraints.maxHeight : null);
+            return field(height == null ? decoration : decoration.copyWith(constraints: BoxConstraints.tightFor(height: height)));
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
@@ -721,16 +726,22 @@ class _SwitchIslandState extends State<_SwitchIsland> {
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
+    final enabled = n.prop(SwitchProps.enabled);
+    final controlled = n.prop(SwitchProps.controlled);
+    // A controlled switch shows only its value; its reactions set it.
+    final ValueChanged<bool>? onChanged = !enabled
+        ? null
+        : (v) {
+            if (!controlled) setState(() => value = v);
+            _fire(context, 'changed', v);
+          };
     // Material's switch can't cast a thumb shadow or take a thumb of another
     // size: a switch that asks for either is a plain toggle.
     if (drawsPlainToggle(n)) {
       return PlainToggle(
         node: n,
         value: value,
-        onChanged: (v) {
-          setState(() => value = v);
-          _fire(context, 'changed', v);
-        },
+        onChanged: onChanged,
       );
     }
     final fillTrack = n.prop(SwitchProps.fillTrack);
@@ -742,10 +753,7 @@ class _SwitchIslandState extends State<_SwitchIsland> {
       // new switch shows the current value.
       key: TickerMode.valuesOf(context).enabled ? null : ValueKey<bool>(value),
       value: value,
-      onChanged: (v) {
-        setState(() => value = v);
-        _fire(context, 'changed', v);
-      },
+      onChanged: onChanged,
       autofocus: n.prop(SwitchProps.autofocus),
       activeTrackColor: _color(n.prop(SwitchProps.activeTrackColor)),
       inactiveTrackColor: _color(n.prop(SwitchProps.inactiveTrackColor)),
@@ -1411,6 +1419,13 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
   String? picked;
 
   @override
+  void didUpdateWidget(covariant _DateTimeInputIsland old) {
+    super.didUpdateWidget(old);
+    // A new bound value (a reset, an action) wins over the last pick.
+    if (old.node.prop(DateTimeInputProps.value) != widget.node.prop(DateTimeInputProps.value)) picked = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final n = widget.node;
     final mode = n.prop(DateTimeInputProps.mode);
@@ -1433,7 +1448,12 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         },
     };
     final localizations = MaterialLocalizations.of(context);
-    final display = switch (mode) {
+    final displayText = n.prop(DateTimeInputProps.displayText);
+    final displayFormat = n.prop(DateTimeInputProps.displayFormat);
+    final formatted = displayFormat.isEmpty || raw.isEmpty
+        ? null
+        : FormulaEvaluator.formatDate(mode == DateTimeInputMode.time ? '2000-01-01T$raw' : raw, displayFormat);
+    final display = displayText.isNotEmpty ? displayText : formatted ?? switch (mode) {
       DateTimeInputMode.date => date == null ? '' : localizations.formatMediumDate(date),
       DateTimeInputMode.time => time == null ? '' : time.format(context),
       DateTimeInputMode.dateTime =>
@@ -1444,8 +1464,33 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     final initial = date == null || date.isBefore(first) || date.isAfter(last)
         ? (DateTime.now().isBefore(first) ? first : (DateTime.now().isAfter(last) ? last : DateTime.now()))
         : date;
+    final opens = n.prop(DateTimeInputProps.picker) == DateTimeInputPicker.dialog;
+    final d = n.prop(DateTimeInputProps.decoration);
+    final styled = d != api.InputDecoration.empty;
+    final vFit = n.layout.height.fit;
+    var decoration = styled
+        ? inputDecoration(d, n.layout.padding, focused: false)
+        : InputDecoration(
+            labelText: label,
+            hintText: label == null || label.isEmpty
+                ? 'Select ${switch (mode) {
+                    DateTimeInputMode.date => 'date',
+                    DateTimeInputMode.time => 'time',
+                    DateTimeInputMode.dateTime => 'date and time',
+                  }}'
+                : null,
+            suffixIcon: Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+            enabled: enabled,
+            border: const OutlineInputBorder(),
+          );
+    // A fixed height is the field's, as a text field's, for a field that
+    // draws its own decoration (older fields kept their natural height).
+    if (vFit == SizeFit.fixed && styled) {
+      decoration = decoration.copyWith(constraints: BoxConstraints.tightFor(height: n.layout.height.value));
+    }
+    final style = _styleOrNull(n.prop(DateTimeInputProps.style));
     return InkWell(
-      onTap: !enabled || !widget.interactive || first.isAfter(last)
+      onTap: !opens || !enabled || !widget.interactive || first.isAfter(last)
           ? null
           : () async {
               var chosen = initial;
@@ -1469,20 +1514,8 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
             },
       child: InputDecorator(
         isEmpty: display.isEmpty,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: label == null || label.isEmpty
-              ? 'Select ${switch (mode) {
-                  DateTimeInputMode.date => 'date',
-                  DateTimeInputMode.time => 'time',
-                  DateTimeInputMode.dateTime => 'date and time',
-                }}'
-              : null,
-          suffixIcon: Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
-          enabled: enabled,
-          border: const OutlineInputBorder(),
-        ),
-        child: Text(display.isEmpty ? ' ' : display),
+        decoration: decoration,
+        child: Text(display.isEmpty ? ' ' : display, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     );
   }
