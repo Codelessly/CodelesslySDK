@@ -92,16 +92,25 @@ Uint8List toneWave(double frequency, double volume, {bool sustained = true}) {
   return bytes;
 }
 
-class NativeSoundEngine implements SoundEngine, SustainedSoundEngine {
+class NativeSoundEngine
+    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine {
   NativeSoundEngine({NativeTonePlayer Function()? createPlayer})
     : _create = createPlayer ?? _AudioTonePlayer.new;
   final NativeTonePlayer Function() _create;
   final Map<String, NativeTonePlayer> _voices = {};
   final Stopwatch _clock = Stopwatch()..start();
   bool _available = true;
+  bool _disposed = false;
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    stopAllNotes();
+  }
+
   int _serial = 0;
   @override
-  bool get available => _available;
+  bool get available => !_disposed && _available;
   @override
   double get now => _clock.elapsedMicroseconds / 1e6;
   @override
@@ -113,6 +122,7 @@ class NativeSoundEngine implements SoundEngine, SustainedSoundEngine {
   }
 
   void _start(String id, double frequency, double volume, bool loop) {
+    if (_disposed) return;
     NativeTonePlayer output;
     try {
       output = _create();
@@ -130,10 +140,11 @@ class NativeSoundEngine implements SoundEngine, SustainedSoundEngine {
         if (!identical(_voices[id], output)) return;
         _available = true;
         output.play();
-        if (!loop)
+        if (!loop) {
           Timer(const Duration(milliseconds: 150), () {
             if (identical(_voices[id], output)) stopNote(id);
           });
+        }
       } catch (_) {
         if (identical(_voices[id], output)) {
           _available = false;
