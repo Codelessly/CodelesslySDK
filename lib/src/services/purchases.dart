@@ -519,9 +519,10 @@ class PaywallRuntime {
   final Set<PaywallSession> _sessions = {};
 
   /// Scopes the runtime to user [uid]: their cache keys; entitlements reset.
-  void scopeToUser(String? uid) {
+  /// [reset] also invalidates sessions when an authentication error occurs.
+  void scopeToUser(String? uid, {bool reset = false}) {
     if (_disposed) return;
-    if (_userId == uid) return;
+    if (!reset && _userId == uid) return;
     _userId = uid;
     _accountEpoch++;
     for (final session in _sessions.toList()) {
