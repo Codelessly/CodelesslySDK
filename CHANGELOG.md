@@ -2,6 +2,9 @@
 
 **New**
 
+- `retryFailed` action: in a canvas's `actionError` reaction (a toast's Retry), runs the failed action chain again —
+  the same node's reactions to the same trigger, with the same event and list item. The error event has
+  `retryable`. `RuntimeActionContext.failed` (`FailedActions`).
 - Paywall test store, for web preview and demo sites: on the web (no store), a paywall published with
   `"testStore": true` (or any, with `Services(testStore: TestStoreMode.force)` for the editor's run preview) runs its
   whole flow — products, trial, purchase, restore, cancel and decline — from its slots' test data

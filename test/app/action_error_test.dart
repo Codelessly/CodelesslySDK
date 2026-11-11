@@ -81,7 +81,7 @@ Node _click(List<Json> actions) => Node.fromJson({
     },
   ],
 }, id: 'button')!;
-PublishBundle _bundle(List<Json> actions, {bool brokenHandler = false}) {
+PublishBundle _bundle(List<Json> actions, {bool brokenHandler = false, bool retryFailed = false}) {
   final layout = PublishLayout.fromJson({
     'schema': 2,
     'id': 'home',
@@ -92,6 +92,7 @@ PublishBundle _bundle(List<Json> actions, {bool brokenHandler = false}) {
         const Variable(name: 'errorCount', type: VariableType.integer, value: 0).toJson(),
         const Variable(name: 'lastError', value: '').toJson(),
         const Variable(name: 'lastNode', value: '').toJson(),
+        const Variable(name: 'retryable', type: VariableType.boolean, value: false).toJson(),
         const Variable(name: 'dataState', type: VariableType.map, value: <String, Object?>{}).toJson(),
       ],
     },
@@ -107,13 +108,14 @@ PublishBundle _bundle(List<Json> actions, {bool brokenHandler = false}) {
               {'type': 'setVariable', 'variable': 'errorCount', 'op': 'add', 'value': '1'},
               _set('lastError', r'${result.error.action}'),
               _set('lastNode', r'${result.error.nodeId}'),
+              _set('retryable', r'${result.error.retryable}'),
               if (brokenHandler) {'type': 'callFunction', 'name': 'missing-error-handler'},
               if (!brokenHandler)
                 {
                   'type': 'showToast',
                   'message': 'Could not save. Try again.',
                   'actionLabel': 'Retry',
-                  'actions': [_write, _set('saved', 'yes')],
+                  'actions': retryFailed ? [{'type': 'retryFailed'}] : [_write, _set('saved', 'yes')],
                 },
             ],
           },
@@ -308,7 +310,7 @@ void main() {
       expect(errors, hasLength(1));
       expect((events.single['error'] as Map)['action'], 'loadCloudData');
       expect((events.single['error'] as Map)['nodeId'], 'button');
-      expect((events.single['error'] as Map).keys.toSet(), {'type', 'code', 'message', 'action', 'nodeId'});
+      expect((events.single['error'] as Map).keys.toSet(), {'type', 'code', 'message', 'action', 'nodeId', 'retryable'});
       context.dispose();
       scope.dispose();
       await cloud.close();
@@ -430,5 +432,41 @@ void main() {
     expect((events.single['error'] as Map)['action'], 'cloudFiles');
     context.dispose();
     scope.dispose();
+  });
+
+  testWidgets('retryFailed: the toast Retry runs the failed chain again; failing again, it says so again', (tester) async {
+    final cloud = _Cloud();
+    final app = Codelessly.fromBundle(
+      _bundle([_write, _set('saved', 'yes')], retryFailed: true),
+      config: CodelesslyConfig(services: Services(cloud: cloud, files: _Files(), analytics: const NoAnalytics())),
+      fonts: const NoFontFetcher(),
+    );
+    final controller = CodelesslyWidgetController();
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app, controller: controller)));
+    await settle(tester);
+    await controller.trigger('button', 'click');
+    await settle(tester);
+    expect(controller.read('errorCount'), 1);
+    expect(controller.read('retryable'), isTrue, reason: 'a failed chain can run again');
+    expect(cloud.writes, 1);
+    // Still failing: the chain runs again (a second write) and the error
+    // reaction hears it again.
+    await tester.tap(find.text('Retry'));
+    await settle(tester);
+    expect(cloud.writes, 2);
+    expect(controller.read('errorCount'), 2);
+    expect(controller.read('saved'), 'no');
+    // Back online: Retry runs the same chain to the end.
+    cloud.fail = false;
+    await tester.tap(find.text('Retry').last);
+    await settle(tester);
+    expect(cloud.writes, 3);
+    expect(controller.read('saved'), 'yes');
+    expect(controller.read('errorCount'), 2);
+    await tester.pumpWidget(const SizedBox());
+    controller.dispose();
+    app.dispose();
+    await cloud.close();
+    expect(tester.takeException(), isNull);
   });
 }
