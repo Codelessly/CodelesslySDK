@@ -1320,7 +1320,10 @@ class RenderTableItems extends RenderCollection {
       }
       final (r, col) = cells[i++];
       final lead = col == 0 ? edge : 0.0, trail = col == columnWidths.length - 1 ? edge : 0.0;
-      final w = math.max(0.0, columnWidths[col] - lead - trail), h = rowHeights[r];
+      // The header's line takes room under its cells, as a bordered box's
+      // does: they centre in the height above it.
+      final line = r == 0 && headerRow && headerBorder != null ? headerBorder!.width : 0.0;
+      final w = math.max(0.0, columnWidths[col] - lead - trail), h = math.max(0.0, rowHeights[r] - line);
       it.layout(BoxConstraints.loose(Size(w, h)), parentUsesSize: true);
       (it.parentData! as CollectionParentData).offset =
           Offset(_start(columnWidths, col) + lead, _start(rowHeights, r) + (h - it.size.height) / 2);
