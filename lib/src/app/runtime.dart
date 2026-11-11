@@ -233,6 +233,7 @@ class BoundSource implements NodeSource {
 /// The [ActionContext] of one screen: its variables (over the route's
 /// params and the app's data), services, UI and node tree. The app can set
 /// variables no screen declares ([RuntimeActionContext.declareMissing]).
+/// On a paywall's screen, its `paywall` actions act on [paywall].
 class ScreenActionContext extends RuntimeActionContext {
   ScreenActionContext({
     required super.scope,
@@ -246,6 +247,7 @@ class ScreenActionContext extends RuntimeActionContext {
     super.paywall,
     super.openPaywall,
     super.scripts,
+    super.paywall,
   }) : super(declareMissing: true);
 }
 

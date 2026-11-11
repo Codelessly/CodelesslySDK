@@ -1,6 +1,6 @@
 # 15. Troubleshooting and FAQ
 
-[Guide](README.md) · Previous: [Testing](14-testing.md)
+[Guide](README.md) · Previous: [Testing](14-testing.md) · Next: [Paywalls](16-paywalls.md)
 
 ![Triage: an error builder means a Loading message; a spinner forever means await initialize in a try; nothing shown means check the controller; a failing action means read the console](images/15-troubleshooting/hero.png)
 

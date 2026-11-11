@@ -530,7 +530,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       return (widget.loadingBuilder ?? _controller?.loadingBuilder)?.call(context) ?? const CodelesslyLoadingScreen();
     }
     Widget view = _LayoutView(
-      key: ObjectKey(layout),
+      // Another layout or paywall is another screen.
+      key: ValueKey((layout, widget.paywall)),
       codelessly: codelessly,
       layout: layout,
       canvasId: widget.canvasId,
@@ -539,6 +540,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       sizing: widget.sizing,
       controller: _controller,
       host: widget,
+      paywall: widget.paywall,
     );
     final builder = widget.layoutBuilder ?? _controller?.layoutBuilder;
     if (builder != null) view = builder(context, view);
@@ -599,6 +601,7 @@ class _LayoutView extends StatefulWidget {
     required this.sizing,
     required this.controller,
     required this.host,
+    this.paywall,
   });
 
   final Codelessly codelessly;
@@ -609,6 +612,7 @@ class _LayoutView extends StatefulWidget {
   final CanvasSizing sizing;
   final CodelesslyWidgetController? controller;
   final CodelesslyWidget host;
+  final PaywallSession? paywall;
 
   @override
   State<_LayoutView> createState() => _LayoutViewState();

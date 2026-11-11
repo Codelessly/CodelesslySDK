@@ -1,3 +1,17 @@
+## Unreleased
+
+**New**
+
+- Paywalls: `codelessly.paywall.present(context, placement: 'onboarding')` shows the paywall published at a
+  placement as a full-screen route and returns a `PaywallResult` (`purchased`, `restored`, `closed`, `skipped`
+  or `failed`). With `cloudServices: true` paywalls are managed by Codelessly (`codelesslyPaywalls`): placements
+  resolved and purchases verified by Codelessly's server. See the guide's [Paywalls](docs/guide/16-paywalls.md).
+- `CodelesslyWidget(paywall:)`: a layout's `paywall` actions act on that `PaywallSession` and its bindings read
+  `product`, `products`, `paywall` and `entitlements`.
+- The publish model's `paywall` setup (product slots, placements, legal links) reaches `Services.config.paywall`.
+- `codelesslyCloudServices(functions:)`; `firebase.dart` exports `FirebaseFunctions`. `LazyPurchaseService`.
+  `PaywallOutcome.skipped`.
+
 ## 22.0.0
 
 **Breaking changes**

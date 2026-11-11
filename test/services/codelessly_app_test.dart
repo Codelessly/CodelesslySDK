@@ -70,6 +70,44 @@ void main() {
       expect(Firebase.apps.where((a) => a.name == kCodelesslyFirebaseAppName), hasLength(1));
     });
 
+    test('cloud services with functions: managed paywalls, the store connected only when used', () async {
+      final app = await codelesslyFirebaseApp(name: 'paywalls', options: CodelesslyFirebaseOptions.android);
+      final storage = MemoryLocalStorage();
+      final services = codelesslyCloudServices(
+        projectId: 'p9',
+        firestore: FakeFirebaseFirestore(),
+        functions: FirebaseFunctions.instanceFor(app: app),
+        localStorage: storage,
+      );
+      final runtime = services.paywalls!;
+      expect(runtime.backend, isA<FirebasePaywallBackend>().having((b) => b.projectId, 'projectId', 'p9'));
+      expect(runtime.projectId, 'p9');
+      expect(identical(runtime.purchases(), services.purchases), isTrue, reason: 'one store service');
+      expect(services.purchases, isA<LazyPurchaseService>());
+      await services.dispose();
+
+      // The store adapter is made on first use, verifying on the server.
+      PurchaseVerifier? verifier;
+      var made = 0;
+      final managed = codelesslyPaywalls(
+        projectId: 'p9',
+        functions: FirebaseFunctions.instanceFor(app: app),
+        platform: TargetPlatform.iOS,
+        purchases: (verify) {
+          made++;
+          verifier = verify;
+          return const NoPurchaseService();
+        },
+      );
+      expect(made, 0);
+      expect(managed.paywalls.platform, 'ios');
+      await managed.purchases.restore();
+      expect(made, 1);
+      expect(verifier, isNotNull);
+      await managed.purchases.restore();
+      expect(made, 1);
+    });
+
     test('another name is another app', () async {
       final other = await codelesslyFirebaseApp(name: 'staging', options: CodelesslyFirebaseOptions.web);
       expect(other.name, 'staging');

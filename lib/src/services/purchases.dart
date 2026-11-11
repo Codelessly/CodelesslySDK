@@ -99,7 +99,12 @@ class PaywallProduct {
   }
 }
 
-enum PaywallOutcome { purchased, restored, restoreNothing, canceled, failed, closed }
+/// How a purchase, restore or paywall ended. A presented paywall
+/// (`Codelessly.paywall.present`) ends [purchased], [restored], [closed]
+/// (dismissed), [failed] (an error; see [PaywallResult.error]) or
+/// [skipped] (nothing to show: an experiment's holdout, a user the
+/// placement doesn't target, or no paywall published there).
+enum PaywallOutcome { purchased, restored, restoreNothing, canceled, failed, closed, skipped }
 
 /// The outcome of a purchase, restore or paywall.
 @immutable
@@ -156,6 +161,33 @@ class NoPurchaseService implements PurchaseService {
 
   @override
   Future<void> dispose() async {}
+}
+
+/// The [PurchaseService] [create] makes, made when first used: a store
+/// adapter connects to the store when made, which an app that never shows
+/// a paywall shouldn't.
+class LazyPurchaseService implements PurchaseService {
+  LazyPurchaseService(this.create);
+
+  final PurchaseService Function() create;
+  PurchaseService? _service;
+
+  PurchaseService get service => _service ??= create();
+
+  @override
+  Stream<PaywallResult> get updates => service.updates;
+
+  @override
+  Future<List<PaywallProduct>> products(List<ProductSlot> slots) => service.products(slots);
+
+  @override
+  Future<void> purchase(PaywallProduct product) => service.purchase(product);
+
+  @override
+  Future<void> restore() => service.restore();
+
+  @override
+  Future<void> dispose() async => _service?.dispose();
 }
 
 /// A store transaction waiting for server verification: what a retry needs
@@ -248,6 +280,7 @@ class PaywallSession extends ChangeNotifier {
     this.onEvent,
     this.ownsService = false,
     this.onDispose,
+    this.details = const {},
   }) : entitlements = entitlements ?? {} {
     _subscription = service.updates.listen(_onResult, onError: (Object failure) {
       if (_disposed) return;
@@ -269,6 +302,10 @@ class PaywallSession extends ChangeNotifier {
   /// Paywall events (`product_selected`, `purchase_start`, `purchase_success`,
   /// `purchase_fail`, `restore`, `close`) with the slot.
   final void Function(String event, String? slot)? onEvent;
+
+  /// More `paywall` values for its bindings: the placement, the variant,
+  /// the legal links (`Codelessly.paywall.present` sets them).
+  final Map<String, Object?> details;
 
   late final StreamSubscription<PaywallResult> _subscription;
   final _completion = Completer<PaywallResult>();
@@ -304,10 +341,15 @@ class PaywallSession extends ChangeNotifier {
     return null;
   }
 
+  /// What its bindings read: `product` (the selected one), `products`
+  /// (each, in slot order), `paywall` (progress, errors, [details]) and
+  /// `entitlements`.
   Map<String, Object?> get values => {
         'product': selectedProduct?.toValue() ?? const <String, Object?>{},
-        'products': {for (final p in products) p.slot: p.toValue()},
+        'products': [for (final p in products) p.toValue()],
+        'productsBySlot': {for (final p in products) p.slot: p.toValue()},
         'paywall': {
+          ...details,
           'purchasing': purchasing,
           'restoring': restoring,
           'restoreResult': restoreResult ?? '',
@@ -404,7 +446,7 @@ class PaywallSession extends ChangeNotifier {
           if (result.outcome == PaywallOutcome.purchased) onEvent?.call('purchase_success', selectedSlot);
           _finish(result);
         }
-      case PaywallOutcome.canceled || PaywallOutcome.closed:
+      case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.skipped:
         break;
     }
     notifyListeners();
@@ -496,12 +538,16 @@ class PaywallRuntime {
     this.loadBudget = const Duration(milliseconds: 800),
     this.cacheLifetime = const Duration(hours: 6),
     this.projectId = '',
+    this.ownsPurchaseServices = true,
     DateTime Function()? now,
   })  : cache = cache ?? MemoryKeyValueCache(),
         _now = now ?? DateTime.now;
 
   final PaywallBackend backend;
   final PurchaseService Function() purchases;
+
+  /// Whether sessions own per-session stores; managed shared stores are owned by Services.
+  final bool ownsPurchaseServices;
   final KeyValueCache cache;
 
   /// `ios` or `android`.
@@ -581,7 +627,7 @@ class PaywallRuntime {
 
   /// A session for [paywall]; the entitlements its verified purchases grant
   /// join [entitlements].
-  PaywallSession session(ResolvedPaywall paywall, {void Function(String event, String? slot)? onEvent}) {
+  PaywallSession session(ResolvedPaywall paywall, {void Function(String event, String? slot)? onEvent, Map<String, Object?> details = const {}}) {
     if (_disposed) throw StateError('Paywall runtime is disposed');
     final epoch = _accountEpoch;
     // The resolver's grants are verified. A session's stale snapshot must
@@ -589,12 +635,13 @@ class PaywallRuntime {
     entitlements.value = {...entitlements.value, ...paywall.entitlements};
     late final PaywallSession session;
     session = PaywallSession(
-      ownsService: true,
+      ownsService: ownsPurchaseServices,
       onDispose: () => _sessions.remove(session),
       service: purchases(),
       slots: paywall.slots,
       entitlements: {...entitlements.value},
       onEvent: onEvent,
+      details: details,
     );
     _sessions.add(session);
     unawaited(session.result.then((result) {

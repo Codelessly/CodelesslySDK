@@ -2,6 +2,7 @@
 // Editor publishes: its client options, the Firebase app an SDK instance
 // uses for it, and a Codelessly instance from a project token alone.
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -18,6 +19,7 @@ import '../storage.dart';
 import 'auth.dart';
 import 'codelessly_firebase.dart';
 import 'firestore.dart';
+import 'paywall.dart';
 import 'project_auth.dart';
 import 'storage.dart';
 
@@ -130,7 +132,8 @@ Future<FirebaseApp> codelesslyFirebaseApp({
 /// exchanges the token for access to its project and reads the publish.
 ///
 /// With [cloudServices], the project's Codelessly cloud data, app user
-/// accounts and cloud files work too ([codelesslyCloudServices]): the token
+/// accounts, cloud files and managed paywalls (`codelessly.paywall`;
+/// purchases verified by Codelessly) work too ([codelesslyCloudServices]): the token
 /// is authenticated first (the project's id is needed), so the future
 /// completes with an error when that fails. Ignored when [config] has its
 /// own `services`.
@@ -176,6 +179,7 @@ Future<Codelessly> codelesslyWithToken(
         firestore: db,
         auth: auth ?? (app == null ? null : FirebaseAuth.instanceFor(app: app)),
         storage: storage ?? (app == null ? null : FirebaseStorage.instanceFor(app: app)),
+        functions: app == null ? null : FirebaseFunctions.instanceFor(app: app),
       ),
     );
   }
@@ -192,9 +196,11 @@ Future<Codelessly> codelesslyWithToken(
 
 /// The [Services] of project [projectId] on Firebase: its cloud data on
 /// [firestore] (under `data/{projectId}`, with the project's data rules),
-/// app user accounts on [auth] and cloud files on [storage], each only when
-/// given. [localStorage] is where the app keeps `storage` values (default:
-/// memory; [PreferencesLocalStorage] keeps them between runs).
+/// app user accounts on [auth], cloud files on [storage] and managed
+/// paywalls on [functions] ([codelesslyPaywalls]), each only when given.
+/// [localStorage] is where the app keeps `storage` values (default:
+/// memory; [PreferencesLocalStorage] keeps them between runs) and the store
+/// purchases waiting for verification.
 ///
 /// Everything else keeps [Services]' defaults.
 Services codelesslyCloudServices({
@@ -202,11 +208,16 @@ Services codelesslyCloudServices({
   required FirebaseFirestore firestore,
   FirebaseAuth? auth,
   FirebaseStorage? storage,
+  FirebaseFunctions? functions,
   LocalStorage? localStorage,
 }) {
   final root = firestoreRoot(projectId);
+  final local = localStorage ?? MemoryLocalStorage();
+  final managed = functions == null ? null : codelesslyPaywalls(projectId: projectId, functions: functions, storage: local);
   return Services(
-    storage: localStorage,
+    storage: local,
+    paywalls: managed?.paywalls,
+    purchases: managed?.purchases,
     auth: auth == null ? null : FirebaseAuthService(auth),
     cloud: BackendCloudDatabase(
       backend: FirestoreDocumentBackend(firestore),
