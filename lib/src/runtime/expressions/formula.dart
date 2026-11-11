@@ -2834,11 +2834,15 @@ final Map<String, _Function> _functions = {
     for (final value in a)
       if (value is Iterable) ...value else ?value,
   ],
-  'without': (a) => [
-    for (final item in _values(_arg(a, 0), null))
-      if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
-        item,
-  ],
+  // without(list, others): the list less others (a list, or one item).
+  'without': (a) {
+    final others = _arg(a, 1);
+    final out = others is Iterable ? others : [others];
+    return [
+      for (final item in _values(_arg(a, 0), null))
+        if (!out.any((other) => _looseEquals(item, other))) item,
+    ];
+  },
   // random() is 0–1; random(n) a whole number from 0 to n - 1; random(a, b)
   // one from a to b. pick(list) is a random item (null when empty).
   'random': (a) => switch (a.length) {
