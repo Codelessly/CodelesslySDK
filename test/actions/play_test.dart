@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -214,5 +215,77 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
     await tester.pumpAndSettle();
     expect(s.rectOf(tester, 'b'), const Rect.fromLTWH(40, 320, 40, 40));
+  });
+
+  testWidgets('a node flies from a holder on a popover that is closing', (tester) async {
+    FlightRegistry.reset();
+    final flight = {'duration': 720, 'curve': 'linear', 'lift': 110};
+    final s = Screen({
+      'b': box({'layout': at(40, 320, 40, 40), 'flightKey': r'react', 'flight': flight, 'bind': {'visible': r'${moved}'}}),
+    }, variables: [const Variable(name: 'moved', type: VariableType.boolean, value: false)]);
+    final picker = Screen({
+      'a': box({'layout': at(200, 100, 40, 40), 'flightKey': r'react'}),
+    });
+    await s.pump(tester);
+    final nav = Navigator.of(tester.element(find.byType(NodeView)));
+    unawaited(nav.push(PageRouteBuilder<void>(
+      opaque: false,
+      transitionDuration: const Duration(milliseconds: 300),
+      pageBuilder: (context, _, _) {
+        HeroRoutes.bind(picker.tree, ModalRoute.of(context));
+        return Align(alignment: Alignment.topLeft, child: NodeView(tree: picker.tree, rootId: 'r', interactive: true));
+      },
+      transitionsBuilder: (context, animation, _, child) => FadeTransition(opacity: animation, child: child),
+    )));
+    await tester.pumpAndSettle();
+    // Picked: the popover starts closing and the chip's emoji shows at once,
+    // while the picker still fades out.
+    nav.pop();
+    // ignore: avoid_print
+    s.scope.set('moved', true);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final b = s.tree.boxOf('b')!;
+    final content = b.contentBox ?? b;
+    final early = MatrixUtils.transformRect(content.getTransformTo(null), Offset.zero & content.size);
+    // On its way from the picker (x 200) to its place (x 40).
+    expect(early.left, greaterThan(50));
+    await tester.pumpAndSettle();
+    final landed = MatrixUtils.transformRect(content.getTransformTo(null), Offset.zero & content.size);
+    expect(landed, const Rect.fromLTWH(40, 320, 40, 40));
+  });
+
+  testWidgets('a flight keeps going when hovering its card re-parents it', (tester) async {
+    FlightRegistry.reset();
+    final flight = {'duration': 720, 'curve': 'linear', 'lift': 110};
+    final s = Screen({
+      'a': box({'layout': at(300, 300, 40, 40), 'flightKey': r'react', 'bind': {'visible': r'${!moved}'}}),
+      'card': {
+        'type': 'stack',
+        'children': ['b'],
+        'layout': at(0, 200, 200, 200),
+        // Hovered, the card lifts: a motion its box didn't have.
+        'states': {
+          'hovered': {'card': {'motion': {'translateX': -2, 'translateY': -2, 'duration': 180}}},
+        },
+      },
+      'b': box({'layout': at(40, 120, 40, 40), 'flightKey': r'react', 'flight': flight, 'bind': {'visible': r'${moved}'}}),
+    }, variables: [const Variable(name: 'moved', type: VariableType.boolean, value: false)]);
+    await s.pump(tester);
+    s.scope.set('moved', true);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(100, 250));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 260));
+    final mid = s.rectOf(tester, 'b');
+    // Half-way: well off its place (40, 320), not frozen where it started.
+    expect(mid.center.dx, inExclusiveRange(80, 280));
+    await tester.pumpAndSettle();
+    expect(s.rectOf(tester, 'b').topLeft, const Offset(38, 318));
   });
 }
