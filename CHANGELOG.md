@@ -14,12 +14,12 @@
 - Presenting layouts from anywhere: `codelessly.present(layoutId, presentation:, params:, data:, dismissible:,
   priority:, anchor:, ...)` shows a layout above the host app (dialog, sheet, side sheet, full screen, popover or
   banner) and completes with its `closeModal` result (null when dismissed). One at a time, by priority.
-  `CodelesslyOverlay` (as `MaterialApp.builder`) leads it to the app's navigator; `codelessly.presenter`.
+  `CodelesslyPresenterHost` (as `MaterialApp.builder`) leads it to the app's navigator; `codelessly.presenter`.
 - Banners: `openModal` with `presentation: banner`, along the top (or bottom) edge with no barrier; swipe to
   dismiss. A presented full-screen layout or banner closes itself with `closeModal`.
 - Automations: the publish model's `automations` run on app start, session start, resume, app events,
   intervals and screens shown, with a `when` formula and `maxRuns` / `maxPerSession` / `everyDays`
-  (`codelessly.automations`, started by the overlay). `${usage}` (launches, sessions, first launch, event and
+  (`codelessly.automations`, started by the presenter host). `${usage}` (launches, sessions, first launch, event and
   automation counts per user) in every layout.
 - App events: `codelessly.emit(name, props)`, `codelessly.events`, and the `emitEvent` action.
 - `captureScreenshot` action (a screen, a node, or the whole app in a `CodelesslyCaptureScope`) giving a PNG

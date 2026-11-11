@@ -63,11 +63,11 @@ PublishBundle bundleOf(List<PublishLayout> layouts, {List<Automation> automation
       layouts: {for (final l in layouts) l.id: l},
     );
 
-/// The host app: [home] (an empty screen), with the presenter's overlay as
+/// The host app: [home] (an empty screen), with the presenter host as
 /// `MaterialApp.builder`.
-Widget overlayApp(Codelessly codelessly, {Widget? home, bool automations = true}) => MaterialApp(
+Widget hostApp(Codelessly codelessly, {Widget? home, bool automations = true}) => MaterialApp(
       debugShowCheckedModeBanner: false,
-      builder: (context, child) => CodelesslyOverlay(codelessly: codelessly, automations: automations, child: child!),
+      builder: (context, child) => CodelesslyPresenterHost(codelessly: codelessly, automations: automations, child: child!),
       home: home ?? const Scaffold(body: SizedBox.expand()),
     );
 
