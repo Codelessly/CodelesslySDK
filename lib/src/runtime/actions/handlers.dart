@@ -88,7 +88,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case AuthAction():
       await _auth(a, run);
     case IfAction():
-      final holds = a.condition != null && run.expressions.test(a.condition!, run.scope);
+      // A condition reading a script formula waits for its answer.
+      final holds = a.condition != null && await _withScripts(run, () => run.expressions.test(a.condition!, run.scope));
       await run.run(holds ? a.then : a.orElse);
     case ForEachAction():
       await _forEach(a, run);
@@ -168,7 +169,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case ControlDragAction(command: DragCommand.pose):
       // Spring a transform gesture to a pose: {x, y, scale, rotation...}.
       final tree = run.host.tree;
-      final pose = _poseOf(a.value.trim().startsWith(r'${') ? run.evaluate(a.value) : a.value);
+      final pose = _poseOf(a.value.trim().startsWith(r'${') ? await _withScripts(run, () => run.evaluate(a.value)) : a.value);
       if (tree != null && pose.isNotEmpty) await TransformGestures.moveTo(tree, a.node, pose);
     case ControlDragAction():
       // A node that follows the pointer (gestures/drag_motion.dart): fling it
@@ -1040,4 +1041,11 @@ Map<String, double> _poseOf(Object? v) {
       if (const {'x', 'y', 'scale', 'rotation', 'scaleX', 'scaleY'}.contains(e.key))
         if (e.value is num) '${e.key}': (e.value as num).toDouble() else if (double.tryParse('${e.value}') case final double d) '${e.key}': d,
   };
+}
+
+/// [evaluate] once the script formulas it reads have answered (a worker on
+/// the web answers null at first), as a setVariable's value does.
+Future<T> _withScripts<T>(ActionRun run, T Function() evaluate) async {
+  final scripts = readPath(run.scope, 'script');
+  return scripts is ScriptsScope ? await scripts.resolve(evaluate) : evaluate();
 }
