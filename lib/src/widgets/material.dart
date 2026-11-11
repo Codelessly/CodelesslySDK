@@ -420,7 +420,9 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
   // A set avatar size is the avatar's box too: Material keeps an 18 px
   // slot otherwise, a gap beside a small dot.
   final avatarSize = n.prop(ChipProps.avatarSize);
-  final avatarBox = avatar == null || avatarSize == null ? null : BoxConstraints.tight(Size.square(avatarSize));
+  // The avatar's box; a selectable chip's checkmark is drawn in the same box
+  // (75 % of it), so the size sets the checkmark's too.
+  final avatarBox = avatarSize == null ? null : BoxConstraints.tight(Size.square(avatarSize));
   final sideModel = n.prop(ChipProps.side);
   final side = sideModel == null
       ? null
