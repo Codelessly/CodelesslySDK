@@ -200,7 +200,8 @@ the collection's role):
 A collection can also expire: with `expiry: {collection: field}` in the rules, documents past the time in that
 field are not returned (queries get `field > now`, and a live query drops documents as they expire), the
 database refuses them to app users, and Codelessly deletes them later. Write the field as a date or ISO text; a
-document without one never expires (it is written as `DataRules.neverExpires`).
+document written without one never expires (the SDK writes `DataRules.neverExpires`), while one stored without
+the field by other means is not readable by app users.
 
 ```dart
 BackendCloudDatabase serverWrittenData({required String uid, String role = 'user', DateTime Function()? now}) =>
