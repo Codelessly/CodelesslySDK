@@ -19,6 +19,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         ProgressBarProps,
         ProgressBarShape,
         RadialGaugeProps;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart' show CustomPainter;
 
@@ -737,7 +738,7 @@ class BarChartPainter extends NodePainter {
         Paint()..color = barColor,
       );
       if (showValues) {
-        final text = value == value.roundToDouble() ? value.round().toString() : value.toStringAsFixed(1);
+        final text = barValueText(value, p(BarChartProps.valueDecimals), p(BarChartProps.valueSuffix));
         final tp = TextPainter(
           text: TextSpan(
             text: text,
@@ -762,12 +763,14 @@ class BarChartPainter extends NodePainter {
       for (var i = 0; i < count; i++) {
         final text = i < labels.length ? labels[i] : '';
         if (text.isEmpty) continue;
+        final spacing = p(BarChartProps.labelLetterSpacing);
+        final labelStyle = spacing == 0 ? style : style.copyWith(letterSpacing: spacing);
         final tp = TextPainter(
           text: TextSpan(
             text: text,
             style: i == highlight && p(BarChartProps.highlightLabels)
-                ? style.copyWith(color: p(BarChartProps.highlightLabelColor).flutter)
-                : style,
+                ? labelStyle.copyWith(color: p(BarChartProps.highlightLabelColor).flutter)
+                : labelStyle,
           ),
           textDirection: TextDirection.ltr,
           textAlign: TextAlign.center,
@@ -780,6 +783,16 @@ class BarChartPainter extends NodePainter {
     }
     canvas.restore();
   }
+}
+
+/// A bar chart's value label: [decimals] places (null: whole numbers
+/// bare, others with one), then [suffix].
+@visibleForTesting
+String barValueText(double value, int? decimals, String suffix) {
+  final number = decimals != null
+      ? value.toStringAsFixed(decimals.clamp(0, 6))
+      : value == value.roundToDouble() ? value.round().toString() : value.toStringAsFixed(1);
+  return number + suffix;
 }
 
 // --- barcode --------------------------------------------------------------------

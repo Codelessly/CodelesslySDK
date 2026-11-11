@@ -72,10 +72,16 @@ class TreeReactions implements NodeInteractions {
     final state = _boxes[box] ??= _BoxReactions(this, box);
     state.update(n, types);
     final pointer = types.intersection(TriggerType.pointer);
+    // Beside a `drag` reaction (and with no drag and drop on the node),
+    // `dragStart` is the start of that one-finger drag: where a stroke
+    // begins, which a pinch (a second finger) doesn't start.
+    if (types.contains(TriggerType.dragStart) && types.contains(TriggerType.drag) && n.behaviors.draggable == null) {
+      pointer.add(TriggerType.dragStart);
+    }
     if (selfTappedTypes.contains(n.type)) pointer.remove(TriggerType.click);
     // A node with a drag drags itself: it fires its swipes when it flies
     // off, and its drag and drag end (gestures/drag_motion.dart).
-    if (n.behaviors.drag != null) pointer.removeAll({...TriggerType.swipes, TriggerType.drag, TriggerType.dragEnd});
+    if (n.behaviors.drag != null) pointer.removeAll({...TriggerType.swipes, TriggerType.dragStart, TriggerType.drag, TriggerType.dragEnd});
     // A transform gesture that zooms on a double tap fires its doubleTap
     // (render/transform_gesture.dart).
     if (n.behaviors.effectiveTransformGesture case final g? when g.zoom && g.doubleTapScale > 0) {
@@ -105,7 +111,10 @@ class TreeReactions implements NodeInteractions {
     if (node == null) return;
     // What a modal anchored to its trigger (or the pointer) sits by.
     RevealAnchor.track();
-    RevealAnchor.lastTrigger = box.attached && box.hasSize ? box.localToGlobal(Offset.zero) & box.size : null;
+    // The box as the screen shows it: its size scales with it too (a running
+    // app inside a scaled preview), not only its origin.
+    RevealAnchor.lastTrigger =
+        box.attached && box.hasSize ? MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size) : null;
     final ctx = contextFor(box);
     if (trigger == 'changed' && event.containsKey('value')) _writeBack(node, event['value'], ctx);
     final state = _boxes[box];
@@ -495,7 +504,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     if (_longPress == null && _has(TriggerType.longPress)) {
       _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = () => _fire(TriggerType.longPress);
     }
-    final swipes = TriggerType.swipes.any(_has) || _has(TriggerType.drag) || _has(TriggerType.dragEnd);
+    final swipes = TriggerType.swipes.any(_has) || _has(TriggerType.dragStart) || _has(TriggerType.drag) || _has(TriggerType.dragEnd);
     if (_pan == null && swipes) {
       _pan = _OneFingerPanGestureRecognizer(debugOwner: this)
         // Where the finger went down, not where the slop was crossed: a
@@ -503,6 +512,12 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         ..dragStartBehavior = DragStartBehavior.down
         ..onStart = ((d) {
           _dragStart = d.localPosition;
+          // A stroke starts here (one finger: a pinch makes it stand down).
+          if (_has(TriggerType.dragStart)) {
+            final p = d.localPosition;
+            final drag = {'dx': 0.0, 'dy': 0.0, 'x': p.dx, 'y': p.dy, 'startX': p.dx, 'startY': p.dy, 'pointerCount': 1};
+            _fire(TriggerType.dragStart, {'result': drag, 'drag': drag});
+          }
         })
         ..onUpdate = (_has(TriggerType.drag)
             ? (d) {
