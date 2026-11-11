@@ -21,11 +21,22 @@ abstract final class IconSources {
   /// drawn from, or null when it has none.
   static String? urlOf(Json icon) {
     if (readString(icon['source']) == 'image') return readString(icon['image']);
-    final name = (readString(icon['name']) ?? '').toLowerCase();
+    var name = (readString(icon['name']) ?? '').toLowerCase();
     switch (readString(icon['type'])) {
       case 'MATERIAL_ICON':
         if (name.isEmpty) return null;
-        final style = switch (readString(icon['style'])) {
+        // Flutter's names carry the style (`download_rounded`, `Icons.
+        // download_rounded`); the font serves the base name in that style's
+        // folder (`materialiconsround/download`), and 404s for the full name.
+        String? styleOfName;
+        for (final (suffix, s) in const [('_rounded', 'rounded'), ('_outlined', 'outlined'), ('_sharp', 'sharp')]) {
+          if (name.length > suffix.length && name.endsWith(suffix)) {
+            name = name.substring(0, name.length - suffix.length);
+            styleOfName = s;
+            break;
+          }
+        }
+        final style = switch (readString(icon['style']) ?? styleOfName) {
           'outlined' => 'outlined',
           'rounded' => 'round',
           'sharp' => 'sharp',
