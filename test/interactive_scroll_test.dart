@@ -2,6 +2,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'actions/wiring_test.dart' as wiring show show;
@@ -200,6 +201,51 @@ void main() {
     await tester.pump();
     expect(inner.pixels, 400);
     expect(outer.pixels, 400);
+  });
+
+  testWidgets('a board scrolls sideways under the wheel over a column: Shift + wheel and a sideways scroll', (tester) async {
+    // A horizontal board of vertical lanes, each scrolling its own cards.
+    final authored = <String, Json>{
+      'col': {
+        'type': 'row',
+        'props': {'scrollable': true, 'scrollDirection': 'horizontal'},
+        'layout': {'width': 300, 'height': 200},
+        'children': ['lane0', 'lane1', 'lane2'],
+      },
+      for (var l = 0; l < 3; l++)
+        'lane$l': {
+          'type': 'column',
+          'props': {'scrollable': true},
+          'layout': {'width': 200, 'height': 200},
+          'children': [for (var i = 0; i < 4; i++) 'card$l$i'],
+        },
+      for (var l = 0; l < 3; l++)
+        for (var i = 0; i < 4; i++)
+          'card$l$i': {
+            'type': 'box',
+            'layout': {'width': 200, 'height': 100},
+          },
+    };
+    final screen = await wiring.show(tester, authored);
+    final board = viewport(screen.tree);
+    final lane = viewport(screen.tree, 'lane0');
+    final at = lane.localToGlobal(const Offset(100, 100));
+    // A mouse wheel with Shift held scrolls the board, not the lane.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendEventToBinding(PointerScrollEvent(position: at, scrollDelta: const Offset(0, 120)));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    expect(board.pixels, 120);
+    expect(lane.pixels, 0);
+    // A sideways scroll (a trackpad) too.
+    await tester.sendEventToBinding(PointerScrollEvent(position: at, scrollDelta: const Offset(80, 0)));
+    await tester.pump();
+    expect(board.pixels, 200);
+    expect(lane.pixels, 0);
+    // A plain wheel still scrolls the lane.
+    await tester.sendEventToBinding(PointerScrollEvent(position: board.localToGlobal(const Offset(150, 100)), scrollDelta: const Offset(0, 50)));
+    await tester.pump();
+    expect(board.pixels, 200);
   });
 
   testWidgets('native scrollTo action respects axis, alignment, offset and animation', (tester) async {
