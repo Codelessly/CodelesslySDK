@@ -36,6 +36,9 @@ abstract final class VariablePreview {
       final formula = FormulaEvaluator.exactExpression(expression);
       if (formula != null && engine.formula(formula, scope) == '') return '';
       final value = engine.interpolate(expression, scope, mode: NullSubstitution.noChange);
+      // A path that resolves to empty text (`''`) shows nothing too; one that
+      // doesn't resolve stays `${...}` (noChange) and gets a placeholder.
+      if (formula == null && value.isEmpty) return '';
       if (value.isNotEmpty && !expressionSyntax.hasMatch(value)) return value;
     }
     final placeholder = placeholderFor(expression);
