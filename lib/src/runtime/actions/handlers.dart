@@ -1098,9 +1098,11 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
   switch (a.operation) {
     case PaywallOperation.openPaywall:
       final placement = run.text(a.placement ?? '').trim();
+      final present = host is RuntimeActionContext ? host.presentPaywall : null;
       final open = host is RuntimeActionContext ? host.openPaywall : null;
-      if (placement.isEmpty || open == null) throw StateError('No paywall placement presenter');
-      final result = await open(placement);
+      if (placement.isEmpty || (present == null && open == null)) throw StateError('No paywall placement presenter');
+      // Its screen opens as the action's transition says, when the shell can.
+      final result = present != null ? await present(placement, PaywallPresentation.of(a)) : await open!(placement);
       run.result = {'outcome': result.outcome.name, 'entitlementId': result.entitlementId};
       return;
     case PaywallOperation.openLegalLink:

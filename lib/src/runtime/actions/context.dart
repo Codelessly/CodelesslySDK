@@ -3,7 +3,8 @@
 // the screen's node tree.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show ActionDef, AuthOperation, Json, NavigateAction, ScriptDef, Variable, VariableType;
+import 'package:codelessly_api/codelessly_api.dart'
+    show ActionDef, AuthOperation, Json, NavigateAction, PageTransition, PaywallAction, RouteTransition, ScriptDef, Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart';
@@ -62,6 +63,7 @@ class RuntimeActionContext implements ActionHost {
     this.declareMissing = false,
     this.paywall,
     this.openPaywall,
+    this.presentPaywall,
     this.scripts = const [],
     List<VoidCallback>? disposers,
   })  : services = services ?? const _NoServices(),
@@ -117,6 +119,11 @@ class RuntimeActionContext implements ActionHost {
   /// Opens a server-resolved placement; supplied by the app shell.
   final Future<PaywallResult> Function(String placement)? openPaywall;
 
+  /// Opens a placement as [PaywallPresentation] says (the `openPaywall`
+  /// action's transition); supplied by the app shell. Without it,
+  /// [openPaywall] opens it with the default transition.
+  final Future<PaywallResult> Function(String placement, PaywallPresentation presentation)? presentPaywall;
+
   /// The scripts its run script actions run (the layout's).
   final List<ScriptDef> scripts;
 
@@ -142,6 +149,7 @@ class RuntimeActionContext implements ActionHost {
         declareMissing: declareMissing,
         paywall: paywall,
         openPaywall: openPaywall,
+        presentPaywall: presentPaywall,
         scripts: scripts,
         disposers: _disposers,
       );
@@ -258,4 +266,41 @@ class _NoServices implements CodelesslyServices {
 
   @override
   Future<bool> openUrl(String url) async => false;
+}
+
+/// How an `openPaywall` action shows its placement's screen: as a
+/// navigation would ([NavigateAction]'s transition and durations), the
+/// transition reversing when the paywall closes.
+@immutable
+class PaywallPresentation {
+  const PaywallPresentation({
+    this.routeTransition,
+    this.transition = PageTransition.platform,
+    this.transitionMs,
+    this.reverseTransitionMs,
+  });
+
+  /// [action]'s.
+  factory PaywallPresentation.of(PaywallAction action) => PaywallPresentation(
+        routeTransition: action.routeTransition,
+        transition: action.transition,
+        transitionMs: action.transitionMs,
+        reverseTransitionMs: action.reverseTransitionMs,
+      );
+
+  /// A custom transition; replaces [transition] and its durations.
+  final RouteTransition? routeTransition;
+  final PageTransition transition;
+  final int? transitionMs, reverseTransitionMs;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PaywallPresentation &&
+      other.routeTransition == routeTransition &&
+      other.transition == transition &&
+      other.transitionMs == transitionMs &&
+      other.reverseTransitionMs == reverseTransitionMs;
+
+  @override
+  int get hashCode => Object.hash(routeTransition, transition, transitionMs, reverseTransitionMs);
 }
