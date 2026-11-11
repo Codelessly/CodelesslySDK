@@ -19,6 +19,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           repository: Codelessly/CodelesslyAPI
+          # Paired model revision for these runtime actions and widget fields.
+          ref: 9879404627321d831c5da899ec2ad74460818d0d
           path: CodelesslyAPI
       - name: Use the sibling CodelesslyAPI checkout
         run: |
