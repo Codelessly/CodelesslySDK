@@ -309,9 +309,37 @@ class NodeTree {
     for (final e in _states.entries) {
       if (e.key.$2 != instance) continue;
       final patch = source.node(e.key.$1)?.behaviors.states.patchFor(id, e.value);
-      if (patch != null) out = out.patched(patch);
+      if (patch != null) out = withoutBindsUnder(out.patched(patch), patch);
     }
     return out;
+  }
+
+  /// [n] without the bindings [patch] (an active state's) sets: a hovered
+  /// fill wins over the bound one while it's hovered, as a state's style
+  /// overrides the node's.
+  @visibleForTesting
+  static Node withoutBindsUnder(Node n, Map<String, Object?> patch) {
+    if (n.bind.isEmpty) return n;
+    final set = <String>[];
+    void walk(Object? v, String path) {
+      if (v is Map && v.isNotEmpty) {
+        for (final e in v.entries) {
+          if (path.isEmpty && (e.key == 'bind' || e.key == 'id')) continue;
+          walk(e.value, path.isEmpty ? '${e.key}' : '$path.${e.key}');
+        }
+      } else if (path.isNotEmpty) {
+        set.add(path);
+      }
+    }
+
+    walk(patch, '');
+    bool overridden(String key) =>
+        set.any((p) => key == p || key.startsWith('$p.') || key.startsWith('$p['));
+    final kept = {
+      for (final e in n.bind.entries)
+        if (!overridden(e.key)) e.key: e.value,
+    };
+    return kept.length == n.bind.length ? n : n.copyWith(bind: kept);
   }
 
   /// The key of node [id]'s box in [instance] (null: outside repeats).
