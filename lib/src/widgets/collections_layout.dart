@@ -255,7 +255,8 @@ class RenderListItems extends RenderCollection {
   /// `listNodeId`), the list opens the target's slot: room for the dragged
   /// node before the item it would land before (gestures/drag_and_drop.dart
   /// `dropSlotOf`). Set in a running tree only.
-  void dropTarget(NodeTree? tree, String listId) {
+  void dropTarget(NodeTree? tree, String listId, [Object? instance]) {
+    _dropInstance = instance;
     if (identical(tree, _dropTree) && listId == _dropListId) return;
     if (attached && _dropTree != null) DragAndDrop.of(_dropTree!).removeListener(markNeedsLayout);
     _dropTree = tree;
@@ -266,6 +267,10 @@ class RenderListItems extends RenderCollection {
 
   NodeTree? _dropTree;
   String _dropListId = '';
+
+  /// The copy of the list this is (a list repeated in every column of a
+  /// board): only the one the drag is over opens the slot.
+  Object? _dropInstance;
 
   /// The drop target's slot node, drawn in the open slot (under the items,
   /// taking no pointer input); null while no slot shows one.
@@ -501,7 +506,7 @@ class RenderListItems extends RenderCollection {
     // An open drop slot: room before raw item [before] (after the last
     // when it's the count), with a gap on its far side when it's between
     // items.
-    final slot = _dropTree == null ? null : dropSlotOf(_dropTree!, _dropListId);
+    final slot = _dropTree == null ? null : dropSlotOf(_dropTree!, _dropListId, instance: _dropInstance);
     var slotExtent = slot == null ? 0.0 : RenderCollection.main(slot.size, axis);
     // The slot's node fills the slot (as wide as the items' room), or keeps
     // its own length along the list (an insertion line).
