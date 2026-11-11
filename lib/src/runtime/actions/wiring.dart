@@ -20,6 +20,7 @@ import '../../render/node_tree.dart';
 import '../../widgets/material.dart' show selfTappedTypes;
 import '../contracts.dart';
 import '../expressions/formula.dart';
+import '../expressions/engine.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
@@ -201,6 +202,7 @@ class _BoxReactions {
   int? _intervalMs;
   final Map<String, Listenable> _watched = {};
   final Map<String, VoidCallback> _unwatch = {};
+  final Map<String, VoidCallback> _clockUnwatch = {};
   bool _keys = false;
   Node? _node;
 
@@ -214,6 +216,7 @@ class _BoxReactions {
       SchedulerBinding.instance.ensureVisualUpdate();
     }
     _updateTimer(n, types);
+    _updateClockWatches(n);
     _updateWatches(n, types);
     final keys = types.contains(TriggerType.keyDown) || types.contains(TriggerType.keyUp);
     if (keys != _keys) {
@@ -227,8 +230,15 @@ class _BoxReactions {
     for (final r in n.actions) {
       if (r.trigger.type == TriggerType.timer) ms = math.min(ms ?? 1 << 30, r.trigger.effectiveIntervalMs);
       if (r.trigger.type == TriggerType.clock) {
-        final every = num.tryParse(r.trigger.every.trim());
-        if (every != null && every > 0) ms = math.min(ms ?? 1 << 30, every.round());
+        final expression = r.trigger.every.trim();
+        final ctx = owner.contextFor(box);
+        final value = num.tryParse(expression) ?? (expression.contains(r'${')
+            ? ctx.expressions.evaluate(expression, ctx.scope)
+            : FormulaEvaluator.evaluate(expression, (path) => readPath(ctx.scope, path)));
+        final every = value is num ? value : num.tryParse('$value');
+        if (every != null && every.isFinite && every > 0) {
+          ms = math.min(ms ?? 1 << 30, every.round().clamp(1, 86400000));
+        }
       }
     }
     if (ms == _intervalMs) return;
@@ -241,6 +251,32 @@ class _BoxReactions {
       if (types.contains(TriggerType.timer)) owner.fire(box, 'timer');
       if (types.contains(TriggerType.clock)) owner.fire(box, 'clock', event: {'result': {'tick': tick++, 'waitMs': 0}});
     });
+  }
+
+  void _updateClockWatches(Node n) {
+    final names = <String>{
+      for (final r in n.actions)
+        if (r.trigger.type == TriggerType.clock)
+          for (final path in (r.trigger.every.contains(r'${')
+              ? Expressions.readsOf(r.trigger.every)
+              : FormulaEvaluator.referencedPaths(r.trigger.every))) rootOf(path),
+    };
+    for (final name in _clockUnwatch.keys.toList()) {
+      if (!names.contains(name)) _clockUnwatch.remove(name)?.call();
+    }
+    for (final name in names) {
+      if (_clockUnwatch.containsKey(name)) continue;
+      final watched = watchName(owner.contextFor(box).scope, name);
+      if (watched == null) continue;
+      void changed() {
+        final current = _node;
+        if (!_disposed && box.attached && current != null) {
+          _updateTimer(current, {for (final r in current.actions) r.trigger.type});
+        }
+      }
+      watched.addListener(changed);
+      _clockUnwatch[name] = () => watched.removeListener(changed);
+    }
   }
 
   void _updateWatches(Node n, Set<TriggerType> types) {
@@ -305,6 +341,8 @@ class _BoxReactions {
     }
     _unwatch.clear();
     _watched.clear();
+    for (final unwatch in _clockUnwatch.values) { unwatch(); }
+    _clockUnwatch.clear();
     if (_keys) HardwareKeyboard.instance.removeHandler(_key);
     _keys = false;
   }
