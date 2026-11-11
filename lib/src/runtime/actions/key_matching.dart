@@ -12,7 +12,8 @@ bool runtimeKeyMatches(
   if (combo == null) return true;
   if ((meta || alt) &&
       RegExp(r'^[a-z0-9]$').hasMatch(combo.key) &&
-      shift != combo.shift)
+      shift != combo.shift) {
     return false;
+  }
   return combo.matches(label, meta: meta, shift: shift, alt: alt);
 }
