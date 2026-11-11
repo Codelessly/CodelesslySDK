@@ -160,6 +160,16 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case ControlDragAction(command: DragCommand.reset) when TransformGestures.hasIn(run.host.tree, a.node):
       // A node with a transform gesture springs back to its rest pose.
       await TransformGestures.reset(run.host.tree!, a.node);
+    case ControlDragAction(command: DragCommand.zoom):
+      // Zoom buttons: scale a transform gesture about its viewport's middle.
+      final tree = run.host.tree;
+      final factor = double.tryParse(run.text(a.value).trim());
+      if (tree != null && factor != null) await TransformGestures.zoom(tree, a.node, factor);
+    case ControlDragAction(command: DragCommand.pose):
+      // Spring a transform gesture to a pose: {x, y, scale, rotation...}.
+      final tree = run.host.tree;
+      final pose = _poseOf(a.value.trim().startsWith(r'${') ? run.evaluate(a.value) : a.value);
+      if (tree != null && pose.isNotEmpty) await TransformGestures.moveTo(tree, a.node, pose);
     case ControlDragAction():
       // A node that follows the pointer (gestures/drag_motion.dart): fling it
       // off, bring it back from a side, or reset or shake it; each of the
@@ -1013,4 +1023,21 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
   } catch (error) {
     return {'ok': false, 'error': '$error'};
   }
+}
+
+/// A pose from an action's value: a map, or its JSON text; numbers only.
+Map<String, double> _poseOf(Object? v) {
+  if (v is String) {
+    try {
+      v = jsonDecode(v);
+    } catch (_) {
+      return const {};
+    }
+  }
+  if (v is! Map) return const {};
+  return {
+    for (final e in v.entries)
+      if (const {'x', 'y', 'scale', 'rotation', 'scaleX', 'scaleY'}.contains(e.key))
+        if (e.value is num) '${e.key}': (e.value as num).toDouble() else if (double.tryParse('${e.value}') case final double d) '${e.key}': d,
+  };
 }
