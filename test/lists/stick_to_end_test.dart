@@ -101,4 +101,38 @@ void main() {
     expect(p.pixels, p.maxScrollExtent);
     expect(topRow(tester, s), 'M32');
   });
+
+  testWidgets('with pullToRefresh too: it opens at the end, follows, and pulled at the top refreshes', (tester) async {
+    final nodes = chat();
+    nodes['list'] = {
+      ...nodes['list']!,
+      'props': {'stickToEnd': true, 'pullToRefresh': true},
+      'actions': [
+        reaction('refresh', [
+          {'type': 'setVariable', 'variable': 'refreshed', 'op': 'add', 'value': '1'},
+        ]),
+      ],
+    };
+    final s = await show(tester, nodes,
+        variables: [v('messages', messages(0, 30), VariableType.list), v('refreshed', 0, VariableType.integer)]);
+    await tester.pumpAndSettle();
+    expect(find.byType(RefreshIndicator), findsOneWidget);
+    final p = position(tester);
+    expect(p.pixels, p.maxScrollExtent);
+    expect(topRow(tester, s), 'M20');
+
+    s.scope.set('messages', messages(0, 31));
+    await tester.pumpAndSettle();
+    expect(topRow(tester, s), 'M21', reason: 'it follows new messages at the end');
+
+    // Scrolled to the top, a pull refreshes.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 4000));
+    await tester.pumpAndSettle();
+    expect(topRow(tester, s), 'M0');
+    await tester.fling(find.byType(CustomScrollView), const Offset(0, 300), 1000);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(s['refreshed'], 1);
+  });
 }
