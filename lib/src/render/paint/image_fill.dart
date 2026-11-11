@@ -249,6 +249,27 @@ mixin ImageClient on RenderObject {
   void _imageChanged() {
     markNeedsPaint();
     _queueStatus();
+    // On the web (CanvasKit) the first draw of a just-decoded image can't
+    // use its mipmaps yet, so a big image drawn small comes out aliased
+    // until something repaints it; a Flutter `Image` that repaints later
+    // looks smoother. Paint once more after the frame that shows it, so a
+    // still screen settles on the filtered image.
+    if (repaintAfterLoad) _repaintAfterFrame();
+  }
+
+  /// Whether a client paints once more after an image arrives (on the web).
+  @visibleForTesting
+  static bool repaintAfterLoad = kIsWeb;
+
+  bool _repaintQueued = false;
+
+  void _repaintAfterFrame() {
+    if (_repaintQueued) return;
+    _repaintQueued = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _repaintQueued = false;
+      if (attached) markNeedsPaint();
+    });
   }
 
   void _queueStatus() {
