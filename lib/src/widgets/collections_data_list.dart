@@ -822,6 +822,9 @@ class DataListViewState extends State<DataListView> {
     final padding = _node.layout.padding.flutter;
     final cache = _node.prop(CollectionScrollProps.cacheExtent);
 
+    // The footer is the list's last item: inside its padding, as in a
+    // padded list (the end-of-list line sits above the bottom padding).
+    final all = [...slivers, if (footer != null) SliverToBoxAdapter(child: footer)];
     Widget list = LayoutBuilder(
       builder: (context, constraints) {
         final bounded = axis == Axis.vertical ? constraints.hasBoundedHeight : constraints.hasBoundedWidth;
@@ -835,12 +838,11 @@ class DataListViewState extends State<DataListView> {
           scrollCacheExtent: cache == null ? null : ScrollCacheExtent.pixels(cache),
           clipBehavior: clip(_node.prop(CollectionScrollProps.clipBehavior)),
           slivers: [
-            for (final sliver in slivers)
+            for (final sliver in all)
               if (padding == EdgeInsets.zero)
                 sliver
               else
-                SliverPadding(padding: _paddingFor(padding, sliver, slivers, axis), sliver: sliver),
-            if (footer != null) SliverToBoxAdapter(child: footer),
+                SliverPadding(padding: _paddingFor(padding, sliver, all, axis), sliver: sliver),
           ],
         );
       },
