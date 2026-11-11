@@ -700,7 +700,7 @@ class _RenderIntrinsicSafeLayoutBuilder extends RenderBox
 // --- checkbox, switch, radio --------------------------------------------------
 
 /// Flutter's own sizes the toggles are scaled from.
-const double _checkboxSize = 40, _switchWidth = 59, _radioSize = 32;
+const double _checkboxSize = 40, _switchWidth = 59, _radioSize = 32, _radioRing = 18;
 
 class _CheckboxIsland extends StatefulWidget {
   const _CheckboxIsland({required this.node});
@@ -854,7 +854,8 @@ class _RadioIslandState extends State<_RadioIsland> {
     final active = _color(n.prop(RadioProps.activeColor));
     final inactive = _color(n.prop(RadioProps.inactiveColor));
     return Transform.scale(
-      scale: n.layout.width.value / _radioSize,
+      // Compact: the ring (18 px with its stroke) fills the box.
+      scale: n.layout.width.value / (n.prop(RadioProps.compact) ? _radioRing : _radioSize),
       child: RadioGroup<String>(
         groupValue: groupValue ?? '',
         onChanged: (v) {
