@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart' show SizedBox, WidgetSpan;
 import 'package:flutter/scheduler.dart';
 
 import 'convert.dart';
@@ -112,6 +113,8 @@ class RenderTypewriter extends RenderProxyBox {
   void dispose() {
     _ticker?.dispose();
     _ticker = null;
+    _lines?.dispose();
+    _lines = null;
     super.dispose();
   }
 
@@ -234,12 +237,70 @@ class RenderTypewriter extends RenderProxyBox {
     final style = _styleAt(p.text, n);
     final fontSize = style?.fontSize ?? 14;
     final width = tw.caretWidth > 0 ? tw.caretWidth : fontSize * 0.5;
-    final color = tw.caretColor?.flutter ?? style?.color ?? const Color(0xFF000000);
-    context.canvas.drawRect(
-      Rect.fromLTWH(offset.dx + at.dx + caretAt.dx + 1, offset.dy + at.dy + caretAt.dy + height * 0.12, width, height * 0.76),
-      Paint()..color = color.withValues(alpha: color.a * 0.8),
-    );
+    // A given color as given; the text's own a little faded.
+    final given = tw.caretColor?.flutter;
+    final textColor = style?.color ?? const Color(0xFF000000);
+    final color = given ?? textColor.withValues(alpha: textColor.a * 0.8);
+    final Rect rect;
+    if (tw.caretHeight > 0) {
+      // Centered on the text's middle, where a WidgetSpan aligned
+      // PlaceholderAlignment.middle would be.
+      final top = _baselineAt(p, caretAt.dy) + _middleTop(style, tw.caretHeight);
+      rect = Rect.fromLTWH(offset.dx + at.dx + caretAt.dx + tw.caretGap, offset.dy + at.dy + top, width, tw.caretHeight);
+    } else {
+      rect = Rect.fromLTWH(offset.dx + at.dx + caretAt.dx + tw.caretGap, offset.dy + at.dy + caretAt.dy + height * 0.12, width, height * 0.76);
+    }
+    context.canvas.drawRect(rect, Paint()..color = color);
   }
+
+  TextPainter? _lines;
+  (InlineSpan, double)? _linesKey;
+
+  /// The baseline of the paragraph's line whose top is at (or just above)
+  /// [top] (from a painter laid out as the paragraph is, kept while the
+  /// text and width stay the same).
+  double _baselineAt(RenderParagraph p, double top) {
+    final key = (p.text, p.size.width);
+    if (_lines == null || _linesKey != key) {
+      _lines?.dispose();
+      _lines = TextPainter(
+        text: p.text,
+        textAlign: p.textAlign,
+        textDirection: p.textDirection,
+        textScaler: p.textScaler,
+        maxLines: p.maxLines,
+        locale: p.locale,
+        strutStyle: p.strutStyle,
+        textWidthBasis: p.textWidthBasis,
+        textHeightBehavior: p.textHeightBehavior,
+      )..layout(minWidth: p.size.width, maxWidth: p.size.width);
+      _linesKey = key;
+    }
+    final lines = _lines!.computeLineMetrics();
+    if (lines.isEmpty) return top;
+    var line = lines.first;
+    for (final l in lines) {
+      if (l.baseline - l.ascent <= top + 0.5) line = l;
+    }
+    return line.baseline;
+  }
+
+  static final Map<(TextStyle?, double), double> _middleCache = {};
+
+  /// How far below the baseline a [height]-tall middle-aligned placeholder
+  /// starts in [style] (negative: above), as Flutter lays one out.
+  static double _middleTop(TextStyle? style, double height) =>
+      _middleCache.putIfAbsent((style, height), () {
+        final tp = TextPainter(
+          text: TextSpan(style: style, children: const [TextSpan(text: 'x'), WidgetSpan(child: SizedBox())]),
+          textDirection: TextDirection.ltr,
+        )
+          ..setPlaceholderDimensions([PlaceholderDimensions(size: Size(1, height), alignment: PlaceholderAlignment.middle)])
+          ..layout();
+        final top = tp.inlinePlaceholderBoxes!.first.top - tp.computeLineMetrics().first.baseline;
+        tp.dispose();
+        return top;
+      });
 
   /// The style of the character at [index] (its run's, over the base).
   static TextStyle? _styleAt(InlineSpan span, int index) {

@@ -1,4 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -246,6 +247,38 @@ void main() {
     await tester.sendEventToBinding(PointerScrollEvent(position: board.localToGlobal(const Offset(150, 100)), scrollDelta: const Offset(0, 50)));
     await tester.pump();
     expect(board.pixels, 200);
+  });
+
+  testWidgets('on desktop a scroll view shows Flutter\'s scrollbar while a mouse hovers its track or it scrolls', (tester) async {
+    final screen = await wiring.show(tester, nodes());
+    final view = viewport(screen.tree);
+    // 200 tall, 600 of content: a third of the track, at the top.
+    expect(view.showsScrollbar, isTrue);
+    expect(view.thumbShown, isFalse);
+    expect(view.thumbRect, rectMoreOrLessEquals(const Rect.fromLTWH(194, 0, 6, 200 / 3)));
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: view.localToGlobal(const Offset(100, 100)));
+    addTearDown(mouse.removePointer);
+    await tester.pump();
+    expect(view.thumbShown, isFalse, reason: 'over the content, not the track');
+    await mouse.moveTo(view.localToGlobal(const Offset(197, 100)));
+    await tester.pump();
+    expect(view.thumbShown, isTrue);
+    await mouse.moveTo(const Offset(700, 500));
+    await tester.pump();
+    expect(view.thumbShown, isFalse);
+    // A wheel scroll shows it a moment, at its new place.
+    await tester.sendEventToBinding(PointerScrollEvent(position: view.localToGlobal(const Offset(100, 100)), scrollDelta: const Offset(0, 400)));
+    await tester.pump();
+    expect(view.thumbShown, isTrue);
+    expect(view.thumbRect.bottom, closeTo(200, 0.01));
+    await tester.pump(const Duration(milliseconds: 700));
+    expect(view.thumbShown, isFalse);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
+  testWidgets('on a touch platform there is no scrollbar', (tester) async {
+    final screen = await wiring.show(tester, nodes());
+    expect(viewport(screen.tree).showsScrollbar, isFalse);
   });
 
   testWidgets('native scrollTo action respects axis, alignment, offset and animation', (tester) async {
