@@ -19,7 +19,7 @@ import '../runtime/actions/context.dart' show setVariableIn, variableOf;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/node_scopes.dart';
 import '../runtime/expressions/scopes.dart';
-import 'behaviours.dart' show RenderPose, motionMatrix;
+import 'behaviors.dart' show RenderPose, motionMatrix;
 import 'node_tree.dart';
 
 class RenderFlip extends RenderPose {

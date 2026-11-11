@@ -197,7 +197,7 @@ void main() {
 
     test('cancel leaves the paywall open and a retry possible', () async {
       await session.purchase();
-      store.events.add(const PaywallResult(PaywallOutcome.cancelled));
+      store.events.add(const PaywallResult(PaywallOutcome.canceled));
       await pumpEventQueue();
       expect(session.purchasing, false);
       expect(session.entitlements, isEmpty);
@@ -313,7 +313,7 @@ void main() {
       expect((await queue.read()).single.serverVerificationData, 'signed-t1');
     });
 
-    test('products by platform, annual savings; a declined purchase is cancelled', () async {
+    test('products by platform, annual savings; a declined purchase is canceled', () async {
       final store = FakeStore();
       final results = <PaywallResult>[];
       final service = StorePurchaseService(
@@ -330,7 +330,7 @@ void main() {
       expect(products.last.savingsPercent, 33);
       await service.purchase(products.first);
       await pumpEventQueue();
-      expect(results.single.outcome, PaywallOutcome.cancelled);
+      expect(results.single.outcome, PaywallOutcome.canceled);
       await service.restore();
       await pumpEventQueue();
       expect(results.last.outcome, PaywallOutcome.restoreNothing);

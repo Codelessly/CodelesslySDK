@@ -83,7 +83,7 @@ void main() {
     expect(r['lead']!.size, const Size(24, 24));
     expect(r['lead']!.left, 16);
     expect(r['title']!.left, greaterThan(r['lead']!.right));
-    // ListTile centres a one-line title in its own (56) height.
+    // ListTile centers a one-line title in its own (56) height.
     expect(r['title']!.center.dy, closeTo(28, 1));
   });
 

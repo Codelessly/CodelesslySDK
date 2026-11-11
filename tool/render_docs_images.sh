@@ -14,7 +14,7 @@
 # Needs: the toolkit (a sibling CodelesslyEditor checkout by default, or
 # DOCS_IMAGES_TOOL), Node 18+ with Playwright installed globally
 # (npm i -g playwright && npx playwright install chromium), and Python 3 with
-# Pillow to shrink the PNGs (256 colours; skipped with a warning without it).
+# Pillow to shrink the PNGs (256 colors; skipped with a warning without it).
 # Screenshots used as bases live in _scenes/shots/ with their targets.json.
 set -euo pipefail
 
@@ -51,7 +51,7 @@ for f in "${pages[@]}"; do
   node "$TOOL/render.mjs" "$f" --out "$out" --check --quiet
 done
 
-# Shrink: 256-colour palettes keep these flat diagrams and UI captures crisp at
+# Shrink: 256-color palettes keep these flat diagrams and UI captures crisp at
 # about a third of the size.
 if python3 -c 'import PIL' 2>/dev/null; then
   python3 - "$IMAGES" "${pages[@]}" <<'PY'
@@ -71,5 +71,5 @@ for page in pages:
 print(f'render_docs_images: {total // 1024} KB of PNGs')
 PY
 else
-  echo "render_docs_images: Pillow not found, PNGs left unoptimised (pip install Pillow)." >&2
+  echo "render_docs_images: Pillow not found, PNGs left unoptimized (pip install Pillow)." >&2
 fi

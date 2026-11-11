@@ -115,7 +115,7 @@ abstract final class CanvasViewport {
 }
 
 /// Lays [child] (a canvas's NodeView) out in the canvas box: at the
-/// layout size, scaled into the box (autoScale), top-centred.
+/// layout size, scaled into the box (autoScale), top-centered.
 class CanvasViewportBox extends StatelessWidget {
   const CanvasViewportBox({super.key, required this.box, required this.child});
 
@@ -141,7 +141,7 @@ class CanvasViewportBox extends StatelessWidget {
 
 /// Lays its child out unconstrained in height when its own height is
 /// unbounded, else at its size divided by [scale], and paints it scaled by
-/// [scale] from the top centre.
+/// [scale] from the top center.
 class _ScaledBox extends SingleChildRenderObjectWidget {
   const _ScaledBox({required this.scale, super.child});
 

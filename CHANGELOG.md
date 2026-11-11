@@ -1,3 +1,14 @@
+## 22.0.0
+
+**Breaking changes**
+
+- Requires `codelessly_api` 22.0.0, where `Behaviours` is now `Behaviors`, `BehaviourFields` is now
+  `BehaviorFields` and `Node.behaviours` is now `Node.behaviors`.
+- `ActionsCancelled` is now `ActionsCanceled`.
+- `ActionCancellation.isCancelled` is now `ActionCancellation.isCanceled`.
+- `ActionRun.isCancelled` is now `ActionRun.isCanceled`.
+- `PaywallOutcome.cancelled` is now `PaywallOutcome.canceled`.
+
 ## 21.0.0
 
 **Breaking changes**
@@ -17,7 +28,7 @@
   data, accounts and files (`codelesslyCloudServices`).
 - `firebase.dart` now exports the Firebase types its functions take (`Firebase`, `FirebaseApp`, `FirebaseOptions`,
   `FirebaseFirestore`, `FirebaseAuth`, `FirebaseStorage`), so you don't need extra imports to call them.
-- Anchored modals: `openModal` honours `anchor`, `placement`, `anchorGap` and `anchorOffset`. A modal anchored to its
+- Anchored modals: `openModal` honors `anchor`, `placement`, `anchorGap` and `anchorOffset`. A modal anchored to its
   trigger or the pointer opens beside it as a popover, flips side when it doesn't fit and stays on screen.
 
 **Fixes**

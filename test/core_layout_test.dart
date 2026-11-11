@@ -32,7 +32,7 @@ void main() {
       'fill': {'type': 'box', 'layout': {'width': {'fill': 60}, 'height': 10}},
     }, 'r');
     Rect r(String id) => tree.boxOf(id)!.rectIn(view)!;
-    // Runs: [a, b] (170 of 200, centred), [c, fill]; centred across each
+    // Runs: [a, b] (170 of 200, centered), [c, fill]; centered across each
     // run (crossAxisAlignment defaults to center).
     expect(r('a'), const Rect.fromLTWH(15, 5, 80, 20));
     expect(r('b'), const Rect.fromLTWH(105, 0, 80, 30));

@@ -43,7 +43,7 @@ class NodeValuesScope extends ValuesScope {
 }
 
 /// The node kinds that declare names, in order (a node with several
-/// behaviours declares all their names in one scope).
+/// behaviors declares all their names in one scope).
 final List<NodeScopeDeclarer> nodeScopeDeclarers = [trackScopeValues, flipScopeValues, tiltScopeValues, transformScopeValues];
 
 /// What [node] declares (empty: nothing), read in [parent].
@@ -58,7 +58,7 @@ Map<String, Object?> nodeScopeValues(Node node, ValueScope parent) {
 
 /// Whether [node] declares any name for the nodes inside it.
 bool declaresNodeScope(Node node) {
-  final be = node.behaviours;
+  final be = node.behaviors;
   return be.drag?.track != null ||
       be.flip != null ||
       be.tilt != null ||
@@ -105,7 +105,7 @@ class ResponsiveScreenScope extends NodeValuesScope {
 /// A drag track's `track`: the value it's drawn at and its progress (as
 /// the design canvas draws it), not dragged, fine or focused.
 Map<String, Object?>? trackScopeValues(Node node, ValueScope parent) {
-  final track = node.behaviours.drag?.track;
+  final track = node.behaviors.drag?.track;
   if (track == null) return null;
   final value = trackValueIn(track, parent);
   return {'track': trackValues(track, value)};
@@ -145,7 +145,7 @@ double trackValueIn(api.DragTrack track, ValueScope? scope) {
 /// A flip card's `flip`: on its back or not, and the turn (0 front, 1
 /// back).
 Map<String, Object?>? flipScopeValues(Node node, ValueScope parent) {
-  final flip = node.behaviours.flip;
+  final flip = node.behaviors.flip;
   if (flip == null) return null;
   final back = flipWantedIn(flip, parent);
   return {
@@ -167,7 +167,7 @@ bool flipWantedIn(api.FlipCard flip, ValueScope? scope) {
 /// A tilt's `tilt`: where the pointer is over it (-1–1) and whether it's
 /// over it.
 Map<String, Object?>? tiltScopeValues(Node node, ValueScope parent) {
-  if (node.behaviours.tilt == null) return null;
+  if (node.behaviors.tilt == null) return null;
   return const {
     'tilt': {'x': 0.0, 'y': 0.0, 'active': false},
   };
@@ -176,7 +176,7 @@ Map<String, Object?>? tiltScopeValues(Node node, ValueScope parent) {
 /// A transform gesture's `transform`, at rest (its render object writes
 /// the live pose).
 Map<String, Object?>? transformScopeValues(Node node, ValueScope parent) {
-  final be = node.behaviours;
+  final be = node.behaviors;
   if (be.transformGesture == null && !be.zoomable) return null;
   return const {
     'transform': {'x': 0, 'y': 0, 'scale': 1, 'rotation': 0, 'scaleX': 1, 'scaleY': 1, 'active': false, 'selected': true},

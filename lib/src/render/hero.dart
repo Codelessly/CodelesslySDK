@@ -17,7 +17,7 @@ import 'recipe.dart';
 /// Adds node [n]'s hero mark to [chain] (inside its rotation and motion, so
 /// a flight starts where the node is drawn). A design canvas has none.
 void heroLayer(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
-  final hero = n.behaviours.hero;
+  final hero = n.behaviors.hero;
   if (!animates || hero == null) return;
   chain.add(
     b.obtain<RenderHeroMark>('hero', RenderHeroMark.new)

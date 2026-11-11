@@ -180,7 +180,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   // The render-only collection below is the design canvas's at-rest view.
   // Counted design templates and lists with drag/drop slots retain their
   // render-object path, which owns item cleanup, shrink wrapping and gaps.
-  if (b.tree.animates && n.bind.containsKey('data') && n.behaviours.dropTarget == null &&
+  if (b.tree.animates && n.bind.containsKey('data') && n.behaviors.dropTarget == null &&
       n.prop(ListViewProps.scrollable) && !_wraps(n) &&
       n.prop(ListViewProps.layout) == api.ListLayout.list && ListRuntime(b, n).data != null) {
     return _dataList(b, n, chain, itemId, item);
@@ -210,8 +210,8 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   final itemMain = _itemMain(n, item);
   if (layout == api.ListLayout.deck) {
-    // Layered, the first on top, each at the top centre (a horizontal
-    // list's: centre left).
+    // Layered, the first on top, each at the top center (a horizontal
+    // list's: center left).
     chain.add(_viewportBox(b, n, canShrinkWrap: false));
     final view = b.obtain<RenderLayeredItems>('deck', RenderLayeredItems.new)
       ..clipBehavior = _clip(n)
