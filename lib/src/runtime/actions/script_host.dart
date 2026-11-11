@@ -50,16 +50,69 @@ Future<void> runScriptAction(RunScriptAction a, ActionRun run) {
   return execute();
 }
 
-final _scriptWriteTails = Expando<Future<void>>('script variable writes');
+final _scriptWriteTurns = Expando<_WriteTurns>('script variable writes');
 final _heldScriptWriteScopes = Object();
+final _scriptWriteTurn = Object();
+
+/// The writers of one app scope, one at a time.
+class _WriteTurns {
+  Future<void> _tail = Future<void>.value();
+
+  /// Waits for the writers ahead; returns the function that lets the next go.
+  Future<void Function()> take() async {
+    final done = Completer<void>();
+    final before = _tail;
+    _tail = done.future;
+    await before;
+    var released = false;
+    return () {
+      if (released) return;
+      released = true;
+      done.complete();
+    };
+  }
+}
+
+/// A writer's turn: given back while its script waits on the app
+/// (app.delay, a navigation, an API call) and taken again before it goes on.
+class ScriptWriteTurn {
+  ScriptWriteTurn._(this._turns);
+
+  final _WriteTurns _turns;
+  void Function()? _release;
+
+  Future<void> _take() async => _release = await _turns.take();
+
+  void _giveBack() {
+    _release?.call();
+    _release = null;
+  }
+
+  /// Runs [wait] without the turn, so other writers (a cancel, a timer tick)
+  /// can run meanwhile; the script reads fresh variables when it resumes.
+  Future<T> without<T>(Future<T> Function() wait) async {
+    _giveBack();
+    try {
+      return await wait();
+    } finally {
+      await _take();
+    }
+  }
+
+  /// The turn of the script running in this zone, if it writes variables.
+  static ScriptWriteTurn? get current => Zone.current[_scriptWriteTurn] as ScriptWriteTurn?;
+}
 
 /// A script takes its variable snapshot when it starts. Writers sharing an app
 /// scope must run through their commits in order, or a timer can overwrite a
 /// newer edit with an old snapshot. Pure reads and different apps stay parallel.
+/// A writer waiting on the app gives its turn back meanwhile (it reads the
+/// variables afresh when it resumes), so a long run with delays doesn't hold
+/// every other writer until it ends.
 Future<void> _serializeScriptWrite(
   ActionRun run,
   Future<void> Function() execute,
-) {
+) async {
   Object owner = run.context.scope;
   for (
     ValueScope? scope = run.context.scope;
@@ -72,29 +125,20 @@ Future<void> _serializeScriptWrite(
       Zone.current[_heldScriptWriteScopes] as Set<Object>? ?? const <Object>{};
   // A host action nested in this script is part of the same write chain.
   if (held.contains(owner)) return execute();
-  final before = _scriptWriteTails[owner] ?? Future<void>.value();
-  final next = before.then((_) {
+  final turn = ScriptWriteTurn._(_scriptWriteTurns[owner] ??= _WriteTurns());
+  await turn._take();
+  try {
     if (run.isCanceled) throw const ActionsCanceled();
-    return runZoned<Future<void>>(
+    await runZoned<Future<void>>(
       execute,
       zoneValues: {
         _heldScriptWriteScopes: {...held, owner},
+        _scriptWriteTurn: turn,
       },
     );
-  });
-  final settled = next.then<void>(
-    (_) {},
-    onError: (Object _, StackTrace _) {},
-  );
-  _scriptWriteTails[owner] = settled;
-  unawaited(
-    settled.then((_) {
-      if (identical(_scriptWriteTails[owner], settled)) {
-        _scriptWriteTails[owner] = null;
-      }
-    }),
-  );
-  return next;
+  } finally {
+    turn._giveBack();
+  }
 }
 
 Future<void> _executeScriptAction(
@@ -214,7 +258,15 @@ class RuntimeScriptHost implements NamedVariablesScriptHost {
   }
 
   @override
-  Future<Object?> call(String name, List<Object?> args) async {
+  Future<Object?> call(String name, List<Object?> args) {
+    // app.yield(ms): wait, giving the write turn back meanwhile. Every other
+    // call keeps it, so a run stays one transaction (read, await, write).
+    final turn = ScriptWriteTurn.current;
+    if (name == 'yield' && turn != null) return turn.without(() => _call('delay', args));
+    return _call(name == 'yield' ? 'delay' : name, args);
+  }
+
+  Future<Object?> _call(String name, List<Object?> args) async {
     Object? arg(int i) => i < args.length ? args[i] : null;
     Json map(Object? v) => v is Map ? {for (final e in v.entries) '${e.key}': e.value} : const {};
     switch (name) {

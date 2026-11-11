@@ -363,8 +363,9 @@ class _BoxReactions {
 
   bool _key(KeyEvent e) {
     final n = _node;
-    if (n == null || _disposed || !box.attached || e is KeyRepeatEvent) return false;
-    final down = e is KeyDownEvent;
+    if (n == null || _disposed || !box.attached) return false;
+    final repeat = e is KeyRepeatEvent;
+    final down = e is KeyDownEvent || repeat;
     final type = down ? TriggerType.keyDown : TriggerType.keyUp;
     // Keys belong to the field being typed in, except Escape, which leaves
     // it (`${result.typing}` tells the actions).
@@ -376,6 +377,8 @@ class _BoxReactions {
     var handled = false;
     for (final r in n.actions) {
       if (r.trigger.type != type) continue;
+      // A held key's repeats reach only keyDown reactions that ask for them.
+      if (repeat && !r.trigger.repeat) continue;
       final combo = r.trigger.keyCombo;
       if (!runtimeKeyMatches(combo, label, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) continue;
       if (r.trigger.when.trim().isNotEmpty) {
@@ -388,7 +391,7 @@ class _BoxReactions {
     }
     if (!handled) return false;
     owner.fire(box, type.name, event: {
-      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta, 'typing': typing},
+      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta, 'repeat': repeat, 'typing': typing},
     });
     return true;
   }
