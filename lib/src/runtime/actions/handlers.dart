@@ -7,11 +7,14 @@ import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
-import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
+import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import 'action_error.dart' show CodedFailure;
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
+import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
@@ -24,6 +27,7 @@ import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
+import 'app_data_sources.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
 import 'runner.dart';
@@ -477,6 +481,10 @@ Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
   final scope = run.context.scope;
   final variable = a.variable.trim();
   if (variable.isEmpty) return;
+  final host = run.host;
+  if (a.scope == CloudDataScope.app && host is RuntimeActionContext && host.appData != null) {
+    return _loadAppCloudData(a, run, db, host.appData!, variable);
+  }
   void put(String status, {Object? data, Object? error}) => setVariableIn(scope, variable, {
         'status': status,
         'isLoading': status == 'loading',
@@ -546,6 +554,50 @@ Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
   }
 }
 
+/// [a] with `scope: app`: the app's one subscription to its source, shared
+/// by every screen that loads the same ([AppDataSources]). Waits for the
+/// first value; the subscription outlives the screen.
+Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDatabase db, AppDataSources sources, String variable) async {
+  final path = resolveCollectionPath(a.query, run.expressions, run.scope);
+  final id = a.single ? run.text(a.id).trim() : '';
+  final query = a.single ? null : resolveCloudQuery(a.query, run.expressions, run.scope);
+  final key = [
+    a.single ? 'document' : 'query',
+    path,
+    id,
+    if (query != null) _cloudQueryKey(query),
+    ...a.query.loadRelated,
+  ].join('\u0000');
+  final loaded = sources.load(
+    variable,
+    key,
+    () => query == null ? db.watchDocument(path, id) : db.watchQuery(path, query, loadRelated: a.query.loadRelated),
+  );
+  // Stopping this run stops waiting, not the app's subscription.
+  final waiting = Completer<void>();
+  loaded.then((_) {
+    if (!waiting.isCompleted) waiting.complete();
+  }, onError: (Object error, StackTrace stack) {
+    if (!waiting.isCompleted) waiting.completeError(error, stack);
+  });
+  final removeCancellation = run.onCancel(() {
+    if (!waiting.isCompleted) waiting.completeError(const ActionsCanceled());
+  });
+  try {
+    await waiting.future;
+  } finally {
+    removeCancellation();
+  }
+}
+
+/// [q] as text: the same query gives the same text.
+String _cloudQueryKey(CloudQuery q) => [
+      for (final f in q.filters) '${f.field} ${f.operator.name} ${jsonEncode(f.value, toEncodable: (v) => '$v')}',
+      for (final o in q.orderBy) '${o.field} ${o.descending ? 'desc' : 'asc'}',
+      'limit ${q.limit}',
+      'after ${q.startAfter}',
+    ].join(';');
+
 // --- auth -----------------------------------------------------------------------------
 
 Future<void> _auth(AuthAction a, ActionRun run) async {
@@ -574,8 +626,10 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.sendEmailVerification:
         await auth.sendEmailVerification();
       case AuthOperation.updatePassword:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.updatePassword(password);
       case AuthOperation.deleteAccount:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.deleteAccount();
       case AuthOperation.signInWithGoogle:
         run.result = (await auth.signInWithProvider(AuthProviderKind.google)).uid;
@@ -585,6 +639,8 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
         await auth.sendSignInLink(email, continueUrl: Uri.base.toString());
       case AuthOperation.completeSignInLink:
         run.result = (await auth.signInWithLink(email, Uri.base.toString())).uid;
+      case AuthOperation.signInAnonymously:
+        run.result = (await auth.signInAsGuest()).uid;
     }
     final host = run.host;
     if (host is RuntimeActionContext) host.refreshAuthValues?.call(a.operation);
@@ -625,9 +681,22 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
   }
   final picked = await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple);
   for (final (i, f) in picked.indexed) {
-    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) throw StateError('${f.name} is larger than ${a.maxSizeMB} MB');
-    if (a.progressVariable.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, i / picked.length);
-    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes, contentType: f.contentType);
+    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
+      throw CodedFailure('file-too-large', '${f.name} is larger than ${_mb(a.maxSizeMB)} MB');
+    }
+    final type = f.contentType ?? '';
+    if (a.kind == CloudFileKind.image && type.isNotEmpty && !type.startsWith('image/')) {
+      throw CodedFailure('invalid-file-type', '${f.name} is not an image');
+    }
+    void progress(double sent) {
+      if (a.progressVariable.isNotEmpty) {
+        setVariableIn(run.context.scope, a.progressVariable, (i + sent.clamp(0, 1)) / picked.length);
+      }
+    }
+
+    progress(0);
+    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes,
+        contentType: f.contentType, onProgress: progress);
     await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
   }
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
@@ -763,13 +832,54 @@ void _editText(EditTextAction a, ActionRun run) {
   }
 }
 
+/// The copy of repeated node [id] that a list built for its item [item]:
+/// the one whose `${item.id}` (or `${item.key}`, or the item itself, as
+/// text) reads [item], else the one whose `${index}` is [item]. Each copy is
+/// asked in its own scope, so a node inside an item template matches too.
+NodeBox? repeatOf(NodeTree tree, String id, String item) {
+  final binder = tree.binder;
+  if (binder == null) return null;
+  NodeBox? byIndex;
+  final index = int.tryParse(item);
+  for (final b in tree.boxesOf(id)) {
+    if (!b.attached) continue;
+    final scope = binder.scopeFor(tree.source, b.id, b.instance);
+    if (scope == null) continue;
+    final value = readPath(scope, 'item');
+    final key = value is Map ? (value['id'] ?? value['key']) : value;
+    if (key != null && '$key' == item) return b;
+    if (index != null && byIndex == null && readPath(scope, 'index') == index) byIndex = b;
+  }
+  return byIndex;
+}
+
+/// Whether the scrolling rows and columns around [box] have laid out
+/// something to scroll (or there are none).
+bool _scrollsLaidOut(RenderObject box) {
+  for (var p = box.parent; p != null; p = p.parent) {
+    if (p is RenderDesignScroll && p.interactive) return p.hasSize && p.maxScrollExtent > 0;
+  }
+  return true;
+}
+
 /// Scrolls the scroll views around node [ScrollToAction.node] (those
 /// along [ScrollToAction.axis] only, when it's set) so the node sits at
 /// its alignment, less its offset: each view reveals the one inside it.
 Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
-  final box = run.host.tree?.boxOf(run.text(a.node).trim());
+  final tree = run.host.tree;
+  final id = run.text(a.node).trim();
+  final item = run.text(a.item).trim();
+  final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
   if (box == null || !box.attached) return;
+  // Run from a screen's `load`, the views around it may not have their
+  // content's extent yet: give layout a few frames.
+  for (var i = 0; i < 4 && !_scrollsLaidOut(box); i++) {
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+  }
+  if (!box.attached) return;
   final target = box.contentBox ?? box;
+  final offset = a.offsetFormula.isEmpty ? a.offset : (double.tryParse(run.text(a.offsetFormula).trim()) ?? a.offset);
   final duration = Duration(milliseconds: a.durationMs);
   final Curve curve = switch (AnimationCurve.parse(a.curve)) {
     AnimationCurve.linear => Curves.linear,
@@ -779,6 +889,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     AnimationCurve.easeOutCubic => Curves.easeOutCubic,
     AnimationCurve.easeInOutCubic => Curves.easeInOutCubic,
     AnimationCurve.decelerate => Curves.decelerate,
+    AnimationCurve.emphasized => const Cubic(0.2, 0, 0, 1),
     _ => Curves.easeInOut,
   };
   final scrolls = <Future<void>>[];
@@ -789,7 +900,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
       viewports++;
       final along=a.axis==null || (p.axis==rendering.Axis.horizontal)==(a.axis==ScrollAxis.horizontal);
       if(along){
-        final to=(p.getOffsetToReveal(revealed,a.alignment)-a.offset).clamp(0.0,p.maxScrollExtent);
+        final to=(p.getOffsetToReveal(revealed,a.alignment)-offset).clamp(0.0,p.maxScrollExtent);
         if(a.durationMs<=0){p.jumpTo(to);}else{scrolls.add(p.animateTo(to,duration:duration,curve:curve));}
       }
       revealed=p;
@@ -801,7 +912,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     viewports++;
     final along = a.axis == null || (p.axis == rendering.Axis.horizontal) == (a.axis == ScrollAxis.horizontal);
     if (along && position.hasContentDimensions) {
-      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - a.offset)
+      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - offset)
           .clamp(position.minScrollExtent, position.maxScrollExtent)
           .toDouble();
       if ((to - position.pixels).abs() >= 0.5) {
@@ -832,12 +943,32 @@ void _speak(SpeakAction a, ActionRun run) {
       pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2)));
 }
 
+/// The latest timed start of each voice id (see [_playSound]).
+final Map<String, Object> _soundTokens = {};
+
 void _playSound(PlaySoundAction a, ActionRun run) {
   double? number(String v) => double.tryParse(run.text(v).trim());
   final service = _require(run, 'Sound').sound;
   switch (a.operation) {
     case 'start':
-      service.startNoteWithWaveform(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1, waveform:run.text(a.waveform));
+      final id = run.text(a.voiceId).trim();
+      final note = a.note.isEmpty ? null : number(a.note);
+      final frequency = note != null ? midiToHz(note) : number(a.frequency) ?? 440;
+      service.startNoteWithWaveform(id, frequency: frequency, volume: number(a.volume) ?? 1, waveform: run.text(a.waveform).trim());
+      // A voice with a duration releases itself, unless something started
+      // another voice under its id in the meantime.
+      final ms = a.duration.isEmpty ? null : number(a.duration);
+      if (ms != null && ms >= 0) {
+        final token = _soundTokens[id] = Object();
+        Timer(Duration(milliseconds: ms.round()), () {
+          if (identical(_soundTokens[id], token)) {
+            _soundTokens.remove(id);
+            service.stopNote(id);
+          }
+        });
+      } else {
+        _soundTokens.remove(id);
+      }
       return;
     case 'stop':
       service.stopNote(run.text(a.voiceId).trim());
@@ -917,10 +1048,18 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
   switch (result.outcome) {
     case PaywallOutcome.purchased || PaywallOutcome.restored:
       return;
-    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing || PaywallOutcome.skipped:
+    // Closing the paywall or nothing to show ends the chain quietly. A
+    // cancelled purchase and an empty restore end it too, without an error,
+    // but the screen's actionError reaction hears them
+    // (`${result.error.code}`) to say so.
+    case PaywallOutcome.closed || PaywallOutcome.skipped:
       throw const ActionsCanceled();
+    case PaywallOutcome.canceled:
+      throw const ActionsStopped('purchase-cancelled', 'Purchase cancelled');
+    case PaywallOutcome.restoreNothing:
+      throw const ActionsStopped('nothing-to-restore', 'No purchase to restore');
     case PaywallOutcome.failed:
-      throw StateError(result.error ?? 'Purchase failed');
+      throw CodedFailure(result.code.isEmpty ? 'purchase-failed' : result.code, result.error ?? 'Purchase failed');
   }
 }
 
@@ -995,3 +1134,6 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
     return {'ok': false, 'error': '$error'};
   }
 }
+
+/// 5 for 5.0, 2.5 for 2.5.
+String _mb(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';

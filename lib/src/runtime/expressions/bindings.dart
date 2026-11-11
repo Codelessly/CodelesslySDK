@@ -50,14 +50,16 @@ final class ProvidedItem {
 final class BoundProperty {
   BoundProperty(this.path, this.expression)
       : reads = Expressions.readsOf(expression),
-        readsClock = Expressions.readsClock(expression);
+        clock = Expressions.clockTick(expression);
 
   final String path;
   final String expression;
 
   /// The paths it reads.
   final Set<String> reads;
-  final bool readsClock;
+
+  /// How often its value changes as time passes; null: it doesn't.
+  final ClockTick? clock;
 
   Object? valueIn(Expressions e, ValueScope scope) => e.evaluate(expression, scope);
 
@@ -70,12 +72,33 @@ final class NodeBindings {
       : properties = [
           for (final e in n.bind.entries)
             if (e.key != BindPaths.visible && e.key != BindPaths.data) BoundProperty(e.key, e.value),
+          ..._imageUrls(n),
         ],
         visible = n.bind[BindPaths.visible]?.let((e) => BoundProperty(BindPaths.visible, e)),
         data = n.bind[BindPaths.data]?.let((e) => BoundProperty(BindPaths.data, e)),
         text = n.type == TextProps.spec.type && n.prop(TextProps.text).contains(r'${') && !n.bind.containsKey('props.text')
             ? n.prop(TextProps.text)
             : null;
+
+  /// An image paint whose own URL holds `${...}` (`${item.cover}`), bound
+  /// to that URL as a text node's own text is: filled in from the scope, as
+  /// v1 drew it, unless the node binds the paint or its URL itself.
+  static Iterable<BoundProperty> _imageUrls(Node n) sync* {
+    final d = n.decoration;
+    for (final (key, paints) in [('fills', d.fills), ('foregroundFills', d.foregroundFills)]) {
+      for (var i = 0; i < paints.length; i++) {
+        final url = paints[i].image?.url;
+        if (url == null || !url.contains(r'${')) continue;
+        final id = paints[i].id;
+        final bound = n.bind.keys.any((k) =>
+            k == 'decoration.$key' ||
+            k.startsWith('decoration.$key[$i]') ||
+            (id != null && id.isNotEmpty && k.startsWith('decoration.$key.$id')) ||
+            k.startsWith('decoration.$key.*'));
+        if (!bound) yield BoundProperty('decoration.$key[$i].image.url', url);
+      }
+    }
+  }
 
   static final Expando<NodeBindings> _cache = Expando('NodeBindings');
 
@@ -95,7 +118,7 @@ final class NodeBindings {
   final String? text;
 
   late final Set<String> textReads = text == null ? const {} : Expressions.readsOf(text!);
-  late final bool textReadsClock = text != null && Expressions.readsClock(text!);
+  late final ClockTick? textClock = text == null ? null : Expressions.clockTick(text!);
 
   bool get isEmpty => properties.isEmpty && visible == null && data == null && text == null;
 }
@@ -128,12 +151,29 @@ final class ConditionTarget {
             for (final s in b.sets)
               if (s.node == node && s.path == path && s.value is String) ...Expressions.readsOf(s.value! as String),
           ],
-        };
+        },
+        clock = _clockOf(node, path, condition);
 
   final String node;
   final String path;
   final Condition condition;
   final Set<String> reads;
+
+  /// How often its value changes as time passes; null: it doesn't.
+  final ClockTick? clock;
+
+  static ClockTick? _clockOf(String node, String path, Condition condition) {
+    ClockTick? out;
+    for (final b in condition.branches) {
+      if (b.when != null) out = Expressions.clockTickOfPredicate(b.when!)?.finer(out) ?? out;
+      for (final s in b.sets) {
+        if (s.node == node && s.path == path && s.value is String) {
+          out = Expressions.clockTick(s.value! as String)?.finer(out) ?? out;
+        }
+      }
+    }
+    return out;
+  }
 
   /// The value the first branch that holds (and sets this property) gives
   /// it; null when none does. A text value is read like a condition
@@ -214,28 +254,29 @@ class NodeBinder {
     if (b.isEmpty && targets.isEmpty) return BoundNode(node);
     final s = _binds ? scopeFor(source, node.id, instance) : null;
     final reads = <String>{};
-    var clock = false;
+    ClockTick? clock;
     var out = node;
     bool? visible;
     if (s != null) {
       for (final p in b.properties) {
         reads.addAll(p.reads);
-        clock |= p.readsClock;
+        clock = p.clock?.finer(clock) ?? clock;
         out = p.applyTo(out, engine, s);
       }
       if (b.visible case final BoundProperty v) {
         reads.addAll(v.reads);
-        clock |= v.readsClock;
+        clock = v.clock?.finer(clock) ?? clock;
         visible = BindValue.boolean(v.valueIn(engine, s));
       }
       if (b.data case final BoundProperty d) {
         reads.addAll(d.reads);
-        clock |= d.readsClock;
+        clock = d.clock?.finer(clock) ?? clock;
         out = _withItems(source, out, instance, d.valueIn(engine, s));
       }
       // Conditions win over bindings.
       for (final t in targets) {
         reads.addAll(t.reads);
+        clock = t.clock?.finer(clock) ?? clock;
         final v = t.valueIn(engine, s);
         if (v == null) continue;
         if (t.path == BindPaths.visible) {
@@ -249,26 +290,27 @@ class NodeBinder {
     }
     if (b.text != null && (s != null || preview)) {
       reads.addAll(b.textReads);
-      clock |= b.textReadsClock;
+      clock = b.textClock?.finer(clock) ?? clock;
       out = _withText(out, s);
     }
     if (visible != null && visible != out.visible) out = out.copyWith(visible: visible);
     return BoundNode(
       out,
       collapsed: visible == false,
-      watch: s == null ? const [] : _watchers(s, reads, clock && !preview),
+      watch: s == null ? const [] : _watchers(s, reads, preview ? null : clock),
     );
   }
 
-  List<Listenable> _watchers(ValueScope s, Set<String> reads, bool clock) {
+  // A name whose computed or function variable reads the clock brings its
+  // clock in through [watchName].
+  List<Listenable> _watchers(ValueScope s, Set<String> reads, ClockTick? clock) {
     final roots = {for (final r in reads) rootOf(r)};
     final out = <Listenable>{};
     for (final r in roots) {
       final w = watchName(s, r);
       if (w != null) out.add(w);
-
     }
-    if (clock) out.add(FormulaClock.instance);
+    if (clock != null) out.add(FormulaClock.of(clock));
     return out.toList();
   }
 
@@ -313,8 +355,10 @@ class NodeBinder {
         e.value.update(index: i, item: i < list.length ? list[i] : null);
       }
     }
-    final def = n.spec?.prop('itemCount');
-    if (def == null || n.bind.containsKey('props.itemCount')) return n;
+    // A list's item count, a table's row count: as many as the items.
+    final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
+    final def = n.spec?.prop(countProp);
+    if (def == null || n.bind.containsKey('props.$countProp')) return n;
     return n.copyWith(props: n.props.set<Object?>(def, list.length));
   }
 

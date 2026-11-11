@@ -64,6 +64,22 @@ class ScriptsScope extends NamedScope implements FormulaScripts, FormulaReadStat
   @override
   Object? valueOf(String name, ValueScope reader) => name == 'script' ? this : null;
 
+  /// Whether a formula's script call is still running.
+  bool get busy => _pending.isNotEmpty;
+
+  /// Completes once no formula's script call is running, including calls
+  /// started meanwhile (a result's repaint asks for more), or after
+  /// [timeout]: for a screenshot or a test of what bound formulas show.
+  Future<void> idle({Duration timeout = const Duration(seconds: 10)}) async {
+    final end = DateTime.now().add(timeout);
+    while (_pending.isNotEmpty && !_disposed) {
+      final left = end.difference(DateTime.now());
+      if (left <= Duration.zero) return;
+      await Future.any<Object?>([Future.wait(_pending.values.toList()), Future<void>.delayed(left)]);
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
   /// Forgets every cached result, e.g. after the scripts changed.
   void clear() => _results.clear();
 
