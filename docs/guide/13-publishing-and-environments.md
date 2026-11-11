@@ -75,13 +75,23 @@ To freeze what a release shows regardless of later publishes, ship a bundle
 
 ## Backends
 
-By default everything talks to Codelessly's production backend, the Firebase project `codeless-app`:
+Codelessly's backend is the Firebase project `codeless-editor`: the Editor, its publishes and the projects' user
+stores ([Codelessly accounts](09-cloud-data-and-services.md#codelessly-accounts)) live there. `codeless-app` is the
+old backend. `codelesslyWithToken` picks `CodelesslyBackend.preferred`: `codeless-editor` on every platform it has
+an app registered for, `codeless-app` on the others until then (today `codeless-editor` has its web app only).
+Pass `backend:` to choose:
+
+```dart
+final codelessly = await codelesslyWithToken('YOUR_PROJECT_TOKEN', backend: CodelesslyBackend.editor);
+```
 
 | Constant | Value |
 |---|---|
+| `CodelesslyBackend.editor` | `codeless-editor`: `CodelesslyEditorFirebaseOptions`, functions at `https://us-central1-codeless-editor.cloudfunctions.net`, the token resolved and accounts kept by the user store (`appAuthUrl`) |
+| `CodelesslyBackend.app` | `codeless-app`: `CodelesslyFirebaseOptions`, the token exchange at `https://us-central1-codeless-app.cloudfunctions.net`, Firebase Auth accounts |
 | `CodelesslyFirebaseOptions.*` | The client options of `codeless-app` for web, Android, iOS, macOS and Windows |
+| `CodelesslyEditorFirebaseOptions.*` | The client options of `codeless-editor` (web; the other platforms once registered) |
 | `kCodelesslyStorageBucket` | `codeless-app.appspot.com` (slug bundles) |
-| `ProjectAuthConfig.functionsBaseUrl` | `https://us-central1-codeless-app.cloudfunctions.net` (token exchange) |
 
 A project published from another Codelessly backend (a staging Editor) is read by giving that backend's Firebase
 app and functions URL:

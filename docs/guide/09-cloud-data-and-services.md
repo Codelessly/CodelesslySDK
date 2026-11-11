@@ -15,7 +15,7 @@ Actions reach the outside world through **services**: one `Services` object per 
 |---|---|---|---|
 | `api` | `callApi` actions, API-backed lists | `HttpApiService` (real HTTP) | Same |
 | `storage` | `setStorage`, `${storage.*}`, persisted variables | In memory | `PreferencesLocalStorage` to keep values |
-| `auth` | `auth` actions | Signed out; every operation fails | `FirebaseAuthService` |
+| `auth` | `auth` actions, `codelessly.auth`, `${auth.*}` | Signed out; every operation fails | `CodelesslyAuthService` (Codelessly accounts) or `FirebaseAuthService` |
 | `cloud` | Cloud data actions, data-bound lists | In memory (`MemoryDocumentBackend`) | `FirestoreDocumentBackend` |
 | `files` | `cloudFiles` (uploads) | In memory | `FirebaseFileStorage` |
 | `analytics` | Screen views, events, errors | Printed in debug builds, dropped in release | Yours |
@@ -67,7 +67,7 @@ What that wires:
 | Service | Where the data lives |
 |---|---|
 | Cloud data | Firestore, under the document `data/{projectId}`. The project's data rules (who may read and write each collection, schemas, indexes) are the document `data_rules/{projectId}`; the SDK follows them live and applies them. |
-| Accounts | Firebase Auth on Codelessly's Firebase app: email and password, email links, Google and Apple. Signing out signs in anonymously again, because the publish is read as an anonymous user. |
+| Accounts | Codelessly accounts: the project's own users, kept by Codelessly ([below](#codelessly-accounts)). On the old backend (`codeless-app`, the platforms where `codeless-editor` has no app yet): Firebase Auth accounts, signed in anonymously to read the publish. |
 | Files | Firebase Storage, under `data/{projectId}`. |
 
 Things to know:
@@ -80,6 +80,69 @@ Things to know:
 - **Linux desktop** has no Firebase: use your own `AuthService`, `DocumentBackend` and `CloudFileStorage`, or the
   in-memory ones.
 - **The signed-in user in layouts**: see [Data and variables](05-data-and-variables.md#the-signed-in-user).
+
+## Codelessly accounts
+
+With `cloudServices: true` on Codelessly's backend (`codeless-editor`), each project has **its own users**,
+kept by Codelessly: the same email in two apps is two accounts, and app users never mix with Codelessly Editor
+accounts. `codelessly.auth` is the API, shaped like Supabase's:
+
+```dart
+Future<void> accounts(Codelessly codelessly) async {
+  final auth = codelessly.auth;
+  final events = auth.onAuthStateChange.listen((state) {
+    debugPrint('${state.event.name}: ${state.user?.email ?? 'signed out'}');
+  });
+  // An anonymous user (the cloud services make one on first use) keeps their
+  // uid and data when they sign up.
+  await auth.signUp(email: 'ada@example.com', password: 'a long password', data: {'displayName': 'Ada'});
+  await auth.signOut();
+  await auth.signInWithPassword(email: 'ada@example.com', password: 'a long password');
+  await auth.updateUser(const UserAttributes(displayName: 'Ada L.'));
+  debugPrint('Signed in as ${auth.currentUser?.displayName}');
+  await events.cancel();
+}
+```
+
+| Member | What it does |
+|---|---|
+| `currentUser`, `currentSession` | The user (`AppUser`; an anonymous one has `isAnonymous`) and the session token, or null |
+| `onAuthStateChange` | `AuthState`s: `initialSession`, `signedIn`, `signedOut`, `userUpdated`, `tokenRefreshed`, `merged` |
+| `signUp(email:, password:, data:)` | Creates the account and signs it in. `data['displayName']` names the user; the rest of `data` goes in their profile |
+| `signInWithPassword(email:, password:)` | Signs in. Five wrong passwords lock the account for a minute, then longer |
+| `signInAnonymously()` | A guest session (as the `signInAnonymously` auth action): the anonymous session, made now when there is none, marked `isGuest`, so `${auth.uid}` shows it. A signed-in user is signed out first. Works on Firebase Auth accounts too |
+| `updateUser(UserAttributes(...))` | Name, photo, password (with `currentPassword`, or within 5 minutes of signing in) |
+| `signOut(scope:)` | This device (`SignOutScope.local`), or every session of the user (`SignOutScope.global`) |
+| `refreshSession()`, `deleteUser()` | A fresh token; deletes the account (needs a recent sign-in) |
+
+How sessions work:
+
+- **No session until one is needed.** Showing the publish needs none. The first cloud data read or write, or file
+  upload, signs in anonymously.
+- **Sign-up keeps the anonymous user.** Their uid, data and purchases carry over. A guest session
+  (`signInAnonymously()`) is that anonymous session, marked: the uid stays the same. Signing in to an existing
+  account from an anonymous session sends `AuthChangeEvent.merged` with `mergedFrom`, the anonymous uid, so the
+  app can move a cart over.
+- **The session persists.** Each project has its own Firebase app (`codelessly.{projectId}`) that keeps the
+  session between runs and refreshes its token. `codelessly.auth.onAuthStateChange` starts with the restored
+  session.
+- **Roles and disabling take effect live.** The project's editors set a user's role or disable them in the
+  Editor's Users table; a running app picks the role up at once (`${auth.role}`), and a disabled user is signed
+  out.
+- **Not available yet:** email verification (new accounts have `emailVerified: false`), password reset by email,
+  email links, codes, and Google or Apple sign-in. Those operations fail with an `AuthFailure` whose `code` is
+  `not_available`.
+
+Failures are `AuthFailure`s with a message to show and the store's `code` (`invalid_credentials`,
+`email_exists`, `weak_password`, `too_many_attempts`, `rate_limited`, `user_disabled`,
+`requires_recent_login`).
+
+The `auth` actions of a layout (sign in, sign up, sign out, update profile or password, delete account) run on the
+same accounts, and layouts read the user as `${auth.*}`
+([Data and variables](05-data-and-variables.md#the-signed-in-user)).
+
+For tests and demos, `MemoryAuthService` behaves the same (anonymous users included) without a backend:
+`Services(auth: MemoryAuthService())`.
 
 ### Cloud data without a backend
 

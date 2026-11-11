@@ -155,18 +155,21 @@ final codelessly = Codelessly(
 
 ## The signed-in user
 
-Auth actions (sign in, sign up, sign out) run through `Services.auth`. In 20.1 `CodelesslyWidget` does not put an
-`auth` value in a screen's scope by itself. To let layouts read the user, mirror it into the instance's data:
+Layouts read the app's user as `${auth.*}`, live, from `Services.auth`
+([Codelessly accounts](09-cloud-data-and-services.md#codelessly-accounts)):
 
-```dart
-final services = codelessly.services;
-if (services is Services) {
-  services.watchAuth().listen((auth) => codelessly.setData('auth', auth));
-}
-```
+| Field | Value |
+|---|---|
+| `status` | `loading` (while the last session is restored), `signedOut`, `anonymous` or `signedIn` |
+| `isSignedIn`, `isAnonymous`, `isGuest` | Whether someone has signed in; whether the session is an anonymous one; whether it is a guest session (the `signInAnonymously` auth action's) |
+| `uid`, `anonymousId` | The signed-in user's or guest's id (empty for another anonymous user); an anonymous user's id |
+| `email`, `displayName`, `initial`, `photoUrl`, `emailVerified`, `providers` | Who they are (`initial`: the first letter of the name or email) |
+| `createdAt`, `lastSignInAt` | ISO dates, or empty |
+| `role` | The user's role (set in the Editor's Users table), else their profile's; `user` by default, `guest` for a guest, empty signed out |
+| `profile` | Their profile document, `users/{uid}` in the project's cloud data |
 
-Layouts then read `${data.auth.isSignedIn}`, `${data.auth.email}`, `${data.auth.displayName}` and
-`${data.auth.profile.<field>}`.
+An anonymous user reads as signed out: `isSignedIn` is false and `uid` is empty. A guest session is not signed
+in either, but has its `uid` and `profile`, so it can keep data of its own; signing up keeps its uid.
 
 ## Expressions, briefly
 

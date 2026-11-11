@@ -22,7 +22,34 @@ class AppUser {
     this.isAnonymous = false,
     this.isGuest = false,
     this.providers = const [],
+    this.role = '',
+    this.createdAt,
+    this.lastSignInAt,
   });
+
+  /// [json] from Codelessly's user store (`{id, email, displayName, role, ...}`) or a
+  /// store record (`{uid, ...}`); times as ISO text, milliseconds or [DateTime].
+  factory AppUser.fromJson(Map<String, Object?> json) {
+    String text(String key) => json[key] is String ? json[key] as String : '';
+    DateTime? time(String key) => switch (json[key]) {
+          final DateTime d => d,
+          final String s => DateTime.tryParse(s),
+          final int ms => DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true),
+          _ => null,
+        };
+    return AppUser(
+      uid: text('id').isNotEmpty ? text('id') : text('uid'),
+      email: text('email'),
+      displayName: text('displayName'),
+      photoUrl: text('photoUrl'),
+      emailVerified: json['emailVerified'] == true,
+      isAnonymous: json['isAnonymous'] == true,
+      providers: [for (final p in (json['providers'] is List ? json['providers'] as List : const [])) '$p'],
+      role: text('role'),
+      createdAt: time('createdAt'),
+      lastSignInAt: time('lastSignInAt'),
+    );
+  }
 
   final String uid;
   final String email;
@@ -30,7 +57,8 @@ class AppUser {
   final String photoUrl;
   final bool emailVerified;
 
-  /// An anonymous user (the SDK's own, to read published data) counts as
+  /// An anonymous user (the SDK's own, to read published data; on
+  /// Codelessly's user store, the session made on first use) counts as
   /// signed out for the app.
   final bool isAnonymous;
 
@@ -42,6 +70,36 @@ class AppUser {
   /// Sign-in providers (`password`, `google.com`...).
   final List<String> providers;
 
+  /// The user's role in the app (Codelessly's user store: the `cl_role` claim), or empty
+  /// when the backend has none (then `${auth.role}` reads the profile's).
+  final String role;
+  final DateTime? createdAt;
+  final DateTime? lastSignInAt;
+
+  AppUser copyWith({
+    String? email,
+    String? displayName,
+    String? photoUrl,
+    bool? emailVerified,
+    bool? isAnonymous,
+    bool? isGuest,
+    List<String>? providers,
+    String? role,
+  }) =>
+      AppUser(
+        uid: uid,
+        email: email ?? this.email,
+        displayName: displayName ?? this.displayName,
+        photoUrl: photoUrl ?? this.photoUrl,
+        emailVerified: emailVerified ?? this.emailVerified,
+        isAnonymous: isAnonymous ?? this.isAnonymous,
+        isGuest: isGuest ?? this.isGuest,
+        providers: providers ?? this.providers,
+        role: role ?? this.role,
+        createdAt: createdAt,
+        lastSignInAt: lastSignInAt,
+      );
+
   @override
   bool operator ==(Object other) =>
       other is AppUser &&
@@ -52,43 +110,54 @@ class AppUser {
       other.emailVerified == emailVerified &&
       other.isAnonymous == isAnonymous &&
       other.isGuest == isGuest &&
-      listEquals(other.providers, providers);
+      listEquals(other.providers, providers) &&
+      other.role == role &&
+      other.createdAt == createdAt &&
+      other.lastSignInAt == lastSignInAt;
 
   @override
-  int get hashCode => Object.hash(uid, email, displayName, photoUrl, emailVerified, isAnonymous, isGuest, Object.hashAll(providers));
+  int get hashCode => Object.hash(uid, email, displayName, photoUrl, emailVerified, isAnonymous, isGuest,
+      Object.hashAll(providers), role, createdAt, lastSignInAt);
 
   /// This user marked as a guest session.
-  AppUser asGuest() => AppUser(
-        uid: uid,
-        email: email,
-        displayName: displayName,
-        photoUrl: photoUrl,
-        emailVerified: emailVerified,
-        isAnonymous: isAnonymous,
-        isGuest: true,
-        providers: providers,
-      );
+  AppUser asGuest() => copyWith(isGuest: true);
 
   @override
   String toString() => 'AppUser($uid${email.isEmpty ? '' : ', $email'}${isGuest ? ', guest' : (isAnonymous ? ', anonymous' : '')})';
 }
 
-/// The `auth` value for [user] and their [profile] document: `isSignedIn`,
-/// `isGuest`, `uid`, `email`, `displayName`, `initial`, `photoUrl`,
-/// `emailVerified`, `providers`, `profile` and `role` (a signed-in user
-/// without one is a `user`, a guest a `guest`; signed out, empty).
-/// Anonymous users read as signed out; a guest session (an anonymous user
-/// the app signed in on purpose) is not signed in either, but has its `uid`
-/// and `profile`, so it can keep data of its own.
-Map<String, Object?> authValue(AppUser? user, {Map<String, Object?>? profile}) {
+/// The `auth` value for [user] and their [profile] document: `status`
+/// (`loading` until the session is known when [loading], then `signedOut`,
+/// `anonymous` or `signedIn`), `isSignedIn`, `isAnonymous`, `isGuest`,
+/// `anonymousId` (an anonymous user's uid), `uid`, `email`, `displayName`,
+/// `initial`, `photoUrl`, `emailVerified`, `providers`, `createdAt`,
+/// `lastSignInAt` (ISO text, or empty), `profile` and `role` (a signed-in
+/// user's own, else the profile's, else `user`; a guest's profile's, else
+/// `guest`; signed out, empty).
+/// Anonymous users read as signed out: `uid` stays empty for them. A guest
+/// session (an anonymous user the app signed in on purpose) is not signed in
+/// either, but has its `uid` and `profile`, so it can keep data of its own.
+Map<String, Object?> authValue(AppUser? user, {Map<String, Object?>? profile, bool loading = false}) {
   final guest = user != null && user.isGuest;
   final signedIn = user != null && !user.isAnonymous;
   final displayName = signedIn ? user.displayName : '';
   final email = signedIn ? user.email : '';
   final initialSource = displayName.isNotEmpty ? displayName : email;
+  final role = signedIn
+      ? (user.role.isNotEmpty ? user.role : '${profile?['role'] ?? 'user'}')
+      : '${profile?['role'] ?? (guest ? 'guest' : '')}';
   return {
+    'status': loading
+        ? 'loading'
+        : user == null
+            ? 'signedOut'
+            : user.isAnonymous
+                ? 'anonymous'
+                : 'signedIn',
     'isSignedIn': signedIn,
+    'isAnonymous': user != null && user.isAnonymous,
     'isGuest': guest,
+    'anonymousId': user != null && user.isAnonymous ? user.uid : '',
     'uid': signedIn || guest ? user.uid : '',
     'email': email,
     'displayName': displayName,
@@ -96,8 +165,10 @@ Map<String, Object?> authValue(AppUser? user, {Map<String, Object?>? profile}) {
     'photoUrl': signedIn ? user.photoUrl : '',
     'emailVerified': signedIn && user.emailVerified,
     'providers': signedIn ? user.providers : const <String>[],
+    'createdAt': signedIn ? user.createdAt?.toIso8601String() ?? '' : '',
+    'lastSignInAt': signedIn ? user.lastSignInAt?.toIso8601String() ?? '' : '',
     'profile': profile ?? const <String, Object?>{},
-    'role': '${profile?['role'] ?? (signedIn ? 'user' : (guest ? 'guest' : ''))}',
+    'role': role,
   };
 }
 
@@ -156,6 +227,207 @@ abstract interface class AuthService {
   Future<AppUser> signInWithLink(String email, String link);
 }
 
+/// What happened to the session ([CodelesslyAuth.onAuthStateChange]).
+enum AuthChangeEvent {
+  /// The session as it was when listening started (restored, or none).
+  initialSession,
+  signedIn,
+  signedOut,
+
+  /// The same user changed: profile, role, an anonymous user who signed up.
+  userUpdated,
+  tokenRefreshed,
+  passwordRecovery,
+
+  /// An anonymous user signed in to an existing account: [AuthState.mergedFrom] is the
+  /// anonymous uid, whose data the app may move over.
+  merged,
+}
+
+/// A session change: the [event] and the user after it.
+@immutable
+class AuthState {
+  const AuthState(this.event, this.user, {this.mergedFrom});
+
+  final AuthChangeEvent event;
+  final AppUser? user;
+
+  /// With [AuthChangeEvent.merged]: the anonymous uid the user came from.
+  final String? mergedFrom;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AuthState && other.event == event && other.user == user && other.mergedFrom == mergedFrom;
+
+  @override
+  int get hashCode => Object.hash(event, user, mergedFrom);
+
+  @override
+  String toString() => 'AuthState(${event.name}, $user${mergedFrom == null ? '' : ', from $mergedFrom'})';
+}
+
+/// The session's access token (a Firebase ID token for Codelessly's user store) and
+/// when it expires; the backend refreshes it.
+@immutable
+class AuthSession {
+  const AuthSession({required this.accessToken, this.expiresAt});
+
+  final String accessToken;
+  final DateTime? expiresAt;
+}
+
+/// What [CodelesslyAuth.updateUser] changes. A new [password] needs a recent sign-in, or
+/// [currentPassword].
+@immutable
+class UserAttributes {
+  const UserAttributes({this.email, this.password, this.currentPassword, this.displayName, this.photoUrl});
+
+  final String? email;
+  final String? password;
+  final String? currentPassword;
+  final String? displayName;
+  final String? photoUrl;
+}
+
+/// [CodelesslyAuth.signOut] on this device, or everywhere (every session of the user).
+enum SignOutScope { local, global }
+
+/// An [AuthService] with sessions: the session token, events, a sign-out everywhere,
+/// sign-up with profile data. Codelessly's user store and [MemoryAuthService] have them.
+/// Anonymous sessions are [AuthService.signInAsGuest]'s, as on every [AuthService].
+abstract interface class SessionAuthService implements AuthService {
+  /// Every session change, starting with [AuthChangeEvent.initialSession].
+  Stream<AuthState> get authStateChanges;
+
+  /// The session's token as last known (null signed out).
+  AuthSession? get currentSession;
+
+  /// A fresh session token.
+  Future<AuthSession?> refreshSession();
+
+  /// Signs up; an anonymous user is upgraded in place (same uid). [data] goes in the
+  /// user's profile.
+  Future<AppUser> signUpWith({
+    required String email,
+    required String password,
+    String displayName = '',
+    Map<String, Object?> data = const {},
+  });
+
+  Future<void> signOutWith(SignOutScope scope);
+
+  Future<AppUser> updateUser(UserAttributes attributes);
+}
+
+/// The events of [users]: the first value is the initial session, then sign-in, sign-out
+/// and changes of the same user.
+Stream<AuthState> authStatesOf(Stream<AppUser?> users) {
+  var first = true;
+  AppUser? last;
+  StreamSubscription<AppUser?>? subscription;
+  late final StreamController<AuthState> controller;
+  void onUser(AppUser? user) {
+    final AuthChangeEvent event;
+    if (first) {
+      event = AuthChangeEvent.initialSession;
+      first = false;
+    } else if (user == null) {
+      if (last == null) return;
+      event = AuthChangeEvent.signedOut;
+    } else if (last == null || last!.uid != user.uid) {
+      event = AuthChangeEvent.signedIn;
+    } else if (user != last) {
+      event = AuthChangeEvent.userUpdated;
+    } else {
+      return;
+    }
+    last = user;
+    controller.add(AuthState(event, user));
+  }
+
+  // Subscribed as soon as listened to, so a change made right after is not missed.
+  controller = StreamController(
+    onListen: () => subscription = users.listen(onUser, onError: controller.addError, onDone: controller.close),
+    onCancel: () => subscription?.cancel(),
+  );
+  return controller.stream;
+}
+
+/// App user accounts, Supabase-style: `codelessly.auth`.
+///
+/// ```dart
+/// await codelessly.auth.signUp(email: email, password: password, data: {'displayName': name});
+/// codelessly.auth.onAuthStateChange.listen((state) => print(state.event));
+/// ```
+///
+/// Over any [AuthService]; the session operations ([currentSession], a sign-out
+/// everywhere, sign-up `data`, [AuthChangeEvent.merged]) need a [SessionAuthService]
+/// (Codelessly's user store): without one [currentSession] is null and a sign-out signs
+/// out of this device only.
+class CodelesslyAuth {
+  CodelesslyAuth(this.service);
+
+  /// The service the operations run on ([Services.auth]).
+  final AuthService service;
+
+  SessionAuthService? get _sessions => service is SessionAuthService ? service as SessionAuthService : null;
+
+  /// The signed-in user (anonymous ones have [AppUser.isAnonymous]), or null.
+  AppUser? get currentUser => service.currentUser;
+
+  /// The session token as last known, or null.
+  AuthSession? get currentSession => _sessions?.currentSession;
+
+  /// Every session change, starting with [AuthChangeEvent.initialSession].
+  Stream<AuthState> get onAuthStateChange => _sessions?.authStateChanges ?? authStatesOf(service.userChanges);
+
+  /// Creates an account and signs it in. A guest session is upgraded in place, keeping
+  /// its uid and data (on Codelessly's user store, any anonymous session is). `data['displayName']` names the user; the rest of [data] goes in
+  /// their profile.
+  Future<AppUser> signUp({required String email, required String password, Map<String, Object?> data = const {}}) {
+    final displayName = '${data['displayName'] ?? ''}';
+    final sessions = _sessions;
+    if (sessions == null) return service.signUp(email: email, password: password, displayName: displayName);
+    return sessions.signUpWith(
+      email: email,
+      password: password,
+      displayName: displayName,
+      data: {...data}..remove('displayName'),
+    );
+  }
+
+  Future<AppUser> signInWithPassword({required String email, required String password}) =>
+      service.signIn(email: email, password: password);
+
+  /// Starts a guest session ([AuthService.signInAsGuest], the `signInAnonymously` auth
+  /// action's): an anonymous user marked [AppUser.isGuest], whose uid `${auth.uid}`
+  /// shows and a later [signUp] keeps. The current anonymous session becomes the guest
+  /// (a signed-in user is signed out first).
+  Future<AppUser> signInAnonymously() => service.signInAsGuest();
+
+  /// Signs out of this device, or of every device with [SignOutScope.global].
+  Future<void> signOut({SignOutScope scope = SignOutScope.local}) =>
+      _sessions?.signOutWith(scope) ?? service.signOut();
+
+  /// Changes the user's name, photo or password.
+  Future<AppUser> updateUser(UserAttributes attributes) async {
+    final sessions = _sessions;
+    if (sessions != null) return sessions.updateUser(attributes);
+    if (attributes.email != null) throw const AuthFailure('Changing the email is not available.', code: 'unavailable');
+    if (attributes.displayName != null || attributes.photoUrl != null) {
+      await service.updateProfile(displayName: attributes.displayName, photoUrl: attributes.photoUrl);
+    }
+    if (attributes.password != null) await service.updatePassword(attributes.password!);
+    return service.currentUser ?? (throw const AuthFailure('Sign in first.'));
+  }
+
+  /// A fresh session token.
+  Future<AuthSession?> refreshSession() => _sessions?.refreshSession() ?? Future.value();
+
+  /// Deletes the signed-in user's account (it needs a recent sign-in).
+  Future<void> deleteUser() => service.deleteAccount();
+}
+
 /// No accounts: always signed out; every operation fails. The default, for
 /// apps without sign-in.
 class SignedOutAuthService implements AuthService {
@@ -211,8 +483,9 @@ class SignedOutAuthService implements AuthService {
 }
 
 /// Accounts in memory, with Firebase Auth's rules and messages: for tests,
-/// previews and demos.
-class MemoryAuthService implements AuthService {
+/// previews and demos. Anonymous users sign up in place, as with Codelessly's
+/// user store.
+class MemoryAuthService implements SessionAuthService {
   MemoryAuthService({AppUser? signedIn}) : _user = signedIn;
 
   /// email → (password, user).
@@ -229,9 +502,17 @@ class MemoryAuthService implements AuthService {
   AppUser? get currentUser => _user;
 
   @override
-  Stream<AppUser?> get userChanges async* {
-    yield _user;
-    yield* _changes.stream;
+  Stream<AppUser?> get userChanges {
+    StreamSubscription<AppUser?>? subscription;
+    late final StreamController<AppUser?> controller;
+    controller = StreamController(
+      onListen: () {
+        controller.add(_user);
+        subscription = _changes.stream.listen(controller.add);
+      },
+      onCancel: () => subscription?.cancel(),
+    );
+    return controller.stream;
   }
 
   AppUser? _set(AppUser? user) {
@@ -266,18 +547,58 @@ class MemoryAuthService implements AuthService {
   }
 
   @override
-  Future<AppUser> signUp({required String email, required String password, String displayName = ''}) async {
+  Future<AppUser> signUp({required String email, required String password, String displayName = ''}) =>
+      signUpWith(email: email, password: password, displayName: displayName);
+
+  /// Profile data given at sign-up, by uid.
+  final Map<String, Map<String, Object?>> profiles = {};
+
+  @override
+  Future<AppUser> signUpWith({
+    required String email,
+    required String password,
+    String displayName = '',
+    Map<String, Object?> data = const {},
+  }) async {
     final e = email.trim();
     if (!e.contains('@')) throw const AuthFailure('That email address is not valid.', code: 'invalid-email');
     if (accounts.containsKey(e)) {
       throw const AuthFailure('An account already exists for that email.', code: 'email-already-in-use');
     }
     if (password.length < 6) throw const AuthFailure('Password must be at least 6 characters.', code: 'weak-password');
-    // A guest's account keeps the guest's uid (and so its data).
-    final guest = _user != null && _user!.isGuest ? _user!.uid : null;
-    final user = AppUser(uid: guest ?? 'user${++_ids}', email: e, displayName: displayName, providers: const ['password']);
+    // An anonymous user's (a guest's) account keeps their uid, and so their data.
+    final anonymous = _user?.isAnonymous == true ? _user : null;
+    final user = AppUser(
+      uid: anonymous?.uid ?? 'user${++_ids}',
+      email: e,
+      displayName: displayName,
+      providers: const ['password'],
+    );
     accounts[e] = (password, user);
+    if (data.isNotEmpty) profiles[user.uid] = {...data};
     return _set(user)!;
+  }
+
+  @override
+  Stream<AuthState> get authStateChanges => authStatesOf(userChanges);
+
+  @override
+  AuthSession? get currentSession => _user == null ? null : AuthSession(accessToken: 'memory-${_user!.uid}');
+
+  @override
+  Future<AuthSession?> refreshSession() async => currentSession;
+
+  @override
+  Future<void> signOutWith(SignOutScope scope) => signOut();
+
+  @override
+  Future<AppUser> updateUser(UserAttributes attributes) async {
+    if (attributes.email != null) throw const AuthFailure('Changing the email is not available.', code: 'unavailable');
+    if (attributes.displayName != null || attributes.photoUrl != null) {
+      await updateProfile(displayName: attributes.displayName, photoUrl: attributes.photoUrl);
+    }
+    if (attributes.password != null) await updatePassword(attributes.password!);
+    return _signedIn();
   }
 
   @override
@@ -290,14 +611,7 @@ class MemoryAuthService implements AuthService {
   @override
   Future<void> updateProfile({String? displayName, String? photoUrl}) async {
     final u = _signedIn();
-    _set(AppUser(
-      uid: u.uid,
-      email: u.email,
-      displayName: displayName ?? u.displayName,
-      photoUrl: photoUrl ?? u.photoUrl,
-      emailVerified: u.emailVerified,
-      providers: u.providers,
-    ));
+    _set(u.copyWith(displayName: displayName, photoUrl: photoUrl));
   }
 
   @override

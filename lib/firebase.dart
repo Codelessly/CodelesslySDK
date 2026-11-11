@@ -43,6 +43,7 @@ export 'package:firebase_storage/firebase_storage.dart' show FirebaseStorage;
 
 export 'src/services/firebase/auth.dart';
 export 'src/services/firebase/codelessly_app.dart';
+export 'src/services/firebase/codelessly_auth.dart';
 export 'src/services/firebase/codelessly_firebase.dart';
 export 'src/services/firebase/firestore.dart';
 export 'src/services/firebase/managed_components.dart';

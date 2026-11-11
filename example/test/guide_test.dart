@@ -371,6 +371,31 @@ void main() {
     expect(codelessly.status, isA<CLoaded>());
   });
 
+  test('accounts: the sample signs up, out and in; layouts read the user as `auth`', () async {
+    final codelessly = Codelessly.fromBundle(
+      twoScreens(),
+      config: CodelesslyConfig(services: Services(auth: MemoryAuthService())),
+      fonts: const NoFontFetcher(),
+    );
+    addTearDown(codelessly.dispose);
+    expect(codelessly.appVariables.read('auth.status'), 'signedOut');
+    final events = <AuthChangeEvent>[];
+    final subscription = codelessly.auth.onAuthStateChange.listen((s) => events.add(s.event));
+    addTearDown(subscription.cancel);
+    await accounts(codelessly);
+    await pumpEventQueue();
+    expect(codelessly.auth.currentUser!.displayName, 'Ada L.');
+    expect(codelessly.appVariables.read('auth.isSignedIn'), true);
+    expect(codelessly.appVariables.read('auth.displayName'), 'Ada L.');
+    expect(events, [
+      AuthChangeEvent.initialSession,
+      AuthChangeEvent.signedIn,
+      AuthChangeEvent.signedOut,
+      AuthChangeEvent.signedIn,
+      AuthChangeEvent.userUpdated,
+    ]);
+  });
+
   testWidgets('a paywall: bought, the Pro screen opens; closed, nothing does', (tester) async {
     final codelessly = Codelessly.fromBundle(
       withPaywall(),

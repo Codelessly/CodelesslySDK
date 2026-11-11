@@ -20,6 +20,18 @@
 
 **New**
 
+- Codelessly accounts: with `cloudServices: true` on `codeless-editor`, each project has its own users, kept by
+  Codelessly's user store (`CodelesslyAuthService`, `codelesslyUserStore`). `codelessly.auth` is a
+  Supabase-shaped API (`signUp`, `signInWithPassword`, `signInAnonymously`, `signOut(scope:)`, `updateUser`,
+  `currentUser`, `currentSession`, `onAuthStateChange`). Anonymous sessions are made on first cloud use and keep
+  their uid on sign-up; `signInAnonymously` (and the auth action) marks that session as the guest session
+  (`AuthService.signInAsGuest`). See the guide's [Codelessly accounts](docs/guide/09-cloud-data-and-services.md#codelessly-accounts).
+- Layouts read the user as `${auth.*}` (`status`, `isSignedIn`, `isAnonymous`, `isGuest`, `uid`, `email`, `role`,
+  `profile`...), live, without mirroring it into data.
+- `CodelesslyBackend` (`editor`, `app`, `preferred`) and `codelesslyWithToken(backend:)`;
+  `CodelesslyEditorFirebaseOptions`. `AppUser` has `role`, `createdAt`, `lastSignInAt`. `MemoryAuthService`
+  has sessions (`SessionAuthService`).
+
 - Paywalls: `codelessly.paywall.present(context, placement: 'onboarding')` shows the paywall published at a
   placement as a full-screen route and returns a `PaywallResult` (`purchased`, `restored`, `closed`, `skipped`
   or `failed`). With `cloudServices: true` paywalls are managed by Codelessly (`codelesslyPaywalls`): placements

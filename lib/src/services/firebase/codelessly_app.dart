@@ -12,11 +12,14 @@ import '../../app/codelessly.dart';
 import '../../app/config.dart';
 import '../../app/fonts.dart';
 import '../../app/loader.dart';
+import '../app_auth.dart';
 import '../auth.dart';
+import '../cloud/backend.dart';
 import '../cloud/database.dart';
 import '../services.dart' show Services;
 import '../storage.dart';
 import 'auth.dart';
+import 'codelessly_auth.dart';
 import 'codelessly_firebase.dart';
 import 'firestore.dart';
 import 'paywall.dart';
@@ -138,7 +141,13 @@ Future<FirebaseApp> codelesslyFirebaseApp({
 /// completes with an error when that fails. Ignored when [config] has its
 /// own `services`.
 ///
-/// A project on another Codelessly backend (a staging one) gives that
+/// [backend] is the Codelessly backend (default: [CodelesslyBackend.preferred],
+/// `codeless-editor` where it has an app for the platform, else `codeless-app`). On
+/// `codeless-editor` the token is resolved by the user store (no Firebase sign-in) and,
+/// with [cloudServices], app accounts are Codelessly accounts
+/// ([codelesslyUserStore]): each project gets its own Firebase app
+/// (`codelessly.{projectId}`) whose session the cloud data rules check, created
+/// anonymously on first use. A project on another backend (a staging one) gives that
 /// backend's Firebase [app] and its [functionsBaseUrl]
 /// ([ProjectAuthConfig.functionsBaseUrl]).
 ///
@@ -154,34 +163,67 @@ Future<Codelessly> codelesslyWithToken(
   FirebaseStorage? storage,
   ProjectAuth? projectAuth,
   String? functionsBaseUrl,
+  CodelesslyBackend? backend,
   PublishCache? cache,
   FontFetcher? fonts,
   Map<String, Object?> data = const {},
 }) async {
   if (authToken.isEmpty) throw ArgumentError.value(authToken, 'authToken', 'A project token is needed');
+  final target = backend ?? (app == null && firestore == null ? CodelesslyBackend.preferred : CodelesslyBackend.app);
   if (app == null && (firestore == null || (auth == null && projectAuth == null))) {
-    app = await codelesslyFirebaseApp();
+    app = await codelesslyFirebaseApp(options: target.currentOptions);
   }
   final db = firestore ?? FirebaseFirestore.instanceFor(app: app!);
   var resolved = config.copyWith(authToken: authToken);
+  // Codelessly accounts: the user store resolves the token and keeps the accounts.
+  final userStore = target.userStore && auth == null && functionsBaseUrl == null;
   final access = projectAuth ??
-      FirebaseProjectAuth(
-        config: functionsBaseUrl == null
-            ? ProjectAuthConfig(authToken: authToken, slug: config.slug)
-            : ProjectAuthConfig(authToken: authToken, slug: config.slug, functionsBaseUrl: functionsBaseUrl),
-        auth: auth ?? FirebaseAuth.instanceFor(app: app!),
-      );
+      (userStore
+          ? AppAuthProjectResolver(
+              client: HttpAppAuthClient(baseUrl: target.appAuthUrl), authToken: authToken, slug: config.slug)
+          : FirebaseProjectAuth(
+              config: ProjectAuthConfig(
+                authToken: authToken,
+                slug: config.slug,
+                functionsBaseUrl: functionsBaseUrl ?? target.functionsBaseUrl,
+              ),
+              auth: auth ?? FirebaseAuth.instanceFor(app: app!),
+            ));
   if (cloudServices && config.services == null) {
     final projectId = config.projectId ?? (await access.authenticate()).projectId;
-    resolved = resolved.copyWith(
-      services: codelesslyCloudServices(
-        projectId: projectId,
-        firestore: db,
-        auth: auth ?? (app == null ? null : FirebaseAuth.instanceFor(app: app)),
-        storage: storage ?? (app == null ? null : FirebaseStorage.instanceFor(app: app)),
-        functions: app == null ? null : FirebaseFunctions.instanceFor(app: app),
-      ),
-    );
+    if (userStore && app != null) {
+      // The project's own Firebase app: its session is this project's app user.
+      final projectApp = await codelesslyFirebaseApp(name: '$kCodelesslyFirebaseAppName.$projectId', options: app.options);
+      final projectDb = FirebaseFirestore.instanceFor(app: projectApp);
+      final local = MemoryLocalStorage();
+      resolved = resolved.copyWith(
+        services: codelesslyCloudServices(
+          projectId: projectId,
+          firestore: projectDb,
+          localStorage: local,
+          userStore: codelesslyUserStore(
+            projectId: projectId,
+            auth: FirebaseAuth.instanceFor(app: projectApp),
+            firestore: projectDb,
+            baseUrl: target.appAuthUrl,
+            env: config.isPreview ? 'preview' : 'publish',
+            storage: local,
+          ),
+          storage: storage ?? FirebaseStorage.instanceFor(app: projectApp),
+          functions: FirebaseFunctions.instanceFor(app: projectApp),
+        ),
+      );
+    } else {
+      resolved = resolved.copyWith(
+        services: codelesslyCloudServices(
+          projectId: projectId,
+          firestore: db,
+          auth: auth ?? (app == null ? null : FirebaseAuth.instanceFor(app: app)),
+          storage: storage ?? (app == null ? null : FirebaseStorage.instanceFor(app: app)),
+          functions: app == null ? null : FirebaseFunctions.instanceFor(app: app),
+        ),
+      );
+    }
   }
   return codelesslyOnFirebase(
     firestore: db,
@@ -196,8 +238,11 @@ Future<Codelessly> codelesslyWithToken(
 
 /// The [Services] of project [projectId] on Firebase: its cloud data on
 /// [firestore] (under `data/{projectId}`, with the project's data rules),
-/// app user accounts on [auth], cloud files on [storage] and managed
-/// paywalls on [functions] ([codelesslyPaywalls]), each only when given.
+/// app user accounts on [auth] (Firebase Auth accounts) or [userStore]
+/// (Codelessly accounts, [codelesslyUserStore]: the cloud data and files then
+/// make an anonymous session on first use), cloud files on [storage] and
+/// managed paywalls on [functions] ([codelesslyPaywalls]), each only when
+/// given.
 /// [localStorage] is where the app keeps `storage` values (default:
 /// memory; [PreferencesLocalStorage] keeps them between runs) and the store
 /// purchases waiting for verification.
@@ -207,6 +252,7 @@ Services codelesslyCloudServices({
   required String projectId,
   required FirebaseFirestore firestore,
   FirebaseAuth? auth,
+  CodelesslyAuthService? userStore,
   FirebaseStorage? storage,
   FirebaseFunctions? functions,
   LocalStorage? localStorage,
@@ -214,17 +260,25 @@ Services codelesslyCloudServices({
   final root = firestoreRoot(projectId);
   final local = localStorage ?? MemoryLocalStorage();
   final managed = functions == null ? null : codelesslyPaywalls(projectId: projectId, functions: functions, storage: local);
+  final DocumentBackend documents = userStore == null
+      ? FirestoreDocumentBackend(firestore)
+      : SessionDocumentBackend(FirestoreDocumentBackend(firestore), userStore.ensureSession);
+  final CloudFileStorage? files = storage == null
+      ? null
+      : userStore == null
+          ? FirebaseFileStorage(storage, root: root)
+          : SessionFileStorage(FirebaseFileStorage(storage, root: root), userStore.ensureSession);
   return Services(
     storage: local,
     paywalls: managed?.paywalls,
     purchases: managed?.purchases,
-    auth: auth == null ? null : FirebaseAuthService(auth, storage: local),
+    auth: userStore ?? (auth == null ? null : FirebaseAuthService(auth, storage: local)),
     cloud: BackendCloudDatabase(
-      backend: FirestoreDocumentBackend(firestore),
+      backend: documents,
       root: root,
       rulesSource: firestoreDataRules(firestore, projectId),
-      userId: () => auth?.currentUser?.uid,
+      userId: userStore != null ? () => userStore.currentUser?.uid : () => auth?.currentUser?.uid,
     ),
-    files: storage == null ? null : FirebaseFileStorage(storage, root: root),
+    files: files,
   );
 }

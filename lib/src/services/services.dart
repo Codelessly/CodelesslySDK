@@ -28,6 +28,7 @@ import 'storage.dart';
 
 export 'analytics.dart';
 export 'api.dart';
+export 'app_auth.dart';
 export 'auth.dart';
 export 'cache.dart';
 export 'cloud/backend.dart';

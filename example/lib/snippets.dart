@@ -427,6 +427,25 @@ Future<Codelessly> cloudServicesByHand(String projectId) async {
   );
 }
 
+/// Codelessly accounts (`codelessly.auth`): sign up, sign in, change the
+/// profile and follow the session. With `cloudServices: true` on Codelessly's
+/// backend these are the project's own users; here they run on whatever
+/// `Services.auth` the instance has.
+Future<void> accounts(Codelessly codelessly) async {
+  final auth = codelessly.auth;
+  final events = auth.onAuthStateChange.listen((state) {
+    debugPrint('${state.event.name}: ${state.user?.email ?? 'signed out'}');
+  });
+  // An anonymous user (the cloud services make one on first use) keeps their
+  // uid and data when they sign up.
+  await auth.signUp(email: 'ada@example.com', password: 'a long password', data: {'displayName': 'Ada'});
+  await auth.signOut();
+  await auth.signInWithPassword(email: 'ada@example.com', password: 'a long password');
+  await auth.updateUser(const UserAttributes(displayName: 'Ada L.'));
+  debugPrint('Signed in as ${auth.currentUser?.displayName}');
+  await events.cancel();
+}
+
 /// The app's own services: analytics and links.
 class MyAnalytics implements AnalyticsService {
   @override
