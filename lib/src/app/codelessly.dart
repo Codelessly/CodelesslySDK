@@ -358,9 +358,6 @@ class Codelessly extends ChangeNotifier {
 
   @override
   void dispose() {
-    if (config.services == null && services is Services) {
-      unawaited((services as Services).dispose());
-    }
     _watching?.cancel();
     _watching = null;
     route.dispose();
@@ -377,6 +374,10 @@ class Codelessly extends ChangeNotifier {
     _storage.dispose();
     _speech.dispose();
     data.dispose();
+    // Lazy expression scopes must detach while the service notifiers live.
+    if (config.services == null && services is Services) {
+      unawaited((services as Services).dispose());
+    }
     if (identical(_instance, this)) _instance = null;
     super.dispose();
   }
