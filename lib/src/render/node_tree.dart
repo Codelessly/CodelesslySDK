@@ -565,17 +565,18 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     // structure depends on its children re-applies them, and so on).
     final n = resolved != null && _applied != null && resolved == _applied ? _applied : resolved;
     _watchBindings(bound?.watch ?? const []);
-    if ((bound?.collapsed ?? false) != _collapsed) {
-      _collapsed = !_collapsed;
-      markNeedsLayout();
-      _applyParentData();
-    }
+    final collapsed = bound?.collapsed ?? false;
     // A top-level node that only moved: its content doesn't depend on where
     // it sits (the host offsets it), so nothing re-applies or repaints.
-    if (_slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
+    if (collapsed == _collapsed && _slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
       _node = n;
       _applied = n;
       return;
+    }
+    _prepareLayoutChanges();
+    if (collapsed != _collapsed) {
+      _collapsed = collapsed;
+      _applyParentData();
     }
     _node = n;
     _applied = n;
@@ -645,6 +646,28 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     _notifyDependentAncestors();
     _applyParentData();
     _relayoutHuggingAncestors();
+  }
+
+  /// A collapsed box skips its children's layout. Its cached inner boxes
+  /// can therefore stay dirty after the collapsed box itself becomes clean.
+  /// Before updating those boxes, invalidate the path from the outermost
+  /// collapsed ancestor down: a dirty child must never have a clean parent
+  /// between it and its relayout boundary. Do this before property setters
+  /// too, since a changed paragraph can invalidate layout before `_wire`.
+  void _prepareLayoutChanges() {
+    final path = <RenderObject>[];
+    var collapsedAt = -1;
+    for (RenderObject? object = this; object != null; object = object.parent) {
+      path.add(object);
+      if (object is NodeBox && object.collapsed) collapsedAt = path.length - 1;
+    }
+    if (collapsedAt < 0) {
+      markNeedsLayout();
+      return;
+    }
+    for (var i = collapsedAt; i >= 0; i--) {
+      path[i].markNeedsLayout();
+    }
   }
 
   /// A row/column that hugs its cross axis and stretches its children
@@ -1380,10 +1403,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _wire(List<RenderBox> next) {
     final relink = _alreadyWired(next);
     if (relink != null) {
+      markNeedsLayout();
       for (final o in relink) {
         o.markNeedsLayout();
       }
-      markNeedsLayout();
       _previousInner = const [];
       _finishWire(next);
       return;
