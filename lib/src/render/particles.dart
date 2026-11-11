@@ -159,6 +159,10 @@ class RenderParticles extends RenderProxyBox {
   @override
   void dispose() {
     _ticker?.dispose();
+    for (final tp in _glyphs.values) {
+      tp.dispose();
+    }
+    _glyphs.clear();
     super.dispose();
   }
 
