@@ -108,6 +108,15 @@ RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap, b
 
 Clip _clip(Node n) => clip(n.prop(CollectionScrollProps.clipBehavior));
 
+/// Whether a drop target around [n] names it as the list its drop slot
+/// opens in: only the render-object list draws that slot.
+bool _opensDropSlots(NodeBuilder b, Node n) {
+  for (String? id = b.tree.source.parentOf(n.id); id != null; id = b.tree.source.parentOf(id)) {
+    if (b.tree.source.node(id)?.behaviors.dropTarget?.listNodeId == n.id) return true;
+  }
+  return false;
+}
+
 /// Whether [n] hugs its items along its scroll axis: it hugs, or it is
 /// flexible (hugs within the room it's given) in a running app.
 bool _hugsMain(NodeBuilder b, Node n) =>
@@ -198,7 +207,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   // The render-only collection below is the design canvas's at-rest view.
   // Counted design templates and lists with drag/drop slots retain their
   // render-object path, which owns item cleanup, shrink wrapping and gaps.
-  if (b.tree.animates && n.bind.containsKey('data') && n.behaviors.dropTarget == null &&
+  if (b.tree.animates && n.bind.containsKey('data') && n.behaviors.dropTarget == null && !_opensDropSlots(b, n) &&
       n.prop(ListViewProps.scrollable) && !_wraps(n) &&
       n.prop(ListViewProps.layout) == api.ListLayout.list && ListRuntime(b, n).data != null) {
     return _dataList(b, n, chain, itemId, item);
