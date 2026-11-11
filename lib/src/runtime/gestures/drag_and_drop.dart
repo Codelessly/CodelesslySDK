@@ -172,6 +172,9 @@ class DragSession {
     'count': count,
     'source': source,
     'over': over,
+    // The node of the target the drag is over (several targets may share a
+    // key: a column and its tab).
+    'target': overTarget?._box?.id ?? '',
     'index': index,
     'beforeId': beforeId,
     'before': before,
@@ -211,6 +214,7 @@ class DragAndDrop extends ChangeNotifier {
     'count': 0,
     'source': '',
     'over': '',
+    'target': '',
     'index': 0,
     'beforeId': '',
     'before': null,
