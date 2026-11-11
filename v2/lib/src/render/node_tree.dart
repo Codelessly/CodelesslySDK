@@ -1403,11 +1403,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   /// Links [next] under this box; a shell stack's single child is the chain
   /// recorded for it in [_innerChains], with its paint layers around it.
   void _wire(List<RenderBox> next) {
+    // Property setters can dirty retained inner boxes before the chain changes.
+    // Keep the owner and its ancestors dirty for both reuse and relinking.
+    markNeedsLayout();
     final relink = _alreadyWired(next);
     if (relink != null) {
-      // An inner box can already be dirty after a property setter. Mark its
-      // owning box first so Flutter's dirty-ancestor invariant remains true.
-      markNeedsLayout();
       for (final o in relink) {
         o.markNeedsLayout();
       }
