@@ -15,6 +15,8 @@
 //   first.
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
+
 import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, Node, Reaction, TriggerType, UnknownAction;
 
 import '../contracts.dart';
@@ -278,7 +280,13 @@ class CodelesslyActions implements ActionRunner {
         context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall'));
       }
     } on ActionsCanceled {
-      // The node left: the rest doesn't run.
+      // The node left: the rest doesn't run. Said in debug builds, so a
+      // chain that stops for this isn't a mystery.
+      assert(() {
+        debugPrint('Codelessly: the actions of ${node.name.isEmpty ? node.id : node.name} stopped: its node left '
+            'the screen while they ran.');
+        return true;
+      }());
     } catch (error, stack) {
       host.reportError(error, stack, action: _failing(error));
     }

@@ -467,6 +467,32 @@ void main() {
     expect(ui.log, ['navigate push details {n: 3}', 'modal sheet bottomSheet']);
   });
 
+  testWidgets('a popover opens by the node that opened it, above it, and answers its result', (tester) async {
+    late BuildContext appContext;
+    late NavigatorActionUi ui;
+    ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 40),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'picker', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'aboveStart', 'anchorGap': 8},
+        {'type': 'setVariable', 'variable': 'count', 'value': r'${result.n}'},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    final box = s.tree.boxOf('button')!;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // By the button, left edges aligned, 8 px off: no room above it at
+    // the top of the screen, so below.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('picker'))), Offset(rect.left, rect.bottom + 8));
+    Navigator.of(tester.element(find.byKey(const ValueKey('picker')))).pop({'n': 7});
+    await tester.pumpAndSettle();
+    expect(s['count'], 7);
+  });
+
   testWidgets('a modal anchored to its trigger or the pointer opens by it', (tester) async {
     late BuildContext appContext;
     final ui = NavigatorActionUi(
