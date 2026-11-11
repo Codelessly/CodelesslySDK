@@ -226,6 +226,7 @@ class NavigatorActionUi implements ActionUi {
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
         sheetWidth: action.sheetWidth,
+        sheetRadius: action.sheetRadius,
         maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
@@ -331,6 +332,7 @@ Future<Object?> showScreenModal(
   required double sheetBelowWidth,
   RouteTransition? routeTransition,
   double? sheetWidth,
+  double? sheetRadius,
   double? maxHeightFactor,
   double barrierBlur = 0,
   double enterScale = 1,
@@ -356,9 +358,10 @@ Future<Object?> showScreenModal(
       },
     ));
   }
-  // Side sheets, sized bottom sheets and frosted or scaled dialogs.
+  // Side sheets, sized or rounded bottom sheets and frosted or scaled
+  // dialogs.
   final presented = presentation == ModalPresentation.sideSheet ||
-      (sheet && maxHeightFactor != null) ||
+      (sheet && (maxHeightFactor != null || sheetRadius != null)) ||
       (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
@@ -367,6 +370,7 @@ Future<Object?> showScreenModal(
       barrierDismissible: barrierDismissible,
       barrierColor: scrim ?? Colors.black54,
       sheetWidth: sheetWidth,
+      cornerRadius: sheetRadius,
       maxHeightFactor: maxHeightFactor ?? 1,
       showDragHandle: showDragHandle,
       barrierBlur: barrierBlur,
