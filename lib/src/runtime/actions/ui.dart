@@ -3,6 +3,7 @@
 // [ActionUi], which the app shell implements (or [NavigatorActionUi], a
 // Navigator-based default any NodeView can use).
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -19,6 +20,7 @@ import 'package:codelessly_api/codelessly_api.dart'
 import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:codelessly_api/codelessly_api.dart' show NavigationMode;
 
+import '../../app/viewport.dart' show CanvasSizing, CanvasSizingScope;
 import 'confirm_dialog.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
@@ -230,6 +232,7 @@ class NavigatorActionUi implements ActionUi {
           placement: action.placement,
           gap: action.anchorGap,
           offset: action.anchorOffset,
+          reserve: action.anchorReserve,
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor);
     }
@@ -246,6 +249,7 @@ class NavigatorActionUi implements ActionUi {
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
         sheetBelowWidth: sheetBelowWidth,
+        cover: action.cover,
         routeTransition: action.routeTransition);
   }
 
@@ -356,6 +360,7 @@ Future<Object?> showScreenModal(
   double? maxHeightFactor,
   double barrierBlur = 0,
   double enterScale = 1,
+  bool cover = false,
 }) {
   final scrim = barrierColor == null ? null : Color(barrierColor.value);
   // A toast on screen goes under the modal's barrier.
@@ -378,10 +383,12 @@ Future<Object?> showScreenModal(
       },
     ));
   }
-  // Side sheets, sized or rounded bottom sheets and frosted or scaled
-  // dialogs.
+  // Side sheets, sized or rounded bottom sheets, sheets with a drag handle
+  // and frosted or scaled dialogs. (Material's sheet put the handle above
+  // the screen, on its transparent background: invisible over the scrim,
+  // and a gap over the screen's own surface.)
   final presented = presentation == ModalPresentation.sideSheet ||
-      (sheet && (maxHeightFactor != null || sheetRadius != null)) ||
+      (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle)) ||
       (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
@@ -422,6 +429,20 @@ Future<Object?> showScreenModal(
   if (presentation == ModalPresentation.fullScreen) {
     return Navigator.of(context).push<Object?>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => content));
   }
+  if (cover && !sheet) {
+    // Covers the screen: the screen it shows fills it, at the device size.
+    return showDialog<Object?>(
+      context: context,
+      useRootNavigator: false,
+      useSafeArea: false,
+      barrierDismissible: barrierDismissible,
+      barrierColor: scrim,
+      builder: (_) => Material(
+        type: MaterialType.transparency,
+        child: CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content)),
+      ),
+    );
+  }
   return showDialog<Object?>(
     context: context,
     useRootNavigator: false,
@@ -434,7 +455,10 @@ Future<Object?> showScreenModal(
 /// Shows [content] as a popover by [anchor] (a global rect: the node that
 /// opened it, or the pointer as an empty rect) at [placement], [gap] away
 /// from it and shifted [offset] along it.
-/// It flips to the other side when it doesn't fit and stays on screen.
+/// It flips to the other side when it doesn't fit and stays on screen. Below
+/// its anchor, it keeps [reserve] of room under its top: when that would pass
+/// the screen's bottom margin it moves up (a menu that may grow keeps its
+/// place).
 Future<Object?> showAnchoredModal(
   BuildContext context,
   Widget content, {
@@ -442,6 +466,7 @@ Future<Object?> showAnchoredModal(
   api.PopoverPlacement placement = api.PopoverPlacement.belowStart,
   double gap = 4,
   double offset = 0,
+  double reserve = 0,
   bool barrierDismissible = true,
   api.Color? barrierColor,
 }) {
@@ -457,7 +482,7 @@ Future<Object?> showAnchoredModal(
     barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
     useSafeArea: false,
     builder: (_) => CustomSingleChildLayout(
-      delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset),
+      delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset, reserve: reserve),
       child: Material(type: MaterialType.transparency, child: content),
     ),
   );
@@ -465,11 +490,16 @@ Future<Object?> showAnchoredModal(
 
 /// Lays a popover out by its anchor (see [showAnchoredModal]).
 class PopoverLayout extends SingleChildLayoutDelegate {
-  PopoverLayout({required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8});
+  PopoverLayout(
+      {required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8, this.reserve = 0});
 
   final Rect anchor;
   final api.PopoverPlacement placement;
   final double gap, offset, margin;
+
+  /// Room kept under the popover's top when it opens below its anchor
+  /// (`OpenModalAction.anchorReserve`).
+  final double reserve;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
@@ -505,6 +535,9 @@ class PopoverLayout extends SingleChildLayoutDelegate {
       if (below && childSize.height > roomBelow && roomAbove > roomBelow) below = false;
       if (!below && childSize.height > roomAbove && roomBelow > roomAbove) below = true;
       y = below ? anchor.bottom + gap : anchor.top - gap - childSize.height;
+      if (below && reserve > 0 && y + reserve > size.height - margin) {
+        y = math.max(margin, size.height - margin - reserve);
+      }
       x = switch (along) {
         -1 => anchor.left + offset,
         1 => anchor.right - childSize.width - offset,
@@ -530,6 +563,11 @@ class PopoverLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(PopoverLayout old) =>
-      old.anchor != anchor || old.placement != placement || old.gap != gap || old.offset != offset || old.margin != margin;
+      old.anchor != anchor ||
+      old.placement != placement ||
+      old.gap != gap ||
+      old.offset != offset ||
+      old.margin != margin ||
+      old.reserve != reserve;
 }
 

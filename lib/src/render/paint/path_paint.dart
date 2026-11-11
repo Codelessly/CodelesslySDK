@@ -284,11 +284,11 @@ class RenderShapePath extends RenderBox with ImageClient {
 double pathStrokeScale(Size? viewBox, Size size, {required bool scaleStroke}) =>
     viewBox == null || !scaleStroke ? 1.0 : math.sqrt((size.width / viewBox.width) * (size.height / viewBox.height));
 
-/// A `path` widget: SizedBox(design size) → the painted path.
+/// A `path` widget: its size by its fit on each axis (fixed: the design
+/// size; fill: the room it's given, also under a start-aligned parent; hug:
+/// the design size, a path having no content to hug) → the painted path.
 void buildPath(NodeBuilder b, Node n, List<RenderBox> chain) {
-  final c = BoxConstraints.tightFor(width: n.layout.width.value, height: n.layout.height.value);
-  chain.add(b.obtain<RenderConstrainedBox>('pathSized', () => RenderConstrainedBox(additionalConstraints: c))
-    ..additionalConstraints = c);
+  chain.add(b.fitBox('pathFit', n.layout.width.fit, n.layout.height.fit, Size(n.layout.width.value, n.layout.height.value)));
   chain.add(b.obtain<RenderShapePath>('shape', RenderShapePath.new)..node = n);
 }
 
