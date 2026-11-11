@@ -492,7 +492,8 @@ class ItemScope extends NamedScope {
 }
 
 /// The value of the `screen` name for a screen [width] × [height]
-/// (DESIGN.md §5.3): its size, orientation and brightness, and its
+/// (DESIGN.md §5.3): its size, orientation and brightness (`isDark`, also
+/// read as `dark`; `brightness`), and its
 /// breakpoint among the project's [breakpoints] (default:
 /// [Breakpoints.defaults]):
 ///
@@ -543,6 +544,8 @@ Map<String, Object?> screenValues(double width, double height,
     'isLandscape': !portrait,
     'brightness': dark ? 'dark' : 'light',
     'isDark': dark,
+    // What some guides and tools called it.
+    'dark': dark,
   };
 }
 

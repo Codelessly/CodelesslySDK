@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart'
     show
         Breakpoints,
+        ThemeTokens,
         CanvasProps,
         jsonEquality,
         Json,
@@ -664,6 +665,25 @@ class _LayoutViewState extends State<_LayoutView> {
     final screen = screenValues(mq.size.width, mq.size.height,
         dark: mq.platformBrightness == Brightness.dark, breakpoints: _breakpoints);
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
+    _updateTheme();
+  }
+
+  /// The project's theme as the layout shows it: its tokens, then a
+  /// layout's own.
+  ThemeTokens get _tokens => widget.layout.theme ?? _codelessly.publishModel?.theme ?? ThemeTokens.none;
+
+  /// Whether the layout shows in dark mode: the device's mode, or with
+  /// [CodelesslyConfig.useHostTheme] the app's theme's (so an app's own
+  /// dark mode switch applies).
+  bool get _dark => _codelessly.config.useHostTheme
+      ? Theme.of(context).brightness == Brightness.dark
+      : MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark;
+
+  /// `theme`: the project's theme tokens for the current mode
+  /// ([themeValues]), kept as the mode and the published theme change.
+  void _updateTheme() {
+    final theme = themeValues(_tokens, dark: _dark);
+    if (!jsonEquality.equals(theme, _screen.values['theme'])) _screen.values.set('theme', theme);
   }
 
   Map<String, Object?> _paywallValues() {
@@ -971,6 +991,8 @@ class _LayoutViewState extends State<_LayoutView> {
   void didUpdateWidget(_LayoutView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!jsonEquality.equals(oldWidget.data, widget.data)) _dataChanged(oldWidget.data);
+    // A republish can bring another theme.
+    _updateTheme();
     if (!identical(oldWidget.controller, widget.controller)) {
       if (identical(oldWidget.controller?._screen, _screen)) oldWidget.controller?._screen = null;
       widget.controller?._screen = _screen;
@@ -1032,7 +1054,15 @@ class _LayoutViewState extends State<_LayoutView> {
     content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
-      if (theme != null) content = Theme(data: themeDataOf(theme), child: content);
+      // A theme with dark colors is a dark theme in dark mode; one without
+      // stays light, as it was designed.
+      if (theme != null) {
+        final dark = theme.hasDark && _dark;
+        content = Theme(
+          data: themeDataOf(theme.forBrightness(dark: dark), brightness: dark ? Brightness.dark : Brightness.light),
+          child: content,
+        );
+      }
     }
     final mq = MediaQuery.maybeOf(context);
     if (mq != null) {
