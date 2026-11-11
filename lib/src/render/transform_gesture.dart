@@ -70,8 +70,13 @@ class TransformPose {
   };
 
   /// [value] rounded as a pose is written to variables: pixels and degrees
-  /// to hundredths, scales to thousandths.
+  /// to hundredths, scales to thousandths (six significant digits below .01).
   static num rounded(String key, double value) {
+    // Rounding a tiny zoom to thousandths could write zero, which then
+    // reset a two-way pose instead of retaining its valid minimum scale.
+    if (key.startsWith('scale') && value != 0 && value.abs() < .01) {
+      return double.parse(value.toStringAsPrecision(6));
+    }
     final places = key.startsWith('scale') ? 1000 : 100;
     final num r = (value * places).round() / places;
     return r == r.roundToDouble() ? r.round() : r;
