@@ -487,8 +487,10 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// The layout and params [screen] opens.
   static (String, Map<String, Object?>)? _resolveScreen(PublishModel model, String? screen) {
     if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
+    // Encode what a typed location may hold raw (spaces, `·`), keeping the
+    // escapes it already has: a link's `?found=a%3A1` stays `a:1`, not
+    // `a%3A1`.
+    final location = screen.trim().splitMapJoin(RegExp('%[0-9A-Fa-f]{2}'), onMatch: (m) => m[0]!, onNonMatch: Uri.encodeFull);
     final CanvasLocationMatch? match;
     final Uri? uri;
     try {

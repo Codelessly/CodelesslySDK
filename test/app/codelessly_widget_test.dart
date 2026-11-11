@@ -266,6 +266,14 @@ void main() {
     final rootQuery = await pumpApp(tester, codelesslyFor(), initialScreen: '/?state=empty');
     expect(rootQuery.layout!.id, bundle.model.entryLayoutId);
     expect(rootQuery.read('route.state'), 'empty');
+    // A link's escapes are read once (`%3A` is `:`), and what a typed
+    // location holds raw still works.
+    await tester.pumpWidget(const SizedBox());
+    final encoded = await pumpApp(tester, codelesslyFor(), initialScreen: '/?state=moss%3A1%3Asun%2Cowl%3A2');
+    expect(encoded.read('route.state'), 'moss:1:sun,owl:2');
+    await tester.pumpWidget(const SizedBox());
+    final raw = await pumpApp(tester, codelesslyFor(), initialScreen: '/?state=moss:1 sun,100%');
+    expect(raw.read('route.state'), 'moss:1 sun,100%');
   });
 
   testWidgets('a canvas can be forced; data and params reach the scope', (tester) async {
