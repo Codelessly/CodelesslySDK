@@ -324,9 +324,10 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     },
     isCollapsed: d.isCollapsed,
     isDense: d.isDense,
-    // A collapsed decoration is the bare input: a compact density must not
-    // shrink its intrinsic height.
-    visualDensity: d.isCollapsed ? VisualDensity.standard : null,
+    // A collapsed decoration is the bare input, and a set content padding is
+    // the designed one: a platform's compact density (desktop) must not
+    // shrink either, or the field is ~8px shorter on desktop than designed.
+    visualDensity: d.isCollapsed || d.contentPadding != null ? VisualDensity.standard : null,
     contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
         error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
         focused: focused),
