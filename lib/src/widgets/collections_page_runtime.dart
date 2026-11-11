@@ -92,8 +92,9 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted ||
               !identical(controller, _controller) ||
-              !controller.hasClients)
+              !controller.hasClients) {
             return;
+          }
           // onPageChanged commonly writes this same bound variable. Its
           // intermediate page reports are feedback, not navigation requests:
           // retargeting to each report would cancel a multi-page animation.

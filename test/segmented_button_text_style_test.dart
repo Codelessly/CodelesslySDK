@@ -6,8 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 SegmentedButton<String> control(NodeTree tree) {
   SegmentedButton<String>? found;
   void visit(Element e) {
-    if (e.widget is SegmentedButton<String>)
+    if (e.widget is SegmentedButton<String>) {
       found = e.widget as SegmentedButton<String>;
+    }
     e.visitChildren(visit);
   }
 

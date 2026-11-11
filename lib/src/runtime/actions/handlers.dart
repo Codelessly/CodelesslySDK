@@ -618,7 +618,7 @@ Future<void> _submitLocalForm(SubmitFormAction a, ActionRun run) async {
     final snapshot = (jsonDecode(jsonEncode(payload)) as Map).cast<String, Object?>();
     if (run.cancellation.isCancelled) return;
     if (destination.isNotEmpty) {
-      final current = run.context.scope?.read(destination);
+      final current = run.context.scope.read(destination);
       final rows = current is List ? [...current] : <Object?>[];
       a.prepend ? rows.insert(0, snapshot) : rows.add(snapshot);
       setVariableIn(run.context.scope, destination, rows);

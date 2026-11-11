@@ -22,6 +22,7 @@ import 'flip_card.dart';
 import 'transform_gesture.dart';
 import 'node_tree.dart' show NodeBox;
 import 'paint/svg_path.dart';
+import '../runtime/actions/wiring.dart' show visibleShare;
 import 'recipe.dart';
 
 /// Track pose, motion and scale: the layers between the constraints and
@@ -668,6 +669,7 @@ class RenderMotion extends RenderPose with _Ticking {
   api.Motion _motion = api.Motion.none;
   bool _animates = false;
   bool _entered = false;
+  bool _waitingForReveal = false;
 
   /// The running transition: from [_from] to [_to] since [_since] (its
   /// delay not yet counted), [_offset] ms into its run (a loop's phase).
@@ -760,20 +762,45 @@ class RenderMotion extends RenderPose with _Ticking {
   void attach(PipelineOwner owner) {
     if (!_entered && _animates) {
       final m = _motion;
-      // Looping from its start, at its phase; or entering.
+      _waitingForReveal = m.revealOnScroll && m.hasEntrance;
       if (_loops(m)) {
         _startLoop();
       } else if (m.hasEntrance && _transitionMs(m) > 0) {
         _start(m.entranceStart, m, at: _clock);
       }
+      _entered = !_waitingForReveal;
     }
-    _entered = true;
     super.attach(owner);
     _show();
+    if (_waitingForReveal) _MotionRevealWatcher.add(this);
+  }
+
+  void _checkReveal() {
+    if (!attached || !hasSize || !_waitingForReveal) return;
+    final share = visibleShare(this);
+    if (share <= 0 || share < _motion.revealFraction.clamp(0.0, 1.0)) return;
+    _waitingForReveal = false;
+    _entered = true;
+    _since = _clock;
+    _MotionRevealWatcher.remove(this);
+    _show();
+    syncTicker();
   }
 
   @override
-  bool get ticking => _animates && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
+  void detach() {
+    _MotionRevealWatcher.remove(this);
+    super.detach();
+  }
+
+  @override
+  void dispose() {
+    _MotionRevealWatcher.remove(this);
+    super.dispose();
+  }
+
+  @override
+  bool get ticking => _animates && !_waitingForReveal && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
 
   @override
   void tick(Duration elapsed) {
@@ -1068,16 +1095,31 @@ class StrokePathPainter extends CustomPainter {
     return out;
   }
 
+  Path visiblePathFor(Size size) {
+    final full = pathFor(size);
+    final progress = path.progress.clamp(0.0, 1.0);
+    if (progress >= 1) return full;
+    final visible = Path();
+    final metrics = full.computeMetrics().toList();
+    var remaining = metrics.fold(0.0, (double length, metric) => length + metric.length) * progress;
+    for (final metric in metrics) {
+      if (remaining <= 0) break;
+      visible.addPath(metric.extractPath(0, math.min(remaining, metric.length)), Offset.zero);
+      remaining -= metric.length;
+    }
+    return visible;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
-    if (path.points.length < 2 || path.width <= 0) return;
+    if (path.points.length < 2 || path.width <= 0 || path.progress <= 0) return;
     final paint = Paint()
       ..color = path.color.flutter
       ..style = PaintingStyle.stroke
       ..strokeWidth = path.width
       ..strokeCap = StrokeCap.values.byName(path.cap.name)
       ..strokeJoin = StrokeJoin.round;
-    final full = pathFor(size);
+    final full = visiblePathFor(size);
     final dash = [
       for (final d in path.dashPattern)
         if (d > 0) d,
@@ -1254,5 +1296,25 @@ class RenderTilt extends RenderPose with _Ticking {
       ),
     );
     origin = Alignment(max.originX, max.originY);
+  }
+}
+
+abstract final class _MotionRevealWatcher {
+  static final Set<RenderMotion> _waiting = {};
+  static bool _scheduled = false;
+  static void add(RenderMotion motion) {
+    _waiting.add(motion);_schedule();SchedulerBinding.instance.scheduleFrame();
+  }
+  static void remove(RenderMotion motion) => _waiting.remove(motion);
+  static void _schedule() {
+    if(_scheduled||_waiting.isEmpty)return;
+    _scheduled=true;
+    SchedulerBinding.instance.addPostFrameCallback((_){
+      _scheduled=false;
+      for(final motion in _waiting.toList()) {
+        motion._checkReveal();
+      }
+      _schedule();
+    });
   }
 }
