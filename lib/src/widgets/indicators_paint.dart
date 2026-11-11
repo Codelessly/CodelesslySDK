@@ -823,6 +823,9 @@ class BarcodePainter extends NodePainter {
   BarcodeSymbology get symbology => p(BarcodeProps.symbology);
   Color get color => p(BarcodeProps.color).flutter;
 
+  /// How far each dark bar reaches past its right and bottom edge.
+  double get overlap => p(BarcodeProps.overlap);
+
   static bc.Barcode barcodeFor(BarcodeSymbology symbology, BarcodeErrorCorrection correction) => switch (symbology) {
         BarcodeSymbology.qrCode => bc.Barcode.qrCode(
             errorCorrectLevel: switch (correction) {
@@ -874,7 +877,7 @@ class BarcodePainter extends NodePainter {
     final path = Path();
     for (final bar in bars) {
       if (!bar.black) continue;
-      path.addRect(Rect.fromLTWH(bar.left, (bar.top - top) * scaleY, bar.width, bar.height * scaleY));
+      path.addRect(Rect.fromLTWH(bar.left, (bar.top - top) * scaleY, bar.width + overlap, bar.height * scaleY + overlap));
     }
     canvas.drawPath(path, Paint()..color = color);
     return true;
@@ -895,7 +898,7 @@ class BarcodePainter extends NodePainter {
     final path = Path();
     for (final element in elements) {
       if (element is bc.BarcodeBar && element.black) {
-        path.addRect(Rect.fromLTWH(element.left, element.top, element.width, element.height));
+        path.addRect(Rect.fromLTWH(element.left, element.top, element.width + overlap, element.height + overlap));
       }
     }
     canvas.drawPath(path, Paint()..color = color);
