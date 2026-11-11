@@ -102,4 +102,82 @@ void main() {
       vars.dispose();
     },
   );
+
+  test('a computed name notifies only when its value changes (Ninefold board)', () async {
+    var calls = 0;
+    final vars = VariableScope([
+      const Variable(name: 'game', type: VariableType.integer, value: 1),
+      const Variable(name: 'clock', type: VariableType.integer, value: 0),
+      const Variable(name: 'cells', type: VariableType.list, formula: 'script.view(game)'),
+      const Variable(name: 'studio', type: VariableType.text, formula: 'script.label(clock)'),
+    ]);
+    final reader = ScriptsScope(
+      parent: vars,
+      scripts: [
+        ScriptDef.fromJson({'id': 'view', 'name': 'view', 'params': [{'name': 'g'}], 'source': ''})!,
+        ScriptDef.fromJson({'id': 'label', 'name': 'label', 'params': [{'name': 'c'}], 'source': ''})!,
+      ],
+      runner: FunctionScriptRunner({
+        'view': (args, host) async {
+          calls++;
+          return [args['g'], args['g']];
+        },
+        'label': (args, host) async => 'at ${args['c']}',
+      }),
+    );
+    reader.reader = reader;
+    final cellsNotes = <Object?>[];
+    final watch = watchName(reader, 'cells')!;
+    watch.addListener(() => cellsNotes.add(reader.read('cells')));
+    reader.read('cells');
+    reader.read('studio');
+    await Future<void>.delayed(Duration.zero);
+    expect(cellsNotes, [[1, 1]]);
+    // Another script's result (a clock-driven label) leaves the cells alone.
+    for (var t = 1; t <= 3; t++) {
+      vars.set('clock', t);
+      reader.read('studio');
+      await Future<void>.delayed(Duration.zero);
+    }
+    expect(cellsNotes, [[1, 1]]);
+    // Its own input changing does notify.
+    vars.set('game', 2);
+    reader.read('cells');
+    await Future<void>.delayed(Duration.zero);
+    expect(cellsNotes.last, [2, 2]);
+    expect(calls, 2);
+    reader.dispose();
+    vars.dispose();
+  });
+
+  test('settled waits for formula scripts, including the ones their results start', () async {
+    final vars = VariableScope([
+      const Variable(name: 'n', type: VariableType.integer, value: 1),
+      const Variable(name: 'a', type: VariableType.integer, formula: 'script.slow(n)'),
+      const Variable(name: 'b', type: VariableType.integer, formula: 'script.slow(a)'),
+    ]);
+    final reader = ScriptsScope(
+      parent: vars,
+      scripts: [ScriptDef.fromJson({'id': 'slow', 'name': 'slow', 'params': [{'name': 'x'}], 'source': ''})!],
+      runner: FunctionScriptRunner({
+        'slow': (args, host) async {
+          await Future<void>.delayed(const Duration(milliseconds: 15));
+          return ((args['x'] as num?) ?? 0) + 1;
+        },
+      }),
+    );
+    reader.reader = reader;
+    // b reads a, which isn't there yet: b's own call starts once a answers.
+    final w = watchName(reader, 'b')!;
+    void reread() => reader.read('b');
+    w.addListener(reread);
+    expect(reader.read('b'), isNull);
+    // The caller's frame: here a microtask (no widgets re-apply).
+    await reader.settled(() => Future<void>.delayed(Duration.zero));
+    expect(reader.read('a'), 2);
+    expect(reader.read('b'), 3);
+    w.removeListener(reread);
+    reader.dispose();
+    vars.dispose();
+  });
 }

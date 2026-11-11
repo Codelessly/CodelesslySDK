@@ -365,6 +365,15 @@ void main() {
       expect(VariablePreview.textFor(r'${item.other}', scope: blank), 'Other');
     });
 
+    test('a value that is empty text shows nothing, as an empty formula does', () {
+      final s = VariableScope([v('blank', '')]);
+      expect(VariablePreview.textFor(r'${blank}', scope: s), '');
+      final note = ItemScope(index: 0, item: {'t': ''}, parent: s);
+      expect(VariablePreview.textFor(r'${item.t}', scope: note), '');
+      // Missing still gets a placeholder.
+      expect(VariablePreview.textFor(r'${item.label}', scope: note), 'Label');
+    });
+
     test('a fixed-width text too narrow for its placeholder shows a marker', () {
       expect(VariablePreview.textFor(r'${shots}', width: 40), '…');
       expect(VariablePreview.textFor(r'${shots}'), 'Shots');

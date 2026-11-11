@@ -71,9 +71,14 @@ final class NodeBindings {
   NodeBindings._(Node n)
       : properties = [
           for (final e in n.bind.entries)
-            if (e.key != BindPaths.visible && e.key != BindPaths.data) BoundProperty(e.key, e.value),
+            if (e.key != BindPaths.visible && e.key != BindPaths.data && BindPaths.stateOf(e.key) == null)
+              BoundProperty(e.key, e.value),
           ..._imageUrls(n),
         ],
+        states = {
+          for (final e in n.bind.entries)
+            if (BindPaths.stateOf(e.key) case final api.WidgetState state) state: BoundProperty(e.key, e.value),
+        },
         visible = n.bind[BindPaths.visible]?.let((e) => BoundProperty(BindPaths.visible, e)),
         data = n.bind[BindPaths.data]?.let((e) => BoundProperty(BindPaths.data, e)),
         text = n.type == TextProps.spec.type && n.prop(TextProps.text).contains(r'${') && !n.bind.containsKey('props.text')
@@ -114,13 +119,16 @@ final class NodeBindings {
   /// The items a repeating widget builds one per.
   final BoundProperty? data;
 
+  /// Interaction states bound to data (`selected`, `disabled`).
+  final Map<api.WidgetState, BoundProperty> states;
+
   /// A text node's own text when it holds `${...}` (interpolated).
   final String? text;
 
   late final Set<String> textReads = text == null ? const {} : Expressions.readsOf(text!);
   late final ClockTick? textClock = text == null ? null : Expressions.clockTick(text!);
 
-  bool get isEmpty => properties.isEmpty && visible == null && data == null && text == null;
+  bool get isEmpty => properties.isEmpty && visible == null && data == null && text == null && states.isEmpty;
 }
 
 /// The properties a layout's conditions set, by node: (path, the first
@@ -196,9 +204,13 @@ final class ConditionTarget {
 /// A node as shown: its bound values applied.
 @immutable
 final class BoundNode {
-  const BoundNode(this.node, {this.collapsed = false, this.watch = const []});
+  const BoundNode(this.node, {this.collapsed = false, this.watch = const [], this.states = const {}});
 
   final Node node;
+
+  /// Interaction states its bindings or conditions turn on or off
+  /// (`selected`, `disabled`); the node tree holds them as it holds hover.
+  final Map<api.WidgetState, bool> states;
 
   /// Hidden by a binding or condition: takes no space (Flutter's
   /// `Visibility` without `maintainSize`). A node hidden in its own data
@@ -257,7 +269,13 @@ class NodeBinder {
     ClockTick? clock;
     var out = node;
     bool? visible;
+    final states = <api.WidgetState, bool>{};
     if (s != null) {
+      for (final e in b.states.entries) {
+        reads.addAll(e.value.reads);
+        clock = e.value.clock?.finer(clock) ?? clock;
+        if (BindValue.boolean(e.value.valueIn(engine, s)) case final bool on) states[e.key] = on;
+      }
       for (final p in b.properties) {
         reads.addAll(p.reads);
         clock = p.clock?.finer(clock) ?? clock;
@@ -281,6 +299,8 @@ class NodeBinder {
         if (v == null) continue;
         if (t.path == BindPaths.visible) {
           visible = BindValue.boolean(v) ?? visible;
+        } else if (BindPaths.stateOf(t.path) case final api.WidgetState state) {
+          if (BindValue.boolean(v) case final bool on) states[state] = on;
         } else if (t.path == BindPaths.data) {
           out = _withItems(source, out, instance, v);
         } else {
@@ -298,6 +318,7 @@ class NodeBinder {
       out,
       collapsed: visible == false,
       watch: s == null ? const [] : _watchers(s, reads, preview ? null : clock),
+      states: states,
     );
   }
 
@@ -363,6 +384,7 @@ class NodeBinder {
         e.value.update(index: i, item: i < list.length ? list[i] : null);
       }
     }
+    _itemRefreshers[(n.id, instance)]?.call(list);
     // A list's item count, a table's row count: as many as the items.
     final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
     final def = n.spec?.prop(countProp);
@@ -556,6 +578,22 @@ class NodeBinder {
   /// Lets go of the scope of repeat [instance] (its widget no longer shows
   /// it). Not disposed: a box leaving with it may still listen.
   void forgetItem(ProvidedItem instance) => _provided.remove(instance);
+
+  /// What re-gives the items of widgets that provide their own item scopes
+  /// ([provideItem]: a table at rest), by node and instance: called with the
+  /// node's new items whenever its bound data changes, as a list's item
+  /// scopes are moved to theirs. Without it a table whose data changed but
+  /// kept its size (the same node) kept showing its old cells.
+  final Map<(String, Object?), void Function(List<Object?> items)> _itemRefreshers = {};
+
+  /// Registers (or with null, drops) [refresh] for node [owner] in [instance].
+  void onItemsChanged(String owner, Object? instance, void Function(List<Object?> items)? refresh) {
+    if (refresh == null) {
+      _itemRefreshers.remove((owner, instance));
+    } else {
+      _itemRefreshers[(owner, instance)] = refresh;
+    }
+  }
 
   /// The items node [list] (in [instance]) is bound to: its `data` binding or
   /// a condition setting it, as a list; null when it has none.

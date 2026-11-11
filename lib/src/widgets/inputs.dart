@@ -459,11 +459,13 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
       }
       _sent.clear();
       // A new value from outside (a slider rewrote the line): keep the caret
-      // where it was, within the new text.
+      // where it was, within the new text. A caret at the end (of an empty
+      // field too: a default that arrives after autofocus) stays at the end.
       final selection = controller.selection;
+      final atEnd = selection.isCollapsed && selection.baseOffset == controller.text.length;
       controller.value = TextEditingValue(
         text: initial,
-        selection: selection.isValid
+        selection: selection.isValid && !atEnd
             ? TextSelection(
                 baseOffset: selection.baseOffset.clamp(0, initial.length),
                 extentOffset: selection.extentOffset.clamp(0, initial.length))
@@ -1539,6 +1541,10 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
       child: _HoverDecorator(
         decoration: decoration,
         enabled: onTap != null,
+        // A fixed height is the node's own: the island can be laid out
+        // unbounded (in a column), where constraints don't carry it.
+        height: n.layout.height.fit == SizeFit.fixed ? n.layout.height.value : null,
+        fills: n.layout.height.fit == SizeFit.fill,
         child: Text(text, style: _styleOrNull(style), maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     ),
@@ -1546,10 +1552,16 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
 }
 
 class _HoverDecorator extends StatefulWidget {
-  const _HoverDecorator({required this.decoration, required this.enabled, required this.child});
+  const _HoverDecorator({required this.decoration, required this.enabled, required this.child, this.height, this.fills = false});
   final InputDecoration decoration;
   final bool enabled;
   final Widget child;
+
+  /// The node's fixed height, which the field takes.
+  final double? height;
+
+  /// Whether the node fills its parent's height (bounded), which it takes.
+  final bool fills;
   @override
   State<_HoverDecorator> createState() => _HoverDecoratorState();
 }
@@ -1564,7 +1576,9 @@ class _HoverDecoratorState extends State<_HoverDecorator> {
         // a dense decoration), its value centred, as a text field does.
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final fills = constraints.hasBoundedHeight;
+            final height = widget.height ??
+                (widget.fills && constraints.hasBoundedHeight ? constraints.maxHeight : null);
+            final fills = height != null;
             final decorator = InputDecorator(
               // Standard density when it fills: a compact theme would draw
               // the field 8 px shorter than its node.
@@ -1578,7 +1592,7 @@ class _HoverDecoratorState extends State<_HoverDecorator> {
               textAlignVertical: fills ? TextAlignVertical.center : null,
               child: widget.child,
             );
-            return fills ? SizedBox(height: constraints.maxHeight, child: decorator) : decorator;
+            return fills ? SizedBox(height: height, child: decorator) : decorator;
           },
         ),
       );
@@ -1789,7 +1803,8 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
           DateTimeInputMode.dateTime => 'date and time',
         }}';
     final empty = display.isEmpty;
-    return Row(children: [
+    // Centered down the box, as a field's value is.
+    return Align(alignment: AlignmentDirectional.centerStart, child: Row(children: [
       Expanded(
         child: Text(empty ? hint : display,
             maxLines: 1,
@@ -1798,7 +1813,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
       ),
       _icon(n.prop(DateTimeInputProps.icon)) ??
           Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
-    ]);
+    ]));
   }
 
   /// [date] / [time] by an `intl` [pattern]; a broken pattern shows ISO.
@@ -2095,6 +2110,7 @@ class _SignatureIslandState extends State<_SignatureIsland> {
             placeholderBelowLine: n.prop(SignatureProps.placeholderPosition) == api.SignaturePlaceholderPosition.belowLine,
             placeholderFontWeight: n.prop(SignatureProps.placeholderFontWeight),
             placeholderLetterSpacing: n.prop(SignatureProps.placeholderLetterSpacing),
+            smooth: n.prop(SignatureProps.smooth),
           ),
           child: const SizedBox.expand(),
         ),

@@ -23,7 +23,10 @@ abstract final class IconSources {
   static String? urlOf(Json icon) {
     if (readString(icon['source']) == 'image') return readString(icon['image']);
     var name = (readString(icon['name']) ?? '').toLowerCase();
-    switch (readString(icon['type'])) {
+    // A feedback icon written `{"source": "icon", "name": "check_rounded"}`
+    // (as a toast's default is) names a Material icon; it drew nothing.
+    final type = readString(icon['type']) ?? (readString(icon['source']) == 'icon' && name.isNotEmpty ? 'MATERIAL_ICON' : null);
+    switch (type) {
       case 'MATERIAL_ICON':
         if (name.isEmpty) return null;
         // Flutter's names carry the style (`download_rounded`, `Icons.
@@ -61,6 +64,16 @@ abstract final class IconSources {
         return '$root/cupertino/$cupertinoVersion/${codepoint.toRadixString(16)}.svg';
     }
     return null;
+  }
+
+  /// The MaterialIcons font codepoint a Material icon draws while its SVG
+  /// isn't available, or null (other icon types, no codepoint).
+  static int? glyphOf(Json icon) {
+    final type = readString(icon['type']);
+    if (type != null && type != 'MATERIAL_ICON') return null;
+    if (readString(icon['source']) == 'image') return null;
+    final c = readInt(icon['codepoint']);
+    return c == null || c <= 0 ? null : c;
   }
 
   /// Where a Material icon saved without its version (an icon named in
@@ -147,6 +160,11 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   @override
   bool get sizedByParent => true;
 
+  /// An icon is solid to the pointer, as Flutter's `Icon` is: a drag handle
+  /// or a button that is only an icon takes the press, not what lies under.
+  @override
+  bool hitTestSelf(Offset position) => true;
+
   /// The icon box: the size its fit box gives it, nothing of its
   /// own (so a row out of room can squeeze it).
   @override
@@ -156,8 +174,14 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   void paint(PaintingContext context, Offset offset) {
     if (_icon['show'] == false) return;
     final loaded = _loaded();
-    if (loaded == null) return;
     final color = _color ?? defaultColor;
+    if (loaded == null) {
+      // Its SVG is loading (or neither version loaded):
+      // a Material icon with a codepoint draws that glyph of the bundled
+      // MaterialIcons font meanwhile, instead of nothing.
+      _paintGlyph(context.canvas, offset, color);
+      return;
+    }
     final isImage = readString(_icon['source']) == 'image';
     // A transparent color shows an image icon's own colors.
     final raw = isImage && _color != null && _color!.a == 0;
@@ -170,5 +194,22 @@ class RenderIconGlyph extends RenderBox with ImageClient {
       scale: isImage && !raw && !loaded.isSvg ? readDouble(_icon['scale']) ?? 1 : 1,
       colorFilter: raw ? null : ColorFilter.mode(color, BlendMode.srcIn),
     );
+  }
+
+  /// The font glyph of a Material icon with a `codepoint` (its SVG's
+  /// stand-in), filling the box; nothing for other icons.
+  void _paintGlyph(Canvas canvas, Offset offset, Color color) {
+    final codepoint = IconSources.glyphOf(_icon);
+    if (codepoint == null || size.isEmpty) return;
+    final extent = size.shortestSide;
+    final painter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(codepoint),
+        style: TextStyle(fontFamily: 'MaterialIcons', fontSize: extent, height: 1, color: color, inherit: false),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(canvas, offset + Offset((size.width - painter.width) / 2, (size.height - painter.height) / 2));
+    painter.dispose();
   }
 }

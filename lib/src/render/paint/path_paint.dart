@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 // SVG paths: the `path` widget (a vector shape) and a box's `path` prop (a
 // box drawn as a shape).
 import 'dart:ui' as ui;
@@ -154,17 +155,22 @@ class RenderShapePath extends RenderBox with ImageClient {
           (Matrix4.identity()..scaleByDouble(size.width / viewBox.width, size.height / viewBox.height, 1, 1)).storage);
     }
     final d = n.decoration;
+    // A stroke in viewBox units grows with the drawing (by the mean of the
+    // two scales, as for a uniform one).
+    final k = pathStrokeScale(viewBox, size, scaleStroke: n.prop(PathProps.scaleStroke));
+    final strokeWidth = d.strokeWidth * k;
+    final dashPattern = k == 1 ? d.dashPattern : [for (final v in d.dashPattern) v * k];
     final bounds = Offset.zero & size;
     final fills = d.fills.where((p) => p.visible && (p.type != api.PaintType.solid || p.color != null)).toList();
     final strokes = [for (final p in d.visibleStrokes) if (p.type != api.PaintType.image && (p.isGradient || p.color != null)) p];
-    final stroked = strokes.isNotEmpty && d.strokeWidth > 0;
+    final stroked = strokes.isNotEmpty && strokeWidth > 0;
     final start = n.prop(PathProps.trimStart), end = n.prop(PathProps.trimEnd);
-    final whole = start <= 0 && end >= 1 && d.dashPattern.isEmpty;
-    final outline = !stroked || whole ? path : trimPath(path, start, end, d.dashPattern);
+    final whole = start <= 0 && end >= 1 && dashPattern.isEmpty;
+    final outline = !stroked || whole ? path : trimPath(path, start, end, dashPattern);
     final cap = _cap(d.strokeCap), join = _join(n.prop(PathProps.strokeJoin));
     final filled = d.fills.any((p) => p.visible);
     paintPathShadows(canvas, path, _shadows(d, api.EffectType.dropShadow),
-        filled: filled, stroke: outline, strokeWidth: stroked ? d.strokeWidth : 0, cap: cap, join: join);
+        filled: filled, stroke: outline, strokeWidth: stroked ? strokeWidth : 0, cap: cap, join: join);
 
     PathShapes? shapes() => PathShapes.of(data, viewBox, size);
     final colors = n.prop(PathProps.subpathColors).map((c) => c?.flutter).toList();
@@ -198,7 +204,7 @@ class RenderShapePath extends RenderBox with ImageClient {
     if (!stroked) return;
     Paint strokePaint(api.Paint p, Rect r) => RenderNodePaint.paintFor(p, r)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = d.strokeWidth
+      ..strokeWidth = strokeWidth
       ..strokeCap = cap
       ..strokeJoin = join;
     for (final p in strokes) {
@@ -272,11 +278,17 @@ class RenderShapePath extends RenderBox with ImageClient {
   }
 }
 
-/// A `path` widget: SizedBox(design size) → the painted path.
+/// How much a path's stroke grows when drawn at [size] from [viewBox]: the
+/// mean of the two scales with [scaleStroke] ([PathProps.scaleStroke]), else
+/// 1 (the stroke is in the box's pixels).
+double pathStrokeScale(Size? viewBox, Size size, {required bool scaleStroke}) =>
+    viewBox == null || !scaleStroke ? 1.0 : math.sqrt((size.width / viewBox.width) * (size.height / viewBox.height));
+
+/// A `path` widget: its size by its fit on each axis (fixed: the design
+/// size; fill: the room it's given, also under a start-aligned parent; hug:
+/// the design size, a path having no content to hug) → the painted path.
 void buildPath(NodeBuilder b, Node n, List<RenderBox> chain) {
-  final c = BoxConstraints.tightFor(width: n.layout.width.value, height: n.layout.height.value);
-  chain.add(b.obtain<RenderConstrainedBox>('pathSized', () => RenderConstrainedBox(additionalConstraints: c))
-    ..additionalConstraints = c);
+  chain.add(b.fitBox('pathFit', n.layout.width.fit, n.layout.height.fit, Size(n.layout.width.value, n.layout.height.value)));
   chain.add(b.obtain<RenderShapePath>('shape', RenderShapePath.new)..node = n);
 }
 

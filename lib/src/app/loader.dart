@@ -47,7 +47,8 @@ abstract interface class LivePublishLoader implements PublishLoader {
 const String kStoredSchemaField = 'schema';
 
 /// Where a stored layout too large for one Firestore document keeps its
-/// nodes: `{"nodes": {...}}` as JSON, gzipped, base64 encoded. Written by the editor's publish
+/// nodes: `{"nodes": {...}}` (and any field Firestore couldn't store as it
+/// was) as JSON, gzipped, base64 encoded. Written by the editor's publish
 /// (the editor's page storage, `encodeStoredLayout`).
 const String kCompressedNodesField = 'compressedNodes';
 
@@ -80,10 +81,12 @@ Map<String, Object?> expandStoredLayout(Map<String, Object?> stored) {
   } catch (e) {
     throw PublishLoadException('Layout [${stored['id']}] has unreadable compressed nodes', e);
   }
+  // The blob holds the nodes, and any other field Firestore couldn't store
+  // as it was (arrays inside arrays): every field of it comes back.
   return {
     for (final e in stored.entries)
       if (e.key != kCompressedNodesField) e.key: e.value,
-    'nodes': unzipped is Map ? unzipped['nodes'] : null,
+    if (unzipped is Map) ...unzipped.cast<String, Object?>() else 'nodes': null,
   };
 }
 
