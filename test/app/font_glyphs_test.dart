@@ -38,6 +38,15 @@ void main() {
     expect(registered['Geist'], [1, 2]);
   });
 
+  test('a font asked for when first drawn fetches the shown layouts\' characters too', () async {
+    final fetcher = _Glyphs();
+    final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, _) async {});
+    fonts.addText('Shift ⇧ and ↵');
+    fonts.addText('Backlog → Done ⇧');
+    await fonts.load([const PublishFont(id: 'm5', family: 'Geist Mono', weight: 500)]);
+    expect(fetcher.asked, ['Geist Mono 500 ⇧↵→']);
+  });
+
   test('text of latin characters only: no extra file', () async {
     final fetcher = _Glyphs();
     final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, _) async {});

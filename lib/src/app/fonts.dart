@@ -230,12 +230,24 @@ class CodelesslyFonts {
     return String.fromCharCodes(out);
   }
 
+  /// Characters beyond `latin` of the layouts shown so far ([addText]).
+  String _glyphs = '';
+
+  /// Notes what a layout shows: the fonts loaded from then on (listed by a
+  /// publish or asked for when first drawn) fetch its characters beyond a
+  /// browser's `latin` subset too.
+  void addText(String text) {
+    if (text.isEmpty || fetcher is! GlyphFontFetcher) return;
+    _glyphs = glyphsBeyondLatin(_glyphs + text);
+  }
+
   /// Fetches and registers [fonts] not registered yet; completes when they
   /// are (a font that can't be fetched is skipped). With [text] (what the
   /// layout shows) and a [GlyphFontFetcher], the characters of it beyond a
   /// browser's `latin` subset come too, registered with their family.
   Future<void> load(Iterable<PublishFont> fonts, {String text = ''}) async {
-    final extra = text.isEmpty || fetcher is! GlyphFontFetcher ? '' : glyphsBeyondLatin(text);
+    addText(text);
+    final extra = fetcher is GlyphFontFetcher ? _glyphs : '';
     final byFamily = <String, List<PublishFont>>{};
     for (final f in fonts) {
       if (_fonts.containsKey(f.id)) continue;
