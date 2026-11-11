@@ -170,6 +170,18 @@ abstract final class PaintImages {
 
   @visibleForTesting
   static int get debugEntries => _entries.length;
+
+  /// Whether an image a render object shows is still loading.
+  static bool get loading => _entries.values.any((e) => e._started && !e.ready && !e.failed);
+
+  /// Completes once no shown image is loading, or after [timeout]: a
+  /// screenshot taken then has every icon and image that will arrive.
+  static Future<void> settled({Duration timeout = const Duration(seconds: 5)}) async {
+    final end = DateTime.now().add(timeout);
+    while (loading && DateTime.now().isBefore(end)) {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+    }
+  }
 }
 
 /// A render object that paints images: it holds the ones it shows while
