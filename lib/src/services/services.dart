@@ -181,7 +181,7 @@ class Services implements CodelesslyServices {
 
   /// Releases what the services hold.
   Future<void> dispose() async {
-    sound.stopAllNotes();
+    sound.dispose();
     cloud.dispose();
     speech.dispose();
     mediaExport.dispose();

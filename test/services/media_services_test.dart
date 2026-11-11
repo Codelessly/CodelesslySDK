@@ -12,7 +12,12 @@ class _Voice implements SpeechEngine {
   bool get available => true;
 
   @override
-  Future<void> speak(String text, {required String language, required double rate, required double pitch}) {
+  Future<void> speak(
+    String text, {
+    required String language,
+    required double rate,
+    required double pitch,
+  }) {
     said.add('$text/$language');
     final c = Completer<void>();
     pending.add(c);
@@ -24,11 +29,15 @@ class _Voice implements SpeechEngine {
 }
 
 void main() {
- test('disposing services releases every sustained voice',()async{
-   final engine=SilentSoundEngine();final sound=SoundService(engine:engine);
-   final services=Services(sound:sound);sound.startNote('note');
-   await services.dispose();expect(engine.notes,isEmpty);
- });
+  test('disposing services releases every sustained voice', () async {
+    final engine = SilentSoundEngine();
+    final sound = SoundService(engine: engine);
+    final services = Services(sound: sound);
+    sound.startNote('note');
+    await services.dispose();
+    expect(engine.notes, isEmpty);
+    expect(sound.startNote('after-dispose'), isFalse);
+  });
 
   test('sustained voices release independently and replace by id', () {
     final engine = SilentSoundEngine();
@@ -51,7 +60,11 @@ void main() {
   test('the sound clock stays continuous when audio starts and stops', () {
     final clock = SoundClock();
     expect(clock.now(wall: 5, running: false, audio: 0), 5);
-    expect(clock.now(wall: 6, running: true, audio: 0.5), 6, reason: 'audio starts late: time does not jump back');
+    expect(
+      clock.now(wall: 6, running: true, audio: 0.5),
+      6,
+      reason: 'audio starts late: time does not jump back',
+    );
     expect(clock.now(wall: 7, running: true, audio: 1.5), 7);
     expect(clock.toAudio(8), 2.5);
     expect(clock.now(wall: 100, running: false, audio: 1.5), 7);
@@ -80,7 +93,11 @@ void main() {
     final second = speech.speak('adiós');
     voice.pending.first.complete();
     expect(await first, isTrue);
-    expect(speech.speaking, isTrue, reason: 'only the latest utterance ends speaking');
+    expect(
+      speech.speaking,
+      isTrue,
+      reason: 'only the latest utterance ends speaking',
+    );
     voice.pending.last.complete();
     await second;
     expect(speech.speaking, isFalse);

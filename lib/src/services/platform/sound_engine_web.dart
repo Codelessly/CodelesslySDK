@@ -13,34 +13,56 @@ SoundEngine createSoundEngine() {
     return SilentSoundEngine();
   }
 }
+
 /// Short synthesised voices, each under 80 ms, through a gentle compressor.
-class _WebSoundEngine implements SoundEngine, SustainedSoundEngine {
+class _WebSoundEngine
+    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine {
   _WebSoundEngine(this._ctx) {
     // Browsers start audio only inside a user gesture, and Play Sound runs
     // from timers and clocks: resume on the first press or key anywhere.
-    void unlock(web.Event _) => resume();
-    web.document.addEventListener('pointerdown', unlock.toJS, true.toJS);
-    web.document.addEventListener('keydown', unlock.toJS, true.toJS);
+    _unlock = ((web.Event _) => resume()).toJS;
+    web.document.addEventListener('pointerdown', _unlock, true.toJS);
+    web.document.addEventListener('keydown', _unlock, true.toJS);
     _out = _ctx.createDynamicsCompressor()
       ..threshold.value = -6
       ..ratio.value = 4;
     _out.connect(_ctx.destination);
-    web.window.addEventListener('blur', ((web.Event _) => stopAllNotes()).toJS);
-    web.document.addEventListener('visibilitychange', ((web.Event _) {
+    _blur = ((web.Event _) => stopAllNotes()).toJS;
+    _visibility = ((web.Event _) {
       if (web.document.hidden) stopAllNotes();
-    }).toJS);
+    }).toJS;
+    web.window.addEventListener('blur', _blur);
+    web.document.addEventListener('visibilitychange', _visibility);
+  }
+
+  late final JSFunction _unlock, _blur, _visibility;
+  bool _disposed = false;
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    stopAllNotes();
+    web.document.removeEventListener('pointerdown', _unlock, true.toJS);
+    web.document.removeEventListener('keydown', _unlock, true.toJS);
+    web.window.removeEventListener('blur', _blur);
+    web.document.removeEventListener('visibilitychange', _visibility);
+    _ctx.close();
   }
 
   final Map<String, (web.OscillatorNode, web.GainNode)> _sustainedVoices = {};
 
   @override
   void startNote(String id, {double frequency = 440, double volume = 1}) {
+    if (_disposed) return;
     stopNote(id);
     final gain = _ctx.createGain()..gain.value = volume * 0.1;
     final osc = _ctx.createOscillator()..frequency.value = frequency;
     osc.connect(gain);
     gain.connect(_out);
-    osc.onended = ((web.Event _) { osc.disconnect(); gain.disconnect(); }).toJS;
+    osc.onended = ((web.Event _) {
+      osc.disconnect();
+      gain.disconnect();
+    }).toJS;
     _sustainedVoices[id] = (osc, gain);
     osc.start();
   }
@@ -55,7 +77,9 @@ class _WebSoundEngine implements SoundEngine, SustainedSoundEngine {
 
   @override
   void stopAllNotes() {
-    for (final id in _sustainedVoices.keys.toList()) { stopNote(id); }
+    for (final id in _sustainedVoices.keys.toList()) {
+      stopNote(id);
+    }
   }
 
   final web.AudioContext _ctx;
@@ -91,7 +115,7 @@ class _WebSoundEngine implements SoundEngine, SustainedSoundEngine {
 
   @override
   void resume() {
-    if (_ctx.state != 'running') _ctx.resume();
+    if (!_disposed && _ctx.state != 'running') _ctx.resume();
   }
 
   web.GainNode _envelope(double t, double gain, double decay) {
