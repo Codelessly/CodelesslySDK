@@ -1058,6 +1058,10 @@ class RenderPageItems extends RenderCollection {
 /// paint under the cells; a [gridLine] trails each column and row over them.
 class RenderTableItems extends RenderCollection {
   List<double> columnWidths = const [];
+
+  /// The column widths for the width the table is laid out at (a table
+  /// that fills shares its spare width by flex), or null: [columnWidths].
+  List<double> Function(double width)? widthsFor;
   List<double> rowHeights = const [];
 
   /// (row, column) of each child, in child order.
@@ -1085,6 +1089,10 @@ class RenderTableItems extends RenderCollection {
   bool layoutItems() {
     final c = constraints;
     size = c.biggest.isFinite ? c.biggest : c.constrain(Size.zero);
+    if (widthsFor case final f?) {
+      final all = f(size.width);
+      columnWidths = [for (var k = 0; k < columnWidths.length && k < all.length; k++) all[k]];
+    }
     var i = 0;
     for (final it in children) {
       if (i >= cells.length) {
