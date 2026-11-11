@@ -343,7 +343,15 @@ class NodeBinder {
   /// count, unless bound on its own); item scopes already made follow.
   Node _withItems(NodeSource source, Node n, Object? instance, Object? items) {
     final list = _listOf(items);
-    if (list == null) return n;
+    if (list == null) {
+      // A running app shows no items while its data isn't there yet (a
+      // script still answering), not the bare template with `${item...}`
+      // in it; a design preview keeps showing the template.
+      final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
+      final def = n.spec?.prop(countProp);
+      if (preview || def == null || n.bind.containsKey('props.$countProp')) return n;
+      return n.copyWith(props: n.props.set<Object?>(def, 0));
+    }
     // This list's item scopes only (a list of thousands of cells used to
     // scan every item scope of every list, per bind). A snapshot: an item's
     // update can rebind nodes that make or drop item scopes (a list inside
@@ -481,21 +489,38 @@ class NodeBinder {
   ValueScope _itemScope(NodeSource source, String listId, Object? instance, ValueScope root) {
     // The collections give item k > 0 its own instance, ('item', outer,
     // list, k); the first item is the list's own (unscoped).
+    final listNode = source.node(listId)!;
+    final isPages = listNode.type == 'pageView';
     final (int index, Object? outer) = switch (instance) {
       (final String tag, final Object? o, final String l, final int k) when tag == 'item' && l == listId => (k, o),
-      _ => (0, instance),
+      _ => (-1, instance),
     };
     final scopes = _items[(listId, outer)] ??= {};
-    final existing = scopes[index];
-    if (existing != null) return existing;
+    // Known without reading the data: an item by index, or any list's first.
+    if (index >= 0 || !isPages) {
+      final known = scopes[index < 0 ? 0 : index];
+      if (known != null) return known;
+    }
     final parent = scopeFor(source, listId, outer) ?? root;
-    final listNode = source.node(listId)!;
     final items = _listOf(_dataOf(listNode, parent));
-    return scopes[index] = ItemScope(
-      index: index,
-      item: items != null && index < items.length ? items[index] : null,
+    // The list's own (first built) item: item 0, or a page view's page at rest.
+    final restPage = isPages
+        ? (items == null || items.isEmpty
+              ? listNode.prop(api.PageViewProps.initialPage)
+              : listNode.prop(api.PageViewProps.initialPage).clamp(0, items.length - 1))
+        : 0;
+    final at = index < 0 ? restPage : index;
+    final existing = scopes[at];
+    if (existing != null) return existing;
+    final scope = scopes[at] = ItemScope(
+      index: at,
+      item: items != null && at < items.length ? items[at] : null,
       parent: parent,
     );
+    // A page view's pages read their distance from the page at rest, as
+    // they do at runtime (parallax, held entrances).
+    if (isPages) scope.setPageOffset((at - restPage).toDouble());
+    return scope;
   }
 
   Object? _dataOf(Node list, ValueScope s) {

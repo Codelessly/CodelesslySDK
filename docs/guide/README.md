@@ -30,6 +30,7 @@ New here? Read [Introduction](01-introduction.md), then do the [Quickstart](02-q
 | 14 | [Testing](14-testing.md) | Write widget tests for screens that show layouts |
 | 15 | [Troubleshooting and FAQ](15-troubleshooting.md) | Decode an error message |
 | 16 | [Paywalls](16-paywalls.md) | Sell subscriptions with a paywall designed in the Editor |
+| 17 | [Presenting, automations and host features](17-presenting-and-automations.md) | Show popups, banners and flows from anywhere; run them on app events; call your app's native features; capture the screen |
 
 Related:
 

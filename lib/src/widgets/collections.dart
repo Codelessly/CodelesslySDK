@@ -232,16 +232,18 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
         );
       })
       ..placeAt = ((_, _) => origin)
-      // Each item at its own x/y (bound per item: a map's rooms), else at
-      // the list's itemPosition.
+      // Each item at its own x/y (bound per item: a map's rooms, a
+      // timeline's clips), else at the list's itemPosition. An item placed
+      // on one axis is at 0 on the other: a clip at x 0 isn't moved by the
+      // list's itemPosition.
       ..placeChild = ((child, box, item) {
         final node = child is NodeBox ? child.node : null;
         if (node == null) return null;
         final x = node.layout.x, y = node.layout.y;
         if (x == api.AxisPosition.zero && y == api.AxisPosition.zero) return null;
         return Offset(
-          padding.left + _stackAxis(x, box.width - padding.horizontal, item.width, at?.dx ?? 0),
-          padding.top + _stackAxis(y, box.height - padding.vertical, item.height, at?.dy ?? 0),
+          padding.left + _stackAxis(x, box.width - padding.horizontal, item.width, 0),
+          padding.top + _stackAxis(y, box.height - padding.vertical, item.height, 0),
         );
       })
       ..onNeedItems = null
@@ -551,7 +553,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
   );
   final view = b.obtain<RenderPageItems>('pages', RenderPageItems.new)
     ..clipBehavior = _clip(n)
-    ..paintReversed = false
+    ..paintReversed = n.prop(PageViewProps.paintOrder) == api.PagePaintOrder.reverse
     ..onNeedItems = null
     ..axis = n.axis
     ..reverse = n.prop(CollectionScrollProps.reverse)
@@ -561,6 +563,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..firstIndex = first
     ..itemCount = count
     ..pageMotion = n.prop(PageViewProps.pageMotion)
+    ..pageMotionBefore = n.prop(PageViewProps.pageMotionBefore)
     ..changed();
   _syncItems(b, n, view, itemId, last - first + 1, first: first);
   chain.add(view);

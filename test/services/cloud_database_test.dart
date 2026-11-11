@@ -122,6 +122,111 @@ void main() {
     });
   });
 
+  group('server-written rules and expiry', () {
+    test('ownerRead reads only the owner, writes stamp nothing', () async {
+      db.rules = rules({'collections': {'notes': 'ownerRead'}});
+      expect(db.readFilters('notes'), isNull);
+      uid = 'u1';
+      backend.seed('data/p1/notes', {
+        'n1': {'ownerId': 'u1', 'read': false},
+        'n2': {'ownerId': 'u2'},
+      });
+      expect((await db.query('notes', const CloudQuery())).map((d) => d['id']), ['n1']);
+      expect(db.prepareWrite('notes', {'read': true}), {'read': true}, reason: 'the owner is never restamped');
+      await db.updateDocument('notes', 'n1', {'read': true});
+      expect(backend.collections['data/p1/notes']!['n1']!['ownerId'], 'u1');
+    });
+
+    test('audience reads what names the reader', () async {
+      backend.seed('data/p1/news', {
+        'all': {'audience': ['*']},
+        'pros': {'audience': ['role:pro']},
+        'mine': {'audience': ['user:u1']},
+        'members': {'audience': ['signedIn']},
+        'none': {'title': 'x'},
+      });
+      db.rules = rules({'collections': {'news': 'audience'}});
+      expect(db.readFilters('news'), isNull);
+      uid = 'u1';
+      expect((await db.query('news', const CloudQuery())).map((d) => d['id']).toSet(), {'all', 'mine'});
+      final pro = BackendCloudDatabase(
+        backend: backend,
+        root: 'data/p1',
+        rules: rules({'collections': {'news': 'audience'}}),
+        userId: () => 'u9',
+        audience: () => DataRules.audienceOf('u9', role: 'pro', signedIn: true),
+      );
+      expect((await pro.query('news', const CloudQuery())).map((d) => d['id']).toSet(), {'all', 'pros', 'members'});
+      pro.dispose();
+    });
+
+    test('expiring collections filter by now and keep the bound on the server', () async {
+      final strict = MemoryDocumentBackend(requireIndexes: true)
+        ..seed('data/p1/offers', {
+          'live': {'ownerId': 'u1', 'expiresAt': '2026-11-04T13:00:00.000Z', 'rank': 2},
+          'later': {'ownerId': 'u1', 'expiresAt': DataRules.neverExpires, 'rank': 1},
+          'old': {'ownerId': 'u1', 'expiresAt': '2026-11-04T11:00:00.000Z', 'rank': 0},
+          'theirs': {'ownerId': 'u2', 'expiresAt': DataRules.neverExpires, 'rank': 3},
+        });
+      final rulesJson = {
+        'collections': {'offers': 'ownerRead'},
+        'expiry': {'offers': 'expiresAt'},
+      };
+      var clock = _now;
+      final strictDb = BackendCloudDatabase(
+        backend: strict,
+        root: 'data/p1',
+        rules: rules(rulesJson),
+        userId: () => 'u1',
+        now: () => clock,
+      );
+      expect(strictDb.readFilters('offers'), [
+        const CloudWhereFilter('ownerId', WhereOperator.equal, 'u1'),
+        const CloudWhereFilter('expiresAt', WhereOperator.greaterThan, '2026-11-04T12:00:00.000Z'),
+      ]);
+      const sorted = CloudQuery(orderBy: [CloudOrderBy('rank')]);
+      // Owner and expiry together need their composite index (the functions
+      // create it when the expiry is set); the app can't drop either filter.
+      await expectLater(strictDb.query('offers', sorted), throwsA(isA<CloudIndexMissing>()));
+      strict.indexes.add('ownerId:asc,expiresAt:asc');
+      expect((await strictDb.query('offers', sorted)).map((d) => d['id']), ['later', 'live']);
+      // Planned for the app, the database still got the owner and expiry
+      // filters (its rules need them), not just the == one.
+      expect(strict.queries.last.$2.filters, strictDb.readFilters('offers'));
+      expect(strict.queries.last.$2.orderBy, isEmpty);
+
+      final live = strictDb.watchQuery('offers', sorted);
+      final first = await live.first;
+      expect(first.map((d) => d['id']), ['later', 'live']);
+      // Later on, a live query drops what has expired since it started.
+      clock = DateTime.utc(2026, 11, 4, 14);
+      expect((await strictDb.query('offers', sorted)).map((d) => d['id']), ['later']);
+      expect(await strictDb.aggregate('offers', const CloudQuery(), CloudAggregate.count), 1);
+      strictDb.dispose();
+    });
+
+    test('expiring writes carry the field as ISO text', () async {
+      db.rules = rules({
+        'expiry': {'board': 'endsAt'},
+      });
+      uid = 'u1';
+      final id = await db.addDocument('board', {'title': 'A'});
+      expect(backend.collections['data/p1/board']![id]!['endsAt'], DataRules.neverExpires);
+      await db.addDocument('board', {'title': 'B', 'endsAt': DateTime.utc(2026, 12, 1)}, id: 'b');
+      expect(backend.collections['data/p1/board']!['b']!['endsAt'], '2026-12-01T00:00:00.000Z');
+      await db.updateDocument('board', 'b', {'title': 'B2'});
+      expect(backend.collections['data/p1/board']!['b']!['endsAt'], '2026-12-01T00:00:00.000Z',
+          reason: 'an update without the field leaves it');
+      await db.updateDocument('board', 'b', {'endsAt': ''});
+      expect(backend.collections['data/p1/board']!['b']!['endsAt'], DataRules.neverExpires);
+      await db.setDocuments('board', [
+        {'id': 'c', 'title': 'C'},
+      ]);
+      expect(backend.collections['data/p1/board']!['c']!['endsAt'], DataRules.neverExpires);
+      expect((await db.query('board', const CloudQuery())).length, 3);
+    });
+  });
+
   group('queries', () {
     setUp(() {
       backend.seed('data/p1/tasks', {

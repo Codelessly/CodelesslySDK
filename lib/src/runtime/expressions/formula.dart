@@ -713,8 +713,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'without',
-      'without(list, other or item)',
-      'without(held, 64)',
+      'without(list, other or item) or without(map, keys)',
+      'without(held, 64) or without(task, ["draft", "tmp"])',
     ),
     FormulaFunctionDoc(
       'concat',
@@ -2995,13 +2995,19 @@ final Map<String, _Function> _functions = {
     for (final value in a)
       if (value is Iterable) ...value else ?value,
   ],
-  // `other` is a list of items to leave out, or one item (`without(held,
-  // 64)`), as concat and append take either.
+  // A list: `other` is a list of items to leave out, or one item
+  // (`without(held, 64)`), as concat and append take either. A map: the map
+  // without those keys (one key, or a list of keys).
   'without': (a) {
+    final from = _arg(a, 0);
     final other = _arg(a, 1);
+    if (from is Map) {
+      final drop = other is String ? {other} : {for (final k in _values(other, null)) '$k'};
+      return {for (final e in from.entries) if (!drop.contains('${e.key}')) '${e.key}': e.value};
+    }
     final out = other is Iterable ? other : [other];
     return [
-      for (final item in _values(_arg(a, 0), null))
+      for (final item in _values(from, null))
         if (!out.any((o) => _looseEquals(item, o))) item,
     ];
   },
@@ -3394,8 +3400,10 @@ class FormulaFunction {
         return scope(path);
       });
       // A body written as the lambda itself, `(a, b) => ...`, with the
-      // same parameters declared: call it rather than return it.
-      if (value is _Closure && value.params.length == parameters.length) {
+      // same parameters declared: call it rather than return it. A lambda
+      // over other names (`(m) => n * m` declared with `n`) is a function
+      // the call returns.
+      if (value is _Closure && _sameNames(value.params, parameters)) {
         return value.callWith(arguments);
       }
       return value;
@@ -3404,6 +3412,14 @@ class FormulaFunction {
     } finally {
       _depth--;
     }
+  }
+
+  static bool _sameNames(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
   }
 
   /// The paths [body] reads that aren't its parameters: the variables a

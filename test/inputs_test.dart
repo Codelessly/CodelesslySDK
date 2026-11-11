@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/widgets/inputs.dart';
@@ -122,6 +123,71 @@ void main() {
     expect(find.text('00:00'), findsNothing);
   });
 
+  testWidgets('a dense picker field takes its node\'s height, its value centred', (tester) async {
+    final tree = NodeTree(DocumentSource(_doc({
+      'time': {
+        'type': 'timePicker',
+        'layout': {'width': 160, 'height': 42},
+        'props': {
+          'value': '13:00',
+          'use24h': true,
+          'format': 'HH:mm',
+          'decoration': {'isDense': true, 'contentPadding': [12, 4, 12, 4], 'border': {'type': 'outline'}},
+        },
+      },
+    })));
+    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
+    await tester.pumpAndSettle();
+    final field = tester.getRect(find.byType(InputDecorator));
+    expect(field.height, 42);
+    final text = tester.getRect(find.text('13:00'));
+    expect((text.center.dy - field.center.dy).abs(), lessThan(1.5));
+  });
+
+  testWidgets('a dense one-line field fills its fixed height', (tester) async {
+    final tree = NodeTree(DocumentSource(_doc({'search': jsonDecode(r'''{"type": "textField", "name": "Search", "layout": {"width": 260, "height": 40}, "props": {"decoration": {"hintText": "Search names or skills", "hintStyle": {"fontFamily": "Instrument Sans", "fontSize": 14.5, "fontWeight": 400, "color": "#FF8C8F94", "height": 1.22, "fontFeatures": ["tabularFigures"]}, "hintMaxLines": 1, "isDense": true, "filled": true, "fillColor": "#FFFFFFFF", "contentPadding": [12, 11, 12, 11], "border": {"type": "outline", "borderSide": {"color": "#FFD3CDC0", "width": 1}, "borderRadius": 10, "gapPadding": 0}, "enabledBorder": {"type": "outline", "borderSide": {"color": "#FFD3CDC0", "width": 1}, "borderRadius": 10, "gapPadding": 0}, "focusedBorder": {"type": "outline", "borderSide": {"color": "#FF2F4F46", "width": 1.5}, "borderRadius": 10, "gapPadding": 0}, "errorBorder": {"type": "outline", "borderSide": {"color": "#FFB4544A", "width": 1}, "borderRadius": 10, "gapPadding": 0}, "focusedErrorBorder": {"type": "outline", "borderSide": {"color": "#FFB4544A", "width": 1.5}, "borderRadius": 10, "gapPadding": 0}, "errorStyle": {"fontFamily": "Instrument Sans", "fontSize": 12.5, "fontWeight": 600, "color": "#FFB4544A", "height": 1.22, "fontFeatures": ["tabularFigures"]}, "errorMaxLines": 1, "prefixIcon": {"icon": {"type": "MATERIAL_ICON", "name": "search", "style": "rounded"}, "size": 18, "color": "#FF8C8F94"}, "prefixIconConstraints": {"minWidth": 40, "minHeight": 18}}, "style": {"fontFamily": "Instrument Sans", "fontSize": 14.5, "fontWeight": 500, "color": "#FF23262B", "height": 1.22, "fontFeatures": ["tabularFigures"]}, "cursorColor": "#FF2F4F46", "initialValue": ""}}''') as Map<String, dynamic>})));
+    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
+    await tester.pumpAndSettle();
+    final box = tester.getRect(find.byType(InputDecorator));
+    expect(box.height, 40);
+    final hint = tester.getRect(find.text('Search names or skills'));
+    // ignore: avoid_print
+    print('box $box hint $hint');
+    expect((hint.center.dy - box.center.dy).abs(), lessThan(1.5));
+  });
+
+  for (final density in [VisualDensity.standard, VisualDensity.compact]) {
+    testWidgets('fixed-height fields keep their height under $density (desktop web is compact)', (tester) async {
+      final tree = NodeTree(DocumentSource(_doc({
+        'field': {
+          'type': 'textField',
+          'layout': {'width': 260, 'height': 40},
+          'props': {
+            'decoration': {'hintText': 'Search', 'isDense': true, 'contentPadding': [12, 11, 12, 11], 'border': {'type': 'outline'}},
+          },
+        },
+        'time': {
+          'type': 'timePicker',
+          'layout': {'width': 160, 'height': 42, 'y': {'start': 100}},
+          'props': {'value': '13:00', 'use24h': true, 'format': 'HH:mm', 'decoration': {'isDense': true, 'border': {'type': 'outline'}}},
+        },
+      })));
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData(visualDensity: density, platform: TargetPlatform.linux),
+        home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true))),
+      ));
+      await tester.pumpAndSettle();
+      // The drawn field: the border container inside each decorator (its
+      // box can be the node's height while a compact density draws less).
+      double drawn(Finder f) {
+        final border = find.descendant(of: f, matching: find.byWidgetPredicate((w) => w.runtimeType.toString() == '_BorderContainer'));
+        return tester.getSize(border.first).height;
+      }
+      final decorators = find.byType(InputDecorator);
+      expect([drawn(decorators.at(0)), drawn(decorators.at(1))]..sort(), [40, 42]);
+    });
+  }
+
   testWidgets('date and time pickers stay in their app navigator', (tester) async {
     final tree = NodeTree(DocumentSource(_doc({
       'date': {'type': 'datePicker', 'layout': {'width': 160, 'height': 50}},
@@ -162,7 +228,7 @@ void main() {
   testWidgets('a one-line field of fixed height keeps it under a compact density', (tester) async {
     // Desktop platforms default to a compact density, which takes 8 px off
     // an input's container: a 46 px field drew 38 px tall in the editor and
-    // on the web inside its 46 px box. The height the design fixed wins.
+    // on the web inside its 46 px box. The fill and border are the box's.
     final tree = NodeTree(DocumentSource(_doc({
       'f': {
         'type': 'textField',
@@ -180,8 +246,8 @@ void main() {
       theme: ThemeData(visualDensity: VisualDensity.compact),
       home: Center(child: NodeView(tree: tree, rootId: 's')),
     ));
-    final border = find.descendant(of: find.byType(InputDecorator), matching: find.byType(CustomPaint)).last;
-    expect(tester.getSize(border).height, 46);
+    final box = find.byWidgetPredicate((w) => w is DecoratedBox && w.decoration is ShapeDecoration);
+    expect(tester.getSize(box).height, 46);
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });
