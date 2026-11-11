@@ -43,6 +43,11 @@ PublishModel tidepool({bool withNotFound = false, Map<String, String> extra = co
 }
 
 void main() {
+  test('disposing an app before reading lazy expression scopes is safe', () {
+    final app = Codelessly();
+    expect(app.dispose, returnsNormally);
+  });
+
   group('CanvasViewport', () {
     const screen = BoxConstraints(maxWidth: 390, maxHeight: 844);
 
