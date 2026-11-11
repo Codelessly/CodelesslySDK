@@ -653,6 +653,7 @@ class BarChartPainter extends NodePainter {
     final labels = p(BarChartProps.labels);
     final highlight = p(BarChartProps.highlight);
     final color = p(BarChartProps.color).flutter;
+    final palette = p(BarChartProps.colors);
     var max = p(BarChartProps.max);
     if (max <= 0) max = values.whereType<double>().fold(0, (a, b) => b > a ? b : a);
     final hasLabels = labels.any((l) => l.isNotEmpty);
@@ -705,8 +706,10 @@ class BarChartPainter extends NodePainter {
         continue;
       }
       final h = max <= 0 ? 0.0 : (height * (value / max).clamp(0.0, 1.0)).clamp(emptyHeight, height).toDouble();
-      final barColor =
-          highlight == null || highlight < 0 || i == highlight ? color : color.withValues(alpha: color.a * dimmed);
+      final baseColor = i < palette.length ? palette[i].flutter : color;
+      final barColor = highlight == null || highlight < 0 || i == highlight
+          ? baseColor
+          : baseColor.withValues(alpha: baseColor.a * dimmed);
       canvas.drawRRect(
         RRect.fromRectAndCorners(Rect.fromLTWH(left, height - h, column, h), topLeft: barRadius, topRight: barRadius),
         Paint()..color = barColor,

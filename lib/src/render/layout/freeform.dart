@@ -80,6 +80,10 @@ class FreeformAxisPlacement {
   /// Whether the child expands on this axis (needs a bounded slot).
   final bool expands;
 
+  /// A fixed design extent may intentionally overhang an aligned parent.
+  /// A fill extent is a fallback for unbounded layout, not an overhang.
+  final bool preserveDesignOverflow;
+
   /// The smallest outer extent the child may get when stretched between its
   /// pins (its min constraint plus margin).
   final double minSize;
@@ -108,6 +112,7 @@ class FreeformAxisPlacement {
     this.anchor = 0.5,
     this.clamp = true,
     this.expands = false,
+    this.preserveDesignOverflow = true,
     this.growsWithContent = false,
     this.minSize = 0,
     this.sizeFactor,
@@ -128,6 +133,7 @@ class FreeformAxisPlacement {
         anchor: anchor,
         clamp: clamp,
         expands: false,
+        preserveDesignOverflow: preserveDesignOverflow,
         growsWithContent: false,
         minSize: minSize,
         sizeFactor: factor,
@@ -238,7 +244,7 @@ class FreeformAxisPlacement {
         // solver keeps a fixed size: a 585 wide decoration aligned in a 390
         // wide frame stays 585 wide and sits at the Alignment.inscribe
         // offset instead of being squashed to the frame.
-        final double designOverflow = math.max(0, extent - parentExtent);
+        final double designOverflow = preserveDesignOverflow && !expands ? math.max(0, extent - parentExtent) : 0;
         final double max = s == null ? incomingMax : s + designOverflow;
         if (expands && max.isInfinite) return (extent, extent);
         return (0, max);
@@ -307,6 +313,7 @@ class FreeformAxisPlacement {
       other.anchor == anchor &&
       other.clamp == clamp &&
       other.expands == expands &&
+      other.preserveDesignOverflow == preserveDesignOverflow &&
       other.growsWithContent == growsWithContent &&
       other.minSize == minSize &&
       other.sizeFactor == sizeFactor &&
@@ -324,6 +331,7 @@ class FreeformAxisPlacement {
     anchor,
     clamp,
     expands,
+    preserveDesignOverflow,
     growsWithContent,
     minSize,
     sizeFactor,
