@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../render/node_tree.dart' show Slot, SlotKind;
 import '../render/paint/path_paint.dart';
 import '../render/recipe.dart';
+import '../render/node_tree.dart' show fireTrigger;
 import 'media_players.dart';
 
 /// The widgets an app builds for its `external` nodes, by builder id. Put it
@@ -30,7 +31,7 @@ class ExternalComponents extends InheritedTheme {
 /// Recipes for the media group, by node type.
 final Map<String, WidgetRecipe> mediaRecipes = {
   'path': buildPath,
-  'video': (b, n, chain) => _player(b, n, chain, (preview) => MediaVideo(node: n, preview: preview)),
+  'video': (b, n, chain) => _player(b, n, chain, (preview) => MediaVideo(node: n, preview: preview,onStatus:(status)=>fireTrigger(b,'changed',event:{'value':status}))),
   'embeddedVideo': (b, n, chain) =>
       _player(b, n, chain, (preview) => MediaEmbeddedVideo(node: n, preview: preview)),
   'audioPlayer': (b, n, chain) => _player(b, n, chain, (preview) => MediaAudioPlayer(node: n, preview: preview)),

@@ -61,9 +61,12 @@ bool get webViewSupported => WebViewPlatform.instance != null;
 
 /// A network MP4 (`video_player`). [preview]: what the design canvas shows.
 class MediaVideo extends StatefulWidget {
-  const MediaVideo({super.key, required this.node, required this.preview});
+  const MediaVideo({super.key, required this.node, required this.preview, this.onStatus});
   final Node node;
   final bool preview;
+
+  /// Runtime readiness/error changes; playback never advances while loading.
+  final ValueChanged<Map<String, Object?>>? onStatus;
 
   @override
   State<MediaVideo> createState() => _MediaVideoState();
@@ -93,24 +96,51 @@ class _MediaVideoState extends State<MediaVideo> {
     }
   }
 
+  void _report({required bool ready, String? error}) {
+    final generation = _generation;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || generation != _generation) return;
+      final value = _controller?.value;
+      widget.onStatus?.call({
+        'ready': ready,
+        'error': ?error,
+        if (ready && value != null) 'durationSeconds': value.duration.inMilliseconds / 1000,
+        if (ready && value != null) 'positionSeconds': value.position.inMilliseconds / 1000,
+      });
+    });
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
   void _load() {
     final generation = ++_generation;
     _pendingControls = Future<void>.value();
     _controller?.dispose();
     _controller = null;
     _ready = _failed = false;
-    if (widget.preview || !isRemoteMediaUrl(_url, const ['.mp4'])) return;
+    _report(ready: false);
+    if (widget.preview) return;
+    if (!isRemoteMediaUrl(_url, const ['.mp4'])) {
+      _report(ready: false, error: 'Choose a public HTTPS MP4 source');
+      return;
+    }
     final c = _controller = VideoPlayerController.networkUrl(Uri.parse(_url));
     c.addListener(() {
-      if (mounted && c.value.hasError && !_failed) setState(() => _failed = true);
+      if (mounted && generation == _generation && c.value.hasError && !_failed) {
+        setState(() { _failed = true; _ready = false; });
+        _report(ready: false, error: 'Video source could not be loaded');
+      }
     });
     c.initialize().then((_) {
       if (!mounted || generation != _generation) return;
       setState(() => _ready = true);
       // Explicit bound controls remain subject to platform playback rules.
       _applyControls();
+      _report(ready: true);
     }, onError: (Object _) {
-      if (mounted && generation == _generation) setState(() => _failed = true);
+      if (mounted && generation == _generation && !_failed) {
+        setState(() => _failed = true);
+        _report(ready: false, error: 'Video source could not be loaded');
+      }
     });
   }
 

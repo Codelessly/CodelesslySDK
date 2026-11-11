@@ -16,7 +16,7 @@ SoundEngine createSoundEngine() {
 
 /// Short synthesised voices, each under 80 ms, through a gentle compressor.
 class _WebSoundEngine
-    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine {
+    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine, WaveformSoundEngine {
   _WebSoundEngine(this._ctx) {
     // Browsers start audio only inside a user gesture, and Play Sound runs
     // from timers and clocks: resume on the first press or key anywhere.
@@ -52,11 +52,13 @@ class _WebSoundEngine
   final Map<String, (web.OscillatorNode, web.GainNode)> _sustainedVoices = {};
 
   @override
-  void startNote(String id, {double frequency = 440, double volume = 1}) {
+  void startNote(String id, {double frequency = 440, double volume = 1}) => startNoteWithWaveform(id,frequency:frequency,volume:volume);
+  @override
+  void startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'}){
     if (_disposed) return;
     stopNote(id);
     final gain = _ctx.createGain()..gain.value = volume * 0.1;
-    final osc = _ctx.createOscillator()..frequency.value = frequency;
+    final osc = _ctx.createOscillator()..frequency.value = frequency..type=waveform=='triangle'?'triangle':'sine';
     osc.connect(gain);
     gain.connect(_out);
     osc.onended = ((web.Event _) {

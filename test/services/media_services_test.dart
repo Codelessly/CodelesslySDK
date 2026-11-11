@@ -28,7 +28,19 @@ class _Voice implements SpeechEngine {
   void cancel() => cancels++;
 }
 
+class LegacySoundService extends SoundService {
+ LegacySoundService():super(engine:SilentSoundEngine());
+ int starts=0;
+ @override bool startNote(String id,{double frequency=440,double volume=1}){starts++;return true;}
+}
+
 void main() {
+ test('legacy sound service overrides keep their existing signature and dispatch',(){
+  final sound=LegacySoundService();
+  expect(sound.startNoteWithWaveform('default'),isTrue);
+  expect(sound.startNoteWithWaveform('unsupported-triangle',waveform:'triangle'),isTrue);
+  expect(sound.starts,2);sound.dispose();
+ });
   test('disposing services releases every sustained voice', () async {
     final engine = SilentSoundEngine();
     final sound = SoundService(engine: engine);

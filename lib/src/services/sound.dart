@@ -84,6 +84,11 @@ abstract interface class SustainedSoundEngine {
   void stopAllNotes();
 }
 
+/// Optional timbre support; older custom sustained engines remain compatible.
+abstract interface class WaveformSoundEngine {
+  void startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'});
+}
+
 /// Optional cleanup for engines owning contexts, players or listeners.
 abstract interface class DisposableSoundEngine {
   void dispose();
@@ -111,7 +116,14 @@ class SoundService {
   bool get available => !_disposed && engine.available;
 
   /// Starts/replaces a sustained voice. Returns false on unsupported engines.
-  bool startNote(String id, {double frequency = 440, double volume = 1}) {
+  bool startNote(String id, {double frequency = 440, double volume = 1}) => _startNote(id,frequency,volume,'sine');
+
+  /// Requests a timbre when supported; legacy engines retain their original voice.
+  bool startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'}) {
+    if(waveform!='triangle'||engine is! WaveformSoundEngine)return startNote(id,frequency:frequency,volume:volume);
+    return _startNote(id,frequency,volume,waveform);
+  }
+  bool _startNote(String id,double frequency,double volume,String waveform) {
     final output = engine;
     if (_disposed ||
         output is! SustainedSoundEngine ||
@@ -121,11 +133,12 @@ class SoundService {
       return false;
     }
     output.resume();
-    (output as SustainedSoundEngine).startNote(
-      id,
-      frequency: frequency.clamp(8, 24000).toDouble(),
-      volume: volume.clamp(0, 2).toDouble(),
-    );
+    final hz=frequency.clamp(8,24000).toDouble(),gain=volume.clamp(0,2).toDouble();
+    if(output is WaveformSoundEngine){
+      (output as WaveformSoundEngine).startNoteWithWaveform(id,frequency:hz,volume:gain,waveform:waveform=='triangle'?'triangle':'sine');
+    }else{
+      (output as SustainedSoundEngine).startNote(id,frequency:hz,volume:gain);
+    }
     return true;
   }
 
