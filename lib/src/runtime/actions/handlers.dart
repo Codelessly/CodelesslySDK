@@ -147,7 +147,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case FocusAction():
       _focus(a, run);
     case SpeakAction():
-      _speak(a, run);
+      final r = await _speak(a, run);
+      if (r != null) run.result = r;
     case ScrollToAction():
       await _scrollTo(a, run);
     case PlaySoundAction():
@@ -837,15 +838,29 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
 
 // --- sound, speech, purchases ---------------------------------------------------------------
 
-void _speak(SpeakAction a, ActionRun run) {
+Future<Object?> _speak(SpeakAction a, ActionRun run) async {
   final speech = _require(run, 'Speech').speech;
-  if (a.stop) return speech.stop();
+  if (a.stop) {
+    speech.stop();
+    return null;
+  }
   double number(String text, double min, double max) =>
       (double.tryParse(run.text(text).trim()) ?? 1).clamp(min, max).toDouble();
+  if (a.readAlong) {
+    // Waits for the text to be said: a chain can go on (turn the page) only
+    // when it was said to the end, not stopped.
+    final completed = await speech.readAlong(run.text(a.text),
+        language: run.text(a.language).trim(),
+        rate: number(a.rate, 0.1, 10),
+        pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2),
+        startWord: int.tryParse(run.text(a.startWord).trim()) ?? double.tryParse(run.text(a.startWord).trim())?.round() ?? 0);
+    return {'completed': completed};
+  }
   unawaited(speech.speak(run.text(a.text),
       language: run.text(a.language).trim(),
       rate: number(a.rate, 0.1, 10),
       pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2)));
+  return null;
 }
 
 void _playSound(PlaySoundAction a, ActionRun run) {
