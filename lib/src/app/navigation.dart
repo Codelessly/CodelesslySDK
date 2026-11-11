@@ -182,6 +182,48 @@ abstract final class CanvasLocation {
     return best;
   }
 
+  /// The locations of the screens beneath [location] when a link opens it,
+  /// outermost first: its screen's [ScreenRoute.under] (`specimen/:id`
+  /// filled from its path params, `/` the entry), that screen's own, and so
+  /// on (`/`, `/specimen/a` for `specimen/a/photo`). Empty when its screen
+  /// has nothing beneath, or for an unknown location.
+  static List<String> beneath(PublishModel model, String location) {
+    final out = <String>[];
+    var current = location;
+    for (var depth = 0; depth < 8; depth++) {
+      final m = match(model, current);
+      final under = m == null ? null : model.canvas(m.canvasId)?.route.under;
+      if (m == null || under == null) break;
+      final String next;
+      if (segmentsOf(under).isEmpty) {
+        next = '/';
+      } else {
+        // Only the path params carry over: the query belongs to the screen
+        // the link opens.
+        final query = Uri.parse(current.trim()).queryParameters;
+        final pathParams = {
+          for (final e in m.params.entries)
+            if (!query.containsKey(e.key)) e.key: e.value,
+        };
+        final filled = fill(under, pathParams);
+        if (filled == null) break;
+        next = '/${Uri.parse(filled).path}';
+      }
+      if (next == current || out.contains(next)) break;
+      out.insert(0, next);
+      if (next == '/') break;
+      current = next;
+    }
+    return out;
+  }
+
+  /// Whether the screen at [location] is drawn over the one beneath it
+  /// ([ScreenRoute.overlay]).
+  static bool isOverlay(PublishModel model, String location) {
+    final m = match(model, location);
+    return m != null && (model.canvas(m.canvasId)?.route.overlay ?? false);
+  }
+
   /// The location of screen [destinationId] (a canvas or layout id) opened
   /// with [params]: its path with `:name` segments filled from [params] and
   /// the other params as the query. The entry screen without a path is at
