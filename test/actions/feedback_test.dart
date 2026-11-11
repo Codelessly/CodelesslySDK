@@ -309,6 +309,33 @@ void main() {
     });
 
 
+    // Petri v2: the buttons share a text style (font, size, weight, a light
+    // color), and the brass confirm takes dark text. Before, the shared
+    // style's color won and the confirm's label was light on brass.
+    testWidgets('a button\'s own text color wins over the shared button style\'s', (tester) async {
+      final host = Host([]);
+      await host.pump(tester);
+      final pending = host.run([
+        {
+          'type': 'confirm',
+          'title': 'Switch?',
+          'confirmLabel': 'Switch',
+          'look': {
+            'buttonStyle': {'fontSize': 13.5, 'fontWeight': 600, 'color': '#FFF3E6BF'},
+            'confirmColor': '#FFE2BE6A',
+            'confirmTextColor': '#FF2A2109',
+          },
+        },
+      ]);
+      await tester.pumpAndSettle();
+      Color colorOf(String text) => tester.widget<RichText>(find.descendant(of: find.text(text), matching: find.byType(RichText))).text.style!.color!;
+      expect(colorOf('Switch'), const Color(0xFF2A2109));
+      expect(colorOf('Cancel'), const Color(0xFFF3E6BF), reason: 'no cancelTextColor: the shared style\'s');
+      await tester.tap(find.byKey(const ValueKey('codelessly-confirm-cancel')));
+      await tester.pumpAndSettle();
+      await pending;
+    });
+
     testWidgets('the built-in dialog: confirm runs actions, cancel runs cancelActions', (tester) async {
       final h = Host([v('who', 'Ada'), v('out', '')]);
       await h.pump(tester);
