@@ -157,12 +157,13 @@ class CodelesslyActions implements ActionRunner {
       {Json event = const {}, ActionCancellation? cancellation, Object? instance}) {
     final reactions = [
       for (final r in node.actions)
-        if (r.trigger.type.name == trigger) r,
+        if (r.trigger.type.name == trigger &&
+            (trigger != 'valueChanged' || event['changedVariable'] == null || r.trigger.variable.trim() == event['changedVariable'])) r,
     ];
     if (reactions.isEmpty) return Future.value();
     final debounce = reactions.fold<int>(0, (m, r) => r.trigger.debounceMs > m ? r.trigger.debounceMs : m);
     if (debounce > 0) {
-      final key = (node.id, instance, trigger);
+      final key = (node.id, instance, trigger, event['changedVariable']);
       final owner = (context is ActionHost ? context.tree : null) ?? context;
       final pending = _debounced[owner]?[key];
       pending?.$1.cancel();

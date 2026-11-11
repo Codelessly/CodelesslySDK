@@ -8,6 +8,7 @@
 // watch what of the box is visible after each frame.
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:collection/collection.dart' show DeepCollectionEquality;
 
 import 'package:codelessly_api_v2/codelessly_api.dart' show Json, Node, TriggerType;
 import 'package:flutter/foundation.dart';
@@ -192,6 +193,7 @@ class _BoxReactions {
   bool _loaded = false;
   Timer? _timer;
   int? _intervalMs;
+  final Map<String, VoidCallback> _timerUnwatch = {};
   final Map<String, Listenable> _watched = {};
   final Map<String, VoidCallback> _unwatch = {};
   bool _keys = false;
@@ -216,12 +218,34 @@ class _BoxReactions {
   }
 
   void _updateTimer(Node n, Set<TriggerType> types) {
+    final ctx = owner.contextFor(box);
+    final reads = <String>{};
+    for (final r in n.actions) {
+      if (r.trigger.type != TriggerType.clock) continue;
+      for (final expression in [r.trigger.every, r.trigger.runWhen]) {
+        reads.addAll(FormulaEvaluator.referencedPaths(FormulaEvaluator.exactExpression(expression) ?? exactPath(expression) ?? expression).map(rootOf));
+      }
+    }
+    for (final name in _timerUnwatch.keys.toList()) {
+      if (!reads.contains(name)) _timerUnwatch.remove(name)!();
+    }
+    for (final name in reads) {
+      if (_timerUnwatch.containsKey(name)) continue;
+      final watcher=watchName(ctx.scope,name);
+      if (watcher==null) continue;
+      void changed(){if(!_disposed && box.attached) _updateTimer(_node ?? n,types);}
+      watcher.addListener(changed);
+      _timerUnwatch[name]=()=>watcher.removeListener(changed);
+    }
     int? ms;
     for (final r in n.actions) {
       if (r.trigger.type == TriggerType.timer) ms = math.min(ms ?? 1 << 30, r.trigger.effectiveIntervalMs);
       if (r.trigger.type == TriggerType.clock) {
-        final every = num.tryParse(r.trigger.every.trim());
-        if (every != null && every > 0) ms = math.min(ms ?? 1 << 30, every.round());
+        final condition=r.trigger.runWhen.trim();
+        if(condition.isNotEmpty && ctx.expressions.evaluate(condition,ctx.scope)!=true) continue;
+        final value=ctx.expressions.evaluate(r.trigger.every,ctx.scope);
+        final every=value is num ? value : num.tryParse('$value');
+        if (every != null && every.isFinite && every > 0) ms = math.min(ms ?? 1 << 30, every.round().clamp(16,86400000));
       }
     }
     if (ms == _intervalMs) return;
@@ -230,10 +254,17 @@ class _BoxReactions {
     if (ms == null) return;
     var tick = 0;
     _timer = Timer.periodic(Duration(milliseconds: ms), (_) {
-      if (_disposed || !box.attached) return;
+      if (_disposed || !box.attached || !box.tree.runtimeVisible || !_onstage) return;
       if (types.contains(TriggerType.timer)) owner.fire(box, 'timer');
       if (types.contains(TriggerType.clock)) owner.fire(box, 'clock', event: {'result': {'tick': tick++, 'waitMs': 0}});
     });
+  }
+
+  bool get _onstage {
+    for(RenderObject? current=box;current!=null;current=current.parent){
+      if(current is RenderOffstage && current.offstage)return false;
+    }
+    return true;
   }
 
   void _updateWatches(Node n, Set<TriggerType> types) {
@@ -249,8 +280,12 @@ class _BoxReactions {
       if (_watched.containsKey(name)) continue;
       final w = watchName(owner.contextFor(box).scope, rootOf(name));
       if (w == null) continue;
+      Object? previous = readPath(owner.contextFor(box).scope, name);
       void changed() {
-        if (!_disposed && box.attached) owner.fire(box, 'valueChanged', event: {'result': readPath(owner.contextFor(box).scope, name)});
+        final next = readPath(owner.contextFor(box).scope, name);
+        if (const DeepCollectionEquality().equals(previous, next)) return;
+        previous = next;
+        if (!_disposed && box.attached) owner.fire(box, 'valueChanged', event: {'result': next, 'changedVariable': name});
       }
 
       w.addListener(changed);
@@ -291,6 +326,8 @@ class _BoxReactions {
 
   void dispose() {
     _disposed = true;
+    for(final remove in _timerUnwatch.values){remove();}
+    _timerUnwatch.clear();
     cancellation.cancel();
     _timer?.cancel();
     for (final u in _unwatch.values) {
