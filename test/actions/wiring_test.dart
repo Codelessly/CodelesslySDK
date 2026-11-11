@@ -544,6 +544,35 @@ void main() {
     expect(tester.getTopLeft(find.byKey(const ValueKey('menu'))), Offset(rect.left, rect.bottom + 6));
   });
 
+  testWidgets('a modal shown as a bottom sheet is as wide as the sheet; a dialog keeps its design width', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey('dialog $to'), width: 120, height: 80),
+      sheetModal: (to, params) => SizedBox(key: ValueKey('sheet $to'), width: double.infinity, height: 80),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet'},
+      ]),
+      reaction('secondaryClick', [
+        {'type': 'openModal', 'to': 'newCard'},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
+    expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // No tinted Material surface behind the screen's own.
+    expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
+    Navigator.of(appContext).pop();
+    await tester.pumpAndSettle();
+    await tester.tapAt(s.center('button'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byKey(const ValueKey('dialog newCard'))).width, 120);
+  });
+
   testWidgets('a popover flips above when there is no room below and stays on screen', (tester) async {
     final layout = PopoverLayout(anchor: const Rect.fromLTWH(700, 560, 80, 30), placement: api.PopoverPlacement.belowStart);
     // 600 tall: 200 doesn't fit below 594, so above; 800 wide keeps it in.
