@@ -676,8 +676,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'without',
-      'without(list, other)',
-      'without(all, picked)',
+      'without(list, other) or without(map, keys)',
+      'without(all, picked) or without(task, ["draft", "tmp"])',
     ),
     FormulaFunctionDoc(
       'concat',
@@ -2822,11 +2822,20 @@ final Map<String, _Function> _functions = {
     for (final value in a)
       if (value is Iterable) ...value else ?value,
   ],
-  'without': (a) => [
-    for (final item in _values(_arg(a, 0), null))
-      if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
-        item,
-  ],
+  'without': (a) {
+    final from = _arg(a, 0);
+    // A map: the map without those keys (one key, or a list of keys).
+    if (from is Map) {
+      final keys = _arg(a, 1);
+      final drop = keys is String ? {keys} : {for (final k in _values(keys, null)) '$k'};
+      return {for (final e in from.entries) if (!drop.contains('${e.key}')) '${e.key}': e.value};
+    }
+    return [
+      for (final item in _values(from, null))
+        if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
+          item,
+    ];
+  },
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
   'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
