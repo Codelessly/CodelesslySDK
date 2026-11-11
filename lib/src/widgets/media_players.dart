@@ -376,9 +376,13 @@ class MediaEmbeddedVideo extends StatelessWidget {
 /// A network audio player (`just_audio`): a play button, its description, a
 /// seek bar and the time; or nothing visible when it plays in the background.
 class MediaAudioPlayer extends StatefulWidget {
-  const MediaAudioPlayer({super.key, required this.node, required this.preview});
+  const MediaAudioPlayer({super.key, required this.node, required this.preview, this.onStatus});
   final Node node;
   final bool preview;
+
+  /// Runtime changes: `ready`, `error`, `playing`, `completed` (it played
+  /// to its end), with `positionSeconds` and `durationSeconds`.
+  final ValueChanged<Map<String, Object?>>? onStatus;
 
   @override
   State<MediaAudioPlayer> createState() => _MediaAudioPlayerState();
@@ -435,16 +439,31 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     final p = _player = AudioPlayer();
     bool current() => mounted && generation == _generation;
     void failed(Object _) {
-      if (current()) setState(() => _failed = true);
+      if (!current()) return;
+      setState(() => _failed = true);
+      widget.onStatus?.call({'ready': false, 'error': 'Audio source could not be loaded'});
     }
 
+    var reported = '';
     _subscriptions
       ..add(p.playerStateStream.listen((s) {
         if (!current()) return;
+        final completed = s.processingState == ProcessingState.completed;
         setState(() {
-          _playing = s.playing && s.processingState != ProcessingState.completed;
-          if (s.processingState == ProcessingState.completed) _position = Duration.zero;
+          _playing = s.playing && !completed;
+          if (completed) _position = Duration.zero;
         });
+        final key = '$_playing/$completed/$_ready';
+        if (key != reported && _ready) {
+          reported = key;
+          widget.onStatus?.call({
+            'ready': true,
+            'playing': _playing,
+            'completed': completed,
+            'positionSeconds': p.position.inMilliseconds / 1000,
+            'durationSeconds': _duration.inMilliseconds / 1000,
+          });
+        }
       }, onError: failed))
       ..add(p.positionStream.listen((v) {
         if (current()) setState(() => _position = v);
@@ -455,6 +474,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     p.setUrl(_url).then((duration) {
       if (!current()) return;
       setState(() { _ready = true; _duration = duration ?? Duration.zero; });
+      widget.onStatus?.call({'ready': true, 'playing': false, 'completed': false, 'durationSeconds': _duration.inMilliseconds / 1000});
       _apply();
       if (_node.prop(AudioPlayerProps.playing) == null && _node.prop(AudioPlayerProps.autoPlay)) _run(p.play);
     }, onError: failed);
