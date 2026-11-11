@@ -291,6 +291,40 @@ void main() {
     expect(controller.read('count'), 3);
   });
 
+  testWidgets('a link\'s params set the app variables they name', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final canvasId = canvasNamed(today, 'Today · D');
+    final json = rigcheckJson();
+    final layouts = (json['layouts'] as Map).cast<String, Object?>();
+    layouts[today.id] = {
+      ...(layouts[today.id] as Map).cast<String, Object?>(),
+      'variables': {
+        'app_variables': [
+          {'id': 'v_t', 'name': 't', 'type': 'decimal', 'value': 0},
+          {'id': 'v_sel', 'name': 'sel', 'type': 'text', 'value': ''},
+          {'id': 'v_twice', 'name': 'twice', 'type': 'decimal', 'formula': 't * 2'},
+        ],
+      },
+    };
+    final withVariables = decodeBundle(utf8.encode(jsonEncode(json)));
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: CodelesslyWidget(
+        codelessly: codelesslyFor(loader: MemoryPublishLoader(withVariables)),
+        controller: controller,
+        layoutId: today.id,
+        canvasId: canvasId,
+        params: const {'t': '2.5', 'sel': 'clip:c2', 'twice': '9'},
+      ),
+    ));
+    await settle(tester);
+    expect(controller.read('t'), 2.5, reason: 'read as the variable\'s type');
+    expect(controller.read('sel'), 'clip:c2');
+    expect(controller.read('twice'), 5, reason: 'a computed variable keeps its formula');
+  });
+
   testWidgets('a variable named like a data key starts at it and follows it', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
