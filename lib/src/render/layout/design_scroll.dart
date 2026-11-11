@@ -31,6 +31,21 @@ class RenderDesignScroll extends RenderProxyBox {
   }
 
   /// Offset from the logical start, independent of reverse.
+  bool _userScrollable = true;
+  bool get userScrollable => _userScrollable;
+  set userScrollable(bool value) {
+    if (_userScrollable == value) return;
+    _userScrollable = value;
+    _drag?.dispose();
+    _drag = null;
+    _stop();
+    markNeedsSemanticsUpdate();
+  }
+
+  double get viewportExtent => hasSize ? (_axis == Axis.vertical ? size.height : size.width) : 0;
+  Future<void> scrollTo(double value, {Duration duration = Duration.zero, Curve curve = Curves.easeInOut}) =>
+      animateTo(value, duration: duration, curve: curve);
+
   double get pixels => _pixels;
   double get offset => _pixels;
   void jumpBy(double delta) { if (interactive) jumpTo(_pixels + delta); }
@@ -100,6 +115,7 @@ class RenderDesignScroll extends RenderProxyBox {
     RenderObject target, {
     double alignment = 0,
     double extraOffset = 0,
+    double? offset,
     Duration duration = Duration.zero,
     Curve curve = Curves.easeInOut,
   }) {
@@ -118,7 +134,7 @@ class RenderDesignScroll extends RenderProxyBox {
     final desired = reverse
         ? maxScrollExtent - contentStart + (viewport - targetExtent) * alignment
         : contentStart - (viewport - targetExtent) * alignment;
-    return animateTo(desired - extraOffset, duration: duration, curve: curve);
+    return animateTo(desired - (offset ?? extraOffset), duration: duration, curve: curve);
   }
 
 
@@ -196,10 +212,14 @@ class RenderDesignScroll extends RenderProxyBox {
   bool hitTestSelf(Offset position) => _interactive;
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (!_interactive || maxScrollExtent <= 0) return;
+    if (!_interactive || !_userScrollable || maxScrollExtent <= 0) return;
     if (event is PointerDownEvent) {
       _ensureDrag();
       _drag!.addPointer(event);
+    }
+    if (event is PointerPanZoomStartEvent) {
+      _ensureDrag();
+      _drag!.addPointerPanZoom(event);
     }
     if (event is PointerScrollEvent) {
       final delta =
@@ -229,8 +249,8 @@ class RenderDesignScroll extends RenderProxyBox {
     final extent = hasSize ? (_axis == Axis.vertical ? size.height : size.width) * .8 : 0.0;
     void forward() => jumpTo(_pixels + extent);
     void backward() => jumpTo(_pixels - extent);
-    final canForward = _pixels < maxScrollExtent;
-    final canBackward = _pixels > 0;
+    final canForward = _userScrollable && _pixels < maxScrollExtent;
+    final canBackward = _userScrollable && _pixels > 0;
     // Flutter names these as the content's drag direction: normal scrollUp
     // increases pixels (ScrollPosition._updateSemanticActions).
     if (_axis == Axis.vertical) {

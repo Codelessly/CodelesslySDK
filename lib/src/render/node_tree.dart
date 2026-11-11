@@ -127,11 +127,28 @@ final class ResponsiveWidth {
 
 typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>;
 
+class _TreeIslands extends IslandManager {
+  _TreeIslands(super.environment);
+  VoidCallback? onEnvironment;
+  @override
+  set environment(IslandEnvironment value) {
+    if (value == environment) return;
+    super.environment = value;
+    onEnvironment?.call();
+  }
+}
+
 /// Owns the boxes built from one [NodeSource].
 class NodeTree {
   NodeTree(this.source,
       {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder, NodeInteractions? interactions})
-      : islands = IslandManager(environment) {
+      : islands = _TreeIslands(environment) {
+    (islands as _TreeIslands).onEnvironment = () {
+      for (final box in _boxes.values.toList()) {
+        box._applied = null;
+        box._apply();
+      }
+    };
     _binder = binder;
     _interactions = interactions;
   }
@@ -1040,7 +1057,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     ));
     final axis = vertical ? Axis.vertical : Axis.horizontal;
     final viewport = _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis))
-      ..interactive = tree.animates && n.prop(ScrollProps.physics) != api.ScrollPhysicsType.never
+      ..interactive = tree.animates
+      ..userScrollable = n.prop(ScrollProps.physics) != api.ScrollPhysicsType.never
       ..onScroll = (event) { tree.interactions?.fire(this, 'scroll', event: event); }
       ..onScrollEnd = (event) { tree.interactions?.fire(this, 'scrollEnd', event: event); }
       ..axis = axis
