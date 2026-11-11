@@ -89,7 +89,8 @@ Future<Board> pump(WidgetTester tester,
     List<Json> bActions = const [],
     Map<String, Object?> bTarget = const {},
     Map<String, Object?> cardDraggable = const {},
-    Map<String, Object?> extraNodes = const {}}) async {
+    Map<String, Object?> extraNodes = const {},
+    bool wrapped = false}) async {
   tester.view.physicalSize = const Size(400, 500);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -109,6 +110,21 @@ Future<Board> pump(WidgetTester tester,
   final card = nodes['card_a']! as Map;
   card['draggable'] = <String, Object?>{...(card['draggable'] as Map).cast<String, Object?>(), ...cardDraggable};
   nodes.addAll(extraNodes);
+  if (wrapped) {
+    // Each column is the drop target and names the list inside it (a kanban
+    // column with its card list).
+    for (final lane in ['a', 'b']) {
+      final list = nodes['list_$lane']! as Map<String, Object?>;
+      nodes['col_$lane'] = {
+        'type': 'column',
+        'children': ['list_$lane'],
+        'layout': {'width': 160, 'height': 400},
+        'dropTarget': list.remove('dropTarget'),
+        'actions': list.remove('actions'),
+      };
+    }
+    (nodes['board']! as Map)['children'] = ['col_a', 'col_b'];
+  }
   final doc = api.LayoutDocument.fromJson({'roots': ['board'], 'nodes': nodes});
   final values = ValuesScope({'drag': dragIdleValues});
   final scope = VariableScope([
@@ -191,6 +207,21 @@ void main() {
     expect(b.drag['active'], isFalse);
     expect(paragraphs(tester, 'One'), 1);
     expect(dropSlotOf(b.tree, 'list_b'), isNull);
+  });
+
+  testWidgets('a column that names its card list opens the slot in that list', (tester) async {
+    final b = await pump(tester, wrapped: true);
+    final start = textRect(tester, 'One').center;
+    final four = textRect(tester, 'Four').topCenter;
+    final gesture = await dragTo(tester, start, four + const Offset(0, 4), release: false);
+    expect(b.drag['over'], 'b');
+    expect(dropSlotOf(b.tree, 'list_b'), const DropSlotSpec(before: 0, size: Size(160, 40)));
+    await tester.pump();
+    // The data-bound list draws the slot: the card below it moves down.
+    expect(textRect(tester, 'Four').top, greaterThanOrEqualTo(four.dy + 40 - 0.5));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(b.lane('b'), ['c1', 'c4']);
   });
 
   testWidgets('a feedback node that hugs takes its content\'s size, not its design size', (tester) async {
