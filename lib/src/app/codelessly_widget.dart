@@ -817,6 +817,15 @@ class _LayoutViewState extends State<_LayoutView> {
     final storage = services is Services ? services.storage : null;
     // A publish can keep the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
+    // A link's query parameters set the app variables they name too (not
+    // only this screen's), so app-wide state can come from a URL
+    // (`/edit/p1?t=2.5&sel=clip:c2`). Computed variables can't be set.
+    final app = _codelessly.appVariables;
+    for (final e in widget.params.entries) {
+      final v = app.variable(e.key);
+      if (v == null || v.formula.isNotEmpty || widget.layout.variablesOf(canvasId).any((c) => c.name == e.key)) continue;
+      app.set(e.key, v.type.coerce(e.value) ?? e.value);
+    }
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
       scope.define(v);
