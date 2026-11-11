@@ -550,6 +550,7 @@ class RenderPose extends RenderProxyBox {
   }
 
   double _opacity = 1;
+  double get opacity => _opacity;
   set opacity(double v) {
     if (v == _opacity) return;
     final composited = alwaysNeedsCompositing;
@@ -674,6 +675,9 @@ class RenderPose extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    // Not laid out yet: a layer a hover style just put in, hit before the
+    // frame that lays it out (two mouse events in one frame).
+    if (!hasSize) return false;
     if (_opacity <= 0 || !_faces) return false;
     return hitTestChildren(result, position: position);
   }
@@ -1056,6 +1060,7 @@ class RenderMotion extends RenderPose with _Ticking {
         final t = ms <= 0 ? 0.0 : _eased(ms);
         done = ms > 0 && (m.curve == api.AnimationCurve.spring ? t == 1 : ms >= m.duration);
         m = _between(from, _to, done ? 1 : t);
+        if (!done) m = _perProperty(m, from, _to, _motion, ms);
       }
       if (done) {
         if (_loops(_motion) && (_motion.repeat == 0 || ++_runs < _motion.repeat)) {
@@ -1126,6 +1131,21 @@ class RenderMotion extends RenderPose with _Ticking {
     opacity = shown.opacity;
     blur = shown.blur;
     backfaceHidden = shown.backfaceHidden;
+  }
+
+  /// [m] with the rotation on [api.Motion.rotateCurve] and the opacity in
+  /// the first [api.Motion.fadeShare] of the run, [ms] into it.
+  static api.Motion _perProperty(api.Motion m, api.Motion a, api.Motion b, api.Motion timing, double ms) {
+    final raw = (ms / math.max(1, timing.duration)).clamp(0.0, 1.0);
+    if (timing.rotateCurve case final curve?) {
+      final t = curve.transform(raw);
+      m = m.withValue('rotate', a.rotate + (b.rotate - a.rotate) * t);
+    }
+    if (timing.fadeShare < 1) {
+      final t = api.AnimationCurve.easeOut.transform((raw / timing.fadeShare).clamp(0.0, 1.0));
+      m = m.withValue('opacity', a.opacity + (b.opacity - a.opacity) * t);
+    }
+    return m;
   }
 
   /// [t] (eased) of the way from [a] to [b]: bent by [api.Motion.arc], the

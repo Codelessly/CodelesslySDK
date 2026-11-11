@@ -1,12 +1,13 @@
-// A negative margin or padding in a document (or from a binding) reads as 0:
-// Flutter asserts insets are never negative, and one bad side used to fail
-// the layout of the whole screen.
+// A negative padding in a document (or from a binding) reads as 0: Flutter
+// asserts insets are never negative, and one bad side used to fail the
+// layout of the whole screen. A negative margin overlaps (RenderMargin): the
+// node reaches that far past its place, and its neighbour moves up to it.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('negative margins and paddings lay out as zero, the rest of the screen intact', (tester) async {
+  testWidgets('negative paddings lay out as zero, negative margins overlap, the rest of the screen intact', (tester) async {
     final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
       'roots': ['r'],
       'nodes': {
@@ -19,8 +20,10 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'r'))));
     expect(tester.takeException(), isNull);
     final view = tester.renderObject(find.byType(NodeView));
-    expect(tree.boxOf('a')!.rectIn(view)!.left, 0);
-    expect(tree.boxOf('b')!.rectIn(view)!.left, 50);
+    // `a` takes 50 - 4 in the row and is drawn 4 px left of it; `b` follows.
+    expect(tree.boxOf('a')!.rectIn(view)!.left, -4);
+    expect(tree.boxOf('a')!.rectIn(view)!.width, 50);
+    expect(tree.boxOf('b')!.rectIn(view)!.left, 46);
     expect(tree.boxOf('r')!.rectIn(view)!.width, 200);
   });
 }

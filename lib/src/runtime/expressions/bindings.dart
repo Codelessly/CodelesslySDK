@@ -363,6 +363,7 @@ class NodeBinder {
         e.value.update(index: i, item: i < list.length ? list[i] : null);
       }
     }
+    _itemRefreshers[(n.id, instance)]?.call(list);
     // A list's item count, a table's row count: as many as the items.
     final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
     final def = n.spec?.prop(countProp);
@@ -556,6 +557,22 @@ class NodeBinder {
   /// Lets go of the scope of repeat [instance] (its widget no longer shows
   /// it). Not disposed: a box leaving with it may still listen.
   void forgetItem(ProvidedItem instance) => _provided.remove(instance);
+
+  /// What re-gives the items of widgets that provide their own item scopes
+  /// ([provideItem]: a table at rest), by node and instance: called with the
+  /// node's new items whenever its bound data changes, as a list's item
+  /// scopes are moved to theirs. Without it a table whose data changed but
+  /// kept its size (the same node) kept showing its old cells.
+  final Map<(String, Object?), void Function(List<Object?> items)> _itemRefreshers = {};
+
+  /// Registers (or with null, drops) [refresh] for node [owner] in [instance].
+  void onItemsChanged(String owner, Object? instance, void Function(List<Object?> items)? refresh) {
+    if (refresh == null) {
+      _itemRefreshers.remove((owner, instance));
+    } else {
+      _itemRefreshers[(owner, instance)] = refresh;
+    }
+  }
 
   /// The items node [list] (in [instance]) is bound to: its `data` binding or
   /// a condition setting it, as a list; null when it has none.
