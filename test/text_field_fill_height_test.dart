@@ -68,4 +68,41 @@ void main() {
         expect(tester.getCenter(find.byType(EditableText)).dy, closeTo(tester.getCenter(box.first).dy, 1.5));
       }
     });
+
+  testWidgets('its prefix icon centres in the whole height', (tester) async {
+    await show(tester, {
+      'col': {
+        'type': 'column',
+        'children': ['field'],
+        'layout': {'width': 390, 'height': 200},
+      },
+      'field': {
+        'type': 'textField',
+        'layout': {'width': {'fill': 358}, 'height': 68},
+        'props': {
+          'style': {'fontSize': 21},
+          'decoration': {
+            'hintText': 'Search',
+            'prefixIcon': {
+              'icon': {'type': 'MATERIAL_ICON', 'name': 'search', 'style': 'rounded'},
+              'size': 26,
+            },
+            'prefixIconPadding': [20, 0, 8, 0],
+            'contentPadding': [0, 0, 18, 0],
+          },
+        },
+      },
+    });
+    await compact(tester);
+    await tester.pumpAndSettle();
+    final box = tester.getRect(find.byType(InputDecorator));
+    // The glyph sits in an Align that hugs it (its padding around).
+    final icon = tester.getRect(find
+        .descendant(
+          of: find.byType(InputDecorator),
+          matching: find.byWidgetPredicate((w) => w is Align && w.widthFactor == 1 && w.heightFactor == 1),
+        )
+        .first);
+    expect(icon.center.dy, closeTo(box.center.dy, 1));
+  });
 }

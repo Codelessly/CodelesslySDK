@@ -642,6 +642,14 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
                   errorBorder: InputBorder.none,
                   focusedErrorBorder: InputBorder.none,
                   constraints: BoxConstraints.tightFor(height: height),
+                  // Its icons centre in the whole height, as the line does
+                  // (the decorator's own container is only 48 px tall).
+                  prefixIconConstraints: decoration.prefixIcon == null
+                      ? null
+                      : _tallIcon(decoration.prefixIconConstraints, height),
+                  suffixIconConstraints: decoration.suffixIcon == null
+                      ? null
+                      : _tallIcon(decoration.suffixIconConstraints, height),
                 ),
                 alignVertical: TextAlignVertical.center,
               ),
@@ -679,6 +687,10 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
 
 /// A [LayoutBuilder] that reports a zero intrinsic size instead of throwing,
 /// so a field built with it can sit under intrinsic measurement.
+/// An icon box as tall as a fixed-height field.
+BoxConstraints _tallIcon(BoxConstraints? c, double height) =>
+    (c ?? const BoxConstraints(minWidth: kMinInteractiveDimension)).copyWith(minHeight: height, maxHeight: height);
+
 class IntrinsicSafeLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const IntrinsicSafeLayoutBuilder({super.key, required super.builder});
 
