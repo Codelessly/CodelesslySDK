@@ -12,3 +12,14 @@ const TextStyle kTextBase = TextStyle(
   textBaseline: TextBaseline.alphabetic,
   leadingDistribution: TextLeadingDistribution.proportional,
 );
+
+/// [kTextBase] without its line height, for a style that asks for the
+/// font's own (`TextStyle.naturalHeight`): Flutter's `height: null`.
+const TextStyle kTextBaseNatural = TextStyle(
+  inherit: false,
+  fontSize: 12,
+  fontWeight: FontWeight.w400,
+  letterSpacing: 0.4,
+  textBaseline: TextBaseline.alphabetic,
+  leadingDistribution: TextLeadingDistribution.proportional,
+);

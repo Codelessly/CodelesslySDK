@@ -6,7 +6,6 @@
 //   flutter test test/bench/petri_tick_bench_test.dart
 //   flutter test --platform chrome test/bench/petri_tick_bench_test.dart
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -178,7 +177,6 @@ void main() {
       debugPrintMarkNeedsPaintStacks = false;
       debugPrintMarkNeedsLayoutStacks = false;
       debugPrint = saved;
-      File('/tmp/claude-0/marks.txt').writeAsStringSync(logs.join('\n'));
       final heads = <String, int>{};
       final text = logs.join('\n');
       for (final block in text.split(RegExp(r'markNeeds(Paint|Layout)\(\) called for '))) {
