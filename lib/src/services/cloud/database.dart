@@ -102,6 +102,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     Stream<DataRules>? rulesSource,
     String? Function()? userId,
     Stream<Object?>? userChanges,
+    this.audience,
     DateTime Function()? now,
     this.onError,
   })  : userId = userId ?? _nobody,
@@ -133,11 +134,17 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     _wrote(writes);
   }
 
-  /// Whether reads of [path] depend on who is signed in.
+  /// Whether reads of [path] depend on who is signed in (an audience
+  /// collection: also on their role).
   bool _readsUser(String path) {
     final rule = rules.ruleFor(path);
-    return rule.readsOwnOnly || rule == DataRule.signedIn;
+    return rule.readsOwnOnly || rule.readsAudience || rule == DataRule.signedIn;
   }
+
+  /// Who is reading, as far as the read filters go: the user and, with
+  /// [audience], the entries they match (a role can change without a new
+  /// user).
+  String _readerKey() => '${userId()}|${audience?.call().join(',') ?? ''}';
 
   static String? _nobody() => null;
 
@@ -146,6 +153,11 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
   /// The document all of the app's collections are under.
   final String root;
   final String? Function() userId;
+
+  /// The entries of an `audience` list the signed-in user matches
+  /// ([DataRules.audienceOf]: everyone, the user, their role, signed-in
+  /// users). Without it: everyone and the user.
+  final List<String> Function()? audience;
   final DateTime Function() _now;
 
   /// Reports errors that don't reach a caller (rules stream).
@@ -182,25 +194,73 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
 
   /// The filters that keep reads of [path] to what the signed-in user may
   /// read: none for shared collections, the owner filter for owner-only
-  /// ones; null when nobody is signed in and the rules need someone.
+  /// ones, the audience filter for audience ones, and the expiry bound
+  /// (`field > now`) for expiring ones; null when nobody is signed in and
+  /// the rules need someone.
   List<CloudWhereFilter>? readFilters(String path) {
     final rule = rules.ruleFor(path);
-    if (!rule.readsOwnOnly && rule != DataRule.signedIn) return const [];
+    final expiry = _expiryFilters(path);
+    if (!rule.readsOwnOnly && !rule.readsAudience && rule != DataRule.signedIn) return expiry;
     final uid = userId();
     if (uid == null || uid.isEmpty) return null;
-    if (!rule.readsOwnOnly) return const [];
-    return [CloudWhereFilter(DataRules.ownerField, WhereOperator.equal, uid)];
+    if (rule.readsOwnOnly) return [CloudWhereFilter(DataRules.ownerField, WhereOperator.equal, uid), ...expiry];
+    if (rule.readsAudience) {
+      final audience = this.audience?.call() ?? DataRules.audienceOf(uid);
+      return [CloudWhereFilter(DataRules.audienceField, WhereOperator.arrayContainsAny, audience), ...expiry];
+    }
+    return expiry;
+  }
+
+  List<CloudWhereFilter> _expiryFilters(String path) {
+    final field = rules.expiryFieldFor(path);
+    if (field == null) return const [];
+    return [CloudWhereFilter(field, WhereOperator.greaterThan, _nowText())];
+  }
+
+  String _nowText() =>
+      DateTime.fromMillisecondsSinceEpoch(_now().millisecondsSinceEpoch, isUtc: true).toIso8601String();
+
+  /// The rule filters the database must run itself, because its rules check
+  /// them on every query: the audience filter and the expiry bound (with the
+  /// owner filter beside them). Empty for the other collections, whose
+  /// queries the app may finish as before.
+  List<CloudWhereFilter> _serverFilters(String path, List<CloudWhereFilter> ruleFilters) =>
+      rules.expiryFieldFor(path) != null || rules.ruleFor(path).readsAudience ? ruleFilters : const [];
+
+  /// [docs] without those past their expiry at this moment: a live query's
+  /// bound was set when it started.
+  List<Json> _withoutExpired(String path, List<Json> docs) {
+    final field = rules.expiryFieldFor(path);
+    if (field == null) return docs;
+    final now = _nowText();
+    return [
+      for (final doc in docs)
+        if (doc[field] case final String at when at.compareTo(now) > 0) doc,
+    ];
   }
 
   /// [value] ready to write under [path]: owned collections record the
-  /// signed-in user as the owner. Throws a [StateError] when the collection
-  /// needs a signed-in user and there is none.
-  Json prepareWrite(String path, Json value) {
+  /// signed-in user as the owner. In an expiring collection the expiry
+  /// field is written as ISO text, and an empty one (or, when [create], a
+  /// missing one) as [DataRules.neverExpires]. Throws a [StateError] when
+  /// the collection needs a signed-in user and there is none.
+  Json prepareWrite(String path, Json value, {bool create = false}) {
     final rule = rules.ruleFor(path);
     final uid = userId();
     if (rule.writeNeedsSignIn && (uid == null || uid.isEmpty)) throw StateError('Sign in to save this.');
-    if (!rule.stampsOwner) return value;
-    return {...value, DataRules.ownerField: uid};
+    final out = _withExpiry(path, value, create: create);
+    if (!rule.stampsOwner) return out;
+    return {...out, DataRules.ownerField: uid};
+  }
+
+  Json _withExpiry(String path, Json value, {required bool create}) {
+    final field = rules.expiryFieldFor(path);
+    if (field == null || value.isEmpty) return value;
+    if (!value.containsKey(field)) return create ? {...value, field: DataRules.neverExpires} : value;
+    final raw = value[field];
+    if (raw == null || (raw is String && raw.trim().isEmpty)) return {...value, field: DataRules.neverExpires};
+    if (raw is DateTime || raw is int) return {...value, field: cloudDateText(raw)};
+    return value;
   }
 
   @override
@@ -225,16 +285,17 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
   @override
   Future<List<Json>> query(String path, CloudQuery query, {List<String> loadRelated = const []}) async {
     final docs = await _runQuery(collectionPath(path), _withRules(path, query), path);
-    return _loadRelated(path, docs, loadRelated);
+    return _loadRelated(path, _withoutExpired(path, docs), loadRelated);
   }
 
   Future<List<Json>> _runQuery(String collection, CloudQuery query, String path) async {
-    var plan = query.plan(readyIndexes: rules.readyIndexesFor(path));
+    final pinned = _serverFilters(path, readFilters(path) ?? const []);
+    var plan = query.plan(readyIndexes: rules.readyIndexesFor(path), keepOnServer: pinned);
     List<CloudDocument> docs;
     try {
       docs = await backend.query(collection, plan.server);
     } on CloudIndexMissing {
-      plan = query.plan(forceClient: true);
+      plan = query.plan(forceClient: true, keepOnServer: pinned);
       docs = await backend.query(collection, plan.server);
     }
     return [for (final d in plan.finish(docs, data: (d) => d.data, id: (d) => d.id)) documentForUse(d.data, id: d.id)];
@@ -249,7 +310,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     late StreamController<List<Json>> controller;
     StreamSubscription<List<CloudDocument>>? sub;
     StreamSubscription<void>? users;
-    String? uid;
+    String? reader;
     // Bumped by every subscription: what an earlier one still delivers is
     // dropped.
     var generation = 0;
@@ -258,19 +319,20 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
       sub?.cancel();
       sub = null;
       final current = ++generation;
-      uid = userId();
+      reader = _readerKey();
       final filters = readFilters(path);
       if (filters == null) {
         controller.add(const []);
         return;
       }
       final full = filters.isEmpty ? query : query.copyWith(filters: [...filters, ...query.filters]);
-      final plan = full.plan(forceClient: forceClient, readyIndexes: rules.readyIndexesFor(path));
+      final pinned = _serverFilters(path, filters);
+      final plan = full.plan(forceClient: forceClient, readyIndexes: rules.readyIndexesFor(path), keepOnServer: pinned);
       sub = backend.watchQuery(collection, plan.server).listen(
         (docs) async {
-          final out = [
+          final out = _withoutExpired(path, [
             for (final d in plan.finish(docs, data: (d) => d.data, id: (d) => d.id)) documentForUse(d.data, id: d.id),
-          ];
+          ]);
           try {
             final related = await _loadRelated(path, out, loadRelated);
             if (!controller.isClosed && current == generation) controller.add(related);
@@ -293,7 +355,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
       onListen: () {
         listen(forceClient: false);
         users = _userChanged.stream.listen((_) {
-          if (userId() != uid && _readsUser(path)) listen(forceClient: false);
+          if (_readerKey() != reader && _readsUser(path)) listen(forceClient: false);
         });
       },
       onCancel: () {
@@ -389,7 +451,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
         case CloudBatchOperation.create:
           final given = w.id?.trim() ?? '';
           final id = given.isEmpty ? backend.newId(collection) : given;
-          final data = documentToSend(prepareWrite(w.path, w.data), id: id, now: _now);
+          final data = documentToSend(prepareWrite(w.path, w.data, create: true), id: id, now: _now);
           out.add(SetDocument(collection, id, resolveFieldOperations(data, now: _now)));
           ids.add(id);
         case CloudBatchOperation.update:
@@ -413,7 +475,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
       throw StateError('Pick the number field to ${operation.name}.');
     }
     final full = _withRules(path, query);
-    final plan = full.plan(readyIndexes: rules.readyIndexesFor(path));
+    final plan = full.plan(readyIndexes: rules.readyIndexesFor(path), keepOnServer: _serverFilters(path, readFilters(path)!));
     if (!plan.runsOnClient) {
       try {
         return await backend.aggregate(collectionPath(path), plan.server, operation, field.trim());
@@ -422,13 +484,13 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
       }
     }
     final docs = await _runQuery(collectionPath(path), full, path);
-    return aggregateDocuments(docs, operation, field.trim());
+    return aggregateDocuments(_withoutExpired(path, docs), operation, field.trim());
   }
 
   @override
   Future<String> addDocument(String path, Json value, {String? id, bool skipIfExists = true}) async {
     final collection = collectionPath(path);
-    final prepared = prepareWrite(path, value);
+    final prepared = prepareWrite(path, value, create: true);
     final docId = id == null ? backend.newId(collection) : _docId(id);
     if (id != null && skipIfExists && await backend.get(collection, docId) != null) return docId;
     await _commit([
@@ -476,7 +538,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
       final given = document[idField]?.toString().trim() ?? '';
       final id = given.isEmpty ? backend.newId(collection) : given;
       written.add(id);
-      final data = documentToSend(prepareWrite(path, document), id: id, keepCreatedAt: merge, now: _now);
+      final data = documentToSend(prepareWrite(path, document, create: !merge), id: id, keepCreatedAt: merge, now: _now);
       writes.add(SetDocument(collection, id, resolveFieldOperations(data, now: _now), merge: merge));
     }
     if (replaceCollection) {
@@ -494,7 +556,8 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
   Future<List<Json>> _matching(String path, List<CloudWhereFilter> filters) async {
     final readable = readFilters(path);
     if (readable == null) return const [];
-    final plan = CloudQuery(filters: [...readable, ...filters]).plan(forceClient: true);
+    final plan = CloudQuery(filters: [...readable, ...filters])
+        .plan(forceClient: true, keepOnServer: _serverFilters(path, readable));
     final docs = await backend.query(collectionPath(path), plan.server);
     return [for (final d in plan.finish(docs, data: (d) => d.data, id: (d) => d.id)) documentForUse(d.data, id: d.id)];
   }
