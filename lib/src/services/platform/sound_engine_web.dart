@@ -14,7 +14,7 @@ SoundEngine createSoundEngine() {
   }
 }
 /// Short synthesised voices, each under 80 ms, through a gentle compressor.
-class _WebSoundEngine implements SoundEngine {
+class _WebSoundEngine implements SoundEngine, SustainedSoundEngine {
   _WebSoundEngine(this._ctx) {
     // Browsers start audio only inside a user gesture, and Play Sound runs
     // from timers and clocks: resume on the first press or key anywhere.
@@ -25,6 +25,37 @@ class _WebSoundEngine implements SoundEngine {
       ..threshold.value = -6
       ..ratio.value = 4;
     _out.connect(_ctx.destination);
+    web.window.addEventListener('blur', ((web.Event _) => stopAllNotes()).toJS);
+    web.document.addEventListener('visibilitychange', ((web.Event _) {
+      if (web.document.hidden) stopAllNotes();
+    }).toJS);
+  }
+
+  final Map<String, (web.OscillatorNode, web.GainNode)> _sustainedVoices = {};
+
+  @override
+  void startNote(String id, {double frequency = 440, double volume = 1}) {
+    stopNote(id);
+    final gain = _ctx.createGain()..gain.value = volume * 0.1;
+    final osc = _ctx.createOscillator()..frequency.value = frequency;
+    osc.connect(gain);
+    gain.connect(_out);
+    osc.onended = ((web.Event _) { osc.disconnect(); gain.disconnect(); }).toJS;
+    _sustainedVoices[id] = (osc, gain);
+    osc.start();
+  }
+
+  @override
+  void stopNote(String id) {
+    final voice = _sustainedVoices.remove(id);
+    if (voice == null) return;
+    voice.$2.gain.setTargetAtTime(0, _ctx.currentTime, 0.015);
+    voice.$1.stop(_ctx.currentTime + 0.1);
+  }
+
+  @override
+  void stopAllNotes() {
+    for (final id in _sustainedVoices.keys.toList()) { stopNote(id); }
   }
 
   final web.AudioContext _ctx;

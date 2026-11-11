@@ -701,6 +701,18 @@ void _speak(SpeakAction a, ActionRun run) {
 
 void _playSound(PlaySoundAction a, ActionRun run) {
   double? number(String v) => double.tryParse(run.text(v).trim());
+  final service = _require(run, 'Sound').sound;
+  switch (a.operation) {
+    case 'start':
+      service.startNote(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1);
+      return;
+    case 'stop':
+      service.stopNote(run.text(a.voiceId).trim());
+      return;
+    case 'stopAll':
+      service.stopAllNotes();
+      return;
+  }
   final url = run.text(a.url).trim();
   if (url.isNotEmpty) {
     unawaited(_playFile(url, (number(a.volume) ?? 1).clamp(0, 1).toDouble()));

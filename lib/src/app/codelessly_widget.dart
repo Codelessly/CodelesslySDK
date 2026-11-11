@@ -683,7 +683,7 @@ class _LayoutViewState extends State<_LayoutView> {
     final storage = services is Services ? services.storage : null;
     // A publish can keep the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
-    for (final v in [...widget.layout.variablesOf('page_variables'), ...widget.layout.variablesOf(canvasId)]) {
+    for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
       scope.define(v);
       // A persisted variable starts from what it was last time, and keeps
