@@ -1404,16 +1404,20 @@ class StrokePathPainter extends CustomPainter {
       canvas.drawPath(full, paint);
       return;
     }
+    // The dashes as one path, drawn once (as a painter's dashed path is):
+    // drawn one by one, a pixel two dash ends share was inked twice.
+    final dashes = Path();
     for (final metric in full.computeMetrics()) {
       var distance = 0.0;
       var i = 0;
       while (distance < metric.length) {
         final length = dash[i % dash.length];
-        if (i.isEven) canvas.drawPath(metric.extractPath(distance, math.min(distance + length, metric.length)), paint);
+        if (i.isEven) dashes.addPath(metric.extractPath(distance, math.min(distance + length, metric.length)), Offset.zero);
         distance += length;
         i++;
       }
     }
+    canvas.drawPath(dashes, paint);
   }
 
   @override
