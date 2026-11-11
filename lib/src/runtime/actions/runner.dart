@@ -226,7 +226,8 @@ class CodelesslyActions implements ActionRunner {
     if (t.type.name != trigger) return false;
     if (t.type != TriggerType.keyDown && t.type != TriggerType.keyUp) return true;
     final value = event['result'] is Map ? event['result'] as Map : event;
-    return runtimeKeyMatches(t.keyCombo, '${value['key'] ?? ''}',
+    return runtimeKeyEventMatches(t.keyCombo, '${value['key'] ?? ''}',
+        character: value['character'] as String?,
         meta: value['meta'] == true, shift: value['shift'] == true,
         alt: value['alt'] == true);
 
