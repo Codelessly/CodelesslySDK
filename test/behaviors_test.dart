@@ -327,6 +327,35 @@ void main() {
     expect(tws().map((t) => t.shownCharacters), [11, 11, 11]);
   });
 
+  testWidgets('a growing typewriter is only as tall as the lines typed so far', (tester) async {
+    LayoutDocument doc({bool grow = true}) => page({
+          't': {
+            'type': 'text',
+            'layout': {'width': 120, 'height': {'hug': 0}},
+            'props': {'text': 'one two three four five six seven eight nine ten', 'style': {'fontSize': 14}},
+            'typewriter': {'charsPerSecond': 100, 'grow': grow},
+          },
+        });
+    final (designTree, designView) = await show(tester, doc());
+    final full = designTree.boxOf('t')!.rectIn(designView)!.height;
+    expect(full, greaterThan(40), reason: 'several lines');
+
+    final (tree, view) = await show(tester, doc(), interactive: true);
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tree.boxOf('t')!.rectIn(view)!.height, 0, reason: 'nothing typed yet');
+    await tester.pump(const Duration(milliseconds: 60)); // a few characters: the first line
+    final oneLine = tree.boxOf('t')!.rectIn(view)!.height;
+    expect(oneLine, greaterThan(10));
+    expect(oneLine, lessThan(full / 2));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tree.boxOf('t')!.rectIn(view)!.height, full, reason: 'the whole text once typed');
+
+    // Without grow it keeps the whole size from the start.
+    final (still, stillView) = await show(tester, doc(grow: false), interactive: true);
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(still.boxOf('t')!.rectIn(stillView)!.height, full);
+  });
+
   testWidgets('a fitted stack scales its board of design size into its box', (tester) async {
     final doc = LayoutDocument.fromJson({
       'roots': ['s'],
