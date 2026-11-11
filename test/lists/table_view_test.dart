@@ -130,9 +130,73 @@ void main() {
     expect(at['r0c1']!.dx - at['r0c0']!.dx, 100);
   });
 
-  testWidgets('a design canvas keeps the table at rest', (tester) async {
+  testWidgets('a table with a padding (a bordered frame) lays its cells inside it', (tester) async {
+    final t = table();
+    final node = Map<String, Object?>.from(t['table']!);
+    node['layout'] = {'width': 600, 'height': 400, 'padding': [1, 1, 1, 1]};
+    node['decoration'] = {'radius': 14, 'strokes': [{'color': '#FFD3CDC0'}], 'strokeWidth': 1};
+    t['table'] = node;
+    final screen = await show(tester, t, root: 'table', variables: [rows]);
+    await tester.pumpAndSettle();
+    final origin = screen.tree.boxOf('table')!.localToGlobal(Offset.zero);
+    final view = tester.getRect(find.byType(TableView));
+    expect(view.topLeft - origin, const Offset(1, 1));
+    expect(view.size, const Size(598, 398));
+  });
+
+  testWidgets('a design canvas keeps the table at rest, showing its bound rows', (tester) async {
     await show(tester, table(), root: 'table', variables: [rows], interactive: false);
     expect(find.byType(TableView), findsNothing);
+    await tester.pumpAndSettle();
+    final shown = <String>[];
+    void visit(RenderObject o) {
+      if (o is RenderParagraph) shown.add(o.text.toPlainText());
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(NodeView)));
+    expect(shown, containsAll(['Col 0', 'r0c0', 'r1c2']));
+  });
+
+  testWidgets('flex columns share the room; rows hover, select and report taps', (tester) async {
+    final nodes = table();
+    final t = nodes['table']!;
+    nodes['table'] = {
+      ...t,
+      'layout': {'width': 600, 'height': 400},
+      'slots': {'cell': 'cell', 'columnHeader': 'colHeader'},
+      'bind': {'data': r'${rows}', 'props.selectedRow': r'${selected}'},
+      'props': {
+        ...(t['props'] as Map),
+        'columns': [
+          {'key': 'c0', 'label': 'Col 0', 'width': 100, 'flex': 1},
+          {'key': 'c1', 'label': 'Col 1', 'width': 100},
+          {'key': 'c2', 'label': 'Col 2', 'width': 100, 'flex': 3},
+        ],
+        'horizontalPadding': 16,
+        'rowHoverColor': '#FF222228',
+        'selectedRowColor': '#FF2E2E36',
+        'selectedRowEdgeColor': '#FFFFD400',
+        'headerBorderColor': '#FF34343C',
+        'headerBorderWidth': 2,
+      },
+      'actions': [
+        reaction('rowTap', [
+          {'type': 'setVariable', 'variable': 'selected', 'value': r'${result.rowIndex}'},
+        ]),
+      ],
+    };
+    final s = await show(tester, nodes, root: 'table', variables: [rows, v('selected', -1, VariableType.integer)]);
+    await tester.pumpAndSettle();
+    final shown = cells(tester);
+    // 600 - 32 padding - 300 fixed = 268 spare: c0 gets 67, c2 201.
+    expect(shown['Col 1']!.dx - shown['Col 0']!.dx, closeTo(167, 1));
+    expect(shown['Col 2']!.dx - shown['Col 1']!.dx, closeTo(100, 1));
+    expect(shown['Col 0']!.dx - tester.getTopLeft(find.byType(TableView)).dx, closeTo(16, 1));
+    await tester.tapAt(shown['r2c1']! + const Offset(4, 4));
+    await tester.pumpAndSettle();
+    expect(s['selected'], 2);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('at rest a data-bound table shows its rows in each cell\'s scope', (tester) async {

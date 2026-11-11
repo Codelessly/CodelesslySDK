@@ -47,8 +47,9 @@ abstract final class IconSources {
           'twoTone' => 'twotone',
           _ => '',
         };
-        // The version that serves this name: a name bound at runtime (props.icon.name)
-        // keeps the version stored for the design's icon, which 404s for another.
+        // Served from the version the icon was added in, known by name: an
+        // icon written without one (by hand, by a tool) or renamed by a
+        // binding (whose version is still the old icon's) loads too.
         final version = materialIconVersions[name] ?? readInt(icon['version']) ?? 1;
         return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v$version/24px.svg';
       case 'MATERIAL_SYMBOL':

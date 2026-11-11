@@ -136,6 +136,21 @@ class LoadedImage {
     stream.addListener(listener);
   }
 
+  static const _svgCacheSize = 256;
+  static final Map<String, Uint8List> _svgBytes = {};
+
+  @visibleForTesting
+  static void debugClearSvgCache() => _svgBytes.clear();
+
+  @visibleForTesting
+  static bool debugSvgCached(String url) => _svgBytes.containsKey(url);
+
+  static Future<Uint8List> _fetch(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) throw http.ClientException('HTTP ${response.statusCode}', Uri.parse(url));
+    return response.bodyBytes;
+  }
+
   // Fetched here rather than by flutter_svg's network loader, whose cache
   // leaves a failed request's error unhandled.
   Future<PictureInfo> _loadSvg() async {
@@ -143,9 +158,13 @@ class LoadedImage {
     if (url.startsWith('data:')) {
       bytes = UriData.parse(url).contentAsBytes();
     } else {
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode != 200) throw http.ClientException('HTTP ${response.statusCode}', Uri.parse(url));
-      bytes = response.bodyBytes;
+      bytes = _svgBytes.remove(url) ?? await _fetch(url);
+      // Most recently used last; a bounded set of SVGs (icons swapped by a
+      // binding) is kept, so showing one again doesn't fetch it again.
+      _svgBytes[url] = bytes;
+      while (_svgBytes.length > _svgCacheSize) {
+        _svgBytes.remove(_svgBytes.keys.first);
+      }
     }
     return vg.loadPicture(SvgBytesLoader(bytes), null);
   }
@@ -413,4 +432,21 @@ void paintLoaded(
     ..drawPicture(picture.picture);
   if (layered) canvas.restore();
   canvas.restore();
+}
+
+/// Whether an image or icon drawn under [root] (its render subtree) is
+/// still loading: what a capture of it waits for.
+bool imagesPendingUnder(RenderObject root) {
+  var pending = false;
+  void visit(RenderObject o) {
+    if (pending) return;
+    if (o is ImageClient && o.imagesPending) {
+      pending = true;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(root);
+  return pending;
 }

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-LayoutDocument _doc(double? radius) => LayoutDocument.fromJson({
+LayoutDocument _doc(double? radius, {List<double>? transform}) => LayoutDocument.fromJson({
       'roots': ['canvas'],
       'nodes': {
         'canvas': {'type': 'canvas', 'slots': {'body': 'box'}, 'layout': {'width': 200, 'height': 100}},
@@ -20,6 +20,7 @@ LayoutDocument _doc(double? radius) => LayoutDocument.fromJson({
               {
                 'type': 'radial',
                 'radius': ?radius,
+                'transform': ?transform,
                 'stops': [
                   {'position': 0, 'color': '#00000000'},
                   {'position': 1, 'color': '#FF000000'},
@@ -31,11 +32,11 @@ LayoutDocument _doc(double? radius) => LayoutDocument.fromJson({
       },
     });
 
-Future<int> _alphaAt(WidgetTester tester, double? radius, Offset at) async {
+Future<int> _alphaAt(WidgetTester tester, double? radius, Offset at, {List<double>? transform}) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = const Size(200, 100);
   addTearDown(tester.view.reset);
-  final tree = NodeTree(DocumentSource(_doc(radius)));
+  final tree = NodeTree(DocumentSource(_doc(radius, transform: transform)));
   final key = GlobalKey();
   await tester.pumpWidget(MaterialApp(
     home: Align(alignment: Alignment.topLeft, child: RepaintBoundary(key: key, child: NodeView(tree: tree, rootId: 'canvas'))),
@@ -61,5 +62,13 @@ void main() {
     final without = await _alphaAt(tester, null, const Offset(150, 50));
     expect(withRadius, greaterThan(240));
     expect(without, inInclusiveRange(100, 155));
+  });
+
+  testWidgets('a transform moves the center of a radius gradient, not its size', (tester) async {
+    // Centered at the box's left edge (u 0): transparent there, solid 50 px
+    // away (radius 0.5 of 100 px).
+    const left = [1.0, 0.0, 0.5, 0.0, 1.0, 0.0];
+    expect(await _alphaAt(tester, 0.5, const Offset(1, 50), transform: left), lessThan(20));
+    expect(await _alphaAt(tester, 0.5, const Offset(60, 50), transform: left), greaterThan(240));
   });
 }
