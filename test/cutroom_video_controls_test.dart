@@ -73,7 +73,9 @@ void main() {
   }
 
   Future<void> flush(WidgetTester tester) async {
-    for (var i = 0; i < 8; i++) await tester.pump();
+    for (var i = 0; i < 8; i++) {
+      await tester.pump();
+    }
   }
 
   testWidgets('bound source time, playing, volume and loop control a loaded video', (tester) async {

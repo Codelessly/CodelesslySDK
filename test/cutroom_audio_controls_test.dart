@@ -141,6 +141,8 @@ void main() {
     expect(audio.seeks.last, const Duration(seconds: 10));
     expect(audio.volumes.last, .2);
     await tester.pumpWidget(const SizedBox());
-    for (var i = 0; i < 10; i++) await tester.pump();
+    for (var i = 0; i < 10; i++) {
+      await tester.pump();
+    }
   });
 }

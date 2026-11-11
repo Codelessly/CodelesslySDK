@@ -7,10 +7,10 @@ class Validator implements ScriptRunner {
  @override Future<ScriptRunResult> run(ScriptDef script,{Json args=const {},List<ScriptDef> scripts=const [],ScriptHost? host})async{this.args=args;await gate?.future;return ScriptRunResult(value:value);}
 }
 class FormHarness {
- final scope=VariableScope([Variable(name:'answers',type:VariableType.map,value:{'email':'ada@example.test','hidden':'private'}),Variable(name:'responses',type:VariableType.list,value:[]),Variable(name:'result',type:VariableType.map,value:{}),Variable(name:'success',type:VariableType.boolean,value:false),Variable(name:'errors',type:VariableType.map,value:{})]);
+ final scope=VariableScope([const Variable(name:'answers',type:VariableType.map,value:{'email':'ada@example.test','hidden':'private'}),const Variable(name:'responses',type:VariableType.list,value:[]),const Variable(name:'result',type:VariableType.map,value:{}),const Variable(name:'success',type:VariableType.boolean,value:false),const Variable(name:'errors',type:VariableType.map,value:{})]);
  late RuntimeActionContext context;
  final failures=<Object>[];
- FormHarness({ScriptRunner? runner}){context=RuntimeActionContext(scope:scope,services:Services(scripts:runner),scripts:[ScriptDef(id:'validate',name:'validate')],onError:(e,s,a)=>failures.add(e));}
+ FormHarness({ScriptRunner? runner}){context=RuntimeActionContext(scope:scope,services:Services(scripts:runner),scripts:[const ScriptDef(id:'validate',name:'validate')],onError:(e,s,a)=>failures.add(e));}
  Future<void> submit(Json action)=>const CodelesslyActions().run(Node.fromJson({'type':'box','actions':[{'trigger':{'type':'click'},'actions':[{'type':'submitForm','service':'local','payload':r'${answers}','responseVariable':'responses','resultVariable':'result','onSuccess':[{'type':'setVariable','variable':'success','value':'true'}],'onError':[{'type':'setVariable','variable':'errors','value':r'${result.errors}'}],...action}]}]},id:'button')!,'click',context);
 }
 void main(){
