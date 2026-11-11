@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,34 @@ class DisposableVoice extends SilentSoundEngine
   }
 }
 
+class AsyncDisposableVoice extends SilentSoundEngine
+    implements DisposableSoundEngine {
+  final closed = Completer<void>();
+  int disposals = 0;
+  @override
+  Future<void> dispose() {
+    disposals++;
+    return closed.future;
+  }
+}
+
 void main() {
+  test('concurrent sound disposal shares and awaits asynchronous engine cleanup', () async {
+    final engine = AsyncDisposableVoice();
+    final sound = SoundService(engine: engine);
+    final first = sound.dispose();
+    final second = sound.dispose();
+    expect(identical(first, second), isTrue);
+    expect(engine.disposals, 1);
+    var completed = false;
+    first.then((_) => completed = true);
+    await Future<void>.delayed(Duration.zero);
+    expect(completed, isFalse);
+    engine.closed.complete();
+    await second;
+    expect(completed, isTrue);
+    expect(engine.disposals, 1);
+  });
   test('closing a project disposes its default services', () async {
     final project = Codelessly();
     final services = project.services as Services;
