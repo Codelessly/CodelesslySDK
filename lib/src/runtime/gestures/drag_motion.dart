@@ -194,10 +194,6 @@ abstract final class DragMotionControl {
     final target = instanceOf(nodeId, tree: tree);
     if (target == null) return false;
     switch (command) {
-      // Commands this runtime doesn't run yet (zooming and posing a
-      // transform gesture): they do nothing.
-      case api.DragCommand.zoom || api.DragCommand.pose:
-        return false;
       case api.DragCommand.fling:
         await target.fling(direction);
       case api.DragCommand.returnFrom:
