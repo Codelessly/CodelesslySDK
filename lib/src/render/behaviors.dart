@@ -75,7 +75,11 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     }
   }
   cardLayers(b, n, chain, animates: animates);
-  if (be.scale != 1) {
+  // A node its own states scale (a button that shrinks while pressed) keeps
+  // the layer at rest too: adding it as the press lands would rebuild the
+  // chain under the pointer and lose the tap.
+  final stateScaled = be.states.patches.values.any((byNode) => byNode[n.id]?.containsKey('scale') ?? false);
+  if (be.scale != 1 || stateScaled) {
     chain.add(
       b.obtain<RenderPose>('scale', RenderPose.new)
         ..transform = Matrix4.diagonal3Values(be.scale, be.scale, 1)
