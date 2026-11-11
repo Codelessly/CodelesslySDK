@@ -1455,15 +1455,23 @@ class LineChartPainter extends NodePainter {
       final ry = _num(r['y']);
       if (ry == null) continue;
       final y = py(ry);
+      final lineColor = _color(r['color'], r['opacity']) ?? axisColor;
       _dashed(
         canvas,
         Offset(plot.left, y),
         Offset(plot.right, y),
         _dash(r['dash'], (5, 5)),
         Paint()
-          ..color = _color(r['color'], r['opacity']) ?? axisColor
+          ..color = lineColor
           ..strokeWidth = _num(r['width']) ?? 1.5,
       );
+      // A label above the line, at its end (or its start), in its colour.
+      if (_text(r['label']) case final String label when label.isNotEmpty) {
+        final tp = _layout(label, axisLabelStyle.copyWith(color: lineColor, fontWeight: FontWeight.w700));
+        final atStart = r['labelAlign'] == 'start';
+        tp.paint(canvas, Offset(atStart ? plot.left + 2 : plot.right - tp.width - 2, y - tp.height - 2));
+        tp.dispose();
+      }
     }
 
     // 7. X axis, ticks and labels.
