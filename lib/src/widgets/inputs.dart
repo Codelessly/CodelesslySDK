@@ -682,10 +682,31 @@ class _CheckboxIslandState extends State<_CheckboxIsland> {
     final tristate = n.prop(CheckboxProps.tristate);
     final radius = n.prop(CheckboxProps.borderRadius);
     final side = n.prop(CheckboxProps.side);
+    final activeSide = n.prop(CheckboxProps.activeSide);
+    final fill = _color(n.prop(CheckboxProps.fillColor));
+    final compact = n.prop(CheckboxProps.compact);
+    final scale = n.layout.width.value / (compact ? Checkbox.width : _checkboxSize);
+    // A compact box's corners and sides are node pixels: drawn before the
+    // scale, they're shrunk by it.
+    final unscale = compact && scale > 0 ? 1 / scale : 1.0;
+    BorderSide? sideOf(api.BorderSide? s) {
+      if (s == null) return null;
+      final b = _side(s);
+      return unscale == 1 ? b : b.copyWith(width: b.width * unscale);
+    }
+
+    final shown = tristate ? value : (value ?? false);
+    final unchecked = sideOf(side), checked = sideOf(activeSide);
     return Transform.scale(
-      scale: n.layout.width.value / (n.prop(CheckboxProps.compact) ? Checkbox.width : _checkboxSize),
+      scale: scale,
       child: Checkbox(
-        value: tristate ? value : (value ?? false),
+        // Where tickers are off (a design canvas) the box can't animate: a
+        // new checkbox shows the current value.
+        key: TickerMode.valuesOf(context).enabled ? null : ValueKey<bool?>(shown),
+        value: shown,
+        fillColor: fill == null
+            ? null
+            : WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? null : fill),
         tristate: tristate,
         autofocus: n.prop(CheckboxProps.autofocus),
         checkColor: _color(n.prop(CheckboxProps.checkColor)),
@@ -694,8 +715,11 @@ class _CheckboxIslandState extends State<_CheckboxIsland> {
         focusColor: _color(n.prop(CheckboxProps.focusColor)),
         splashRadius: n.prop(CheckboxProps.splashRadius),
         visualDensity: VisualDensity.standard,
-        shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
-        side: side == null ? null : _side(side),
+        shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter * unscale),
+        side: checked == null
+            ? unchecked
+            : WidgetStateBorderSide.resolveWith(
+                (states) => states.contains(WidgetState.selected) ? checked : unchecked),
         onChanged: (v) {
           setState(() => value = v);
           _fire(context, 'changed', v);
@@ -1647,6 +1671,57 @@ class _SignatureIslandState extends State<_SignatureIsland> {
     final error = n.prop(SignatureProps.error);
     final radius = n.prop(SignatureProps.borderRadius).flutter;
     final borderWidth = error ? n.prop(SignatureProps.errorBorderWidth) : n.prop(SignatureProps.borderWidth);
+    final lineColor = n.prop(SignatureProps.signLineColor).flutter;
+    final markColor = n.prop(SignatureProps.signMarkColor)?.flutter ?? lineColor;
+    final markSize = n.prop(SignatureProps.signMarkSize);
+    final showSignLine = n.prop(SignatureProps.showSignLine);
+    final showMark = n.prop(SignatureProps.showSignMark);
+    final iconJson = n.prop(SignatureProps.signMarkIcon);
+    final hasIcon = iconJson != null && iconJson.isNotEmpty && iconJson['show'] != false;
+    final placeholderFontSize = n.prop(SignatureProps.placeholderFontSize);
+    final placeholderStyle = n.prop(SignatureProps.placeholderStyle);
+    final captionStyle = n.prop(SignatureProps.captionStyle);
+    final painter = SignaturePainter(
+      strokes: [...strokes, ?current],
+      inkColor: n.prop(SignatureProps.inkColor).flutter,
+      inkWidth: n.prop(SignatureProps.inkWidth),
+      placeholder: n.prop(SignatureProps.placeholder),
+      placeholderColor: n.prop(SignatureProps.placeholderColor).flutter,
+      placeholderFontSize: placeholderFontSize,
+      placeholderStyle: placeholderStyle.isEmpty
+          ? null
+          : _signatureStyle(placeholderStyle,
+              color: n.prop(SignatureProps.placeholderColor).flutter,
+              fontSize: placeholderFontSize,
+              fontWeight: FontWeight.w600,
+              letterSpacing: (placeholderStyle.fontSize ?? placeholderFontSize) * 0.12),
+      placeholderAlignment: n.prop(SignatureProps.placeholderAlignment).flutter,
+      placeholderOffset: Offset(n.prop(SignatureProps.placeholderOffset).dx, n.prop(SignatureProps.placeholderOffset).dy),
+      showSignLine: showSignLine,
+      signLineColor: lineColor,
+      signLineWidth: n.prop(SignatureProps.signLineWidth),
+      dashed: n.prop(SignatureProps.signLineStyle) == api.SignLineStyle.dashed,
+      dash: n.prop(SignatureProps.signLineDash),
+      gap: n.prop(SignatureProps.signLineGap),
+      signLineOffset: n.prop(SignatureProps.signLineOffset),
+      signLineInset: n.prop(SignatureProps.signLineInset),
+      showMark: showMark,
+      markGlyph: !hasIcon,
+      markSize: markSize,
+      markColor: markColor,
+      leadingMark: n.prop(SignatureProps.signMarkPlacement) == api.SignMarkPlacement.leading,
+      markGap: n.prop(SignatureProps.signMarkGap),
+      caption: n.prop(SignatureProps.caption),
+      captionStyle: _signatureStyle(captionStyle, color: lineColor, fontSize: 11),
+      captionGap: n.prop(SignatureProps.captionGap),
+      captionAlign: textAlign(n.prop(SignatureProps.captionAlign)),
+      textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
+      normalized: n.prop(SignatureProps.normalized),
+    );
+    final paint = CustomPaint(painter: painter, child: const SizedBox.expand());
+    final markIcon = hasIcon && showMark && showSignLine
+        ? _icon(api.InputIcon(icon: iconJson, size: markSize, color: n.prop(SignatureProps.signMarkColor) ?? n.prop(SignatureProps.signLineColor)))
+        : null;
     final pad = DecoratedBox(
       decoration: BoxDecoration(
         color: n.prop(SignatureProps.backgroundColor).flutter,
@@ -1660,21 +1735,12 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       ),
       child: ClipRRect(
         borderRadius: radius,
-        child: CustomPaint(
-          painter: SignaturePainter(
-            strokes: [...strokes, ?current],
-            inkColor: n.prop(SignatureProps.inkColor).flutter,
-            inkWidth: n.prop(SignatureProps.inkWidth),
-            placeholder: n.prop(SignatureProps.placeholder),
-            placeholderColor: n.prop(SignatureProps.placeholderColor).flutter,
-            placeholderFontSize: n.prop(SignatureProps.placeholderFontSize),
-            showSignLine: n.prop(SignatureProps.showSignLine),
-            signLineColor: n.prop(SignatureProps.signLineColor).flutter,
-            textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
-            normalized: n.prop(SignatureProps.normalized),
-          ),
-          child: const SizedBox.expand(),
-        ),
+        child: markIcon == null
+            ? paint
+            : Stack(fit: StackFit.expand, children: [
+                paint,
+                CustomSingleChildLayout(delegate: _SignMarkLayout(painter), child: markIcon),
+              ]),
       ),
     );
     if (!n.prop(SignatureProps.enabled) || n.prop(SignatureProps.readOnly)) return pad;
@@ -1705,6 +1771,43 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       },
     );
   }
+}
+
+/// [style] over a signature pad's fallbacks for what it leaves unset.
+TextStyle _signatureStyle(api.TextStyle style,
+    {required Color color, required double fontSize, FontWeight? fontWeight, double? letterSpacing}) {
+  final converted = textStyle(style);
+  return converted.copyWith(
+    color: style.color == null && style.foreground == null ? color : converted.color,
+    fontSize: style.fontSize ?? fontSize,
+    fontWeight: style.fontWeight == null ? fontWeight ?? converted.fontWeight : converted.fontWeight,
+    letterSpacing: style.letterSpacing ?? letterSpacing ?? converted.letterSpacing,
+  );
+}
+
+/// Lays a signature pad's icon mark where its painter puts the mark.
+class _SignMarkLayout extends SingleChildLayoutDelegate {
+  _SignMarkLayout(this.painter);
+  final SignaturePainter painter;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.tight(Size.square(painter.markSize));
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final g = painter.geometry();
+    // Off the pad where the line has no room (it isn't drawn).
+    return g.fits(size) ? g.markOrigin(size) : Offset(-childSize.width - size.width, 0);
+  }
+
+  @override
+  bool shouldRelayout(_SignMarkLayout old) =>
+      old.painter.markSize != painter.markSize ||
+      old.painter.signLineOffset != painter.signLineOffset ||
+      old.painter.signLineInset != painter.signLineInset ||
+      old.painter.leadingMark != painter.leadingMark ||
+      old.painter.markGap != painter.markGap;
 }
 
 /// Takes a drag at once, so a scroll view around the pad doesn't.
