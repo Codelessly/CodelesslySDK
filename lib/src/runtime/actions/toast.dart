@@ -165,9 +165,13 @@ abstract final class CodelesslyToast {
     final hasButton = request.actionLabel.trim().isNotEmpty && request.onAction != null;
 
     hide();
+    // A toast shown from a dialog or sheet (its "Password needed") sits
+    // above that one's barrier: only those opened after it cover it.
+    final shownOver = List<ModalRoute<Object?>>.of(covers.value);
     late final OverlayEntry entry;
     entry = OverlayEntry(
       builder: (context) => _ToastView(
+        shownOver: shownOver,
         action: action,
         message: request.message,
         title: request.title.trim().isEmpty ? '' : request.title,
@@ -214,8 +218,12 @@ class _ToastView extends StatefulWidget {
     required this.onAction,
     required this.breakpoints,
     required this.onDone,
+    this.shownOver = const [],
   });
 
+  /// The dialogs and sheets already open when it was shown: their barriers
+  /// don't cover it.
+  final List<ModalRoute<Object?>> shownOver;
   final ShowToastAction action;
   final api.Breakpoints breakpoints;
   final String message, title;
@@ -492,7 +500,7 @@ class _ToastViewState extends State<_ToastView> {
         boxShadow: look.shadows('shadows') ??
             const [BoxShadow(color: Color(0x33000000), blurRadius: 18, offset: Offset(0, 6))],
       ),
-      child: ClipRRect(borderRadius: radius, child: _UnderBarriers(child: toast)),
+      child: ClipRRect(borderRadius: radius, child: _UnderBarriers(shownOver: widget.shownOver, child: toast)),
     );
     final enterOffset = look.numberOr('enterOffset', 0.25);
     final rotation = look.numberOr('rotation', 0);
@@ -550,7 +558,7 @@ class _ToastViewState extends State<_ToastView> {
         valueListenable: CodelesslyToast.covers,
         child: toast,
         builder: (context, covers, toast) => IgnorePointer(
-          ignoring: !(hasButton || hasClose) || _closing || covers.isNotEmpty,
+          ignoring: !(hasButton || hasClose) || _closing || covers.any((r) => !widget.shownOver.contains(r)),
           child: toast,
         ),
       ),
@@ -570,9 +578,12 @@ Widget _withShadows(Widget button, List<BoxShadow>? shadows, double radius) {
 /// Paints the barriers of [CodelesslyToast.covers] over [child], each as
 /// far as its route has faded it in.
 class _UnderBarriers extends StatelessWidget {
-  const _UnderBarriers({required this.child});
+  const _UnderBarriers({required this.child, this.shownOver = const []});
 
   final Widget child;
+
+  /// Routes the toast was shown over: their barriers stay under it.
+  final List<ModalRoute<Object?>> shownOver;
 
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<List<ModalRoute<Object?>>>(
@@ -581,6 +592,7 @@ class _UnderBarriers extends StatelessWidget {
         builder: (context, covers, child) {
           var result = child!;
           for (final route in covers) {
+            if (shownOver.contains(route)) continue;
             final color = route.barrierColor;
             final animation = route.animation;
             if (color == null || color.a == 0) continue;

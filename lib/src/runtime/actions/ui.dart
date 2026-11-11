@@ -325,6 +325,7 @@ class NavigatorActionUi implements ActionUi {
           showDragHandle: look.flag('showDragHandle'),
           sheetBelowWidth: defaultSheetBelowWidth(_breakpoints),
           sheetWidth: look.number('sheetWidth'),
+          sheetMargin: look.numberOr('sheetMargin', 0),
           maxHeightFactor: look.number('maxHeightFactor'),
           barrierBlur: look.numberOr('barrierBlur', 0),
           enterScale: look.numberOr('enterScale', 1),
@@ -356,6 +357,7 @@ Future<Object?> showScreenModal(
   required double sheetBelowWidth,
   RouteTransition? routeTransition,
   double? sheetWidth,
+  double sheetMargin = 0,
   double? sheetRadius,
   double? maxHeightFactor,
   double barrierBlur = 0,
@@ -388,7 +390,7 @@ Future<Object?> showScreenModal(
   // the screen, on its transparent background: invisible over the scrim,
   // and a gap over the screen's own surface.)
   final presented = presentation == ModalPresentation.sideSheet ||
-      (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle)) ||
+      (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle || sheetMargin > 0)) ||
       (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
@@ -397,6 +399,7 @@ Future<Object?> showScreenModal(
       barrierDismissible: barrierDismissible,
       barrierColor: scrim ?? Colors.black54,
       sheetWidth: sheetWidth,
+      sheetMargin: sheetMargin,
       cornerRadius: sheetRadius,
       maxHeightFactor: maxHeightFactor ?? 1,
       showDragHandle: showDragHandle,
