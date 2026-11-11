@@ -188,9 +188,14 @@ class _RuntimePageViewState extends State<RuntimePageView> {
     // button/API request, even after the reaction awaited another action.
     unawaited(
       runZoned(
-        // `value` too: what SDK 8.x's page view reported and migrated
-        // actions read (`lanePage = \${value}`).
-        () => _r.fire('changed', event: {'index': index, 'page': index, 'value': index}),
+        // `${result.index}` / `${result.page}`, as documented: the runner
+        // reads a `value` as the whole result, so the map is given as
+        // `result`. `value` too: what SDK 8.x's page view reported and
+        // migrated actions read (`lanePage = \${value}`).
+        () => _r.fire('changed', event: {
+          'result': {'index': index, 'page': index},
+          'value': index,
+        }),
         zoneValues: {_pageReportZone: (this, index)},
       ),
     );
