@@ -20,9 +20,10 @@
 //   (after its `hoverDelay`), `dragExit`, `drop` (with `key`),
 //   `dropRejected` (its `acceptIf` refused) and `dropFull`.
 //
-// Not supported yet: auto-scroll of the scroll views around a target
-// (this SDK doesn't scroll at runtime yet) and the drop position a flight key
-// records for the hero that shows the drop next.
+// Scroll views under the pointer scroll near their edges while dragging,
+// including nested horizontal/vertical views. Targets are hit-tested again
+// after scrolling, so a stationary pointer can reach off-screen slots.
+// Not supported yet: the drop position a flight key records for the hero.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -49,16 +50,16 @@ import 'physics.dart';
 /// The id of a list item or payload value: a map's `id`, else the value
 /// itself as text.
 String dragItemId(Object? value) => switch (value) {
-      final Map map when map['id'] != null => FormulaEvaluator.stringify(map['id']),
-      _ => FormulaEvaluator.stringify(value),
-    };
+  final Map map when map['id'] != null => FormulaEvaluator.stringify(map['id']),
+  _ => FormulaEvaluator.stringify(value),
+};
 
 /// The ids a payload carries: each element of a list, or the value.
 List<String> dragPayloadIds(Object? data) => switch (data) {
-      final Iterable list => [for (final v in list) dragItemId(v)],
-      null => const [],
-      _ => [dragItemId(data)],
-    };
+  final Iterable list => [for (final v in list) dragItemId(v)],
+  null => const [],
+  _ => [dragItemId(data)],
+};
 
 /// The size a drag carries (`drag.width`/`drag.height`, a list's slot): what
 /// follows the pointer, the feedback node at its designed [feedbackSize]
@@ -87,10 +88,22 @@ bool dropLandsBefore(Offset position, Rect rect, {required Axis axis, bool wraps
   return position.dx <= rect.right && position.dy < rect.center.dy;
 }
 
+/// Logical pixels per second for a drag held inside a scroll viewport.
+/// A 48px edge band (at most a third of a small view) ramps smoothly to
+/// 720px/s; the centre and positions outside the viewport do not scroll.
+@visibleForTesting
+double dragEdgeScrollVelocity(double position, double extent) {
+  if (extent <= 0 || position < 0 || position > extent) return 0;
+  final band = math.min(48.0, extent / 3);
+  if (position < band) return -720 * math.pow(1 - position / band, 2).toDouble();
+  if (position > extent - band) return 720 * math.pow(1 - (extent - position) / band, 2).toDouble();
+  return 0;
+}
+
 /// A drag in progress.
 class DragSession {
   DragSession({required this.group, required this.data, required this.source, required this.size})
-      : ids = dragPayloadIds(data);
+    : ids = dragPayloadIds(data);
 
   /// The draggable's group.
   final String group;
@@ -152,25 +165,25 @@ class DragSession {
 
   /// What `${drag}` reads.
   Map<String, Object?> toMap({bool active = true}) => {
-        'active': active,
-        'group': group,
-        'data': data,
-        'ids': ids,
-        'count': count,
-        'source': source,
-        'over': over,
-        'index': index,
-        'beforeId': beforeId,
-        'before': before,
-        'accepted': accepted,
-        'x': x,
-        'y': y,
-        'fx': fx,
-        'fy': fy,
-        'full': full,
-        'width': size.width,
-        'height': size.height,
-      };
+    'active': active,
+    'group': group,
+    'data': data,
+    'ids': ids,
+    'count': count,
+    'source': source,
+    'over': over,
+    'index': index,
+    'beforeId': beforeId,
+    'before': before,
+    'accepted': accepted,
+    'x': x,
+    'y': y,
+    'fx': fx,
+    'fy': fy,
+    'full': full,
+    'width': size.width,
+    'height': size.height,
+  };
 }
 
 /// What `${drag}` reads when nothing is being dragged (a drag's live values
@@ -389,10 +402,10 @@ class _SourceDrag implements Drag {
   final ValueNotifier<Offset> _overlayAt = ValueNotifier(Offset.zero);
 
   Offset _restrict(Offset delta) => switch (source._model.axis) {
-        api.DragAxis.free => delta,
-        api.DragAxis.horizontal => Offset(delta.dx, 0),
-        api.DragAxis.vertical => Offset(0, delta.dy),
-      };
+    api.DragAxis.free => delta,
+    api.DragAxis.horizontal => Offset(delta.dx, 0),
+    api.DragAxis.vertical => Offset(0, delta.dy),
+  };
 
   @override
   void update(DragUpdateDetails details) {
@@ -403,6 +416,75 @@ class _SourceDrag implements Drag {
   void _moved() {
     _placeFeedback();
     _updateTargets(_position);
+    _edgeTicker ??= Ticker(_scrollTick, debugLabel: 'drag edge scroll')..start();
+  }
+
+  Ticker? _edgeTicker;
+  Duration _lastScrollTick = Duration.zero;
+
+  /// Scroll the innermost view that can still move on each axis. Retest the
+  /// pointer every frame: scrolling can recycle list items and change both
+  /// the viewport and the drop target under a stationary pointer.
+  void _scrollTick(Duration elapsed) {
+    if (_finished) return;
+    final dt = math.min((elapsed - _lastScrollTick).inMicroseconds / 1e6, .05);
+    _lastScrollTick = elapsed;
+    final axes = <Axis>{};
+    final visited = <RenderObject>{};
+    final offsets = <ViewportOffset>{};
+    var moved = false;
+    void consider(RenderBox box, ViewportOffset offset, AxisDirection direction) {
+      final axis = axisDirectionToAxis(direction);
+      if (!offsets.add(offset) ||
+          axes.contains(axis) ||
+          !box.attached ||
+          !box.hasSize ||
+          offset is! ScrollPosition ||
+          !offset.hasContentDimensions ||
+          !offset.physics.shouldAcceptUserOffset(offset)) {
+        return;
+      }
+      final local = box.globalToLocal(_position);
+      if (!(Offset.zero & box.size).contains(local)) return;
+      final coordinate = axis == Axis.vertical ? local.dy : local.dx;
+      final extent = axis == Axis.vertical ? box.size.height : box.size.width;
+      final velocity = dragEdgeScrollVelocity(coordinate, extent) * (axisDirectionIsReversed(direction) ? -1 : 1);
+      final next = (offset.pixels + velocity * dt).clamp(offset.minScrollExtent, offset.maxScrollExtent);
+      if ((next - offset.pixels).abs() < .01) return;
+      offset.jumpTo(next);
+      axes.add(axis);
+      moved = true;
+    }
+
+    for (final entry in _hitTestAt(_position).path) {
+      if (entry.target case final RenderObject target) {
+        for (RenderObject? object = target; object != null; object = object.parent) {
+          if (!visited.add(object)) continue;
+          if (object is RenderViewport) consider(object, object.offset, object.axisDirection);
+          if (object is RenderShrinkWrappingViewport) consider(object, object.offset, object.axisDirection);
+          if (object is RenderTwoDimensionalViewport) {
+            consider(object, object.horizontalOffset, object.horizontalAxisDirection);
+            consider(object, object.verticalOffset, object.verticalAxisDirection);
+          }
+        }
+        // SingleChildScrollView has a private render viewport. The islands'
+        // element ancestry also exposes its public ScrollableState; use the
+        // scrollable's own render box as the viewport, never the dragged node.
+        islandContextOf(target)?.visitAncestorElements((element) {
+          if (element is StatefulElement && element.state is ScrollableState) {
+            final state = element.state as ScrollableState;
+            final box = state.context.findRenderObject();
+            if (box is RenderBox) consider(box, state.position, state.axisDirection);
+          }
+          return true;
+        });
+      }
+    }
+    if (moved) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!_finished) _updateTargets(_position);
+      });
+    }
   }
 
   void _updateTargets(Offset globalPosition) {
@@ -443,16 +525,20 @@ class _SourceDrag implements Drag {
   List<RenderDropTarget> _targetsAt(Offset globalPosition) {
     final dnd = DragAndDrop.of(source._box!.tree);
     if (dnd._targets.isEmpty) return const [];
-    final result = HitTestResult();
-    final context = islandContextOf(source);
-    final viewId = (context == null ? null : View.maybeOf(context))?.viewId ??
-        WidgetsBinding.instance.platformDispatcher.implicitView?.viewId;
-    if (viewId == null) return const [];
-    WidgetsBinding.instance.hitTestInView(result, globalPosition, viewId);
     return [
-      for (final e in result.path)
+      for (final e in _hitTestAt(globalPosition).path)
         if (e.target case final RenderDropTarget t when dnd._targets.contains(t)) t,
     ];
+  }
+
+  HitTestResult _hitTestAt(Offset globalPosition) {
+    final result = HitTestResult();
+    final context = islandContextOf(source);
+    final viewId =
+        (context == null ? null : View.maybeOf(context))?.viewId ??
+        WidgetsBinding.instance.platformDispatcher.implicitView?.viewId;
+    if (viewId != null) WidgetsBinding.instance.hitTestInView(result, globalPosition, viewId);
+    return result;
   }
 
   void _leaveAll() {
@@ -473,6 +559,8 @@ class _SourceDrag implements Drag {
   void _finish({required bool dropped}) {
     if (_finished) return;
     _finished = true;
+    _edgeTicker?.dispose();
+    _edgeTicker = null;
     var wasAccepted = false;
     final active = _active;
     if (dropped && active != null) {
@@ -621,7 +709,8 @@ class _NodeInstanceView extends RenderObjectWidget {
   IslandOwnerElement createElement() => IslandOwnerElement(this);
 
   @override
-  _RenderInstanceView createRenderObject(BuildContext context) => _RenderInstanceView(tree.obtain(id, const Slot.root(), instance: instance));
+  _RenderInstanceView createRenderObject(BuildContext context) =>
+      _RenderInstanceView(tree.obtain(id, const Slot.root(), instance: instance));
 
   @override
   void updateRenderObject(BuildContext context, _RenderInstanceView renderObject) {}
@@ -818,20 +907,24 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
   _SourceDrag? _drag;
 
   bool get _longPress => switch (_model.start) {
-        api.DragStart.press => false,
-        api.DragStart.longPress => true,
-        api.DragStart.auto => const {TargetPlatform.android, TargetPlatform.iOS, TargetPlatform.fuchsia}
-            .contains(defaultTargetPlatform),
-      };
+    api.DragStart.press => false,
+    api.DragStart.longPress => true,
+    api.DragStart.auto => const {
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+      TargetPlatform.fuchsia,
+    }.contains(defaultTargetPlatform),
+  };
 
-  MultiDragGestureRecognizer _ensureRecognizer() => _recognizer ??= (_longPress
-      ? DelayedMultiDragGestureRecognizer(delay: const Duration(milliseconds: 300), debugOwner: this)
-      : switch (_model.axis) {
-          api.DragAxis.free => ImmediateMultiDragGestureRecognizer(debugOwner: this),
-          api.DragAxis.horizontal => HorizontalMultiDragGestureRecognizer(debugOwner: this),
-          api.DragAxis.vertical => VerticalMultiDragGestureRecognizer(debugOwner: this),
-        })
-    ..onStart = _onStart;
+  MultiDragGestureRecognizer _ensureRecognizer() => _recognizer ??=
+      (_longPress
+            ? DelayedMultiDragGestureRecognizer(delay: const Duration(milliseconds: 300), debugOwner: this)
+            : switch (_model.axis) {
+                api.DragAxis.free => ImmediateMultiDragGestureRecognizer(debugOwner: this),
+                api.DragAxis.horizontal => HorizontalMultiDragGestureRecognizer(debugOwner: this),
+                api.DragAxis.vertical => VerticalMultiDragGestureRecognizer(debugOwner: this),
+              })
+        ..onStart = _onStart;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
@@ -1141,7 +1234,8 @@ class RenderDropTarget extends RenderProxyBox {
         : switch (list.type) {
             'row' => Axis.horizontal,
             'column' => Axis.vertical,
-            _ => list.prop(CollectionScrollProps.scrollDirection) == api.Axis.horizontal ? Axis.horizontal : Axis.vertical,
+            _ =>
+              list.prop(CollectionScrollProps.scrollDirection) == api.Axis.horizontal ? Axis.horizontal : Axis.vertical,
           };
     final wraps = list != null && list.type == 'listView' && list.prop(ListViewProps.wrap);
     var index = 0;
@@ -1179,7 +1273,12 @@ class RenderDropTarget extends RenderProxyBox {
             break;
           }
         }
-        final index = item?.index ?? switch (o.instance) { (_, _, _, final int k) => k, _ => 0 };
+        final index =
+            item?.index ??
+            switch (o.instance) {
+              (_, _, _, final int k) => k,
+              _ => 0,
+            };
         final rect = MatrixUtils.transformRect(o.getTransformTo(null), Offset.zero & o.size);
         out.add(_ListItem(index, item?.item, rect));
         return;
