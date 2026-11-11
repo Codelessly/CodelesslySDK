@@ -14,17 +14,29 @@ SoundEngine createSoundEngine() {
   }
 }
 /// Short synthesised voices, each under 80 ms, through a gentle compressor.
-class _WebSoundEngine implements SoundEngine {
+class _WebSoundEngine implements SoundEngine, DisposableSoundEngine {
   _WebSoundEngine(this._ctx) {
     // Browsers start audio only inside a user gesture, and Play Sound runs
     // from timers and clocks: resume on the first press or key anywhere.
-    void unlock(web.Event _) => resume();
-    web.document.addEventListener('pointerdown', unlock.toJS, true.toJS);
-    web.document.addEventListener('keydown', unlock.toJS, true.toJS);
+    _unlock = ((web.Event _) => resume()).toJS;
+    web.document.addEventListener('pointerdown', _unlock, true.toJS);
+    web.document.addEventListener('keydown', _unlock, true.toJS);
     _out = _ctx.createDynamicsCompressor()
       ..threshold.value = -6
       ..ratio.value = 4;
     _out.connect(_ctx.destination);
+  }
+
+  late final JSFunction _unlock;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    web.document.removeEventListener('pointerdown', _unlock, true.toJS);
+    web.document.removeEventListener('keydown', _unlock, true.toJS);
+    _ctx.close();
   }
 
   final web.AudioContext _ctx;
@@ -44,7 +56,7 @@ class _WebSoundEngine implements SoundEngine {
   }();
 
   @override
-  bool get available => _ctx.state == 'running';
+  bool get available => !_disposed && _ctx.state == 'running';
 
   final Stopwatch _stopwatch = Stopwatch()..start();
 
@@ -60,6 +72,7 @@ class _WebSoundEngine implements SoundEngine {
 
   @override
   void resume() {
+    if (_disposed) return;
     if (_ctx.state != 'running') _ctx.resume();
   }
 
@@ -103,6 +116,7 @@ class _WebSoundEngine implements SoundEngine {
     double volume = 1,
     double pitch = 1,
   }) {
+    if (_disposed) return;
     if (volume <= 0.0005) return;
     // [time] is on the sound clock ([now]); the audio graph runs on the
     // audio clock.

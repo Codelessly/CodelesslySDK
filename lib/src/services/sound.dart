@@ -69,19 +69,33 @@ abstract interface class SoundEngine {
   void play(SoundVoice voice, {double? time, double volume = 1, double pitch = 1});
 }
 
+/// Optional cleanup for engines owning contexts, players or listeners.
+abstract interface class DisposableSoundEngine {
+  void dispose();
+}
+
 /// The app's sounds, on an [engine] (the platform's by default).
 class SoundService {
   SoundService({SoundEngine? engine}) : engine = engine ?? createSoundEngine();
 
   final SoundEngine engine;
+  bool _disposed = false;
+
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    final output = engine;
+    if (output is DisposableSoundEngine) (output as DisposableSoundEngine).dispose();
+  }
 
   /// Seconds on the sound clock.
   double get now => engine.now;
 
-  bool get available => engine.available;
+  bool get available => !_disposed && engine.available;
 
   /// Plays [voice]; volume is clamped to 0–2 and pitch to 0.25–4.
   void play(SoundVoice voice, {double? time, double volume = 1, double pitch = 1}) {
+    if (_disposed) return;
     engine.resume();
     engine.play(voice, time: time, volume: volume.clamp(0, 2).toDouble(), pitch: pitch.clamp(0.25, 4).toDouble());
   }

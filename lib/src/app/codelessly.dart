@@ -348,6 +348,11 @@ class Codelessly extends ChangeNotifier {
     appVariables.dispose();
     _storage.dispose();
     data.dispose();
+    // Detach expression scopes before releasing the notifiers they read.
+    // Services supplied by a host stay owned by that host.
+    if (config.services == null && services is Services) {
+      unawaited((services as Services).dispose());
+    }
     if (identical(_instance, this)) _instance = null;
     super.dispose();
   }
