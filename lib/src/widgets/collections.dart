@@ -24,6 +24,7 @@ import 'collections_pagination.dart';
 import 'collections_page_runtime.dart';
 import 'collections_reorder.dart';
 import 'collections_table.dart';
+import '../runtime/expressions/bindings.dart' show ProvidedItem;
 
 /// Recipes for the collections group, by node type.
 final Map<String, WidgetRecipe> collectionsRecipes = {
@@ -539,8 +540,9 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
 const int _maxTableSpans = 200;
 
 /// A table view at rest: its fit box → the cells that fit its design size,
-/// each a template slot repeated. Rows are
-/// [TableViewProps.rowCount] (bound data is a runtime matter).
+/// each a template slot repeated. Rows are its bound data (each cell in its
+/// own scope, `${item.value}`... as at runtime) when a binder shows the
+/// canvas's values, else [TableViewProps.rowCount].
 void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   if (b.tree.animates) return tableViewRuntimeRecipe(b, n, chain);
   final design = Size(n.layout.width.value, n.layout.height.value);
@@ -550,7 +552,9 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final rowHeader = slot(TableViewProps.rowHeader), corner = slot(TableViewProps.corner);
   final headerRow = columnHeader != null, headerColumn = rowHeader != null;
   final columns = n.prop(TableViewProps.columns);
-  final rowCount = math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
+  final binder = b.tree.binder;
+  final data = n.bind.containsKey('data') && binder != null ? binder.itemsOf(b.tree.source, n, b.instance) : null;
+  final rowCount = data?.length ?? math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
 
   // The spans that show in the design size (a cell past it is cut off).
   List<double> fit(List<double> all, double extent) {
@@ -575,13 +579,44 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
+  final rowOffset = headerRow ? 1 : 0, columnOffset = headerColumn ? 1 : 0;
   void add(String? id, int r, int c) {
     if (id == null) return;
     ids.add(id);
-    // The first of each template in the table's own scope (what tools
-    // measure), the others in their cell's.
-    instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
     cells.add((r, c));
+    if (data == null) {
+      // The first of each template in the table's own scope (what tools
+      // measure), the others in their cell's.
+      instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
+      return;
+    }
+    // Bound rows: each cell in the scope the running table gives it.
+    final rowIndex = r - rowOffset, columnIndex = c - columnOffset;
+    final column = columnIndex >= 0 && columnIndex < columns.length ? columns[columnIndex] : null;
+    final row = rowIndex >= 0 && rowIndex < data.length ? data[rowIndex] : null;
+    final (Object key, int index, Object? item) = switch ((r < rowOffset, c < columnOffset)) {
+      (true, true) => ('corner', 0, null),
+      (true, false) => (('column', columnIndex), columnIndex, {'label': column?.label, 'column': column?.key, 'columnIndex': columnIndex}),
+      (false, true) => (('row', rowIndex), rowIndex, {'row': row, 'rowIndex': rowIndex}),
+      (false, false) => (
+          (rowIndex, columnIndex),
+          rowIndex,
+          {
+            'value': switch (row) {
+              final Map m => m[column?.key],
+              final List l => l.elementAtOrNull(columnIndex),
+              _ => null,
+            },
+            'row': row,
+            'column': column?.key,
+            'rowIndex': rowIndex,
+            'columnIndex': columnIndex,
+          }
+        ),
+    };
+    final instance = ProvidedItem('cell', b.instance, n.id, key);
+    binder!.provideItem(b.tree.source, instance, index: index, item: item);
+    instances.add(instance);
   }
 
   for (var r = 0; r < rowHeights.length; r++) {
