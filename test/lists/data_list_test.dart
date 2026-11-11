@@ -253,6 +253,32 @@ void main() {
     expect(rows(tester).first, 'P0');
   });
 
+  for (final how in ['pullToRefresh', 'a refresh reaction alone']) {
+    testWidgets('a list without pagination pulls to refresh: $how', (tester) async {
+      final s = await show(
+        tester,
+        screen(
+          extraList: {
+            'props': {if (how == 'pullToRefresh') 'pullToRefresh': true},
+            'actions': [
+              reaction('refresh', [
+                {'type': 'setVariable', 'variable': 'refreshed', 'op': 'add', 'value': '1'},
+              ]),
+            ],
+          },
+        ),
+        variables: [v('people', people(5), VariableType.list), v('refreshed', 0, VariableType.integer)],
+      );
+      await tester.pumpAndSettle();
+      expect(rows(tester), hasLength(5));
+      await tester.fling(find.byType(CustomScrollView), const Offset(0, 300), 1000);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(s['refreshed'], 1);
+    });
+  }
+
   testWidgets('sections: a header per group, reading the section as item', (tester) async {
     await show(
       tester,

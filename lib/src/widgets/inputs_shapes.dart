@@ -387,7 +387,29 @@ class SignaturePainter extends CustomPainter {
     this.captionStyle,
     this.captionGap = 8,
     this.captionAlign = TextAlign.start,
+    this.signLineMark = true,
+    this.signLineBottom,
+    this.placeholderBelowLine = false,
+    this.placeholderFontWeight = 600,
+    this.placeholderLetterSpacing,
   });
+
+  /// The × at the line's start (with [showMark]: either off hides it).
+  final bool signLineMark;
+
+  /// From the bottom; null is [signLineOffset] (else 24% of the height).
+  final double? signLineBottom;
+
+  /// The placeholder under the line at its start, not at
+  /// [placeholderAlignment].
+  final bool placeholderBelowLine;
+
+  /// The default placeholder style's weight and letter spacing (null: 0.12
+  /// × the size), where [placeholderStyle] is unset.
+  final int placeholderFontWeight;
+  final double? placeholderLetterSpacing;
+
+  bool get _mark => showMark && signLineMark;
 
   final List<List<Offset>> strokes;
   final Color inkColor;
@@ -436,11 +458,13 @@ class SignaturePainter extends CustomPainter {
   final TextAlign captionAlign;
 
   /// The legacy placeholder style.
-  static TextStyle defaultPlaceholderStyle(Color color, double fontSize) => TextStyle(
+  static TextStyle defaultPlaceholderStyle(Color color, double fontSize,
+          {int fontWeight = 600, double? letterSpacing}) =>
+      TextStyle(
         color: color,
         fontSize: fontSize,
-        fontWeight: FontWeight.w600,
-        letterSpacing: fontSize * 0.12,
+        fontWeight: FontWeight.values[((fontWeight ~/ 100) - 1).clamp(0, 8)],
+        letterSpacing: letterSpacing ?? fontSize * 0.12,
       );
 
   TextPainter _glyph() => TextPainter(
@@ -452,20 +476,20 @@ class SignaturePainter extends CustomPainter {
   /// else a square mark of [markSize] (an icon).
   SignLineGeometry geometry() {
     var w = markSize, h = markSize;
-    if (markGlyph && showMark) {
+    if (markGlyph && _mark) {
       final g = _glyph();
       w = g.width;
       h = g.height;
       g.dispose();
     }
     return SignLineGeometry(
-      offset: signLineOffset,
+      offset: signLineBottom ?? signLineOffset,
       inset: signLineInset,
       markWidth: w,
       markHeight: h,
       markGap: markGap,
       leadingMark: leadingMark,
-      showMark: showMark,
+      showMark: _mark,
     );
   }
 
@@ -520,7 +544,7 @@ class SignaturePainter extends CustomPainter {
         canvas.drawLine(Offset(start, y), Offset(end, y), paint);
       }
     }
-    if (showMark && markGlyph) {
+    if (_mark && markGlyph) {
       final cross = _glyph();
       cross.paint(canvas, g.markOrigin(size));
       cross.dispose();
@@ -546,19 +570,147 @@ class SignaturePainter extends CustomPainter {
     final text = TextPainter(
       text: TextSpan(
         text: placeholder,
-        style: placeholderStyle ?? defaultPlaceholderStyle(placeholderColor, placeholderFontSize),
+        style: placeholderStyle ??
+            defaultPlaceholderStyle(placeholderColor, placeholderFontSize,
+                fontWeight: placeholderFontWeight, letterSpacing: placeholderLetterSpacing),
       ),
-      textAlign: TextAlign.center,
+      textAlign: placeholderBelowLine ? TextAlign.start : TextAlign.center,
       textDirection: textDirection,
       maxLines: 1,
       ellipsis: '…',
     )..layout(maxWidth: size.width);
-    final at = placeholderAlignment.alongOffset(Offset(size.width - text.width, size.height - text.height));
-    text.paint(canvas, at + placeholderOffset);
+    if (placeholderBelowLine) {
+      // Its top a little under the line, at the line's start.
+      final g = geometry();
+      final top = showSignLine ? g.lineY(size) + 5 : size.height - text.height - 8;
+      final x = textDirection == TextDirection.rtl ? size.width - g.inset - text.width : g.inset;
+      text.paint(canvas, Offset(x, top) + placeholderOffset);
+    } else {
+      final at = placeholderAlignment.alongOffset(Offset(size.width - text.width, size.height - text.height));
+      text.paint(canvas, at + placeholderOffset);
+    }
     text.dispose();
   }
 
   // Strokes grow in place while drawing.
   @override
   bool shouldRepaint(covariant SignaturePainter oldDelegate) => true;
+}
+
+/// A drafting ruler as a slider track: a strip in the inactive track color
+/// across the slider's whole width, a baseline with [ticks] ticks (every
+/// [majorEvery]th long), and the active color filled from zero (or the
+/// minimum) to the value just under the baseline.
+class RulerSliderTrackShape extends SliderTrackShape {
+  const RulerSliderTrackShape({
+    required this.ticks,
+    required this.majorEvery,
+    required this.tickColor,
+    required this.minorTickColor,
+    required this.zeroFraction,
+  });
+
+  final int ticks, majorEvery;
+  final Color tickColor, minorTickColor;
+
+  /// Where zero sits along the track (0 when the range doesn't include it).
+  final double zeroFraction;
+
+  @override
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    final size = parentBox.size;
+    return Rect.fromLTWH(offset.dx, offset.dy + size.height / 2 - 1, size.width, 2);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 2,
+  }) {
+    final rect = getPreferredRect(parentBox: parentBox, offset: offset, sliderTheme: sliderTheme);
+    final canvas = context.canvas;
+    final cy = rect.center.dy;
+    final base = cy + 1;
+    canvas.drawRect(Rect.fromLTRB(rect.left, cy - 9, rect.right, base), Paint()..color = sliderTheme.inactiveTrackColor ?? const Color(0x00000000));
+    final major = Paint()
+      ..color = tickColor
+      ..strokeWidth = 1;
+    final minor = Paint()
+      ..color = minorTickColor
+      ..strokeWidth = 1;
+    canvas.drawLine(Offset(rect.left, base), Offset(rect.right, base), major);
+    for (var i = 0; i <= ticks; i++) {
+      final x = rect.left + (rect.width - 1) * i / ticks + 0.5;
+      final long = i % majorEvery == 0;
+      canvas.drawLine(Offset(x, base), Offset(x, base - (long ? 8 : 4)), long ? major : minor);
+    }
+    final zero = rect.left + rect.width * zeroFraction;
+    final a = math.min(zero, thumbCenter.dx), b = math.max(zero, thumbCenter.dx);
+    canvas.drawRect(Rect.fromLTRB(a, base + 1, b, base + 4), Paint()..color = sliderTheme.activeTrackColor ?? tickColor);
+  }
+}
+
+/// A ruler's index as a slider thumb: a 2px hairline down across the
+/// track and a triangle under it pointing up, in the thumb color, outlined
+/// in [strokeColor].
+class PointerSliderThumbShape extends SliderComponentShape {
+  const PointerSliderThumbShape({required this.strokeColor});
+
+  final Color strokeColor;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(14, 28);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final canvas = context.canvas;
+    final color = sliderTheme.thumbColor ?? strokeColor;
+    final x = center.dx, cy = center.dy;
+    canvas.drawLine(
+        Offset(x, cy - 13),
+        Offset(x, cy + 5),
+        Paint()
+          ..color = color
+          ..strokeWidth = 2);
+    final triangle = Path()
+      ..moveTo(x, cy + 5)
+      ..lineTo(x - 7, cy + 14)
+      ..lineTo(x + 7, cy + 14)
+      ..close();
+    canvas.drawPath(triangle, Paint()..color = color);
+    canvas.drawPath(
+        triangle,
+        Paint()
+          ..color = strokeColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1);
+  }
 }

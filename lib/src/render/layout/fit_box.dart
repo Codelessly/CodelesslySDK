@@ -55,12 +55,28 @@ class RenderFitBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  /// A share of the room on each axis (`Layout.widthFactor`/`heightFactor`).
+  double? _widthFactor, _heightFactor;
+  set widthFactor(double? v) {
+    if (v == _widthFactor) return;
+    _widthFactor = v;
+    markNeedsLayout();
+  }
+
+  set heightFactor(double? v) {
+    if (v == _heightFactor) return;
+    _heightFactor = v;
+    markNeedsLayout();
+  }
+
   /// The extent on one axis, or null when the axis hugs.
   static double? _extent({
     required bool fill,
     required double? design,
     required double max,
+    double? factor,
   }) {
+    if (factor != null && max.isFinite) return math.max(0, max * factor);
     if (fill && max.isFinite) return max;
     if (design == null || !design.isFinite) return null;
     return math.max(0, design);
@@ -71,11 +87,13 @@ class RenderFitBox extends RenderProxyBox {
       fill: _fillWidth,
       design: _width,
       max: constraints.maxWidth,
+      factor: _widthFactor,
     );
     final double? h = _extent(
       fill: _fillHeight,
       design: _height,
       max: constraints.maxHeight,
+      factor: _heightFactor,
     );
     final double? ratio = _aspectRatio;
     if (ratio != null && ratio.isFinite && ratio > 0) {
@@ -132,7 +150,11 @@ class RenderFitBox extends RenderProxyBox {
       return;
     }
     child.layout(childConstraints, parentUsesSize: true);
-    size = childConstraints.constrain(child.size);
+    // A child whose own layout threw has no size: take the smallest, so
+    // one broken node doesn't break its ancestors' layout and hit tests too
+    // (in a debug build such a throw inside a pointer update leaves the
+    // mouse tracker unusable).
+    size = childConstraints.constrain(child.hasSize ? child.size : childConstraints.smallest);
   }
 
   @override

@@ -59,6 +59,20 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
           ..configure(b is NodeBox ? b : null, gesture),
       );
     }
+  } else if (n.type != 'canvas') {
+    // The design canvas draws a pose given by data (a sticker or a caption
+    // placed by its record: `transformGesture.x` bound), as a running app
+    // starts at it: translate, then rotate, then scale, about the center.
+    if (be.effectiveTransformGesture case final api.TransformGesture g
+        when g.x != null || g.y != null || g.scale != null || g.rotation != null || g.scaleX != null || g.scaleY != null) {
+      final s = g.scale ?? 1;
+      chain.add(
+        b.obtain<RenderPose>('transformPose', RenderPose.new)
+          ..transform = (Matrix4.translationValues(g.x ?? 0, g.y ?? 0, 0)
+            ..rotateZ((g.rotation ?? 0) * math.pi / 180)
+            ..scaleByDouble(s * (g.scaleX ?? 1), s * (g.scaleY ?? 1), 1, 1)),
+      );
+    }
   }
   if (be.motion case final api.Motion motion) {
     chain.add(
@@ -75,11 +89,10 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     }
   }
   cardLayers(b, n, chain, animates: animates);
-  // A node its own states scale (a button that shrinks while pressed) keeps
-  // the layer at rest too: adding it as the press lands would rebuild the
-  // chain under the pointer and lose the tap.
-  final stateScaled = be.states.patches.values.any((byNode) => byNode[n.id]?.containsKey('scale') ?? false);
-  if (be.scale != 1 || stateScaled) {
+  // A state style that scales the node (a press shrink) keeps the layer at
+  // rest too: adding it mid-press rewired the chain under the pointer and
+  // the tap was lost.
+  if (be.scale != 1 || (animates && _stateScales(b, n))) {
     chain.add(
       b.obtain<RenderPose>('scale', RenderPose.new)
         ..transform = Matrix4.diagonal3Values(be.scale, be.scale, 1)
@@ -153,12 +166,107 @@ void paintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
     );
   }
   if (n.behaviors.strokePath case final api.StrokePath path) {
-    final painter = StrokePathPainter(path);
     chain.add(
-      b.obtain<RenderCustomPaint>('strokePath', RenderCustomPaint.new)
-        ..painter = path.inFront ? null : painter
-        ..foregroundPainter = path.inFront ? painter : null,
+      b.obtain<RenderStrokePath>('strokePath', RenderStrokePath.new)..configure(path, animates: b.tree.animates),
     );
+  }
+}
+
+/// A node's [api.StrokePath], behind its content or in front. A running app
+/// draws it along its length over [api.StrokePath.drawMs]: when it first
+/// shows, from nothing when [api.StrokePath.drawKey] changes, and from where
+/// it is when [api.StrokePath.progress] changes.
+class RenderStrokePath extends RenderProxyBox {
+  api.StrokePath? _path;
+  bool _animates = false;
+
+  /// The share of the stroke drawn now, and the run toward [_to].
+  double _shown = 1, _from = 0, _to = 1;
+  Duration? _start;
+  Ticker? _ticker;
+
+  /// The share drawn now (for tests).
+  double get shown => _shown;
+
+  void configure(api.StrokePath path, {required bool animates}) {
+    final old = _path;
+    _path = path;
+    _animates = animates;
+    if (!animates || !path.draws) {
+      _stop();
+      _shown = path.progress;
+    } else if (old == null || !old.draws) {
+      _run(0, path.progress);
+    } else if (path.drawKey != old.drawKey) {
+      _run(0, path.progress);
+    } else if (path.progress != old.progress) {
+      _run(_shown, path.progress);
+    }
+    markNeedsPaint();
+  }
+
+  void _run(double from, double to) {
+    _from = from;
+    _to = to;
+    _shown = from;
+    _start = null;
+    _ticker ??= Ticker(_tick);
+    if (attached && !_ticker!.isActive) _ticker!.start();
+  }
+
+  void _stop() {
+    if (_ticker?.isActive ?? false) _ticker!.stop();
+    _start = null;
+  }
+
+  void _tick(Duration elapsed) {
+    final path = _path;
+    if (path == null) return _stop();
+    _start ??= elapsed;
+    final ms = (elapsed - _start!).inMicroseconds / 1000 - path.drawDelayMs;
+    final t = path.drawMs <= 0 ? 1.0 : (ms / path.drawMs).clamp(0.0, 1.0);
+    _shown = _from + (_to - _from) * path.drawCurve.transform(t);
+    markNeedsPaint();
+    if (t >= 1) _stop();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_animates && (_path?.draws ?? false) && _shown != _to && !(_ticker?.isActive ?? false)) {
+      _ticker ??= Ticker(_tick);
+      _ticker!.start();
+    }
+  }
+
+  @override
+  void detach() {
+    _stop();
+    super.detach();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.dispose();
+    _ticker = null;
+    super.dispose();
+  }
+
+  void _paintStroke(PaintingContext context, Offset offset) {
+    final path = _path;
+    if (path == null || !hasSize) return;
+    context.canvas.save();
+    context.canvas.translate(offset.dx, offset.dy);
+    StrokePathPainter(_shown == path.progress ? path : path.copyWith(progress: _shown)).paint(context.canvas, size);
+    context.canvas.restore();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final inFront = _path?.inFront ?? false;
+    if (!inFront) _paintStroke(context, offset);
+    super.paint(context, offset);
+    if (inFront) _paintStroke(context, offset);
   }
 }
 
@@ -417,6 +525,9 @@ class RenderPose extends RenderProxyBox {
   RenderPose();
 
   Matrix4 _transform = Matrix4.identity();
+
+  /// The pose it draws its child with.
+  Matrix4 get transform => _transform;
   set transform(Matrix4 v) {
     if (v == _transform) return;
     _transform = v;
@@ -441,16 +552,27 @@ class RenderPose extends RenderProxyBox {
   double _opacity = 1;
   set opacity(double v) {
     if (v == _opacity) return;
+    final composited = alwaysNeedsCompositing;
     _opacity = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
   double _blur = 0;
   set blur(double v) {
     if (v == _blur) return;
+    final composited = alwaysNeedsCompositing;
     _blur = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
+
+  /// A partly transparent or blurred pose paints its child into a layer
+  /// (an opacity or image filter layer), so what's above it must composite
+  /// too: an ancestor that scales or clips with the canvas alone (a fitted
+  /// board, a clip) would otherwise leave the layer unscaled and unclipped.
+  @override
+  bool get alwaysNeedsCompositing => child != null && ((_opacity > 0 && _opacity < 1) || _blur > 0);
 
   /// Hidden while its back faces the viewer (through every transform above).
   bool _backfaceHidden = false;
@@ -670,10 +792,29 @@ class RenderLoops extends RenderPose with _Ticking {
 /// a running app plays its entrance, loop and spin, and transitions to new
 /// values when they change.
 class RenderMotion extends RenderPose with _Ticking {
+  /// The size of the node's parent node (the second node box above it), for
+  /// a path in a viewBox; null before layout.
+  Size? _parentSize() {
+    var boxes = 0;
+    for (var p = parent; p != null; p = p.parent) {
+      if (p is NodeBox) {
+        boxes++;
+        if (boxes == 2) {
+          final b = p.contentBox ?? p;
+          return b.hasSize ? b.size : null;
+        }
+      }
+    }
+    return null;
+  }
+
   api.Motion _motion = api.Motion.none;
   bool _animates = false;
   bool _entered = false;
   bool _waitingForReveal = false;
+
+  /// The entrance waits at its start while the motion's `enterHeld` holds.
+  bool _held = false;
 
   /// The running transition: from [_from] to [_to] since [_since] (its
   /// delay not yet counted), [_offset] ms into its run (a loop's phase).
@@ -711,6 +852,23 @@ class RenderMotion extends RenderPose with _Ticking {
     if (v == _motion) return;
     final old = _motion;
     _motion = v;
+    if (_held && !v.enterHeld) {
+      // Released: the entrance plays from its start now.
+      _held = false;
+      _entered = !_waitingForReveal;
+      _to = v;
+      _since = _clock;
+      _show();
+      syncTicker();
+      return;
+    }
+    if (_animates && _entered && !_loops(v) && v.hasEntrance && old.replayKey != v.replayKey) {
+      // A new replay key plays the entrance again.
+      _start(v.entranceStart, v, at: _clock);
+      _show();
+      syncTicker();
+      return;
+    }
     if (_animates && _entered && _loops(v)) {
       if (!_loops(old) ||
           old.loop != v.loop ||
@@ -725,13 +883,27 @@ class RenderMotion extends RenderPose with _Ticking {
       }
     } else {
       _to = v;
-      if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
+      if (_animates && _entered && _replays(old, v)) {
+        // A new replay key plays the entrance again (from its start, after
+        // its delay, through its keyframes): a list's items falling into
+        // place one after another when the data they show is refilled.
+        _start(v.entranceStart, v, at: _clock);
+      } else if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
         _start(_shown, v, at: _clock);
       }
     }
     _show();
     syncTicker();
   }
+
+  /// Whether [v] replays its entrance: its replay key changed to a new one
+  /// on a motion with an entrance (or keyframes to run through).
+  static bool _replays(api.Motion old, api.Motion v) =>
+      v.replayKey != null &&
+      v.replayKey!.isNotEmpty &&
+      v.replayKey != old.replayKey &&
+      (v.hasEntrance || v.keyframes.isNotEmpty) &&
+      _transitionMs(v) > 0;
 
   static bool _loops(api.Motion m) => m.loop != api.MotionLoop.none && m.duration > 0;
 
@@ -767,12 +939,13 @@ class RenderMotion extends RenderPose with _Ticking {
     if (!_entered && _animates) {
       final m = _motion;
       _waitingForReveal = m.revealOnScroll && m.hasEntrance;
+      _held = m.enterHeld && m.hasEntrance && !_loops(m);
       if (_loops(m)) {
         _startLoop();
       } else if (m.hasEntrance && _transitionMs(m) > 0) {
         _start(m.entranceStart, m, at: _clock);
       }
-      _entered = !_waitingForReveal;
+      _entered = !_waitingForReveal && !_held;
     }
     super.attach(owner);
     _show();
@@ -791,6 +964,24 @@ class RenderMotion extends RenderPose with _Ticking {
     syncTicker();
   }
 
+  /// A path in a viewBox follows the parent's size: placed again once laid
+  /// out (the parent has its size by then).
+  Size? _stage;
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (_motion.hasPath && _motion.pathViewBox.length >= 2) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!attached) return;
+        final stage = _parentSize();
+        if (stage != null && stage != _stage) {
+          _stage = stage;
+          _show();
+        }
+      });
+    }
+  }
+
   @override
   void detach() {
     _MotionRevealWatcher.remove(this);
@@ -804,7 +995,7 @@ class RenderMotion extends RenderPose with _Ticking {
   }
 
   @override
-  bool get ticking => _animates && !_waitingForReveal && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
+  bool get ticking => _animates && !_waitingForReveal && !_held && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
 
   @override
   void tick(Duration elapsed) {
@@ -816,12 +1007,16 @@ class RenderMotion extends RenderPose with _Ticking {
     if (!_motion.paused) _clock += step;
     final target = _motion.paused ? 0.0 : _motion.spin;
     if (_speed != target) {
-      final perSecond = _motion.spinRamp <= 0
-          ? double.infinity
-          : math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
-      final change = math.min((target - _speed).abs(), perSecond * dt);
-      _speed += (target - _speed).sign * change;
-      if ((target - _speed).abs() < 0.002) _speed = target;
+      if (_motion.spinRamp <= 0) {
+        // No ramp: at speed at once. (An infinite rate times a zero step,
+        // a first tick on the web, would be NaN and stop it for good.)
+        _speed = target;
+      } else if (dt > 0) {
+        final perSecond = math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
+        final change = math.min((target - _speed).abs(), perSecond * dt);
+        _speed += (target - _speed).sign * change;
+        if ((target - _speed).abs() < 0.002) _speed = target;
+      }
     }
     _turns = (_turns + _speed * dt) % 1;
     _show();
@@ -880,16 +1075,29 @@ class RenderMotion extends RenderPose with _Ticking {
     var shown = m;
     if (m.hasPath) {
       final progress = m.pathWrap ? api.Motion.wrapProgress(m.pathProgress) : m.pathProgress;
-      final at = MeasuredPath.of(m.path!)?.at(
+      final measured = MeasuredPath.of(m.path!);
+      final at = measured?.at(
         progress,
         byArea: m.pathPacing == api.MotionPathPacing.area,
         focus: Offset(m.pathFocusX, m.pathFocusY),
       );
       if (at != null) {
-        final total = Offset(m.translateX + at.$1.dx, m.translateY + at.$1.dy);
+        // A path in a viewBox is stretched over the node's parent.
+        var point = at.$1;
+        var heading = at.$2;
+        final stage = m.pathViewBox.length >= 2 ? _parentSize() : null;
+        if (stage != null && m.pathViewBox[0] > 0 && m.pathViewBox[1] > 0) {
+          // In a viewBox the path is placed over the parent: its points are
+          // where the node goes (from the parent's origin), not offsets from
+          // the path's start, so the node is laid out at the origin.
+          final sx = stage.width / m.pathViewBox[0], sy = stage.height / m.pathViewBox[1];
+          final absolute = point + measured!.start;
+          point = Offset(absolute.dx * sx, absolute.dy * sy);
+          heading = math.atan2(math.sin(heading) * sy, math.cos(heading) * sx);
+        }
+        final total = Offset(m.translateX + point.dx, m.translateY + point.dy);
         // Keyframes that push the node off its path turn it too: its nose
         // follows where it actually goes.
-        var heading = at.$2;
         final pushed =
             m.orientToPath && moving && m.keyframes.any((k) => k.translateX != null || k.translateY != null);
         if (pushed) {
@@ -906,6 +1114,10 @@ class RenderMotion extends RenderPose with _Ticking {
             .withValue('translateX', total.dx)
             .withValue('translateY', total.dy)
             .withValue('rotate', m.orientToPath ? m.rotate + turn * 180 / math.pi : m.rotate);
+        // Upright and mirrored: heading left faces left, nose first.
+        if (m.orientToPath && m.orientUpright && m.uprightMirror && api.Motion.headsLeft(heading)) {
+          shown = shown.withValue('scaleX', -shown.scaleX);
+        }
       }
     }
     transform = motionMatrix(shown, spinTurns: _turns);
@@ -1321,4 +1533,16 @@ abstract final class _MotionRevealWatcher {
       _schedule();
     });
   }
+}
+
+/// Whether a state style (the node's own, or one of a node around it that
+/// targets it) can set node [n]'s scale.
+bool _stateScales(NodeBuilder b, Node n) {
+  bool scales(Node? owner) =>
+      owner != null && owner.behaviors.states.patches.values.any((p) => p[n.id]?.containsKey('scale') ?? false);
+  if (scales(b.tree.source.node(n.id))) return true;
+  for (String? id = b.tree.source.parentOf(n.id); id != null; id = b.tree.source.parentOf(id)) {
+    if (scales(b.tree.source.node(id))) return true;
+  }
+  return false;
 }

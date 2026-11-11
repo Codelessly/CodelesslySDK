@@ -8,6 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/physics.dart';
 
+import '../view_scroll.dart' show RenderSticky;
+
 class RenderDesignScroll extends RenderProxyBox {
   RenderDesignScroll({
     required this._axis,
@@ -74,7 +76,25 @@ class RenderDesignScroll extends RenderProxyBox {
     'progress': maxScrollExtent > 0 ? _pixels / maxScrollExtent : 0.0,
     'axis': _axis.name,
   };
+  final List<VoidCallback> _scrollListeners = [];
+
+  /// Called whenever the offset changes (sticky nodes, view progress).
+  void addScrollListener(VoidCallback l) => _scrollListeners.add(l);
+  void removeScrollListener(VoidCallback l) => _scrollListeners.remove(l);
+
+  /// Sticky nodes inside, pinned above the content while they're stuck
+  /// (render/view_scroll.dart).
+  final List<RenderSticky> _pinned = [];
+  void registerPinned(RenderSticky s) {
+    if (!_pinned.contains(s)) _pinned.add(s);
+  }
+
+  void unregisterPinned(RenderSticky s) => _pinned.remove(s);
+
   void _notifyScroll() {
+    for (final l in List.of(_scrollListeners)) {
+      l();
+    }
     if (onScroll == null && onScrollEnd == null) return;
     if (!_pendingEvent) {
       _pendingEvent = true;
@@ -404,8 +424,15 @@ class RenderDesignScroll extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final child = this.child;
     if (child == null) return;
-    void paintContent(PaintingContext c, Offset o) =>
-        c.paintChild(child, o + _paintOffset);
+    void paintContent(PaintingContext c, Offset o) {
+      c.paintChild(child, o + _paintOffset);
+      // Pinned sticky nodes, over the content.
+      for (final s in _pinned) {
+        if (!s.attached || !s.paintedByView) continue;
+        final at = MatrixUtils.transformPoint(s.getTransformTo(this), Offset.zero);
+        s.paintPinned(c, o + at);
+      }
+    }
     if (_overflows && _clip != Clip.none) {
       _clipLayer.layer = context.pushClipRect(
         needsCompositing,
@@ -440,6 +467,9 @@ class RenderDesignScroll extends RenderProxyBox {
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final child = this.child;
     if (child == null) return false;
+    for (final s in _pinned.reversed) {
+      if (s.attached && s.paintedByView && s.hitTestPinned(result, position, this)) return true;
+    }
     return result.addWithPaintOffset(
       offset: _paintOffset,
       position: position,

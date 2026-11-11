@@ -27,7 +27,14 @@ import 'package:flutter/scheduler.dart';
 /// How islands are built in one node tree.
 @immutable
 class IslandEnvironment {
-  const IslandEnvironment({this.wrap, this.interactive = false});
+  const IslandEnvironment({this.wrap, this.interactive = false, this.restartsWhenRebuilt = false});
+
+  /// Whether an island's widget starts over (fresh state) each time its node
+  /// re-applies, rather than updating in place. A board whose islands don't
+  /// tick (`TickerMode` off) needs it: a radio's dot or a slider's thumb
+  /// moves to a new value by animating, which never runs there, so they would
+  /// keep showing the first value.
+  final bool restartsWhenRebuilt;
 
   /// Whether islands take pointer input and focus (a running app) or are
   /// only drawn (a design canvas, the default).
@@ -52,10 +59,13 @@ class IslandEnvironment {
 
   @override
   bool operator ==(Object other) =>
-      other is IslandEnvironment && other.interactive == interactive && other.wrap == wrap;
+      other is IslandEnvironment &&
+      other.interactive == interactive &&
+      other.wrap == wrap &&
+      other.restartsWhenRebuilt == restartsWhenRebuilt;
 
   @override
-  int get hashCode => Object.hash(interactive, wrap);
+  int get hashCode => Object.hash(interactive, wrap, restartsWhenRebuilt);
 }
 
 /// Media query, directionality and overlay for islands shown outside an app.
@@ -195,8 +205,13 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
   WidgetBuilder get builder => _builder;
   set builder(WidgetBuilder b) {
     _builder = b;
+    _generation++;
     markRebuild();
   }
+
+  /// Bumped with every new [builder]: the key of the island's widget where
+  /// the environment restarts islands when rebuilt.
+  int _generation = 0;
 
   /// Islands whose widgets rebuild themselves (spinners, streams) become
   /// their own layer, so their frames don't repaint around them.
@@ -266,7 +281,10 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
       if (_dirty || scope == null || !identical(owner, _owner)) {
         _dirty = false;
         debugBuilds++;
-        owner._buildIsland(this, _IslandScope(key: _key, host: this, child: manager.environment.apply(Builder(builder: _builder))));
+        final env = manager.environment;
+        Widget content = Builder(builder: _builder);
+        if (env.restartsWhenRebuilt) content = KeyedSubtree(key: ValueKey(_generation), child: content);
+        owner._buildIsland(this, _IslandScope(key: _key, host: this, child: env.apply(content)));
       }
       // Always flush the island's own scope, also after rebuilding it from
       // the top: a widget that marked itself dirty (a ticking spinner) and

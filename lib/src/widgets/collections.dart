@@ -58,6 +58,18 @@ Object? _scope(NodeBuilder b, int index, int first) => index == first ? null : (
 
 /// Places [count] items (the template [itemId] repeated) from index [first]
 /// in [container].
+/// Where a stacked list's item sits on one axis of the padded box
+/// ([inner] long) from its own position: a distance from the start or the
+/// end, an alignment, or a relative distance; [fallback] when unset.
+double _stackAxis(api.AxisPosition p, double inner, double item, double fallback) {
+  if (p == api.AxisPosition.zero) return fallback;
+  if (p.align case final double a) return (inner - item) * (a + 1) / 2;
+  if (p.relative case final double r) return r;
+  if (p.start case final double s) return s;
+  if (p.end case final double e) return inner - e - item;
+  return fallback;
+}
+
 void _syncItems(NodeBuilder b, Node n, _Container container, String? itemId, int count, {int first = 0}) {
   if (itemId == null || count <= 0) {
     b.syncChildren(container, const [], Slot(SlotKind.root, n));
@@ -78,14 +90,17 @@ void _syncItems(NodeBuilder b, Node n, _Container container, String? itemId, int
 /// At runtime a flexible scroll axis shrink-wraps its items too, within the
 /// room its parent gives it, and scrolls once they outgrow it, so what follows the list sits under its last item. A
 /// design canvas keeps it at its design size, as the editor showed it.
-RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap}) {
+RenderFitBox _viewportBox(NodeBuilder b, Node n, {required bool canShrinkWrap, bool hugCross = false, double? crossExtent}) {
   final shrinkWrap = _hugsMain(b, n) && canShrinkWrap;
   final main = shrinkWrap ? null : n.designMain;
+  // Hugging across: as thick as its items (a row of chips that scrolls),
+  // measured, or the item's own extent where a scroll view needs a bound.
+  final cross = crossExtent ?? (hugCross ? null : n.designCross);
   final fillMain = n.mainFit == SizeFit.fill;
   final fillCross = n.crossFit == SizeFit.fill;
   return b.obtain<RenderFitBox>('viewport', RenderFitBox.new)
-    ..width = n.vertical ? n.designCross : main
-    ..height = n.vertical ? main : n.designCross
+    ..width = n.vertical ? cross : main
+    ..height = n.vertical ? main : cross
     ..fillWidth = n.vertical ? fillCross : fillMain
     ..fillHeight = n.vertical ? fillMain : fillCross
     ..aspectRatio = null;
@@ -146,6 +161,8 @@ double? _itemMain(Node list, Node item) {
   final extent = list.prop(ListViewProps.itemExtent);
   if (extent != null) return extent;
   final fit = list.vertical ? item.layout.height.fit : item.layout.width.fit;
+  // An item binding its size along the list sizes itself, item by item.
+  if (item.bind.containsKey(list.vertical ? 'layout.height' : 'layout.width')) return null;
   if (fit == SizeFit.fill || fit == SizeFit.flexible) return list.vertical ? item.outerHeight : item.outerWidth;
   return null;
 }
@@ -168,7 +185,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     if (reordersItems(n, hasData: ListRuntime(b, n).data != null, handle: handle)) {
       chain.add(_viewportBox(b, n, canShrinkWrap: true));
       final itemExtent = n.prop(ListViewProps.itemExtent);
-      final separated = n.prop(ListViewProps.separator) != api.ListSeparator.none;
+      final separated = listSeparator(n) != api.ListSeparator.none;
       return reorderRecipe(
         b,
         n,
@@ -205,8 +222,35 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     final view = b.obtain<RenderLayeredItems>('stack', RenderLayeredItems.new)
       ..clipBehavior = _clip(n)
       ..paintReversed = reversePaint
-      ..itemConstraints = ((_) => const BoxConstraints())
+      // Unbounded, so an item may be any size, except along an axis it
+      // fills: there it takes the padded box (a layered figure whose items
+      // fill the list), not its design size.
+      ..itemConstraints = ((box) {
+        final w = math.max(0.0, box.width - padding.horizontal - (at?.dx ?? 0));
+        final h = math.max(0.0, box.height - padding.vertical - (at?.dy ?? 0));
+        final fillW = item.layout.width.fit == SizeFit.fill, fillH = item.layout.height.fit == SizeFit.fill;
+        return BoxConstraints(
+          minWidth: fillW ? w : 0,
+          maxWidth: fillW ? w : double.infinity,
+          minHeight: fillH ? h : 0,
+          maxHeight: fillH ? h : double.infinity,
+        );
+      })
       ..placeAt = ((_, _) => origin)
+      // Each item at its own x/y (bound per item: a map's rooms, a
+      // timeline's clips), else at the list's itemPosition. An item placed
+      // on one axis is at 0 on the other: a clip at x 0 isn't moved by the
+      // list's itemPosition.
+      ..placeChild = ((child, box, item) {
+        final node = child is NodeBox ? child.node : null;
+        if (node == null) return null;
+        final x = node.layout.x, y = node.layout.y;
+        if (x == api.AxisPosition.zero && y == api.AxisPosition.zero) return null;
+        return Offset(
+          padding.left + _stackAxis(x, box.width - padding.horizontal, item.width, 0),
+          padding.top + _stackAxis(y, box.height - padding.vertical, item.height, 0),
+        );
+      })
       ..onNeedItems = null
       ..changed();
     _syncItems(b, n, view, itemId, count ?? 0);
@@ -239,7 +283,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return;
   }
 
-  final separator = n.prop(ListViewProps.separator);
+  final separator = listSeparator(n);
   final spacing = n.prop(ListViewProps.spacing);
   final stretchItems = n.prop(ListViewProps.stretchItems);
 
@@ -308,6 +352,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final overlap = count != null && separator == api.ListSeparator.space && spacing < 0 ? -spacing : 0.0;
 
   final view = b.obtain<RenderListItems>('list', RenderListItems.new)
+    ..shareFill = !n.prop(ListViewProps.scrollable)
     ..clipBehavior = _clip(n)
     ..paintReversed = false
     ..dropTarget(b.tree.animates ? b.tree : null, n.id);
@@ -353,7 +398,9 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   // A ListView: endless without a count (it builds what covers its
   // viewport), shrink-wrapping its items when it hugs them and can.
-  final box = _viewportBox(b, n, canShrinkWrap: count != null);
+  // Hugging across needs its items measured: not for a stretched list.
+  final hugCross = n.crossFit == SizeFit.hug && !stretchItems;
+  final box = _viewportBox(b, n, canShrinkWrap: count != null, hugCross: hugCross);
   chain.add(box);
   view
     ..measurable = false
@@ -364,7 +411,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       anchorEnd: true,
       padding: padding,
       hugMain: _hugsMain(b, n) && count != null,
-      hugCross: false,
+      hugCross: hugCross,
       stretch: stretchItems,
       itemMain: itemMain,
       gap: gap,
@@ -381,9 +428,17 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
 /// A running list that pages, groups into sections or swipes: a
 /// [DataListView] island in its viewport box.
 void _dataList(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node item) {
-  chain.add(_viewportBox(b, n, canShrinkWrap: true));
   final vertical = n.vertical;
-  final separator = n.prop(ListViewProps.separator);
+  // A scroll view needs a bounded cross axis: hugging, it is the item's.
+  final pad = n.layout.padding.flutter;
+  final hugCross = n.crossFit == SizeFit.hug && !n.prop(ListViewProps.stretchItems);
+  final crossExtent = !hugCross
+      ? null
+      : vertical
+          ? item.outerWidth + pad.horizontal
+          : item.outerHeight + pad.vertical;
+  chain.add(_viewportBox(b, n, canShrinkWrap: true, crossExtent: crossExtent));
+  final separator = listSeparator(n);
   final spacing = n.prop(ListViewProps.spacing);
   final color = n.prop(ListViewProps.dividerColor).flutter;
   Widget gap() => switch (separator) {
@@ -414,6 +469,7 @@ void _dataList(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node
     separatorExtent: math.max(0, spacing),
     separator: separator == api.ListSeparator.none ? null : gap,
     scrollable: n.prop(ListViewProps.scrollable),
+    hugMain: _hugsMain(b, n),
   );
 }
 
@@ -463,6 +519,7 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..mainAxisExtent = n.prop(GridViewProps.mainAxisExtent)
     ..shrinkWrapRows = n.prop(GridViewProps.shrinkWrapRows)
     ..masonry = n.prop(GridViewProps.masonry)
+    ..masonryShortest = n.prop(GridViewProps.masonryPlacement) == api.MasonryPlacement.shortest
     ..intrinsicRows = !_blocksIntrinsics(b, item)
     ..hugMain = n.mainFit == SizeFit.hug && count != null
     ..itemCount = count
@@ -501,7 +558,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
   );
   final view = b.obtain<RenderPageItems>('pages', RenderPageItems.new)
     ..clipBehavior = _clip(n)
-    ..paintReversed = false
+    ..paintReversed = n.prop(PageViewProps.paintOrder) == api.PagePaintOrder.reverse
     ..onNeedItems = null
     ..axis = n.axis
     ..reverse = n.prop(CollectionScrollProps.reverse)
@@ -511,6 +568,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..firstIndex = first
     ..itemCount = count
     ..pageMotion = n.prop(PageViewProps.pageMotion)
+    ..pageMotionBefore = n.prop(PageViewProps.pageMotionBefore)
     ..changed();
   _syncItems(b, n, view, itemId, last - first + 1, first: first);
   chain.add(view);
@@ -525,8 +583,9 @@ const int _maxTableSpans = 200;
 const double _restFillExtent = 1600;
 
 /// A table view at rest: its fit box → the cells that fit its design size,
-/// each a template slot repeated. Rows are
-/// [TableViewProps.rowCount] (bound data is a runtime matter).
+/// each a template slot repeated. Rows are its bound data (each cell in its
+/// own scope, `${item.value}`... as at runtime) when a binder shows the
+/// canvas's values, else [TableViewProps.rowCount].
 void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   if (b.tree.animates) return tableViewRuntimeRecipe(b, n, chain);
   final design = Size(n.layout.width.value, n.layout.height.value);
@@ -538,9 +597,9 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final columns = n.prop(TableViewProps.columns);
   // Bound rows show on the design canvas too, each cell in its scope, as
   // the running table shows them.
-  final runtime = ListRuntime(b, n);
-  final List<Object?>? boundRows = n.bind.containsKey('data') ? tableRowsOf(runtime) : null;
-  final rowCount = boundRows?.length ?? math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
+  final binder = b.tree.binder;
+  final data = n.bind.containsKey('data') && binder != null ? binder.itemsOf(b.tree.source, n, b.instance) : null;
+  final rowCount = data?.length ?? math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
 
   // The spans that show in the design size (a cell past it is cut off).
   List<double> fit(List<double> all, double extent) {
@@ -556,70 +615,87 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   final edge = n.prop(TableViewProps.horizontalPadding);
   final rowHeaderWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0.0;
+  final fillWidth = n.prop(TableViewProps.fillWidth) && columns.isNotEmpty;
   // The column widths at a width: a table that fills is laid out wider
-  // than its design size, and its flex columns take that width.
+  // than its design size, and its flex columns take that width; with
+  // `fillWidth`, as at runtime, the columns share the width beyond their own.
   List<double> widthsAt(double width) {
     final widths = tableColumnWidths(columns, n.prop(TableViewProps.columnWidth), width - rowHeaderWidth - edge * 2);
+    if (fillWidth) {
+      final total = rowHeaderWidth + edge * 2 + widths.fold<double>(0, (a, w) => a + w);
+      final extra = math.max(0.0, width - total) / widths.length;
+      for (var i = 0; i < widths.length; i++) {
+        widths[i] += extra;
+      }
+    }
     return [
       if (headerColumn) rowHeaderWidth,
       for (var i = 0; i < columns.length; i++) widths[i] + (i == 0 ? edge : 0) + (i == columns.length - 1 ? edge : 0),
     ];
   }
 
+  // A table that fills its parent is drawn at the size it is given, not
+  // its design size: its rows and columns are built past it (bound data's
+  // all, up to [_maxTableSpans]; else the tallest screen's worth of rows)
+  // and the box clips them.
   final fillsWidth = n.layout.width.fit == SizeFit.fill;
-  final columnWidths = fit(widthsAt(design.width), fillsWidth ? double.infinity : design.width);
-  // A table that fills its height shows rows past its design height (the
-  // tallest screen's worth), cut where it's laid out.
+  final allColumns = fillsWidth || (data != null && n.layout.width.fit != SizeFit.fixed);
+  final allRows = data != null && n.layout.height.fit != SizeFit.fixed;
+  final columnWidths = fit(widthsAt(design.width), allColumns ? double.infinity : design.width);
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
     for (var i = 0; i < math.min(rowCount, _maxTableSpans); i++) n.prop(TableViewProps.rowHeight),
-  ], n.layout.height.fit == SizeFit.fill ? math.max(design.height, _restFillExtent) : design.height);
+  ], allRows
+      ? double.infinity
+      : n.layout.height.fit == SizeFit.fill
+          ? math.max(design.height, _restFillExtent)
+          : design.height);
 
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
+  final rowOffset = headerRow ? 1 : 0, columnOffset = headerColumn ? 1 : 0;
   void add(String? id, int r, int c) {
     if (id == null) return;
     ids.add(id);
-    // The first of each template in the table's own scope (what tools
-    // measure), the others in their cell's.
-    instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
     cells.add((r, c));
+    if (data == null) {
+      // The first of each template in the table's own scope (what tools
+      // measure), the others in their cell's.
+      instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
+      return;
+    }
+    // Bound rows: each cell in the scope the running table gives it.
+    final rowIndex = r - rowOffset, columnIndex = c - columnOffset;
+    final column = columnIndex >= 0 && columnIndex < columns.length ? columns[columnIndex] : null;
+    final row = rowIndex >= 0 && rowIndex < data.length ? data[rowIndex] : null;
+    final (Object key, int index, Object? item) = switch ((r < rowOffset, c < columnOffset)) {
+      (true, true) => ('corner', 0, null),
+      (true, false) => (('column', columnIndex), columnIndex, {'label': column?.label, 'column': column?.key, 'columnIndex': columnIndex}),
+      (false, true) => (('row', rowIndex), rowIndex, {'row': row, 'rowIndex': rowIndex}),
+      (false, false) => (
+          (rowIndex, columnIndex),
+          rowIndex,
+          {
+            'value': switch (row) {
+              final Map m => m[column?.key],
+              final List l => l.elementAtOrNull(columnIndex),
+              _ => null,
+            },
+            'row': row,
+            'column': column?.key,
+            'rowIndex': rowIndex,
+            'columnIndex': columnIndex,
+          }
+        ),
+    };
+    final instance = ProvidedItem('cell', b.instance, n.id, key);
+    binder!.provideItem(b.tree.source, instance, index: index, item: item);
+    instances.add(instance);
   }
 
-  final rowOffset = headerRow ? 1 : 0, columnOffset = headerColumn ? 1 : 0;
   for (var r = 0; r < rowHeights.length; r++) {
     for (var c = 0; c < columnWidths.length; c++) {
       final inHeaderRow = headerRow && r == 0, inHeaderColumn = headerColumn && c == 0;
-      final rowIndex = r - rowOffset, columnIndex = c - columnOffset;
-      if (boundRows != null && !inHeaderColumn && columnIndex < columns.length) {
-        // A cell with its data in scope (`${item.value}`, `${item.label}`).
-        final id = inHeaderRow ? columnHeader : cell;
-        if (id != null) {
-          final column = columns[columnIndex];
-          final Object key = inHeaderRow ? ('column', columnIndex) : (rowIndex, columnIndex);
-          final instance = ProvidedItem('cell', b.instance, n.id, key);
-          final row = inHeaderRow ? null : boundRows[rowIndex];
-          runtime.binder?.provideItem(b.tree.source, instance,
-              index: inHeaderRow ? columnIndex : rowIndex,
-              item: inHeaderRow
-                  ? {'label': column.label, 'column': column.key, 'columnIndex': columnIndex}
-                  : {
-                      'value': switch (row) {
-                        final Map m => m[column.key],
-                        final List l => l.elementAtOrNull(columnIndex),
-                        _ => null,
-                      },
-                      'row': row,
-                      'column': column.key,
-                      'rowIndex': rowIndex,
-                      'columnIndex': columnIndex,
-                    });
-          ids.add(id);
-          instances.add(instance);
-          cells.add((r, c));
-        }
-        continue;
-      }
       add(
           inHeaderRow && inHeaderColumn
               ? corner
@@ -635,8 +711,9 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final lineColor = n.prop(TableViewProps.gridLineColor), lineWidth = n.prop(TableViewProps.gridLineWidth);
   final view = b.obtain<RenderTableItems>('table', RenderTableItems.new)
     ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
-    ..columnWidths = columnWidths
+    ..givenColumnWidths = columnWidths
     ..widthsFor = fillsWidth ? widthsAt : null
+    ..stretchLastColumn = n.prop(TableViewProps.stretchLastColumn)
     ..rowHeights = rowHeights
     ..cells = cells
     ..headerRow = headerRow
@@ -647,4 +724,13 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..changed();
   b.syncChildren(view as _Container, ids, Slot(SlotKind.root, n), instances: instances);
   chain.add(view);
+}
+
+/// What [n] (a list) draws between its items: its separator, or empty space
+/// when it has none but a [ListViewProps.spacing] (spacing alone spaces the
+/// items, as a row's or column's does).
+api.ListSeparator listSeparator(Node n) {
+  final separator = n.prop(ListViewProps.separator);
+  if (separator == api.ListSeparator.none && n.prop(ListViewProps.spacing) != 0) return api.ListSeparator.space;
+  return separator;
 }
