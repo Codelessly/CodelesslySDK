@@ -367,9 +367,11 @@ class NodeTree {
     _fontNotifications?.removeListener(_fontsChanged);
     _afterFonts.clear();
     for (final b in _boxes.values.toList()) {
-      b._unsubscribe();
+      if (identical(_boxes[b.key], b)) release(b);
     }
     _boxes.clear();
+    _orphans.clear();
+    _states.clear();
     islands.dispose();
   }
 }
@@ -419,6 +421,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   List<RenderBox> _chain = const [];
   final Map<String, RenderBox> _objects = {};
+  final Set<RenderBox> _retiredObjects = {};
+  bool _released = false;
   _Container? _container;
 
   bool _hidden = false;
@@ -605,6 +609,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final existing = _objects[key];
     if (existing is T) return existing;
     final made = create();
+    if (existing != null) _retiredObjects.add(existing);
     _objects[key] = made;
     return made;
   }
@@ -1591,6 +1596,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         if (next.contains(e.key)) ...[...e.value.$1, ...e.value.$2],
     };
     _stackExtras.removeWhere((stack, _) => !next.contains(stack));
+    final retired = {..._retiredObjects, for (final o in _objects.values) if (!keep.contains(o)) o};
+    _retiredObjects.clear();
+    _disposeObjects(retired);
     _objects.removeWhere((k, v) => !keep.contains(v));
     _chain = next;
     _innerChains.removeWhere((stack, _) => !next.contains(stack));
@@ -1671,6 +1679,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   }
 
   void _releaseSubtree() {
+    if (_released) return;
+    _released = true;
     final c = _container;
     if (c != null) {
       var child = c.firstChild;
@@ -1688,6 +1698,39 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     _islands.clear();
     if (identical(tree._boxes[key], this)) tree._boxes.remove(key);
+    child = null;
+    _disposeObjects({..._objects.values, ..._retiredObjects});
+    _objects.clear();
+    _retiredObjects.clear();
+    _chain = const [];
+    _innerChains.clear();
+    _stackExtras.clear();
+    _container = null;
+    super.dispose();
+  }
+
+  // These objects were constructed by recipes, without RenderObjectElements.
+  // Dropping Dart references alone does not release their layers, paragraph
+  // caches, image listeners or animation controllers.
+  void _disposeObjects(Set<RenderBox> objects) {
+    for (final o in objects) {
+      _detachFromAnyParent(o);
+      if (o is _Container) {
+        final container = o as _Container;
+        var c = container.firstChild;
+        while (c != null) {
+          final next = container.childAfter(c);
+          container.remove(c);
+          if (c is NodeBox) tree.orphan(c);
+          c = next;
+        }
+      } else if (o is RenderObjectWithChildMixin<RenderBox>) {
+        (o as RenderObjectWithChildMixin<RenderBox>).child = null;
+      }
+    }
+    for (final o in objects) {
+      o.dispose();
+    }
   }
 }
 
