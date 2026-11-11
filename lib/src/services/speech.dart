@@ -247,6 +247,9 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
     final watch = Stopwatch()..start();
     var phraseStart = Duration.zero;
     var running = false;
+    // Reading silently, each word is shown at its own time (below), not by
+    // the clock: a late tick of the clock jumped words, never shown.
+    var stepping = false;
     var from = first, to = first;
 
     void show(int word) {
@@ -262,7 +265,7 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
     }
 
     _clock = Timer.periodic(const Duration(milliseconds: 16), (_) {
-      if (id != _utterance || !running) return;
+      if (id != _utterance || !running || stepping) return;
       final syl = (watch.elapsed - phraseStart).inMilliseconds * rate / msPerSyllable;
       final word = timing.wordAt(from, to, syl);
       // The highlight only moves forward within a phrase.
@@ -285,10 +288,21 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
 
         Future<bool> readSilently() async {
           start();
-          final ms = timing.span(from, to) * msPerSyllable / rate;
-          await Future<void>.delayed(Duration(milliseconds: ms.round()));
+          stepping = true;
+          Future<void> until(double syllables) async {
+            final wait = syllables * msPerSyllable / rate - (watch.elapsed - phraseStart).inMilliseconds;
+            if (wait > 0) await Future<void>.delayed(Duration(milliseconds: wait.round()));
+          }
+
+          for (var i = from + 1; i <= to; i++) {
+            await until(timing.before(from, i));
+            if (id != _utterance) return false;
+            show(i);
+          }
+          await until(timing.span(from, to));
           if (id != _utterance) return false;
           show(to);
+          stepping = false;
           running = false;
           await Future<void>.delayed(const Duration(milliseconds: ReadAlongTiming.phrasePauseMs));
           return true;
