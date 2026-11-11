@@ -577,6 +577,57 @@ void main() {
     expect(tester.getSize(find.byKey(const ValueKey('dialog newCard'))).width, 120);
   });
 
+  testWidgets('a popover in a scaled app (an editor\'s run preview) opens right under its trigger', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 80),
+    );
+    final doc = LayoutDocument.fromJson({
+      'roots': ['col'],
+      'nodes': counter(actions: [
+        reaction('click', [
+          {'type': 'openModal', 'to': 'menu', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'belowEnd', 'anchorGap': 6},
+        ]),
+      ]),
+    });
+    final scope = VariableScope([v('count', 0, VariableType.integer)]);
+    final values = NodeValues(DocumentSource(doc));
+    final tree = NodeTree(values, binder: NodeBinder(scope: scope));
+    final context = RuntimeActionContext(scope: scope, ui: ui, tree: tree, nodeValues: values, services: Services());
+    final reactions = TreeReactions(runner: const CodelesslyActions(), context: context);
+    tree.interactions = reactions;
+    addTearDown(() {
+      reactions.dispose();
+      tree.dispose();
+    });
+    await tester.pumpWidget(Align(
+      alignment: Alignment.topLeft,
+      child: SizedBox(
+        width: 400,
+        height: 300,
+        child: Transform.scale(
+          scale: 0.5,
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 800,
+            height: 600,
+            child: MaterialApp(home: Scaffold(body: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'col', interactive: true)))),
+          ),
+        ),
+      ),
+    ));
+    appContext = tester.element(find.byType(NodeView));
+    final box = tree.boxOf('button')!;
+    final rect = MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // Its end under the trigger's end, 6 (3 on screen) below it.
+    final menu = tester.getRect(find.byKey(const ValueKey('menu')));
+    expect(menu.right, closeTo(rect.right, 0.5));
+    expect(menu.top, closeTo(rect.bottom + 3, 0.5));
+  });
+
   testWidgets('a popover flips above when there is no room below and stays on screen', (tester) async {
     final layout = PopoverLayout(anchor: const Rect.fromLTWH(700, 560, 80, 30), placement: api.PopoverPlacement.belowStart);
     // 600 tall: 200 doesn't fit below 594, so above; 800 wide keeps it in.
