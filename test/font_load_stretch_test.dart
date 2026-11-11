@@ -37,6 +37,11 @@ void main() {
     final text = tree.boxOf('t')!.size.width;
     expect(tree.boxOf('nav')!.size.width, closeTo(text, 0.5));
     expect(tree.boxOf('bar')!.size.width, closeTo(text, 0.5));
+    // An explicit remeasure (the editor's, when its fonts load) keeps
+    // everything consistent.
+    tree.remeasure();
+    await tester.pump();
+    expect(tree.boxOf('nav')!.size.width, closeTo(tree.boxOf('t')!.size.width, 0.5));
     tree.dispose();
     scope.dispose();
   });
