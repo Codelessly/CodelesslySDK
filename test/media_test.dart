@@ -86,6 +86,21 @@ void main() {
     expect(IconSources.urlOf({'source': 'image', 'image': 'https://x.com/a.png'}), 'https://x.com/a.png');
   });
 
+  test("a Material icon named with Flutter's style suffix is served under its base name", () {
+    String? url(String name, [String? style]) =>
+        IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': name, 'style': ?style});
+    expect(url('download_rounded', 'rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/download/'));
+    expect(url('check_circle_outline_rounded', 'rounded'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsround/check_circle_outline/'));
+    expect(url('theater_comedy_outlined', 'outlined'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsoutlined/theater_comedy/'));
+    // With no style set, the suffix names it.
+    expect(url('playlist_add_rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/playlist_add/'));
+    expect(url('memory_sharp'), startsWith('https://fonts.gstatic.com/s/i/materialiconssharp/memory/'));
+    // Names that only contain the words are untouched.
+    expect(url('outlined_flag'), startsWith('https://fonts.gstatic.com/s/i/materialicons/outlined_flag/'));
+  });
+
   test('SVG paths parse, trim and dash', () {
     expect(parseSvgPath(''), isNull);
     expect(parseSvgPath('M0 0 L'), isNull);
