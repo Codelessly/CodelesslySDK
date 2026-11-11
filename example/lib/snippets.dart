@@ -853,7 +853,7 @@ Codelessly ownPurchases() => Codelessly(
 /// project's automations show their layouts above any screen, and a
 /// screenshot action can capture the whole app.
 Widget appWithOverlay(Codelessly codelessly) => MaterialApp(
-      builder: (context, child) => CodelesslyOverlay(codelessly: codelessly, child: child!),
+      builder: (context, child) => CodelesslyPresenterHost(codelessly: codelessly, child: child!),
       home: const Scaffold(body: Center(child: Text('Your app'))),
     );
 

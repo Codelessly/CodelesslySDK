@@ -145,7 +145,7 @@ void main() {
     );
     final heard = <AppEvent>[];
     c.events.listen(heard.add);
-    await tester.pumpWidget(overlayApp(c, home: CodelesslyWidget(codelessly: c, layoutId: 'home')));
+    await tester.pumpWidget(hostApp(c, home: CodelesslyWidget(codelessly: c, layoutId: 'home')));
     await settle(tester);
     await tester.tapAt(const Offset(200, 100));
     await settle(tester);
@@ -256,7 +256,7 @@ void main() {
     );
     final controller = CodelesslyWidgetController(layoutId: 'home');
     addTearDown(controller.dispose);
-    await tester.pumpWidget(overlayApp(c, home: CodelesslyWidget(codelessly: c, controller: controller)));
+    await tester.pumpWidget(hostApp(c, home: CodelesslyWidget(codelessly: c, controller: controller)));
     await settle(tester);
     expect(calls, isEmpty);
     controller.layoutId = 'settings';

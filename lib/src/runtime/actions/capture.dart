@@ -38,7 +38,7 @@ abstract final class CaptureRegistry {
 
 /// Wraps the host app (or any part of it) so that a `captureScreenshot`
 /// action with `target: app` captures it, including what isn't a Codelessly
-/// layout. `CodelesslyOverlay` adds one.
+/// layout. `CodelesslyPresenterHost` adds one.
 class CodelesslyCaptureScope extends StatefulWidget {
   const CodelesslyCaptureScope({super.key, required this.child});
 

@@ -7,21 +7,22 @@ how they reach the user without your code placing a `CodelesslyWidget` on the cu
 (`codelessly.present`), the project's **automations** (app-level triggers designed in the Editor), **app
 events**, your app's **functions** that a layout calls and branches on, and **screen capture**.
 
-## The overlay
+## The presenter host
 
-Put a `CodelesslyOverlay` around your app, as `MaterialApp.builder` (or around the home screen):
+Put a `CodelesslyPresenterHost` around your app, as `MaterialApp.builder` (or around the home screen):
 
 ```dart
 MaterialApp(
-  builder: (context, child) => CodelesslyOverlay(codelessly: codelessly, child: child!),
+  builder: (context, child) => CodelesslyPresenterHost(codelessly: codelessly, child: child!),
   home: const Scaffold(body: Center(child: Text('Your app'))),
 );
 ```
 
-It leads the presenter to your app's root `Navigator` (pass `navigatorKey` when the overlay sits elsewhere),
+It leads the presenter to your app's root `Navigator` (pass `navigatorKey` when the host sits elsewhere),
 starts the project's automations (`automations: false` to leave them off), and wraps the app in a
 `CodelesslyCaptureScope` so a screenshot can capture the whole app (`capture: false` to leave it out).
-`onNavigate` and `onActionError` apply to the presented layouts.
+`onNavigate` and `onActionError` apply to the presented layouts. (It is not the project's overlay screens, the
+layouts drawn above every screen, which `CodelesslyWidget` adds through `CodelesslyOverlayHost` by itself.)
 
 ## Presenting a layout
 
@@ -46,9 +47,9 @@ what closed it: the result of the layout's `closeModal` action (`{"type": "close
 | `priority` | Presentations show one at a time: higher priority first, then in the order asked |
 | `bottom` | A banner along the bottom edge instead of the top |
 | `modal` | Every other `openModal` option (barrier color and blur, drag handle, insets, a route transition) |
-| `context` | Show on that context's root navigator without waiting for an overlay |
+| `context` | Show on that context's root navigator without waiting for a presenter host |
 
-A presentation asked for before an overlay is mounted waits for one. `codelessly.presenter.isPresenting`,
+A presentation asked for before a presenter host is mounted waits for one. `codelessly.presenter.isPresenting`,
 `.waiting` and `.dismissAll()` read and clear the queue. A presented layout is not the app's screen:
 `codelessly.route` keeps naming yours.
 
@@ -87,7 +88,7 @@ and the actions it runs (most often an `openModal`, which the presenter shows in
 
 | Trigger | When |
 |---|---|
-| `appStart` | Once per run, when the automations start (the overlay mounts, or `codelessly.automations.start()`) |
+| `appStart` | Once per run, when the automations start (the presenter host mounts, or `codelessly.automations.start()`) |
 | `sessionStart` | At start, when a user signs in for the first time in the run, and on a return after `codelessly.automations.sessionTimeout` (30 minutes) in the background |
 | `resume` | The app came back to the foreground (`${result.awayMs}`) |
 | `event` | App event `event` was fired (`${result}` is its props) |
@@ -139,7 +140,7 @@ chain, so a layout can ship before every app version wires the feature.
 ```
 
 `captureScreenshot` captures the screen the action runs on (`layout`), one of its nodes (`node`, with `node`),
-or the whole app inside a `CodelesslyCaptureScope` (`app`; the overlay adds one). `${result.image}` is a PNG
+or the whole app inside a `CodelesslyCaptureScope` (`app`; the presenter host adds one). `${result.image}` is a PNG
 `data:` URL (`width` and `height` in pixels; `pixelRatio` 0 is the device's). Bind it to an image fill to show
 it, and upload it with `cloudFiles`:
 

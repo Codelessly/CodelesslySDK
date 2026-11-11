@@ -23,7 +23,7 @@ const String kUsageStorageKey = 'codelessly.usage';
 /// Runs a [Codelessly]'s automations ([Codelessly.automations]) and carries
 /// its app events.
 ///
-/// [start] (called by a `CodelesslyOverlay`, or by the app) loads the
+/// [start] (called by a `CodelesslyPresenterHost`, or by the app) loads the
 /// project, counts the launch and the session for the current user, and runs
 /// the `appStart` and `sessionStart` automations; from then on it follows
 /// the app's lifecycle (`resume`, a new session after [sessionTimeout] in

@@ -1,5 +1,5 @@
 // Presenting layouts above the host app from anywhere (Codelessly.present,
-// CodelesslyOverlay): the presentations, their results, queueing by
+// CodelesslyPresenterHost): the presentations, their results, queueing by
 // priority, banners, and what a presented layout reports.
 import 'dart:async';
 
@@ -37,7 +37,7 @@ void main() {
         {'type': 'closeModal', 'result': {'stars': '5', 'orders': r'${orders}'}},
       ]),
     ]);
-    await tester.pumpWidget(overlayApp(codelessly));
+    await tester.pumpWidget(hostApp(codelessly));
     final answer = codelessly.present('rate', params: {'orders': 3});
     await settle(tester);
     expect(find.byType(CodelesslyWidget), findsOneWidget);
@@ -58,7 +58,7 @@ void main() {
   testWidgets('a dismissed presentation gives null; an unknown screen gives null without throwing', (tester) async {
     setSize(tester);
     codelessly = app([screen('promo')]);
-    await tester.pumpWidget(overlayApp(codelessly));
+    await tester.pumpWidget(hostApp(codelessly));
     final dismissed = codelessly.present('promo');
     await settle(tester);
     await tester.tapAt(const Offset(10, 10)); // the barrier
@@ -78,7 +78,7 @@ void main() {
           {'type': 'closeModal', 'result': {'id': id}},
         ]),
     ]);
-    await tester.pumpWidget(overlayApp(codelessly));
+    await tester.pumpWidget(hostApp(codelessly));
     final results = [
       codelessly.present('a'),
       codelessly.present('b'),
@@ -97,14 +97,14 @@ void main() {
     expect([for (final r in results) ((await r) as Map)['id']], ['a', 'b', 'c', 'd']);
   });
 
-  testWidgets('waits for an overlay, then shows on the app navigator (MaterialApp.builder)', (tester) async {
+  testWidgets('waits for a presenter host, then shows on the app navigator (MaterialApp.builder)', (tester) async {
     setSize(tester);
     codelessly = app([screen('later')]);
     final pending = codelessly.present('later');
     await tester.pumpWidget(const SizedBox());
     await settle(tester);
     expect(codelessly.presenter.waiting, 1);
-    await tester.pumpWidget(overlayApp(codelessly));
+    await tester.pumpWidget(hostApp(codelessly));
     await settle(tester);
     expect(find.byType(CodelesslyWidget), findsOneWidget);
     expect(codelessly.presenter.isPresenting, isTrue);
@@ -123,7 +123,7 @@ void main() {
         {'type': 'closeModal', 'result': {'opened': true}},
       ]),
     ]);
-    await tester.pumpWidget(overlayApp(codelessly, home: GestureDetector(
+    await tester.pumpWidget(hostApp(codelessly, home: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => hostTaps++,
       child: const SizedBox.expand(),
@@ -157,7 +157,7 @@ void main() {
         {'type': 'closeModal', 'result': {'done': true}},
       ]),
     ]);
-    await tester.pumpWidget(overlayApp(codelessly));
+    await tester.pumpWidget(hostApp(codelessly));
     final done = codelessly.present('welcome', presentation: ModalPresentation.fullScreen);
     await settle(tester);
     expect(tester.getSize(find.byType(CodelesslyWidget)), const Size(400, 800));
@@ -170,7 +170,7 @@ void main() {
     setSize(tester);
     final anchor = GlobalKey();
     codelessly = app([screen('tip', width: 160, height: 60)]);
-    await tester.pumpWidget(overlayApp(codelessly,
+    await tester.pumpWidget(hostApp(codelessly,
         home: Align(alignment: Alignment.topLeft, child: SizedBox(key: anchor, width: 100, height: 40))));
     unawaited(codelessly.present('tip', presentation: ModalPresentation.popover, anchorKey: anchor,
         placement: PopoverPlacement.belowStart));
@@ -184,7 +184,7 @@ void main() {
   testWidgets('a sheet rises above the keyboard', (tester) async {
     setSize(tester);
     codelessly = app([screen('composer', width: 400, height: 120)]);
-    await tester.pumpWidget(overlayApp(codelessly));
+    await tester.pumpWidget(hostApp(codelessly));
     unawaited(codelessly.present('composer', presentation: ModalPresentation.bottomSheet));
     await settle(tester);
     expect(tester.getRect(find.byType(CodelesslyWidget)).bottom, 800);

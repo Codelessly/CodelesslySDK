@@ -2,7 +2,7 @@
 // (and the openModal actions of automations, which have no screen of their
 // own) shows a published layout as a dialog, sheet, full screen, popover or
 // banner, one at a time in priority order, on the app's Navigator, found
-// through a CodelesslyOverlay the host puts around its app.
+// through a CodelesslyPresenterHost the host puts around its app.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -23,7 +23,7 @@ import 'viewport.dart';
 ///
 /// Presentations show one at a time: a [present] while another shows waits
 /// its turn, higher [present]'s `priority` first, then in the order asked.
-/// They show on the app's root [Navigator], which a [CodelesslyOverlay]
+/// They show on the app's root [Navigator], which a [CodelesslyPresenterHost]
 /// around the app (or a `context` given to [present]) leads to; until one is
 /// there, they wait.
 class CodelesslyPresenter {
@@ -31,7 +31,7 @@ class CodelesslyPresenter {
 
   final Codelessly codelessly;
 
-  final List<_CodelesslyOverlayState> _hosts = [];
+  final List<_CodelesslyPresenterHostState> _hosts = [];
   final List<_Pending> _queue = [];
   _Pending? _current;
   int _seq = 0;
@@ -42,7 +42,7 @@ class CodelesslyPresenter {
   /// How many presentations wait for their turn.
   int get waiting => _queue.length;
 
-  /// The app's root navigator, through the innermost [CodelesslyOverlay]
+  /// The app's root navigator, through the innermost [CodelesslyPresenterHost]
   /// shown; null when there is none (yet). A host function can show its own
   /// UI on it (a share sheet, a permission explanation).
   NavigatorState? get navigator {
@@ -66,7 +66,7 @@ class CodelesslyPresenter {
   /// shows at the top, or at the bottom with [bottom]. [modal] gives every
   /// other option of an `openModal` action (its `to` and `presentation` are
   /// replaced by these). [context] shows it on that context's root
-  /// navigator, without waiting for a [CodelesslyOverlay].
+  /// navigator, without waiting for a [CodelesslyPresenterHost].
   Future<Object?> present(
     String layoutId, {
     ModalPresentation presentation = ModalPresentation.dialog,
@@ -132,12 +132,12 @@ class CodelesslyPresenter {
     _current?.dismiss?.call();
   }
 
-  void _attach(_CodelesslyOverlayState host) {
+  void _attach(_CodelesslyPresenterHostState host) {
     _hosts.add(host);
     _pump();
   }
 
-  void _detach(_CodelesslyOverlayState host) => _hosts.remove(host);
+  void _detach(_CodelesslyPresenterHostState host) => _hosts.remove(host);
 
   void _pump() {
     if (_current != null || _queue.isEmpty) return;
@@ -386,7 +386,7 @@ class _PresenterUi extends NavigatorActionUi {
 ///
 /// ```dart
 /// MaterialApp(
-///   builder: (context, child) => CodelesslyOverlay(codelessly: codelessly, child: child!),
+///   builder: (context, child) => CodelesslyPresenterHost(codelessly: codelessly, child: child!),
 ///   home: const HomeScreen(),
 /// );
 /// ```
@@ -394,8 +394,8 @@ class _PresenterUi extends NavigatorActionUi {
 /// It also starts the project's automations ([Codelessly.automations]) and,
 /// with [capture], wraps [child] in a [CodelesslyCaptureScope] so a
 /// `captureScreenshot` action with `target: app` captures the whole app.
-class CodelesslyOverlay extends StatefulWidget {
-  const CodelesslyOverlay({
+class CodelesslyPresenterHost extends StatefulWidget {
+  const CodelesslyPresenterHost({
     super.key,
     this.codelessly,
     this.navigatorKey,
@@ -410,7 +410,7 @@ class CodelesslyOverlay extends StatefulWidget {
   /// [Codelessly.instance].
   final Codelessly? codelessly;
 
-  /// The app's navigator, when the overlay is neither below it nor right
+  /// The app's navigator, when the host is neither below it nor right
   /// above it (as `MaterialApp.builder` is).
   final GlobalKey<NavigatorState>? navigatorKey;
 
@@ -429,10 +429,10 @@ class CodelesslyOverlay extends StatefulWidget {
   final Widget child;
 
   @override
-  State<CodelesslyOverlay> createState() => _CodelesslyOverlayState();
+  State<CodelesslyPresenterHost> createState() => _CodelesslyPresenterHostState();
 }
 
-class _CodelesslyOverlayState extends State<CodelesslyOverlay> {
+class _CodelesslyPresenterHostState extends State<CodelesslyPresenterHost> {
   Codelessly? _codelessly;
 
   @override
@@ -442,7 +442,7 @@ class _CodelesslyOverlayState extends State<CodelesslyOverlay> {
   }
 
   @override
-  void didUpdateWidget(CodelesslyOverlay oldWidget) {
+  void didUpdateWidget(CodelesslyPresenterHost oldWidget) {
     super.didUpdateWidget(oldWidget);
     _resolve();
   }

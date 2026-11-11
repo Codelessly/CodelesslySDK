@@ -250,11 +250,11 @@ class Codelessly extends ChangeNotifier {
   late final CodelesslyPaywalls paywall = CodelesslyPaywalls(this);
 
   /// Shows its layouts above the host app, one at a time
-  /// ([CodelesslyPresenter.present]); a `CodelesslyOverlay` around the app
+  /// ([CodelesslyPresenter.present]); a `CodelesslyPresenterHost` around the app
   /// leads it to the app's navigator.
   late final CodelesslyPresenter presenter = CodelesslyPresenter(this);
 
-  /// Its automations and app events: started by a `CodelesslyOverlay` (or
+  /// Its automations and app events: started by a `CodelesslyPresenterHost` (or
   /// [CodelesslyAutomations.start]).
   late final CodelesslyAutomations automations = CodelesslyAutomations(this, _usage);
 
