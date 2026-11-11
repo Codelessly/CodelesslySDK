@@ -22,8 +22,8 @@ class NodeView extends RenderObjectWidget {
   IslandOwnerElement createElement() => IslandOwnerElement(this);
 
   void _configure(BuildContext context) {
-    final visibility = TickerMode.getNotifier(context);
-    tree.runtimeVisibility = () => visibility.value;
+    final visibility = TickerMode.getValuesNotifier(context);
+    tree.runtimeVisibility = () => visibility.value.enabled;
     final env = tree.islands.environment;
     if (env.interactive != interactive) {
       tree.islands.environment = IslandEnvironment(interactive: interactive, wrap: env.wrap);
