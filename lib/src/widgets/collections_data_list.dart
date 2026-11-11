@@ -769,7 +769,8 @@ class DataListViewState extends State<DataListView> {
     if (sections != null && (_node.sections?.indexBar ?? false)) {
       list = Stack(
         children: [
-          Positioned.fill(child: Scrollbar(controller: scrollController, interactive: true, child: list)),
+          // The index is the list's scroll control: no scrollbar under it.
+          Positioned.fill(child: list),
           Positioned(
             top: 0,
             bottom: 0,
