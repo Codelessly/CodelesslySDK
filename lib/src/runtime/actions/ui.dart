@@ -202,10 +202,14 @@ class NavigatorActionUi implements ActionUi {
     if (content == null) return null;
     // Preserve inherited localizations and themes across both modal routes.
     final inherited = InheritedTheme.captureAll(c, Localizations.override(context: c, child: content));
-    final modalContent = Padding(
-      padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
-      child: inherited,
-    );
+    // Insets keep space around a dialog; a bottom sheet sits on the screen's
+    // edge (an adaptive modal used both ways keeps its sheet flush).
+    final modalContent = sheet
+        ? inherited
+        : Padding(
+            padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
+            child: inherited,
+          );
     final pointer = RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero;
     final anchor = switch (action.anchor) {
       api.ModalAnchor.trigger => RevealAnchor.lastTrigger,
