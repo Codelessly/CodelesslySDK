@@ -202,12 +202,12 @@ Layouts then read `${data.auth.isSignedIn}`, `${data.auth.email}`, `${data.auth.
   `${...}` in it is text.
 - Values are read loosely where a property needs a type: `"12"` is a number, `"#F00F00"` a color.
 - Time: `now()`, `today()`, `formatDate(date, 'MMM d')`, `diffMinutes`, `diffDays`, `addDays`, `isBefore`,
-  `isAfter`, `isToday`, `isSameDay`, and `timeAgo(date, style?, locale?, labels?)` for relative times: `now`,
+  `isAfter`, `isPast`, `isFuture`, `isToday`, `isSameDay`, and `timeAgo(date, style?, locale?, labels?)` for relative times: `now`,
   `5m`, `3h`, `Yesterday`, `3d`, then `Mar 4` (`5 minutes ago` with the `long` style; dates in the locale's words;
   `labels` gives the words in another language). Dates can be ISO text, epoch milliseconds or Firestore
   timestamps.
 - What reads the clock stays current, as often as it can change and no more: a formula with `now()` every
-  second, one with only `today()`, `timeAgo` or `isToday` every minute, `nowMs()` every frame. That holds through
+  second, one with only `today()`, `timeAgo`, `isToday`, `isPast` or `isFuture` every minute, `nowMs()` every frame. That holds through
   your own functions too: a binding `${= ago(item.sentAt)}`, where `ago` is a function variable calling
   `timeAgo`, updates every minute. No timer runs while nothing on screen reads the clock. In tests, pin the time
   with `FormulaClock.pinned` and step it with `FormulaClock.minutes.tick()` (or pump past

@@ -120,9 +120,9 @@ abstract interface class FormulaReadStatus {
 ///    diffSeconds and formatDuration; timeAgo(date, style?, locale?,
 ///    labels?) (alias formatRelative) for relative times (`5m`, `3h`,
 ///    `Yesterday`, `Mar 4`; `5 minutes ago` in the long style), isToday,
-///    isSameDay, isBefore and isAfter. A formula using now() rebuilds every
-///    second while shown; one using today(), timeAgo or isToday (and no
-///    now()) every minute, and nowMs() every frame ([ClockTick]). So does
+///    isPast, isFuture, isSameDay, isBefore and isAfter. A formula using
+///    now() rebuilds every second while shown; one using today(), timeAgo,
+///    isToday, isPast or isFuture (and no now()) every minute, and nowMs() every frame ([ClockTick]). So does
 ///    a formula calling a function variable or computed variable that does. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
@@ -252,7 +252,7 @@ class FormulaEvaluator {
   }
 
   /// The functions that read the clock: [clockTick] and [readsClock].
-  static final RegExp _clockCall = RegExp(r'\b(now|today|timeAgo|formatRelative|isToday)\s*\(');
+  static final RegExp _clockCall = RegExp(r'\b(now|today|timeAgo|formatRelative|isToday|isPast|isFuture)\s*\(');
   static final RegExp _secondClockCall = RegExp(r'\bnow\s*\(');
 
   /// Whether [expression] reads the millisecond clock (`nowMs()`), so its
@@ -1031,6 +1031,16 @@ class FormulaEvaluator {
       'isToday',
       'isToday(date)',
       'isToday(sentAt) → true',
+    ),
+    FormulaFunctionDoc(
+      'isPast',
+      'isPast(date)',
+      'isPast(expiresAt) → true once it has passed (checked every minute)',
+    ),
+    FormulaFunctionDoc(
+      'isFuture',
+      'isFuture(date)',
+      'isFuture(startsAt) → true until it comes (checked every minute)',
     ),
     FormulaFunctionDoc(
       'isSameDay',
@@ -3199,6 +3209,8 @@ final Map<String, _Function> _functions = {
   'formatRelative': (a) => _timeAgo(_arg(a, 0), _arg(a, 1), _arg(a, 2), _arg(a, 3)),
   'isToday': (a) => _sameDay(_arg(a, 0), FormulaClock.now()),
   'isSameDay': (a) => _sameDay(_arg(a, 0), _arg(a, 1)),
+  'isPast': (a) => _dateOrder(_arg(a, 0), FormulaClock.now(), before: true),
+  'isFuture': (a) => _dateOrder(_arg(a, 0), FormulaClock.now(), before: false),
   'isBefore': (a) => _dateOrder(_arg(a, 0), _arg(a, 1), before: true),
   'isAfter': (a) => _dateOrder(_arg(a, 0), _arg(a, 1), before: false),
   'diffHours': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inHours,

@@ -23,13 +23,14 @@
 - Relative times in formulas: `timeAgo(date, style?, locale?, labels?)` (alias `formatRelative`): `now`, `5m`,
   `3h`, `Yesterday`, `3d`, then `Mar 4` / `Mar 4, 2025` (`long`: `5 minutes ago`, `March 4`); dates to come read
   `in 5m`, `Tomorrow`; dates in the locale's words and digits, other words from `labels` (text or plural forms).
-  Also `isToday`, `isSameDay`, `isBefore`, `isAfter`.
-- Clocks tick only as often as a value can change: `now()` every second, `today()`, `timeAgo` and `isToday`
-  every minute (`FormulaClock.minutes`, `ClockTick`), `nowMs()` every frame again (`FrameClock`); bindings and
-  conditions that call a function or computed variable reading the clock now tick too (they didn't).
+  Also `isToday`, `isPast`, `isFuture`, `isSameDay`, `isBefore`, `isAfter`.
+- Clocks tick only as often as a value can change: `now()` every second; `today()`, `timeAgo`, `isToday`,
+  `isPast` and `isFuture` every minute (`FormulaClock.minutes`, `ClockTick`); `nowMs()` every frame again
+  (`FrameClock`). Bindings and conditions that call a function or computed variable reading the clock now tick
+  too (they didn't).
   `FormulaClock.tick()` steps a clock by hand (tests, editors).
 - `${theme.*}`: the project's theme for the current mode, live: role colors (`theme.surface`), every color style
-  (`theme.colors.brandBlue`), text style values (`theme.text.title.fontSize`), `theme.isDark`, `theme.brightness`.
+  (`theme.colors.brandBlue`), text style values (`theme.text.title.fontSize`), `theme.isDark`, `theme.brightness`, `theme.hasDark`.
   Dark values of color styles (`ThemeTokens.dark`) apply in dark mode, and a theme with dark values gives a dark
   Material theme in dark mode. The mode is the device's, or with `useHostTheme` the app's theme's.
   `themeValues(tokens, dark:)`.

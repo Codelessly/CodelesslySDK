@@ -51,6 +51,7 @@ Layouts read the project's theme at run time as `theme`, for the current light o
 | `theme.text.<key>.<value>` | Every text style's values: `theme.text.title.fontSize`, `theme.text.body.fontFamily` |
 | `theme.fontFamily`, `theme.titleFontFamily`, `theme.radius`, `theme.buttonRadius` | The other tokens |
 | `theme.isDark`, `theme.brightness` | The mode the colors are for |
+| `theme.hasDark` | Whether the project's styles have dark values (without, dark mode reads the light ones) |
 
 A node whose color is bound to one (`${theme.surface}`, `${theme.colors.brandBlue}`) follows the theme: a new
 publish of the project's styles, and the device switching between light and dark, update it live. A role or
