@@ -92,4 +92,22 @@ void main() {
     expect(shown, containsAll(['Col 0', 'Col 4', 'R0', 'R1', 'r0c0', 'r1c3']));
     expect(shown, isNot(contains('r999c0')));
   });
+
+  testWidgets('at rest a table that fills its height builds the rows it has room for', (tester) async {
+    final t = table();
+    t['table'] = {...t['table']!, 'layout': {'width': 600, 'height': {'fill': 1}}};
+    await show(tester, {
+      'root': {'type': 'column', 'children': ['table'], 'layout': {'width': 600, 'height': 400},
+               'props': {'crossAxisAlignment': 'stretch'}},
+      ...t,
+    }, root: 'root', variables: [rows], interactive: false);
+    final shown = <String>{};
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.attached) shown.add(o.text.toPlainText());
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(NodeView)));
+    expect(shown, containsAll(['Col 0', 'R0', 'r0c0', 'r5c0']));
+  });
 }
