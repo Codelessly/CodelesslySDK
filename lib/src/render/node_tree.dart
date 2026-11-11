@@ -645,6 +645,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return false;
+    // A chain rebuilt after this frame's layout (a font arriving in a
+    // post-frame callback) hasn't been laid out yet, and the mouse tracker
+    // hit tests after frames: there's nothing drawn to hit. (Hit testing it
+    // threw in debug builds, inside the mouse tracker, which then refused
+    // every later pointer event.)
+    final c = child;
+    if (c != null && !c.hasSize) return false;
     // A dragged node is hit where it is drawn, outside its layout box.
     if (child case final RenderDragMotion drag) {
       if (!drag.hitTest(result, position: position)) return false;
