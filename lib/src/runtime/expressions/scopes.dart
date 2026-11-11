@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 
 import '../contracts.dart';
 import 'formula.dart';
+import 'formula_clock.dart';
 import 'paths.dart';
 
 /// A scope that declares its names: the nearest scope declaring a path's
@@ -81,7 +82,11 @@ Object? readPath(ValueScope? scope, String path) {
 
 /// What tells [scope]'s readers that [name] changed: the declaring scope's
 /// watcher and foreign computed dependencies, a scope that doesn't declare
-/// its names itself, or null when no scope declares it.
+/// its names itself, or null when no scope declares it. A computed or
+/// function variable that reads the clock (`now()`, `timeAgo(t)`, directly
+/// or through the variables it reads) also brings that clock
+/// ([FormulaClock.of]), so a binding calling `ago(t)` ticks like one
+/// calling `timeAgo(t)`.
 Listenable? watchName(ValueScope? scope, String name) {
   if (scope == null) return null;
   final watches = <Listenable>{};
@@ -95,6 +100,7 @@ Listenable? watchName(ValueScope? scope, String name) {
         if (!s.declares(name)) continue;
         watches.add(s.watch(name));
         if (s is VariableScope) {
+          if (s.clockOf(name) case final ClockTick tick) watches.add(FormulaClock.of(tick));
           for (final foreign in s.foreignReads(name)) {
             collect(foreign);
           }
@@ -144,6 +150,11 @@ class VariableScope extends NamedScope {
   final Map<String, Variable> _defs = {};
   final Map<String, Object?> _values = {};
 
+  /// Bumps whenever a value or definition changes in any variable scope:
+  /// a computed value that reads only variable scopes (this one and the
+  /// ones around it) is cached against it.
+  static int _globalVersion = 0;
+
   /// Computed variable → the names its formula reads.
   final Map<String, Set<String>> _reads = {};
 
@@ -167,6 +178,7 @@ class VariableScope extends NamedScope {
     _indexDependents();
     _cache.clear();
     _version++;
+    _globalVersion++;
     changed([v.name, ...?_dependents[v.name]]);
   }
 
@@ -179,6 +191,7 @@ class VariableScope extends NamedScope {
     _indexDependents();
     _cache.clear();
     _version++;
+    _globalVersion++;
     changed([name, ...?dependents]);
     return true;
   }
@@ -195,6 +208,7 @@ class VariableScope extends NamedScope {
     if (_same(_values[name], next)) return false;
     _values[name] = next;
     _version++;
+    _globalVersion++;
     changed([name, ...?_dependents[name]]);
     return true;
   }
@@ -225,6 +239,10 @@ class VariableScope extends NamedScope {
   final Map<String, (int, Object?)> _cache = {};
   final Set<String> _computing = {};
 
+  /// Each computed variable's last value worked out with every script it
+  /// calls answered.
+  final Map<String, Object?> _lastValue = {};
+
   Object? _computed(Variable v, ValueScope reader) {
     // A formula reading only this scope's variables gives the same value
     // whoever reads it: worked out once per change. One reading the clock
@@ -234,15 +252,71 @@ class VariableScope extends NamedScope {
       final cached = _cache[v.name];
       if (cached != null && cached.$1 == _version) return cached.$2;
     }
+    // One that also reads the variable scopes around this one (app data, a
+    // page's state) gives the same value to every reader too: worked out
+    // once per change anywhere in the variable scopes.
+    final shared = !local && _readsOnlyVariableScopes(v.name);
+    if (shared) {
+      final cached = _sharedCache[v.name];
+      if (cached != null && cached.$1 == _globalVersion) return cached.$2;
+    }
     if (!_computing.add(v.name)) return null;
     try {
-      final value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local ? this : reader, p));
+      // A script the formula calls with new arguments (the clock's next
+      // minute) answers from a worker later, so the formula reads null for a
+      // frame or two: keep the last value meanwhile instead of blinking
+      // everything that reads it.
+      final status = readPath(reader, 'script');
+      final pendingBefore = status is FormulaReadStatus ? status.pendingReads : 0;
+      var value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local || shared ? this : reader, p));
+      if (value == null && status is FormulaReadStatus && status.pendingReads > pendingBefore) {
+        value = _lastValue[v.name];
+      } else {
+        _lastValue[v.name] = value;
+      }
       // Only a top-level read: one inside a cycle saw a partial value.
       if (local && _computing.length == 1) _cache[v.name] = (_version, value);
+      if (shared && _computing.length == 1) _sharedCache[v.name] = (_globalVersion, value);
       return value;
     } finally {
       _computing.remove(v.name);
     }
+  }
+
+  final Map<String, (int, Object?)> _sharedCache = {};
+
+  @visibleForTesting
+  Iterable<String> get debugSharedCacheKeys => _sharedCache.keys;
+
+  /// Whether [name] (a computed variable) reads only variables declared by
+  /// this scope or variable scopes around it, and no clock: then whoever
+  /// reads it (an item, a nested scope) gets the same value.
+  bool _readsOnlyVariableScopes(String name) {
+    if (_readsClock(name, {})) return false;
+    for (final foreign in foreignReads(name)) {
+      ValueScope? s = parent;
+      var found = false;
+      while (s != null) {
+        if (s is NamedScope && s.declares(foreign)) {
+          // A computed one there must itself depend on variables only.
+          found = s is VariableScope &&
+              (!(s._defs[foreign]?.isComputed ?? false) ||
+                  (!s._readsClock(foreign, {}) &&
+                      (s._isLocal(foreign, {}) || s._readsOnlyVariableScopes(foreign))));
+          break;
+        }
+        s = s.parent;
+      }
+      if (!found) return false;
+    }
+    return true;
+  }
+
+  bool _readsClock(String name, Set<String> seen) {
+    final v = _defs[name];
+    if (v == null || !v.isComputed || !seen.add(name)) return false;
+    if (FormulaEvaluator.readsClock(v.formula) || FormulaEvaluator.readsFrameClock(v.formula)) return true;
+    return (_reads[name] ?? const {}).any((r) => _readsClock(r, seen));
   }
 
   bool _isLocal(String name, Set<String> seen) {
@@ -250,11 +324,32 @@ class VariableScope extends NamedScope {
     if (v == null) return false;
     if (!v.isComputed) return true;
     if (!seen.add(name)) return true;
-    if (FormulaEvaluator.readsClock(v.formula) || FormulaEvaluator.readsFrameClock(v.formula)) return false;
+    if (FormulaEvaluator.clockTick(v.formula) != null) return false;
     return (_reads[name] ?? const {}).every((r) => _isLocal(r, seen));
   }
 
+  /// How often computed or function variable [name]'s value changes as
+  /// time passes, through the variables of this scope it reads (those of
+  /// other scopes answer for themselves, [foreignReads]); null when it
+  /// doesn't read the clock.
+  ClockTick? clockOf(String name) => _clocks.putIfAbsent(name, () {
+        ClockTick? out;
+        final seen = <String>{};
+        final stack = [name];
+        while (stack.isNotEmpty) {
+          final n = stack.removeLast();
+          final v = _defs[n];
+          if (v == null || !v.isComputed || !seen.add(n)) continue;
+          out = FormulaEvaluator.clockTick(v.formula)?.finer(out) ?? out;
+          stack.addAll(_reads[n] ?? const <String>{});
+        }
+        return out;
+      });
+
+  final Map<String, ClockTick?> _clocks = {};
+
   void _indexDependents() {
+    _clocks.clear();
     _reads.clear();
     _dependents.clear();
     for (final v in _defs.values) {
@@ -429,13 +524,18 @@ class ItemScope extends NamedScope {
 
   /// Moves to [item] at [index] (the data changed).
   void update({required int index, Object? item, bool deferNotifications = false}) {
+    // Most items of a big list (a board of cells) are numbers or text that
+    // didn't change: compare those directly, without the deep equality.
+    final sameItem = identical(item, _item) ||
+        ((item is num || item is String || item is bool) && item == _item) ||
+        (item is! num && item is! String && item is! bool && const DeepCollectionEquality().equals(item, _item));
+    if (sameItem && index == _index) return;
     final names = <String>[
-      if (!const DeepCollectionEquality().equals(item, _item)) 'item',
+      if (!sameItem) 'item',
       if (index != _index) 'index',
     ];
     _index = index;
     _item = item;
-    if (names.isEmpty) return;
     if (!deferNotifications) {
       changed(names);
       return;
@@ -465,7 +565,8 @@ class ItemScope extends NamedScope {
 }
 
 /// The value of the `screen` name for a screen [width] × [height]
-/// (DESIGN.md §5.3): its size, orientation and brightness, and its
+/// (DESIGN.md §5.3): its size, orientation and brightness (`isDark`, also
+/// read as `dark`; `brightness`), and its
 /// breakpoint among the project's [breakpoints] (default:
 /// [Breakpoints.defaults]):
 ///
@@ -516,6 +617,8 @@ Map<String, Object?> screenValues(double width, double height,
     'isLandscape': !portrait,
     'brightness': dark ? 'dark' : 'light',
     'isDark': dark,
+    // What some guides and tools called it.
+    'dark': dark,
   };
 }
 

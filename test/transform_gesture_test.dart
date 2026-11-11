@@ -441,6 +441,81 @@ void main() {
     expect(scope.read('px'), 0);
   });
 
+  testWidgets('control drag zoom scales about the viewport middle; pose springs to a given pose', (tester) async {
+    final doc = LayoutDocument.fromJson({
+      'roots': ['board'],
+      'nodes': {
+        'board': {
+          'type': 'stack',
+          'children': ['p', 'zoomIn', 'fit'],
+          'layout': {'width': 400, 'height': 400},
+        },
+        'p': {
+          'type': 'box',
+          'transformGesture': {'bounds': 'none', 'minScale': 0.3, 'xVariable': 'px', 'scaleVariable': 'ps'},
+          'layout': {'width': 200, 'height': 200, 'x': {'start': 100}, 'y': {'start': 100}},
+        },
+        'zoomIn': {
+          'type': 'box',
+          'layout': {'width': 40, 'height': 40},
+          'actions': [
+            {
+              'trigger': {'type': 'click'},
+              'actions': [
+                {'type': 'controlDrag', 'node': 'p', 'command': 'zoom', 'value': '2'},
+              ],
+            },
+          ],
+        },
+        'fit': {
+          'type': 'box',
+          'layout': {'width': 40, 'height': 40, 'x': {'start': 0}, 'y': {'start': 360}},
+          'actions': [
+            {
+              'trigger': {'type': 'click'},
+              'actions': [
+                {'type': 'controlDrag', 'node': 'p', 'command': 'pose', 'value': r'${= {x: target, scale: 0.5}}'},
+              ],
+            },
+          ],
+        },
+      },
+    });
+    final scope = VariableScope([v('px', 0), v('ps', 1), v('target', -30)]);
+    final values = NodeValues(DocumentSource(doc));
+    final tree = NodeTree(values, binder: NodeBinder(scope: scope));
+    final reactions = TreeReactions(
+      runner: const CodelesslyActions(),
+      context: RuntimeActionContext(scope: scope, tree: tree, nodeValues: values),
+    );
+    tree.interactions = reactions;
+    addTearDown(() {
+      reactions.dispose();
+      tree.dispose();
+    });
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: NodeView(tree: tree, rootId: 'board', interactive: true),
+        ),
+      ),
+    );
+    final b = Board(tree, scope);
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pumpAndSettle();
+    // Twice the size, about the middle of the board (its viewport): still centred.
+    expect(b.pose.scale, closeTo(2, 0.01));
+    expect(b.pose.x, closeTo(0, 0.05));
+    expect(scope.read('ps'), 2);
+    // The pose from the action's value, even after panning away from any binding.
+    await tester.tapAt(const Offset(20, 380));
+    await tester.pumpAndSettle();
+    expect(b.pose.scale, closeTo(0.5, 0.01));
+    expect(b.pose.x, closeTo(-30, 0.05));
+    expect(scope.read('px'), -30);
+  });
+
   testWidgets('the design canvas has no gesture', (tester) async {
     final doc = LayoutDocument.fromJson({
       'roots': ['p'],

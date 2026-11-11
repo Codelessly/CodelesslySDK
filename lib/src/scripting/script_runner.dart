@@ -9,6 +9,7 @@ import 'package:codelessly_api/codelessly_api.dart' show Json, ScriptCapability,
 
 import '../services/scripts.dart';
 import 'sandbox/script_sandbox.dart';
+import 'script_reach.dart';
 
 /// Runs [ScriptDef]s in the platform's [ScriptSandbox] ([sandbox], or
 /// [ScriptSandbox.instance]). Without an engine (no `codelessly_quickjs` in
@@ -49,6 +50,18 @@ class SandboxScriptRunner implements ScriptRunner {
   }) {
     final grants = script.capabilities.toSet();
     final readsVariables = grants.contains(ScriptCapability.variablesRead) || grants.contains(ScriptCapability.variablesWrite);
+    // Only what the run can reach (ScriptReach): the scripts it names and,
+    // across them, the variables they name.
+    final others = callable(script, scripts);
+    final reach = ScriptReach.of(script, others);
+    Map<String, Object?> varsFor(ScriptHost host) {
+      final names = reach.variables;
+      if (names == null) return host.variables();
+      if (host is NamedVariablesScriptHost) return host.variablesNamed(names);
+      final all = host.variables();
+      return {for (final n in names) if (all.containsKey(n)) n: all[n]};
+    }
+
     return {
       'run': 'r${++_runCount}',
       'source': script.source,
@@ -57,12 +70,13 @@ class SandboxScriptRunner implements ScriptRunner {
         for (final ScriptParam p in script.params) p.name: args.containsKey(p.name) ? args[p.name] : p.defaultValue,
       },
       'grants': [for (final c in script.capabilities) c.id],
-      if (readsVariables && host != null) 'vars': jsonData(host.variables()),
+      if (readsVariables && host != null) 'vars': jsonData(varsFor(host)),
       if (grants.contains(ScriptCapability.nodesRead) && host != null) 'nodes': jsonData(host.nodeValues()),
       'seed': seed ?? _seedOf(script, args),
       if (grants.contains(ScriptCapability.clock)) 'now': (now ?? DateTime.now()).millisecondsSinceEpoch,
       'scripts': {
-        for (final s in callable(script, scripts).values) s.name: {'source': s.source, 'paramNames': s.paramNames},
+        for (final s in others.values)
+          if (reach.scripts?.contains(s.name) ?? true) s.name: {'source': s.source, 'paramNames': s.paramNames},
       },
     };
   }
@@ -374,7 +388,7 @@ String? scriptTestFailure(ScriptTest t, ScriptRunResult run) {
   final expectError = t.expectError;
   if (expectError != null) {
     if (run.ok) return 'Expected a $expectError, but it returned ${_compared(run.value)}.';
-    if (run.error!['type'] != expectError) {
+    if (!expectedError(expectError, run.error!)) {
       return 'Expected a $expectError, but it failed with ${run.error!['type']}: ${run.error!['message']}';
     }
     return null;
@@ -385,6 +399,16 @@ String? scriptTestFailure(ScriptTest t, ScriptRunResult run) {
   }
   if (_compared(run.value) != _compared(t.expect)) return 'Expected ${_compared(t.expect)}, got ${_compared(run.value)}.';
   return null;
+}
+
+/// Whether a run's [error] is the one a test's `expectError` names: its
+/// type (`RangeError`), its message (`Pick a template`), or both as
+/// `Type: message` (`Error: Pick a template`). A validation script throws
+/// plain `Error`s, so only the message tells its failures apart.
+bool expectedError(String expected, Map<String, Object?> error) {
+  final type = '${error['type'] ?? ''}', message = '${error['message'] ?? ''}';
+  final want = expected.trim();
+  return want == type || want == message || want == '$type: $message';
 }
 
 String _compared(Object? v) => jsonEncode(_sorted(v));
