@@ -571,7 +571,28 @@ class _ServiceValuesScope extends ValuesScope {
         s.analytics.logError(error, stackTrace: stack, type: 'auth_scope');
       },
     );
-    s.paywalls?.entitlements.addListener(_entitlementsChanged);
+    _runtime = s.paywalls;
+    _runtime?.entitlements.addListener(_entitlementsChanged);
+    s.paywallsChanged.addListener(_paywallsChanged);
+    _entitlementsChanged();
+  }
+
+  /// The paywalls whose entitlements this follows: the app's, or the test
+  /// store's while it's on ([Services.usesTestStore]).
+  PaywallRuntime? _runtime;
+
+  /// The paywalls switched between the test store and the app's: follow
+  /// the new one's entitlements, scoped to the current account.
+  void _paywallsChanged() {
+    final s = _services;
+    if (_disposed || s == null || identical(s.paywalls, _runtime)) return;
+    _runtime?.entitlements.removeListener(_entitlementsChanged);
+    _runtime = s.paywalls;
+    _runtime?.entitlements.addListener(_entitlementsChanged);
+    if (_accountInitialized) {
+      _accountInitialized = false;
+      _scopeAccount(_uid);
+    }
     _entitlementsChanged();
   }
 
@@ -617,7 +638,7 @@ class _ServiceValuesScope extends ValuesScope {
 
   void _entitlementsChanged() {
     if (!_disposed) {
-      set('entitlements', {for (final e in _services?.paywalls?.entitlements.value ?? <String>{}) e: true});
+      set('entitlements', {for (final e in _runtime?.entitlements.value ?? <String>{}) e: true});
     }
   }
 
@@ -625,7 +646,8 @@ class _ServiceValuesScope extends ValuesScope {
   void dispose() {
     _disposed = true;
     _auth?.cancel();
-    _services?.paywalls?.entitlements.removeListener(_entitlementsChanged);
+    _runtime?.entitlements.removeListener(_entitlementsChanged);
+    _services?.paywallsChanged.removeListener(_paywallsChanged);
     super.dispose();
   }
 }
