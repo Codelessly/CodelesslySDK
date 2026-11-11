@@ -1003,7 +1003,15 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     dnd.start(session);
     _fire(api.TriggerType.dragStart.name, session.toMap());
     drag.showFeedback();
-    drag._moved();
+    // Starting re-applies what reads the drag (a column dimmed while its
+    // grip drags it adds a layer): look for targets once that is laid out,
+    // not in the stale tree, whose hit test would throw and drop the
+    // gesture.
+    drag._placeFeedback();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!drag._finished) drag._moved();
+    }, debugLabel: 'drag start targets');
+    SchedulerBinding.instance.ensureVisualUpdate();
     return drag;
   }
 
