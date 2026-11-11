@@ -85,8 +85,8 @@ class FormulaClock extends ChangeNotifier {
   @visibleForTesting
   bool get isListened => hasListeners;
 
-  /// Ticks now, as the timer would: tests move [pinned] and call it.
-  @visibleForTesting
+  /// Ticks now, as the timer would: tests and editors move [pinned] and
+  /// call it.
   void tick() => notifyListeners();
 }
 

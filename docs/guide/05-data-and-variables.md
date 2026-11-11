@@ -19,11 +19,12 @@ names a layout can read, and which of them your app controls.
 | `<app variable>` | A variable shared by every screen | Declared in the Editor; changed by actions |
 | `storage.<key>` | Values the app keeps on the device | "Set storage" actions |
 | `screen.*` | Size, breakpoint, orientation, brightness | The SDK ([chapter 8](08-conditions-and-breakpoints.md)) |
+| `theme.*` | The project's theme for the current light or dark mode: colors, text styles, `isDark` | The project's styles; the SDK picks the mode ([chapter 11](11-theming-and-fonts.md#the-theme-in-expressions)) |
 | `item`, `index`, `parent` | The current list item | Lists |
 | `result` | What the previous action of a chain gave | Actions ([chapter 6](06-actions-and-functions.md)) |
 
-A name is looked up from the inside out: the list item, then the screen's variables, then `route`, `data` and
-`screen`, then the app's variables, then `storage`.
+A name is looked up from the inside out: the list item, then the screen's variables, then `route`, `data`,
+`screen` and `theme`, then the app's variables, then `storage`.
 
 ## Passing data in
 
@@ -138,6 +139,29 @@ Variables are declared in the Editor and published with the layout.
 
 Types: `integer`, `decimal`, `text`, `boolean`, `color`, `list`, `map`, `image`, `choice`.
 
+### Values every screen shares
+
+An app variable is one value for the whole `Codelessly` instance: every screen of every `CodelesslyWidget` showing
+the project reads it, and a change on one screen shows on all of them, even on host screens of your own app (a
+badge in your tab bar and a list on another tab are two widgets of one instance).
+
+To keep live cloud data in one, give the layout's "Load cloud data" action the **app** scope
+(`"scope": "app"`): the first load opens one live subscription, kept by the instance; every later load of the
+same document or query, from any screen, shares it instead of opening another, and it stays live when the screen
+that opened it goes. Declare its variable as an app variable (a screen variable of the same name would hide
+it). See [chapter 9](09-cloud-data-and-services.md#live-data-every-screen-shares).
+
+```dart
+// Two widgets of one instance: the badge and the list read the same `cards`,
+// loaded once.
+Widget sharedLiveData(Codelessly codelessly) => Scaffold(
+      appBar: AppBar(actions: [
+        SizedBox(width: 56, height: 56, child: CodelesslyWidget(codelessly: codelessly, layoutId: 'badge')),
+      ]),
+      body: CodelesslyWidget(codelessly: codelessly, layoutId: 'list'),
+    );
+```
+
 ### Keeping values between runs
 
 Persisted variables and `storage.<key>` live in `Services.storage`. **The default is in memory**, so they reset
@@ -177,6 +201,17 @@ Layouts then read `${data.auth.isSignedIn}`, `${data.auth.email}`, `${data.auth.
 - A binding that is exactly one expression keeps the value's type (a list stays a list). Any other text with
   `${...}` in it is text.
 - Values are read loosely where a property needs a type: `"12"` is a number, `"#F00F00"` a color.
+- Time: `now()`, `today()`, `formatDate(date, 'MMM d')`, `diffMinutes`, `diffDays`, `addDays`, `isBefore`,
+  `isAfter`, `isToday`, `isSameDay`, and `timeAgo(date, style?, locale?, labels?)` for relative times: `now`,
+  `5m`, `3h`, `Yesterday`, `3d`, then `Mar 4` (`5 minutes ago` with the `long` style; dates in the locale's words;
+  `labels` gives the words in another language). Dates can be ISO text, epoch milliseconds or Firestore
+  timestamps.
+- What reads the clock stays current, as often as it can change and no more: a formula with `now()` every
+  second, one with only `today()`, `timeAgo` or `isToday` every minute, `nowMs()` every frame. That holds through
+  your own functions too: a binding `${= ago(item.sentAt)}`, where `ago` is a function variable calling
+  `timeAgo`, updates every minute. No timer runs while nothing on screen reads the clock. In tests, pin the time
+  with `FormulaClock.pinned` and step it with `FormulaClock.minutes.tick()` (or pump past
+  `FormulaClock.minuteInterval`).
 
 To show layouts exactly as designed, without evaluating anything, use `NoopExpressionEngine`
 ([chapter 6](06-actions-and-functions.md#turning-the-runtime-down)).
