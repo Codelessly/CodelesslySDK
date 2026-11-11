@@ -27,6 +27,7 @@ import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
+import 'app_data_sources.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
 import 'runner.dart';
@@ -480,6 +481,10 @@ Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
   final scope = run.context.scope;
   final variable = a.variable.trim();
   if (variable.isEmpty) return;
+  final host = run.host;
+  if (a.scope == CloudDataScope.app && host is RuntimeActionContext && host.appData != null) {
+    return _loadAppCloudData(a, run, db, host.appData!, variable);
+  }
   void put(String status, {Object? data, Object? error}) => setVariableIn(scope, variable, {
         'status': status,
         'isLoading': status == 'loading',
@@ -548,6 +553,50 @@ Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
     removeCancellation();
   }
 }
+
+/// [a] with `scope: app`: the app's one subscription to its source, shared
+/// by every screen that loads the same ([AppDataSources]). Waits for the
+/// first value; the subscription outlives the screen.
+Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDatabase db, AppDataSources sources, String variable) async {
+  final path = resolveCollectionPath(a.query, run.expressions, run.scope);
+  final id = a.single ? run.text(a.id).trim() : '';
+  final query = a.single ? null : resolveCloudQuery(a.query, run.expressions, run.scope);
+  final key = [
+    a.single ? 'document' : 'query',
+    path,
+    id,
+    if (query != null) _cloudQueryKey(query),
+    ...a.query.loadRelated,
+  ].join('\u0000');
+  final loaded = sources.load(
+    variable,
+    key,
+    () => query == null ? db.watchDocument(path, id) : db.watchQuery(path, query, loadRelated: a.query.loadRelated),
+  );
+  // Stopping this run stops waiting, not the app's subscription.
+  final waiting = Completer<void>();
+  loaded.then((_) {
+    if (!waiting.isCompleted) waiting.complete();
+  }, onError: (Object error, StackTrace stack) {
+    if (!waiting.isCompleted) waiting.completeError(error, stack);
+  });
+  final removeCancellation = run.onCancel(() {
+    if (!waiting.isCompleted) waiting.completeError(const ActionsCanceled());
+  });
+  try {
+    await waiting.future;
+  } finally {
+    removeCancellation();
+  }
+}
+
+/// [q] as text: the same query gives the same text.
+String _cloudQueryKey(CloudQuery q) => [
+      for (final f in q.filters) '${f.field} ${f.operator.name} ${jsonEncode(f.value, toEncodable: (v) => '$v')}',
+      for (final o in q.orderBy) '${o.field} ${o.descending ? 'desc' : 'asc'}',
+      'limit ${q.limit}',
+      'after ${q.startAfter}',
+    ].join(';');
 
 // --- auth -----------------------------------------------------------------------------
 
