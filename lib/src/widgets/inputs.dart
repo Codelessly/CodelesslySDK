@@ -569,7 +569,8 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
             final double? height = vFit == SizeFit.fixed
                 ? n.layout.height.value
                 : (constraints.hasBoundedHeight ? constraints.maxHeight : null);
-            return field(height == null ? decoration : decoration.copyWith(constraints: BoxConstraints.tightFor(height: height)));
+            if (height == null) return field(decoration);
+            return field(fillHeight(context, decoration, style, height));
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
@@ -601,6 +602,33 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
 
 /// A [LayoutBuilder] that reports a zero intrinsic size instead of throwing,
 /// so a field built with it can sit under intrinsic measurement.
+/// [decoration] for a one-line field [height] tall: that height as its
+/// constraints, and its content padded to it, since a decorator's border
+/// box is only as tall as its content (at least 48), not as its box.
+InputDecoration fillHeight(BuildContext context, InputDecoration decoration, TextStyle? style, double height) {
+  final theme = Theme.of(context);
+  final textScaler = MediaQuery.maybeTextScalerOf(context) ?? TextScaler.noScaling;
+  double lineOf(TextStyle? s) {
+    final painter = TextPainter(
+      text: TextSpan(text: ' ', style: theme.textTheme.bodyLarge?.merge(style) ?? style),
+      textDirection: TextDirection.ltr,
+      textScaler: textScaler,
+    )..layout();
+    final h = painter.preferredLineHeight;
+    painter.dispose();
+    return h;
+  }
+
+  final line = math.max(lineOf(style), decoration.hintText == null ? 0.0 : lineOf(style?.merge(decoration.hintStyle) ?? decoration.hintStyle));
+  final padding = (decoration.contentPadding ?? EdgeInsets.zero).resolve(TextDirection.ltr);
+  final content = padding.vertical + line + theme.visualDensity.baseSizeAdjustment.dy;
+  final extra = math.max(0.0, height - content) / 2;
+  return decoration.copyWith(
+    constraints: BoxConstraints.tightFor(height: height),
+    contentPadding: extra <= 0 ? null : padding.copyWith(top: padding.top + extra, bottom: padding.bottom + extra),
+  );
+}
+
 class IntrinsicSafeLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const IntrinsicSafeLayoutBuilder({super.key, required super.builder});
 

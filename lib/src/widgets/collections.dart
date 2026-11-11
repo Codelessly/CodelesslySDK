@@ -159,7 +159,8 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   }
   // A sectioned list shows its section headers and index bar on the design
   // canvas too (its items come from its data, as when it runs).
-  if ((b.tree.animates || (n.sectioned && ListRuntime(b, n).data != null)) && usesDataList(n)) {
+  if ((b.tree.animates || (n.sectioned && n.bind.containsKey('data') && ListRuntime(b, n).data != null)) &&
+      usesDataList(n)) {
     return _dataList(b, n, chain, itemId, item);
   }
   if (b.tree.animates) {
