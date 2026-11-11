@@ -380,20 +380,32 @@ class RadialGaugePainter extends NodePainter {
           ),
           textDirection: TextDirection.ltr,
         )..layout();
-        final position = at(math.max(0, radius - stroke / 2 - 27), start + sweep * _fraction(label));
+        final angle = start + sweep * _fraction(label);
+        final inset = p(RadialGaugeProps.labelInset);
+        final position = at(math.max(0, inset == null ? radius - stroke / 2 - 27 : radius - inset), angle);
         painter.paint(canvas, position - Offset(painter.width / 2, painter.height / 2));
         painter.dispose();
+        if (p(RadialGaugeProps.labelTicks)) {
+          canvas.drawLine(
+            at(radius + stroke / 2 + 2, angle),
+            at(radius + stroke / 2 + 6, angle),
+            Paint()
+              ..color = p(RadialGaugeProps.tickColor).flutter
+              ..strokeWidth = 1,
+          );
+        }
       }
     }
 
     if (p(RadialGaugeProps.showTarget)) {
       final angle = start + sweep * _fraction(p(RadialGaugeProps.target));
+      final across = p(RadialGaugeProps.targetAcross);
       canvas.drawLine(
-        at(radius + stroke / 2 + 2, angle),
-        at(radius + stroke / 2 + 11, angle),
+        at(across ? radius - stroke / 2 - 4 : radius + stroke / 2 + 2, angle),
+        at(across ? radius + stroke / 2 + 4 : radius + stroke / 2 + 11, angle),
         Paint()
           ..color = p(RadialGaugeProps.targetColor).flutter
-          ..strokeWidth = 3,
+          ..strokeWidth = across ? 2.5 : 3,
       );
     }
     if (p(RadialGaugeProps.showNeedle)) {

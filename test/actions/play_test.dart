@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/particles.dart' show RenderParticles;
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -321,5 +322,46 @@ void main() {
     expect(mid.center.dx, inExclusiveRange(80, 280));
     await tester.pumpAndSettle();
     expect(s.rectOf(tester, 'b').topLeft, const Offset(38, 318));
+  });
+
+  testWidgets('a burst of particles keeps going when hovering its card re-parents it', (tester) async {
+    final s = Screen({
+      'card': {
+        'type': 'stack',
+        'children': ['p'],
+        'layout': at(0, 0, 300, 300),
+        // Hovered, the card lifts: a motion layer its box didn't have.
+        'states': {
+          'hovered': {'card': {'motion': {'translateX': -2, 'translateY': -2, 'duration': 180}}},
+        },
+      },
+      'p': {
+        'type': 'box',
+        'layout': at(0, 0, 300, 300),
+        'particles': {'count': 20, 'lifetime': 2000, 'speed': 400, 'gravity': 0, 'playOnAppear': true},
+      },
+    });
+    await s.pump(tester);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    RenderParticles particles() {
+      RenderParticles? found;
+      void visit(RenderObject o) {
+        if (o is RenderParticles) found = o;
+        o.visitChildren(visit);
+      }
+      visit(s.tree.boxOf('p')!);
+      return found!;
+    }
+    expect(particles().activeBursts, 1);
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(150, 150));
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    // Still flying, not wiped by the re-parenting.
+    expect(particles().activeBursts, 1);
+    await tester.pump(const Duration(seconds: 3));
+    expect(particles().activeBursts, 0);
   });
 }

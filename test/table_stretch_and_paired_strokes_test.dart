@@ -109,4 +109,44 @@ void main() {
     expect(red(0, 20), greaterThan(200), reason: 'no left rule');
     expect(red(99, 20), greaterThan(200), reason: 'no right rule');
   });
+
+  for (final (sides, top, right, bottom, left) in const [
+    ('bottomRight', false, true, true, false),
+    ('noTop', false, true, true, true),
+  ]) {
+    testWidgets('$sides strokes exactly its sides', (tester) async {
+      final doc = {
+        'roots': ['b'],
+        'nodes': {
+          'b': {
+            'type': 'box',
+            'layout': {'width': 100, 'height': 40},
+            'decoration': {
+              'fills': [{'color': '#FFFFFFFF'}],
+              'strokes': [{'color': '#FF000000'}],
+              'strokeWidth': 2,
+              'strokeSides': sides,
+            },
+          },
+        },
+      };
+      final tree = NodeTree(NodeValues(DocumentSource(LayoutDocument.fromJson(doc))));
+      addTearDown(tree.dispose);
+      await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft,
+          child: RepaintBoundary(key: const ValueKey('r'), child: NodeView(tree: tree, rootId: 'b', interactive: false)))));
+      await tester.pump();
+      late ByteData bytes;
+      late int w;
+      await tester.runAsync(() async {
+        final image = await tester.renderObject<RenderRepaintBoundary>(find.byKey(const ValueKey('r'))).toImage();
+        w = image.width;
+        bytes = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+      });
+      bool dark(int x, int y) => bytes.getUint8((y * w + x) * 4) < 60;
+      expect(dark(50, 0), top, reason: 'top');
+      expect(dark(99, 20), right, reason: 'right');
+      expect(dark(50, 39), bottom, reason: 'bottom');
+      expect(dark(0, 20), left, reason: 'left');
+    });
+  }
 }

@@ -331,7 +331,8 @@ class ChartSeriesPainter extends NodePainter {
           final start = p(ChartProps.yLabelAlign) == ChartYLabelAlign.start;
           _label(
             canvas,
-            yAxisLabel(v, p(ChartProps.yLabelPrefix), p(ChartProps.yLabelSuffix)),
+            gridLabelText(v, k, gridLines, p(ChartProps.yLabelPrefix), p(ChartProps.yLabelSuffix),
+                topOnly: p(ChartProps.yLabelAffixTopOnly)),
             Offset(start ? 0 : plot.left - 8, gy),
             align: start ? TextAlign.left : TextAlign.right,
             style: yFamily == null ? null : _labelStyle(yFamily),
@@ -821,7 +822,9 @@ class PlotChartPainter extends NodePainter {
     final span = xMax - xMin;
     // A gutter on the left holds the y lines' axis labels.
     final gutter = math.max(0.0, p(PlotChartProps.yAxisWidth));
-    double x(double value) => gutter + (span == 0 ? 0 : (value - xMin) / span * (size.width - gutter));
+    final plotPadding = p(PlotChartProps.plotPadding);
+    final plotRight = size.width - (plotPadding?.right ?? 0);
+    double x(double value) => gutter + (span == 0 ? 0 : (value - xMin) / span * (plotRight - gutter));
     final points = this.points;
     final series = p(PlotChartProps.series);
     var low = p(PlotChartProps.yMin) ?? _extent(points, series, math.min) ?? 0;
@@ -831,7 +834,8 @@ class PlotChartPainter extends NodePainter {
       high += 1;
     }
     final inset = p(PlotChartProps.plotInset);
-    double y(double value) => inset + (1 - (value - low) / (high - low)) * (chartHeight - inset * 2);
+    final plotTop = plotPadding?.top ?? inset, plotBottom = chartHeight - (plotPadding?.bottom ?? inset);
+    double y(double value) => plotTop + (1 - (value - low) / (high - low)) * (plotBottom - plotTop);
     final labelStyle = _style(p(PlotChartProps.labelStyle));
     final zeroAnchored = p(PlotChartProps.gridAnchor) == PlotChartGridAnchor.zero;
 
@@ -923,11 +927,13 @@ class PlotChartPainter extends NodePainter {
     }
 
     for (final range in p(PlotChartProps.ranges)) {
-      canvas.drawRect(Rect.fromLTRB(x(range.from), 0, x(range.to), chartHeight), Paint()..color = range.color.flutter);
+      // A set plot padding bounds the range to the plot; otherwise it fills the chart.
+      final rangeTop = plotPadding == null ? 0.0 : plotTop, rangeBottom = plotPadding == null ? chartHeight : plotBottom;
+      canvas.drawRect(Rect.fromLTRB(x(range.from), rangeTop, x(range.to), rangeBottom), Paint()..color = range.color.flutter);
       if (range.label.isNotEmpty) {
         final text = _text(range.label,
             _style(p(PlotChartProps.markerLabelStyle), color: range.labelColor?.flutter ?? labelStyle.color, weight: 800));
-        text.paint(canvas, Offset(x(range.from) + 5, 4));
+        text.paint(canvas, Offset(x(range.from) + 5, rangeTop + 4));
         text.dispose();
       }
     }
@@ -940,11 +946,11 @@ class PlotChartPainter extends NodePainter {
         ..color = line.color.flutter
         ..strokeWidth = line.width;
       if (line.dashed) {
-        for (double dx = gutter; dx < size.width; dx += 10) {
-          canvas.drawLine(Offset(dx, ly), Offset(math.min(size.width, dx + 6), ly), paint);
+        for (double dx = gutter; dx < plotRight; dx += 10) {
+          canvas.drawLine(Offset(dx, ly), Offset(math.min(plotRight, dx + 6), ly), paint);
         }
       } else {
-        canvas.drawLine(Offset(gutter, ly), Offset(size.width, ly), paint);
+        canvas.drawLine(Offset(gutter, ly), Offset(plotRight, ly), paint);
       }
       if (line.axisLabel.isNotEmpty && gutter > 0) {
         final text = _text(line.axisLabel, labelStyle);
@@ -1148,7 +1154,9 @@ class PlotChartPainter extends NodePainter {
       if (marker.label.isEmpty) continue;
       final color = marker.color.flutter;
       final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
-      final dx = (dot.dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
+      // Centred on the marker, kept over the plot (clear of the y-axis
+      // gutter's labels).
+      final dx = (dot.dx - text.width / 2).clamp(gutter, math.max(gutter, size.width - text.width)).toDouble();
       final dy = switch (marker.position) {
         PlotChartMarkerPosition.above => dot.dy - r - (markerStyle.fontSize ?? 10) * 1.3,
         PlotChartMarkerPosition.below => dot.dy + r + 1.5,
@@ -1362,6 +1370,11 @@ class PlotChartPainter extends NodePainter {
 /// Paints a line chart: bands, grid lines with labels, the curve and the
 /// area under it, area bands, reference lines, the x axis, markers and
 /// vertical lines. Its data and overlays are rows (usually bound).
+/// The y label of grid line [k] of [lines] (0 at the bottom): [v] with the
+/// prefix and suffix, on the top line only when [topOnly].
+String gridLabelText(double v, int k, int lines, String prefix, String suffix, {bool topOnly = false}) =>
+    topOnly && k != lines ? yAxisLabel(v, '', '') : yAxisLabel(v, prefix, suffix);
+
 class LineChartPainter extends NodePainter {
   LineChartPainter(super.n) : super(repaint: PaintingBinding.instance.systemFonts);
 

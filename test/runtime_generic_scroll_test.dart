@@ -172,6 +172,8 @@ void main() {
     final semantics = SemanticsConfiguration();
     v.describeSemanticsConfiguration(semantics);
     expect(semantics.hasImplicitScrolling, true);
+    // Its texts and controls are their own nodes, not merged into one label.
+    expect(semantics.explicitChildNodes, true);
     expect(semantics.scrollExtentMin, 0);
     expect(semantics.scrollExtentMax, 200);
     expect(semantics.onScrollDown, isNull);
