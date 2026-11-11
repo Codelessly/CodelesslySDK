@@ -1326,8 +1326,11 @@ class StrokePathPainter extends CustomPainter {
     if (points.isEmpty) return out;
     var prev = at(points.first);
     out.moveTo(prev.dx, prev.dy);
+    // untilWidth: no segment that starts past the box's width.
+    bool past(Offset from) => path.untilWidth && from.dx > size.width;
     if (path.curve == api.PathCurve.quadratic) {
       for (var i = 1; i < points.length; i += 2) {
+        if (past(prev)) break;
         final control = at(points[i]);
         if (i + 1 >= points.length) {
           out.lineTo(control.dx, control.dy);
@@ -1335,10 +1338,12 @@ class StrokePathPainter extends CustomPainter {
         }
         final end = at(points[i + 1]);
         out.quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
+        prev = end;
       }
       return out;
     }
     for (final p in points.skip(1)) {
+      if (past(prev)) break;
       final next = at(p);
       switch (path.curve) {
         case api.PathCurve.straight:
