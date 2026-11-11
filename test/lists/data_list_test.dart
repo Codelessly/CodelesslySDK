@@ -277,6 +277,31 @@ void main() {
     expect(texts(tester), ['#A 3', 'P0', 'P1', 'P2', '#B 2', 'P3', 'P4']);
   });
 
+  testWidgets('sections at rest: the design canvas shows the headers too', (tester) async {
+    await show(
+      tester,
+      screen(
+        extraList: {
+          'props': {
+            'sections': {'groupBy': 'group'},
+          },
+          'slots': {'sectionHeader': 'header'},
+        },
+        extra: {
+          'header': {
+            'type': 'text',
+            'layout': {'width': 300, 'height': 24},
+            'props': {'text': r'#${item.key} ${item.count}'},
+          },
+        },
+      ),
+      variables: [v('people', people(5), VariableType.list)],
+      interactive: false,
+    );
+    await tester.pumpAndSettle();
+    expect(texts(tester), ['#A 3', 'P0', 'P1', 'P2', '#B 2', 'P3', 'P4']);
+  });
+
   testWidgets('swipe actions: a swipe past the threshold runs the first action, with undo', (tester) async {
     final s = await show(
       tester,
