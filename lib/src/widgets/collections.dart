@@ -199,7 +199,20 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     final view = b.obtain<RenderLayeredItems>('stack', RenderLayeredItems.new)
       ..clipBehavior = _clip(n)
       ..paintReversed = reversePaint
-      ..itemConstraints = ((_) => const BoxConstraints())
+      // Unbounded, so an item may be any size, except along an axis it
+      // fills: there it takes the padded box (a layered figure whose items
+      // fill the list), not its design size.
+      ..itemConstraints = ((box) {
+        final w = math.max(0.0, box.width - padding.horizontal - (at?.dx ?? 0));
+        final h = math.max(0.0, box.height - padding.vertical - (at?.dy ?? 0));
+        final fillW = item.layout.width.fit == SizeFit.fill, fillH = item.layout.height.fit == SizeFit.fill;
+        return BoxConstraints(
+          minWidth: fillW ? w : 0,
+          maxWidth: fillW ? w : double.infinity,
+          minHeight: fillH ? h : 0,
+          maxHeight: fillH ? h : double.infinity,
+        );
+      })
       ..placeAt = ((_, _) => origin)
       ..onNeedItems = null
       ..changed();
