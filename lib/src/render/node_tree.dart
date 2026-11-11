@@ -830,7 +830,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final contentSized = _scrollsFlexiblyOnMainAxis(n);
     final hFit = isPlaceholder || (contentSized && n.isRow) ? SizeFit.hug : n.hFit;
     final vFit = isPlaceholder || (contentSized && !n.isRow) ? SizeFit.hug : n.vFit;
-    chain.add(_fitBox('shellFit', hFit, vFit, n.designSize));
+    chain.add(_fitBox('shellFit', hFit, vFit, n.designSize)
+      ..widthFactor = n.layout.widthFactor
+      ..heightFactor = n.layout.heightFactor);
 
     final d = n.decoration;
     final radius = d.radius.isZero ? null : d.radius.flutter;
@@ -1479,7 +1481,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       return at(FreeformAxisMode.start);
     }
 
-    return FreeformPlacement(horizontal: axis(true), vertical: axis(false));
+    // A share of the container on an axis (Layout.widthFactor/heightFactor).
+    FreeformAxisPlacement sized(bool horizontal) {
+      final p = axis(horizontal);
+      final f = horizontal ? n.layout.widthFactor : n.layout.heightFactor;
+      return f == null ? p : p.withSizeFactor(f, horizontal ? n.layout.margin.horizontal : n.layout.margin.vertical);
+    }
+
+    return FreeformPlacement(horizontal: sized(true), vertical: sized(false));
   }
 
   // --- children & wiring ------------------------------------------------------
