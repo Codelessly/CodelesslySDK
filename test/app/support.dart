@@ -35,7 +35,7 @@ String nodeNamed(PublishLayout layout, String canvasId, String name) =>
 PublishLayout layoutWithCanvas(PublishBundle bundle, String canvasName) =>
     bundle.layouts.values.firstWhere((l) => l.canvasIds.any((c) => l.document[c]!.name == canvasName));
 
-/// Taps the centre of node [id]'s box in [controller]'s screen.
+/// Taps the center of node [id]'s box in [controller]'s screen.
 Future<void> tapNode(WidgetTester tester, CodelesslyWidgetController controller, String id) async {
   final box = controller.tree!.boxOf(id)!;
   final content = box.contentBox ?? box;

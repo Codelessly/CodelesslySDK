@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/widgets.dart';
 
-import '../render/behaviours.dart' show motionMatrix;
+import '../render/behaviors.dart' show motionMatrix;
 import '../render/convert.dart' show clip;
 import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart';

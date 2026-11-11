@@ -94,7 +94,7 @@ breakpoint.
 
 Each canvas has a scale mode, set in the Editor:
 
-| Mode | Behaviour |
+| Mode | Behavior |
 |---|---|
 | Responsive (default) | The canvas lays out at the size it is given. Children with fill sizes stretch; fixed ones don't. |
 | Auto scale | The canvas lays out at its design width and is scaled uniformly to fit the width it is given (up to its max width, if it has one). |

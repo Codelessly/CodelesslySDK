@@ -282,7 +282,7 @@ class _Flight {
   }
 }
 
-/// The path of an arc flight: the centre travels a quadratic curve bowed to
+/// The path of an arc flight: the center travels a quadratic curve bowed to
 /// the side by 28% of the distance (like Material's arc), while the size
 /// changes evenly.
 class HeroArcRectTween extends RectTween {

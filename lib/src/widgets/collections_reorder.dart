@@ -30,7 +30,7 @@ import 'collections_list_runtime.dart';
 String? reorderHandleOf(NodeBuilder b, String id) {
   final n = b.nodeOf(id);
   if (n == null) return null;
-  if (n.behaviours.drag?.reorder ?? false) return id;
+  if (n.behaviors.drag?.reorder ?? false) return id;
   for (final c in [...n.children, ...n.slots.values]) {
     final found = reorderHandleOf(b, c);
     if (found != null) return found;
@@ -166,13 +166,13 @@ Future<bool> runListReorder(
   return true;
 }
 
-/// Writes the moved document's order field between its new neighbours'.
+/// Writes the moved document's order field between its new neighbors'.
 Future<void> _writeOrder(ListRuntime r, ListReorder model, List<Object?> items, int from, int to) async {
   final moved = moveListItem(items, from, to);
   final item = moved.elementAtOrNull(to);
   final id = item is Map ? item['id'] : null;
   if (id is! String) return;
-  num? orderOf(Object? neighbour) => neighbour is Map ? neighbour[model.orderField] as num? : null;
+  num? orderOf(Object? neighbor) => neighbor is Map ? neighbor[model.orderField] as num? : null;
   final order = orderBetween(
     to > 0 ? orderOf(moved[to - 1]) : null,
     to < moved.length - 1 ? orderOf(moved[to + 1]) : null,

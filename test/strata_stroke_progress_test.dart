@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_sdk/src/render/behaviours.dart';
+import 'package:codelessly_sdk/src/render/behaviors.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 

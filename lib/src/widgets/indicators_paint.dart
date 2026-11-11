@@ -225,7 +225,7 @@ class ProgressBarPainter extends NodePainter {
 
   /// Where the arc's circle sits in a box of [size]: the largest circle
   /// whose arc fits the box, or with [ArcFit.circle] the whole circle,
-  /// centred. [outer] is the room kept outside the circle's line.
+  /// centered. [outer] is the room kept outside the circle's line.
   ({Offset center, double radius}) arcGeometry(Size size, {required double outer}) {
     if (p(ProgressBarProps.arcFit) == ArcFit.circle) {
       return (center: size.center(Offset.zero), radius: math.max(0, size.shortestSide / 2 - outer));
@@ -242,7 +242,7 @@ class ProgressBarPainter extends NodePainter {
   }
 
   /// Bounds of an arc of a unit circle from [start] sweeping [sweep], with
-  /// the centre.
+  /// the center.
   static Rect _arcBounds(double start, double sweep) {
     final points = [Offset.zero];
     void add(double a) => points.add(Offset(math.cos(a), math.sin(a)));
@@ -745,7 +745,7 @@ class BarChartPainter extends NodePainter {
 // --- barcode --------------------------------------------------------------------
 
 /// A barcode of the node's data: square-module codes (QR, Aztec, Data
-/// Matrix) keep their aspect and are centred; PDF417 and 1D codes stretch to
+/// Matrix) keep their aspect and are centered; PDF417 and 1D codes stretch to
 /// fill the box. Data the symbology can't encode paints a placeholder.
 class BarcodePainter extends NodePainter {
   BarcodePainter(super.n);

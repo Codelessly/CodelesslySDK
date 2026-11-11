@@ -1,5 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/behaviours.dart';
+import 'package:codelessly_sdk/src/render/behaviors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 void main(){

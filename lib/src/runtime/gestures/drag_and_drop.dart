@@ -7,7 +7,7 @@
 //   the app's overlay, shows the node as a ghost, hidden or kept while it's
 //   dragged, and on a drop no target takes springs it back on its physics.
 // * [RenderDropTarget] takes drags of the groups it accepts: where the
-//   dragged node's centre is over it (`x`, `y`, `fx`, `fy`), whether it's
+//   dragged node's center is over it (`x`, `y`, `fx`, `fy`), whether it's
 //   full (`fullIf`) and takes the drop (`acceptIf`), and for a target with
 //   a list (`listNodeId`) where among the list's items the drop lands
 //   (`index`, `before`, `beforeId`); [dropSlotOf] gives a list the slot to
@@ -73,11 +73,11 @@ Size draggedSize(Size size, {Size? feedbackSize, double feedbackScale = 1}) {
 /// Whether a drop at [position] lands before the list item at [rect].
 ///
 /// Along a single line (a plain list) it lands before an item when it is
-/// above the item's centre ([Axis.vertical]) or left of it
+/// above the item's center ([Axis.vertical]) or left of it
 /// ([Axis.horizontal]). A wrapping list ([wraps]) reads like text: a
 /// horizontal one lays its items in rows, left to right, so a drop lands
 /// before an item in an earlier row, or in the item's row left of its
-/// centre; a vertical one lays them in columns, top to bottom.
+/// center; a vertical one lays them in columns, top to bottom.
 bool dropLandsBefore(Offset position, Rect rect, {required Axis axis, bool wraps = false}) {
   if (!wraps) return axis == Axis.vertical ? position.dy < rect.center.dy : position.dx < rect.center.dx;
   if (axis == Axis.horizontal) {
@@ -121,17 +121,17 @@ class DragSession {
   final Size size;
 
   /// Where the pointer holds the dragged node, from its top left: where it
-  /// was grabbed, or its centre ([api.FeedbackAnchor.center]).
+  /// was grabbed, or its center ([api.FeedbackAnchor.center]).
   Offset grab = Offset.zero;
 
   /// Where the feedback is held from its top left: [grab], or zero for a
-  /// copy centred on the pointer, which is shifted by half its own size
+  /// copy centered on the pointer, which is shifted by half its own size
   /// instead.
   Offset feedbackAnchor = Offset.zero;
 
   /// The global top left of the dragged node's box for a drag whose
-  /// feedback is at [feedbackOffset]: so its centre, where `drag.x` and
-  /// `drag.y` are measured, is the pointer for a centred copy.
+  /// feedback is at [feedbackOffset]: so its center, where `drag.x` and
+  /// `drag.y` are measured, is the pointer for a centered copy.
   Offset nodeTopLeft(Offset feedbackOffset) => feedbackOffset + feedbackAnchor - grab;
 
   /// The drop target under the pointer, or null.
@@ -151,7 +151,7 @@ class DragSession {
   /// Whether [overTarget] accepts the drop (its `acceptIf`).
   bool accepted = false;
 
-  /// Where the centre of the dragged node is over [overTarget], in logical
+  /// Where the center of the dragged node is over [overTarget], in logical
   /// pixels from the target's top left ([x], [y]) and as a share of its
   /// size, 0 to 1 ([fx], [fy]). 0 while over no target.
   double x = 0, y = 0, fx = 0, fy = 0;
@@ -297,7 +297,7 @@ class DragAndDrop extends ChangeNotifier {
 /// reacts.
 void dragAndDropLayers(NodeBox box, Node n, List<RenderBox> chain) {
   if (!box.tree.animates || box.tree.interactions == null || n.type == 'canvas') return;
-  final be = n.behaviours;
+  final be = n.behaviors;
   if (be.draggable case final api.DragSource source) {
     chain.add(box.obtain<RenderDragSource>('dragSource', RenderDragSource.new)..configure(box, n, source));
   }
@@ -941,11 +941,11 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
       source: _sourceKey(box),
       size: draggedSize(size, feedbackSize: _feedbackSize, feedbackScale: _model.feedbackScale),
     )..grab = globalToLocal(position);
-    // A centred copy is held by the centre of what is dragged (the feedback
+    // A centered copy is held by the center of what is dragged (the feedback
     // node at its own size): `drag.x` and `drag.y` are then the pointer.
-    final centred = _model.feedbackAnchor == api.FeedbackAnchor.center;
-    if (centred) session.grab = session.size.center(Offset.zero);
-    session.feedbackAnchor = centred ? Offset.zero : session.grab;
+    final centered = _model.feedbackAnchor == api.FeedbackAnchor.center;
+    if (centered) session.grab = session.size.center(Offset.zero);
+    session.feedbackAnchor = centered ? Offset.zero : session.grab;
     final drag = _drag = _SourceDrag(this, session, position);
     _stopReturn();
     HapticFeedback.selectionClick();
@@ -979,7 +979,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     if (wasAccepted && drag.dropped) {
       // Where the copy was let go, for the node with the same flight key
       // that shows the drop next (render/play.dart's FlightRegistry).
-      final key = box.node?.behaviours.flightKey ?? '';
+      final key = box.node?.behaviors.flightKey ?? '';
       if (key.isNotEmpty && box.hasSize) {
         final dropped = drag.session.size;
         FlightRegistry.recordDrop(
@@ -998,11 +998,11 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     // A drop on a target ends the session there.
     if (wasAccepted && !identical(dnd.session, drag.session)) return;
     dnd.end();
-    _cancelled(drag.session);
+    _canceled(drag.session);
   }
 
   /// Fires the `dragCancel` reactions.
-  void _cancelled(DragSession session) => _fire(api.TriggerType.dragCancel.name, session.toMap(active: false));
+  void _canceled(DragSession session) => _fire(api.TriggerType.dragCancel.name, session.toMap(active: false));
 
   // --- mouse ------------------------------------------------------------------------
 
@@ -1101,7 +1101,7 @@ class RenderDropTarget extends RenderProxyBox {
   Timer? _hoverTimer;
   bool _entered = false;
 
-  /// Sets where the dragged node's centre is over this target, from the
+  /// Sets where the dragged node's center is over this target, from the
   /// global position of its top left.
   bool _locate(DragSession session, Offset topLeft) {
     if (!attached || !hasSize) return false;
@@ -1210,11 +1210,11 @@ class RenderDropTarget extends RenderProxyBox {
     } else if (full) {
       // Let go on a full target: not a wrong answer, but say so.
       _fire(api.TriggerType.dropFull.name, result);
-      drag.source._cancelled(session);
+      drag.source._canceled(session);
     } else {
       // Of a group it takes, but its acceptIf refused it: a wrong answer.
       _fire(api.TriggerType.dropRejected.name, result);
-      drag.source._cancelled(session);
+      drag.source._canceled(session);
     }
   }
 

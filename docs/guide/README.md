@@ -1,7 +1,7 @@
 # Codelessly SDK developer guide
 
-For `codelessly_sdk` 21.x. Every code sample here is compiled with the
-[example app](../../example) (`lib/snippets.dart`), and the behaviour the chapters describe is covered by its
+For `codelessly_sdk` 22.x. Every code sample here is compiled with the
+[example app](../../example) (`lib/snippets.dart`), and the behavior the chapters describe is covered by its
 tests (`test/guide_test.dart`) or the SDK's own.
 
 ![The guide in four groups: Get started, Build, Extend, Ship and maintain](images/index/hero.png)

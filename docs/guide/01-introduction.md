@@ -32,13 +32,13 @@ The SDK exports the model, so most apps only depend on `codelessly_sdk`.
 
 ## The model in one page
 
-![Diagram: a publish model lists layouts; a layout holds one canvas per breakpoint; a canvas is a tree of nodes with layout, decoration, props, bind, actions and behaviours](images/01-introduction/model.png)
+![Diagram: a publish model lists layouts; a layout holds one canvas per breakpoint; a canvas is a tree of nodes with layout, decoration, props, bind, actions and behaviors](images/01-introduction/model.png)
 
 *A publish lists layouts; a layout holds canvases; a canvas is a tree of nodes.*
 
 - A **node** is one widget: a `type` (`row`, `text`, `filledButton`, ...), a `layout` (how it sizes and sits in its
   parent), a `decoration` (fills, strokes, radius, shadows), the widget's own `props` (Flutter's parameter names
-  and defaults), bindings (`bind`), reactions (`actions`) and behaviours (motion, transitions, gestures).
+  and defaults), bindings (`bind`), reactions (`actions`) and behaviors (motion, transitions, gestures).
 - A **canvas** is a node of type `canvas`: one screen, a `Scaffold`.
 - A **layout** is a document of one or more canvases. When it has several, each is the design for one breakpoint
   (mobile, tablet, desktop), and the SDK shows the one for the width it is given.
