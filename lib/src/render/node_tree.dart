@@ -495,6 +495,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   ValueListenable<Node?>? _listenable;
 
   static final Map<String, int> debugApplyCounts = {};
+
+  /// Nodes whose bound change was drawn in place, without a re-apply (a
+  /// text's new text, a fill's new colour), while [debugCountApplies].
+  static final Map<String, int> debugInPlaceCounts = {};
   static bool debugCountApplies = false;
 
   /// Paints per node id while [debugCountPaints] is on (tools, tests).
@@ -568,6 +572,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         return;
       }
       if (_repaintOnly(old, n) || _retextOnly(old, n)) {
+        // Updated in place (no re-apply): counted apart.
+        if (debugCountApplies) debugInPlaceCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
         _watchBindings(bound.watch);
         _noteDataChange();
         return;
