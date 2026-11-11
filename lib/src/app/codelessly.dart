@@ -150,6 +150,23 @@ class Codelessly extends ChangeNotifier {
     }
   }
 
+  final Map<String, VariableScope> _pageVariables = {};
+  final List<PersistedVariable> _persistedPages = [];
+
+  /// Page variables shared by its layouts, below each canvas's variables
+  /// and above the app's. Leaving a screen must not reset the page state.
+  VariableScope pageVariables(String pageId, Iterable<Variable> variables) {
+    final scope = _pageVariables.putIfAbsent(pageId, () => VariableScope(const [], parent: appVariables));
+    final current = services;
+    final storage = current is Services ? current.storage : null;
+    for (final variable in variables) {
+      if (scope.declares(variable.name)) continue;
+      scope.define(variable);
+      if (variable.persists) _persistedPages.add(PersistedVariable.attach(scope, variable, storage));
+    }
+    return scope;
+  }
+
   void _declareModelVariables(PublishModel model) => declareAppVariables([
         for (final json in model.variables.values)
           if (Variable.fromJson(json) case final Variable v) v,
@@ -347,6 +364,12 @@ class Codelessly extends ChangeNotifier {
     for (final p in _persistedApp) {
       p.dispose();
     }
+    for (final persisted in _persistedPages) {
+      persisted.dispose();
+    }
+    for (final scope in _pageVariables.values) {
+      scope.dispose();
+    }
     appVariables.dispose();
     _storage.dispose();
     _speech.dispose();
@@ -403,6 +426,9 @@ class _SpeechScope extends NamedScope {
 /// The variable scope a publish can keep the app's variables
 /// under, in each layout's `variables`.
 const String kV1AppVariablesScope = 'app_variables';
+
+/// The variables shared by every layout of the same source page.
+const String kPageVariablesScope = 'page_variables';
 
 /// The storage bucket Codelessly publishes to.
 const String kCodelesslyStorageBucket = 'codeless-app.appspot.com';
