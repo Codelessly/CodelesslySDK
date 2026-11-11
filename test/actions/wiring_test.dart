@@ -635,6 +635,22 @@ void main() {
     expect(layout.getPositionForChild(const Size(800, 600), const Size(232, 200)), const Offset(560, 356));
   });
 
+  testWidgets('a popover that reserves room moves up to keep it', (tester) async {
+    // 844 tall, anchor bottom 603: a 112 menu fits below at 609, but 609 +
+    // 360 passes 836, so its top moves to 844 - 8 - 360.
+    final reserving = PopoverLayout(
+        anchor: const Rect.fromLTWH(320, 575, 28, 28), placement: api.PopoverPlacement.belowEnd, gap: 6, reserve: 360);
+    expect(reserving.getPositionForChild(const Size(390, 844), const Size(200, 112)).dy, 476);
+    // Room for it: placed below as usual.
+    final roomy = PopoverLayout(
+        anchor: const Rect.fromLTWH(320, 375, 28, 28), placement: api.PopoverPlacement.belowEnd, gap: 6, reserve: 360);
+    expect(roomy.getPositionForChild(const Size(390, 844), const Size(200, 112)).dy, 409);
+    // No reserve: below.
+    final plain =
+        PopoverLayout(anchor: const Rect.fromLTWH(320, 575, 28, 28), placement: api.PopoverPlacement.belowEnd, gap: 6);
+    expect(plain.getPositionForChild(const Size(390, 844), const Size(200, 112)).dy, 609);
+  });
+
   testWidgets('set value and set variant change nodes at runtime', (tester) async {
     final nodes = counter(actions: [
       reaction('click', [
