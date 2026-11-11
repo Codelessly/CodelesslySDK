@@ -33,6 +33,7 @@ export 'cache.dart';
 export 'cloud/backend.dart';
 export 'cloud/database.dart';
 export 'cloud/fields.dart';
+export 'cloud/join.dart';
 export 'cloud/query.dart';
 export 'cloud/resolve.dart';
 export 'links.dart';

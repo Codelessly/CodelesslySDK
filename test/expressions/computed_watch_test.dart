@@ -90,7 +90,9 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(notifications.last, {'totalVotes': 614493});
       vars.set('wave', 8);
-      expect(reader.read('model'), isNull);
+      // While wave 8's answer is on its way, the last answer stays (no blink
+      // to null for whatever reads it).
+      expect(reader.read('model'), {'totalVotes': 614493});
       gates[8]!.complete({'totalVotes': 710917});
       await Future<void>.delayed(Duration.zero);
       expect(notifications.last, {'totalVotes': 710917});

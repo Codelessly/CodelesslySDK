@@ -214,17 +214,32 @@ Services codelesslyCloudServices({
   final root = firestoreRoot(projectId);
   final local = localStorage ?? MemoryLocalStorage();
   final managed = functions == null ? null : codelesslyPaywalls(projectId: projectId, functions: functions, storage: local);
+  final users = auth == null ? null : FirebaseAuthService(auth, storage: local);
+  final backend = FirestoreDocumentBackend(firestore);
+  // The role in the user's profile (users/{uid}), as the rules read it.
+  final audience = users == null
+      ? null
+      : AuthAudience(
+          users: users.userChanges,
+          currentUser: () => users.currentUser,
+          profile: (uid) => backend.watch('$root/${AuthProfiles.collection}', uid),
+        );
+  final cloud = BackendCloudDatabase(
+    backend: backend,
+    root: root,
+    rulesSource: firestoreDataRules(firestore, projectId),
+    userId: () => auth?.currentUser?.uid,
+    // Live owner-only and audience queries follow sign in and out, and a
+    // change of the user's role.
+    userChanges: audience?.changes,
+    audience: audience?.call,
+  );
   return Services(
     storage: local,
     paywalls: managed?.paywalls,
     purchases: managed?.purchases,
-    auth: auth == null ? null : FirebaseAuthService(auth, storage: local),
-    cloud: BackendCloudDatabase(
-      backend: FirestoreDocumentBackend(firestore),
-      root: root,
-      rulesSource: firestoreDataRules(firestore, projectId),
-      userId: () => auth?.currentUser?.uid,
-    ),
+    auth: users,
+    cloud: cloud,
     files: storage == null ? null : FirebaseFileStorage(storage, root: root),
   );
 }
