@@ -26,6 +26,8 @@ void main() {
     expect(CodelesslyFonts.glyphsBeyondLatin('Plain text, “quotes” — 100 €'), '');
   });
 
+  setUp(CodelesslyFonts.resetGlyphs);
+
   test('a layout\'s characters beyond latin are fetched and registered with their family', () async {
     final fetcher = _Glyphs();
     final registered = <String, List<int>>{};
@@ -41,13 +43,29 @@ void main() {
   test('a font asked for when first drawn fetches the shown layouts\' characters too', () async {
     final fetcher = _Glyphs();
     final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, _) async {});
-    fonts.addText('Shift ⇧ and ↵');
+    // Another app's fonts note what it shows: the characters are global.
+    CodelesslyFonts(fetcher: const NoFontFetcher(), register: (_, _) async {}).addText('Shift ⇧ and ↵');
     fonts.addText('Backlog → Done ⇧');
     await fonts.load([const PublishFont(id: 'm5', family: 'Geist Mono', weight: 500)]);
     expect(fetcher.asked, ['Geist Mono 500 ⇧↵→']);
   });
 
+  test('a font drawn on an earlier screen fetches a later layout\'s new characters', () async {
+    final fetcher = _Glyphs();
+    final registered = <List<int>>[];
+    final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, files) async => registered.add([for (final f in files) f.first]));
+    await fonts.addText('Boards ⌘');
+    await fonts.load([const PublishFont(id: 'g4', family: 'Geist', weight: 400)]);
+    expect(fetcher.asked, ['Geist 400 ⌘']);
+    await fonts.addText('Backlog → Done ⌘');
+    expect(fetcher.asked, ['Geist 400 ⌘', 'Geist 400 →'], reason: 'only the new character');
+    expect(registered, [[1, 2], [2]]);
+    await fonts.addText('Nothing new →');
+    expect(fetcher.asked.length, 2);
+  });
+
   test('text of latin characters only: no extra file', () async {
+    CodelesslyFonts.resetGlyphs();
     final fetcher = _Glyphs();
     final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, _) async {});
     await fonts.load([const PublishFont(id: 'g4', family: 'Geist', weight: 400)], text: 'To Do, Doing, Done');
