@@ -403,7 +403,9 @@ class IslandOwnerElement extends RenderObjectElement {
   }
 
   void _flushDrops() {
-    if (_drops.isEmpty) return;
+    // The owner itself can be dirty after hot reload or an inherited update.
+    // Flush its scope even without drops, so an ordinary parent update cannot
+    // clear its dirty flag while leaving it in this scope's dirty list.
     owner!.buildScope(this, () {
       final drops = _drops.toList();
       _drops.clear();
