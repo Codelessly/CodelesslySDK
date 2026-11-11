@@ -720,11 +720,15 @@ class PaywallRuntime {
 
   /// Resolve and load before presenting; failures never open a selling UI.
   /// The session belongs to this call and is disposed on every exit path.
+  /// [details] are more `paywall` values for its screen (the legal links,
+  /// the placement); [onEvent] hears its events.
   Future<PaywallResult> open(
     String placement, {
     required String locale,
     required String appVersion,
     required Future<PaywallResult?> Function(ResolvedPaywall paywall, PaywallSession session) present,
+    Map<String, Object?> Function(ResolvedPaywall paywall)? details,
+    void Function(ResolvedPaywall paywall, String event, String? slot)? onEvent,
   }) async {
     final epoch = _accountEpoch;
     final resolved = await resolve(placement, locale: locale, appVersion: appVersion);
@@ -732,7 +736,11 @@ class PaywallRuntime {
     if (resolved == null || resolved.placement.layoutId.isEmpty || resolved.slots.isEmpty) {
       throw StateError('Paywall placement is unavailable');
     }
-    final current = session(resolved);
+    final current = session(
+      resolved,
+      details: details?.call(resolved) ?? const {},
+      onEvent: onEvent == null ? null : (event, slot) => onEvent(resolved, event, slot),
+    );
     try {
       await current.load();
       if (current.isDisposed || _disposed || epoch != _accountEpoch) return const PaywallResult(PaywallOutcome.closed);

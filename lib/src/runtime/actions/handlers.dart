@@ -7,7 +7,7 @@ import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
-import 'package:flutter/rendering.dart' show RenderBox, RenderObject, RenderViewportBase;
+import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderBox, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
@@ -35,6 +35,7 @@ import 'app_events.dart';
 import 'capture.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
+import 'route_transition.dart' show RevealAnchor;
 import 'ui.dart' show NavigatorActionUi, PickedFile;
 import 'runner.dart';
 import 'script_host.dart';
@@ -53,6 +54,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case NavigateAction():
       await run.host.ui.navigate(a, params: run.json(a.params), baseParams: run.json(a.baseParams));
     case OpenModalAction():
+      if (a.anchor == ModalAnchor.node) RevealAnchor.named = await _namedAnchor(a, run);
       final result = await run.host.ui.openModal(a, params: run.json(a.params));
       if (result != null) run.result = result;
     case CloseModalAction():
@@ -892,6 +894,25 @@ NodeBox? repeatOf(NodeTree tree, String id, String item) {
   return byIndex;
 }
 
+/// The box (global) of the node [OpenModalAction.anchorNode] names, in a
+/// list the copy built for [OpenModalAction.anchorItem]. Opened from a
+/// screen's `load`, the node may not be laid out yet: give it a few frames.
+Future<Rect?> _namedAnchor(OpenModalAction a, ActionRun run) async {
+  final tree = run.host.tree;
+  final id = run.text(a.anchorNode).trim();
+  final item = run.text(a.anchorItem).trim();
+  if (tree == null || id.isEmpty) return null;
+  NodeBox? find() => (item.isEmpty ? tree.boxOf(id) ?? tree.boxesOf(id).firstOrNull : repeatOf(tree, id, item));
+  var box = find();
+  for (var i = 0; i < 6 && (box == null || !box.attached || !box.hasSize); i++) {
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+    box = find();
+  }
+  if (box == null || !box.attached || !box.hasSize) return null;
+  return MatrixUtils.transformRect(box.getTransformTo(null), Rect.fromLTWH(0, 0, box.size.width, box.size.height));
+}
+
 /// Whether the scrolling rows and columns around [box] have laid out
 /// something to scroll (or there are none).
 bool _scrollsLaidOut(RenderObject box) {
@@ -1098,9 +1119,11 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
   switch (a.operation) {
     case PaywallOperation.openPaywall:
       final placement = run.text(a.placement ?? '').trim();
+      final present = host is RuntimeActionContext ? host.presentPaywall : null;
       final open = host is RuntimeActionContext ? host.openPaywall : null;
-      if (placement.isEmpty || open == null) throw StateError('No paywall placement presenter');
-      final result = await open(placement);
+      if (placement.isEmpty || (present == null && open == null)) throw StateError('No paywall placement presenter');
+      // Its screen opens as the action's transition says, when the shell can.
+      final result = present != null ? await present(placement, PaywallPresentation.of(a)) : await open!(placement);
       run.result = {'outcome': result.outcome.name, 'entitlementId': result.entitlementId};
       return;
     case PaywallOperation.openLegalLink:

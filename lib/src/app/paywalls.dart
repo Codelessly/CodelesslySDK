@@ -104,14 +104,8 @@ class CodelesslyPaywalls {
     }
     if (!navigator.mounted) return const PaywallResult(PaywallOutcome.failed, error: 'The Navigator is gone');
 
-    final config = s.config.paywall;
-    final details = <String, Object?>{
-      'placement': paywall.placement.id,
-      'variant': paywall.variant,
-      'termsUrl': config.termsUrl,
-      'privacyUrl': config.privacyUrl,
-    };
-    void onEvent(String name, String? slot) => _record(s, paywall!, name, slot);
+    final details = detailsOf(paywall);
+    void onEvent(String name, String? slot) => record(paywall!, name, slot);
     final runtime = s.paywalls;
     final session = runtime != null
         ? runtime.session(paywall, onEvent: onEvent, details: details)
@@ -152,9 +146,29 @@ class CodelesslyPaywalls {
     return const PaywallResult(PaywallOutcome.closed);
   }
 
+  /// The `paywall` values of [paywall]'s screen besides the session's own:
+  /// its `placement`, `variant`, the legal links (`termsUrl`,
+  /// `privacyUrl`) and, on the test store, `test: true`.
+  Map<String, Object?> detailsOf(ResolvedPaywall paywall) {
+    final s = codelessly.services;
+    final config = s is Services ? s.config.paywall : null;
+    return {
+      'placement': paywall.placement.id,
+      'variant': paywall.variant,
+      'termsUrl': config?.termsUrl ?? '',
+      'privacyUrl': config?.privacyUrl ?? '',
+      if (s is Services && s.usesTestStore) 'test': true,
+    };
+  }
+
   /// Logs paywall event [name] to the app's analytics (`paywall_view`,
   /// `paywall_purchase_start`...) and, with a paywall server, records it
   /// there.
+  void record(ResolvedPaywall paywall, String name, String? slot) {
+    final s = codelessly.services;
+    if (s is Services) _record(s, paywall, name, slot);
+  }
+
   void _record(Services s, ResolvedPaywall paywall, String name, String? slot) {
     final event = name.startsWith('paywall_') ? name : 'paywall_$name';
     s.analytics.logEvent(event, {
