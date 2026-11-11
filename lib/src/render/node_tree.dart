@@ -1325,6 +1325,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
             alignment: alignment,
             clamp: !isScrollAxis,
             expands: expands,
+            preserveDesignOverflow: fit != SizeFit.fill,
             growsWithContent: grows,
           );
       if (pos.align case final double a) return at(FreeformAxisMode.align, alignment: a);
