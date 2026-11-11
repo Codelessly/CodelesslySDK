@@ -5,6 +5,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 class ReplacementBox extends ResourceBox {}
 
+class _BoundaryResourceBox extends ResourceBox {
+  @override
+  bool get isRepaintBoundary => true;
+}
+
 class ResourceBox extends RenderBox {
   int disposals = 0;
   @override
@@ -64,6 +69,26 @@ void main() {
       expect(resources.single.disposals, 1);
     },
   );
+  testWidgets('retiring a queued repaint boundary preserves its layer until paint drains', (tester) async {
+    widgetRecipes['resourceProbe'] = (b, n, chain) {
+      if (n.name == 'active') {
+        chain.add(b.obtain<_BoundaryResourceBox>('resource', () {
+          final box = _BoundaryResourceBox();
+          resources.add(box);
+          return box;
+        }));
+      }
+    };
+    final source = DocumentSource(document());
+    final tree = NodeTree(source);
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(home: NodeView(tree: tree, rootId: 'root')));
+    resources.single.markNeedsPaint();
+    source.document = document(active: false);
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(resources.single.disposals, 1);
+  });
   testWidgets(
     'retiring a render-chain object disposes it without releasing live nodes',
     (tester) async {

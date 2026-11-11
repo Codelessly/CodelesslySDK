@@ -1730,7 +1730,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       }
     }
     for (final o in objects) {
-      o.dispose();
+      // Flutter's current paint queue asserts the retained layer exists even
+      // for a detached object. Release that layer only after this frame drains.
+      // ignore: invalid_use_of_protected_member
+      final hasLayer = o.layer != null;
+      if (hasLayer && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.postFrameCallbacks) {
+        SchedulerBinding.instance.addPostFrameCallback((_) => o.dispose(), debugLabel: 'NodeTree.disposeLayer');
+        SchedulerBinding.instance.ensureVisualUpdate();
+      } else {
+        o.dispose();
+      }
     }
   }
 }
