@@ -44,6 +44,11 @@ class HttpFontFetcher implements FontFetcher {
     '$googleFontsApi?family=${Uri.encodeQueryComponent(font.family).replaceAll('%20', '+')}:ital,wght@${font.italic ? 1 : 0},${font.weight}',
   );
 
+  /// The Google Fonts CSS URL of [font]'s family alone (its default file).
+  Uri googleFontsFamilyUrl(PublishFont font) => Uri.parse(
+    '$googleFontsApi?family=${Uri.encodeQueryComponent(font.family).replaceAll('%20', '+')}',
+  );
+
   /// The font file of Google Fonts [css]. Without a browser's user agent it
   /// names one TrueType file; in a browser it names one file per Unicode
   /// subset (`/* cyrillic */`, ..., `/* latin */`), each holding only that
@@ -86,7 +91,11 @@ class HttpFontFetcher implements FontFetcher {
       var url = font.url == null ? null : Uri.tryParse(font.url!);
       if (url == null) {
         // Without a browser's user agent, the API serves TrueType files.
-        final css = await _get(googleFontsUrl(font));
+        var css = await _get(googleFontsUrl(font));
+        // A weight or style the family doesn't have (Anton asked for at
+        // 700) is a 400: take the family's default file, which the engine
+        // then draws bolder or slanted, rather than the platform's font.
+        if (css.statusCode == 400) css = await _get(googleFontsFamilyUrl(font));
         if (css.statusCode != 200) return null;
         final file = fontFileOf(css.body);
         if (file == null) return null;
