@@ -20,7 +20,7 @@ import 'package:codelessly_api_v2/codelessly_api.dart'
         ShowToastAction;
 import 'package:flutter/gestures.dart' show HitTestResult;
 import 'package:flutter/material.dart' hide NavigationMode;
-import 'package:flutter/rendering.dart' show RendererBinding;
+import 'package:flutter/rendering.dart' show RenderBox, RendererBinding;
 import 'package:codelessly_api_v2/codelessly_api.dart' show NavigationMode;
 
 import 'confirm_dialog.dart';
@@ -363,6 +363,7 @@ Future<Object?> showScreenModal(
   if (sheet) {
     return showModalBottomSheet<Object?>(
       context: context,
+      useRootNavigator: false,
       isScrollControlled: true,
       isDismissible: barrierDismissible,
       showDragHandle: showDragHandle,
@@ -375,6 +376,7 @@ Future<Object?> showScreenModal(
   }
   return showDialog<Object?>(
     context: context,
+    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: scrim,
     builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
@@ -419,8 +421,15 @@ Future<Object?> showPopover(
   api.Color? barrierColor,
 }) {
   content = ToastBelowRoute(child: content);
+  // On the nearest navigator (an app inside a scaled or nested view keeps
+  // its popovers in it), with the anchor in that navigator's coordinates.
+  final navigatorBox = Navigator.of(context).context.findRenderObject();
+  if (anchor != null && navigatorBox is RenderBox && navigatorBox.attached) {
+    anchor = Rect.fromPoints(navigatorBox.globalToLocal(anchor.topLeft), navigatorBox.globalToLocal(anchor.bottomRight));
+  }
   return showGeneralDialog<Object?>(
     context: context,
+    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierLabel: 'Dismiss',
     barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
