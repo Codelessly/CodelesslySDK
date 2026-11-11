@@ -29,6 +29,8 @@
 - `listView` with `stickToEnd: true`: opens at its end, keeps its place when items are put in front, follows new
   items at the end only while there (chats, logs).
 - A bottom sheet modal rises above the keyboard.
+- A plain box as a canvas's body keeps its own size (it had none): it paints and runs its click reactions, as a
+  stack does.
 - Guide: [Presenting, automations and host features](docs/guide/17-presenting-and-automations.md).
 
 ## 23.0.0
