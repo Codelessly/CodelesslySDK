@@ -39,6 +39,7 @@ import '../services/services.dart' show NoScriptRunner, Services, PaywallSession
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
+import 'overlay_screens.dart';
 import 'page_transitions.dart';
 import 'persisted_variables.dart';
 import 'runtime.dart';
@@ -380,6 +381,45 @@ class CodelesslyWidget extends StatefulWidget {
         );
       };
 
+  /// The layout and params [screen] opens.
+  @visibleForTesting
+  static (String, Map<String, Object?>)? resolveScreen(PublishModel model, String? screen) {
+    if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
+    // Encode what a typed location may hold raw (spaces, `·`).
+    final location = Uri.encodeFull(screen.trim());
+    final CanvasLocationMatch? match;
+    final Uri? uri;
+    try {
+      match = CanvasLocation.match(model, location);
+      uri = Uri.parse(location);
+    } on FormatException {
+      return null;
+    } on ArgumentError {
+      return null;
+    }
+    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    if (match != null) {
+      // A catch-all (`*`, an app's not-found screen) takes only what names
+      // no screen: a one-segment location that is a screen's id or name
+      // opens that screen, as it would with no catch-all.
+      final path = CanvasLocation.pathOf(model, match.canvasId);
+      final catchAll = path != null && CanvasLocation.isCatchAll(CanvasLocation.segmentsOf(path).last);
+      if (catchAll && segments.length == 1) {
+        final id = model.layoutIdForScreen(Uri.encodeComponent(segments.single));
+        if (id != null) return (id, {...uri.queryParameters});
+      }
+      return (match.layoutId, match.params);
+    }
+    // The app's root with a query (`/?state=empty`): the entry screen,
+    // opened with those params.
+    if (segments.isEmpty && uri.queryParameters.isNotEmpty) {
+      final entry = model.entryLayoutId;
+      return entry == null ? null : (entry, {...uri.queryParameters});
+    }
+    final id = model.layoutIdForScreen(segments.isEmpty ? screen.trim() : Uri.encodeComponent(segments.last));
+    return id == null ? null : (id, {...uri.queryParameters});
+  }
+
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
 }
@@ -464,7 +504,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       var params = {...?_controller?.params, ...widget.params};
       String? layoutId = requested;
       if (layoutId == null) {
-        final screen = _resolveScreen(model, widget.initialScreen);
+        final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
         layoutId = screen?.$1 ?? model.entryLayoutId;
         if (screen != null) params = {...screen.$2, ...params};
       }
@@ -482,33 +522,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       setState(() => _error = e);
       _controller?._update(error: e);
     }
-  }
-
-  /// The layout and params [screen] opens.
-  static (String, Map<String, Object?>)? _resolveScreen(PublishModel model, String? screen) {
-    if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
-    final CanvasLocationMatch? match;
-    final Uri? uri;
-    try {
-      match = CanvasLocation.match(model, location);
-      uri = Uri.parse(location);
-    } on FormatException {
-      return null;
-    } on ArgumentError {
-      return null;
-    }
-    if (match != null) return (match.layoutId, match.params);
-    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
-    // The app's root with a query (`/?state=empty`): the entry screen,
-    // opened with those params.
-    if (segments.isEmpty && uri.queryParameters.isNotEmpty) {
-      final entry = model.entryLayoutId;
-      return entry == null ? null : (entry, {...uri.queryParameters});
-    }
-    final id = model.layoutIdForScreen(segments.isEmpty ? screen.trim() : Uri.encodeComponent(segments.last));
-    return id == null ? null : (id, {...uri.queryParameters});
   }
 
   @override
@@ -530,6 +543,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     if (layout == null || codelessly == null) {
       return (widget.loadingBuilder ?? _controller?.loadingBuilder)?.call(context) ?? const CodelesslyLoadingScreen();
     }
+    // The project's overlay screens, above the navigator's screens.
+    _ensureOverlayScreens(codelessly, layout);
     Widget view = _LayoutView(
       // Another layout or paywall is another screen.
       key: ValueKey((layout, widget.paywall)),
@@ -546,6 +561,16 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     final builder = widget.layoutBuilder ?? _controller?.layoutBuilder;
     if (builder != null) view = builder(context, view);
     return view;
+  }
+}
+
+extension on _CodelesslyWidgetState {
+  void _ensureOverlayScreens(Codelessly codelessly, PublishLayout layout) {
+    if (codelessly.publishModel?.overlayLayoutIds.isEmpty ?? true) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      CodelesslyOverlayHost.ensure(context, codelessly: codelessly, currentLayoutId: layout.id, template: widget);
+    });
   }
 }
 
@@ -821,6 +846,8 @@ class _LayoutViewState extends State<_LayoutView> {
     final shown = _shown;
     if (!mounted || shown == null) return;
     if (ModalRoute.isCurrentOf(context) == false) return;
+    // An overlay screen (no route) isn't the screen the app is on.
+    if (OverlayScreenScope.of(context)) return;
     final route = CodelesslyRoute(widget.layout.id, shown, widget.params);
     if (_codelessly.route.value != route) _codelessly.route.value = route;
   }

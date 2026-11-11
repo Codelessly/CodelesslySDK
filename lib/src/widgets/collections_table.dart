@@ -51,6 +51,11 @@ class RuntimeTableView extends StatelessWidget {
     final line = lineColor.alpha == 0 || lineWidth <= 0 ? BorderSide.none : BorderSide(color: lineColor.flutter, width: lineWidth);
     final headerColor = n.prop(TableViewProps.headerColor)?.flutter;
     final stripe = n.prop(TableViewProps.stripeColor)?.flutter;
+    final double headerWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0;
+    final bodyWidths = <double>[for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth)];
+    final total = headerWidth + bodyWidths.fold<double>(0, (a, w) => a + w);
+    final fill = n.prop(TableViewProps.fillWidth) && columns.isNotEmpty;
+    final rowHeightKey = n.prop(TableViewProps.rowHeightKey), rowHeight = n.prop(TableViewProps.rowHeight);
 
     Widget template(String? id, Object key, int index, Object? item) {
       if (id == null) return const SizedBox.shrink();
@@ -76,20 +81,14 @@ class RuntimeTableView extends StatelessWidget {
           pinnedColumnCount: headerColumn && n.prop(TableViewProps.pinHeaderColumn) ? 1 : 0,
           columnBuilder: (index) {
             final header = headerColumn && index == 0;
-            double widthOf(int i) => headerColumn && i == 0
-                ? n.prop(TableViewProps.rowHeaderWidth)
-                : columns[i - columnOffset].width ?? n.prop(TableViewProps.columnWidth);
-            var width = widthOf(index);
+            var width = header ? headerWidth : bodyWidths[index - columnOffset];
             final count = columns.length + columnOffset;
             if (n.prop(TableViewProps.stretchLastColumn) && index == count - 1 && constraints.hasBoundedWidth) {
-              var others = 0.0;
-              for (var i = 0; i < count - 1; i++) {
-                others += widthOf(i);
-              }
-              width = math.max(width, constraints.maxWidth - others);
+              // The last column takes what the others leave.
+              width = math.max(width, constraints.maxWidth - (total - width));
             }
             return TableSpan(
-              extent: FixedTableSpanExtent(width),
+              extent: header || !fill ? FixedTableSpanExtent(width) : FillTableSpanExtent(width, total, columns.length),
               foregroundDecoration: TableSpanDecoration(border: TableSpanBorder(trailing: line)),
               backgroundDecoration: header && headerColor != null ? TableSpanDecoration(color: headerColor) : null,
             );
@@ -98,7 +97,8 @@ class RuntimeTableView extends StatelessWidget {
             final header = headerRow && index == 0;
             final body = index - rowOffset;
             return TableSpan(
-              extent: FixedTableSpanExtent(header ? n.prop(TableViewProps.headerHeight) : n.prop(TableViewProps.rowHeight)),
+              extent: FixedTableSpanExtent(
+                  header ? n.prop(TableViewProps.headerHeight) : tableRowHeight(rows[body], rowHeightKey, rowHeight)),
               foregroundDecoration: TableSpanDecoration(border: TableSpanBorder(trailing: line)),
               backgroundDecoration: header
                   ? (headerColor == null ? null : TableSpanDecoration(color: headerColor))
@@ -146,4 +146,27 @@ class RuntimeTableView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A body row's height: its own number at [key] (when the row is a map that
+/// has one), else [fallback].
+double tableRowHeight(Object? row, String key, double fallback) {
+  if (key.isEmpty || row is! Map) return fallback;
+  final v = row[key];
+  final h = v is num ? v.toDouble() : double.tryParse('$v');
+  return h != null && h.isFinite && h > 0 ? h : fallback;
+}
+
+/// A body column of a `fillWidth` table: its [width] plus an equal share
+/// ([count] columns) of what the viewport has beyond the [total] width of
+/// every column.
+class FillTableSpanExtent extends TableSpanExtent {
+  const FillTableSpanExtent(this.width, this.total, this.count);
+
+  final double width, total;
+  final int count;
+
+  @override
+  double calculateExtent(TableSpanExtentDelegate delegate) =>
+      width + (count == 0 ? 0 : math.max(0.0, delegate.viewportExtent - total) / count);
 }
