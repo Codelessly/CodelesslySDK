@@ -568,7 +568,9 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
-    if (vFit == SizeFit.hug) result = IntrinsicHeight(child: result);
+    // A collapsed field sizes to its line on its own; under IntrinsicHeight
+    // Flutter's TextField reports the 48 px interactive minimum instead.
+    if (vFit == SizeFit.hug && !d.isCollapsed) result = IntrinsicHeight(child: result);
 
     // Always a DecoratedBox, empty without focus: a ring that came and went
     // as a wrapper would rebuild the field and drop its focus.
