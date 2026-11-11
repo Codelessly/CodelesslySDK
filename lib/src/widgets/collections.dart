@@ -16,6 +16,7 @@ import '../render/convert.dart';
 import '../render/layout/fit_box.dart';
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
+import '../runtime/expressions/bindings.dart' show ProvidedItem;
 import 'collections_data_list.dart';
 import 'collections_islands.dart';
 import 'collections_list_runtime.dart';
@@ -526,7 +527,11 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final rowHeader = slot(TableViewProps.rowHeader), corner = slot(TableViewProps.corner);
   final headerRow = columnHeader != null, headerColumn = rowHeader != null;
   final columns = n.prop(TableViewProps.columns);
-  final rowCount = math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
+  // Bound rows show at rest too, each cell in the scope a running table
+  // gives it; without data, `rowCount` empty rows.
+  final binder = b.tree.binder;
+  final bound = n.bind.containsKey('data') ? binder?.itemsOf(b.tree.source, n, b.instance) : null;
+  final rowCount = bound?.length ?? math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
 
   // The spans that show in the design size (a cell past it is cut off).
   List<double> fit(List<double> all, double extent) {
@@ -551,13 +556,48 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
+  final rowOffset = headerRow ? 1 : 0, columnOffset = headerColumn ? 1 : 0;
   void add(String? id, int r, int c) {
     if (id == null) return;
     ids.add(id);
+    cells.add((r, c));
+    if (bound != null && binder != null) {
+      // As the running table: header cells read label/column, row headers
+      // row/rowIndex, cells value/row/column and their indexes.
+      final rowIndex = r - rowOffset, columnIndex = c - columnOffset;
+      final inHeaderRow = headerRow && r == 0, inHeaderColumn = headerColumn && c == 0;
+      final (Object key, int index, Object? item) = switch ((inHeaderRow, inHeaderColumn)) {
+        (true, true) => ('corner', 0, null),
+        (true, false) => (
+            ('column', columnIndex),
+            columnIndex,
+            {'label': columns[columnIndex].label, 'column': columns[columnIndex].key, 'columnIndex': columnIndex},
+          ),
+        (false, true) => (('row', rowIndex), rowIndex, {'row': bound[rowIndex], 'rowIndex': rowIndex}),
+        (false, false) => (
+            (rowIndex, columnIndex),
+            rowIndex,
+            {
+              'value': switch (bound[rowIndex]) {
+                final Map m => m[columns[columnIndex].key],
+                final List l => l.elementAtOrNull(columnIndex),
+                _ => null,
+              },
+              'row': bound[rowIndex],
+              'column': columns[columnIndex].key,
+              'rowIndex': rowIndex,
+              'columnIndex': columnIndex,
+            },
+          ),
+      };
+      final instance = ProvidedItem('cell', b.instance, n.id, key);
+      binder.provideItem(b.tree.source, instance, index: index, item: item);
+      instances.add(instance);
+      return;
+    }
     // The first of each template in the table's own scope (what tools
     // measure), the others in their cell's.
     instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
-    cells.add((r, c));
   }
 
   for (var r = 0; r < rowHeights.length; r++) {
