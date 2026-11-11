@@ -874,6 +874,10 @@ class RenderPageItems extends RenderCollection {
   /// carousel); null: flat pages. See [pageMotionAt].
   api.Motion? pageMotion;
 
+  /// The pose one page before the current one, when it isn't [pageMotion]
+  /// mirrored (a book's turning page). See [pageMotionAt].
+  api.Motion? pageMotionBefore;
+
   void changed() {
     markNeedsLayout();
     markNeedsPaint();
@@ -887,19 +891,21 @@ class RenderPageItems extends RenderCollection {
 
   /// [motion] (the pose one page after the current one) for a page
   /// [offset] pages from it: at rest at 0, interpolated by the distance (up
-  /// to two pages), mirrored for pages before it; a [vertical] pager turns
-  /// around X and moves along Y.
-  static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false}) {
+  /// to two pages), mirrored for pages before it, or, given [before] (the
+  /// pose one page before), [before] interpolated the same way unmirrored;
+  /// a [vertical] pager turns around X and moves along Y.
+  static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false, api.Motion? before}) {
     final distance = offset.abs().clamp(0.0, 2.0);
-    var m = motion;
+    final source = offset < 0 && before != null ? before : motion;
+    var m = source;
     for (final p in _scaled) {
       final rest = api.Motion.none.valueOf(p);
-      var v = rest + (motion.valueOf(p) - rest) * distance;
+      var v = rest + (source.valueOf(p) - rest) * distance;
       if (p == 'opacity') v = v.clamp(0.0, 1.0);
       if (p == 'blur') v = math.max(0, v);
       m = m.withValue(p, v);
     }
-    if (offset < 0) {
+    if (offset < 0 && before == null) {
       for (final p in const ['translateX', 'shiftX', 'rotate', 'rotateY', 'originX']) {
         m = m.withValue(p, -m.valueOf(p));
       }
@@ -918,6 +924,11 @@ class RenderPageItems extends RenderCollection {
     return m;
   }
 
+  /// Whether a pose with [api.Motion.backfaceHidden] shows its back (turned
+  /// past 90 degrees about X or Y): such a page isn't drawn.
+  static bool facesAway(api.Motion m) =>
+      m.backfaceHidden && math.cos(m.rotateX * math.pi / 180) * math.cos(m.rotateY * math.pi / 180) < 0;
+
   /// The page at rest: the initial page, within the pages there are.
   double get _currentPage {
     final count = itemCount;
@@ -929,7 +940,7 @@ class RenderPageItems extends RenderCollection {
   Matrix4? _poseOf(RenderBox child, int index) {
     final motion = pageMotion;
     if (motion == null) return null;
-    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical);
+    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical, before: pageMotionBefore);
     final o = Alignment(m.originX, m.originY).alongSize(child.size);
     return Matrix4.translationValues(m.shiftX * child.size.width + o.dx, m.shiftY * child.size.height + o.dy, 0)
       ..multiply(motionMatrix(m))
@@ -948,8 +959,9 @@ class RenderPageItems extends RenderCollection {
   void paintItem(PaintingContext context, RenderBox child, Offset offset) {
     final pose = _poseOf(child, _indexOf(child));
     if (pose == null) return super.paintItem(context, child, offset);
-    final opacity = pageMotionAt(pageMotion!, _indexOf(child) - _currentPage).opacity;
-    if (opacity <= 0) return;
+    final at = pageMotionAt(pageMotion!, _indexOf(child) - _currentPage, vertical: axis == Axis.vertical, before: pageMotionBefore);
+    final opacity = at.opacity;
+    if (opacity <= 0 || facesAway(at)) return;
     void paintPosed(PaintingContext c, Offset o) =>
         c.pushTransform(needsCompositing, o, pose, (c, o) => c.paintChild(child, o));
     if (opacity >= 1) {
@@ -969,8 +981,10 @@ class RenderPageItems extends RenderCollection {
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     if (pageMotion == null) return super.hitTestChildren(result, position: position);
-    var i = firstIndex + childCount - 1;
-    for (var child = lastChild; child != null; child = childBefore(child), i--) {
+    // The page drawn on top takes taps first.
+    final reversed = paintReversed;
+    var i = reversed ? firstIndex : firstIndex + childCount - 1;
+    for (var child = reversed ? firstChild : lastChild; child != null; child = reversed ? childAfter(child) : childBefore(child), i += reversed ? 1 : -1) {
       final pd = child.parentData! as CollectionParentData;
       final pose = Matrix4.translationValues(pd.offset.dx, pd.offset.dy, 0)..multiply(_poseOf(child, i)!);
       final c = child;

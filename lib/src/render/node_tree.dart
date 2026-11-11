@@ -1142,6 +1142,35 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   }
 
   void _freeform(Node n, List<RenderBox> chain, {List<String>? children}) {
+    // Content designed at the stack's size, scaled into whatever box it gets
+    // (`contentFit`, as a FittedBox): laid out at the design size, then fitted.
+    final fit = n.type == 'stack' && children == null ? n.prop(api.StackProps.contentFit) : api.BoxFit.none;
+    if (fit != api.BoxFit.none && n.innerSize.width > 0 && n.innerSize.height > 0) {
+      final a = n.prop(api.StackProps.contentAlignment);
+      // The fitted box fills the stack's box (a FittedBox under loose
+      // constraints would shrink to the content's aspect ratio); with no
+      // bound on an axis it takes the design size there.
+      chain.add(_obtain<RenderLimitedBox>('contentLimit', RenderLimitedBox.new)
+        ..maxWidth = n.innerSize.width
+        ..maxHeight = n.innerSize.height);
+      chain.add(_obtain<RenderConstrainedBox>('contentExpand', () => RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand())));
+      chain.add(_obtain<RenderFittedBox>('contentFit', () => RenderFittedBox(alignment: Alignment.center))
+        ..fit = _boxFit(fit)
+        ..alignment = Alignment(a.x, a.y)
+        ..clipBehavior = clip(n.decoration.clip));
+      final c = BoxConstraints.tight(n.innerSize);
+      chain.add(_obtain<RenderConstrainedBox>('contentSize', () => RenderConstrainedBox(additionalConstraints: c))
+        ..additionalConstraints = c);
+      final layout = _obtain<RenderFreeformLayout>(
+          'freeform', () => RenderFreeformLayout(wrapsWidth: false, wrapsHeight: false, designSize: Size.zero))
+        ..wrapsWidth = false
+        ..wrapsHeight = false
+        ..designSize = n.innerSize
+        ..textDirection = TextDirection.ltr;
+      _syncChildren(layout, n.children, Slot(SlotKind.freeform, n));
+      chain.add(layout);
+      return;
+    }
     final layout = _obtain<RenderFreeformLayout>(
         'freeform', () => RenderFreeformLayout(wrapsWidth: false, wrapsHeight: false, designSize: Size.zero))
       ..wrapsWidth = n.hFit == SizeFit.hug
@@ -1151,6 +1180,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _syncChildren(layout, children ?? n.children, Slot(SlotKind.freeform, n));
     chain.add(layout);
   }
+
+  static BoxFit _boxFit(api.BoxFit f) => switch (f) {
+    api.BoxFit.fill => BoxFit.fill,
+    api.BoxFit.contain => BoxFit.contain,
+    api.BoxFit.cover => BoxFit.cover,
+    api.BoxFit.fitWidth => BoxFit.fitWidth,
+    api.BoxFit.fitHeight => BoxFit.fitHeight,
+    api.BoxFit.scaleDown => BoxFit.scaleDown,
+    api.BoxFit.none => BoxFit.none,
+  };
 
   void _scrollingFreeform(Node n, List<RenderBox> chain) {
     _scrollView(n, chain, const [], contentSized: false);
