@@ -1,8 +1,9 @@
-// just_audio exposes in-memory PCM through its experimental stream source API.
-// ignore_for_file: experimental_member_use
+// Native voices use owned local files, avoiding a localhost HTTP proxy.
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:just_audio/just_audio.dart' as audio;
 import '../sound.dart';
 
@@ -13,40 +14,44 @@ abstract interface class NativeTonePlayer {
   Future<void> dispose();
 }
 
+/// One temporary WAV, cancelled and removed when its voice is released.
+class NativeToneFile {
+  NativeToneFile({Future<Directory> Function()? directory}):_directory=directory??getTemporaryDirectory;
+  final Future<Directory> Function() _directory;
+  File? _file;
+  bool _disposed=false;
+  Future<File?> write(Uint8List wav)async{
+    final directory=await _directory();
+    if(_disposed)return null;
+    final file=_file=File('${directory.path}/codelessly-tone-${identityHashCode(this)}.wav');
+    await file.writeAsBytes(wav);
+    if(_disposed){await _remove();return null;}
+    return file;
+  }
+  Future<void> _remove()async{
+    final file=_file;
+    if(file==null)return;
+    try{await file.delete();}on FileSystemException{if(await file.exists())rethrow;}
+  }
+  Future<void> dispose()async{_disposed=true;await _remove();}
+}
 class _AudioTonePlayer implements NativeTonePlayer {
   final audio.AudioPlayer player = audio.AudioPlayer();
+  final NativeToneFile file=NativeToneFile();
+  bool _disposed=false;
   @override
   Future<void> load(Uint8List wav, {required bool loop}) async {
-    await player.setAudioSource(_WaveSource(wav));
-    await player.setLoopMode(loop ? audio.LoopMode.one : audio.LoopMode.off);
+    final source=await file.write(wav);
+    if(source==null||_disposed)return;
+    await player.setFilePath(source.path);
+    if(!_disposed)await player.setLoopMode(loop ? audio.LoopMode.one : audio.LoopMode.off);
   }
-
   @override
-  void play() {
-    unawaited(player.play().catchError((Object _) {}));
-  }
-
+  void play() {if(!_disposed)unawaited(player.play().catchError((Object _) {}));}
   @override
-  Future<void> dispose() => player.dispose();
-}
-
-class _WaveSource extends audio.StreamAudioSource {
-  _WaveSource(this.bytes);
-  final Uint8List bytes;
-  @override
-  Future<audio.StreamAudioResponse> request([int? start, int? end]) async {
-    final a = (start ?? 0).clamp(0, bytes.length),
-        b = (end ?? bytes.length).clamp(
-          (start ?? 0).clamp(0, bytes.length),
-          bytes.length,
-        );
-    return audio.StreamAudioResponse(
-      sourceLength: bytes.length,
-      contentLength: b - a,
-      offset: a,
-      stream: Stream.value(bytes.sublist(a, b)),
-      contentType: 'audio/wav',
-    );
+  Future<void> dispose()async{
+    if(_disposed)return;_disposed=true;
+    try{await player.dispose();}finally{await file.dispose();}
   }
 }
 

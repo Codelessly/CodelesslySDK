@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:io';
 import 'package:codelessly_sdk_v2/src/services/platform/sound_engine_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk_v2/src/services/sound.dart';
@@ -18,6 +19,16 @@ class Player implements NativeTonePlayer {
 }
 
 void main() {
+  test('owned native tone files are removed and cancelled before directory resolution',()async{
+    final directory=await Directory.systemTemp.createTemp('native-tone-test-');
+    addTearDown(()=>directory.delete(recursive:true));
+    final source=NativeToneFile(directory:()async=>directory);
+    final file=await source.write(toneWave(440,1));expect(await file!.exists(),isTrue);
+    await source.dispose();await source.dispose();expect(await file.exists(),isFalse);
+    final pending=Completer<Directory>(),cancelled=NativeToneFile(directory:()=>pending.future);
+    final writing=cancelled.write(toneWave(440,1));await cancelled.dispose();pending.complete(directory);
+    expect(await writing,isNull);expect(await directory.list().isEmpty,isTrue);
+  });
   test('triangle PCM matches the requested waveform while sine stays default',(){
     final sine=ByteData.sublistView(toneWave(440,1)),triangle=ByteData.sublistView(toneWave(440,1,waveform:'triangle'));
     expect(sine.getInt16(44,Endian.little),0);
