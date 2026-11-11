@@ -845,15 +845,20 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         ..painter = SpreadShadowPainter(shadows: spread, borderRadius: radius!));
     }
     final plan = _PaintPlan.of(n);
-    chain.add(_obtain<RenderDecoratedBox>('decoration', () => RenderDecoratedBox(decoration: const BoxDecoration()))
+    chain.add(_obtain<RenderNodeDecoration>('decoration', () => RenderNodeDecoration(decoration: const BoxDecoration()))
       ..decoration = BoxDecoration(
         boxShadow: [for (final sh in shadows) if (!spread.contains(sh)) sh],
         borderRadius: radius,
         color: plan.native ? plan.fill : null,
-      ));
+      )
+      // A node that paints a fill is opaque to pointers, as Flutter's
+      // Container(color:) is; one without lets them through its gaps to what
+      // lies under it (a row of black keys over the white ones).
+      ..opaque = d.fills.any((f) => f.visible));
     if (plan.native && plan.border != null) {
-      chain.add(_obtain<RenderDecoratedBox>('stroke', () => RenderDecoratedBox(decoration: const BoxDecoration()))
-        ..decoration = BoxDecoration(borderRadius: radius, border: plan.border));
+      chain.add(_obtain<RenderNodeDecoration>('stroke', () => RenderNodeDecoration(decoration: const BoxDecoration()))
+        ..decoration = BoxDecoration(borderRadius: radius, border: plan.border)
+        ..opaque = false);
     }
     final clipBehavior = clip(d.clip);
     if (clipBehavior != Clip.none) {
@@ -1784,4 +1789,16 @@ class _PaintPlan {
       foreground,
     );
   }
+}
+
+/// A node's box decoration (color, shadows; or its stroke), taking pointers
+/// on its own only while [opaque]: a box with no fill paints nothing there,
+/// so pointers pass to its children, or else to what lies under it.
+class RenderNodeDecoration extends RenderDecoratedBox {
+  RenderNodeDecoration({required super.decoration});
+
+  bool opaque = true;
+
+  @override
+  bool hitTestSelf(Offset position) => opaque && super.hitTestSelf(position);
 }
