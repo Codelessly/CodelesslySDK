@@ -117,6 +117,28 @@ void main() {
       expect(painter.thumbAt(const Size(50, 30), 0).center, const Offset(15, 15));
     });
 
+    testWidgets('a switch with track or thumb radii is a square plain toggle', (tester) async {
+      await show(tester, {
+        's': {
+          'type': 'switch',
+          'layout': {'width': 32, 'height': 18},
+          'props': {
+            'value': true,
+            'trackRadius': 4,
+            'thumbRadius': 2,
+            'thumbInset': 2,
+            'activeTrackColor': '#FF0B5CAD',
+            'activeThumbColor': '#FFFFFFFF',
+          },
+        },
+      }, 's');
+      expect(find.byType(PlainToggle), findsOneWidget);
+      expect(find.byType(Switch), findsNothing);
+      final square = api.Node.fromJson({'type': 'switch', 'props': {'trackRadius': 4}}, id: 's')!;
+      expect(drawsPlainToggle(square), isTrue);
+      expect(api.Node.fromJson(square.toJson(), id: 's')!.prop(api.SwitchProps.trackRadius), 4);
+    });
+
     test('page motion: rest at the current page, scaled by distance, mirrored before it', () {
       final m = api.Motion.fromJson({'rotateY': -50, 'scale': 0.8, 'translateX': 10})!;
       expect(RenderPageItems.pageMotionAt(m, 0).rotateY, 0);

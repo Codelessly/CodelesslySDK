@@ -11,8 +11,10 @@ import '../render/convert.dart';
 /// Whether [n] is drawn as a [PlainToggle]: its track fills the node and it
 /// has thumb shadows or a thumb inset.
 bool drawsPlainToggle(Node n) =>
-    n.prop(SwitchProps.fillTrack) &&
-    (n.prop(SwitchProps.thumbShadows).isNotEmpty || n.prop(SwitchProps.thumbInset) != null);
+    (n.prop(SwitchProps.fillTrack) &&
+        (n.prop(SwitchProps.thumbShadows).isNotEmpty || n.prop(SwitchProps.thumbInset) != null)) ||
+    n.prop(SwitchProps.trackRadius) != null ||
+    n.prop(SwitchProps.thumbRadius) != null;
 
 /// The plain toggle of switch [node]. Off, a Material 3 thumb without
 /// `uniformThumb` is two thirds of its on size, as Material's is. Colors ease
@@ -157,7 +159,8 @@ class PlainTogglePainter extends CustomPainter {
     final t = position.value.clamp(0.0, 1.0);
     final n = node;
     Color lerp(api.Color? off, api.Color? on) => Color.lerp(off?.flutter ?? _clear, on?.flutter ?? _clear, t)!;
-    final track = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(size.shortestSide / 2));
+    final trackRadius = n.prop(SwitchProps.trackRadius) ?? size.shortestSide / 2;
+    final track = RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(trackRadius.clamp(0, size.shortestSide / 2)));
     canvas.drawRRect(
         track, Paint()..color = lerp(n.prop(SwitchProps.inactiveTrackColor), n.prop(SwitchProps.activeTrackColor)));
     final border = lerp(n.prop(SwitchProps.inactiveTrackOutlineColor), n.prop(SwitchProps.activeTrackOutlineColor));
@@ -171,16 +174,21 @@ class PlainTogglePainter extends CustomPainter {
             ..color = border);
     }
     final (:center, :radius) = thumbAt(size, t);
+    // A thumb radius makes it a rounded square; null keeps it round.
+    final corner = n.prop(SwitchProps.thumbRadius);
+    void thumb(Offset c, double r, Paint paint) => corner == null
+        ? canvas.drawCircle(c, r, paint)
+        : canvas.drawRRect(
+            RRect.fromRectAndRadius(Rect.fromCircle(center: c, radius: r), Radius.circular(corner.clamp(0, r))), paint);
     if (highlight case final Color color) {
-      canvas.drawCircle(center, radius + _inset(size) * 2, Paint()..color = color);
+      thumb(center, radius + _inset(size) * 2, Paint()..color = color);
     }
     for (final e in n.prop(SwitchProps.thumbShadows)) {
       if (e.type != api.EffectType.dropShadow || !e.visible) continue;
       final shadow = boxShadow(e);
-      canvas.drawCircle(center + shadow.offset, radius + shadow.spreadRadius, shadow.toPaint());
+      thumb(center + shadow.offset, radius + shadow.spreadRadius, shadow.toPaint());
     }
-    canvas.drawCircle(
-        center, radius, Paint()..color = lerp(n.prop(SwitchProps.inactiveThumbColor), n.prop(SwitchProps.activeThumbColor)));
+    thumb(center, radius, Paint()..color = lerp(n.prop(SwitchProps.inactiveThumbColor), n.prop(SwitchProps.activeThumbColor)));
   }
 
   @override
