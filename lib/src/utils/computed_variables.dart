@@ -159,10 +159,13 @@ abstract final class ComputedVariables {
 
   /// [variables] (by name) with every computed variable holding its
   /// formula's result over the others, as a design canvas previews them with
-  /// default values. [data] is what the formulas read as `data`.
+  /// default values. [data] is what the formulas read as `data`, and
+  /// [routeParams] what they read as `route` (a canvas's design preview
+  /// params, e.g. `{version: 2.12.0}` for a screen at `changelog/:version`).
   static Map<String, VariableData> resolveAll(
     Map<String, VariableData> variables, {
     Map<String, dynamic>? data,
+    Map<String, dynamic>? routeParams,
   }) {
     if (!variables.values.any((variable) => variable.isComputed)) {
       return variables;
@@ -172,6 +175,7 @@ abstract final class ComputedVariables {
     final ScopedValues scope = ScopedValues.preview(
       variables: resolved,
       data: data,
+      routeParams: routeParams,
     );
     for (final String name in evaluationOrder(variables)) {
       final VariableData variable = resolved[name]!;

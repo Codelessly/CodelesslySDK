@@ -223,18 +223,13 @@ class PropertyValueDelegate {
     required ScopedValues scopedValues,
     required NullSubstitutionMode nullSubstitutionMode,
   }) {
-    if (text.trim().isEmpty) return text;
-    // Formulas first, so `${= ...}` isn't read as a path.
-    text = FormulaEvaluator.substitute(
-      text,
-      (path) =>
-          getVariableValueFromPath<Object>(path, scopedValues: scopedValues),
-      nullText: switch (nullSubstitutionMode) {
-        NullSubstitutionMode.nullValue => 'null',
-        _ => '',
-      },
-    );
-    return text.splitMapJoinRegex(
+    if (text.trim().isEmpty || !text.contains(r'${')) return text;
+    String? onNull(String expression) => switch (nullSubstitutionMode) {
+      NullSubstitutionMode.emptyString => '',
+      NullSubstitutionMode.nullValue => 'null',
+      NullSubstitutionMode.noChange => expression,
+    };
+    String substitutePaths(String text) => text.splitMapJoinRegex(
       variablePathRegex,
       onNonMatch: (text) => text,
       onMatch: (match) {
@@ -243,16 +238,67 @@ class PropertyValueDelegate {
           path,
           scopedValues: scopedValues,
         );
-
-        if (value != null) return value;
-
-        return switch (nullSubstitutionMode) {
-          NullSubstitutionMode.emptyString => '',
-          NullSubstitutionMode.nullValue => 'null',
-          NullSubstitutionMode.noChange => match[0]!,
-        };
+        return value ?? onNull(match[0]!)!;
       },
     );
+
+    // One pass over the text's own `${...}` expressions: a value that holds
+    // `${...}` itself (a code sample, a template) shows as it is, instead of
+    // being read as another expression and substituted again.
+    return text.splitMapJoin(
+      variableSyntaxIdentifierRegex,
+      onNonMatch: (text) => text,
+      onMatch: (match) {
+        final String expression = match[0]!;
+        // A formula, `${= ...}`.
+        if (expression.startsWith(r'${=')) {
+          return FormulaEvaluator.substitute(
+            expression,
+            (path) => getVariableValueFromPath<Object>(
+              path,
+              scopedValues: scopedValues,
+            ),
+            nullText: switch (nullSubstitutionMode) {
+              NullSubstitutionMode.nullValue => 'null',
+              _ => '',
+            },
+          );
+        }
+        // A path indexed by another value, `${a[b].c}`.
+        final String? indexed = indexedPathExpression(expression);
+        if (indexed != null) {
+          final String? value = getVariableValueFromPath<String>(
+            expression,
+            scopedValues: scopedValues,
+          );
+          return value ?? onNull(expression)!;
+        }
+        return substitutePaths(expression);
+      },
+    );
+  }
+
+  static final RegExp _indexedPath = RegExp(
+    r'^[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*|\[[^\[\]{}]+\])*$',
+  );
+
+  static final RegExp _literalIndex = RegExp(r'\[\d+\]');
+
+  /// The formula that reads [path] (with or without `${}`) when it is a
+  /// path indexed by another value, such as `a[b].c` or
+  /// `code.samples[lang].code`, which plain paths can't express (their
+  /// indices are numbers: `a[0].c`). Null for any other text.
+  static String? indexedPathExpression(String path) {
+    String inner = path.trim();
+    if (inner.startsWith(r'${') && inner.endsWith('}')) {
+      inner = inner.substring(2, inner.length - 1).trim();
+    }
+    if (!inner.contains('[') ||
+        !_indexedPath.hasMatch(inner) ||
+        !inner.replaceAll(_literalIndex, '').contains('[')) {
+      return null;
+    }
+    return FormulaEvaluator.parses(inner) ? inner : null;
   }
 
   /// Whether [variable] has a separate expression or a `${= ...}` value.
@@ -343,7 +389,20 @@ class PropertyValueDelegate {
       return value?.typedValue<R>();
     }
     final match = VariableMatch.parse(path.wrapWithVariableSyntax());
-    if (match == null) return null;
+    if (match == null) {
+      // A path indexed by another value, `${a[b].c}`, reads like the same
+      // formula would: `${= a[b].c}`.
+      final String? indexed = indexedPathExpression(path);
+      if (indexed == null) return null;
+      final Object? value = evaluateFormula(
+        indexed,
+        scopedValues: scopedValues,
+      );
+      if (R == String) {
+        return value == null ? null : FormulaEvaluator.stringify(value) as R;
+      }
+      return value?.typedValue<R>();
+    }
 
     final List<String> segments = match.fullPath.split(r'.');
     // remove variable name

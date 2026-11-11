@@ -1,0 +1,140 @@
+{
+ "_comment": "Hookline Home code block (page 0Sg1CdfBm7Grfu8catUv): the code and line-number texts as stored, and the app variable `code` (trimmed).",
+ "nodes": {
+  "0SgHhHARA747bKYQqK0i": {
+   "name": "code",
+   "type": "text",
+   "basicBoxLocal": [
+    0,
+    0,
+    32.4,
+    24
+   ],
+   "variables": {
+    "codeLanguage": "${bot_langInfo.highlighter}"
+   },
+   "id": "0SgHhHARA747bKYQqK0i",
+   "textMixedProps": [
+    {
+     "lineHeight": {
+      "value": 175,
+      "unit": "percent"
+     },
+     "start": 0,
+     "fontSize": 13.5,
+     "fontName": {
+      "weight": "w400",
+      "family": "JetBrains Mono"
+     },
+     "fills": [
+      {
+       "color": "#D8E3DB",
+       "id": "0SgHhHArYQKDBX1HDRDH",
+       "type": "solid"
+      }
+     ],
+     "end": 33
+    }
+   ],
+   "verticalFit": "shrinkWrap",
+   "parentID": "0SgHhHAR4v23ppG7B6yD",
+   "data": "${= code.samples.send[lang].code}",
+   "horizontalFit": "shrinkWrap",
+   "codeTheme": {
+    "function": "#FF67D4FF",
+    "number": "#FFFFB547",
+    "comment": "#FF5E7166",
+    "property": "#FFC3D2C8",
+    "string": "#FF7EE2A0",
+    "type": "#FFFFD58C",
+    "punctuation": "#FF7E9186",
+    "keyword": "#FFF472B6"
+   }
+  },
+  "0SgHhHARpYbgWDXhh_f9": {
+   "basicBoxLocal": [
+    14,
+    0,
+    16.2,
+    336
+   ],
+   "id": "0SgHhHARpYbgWDXhh_f9",
+   "type": "text",
+   "name": "line numbers",
+   "verticalFit": "shrinkWrap",
+   "textMixedProps": [
+    {
+     "lineHeight": {
+      "unit": "percent",
+      "value": 175
+     },
+     "start": 0,
+     "end": 73,
+     "fontSize": 13.5,
+     "fontName": {
+      "family": "JetBrains Mono",
+      "weight": "w400"
+     },
+     "fills": [
+      {
+       "id": "0SgHhHAqnrsrGdiyLxon",
+       "color": "#52625A",
+       "type": "solid"
+      }
+     ]
+    }
+   ],
+   "horizontalFit": "shrinkWrap",
+   "parentID": "0SgHhHARJuuo1qBYTmcb",
+   "textAlignHorizontal": "right",
+   "data": "${= join(range(1, count(split(code.samples.send[lang].code, '\n'))), '\n')}"
+  }
+ },
+ "code": {
+  "languages": [
+   {
+    "id": "curl",
+    "label": "cURL",
+    "highlighter": "bash"
+   },
+   {
+    "id": "node",
+    "label": "Node.js",
+    "highlighter": "js"
+   },
+   {
+    "id": "python",
+    "label": "Python",
+    "highlighter": "python"
+   },
+   {
+    "id": "go",
+    "label": "Go",
+    "highlighter": "go"
+   },
+   {
+    "id": "ruby",
+    "label": "Ruby",
+    "highlighter": "ruby"
+   }
+  ],
+  "samples": {
+   "send": {
+    "node": {
+     "filename": "send.mjs",
+     "code": "import { Hookline } from '@hookline/node';\n\nconst hookline = new Hookline(process.env.HOOKLINE_KEY);\n\n// One call. Fan-out, retries and signing are on us.\nawait hookline.events.send({\n  type: 'invoice.paid',\n  customer: 'cus_8fJ2kLq',\n  idempotencyKey: `inv_${invoice.id}`,\n  data: {\n    amount: 4900,\n    currency: 'usd',\n  },\n});"
+    },
+    "curl": {
+     "filename": "send.sh",
+     "code": "# One call. Fan-out, retries and signing are on us.\ncurl https://api.hookline.dev/v1/events \\\n  -X POST \\\n  -H \"Authorization: Bearer $HOOKLINE_KEY\" \\\n  -H \"Idempotency-Key: inv_2026_0042\" \\\n  -d '{\n    \"type\": \"invoice.paid\",\n    \"customer\": \"cus_8fJ2kLq\",\n    \"data\": { \"amount\": 4900, \"currency\": \"usd\" }\n  }'"
+    }
+   },
+   "verify": {
+    "node": {
+     "filename": "server.mjs",
+     "code": "import { verify } from '@hookline/node';\nimport { raw } from 'express';\n\napp.post('/webhooks', raw({ type: '*/*' }), (req, res) => {\n  // Throws if the signature is wrong or older than 5 minutes.\n  const event = verify(req.body, req.headers, SECRET);\n  console.log(`received ${event.type}`);\n  res.sendStatus(200);\n});"
+    }
+   }
+  }
+ }
+}

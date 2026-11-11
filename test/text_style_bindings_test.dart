@@ -455,6 +455,37 @@ void main() {
       );
     });
 
+    testWidgets('paddingSpaces pads each segment in its code style', (
+      tester,
+    ) async {
+      // "Sh`ip " | "fas`ter": one pad where the code starts, one where it
+      // ends, across styled ranges; none inside.
+      final host = Host(
+        heading(
+          {},
+          data: 'Sh`ip fas`ter, `x`',
+          extra: {
+            'inlineCode': {
+              ...code['inlineCode'] as Map,
+              'paddingSpaces': 1,
+            },
+          },
+        ),
+      );
+      await host.pump(tester);
+      expect(shownText(tester), 'Sh ip fas ter,  x ');
+      final List<String> codeParts = [
+        for (final leaf in leaves(tester))
+          if (leaf.$2.backgroundColor != null) leaf.$1,
+      ];
+      expect(codeParts.join(), ' ip fas  x ');
+      expect(
+        const InlineCodeStyle(paddingSpaces: 1).toJson(),
+        {'paddingSpaces': 1},
+      );
+      expect(InlineCodeStyle.fromJson({'paddingSpaces': 2}).paddingSpaces, 2);
+    });
+
     testWidgets('backticks stay without the option', (tester) async {
       await Host(heading({}, data: 'Use `x` here')).pump(tester);
       expect(shownText(tester), 'Use `x` here');

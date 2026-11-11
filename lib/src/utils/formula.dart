@@ -1,12 +1,15 @@
 import 'dart:math' as math;
 
+import 'package:codelessly_api/codelessly_api.dart'
+    show formulaQuotedTextPattern, formulaQuotedTextRegex;
+
 import 'formula_clock.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
 /// `merge(r, {tags: {a: 1}})`. Braces inside quoted strings don't count.
 String _formulaBody(int depth) {
-  const String atom = r'''[^{}'"]|'[^']*'|"[^"]*"''';
+  const String atom = '[^{}\'"]|$formulaQuotedTextPattern';
   String body = '(?:$atom)*';
   for (int i = 0; i < depth; i++) {
     body = '(?:$atom|\\{$body\\})*';
@@ -34,7 +37,9 @@ typedef FormulaPathResolver = Object? Function(String path);
 /// Evaluates small expressions used in `${= ...}` formulas.
 ///
 /// Supports:
-///  - numbers, 'single' or "double" quoted strings, true, false, null,
+///  - numbers, 'single' or "double" quoted strings (a backslash escapes the
+///    next character: `'it\'s'`, `"say \"hi\""`, `'a\\b'`; before any
+///    other character it stays, so `'\d+'` is a regex), true, false, null,
 ///    `[a, b]` lists and `{id: 'a', 'full name': n + 1}` objects, whose keys
 ///    are names or quoted text.
 ///  - variable paths like `storage.cart.length` or `item.price`, resolved with
@@ -149,11 +154,7 @@ class FormulaEvaluator {
 
   static final RegExp _clockCall = RegExp(r'\b(now|today)\s*\(');
 
-  static final RegExp _quoted = RegExp(
-    r'"[^"]*"'
-    '|'
-    r"'[^']*'",
-  );
+  static final RegExp _quoted = formulaQuotedTextRegex;
 
   /// The variable paths read by every formula in [text].
   static Set<String> referencedPathsInText(String text) => {
@@ -232,6 +233,50 @@ class FormulaEvaluator {
     } catch (error) {
       return error.toString();
     }
+  }
+
+  static final RegExp _formulaStart = RegExp(r'(?<!\\)\$\{=');
+
+  /// Why a `${= ...}` formula in [text] can't be evaluated, naming the
+  /// character (1-based, in [text]) where it goes wrong, or null when every
+  /// formula in [text] parses. A formula whose quotes or braces don't close
+  /// isn't recognised as a formula at all, and would otherwise show as
+  /// plain text.
+  static String? textErrorOf(String text) {
+    if (!text.contains(r'${=')) return null;
+    for (final Match start in _formulaStart.allMatches(text)) {
+      final RegExpMatch? match = formulaRegex.matchAsPrefix(text, start.start)
+          as RegExpMatch?;
+      final String snippet = _snippet(text, start.start);
+      if (match == null) {
+        return 'The formula "$snippet" at character ${start.start + 1} is '
+            'not closed: it needs a "}" outside quoted text. Check for an '
+            "unclosed quote; write \\' for a quote inside 'single quoted' "
+            'text, or use "double quotes".';
+      }
+      final String expression = match.namedGroup('expr')!;
+      final int lead = expression.length - expression.trimLeft().length;
+      try {
+        _Parser(expression.trim()).parseAll();
+      } on FormatException catch (error) {
+        final int? offset = error.offset;
+        final int at = offset == null
+            ? start.start
+            : start.start + 3 + lead + offset;
+        return 'The formula "$snippet" at character ${start.start + 1} is '
+            'invalid: ${error.message} at character ${at + 1}.';
+      } catch (error) {
+        return 'The formula "$snippet" at character ${start.start + 1} is '
+            'invalid: $error.';
+      }
+    }
+    return null;
+  }
+
+  static String _snippet(String text, int start) {
+    final int end = math.min(text.length, start + 40);
+    final String snippet = text.substring(start, end);
+    return end < text.length ? '$snippet…' : snippet;
   }
 
   /// How to call each function, with an example, for editors to list.
@@ -2474,15 +2519,41 @@ class _Parser {
     }
   }
 
+  /// The quoted text at [pos], 'single' or "double" quoted. A backslash
+  /// escapes a quote or a backslash (`'it\'s'`, `'a\\b'`); before any other
+  /// character it is kept, so `'\d+'` stays a regex.
+  String _quotedText() {
+    final int start = pos;
+    final String quote = source[pos];
+    final StringBuffer text = StringBuffer();
+    int i = pos + 1;
+    while (i < source.length) {
+      final String char = source[i];
+      if (char == quote) {
+        pos = i + 1;
+        return text.toString();
+      }
+      if (char == r'\' && i + 1 < source.length) {
+        final String next = source[i + 1];
+        if (next == "'" || next == '"' || next == r'\') {
+          text.write(next);
+        } else {
+          text.write(char + next);
+        }
+        i += 2;
+        continue;
+      }
+      text.write(char);
+      i++;
+    }
+    throw FormatException('Unclosed text (opened with $quote)', source, start);
+  }
+
   /// An object literal's key: a name or quoted text.
   String _key() {
     _skip();
     if (pos < source.length && (source[pos] == "'" || source[pos] == '"')) {
-      final int end = source.indexOf(source[pos], pos + 1);
-      if (end < 0) throw FormatException('Unclosed text', source, pos);
-      final String key = source.substring(pos + 1, end);
-      pos = end + 1;
-      return key;
+      return _quotedText();
     }
     final Match? name = _identifier.matchAsPrefix(source, pos);
     if (name == null) throw FormatException('Expected a key', source, pos);
@@ -2530,13 +2601,7 @@ class _Parser {
       return _MapLiteral(entries);
     }
 
-    if (char == "'" || char == '"') {
-      final int end = source.indexOf(char, pos + 1);
-      if (end < 0) throw FormatException('Unclosed text', source, pos);
-      final String text = source.substring(pos + 1, end);
-      pos = end + 1;
-      return _Literal(text);
-    }
+    if (char == "'" || char == '"') return _Literal(_quotedText());
 
     final Match? number = _number.matchAsPrefix(source, pos);
     if (number != null) {

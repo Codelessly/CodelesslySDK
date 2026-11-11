@@ -43,7 +43,9 @@ abstract final class InlineCode {
         kinds[i] = _Kind.code;
       }
     }
-    bool isTick(int at) => kinds[at] == _Kind.tick;
+    bool isTick(int at) =>
+        at >= 0 && at < kinds.length && kinds[at] == _Kind.tick;
+    final String padding = ' ' * style.paddingSpaces.clamp(0, 8);
     bool isCode(int at) => kinds[at] == _Kind.code;
 
     final Color? color = style.color?.toFlutterColor();
@@ -109,7 +111,11 @@ abstract final class InlineCode {
           if (code) changed = true;
           if (runIsCode != null && runIsCode != code) flush();
           runIsCode = code;
+          // A segment's first and last characters follow and precede its
+          // backticks: pad there, in the code's style.
+          if (code && isTick(at - 1)) run.write(padding);
           run.write(text[i]);
+          if (code && isTick(at + 1)) run.write(padding);
         }
         flush();
         offset += text.length;

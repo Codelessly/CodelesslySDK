@@ -443,6 +443,34 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
         ? node.verticalFit
         : node.horizontalFit);
 
+    // Stretched across, a child is as wide as the row or column up to its
+    // own max constraint there (a paragraph's maxWidth), as the editor lays
+    // it out (stretchedCrossExtent); a fixed size still stretches, as in
+    // Flutter. The cap is on the child's outer box, margins included.
+    final AxisC crossAxis = mainAxis == AxisC.horizontal
+        ? AxisC.vertical
+        : AxisC.horizontal;
+    final double? crossMax = crossAxis == AxisC.horizontal
+        ? node.resolvedConstraints.maxWidth
+        : node.resolvedConstraints.maxHeight;
+    final bool capsCross =
+        parent.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
+        crossMax != null;
+    if (capsCross) {
+      childWidget = CrossAxisCap(
+        axis: crossAxis == AxisC.horizontal ? Axis.horizontal : Axis.vertical,
+        max: node.constrainValue(
+          double.infinity,
+          crossAxis,
+          nodeBoundaryType: NodeBoundaryType.outerBox,
+        ),
+        alignment:
+            (alignment ?? node.alignment).data?.flutterAlignmentGeometry ??
+            AlignmentDirectional.topStart,
+        child: childWidget,
+      );
+    }
+
     // A parent that stretches its children across gives each one the full
     // cross axis, like the editor's solver, except a child that hugs on that
     // axis: the solver keeps its own size there and places it at the start.
@@ -454,13 +482,16 @@ class PassiveRowColumnTransformer extends NodeWidgetTransformer<RowColumnNode> {
             ? parentRowColumn.verticalFit
             : parentRowColumn.horizontalFit) ==
         SizeFit.shrinkWrap;
-    final AlignmentGeometry? childAlignment =
-        (alignment ?? node.alignment).data?.flutterAlignmentGeometry ??
-        (parent.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
-                crossAxisFit == SizeFit.shrinkWrap &&
-                !parentHugsCross
-            ? AlignmentDirectional.topStart
-            : null);
+    // A capped child is already placed by its alignment in the stretched
+    // space (CrossAxisCap).
+    final AlignmentGeometry? childAlignment = capsCross
+        ? null
+        : (alignment ?? node.alignment).data?.flutterAlignmentGeometry ??
+              (parent.crossAxisAlignment == CrossAxisAlignmentC.stretch &&
+                      crossAxisFit == SizeFit.shrinkWrap &&
+                      !parentHugsCross
+                  ? AlignmentDirectional.topStart
+                  : null);
     final bool hasAlignment = childAlignment != null;
 
     final double? mainAxisMaxConstraint = (mainAxis == AxisC.horizontal

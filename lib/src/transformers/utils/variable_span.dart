@@ -47,6 +47,8 @@ abstract final class VariablePreview {
       screenSize: values.screenSize,
       parentSize: values.parentSize,
       data: values.data,
+      routeParams: values.routeParams,
+      parentIndexedItem: values.parentIndexedItem,
       indexedItem: row.item != null || values.indexedItem == null
           ? row
           : IndexedItem(row.index, values.indexedItem!.item),
@@ -105,9 +107,9 @@ abstract final class VariablePreview {
         scopedValues: scopedValues,
         nullSubstitutionMode: NullSubstitutionMode.noChange,
       );
-      if (value.isNotEmpty && !variableSyntaxIdentifierRegex.hasMatch(value)) {
-        return value;
-      }
+      // An unresolved path is left as it was. A resolved value may hold
+      // `${...}` itself (a code sample) and shows as it is.
+      if (value.isNotEmpty && value != expression) return value;
     }
     final String placeholder = placeholderFor(expression);
     // A name can be wider than a fixed-width slot; show a compact marker
