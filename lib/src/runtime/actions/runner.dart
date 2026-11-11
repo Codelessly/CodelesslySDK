@@ -145,6 +145,10 @@ class ActionRun {
   /// [expression] evaluated (a value).
   Object? evaluate(String expression) => expressions.evaluate(expression, scope);
 
+  /// [value] (any JSON) with its strings evaluated: one `${...}` gives the
+  /// value as is, other text is interpolated.
+  Object? evaluateJson(Object? value) => expressions.substituteJson(value, scope);
+
   /// [json] with its strings evaluated (params).
   Json json(Json json) {
     final out = expressions.substituteJson(json, scope);
