@@ -498,6 +498,26 @@ void main() {
     expect(tester.getTopLeft(find.byKey(const ValueKey('pointerMenu'))), Offset(at.dx, at.dy + 4));
   });
 
+  testWidgets('a popover presentation opens by its trigger, not centered', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 80),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'menu', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'belowStart', 'anchorGap': 6},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    final box = s.tree.boxOf('button')!;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // Below the button, its start edges aligned.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('menu'))), Offset(rect.left, rect.bottom + 6));
+  });
+
   testWidgets('a popover flips above when there is no room below and stays on screen', (tester) async {
     final layout = PopoverLayout(anchor: const Rect.fromLTWH(700, 560, 80, 30), placement: api.PopoverPlacement.belowStart);
     // 600 tall: 200 doesn't fit below 594, so above; 800 wide keeps it in.

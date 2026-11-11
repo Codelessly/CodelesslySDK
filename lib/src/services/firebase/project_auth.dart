@@ -65,6 +65,7 @@ class FirebaseProjectAuth implements ProjectAuth {
     this.claimsPropagationTimeout = const Duration(seconds: 30),
     this.claimsPollInterval = const Duration(seconds: 2),
     this.claimsReverifyEvery = 3,
+    this.restoreTimeout = const Duration(seconds: 3),
     bool? claimsFromToken,
     this.onError,
   })  : client = client ?? http.Client(),
@@ -78,6 +79,10 @@ class FirebaseProjectAuth implements ProjectAuth {
   final http.Client client;
   final KeyValueCache cache;
   final Duration claimsPropagationTimeout;
+
+  /// How long [authenticate] waits for Firebase to restore a persisted user
+  /// before signing in anonymously.
+  final Duration restoreTimeout;
   final Duration claimsPollInterval;
   final int claimsReverifyEvery;
 
@@ -116,6 +121,17 @@ class FirebaseProjectAuth implements ProjectAuth {
 
   @override
   Future<ProjectAccess> authenticate() async {
+    // On the web Firebase restores the signed-in user (an app user, or the
+    // guest's or SDK's anonymous one) after the app starts: wait for it,
+    // or every page load signs in a new anonymous user (a guest loses their
+    // session, and Firebase soon blocks the device: too-many-requests).
+    if (auth.currentUser == null) {
+      try {
+        await auth.userChanges().first.timeout(restoreTimeout, onTimeout: () => null);
+      } on StateError {
+        // No event at all (a closed stream): nobody to restore.
+      }
+    }
     if (auth.currentUser == null) await auth.signInAnonymously();
     _idToken = await auth.currentUser!.getIdTokenResult(true);
     final cached = await readCached(cache, cacheKey, ProjectAccess.fromJson);

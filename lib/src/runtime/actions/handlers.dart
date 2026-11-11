@@ -575,8 +575,10 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.sendEmailVerification:
         await auth.sendEmailVerification();
       case AuthOperation.updatePassword:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.updatePassword(password);
       case AuthOperation.deleteAccount:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.deleteAccount();
       case AuthOperation.signInWithGoogle:
         run.result = (await auth.signInWithProvider(AuthProviderKind.google)).uid;

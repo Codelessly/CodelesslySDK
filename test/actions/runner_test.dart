@@ -457,6 +457,22 @@ void main() {
       expect(h.errors, hasLength(1));
     });
 
+    test('auth: changing the password and deleting the account confirm the current one first', () async {
+      final auth = MemoryAuthService();
+      final h = Harness(services: Services(auth: auth), variables: [v('err', '')]);
+      await h.click([
+        {'type': 'auth', 'operation': 'signUp', 'email': 'a@b.c', 'password': 'secret1'},
+        {'type': 'auth', 'operation': 'updatePassword', 'currentPassword': 'nope', 'password': 'secret22', 'errorVariable': 'err'},
+      ]);
+      expect(h['err'], isNotEmpty, reason: 'a wrong current password stops it');
+      await h.click([
+        {'type': 'auth', 'operation': 'updatePassword', 'currentPassword': 'secret1', 'password': 'secret22', 'errorVariable': 'err'},
+        {'type': 'auth', 'operation': 'deleteAccount', 'currentPassword': 'secret22'},
+      ]);
+      expect(h['err'], '');
+      expect(auth.currentUser, isNull, reason: 'deleted with the new password');
+    });
+
     test('auth: a guest session keeps its uid when it signs up', () async {
       final auth = MemoryAuthService();
       final h = Harness(services: Services(auth: auth), variables: [v('guest', ''), v('uid', '')]);
