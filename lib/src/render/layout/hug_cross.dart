@@ -64,3 +64,56 @@ class RenderHugCross extends RenderProxyBox {
   }
 }
 
+
+/// A leaf box that fills the cross axis of a [RenderHugCross] row/column:
+/// while the flex measures its natural thickness (unbounded across), it
+/// takes none, so it doesn't make the flex as thick as its design size; laid
+/// out stretched, it fills the thickness its siblings gave. Flutter's
+/// stretch (and CSS's `align-items: stretch`) size a bare bar like this.
+class RenderStretchFiller extends RenderProxyBox {
+  RenderStretchFiller({Axis cross = Axis.vertical}) : _cross = cross;
+
+  /// The parent's cross axis.
+  Axis get cross => _cross;
+  Axis _cross;
+  set cross(Axis value) {
+    if (_cross == value) return;
+    _cross = value;
+    markNeedsLayout();
+  }
+
+  bool get _measuring =>
+      _cross == Axis.vertical ? !constraints.hasBoundedHeight : !constraints.hasBoundedWidth;
+
+  @override
+  void performLayout() {
+    final RenderBox? box = child;
+    if (!_measuring || box == null) {
+      super.performLayout();
+      return;
+    }
+    box.layout(
+      _cross == Axis.vertical
+          ? constraints.copyWith(minHeight: 0, maxHeight: 0)
+          : constraints.copyWith(minWidth: 0, maxWidth: 0),
+      parentUsesSize: true,
+    );
+    size = constraints.constrain(box.size);
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      _cross == Axis.vertical ? 0 : super.computeMinIntrinsicHeight(width);
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      _cross == Axis.vertical ? 0 : super.computeMaxIntrinsicHeight(width);
+
+  @override
+  double computeMinIntrinsicWidth(double height) =>
+      _cross == Axis.horizontal ? 0 : super.computeMinIntrinsicWidth(height);
+
+  @override
+  double computeMaxIntrinsicWidth(double height) =>
+      _cross == Axis.horizontal ? 0 : super.computeMaxIntrinsicWidth(height);
+}

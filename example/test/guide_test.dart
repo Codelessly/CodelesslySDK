@@ -184,6 +184,80 @@ PublishBundle withPaywall() {
   });
 }
 
+/// A project with a `list` and a `badge` screen, each loading `cards` with
+/// the app scope on load, showing how many there are and when the newest
+/// came (`timeAgo`), colored by the theme.
+PublishBundle sharedCards() {
+  Json screen(String id) => {
+        'schema': 2,
+        'id': id,
+        'roots': ['$id-canvas'],
+        'nodes': {
+          '$id-canvas': {
+            'type': 'canvas',
+            'slots': {'body': '$id-body'},
+            'layout': {'width': 390, 'height': 200},
+            'actions': [
+              {
+                'trigger': {'type': 'load'},
+                'actions': [
+                  {
+                    'type': 'loadCloudData',
+                    'variable': 'cards',
+                    'single': false,
+                    'scope': 'app',
+                    'query': {'collectionPath': 'cards'},
+                  },
+                ],
+              },
+            ],
+          },
+          '$id-body': {
+            'type': 'stack',
+            'layout': {
+              'width': {'fill': 390},
+              'height': {'fill': 200},
+            },
+            'children': ['$id-label'],
+          },
+          '$id-label': {
+            'type': 'text',
+            'props': {'text': r'${= length(cards.data)} · ${= ago(last(cards.data).sentAt)}'},
+            'bind': {'props.style.color': r'${theme.onSurface}'},
+            'layout': {'width': 300, 'height': 20},
+          },
+        },
+      };
+  return PublishBundle.fromJson({
+    'model': {
+      'schema': 2,
+      'projectId': 'shared',
+      'entryLayoutId': 'list',
+      'layouts': {
+        'list': {
+          'canvases': [
+            {'id': 'list-canvas', 'name': 'List'},
+          ],
+        },
+        'badge': {
+          'canvases': [
+            {'id': 'badge-canvas', 'name': 'Badge'},
+          ],
+        },
+      },
+      'variables': {
+        'cards': {'id': 'cards', 'name': 'cards', 'type': 'map', 'value': <String, Object?>{}},
+        'ago': {'id': 'ago', 'name': 'ago', 'formula': 'timeAgo(t)', 'parameters': ['t']},
+      },
+      'theme': {
+        'onSurface': '#FF111111',
+        'dark': {'onSurface': '#FFEEEEEE'},
+      },
+    },
+    'layouts': {'list': screen('list'), 'badge': screen('badge')},
+  });
+}
+
 /// Taps node [id] of the layout shown on top.
 Future<void> tapNode(WidgetTester tester, String id) async {
   final box = tester.widget<NodeView>(find.byType(NodeView).last).tree.boxOf(id)!;
@@ -393,5 +467,42 @@ void main() {
     await frames(tester);
     await tapNode(tester, 'buy');
     expect(find.text('Pro'), findsOneWidget);
+  });
+
+  testWidgets('values every screen shares: one live load for two widgets, relative times, the theme', (tester) async {
+    FormulaClock.pinned = DateTime(2026, 11, 11, 15);
+    addTearDown(() => FormulaClock.pinned = null);
+    final cloud = BackendCloudDatabase(backend: MemoryDocumentBackend());
+    addTearDown(cloud.dispose);
+    await cloud.addDocument('cards', {'sentAt': '2026-11-11T14:58:00'}, id: 'a');
+    final codelessly = Codelessly.fromBundle(
+      sharedCards(),
+      config: CodelesslyConfig(services: Services(cloud: cloud, analytics: const NoAnalytics())),
+      fonts: const NoFontFetcher(),
+    );
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(MaterialApp(home: sharedLiveData(codelessly)));
+    await frames(tester);
+    String shown(String id) => tester
+        .widgetList<NodeView>(find.byType(NodeView))
+        .map((v) => v.tree.boxOf('$id-label'))
+        .firstWhere((b) => b != null)!
+        .node!
+        .prop(TextProps.text);
+    expect(shown('list'), '1 · 2m');
+    expect(shown('badge'), '1 · 2m');
+    expect(codelessly.appData.opened, 1, reason: 'the second widget shares the first one\'s subscription');
+
+    await cloud.addDocument('cards', {'sentAt': '2026-11-11T15:00:00'}, id: 'b');
+    await frames(tester);
+    expect(shown('badge'), '2 · now');
+
+    FormulaClock.pinned = DateTime(2026, 11, 11, 18);
+    FormulaClock.minutes.tick();
+    await tester.pump();
+    expect(shown('list'), '2 · 3h');
+
+    expect(projectThemeValues(codelessly)['onSurface'], '#FFEEEEEE');
+    expect(themeValues(codelessly.publishModel!.theme, dark: false)['onSurface'], '#FF111111');
   });
 }

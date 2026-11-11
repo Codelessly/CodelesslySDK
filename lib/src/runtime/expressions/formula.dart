@@ -119,8 +119,13 @@ abstract interface class FormulaReadStatus {
 ///    addMinutes, addHours,
 ///    addDays, addMonths, diffMinutes, diffHours, diffDays, year, month, day,
 ///    hour, minute, second, weekday and daysInMonth, plus addSeconds,
-///    diffSeconds and formatDuration. Formulas using now() or today() rebuild
-///    every second while listened to. Dates are ISO 8601 text such as
+///    diffSeconds and formatDuration; timeAgo(date, style?, locale?,
+///    labels?) (alias formatRelative) for relative times (`5m`, `3h`,
+///    `Yesterday`, `Mar 4`; `5 minutes ago` in the long style), isToday,
+///    isPast, isFuture, isSameDay, isBefore and isAfter. A formula using
+///    now() rebuilds every second while shown; one using today(), timeAgo,
+///    isToday, isPast or isFuture (and no now()) every minute, and nowMs() every frame ([ClockTick]). So does
+///    a formula calling a function variable or computed variable that does. Dates are ISO 8601 text such as
 ///    `2026-10-21T14:30:00.000`; a date argument can also be epoch
 ///    milliseconds or a Firestore timestamp.
 ///  - locale-aware formatting with intl, taking a locale such as `ar_EG`,
@@ -221,7 +226,8 @@ class FormulaEvaluator {
 
   static final RegExp _scriptCallPattern = RegExp(r'\bscript\s*\.\s*[a-zA-Z_$][a-zA-Z0-9_$]*\s*\(');
 
-  /// Whether [expression] reads the clock (`now()` or `today()`), so its
+  /// Whether [expression] reads the clock (`now()`, `today()` or a
+  /// function that compares with now, such as `timeAgo(date)`), so its
   /// value changes as time passes.
   static bool readsClock(String expression) =>
       _clockCall.hasMatch(expression.replaceAll(_quoted, ''));
@@ -231,7 +237,30 @@ class FormulaEvaluator {
       .allMatches(text)
       .any((match) => readsClock(match.namedGroup('expr')!));
 
-  static final RegExp _clockCall = RegExp(r'\b(now|today)\s*\(');
+  /// How often [expression]'s value can change as time passes: every frame
+  /// (`nowMs()`), every second (`now()`), every minute (`today()`,
+  /// `timeAgo(date)`, `isToday(date)`), or null when it doesn't read the
+  /// clock.
+  static ClockTick? clockTick(String expression) {
+    final String code = expression.replaceAll(_quoted, '');
+    if (_frameClockCall.hasMatch(code)) return ClockTick.frame;
+    if (_secondClockCall.hasMatch(code)) return ClockTick.second;
+    if (_clockCall.hasMatch(code)) return ClockTick.minute;
+    return null;
+  }
+
+  /// The finest [clockTick] of the formulas in [text].
+  static ClockTick? textClockTick(String text) {
+    ClockTick? out;
+    for (final match in formulaRegex.allMatches(text)) {
+      out = clockTick(match.namedGroup('expr')!)?.finer(out) ?? out;
+    }
+    return out;
+  }
+
+  /// The functions that read the clock: [clockTick] and [readsClock].
+  static final RegExp _clockCall = RegExp(r'\b(now|today|timeAgo|formatRelative|isToday|isPast|isFuture)\s*\(');
+  static final RegExp _secondClockCall = RegExp(r'\bnow\s*\(');
 
   /// Whether [expression] reads the millisecond clock (`nowMs()`), so its
   /// value changes from frame to frame.
@@ -242,6 +271,7 @@ class FormulaEvaluator {
   static bool textReadsFrameClock(String text) => formulaRegex
       .allMatches(text)
       .any((match) => readsFrameClock(match.namedGroup('expr')!));
+
 
   static final RegExp _frameClockCall = RegExp(r'\bnowMs\s*\(');
 
@@ -683,8 +713,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'without',
-      'without(list, other)',
-      'without(all, picked)',
+      'without(list, other or item)',
+      'without(held, 64)',
     ),
     FormulaFunctionDoc(
       'concat',
@@ -992,6 +1022,47 @@ class FormulaEvaluator {
       'diffDays',
       'diffDays(from, to)',
       'diffDays(today(), dueDate) → 5',
+    ),
+    FormulaFunctionDoc(
+      'timeAgo',
+      'timeAgo(date, style?, locale?, labels?)',
+      'timeAgo(sentAt) → now · 5m · 3h · Yesterday · 3d · Mar 4 · '
+          'timeAgo(sentAt, "long") → 5 minutes ago (alias formatRelative)',
+    ),
+    FormulaFunctionDoc(
+      'formatRelative',
+      'formatRelative(date, style?, locale?, labels?)',
+      'formatRelative(sentAt) → 3h (the same as timeAgo)',
+    ),
+    FormulaFunctionDoc(
+      'isToday',
+      'isToday(date)',
+      'isToday(sentAt) → true',
+    ),
+    FormulaFunctionDoc(
+      'isPast',
+      'isPast(date)',
+      'isPast(expiresAt) → true once it has passed (checked every minute)',
+    ),
+    FormulaFunctionDoc(
+      'isFuture',
+      'isFuture(date)',
+      'isFuture(startsAt) → true until it comes (checked every minute)',
+    ),
+    FormulaFunctionDoc(
+      'isSameDay',
+      'isSameDay(a, b)',
+      'isSameDay(a.sentAt, b.sentAt) → false',
+    ),
+    FormulaFunctionDoc(
+      'isBefore',
+      'isBefore(a, b)',
+      'isBefore(expiresAt, now()) → true',
+    ),
+    FormulaFunctionDoc(
+      'isAfter',
+      'isAfter(a, b)',
+      'isAfter(startsAt, now()) → false',
     ),
     FormulaFunctionDoc('year', 'year(date)', 'year("2026-10-21") → 2026'),
     FormulaFunctionDoc('month', 'month(date)', 'month("2026-10-21") → 10'),
@@ -2269,6 +2340,101 @@ String? _formatDuration(Object? seconds, Object? pattern) {
   };
 }
 
+/// The words [_timeAgo] uses by default, by style: text or plural forms
+/// (`{one: …, other: …}`) with `{n}` for the count. A `labels` map given to
+/// `timeAgo` replaces any of them (another language, other wording).
+const Map<String, Map<String, Object>> _timeAgoLabels = {
+  'short': {
+    'now': 'now',
+    'minutes': '{n}m',
+    'hours': '{n}h',
+    'days': '{n}d',
+    'yesterday': 'Yesterday',
+    'inMinutes': 'in {n}m',
+    'inHours': 'in {n}h',
+    'inDays': 'in {n}d',
+    'tomorrow': 'Tomorrow',
+  },
+  'long': {
+    'now': 'just now',
+    'minutes': {'one': '{n} minute ago', 'other': '{n} minutes ago'},
+    'hours': {'one': '{n} hour ago', 'other': '{n} hours ago'},
+    'days': {'one': '{n} day ago', 'other': '{n} days ago'},
+    'yesterday': 'Yesterday',
+    'inMinutes': {'one': 'in {n} minute', 'other': 'in {n} minutes'},
+    'inHours': {'one': 'in {n} hour', 'other': 'in {n} hours'},
+    'inDays': {'one': 'in {n} day', 'other': 'in {n} days'},
+    'tomorrow': 'Tomorrow',
+  },
+};
+
+/// `timeAgo(date, style?, locale?, labels?)`: how long ago (or how soon)
+/// [value] is from now, the way feeds and inboxes write it:
+///
+/// * under a minute: `now` (`just now` in the long style);
+/// * under an hour: `5m` (`5 minutes ago`);
+/// * under a day: `3h` (`3 hours ago`);
+/// * the calendar day before today: `Yesterday`;
+/// * under a week: `3d` (`3 days ago`);
+/// * else the date, `Mar 4` this year and `Mar 4, 2025` another
+///   (`March 4`, `March 4, 2025` in the long style), in [locale]'s words.
+///
+/// A date to come reads `in 5m`, `in 3h`, `Tomorrow`, `in 3d`, then the
+/// date. [labels] replaces the words (keys: now, minutes, hours, days,
+/// yesterday, inMinutes, inHours, inDays, tomorrow; text or plural forms
+/// with `{n}`). Counts are written in [locale]'s digits. Null when [value]
+/// isn't a date.
+String? _timeAgo(Object? value, Object? style, Object? locale, Object? labels) {
+  final DateTime? date = _toDate(value)?.toLocal();
+  if (date == null) return null;
+  // A map in place of the style or the locale is the labels.
+  if (style is Map) (style, labels) = (null, style);
+  if (locale is Map) (locale, labels) = (null, locale);
+  final String styleName = FormulaEvaluator.stringify(style).trim() == 'long' ? 'long' : 'short';
+  final Map<String, Object> defaults = _timeAgoLabels[styleName]!;
+  String say(String key, [int? n]) {
+    final Object? label = (labels is Map ? labels[key] : null) ?? defaults[key];
+    if (label is Map) return _pluralForms(n ?? 0, label, locale);
+    final String text = FormulaEvaluator.stringify(label);
+    if (n == null || !text.contains('{n}')) return text;
+    return text.replaceAll('{n}', _localeNumber(n, 0, locale ?? _defaultLocale));
+  }
+
+  final DateTime now = FormulaClock.now().toLocal();
+  final Duration diff = now.difference(date);
+  final bool past = !diff.isNegative;
+  final Duration size = diff.abs();
+  final int calendarDays = _diffDays(date, now)!;
+  if (size.inMinutes < 1) return say('now');
+  if (size.inHours < 1) return say(past ? 'minutes' : 'inMinutes', size.inMinutes);
+  if (size.inDays < 1) return say(past ? 'hours' : 'inHours', size.inHours);
+  if (calendarDays == 1) return say('yesterday');
+  if (calendarDays == -1) return say('tomorrow');
+  if (calendarDays.abs() < 7) return say(past ? 'days' : 'inDays', calendarDays.abs());
+  final bool long = styleName == 'long';
+  final String pattern = date.year == now.year
+      ? (long ? DateFormat.MONTH_DAY : DateFormat.ABBR_MONTH_DAY)
+      : (long ? DateFormat.YEAR_MONTH_DAY : DateFormat.YEAR_ABBR_MONTH_DAY);
+  return (DateFormat(null, _dateLocale(locale))..addPattern(pattern)).format(date);
+}
+
+/// Whether [a] and [b] fall on the same calendar day (local time).
+bool? _sameDay(Object? a, Object? b) {
+  final DateTime? x = _toDate(a)?.toLocal();
+  final DateTime? y = _toDate(b)?.toLocal();
+  if (x == null || y == null) return null;
+  return x.year == y.year && x.month == y.month && x.day == y.day;
+}
+
+/// `isBefore(a, b)` (or after): whether date [a] is before [b]; false when
+/// either isn't a date.
+bool _dateOrder(Object? a, Object? b, {required bool before}) {
+  final DateTime? x = _toDate(a);
+  final DateTime? y = _toDate(b);
+  if (x == null || y == null) return false;
+  return before ? x.isBefore(y) : x.isAfter(y);
+}
+
 const List<String> _monthNames = [
   'January',
   'February',
@@ -2829,11 +2995,16 @@ final Map<String, _Function> _functions = {
     for (final value in a)
       if (value is Iterable) ...value else ?value,
   ],
-  'without': (a) => [
-    for (final item in _values(_arg(a, 0), null))
-      if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
-        item,
-  ],
+  // `other` is a list of items to leave out, or one item (`without(held,
+  // 64)`), as concat and append take either.
+  'without': (a) {
+    final other = _arg(a, 1);
+    final out = other is Iterable ? other : [other];
+    return [
+      for (final item in _values(_arg(a, 0), null))
+        if (!out.any((o) => _looseEquals(item, o))) item,
+    ];
+  },
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
   'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
@@ -3041,6 +3212,14 @@ final Map<String, _Function> _functions = {
   'diffSeconds': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inSeconds,
   'formatDuration': (a) => _formatDuration(_arg(a, 0), _arg(a, 1)),
   'diffMinutes': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inMinutes,
+  'timeAgo': (a) => _timeAgo(_arg(a, 0), _arg(a, 1), _arg(a, 2), _arg(a, 3)),
+  'formatRelative': (a) => _timeAgo(_arg(a, 0), _arg(a, 1), _arg(a, 2), _arg(a, 3)),
+  'isToday': (a) => _sameDay(_arg(a, 0), FormulaClock.now()),
+  'isSameDay': (a) => _sameDay(_arg(a, 0), _arg(a, 1)),
+  'isPast': (a) => _dateOrder(_arg(a, 0), FormulaClock.now(), before: true),
+  'isFuture': (a) => _dateOrder(_arg(a, 0), FormulaClock.now(), before: false),
+  'isBefore': (a) => _dateOrder(_arg(a, 0), _arg(a, 1), before: true),
+  'isAfter': (a) => _dateOrder(_arg(a, 0), _arg(a, 1), before: false),
   'diffHours': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inHours,
   'diffDays': (a) => _diffDays(_arg(a, 0), _arg(a, 1)),
   'year': (a) => _toDate(_arg(a, 0))?.year,
@@ -3665,17 +3844,23 @@ class _Parser {
   }
 
   /// The quoted text at [pos], without its quotes: a backslash before the
-  /// quote (`'Won\'t'`) keeps the quote in the text; other backslashes are
-  /// kept as written.
+  /// quote (`'Won\'t'`) keeps the quote in the text, `\n` is a line break
+  /// and `\t` a tab (`join(lines, '\n')`); other backslashes are kept as
+  /// written (`matches(code, '\d+')`).
   String _quotedText() {
     final String quote = source[pos];
     final StringBuffer text = StringBuffer();
     int i = pos + 1;
     while (i < source.length && source[i] != quote) {
-      if (source[i] == r'\' &&
-          i + 1 < source.length &&
-          source[i + 1] == quote) {
-        i++;
+      if (source[i] == r'\' && i + 1 < source.length) {
+        final next = source[i + 1];
+        if (next == quote) {
+          i++;
+        } else if (next == 'n' || next == 't') {
+          text.write(next == 'n' ? '\n' : '\t');
+          i += 2;
+          continue;
+        }
       }
       text.write(source[i]);
       i++;
