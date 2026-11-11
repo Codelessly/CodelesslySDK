@@ -299,7 +299,9 @@ void main() {
     await tester.pump();
     expect(s['count'], 1);
     expect(textOf(s.tree, 'label'), 'Count 1');
-    expect(NodeBox.debugApplyCounts.keys, ['label']);
+    // The label's text is set in place (NodeBox._retextOnly): no box
+    // re-applies, the label included.
+    expect(NodeBox.debugApplyCounts.keys, isEmpty);
     await tester.tapAt(s.center('button'));
     await tester.tapAt(s.center('other'));
     await tester.pump();

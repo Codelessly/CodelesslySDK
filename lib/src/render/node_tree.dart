@@ -194,8 +194,31 @@ class NodeTree {
         for (final box in pending) {
           if (identical(_boxes[box.key], box)) box._apply();
         }
+        remeasure();
       });
     });
+  }
+
+  /// Lays every box out again from scratch, as after an edit: what fonts
+  /// changed (a family that loaded after the first layout) is measured
+  /// again. Paragraphs inside stretched children of a hugging row/column
+  /// sit behind relayout boundaries, and islands (chips, buttons) cache the
+  /// intrinsic sizes they measured, so every render object below each box
+  /// is marked, then the hugging layouts above it.
+  void remeasure() {
+    void markAll(RenderObject o) {
+      o.markNeedsLayout();
+      o.visitChildren(markAll);
+    }
+
+    for (final box in _boxes.values.toList()) {
+      if (!box.attached) continue;
+      // Applied again as after an edit: islands rebuild their widgets
+      // (a chip measures its label anew).
+      box._apply();
+      markAll(box);
+      box._relayoutHuggingAncestors();
+    }
   }
 
   final NodeSource source;
@@ -415,6 +438,56 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   Slot _slot;
   @override
   Slot get slot => _slot;
+
+  // ---- adaptive repaint boundaries -------------------------------------------
+  //
+  // A running app's box that its data keeps changing (a readout ticking with
+  // a simulation, a live chart, a clock) gets a layer of its own after three
+  // changes within two seconds: its repaints then stay in that layer instead
+  // of repainting what's around it (shadows, gradients, big lists), as a
+  // Flutter author would place a RepaintBoundary. Items of a list don't: the
+  // list is the boundary (RenderCollection).
+  bool _ownLayer = false;
+  int _recentChanges = 0, _windowStartMs = 0;
+  static final Stopwatch _clock = Stopwatch()..start();
+  static const _repeaters = {'listView', 'gridView', 'pageView', 'tableView'};
+
+  /// Some boxes are worth a layer from the start: one whose content moves
+  /// on its own (a transform gesture: pinch, pan) and one that's expensive
+  /// to paint again (a large blurred shadow), so a change elsewhere on the
+  /// screen doesn't repaint them.
+  bool _heavy = false;
+
+  static bool _isHeavy(Node n) =>
+      n.behaviors.transformGesture != null ||
+      n.decoration.effects.any((e) => e.visible && e.type == api.EffectType.dropShadow && e.blurRadius >= 16);
+
+  void _updateHeavy(Node n) {
+    final heavy = tree.animates && _isHeavy(n);
+    if (heavy == _heavy) return;
+    _heavy = heavy;
+    markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
+  @override
+  bool get isRepaintBoundary => _ownLayer || _heavy;
+
+  /// Whether this box paints in a layer of its own (it changed often).
+  bool get hasOwnLayer => _ownLayer;
+
+  void _noteDataChange() {
+    if (_ownLayer || !tree.animates || _repeaters.contains(_slot.parent?.type)) return;
+    final now = _clock.elapsedMilliseconds;
+    if (now - _windowStartMs > 2000) {
+      _windowStartMs = now;
+      _recentChanges = 0;
+    }
+    if (++_recentChanges < 3) return;
+    _ownLayer = true;
+    markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
   Node? _node;
 
   /// The node as rendered.
@@ -423,6 +496,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   static final Map<String, int> debugApplyCounts = {};
   static bool debugCountApplies = false;
+
+  /// Paints per node id while [debugCountPaints] is on (tools, tests).
+  static final Map<String, int> debugPaintCounts = {};
+  static bool debugCountPaints = false;
 
   /// The node's own box (margin excluded).
   RenderBox? contentBox;
@@ -467,7 +544,88 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   // Font notifications are deferred by _apply's shared tree guard. Keep
   // ordinary bindings synchronous so motion observes a change this frame.
-  void _bindingsChanged() => _apply();
+  //
+  // A binding change that leaves the node as it was (a list whose items
+  // moved but whose count didn't: its item scopes were updated while it
+  // resolved) re-applies nothing, and one that only changes a solid fill or
+  // stroke repaints without relayout (render-object boxes only). A grid of thousands of bound cells
+  // then costs what its changed cells cost, not a rebuild of the grid.
+  void _bindingsChanged() {
+    final old = _applied;
+    // A box hosting islands (a table, a paged or reordering list, an input,
+    // a chart) hands its widgets what they read when it applies: always
+    // re-apply it.
+    if (tree._fontsPending || old == null || _islands.isNotEmpty) {
+      _apply();
+      if (old != null) _noteDataChange();
+      return;
+    }
+    final bound = tree.resolveBound(id, instance: instance);
+    final n = bound?.node;
+    if (bound != null && n != null && bound.collapsed == _collapsed) {
+      if (n == old) {
+        _watchBindings(bound.watch);
+        return;
+      }
+      if (_repaintOnly(old, n) || _retextOnly(old, n)) {
+        _watchBindings(bound.watch);
+        _noteDataChange();
+        return;
+      }
+    }
+    _apply(given: (bound,));
+    _noteDataChange();
+  }
+
+  /// Applies [n] when it is a text that differs from [old] only in its
+  /// characters, runs or style (a readout ticking every frame): sets the
+  /// paragraph's text in place. Its layout, if it changes, propagates as any
+  /// Flutter text's does; nothing around it re-applies. False (nothing done)
+  /// for any other change.
+  bool _retextOnly(Node old, Node n) {
+    if (n.type != 'text' || old.type != 'text') return false;
+    if (old.copyWith(props: n.props) != n) return false;
+    final sameOtherwise = old.props
+        .set<Object?>(TextProps.text, n.prop(TextProps.text))
+        .set<Object?>(TextProps.runs, n.prop(TextProps.runs))
+        .set<Object?>(TextProps.style, n.prop(TextProps.style));
+    if (sameOtherwise != n.props) return false;
+    final paragraph = _objects['paragraph'];
+    if (paragraph is! RenderParagraph) return false;
+    paragraph.text = _textSpan(n);
+    _node = n;
+    _applied = n;
+    return true;
+  }
+
+  /// Applies [n] when it differs from [old] only in the colors of a native
+  /// (solid) fill or stroke: sets the decoration's colors and repaints.
+  /// False (nothing done) for any other change.
+  bool _repaintOnly(Node old, Node n) {
+    final od = old.decoration, nd = n.decoration;
+    if (identical(od, nd) || od.copyWith(fills: nd.fills, strokes: nd.strokes) != nd) return false;
+    if (old.copyWith(decoration: nd) != n) return false;
+    final before = _PaintPlan.of(old), after = _PaintPlan.of(n);
+    if (!before.native || !after.native || before.foreground || after.foreground) return false;
+    if ((before.border == null) != (after.border == null)) return false;
+    final deco = _objects['decoration'];
+    if (deco is! RenderDecoratedBox) return false;
+    final current = deco.decoration;
+    if (current is! BoxDecoration) return false;
+    final stroke = _objects['stroke'];
+    if (after.border != null && stroke is! RenderDecoratedBox) return false;
+    deco.decoration = BoxDecoration(
+      boxShadow: current.boxShadow,
+      borderRadius: current.borderRadius,
+      color: after.fill,
+    );
+    if (after.border != null) {
+      (stroke! as RenderDecoratedBox).decoration = BoxDecoration(borderRadius: current.borderRadius, border: after.border);
+    }
+    _node = n;
+    _applied = n;
+    return true;
+  }
 
   @override
   void performLayout() {
@@ -504,6 +662,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (debugCountPaints) debugPaintCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
     tree.observer?.nodePainted(this);
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return;
     super.paint(context, offset);
@@ -516,6 +675,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   @override
   bool hitTest(BoxHitTestResult result, {required Offset position}) {
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return false;
+    // A chain rebuilt after this frame's layout (a font arriving in a
+    // post-frame callback) hasn't been laid out yet, and the mouse tracker
+    // hit tests after frames: there's nothing drawn to hit. (Hit testing it
+    // threw in debug builds, inside the mouse tracker, which then refused
+    // every later pointer event.)
+    final c = child;
+    if (c != null && !c.hasSize) return false;
     // A dragged node is hit where it is drawn, outside its layout box.
     if (child case final RenderDragMotion drag) {
       if (!drag.hitTest(result, position: position)) return false;
@@ -624,13 +790,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   Node? _applied;
 
-  void _apply() {
+  void _apply({(BoundNode?,)? given}) {
     if (tree._fontsPending) {
       tree._afterFonts.add(this);
       return;
     }
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
-    final bound = tree.resolveBound(id, instance: instance);
+    final bound = given != null ? given.$1 : tree.resolveBound(id, instance: instance);
     final resolved = bound?.node;
     // Bindings give a new node each time: the same one keeps its identity,
     // which the children's slots compare (else re-applying a row whose
@@ -660,6 +826,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _node = n;
     _applied = n;
     contentBox = null;
+    if (n != null) _updateHeavy(n);
     if (n == null) {
       _releaseContainerChildren();
       _wire(const []);
@@ -1506,8 +1673,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
           );
       if (pos.align case final double a) return at(FreeformAxisMode.align, alignment: a);
       final relative = pos.relative;
-      // Pinned to both edges wins over fill (Flutter's Positioned(left,
-      // right)): the pins say where it spans.
+      // A fill child pinned to both edges fills the space between its
+      // insets; pinned to one edge (or none) it fills the container.
       if (expands && !(pos.isStretch && !isScrollAxis)) return at(FreeformAxisMode.fill);
       if (isScrollAxis) return at(FreeformAxisMode.start);
       if (pos.isStretch && !wraps) {
@@ -1834,6 +2001,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 /// How a shell paints its fills and strokes: one solid fill and at most one
 /// plain solid stroke on every side are the decoration's color and border;
 /// anything richer is a [RenderNodePaint] layer.
+Color? _visible(Color? c) => c == null || c.a == 0 ? null : c;
+
 class _PaintPlan {
   _PaintPlan(this.native, this.fill, this.border, this.foreground);
 
@@ -1864,7 +2033,9 @@ class _PaintPlan {
     final strokeColor = strokes.isEmpty ? null : strokes.first.effectiveColor?.flutter;
     return _PaintPlan(
       true,
-      fills.isEmpty ? null : fills.first.effectiveColor?.flutter,
+      // A transparent fill draws nothing: leave it out (most cells of a
+      // sparse board are empty).
+      fills.isEmpty ? null : _visible(fills.first.effectiveColor?.flutter),
       strokeColor == null
           ? null
           : Border.all(strokeAlign: d.strokeAlign.value, color: strokeColor, width: d.strokeWidth),
