@@ -1,5 +1,5 @@
 // A link opens a screen with the screens beneath it (ScreenRoute.under),
-// and an overlay screen's route lets the one beneath show.
+// and a translucent screen's route lets the one beneath show.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/widgets.dart';
@@ -14,7 +14,7 @@ PublishModel museum() {
     layouts: {
       'wall': screen('wall', 'layer/:layer'),
       'specimen': screen('specimen', 'specimen/:id', const api.ScreenRoute(under: '/')),
-      'photo': screen('photo', 'specimen/:id/photo', const api.ScreenRoute(under: 'specimen/:id', overlay: true)),
+      'photo': screen('photo', 'specimen/:id/photo', const api.ScreenRoute(under: 'specimen/:id', translucent: true)),
       'glossary': screen('glossary', 'glossary', const api.ScreenRoute(under: '/')),
       'loop': screen('loop', 'loop', const api.ScreenRoute(under: 'loop')),
       'lost': screen('lost', '*path'),
@@ -33,13 +33,13 @@ void main() {
     expect(CanvasLocation.beneath(m, '/loop'), isEmpty);
   });
 
-  test('an overlay screen', () {
+  test('a translucent screen', () {
     final m = museum();
-    expect(CanvasLocation.isOverlay(m, '/specimen/a/photo'), isTrue);
-    expect(CanvasLocation.isOverlay(m, '/specimen/a'), isFalse);
+    expect(CanvasLocation.isTranslucent(m, '/specimen/a/photo'), isTrue);
+    expect(CanvasLocation.isTranslucent(m, '/specimen/a'), isFalse);
   });
 
-  test('initial routes: the stack beneath, the overlay route not opaque', () async {
+  test('initial routes: the stack beneath, the translucent route not opaque', () async {
     final app = Codelessly(
       config: const CodelesslyConfig(projectId: 'museum'),
       loader: MemoryPublishLoader(PublishBundle(model: museum(), layouts: const {})),
