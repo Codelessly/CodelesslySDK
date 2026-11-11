@@ -15,6 +15,7 @@ import '../runtime/actions/capture.dart';
 import '../runtime/actions/presentation_scope.dart';
 import '../runtime/actions/ui.dart';
 import '../services/services.dart' show Services;
+import 'backdrop_screens.dart';
 import 'codelessly.dart';
 import 'codelessly_widget.dart';
 import 'viewport.dart';
@@ -392,9 +393,10 @@ class _PresenterUi extends NavigatorActionUi {
 /// );
 /// ```
 ///
-/// It also starts the project's automations ([Codelessly.automations]) and,
-/// with [capture], wraps [child] in a [CodelesslyCaptureScope] so a
-/// `captureScreenshot` action with `target: app` captures the whole app.
+/// It also starts the project's automations ([Codelessly.automations]),
+/// draws the project's backdrop screens beneath [child] ([backdrops], a
+/// [CodelesslyBackdropHost]) and, with [capture], wraps [child] in a
+/// [CodelesslyCaptureScope] so a `captureScreenshot` action with `target: app` captures the whole app.
 class CodelesslyPresenterHost extends StatefulWidget {
   const CodelesslyPresenterHost({
     super.key,
@@ -402,6 +404,7 @@ class CodelesslyPresenterHost extends StatefulWidget {
     this.navigatorKey,
     this.capture = true,
     this.automations = true,
+    this.backdrops = true,
     this.onNavigate,
     this.onActionError,
     required this.child,
@@ -420,6 +423,11 @@ class CodelesslyPresenterHost extends StatefulWidget {
 
   /// Starts the project's automations.
   final bool automations;
+
+  /// Draws the project's backdrop screens beneath [child] (a
+  /// [CodelesslyBackdropHost]): as `MaterialApp.builder`, [child] is the
+  /// app's navigator. Don't also put a [CodelesslyBackdropHost] there.
+  final bool backdrops;
 
   /// Handles the navigation actions of presented layouts first.
   final CodelesslyNavigationHandler? onNavigate;
@@ -489,8 +497,9 @@ class _CodelesslyPresenterHostState extends State<CodelesslyPresenterHost> {
   @override
   Widget build(BuildContext context) {
     Widget child = widget.child;
-    if (widget.capture) child = CodelesslyCaptureScope(child: child);
     final c = _codelessly;
+    if (c != null && widget.backdrops) child = CodelesslyBackdropHost(codelessly: c, onActionError: widget.onActionError, child: child);
+    if (widget.capture) child = CodelesslyCaptureScope(child: child);
     return c == null ? child : CodelesslyScope(codelessly: c, child: child);
   }
 }

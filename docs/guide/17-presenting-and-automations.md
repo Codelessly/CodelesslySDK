@@ -24,6 +24,25 @@ starts the project's automations (`automations: false` to leave them off), and w
 `onNavigate` and `onActionError` apply to the presented layouts. (It is not the project's overlay screens, the
 layouts drawn above every screen, which `CodelesslyWidget` adds through `CodelesslyOverlayHost` by itself.)
 
+The host also draws the project's **backdrop screens** (`backdrops: false` to leave them out): canvases marked
+"Draw beneath every screen" (`CanvasProps.backdrop`, listed in `PublishModel.backdrops`), drawn once beneath the
+app's navigator, outside navigation, so route transitions move only your screens while the backdrop (a sky, an
+animated starfield) stays perfectly still and keeps its state. A screen shows it through where it paints nothing:
+give its canvas no background fill. While backdrops are shown, `CodelesslyPageRoute` plays the theme's page
+transition without the scrim or surface color it would paint behind the screens. Without a presenter host, use
+`CodelesslyBackdropHost` the same way:
+
+```dart
+MaterialApp(
+  builder: (context, child) => CodelesslyBackdropHost(codelessly: codelessly, child: child!),
+  onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+);
+```
+
+A backdrop can't live inside the navigator (an opaque route stops the navigator painting what is beneath it), so
+it needs the builder: a `CodelesslyWidget` alone doesn't add it. A canvas that is both an overlay and a backdrop is
+an overlay.
+
 ## Presenting a layout
 
 ```dart
