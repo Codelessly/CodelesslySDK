@@ -473,7 +473,7 @@ class Codelessly extends ChangeNotifier {
     // The layout's characters: on the web those beyond a Google Font's
     // `latin` subset come in a file of their own, for the fonts it lists and
     // those asked for when first drawn.
-    if (kIsWeb) fonts.addText(jsonEncode(layout.toJson()));
+    if (kIsWeb) await fonts.addText(jsonEncode(layout.toJson())).timeout(config.fontTimeout, onTimeout: () {});
     if (fontsOf.isNotEmpty) {
       await fonts.load(fontsOf).timeout(config.fontTimeout, onTimeout: () {});
     }
