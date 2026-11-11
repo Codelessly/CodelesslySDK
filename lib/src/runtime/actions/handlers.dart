@@ -566,6 +566,7 @@ String _fieldText(ActionRun run, String nodeId) {
 }
 
 Future<void> _submitForm(SubmitFormAction a, ActionRun run) async {
+  if (a.service == FormService.local) return _submitLocalForm(a, run);
   final email = _fieldText(run, a.emailField).trim();
   if (email.isEmpty) throw StateError('No email to submit');
   final response = await http.post(
@@ -584,6 +585,66 @@ Future<void> _submitForm(SubmitFormAction a, ActionRun run) async {
     }),
   );
   if (response.statusCode >= 300) throw StateError('Submit failed: ${response.statusCode}');
+}
+
+/// Generic local submission: validation finishes before any response is stored.
+/// Persisting the response variable uses the SDK's normal variable persistence.
+Future<void> _submitLocalForm(SubmitFormAction a, ActionRun run) async {
+  Json outcome;
+  try {
+    final destination = a.responseVariable.trim();
+    if (destination.isNotEmpty) {
+      final found = variableOf(run.context.scope, destination);
+      if (found == null || found.$2.isComputed || found.$2.type != VariableType.list ||
+          (ValuePath.parse(destination)?.keys.isNotEmpty ?? true)) {
+        throw const _FormSubmissionFailure('invalid_response_variable', 'The response variable must be a mutable list.');
+      }
+    }
+    Object? payload = a.payload.trim().isEmpty ? <String, Object?>{} : run.evaluate(a.payload);
+    if (a.validationScript.trim().isNotEmpty) {
+      await runScriptAction(RunScriptAction(script: a.validationScript, arguments: a.validationArguments), run);
+      final validation = readMap(run.result);
+      if (validation == null || validation['valid'] is! bool) {
+        throw const _FormSubmissionFailure('invalid_validation_result', 'The validator must return {valid, errors?, payload?}.');
+      }
+      if (validation['valid'] != true) {
+        throw _FormSubmissionFailure('validation_failed', 'Please check the form answers.', readMap(validation['errors']) ?? const {});
+      }
+      if (validation.containsKey('payload')) payload = validation['payload'];
+    }
+    if (payload is! Map) throw const _FormSubmissionFailure('invalid_payload', 'The submission payload must be a JSON object.');
+    // Copy at the boundary: the response is a snapshot, not an alias of answers.
+    final snapshot = (jsonDecode(jsonEncode(payload)) as Map).cast<String, Object?>();
+    if (run.cancellation.isCancelled) return;
+    if (destination.isNotEmpty) {
+      final current = run.context.scope?.read(destination);
+      final rows = current is List ? [...current] : <Object?>[];
+      a.prepend ? rows.insert(0, snapshot) : rows.add(snapshot);
+      setVariableIn(run.context.scope, destination, rows);
+    }
+    outcome = {'ok': true, 'value': snapshot, 'error': null, 'errors': <String, Object?>{}};
+  } on _FormSubmissionFailure catch (e) {
+    outcome = {'ok': false, 'value': null, 'error': {'code': e.code, 'message': e.message}, 'errors': e.errors};
+  } on ScriptFailed catch (e) {
+    outcome = {'ok': false, 'value': null, 'error': {'code': 'validation_script_failed', 'message': e.message}, 'errors': <String, Object?>{}};
+  } catch (e) {
+    outcome = {'ok': false, 'value': null, 'error': {'code': 'invalid_payload', 'message': '$e'}, 'errors': <String, Object?>{}};
+  }
+  run.result = outcome;
+  if (a.resultVariable.trim().isNotEmpty) setVariableIn(run.context.scope, a.resultVariable.trim(), outcome);
+  if (outcome['ok'] == true) {
+    await run.run(a.onSuccess);
+  } else if (a.onError.isNotEmpty) {
+    await run.run(a.onError);
+  } else {
+    throw StateError((outcome['error'] as Map)['message'] as String);
+  }
+}
+
+class _FormSubmissionFailure implements Exception {
+  const _FormSubmissionFailure(this.code, this.message, [this.errors = const {}]);
+  final String code, message;
+  final Json errors;
 }
 
 void _focus(FocusAction a, ActionRun run) {
