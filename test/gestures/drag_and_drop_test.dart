@@ -85,7 +85,11 @@ Map<String, Object?> lane(String lane,
     };
 
 Future<Board> pump(WidgetTester tester,
-    {List<Json> cardActions = const [], List<Json> bActions = const [], Map<String, Object?> bTarget = const {}}) async {
+    {List<Json> cardActions = const [],
+    List<Json> bActions = const [],
+    Map<String, Object?> bTarget = const {},
+    Map<String, Object?> cardDraggable = const {},
+    Map<String, Object?> extraNodes = const {}}) async {
   tester.view.physicalSize = const Size(400, 500);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -102,6 +106,9 @@ Future<Board> pump(WidgetTester tester,
         target: bTarget),
   };
   (nodes['card_a']! as Map)['actions'] = cardActions;
+  final card = nodes['card_a']! as Map;
+  card['draggable'] = <String, Object?>{...(card['draggable'] as Map).cast<String, Object?>(), ...cardDraggable};
+  nodes.addAll(extraNodes);
   final doc = api.LayoutDocument.fromJson({'roots': ['board'], 'nodes': nodes});
   final values = ValuesScope({'drag': dragIdleValues});
   final scope = VariableScope([
@@ -184,6 +191,33 @@ void main() {
     expect(b.drag['active'], isFalse);
     expect(paragraphs(tester, 'One'), 1);
     expect(dropSlotOf(b.tree, 'list_b'), isNull);
+  });
+
+  testWidgets('a feedback node that hugs takes its content\'s size, not its design size', (tester) async {
+    await pump(tester, cardDraggable: {'feedbackNodeId': 'fb'}, extraNodes: {
+      // Designed 40 × 40 (the size a hug node is saved with), hugging
+      // a label that reads the drag: it must grow with the text.
+      'fb': {
+        'type': 'column',
+        'children': ['fb_text'],
+        'visible': false,
+        'layout': {'width': {'hug': 40}, 'height': {'hug': 40}},
+      },
+      'fb_text': {
+        'type': 'text',
+        'layout': {'width': {'hug': 40}, 'height': {'hug': 20}},
+        'props': {'text': r"${item.title} over ${= drag.over == '' ? 'nothing yet' : drag.over}"},
+      },
+    });
+    final start = textRect(tester, 'One').center;
+    final gesture = await dragTo(tester, start, start + const Offset(20, 30), release: false);
+    await tester.pump();
+    final label = textRect(tester, 'One over a', feedback: true);
+    expect(label.width, greaterThan(60));
+    expect(label.height, lessThan(30)); // one line, not squeezed into 40 wide
+    expect(tester.takeException(), isNull);
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 
   testWidgets('a full column refuses the drop (acceptIf) and nothing moves', (tester) async {

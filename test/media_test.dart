@@ -2,6 +2,7 @@
 // `path` widget and a box's path), icons, and the players' islands.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart';
+import 'package:codelessly_sdk/src/render/paint/material_icon_versions.dart';
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
 import 'package:codelessly_sdk/src/widgets/media_players.dart';
 import 'package:flutter/material.dart';
@@ -63,9 +64,18 @@ void main() {
   test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
         'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
+    // Without a version (an icon named in data): its latest version, since
+    // gstatic doesn't keep v1 of every icon.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),
-        'https://fonts.gstatic.com/s/i/materialicons/home/v16/24px.svg',
-        reason: 'without a version, the version the icon table knows');
+        'https://fonts.gstatic.com/s/i/materialicons/home/v16/24px.svg');
+    expect(IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': 'auto_awesome', 'style': 'rounded'}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/auto_awesome/v14/24px.svg');
+    // A name bound at runtime keeps the design icon's version: the name's own is used.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'bolt', 'style': 'rounded', 'version': 18}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/bolt/v10/24px.svg');
+    // A name the table doesn't know keeps its stored version.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'brand_new_icon', 'version': 3}),
+        'https://fonts.gstatic.com/s/i/materialicons/brand_new_icon/v3/24px.svg');
     // ios_share has no v1 SVG: without the table it drew nothing.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'ios_share', 'style': 'rounded'}),
         contains('/materialiconsround/ios_share/v'));
@@ -82,6 +92,32 @@ void main() {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'CUPERTINO_ICON', 'codepoint': 61708}),
         'https://icons.codelessly.com/cupertino/1.0.9/f10c.svg');
     expect(IconSources.urlOf({'source': 'image', 'image': 'https://x.com/a.png'}), 'https://x.com/a.png');
+  });
+
+  test("a Material icon named with Flutter's style suffix is served under its base name", () {
+    String? url(String name, [String? style]) =>
+        IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': name, 'style': ?style});
+    expect(url('download_rounded', 'rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/download/'));
+    expect(url('check_circle_outline_rounded', 'rounded'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsround/check_circle_outline/'));
+    expect(url('theater_comedy_outlined', 'outlined'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsoutlined/theater_comedy/'));
+    // With no style set, the suffix names it.
+    expect(url('playlist_add_rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/playlist_add/'));
+    expect(url('memory_sharp'), startsWith('https://fonts.gstatic.com/s/i/materialiconssharp/memory/'));
+    // Names that only contain the words are untouched.
+    expect(url('outlined_flag'), startsWith('https://fonts.gstatic.com/s/i/materialicons/outlined_flag/'));
+  });
+
+  test('a Material icon saved without its version is drawn from its current SVG', () {
+    const week = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'calendar_view_week', 'style': 'rounded'};
+    // Icons added after Material's first release have no v1 SVG.
+    expect(IconSources.urlOf(week),
+        'https://fonts.gstatic.com/s/i/materialiconsround/calendar_view_week/v${materialIconVersions['calendar_view_week']}/24px.svg');
+    // urlOf already gives the current version: no second try.
+    expect(IconSources.fallbackUrlOf(week), isNull);
+    expect(IconSources.fallbackUrlOf({'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star'}), isNull);
+    expect(IconSources.fallbackUrlOf({'source': 'image', 'image': 'https://x.com/a.png'}), isNull);
   });
 
   test('SVG paths parse, trim and dash', () {

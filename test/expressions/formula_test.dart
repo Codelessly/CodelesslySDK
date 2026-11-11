@@ -172,6 +172,8 @@ void main() {
       // A map drops keys instead of reading as an empty list.
       expect(eval("without({a: 1, b: 2, c: 3}, ['a', 'c'])"), {'b': 2});
       expect(eval("without({a: 1, b: 2}, 'a')"), {'b': 2});
+      expect(eval("without(syrups, 'honey')"), ['vanilla'], reason: 'one item, as append takes');
+      expect(eval('without([60, 64, 67], 64)'), [60, 67]);
     });
 
     test('member access', () {

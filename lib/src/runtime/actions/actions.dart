@@ -2,6 +2,7 @@
 /// ActionContext, and their triggers wired into the render tree.
 library;
 
+export 'app_data_sources.dart';
 export 'confirm_dialog.dart' show ConfirmRequest, ThemedConfirmDialog, isConfirmResult, showConfirmDialog;
 export 'context.dart';
 export 'feedback_theme.dart' show FeedbackTheme, FeedbackThemeScope, ResolvedFeedbackTheme;

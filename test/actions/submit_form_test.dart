@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 class Validator implements ScriptRunner {
@@ -20,4 +24,43 @@ void main(){
  test('malformed validator fails closed',()async{final h=FormHarness(runner:Validator({'valid':'yes'}));await h.submit({'validationScript':'validate'});expect(h.scope.read('responses'),isEmpty);expect((h.scope.read('result') as Map)['error'],containsPair('code','invalid_validation_result'));});
  test('missing destination and non-object payload fail without mutation',()async{final h=FormHarness();await h.submit({'responseVariable':'missing'});expect(h.scope.read('responses'),isEmpty);expect((h.scope.read('result') as Map)['error'],containsPair('code','invalid_response_variable'));await h.submit({'payload':'42'});expect(h.scope.read('responses'),isEmpty);expect((h.scope.read('result') as Map)['ok'],false);});
  test('prepend preserves the existing response order',()async{final h=FormHarness();await h.submit({'payload':r'${= {"id": "first"}}'});await h.submit({'payload':r'${= {"id": "second"}}','prepend':true});expect(h.scope.read('responses'),[{'id':'second'},{'id':'first'}]);});
+
+ group('older newsletter submissions',(){
+  // A layout saved before the built-in Mailchimp service was removed.
+  const legacy={'type':'submitForm','service':'mailchimp','emailField':'email','apiKey':'secret-us1','dataCenter':'us1','listId':'list','firstNameField':'first'};
+  Future<List<Object>> noNetwork(Future<void> Function() body)async{
+   final requests=<Object>[];
+   await HttpOverrides.runZoned(()=>http.runWithClient(body,()=>MockClient((r)async{requests.add(r.url);return http.Response('',200);})),
+    createHttpClient:(_){requests.add('dart:io HttpClient');throw StateError('no network in this test');});
+   return requests;
+  }
+  Future<(FormHarness,List<Object>)> run(Json action,{bool callbacks=true})async{
+   final h=FormHarness();
+   final requests=await noNetwork(()=>callbacks?h.submit(action):const CodelesslyActions().run(Node.fromJson({'type':'box','actions':[{'trigger':{'type':'click'},'actions':[action,{'type':'setVariable','variable':'success','value':'true'}]}]},id:'button')!,'click',h.context));
+   return (h,requests);
+  }
+  test('without callbacks: reported as the action error, chain stops, nothing sent',()async{
+   final (h,requests)=await run(legacy,callbacks:false);
+   expect(requests,isEmpty);
+   expect(h.failures,hasLength(1));
+   expect(h.failures.single,isA<ActionFailed>().having((e)=>e.action,'action','submitForm'));
+   expect('${h.failures.single}',contains('no longer supported'));
+   expect(h.scope.read('success'),false);
+  });
+  test('with callbacks: onError gets unsupported_service, nothing stored or sent',()async{
+   final (h,requests)=await run({...legacy});
+   expect(requests,isEmpty);
+   expect(h.failures,isEmpty);
+   expect(h.scope.read('responses'),isEmpty);
+   expect(h.scope.read('success'),false);
+   expect((h.scope.read('result') as Map)['error'],containsPair('code','unsupported_service'));
+  });
+  test('the pre-service shape and unknown services fail the same way',()async{
+   for(final json in <Json>[{'type':'submitForm','emailField':'email','apiKey':'k','dataCenter':'us1','listId':'l'},{'type':'submitForm','service':'someFutureService'}]){
+    final (h,requests)=await run(json,callbacks:false);
+    expect(requests,isEmpty);
+    expect(h.failures,hasLength(1),reason:'$json');
+   }
+  });
+ });
 }
