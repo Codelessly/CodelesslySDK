@@ -51,7 +51,7 @@ double rubberBand(double value, double lo, double hi, double overscroll) {
   return value;
 }
 
-/// The range a centre at [center] (with [half] its half extent) may move
+/// The range a center at [center] (with [half] its half extent) may move
 /// to so the box stays inside, or covers, [viewLo]..[viewHi], as an offset
 /// range from where it is. Unbounded for [api.GestureBounds.none].
 (double, double) boundsRange({
@@ -75,7 +75,7 @@ double rubberBand(double value, double lo, double hi, double overscroll) {
     lo = viewHi - half;
     hi = viewLo + half;
   } else {
-    // Cover, but too small to: centred.
+    // Cover, but too small to: centered.
     lo = hi = (viewLo + viewHi) / 2;
   }
   return (lo - center, hi - center);

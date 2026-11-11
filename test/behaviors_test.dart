@@ -22,7 +22,7 @@ Future<(NodeTree, RenderObject)> show(WidgetTester tester, LayoutDocument doc, {
 }
 
 void main() {
-  testWidgets('the design canvas draws behaviours at rest', (tester) async {
+  testWidgets('the design canvas draws behaviors at rest', (tester) async {
     final (tree, view) = await show(
         tester,
         page({
@@ -47,7 +47,7 @@ void main() {
           },
         }));
     // At its values (an entrance doesn't wait at its start), scaled about
-    // its centre.
+    // its center.
     expect(tree.boxOf('m')!.rectIn(view), const Rect.fromLTWH(20, 0, 80, 40));
     // A loop's first frame.
     expect(tree.boxOf('l')!.rectIn(view), const Rect.fromLTWH(110, 110, 20, 20));

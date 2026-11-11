@@ -136,7 +136,7 @@ class StorePurchaseService implements PurchaseService {
       throw StateError('Store product not found: ${product.storeId}');
     }
     final started = await store.buyNonConsumable(purchaseParam: PurchaseParam(productDetails: response.productDetails.first));
-    if (!started) _events.add(PaywallResult(PaywallOutcome.cancelled, productId: product.storeId));
+    if (!started) _events.add(PaywallResult(PaywallOutcome.canceled, productId: product.storeId));
   }
 
   @override
@@ -163,7 +163,7 @@ class StorePurchaseService implements PurchaseService {
           continue;
         case PurchaseStatus.error || PurchaseStatus.canceled:
           _events.add(PaywallResult(
-            purchase.status == PurchaseStatus.canceled ? PaywallOutcome.cancelled : PaywallOutcome.failed,
+            purchase.status == PurchaseStatus.canceled ? PaywallOutcome.canceled : PaywallOutcome.failed,
             productId: purchase.productID,
             error: purchase.error?.message,
           ));

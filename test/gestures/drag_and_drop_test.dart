@@ -228,32 +228,32 @@ void main() {
 
   testWidgets('drag.x/y and fx/fy give where the dragged node lands', (tester) async {
     final b = await pump(tester);
-    // The dragged node's centre is the pointer less the grab's distance
-    // from the node's centre. Column b spans x 160..320, y 0..400.
+    // The dragged node's center is the pointer less the grab's distance
+    // from the node's center. Column b spans x 160..320, y 0..400.
     final start = textRect(tester, 'One').center;
     final box = b.tree.boxOf('card_a')!.contentBox!;
     final card = box.localToGlobal(Offset.zero) & box.size;
-    final fromCentre = start - card.center;
+    final fromCenter = start - card.center;
     var to = const Offset(240, 300);
     final gesture = await dragTo(tester, start, to, release: false);
     var drag = b.drag;
-    var centre = to - fromCentre - const Offset(160, 0);
+    var center = to - fromCenter - const Offset(160, 0);
     expect(drag['over'], 'b');
-    expect(drag['x'] as double, closeTo(centre.dx, 0.5));
-    expect(drag['y'] as double, closeTo(centre.dy, 0.5));
-    expect(drag['fx'] as double, closeTo(centre.dx / 160, 0.01));
-    expect(drag['fy'] as double, closeTo(centre.dy / 400, 0.01));
+    expect(drag['x'] as double, closeTo(center.dx, 0.5));
+    expect(drag['y'] as double, closeTo(center.dy, 0.5));
+    expect(drag['fx'] as double, closeTo(center.dx / 160, 0.01));
+    expect(drag['fy'] as double, closeTo(center.dy / 400, 0.01));
     to = const Offset(250, 100);
     await gesture.moveTo(to);
     await tester.pump();
     drag = b.drag;
-    centre = to - fromCentre - const Offset(160, 0);
-    expect(drag['x'] as double, closeTo(centre.dx, 0.5));
-    expect(drag['fy'] as double, closeTo(centre.dy / 400, 0.01));
+    center = to - fromCenter - const Offset(160, 0);
+    expect(drag['x'] as double, closeTo(center.dx, 0.5));
+    expect(drag['fy'] as double, closeTo(center.dy / 400, 0.01));
     await gesture.up();
     await tester.pumpAndSettle();
     // The drop keeps where it landed for the drop's actions.
-    expect(b.drag['fy'] as double, closeTo(centre.dy / 400, 0.01));
+    expect(b.drag['fy'] as double, closeTo(center.dy / 400, 0.01));
   });
 
   testWidgets('reordering within a column', (tester) async {
@@ -384,7 +384,7 @@ void main() {
       return found!;
     }
 
-    testWidgets('a centred copy is held by its centre: drag.x/y is the pointer', (tester) async {
+    testWidgets('a centered copy is held by its center: drag.x/y is the pointer', (tester) async {
       final (tree, scope) = await stack(tester, source: {'feedbackAnchor': 'center'});
       final g = await dragTo(tester, const Offset(30, 30), const Offset(280, 230), release: false);
       expect(DragAndDrop.of(tree).value['x'], closeTo(100, 0.01));
