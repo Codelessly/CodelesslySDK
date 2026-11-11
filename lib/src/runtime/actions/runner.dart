@@ -23,6 +23,7 @@ import '../expressions/formula.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
 import 'handlers.dart';
+import 'key_matching.dart';
 import 'ui.dart';
 
 /// Cancels the chains it's given to: [cancel] stops them between actions.
@@ -158,7 +159,7 @@ class CodelesslyActions implements ActionRunner {
       {Json event = const {}, ActionCancellation? cancellation, Object? instance}) {
     final reactions = [
       for (final r in node.actions)
-        if (r.trigger.type.name == trigger && _allowed(r, context, event) &&
+        if (_matchesReaction(r, trigger, event) && _allowed(r, context, event) &&
             (trigger != 'valueChanged' || event['changedVariable'] == null || r.trigger.variable.trim() == event['changedVariable'])) r,
     ];
     if (reactions.isEmpty) return Future.value();
@@ -182,6 +183,7 @@ class CodelesslyActions implements ActionRunner {
     return _run(node, reactions, context, event, cancellation);
   }
 
+
   // A trigger guard applies to every trigger, not only the keyboard's
   // event listener. Evaluate against the triggering event before any action
   // runs, so timer/click/change reactions obey the same condition contract.
@@ -193,11 +195,22 @@ class CodelesslyActions implements ActionRunner {
     try {
       final value = FormulaEvaluator.exactExpression(when) != null
           ? context.expressions.evaluate(when, scope)
-          : readPath(scope, when);
+          : context.expressions.evaluate('\${= $when}', scope);
       return value == true;
     } finally {
       scope.dispose();
     }
+  }
+
+  bool _matchesReaction(Reaction reaction, String trigger, Json event) {
+    final t = reaction.trigger;
+    if (t.type.name != trigger) return false;
+    if (t.type != TriggerType.keyDown && t.type != TriggerType.keyUp) return true;
+    final value = event['result'] is Map ? event['result'] as Map : event;
+    return runtimeKeyMatches(t.keyCombo, '${value['key'] ?? ''}',
+        meta: value['meta'] == true, shift: value['shift'] == true,
+        alt: value['alt'] == true);
+
   }
 
   static final Expando<Map<Object, (Timer, Completer<void>)>> _debounced = Expando('debounce');
