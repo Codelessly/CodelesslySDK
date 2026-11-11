@@ -70,12 +70,33 @@ final class NodeBindings {
       : properties = [
           for (final e in n.bind.entries)
             if (e.key != BindPaths.visible && e.key != BindPaths.data) BoundProperty(e.key, e.value),
+          ..._imageUrls(n),
         ],
         visible = n.bind[BindPaths.visible]?.let((e) => BoundProperty(BindPaths.visible, e)),
         data = n.bind[BindPaths.data]?.let((e) => BoundProperty(BindPaths.data, e)),
         text = n.type == TextProps.spec.type && n.prop(TextProps.text).contains(r'${') && !n.bind.containsKey('props.text')
             ? n.prop(TextProps.text)
             : null;
+
+  /// An image paint whose own URL holds `${...}` (`${item.cover}`), bound
+  /// to that URL as a text node's own text is: filled in from the scope, as
+  /// v1 drew it, unless the node binds the paint or its URL itself.
+  static Iterable<BoundProperty> _imageUrls(Node n) sync* {
+    final d = n.decoration;
+    for (final (key, paints) in [('fills', d.fills), ('foregroundFills', d.foregroundFills)]) {
+      for (var i = 0; i < paints.length; i++) {
+        final url = paints[i].image?.url;
+        if (url == null || !url.contains(r'${')) continue;
+        final id = paints[i].id;
+        final bound = n.bind.keys.any((k) =>
+            k == 'decoration.$key' ||
+            k.startsWith('decoration.$key[$i]') ||
+            (id != null && id.isNotEmpty && k.startsWith('decoration.$key.$id')) ||
+            k.startsWith('decoration.$key.*'));
+        if (!bound) yield BoundProperty('decoration.$key[$i].image.url', url);
+      }
+    }
+  }
 
   static final Expando<NodeBindings> _cache = Expando('NodeBindings');
 
