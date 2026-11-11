@@ -169,6 +169,8 @@ void main() {
       ]);
       expect(eval("length(where(cart, 'qty'))"), 2);
       expect(eval("without(syrups, ['honey'])"), ['vanilla']);
+      expect(eval("without(syrups, 'honey')"), ['vanilla'], reason: 'one item, as append takes');
+      expect(eval('without([60, 64, 67], 64)'), [60, 67]);
     });
 
     test('member access', () {

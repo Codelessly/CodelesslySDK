@@ -171,7 +171,7 @@ class Services implements CodelesslyServices {
           final currentGeneration = ++generation;
           profiles?.cancel();
           controller.add(authValue(u));
-          if (u == null || u.isAnonymous) return;
+          if (!AuthProfiles.hasProfile(u)) return;
           profiles = AuthProfiles.watch(cloud, u).listen(
             (profile) {
               if (currentGeneration == generation) controller.add(authValue(user, profile: profile));
