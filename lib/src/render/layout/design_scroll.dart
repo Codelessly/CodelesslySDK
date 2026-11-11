@@ -4,6 +4,7 @@
 import 'dart:async';
 import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/physics.dart';
@@ -247,8 +248,15 @@ class RenderDesignScroll extends RenderProxyBox {
       _drag!.addPointerPanZoom(event);
     }
     if (event is PointerScrollEvent) {
+      // A mouse wheel with Shift held scrolls across, as Flutter's
+      // Scrollable does (ScrollBehavior.pointerAxisModifiers): a vertical
+      // list under the pointer lets it through to the board around it.
+      final pressed = HardwareKeyboard.instance.logicalKeysPressed;
+      final flip = event.kind == PointerDeviceKind.mouse &&
+          (pressed.contains(LogicalKeyboardKey.shiftLeft) || pressed.contains(LogicalKeyboardKey.shiftRight));
+      final axis = flip ? flipAxis(_axis) : _axis;
       final delta =
-          (_axis == Axis.vertical
+          (axis == Axis.vertical
               ? event.scrollDelta.dy
               : event.scrollDelta.dx) *
           (_reverse ? -1 : 1);
