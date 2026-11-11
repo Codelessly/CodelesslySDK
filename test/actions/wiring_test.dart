@@ -673,6 +673,52 @@ void main() {
     expect(s['lanePage'], 1);
   });
 
+  testWidgets('a flexible list in a running page view hugs its items', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'pages': {
+          'type': 'pageView',
+          'children': ['page'],
+          'layout': {'width': 300, 'height': 400},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}'},
+        },
+        'page': {
+          'type': 'column',
+          'children': ['cards', 'add'],
+          'layout': {'width': {'fill': 300}, 'height': {'fill': 400}},
+        },
+        'cards': {
+          'type': 'listView',
+          'children': ['card'],
+          'layout': {'width': {'fill': 300}, 'height': {'flexible': 360}},
+          'bind': {'data': r'${item.cards}'},
+        },
+        'card': {'type': 'box', 'layout': {'width': 300, 'height': 40}},
+        'add': {'type': 'box', 'layout': {'width': 300, 'height': 30}},
+      },
+      root: 'pages',
+      variables: [
+        v('lanes', const [
+          {'id': 'todo', 'cards': [1, 2]},
+        ], VariableType.list),
+      ],
+    );
+    await tester.pumpAndSettle();
+    final view = s.tree.boxOf('pages')!;
+    RenderBox? add;
+    void find(RenderObject o) {
+      if (o is NodeBox && o.id == 'add' && o.hasSize) add ??= o;
+      o.visitChildren(find);
+    }
+
+    find(view);
+    expect(add, isNotNull);
+    final top = add!.localToGlobal(Offset.zero).dy - view.localToGlobal(Offset.zero).dy;
+    expect(top, 80, reason: 'under the two cards');
+  });
+
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
     final s = await show(
       tester,
