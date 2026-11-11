@@ -5,6 +5,7 @@
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -437,6 +438,26 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
     expect(b.lane('b'), ['c4', 'c1']);
+  });
+
+  testWidgets('a running list a drop target opens its slot in still scrolls', (tester) async {
+    final b = await pump(tester, wrapped: true, extraNodes: {});
+    // Lane a holds three 40 px cards in a 400 px list: give it more than fits.
+    b.scope.set('cards', [
+      for (var i = 0; i < 14; i++) {'id': 'm$i', 'title': 'Card $i', 'lane': 'a'},
+    ]);
+    await tester.pump();
+    RenderBox? scroll;
+    void visit(RenderObject o) {
+      if (scroll == null && o.runtimeType.toString() == 'RenderDesignScroll' && o.attached) scroll = o as RenderBox;
+      o.visitChildren(visit);
+    }
+    visit(b.tree.boxOf('list_a')!);
+    expect(scroll, isNotNull);
+    final before = textRect(tester, 'Card 0').top;
+    await tester.sendEventToBinding(PointerScrollEvent(position: textRect(tester, 'Card 2').center, scrollDelta: const Offset(0, 120)));
+    await tester.pump();
+    expect(textRect(tester, 'Card 0').top, closeTo(before - 120, 0.5));
   });
 
   testWidgets('a feedback node that hugs takes its content\'s size, not its design size', (tester) async {
