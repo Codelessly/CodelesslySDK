@@ -132,7 +132,9 @@ class Codelessly extends ChangeNotifier {
 
   /// `storage`: what the app keeps on the device ([Services.storage], the
   /// `setStorage` action's), read live as `storage.<key>`.
-  late final _StorageScope _storage = _StorageScope(services, parent: data);
+  late final _StorageScope _storage = _StorageScope(services, parent: _speech);
+
+  late final _SpeechScope _speech = _SpeechScope(services, parent: data);
 
   final List<PersistedVariable> _persistedApp = [];
 
@@ -347,6 +349,7 @@ class Codelessly extends ChangeNotifier {
     }
     appVariables.dispose();
     _storage.dispose();
+    _speech.dispose();
     data.dispose();
     if (identical(_instance, this)) _instance = null;
     super.dispose();
@@ -374,6 +377,25 @@ class _StorageScope extends NamedScope {
   @override
   void dispose() {
     _store?.removeListener(_storeChanged);
+    super.dispose();
+  }
+}
+
+/// The current utterance, including boundary-driven word highlighting.
+class _SpeechScope extends NamedScope {
+  _SpeechScope(CodelesslyServices services, {super.parent})
+      : _speech = services is Services ? services.speech : null {
+    _speech?.addListener(_changed);
+  }
+  final SpeechService? _speech;
+  void _changed() => changed(const ['speech']);
+  @override
+  bool declares(String name) => name == 'speech';
+  @override
+  Object? valueOf(String name, ValueScope reader) => _speech?.value ?? const <String, Object?>{};
+  @override
+  void dispose() {
+    _speech?.removeListener(_changed);
     super.dispose();
   }
 }

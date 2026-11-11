@@ -48,7 +48,9 @@ void main() {
   test('speech says one thing at a time and reports its state', () async {
     final voice = _Voice();
     final speech = SpeechService(engine: voice);
-    expect(speech.value, {'speaking': false, 'text': '', 'available': true});
+    expect(speech.value, containsPair('speaking', false));
+    expect(speech.value, containsPair('wordIndex', -1));
+    expect(speech.value, containsPair('boundaryAvailable', false));
     final first = speech.speak('hola', language: 'es');
     expect(speech.value['text'], 'hola');
     final second = speech.speak('adiós');

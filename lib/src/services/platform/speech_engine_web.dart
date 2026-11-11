@@ -9,7 +9,7 @@ import '../speech.dart';
 /// The browser's Web Speech voice (`speechSynthesis`).
 SpeechEngine createSpeechEngine() => _WebSpeech();
 
-class _WebSpeech implements SpeechEngine {
+class _WebSpeech implements BoundarySpeechEngine {
   @override
   bool get available => web.window.has('speechSynthesis');
 
@@ -19,6 +19,21 @@ class _WebSpeech implements SpeechEngine {
     required String language,
     required double rate,
     required double pitch,
+  }) => speakWithBoundaries(
+    text,
+    language: language,
+    rate: rate,
+    pitch: pitch,
+    onBoundary: (_) {},
+  );
+
+  @override
+  Future<void> speakWithBoundaries(
+    String text, {
+    required String language,
+    required double rate,
+    required double pitch,
+    required void Function(SpeechBoundary boundary) onBoundary,
   }) {
     final Completer<void> done = Completer<void>();
     final web.SpeechSynthesisUtterance utterance =
@@ -30,6 +45,13 @@ class _WebSpeech implements SpeechEngine {
       if (!done.isCompleted) done.complete();
     }
 
+    utterance.onboundary = ((web.SpeechSynthesisEvent event) {
+      if (event.name == 'word') {
+        onBoundary(
+          SpeechBoundary(event.charIndex, charLength: event.charLength),
+        );
+      }
+    }).toJS;
     utterance.onend = finish.toJS;
     utterance.onerror = finish.toJS;
     web.window.speechSynthesis.speak(utterance);
