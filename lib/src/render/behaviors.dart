@@ -149,12 +149,107 @@ void paintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
     );
   }
   if (n.behaviors.strokePath case final api.StrokePath path) {
-    final painter = StrokePathPainter(path);
     chain.add(
-      b.obtain<RenderCustomPaint>('strokePath', RenderCustomPaint.new)
-        ..painter = path.inFront ? null : painter
-        ..foregroundPainter = path.inFront ? painter : null,
+      b.obtain<RenderStrokePath>('strokePath', RenderStrokePath.new)..configure(path, animates: b.tree.animates),
     );
+  }
+}
+
+/// A node's [api.StrokePath], behind its content or in front. A running app
+/// draws it along its length over [api.StrokePath.drawMs]: when it first
+/// shows, from nothing when [api.StrokePath.drawKey] changes, and from where
+/// it is when [api.StrokePath.progress] changes.
+class RenderStrokePath extends RenderProxyBox {
+  api.StrokePath? _path;
+  bool _animates = false;
+
+  /// The share of the stroke drawn now, and the run toward [_to].
+  double _shown = 1, _from = 0, _to = 1;
+  Duration? _start;
+  Ticker? _ticker;
+
+  /// The share drawn now (for tests).
+  double get shown => _shown;
+
+  void configure(api.StrokePath path, {required bool animates}) {
+    final old = _path;
+    _path = path;
+    _animates = animates;
+    if (!animates || !path.draws) {
+      _stop();
+      _shown = path.progress;
+    } else if (old == null || !old.draws) {
+      _run(0, path.progress);
+    } else if (path.drawKey != old.drawKey) {
+      _run(0, path.progress);
+    } else if (path.progress != old.progress) {
+      _run(_shown, path.progress);
+    }
+    markNeedsPaint();
+  }
+
+  void _run(double from, double to) {
+    _from = from;
+    _to = to;
+    _shown = from;
+    _start = null;
+    _ticker ??= Ticker(_tick);
+    if (attached && !_ticker!.isActive) _ticker!.start();
+  }
+
+  void _stop() {
+    if (_ticker?.isActive ?? false) _ticker!.stop();
+    _start = null;
+  }
+
+  void _tick(Duration elapsed) {
+    final path = _path;
+    if (path == null) return _stop();
+    _start ??= elapsed;
+    final ms = (elapsed - _start!).inMicroseconds / 1000 - path.drawDelayMs;
+    final t = path.drawMs <= 0 ? 1.0 : (ms / path.drawMs).clamp(0.0, 1.0);
+    _shown = _from + (_to - _from) * path.drawCurve.transform(t);
+    markNeedsPaint();
+    if (t >= 1) _stop();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_animates && (_path?.draws ?? false) && _shown != _to && !(_ticker?.isActive ?? false)) {
+      _ticker ??= Ticker(_tick);
+      _ticker!.start();
+    }
+  }
+
+  @override
+  void detach() {
+    _stop();
+    super.detach();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.dispose();
+    _ticker = null;
+    super.dispose();
+  }
+
+  void _paintStroke(PaintingContext context, Offset offset) {
+    final path = _path;
+    if (path == null || !hasSize) return;
+    context.canvas.save();
+    context.canvas.translate(offset.dx, offset.dy);
+    StrokePathPainter(_shown == path.progress ? path : path.copyWith(progress: _shown)).paint(context.canvas, size);
+    context.canvas.restore();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final inFront = _path?.inFront ?? false;
+    if (!inFront) _paintStroke(context, offset);
+    super.paint(context, offset);
+    if (inFront) _paintStroke(context, offset);
   }
 }
 
@@ -440,16 +535,27 @@ class RenderPose extends RenderProxyBox {
   double _opacity = 1;
   set opacity(double v) {
     if (v == _opacity) return;
+    final composited = alwaysNeedsCompositing;
     _opacity = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
   double _blur = 0;
   set blur(double v) {
     if (v == _blur) return;
+    final composited = alwaysNeedsCompositing;
     _blur = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
+
+  /// A partly transparent or blurred pose paints its child into a layer
+  /// (an opacity or image filter layer), so what's above it must composite
+  /// too: an ancestor that scales or clips with the canvas alone (a fitted
+  /// board, a clip) would otherwise leave the layer unscaled and unclipped.
+  @override
+  bool get alwaysNeedsCompositing => child != null && ((_opacity > 0 && _opacity < 1) || _blur > 0);
 
   /// Hidden while its back faces the viewer (through every transform above).
   bool _backfaceHidden = false;

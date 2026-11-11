@@ -205,6 +205,12 @@ class FirebaseAuthService implements AuthService {
       });
 
   @override
+  Future<void> reauthenticate(String password) => _run(() async {
+        final user = _signedIn();
+        await user.reauthenticateWithCredential(EmailAuthProvider.credential(email: user.email ?? '', password: password));
+      });
+
+  @override
   Future<void> sendSignInLink(String email, {required String continueUrl}) => _run(() async {
         if (email.trim().isEmpty) throw const AuthFailure('Enter your email.');
         await auth.sendSignInLinkToEmail(

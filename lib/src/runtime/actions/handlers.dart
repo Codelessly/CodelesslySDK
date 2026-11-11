@@ -8,7 +8,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
-import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
+import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import 'action_error.dart' show CodedFailure;
@@ -579,8 +579,10 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.sendEmailVerification:
         await auth.sendEmailVerification();
       case AuthOperation.updatePassword:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.updatePassword(password);
       case AuthOperation.deleteAccount:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.deleteAccount();
       case AuthOperation.signInWithGoogle:
         run.result = (await auth.signInWithProvider(AuthProviderKind.google)).uid;
@@ -799,6 +801,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     AnimationCurve.easeOutCubic => Curves.easeOutCubic,
     AnimationCurve.easeInOutCubic => Curves.easeInOutCubic,
     AnimationCurve.decelerate => Curves.decelerate,
+    AnimationCurve.emphasized => const Cubic(0.2, 0, 0, 1),
     _ => Curves.easeInOut,
   };
   final scrolls = <Future<void>>[];
@@ -892,12 +895,32 @@ Future<Object?> _speak(SpeakAction a, ActionRun run) async {
   return null;
 }
 
+/// The latest timed start of each voice id (see [_playSound]).
+final Map<String, Object> _soundTokens = {};
+
 void _playSound(PlaySoundAction a, ActionRun run) {
   double? number(String v) => double.tryParse(run.text(v).trim());
   final service = _require(run, 'Sound').sound;
   switch (a.operation) {
     case 'start':
-      service.startNoteWithWaveform(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1, waveform:run.text(a.waveform));
+      final id = run.text(a.voiceId).trim();
+      final note = a.note.isEmpty ? null : number(a.note);
+      final frequency = note != null ? midiToHz(note) : number(a.frequency) ?? 440;
+      service.startNoteWithWaveform(id, frequency: frequency, volume: number(a.volume) ?? 1, waveform: run.text(a.waveform).trim());
+      // A voice with a duration releases itself, unless something started
+      // another voice under its id in the meantime.
+      final ms = a.duration.isEmpty ? null : number(a.duration);
+      if (ms != null && ms >= 0) {
+        final token = _soundTokens[id] = Object();
+        Timer(Duration(milliseconds: ms.round()), () {
+          if (identical(_soundTokens[id], token)) {
+            _soundTokens.remove(id);
+            service.stopNote(id);
+          }
+        });
+      } else {
+        _soundTokens.remove(id);
+      }
       return;
     case 'stop':
       service.stopNote(run.text(a.voiceId).trim());
@@ -977,10 +1000,18 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
   switch (result.outcome) {
     case PaywallOutcome.purchased || PaywallOutcome.restored:
       return;
-    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing || PaywallOutcome.skipped:
+    // Closing the paywall or nothing to show ends the chain quietly. A
+    // cancelled purchase and an empty restore end it too, without an error,
+    // but the screen's actionError reaction hears them
+    // (`${result.error.code}`) to say so.
+    case PaywallOutcome.closed || PaywallOutcome.skipped:
       throw const ActionsCanceled();
+    case PaywallOutcome.canceled:
+      throw const ActionsStopped('purchase-cancelled', 'Purchase cancelled');
+    case PaywallOutcome.restoreNothing:
+      throw const ActionsStopped('nothing-to-restore', 'No purchase to restore');
     case PaywallOutcome.failed:
-      throw StateError(result.error ?? 'Purchase failed');
+      throw CodedFailure(result.code.isEmpty ? 'purchase-failed' : result.code, result.error ?? 'Purchase failed');
   }
 }
 

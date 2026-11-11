@@ -196,10 +196,13 @@ class NavigatorActionUi implements ActionUi {
       padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
       child: inherited,
     );
+    final pointer = RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero;
     final anchor = switch (action.anchor) {
       api.ModalAnchor.trigger => RevealAnchor.lastTrigger,
-      api.ModalAnchor.pointer => RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero,
-      api.ModalAnchor.none => null,
+      api.ModalAnchor.pointer => pointer,
+      // A popover sits by the node that opened it (or the pointer) even
+      // when no anchor is named.
+      api.ModalAnchor.none => action.presentation == ModalPresentation.popover ? RevealAnchor.lastTrigger ?? pointer : null,
     };
     final sheetBelowWidth = action.sheetBelowWidthIn(_breakpoints);
     final width = MediaQuery.maybeSizeOf(c)?.width;
@@ -209,7 +212,9 @@ class NavigatorActionUi implements ActionUi {
     if (anchor != null &&
         action.routeTransition == null &&
         !sheet &&
-        (action.presentation == ModalPresentation.dialog || action.presentation == ModalPresentation.adaptive)) {
+        (action.presentation == ModalPresentation.popover ||
+            action.presentation == ModalPresentation.dialog ||
+            action.presentation == ModalPresentation.adaptive)) {
       return showAnchoredModal(c, modalContent,
           anchor: anchor,
           placement: action.placement,
