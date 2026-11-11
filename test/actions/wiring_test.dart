@@ -548,6 +548,56 @@ void main() {
     expect(s['picked'], 'c:2');
   });
 
+  testWidgets('a running page view swipes, follows its bound page and reports the page shown', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'pages': {
+          'type': 'pageView',
+          'children': ['page'],
+          'layout': {'width': 300, 'height': 200},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}', 'props.initialPage': r'${lanePage}'},
+          'actions': [reaction('changed', [{'type': 'setVariable', 'variable': 'lanePage', 'value': r'${value}'}])],
+        },
+        'page': {
+          'type': 'text',
+          'layout': {'width': 300, 'height': 200},
+          'props': {'text': r'Lane ${item}'},
+        },
+      },
+      root: 'pages',
+      variables: [v('lanes', const ['todo', 'doing', 'done'], VariableType.list), v('lanePage', 0, VariableType.integer)],
+    );
+    // The texts of the pages on screen.
+    List<String> shown() {
+      final view = s.tree.boxOf('pages')!;
+      final area = view.localToGlobal(Offset.zero) & view.size;
+      final out = <String>[];
+      void visit(RenderObject o) {
+        if (o is RenderParagraph && o.hasSize && area.overlaps(o.localToGlobal(Offset.zero) & o.size)) {
+          out.add(o.text.toPlainText());
+        }
+        o.visitChildren(visit);
+      }
+
+      visit(view);
+      return out;
+    }
+
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane todo']);
+    // The app moves the page (a tab, a link).
+    s.scope.set('lanePage', 2);
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane done']);
+    // A swipe back shows the page before and sets the variable.
+    await tester.timedDrag(find.byType(PageView), const Offset(200, 0), const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane doing']);
+    expect(s['lanePage'], 1);
+  });
+
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
     final s = await show(
       tester,
