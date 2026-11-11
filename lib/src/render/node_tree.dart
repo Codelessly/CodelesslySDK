@@ -1255,13 +1255,6 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       chain.add(_obtain<RenderTextMinHeight>('textMin', () => RenderTextMinHeight(minHeight: 0))
         ..minHeight = n.layout.height.value);
     }
-    // Padding inside the text's box (a Container's padding around Text):
-    // a fixed or filled size includes it, a hugging one adds it.
-    final padding = n.layout.padding.flutter;
-    if (padding != EdgeInsets.zero) {
-      chain.add(_obtain<RenderPadding>('textPad', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
-        ..padding = padding);
-    }
     final textAlign = n.prop(TextProps.textAlign);
     final y = switch (n.prop(TextProps.textAlignVertical)) {
       api.TextAlignVertical.top => -1.0,
