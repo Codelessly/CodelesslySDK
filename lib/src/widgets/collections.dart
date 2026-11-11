@@ -721,6 +721,14 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..headerColor = n.prop(TableViewProps.headerColor)?.flutter
     ..stripeColor = n.prop(TableViewProps.stripeColor)?.flutter
     ..gridLine = lineColor.alpha == 0 || lineWidth <= 0 ? null : BorderSide(color: lineColor.flutter, width: lineWidth)
+    ..edge = edge
+    ..headerBorder = n.prop(TableViewProps.headerBorderColor) == null
+        ? null
+        : BorderSide(color: n.prop(TableViewProps.headerBorderColor)!.flutter, width: n.prop(TableViewProps.headerBorderWidth))
+    ..selectedRow = n.prop(TableViewProps.selectedRow)
+    ..selectedColor = n.prop(TableViewProps.selectedRowColor)?.flutter
+    ..selectedEdgeColor = n.prop(TableViewProps.selectedRowEdgeColor)?.flutter
+    ..selectedEdgeWidth = n.prop(TableViewProps.selectedRowEdgeWidth)
     ..changed();
   b.syncChildren(view as _Container, ids, Slot(SlotKind.root, n), instances: instances);
   chain.add(view);
