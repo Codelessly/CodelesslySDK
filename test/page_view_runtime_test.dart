@@ -181,6 +181,56 @@ void main() {
     },
   );
 
+  testWidgets(
+    'a shorter data set keeps the requested page despite clamp feedback',
+    (tester) async {
+      final nodes = pages(count: 12, initial: 11);
+      nodes['col']!['props'] = {
+        'initialPage': 11,
+        'scrollDirection': 'horizontal',
+        'animationDuration': 650,
+        'animationCurve': 'linear',
+      };
+      nodes['col']!['bind'] = {
+        'props.initialPage': r'${bookmark}',
+        'data': r'${story}',
+      };
+      nodes['col']!['actions'] = [
+        support.reaction('changed', [
+          {
+            'type': 'setVariable',
+            'variable': 'bookmark',
+            'value': r'${result.index}',
+          },
+        ]),
+      ];
+      final screen = await support.show(
+        tester,
+        nodes,
+        variables: [
+          support.v('bookmark', 11, VariableType.integer),
+          support.v(
+            'story',
+            List.generate(12, (index) => index),
+            VariableType.list,
+          ),
+        ],
+      );
+      final controller = tester
+          .widget<PageView>(find.byType(PageView))
+          .controller!;
+      expect(controller.page, 11);
+      screen.scope.set('story', [0, 1, 2, 3]);
+      screen.scope.set('bookmark', 0);
+      await tester.pump();
+      for (var frame = 0; frame < 22; frame++) {
+        await tester.pump(const Duration(milliseconds: 40));
+      }
+      expect(controller.page, closeTo(0, .001));
+      expect(screen.scope.read('bookmark'), 0);
+    },
+  );
+
   testWidgets('empty page view builds no item', (tester) async {
     await support.show(tester, pages(count: 0, initial: 8));
     expect(find.byType(PageView), findsOneWidget);
