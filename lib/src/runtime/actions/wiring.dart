@@ -16,6 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show EditableText, FocusManager;
 
 import '../../render/node_tree.dart';
 import '../../widgets/material.dart' show selfTappedTypes;
@@ -334,11 +335,17 @@ class _BoxReactions {
     final keys = HardwareKeyboard.instance;
     final meta = keys.isMetaPressed || keys.isControlPressed;
     final label = e.logicalKey.keyLabel;
+    final character = e.character;
+    // A key that types text goes to a focused text field, not a shortcut.
+    if (!meta && !keys.isAltPressed && typesText(character) && _textFieldFocused()) return false;
     var handled = false;
     for (final r in n.actions) {
       if (r.trigger.type != type) continue;
       final combo = r.trigger.keyCombo;
-      if (!runtimeKeyMatches(combo, label, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) continue;
+      if (!runtimeKeyEventMatches(combo, label,
+          character: character, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) {
+        continue;
+      }
       if (r.trigger.when.trim().isNotEmpty) {
         final ok = FormulaEvaluator.exactExpression(r.trigger.when) != null
             ? owner.contextFor(box).expressions.evaluate(r.trigger.when, owner.contextFor(box).scope)
@@ -349,10 +356,19 @@ class _BoxReactions {
     }
     if (!handled) return false;
     owner.fire(box, type.name, event: {
-      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta},
+      'result': {
+        'key': label,
+        'character': ?character,
+        'shift': keys.isShiftPressed,
+        'alt': keys.isAltPressed,
+        'meta': meta,
+      },
     });
     return true;
   }
+
+  static bool _textFieldFocused() =>
+      FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>() != null;
 
   bool _disposed = false;
 

@@ -1,6 +1,7 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
+import 'package:codelessly_sdk/src/runtime/actions/key_matching.dart';
 import 'wiring_test.dart' show show, counter, v, reaction, add;
 
 void main() {
@@ -42,6 +43,21 @@ void main() {
       'result': {'key': label, 'meta': meta, 'shift': shift, 'alt': alt},
     },
   );
+  test('a shortcut matches the character a key types (? is Shift+/)', () async {
+    final s = scope();
+    final n = node([key('?', 1), key('/', 10)]);
+    await const CodelesslyActions().run(n, 'keyDown', RuntimeActionContext(scope: s, services: Services()),
+        event: {
+          'result': {'key': '/', 'character': '?', 'shift': true, 'meta': false, 'alt': false},
+        });
+    expect(s.read('count'), 1);
+    expect(runtimeKeyEventMatches(KeyCombo.tryParse('u'), 'U', character: 'U', shift: true), isTrue);
+    expect(runtimeKeyEventMatches(KeyCombo.tryParse('?'), '/', character: '?', meta: true), isFalse);
+    expect(typesText('a'), isTrue);
+    expect(typesText('\r'), isFalse);
+    expect(typesText(null), isFalse);
+  });
+
   test('one digit runs only its matching reaction', () async {
     final s = scope();
     final n = node([key('1', 1), key('6', 6), key('9', 9)]);
