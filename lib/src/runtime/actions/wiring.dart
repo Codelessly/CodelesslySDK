@@ -50,6 +50,8 @@ class TreeReactions implements NodeInteractions {
     'textField': 'props.initialValue',
     'radio': 'props.groupValue',
     'segmentedButton': 'props.selected',
+    'choiceChip': 'props.selected',
+    'filterChip': 'props.selected',
     'checkbox': 'props.value',
     'switch': 'props.value',
     'slider': 'props.value',
@@ -151,8 +153,8 @@ class TreeReactions implements NodeInteractions {
   @override
   void released(NodeBox box) => _boxes.remove(box)?.dispose();
 
-  /// A box out of the render tree (its view went) stops its chains and
-  /// timers; they start again when it's back.
+  /// A removed view stops its chains and timers. Conditional hiding only
+  /// pauses screen triggers: the reaction that hid the node may finish.
   @override
   void attachChanged(NodeBox box) {
     final state = _boxes[box];
@@ -160,7 +162,7 @@ class TreeReactions implements NodeInteractions {
     if (box.attached) {
       state.resume();
     } else {
-      state.pause();
+      state.pause(cancelActions: !box.tree.preservingActions);
     }
   }
 
@@ -182,11 +184,13 @@ class _BoxReactions {
   final NodeBox box;
   ActionCancellation cancellation = ActionCancellation();
 
-  /// Out of the render tree: cancels the running chains (later ones run
-  /// on) and stops the timer.
-  void pause() {
-    cancellation.cancel();
-    cancellation = ActionCancellation();
+  /// Stops screen timers; a retained conditional subtree keeps its active
+  /// reactions, whereas a removed view cancels them.
+  void pause({bool cancelActions = true}) {
+    if (cancelActions) {
+      cancellation.cancel();
+      cancellation = ActionCancellation();
+    }
     _timer?.cancel();
     _timer = null;
     _intervalMs = null;
@@ -288,12 +292,29 @@ class _BoxReactions {
       if (_watched.containsKey(name)) continue;
       final w = watchName(owner.contextFor(box).scope, rootOf(name));
       if (w == null) continue;
-      Object? previous = readPath(owner.contextFor(box).scope, name);
+      // Named computed watches can also be invalidated by a shared foreign
+      // dependency (e.g. any async script result). Fire only when this path's
+      // completed value changed; an unrelated completion must not restart a
+      // counting animation, and an unresolved result is not a real null.
+      (Object?, bool) readValue() {
+        final scope = owner.contextFor(box).scope;
+        final scripts = readPath(scope, 'script');
+        final status = scripts is FormulaReadStatus ? scripts : null;
+        final pendingBefore = status?.pendingReads;
+        final value = readPath(scope, name);
+        return (value, pendingBefore != status?.pendingReads);
+      }
+
+      final initial = readValue();
+      var lastValue = initial.$1;
+      var hasValue = !initial.$2;
       void changed() {
-        final next = readPath(owner.contextFor(box).scope, name);
-        if (const DeepCollectionEquality().equals(previous, next)) return;
-        previous = next;
-        if (!_disposed && box.attached) owner.fire(box, 'valueChanged', event: {'result': next, 'changedVariable': name});
+        if (_disposed || !box.attached) return;
+        final (value, pending) = readValue();
+        if (pending || hasValue && const DeepCollectionEquality().equals(value, lastValue)) return;
+        lastValue = value;
+        hasValue = true;
+        owner.fire(box, 'valueChanged', event: {'result': value, 'changedVariable': name});
       }
 
       w.addListener(changed);

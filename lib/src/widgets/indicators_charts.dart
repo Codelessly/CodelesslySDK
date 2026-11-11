@@ -562,6 +562,7 @@ class PlotChartPainter extends NodePainter {
       fontSize: style.fontSize ?? 10,
       fontWeight: FontWeight.values[((w / 100).round() - 1).clamp(0, 8)],
       fontFamily: style.fontFamily,
+      fontFamilyFallback: style.fontFamilyFallback,
       color: color ?? style.color?.flutter ?? const Color(0x8A000000),
       height: style.height,
     );

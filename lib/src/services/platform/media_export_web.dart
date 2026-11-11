@@ -49,7 +49,9 @@ class _WebMediaExport implements MediaExportEngine {
   }
 
   Future<void> _seek(web.HTMLVideoElement video, double seconds) async {
-    if (seconds == 0) return;
+    if ((video.currentTime - seconds).abs() < .001 && video.readyState >= 2) {
+      return;
+    }
     final done = Completer<void>();
     video.onseeked = ((web.Event _) {
       if (!done.isCompleted) done.complete();
@@ -70,10 +72,7 @@ class _WebMediaExport implements MediaExportEngine {
       ..width = request.width
       ..height = request.height;
     final context = canvas.getContext('2d') as web.CanvasRenderingContext2D;
-    final previous = web.HTMLCanvasElement()
-      ..width = request.width
-      ..height = request.height;
-    final previousContext = previous.getContext('2d') as web.CanvasRenderingContext2D;
+    final held = <web.HTMLCanvasElement>[];
     final audio = web.AudioContext(), stream = canvas.captureStream(25);
     final sound = web.HTMLAudioElement()
       ..crossOrigin = 'anonymous'
@@ -99,8 +98,23 @@ class _WebMediaExport implements MediaExportEngine {
         prepared.add(source);
         await _loaded(source);
         final end = (clip['end'] as num).toDouble();
-        if (end > source.duration + .05) throw ArgumentError('A clip extends beyond its source video');
-        await _seek(source, (clip['start'] as num).toDouble());
+        if (end > source.duration + .05) {
+          throw ArgumentError('A clip extends beyond its source video');
+        }
+        final start = (clip['start'] as num).toDouble();
+        await _seek(source, math.max(start, end - .04));
+        final finalFrame = web.HTMLCanvasElement()
+          ..width = request.width
+          ..height = request.height;
+        (finalFrame.getContext('2d') as web.CanvasRenderingContext2D).drawImage(
+          source,
+          0,
+          0,
+          request.width,
+          request.height,
+        );
+        held.add(finalFrame);
+        await _seek(source, start);
       }
       if (music.isNotEmpty) {
         sound.src = music;
@@ -122,7 +136,9 @@ class _WebMediaExport implements MediaExportEngine {
         'video/webm;codecs=vp8,opus',
         'video/webm',
       ].where((type) => web.MediaRecorder.isTypeSupported(type)).firstOrNull;
-      if (mime == null) throw UnsupportedError('This browser has no WebM encoder');
+      if (mime == null) {
+        throw UnsupportedError('This browser has no WebM encoder');
+      }
       recorder = web.MediaRecorder(stream, web.MediaRecorderOptions(mimeType: mime, videoBitsPerSecond: 1800000));
       stopped = Completer<void>();
       recorder.ondataavailable = ((web.BlobEvent e) {
@@ -137,14 +153,15 @@ class _WebMediaExport implements MediaExportEngine {
       }).toJS;
       recorder.start(100);
       double elapsed = 0;
-      bool hasPrevious = false;
       var sourceIndex = 0;
       for (final raw in project['clips'] as List) {
         if (_cancelled) throw const MediaExportCancelled();
         final clip = raw as Map;
         video = prepared[sourceIndex++];
         final start = (clip['start'] as num).toDouble(), end = (clip['end'] as num).toDouble(), duration = end - start;
-        if (end > video.duration + .05) throw ArgumentError('A clip extends beyond its source video');
+        if (end > video.duration + .05) {
+          throw ArgumentError('A clip extends beyond its source video');
+        }
         await _wait(video.play().toDart);
         final clock = Stopwatch()..start();
         while (clock.elapsedMicroseconds / 1e6 < duration) {
@@ -154,14 +171,19 @@ class _WebMediaExport implements MediaExportEngine {
           context.fillStyle = '#141518'.toJS;
           context.fillRect(0, 0, request.width, request.height);
           context.drawImage(video, 0, 0, request.width, request.height);
-          final transition = clip['transition'];
-          if (transition == 'Dissolve' && hasPrevious && local < .4) {
-            context.globalAlpha = 1 - local / .4;
-            context.drawImage(previous, 0, 0);
+          final weights = mediaTransitionAt(
+            clip['transition'] as String? ?? 'Cut',
+            local,
+            duration,
+            hasPrevious: sourceIndex > 1,
+          );
+          if (weights.previous > 0) {
+            context.globalAlpha = weights.previous;
+            context.drawImage(held[sourceIndex - 2], 0, 0);
             context.globalAlpha = 1;
           }
-          if (transition == 'Dip to black') {
-            context.fillStyle = 'rgba(0,0,0,${math.max(0, (local - (duration - .4)) / .4)})'.toJS;
+          if (weights.black > 0) {
+            context.fillStyle = 'rgba(0,0,0,${weights.black})'.toJS;
             context.fillRect(0, 0, request.width, request.height);
           }
           for (final rawCaption in project['captions'] as List? ?? const []) {
@@ -185,8 +207,6 @@ class _WebMediaExport implements MediaExportEngine {
           await Future<void>.delayed(const Duration(milliseconds: 40));
         }
         video.pause();
-        previousContext.drawImage(canvas, 0, 0);
-        hasPrevious = true;
         elapsed += duration;
       }
       if (encoderFailure != null) throw encoderFailure!;

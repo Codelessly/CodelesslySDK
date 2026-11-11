@@ -266,15 +266,7 @@ class NodeBinder {
     for (final r in roots) {
       final w = watchName(s, r);
       if (w != null) out.add(w);
-      // A computed variable that reads names of other scopes (an item).
-      for (ValueScope? x = s; x != null; x = x.parent) {
-        if (x is VariableScope && x.declares(r)) {
-          for (final f in x.foreignReads(r)) {
-            watchName(s, f)?.let(out.add);
-          }
-          break;
-        }
-      }
+
     }
     if (clock) out.add(FormulaClock.instance);
     return out.toList();
@@ -478,7 +470,7 @@ class NodeBinder {
     if (root == null) return null;
     final existing = _provided[instance];
     if (existing != null) {
-      existing.update(index: index, item: item);
+      existing.update(index: index, item: item, deferNotifications: true);
       return existing;
     }
     return _provided[instance] = ItemScope(

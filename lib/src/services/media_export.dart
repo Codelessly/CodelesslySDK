@@ -35,7 +35,9 @@ class MediaExportRequest {
       }
       total += end - start;
     }
-    if (total > 600) throw ArgumentError('Export supports videos up to ten minutes');
+    if (total > 600) {
+      throw ArgumentError('Export supports videos up to ten minutes');
+    }
     final music = project['musicUrl'];
     if (music != null &&
         music != '' &&
@@ -47,14 +49,18 @@ class MediaExportRequest {
       throw ArgumentError('Music volume must be between zero and one');
     }
     final captions = project['captions'];
-    if (captions != null && captions is! List) throw ArgumentError('Captions must be a list');
+    if (captions != null && captions is! List) {
+      throw ArgumentError('Captions must be a list');
+    }
     for (final c in (captions as List? ?? const [])) {
       if (c is! Map || c['text'] is! String || c['start'] is! num || c['end'] is! num) {
         throw ArgumentError('Every caption needs text and timing');
       }
       for (final key in ['start', 'end', 'x', 'y', 'scale', 'rotation']) {
         final value = c[key];
-        if (value != null && (value is! num || !value.isFinite)) throw ArgumentError('Caption $key must be finite');
+        if (value != null && (value is! num || !value.isFinite)) {
+          throw ArgumentError('Caption $key must be finite');
+        }
       }
       if ((c['start'] as num) < 0 || (c['end'] as num) <= (c['start'] as num) || (c['end'] as num) > total) {
         throw ArgumentError('Caption timing must be inside the export');
@@ -89,7 +95,9 @@ class MediaExportService {
   bool get available => engine.available;
   Future<Map<String, Object?>> export(MediaExportRequest request, {void Function(double)? onProgress}) async {
     if (_running) throw StateError('An export is already running');
-    if (!available) throw UnsupportedError('Video export is unavailable on this platform');
+    if (!available) {
+      throw UnsupportedError('Video export is unavailable on this platform');
+    }
     _running = true;
     _generation++;
     try {
@@ -102,3 +110,15 @@ class MediaExportService {
   void cancel() => engine.cancel();
   void dispose() => cancel();
 }
+
+/// Duration-preserving incoming dissolve and outgoing dip weights. The held
+/// previous source frame excludes captions, which are composited afterward.
+({double previous, double black}) mediaTransitionAt(
+  String kind,
+  double position,
+  double duration, {
+  required bool hasPrevious,
+}) => (
+  previous: kind == 'Dissolve' && hasPrevious ? (1 - position / .4).clamp(0.0, 1.0) : 0,
+  black: kind == 'Dip to black' ? ((position - duration + .4) / .4).clamp(0.0, 1.0) : 0,
+);

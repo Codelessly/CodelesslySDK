@@ -140,6 +140,11 @@ class _TreeIslands extends IslandManager {
 
 /// Owns the boxes built from one [NodeSource].
 class NodeTree {
+  bool _preservingActions = false;
+
+  /// Conditional hiding retains the node: pause its screen triggers, but
+  /// let the reaction that hid it finish. Removing a view still cancels it.
+  bool get preservingActions => _preservingActions;
   NodeTree(this.source,
       {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder, NodeInteractions? interactions})
       : islands = _TreeIslands(environment) {
@@ -386,7 +391,7 @@ extension _NodeLayout on Node {
 }
 
 /// One node in the render tree.
-class NodeBox extends RenderProxyBox implements NodeBuilder {
+class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout {
   NodeBox._(this.tree, this.id, this._slot, this.instance);
 
   @override
@@ -433,6 +438,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   /// Hidden by a binding or condition (not by its own `visible`): it takes
   /// no space, as Flutter's `Visibility` without `maintainSize`.
   bool get collapsed => _collapsed;
+
+  @override
+  bool get skipsChildLayout => _collapsed;
   bool _collapsed = false;
   List<Listenable> _bindingWatch = const [];
   Listenable? _bindingListenable;
@@ -615,17 +623,23 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     // structure depends on its children re-applies them, and so on).
     final n = resolved != null && _applied != null && resolved == _applied ? _applied : resolved;
     _watchBindings(bound?.watch ?? const []);
-    if ((bound?.collapsed ?? false) != _collapsed) {
-      _collapsed = !_collapsed;
-      markNeedsLayout();
-      _applyParentData();
-    }
+    final collapsed = bound?.collapsed ?? false;
     // A top-level node that only moved: its content doesn't depend on where
     // it sits (the host offsets it), so nothing re-applies or repaints.
-    if (_slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
+    if (collapsed == _collapsed && _slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
       _node = n;
       _applied = n;
       return;
+    }
+    _prepareLayoutChanges();
+    if (collapsed != _collapsed) {
+      _collapsed = collapsed;
+      if (_collapsed) {
+        final previous = tree._preservingActions;
+        tree._preservingActions = true;
+        try { child = null; } finally { tree._preservingActions = previous; }
+      }
+      _applyParentData();
     }
     _node = n;
     _applied = n;
@@ -696,6 +710,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     _applyParentData();
     _relayoutHuggingAncestors();
   }
+
+  /// A collapsed box skips its children's layout. Its cached inner boxes
+  /// can therefore stay dirty after the collapsed box itself becomes clean.
+  /// Before updating those boxes, invalidate the path from the outermost
+  /// collapsed ancestor down: a dirty child must never have a clean parent
+  /// between it and its relayout boundary. Do this before property setters
+  /// too, since a changed paragraph can invalidate layout before `_wire`.
+  void _prepareLayoutChanges() => prepareSkippedLayoutChange(this);
 
   /// A row/column that hugs its cross axis and stretches its children
   /// measures them unstretched, then lays them out stretched, which makes
@@ -834,9 +856,27 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     final under = <RenderBox>[], over = <RenderBox>[];
     final canStack = content != null || (hFit != SizeFit.hug && vFit != SizeFit.hug);
     if (canStack && !plan.native) {
-      under.add(_obtain<RenderNodePaint>('under', RenderNodePaint.new)
-        ..decoration = d
-        ..foreground = false);
+      under.add(
+        _obtain<RenderNodePaint>('under', RenderNodePaint.new)
+          ..onImageState = tree.animates
+              ? (status, url) {
+                  final trigger = switch (status) {
+                    'loaded' => 'imageLoaded',
+                    'error' => 'imageError',
+                    _ => 'imageLoading',
+                  };
+                  tree.interactions?.fire(
+                    this,
+                    trigger,
+                    event: {
+                      'result': {'status': status, 'url': url},
+                    },
+                  );
+                }
+              : null
+          ..decoration = d
+          ..foreground = false,
+      );
     }
     if (canStack && plan.foreground) {
       over.add(_obtain<RenderNodePaint>('over', RenderNodePaint.new)
@@ -1438,6 +1478,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   /// Links [next] under this box; a shell stack's single child is the chain
   /// recorded for it in [_innerChains], with its paint layers around it.
   void _wire(List<RenderBox> next) {
+    markNeedsLayout();
     final relink = _alreadyWired(next);
     if (relink != null) {
       // Dirty the owner before invalidating reused inner layers.
@@ -1515,7 +1556,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       }
     }
     if (next.isNotEmpty) _detachFromAnyParent(next.first);
-    child = next.isEmpty ? null : next.first;
+    child = _collapsed || next.isEmpty ? null : next.first;
     _finishWire(next);
   }
 
