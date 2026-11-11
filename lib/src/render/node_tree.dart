@@ -33,6 +33,7 @@ import 'paint/path_paint.dart';
 import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
+import 'reveal.dart';
 import 'source.dart';
 import '../runtime/expressions/bindings.dart' show BoundNode, NodeBinder;
 import '../widgets/collections.dart' show listBuildsAllItems;
@@ -679,6 +680,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       final c = n.layout.constraints.flutter;
       chain.add(_obtain<RenderConstrainedBox>('constraints', () => RenderConstrainedBox(additionalConstraints: c))
         ..additionalConstraints = c);
+    }
+    final reveal = n.behaviors.reveal;
+    if (tree.animates && reveal != null) {
+      chain.add(_obtain<RenderReveal>('reveal', RenderReveal.new)..configure(reveal, n.visible));
     }
     playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);

@@ -108,8 +108,11 @@ class PreferencesLocalStorage extends LocalStorageBase {
   }
 
   /// Opens the storage for [prefix] (`codelessly.{projectId}.`).
-  static Future<PreferencesLocalStorage> open({String prefix = 'codelessly.'}) async =>
-      PreferencesLocalStorage._(await SharedPreferences.getInstance(), prefix);
+  static Future<PreferencesLocalStorage> open({String prefix = 'codelessly.'}) async {
+    final prefs=await SharedPreferences.getInstance();
+    await prefs.reload();
+    return PreferencesLocalStorage._(prefs,prefix);
+  }
 
   final SharedPreferences _prefs;
   final String prefix;

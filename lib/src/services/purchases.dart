@@ -409,7 +409,11 @@ class PaywallSession extends ChangeNotifier {
     if (_attempt != null || purchasing || restoring) throw StateError('Paywall operation is already in progress');
     final attempt = _attempt = Completer<PaywallResult>();
     try {
-      await start();
+      // Store outcomes can arrive before initiation cleanup finishes. The
+      // verified outcome owns the action boundary, not that cleanup future.
+      unawaited(Future<void>.sync(start).then<void>((_) {}, onError: (Object error, StackTrace stack) {
+        if (!attempt.isCompleted) attempt.completeError(error, stack);
+      }));
       return await attempt.future;
     } finally {
       if (identical(_attempt, attempt)) _attempt = null;
