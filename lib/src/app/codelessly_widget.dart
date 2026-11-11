@@ -35,7 +35,8 @@ import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
-import '../services/services.dart' show NoScriptRunner, Services, PaywallSession, PaywallResult;
+import '../services/services.dart'
+    show CodelesslyAuthService, NoScriptRunner, Services, PaywallSession, PaywallResult;
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
@@ -832,6 +833,10 @@ class _LayoutViewState extends State<_LayoutView> {
     if (!mounted) throw StateError('Paywall host is no longer mounted');
     final navigator = Navigator.maybeOf(context);
     if (navigator == null) throw StateError('Paywall requires a Navigator');
+    if (services is Services && services.auth is CodelesslyAuthService) {
+      await _codelessly.paywall.scopeAccount();
+      if (!mounted) throw StateError('Paywall host is no longer mounted');
+    }
     return runtime.open(
       placement,
       locale: Localizations.maybeLocaleOf(context)?.toLanguageTag() ?? 'en',

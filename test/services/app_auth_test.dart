@@ -8,11 +8,13 @@ import 'dart:convert';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/firebase.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 import '../app/northstar_paywall_test.dart' show Backend, Store, bundle;
+import '../app/support.dart' show settle;
 
 /// The `appAuth` function in memory: users, passwords, claims and the same answers
 /// and error codes. A custom token is `ct:{uid}`; an ID token is `id:{uid}`.
@@ -500,6 +502,38 @@ void main() {
       expect(store.calls.where((c) => c.contains('anonymous')), hasLength(1));
       expect(await codelessly.paywall.resolve('onboarding'), isNotNull);
       expect(store.calls.where((c) => c.contains('anonymous')), hasLength(1));
+    });
+  });
+
+  group('Codelessly accounts and the open paywall action', () {
+    testWidgets('the action makes the session before the placement is resolved', (tester) async {
+      final auth = service();
+      String? caller;
+      final backend = _SessionBackend(() => caller = session.uid);
+      final store = Store();
+      final runtime = PaywallRuntime(backend: backend, purchases: () => store, platform: 'ios');
+      final app = Codelessly(
+        config: CodelesslyConfig(services: Services(auth: auth, paywalls: runtime, analytics: const NoAnalytics())),
+        loader: MemoryPublishLoader(bundle()),
+        fonts: const NoFontFetcher(),
+      );
+      final controller = CodelesslyWidgetController();
+      await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app, controller: controller)));
+      await settle(tester);
+      expect(auth.currentUser, isNull);
+      final open = controller.trigger('homeButton', 'click');
+      await settle(tester);
+      expect(caller, isNotNull);
+      expect(caller, auth.currentUser?.uid);
+      final shown = tester.widgetList<CodelesslyWidget>(find.byType(CodelesslyWidget)).last;
+      expect(shown.paywall, isNotNull, reason: 'the placement was kept and presented');
+      shown.paywall!.close();
+      await settle(tester);
+      await open;
+      await tester.pumpWidget(const SizedBox());
+      controller.dispose();
+      app.dispose();
+      runtime.dispose();
     });
   });
 

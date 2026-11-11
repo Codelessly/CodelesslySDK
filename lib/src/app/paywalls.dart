@@ -43,16 +43,7 @@ class CodelesslyPaywalls {
     if (s is! Services) return null;
     final runtime = s.paywalls;
     if (runtime != null) {
-      // The paywall server's callables run as the session: on Codelessly's
-      // user store one is made (anonymous) on first use, before the account
-      // scope is taken, so the placement isn't discarded when it appears.
-      if (s.auth case final CodelesslyAuthService store) {
-        try {
-          await store.ensureSession();
-        } catch (error, stack) {
-          s.analytics.logError(error, stackTrace: stack, message: 'Could not start a session', type: 'auth');
-        }
-      }
+      await scopeAccount();
       runtime.scopeToUser(s.auth.currentUser?.uid);
       return runtime.resolve(placement, locale: locale, appVersion: appVersion);
     }
@@ -60,6 +51,26 @@ class CodelesslyPaywalls {
     final found = config.placement(placement);
     if (found == null || found.layoutId.isEmpty) return null;
     return ResolvedPaywall(placement: found, slots: config.slotsOf(found));
+  }
+
+  /// On Codelessly's user store, makes the session the paywall server's
+  /// callables run as (anonymous, on first use) and scopes the paywall
+  /// server ([Services.paywalls]) to it, before a placement is resolved, so
+  /// the session appearing doesn't discard the placement. Other auth
+  /// services keep the scope the auth stream gives.
+  Future<void> scopeAccount() async {
+    final s = codelessly.services;
+    if (s is! Services) return;
+    final runtime = s.paywalls;
+    final store = s.auth;
+    if (runtime == null || store is! CodelesslyAuthService) return;
+    try {
+      await store.ensureSession();
+    } catch (error, stack) {
+      s.analytics.logError(error, stackTrace: stack, message: 'Could not start a session', type: 'auth');
+      return;
+    }
+    runtime.scopeToUser(store.currentUser?.uid);
   }
 
   /// Shows the paywall at [placement] as a full-screen route on the
