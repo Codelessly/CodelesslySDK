@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:barcode/barcode.dart' as bc;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -58,4 +59,56 @@ void main() {
     final (_, overlapped) = await _columns(tester, {...props, 'overlap': 0.4}, width: 107, height: 107);
     expect(overlapped.fold<int>(0, (a, b) => a + b), greaterThan(exact.fold<int>(0, (a, b) => a + b)));
   });
+
+  testWidgets('with overlap a code draws exactly as Flutter code drawing it rect by rect', (tester) async {
+    const data = 'DL-424973';
+    const w = 264.0, h = 39.0;
+    Future<List<int>> pixels(Widget child) async {
+      final key = GlobalKey();
+      await tester.pumpWidget(MaterialApp(
+          home: Align(
+              alignment: Alignment.topLeft,
+              child: RepaintBoundary(key: key, child: ColoredBox(color: Colors.white, child: child)))));
+      late List<int> out;
+      await tester.runAsync(() async {
+        final img = await (key.currentContext!.findRenderObject()! as RenderRepaintBoundary).toImage();
+        out = (await img.toByteData(format: ui.ImageByteFormat.rawRgba))!.buffer.asUint8List().toList();
+      });
+      return out;
+    }
+
+    final doc = LayoutDocument.fromJson({
+      'roots': ['n'],
+      'nodes': {
+        'n': {
+          'type': 'barcode',
+          'layout': {'width': w, 'height': h},
+          'props': {'data': data, 'symbology': 'code128', 'drawText': false, 'overlap': 0.4, 'color': '#FF0E0E10'},
+        },
+      },
+    });
+    final tree = NodeTree(DocumentSource(doc));
+    final node = await pixels(NodeView(tree: tree, rootId: 'n'));
+    tree.dispose();
+    final reference = await pixels(SizedBox(width: w, height: h, child: CustomPaint(painter: _RectByRect(data))));
+    expect(node, reference);
+  });
+}
+
+/// A Code 128 drawn the way app code commonly draws one: each bar a rect,
+/// a hair wider and taller so neighbours overlap.
+class _RectByRect extends CustomPainter {
+  _RectByRect(this.data);
+  final String data;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = const Color(0xFF0E0E10);
+    for (final e in bc.Barcode.code128().make(data, width: size.width, height: size.height, drawText: false)) {
+      if (e is bc.BarcodeBar && e.black) canvas.drawRect(Rect.fromLTWH(e.left, e.top, e.width + 0.4, e.height + 0.4), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RectByRect old) => false;
 }

@@ -826,6 +826,24 @@ class BarcodePainter extends NodePainter {
   /// How far each dark bar reaches past its right and bottom edge.
   double get overlap => p(BarcodeProps.overlap);
 
+  /// The dark bars: without overlap one path, so neighbours leave no
+  /// anti-aliasing seams; with it each bar on its own, overlapping its
+  /// neighbour (as code drawn rect by rect does), which covers the seams.
+  void _drawBars(Canvas canvas, List<Rect> bars) {
+    final paint = Paint()..color = color;
+    if (overlap > 0) {
+      for (final r in bars) {
+        canvas.drawRect(r, paint);
+      }
+      return;
+    }
+    final path = Path();
+    for (final r in bars) {
+      path.addRect(r);
+    }
+    canvas.drawPath(path, paint);
+  }
+
   static bc.Barcode barcodeFor(BarcodeSymbology symbology, BarcodeErrorCorrection correction) => switch (symbology) {
         BarcodeSymbology.qrCode => bc.Barcode.qrCode(
             errorCorrectLevel: switch (correction) {
@@ -873,13 +891,10 @@ class BarcodePainter extends NodePainter {
       if (bottom <= top) return false;
       scaleY = size.height / (bottom - top);
     }
-    // One path for every dark run: no anti-aliasing seams between modules.
-    final path = Path();
-    for (final bar in bars) {
-      if (!bar.black) continue;
-      path.addRect(Rect.fromLTWH(bar.left, (bar.top - top) * scaleY, bar.width + overlap, bar.height * scaleY + overlap));
-    }
-    canvas.drawPath(path, Paint()..color = color);
+    _drawBars(canvas, [
+      for (final bar in bars)
+        if (bar.black) Rect.fromLTWH(bar.left, (bar.top - top) * scaleY, bar.width + overlap, bar.height * scaleY + overlap),
+    ]);
     return true;
   }
 
@@ -895,13 +910,11 @@ class BarcodePainter extends NodePainter {
     } catch (_) {
       return false;
     }
-    final path = Path();
-    for (final element in elements) {
-      if (element is bc.BarcodeBar && element.black) {
-        path.addRect(Rect.fromLTWH(element.left, element.top, element.width + overlap, element.height + overlap));
-      }
-    }
-    canvas.drawPath(path, Paint()..color = color);
+    _drawBars(canvas, [
+      for (final element in elements)
+        if (element is bc.BarcodeBar && element.black)
+          Rect.fromLTWH(element.left, element.top, element.width + overlap, element.height + overlap),
+    ]);
     for (final element in elements) {
       if (element is bc.BarcodeText) _paintText(canvas, element, fontHeight);
     }
