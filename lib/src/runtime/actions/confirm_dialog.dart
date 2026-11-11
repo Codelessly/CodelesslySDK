@@ -71,6 +71,11 @@ const confirmBindableColors = [
   'iconColor',
   'iconDiscColor',
   'iconDiscBorderColor',
+  // A gradient fill for the confirm button, top-left to bottom-right
+  // (start, middle, end; middle optional), over `confirmColor`.
+  'confirmGradientStart',
+  'confirmGradientMiddle',
+  'confirmGradientEnd',
 ];
 
 /// The key of a dialog screen's close result that answers it.
@@ -245,6 +250,10 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
           buttonRadius: look.number('buttonRadius'),
           buttonBorder: side('buttonBorder', 'buttonBorderColor'),
           buttonShadows: look.shadows('buttonShadows'),
+          cancelShadows: action.style.containsKey('cancelShadows') ? look.shadows('cancelShadows') ?? const [] : null,
+          confirmGradient: [
+            for (final key in const ['confirmGradientStart', 'confirmGradientMiddle', 'confirmGradientEnd']) ?color(key),
+          ],
           confirmTextColor: color('confirmTextColor'),
           cancelColor: color('cancelColor'),
           cancelTextColor: color('cancelTextColor'),
@@ -282,6 +291,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
       barrierDismissible: action.barrierDismissible,
       barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
       sheetWidth: look.number('sheetWidth'),
+      sheetMargin: look.numberOr('sheetMargin', 0),
       cornerRadius: look.number('radius'),
       maxHeightFactor: look.numberOr('maxHeightFactor', 1),
       showDragHandle: look.flag('showDragHandle'),
@@ -325,6 +335,8 @@ class ThemedConfirmDialog extends StatelessWidget {
     this.buttonRadius,
     this.buttonBorder,
     this.buttonShadows,
+    this.cancelShadows,
+    this.confirmGradient = const [],
     this.confirmTextColor,
     this.cancelColor,
     this.cancelTextColor,
@@ -424,8 +436,17 @@ class ThemedConfirmDialog extends StatelessWidget {
   final double? buttonRadius;
   final BorderSide? buttonBorder;
 
-  /// The cancel button takes them only when it has a [cancelColor].
+  /// The cancel button takes them only when it has a [cancelColor], and
+  /// only when it has no [cancelShadows] of its own.
   final List<BoxShadow>? buttonShadows;
+
+  /// The cancel button's own shadows (empty: none), instead of
+  /// [buttonShadows]: a glowing confirm beside a flat cancel.
+  final List<BoxShadow>? cancelShadows;
+
+  /// Two or three colors: the confirm button is filled with this gradient
+  /// (top-left to bottom-right) instead of [confirmColor].
+  final List<Color> confirmGradient;
   final Color? confirmTextColor, cancelColor, cancelTextColor;
 
   @override
@@ -450,11 +471,19 @@ class ThemedConfirmDialog extends StatelessWidget {
     final dialogSide = border ?? theme.border;
     final dialogShadows = shadows ?? theme.shadows;
 
-    Widget withShadow(Widget button) => buttonShadowList.isEmpty
+    Widget withShadow(Widget button, [List<BoxShadow>? shadows]) => (shadows ?? buttonShadowList).isEmpty
         ? button
         : DecoratedBox(
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(buttonCorner), boxShadow: buttonShadowList),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(buttonCorner), boxShadow: shadows ?? buttonShadowList),
             child: button,
+          );
+    final gradient = confirmGradient.length < 2
+        ? null
+        : LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: confirmGradient,
+            stops: confirmGradient.length == 3 ? const [0, 0.5, 1] : null,
           );
 
     final cancel = TextButton(
@@ -478,7 +507,8 @@ class ThemedConfirmDialog extends StatelessWidget {
       key: const ValueKey('codelessly-confirm-ok'),
       onPressed: () => Navigator.of(context).pop(true),
       style: FilledButton.styleFrom(
-        backgroundColor: confirmFill,
+        backgroundColor: gradient == null ? confirmFill : Colors.transparent,
+        shadowColor: gradient == null ? null : Colors.transparent,
         foregroundColor: onConfirm,
         textStyle: buttonText,
         shape: buttonShape,
@@ -514,7 +544,17 @@ class ThemedConfirmDialog extends StatelessWidget {
         child: leading,
       );
     }
-    final buttons = [cancelColor != null ? withShadow(cancel) : cancel, withShadow(confirm)];
+    final filledConfirm = gradient == null
+        ? confirm
+        : DecoratedBox(
+            key: const ValueKey('codelessly-confirm-gradient'),
+            decoration: BoxDecoration(gradient: gradient, borderRadius: BorderRadius.circular(buttonCorner)),
+            child: confirm,
+          );
+    final cancelled = cancelShadows != null
+        ? withShadow(cancel, cancelShadows)
+        : (cancelColor != null ? withShadow(cancel) : cancel);
+    final buttons = [cancelled, withShadow(filledConfirm)];
 
     final Widget content = Semantics(
       scopesRoute: true,
