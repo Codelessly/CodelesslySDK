@@ -1358,10 +1358,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _wire(List<RenderBox> next) {
     final relink = _alreadyWired(next);
     if (relink != null) {
+      // Invalidate from the owner down. A reused inner layer can already
+      // be dirty after a preceding binding changed the chain or its fits;
+      // Flutter requires its non-boundary ancestors to be dirty as well.
+      // Marking it before this box violates that invariant between updates.
+      markNeedsLayout();
       for (final o in relink) {
         o.markNeedsLayout();
       }
-      markNeedsLayout();
       _previousInner = const [];
       _finishWire(next);
       return;
