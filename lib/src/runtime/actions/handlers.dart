@@ -586,6 +586,8 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
         await auth.sendSignInLink(email, continueUrl: Uri.base.toString());
       case AuthOperation.completeSignInLink:
         run.result = (await auth.signInWithLink(email, Uri.base.toString())).uid;
+      case AuthOperation.signInAnonymously:
+        run.result = (await auth.signInAsGuest()).uid;
     }
     final host = run.host;
     if (host is RuntimeActionContext) host.refreshAuthValues?.call(a.operation);
