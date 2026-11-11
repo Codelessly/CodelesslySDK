@@ -1925,6 +1925,9 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final padding = n.prop(SegmentedButtonProps.padding)?.flutter ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 5);
     final expand = n.layout.width.fit != SizeFit.hug;
     final vertical = n.prop(SegmentedButtonProps.direction) == api.Axis.vertical;
+    // One thumb sliding under equal segments, instead of each filling.
+    final slide = n.prop(SegmentedButtonProps.slidingThumb) && !multi && !vertical && expand;
+    final segments = n.prop(SegmentedButtonProps.segments);
     final children = <Widget>[
       for (final s in n.prop(SegmentedButtonProps.segments))
         () {
@@ -1947,17 +1950,23 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
                   curve: Curves.easeOutCubic,
                   padding: padding,
                   decoration: BoxDecoration(
-                    color: on ? selectedBg : selectedBg.withValues(alpha: 0),
+                    color: on && !slide ? selectedBg : selectedBg.withValues(alpha: 0),
                     borderRadius: radius,
-                    boxShadow: on ? shadows : null,
+                    boxShadow: on && !slide ? shadows : null,
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
                     if (icon != null) icon,
                     if (icon != null && label != null) const SizedBox(width: 6),
                     if (label != null)
                       Flexible(
-                        child: Text(label,
-                            maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis, style: base.copyWith(color: color)),
+                        child: slide
+                            ? AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 200),
+                                style: base.copyWith(color: color),
+                                child: Text(label, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                              )
+                            : Text(label,
+                                maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis, style: base.copyWith(color: color)),
                       ),
                   ]),
                 ),
@@ -1977,7 +1986,27 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
       ),
       child: vertical
           ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
-          : Row(mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min, children: children),
+          : slide
+              ? LayoutBuilder(builder: (context, c) {
+                  final index = segments.indexWhere((s) => selection.contains(s.value));
+                  final width = segments.isEmpty || !c.maxWidth.isFinite ? 0.0 : c.maxWidth / segments.length;
+                  return Stack(children: [
+                    if (index >= 0)
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 260),
+                        curve: Curves.easeOutCubic,
+                        left: width * index,
+                        top: 0,
+                        bottom: 0,
+                        width: width,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(color: selectedBg, borderRadius: radius, boxShadow: shadows),
+                        ),
+                      ),
+                    Positioned.fill(child: Row(children: children)),
+                  ]);
+                })
+              : Row(mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min, children: children),
     );
   }
 }
