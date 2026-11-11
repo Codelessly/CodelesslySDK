@@ -4,6 +4,7 @@ import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderStrokePath;
 import 'package:codelessly_sdk/src/render/typewriter.dart' show RenderTypewriter;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 LayoutDocument page(Map<String, Map<String, Object?>> nodes) => LayoutDocument.fromJson({
@@ -309,5 +310,39 @@ void main() {
     expect(rect.top, closeTo(320 * k, 0.01));
     expect(rect.width, closeTo(96 * k, 0.01));
     expect(api.StackProps.spec.props, contains(api.StackProps.fit));
+  });
+
+  testWidgets('a fading loop inside a fitted board is scaled and clipped with it', (tester) async {
+    final doc = LayoutDocument.fromJson({
+      'roots': ['s'],
+      'nodes': {
+        's': {'type': 'stack', 'children': ['board'], 'layout': {'width': 240, 'height': 320}},
+        'board': {
+          'type': 'stack',
+          'children': ['glow'],
+          'props': {'fit': 'contain'},
+          'decoration': {'clip': 'hardEdge'},
+          'layout': {'width': {'fill': 480}, 'height': {'fill': 640}, 'x': {'start': 0, 'end': 0}, 'y': {'start': 0, 'end': 0}},
+        },
+        'glow': {
+          'type': 'box',
+          'layout': {'width': 64, 'height': 64, 'x': {'start': 300}, 'y': {'start': 100}},
+          'decoration': {'fills': [{'color': '#FFFF0000'}]},
+          'loops': [{'type': 'flicker', 'duration': 600, 'opacityFrom': 0.5, 'opacityTo': 0.9}],
+        },
+      },
+    });
+    await show(tester, doc, interactive: true);
+    await tester.pump(const Duration(milliseconds: 100));
+    // The glow's opacity layer sits under the board's transform (half size).
+    final faded = tester.layers.whereType<OpacityLayer>().where((l) => (l.alpha ?? 255) < 255).toList();
+    expect(faded, isNotEmpty);
+    for (final layer in faded) {
+      final transform = Matrix4.identity();
+      for (ContainerLayer? l = layer.parent; l != null; l = l.parent) {
+        if (l is TransformLayer) transform.multiply(l.transform!);
+      }
+      expect(transform.getMaxScaleOnAxis() / tester.view.devicePixelRatio, closeTo(0.5, 0.01));
+    }
   });
 }
