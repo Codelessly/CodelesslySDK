@@ -46,6 +46,13 @@ abstract interface class FormulaScripts {
   Object? callScript(String name, List<Object?> args);
 }
 
+/// Optional status from an asynchronous formula-script provider. A read
+/// increments [pendingReads] when it used a result that is not ready yet,
+/// distinguishing an interim null from a completed script returning null.
+abstract interface class FormulaReadStatus {
+  int get pendingReads;
+}
+
 /// Evaluates small expressions used in `${= ...}` formulas.
 ///
 /// Supports:

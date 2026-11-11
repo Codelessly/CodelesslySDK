@@ -36,10 +36,73 @@ class ScriptFailed implements Exception {
 /// Runs [a]: its result is `${result}` (and its result variable's value);
 /// a failure runs its `onError` with `${result}` `{error, logs}`, or stops
 /// the chain without them.
-Future<void> runScriptAction(RunScriptAction a, ActionRun run) async {
+Future<void> runScriptAction(RunScriptAction a, ActionRun run) {
   final host = run.host;
-  final scripts = host is RuntimeActionContext ? host.scripts : const <ScriptDef>[];
+  final scripts = host is RuntimeActionContext
+      ? host.scripts
+      : const <ScriptDef>[];
   final script = findScript(scripts, a.script.trim());
+  Future<void> execute() => _executeScriptAction(a, run, script, scripts);
+  if ((script?.allows(ScriptCapability.variablesWrite) ?? false) ||
+      a.resultVariable.trim().isNotEmpty) {
+    return _serializeScriptWrite(run, execute);
+  }
+  return execute();
+}
+
+final _scriptWriteTails = Expando<Future<void>>('script variable writes');
+final _heldScriptWriteScopes = Object();
+
+/// A script takes its variable snapshot when it starts. Writers sharing an app
+/// scope must run through their commits in order, or a timer can overwrite a
+/// newer edit with an old snapshot. Pure reads and different apps stay parallel.
+Future<void> _serializeScriptWrite(
+  ActionRun run,
+  Future<void> Function() execute,
+) {
+  Object owner = run.context.scope;
+  for (
+    ValueScope? scope = run.context.scope;
+    scope != null;
+    scope = scope.parent
+  ) {
+    if (scope is VariableScope) owner = scope;
+  }
+  final held =
+      Zone.current[_heldScriptWriteScopes] as Set<Object>? ?? const <Object>{};
+  // A host action nested in this script is part of the same write chain.
+  if (held.contains(owner)) return execute();
+  final before = _scriptWriteTails[owner] ?? Future<void>.value();
+  final next = before.then((_) {
+    if (run.isCanceled) throw const ActionsCanceled();
+    return runZoned<Future<void>>(
+      execute,
+      zoneValues: {
+        _heldScriptWriteScopes: {...held, owner},
+      },
+    );
+  });
+  final settled = next.then<void>(
+    (_) {},
+    onError: (Object _, StackTrace _) {},
+  );
+  _scriptWriteTails[owner] = settled;
+  unawaited(
+    settled.then((_) {
+      if (identical(_scriptWriteTails[owner], settled)) {
+        _scriptWriteTails[owner] = null;
+      }
+    }),
+  );
+  return next;
+}
+
+Future<void> _executeScriptAction(
+  RunScriptAction a,
+  ActionRun run,
+  ScriptDef? script,
+  List<ScriptDef> scripts,
+) async {
   final services = run.context.services;
   final runner = services is Services ? services.scripts : const NoScriptRunner();
   final result = script == null

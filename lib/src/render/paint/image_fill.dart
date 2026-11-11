@@ -9,6 +9,7 @@ import 'dart:math' as math;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 
@@ -66,6 +67,7 @@ class LoadedImage {
         provider = MemoryImage(UriData.parse(url).contentAsBytes());
       } on FormatException {
         failed = true;
+        _changed();
         return;
       }
     } else {
@@ -103,7 +105,7 @@ class LoadedImage {
   // cache arrives synchronously, possibly while a client paints.
   void _changed() => scheduleMicrotask(() {
         for (final c in _clients.toList()) {
-          c.markNeedsPaint();
+          c._imageChanged();
         }
       });
 
@@ -155,6 +157,40 @@ mixin ImageClient on RenderObject {
   final Map<String, LoadedImage> _images = {};
   Set<String> _wanted = const {};
 
+  final Map<String, String> _reported = {};
+  bool _statusQueued = false;
+
+  /// Actual fetch state for each image URL; delivered outside layout and
+  /// paint so a reaction can safely change another node's bindings.
+  void Function(String status, String url)? onImageState;
+
+  void _imageChanged() {
+    markNeedsPaint();
+    _queueStatus();
+  }
+
+  void _queueStatus() {
+    if (_statusQueued || onImageState == null) return;
+    _statusQueued = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _statusQueued = false;
+      if (!attached) return;
+      _reported.removeWhere((url, _) => !_wanted.contains(url));
+      for (final url in _wanted.toList()) {
+        final image = _images[url];
+        final status = image?.failed == true
+            ? 'error'
+            : image?.ready == true
+            ? 'loaded'
+            : 'loading';
+        if (_reported[url] == status) continue;
+        _reported[url] = status;
+        onImageState?.call(status, url);
+      }
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
   /// Sets the image URLs this object shows.
   void showImages(Iterable<String?> urls) {
     _wanted = {for (final u in urls) if (PaintImages.loadable(u)) u!};
@@ -180,6 +216,7 @@ mixin ImageClient on RenderObject {
     for (final u in _wanted) {
       _images[u] ??= PaintImages._acquire(u, this);
     }
+    _queueStatus();
   }
 
   @override

@@ -19,6 +19,7 @@ import 'links.dart';
 import 'file_exports.dart';
 import 'media_export.dart';
 import 'purchases.dart';
+import 'printing.dart';
 import '../scripting/script_runner.dart';
 import 'scripts.dart';
 import 'sound.dart';
@@ -37,7 +38,9 @@ export 'cloud/resolve.dart';
 export 'links.dart';
 export 'file_exports.dart';
 export 'media_export.dart';
+export 'media_probe.dart';
 export 'purchases.dart';
+export 'printing.dart';
 export 'scripts.dart';
 export 'sound.dart';
 export 'speech.dart';
@@ -64,6 +67,7 @@ class Services implements CodelesslyServices {
     FileExporter? exports,
     ScriptRunner? scripts,
     MediaExportService? mediaExport,
+    PrintService? printing,
   })  : config = config ?? ServiceConfig.empty,
         api = api ?? HttpApiService(),
         cache = cache ?? MemoryKeyValueCache(),
@@ -79,7 +83,8 @@ class Services implements CodelesslyServices {
         links = links ?? const PlatformLinkOpener(),
         exports = exports ?? const PlatformFileExporter(),
         scripts = scripts ?? const SandboxScriptRunner(),
-        mediaExport = mediaExport ?? MediaExportService();
+        mediaExport = mediaExport ?? MediaExportService(),
+        printing = printing ?? const PlatformPrintService();
 
   /// What the publish model configures (APIs, paywall setup); the app
   /// shell sets it when a publish model loads.
@@ -121,6 +126,7 @@ class Services implements CodelesslyServices {
   /// Browser WebM export, or an encoder supplied by a native host.
   final MediaExportService mediaExport;
   final LinkOpener links;
+  final PrintService printing;
 
   /// Saves generated files with the browser or platform save picker.
   final FileExporter exports;

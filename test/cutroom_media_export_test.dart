@@ -31,6 +31,15 @@ class Encoder implements MediaExportEngine {
 }
 
 void main() {
+  test('transition weights match preview endpoints and midpoint', () {
+    expect(mediaTransitionAt('Dissolve', 0, 2, hasPrevious: true).previous, 1);
+    expect(mediaTransitionAt('Dissolve', .2, 2, hasPrevious: true).previous, .5);
+    expect(mediaTransitionAt('Dissolve', .4, 2, hasPrevious: true).previous, 0);
+    expect(mediaTransitionAt('Dissolve', 0, 2, hasPrevious: false).previous, 0);
+    expect(mediaTransitionAt('Dip to black', 1.8, 2, hasPrevious: true).black, closeTo(.5, 1e-9));
+    expect(mediaTransitionAt('Dip to black', 2, 2, hasPrevious: true).black, closeTo(1, 1e-9));
+  });
+
   test('export request validates sources, timing, captions and dimensions', () {
     expect(MediaExportRequest.fromJson(project()).duration, 2);
     for (final url in [

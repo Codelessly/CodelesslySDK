@@ -125,9 +125,47 @@ void _whenLaidOut(VoidCallback callback) {
   }
 }
 
+/// A render object that can deliberately skip laying out its children.
+abstract interface class SkippedChildLayout {
+  bool get skipsChildLayout;
+}
+
+/// Repairs the dirty path left by a skipped child layout before mutating it.
+/// A skipped descendant may stay dirty while its ancestor becomes clean;
+/// invalidating from the outermost skipped ancestor down restores the normal
+/// relayout-boundary invariant, including cached wrappers between node boxes.
+void prepareSkippedLayoutChange(RenderObject object, {bool markWhenExpanded = true}) {
+  final path = <RenderObject>[];
+  var skippedAt = -1;
+  for (RenderObject? current = object; current != null; current = current.parent) {
+    path.add(current);
+    final ancestor = current;
+    if (ancestor is SkippedChildLayout && (ancestor as SkippedChildLayout).skipsChildLayout) skippedAt = path.length - 1;
+  }
+  if (skippedAt < 0) {
+    if (markWhenExpanded) object.markNeedsLayout();
+    return;
+  }
+  for (var i = skippedAt; i >= 0; i--) {
+    path[i].markNeedsLayout();
+  }
+}
+
 /// A render box hosting one island's widget.
 class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin {
   IslandHost._(this.manager, this.debugLabel);
+
+  @override
+  set child(RenderBox? value) {
+    if (identical(super.child, value)) return;
+    // Flutter can remove an island while its node is collapsed,
+    // outside NodeBox's normal property-update path (owner deactivation,
+    // transfer, or release). Repair the entire path before dropChild.
+    // Inserting into an empty host does not drop a dirty child and can happen
+    // in that host's own layout callback, where its ancestors must stay clean.
+    if (super.child != null) prepareSkippedLayoutChange(this, markWhenExpanded: false);
+    super.child = value;
+  }
 
   final IslandManager manager;
   final String debugLabel;
