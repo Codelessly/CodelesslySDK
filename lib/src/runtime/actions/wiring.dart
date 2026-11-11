@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node, TriggerType, Trigger;
+import 'package:codelessly_api/codelessly_api.dart' show Json, Node, SwitchProps, TriggerType, Trigger;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -135,6 +135,8 @@ class TreeReactions implements NodeInteractions {
   /// An input's new value goes to the variable its value is bound to.
   void _writeBack(Node node, Object? value, ActionContext ctx) {
     final path = valuePaths[node.type];
+    // A controlled input shows only its bound value: its reactions set it.
+    if (node.type == 'switch' && node.prop(SwitchProps.controlled)) return;
     final bound = path == null ? null : node.bind[path];
     final variable = bound == null ? null : exactPath(bound);
     if (variable == null) return;

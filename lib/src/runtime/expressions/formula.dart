@@ -1048,6 +1048,16 @@ class FormulaEvaluator {
       'coalesce(route.date, today())',
     ),
     FormulaFunctionDoc(
+      'random',
+      'random() · random(n) · random(a, b)',
+      'random(1, 6) → a whole number from 1 to 6',
+    ),
+    FormulaFunctionDoc(
+      'pick',
+      'pick(list)',
+      'pick(guests) → a random guest',
+    ),
+    FormulaFunctionDoc(
       'with',
       'with(map, key, value, …)',
       "with(item, 'x', item.x + 1) → item with x changed",
