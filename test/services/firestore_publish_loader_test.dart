@@ -99,6 +99,25 @@ void main() {
     expect(jsonEncode(layout.document.toJson()), jsonEncode(want.document.toJson()));
   });
 
+  test('fields packed with the nodes (arrays inside arrays) come back from the blob', () {
+    // The editor packs a field Firestore can't store as it is (a script's
+    // data with arrays inside arrays) into compressedNodes with the nodes.
+    final stored = {
+      'id': 'L1',
+      'schema': 2,
+      'compressedNodes': encodeGzipJson({
+        'nodes': {'t': {'type': 'text'}},
+        'scripts': [
+          {'name': 'moves', 'source': 'x', 'data': [['place', 'A1', 1], ['undo']]},
+        ],
+      }),
+    };
+    final json = expandStoredLayout(stored);
+    expect(json.containsKey('compressedNodes'), isFalse);
+    expect(json['nodes'], {'t': {'type': 'text'}});
+    expect((json['scripts'] as List).single['data'], [['place', 'A1', 1], ['undo']]);
+  });
+
   test('the preview reads publish_preview', () async {
     final db = FakeFirebaseFirestore();
     await writePublish(db, 'p1', rigcheck, collection: 'publish_preview');

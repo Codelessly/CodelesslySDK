@@ -147,6 +147,40 @@ void main() {
     expect(s.rectOf(tester, 'n').width, 50);
   });
 
+  testWidgets('a cue that clears does not play: nodes can share one cue', (tester) async {
+    final s = Screen({
+      'n': box({
+        'effectAnimations': [
+          {'name': 'shake', 'type': 'shake', 'duration': 300},
+        ],
+        // Shakes only when the shared cue names this node.
+        'bind': {'effectAnimations[0].playKey': r"${= shake.cell == 4 ? shake.tick : ''}"},
+      }),
+    }, variables: [
+      const Variable(name: 'shake', type: VariableType.map, value: {'cell': -1, 'tick': 0}),
+    ]);
+    await s.pump(tester);
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(s.rectOf(tester, 'n').left, 100);
+    s.scope.set('shake', {'cell': 4, 'tick': 1});
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(s.rectOf(tester, 'n').left, isNot(100));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(s.rectOf(tester, 'n').left, 100);
+    // Another node's turn: this cue clears, and nothing plays here.
+    s.scope.set('shake', {'cell': 7, 'tick': 2});
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(s.rectOf(tester, 'n').left, 100);
+    // Its turn again with a new tick: it plays.
+    s.scope.set('shake', {'cell': 4, 'tick': 3});
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 40));
+    expect(s.rectOf(tester, 'n').left, isNot(100));
+    await tester.pump(const Duration(milliseconds: 400));
+  });
+
   testWidgets('playOnAppear plays as it shows; a design canvas never plays', (tester) async {
     final s = Screen({
       'n': box({
