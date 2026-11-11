@@ -15,5 +15,5 @@ bool runtimeKeyMatches(
       shift != combo.shift) {
     return false;
   }
-  return combo.matches(label, meta: meta, shift: shift, alt: alt);
+  return combo.matches(label == ' ' ? 'Space' : label, meta: meta, shift: shift, alt: alt);
 }
