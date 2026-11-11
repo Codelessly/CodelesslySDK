@@ -772,6 +772,22 @@ class RenderLoops extends RenderPose with _Ticking {
 /// a running app plays its entrance, loop and spin, and transitions to new
 /// values when they change.
 class RenderMotion extends RenderPose with _Ticking {
+  /// The size of the node's parent node (the second node box above it), for
+  /// a path in a viewBox; null before layout.
+  Size? _parentSize() {
+    var boxes = 0;
+    for (var p = parent; p != null; p = p.parent) {
+      if (p is NodeBox) {
+        boxes++;
+        if (boxes == 2) {
+          final b = p.contentBox ?? p;
+          return b.hasSize ? b.size : null;
+        }
+      }
+    }
+    return null;
+  }
+
   api.Motion _motion = api.Motion.none;
   bool _animates = false;
   bool _entered = false;
@@ -907,6 +923,24 @@ class RenderMotion extends RenderPose with _Ticking {
     syncTicker();
   }
 
+  /// A path in a viewBox follows the parent's size: placed again once laid
+  /// out (the parent has its size by then).
+  Size? _stage;
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (_motion.hasPath && _motion.pathViewBox.length >= 2) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!attached) return;
+        final stage = _parentSize();
+        if (stage != null && stage != _stage) {
+          _stage = stage;
+          _show();
+        }
+      });
+    }
+  }
+
   @override
   void detach() {
     _MotionRevealWatcher.remove(this);
@@ -996,16 +1030,29 @@ class RenderMotion extends RenderPose with _Ticking {
     var shown = m;
     if (m.hasPath) {
       final progress = m.pathWrap ? api.Motion.wrapProgress(m.pathProgress) : m.pathProgress;
-      final at = MeasuredPath.of(m.path!)?.at(
+      final measured = MeasuredPath.of(m.path!);
+      final at = measured?.at(
         progress,
         byArea: m.pathPacing == api.MotionPathPacing.area,
         focus: Offset(m.pathFocusX, m.pathFocusY),
       );
       if (at != null) {
-        final total = Offset(m.translateX + at.$1.dx, m.translateY + at.$1.dy);
+        // A path in a viewBox is stretched over the node's parent.
+        var point = at.$1;
+        var heading = at.$2;
+        final stage = m.pathViewBox.length >= 2 ? _parentSize() : null;
+        if (stage != null && m.pathViewBox[0] > 0 && m.pathViewBox[1] > 0) {
+          // In a viewBox the path is placed over the parent: its points are
+          // where the node goes (from the parent's origin), not offsets from
+          // the path's start, so the node is laid out at the origin.
+          final sx = stage.width / m.pathViewBox[0], sy = stage.height / m.pathViewBox[1];
+          final absolute = point + measured!.start;
+          point = Offset(absolute.dx * sx, absolute.dy * sy);
+          heading = math.atan2(math.sin(heading) * sy, math.cos(heading) * sx);
+        }
+        final total = Offset(m.translateX + point.dx, m.translateY + point.dy);
         // Keyframes that push the node off its path turn it too: its nose
         // follows where it actually goes.
-        var heading = at.$2;
         final pushed =
             m.orientToPath && moving && m.keyframes.any((k) => k.translateX != null || k.translateY != null);
         if (pushed) {
