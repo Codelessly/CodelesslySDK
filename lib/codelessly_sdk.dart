@@ -114,7 +114,7 @@ export 'package:codelessly_api/codelessly_api.dart'
 export 'src/render/islands.dart' show IslandEnvironment, IslandHost, IslandOwnerElement, IslandParent;
 export 'src/render/node_tree.dart' show NodeTree, NodeBox, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
 // Text as the SDK renders it, for a host's own text (an in-place editor).
-export 'src/render/convert.dart' show textStyle;
+export 'src/render/convert.dart' show textStyle, FontDemand;
 export 'src/render/paint/image_fill.dart' show ImageClient;
 export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';

@@ -64,7 +64,13 @@ void main() {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
         'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),
-        'https://fonts.gstatic.com/s/i/materialicons/home/v1/24px.svg');
+        'https://fonts.gstatic.com/s/i/materialicons/home/v16/24px.svg',
+        reason: 'without a version, the version the icon table knows');
+    // ios_share has no v1 SVG: without the table it drew nothing.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'ios_share', 'style': 'rounded'}),
+        contains('/materialiconsround/ios_share/v'));
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'ios_share', 'style': 'rounded'}),
+        isNot(contains('/v1/')));
     expect(
         IconSources.urlOf({
           'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star', 'style': 'rounded', //
