@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart'
     show
         Breakpoints,
+        ThemeTokens,
         CanvasProps,
         jsonEquality,
         Json,
@@ -32,6 +33,7 @@ import '../runtime/actions/runner.dart' show CodelesslyActions, ActionCancellati
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
+import '../runtime/expressions/perf_scope.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
@@ -39,6 +41,7 @@ import '../services/services.dart' show NoScriptRunner, Services, PaywallSession
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
+import 'overlay_screens.dart';
 import 'page_transitions.dart';
 import 'persisted_variables.dart';
 import 'runtime.dart';
@@ -380,6 +383,45 @@ class CodelesslyWidget extends StatefulWidget {
         );
       };
 
+  /// The layout and params [screen] opens.
+  @visibleForTesting
+  static (String, Map<String, Object?>)? resolveScreen(PublishModel model, String? screen) {
+    if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
+    // Encode what a typed location may hold raw (spaces, `·`).
+    final location = Uri.encodeFull(screen.trim());
+    final CanvasLocationMatch? match;
+    final Uri? uri;
+    try {
+      match = CanvasLocation.match(model, location);
+      uri = Uri.parse(location);
+    } on FormatException {
+      return null;
+    } on ArgumentError {
+      return null;
+    }
+    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+    if (match != null) {
+      // A catch-all (`*`, an app's not-found screen) takes only what names
+      // no screen: a one-segment location that is a screen's id or name
+      // opens that screen, as it would with no catch-all.
+      final path = CanvasLocation.pathOf(model, match.canvasId);
+      final catchAll = path != null && CanvasLocation.isCatchAll(CanvasLocation.segmentsOf(path).last);
+      if (catchAll && segments.length == 1) {
+        final id = model.layoutIdForScreen(Uri.encodeComponent(segments.single));
+        if (id != null) return (id, {...uri.queryParameters});
+      }
+      return (match.layoutId, match.params);
+    }
+    // The app's root with a query (`/?state=empty`): the entry screen,
+    // opened with those params.
+    if (segments.isEmpty && uri.queryParameters.isNotEmpty) {
+      final entry = model.entryLayoutId;
+      return entry == null ? null : (entry, {...uri.queryParameters});
+    }
+    final id = model.layoutIdForScreen(segments.isEmpty ? screen.trim() : Uri.encodeComponent(segments.last));
+    return id == null ? null : (id, {...uri.queryParameters});
+  }
+
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
 }
@@ -464,7 +506,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       var params = {...?_controller?.params, ...widget.params};
       String? layoutId = requested;
       if (layoutId == null) {
-        final screen = _resolveScreen(model, widget.initialScreen);
+        final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
         layoutId = screen?.$1 ?? model.entryLayoutId;
         if (screen != null) params = {...screen.$2, ...params};
       }
@@ -482,33 +524,6 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       setState(() => _error = e);
       _controller?._update(error: e);
     }
-  }
-
-  /// The layout and params [screen] opens.
-  static (String, Map<String, Object?>)? _resolveScreen(PublishModel model, String? screen) {
-    if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
-    final CanvasLocationMatch? match;
-    final Uri? uri;
-    try {
-      match = CanvasLocation.match(model, location);
-      uri = Uri.parse(location);
-    } on FormatException {
-      return null;
-    } on ArgumentError {
-      return null;
-    }
-    if (match != null) return (match.layoutId, match.params);
-    final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
-    // The app's root with a query (`/?state=empty`): the entry screen,
-    // opened with those params.
-    if (segments.isEmpty && uri.queryParameters.isNotEmpty) {
-      final entry = model.entryLayoutId;
-      return entry == null ? null : (entry, {...uri.queryParameters});
-    }
-    final id = model.layoutIdForScreen(segments.isEmpty ? screen.trim() : Uri.encodeComponent(segments.last));
-    return id == null ? null : (id, {...uri.queryParameters});
   }
 
   @override
@@ -530,6 +545,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     if (layout == null || codelessly == null) {
       return (widget.loadingBuilder ?? _controller?.loadingBuilder)?.call(context) ?? const CodelesslyLoadingScreen();
     }
+    // The project's overlay screens, above the navigator's screens.
+    _ensureOverlayScreens(codelessly, layout);
     Widget view = _LayoutView(
       // Another layout or paywall is another screen.
       key: ValueKey((layout, widget.paywall)),
@@ -546,6 +563,16 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     final builder = widget.layoutBuilder ?? _controller?.layoutBuilder;
     if (builder != null) view = builder(context, view);
     return view;
+  }
+}
+
+extension on _CodelesslyWidgetState {
+  void _ensureOverlayScreens(Codelessly codelessly, PublishLayout layout) {
+    if (codelessly.publishModel?.overlayLayoutIds.isEmpty ?? true) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      CodelesslyOverlayHost.ensure(context, codelessly: codelessly, currentLayoutId: layout.id, template: widget);
+    });
   }
 }
 
@@ -587,6 +614,7 @@ class _ScreenState {
     nodeValues.dispose();
     scope.dispose();
     if (scope.parent case final ScriptsScope scripts) scripts.dispose();
+    if (values.parent case final PerfScope perf) perf.dispose();
     values.dispose();
   }
 }
@@ -639,6 +667,25 @@ class _LayoutViewState extends State<_LayoutView> {
     final screen = screenValues(mq.size.width, mq.size.height,
         dark: mq.platformBrightness == Brightness.dark, breakpoints: _breakpoints);
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
+    _updateTheme();
+  }
+
+  /// The project's theme as the layout shows it: its tokens, then a
+  /// layout's own.
+  ThemeTokens get _tokens => widget.layout.theme ?? _codelessly.publishModel?.theme ?? ThemeTokens.none;
+
+  /// Whether the layout shows in dark mode: the device's mode, or with
+  /// [CodelesslyConfig.useHostTheme] the app's theme's (so an app's own
+  /// dark mode switch applies).
+  bool get _dark => _codelessly.config.useHostTheme
+      ? Theme.of(context).brightness == Brightness.dark
+      : MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark;
+
+  /// `theme`: the project's theme tokens for the current mode
+  /// ([themeValues]), kept as the mode and the published theme change.
+  void _updateTheme() {
+    final theme = themeValues(_tokens, dark: _dark);
+    if (!jsonEquality.equals(theme, _screen.values['theme'])) _screen.values.set('theme', theme);
   }
 
   Map<String, Object?> _paywallValues() {
@@ -659,7 +706,8 @@ class _LayoutViewState extends State<_LayoutView> {
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
       ..._paywallValues(),
-    }, _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope)));
+      // `perf` (frame timings) sits between the page's variables and these.
+    }, PerfScope(parent: _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope))));
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
     final scripts = ScriptsScope(
@@ -695,6 +743,7 @@ class _LayoutViewState extends State<_LayoutView> {
       onError: widget.host.onActionError,
       onActionErrorEvent: _actionError,
       refreshAuthValues: _codelessly.refreshAuthValues,
+      appData: _codelessly.appData,
     );
     final session = widget.host.paywall;
     if (session != null) {
@@ -821,6 +870,8 @@ class _LayoutViewState extends State<_LayoutView> {
     final shown = _shown;
     if (!mounted || shown == null) return;
     if (ModalRoute.isCurrentOf(context) == false) return;
+    // An overlay screen (no route) isn't the screen the app is on.
+    if (OverlayScreenScope.of(context)) return;
     final route = CodelesslyRoute(widget.layout.id, shown, widget.params);
     if (_codelessly.route.value != route) _codelessly.route.value = route;
   }
@@ -944,6 +995,8 @@ class _LayoutViewState extends State<_LayoutView> {
   void didUpdateWidget(_LayoutView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!jsonEquality.equals(oldWidget.data, widget.data)) _dataChanged(oldWidget.data);
+    // A republish can bring another theme.
+    _updateTheme();
     if (!identical(oldWidget.controller, widget.controller)) {
       if (identical(oldWidget.controller?._screen, _screen)) oldWidget.controller?._screen = null;
       widget.controller?._screen = _screen;
@@ -1005,7 +1058,15 @@ class _LayoutViewState extends State<_LayoutView> {
     content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
-      if (theme != null) content = Theme(data: themeDataOf(theme), child: content);
+      // A theme with dark colors is a dark theme in dark mode; one without
+      // stays light, as it was designed.
+      if (theme != null) {
+        final dark = theme.hasDark && _dark;
+        content = Theme(
+          data: themeDataOf(theme.forBrightness(dark: dark), brightness: dark ? Brightness.dark : Brightness.light),
+          child: content,
+        );
+      }
     }
     final mq = MediaQuery.maybeOf(context);
     if (mq != null) {
@@ -1026,7 +1087,13 @@ class _ScreenUi extends NavigatorActionUi {
   final _LayoutViewState view;
 
   @override
-  ScreenBuilder get modal => (destination, params) {
+  ScreenBuilder get modal => _modal(CanvasSizing.design);
+
+  /// A sheet's screen fills the sheet's width.
+  @override
+  ScreenBuilder get sheetModal => _modal(CanvasSizing.fillWidth);
+
+  ScreenBuilder _modal(CanvasSizing sizing) => (destination, params) {
         final layoutId = view._codelessly.publishModel?.resolveLayoutId(destination);
         if (layoutId == null) return null;
         // A modal opens the destination screen, like navigation does. Its
@@ -1037,7 +1104,7 @@ class _ScreenUi extends NavigatorActionUi {
           layoutId: layoutId,
           params: params,
           data: view.widget.data,
-          sizing: CanvasSizing.design,
+          sizing: sizing,
           onNavigate: view.widget.host.onNavigate,
           paywall: view.widget.host.paywall,
           paywallAppVersion: view.widget.host.paywallAppVersion,

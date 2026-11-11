@@ -115,6 +115,7 @@ export 'src/render/islands.dart' show IslandEnvironment, IslandHost, IslandOwner
 export 'src/render/node_tree.dart' show NodeTree, NodeBox, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
 // Text as the SDK renders it, for a host's own text (an in-place editor).
 export 'src/render/convert.dart' show textStyle;
+export 'src/render/paint/image_fill.dart' show PaintImages;
 export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';
 export 'src/render/hero.dart' show HeroMarkPaint, HeroMarks, RenderHeroMark;
@@ -136,6 +137,7 @@ export 'src/render/paint/image_fill.dart' show ImageClient;
 export 'src/runtime/lists/lists.dart';
 // What `${drag}` reads when nothing is dragged (a design canvas's default).
 export 'src/runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+export 'src/runtime/expressions/perf_scope.dart' show PerfScope;
 export 'src/widgets/collections_data_list.dart' show DataListView, DataListViewState, ListSection, SectionIndexBar, UndoBar, groupIntoSections, sectionOffset;
 export 'src/widgets/collections_reorder.dart' show GroupReorderList, KeyboardReorderItem, ReorderListView;
 export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
@@ -150,11 +152,12 @@ export 'src/app/fonts.dart';
 export 'src/app/loader.dart';
 export 'src/app/managed_components.dart';
 export 'src/app/navigation.dart';
+export 'src/app/overlay_screens.dart';
 export 'src/app/page_transitions.dart';
 export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
 export 'src/app/runtime.dart';
-export 'src/app/theme.dart' show themeDataOf;
+export 'src/app/theme.dart' show themeDataOf, themeValues;
 export 'src/app/viewport.dart';
 
 export 'src/render/layout/design_scroll.dart' show RenderDesignScroll;
