@@ -118,6 +118,116 @@ final codelessly = Codelessly(
 To use your own database, implement `DocumentBackend` (get, watch, query, write documents) and give it to
 `BackendCloudDatabase`, which adds the rules, owner stamps and relations on top.
 
+### Live cloud data in a layout
+
+A `loadCloudData` action streams a document, a query's documents, or a number over a query into a variable for as
+long as the screen shows. The variable holds `{status, isLoading, data, error, hasMore}`; a variable of type list
+holds the documents themselves, and with an `aggregate`, a number variable holds the number. The reactions below are
+`liveCloudLoads`, `markAllRead` and `cardImpression` in the example app's `lib/snippets.dart`:
+
+```json
+{"type": "loadCloudData", "variable": "cards", "single": false, "limit": "${shown}",
+ "query": {"enabled": true, "collectionPath": "cards",
+           "orderByFilters": [{"field": "sentAt", "sortOrder": "descending"}],
+           "joins": [{"collection": "card_state", "as": "state", "id": "${auth.uid}_${item.id}"}]}}
+```
+
+- **One listener per variable.** Running the load again, or `{"type": "reloadCloudData", "variable": "cards"}`,
+  replaces the subscription; it never adds a second one. The subscription ends when the screen goes.
+- **It follows its values.** When a value the query reads changes (`${auth.uid}` after a sign in, a search text, a
+  limit bound to a variable), the load runs again by itself; a change of its own variable never does. A load that
+  keeps re-running (20 times in a second) stops following and reports why. `"reactive": false` turns this off. Owner
+  only and audience collections also follow the signed-in user (and their role): `codelesslyCloudServices` gives
+  the database the user's changes.
+- **Bounded.** A query loads at most its `limit` (a number or expression), else the query's limit, else 500
+  (`kDefaultCloudLoadLimit`), reading one document more so that `hasMore` is true exactly when more match. `"limit":
+  "0"` loads everything. "Show more" is a `setVariable` that raises `shown`.
+- **Joins.** Each `query.joins` entry attaches, per item, the matching document of another collection under `as`
+  (`${item.state.read}`): by a key template (`id`, the matching document's id) or by `localField` and `foreignField`,
+  with `many` for every match. The matches are read with `in` queries of 30 keys, kept live: 100 items are 4
+  listeners, not 100 reads.
+- **Live numbers.** `"aggregate": "count"` (or `sum`, `average` with `aggregateField`) keeps the number without
+  loading a document: the database computes it (with Firestore, one read per 1000 documents counted), again after
+  this app writes to that collection, and every `refreshSeconds` when set (for writes made elsewhere). Streaming the
+  documents to count them would read every one, and again on each change.
+- **App-wide.** With `"scope": "app"` (above) the load keeps the same limit, aggregate and joins, shared by
+  every screen: a live unread count for a badge on any screen.
+
+```json
+{"type": "loadCloudData", "variable": "unread", "single": false, "aggregate": "count",
+ "query": {"enabled": true, "collectionPath": "cards",
+           "whereFilters": [{"field": "read", "operator": "equal", "value": "false"}]}}
+```
+
+**Batches over a list.** `cloudBatch` with `forEach` runs its `cloudData` steps (create, update, delete) once per
+item (`${loop.item}`, `${loop.index}`) and commits them together: up to 500 writes all or none, more in commits of
+500 each, or, with `"transaction": true`, an error before anything is written. `${result}` is the ids written.
+
+```json
+{"type": "cloudBatch", "forEach": "${cards}",
+ "steps": [{"type": "cloudData", "operation": "update", "collection": "cards", "id": "${loop.item.id}",
+            "fields": [{"field": "read", "value": "true"}]}]}
+```
+
+**Pull to refresh.** A list with `pullToRefresh` (or a `refresh` reaction) can be pulled, with or without
+pagination; its `refresh` reactions run (`reloadCloudData`) and the indicator shows until they finish.
+
+**Impressions.** A trigger's `onceKey` runs its reaction once per key for as long as the app runs, and
+`enterViewport`'s `visibleMs` waits until the node has stayed in view that long. An `increment` field operation
+counts atomically:
+
+```json
+{"trigger": {"type": "enterViewport", "visibleFraction": 0.5, "visibleMs": 1000, "onceKey": "${item.id}"},
+ "actions": [{"type": "cloudData", "operation": "update", "collection": "cards", "id": "${item.id}",
+              "fields": [{"field": "views", "operation": "increment", "value": "1"}]}]}
+```
+
+### Who reads and writes each collection
+
+The project's data rules (set per top-level collection in the editor's Data panel) decide who may read and write,
+and `BackendCloudDatabase` follows them: it adds the filters the database's rules expect to every query and
+stamps the owner on writes. Besides `app`, `signedIn`, `owner`, `publicReadOwnerWrite` and `roleWrite`, two rules
+are for data the app reads but only the project writes (from the editor, Codelessly's server, or app users with
+the collection's role):
+
+- `ownerRead`: each signed-in user reads the documents whose `ownerId` is theirs. Users can't create, edit or
+  delete them, except the fields the rules list in `ownerFields` (for example a `read` flag) on their own
+  documents.
+- `audience`: a user reads a document when its `audience` list names everyone (`*`), signed-in users
+  (`signedIn`), their role (`role:pro`) or them (`user:{uid}`). It is checked when the document is read, so users
+  who sign up or change role later see it too. Give `BackendCloudDatabase(audience:)` what the user matches
+  (`DataRules.audienceOf(uid, role: ..., signedIn: ...)`); without it, everyone and the user.
+  `codelesslyCloudServices` gives it an `AuthAudience`: the `role` in the user's `users/{uid}` profile (`user`
+  without one, as the rules read it), signed in unless anonymous; live queries follow a change of role.
+
+A collection can also expire: with `expiry: {collection: field}` in the rules, documents past the time in that
+field are not returned (queries get `field > now`, and a live query drops documents as they expire), the
+database refuses them to app users, and Codelessly deletes them later. Write the field as a date or ISO text; a
+document written without one never expires (the SDK writes `DataRules.neverExpires`), while one stored without
+the field by other means is not readable by app users.
+
+```dart
+BackendCloudDatabase serverWrittenData({required String uid, String role = 'user', DateTime Function()? now}) =>
+    BackendCloudDatabase(
+      backend: MemoryDocumentBackend(),
+      rules: DataRules.fromJson({
+        'collections': {'notes': 'ownerRead', 'news': 'audience'},
+        'ownerFields': {
+          'notes': ['read'],
+        },
+        'expiry': {'notes': 'expiresAt', 'news': 'expiresAt'},
+      }),
+      userId: () => uid,
+      // What this user matches in a document's `audience` list.
+      audience: () => DataRules.audienceOf(uid, role: role, signedIn: true),
+      now: now,
+    );
+```
+
+With Codelessly's cloud, a query on an expiring `ownerRead` or `audience` collection runs on its owner (or
+audience) filter and the expiry bound together, which needs a composite index; Codelessly creates it when the
+expiry is set, and the query fails until it is ready (a few minutes).
+
 ## HTTP APIs
 
 ![On the web, callApi posts {url, method, headers, body} to your proxy, which calls the API and returns {statusCode, headers, body}](images/09-cloud-data-and-services/api-proxy.png)

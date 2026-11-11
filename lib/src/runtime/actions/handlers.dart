@@ -6,13 +6,14 @@ import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
-import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/rendering.dart' show RenderBox, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import 'action_error.dart' show CodedFailure;
+import 'cloud_loads.dart';
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
@@ -29,8 +30,11 @@ import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'app_data_sources.dart';
+import 'app_events.dart';
+import 'capture.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
+import 'ui.dart' show PickedFile;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
@@ -44,12 +48,6 @@ typedef ActionHandler = FutureOr<void> Function(ActionDef action, ActionRun run)
 /// Runs [a] with its built-in handler.
 Future<void> handleAction(ActionDef a, ActionRun run) async {
   switch (a) {
-    // API actions this runtime doesn't run yet (their runtime support is
-    // still to come): they do nothing, as an unknown action would.
-    case ReloadCloudDataAction():
-    case EmitEventAction():
-    case CaptureScreenshotAction():
-      break;
     case NavigateAction():
       await run.host.ui.navigate(a, params: run.json(a.params), baseParams: run.json(a.baseParams));
     case OpenModalAction():
@@ -84,6 +82,9 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
         run.result = await _mediaImport(a, run);
       } else if (a.name == 'media.export' || a.name == 'media.cancelExport') {
         run.result = await _mediaExport(a, run);
+      } else if (a.optional) {
+        // The app hasn't registered it: the chain goes on without it.
+        run.result = null;
       } else {
         throw StateError('No function named [${a.name}]');
       }
@@ -95,10 +96,13 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _cloudDocuments(a, run);
     case LoadCloudDataAction():
       await _loadCloudData(a, run);
+    case ReloadCloudDataAction():
+      await reloadCloudData(a, run);
     case AuthAction():
       await _auth(a, run);
     case IfAction():
-      final holds = a.condition != null && run.expressions.test(a.condition!, run.scope);
+      // A condition reading a script formula waits for its answer.
+      final holds = a.condition != null && await _withScripts(run, () => run.expressions.test(a.condition!, run.scope));
       await run.run(holds ? a.then : a.orElse);
     case ForEachAction():
       await _forEach(a, run);
@@ -141,9 +145,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case CloudDataAction():
       await _cloudData(a, run);
     case CloudBatchAction():
-      for (final step in a.steps) {
-        await _cloudData(step, run);
-      }
+      await cloudBatch(a, run, _cloudData);
     case PreloadImagesAction():
       run.result = await _preloadImages(a, run);
     case DownloadFileAction():
@@ -173,6 +175,16 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case ControlDragAction(command: DragCommand.reset) when TransformGestures.hasIn(run.host.tree, a.node):
       // A node with a transform gesture springs back to its rest pose.
       await TransformGestures.reset(run.host.tree!, a.node);
+    case ControlDragAction(command: DragCommand.zoom):
+      // Zoom buttons: scale a transform gesture about its viewport's middle.
+      final tree = run.host.tree;
+      final factor = double.tryParse(run.text(a.value).trim());
+      if (tree != null && factor != null) await TransformGestures.zoom(tree, a.node, factor);
+    case ControlDragAction(command: DragCommand.pose):
+      // Spring a transform gesture to a pose: {x, y, scale, rotation...}.
+      final tree = run.host.tree;
+      final pose = _poseOf(a.value.trim().startsWith(r'${') ? await _withScripts(run, () => run.evaluate(a.value)) : a.value);
+      if (tree != null && pose.isNotEmpty) await TransformGestures.moveTo(tree, a.node, pose);
     case ControlDragAction():
       // A node that follows the pointer (gestures/drag_motion.dart): fling it
       // off, bring it back from a side, or reset or shake it; each of the
@@ -190,6 +202,11 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       break;
     case PaginateAction():
       await paginateAction(a, run);
+    case EmitEventAction():
+      final name = run.text(a.event).trim();
+      if (name.isNotEmpty) AppEventBus.of(run.context.services)?.emit(name, run.json(a.props));
+    case CaptureScreenshotAction():
+      run.result = await _captureScreenshot(a, run);
     case UnknownAction():
       break;
   }
@@ -497,105 +514,25 @@ Future<void> _cloudDocuments(CloudDocumentsAction a, ActionRun run) async {
   }
 }
 
-/// Streams [a]'s document or query into its variable until the screen goes:
-/// `{status, isLoading, data, error}`.
+/// [a] with `scope: app` on a host with app data goes to the app's shared
+/// subscription; any other load is the screen's live load (cloud_loads.dart).
 Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
-  final db = _require(run, 'Cloud data').cloud;
-  final scope = run.context.scope;
   final variable = a.variable.trim();
   if (variable.isEmpty) return;
   final host = run.host;
   if (a.scope == CloudDataScope.app && host is RuntimeActionContext && host.appData != null) {
-    return _loadAppCloudData(a, run, db, host.appData!, variable);
+    return _loadAppCloudData(a, run, _require(run, 'Cloud data').cloud, host.appData!, variable);
   }
-  void put(String status, {Object? data, Object? error}) => setVariableIn(scope, variable, {
-        'status': status,
-        'isLoading': status == 'loading',
-        'data': data,
-        'error': ?error,
-      });
-  put('loading');
-  late final Stream<Object?> stream;
-  try {
-    final path = resolveCollectionPath(a.query, run.expressions, run.scope);
-    stream = a.single
-        ? db.watchDocument(path, run.text(a.id).trim())
-        : db.watchQuery(path, resolveCloudQuery(a.query, run.expressions, run.scope), loadRelated: a.query.loadRelated);
-  } catch (error) {
-    put('error', error: '$error');
-    rethrow;
-  }
-  final first = Completer<void>();
-  var active = true;
-  late final StreamSubscription<Object?> sub;
-  try {
-    sub = stream.listen(
-    (data) {
-      if (!active) return;
-      put('loaded', data: data);
-      if (!first.isCompleted) first.complete();
-    },
-    onError: (Object error, StackTrace stack) {
-      if (!active) return;
-      active = false;
-      put('error', error: '$error');
-      if (!first.isCompleted) {
-        first.completeError(error, stack);
-      } else {
-        // A later subscription error has no awaited action to throw through.
-        // Stop this invocation's remaining actions, report once and close it.
-        run.stop();
-        run.host.reportError(ActionFailed(a.type, error, nodeId: run.node?.id), stack, action: a.type);
-      }
-    },
-    onDone: () {
-      if (active && !first.isCompleted) {
-        active = false;
-        final error = StateError('Cloud data stream closed before a value');
-        put('error', error: '$error');
-        first.completeError(error);
-      }
-    },
-    cancelOnError: true,
-    );
-  } catch (error) {
-    active = false;
-    put('error', error: '$error');
-    rethrow;
-  }
-  void cancel() {
-    active = false;
-    unawaited(sub.cancel());
-    if (!first.isCompleted) first.completeError(const ActionsCanceled());
-  }
-  final removeCancellation = run.onCancel(cancel);
-  run.host.onDispose(cancel);
-  try {
-    await first.future;
-  } finally {
-    removeCancellation();
-  }
+  return loadCloudData(a, run);
 }
 
 /// [a] with `scope: app`: the app's one subscription to its source, shared
 /// by every screen that loads the same ([AppDataSources]). Waits for the
 /// first value; the subscription outlives the screen.
 Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDatabase db, AppDataSources sources, String variable) async {
-  final path = resolveCollectionPath(a.query, run.expressions, run.scope);
-  final id = a.single ? run.text(a.id).trim() : '';
-  final query = a.single ? null : resolveCloudQuery(a.query, run.expressions, run.scope);
-  final key = [
-    a.single ? 'document' : 'query',
-    path,
-    id,
-    if (query != null) _cloudQueryKey(query),
-    ...a.query.loadRelated,
-  ].join('\u0000');
-  final loaded = sources.load(
-    variable,
-    key,
-    () => query == null ? db.watchDocument(path, id) : db.watchQuery(path, query, loadRelated: a.query.loadRelated),
-  );
+  // The same limit, aggregate and joins as a screen's load (cloud_loads.dart).
+  final source = appCloudSource(a, run, db);
+  final loaded = sources.load(variable, source.key, source.open);
   // Stopping this run stops waiting, not the app's subscription.
   final waiting = Completer<void>();
   loaded.then((_) {
@@ -612,14 +549,6 @@ Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDataba
     removeCancellation();
   }
 }
-
-/// [q] as text: the same query gives the same text.
-String _cloudQueryKey(CloudQuery q) => [
-      for (final f in q.filters) '${f.field} ${f.operator.name} ${jsonEncode(f.value, toEncodable: (v) => '$v')}',
-      for (final o in q.orderBy) '${o.field} ${o.descending ? 'desc' : 'asc'}',
-      'limit ${q.limit}',
-      'after ${q.startAfter}',
-    ].join(';');
 
 // --- auth -----------------------------------------------------------------------------
 
@@ -702,7 +631,9 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
     await files.delete(folder);
     return;
   }
-  final picked = await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple);
+  final picked = a.source.trim().isEmpty
+      ? await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple)
+      : sourceFiles(run.evaluate(a.source), name: run.text(a.fileName).trim());
   for (final (i, f) in picked.indexed) {
     if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
       throw CodedFailure('file-too-large', '${f.name} is larger than ${_mb(a.maxSizeMB)} MB');
@@ -723,6 +654,67 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
     await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
   }
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
+}
+
+/// The files a cloudFiles action's `source` gives: a `data:` URL, a map
+/// `{"data": "data:...", "name"}`, or a list of them. [name] names them
+/// (numbered when several); else a map's `name`, else `file-<time>.<ext>`.
+List<PickedFile> sourceFiles(Object? value, {String name = ''}) {
+  final items = value is List ? value : [value];
+  final out = <PickedFile>[];
+  for (final (i, item) in items.indexed) {
+    final data = item is Map ? item['data'] : item;
+    if (data is! String || !data.trim().startsWith('data:')) {
+      throw const CodedFailure('invalid-source', 'The file to upload is not a data: URL');
+    }
+    final UriData uri;
+    try {
+      uri = UriData.parse(data.trim());
+    } on FormatException {
+      throw const CodedFailure('invalid-source', 'The file to upload is not a valid data: URL');
+    }
+    final type = uri.mimeType;
+    final ext = switch (type) {
+      'image/png' => 'png',
+      'image/jpeg' => 'jpg',
+      'image/gif' => 'gif',
+      'image/webp' => 'webp',
+      'application/pdf' => 'pdf',
+      'application/json' => 'json',
+      'text/plain' => 'txt',
+      _ => 'bin',
+    };
+    final given = name.isNotEmpty
+        ? (items.length > 1 ? _numbered(name, i + 1) : name)
+        : (item is Map && item['name'] is String && (item['name'] as String).trim().isNotEmpty
+            ? (item['name'] as String).trim()
+            : 'file-${DateTime.now().millisecondsSinceEpoch}${items.length > 1 ? '-${i + 1}' : ''}.$ext');
+    out.add(PickedFile(name: given, bytes: uri.contentAsBytes(), contentType: type));
+  }
+  return out;
+}
+
+String _numbered(String name, int n) {
+  final dot = name.lastIndexOf('.');
+  return dot <= 0 ? '$name-$n' : '${name.substring(0, dot)}-$n${name.substring(dot)}';
+}
+
+// --- capture -------------------------------------------------------------------------------
+
+Future<Object?> _captureScreenshot(CaptureScreenshotAction a, ActionRun run) async {
+  // Let a change the chain just made paint first.
+  if (SchedulerBinding.instance.hasScheduledFrame) await SchedulerBinding.instance.endOfFrame;
+  final tree = run.host.tree;
+  final layout = CaptureRegistry.layoutOf(tree);
+  final boundary = a.target == CaptureTarget.app ? CaptureRegistry.app ?? layout : layout ?? CaptureRegistry.app;
+  if (boundary == null) throw StateError('Nothing to capture: no layout or capture scope is shown');
+  RenderBox? box;
+  if (a.target == CaptureTarget.node) {
+    final id = run.text(a.node).trim();
+    box = tree?.boxOf(id);
+    if (box == null) throw StateError('No node [$id] on screen to capture');
+  }
+  return captureImage(boundary, box: box, pixelRatio: a.pixelRatio);
 }
 
 // --- forms and text fields -------------------------------------------------------------
@@ -1200,3 +1192,27 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
 
 /// 5 for 5.0, 2.5 for 2.5.
 String _mb(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';
+
+/// A pose from an action's value: a map, or its JSON text; numbers only.
+Map<String, double> _poseOf(Object? v) {
+  if (v is String) {
+    try {
+      v = jsonDecode(v);
+    } catch (_) {
+      return const {};
+    }
+  }
+  if (v is! Map) return const {};
+  return {
+    for (final e in v.entries)
+      if (const {'x', 'y', 'scale', 'rotation', 'scaleX', 'scaleY'}.contains(e.key))
+        if (e.value is num) '${e.key}': (e.value as num).toDouble() else if (double.tryParse('${e.value}') case final double d) '${e.key}': d,
+  };
+}
+
+/// [evaluate] once the script formulas it reads have answered (a worker on
+/// the web answers null at first), as a setVariable's value does.
+Future<T> _withScripts<T>(ActionRun run, T Function() evaluate) async {
+  final scripts = readPath(run.scope, 'script');
+  return scripts is ScriptsScope ? await scripts.resolve(evaluate) : evaluate();
+}

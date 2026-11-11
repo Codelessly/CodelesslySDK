@@ -1,6 +1,6 @@
 # 16. Paywalls
 
-[Guide](README.md) · Previous: [Troubleshooting and FAQ](15-troubleshooting.md)
+[Guide](README.md) · Previous: [Troubleshooting and FAQ](15-troubleshooting.md) · Next: [Presenting, automations and host features](17-presenting-and-automations.md)
 
 A paywall is a layout designed in the Codelessly Editor and published at a **placement**: a name your app shows
 it at (`onboarding`, `settings`), with the **product slots** it sells (`monthly`, `annual`). Your app calls one

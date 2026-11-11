@@ -343,7 +343,15 @@ class NodeBinder {
   /// count, unless bound on its own); item scopes already made follow.
   Node _withItems(NodeSource source, Node n, Object? instance, Object? items) {
     final list = _listOf(items);
-    if (list == null) return n;
+    if (list == null) {
+      // A running app shows no items while its data isn't there yet (a
+      // script still answering), not the bare template with `${item...}`
+      // in it; a design preview keeps showing the template.
+      final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
+      final def = n.spec?.prop(countProp);
+      if (preview || def == null || n.bind.containsKey('props.$countProp')) return n;
+      return n.copyWith(props: n.props.set<Object?>(def, 0));
+    }
     // This list's item scopes only (a list of thousands of cells used to
     // scan every item scope of every list, per bind). A snapshot: an item's
     // update can rebind nodes that make or drop item scopes (a list inside

@@ -21,7 +21,9 @@ import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+import '../runtime/actions/capture.dart' show CaptureRegistry;
 import '../runtime/actions/feedback_theme.dart';
+import '../runtime/actions/presentation_scope.dart';
 import '../runtime/actions/hero_flights.dart';
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
@@ -690,6 +692,7 @@ class _LayoutView extends StatefulWidget {
 
 class _LayoutViewState extends State<_LayoutView> {
   late final _ScreenState _screen = _create();
+  final GlobalKey _captureKey = GlobalKey(debugLabel: 'Codelessly layout');
   final Set<String> _seeded = {};
   String? _shown;
 
@@ -775,7 +778,7 @@ class _LayoutViewState extends State<_LayoutView> {
       expressions: engine,
       services: _codelessly.services,
       ui: _ScreenUi(this),
-      functions: config.functions,
+      functions: _codelessly.functions,
       tree: tree,
       nodeValues: nodeValues,
       scripts: widget.layout.document.scripts,
@@ -922,6 +925,8 @@ class _LayoutViewState extends State<_LayoutView> {
     if (ModalRoute.isCurrentOf(context) == false) return;
     // An overlay screen (no route) isn't the screen the app is on.
     if (OverlayScreenScope.of(context)) return;
+    // A presented layout (a banner, a popup) is not the app's screen.
+    if (CodelesslyPresentation.maybeOf(context) != null) return;
     final route = CodelesslyRoute(widget.layout.id, shown, widget.params);
     if (_codelessly.route.value != route) _codelessly.route.value = route;
   }
@@ -1119,6 +1124,9 @@ class _LayoutViewState extends State<_LayoutView> {
     // The look of the runtime's own toasts and dialogs: the project's
     // tokens, then what the layout's nodes show.
     content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
+    // What a captureScreenshot action of this screen captures.
+    CaptureRegistry.bindLayout(_screen.tree, _captureKey);
+    content = RepaintBoundary(key: _captureKey, child: content);
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
       // A theme with dark colors is a dark theme in dark mode; one without

@@ -41,6 +41,17 @@ void main() {
     expect(r('r'), const Rect.fromLTWH(0, 0, 200, 55));
   });
 
+  testWidgets('a stack child pinned to both edges spans between its pins, even with a fill size', (tester) async {
+    final (tree, view) = await _show(tester, {
+      's': {'type': 'stack', 'children': ['card', 'plain'], 'layout': {'width': 390, 'height': 300}},
+      // Positioned(left: 12, right: 12): fill doesn't override the pins.
+      'card': {'type': 'box', 'layout': {'width': {'fill': 390}, 'height': 50, 'x': {'start': 12, 'end': 12}, 'y': {'start': 12}}},
+      'plain': {'type': 'box', 'layout': {'width': {'fill': 390}, 'height': 50, 'y': {'start': 100}}},
+    }, 's');
+    expect(tree.boxOf('card')!.rectIn(view)!, const Rect.fromLTWH(12, 12, 366, 50));
+    expect(tree.boxOf('plain')!.rectIn(view)!, const Rect.fromLTWH(0, 100, 390, 50));
+  });
+
   testWidgets('a row short of room squeezes a list viewport and an ink box to nothing', (tester) async {
     final (tree, view) = await _show(tester, {
       'r': {
