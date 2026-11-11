@@ -384,6 +384,18 @@ void main() {
     });
   });
 
+  test('closeModal returns any value, its expression evaluated, also inside an if', () async {
+    final ui = RecordingUi();
+    final h = Harness(variables: [v('day', '2026-12-15')], ui: ui);
+    await h.click([
+      {'type': 'closeModal', 'result': 'duplicate'},
+      {'type': 'if', 'condition': {'left': r'${day}', 'op': 'notEqualsTo', 'right': ''},
+       'then': [{'type': 'closeModal', 'result': r'${day}'}]},
+      {'type': 'closeModal'},
+    ]);
+    expect(ui.log, ['close duplicate', 'close 2026-12-15', 'close null']);
+  });
+
   group('services', () {
     test('call API: success and error branches read the response as result', () async {
       final client = MockClient((r) async => r.url.path == '/ok'
