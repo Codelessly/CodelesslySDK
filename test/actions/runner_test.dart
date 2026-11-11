@@ -82,6 +82,21 @@ void main() {
     });
   });
 
+  test('clock runWhen gates each reaction and reads the current variable', () async {
+    final h=Harness(variables:[v('playing',false,VariableType.boolean),v('count',0,VariableType.integer),v('other',0,VariableType.integer)]);
+    final node=Node.fromJson({'type':'box','actions':[
+      {'trigger':{'type':'clock','runWhen':r'${= playing}'},'actions':[setVar('count','1',op:'add')]},
+      {'trigger':{'type':'clock','runWhen':r'${playing}'},'actions':[setVar('count','10',op:'add')]},
+      {'trigger':{'type':'clock','runWhen':'playing'},'actions':[setVar('count','100',op:'add')]},
+      {'trigger':{'type':'clock'},'actions':[setVar('other','1',op:'add')]},
+    ]},id:'clock')!;
+    await h.actions.run(node,'clock',h.context);expect(h['count'],0);expect(h['other'],1);
+    await h.click([setVar('playing','true')]);
+    await h.actions.run(node,'clock',h.context);expect(h['count'],111);expect(h['other'],2);
+    await h.click([setVar('playing','false')]);
+    await h.actions.run(node,'clock',h.context);expect(h['count'],111);expect(h['other'],3);
+  });
+
   group('chains', () {
     test('blocking functions run in order and are awaited', () async {
       final calls = <String>[];
