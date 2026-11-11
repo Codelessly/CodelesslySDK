@@ -11,12 +11,16 @@ import 'package:codelessly_api_v2/codelessly_api.dart'
         CloseModalAction,
         ConfirmAction,
         Json,
+        ModalAnchor,
         ModalPresentation,
         NavigateAction,
         OpenModalAction,
+        PopoverPlacement,
         RouteTransition,
         ShowToastAction;
+import 'package:flutter/gestures.dart' show HitTestResult;
 import 'package:flutter/material.dart' hide NavigationMode;
+import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:codelessly_api_v2/codelessly_api.dart' show NavigationMode;
 
 import 'confirm_dialog.dart';
@@ -24,6 +28,7 @@ import 'feedback_theme.dart';
 import 'presentation_route.dart';
 import 'route_transition.dart';
 import 'toast.dart';
+import '../../render/node_tree.dart' show NodeBox;
 
 /// What a confirm dialog answered: whether the user confirmed, and what a
 /// screen used as the dialog gave back (its close modal action's result).
@@ -136,7 +141,10 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
 class NavigatorActionUi implements ActionUi {
-  NavigatorActionUi({required this.context, this.route, this.modal, this.files, this.breakpoints});
+  NavigatorActionUi({required this.context, this.route, this.modal, this.files, this.breakpoints}) {
+    // Popovers anchor to the node tapped last: track taps from the start.
+    RevealAnchor.track();
+  }
 
   final BuildContext? Function() context;
 
@@ -190,6 +198,15 @@ class NavigatorActionUi implements ActionUi {
     final c = _context;
     final content = modal?.call(action.to, params);
     if (c == null || content == null) return null;
+    if (action.presentation == ModalPresentation.popover) {
+      return showPopover(c, content,
+          anchor: popoverAnchor(c, action.anchor),
+          placement: action.placement,
+          gap: action.anchorGap,
+          offset: action.anchorOffset,
+          barrierDismissible: action.barrierDismissible,
+          barrierColor: action.barrierColor);
+    }
     return showScreenModal(c, content,
         presentation: action.presentation,
         barrierDismissible: action.barrierDismissible,
@@ -362,4 +379,109 @@ Future<Object?> showScreenModal(
     barrierColor: scrim,
     builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
   );
+}
+
+
+/// Where a popover anchors, globally: the box of the node whose click
+/// opened it ([ModalAnchor.trigger]: the nearest node under the last tap
+/// with a click reaction), the last tap itself ([ModalAnchor.pointer]), or
+/// null ([ModalAnchor.none]: centered).
+Rect? popoverAnchor(BuildContext context, ModalAnchor anchor) {
+  final tap = RevealAnchor.lastTap;
+  if (anchor == ModalAnchor.none || tap == null) return null;
+  if (anchor == ModalAnchor.pointer) return Rect.fromCenter(center: tap, width: 0, height: 0);
+  final result = HitTestResult();
+  RendererBinding.instance.hitTestInView(result, tap, View.of(context).viewId);
+  RenderBox? first;
+  for (final entry in result.path) {
+    final target = entry.target;
+    if (target is! NodeBox || !target.attached || !target.hasSize) continue;
+    first ??= target;
+    final clickable = target.node?.actions.any((r) => r.trigger.type.name == 'click') ?? false;
+    if (clickable) return target.localToGlobal(Offset.zero) & target.size;
+  }
+  if (first != null) return first.localToGlobal(Offset.zero) & first.size;
+  return Rect.fromCenter(center: tap, width: 0, height: 0);
+}
+
+/// Shows [content] as a popover beside [anchor] (global), as [placement]
+/// says, [gap] away and moved [offset] along its edge; it flips to the
+/// other side and stays on screen when it doesn't fit. A null [anchor]
+/// centers it. Completes with what closed it.
+Future<Object?> showPopover(
+  BuildContext context,
+  Widget content, {
+  required Rect? anchor,
+  PopoverPlacement placement = PopoverPlacement.belowStart,
+  double gap = 4,
+  double offset = 0,
+  bool barrierDismissible = true,
+  api.Color? barrierColor,
+}) {
+  content = ToastBelowRoute(child: content);
+  return showGeneralDialog<Object?>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: 'Dismiss',
+    barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
+    transitionDuration: const Duration(milliseconds: 140),
+    transitionBuilder: (_, animation, _, child) => FadeTransition(
+      opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      child: child,
+    ),
+    pageBuilder: (_, _, _) => CustomSingleChildLayout(
+      delegate: PopoverLayout(anchor: anchor, placement: placement, gap: gap, offset: offset),
+      child: Material(type: MaterialType.transparency, child: content),
+    ),
+  );
+}
+
+/// Places a popover of its own size beside [anchor] (see [showPopover]).
+class PopoverLayout extends SingleChildLayoutDelegate {
+  PopoverLayout({required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8});
+
+  final Rect? anchor;
+  final PopoverPlacement placement;
+  final double gap, offset, margin;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size child) {
+    final a = anchor;
+    Offset clamp(Offset p) => Offset(
+          p.dx.clamp(margin, (size.width - child.width - margin).clamp(margin, double.infinity)).toDouble(),
+          p.dy.clamp(margin, (size.height - child.height - margin).clamp(margin, double.infinity)).toDouble(),
+        );
+    if (a == null || placement == PopoverPlacement.center) {
+      return clamp(Offset((size.width - child.width) / 2, (size.height - child.height) / 2));
+    }
+    final name = placement.name;
+    final vertical = name.startsWith('below') || name.startsWith('above') || !(name.startsWith('right') || name.startsWith('left'));
+    double along(double start, double center, double end, double extent) => name.endsWith('Center')
+        ? center - extent / 2
+        : name.endsWith('End')
+            ? end - extent - offset
+            : start + offset;
+    if (vertical) {
+      final x = along(a.left, a.center.dx, a.right, child.width);
+      var above = name.startsWith('above');
+      final belowY = a.bottom + gap, aboveY = a.top - gap - child.height;
+      // Flip when the preferred side doesn't fit and the other does.
+      if (!above && belowY + child.height > size.height - margin && aboveY >= margin) above = true;
+      if (above && aboveY < margin && belowY + child.height <= size.height - margin) above = false;
+      return clamp(Offset(x, above ? aboveY : belowY));
+    }
+    final y = along(a.top, a.center.dy, a.bottom, child.height);
+    var left = name.startsWith('left');
+    final rightX = a.right + gap, leftX = a.left - gap - child.width;
+    if (!left && rightX + child.width > size.width - margin && leftX >= margin) left = true;
+    if (left && leftX < margin && rightX + child.width <= size.width - margin) left = false;
+    return clamp(Offset(left ? leftX : rightX, y));
+  }
+
+  @override
+  bool shouldRelayout(PopoverLayout old) =>
+      old.anchor != anchor || old.placement != placement || old.gap != gap || old.offset != offset;
 }
