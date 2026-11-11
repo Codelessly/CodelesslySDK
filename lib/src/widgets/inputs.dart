@@ -459,11 +459,13 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
       }
       _sent.clear();
       // A new value from outside (a slider rewrote the line): keep the caret
-      // where it was, within the new text.
+      // where it was, within the new text. A caret at the end (of an empty
+      // field too: a default that arrives after autofocus) stays at the end.
       final selection = controller.selection;
+      final atEnd = selection.isCollapsed && selection.baseOffset == controller.text.length;
       controller.value = TextEditingValue(
         text: initial,
-        selection: selection.isValid
+        selection: selection.isValid && !atEnd
             ? TextSelection(
                 baseOffset: selection.baseOffset.clamp(0, initial.length),
                 extentOffset: selection.extentOffset.clamp(0, initial.length))
