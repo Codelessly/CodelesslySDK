@@ -268,6 +268,39 @@ void main() {
     expect(rootQuery.read('route.state'), 'empty');
   });
 
+  testWidgets("a link's params set the app variables of the same name", (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final b = PublishBundle(
+      model: bundle.model.copyWith(variables: {
+        'a': {'id': 'a', 'name': 'loadState', 'type': 'text', 'value': 'ready'},
+        'b': {'id': 'b', 'name': 'queue', 'type': 'list', 'value': ['x']},
+        'c': {'id': 'c', 'name': 'open', 'type': 'boolean', 'value': false},
+        'd': {'id': 'd', 'name': 'untouched', 'type': 'integer', 'value': 3},
+      }),
+      layouts: bundle.layouts,
+    );
+    Codelessly app() => Codelessly(
+          config: const CodelesslyConfig(projectId: 'rigcheck', actions: NavigationActionRunner()),
+          loader: MemoryPublishLoader(b),
+          fonts: const NoFontFetcher(),
+        );
+    final linked = app();
+    addTearDown(linked.dispose);
+    final c = await pumpApp(tester, linked, initialScreen: '/?loadState=error&queue=%5B%5D&open=true&other=1');
+    expect(c.scope!.read('loadState'), 'error');
+    expect(c.scope!.read('queue'), isEmpty);
+    expect(c.scope!.read('open'), isTrue);
+    expect(c.scope!.read('untouched'), 3);
+    expect(c.read('route.other'), '1');
+    // Opened by id, not by a link: the defaults.
+    await tester.pumpWidget(const SizedBox());
+    final plain = app();
+    addTearDown(plain.dispose);
+    final d = await pumpApp(tester, plain, layoutId: bundle.model.entryLayoutId);
+    expect(d.scope!.read('loadState'), 'ready');
+  });
+
   testWidgets('a canvas can be forced; data and params reach the scope', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));

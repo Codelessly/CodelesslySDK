@@ -385,8 +385,9 @@ class CodelesslyWidget extends StatefulWidget {
   @visibleForTesting
   static (String, Map<String, Object?>)? resolveScreen(PublishModel model, String? screen) {
     if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
+    // Encode what a typed location may hold raw (spaces, `·`), keeping
+    // what a link already encoded (`%5B%5D` stays `[]`, not `%255B%255D`).
+    final location = _encodeRaw(screen.trim());
     final CanvasLocationMatch? match;
     final Uri? uri;
     try {
@@ -419,6 +420,13 @@ class CodelesslyWidget extends StatefulWidget {
     final id = model.layoutIdForScreen(segments.isEmpty ? screen.trim() : Uri.encodeComponent(segments.last));
     return id == null ? null : (id, {...uri.queryParameters});
   }
+
+  /// [location] with each character a URI can't hold raw percent-encoded,
+  /// and its `%XX` escapes kept.
+  static String _encodeRaw(String location) => location.replaceAllMapped(
+        RegExp(r"(%[0-9A-Fa-f]{2})|[^A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=]"),
+        (m) => m[1] ?? Uri.encodeComponent(m[0]!),
+      );
 
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
@@ -506,7 +514,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       if (layoutId == null) {
         final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
         layoutId = screen?.$1 ?? model.entryLayoutId;
-        if (screen != null) params = {...screen.$2, ...params};
+        if (screen != null) {
+          params = {...screen.$2, ...params};
+          // A link opens the app in a state: its params set the app's
+          // variables of the same name, as they set the screen's.
+          for (final MapEntry(:key, :value) in screen.$2.entries) {
+            if (c.appVariables.declares(key)) c.appVariables.set(key, value);
+          }
+        }
       }
       if (layoutId == null) throw StateError('No layout to show: project [${model.projectId}] has no entry screen');
       final layout = await c.loadLayout(layoutId);
