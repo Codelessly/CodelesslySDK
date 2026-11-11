@@ -769,7 +769,7 @@ class PlotChartPainter extends NodePainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
     canvas.save();
-    canvas.clipRect(Offset.zero & size);
+    if (p(PlotChartProps.clip)) canvas.clipRect(Offset.zero & size);
 
     final originAxes = p(PlotChartProps.originAxes);
     final labelHeight = originAxes ? 0.0 : math.max(0.0, p(PlotChartProps.labelHeight));
@@ -1491,6 +1491,15 @@ class LineChartPainter extends NodePainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Values outside the domain (yMin/yMax set) would draw beyond the box,
+    // over whatever sits below: the chart stays in its box.
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
+    _paintChart(canvas, size);
+    canvas.restore();
+  }
+
+  void _paintChart(Canvas canvas, Size size) {
     final xField = p(LineChartProps.xField), yField = p(LineChartProps.yField);
     final segments = sampleSegments(p(LineChartProps.data), xField, yField);
     final points = segments.expand((segment) => segment).toList();
@@ -1597,12 +1606,14 @@ class LineChartPainter extends NodePainter {
           ..color = color
           ..strokeWidth = _num(r['width']) ?? 1.5,
       );
-      // Its label at the right end, above the line (or below).
+      // Its label at the line's end (or its start, labelAlign "start"), above
+      // the line (or below).
       if (_text(r['label']) case final String label when label.isNotEmpty) {
         final tp = _layout(label,
             axisLabelStyle.copyWith(color: _color(r['labelColor']) ?? color, fontWeight: FontWeight.w700));
         final ly = r['labelBelow'] == true ? y + 4 : y - tp.height - 2;
-        tp.paint(canvas, Offset(math.max(plot.left, plot.right - tp.width), ly));
+        final atStart = r['labelAlign'] == 'start';
+        tp.paint(canvas, Offset(atStart ? plot.left + 2 : math.max(plot.left, plot.right - tp.width), ly));
         tp.dispose();
       }
     }

@@ -14,7 +14,7 @@ import 'package:flutter/rendering.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
 import '../render/node_tree.dart' show NodeTree, NodeBox;
-import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, dropSlotOf;
+import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, DropSlotNode, dropSlotOf;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
 
@@ -255,7 +255,8 @@ class RenderListItems extends RenderCollection {
   /// `listNodeId`), the list opens the target's slot: room for the dragged
   /// node before the item it would land before (gestures/drag_and_drop.dart
   /// `dropSlotOf`). Set in a running tree only.
-  void dropTarget(NodeTree? tree, String listId) {
+  void dropTarget(NodeTree? tree, String listId, [Object? instance]) {
+    _dropInstance = instance;
     if (identical(tree, _dropTree) && listId == _dropListId) return;
     if (attached && _dropTree != null) DragAndDrop.of(_dropTree!).removeListener(markNeedsLayout);
     _dropTree = tree;
@@ -267,16 +268,75 @@ class RenderListItems extends RenderCollection {
   NodeTree? _dropTree;
   String _dropListId = '';
 
+  /// The copy of the list this is (a list repeated in every column of a
+  /// board): only the one the drag is over opens the slot.
+  Object? _dropInstance;
+
+  /// The drop target's slot node, drawn in the open slot (under the items,
+  /// taking no pointer input); null while no slot shows one.
+  DropSlotNode? _slotNode;
+  Offset _slotOffset = Offset.zero;
+
+  /// Shows slot node [id] ('' for none), inside layout.
+  RenderBox? _showSlotNode(String id) {
+    final current = _slotNode;
+    if (current != null && current.id == id && _dropTree != null) return current.box;
+    if (current == null && id.isEmpty) return null;
+    invokeLayoutCallback<BoxConstraints>((_) {
+      _dropSlotNode();
+      if (id.isEmpty || _dropTree == null) return;
+      final node = _slotNode = DropSlotNode(_dropTree!, id);
+      final box = node.box;
+      if (box.parent != null) box.detachFromParent();
+      adoptChild(box);
+    });
+    return _slotNode?.box;
+  }
+
+  void _dropSlotNode() {
+    final node = _slotNode;
+    if (node == null) return;
+    _slotNode = null;
+    if (identical(node.box.parent, this)) dropChild(node.box);
+    node.dispose();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     if (_dropTree case final tree?) DragAndDrop.of(tree).addListener(markNeedsLayout);
+    _slotNode?.box.attach(owner);
   }
 
   @override
   void detach() {
     if (_dropTree case final tree?) DragAndDrop.of(tree).removeListener(markNeedsLayout);
     super.detach();
+    _slotNode?.box.detach();
+  }
+
+  @override
+  void redepthChildren() {
+    super.redepthChildren();
+    if (_slotNode case final node?) redepthChild(node.box);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    if (_slotNode case final node?) visitor(node.box);
+    super.visitChildren(visitor);
+  }
+
+  @override
+  void dispose() {
+    _dropSlotNode();
+    super.dispose();
+  }
+
+  @override
+  void paintDecorations(PaintingContext context, Offset offset) {
+    if (_slotNode?.box case final box? when box.hasSize) context.paintChild(box, offset + _slotOffset);
+    _paintDividers(context, offset);
   }
 
   void update({
@@ -446,8 +506,23 @@ class RenderListItems extends RenderCollection {
     // An open drop slot: room before raw item [before] (after the last
     // when it's the count), with a gap on its far side when it's between
     // items.
-    final slot = _dropTree == null ? null : dropSlotOf(_dropTree!, _dropListId);
-    final slotExtent = slot == null ? 0.0 : RenderCollection.main(slot.size, axis);
+    final slot = _dropTree == null ? null : dropSlotOf(_dropTree!, _dropListId, instance: _dropInstance);
+    var slotExtent = slot == null ? 0.0 : RenderCollection.main(slot.size, axis);
+    // The slot's node fills the slot (as wide as the items' room), or keeps
+    // its own length along the list (an insertion line).
+    final slotBox = _showSlotNode(slot != null && slotExtent > 0 ? slot.slotNodeId : '');
+    final slotCross = stretch || !hugsCross
+        ? math.max(0.0, (hugsCross ? contentCross : maxCross - _padCross))
+        : contentCross;
+    if (slotBox != null && slot != null) {
+      slotBox.layout(
+        slot.ownSize
+            ? RenderCollection.constraintsOf(minMain: 0, maxMain: double.infinity, minCross: 0, maxCross: slotCross, axis: axis)
+            : RenderCollection.constraintsOf(minMain: slotExtent, maxMain: slotExtent, minCross: slotCross, maxCross: slotCross, axis: axis),
+        parentUsesSize: true,
+      );
+      if (slot.ownSize) slotExtent = RenderCollection.main(slotBox.size, axis);
+    }
     final slotBefore = slotExtent > 0 ? slot!.before.clamp(0, items.length) : -1;
     final slotRoom = slotBefore < 0 ? 0.0 : slotExtent + (items.isEmpty ? 0 : gap);
     if (slotRoom > 0) used += slotRoom;
@@ -470,6 +545,7 @@ class RenderListItems extends RenderCollection {
     if (flexReversed) order.setAll(0, order.reversed.toList());
     final logical = List<double>.filled(items.length, 0);
     var at = 0.0;
+    var slotLogical = 0.0;
     _dividers.clear();
     for (var k = 0; k < order.length; k++) {
       final i = order[k];
@@ -479,10 +555,14 @@ class RenderListItems extends RenderCollection {
       }
       // The slot sits where item [slotBefore] was, pushing it (and the
       // items after it) on.
-      if (i == slotBefore) at += slotRoom;
+      if (i == slotBefore) {
+        slotLogical = at;
+        at += slotRoom;
+      }
       logical[i] = at;
       at += advances[i];
     }
+    if (slotBefore >= 0 && slotBefore >= items.length) slotLogical = at + (items.isEmpty ? 0 : gap);
     for (var i = 0; i < items.length; i++) {
       final it = items[i];
       final itemCross = RenderCollection.cross(it.size, axis);
@@ -494,6 +574,13 @@ class RenderListItems extends RenderCollection {
       }
       final crossPos = _padCrossStart + (stretch ? 0 : (crossInner - itemCross) / 2);
       (it.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(mainPos, crossPos, axis);
+    }
+    if (slotBox != null) {
+      final mainPos = reverse && anchorEnd
+          ? mainSize - _leading(_padMainEnd, mainSize) - slotLogical - slotExtent
+          : _leading(_padMainStart, mainSize) + slotLogical;
+      final crossPos = _padCrossStart + (crossInner - RenderCollection.cross(slotBox.size, axis)) / 2;
+      _slotOffset = RenderCollection.offsetOf(mainPos, crossPos, axis);
     }
     return _anyChildOutside || _dividers.any((r) => !(Offset.zero & size).contains(r.topLeft));
   }
@@ -520,8 +607,7 @@ class RenderListItems extends RenderCollection {
     );
   }
 
-  @override
-  void paintDecorations(PaintingContext context, Offset offset) {
+  void _paintDividers(PaintingContext context, Offset offset) {
     final d = divider;
     if (d == null || _dividers.isEmpty) return;
     final paint = Paint()..color = d.color;

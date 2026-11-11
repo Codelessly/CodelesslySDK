@@ -134,6 +134,10 @@ class RenderNodePaint extends RenderBox with ImageClient {
     final tile = TileMode.values.byName(p.tileMode.name);
     paint.shader = switch (p.type) {
       api.PaintType.linear => ui.Gradient.linear(at(0, 0.5), at(1, 0.5), colors, stops, tile),
+      // A radius given as a share of the shortest side (Flutter's
+      // RadialGradient), else the transform's: to the box's edge.
+      api.PaintType.radial when p.radius != null =>
+        ui.Gradient.radial(rect.center, p.radius! * rect.shortestSide, colors, stops, tile),
       api.PaintType.radial || api.PaintType.diamond =>
         ui.Gradient.radial(at(0.5, 0.5), (at(1, 0.5) - at(0.5, 0.5)).distance, colors, stops, tile),
       _ => ui.Gradient.sweep(at(0.5, 0.5), colors, stops, tile, 0, math.pi * 2),

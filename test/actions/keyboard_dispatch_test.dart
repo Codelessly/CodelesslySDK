@@ -1,5 +1,6 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart' show TextField;
 import 'package:flutter/services.dart';
 import 'package:codelessly_sdk/src/runtime/actions/key_matching.dart';
 import 'wiring_test.dart' show show, counter, v, reaction, add;
@@ -157,5 +158,35 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
     expect(screen['count'], 1111);
+  });
+
+  testWidgets('while typing only Escape reaches Key Down, marked typing', (tester) async {
+    final nodes = counter(extraNodes: {
+      'field': {'type': 'textField', 'layout': {'width': 200, 'height': 48}},
+    });
+    nodes['col']!['children'] = ['label', 'button', 'other', 'field'];
+    nodes['col']!['actions'] = [
+      reaction('keyDown', [add('count', '1')], extra: {'key': 'c'}),
+      reaction('keyDown', [
+        {'type': 'setVariable', 'variable': 'typing', 'value': r'${result.typing}'},
+      ], extra: {'key': 'Escape'}),
+    ];
+    final screen = await show(
+      tester,
+      nodes,
+      variables: [v('count', 0, VariableType.integer), v('typing', '')],
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+    await tester.pump();
+    expect(screen['count'], 1);
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    // In the field: c is typed, not a shortcut.
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+    await tester.pump();
+    expect(screen['count'], 1);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pump();
+    expect(screen['typing'], 'true');
   });
 }

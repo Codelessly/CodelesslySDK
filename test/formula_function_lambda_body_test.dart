@@ -16,4 +16,9 @@ void main() {
     final f = FormulaFunction(['a'], '(x, y) => x + y + a', (_) => null);
     expect(f.call([1]), isNot(isA<num>()));
   });
+
+  test('a lambda over other names with as many parameters is returned, not called', () {
+    final f = FormulaFunction(['n'], '(m) => n * m', (_) => null);
+    expect(f.call([3]), isNot(isA<num>()));
+  });
 }

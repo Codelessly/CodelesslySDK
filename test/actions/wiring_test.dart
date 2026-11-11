@@ -7,6 +7,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'runner_test.dart' show RecordingUi;
@@ -555,7 +556,7 @@ void main() {
     );
     final s = await show(tester, counter(actions: [
       reaction('click', [
-        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet'},
+        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet', 'insets': [24, 24, 24, 24]},
       ]),
       reaction('secondaryClick', [
         {'type': 'openModal', 'to': 'newCard'},
@@ -566,6 +567,8 @@ void main() {
     await tester.pumpAndSettle();
     // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
     expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // A dialog's insets don't push a sheet off the screen's edge.
+    expect(tester.getBottomLeft(find.byKey(const ValueKey('sheet newCard'))).dy, 600);
     // No tinted Material surface behind the screen's own.
     expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
     Navigator.of(appContext).pop();
@@ -573,6 +576,57 @@ void main() {
     await tester.tapAt(s.center('button'), buttons: kSecondaryButton);
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byKey(const ValueKey('dialog newCard'))).width, 120);
+  });
+
+  testWidgets('a popover in a scaled app (an editor\'s run preview) opens right under its trigger', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 80),
+    );
+    final doc = LayoutDocument.fromJson({
+      'roots': ['col'],
+      'nodes': counter(actions: [
+        reaction('click', [
+          {'type': 'openModal', 'to': 'menu', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'belowEnd', 'anchorGap': 6},
+        ]),
+      ]),
+    });
+    final scope = VariableScope([v('count', 0, VariableType.integer)]);
+    final values = NodeValues(DocumentSource(doc));
+    final tree = NodeTree(values, binder: NodeBinder(scope: scope));
+    final context = RuntimeActionContext(scope: scope, ui: ui, tree: tree, nodeValues: values, services: Services());
+    final reactions = TreeReactions(runner: const CodelesslyActions(), context: context);
+    tree.interactions = reactions;
+    addTearDown(() {
+      reactions.dispose();
+      tree.dispose();
+    });
+    await tester.pumpWidget(Align(
+      alignment: Alignment.topLeft,
+      child: SizedBox(
+        width: 400,
+        height: 300,
+        child: Transform.scale(
+          scale: 0.5,
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 800,
+            height: 600,
+            child: MaterialApp(home: Scaffold(body: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'col', interactive: true)))),
+          ),
+        ),
+      ),
+    ));
+    appContext = tester.element(find.byType(NodeView));
+    final box = tree.boxOf('button')!;
+    final rect = MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // Its end under the trigger's end, 6 (3 on screen) below it.
+    final menu = tester.getRect(find.byKey(const ValueKey('menu')));
+    expect(menu.right, closeTo(rect.right, 0.5));
+    expect(menu.top, closeTo(rect.bottom + 3, 0.5));
   });
 
   testWidgets('a popover flips above when there is no room below and stays on screen', (tester) async {
@@ -775,6 +829,57 @@ void main() {
     expect(s['filter'], 'draft');
     expect(deco('Draft').boxShadow, hasLength(1));
     expect(deco('All').boxShadow, isNull);
+  });
+
+  testWidgets('focus reaches the field in the same list item, even one the same tap reveals', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'lanes': {
+          'type': 'listView',
+          'children': ['lane'],
+          'layout': {'width': 400, 'height': 200},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}'},
+        },
+        'lane': {
+          'type': 'column',
+          'children': ['add', 'field'],
+          'layout': {'width': 200, 'height': 200},
+        },
+        'add': {
+          'type': 'box',
+          'layout': {'width': 200, 'height': 40},
+          'decoration': {'fills': [{'color': '#FF2196F3'}]},
+          'actions': [
+            reaction('click', [
+              {'type': 'setVariable', 'variable': 'adding', 'value': r'${item}'},
+              {'type': 'focus', 'node': 'field'},
+            ]),
+          ],
+        },
+        'field': {
+          'type': 'textField',
+          'layout': {'width': 200, 'height': 48},
+          'visible': true,
+          'bind': {'visible': r'${= adding == item}'},
+        },
+      },
+      root: 'lanes',
+      variables: [v('lanes', const ['todo', 'doing'], VariableType.list), v('adding', '')],
+    );
+    await tester.pumpAndSettle();
+    // The second column's button.
+    final adds = s.tree.boxesOf('add').toList()..sort((a, b) => a.localToGlobal(Offset.zero).dx.compareTo(b.localToGlobal(Offset.zero).dx));
+    final second = adds.last;
+    await tester.tapAt(second.localToGlobal(second.size.center(Offset.zero)));
+    await tester.pumpAndSettle();
+    expect(s['adding'], 'doing');
+    // The second column's field has the focus, the first column's doesn't.
+    expect(TextFieldHandle.near(s.tree, 'field', second.instance)!.focusNode.hasFocus, isTrue);
+    expect(FocusManager.instance.primaryFocus, TextFieldHandle.near(s.tree, 'field', second.instance)!.focusNode);
+    expect(TextFieldHandle.near(s.tree, 'field', adds.first.instance), isNull,
+        reason: 'the first column\'s field is hidden, so not built');
   });
 
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
