@@ -25,6 +25,7 @@ import 'package:flutter/rendering.dart';
 
 import '../render/convert.dart';
 import '../render/recipe.dart';
+import 'indicator_transition.dart';
 import 'indicators_charts.dart';
 import 'indicators_paint.dart';
 
@@ -32,12 +33,12 @@ import 'indicators_paint.dart';
 final Map<String, WidgetRecipe> indicatorsRecipes = {
   CircularProgressIndicatorProps.spec.type: _circularProgressIndicator,
   ActivityIndicatorProps.spec.type: _activityIndicator,
-  ProgressBarProps.spec.type: (b, n, chain) => _painted(b, n, chain, ProgressBarPainter(n)),
-  RadialGaugeProps.spec.type: (b, n, chain) => _painted(b, n, chain, RadialGaugePainter(n)),
-  GaugeMeterProps.spec.type: (b, n, chain) => _painted(b, n, chain, GaugeMeterPainter(n)),
+  ProgressBarProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, ProgressBarPainter.new),
+  RadialGaugeProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, RadialGaugePainter.new),
+  GaugeMeterProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, GaugeMeterPainter.new),
   ChartProps.spec.type: (b, n, chain) => _painted(b, n, chain, ChartSeriesPainter(n)),
   PlotChartProps.spec.type: (b, n, chain) => _painted(b, n, chain, PlotChartPainter(n)),
-  BarChartProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarChartPainter(n)),
+  BarChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, BarChartPainter.new),
   LineChartProps.spec.type: (b, n, chain) => _painted(b, n, chain, LineChartPainter(n)),
   BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(n)),
 };
@@ -50,6 +51,13 @@ void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painte
   chain.add(b.obtain<RenderCustomPaint>('indicatorPaint', RenderCustomPaint.new)
     ..painter = painter
     ..isComplex = true);
+}
+
+/// Data-change animation is isolated to the indicator's paint layer.
+void _transitioned(NodeBuilder b, Node n, List<RenderBox> chain, IndicatorPainterFactory factory) {
+  chain.add(b.fitBox('indicatorFit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
+  chain.add(b.obtain<RenderIndicatorTransition>('indicatorPaint', RenderIndicatorTransition.new)
+    ..update(n, factory, interactive: b.tree.animates));
 }
 
 /// A `CircularProgressIndicator` centred in a square of the box's shortest
