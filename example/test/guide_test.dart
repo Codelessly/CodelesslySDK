@@ -258,6 +258,154 @@ PublishBundle sharedCards() {
   });
 }
 
+/// A canvas [id] that is one box: a tap anywhere on it runs [onClick].
+Json tapScreen(String id, List<Json> onClick, {List<Json> variables = const []}) => {
+      'schema': 2,
+      'id': id,
+      'roots': ['$id-canvas'],
+      'variables': {'$id-canvas': variables},
+      'nodes': {
+        '$id-canvas': {
+          'type': 'canvas',
+          'name': id,
+          'slots': {'body': '$id-box'},
+          'layout': {'width': 390, 'height': 300},
+        },
+        '$id-box': {
+          'type': 'stack',
+          'decoration': {
+            'fills': [
+              {'color': '#FFFFFFFF'},
+            ],
+          },
+          'layout': {
+            'width': {'fill': 390},
+            'height': {'fill': 300},
+          },
+          'actions': [
+            {
+              'trigger': {'type': 'click'},
+              'actions': onClick,
+            },
+          ],
+        },
+      },
+    };
+
+/// A project with a rating sheet (`rate-us`), a permission priming screen
+/// that calls the host and branches on its answer, and an automation that
+/// presents the sheet after the third order.
+PublishBundle withPresentations() {
+  final layouts = {
+    'rate-us': PublishLayout.fromJson(tapScreen('rate-us', [
+      {
+        'type': 'closeModal',
+        'result': {'stars': r'${= orders + 2}'},
+      },
+    ], variables: [
+      {'id': 'orders', 'name': 'orders', 'type': 'integer', 'value': 0},
+    ])),
+    'permission': PublishLayout.fromJson(tapScreen('permission', [
+      {
+        'type': 'callFunction',
+        'name': 'requestPermission',
+        'params': {'kind': 'notifications'},
+      },
+      {
+        'type': 'closeModal',
+        'result': {'granted': r'${result.granted}'},
+      },
+    ])),
+  };
+  return PublishBundle(
+    model: PublishModel(
+      projectId: 'presenting',
+      entryLayoutId: 'rate-us',
+      layouts: {for (final e in layouts.entries) e.key: PublishLayoutInfo.of(e.value)},
+    ).withAutomations([
+      Automation.fromJson({
+        'id': 'rate-after-three',
+        'trigger': 'event',
+        'event': 'order_completed',
+        'when': 'usage.events.order_completed.count >= 3',
+        'maxRuns': 1,
+        'actions': [
+          {'type': 'openModal', 'to': 'rate-us', 'presentation': 'bottomSheet', 'params': {'orders': r'${result.items}'}},
+        ],
+      })!,
+    ]),
+    layouts: layouts,
+  );
+}
+/// A screen that loads [liveCloudLoads] and shows the unread count, with a
+/// [markAllRead] button.
+PublishBundle liveCards() => PublishBundle.fromJson({
+      'model': {
+        'schema': 2,
+        'projectId': 'test-project',
+        'entryLayoutId': 'cards',
+        'layouts': {
+          'cards': {
+            'canvases': [
+              {'id': 'cards-canvas', 'name': 'Cards'},
+            ],
+          },
+        },
+      },
+      'layouts': {
+        'cards': {
+          'schema': 2,
+          'id': 'cards',
+          'roots': ['cards-canvas'],
+          'variables': {
+            'cards-canvas': [
+              const Variable(name: 'cards', type: VariableType.map, value: <String, Object?>{}).toJson(),
+              const Variable(name: 'unread', type: VariableType.integer, value: 0).toJson(),
+              const Variable(name: 'shown', type: VariableType.integer, value: 20).toJson(),
+            ],
+          },
+          'nodes': {
+            'cards-canvas': {
+              'type': 'canvas',
+              'slots': {'body': 'cards-column'},
+              'layout': {'width': 390, 'height': 844},
+              'actions': [
+                {'id': 'load', 'trigger': {'type': 'load'}, 'actions': liveCloudLoads},
+              ],
+            },
+            'cards-column': {
+              'type': 'column',
+              'children': ['count', 'all-read'],
+              'layout': {
+                'width': {'fill': 390},
+                'height': {'fill': 844},
+              },
+            },
+            'count': {
+              'type': 'text',
+              'layout': {
+                'width': {'hug': 200},
+                'height': {'hug': 20},
+              },
+              'props': {'text': r'${unread} unread of ${= length(cards.data)}'},
+            },
+            'all-read': {
+              'type': 'box',
+              'layout': {'width': 390, 'height': 60},
+              'decoration': {
+                'fills': [
+                  {'color': '#FF2196F3'},
+                ],
+              },
+              'actions': [
+                {'id': 'all', 'trigger': {'type': 'click'}, 'actions': [markAllRead]},
+              ],
+            },
+          },
+        },
+      },
+    });
+
 /// Taps node [id] of the layout shown on top.
 Future<void> tapNode(WidgetTester tester, String id) async {
   final box = tester.widget<NodeView>(find.byType(NodeView).last).tree.boxOf(id)!;
@@ -434,6 +582,28 @@ void main() {
     expect(codelessly.route.value!.layoutId, 'home');
   });
 
+  test('server-written data: own notes, an audience, an expiry', () async {
+    final clock = DateTime.utc(2026, 11, 11, 12);
+    final ana = serverWrittenData(uid: 'ana', role: 'pro', now: () => clock);
+    // What the project's editors or the server write (sendToUsers, the Data
+    // panel); the in-memory backend does not check the rules.
+    await ana.addDocument('notes', {'ownerId': 'ana', 'text': 'Welcome', 'read': false}, id: 'n1');
+    await ana.addDocument('notes', {'ownerId': 'bo', 'text': 'Hi Bo'}, id: 'n2');
+    await ana.addDocument('notes', {'ownerId': 'ana', 'text': 'Old', 'expiresAt': '2026-11-01T00:00:00.000Z'}, id: 'n3');
+    await ana.addDocument('news', {'audience': ['role:pro'], 'title': 'For pros'}, id: 'p1');
+    await ana.addDocument('news', {'audience': ['role:admin'], 'title': 'For admins'}, id: 'p2');
+
+    final notes = await ana.query('notes', const CloudQuery());
+    expect(notes.map((n) => n['id']), ['n1'], reason: "not Bo's, not expired");
+    expect(notes.single['expiresAt'], DataRules.neverExpires);
+    final news = await ana.query('news', const CloudQuery());
+    expect(news.map((n) => n['title']), ['For pros']);
+    // The owner may flip `read` (the rules allow only the ownerFields).
+    await ana.updateDocument('notes', 'n1', {'read': true});
+    expect((await ana.getDocument('notes', 'n1'))!['read'], isTrue);
+    ana.dispose();
+  });
+
   test('the instance\'s status: empty, loaded, and loaded again after a reset', () async {
     final codelessly = testCodelessly();
     addTearDown(codelessly.dispose);
@@ -443,6 +613,31 @@ void main() {
     expect(codelessly.publishModel!.projectId, 'test-project');
     await reload(codelessly);
     expect(codelessly.status, isA<CLoaded>());
+  });
+
+  testWidgets('live cloud data: a joined list, a live count, and mark all read in one commit', (tester) async {
+    final backend = MemoryDocumentBackend();
+    backend.seed('data/default/cards', {
+      for (var i = 0; i < 3; i++) 'c$i': {'title': 'Card $i', 'read': false, 'sentAt': i},
+    });
+    final codelessly = Codelessly.fromBundle(
+      liveCards(),
+      config: CodelesslyConfig(services: Services(cloud: BackendCloudDatabase(backend: backend))),
+      fonts: const NoFontFetcher(),
+    );
+    addTearDown(codelessly.dispose);
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller)));
+    await frames(tester);
+    expect(controller.read('unread'), 3);
+    expect((controller.read('cards.data') as List).first['title'], 'Card 2', reason: 'newest first');
+    expect(controller.read('cards.hasMore'), isFalse);
+    final commits = backend.commits;
+    await controller.trigger('all-read', 'click');
+    await frames(tester);
+    expect(controller.read('unread'), 0);
+    expect(backend.commits - commits, 1);
   });
 
   testWidgets('a paywall: bought, the Pro screen opens; closed, nothing does', (tester) async {
@@ -504,5 +699,44 @@ void main() {
 
     expect(projectThemeValues(codelessly)['onSurface'], '#FFEEEEEE');
     expect(themeValues(codelessly.publishModel!.theme, dark: false)['onSurface'], '#FF111111');
+  });
+
+  testWidgets('present: a layout above any screen gives back what closed it', (tester) async {
+    final codelessly = Codelessly.fromBundle(withPresentations(), fonts: const NoFontFetcher());
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(appWithOverlay(codelessly));
+    final stars = askForRating(codelessly, 3);
+    await frames(tester);
+    await tapNode(tester, 'rate-us-box');
+    expect(await stars, 5);
+    expect(find.byType(NodeView), findsNothing);
+  });
+
+  testWidgets('app events run the automations listening for them', (tester) async {
+    final codelessly = Codelessly.fromBundle(withPresentations(), fonts: const NoFontFetcher());
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(appWithOverlay(codelessly));
+    await frames(tester);
+    appEvents(codelessly);
+    appEvents(codelessly);
+    await frames(tester);
+    expect(find.byType(NodeView), findsNothing);
+    appEvents(codelessly);
+    await frames(tester);
+    // The third order: the rating sheet, opened with the event's items.
+    expect(find.byType(NodeView), findsOneWidget);
+    await tapNode(tester, 'rate-us-box');
+    expect(find.byType(NodeView), findsNothing);
+    expect(codelessly.automations.usage['events'], containsPair('order_completed', containsPair('count', 3)));
+  });
+
+  testWidgets('a layout calls a host function and branches on its answer', (tester) async {
+    final codelessly = Codelessly.fromBundle(withPresentations(), fonts: const NoFontFetcher());
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(PermissionHandlers(codelessly: codelessly, child: appWithOverlay(codelessly)));
+    final answer = codelessly.present('permission');
+    await frames(tester);
+    await tapNode(tester, 'permission-box');
+    expect(await answer, {'granted': true});
   });
 }

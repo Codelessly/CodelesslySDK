@@ -492,11 +492,9 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
       _edited = false;
       _fire(context, 'editingComplete', controller.text);
     }
-    // The focus ring follows focus, and so does a padding that includes the
-    // (focused) border.
-    if (n.prop(TextFieldProps.focusRingWidth) > 0 || n.prop(TextFieldProps.decoration).paddingIncludesBorder) {
-      setState(() {});
-    }
+    // The focus ring, a padding that includes the (focused) border and a
+    // fixed-height field's border (painted by its box) follow focus.
+    setState(() {});
     if (focusNode.hasFocus && n.prop(TextFieldProps.selectAllOnFocus)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !focusNode.hasFocus) return;
@@ -609,14 +607,40 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
-            // Standard density: the node's height is the field's. A compact
-            // theme (desktop web's default) would draw it 8 px shorter.
-            return field(constraints.hasBoundedHeight
-                ? decoration.copyWith(
-                    constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
-                    visualDensity: VisualDensity.standard,
-                  )
-                : decoration);
+            if (!constraints.hasBoundedHeight) return field(decoration);
+            // InputDecorator doesn't stretch its container (fill, border) to
+            // a height: a dense 50 px field painted a 20 px box at its top.
+            // So the box paints them at full height and a borderless field
+            // sits in it where textAlignVertical puts the line (centred by
+            // default), as a Container around a TextField would.
+            final error = decoration.errorText != null || decoration.error != null;
+            final border = (error ? (focusNode.hasFocus ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
+                (focusNode.hasFocus ? decoration.focusedBorder : null) ??
+                decoration.enabledBorder ??
+                decoration.border ??
+                const UnderlineInputBorder();
+            final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
+            final y = switch (n.prop(TextFieldProps.textAlignVertical)) {
+              api.TextAlignVertical.top => -1.0,
+              api.TextAlignVertical.bottom => 1.0,
+              _ => 0.0,
+            };
+            return DecoratedBox(
+              decoration: ShapeDecoration(color: fill, shape: border),
+              child: Align(
+                alignment: Alignment(-1, y),
+                child: field(decoration.copyWith(
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  isDense: true,
+                )),
+              ),
+            );
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
@@ -1695,12 +1719,15 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         },
     };
     final localizations = MaterialLocalizations.of(context);
-    final display = switch (mode) {
+    final pattern = n.prop(DateTimeInputProps.format);
+    final display = pattern != null && pattern.isNotEmpty && (date != null || time != null)
+        ? _formatPattern(pattern, mode, date, time)
+        : switch (mode) {
       DateTimeInputMode.date => date == null ? '' : localizations.formatMediumDate(date),
       DateTimeInputMode.time => time == null ? '' : time.format(context),
       DateTimeInputMode.dateTime =>
         date == null || time == null ? '' : '${localizations.formatMediumDate(date)} · ${time.format(context)}',
-    };
+          };
     final enabled = n.prop(DateTimeInputProps.enabled);
     final label = n.prop(DateTimeInputProps.labelText);
     final initial = date == null || date.isBefore(first) || date.isAfter(last)
@@ -1729,7 +1756,9 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   });
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: InputDecorator(
+      child: n.prop(DateTimeInputProps.bare)
+          ? _bare(n, mode, display)
+          : InputDecorator(
         isEmpty: display.isEmpty,
         decoration: InputDecoration(
           labelText: label,
@@ -1740,13 +1769,46 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   DateTimeInputMode.dateTime => 'date and time',
                 }}'
               : null,
-          suffixIcon: Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+          suffixIcon: _icon(n.prop(DateTimeInputProps.icon)) ??
+              Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
           enabled: enabled,
           border: const OutlineInputBorder(),
         ),
-        child: Text(display.isEmpty ? ' ' : display),
+        child: Text(display.isEmpty ? ' ' : display, style: _styleOrNull(n.prop(DateTimeInputProps.style))),
       ),
     );
+  }
+
+  /// [bare]: the value (or hint) and its icon in a row, the box left to the
+  /// node's own decoration.
+  Widget _bare(Node n, DateTimeInputMode mode, String display) {
+    final hint = n.prop(DateTimeInputProps.hint) ??
+        'Select ${switch (mode) {
+          DateTimeInputMode.date => 'date',
+          DateTimeInputMode.time => 'time',
+          DateTimeInputMode.dateTime => 'date and time',
+        }}';
+    final empty = display.isEmpty;
+    return Row(children: [
+      Expanded(
+        child: Text(empty ? hint : display,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style))),
+      ),
+      _icon(n.prop(DateTimeInputProps.icon)) ??
+          Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
+    ]);
+  }
+
+  /// [date] / [time] by an `intl` [pattern]; a broken pattern shows ISO.
+  static String _formatPattern(String pattern, DateTimeInputMode mode, DateTime? date, TimeOfDay? time) {
+    final at = DateTime(date?.year ?? 2000, date?.month ?? 1, date?.day ?? 1, time?.hour ?? 0, time?.minute ?? 0);
+    try {
+      return DateFormat(pattern).format(at);
+    } catch (_) {
+      return mode == DateTimeInputMode.time ? '${time?.hour}:${time?.minute.toString().padLeft(2, '0')}' : at.toIso8601String();
+    }
   }
 }
 
@@ -2027,6 +2089,12 @@ class _SignatureIslandState extends State<_SignatureIsland> {
             signLineColor: n.prop(SignatureProps.signLineColor).flutter,
             textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
             normalized: n.prop(SignatureProps.normalized),
+            signLineMark: n.prop(SignatureProps.signLineMark),
+            signLineInset: n.prop(SignatureProps.signLineInset),
+            signLineBottom: n.prop(SignatureProps.signLineBottom),
+            placeholderBelowLine: n.prop(SignatureProps.placeholderPosition) == api.SignaturePlaceholderPosition.belowLine,
+            placeholderFontWeight: n.prop(SignatureProps.placeholderFontWeight),
+            placeholderLetterSpacing: n.prop(SignatureProps.placeholderLetterSpacing),
           ),
           child: const SizedBox.expand(),
         ),

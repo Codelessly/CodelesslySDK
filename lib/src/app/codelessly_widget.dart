@@ -21,7 +21,9 @@ import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+import '../runtime/actions/capture.dart' show CaptureRegistry;
 import '../runtime/actions/feedback_theme.dart';
+import '../runtime/actions/presentation_scope.dart';
 import '../runtime/actions/hero_flights.dart';
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
@@ -434,6 +436,7 @@ class CodelesslyWidget extends StatefulWidget {
     return id == null ? null : (id, {...uri.queryParameters});
   }
 
+
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
 }
@@ -512,6 +515,35 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     final id = ++_loadId;
     final requested = widget.layoutId ?? _controller?.layoutId;
     _lastRequested = requested;
+    // A layout already loaded shows in this frame, not after a loading one:
+    // a screen opened with a route transition is there when the transition
+    // starts, so its shared elements fly.
+    if (c.publishModel case final model?) {
+      var params = {...?_controller?.params, ...widget.params};
+      var layoutId = requested;
+      if (layoutId == null) {
+        final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
+        layoutId = screen?.$1 ?? model.entryLayoutId;
+        if (screen != null) params = {...screen.$2, ...params};
+      }
+      final cached = layoutId == null ? null : c.layout(layoutId);
+      if (cached != null) {
+        void show() {
+          _layout = cached;
+          _routeParams = params;
+          _error = null;
+        }
+
+        mounted ? setState(show) : show();
+        final controller = _controller;
+        if (controller != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && id == _loadId) controller._update(layout: cached, clearError: true);
+          });
+        }
+        return;
+      }
+    }
     try {
       await c.initialize();
       final model = c.publishModel!;
@@ -520,7 +552,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       if (layoutId == null) {
         final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
         layoutId = screen?.$1 ?? model.entryLayoutId;
-        if (screen != null) params = {...screen.$2, ...params};
+        if (screen != null) {
+          params = {...screen.$2, ...params};
+          // A link opens the app in a state: its params set the app's
+          // variables of the same name, as they set the screen's.
+          for (final MapEntry(:key, :value) in screen.$2.entries) {
+            if (c.appVariables.declares(key)) c.appVariables.set(key, value);
+          }
+        }
       }
       if (layoutId == null) throw StateError('No layout to show: project [${model.projectId}] has no entry screen');
       final layout = await c.loadLayout(layoutId);
@@ -661,6 +700,7 @@ class _LayoutView extends StatefulWidget {
 
 class _LayoutViewState extends State<_LayoutView> {
   late final _ScreenState _screen = _create();
+  final GlobalKey _captureKey = GlobalKey(debugLabel: 'Codelessly layout');
   final Set<String> _seeded = {};
   String? _shown;
 
@@ -746,7 +786,7 @@ class _LayoutViewState extends State<_LayoutView> {
       expressions: engine,
       services: _codelessly.services,
       ui: _ScreenUi(this),
-      functions: config.functions,
+      functions: _codelessly.functions,
       tree: tree,
       nodeValues: nodeValues,
       scripts: widget.layout.document.scripts,
@@ -893,6 +933,8 @@ class _LayoutViewState extends State<_LayoutView> {
     if (ModalRoute.isCurrentOf(context) == false) return;
     // An overlay screen (no route) isn't the screen the app is on.
     if (OverlayScreenScope.of(context)) return;
+    // A presented layout (a banner, a popup) is not the app's screen.
+    if (CodelesslyPresentation.maybeOf(context) != null) return;
     final route = CodelesslyRoute(widget.layout.id, shown, widget.params);
     if (_codelessly.route.value != route) _codelessly.route.value = route;
   }
@@ -938,6 +980,19 @@ class _LayoutViewState extends State<_LayoutView> {
 
   Future<void> _navigate(NavigationRequest request) async {
     if (!mounted) return;
+    // Load the destination first (briefly), so the screen is there when its
+    // transition starts: no loading frame, and shared elements fly.
+    final destination = request.type == NavigationType.pop || request.destinationId.isEmpty
+        ? null
+        : _codelessly.publishModel?.resolveLayoutId(request.destinationId);
+    if (destination != null && _codelessly.layout(destination) == null) {
+      try {
+        await _codelessly.loadLayout(destination).timeout(const Duration(seconds: 2));
+      } catch (_) {
+        // It loads in its own screen, which shows the error if it fails.
+      }
+      if (!mounted) return;
+    }
     final handler = widget.host.onNavigate;
     if (handler != null && await handler(context, request)) return;
     if (!mounted) return;
@@ -1077,6 +1132,9 @@ class _LayoutViewState extends State<_LayoutView> {
     // The look of the runtime's own toasts and dialogs: the project's
     // tokens, then what the layout's nodes show.
     content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
+    // What a captureScreenshot action of this screen captures.
+    CaptureRegistry.bindLayout(_screen.tree, _captureKey);
+    content = RepaintBoundary(key: _captureKey, child: content);
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
       // A theme with dark colors is a dark theme in dark mode; one without

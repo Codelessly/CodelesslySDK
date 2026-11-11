@@ -1,3 +1,38 @@
+## Unreleased
+
+**New**
+
+- Cloud data follows the new data rules `ownerRead` (each user reads their own documents, which only the project
+  writes; the owner may change the rules' `ownerFields`) and `audience` (a user reads the documents whose `audience`
+  list names them, their role, signed-in users or everyone), and a collection's `expiry` field: queries filter
+  `field > now` and keep that bound (and the owner or audience filter) on the database when the app finishes the
+  rest, live queries drop documents as they expire, and writes store the field as ISO text (empty or missing:
+  `DataRules.neverExpires`). `BackendCloudDatabase(audience:)` gives what the user matches;
+  `codelesslyCloudServices` gives it an `AuthAudience` (the role in the user's profile, signed in unless anonymous),
+  and live queries, joins and live counts follow a change of user or role. `CloudQuery.plan`
+  takes `keepOnServer`. See the guide's [Cloud data and services](docs/guide/09-cloud-data-and-services.md).
+- Presenting layouts from anywhere: `codelessly.present(layoutId, presentation:, params:, data:, dismissible:,
+  priority:, anchor:, ...)` shows a layout above the host app (dialog, sheet, side sheet, full screen, popover or
+  banner) and completes with its `closeModal` result (null when dismissed). One at a time, by priority.
+  `CodelesslyPresenterHost` (as `MaterialApp.builder`) leads it to the app's navigator; `codelessly.presenter`.
+- Banners: `openModal` with `presentation: banner`, along the top (or bottom) edge with no barrier; swipe to
+  dismiss. A presented full-screen layout or banner closes itself with `closeModal`.
+- Automations: the publish model's `automations` run on app start, session start, resume, app events,
+  intervals and screens shown, with a `when` formula and `maxRuns` / `maxPerSession` / `everyDays`
+  (`codelessly.automations`, started by the presenter host). `${usage}` (launches, sessions, first launch, event and
+  automation counts per user) in every layout.
+- App events: `codelessly.emit(name, props)`, `codelessly.events`, and the `emitEvent` action.
+- `captureScreenshot` action (a screen, a node, or the whole app in a `CodelesslyCaptureScope`) giving a PNG
+  `data:` URL; `cloudFiles` with `source` uploads such a value instead of asking the user.
+- `codelessly.registerFunction` / `unregisterFunction` / `functions` (live, over `CodelesslyConfig.functions`);
+  `callFunction` with `optional: true` skips a function the app didn't register.
+- `listView` with `stickToEnd: true`: opens at its end, keeps its place when items are put in front, follows new
+  items at the end only while there (chats, logs).
+- A bottom sheet modal rises above the keyboard.
+- A plain box as a canvas's body keeps its own size (it had none): it paints and runs its click reactions, as a
+  stack does.
+- Guide: [Presenting, automations and host features](docs/guide/17-presenting-and-automations.md).
+
 ## 23.0.0
 
 **Breaking changes**
@@ -47,6 +82,40 @@
 - The publish model's `paywall` setup (product slots, placements, legal links) reaches `Services.config.paywall`.
 - `codelesslyCloudServices(functions:)`; `firebase.dart` exports `FirebaseFunctions`. `LazyPurchaseService`.
   `PaywallOutcome.skipped`.
+- Live cloud data bindings (guide: [Live cloud data in a layout](docs/guide/09-cloud-data-and-services.md#live-cloud-data-in-a-layout)):
+  - `loadCloudData` with `aggregate` (`count`, `sum`, `average`) keeps a live number in its variable without loading
+    the documents (`BackendCloudDatabase.watchAggregate`: the database's aggregate, run again after this app's
+    writes to the collection, on a sign in and every `refreshSeconds`).
+  - `query.joins` attach another collection's document to each item (`${item.state.read}`), by a key template or a
+    field, read live with `in` queries of 30 keys (`watchJoined`), not one read per item.
+  - A load runs again by itself when a value its query reads changes (`${auth.uid}`, a bound limit), with a guard
+    against loops; `"reactive": false` opts out. `BackendCloudDatabase(userChanges:)` makes live owner-only queries
+    and counts follow sign in and out (`codelesslyCloudServices` wires it).
+  - A query loads at most its `limit` (an expression), the query's limit, or 500, and its variable's `hasMore` says
+    truthfully whether more match. A list variable gets the documents; a number variable an aggregate.
+  - `reloadCloudData { variable }` subscribes a load afresh.
+  - An app-scoped load (`"scope": "app"`) takes the same limit, aggregate and joins (a live unread badge).
+  - `cloudBatch` commits its writes at once (`BackendCloudDatabase.commitBatch`), with `forEach` once per item of a
+    list; more than 500 writes go in chunks, or fail first with `transaction`.
+  - A list pulls to refresh without pagination (`pullToRefresh`, or a `refresh` reaction).
+  - Triggers: `onceKey` (a reaction runs once per key per app session) and `enterViewport`'s `visibleMs` (stays in
+    view that long first), for impressions.
+
+**Fixes**
+
+- Running `loadCloudData` again for the same variable replaced nothing: each run added a listener, and the older
+  ones kept writing the variable until the screen went. One variable now has one subscription.
+- A signed-out live query of an owner-only collection closed its stream; it now stays open and follows a sign in.
+
+**Migration**
+
+- A `loadCloudData` query without a limit now loads at most 500 documents (it loaded every one). Layouts with fewer
+  documents see no change; past 500, `hasMore` is true and a debug message names the collection. Set `"limit": "0"`
+  to load everything as before, or page with a bound limit.
+- A load whose query reads a variable now follows it. A layout that relied on a load keeping the values it started
+  with sets `"reactive": false`.
+- `cloudBatch` steps that only write now commit together instead of one by one; a batch with a read step runs as
+  before.
 
 **Improvements and fixes**
 

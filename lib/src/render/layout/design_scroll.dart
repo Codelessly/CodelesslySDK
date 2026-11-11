@@ -218,10 +218,15 @@ class RenderDesignScroll extends RenderProxyBox {
     })..start();
   }
 
+  /// How many times the user has scrolled it (a drag, a wheel, an
+  /// accessibility scroll): what tells a user's scroll from a program's.
+  int get userScrolls => _userScrolls;
+  int _userScrolls = 0;
+
   void _ensureDrag() {
     if (_drag != null) return;
     final drag = _axis == Axis.vertical ? VerticalDragGestureRecognizer(debugOwner: this) : HorizontalDragGestureRecognizer(debugOwner: this);
-    drag.onStart = (_) { _stop(); };
+    drag.onStart = (_) { _userScrolls++; _stop(); };
     drag.onUpdate = (d) { _setPixels(_pixels + (d.primaryDelta ?? 0) * (_reverse ? 1 : -1)); };
     drag.onEnd = (d) { _fling((d.primaryVelocity ?? 0) * (_reverse ? 1 : -1)); };
     drag.onCancel = () { onScrollEnd?.call(metrics); };
@@ -249,6 +254,7 @@ class RenderDesignScroll extends RenderProxyBox {
           (_reverse ? -1 : 1);
       if ((_pixels + delta).clamp(0, maxScrollExtent) == _pixels) return;
       GestureBinding.instance.pointerSignalResolver.register(event, (e) {
+        _userScrolls++;
         _stop();
         _setPixels(_pixels + delta);
 
@@ -267,8 +273,15 @@ class RenderDesignScroll extends RenderProxyBox {
       ..scrollExtentMin = 0
       ..scrollExtentMax = maxScrollExtent;
     final extent = hasSize ? (_axis == Axis.vertical ? size.height : size.width) * .8 : 0.0;
-    void forward() => jumpTo(_pixels + extent);
-    void backward() => jumpTo(_pixels - extent);
+    void forward() {
+      _userScrolls++;
+      jumpTo(_pixels + extent);
+    }
+
+    void backward() {
+      _userScrolls++;
+      jumpTo(_pixels - extent);
+    }
     final canForward = _userScrollable && _pixels < maxScrollExtent;
     final canBackward = _userScrollable && _pixels > 0;
     // Flutter names these as the content's drag direction: normal scrollUp
