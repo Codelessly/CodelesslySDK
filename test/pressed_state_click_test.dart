@@ -1,37 +1,56 @@
-// A node whose `pressed` state style changes its own layers (a scale, an
-// opacity) still gets its click: the press re-parents its reactions box,
-// which used to drop the tap recognizer mid-gesture (Ninefold v2's number
-// pad keys never placed a digit).
+// A node's interaction states change how it's drawn while it's pressed or
+// hovered; they must never take its taps away.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'actions/wiring_test.dart' show show, v;
-
 void main() {
-  for (final patch in [
-    {'scale': 0.97, 'opacity': 0.8},
-    {'opacity': 0.5},
-    {'scale': 0.9},
-  ]) {
-    testWidgets('a pressed style $patch keeps the click', (tester) async {
-      final screen = await show(tester, {
-        'col': {'type': 'column', 'layout': {'width': 200, 'height': 200}, 'children': ['btn']},
-        'btn': {
-          'type': 'stack',
-          'layout': {'width': 100, 'height': 40},
-          'decoration': {'fills': [{'color': '#FFFFFFFF'}]},
-          'states': {'pressed': {'btn': patch}},
-          'actions': [
-            {'trigger': {'type': 'click'}, 'actions': [{'type': 'setVariable', 'variable': 'count', 'op': 'add', 'value': '1'}]},
-          ],
-        },
-      }, variables: [v('count', 0, VariableType.integer)]);
-      await tester.tapAt(screen.center('btn'));
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(screen['count'], 1);
-      await tester.tapAt(screen.center('btn'));
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(screen['count'], 2);
+  for (final states in <String, Map<String, Object?>>{
+    'pressed scale': {'pressed': {'b': {'scale': 0.97}}},
+    'pressed and hovered': {
+      'pressed': {'b': {'scale': 0.97}},
+      'hovered': {'b': {'decoration': {'fills': [{'color': '#FF00FF00'}]}}},
+    },
+    'pressed opacity': {'pressed': {'b': {'opacity': 0.8}}},
+  }.entries) {
+    testWidgets('a click runs while a ${states.key} state patch applies', (tester) async {
+      final scope = VariableScope([const Variable(name: 'count', type: VariableType.integer, value: 0)]);
+      final tree = NodeTree(
+        DocumentSource(LayoutDocument.fromJson({
+          'roots': ['root'],
+          'nodes': {
+            'root': {'type': 'stack', 'children': ['b'], 'layout': {'width': 300, 'height': 300}},
+            'b': {
+              'type': 'box',
+              'layout': {'width': 120, 'height': 48, 'x': {'start': 20}, 'y': {'start': 20}},
+              'decoration': {'fills': [{'color': '#FF9A3B22'}]},
+              'states': states.value,
+              'actions': [
+                {'id': 'tap', 'trigger': {'type': 'click'}, 'actions': [
+                  {'type': 'setVariable', 'variable': 'count', 'op': 'add', 'value': '1'},
+                ]},
+              ],
+            },
+          },
+        })),
+        binder: NodeBinder(scope: scope),
+      );
+      final reactions = TreeReactions(runner: const CodelesslyActions(), context: RuntimeActionContext(scope: scope, tree: tree));
+      tree.interactions = reactions;
+      await tester.pumpWidget(MaterialApp(
+        home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'root', interactive: true)),
+      ));
+      addTearDown(() async {
+        await tester.pumpWidget(const SizedBox());
+        reactions.dispose();
+        tree.dispose();
+        scope.dispose();
+      });
+      await tester.tapAt(const Offset(60, 40));
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.tapAt(const Offset(60, 40));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(scope.read('count'), 2);
     });
   }
 }

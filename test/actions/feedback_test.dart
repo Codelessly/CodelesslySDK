@@ -217,6 +217,43 @@ void main() {
       expect(find.text('Saved'), findsOneWidget);
     });
 
+    testWidgets('a toast\'s time counts from its first frame, not from when it was asked for', (tester) async {
+      final h = Host([]);
+      await h.pump(tester);
+      await h.run([
+        {'type': 'showToast', 'message': 'Split at 00:09.12', 'durationMs': 2000},
+      ]);
+      // A long first build: time passes before the toast is drawn.
+      await tester.binding.delayed(const Duration(seconds: 3));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Split at 00:09.12'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 1500));
+      expect(find.text('Split at 00:09.12'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text('Split at 00:09.12'), findsNothing);
+    });
+
+    testWidgets('the action pill\'s background binds like the other toast colors', (tester) async {
+      final h = Host([v('pill', '#FF123456')]);
+      await h.pump(tester);
+      await h.run([
+        {
+          'type': 'showToast',
+          'message': 'Wrong password',
+          'actionLabel': 'Reset',
+          'durationMs': 0,
+          'look': {'actionBackgroundColor': '#FFFFFFFF'},
+          'variables': {'actionBackgroundColor': r'${pill}'},
+        },
+      ]);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      final button = tester.widget<TextButton>(find.byKey(const ValueKey('codelessly-toast-action')));
+      expect(button.style!.backgroundColor!.resolve({}), const Color(0xFF123456));
+    });
+
     testWidgets('the button runs its actions with the chain\'s result, and closes the toast', (tester) async {
       final h = Host([v('restored', '')]);
       await h.pump(tester);
@@ -308,6 +345,33 @@ void main() {
       await pending;
     });
 
+
+    // Petri v2: the buttons share a text style (font, size, weight, a light
+    // color), and the brass confirm takes dark text. Before, the shared
+    // style's color won and the confirm's label was light on brass.
+    testWidgets('a button\'s own text color wins over the shared button style\'s', (tester) async {
+      final host = Host([]);
+      await host.pump(tester);
+      final pending = host.run([
+        {
+          'type': 'confirm',
+          'title': 'Switch?',
+          'confirmLabel': 'Switch',
+          'look': {
+            'buttonStyle': {'fontSize': 13.5, 'fontWeight': 600, 'color': '#FFF3E6BF'},
+            'confirmColor': '#FFE2BE6A',
+            'confirmTextColor': '#FF2A2109',
+          },
+        },
+      ]);
+      await tester.pumpAndSettle();
+      Color colorOf(String text) => tester.widget<RichText>(find.descendant(of: find.text(text), matching: find.byType(RichText))).text.style!.color!;
+      expect(colorOf('Switch'), const Color(0xFF2A2109));
+      expect(colorOf('Cancel'), const Color(0xFFF3E6BF), reason: 'no cancelTextColor: the shared style\'s');
+      await tester.tap(find.byKey(const ValueKey('codelessly-confirm-cancel')));
+      await tester.pumpAndSettle();
+      await pending;
+    });
 
     testWidgets('the built-in dialog: confirm runs actions, cancel runs cancelActions', (tester) async {
       final h = Host([v('who', 'Ada'), v('out', '')]);

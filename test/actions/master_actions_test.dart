@@ -134,6 +134,32 @@ void main() {
       expect(h['n'], stopped);
     });
 
+    testWidgets('a duration expression sets the play\'s length', (tester) async {
+      final h = Harness(variables: [v('t', 7, VariableType.decimal), v('total', 24, VariableType.decimal)]);
+      unawaited(h.click([
+        {'type': 'animateVariable', 'variable': 't', 'to': r'${total}', 'duration': r'${= (total - t) * 1000}'},
+      ]));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1000));
+      expect(h['t'] as double, closeTo(8, 0.1), reason: 'one second of a 17 s play');
+      await h.click([{'type': 'animateVariable', 'variable': 't', 'mode': 'stop'}]);
+    });
+
+    testWidgets('a duration expression over computed variables', (tester) async {
+      final h = Harness(variables: [
+        v('playhead', 0, VariableType.decimal),
+        v('proj', {'clips': [{'in': 0.5, 'out': 6.0}, {'in': 1.0, 'out': 5.5}]}, VariableType.map),
+        const Variable(name: 'total', type: VariableType.decimal, formula: 'sum(map(proj.clips, (c) => c.out - c.in))'),
+      ]);
+      unawaited(h.click([
+        {'type': 'animateVariable', 'variable': 'playhead', 'to': r'${total}', 'duration': r'${= (total - playhead) * 1000}'},
+      ]));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1000));
+      expect(h['playhead'] as double, closeTo(1, 0.1));
+      await h.click([{'type': 'animateVariable', 'variable': 'playhead', 'mode': 'stop'}]);
+    });
+
     testWidgets('a computed or missing variable is skipped', (tester) async {
       final h = Harness(variables: [const Variable(name: 'c', type: VariableType.decimal, formula: '1 + 1')]);
       await h.click([

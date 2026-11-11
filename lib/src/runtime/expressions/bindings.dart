@@ -50,14 +50,16 @@ final class ProvidedItem {
 final class BoundProperty {
   BoundProperty(this.path, this.expression)
       : reads = Expressions.readsOf(expression),
-        readsClock = Expressions.readsClock(expression);
+        clock = Expressions.clockTick(expression);
 
   final String path;
   final String expression;
 
   /// The paths it reads.
   final Set<String> reads;
-  final bool readsClock;
+
+  /// How often its value changes as time passes; null: it doesn't.
+  final ClockTick? clock;
 
   Object? valueIn(Expressions e, ValueScope scope) => e.evaluate(expression, scope);
 
@@ -71,6 +73,7 @@ final class NodeBindings {
           for (final e in n.bind.entries)
             if (e.key != BindPaths.visible && e.key != BindPaths.data && BindPaths.stateOf(e.key) == null)
               BoundProperty(e.key, e.value),
+          ..._imageUrls(n),
         ],
         states = {
           for (final e in n.bind.entries)
@@ -81,6 +84,26 @@ final class NodeBindings {
         text = n.type == TextProps.spec.type && n.prop(TextProps.text).contains(r'${') && !n.bind.containsKey('props.text')
             ? n.prop(TextProps.text)
             : null;
+
+  /// An image paint whose own URL holds `${...}` (`${item.cover}`), bound
+  /// to that URL as a text node's own text is: filled in from the scope, as
+  /// v1 drew it, unless the node binds the paint or its URL itself.
+  static Iterable<BoundProperty> _imageUrls(Node n) sync* {
+    final d = n.decoration;
+    for (final (key, paints) in [('fills', d.fills), ('foregroundFills', d.foregroundFills)]) {
+      for (var i = 0; i < paints.length; i++) {
+        final url = paints[i].image?.url;
+        if (url == null || !url.contains(r'${')) continue;
+        final id = paints[i].id;
+        final bound = n.bind.keys.any((k) =>
+            k == 'decoration.$key' ||
+            k.startsWith('decoration.$key[$i]') ||
+            (id != null && id.isNotEmpty && k.startsWith('decoration.$key.$id')) ||
+            k.startsWith('decoration.$key.*'));
+        if (!bound) yield BoundProperty('decoration.$key[$i].image.url', url);
+      }
+    }
+  }
 
   static final Expando<NodeBindings> _cache = Expando('NodeBindings');
 
@@ -103,7 +126,7 @@ final class NodeBindings {
   final String? text;
 
   late final Set<String> textReads = text == null ? const {} : Expressions.readsOf(text!);
-  late final bool textReadsClock = text != null && Expressions.readsClock(text!);
+  late final ClockTick? textClock = text == null ? null : Expressions.clockTick(text!);
 
   bool get isEmpty => properties.isEmpty && visible == null && data == null && text == null && states.isEmpty;
 }
@@ -136,12 +159,29 @@ final class ConditionTarget {
             for (final s in b.sets)
               if (s.node == node && s.path == path && s.value is String) ...Expressions.readsOf(s.value! as String),
           ],
-        };
+        },
+        clock = _clockOf(node, path, condition);
 
   final String node;
   final String path;
   final Condition condition;
   final Set<String> reads;
+
+  /// How often its value changes as time passes; null: it doesn't.
+  final ClockTick? clock;
+
+  static ClockTick? _clockOf(String node, String path, Condition condition) {
+    ClockTick? out;
+    for (final b in condition.branches) {
+      if (b.when != null) out = Expressions.clockTickOfPredicate(b.when!)?.finer(out) ?? out;
+      for (final s in b.sets) {
+        if (s.node == node && s.path == path && s.value is String) {
+          out = Expressions.clockTick(s.value! as String)?.finer(out) ?? out;
+        }
+      }
+    }
+    return out;
+  }
 
   /// The value the first branch that holds (and sets this property) gives
   /// it; null when none does. A text value is read like a condition
@@ -226,34 +266,35 @@ class NodeBinder {
     if (b.isEmpty && targets.isEmpty) return BoundNode(node);
     final s = _binds ? scopeFor(source, node.id, instance) : null;
     final reads = <String>{};
-    var clock = false;
+    ClockTick? clock;
     var out = node;
     bool? visible;
     final states = <api.WidgetState, bool>{};
     if (s != null) {
       for (final e in b.states.entries) {
         reads.addAll(e.value.reads);
-        clock |= e.value.readsClock;
+        clock = e.value.clock?.finer(clock) ?? clock;
         if (BindValue.boolean(e.value.valueIn(engine, s)) case final bool on) states[e.key] = on;
       }
       for (final p in b.properties) {
         reads.addAll(p.reads);
-        clock |= p.readsClock;
+        clock = p.clock?.finer(clock) ?? clock;
         out = p.applyTo(out, engine, s);
       }
       if (b.visible case final BoundProperty v) {
         reads.addAll(v.reads);
-        clock |= v.readsClock;
+        clock = v.clock?.finer(clock) ?? clock;
         visible = BindValue.boolean(v.valueIn(engine, s));
       }
       if (b.data case final BoundProperty d) {
         reads.addAll(d.reads);
-        clock |= d.readsClock;
+        clock = d.clock?.finer(clock) ?? clock;
         out = _withItems(source, out, instance, d.valueIn(engine, s));
       }
       // Conditions win over bindings.
       for (final t in targets) {
         reads.addAll(t.reads);
+        clock = t.clock?.finer(clock) ?? clock;
         final v = t.valueIn(engine, s);
         if (v == null) continue;
         if (t.path == BindPaths.visible) {
@@ -269,27 +310,28 @@ class NodeBinder {
     }
     if (b.text != null && (s != null || preview)) {
       reads.addAll(b.textReads);
-      clock |= b.textReadsClock;
+      clock = b.textClock?.finer(clock) ?? clock;
       out = _withText(out, s);
     }
     if (visible != null && visible != out.visible) out = out.copyWith(visible: visible);
     return BoundNode(
       out,
       collapsed: visible == false,
-      watch: s == null ? const [] : _watchers(s, reads, clock && !preview),
+      watch: s == null ? const [] : _watchers(s, reads, preview ? null : clock),
       states: states,
     );
   }
 
-  List<Listenable> _watchers(ValueScope s, Set<String> reads, bool clock) {
+  // A name whose computed or function variable reads the clock brings its
+  // clock in through [watchName].
+  List<Listenable> _watchers(ValueScope s, Set<String> reads, ClockTick? clock) {
     final roots = {for (final r in reads) rootOf(r)};
     final out = <Listenable>{};
     for (final r in roots) {
       final w = watchName(s, r);
       if (w != null) out.add(w);
-
     }
-    if (clock) out.add(FormulaClock.instance);
+    if (clock != null) out.add(FormulaClock.of(clock));
     return out.toList();
   }
 
@@ -322,17 +364,31 @@ class NodeBinder {
   /// count, unless bound on its own); item scopes already made follow.
   Node _withItems(NodeSource source, Node n, Object? instance, Object? items) {
     final list = _listOf(items);
-    if (list == null) return n;
-    // A snapshot: an item's update can rebind nodes that make or drop item
-    // scopes (a list inside the item), changing [_items] mid-loop.
-    for (final e in _items.entries.toList()) {
-      if (e.key.$1 == n.id && e.key.$2 == instance) {
-        final i = e.key.$3;
+    if (list == null) {
+      // A running app shows no items while its data isn't there yet (a
+      // script still answering), not the bare template with `${item...}`
+      // in it; a design preview keeps showing the template.
+      final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
+      final def = n.spec?.prop(countProp);
+      if (preview || def == null || n.bind.containsKey('props.$countProp')) return n;
+      return n.copyWith(props: n.props.set<Object?>(def, 0));
+    }
+    // This list's item scopes only (a list of thousands of cells used to
+    // scan every item scope of every list, per bind). A snapshot: an item's
+    // update can rebind nodes that make or drop item scopes (a list inside
+    // the item), changing the map mid-loop.
+    final scopes = _items[(n.id, instance)];
+    if (scopes != null) {
+      for (final e in scopes.entries.toList(growable: false)) {
+        final i = e.key;
         e.value.update(index: i, item: i < list.length ? list[i] : null);
       }
     }
-    final def = n.spec?.prop('itemCount');
-    if (def == null || n.bind.containsKey('props.itemCount')) return n;
+    _itemRefreshers[(n.id, instance)]?.call(list);
+    // A list's item count, a table's row count: as many as the items.
+    final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
+    final def = n.spec?.prop(countProp);
+    if (def == null || n.bind.containsKey('props.$countProp')) return n;
     return n.copyWith(props: n.props.set<Object?>(def, list.length));
   }
 
@@ -343,7 +399,8 @@ class NodeBinder {
         _ => null,
       };
 
-  final Map<(String, Object?, int), ItemScope> _items = {};
+  /// Item scopes by list (its id and instance), then by index.
+  final Map<(String, Object?), Map<int, ItemScope>> _items = {};
 
   static const _repeaters = {'listView', 'gridView', 'pageView'};
 
@@ -454,21 +511,38 @@ class NodeBinder {
   ValueScope _itemScope(NodeSource source, String listId, Object? instance, ValueScope root) {
     // The collections give item k > 0 its own instance, ('item', outer,
     // list, k); the first item is the list's own (unscoped).
+    final listNode = source.node(listId)!;
+    final isPages = listNode.type == 'pageView';
     final (int index, Object? outer) = switch (instance) {
       (final String tag, final Object? o, final String l, final int k) when tag == 'item' && l == listId => (k, o),
-      _ => (0, instance),
+      _ => (-1, instance),
     };
-    final key = (listId, outer, index);
-    final existing = _items[key];
-    if (existing != null) return existing;
+    final scopes = _items[(listId, outer)] ??= {};
+    // Known without reading the data: an item by index, or any list's first.
+    if (index >= 0 || !isPages) {
+      final known = scopes[index < 0 ? 0 : index];
+      if (known != null) return known;
+    }
     final parent = scopeFor(source, listId, outer) ?? root;
-    final listNode = source.node(listId)!;
     final items = _listOf(_dataOf(listNode, parent));
-    return _items[key] = ItemScope(
-      index: index,
-      item: items != null && index < items.length ? items[index] : null,
+    // The list's own (first built) item: item 0, or a page view's page at rest.
+    final restPage = isPages
+        ? (items == null || items.isEmpty
+              ? listNode.prop(api.PageViewProps.initialPage)
+              : listNode.prop(api.PageViewProps.initialPage).clamp(0, items.length - 1))
+        : 0;
+    final at = index < 0 ? restPage : index;
+    final existing = scopes[at];
+    if (existing != null) return existing;
+    final scope = scopes[at] = ItemScope(
+      index: at,
+      item: items != null && at < items.length ? items[at] : null,
       parent: parent,
     );
+    // A page view's pages read their distance from the page at rest, as
+    // they do at runtime (parallax, held entrances).
+    if (isPages) scope.setPageOffset((at - restPage).toDouble());
+    return scope;
   }
 
   Object? _dataOf(Node list, ValueScope s) {
@@ -505,6 +579,22 @@ class NodeBinder {
   /// it). Not disposed: a box leaving with it may still listen.
   void forgetItem(ProvidedItem instance) => _provided.remove(instance);
 
+  /// What re-gives the items of widgets that provide their own item scopes
+  /// ([provideItem]: a table at rest), by node and instance: called with the
+  /// node's new items whenever its bound data changes, as a list's item
+  /// scopes are moved to theirs. Without it a table whose data changed but
+  /// kept its size (the same node) kept showing its old cells.
+  final Map<(String, Object?), void Function(List<Object?> items)> _itemRefreshers = {};
+
+  /// Registers (or with null, drops) [refresh] for node [owner] in [instance].
+  void onItemsChanged(String owner, Object? instance, void Function(List<Object?> items)? refresh) {
+    if (refresh == null) {
+      _itemRefreshers.remove((owner, instance));
+    } else {
+      _itemRefreshers[(owner, instance)] = refresh;
+    }
+  }
+
   /// The items node [list] (in [instance]) is bound to: its `data` binding or
   /// a condition setting it, as a list; null when it has none.
   List<Object?>? itemsOf(NodeSource source, Node list, Object? instance) {
@@ -515,7 +605,7 @@ class NodeBinder {
 
   /// Lets go of the item, local and node scopes.
   void dispose() {
-    for (final s in [..._items.values, ..._provided.values]) {
+    for (final s in [for (final m in _items.values) ...m.values, ..._provided.values]) {
       s.dispose();
     }
     _items.clear();

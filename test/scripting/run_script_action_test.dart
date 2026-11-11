@@ -370,6 +370,27 @@ void main() {
     expect(ScriptDef.fromJson(model.toJson())!.tests, model.tests);
   });
 
+  test('expectError names the error by type, message or both', () async {
+    final model = ScriptDef(
+      id: 'v',
+      name: 'validate',
+      params: const [ScriptParam(name: 'start'), ScriptParam(name: 'end')],
+      source: 'if (end <= start) throw new Error("Ends before it starts"); return end - start;',
+      tests: const [
+        ScriptTest(name: 'type', args: {'start': 9, 'end': 8}, expectError: 'Error'),
+        ScriptTest(name: 'message', args: {'start': 9, 'end': 8}, expectError: 'Ends before it starts'),
+        ScriptTest(name: 'type and message', args: {'start': 9, 'end': 8}, expectError: 'Error: Ends before it starts'),
+        ScriptTest(name: 'another message', args: {'start': 9, 'end': 8}, expectError: 'Pick a template'),
+        ScriptTest(name: 'another type', args: {'start': 9, 'end': 8}, expectError: 'RangeError'),
+      ],
+    );
+    final results = await runScriptTests(model);
+    expect([for (final r in results) r.passed], [true, true, true, false, false]);
+    expect(results[3].reason, 'Expected a Pick a template, but it failed with Error: Ends before it starts');
+    expect(expectedError('RangeError: too big', {'type': 'RangeError', 'message': 'too big'}), isTrue);
+    expect(expectedError('too', {'type': 'RangeError', 'message': 'too big'}), isFalse);
+  });
+
   test('Check compiles a script without running it', () async {
     const runner = SandboxScriptRunner();
     expect(await runner.check(const ScriptDef(id: 'a', name: 'a', source: 'while (true) {}')), isNull);

@@ -19,11 +19,13 @@ import 'package:codelessly_api/codelessly_api.dart'
         CheckboxProps,
         DatePickerProps,
         DateTimeInputMode,
+        PickerFieldProps,
         DateTimeInputProps,
         DropdownProps,
         Node,
         RadioProps,
         SegmentedButtonProps,
+        SegmentedVariant,
         SignatureProps,
         SizeFit,
         SliderProps,
@@ -34,6 +36,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart' show DateFormat;
 
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
@@ -308,7 +311,11 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     hintText: previewText(d.hintText),
     hintStyle: _styleOrNull(d.hintStyle),
     hintMaxLines: d.hintMaxLines,
-    error: errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle),
+    // In error without a message (an error text bound to `true`): the
+    // error border, nothing under the field.
+    error: errorText == api.kErrorWithoutMessage
+        ? const SizedBox.shrink()
+        : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle)),
     errorStyle: _styleOrNull(d.errorStyle),
     errorMaxLines: d.errorMaxLines,
     floatingLabelBehavior: switch (d.floatingLabelBehavior) {
@@ -317,11 +324,13 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     },
     isCollapsed: d.isCollapsed,
     isDense: d.isDense,
-    // A collapsed decoration is the bare input: a compact density must not
-    // shrink its intrinsic height.
-    visualDensity: d.isCollapsed ? VisualDensity.standard : null,
+    // A collapsed decoration is the bare input, and a set content padding is
+    // the designed one: a platform's compact density (desktop) must not
+    // shrink either, or the field is ~8px shorter on desktop than designed.
+    visualDensity: d.isCollapsed || d.contentPadding != null ? VisualDensity.standard : null,
     contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
-        error: error ?? (errorText != null && errorText.trim().isNotEmpty), focused: focused),
+        error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
+        focused: focused),
     prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
     prefixIconConstraints: iconConstraints(d.prefixIconConstraints, d.prefixIconPadding, prefixWidget, prefixIcon),
     prefix: always ? null : prefixWidget,
@@ -420,15 +429,48 @@ class _TextFieldIsland extends StatefulWidget {
 }
 
 class _TextFieldIslandState extends State<_TextFieldIsland> {
-  late final TextEditingController controller = TextEditingController(text: widget.node.prop(TextFieldProps.initialValue));
+  late final HighlightTextController controller = HighlightTextController(text: widget.node.prop(TextFieldProps.initialValue))
+    ..highlight = _highlight(widget.node);
   late final FocusNode focusNode = FocusNode()..addListener(_focusChanged);
+
+  /// The texts this field reported as changed, newest last: a value bound
+  /// to `initialValue` that comes back from them (an action, a script or a
+  /// formula fed by `changed`, which can lag behind the keyboard) is an
+  /// echo, not a new value, and must not overwrite what was typed since.
+  final List<String> _sent = [];
+
+  static (int, int, TextStyle?)? _highlight(Node n) {
+    final start = n.prop(TextFieldProps.highlightStart), end = n.prop(TextFieldProps.highlightEnd);
+    if (start == null || end == null || end <= start) return null;
+    return (start, end, _styleOrNull(n.prop(TextFieldProps.highlightStyle)));
+  }
 
   @override
   void didUpdateWidget(covariant _TextFieldIsland oldWidget) {
     super.didUpdateWidget(oldWidget);
+    controller.highlight = _highlight(widget.node);
     final initial = widget.node.prop(TextFieldProps.initialValue);
     if (initial != oldWidget.node.prop(TextFieldProps.initialValue) && controller.text != initial) {
-      controller.text = initial;
+      final echo = _sent.indexOf(initial);
+      if (echo >= 0) {
+        // The newer edits are still on their way back.
+        _sent.removeRange(0, echo + 1);
+        return;
+      }
+      _sent.clear();
+      // A new value from outside (a slider rewrote the line): keep the caret
+      // where it was, within the new text. A caret at the end (of an empty
+      // field too: a default that arrives after autofocus) stays at the end.
+      final selection = controller.selection;
+      final atEnd = selection.isCollapsed && selection.baseOffset == controller.text.length;
+      controller.value = TextEditingValue(
+        text: initial,
+        selection: selection.isValid && !atEnd
+            ? TextSelection(
+                baseOffset: selection.baseOffset.clamp(0, initial.length),
+                extentOffset: selection.extentOffset.clamp(0, initial.length))
+            : TextSelection.collapsed(offset: initial.length),
+      );
     }
   }
 
@@ -452,11 +494,9 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
       _edited = false;
       _fire(context, 'editingComplete', controller.text);
     }
-    // The focus ring follows focus, and so does a padding that includes the
-    // (focused) border.
-    if (n.prop(TextFieldProps.focusRingWidth) > 0 || n.prop(TextFieldProps.decoration).paddingIncludesBorder) {
-      setState(() {});
-    }
+    // The focus ring, a padding that includes the (focused) border and a
+    // fixed-height field's border (painted by its box) follow focus.
+    setState(() {});
     if (focusNode.hasFocus && n.prop(TextFieldProps.selectAllOnFocus)) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || !focusNode.hasFocus) return;
@@ -494,7 +534,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final style = _styleOrNull(n.prop(TextFieldProps.style));
     final cursorRadius = n.prop(TextFieldProps.cursorRadius);
 
+    // Where tickers are off (a design canvas) the decorator can't animate a
+    // border or fill change: it would keep painting the old one. A new
+    // decorator shows the current decoration.
+    final atRest = !TickerMode.valuesOf(context).enabled;
     Widget field(InputDecoration decoration) => TextField(
+          key: atRest ? ValueKey<InputDecoration>(decoration) : null,
           controller: controller,
           focusNode: focusNode,
           decoration: decoration,
@@ -524,6 +569,8 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
           readOnly: n.prop(TextFieldProps.readOnly),
           onChanged: (v) {
             _edited = true;
+            _sent.add(v);
+            if (_sent.length > 64) _sent.removeAt(0);
             _fire(context, 'changed', v);
           },
           onSubmitted: (v) => _fire(context, 'submitted', v),
@@ -562,13 +609,46 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
-            return field(constraints.hasBoundedHeight
-                ? decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))
-                : decoration);
+            if (!constraints.hasBoundedHeight) return field(decoration);
+            // InputDecorator doesn't stretch its container (fill, border) to
+            // a height: a dense 50 px field painted a 20 px box at its top.
+            // So the box paints them at full height and a borderless field
+            // sits in it where textAlignVertical puts the line (centred by
+            // default), as a Container around a TextField would.
+            final error = decoration.errorText != null || decoration.error != null;
+            final border = (error ? (focusNode.hasFocus ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
+                (focusNode.hasFocus ? decoration.focusedBorder : null) ??
+                decoration.enabledBorder ??
+                decoration.border ??
+                const UnderlineInputBorder();
+            final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
+            final y = switch (n.prop(TextFieldProps.textAlignVertical)) {
+              api.TextAlignVertical.top => -1.0,
+              api.TextAlignVertical.bottom => 1.0,
+              _ => 0.0,
+            };
+            return DecoratedBox(
+              decoration: ShapeDecoration(color: fill, shape: border),
+              child: Align(
+                alignment: Alignment(-1, y),
+                child: field(decoration.copyWith(
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  isDense: true,
+                )),
+              ),
+            );
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
-    if (vFit == SizeFit.hug) result = IntrinsicHeight(child: result);
+    // A collapsed field sizes to its line on its own; under IntrinsicHeight
+    // Flutter's TextField reports the 48 px interactive minimum instead.
+    if (vFit == SizeFit.hug && !d.isCollapsed) result = IntrinsicHeight(child: result);
 
     // Always a DecoratedBox, empty without focus: a ring that came and went
     // as a wrapper would rebuild the field and drop its focus.
@@ -651,7 +731,7 @@ class _RenderIntrinsicSafeLayoutBuilder extends RenderBox
 // --- checkbox, switch, radio --------------------------------------------------
 
 /// Flutter's own sizes the toggles are scaled from.
-const double _checkboxSize = 40, _switchWidth = 59, _radioSize = 32;
+const double _checkboxSize = 40, _switchWidth = 59, _radioSize = 32, _radioRing = 18;
 
 class _CheckboxIsland extends StatefulWidget {
   const _CheckboxIsland({required this.node});
@@ -805,7 +885,8 @@ class _RadioIslandState extends State<_RadioIsland> {
     final active = _color(n.prop(RadioProps.activeColor));
     final inactive = _color(n.prop(RadioProps.inactiveColor));
     return Transform.scale(
-      scale: n.layout.width.value / _radioSize,
+      // Compact: the ring (18 px with its stroke) fills the box.
+      scale: n.layout.width.value / (n.prop(RadioProps.compact) ? _radioRing : _radioSize),
       child: RadioGroup<String>(
         groupValue: groupValue ?? '',
         onChanged: (v) {
@@ -879,9 +960,18 @@ class _SliderIslandState extends State<_SliderIsland> {
       api.SliderTrackShape.rectangle => const RectangularSliderTrackShape(),
       api.SliderTrackShape.roundedRectangle => const RoundedRectSliderTrackShape(),
       api.SliderTrackShape.gapped => const GappedSliderTrackShape(),
+      api.SliderTrackShape.ruler => RulerSliderTrackShape(
+          ticks: n.prop(SliderProps.rulerTicks),
+          majorEvery: n.prop(SliderProps.rulerMajorEvery),
+          tickColor: _color(n.prop(SliderProps.rulerTickColor)) ?? const Color(0xFF000000),
+          minorTickColor: _color(n.prop(SliderProps.rulerMinorTickColor)) ??
+              _color(n.prop(SliderProps.rulerTickColor)) ??
+              const Color(0xFF000000),
+          zeroFraction: range <= 0 || min > 0 || max < 0 ? 0 : (0 - min) / range,
+        ),
     };
-    final trackShape = fillFromEnd || markerFraction != null || startOpacity < 1
-        ? MarkedSliderTrackShape(
+    final trackShape = trackShapeKind != api.SliderTrackShape.ruler && (fillFromEnd || markerFraction != null || startOpacity < 1
+) ? MarkedSliderTrackShape(
             fillFromEnd: fillFromEnd,
             activeStartOpacity: startOpacity,
             markerFraction: markerFraction,
@@ -915,6 +1005,8 @@ class _SliderIslandState extends State<_SliderIsland> {
           strokeColor: _color(n.prop(SliderProps.thumbStrokeColor)),
           strokeWidth: n.prop(SliderProps.thumbStrokeWidth),
         ),
+      api.SliderThumbShape.pointer =>
+        PointerSliderThumbShape(strokeColor: _color(n.prop(SliderProps.thumbStrokeColor)) ?? const Color(0xFF000000)),
     };
     final glow = _color(n.prop(SliderProps.thumbGlowColor));
     final thumbShape = showThumb && glow != null && glow.a > 0
@@ -1334,6 +1426,178 @@ TimeOfDay? _time(String value) {
   return h < 24 && min < 60 ? TimeOfDay(hour: h, minute: min) : null;
 }
 
+/// A picker's dialog theme: the app's tokens ([_pickerTheme]), then the
+/// node's `pickerTheme` (colors, radii, font, headline), and a 24-hour
+/// clock when asked.
+Widget _nodePickerTheme(BuildContext context, Widget? child, Node n, {bool use24h = false}) {
+  final j = n.prop(PickerFieldProps.pickerTheme);
+  Widget themed = child ?? const SizedBox.shrink();
+  if (use24h) {
+    themed = MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: themed);
+  }
+  if (j == null || j.isEmpty) return _pickerTheme(context, themed);
+  Color? c(String key) => api.Color.fromJson(j[key])?.flutter;
+  double? d(String key) => j[key] is num ? (j[key] as num).toDouble() : double.tryParse('${j[key] ?? ''}');
+  final base = Theme.of(context);
+  final background = c('backgroundColor'), accent = c('accentColor'), onAccent = c('onAccentColor');
+  final text = c('textColor'), muted = c('mutedColor'), divider = c('dividerColor');
+  final radius = d('radius'), dayRadius = d('dayRadius');
+  final family = j['fontFamily'] is String ? j['fontFamily'] as String : null;
+  final headline = j['headlineStyle'] == null ? null : textStyle(api.TextStyle.fromJson(j['headlineStyle']));
+  TextStyle? font([double? size, Color? color, FontWeight? weight]) =>
+      family == null && color == null ? null : TextStyle(fontFamily: family, fontSize: size, color: color, fontWeight: weight);
+  final shape = radius == null ? null : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
+  ButtonStyle? button(Color? color) => color == null && family == null
+      ? null
+      : TextButton.styleFrom(foregroundColor: color, textStyle: TextStyle(fontFamily: family, fontWeight: FontWeight.w600, fontSize: 14));
+  return Builder(builder: (context) {
+    final scheme = base.colorScheme.copyWith(
+      primary: accent,
+      onPrimary: onAccent,
+      surface: background,
+      onSurface: text,
+      // Material 3 tints dialogs with the scheme's containers: keep them the surface.
+      surfaceContainerHigh: background,
+      surfaceContainerHighest: background,
+      surfaceTint: Colors.transparent,
+      outline: divider,
+      outlineVariant: divider,
+    );
+    final data = base.copyWith(
+      colorScheme: scheme,
+      textTheme: family == null ? base.textTheme : base.textTheme.apply(fontFamily: family),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: background,
+        surfaceTintColor: Colors.transparent,
+        shape: shape,
+        headerBackgroundColor: background,
+        headerForegroundColor: text,
+        headerHeadlineStyle: headline,
+        headerHelpStyle: font(11, muted, FontWeight.w600)?.copyWith(letterSpacing: 0.9),
+        weekdayStyle: font(12, muted, FontWeight.w600),
+        dayStyle: font(13, null, FontWeight.w500),
+        yearStyle: font(13, null, FontWeight.w500),
+        dayShape: dayRadius == null
+            ? null
+            : WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(dayRadius))),
+        todayBorder: accent == null ? null : BorderSide(color: accent),
+        dividerColor: divider,
+        cancelButtonStyle: button(muted ?? text),
+        confirmButtonStyle: button(accent),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: background,
+        shape: shape,
+        hourMinuteShape: dayRadius == null
+            ? null
+            : RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(dayRadius), side: BorderSide(color: divider ?? Colors.transparent)),
+        hourMinuteTextColor: text,
+        dialHandColor: accent,
+        dialTextColor: text,
+        entryModeIconColor: muted,
+        helpTextStyle: font(11, muted, FontWeight.w600)?.copyWith(letterSpacing: 0.9),
+        hourMinuteTextStyle: headline?.copyWith(fontSize: 44) ?? font(44, text, FontWeight.w500),
+        cancelButtonStyle: button(muted ?? text),
+        confirmButtonStyle: button(accent),
+      ),
+    );
+    return Theme(data: data, child: themed);
+  });
+}
+
+/// A date's or a time's text in [pattern] (intl), or [fallback] when the
+/// pattern is empty or can't format it.
+String _formatted(DateTime value, String pattern, String fallback) {
+  if (pattern.trim().isEmpty) return fallback;
+  try {
+    return DateFormat(pattern).format(value);
+  } catch (_) {
+    return fallback;
+  }
+}
+
+/// A picker's face: the outlined button, or with a decoration a read-only
+/// field (hover and press feedback, the decoration's border, icons and
+/// error) that opens the picker.
+Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap, {bool empty = false}) {
+  var style = n.prop(PickerFieldProps.style);
+  final d = n.prop(PickerFieldProps.decoration);
+  // No value yet: the decoration's hint (`—`, "Pick a day") in its style.
+  final hint = d.hintText;
+  if (empty && hint != null) {
+    text = hint;
+    if (!d.hintStyle.isEmpty) style = d.hintStyle;
+  }
+  if (d.isEmpty) {
+    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style)));
+  }
+  final decoration = inputDecoration(d, n.layout.padding, error: d.errorText != null && d.errorText!.isNotEmpty);
+  return MouseRegion(
+    cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: _HoverDecorator(
+        decoration: decoration,
+        enabled: onTap != null,
+        // A fixed height is the node's own: the island can be laid out
+        // unbounded (in a column), where constraints don't carry it.
+        height: n.layout.height.fit == SizeFit.fixed ? n.layout.height.value : null,
+        fills: n.layout.height.fit == SizeFit.fill,
+        child: Text(text, style: _styleOrNull(style), maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
+    ),
+  );
+}
+
+class _HoverDecorator extends StatefulWidget {
+  const _HoverDecorator({required this.decoration, required this.enabled, required this.child, this.height, this.fills = false});
+  final InputDecoration decoration;
+  final bool enabled;
+  final Widget child;
+
+  /// The node's fixed height, which the field takes.
+  final double? height;
+
+  /// Whether the node fills its parent's height (bounded), which it takes.
+  final bool fills;
+  @override
+  State<_HoverDecorator> createState() => _HoverDecoratorState();
+}
+
+class _HoverDecoratorState extends State<_HoverDecorator> {
+  bool hover = false;
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        onEnter: (_) => setState(() => hover = true),
+        onExit: (_) => setState(() => hover = false),
+        // The field takes the node's height (a 42-high field stays 42 with
+        // a dense decoration), its value centred, as a text field does.
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final height = widget.height ??
+                (widget.fills && constraints.hasBoundedHeight ? constraints.maxHeight : null);
+            final fills = height != null;
+            final decorator = InputDecorator(
+              // Standard density when it fills: a compact theme would draw
+              // the field 8 px shorter than its node.
+              decoration: widget.decoration.copyWith(
+                enabled: widget.enabled,
+                visualDensity: fills ? VisualDensity.standard : null,
+              ),
+              isHovering: hover && widget.enabled,
+              isEmpty: false,
+              expands: fills,
+              textAlignVertical: fills ? TextAlignVertical.center : null,
+              child: widget.child,
+            );
+            return fills ? SizedBox(height: height, child: decorator) : decorator;
+          },
+        ),
+      );
+}
+
 class _DatePickerIsland extends StatefulWidget {
   const _DatePickerIsland({required this.node, required this.interactive});
   final Node node;
@@ -1345,25 +1609,44 @@ class _DatePickerIsland extends StatefulWidget {
 
 class _DatePickerIslandState extends State<_DatePickerIsland> {
   String? picked;
+  String? _shown;
 
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
+    // A new bound value (another field changed it) wins over the last pick.
+    final value = n.prop(DatePickerProps.value);
+    if (value != _shown) {
+      _shown = value;
+      picked = null;
+    }
     final first = _date(n.prop(DatePickerProps.firstDate)) ?? DateTime(1);
     final last = _date(n.prop(DatePickerProps.lastDate)) ?? DateTime(9999, 12, 31);
-    var initial = _date(picked ?? n.prop(DatePickerProps.value)) ?? DateTime.now();
+    var initial = _date(picked ?? value) ?? DateTime.now();
     if (initial.isBefore(first)) initial = first;
     if (initial.isAfter(last)) initial = last;
-    return OutlinedButton(
-      onPressed: !n.prop(DatePickerProps.enabled) || !widget.interactive
+    final help = n.prop(PickerFieldProps.helpText);
+    return _pickerFace(
+      context,
+      n,
+      _formatted(initial, n.prop(PickerFieldProps.format), _isoDate(initial)),
+      empty: _date(picked ?? value) == null,
+      !n.prop(DatePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final date = await showDatePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialDate: initial, firstDate: first, lastDate: last);
+              final date = await showDatePicker(
+                context: context,
+                useRootNavigator: false,
+                builder: (_, child) => _nodePickerTheme(context, child, n),
+                helpText: help.isEmpty ? null : help,
+                initialDate: initial,
+                firstDate: first,
+                lastDate: last,
+              );
               if (date == null || !mounted) return;
               setState(() => picked = _isoDate(date));
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: Text(_isoDate(initial)),
     );
   }
 }
@@ -1379,21 +1662,38 @@ class _TimePickerIsland extends StatefulWidget {
 
 class _TimePickerIslandState extends State<_TimePickerIsland> {
   String? picked;
+  String? _shown;
 
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
-    final time = _time(picked ?? n.prop(TimePickerProps.value)) ?? const TimeOfDay(hour: 0, minute: 0);
-    return OutlinedButton(
-      onPressed: !n.prop(TimePickerProps.enabled) || !widget.interactive
+    final value = n.prop(TimePickerProps.value);
+    if (value != _shown) {
+      _shown = value;
+      picked = null;
+    }
+    final time = _time(picked ?? value) ?? const TimeOfDay(hour: 0, minute: 0);
+    final help = n.prop(PickerFieldProps.helpText);
+    final use24h = n.prop(TimePickerProps.use24h);
+    return _pickerFace(
+      context,
+      n,
+      _formatted(DateTime(2000, 1, 1, time.hour, time.minute), n.prop(PickerFieldProps.format), _clock(time)),
+      empty: _time(picked ?? value) == null,
+      !n.prop(TimePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final t = await showTimePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialTime: time);
+              final t = await showTimePicker(
+                context: context,
+                useRootNavigator: false,
+                builder: (_, child) => _nodePickerTheme(context, child, n, use24h: use24h),
+                helpText: help.isEmpty ? null : help,
+                initialTime: time,
+              );
               if (t == null || !mounted) return;
               setState(() => picked = _clock(t));
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: Text(_clock(time)),
     );
   }
 }
@@ -1433,12 +1733,15 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         },
     };
     final localizations = MaterialLocalizations.of(context);
-    final display = switch (mode) {
+    final pattern = n.prop(DateTimeInputProps.format);
+    final display = pattern != null && pattern.isNotEmpty && (date != null || time != null)
+        ? _formatPattern(pattern, mode, date, time)
+        : switch (mode) {
       DateTimeInputMode.date => date == null ? '' : localizations.formatMediumDate(date),
       DateTimeInputMode.time => time == null ? '' : time.format(context),
       DateTimeInputMode.dateTime =>
         date == null || time == null ? '' : '${localizations.formatMediumDate(date)} · ${time.format(context)}',
-    };
+          };
     final enabled = n.prop(DateTimeInputProps.enabled);
     final label = n.prop(DateTimeInputProps.labelText);
     final initial = date == null || date.isBefore(first) || date.isAfter(last)
@@ -1467,7 +1770,9 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   });
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: InputDecorator(
+      child: n.prop(DateTimeInputProps.bare)
+          ? _bare(n, mode, display)
+          : InputDecorator(
         isEmpty: display.isEmpty,
         decoration: InputDecoration(
           labelText: label,
@@ -1478,13 +1783,47 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   DateTimeInputMode.dateTime => 'date and time',
                 }}'
               : null,
-          suffixIcon: Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+          suffixIcon: _icon(n.prop(DateTimeInputProps.icon)) ??
+              Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
           enabled: enabled,
           border: const OutlineInputBorder(),
         ),
-        child: Text(display.isEmpty ? ' ' : display),
+        child: Text(display.isEmpty ? ' ' : display, style: _styleOrNull(n.prop(DateTimeInputProps.style))),
       ),
     );
+  }
+
+  /// [bare]: the value (or hint) and its icon in a row, the box left to the
+  /// node's own decoration.
+  Widget _bare(Node n, DateTimeInputMode mode, String display) {
+    final hint = n.prop(DateTimeInputProps.hint) ??
+        'Select ${switch (mode) {
+          DateTimeInputMode.date => 'date',
+          DateTimeInputMode.time => 'time',
+          DateTimeInputMode.dateTime => 'date and time',
+        }}';
+    final empty = display.isEmpty;
+    // Centered down the box, as a field's value is.
+    return Align(alignment: AlignmentDirectional.centerStart, child: Row(children: [
+      Expanded(
+        child: Text(empty ? hint : display,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style))),
+      ),
+      _icon(n.prop(DateTimeInputProps.icon)) ??
+          Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
+    ]));
+  }
+
+  /// [date] / [time] by an `intl` [pattern]; a broken pattern shows ISO.
+  static String _formatPattern(String pattern, DateTimeInputMode mode, DateTime? date, TimeOfDay? time) {
+    final at = DateTime(date?.year ?? 2000, date?.month ?? 1, date?.day ?? 1, time?.hour ?? 0, time?.minute ?? 0);
+    try {
+      return DateFormat(pattern).format(at);
+    } catch (_) {
+      return mode == DateTimeInputMode.time ? '${time?.hour}:${time?.minute.toString().padLeft(2, '0')}' : at.toIso8601String();
+    }
   }
 }
 
@@ -1533,7 +1872,11 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final side = n.prop(SegmentedButtonProps.side);
     final radius = n.prop(SegmentedButtonProps.borderRadius);
     final selectedIcon = _icon(n.prop(SegmentedButtonProps.selectedIcon));
-    return SegmentedButton<String>(
+    final segmentHeight = n.prop(SegmentedButtonProps.segmentHeight);
+    if (n.prop(SegmentedButtonProps.variant) == SegmentedVariant.track) {
+      return _track(context, n, selection, multi);
+    }
+    final button = SegmentedButton<String>(
       segments: segments,
       selected: selection,
       onSelectionChanged:
@@ -1556,7 +1899,129 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         selectedForegroundColor: _color(n.prop(SegmentedButtonProps.selectedForegroundColor)),
         side: side == null ? null : _side(side),
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
+        padding: n.prop(SegmentedButtonProps.padding)?.flutter,
+        minimumSize: segmentHeight == null ? null : Size(0, segmentHeight),
+        maximumSize: segmentHeight == null ? null : Size(double.infinity, segmentHeight),
+        tapTargetSize: n.prop(SegmentedButtonProps.shrinkTapTarget) ? MaterialTapTargetSize.shrinkWrap : null,
+        visualDensity: segmentHeight == null ? null : VisualDensity.standard,
       ),
+      expandedInsets: n.prop(SegmentedButtonProps.expanded) ? EdgeInsets.zero : null,
+    );
+    // Segments sit on a canvas-type Material: a set background (transparent
+    // included) shows alone, as on chips.
+    if (n.prop(SegmentedButtonProps.backgroundColor) == null) return button;
+    return Theme(data: Theme.of(context).copyWith(canvasColor: Colors.transparent), child: button);
+  }
+
+  void _select(String value, bool multi) {
+    final next = multi
+        ? (selected.contains(value) ? ({...selected}..remove(value)) : {...selected, value})
+        : {value};
+    if (next.isEmpty && !widget.node.prop(SegmentedButtonProps.emptySelectionAllowed)) return;
+    setState(() => selected = next);
+    _fire(context, 'changed', next.toList());
+  }
+
+  /// The track variant: the segments on a tinted, bordered track, the
+  /// selected one raised (its own fill and shadows), no dividers. Segments
+  /// take their natural width (hug), or share a fixed or filling width equally.
+  Widget _track(BuildContext context, Node n, Set<String> selection, bool multi) {
+    final radius = n.prop(SegmentedButtonProps.borderRadius)?.flutter ?? BorderRadius.circular(4);
+    final side = n.prop(SegmentedButtonProps.side);
+    final enabled = n.prop(SegmentedButtonProps.enabled);
+    final base = _styleOrNull(n.prop(SegmentedButtonProps.textStyle)) ?? const TextStyle(fontSize: 13, fontWeight: FontWeight.w600);
+    final fg = _color(n.prop(SegmentedButtonProps.foregroundColor)) ?? const Color(0xFF6B7A8D);
+    final selectedFg = _color(n.prop(SegmentedButtonProps.selectedForegroundColor)) ?? const Color(0xFF0F1B2D);
+    final selectedBg = _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)) ?? Colors.white;
+    final shadows = [
+      for (final e in n.prop(SegmentedButtonProps.selectedShadows))
+        if (e.type == api.EffectType.dropShadow && e.visible) boxShadow(e),
+    ];
+    final padding = n.prop(SegmentedButtonProps.padding)?.flutter ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 5);
+    final expand = n.layout.width.fit != SizeFit.hug;
+    final vertical = n.prop(SegmentedButtonProps.direction) == api.Axis.vertical;
+    // One thumb sliding under equal segments, instead of each filling.
+    final slide = n.prop(SegmentedButtonProps.slidingThumb) && !multi && !vertical && expand;
+    final segments = n.prop(SegmentedButtonProps.segments);
+    final children = <Widget>[
+      for (final s in n.prop(SegmentedButtonProps.segments))
+        () {
+          final on = selection.contains(s.value);
+          final color = on ? selectedFg : fg;
+          final icon = _icon(s.icon, color: color);
+          final label = s.label.isNotEmpty || icon == null ? s.label.isNotEmpty ? s.label : s.value : null;
+          Widget seg = Semantics(
+            button: true,
+            selected: on,
+            enabled: enabled && s.enabled,
+            label: label,
+            child: MouseRegion(
+              cursor: enabled && s.enabled ? SystemMouseCursors.click : MouseCursor.defer,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: enabled && s.enabled ? () => _select(s.value, multi) : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  padding: padding,
+                  decoration: BoxDecoration(
+                    color: on && !slide ? selectedBg : selectedBg.withValues(alpha: 0),
+                    borderRadius: radius,
+                    boxShadow: on && !slide ? shadows : null,
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                    if (icon != null) icon,
+                    if (icon != null && label != null) const SizedBox(width: 6),
+                    if (label != null)
+                      Flexible(
+                        child: slide
+                            ? AnimatedDefaultTextStyle(
+                                duration: const Duration(milliseconds: 200),
+                                style: base.copyWith(color: color),
+                                child: Text(label, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis),
+                              )
+                            : Text(label,
+                                maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis, style: base.copyWith(color: color)),
+                      ),
+                  ]),
+                ),
+              ),
+            ),
+          );
+          if (s.tooltip != null && s.tooltip!.isNotEmpty) seg = Tooltip(message: s.tooltip!, child: seg);
+          return expand && !vertical ? Expanded(child: seg) : seg;
+        }(),
+    ];
+    return Container(
+      padding: EdgeInsets.all(n.prop(SegmentedButtonProps.trackPadding)),
+      decoration: BoxDecoration(
+        color: _color(n.prop(SegmentedButtonProps.backgroundColor)) ?? const Color(0xFFE2E7EE),
+        borderRadius: radius,
+        border: side == null ? null : Border.fromBorderSide(_side(side)),
+      ),
+      child: vertical
+          ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
+          : slide
+              ? LayoutBuilder(builder: (context, c) {
+                  final index = segments.indexWhere((s) => selection.contains(s.value));
+                  final width = segments.isEmpty || !c.maxWidth.isFinite ? 0.0 : c.maxWidth / segments.length;
+                  return Stack(children: [
+                    if (index >= 0)
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 260),
+                        curve: Curves.easeOutCubic,
+                        left: width * index,
+                        top: 0,
+                        bottom: 0,
+                        width: width,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(color: selectedBg, borderRadius: radius, boxShadow: shadows),
+                        ),
+                      ),
+                    Positioned.fill(child: Row(children: children)),
+                  ]);
+                })
+              : Row(mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min, children: children),
     );
   }
 }
@@ -1639,6 +2104,13 @@ class _SignatureIslandState extends State<_SignatureIsland> {
             signLineColor: n.prop(SignatureProps.signLineColor).flutter,
             textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
             normalized: n.prop(SignatureProps.normalized),
+            signLineMark: n.prop(SignatureProps.signLineMark),
+            signLineInset: n.prop(SignatureProps.signLineInset),
+            signLineBottom: n.prop(SignatureProps.signLineBottom),
+            placeholderBelowLine: n.prop(SignatureProps.placeholderPosition) == api.SignaturePlaceholderPosition.belowLine,
+            placeholderFontWeight: n.prop(SignatureProps.placeholderFontWeight),
+            placeholderLetterSpacing: n.prop(SignatureProps.placeholderLetterSpacing),
+            smooth: n.prop(SignatureProps.smooth),
           ),
           child: const SizedBox.expand(),
         ),
@@ -1680,5 +2152,34 @@ class _EagerPanGestureRecognizer extends PanGestureRecognizer {
   void addAllowedPointer(PointerDownEvent event) {
     super.addAllowedPointer(event);
     resolvePointer(event.pointer, GestureDisposition.accepted);
+  }
+}
+
+
+/// A text field's controller that draws a range of its text in another
+/// style ([TextFieldProps.highlightStart] to `highlightEnd`).
+class HighlightTextController extends TextEditingController {
+  HighlightTextController({super.text});
+
+  (int, int, TextStyle?)? _highlight;
+  (int, int, TextStyle?)? get highlight => _highlight;
+  set highlight((int, int, TextStyle?)? value) {
+    if (value == _highlight) return;
+    _highlight = value;
+    notifyListeners();
+  }
+
+  @override
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+    final h = _highlight;
+    final composing = withComposing && value.isComposingRangeValid;
+    if (h == null || composing) return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
+    final start = h.$1.clamp(0, text.length), end = h.$2.clamp(0, text.length);
+    if (end <= start) return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
+    return TextSpan(style: style, children: [
+      TextSpan(text: text.substring(0, start)),
+      TextSpan(text: text.substring(start, end), style: h.$3),
+      TextSpan(text: text.substring(end)),
+    ]);
   }
 }

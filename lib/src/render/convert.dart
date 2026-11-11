@@ -11,7 +11,16 @@ extension ColorToFlutter on api.Color {
 }
 
 extension InsetsToFlutter on api.EdgeInsets {
-  EdgeInsets get flutter => EdgeInsets.fromLTRB(left, top, right, bottom);
+  /// Flutter's insets. Flutter asserts insets (a padding) are never
+  /// negative, and one negative side would fail the whole screen's layout;
+  /// a negative side reads as 0, as the API reads a bad value. (A margin
+  /// keeps its negative sides: RenderMargin lays them out.)
+  EdgeInsets get flutter => EdgeInsets.fromLTRB(
+        left < 0 ? 0 : left,
+        top < 0 ? 0 : top,
+        right < 0 ? 0 : right,
+        bottom < 0 ? 0 : bottom,
+      );
 }
 
 extension RadiusToFlutter on api.BorderRadius {
@@ -67,8 +76,27 @@ List<ui.FontFeature>? fontFeatures(api.TextStyle style) {
 
 /// [style] as Flutter's `TextStyle`, over the base text style
 /// ([kTextBase]).
+/// Fonts a text style asks for while it renders. A family can reach a
+/// style only through a binding (a caption's look from data), which no
+/// publish lists: [handler] (installed by the app's font loader) fetches
+/// such a family the first time it is drawn. Each family, weight and style
+/// is asked for once.
+abstract final class FontDemand {
+  static void Function(String family, int weight, bool italic)? handler;
+  static final Set<String> _asked = {};
+
+  static void need(String family, int weight, bool italic) {
+    final h = handler;
+    if (h == null || family.isEmpty) return;
+    if (_asked.add('$family/$weight/$italic')) h(family, weight, italic);
+  }
+}
+
 TextStyle textStyle(api.TextStyle style) {
   final weight = style.fontWeight;
+  if (style.fontFamily case final String family) {
+    FontDemand.need(family, ((weight ?? 400) ~/ 100 * 100).clamp(100, 900), style.fontStyle == api.FontStyle.italic);
+  }
   return kTextBase.merge(TextStyle(
     fontFamily: style.fontFamily,
       fontFamilyFallback: style.fontFamilyFallback,
@@ -85,6 +113,7 @@ TextStyle textStyle(api.TextStyle style) {
       api.TextDecoration.lineThrough => TextDecoration.lineThrough,
     },
     decorationColor: style.decorationColor?.flutter,
+    backgroundColor: style.backgroundColor?.flutter,
     decorationStyle: style.decorationStyle == null || style.decorationStyle == api.TextDecorationStyle.solid
         ? null
         : TextDecorationStyle.values.byName(style.decorationStyle!.name),

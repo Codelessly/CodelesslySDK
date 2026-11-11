@@ -29,6 +29,7 @@ import 'package:flutter/rendering.dart';
 import '../render/convert.dart';
 import '../render/node_tree.dart';
 import '../render/paint/icon_glyph.dart';
+import '../render/paint/icon_names.dart';
 import '../render/recipe.dart';
 
 /// Recipes for the material group, by node type.
@@ -70,6 +71,11 @@ Widget? _icon(Json glyph, {double? size, Color? color}) {
   final codepoint = readInt(glyph['codepoint']);
   if (codepoint != null && codepoint > 0) return _GlyphIcon(glyph, size: size, color: color);
   if (readString(glyph['image']) != null) return SizedBox.square(dimension: size ?? 24);
+  // A Material icon given by name alone (`{"name": "circle"}`), as a glyph
+  // bound by name is: drawn from its name.
+  if (readString(glyph['name']) case final String name when name.isNotEmpty) {
+    return _GlyphIcon(iconWithName(glyph, name), size: size, color: color);
+  }
   return null;
 }
 
@@ -411,6 +417,10 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
   final Widget? avatar = image != null && avatarGlyph['codepoint'] == null
       ? CircleAvatar(backgroundImage: NetworkImage(image), onBackgroundImageError: (_, _) {})
       : _icon(avatarGlyph, size: n.prop(ChipProps.avatarSize) ?? 18, color: _color(n.prop(ChipProps.avatarColor)));
+  // A set avatar size is the avatar's box too: Material keeps an 18 px
+  // slot otherwise, a gap beside a small dot.
+  final avatarSize = n.prop(ChipProps.avatarSize);
+  final avatarBox = avatar == null || avatarSize == null ? null : BoxConstraints.tight(Size.square(avatarSize));
   final sideModel = n.prop(ChipProps.side);
   final side = sideModel == null
       ? null
@@ -432,13 +442,24 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
   final selected = selection;
   final showCheckmark = n.prop(ChipProps.showCheckmark);
   final checkmarkColor = _color(n.prop(ChipProps.checkmarkColor));
-  return switch (n.type) {
+  // Material 3 chips paint their surface from `color` (by state), over
+  // backgroundColor: give the set colours that way too, so a transparent
+  // background really is transparent.
+  final WidgetStateProperty<Color?>? color = background == null && selectedColor == null
+      ? null
+      : WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) return selectedColor ?? background;
+          return background;
+        });
+  final Widget chip = switch (n.type) {
     'actionChip' => ActionChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         backgroundColor: background,
+        color: color,
         side: side,
         shape: shape,
         elevation: elevation,
@@ -451,10 +472,12 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     'choiceChip' => ChoiceChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         selected: selected,
         backgroundColor: background,
+        color: color,
         selectedColor: selectedColor,
         showCheckmark: showCheckmark,
         checkmarkColor: checkmarkColor,
@@ -470,10 +493,12 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     'filterChip' => FilterChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         selected: selected,
         backgroundColor: background,
+        color: color,
         selectedColor: selectedColor,
         showCheckmark: showCheckmark,
         checkmarkColor: checkmarkColor,
@@ -489,11 +514,13 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     'inputChip' => InputChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         deleteIcon: _icon(n.prop(ChipProps.deleteIcon), size: n.prop(ChipProps.deleteIconSize) ?? 18),
         deleteIconColor: _color(n.prop(ChipProps.deleteIconColor)),
         backgroundColor: background,
+        color: color,
         side: side,
         shape: shape,
         elevation: elevation,
@@ -508,9 +535,11 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     _ => Chip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         backgroundColor: background,
+        color: color,
         side: side,
         shape: shape,
         elevation: elevation,
@@ -519,6 +548,11 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
         autofocus: autofocus,
       ),
   };
+  // A Material 3 chip sits on a canvas-type Material that paints the
+  // theme's canvas colour under its own: with a background set (transparent
+  // included), only the chip's colours show.
+  if (background == null) return chip;
+  return Theme(data: Theme.of(context).copyWith(canvasColor: Colors.transparent), child: chip);
 }
 
 // --- badge --------------------------------------------------------------------

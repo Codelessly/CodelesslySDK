@@ -90,7 +90,9 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(notifications.last, {'totalVotes': 614493});
       vars.set('wave', 8);
-      expect(reader.read('model'), isNull);
+      // While wave 8's answer is on its way, the last answer stays (no blink
+      // to null for whatever reads it).
+      expect(reader.read('model'), {'totalVotes': 614493});
       gates[8]!.complete({'totalVotes': 710917});
       await Future<void>.delayed(Duration.zero);
       expect(notifications.last, {'totalVotes': 710917});
@@ -170,7 +172,8 @@ void main() {
     void reread() => reader.read('b');
     w.addListener(reread);
     expect(reader.read('b'), isNull);
-    await reader.settled();
+    // The caller's frame: here a microtask (no widgets re-apply).
+    await reader.settled(() => Future<void>.delayed(Duration.zero));
     expect(reader.read('a'), 2);
     expect(reader.read('b'), 3);
     w.removeListener(reread);

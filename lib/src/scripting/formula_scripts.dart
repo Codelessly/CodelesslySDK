@@ -64,6 +64,22 @@ class ScriptsScope extends NamedScope implements FormulaScripts, FormulaReadStat
   @override
   Object? valueOf(String name, ValueScope reader) => name == 'script' ? this : null;
 
+  /// Whether a formula's script call is still running.
+  bool get busy => _pending.isNotEmpty;
+
+  /// Completes once no formula's script call is running, including calls
+  /// started meanwhile (a result's repaint asks for more), or after
+  /// [timeout]: for a screenshot or a test of what bound formulas show.
+  Future<void> idle({Duration timeout = const Duration(seconds: 10)}) async {
+    final end = DateTime.now().add(timeout);
+    while (_pending.isNotEmpty && !_disposed) {
+      final left = end.difference(DateTime.now());
+      if (left <= Duration.zero) return;
+      await Future.any<Object?>([Future.wait(_pending.values.toList()), Future<void>.delayed(left)]);
+      await Future<void>.delayed(Duration.zero);
+    }
+  }
+
   /// Forgets every cached result, e.g. after the scripts changed.
   void clear() => _results.clear();
 
@@ -123,17 +139,22 @@ class ScriptsScope extends NamedScope implements FormulaScripts, FormulaReadStat
     return earlier != null && earlier.ok ? earlier.value : null;
   }
 
-  /// Completes once no script call a formula started is still running (calls
-  /// started meanwhile, by what re-applied, included), or after [timeout]:
-  /// what a capture waits for before it draws.
-  Future<void> settled({Duration timeout = const Duration(seconds: 10)}) async {
+  /// Completes once no script started by a formula is still running: after
+  /// a value changes, the formulas that read it start their scripts on the
+  /// next build, and the ones reading those results may start more, so it
+  /// waits for [frame] (a frame, by the caller) between rounds until a
+  /// round starts nothing. Gives up after [timeout].
+  Future<void> settled(Future<void> Function() frame, {Duration timeout = const Duration(seconds: 15)}) async {
     final end = DateTime.now().add(timeout);
-    while (_pending.isNotEmpty && !_disposed) {
-      final left = end.difference(DateTime.now());
-      if (left <= Duration.zero) return;
-      await Future.wait(_pending.values.toList()).timeout(left, onTimeout: () => const []);
-      // Readers re-apply on the results and may start more calls.
-      await Future<void>.delayed(Duration.zero);
+    var quiet = 0;
+    while (DateTime.now().isBefore(end) && quiet < 2) {
+      await frame();
+      if (_pending.isEmpty) {
+        quiet++;
+        continue;
+      }
+      quiet = 0;
+      await Future.wait(_pending.values.toList()).timeout(end.difference(DateTime.now()), onTimeout: () => const []);
     }
   }
 
@@ -192,7 +213,7 @@ class ScriptsScope extends NamedScope implements FormulaScripts, FormulaReadStat
 }
 
 /// A [ScriptHost] that only reads: for scripts called from formulas.
-class _ReadOnlyHost implements ScriptHost {
+class _ReadOnlyHost implements NamedVariablesScriptHost {
   _ReadOnlyHost(this.scope);
 
   final ScriptsScope scope;
@@ -201,6 +222,12 @@ class _ReadOnlyHost implements ScriptHost {
   Map<String, Object?> variables() {
     final reader = scope.reader ?? scope;
     return scriptVariables(reader, reader);
+  }
+
+  @override
+  Map<String, Object?> variablesNamed(Set<String> names) {
+    final reader = scope.reader ?? scope;
+    return scriptVariables(reader, reader, only: names);
   }
 
   @override

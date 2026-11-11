@@ -114,7 +114,7 @@ export 'package:codelessly_api/codelessly_api.dart'
 export 'src/render/islands.dart' show IslandEnvironment, IslandHost, IslandOwnerElement, IslandParent;
 export 'src/render/node_tree.dart' show NodeTree, NodeBox, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
 // Text as the SDK renders it, for a host's own text (an in-place editor).
-export 'src/render/convert.dart' show textStyle;
+export 'src/render/convert.dart' show textStyle, FontDemand;
 export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';
 export 'src/render/hero.dart' show HeroMarkPaint, HeroMarks, RenderHeroMark;
@@ -131,27 +131,34 @@ export 'src/scripting/sandbox/script_sandbox.dart';
 export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
 export 'src/runtime/actions/actions.dart';
+// Render objects that paint images, and whether one is still loading (tools wait for them before a capture).
+export 'src/render/paint/image_fill.dart' show ImageClient, PaintImages;
 export 'src/runtime/lists/lists.dart';
 // What `${drag}` reads when nothing is dragged (a design canvas's default).
 export 'src/runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+export 'src/runtime/expressions/perf_scope.dart' show PerfScope;
 export 'src/widgets/collections_data_list.dart' show DataListView, DataListViewState, ListSection, SectionIndexBar, UndoBar, groupIntoSections, sectionOffset;
 export 'src/widgets/collections_reorder.dart' show GroupReorderList, KeyboardReorderItem, ReorderListView;
 export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
 
 // The app shell: Codelessly, CodelesslyWidget, loading, navigation.
 export 'src/app/app_identity.dart';
+export 'src/app/automations.dart';
 export 'src/app/back_guard.dart';
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart';
 export 'src/app/config.dart';
 export 'src/app/fonts.dart';
 export 'src/app/loader.dart';
+export 'src/app/managed_components.dart';
 export 'src/app/navigation.dart';
+export 'src/app/overlay_screens.dart';
 export 'src/app/page_transitions.dart';
 export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
+export 'src/app/presenter.dart';
 export 'src/app/runtime.dart';
-export 'src/app/theme.dart' show themeDataOf;
+export 'src/app/theme.dart' show themeDataOf, themeValues;
 export 'src/app/viewport.dart';
 
 export 'src/render/layout/design_scroll.dart' show RenderDesignScroll;

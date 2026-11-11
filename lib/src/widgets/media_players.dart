@@ -78,6 +78,13 @@ class _MediaVideoState extends State<MediaVideo> {
   int _generation = 0;
   Future<void> _pendingControls = Future<void>.value();
 
+  // Seeks are coalesced: while one runs, later requests replace each other
+  // and only the newest runs next, so a scrub never queues up behind itself.
+  bool _seeking = false;
+  double? _queuedSeek;
+  bool _shownFrame = false;
+  Timer? _reporter;
+
   String get _url => widget.node.prop(VideoProps.url);
 
   @override
@@ -111,30 +118,64 @@ class _MediaVideoState extends State<MediaVideo> {
     WidgetsBinding.instance.scheduleFrame();
   }
 
+  /// While playing, reports the position every reportIntervalMs (the video
+  /// as a clock for whatever follows it).
+  void _syncReporter() {
+    final c = _controller;
+    final every = widget.node.prop(VideoProps.reportIntervalMs);
+    final run = !widget.preview && c != null && _ready && every > 0 && c.value.isPlaying;
+    if (!run) {
+      _reporter?.cancel();
+      _reporter = null;
+      return;
+    }
+    if (_reporter != null) return;
+    final generation = _generation;
+    _reporter = Timer.periodic(Duration(milliseconds: every), (_) {
+      final cc = _controller;
+      if (!mounted || generation != _generation || cc == null) return;
+      if (!cc.value.isPlaying) return _syncReporter();
+      if (_seeking) return;
+      widget.onStatus?.call({
+        'ready': true,
+        'playing': true,
+        'positionSeconds': cc.value.position.inMicroseconds / 1e6,
+        'durationSeconds': cc.value.duration.inMilliseconds / 1000,
+      });
+    });
+  }
+
   void _load() {
     final generation = ++_generation;
     _pendingControls = Future<void>.value();
+    _reporter?.cancel();
+    _reporter = null;
     _controller?.dispose();
     _controller = null;
-    _ready = _failed = false;
+    _ready = _failed = _seeking = _shownFrame = false;
+    _queuedSeek = null;
     _report(ready: false);
     if (widget.preview) return;
-    if (!isRemoteMediaUrl(_url, const ['.mp4'])) {
-      _report(ready: false, error: 'Choose a public HTTPS MP4 source');
+    if (!isRemoteMediaUrl(_url, videoExtensions)) {
+      _report(ready: false, error: 'Choose a public HTTPS video (MP4, WebM, MOV or M4V)');
       return;
     }
     final c = _controller = VideoPlayerController.networkUrl(Uri.parse(_url));
     c.addListener(() {
-      if (mounted && generation == _generation && c.value.hasError && !_failed) {
+      if (!mounted || generation != _generation) return;
+      if (c.value.hasError && !_failed) {
         setState(() { _failed = true; _ready = false; });
         _report(ready: false, error: 'Video source could not be loaded');
       }
+      _syncReporter();
     });
     c.initialize().then((_) {
       if (!mounted || generation != _generation) return;
       setState(() => _ready = true);
       // Explicit bound controls remain subject to platform playback rules.
       _applyControls();
+      // No position to go to: the first frame is already decoded.
+      if (widget.node.prop(VideoProps.positionSeconds) == null) setState(() => _shownFrame = true);
       _report(ready: true);
     }, onError: (Object _) {
       if (mounted && generation == _generation && !_failed) {
@@ -144,11 +185,46 @@ class _MediaVideoState extends State<MediaVideo> {
     });
   }
 
+  /// Seeks to [seconds], coalescing: a request made while a seek runs
+  /// replaces any queued one, and only the newest runs after it.
+  Future<void> _seek(VideoPlayerController c, double seconds) async {
+    if (_seeking) {
+      _queuedSeek = seconds;
+      return;
+    }
+    _seeking = true;
+    final generation = _generation;
+    try {
+      await c.seekTo(Duration(microseconds: (seconds * 1e6).round()));
+    } finally {
+      if (mounted && generation == _generation) {
+        _seeking = false;
+        if (!_shownFrame) setState(() => _shownFrame = true);
+        final next = _queuedSeek;
+        _queuedSeek = null;
+        if (next != null) await _seek(c, next);
+      }
+    }
+  }
+
   void _applyControls({Node? previous}) {
     final c = _controller;
     if (c == null || !_ready) return;
     final node = widget.node, generation = _generation;
     bool current() => mounted && generation == _generation && identical(c, _controller);
+    // Position first, outside the queue, so it coalesces (see _seek).
+    final seconds = node.prop(VideoProps.positionSeconds);
+    if (seconds != null && (previous == null || previous.prop(VideoProps.positionSeconds) != seconds)) {
+      final playing = node.prop(VideoProps.playing) ?? c.value.isPlaying;
+      final at = c.value.position.inMicroseconds / 1e6;
+      final tolerance = node.prop(VideoProps.syncTolerance);
+      // Playing: only correct drift; paused: show exactly that frame.
+      if (!playing || previous == null || (at - seconds).abs() > tolerance) {
+        _seek(c, seconds).catchError((Object _) {
+          if (current()) setState(() => _failed = true);
+        });
+      }
+    }
     _pendingControls = _pendingControls
         .then((_) async {
           if (!current()) return;
@@ -160,11 +236,6 @@ class _MediaVideoState extends State<MediaVideo> {
             await c.setLooping(node.prop(VideoProps.loop));
           }
           if (!current()) return;
-          final seconds = node.prop(VideoProps.positionSeconds);
-          if (seconds != null && (previous == null || previous.prop(VideoProps.positionSeconds) != seconds)) {
-            await c.seekTo(Duration(milliseconds: (seconds * 1000).round()));
-          }
-          if (!current()) return;
           final playing = node.prop(VideoProps.playing);
           if (playing != null && (previous == null || previous.prop(VideoProps.playing) != playing)) {
             if (playing) {
@@ -173,6 +244,7 @@ class _MediaVideoState extends State<MediaVideo> {
               await c.pause();
             }
           }
+          if (current()) _syncReporter();
         })
         .catchError((Object _) {
           if (current()) setState(() => _failed = true);
@@ -182,6 +254,7 @@ class _MediaVideoState extends State<MediaVideo> {
   @override
   void dispose() {
     ++_generation;
+    _reporter?.cancel();
     _controller?.dispose();
     super.dispose();
   }
@@ -189,35 +262,64 @@ class _MediaVideoState extends State<MediaVideo> {
   @override
   Widget build(BuildContext context) {
     final c = _controller;
+    final node = widget.node;
+    final fit = boxFit(node.prop(VideoProps.fit));
+    final poster = node.prop(VideoProps.poster);
+    final posterImage = poster.isEmpty
+        ? null
+        : Image.network(poster, fit: fit, gaplessPlayback: true, errorBuilder: (_, _, _) => const SizedBox.shrink());
     final Widget content;
     if (widget.preview || _url.isEmpty) {
-      content = const Center(child: Icon(Icons.movie_outlined, semanticLabel: 'Video preview'));
+      content = posterImage ?? const Center(child: Icon(Icons.movie_outlined, semanticLabel: 'Video preview'));
     } else if (_failed || c == null) {
-      content = const Center(child: Icon(Icons.error_outline, semanticLabel: 'Video unavailable'));
+      content = posterImage ?? const Center(child: Icon(Icons.error_outline, semanticLabel: 'Video unavailable'));
     } else if (!_ready) {
-      content = const Center(child: CircularProgressIndicator());
+      // The poster (or nothing) while loading: no spinner over the picture.
+      content = posterImage ?? const SizedBox.expand();
     } else {
-      content = Stack(alignment: Alignment.bottomCenter, children: [
-        Center(
-          child: AspectRatio(
-            aspectRatio: c.value.aspectRatio > 0 ? c.value.aspectRatio : 16 / 9,
-            child: VideoPlayer(c),
+      final size = c.value.size;
+      content = Stack(fit: StackFit.expand, alignment: Alignment.bottomCenter, children: [
+        ?posterImage,
+        Opacity(
+          // Until the first wanted frame is decoded the poster shows.
+          opacity: _shownFrame || posterImage == null ? 1 : 0,
+          child: ClipRect(
+            child: FittedBox(
+              fit: fit,
+              child: SizedBox(
+                width: size.width > 0 ? size.width : 16,
+                height: size.height > 0 ? size.height : 9,
+                child: VideoPlayer(c),
+              ),
+            ),
           ),
         ),
-        if (widget.node.prop(VideoProps.showControls))
-          ValueListenableBuilder<VideoPlayerValue>(
-            valueListenable: c,
-            builder: (context, value, _) => IconButton(
-              tooltip: value.isPlaying ? 'Pause video' : 'Play video',
-              icon: Icon(value.isPlaying ? Icons.pause_circle : Icons.play_circle),
-              onPressed: () => value.isPlaying ? c.pause() : c.play(),
+        if (node.prop(VideoProps.showControls))
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: ValueListenableBuilder<VideoPlayerValue>(
+              valueListenable: c,
+              builder: (context, value, _) => IconButton(
+                tooltip: value.isPlaying ? 'Pause video' : 'Play video',
+                icon: Icon(value.isPlaying ? Icons.pause_circle : Icons.play_circle),
+                onPressed: () => value.isPlaying ? c.pause() : c.play(),
+              ),
             ),
           ),
       ]);
     }
-    return ColoredBox(color: Colors.black12, child: content);
+    return content;
   }
 }
+
+/// Flutter's BoxFit for the API's (same names).
+BoxFit boxFit(api.BoxFit f) => BoxFit.values.byName(f.name);
+
+/// The containers a video island plays.
+const videoExtensions = ['.mp4', '.webm', '.mov', '.m4v'];
+
+/// The containers an audio player plays.
+const audioExtensions = ['.mp3', '.m4a', '.wav', '.ogg', '.aac'];
 
 // --- embedded video ------------------------------------------------------------
 
@@ -274,9 +376,13 @@ class MediaEmbeddedVideo extends StatelessWidget {
 /// A network audio player (`just_audio`): a play button, its description, a
 /// seek bar and the time; or nothing visible when it plays in the background.
 class MediaAudioPlayer extends StatefulWidget {
-  const MediaAudioPlayer({super.key, required this.node, required this.preview});
+  const MediaAudioPlayer({super.key, required this.node, required this.preview, this.onStatus});
   final Node node;
   final bool preview;
+
+  /// Runtime changes: `ready`, `error`, `playing`, `completed` (it played
+  /// to its end), with `positionSeconds` and `durationSeconds`.
+  final ValueChanged<Map<String, Object?>>? onStatus;
 
   @override
   State<MediaAudioPlayer> createState() => _MediaAudioPlayerState();
@@ -329,20 +435,35 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     _release();
     _ready = _failed = _playing = false;
     _position = _duration = Duration.zero;
-    if (widget.preview || !isRemoteMediaUrl(_url, const ['.mp3', '.m4a', '.wav'])) return;
+    if (widget.preview || !isRemoteMediaUrl(_url, audioExtensions)) return;
     final p = _player = AudioPlayer();
     bool current() => mounted && generation == _generation;
     void failed(Object _) {
-      if (current()) setState(() => _failed = true);
+      if (!current()) return;
+      setState(() => _failed = true);
+      widget.onStatus?.call({'ready': false, 'error': 'Audio source could not be loaded'});
     }
 
+    var reported = '';
     _subscriptions
       ..add(p.playerStateStream.listen((s) {
         if (!current()) return;
+        final completed = s.processingState == ProcessingState.completed;
         setState(() {
-          _playing = s.playing && s.processingState != ProcessingState.completed;
-          if (s.processingState == ProcessingState.completed) _position = Duration.zero;
+          _playing = s.playing && !completed;
+          if (completed) _position = Duration.zero;
         });
+        final key = '$_playing/$completed/$_ready';
+        if (key != reported && _ready) {
+          reported = key;
+          widget.onStatus?.call({
+            'ready': true,
+            'playing': _playing,
+            'completed': completed,
+            'positionSeconds': p.position.inMilliseconds / 1000,
+            'durationSeconds': _duration.inMilliseconds / 1000,
+          });
+        }
       }, onError: failed))
       ..add(p.positionStream.listen((v) {
         if (current()) setState(() => _position = v);
@@ -353,6 +474,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     p.setUrl(_url).then((duration) {
       if (!current()) return;
       setState(() { _ready = true; _duration = duration ?? Duration.zero; });
+      widget.onStatus?.call({'ready': true, 'playing': false, 'completed': false, 'durationSeconds': _duration.inMilliseconds / 1000});
       _apply();
       if (_node.prop(AudioPlayerProps.playing) == null && _node.prop(AudioPlayerProps.autoPlay)) _run(p.play);
     }, onError: failed);
@@ -366,7 +488,13 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     final seconds = _node.prop(AudioPlayerProps.positionSeconds);
     if (seconds != null && (previous == null || previous.prop(AudioPlayerProps.positionSeconds) != seconds)) {
       final requested = Duration(milliseconds: (seconds * 1000).round());
-      _run(() => p.seek(_duration > Duration.zero && requested > _duration ? _duration : requested));
+      final playing = _node.prop(AudioPlayerProps.playing) ?? _playing;
+      final drift = (p.position.inMilliseconds / 1000 - seconds).abs();
+      // Playing: a bound position only corrects drift (a seek every frame
+      // would stall playback); paused: it goes there.
+      if (!playing || previous == null || drift > _node.prop(AudioPlayerProps.syncTolerance)) {
+        _run(() => p.seek(_duration > Duration.zero && requested > _duration ? _duration : requested));
+      }
     }
     final playing = _node.prop(AudioPlayerProps.playing);
     if (playing != null && (previous == null || previous.prop(AudioPlayerProps.playing) != playing)) {

@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:http/http.dart' as http;
 
+import '../render/convert.dart' show FontDemand;
+
 /// Gets the file of a font.
 abstract interface class FontFetcher {
   /// The font file's bytes (TTF/OTF), or null when it can't be had.
@@ -40,6 +42,11 @@ class HttpFontFetcher implements FontFetcher {
   /// The Google Fonts CSS URL of [font].
   Uri googleFontsUrl(PublishFont font) => Uri.parse(
     '$googleFontsApi?family=${Uri.encodeQueryComponent(font.family).replaceAll('%20', '+')}:ital,wght@${font.italic ? 1 : 0},${font.weight}',
+  );
+
+  /// The Google Fonts CSS URL of [font]'s family alone (its default file).
+  Uri googleFontsFamilyUrl(PublishFont font) => Uri.parse(
+    '$googleFontsApi?family=${Uri.encodeQueryComponent(font.family).replaceAll('%20', '+')}',
   );
 
   /// The font file of Google Fonts [css]. Without a browser's user agent it
@@ -84,7 +91,11 @@ class HttpFontFetcher implements FontFetcher {
       var url = font.url == null ? null : Uri.tryParse(font.url!);
       if (url == null) {
         // Without a browser's user agent, the API serves TrueType files.
-        final css = await _get(googleFontsUrl(font));
+        var css = await _get(googleFontsUrl(font));
+        // A weight or style the family doesn't have (Anton asked for at
+        // 700) is a 400: take the family's default file, which the engine
+        // then draws bolder or slanted, rather than the platform's font.
+        if (css.statusCode == 400) css = await _get(googleFontsFamilyUrl(font));
         if (css.statusCode != 200) return null;
         final file = fontFileOf(css.body);
         if (file == null) return null;
@@ -104,7 +115,15 @@ class CodelesslyFonts {
   CodelesslyFonts({
     this.fetcher = const NoFontFetcher(),
     Future<void> Function(String family, List<Uint8List> files)? register,
-  }) : _register = register ?? _registerWithEngine;
+  }) : _register = register ?? _registerWithEngine {
+    // Families only bindings reach are fetched when first drawn (Google
+    // Fonts by name; a project's uploaded fonts are in the publish).
+    if (fetcher is! NoFontFetcher) {
+      FontDemand.handler ??= (family, weight, italic) => load([
+            PublishFont(id: 'demand:$family/$weight/$italic', family: family, weight: weight, italic: italic),
+          ]);
+    }
+  }
 
   final FontFetcher fetcher;
   final Future<void> Function(String family, List<Uint8List> files) _register;

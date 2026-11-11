@@ -67,6 +67,7 @@ const toastBindableColors = [
   'iconColor',
   'iconDiscColor',
   'actionColor',
+  'actionBackgroundColor',
   'closeColor',
   'borderColor',
 ];
@@ -252,10 +253,14 @@ class _ToastViewState extends State<_ToastView> {
   @override
   void initState() {
     super.initState();
+    // The time on screen counts from the toast's first frame: shown while
+    // a screen's first frame is still being built (a load action), it would
+    // otherwise run out before anyone saw it.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _visible = true);
+      if (!mounted) return;
+      setState(() => _visible = true);
+      if (widget.duration > 0 && !_closing) _timer = Timer(Duration(milliseconds: widget.duration), _close);
     });
-    if (widget.duration > 0) _timer = Timer(Duration(milliseconds: widget.duration), _close);
   }
 
   void _close() {
@@ -444,7 +449,7 @@ class _ToastViewState extends State<_ToastView> {
                 onPressed: _onActionPressed,
                 style: TextButton.styleFrom(
                   foregroundColor: actionColor,
-                  backgroundColor: look.color('actionBackgroundColor'),
+                  backgroundColor: bound['actionBackgroundColor'] ?? look.color('actionBackgroundColor'),
                   minimumSize: const Size(48, 36),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   // The action's own font size wins over the message's.

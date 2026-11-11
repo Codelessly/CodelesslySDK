@@ -14,6 +14,20 @@ void main() {
       }
     });
 
+    test('a guest is not signed in but has its uid, profile and role', () {
+      const guest = AppUser(uid: 'g1', isAnonymous: true, isGuest: true);
+      final value = authValue(guest, profile: {'favourites': ['a']});
+      expect(value['isSignedIn'], false);
+      expect(value['isGuest'], true);
+      expect(value['uid'], 'g1');
+      expect(value['role'], 'guest');
+      expect(value['profile'], {'favourites': ['a']});
+      expect(authValue(const AppUser(uid: 'anon', isAnonymous: true))['isGuest'], false);
+      expect(AuthProfiles.hasProfile(guest), isTrue);
+      expect(AuthProfiles.hasProfile(const AppUser(uid: 'anon', isAnonymous: true)), isFalse);
+      expect(AuthProfiles.newProfile(guest)['role'], 'guest');
+    });
+
     test('describes a signed-in user and their profile', () {
       const user = AppUser(uid: 'u1', email: 'ana@x.dev', providers: ['password'], emailVerified: true);
       final value = authValue(user);
@@ -43,6 +57,20 @@ void main() {
       expect(auth.currentUser!.displayName, 'Ana B');
       await auth.deleteAccount();
       await expectLater(auth.signIn(email: 'ana@x.dev', password: 'secret1'), throwsA(isA<AuthFailure>()));
+      auth.dispose();
+    });
+
+    test('a guest session: sign out ends it, delete removes it', () async {
+      final auth = MemoryAuthService();
+      final guest = await auth.signInAsGuest();
+      expect(guest.isGuest, isTrue);
+      expect(await auth.signInAsGuest(), guest, reason: 'one guest session at a time');
+      await auth.signOut();
+      expect(auth.currentUser, isNull);
+      await auth.signInAsGuest();
+      await auth.deleteAccount();
+      expect(auth.currentUser, isNull);
+      await expectLater(const SignedOutAuthService().signInAsGuest(), throwsA(isA<AuthFailure>()));
       auth.dispose();
     });
 

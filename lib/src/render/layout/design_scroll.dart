@@ -8,6 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/physics.dart';
 
+import '../view_scroll.dart' show RenderSticky;
+
 class RenderDesignScroll extends RenderProxyBox {
   RenderDesignScroll({
     required this._axis,
@@ -74,7 +76,25 @@ class RenderDesignScroll extends RenderProxyBox {
     'progress': maxScrollExtent > 0 ? _pixels / maxScrollExtent : 0.0,
     'axis': _axis.name,
   };
+  final List<VoidCallback> _scrollListeners = [];
+
+  /// Called whenever the offset changes (sticky nodes, view progress).
+  void addScrollListener(VoidCallback l) => _scrollListeners.add(l);
+  void removeScrollListener(VoidCallback l) => _scrollListeners.remove(l);
+
+  /// Sticky nodes inside, pinned above the content while they're stuck
+  /// (render/view_scroll.dart).
+  final List<RenderSticky> _pinned = [];
+  void registerPinned(RenderSticky s) {
+    if (!_pinned.contains(s)) _pinned.add(s);
+  }
+
+  void unregisterPinned(RenderSticky s) => _pinned.remove(s);
+
   void _notifyScroll() {
+    for (final l in List.of(_scrollListeners)) {
+      l();
+    }
     if (onScroll == null && onScrollEnd == null) return;
     if (!_pendingEvent) {
       _pendingEvent = true;
@@ -198,10 +218,15 @@ class RenderDesignScroll extends RenderProxyBox {
     })..start();
   }
 
+  /// How many times the user has scrolled it (a drag, a wheel, an
+  /// accessibility scroll): what tells a user's scroll from a program's.
+  int get userScrolls => _userScrolls;
+  int _userScrolls = 0;
+
   void _ensureDrag() {
     if (_drag != null) return;
     final drag = _axis == Axis.vertical ? VerticalDragGestureRecognizer(debugOwner: this) : HorizontalDragGestureRecognizer(debugOwner: this);
-    drag.onStart = (_) { _stop(); };
+    drag.onStart = (_) { _userScrolls++; _stop(); };
     drag.onUpdate = (d) { _setPixels(_pixels + (d.primaryDelta ?? 0) * (_reverse ? 1 : -1)); };
     drag.onEnd = (d) { _fling((d.primaryVelocity ?? 0) * (_reverse ? 1 : -1)); };
     drag.onCancel = () { onScrollEnd?.call(metrics); };
@@ -229,6 +254,7 @@ class RenderDesignScroll extends RenderProxyBox {
           (_reverse ? -1 : 1);
       if ((_pixels + delta).clamp(0, maxScrollExtent) == _pixels) return;
       GestureBinding.instance.pointerSignalResolver.register(event, (e) {
+        _userScrolls++;
         _stop();
         _setPixels(_pixels + delta);
 
@@ -247,8 +273,15 @@ class RenderDesignScroll extends RenderProxyBox {
       ..scrollExtentMin = 0
       ..scrollExtentMax = maxScrollExtent;
     final extent = hasSize ? (_axis == Axis.vertical ? size.height : size.width) * .8 : 0.0;
-    void forward() => jumpTo(_pixels + extent);
-    void backward() => jumpTo(_pixels - extent);
+    void forward() {
+      _userScrolls++;
+      jumpTo(_pixels + extent);
+    }
+
+    void backward() {
+      _userScrolls++;
+      jumpTo(_pixels - extent);
+    }
     final canForward = _userScrollable && _pixels < maxScrollExtent;
     final canBackward = _userScrollable && _pixels > 0;
     // Flutter names these as the content's drag direction: normal scrollUp
@@ -404,8 +437,15 @@ class RenderDesignScroll extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final child = this.child;
     if (child == null) return;
-    void paintContent(PaintingContext c, Offset o) =>
-        c.paintChild(child, o + _paintOffset);
+    void paintContent(PaintingContext c, Offset o) {
+      c.paintChild(child, o + _paintOffset);
+      // Pinned sticky nodes, over the content.
+      for (final s in _pinned) {
+        if (!s.attached || !s.paintedByView) continue;
+        final at = MatrixUtils.transformPoint(s.getTransformTo(this), Offset.zero);
+        s.paintPinned(c, o + at);
+      }
+    }
     if (_overflows && _clip != Clip.none) {
       _clipLayer.layer = context.pushClipRect(
         needsCompositing,
@@ -440,6 +480,9 @@ class RenderDesignScroll extends RenderProxyBox {
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     final child = this.child;
     if (child == null) return false;
+    for (final s in _pinned.reversed) {
+      if (s.attached && s.paintedByView && s.hitTestPinned(result, position, this)) return true;
+    }
     return result.addWithPaintOffset(
       offset: _paintOffset,
       position: position,

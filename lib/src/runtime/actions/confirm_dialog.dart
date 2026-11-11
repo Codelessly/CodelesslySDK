@@ -439,8 +439,10 @@ class ThemedConfirmDialog extends StatelessWidget {
     final buttonShadowList = buttonShadows ?? theme.buttonShadows ?? const <BoxShadow>[];
     final buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonCorner));
     final buttonText = applyTextStyle(buttonStyle, theme.buttonStyle.copyWith(fontSize: 15, height: 1.2));
-    final onConfirm = buttonStyle?.color?.flutter ?? confirmTextColor ?? ResolvedFeedbackTheme.onColor(confirmFill);
-    final onCancel = buttonStyle?.color?.flutter ?? cancelTextColor ?? onSurface;
+    // A button's own text color wins over the color both buttons' text
+    // style gives (a brass confirm with dark text beside a light cancel).
+    final onConfirm = confirmTextColor ?? buttonStyle?.color?.flutter ?? ResolvedFeedbackTheme.onColor(confirmFill);
+    final onCancel = cancelTextColor ?? buttonStyle?.color?.flutter ?? onSurface;
     // A set height is the buttons' height exactly, not just their least.
     final buttonSize = Size(buttonMinWidth, buttonHeight ?? 44);
     final buttonMaxSize = buttonHeight == null ? null : Size(double.infinity, buttonHeight!);
