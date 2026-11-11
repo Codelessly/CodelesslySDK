@@ -81,6 +81,7 @@ A paywall layout uses `paywall` actions and reads the paywall's values:
 |---|---|
 | `${product.price}`, `.period`, `.trial`, `.introOffer`, `.pricePerMonth`, `.savingsPercent`, `.slot` | The selected product, with the store's localized prices. |
 | `${products}` | Every product, in slot order (the same fields). |
+| `${productsBySlot.annual.price}` | A store-backed product looked up by its slot ID, independent of selection or ordering. |
 | `${paywall.purchasing}`, `.restoring`, `.error`, `.restoreResult`, `.selectedProduct` | Progress, for spinners and messages. |
 | `${paywall.placement}`, `.variant`, `.termsUrl`, `.privacyUrl` | Where it was shown, and the project's legal links. |
 | `${entitlements.pro}` | True when the user holds the entitlement `pro`. |
@@ -139,6 +140,11 @@ Report `purchased` or `restored` only for a purchase your server verified, with 
 To show a paywall inside your own screen instead, give a `PaywallSession` to `CodelesslyWidget(paywall:)`. Its
 `paywall` actions act on the session, and `session.result` completes like `present`'s result. Outside a paywall
 (a layout shown without a session), `purchase`, `restore` and `selectProduct` actions fail.
+
+A `PaywallRuntime` whose factory creates a separate purchase adapter for each session owns and disposes those
+adapters by default. If its factory returns the app's shared `Services.purchases`, set
+`ownsPurchaseServices: false`; `Services` retains ownership. `codelesslyPaywalls` configures this for the managed
+shared store. Session disposal still removes its listeners and rejects stale account results.
 
 ## Test
 
