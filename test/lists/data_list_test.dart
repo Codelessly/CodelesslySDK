@@ -304,6 +304,45 @@ void main() {
     expect(texts(tester), ['#A 3', 'P0', 'P1', 'P2', '#B 2', 'P3', 'P4']);
   });
 
+  testWidgets('sections: the list spacing parts one section from the next', (tester) async {
+    await show(
+      tester,
+      screen(
+        extraList: {
+          'props': {
+            'sections': {'groupBy': 'group'},
+            'separator': 'space',
+            'spacing': 8,
+          },
+          'slots': {'sectionHeader': 'header'},
+        },
+        extra: {
+          'header': {
+            'type': 'text',
+            'layout': {'width': 300, 'height': 24},
+            'props': {'text': r'#${item.key}'},
+          },
+        },
+      ),
+      variables: [v('people', people(5), VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    final at = <String, Rect>{};
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.attached) {
+        at[o.text.toPlainText()] = o.localToGlobal(Offset.zero) & o.size;
+      }
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(CustomScrollView)));
+    // P2 (the last of A) and P3 (the first of B) are 40-high rows: between
+    // them, 8 and the 24 px header (a header sits right on its items).
+    expect(at['P3']!.top - at['P2']!.top, closeTo(40 + 8 + 24, 0.5));
+    // Within a section, 40 + 8.
+    expect(at['P1']!.top - at['P0']!.top, closeTo(48, 0.5));
+  });
+
   testWidgets('sections at rest: the design canvas shows the headers too', (tester) async {
     await show(
       tester,
