@@ -34,7 +34,8 @@ final Map<String, WidgetRecipe> mediaRecipes = {
   'video': (b, n, chain) => _player(b, n, chain, (preview) => MediaVideo(node: n, preview: preview,onStatus:(status)=>fireTrigger(b,'changed',event:{'value':status}))),
   'embeddedVideo': (b, n, chain) =>
       _player(b, n, chain, (preview) => MediaEmbeddedVideo(node: n, preview: preview)),
-  'audioPlayer': (b, n, chain) => _player(b, n, chain, (preview) => MediaAudioPlayer(node: n, preview: preview)),
+  'audioPlayer': (b, n, chain) => _player(b, n, chain,
+      (preview) => MediaAudioPlayer(node: n, preview: preview, onStatus: (status) => fireTrigger(b, 'changed', event: {'value': status}))),
   'webView': (b, n, chain) => _player(b, n, chain, (preview) => MediaWebViewNode(node: n, preview: preview)),
   'external': (b, n, chain) => _player(b, n, chain, (_) => _External(n)),
   'placeholder': _placeholder,

@@ -75,8 +75,27 @@ List<ui.FontFeature>? fontFeatures(api.TextStyle style) {
 
 /// [style] as Flutter's `TextStyle`, over the base text style
 /// ([kTextBase]).
+/// Fonts a text style asks for while it renders. A family can reach a
+/// style only through a binding (a caption's look from data), which no
+/// publish lists: [handler] (installed by the app's font loader) fetches
+/// such a family the first time it is drawn. Each family, weight and style
+/// is asked for once.
+abstract final class FontDemand {
+  static void Function(String family, int weight, bool italic)? handler;
+  static final Set<String> _asked = {};
+
+  static void need(String family, int weight, bool italic) {
+    final h = handler;
+    if (h == null || family.isEmpty) return;
+    if (_asked.add('$family/$weight/$italic')) h(family, weight, italic);
+  }
+}
+
 TextStyle textStyle(api.TextStyle style) {
   final weight = style.fontWeight;
+  if (style.fontFamily case final String family) {
+    FontDemand.need(family, ((weight ?? 400) ~/ 100 * 100).clamp(100, 900), style.fontStyle == api.FontStyle.italic);
+  }
   return kTextBase.merge(TextStyle(
     fontFamily: style.fontFamily,
       fontFamilyFallback: style.fontFamilyFallback,
@@ -93,6 +112,7 @@ TextStyle textStyle(api.TextStyle style) {
       api.TextDecoration.lineThrough => TextDecoration.lineThrough,
     },
     decorationColor: style.decorationColor?.flutter,
+    backgroundColor: style.backgroundColor?.flutter,
     decorationStyle: style.decorationStyle == null || style.decorationStyle == api.TextDecorationStyle.solid
         ? null
         : TextDecorationStyle.values.byName(style.decorationStyle!.name),

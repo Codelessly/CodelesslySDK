@@ -12,6 +12,14 @@ import 'package:codelessly_api/codelessly_api.dart' show Json, ScriptDef;
 /// and host calls (`navigate`, `back`, `callApi`, `cloudData`, `runAction`,
 /// `toast`, `delay`). Calls a script's capabilities don't grant never get
 /// here: the runner refuses them.
+/// A [ScriptHost] that can read just some variables: a run is sent only
+/// the variables it can reach by name (ScriptReach), and reading the others
+/// (computed ones included) would be wasted work on every run.
+abstract interface class NamedVariablesScriptHost implements ScriptHost {
+  /// The variables among [names] the script can read, by name.
+  Map<String, Object?> variablesNamed(Set<String> names);
+}
+
 abstract interface class ScriptHost {
   /// The variables the script can read, by name.
   Map<String, Object?> variables();

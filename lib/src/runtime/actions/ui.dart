@@ -22,6 +22,7 @@ import 'package:codelessly_api/codelessly_api.dart' show NavigationMode;
 import 'confirm_dialog.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
+import 'presentation_scope.dart';
 import 'route_transition.dart';
 import 'toast.dart';
 
@@ -201,10 +202,14 @@ class NavigatorActionUi implements ActionUi {
     if (content == null) return null;
     // Preserve inherited localizations and themes across both modal routes.
     final inherited = InheritedTheme.captureAll(c, Localizations.override(context: c, child: content));
-    final modalContent = Padding(
-      padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
-      child: inherited,
-    );
+    // Insets keep space around a dialog; a bottom sheet sits on the screen's
+    // edge (an adaptive modal used both ways keeps its sheet flush).
+    final modalContent = sheet
+        ? inherited
+        : Padding(
+            padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
+            child: inherited,
+          );
     final pointer = RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero;
     final anchor = switch (action.anchor) {
       api.ModalAnchor.trigger => RevealAnchor.lastTrigger,
@@ -236,6 +241,7 @@ class NavigatorActionUi implements ActionUi {
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
         sheetWidth: action.sheetWidth,
+        sheetRadius: action.sheetRadius,
         maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
@@ -247,6 +253,11 @@ class NavigatorActionUi implements ActionUi {
   bool closeModal(Object? result) {
     final c = _context;
     if (c == null) return false;
+    // A presented banner or full-screen layout closes the way it was shown.
+    if (CodelesslyPresentation.maybeOf(c)?.close case final close?) {
+      close(result);
+      return true;
+    }
     final route = ModalRoute.of(c);
     final modal = route is PopupRoute || (route is CodelesslyRouteTransitionRoute && route.modal);
     if (route == null || !modal || !route.isCurrent) return false;
@@ -341,6 +352,7 @@ Future<Object?> showScreenModal(
   required double sheetBelowWidth,
   RouteTransition? routeTransition,
   double? sheetWidth,
+  double? sheetRadius,
   double? maxHeightFactor,
   double barrierBlur = 0,
   double enterScale = 1,
@@ -366,9 +378,10 @@ Future<Object?> showScreenModal(
       },
     ));
   }
-  // Side sheets, sized bottom sheets and frosted or scaled dialogs.
+  // Side sheets, sized or rounded bottom sheets and frosted or scaled
+  // dialogs.
   final presented = presentation == ModalPresentation.sideSheet ||
-      (sheet && maxHeightFactor != null) ||
+      (sheet && (maxHeightFactor != null || sheetRadius != null)) ||
       (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
@@ -377,6 +390,7 @@ Future<Object?> showScreenModal(
       barrierDismissible: barrierDismissible,
       barrierColor: scrim ?? Colors.black54,
       sheetWidth: sheetWidth,
+      cornerRadius: sheetRadius,
       maxHeightFactor: maxHeightFactor ?? 1,
       showDragHandle: showDragHandle,
       barrierBlur: barrierBlur,
@@ -398,7 +412,11 @@ Future<Object?> showScreenModal(
       // sits at the bottom of its canvas.
       backgroundColor: Colors.transparent,
       elevation: 0,
-      builder: (_) => content,
+      // The keyboard pushes the sheet up (a composer at its bottom).
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: content,
+      ),
     );
   }
   if (presentation == ModalPresentation.fullScreen) {

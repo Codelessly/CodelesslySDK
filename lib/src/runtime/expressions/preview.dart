@@ -35,7 +35,13 @@ abstract final class VariablePreview {
       // that can't be evaluated (null), which gets a placeholder.
       final formula = FormulaEvaluator.exactExpression(expression);
       if (formula != null && engine.formula(formula, scope) == '') return '';
+      // So does a path whose value is empty text (`${item.before}` of a
+      // match at the start); only a missing value (null) gets a placeholder.
+      if (formula == null && engine.evaluate(expression, scope) == '') return '';
       final value = engine.interpolate(expression, scope, mode: NullSubstitution.noChange);
+      // A path that resolves to empty text (`''`) shows nothing too; one that
+      // doesn't resolve stays `${...}` (noChange) and gets a placeholder.
+      if (formula == null && value.isEmpty) return '';
       if (value.isNotEmpty && !expressionSyntax.hasMatch(value)) return value;
     }
     final placeholder = placeholderFor(expression);
