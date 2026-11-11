@@ -303,6 +303,26 @@ class DataExample extends StatelessWidget {
       );
 }
 
+/// Two widgets of one instance: the badge and the list read the same
+/// `cards` app variable, loaded once by a "Load cloud data" action with the
+/// app scope, live on both.
+Widget sharedLiveData(Codelessly codelessly) => Scaffold(
+      appBar: AppBar(actions: [
+        SizedBox(width: 56, height: 56, child: CodelesslyWidget(codelessly: codelessly, layoutId: 'badge')),
+      ]),
+      body: CodelesslyWidget(codelessly: codelessly, layoutId: 'list'),
+    );
+
+/// Tests: formulas that read the clock (`now()`, `timeAgo(date)`) see a
+/// fixed time, moved by hand.
+void pinnedClock() {
+  FormulaClock.pinned = DateTime(2026, 11, 11, 15);
+  // ...pump the screen, then:
+  FormulaClock.pinned = DateTime(2026, 11, 11, 15, 5);
+  FormulaClock.minutes.tick(); // `timeAgo` bindings now read 5 minutes later
+  FormulaClock.pinned = null;
+}
+
 /// What the app keeps on the device (`${storage.<key>}`, persisted
 /// variables), kept between runs.
 Future<Codelessly> persistentStorage() async {
@@ -609,6 +629,11 @@ Codelessly stagingSlug() => Codelessly(
 
 /// The project's theme, for the app's own widgets.
 ThemeData projectTheme(Codelessly codelessly) => themeDataOf(codelessly.publishModel!.theme);
+
+/// What layouts read as `theme` in dark mode: `theme.surface`,
+/// `theme.colors.brandBlue`, `theme.text.title.fontSize`, `theme.isDark`.
+Map<String, Object?> projectThemeValues(Codelessly codelessly) =>
+    themeValues(codelessly.publishModel!.theme, dark: true);
 
 /// API calls through a CORS proxy (the web).
 Codelessly apiProxy() => Codelessly(

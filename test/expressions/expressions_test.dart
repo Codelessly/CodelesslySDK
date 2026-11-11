@@ -102,6 +102,9 @@ void main() {
     test('parent reads the item around a nested item', () {
       final inner = ItemScope(index: 3, item: 'x', parent: ItemScope(index: 1, item: {'cur': 'EUR'}, parent: vars));
       expect(e.evaluate(r'${parent.item.cur}', inner), 'EUR');
+      // The outer item's own fields read on parent too.
+      expect(e.evaluate(r'${parent.cur}', inner), 'EUR');
+      expect(e.evaluate(r'${parent.index}', inner), 1);
       expect(e.evaluate(r'${parent.index}', inner), 1);
       expect(e.evaluate(r'${index}', inner), 3);
     });
@@ -266,6 +269,15 @@ void main() {
       expect(check({'error': 'Incorrect PIN'}, notEmpty), isTrue);
       expect(check({}, empty), isTrue);
       expect(check({}, notEmpty), isFalse);
+    });
+
+    test('a number or boolean value is not empty (text read as a number too)', () {
+      const empty = Comparison(ConditionOperand(r'${offset}'), ConditionOp.isEmpty);
+      const notEmpty = Comparison(ConditionOperand(r'${offset}'), ConditionOp.isNotEmpty);
+      for (final value in ['900', 900, 0, true, false]) {
+        expect(check({'offset': value}, notEmpty), isTrue, reason: '$value');
+        expect(check({'offset': value}, empty), isFalse, reason: '$value');
+      }
     });
 
     test('joined with and / or', () {

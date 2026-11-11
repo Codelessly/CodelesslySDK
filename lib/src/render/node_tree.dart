@@ -16,6 +16,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'behaviors.dart';
+import 'typewriter.dart';
 import 'hero.dart';
 import 'play.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragAndDropLayers;
@@ -34,6 +35,7 @@ import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
 import 'reveal.dart';
+import 'view_scroll.dart';
 import 'source.dart';
 import '../runtime/expressions/bindings.dart' show BoundNode, NodeBinder;
 import '../widgets/collections.dart' show listBuildsAllItems;
@@ -321,6 +323,10 @@ class NodeTree {
   bool _sweepScheduled = false;
 
   NodeBox? boxOf(String id, {Object? instance}) => _boxes[keyOf(id, instance)];
+
+  /// Every box of node [id]: one per copy a list (or grid, page view...)
+  /// repeats it in, and the single one of a node that doesn't repeat.
+  Iterable<NodeBox> boxesOf(String id) => _boxes.values.where((b) => b.id == id);
   int get length => _boxes.length;
 
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
@@ -817,6 +823,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     outsideHitTest = null;
     // A node that follows the pointer moves with its margin (outermost).
     dragMotionLayers(this, n, chain);
+    // Pinned while its parent is in view (render/view_scroll.dart): the
+    // whole node, margin included, moves.
+    if (n.behaviors.sticky case final api.Sticky sticky) {
+      chain.add(_obtain<RenderSticky>('sticky', RenderSticky.new)
+        ..onStuck = ((stuck) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('sticky', {'stuck': stuck}))
+        ..configure(sticky, interactive: tree.animates));
+    }
 
     // Outer layers, outermost first: margin, constraints, motion and scale
     // (render/behaviors.dart), rotation, loops, opacity, blurs and stroke
@@ -834,6 +847,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final reveal = n.behaviors.reveal;
     if (tree.animates && reveal != null) {
       chain.add(_obtain<RenderReveal>('reveal', RenderReveal.new)..configure(reveal, n.visible));
+    }
+    // `${view.progress}` as it scrolls through its view.
+    if (n.behaviors.viewProgress case final api.ViewProgress progress) {
+      chain.add(_obtain<RenderViewProgress>('viewProgress', RenderViewProgress.new)
+        ..onValues = ((values) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('view', values))
+        ..configure(this, progress, interactive: tree.animates));
+    }
+    // Its laid-out box, written to a variable.
+    if (n.behaviors.measure case final api.Measure measure) {
+      chain.add(_obtain<RenderMeasure>('measure', RenderMeasure.new)..configure(this, measure));
     }
     playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);
@@ -989,15 +1012,20 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         ..painter = SpreadShadowPainter(shadows: spread, borderRadius: radius!));
     }
     final plan = _PaintPlan.of(n);
-    chain.add(_obtain<RenderDecoratedBox>('decoration', () => RenderDecoratedBox(decoration: const BoxDecoration()))
+    chain.add(_obtain<RenderNodeDecoration>('decoration', () => RenderNodeDecoration(decoration: const BoxDecoration()))
       ..decoration = BoxDecoration(
         boxShadow: [for (final sh in shadows) if (!spread.contains(sh)) sh],
         borderRadius: radius,
         color: plan.native ? plan.fill : null,
-      ));
+      )
+      // A node that paints a fill is opaque to pointers, as Flutter's
+      // Container(color:) is; one without lets them through its gaps to what
+      // lies under it (a row of black keys over the white ones).
+      ..opaque = d.fills.any((f) => f.visible));
     if (plan.native && plan.border != null) {
-      chain.add(_obtain<RenderDecoratedBox>('stroke', () => RenderDecoratedBox(decoration: const BoxDecoration()))
-        ..decoration = BoxDecoration(borderRadius: radius, border: plan.border));
+      chain.add(_obtain<RenderNodeDecoration>('stroke', () => RenderNodeDecoration(decoration: const BoxDecoration()))
+        ..decoration = BoxDecoration(borderRadius: radius, border: plan.border)
+        ..opaque = false);
     }
     final clipBehavior = clip(d.clip);
     if (clipBehavior != Clip.none) {
@@ -1286,10 +1314,21 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   }
 
   void _freeform(Node n, List<RenderBox> chain, {List<String>? children}) {
+    // A fitted board: laid out at its design size, then scaled into the box.
+    final fit = n.type == 'stack' ? n.prop(api.StackProps.fit) : null;
+    if (fit != null) {
+      chain.add(_obtain<RenderFillBounds>('boardFill', RenderFillBounds.new)..fallback = n.innerSize);
+      chain.add(_obtain<RenderFittedBox>('boardFit', () => RenderFittedBox(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge))
+        ..fit = BoxFit.values.byName(fit.name)
+        ..alignment = n.prop(api.StackProps.fitAlignment).flutter);
+      final board = BoxConstraints.tight(n.innerSize);
+      chain.add(_obtain<RenderConstrainedBox>('boardSize', () => RenderConstrainedBox(additionalConstraints: board))
+        ..additionalConstraints = board);
+    }
     final layout = _obtain<RenderFreeformLayout>(
         'freeform', () => RenderFreeformLayout(wrapsWidth: false, wrapsHeight: false, designSize: Size.zero))
-      ..wrapsWidth = n.hFit == SizeFit.hug
-      ..wrapsHeight = n.vFit == SizeFit.hug
+      ..wrapsWidth = fit == null && n.hFit == SizeFit.hug
+      ..wrapsHeight = fit == null && n.vFit == SizeFit.hug
       ..designSize = n.innerSize
       ..textDirection = TextDirection.ltr;
     _syncChildren(layout, children ?? n.children, Slot(SlotKind.freeform, n));
@@ -1406,6 +1445,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       chain.add(_obtain<RenderFittedBox>('textScale', () => RenderFittedBox(fit: BoxFit.scaleDown, textDirection: TextDirection.ltr))
         ..alignment = Alignment(x, y));
     }
+    if (n.behaviors.typewriter case final api.Typewriter tw) {
+      chain.add(_obtain<RenderTypewriter>('typewriter', RenderTypewriter.new)
+        ..configure(tw, plainText(span), animates: tree.animates));
+    }
     chain.add(paragraph);
   }
 
@@ -1457,6 +1500,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final cross = parent.prop(FlexProps.crossAxisAlignment);
     final Alignment? align = n.layout.align?.flutter ??
         (cross == api.CrossAxisAlignment.stretch && crossFit == SizeFit.hug && !parentHugsCross ? Alignment.topLeft : null);
+    // A bare box filling across a row/column that hugs that axis and
+    // stretches: its siblings set the thickness (RenderStretchFiller).
+    if (cross == api.CrossAxisAlignment.stretch && parentHugsCross && crossFit == SizeFit.fill &&
+        n.type == 'box' && n.children.isEmpty) {
+      chain.add(_obtain<RenderStretchFiller>('stretchFill', RenderStretchFiller.new)
+        ..cross = isRow ? Axis.vertical : Axis.horizontal);
+    }
     if (align != null) {
       chain.add(_obtain<RenderPositionedBox>('slotAlign', () => RenderPositionedBox(alignment: align, textDirection: TextDirection.ltr))
         ..alignment = align);
@@ -1932,4 +1982,36 @@ class _PaintPlan {
       foreground,
     );
   }
+}
+
+/// Takes all the room it's given (its constraints' bounded maximum; on an
+/// unbounded axis, [fallback]): the box a fitted board scales into.
+class RenderFillBounds extends RenderProxyBox {
+  Size _fallback = Size.zero;
+  set fallback(Size v) {
+    if (v == _fallback) return;
+    _fallback = v;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final c = constraints;
+    final w = c.hasBoundedWidth ? c.maxWidth : c.constrainWidth(_fallback.width);
+    final h = c.hasBoundedHeight ? c.maxHeight : c.constrainHeight(_fallback.height);
+    child?.layout(BoxConstraints.tight(Size(w, h)));
+    size = Size(w, h);
+  }
+}
+
+/// A node's box decoration (color, shadows; or its stroke), taking pointers
+/// on its own only while [opaque]: a box with no fill paints nothing there,
+/// so pointers pass to its children, or else to what lies under it.
+class RenderNodeDecoration extends RenderDecoratedBox {
+  RenderNodeDecoration({required super.decoration});
+
+  bool opaque = true;
+
+  @override
+  bool hitTestSelf(Offset position) => opaque && super.hitTestSelf(position);
 }

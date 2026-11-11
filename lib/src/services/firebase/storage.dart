@@ -20,10 +20,21 @@ class FirebaseFileStorage implements CloudFileStorage {
       _isUrl(path) ? storage.refFromURL(path) : storage.ref([root, ...CloudFilePaths.segments(path)].join('/'));
 
   @override
-  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType}) async {
+  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType, void Function(double sent)? onProgress}) async {
     final ref = _ref(path);
     final type = contentType ?? CloudFilePaths.contentTypeFor(ref.name.split('.').last);
-    await ref.putData(bytes, SettableMetadata(contentType: type));
+    final task = ref.putData(bytes, SettableMetadata(contentType: type));
+    final progress = onProgress == null
+        ? null
+        : task.snapshotEvents.listen((s) {
+            if (s.totalBytes > 0) onProgress(s.bytesTransferred / s.totalBytes);
+          }, onError: (_) {});
+    try {
+      await task;
+    } finally {
+      await progress?.cancel();
+    }
+    onProgress?.call(1);
     return CloudFile(path: ref.fullPath, url: await ref.getDownloadURL(), name: ref.name, size: bytes.length, contentType: type);
   }
 

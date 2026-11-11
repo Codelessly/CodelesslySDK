@@ -41,6 +41,87 @@ Offset _center(WidgetTester tester, NodeTree tree, String id) =>
     tester.getTopLeft(find.byType(NodeView)) + tree.boxOf(id)!.rectIn(tester.renderObject(find.byType(NodeView)))!.center;
 
 void main() {
+  testWidgets('a picker with a decoration is a formatted field; its dialog takes pickerTheme', (tester) async {
+    const theme = {
+      'backgroundColor': '#FFFFFFFF',
+      'accentColor': '#FF2F4F46',
+      'textColor': '#FF23262B',
+      'mutedColor': '#FF8C8F94',
+      'radius': 14,
+      'dayRadius': 8,
+      'fontFamily': 'Arial',
+    };
+    final field = {
+      'border': {'type': 'outline', 'borderRadius': 10, 'borderSide': {'color': '#FFD3CDC0'}},
+      'prefixIcon': {'icon': {'type': 'MATERIAL_ICON', 'name': 'calendar_today', 'style': 'outlined'}, 'size': 17},
+      'filled': true,
+      'fillColor': '#FFFFFFFF',
+    };
+    final tree = NodeTree(DocumentSource(_doc({
+      'date': {
+        'type': 'datePicker',
+        'layout': {'width': 260, 'height': 42},
+        'props': {
+          'value': '2026-11-30',
+          'format': 'EEE d MMM yyyy',
+          'helpText': 'FIRST DAY OFF',
+          'decoration': field,
+          'pickerTheme': theme,
+        },
+      },
+      'time': {
+        'type': 'timePicker',
+        'layout': {'width': 160, 'height': 42, 'y': {'start': 80}},
+        'props': {'value': '13:00', 'format': 'HH:mm', 'use24h': true, 'decoration': field, 'pickerTheme': theme},
+      },
+    })));
+    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
+    await tester.pumpAndSettle();
+    // A field, not a button, showing the formatted value.
+    expect(find.byType(OutlinedButton), findsNothing);
+    expect(find.byType(InputDecorator), findsNWidgets(2));
+    expect(find.text('Mon 30 Nov 2026'), findsOneWidget);
+    expect(find.text('13:00'), findsOneWidget);
+
+    await tester.tapAt(_center(tester, tree, 'date'));
+    await tester.pumpAndSettle();
+    final dialog = tester.element(find.byType(DatePickerDialog));
+    final t = Theme.of(dialog);
+    expect(t.colorScheme.primary, const Color(0xFF2F4F46));
+    expect(t.colorScheme.surfaceContainerHigh, const Color(0xFFFFFFFF));
+    expect(t.datePickerTheme.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)));
+    expect(find.text('FIRST DAY OFF'), findsOneWidget);
+    Navigator.of(dialog).pop(DateTime(2026, 12, 4));
+    await tester.pumpAndSettle();
+    expect(find.text('Fri 4 Dec 2026'), findsOneWidget);
+
+    await tester.tapAt(_center(tester, tree, 'time'));
+    await tester.pumpAndSettle();
+    final timeDialog = tester.element(find.byType(TimePickerDialog));
+    expect(MediaQuery.of(timeDialog).alwaysUse24HourFormat, isTrue);
+    expect(Theme.of(timeDialog).timePickerTheme.dialHandColor, const Color(0xFF2F4F46));
+    Navigator.of(timeDialog).pop(const TimeOfDay(hour: 14, minute: 30));
+    await tester.pumpAndSettle();
+    expect(find.text('14:30'), findsOneWidget);
+  });
+
+  testWidgets('an empty picker field shows its hint', (tester) async {
+    final tree = NodeTree(DocumentSource(_doc({
+      'time': {
+        'type': 'timePicker',
+        'layout': {'width': 160, 'height': 42},
+        'props': {
+          'value': '',
+          'decoration': {'hintText': '—', 'border': {'type': 'outline'}},
+        },
+      },
+    })));
+    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
+    await tester.pumpAndSettle();
+    expect(find.text('—'), findsWidgets);
+    expect(find.text('00:00'), findsNothing);
+  });
+
   testWidgets('date and time pickers stay in their app navigator', (tester) async {
     final tree = NodeTree(DocumentSource(_doc({
       'date': {'type': 'datePicker', 'layout': {'width': 160, 'height': 50}},
@@ -74,6 +155,33 @@ void main() {
     expect(outer.currentState!.canPop(), isFalse);
     inner.currentState!.pop(const TimeOfDay(hour: 9, minute: 30));
     await tester.pumpAndSettle();
+    await tester.pumpWidget(const SizedBox());
+    tree.dispose();
+  });
+
+  testWidgets('an error text that is a yes/no shows the error border without a message (SDK 8.x)', (tester) async {
+    InputDecoration decorationWith(Object errorText) => inputDecoration(
+        api.InputDecoration.fromJson({'errorText': errorText}), api.EdgeInsets.zero);
+    final on = decorationWith(true);
+    expect(on.error, isA<SizedBox>(), reason: 'in error, nothing under the field');
+    expect(decorationWith(false).error, isNull);
+    expect(decorationWith('Give the card a title.').error, isNotNull);
+    // A field in error draws the error border.
+    final source = DocumentSource(_doc({
+      'f': {
+        'type': 'textField',
+        'layout': {'width': 200, 'height': 48},
+        'props': {
+          'decoration': {
+            'errorText': true,
+            'errorBorder': {'type': 'outline', 'borderSide': {'color': '#FFE5484D'}},
+          },
+        },
+      },
+    }));
+    final (tree, _) = await _show(tester, source);
+    expect(_widget<TextField>(tree).decoration!.error, isA<SizedBox>());
+    expect(tester.widget<InputDecorator>(find.byType(InputDecorator)).decoration.errorBorder, isNotNull);
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });

@@ -44,7 +44,9 @@ class NodeValuesScope extends ValuesScope {
 
 /// The node kinds that declare names, in order (a node with several
 /// behaviors declares all their names in one scope).
-final List<NodeScopeDeclarer> nodeScopeDeclarers = [trackScopeValues, flipScopeValues, tiltScopeValues, transformScopeValues];
+final List<NodeScopeDeclarer> nodeScopeDeclarers = [
+  trackScopeValues, flipScopeValues, tiltScopeValues, transformScopeValues, stickyScopeValues, viewScopeValues, //
+];
 
 /// What [node] declares (empty: nothing), read in [parent].
 Map<String, Object?> nodeScopeValues(Node node, ValueScope parent) {
@@ -64,6 +66,8 @@ bool declaresNodeScope(Node node) {
       be.tilt != null ||
       be.transformGesture != null ||
       be.zoomable ||
+      be.sticky != null ||
+      be.viewProgress != null ||
       ownSwitchPoints(node).isNotEmpty;
 }
 
@@ -180,5 +184,24 @@ Map<String, Object?>? transformScopeValues(Node node, ValueScope parent) {
   if (be.transformGesture == null && !be.zoomable) return null;
   return const {
     'transform': {'x': 0, 'y': 0, 'scale': 1, 'rotation': 0, 'scaleX': 1, 'scaleY': 1, 'active': false, 'selected': true},
+  };
+}
+
+/// A sticky node's `sticky`: whether it is pinned now (its render object
+/// writes it as the view scrolls).
+Map<String, Object?>? stickyScopeValues(Node node, ValueScope parent) {
+  if (node.behaviors.sticky == null) return null;
+  return const {
+    'sticky': {'stuck': false},
+  };
+}
+
+/// A view progress's `view`: how far through its view the node has
+/// scrolled (0–1) and whether any of it shows; its render object writes
+/// them as the view scrolls.
+Map<String, Object?>? viewScopeValues(Node node, ValueScope parent) {
+  if (node.behaviors.viewProgress == null) return null;
+  return const {
+    'view': {'progress': 0.0, 'visible': false},
   };
 }

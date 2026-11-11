@@ -217,6 +217,25 @@ void main() {
       expect(find.text('Saved'), findsOneWidget);
     });
 
+    testWidgets('the action pill\'s background binds like the other toast colors', (tester) async {
+      final h = Host([v('pill', '#FF123456')]);
+      await h.pump(tester);
+      await h.run([
+        {
+          'type': 'showToast',
+          'message': 'Wrong password',
+          'actionLabel': 'Reset',
+          'durationMs': 0,
+          'look': {'actionBackgroundColor': '#FFFFFFFF'},
+          'variables': {'actionBackgroundColor': r'${pill}'},
+        },
+      ]);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 600));
+      final button = tester.widget<TextButton>(find.byKey(const ValueKey('codelessly-toast-action')));
+      expect(button.style!.backgroundColor!.resolve({}), const Color(0xFF123456));
+    });
+
     testWidgets('the button runs its actions with the chain\'s result, and closes the toast', (tester) async {
       final h = Host([v('restored', '')]);
       await h.pump(tester);

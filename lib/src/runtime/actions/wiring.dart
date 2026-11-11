@@ -83,8 +83,12 @@ class TreeReactions implements NodeInteractions {
     }
     final viewport = types.contains(TriggerType.enterViewport) || types.contains(TriggerType.exitViewport);
     if (pointer.isEmpty && !viewport) return;
+    final g = n.behaviors.effectiveTransformGesture;
     chain.add(box.obtain<RenderReactions>('reactions', RenderReactions.new)
       ..triggers = pointer
+      // A plain drag is one finger: on a node that also pinches, a second
+      // finger hands the gesture to the pinch.
+      ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
       ..holdMs = n.actions.firstWhere((r) => r.trigger.type == TriggerType.hold, orElse: () => n.actions.first).trigger.holdMs
       ..visibleFraction = viewport ? n.actions.firstWhere((r) => _isViewport(r.trigger.type)).trigger.visibleFraction : null
       ..onTrigger = (type, event) => fire(box, type.name, event: event));
@@ -155,15 +159,30 @@ class TreeReactions implements NodeInteractions {
 
   /// A removed view stops its chains and timers. Conditional hiding only
   /// pauses screen triggers: the reaction that hid the node may finish.
+  ///
+  /// A box that leaves and comes back in the same frame (a layer added or
+  /// taken away above it re-parents it, as a hover style adding a motion
+  /// does) keeps its chains: whether it left is decided after the frame.
   @override
   void attachChanged(NodeBox box) {
     final state = _boxes[box];
     if (state == null) return;
     if (box.attached) {
+      state.leaving = false;
       state.resume();
-    } else {
-      state.pause(cancelActions: !box.tree.preservingActions);
+      return;
     }
+    if (box.tree.preservingActions) {
+      state.pause(cancelActions: false);
+      return;
+    }
+    state.leaving = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!state.leaving || box.attached) return;
+      state.leaving = false;
+      state.pause();
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
   }
 
   /// Stops everything the boxes run.
@@ -183,6 +202,9 @@ class _BoxReactions {
   final TreeReactions owner;
   final NodeBox box;
   ActionCancellation cancellation = ActionCancellation();
+
+  /// Detached, waiting for the end of the frame to see whether it is back.
+  bool leaving = false;
 
   /// Stops screen timers; a retained conditional subtree keeps its active
   /// reactions, whereas a removed view cancels them.
@@ -390,6 +412,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   int holdMs = 1200;
 
+  /// A second finger cancels a plain drag (and its swipes), so a pinch on
+  /// this node (a transform gesture's zoom, pinch reactions) wins.
+  bool yieldsToPinch = false;
+  final Set<int> _down = {};
+
   /// The visible share (0–1) that counts as in view; null: not watched.
   double? get visibleFraction => _visibleFraction;
   double? _visibleFraction;
@@ -451,7 +478,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
             : null;
     }
     if (_doubleTap == null && _has(TriggerType.doubleTap)) {
-      _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)..onDoubleTap = () => _fire(TriggerType.doubleTap);
+      // ${result.x} / ${result.y}: where the second tap went down (local).
+      Json? at;
+      _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)
+        ..onDoubleTapDown = ((d) => at = _where(d.localPosition, d.globalPosition))
+        ..onDoubleTap = () => _fire(TriggerType.doubleTap, at ?? const {});
     }
     if (_longPress == null && _has(TriggerType.longPress)) {
       _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = () => _fire(TriggerType.longPress);
@@ -475,8 +506,13 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
                 final drag = {
                   'dx': d.delta.dx,
                   'dy': d.delta.dy,
+                  'deltaX': d.delta.dx,
+                  'deltaY': d.delta.dy,
                   'x': d.localPosition.dx,
                   'y': d.localPosition.dy,
+                  'globalX': d.globalPosition.dx,
+                  'globalY': d.globalPosition.dy,
+                  'pointerCount': 1,
                   'startX': start.dx,
                   'startY': start.dy,
                 };
@@ -525,7 +561,22 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (event is PointerUpEvent || event is PointerCancelEvent) _down.remove(event.pointer);
     if (event is PointerDownEvent) {
+      _down.add(event.pointer);
+      if (yieldsToPinch && _down.length > 1 && _pan != null) {
+        // Disposing rejects its pointers in the arena; it is made again on
+        // the next first finger.
+        _pan!.dispose();
+        _pan = null;
+      }
+      if (yieldsToPinch && _down.length > 1) {
+        _tap?.addPointer(event);
+        _doubleTap?.addPointer(event);
+        _longPress?.addPointer(event);
+        if (_has(TriggerType.pointerDown)) _fire(TriggerType.pointerDown, _pointerScope(event));
+        return;
+      }
       _ensureRecognizers();
       _tap?.addPointer(event);
       _doubleTap?.addPointer(event);
@@ -601,10 +652,18 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void detach() {
     _ViewportWatcher.remove(this);
-    _disposeRecognizers();
+    _hold?.cancel();
+    _hold = null;
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
     _hovering = false;
     super.detach();
+    // A chain rebuilt around this box (a pressed state adding a scale
+    // layer on pointer down) detaches and re-attaches it in the same frame:
+    // disposing the recognizers then lost the tap in progress, so a button
+    // with press feedback never clicked. Dispose only if it stays detached.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!attached) _disposeRecognizers();
+    });
   }
 
   @override

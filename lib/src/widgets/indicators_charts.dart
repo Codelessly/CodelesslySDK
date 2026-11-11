@@ -6,7 +6,19 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart'
-    show ChartProps, ChartSeries, ChartSeriesKind, ChartType, LineChartProps, PlotChartMarkerPosition, PlotChartProps;
+    show
+        ChartProps,
+        ChartSeries,
+        ChartSeriesKind,
+        ChartType,
+        LineChartProps,
+        PlotChartGridAnchor,
+        PlotChartMarker,
+        PlotChartMarkerPosition,
+        PlotChartMarkerShape,
+        PlotChartProps,
+        PlotChartSelectionGuides,
+        PlotChartSeries;
 import 'package:flutter/painting.dart';
 
 import '../render/convert.dart';
@@ -563,6 +575,8 @@ class PlotChartPainter extends NodePainter {
       fontWeight: FontWeight.values[((w / 100).round() - 1).clamp(0, 8)],
       fontFamily: style.fontFamily,
       fontFamilyFallback: style.fontFamilyFallback,
+      fontStyle: style.fontStyle == api.FontStyle.italic ? FontStyle.italic : null,
+      letterSpacing: style.letterSpacing,
       color: color ?? style.color?.flutter ?? const Color(0x8A000000),
       height: style.height,
     );
@@ -571,19 +585,36 @@ class PlotChartPainter extends NodePainter {
   TextPainter _text(String text, TextStyle style) =>
       TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr)..layout();
 
+  /// The y of series [id] at [x], interpolated between its points; null in
+  /// a gap or when there is no such series.
+  double? seriesValueAt(String id, double x) {
+    final series = p(PlotChartProps.series).where((s) => s.id == id).firstOrNull;
+    if (series == null || series.points.isEmpty) return null;
+    final values = series.points;
+    if (values.length == 1 || xMax == xMin) return values.first;
+    final position = ((x - xMin) / (xMax - xMin)).clamp(0.0, 1.0) * (values.length - 1);
+    final index = position.floor().clamp(0, values.length - 2);
+    final a = values[index], b = values[index + 1];
+    final t = position - index;
+    if (a == null || b == null) return t < 0.5 ? a ?? b : b ?? a;
+    return a + (b - a) * t;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
     canvas.save();
     canvas.clipRect(Offset.zero & size);
 
-    final labelHeight = math.max(0.0, p(PlotChartProps.labelHeight));
+    final originAxes = p(PlotChartProps.originAxes);
+    final labelHeight = originAxes ? 0.0 : math.max(0.0, p(PlotChartProps.labelHeight));
     final chartHeight = math.max(0.0, size.height - labelHeight);
     final span = xMax - xMin;
     double x(double value) => span == 0 ? 0 : (value - xMin) / span * size.width;
     final points = this.points;
-    var low = p(PlotChartProps.yMin) ?? (points.isEmpty ? 0 : points.reduce(math.min));
-    var high = p(PlotChartProps.yMax) ?? (points.isEmpty ? 1 : points.reduce(math.max));
+    final series = p(PlotChartProps.series);
+    var low = p(PlotChartProps.yMin) ?? _extent(points, series, math.min) ?? 0;
+    var high = p(PlotChartProps.yMax) ?? _extent(points, series, math.max) ?? 1;
     if (high == low) {
       low -= 1;
       high += 1;
@@ -591,6 +622,7 @@ class PlotChartPainter extends NodePainter {
     final inset = p(PlotChartProps.plotInset);
     double y(double value) => inset + (1 - (value - low) / (high - low)) * (chartHeight - inset * 2);
     final labelStyle = _style(p(PlotChartProps.labelStyle));
+    final zeroAnchored = p(PlotChartProps.gridAnchor) == PlotChartGridAnchor.zero;
 
     void paintLabel(String label, double dx) {
       if (labelHeight <= 0 || label.isEmpty) return;
@@ -601,26 +633,72 @@ class PlotChartPainter extends NodePainter {
 
     // Grid and its labels.
     final gridStep = p(PlotChartProps.gridStepX);
+    final gridStepY = p(PlotChartProps.gridStepY);
     final xLabels = p(PlotChartProps.xLabels);
     final gridLabels = p(PlotChartProps.gridLabels);
-    if (gridStep != null && gridStep > 0 && span > 0) {
-      final grid = Paint()
-        ..color = p(PlotChartProps.gridColor).flutter
+    final pxPerX = span == 0 ? 0.0 : size.width / span;
+    final pxPerY = (chartHeight - inset * 2) / (high - low);
+    final divisions = p(PlotChartProps.minorDivisions);
+    if (divisions > 1) {
+      final minor = Paint()
+        ..color = p(PlotChartProps.minorGridColor).flutter
         ..strokeWidth = 1;
-      final lines = (span / gridStep + 1e-9).floor();
-      for (var i = 0; i <= lines; i++) {
-        final value = xMin + i * gridStep;
-        final dx = x(value);
-        canvas.drawLine(Offset(dx, 0), Offset(dx, chartHeight), grid);
-        if (xLabels.isEmpty && i > 0 && value < xMax - 1e-9) {
-          paintLabel(i - 1 < gridLabels.length ? gridLabels[i - 1] : _formatNumber(value), dx);
+      if (gridStep != null && gridStep > 0 && gridStep / divisions * pxPerX >= 6) {
+        final m = gridStep / divisions;
+        final first = zeroAnchored ? (xMin / m).ceil() : 0;
+        for (var k = first; (zeroAnchored ? k * m : xMin + k * m) <= xMax + 1e-9; k++) {
+          if (k % divisions == 0) continue;
+          final dx = _crisp(x(zeroAnchored ? k * m : xMin + k * m), zeroAnchored);
+          canvas.drawLine(Offset(dx, 0), Offset(dx, chartHeight), minor);
         }
+      }
+      if (gridStepY != null && gridStepY > 0 && gridStepY / divisions * pxPerY >= 6) {
+        final m = gridStepY / divisions;
+        for (var k = (low / m).ceil(); k * m <= high + 1e-9; k++) {
+          if (k % divisions == 0) continue;
+          final dy = _crisp(y(k * m), true);
+          canvas.drawLine(Offset(0, dy), Offset(size.width, dy), minor);
+        }
+      }
+    }
+    final grid = Paint()
+      ..color = p(PlotChartProps.gridColor).flutter
+      ..strokeWidth = 1;
+    if (gridStep != null && gridStep > 0 && span > 0) {
+      if (zeroAnchored) {
+        for (var k = (xMin / gridStep).ceil(); k * gridStep <= xMax + 1e-9; k++) {
+          final dx = _crisp(x(k * gridStep), true);
+          canvas.drawLine(Offset(dx, 0), Offset(dx, chartHeight), grid);
+          if (!originAxes && xLabels.isEmpty) paintLabel(_formatTick(k * gridStep, gridStep), x(k * gridStep));
+        }
+      } else {
+        final lines = (span / gridStep + 1e-9).floor();
+        for (var i = 0; i <= lines; i++) {
+          final value = xMin + i * gridStep;
+          final dx = x(value);
+          canvas.drawLine(Offset(dx, 0), Offset(dx, chartHeight), grid);
+          if (xLabels.isEmpty && i > 0 && value < xMax - 1e-9) {
+            paintLabel(i - 1 < gridLabels.length ? gridLabels[i - 1] : _formatNumber(value), dx);
+          }
+        }
+      }
+    }
+    if (gridStepY != null && gridStepY > 0) {
+      for (var k = (low / gridStepY).ceil(); k * gridStepY <= high + 1e-9; k++) {
+        final dy = _crisp(y(k * gridStepY), true);
+        canvas.drawLine(Offset(0, dy), Offset(size.width, dy), grid);
       }
     }
     for (final label in xLabels) {
       paintLabel(label.label, x(label.x));
     }
-    if (p(PlotChartProps.axisColor) case final api.Color axisColor) {
+
+    // Axes: a baseline, or the Cartesian axes through the origin.
+    final axisY = y(0), axisX = x(0);
+    final xAxisOn = axisY >= 0 && axisY <= chartHeight, yAxisOn = axisX >= 0 && axisX <= size.width;
+    if (originAxes) {
+      _paintOriginAxes(canvas, size, chartHeight, x, y, axisX, axisY, xAxisOn, yAxisOn, gridStep, gridStepY, low, high);
+    } else if (p(PlotChartProps.axisColor) case final api.Color axisColor) {
       canvas.drawLine(
         Offset(0, chartHeight),
         Offset(size.width, chartHeight),
@@ -671,6 +749,40 @@ class PlotChartPainter extends NodePainter {
       }
     }
 
+    // More curves, broken at gaps. Far-off points are clamped so a steep
+    // curve still runs off the edge without overflowing the canvas.
+    for (final s in series) {
+      final values = s.points;
+      if (values.isEmpty || s.width <= 0) continue;
+      final path = Path();
+      var pen = false;
+      for (var i = 0; i < values.length; i++) {
+        final v = values[i];
+        if (v == null || !v.isFinite) {
+          pen = false;
+          continue;
+        }
+        final dx = values.length == 1 ? 0.0 : x(xMin + span * i / (values.length - 1));
+        final dy = y(v).clamp(-4 * chartHeight, 5 * chartHeight).toDouble();
+        if (pen) {
+          path.lineTo(dx, dy);
+        } else {
+          path.moveTo(dx, dy);
+          pen = true;
+        }
+      }
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = s.color.flutter
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = s.width
+          ..strokeJoin = StrokeJoin.round
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+
+
     if (p(PlotChartProps.referenceX) case final double referenceX) {
       final dx = x(referenceX);
       final paint = Paint()
@@ -686,38 +798,58 @@ class PlotChartPainter extends NodePainter {
     }
 
     if (p(PlotChartProps.selectedX) case final double selected) {
+      final guides = p(PlotChartProps.selectionGuides);
       final step = math.max(0.0, p(PlotChartProps.selectionStep));
-      if (step > 0) {
+      if (step > 0 && guides == PlotChartSelectionGuides.line) {
         canvas.drawRect(Rect.fromLTRB(x(selected), 0, x(selected + step), chartHeight),
             Paint()..color = p(PlotChartProps.selectionColor).flutter);
       }
-      final center = selected + step / 2;
+      final center = guides == PlotChartSelectionGuides.line ? selected + step / 2 : selected;
       final dx = x(center);
       final lineWidth = p(PlotChartProps.selectionLineWidth);
-      if (lineWidth > 0) {
-        canvas.drawLine(
-          Offset(dx, 0),
-          Offset(dx, chartHeight),
-          Paint()
-            ..color = p(PlotChartProps.selectionLineColor).flutter
-            ..strokeWidth = lineWidth,
-        );
+      final selectionId = p(PlotChartProps.selectionSeries);
+      final value = p(PlotChartProps.selectionY) ??
+          (selectionId.isEmpty ? valueAt(center) : seriesValueAt(selectionId, center));
+      final linePaint = Paint()
+        ..color = p(PlotChartProps.selectionLineColor).flutter
+        ..strokeWidth = lineWidth;
+      switch (guides) {
+        case PlotChartSelectionGuides.line:
+          if (lineWidth > 0) canvas.drawLine(Offset(dx, 0), Offset(dx, chartHeight), linePaint);
+        case PlotChartSelectionGuides.axes:
+          final toX = axisY.clamp(0.0, chartHeight).toDouble(), toY = axisX.clamp(0.0, size.width).toDouble();
+          if (value == null) {
+            if (lineWidth > 0) _dashed(canvas, Offset(dx, 0), Offset(dx, chartHeight), linePaint);
+          } else {
+            final dy = y(value);
+            if (lineWidth > 0) {
+              _dashed(canvas, Offset(dx, dy), Offset(dx, toX), linePaint);
+              _dashed(canvas, Offset(dx, dy), Offset(toY, dy), linePaint);
+            }
+            _tag(canvas, size, chartHeight, p(PlotChartProps.selectionXLabel), Offset(dx, toX), below: true);
+            _tag(canvas, size, chartHeight, p(PlotChartProps.selectionYLabel), Offset(toY, dy), below: false);
+          }
+        case PlotChartSelectionGuides.none:
+          break;
       }
-      final value = valueAt(center);
       final dotRadius = p(PlotChartProps.selectionDotRadius);
-      if (value != null && dotRadius > 0) {
+      if (value != null) {
         final dot = Offset(dx, y(value));
-        canvas.drawCircle(dot, dotRadius, Paint()..color = p(PlotChartProps.selectionDotColor).flutter);
-        final strokeWidth = p(PlotChartProps.selectionDotStrokeWidth);
-        if (strokeWidth > 0) {
-          canvas.drawCircle(
-            dot,
-            dotRadius,
-            Paint()
-              ..color = p(PlotChartProps.selectionDotStrokeColor).flutter
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = strokeWidth,
-          );
+        final halo = p(PlotChartProps.selectionHaloRadius);
+        if (halo > 0) canvas.drawCircle(dot, halo, Paint()..color = p(PlotChartProps.selectionHaloColor).flutter);
+        if (dotRadius > 0) {
+          canvas.drawCircle(dot, dotRadius, Paint()..color = p(PlotChartProps.selectionDotColor).flutter);
+          final strokeWidth = p(PlotChartProps.selectionDotStrokeWidth);
+          if (strokeWidth > 0) {
+            canvas.drawCircle(
+              dot,
+              dotRadius,
+              Paint()
+                ..color = p(PlotChartProps.selectionDotStrokeColor).flutter
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = strokeWidth,
+            );
+          }
         }
       }
     }
@@ -731,18 +863,213 @@ class PlotChartPainter extends NodePainter {
       final value = marker.y ?? valueAt(marker.x);
       if (value == null) continue;
       final dot = Offset(x(marker.x), y(value));
-      final color = marker.color.flutter;
-      canvas.drawCircle(dot, markerRadius, Paint()..color = color);
+      final r = marker.radius ?? markerRadius;
+      _paintMarker(canvas, marker, dot, r);
       if (marker.label.isEmpty) continue;
+      final color = marker.color.flutter;
       final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
       final dx = (dot.dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
       final dy = switch (marker.position) {
-        PlotChartMarkerPosition.above => dot.dy - markerRadius - (markerStyle.fontSize ?? 10) * 1.3,
-        PlotChartMarkerPosition.below => dot.dy + markerRadius + 1.5,
+        PlotChartMarkerPosition.above => dot.dy - r - (markerStyle.fontSize ?? 10) * 1.3,
+        PlotChartMarkerPosition.below => dot.dy + r + 1.5,
       };
       text.paint(canvas, Offset(dx, dy));
       text.dispose();
     }
+  }
+
+  /// The lowest or highest finite value of the points and series.
+  static double? _extent(List<double> points, List<PlotChartSeries> series, double Function(double, double) pick) {
+    double? out;
+    for (final v in [...points, for (final s in series) ...s.points]) {
+      if (v == null || !v.isFinite) continue;
+      out = out == null ? v : pick(out, v);
+    }
+    return out;
+  }
+
+  /// On a zero-anchored grid, lines sit on whole pixels (+0.5) so 1px lines
+  /// stay crisp.
+  static double _crisp(double v, bool snap) => snap ? v.roundToDouble() + 0.5 : v;
+
+  /// The x and y axes through the origin with arrowheads, titles, ticks and
+  /// labels at the grid lines; labels of an axis off the plot stick to the
+  /// nearest edge, and labels in [PlotChartProps.labelMargin] are skipped.
+  void _paintOriginAxes(Canvas canvas, Size size, double h, double Function(double) x, double Function(double) y,
+      double axisX, double axisY, bool xAxisOn, bool yAxisOn, double? stepX, double? stepY, double low, double high) {
+    final w = size.width;
+    final axis = Paint()
+      ..color = (p(PlotChartProps.axisColor) ?? api.Color.black).flutter
+      ..strokeWidth = p(PlotChartProps.axisWidth);
+    final arrows = p(PlotChartProps.axisArrows);
+    final titleStyle = _style(p(PlotChartProps.axisTitleStyle), color: axis.color);
+    if (xAxisOn) {
+      canvas.drawLine(Offset(0, axisY), Offset(w, axisY), axis);
+      if (arrows) _arrow(canvas, Offset(w - 1, axisY), 0, axis.color);
+      _title(canvas, p(PlotChartProps.xAxisTitle), Offset(w - 18, axisY - 22), titleStyle);
+    }
+    if (yAxisOn) {
+      canvas.drawLine(Offset(axisX, 0), Offset(axisX, h), axis);
+      if (arrows) _arrow(canvas, Offset(axisX, 1), -math.pi / 2, axis.color);
+      _title(canvas, p(PlotChartProps.yAxisTitle), Offset(axisX + 10, 4), titleStyle);
+    }
+    final label = _style(p(PlotChartProps.labelStyle));
+    final margin = p(PlotChartProps.labelMargin);
+    final halo = p(PlotChartProps.labelBackground)?.flutter;
+    final tick = Paint()
+      ..color = axis.color
+      ..strokeWidth = 1.2;
+    final xMin = this.xMin, xMax = this.xMax;
+    if (stepX != null && stepX > 0) {
+      for (var k = (xMin / stepX).ceil(); k * stepX <= xMax + 1e-9; k++) {
+        if (k == 0) continue;
+        final dx = x(k * stepX);
+        final text = _text(_formatTick(k * stepX, stepX), label);
+        if (dx - text.width / 2 < margin.left || dx + text.width / 2 > w - margin.right) {
+          text.dispose();
+          continue;
+        }
+        final ly = (xAxisOn ? axisY + 5 : (axisY < 0 ? 5.0 : h - text.height - 5)).clamp(5.0, math.max(5.0, h - text.height - 5)).toDouble();
+        if (halo != null) {
+          canvas.drawRect(Rect.fromLTWH(dx - text.width / 2 - 2, ly - 1, text.width + 4, text.height + 2), Paint()..color = halo);
+        }
+        canvas.drawLine(Offset(dx, axisY - 4), Offset(dx, axisY + 4), tick);
+        text.paint(canvas, Offset(dx - text.width / 2, ly));
+        text.dispose();
+      }
+    }
+    if (stepY != null && stepY > 0) {
+      for (var k = (low / stepY).ceil(); k * stepY <= high + 1e-9; k++) {
+        if (k == 0) continue;
+        final dy = y(k * stepY);
+        final text = _text(_formatTick(k * stepY, stepY), label);
+        if (dy - text.height / 2 < margin.top || dy + text.height / 2 > h - margin.bottom) {
+          text.dispose();
+          continue;
+        }
+        final lx = yAxisOn ? axisX - text.width - 7 : (axisX < 0 ? 6.0 : w - text.width - 6);
+        final clamped = lx.clamp(6.0, math.max(6.0, w - text.width - 6)).toDouble();
+        if (halo != null) {
+          canvas.drawRect(Rect.fromLTWH(clamped - 2, dy - text.height / 2 - 1, text.width + 4, text.height + 2), Paint()..color = halo);
+        }
+        if (yAxisOn) canvas.drawLine(Offset(axisX - 4, dy), Offset(axisX + 4, dy), tick);
+        text.paint(canvas, Offset(clamped, dy - text.height / 2));
+        text.dispose();
+      }
+    }
+    if (xAxisOn && yAxisOn) _title(canvas, '0', Offset(axisX - 12, axisY + 5), label);
+  }
+
+  void _arrow(Canvas canvas, Offset tip, double angle, Color color) {
+    canvas.save();
+    canvas.translate(tip.dx, tip.dy);
+    canvas.rotate(angle);
+    canvas.drawPath(
+      Path()
+        ..moveTo(0, 0)
+        ..lineTo(-10, -4)
+        ..lineTo(-10, 4)
+        ..close(),
+      Paint()..color = color,
+    );
+    canvas.restore();
+  }
+
+  void _title(Canvas canvas, String text, Offset at, TextStyle style) {
+    if (text.isEmpty) return;
+    final painter = _text(text, style);
+    painter.paint(canvas, at);
+    painter.dispose();
+  }
+
+  void _paintMarker(Canvas canvas, PlotChartMarker marker, Offset c, double r) {
+    final color = marker.color.flutter;
+    final fill = Paint()..color = (marker.fillColor ?? api.Color.white).flutter;
+    switch (marker.shape) {
+      case PlotChartMarkerShape.dot:
+        canvas.drawCircle(c, r, Paint()..color = color);
+        if (marker.strokeColor case final api.Color stroke) {
+          canvas.drawCircle(
+              c,
+              r,
+              Paint()
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = marker.strokeWidth ?? 1.2
+                ..color = stroke.flutter);
+        }
+      case PlotChartMarkerShape.ring:
+        canvas.drawCircle(c, r, fill);
+        canvas.drawCircle(
+            c,
+            r,
+            Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = marker.strokeWidth ?? 2
+              ..color = color);
+      case PlotChartMarkerShape.square:
+        final rect = Rect.fromCenter(center: c, width: r * 2, height: r * 2);
+        canvas.drawRect(rect, fill);
+        canvas.drawRect(
+            rect,
+            Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = marker.strokeWidth ?? 2
+              ..color = color);
+      case PlotChartMarkerShape.diamond:
+        final d = Path()
+          ..moveTo(c.dx, c.dy - r)
+          ..lineTo(c.dx + r, c.dy)
+          ..lineTo(c.dx, c.dy + r)
+          ..lineTo(c.dx - r, c.dy)
+          ..close();
+        canvas.drawPath(d, fill);
+        canvas.drawPath(
+            d,
+            Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = marker.strokeWidth ?? 1.2
+              ..color = (marker.strokeColor ?? api.Color.black).flutter);
+    }
+  }
+
+  /// A dashed line, 4px on and 4px off.
+  static void _dashed(Canvas canvas, Offset a, Offset b, Paint paint) {
+    final d = (b - a).distance;
+    if (d < 1) return;
+    final dir = (b - a) / d;
+    for (var t = 0.0; t < d; t += 8) {
+      canvas.drawLine(a + dir * t, a + dir * math.min(t + 4, d), paint);
+    }
+  }
+
+  /// A value tag where a selection guide meets an axis: under the x axis,
+  /// or beside the y axis, kept inside the chart.
+  void _tag(Canvas canvas, Size size, double h, String text, Offset at, {required bool below}) {
+    if (text.isEmpty) return;
+    final style = _style(p(PlotChartProps.selectionTagStyle), color: null, weight: 600);
+    final tagStyle = p(PlotChartProps.selectionTagStyle).color == null ? style.copyWith(color: const Color(0xFFFFFFFF)) : style;
+    final painter = _text(text, tagStyle.copyWith(fontSize: p(PlotChartProps.selectionTagStyle).fontSize ?? 11));
+    final w = painter.width + 10, th = painter.height + 4;
+    final r = below
+        ? Rect.fromLTWH((at.dx - painter.width / 2 - 5).clamp(2.0, math.max(2.0, size.width - w - 2)).toDouble(),
+            (at.dy + 6).clamp(2.0, math.max(2.0, h - th - 2)).toDouble(), w, th)
+        : Rect.fromLTWH((at.dx + 6).clamp(2.0, math.max(2.0, size.width - w - 2)).toDouble(),
+            (at.dy - painter.height / 2 - 2).clamp(2.0, math.max(2.0, h - th - 2)).toDouble(), w, th);
+    canvas.drawRect(r, Paint()..color = p(PlotChartProps.selectionTagColor).flutter);
+    painter.paint(canvas, r.topLeft + const Offset(5, 2));
+    painter.dispose();
+  }
+
+  /// A Cartesian grid label: the step's decimals, exponent form for very
+  /// large values or very small steps, never "-0".
+  static String _formatTick(double v, double step) {
+    if (v.abs() < step * 1e-6) return '0';
+    if (v.abs() >= 1e6 || step < 1e-4) {
+      final e = (math.log(v.abs()) / math.ln10).floor();
+      final m = (v / math.pow(10, e)).toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
+      return '${m}e$e';
+    }
+    return v.toStringAsFixed(math.max(0, -(math.log(step) / math.ln10 + 1e-9).floor()));
   }
 
   /// An axis value without a trailing `.0`.

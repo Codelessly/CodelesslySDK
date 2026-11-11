@@ -149,12 +149,107 @@ void paintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
     );
   }
   if (n.behaviors.strokePath case final api.StrokePath path) {
-    final painter = StrokePathPainter(path);
     chain.add(
-      b.obtain<RenderCustomPaint>('strokePath', RenderCustomPaint.new)
-        ..painter = path.inFront ? null : painter
-        ..foregroundPainter = path.inFront ? painter : null,
+      b.obtain<RenderStrokePath>('strokePath', RenderStrokePath.new)..configure(path, animates: b.tree.animates),
     );
+  }
+}
+
+/// A node's [api.StrokePath], behind its content or in front. A running app
+/// draws it along its length over [api.StrokePath.drawMs]: when it first
+/// shows, from nothing when [api.StrokePath.drawKey] changes, and from where
+/// it is when [api.StrokePath.progress] changes.
+class RenderStrokePath extends RenderProxyBox {
+  api.StrokePath? _path;
+  bool _animates = false;
+
+  /// The share of the stroke drawn now, and the run toward [_to].
+  double _shown = 1, _from = 0, _to = 1;
+  Duration? _start;
+  Ticker? _ticker;
+
+  /// The share drawn now (for tests).
+  double get shown => _shown;
+
+  void configure(api.StrokePath path, {required bool animates}) {
+    final old = _path;
+    _path = path;
+    _animates = animates;
+    if (!animates || !path.draws) {
+      _stop();
+      _shown = path.progress;
+    } else if (old == null || !old.draws) {
+      _run(0, path.progress);
+    } else if (path.drawKey != old.drawKey) {
+      _run(0, path.progress);
+    } else if (path.progress != old.progress) {
+      _run(_shown, path.progress);
+    }
+    markNeedsPaint();
+  }
+
+  void _run(double from, double to) {
+    _from = from;
+    _to = to;
+    _shown = from;
+    _start = null;
+    _ticker ??= Ticker(_tick);
+    if (attached && !_ticker!.isActive) _ticker!.start();
+  }
+
+  void _stop() {
+    if (_ticker?.isActive ?? false) _ticker!.stop();
+    _start = null;
+  }
+
+  void _tick(Duration elapsed) {
+    final path = _path;
+    if (path == null) return _stop();
+    _start ??= elapsed;
+    final ms = (elapsed - _start!).inMicroseconds / 1000 - path.drawDelayMs;
+    final t = path.drawMs <= 0 ? 1.0 : (ms / path.drawMs).clamp(0.0, 1.0);
+    _shown = _from + (_to - _from) * path.drawCurve.transform(t);
+    markNeedsPaint();
+    if (t >= 1) _stop();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_animates && (_path?.draws ?? false) && _shown != _to && !(_ticker?.isActive ?? false)) {
+      _ticker ??= Ticker(_tick);
+      _ticker!.start();
+    }
+  }
+
+  @override
+  void detach() {
+    _stop();
+    super.detach();
+  }
+
+  @override
+  void dispose() {
+    _ticker?.dispose();
+    _ticker = null;
+    super.dispose();
+  }
+
+  void _paintStroke(PaintingContext context, Offset offset) {
+    final path = _path;
+    if (path == null || !hasSize) return;
+    context.canvas.save();
+    context.canvas.translate(offset.dx, offset.dy);
+    StrokePathPainter(_shown == path.progress ? path : path.copyWith(progress: _shown)).paint(context.canvas, size);
+    context.canvas.restore();
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final inFront = _path?.inFront ?? false;
+    if (!inFront) _paintStroke(context, offset);
+    super.paint(context, offset);
+    if (inFront) _paintStroke(context, offset);
   }
 }
 
@@ -437,16 +532,27 @@ class RenderPose extends RenderProxyBox {
   double _opacity = 1;
   set opacity(double v) {
     if (v == _opacity) return;
+    final composited = alwaysNeedsCompositing;
     _opacity = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
   double _blur = 0;
   set blur(double v) {
     if (v == _blur) return;
+    final composited = alwaysNeedsCompositing;
     _blur = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
+
+  /// A partly transparent or blurred pose paints its child into a layer
+  /// (an opacity or image filter layer), so what's above it must composite
+  /// too: an ancestor that scales or clips with the canvas alone (a fitted
+  /// board, a clip) would otherwise leave the layer unscaled and unclipped.
+  @override
+  bool get alwaysNeedsCompositing => child != null && ((_opacity > 0 && _opacity < 1) || _blur > 0);
 
   /// Hidden while its back faces the viewer (through every transform above).
   bool _backfaceHidden = false;
@@ -666,6 +772,22 @@ class RenderLoops extends RenderPose with _Ticking {
 /// a running app plays its entrance, loop and spin, and transitions to new
 /// values when they change.
 class RenderMotion extends RenderPose with _Ticking {
+  /// The size of the node's parent node (the second node box above it), for
+  /// a path in a viewBox; null before layout.
+  Size? _parentSize() {
+    var boxes = 0;
+    for (var p = parent; p != null; p = p.parent) {
+      if (p is NodeBox) {
+        boxes++;
+        if (boxes == 2) {
+          final b = p.contentBox ?? p;
+          return b.hasSize ? b.size : null;
+        }
+      }
+    }
+    return null;
+  }
+
   api.Motion _motion = api.Motion.none;
   bool _animates = false;
   bool _entered = false;
@@ -721,13 +843,27 @@ class RenderMotion extends RenderPose with _Ticking {
       }
     } else {
       _to = v;
-      if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
+      if (_animates && _entered && _replays(old, v)) {
+        // A new replay key plays the entrance again (from its start, after
+        // its delay, through its keyframes): a list's items falling into
+        // place one after another when the data they show is refilled.
+        _start(v.entranceStart, v, at: _clock);
+      } else if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
         _start(_shown, v, at: _clock);
       }
     }
     _show();
     syncTicker();
   }
+
+  /// Whether [v] replays its entrance: its replay key changed to a new one
+  /// on a motion with an entrance (or keyframes to run through).
+  static bool _replays(api.Motion old, api.Motion v) =>
+      v.replayKey != null &&
+      v.replayKey!.isNotEmpty &&
+      v.replayKey != old.replayKey &&
+      (v.hasEntrance || v.keyframes.isNotEmpty) &&
+      _transitionMs(v) > 0;
 
   static bool _loops(api.Motion m) => m.loop != api.MotionLoop.none && m.duration > 0;
 
@@ -785,6 +921,24 @@ class RenderMotion extends RenderPose with _Ticking {
     _MotionRevealWatcher.remove(this);
     _show();
     syncTicker();
+  }
+
+  /// A path in a viewBox follows the parent's size: placed again once laid
+  /// out (the parent has its size by then).
+  Size? _stage;
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (_motion.hasPath && _motion.pathViewBox.length >= 2) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (!attached) return;
+        final stage = _parentSize();
+        if (stage != null && stage != _stage) {
+          _stage = stage;
+          _show();
+        }
+      });
+    }
   }
 
   @override
@@ -876,16 +1030,29 @@ class RenderMotion extends RenderPose with _Ticking {
     var shown = m;
     if (m.hasPath) {
       final progress = m.pathWrap ? api.Motion.wrapProgress(m.pathProgress) : m.pathProgress;
-      final at = MeasuredPath.of(m.path!)?.at(
+      final measured = MeasuredPath.of(m.path!);
+      final at = measured?.at(
         progress,
         byArea: m.pathPacing == api.MotionPathPacing.area,
         focus: Offset(m.pathFocusX, m.pathFocusY),
       );
       if (at != null) {
-        final total = Offset(m.translateX + at.$1.dx, m.translateY + at.$1.dy);
+        // A path in a viewBox is stretched over the node's parent.
+        var point = at.$1;
+        var heading = at.$2;
+        final stage = m.pathViewBox.length >= 2 ? _parentSize() : null;
+        if (stage != null && m.pathViewBox[0] > 0 && m.pathViewBox[1] > 0) {
+          // In a viewBox the path is placed over the parent: its points are
+          // where the node goes (from the parent's origin), not offsets from
+          // the path's start, so the node is laid out at the origin.
+          final sx = stage.width / m.pathViewBox[0], sy = stage.height / m.pathViewBox[1];
+          final absolute = point + measured!.start;
+          point = Offset(absolute.dx * sx, absolute.dy * sy);
+          heading = math.atan2(math.sin(heading) * sy, math.cos(heading) * sx);
+        }
+        final total = Offset(m.translateX + point.dx, m.translateY + point.dy);
         // Keyframes that push the node off its path turn it too: its nose
         // follows where it actually goes.
-        var heading = at.$2;
         final pushed =
             m.orientToPath && moving && m.keyframes.any((k) => k.translateX != null || k.translateY != null);
         if (pushed) {
