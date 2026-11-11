@@ -16,6 +16,7 @@ import '../render/convert.dart';
 import '../render/layout/fit_box.dart';
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
+import '../runtime/expressions/bindings.dart' show ProvidedItem;
 import 'collections_data_list.dart';
 import 'collections_islands.dart';
 import 'collections_list_runtime.dart';
@@ -526,7 +527,11 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final rowHeader = slot(TableViewProps.rowHeader), corner = slot(TableViewProps.corner);
   final headerRow = columnHeader != null, headerColumn = rowHeader != null;
   final columns = n.prop(TableViewProps.columns);
-  final rowCount = math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
+  // Bound rows show on the design canvas too, each cell in its scope, as
+  // the running table shows them.
+  final runtime = ListRuntime(b, n);
+  final List<Object?>? boundRows = n.bind.containsKey('data') ? tableRowsOf(runtime) : null;
+  final rowCount = boundRows?.length ?? math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
 
   // The spans that show in the design size (a cell past it is cut off).
   List<double> fit(List<double> all, double extent) {
@@ -540,10 +545,13 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return out;
   }
 
+  final edge = n.prop(TableViewProps.horizontalPadding);
+  final widths = tableColumnWidths(columns, n.prop(TableViewProps.columnWidth),
+      design.width - (headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0) - edge * 2);
   final columnWidths = fit([
     if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
-    for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth),
-  ], design.width);
+    for (var i = 0; i < columns.length; i++) widths[i] + (i == 0 ? edge : 0) + (i == columns.length - 1 ? edge : 0),
+  ], n.layout.width.fit == SizeFit.fill ? double.infinity : design.width);
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
     for (var i = 0; i < math.min(rowCount, _maxTableSpans); i++) n.prop(TableViewProps.rowHeight),
@@ -560,9 +568,40 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     cells.add((r, c));
   }
 
+  final rowOffset = headerRow ? 1 : 0, columnOffset = headerColumn ? 1 : 0;
   for (var r = 0; r < rowHeights.length; r++) {
     for (var c = 0; c < columnWidths.length; c++) {
       final inHeaderRow = headerRow && r == 0, inHeaderColumn = headerColumn && c == 0;
+      final rowIndex = r - rowOffset, columnIndex = c - columnOffset;
+      if (boundRows != null && !inHeaderColumn && columnIndex < columns.length) {
+        // A cell with its data in scope (`${item.value}`, `${item.label}`).
+        final id = inHeaderRow ? columnHeader : cell;
+        if (id != null) {
+          final column = columns[columnIndex];
+          final Object key = inHeaderRow ? ('column', columnIndex) : (rowIndex, columnIndex);
+          final instance = ProvidedItem('cell', b.instance, n.id, key);
+          final row = inHeaderRow ? null : boundRows[rowIndex];
+          runtime.binder?.provideItem(b.tree.source, instance,
+              index: inHeaderRow ? columnIndex : rowIndex,
+              item: inHeaderRow
+                  ? {'label': column.label, 'column': column.key, 'columnIndex': columnIndex}
+                  : {
+                      'value': switch (row) {
+                        final Map m => m[column.key],
+                        final List l => l.elementAtOrNull(columnIndex),
+                        _ => null,
+                      },
+                      'row': row,
+                      'column': column.key,
+                      'rowIndex': rowIndex,
+                      'columnIndex': columnIndex,
+                    });
+          ids.add(id);
+          instances.add(instance);
+          cells.add((r, c));
+        }
+        continue;
+      }
       add(
           inHeaderRow && inHeaderColumn
               ? corner
