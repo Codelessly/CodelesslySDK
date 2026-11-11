@@ -161,4 +161,19 @@ void main() {
     expect(controller.scope!.read('theme.isDark'), isFalse);
     expect(controller.scope!.read('theme.surface'), '#FFFFFFFF');
   });
+
+  testWidgets('an app variable named theme is the project\'s: the built-in neither hides nor takes its writes', (tester) async {
+    final app = Codelessly.fromBundle(_bundle(_theme), fonts: const NoFontFetcher());
+    addTearDown(app.dispose);
+    app.declareAppVariables([const Variable(name: 'theme', value: 'Midnight')]);
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app, controller: controller)));
+    await tester.pumpAndSettle();
+    expect(controller.scope!.read('theme'), 'Midnight');
+    controller.setVariable('theme', 'Dusk');
+    await tester.pump();
+    expect(app.appVariables.read('theme'), 'Dusk');
+    expect(controller.scope!.read('theme'), 'Dusk');
+  });
 }
