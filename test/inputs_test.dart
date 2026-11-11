@@ -41,6 +41,43 @@ Offset _center(WidgetTester tester, NodeTree tree, String id) =>
     tester.getTopLeft(find.byType(NodeView)) + tree.boxOf(id)!.rectIn(tester.renderObject(find.byType(NodeView)))!.center;
 
 void main() {
+  testWidgets('date and time pickers stay in their app navigator', (tester) async {
+    final tree = NodeTree(DocumentSource(_doc({
+      'date': {'type': 'datePicker', 'layout': {'width': 160, 'height': 50}},
+      'time': {'type': 'timePicker', 'layout': {'width': 160, 'height': 50, 'y': {'start': 80}}},
+    })));
+    final outer = GlobalKey<NavigatorState>();
+    final inner = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MaterialApp(navigatorKey: outer, home: Navigator(
+      key: inner,
+      onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => Material(
+        child: Center(child: FeedbackThemeScope(
+          theme: const FeedbackTheme(primary: Color(0xFF147D68), surface: Colors.white, bodyStyle: TextStyle(fontFamily: 'Arial')),
+          child: NodeView(tree: tree, rootId: 's', interactive: true),
+        )),
+      )),
+    )));
+    await tester.pumpAndSettle();
+    await tester.tapAt(_center(tester, tree, 'date'));
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsOneWidget);
+    expect(Theme.of(tester.element(find.byType(DatePickerDialog))).colorScheme.primary, const Color(0xFF147D68));
+    expect(inner.currentState!.canPop(), isTrue);
+    expect(outer.currentState!.canPop(), isFalse);
+    inner.currentState!.pop(DateTime(2026, 6, 1));
+    await tester.pumpAndSettle();
+    await tester.tapAt(_center(tester, tree, 'time'));
+    await tester.pumpAndSettle();
+    expect(find.byType(TimePickerDialog), findsOneWidget);
+    expect(Theme.of(tester.element(find.byType(TimePickerDialog))).colorScheme.primary, const Color(0xFF147D68));
+    expect(inner.currentState!.canPop(), isTrue);
+    expect(outer.currentState!.canPop(), isFalse);
+    inner.currentState!.pop(const TimeOfDay(hour: 9, minute: 30));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(const SizedBox());
+    tree.dispose();
+  });
+
   testWidgets('a text field is a real TextField, sized by its fits', (tester) async {
     final source = DocumentSource(_doc({
       'f': {

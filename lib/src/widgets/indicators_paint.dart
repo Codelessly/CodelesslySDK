@@ -307,7 +307,7 @@ class RadialGaugePainter extends NodePainter {
     final fill = _colorFor(min + (max - min) * fraction);
     final stroke = math.max(0.0, thickness);
 
-    void arc(Rect bounds, double from, double length, Color color, double width) {
+    void arc(Rect bounds, double from, double length, Color color, double width, {bool round = false}) {
       if (width <= 0 || length <= 0) return;
       canvas.drawArc(
         bounds,
@@ -317,6 +317,7 @@ class RadialGaugePainter extends NodePainter {
         Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = width
+          ..strokeCap = round ? StrokeCap.round : StrokeCap.butt
           ..color = color,
       );
     }
@@ -343,7 +344,7 @@ class RadialGaugePainter extends NodePainter {
       }
     } else {
       arc(rect, start, sweep, track, stroke);
-      arc(rect, start, sweep * fraction, fill, stroke);
+      arc(rect, start, sweep * fraction, fill, stroke, round: p(RadialGaugeProps.roundCaps));
     }
 
     Offset at(double r, double angle) => center + Offset(math.cos(angle), math.sin(angle)) * r;

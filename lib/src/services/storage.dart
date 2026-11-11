@@ -126,9 +126,9 @@ class PreferencesLocalStorage extends LocalStorageBase {
 
   @override
   Future<void> put(String key, Object? value) async {
+    if(!await _prefs.setString('$prefix$key',jsonEncode(value)))throw StateError('Storage write rejected');
     _values[key] = value;
     changed(key);
-    await _prefs.setString('$prefix$key', jsonEncode(value));
   }
 
   @override

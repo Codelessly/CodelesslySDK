@@ -39,6 +39,16 @@ Map<String, Json> list(Json reorder, {Json rowExtra = const {}, Map<String, Json
     };
 
 void main() {
+  testWidgets('group reorder preserves configured separator spacing', (tester) async {
+    final nodes = list({'group': 'spaced', 'start': 'press'});
+    nodes['list']!['props'] = <String, Object?>{...(nodes['list']!['props'] as Json), 'separator': 'space', 'spacing': 18};
+    final screen = await show(tester, nodes, variables: [v('songs', songs(), VariableType.list)]);
+    await tester.pumpAndSettle();
+    final first = screen.center('row', instance: const ProvidedItem('row', null, 'list', ('id', 's0')));
+    final second = screen.center('row', instance: const ProvidedItem('row', null, 'list', ('id', 's1')));
+    expect(second.dy - first.dy, 68);
+  });
+
   group('index math', () {
     test('moveListItem puts the item at its index in the new order', () {
       expect(moveListItem([0, 1, 2, 3, 4], 0, 2), [1, 2, 0, 3, 4]);

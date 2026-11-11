@@ -191,7 +191,11 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       bodyStyle = _fontOf(body);
       titleStyle = weightOf(title) > weightOf(body) ? _fontOf(title) : bodyStyle.copyWith(fontWeight: FontWeight.w600);
     }
-    final primary = maxKey(primaryVotes.entries.where((e) => e.key != surface?.toARGB32()));
+    // Neutral paper-colored controls must not outvote the accent on a light canvas.
+    // White remains a valid inferred accent on a dark canvas; explicit tokens win above.
+    final lightSurface = surface == null || surface.computeLuminance() > .8;
+    final primary = maxKey(primaryVotes.entries.where((e) =>
+        e.key != surface?.toARGB32() && !(lightSurface && Color(e.key).computeLuminance() > .95)));
     final onSurface = maxKey(textColors.entries);
     final buttonRadius = maxKey(radiusVotes.entries);
     MapEntry<BorderSide, int>? border;
@@ -221,6 +225,7 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     final weight = s.fontWeight;
     return TextStyle(
       fontFamily: s.fontFamily,
+      fontFamilyFallback: s.fontFamilyFallback,
       fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
       fontStyle: s.fontStyle == api.FontStyle.italic ? FontStyle.italic : null,
     );
@@ -482,6 +487,7 @@ TextStyle applyTextStyle(api.TextStyle? style, TextStyle base) {
   final weight = style.fontWeight;
   return base.copyWith(
     fontFamily: style.fontFamily,
+      fontFamilyFallback: style.fontFamilyFallback,
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
     fontStyle: style.fontStyle == null ? null : (style.fontStyle == api.FontStyle.italic ? FontStyle.italic : FontStyle.normal),
     fontSize: style.fontSize,

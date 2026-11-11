@@ -77,6 +77,7 @@ void reorderRecipe(
         itemMain: itemMain,
         itemExtent: itemExtent,
         stretch: stretch,
+        gap: gap,
       ),
     ));
     return;
@@ -543,6 +544,7 @@ class GroupReorderList extends StatefulWidget {
     this.itemMain,
     this.itemExtent,
     this.stretch = false,
+    this.gap = 0,
   });
 
   final ListRuntime runtime;
@@ -556,6 +558,7 @@ class GroupReorderList extends StatefulWidget {
   /// are measured.
   final double? itemExtent;
   final bool stretch;
+  final double gap;
 
   @override
   State<GroupReorderList> createState() => GroupReorderListState();
@@ -595,7 +598,7 @@ class GroupReorderListState extends State<GroupReorderList> {
         along -
         (_axis == Axis.vertical ? _padding.top : _padding.left);
     final extent = widget.itemExtent;
-    if (extent != null && extent > 0) return (offset / extent).round().clamp(0, widget.items.length);
+    if (extent != null && extent > 0) return (offset / (extent + widget.gap)).round().clamp(0, widget.items.length);
     // Measured items: the first whose middle is after the pointer.
     for (var i = 0; i < widget.items.length; i++) {
       final itemBox = _itemKeys[i]?.currentContext?.findRenderObject() as RenderBox?;
@@ -758,7 +761,12 @@ class GroupReorderListState extends State<GroupReorderList> {
                 final index = slot != null && i > slot ? i - 1 : i;
                 // The dragged item of this list collapses while away.
                 if (index == _dragging && slot != null) return const SizedBox.shrink();
-                return _item(context, index);
+                final item = _item(context, index);
+                if (widget.gap <= 0 || index == widget.items.length - 1) return item;
+                return Padding(
+                  padding: _axis == Axis.vertical ? EdgeInsets.only(bottom: widget.gap) : EdgeInsets.only(right: widget.gap),
+                  child: item,
+                );
               },
             );
           });

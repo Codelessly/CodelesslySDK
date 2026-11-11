@@ -79,3 +79,4 @@ dev_dependencies:
   fake_cloud_firestore: ^4.5.0
   # Firebase.initializeApp without a platform, for the Firebase app test.
   firebase_core_platform_interface: ^8.1.1
+  shared_preferences_platform_interface: ^2.4.1

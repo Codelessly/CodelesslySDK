@@ -363,10 +363,47 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
 
 void _chip(NodeBuilder b, Node n, List<RenderBox> chain) {
   _fit(b, n, chain);
-  chain.add(_pressable(b, 'chip', (context) => Material(type: MaterialType.transparency, child: _buildChip(context, n))));
+  chain.add(_pressable(b, 'chip', (context) => Material(type: MaterialType.transparency, child: _ChipIsland(node: n))));
 }
 
-Widget _buildChip(BuildContext context, Node n) {
+class _ChipIsland extends StatefulWidget {
+  const _ChipIsland({required this.node});
+  final Node node;
+
+  @override
+  State<_ChipIsland> createState() => _ChipIslandState();
+}
+
+class _ChipIslandState extends State<_ChipIsland> {
+  late bool selected = widget.node.prop(ChipProps.selected);
+
+  @override
+  void didUpdateWidget(covariant _ChipIsland oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.node.prop(ChipProps.selected) != oldWidget.node.prop(ChipProps.selected) ||
+        widget.node.type != oldWidget.node.type) {
+      selected = widget.node.prop(ChipProps.selected);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = widget.node;
+    final controlled = n.bind.containsKey('props.selected');
+    return _buildChip(context, n, selection: controlled ? n.prop(ChipProps.selected) : selected,
+        onSelected: (value) async {
+      if (!controlled) setState(() => selected = value);
+      final b = context.findAncestorWidgetOfExactType<_Pressable>()?.builder;
+      if (b == null) return;
+      // Native selection owns the pointer gesture. Report the proposed value
+      // before its click so bindings and changed actions can update the model.
+      await runTrigger(b, 'changed', event: {'value': value});
+      if (mounted) await runTrigger(b, 'click', event: {'value': value});
+    });
+  }
+}
+
+Widget _buildChip(BuildContext context, Node n, {required bool selection, required ValueChanged<bool> onSelected}) {
   final label = Text(n.prop(ChipProps.label));
   final labelStyle = textStyle(n.prop(ChipProps.labelStyle));
   final avatarGlyph = n.prop(ChipProps.avatar);
@@ -392,10 +429,9 @@ Widget _buildChip(BuildContext context, Node n) {
   final tooltip = n.prop(ChipProps.tooltip);
   final autofocus = n.prop(ChipProps.autofocus);
   final enabled = n.prop(ChipProps.isEnabled);
-  final selected = n.prop(ChipProps.selected);
+  final selected = selection;
   final showCheckmark = n.prop(ChipProps.showCheckmark);
   final checkmarkColor = _color(n.prop(ChipProps.checkmarkColor));
-  void onSelected(bool _) {}
   return switch (n.type) {
     'actionChip' => ActionChip(
         label: label,

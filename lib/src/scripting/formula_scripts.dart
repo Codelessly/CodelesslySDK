@@ -25,7 +25,7 @@ import 'script_runner.dart';
 /// script can't run synchronously (the web's worker, a runner other than
 /// [SandboxScriptRunner]) the first evaluation starts it and gives null;
 /// `script` notifies when the result arrives, so what read it re-applies.
-class ScriptsScope extends NamedScope implements FormulaScripts {
+class ScriptsScope extends NamedScope implements FormulaScripts, FormulaReadStatus {
   ScriptsScope({required this.scripts, required this.runner, super.parent});
 
   final List<ScriptDef> scripts;
@@ -47,6 +47,10 @@ class ScriptsScope extends NamedScope implements FormulaScripts {
   Set<String>? _resolvingReads;
   bool _resolvedRead = false;
   bool _disposed = false;
+
+  @override
+  int get pendingReads => _pendingReads;
+  int _pendingReads = 0;
 
   static const Set<ScriptCapability> _readOnly = {
     ScriptCapability.variablesRead,
@@ -115,6 +119,7 @@ class ScriptsScope extends NamedScope implements FormulaScripts {
         return result;
       });
     }
+    if (earlier == null) _pendingReads++;
     return earlier != null && earlier.ok ? earlier.value : null;
   }
 

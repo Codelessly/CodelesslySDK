@@ -226,11 +226,10 @@ class NavigatorActionUi implements ActionUi {
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
         sheetWidth: action.sheetWidth,
-        maxHeightFactor: action.maxHeightFactor,
+        maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
         sheetBelowWidth: sheetBelowWidth,
-
         routeTransition: action.routeTransition);
   }
 

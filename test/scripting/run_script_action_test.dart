@@ -60,6 +60,24 @@ void main() {
     expect(Services().scripts, isA<SandboxScriptRunner>());
   });
 
+  test('overlapping sandbox actions preserve complete state-map updates', () async {
+    final h = Harness(scripts: [ScriptDef.fromJson({
+      'id': 'edit', 'name': 'edit',
+      'capabilities': ['variables.read', 'variables.write', 'actions'],
+      'source': r"""
+        const game = vars.get('game');
+        await app.delay(15);
+        vars.set('game', {count: game.count + 1, history: [...game.history, game.count + 1]});
+      """,
+    })!], variables: [v('game', {'count': 0, 'history': []}, VariableType.map)]);
+    await Future.wait([
+      h.click([{'type': 'runScript', 'script': 'edit'}]),
+      h.click([{'type': 'runScript', 'script': 'edit'}]),
+    ]);
+    expect(h.errors, isEmpty);
+    expect(h['game'], {'count': 2, 'history': [1, 2]});
+  });
+
   test('A run script action passes typed arguments, writes variables and leaves its result', () async {
     final h = Harness(
       scripts: [addTip],

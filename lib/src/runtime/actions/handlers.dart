@@ -32,6 +32,7 @@ import 'script_host.dart';
 import 'text_fields.dart';
 import 'values.dart';
 import 'variable_animator.dart';
+import 'printing.dart';
 
 /// Runs one action of a chain. Throws to stop the chain.
 typedef ActionHandler = FutureOr<void> Function(ActionDef action, ActionRun run);
@@ -46,6 +47,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       if (result != null) run.result = result;
     case CloseModalAction():
       run.host.ui.closeModal(a.result.isEmpty ? null : run.json(a.result));
+    case PrintAction():
+      await printNodeAction(a.node, run);
     case OpenLinkAction():
       final url = run.text(a.url).trim();
       if (url.isNotEmpty) await run.context.services.openUrl(url);
@@ -67,6 +70,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       final f = run.host.functions[a.name];
       if (f != null) {
         run.result = await f(run.context, run.json(a.params));
+      } else if (a.name == 'media.probe' || a.name == 'media.import') {
+        run.result = await _mediaImport(a, run);
       } else if (a.name == 'media.export' || a.name == 'media.cancelExport') {
         run.result = await _mediaExport(a, run);
       } else {
@@ -911,5 +916,40 @@ Future<Object?> _mediaExport(CallFunctionAction action, ActionRun run) async {
     return {'ok': true, ...result};
   } catch (error) {
     return {'ok': false, 'error': '$error', 'cancelled': error is MediaExportCancelled};
+  }
+}
+
+// Imported bytes are inspected before uploading. Public URL probing keeps the
+// same HTTPS/MP4 restriction as the player; neither exposes DOM to scripts.
+Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
+  try {
+    final params = run.json(action.params);
+    if (action.name == 'media.probe') {
+      return {'ok': true, ...await probeMedia(params['url'] as String? ?? '')};
+    }
+    final files = _require(run, 'Video import').files;
+    if (files is MemoryFileStorage) {
+      throw StateError(
+        'Connect cloud file storage before choosing a device video. You can import a public HTTPS MP4 URL instead.',
+      );
+    }
+    final picked = await run.host.ui.pickFiles(images: false, multiple: false);
+    if (run.isCanceled || picked.isEmpty) {
+      return {'ok': false, 'cancelled': true};
+    }
+    final file = picked.first;
+    final metadata = await probePickedVideo(file.name, file.bytes, contentType: file.contentType);
+    if (run.isCanceled) {
+      return {'ok': false, 'cancelled': true};
+    }
+    final name = file.name.replaceAll(RegExp(r'[^A-Za-z0-9_.-]'), '_');
+    final uploaded = await files.upload(
+      'cutroom/imports/${DateTime.now().microsecondsSinceEpoch}-$name',
+      file.bytes,
+      contentType: 'video/mp4',
+    );
+    return {'ok': true, ...metadata, 'url': uploaded.url, 'name': file.name};
+  } catch (error) {
+    return {'ok': false, 'error': '$error'};
   }
 }

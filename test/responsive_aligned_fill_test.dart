@@ -97,6 +97,36 @@ Future<(DocumentSource, NodeTree, RenderObject)> _show(
 
 void main() {
   testWidgets(
+    'scrollable aligned fill desktop keeps its padding origin and viewport with tall content',
+    (tester) async {
+      final original = _doc();
+      final content = original.nodes['content']!;
+      final doc = original.copyWith(
+        nodes: {
+          ...original.nodes,
+          'content': content.copyWith(
+            props: content.props.set(ScrollProps.scrollable, true),
+            children: ['title', 'tall'],
+          ),
+          'tall': Node.fromJson({
+            'id': 'tall',
+            'type': 'box',
+            'layout': {'width': 200, 'height': 2000},
+          })!,
+        },
+      );
+      final (_, tree, view) = await _show(tester, doc);
+      expect(
+        tree.boxOf('content')!.rectIn(view),
+        const Rect.fromLTWH(0, 0, 1440, 900),
+      );
+      expect(tree.boxOf('title')!.rectIn(view)!.topLeft, const Offset(36, 36));
+      expect(tree.boxOf('tall')!.rectIn(view)!.topLeft, const Offset(36, 66));
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'desktop aligned fill content uses its runtime viewport, not a mobile fallback overhang',
     (tester) async {
       final (_, tree, view) = await _show(tester, _doc());
