@@ -85,6 +85,16 @@ abstract final class FontDemand {
   static void Function(String family, int weight, bool italic)? handler;
   static final Set<String> _asked = {};
 
+  /// Whether a family's characters beyond a browser's `latin` subset come as
+  /// a family of their own ([glyphFamily]), which every style using the
+  /// family falls back to. Set by the app's font loader on the web.
+  static bool glyphFallback = false;
+
+  /// The family holding [family]'s characters beyond `latin`. On the web a
+  /// family's later files don't add glyphs to its first (the engine draws
+  /// the first's empty glyph), so they are a family of their own.
+  static String glyphFamily(String family) => '$family glyphs';
+
   static void need(String family, int weight, bool italic) {
     final h = handler;
     if (h == null || family.isEmpty) return;
@@ -101,7 +111,9 @@ TextStyle textStyle(api.TextStyle style) {
   final natural = style.height == null && style.naturalHeight == true;
   return (natural ? kTextBaseNatural : kTextBase).merge(TextStyle(
     fontFamily: style.fontFamily,
-      fontFamilyFallback: style.fontFamilyFallback,
+      fontFamilyFallback: FontDemand.glyphFallback && style.fontFamily != null
+          ? [FontDemand.glyphFamily(style.fontFamily!), ...style.fontFamilyFallback]
+          : style.fontFamilyFallback,
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
     fontStyle: style.fontStyle == null ? null : FontStyle.values.byName(style.fontStyle!.name),
     fontSize: style.fontSize,

@@ -4,7 +4,9 @@
 // They now come in a file of their own (`text=`), registered with the family.
 import 'dart:typed_data';
 
+import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/convert.dart' show FontDemand;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -37,7 +39,9 @@ void main() {
     );
     await fonts.load([const PublishFont(id: 'g6', family: 'Geist', weight: 600)], text: 'Backlog → Done');
     expect(fetcher.asked, ['Geist 600 →']);
-    expect(registered['Geist'], [1, 2]);
+    // A family of their own: on the web a family's later files add no glyphs.
+    expect(registered['Geist'], [1]);
+    expect(registered['Geist glyphs'], [2]);
   });
 
   test('a font asked for when first drawn fetches the shown layouts\' characters too', () async {
@@ -52,14 +56,15 @@ void main() {
 
   test('a font drawn on an earlier screen fetches a later layout\'s new characters', () async {
     final fetcher = _Glyphs();
-    final registered = <List<int>>[];
-    final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, files) async => registered.add([for (final f in files) f.first]));
+    final registered = <String>[];
+    final fonts = CodelesslyFonts(
+        fetcher: fetcher, register: (family, files) async => registered.add('$family ${[for (final f in files) f.first]}'));
     await fonts.addText('Boards ⌘');
     await fonts.load([const PublishFont(id: 'g4', family: 'Geist', weight: 400)]);
     expect(fetcher.asked, ['Geist 400 ⌘']);
     await fonts.addText('Backlog → Done ⌘');
     expect(fetcher.asked, ['Geist 400 ⌘', 'Geist 400 →'], reason: 'only the new character');
-    expect(registered, [[1, 2], [2]]);
+    expect(registered, ['Geist [1]', 'Geist glyphs [2]', 'Geist glyphs [2]']);
     await fonts.addText('Nothing new →');
     expect(fetcher.asked.length, 2);
   });
@@ -70,6 +75,14 @@ void main() {
     final fonts = CodelesslyFonts(fetcher: fetcher, register: (_, _) async {});
     await fonts.load([const PublishFont(id: 'g4', family: 'Geist', weight: 400)], text: 'To Do, Doing, Done');
     expect(fetcher.asked, isEmpty);
+  });
+
+  test('on the web a style falls back to its family\'s glyphs', () {
+    FontDemand.glyphFallback = true;
+    addTearDown(() => FontDemand.glyphFallback = false);
+    final style = textStyle(const api.TextStyle(fontFamily: 'Geist', fontWeight: 400, fontFamilyFallback: ['Noto Sans']));
+    expect(style.fontFamilyFallback, ['Geist glyphs', 'Noto Sans']);
+    expect(textStyle(const api.TextStyle(fontWeight: 400)).fontFamilyFallback, isEmpty);
   });
 
   test('HttpFontFetcher asks Google Fonts for just those characters', () async {
