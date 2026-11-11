@@ -564,6 +564,8 @@ void main() {
     await tester.pumpAndSettle();
     // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
     expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // No tinted Material surface behind the screen's own.
+    expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
     Navigator.of(appContext).pop();
     await tester.pumpAndSettle();
     await tester.tapAt(s.center('button'), buttons: kSecondaryButton);

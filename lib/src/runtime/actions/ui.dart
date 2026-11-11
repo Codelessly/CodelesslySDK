@@ -393,6 +393,11 @@ Future<Object?> showScreenModal(
       isDismissible: barrierDismissible,
       showDragHandle: showDragHandle,
       barrierColor: scrim,
+      // The screen draws its own surface (its fills, radius and shadow): a
+      // tinted Material sheet behind it showed above a screen whose content
+      // sits at the bottom of its canvas.
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       builder: (_) => content,
     );
   }
