@@ -814,6 +814,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
   if (box == null || !box.attached) return;
   final target = box.contentBox ?? box;
+  final offset = a.offsetFormula.isEmpty ? a.offset : (double.tryParse(run.text(a.offsetFormula).trim()) ?? a.offset);
   final duration = Duration(milliseconds: a.durationMs);
   final Curve curve = switch (AnimationCurve.parse(a.curve)) {
     AnimationCurve.linear => Curves.linear,
@@ -833,7 +834,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
       viewports++;
       final along=a.axis==null || (p.axis==rendering.Axis.horizontal)==(a.axis==ScrollAxis.horizontal);
       if(along){
-        final to=(p.getOffsetToReveal(revealed,a.alignment)-a.offset).clamp(0.0,p.maxScrollExtent);
+        final to=(p.getOffsetToReveal(revealed,a.alignment)-offset).clamp(0.0,p.maxScrollExtent);
         if(a.durationMs<=0){p.jumpTo(to);}else{scrolls.add(p.animateTo(to,duration:duration,curve:curve));}
       }
       revealed=p;
@@ -845,7 +846,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     viewports++;
     final along = a.axis == null || (p.axis == rendering.Axis.horizontal) == (a.axis == ScrollAxis.horizontal);
     if (along && position.hasContentDimensions) {
-      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - a.offset)
+      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - offset)
           .clamp(position.minScrollExtent, position.maxScrollExtent)
           .toDouble();
       if ((to - position.pixels).abs() >= 0.5) {

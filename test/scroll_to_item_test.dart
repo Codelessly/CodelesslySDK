@@ -59,6 +59,16 @@ void main() {
     });
   }
 
+  testWidgets('offset as a formula (a link param) moves it further', (tester) async {
+    final nodes = page('c');
+    ((nodes['go']!['actions'] as List).first['actions'] as List).first['offset'] = r'${= -number(shift)}';
+    final screen = await wiring.show(tester, nodes, variables: [rows, const Variable(name: 'shift', value: '60')]);
+    final view = viewport(screen.tree);
+    await tester.tapAt(view.localToGlobal(const Offset(100, 20)));
+    await tester.pump();
+    expect(view.pixels, 300);
+  });
+
   testWidgets('without item, the first copy (unchanged behavior)', (tester) async {
     final screen = await wiring.show(tester, page(''), variables: [rows]);
     final view = viewport(screen.tree);
