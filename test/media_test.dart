@@ -8,6 +8,8 @@ import 'package:codelessly_sdk/src/widgets/media_players.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 /// A 4×2 red PNG.
 const _png = 'data:image/png;base64,'
@@ -74,6 +76,11 @@ void main() {
     // A name the table doesn't know keeps its stored version.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'brand_new_icon', 'version': 3}),
         'https://fonts.gstatic.com/s/i/materialicons/brand_new_icon/v3/24px.svg');
+    // ios_share has no v1 SVG: without the table it drew nothing.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'ios_share', 'style': 'rounded'}),
+        contains('/materialiconsround/ios_share/v'));
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'ios_share', 'style': 'rounded'}),
+        isNot(contains('/v1/')));
     expect(
         IconSources.urlOf({
           'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star', 'style': 'rounded', //
@@ -85,6 +92,21 @@ void main() {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'CUPERTINO_ICON', 'codepoint': 61708}),
         'https://icons.codelessly.com/cupertino/1.0.9/f10c.svg');
     expect(IconSources.urlOf({'source': 'image', 'image': 'https://x.com/a.png'}), 'https://x.com/a.png');
+  });
+
+  test("a Material icon named with Flutter's style suffix is served under its base name", () {
+    String? url(String name, [String? style]) =>
+        IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': name, 'style': ?style});
+    expect(url('download_rounded', 'rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/download/'));
+    expect(url('check_circle_outline_rounded', 'rounded'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsround/check_circle_outline/'));
+    expect(url('theater_comedy_outlined', 'outlined'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsoutlined/theater_comedy/'));
+    // With no style set, the suffix names it.
+    expect(url('playlist_add_rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/playlist_add/'));
+    expect(url('memory_sharp'), startsWith('https://fonts.gstatic.com/s/i/materialiconssharp/memory/'));
+    // Names that only contain the words are untouched.
+    expect(url('outlined_flag'), startsWith('https://fonts.gstatic.com/s/i/materialicons/outlined_flag/'));
   });
 
   test('a Material icon saved without its version is drawn from its current SVG', () {
@@ -214,6 +236,32 @@ void main() {
         paints
           ..clipRect(rect: const Rect.fromLTWH(10, 0, 20, 20))
           ..something((m, args) => m == #drawPicture));
+  });
+
+  testWidgets('an SVG icon whose first fetch fails loads on a retry', (tester) async {
+    var calls = 0;
+    final svg = UriData.parse(_svg).contentAsBytes();
+    final client = MockClient((request) async {
+      calls++;
+      return calls == 1 ? http.Response('dropped', 502) : http.Response.bytes(svg, 200);
+    });
+    await http.runWithClient(() async {
+      final tree = await _show(tester, _doc({
+        'i': {
+          'type': 'icon',
+          'layout': {'width': 20, 'height': 20},
+          'props': {'icon': {'source': 'image', 'image': 'https://cdn.example.com/icons/flaky.svg'}, 'color': '#FF00FF00'},
+        },
+      }));
+      await _loadImages(tester);
+      expect(calls, 1);
+      expect(tree.boxOf('i')!, isNot(paints..something((m, args) => m == #drawPicture)));
+      // The retry after a second loads it.
+      await tester.pump(const Duration(milliseconds: 1100)); // the retry timer
+      await _loadImages(tester);
+      expect(calls, 2);
+      expect(tree.boxOf('i')!, paints..something((m, args) => m == #drawPicture));
+    }, () => client);
   });
 
   testWidgets('players are islands showing their design-time preview', (tester) async {

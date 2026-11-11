@@ -195,6 +195,30 @@ void main() {
     expect(find.byType(CodelesslyWidget), findsOneWidget);
   });
 
+  testWidgets('a screen opens already drawn: navigation loads it first, a loaded layout shows in the first frame', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    final fleet = layoutWithCanvas(bundle, 'Fleet · M');
+    final home = await pumpApp(tester, codelessly, layoutId: today.id);
+    expect(codelessly.layout(fleet.id), isNull, reason: 'not loaded yet');
+    unawaited(home.actionContext!.navigate({'type': 'navigate', 'to': canvasNamed(fleet, 'Fleet · M')}));
+    // Frame by frame until the push: the new screen is never a loading one.
+    for (var i = 0; i < 60 && find.byType(CodelesslyWidget).evaluate().length < 2; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(find.byType(CodelesslyLoadingScreen), findsNothing, reason: 'frame $i');
+    }
+    expect(find.byType(CodelesslyWidget), findsNWidgets(2));
+    expect(find.byType(CodelesslyLoadingScreen), findsNothing);
+    await settle(tester);
+
+    // A widget for a layout already loaded draws it in its first frame.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, layoutId: fleet.id)));
+    expect(find.byType(CodelesslyLoadingScreen), findsNothing);
+    expect(find.byType(NodeView), findsOneWidget);
+  });
+
   testWidgets('a navigation plays its page transition; a link by id is named at the screen\'s path', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
@@ -266,6 +290,47 @@ void main() {
     final rootQuery = await pumpApp(tester, codelesslyFor(), initialScreen: '/?state=empty');
     expect(rootQuery.layout!.id, bundle.model.entryLayoutId);
     expect(rootQuery.read('route.state'), 'empty');
+    // A link's escapes are read once (`%3A` is `:`), and what a typed
+    // location holds raw still works.
+    await tester.pumpWidget(const SizedBox());
+    final encoded = await pumpApp(tester, codelesslyFor(), initialScreen: '/?state=moss%3A1%3Asun%2Cowl%3A2');
+    expect(encoded.read('route.state'), 'moss:1:sun,owl:2');
+    await tester.pumpWidget(const SizedBox());
+    final raw = await pumpApp(tester, codelesslyFor(), initialScreen: '/?state=moss:1 sun,100%');
+    expect(raw.read('route.state'), 'moss:1 sun,100%');
+  });
+
+  testWidgets("a link's params set the app variables of the same name", (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final b = PublishBundle(
+      model: bundle.model.copyWith(variables: {
+        'a': {'id': 'a', 'name': 'loadState', 'type': 'text', 'value': 'ready'},
+        'b': {'id': 'b', 'name': 'queue', 'type': 'list', 'value': ['x']},
+        'c': {'id': 'c', 'name': 'open', 'type': 'boolean', 'value': false},
+        'd': {'id': 'd', 'name': 'untouched', 'type': 'integer', 'value': 3},
+      }),
+      layouts: bundle.layouts,
+    );
+    Codelessly app() => Codelessly(
+          config: const CodelesslyConfig(projectId: 'rigcheck', actions: NavigationActionRunner()),
+          loader: MemoryPublishLoader(b),
+          fonts: const NoFontFetcher(),
+        );
+    final linked = app();
+    addTearDown(linked.dispose);
+    final c = await pumpApp(tester, linked, initialScreen: '/?loadState=error&queue=%5B%5D&open=true&other=1');
+    expect(c.scope!.read('loadState'), 'error');
+    expect(c.scope!.read('queue'), isEmpty);
+    expect(c.scope!.read('open'), isTrue);
+    expect(c.scope!.read('untouched'), 3);
+    expect(c.read('route.other'), '1');
+    // Opened by id, not by a link: the defaults.
+    await tester.pumpWidget(const SizedBox());
+    final plain = app();
+    addTearDown(plain.dispose);
+    final d = await pumpApp(tester, plain, layoutId: bundle.model.entryLayoutId);
+    expect(d.scope!.read('loadState'), 'ready');
   });
 
   testWidgets('a canvas can be forced; data and params reach the scope', (tester) async {
@@ -289,6 +354,40 @@ void main() {
     expect(controller.read('data.user.name'), 'Ada');
     controller.setVariable('count', 3);
     expect(controller.read('count'), 3);
+  });
+
+  testWidgets('a link\'s params set the app variables they name', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final canvasId = canvasNamed(today, 'Today · D');
+    final json = rigcheckJson();
+    final layouts = (json['layouts'] as Map).cast<String, Object?>();
+    layouts[today.id] = {
+      ...(layouts[today.id] as Map).cast<String, Object?>(),
+      'variables': {
+        'app_variables': [
+          {'id': 'v_t', 'name': 't', 'type': 'decimal', 'value': 0},
+          {'id': 'v_sel', 'name': 'sel', 'type': 'text', 'value': ''},
+          {'id': 'v_twice', 'name': 'twice', 'type': 'decimal', 'formula': 't * 2'},
+        ],
+      },
+    };
+    final withVariables = decodeBundle(utf8.encode(jsonEncode(json)));
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: CodelesslyWidget(
+        codelessly: codelesslyFor(loader: MemoryPublishLoader(withVariables)),
+        controller: controller,
+        layoutId: today.id,
+        canvasId: canvasId,
+        params: const {'t': '2.5', 'sel': 'clip:c2', 'twice': '9'},
+      ),
+    ));
+    await settle(tester);
+    expect(controller.read('t'), 2.5, reason: 'read as the variable\'s type');
+    expect(controller.read('sel'), 'clip:c2');
+    expect(controller.read('twice'), 5, reason: 'a computed variable keeps its formula');
   });
 
   testWidgets('a variable named like a data key starts at it and follows it', (tester) async {

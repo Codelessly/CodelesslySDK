@@ -59,6 +59,20 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
           ..configure(b is NodeBox ? b : null, gesture),
       );
     }
+  } else if (n.type != 'canvas') {
+    // The design canvas draws a pose given by data (a sticker or a caption
+    // placed by its record: `transformGesture.x` bound), as a running app
+    // starts at it: translate, then rotate, then scale, about the center.
+    if (be.effectiveTransformGesture case final api.TransformGesture g
+        when g.x != null || g.y != null || g.scale != null || g.rotation != null || g.scaleX != null || g.scaleY != null) {
+      final s = g.scale ?? 1;
+      chain.add(
+        b.obtain<RenderPose>('transformPose', RenderPose.new)
+          ..transform = (Matrix4.translationValues(g.x ?? 0, g.y ?? 0, 0)
+            ..rotateZ((g.rotation ?? 0) * math.pi / 180)
+            ..scaleByDouble(s * (g.scaleX ?? 1), s * (g.scaleY ?? 1), 1, 1)),
+      );
+    }
   }
   if (be.motion case final api.Motion motion) {
     chain.add(
@@ -75,7 +89,10 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     }
   }
   cardLayers(b, n, chain, animates: animates);
-  if (be.scale != 1) {
+  // A state style that scales the node (a press shrink) keeps the layer at
+  // rest too: adding it mid-press rewired the chain under the pointer and
+  // the tap was lost.
+  if (be.scale != 1 || (animates && _stateScales(b, n))) {
     chain.add(
       b.obtain<RenderPose>('scale', RenderPose.new)
         ..transform = Matrix4.diagonal3Values(be.scale, be.scale, 1)
@@ -508,6 +525,9 @@ class RenderPose extends RenderProxyBox {
   RenderPose();
 
   Matrix4 _transform = Matrix4.identity();
+
+  /// The pose it draws its child with.
+  Matrix4 get transform => _transform;
   set transform(Matrix4 v) {
     if (v == _transform) return;
     _transform = v;
@@ -797,6 +817,9 @@ class RenderMotion extends RenderPose with _Ticking {
   bool _entered = false;
   bool _waitingForReveal = false;
 
+  /// The entrance waits at its start while the motion's `enterHeld` holds.
+  bool _held = false;
+
   /// The running transition: from [_from] to [_to] since [_since] (its
   /// delay not yet counted), [_offset] ms into its run (a loop's phase).
   api.Motion? _from;
@@ -833,6 +856,23 @@ class RenderMotion extends RenderPose with _Ticking {
     if (v == _motion) return;
     final old = _motion;
     _motion = v;
+    if (_held && !v.enterHeld) {
+      // Released: the entrance plays from its start now.
+      _held = false;
+      _entered = !_waitingForReveal;
+      _to = v;
+      _since = _clock;
+      _show();
+      syncTicker();
+      return;
+    }
+    if (_animates && _entered && !_loops(v) && v.hasEntrance && old.replayKey != v.replayKey) {
+      // A new replay key plays the entrance again.
+      _start(v.entranceStart, v, at: _clock);
+      _show();
+      syncTicker();
+      return;
+    }
     if (_animates && _entered && _loops(v)) {
       if (!_loops(old) ||
           old.loop != v.loop ||
@@ -903,12 +943,13 @@ class RenderMotion extends RenderPose with _Ticking {
     if (!_entered && _animates) {
       final m = _motion;
       _waitingForReveal = m.revealOnScroll && m.hasEntrance;
+      _held = m.enterHeld && m.hasEntrance && !_loops(m);
       if (_loops(m)) {
         _startLoop();
       } else if (m.hasEntrance && _transitionMs(m) > 0) {
         _start(m.entranceStart, m, at: _clock);
       }
-      _entered = !_waitingForReveal;
+      _entered = !_waitingForReveal && !_held;
     }
     super.attach(owner);
     _show();
@@ -958,7 +999,7 @@ class RenderMotion extends RenderPose with _Ticking {
   }
 
   @override
-  bool get ticking => _animates && !_waitingForReveal && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
+  bool get ticking => _animates && !_waitingForReveal && !_held && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
 
   @override
   void tick(Duration elapsed) {
@@ -970,12 +1011,16 @@ class RenderMotion extends RenderPose with _Ticking {
     if (!_motion.paused) _clock += step;
     final target = _motion.paused ? 0.0 : _motion.spin;
     if (_speed != target) {
-      final perSecond = _motion.spinRamp <= 0
-          ? double.infinity
-          : math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
-      final change = math.min((target - _speed).abs(), perSecond * dt);
-      _speed += (target - _speed).sign * change;
-      if ((target - _speed).abs() < 0.002) _speed = target;
+      if (_motion.spinRamp <= 0) {
+        // No ramp: at speed at once. (An infinite rate times a zero step,
+        // a first tick on the web, would be NaN and stop it for good.)
+        _speed = target;
+      } else if (dt > 0) {
+        final perSecond = math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
+        final change = math.min((target - _speed).abs(), perSecond * dt);
+        _speed += (target - _speed).sign * change;
+        if ((target - _speed).abs() < 0.002) _speed = target;
+      }
     }
     _turns = (_turns + _speed * dt) % 1;
     _show();
@@ -1074,6 +1119,10 @@ class RenderMotion extends RenderPose with _Ticking {
             .withValue('translateX', total.dx)
             .withValue('translateY', total.dy)
             .withValue('rotate', m.orientToPath ? m.rotate + turn * 180 / math.pi : m.rotate);
+        // Upright and mirrored: heading left faces left, nose first.
+        if (m.orientToPath && m.orientUpright && m.uprightMirror && api.Motion.headsLeft(heading)) {
+          shown = shown.withValue('scaleX', -shown.scaleX);
+        }
       }
     }
     transform = motionMatrix(shown, spinTurns: _turns);
@@ -1504,4 +1553,16 @@ abstract final class _MotionRevealWatcher {
       _schedule();
     });
   }
+}
+
+/// Whether a state style (the node's own, or one of a node around it that
+/// targets it) can set node [n]'s scale.
+bool _stateScales(NodeBuilder b, Node n) {
+  bool scales(Node? owner) =>
+      owner != null && owner.behaviors.states.patches.values.any((p) => p[n.id]?.containsKey('scale') ?? false);
+  if (scales(b.tree.source.node(n.id))) return true;
+  for (String? id = b.tree.source.parentOf(n.id); id != null; id = b.tree.source.parentOf(id)) {
+    if (scales(b.tree.source.node(id))) return true;
+  }
+  return false;
 }

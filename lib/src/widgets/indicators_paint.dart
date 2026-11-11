@@ -668,10 +668,17 @@ class BarChartPainter extends NodePainter {
     final labelGap = p(BarChartProps.labelGap);
     final style = textStyle(api.TextStyle(
       fontFamily: p(BarChartProps.labelFontFamily),
-      fontWeight: 400,
+      fontWeight: p(BarChartProps.labelFontWeight),
       fontSize: fontSize,
       color: p(BarChartProps.labelColor),
     )).copyWith(height: 1.2);
+    final gridStyle = textStyle(api.TextStyle(
+      fontFamily: p(BarChartProps.labelFontFamily),
+      fontWeight: p(BarChartProps.gridLabelFontWeight) ?? p(BarChartProps.labelFontWeight),
+      fontSize: p(BarChartProps.gridLabelFontSize) ?? fontSize,
+      color: p(BarChartProps.gridLabelColor) ?? p(BarChartProps.labelColor),
+    )).copyWith(height: 1);
+    final gridFontSize = p(BarChartProps.gridLabelFontSize) ?? fontSize;
     final labelHeight = hasLabels ? fontSize * 1.2 + labelGap : 0.0;
     final showValues = p(BarChartProps.showValues);
     // Room above the tallest bar for its value.
@@ -685,16 +692,19 @@ class BarChartPainter extends NodePainter {
     // Grid lines and their labels.
     final gridLines = p(BarChartProps.gridLines);
     final gridPaint = Paint()..color = p(BarChartProps.gridColor).flutter;
-    for (var g = 1; g <= gridLines; g++) {
+    // One label more than the grid lines labels the baseline first.
+    final labelsBaseline = gridLabels.length > gridLines;
+    for (var g = labelsBaseline ? 0 : 1; g <= gridLines; g++) {
       final bottom = plotHeight * g / gridLines - 0.5;
-      canvas.drawRect(Rect.fromLTWH(0, height - bottom - 1, width, 1), gridPaint);
-      if (gridLabels.isNotEmpty && g - 1 < gridLabels.length) {
+      if (g > 0) canvas.drawRect(Rect.fromLTWH(0, height - bottom - 1, width, 1), gridPaint);
+      final at = labelsBaseline ? g : g - 1;
+      if (gridLabels.isNotEmpty && at < gridLabels.length) {
         final tp = TextPainter(
-          text: TextSpan(text: gridLabels[g - 1], style: style.copyWith(height: 1)),
+          text: TextSpan(text: gridLabels[at], style: gridStyle),
           textDirection: TextDirection.ltr,
           maxLines: 1,
         )..layout(maxWidth: math.max(0, gridLabelWidth - 6));
-        final labelBottom = plotHeight * g / gridLines - fontSize / 2;
+        final labelBottom = plotHeight * g / gridLines - gridFontSize / 2;
         tp.paint(canvas, Offset(labelsLeft ? -plotLeft : size.width - plotLeft - (gridLabelWidth - 6), height - labelBottom - tp.height));
         tp.dispose();
       }
@@ -755,7 +765,9 @@ class BarChartPainter extends NodePainter {
         final tp = TextPainter(
           text: TextSpan(
             text: text,
-            style: i == highlight ? style.copyWith(color: p(BarChartProps.highlightLabelColor).flutter) : style,
+            style: i == highlight && p(BarChartProps.highlightLabels)
+                ? style.copyWith(color: p(BarChartProps.highlightLabelColor).flutter)
+                : style,
           ),
           textDirection: TextDirection.ltr,
           textAlign: TextAlign.center,
