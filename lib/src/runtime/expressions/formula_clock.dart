@@ -8,8 +8,9 @@ import 'package:flutter/scheduler.dart';
 ///
 /// * [frame]: `nowMs()`, a millisecond clock (every frame);
 /// * [second]: `now()`, a time of day or a countdown (every second);
-/// * [minute]: `today()`, `timeAgo(date)`, `isToday(date)`: values that
-///   change at most once a minute (every minute).
+/// * [minute]: `today()`, `timeAgo(date)`, `isToday(date)`, `isPast(date)`,
+///   `isFuture(date)`: values that change at most once a minute, or that
+///   may show a minute late (every minute).
 enum ClockTick {
   frame,
   second,

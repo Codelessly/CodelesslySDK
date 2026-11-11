@@ -121,6 +121,10 @@ void main() {
     expect(eval('isBefore("2026-11-10", now())'), isTrue);
     expect(eval('isAfter("2026-11-10", now())'), isFalse);
     expect(eval('isBefore(null, now())'), isFalse);
+    expect(eval('isPast("2026-11-11T14:59:00")'), isTrue);
+    expect(eval('isFuture("2026-11-11T14:59:00")'), isFalse);
+    expect(eval('isFuture("2026-11-12")'), isTrue);
+    expect(eval('isPast(null)'), isFalse);
     // Comparisons were already date-aware; diffDays counts calendar days.
     expect(eval('"2026-11-10" < now()'), isTrue);
     expect(eval('diffDays("2026-11-01", today())'), 10);
@@ -133,6 +137,7 @@ void main() {
     expect(FormulaEvaluator.clockTick('timeAgo(t)'), ClockTick.minute);
     expect(FormulaEvaluator.clockTick('today()'), ClockTick.minute);
     expect(FormulaEvaluator.clockTick('isToday(t)'), ClockTick.minute);
+    expect(FormulaEvaluator.clockTick('filter(cards, c => isFuture(c.expiresAt))'), ClockTick.minute);
     expect(FormulaEvaluator.clockTick('"now()" + t'), isNull);
     expect(FormulaEvaluator.clockTick('nowhere(t)'), isNull);
     expect(Expressions.clockTick(r'${= timeAgo(t)} · ${= now()}'), ClockTick.second);

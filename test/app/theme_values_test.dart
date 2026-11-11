@@ -83,7 +83,9 @@ void main() {
     expect(dark['colors'], {'brandBlue': '#FF2F6BFF', 'mutedText': '#FFAAAAAA'});
     expect(dark['isDark'], isTrue);
     // A project without a theme still reads its mode.
-    expect(themeValues(ThemeTokens.none, dark: true), {'colors': {}, 'text': {}, 'isDark': true, 'brightness': 'dark'});
+    expect(light['hasDark'], isTrue);
+    expect(themeValues(ThemeTokens.none, dark: true),
+        {'colors': {}, 'text': {}, 'isDark': true, 'brightness': 'dark', 'hasDark': false});
   });
 
   testWidgets('theme follows the device mode live: bound colors, texts and the Material theme', (tester) async {
