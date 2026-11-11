@@ -676,8 +676,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'without',
-      'without(list, other)',
-      'without(all, picked)',
+      'without(list, other or item)',
+      'without(all, picked), without(held, 64)',
     ),
     FormulaFunctionDoc(
       'concat',
@@ -2822,11 +2822,16 @@ final Map<String, _Function> _functions = {
     for (final value in a)
       if (value is Iterable) ...value else ?value,
   ],
-  'without': (a) => [
-    for (final item in _values(_arg(a, 0), null))
-      if (!_values(_arg(a, 1), null).any((other) => _looseEquals(item, other)))
-        item,
-  ],
+  // `other` is a list of items to leave out, or one item (`without(held,
+  // 64)`), as concat and append take either.
+  'without': (a) {
+    final other = _arg(a, 1);
+    final out = other is Iterable ? other : [other];
+    return [
+      for (final item in _values(_arg(a, 0), null))
+        if (!out.any((o) => _looseEquals(item, o))) item,
+    ];
+  },
   'sqrt': (a) => _tidy(math.sqrt(_num(_arg(a, 0)))),
   'pow': (a) => _tidy(math.pow(_num(_arg(a, 0)), _num(_arg(a, 1)))),
   'exp': (a) => _tidy(math.exp(_num(_arg(a, 0)))),
