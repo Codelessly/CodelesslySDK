@@ -135,6 +135,63 @@ Codelessly ownPurchases() => Codelessly(
 
 Report `purchased` or `restored` only for a purchase your server verified, with the entitlement it grants.
 
+## Test store (web previews and demos)
+
+The web has no App Store or Google Play, so a paywall there can't sell. For preview and demo sites, the SDK's
+**test store** runs a paywall's whole flow on the web — products, trial, purchase, restore, cancel and decline —
+from made-up data published with each product slot, **without charging and without ever granting a real
+entitlement**.
+
+Give each slot of the published `paywall` a `test` object, and the paywall `"testStore": true`:
+
+```json
+{
+  "products": [
+    {"id": "monthly", "iosProductId": "pro.monthly",
+     "test": {"rawPrice": 4.99, "currency": "USD", "period": "month", "trialDays": 7, "entitlementId": "pro"}},
+    {"id": "annual", "iosProductId": "pro.annual",
+     "test": {"price": "$39.99", "rawPrice": 39.99, "currency": "USD", "period": "year", "entitlementId": "pro"}},
+    {"id": "declined", "test": {"rawPrice": 1, "entitlementId": "pro", "outcome": "declined"}}
+  ],
+  "placements": [{"id": "onboarding", "layoutId": "paywall", "productSlots": ["annual", "monthly"]}],
+  "testStore": true
+}
+```
+
+`test` (`ProductTestData` in codelessly_api) has `price` (shown; derived from `rawPrice` when empty), `rawPrice`,
+`currency`, `currencySymbol`, `period` (`week`, `month`, `year`, or empty for a one-time purchase), `trialDays`,
+`entitlementId` (the test entitlement a purchase grants) and `outcome`: `purchased` (default), `declined` (the
+purchase fails with code `payment-declined`) or `cancelled` (`purchase-cancelled`). Real stores ignore it.
+
+When it runs is `Services(testStore:)`, a `TestStoreMode`:
+
+- `auto` (default): on the web, when the published paywall has `"testStore": true`. Never on iOS, Android or
+  desktop, which have a real store: there the flag changes nothing.
+- `force`: always on the web, whatever the publish says (the editor's run preview); elsewhere only outside release
+  builds (tests).
+- `off`: never.
+
+`codelesslyCloudServices(testStore:)` and `codelesslyWithToken(testStore:)` pass it on. While it's on
+(`Services.usesTestStore`), `Services.paywalls` is the test store's `PaywallRuntime` and `Services.purchases` its
+`TestPurchaseService`; `Services.paywallsChanged` notifies when that switches (the publish loaded or changed).
+
+What it does:
+
+- Products come from the slots' `test` data (a slot without it is unavailable, like a store product that isn't
+  found), with `price`, `currency`, `period` (`1 month`), `trial` (`7 days`), `eligibleForTrial`, `pricePerMonth` and
+  the yearly product's `savingsPercent` over a monthly one. Every one has `test: true` (`${product.test}`), so the
+  layout can badge it.
+- A purchase ends, after a short delay, as its `outcome` says. `purchase` with offer `trial` takes the trial (only
+  while the user hasn't test-bought that slot), `standard` skips it.
+- Restore restores the current user's earlier test purchases, or ends with `nothing-to-restore`.
+- Test purchases are kept in `Services.storage` per user (`codelessly.test_store.v1.<uid>`, `anonymous` when
+  signed out) and read back as the user's `entitlements`.
+
+The guarantees: the test store's backend (`TestPaywallBackend`) resolves placements from the publish and never
+contacts Codelessly's paywall server (no resolve, no verification, no events, nothing written to Firestore or
+functions); its grants live only in the test store's own runtime and are dropped when it turns off; and the server
+rejects test receipts anyway. Analytics events it logs carry `test: true`.
+
 ## Embed a paywall
 
 To show a paywall inside your own screen instead, give a `PaywallSession` to `CodelesslyWidget(paywall:)`. Its
@@ -150,4 +207,5 @@ shared store. Session disposal still removes its listeners and rejects stale acc
 
 Paywalls are tested like any screen ([Testing](14-testing.md)): give the instance a bundle whose layout is the
 paywall and `Services(purchases: ...)` a fake `PurchaseService`, call `present`, and tap its buttons. The SDK's
-own tests (`test/app/paywall_test.dart`) also fake the paywall server and the store.
+own tests (`test/app/paywall_test.dart`) also fake the paywall server and the store; `Services(testStore:
+TestStoreMode.force)` runs a published paywall on the test store (`test/app/test_store_paywall_test.dart`).

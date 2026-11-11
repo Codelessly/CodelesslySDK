@@ -1209,13 +1209,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
                 }
               : null
           ..decoration = d
-          ..foreground = false,
+          ..foreground = false
+          ..clipped = clipBehavior == Clip.antiAlias || clipBehavior == Clip.antiAliasWithSaveLayer,
       );
     }
     if (canStack && plan.foreground) {
       over.add(_obtain<RenderNodePaint>('over', RenderNodePaint.new)
         ..decoration = d
-        ..foreground = true);
+        ..foreground = true
+        ..clipped = clipBehavior == Clip.antiAlias || clipBehavior == Clip.antiAliasWithSaveLayer);
     }
     if (canStack && tree.animates && n.behaviors.inkWell != null) under.add(inkOverlay(this, n, radius));
     if (content == null && under.isEmpty && over.isEmpty) return;

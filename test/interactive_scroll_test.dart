@@ -276,6 +276,15 @@ void main() {
     expect(view.thumbShown, isFalse);
   }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
+  testWidgets('a mouse already resting over the track when the view appears shows the thumb', (tester) async {
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: const Offset(197, 100));
+    addTearDown(mouse.removePointer);
+    final screen = await wiring.show(tester, nodes());
+    await tester.pump();
+    expect(viewport(screen.tree).thumbShown, isTrue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
   testWidgets('on a touch platform there is no scrollbar', (tester) async {
     final screen = await wiring.show(tester, nodes());
     expect(viewport(screen.tree).showsScrollbar, isFalse);
