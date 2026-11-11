@@ -1160,6 +1160,18 @@ class RenderTableItems extends RenderCollection {
   /// The lines between cells, or null.
   BorderSide? gridLine;
 
+  /// Space inside the first and last columns at the table's edges (their
+  /// widths include it; their cells sit inside it).
+  double edge = 0;
+
+  /// The line under the header row, or null (then [gridLine]).
+  BorderSide? headerBorder;
+
+  /// The selected body row (-1: none): its fill and the bar at its start.
+  int selectedRow = -1;
+  Color? selectedColor, selectedEdgeColor;
+  double selectedEdgeWidth = 4;
+
   void changed() {
     markNeedsLayout();
     markNeedsPaint();
@@ -1194,10 +1206,11 @@ class RenderTableItems extends RenderCollection {
         continue;
       }
       final (r, col) = cells[i++];
-      final w = columnWidths[col], h = rowHeights[r];
+      final lead = col == 0 ? edge : 0.0, trail = col == columnWidths.length - 1 ? edge : 0.0;
+      final w = math.max(0.0, columnWidths[col] - lead - trail), h = rowHeights[r];
       it.layout(BoxConstraints.loose(Size(w, h)), parentUsesSize: true);
       (it.parentData! as CollectionParentData).offset =
-          Offset(_start(columnWidths, col), _start(rowHeights, r) + (h - it.size.height) / 2);
+          Offset(_start(columnWidths, col) + lead, _start(rowHeights, r) + (h - it.size.height) / 2);
     }
     final w = _start(columnWidths, columnWidths.length), h = _start(rowHeights, rowHeights.length);
     return w > size.width + 0.01 || h > size.height + 0.01 || _anyChildOutside;
@@ -1223,10 +1236,28 @@ class RenderTableItems extends RenderCollection {
         }
       }
     }
+    final selected = selectedRow + (headerRow ? 1 : 0);
+    if (selectedRow >= 0 && selected < rowHeights.length) {
+      final band = Offset(offset.dx, offset.dy + _start(rowHeights, selected)) & Size(width, rowHeights[selected]);
+      if (selectedColor case final Color color) canvas.drawRect(band, Paint()..color = color);
+      if (selectedEdgeColor case final Color color) {
+        canvas.drawRect(band.topLeft & Size(selectedEdgeWidth, band.height), Paint()..color = color);
+      }
+    }
   }
 
   @override
   void paintForeground(PaintingContext context, Offset offset) {
+    _paintGrid(context, offset);
+    // The header's own line, over the grid's.
+    if (headerBorder case final b? when headerRow && rowHeights.isNotEmpty && b.width > 0) {
+      final width = _start(columnWidths, columnWidths.length);
+      context.canvas.drawRect(
+          Rect.fromLTWH(offset.dx, offset.dy + rowHeights.first - b.width, width, b.width), Paint()..color = b.color);
+    }
+  }
+
+  void _paintGrid(PaintingContext context, Offset offset) {
     final line = gridLine;
     if (line == null || line.width <= 0 || line.style == BorderStyle.none) return;
     final canvas = context.canvas;
