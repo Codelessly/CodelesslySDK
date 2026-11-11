@@ -112,6 +112,86 @@ Future<void> frames(WidgetTester tester) async {
   }
 }
 
+/// A project with a paywall published at `onboarding` (the `monthly` slot):
+/// a layout with a buy button (a purchase action) and a close button.
+PublishBundle withPaywall() {
+  final base = twoScreens();
+  Json button(String name, String operation) => {
+        'type': 'box',
+        'name': name,
+        'layout': {'width': 390, 'height': 60},
+        'decoration': {
+          'fills': [
+            {'color': '#FF2196F3'},
+          ],
+        },
+        'actions': [
+          {
+            'id': 'r-$name',
+            'trigger': {'type': 'click'},
+            'actions': [
+              {'type': 'paywall', 'operation': operation},
+            ],
+          },
+        ],
+      };
+  return PublishBundle.fromJson({
+    'model': {
+      ...base.model.toJson(),
+      'layouts': {
+        ...base.model.toJson()['layouts'] as Map,
+        'paywall': {
+          'canvases': [
+            {'id': 'paywall-canvas', 'name': 'Paywall'},
+          ],
+        },
+      },
+      'paywall': {
+        'products': [
+          {'id': 'monthly', 'iosProductId': 'pro_monthly', 'androidProductId': 'pro_monthly'},
+        ],
+        'placements': [
+          {'id': 'onboarding', 'layoutId': 'paywall', 'productSlots': ['monthly']},
+        ],
+      },
+    },
+    'layouts': {
+      for (final e in base.layouts.entries) e.key: e.value.toJson(),
+      'paywall': {
+        'schema': 2,
+        'id': 'paywall',
+        'roots': ['paywall-canvas'],
+        'nodes': {
+          'paywall-canvas': {
+            'type': 'canvas',
+            'name': 'Paywall',
+            'slots': {'body': 'paywall-column'},
+            'layout': {'width': 390, 'height': 844},
+          },
+          'paywall-column': {
+            'type': 'column',
+            'children': ['buy', 'close'],
+            'layout': {
+              'width': {'fill': 390},
+              'height': {'fill': 844},
+            },
+          },
+          'buy': button('buy', 'purchase'),
+          'close': button('close', 'closePaywall'),
+        },
+      },
+    },
+  });
+}
+
+/// Taps node [id] of the layout shown on top.
+Future<void> tapNode(WidgetTester tester, String id) async {
+  final box = tester.widget<NodeView>(find.byType(NodeView).last).tree.boxOf(id)!;
+  final content = box.contentBox ?? box;
+  await tester.tapAt(content.localToGlobal(content.size.center(Offset.zero)));
+  await frames(tester);
+}
+
 void main() {
   testWidgets('shows the entry screen, and a layout by id, custom id or canvas id', (tester) async {
     final codelessly = testCodelessly();
@@ -289,5 +369,29 @@ void main() {
     expect(codelessly.publishModel!.projectId, 'test-project');
     await reload(codelessly);
     expect(codelessly.status, isA<CLoaded>());
+  });
+
+  testWidgets('a paywall: bought, the Pro screen opens; closed, nothing does', (tester) async {
+    final codelessly = Codelessly.fromBundle(
+      withPaywall(),
+      config: CodelesslyConfig(services: Services(purchases: MyPurchases())),
+      fonts: const NoFontFetcher(),
+    );
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (context) => TextButton(onPressed: () => openProFeature(context, codelessly), child: const Text('Go pro')),
+      ),
+    ));
+    await tester.tap(find.text('Go pro'));
+    await frames(tester);
+    await tapNode(tester, 'close');
+    expect(find.byType(NodeView), findsNothing);
+    expect(find.text('Pro'), findsNothing);
+
+    await tester.tap(find.text('Go pro'));
+    await frames(tester);
+    await tapNode(tester, 'buy');
+    expect(find.text('Pro'), findsOneWidget);
   });
 }
