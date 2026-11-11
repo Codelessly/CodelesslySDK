@@ -34,6 +34,7 @@ void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
                 damping: motion.springDamping < 0 ? 20 : motion.springDamping,
               )
             : const SpringDescription(mass: 1, stiffness: 420, damping: 24)
+        ..flight = be.flight
         ..flightKey = be.flightKey,
     );
   }
@@ -348,6 +349,16 @@ class RenderFlightBox extends RenderPose {
 
   SpringDescription spring = const SpringDescription(mass: 1, stiffness: 420, damping: 24);
 
+  /// A timed, curved flight instead of the spring (when its duration is
+  /// set).
+  api.Flight? flight;
+
+  /// The flight's path in this box's rest coordinates: from the source's
+  /// center offset to zero, through [_control].
+  Offset _control = Offset.zero;
+  double _turnSign = 1;
+  double _u = 1;
+
   Offset _fromOffset = Offset.zero;
   double _fromScale = 1;
   double _value = 1;
@@ -376,7 +387,18 @@ class RenderFlightBox extends RenderPose {
       if (!attached) return;
       _fromOffset = from.center - rect.center;
       _fromScale = rect.width > 0 ? from.width / rect.width : 1;
-      _sim = SpringSimulation(spring, 0, 1, 0);
+      final f = flight;
+      if (f != null && f.duration > 0) {
+        // The control point: halfway across, risen above the higher end.
+        final rise = math.max(f.lift, f.liftShare * _fromOffset.distance);
+        final top = math.min(_fromOffset.dy, 0.0);
+        _control = Offset(_fromOffset.dx / 2, top - rise);
+        _turnSign = _fromOffset.dx <= 0 ? 1 : -1; // flying right (from the left) turns clockwise
+        _sim = null;
+        _u = 0;
+      } else {
+        _sim = SpringSimulation(spring, 0, 1, 0);
+      }
       _value = 0;
       _show();
       _ticker ??= Ticker(_tick);
@@ -386,7 +408,26 @@ class RenderFlightBox extends RenderPose {
     SchedulerBinding.instance.scheduleFrame();
   }
 
+  /// A point of the curved flight at [u] (0 at the source, 1 at rest).
+  Offset _pathAt(double u) {
+    final a = _fromOffset, c = _control;
+    final v = 1 - u;
+    return a * (v * v) + c * (2 * v * u);
+  }
+
   void _tick(Duration elapsed) {
+    final f = flight;
+    if (f != null && f.duration > 0 && _value < 1) {
+      final t = (elapsed.inMicroseconds / 1000 / f.duration).clamp(0.0, 1.0);
+      _u = f.curve.transform(t);
+      _value = t >= 1 ? 1 : _u;
+      if (t >= 1) {
+        _u = 1;
+        _ticker?.stop();
+      }
+      _showFlight(f);
+      return;
+    }
     final sim = _sim;
     if (sim == null) return;
     final t = elapsed.inMicroseconds / 1e6;
@@ -397,6 +438,20 @@ class RenderFlightBox extends RenderPose {
       _ticker?.stop();
     }
     _show();
+  }
+
+  void _showFlight(api.Flight f) {
+    final u = _u;
+    final p = _pathAt(u);
+    final s = (1 + (_fromScale - 1) * (1 - u)) * (1 + (f.swell - 1) * math.sin(u * math.pi));
+    shift = Offset.zero;
+    origin = Alignment.center;
+    transform = u >= 1
+        ? Matrix4.identity()
+        : (Matrix4.translationValues(p.dx, p.dy, 0)
+          ..rotateZ(_turnSign * f.turns * 2 * math.pi * u)
+          ..scaleByDouble(s, s, 1, 1));
+    markNeedsPaint();
   }
 
   void _show() {
@@ -423,6 +478,21 @@ class RenderFlightBox extends RenderPose {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    final f = flight;
+    if (f != null && f.trail > 0 && f.duration > 0 && _u < 1 && _value < 1 && hasSize) {
+      // Fading dots where the flight just was.
+      final center = offset + size.center(Offset.zero);
+      for (var i = f.trail; i >= 1; i--) {
+        final u = _u - i * 26 / f.duration;
+        if (u <= 0) continue;
+        final alpha = (0.55 - i * 0.11).clamp(0.0, 1.0);
+        context.canvas.drawCircle(
+          center + _pathAt(f.curve.transform(u.clamp(0.0, 1.0))),
+          math.max(1.0, 5.0 - i),
+          Paint()..color = Color(f.trailColor.value).withValues(alpha: alpha * ((f.trailColor.value >> 24) / 255)),
+        );
+      }
+    }
     super.paint(context, offset);
     if (_flightKey.isEmpty || !hasSize) return;
     // Its layout place, not where the flight draws it.
