@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
+import 'package:codelessly_sdk/src/widgets/collections_table.dart' show tableRowHeight;
+
 import 'support.dart';
 
 Map<String, Json> table() => {
@@ -71,6 +73,61 @@ void main() {
     expect(rowHeaders, isNotEmpty);
     expect(rowHeaders.first.value.dx - origin.dx, lessThan(80));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('rowHeightKey gives a row its own height; fillWidth spreads the columns', (tester) async {
+    // A week: an "open shifts" row as tall as its busiest day, then people.
+    final week = v('week', [
+      {'id': 'open', 'height': 150},
+      {'id': 'ana'},
+      {'id': 'bo', 'height': 'tall'},
+    ], VariableType.list);
+    final nodes = {
+      'table': {
+        'type': 'tableView',
+        'layout': {'width': 1000, 'height': 400},
+        'bind': {'data': r'${week}'},
+        'slots': {'cell': 'cell', 'columnHeader': 'colHeader', 'rowHeader': 'rowHeader'},
+        'props': {
+          'columns': [for (var d = 0; d < 5; d++) {'key': 'd$d', 'label': 'D$d'}],
+          'columnWidth': 100,
+          'rowHeaderWidth': 160,
+          'rowHeight': 70,
+          'headerHeight': 60,
+          'rowHeightKey': 'height',
+          'fillWidth': true,
+        },
+      },
+      'cell': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.row.id}${item.columnIndex}'}},
+      'colHeader': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.label}'}},
+      'rowHeader': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.row.id}'}},
+    };
+    await show(tester, nodes, root: 'table', variables: [week]);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final at = cells(tester);
+    // Rows (texts centred in them): header 60, open 150, ana 70 (no
+    // height), bo 70 (not a number).
+    expect(at['ana']!.dy - at['open']!.dy, (150 + 70) / 2);
+    expect(at['bo']!.dy - at['ana']!.dy, 70);
+    // Columns: the 800 wide test view, 160 + 5 × 100 = 660, so each day
+    // gets 28 more.
+    expect(at['open1']!.dx - at['open0']!.dx, 128);
+    expect(at['open4']!.dx - at['open0']!.dx, 512);
+    expect(at['D0']!.dx, 160);
+    expect(tableRowHeight({'h': '12'}, 'h', 40), 12);
+    expect(tableRowHeight({'h': -3}, 'h', 40), 40);
+    expect(tableRowHeight('x', 'h', 40), 40);
+  });
+
+  testWidgets('fillWidth never makes a column narrower than its width', (tester) async {
+    final nodes = table();
+    (nodes['table']!['props'] as Map)['fillWidth'] = true;
+    await show(tester, nodes, root: 'table', variables: [rows]);
+    await tester.pumpAndSettle();
+    final at = cells(tester);
+    // 80 + 50 × 100 is wider than the 600 box: every column keeps its 100.
+    expect(at['r0c1']!.dx - at['r0c0']!.dx, 100);
   });
 
   testWidgets('a design canvas keeps the table at rest', (tester) async {
