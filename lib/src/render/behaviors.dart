@@ -902,6 +902,10 @@ class RenderMotion extends RenderPose with _Ticking {
             .withValue('translateX', total.dx)
             .withValue('translateY', total.dy)
             .withValue('rotate', m.orientToPath ? m.rotate + turn * 180 / math.pi : m.rotate);
+        // Upright and mirrored: heading left faces left, nose first.
+        if (m.orientToPath && m.orientUpright && m.uprightMirror && api.Motion.headsLeft(heading)) {
+          shown = shown.withValue('scaleX', -shown.scaleX);
+        }
       }
     }
     transform = motionMatrix(shown, spinTurns: _turns);
