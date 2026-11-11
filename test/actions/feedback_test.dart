@@ -37,11 +37,12 @@ class Host {
   );
   final List<Object> errors = [];
 
-  Future<void> pump(WidgetTester tester, {Size size = const Size(400, 800)}) async {
+  Future<void> pump(WidgetTester tester, {Size size = const Size(400, 800), ThemeData? theme}) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = size;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(MaterialApp(
+      theme: theme,
       home: Builder(builder: (c) {
         context = c;
         return const Scaffold(body: SizedBox.expand());
@@ -268,6 +269,46 @@ void main() {
   });
 
   group('confirm', () {
+    testWidgets('dialog look supports leading actions and explicit text gaps', (
+      tester,
+    ) async {
+      final host = Host([]);
+      await host.pump(tester, theme: ThemeData(visualDensity: VisualDensity.compact));
+      final pending = host.run([
+        {
+          'type': 'confirm',
+          'caption': 'EXPERIMENT',
+          'title': 'Clear?',
+          'message': 'Keep a copy first.',
+          'look': {
+            'width': 294,
+            'padding': 26,
+            'captionGap': 10,
+            'messageGap': 12,
+            'buttonsAlignment': 'start',
+            'buttonMinWidth': 0,
+            'buttonPadding': [15, 0, 15, 0],
+            'buttonHeight': 43,
+          },
+        },
+      ]);
+      await tester.pumpAndSettle();
+      final title = tester.getRect(find.text('Clear?')),
+          caption = tester.getRect(find.text('EXPERIMENT')),
+          message = tester.getRect(find.text('Keep a copy first.'));
+      final cancel = tester.getRect(
+        find.byKey(const ValueKey('codelessly-confirm-cancel')),
+      );
+      expect(title.top - caption.bottom, closeTo(10, .01));
+      expect(message.top - title.bottom, closeTo(12, .01));
+      expect(cancel.left, closeTo(title.left, .01));
+      expect(cancel.height, 43);
+      await tester.tap(find.byKey(const ValueKey('codelessly-confirm-cancel')));
+      await tester.pumpAndSettle();
+      await pending;
+    });
+
+
     testWidgets('the built-in dialog: confirm runs actions, cancel runs cancelActions', (tester) async {
       final h = Host([v('who', 'Ada'), v('out', '')]);
       await h.pump(tester);
