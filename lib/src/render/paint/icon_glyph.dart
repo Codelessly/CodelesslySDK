@@ -71,6 +71,7 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   static const Color defaultColor = Color(0xDD000000);
 
   Json _icon = const {};
+  Json get icon => _icon;
   set icon(Json v) {
     if (identical(v, _icon)) return;
     _icon = v;
