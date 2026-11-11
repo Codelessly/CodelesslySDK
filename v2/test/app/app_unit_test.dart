@@ -6,6 +6,8 @@ import 'dart:typed_data';
 import 'package:codelessly_api_v2/codelessly_api.dart' as api;
 import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/testing.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_test/flutter_test.dart';
 
 Node canvasNode(double w, double h, {ScaleMode mode = ScaleMode.responsive, bool hug = false, double? maxWidth}) => Node.fromJson({
@@ -320,6 +322,18 @@ void main() {
     await fonts.load([a, c]);
     expect(registered, {'Inter': 2, 'Barlow': 1});
     expect(fonts.loaded, {'a', 'b', 'c'});
+  });
+
+  test('platform font families do not issue invalid Google Fonts requests', () async {
+    var calls = 0;
+    final fetcher = HttpFontFetcher(client: MockClient((request) async {
+      calls++;
+      return http.Response('', 404);
+    }));
+    expect(await fetcher.fetch(const PublishFont(id:'arial', family:'Arial')), isNull);
+    expect(calls, 0);
+    await fetcher.fetch(const PublishFont(id:'uploaded', family:'Arial', url:'https://example.com/arial.ttf'));
+    expect(calls, 1);
   });
 
   test('Google Fonts are fetched by family, weight and style', () {

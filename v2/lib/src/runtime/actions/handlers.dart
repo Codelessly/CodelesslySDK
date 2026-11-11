@@ -16,6 +16,7 @@ import '../../render/drag_track.dart' show DragTracks;
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../render/play.dart' show EffectPlayers;
+import '../../render/particles.dart' show ParticlePlayers;
 import '../../services/services.dart';
 import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
@@ -153,8 +154,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       ]);
     case PlayAnimationAction():
       // A node's one-shot effect, on every shown instance; the chain waits
-      // for it. (Particles aren't drawn by v2 yet.)
-      await EffectPlayers.play(a.node, a.animation);
+      // for it, including a particle burst with the reserved particles name.
+      await Future.wait([EffectPlayers.play(a.node, a.animation), ParticlePlayers.play(a.node, a.animation)]);
       break;
     case PaginateAction():
       await paginateAction(a, run);

@@ -431,7 +431,7 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(_viewportBox(b, n, canShrinkWrap: true));
     return;
   }
-  if (b.tree.animates && n.pagination != null && !n.prop(GridViewProps.shrinkWrapRows)) {
+  if (b.tree.animates && n.pagination != null && !n.prop(GridViewProps.shrinkWrapRows) && !n.prop(GridViewProps.masonry)) {
     return _pagedGrid(b, n, chain, itemId);
   }
   final count = _itemCount(n);
@@ -449,6 +449,7 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..childAspectRatio = n.prop(GridViewProps.childAspectRatio)
     ..mainAxisExtent = n.prop(GridViewProps.mainAxisExtent)
     ..shrinkWrapRows = n.prop(GridViewProps.shrinkWrapRows)
+    ..masonry = n.prop(GridViewProps.masonry)
     ..intrinsicRows = !_blocksIntrinsics(b, item)
     ..hugMain = n.mainFit == SizeFit.hug && count != null
     ..itemCount = count

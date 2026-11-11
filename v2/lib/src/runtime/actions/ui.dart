@@ -190,12 +190,21 @@ class NavigatorActionUi implements ActionUi {
     final c = _context;
     final content = modal?.call(action.to, params);
     if (c == null || content == null) return null;
-    return showScreenModal(c, content,
+    // A preview may provide Material localizations below its Navigator.
+    // Carry those inherited values across the modal route boundary.
+    final inherited = InheritedTheme.captureAll(c, Localizations.override(context: c, child: content));
+    return showScreenModal(c, Padding(
+        padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
+        child: inherited),
         presentation: action.presentation,
         barrierDismissible: action.barrierDismissible,
         barrierColor: action.barrierColor,
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
+        sheetWidth: action.sheetWidth,
+        maxHeightFactor: action.maxHeightFactor,
+        barrierBlur: action.barrierBlur,
+        enterScale: action.enterScale,
         sheetBelowWidth: action.sheetBelowWidthIn(_breakpoints),
         routeTransition: action.routeTransition);
   }

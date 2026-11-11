@@ -14,10 +14,16 @@ import 'package:flutter/scheduler.dart';
 import 'behaviours.dart' show RenderPose;
 import 'node_tree.dart' show NodeBox;
 import 'recipe.dart';
+import 'particles.dart';
 
 /// Adds node [n]'s fly-in and one-shot effects to [chain].
 void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviours;
+  if (animates && be.particles != null) {
+    chain.add(b.obtain<RenderParticles>('particles', RenderParticles.new)
+      ..nodeId = b.id
+      ..emitter = be.particles!);
+  }
   if (animates && be.flightKey.isNotEmpty) {
     final motion = be.motion;
     chain.add(
