@@ -1505,6 +1505,7 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final side = n.prop(SegmentedButtonProps.side);
     final radius = n.prop(SegmentedButtonProps.borderRadius);
     final selectedIcon = _icon(n.prop(SegmentedButtonProps.selectedIcon));
+    final labelStyle = n.prop(SegmentedButtonProps.textStyle);
     return SegmentedButton<String>(
       segments: segments,
       selected: selection,
@@ -1527,6 +1528,8 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         selectedForegroundColor: _color(n.prop(SegmentedButtonProps.selectedForegroundColor)),
         side: side == null ? null : _side(side),
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
+        textStyle: labelStyle.isEmpty ? null : textStyle(labelStyle),
+        padding: n.prop(SegmentedButtonProps.padding)?.flutter,
       ),
     );
   }
