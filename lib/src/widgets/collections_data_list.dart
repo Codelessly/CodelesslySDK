@@ -878,9 +878,9 @@ class DataListViewState extends State<DataListView> {
           // The index is the list's scroll control: no scrollbar under it.
           Positioned.fill(child: list),
           Positioned(
-            top: 0,
-            bottom: 0,
-            right: 0,
+            top: _node.sections!.indexInsets.elementAtOrNull(1) ?? 0,
+            bottom: _node.sections!.indexInsets.elementAtOrNull(3) ?? 0,
+            right: _node.sections!.indexInsets.elementAtOrNull(2) ?? 0,
             child: () {
               final model = _node.sections!;
               final keys = _indexKeys(sections);
