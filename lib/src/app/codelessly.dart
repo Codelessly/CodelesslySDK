@@ -10,8 +10,13 @@ import 'config.dart';
 import 'fonts.dart';
 import 'loader.dart';
 import 'navigation.dart';
+import 'paywalls.dart';
 import 'persisted_variables.dart';
 import 'runtime.dart';
+
+/// The publish model's key holding the project's paywall setup
+/// ([PaywallConfig] JSON), next to its `apis`.
+const kPublishModelPaywallKey = 'paywall';
 
 /// A published Codelessly project: loads and caches its publish model and
 /// layouts, registers their fonts, and holds the app's data the layouts
@@ -173,6 +178,15 @@ class Codelessly extends ChangeNotifier {
   /// The screen shown last (by any [CodelesslyWidget] of this instance).
   final ValueNotifier<CodelesslyRoute?> route = ValueNotifier(null);
 
+  /// Its paywalls: [CodelesslyPaywalls.present] shows the paywall published
+  /// at a placement and returns how it ended.
+  ///
+  /// ```dart
+  /// final result = await codelessly.paywall.present(context, placement: 'onboarding');
+  /// if (result.outcome == PaywallOutcome.purchased) unlockPro();
+  /// ```
+  late final CodelesslyPaywalls paywall = CodelesslyPaywalls(this);
+
   Future<void>? _initializing;
 
   /// Loads the publish model: from the cache when it has one (then
@@ -248,11 +262,19 @@ class Codelessly extends ChangeNotifier {
     }
   }
 
+  /// A [Services]' config follows the model: its APIs (added to the app's)
+  /// and its paywall setup (the model's `paywall`: product slots,
+  /// placements, legal links), which replaces the app's.
   void _configureServices(PublishModel model) {
     final s = services;
-    if (s is Services && model.apis.isNotEmpty) {
-      s.config = ServiceConfig.fromJson({...s.config.toJson(), 'apis': {...?s.config.toJson()['apis'] as Map?, ...model.apis}});
-    }
+    final paywall = model.extra[kPublishModelPaywallKey];
+    if (s is! Services || (model.apis.isEmpty && paywall is! Map)) return;
+    final current = s.config.toJson();
+    s.config = ServiceConfig.fromJson({
+      ...current,
+      if (model.apis.isNotEmpty) 'apis': {...?current['apis'] as Map?, ...model.apis},
+      if (paywall is Map) 'paywall': paywall,
+    });
   }
 
   /// The id of the layout [id] names (a layout id, custom id or canvas
