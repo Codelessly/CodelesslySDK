@@ -721,6 +721,62 @@ void main() {
     expect(top, 80, reason: 'under the two cards');
   });
 
+  for (final width in [<String, Object>{'hug': 0}, 320])
+  testWidgets('a track segmented button selects by tap, raises the selection and hugs or shares its width ($width)',
+      (tester) async {
+    final s = await show(
+      tester,
+      {
+        'col': {'type': 'column', 'children': ['seg'], 'layout': {'width': 400, 'height': {'hug': 40}}},
+        'seg': {
+          'type': 'segmentedButton',
+          'layout': {'width': width, 'height': {'hug': 0}},
+          'props': {
+            'variant': 'track',
+            'segments': [
+              for (final x in ['All', 'Live', 'Draft', 'Closed']) {'value': x.toLowerCase(), 'label': x},
+            ],
+            'selectedBackgroundColor': '#FFFFFFFF',
+            'backgroundColor': '#FFE2E7EE',
+            'selectedShadows': [
+              {'type': 'dropShadow', 'color': '#14000000', 'offset': [0, 2], 'blurRadius': 8},
+            ],
+          },
+          'bind': {'props.selected': r'${= [filter]}'},
+          'actions': [
+            reaction('changed', [
+              {'type': 'setVariable', 'variable': 'filter', 'value': r'${result[0]}'},
+            ]),
+          ],
+        },
+      },
+      variables: [v('filter', 'all')],
+    );
+    expect(find.byType(SegmentedButton<String>), findsNothing);
+    // Hugging, every label fits on one line; a narrower share ellipsizes.
+    for (final label in ['All', 'Live', 'Draft', 'Closed']) {
+      final p = tester.renderObject<RenderParagraph>(find.text(label));
+      if (width is! int) expect(p.didExceedMaxLines, isFalse);
+      expect(p.maxLines, 1);
+    }
+    final widths = [for (final l in ['All', 'Closed']) tester.getSize(find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).width];
+    if (width is int) {
+      // A filling track shares its width: 320 less the 3px inset each side, by 4.
+      expect(widths, everyElement(closeTo((320 - 6) / 4, 0.5)));
+    } else {
+      expect(widths[0], lessThan(widths[1]));
+    }
+    BoxDecoration deco(String l) => tester.widget<AnimatedContainer>(
+        find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).decoration! as BoxDecoration;
+    expect(deco('All').boxShadow, hasLength(1));
+    expect(deco('Draft').boxShadow, isNull);
+    await tester.tap(find.text('Draft'));
+    await tester.pumpAndSettle();
+    expect(s['filter'], 'draft');
+    expect(deco('Draft').boxShadow, hasLength(1));
+    expect(deco('All').boxShadow, isNull);
+  });
+
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
     final s = await show(
       tester,

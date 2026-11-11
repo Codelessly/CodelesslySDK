@@ -40,6 +40,7 @@ import 'source.dart';
 import '../runtime/expressions/bindings.dart' show BoundNode, NodeBinder;
 import '../widgets/collections.dart' show listBuildsAllItems;
 import '../widgets/registry.dart';
+import '../widgets/inputs.dart' show inputsRecipes;
 
 /// How a node is laid out by its parent.
 enum SlotKind {
@@ -976,13 +977,47 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         _icon(n, chain);
       default:
         final recipe = widgetRecipes[n.type];
-        if (recipe != null) {
+        if (recipe != null && _inputInShell(n)) {
+          // An input with its own fill, border, shadow or padding: the node's
+          // shell around it, the widget filling (or hugging) the padded box.
+          _shell(n, chain, content: (inner) => recipe(this, _shellContent(n), inner));
+        } else if (recipe != null) {
           recipe(this, n, chain);
         } else {
           // A type this SDK doesn't render yet: its box, at its size.
           chain.add(_fitBox('placeholder', n.hFit, n.vFit, n.designSize));
         }
     }
+  }
+
+  /// Whether input [n] draws the node shell around its widget: a decorated
+  /// input (dropdown, date/time input) with a visible fill, stroke or
+  /// shadow, or padding.
+  static bool _inputInShell(Node n) {
+    if (!inputsRecipes.containsKey(n.type) || !(n.spec?.decorated ?? false)) return false;
+    final d = n.decoration;
+    return d.fills.any((f) => f.visible) ||
+        d.strokes.any((s) => s.visible) ||
+        d.effects.any((e) => e.visible) ||
+        n.layout.padding != api.EdgeInsets.zero;
+  }
+
+  /// [n] as the widget inside its shell: filling the padded box (hugging
+  /// where the node hugs), without the shell's padding, margin or decoration.
+  static Node _shellContent(Node n) {
+    final l = n.layout;
+    final p = l.padding;
+    api.AxisSize inner(api.AxisSize s, double pad) =>
+        s.fit == SizeFit.hug ? api.AxisSize.hug(math.max(0, s.value - pad)) : api.AxisSize.fill(math.max(0, s.value - pad));
+    return n.copyWith(
+      layout: l.copyWith(
+        width: inner(l.width, p.horizontal),
+        height: inner(l.height, p.vertical),
+        padding: api.EdgeInsets.zero,
+        margin: api.EdgeInsets.zero,
+      ),
+      decoration: api.Decoration.none,
+    );
   }
 
   bool get _isPlaceholder {
