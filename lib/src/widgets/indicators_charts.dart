@@ -313,7 +313,24 @@ class ChartSeriesPainter extends NodePainter {
         }
       }
     }
-    if (n == 0) return;
+    // Labels placed by value (xField with xLabels): the axis stands without
+    // rows too, so an empty chart keeps its time line.
+    void paintValueLabels() {
+      final color = p(ChartProps.xAxisLabelColor)?.flutter;
+      final style = color == null ? _axisStyle : _axisStyle.copyWith(color: color);
+      for (final l in p(ChartProps.xLabels)) {
+        final tp = TextPainter(text: TextSpan(text: l.label, style: style), textDirection: TextDirection.ltr)
+          ..layout();
+        final lx = (xAt(l.x) - tp.width / 2).clamp(0.0, math.max(0.0, size.width - tp.width));
+        tp.paint(canvas, Offset(lx.toDouble(), plot.bottom + _xAxisHeight / 2 + 2 - tp.height / 2));
+        tp.dispose();
+      }
+    }
+
+    if (n == 0) {
+      if (p(ChartProps.showXAxis) && xField != null) paintValueLabels();
+      return;
+    }
 
     // Selection.
     final selected = selectedIndex;
@@ -550,13 +567,7 @@ class ChartSeriesPainter extends NodePainter {
     final base = xColor == null ? _axisStyle : _axisStyle.copyWith(color: xColor);
     final xLabels = p(ChartProps.xLabels);
     if (p(ChartProps.showXAxis) && xField != null && xLabels.isNotEmpty) {
-      for (final l in xLabels) {
-        final tp = TextPainter(text: TextSpan(text: l.label, style: base), textDirection: TextDirection.ltr)
-          ..layout();
-        final lx = (xAt(l.x) - tp.width / 2).clamp(0.0, math.max(0.0, size.width - tp.width));
-        tp.paint(canvas, Offset(lx.toDouble(), plot.bottom + _xAxisHeight / 2 + 2 - tp.height / 2));
-        tp.dispose();
-      }
+      paintValueLabels();
     } else if (p(ChartProps.showXAxis)) {
       final highlight = p(ChartProps.highlightIndex);
       final highlightColor = p(ChartProps.highlightColor)?.flutter;
@@ -794,7 +805,10 @@ class PlotChartPainter extends NodePainter {
     void paintLabel(String label, double dx) {
       if (labelHeight <= 0 || label.isEmpty) return;
       final text = _text(label, labelStyle);
-      text.paint(canvas, Offset(dx - text.width / 2, chartHeight + 3));
+      // Centred on its x, kept inside the chart (the last label sits at
+      // the right edge).
+      final left = (dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
+      text.paint(canvas, Offset(left, chartHeight + 3));
       text.dispose();
     }
 

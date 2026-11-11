@@ -2,6 +2,19 @@
 import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart';
 
+/// The browser iframe's attributes, set before its `src`. `credentialless`
+/// lets the provider's page load under a site that isolates itself
+/// (`Cross-Origin-Embedder-Policy: credentialless`, which multithreaded
+/// rendering needs): without it the browser blocks YouTube's and Vimeo's
+/// players, which send no embedder policy of their own, and the frame stays
+/// blank.
+const Map<String, String> embeddedFrameAttributes = {
+  'credentialless': '',
+  'allow': 'autoplay; fullscreen; picture-in-picture',
+  'referrerpolicy': 'strict-origin-when-cross-origin',
+  'title': 'Embedded video',
+};
+
 String embeddedOrigin(EmbeddedVideoSource source) =>
     source == EmbeddedVideoSource.youtube ? 'https://www.youtube.com' : 'https://player.vimeo.com';
 
