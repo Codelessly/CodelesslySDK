@@ -721,13 +721,27 @@ class RenderMotion extends RenderPose with _Ticking {
       }
     } else {
       _to = v;
-      if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
+      if (_animates && _entered && _replays(old, v)) {
+        // A new replay key plays the entrance again (from its start, after
+        // its delay, through its keyframes): a list's items falling into
+        // place one after another when the data they show is refilled.
+        _start(v.entranceStart, v, at: _clock);
+      } else if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
         _start(_shown, v, at: _clock);
       }
     }
     _show();
     syncTicker();
   }
+
+  /// Whether [v] replays its entrance: its replay key changed to a new one
+  /// on a motion with an entrance (or keyframes to run through).
+  static bool _replays(api.Motion old, api.Motion v) =>
+      v.replayKey != null &&
+      v.replayKey!.isNotEmpty &&
+      v.replayKey != old.replayKey &&
+      (v.hasEntrance || v.keyframes.isNotEmpty) &&
+      _transitionMs(v) > 0;
 
   static bool _loops(api.Motion m) => m.loop != api.MotionLoop.none && m.duration > 0;
 
