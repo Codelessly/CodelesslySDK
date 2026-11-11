@@ -979,16 +979,21 @@ class _LayoutViewState extends State<_LayoutView> {
       // Responsive layouts follow the screen: the width the layout is shown
       // at, and in a dialog, sheet or popover (shown at its design size) the
       // device's.
+      // A modal covering the screen asks its screen to fill it.
+      final sizing = CanvasSizingScope.maybeOf(context) ?? widget.sizing;
       _screen.tree.responsive = ResponsiveWidth(
-          breakpoints, widget.sizing == CanvasSizing.design ? MediaQuery.sizeOf(context).width : width);
+          breakpoints, sizing == CanvasSizing.design ? MediaQuery.sizeOf(context).width : width);
       final canvas = canvasId == null ? null : layout.document[canvasId];
       if (canvasId == null || canvas == null) return const SizedBox.shrink();
       _seed(canvasId);
       _shownCanvas(canvasId);
-      final box = CanvasViewport.resolve(canvas, constraints, sizing: widget.sizing);
+      final box = CanvasViewport.resolve(canvas, constraints, sizing: sizing);
       Widget view = CanvasViewportBox(
         box: box,
-        child: NodeView(tree: _screen.tree, rootId: canvasId, interactive: true),
+        child: CanvasSizingScope(
+          sizing: null,
+          child: NodeView(tree: _screen.tree, rootId: canvasId, interactive: true),
+        ),
       );
       if (canvas.bind.containsKey('props.${CanvasProps.blockBack.key}') || canvas.props.get(CanvasProps.blockBack)) {
         view = BackGuard(
