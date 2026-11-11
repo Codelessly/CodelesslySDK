@@ -311,6 +311,7 @@ class QuickJsSandbox implements ScriptSandbox {
     String run,
     List<Map<String, Object?>> responses, {
     required Duration cpuBudget,
+    Map<String, Object?>? vars,
   }) {
     final (QuickJsContext, Stopwatch)? entry = _runs[run];
     if (entry == null) {
@@ -325,7 +326,7 @@ class QuickJsSandbox implements ScriptSandbox {
       run,
       () => context.call(
         '__cl_resume',
-        jsonEncode({'run': run, 'responses': responses}),
+        jsonEncode({'run': run, 'responses': responses, 'vars': ?vars}),
         timeout: _remaining(cpuBudget, cpu),
       ),
       cpuBudget,

@@ -328,8 +328,9 @@ class _BoxReactions {
 
   bool _key(KeyEvent e) {
     final n = _node;
-    if (n == null || _disposed || !box.attached || e is KeyRepeatEvent) return false;
-    final down = e is KeyDownEvent;
+    if (n == null || _disposed || !box.attached) return false;
+    final repeat = e is KeyRepeatEvent;
+    final down = e is KeyDownEvent || repeat;
     final type = down ? TriggerType.keyDown : TriggerType.keyUp;
     final keys = HardwareKeyboard.instance;
     final meta = keys.isMetaPressed || keys.isControlPressed;
@@ -337,6 +338,8 @@ class _BoxReactions {
     var handled = false;
     for (final r in n.actions) {
       if (r.trigger.type != type) continue;
+      // A held key's repeats reach only keyDown reactions that ask for them.
+      if (repeat && !r.trigger.repeat) continue;
       final combo = r.trigger.keyCombo;
       if (!runtimeKeyMatches(combo, label, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) continue;
       if (r.trigger.when.trim().isNotEmpty) {
@@ -349,7 +352,7 @@ class _BoxReactions {
     }
     if (!handled) return false;
     owner.fire(box, type.name, event: {
-      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta},
+      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta, 'repeat': repeat},
     });
     return true;
   }
@@ -573,13 +576,27 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    _detachedAt = null;
     if (_visibleFraction != null) _ViewportWatcher.add(this);
   }
+
+  /// Bumped on every detach; a deferred disposal runs only if no attach
+  /// came after it.
+  int? _detachedAt;
+  int _detaches = 0;
 
   @override
   void detach() {
     _ViewportWatcher.remove(this);
-    _disposeRecognizers();
+    // A state style that changes the node's layers (a pressed scale)
+    // re-parents this box while the press is under way: keep the gesture
+    // recognizers until the frame ends, and drop them only if the box is
+    // still detached then (it left the tree).
+    final at = _detachedAt = ++_detaches;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!attached && _detachedAt == at) _disposeRecognizers();
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
     _hovering = false;
     super.detach();
