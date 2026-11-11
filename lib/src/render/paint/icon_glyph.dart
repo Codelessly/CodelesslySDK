@@ -147,6 +147,11 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   @override
   bool get sizedByParent => true;
 
+  /// An icon is solid to the pointer, as Flutter's `Icon` is: a drag handle
+  /// or a button that is only an icon takes the press, not what lies under.
+  @override
+  bool hitTestSelf(Offset position) => true;
+
   /// The icon box: the size its fit box gives it, nothing of its
   /// own (so a row out of room can squeeze it).
   @override
