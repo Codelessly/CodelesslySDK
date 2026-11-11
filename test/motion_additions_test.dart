@@ -132,6 +132,40 @@ void main() {
     expect(tree.boxOf('u')!.rectIn(view)!, rectMoreOrLessEquals(const Rect.fromLTWH(150, 100, 20, 20), epsilon: 0.01));
   });
 
+  testWidgets('upright and mirrored: heading left, the node faces left (its front leads)', (tester) async {
+    // A 40×20 carriage with its nose (n, 10×10) at the right end.
+    Map<String, Map<String, Object?>> carriage(String path, {required bool mirror}) => {
+          't': {
+            'type': 'stack',
+            'children': ['n'],
+            'layout': {'width': 40, 'height': 20, 'x': {'start': 200}, 'y': {'start': 100}},
+            'motion': {'path': path, 'orientToPath': true, 'orientUpright': true, 'uprightMirror': mirror, 'pathProgress': 0.5},
+          },
+          'n': {'type': 'box', 'layout': {'width': 10, 'height': 10, 'x': {'start': 30}, 'y': {'start': 5}}},
+        };
+    Future<Rect> nose(String path, {required bool mirror}) async {
+      final nodes = carriage(path, mirror: mirror);
+      final (tree, view, _) = await showDoc(tester, {
+        'roots': ['s'],
+        'nodes': {
+          's': {'type': 'stack', 'children': ['t'], 'layout': {'width': 400, 'height': 300}},
+          ...nodes,
+        },
+      });
+      final r = tree.boxOf('n')!.rectIn(view)!;
+      await tester.pumpWidget(const SizedBox());
+      return r;
+    }
+
+    // Heading left at the path's middle (-50, 0): mirrored, the nose is at the left end.
+    expect(await nose('M0 0 L-100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(150, 105, 10, 10), epsilon: 0.01));
+    // Not mirrored it stays at the right end, facing backwards.
+    expect(await nose('M0 0 L-100 0', mirror: false), rectMoreOrLessEquals(const Rect.fromLTWH(180, 105, 10, 10), epsilon: 0.01));
+    // Heading right nothing is mirrored.
+    expect(await nose('M0 0 L100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(280, 105, 10, 10), epsilon: 0.01));
+    expect(api.Motion.fromJson({'uprightMirror': true})!.toJson()['uprightMirror'], isTrue);
+  });
+
   test('area pacing sweeps equal areas about the focus', () {
     // An ellipse with its focus off-center: half the area is swept before
     // half the length.
