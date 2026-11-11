@@ -47,6 +47,17 @@ void main() {
     expect(readPath(screen, 'perf.fps') as double, closeTo(30, 0.1));
   });
 
+  test('fps is the rate while drawing; an idle pause doesn\'t count', () {
+    final perf = PerfScope();
+    addTearDown(perf.dispose);
+    // Ten frames at 60 Hz, a 2 s pause, ten more: still 60 a second.
+    perf.report([
+      for (var i = 0; i < 10; i++) _frame(i * 16667, 4000, 2000),
+      for (var i = 0; i < 10; i++) _frame(2000000 + i * 16667, 4000, 2000),
+    ]);
+    expect(readPath(perf, 'perf.fps') as double, closeTo(60, 0.1));
+  });
+
   testWidgets('a running screen reads perf from the engine\'s frame timings', (tester) async {
     final perf = PerfScope();
     addTearDown(perf.dispose);
