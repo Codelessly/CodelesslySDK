@@ -195,6 +195,30 @@ void main() {
     expect(find.byType(CodelesslyWidget), findsOneWidget);
   });
 
+  testWidgets('a screen opens already drawn: navigation loads it first, a loaded layout shows in the first frame', (tester) async {
+    ignoreOverflows();
+    setScreen(tester, const Size(390, 844));
+    final codelessly = codelesslyFor();
+    final fleet = layoutWithCanvas(bundle, 'Fleet · M');
+    final home = await pumpApp(tester, codelessly, layoutId: today.id);
+    expect(codelessly.layout(fleet.id), isNull, reason: 'not loaded yet');
+    unawaited(home.actionContext!.navigate({'type': 'navigate', 'to': canvasNamed(fleet, 'Fleet · M')}));
+    // Frame by frame until the push: the new screen is never a loading one.
+    for (var i = 0; i < 60 && find.byType(CodelesslyWidget).evaluate().length < 2; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(find.byType(CodelesslyLoadingScreen), findsNothing, reason: 'frame $i');
+    }
+    expect(find.byType(CodelesslyWidget), findsNWidgets(2));
+    expect(find.byType(CodelesslyLoadingScreen), findsNothing);
+    await settle(tester);
+
+    // A widget for a layout already loaded draws it in its first frame.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, layoutId: fleet.id)));
+    expect(find.byType(CodelesslyLoadingScreen), findsNothing);
+    expect(find.byType(NodeView), findsOneWidget);
+  });
+
   testWidgets('a navigation plays its page transition; a link by id is named at the screen\'s path', (tester) async {
     ignoreOverflows();
     setScreen(tester, const Size(390, 844));
