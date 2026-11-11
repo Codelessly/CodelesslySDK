@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:codelessly_api_v2/codelessly_api.dart' show PublishFont;
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:http/http.dart' as http;
 
 /// Gets the file of a font.
@@ -28,15 +29,18 @@ class NoFontFetcher implements FontFetcher {
 /// Fetches fonts over HTTP: an uploaded font from its URL, a Google Font
 /// through the Google Fonts CSS API.
 class HttpFontFetcher implements FontFetcher {
-  HttpFontFetcher({http.Client? client, this.googleFontsApi = 'https://fonts.googleapis.com/css2'})
-      : _client = client; // ignore: prefer_initializing_formals
+  HttpFontFetcher({
+    http.Client? client,
+    this.googleFontsApi = 'https://fonts.googleapis.com/css2',
+  }) : _client = client; // ignore: prefer_initializing_formals
 
   final http.Client? _client;
   final String googleFontsApi;
 
   /// The Google Fonts CSS URL of [font].
   Uri googleFontsUrl(PublishFont font) => Uri.parse(
-      '$googleFontsApi?family=${Uri.encodeQueryComponent(font.family).replaceAll('%20', '+')}:ital,wght@${font.italic ? 1 : 0},${font.weight}');
+    '$googleFontsApi?family=${Uri.encodeQueryComponent(font.family).replaceAll('%20', '+')}:ital,wght@${font.italic ? 1 : 0},${font.weight}',
+  );
 
   /// The font file of Google Fonts [css]. Without a browser's user agent it
   /// names one TrueType file; in a browser it names one file per Unicode
@@ -46,8 +50,11 @@ class HttpFontFetcher implements FontFetcher {
   /// platform's font. Null when the CSS names no file.
   static String? fontFileOf(String css) {
     String? clean(String? u) => u?.replaceAll(RegExp(r'''['"]'''), '').trim();
-    final blocks = RegExp(r'(?:/\*\s*([\w-]+)\s*\*/\s*)?@font-face\s*\{([^}]*)\}').allMatches(css).toList();
-    String? urlIn(String body) => clean(RegExp(r'url\(([^)]+)\)').firstMatch(body)?.group(1));
+    final blocks = RegExp(
+      r'(?:/\*\s*([\w-]+)\s*\*/\s*)?@font-face\s*\{([^}]*)\}',
+    ).allMatches(css).toList();
+    String? urlIn(String body) =>
+        clean(RegExp(r'url\(([^)]+)\)').firstMatch(body)?.group(1));
     for (final b in blocks) {
       if (b.group(1) == 'latin') return urlIn(b.group(2)!);
     }
@@ -89,8 +96,10 @@ class HttpFontFetcher implements FontFetcher {
 
 /// Registers the fonts of published layouts with the engine, each once.
 class CodelesslyFonts {
-  CodelesslyFonts({this.fetcher = const NoFontFetcher(), Future<void> Function(String family, List<Uint8List> files)? register})
-      : _register = register ?? _registerWithEngine;
+  CodelesslyFonts({
+    this.fetcher = const NoFontFetcher(),
+    Future<void> Function(String family, List<Uint8List> files)? register,
+  }) : _register = register ?? _registerWithEngine;
 
   final FontFetcher fetcher;
   final Future<void> Function(String family, List<Uint8List> files) _register;
@@ -110,12 +119,14 @@ class CodelesslyFonts {
     final pending = <Future<bool>>[];
     for (final e in byFamily.entries) {
       final files = Future.wait(e.value.map(fetcher.fetch));
-      final done = files.then((bytes) async {
-        final ok = [...bytes.nonNulls];
-        if (ok.isEmpty) return false;
-        await _register(e.key, ok);
-        return true;
-      }).catchError((Object _) => false);
+      final done = files
+          .then((bytes) async {
+            final ok = [...bytes.nonNulls];
+            if (ok.isEmpty) return false;
+            await _register(e.key, ok);
+            return true;
+          })
+          .catchError((Object _) => false);
       for (final f in e.value) {
         _fonts[f.id] = done;
       }
@@ -124,11 +135,69 @@ class CodelesslyFonts {
     await Future.wait(pending);
   }
 
-  static Future<void> _registerWithEngine(String family, List<Uint8List> files) async {
+  // Engine registrations outlive an individual app/preview. Re-registering
+  // identical files sends global font notifications to unrelated live trees.
+  static final _engine = FontRegistrationCache(register: _loadEngineFonts);
+
+  static Future<void> _registerWithEngine(
+    String family,
+    List<Uint8List> files,
+  ) => _engine.load(family, files);
+
+  static Future<void> _loadEngineFonts(
+    String family,
+    List<Uint8List> files,
+  ) async {
     final loader = FontLoader(family);
     for (final f in files) {
       loader.addFont(Future.value(ByteData.sublistView(f)));
     }
     await loader.load();
   }
+}
+
+/// Deduplicates engine registrations by family and actual file bytes, including
+/// concurrent loads and overlapping style sets. Failed loads remain retryable.
+class FontRegistrationCache {
+  FontRegistrationCache({required this.register});
+  final Future<void> Function(String family, List<Uint8List> files) register;
+  final Map<String, List<_RegisteredFont>> _families = {};
+
+  Future<void> load(String family, List<Uint8List> files) async {
+    final known = _families.putIfAbsent(family, () => []);
+    final pending = <Future<void>>[];
+    final fresh = <Uint8List>[];
+    for (final bytes in files) {
+      final existing = known
+          .where((entry) => listEquals(entry.bytes, bytes))
+          .firstOrNull;
+      if (existing != null) {
+        pending.add(existing.loaded);
+      } else if (!fresh.any((other) => listEquals(other, bytes))) {
+        fresh.add(bytes);
+      }
+    }
+    if (fresh.isNotEmpty) {
+      late final Future<void> done;
+      done = Future<void>.sync(() => register(family, fresh)).catchError((
+        Object error,
+        StackTrace stack,
+      ) {
+        known.removeWhere((entry) => identical(entry.loaded, done));
+        Error.throwWithStackTrace(error, stack);
+      });
+      known.addAll([
+        for (final bytes in fresh)
+          _RegisteredFont(Uint8List.fromList(bytes), done),
+      ]);
+      pending.add(done);
+    }
+    await Future.wait(pending);
+  }
+}
+
+class _RegisteredFont {
+  const _RegisteredFont(this.bytes, this.loaded);
+  final Uint8List bytes;
+  final Future<void> loaded;
 }
