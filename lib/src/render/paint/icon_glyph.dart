@@ -32,9 +32,10 @@ abstract final class IconSources {
           'twoTone' => 'twotone',
           _ => '',
         };
-        // An icon without a version (written by hand or by a tool) is served
-        // from the version it was added in, as a picked one is.
-        final version = readInt(icon['version']) ?? materialIconVersions[name] ?? 1;
+        // Served from the version the icon was added in, known by name: an
+        // icon written without one (by hand, by a tool) or renamed by a
+        // binding (whose version is still the old icon's) loads too.
+        final version = materialIconVersions[name] ?? readInt(icon['version']) ?? 1;
         return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v$version/24px.svg';
       case 'MATERIAL_SYMBOL':
         if (name.isEmpty) return null;
