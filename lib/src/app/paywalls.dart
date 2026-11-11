@@ -36,6 +36,9 @@ class CodelesslyPaywalls {
   /// a user the placement doesn't target, no such placement).
   Future<ResolvedPaywall?> resolve(String placement, {String locale = '', String appVersion = ''}) async {
     await codelessly.initialize();
+    // Bind the shared account observer before placement resolution, including
+    // callers presenting a paywall without an existing CodelesslyWidget.
+    codelessly.appVariables.read('auth');
     final s = codelessly.services;
     if (s is! Services) return null;
     final runtime = s.paywalls;

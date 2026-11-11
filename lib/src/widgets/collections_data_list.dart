@@ -258,7 +258,8 @@ class DataListViewState extends State<DataListView> {
     }
     switch (model.source) {
       case PaginationSource.data:
-        controller.setLocalItems(widget.data ?? const [], notify: false);
+        final changed = controller.setLocalItems(widget.data ?? const [], notify: false);
+        if (changed) registry.localItemsChanged(model.name);
         registry.publish(model.name);
       case PaginationSource.cloud || PaginationSource.api:
         final f = _sourceFetcher(model);

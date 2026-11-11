@@ -875,7 +875,7 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
   switch (result.outcome) {
     case PaywallOutcome.purchased || PaywallOutcome.restored:
       return;
-    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing:
+    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing || PaywallOutcome.skipped:
       throw const ActionsCanceled();
     case PaywallOutcome.failed:
       throw StateError(result.error ?? 'Purchase failed');

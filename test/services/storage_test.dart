@@ -21,6 +21,9 @@ void main() {
     var notifications=0;storage.addListener(()=>notifications++);
     await expectLater(storage.put('tapes',[1]),throwsStateError);
     expect(storage.get('tapes'),isNull);expect(notifications,0);
+    final reopened=await PreferencesLocalStorage.open(prefix:'rejected.');
+    expect(reopened.get('tapes'),isNull,reason:'failed SharedPreferences cache entries must not look durable');
+    reopened.dispose();
     storage.dispose();
   });
   test('memory caches', () async {

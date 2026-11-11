@@ -68,7 +68,26 @@ PublishBundle bundle() {
     'home': PublishLayoutInfo.of(home), 'paywall': PublishLayoutInfo.of(paywall),
   }), layouts: {'home': home, 'paywall': paywall});
 }
+class _DelayedRestoreStore extends Store {
+  final cleanup = Completer<void>();
+  @override
+  Future<void> restore() async {
+    events.add(const PaywallResult(PaywallOutcome.restoreNothing));
+    await cleanup.future;
+  }
+}
 void main() {
+  test('completed store outcome releases the attempt before initiation cleanup', () async {
+    final store = _DelayedRestoreStore();
+    final session = PaywallSession(service: store, slots: const []);
+    expect((await session.restoreAndWait()).outcome, PaywallOutcome.restoreNothing);
+    expect(store.cleanup.isCompleted, false);
+    expect((await session.restoreAndWait()).outcome, PaywallOutcome.restoreNothing);
+    store.cleanup.complete();
+    session.dispose();
+    await store.dispose();
+  });
+
   test('slot inventory stays store-backed across selection changes', () async {
     final store = Store();
     final session = PaywallSession(service: store, slots: const [ProductSlot('annual'), ProductSlot('monthly')]);
