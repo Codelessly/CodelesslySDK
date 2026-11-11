@@ -32,7 +32,10 @@ abstract final class IconSources {
           'twoTone' => 'twotone',
           _ => '',
         };
-        return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v${readInt(icon['version']) ?? materialIconVersion(name)}/24px.svg';
+        // The version that serves this name: a name bound at runtime (props.icon.name)
+        // keeps the version stored for the design's icon, which 404s for another.
+        final version = materialIconVersions[name] ?? readInt(icon['version']) ?? 1;
+        return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v$version/24px.svg';
       case 'MATERIAL_SYMBOL':
         if (name.isEmpty) return null;
         final style = readString(icon['style']) ?? 'outlined';
