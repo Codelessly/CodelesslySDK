@@ -35,6 +35,9 @@ abstract final class VariablePreview {
       // that can't be evaluated (null), which gets a placeholder.
       final formula = FormulaEvaluator.exactExpression(expression);
       if (formula != null && engine.formula(formula, scope) == '') return '';
+      // So does a value that is empty text (`${item.note}` of an empty
+      // note slot): it exists, it is just blank.
+      if (formula == null && exactPath(expression) != null && engine.evaluate(expression, scope) == '') return '';
       final value = engine.interpolate(expression, scope, mode: NullSubstitution.noChange);
       if (value.isNotEmpty && !expressionSyntax.hasMatch(value)) return value;
     }

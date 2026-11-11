@@ -296,9 +296,55 @@ class NodeTree {
 
   /// [resolve], with whether a binding hides the node and what it read.
   BoundNode? resolveBound(String id, {Object? instance}) {
-    final n = _patched(id, instance);
+    var n = _patched(id, instance);
     if (n == null) return null;
-    return _binder?.bind(source, n, instance) ?? BoundNode(n);
+    final binder = _binder;
+    if (binder == null) return BoundNode(n);
+    var bound = binder.bind(source, n, instance);
+    // States driven by data (`selected`, `disabled`): held like hover, so
+    // the node's state styles patch it (bind it again) and its targets.
+    if (bound.states.isNotEmpty && _syncBoundStates(id, instance, bound.states)) {
+      n = _patched(id, instance)!;
+      bound = binder.bind(source, n, instance);
+    }
+    return bound;
+  }
+
+  /// Turns node [id]'s bound [states] on or off without re-applying it
+  /// (it is being resolved); the other nodes its state styles patch
+  /// re-apply right after. Whether anything changed.
+  bool _syncBoundStates(String id, Object? instance, Map<api.WidgetState, bool> states) {
+    final key = (id, instance);
+    final current = _states[key] ?? const <api.WidgetState>{};
+    final next = {...current};
+    for (final e in states.entries) {
+      e.value ? next.add(e.key) : next.remove(e.key);
+    }
+    if (setEquals(next, current)) return false;
+    next.isEmpty ? _states.remove(key) : _states[key] = next;
+    final targets = {...?source.node(id)?.behaviors.states.targets}..remove(id);
+    if (targets.isNotEmpty) {
+      _pendingStateTargets.add((targets, instance));
+      if (!_stateFlushScheduled) {
+        _stateFlushScheduled = true;
+        scheduleMicrotask(_flushStateTargets);
+      }
+    }
+    return true;
+  }
+
+  final List<(Set<String>, Object?)> _pendingStateTargets = [];
+  bool _stateFlushScheduled = false;
+
+  void _flushStateTargets() {
+    _stateFlushScheduled = false;
+    final pending = _pendingStateTargets.toList();
+    _pendingStateTargets.clear();
+    for (final (ids, instance) in pending) {
+      for (final b in _boxes.values.toList()) {
+        if (b.instance == instance && ids.contains(b.id)) b._apply();
+      }
+    }
   }
 
   Node? _patched(String id, Object? instance) {
@@ -321,6 +367,9 @@ class NodeTree {
   bool _sweepScheduled = false;
 
   NodeBox? boxOf(String id, {Object? instance}) => _boxes[keyOf(id, instance)];
+
+  /// Every box of node [id]: one per repeat it is built in (a list's items).
+  Iterable<NodeBox> boxesOf(String id) => _boxes.values.where((b) => b.id == id);
   int get length => _boxes.length;
 
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
