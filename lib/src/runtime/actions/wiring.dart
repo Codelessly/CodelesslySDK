@@ -91,6 +91,9 @@ class TreeReactions implements NodeInteractions {
       ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
       ..holdMs = n.actions.firstWhere((r) => r.trigger.type == TriggerType.hold, orElse: () => n.actions.first).trigger.holdMs
       ..visibleFraction = viewport ? n.actions.firstWhere((r) => _isViewport(r.trigger.type)).trigger.visibleFraction : null
+      ..visibleMs = viewport
+          ? n.actions.firstWhere((r) => r.trigger.type == TriggerType.enterViewport, orElse: () => n.actions.first).trigger.visibleMs
+          : 0
       ..onTrigger = (type, event) => fire(box, type.name, event: event));
   }
 
@@ -426,6 +429,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     v == null ? _ViewportWatcher.remove(this) : (attached ? _ViewportWatcher.add(this) : null);
   }
 
+  /// How long (ms) it stays in view before enterViewport fires; leaving
+  /// sooner doesn't fire it.
+  int visibleMs = 0;
+  Timer? _dwell;
+
   void Function(TriggerType type, Json event)? onTrigger;
 
   bool _has(TriggerType t) => _triggers.contains(t);
@@ -652,6 +660,12 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void detach() {
     _ViewportWatcher.remove(this);
+    if (_dwell != null) {
+      // Not in view long enough: seen again, it waits again.
+      _dwell!.cancel();
+      _dwell = null;
+      _inView = false;
+    }
     _hold?.cancel();
     _hold = null;
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
@@ -683,6 +697,16 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     final inView = fraction <= 0 ? visible > 0 : visible >= fraction - 1e-6;
     if (inView == _inView) return;
     _inView = inView;
+    _dwell?.cancel();
+    _dwell = null;
+    if (inView && visibleMs > 0) {
+      // It must stay in view that long: leaving first cancels it.
+      _dwell = Timer(Duration(milliseconds: visibleMs), () {
+        _dwell = null;
+        if (_inView && attached) _fire(TriggerType.enterViewport);
+      });
+      return;
+    }
     final t = inView ? TriggerType.enterViewport : TriggerType.exitViewport;
     if (_triggersAll.contains(t)) _fire(t);
   }

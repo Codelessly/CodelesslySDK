@@ -92,12 +92,19 @@ extension ListFeatures on Node {
   /// A sections setting that groups (a key and a header).
   bool get sectioned => (sections?.groupBy.trim().isNotEmpty ?? false) && slots[CollectionSlots.sectionHeader] != null;
   bool get swipes => swipeActions != null && (swipeActions!.startActions.isNotEmpty || swipeActions!.endActions.isNotEmpty);
+
+  /// A list pulled to refresh without pagination: its `pullToRefresh`, or
+  /// a `refresh` reaction.
+  bool get pullsToRefresh =>
+      type == 'listView' &&
+      (prop(ListViewProps.pullToRefresh) || actions.any((r) => r.trigger.type == TriggerType.refresh));
 }
 
-/// Whether a running list [n] is a [DataListView]: it pages, groups into sections or has swipe
-/// actions, and lays its items in a line.
+/// Whether a running list [n] is a [DataListView]: it pages, groups into
+/// sections, has swipe actions or pulls to refresh, and lays its items in a
+/// line.
 bool usesDataList(Node n) =>
-    (n.pagination != null || n.sectioned || n.swipes) &&
+    (n.pagination != null || n.sectioned || n.swipes || n.pullsToRefresh) &&
     !n.prop(ListViewProps.wrap) &&
     n.prop(ListViewProps.layout) == api.ListLayout.list;
 
@@ -670,7 +677,9 @@ class DataListViewState extends State<DataListView> {
       slivers = [_sliverList(_delegate(items, onBuilt: (index) => _onItemBuilt(index, items.length)))];
     }
 
-    final refreshable = model?.pullToRefresh == true || _node.actions.any((r) => r.trigger.type == TriggerType.refresh);
+    final refreshable = model?.pullToRefresh == true ||
+        _node.pullsToRefresh ||
+        _node.actions.any((r) => r.trigger.type == TriggerType.refresh);
     final padding = _node.layout.padding.flutter;
     final cache = _node.prop(CollectionScrollProps.cacheExtent);
 

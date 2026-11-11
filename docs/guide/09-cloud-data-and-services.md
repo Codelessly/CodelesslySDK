@@ -118,6 +118,67 @@ final codelessly = Codelessly(
 To use your own database, implement `DocumentBackend` (get, watch, query, write documents) and give it to
 `BackendCloudDatabase`, which adds the rules, owner stamps and relations on top.
 
+### Live cloud data in a layout
+
+A `loadCloudData` action streams a document, a query's documents, or a number over a query into a variable for as
+long as the screen shows. The variable holds `{status, isLoading, data, error, hasMore}`; a variable of type list
+holds the documents themselves, and with an `aggregate`, a number variable holds the number. The reactions below are
+`liveCloudLoads`, `markAllRead` and `cardImpression` in the example app's `lib/snippets.dart`:
+
+```json
+{"type": "loadCloudData", "variable": "cards", "single": false, "limit": "${shown}",
+ "query": {"enabled": true, "collectionPath": "cards",
+           "orderByFilters": [{"field": "sentAt", "sortOrder": "descending"}],
+           "joins": [{"collection": "card_state", "as": "state", "id": "${auth.uid}_${item.id}"}]}}
+```
+
+- **One listener per variable.** Running the load again, or `{"type": "reloadCloudData", "variable": "cards"}`,
+  replaces the subscription; it never adds a second one. The subscription ends when the screen goes.
+- **It follows its values.** When a value the query reads changes (`${auth.uid}` after a sign in, a search text, a
+  limit bound to a variable), the load runs again by itself; a change of its own variable never does. A load that
+  keeps re-running (20 times in a second) stops following and reports why. `"reactive": false` turns this off. Owner
+  only collections also follow the signed-in user: `codelesslyCloudServices` gives the database the user's changes.
+- **Bounded.** A query loads at most its `limit` (a number or expression), else the query's limit, else 500
+  (`kDefaultCloudLoadLimit`), reading one document more so that `hasMore` is true exactly when more match. `"limit":
+  "0"` loads everything. "Show more" is a `setVariable` that raises `shown`.
+- **Joins.** Each `query.joins` entry attaches, per item, the matching document of another collection under `as`
+  (`${item.state.read}`): by a key template (`id`, the matching document's id) or by `localField` and `foreignField`,
+  with `many` for every match. The matches are read with `in` queries of 30 keys, kept live: 100 items are 4
+  listeners, not 100 reads.
+- **Live numbers.** `"aggregate": "count"` (or `sum`, `average` with `aggregateField`) keeps the number without
+  loading a document: the database computes it (with Firestore, one read per 1000 documents counted), again after
+  this app writes to that collection, and every `refreshSeconds` when set (for writes made elsewhere). Streaming the
+  documents to count them would read every one, and again on each change.
+
+```json
+{"type": "loadCloudData", "variable": "unread", "single": false, "aggregate": "count",
+ "query": {"enabled": true, "collectionPath": "cards",
+           "whereFilters": [{"field": "read", "operator": "equal", "value": "false"}]}}
+```
+
+**Batches over a list.** `cloudBatch` with `forEach` runs its `cloudData` steps (create, update, delete) once per
+item (`${loop.item}`, `${loop.index}`) and commits them together: up to 500 writes all or none, more in commits of
+500 each, or, with `"transaction": true`, an error before anything is written. `${result}` is the ids written.
+
+```json
+{"type": "cloudBatch", "forEach": "${cards}",
+ "steps": [{"type": "cloudData", "operation": "update", "collection": "cards", "id": "${loop.item.id}",
+            "fields": [{"field": "read", "value": "true"}]}]}
+```
+
+**Pull to refresh.** A list with `pullToRefresh` (or a `refresh` reaction) can be pulled, with or without
+pagination; its `refresh` reactions run (`reloadCloudData`) and the indicator shows until they finish.
+
+**Impressions.** A trigger's `onceKey` runs its reaction once per key for as long as the app runs, and
+`enterViewport`'s `visibleMs` waits until the node has stayed in view that long. An `increment` field operation
+counts atomically:
+
+```json
+{"trigger": {"type": "enterViewport", "visibleFraction": 0.5, "visibleMs": 1000, "onceKey": "${item.id}"},
+ "actions": [{"type": "cloudData", "operation": "update", "collection": "cards", "id": "${item.id}",
+              "fields": [{"field": "views", "operation": "increment", "value": "1"}]}]}
+```
+
 ## HTTP APIs
 
 ![On the web, callApi posts {url, method, headers, body} to your proxy, which calls the API and returns {statusCode, headers, body}](images/09-cloud-data-and-services/api-proxy.png)

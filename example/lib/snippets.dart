@@ -484,6 +484,76 @@ Codelessly memoryCloud() => Codelessly(
       ),
     );
 
+/// Live cloud data in a layout, as the reactions a screen's canvas `load`
+/// runs: a list of `cards` with each user's `card_state` joined in, at most
+/// `${shown}` of them; and an unread count, without loading the cards.
+/// A "Mark all read" button's batch and a card's impression are below.
+const List<Map<String, Object?>> liveCloudLoads = [
+  {
+    'type': 'loadCloudData',
+    'variable': 'cards',
+    'single': false,
+    'limit': r'${shown}',
+    'query': {
+      'enabled': true,
+      'collectionPath': 'cards',
+      'orderByFilters': [
+        {'field': 'sentAt', 'sortOrder': 'descending'},
+      ],
+      'joins': [
+        {'collection': 'card_state', 'as': 'state', 'id': r'${auth.uid}_${item.id}'},
+      ],
+    },
+  },
+  {
+    'type': 'loadCloudData',
+    'variable': 'unread',
+    'single': false,
+    'aggregate': 'count',
+    'query': {
+      'enabled': true,
+      'collectionPath': 'cards',
+      'whereFilters': [
+        {'field': 'read', 'operator': 'equal', 'value': 'false'},
+      ],
+    },
+  },
+];
+
+/// "Mark all read": one write per loaded card, all in one commit.
+const Map<String, Object?> markAllRead = {
+  'type': 'cloudBatch',
+  'forEach': r'${cards}',
+  'steps': [
+    {
+      'type': 'cloudData',
+      'operation': 'update',
+      'collection': 'cards',
+      'id': r'${loop.item.id}',
+      'fields': [
+        {'field': 'read', 'value': 'true'},
+      ],
+    },
+  ],
+};
+
+/// A card's impression: once per card per session, after it has been half
+/// in view for a second.
+const Map<String, Object?> cardImpression = {
+  'trigger': {'type': 'enterViewport', 'visibleFraction': 0.5, 'visibleMs': 1000, 'onceKey': r'${item.id}'},
+  'actions': [
+    {
+      'type': 'cloudData',
+      'operation': 'update',
+      'collection': 'cards',
+      'id': r'${item.id}',
+      'fields': [
+        {'field': 'views', 'operation': 'increment', 'value': '1'},
+      ],
+    },
+  ],
+};
+
 // ---------------------------------------------------------------------
 // Scripting.
 // ---------------------------------------------------------------------
