@@ -415,12 +415,15 @@ class PaginationController extends ChangeNotifier {
 
   /// Gives a [PaginationSource.data] source its items (the list's bound
   /// data); pages are cut from them, and a change re-cuts the pages shown.
-  void setLocalItems(List<Object?> items, {bool notify = true}) {
-    if (identical(items, _localItems) || (_localItems != null && listEquals(items, _localItems))) return;
+  /// Returns whether new data replaced the previous list.
+  bool setLocalItems(List<Object?> items, {bool notify = true}) {
+    if (identical(items, _localItems) || (_localItems != null && listEquals(items, _localItems))) {
+      return false;
+    }
     final hadItems = _localItems != null;
     _localItems = items;
     _fetcher = _localFetcher;
-    if (!hadItems) return;
+    if (!hadItems) return true;
     final shown = _pages.keys.toList();
     _pages.clear();
     _lastPage = null;
@@ -429,6 +432,7 @@ class PaginationController extends ChangeNotifier {
       _pages[page] = _slice(items, PageRequest(page: page, pageSize: _pageSize));
     }
     if (notify) _notify();
+    return true;
   }
 
   List<Object?>? _localItems;
@@ -633,6 +637,10 @@ class PaginationRegistry extends ChangeNotifier {
   /// Writes [name]'s state into its variable, now or, during a frame's
   /// build or layout, after it.
   void publish(String name) => _later(() => _write(name));
+
+  /// Local data can arrive during a list build. Notify its controls and list
+  /// after that frame, rather than leaving controls on the old empty state.
+  void localItemsChanged(String name) => _later(() => _controllers[name]?._notify());
 
   static bool get _inFrame {
     try {

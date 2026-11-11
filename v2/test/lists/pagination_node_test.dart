@@ -72,6 +72,22 @@ void main() {
     expect(c.page, 1);
   });
 
+  testWidgets(
+    'controls refresh when asynchronous local data replaces an empty list',
+    (tester) async {
+      await pump(tester, 0);
+      expect(find.text('Showing 0–0 of 0'), findsOneWidget);
+      s.scope.set('rows', [
+        for (var i = 0; i < 35; i++) {'id': i},
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.text('Showing 1–10 of 35'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Next page'));
+      await tester.pumpAndSettle();
+      expect(find.text('Showing 11–20 of 35'), findsOneWidget);
+    },
+  );
+
   testWidgets('previous is disabled on the first page', (tester) async {
     await pump(tester, 35);
     final previous = tester.widget<Semantics>(find
