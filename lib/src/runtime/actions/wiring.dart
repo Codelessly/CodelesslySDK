@@ -346,12 +346,7 @@ class _BoxReactions {
           character: character, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) {
         continue;
       }
-      if (r.trigger.when.trim().isNotEmpty) {
-        final ok = FormulaEvaluator.exactExpression(r.trigger.when) != null
-            ? owner.contextFor(box).expressions.evaluate(r.trigger.when, owner.contextFor(box).scope)
-            : readPath(owner.contextFor(box).scope, r.trigger.when);
-        if (ok != true) continue;
-      }
+      if (r.trigger.when.trim().isNotEmpty && !triggerWhenHolds(r.trigger.when, owner.contextFor(box))) continue;
       handled = true;
     }
     if (!handled) return false;
@@ -678,4 +673,17 @@ abstract final class _ViewportWatcher {
       _schedule();
     }, debugLabel: 'ViewportWatcher');
   }
+}
+
+/// Whether a trigger's `when` holds: a `${path}` binding, a `${= formula}`,
+/// or a bare path or formula, reading true (or `true` / 1).
+bool triggerWhenHolds(String when, ActionContext context) {
+  final t = when.trim();
+  final Object? value;
+  if (t.contains(r'${')) {
+    value = context.expressions.evaluate(t, context.scope);
+  } else {
+    value = readPath(context.scope, t) ?? context.expressions.evaluate('\${= $t}', context.scope);
+  }
+  return value == true || value == 1 || value == 'true' || value == '1';
 }
