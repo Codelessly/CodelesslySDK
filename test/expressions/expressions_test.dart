@@ -347,6 +347,10 @@ void main() {
       final row = ItemScope(index: 2, item: {'label': 'Orange County'}, parent: s);
       expect(VariablePreview.textFor(r'${item.label}', scope: row), 'Orange County');
       expect(VariablePreview.textFor(r'${= index + 1}', scope: row), '3');
+      // An empty value shows nothing (the text before a match at the start).
+      final match = ItemScope(index: 0, item: {'before': '', 'match': 'Har'}, parent: s);
+      expect(VariablePreview.textFor(r'${item.before}', scope: match), '');
+      expect(VariablePreview.textFor(r'${item.missing}', scope: match), 'Missing');
     });
 
     test('a fixed-width text too narrow for its placeholder shows a marker', () {

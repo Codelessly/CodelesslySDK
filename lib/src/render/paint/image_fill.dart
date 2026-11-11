@@ -149,6 +149,10 @@ abstract final class PaintImages {
 
   @visibleForTesting
   static int get debugEntries => _entries.length;
+
+  /// Whether an image (an icon's SVG, a photo) shown on screen is still
+  /// loading: a capture waits for none to be.
+  static bool get loading => _entries.values.any((e) => e._clients.isNotEmpty && !e.ready && !e.failed);
 }
 
 /// A render object that paints images: it holds the ones it shows while

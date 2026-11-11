@@ -85,6 +85,7 @@ TextStyle textStyle(api.TextStyle style) {
       api.TextDecoration.lineThrough => TextDecoration.lineThrough,
     },
     decorationColor: style.decorationColor?.flutter,
+    backgroundColor: style.backgroundColor?.flutter,
     decorationStyle: style.decorationStyle == null || style.decorationStyle == api.TextDecorationStyle.solid
         ? null
         : TextDecorationStyle.values.byName(style.decorationStyle!.name),
