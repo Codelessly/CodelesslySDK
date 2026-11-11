@@ -143,6 +143,7 @@ export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
 
 // The app shell: Codelessly, CodelesslyWidget, loading, navigation.
 export 'src/app/app_identity.dart';
+export 'src/app/automations.dart';
 export 'src/app/back_guard.dart';
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart';
@@ -155,6 +156,7 @@ export 'src/app/overlay_screens.dart';
 export 'src/app/page_transitions.dart';
 export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
+export 'src/app/presenter.dart';
 export 'src/app/runtime.dart';
 export 'src/app/theme.dart' show themeDataOf, themeValues;
 export 'src/app/viewport.dart';
