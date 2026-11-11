@@ -61,12 +61,15 @@ String _text(RenderObject root) => _find<RenderParagraph>(root).map((p) => p.tex
 void main() {
   test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
-        'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
+        'https://fonts.gstatic.com/s/i/materialiconsround/home/v${materialIconVersions['home']}/24px.svg');
     // Without a version, the icon is served from the version it was added in.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),
         'https://fonts.gstatic.com/s/i/materialicons/home/v${materialIconVersions['home']}/24px.svg');
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'check', 'style': 'rounded'}),
         'https://fonts.gstatic.com/s/i/materialiconsround/check/v18/24px.svg');
+    // A binding that renames an icon keeps the old icon's version: the name wins.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'lock_open', 'style': 'rounded', 'version': 1234}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/lock_open/v${materialIconVersions['lock_open']}/24px.svg');
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'not_an_icon_name'}),
         'https://fonts.gstatic.com/s/i/materialicons/not_an_icon_name/v1/24px.svg');
     expect(
