@@ -671,25 +671,6 @@ class PlotChartPainter extends NodePainter {
       }
     }
 
-    final markerRadius = p(PlotChartProps.markerRadius);
-    final markerStyle = p(PlotChartProps.markerLabelStyle);
-    for (final marker in p(PlotChartProps.markers)) {
-      final value = marker.y ?? valueAt(marker.x);
-      if (value == null) continue;
-      final dot = Offset(x(marker.x), y(value));
-      final color = marker.color.flutter;
-      canvas.drawCircle(dot, markerRadius, Paint()..color = color);
-      if (marker.label.isEmpty) continue;
-      final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
-      final dx = (dot.dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
-      final dy = switch (marker.position) {
-        PlotChartMarkerPosition.above => dot.dy - markerRadius - (markerStyle.fontSize ?? 10) * 1.3,
-        PlotChartMarkerPosition.below => dot.dy + markerRadius + 1.5,
-      };
-      text.paint(canvas, Offset(dx, dy));
-      text.dispose();
-    }
-
     if (p(PlotChartProps.referenceX) case final double referenceX) {
       final dx = x(referenceX);
       final paint = Paint()
@@ -741,6 +722,27 @@ class PlotChartPainter extends NodePainter {
       }
     }
     canvas.restore();
+
+    // Markers draw over the plot's edge: one at the last point (the
+    // usual "now" dot) sits on the right edge and was cut in half.
+    final markerRadius = p(PlotChartProps.markerRadius);
+    final markerStyle = p(PlotChartProps.markerLabelStyle);
+    for (final marker in p(PlotChartProps.markers)) {
+      final value = marker.y ?? valueAt(marker.x);
+      if (value == null) continue;
+      final dot = Offset(x(marker.x), y(value));
+      final color = marker.color.flutter;
+      canvas.drawCircle(dot, markerRadius, Paint()..color = color);
+      if (marker.label.isEmpty) continue;
+      final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
+      final dx = (dot.dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
+      final dy = switch (marker.position) {
+        PlotChartMarkerPosition.above => dot.dy - markerRadius - (markerStyle.fontSize ?? 10) * 1.3,
+        PlotChartMarkerPosition.below => dot.dy + markerRadius + 1.5,
+      };
+      text.paint(canvas, Offset(dx, dy));
+      text.dispose();
+    }
   }
 
   /// An axis value without a trailing `.0`.
