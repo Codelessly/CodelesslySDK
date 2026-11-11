@@ -74,6 +74,10 @@ class _RuntimePageViewState extends State<RuntimePageView> {
           final target = count == null
               ? requested
               : requested.clamp(0, count - 1);
+          // onPageChanged commonly writes this same bound variable. Its
+          // intermediate page reports are feedback, not navigation requests:
+          // retargeting to each report would cancel a multi-page animation.
+          if (target == _page.round()) return;
           final duration = _node.prop(api.PageViewProps.animationDuration);
           if (duration == 0) {
             _controller.jumpToPage(target);
