@@ -7,12 +7,14 @@ import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import 'action_error.dart' show CodedFailure;
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
+import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
@@ -781,13 +783,54 @@ void _editText(EditTextAction a, ActionRun run) {
   }
 }
 
+/// The copy of repeated node [id] that a list built for its item [item]:
+/// the one whose `${item.id}` (or `${item.key}`, or the item itself, as
+/// text) reads [item], else the one whose `${index}` is [item]. Each copy is
+/// asked in its own scope, so a node inside an item template matches too.
+NodeBox? repeatOf(NodeTree tree, String id, String item) {
+  final binder = tree.binder;
+  if (binder == null) return null;
+  NodeBox? byIndex;
+  final index = int.tryParse(item);
+  for (final b in tree.boxesOf(id)) {
+    if (!b.attached) continue;
+    final scope = binder.scopeFor(tree.source, b.id, b.instance);
+    if (scope == null) continue;
+    final value = readPath(scope, 'item');
+    final key = value is Map ? (value['id'] ?? value['key']) : value;
+    if (key != null && '$key' == item) return b;
+    if (index != null && byIndex == null && readPath(scope, 'index') == index) byIndex = b;
+  }
+  return byIndex;
+}
+
+/// Whether the scrolling rows and columns around [box] have laid out
+/// something to scroll (or there are none).
+bool _scrollsLaidOut(RenderObject box) {
+  for (var p = box.parent; p != null; p = p.parent) {
+    if (p is RenderDesignScroll && p.interactive) return p.hasSize && p.maxScrollExtent > 0;
+  }
+  return true;
+}
+
 /// Scrolls the scroll views around node [ScrollToAction.node] (those
 /// along [ScrollToAction.axis] only, when it's set) so the node sits at
 /// its alignment, less its offset: each view reveals the one inside it.
 Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
-  final box = run.host.tree?.boxOf(run.text(a.node).trim());
+  final tree = run.host.tree;
+  final id = run.text(a.node).trim();
+  final item = run.text(a.item).trim();
+  final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
   if (box == null || !box.attached) return;
+  // Run from a screen's `load`, the views around it may not have their
+  // content's extent yet: give layout a few frames.
+  for (var i = 0; i < 4 && !_scrollsLaidOut(box); i++) {
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+  }
+  if (!box.attached) return;
   final target = box.contentBox ?? box;
+  final offset = a.offsetFormula.isEmpty ? a.offset : (double.tryParse(run.text(a.offsetFormula).trim()) ?? a.offset);
   final duration = Duration(milliseconds: a.durationMs);
   final Curve curve = switch (AnimationCurve.parse(a.curve)) {
     AnimationCurve.linear => Curves.linear,
@@ -808,7 +851,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
       viewports++;
       final along=a.axis==null || (p.axis==rendering.Axis.horizontal)==(a.axis==ScrollAxis.horizontal);
       if(along){
-        final to=(p.getOffsetToReveal(revealed,a.alignment)-a.offset).clamp(0.0,p.maxScrollExtent);
+        final to=(p.getOffsetToReveal(revealed,a.alignment)-offset).clamp(0.0,p.maxScrollExtent);
         if(a.durationMs<=0){p.jumpTo(to);}else{scrolls.add(p.animateTo(to,duration:duration,curve:curve));}
       }
       revealed=p;
@@ -820,7 +863,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     viewports++;
     final along = a.axis == null || (p.axis == rendering.Axis.horizontal) == (a.axis == ScrollAxis.horizontal);
     if (along && position.hasContentDimensions) {
-      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - a.offset)
+      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - offset)
           .clamp(position.minScrollExtent, position.maxScrollExtent)
           .toDouble();
       if ((to - position.pixels).abs() >= 0.5) {
