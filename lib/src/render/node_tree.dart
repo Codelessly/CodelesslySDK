@@ -127,11 +127,32 @@ final class ResponsiveWidth {
 
 typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>;
 
+/// Native behaviours, including scroll viewports, follow the same mode as
+/// widget islands when an existing tree switches between design and runtime.
+class _TreeIslands extends IslandManager {
+  _TreeIslands(super.environment);
+  VoidCallback? onEnvironment;
+  @override
+  set environment(IslandEnvironment value) {
+    if (value == environment) return;
+    super.environment = value;
+    onEnvironment?.call();
+  }
+}
+
 /// Owns the boxes built from one [NodeSource].
 class NodeTree {
   NodeTree(this.source,
       {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder, NodeInteractions? interactions})
-      : islands = IslandManager(environment) {
+      : islands = _TreeIslands(environment) {
+    (islands as _TreeIslands).onEnvironment = () {
+      for (final box in _boxes.values.toList()) {
+        // A mode change is not a document edit: bypass the root's
+        // unchanged/moved-only shortcut so native behaviour layers follow it.
+        box._applied = null;
+        box._apply();
+      }
+    };
     _binder = binder;
     _interactions = interactions;
   }
@@ -973,7 +994,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     return false;
   }
 
-  /// A scroll view at rest: fit box → viewport → padding → content extent.
+  /// A single-child scroll view: at rest in design, interactive in the app.
   void _scrollView(Node n, List<RenderBox> chain, List<Node> children,
       {required bool contentSized, bool? fillViewport}) {
     final vertical = n.scrollDirection == api.Axis.vertical;
@@ -986,6 +1007,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     final axis = vertical ? Axis.vertical : Axis.horizontal;
     final viewport = _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis))
       ..axis = axis
+      ..interactive = tree.islands.environment.interactive
+      ..userScrollable = n.prop(ScrollProps.physics) != api.ScrollPhysicsType.never
       ..reverse = n.prop(ScrollProps.reverse)
       ..clipBehavior = clip(n.prop(ScrollProps.clipBehavior));
     chain.add(viewport);

@@ -241,17 +241,28 @@ class StoragePurchaseQueue implements PurchaseRetryQueue {
 /// bindings read (`product`, `paywall`, `entitlements`); [result] completes
 /// with a verified purchase or restore, or a close.
 class PaywallSession extends ChangeNotifier {
-  PaywallSession({required this.service, required this.slots, Set<String>? entitlements, this.onEvent})
-      : entitlements = entitlements ?? {} {
+  PaywallSession({
+    required this.service,
+    required this.slots,
+    Set<String>? entitlements,
+    this.onEvent,
+    this.ownsService = false,
+    this.onDispose,
+  }) : entitlements = entitlements ?? {} {
     _subscription = service.updates.listen(_onResult, onError: (Object failure) {
-      error = '$failure';
-      purchasing = false;
-      restoring = false;
-      notifyListeners();
+      if (_disposed) return;
+      _onResult(PaywallResult(PaywallOutcome.failed, error: '$failure'));
     });
   }
 
   final PurchaseService service;
+
+  /// Runtime-created sessions own their store adapter. Manually supplied
+  /// sessions keep the caller’s ownership by default.
+  final bool ownsService;
+  final VoidCallback? onDispose;
+  bool _disposed = false;
+  bool get isDisposed => _disposed;
   final List<ProductSlot> slots;
   final Set<String> entitlements;
 
@@ -261,6 +272,7 @@ class PaywallSession extends ChangeNotifier {
 
   late final StreamSubscription<PaywallResult> _subscription;
   final _completion = Completer<PaywallResult>();
+  Completer<PaywallResult>? _attempt;
 
   List<PaywallProduct> products = const [];
   String? selectedSlot;
@@ -274,9 +286,12 @@ class PaywallSession extends ChangeNotifier {
   /// Loads the store's products and selects the first.
   Future<void> load() async {
     try {
-      products = await service.products(slots);
+      final loaded = await service.products(slots);
+      if (_disposed) return;
+      products = loaded;
       selectedSlot ??= products.isEmpty ? null : products.first.slot;
     } catch (failure) {
+      if (_disposed) return;
       error = '$failure';
     }
     notifyListeners();
@@ -291,6 +306,7 @@ class PaywallSession extends ChangeNotifier {
 
   Map<String, Object?> get values => {
         'product': selectedProduct?.toValue() ?? const <String, Object?>{},
+        'products': {for (final p in products) p.slot: p.toValue()},
         'paywall': {
           'purchasing': purchasing,
           'restoring': restoring,
@@ -302,6 +318,7 @@ class PaywallSession extends ChangeNotifier {
       };
 
   void selectProduct(String slot) {
+    if (_disposed || _completion.isCompleted) throw StateError('Paywall session is closed');
     if (!products.any((p) => p.slot == slot)) throw ArgumentError.value(slot, 'slot', 'Unknown store product');
     selectedSlot = slot;
     onEvent?.call('product_selected', slot);
@@ -309,6 +326,7 @@ class PaywallSession extends ChangeNotifier {
   }
 
   Future<void> purchase({String? slot}) async {
+    if (_disposed || _completion.isCompleted) throw StateError('Paywall session is closed');
     if (purchasing || restoring) return;
     if (slot != null) selectProduct(slot);
     final product = selectedProduct;
@@ -325,6 +343,7 @@ class PaywallSession extends ChangeNotifier {
   }
 
   Future<void> restore() async {
+    if (_disposed || _completion.isCompleted) throw StateError('Paywall session is closed');
     if (purchasing || restoring) return;
     error = null;
     restoring = true;
@@ -338,12 +357,36 @@ class PaywallSession extends ChangeNotifier {
     }
   }
 
+  /// Waits for the store's verified outcome, cancellation or error, rather
+  /// than just purchase initiation. Native action chains use this boundary.
+  Future<PaywallResult> purchaseAndWait({String? slot}) => _waitForAttempt(() => purchase(slot: slot));
+
+  Future<PaywallResult> restoreAndWait() => _waitForAttempt(restore);
+
+  Future<PaywallResult> _waitForAttempt(Future<void> Function() start) async {
+    if (_attempt != null || purchasing || restoring) throw StateError('Paywall operation is already in progress');
+    final attempt = _attempt = Completer<PaywallResult>();
+    try {
+      await start();
+      return await attempt.future;
+    } finally {
+      if (identical(_attempt, attempt)) _attempt = null;
+    }
+  }
+
   void close() {
+    if (_disposed || _completion.isCompleted) return;
     onEvent?.call('close', selectedSlot);
     _finish(const PaywallResult(PaywallOutcome.closed));
   }
 
   void _onResult(PaywallResult result) {
+    if (_disposed || _completion.isCompleted) return;
+    if ((result.outcome == PaywallOutcome.purchased || result.outcome == PaywallOutcome.restored) &&
+        (result.entitlementId == null || result.entitlementId!.isEmpty)) {
+      result = const PaywallResult(PaywallOutcome.failed, error: 'Missing verified entitlement');
+    }
+    if (_attempt case final attempt? when !attempt.isCompleted) attempt.complete(result);
     purchasing = false;
     restoring = false;
     switch (result.outcome) {
@@ -368,12 +411,18 @@ class PaywallSession extends ChangeNotifier {
   }
 
   void _finish(PaywallResult result) {
+    if (_attempt case final attempt? when !attempt.isCompleted) attempt.complete(result);
     if (!_completion.isCompleted) _completion.complete(result);
   }
 
   @override
   void dispose() {
+    if (_disposed) return;
+    close();
+    _disposed = true;
     _subscription.cancel();
+    if (ownsService) unawaited(service.dispose());
+    onDispose?.call();
     super.dispose();
   }
 }
@@ -465,11 +514,20 @@ class PaywallRuntime {
   /// The signed-in user's verified entitlements.
   final ValueNotifier<Set<String>> entitlements = ValueNotifier(const {});
   String? _userId;
+  int _accountEpoch = 0;
+  bool _disposed = false;
+  final Set<PaywallSession> _sessions = {};
 
   /// Scopes the runtime to user [uid]: their cache keys; entitlements reset.
   void scopeToUser(String? uid) {
+    if (_disposed) return;
     if (_userId == uid) return;
     _userId = uid;
+    _accountEpoch++;
+    for (final session in _sessions.toList()) {
+      session.dispose();
+    }
+    _sessions.clear();
     entitlements.value = const {};
   }
 
@@ -479,16 +537,18 @@ class PaywallRuntime {
   /// Refreshes [entitlements] from the server, failing closed (no grants)
   /// when it can't.
   Future<void> refreshEntitlements() async {
+    if (_disposed) return;
     final uid = _userId;
+    final epoch = _accountEpoch;
     if (uid == null) {
       entitlements.value = const {};
       return;
     }
     try {
       final verified = await backend.entitlements();
-      if (uid == _userId) entitlements.value = verified;
+      if (!_disposed && epoch == _accountEpoch && uid == _userId) entitlements.value = verified;
     } catch (_) {
-      if (uid == _userId) entitlements.value = const {};
+      if (!_disposed && epoch == _accountEpoch && uid == _userId) entitlements.value = const {};
     }
   }
 
@@ -496,37 +556,91 @@ class PaywallRuntime {
   /// cached; null with neither, when the app must show a fallback that
   /// doesn't sell (never made-up prices or grants).
   Future<ResolvedPaywall?> resolve(String placement, {required String locale, required String appVersion}) async {
+    if (_disposed) throw StateError('Paywall runtime is disposed');
+    final epoch = _accountEpoch;
     final key = _cacheKey(placement, locale, appVersion);
     try {
       final remote = await backend
           .resolve(placement, locale: locale, platform: platform, appVersion: appVersion)
           .timeout(loadBudget);
+      if (_disposed || epoch != _accountEpoch) return null;
       await cache.write(key, {'expires': _now().add(cacheLifetime).millisecondsSinceEpoch, ...remote.toCacheJson()});
-      return remote;
+      return !_disposed && epoch == _accountEpoch ? remote : null;
     } catch (_) {
+      if (_disposed || epoch != _accountEpoch) return null;
       unawaited(refreshEntitlements());
-      return readCached<ResolvedPaywall?>(cache, key, (json) {
+      final cached = await readCached<ResolvedPaywall?>(cache, key, (json) {
         final expires = (json as Map)['expires'];
         if (expires is! num || expires < _now().millisecondsSinceEpoch) throw StateError('expired');
         return ResolvedPaywall.fromCacheJson(json);
       });
+      return !_disposed && epoch == _accountEpoch ? cached : null;
     }
   }
 
   /// A session for [paywall]; the entitlements its verified purchases grant
   /// join [entitlements].
   PaywallSession session(ResolvedPaywall paywall, {void Function(String event, String? slot)? onEvent}) {
-    final session = PaywallSession(
+    if (_disposed) throw StateError('Paywall runtime is disposed');
+    final epoch = _accountEpoch;
+    // The resolver's grants are verified. A session's stale snapshot must
+    // never replace newer grants or resurrect a subsequently revoked one.
+    entitlements.value = {...entitlements.value, ...paywall.entitlements};
+    late final PaywallSession session;
+    session = PaywallSession(
+      ownsService: true,
+      onDispose: () => _sessions.remove(session),
       service: purchases(),
       slots: paywall.slots,
-      entitlements: {...entitlements.value, ...paywall.entitlements},
+      entitlements: {...entitlements.value},
       onEvent: onEvent,
     );
-    session.addListener(() {
-      if (!setEquals(entitlements.value, session.entitlements)) entitlements.value = {...session.entitlements};
-    });
+    _sessions.add(session);
+    unawaited(session.result.then((result) {
+      if (_disposed || epoch != _accountEpoch || session.isDisposed) return;
+      if (result.outcome != PaywallOutcome.purchased && result.outcome != PaywallOutcome.restored) return;
+      final id = result.entitlementId;
+      if (id != null && id.isNotEmpty) entitlements.value = {...entitlements.value, id};
+    }));
     return session;
   }
 
-  void dispose() => entitlements.dispose();
+  /// Resolve and load before presenting; failures never open a selling UI.
+  /// The session belongs to this call and is disposed on every exit path.
+  Future<PaywallResult> open(
+    String placement, {
+    required String locale,
+    required String appVersion,
+    required Future<PaywallResult?> Function(ResolvedPaywall paywall, PaywallSession session) present,
+  }) async {
+    final epoch = _accountEpoch;
+    final resolved = await resolve(placement, locale: locale, appVersion: appVersion);
+    if (_disposed || epoch != _accountEpoch) return const PaywallResult(PaywallOutcome.closed);
+    if (resolved == null || resolved.placement.layoutId.isEmpty || resolved.slots.isEmpty) {
+      throw StateError('Paywall placement is unavailable');
+    }
+    final current = session(resolved);
+    try {
+      await current.load();
+      if (current.isDisposed || _disposed || epoch != _accountEpoch) return const PaywallResult(PaywallOutcome.closed);
+      if (current.error != null || resolved.slots.any((slot) => !current.products.any((product) => product.slot == slot.id))) {
+        throw StateError('Store products are unavailable');
+      }
+      return await present(resolved, current) ?? const PaywallResult(PaywallOutcome.closed);
+    } finally {
+      _sessions.remove(current);
+      current.dispose();
+    }
+  }
+
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _accountEpoch++;
+    for (final session in _sessions.toList()) {
+      session.dispose();
+    }
+    _sessions.clear();
+    entitlements.dispose();
+  }
 }

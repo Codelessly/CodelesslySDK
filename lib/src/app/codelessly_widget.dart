@@ -34,7 +34,7 @@ import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
-import '../services/services.dart' show NoScriptRunner, Services;
+import '../services/services.dart' show NoScriptRunner, Services, PaywallSession, PaywallResult;
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
@@ -238,6 +238,9 @@ class CodelesslyWidget extends StatefulWidget {
     this.errorBuilder,
     this.layoutBuilder,
     this.onNavigate,
+    this.paywall,
+    this.paywallAppVersion = '',
+    this.onActionError,
   });
 
   /// The layout to show: a layout id, a custom id, or the id of one of its
@@ -289,6 +292,17 @@ class CodelesslyWidget extends StatefulWidget {
   /// Handles navigation actions first (an app routing screens itself).
   final CodelesslyNavigationHandler? onNavigate;
 
+  /// The route's session. Its owner disposes it; nested modal actions use
+  /// the same session. Normal navigation does not implicitly open a paywall.
+  final PaywallSession? paywall;
+
+  /// Host app version passed to server placement resolution.
+  final String paywallAppVersion;
+
+  /// Failed action chains stop and report here, so the host can show its
+  /// designed toast or recovery UI. Propagated to routes and modals.
+  final void Function(Object error, StackTrace stack, String? action)? onActionError;
+
   /// A route showing layout [layoutId] of [codelessly], as navigation
   /// pushes them. [template] passes its builders and handler along. With
   /// [transition] it plays that custom transition (its reveals growing
@@ -299,6 +313,7 @@ class CodelesslyWidget extends StatefulWidget {
     required String layoutId,
     Map<String, Object?> params = const {},
     CodelesslyWidget? template,
+    PaywallSession? paywall,
     String? name,
     RouteTransition? transition,
     RevealAnchor anchor = const RevealAnchor(),
@@ -317,6 +332,9 @@ class CodelesslyWidget extends StatefulWidget {
           errorBuilder: template?.errorBuilder ?? template?.controller?.errorBuilder,
           layoutBuilder: template?.layoutBuilder ?? template?.controller?.layoutBuilder,
           onNavigate: template?.onNavigate,
+          paywall: paywall,
+          paywallAppVersion: template?.paywallAppVersion ?? '',
+          onActionError: template?.onActionError,
         );
     if (transition != null) {
       return CodelesslyRouteTransitionRoute<T>(transition: transition, settings: settings, anchor: anchor, builder: build);
@@ -355,6 +373,8 @@ class CodelesslyWidget extends StatefulWidget {
             errorBuilder: template?.errorBuilder,
             layoutBuilder: template?.layoutBuilder,
             onNavigate: template?.onNavigate,
+            paywallAppVersion: template?.paywallAppVersion ?? '',
+            onActionError: template?.onActionError,
           ),
         );
       };
@@ -616,6 +636,15 @@ class _LayoutViewState extends State<_LayoutView> {
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
   }
 
+  Map<String, Object?> _paywallValues() {
+    final values = {...?widget.host.paywall?.values};
+    final services = _codelessly.services;
+    // Runtime entitlements are live and account-scoped; the session's
+    // snapshot must not hide a later revocation or another session's grant.
+    if (services is Services && services.paywalls != null) values.remove('entitlements');
+    return values;
+  }
+
   _ScreenState _create() {
     final config = _codelessly.config;
     final appData = (_codelessly.data.read('data') as Map?)?.cast<String, Object?>() ?? const {};
@@ -624,6 +653,7 @@ class _LayoutViewState extends State<_LayoutView> {
       if (widget.data.isNotEmpty) 'data': {...appData, ...widget.data},
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
+      ..._paywallValues(),
     }, _codelessly.appVariables);
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
@@ -655,7 +685,21 @@ class _LayoutViewState extends State<_LayoutView> {
       tree: tree,
       nodeValues: nodeValues,
       scripts: widget.layout.document.scripts,
+      paywall: widget.host.paywall,
+      openPaywall: _openPaywall,
+      onError: widget.host.onActionError,
     );
+    final session = widget.host.paywall;
+    if (session != null) {
+      void changed() {
+        for (final entry in _paywallValues().entries) {
+          values.set(entry.key, entry.value);
+        }
+      }
+
+      session.addListener(changed);
+      context.onDispose(() => session.removeListener(changed));
+    }
     final reactions = TreeReactions(runner: config.actions, context: context);
     tree.interactions = reactions;
     final screen = _ScreenState(
@@ -750,6 +794,45 @@ class _LayoutViewState extends State<_LayoutView> {
     if (ModalRoute.isCurrentOf(context) == false) return;
     final route = CodelesslyRoute(widget.layout.id, shown, widget.params);
     if (_codelessly.route.value != route) _codelessly.route.value = route;
+  }
+
+  Future<PaywallResult> _openPaywall(String placement) async {
+    final services = _codelessly.services;
+    final runtime = services is Services ? services.paywalls : null;
+    if (runtime == null) throw StateError('No paywall backend configured');
+    if (!mounted) throw StateError('Paywall host is no longer mounted');
+    final navigator = Navigator.maybeOf(context);
+    if (navigator == null) throw StateError('Paywall requires a Navigator');
+    return runtime.open(
+      placement,
+      locale: Localizations.maybeLocaleOf(context)?.toLanguageTag() ?? 'en',
+      appVersion: widget.host.paywallAppVersion,
+      present: (resolved, session) async {
+        if (!mounted) return null;
+        final destination = resolved.placement.layoutId;
+        final layoutId = _codelessly.publishModel?.resolveLayoutId(destination);
+        if (layoutId == null) throw StateError('Paywall layout is unavailable');
+        // Load before opening so a broken placement never shows selling controls.
+        await _codelessly.loadLayout(layoutId);
+        if (!mounted || session.isDisposed) return null;
+        final route = CodelesslyWidget.route<Object?>(
+          codelessly: _codelessly,
+          layoutId: layoutId,
+          template: widget.host,
+          paywall: session,
+          name: '/paywall/$placement',
+        );
+        // Purchase/restore/close completes the same session used by actions.
+        // Removing this exact route cannot accidentally pop a newer route.
+        unawaited(
+          session.result.then((result) {
+            if (navigator.mounted && route.isActive) navigator.removeRoute(route, result);
+          }),
+        );
+        final result = await navigator.push(route);
+        return result is PaywallResult ? result : null;
+      },
+    );
   }
 
   Future<void> _navigate(NavigationRequest request) async {
@@ -927,6 +1010,9 @@ class _ScreenUi extends NavigatorActionUi {
           data: view.widget.data,
           sizing: CanvasSizing.design,
           onNavigate: view.widget.host.onNavigate,
+          paywall: view.widget.host.paywall,
+          paywallAppVersion: view.widget.host.paywallAppVersion,
+          onActionError: view.widget.host.onActionError,
         );
       };
 

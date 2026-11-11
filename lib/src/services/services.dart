@@ -143,21 +143,32 @@ class Services implements CodelesslyServices {
     StreamSubscription<AppUser?>? users;
     StreamSubscription<Map<String, Object?>?>? profiles;
     AppUser? user;
+    var generation = 0;
     controller = StreamController(
       onListen: () {
         users = auth.userChanges.listen((u) {
           user = u;
+          final currentGeneration = ++generation;
           profiles?.cancel();
           controller.add(authValue(u));
           if (u == null || u.isAnonymous) return;
           profiles = AuthProfiles.watch(cloud, u).listen(
-            (profile) => controller.add(authValue(user, profile: profile)),
+            (profile) {
+              if (currentGeneration == generation) controller.add(authValue(user, profile: profile));
+            },
             onError: (Object error, StackTrace stack) =>
                 analytics.logError(error, stackTrace: stack, message: 'Could not read the user profile', type: 'profile'),
           );
-        }, onError: controller.addError);
+        }, onError: (Object error, StackTrace stack) {
+          generation++;
+          user = null;
+          profiles?.cancel();
+          profiles = null;
+          controller.addError(error, stack);
+        });
       },
       onCancel: () async {
+        generation++;
         await profiles?.cancel();
         await users?.cancel();
       },

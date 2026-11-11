@@ -262,3 +262,28 @@ model is its own package, [`codelessly_api`](https://pub.dev/packages/codelessly
 ## License
 
 BSD 3-Clause. See [LICENSE](https://github.com/Codelessly/CodelesslySDK/blob/master/LICENSE).
+
+### Native paywall placements
+
+Configure `Services.paywalls` with your `PaywallRuntime`, trusted backend and
+store-adapter factory. A published action opens a placement from any screen:
+
+```json
+{"type":"paywall","operation":"openPaywall","placement":"onboarding"}
+```
+
+`CodelesslyWidget` resolves the placement, loads its store products and layout,
+and presents a route whose native actions share one `PaywallSession`. Supply
+`paywallAppVersion` for server targeting. Missing configuration/products fail
+before selling controls open; `onActionError` lets the host show its recovery UI.
+The session and its owned adapter are disposed when the route closes or the
+account changes. A custom host can use `PaywallRuntime.open(present: ...)`.
+
+Bindings read `products.annual.price`, `products.monthly.price`, the selected
+`product`, purchase progress in `paywall`, and live verified `entitlements`.
+Prices come from the store. Purchase/restore actions wait for a verified
+per-attempt outcome; cancellation and restore-nothing stop the success chain.
+`openPaywall` returns `result.outcome` (`purchased`, `restored`, `closed`) and
+`result.entitlementId` to its originating chain. A UI must check that outcome
+before displaying paid-access success. Account/profile bindings read live
+`auth`; do not declare app variables with service namespace names.
