@@ -422,9 +422,31 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
 
   void _watchBindings(List<Listenable> watch) {
     if (listEquals(watch, _bindingWatch)) return;
-    _bindingListenable?.removeListener(_apply);
+    _bindingListenable?.removeListener(_bindingsChanged);
     _bindingWatch = watch;
-    _bindingListenable = watch.isEmpty ? null : (Listenable.merge(watch)..addListener(_apply));
+    _bindingListenable = watch.isEmpty ? null : (Listenable.merge(watch)..addListener(_bindingsChanged));
+  }
+
+  bool _bindingApplyScheduled = false;
+
+  void _bindingsChanged() {
+    final scheduler = SchedulerBinding.instance;
+    // Async bindings (notably a web script's result) can arrive while
+    // RenderParagraph has a pending system-font callback. Reparenting its
+    // render objects then violates Flutter's detach/attach contract. Apply
+    // those changes in the next frame, after pending font callbacks.
+    if (scheduler.schedulerPhase == SchedulerPhase.idle ||
+        scheduler.schedulerPhase == SchedulerPhase.midFrameMicrotasks ||
+        scheduler.schedulerPhase == SchedulerPhase.postFrameCallbacks) {
+      if (_bindingApplyScheduled) return;
+      _bindingApplyScheduled = true;
+      scheduler.scheduleFrameCallback((_) {
+        _bindingApplyScheduled = false;
+        if (_listenable != null) _apply();
+      });
+      return;
+    }
+    _apply();
   }
 
   @override
