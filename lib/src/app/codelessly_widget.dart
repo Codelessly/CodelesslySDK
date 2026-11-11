@@ -1026,7 +1026,13 @@ class _ScreenUi extends NavigatorActionUi {
   final _LayoutViewState view;
 
   @override
-  ScreenBuilder get modal => (destination, params) {
+  ScreenBuilder get modal => _modal(CanvasSizing.design);
+
+  /// A sheet's screen fills the sheet's width.
+  @override
+  ScreenBuilder get sheetModal => _modal(CanvasSizing.fillWidth);
+
+  ScreenBuilder _modal(CanvasSizing sizing) => (destination, params) {
         final layoutId = view._codelessly.publishModel?.resolveLayoutId(destination);
         if (layoutId == null) return null;
         // A modal opens the destination screen, like navigation does. Its
@@ -1037,7 +1043,7 @@ class _ScreenUi extends NavigatorActionUi {
           layoutId: layoutId,
           params: params,
           data: view.widget.data,
-          sizing: CanvasSizing.design,
+          sizing: sizing,
           onNavigate: view.widget.host.onNavigate,
           paywall: view.widget.host.paywall,
           paywallAppVersion: view.widget.host.paywallAppVersion,
