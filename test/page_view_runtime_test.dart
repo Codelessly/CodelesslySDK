@@ -1,5 +1,6 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'lists/support.dart' as support;
@@ -229,6 +230,29 @@ void main() {
       expect(screen.scope.read('bookmark'), 0);
     },
   );
+
+  testWidgets('desktop mouse drags turn pages like touch swipes', (
+    tester,
+  ) async {
+    await support.show(tester, pages());
+    final pager = find.byType(PageView);
+    final controller = tester.widget<PageView>(pager).controller!;
+    final start = tester.getCenter(pager) + const Offset(96, 0);
+    final gesture = await tester.startGesture(
+      start,
+      kind: PointerDeviceKind.mouse,
+    );
+    for (var step = 1; step <= 20; step++) {
+      await tester.pump(const Duration(milliseconds: 32));
+      await gesture.moveTo(start - Offset(192 * step / 20, 0));
+    }
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(controller.page, 1);
+    await tester.drag(pager, const Offset(250, 0));
+    await tester.pumpAndSettle();
+    expect(controller.page, 0, reason: 'touch remains enabled alongside mouse');
+  });
 
   testWidgets('empty page view builds no item', (tester) async {
     await support.show(tester, pages(count: 0, initial: 8));

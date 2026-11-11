@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/widgets.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
@@ -227,6 +228,15 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         api.Axis.vertical;
     return PageView.builder(
       controller: _controller,
+      // Page turning is also a desktop interaction. Keep the host's input
+      // devices while opting this pager into mouse dragging.
+      scrollBehavior: ScrollConfiguration.of(context).copyWith(
+        scrollbars: false,
+        dragDevices: {
+          ...ScrollConfiguration.of(context).dragDevices,
+          PointerDeviceKind.mouse,
+        },
+      ),
       scrollDirection: vertical ? Axis.vertical : Axis.horizontal,
       reverse: _node.prop(api.CollectionScrollProps.reverse),
       physics: scrollPhysicsOf(_node),

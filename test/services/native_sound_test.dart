@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'package:codelessly_sdk/src/services/platform/sound_engine_native.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:codelessly_sdk/src/services/sound.dart';
 
 class Player implements NativeTonePlayer {
   final loaded = Completer<void>();
@@ -17,6 +18,30 @@ class Player implements NativeTonePlayer {
 }
 
 void main() {
+  testWidgets('dispose cancels pending loads and future one-shot starts', (
+    tester,
+  ) async {
+    final players = <Player>[];
+    final engine = NativeSoundEngine(
+      createPlayer: () {
+        final player = Player();
+        players.add(player);
+        return player;
+      },
+    );
+    engine.startNote('loading');
+    engine.play(SoundVoice.beep, time: engine.now + 0.1);
+    engine.dispose();
+    engine.dispose();
+    players.single.loaded.complete();
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(players, hasLength(1));
+    expect(players.single.played, isFalse);
+    expect(players.single.disposed, isTrue);
+    expect(engine.available, isFalse);
+    engine.startNote('late');
+    expect(players, hasLength(1));
+  });
   test('PCM has valid RIFF length, mono sample rate and bounded samples', () {
     final bytes = toneWave(440, 2);
     final data = ByteData.sublistView(bytes);

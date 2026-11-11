@@ -621,7 +621,7 @@ Future<void> _submitLocalForm(SubmitFormAction a, ActionRun run) async {
     if (payload is! Map) throw const _FormSubmissionFailure('invalid_payload', 'The submission payload must be a JSON object.');
     // Copy at the boundary: the response is a snapshot, not an alias of answers.
     final snapshot = (jsonDecode(jsonEncode(payload)) as Map).cast<String, Object?>();
-    if (run.cancellation.isCancelled) return;
+    if (run.cancellation.isCanceled) return;
     if (destination.isNotEmpty) {
       final current = run.context.scope.read(destination);
       final rows = current is List ? [...current] : <Object?>[];

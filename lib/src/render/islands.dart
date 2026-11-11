@@ -140,8 +140,7 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
   /// The element that owns [_scope].
   IslandOwnerElement? _owner;
 
-  /// The island's root element, for tools and tests.
-  @visibleForTesting
+  /// The island's root element, for runtime inspection tools and tests.
   Element? get element => _scope;
 
   /// Keeps the island's elements (and their state) when its node moves under
