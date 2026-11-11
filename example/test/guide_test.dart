@@ -256,6 +256,8 @@ PublishBundle sharedCards() {
     },
     'layouts': {'list': screen('list'), 'badge': screen('badge')},
   });
+}
+
 /// A canvas [id] that is one box: a tap anywhere on it runs [onClick].
 Json tapScreen(String id, List<Json> onClick, {List<Json> variables = const []}) => {
       'schema': 2,
@@ -697,6 +699,8 @@ void main() {
 
     expect(projectThemeValues(codelessly)['onSurface'], '#FFEEEEEE');
     expect(themeValues(codelessly.publishModel!.theme, dark: false)['onSurface'], '#FF111111');
+  });
+
   testWidgets('present: a layout above any screen gives back what closed it', (tester) async {
     final codelessly = Codelessly.fromBundle(withPresentations(), fonts: const NoFontFetcher());
     addTearDown(codelessly.dispose);
