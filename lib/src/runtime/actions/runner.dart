@@ -15,6 +15,8 @@
 //   first.
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
+
 import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, Node, Reaction, TriggerType, UnknownAction;
 
 import '../contracts.dart';
@@ -255,7 +257,12 @@ class CodelesslyActions implements ActionRunner {
       host,
       // `value` too: an input's new value is also read by that name (a
       // search field's `query = \${value}`).
-      ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope),
+      // `drag` too: a drag trigger's pointer (`\${drag.x}`, `\${drag.y}`).
+      ValuesScope({
+        'result': result,
+        if (event.containsKey('value')) 'value': event['value'],
+        if (event.containsKey('drag')) 'drag': event['drag'],
+      }, context.scope),
       cancellation ?? ActionCancellation(),
       node,
       event['value'],
@@ -278,7 +285,13 @@ class CodelesslyActions implements ActionRunner {
         context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall'));
       }
     } on ActionsCanceled {
-      // The node left: the rest doesn't run.
+      // The node left: the rest doesn't run. Said in debug builds, so a
+      // chain that stops for this isn't a mystery.
+      assert(() {
+        debugPrint('Codelessly: the actions of ${node.name.isEmpty ? node.id : node.name} stopped: its node left '
+            'the screen while they ran.');
+        return true;
+      }());
     } catch (error, stack) {
       host.reportError(error, stack, action: _failing(error));
     }

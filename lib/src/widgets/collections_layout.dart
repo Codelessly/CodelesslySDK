@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
-import '../render/node_tree.dart' show NodeTree;
+import '../render/node_tree.dart' show NodeTree, NodeBox;
 import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, dropSlotOf;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
@@ -30,6 +30,17 @@ abstract class RenderCollection extends RenderBox
     _clipBehavior = v;
     markNeedsPaint();
   }
+
+  /// A collection of many items paints in a layer of its own: a change to
+  /// one of its items (a cell of a board stepping every tick) repaints the
+  /// collection, not the screen around it (shadows, gradients, other
+  /// widgets), and the collection's own change doesn't repaint them either.
+  /// Small lists stay in their parent's layer. Adding or removing items
+  /// updates the compositing bits, so crossing the threshold is safe.
+  static const int repaintBoundaryItems = 64;
+
+  @override
+  bool get isRepaintBoundary => childCount >= repaintBoundaryItems;
 
   /// Paints the last child first (the first on top).
   bool _paintReversed = false;
@@ -227,6 +238,10 @@ class RenderListItems extends RenderCollection {
   /// False for a scroll view: a viewport has no
   /// intrinsic size, so it reports none (a row squeezing it can take it to
   /// nothing). True when every item is laid out in a Flex.
+  /// Items that fill along the list share its length by their flex (a list
+  /// that doesn't scroll, as a Row/Column).
+  bool shareFill = false;
+
   bool _measurable = true;
   bool get measurable => _measurable;
   set measurable(bool v) {
@@ -368,6 +383,44 @@ class RenderListItems extends RenderCollection {
       final more = ((viewportMain + cacheExtent - used) / (per + gap)).ceil() + 1;
       if (!requestItems(childCount + more)) break;
       child = last == null ? firstChild : childAfter(last);
+    }
+
+    // A list that builds all its items and keeps its length lays the items
+    // that fill along it out as a Row/Column does its Expanded children:
+    // they share what the other items leave, by their flex (a bar of
+    // segments sized by data).
+    if (shareFill && itemCount != null && viewportMain.isFinite && !hugMain) {
+      final kids = children;
+      final flexOf = <int, int>{};
+      for (final (i, it) in kids.indexed) {
+        final n = it is NodeBox ? it.node : null;
+        if (n == null) continue;
+        final fit = axis == Axis.vertical ? n.layout.height.fit : n.layout.width.fit;
+        if (fit == api.SizeFit.fill) flexOf[i] = math.max(1, n.layout.flex);
+      }
+      if (flexOf.isNotEmpty) {
+        var fixed = 0.0;
+        for (final (i, a) in advances.indexed) {
+          if (!flexOf.containsKey(i)) fixed += a;
+        }
+        fixed += gap * math.max(0, kids.length - 1);
+        final free = math.max(0.0, viewportMain - fixed);
+        final total = flexOf.values.fold<int>(0, (a, b) => a + b);
+        used = fixed;
+        for (final e in flexOf.entries) {
+          final extent = free * e.value / total;
+          final it = kids[e.key];
+          final base = _childConstraints(crossAvail, tightCross: stretchNow ? crossAvail : null);
+          it.layout(
+            axis == Axis.vertical
+                ? base.copyWith(minHeight: extent, maxHeight: extent)
+                : base.copyWith(minWidth: extent, maxWidth: extent),
+            parentUsesSize: true,
+          );
+          advances[e.key] = extent;
+          used += extent;
+        }
+      }
     }
 
     final items = children;
@@ -699,6 +752,10 @@ class RenderGridItems extends RenderCollection {
   bool shrinkWrapRows = false;
   bool masonry = false;
 
+  /// With [masonry]: each item in the shortest lane so far instead of in
+  /// turn.
+  bool masonryShortest = false;
+
   /// With [shrinkWrapRows]: cells stretch to their row's longest item.
   bool intrinsicRows = true;
   bool hugMain = false;
@@ -735,8 +792,17 @@ class RenderGridItems extends RenderCollection {
     if (masonry) {
       final lanes = List<double>.filled(cols, 0);
       final offsets = <double>[];
+      final laneOf = <int>[];
       for (final (i, it) in children.indexed) {
-        final lane = i % cols;
+        var lane = i % cols;
+        if (masonryShortest) {
+          // The shortest lane; the first of lanes within half a pixel.
+          lane = 0;
+          for (var l = 1; l < cols; l++) {
+            if (lanes[l] < lanes[lane] - 0.5) lane = l;
+          }
+        }
+        laneOf.add(lane);
         it.layout(
           RenderCollection.constraintsOf(
             minMain: 0,
@@ -769,7 +835,7 @@ class RenderGridItems extends RenderCollection {
         (it.parentData! as CollectionParentData).offset =
             RenderCollection.offsetOf(
               pos,
-              padCrossStart + (i % cols) * (cellCross + crossAxisSpacing),
+              padCrossStart + laneOf[i] * (cellCross + crossAxisSpacing),
               axis,
             );
       }
@@ -1061,7 +1127,11 @@ class RenderPageItems extends RenderCollection {
 /// the cells in [cells] order, row by row. Header backgrounds and stripes
 /// paint under the cells; a [gridLine] trails each column and row over them.
 class RenderTableItems extends RenderCollection {
+  /// The columns as given; laid out, the last takes the width left over
+  /// when [stretchLastColumn].
+  List<double> givenColumnWidths = const [];
   List<double> columnWidths = const [];
+  bool stretchLastColumn = false;
   List<double> rowHeights = const [];
 
   /// (row, column) of each child, in child order.
@@ -1089,6 +1159,11 @@ class RenderTableItems extends RenderCollection {
   bool layoutItems() {
     final c = constraints;
     size = c.biggest.isFinite ? c.biggest : c.constrain(Size.zero);
+    columnWidths = [...givenColumnWidths];
+    if (stretchLastColumn && columnWidths.isNotEmpty) {
+      final others = _start(columnWidths, columnWidths.length - 1);
+      columnWidths[columnWidths.length - 1] = math.max(columnWidths.last, size.width - others);
+    }
     var i = 0;
     for (final it in children) {
       if (i >= cells.length) {

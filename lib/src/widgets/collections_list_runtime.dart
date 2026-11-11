@@ -188,6 +188,9 @@ double? listItemMain(Node item, {required bool vertical, double? itemExtent}) {
   if (itemExtent != null) return itemExtent;
   final fit = vertical ? item.layout.height.fit : item.layout.width.fit;
   if (fit != SizeFit.fill && fit != SizeFit.flexible) return null;
+  // An item that binds its size along the list (each item its own fit or
+  // extent) is measured as it resolves, not given the template's.
+  if (item.bind.containsKey(vertical ? 'layout.height' : 'layout.width')) return null;
   return vertical
       ? item.layout.height.value + item.layout.margin.vertical
       : item.layout.width.value + item.layout.margin.horizontal;
