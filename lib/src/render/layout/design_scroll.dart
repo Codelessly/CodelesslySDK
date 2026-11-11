@@ -1,7 +1,6 @@
-// A scroll view at rest, as a render object: what SingleChildScrollView's
-// viewport does at scroll offset 0, without a ScrollPosition, controller,
-// gesture detector or element tree. The design canvas shows content at its
-// start (the end, when reversed), clipped to the viewport.
+// Render-only container viewport. The design canvas stays at its start;
+// interactive mode ports Chordbook's wheel/drag scrolling and adds metrics,
+// frame-coalesced events and animated reveal, without a widget per node.
 import 'dart:async';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
