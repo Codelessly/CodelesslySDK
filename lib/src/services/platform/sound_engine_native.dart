@@ -130,10 +130,11 @@ class NativeSoundEngine implements SoundEngine, SustainedSoundEngine {
         if (!identical(_voices[id], output)) return;
         _available = true;
         output.play();
-        if (!loop)
+        if (!loop) {
           Timer(const Duration(milliseconds: 150), () {
             if (identical(_voices[id], output)) stopNote(id);
           });
+        }
       } catch (_) {
         if (identical(_voices[id], output)) {
           _available = false;

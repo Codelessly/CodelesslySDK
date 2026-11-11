@@ -1,5 +1,4 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/runtime/expressions/bindings.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
