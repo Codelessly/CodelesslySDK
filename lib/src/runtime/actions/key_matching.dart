@@ -14,5 +14,10 @@ bool runtimeKeyMatches(
       RegExp(r'^[a-z0-9]$').hasMatch(combo.key) &&
       shift != combo.shift)
     return false;
-  return combo.matches(label, meta: meta, shift: shift, alt: alt);
+  return combo.matches(
+    label == ' ' ? 'Space' : label,
+    meta: meta,
+    shift: shift,
+    alt: alt,
+  );
 }
