@@ -562,9 +562,40 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
-            return field(constraints.hasBoundedHeight
-                ? decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))
-                : decoration);
+            if (!constraints.hasBoundedHeight) return field(decoration);
+            // InputDecorator doesn't stretch its container (fill, border) to
+            // a height: a dense 50 px field painted a 20 px box at its top.
+            // So the box paints them at full height and a borderless field
+            // sits in it where textAlignVertical puts the line (centred by
+            // default), as a Container around a TextField would.
+            final error = decoration.errorText != null || decoration.error != null;
+            final border = (error ? (focusNode.hasFocus ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
+                (focusNode.hasFocus ? decoration.focusedBorder : null) ??
+                decoration.enabledBorder ??
+                decoration.border ??
+                const UnderlineInputBorder();
+            final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
+            final y = switch (n.prop(TextFieldProps.textAlignVertical)) {
+              api.TextAlignVertical.top => -1.0,
+              api.TextAlignVertical.bottom => 1.0,
+              _ => 0.0,
+            };
+            return DecoratedBox(
+              decoration: ShapeDecoration(color: fill, shape: border),
+              child: Align(
+                alignment: Alignment(-1, y),
+                child: field(decoration.copyWith(
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  isDense: true,
+                )),
+              ),
+            );
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
