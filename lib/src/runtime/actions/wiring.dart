@@ -579,10 +579,17 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void detach() {
     _ViewportWatcher.remove(this);
-    _disposeRecognizers();
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
     _hovering = false;
     super.detach();
+    // A node's render chain is rewired when what it shows changes (a pressed
+    // state's scale adds a layer), which moves this box out and back in
+    // within one frame. Its recognizers hold the gesture in progress (the
+    // press that caused the change), so they go only if it stays detached.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!attached) _disposeRecognizers();
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
   }
 
   @override
