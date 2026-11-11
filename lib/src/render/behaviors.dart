@@ -75,7 +75,10 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     }
   }
   cardLayers(b, n, chain, animates: animates);
-  if (be.scale != 1) {
+  // A state style that scales the node (a press shrink) keeps the layer at
+  // rest too: adding it mid-press rewired the chain under the pointer and
+  // the tap was lost.
+  if (be.scale != 1 || (animates && _stateScales(b, n))) {
     chain.add(
       b.obtain<RenderPose>('scale', RenderPose.new)
         ..transform = Matrix4.diagonal3Values(be.scale, be.scale, 1)
@@ -966,12 +969,16 @@ class RenderMotion extends RenderPose with _Ticking {
     if (!_motion.paused) _clock += step;
     final target = _motion.paused ? 0.0 : _motion.spin;
     if (_speed != target) {
-      final perSecond = _motion.spinRamp <= 0
-          ? double.infinity
-          : math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
-      final change = math.min((target - _speed).abs(), perSecond * dt);
-      _speed += (target - _speed).sign * change;
-      if ((target - _speed).abs() < 0.002) _speed = target;
+      if (_motion.spinRamp <= 0) {
+        // No ramp: at speed at once. (An infinite rate times a zero step,
+        // a first tick on the web, would be NaN and stop it for good.)
+        _speed = target;
+      } else if (dt > 0) {
+        final perSecond = math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
+        final change = math.min((target - _speed).abs(), perSecond * dt);
+        _speed += (target - _speed).sign * change;
+        if ((target - _speed).abs() < 0.002) _speed = target;
+      }
     }
     _turns = (_turns + _speed * dt) % 1;
     _show();
@@ -1069,6 +1076,10 @@ class RenderMotion extends RenderPose with _Ticking {
             .withValue('translateX', total.dx)
             .withValue('translateY', total.dy)
             .withValue('rotate', m.orientToPath ? m.rotate + turn * 180 / math.pi : m.rotate);
+        // Upright and mirrored: heading left faces left, nose first.
+        if (m.orientToPath && m.orientUpright && m.uprightMirror && api.Motion.headsLeft(heading)) {
+          shown = shown.withValue('scaleX', -shown.scaleX);
+        }
       }
     }
     transform = motionMatrix(shown, spinTurns: _turns);
@@ -1484,4 +1495,16 @@ abstract final class _MotionRevealWatcher {
       _schedule();
     });
   }
+}
+
+/// Whether a state style (the node's own, or one of a node around it that
+/// targets it) can set node [n]'s scale.
+bool _stateScales(NodeBuilder b, Node n) {
+  bool scales(Node? owner) =>
+      owner != null && owner.behaviors.states.patches.values.any((p) => p[n.id]?.containsKey('scale') ?? false);
+  if (scales(b.tree.source.node(n.id))) return true;
+  for (String? id = b.tree.source.parentOf(n.id); id != null; id = b.tree.source.parentOf(id)) {
+    if (scales(b.tree.source.node(id))) return true;
+  }
+  return false;
 }
