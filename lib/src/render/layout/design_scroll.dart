@@ -1,18 +1,200 @@
-// A scroll view at rest, as a render object: what SingleChildScrollView's
-// viewport does at scroll offset 0, without a ScrollPosition, controller,
-// gesture detector or element tree. The design canvas shows content at its
-// start (the end, when reversed), clipped to the viewport.
+// A node's scroll viewport: at rest on the design canvas, interactive in
+// a running app. Keeps scrolling in the render tree without one widget per
+// node, with wheel arbitration, axis gestures, clamped fling and semantics.
+import 'dart:async';
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/physics.dart';
 
 class RenderDesignScroll extends RenderProxyBox {
-  RenderDesignScroll({required this._axis, this._reverse = false, Clip clipBehavior = Clip.hardEdge})
-      : _clip = clipBehavior;
+  RenderDesignScroll({
+    required this._axis,
+    this._reverse = false,
+    Clip clipBehavior = Clip.hardEdge,
+  }) : _clip = clipBehavior;
+
+  bool _interactive = false;
+  bool get interactive => _interactive;
+  set interactive(bool value) {
+    if (value == _interactive) return;
+    _interactive = value;
+    if (!value) {
+      _stop();
+      _drag?.dispose();
+      _drag = null;
+      _pixels = 0;
+    }
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Offset from the logical start, independent of reverse.
+  double get pixels => _pixels;
+  double _pixels = 0;
+  double get maxScrollExtent {
+    final c = child;
+    if (!hasSize || c == null || !c.hasSize) return 0;
+    return ((_axis == Axis.vertical
+            ? c.size.height - size.height
+            : c.size.width - size.width))
+        .clamp(0, double.infinity);
+  }
+
+  void Function(double offset, double max)? onScroll;
+  VoidCallback? onScrollEnd;
+  DragGestureRecognizer? _drag;
+  Ticker? _ticker;
+  Timer? _wheelEnd;
+  Completer<void>? _animationDone;
+  void _stop() {
+    _ticker?.dispose();
+    _ticker = null;
+    final d = _animationDone;
+    _animationDone = null;
+    if (d != null && !d.isCompleted) d.complete();
+  }
+
+  /// Logical offset revealing [target] at [alignment] in this viewport.
+  double getOffsetToReveal(RenderObject target,double alignment) {
+    final rect=MatrixUtils.transformRect(target.getTransformTo(this),target.paintBounds);
+    final start=_axis==Axis.vertical?rect.top:rect.left;
+    final extent=_axis==Axis.vertical?rect.height:rect.width;
+    final viewport=_axis==Axis.vertical?size.height:size.width;
+    return _pixels+(start-(viewport-extent)*alignment)*(_reverse?-1:1);
+  }
+
+  void jumpTo(double value) {
+    _stop();
+    _setPixels(value);
+  }
+
+  void _setPixels(double value) {
+    final next = value.clamp(0.0, maxScrollExtent);
+    if (next == _pixels) return;
+    _pixels = next;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+    onScroll?.call(_pixels, maxScrollExtent);
+  }
+
+  Future<void> animateTo(
+    double value, {
+    required Duration duration,
+    Curve curve = Curves.easeInOut,
+  }) {
+    _stop();
+    if (duration == Duration.zero) {
+      _setPixels(value);
+      return Future.value();
+    }
+    final start = _pixels,
+        end = value.clamp(0.0, maxScrollExtent),
+        done = Completer<void>();
+    _animationDone = done;
+    _ticker = Ticker((elapsed) {
+      final t = (elapsed.inMicroseconds / duration.inMicroseconds).clamp(
+        0.0,
+        1.0,
+      );
+      _setPixels(start + (end - start) * curve.transform(t));
+      if (t >= 1) {
+        _stop();
+        onScrollEnd?.call();
+      }
+    })..start();
+    return done.future;
+  }
+
+  void _fling(double velocity) {
+    _stop();
+    if (velocity.abs() < 50) {
+      onScrollEnd?.call();
+      return;
+    }
+    final simulation = FrictionSimulation(.135, _pixels, velocity);
+    _ticker = Ticker((elapsed) {
+      final t = elapsed.inMicroseconds / 1000000.0, x = simulation.x(t);
+      _setPixels(x);
+      if (simulation.isDone(t) || x <= 0 || x >= maxScrollExtent) {
+        _stop();
+        onScrollEnd?.call();
+      }
+    })..start();
+  }
+
+  void _ensureDrag() {
+    if (_drag != null) return;
+    final drag = _axis == Axis.vertical ? VerticalDragGestureRecognizer(debugOwner: this) : HorizontalDragGestureRecognizer(debugOwner: this);
+    drag.onStart = (_) { _stop(); };
+    drag.onUpdate = (d) { _setPixels(_pixels + (d.primaryDelta ?? 0) * (_reverse ? 1 : -1)); };
+    drag.onEnd = (d) { _fling((d.primaryVelocity ?? 0) * (_reverse ? 1 : -1)); };
+    drag.onCancel = () { onScrollEnd?.call(); };
+    _drag = drag;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => _interactive;
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (!_interactive || maxScrollExtent <= 0) return;
+    if (event is PointerDownEvent) {
+      _ensureDrag();
+      _drag!.addPointer(event);
+    }
+    if (event is PointerScrollEvent) {
+      final delta =
+          (_axis == Axis.vertical
+              ? event.scrollDelta.dy
+              : event.scrollDelta.dx) *
+          (_reverse ? -1 : 1);
+      if ((_pixels + delta).clamp(0, maxScrollExtent) == _pixels) return;
+      GestureBinding.instance.pointerSignalResolver.register(event, (e) {
+        _stop();
+        _setPixels(_pixels + delta);
+        _wheelEnd?.cancel();
+        _wheelEnd = Timer(
+          const Duration(milliseconds: 120),
+          () => onScrollEnd?.call(),
+        );
+      });
+    }
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    if (!_interactive) return;
+    config
+      ..isSemanticBoundary = true
+      ..scrollPosition = _pixels
+      ..scrollExtentMin = 0
+      ..scrollExtentMax = maxScrollExtent;
+    void by(double delta) => _setPixels(_pixels + delta);
+    if (_axis == Axis.vertical) {
+      config.onScrollUp = () => by(-size.height * .8);
+      config.onScrollDown = () => by(size.height * .8);
+    } else {
+      config.onScrollLeft = () => by(-size.width * .8);
+      config.onScrollRight = () => by(size.width * .8);
+    }
+  }
+
+  @override
+  void detach() {
+    _stop();
+    _wheelEnd?.cancel();
+    super.detach();
+  }
 
   Axis _axis;
   Axis get axis => _axis;
   set axis(Axis v) {
     if (v == _axis) return;
     _axis = v;
+    _drag?.dispose();
+    _drag = null;
     markNeedsLayout();
   }
 
@@ -49,7 +231,9 @@ class RenderDesignScroll extends RenderProxyBox {
     final child = this.child;
     final cb = onViewport;
     if (cb != null) {
-      final extent = _axis == Axis.vertical ? constraints.maxHeight : constraints.maxWidth;
+      final extent = _axis == Axis.vertical
+          ? constraints.maxHeight
+          : constraints.maxWidth;
       // The content's extent depends on the viewport (LayoutBuilder-style):
       // mutating descendants is allowed inside a layout callback.
       invokeLayoutCallback<BoxConstraints>((_) => cb(extent));
@@ -60,37 +244,49 @@ class RenderDesignScroll extends RenderProxyBox {
     }
     child.layout(_contentConstraints(constraints), parentUsesSize: true);
     size = constraints.constrain(child.size);
+    _pixels = _pixels.clamp(0, maxScrollExtent);
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     final child = this.child;
     if (child == null) return constraints.smallest;
-    return constraints.constrain(child.getDryLayout(_contentConstraints(constraints)));
+    return constraints.constrain(
+      child.getDryLayout(_contentConstraints(constraints)),
+    );
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => child?.getMinIntrinsicWidth(height) ?? 0;
+  double computeMinIntrinsicWidth(double height) =>
+      child?.getMinIntrinsicWidth(height) ?? 0;
   @override
-  double computeMaxIntrinsicWidth(double height) => child?.getMaxIntrinsicWidth(height) ?? 0;
+  double computeMaxIntrinsicWidth(double height) =>
+      child?.getMaxIntrinsicWidth(height) ?? 0;
   @override
-  double computeMinIntrinsicHeight(double width) => child?.getMinIntrinsicHeight(width) ?? 0;
+  double computeMinIntrinsicHeight(double width) =>
+      child?.getMinIntrinsicHeight(width) ?? 0;
   @override
-  double computeMaxIntrinsicHeight(double width) => child?.getMaxIntrinsicHeight(width) ?? 0;
+  double computeMaxIntrinsicHeight(double width) =>
+      child?.getMaxIntrinsicHeight(width) ?? 0;
 
   /// Offset 0: the content's start at the viewport's start; reversed, its
   /// end at the viewport's end.
   Offset get _paintOffset {
     final child = this.child;
-    if (child == null || !_reverse) return Offset.zero;
-    return _axis == Axis.vertical
-        ? Offset(0, size.height - child.size.height)
-        : Offset(size.width - child.size.width, 0);
+    if (child == null) return Offset.zero;
+    final base = _reverse
+        ? (_axis == Axis.vertical
+              ? size.height - child.size.height
+              : size.width - child.size.width)
+        : 0.0;
+    final offset = base + (_interactive ? _pixels * (_reverse ? 1 : -1) : 0);
+    return _axis == Axis.vertical ? Offset(0, offset) : Offset(offset, 0);
   }
 
   bool get _overflows {
     final child = this.child;
-    return child != null && (child.size.width > size.width || child.size.height > size.height);
+    return child != null &&
+        (child.size.width > size.width || child.size.height > size.height);
   }
 
   final LayerHandle<ClipRectLayer> _clipLayer = LayerHandle();
@@ -99,10 +295,17 @@ class RenderDesignScroll extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final child = this.child;
     if (child == null) return;
-    void paintContent(PaintingContext c, Offset o) => c.paintChild(child, o + _paintOffset);
+    void paintContent(PaintingContext c, Offset o) =>
+        c.paintChild(child, o + _paintOffset);
     if (_overflows && _clip != Clip.none) {
-      _clipLayer.layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContent,
-          clipBehavior: _clip, oldLayer: _clipLayer.layer);
+      _clipLayer.layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        paintContent,
+        clipBehavior: _clip,
+        oldLayer: _clipLayer.layer,
+      );
     } else {
       _clipLayer.layer = null;
       paintContent(context, offset);
@@ -111,6 +314,9 @@ class RenderDesignScroll extends RenderProxyBox {
 
   @override
   void dispose() {
+    _stop();
+    _wheelEnd?.cancel();
+    _drag?.dispose();
     _clipLayer.layer = null;
     super.dispose();
   }
