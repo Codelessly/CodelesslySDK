@@ -342,12 +342,16 @@ class DropSlotSpec {
 /// The slot list [listNodeId] of [tree] opens now, while a drag is over its
 /// drop target ([api.DropTarget.listNodeId]); null for none. A list listens
 /// to [DragAndDrop.of] to follow it.
-DropSlotSpec? dropSlotOf(NodeTree tree, String listNodeId) {
+///
+/// A list repeated in several copies (each column of a board has its card
+/// list) gives its [instance]: only the copy the target names opens it.
+DropSlotSpec? dropSlotOf(NodeTree tree, String listNodeId, {Object? instance}) {
   final session = DragAndDrop.of(tree).session;
   final target = session?.overTarget;
   if (session == null || target == null) return null;
   final m = target._model;
   if (m.listNodeId != listNodeId || m.slot == api.DropSlot.none) return null;
+  if (!identical(target._listBox, tree.boxOf(listNodeId, instance: instance))) return null;
   final before = session.rawBefore;
   if (before == null) return null;
   // A refused drop opens no slot when the target says so.
@@ -1311,10 +1315,18 @@ class RenderDropTarget extends RenderProxyBox {
 
   /// The items of the target's list as laid out: their index, value and
   /// global rect, in index order.
+  /// The box of the list this target drops into: the copy in its own list
+  /// item, else the list's only one.
+  NodeBox? get _listBox {
+    final box = _box;
+    if (box == null) return null;
+    return box.tree.boxOf(_model.listNodeId, instance: box.instance) ?? box.tree.boxOf(_model.listNodeId);
+  }
+
   List<_ListItem> _listItems() {
     final box = _box!;
     final tree = box.tree;
-    final list = tree.boxOf(_model.listNodeId, instance: box.instance) ?? tree.boxOf(_model.listNodeId);
+    final list = _listBox;
     if (list == null || !list.attached) return const [];
     final out = <_ListItem>[];
     void visit(RenderObject o) {
