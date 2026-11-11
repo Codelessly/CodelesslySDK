@@ -1,10 +1,77 @@
+// A date/time input styled like a text field: its value in a pattern, or a
+// bound display text, and no dialog when its picker is the design's own.
+//
 // A date/time input reads its value by a pattern, in its own style, and bare
 // shows only the value (or hint) and its icon inside the node's box.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'actions/wiring_test.dart' show show;
+import 'lists/support.dart';
+
+void main() {
+  _ours();
+  _master();
+}
+
+Map<String, Json> _screen(Map<String, Object?> props) => {
+  'col': {
+    'type': 'column',
+    'children': ['dt'],
+    'layout': {'width': 390, 'height': 200},
+  },
+  'dt': {
+    'type': 'dateTimeInput',
+    'layout': {
+      'width': {'fill': 358},
+      'height': 60,
+    },
+    'bind': {'props.value': r'${arrival}'},
+    'props': {
+      'mode': 'dateTime',
+      'decoration': {
+        'filled': true,
+        'fillColor': '#FF18181C',
+        'contentPadding': [18, 0, 18, 0],
+        'prefixIcon': {
+          'icon': {'type': 'MATERIAL_ICON', 'name': 'event', 'style': 'rounded'},
+          'size': 24,
+        },
+      },
+      'style': {'fontSize': 18, 'color': '#FFF7F5F0'},
+      ...props,
+    },
+  },
+};
+
+void _ours() {
+  testWidgets('shows its value in a pattern and follows the bound value', (tester) async {
+    final s = await show(
+      tester,
+      _screen({'displayFormat': 'EEE, MMM d · h:mm a'}),
+      variables: [v('arrival', '2026-11-12T09:05:00')],
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Thu, Nov 12 · 9:05 AM'), findsOneWidget);
+    s.scope.set('arrival', '2026-11-12T13:20:00');
+    await tester.pumpAndSettle();
+    expect(find.text('Thu, Nov 12 · 1:20 PM'), findsOneWidget);
+    expect(tester.getSize(find.byType(InputDecorator)).height, 60);
+  });
+
+  testWidgets('a display text wins; with its own picker a tap opens no dialog', (tester) async {
+    await show(
+      tester,
+      _screen({'displayText': 'Now · 1:20 PM', 'picker': 'none'}),
+      variables: [v('arrival', '2026-11-12T13:20:00')],
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Now · 1:20 PM'), findsOneWidget);
+    await tester.tap(find.byType(InputDecorator));
+    await tester.pumpAndSettle();
+    expect(find.byType(DatePickerDialog), findsNothing);
+  });
+}
 
 Future<void> _field(WidgetTester tester, Map<String, Object?> props) => show(tester, {
       'col': {'type': 'column', 'children': ['d'], 'layout': {'width': 300, 'height': 100}},
@@ -16,7 +83,7 @@ Future<void> _field(WidgetTester tester, Map<String, Object?> props) => show(tes
       },
     });
 
-void main() {
+void _master() {
   testWidgets('a pattern formats the date and the time', (tester) async {
     await _field(tester, {'mode': 'date', 'value': '2026-12-01', 'format': 'MMM d, y', 'bare': true});
     await tester.pumpAndSettle();
