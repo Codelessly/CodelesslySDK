@@ -417,6 +417,10 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
   final Widget? avatar = image != null && avatarGlyph['codepoint'] == null
       ? CircleAvatar(backgroundImage: NetworkImage(image), onBackgroundImageError: (_, _) {})
       : _icon(avatarGlyph, size: n.prop(ChipProps.avatarSize) ?? 18, color: _color(n.prop(ChipProps.avatarColor)));
+  // A set avatar size is the avatar's box too: Material keeps an 18 px
+  // slot otherwise, a gap beside a small dot.
+  final avatarSize = n.prop(ChipProps.avatarSize);
+  final avatarBox = avatar == null || avatarSize == null ? null : BoxConstraints.tight(Size.square(avatarSize));
   final sideModel = n.prop(ChipProps.side);
   final side = sideModel == null
       ? null
@@ -451,6 +455,7 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     'actionChip' => ActionChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         backgroundColor: background,
@@ -467,6 +472,7 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     'choiceChip' => ChoiceChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         selected: selected,
@@ -487,6 +493,7 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     'filterChip' => FilterChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         selected: selected,
@@ -507,6 +514,7 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     'inputChip' => InputChip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         deleteIcon: _icon(n.prop(ChipProps.deleteIcon), size: n.prop(ChipProps.deleteIconSize) ?? 18),
@@ -527,6 +535,7 @@ Widget _buildChip(BuildContext context, Node n, {required bool selection, requir
     _ => Chip(
         label: label,
         avatar: avatar,
+        avatarBoxConstraints: avatarBox,
         labelStyle: labelStyle,
         labelPadding: labelPadding,
         backgroundColor: background,
