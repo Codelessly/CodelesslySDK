@@ -677,7 +677,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'without',
       'without(list, other or item)',
-      'without(all, picked), without(held, 64)',
+      'without(held, 64)',
     ),
     FormulaFunctionDoc(
       'concat',

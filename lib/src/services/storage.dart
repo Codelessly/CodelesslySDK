@@ -178,7 +178,9 @@ class CloudFile {
 /// Files in the cloud (uploads). Paths are relative to the project's
 /// folder; implementations keep a path from leaving it.
 abstract interface class CloudFileStorage {
-  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType});
+  /// Uploads [bytes] to [path]. [onProgress] gets the fraction sent (0–1)
+  /// as the upload goes, when the storage can tell.
+  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType, void Function(double sent)? onProgress});
 
   /// Deletes the file at [pathOrUrl].
   Future<void> delete(String pathOrUrl);
@@ -232,7 +234,8 @@ class MemoryFileStorage implements CloudFileStorage {
   String _clean(String path) => CloudFilePaths.segments(path.replaceFirst('memory://', '')).join('/');
 
   @override
-  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType}) async {
+  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType, void Function(double sent)? onProgress}) async {
+    onProgress?.call(1);
     final p = _clean(path);
     files[p] = (bytes, contentType);
     return CloudFile(path: p, url: 'memory://$p', name: p.split('/').last, size: bytes.length, contentType: contentType);

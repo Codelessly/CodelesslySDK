@@ -459,7 +459,7 @@ class _ServiceValuesScope extends ValuesScope {
       (value) {
         if (_disposed) return;
         final user = s.auth.currentUser;
-        final uid = user == null || user.isAnonymous ? '' : user.uid;
+        final uid = AuthProfiles.hasProfile(user) ? user!.uid : '';
         if (value['uid'] != uid) return; // A queued snapshot from an earlier identity.
         _authFailed = false;
         _scopeAccount(user?.uid);
@@ -485,7 +485,7 @@ class _ServiceValuesScope extends ValuesScope {
   bool _authFailed = false;
 
   Map<String, Object?>? _matchingProfile(Object? snapshot, AppUser? user) {
-    if (user == null || user.isAnonymous || snapshot is! Map || snapshot['uid'] != user.uid) return null;
+    if (!AuthProfiles.hasProfile(user) || snapshot is! Map || snapshot['uid'] != user!.uid) return null;
     final profile = snapshot['profile'];
     return profile is Map ? profile.cast<String, Object?>() : null;
   }
@@ -496,7 +496,7 @@ class _ServiceValuesScope extends ValuesScope {
     if (service == null) return;
     final recovery = const {
       AuthOperation.signIn, AuthOperation.signUp, AuthOperation.signInWithGoogle,
-      AuthOperation.signInWithApple, AuthOperation.completeSignInLink,
+      AuthOperation.signInWithApple, AuthOperation.completeSignInLink, AuthOperation.signInAnonymously,
     }.contains(operation);
     // A stale currentUser after an auth stream error is not proof of a live
     // session. Only an explicit successful sign-in can recover that identity.

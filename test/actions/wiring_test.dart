@@ -101,6 +101,25 @@ String textOf(NodeTree tree, String id) {
 }
 
 void main() {
+  testWidgets('a button with press feedback (a pressed state) still clicks', (tester) async {
+    final nodes = counter(actions: [reaction('click', [add('count')])]);
+    nodes['button'] = {
+      ...nodes['button']!,
+      'states': {
+        'pressed': {'button': {'scale': 0.97, 'opacity': 0.82}},
+        'hovered': {'button': {'scale': 1.012}},
+      },
+      'transitions': {'style': {'duration': 180, 'curve': 'easeOut'}},
+    };
+    final s = await show(tester, nodes, variables: [v('count', 0, VariableType.integer)]);
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    expect(s['count'], 1, reason: 'the pressed state re-applies the box mid-tap; the tap must survive');
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    expect(s['count'], 2);
+  });
+
   for (final expression in ['period', r'${period}']) {
     testWidgets('clock interval reads $expression and clamps tiny periods', (tester) async {
       final s=await show(tester,counter(actions:[reaction('clock',[add('count')],extra:{'every':expression})]),variables:[v('count',0,VariableType.integer),v('period',80,VariableType.decimal)]);
