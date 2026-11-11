@@ -4,29 +4,61 @@
 // thumb shadow, and scaling it to the node makes its thumb smaller and oval.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show Node, SwitchProps;
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../render/convert.dart';
 
+/// An API easing curve as a Flutter [Curve].
+class _ApiCurve extends Curve {
+  const _ApiCurve(this.curve);
+  final api.AnimationCurve curve;
+
+  /// Flutter's own constant where there is one.
+  static Curve of(api.AnimationCurve c) => switch (c) {
+        api.AnimationCurve.linear => Curves.linear,
+        api.AnimationCurve.easeIn => Curves.easeIn,
+        api.AnimationCurve.easeOut => Curves.easeOut,
+        api.AnimationCurve.easeInOut => Curves.easeInOut,
+        api.AnimationCurve.easeOutBack => Curves.easeOutBack,
+        api.AnimationCurve.easeOutCubic => Curves.easeOutCubic,
+        api.AnimationCurve.easeInOutCubic => Curves.easeInOutCubic,
+        api.AnimationCurve.easeInOutSine => Curves.easeInOutSine,
+        api.AnimationCurve.fastOutSlowIn => Curves.fastOutSlowIn,
+        api.AnimationCurve.decelerate => Curves.decelerate,
+        api.AnimationCurve.elasticOut => Curves.elasticOut,
+        api.AnimationCurve.bounceOut => Curves.bounceOut,
+        _ => _ApiCurve(c),
+      };
+
+  @override
+  double transformInternal(double t) => curve.transform(t);
+}
+
 /// Whether [n] is drawn as a [PlainToggle]: its track fills the node and it
-/// has thumb shadows or a thumb inset.
+/// has thumb shadows, a thumb inset or a thumb border.
 bool drawsPlainToggle(Node n) =>
     (n.prop(SwitchProps.fillTrack) &&
-        (n.prop(SwitchProps.thumbShadows).isNotEmpty || n.prop(SwitchProps.thumbInset) != null)) ||
+        (n.prop(SwitchProps.thumbShadows).isNotEmpty ||
+            n.prop(SwitchProps.thumbInset) != null ||
+            n.prop(SwitchProps.activeThumbBorderColor) != null ||
+            n.prop(SwitchProps.inactiveThumbBorderColor) != null)) ||
     n.prop(SwitchProps.trackRadius) != null ||
     n.prop(SwitchProps.thumbRadius) != null;
 
 /// The plain toggle of switch [node]. Off, a Material 3 thumb without
 /// `uniformThumb` is two thirds of its on size, as Material's is. Colors ease
-/// between off and on as the thumb slides; where tickers are off (a design
-/// canvas) it shows the value at once.
+/// between off and on as the thumb slides (for `toggleDurationMs`, along
+/// `toggleCurve`); where tickers are off (a design canvas) it shows the
+/// value at once.
 class PlainToggle extends StatefulWidget {
   const PlainToggle({
     super.key,
     required this.node,
     required this.value,
     required this.onChanged,
-    this.duration = const Duration(milliseconds: 220),
+    this.duration,
   });
 
   final Node node;
@@ -34,7 +66,11 @@ class PlainToggle extends StatefulWidget {
 
   /// Null disables it.
   final ValueChanged<bool>? onChanged;
-  final Duration duration;
+
+  /// The slide's duration; null is the node's `toggleDurationMs`.
+  final Duration? duration;
+
+  Duration get _duration => duration ?? Duration(milliseconds: node.prop(SwitchProps.toggleDurationMs));
 
   /// The thumb's diameter in a box [height] tall, on and off.
   static ({double on, double off}) thumbDiameters(Node n, double height, {required bool material3}) {
@@ -50,15 +86,28 @@ class PlainToggle extends StatefulWidget {
 
 class _PlainToggleState extends State<PlainToggle> with SingleTickerProviderStateMixin {
   late final AnimationController _position =
-      AnimationController(vsync: this, duration: widget.duration, value: widget.value ? 1 : 0);
-  late final CurvedAnimation _curved =
-      CurvedAnimation(parent: _position, curve: Curves.easeOutCubic, reverseCurve: Curves.easeOutCubic.flipped);
+      AnimationController(vsync: this, duration: widget._duration, value: widget.value ? 1 : 0);
+  late final CurvedAnimation _curved = _initCurve();
   bool _hovered = false, _focused = false;
+
+  CurvedAnimation _initCurve() {
+    final a = CurvedAnimation(parent: _position, curve: Curves.linear);
+    _setCurve(a);
+    return a;
+  }
+
+  void _setCurve(CurvedAnimation a) {
+    final curve = _ApiCurve.of(widget.node.prop(SwitchProps.toggleCurve));
+    a
+      ..curve = curve
+      ..reverseCurve = curve.flipped;
+  }
 
   @override
   void didUpdateWidget(PlainToggle oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _position.duration = widget.duration;
+    _position.duration = widget._duration;
+    _setCurve(_curved);
     if (oldWidget.value == widget.value) return;
     final target = widget.value ? 1.0 : 0.0;
     if (TickerMode.valuesOf(context).enabled) {
@@ -189,6 +238,18 @@ class PlainTogglePainter extends CustomPainter {
       thumb(center + shadow.offset, radius + shadow.spreadRadius, shadow.toPaint());
     }
     thumb(center, radius, Paint()..color = lerp(n.prop(SwitchProps.inactiveThumbColor), n.prop(SwitchProps.activeThumbColor)));
+    // The border inside the thumb's edge, as a BoxDecoration's.
+    final ring = lerp(n.prop(SwitchProps.inactiveThumbBorderColor), n.prop(SwitchProps.activeThumbBorderColor));
+    final ringWidth = math.min(n.prop(SwitchProps.thumbBorderWidth) ?? 1, radius);
+    if (ringWidth > 0 && ring.a > 0) {
+      thumb(
+          center,
+          radius - ringWidth / 2,
+          Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = ringWidth
+            ..color = ring);
+    }
   }
 
   @override

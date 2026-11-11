@@ -206,4 +206,39 @@ void main() {
     await click(context, 'outer').timeout(const Duration(seconds: 2));
     expect(app.read('count'), 1);
   });
+
+  test('a writer yielding (app.yield) lets other writers run, then reads their changes', () async {
+    final app = scope();
+    final waiting = Completer<void>();
+    final seenAfterWait = <int>[];
+    final runner = FunctionScriptRunner({
+      // A long run: waits on the app (app.delay), then reads again.
+      'write': (_, host) async {
+        waiting.complete();
+        await host!.call('yield', [50]);
+        seenAfterWait.add(host.variables()['count'] as int);
+        host.setVariable('count', (host.variables()['count'] as int) + 100);
+        return null;
+      },
+      // A short writer (a cancel button, a timer tick).
+      'tick': (_, host) {
+        host!.setVariable('count', (host.variables()['count'] as int) + 1);
+        return null;
+      },
+    });
+    const tick = ScriptDef(id: 'tick', name: 'tick', source: '', capabilities: [ScriptCapability.variablesRead, ScriptCapability.variablesWrite]);
+    RuntimeActionContext context() => RuntimeActionContext(
+          scope: VariableScope(const [], parent: app),
+          services: Services(scripts: runner),
+          scripts: const [writer, tick],
+        );
+    final long = click(context(), 'write');
+    await waiting.future;
+    // Runs while the long one waits, instead of after it.
+    await click(context(), 'tick').timeout(const Duration(seconds: 2));
+    expect(app.read('count'), 1);
+    await long;
+    expect(seenAfterWait, [1]);
+    expect(app.read('count'), 101);
+  });
 }

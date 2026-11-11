@@ -138,6 +138,13 @@ class SandboxScriptRunner implements ScriptRunner {
     } on Object catch (e) {
       return ScriptRunResult.failure('EngineUnavailable', '$e');
     }
+    // A run waiting on the app reads the variables afresh when it resumes:
+    // what they are after its own writes and whatever else changed them
+    // meanwhile (the run script action serializes writers; app.yield lets
+    // others run during a wait).
+    final grants = script.capabilities.toSet();
+    final readsVars = host != null &&
+        (grants.contains(ScriptCapability.variablesWrite) || grants.contains(ScriptCapability.variablesRead));
     final req = request(script, args: args, scripts: scripts, host: host, seed: seed, now: now);
     final run = req['run'] as String;
     final budget = Duration(milliseconds: script.timeoutMs);
@@ -204,7 +211,8 @@ class SandboxScriptRunner implements ScriptRunner {
             writes: writes,
           );
         }
-        state = await box.resume(run, responses, cpuBudget: budget);
+        state = await box.resume(run, responses, cpuBudget: budget,
+            vars: readsVars ? (jsonData(host.variables()) as Map).cast<String, Object?>() : null);
       }
     } on Object catch (e) {
       box.end(run);
