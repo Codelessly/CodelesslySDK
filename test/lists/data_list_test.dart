@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
@@ -326,6 +327,35 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(texts(tester), ['#A 3', 'P0', 'P1', 'P2', '#B 2', 'P3', 'P4']);
+  });
+
+  testWidgets('the end footer sits after the last item, inside the bottom padding', (tester) async {
+    await show(
+      tester,
+      screen(
+        pagination: {'name': 'contacts', 'pageSize': 10},
+        extraList: {
+          'layout': {
+            'width': 300,
+            'height': 400,
+            'padding': [0, 0, 0, 120],
+          },
+          'slots': {'end': 'end'},
+        },
+        extra: footers(),
+      ),
+      variables: [v('people', people(3), VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    final at = <String, double>{};
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.attached) at[o.text.toPlainText()] = o.localToGlobal(Offset.zero).dy;
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(CustomScrollView)));
+    // Right under the third 40-high row, not 120 px further down.
+    expect(at['The end']! - at['P2']!, lessThan(60));
   });
 
   testWidgets('swipe actions: a swipe past the threshold runs the first action, with undo', (tester) async {
