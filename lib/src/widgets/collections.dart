@@ -568,14 +568,19 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return out;
   }
 
+  // A table that fills its parent is drawn at the size it is given, not
+  // its design size: its data's rows and columns are all built (up to
+  // [_maxTableSpans]) and the box clips them.
+  final fillsWidth = data != null && n.layout.width.fit != SizeFit.fixed;
+  final fillsHeight = data != null && n.layout.height.fit != SizeFit.fixed;
   final columnWidths = fit([
     if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
     for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth),
-  ], design.width);
+  ], fillsWidth ? double.infinity : design.width);
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
     for (var i = 0; i < math.min(rowCount, _maxTableSpans); i++) n.prop(TableViewProps.rowHeight),
-  ], design.height);
+  ], fillsHeight ? double.infinity : design.height);
 
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
