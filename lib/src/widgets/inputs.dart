@@ -630,6 +630,11 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
                 decoration.border ??
                 const UnderlineInputBorder();
             final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
+            // With no icon to make it so, an empty suffix as wide as the end
+            // padding makes the decorator's container the whole height, so
+            // small text centres in it too (its container is otherwise 48 px).
+            final padEnd = (decoration.contentPadding ?? EdgeInsets.zero).resolve(Directionality.of(context)).right;
+            final spacer = decoration.prefixIcon == null && decoration.suffixIcon == null;
             return DecoratedBox(
               decoration: ShapeDecoration(color: fill, shape: border),
               child: field(
@@ -647,9 +652,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
                   prefixIconConstraints: decoration.prefixIcon == null
                       ? null
                       : _tallIcon(decoration.prefixIconConstraints, height),
-                  suffixIconConstraints: decoration.suffixIcon == null
-                      ? null
-                      : _tallIcon(decoration.suffixIconConstraints, height),
+                  suffixIcon: spacer ? SizedBox(width: padEnd, height: height) : decoration.suffixIcon,
+                  suffixIconConstraints: spacer
+                      ? BoxConstraints.tightFor(width: padEnd, height: height)
+                      : decoration.suffixIcon == null
+                          ? null
+                          : _tallIcon(decoration.suffixIconConstraints, height),
                 ),
                 alignVertical: TextAlignVertical.center,
               ),
