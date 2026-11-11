@@ -132,10 +132,11 @@ export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
 export 'src/runtime/actions/actions.dart';
 // Render objects that paint images, and whether one is still loading (tools wait for them before a capture).
-export 'src/render/paint/image_fill.dart' show ImageClient;
+export 'src/render/paint/image_fill.dart' show ImageClient, PaintImages;
 export 'src/runtime/lists/lists.dart';
 // What `${drag}` reads when nothing is dragged (a design canvas's default).
 export 'src/runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+export 'src/runtime/expressions/perf_scope.dart' show PerfScope;
 export 'src/widgets/collections_data_list.dart' show DataListView, DataListViewState, ListSection, SectionIndexBar, UndoBar, groupIntoSections, sectionOffset;
 export 'src/widgets/collections_reorder.dart' show GroupReorderList, KeyboardReorderItem, ReorderListView;
 export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
