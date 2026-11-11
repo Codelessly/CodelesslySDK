@@ -428,6 +428,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void performLayout() {
     final child = this.child;
     if (_collapsed) {
+      // Like RenderOffstage, keep descendant layout boundaries clean even
+      // though this node takes no space and is not painted or hit tested.
+      // Widget islands can still rebuild while the node is collapsed.
+      child?.layout(constraints);
       size = constraints.smallest;
     } else if (child == null) {
       size = constraints.smallest;
