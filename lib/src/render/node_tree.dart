@@ -1148,8 +1148,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     if (canStack && tree.animates && n.behaviors.inkWell != null) under.add(inkOverlay(this, n, radius));
     if (content == null && under.isEmpty && over.isEmpty) return;
+    // Passthrough: the content gets the shell's own constraints, as it
+    // would with no decoration, so a size the parent forces (a fixed child
+    // stretched between two pins) reaches it instead of its design size.
     final stack = _obtain<RenderStack>('shellStack',
-        () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
+        () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none, fit: StackFit.passthrough));
     _stackExtras[stack] = (under, over);
     if (content == null) {
       _innerChains[stack] = const [];
