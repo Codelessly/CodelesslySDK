@@ -540,9 +540,18 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return out;
   }
 
+  final bodyWidths = <double>[for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth)];
+  if (n.prop(TableViewProps.fillWidth) && bodyWidths.isNotEmpty) {
+    // As at runtime: the columns share the width beyond their own.
+    final total = (headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0) + bodyWidths.fold<double>(0, (a, w) => a + w);
+    final extra = math.max(0.0, design.width - total) / bodyWidths.length;
+    for (var i = 0; i < bodyWidths.length; i++) {
+      bodyWidths[i] += extra;
+    }
+  }
   final columnWidths = fit([
     if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
-    for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth),
+    ...bodyWidths,
   ], design.width);
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
