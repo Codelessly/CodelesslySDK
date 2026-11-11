@@ -230,6 +230,7 @@ class StorePurchaseService implements OfferPurchaseService {
             purchase.status == PurchaseStatus.canceled ? PaywallOutcome.canceled : PaywallOutcome.failed,
             productId: purchase.productID,
             error: purchase.error?.message,
+            code: purchase.error?.code ?? '',
           ));
           continue;
         case PurchaseStatus.purchased || PurchaseStatus.restored:

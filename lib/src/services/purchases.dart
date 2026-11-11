@@ -126,7 +126,7 @@ enum PaywallOutcome { purchased, restored, restoreNothing, canceled, failed, clo
 /// The outcome of a purchase, restore or paywall.
 @immutable
 class PaywallResult {
-  const PaywallResult(this.outcome, {this.productId, this.entitlementId, this.error});
+  const PaywallResult(this.outcome, {this.productId, this.entitlementId, this.error, this.code = ''});
 
   final PaywallOutcome outcome;
   final String? productId;
@@ -134,6 +134,10 @@ class PaywallResult {
   /// The entitlement a verified purchase granted.
   final String? entitlementId;
   final String? error;
+
+  /// The store's code for a failure (`payment-declined`,
+  /// `storekit_duplicate_product_object`...), or ''.
+  final String code;
 
   @override
   String toString() => 'PaywallResult(${outcome.name}${productId == null ? '' : ' $productId'}'
