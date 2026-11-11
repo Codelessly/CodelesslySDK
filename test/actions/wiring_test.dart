@@ -282,6 +282,33 @@ void main() {
     expect(s['count'], 111);
   });
 
+  testWidgets('a double tap reports where it landed; a drag its step and position', (tester) async {
+    Json set(String name, String value) => {'type': 'setVariable', 'variable': name, 'value': value};
+    final s = await show(tester, counter(actions: [
+      reaction('doubleTap', [set('tapX', r'${result.x}'), set('tapY', r'${result.y}')]),
+      reaction('drag', [set('stepX', r'${result.deltaX}'), set('atX', r'${result.x}')]),
+    ]), variables: [
+      v('tapX', 0, VariableType.decimal), v('tapY', 0, VariableType.decimal),
+      v('stepX', 0, VariableType.decimal), v('atX', 0, VariableType.decimal),
+    ]);
+    final box = s.tree.boxOf('button')!;
+    final topLeft = box.localToGlobal(Offset.zero);
+    await tester.tapAt(topLeft + const Offset(7, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(topLeft + const Offset(7, 5));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect((s['tapX'], s['tapY']), (7.0, 5.0));
+    final g = await tester.startGesture(topLeft + const Offset(4, 4));
+    for (var i = 0; i < 6; i++) {
+      await g.moveBy(const Offset(10, 0));
+      await tester.pump();
+    }
+    await g.up();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(s['stepX'], 10.0);
+    expect(s['atX'], 64.0);
+  });
+
   testWidgets('hover: the cursor, and enter and exit', (tester) async {
     final s = await show(tester, counter(actions: [
       reaction('click', []),
