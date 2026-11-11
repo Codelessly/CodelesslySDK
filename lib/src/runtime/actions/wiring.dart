@@ -188,8 +188,17 @@ class _BoxReactions {
   /// reactions, whereas a removed view cancels them.
   void pause({bool cancelActions = true}) {
     if (cancelActions) {
-      cancellation.cancel();
-      cancellation = ActionCancellation();
+      // Cancelled once the frame is over if the box is still out of the
+      // tree: a box moved within a frame (a route transition or hero
+      // re-parenting the screen) keeps its running chains, such as the
+      // screen's `load` reaction waiting in a delay.
+      final pending = cancellation;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (box.attached || !identical(pending, cancellation)) return;
+        cancellation.cancel();
+        cancellation = ActionCancellation();
+      });
+      SchedulerBinding.instance.ensureVisualUpdate();
     }
     _timer?.cancel();
     _timer = null;
