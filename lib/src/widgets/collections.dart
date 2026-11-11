@@ -57,6 +57,18 @@ Object? _scope(NodeBuilder b, int index, int first) => index == first ? null : (
 
 /// Places [count] items (the template [itemId] repeated) from index [first]
 /// in [container].
+/// Where a stacked list's item sits on one axis of the padded box
+/// ([inner] long) from its own position: a distance from the start or the
+/// end, an alignment, or a relative distance; [fallback] when unset.
+double _stackAxis(api.AxisPosition p, double inner, double item, double fallback) {
+  if (p == api.AxisPosition.zero) return fallback;
+  if (p.align case final double a) return (inner - item) * (a + 1) / 2;
+  if (p.relative case final double r) return r;
+  if (p.start case final double s) return s;
+  if (p.end case final double e) return inner - e - item;
+  return fallback;
+}
+
 void _syncItems(NodeBuilder b, Node n, _Container container, String? itemId, int count, {int first = 0}) {
   if (itemId == null || count <= 0) {
     b.syncChildren(container, const [], Slot(SlotKind.root, n));
@@ -201,6 +213,18 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       ..paintReversed = reversePaint
       ..itemConstraints = ((_) => const BoxConstraints())
       ..placeAt = ((_, _) => origin)
+      // Each item at its own x/y (bound per item: a map's rooms), else at
+      // the list's itemPosition.
+      ..placeChild = ((child, box, item) {
+        final node = child is NodeBox ? child.node : null;
+        if (node == null) return null;
+        final x = node.layout.x, y = node.layout.y;
+        if (x == api.AxisPosition.zero && y == api.AxisPosition.zero) return null;
+        return Offset(
+          padding.left + _stackAxis(x, box.width - padding.horizontal, item.width, at?.dx ?? 0),
+          padding.top + _stackAxis(y, box.height - padding.vertical, item.height, at?.dy ?? 0),
+        );
+      })
       ..onNeedItems = null
       ..changed();
     _syncItems(b, n, view, itemId, count ?? 0);
