@@ -20,6 +20,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         PlotChartSelectionGuides,
         PlotChartSeries;
 import 'package:flutter/painting.dart';
+import 'package:intl/intl.dart' show DateFormat;
 
 import '../render/convert.dart';
 import 'indicators_paint.dart';
@@ -240,8 +241,8 @@ class ChartSeriesPainter extends NodePainter {
     final total = values.fold(0.0, (a, b) => a + b);
     final diameter = math.min(size.width, size.height);
     final stroke = diameter * p(ChartProps.donutThickness).clamp(0.02, 0.5);
-    // Room for the selected slice, drawn thicker.
-    final r = diameter / 2 - stroke / 2 - 4;
+    // Room for a selected slice, drawn thicker.
+    final r = diameter / 2 - stroke / 2 - (selectedIndex >= 0 ? 4 : 0);
     final rect = Rect.fromCircle(center: size.center(Offset.zero), radius: r);
     final paint = Paint()..style = PaintingStyle.stroke;
     if (total <= 0) {
@@ -304,7 +305,8 @@ class ChartSeriesPainter extends NodePainter {
         if (p(ChartProps.showYAxis)) {
           _label(
             canvas,
-            yAxisLabel(v, p(ChartProps.yLabelPrefix), p(ChartProps.yLabelSuffix)),
+            gridLabelText(v, k, gridLines, p(ChartProps.yLabelPrefix), p(ChartProps.yLabelSuffix),
+                topOnly: p(ChartProps.yLabelAffixTopOnly)),
             Offset(plot.left - 8, gy),
             align: TextAlign.right,
             style: yFamily == null ? null : _labelStyle(yFamily),
@@ -315,8 +317,10 @@ class ChartSeriesPainter extends NodePainter {
     // Labels placed by value (xField with xLabels): the axis stands without
     // rows too, so an empty chart keeps its time line.
     void paintValueLabels() {
+      final color = p(ChartProps.xAxisLabelColor)?.flutter;
+      final style = color == null ? _axisStyle : _axisStyle.copyWith(color: color);
       for (final l in p(ChartProps.xLabels)) {
-        final tp = TextPainter(text: TextSpan(text: l.label, style: _axisStyle), textDirection: TextDirection.ltr)
+        final tp = TextPainter(text: TextSpan(text: l.label, style: style), textDirection: TextDirection.ltr)
           ..layout();
         final lx = (xAt(l.x) - tp.width / 2).clamp(0.0, math.max(0.0, size.width - tp.width));
         tp.paint(canvas, Offset(lx.toDouble(), plot.bottom + _xAxisHeight / 2 + 2 - tp.height / 2));
@@ -339,7 +343,9 @@ class ChartSeriesPainter extends NodePainter {
       );
     }
 
-    // Bars.
+    // Bars. While a category is selected the others can fade.
+    final dim = p(ChartProps.dimUnselected) && selected >= 0 && selected < n;
+    final stackGap = p(ChartProps.stackGap);
     final groups = _groups;
     final barGap = p(ChartProps.barGap);
     final total = math.min(p(ChartProps.maxBarWidth) * math.max(1, groups.length), catW * p(ChartProps.barWidthFraction));
@@ -375,8 +381,9 @@ class ChartSeriesPainter extends NodePainter {
             final v = chartNumber(item, s.field);
             if (v == null || v == 0) continue;
             final colorField = s.colorField;
-            final color = chartColor(colorField == null ? null : item[colorField]) ?? s.color.flutter;
-            final r = Rect.fromLTRB(left, y(base + v), left + groupW, y(base));
+            final full = chartColor(colorField == null ? null : item[colorField]) ?? s.color.flutter;
+            final color = dim && i != selected ? full.withValues(alpha: full.a * 0.45) : full;
+            final r = Rect.fromLTRB(left, y(base + v), left + groupW, y(base) - (base > 0 ? stackGap : 0));
             final top = s == groups[g].last;
             canvas.drawRRect(
               RRect.fromRectAndCorners(
@@ -392,9 +399,33 @@ class ChartSeriesPainter extends NodePainter {
       }
     }
 
+    // Totals above the bar groups.
+    if (!isLine && p(ChartProps.showTotals)) {
+      final color = p(ChartProps.totalsColor)?.flutter ?? p(ChartProps.axisLabelColor).flutter;
+      final selectedColor = p(ChartProps.totalsSelectedColor)?.flutter ?? color;
+      final base = _labelStyle(p(ChartProps.axisFontFamily)).copyWith(fontWeight: FontWeight.w700);
+      for (var i = 0; i < n; i++) {
+        double sum = 0;
+        for (final g in groups) {
+          for (final s in g) {
+            sum += chartNumber(data[i], s.field) ?? 0;
+          }
+        }
+        if (sum <= 0) continue;
+        _label(canvas, compactNumber(sum), Offset(cx(i), y(sum) - 10),
+            style: base.copyWith(color: i == selected ? selectedColor : color));
+      }
+    }
+
     // Reference lines.
     for (final line in p(ChartProps.referenceLines)) {
       final ly = y(line.value);
+      if (line.label.isNotEmpty) {
+        final style = _labelStyle(p(ChartProps.axisFontFamily))
+            .copyWith(color: (line.labelColor ?? line.color).flutter, fontWeight: FontWeight.w700);
+        _label(canvas, line.label, Offset(plot.right, ly + (line.labelBelow ? 10 : -10)),
+            align: TextAlign.right, style: style);
+      }
       final paint = Paint()
         ..color = line.color.flutter
         ..strokeWidth = line.strokeWidth;
@@ -533,21 +564,96 @@ class ChartSeriesPainter extends NodePainter {
     }
 
     // X labels.
+    final xColor = p(ChartProps.xAxisLabelColor)?.flutter;
+    final base = xColor == null ? _axisStyle : _axisStyle.copyWith(color: xColor);
     final xLabels = p(ChartProps.xLabels);
     if (p(ChartProps.showXAxis) && xField != null && xLabels.isNotEmpty) {
       paintValueLabels();
     } else if (p(ChartProps.showXAxis)) {
-      final style = _axisStyle;
-      final selectedStyle = style.copyWith(color: selection.withValues(alpha: 1));
+      final highlight = p(ChartProps.highlightIndex);
+      final highlightColor = p(ChartProps.highlightColor)?.flutter;
+      final selectedStyle = base.copyWith(color: selection.withValues(alpha: 1));
       final every = math.max(1, p(ChartProps.xLabelEvery));
       final labelField = p(ChartProps.labelField);
       for (var i = 0; i < n; i += every) {
         final label = data[i][labelField];
         if (label == null) continue;
+        final style = i == highlight && highlightColor != null ? base.copyWith(color: highlightColor) : base;
         _label(canvas, '$label', Offset(cx(i), plot.bottom + _xAxisHeight / 2 + 2),
-            style: i == selected && !isLine ? selectedStyle : style);
+            style: i == selected && !isLine && !p(ChartProps.tooltip) ? selectedStyle : style);
       }
     }
+
+    if (p(ChartProps.tooltip) && selected >= 0 && selected < n) _paintTooltip(canvas, size, plot, data[selected], cx(selected));
+  }
+
+  /// The selected category's box: its title, then a row per series with a
+  /// value there (a dot in the series' color, its name, the value).
+  void _paintTooltip(Canvas canvas, Size size, Rect plot, Map<String, Object?> item, double centerX) {
+    final text = p(ChartProps.tooltipTextColor).flutter;
+    final family = p(ChartProps.axisFontFamily);
+    final titleField = p(ChartProps.tooltipTitleField);
+    final title = '${item[titleField.isEmpty ? p(ChartProps.labelField) : titleField] ?? ''}';
+    final rows = <(Color, String, String)>[
+      for (final s in series)
+        if (chartNumber(item, s.field) case final double v when v != 0)
+          (
+            chartColor(s.colorField == null ? null : item[s.colorField!]) ?? s.color.flutter,
+            s.name.isEmpty ? s.field : s.name,
+            compactNumber(v),
+          ),
+    ];
+    final textColor = p(ChartProps.tooltipTextColor);
+    final titleStyle = _tooltipStyle(ChartProps.tooltipTitleStyle,
+        TextStyle(fontFamily: family, fontSize: 12, fontWeight: FontWeight.w700, color: text),
+        api.TextStyle(fontFamily: family, fontSize: 12, fontWeight: 700, color: textColor));
+    final rowStyle = _tooltipStyle(ChartProps.tooltipLabelStyle,
+        TextStyle(fontFamily: family, fontSize: 13, fontWeight: FontWeight.w600, color: text),
+        api.TextStyle(fontFamily: family, fontSize: 13, fontWeight: 600, color: textColor));
+    final valueStyle = _tooltipStyle(ChartProps.tooltipValueStyle,
+        TextStyle(fontFamily: family, fontSize: 13, fontWeight: FontWeight.w700, color: text),
+        api.TextStyle(fontFamily: family, fontSize: 13, fontWeight: 700, color: textColor));
+    // Rows and title grow with larger styles.
+    const w = 190.0, pad = 14.0;
+    final rowH = math.max(18.0, math.max(rowStyle.fontSize ?? 13, valueStyle.fontSize ?? 13) * 1.35);
+    final titleH = math.max(20.0, (titleStyle.fontSize ?? 12) * 1.6);
+    final h = pad * 2 + titleH + rows.length * rowH;
+    final left = (centerX - w / 2).clamp(0.0, math.max(0.0, size.width - w)).toDouble();
+    final box = RRect.fromRectAndRadius(Rect.fromLTWH(left, plot.top, w, h), const Radius.circular(12));
+    canvas.drawRRect(box.shift(const Offset(0, 4)), Paint()
+      ..color = const Color(0x88000000)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10));
+    canvas.drawRRect(box, Paint()..color = p(ChartProps.tooltipColor).flutter);
+    _label(canvas, title, Offset(left + pad, plot.top + pad + titleH / 2 - 2), align: TextAlign.left, style: titleStyle);
+    for (var k = 0; k < rows.length; k++) {
+      final (color, name, value) = rows[k];
+      final cy = plot.top + pad + titleH + rowH * k + rowH / 2;
+      canvas.drawCircle(Offset(left + pad + 5, cy), 5, Paint()..color = color);
+      canvas.drawCircle(Offset(left + pad + 5, cy), 5, Paint()
+        ..style = PaintingStyle.stroke
+        ..color = const Color(0x33000000));
+      _label(canvas, name, Offset(left + pad + 18, cy), align: TextAlign.left, style: rowStyle);
+      _label(canvas, value, Offset(left + w - pad, cy), align: TextAlign.right, style: valueStyle);
+    }
+  }
+
+  /// A tooltip text style: [plain] unless the node sets [def], then the
+  /// node's style merged over [base].
+  TextStyle _tooltipStyle(api.PropDef<api.TextStyle> def, TextStyle plain, api.TextStyle base) {
+    final style = p(def);
+    return style.isEmpty ? plain : textStyle(base.merge(style));
+  }
+
+  /// The category under [local] (the painter's coordinates), or -1.
+  int categoryAt(Offset local, Size size) {
+    if (chartType == ChartType.donut || chartType == ChartType.timeline) return -1;
+    final plot = plotRect(size);
+    final n = data.length;
+    if (n == 0 || local.dx < plot.left || local.dx > plot.right) return -1;
+    if (chartType == ChartType.line) {
+      return ((local.dx - plot.left) / plot.width * _slots).round().clamp(0, n - 1);
+    }
+    return ((local.dx - plot.left) / (plot.width / n)).floor().clamp(0, n - 1);
   }
 
   void _paintTimeline(Canvas canvas, Size size) {
@@ -1010,7 +1116,9 @@ class PlotChartPainter extends NodePainter {
       if (marker.label.isEmpty) continue;
       final color = marker.color.flutter;
       final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
-      final dx = (dot.dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
+      // Centred on the marker, kept over the plot (clear of the y-axis
+      // gutter's labels).
+      final dx = (dot.dx - text.width / 2).clamp(gutter, math.max(gutter, size.width - text.width)).toDouble();
       final dy = switch (marker.position) {
         PlotChartMarkerPosition.above => dot.dy - r - (markerStyle.fontSize ?? 10) * 1.3,
         PlotChartMarkerPosition.below => dot.dy + r + 1.5,
@@ -1224,6 +1332,11 @@ class PlotChartPainter extends NodePainter {
 /// Paints a line chart: bands, grid lines with labels, the curve and the
 /// area under it, area bands, reference lines, the x axis, markers and
 /// vertical lines. Its data and overlays are rows (usually bound).
+/// The y label of grid line [k] of [lines] (0 at the bottom): [v] with the
+/// prefix and suffix, on the top line only when [topOnly].
+String gridLabelText(double v, int k, int lines, String prefix, String suffix, {bool topOnly = false}) =>
+    topOnly && k != lines ? yAxisLabel(v, '', '') : yAxisLabel(v, prefix, suffix);
+
 class LineChartPainter extends NodePainter {
   LineChartPainter(super.n) : super(repaint: PaintingBinding.instance.systemFonts);
 
@@ -1345,6 +1458,59 @@ class LineChartPainter extends NodePainter {
     return path;
   }
 
+  /// The plot rect inside [size] and the x and y domains.
+  (Rect, double, double, double, double) _frame(Size size, List<Offset> points) {
+    final pad = p(LineChartProps.plotPadding);
+    final plot = Rect.fromLTRB(
+      pad.left,
+      pad.top,
+      math.max(pad.left, size.width - pad.right),
+      math.max(pad.top, size.height - pad.bottom),
+    );
+    double extent(Iterable<double> values, double Function(double, double) f) =>
+        values.isEmpty ? 0 : values.reduce(f);
+    var x0 = p(LineChartProps.xMin) ?? extent(points.map((pt) => pt.dx), math.min);
+    var x1 = p(LineChartProps.xMax) ?? extent(points.map((pt) => pt.dx), math.max);
+    var y0 = p(LineChartProps.yMin) ?? extent(points.map((pt) => pt.dy), math.min);
+    var y1 = p(LineChartProps.yMax) ?? extent(points.map((pt) => pt.dy), math.max);
+    if (x1 <= x0) (x0, x1) = (x0 - 0.5, x0 + 0.5);
+    if (y1 <= y0) (y0, y1) = (y0 - 0.5, y0 + 0.5);
+    return (plot, x0, x1, y0, y1);
+  }
+
+  /// The plotted rows (x, y, row) in x order.
+  List<(double, double, api.Json)> _rows() {
+    final xField = p(LineChartProps.xField), yField = p(LineChartProps.yField);
+    return [
+      for (final row in p(LineChartProps.data))
+        if ((_x(row[xField]), _num(row[yField])) case (final double x, final double y) when x.isFinite && y.isFinite)
+          (x, y, row),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
+  }
+
+  /// The index in [rows] of the point nearest [x], or -1.
+  static int _nearest(List<(double, double, api.Json)> rows, double x) {
+    var best = -1;
+    var distance = double.infinity;
+    for (var i = 0; i < rows.length; i++) {
+      final d = (rows[i].$1 - x).abs();
+      if (d < distance) (best, distance) = (i, d);
+    }
+    return best;
+  }
+
+  /// The x of the data point nearest the pointer at [local] (the painter's
+  /// coordinates), or null off the plot.
+  double? xAt(Offset local, Size size) {
+    final rows = _rows();
+    if (rows.isEmpty) return null;
+    final (plot, x0, x1, _, _) = _frame(size, [for (final r in rows) Offset(r.$1, r.$2)]);
+    if (plot.width <= 0 || local.dx < plot.left - 8 || local.dx > plot.right + 8) return null;
+    if (local.dy < 0 || local.dy > size.height) return null;
+    final x = x0 + (local.dx - plot.left) / plot.width * (x1 - x0);
+    return rows[_nearest(rows, x)].$1;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     // Values outside the domain (yMin/yMax set) would draw beyond the box,
@@ -1356,26 +1522,11 @@ class LineChartPainter extends NodePainter {
   }
 
   void _paintChart(Canvas canvas, Size size) {
-    final pad = p(LineChartProps.plotPadding);
-    final plot = Rect.fromLTRB(
-      pad.left,
-      pad.top,
-      math.max(pad.left, size.width - pad.right),
-      math.max(pad.top, size.height - pad.bottom),
-    );
-    if (plot.width <= 0 || plot.height <= 0) return;
-
     final xField = p(LineChartProps.xField), yField = p(LineChartProps.yField);
     final segments = sampleSegments(p(LineChartProps.data), xField, yField);
     final points = segments.expand((segment) => segment).toList();
-    double extent(Iterable<double> values, double Function(double, double) f) =>
-        values.isEmpty ? 0 : values.reduce(f);
-    var x0 = p(LineChartProps.xMin) ?? extent(points.map((pt) => pt.dx), math.min);
-    var x1 = p(LineChartProps.xMax) ?? extent(points.map((pt) => pt.dx), math.max);
-    var y0 = p(LineChartProps.yMin) ?? extent(points.map((pt) => pt.dy), math.min);
-    var y1 = p(LineChartProps.yMax) ?? extent(points.map((pt) => pt.dy), math.max);
-    if (x1 <= x0) (x0, x1) = (x0 - 0.5, x0 + 0.5);
-    if (y1 <= y0) (y0, y1) = (y0 - 0.5, y0 + 0.5);
+    final (plot, x0, x1, y0, y1) = _frame(size, points);
+    if (plot.width <= 0 || plot.height <= 0) return;
     double px(double x) => plot.left + (x - x0) / (x1 - x0) * plot.width;
     double py(double y) => plot.bottom - (y - y0) / (y1 - y0) * plot.height;
 
@@ -1467,21 +1618,24 @@ class LineChartPainter extends NodePainter {
       final ry = _num(r['y']);
       if (ry == null) continue;
       final y = py(ry);
-      final lineColor = _color(r['color'], r['opacity']) ?? axisColor;
+      final color = _color(r['color'], r['opacity']) ?? axisColor;
       _dashed(
         canvas,
         Offset(plot.left, y),
         Offset(plot.right, y),
         _dash(r['dash'], (5, 5)),
         Paint()
-          ..color = lineColor
+          ..color = color
           ..strokeWidth = _num(r['width']) ?? 1.5,
       );
-      // A label above the line, at its end (or its start), in its colour.
+      // Its label at the line's end (or its start, labelAlign "start"), above
+      // the line (or below).
       if (_text(r['label']) case final String label when label.isNotEmpty) {
-        final tp = _layout(label, axisLabelStyle.copyWith(color: lineColor, fontWeight: FontWeight.w700));
+        final tp = _layout(label,
+            axisLabelStyle.copyWith(color: _color(r['labelColor']) ?? color, fontWeight: FontWeight.w700));
+        final ly = r['labelBelow'] == true ? y + 4 : y - tp.height - 2;
         final atStart = r['labelAlign'] == 'start';
-        tp.paint(canvas, Offset(atStart ? plot.left + 2 : plot.right - tp.width - 2, y - tp.height - 2));
+        tp.paint(canvas, Offset(atStart ? plot.left + 2 : math.max(plot.left, plot.right - tp.width), ly));
         tp.dispose();
       }
     }
@@ -1581,5 +1735,84 @@ class LineChartPainter extends NodePainter {
         }
       }
     }
+
+    // 10. The selected point: cursor, ring and tooltip.
+    if (p(LineChartProps.selectedX) case final double selectedX) {
+      final rows = _rows();
+      final i = _nearest(rows, selectedX);
+      if (i >= 0) _paintTooltip(canvas, size, plot, rows, i, Offset(px(rows[i].$1), py(rows[i].$2)));
+    }
+  }
+
+  /// The tooltip's first line: the label field, a formatted date, or the x.
+  String _tooltipLabel(api.Json row, double x) {
+    final field = p(LineChartProps.tooltipLabelField);
+    if (field.isNotEmpty && row[field] != null) return '${row[field]}';
+    final raw = row[p(LineChartProps.xField)];
+    if (raw is String && _num(raw) == null) {
+      final d = DateTime.tryParse(raw.trim());
+      if (d != null) {
+        try {
+          return DateFormat(p(LineChartProps.tooltipXFormat)).format(d);
+        } catch (_) {
+          return raw;
+        }
+      }
+    }
+    return compactNumber(x);
+  }
+
+  void _paintTooltip(Canvas canvas, Size size, Rect plot, List<(double, double, api.Json)> rows, int i, Offset pt) {
+    final lineColor = p(LineChartProps.lineColor).flutter;
+    canvas.drawLine(
+        Offset(pt.dx, plot.top),
+        Offset(pt.dx, plot.bottom),
+        Paint()
+          ..color = p(LineChartProps.cursorColor).flutter
+          ..strokeWidth = 1);
+    canvas.drawCircle(pt, 6, Paint()..color = p(LineChartProps.cursorRingFill).flutter);
+    canvas.drawCircle(
+        pt,
+        6,
+        Paint()
+          ..color = lineColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.5);
+
+    final (x, y, row) = rows[i];
+    var value = (y * p(LineChartProps.tooltipYScale)).toStringAsFixed(p(LineChartProps.tooltipYDecimals));
+    value += p(LineChartProps.tooltipYSuffix);
+    if (p(LineChartProps.tooltipTrend) && i > 0 && rows[i - 1].$2 != y) {
+      value = '${y > rows[i - 1].$2 ? '▲' : '▼'} $value';
+    }
+    const muted = api.Color(0xB3FFFFFF), white = api.Color(0xFFFFFFFF);
+    final label = _layout(
+        _tooltipLabel(row, x),
+        textStyle(const api.TextStyle(fontSize: 11, fontWeight: 600, letterSpacing: 0.6, color: muted)
+            .merge(p(LineChartProps.tooltipLabelStyle))));
+    final val = _layout(
+        value,
+        textStyle(const api.TextStyle(fontSize: 16, fontWeight: 700, color: white)
+            .merge(p(LineChartProps.tooltipValueStyle))));
+    const padX = 10.0, padY = 8.0, gap = 2.0;
+    final w = math.max(label.width, val.width) + padX * 2;
+    final h = label.height + gap + val.height + padY * 2;
+    final left = (pt.dx - w / 2).clamp(0.0, math.max(0.0, size.width - w)).toDouble();
+    var top = pt.dy - h - 12;
+    if (top < 0) top = math.min(pt.dy + 12, math.max(0.0, size.height - h));
+    final box = RRect.fromRectAndRadius(Rect.fromLTWH(left, top, w, h), const Radius.circular(8));
+    final shadow = p(LineChartProps.tooltipShadowColor).flutter;
+    if (shadow.a > 0) {
+      canvas.drawRRect(
+          box.shift(const Offset(0, 4)),
+          Paint()
+            ..color = shadow
+            ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10));
+    }
+    canvas.drawRRect(box, Paint()..color = p(LineChartProps.tooltipBackground).flutter);
+    label.paint(canvas, Offset(left + padX, top + padY));
+    val.paint(canvas, Offset(left + padX, top + padY + label.height + gap));
+    label.dispose();
+    val.dispose();
   }
 }

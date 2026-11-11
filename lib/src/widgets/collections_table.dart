@@ -9,7 +9,8 @@
 // rest (collections.dart).
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' show Node, TableColumn, TableViewProps;
+import 'package:codelessly_api/codelessly_api.dart' show Node, TableColumn, TableViewProps, TriggerType;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
@@ -32,15 +33,34 @@ void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(b.island('table', (context) => RuntimeTableView(runtime: runtime, rows: rows)));
 }
 
-class RuntimeTableView extends StatelessWidget {
+/// The widths of [columns] in [available] pixels: their own (or
+/// [fallback]), and the room left over shared by their `flex`.
+List<double> tableColumnWidths(List<TableColumn> columns, double fallback, double available) {
+  final base = [for (final c in columns) c.width ?? fallback];
+  final flexTotal = columns.fold<double>(0, (a, c) => a + c.flex);
+  final spare = available - base.fold<double>(0, (a, b) => a + b);
+  if (flexTotal <= 0 || !spare.isFinite || spare <= 0) return base;
+  return [for (var i = 0; i < columns.length; i++) base[i] + spare * columns[i].flex / flexTotal];
+}
+
+class RuntimeTableView extends StatefulWidget {
   const RuntimeTableView({super.key, required this.runtime, required this.rows});
 
   final ListRuntime runtime;
   final List<Object?> rows;
 
   @override
+  State<RuntimeTableView> createState() => _RuntimeTableViewState();
+}
+
+class _RuntimeTableViewState extends State<RuntimeTableView> {
+  /// The body row under the pointer, -1 for none.
+  int _hover = -1;
+
+  @override
   Widget build(BuildContext context) {
-    final r = runtime, n = r.node;
+    final r = widget.runtime, n = r.node;
+    final rows = widget.rows;
     String? slot(String name) => n.slots[name] != null && r.b.nodeOf(n.slots[name]!) != null ? n.slots[name] : null;
     final cell = slot(TableViewProps.cell), columnHeader = slot(TableViewProps.columnHeader);
     final rowHeader = slot(TableViewProps.rowHeader), corner = slot(TableViewProps.corner);
@@ -51,9 +71,6 @@ class RuntimeTableView extends StatelessWidget {
     final line = lineColor.alpha == 0 || lineWidth <= 0 ? BorderSide.none : BorderSide(color: lineColor.flutter, width: lineWidth);
     final headerColor = n.prop(TableViewProps.headerColor)?.flutter;
     final stripe = n.prop(TableViewProps.stripeColor)?.flutter;
-    final double headerWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0;
-    final bodyWidths = <double>[for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth)];
-    final total = headerWidth + bodyWidths.fold<double>(0, (a, w) => a + w);
     final fill = n.prop(TableViewProps.fillWidth) && columns.isNotEmpty;
     final rowHeightKey = n.prop(TableViewProps.rowHeightKey), rowHeight = n.prop(TableViewProps.rowHeight);
 
@@ -66,10 +83,33 @@ class RuntimeTableView extends StatelessWidget {
       );
     }
 
+    final edge = n.prop(TableViewProps.horizontalPadding);
+    final headerBorderColor = n.prop(TableViewProps.headerBorderColor)?.flutter;
+    final headerBorder = headerBorderColor == null
+        ? null
+        : BorderSide(color: headerBorderColor, width: n.prop(TableViewProps.headerBorderWidth));
+    final hoverColor = n.prop(TableViewProps.rowHoverColor)?.flutter;
+    final selected = n.prop(TableViewProps.selectedRow);
+    final selectedColor = n.prop(TableViewProps.selectedRowColor)?.flutter;
+    final selectedEdge = n.prop(TableViewProps.selectedRowEdgeColor)?.flutter;
+    final selectedEdgeWidth = n.prop(TableViewProps.selectedRowEdgeWidth);
+    final lastColumn = columns.length + columnOffset - 1;
+
+    void tapRow(int rowIndex) => r.fire(TriggerType.rowTap.name, event: {
+          'result': {'row': rows[rowIndex], 'rowIndex': rowIndex, 'item': rows[rowIndex]},
+        });
+
     // A table needs a bounded box; where it gets none (in a scroll view), it
     // takes its design size.
     return LayoutBuilder(
-      builder: (context, constraints) => SizedBox(
+      builder: (context, constraints) {
+        final width = constraints.hasBoundedWidth ? constraints.maxWidth : n.layout.width.value;
+        final headerWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0.0;
+        final widths = tableColumnWidths(columns, n.prop(TableViewProps.columnWidth), width - headerWidth - edge * 2);
+        // Every column's width with the edges: a `fillWidth` table shares
+        // what the viewport has beyond it.
+        final laidTotal = headerWidth + edge * 2 + widths.fold<double>(0, (a, w) => a + w);
+        return SizedBox(
         width: constraints.hasBoundedWidth ? null : n.layout.width.value,
         height: constraints.hasBoundedHeight ? null : n.layout.height.value,
         child: TableView.builder(
@@ -81,14 +121,15 @@ class RuntimeTableView extends StatelessWidget {
           pinnedColumnCount: headerColumn && n.prop(TableViewProps.pinHeaderColumn) ? 1 : 0,
           columnBuilder: (index) {
             final header = headerColumn && index == 0;
-            var width = header ? headerWidth : bodyWidths[index - columnOffset];
+            var width = header ? headerWidth : widths[index - columnOffset];
             final count = columns.length + columnOffset;
             if (n.prop(TableViewProps.stretchLastColumn) && index == count - 1 && constraints.hasBoundedWidth) {
               // The last column takes what the others leave.
-              width = math.max(width, constraints.maxWidth - (total - width));
+              width = math.max(width, constraints.maxWidth - (laidTotal - width));
             }
             return TableSpan(
-              extent: header || !fill ? FixedTableSpanExtent(width) : FillTableSpanExtent(width, total, columns.length),
+              extent: header || !fill ? FixedTableSpanExtent(width) : FillTableSpanExtent(width, laidTotal, columns.length),
+              padding: SpanPadding(leading: index == 0 ? edge : 0, trailing: index == lastColumn ? edge : 0),
               foregroundDecoration: TableSpanDecoration(border: TableSpanBorder(trailing: line)),
               backgroundDecoration: header && headerColor != null ? TableSpanDecoration(color: headerColor) : null,
             );
@@ -96,13 +137,29 @@ class RuntimeTableView extends StatelessWidget {
           rowBuilder: (index) {
             final header = headerRow && index == 0;
             final body = index - rowOffset;
+            final Color? background = header
+                ? headerColor
+                : body == selected && selectedColor != null
+                    ? selectedColor
+                    : body == _hover && hoverColor != null
+                        ? hoverColor
+                        : (stripe != null && body.isOdd ? stripe : null);
             return TableSpan(
               extent: FixedTableSpanExtent(
                   header ? n.prop(TableViewProps.headerHeight) : tableRowHeight(rows[body], rowHeightKey, rowHeight)),
-              foregroundDecoration: TableSpanDecoration(border: TableSpanBorder(trailing: line)),
-              backgroundDecoration: header
-                  ? (headerColor == null ? null : TableSpanDecoration(color: headerColor))
-                  : (stripe != null && body.isOdd ? TableSpanDecoration(color: stripe) : null),
+              foregroundDecoration: TableSpanDecoration(
+                  border: TableSpanBorder(trailing: header && headerBorder != null ? headerBorder : line)),
+              backgroundDecoration: background == null ? null : TableSpanDecoration(color: background),
+              onEnter: header || hoverColor == null ? null : (_) => setState(() => _hover = body),
+              onExit: header || hoverColor == null ? null : (_) => setState(() => _hover = _hover == body ? -1 : _hover),
+              recognizerFactories: header
+                  ? const {}
+                  : {
+                      TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                        () => TapGestureRecognizer(),
+                        (t) => t.onTap = () => tapRow(body),
+                      ),
+                    },
             );
           },
           cellBuilder: (context, vicinity) {
@@ -132,7 +189,7 @@ class RuntimeTableView extends StatelessWidget {
               final List l => l.elementAtOrNull(columnIndex),
               _ => null,
             };
-            return TableViewCell(
+            final content = TableViewCell(
               child: template(cell, (rowIndex, columnIndex), rowIndex, {
                 'value': value,
                 'row': row,
@@ -141,9 +198,24 @@ class RuntimeTableView extends StatelessWidget {
                 'columnIndex': columnIndex,
               }),
             );
+            // The selected row's edge, at the start of its first cell.
+            if (columnIndex != 0 || rowIndex != selected || selectedEdge == null) return content;
+            return TableViewCell(
+              child: Stack(children: [
+                Positioned.fill(child: content.child),
+                Positioned(
+                  left: -edge,
+                  top: 0,
+                  bottom: 0,
+                  width: selectedEdgeWidth,
+                  child: ColoredBox(color: selectedEdge),
+                ),
+              ], clipBehavior: Clip.none),
+            );
           },
         ),
-      ),
+      );
+      },
     );
   }
 }
