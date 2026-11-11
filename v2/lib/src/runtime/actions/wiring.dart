@@ -316,6 +316,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     _disposeRecognizers();
     behavior = value.isEmpty ? HitTestBehavior.deferToChild : HitTestBehavior.opaque;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   int holdMs = 1200;
@@ -333,6 +334,17 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   bool _has(TriggerType t) => _triggers.contains(t);
   void _fire(TriggerType t, [Json event = const {}]) => onTrigger?.call(t, event);
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    if (_has(TriggerType.click) || _has(TriggerType.longPress)) {
+      config.isSemanticBoundary = true;
+      config.isButton = true;
+      if (_has(TriggerType.click)) config.onTap = () => _fire(TriggerType.click);
+      if (_has(TriggerType.longPress)) config.onLongPress = () => _fire(TriggerType.longPress);
+    }
+  }
 
   TapGestureRecognizer? _tap;
   DoubleTapGestureRecognizer? _doubleTap;

@@ -99,6 +99,26 @@ String textOf(NodeTree tree, String id) {
 }
 
 void main() {
+  testWidgets('custom action nodes expose a labeled accessible button', (tester) async {
+    final handle = tester.ensureSemantics();
+    final nodes = counter(actions: [reaction('click', [add('count')])]);
+    nodes['button'] = {...nodes['button']!, 'type': 'column', 'children': ['buttonLabel']};
+    nodes['buttonLabel'] = {'type': 'text', 'layout': {'width': 100, 'height': 20}, 'props': {'text': 'Appreciate'}};
+    final screen = await show(tester, nodes, variables: [v('count', 0, VariableType.integer)]);
+    final found = <SemanticsNode>[];
+    void visit(SemanticsNode node) {
+      if (node.getSemanticsData().label == 'Appreciate') found.add(node);
+      node.visitChildren((child) { visit(child); return true; });
+    }
+    visit(tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!);
+    final semantics = found.single;
+    expect(semantics.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(semantics.id, SemanticsAction.tap);
+    await tester.pump();
+    expect(screen['count'], 1);
+    handle.dispose();
+  });
+
   testWidgets('a tap sets a variable; only the boxes reading it re-apply', (tester) async {
     final s = await show(tester, counter(actions: [reaction('click', [add('count')])]), variables: [v('count', 0, VariableType.integer)]);
     expect(textOf(s.tree, 'label'), 'Count 0');

@@ -389,6 +389,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void performLayout() {
     final child = this.child;
     if (_collapsed) {
+      // Like Offstage: lay out attached descendants even though this box
+      // takes no space. Font/binding changes must have a clean boundary.
+      child?.layout(constraints.loosen(), parentUsesSize: false);
       size = constraints.smallest;
     } else if (child == null) {
       size = constraints.smallest;
@@ -986,7 +989,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       n.designSize,
     ));
     final axis = vertical ? Axis.vertical : Axis.horizontal;
-    final viewport = _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis))
+    final viewport = tree.animates
+        ? _obtain<RenderRuntimeScroll>('runtimeScroll', () => RenderRuntimeScroll(axis: axis))
+        : _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis));
+    if (viewport is RenderRuntimeScroll) viewport.userScrollable = n.prop(ScrollProps.physics) != api.ScrollPhysicsType.never;
+    viewport
       ..axis = axis
       ..reverse = n.prop(ScrollProps.reverse)
       ..clipBehavior = clip(n.prop(ScrollProps.clipBehavior));
@@ -1365,10 +1372,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _wire(List<RenderBox> next) {
     final relink = _alreadyWired(next);
     if (relink != null) {
+      // Dirty the owner before reused descendants: a hidden subtree may
+      // still carry dirty children while its nearest boundary is clean.
+      markNeedsLayout();
       for (final o in relink) {
         o.markNeedsLayout();
       }
-      markNeedsLayout();
       _previousInner = const [];
       _finishWire(next);
       return;
