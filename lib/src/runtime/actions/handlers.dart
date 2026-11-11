@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
 import 'package:http/http.dart' as http;
@@ -804,6 +805,15 @@ NodeBox? repeatOf(NodeTree tree, String id, String item) {
   return byIndex;
 }
 
+/// Whether the scrolling rows and columns around [box] have laid out
+/// something to scroll (or there are none).
+bool _scrollsLaidOut(RenderObject box) {
+  for (var p = box.parent; p != null; p = p.parent) {
+    if (p is RenderDesignScroll && p.interactive) return p.hasSize && p.maxScrollExtent > 0;
+  }
+  return true;
+}
+
 /// Scrolls the scroll views around node [ScrollToAction.node] (those
 /// along [ScrollToAction.axis] only, when it's set) so the node sits at
 /// its alignment, less its offset: each view reveals the one inside it.
@@ -813,6 +823,13 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final item = run.text(a.item).trim();
   final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
   if (box == null || !box.attached) return;
+  // Run from a screen's `load`, the views around it may not have their
+  // content's extent yet: give layout a few frames.
+  for (var i = 0; i < 4 && !_scrollsLaidOut(box); i++) {
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+  }
+  if (!box.attached) return;
   final target = box.contentBox ?? box;
   final offset = a.offsetFormula.isEmpty ? a.offset : (double.tryParse(run.text(a.offsetFormula).trim()) ?? a.offset);
   final duration = Duration(milliseconds: a.durationMs);

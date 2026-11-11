@@ -69,6 +69,17 @@ void main() {
     expect(view.pixels, 300);
   });
 
+  testWidgets('from load, it waits for the view to lay out', (tester) async {
+    final nodes = page('d');
+    nodes['col']!['actions'] = (nodes['go']!['actions'] as List).map((r) => {...(r as Map), 'trigger': {'type': 'load'}}).toList();
+    final screen = await wiring.show(tester, nodes, variables: [rows]);
+    final view = viewport(screen.tree);
+    for (var i = 0; i < 6; i++) {
+      await tester.pump();
+    }
+    expect(view.pixels, 340);
+  });
+
   testWidgets('without item, the first copy (unchanged behavior)', (tester) async {
     final screen = await wiring.show(tester, page(''), variables: [rows]);
     final view = viewport(screen.tree);

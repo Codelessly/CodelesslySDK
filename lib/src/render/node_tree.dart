@@ -709,6 +709,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         ..onValues = ((values) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('view', values))
         ..configure(this, progress, interactive: tree.animates));
     }
+    // Its laid-out box, written to a variable.
+    if (n.behaviors.measure case final api.Measure measure) {
+      chain.add(_obtain<RenderMeasure>('measure', RenderMeasure.new)..configure(this, measure));
+    }
     playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);
     if (n.layout.rotation != 0) {

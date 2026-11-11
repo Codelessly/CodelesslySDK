@@ -23,6 +23,19 @@ Map<String, Json> figure(double width, double height, {List<double>? viewBox, do
       },
     };
 
+Map<String, Json> offStart(double width, double height) => {
+      'stage': {
+        'type': 'stack',
+        'layout': {'width': width, 'height': height},
+        'children': ['walker'],
+      },
+      'walker': {
+        'type': 'box',
+        'layout': {'width': 10, 'height': 10},
+        'motion': {'path': 'M100 50 L300 50', 'pathProgress': 0.0001, 'pathViewBox': [320, 180]},
+      },
+    };
+
 Offset _at(NodeTree tree, String id) => tree.boxOf(id)!.contentBox!.localToGlobal(Offset.zero) - tree.boxOf('stage')!.localToGlobal(Offset.zero);
 
 void main() {
@@ -51,5 +64,14 @@ void main() {
     final p = _at(s.tree, 'walker');
     expect(p.dx, closeTo(360, 6));
     expect(p.dy, closeTo(0, 6));
+  });
+
+  testWidgets('a viewBox path is placed over the parent: its start is where the node starts', (tester) async {
+    final s = await wiring.show(tester, offStart(640, 360), root: 'stage');
+    await tester.pump();
+    await tester.pump();
+    final p = _at(s.tree, 'walker');
+    expect(p.dx, closeTo(200, 6));
+    expect(p.dy, closeTo(100, 6));
   });
 }

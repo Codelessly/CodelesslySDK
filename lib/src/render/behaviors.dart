@@ -910,7 +910,8 @@ class RenderMotion extends RenderPose with _Ticking {
     var shown = m;
     if (m.hasPath) {
       final progress = m.pathWrap ? api.Motion.wrapProgress(m.pathProgress) : m.pathProgress;
-      final at = MeasuredPath.of(m.path!)?.at(
+      final measured = MeasuredPath.of(m.path!);
+      final at = measured?.at(
         progress,
         byArea: m.pathPacing == api.MotionPathPacing.area,
         focus: Offset(m.pathFocusX, m.pathFocusY),
@@ -921,8 +922,12 @@ class RenderMotion extends RenderPose with _Ticking {
         var heading = at.$2;
         final stage = m.pathViewBox.length >= 2 ? _parentSize() : null;
         if (stage != null && m.pathViewBox[0] > 0 && m.pathViewBox[1] > 0) {
+          // In a viewBox the path is placed over the parent: its points are
+          // where the node goes (from the parent's origin), not offsets from
+          // the path's start, so the node is laid out at the origin.
           final sx = stage.width / m.pathViewBox[0], sy = stage.height / m.pathViewBox[1];
-          point = Offset(point.dx * sx, point.dy * sy);
+          final absolute = point + measured!.start;
+          point = Offset(absolute.dx * sx, absolute.dy * sy);
           heading = math.atan2(math.sin(heading) * sy, math.cos(heading) * sx);
         }
         final total = Offset(m.translateX + point.dx, m.translateY + point.dy);
