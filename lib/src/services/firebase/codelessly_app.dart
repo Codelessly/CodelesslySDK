@@ -15,6 +15,7 @@ import '../../app/loader.dart';
 import '../auth.dart';
 import '../cloud/database.dart';
 import '../services.dart' show Services;
+import '../test_store.dart' show TestStoreMode;
 import '../storage.dart';
 import 'auth.dart';
 import 'codelessly_firebase.dart';
@@ -136,7 +137,8 @@ Future<FirebaseApp> codelesslyFirebaseApp({
 /// purchases verified by Codelessly) work too ([codelesslyCloudServices]): the token
 /// is authenticated first (the project's id is needed), so the future
 /// completes with an error when that fails. Ignored when [config] has its
-/// own `services`.
+/// own `services`. [testStore] is when their paywalls run on the test store
+/// ([Services.testStore]; [TestStoreMode.force] for a run preview).
 ///
 /// A project on another Codelessly backend (a staging one) gives that
 /// backend's Firebase [app] and its [functionsBaseUrl]
@@ -148,6 +150,7 @@ Future<Codelessly> codelesslyWithToken(
   String authToken, {
   CodelesslyConfig config = const CodelesslyConfig(),
   bool cloudServices = false,
+  TestStoreMode testStore = TestStoreMode.auto,
   FirebaseApp? app,
   FirebaseFirestore? firestore,
   FirebaseAuth? auth,
@@ -180,6 +183,7 @@ Future<Codelessly> codelesslyWithToken(
         auth: auth ?? (app == null ? null : FirebaseAuth.instanceFor(app: app)),
         storage: storage ?? (app == null ? null : FirebaseStorage.instanceFor(app: app)),
         functions: app == null ? null : FirebaseFunctions.instanceFor(app: app),
+        testStore: testStore,
       ),
     );
   }
@@ -200,7 +204,9 @@ Future<Codelessly> codelesslyWithToken(
 /// paywalls on [functions] ([codelesslyPaywalls]), each only when given.
 /// [localStorage] is where the app keeps `storage` values (default:
 /// memory; [PreferencesLocalStorage] keeps them between runs) and the store
-/// purchases waiting for verification.
+/// purchases waiting for verification. [testStore] is when paywalls run on
+/// the test store instead ([Services.testStore]: by default, on the web for
+/// a paywall published with `"testStore": true`).
 ///
 /// Everything else keeps [Services]' defaults.
 Services codelesslyCloudServices({
@@ -210,6 +216,7 @@ Services codelesslyCloudServices({
   FirebaseStorage? storage,
   FirebaseFunctions? functions,
   LocalStorage? localStorage,
+  TestStoreMode testStore = TestStoreMode.auto,
 }) {
   final root = firestoreRoot(projectId);
   final local = localStorage ?? MemoryLocalStorage();
@@ -238,6 +245,7 @@ Services codelesslyCloudServices({
     storage: local,
     paywalls: managed?.paywalls,
     purchases: managed?.purchases,
+    testStore: testStore,
     auth: users,
     cloud: cloud,
     files: storage == null ? null : FirebaseFileStorage(storage, root: root),
