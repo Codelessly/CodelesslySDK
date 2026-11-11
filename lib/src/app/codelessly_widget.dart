@@ -453,6 +453,7 @@ class CodelesslyWidget extends StatefulWidget {
     return id == null ? null : (id, {...uri.queryParameters});
   }
 
+
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
 }
@@ -568,7 +569,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       if (layoutId == null) {
         final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
         layoutId = screen?.$1 ?? model.entryLayoutId;
-        if (screen != null) params = {...screen.$2, ...params};
+        if (screen != null) {
+          params = {...screen.$2, ...params};
+          // A link opens the app in a state: its params set the app's
+          // variables of the same name, as they set the screen's.
+          for (final MapEntry(:key, :value) in screen.$2.entries) {
+            if (c.appVariables.declares(key)) c.appVariables.set(key, value);
+          }
+        }
       }
       if (layoutId == null) throw StateError('No layout to show: project [${model.projectId}] has no entry screen');
       final layout = await c.loadLayout(layoutId);
