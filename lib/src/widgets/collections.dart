@@ -359,7 +359,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..shareFill = !n.prop(ListViewProps.scrollable)
     ..clipBehavior = _clip(n)
     ..paintReversed = false
-    ..dropTarget(b.tree.animates ? b.tree : null, n.id);
+    ..dropTarget(b.tree.animates ? b.tree : null, n.id, b.instance);
   final container = view as _Container;
 
   if (listBuildsAllItems(n)) {
