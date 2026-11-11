@@ -304,7 +304,8 @@ class ChartSeriesPainter extends NodePainter {
         if (p(ChartProps.showYAxis)) {
           _label(
             canvas,
-            yAxisLabel(v, p(ChartProps.yLabelPrefix), p(ChartProps.yLabelSuffix)),
+            gridLabelText(v, k, gridLines, p(ChartProps.yLabelPrefix), p(ChartProps.yLabelSuffix),
+                topOnly: p(ChartProps.yLabelAffixTopOnly)),
             Offset(plot.left - 8, gy),
             align: TextAlign.right,
             style: yFamily == null ? null : _labelStyle(yFamily),
@@ -1010,7 +1011,9 @@ class PlotChartPainter extends NodePainter {
       if (marker.label.isEmpty) continue;
       final color = marker.color.flutter;
       final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
-      final dx = (dot.dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
+      // Centred on the marker, kept over the plot (clear of the y-axis
+      // gutter's labels).
+      final dx = (dot.dx - text.width / 2).clamp(gutter, math.max(gutter, size.width - text.width)).toDouble();
       final dy = switch (marker.position) {
         PlotChartMarkerPosition.above => dot.dy - r - (markerStyle.fontSize ?? 10) * 1.3,
         PlotChartMarkerPosition.below => dot.dy + r + 1.5,
@@ -1224,6 +1227,11 @@ class PlotChartPainter extends NodePainter {
 /// Paints a line chart: bands, grid lines with labels, the curve and the
 /// area under it, area bands, reference lines, the x axis, markers and
 /// vertical lines. Its data and overlays are rows (usually bound).
+/// The y label of grid line [k] of [lines] (0 at the bottom): [v] with the
+/// prefix and suffix, on the top line only when [topOnly].
+String gridLabelText(double v, int k, int lines, String prefix, String suffix, {bool topOnly = false}) =>
+    topOnly && k != lines ? yAxisLabel(v, '', '') : yAxisLabel(v, prefix, suffix);
+
 class LineChartPainter extends NodePainter {
   LineChartPainter(super.n) : super(repaint: PaintingBinding.instance.systemFonts);
 
