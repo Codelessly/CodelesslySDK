@@ -13,6 +13,7 @@ import 'package:flutter/material.dart' show Divider, VerticalDivider, SizedBox, 
 import 'package:flutter/rendering.dart';
 
 import '../render/convert.dart';
+import '../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../render/layout/fit_box.dart';
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
@@ -411,6 +412,38 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final hugCross = n.crossFit == SizeFit.hug && !stretchItems;
   final box = _viewportBox(b, n, canShrinkWrap: count != null, hugCross: hugCross);
   chain.add(box);
+  if (b.tree.animates && count != null && n.prop(ListViewProps.scrollable)) {
+    // Running, with every item known (a list a drop target opens its slot
+    // in, which stays a render-object list): all its items in a scroll
+    // view, so it scrolls as a ListView does, by drag, wheel and trackpad.
+    chain.add(b.obtain<RenderDesignScroll>('listScroll', () => RenderDesignScroll(axis: n.axis))
+      ..interactive = true
+      ..userScrollable = n.prop(CollectionScrollProps.physics) != api.ScrollPhysicsType.never
+      ..axis = n.axis
+      ..reverse = n.prop(CollectionScrollProps.reverse)
+      ..clipBehavior = _clip(n));
+    view
+      ..measurable = true
+      ..onNeedItems = null
+      ..update(
+        axis: n.axis,
+        reverse: n.prop(CollectionScrollProps.reverse),
+        anchorEnd: false,
+        padding: padding,
+        hugMain: true,
+        hugCross: hugCross,
+        stretch: stretchItems,
+        itemMain: itemMain,
+        gap: gap,
+        overlap: overlap,
+        divider: divider,
+        itemCount: count,
+        cacheExtent: 0,
+      );
+    _syncItems(b, n, container, itemId, count);
+    chain.add(view);
+    return;
+  }
   view
     ..measurable = false
     ..onNeedItems = ((c) => _syncItems(b, n, container, itemId, c))
