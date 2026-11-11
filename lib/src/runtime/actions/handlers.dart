@@ -934,10 +934,18 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
   switch (result.outcome) {
     case PaywallOutcome.purchased || PaywallOutcome.restored:
       return;
-    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing || PaywallOutcome.skipped:
+    // Closing the paywall or nothing to show ends the chain quietly. A
+    // cancelled purchase and an empty restore end it too, without an error,
+    // but the screen's actionError reaction hears them
+    // (`${result.error.code}`) to say so.
+    case PaywallOutcome.closed || PaywallOutcome.skipped:
       throw const ActionsCanceled();
+    case PaywallOutcome.canceled:
+      throw const ActionsStopped('purchase-cancelled', 'Purchase cancelled');
+    case PaywallOutcome.restoreNothing:
+      throw const ActionsStopped('nothing-to-restore', 'No purchase to restore');
     case PaywallOutcome.failed:
-      throw StateError(result.error ?? 'Purchase failed');
+      throw CodedFailure(result.code.isEmpty ? 'purchase-failed' : result.code, result.error ?? 'Purchase failed');
   }
 }
 
