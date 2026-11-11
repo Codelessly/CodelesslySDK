@@ -515,6 +515,10 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
 /// size (none past it are shown).
 const int _maxTableSpans = 200;
 
+/// How tall a table that fills its height is built at rest: the tallest
+/// screen's worth of rows (the rest are cut by its box anyway).
+const double _restFillExtent = 1600;
+
 /// A table view at rest: its fit box → the cells that fit its design size,
 /// each a template slot repeated. Rows are
 /// [TableViewProps.rowCount] (bound data is a runtime matter).
@@ -546,16 +550,25 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   }
 
   final edge = n.prop(TableViewProps.horizontalPadding);
-  final widths = tableColumnWidths(columns, n.prop(TableViewProps.columnWidth),
-      design.width - (headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0) - edge * 2);
-  final columnWidths = fit([
-    if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
-    for (var i = 0; i < columns.length; i++) widths[i] + (i == 0 ? edge : 0) + (i == columns.length - 1 ? edge : 0),
-  ], n.layout.width.fit == SizeFit.fill ? double.infinity : design.width);
+  final rowHeaderWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0.0;
+  // The column widths at a width: a table that fills is laid out wider
+  // than its design size, and its flex columns take that width.
+  List<double> widthsAt(double width) {
+    final widths = tableColumnWidths(columns, n.prop(TableViewProps.columnWidth), width - rowHeaderWidth - edge * 2);
+    return [
+      if (headerColumn) rowHeaderWidth,
+      for (var i = 0; i < columns.length; i++) widths[i] + (i == 0 ? edge : 0) + (i == columns.length - 1 ? edge : 0),
+    ];
+  }
+
+  final fillsWidth = n.layout.width.fit == SizeFit.fill;
+  final columnWidths = fit(widthsAt(design.width), fillsWidth ? double.infinity : design.width);
+  // A table that fills its height shows rows past its design height (the
+  // tallest screen's worth), cut where it's laid out.
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
     for (var i = 0; i < math.min(rowCount, _maxTableSpans); i++) n.prop(TableViewProps.rowHeight),
-  ], design.height);
+  ], n.layout.height.fit == SizeFit.fill ? math.max(design.height, _restFillExtent) : design.height);
 
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
@@ -618,6 +631,7 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final view = b.obtain<RenderTableItems>('table', RenderTableItems.new)
     ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
     ..columnWidths = columnWidths
+    ..widthsFor = fillsWidth ? widthsAt : null
     ..rowHeights = rowHeights
     ..cells = cells
     ..headerRow = headerRow
