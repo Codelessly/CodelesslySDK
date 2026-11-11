@@ -51,7 +51,7 @@ class _WaveSource extends audio.StreamAudioSource {
 }
 
 /// PCM16 mono WAV. An integer number of periods makes a seamless loop.
-Uint8List toneWave(double frequency, double volume, {bool sustained = true}) {
+Uint8List toneWave(double frequency, double volume, {bool sustained = true, String waveform='sine'}) {
   const rate = 48000;
   final hz = frequency.clamp(8, 24000).toDouble();
   final cycles = math.max(1, (hz / 4).round());
@@ -80,7 +80,7 @@ Uint8List toneWave(double frequency, double volume, {bool sustained = true}) {
     final envelope = sustained ? 1.0 : math.exp(-i / (rate * .015));
     data.setInt16(
       44 + i * 2,
-      (math.sin(radiansPerSample * i) *
+      ((waveform=='triangle'?4*(((radiansPerSample*i/(2*math.pi))%1)-.5).abs()-1:math.sin(radiansPerSample * i)) *
               volume.clamp(0, 2) *
               .1 *
               32767 *
@@ -93,7 +93,7 @@ Uint8List toneWave(double frequency, double volume, {bool sustained = true}) {
 }
 
 class NativeSoundEngine
-    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine {
+    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine, WaveformSoundEngine {
   NativeSoundEngine({NativeTonePlayer Function()? createPlayer})
     : _create = createPlayer ?? _AudioTonePlayer.new;
   final NativeTonePlayer Function() _create;
@@ -121,7 +121,11 @@ class NativeSoundEngine
     _start(id, frequency, volume, true);
   }
 
-  void _start(String id, double frequency, double volume, bool loop) {
+  @override
+  void startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'}){
+    stopNote(id);_start(id,frequency,volume,true,waveform:waveform);
+  }
+  void _start(String id, double frequency, double volume, bool loop,{String waveform='sine'}) {
     if (_disposed) return;
     NativeTonePlayer output;
     try {
@@ -134,7 +138,7 @@ class NativeSoundEngine
     unawaited(() async {
       try {
         await output.load(
-          toneWave(frequency, volume, sustained: loop),
+          toneWave(frequency, volume, sustained: loop,waveform:waveform),
           loop: loop,
         );
         if (!identical(_voices[id], output)) return;

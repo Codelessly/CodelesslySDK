@@ -702,7 +702,7 @@ void _playSound(PlaySoundAction a, ActionRun run) {
   final service = _require(run, 'Sound').sound;
   switch (a.operation) {
     case 'start':
-      service.startNote(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1);
+      service.startNoteWithWaveform(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1, waveform:run.text(a.waveform));
       return;
     case 'stop':
       service.stopNote(run.text(a.voiceId).trim());

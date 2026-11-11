@@ -18,6 +18,12 @@ class Player implements NativeTonePlayer {
 }
 
 void main() {
+  test('triangle PCM matches the requested waveform while sine stays default',(){
+    final sine=ByteData.sublistView(toneWave(440,1)),triangle=ByteData.sublistView(toneWave(440,1,waveform:'triangle'));
+    expect(sine.getInt16(44,Endian.little),0);
+    expect(triangle.getInt16(44,Endian.little),3277);
+    expect(triangle.getInt16(44+27*2,Endian.little).abs(),lessThan(100));
+  });
   testWidgets('dispose cancels pending loads and future one-shot starts', (
     tester,
   ) async {
