@@ -408,6 +408,19 @@ void main() {
     expect(b.lane('a'), ['c1', 'c2', 'c4']);
   });
 
+  testWidgets('drag.target names the node of the target the drag is over, a tab or its column', (tester) async {
+    final b = await pumpRepeated(tester, tabs: true);
+    final gesture = await dragTo(tester, textRect(tester, 'One').center, textRect(tester, 'Tab b').center, release: false);
+    expect(b.drag['over'], 'b');
+    expect(b.drag['target'], 'tab');
+    await gesture.moveTo(textRect(tester, 'Four').center);
+    await tester.pump();
+    expect(b.drag['over'], 'b');
+    expect(b.drag['target'], 'col');
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('a tab beside the columns opens the slot at the end of its column', (tester) async {
     final b = await pumpRepeated(tester, tabs: true);
     final four = textRect(tester, 'Four');
