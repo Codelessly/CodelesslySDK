@@ -55,9 +55,9 @@ class HttpFontFetcher implements FontFetcher {
         // Without a browser's user agent, the API serves TrueType files.
         final css = await _get(googleFontsUrl(font));
         if (css.statusCode != 200) return null;
-        final match = RegExp(r'url\(([^)]+)\)').firstMatch(css.body);
-        if (match == null) return null;
-        url = Uri.tryParse(match.group(1)!.replaceAll(RegExp(r'''['"]'''), ''));
+        final file = fontFileIn(css.body);
+        if (file == null) return null;
+        url = Uri.tryParse(file);
         if (url == null) return null;
       }
       final res = await _get(url);
@@ -66,6 +66,34 @@ class HttpFontFetcher implements FontFetcher {
       return null;
     }
   }
+}
+
+/// The font file a Google Fonts stylesheet [css] names for Latin text.
+///
+/// Asked from a browser, the API answers with one `@font-face` per unicode
+/// subset (cyrillic-ext, greek, vietnamese, latin-ext, latin...), each its
+/// own woff2 file; the first is not Latin, so taking it registered a font
+/// without the letters the text uses. This takes the block marked
+/// `/* latin */`, else the one whose `unicode-range` starts at U+0000, else
+/// the only (or last) one; null when [css] names no file.
+String? fontFileIn(String css) {
+  final blocks = RegExp(r'(/\*\s*([\w-]+)\s*\*/\s*)?@font-face\s*\{([^}]*)\}').allMatches(css).toList();
+  String? urlOf(String block) {
+    final m = RegExp(r'url\(([^)]+)\)').firstMatch(block);
+    return m?.group(1)!.replaceAll(RegExp(r'''['"]'''), '');
+  }
+
+  if (blocks.isEmpty) {
+    final m = RegExp(r'url\(([^)]+)\)').firstMatch(css);
+    return m?.group(1)!.replaceAll(RegExp(r'''['"]'''), '');
+  }
+  for (final b in blocks) {
+    if (b.group(2) == 'latin') return urlOf(b.group(3)!);
+  }
+  for (final b in blocks) {
+    if (RegExp(r'unicode-range:\s*U\+0000-').hasMatch(b.group(3)!)) return urlOf(b.group(3)!);
+  }
+  return urlOf(blocks.last.group(3)!);
 }
 
 /// Registers the fonts of published layouts with the engine, each once.

@@ -327,6 +327,35 @@ void main() {
     expect('$url', 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@1,500');
   });
 
+  test('a browser stylesheet with subsets gives the Latin file', () {
+    const css = '''
+/* cyrillic-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://fonts.gstatic.com/s/x/cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://fonts.gstatic.com/s/x/latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA;
+}
+/* latin */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url(https://fonts.gstatic.com/s/x/latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131;
+}
+''';
+    expect(fontFileIn(css), 'https://fonts.gstatic.com/s/x/latin.woff2');
+    // Without the comments: the block whose range starts at U+0000.
+    expect(fontFileIn(css.replaceAll(RegExp(r'/\*[^*]*\*/'), '')), 'https://fonts.gstatic.com/s/x/latin.woff2');
+    // A server-side answer: one TrueType file.
+    expect(fontFileIn("@font-face { font-family: 'A'; src: url(https://x/a.ttf) format('truetype'); }"), 'https://x/a.ttf');
+    expect(fontFileIn('no fonts here'), isNull);
+  });
+
   test('theme tokens make the theme', () {
     final theme = themeDataOf(const api.ThemeTokens(primary: api.Color(0xFF3366FF), fontFamily: 'Barlow'));
     expect(theme.colorScheme.primary, const Color(0xFF3366FF));
