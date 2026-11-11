@@ -77,4 +77,19 @@ void main() {
     await show(tester, table(), root: 'table', variables: [rows], interactive: false);
     expect(find.byType(TableView), findsNothing);
   });
+
+  testWidgets('at rest a data-bound table shows its rows in each cell\'s scope', (tester) async {
+    await show(tester, table(), root: 'table', variables: [rows], interactive: false);
+    final shown = <String>{};
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.attached) shown.add(o.text.toPlainText());
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(NodeView)));
+    // Header labels, row headers and cell values of the first rows, as the
+    // running table shows them; only the cells that fit the design size.
+    expect(shown, containsAll(['Col 0', 'Col 4', 'R0', 'R1', 'r0c0', 'r1c3']));
+    expect(shown, isNot(contains('r999c0')));
+  });
 }

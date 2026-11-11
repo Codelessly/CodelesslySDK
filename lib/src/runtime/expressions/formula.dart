@@ -6,6 +6,8 @@ import 'package:intl/date_symbols.dart';
 import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
 
+import 'package:meta/meta.dart' show visibleForTesting;
+
 import 'formula_clock.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
@@ -165,7 +167,12 @@ class FormulaEvaluator {
   static final Map<String, _Node?> _cache = {};
 
   /// Evaluates [expression], resolving variable paths with [resolve].
+  /// Called on every [evaluate] (tests count evaluations with it).
+  @visibleForTesting
+  static void Function()? debugOnEvaluate;
+
   static Object? evaluate(String expression, FormulaPathResolver resolve) {
+    debugOnEvaluate?.call();
     final _Node? node = _parse(expression);
     if (node == null) return null;
     try {

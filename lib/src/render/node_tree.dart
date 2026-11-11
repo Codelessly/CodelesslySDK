@@ -191,6 +191,12 @@ class NodeTree {
         for (final box in pending) {
           if (identical(_boxes[box.key], box)) box._apply();
         }
+        // Paragraphs measured again inside stretched children of a hugging
+        // row/column stop at those relayout boundaries: measure the hugging
+        // layouts above every text again, as an edit of the text would.
+        for (final box in _boxes.values.toList()) {
+          if (box.node?.type == 'text') box._relayoutHuggingAncestors();
+        }
       });
     });
   }
