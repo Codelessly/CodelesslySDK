@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import '../../render/drag_track.dart' show DragTracks;
+import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../render/play.dart' show EffectPlayers;
@@ -727,6 +728,16 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   var viewports = 0;
   RenderObject revealed = target;
   for (var p = target.parent; p != null; p = p.parent) {
+    if (p is RenderDesignScroll && p.interactive) {
+      viewports++;
+      final along=a.axis==null || (p.axis==rendering.Axis.horizontal)==(a.axis==ScrollAxis.horizontal);
+      if(along){
+        final to=(p.getOffsetToReveal(revealed,a.alignment)-a.offset).clamp(0.0,p.maxScrollExtent);
+        if(a.durationMs<=0){p.jumpTo(to);}else{scrolls.add(p.animateTo(to,duration:duration,curve:curve));}
+      }
+      revealed=p;
+      continue;
+    }
     if (p is! RenderViewportBase) continue;
     final position = p.offset;
     if (position is! ScrollPosition) continue;
