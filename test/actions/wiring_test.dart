@@ -100,6 +100,35 @@ String textOf(NodeTree tree, String id) {
 }
 
 void main() {
+  testWidgets('two pointers sustain the same pitch independently and cancel releases', (tester) async {
+    final engine = SilentSoundEngine();
+    final s = await show(tester, counter(actions: [
+      reaction('pointerDown', [
+        {'type': 'playSound', 'operation': 'start', 'voiceId': r'${result.pointer}', 'frequency': '261.6'},
+        {'type': 'setVariable', 'variable': 'pointer', 'value': r'${result.pointer}'},
+      ]),
+      reaction('pointerUp', [
+        {'type': 'playSound', 'operation': 'stop', 'voiceId': r'${result.pointer}'},
+        {'type': 'setVariable', 'variable': 'cancelled', 'value': r'${result.cancelled}'},
+      ]),
+    ]), services: Services(sound: SoundService(engine: engine)), variables: [
+      v('count', 0, VariableType.integer), v('pointer', 0, VariableType.integer), v('cancelled', false, VariableType.boolean),
+    ]);
+    final first = await tester.startGesture(s.center('button'), pointer: 41);
+    final second = await tester.startGesture(s.center('button'), pointer: 42);
+    await tester.pump();
+    expect(s['pointer'], 42);
+    expect(engine.notes.keys.toSet(), {'41', '42'});
+    await first.up();
+    await tester.pump();
+    expect(engine.notes.keys, ['42']);
+    expect(s['cancelled'], isFalse);
+    await second.cancel();
+    await tester.pump();
+    expect(engine.notes, isEmpty);
+    expect(s['cancelled'], isTrue);
+  });
+
   testWidgets('a tap sets a variable; only the boxes reading it re-apply', (tester) async {
     final s = await show(tester, counter(actions: [reaction('click', [add('count')])]), variables: [v('count', 0, VariableType.integer)]);
     expect(textOf(s.tree, 'label'), 'Count 0');
