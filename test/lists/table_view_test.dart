@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 // Table view: a running table builds its rows from bound data, only the cells on
 // screen, and pins its header row and column while it scrolls.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -142,6 +143,34 @@ void main() {
     final view = tester.getRect(find.byType(TableView));
     expect(view.topLeft - origin, const Offset(1, 1));
     expect(view.size, const Size(598, 398));
+  });
+
+  testWidgets('a table draws its decoration: border and rounded corners around the cells', (tester) async {
+    final t = table();
+    final node = Map<String, Object?>.from(t['table']!);
+    node['layout'] = {'width': 600, 'height': 400, 'padding': [2, 2, 2, 2]};
+    node['decoration'] = {
+      'fills': [{'color': '#FFFFFFFF'}],
+      'radius': 14,
+      'strokes': [{'color': '#FFFF0000'}],
+      'strokeWidth': 2,
+      'clip': 'antiAlias',
+    };
+    t['table'] = node;
+    t['colHeader'] = {...t['colHeader']!, 'type': 'box', 'decoration': {'fills': [{'color': '#FF0000FF'}]}, 'layout': {'width': {'fill': 100}, 'height': {'fill': 100}}};
+    final screen = await show(tester, t, root: 'table', variables: [rows]);
+    await tester.pumpAndSettle();
+    final box = screen.tree.boxOf('table')!;
+    final origin = box.localToGlobal(Offset.zero);
+    final view = tester.binding.renderViews.first;
+    final image = await tester.runAsync(() => (view.debugLayer! as OffsetLayer).toImage(origin & box.size));
+    final bytes = (await tester.runAsync(() => image!.toByteData(format: ui.ImageByteFormat.rawRgba)))!;
+    int r(int x, int y) => bytes.getUint8((y * image!.width + x) * 4);
+    int b(int x, int y) => bytes.getUint8((y * image!.width + x) * 4 + 2);
+    expect(r(0, 200), greaterThan(200), reason: 'the left border is drawn');
+    expect(b(0, 200), lessThan(60), reason: 'not covered by a cell');
+    // Outside the rounded corner: the page, neither the border nor a cell.
+    expect([r(1, 1), b(1, 1)], [greaterThan(200), greaterThan(200)], reason: 'the rounded corner clips');
   });
 
   testWidgets('a design canvas keeps the table at rest, showing its bound rows', (tester) async {
