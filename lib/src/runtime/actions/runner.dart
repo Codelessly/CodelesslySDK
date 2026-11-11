@@ -64,6 +64,19 @@ class ActionsCanceled implements Exception {
   String toString() => 'The actions were canceled.';
 }
 
+/// A chain stopped by an outcome the person chose (a cancelled purchase,
+/// nothing to restore): not a failure, so nothing is logged as an error,
+/// but the screen's actionError reaction still hears it, with [code], to
+/// say so.
+class ActionsStopped extends ActionsCanceled {
+  const ActionsStopped(this.code, this.message);
+  final String code;
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// One running chain: what its actions read and share.
 class ActionRun {
   ActionRun._(this.context, this.host, this.scope, this.cancellation, this.node, this.value, [ActionCancellation? stopped])
@@ -260,6 +273,10 @@ class CodelesslyActions implements ActionRunner {
       await (scoped == null
           ? runActions(actions, run)
           : runZoned(() => runActions(actions, run), zoneValues: {#codelesslyHandlers: scoped}));
+    } on ActionsStopped catch (stop) {
+      if (host case final RuntimeActionContext context) {
+        context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall'));
+      }
     } on ActionsCanceled {
       // The node left: the rest doesn't run.
     } catch (error, stack) {
