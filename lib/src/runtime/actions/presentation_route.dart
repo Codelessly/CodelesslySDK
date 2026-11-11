@@ -28,6 +28,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
     required this.builder,
     required BuildContext context,
     this.sheetWidth,
+    this.sheetMargin = 0,
     this.cornerRadius,
     this.maxHeightFactor = 1,
     this.insets = EdgeInsets.zero,
@@ -56,6 +57,11 @@ class PresentationRoute<T> extends PopupRoute<T> {
   /// Width of a side sheet (null: [defaultSheetWidth]); maximum width of
   /// a bottom sheet (null: the screen width). Both stay within the screen.
   final double? sheetWidth;
+
+  /// A bottom sheet narrower than the screen (a tablet, a desktop) floats
+  /// this far above the bottom with all its corners rounded; a phone's
+  /// full-width sheet stays docked to the bottom edge.
+  final double sheetMargin;
 
   /// Radius of a bottom sheet's top corners. Null preserves
   /// [bottomSheetRadius]; other presentations keep their own shape.
@@ -101,6 +107,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
       child: switch (presentation) {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => _BottomSheet(
             width: sheetWidth,
+            margin: sheetMargin,
             cornerRadius: cornerRadius ?? bottomSheetRadius,
             maxHeightFactor: maxHeightFactor,
             showDragHandle: showDragHandle,
@@ -145,9 +152,10 @@ class PresentationRoute<T> extends PopupRoute<T> {
 }
 
 class _BottomSheet extends StatelessWidget {
-  const _BottomSheet({this.width, required this.cornerRadius, required this.maxHeightFactor, required this.showDragHandle, required this.builder});
+  const _BottomSheet({this.width, this.margin = 0, required this.cornerRadius, required this.maxHeightFactor, required this.showDragHandle, required this.builder});
 
   final double? width;
+  final double margin;
   final double cornerRadius;
   final double maxHeightFactor;
   final bool showDragHandle;
@@ -158,16 +166,20 @@ class _BottomSheet extends StatelessWidget {
     final media = MediaQuery.of(context);
     // The keyboard pushes the sheet up.
     final keyboard = media.viewInsets.bottom;
-    final maxHeight = math.max(0.0, media.size.height - keyboard) * maxHeightFactor.clamp(0, 1);
+    final sheetWidth = math.min(width ?? media.size.width, media.size.width);
+    // Narrower than the screen: it floats [margin] above the bottom, every
+    // corner rounded.
+    final floating = margin > 0 && sheetWidth < media.size.width;
+    final maxHeight = math.max(0.0, media.size.height - keyboard - (floating ? margin : 0)) * maxHeightFactor.clamp(0, 1);
     return Padding(
-      padding: EdgeInsets.only(bottom: keyboard),
+      padding: EdgeInsets.only(bottom: keyboard + (floating ? margin : 0)),
       child: Align(
         alignment: Alignment.bottomCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: math.min(width ?? media.size.width, media.size.width), maxHeight: maxHeight),
+          constraints: BoxConstraints(maxWidth: sheetWidth, maxHeight: maxHeight),
           child: ClipRRect(
             key: const ValueKey('Codelessly bottom sheet'),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(cornerRadius)),
+            borderRadius: floating ? BorderRadius.circular(cornerRadius) : BorderRadius.vertical(top: Radius.circular(cornerRadius)),
             child: MediaQuery.removePadding(
               context: context,
               removeTop: true,
