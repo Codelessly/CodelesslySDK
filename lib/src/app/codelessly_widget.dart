@@ -458,6 +458,35 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     final id = ++_loadId;
     final requested = widget.layoutId ?? _controller?.layoutId;
     _lastRequested = requested;
+    // A layout already loaded shows in this frame, not after a loading one:
+    // a screen opened with a route transition is there when the transition
+    // starts, so its shared elements fly.
+    if (c.publishModel case final model?) {
+      var params = {...?_controller?.params, ...widget.params};
+      var layoutId = requested;
+      if (layoutId == null) {
+        final screen = _resolveScreen(model, widget.initialScreen);
+        layoutId = screen?.$1 ?? model.entryLayoutId;
+        if (screen != null) params = {...screen.$2, ...params};
+      }
+      final cached = layoutId == null ? null : c.layout(layoutId);
+      if (cached != null) {
+        void show() {
+          _layout = cached;
+          _routeParams = params;
+          _error = null;
+        }
+
+        mounted ? setState(show) : show();
+        final controller = _controller;
+        if (controller != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && id == _loadId) controller._update(layout: cached, clearError: true);
+          });
+        }
+        return;
+      }
+    }
     try {
       await c.initialize();
       final model = c.publishModel!;
@@ -868,6 +897,19 @@ class _LayoutViewState extends State<_LayoutView> {
 
   Future<void> _navigate(NavigationRequest request) async {
     if (!mounted) return;
+    // Load the destination first (briefly), so the screen is there when its
+    // transition starts: no loading frame, and shared elements fly.
+    final destination = request.type == NavigationType.pop || request.destinationId.isEmpty
+        ? null
+        : _codelessly.publishModel?.resolveLayoutId(request.destinationId);
+    if (destination != null && _codelessly.layout(destination) == null) {
+      try {
+        await _codelessly.loadLayout(destination).timeout(const Duration(seconds: 2));
+      } catch (_) {
+        // It loads in its own screen, which shows the error if it fails.
+      }
+      if (!mounted) return;
+    }
     final handler = widget.host.onNavigate;
     if (handler != null && await handler(context, request)) return;
     if (!mounted) return;
