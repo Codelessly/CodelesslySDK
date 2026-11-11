@@ -42,7 +42,16 @@ final class ProvidedItem {
   int get hashCode => Object.hash(tag, outer, owner, key);
 
   @override
-  String toString() => '($tag, $outer, $owner, $key)';
+  String toString() => '($tag, $outer, $owner, ${_printed(key)})';
+
+  /// [key] as box keys tell repeats apart: a map or list item (a row
+  /// without an id is keyed by its item) by identity, as it compares. Its
+  /// contents printed alike for an equal item from a newer answer (a script
+  /// answering again for new inputs), so the new row found the old row's
+  /// box, still reading the old row's scope, which was then let go: the
+  /// row's texts fell back to the template's.
+  static String _printed(Object? key) =>
+      key is Map || key is Iterable ? '${key.runtimeType}#${identityHashCode(key)}' : '$key';
 }
 
 /// One bound property: a path of the node and the expression giving it.
