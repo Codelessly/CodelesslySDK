@@ -220,7 +220,7 @@ class NavigatorActionUi implements ActionUi {
         alignment: Alignment(action.alignment[0], action.alignment[1]),
         sheetBelowWidth: sheetBelowWidth,
         sheetWidth: action.sheetWidth,
-        maxHeightFactor: action.maxHeightFactor,
+        maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
         routeTransition: action.routeTransition);

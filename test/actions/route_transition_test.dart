@@ -63,7 +63,7 @@ void main() {
     expect(find.text('next'), findsNothing);
   });
 
-  testWidgets('open modal forwards the bottom sheet height limit', (tester) async {
+  testWidgets('open modal forwards height limits and preserves the default sheet route', (tester) async {
     late BuildContext home;
     await tester.pumpWidget(
       MaterialApp(
@@ -88,6 +88,11 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byKey(panelKey)).height, 300);
     expect(tester.getBottomLeft(find.byKey(panelKey)).dy, 600);
+    Navigator.of(home).pop();
+    await tester.pumpAndSettle();
+    unawaited(ui.openModal(const OpenModalAction(to: 'sheet', presentation: ModalPresentation.bottomSheet)));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsOneWidget);
   });
 
   testWidgets('a modal with a transition is see-through, closes with a close modal action, and gives its result', (tester) async {
