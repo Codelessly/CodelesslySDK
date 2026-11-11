@@ -1147,11 +1147,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     final base = n.prop(TextProps.style);
     final runs = n.prop(TextProps.runs);
     if (runs.isEmpty) return TextSpan(text: text, style: textStyle(base));
+    // Runs style ranges; they do not replace the unstyled characters.
+    // Split at each boundary so gaps and overlapping styles retain text once.
+    final bounds = <int>{0, text.length,
+      for (final r in runs) ...[r.start.clamp(0, text.length), r.end.clamp(0, text.length)]}.toList()..sort();
     return TextSpan(children: [
-      for (final r in runs)
+      for (var i = 0; i + 1 < bounds.length; i++)
         TextSpan(
-          text: text.substring(r.start.clamp(0, text.length), r.end.clamp(r.start.clamp(0, text.length), text.length)),
-          style: textStyle(base.merge(r.style)),
+          text: text.substring(bounds[i], bounds[i + 1]),
+          style: textStyle(runs.where((r) => r.start <= bounds[i] && r.end >= bounds[i + 1])
+              .fold(base, (style, run) => style.merge(run.style))),
         ),
     ]);
   }
