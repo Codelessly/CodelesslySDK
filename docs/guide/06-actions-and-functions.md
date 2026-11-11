@@ -24,14 +24,15 @@ are made in the Editor and run by the SDK; your app takes part through **functio
 
 | Area | Actions |
 |---|---|
-| Navigation | `navigate` (push, pop, replace, reset), `openModal` (dialog, sheets, full screen, popover), `closeModal`, `openLink` |
+| Navigation | `navigate` (push, pop, replace, reset), `openModal` (dialog, sheets, full screen, popover, banner), `closeModal`, `openLink` |
 | State | `setVariable`, `animateVariable`, `setValue` (a node's properties), `setVariant`, `setStorage` |
 | Flow | `if`, `forEach`, `delay`, `confirm` |
-| Your code | `callFunction`, `runScript` |
+| Your code and the app | `callFunction`, `runScript`, `emitEvent` |
 | Data | `callApi`, `loadCloudData`, `reloadCloudData`, `cloudData`, `cloudDocuments`, `cloudBatch`, `cloudFiles`, `paginate` |
 | Accounts and purchases | `auth`, `paywall` |
 | Feedback | `showToast`, `haptic`, `playSound`, `speak`, `copyToClipboard` |
 | Inputs and motion | `submitForm`, `editText`, `focus`, `scrollTo`, `playAnimation`, `controlDrag` |
+| Capture | `captureScreenshot` |
 
 How a chain runs:
 
@@ -81,7 +82,10 @@ The signature is `FutureOr<Object?> Function(ActionContext context, Map<String, 
   Because a returned future is awaited, don't return one that completes late by accident: `=> navigator.push(...)`
   makes the chain wait until that route is popped.
 - Throwing stops the chain and reports the error.
-- A function the layout names but you didn't register fails the chain with `No function named [name]`.
+- A function the layout names but you didn't register fails the chain with `No function named [name]`, unless
+  the action is `optional` (then `${result}` is null and the chain goes on).
+- `codelessly.registerFunction(name, function)` adds one later (from a widget that has what it needs); screens
+  already shown see it. See [Presenting, automations and host features](17-presenting-and-automations.md).
 
 `ActionContext` is what a function can do without a `BuildContext`:
 
@@ -97,7 +101,7 @@ There is no `BuildContext` in a function on purpose (the runtime also runs headl
 navigator, capture what you need when you build the config: a `GlobalKey<NavigatorState>`, a
 `ScaffoldMessengerState`, your state management.
 
-Functions are per instance. To give the same layout different handlers in different places, use different
+Functions are per instance (`codelessly.functions`: the registered ones over the config's). To give the same layout different handlers in different places, use different
 instances, or dispatch inside the function on a param or on `context.scope.read('route.<name>')`.
 
 ## Reacting to navigation and links

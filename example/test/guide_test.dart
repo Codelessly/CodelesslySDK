@@ -256,6 +256,84 @@ PublishBundle sharedCards() {
     },
     'layouts': {'list': screen('list'), 'badge': screen('badge')},
   });
+/// A canvas [id] that is one box: a tap anywhere on it runs [onClick].
+Json tapScreen(String id, List<Json> onClick, {List<Json> variables = const []}) => {
+      'schema': 2,
+      'id': id,
+      'roots': ['$id-canvas'],
+      'variables': {'$id-canvas': variables},
+      'nodes': {
+        '$id-canvas': {
+          'type': 'canvas',
+          'name': id,
+          'slots': {'body': '$id-box'},
+          'layout': {'width': 390, 'height': 300},
+        },
+        '$id-box': {
+          'type': 'stack',
+          'decoration': {
+            'fills': [
+              {'color': '#FFFFFFFF'},
+            ],
+          },
+          'layout': {
+            'width': {'fill': 390},
+            'height': {'fill': 300},
+          },
+          'actions': [
+            {
+              'trigger': {'type': 'click'},
+              'actions': onClick,
+            },
+          ],
+        },
+      },
+    };
+
+/// A project with a rating sheet (`rate-us`), a permission priming screen
+/// that calls the host and branches on its answer, and an automation that
+/// presents the sheet after the third order.
+PublishBundle withPresentations() {
+  final layouts = {
+    'rate-us': PublishLayout.fromJson(tapScreen('rate-us', [
+      {
+        'type': 'closeModal',
+        'result': {'stars': r'${= orders + 2}'},
+      },
+    ], variables: [
+      {'id': 'orders', 'name': 'orders', 'type': 'integer', 'value': 0},
+    ])),
+    'permission': PublishLayout.fromJson(tapScreen('permission', [
+      {
+        'type': 'callFunction',
+        'name': 'requestPermission',
+        'params': {'kind': 'notifications'},
+      },
+      {
+        'type': 'closeModal',
+        'result': {'granted': r'${result.granted}'},
+      },
+    ])),
+  };
+  return PublishBundle(
+    model: PublishModel(
+      projectId: 'presenting',
+      entryLayoutId: 'rate-us',
+      layouts: {for (final e in layouts.entries) e.key: PublishLayoutInfo.of(e.value)},
+    ).withAutomations([
+      Automation.fromJson({
+        'id': 'rate-after-three',
+        'trigger': 'event',
+        'event': 'order_completed',
+        'when': 'usage.events.order_completed.count >= 3',
+        'maxRuns': 1,
+        'actions': [
+          {'type': 'openModal', 'to': 'rate-us', 'presentation': 'bottomSheet', 'params': {'orders': r'${result.items}'}},
+        ],
+      })!,
+    ]),
+    layouts: layouts,
+  );
 }
 /// A screen that loads [liveCloudLoads] and shows the unread count, with a
 /// [markAllRead] button.
@@ -619,5 +697,42 @@ void main() {
 
     expect(projectThemeValues(codelessly)['onSurface'], '#FFEEEEEE');
     expect(themeValues(codelessly.publishModel!.theme, dark: false)['onSurface'], '#FF111111');
+  testWidgets('present: a layout above any screen gives back what closed it', (tester) async {
+    final codelessly = Codelessly.fromBundle(withPresentations(), fonts: const NoFontFetcher());
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(appWithOverlay(codelessly));
+    final stars = askForRating(codelessly, 3);
+    await frames(tester);
+    await tapNode(tester, 'rate-us-box');
+    expect(await stars, 5);
+    expect(find.byType(NodeView), findsNothing);
+  });
+
+  testWidgets('app events run the automations listening for them', (tester) async {
+    final codelessly = Codelessly.fromBundle(withPresentations(), fonts: const NoFontFetcher());
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(appWithOverlay(codelessly));
+    await frames(tester);
+    appEvents(codelessly);
+    appEvents(codelessly);
+    await frames(tester);
+    expect(find.byType(NodeView), findsNothing);
+    appEvents(codelessly);
+    await frames(tester);
+    // The third order: the rating sheet, opened with the event's items.
+    expect(find.byType(NodeView), findsOneWidget);
+    await tapNode(tester, 'rate-us-box');
+    expect(find.byType(NodeView), findsNothing);
+    expect(codelessly.automations.usage['events'], containsPair('order_completed', containsPair('count', 3)));
+  });
+
+  testWidgets('a layout calls a host function and branches on its answer', (tester) async {
+    final codelessly = Codelessly.fromBundle(withPresentations(), fonts: const NoFontFetcher());
+    addTearDown(codelessly.dispose);
+    await tester.pumpWidget(PermissionHandlers(codelessly: codelessly, child: appWithOverlay(codelessly)));
+    final answer = codelessly.present('permission');
+    await frames(tester);
+    await tapNode(tester, 'permission-box');
+    expect(await answer, {'granted': true});
   });
 }
