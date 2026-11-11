@@ -555,7 +555,7 @@ void main() {
     );
     final s = await show(tester, counter(actions: [
       reaction('click', [
-        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet'},
+        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet', 'insets': [24, 24, 24, 24]},
       ]),
       reaction('secondaryClick', [
         {'type': 'openModal', 'to': 'newCard'},
@@ -566,6 +566,8 @@ void main() {
     await tester.pumpAndSettle();
     // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
     expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // A dialog's insets don't push a sheet off the screen's edge.
+    expect(tester.getBottomLeft(find.byKey(const ValueKey('sheet newCard'))).dy, 600);
     // No tinted Material surface behind the screen's own.
     expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
     Navigator.of(appContext).pop();
