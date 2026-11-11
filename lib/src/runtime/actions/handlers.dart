@@ -8,7 +8,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
-import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
+import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import 'action_error.dart' show CodedFailure;
@@ -795,6 +795,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     AnimationCurve.easeOutCubic => Curves.easeOutCubic,
     AnimationCurve.easeInOutCubic => Curves.easeInOutCubic,
     AnimationCurve.decelerate => Curves.decelerate,
+    AnimationCurve.emphasized => const Cubic(0.2, 0, 0, 1),
     _ => Curves.easeInOut,
   };
   final scrolls = <Future<void>>[];
