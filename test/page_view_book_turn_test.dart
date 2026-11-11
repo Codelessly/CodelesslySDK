@@ -120,6 +120,28 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('on the design canvas, pages read their distance from the page at rest', (tester) async {
+    final nodes = pages();
+    nodes['col']!['props'] = {...(nodes['col']!['props'] as Map), 'initialPage': 1};
+    nodes['item']!['props'] = {'text': r'Page ${item.n} at ${pageOffset}'};
+    nodes['col']!['bind'] = {'data': r'${pagesData}'};
+    await support.show(tester, nodes, interactive: false, variables: [
+      support.v('pagesData', [
+        {'n': 0},
+        {'n': 1},
+        {'n': 2},
+      ], api.VariableType.list),
+    ]);
+    final texts = <String>[];
+    void visit(RenderObject o) {
+      if (o is RenderParagraph) texts.add(o.text.toPlainText());
+      o.visitChildren(visit);
+    }
+
+    visit(tester.binding.renderView);
+    expect(texts, contains('Page 1 at 0.0'));
+  });
+
   testWidgets('a page turned past 90 degrees is not drawn', (tester) async {
     await support.show(tester, pages());
     final viewport = tester.renderObject<RenderBox>(find.byType(Viewport));

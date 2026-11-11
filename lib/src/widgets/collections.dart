@@ -196,11 +196,35 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(_viewportBox(b, n, canShrinkWrap: false));
     final at = n.prop(ListViewProps.itemPosition);
     final origin = Offset(padding.left + (at?.dx ?? 0), padding.top + (at?.dy ?? 0));
+    // An item that binds its own position (`layout.x`/`layout.y`: a scene's
+    // characters from data) sits there, in the padded box, like a stack's
+    // child; the others at the list's item position.
+    final template = b.tree.source.node(itemId);
+    final ownX = template?.bind.containsKey('layout.x') ?? false;
+    final ownY = template?.bind.containsKey('layout.y') ?? false;
+    double along(api.AxisPosition p, double box, double item) => switch (p) {
+      api.AxisPosition(start: final double s) => s,
+      api.AxisPosition(end: final double e) => box - item - e,
+      api.AxisPosition(align: final double a) => (box - item) * (a + 1) / 2,
+      api.AxisPosition(relative: final double r) => r,
+      _ => 0,
+    };
     final view = b.obtain<RenderLayeredItems>('stack', RenderLayeredItems.new)
       ..clipBehavior = _clip(n)
       ..paintReversed = reversePaint
       ..itemConstraints = ((_) => const BoxConstraints())
       ..placeAt = ((_, _) => origin)
+      ..placeChild = !ownX && !ownY
+          ? null
+          : (child, box, item) {
+              final node = child is NodeBox ? child.node : null;
+              if (node == null) return null;
+              final inner = Size(box.width - padding.horizontal, box.height - padding.vertical);
+              return Offset(
+                ownX ? padding.left + along(node.layout.x, inner.width, item.width) : origin.dx,
+                ownY ? padding.top + along(node.layout.y, inner.height, item.height) : origin.dy,
+              );
+            }
       ..onNeedItems = null
       ..changed();
     _syncItems(b, n, view, itemId, count ?? 0);

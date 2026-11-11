@@ -433,21 +433,33 @@ class NodeBinder {
   ValueScope _itemScope(NodeSource source, String listId, Object? instance, ValueScope root) {
     // The collections give item k > 0 its own instance, ('item', outer,
     // list, k); the first item is the list's own (unscoped).
+    final listNode = source.node(listId)!;
+    final isPages = listNode.type == 'pageView';
     final (int index, Object? outer) = switch (instance) {
       (final String tag, final Object? o, final String l, final int k) when tag == 'item' && l == listId => (k, o),
-      _ => (0, instance),
+      _ => (-1, instance),
     };
-    final key = (listId, outer, index);
+    final parent = scopeFor(source, listId, outer) ?? root;
+    final items = _listOf(_dataOf(listNode, parent));
+    // The list's own (first built) item: item 0, or a page view's page at rest.
+    final restPage = isPages
+        ? (items == null || items.isEmpty
+              ? listNode.prop(api.PageViewProps.initialPage)
+              : listNode.prop(api.PageViewProps.initialPage).clamp(0, items.length - 1))
+        : 0;
+    final at = index < 0 ? restPage : index;
+    final key = (listId, outer, at);
     final existing = _items[key];
     if (existing != null) return existing;
-    final parent = scopeFor(source, listId, outer) ?? root;
-    final listNode = source.node(listId)!;
-    final items = _listOf(_dataOf(listNode, parent));
-    return _items[key] = ItemScope(
-      index: index,
-      item: items != null && index < items.length ? items[index] : null,
+    final scope = _items[key] = ItemScope(
+      index: at,
+      item: items != null && at < items.length ? items[at] : null,
       parent: parent,
     );
+    // A page view's pages read their distance from the page at rest, as
+    // they do at runtime (parallax, held entrances).
+    if (isPages) scope.setPageOffset((at - restPage).toDouble());
+    return scope;
   }
 
   Object? _dataOf(Node list, ValueScope s) {
