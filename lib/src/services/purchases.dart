@@ -99,7 +99,7 @@ class PaywallProduct {
   }
 }
 
-enum PaywallOutcome { purchased, restored, restoreNothing, cancelled, failed, closed }
+enum PaywallOutcome { purchased, restored, restoreNothing, canceled, failed, closed }
 
 /// The outcome of a purchase, restore or paywall.
 @immutable
@@ -361,7 +361,7 @@ class PaywallSession extends ChangeNotifier {
           if (result.outcome == PaywallOutcome.purchased) onEvent?.call('purchase_success', selectedSlot);
           _finish(result);
         }
-      case PaywallOutcome.cancelled || PaywallOutcome.closed:
+      case PaywallOutcome.canceled || PaywallOutcome.closed:
         break;
     }
     notifyListeners();

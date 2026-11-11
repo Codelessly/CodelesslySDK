@@ -145,7 +145,7 @@ const Json fader = {
 void main() {
   testWidgets('a line track draws the node at its variable\'s value', (tester) async {
     final s = await plate(tester, fader, variables: [v('accent', -21)]);
-    // Laid out centred at (200, 311); halfway up the 250px throw.
+    // Laid out centered at (200, 311); halfway up the 250px throw.
     expect(s.center('k'), const Offset(200, 186));
     s.set('accent', 6);
     await tester.pump();

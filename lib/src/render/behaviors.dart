@@ -1,4 +1,4 @@
-// A node's behaviours as layers of its render chain (see node_tree.dart's
+// A node's behaviors as layers of its render chain (see node_tree.dart's
 // outer layers). Outermost first:
 //
 //   constraints → track pose → transform gesture → motion → scale → rotation → [ignore pointer]
@@ -27,7 +27,7 @@ import 'recipe.dart';
 /// Track pose, motion and scale: the layers between the constraints and
 /// the rotation.
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
-  final be = n.behaviours;
+  final be = n.behaviors;
   if (be.drag?.track case final api.DragTrack track) {
     // At its value (`drag.track.value`, else its variable's, else its
     // default or start; parked when out of range or empty), and in a
@@ -85,7 +85,7 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
 
 /// Loops, between the rotation and the opacity.
 void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
-  final be = n.behaviours;
+  final be = n.behaviors;
   if (be.ignorePointer && animates) chain.add(b.obtain<RenderIgnorePointer>('ignorePointer', RenderIgnorePointer.new));
   // Pointer states a running app tracks (hover and press), for the node's
   // state styles and ink.
@@ -147,7 +147,7 @@ void paintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
         ..filter = ui.ImageFilter.blur(sigmaX: layer, sigmaY: layer),
     );
   }
-  if (n.behaviours.strokePath case final api.StrokePath path) {
+  if (n.behaviors.strokePath case final api.StrokePath path) {
     final painter = StrokePathPainter(path);
     chain.add(
       b.obtain<RenderCustomPaint>('strokePath', RenderCustomPaint.new)
@@ -160,7 +160,7 @@ void paintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
 /// The ink a running app shows over a box's paint, under its content: the
 /// overlay of its current hover, focus or press state.
 RenderBox inkOverlay(NodeBuilder b, Node n, BorderRadius? radius) {
-  final ink = n.behaviours.inkWell!;
+  final ink = n.behaviors.inkWell!;
   final active = b.tree.statesOf(b.id, instance: b.instance);
   api.Color? color;
   for (final s in const [api.WidgetState.pressed, api.WidgetState.hovered, api.WidgetState.focused]) {
@@ -212,7 +212,7 @@ class RenderInkOverlay extends RenderBox {
 }
 
 /// Where a [api.DragTrack] puts its node, in the node's coordinates with
-/// the origin at its rest centre: a line,
+/// the origin at its rest center: a line,
 /// an arc about its pivot, or a path, measured in pixels, in the node's own
 /// size ([api.DragTrack.relative]), in its parent's
 /// ([api.DragTrackUnits.parent]) or in a viewBox stretched to the parent
@@ -223,7 +223,7 @@ class TrackGeometry {
   final api.DragTrack track;
 
   /// The node's size, the parent's (null unknown), and the node's rest
-  /// centre in the parent (for a viewBox).
+  /// center in the parent (for a viewBox).
   final Size size;
   final Size? parent;
   final Offset rest;
@@ -253,7 +253,7 @@ class TrackGeometry {
     return Offset(_x(point.dx), _y(point.dy));
   }
 
-  /// Where the node's centre sits at [progress], from rest. A line or arc
+  /// Where the node's center sits at [progress], from rest. A line or arc
   /// goes on past its ends (overscroll, a parked node); a path stops there.
   Offset offsetAt(double progress) {
     switch (track.shape) {
@@ -317,7 +317,7 @@ class TrackGeometry {
     }
   }
 
-  /// The move and turn about the node's centre at [progress]; null at rest.
+  /// The move and turn about the node's center at [progress]; null at rest.
   Matrix4? poseAt(double progress) {
     final o = offsetAt(progress);
     final r = rotationAt(progress);
@@ -328,7 +328,7 @@ class TrackGeometry {
 
 /// Where [track] puts its node at [progress] (in pixels; see
 /// [TrackGeometry] for a track measured in its node or parent): a move (and
-/// a turn) about its centre. Null at its place.
+/// a turn) about its center. Null at its place.
 Matrix4? trackPose(api.DragTrack track, double progress) => TrackGeometry(track).poseAt(progress);
 
 /// A node drawn where its [api.DragTrack] puts it at [progress], worked out
@@ -354,7 +354,7 @@ class RenderTrackPose extends RenderPose {
   bool get _measuresParent => _track.units == api.DragTrackUnits.parent || _track.usesViewBox;
 
   /// The box this node sits in (its parent's layout), and where this
-  /// node's centre is in it.
+  /// node's center is in it.
   (Size, Offset)? _frame() {
     RenderObject? o = parent;
     while (o != null && o is! NodeBuilder) {
@@ -994,13 +994,13 @@ Shader shimmerShader(api.MotionShimmer s, double t, Rect bounds) {
   final glow = color.withValues(alpha: color.a * s.strength.clamp(0.0, 1.0));
   final clear = color.withValues(alpha: 0);
   final half = math.max(0.001, s.width / 2);
-  final centre = -half + t * (1 + 2 * half);
+  final center = -half + t * (1 + 2 * half);
   final a = s.angle * math.pi / 180;
   final dir = Offset(math.cos(a), math.sin(a));
   final extent = (bounds.width * dir.dx).abs() + (bounds.height * dir.dy).abs();
   final mid = bounds.center;
   Offset at(double f) => mid + dir * ((f - 0.5) * extent);
-  return ui.Gradient.linear(at(centre - half), at(centre + half), [clear, glow, clear], const [0, 0.5, 1]);
+  return ui.Gradient.linear(at(center - half), at(center + half), [clear, glow, clear], const [0, 0.5, 1]);
 }
 
 /// The transform [m] draws (without its shift), plus [spinTurns] turns.
@@ -1107,12 +1107,12 @@ class StrokePathPainter extends CustomPainter {
 /// The flip card and tilt of [n], and its face of a flip card around it:
 /// inside the motion.
 void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
-  final be = n.behaviours;
+  final be = n.behaviors;
   // A face of the flip card it sits in: the front hides when turned away,
   // the back is turned over in advance.
   final parentId = b.tree.source.parentOf(b.id);
   final parent = parentId == null ? null : b.tree.source.node(parentId);
-  if (parent?.behaviours.flip case final api.FlipCard card) {
+  if (parent?.behaviors.flip case final api.FlipCard card) {
     final face = parent!.children.indexOf(b.id);
     if (face == 0 || face == 1) {
       final back = face == 1;

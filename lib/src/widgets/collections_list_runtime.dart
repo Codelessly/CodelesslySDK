@@ -162,7 +162,7 @@ ScrollPhysics? scrollPhysicsOf(Node n, {bool scrollable = true, bool? alwaysScro
 
 /// Places a list item as the editor lays it out:
 /// at [main] along the list when set (a fixed item extent, or the design
-/// extent of an item that fills), at the start of the list and centred
+/// extent of an item that fills), at the start of the list and centered
 /// across it unless [stretch].
 class ListItemBox extends StatelessWidget {
   const ListItemBox({super.key, required this.axis, this.main, this.stretch = false, required this.child});

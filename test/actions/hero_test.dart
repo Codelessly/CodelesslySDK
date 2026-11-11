@@ -122,7 +122,7 @@ void main() {
     final glow = tester.widget<DecoratedBox>(
         find.ancestor(of: find.byType(HeroMarkPaint), matching: find.byType(DecoratedBox)).first);
     expect((glow.decoration as BoxDecoration).shape, BoxShape.circle);
-    // The path: off the line between the two centres.
+    // The path: off the line between the two centers.
     final tween = HeroArcRectTween(begin: const Rect.fromLTWH(0, 0, 10, 10), end: const Rect.fromLTWH(100, 0, 10, 10));
     expect(tween.lerp(0.5)!.center.dy, isNot(closeTo(5, 1)));
     await tester.pumpAndSettle();

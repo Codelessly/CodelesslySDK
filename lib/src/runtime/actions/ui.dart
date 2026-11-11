@@ -80,7 +80,7 @@ abstract interface class ActionUi {
       Map<String, Object?> bound = const {},
       Json params = const {}});
 
-  /// Lets the user pick files for an upload (none: cancelled).
+  /// Lets the user pick files for an upload (none: canceled).
   Future<List<PickedFile>> pickFiles({bool images = true, bool multiple = true});
 }
 

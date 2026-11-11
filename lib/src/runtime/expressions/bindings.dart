@@ -343,9 +343,9 @@ class NodeBinder {
   /// them: a node that follows the pointer shares its drag as `drag`
   /// ([api.DragMotion], not a track or a list's reorder handle). Each such
   /// node reads from a [LocalScope] of its own ([localScopeOf]), which the
-  /// behaviour sets.
+  /// behavior sets.
   static final Map<String, bool Function(Node n)> localNames = {
-    'drag': (n) => switch (n.behaviours.drag) {
+    'drag': (n) => switch (n.behaviors.drag) {
           final api.DragMotion d => d.track == null && !d.reorder,
           null => false,
         },

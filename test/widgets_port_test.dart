@@ -150,7 +150,7 @@ void main() {
       final view = renderOf<RenderPageItems>(root).single;
       final pages = view.children;
       expect(pages, hasLength(2));
-      // The current page at rest; the next one half its size about its centre.
+      // The current page at rest; the next one half its size about its center.
       Rect shown(RenderBox page) => MatrixUtils.transformRect(page.getTransformTo(view), Offset.zero & page.size);
       expect(shown(pages[0]), const Rect.fromLTWH(0, 0, 150, 200));
       expect(shown(pages[1]), const Rect.fromLTWH(187.5, 50, 75, 100));

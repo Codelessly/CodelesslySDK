@@ -9,7 +9,7 @@ abstract interface class SpeechEngine {
   /// Whether this device can speak.
   bool get available;
 
-  /// Says [text]; completes when it has been said or was cancelled.
+  /// Says [text]; completes when it has been said or was canceled.
   Future<void> speak(String text, {required String language, required double rate, required double pitch});
 
   /// Stops speaking.

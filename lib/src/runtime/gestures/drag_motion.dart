@@ -125,7 +125,7 @@ class DragValues {
 /// Whether node [n] follows the pointer as a [RenderDragMotion]: it has a
 /// drag that is neither a track (a value control) nor a list's reorder
 /// handle. The screen itself doesn't.
-bool followsPointer(Node n) => switch (n.behaviours.drag) {
+bool followsPointer(Node n) => switch (n.behaviors.drag) {
       final api.DragMotion d => d.track == null && !d.reorder && n.type != 'canvas',
       null => false,
     };
@@ -244,7 +244,7 @@ class RenderDragMotion extends RenderProxyBox {
 
   /// Takes node [n] (as shown) of [box].
   void configure(NodeBox box, Node n) {
-    final model = n.behaviours.drag!;
+    final model = n.behaviors.drag!;
     _box = box;
     _node = n;
     final axisChanged = model.axis != _model.axis;
@@ -415,7 +415,7 @@ class RenderDragMotion extends RenderProxyBox {
     void visit(String id) {
       final n = tree.source.node(id);
       if (n == null) return;
-      if (n.behaviours.states.patches.containsKey(api.WidgetState.dragged)) ids.add(id);
+      if (n.behaviors.states.patches.containsKey(api.WidgetState.dragged)) ids.add(id);
       n.children.forEach(visit);
     }
 
