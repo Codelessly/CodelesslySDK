@@ -247,6 +247,35 @@ class RenderCodelesslyFlex extends RenderFlex {
     markNeedsLayout();
   }
 
+  /// A flex that doesn't squeeze its children ([squeeze] false: the
+  /// designer let them run past its end, as a Flutter Row in a release
+  /// build does) paints them, clipped as [clipBehavior] says, without the
+  /// debug build's yellow-and-black overflow stripe and its error report:
+  /// the design canvas and the debug editor then show what the published
+  /// app shows.
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_squeeze) {
+      super.paint(context, offset);
+      return;
+    }
+    if (clipBehavior == Clip.none) {
+      _overflowClip.layer = null;
+      defaultPaint(context, offset);
+      return;
+    }
+    _overflowClip.layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint,
+        clipBehavior: clipBehavior, oldLayer: _overflowClip.layer);
+  }
+
+  final LayerHandle<ClipRectLayer> _overflowClip = LayerHandle<ClipRectLayer>();
+
+  @override
+  void dispose() {
+    _overflowClip.layer = null;
+    super.dispose();
+  }
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! CodelesslyFlexParentData) {
