@@ -773,6 +773,29 @@ class LineChartPainter extends NodePainter {
         .toDouble();
   }
 
+  /// Split samples at missing/non-finite values or an explicit domain
+  /// boundary. Graphs such as 1/x must not gain a line through their poles.
+  static List<List<Offset>> sampleSegments(List<api.Json> rows, String xField, String yField) {
+    final ordered = [
+      for (final row in rows)
+        if (_x(row[xField]) case final double x when x.isFinite) (x, row),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
+    final segments = <List<Offset>>[];
+    var current = <Offset>[];
+    void finish() {
+      if (current.isNotEmpty) segments.add(current);
+      current = <Offset>[];
+    }
+
+    for (final (x, row) in ordered) {
+      final y = _num(row[yField]);
+      if (row['breakBefore'] == true || y == null || !y.isFinite) finish();
+      if (y != null && y.isFinite) current.add(Offset(x, y));
+    }
+    finish();
+    return segments;
+  }
+
   static Color? _color(Object? value, [Object? opacity]) {
     final color = chartColor(value);
     final alpha = _num(opacity);
@@ -822,6 +845,13 @@ class LineChartPainter extends NodePainter {
     return a.dy + (b.dy - a.dy) * (x - a.dx) / (b.dx - a.dx);
   }
 
+  static double? _interpolateSegment(List<List<Offset>> segments, double x) {
+    for (final segment in segments) {
+      if (x >= segment.first.dx && x <= segment.last.dx) return _interpolate(segment, x);
+    }
+    return null;
+  }
+
   /// The curve through pixel [points]: a Catmull-Rom spline when [smooth].
   static Path _curve(List<Offset> points, {required bool smooth}) {
     final path = Path();
@@ -855,10 +885,8 @@ class LineChartPainter extends NodePainter {
     if (plot.width <= 0 || plot.height <= 0) return;
 
     final xField = p(LineChartProps.xField), yField = p(LineChartProps.yField);
-    final points = [
-      for (final item in p(LineChartProps.data))
-        if ((_x(item[xField]), _num(item[yField])) case (final double x, final double y)) Offset(x, y),
-    ]..sort((a, b) => a.dx.compareTo(b.dx));
+    final segments = sampleSegments(p(LineChartProps.data), xField, yField);
+    final points = segments.expand((segment) => segment).toList();
     double extent(Iterable<double> values, double Function(double, double) f) =>
         values.isEmpty ? 0 : values.reduce(f);
     var x0 = p(LineChartProps.xMin) ?? extent(points.map((pt) => pt.dx), math.min);
@@ -908,8 +936,9 @@ class LineChartPainter extends NodePainter {
       tp.dispose();
     }
 
-    final pixels = [for (final pt in points) Offset(px(pt.dx), py(pt.dy))];
-    if (pixels.length >= 2) {
+    for (final segment in segments) {
+      final pixels = [for (final pt in segment) Offset(px(pt.dx), py(pt.dy))];
+      if (pixels.length < 2) continue;
       // 3. Area under the curve.
       final curve = _curve(pixels, smooth: p(LineChartProps.smooth));
       final area = Path.from(curve)
@@ -1056,7 +1085,7 @@ class LineChartPainter extends NodePainter {
         tp.dispose();
       }
       if (v['dotOnCurve'] == true) {
-        if (_interpolate(points, vx) case final double y) {
+        if (_interpolateSegment(segments, vx) case final double y) {
           final dot = Offset(x, py(y));
           canvas.drawCircle(dot, 6, Paint()..color = _color(v['dotColor']) ?? lineColor);
           canvas.drawCircle(dot, 6, outline);
