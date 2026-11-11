@@ -55,12 +55,28 @@ class RenderFitBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  /// A share of the room on each axis (`Layout.widthFactor`/`heightFactor`).
+  double? _widthFactor, _heightFactor;
+  set widthFactor(double? v) {
+    if (v == _widthFactor) return;
+    _widthFactor = v;
+    markNeedsLayout();
+  }
+
+  set heightFactor(double? v) {
+    if (v == _heightFactor) return;
+    _heightFactor = v;
+    markNeedsLayout();
+  }
+
   /// The extent on one axis, or null when the axis hugs.
   static double? _extent({
     required bool fill,
     required double? design,
     required double max,
+    double? factor,
   }) {
+    if (factor != null && max.isFinite) return math.max(0, max * factor);
     if (fill && max.isFinite) return max;
     if (design == null || !design.isFinite) return null;
     return math.max(0, design);
@@ -71,11 +87,13 @@ class RenderFitBox extends RenderProxyBox {
       fill: _fillWidth,
       design: _width,
       max: constraints.maxWidth,
+      factor: _widthFactor,
     );
     final double? h = _extent(
       fill: _fillHeight,
       design: _height,
       max: constraints.maxHeight,
+      factor: _heightFactor,
     );
     final double? ratio = _aspectRatio;
     if (ratio != null && ratio.isFinite && ratio > 0) {
@@ -132,7 +150,11 @@ class RenderFitBox extends RenderProxyBox {
       return;
     }
     child.layout(childConstraints, parentUsesSize: true);
-    size = childConstraints.constrain(child.size);
+    // A child whose own layout threw has no size: take the smallest, so
+    // one broken node doesn't break its ancestors' layout and hit tests too
+    // (in a debug build such a throw inside a pointer update leaves the
+    // mouse tracker unusable).
+    size = childConstraints.constrain(child.hasSize ? child.size : childConstraints.smallest);
   }
 
   @override
@@ -160,6 +182,7 @@ class RenderFitBox extends RenderProxyBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
+    if (_ratioWidth(height) case final double w) return w;
     final double content =
         child?.getMinIntrinsicWidth(_sizedHeight ?? height) ?? 0;
     final double? sized = _sizedWidth;
@@ -168,10 +191,11 @@ class RenderFitBox extends RenderProxyBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) =>
-      _sizedWidth ?? child?.getMaxIntrinsicWidth(_sizedHeight ?? height) ?? 0;
+      _sizedWidth ?? _ratioWidth(height) ?? child?.getMaxIntrinsicWidth(_sizedHeight ?? height) ?? 0;
 
   @override
   double computeMinIntrinsicHeight(double width) {
+    if (_ratioHeight(width) case final double h) return h;
     final double content =
         child?.getMinIntrinsicHeight(_sizedWidth ?? width) ?? 0;
     final double? sized = _sizedHeight;
@@ -180,7 +204,27 @@ class RenderFitBox extends RenderProxyBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) =>
-      _sizedHeight ?? child?.getMaxIntrinsicHeight(_sizedWidth ?? width) ?? 0;
+      _sizedHeight ?? _ratioHeight(width) ?? child?.getMaxIntrinsicHeight(_sizedWidth ?? width) ?? 0;
+
+  /// With an aspect ratio and a height that isn't set: the height [width]
+  /// (or the box's own width) gives. A grid row sized by its items'
+  /// intrinsic heights otherwise drew a card that only keeps its ratio
+  /// as tall as its text lines.
+  double? _ratioHeight(double width) {
+    final double? ratio = _aspectRatio;
+    if (ratio == null || !ratio.isFinite || ratio <= 0 || _sizedHeight != null) return null;
+    final double w = _sizedWidth ?? width;
+    return w.isFinite ? w / ratio : null;
+  }
+
+  /// With an aspect ratio and a width that isn't set: the width [height]
+  /// (or the box's own height) gives.
+  double? _ratioWidth(double height) {
+    final double? ratio = _aspectRatio;
+    if (ratio == null || !ratio.isFinite || ratio <= 0 || _sizedWidth != null) return null;
+    final double h = _sizedHeight ?? height;
+    return h.isFinite ? h * ratio : null;
+  }
 }
 
 

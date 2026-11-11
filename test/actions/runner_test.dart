@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -247,6 +248,20 @@ void main() {
         expect(h['done'], isTrue);
       }
     });
+
+    testWidgets('keeps time with slowed animations', (tester) async {
+      final h = Harness(variables: [v('done', false, VariableType.boolean)]);
+      timeDilation = 10;
+      h.click([
+        {'type': 'delay', 'ms': 100},
+        setVar('done', 'true'),
+      ]);
+      await tester.pump(const Duration(milliseconds: 900));
+      expect(h['done'], isFalse);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(h['done'], isTrue);
+      timeDilation = 1;
+    });
   });
 
   group('set variable', () {
@@ -455,6 +470,41 @@ void main() {
       ]);
       expect(h['err'], isNotEmpty);
       expect(h.errors, hasLength(1));
+    });
+
+    test('auth: changing the password and deleting the account confirm the current one first', () async {
+      final auth = MemoryAuthService();
+      final h = Harness(services: Services(auth: auth), variables: [v('err', '')]);
+      await h.click([
+        {'type': 'auth', 'operation': 'signUp', 'email': 'a@b.c', 'password': 'secret1'},
+        {'type': 'auth', 'operation': 'updatePassword', 'currentPassword': 'nope', 'password': 'secret22', 'errorVariable': 'err'},
+      ]);
+      expect(h['err'], isNotEmpty, reason: 'a wrong current password stops it');
+      await h.click([
+        {'type': 'auth', 'operation': 'updatePassword', 'currentPassword': 'secret1', 'password': 'secret22', 'errorVariable': 'err'},
+        {'type': 'auth', 'operation': 'deleteAccount', 'currentPassword': 'secret22'},
+      ]);
+      expect(h['err'], '');
+      expect(auth.currentUser, isNull, reason: 'deleted with the new password');
+    });
+
+    test('auth: a guest session keeps its uid when it signs up', () async {
+      final auth = MemoryAuthService();
+      final h = Harness(services: Services(auth: auth), variables: [v('guest', ''), v('uid', '')]);
+      await h.click([
+        {'type': 'auth', 'operation': 'signInAnonymously'},
+        setVar('guest', r'${result}'),
+      ]);
+      expect(h.errors, isEmpty);
+      expect(auth.currentUser!.isGuest, isTrue);
+      expect(h['guest'], isNotEmpty);
+      await h.click([
+        {'type': 'auth', 'operation': 'signUp', 'email': 'g@b.c', 'password': 'secret1', 'displayName': 'Gus'},
+        setVar('uid', r'${result}'),
+      ]);
+      expect(h['uid'], h['guest'], reason: 'signing up as a guest upgrades the same account');
+      expect(auth.currentUser!.isGuest, isFalse);
+      expect(auth.currentUser!.email, 'g@b.c');
     });
   });
 }

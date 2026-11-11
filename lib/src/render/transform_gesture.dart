@@ -147,6 +147,24 @@ abstract final class TransformGestures {
       if (t.attached) t.reset();
     }
   }
+
+  /// Zooms every instance of [nodeId] by [factor] about the middle of what
+  /// its viewport shows, springing there (zoom buttons).
+  static Future<void> zoom(NodeTree tree, String nodeId, double factor) async {
+    for (final t in [...?_byTree[tree]?[nodeId]]) {
+      if (t.attached) t.zoomBy(factor);
+    }
+  }
+
+  /// Springs every instance of [nodeId] to [pose] (`x`, `y`, `scale`,
+  /// `rotation`, `scaleX`, `scaleY`; keys left out are kept), within its
+  /// scale limits and bounds, even when that's where a bound pose already
+  /// says (a "fit" button after the user panned away).
+  static Future<void> moveTo(NodeTree tree, String nodeId, Map<String, double> pose) async {
+    for (final t in [...?_byTree[tree]?[nodeId]]) {
+      if (t.attached) t.moveTo(pose);
+    }
+  }
 }
 
 /// A node's [api.TransformGesture] in a running app.
@@ -631,6 +649,32 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
       return _show();
     }
     _springTo(target);
+  }
+
+  /// Zooms by [factor] about the middle of the viewport, springing there.
+  void zoomBy(double factor) {
+    if (!factor.isFinite || factor <= 0) return;
+    _gesture = 'settle';
+    _lastVelocity = Offset.zero;
+    final focal = (hasSize ? _viewport()?.center : null) ?? _center;
+    final next = _clamped(_around(_pose, focal, factor: (_pose.scale * factor).clamp(_minScale, _maxScale) / _pose.scale));
+    _written = next;
+    _writePose(next);
+    hasSize ? _springTo(next) : (_pose = next);
+  }
+
+  /// Springs to [pose] (keys left out kept).
+  void moveTo(Map<String, double> pose) {
+    _gesture = 'settle';
+    _lastVelocity = Offset.zero;
+    final next = _clamped(_with(_pose, pose));
+    _written = next;
+    _writePose(next);
+    if (!hasSize) {
+      _pose = next;
+      return _show();
+    }
+    _springTo(next);
   }
 
   /// Springs back to the rest pose: no offset, scale 1 (or the minimum),

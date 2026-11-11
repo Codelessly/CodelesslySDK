@@ -77,7 +77,7 @@ Layouts read the size class in expressions:
 | `screen.is.<id>`, `screen.is<Id>` | Whether that breakpoint is current: `screen.is.mobile`, `screen.isMobile` |
 | `screen.atLeast.<id>` | Whether the current breakpoint is that one or a wider one |
 | `screen.orientation`, `screen.isPortrait`, `screen.isLandscape` | Orientation |
-| `screen.brightness`, `screen.isDark` | The platform's brightness |
+| `screen.brightness`, `screen.isDark` | The platform's brightness (`screen.dark` is the same as `screen.isDark`). For the mode the layout's colors follow, read `theme.isDark` ([chapter 11](11-theming-and-fonts.md#dark-mode)) |
 | `screen.breakpoints` | The project's breakpoints: `[{id, name, minWidth}]` |
 
 Note the difference: the *canvas* is picked by the widget's width, while `${screen.width}` and

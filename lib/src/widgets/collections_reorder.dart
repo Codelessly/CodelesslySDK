@@ -296,11 +296,15 @@ class _ReorderListViewState extends State<ReorderListView> {
         // in the list), in its nodes' `dragged` state.
         proxyDecorator: (child, index, animation) => decorateReorderProxy(
             Material(type: MaterialType.transparency, child: _proxy(index)), animation, model),
-        onReorderStart: (index) => _setDragged(_r, widget.itemId, _proxyInstance(index), true),
+        onReorderStart: (index) {
+          _setDragged(_r, widget.itemId, _proxyInstance(index), true);
+          _r.fire(TriggerType.dragStart.name, event: {'index': index, 'item': widget.items.elementAtOrNull(index)});
+        },
         onReorderEnd: (index) {
           for (var i = 0; i < count; i++) {
             _setDragged(_r, widget.itemId, _proxyInstance(i), false);
           }
+          _r.fire(TriggerType.dragCompleted.name, event: {'index': index, 'item': widget.items.elementAtOrNull(index)});
         },
         onReorderItem: (from, to) => _move(from, to),
         itemBuilder: (context, index) {

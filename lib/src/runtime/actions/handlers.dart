@@ -6,18 +6,22 @@ import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
-import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/rendering.dart' show RenderBox, RenderObject, RenderViewportBase;
+import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
-import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
-import 'package:http/http.dart' as http;
+import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import 'action_error.dart' show CodedFailure;
+import 'cloud_loads.dart';
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
+import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../render/play.dart' show EffectPlayers;
+import '../../render/paint/image_fill.dart' show preloadImage;
 import '../../render/particles.dart' show ParticlePlayers;
 import '../../scripting/formula_scripts.dart' show ScriptsScope;
 import '../../services/services.dart';
@@ -25,8 +29,12 @@ import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
+import 'app_data_sources.dart';
+import 'app_events.dart';
+import 'capture.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
+import 'ui.dart' show PickedFile;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
@@ -74,6 +82,9 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
         run.result = await _mediaImport(a, run);
       } else if (a.name == 'media.export' || a.name == 'media.cancelExport') {
         run.result = await _mediaExport(a, run);
+      } else if (a.optional) {
+        // The app hasn't registered it: the chain goes on without it.
+        run.result = null;
       } else {
         throw StateError('No function named [${a.name}]');
       }
@@ -85,10 +96,13 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _cloudDocuments(a, run);
     case LoadCloudDataAction():
       await _loadCloudData(a, run);
+    case ReloadCloudDataAction():
+      await reloadCloudData(a, run);
     case AuthAction():
       await _auth(a, run);
     case IfAction():
-      final holds = a.condition != null && run.expressions.test(a.condition!, run.scope);
+      // A condition reading a script formula waits for its answer.
+      final holds = a.condition != null && await _withScripts(run, () => run.expressions.test(a.condition!, run.scope));
       await run.run(holds ? a.then : a.orElse);
     case ForEachAction():
       await _forEach(a, run);
@@ -127,13 +141,15 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       if (outcome.values case final Map<Object?, Object?> v when v.isNotEmpty) run.result = v;
       await run.run(outcome.confirmed ? a.actions : a.cancelActions);
     case DelayAction():
-      await run.wait(Duration(milliseconds: delayMilliseconds(a, run)));
+      // On the animation clock, as the motion it's usually timed against:
+      // slowed animations (timeDilation) slow the chain with them.
+      await run.wait(Duration(milliseconds: delayMilliseconds(a, run)) * timeDilation);
     case CloudDataAction():
       await _cloudData(a, run);
     case CloudBatchAction():
-      for (final step in a.steps) {
-        await _cloudData(step, run);
-      }
+      await cloudBatch(a, run, _cloudData);
+    case PreloadImagesAction():
+      run.result = await _preloadImages(a, run);
     case DownloadFileAction():
       final services = run.host.services;
       if (services is! Services) throw StateError('downloadFile needs Services.');
@@ -145,9 +161,10 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case PaywallAction():
       await _paywall(a, run);
     case FocusAction():
-      _focus(a, run);
+      await _focus(a, run);
     case SpeakAction():
-      _speak(a, run);
+      final r = await _speak(a, run);
+      if (r != null) run.result = r;
     case ScrollToAction():
       await _scrollTo(a, run);
     case PlaySoundAction():
@@ -160,6 +177,16 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case ControlDragAction(command: DragCommand.reset) when TransformGestures.hasIn(run.host.tree, a.node):
       // A node with a transform gesture springs back to its rest pose.
       await TransformGestures.reset(run.host.tree!, a.node);
+    case ControlDragAction(command: DragCommand.zoom):
+      // Zoom buttons: scale a transform gesture about its viewport's middle.
+      final tree = run.host.tree;
+      final factor = double.tryParse(run.text(a.value).trim());
+      if (tree != null && factor != null) await TransformGestures.zoom(tree, a.node, factor);
+    case ControlDragAction(command: DragCommand.pose):
+      // Spring a transform gesture to a pose: {x, y, scale, rotation...}.
+      final tree = run.host.tree;
+      final pose = _poseOf(a.value.trim().startsWith(r'${') ? await _withScripts(run, () => run.evaluate(a.value)) : a.value);
+      if (tree != null && pose.isNotEmpty) await TransformGestures.moveTo(tree, a.node, pose);
     case ControlDragAction():
       // A node that follows the pointer (gestures/drag_motion.dart): fling it
       // off, bring it back from a side, or reset or shake it; each of the
@@ -177,6 +204,11 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       break;
     case PaginateAction():
       await paginateAction(a, run);
+    case EmitEventAction():
+      final name = run.text(a.event).trim();
+      if (name.isNotEmpty) AppEventBus.of(run.context.services)?.emit(name, run.json(a.props));
+    case CaptureScreenshotAction():
+      run.result = await _captureScreenshot(a, run);
     case UnknownAction():
       break;
   }
@@ -207,8 +239,25 @@ Services _require(ActionRun run, String what) =>
 /// its fixed time.
 int delayMilliseconds(DelayAction a, ActionRun run) {
   if (a.duration.trim().isEmpty) return a.ms;
-  final v = num.tryParse(run.text(a.duration).trim());
+  final v = numberOfExpression(a.duration, run);
   return v == null || v < 0 ? a.ms : v.round();
+}
+
+/// The number [text] gives: a `${...}` expression's value as it is (a
+/// number stays a number, never formatted text such as "24,000"), else the
+/// interpolated text read as a number. Null when it gives none.
+double? numberOfExpression(String text, ActionRun run) {
+  final t = text.trim();
+  if (t.isEmpty) return null;
+  if (t.startsWith(r'${') && t.endsWith('}') && t.indexOf(r'${', 2) < 0) {
+    try {
+      final v = run.evaluate(t);
+      if (v is num) return v.isFinite ? v.toDouble() : null;
+      if (v is String) return double.tryParse(v.trim());
+    } catch (_) {}
+  }
+  final n = double.tryParse(run.text(t).trim());
+  return n != null && n.isFinite ? n : null;
 }
 
 // --- variables and values ----------------------------------------------------------
@@ -266,11 +315,7 @@ Future<void> _animateVariable(AnimateVariableAction a, ActionRun run, {bool from
   if (found == null || found.$2.isComputed) return;
   final (scope, variable) = found;
   final name = variable.name;
-  double? number(String text) {
-    if (text.trim().isEmpty) return null;
-    final n = double.tryParse(run.text(text).trim());
-    return n != null && n.isFinite ? n : null;
-  }
+  double? number(String text) => numberOfExpression(text, run);
 
   switch (a.mode) {
     case AnimateVariableMode.resume:
@@ -471,77 +516,37 @@ Future<void> _cloudDocuments(CloudDocumentsAction a, ActionRun run) async {
   }
 }
 
-/// Streams [a]'s document or query into its variable until the screen goes:
-/// `{status, isLoading, data, error}`.
+/// [a] with `scope: app` on a host with app data goes to the app's shared
+/// subscription; any other load is the screen's live load (cloud_loads.dart).
 Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
-  final db = _require(run, 'Cloud data').cloud;
-  final scope = run.context.scope;
   final variable = a.variable.trim();
   if (variable.isEmpty) return;
-  void put(String status, {Object? data, Object? error}) => setVariableIn(scope, variable, {
-        'status': status,
-        'isLoading': status == 'loading',
-        'data': data,
-        'error': ?error,
-      });
-  put('loading');
-  late final Stream<Object?> stream;
-  try {
-    final path = resolveCollectionPath(a.query, run.expressions, run.scope);
-    stream = a.single
-        ? db.watchDocument(path, run.text(a.id).trim())
-        : db.watchQuery(path, resolveCloudQuery(a.query, run.expressions, run.scope), loadRelated: a.query.loadRelated);
-  } catch (error) {
-    put('error', error: '$error');
-    rethrow;
+  final host = run.host;
+  if (a.scope == CloudDataScope.app && host is RuntimeActionContext && host.appData != null) {
+    return _loadAppCloudData(a, run, _require(run, 'Cloud data').cloud, host.appData!, variable);
   }
-  final first = Completer<void>();
-  var active = true;
-  late final StreamSubscription<Object?> sub;
+  return loadCloudData(a, run);
+}
+
+/// [a] with `scope: app`: the app's one subscription to its source, shared
+/// by every screen that loads the same ([AppDataSources]). Waits for the
+/// first value; the subscription outlives the screen.
+Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDatabase db, AppDataSources sources, String variable) async {
+  // The same limit, aggregate and joins as a screen's load (cloud_loads.dart).
+  final source = appCloudSource(a, run, db);
+  final loaded = sources.load(variable, source.key, source.open);
+  // Stopping this run stops waiting, not the app's subscription.
+  final waiting = Completer<void>();
+  loaded.then((_) {
+    if (!waiting.isCompleted) waiting.complete();
+  }, onError: (Object error, StackTrace stack) {
+    if (!waiting.isCompleted) waiting.completeError(error, stack);
+  });
+  final removeCancellation = run.onCancel(() {
+    if (!waiting.isCompleted) waiting.completeError(const ActionsCanceled());
+  });
   try {
-    sub = stream.listen(
-    (data) {
-      if (!active) return;
-      put('loaded', data: data);
-      if (!first.isCompleted) first.complete();
-    },
-    onError: (Object error, StackTrace stack) {
-      if (!active) return;
-      active = false;
-      put('error', error: '$error');
-      if (!first.isCompleted) {
-        first.completeError(error, stack);
-      } else {
-        // A later subscription error has no awaited action to throw through.
-        // Stop this invocation's remaining actions, report once and close it.
-        run.stop();
-        run.host.reportError(ActionFailed(a.type, error, nodeId: run.node?.id), stack, action: a.type);
-      }
-    },
-    onDone: () {
-      if (active && !first.isCompleted) {
-        active = false;
-        final error = StateError('Cloud data stream closed before a value');
-        put('error', error: '$error');
-        first.completeError(error);
-      }
-    },
-    cancelOnError: true,
-    );
-  } catch (error) {
-    active = false;
-    put('error', error: '$error');
-    rethrow;
-  }
-  void cancel() {
-    active = false;
-    unawaited(sub.cancel());
-    if (!first.isCompleted) first.completeError(const ActionsCanceled());
-  }
-  final removeCancellation = run.onCancel(cancel);
-  run.host.onDispose(cancel);
-  try {
-    await first.future;
+    await waiting.future;
   } finally {
     removeCancellation();
   }
@@ -575,8 +580,10 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.sendEmailVerification:
         await auth.sendEmailVerification();
       case AuthOperation.updatePassword:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.updatePassword(password);
       case AuthOperation.deleteAccount:
+        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
         await auth.deleteAccount();
       case AuthOperation.signInWithGoogle:
         run.result = (await auth.signInWithProvider(AuthProviderKind.google)).uid;
@@ -586,6 +593,8 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
         await auth.sendSignInLink(email, continueUrl: Uri.base.toString());
       case AuthOperation.completeSignInLink:
         run.result = (await auth.signInWithLink(email, Uri.base.toString())).uid;
+      case AuthOperation.signInAnonymously:
+        run.result = (await auth.signInAsGuest()).uid;
     }
     final host = run.host;
     if (host is RuntimeActionContext) host.refreshAuthValues?.call(a.operation);
@@ -624,51 +633,109 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
     await files.delete(folder);
     return;
   }
-  final picked = await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple);
+  final picked = a.source.trim().isEmpty
+      ? await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple)
+      : sourceFiles(run.evaluate(a.source), name: run.text(a.fileName).trim());
   for (final (i, f) in picked.indexed) {
-    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) throw StateError('${f.name} is larger than ${a.maxSizeMB} MB');
-    if (a.progressVariable.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, i / picked.length);
-    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes, contentType: f.contentType);
+    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
+      throw CodedFailure('file-too-large', '${f.name} is larger than ${_mb(a.maxSizeMB)} MB');
+    }
+    final type = f.contentType ?? '';
+    if (a.kind == CloudFileKind.image && type.isNotEmpty && !type.startsWith('image/')) {
+      throw CodedFailure('invalid-file-type', '${f.name} is not an image');
+    }
+    void progress(double sent) {
+      if (a.progressVariable.isNotEmpty) {
+        setVariableIn(run.context.scope, a.progressVariable, (i + sent.clamp(0, 1)) / picked.length);
+      }
+    }
+
+    progress(0);
+    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes,
+        contentType: f.contentType, onProgress: progress);
     await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
   }
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
 }
 
+/// The files a cloudFiles action's `source` gives: a `data:` URL, a map
+/// `{"data": "data:...", "name"}`, or a list of them. [name] names them
+/// (numbered when several); else a map's `name`, else `file-<time>.<ext>`.
+List<PickedFile> sourceFiles(Object? value, {String name = ''}) {
+  final items = value is List ? value : [value];
+  final out = <PickedFile>[];
+  for (final (i, item) in items.indexed) {
+    final data = item is Map ? item['data'] : item;
+    if (data is! String || !data.trim().startsWith('data:')) {
+      throw const CodedFailure('invalid-source', 'The file to upload is not a data: URL');
+    }
+    final UriData uri;
+    try {
+      uri = UriData.parse(data.trim());
+    } on FormatException {
+      throw const CodedFailure('invalid-source', 'The file to upload is not a valid data: URL');
+    }
+    final type = uri.mimeType;
+    final ext = switch (type) {
+      'image/png' => 'png',
+      'image/jpeg' => 'jpg',
+      'image/gif' => 'gif',
+      'image/webp' => 'webp',
+      'application/pdf' => 'pdf',
+      'application/json' => 'json',
+      'text/plain' => 'txt',
+      _ => 'bin',
+    };
+    final given = name.isNotEmpty
+        ? (items.length > 1 ? _numbered(name, i + 1) : name)
+        : (item is Map && item['name'] is String && (item['name'] as String).trim().isNotEmpty
+            ? (item['name'] as String).trim()
+            : 'file-${DateTime.now().millisecondsSinceEpoch}${items.length > 1 ? '-${i + 1}' : ''}.$ext');
+    out.add(PickedFile(name: given, bytes: uri.contentAsBytes(), contentType: type));
+  }
+  return out;
+}
+
+String _numbered(String name, int n) {
+  final dot = name.lastIndexOf('.');
+  return dot <= 0 ? '$name-$n' : '${name.substring(0, dot)}-$n${name.substring(dot)}';
+}
+
+// --- capture -------------------------------------------------------------------------------
+
+Future<Object?> _captureScreenshot(CaptureScreenshotAction a, ActionRun run) async {
+  // Let a change the chain just made paint first.
+  if (SchedulerBinding.instance.hasScheduledFrame) await SchedulerBinding.instance.endOfFrame;
+  final tree = run.host.tree;
+  final layout = CaptureRegistry.layoutOf(tree);
+  final boundary = a.target == CaptureTarget.app ? CaptureRegistry.app ?? layout : layout ?? CaptureRegistry.app;
+  if (boundary == null) throw StateError('Nothing to capture: no layout or capture scope is shown');
+  RenderBox? box;
+  if (a.target == CaptureTarget.node) {
+    final id = run.text(a.node).trim();
+    box = tree?.boxOf(id);
+    if (box == null) throw StateError('No node [$id] on screen to capture');
+  }
+  return captureImage(boundary, box: box, pixelRatio: a.pixelRatio);
+}
+
 // --- forms and text fields -------------------------------------------------------------
 
-String _fieldText(ActionRun run, String nodeId) {
-  final tree = run.host.tree;
-  if (tree == null || nodeId.isEmpty) return '';
-  return TextFieldHandle.of(tree, nodeId)?.controller.text ?? '';
-}
-
+/// A form submission. Only the local service runs: an older layout's
+/// built-in newsletter service (or an unknown one), decoded as
+/// [FormService.unsupported], sends nothing and fails as
+/// `unsupported_service` through the same result and callbacks.
+///
+/// Validation finishes before any response is stored. Persisting the
+/// response variable uses the SDK's normal variable persistence. Nothing is
+/// sent over the network.
 Future<void> _submitForm(SubmitFormAction a, ActionRun run) async {
-  if (a.service == FormService.local) return _submitLocalForm(a, run);
-  final email = _fieldText(run, a.emailField).trim();
-  if (email.isEmpty) throw StateError('No email to submit');
-  final response = await http.post(
-    Uri.parse('https://${a.dataCenter}.api.mailchimp.com/3.0/lists/${a.listId}/members'),
-    headers: {
-      'Authorization': 'Basic ${base64Encode(utf8.encode('codelessly:${a.apiKey}'))}',
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({
-      'email_address': email,
-      'status': 'subscribed',
-      'merge_fields': {
-        if (a.firstNameField.isNotEmpty) 'FNAME': _fieldText(run, a.firstNameField),
-        if (a.lastNameField.isNotEmpty) 'LNAME': _fieldText(run, a.lastNameField),
-      },
-    }),
-  );
-  if (response.statusCode >= 300) throw StateError('Submit failed: ${response.statusCode}');
-}
-
-/// Generic local submission: validation finishes before any response is stored.
-/// Persisting the response variable uses the SDK's normal variable persistence.
-Future<void> _submitLocalForm(SubmitFormAction a, ActionRun run) async {
   Json outcome;
   try {
+    if (a.service != FormService.local) {
+      throw const _FormSubmissionFailure('unsupported_service',
+          'This form uses a submission service that is no longer supported. Nothing was sent.');
+    }
     final destination = a.responseVariable.trim();
     if (destination.isNotEmpty) {
       final found = variableOf(run.context.scope, destination);
@@ -724,12 +791,20 @@ class _FormSubmissionFailure implements Exception {
   final Json errors;
 }
 
-void _focus(FocusAction a, ActionRun run) {
+Future<void> _focus(FocusAction a, ActionRun run) async {
   final tree = run.host.tree;
-  final handle = tree == null || a.node.isEmpty ? null : TextFieldHandle.of(tree, a.node);
+  TextFieldHandle? find() => tree == null || a.node.isEmpty ? null : TextFieldHandle.near(tree, a.node, run.instance);
+  var handle = find();
   if (a.unfocus) {
     handle == null ? TextFieldHandle.unfocusAll() : handle.focusNode.unfocus();
     return;
+  }
+  // A field the same tap reveals (an inline "Add card") is built in the
+  // frames that follow: wait for it, a few frames at most.
+  for (var frame = 0; handle == null && frame < 8 && !run.isCanceled; frame++) {
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+    handle = find();
   }
   if (handle == null) return;
   handle.focusNode.requestFocus();
@@ -782,13 +857,54 @@ void _editText(EditTextAction a, ActionRun run) {
   }
 }
 
+/// The copy of repeated node [id] that a list built for its item [item]:
+/// the one whose `${item.id}` (or `${item.key}`, or the item itself, as
+/// text) reads [item], else the one whose `${index}` is [item]. Each copy is
+/// asked in its own scope, so a node inside an item template matches too.
+NodeBox? repeatOf(NodeTree tree, String id, String item) {
+  final binder = tree.binder;
+  if (binder == null) return null;
+  NodeBox? byIndex;
+  final index = int.tryParse(item);
+  for (final b in tree.boxesOf(id)) {
+    if (!b.attached) continue;
+    final scope = binder.scopeFor(tree.source, b.id, b.instance);
+    if (scope == null) continue;
+    final value = readPath(scope, 'item');
+    final key = value is Map ? (value['id'] ?? value['key']) : value;
+    if (key != null && '$key' == item) return b;
+    if (index != null && byIndex == null && readPath(scope, 'index') == index) byIndex = b;
+  }
+  return byIndex;
+}
+
+/// Whether the scrolling rows and columns around [box] have laid out
+/// something to scroll (or there are none).
+bool _scrollsLaidOut(RenderObject box) {
+  for (var p = box.parent; p != null; p = p.parent) {
+    if (p is RenderDesignScroll && p.interactive) return p.hasSize && p.maxScrollExtent > 0;
+  }
+  return true;
+}
+
 /// Scrolls the scroll views around node [ScrollToAction.node] (those
 /// along [ScrollToAction.axis] only, when it's set) so the node sits at
 /// its alignment, less its offset: each view reveals the one inside it.
 Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
-  final box = run.host.tree?.boxOf(run.text(a.node).trim());
+  final tree = run.host.tree;
+  final id = run.text(a.node).trim();
+  final item = run.text(a.item).trim();
+  final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
   if (box == null || !box.attached) return;
+  // Run from a screen's `load`, the views around it may not have their
+  // content's extent yet: give layout a few frames.
+  for (var i = 0; i < 4 && !_scrollsLaidOut(box); i++) {
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+  }
+  if (!box.attached) return;
   final target = box.contentBox ?? box;
+  final offset = a.offsetFormula.isEmpty ? a.offset : (double.tryParse(run.text(a.offsetFormula).trim()) ?? a.offset);
   final duration = Duration(milliseconds: a.durationMs);
   final Curve curve = switch (AnimationCurve.parse(a.curve)) {
     AnimationCurve.linear => Curves.linear,
@@ -798,6 +914,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     AnimationCurve.easeOutCubic => Curves.easeOutCubic,
     AnimationCurve.easeInOutCubic => Curves.easeInOutCubic,
     AnimationCurve.decelerate => Curves.decelerate,
+    AnimationCurve.emphasized => const Cubic(0.2, 0, 0, 1),
     _ => Curves.easeInOut,
   };
   final scrolls = <Future<void>>[];
@@ -808,7 +925,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
       viewports++;
       final along=a.axis==null || (p.axis==rendering.Axis.horizontal)==(a.axis==ScrollAxis.horizontal);
       if(along){
-        final to=(p.getOffsetToReveal(revealed,a.alignment)-a.offset).clamp(0.0,p.maxScrollExtent);
+        final to=(p.getOffsetToReveal(revealed,a.alignment)-offset).clamp(0.0,p.maxScrollExtent);
         if(a.durationMs<=0){p.jumpTo(to);}else{scrolls.add(p.animateTo(to,duration:duration,curve:curve));}
       }
       revealed=p;
@@ -820,7 +937,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     viewports++;
     final along = a.axis == null || (p.axis == rendering.Axis.horizontal) == (a.axis == ScrollAxis.horizontal);
     if (along && position.hasContentDimensions) {
-      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - a.offset)
+      final to = (p.getOffsetToReveal(revealed, a.alignment).offset - offset)
           .clamp(position.minScrollExtent, position.maxScrollExtent)
           .toDouble();
       if ((to - position.pixels).abs() >= 0.5) {
@@ -838,25 +955,85 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   await Future.wait(scrolls);
 }
 
+Future<Json> _preloadImages(PreloadImagesAction a, ActionRun run) async {
+  // A list from an expression, or comma-separated text.
+  final Object? value = a.urls.contains(r'${') ? run.evaluate(a.urls) : a.urls;
+  final urls = <String>{
+    ...switch (value) {
+      final List<Object?> l => [for (final u in l) if (u != null) '$u'],
+      final String t => t.split(','),
+      _ => const <String>[],
+    }.map((u) => u.trim()).where((u) => u.isNotEmpty),
+  }.toList();
+  final progress = a.progressVariable.trim();
+  var done = 0, failed = 0;
+  void report() {
+    if (progress.isNotEmpty && !run.isCanceled) setVariableIn(run.context.scope, progress, urls.isEmpty ? 1.0 : done / urls.length);
+  }
+
+  report();
+  await Future.wait(urls.map((u) async {
+    final ok = await preloadImage(u);
+    done++;
+    if (!ok) failed++;
+    report();
+  }));
+  return {'loaded': done - failed, 'failed': failed, 'total': urls.length};
+}
+
 // --- sound, speech, purchases ---------------------------------------------------------------
 
-void _speak(SpeakAction a, ActionRun run) {
+Future<Object?> _speak(SpeakAction a, ActionRun run) async {
   final speech = _require(run, 'Speech').speech;
-  if (a.stop) return speech.stop();
+  if (a.stop) {
+    speech.stop();
+    return null;
+  }
   double number(String text, double min, double max) =>
       (double.tryParse(run.text(text).trim()) ?? 1).clamp(min, max).toDouble();
+  if (a.readAlong) {
+    // Waits for the text to be said: a chain can go on (turn the page) only
+    // when it was said to the end, not stopped.
+    final completed = await speech.readAlong(run.text(a.text),
+        language: run.text(a.language).trim(),
+        rate: number(a.rate, 0.1, 10),
+        pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2),
+        startWord: int.tryParse(run.text(a.startWord).trim()) ?? double.tryParse(run.text(a.startWord).trim())?.round() ?? 0);
+    return {'completed': completed};
+  }
   unawaited(speech.speak(run.text(a.text),
       language: run.text(a.language).trim(),
       rate: number(a.rate, 0.1, 10),
       pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2)));
+  return null;
 }
+
+/// The latest timed start of each voice id (see [_playSound]).
+final Map<String, Object> _soundTokens = {};
 
 void _playSound(PlaySoundAction a, ActionRun run) {
   double? number(String v) => double.tryParse(run.text(v).trim());
   final service = _require(run, 'Sound').sound;
   switch (a.operation) {
     case 'start':
-      service.startNoteWithWaveform(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1, waveform:run.text(a.waveform));
+      final id = run.text(a.voiceId).trim();
+      final note = a.note.isEmpty ? null : number(a.note);
+      final frequency = note != null ? midiToHz(note) : number(a.frequency) ?? 440;
+      service.startNoteWithWaveform(id, frequency: frequency, volume: number(a.volume) ?? 1, waveform: run.text(a.waveform).trim());
+      // A voice with a duration releases itself, unless something started
+      // another voice under its id in the meantime.
+      final ms = a.duration.isEmpty ? null : number(a.duration);
+      if (ms != null && ms >= 0) {
+        final token = _soundTokens[id] = Object();
+        Timer(Duration(milliseconds: ms.round()), () {
+          if (identical(_soundTokens[id], token)) {
+            _soundTokens.remove(id);
+            service.stopNote(id);
+          }
+        });
+      } else {
+        _soundTokens.remove(id);
+      }
       return;
     case 'stop':
       service.stopNote(run.text(a.voiceId).trim());
@@ -936,10 +1113,18 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
   switch (result.outcome) {
     case PaywallOutcome.purchased || PaywallOutcome.restored:
       return;
-    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing || PaywallOutcome.skipped:
+    // Closing the paywall or nothing to show ends the chain quietly. A
+    // cancelled purchase and an empty restore end it too, without an error,
+    // but the screen's actionError reaction hears them
+    // (`${result.error.code}`) to say so.
+    case PaywallOutcome.closed || PaywallOutcome.skipped:
       throw const ActionsCanceled();
+    case PaywallOutcome.canceled:
+      throw const ActionsStopped('purchase-cancelled', 'Purchase cancelled');
+    case PaywallOutcome.restoreNothing:
+      throw const ActionsStopped('nothing-to-restore', 'No purchase to restore');
     case PaywallOutcome.failed:
-      throw StateError(result.error ?? 'Purchase failed');
+      throw CodedFailure(result.code.isEmpty ? 'purchase-failed' : result.code, result.error ?? 'Purchase failed');
   }
 }
 
@@ -1013,4 +1198,31 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
   } catch (error) {
     return {'ok': false, 'error': '$error'};
   }
+}
+
+/// 5 for 5.0, 2.5 for 2.5.
+String _mb(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';
+
+/// A pose from an action's value: a map, or its JSON text; numbers only.
+Map<String, double> _poseOf(Object? v) {
+  if (v is String) {
+    try {
+      v = jsonDecode(v);
+    } catch (_) {
+      return const {};
+    }
+  }
+  if (v is! Map) return const {};
+  return {
+    for (final e in v.entries)
+      if (const {'x', 'y', 'scale', 'rotation', 'scaleX', 'scaleY'}.contains(e.key))
+        if (e.value is num) '${e.key}': (e.value as num).toDouble() else if (double.tryParse('${e.value}') case final double d) '${e.key}': d,
+  };
+}
+
+/// [evaluate] once the script formulas it reads have answered (a worker on
+/// the web answers null at first), as a setVariable's value does.
+Future<T> _withScripts<T>(ActionRun run, T Function() evaluate) async {
+  final scripts = readPath(run.scope, 'script');
+  return scripts is ScriptsScope ? await scripts.resolve(evaluate) : evaluate();
 }

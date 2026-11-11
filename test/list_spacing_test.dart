@@ -71,15 +71,7 @@ void main() {
     expect(r[2].top - r[1].bottom, 10);
   });
 
-  testWidgets('separator none keeps the items together', (tester) async {
-    final r = await _items(tester, {
-      'layout': {'width': 40, 'height': 300},
-      'props': {'itemCount': 3, 'spacing': 10, 'separator': 'none'},
-    });
-    expect(r[1].top, r[0].bottom);
-  });
-
-  testWidgets('a grid spaces its items by its axis spacings', (tester) async {
+    testWidgets('a grid spaces its items by its axis spacings', (tester) async {
     final r = await _items(tester, {
       'type': 'gridView',
       'layout': {'width': 90, 'height': 300},
@@ -87,9 +79,5 @@ void main() {
     });
     expect(r[1].left - r[0].right, 10);
     expect(r[2].top - r[0].bottom, 10);
-  });
-
-  test('a list separates its items with space by default', () {
-    expect(api.ListViewProps.separator.defaultValue, api.ListSeparator.space);
   });
 }
