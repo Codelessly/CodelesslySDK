@@ -849,12 +849,32 @@ void _speak(SpeakAction a, ActionRun run) {
       pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2)));
 }
 
+/// The latest timed start of each voice id (see [_playSound]).
+final Map<String, Object> _soundTokens = {};
+
 void _playSound(PlaySoundAction a, ActionRun run) {
   double? number(String v) => double.tryParse(run.text(v).trim());
   final service = _require(run, 'Sound').sound;
   switch (a.operation) {
     case 'start':
-      service.startNoteWithWaveform(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1, waveform:run.text(a.waveform));
+      final id = run.text(a.voiceId).trim();
+      final note = a.note.isEmpty ? null : number(a.note);
+      final frequency = note != null ? midiToHz(note) : number(a.frequency) ?? 440;
+      service.startNoteWithWaveform(id, frequency: frequency, volume: number(a.volume) ?? 1, waveform: run.text(a.waveform).trim());
+      // A voice with a duration releases itself, unless something started
+      // another voice under its id in the meantime.
+      final ms = a.duration.isEmpty ? null : number(a.duration);
+      if (ms != null && ms >= 0) {
+        final token = _soundTokens[id] = Object();
+        Timer(Duration(milliseconds: ms.round()), () {
+          if (identical(_soundTokens[id], token)) {
+            _soundTokens.remove(id);
+            service.stopNote(id);
+          }
+        });
+      } else {
+        _soundTokens.remove(id);
+      }
       return;
     case 'stop':
       service.stopNote(run.text(a.voiceId).trim());
