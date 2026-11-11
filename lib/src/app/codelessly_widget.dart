@@ -40,6 +40,7 @@ import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
 import '../services/services.dart' show NoScriptRunner, Services, PaywallSession, PaywallResult;
+import 'backdrop_screens.dart';
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
@@ -961,8 +962,8 @@ class _LayoutViewState extends State<_LayoutView> {
     final shown = _shown;
     if (!mounted || shown == null) return;
     if (ModalRoute.isCurrentOf(context) == false) return;
-    // An overlay screen (no route) isn't the screen the app is on.
-    if (OverlayScreenScope.of(context)) return;
+    // An overlay or backdrop screen (no route) isn't the screen the app is on.
+    if (OverlayScreenScope.of(context) || BackdropScreenScope.of(context)) return;
     // A presented layout (a banner, a popup) is not the app's screen.
     if (CodelesslyPresentation.maybeOf(context) != null) return;
     final route = CodelesslyRoute(widget.layout.id, shown, widget.params);
@@ -1235,6 +1236,34 @@ class _ScreenUi extends NavigatorActionUi {
 /// shared elements of the screens it moves between.
 class CodelesslyPageRoute<T> extends MaterialPageRoute<T> with CodelesslyHeroRoute<T> {
   CodelesslyPageRoute({required super.builder, super.settings, super.fullscreenDialog});
+
+  /// The theme's page transition; above backdrop screens
+  /// ([CodelesslyBackdropHost]) without the scrim or surface color it paints
+  /// behind the screens, which would cover the backdrop while they move.
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    if (!CodelesslyBackdropHost.showsBackdrop(context)) return super.buildTransitions(context, animation, secondaryAnimation, child);
+    return seeThroughPageTransitions(Theme.of(context).pageTransitionsTheme)
+        .buildTransitions<T>(this, context, animation, secondaryAnimation, child);
+  }
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => _delegatedTransition;
+
+  /// What the route beneath plays while this one comes in or leaves (the
+  /// theme's), see-through above backdrop screens.
+  static Widget? _delegatedTransition(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    bool allowSnapshotting,
+    Widget? child,
+  ) {
+    final theme = Theme.of(context);
+    var transitions = theme.pageTransitionsTheme;
+    if (CodelesslyBackdropHost.showsBackdrop(context)) transitions = seeThroughPageTransitions(transitions);
+    return transitions.delegatedTransition(theme.platform)?.call(context, animation, secondaryAnimation, allowSnapshotting, child);
+  }
 
   /// The route of a screen at [settings]: a [CodelesslyTranslucentRoute]
   /// when [translucent] (a screen published so, [ScreenRoute.translucent]),

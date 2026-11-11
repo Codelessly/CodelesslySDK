@@ -2,6 +2,13 @@
 
 **New**
 
+- Backdrop screens: a project's backdrop canvases (`CanvasProps.backdrop`, `PublishModel.backdrops`) are drawn once
+  beneath every screen, outside navigation, by `CodelesslyBackdropHost(codelessly:, child:)` as
+  `MaterialApp.builder` (a `CodelesslyPresenterHost` there draws them too; `backdrops: false` leaves them out).
+  Route transitions move only the screens; the backdrop keeps its state and stays still. Screens whose canvas has
+  no fill show it through: while backdrops are shown, `CodelesslyPageRoute` plays the theme's page transition
+  without the scrim or surface color it paints behind the screens (`seeThroughPageTransitions`,
+  `SeeThroughZoomPageTransitionsBuilder`). Projects without backdrops are unchanged.
 - Cloud data follows the new data rules `ownerRead` (each user reads their own documents, which only the project
   writes; the owner may change the rules' `ownerFields`) and `audience` (a user reads the documents whose `audience`
   list names them, their role, signed-in users or everyone), and a collection's `expiry` field: queries filter

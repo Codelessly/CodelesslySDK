@@ -146,6 +146,7 @@ export 'src/widgets/collections_swipe.dart' show SwipeActionsBox;
 export 'src/app/app_identity.dart';
 export 'src/app/automations.dart';
 export 'src/app/back_guard.dart';
+export 'src/app/backdrop_screens.dart';
 export 'src/app/codelessly.dart';
 export 'src/app/codelessly_widget.dart';
 export 'src/app/config.dart';
