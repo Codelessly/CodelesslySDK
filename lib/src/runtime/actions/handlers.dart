@@ -167,7 +167,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
 Future<void> _deferred(List<ActionDef> actions, ActionRun run) async {
   try {
     await run.run(actions);
-  } on ActionsCancelled {
+  } on ActionsCanceled {
     // The screen went.
   } catch (e, s) {
     run.host.reportError(e, s);

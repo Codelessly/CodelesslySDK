@@ -1,3 +1,14 @@
+## 22.0.0
+
+**Breaking changes**
+
+- Requires `codelessly_api` 22.0.0, where `Behaviours` is now `Behaviors`, `BehaviourFields` is now
+  `BehaviorFields` and `Node.behaviours` is now `Node.behaviors`.
+- `ActionsCancelled` is now `ActionsCanceled`.
+- `ActionCancellation.isCancelled` is now `ActionCancellation.isCanceled`.
+- `ActionRun.isCancelled` is now `ActionRun.isCanceled`.
+- `PaywallOutcome.cancelled` is now `PaywallOutcome.canceled`.
+
 ## 21.0.0
 
 **Breaking changes**

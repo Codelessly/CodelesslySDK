@@ -52,7 +52,7 @@ void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painte
     ..isComplex = true);
 }
 
-/// A `CircularProgressIndicator` centred in a square of the box's shortest
+/// A `CircularProgressIndicator` centered in a square of the box's shortest
 /// side, or an arc painter.
 void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
   final l = n.layout;

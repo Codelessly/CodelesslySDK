@@ -200,8 +200,8 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
 
   final itemMain = _itemMain(n, item);
   if (layout == api.ListLayout.deck) {
-    // Layered, the first on top, each at the top centre (a horizontal
-    // list's: centre left).
+    // Layered, the first on top, each at the top center (a horizontal
+    // list's: center left).
     chain.add(_viewportBox(b, n, canShrinkWrap: false));
     final view = b.obtain<RenderLayeredItems>('deck', RenderLayeredItems.new)
       ..clipBehavior = _clip(n)
