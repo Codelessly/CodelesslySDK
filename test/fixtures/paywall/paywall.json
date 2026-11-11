@@ -1,0 +1,269 @@
+{
+  "schema": 2,
+  "model": {
+    "schema": 2,
+    "projectId": "paywall_demo",
+    "entryLayoutId": "home",
+    "layouts": {
+      "home": {
+        "canvases": [
+          {
+            "id": "home-canvas",
+            "name": "Home"
+          }
+        ]
+      },
+      "paywall": {
+        "canvases": [
+          {
+            "id": "paywall-canvas",
+            "name": "Paywall"
+          }
+        ]
+      }
+    },
+    "paywall": {
+      "products": [
+        {
+          "id": "annual",
+          "iosProductId": "com.example.pro.annual",
+          "androidProductId": "pro_annual"
+        },
+        {
+          "id": "monthly",
+          "iosProductId": "com.example.pro.monthly",
+          "androidProductId": "pro_monthly"
+        }
+      ],
+      "placements": [
+        {
+          "id": "onboarding",
+          "layoutId": "paywall",
+          "productSlots": [
+            "annual",
+            "monthly"
+          ]
+        }
+      ],
+      "termsUrl": "https://example.com/terms",
+      "privacyUrl": "https://example.com/privacy"
+    }
+  },
+  "layouts": {
+    "home": {
+      "schema": 2,
+      "id": "home",
+      "roots": [
+        "home-canvas"
+      ],
+      "nodes": {
+        "home-canvas": {
+          "type": "canvas",
+          "name": "Home",
+          "layout": {
+            "width": 390,
+            "height": 844
+          }
+        }
+      }
+    },
+    "paywall": {
+      "schema": 2,
+      "id": "paywall",
+      "roots": [
+        "paywall-canvas"
+      ],
+      "nodes": {
+        "paywall-canvas": {
+          "type": "canvas",
+          "name": "Paywall",
+          "slots": {
+            "body": "paywall-column"
+          },
+          "layout": {
+            "width": 390,
+            "height": 844
+          }
+        },
+        "paywall-column": {
+          "type": "column",
+          "name": "Column",
+          "children": [
+            "price",
+            "buy",
+            "monthly",
+            "restore",
+            "close",
+            "terms"
+          ],
+          "layout": {
+            "width": {
+              "fill": 390
+            },
+            "height": {
+              "fill": 844
+            }
+          }
+        },
+        "price": {
+          "type": "text",
+          "name": "Price",
+          "layout": {
+            "width": 390,
+            "height": 40
+          },
+          "props": {
+            "text": "${product.slot}: ${product.price}${paywall.purchasing ? ' (buying)' : ''}"
+          }
+        },
+        "buy": {
+          "type": "box",
+          "name": "Buy",
+          "layout": {
+            "width": 390,
+            "height": 60
+          },
+          "decoration": {
+            "fills": [
+              {
+                "color": "#FF2196F3"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "id": "r_Buy",
+              "trigger": {
+                "type": "click"
+              },
+              "actions": [
+                {
+                  "type": "paywall",
+                  "operation": "purchase"
+                }
+              ]
+            }
+          ]
+        },
+        "monthly": {
+          "type": "box",
+          "name": "Monthly",
+          "layout": {
+            "width": 390,
+            "height": 60
+          },
+          "decoration": {
+            "fills": [
+              {
+                "color": "#FF4CAF50"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "id": "r_Monthly",
+              "trigger": {
+                "type": "click"
+              },
+              "actions": [
+                {
+                  "type": "paywall",
+                  "operation": "selectProduct",
+                  "slot": "monthly"
+                }
+              ]
+            }
+          ]
+        },
+        "restore": {
+          "type": "box",
+          "name": "Restore",
+          "layout": {
+            "width": 390,
+            "height": 60
+          },
+          "decoration": {
+            "fills": [
+              {
+                "color": "#FF9E9E9E"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "id": "r_Restore",
+              "trigger": {
+                "type": "click"
+              },
+              "actions": [
+                {
+                  "type": "paywall",
+                  "operation": "restore"
+                }
+              ]
+            }
+          ]
+        },
+        "close": {
+          "type": "box",
+          "name": "Close",
+          "layout": {
+            "width": 390,
+            "height": 60
+          },
+          "decoration": {
+            "fills": [
+              {
+                "color": "#FF000000"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "id": "r_Close",
+              "trigger": {
+                "type": "click"
+              },
+              "actions": [
+                {
+                  "type": "paywall",
+                  "operation": "closePaywall"
+                }
+              ]
+            }
+          ]
+        },
+        "terms": {
+          "type": "box",
+          "name": "Terms",
+          "layout": {
+            "width": 390,
+            "height": 60
+          },
+          "decoration": {
+            "fills": [
+              {
+                "color": "#FFFF9800"
+              }
+            ]
+          },
+          "actions": [
+            {
+              "id": "r_Terms",
+              "trigger": {
+                "type": "click"
+              },
+              "actions": [
+                {
+                  "type": "paywall",
+                  "operation": "openLegalLink",
+                  "url": "${paywall.termsUrl}"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
