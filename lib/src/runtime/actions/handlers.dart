@@ -161,7 +161,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case PaywallAction():
       await _paywall(a, run);
     case FocusAction():
-      _focus(a, run);
+      await _focus(a, run);
     case SpeakAction():
       final r = await _speak(a, run);
       if (r != null) run.result = r;
@@ -791,12 +791,20 @@ class _FormSubmissionFailure implements Exception {
   final Json errors;
 }
 
-void _focus(FocusAction a, ActionRun run) {
+Future<void> _focus(FocusAction a, ActionRun run) async {
   final tree = run.host.tree;
-  final handle = tree == null || a.node.isEmpty ? null : TextFieldHandle.of(tree, a.node);
+  TextFieldHandle? find() => tree == null || a.node.isEmpty ? null : TextFieldHandle.near(tree, a.node, run.instance);
+  var handle = find();
   if (a.unfocus) {
     handle == null ? TextFieldHandle.unfocusAll() : handle.focusNode.unfocus();
     return;
+  }
+  // A field the same tap reveals (an inline "Add card") is built in the
+  // frames that follow: wait for it, a few frames at most.
+  for (var frame = 0; handle == null && frame < 8 && !run.isCanceled; frame++) {
+    SchedulerBinding.instance.scheduleFrame();
+    await SchedulerBinding.instance.endOfFrame;
+    handle = find();
   }
   if (handle == null) return;
   handle.focusNode.requestFocus();

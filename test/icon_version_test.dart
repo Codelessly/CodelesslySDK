@@ -8,4 +8,14 @@ void main() {
     expect(IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': 'star', 'style': 'rounded'}),
         'https://fonts.gstatic.com/s/i/materialiconsround/star/v22/24px.svg');
   });
+
+  // Petri v2: a toast's icon written as `{"source": "icon", "name": ...}`
+  // (the shape a toast's own default takes) resolved to nothing, so the
+  // toast showed no icon.
+  test('a feedback icon given by source and name is a Material icon', () {
+    expect(IconSources.urlOf({'source': 'icon', 'name': 'check_rounded', 'size': 18}),
+        IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': 'check', 'style': 'rounded'}));
+    expect(IconSources.urlOf({'source': 'icon', 'name': 'check_rounded'}), isNotNull);
+    expect(IconSources.urlOf({'source': 'icon'}), isNull, reason: 'no name, no icon');
+  });
 }

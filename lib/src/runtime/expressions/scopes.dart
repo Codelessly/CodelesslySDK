@@ -269,14 +269,17 @@ class VariableScope extends NamedScope {
       final status = readPath(reader, 'script');
       final pendingBefore = status is FormulaReadStatus ? status.pendingReads : 0;
       var value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local || shared ? this : reader, p));
-      if (value == null && status is FormulaReadStatus && status.pendingReads > pendingBefore) {
+      final pending = status is FormulaReadStatus && status.pendingReads > pendingBefore;
+      if (value == null && pending) {
         value = _lastValue[v.name];
       } else {
         _lastValue[v.name] = value;
       }
-      // Only a top-level read: one inside a cycle saw a partial value.
-      if (local && _computing.length == 1) _cache[v.name] = (_version, value);
-      if (shared && _computing.length == 1) _sharedCache[v.name] = (_globalVersion, value);
+      // Only a top-level read: one inside a cycle saw a partial value. Nor
+      // one made while a script it calls is still answering: the next read
+      // works it out again with the answer.
+      if (local && !pending && _computing.length == 1) _cache[v.name] = (_version, value);
+      if (shared && !pending && _computing.length == 1) _sharedCache[v.name] = (_globalVersion, value);
       return value;
     } finally {
       _computing.remove(v.name);

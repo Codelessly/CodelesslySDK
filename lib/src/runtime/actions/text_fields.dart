@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../render/node_tree.dart';
 import '../../render/recipe.dart';
+import '../expressions/bindings.dart' show ProvidedItem;
 
 /// A text field's controller and focus node.
 class TextFieldHandle {
@@ -19,6 +20,29 @@ class TextFieldHandle {
   static TextFieldHandle? of(NodeTree tree, String id) {
     final box = tree.boxOf(id);
     return box == null ? null : _handles[box];
+  }
+
+  /// The field node [id] of [tree] shows nearest [instance] (the repeat of
+  /// the node whose trigger fired): in the same list item, else one inside
+  /// it or around it, else the first. A field in a kanban column's repeated
+  /// quick add is the one of the column whose button was pressed.
+  static TextFieldHandle? near(NodeTree tree, String id, Object? instance) {
+    if (instance == null) return of(tree, id);
+    bool within(Object? inner, Object? outer) {
+      for (Object? i = inner; i != null; i = i is ProvidedItem ? i.outer : null) {
+        if (i == outer) return true;
+      }
+      return false;
+    }
+
+    TextFieldHandle? related;
+    for (final box in tree.boxesOf(id)) {
+      final handle = _handles[box];
+      if (handle == null) continue;
+      if (box.instance == instance) return handle;
+      if (related == null && (within(box.instance, instance) || within(instance, box.instance))) related = handle;
+    }
+    return related ?? of(tree, id);
   }
 
   static void register(NodeBuilder box, TextFieldHandle handle) => _handles[box] = handle;
