@@ -169,6 +169,9 @@ void main() {
       ]);
       expect(eval("length(where(cart, 'qty'))"), 2);
       expect(eval("without(syrups, ['honey'])"), ['vanilla']);
+      // A map drops keys instead of reading as an empty list.
+      expect(eval("without({a: 1, b: 2, c: 3}, ['a', 'c'])"), {'b': 2});
+      expect(eval("without({a: 1, b: 2}, 'a')"), {'b': 2});
     });
 
     test('member access', () {
