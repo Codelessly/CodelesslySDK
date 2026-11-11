@@ -6,13 +6,14 @@ import 'dart:convert';
 
 import 'package:codelessly_api_v2/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
-import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase, MatrixUtils;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import '../../render/drag_track.dart' show DragTracks;
+import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../render/play.dart' show EffectPlayers;
@@ -61,8 +62,13 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await runScriptAction(a, run);
     case CallFunctionAction():
       final f = run.host.functions[a.name];
-      if (f == null) throw StateError('No function named [${a.name}]');
-      run.result = await f(run.context, run.json(a.params));
+      if (f != null) {
+        run.result = await f(run.context, run.json(a.params));
+      } else if (a.name == 'media.export' || a.name == 'media.cancelExport') {
+        run.result = await _mediaExport(a, run);
+      } else {
+        throw StateError('No function named [${a.name}]');
+      }
     case CallApiAction():
       await _callApi(a, run);
     case SetStorageAction():
@@ -660,6 +666,25 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   var viewports = 0;
   RenderObject revealed = target;
   for (var p = target.parent; p != null; p = p.parent) {
+    if (p is RenderDesignScroll && p.interactive) {
+      viewports++;
+      final along = a.axis == null || (p.axis == rendering.Axis.horizontal) == (a.axis == ScrollAxis.horizontal);
+      if (along && p.hasSize) {
+        final rect = MatrixUtils.transformRect(revealed.getTransformTo(p), revealed.paintBounds);
+        final start = p.axis == rendering.Axis.vertical ? rect.top : rect.left;
+        final length = p.axis == rendering.Axis.vertical ? rect.height : rect.width;
+        final extent = p.axis == rendering.Axis.vertical ? p.size.height : p.size.width;
+        final delta = start - (extent - length) * a.alignment - a.offset;
+        final to = p.pixels + delta * (p.reverse ? -1 : 1);
+        if (a.durationMs <= 0) {
+          p.jumpTo(to);
+        } else {
+          scrolls.add(p.animateTo(to, duration: duration, curve: curve));
+        }
+      }
+      revealed = p;
+      continue;
+    }
     if (p is! RenderViewportBase) continue;
     final position = p.offset;
     if (position is! ScrollPosition) continue;
@@ -755,3 +780,34 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
 
 /// Whether [text] holds `${...}` (an expression, not a literal).
 bool isExpression(String text) => text.contains(r'${') || FormulaEvaluator.exactExpression(text) != null;
+
+// Built-in callFunction names keep media encoding in the runtime host,
+// never in the script sandbox. An app may override them in functions.
+Future<Object?> _mediaExport(CallFunctionAction action, ActionRun run) async {
+  final services = run.context.services;
+  if (services is! Services) return {'ok': false, 'error': 'Video export is unavailable'};
+  final service = services.mediaExport;
+  if (action.name == 'media.cancelExport') {
+    service.cancel();
+    return {'cancelled': true};
+  }
+  final params = run.json(action.params);
+  final progress = params['progressVariable'] as String? ?? '';
+  try {
+    final raw = params['project'];
+    if (raw is! Map) throw ArgumentError('Export needs a project with source clips');
+    final request = MediaExportRequest.fromJson(raw.cast<String,Object?>(),
+      fileName: params['fileName'] as String? ?? 'video.webm',
+      width: (params['width'] as num?)?.toInt() ?? 640,
+      height: (params['height'] as num?)?.toInt() ?? 360);
+    final operation = service.export(request, onProgress: (value) {
+      if (progress.isNotEmpty) run.context.setVariable(progress, value);
+    });
+    final generation = service.generation;
+    run.host.onDispose(() { if (service.running && service.generation == generation) service.cancel(); });
+    final result = await operation;
+    return {'ok': true, ...result};
+  } catch (error) {
+    return {'ok': false, 'error': '$error', 'cancelled': error is MediaExportCancelled};
+  }
+}
