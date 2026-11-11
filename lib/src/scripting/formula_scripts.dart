@@ -213,7 +213,7 @@ class ScriptsScope extends NamedScope implements FormulaScripts, FormulaReadStat
 }
 
 /// A [ScriptHost] that only reads: for scripts called from formulas.
-class _ReadOnlyHost implements ScriptHost {
+class _ReadOnlyHost implements NamedVariablesScriptHost {
   _ReadOnlyHost(this.scope);
 
   final ScriptsScope scope;
@@ -222,6 +222,12 @@ class _ReadOnlyHost implements ScriptHost {
   Map<String, Object?> variables() {
     final reader = scope.reader ?? scope;
     return scriptVariables(reader, reader);
+  }
+
+  @override
+  Map<String, Object?> variablesNamed(Set<String> names) {
+    final reader = scope.reader ?? scope;
+    return scriptVariables(reader, reader, only: names);
   }
 
   @override

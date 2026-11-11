@@ -1806,10 +1806,11 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final side = n.prop(SegmentedButtonProps.side);
     final radius = n.prop(SegmentedButtonProps.borderRadius);
     final selectedIcon = _icon(n.prop(SegmentedButtonProps.selectedIcon));
+    final segmentHeight = n.prop(SegmentedButtonProps.segmentHeight);
     if (n.prop(SegmentedButtonProps.variant) == SegmentedVariant.track) {
       return _track(context, n, selection, multi);
     }
-    return SegmentedButton<String>(
+    final button = SegmentedButton<String>(
       segments: segments,
       selected: selection,
       onSelectionChanged:
@@ -1833,8 +1834,17 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         side: side == null ? null : _side(side),
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
         padding: n.prop(SegmentedButtonProps.padding)?.flutter,
+        minimumSize: segmentHeight == null ? null : Size(0, segmentHeight),
+        maximumSize: segmentHeight == null ? null : Size(double.infinity, segmentHeight),
+        tapTargetSize: n.prop(SegmentedButtonProps.shrinkTapTarget) ? MaterialTapTargetSize.shrinkWrap : null,
+        visualDensity: segmentHeight == null ? null : VisualDensity.standard,
       ),
+      expandedInsets: n.prop(SegmentedButtonProps.expanded) ? EdgeInsets.zero : null,
     );
+    // Segments sit on a canvas-type Material: a set background (transparent
+    // included) shows alone, as on chips.
+    if (n.prop(SegmentedButtonProps.backgroundColor) == null) return button;
+    return Theme(data: Theme.of(context).copyWith(canvasColor: Colors.transparent), child: button);
   }
 
   void _select(String value, bool multi) {
