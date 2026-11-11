@@ -47,12 +47,6 @@ typedef ActionHandler = FutureOr<void> Function(ActionDef action, ActionRun run)
 /// Runs [a] with its built-in handler.
 Future<void> handleAction(ActionDef a, ActionRun run) async {
   switch (a) {
-    // API actions this runtime doesn't run yet (their runtime support is
-    // still to come): they do nothing, as an unknown action would.
-    case ReloadCloudDataAction():
-    case EmitEventAction():
-    case CaptureScreenshotAction():
-      break;
     case NavigateAction():
       await run.host.ui.navigate(a, params: run.json(a.params), baseParams: run.json(a.baseParams));
     case OpenModalAction():
