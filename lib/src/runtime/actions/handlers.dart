@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import 'action_error.dart' show CodedFailure;
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
@@ -628,9 +629,22 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
   }
   final picked = await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple);
   for (final (i, f) in picked.indexed) {
-    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) throw StateError('${f.name} is larger than ${a.maxSizeMB} MB');
-    if (a.progressVariable.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, i / picked.length);
-    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes, contentType: f.contentType);
+    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
+      throw CodedFailure('file-too-large', '${f.name} is larger than ${_mb(a.maxSizeMB)} MB');
+    }
+    final type = f.contentType ?? '';
+    if (a.kind == CloudFileKind.image && type.isNotEmpty && !type.startsWith('image/')) {
+      throw CodedFailure('invalid-file-type', '${f.name} is not an image');
+    }
+    void progress(double sent) {
+      if (a.progressVariable.isNotEmpty) {
+        setVariableIn(run.context.scope, a.progressVariable, (i + sent.clamp(0, 1)) / picked.length);
+      }
+    }
+
+    progress(0);
+    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes,
+        contentType: f.contentType, onProgress: progress);
     await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
   }
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
@@ -1016,3 +1030,6 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
     return {'ok': false, 'error': '$error'};
   }
 }
+
+/// 5 for 5.0, 2.5 for 2.5.
+String _mb(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';
