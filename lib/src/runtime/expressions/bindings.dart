@@ -344,11 +344,14 @@ class NodeBinder {
   Node _withItems(NodeSource source, Node n, Object? instance, Object? items) {
     final list = _listOf(items);
     if (list == null) return n;
-    // A snapshot: an item's update can rebind nodes that make or drop item
-    // scopes (a list inside the item), changing [_items] mid-loop.
-    for (final e in _items.entries.toList()) {
-      if (e.key.$1 == n.id && e.key.$2 == instance) {
-        final i = e.key.$3;
+    // This list's item scopes only (a list of thousands of cells used to
+    // scan every item scope of every list, per bind). A snapshot: an item's
+    // update can rebind nodes that make or drop item scopes (a list inside
+    // the item), changing the map mid-loop.
+    final scopes = _items[(n.id, instance)];
+    if (scopes != null) {
+      for (final e in scopes.entries.toList(growable: false)) {
+        final i = e.key;
         e.value.update(index: i, item: i < list.length ? list[i] : null);
       }
     }
@@ -366,7 +369,8 @@ class NodeBinder {
         _ => null,
       };
 
-  final Map<(String, Object?, int), ItemScope> _items = {};
+  /// Item scopes by list (its id and instance), then by index.
+  final Map<(String, Object?), Map<int, ItemScope>> _items = {};
 
   static const _repeaters = {'listView', 'gridView', 'pageView'};
 
@@ -481,13 +485,13 @@ class NodeBinder {
       (final String tag, final Object? o, final String l, final int k) when tag == 'item' && l == listId => (k, o),
       _ => (0, instance),
     };
-    final key = (listId, outer, index);
-    final existing = _items[key];
+    final scopes = _items[(listId, outer)] ??= {};
+    final existing = scopes[index];
     if (existing != null) return existing;
     final parent = scopeFor(source, listId, outer) ?? root;
     final listNode = source.node(listId)!;
     final items = _listOf(_dataOf(listNode, parent));
-    return _items[key] = ItemScope(
+    return scopes[index] = ItemScope(
       index: index,
       item: items != null && index < items.length ? items[index] : null,
       parent: parent,
@@ -538,7 +542,7 @@ class NodeBinder {
 
   /// Lets go of the item, local and node scopes.
   void dispose() {
-    for (final s in [..._items.values, ..._provided.values]) {
+    for (final s in [for (final m in _items.values) ...m.values, ..._provided.values]) {
       s.dispose();
     }
     _items.clear();

@@ -257,7 +257,12 @@ class CodelesslyActions implements ActionRunner {
       host,
       // `value` too: an input's new value is also read by that name (a
       // search field's `query = \${value}`).
-      ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope),
+      // `drag` too: a drag trigger's pointer (`\${drag.x}`, `\${drag.y}`).
+      ValuesScope({
+        'result': result,
+        if (event.containsKey('value')) 'value': event['value'],
+        if (event.containsKey('drag')) 'drag': event['drag'],
+      }, context.scope),
       cancellation ?? ActionCancellation(),
       node,
       event['value'],
