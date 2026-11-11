@@ -170,6 +170,7 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
   final IslandManager manager;
   final String debugLabel;
   bool _disposed = false;
+  bool _renderDisposed = false;
   bool get disposed => _disposed;
 
   /// The island's root element (null until built, or once unmounted).
@@ -288,7 +289,11 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
     _disposed = true;
     manager._hosts.remove(this);
     final owner = _owner;
-    if (owner != null && owner.mounted) owner._drop(this);
+    if (owner != null && owner.mounted && _scope != null) {
+      owner._drop(this);
+    } else {
+      _disposeRenderHost();
+    }
   }
 
   void _unmounted(_IslandScopeElement scope) {
@@ -298,6 +303,14 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
     _dirty = true;
     // The island's render objects are disposed with its elements.
     child = null;
+    if (_disposed) _disposeRenderHost();
+  }
+
+  void _disposeRenderHost() {
+    if (_renderDisposed) return;
+    _renderDisposed = true;
+    child = null;
+    super.dispose();
   }
 }
 
