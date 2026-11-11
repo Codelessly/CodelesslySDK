@@ -460,6 +460,29 @@ void main() {
     expect(textRect(tester, 'Card 0').top, closeTo(before - 120, 0.5));
   });
 
+  testWidgets('an in-gap slot draws its node between the items and moves nothing', (tester) async {
+    final b = await pump(tester, wrapped: true, bTarget: {'slot': 'node', 'slotNodeId': 'bar', 'slotSize': 'inGap'}, extraNodes: {
+      'bar': {
+        'type': 'text',
+        'visible': false,
+        'layout': {'width': 160, 'height': 10},
+        'props': {'text': 'Insert'},
+      },
+    });
+    // Lane b: Four only; spaced cards would leave a gap, here 0: the bar sits on the boundary.
+    final four = textRect(tester, 'Four');
+    final gesture = await dragTo(tester, textRect(tester, 'One').center, four.topCenter + const Offset(0, 4), release: false);
+    expect(b.drag['over'], 'b');
+    await tester.pump();
+    // Nothing moves; the bar is centred on Four's top edge (before it).
+    expect(textRect(tester, 'Four').top, closeTo(four.top, 0.5));
+    final bar = textRect(tester, 'Insert');
+    expect(bar.center.dy, closeTo(four.top, 1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(b.lane('b'), ['c1', 'c4']);
+  });
+
   testWidgets('a feedback node that hugs takes its content\'s size, not its design size', (tester) async {
     await pump(tester, cardDraggable: {'feedbackNodeId': 'fb'}, extraNodes: {
       // Designed 40 × 40 (the size a hug node is saved with), hugging
