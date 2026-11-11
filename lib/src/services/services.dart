@@ -169,8 +169,10 @@ class Services implements CodelesslyServices {
   Future<void> dispose() async {
     cloud.dispose();
     speech.dispose();
+    final audioClosing = sound.dispose();
     paywalls?.dispose();
     await purchases.dispose();
     if (storage case final ChangeNotifier n) n.dispose();
+    await audioClosing;
   }
 }

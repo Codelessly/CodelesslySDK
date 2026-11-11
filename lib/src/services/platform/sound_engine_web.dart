@@ -14,13 +14,13 @@ SoundEngine createSoundEngine() {
   }
 }
 /// Short synthesised voices, each under 80 ms, through a gentle compressor.
-class _WebSoundEngine implements SoundEngine {
+class _WebSoundEngine implements DisposableSoundEngine {
   _WebSoundEngine(this._ctx) {
     // Browsers start audio only inside a user gesture, and Play Sound runs
     // from timers and clocks: resume on the first press or key anywhere.
-    void unlock(web.Event _) => resume();
-    web.document.addEventListener('pointerdown', unlock.toJS, true.toJS);
-    web.document.addEventListener('keydown', unlock.toJS, true.toJS);
+    _unlock = ((web.Event _) => resume()).toJS;
+    web.document.addEventListener('pointerdown', _unlock, true.toJS);
+    web.document.addEventListener('keydown', _unlock, true.toJS);
     _out = _ctx.createDynamicsCompressor()
       ..threshold.value = -6
       ..ratio.value = 4;
@@ -28,6 +28,20 @@ class _WebSoundEngine implements SoundEngine {
   }
 
   final web.AudioContext _ctx;
+  late final JSFunction _unlock;
+  bool _disposed = false;
+
+  @override
+  Future<void> dispose() async {
+    if (_disposed) return;
+    _disposed = true;
+    web.document.removeEventListener('pointerdown', _unlock, true.toJS);
+    web.document.removeEventListener('keydown', _unlock, true.toJS);
+    _stopwatch.stop();
+    _out.disconnect();
+    _noiseBuffer = null;
+    if (_ctx.state != 'closed') await _ctx.close().toDart;
+  }
   late final web.DynamicsCompressorNode _out;
   web.AudioBuffer? _noiseBuffer;
 
@@ -44,7 +58,7 @@ class _WebSoundEngine implements SoundEngine {
   }();
 
   @override
-  bool get available => _ctx.state == 'running';
+  bool get available => !_disposed && _ctx.state == 'running';
 
   final Stopwatch _stopwatch = Stopwatch()..start();
 
@@ -60,7 +74,7 @@ class _WebSoundEngine implements SoundEngine {
 
   @override
   void resume() {
-    if (_ctx.state != 'running') _ctx.resume();
+    if (!_disposed && _ctx.state != 'running') _ctx.resume();
   }
 
   web.GainNode _envelope(double t, double gain, double decay) {
@@ -103,7 +117,7 @@ class _WebSoundEngine implements SoundEngine {
     double volume = 1,
     double pitch = 1,
   }) {
-    if (volume <= 0.0005) return;
+    if (_disposed || volume <= 0.0005) return;
     // [time] is on the sound clock ([now]); the audio graph runs on the
     // audio clock.
     final double t = math.max(_clock.toAudio(time ?? 0), _ctx.currentTime);

@@ -105,8 +105,10 @@ class Codelessly extends ChangeNotifier {
 
   /// The services the layouts use: [CodelesslyConfig.services], else
   /// [Services] with their defaults. A [Services]' config follows the
-  /// publish model (its APIs).
-  late final CodelesslyServices services = config.services ?? Services();
+  /// publish model (its APIs). Defaults are released by [dispose]; injected
+  /// services remain owned by their host.
+  late final CodelesslyServices services = config.services ?? (_ownedServices = Services());
+  Services? _ownedServices;
 
   /// Where the publish model and the layouts come from.
   final PublishLoader loader;
@@ -348,6 +350,8 @@ class Codelessly extends ChangeNotifier {
     appVariables.dispose();
     _storage.dispose();
     data.dispose();
+    // Services supplied by the host may be shared by several projects.
+    unawaited(_ownedServices?.dispose());
     if (identical(_instance, this)) _instance = null;
     super.dispose();
   }
