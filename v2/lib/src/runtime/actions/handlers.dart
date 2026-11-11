@@ -28,6 +28,7 @@ import 'script_host.dart';
 import 'text_fields.dart';
 import 'values.dart';
 import 'variable_animator.dart';
+import 'printing.dart';
 
 /// Runs one action of a chain. Throws to stop the chain.
 typedef ActionHandler = FutureOr<void> Function(ActionDef action, ActionRun run);
@@ -42,6 +43,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       if (result != null) run.result = result;
     case CloseModalAction():
       run.host.ui.closeModal(a.result.isEmpty ? null : run.json(a.result));
+    case PrintAction():
+      await printNodeAction(a.node, run);
     case OpenLinkAction():
       final url = run.text(a.url).trim();
       if (url.isNotEmpty) await run.context.services.openUrl(url);
