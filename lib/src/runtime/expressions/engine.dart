@@ -123,7 +123,9 @@ class Expressions implements ExpressionEngine {
     }
 
     bool equals() {
-      if (left == null && right == null) return true;
+      // Empty text is as good as nothing, as for isEmpty: an empty right
+      // side (`''` parses to null) equals a formula's ''.
+      if ((left == null || left == '') && (right == null || right == '')) return true;
       if (left is num && right is num) return left == right;
       if (left == null || right == null) return false;
       if (left is bool && right is bool) return left == right;
