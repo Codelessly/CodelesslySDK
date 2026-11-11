@@ -406,6 +406,7 @@ class DataListViewState extends State<DataListView> {
       child = SwipeActionsBox(
         key: ValueKey(('swipe', key)),
         model: swipe,
+        offered: (action) => _r.holds(action.when, item: item, index: index),
         onAction: (action) => _onSwipe(action, index, item),
         child: child,
       );
@@ -487,6 +488,66 @@ class DataListViewState extends State<DataListView> {
     _sectionedItems = items;
     _sectionedBy = model.groupBy;
     return _sections;
+  }
+
+  List<Object?>? _keyedData;
+  String? _keyedBy;
+  Map<String, int> _firstIndexOfKey = const {};
+
+  /// The section key of every item of the list's data, by its first index:
+  /// with a data-paged list all of its data counts, not only the loaded
+  /// pages, so the index bar offers sections still to load.
+  Map<String, int> _dataKeys() {
+    final model = _node.sections;
+    final data = widget.data;
+    if (model == null || data == null || _model?.source != PaginationSource.data) return const {};
+    if (identical(data, _keyedData) && _keyedBy == model.groupBy) return _firstIndexOfKey;
+    final groupBy = model.groupBy.trim();
+    final binding = groupBy.contains(r'${');
+    final out = <String, int>{};
+    for (var i = 0; i < data.length; i++) {
+      final key = binding ? _r.text(groupBy, index: i, item: data[i]) : PaginationController.keyOf(data[i], groupBy);
+      out.putIfAbsent('$key', () => i);
+    }
+    _keyedData = data;
+    _keyedBy = model.groupBy;
+    return _firstIndexOfKey = out;
+  }
+
+  /// The keys the index bar shows: its own, else the sections'.
+  List<Object?> _indexKeys(List<ListSection> sections) {
+    final own = _node.sections?.indexKeys ?? const [];
+    if (own.isNotEmpty) return own;
+    final keys = <Object?>[for (final s in sections) s.key];
+    for (final k in _dataKeys().keys) {
+      if (!keys.any((x) => '$x' == k)) keys.add(k);
+    }
+    return keys;
+  }
+
+  /// Keys some item has (the rest show muted and do nothing).
+  Set<String> _presentKeys(List<ListSection> sections) =>
+      {for (final s in sections) '${s.key}', ..._dataKeys().keys};
+
+  /// Jumps to the section with [key]. With a data-paged list whose pages
+  /// don't reach it yet, loads them first.
+  Future<void> jumpToKey(Object? key) async {
+    int find() => (_sections ?? const <ListSection>[]).indexWhere((s) => '${s.key}' == '$key');
+    var i = find();
+    final c = _controller;
+    final target = _dataKeys()['$key'];
+    if (i < 0 && c != null && target != null) {
+      while (mounted && c.items.length <= target && c.hasMore) {
+        await c.loadMore();
+      }
+      if (!mounted) return;
+      setState(() {});
+      await SchedulerBinding.instance.endOfFrame;
+      if (!mounted) return;
+      _sectionsFor(_items);
+      i = find();
+    }
+    if (i >= 0) jumpToSection(i);
   }
 
   /// Jumps to the start of section [index].
@@ -713,7 +774,23 @@ class DataListViewState extends State<DataListView> {
             top: 0,
             bottom: 0,
             right: 0,
-            child: SectionIndexBar(keys: [for (final s in sections) s.key], onSelected: jumpToSection),
+            child: () {
+              final model = _node.sections!;
+              final keys = _indexKeys(sections);
+              final style = model.indexStyle;
+              return SectionIndexBar(
+                keys: keys,
+                present: _presentKeys(sections),
+                style: style == api.TextStyle.empty ? null : textStyle(style),
+                activeColor: model.indexActiveColor?.flutter,
+                mutedColor: model.indexMutedColor?.flutter,
+                width: model.indexWidth,
+                bubble: model.indexBubble,
+                bubbleColor: model.indexBubbleColor?.flutter,
+                bubbleStyle: model.indexBubbleStyle == api.TextStyle.empty ? null : textStyle(model.indexBubbleStyle),
+                onSelected: (i) => jumpToKey(keys[i]),
+              );
+            }(),
           ),
         ],
       );
@@ -778,46 +855,125 @@ class _HeaderDelegate extends SliverPersistentHeaderDelegate {
 }
 
 /// The keys of a list's sections along its edge (A–Z): pressing or
-/// dragging over one calls [onSelected] with its index.
-class SectionIndexBar extends StatelessWidget {
-  const SectionIndexBar({super.key, required this.keys, required this.onSelected});
+/// dragging over one calls [onSelected] with its index. Keys not in
+/// [present] (when given) show in [mutedColor] and do nothing; the touched
+/// key shows in [activeColor], and with [bubble] pops up large beside the
+/// bar.
+class SectionIndexBar extends StatefulWidget {
+  const SectionIndexBar({
+    super.key,
+    required this.keys,
+    required this.onSelected,
+    this.present,
+    this.style,
+    this.activeColor,
+    this.mutedColor,
+    this.width = 20,
+    this.bubble = false,
+    this.bubbleColor,
+    this.bubbleStyle,
+  });
 
   final List<Object?> keys;
   final ValueChanged<int> onSelected;
+  final Set<String>? present;
+  final TextStyle? style;
+  final Color? activeColor, mutedColor;
+  final double width;
+  final bool bubble;
+  final Color? bubbleColor;
+  final TextStyle? bubbleStyle;
+
+  @override
+  State<SectionIndexBar> createState() => _SectionIndexBarState();
+}
+
+class _SectionIndexBarState extends State<SectionIndexBar> {
+  int? _touching;
+
+  bool _offers(int i) => widget.present == null || widget.present!.contains('${widget.keys[i]}');
+
+  void _select(Offset local, double height) {
+    if (!height.isFinite || height <= 0) return;
+    final i = (local.dy / height * widget.keys.length).floor().clamp(0, widget.keys.length - 1);
+    if (i == _touching) return;
+    setState(() => _touching = i);
+    if (_offers(i)) widget.onSelected(i);
+  }
+
+  void _release() {
+    if (_touching != null) setState(() => _touching = null);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final keys = widget.keys;
     if (keys.isEmpty) return const SizedBox.shrink();
+    final base = const TextStyle(fontSize: 11, fontWeight: FontWeight.w600).merge(widget.style);
     return LayoutBuilder(
       builder: (context, constraints) {
-        void select(Offset local) {
-          final height = constraints.maxHeight;
-          if (!height.isFinite || height <= 0) return;
-          onSelected((local.dy / height * keys.length).floor().clamp(0, keys.length - 1));
-        }
-
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (d) => select(d.localPosition),
-          onVerticalDragStart: (d) => select(d.localPosition),
-          onVerticalDragUpdate: (d) => select(d.localPosition),
-          child: Semantics(
-            label: 'Section index',
-            child: SizedBox(
-              width: 20,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  for (final key in keys)
-                    Flexible(
-                      child: FittedBox(
-                        child: Text('${key ?? ''}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                      ),
-                    ),
-                ],
+        final height = constraints.maxHeight;
+        final touching = _touching;
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapDown: (d) => _select(d.localPosition, height),
+              onTapUp: (_) => _release(),
+              onTapCancel: _release,
+              onVerticalDragStart: (d) => _select(d.localPosition, height),
+              onVerticalDragUpdate: (d) => _select(d.localPosition, height),
+              onVerticalDragEnd: (_) => _release(),
+              child: Semantics(
+                label: 'Section index',
+                child: SizedBox(
+                  width: widget.width,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      for (var i = 0; i < keys.length; i++)
+                        Flexible(
+                          child: FittedBox(
+                            child: Text(
+                              '${keys[i] ?? ''}',
+                              style: base.copyWith(
+                                color: i == touching && widget.activeColor != null
+                                    ? widget.activeColor
+                                    : !_offers(i) && widget.mutedColor != null
+                                        ? widget.mutedColor
+                                        : null,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
+            if (widget.bubble && touching != null && height.isFinite)
+              Positioned(
+                right: widget.width + 12,
+                top: (touching + 0.5) / keys.length * height - 36,
+                child: IgnorePointer(
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: widget.bubbleColor ?? const Color(0xFF323232),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${keys[touching] ?? ''}',
+                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: Colors.white)
+                          .merge(widget.bubbleStyle),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         );
       },
     );
