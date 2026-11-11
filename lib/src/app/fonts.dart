@@ -132,6 +132,28 @@ class CodelesslyFonts {
   /// Fonts registered (by id).
   Set<String> get loaded => {..._fonts.keys};
 
+  /// Font loads in flight, in any app (the engine's fonts are global).
+  static final Set<Future<void>> _inFlight = {};
+
+  /// Completes once every font load in flight now has finished (or failed):
+  /// text measured after it uses the fonts it asked for. At once when none
+  /// is loading.
+  static Future<void> get settled {
+    if (_inFlight.isEmpty) return Future<void>.value();
+    return Future.wait([for (final f in _inFlight) f.catchError((Object _) {})]).then((_) {});
+  }
+
+  /// Whether a font load is in flight.
+  static bool get loading => _inFlight.isNotEmpty;
+
+  /// Tracks [load] in [settled] until it finishes.
+  static Future<T> track<T>(Future<T> load) {
+    final done = load.then<void>((_) {}, onError: (Object _) {});
+    _inFlight.add(done);
+    done.whenComplete(() => _inFlight.remove(done));
+    return load;
+  }
+
   /// Fetches and registers [fonts] not registered yet; completes when they
   /// are (a font that can't be fetched is skipped).
   Future<void> load(Iterable<PublishFont> fonts) async {
@@ -154,6 +176,7 @@ class CodelesslyFonts {
       for (final f in e.value) {
         _fonts[f.id] = done;
       }
+      track(done);
       pending.add(done);
     }
     await Future.wait(pending);
