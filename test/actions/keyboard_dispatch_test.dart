@@ -58,6 +58,16 @@ void main() {
     expect(typesText(null), isFalse);
   });
 
+  test('a when written as a \${path} binding guards a key', () async {
+    final s = scope();
+    final n = node([key('k', 1, when: r'${enabled}')]);
+    await fire(n, s, 'K');
+    expect(s.read('count'), 0);
+    s.set('enabled', true);
+    await fire(n, s, 'K');
+    expect(s.read('count'), 1);
+  });
+
   test('one digit runs only its matching reaction', () async {
     final s = scope();
     final n = node([key('1', 1), key('6', 6), key('9', 9)]);

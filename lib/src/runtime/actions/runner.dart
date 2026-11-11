@@ -212,10 +212,11 @@ class CodelesslyActions implements ActionRunner {
     final result = event.containsKey('result') ? event['result'] : (event.containsKey('value') ? event['value'] : (event.isEmpty ? null : event));
     final scope = ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope);
     try {
-      final value = FormulaEvaluator.exactExpression(when) != null
+      // `${path}` and `${= formula}` as written; a bare one is a formula.
+      final value = when.contains(r'${')
           ? context.expressions.evaluate(when, scope)
           : context.expressions.evaluate('\${= $when}', scope);
-      return value == true;
+      return value == true || value == 'true';
     } finally {
       scope.dispose();
     }
