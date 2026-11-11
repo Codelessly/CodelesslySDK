@@ -192,6 +192,15 @@ contacts Codelessly's paywall server (no resolve, no verification, no events, no
 functions); its grants live only in the test store's own runtime and are dropped when it turns off; and the server
 rejects test receipts anyway. Analytics events it logs carry `test: true`.
 
+## Open a paywall from a screen
+
+A layout opens a placement with the action `{"type": "paywall", "operation": "openPaywall", "placement":
+"upgrade"}`. Its screen comes in as a navigation would: give the action a `routeTransition` (`{"preset":
+"coverVertical", "durationMs": 520}`) or a `transition` with `transitionMs` / `reverseTransitionMs`, as on
+`navigate`. A purchase, a restore or the paywall's close action pops it, so the transition plays in reverse. Its
+bindings read `paywall.placement`, `paywall.termsUrl` / `privacyUrl` and, on the test store, `paywall.test`
+(`true`), as a presented paywall's do. The action's `${result.outcome}` is how it ended.
+
 ## Embed a paywall
 
 To show a paywall inside your own screen instead, give a `PaywallSession` to `CodelesslyWidget(paywall:)`. Its
