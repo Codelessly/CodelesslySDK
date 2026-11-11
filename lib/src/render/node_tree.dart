@@ -845,7 +845,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         ..painter = SpreadShadowPainter(shadows: spread, borderRadius: radius!));
     }
     final plan = _PaintPlan.of(n);
-    chain.add(_obtain<RenderDecoratedBox>('decoration', () => RenderDecoratedBox(decoration: const BoxDecoration()))
+    chain.add(_obtain<RenderNodeDecoration>('decoration', RenderNodeDecoration.new)
+      // An empty, undecorated container lets pointers through to what's
+      // under it, as Flutter's Stack and Container do: a full-screen overlay
+      // of floating panels over an interactive map.
+      ..opaque = d.fills.any((f) => f.visible) || d.strokes.any((f) => f.visible) || shadows.isNotEmpty || n.actions.isNotEmpty
       ..decoration = BoxDecoration(
         boxShadow: [for (final sh in shadows) if (!spread.contains(sh)) sh],
         borderRadius: radius,
@@ -1786,4 +1790,15 @@ class _PaintPlan {
       foreground,
     );
   }
+}
+
+/// A node's box decoration, hit only where the node paints (or reacts).
+class RenderNodeDecoration extends RenderDecoratedBox {
+  RenderNodeDecoration() : super(decoration: const BoxDecoration());
+
+  /// Whether the box takes hits on its own (else only through its child).
+  bool opaque = true;
+
+  @override
+  bool hitTestSelf(Offset position) => opaque && super.hitTestSelf(position);
 }

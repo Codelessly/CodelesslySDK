@@ -75,7 +75,10 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     }
   }
   cardLayers(b, n, chain, animates: animates);
-  if (be.scale != 1) {
+  // A state style that scales the node (a press shrink) keeps the layer at
+  // rest too: adding it mid-press rewired the chain under the pointer and
+  // the tap was lost.
+  if (be.scale != 1 || (animates && _stateScales(b, n))) {
     chain.add(
       b.obtain<RenderPose>('scale', RenderPose.new)
         ..transform = Matrix4.diagonal3Values(be.scale, be.scale, 1)
@@ -1321,4 +1324,16 @@ abstract final class _MotionRevealWatcher {
       _schedule();
     });
   }
+}
+
+/// Whether a state style (the node's own, or one of a node around it that
+/// targets it) can set node [n]'s scale.
+bool _stateScales(NodeBuilder b, Node n) {
+  bool scales(Node? owner) =>
+      owner != null && owner.behaviors.states.patches.values.any((p) => p[n.id]?.containsKey('scale') ?? false);
+  if (scales(b.tree.source.node(n.id))) return true;
+  for (String? id = b.tree.source.parentOf(n.id); id != null; id = b.tree.source.parentOf(id)) {
+    if (scales(b.tree.source.node(id))) return true;
+  }
+  return false;
 }
