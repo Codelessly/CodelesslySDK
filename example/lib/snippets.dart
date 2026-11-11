@@ -4,6 +4,7 @@
 //
 // Nothing here runs in the example app.
 // ignore_for_file: unused_element, unreachable_from_main
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -663,4 +664,67 @@ Codelessly functionOpeningRoute(GlobalKey<NavigatorState> navigatorKey) => Codel
           },
         },
       ),
+    );
+
+// ---------------------------------------------------------------------
+// Paywalls.
+// ---------------------------------------------------------------------
+
+/// Managed paywalls come with the project's cloud services: placements,
+/// store prices, purchases verified by Codelessly.
+Future<Codelessly> paywallSetup() => codelesslyWithToken('YOUR_PROJECT_TOKEN', cloudServices: true);
+
+/// The paywall published at `onboarding`; the Pro screen once it's bought.
+Future<void> openProFeature(BuildContext context, Codelessly codelessly) async {
+  final result = await codelessly.paywall.present(context, placement: 'onboarding');
+  if (!context.mounted) return;
+  switch (result.outcome) {
+    case PaywallOutcome.purchased || PaywallOutcome.restored:
+      // result.entitlementId: the entitlement Codelessly verified ('pro').
+      await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ProScreen()));
+    case PaywallOutcome.failed:
+      debugPrint('Paywall failed: ${result.error}');
+    default:
+      // closed (dismissed) or skipped (a holdout, nothing published there).
+      break;
+  }
+}
+
+class ProScreen extends StatelessWidget {
+  const ProScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Pro')));
+}
+
+/// Without Codelessly's backend: the placements come from the publish and the
+/// purchases from your own store code (RevenueCat, StoreKit). Report
+/// [PaywallOutcome.purchased] only once your server verified the purchase.
+class MyPurchases implements PurchaseService {
+  final _updates = StreamController<PaywallResult>.broadcast();
+
+  @override
+  Stream<PaywallResult> get updates => _updates.stream;
+
+  @override
+  Future<List<PaywallProduct>> products(List<ProductSlot> slots) async => [
+        for (final slot in slots)
+          PaywallProduct(slot: slot.id, storeId: slot.iosProductId, price: r'$4.99', currency: 'USD'),
+      ];
+
+  @override
+  Future<void> purchase(PaywallProduct product) async {
+    // Buy product.storeId with your store code, verify it, then:
+    _updates.add(PaywallResult(PaywallOutcome.purchased, productId: product.storeId, entitlementId: 'pro'));
+  }
+
+  @override
+  Future<void> restore() async => _updates.add(const PaywallResult(PaywallOutcome.restoreNothing));
+
+  @override
+  Future<void> dispose() => _updates.close();
+}
+
+Codelessly ownPurchases() => Codelessly(
+      config: CodelesslyConfig(slug: 'my-project', services: Services(purchases: MyPurchases())),
     );

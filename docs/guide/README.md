@@ -6,7 +6,7 @@ tests (`test/guide_test.dart`) or the SDK's own.
 
 ![The guide in four groups: Get started, Build, Extend, Ship and maintain](images/index/hero.png)
 
-*The fifteen chapters, by what you are doing.*
+*The chapters, by what you are doing.*
 
 New here? Read [Introduction](01-introduction.md), then do the [Quickstart](02-quickstart.md).
 
@@ -29,6 +29,7 @@ New here? Read [Introduction](01-introduction.md), then do the [Quickstart](02-q
 | 13 | [Publishing and environments](13-publishing-and-environments.md) | Understand publish, preview, templates, sites and app identity |
 | 14 | [Testing](14-testing.md) | Write widget tests for screens that show layouts |
 | 15 | [Troubleshooting and FAQ](15-troubleshooting.md) | Decode an error message |
+| 16 | [Paywalls](16-paywalls.md) | Sell subscriptions with a paywall designed in the Editor |
 
 Related:
 
