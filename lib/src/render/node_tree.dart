@@ -1361,10 +1361,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _wire(List<RenderBox> next) {
     final relink = _alreadyWired(next);
     if (relink != null) {
+      // A dirty inner wrapper may have been reparented since its last layout.
+      // Invalidate this ancestor first, before asking wrappers to propagate
+      // dirtiness through their newly connected parent chain.
+      markNeedsLayout();
       for (final o in relink) {
         o.markNeedsLayout();
       }
-      markNeedsLayout();
       _previousInner = const [];
       _finishWire(next);
       return;
