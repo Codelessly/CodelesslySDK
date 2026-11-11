@@ -72,6 +72,7 @@ TextStyle textStyle(api.TextStyle style) {
   final weight = style.fontWeight;
   return kTextBase.merge(TextStyle(
     fontFamily: style.fontFamily,
+      fontFamilyFallback: style.fontFamilyFallback,
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
     fontStyle: style.fontStyle == null ? null : FontStyle.values.byName(style.fontStyle!.name),
     fontSize: style.fontSize,

@@ -222,6 +222,7 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     final weight = s.fontWeight;
     return TextStyle(
       fontFamily: s.fontFamily,
+      fontFamilyFallback: s.fontFamilyFallback,
       fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
       fontStyle: s.fontStyle == api.FontStyle.italic ? FontStyle.italic : null,
     );
@@ -484,6 +485,7 @@ TextStyle applyTextStyle(api.TextStyle? style, TextStyle base) {
   final weight = style.fontWeight;
   return base.copyWith(
     fontFamily: style.fontFamily,
+      fontFamilyFallback: style.fontFamilyFallback,
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
     fontStyle: style.fontStyle == null ? null : (style.fontStyle == api.FontStyle.italic ? FontStyle.italic : FontStyle.normal),
     fontSize: style.fontSize,

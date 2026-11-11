@@ -3,8 +3,26 @@ import 'dart:typed_data';
 import 'package:codelessly_sdk_v2/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// ignore: depend_on_referenced_packages
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
+class RejectWrites extends InMemorySharedPreferencesStore {
+ RejectWrites():super.empty();
+ @override Future<bool> setValue(String valueType,String key,Object value)async=>false;
+}
+
 
 void main() {
+  test('rejected preference writes fail without notifying or changing runtime data',()async{
+    SharedPreferences.setMockInitialValues({});
+    final original=SharedPreferencesStorePlatform.instance;
+    SharedPreferencesStorePlatform.instance=RejectWrites();
+    addTearDown((){SharedPreferencesStorePlatform.instance=original;SharedPreferences.setMockInitialValues({});});
+    final storage=await PreferencesLocalStorage.open(prefix:'rejected.');
+    var notifications=0;storage.addListener(()=>notifications++);
+    await expectLater(storage.put('tapes',[1]),throwsStateError);
+    expect(storage.get('tapes'),isNull);expect(notifications,0);
+    storage.dispose();
+  });
   test('memory caches', () async {
     final cache = MemoryKeyValueCache();
     await cache.write('auth', {'projectId': 'p'});
