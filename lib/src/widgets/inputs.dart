@@ -1430,9 +1430,15 @@ String _formatted(DateTime value, String pattern, String fallback) {
 /// A picker's face: the outlined button, or with a decoration a read-only
 /// field (hover and press feedback, the decoration's border, icons and
 /// error) that opens the picker.
-Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap) {
-  final style = n.prop(PickerFieldProps.style);
+Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap, {bool empty = false}) {
+  var style = n.prop(PickerFieldProps.style);
   final d = n.prop(PickerFieldProps.decoration);
+  // No value yet: the decoration's hint (`—`, "Pick a day") in its style.
+  final hint = d.hintText;
+  if (empty && hint != null) {
+    text = hint;
+    if (!d.hintStyle.isEmpty) style = d.hintStyle;
+  }
   if (d.isEmpty) {
     return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style)));
   }
@@ -1507,6 +1513,7 @@ class _DatePickerIslandState extends State<_DatePickerIsland> {
       context,
       n,
       _formatted(initial, n.prop(PickerFieldProps.format), _isoDate(initial)),
+      empty: _date(picked ?? value) == null,
       !n.prop(DatePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
@@ -1555,6 +1562,7 @@ class _TimePickerIslandState extends State<_TimePickerIsland> {
       context,
       n,
       _formatted(DateTime(2000, 1, 1, time.hour, time.minute), n.prop(PickerFieldProps.format), _clock(time)),
+      empty: _time(picked ?? value) == null,
       !n.prop(TimePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
