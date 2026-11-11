@@ -15,8 +15,9 @@ class RenderReveal extends RenderProxyBox {
   int _generation = 0;
   Timer? _delay;
 
-  /// The scrollables followed (reveal.follow) and the offset each was left
-  /// at: one that has moved since was scrolled by the user, and ends it.
+  /// The scrollables followed (reveal.follow), each with what tells a user's
+  /// scroll since: a design scroll's count of user scrolls, a Flutter
+  /// viewport's offset as it was left (there, any other move ends it).
   List<(Object, double)>? _following;
 
   void configure(api.Reveal model, bool interactive) {
@@ -91,6 +92,12 @@ class RenderReveal extends RenderProxyBox {
         _ => null,
       };
 
+  /// What [_following] keeps for [s] (see there).
+  static double? _markOf(Object s) => switch (s) {
+        RenderDesignScroll d => d.userScrolls.toDouble(),
+        _ => _pixelsOf(s),
+      };
+
   static double? _maxOf(Object s) => switch (s) {
         RenderDesignScroll d => d.maxScrollExtent,
         ScrollPosition p => p.hasContentDimensions ? p.maxScrollExtent : null,
@@ -99,7 +106,7 @@ class RenderReveal extends RenderProxyBox {
 
   void _startFollowing(int generation) {
     if (!attached || !_enabled || generation != _generation) return;
-    _following = [for (final s in _scrollables()) if (_pixelsOf(s) case final px?) (s, px)];
+    _following = [for (final s in _scrollables()) if (_markOf(s) case final m?) (s, m)];
     _followAfterFrame(generation);
   }
 
@@ -110,11 +117,12 @@ class RenderReveal extends RenderProxyBox {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       final following = _following;
       if (following == null || !attached || !_enabled || generation != _generation || !hasSize) return;
-      for (final (s, px) in following) {
-        final now = _pixelsOf(s);
-        // Shorter content clamps the offset to its new end: not a scroll.
-        final clamped = now != null && now < px && now == _maxOf(s);
-        if (now != px && !clamped) {
+      for (final (s, mark) in following) {
+        final now = _markOf(s);
+        // Shorter content clamps a viewport's offset to its new end: not a
+        // scroll. (A design scroll counts its user's scrolls instead.)
+        final clamped = s is ScrollPosition && now != null && now < mark && now == _maxOf(s);
+        if (now != mark && !clamped) {
           _following = null; // scrolled by the user
           return;
         }
@@ -136,7 +144,7 @@ class RenderReveal extends RenderProxyBox {
           target = parent;
         }
       }
-      _following = [for (final s in _scrollables()) if (_pixelsOf(s) case final px?) (s, px)];
+      _following = [for (final s in _scrollables()) if (_markOf(s) case final m?) (s, m)];
       _followAfterFrame(generation);
     });
   }

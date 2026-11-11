@@ -59,13 +59,23 @@ void main() {
     await tester.pump();
     expect(viewport.offset, closeTo(340, .1));
 
-    // The user scrolls up: it stops following.
-    viewport.jumpBy(-100);
+    // A program scrolls (a scrollTo action) as the content grows: still
+    // following.
+    viewport.jumpBy(-30);
+    setVariableIn(s.scope, 'h', 480);
     await tester.pump();
+    await tester.pump();
+    expect(viewport.offset, closeTo(370, .1));
+
+    // The user drags it down (scrolling up): it stops following.
+    await tester.drag(find.byType(NodeView), const Offset(0, 100));
+    await tester.pump();
+    final left = viewport.offset;
+    expect(left, lessThan(370));
     setVariableIn(s.scope, 'h', 700);
     await tester.pump();
     await tester.pump();
-    expect(viewport.offset, closeTo(240, .1));
+    expect(viewport.offset, closeTo(left, .1));
     expect(tester.takeException(), isNull);
   });
 
