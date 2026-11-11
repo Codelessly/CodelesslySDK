@@ -502,6 +502,28 @@ void main() {
     expect(codelessly.route.value!.layoutId, 'home');
   });
 
+  test('server-written data: own notes, an audience, an expiry', () async {
+    final clock = DateTime.utc(2026, 11, 11, 12);
+    final ana = serverWrittenData(uid: 'ana', role: 'pro', now: () => clock);
+    // What the project's editors or the server write (sendToUsers, the Data
+    // panel); the in-memory backend does not check the rules.
+    await ana.addDocument('notes', {'ownerId': 'ana', 'text': 'Welcome', 'read': false}, id: 'n1');
+    await ana.addDocument('notes', {'ownerId': 'bo', 'text': 'Hi Bo'}, id: 'n2');
+    await ana.addDocument('notes', {'ownerId': 'ana', 'text': 'Old', 'expiresAt': '2026-11-01T00:00:00.000Z'}, id: 'n3');
+    await ana.addDocument('news', {'audience': ['role:pro'], 'title': 'For pros'}, id: 'p1');
+    await ana.addDocument('news', {'audience': ['role:admin'], 'title': 'For admins'}, id: 'p2');
+
+    final notes = await ana.query('notes', const CloudQuery());
+    expect(notes.map((n) => n['id']), ['n1'], reason: "not Bo's, not expired");
+    expect(notes.single['expiresAt'], DataRules.neverExpires);
+    final news = await ana.query('news', const CloudQuery());
+    expect(news.map((n) => n['title']), ['For pros']);
+    // The owner may flip `read` (the rules allow only the ownerFields).
+    await ana.updateDocument('notes', 'n1', {'read': true});
+    expect((await ana.getDocument('notes', 'n1'))!['read'], isTrue);
+    ana.dispose();
+  });
+
   test('the instance\'s status: empty, loaded, and loaded again after a reset', () async {
     final codelessly = testCodelessly();
     addTearDown(codelessly.dispose);

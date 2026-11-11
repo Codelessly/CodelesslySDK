@@ -1,3 +1,15 @@
+## Unreleased
+
+**New**
+
+- Cloud data follows the new data rules `ownerRead` (each user reads their own documents, which only the project
+  writes; the owner may change the rules' `ownerFields`) and `audience` (a user reads the documents whose `audience`
+  list names them, their role, signed-in users or everyone), and a collection's `expiry` field: queries filter
+  `field > now` and keep that bound (and the owner or audience filter) on the database when the app finishes the
+  rest, live queries drop documents as they expire, and writes store the field as ISO text (empty or missing:
+  `DataRules.neverExpires`). `BackendCloudDatabase(audience:)` gives what the user matches. `CloudQuery.plan`
+  takes `keepOnServer`. See the guide's [Cloud data and services](docs/guide/09-cloud-data-and-services.md).
+
 ## 23.0.0
 
 **Breaking changes**

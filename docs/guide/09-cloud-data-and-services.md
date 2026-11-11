@@ -181,6 +181,49 @@ counts atomically:
               "fields": [{"field": "views", "operation": "increment", "value": "1"}]}]}
 ```
 
+### Who reads and writes each collection
+
+The project's data rules (set per top-level collection in the editor's Data panel) decide who may read and write,
+and `BackendCloudDatabase` follows them: it adds the filters the database's rules expect to every query and
+stamps the owner on writes. Besides `app`, `signedIn`, `owner`, `publicReadOwnerWrite` and `roleWrite`, two rules
+are for data the app reads but only the project writes (from the editor, Codelessly's server, or app users with
+the collection's role):
+
+- `ownerRead`: each signed-in user reads the documents whose `ownerId` is theirs. Users can't create, edit or
+  delete them, except the fields the rules list in `ownerFields` (for example a `read` flag) on their own
+  documents.
+- `audience`: a user reads a document when its `audience` list names everyone (`*`), signed-in users
+  (`signedIn`), their role (`role:pro`) or them (`user:{uid}`). It is checked when the document is read, so users
+  who sign up or change role later see it too. Give `BackendCloudDatabase(audience:)` what the user matches
+  (`DataRules.audienceOf(uid, role: ..., signedIn: ...)`); without it, everyone and the user.
+
+A collection can also expire: with `expiry: {collection: field}` in the rules, documents past the time in that
+field are not returned (queries get `field > now`, and a live query drops documents as they expire), the
+database refuses them to app users, and Codelessly deletes them later. Write the field as a date or ISO text; a
+document without one never expires (it is written as `DataRules.neverExpires`).
+
+```dart
+BackendCloudDatabase serverWrittenData({required String uid, String role = 'user', DateTime Function()? now}) =>
+    BackendCloudDatabase(
+      backend: MemoryDocumentBackend(),
+      rules: DataRules.fromJson({
+        'collections': {'notes': 'ownerRead', 'news': 'audience'},
+        'ownerFields': {
+          'notes': ['read'],
+        },
+        'expiry': {'notes': 'expiresAt', 'news': 'expiresAt'},
+      }),
+      userId: () => uid,
+      // What this user matches in a document's `audience` list.
+      audience: () => DataRules.audienceOf(uid, role: role, signedIn: true),
+      now: now,
+    );
+```
+
+With Codelessly's cloud, a query on an expiring `ownerRead` or `audience` collection runs on its owner (or
+audience) filter and the expiry bound together, which needs a composite index; Codelessly creates it when the
+expiry is set, and the query fails until it is ready (a few minutes).
+
 ## HTTP APIs
 
 ![On the web, callApi posts {url, method, headers, body} to your proxy, which calls the API and returns {statusCode, headers, body}](images/09-cloud-data-and-services/api-proxy.png)

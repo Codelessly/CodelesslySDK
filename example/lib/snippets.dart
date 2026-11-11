@@ -554,6 +554,27 @@ const Map<String, Object?> cardImpression = {
   ],
 };
 
+/// Data the app reads but only the project (or its server) writes: a
+/// user's own notes (`ownerRead`, the owner may flip `read`), posts to an
+/// audience checked at read time (`audience`), and an expiry on both. The
+/// rules come live from `data_rules/{projectId}` with Codelessly's cloud;
+/// here they are given, in memory.
+BackendCloudDatabase serverWrittenData({required String uid, String role = 'user', DateTime Function()? now}) =>
+    BackendCloudDatabase(
+      backend: MemoryDocumentBackend(),
+      rules: DataRules.fromJson({
+        'collections': {'notes': 'ownerRead', 'news': 'audience'},
+        'ownerFields': {
+          'notes': ['read'],
+        },
+        'expiry': {'notes': 'expiresAt', 'news': 'expiresAt'},
+      }),
+      userId: () => uid,
+      // What this user matches in a document's `audience` list.
+      audience: () => DataRules.audienceOf(uid, role: role, signedIn: true),
+      now: now,
+    );
+
 // ---------------------------------------------------------------------
 // Scripting.
 // ---------------------------------------------------------------------
