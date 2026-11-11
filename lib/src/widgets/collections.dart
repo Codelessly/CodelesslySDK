@@ -637,21 +637,14 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
   final rowOffset = headerRow ? 1 : 0, columnOffset = headerColumn ? 1 : 0;
-  void add(String? id, int r, int c) {
-    if (id == null) return;
-    ids.add(id);
-    cells.add((r, c));
-    if (data == null) {
-      // The first of each template in the table's own scope (what tools
-      // measure), the others in their cell's.
-      instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
-      return;
-    }
-    // Bound rows: each cell in the scope the running table gives it.
+
+  /// Cell (r, c)'s scope key, index and item from rows [data]: what the
+  /// running table gives the cell there.
+  (Object, int, Object?) cellItem(List<Object?> data, int r, int c) {
     final rowIndex = r - rowOffset, columnIndex = c - columnOffset;
     final column = columnIndex >= 0 && columnIndex < columns.length ? columns[columnIndex] : null;
     final row = rowIndex >= 0 && rowIndex < data.length ? data[rowIndex] : null;
-    final (Object key, int index, Object? item) = switch ((r < rowOffset, c < columnOffset)) {
+    return switch ((r < rowOffset, c < columnOffset)) {
       (true, true) => ('corner', 0, null),
       (true, false) => (('column', columnIndex), columnIndex, {'label': column?.label, 'column': column?.key, 'columnIndex': columnIndex}),
       (false, true) => (('row', rowIndex), rowIndex, {'row': row, 'rowIndex': rowIndex}),
@@ -671,6 +664,20 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
           }
         ),
     };
+  }
+
+  void add(String? id, int r, int c) {
+    if (id == null) return;
+    ids.add(id);
+    cells.add((r, c));
+    if (data == null) {
+      // The first of each template in the table's own scope (what tools
+      // measure), the others in their cell's.
+      instances.add(firsts.add(id) ? null : ('cell', b.instance, b.id, r, c));
+      return;
+    }
+    // Bound rows: each cell in the scope the running table gives it.
+    final (Object key, int index, Object? item) = cellItem(data, r, c);
     final instance = ProvidedItem('cell', b.instance, n.id, key);
     binder!.provideItem(b.tree.source, instance, index: index, item: item);
     instances.add(instance);
@@ -690,6 +697,20 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
           r,
           c);
     }
+  }
+  // New data (a variable edit, a capture's values) moves the cells' items
+  // in place, as a list's item scopes move, even when the table's size and
+  // so its node stay the same.
+  if (data == null) {
+    binder?.onItemsChanged(n.id, b.instance, null);
+  } else {
+    final shown = [...cells];
+    binder!.onItemsChanged(n.id, b.instance, (items) {
+      for (final (r, c) in shown) {
+        final (key, index, item) = cellItem(items, r, c);
+        binder.provideItem(b.tree.source, ProvidedItem('cell', b.instance, n.id, key), index: index, item: item);
+      }
+    });
   }
   final lineColor = n.prop(TableViewProps.gridLineColor), lineWidth = n.prop(TableViewProps.gridLineWidth);
   final view = b.obtain<RenderTableItems>('table', RenderTableItems.new)
