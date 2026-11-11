@@ -545,14 +545,19 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return out;
   }
 
+  // A table that fills or flexes gets more than its design size (a
+  // `fill` height's design value may be 1): build the cells for a screenful
+  // there, clipped to the box it gets.
+  double reach(SizeFit fit, double designExtent, double screen) =>
+      fit == SizeFit.fill || fit == SizeFit.flexible ? math.max(designExtent, screen) : designExtent;
   final columnWidths = fit([
     if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
     for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth),
-  ], design.width);
+  ], reach(n.layout.width.fit, design.width, 2400));
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
     for (var i = 0; i < math.min(rowCount, _maxTableSpans); i++) n.prop(TableViewProps.rowHeight),
-  ], design.height);
+  ], reach(n.layout.height.fit, design.height, 1600));
 
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
