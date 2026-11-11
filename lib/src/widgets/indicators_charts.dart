@@ -7,11 +7,14 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart'
     show
+        ChartGridLineMode,
         ChartProps,
         ChartSeries,
         ChartSeriesKind,
         ChartType,
+        ChartYLabelAlign,
         LineChartProps,
+        LineChartXLabelAnchor,
         PlotChartGridAnchor,
         PlotChartMarker,
         PlotChartMarkerPosition,
@@ -111,7 +114,25 @@ void _dashedLine(Canvas canvas, Offset a, Offset b, Paint paint, {double dash = 
 class ChartSeriesPainter extends NodePainter {
   ChartSeriesPainter(super.n) : super(repaint: PaintingBinding.instance.systemFonts);
 
-  static const double _xAxisHeight = 22;
+  double get _xAxisHeight => p(ChartProps.xAxisHeight);
+
+  /// The y of an x label's centre below a plot (or band) ending at [bottom]:
+  /// its top [ChartProps.xLabelGap] below, else centred in the band.
+  double _xLabelY(double bottom, double textHeight) => switch (p(ChartProps.xLabelGap)) {
+        final double gap => bottom + gap + textHeight / 2,
+        null => bottom + _xAxisHeight / 2 + 2,
+      };
+
+  /// The centre y of a horizontal line [width] thick for the value at [y]
+  /// ([ChartProps.gridLineMode]); [bottom] marks the plot's bottom line.
+  double _lineY(double y, double width, {bool bottom = false}) => switch (p(ChartProps.gridLineMode)) {
+        ChartGridLineMode.centered => y.roundToDouble() - (bottom ? 0.5 : 0),
+        // Whole rows from the rounded y down (the bottom line up, inside the
+        // plot). Only a whole width fills whole rows; others stay on the value.
+        ChartGridLineMode.crisp when width != width.roundToDouble() => y,
+        ChartGridLineMode.crisp => y.roundToDouble() + (bottom ? -width / 2 : width / 2),
+        ChartGridLineMode.exact => y - width / 2,
+      };
 
   List<Map<String, Object?>> get data => p(ChartProps.data);
   List<ChartSeries> get series => p(ChartProps.series);
@@ -204,7 +225,10 @@ class ChartSeriesPainter extends NodePainter {
     return (lo, lo + top, step);
   }
 
-  void _label(Canvas canvas, String text, Offset anchor, {TextAlign align = TextAlign.center, TextStyle? style}) {
+  /// Paints [text] centred vertically on [anchor] (or, with [xAxisBottom],
+  /// as an x label below a plot ending there: see [_xLabelY]).
+  void _label(Canvas canvas, String text, Offset anchor,
+      {TextAlign align = TextAlign.center, TextStyle? style, double? xAxisBottom}) {
     final tp = TextPainter(text: TextSpan(text: text, style: style ?? _axisStyle), textDirection: TextDirection.ltr)
       ..layout();
     final dx = switch (align) {
@@ -212,7 +236,8 @@ class ChartSeriesPainter extends NodePainter {
       TextAlign.left || TextAlign.start => 0.0,
       _ => -tp.width / 2,
     };
-    tp.paint(canvas, anchor + Offset(dx, -tp.height / 2));
+    final cy = xAxisBottom == null ? anchor.dy : _xLabelY(xAxisBottom, tp.height);
+    tp.paint(canvas, Offset(anchor.dx + dx, cy - tp.height / 2));
     tp.dispose();
   }
 
@@ -300,15 +325,16 @@ class ChartSeriesPainter extends NodePainter {
       final yFamily = p(ChartProps.yAxisFontFamily);
       for (var k = 0; k <= gridLines; k++) {
         final v = lo + (hi - lo) * k / gridLines;
-        final gy = y(v).roundToDouble() - (k == 0 ? 0.5 : 0);
+        final gy = _lineY(y(v), 1, bottom: k == 0);
         canvas.drawLine(Offset(plot.left, gy), Offset(plot.right, gy), grid);
         if (p(ChartProps.showYAxis)) {
+          final start = p(ChartProps.yLabelAlign) == ChartYLabelAlign.start;
           _label(
             canvas,
             gridLabelText(v, k, gridLines, p(ChartProps.yLabelPrefix), p(ChartProps.yLabelSuffix),
                 topOnly: p(ChartProps.yLabelAffixTopOnly)),
-            Offset(plot.left - 8, gy),
-            align: TextAlign.right,
+            Offset(start ? 0 : plot.left - 8, gy),
+            align: start ? TextAlign.left : TextAlign.right,
             style: yFamily == null ? null : _labelStyle(yFamily),
           );
         }
@@ -323,7 +349,7 @@ class ChartSeriesPainter extends NodePainter {
         final tp = TextPainter(text: TextSpan(text: l.label, style: style), textDirection: TextDirection.ltr)
           ..layout();
         final lx = (xAt(l.x) - tp.width / 2).clamp(0.0, math.max(0.0, size.width - tp.width));
-        tp.paint(canvas, Offset(lx.toDouble(), plot.bottom + _xAxisHeight / 2 + 2 - tp.height / 2));
+        tp.paint(canvas, Offset(lx.toDouble(), _xLabelY(plot.bottom, tp.height) - tp.height / 2));
         tp.dispose();
       }
     }
@@ -429,10 +455,15 @@ class ChartSeriesPainter extends NodePainter {
       final paint = Paint()
         ..color = line.color.flutter
         ..strokeWidth = line.strokeWidth;
+      // Centered keeps the line on its value; crisp and exact place it as
+      // they do the grid lines.
+      final sy = p(ChartProps.gridLineMode) == ChartGridLineMode.centered
+          ? ly
+          : _lineY(ly, line.strokeWidth, bottom: ly.round() >= plot.bottom.round());
       if (line.dashed) {
-        _dashedLine(canvas, Offset(plot.left, ly), Offset(plot.right, ly), paint);
+        _dashedLine(canvas, Offset(plot.left, sy), Offset(plot.right, sy), paint);
       } else {
-        canvas.drawLine(Offset(plot.left, ly), Offset(plot.right, ly), paint);
+        canvas.drawLine(Offset(plot.left, sy), Offset(plot.right, sy), paint);
       }
     }
 
@@ -579,7 +610,8 @@ class ChartSeriesPainter extends NodePainter {
         final label = data[i][labelField];
         if (label == null) continue;
         final style = i == highlight && highlightColor != null ? base.copyWith(color: highlightColor) : base;
-        _label(canvas, '$label', Offset(cx(i), plot.bottom + _xAxisHeight / 2 + 2),
+        _label(canvas, '$label', Offset(cx(i), 0),
+            xAxisBottom: plot.bottom,
             style: i == selected && !isLine && !p(ChartProps.tooltip) ? selectedStyle : style);
       }
     }
@@ -715,7 +747,8 @@ class ChartSeriesPainter extends NodePainter {
       for (var k = 0; k <= divisions; k += every) {
         final v = domainMin + span * k / divisions;
         final lx = band.width * k / divisions;
-        _label(canvas, compactNumber(v), Offset(lx, bandH + _xAxisHeight / 2 + 2),
+        _label(canvas, compactNumber(v), Offset(lx, 0),
+            xAxisBottom: bandH,
             align: k == 0 ? TextAlign.left : (k == divisions ? TextAlign.right : TextAlign.center));
       }
     }
@@ -1520,6 +1553,8 @@ class LineChartPainter extends NodePainter {
   void paint(Canvas canvas, Size size) {
     // Values outside the domain (yMin/yMax set) would draw beyond the box,
     // over whatever sits below: the chart stays in its box.
+    // Unless [LineChartProps.clip] is off.
+    if (!p(LineChartProps.clip)) return _paintChart(canvas, size);
     canvas.save();
     canvas.clipRect(Offset.zero & size);
     _paintChart(canvas, size);
@@ -1653,14 +1688,21 @@ class LineChartPainter extends NodePainter {
       for (final t in p(LineChartProps.xTicks))
         if (_x(t['x']) case final double tx) (x: tx, label: _text(t['label']) ?? ''),
     ];
+    final anchor = p(LineChartProps.xLabelAnchor), labelOffset = p(LineChartProps.xLabelOffset);
     for (var i = 0; i < xTicks.length; i++) {
       final x = px(xTicks[i].x);
       final tp = _layout(xTicks[i].label, axisLabelStyle);
-      final dx = i == 0
-          ? 0.0
-          : i == xTicks.length - 1
-              ? -tp.width
-              : -tp.width / 2;
+      final dx = labelOffset +
+          switch (anchor) {
+            LineChartXLabelAnchor.edgeClamped => i == 0
+                ? 0.0
+                : i == xTicks.length - 1
+                    ? -tp.width
+                    : -tp.width / 2,
+            LineChartXLabelAnchor.start => 0.0,
+            LineChartXLabelAnchor.center => -tp.width / 2,
+            LineChartXLabelAnchor.end => -tp.width,
+          };
       tp.paint(canvas, Offset(x + dx, plot.bottom + 8));
       tp.dispose();
       canvas.drawLine(Offset(x, plot.bottom), Offset(x, plot.bottom + 4), axis);

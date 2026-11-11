@@ -73,14 +73,15 @@ List<ListSection> groupIntoSections(List<Object?> items, Object? Function(int in
 
 /// The scroll offset of the start of section [index] in a list whose items
 /// are [itemExtent] long, with [separator] between items of a section and
-/// headers [headerExtent] long; null when items aren't of one extent.
+/// between sections, and headers [headerExtent] long; null when items
+/// aren't of one extent.
 double? sectionOffset(List<ListSection> sections, int index,
     {required double? itemExtent, required double headerExtent, double separator = 0}) {
   if (itemExtent == null) return null;
   var offset = 0.0;
   for (var i = 0; i < index && i < sections.length; i++) {
     final count = sections[i].count;
-    offset += headerExtent + count * itemExtent + math.max(0, count - 1) * separator;
+    offset += headerExtent + count * itemExtent + math.max(0, count - 1) * separator + separator;
   }
   return offset;
 }
@@ -729,6 +730,15 @@ class DataListViewState extends State<DataListView> {
                 start: sections[s].start,
                 count: sections[s].count,
                 onBuilt: (index) => _onItemBuilt(index, items.length))),
+            // The list's spacing also parts a section's last item from the
+            // next section's header, as between any two entries of a list.
+            if (s < sections.length - 1 && widget.separator != null && widget.separatorExtent > 0)
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  width: vertical ? null : widget.separatorExtent,
+                  height: vertical ? widget.separatorExtent : null,
+                ),
+              ),
           ],
         ),
     ];
