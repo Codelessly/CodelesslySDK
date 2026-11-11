@@ -39,6 +39,11 @@ class RenderDesignScroll extends RenderProxyBox {
   }
 
   void Function(double offset, double maxExtent)? onScroll;
+  /// Moves an interactive viewport relative to its current position.
+  void jumpBy(double delta) {
+    if (interactive) jumpTo(offset + delta);
+  }
+
   void jumpTo(double value) {
     _flingEpoch++;
     _moveTo(value);
