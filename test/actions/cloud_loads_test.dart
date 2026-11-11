@@ -335,4 +335,96 @@ void main() {
     await tester.pump();
     cloud.dispose();
   });
+
+  testWidgets('app-scoped loads keep the expiry and audience rules: a count and a list without what the reader may not see',
+      (tester) async {
+    final layout = PublishLayout.fromJson({
+      'schema': 2,
+      'id': 'home',
+      'roots': ['home-canvas'],
+      'nodes': {
+        'home-canvas': {
+          'type': 'canvas',
+          'layout': {'width': 390, 'height': 300},
+          'actions': [
+            {
+              'trigger': {'type': 'load'},
+              'actions': [
+                {..._load('unread', 'news', aggregate: 'count'), 'scope': 'app'},
+                {..._load('news', 'news'), 'scope': 'app'},
+              ],
+            },
+          ],
+        },
+      },
+    });
+    final appBackend = CountingBackend();
+    final cloud = BackendCloudDatabase(
+      backend: appBackend,
+      userId: () => 'ana',
+      rules: DataRules.fromJson({
+        'collections': {'news': 'audience'},
+        'expiry': {'news': 'expiresAt'},
+      }),
+      now: () => DateTime.utc(2026, 11, 4, 12),
+    );
+    appBackend.seed('data/default/news', {
+      'all': {'audience': ['*'], 'expiresAt': DataRules.neverExpires},
+      'mine': {'audience': ['user:ana'], 'expiresAt': DataRules.neverExpires},
+      'old': {'audience': ['*'], 'expiresAt': '2026-11-04T11:00:00.000Z'},
+      'pros': {'audience': ['role:pro'], 'expiresAt': DataRules.neverExpires},
+    });
+    final app = Codelessly.fromBundle(
+      PublishBundle(
+        model: PublishModel(projectId: 'p', entryLayoutId: 'home', layouts: {'home': PublishLayoutInfo.of(layout)}),
+        layouts: {'home': layout},
+      ),
+      config: CodelesslyConfig(services: Services(cloud: cloud, analytics: const NoAnalytics())),
+      fonts: const NoFontFetcher(),
+    );
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app, layoutId: 'home')));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    expect(app.appVariables.read('unread.data'), 2);
+    expect({for (final d in app.appVariables.read('news.data') as List) (d as Map)['id']}, {'all', 'mine'});
+    await tester.pumpWidget(const SizedBox());
+    app.dispose();
+    await tester.pump();
+    cloud.dispose();
+  });
+
+  test('a screen load joining an expiring audience collection attaches only what the reader may see', () async {
+    db.dispose();
+    db = BackendCloudDatabase(
+      backend: backend,
+      root: 'data/p',
+      userId: () => 'ana',
+      rules: DataRules.fromJson({
+        'collections': {'news': 'audience'},
+        'expiry': {'news': 'expiresAt'},
+      }),
+      now: () => DateTime.utc(2026, 11, 4, 12),
+    );
+    context.dispose();
+    context = RuntimeActionContext(scope: scope, services: Services(cloud: db, analytics: const NoAnalytics()));
+    backend.seed('data/p/news', {
+      'all': {'audience': ['*'], 'expiresAt': DataRules.neverExpires},
+      'old': {'audience': ['*'], 'expiresAt': '2026-11-04T11:00:00.000Z'},
+      'pros': {'audience': ['role:pro'], 'expiresAt': DataRules.neverExpires},
+    });
+    backend.seed('data/p/cards', {
+      for (final id in ['all', 'old', 'pros']) 'c_$id': {'news': id},
+    });
+    await run([
+      _load('cards', 'cards', joins: [
+        {'collection': 'news', 'as': 'news', 'localField': 'news'},
+      ]),
+    ]);
+    final byId = {for (final c in scope.read('cards.data') as List) (c as Map)['id']: c['news']};
+    expect(byId.keys.toSet(), {'c_all', 'c_old', 'c_pros'});
+    expect((byId['c_all'] as Map)['id'], 'all');
+    expect(byId['c_old'], isNull, reason: 'expired');
+    expect(byId['c_pros'], isNull, reason: 'not in its audience');
+  });
 }

@@ -137,7 +137,8 @@ holds the documents themselves, and with an `aggregate`, a number variable holds
 - **It follows its values.** When a value the query reads changes (`${auth.uid}` after a sign in, a search text, a
   limit bound to a variable), the load runs again by itself; a change of its own variable never does. A load that
   keeps re-running (20 times in a second) stops following and reports why. `"reactive": false` turns this off. Owner
-  only collections also follow the signed-in user: `codelesslyCloudServices` gives the database the user's changes.
+  only and audience collections also follow the signed-in user (and their role): `codelesslyCloudServices` gives
+  the database the user's changes.
 - **Bounded.** A query loads at most its `limit` (a number or expression), else the query's limit, else 500
   (`kDefaultCloudLoadLimit`), reading one document more so that `hasMore` is true exactly when more match. `"limit":
   "0"` loads everything. "Show more" is a `setVariable` that raises `shown`.
@@ -196,6 +197,8 @@ the collection's role):
   (`signedIn`), their role (`role:pro`) or them (`user:{uid}`). It is checked when the document is read, so users
   who sign up or change role later see it too. Give `BackendCloudDatabase(audience:)` what the user matches
   (`DataRules.audienceOf(uid, role: ..., signedIn: ...)`); without it, everyone and the user.
+  `codelesslyCloudServices` gives it an `AuthAudience`: the `role` in the user's `users/{uid}` profile (`user`
+  without one, as the rules read it), signed in unless anonymous; live queries follow a change of role.
 
 A collection can also expire: with `expiry: {collection: field}` in the rules, documents past the time in that
 field are not returned (queries get `field > now`, and a live query drops documents as they expire), the
