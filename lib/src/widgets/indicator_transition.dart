@@ -18,7 +18,7 @@ import 'package:flutter/services.dart'
 import 'package:flutter/scheduler.dart';
 
 import 'chart_transition.dart';
-import 'indicators_charts.dart' show ChartSeriesPainter;
+import 'indicators_charts.dart' show ChartSeriesPainter, LineChartPainter;
 import 'indicators_paint.dart';
 
 typedef IndicatorPainterFactory = NodePainter Function(Node node);
@@ -106,18 +106,31 @@ class RenderIndicatorTransition extends RenderCustomPaint implements MouseTracke
   Node _sample() => _hovered(_sampleData());
 
   // --- hover: a chart with selectOnHover selects the category under the
-  // pointer (its dimming and tooltip follow); off the chart, its own
-  // selection again.
+  // pointer (its dimming and tooltip follow), a line chart with
+  // scrubEnabled the nearest point (its cursor and tooltip); off the
+  // chart, its own selection again.
   bool _interactive = false;
   int _hover = -1;
+  double? _hoverX;
 
-  bool get _hoverable => _interactive && _target?.type == 'chart' && _target!.prop(ChartProps.selectOnHover);
+  bool get _hoverable =>
+      _interactive &&
+      switch (_target?.type) {
+        'chart' => _target!.prop(ChartProps.selectOnHover),
+        'lineChart' => _target!.prop(LineChartProps.scrubEnabled),
+        _ => false,
+      };
 
-  Node _hovered(Node n) => _hover >= 0 && _hoverable ? n.withProp(ChartProps.selectedIndex, _hover) : n;
+  Node _hovered(Node n) {
+    if (!_hoverable) return n;
+    if (n.type == 'lineChart') return _hoverX == null ? n : n.withProp(LineChartProps.selectedX, _hoverX);
+    return _hover >= 0 ? n.withProp(ChartProps.selectedIndex, _hover) : n;
+  }
 
-  void _setHover(int index) {
-    if (index == _hover) return;
+  void _setHover(int index, [double? x]) {
+    if (index == _hover && x == _hoverX) return;
     _hover = index;
+    _hoverX = x;
     if (_target != null) painter = _factory!(_sample());
   }
 
@@ -127,7 +140,11 @@ class RenderIndicatorTransition extends RenderCustomPaint implements MouseTracke
   @override
   void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
     if (_hoverable && (event is PointerHoverEvent || event is PointerMoveEvent || event is PointerDownEvent)) {
-      _setHover(ChartSeriesPainter(_target!).categoryAt(event.localPosition, size));
+      if (_target!.type == 'lineChart') {
+        _setHover(-1, LineChartPainter(_target!).xAt(event.localPosition, size));
+      } else {
+        _setHover(ChartSeriesPainter(_target!).categoryAt(event.localPosition, size));
+      }
     }
   }
 
