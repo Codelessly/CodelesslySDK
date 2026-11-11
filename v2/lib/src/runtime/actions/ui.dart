@@ -358,6 +358,7 @@ Future<Object?> showScreenModal(
   }
   return showDialog<Object?>(
     context: context,
+    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: scrim,
     builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
