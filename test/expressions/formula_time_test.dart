@@ -101,7 +101,7 @@ void main() {
     test('dates in the locale, words from labels', () {
       expect(eval('timeAgo("2026-03-04T09:00:00", "short", "fr")'), '4 mars');
       expect(eval('timeAgo("2026-03-04T09:00:00", "long", "de")'), '4. März');
-      final fr = "{now: \"à l'instant\", minutes: 'il y a {n} min', hours: {one: 'il y a {n} heure', other: 'il y a {n} heures'}, yesterday: 'Hier'}";
+      const fr = "{now: \"à l'instant\", minutes: 'il y a {n} min', hours: {one: 'il y a {n} heure', other: 'il y a {n} heures'}, yesterday: 'Hier'}";
       expect(ago(const Duration(seconds: 1), ', "short", "fr", $fr'), "à l'instant");
       expect(ago(const Duration(minutes: 4), ', "short", "fr", $fr'), 'il y a 4 min');
       expect(ago(const Duration(hours: 1), ', "short", "fr", $fr'), 'il y a 1 heure');
