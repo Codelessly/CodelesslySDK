@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart' show PublishFont;
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/foundation.dart' show listEquals, visibleForTesting;
 import 'package:http/http.dart' as http;
 
 import '../render/convert.dart' show FontDemand;
@@ -230,15 +230,40 @@ class CodelesslyFonts {
     return String.fromCharCodes(out);
   }
 
-  /// Characters beyond `latin` of the layouts shown so far ([addText]).
-  String _glyphs = '';
+  /// Characters beyond `latin` of the layouts shown so far ([addText]), in
+  /// any app: the engine's fonts are global, and the fonts asked for when
+  /// first drawn load through the first [CodelesslyFonts] made.
+  static String _glyphs = '';
+
+  /// Forgets the characters noted (tests).
+  @visibleForTesting
+  static void resetGlyphs() => _glyphs = '';
+
+  /// The fonts this registered, for characters noted later.
+  final List<PublishFont> _registered = [];
 
   /// Notes what a layout shows: the fonts loaded from then on (listed by a
   /// publish or asked for when first drawn) fetch its characters beyond a
-  /// browser's `latin` subset too.
-  void addText(String text) {
-    if (text.isEmpty || fetcher is! GlyphFontFetcher) return;
-    _glyphs = glyphsBeyondLatin(_glyphs + text);
+  /// browser's `latin` subset too, and those loaded already (drawn on an
+  /// earlier screen) fetch the ones new to them now.
+  Future<void> addText(String text) async {
+    if (text.isEmpty) return;
+    final before = _glyphs;
+    _glyphs = glyphsBeyondLatin(before + text);
+    final fresh = String.fromCharCodes(_glyphs.runes.skip(before.runes.length));
+    final glyphs = fetcher;
+    if (fresh.isEmpty || glyphs is! GlyphFontFetcher || _registered.isEmpty) return;
+    final byFamily = <String, List<PublishFont>>{};
+    for (final f in _registered) {
+      byFamily.putIfAbsent(f.family, () => []).add(f);
+    }
+    await track(Future.wait([
+      for (final e in byFamily.entries)
+        Future.wait(e.value.map((f) => glyphs.fetchGlyphs(f, fresh))).then((files) async {
+          final ok = [...files.nonNulls];
+          if (ok.isNotEmpty) await _register(e.key, ok);
+        }).catchError((Object _) {}),
+    ]));
   }
 
   /// Fetches and registers [fonts] not registered yet; completes when they
@@ -266,6 +291,7 @@ class CodelesslyFonts {
             final ok = [...bytes.nonNulls];
             if (ok.isEmpty) return false;
             await _register(e.key, ok);
+            _registered.addAll(e.value);
             return true;
           })
           .catchError((Object _) => false);
