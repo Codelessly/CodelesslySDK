@@ -11,9 +11,10 @@ extension ColorToFlutter on api.Color {
 }
 
 extension InsetsToFlutter on api.EdgeInsets {
-  /// Flutter's insets. Flutter asserts insets (a margin, a padding) are
-  /// never negative, and one negative side would fail the whole screen's
-  /// layout; a negative side reads as 0, as the API reads a bad value.
+  /// Flutter's insets. Flutter asserts insets (a padding) are never
+  /// negative, and one negative side would fail the whole screen's layout;
+  /// a negative side reads as 0, as the API reads a bad value. (A margin
+  /// keeps its negative sides: RenderMargin lays them out.)
   EdgeInsets get flutter => EdgeInsets.fromLTRB(
         left < 0 ? 0 : left,
         top < 0 ? 0 : top,
@@ -96,7 +97,9 @@ TextStyle textStyle(api.TextStyle style) {
   if (style.fontFamily case final String family) {
     FontDemand.need(family, ((weight ?? 400) ~/ 100 * 100).clamp(100, 900), style.fontStyle == api.FontStyle.italic);
   }
-  return kTextBase.merge(TextStyle(
+  // No height and naturalHeight: the font's own line height, not the base's.
+  final natural = style.height == null && style.naturalHeight == true;
+  return (natural ? kTextBaseNatural : kTextBase).merge(TextStyle(
     fontFamily: style.fontFamily,
       fontFamilyFallback: style.fontFamilyFallback,
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],

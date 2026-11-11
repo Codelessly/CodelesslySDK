@@ -39,4 +39,12 @@ void main() {
     ));
     expect(tester.renderObject(find.byType(CustomPaint).last), paintsExactlyCountTimes(#drawParagraph, 2));
   });
+
+  test('strokes are curves, or straight segments when not smooth', () {
+    const pts = [Offset(0, 0), Offset(10, 10), Offset(20, 0)];
+    double length(Path p) => p.computeMetrics().fold(0.0, (a, m) => a + m.length);
+    // Through the middle point: 2 × √200; the curve cuts the corner.
+    expect(length(SignaturePainter.linePath(pts)), closeTo(28.28, 0.01));
+    expect(length(SignaturePainter.smoothPath(pts)), lessThan(28.2));
+  });
 }

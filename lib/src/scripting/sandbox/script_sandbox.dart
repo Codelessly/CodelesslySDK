@@ -37,11 +37,13 @@ abstract class ScriptSandbox {
   });
 
   /// Delivers host call [responses] to the run [run] and returns its next
-  /// state.
+  /// state. [vars], when given, replaces the variables the run reads: what
+  /// they are now, after the run's own writes and other actions' changes.
   FutureOr<Map<String, Object?>> resume(
     String run,
     List<Map<String, Object?>> responses, {
     required Duration cpuBudget,
+    Map<String, Object?>? vars,
   });
 
   /// Compiles [source] (a script with params [paramNames]) without running

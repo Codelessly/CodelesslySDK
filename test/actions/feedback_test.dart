@@ -96,6 +96,30 @@ void main() {
       expect(find.text('Second'), findsNothing);
     });
 
+    testWidgets('a side margin can differ left and right: a toast centred beside a rail', (tester) async {
+      final h = Host([]);
+      await h.pump(tester);
+      await h.run([
+        {
+          'type': 'showToast',
+          'message': 'Market Cross: station closed',
+          'look': {
+            'minWidth': 440, 'maxWidth': 440,
+            'sideMargins': {'mobile': [100, 16], 'tablet': [100, 16], 'desktop': [100, 16]},
+            'bottomOffsets': {'mobile': 24, 'tablet': 24, 'desktop': 24},
+          },
+        },
+      ]);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      final toast = find.byKey(const ValueKey('codelessly-toast'));
+      final positioned = tester.widget<Positioned>(find.ancestor(of: toast, matching: find.byType(Positioned)).first);
+      expect((positioned.left, positioned.right, positioned.bottom), (100.0, 16.0, 24.0));
+      final width = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+      expect(tester.getRect(toast).center.dx, closeTo(100 + (width - 116) / 2, 1));
+      await tester.pump(const Duration(seconds: 5));
+    });
+
     testWidgets('the look: colors, radius, border, shadows, offsets, alignment and rotation', (tester) async {
       final h = Host([]);
       await h.pump(tester);
@@ -215,6 +239,24 @@ void main() {
       // A duration of 0 stays.
       await tester.pump(const Duration(seconds: 10));
       expect(find.text('Saved'), findsOneWidget);
+    });
+
+    testWidgets('a toast\'s time counts from its first frame, not from when it was asked for', (tester) async {
+      final h = Host([]);
+      await h.pump(tester);
+      await h.run([
+        {'type': 'showToast', 'message': 'Split at 00:09.12', 'durationMs': 2000},
+      ]);
+      // A long first build: time passes before the toast is drawn.
+      await tester.binding.delayed(const Duration(seconds: 3));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Split at 00:09.12'), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 1500));
+      expect(find.text('Split at 00:09.12'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text('Split at 00:09.12'), findsNothing);
     });
 
     testWidgets('the action pill\'s background binds like the other toast colors', (tester) async {
