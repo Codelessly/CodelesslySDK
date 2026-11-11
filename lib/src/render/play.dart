@@ -6,12 +6,13 @@ import 'dart:math' as math;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show Node;
 import 'package:flutter/animation.dart' show Curves;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'behaviors.dart' show RenderPose;
-import 'node_tree.dart' show NodeBox;
+import 'node_tree.dart' show NodeBox, NodeTree;
 import 'recipe.dart';
 import 'particles.dart';
 
@@ -322,6 +323,12 @@ class _FlightRecord {
 abstract final class FlightRegistry {
   static final Map<String, List<_FlightRecord>> _records = {};
 
+  /// Whether a tree's screen is on its way out (its route closing): a
+  /// holder there is as good as gone, so a picked emoji flies from a
+  /// popover while it fades. Set by the runtime that knows the routes.
+  static bool Function(NodeTree tree) leaving = _never;
+  static bool _never(NodeTree tree) => false;
+
   /// A dragged copy with [key] was let go at [rect] (global): the node that
   /// shows the drop next flies from there.
   static void recordDrop(String key, Rect rect) {
@@ -361,19 +368,26 @@ abstract final class FlightRegistry {
   /// Where a node with [key] that [box] now shows flies from: the latest
   /// place another holder of the key was seen that isn't on screen any more
   /// (hidden, removed within two seconds, or a drag let go).
-  static Rect? _source(RenderFlightBox box, String key) {
+  static Rect? _source(RenderFlightBox? box, String key) {
     final list = _records[key];
     if (list == null) return null;
     final now = DateTime.now();
-    list.removeWhere((r) => r.owner == null && now.difference(r.time).inSeconds >= 2);
+    // Two seconds of animation time: a popover that takes its time closing
+    // (slowed animations, a busy device) still lets its emoji fly.
+    final keep = const Duration(seconds: 2) * timeDilation;
+    list.removeWhere((r) => r.owner == null && now.difference(r.time) >= keep);
     _FlightRecord? best;
     for (final r in list) {
-      if (r.owner == box) continue;
+      if (box != null && r.owner == box) continue;
       if (r.owner != null && r.owner!.isShowing) continue;
       if (best == null || r.time.isAfter(best.time)) best = r;
     }
     return best?.rect;
   }
+
+  /// Where a node with [key] would fly from now (tests).
+  @visibleForTesting
+  static Rect? sourceOf(String key) => _source(null, key);
 
   /// Clears every record (tests).
   static void reset() => _records.clear();
@@ -420,7 +434,7 @@ class RenderFlightBox extends RenderPose {
       if (node is RenderOffstage && node.offstage) return false;
       if (node is RenderOpacity && node.opacity == 0) return false;
       if (node is RenderAnimatedOpacity && node.opacity.value == 0) return false;
-      if (node is NodeBox && !node.drawn) return false;
+      if (node is NodeBox && (!node.drawn || FlightRegistry.leaving(node.tree))) return false;
       node = node.parent;
     }
     return true;
@@ -509,9 +523,19 @@ class RenderFlightBox extends RenderPose {
   }
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    // Back from a re-parenting (a hover style lifting its card): the flight
+    // carries on where its clock is.
+    _ticker?.muted = false;
+  }
+
+  @override
   void detach() {
     if (_flightKey.isNotEmpty) FlightRegistry._forget(this, _flightKey);
-    _ticker?.stop();
+    // Muted, not stopped: a box only moved to another parent comes back in
+    // the same frame and must not freeze where its flight began.
+    _ticker?.muted = true;
     super.detach();
   }
 

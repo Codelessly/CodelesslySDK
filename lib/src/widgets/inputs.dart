@@ -2096,6 +2096,7 @@ class _SignatureIslandState extends State<_SignatureIsland> {
             placeholderBelowLine: n.prop(SignatureProps.placeholderPosition) == api.SignaturePlaceholderPosition.belowLine,
             placeholderFontWeight: n.prop(SignatureProps.placeholderFontWeight),
             placeholderLetterSpacing: n.prop(SignatureProps.placeholderLetterSpacing),
+            smooth: n.prop(SignatureProps.smooth),
           ),
           child: const SizedBox.expand(),
         ),
