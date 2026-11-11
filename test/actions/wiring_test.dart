@@ -166,6 +166,27 @@ void main() {
     expect(s['cancelled'], isTrue);
   });
 
+  testWidgets('pointer down and up expose local and global coordinates', (tester) async {
+    final s = await show(tester, counter(actions: [
+      reaction('pointerDown', [
+        {'type':'setVariable','variable':'down','value':r'${result}'},
+      ]),
+      reaction('pointerUp', [
+        {'type':'setVariable','variable':'up','value':r'${result}'},
+      ]),
+    ]), variables: [v('count',0,VariableType.integer),v('down',{},VariableType.map),v('up',{},VariableType.map)]);
+    final point=s.center('button');
+    final gesture=await tester.startGesture(point);
+    await tester.pump();
+    final down=s['down'] as Map;
+    expect(down['x'],50);expect(down['y'],20);
+    expect(down['globalX'],point.dx);expect(down['globalY'],point.dy);
+    await gesture.up();await tester.pump();
+    final up=s['up'] as Map;
+    expect(up['x'],50);expect(up['y'],20);
+    expect(up['globalX'],point.dx);expect(up['globalY'],point.dy);
+  });
+
   testWidgets('a tap sets a variable; only the boxes reading it re-apply', (tester) async {
     final s = await show(tester, counter(actions: [reaction('click', [add('count')])]), variables: [v('count', 0, VariableType.integer)]);
     expect(textOf(s.tree, 'label'), 'Count 0');
