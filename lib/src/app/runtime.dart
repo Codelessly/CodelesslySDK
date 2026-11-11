@@ -249,6 +249,7 @@ class ScreenActionContext extends RuntimeActionContext {
     super.appData,
     super.paywall,
     super.openPaywall,
+    super.presentPaywall,
     super.scripts,
   }) : super(declareMissing: true);
 }

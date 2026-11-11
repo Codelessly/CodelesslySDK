@@ -32,6 +32,7 @@ import '../runtime/actions/ui.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
 import '../runtime/actions/runner.dart' show CodelesslyActions, ActionCancellation;
+import '../runtime/actions/context.dart' show PaywallPresentation;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
@@ -831,6 +832,7 @@ class _LayoutViewState extends State<_LayoutView> {
       scripts: widget.layout.document.scripts,
       paywall: widget.host.paywall,
       openPaywall: _openPaywall,
+      presentPaywall: _openPaywall,
       onError: widget.host.onActionError,
       onActionErrorEvent: _actionError,
       refreshAuthValues: _codelessly.refreshAuthValues,
@@ -978,17 +980,26 @@ class _LayoutViewState extends State<_LayoutView> {
     if (_codelessly.route.value != route) _codelessly.route.value = route;
   }
 
-  Future<PaywallResult> _openPaywall(String placement) async {
+  /// Opens the paywall at [placement] over this screen, its screen coming
+  /// in as [presentation] says (the `openPaywall` action's transition) and
+  /// going out in reverse when a purchase, a restore or its close action
+  /// ends it.
+  Future<PaywallResult> _openPaywall(String placement, [PaywallPresentation presentation = const PaywallPresentation()]) async {
     final services = _codelessly.services;
     final runtime = services is Services ? services.paywalls : null;
     if (runtime == null) throw StateError('No paywall backend configured');
     if (!mounted) throw StateError('Paywall host is no longer mounted');
     final navigator = Navigator.maybeOf(context);
     if (navigator == null) throw StateError('Paywall requires a Navigator');
+    final paywalls = _codelessly.paywall;
     return runtime.open(
       placement,
       locale: Localizations.maybeLocaleOf(context)?.toLanguageTag() ?? 'en',
       appVersion: widget.host.paywallAppVersion,
+      // Its screen reads the legal links, the placement and whether it's the
+      // test store, as a presented paywall's does; its events are logged.
+      details: paywalls.detailsOf,
+      onEvent: paywalls.record,
       present: (resolved, session) async {
         if (!mounted) return null;
         final destination = resolved.placement.layoutId;
@@ -997,18 +1008,31 @@ class _LayoutViewState extends State<_LayoutView> {
         // Load before opening so a broken placement never shows selling controls.
         await _codelessly.loadLayout(layoutId);
         if (!mounted || session.isDisposed) return null;
+        paywalls.record(resolved, 'paywall_view', null);
+        final transition = presentation.routeTransition;
         final route = CodelesslyWidget.route<Object?>(
           codelessly: _codelessly,
           layoutId: layoutId,
           template: widget.host,
           paywall: session,
           name: '/paywall/$placement',
+          transition: transition,
+          anchor: transition == null ? const RevealAnchor() : RevealAnchor(tap: RevealAnchor.lastTap),
+          pageTransition: presentation.transition,
+          transitionMs: presentation.transitionMs,
+          reverseTransitionMs: presentation.reverseTransitionMs,
         );
         // Purchase/restore/close completes the same session used by actions.
-        // Removing this exact route cannot accidentally pop a newer route.
+        // On top, it goes back as a navigation does (its transition in
+        // reverse); under a newer route, only this exact route is removed.
         unawaited(
           session.result.then((result) {
-            if (navigator.mounted && route.isActive) navigator.removeRoute(route, result);
+            if (!navigator.mounted || !route.isActive) return;
+            if (route.isCurrent) {
+              navigator.pop(result);
+            } else {
+              navigator.removeRoute(route, result);
+            }
           }),
         );
         final result = await navigator.push(route);
