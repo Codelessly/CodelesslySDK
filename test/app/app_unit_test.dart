@@ -186,6 +186,15 @@ void main() {
       expect(CodelesslyAppIdentity.layoutIdAt(model, '/nowhere'), 'lost');
     });
 
+    test("a link's escapes are read once, and its raw characters encoded", () {
+      final model = tidepool(withNotFound: true);
+      final (_, p) = CodelesslyWidget.resolveScreen(model, '/settings?q=%5B%5D&s=a b&t=50%25&u=%')!;
+      expect(p['q'], '[]');
+      expect(p['s'], 'a b');
+      expect(p['t'], '50%');
+      expect(p['u'], '%');
+    });
+
     test('an app opens a screen by its id or name before its catch-all', () {
       final model = tidepool(withNotFound: true);
       // 'settings' has no path: the catch-all used to take it.
