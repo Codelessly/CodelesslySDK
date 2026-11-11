@@ -617,42 +617,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
                 ? n.layout.height.value
                 : (constraints.hasBoundedHeight ? constraints.maxHeight : null);
             if (height == null) return field(decoration);
-            // InputDecorator doesn't stretch its container (fill, border) to
-            // a height: a dense 50 px field painted a 20 px box at its top.
-            // So the box paints them at full height and a borderless field
-            // of that height sits in it, its line where textAlignVertical
-            // puts it (centred by default), as a Container around a
-            // TextField would.
-            final error = decoration.errorText != null || decoration.error != null;
-            final border = (error ? (focusNode.hasFocus ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
-                (focusNode.hasFocus ? decoration.focusedBorder : null) ??
-                decoration.enabledBorder ??
-                decoration.border ??
-                const UnderlineInputBorder();
-            final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
-            return DecoratedBox(
-              decoration: ShapeDecoration(color: fill, shape: border),
-              child: field(
-                decoration.copyWith(
-                  filled: false,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  disabledBorder: InputBorder.none,
-                  errorBorder: InputBorder.none,
-                  focusedErrorBorder: InputBorder.none,
-                  constraints: BoxConstraints.tightFor(height: height),
-                  // Its icons centre in the whole height, as the line does
-                  // (the decorator's own container is only 48 px tall).
-                  prefixIconConstraints: decoration.prefixIcon == null
-                      ? null
-                      : _tallIcon(decoration.prefixIconConstraints, height),
-                  suffixIconConstraints: decoration.suffixIcon == null
-                      ? null
-                      : _tallIcon(decoration.suffixIconConstraints, height),
-                ),
-                alignVertical: TextAlignVertical.center,
-              ),
+            return fullHeightField(
+              context,
+              decoration,
+              height,
+              focused: focusNode.hasFocus,
+              (d) => field(d, alignVertical: TextAlignVertical.center),
             );
           })
         : field(decoration);
@@ -687,6 +657,55 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
 
 /// A [LayoutBuilder] that reports a zero intrinsic size instead of throwing,
 /// so a field built with it can sit under intrinsic measurement.
+/// A one-line input [height] tall. InputDecorator doesn't stretch its
+/// container (fill, border) to a height: a dense 50 px field painted a 20 px
+/// box at its top. So a box paints them at full height and a borderless
+/// decorator of that height sits in it, its line centred (as a Container
+/// around a TextField would). Its icons centre in the whole height too, and
+/// one with no icon gets an empty suffix as wide as its end padding and as
+/// tall as the field, so small text centres as well (the decorator's own
+/// container is otherwise 48 px).
+Widget fullHeightField(
+  BuildContext context,
+  InputDecoration decoration,
+  double height,
+  Widget Function(InputDecoration borderless) build, {
+  bool focused = false,
+}) {
+  final error = decoration.errorText != null || decoration.error != null;
+  final border = (error ? (focused ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
+      (focused ? decoration.focusedBorder : null) ??
+      decoration.enabledBorder ??
+      decoration.border ??
+      const UnderlineInputBorder();
+  final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
+  final padEnd = (decoration.contentPadding ?? EdgeInsets.zero).resolve(Directionality.of(context)).right;
+  final spacer = decoration.prefixIcon == null && decoration.suffixIcon == null;
+  return DecoratedBox(
+    decoration: ShapeDecoration(color: fill, shape: border),
+    child: build(
+      decoration.copyWith(
+        filled: false,
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        disabledBorder: InputBorder.none,
+        errorBorder: InputBorder.none,
+        focusedErrorBorder: InputBorder.none,
+        constraints: BoxConstraints.tightFor(height: height),
+        prefixIconConstraints:
+            decoration.prefixIcon == null ? null : _tallIcon(decoration.prefixIconConstraints, height),
+        suffixIcon: spacer ? SizedBox(width: padEnd, height: height) : decoration.suffixIcon,
+        suffixIconConstraints: spacer
+            ? BoxConstraints.tightFor(width: padEnd, height: height)
+            : decoration.suffixIcon == null
+                ? null
+                : _tallIcon(decoration.suffixIconConstraints, height),
+      ),
+    ),
+  );
+}
+
 /// An icon box as tall as a fixed-height field.
 BoxConstraints _tallIcon(BoxConstraints? c, double height) =>
     (c ?? const BoxConstraints(minWidth: kMinInteractiveDimension)).copyWith(minHeight: height, maxHeight: height);
@@ -1826,9 +1845,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
           );
     // A fixed height is the field's, as a text field's, for a field that
     // draws its own decoration (older fields kept their natural height).
-    if (vFit == SizeFit.fixed && styled) {
-      decoration = decoration.copyWith(constraints: BoxConstraints.tightFor(height: n.layout.height.value));
-    }
+    final fixedHeight = vFit == SizeFit.fixed && styled ? n.layout.height.value : null;
     final style = _styleOrNull(n.prop(DateTimeInputProps.style));
     return InkWell(
       onTap: !opens || !enabled || !widget.interactive || first.isAfter(last)
@@ -1855,11 +1872,24 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
             },
       child: n.prop(DateTimeInputProps.bare)
           ? _bare(n, mode, display)
-          : InputDecorator(
-        isEmpty: display.isEmpty,
-        decoration: decoration,
-        child: Text(display.isEmpty ? ' ' : display, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
-      ),
+          : fixedHeight == null
+              ? InputDecorator(
+                  isEmpty: display.isEmpty,
+                  decoration: decoration,
+                  child: Text(display.isEmpty ? ' ' : display, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+                )
+              // Its box at the whole height, the value centred, as a text field's.
+              : fullHeightField(
+                  context,
+                  decoration,
+                  fixedHeight,
+                  (d) => InputDecorator(
+                    isEmpty: display.isEmpty,
+                    decoration: d,
+                    textAlignVertical: TextAlignVertical.center,
+                    child: Text(display.isEmpty ? ' ' : display, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
     );
   }
 
