@@ -1721,12 +1721,15 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         },
     };
     final localizations = MaterialLocalizations.of(context);
-    final display = switch (mode) {
+    final pattern = n.prop(DateTimeInputProps.format);
+    final display = pattern != null && pattern.isNotEmpty && (date != null || time != null)
+        ? _formatPattern(pattern, mode, date, time)
+        : switch (mode) {
       DateTimeInputMode.date => date == null ? '' : localizations.formatMediumDate(date),
       DateTimeInputMode.time => time == null ? '' : time.format(context),
       DateTimeInputMode.dateTime =>
         date == null || time == null ? '' : '${localizations.formatMediumDate(date)} · ${time.format(context)}',
-    };
+          };
     final enabled = n.prop(DateTimeInputProps.enabled);
     final label = n.prop(DateTimeInputProps.labelText);
     final initial = date == null || date.isBefore(first) || date.isAfter(last)
@@ -1755,7 +1758,9 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   });
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: InputDecorator(
+      child: n.prop(DateTimeInputProps.bare)
+          ? _bare(n, mode, display)
+          : InputDecorator(
         isEmpty: display.isEmpty,
         decoration: InputDecoration(
           labelText: label,
@@ -1766,13 +1771,46 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   DateTimeInputMode.dateTime => 'date and time',
                 }}'
               : null,
-          suffixIcon: Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+          suffixIcon: _icon(n.prop(DateTimeInputProps.icon)) ??
+              Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
           enabled: enabled,
           border: const OutlineInputBorder(),
         ),
-        child: Text(display.isEmpty ? ' ' : display),
+        child: Text(display.isEmpty ? ' ' : display, style: _styleOrNull(n.prop(DateTimeInputProps.style))),
       ),
     );
+  }
+
+  /// [bare]: the value (or hint) and its icon in a row, the box left to the
+  /// node's own decoration.
+  Widget _bare(Node n, DateTimeInputMode mode, String display) {
+    final hint = n.prop(DateTimeInputProps.hint) ??
+        'Select ${switch (mode) {
+          DateTimeInputMode.date => 'date',
+          DateTimeInputMode.time => 'time',
+          DateTimeInputMode.dateTime => 'date and time',
+        }}';
+    final empty = display.isEmpty;
+    return Row(children: [
+      Expanded(
+        child: Text(empty ? hint : display,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style))),
+      ),
+      _icon(n.prop(DateTimeInputProps.icon)) ??
+          Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
+    ]);
+  }
+
+  /// [date] / [time] by an `intl` [pattern]; a broken pattern shows ISO.
+  static String _formatPattern(String pattern, DateTimeInputMode mode, DateTime? date, TimeOfDay? time) {
+    final at = DateTime(date?.year ?? 2000, date?.month ?? 1, date?.day ?? 1, time?.hour ?? 0, time?.minute ?? 0);
+    try {
+      return DateFormat(pattern).format(at);
+    } catch (_) {
+      return mode == DateTimeInputMode.time ? '${time?.hour}:${time?.minute.toString().padLeft(2, '0')}' : at.toIso8601String();
+    }
   }
 }
 
