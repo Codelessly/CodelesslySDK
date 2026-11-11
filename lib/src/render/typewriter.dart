@@ -21,11 +21,17 @@ class RenderTypewriter extends RenderProxyBox {
   /// toward the end of the text.
   double _shown = 0, _from = 0;
   Duration? _start;
+
+  /// Whether the run is past its delay (a line still waiting shows no caret).
+  bool _begun = false;
   Duration _now = Duration.zero;
   Ticker? _ticker;
 
   /// The characters painted now (for tests).
   int get shownCharacters => math.min(_shown.floor(), _text.length);
+
+  /// Whether a caret shows: typing, and past its delay.
+  bool get caretShown => typing && (_tw?.caret ?? false) && _begun;
 
   /// Whether it's still typing.
   bool get typing => _animates && (_tw?.types ?? false) && _shown < _text.length;
@@ -44,8 +50,10 @@ class RenderTypewriter extends RenderProxyBox {
     } else if (text != oldText) {
       // Appended: type the rest from where it is; otherwise afresh.
       _run(text.startsWith(oldText) ? math.min(_shown, oldText.length.toDouble()) : 0);
-    } else if (old.delayMs != tw.delayMs && _shown == 0) {
+    } else if ((old.delayMs != tw.delayMs || old.holdAtMs != tw.holdAtMs) && _shown == 0) {
       _run(0);
+    } else if (old.holdAtMs != tw.holdAtMs) {
+      _run(_from); // the clock restarts with the new hold
     }
     markNeedsPaint();
   }
@@ -54,6 +62,7 @@ class RenderTypewriter extends RenderProxyBox {
     _from = from;
     _shown = from;
     _start = null;
+    _begun = false;
     _ticker ??= Ticker(_tick);
     if (attached && !_ticker!.isActive) _ticker!.start();
   }
@@ -68,10 +77,15 @@ class RenderTypewriter extends RenderProxyBox {
     if (tw == null) return _stop();
     _start ??= elapsed;
     _now = elapsed;
-    final ms = (elapsed - _start!).inMicroseconds / 1000 - tw.delayMs;
+    var clock = (elapsed - _start!).inMicroseconds / 1000;
+    final hold = tw.holdAtMs;
+    if (hold != null) clock = math.min(clock, hold.toDouble());
+    final ms = clock - tw.delayMs;
+    _begun = ms >= 0;
     _shown = math.min(_text.length.toDouble(), _from + math.max(0, ms) * tw.charsPerSecond / 1000);
     markNeedsPaint();
-    if (_shown >= _text.length) _stop();
+    // Held: it only blinks from here, and a line not begun has no caret.
+    if (_shown >= _text.length || (hold != null && clock >= hold && (!_begun || !tw.caret))) _stop();
   }
 
   @override
@@ -124,7 +138,7 @@ class RenderTypewriter extends RenderProxyBox {
       }
       context.pushClipPath(needsCompositing, offset, Offset.zero & size, clip, super.paint);
     }
-    if (!tw.caret) return;
+    if (!caretShown) return;
     // Blinks: on for blinkMs, off for blinkMs.
     final on = ((_now - (_start ?? _now)).inMilliseconds ~/ tw.blinkMs).isEven;
     if (!on) return;

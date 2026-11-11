@@ -287,6 +287,46 @@ void main() {
     expect(api.Typewriter.fromJson(nodes('x', key: 'k')['t']!['typewriter'])!.playKey, 'k');
   });
 
+  testWidgets('typewriter.holdAtMs stops lines typed one after another at one moment', (tester) async {
+    Map<String, Object?> line(int delayMs, {int? hold}) => <String, Object?>{
+          'type': 'text',
+          'layout': {'width': 300},
+          'props': {'text': 'Eleven char', 'style': {'fontSize': 14}},
+          'typewriter': {'charsPerSecond': 100, 'delayMs': delayMs, 'holdAtMs': ?hold},
+        };
+    LayoutDocument doc({int? hold}) => page({'a': line(0, hold: hold), 'b': line(110, hold: hold), 'z': line(500, hold: hold)});
+    List<RenderTypewriter> tws() {
+      final found = <RenderTypewriter>[];
+      void visit(RenderObject o) {
+        if (o is RenderTypewriter) found.add(o);
+        o.visitChildren(visit);
+      }
+
+      visit(tester.renderObject(find.byType(NodeView)));
+      return found;
+    }
+
+    final (tree, _) = await show(tester, doc(hold: 160), interactive: true);
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 1000));
+    final [a, b, z] = tws();
+    expect(a.shownCharacters, 11, reason: 'done before the hold');
+    expect(b.shownCharacters, 5, reason: '50 ms of typing after its 110 ms delay');
+    expect(b.typing, isTrue);
+    expect(b.caretShown, isTrue);
+    expect(z.shownCharacters, 0);
+    expect(z.caretShown, isFalse, reason: 'a line still waiting has no caret');
+    await tester.pump(const Duration(seconds: 2));
+    expect(b.shownCharacters, 5, reason: 'held');
+
+    // Released: it types on to the end.
+    (tree.source as DocumentSource).document = doc();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(seconds: 2));
+    expect(tws().map((t) => t.shownCharacters), [11, 11, 11]);
+  });
+
   testWidgets('a fitted stack scales its board of design size into its box', (tester) async {
     final doc = LayoutDocument.fromJson({
       'roots': ['s'],
