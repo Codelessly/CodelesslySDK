@@ -159,6 +159,33 @@ void main() {
     tree.dispose();
   });
 
+  testWidgets('an error text that is a yes/no shows the error border without a message (SDK 8.x)', (tester) async {
+    InputDecoration decorationWith(Object errorText) => inputDecoration(
+        api.InputDecoration.fromJson({'errorText': errorText}), api.EdgeInsets.zero);
+    final on = decorationWith(true);
+    expect(on.error, isA<SizedBox>(), reason: 'in error, nothing under the field');
+    expect(decorationWith(false).error, isNull);
+    expect(decorationWith('Give the card a title.').error, isNotNull);
+    // A field in error draws the error border.
+    final source = DocumentSource(_doc({
+      'f': {
+        'type': 'textField',
+        'layout': {'width': 200, 'height': 48},
+        'props': {
+          'decoration': {
+            'errorText': true,
+            'errorBorder': {'type': 'outline', 'borderSide': {'color': '#FFE5484D'}},
+          },
+        },
+      },
+    }));
+    final (tree, _) = await _show(tester, source);
+    expect(_widget<TextField>(tree).decoration!.error, isA<SizedBox>());
+    expect(tester.widget<InputDecorator>(find.byType(InputDecorator)).decoration.errorBorder, isNotNull);
+    await tester.pumpWidget(const SizedBox());
+    tree.dispose();
+  });
+
   testWidgets('a text field is a real TextField, sized by its fits', (tester) async {
     final source = DocumentSource(_doc({
       'f': {

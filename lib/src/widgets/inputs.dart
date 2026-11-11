@@ -310,7 +310,11 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     hintText: previewText(d.hintText),
     hintStyle: _styleOrNull(d.hintStyle),
     hintMaxLines: d.hintMaxLines,
-    error: errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle),
+    // In error without a message (an error text bound to `true`): the
+    // error border, nothing under the field.
+    error: errorText == api.kErrorWithoutMessage
+        ? const SizedBox.shrink()
+        : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle)),
     errorStyle: _styleOrNull(d.errorStyle),
     errorMaxLines: d.errorMaxLines,
     floatingLabelBehavior: switch (d.floatingLabelBehavior) {
@@ -323,7 +327,8 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     // shrink its intrinsic height.
     visualDensity: d.isCollapsed ? VisualDensity.standard : null,
     contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
-        error: error ?? (errorText != null && errorText.trim().isNotEmpty), focused: focused),
+        error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
+        focused: focused),
     prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
     prefixIconConstraints: iconConstraints(d.prefixIconConstraints, d.prefixIconPadding, prefixWidget, prefixIcon),
     prefix: always ? null : prefixWidget,
