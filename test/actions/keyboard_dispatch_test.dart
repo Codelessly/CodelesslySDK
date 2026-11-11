@@ -2,6 +2,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart' show TextField;
 import 'package:flutter/services.dart';
+import 'package:codelessly_sdk/src/runtime/actions/key_matching.dart';
 import 'wiring_test.dart' show show, counter, v, reaction, add;
 
 void main() {
@@ -43,6 +44,49 @@ void main() {
       'result': {'key': label, 'meta': meta, 'shift': shift, 'alt': alt},
     },
   );
+  test('a shortcut matches the character a key types (? is Shift+/)', () async {
+    final s = scope();
+    final n = node([key('?', 1), key('/', 10)]);
+    await const CodelesslyActions().run(n, 'keyDown', RuntimeActionContext(scope: s, services: Services()),
+        event: {
+          'result': {'key': '/', 'character': '?', 'shift': true, 'meta': false, 'alt': false},
+        });
+    expect(s.read('count'), 1);
+    expect(runtimeKeyEventMatches(KeyCombo.tryParse('u'), 'U', character: 'U', shift: true), isTrue);
+    expect(runtimeKeyEventMatches(KeyCombo.tryParse('?'), '/', character: '?', meta: true), isFalse);
+    expect(typesText('a'), isTrue);
+    expect(typesText('\r'), isFalse);
+    expect(typesText(null), isFalse);
+  });
+
+  test('a when written as a \${path} binding guards a key', () async {
+    final s = scope();
+    final n = node([key('k', 1, when: r'${enabled}')]);
+    await fire(n, s, 'K');
+    expect(s.read('count'), 0);
+    s.set('enabled', true);
+    await fire(n, s, 'K');
+    expect(s.read('count'), 1);
+  });
+
+  test('a held key repeats only into reactions with repeat', () async {
+    final s = scope();
+    final n = node([
+      key('Arrow Right', 1),
+      {...key('Arrow Right', 10), 'trigger': {'type': 'keyDown', 'key': 'Arrow Right', 'repeat': true}},
+    ]);
+    // The first press runs both.
+    await const CodelesslyActions().run(n, 'keyDown', RuntimeActionContext(scope: s, services: Services()),
+        event: {'result': {'key': 'Arrow Right', 'repeat': false}});
+    expect(s.read('count'), 11);
+    // A repeat runs only the one that asked for repeats.
+    await const CodelesslyActions().run(n, 'keyDown', RuntimeActionContext(scope: s, services: Services()),
+        event: {'result': {'key': 'Arrow Right', 'repeat': true}});
+    expect(s.read('count'), 21);
+    expect(Trigger.fromJson({'type': 'keyDown', 'repeat': true})!.toJson(), {'type': 'keyDown', 'repeat': true});
+    expect(Trigger.fromJson({'type': 'keyDown'})!.repeat, isFalse);
+  });
+
   test('one digit runs only its matching reaction', () async {
     final s = scope();
     final n = node([key('1', 1), key('6', 6), key('9', 9)]);
@@ -132,6 +176,26 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
     expect(screen['count'], 1111);
+  });
+
+  testWidgets('a held arrow repeats into a repeat reaction, once into others', (tester) async {
+    final nodes = counter();
+    nodes['col']!['actions'] = [
+      reaction('keyDown', [add('count', '1')], extra: {'key': 'Arrow Right', 'repeat': true}),
+      reaction('keyDown', [add('count', '100')], extra: {'key': 'Arrow Left'}),
+    ];
+    final screen = await show(tester, nodes, variables: [v('count', 0, VariableType.integer)]);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(screen['count'], 3);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(screen['count'], 103);
   });
 
   testWidgets('while typing only Escape reaches Key Down, marked typing', (tester) async {

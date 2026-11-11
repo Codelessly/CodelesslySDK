@@ -47,8 +47,9 @@ abstract final class IconSources {
           'twoTone' => 'twotone',
           _ => '',
         };
-        // The version that serves this name: a name bound at runtime (props.icon.name)
-        // keeps the version stored for the design's icon, which 404s for another.
+        // Served from the version the icon was added in, known by name: an
+        // icon written without one (by hand, by a tool) or renamed by a
+        // binding (whose version is still the old icon's) loads too.
         final version = materialIconVersions[name] ?? readInt(icon['version']) ?? 1;
         return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v$version/24px.svg';
       case 'MATERIAL_SYMBOL':
@@ -64,6 +65,16 @@ abstract final class IconSources {
         return '$root/cupertino/$cupertinoVersion/${codepoint.toRadixString(16)}.svg';
     }
     return null;
+  }
+
+  /// The MaterialIcons font codepoint a Material icon draws while its SVG
+  /// isn't available, or null (other icon types, no codepoint).
+  static int? glyphOf(Json icon) {
+    final type = readString(icon['type']);
+    if (type != null && type != 'MATERIAL_ICON') return null;
+    if (readString(icon['source']) == 'image') return null;
+    final c = readInt(icon['codepoint']);
+    return c == null || c <= 0 ? null : c;
   }
 
   /// Where a Material icon saved without its version (an icon named in
@@ -164,8 +175,14 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   void paint(PaintingContext context, Offset offset) {
     if (_icon['show'] == false) return;
     final loaded = _loaded();
-    if (loaded == null) return;
     final color = _color ?? defaultColor;
+    if (loaded == null) {
+      // Its SVG is loading (or neither version loaded):
+      // a Material icon with a codepoint draws that glyph of the bundled
+      // MaterialIcons font meanwhile, instead of nothing.
+      _paintGlyph(context.canvas, offset, color);
+      return;
+    }
     final isImage = readString(_icon['source']) == 'image';
     // A transparent color shows an image icon's own colors.
     final raw = isImage && _color != null && _color!.a == 0;
@@ -178,5 +195,22 @@ class RenderIconGlyph extends RenderBox with ImageClient {
       scale: isImage && !raw && !loaded.isSvg ? readDouble(_icon['scale']) ?? 1 : 1,
       colorFilter: raw ? null : ColorFilter.mode(color, BlendMode.srcIn),
     );
+  }
+
+  /// The font glyph of a Material icon with a `codepoint` (its SVG's
+  /// stand-in), filling the box; nothing for other icons.
+  void _paintGlyph(Canvas canvas, Offset offset, Color color) {
+    final codepoint = IconSources.glyphOf(_icon);
+    if (codepoint == null || size.isEmpty) return;
+    final extent = size.shortestSide;
+    final painter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(codepoint),
+        style: TextStyle(fontFamily: 'MaterialIcons', fontSize: extent, height: 1, color: color, inherit: false),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(canvas, offset + Offset((size.width - painter.width) / 2, (size.height - painter.height) / 2));
+    painter.dispose();
   }
 }

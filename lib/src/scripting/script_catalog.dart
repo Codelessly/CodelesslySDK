@@ -196,7 +196,15 @@ abstract final class ScriptCatalog {
     ScriptApiEntry(
       'app.delay(ms)',
       'Promise<null>',
-      'Waits [ms] milliseconds (at most 60000).',
+      'Waits [ms] milliseconds (at most 60000). The run stays one transaction: no other script changes '
+          'variables meanwhile.',
+      capability: 'actions',
+    ),
+    ScriptApiEntry(
+      'app.yield(ms)',
+      'Promise<null>',
+      'Waits [ms] milliseconds, letting other scripts change variables meanwhile (a cancel button, a timer); '
+          'vars.get afterwards reads their changes. For long runs that show progress.',
       capability: 'actions',
     ),
     // Other scripts.
@@ -260,7 +268,7 @@ abstract final class ScriptCatalog {
       'navigation': 'app.navigate, app.back',
       'api': 'app.callApi',
       'cloud': 'app.cloudData',
-      'actions': 'app.runAction, app.toast, app.delay',
+      'actions': 'app.runAction, app.toast, app.delay, app.yield',
       'clock': 'Date.now(), new Date()',
     },
     'api': [for (final ScriptApiEntry e in entries) e.toJson()],

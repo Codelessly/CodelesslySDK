@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node, TriggerType, Trigger;
+import 'package:codelessly_api/codelessly_api.dart' show Json, Node, SwitchProps, TriggerType, Trigger;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -151,6 +151,8 @@ class TreeReactions implements NodeInteractions {
   /// An input's new value goes to the variable its value is bound to.
   void _writeBack(Node node, Object? value, ActionContext ctx) {
     final path = valuePaths[node.type];
+    // A controlled input shows only its bound value: its reactions set it.
+    if (node.type == 'switch' && node.prop(SwitchProps.controlled)) return;
     final bound = path == null ? null : node.bind[path];
     final variable = bound == null ? null : exactPath(bound);
     if (variable == null) return;
@@ -363,8 +365,9 @@ class _BoxReactions {
 
   bool _key(KeyEvent e) {
     final n = _node;
-    if (n == null || _disposed || !box.attached || e is KeyRepeatEvent) return false;
-    final down = e is KeyDownEvent;
+    if (n == null || _disposed || !box.attached) return false;
+    final repeat = e is KeyRepeatEvent;
+    final down = e is KeyDownEvent || repeat;
     final type = down ? TriggerType.keyDown : TriggerType.keyUp;
     // Keys belong to the field being typed in, except Escape, which leaves
     // it (`${result.typing}` tells the actions).
@@ -373,25 +376,39 @@ class _BoxReactions {
     final keys = HardwareKeyboard.instance;
     final meta = keys.isMetaPressed || keys.isControlPressed;
     final label = e.logicalKey.keyLabel;
+    final character = e.character;
+    // A key that types text goes to a focused text field, not a shortcut.
+    if (!meta && !keys.isAltPressed && typesText(character) && _textFieldFocused()) return false;
     var handled = false;
     for (final r in n.actions) {
       if (r.trigger.type != type) continue;
+      // A held key's repeats reach only keyDown reactions that ask for them.
+      if (repeat && !r.trigger.repeat) continue;
       final combo = r.trigger.keyCombo;
-      if (!runtimeKeyMatches(combo, label, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) continue;
-      if (r.trigger.when.trim().isNotEmpty) {
-        final ok = FormulaEvaluator.exactExpression(r.trigger.when) != null
-            ? owner.contextFor(box).expressions.evaluate(r.trigger.when, owner.contextFor(box).scope)
-            : readPath(owner.contextFor(box).scope, r.trigger.when);
-        if (ok != true) continue;
+      if (!runtimeKeyEventMatches(combo, label,
+          character: character, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) {
+        continue;
       }
+      if (r.trigger.when.trim().isNotEmpty && !triggerWhenHolds(r.trigger.when, owner.contextFor(box))) continue;
       handled = true;
     }
     if (!handled) return false;
     owner.fire(box, type.name, event: {
-      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta, 'typing': typing},
+      'result': {
+        'key': label,
+        'character': ?character,
+        'shift': keys.isShiftPressed,
+        'alt': keys.isAltPressed,
+        'meta': meta,
+        'repeat': repeat,
+        'typing': typing,
+      },
     });
     return true;
   }
+
+  static bool _textFieldFocused() =>
+      FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>() != null;
 
   bool _disposed = false;
 
@@ -787,6 +804,19 @@ abstract final class _ViewportWatcher {
       _schedule();
     }, debugLabel: 'ViewportWatcher');
   }
+}
+
+/// Whether a trigger's `when` holds: a `${path}` binding, a `${= formula}`,
+/// or a bare path or formula, reading true (or `true` / 1).
+bool triggerWhenHolds(String when, ActionContext context) {
+  final t = when.trim();
+  final Object? value;
+  if (t.contains(r'${')) {
+    value = context.expressions.evaluate(t, context.scope);
+  } else {
+    value = readPath(context.scope, t) ?? context.expressions.evaluate('\${= $t}', context.scope);
+  }
+  return value == true || value == 1 || value == 'true' || value == '1';
 }
 
 /// A drag reaction is a one-finger gesture: a second finger landing before
