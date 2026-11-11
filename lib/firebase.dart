@@ -19,7 +19,7 @@
 /// access ([FirebaseProjectAuth]), app user accounts
 /// ([FirebaseAuthService]), cloud data ([FirestoreDocumentBackend]), cloud
 /// files ([FirebaseFileStorage]) and the paywall server
-/// ([FirebasePaywallBackend]). [codelesslyCloudServices] builds the
+/// ([FirebasePaywallBackend]; [codelesslyPaywalls] for managed paywalls). [codelesslyCloudServices] builds the
 /// services of a project:
 ///
 /// ```dart
@@ -36,6 +36,7 @@ library;
 // The Firebase types the functions here take, so an app that only uses
 // Codelessly's Firebase needs no Firebase package of its own.
 export 'package:cloud_firestore/cloud_firestore.dart' show FirebaseFirestore;
+export 'package:cloud_functions/cloud_functions.dart' show FirebaseFunctions;
 export 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 export 'package:firebase_core/firebase_core.dart' show Firebase, FirebaseApp, FirebaseOptions;
 export 'package:firebase_storage/firebase_storage.dart' show FirebaseStorage;
