@@ -57,6 +57,22 @@ String paragraphText(NodeTree tree, String id) {
 }
 
 void main() {
+  testWidgets('bound list changes wait for pending system-font updates before detaching text', (tester) async {
+    final vars = VariableScope([v('rows', ['Alma', 'Leo'], VariableType.list)]);
+    final (tree, _) = await show(tester, page({
+      'list': {'type':'listView','children':['name'],'layout':{'width':300,'height':200},'bind':{'data':r'${rows}'}},
+      'name': {'type':'text','layout':{'width':300,'height':40},'props':{'text':r'${item}'}},
+    }, root:'list'), NodeBinder(scope:vars), root:'list');
+    await tester.binding.handleSystemMessage({'type':'fontsChange'});
+    vars.set('rows', <String>[]);
+    await tester.pump();
+    await tester.pump();
+    expect(tester.takeException(),isNull);
+    expect(tree.length,greaterThan(0));
+    vars.set('rows',['Maja']);await tester.pump();
+    expect(tester.takeException(),isNull);
+  });
+
   testWidgets('a node a binding hides collapses: no space, no gap', (tester) async {
     final vars = VariableScope([v('shown', false, VariableType.boolean)]);
     final (tree, view) = await show(tester, page(column(bindB: {'visible': r'${shown}'})), NodeBinder(scope: vars));
