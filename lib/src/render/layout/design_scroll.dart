@@ -80,7 +80,7 @@ class RenderDesignScroll extends RenderProxyBox {
 
   /// Offset 0: the content's start at the viewport's start; reversed, its
   /// end at the viewport's end.
-  Offset get _paintOffset {
+  Offset get paintOffset {
     final child = this.child;
     if (child == null || !_reverse) return Offset.zero;
     return _axis == Axis.vertical
@@ -99,7 +99,7 @@ class RenderDesignScroll extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final child = this.child;
     if (child == null) return;
-    void paintContent(PaintingContext c, Offset o) => c.paintChild(child, o + _paintOffset);
+    void paintContent(PaintingContext c, Offset o) => c.paintChild(child, o + paintOffset);
     if (_overflows && _clip != Clip.none) {
       _clipLayer.layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContent,
           clipBehavior: _clip, oldLayer: _clipLayer.layer);
@@ -117,7 +117,7 @@ class RenderDesignScroll extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final o = _paintOffset;
+    final o = paintOffset;
     transform.translateByDouble(o.dx, o.dy, 0, 1);
   }
 
@@ -126,7 +126,7 @@ class RenderDesignScroll extends RenderProxyBox {
     final child = this.child;
     if (child == null) return false;
     return result.addWithPaintOffset(
-      offset: _paintOffset,
+      offset: paintOffset,
       position: position,
       hitTest: (r, p) => child.hitTest(r, position: p),
     );

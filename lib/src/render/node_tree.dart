@@ -22,6 +22,7 @@ import '../runtime/gestures/drag_and_drop.dart' show dragAndDropLayers;
 import '../runtime/gestures/drag_motion.dart' show RenderDragMotion, dragMotionLayers;
 import 'convert.dart';
 import 'layout/design_scroll.dart';
+import 'layout/runtime_scroll.dart';
 import 'layout/fit_box.dart';
 import 'layout/freeform.dart';
 import 'layout/hug_cross.dart';
@@ -1027,7 +1028,24 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       n.designSize,
     ));
     final axis = vertical ? Axis.vertical : Axis.horizontal;
-    final viewport = _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis))
+    final RenderDesignScroll viewport;
+    if (tree.animates) {
+      final runtime = _obtain<RenderRuntimeScroll>('runtimeScroll', () => RenderRuntimeScroll(axis: axis))
+        ..physics = runtimeScrollPhysics(n.prop(ScrollProps.physics), alwaysScroll: n.prop(ScrollProps.alwaysScroll));
+      void fire(String trigger, double pixels, double delta) {
+        unawaited(tree.interactions?.fire(this, trigger, event: {
+          'offset': pixels, 'x': vertical ? 0 : pixels, 'y': vertical ? pixels : 0,
+          'delta': delta, 'maxScrollExtent': runtime.maxScrollExtent,
+          'progress': runtime.maxScrollExtent <= 0 ? 0 : pixels / runtime.maxScrollExtent,
+        }));
+      }
+      runtime.onChanged = (pixels, delta) => fire('scroll', pixels, delta);
+      runtime.onScrollEnd = () => fire('scrollEnd', runtime.pixels, 0);
+      viewport = runtime;
+    } else {
+      viewport = _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis));
+    }
+    viewport
       ..axis = axis
       ..reverse = n.prop(ScrollProps.reverse)
       ..clipBehavior = clip(n.prop(ScrollProps.clipBehavior));
