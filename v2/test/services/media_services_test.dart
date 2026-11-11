@@ -24,6 +24,24 @@ class _Voice implements SpeechEngine {
 }
 
 void main() {
+  test('sustained voices release independently and replace by id', () {
+    final engine = SilentSoundEngine();
+    final sound = SoundService(engine: engine);
+    expect(sound.startNote('left', frequency: 261.6, volume: 0.1), isTrue);
+    sound.startNote('right', frequency: 261.6, volume: 0.1);
+    sound.stopNote('left');
+    expect(engine.notes.keys, ['right']);
+    sound.startNote('right', frequency: 99999, volume: 5);
+    expect(engine.notes['right'], (24000.0, 2.0));
+    expect(sound.startNote('', frequency: 440), isFalse);
+    expect(sound.startNote('bad', frequency: double.nan), isFalse);
+    sound.stopNote('unknown');
+    sound.stopAllNotes();
+    expect(engine.notes, isEmpty);
+    sound.play(SoundVoice.beep);
+    expect(engine.played, hasLength(1));
+  });
+
   // Ported from SDK 8.x's sound_clock_test.
   test('the sound clock stays continuous when audio starts and stops', () {
     final clock = SoundClock();

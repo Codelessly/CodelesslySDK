@@ -69,6 +69,14 @@ abstract interface class SoundEngine {
   void play(SoundVoice voice, {double? time, double volume = 1, double pitch = 1});
 }
 
+/// Optional engine capability: independently owned, sustained sine voices.
+/// Kept separate so existing custom SoundEngine implementations remain valid.
+abstract interface class SustainedSoundEngine {
+  void startNote(String id, {double frequency = 440, double volume = 1});
+  void stopNote(String id);
+  void stopAllNotes();
+}
+
 /// The app's sounds, on an [engine] (the platform's by default).
 class SoundService {
   SoundService({SoundEngine? engine}) : engine = engine ?? createSoundEngine();
@@ -80,6 +88,25 @@ class SoundService {
 
   bool get available => engine.available;
 
+  /// Starts/replaces a sustained voice. Returns false on unsupported engines.
+  bool startNote(String id, {double frequency = 440, double volume = 1}) {
+    final output = engine;
+    if (output is! SustainedSoundEngine || id.isEmpty || !frequency.isFinite || !volume.isFinite) return false;
+    output.resume();
+    (output as SustainedSoundEngine).startNote(id, frequency: frequency.clamp(8, 24000).toDouble(), volume: volume.clamp(0, 2).toDouble());
+    return true;
+  }
+
+  void stopNote(String id) {
+    final output = engine;
+    if (output is SustainedSoundEngine) (output as SustainedSoundEngine).stopNote(id);
+  }
+
+  void stopAllNotes() {
+    final output = engine;
+    if (output is SustainedSoundEngine) (output as SustainedSoundEngine).stopAllNotes();
+  }
+
   /// Plays [voice]; volume is clamped to 0–2 and pitch to 0.25–4.
   void play(SoundVoice voice, {double? time, double volume = 1, double pitch = 1}) {
     engine.resume();
@@ -88,7 +115,14 @@ class SoundService {
 }
 
 /// A silent engine on a stopwatch clock: off the web, and in tests.
-class SilentSoundEngine implements SoundEngine {
+class SilentSoundEngine implements SoundEngine, SustainedSoundEngine {
+  final Map<String, (double, double)> notes = {};
+  @override
+  void startNote(String id, {double frequency = 440, double volume = 1}) => notes[id] = (frequency, volume);
+  @override
+  void stopNote(String id) => notes.remove(id);
+  @override
+  void stopAllNotes() => notes.clear();
   final Stopwatch _clock = Stopwatch()..start();
 
   /// Sounds played (voice, time, volume, pitch), for tests.
