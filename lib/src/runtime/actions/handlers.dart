@@ -19,6 +19,7 @@ import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../render/play.dart' show EffectPlayers;
 import '../../render/particles.dart' show ParticlePlayers;
+import '../../scripting/formula_scripts.dart' show ScriptsScope;
 import '../../services/services.dart';
 import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
@@ -221,13 +222,19 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   if (variable.isComputed) return;
   final path = ValuePath.parse(name);
   if (path == null) return;
-  final whole = scope.valueOf(path.root, scope);
-  final current = path.keys.isEmpty ? whole : path.readFrom(whole);
-  // A part of a list or map takes the type of what it holds now.
-  final type = path.keys.isEmpty ? variable.type : typeOf(current);
-  final next = path.keys.isNotEmpty && a.write.op == WriteOp.set
-      ? evaluateValue(a.write.value, run.expressions, run.scope)
-      : applyWrite(current, type, a.write, run.expressions, run.scope);
+  (Object?, VariableType, Object?) calculate() {
+    final whole = scope.valueOf(path.root, scope);
+    final current = path.keys.isEmpty ? whole : path.readFrom(whole);
+    // Re-read the current value after awaiting a worker result.
+    final type = path.keys.isEmpty ? variable.type : typeOf(current);
+    final next = path.keys.isNotEmpty && a.write.op == WriteOp.set
+        ? evaluateValue(a.write.value, run.expressions, run.scope)
+        : applyWrite(current, type, a.write, run.expressions, run.scope);
+    return (current, type, next);
+  }
+  final scripts = readPath(run.scope, 'script');
+  final (current, type, next) = scripts is ScriptsScope ? await scripts.resolve(calculate) : calculate();
+  if (run.cancellation.isCanceled) return;
   // A number glides to its new value over animateMs.
   final ms = a.animateMs.trim().isEmpty ? 0 : (double.tryParse(run.text(a.animateMs).trim()) ?? 0).round();
   final number = type == VariableType.integer || type == VariableType.decimal;

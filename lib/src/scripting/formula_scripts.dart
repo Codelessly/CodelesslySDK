@@ -1,6 +1,8 @@
-// `script.name(args)` in formulas, as a value scope declaring `script` above a screen's
+// `script.name(args)` in formulas: SDK 8.x's ScriptFormulaCalls and
+// ScriptResults, as a value scope declaring `script` above a screen's
 // variables.
 import 'dart:collection';
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart' show ScriptCapability, ScriptDef, findScript;
@@ -41,6 +43,9 @@ class ScriptsScope extends NamedScope implements FormulaScripts {
 
   final LinkedHashMap<String, ScriptRunResult> _results = LinkedHashMap();
   final Set<String> _running = {};
+  final Map<String, Future<ScriptRunResult>> _pending = {};
+  Set<String>? _resolvingReads;
+  bool _resolvedRead = false;
   bool _disposed = false;
 
   static const Set<ScriptCapability> _readOnly = {
@@ -82,7 +87,8 @@ class ScriptsScope extends NamedScope implements FormulaScripts {
     };
     final pure = script.capabilities.isEmpty;
     final key = '${script.id}@${script.version}:${_text(named)}';
-    if (pure) {
+    _resolvingReads?.add(key);
+    if (pure || _resolvedRead) {
       final cached = _get(key);
       if (cached != null) return cached.ok ? cached.value : null;
     }
@@ -90,24 +96,60 @@ class ScriptsScope extends NamedScope implements FormulaScripts {
     final runner = this.runner;
     final now = runner is SandboxScriptRunner ? runner.runSync(script, args: named, scripts: scripts, host: host) : null;
     if (now != null) {
-      if (pure) _put(key, now);
+      if (pure || _resolvingReads != null) _put(key, now);
       _report(script, now);
       return now.ok ? now.value : null;
     }
     // Asynchronous: run it, and notify when it's done.
     final earlier = _get(key);
     if (_running.add(key)) {
-      runner.run(script, args: named, scripts: scripts, host: host).then((result) {
+      _pending[key] = runner.run(script, args: named, scripts: scripts, host: host).then((result) {
         _running.remove(key);
-        if (_disposed) return;
+        _pending.remove(key);
+        if (_disposed) return result;
         final changedValue =
             earlier == null || jsonEncode(earlier.value) != jsonEncode(result.value) || earlier.ok != result.ok;
         _put(key, result);
         _report(script, result);
         if (changedValue) changed(const ['script']);
+        return result;
       });
     }
     return earlier != null && earlier.ok ? earlier.value : null;
+  }
+
+  /// Resolves the script calls an action reads before it writes their value.
+  /// UI formulas remain synchronous and repaint when their worker completes.
+  Future<T> resolve<T>(T Function() evaluate) async {
+    var warmed = false;
+    for (var pass = 0; pass < 32; pass++) {
+      if (_disposed) throw StateError('The script scope was disposed.');
+      final reads = <String>{};
+      final previousReads = _resolvingReads;
+      final previousResolved = _resolvedRead;
+      _resolvingReads = reads;
+      _resolvedRead = warmed;
+      late T value;
+      try { value = evaluate(); } finally {
+        _resolvingReads = previousReads;
+        _resolvedRead = previousResolved;
+      }
+      final pending = <Future<ScriptRunResult>>[];
+      for (final key in reads) {
+        final future = _pending[key];
+        if (future != null) {
+          pending.add(future);
+        } else if (_results[key] case final ScriptRunResult result when !result.ok) {
+          throw StateError('Script formula failed: ${result.error}');
+        }
+      }
+      if (pending.isEmpty) return value;
+      for (final result in await Future.wait(pending)) {
+        if (!result.ok) throw StateError('Script formula failed: ${result.error}');
+      }
+      warmed = true;
+    }
+    throw StateError('Script formula dependencies did not settle.');
   }
 
   static void _report(ScriptDef script, ScriptRunResult result) {

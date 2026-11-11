@@ -1000,12 +1000,12 @@ class _ScreenUi extends NavigatorActionUi {
   ScreenBuilder get modal => (destination, params) {
         final layoutId = view._codelessly.publishModel?.resolveLayoutId(destination);
         if (layoutId == null) return null;
-        final model = view._codelessly.publishModel!;
-        final canvasId = model.layouts[layoutId]?.canvases.any((c) => c.id == destination) ?? false ? destination : null;
+        // A modal opens the destination screen, like navigation does. Its
+        // breakpoint canvases follow the available width; a link to the
+        // narrowest canvas must not pin a responsive dialog to phone size.
         return CodelesslyWidget(
           codelessly: view._codelessly,
           layoutId: layoutId,
-          canvasId: canvasId,
           params: params,
           data: view.widget.data,
           sizing: CanvasSizing.design,
