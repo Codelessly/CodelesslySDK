@@ -253,6 +253,16 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
           iconDiscBorder: side('iconDiscBorder', 'iconDiscBorderColor'),
           centered: look.flag('centered'),
           expandButtons: look.flag('expandButtons'),
+          buttonsAlignment: switch (action.style['buttonsAlignment']) {
+            'start' => MainAxisAlignment.start,
+            'center' => MainAxisAlignment.center,
+            'end' => MainAxisAlignment.end,
+            _ => null,
+          },
+          captionGap: look.numberOr('captionGap', 6),
+          messageGap: look.numberOr('messageGap', 8),
+          buttonPadding: look.insets('buttonPadding'),
+          buttonMinWidth: look.numberOr('buttonMinWidth', 64),
         ),
       );
 
@@ -323,6 +333,11 @@ class ThemedConfirmDialog extends StatelessWidget {
     this.insets,
     this.padding,
     this.buttonHeight,
+    this.buttonsAlignment,
+    this.captionGap = 6,
+    this.messageGap = 8,
+    this.buttonPadding,
+    this.buttonMinWidth = 64,
   });
 
   /// Width of a centered dialog, within [maxWidth] and the screen less
@@ -341,6 +356,11 @@ class ThemedConfirmDialog extends StatelessWidget {
 
   /// Height of the buttons; null is 44.
   final double? buttonHeight;
+  /// The action row's alignment; null preserves the centered/end default.
+  final MainAxisAlignment? buttonsAlignment;
+  /// Optional look spacing and button sizing; existing defaults stay intact.
+  final double captionGap, messageGap, buttonMinWidth;
+  final EdgeInsets? buttonPadding;
 
   final BorderSide? confirmBorder, cancelBorder;
 
@@ -396,9 +416,9 @@ class ThemedConfirmDialog extends StatelessWidget {
     final onConfirm = buttonStyle?.color?.flutter ?? confirmTextColor ?? ResolvedFeedbackTheme.onColor(confirmFill);
     final onCancel = buttonStyle?.color?.flutter ?? cancelTextColor ?? onSurface;
     // A set height is the buttons' height exactly, not just their least.
-    final buttonSize = Size(64, buttonHeight ?? 44);
+    final buttonSize = Size(buttonMinWidth, buttonHeight ?? 44);
     final buttonMaxSize = buttonHeight == null ? null : Size(double.infinity, buttonHeight!);
-    const buttonPadding = EdgeInsets.symmetric(horizontal: 18);
+    final buttonPadding = this.buttonPadding ?? const EdgeInsets.symmetric(horizontal: 18);
     final dialogSide = border ?? theme.border;
     final dialogShadows = shadows ?? theme.shadows;
 
@@ -418,6 +438,7 @@ class ThemedConfirmDialog extends StatelessWidget {
         textStyle: buttonText,
         shape: buttonShape,
         side: cancelBorder ?? buttonSide,
+        visualDensity: buttonHeight == null ? null : VisualDensity.standard,
         minimumSize: buttonSize,
         maximumSize: buttonMaxSize,
         tapTargetSize: buttonHeight == null ? null : MaterialTapTargetSize.shrinkWrap,
@@ -434,6 +455,7 @@ class ThemedConfirmDialog extends StatelessWidget {
         textStyle: buttonText,
         shape: buttonShape,
         side: confirmBorder ?? buttonSide,
+        visualDensity: buttonHeight == null ? null : VisualDensity.standard,
         minimumSize: buttonSize,
         maximumSize: buttonMaxSize,
         tapTargetSize: buttonHeight == null ? null : MaterialTapTargetSize.shrinkWrap,
@@ -493,7 +515,7 @@ class ThemedConfirmDialog extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: captionGap),
             ],
             if (title.isNotEmpty)
               Text(
@@ -501,7 +523,7 @@ class ThemedConfirmDialog extends StatelessWidget {
                 textAlign: textAlign,
                 style: applyTextStyle(titleStyle, theme.titleStyle.copyWith(fontSize: 18, height: 1.3, color: onSurface)),
               ),
-            if (title.isNotEmpty && message.isNotEmpty) const SizedBox(height: 8),
+            if (title.isNotEmpty && message.isNotEmpty) SizedBox(height: messageGap),
             if (message.isNotEmpty)
               Flexible(
                 child: SingleChildScrollView(
@@ -520,7 +542,7 @@ class ThemedConfirmDialog extends StatelessWidget {
               Row(children: [Expanded(child: buttons[0]), const SizedBox(width: 12), Expanded(child: buttons[1])])
             else
               OverflowBar(
-                alignment: centered ? MainAxisAlignment.center : MainAxisAlignment.end,
+                alignment: buttonsAlignment ?? (centered ? MainAxisAlignment.center : MainAxisAlignment.end),
                 overflowAlignment: centered ? OverflowBarAlignment.center : OverflowBarAlignment.end,
                 // Outlined or shadowed buttons need room between them.
                 spacing: buttonShadowList.isEmpty && confirmBorder == null && cancelBorder == null ? 8 : 12,
