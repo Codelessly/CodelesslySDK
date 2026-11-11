@@ -34,7 +34,7 @@ import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
-import '../services/services.dart' show NoScriptRunner, Services;
+import '../services/services.dart' show NoScriptRunner, PaywallSession, Services;
 import 'back_guard.dart';
 import 'codelessly.dart';
 import 'navigation.dart';
@@ -238,6 +238,7 @@ class CodelesslyWidget extends StatefulWidget {
     this.errorBuilder,
     this.layoutBuilder,
     this.onNavigate,
+    this.paywall,
   });
 
   /// The layout to show: a layout id, a custom id, or the id of one of its
@@ -288,6 +289,12 @@ class CodelesslyWidget extends StatefulWidget {
 
   /// Handles navigation actions first (an app routing screens itself).
   final CodelesslyNavigationHandler? onNavigate;
+
+  /// The paywall this layout shows: its `paywall` actions (purchase,
+  /// restore, select product, close) act on it, and its bindings read its
+  /// values (`product`, `products`, `paywall`, `entitlements`), live.
+  /// `Codelessly.paywall.present` sets it; give one to embed a paywall.
+  final PaywallSession? paywall;
 
   /// A route showing layout [layoutId] of [codelessly], as navigation
   /// pushes them. [template] passes its builders and handler along. With
@@ -510,7 +517,8 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       return (widget.loadingBuilder ?? _controller?.loadingBuilder)?.call(context) ?? const CodelesslyLoadingScreen();
     }
     Widget view = _LayoutView(
-      key: ObjectKey(layout),
+      // Another layout or paywall is another screen.
+      key: ValueKey((layout, widget.paywall)),
       codelessly: codelessly,
       layout: layout,
       canvasId: widget.canvasId,
@@ -519,6 +527,7 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       sizing: widget.sizing,
       controller: _controller,
       host: widget,
+      paywall: widget.paywall,
     );
     final builder = widget.layoutBuilder ?? _controller?.layoutBuilder;
     if (builder != null) view = builder(context, view);
@@ -579,6 +588,7 @@ class _LayoutView extends StatefulWidget {
     required this.sizing,
     required this.controller,
     required this.host,
+    this.paywall,
   });
 
   final Codelessly codelessly;
@@ -589,6 +599,7 @@ class _LayoutView extends StatefulWidget {
   final CanvasSizing sizing;
   final CodelesslyWidgetController? controller;
   final CodelesslyWidget host;
+  final PaywallSession? paywall;
 
   @override
   State<_LayoutView> createState() => _LayoutViewState();
@@ -624,6 +635,8 @@ class _LayoutViewState extends State<_LayoutView> {
       if (widget.data.isNotEmpty) 'data': {...appData, ...widget.data},
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
+      // A paywall's values (kept live by _paywallChanged).
+      ...?widget.paywall?.values,
     }, _codelessly.appVariables);
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
@@ -655,7 +668,9 @@ class _LayoutViewState extends State<_LayoutView> {
       tree: tree,
       nodeValues: nodeValues,
       scripts: widget.layout.document.scripts,
+      paywall: widget.paywall,
     );
+    widget.paywall?.addListener(_paywallChanged);
     final reactions = TreeReactions(runner: config.actions, context: context);
     tree.interactions = reactions;
     final screen = _ScreenState(
@@ -699,6 +714,16 @@ class _LayoutViewState extends State<_LayoutView> {
   }
 
   final List<PersistedVariable> _persisted = [];
+
+  /// The paywall changed (products loaded, purchasing, an error): its
+  /// bindings read the new values.
+  void _paywallChanged() {
+    final paywall = widget.paywall;
+    if (paywall == null) return;
+    for (final e in paywall.values.entries) {
+      if (!jsonEquality.equals(_screen.values[e.key], e.value)) _screen.values.set(e.key, e.value);
+    }
+  }
 
   /// The widget's data changed: `data` reads the new values, and a variable
   /// that started from the data follows it, unless the user changed it
@@ -842,6 +867,7 @@ class _LayoutViewState extends State<_LayoutView> {
 
   @override
   void dispose() {
+    widget.paywall?.removeListener(_paywallChanged);
     if (identical(widget.controller?._screen, _screen)) widget.controller?._screen = null;
     for (final p in _persisted) {
       p.dispose();
