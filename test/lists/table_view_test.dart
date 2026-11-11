@@ -286,4 +286,19 @@ void main() {
     expect(shown(), containsAll(['new0c0', 'new2c2']));
     expect(shown(), isNot(contains('r0c0')));
   });
+
+  testWidgets('the header line takes room: its cells centre above it, as a bordered box', (tester) async {
+    final t = table();
+    (t['table']!['props'] as Map)
+      ..['headerBorderColor'] = '#FFFF0000'
+      ..['headerBorderWidth'] = 2;
+    await show(tester, t, root: 'table', variables: [rows]);
+    final at = cells(tester);
+    final origin = tester.getTopLeft(find.byType(TableView));
+    // A 20 px label in the 40 px header above its 2 px line: (38 - 20) / 2.
+    expect(at['Col 0']!.dy - origin.dy, closeTo(9, 0.01));
+    // The header keeps its height: body rows start at 40.
+    expect(at['r0c0']!.dy - origin.dy, closeTo(40 + 10, 0.01));
+  });
 }
+

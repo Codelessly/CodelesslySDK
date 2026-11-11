@@ -178,9 +178,14 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
                     : body == _hover && hoverColor != null
                         ? hoverColor
                         : (stripe != null && body.isOdd ? stripe : null);
+            // The header's line takes room under its cells, as a bordered
+            // box's does: they centre in the height above it.
+            final headerLine = header && headerBorder != null ? headerBorder.width : 0.0;
             return TableSpan(
-              extent: FixedTableSpanExtent(
-                  header ? n.prop(TableViewProps.headerHeight) : tableRowHeight(rows[body], rowHeightKey, rowHeight)),
+              extent: FixedTableSpanExtent(header
+                  ? math.max(0.0, n.prop(TableViewProps.headerHeight) - headerLine)
+                  : tableRowHeight(rows[body], rowHeightKey, rowHeight)),
+              padding: headerLine > 0 ? SpanPadding(trailing: headerLine) : null,
               foregroundDecoration: TableSpanDecoration(
                   border: TableSpanBorder(trailing: header && headerBorder != null ? headerBorder : line)),
               backgroundDecoration: background == null ? null : TableSpanDecoration(color: background),

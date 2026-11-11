@@ -44,8 +44,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     final at = <String, Offset>{};
+    final heights = <String, double>{};
     void visit(RenderObject o) {
-      if (o is RenderParagraph) at[o.text.toPlainText()] = o.localToGlobal(Offset.zero);
+      if (o is RenderParagraph) {
+        at[o.text.toPlainText()] = o.localToGlobal(Offset.zero);
+        heights[o.text.toPlainText()] = o.size.height;
+      }
       o.visitChildren(visit);
     }
 
@@ -53,6 +57,8 @@ void main() {
     visit(root);
     final origin = (root as RenderBox).localToGlobal(Offset.zero);
     expect(at['N0']!.dx - origin.dx, closeTo(18, 0.5));
+    // The header's 2 px line takes room: its label centres in the 48 above it.
+    expect(at['Name']!.dy - origin.dy, closeTo((48 - heights['Name']!) / 2, 0.01));
 
     final image = await tester.runAsync(() => captureImage(tester.element(find.byType(NodeView))));
     final bytes = (await tester.runAsync(() => image!.toByteData()))!;
