@@ -63,6 +63,33 @@ void main() {
     expect(find.text('next'), findsNothing);
   });
 
+  testWidgets('open modal forwards the bottom sheet height limit', (tester) async {
+    late BuildContext home;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (c) {
+            home = c;
+            return const Text('home');
+          },
+        ),
+      ),
+    );
+    const panelKey = ValueKey('limited-sheet');
+    final ui = NavigatorActionUi(
+      context: () => home,
+      modal: (_, params) => const SizedBox.expand(key: panelKey),
+    );
+    unawaited(
+      ui.openModal(
+        const OpenModalAction(to: 'sheet', presentation: ModalPresentation.bottomSheet, maxHeightFactor: .5),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byKey(panelKey)).height, 300);
+    expect(tester.getBottomLeft(find.byKey(panelKey)).dy, 600);
+  });
+
   testWidgets('a modal with a transition is see-through, closes with a close modal action, and gives its result', (tester) async {
     late BuildContext home;
     late BuildContext inModal;
