@@ -176,3 +176,22 @@ actions fail and the rest of the app is unaffected. See the API docs of `Paywall
 `Codelessly.dispose()` does not dispose its services.
 
 Next: [Scripting](10-scripting.md)
+
+### Read-along word boundaries
+
+The live `speech` expression value includes `speaking`, `text`, `available`,
+`boundaryAvailable`, `charIndex`, `charLength`, `wordIndex` and `word`.
+`wordIndex` starts at -1 and updates only when the platform voice delivers a
+real word boundary; it returns to -1 when narration ends or is stopped.
+Character offsets use UTF-16, matching browser SpeechSynthesis events.
+Whitespace separates words and punctuation stays with its word.
+
+For read-along text, repeat `split(text, ' ')` and highlight the item where
+`index == speech.wordIndex`. Some browser voices do not emit word boundaries;
+those voices can narrate without a moving highlight. There is no estimated
+timer fallback. `boundaryAvailable` means the engine exposes the boundary API,
+not that every voice guarantees events.
+
+Native hosts can keep an existing `SpeechEngine` implementation, or implement
+`BoundarySpeechEngine.speakWithBoundaries` and send `SpeechBoundary` events
+from their platform TTS. Late events from canceled utterances are ignored.
