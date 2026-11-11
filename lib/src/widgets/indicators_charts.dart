@@ -666,7 +666,7 @@ class PlotChartPainter extends NodePainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
     canvas.save();
-    canvas.clipRect(Offset.zero & size);
+    if (p(PlotChartProps.clip)) canvas.clipRect(Offset.zero & size);
 
     final originAxes = p(PlotChartProps.originAxes);
     final labelHeight = originAxes ? 0.0 : math.max(0.0, p(PlotChartProps.labelHeight));
