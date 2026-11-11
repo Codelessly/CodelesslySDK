@@ -82,6 +82,17 @@ void main() {
     expect(r.containsKey(3), isFalse);
   });
 
+  testWidgets('spacing without a separator spaces the items, as a column\'s does', (tester) async {
+    final r = await _items(tester, {
+      'type': 'listView',
+      'layout': {'width': 200, 'height': {'hug': 300}},
+      'props': {'itemCount': 3, 'spacing': 10},
+    }, _box);
+    expect(r[1]!.top - r[0]!.bottom, 10);
+    expect(r[2]!.top - r[1]!.bottom, 10);
+    expect(r[-1]!.height, 40 * 3 + 20);
+  });
+
   testWidgets('a running flexible list hugs its items within its room, then scrolls', (tester) async {
     // A column: the list (flexible), then a box that follows its last item.
     Future<(Rect list, Rect after)> layout(int count, {bool interactive = true}) async {
