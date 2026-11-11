@@ -5,6 +5,7 @@ import 'package:codelessly_api/codelessly_api.dart' show Json, readDouble, readI
 import 'package:flutter/rendering.dart';
 
 import 'image_fill.dart';
+import 'material_icon_versions.dart';
 
 /// Where icon SVGs come from. Material icons and symbols load from Google's
 /// prebuilt SVGs; Cupertino icons from Codelessly's icon CDN (override with
@@ -31,7 +32,10 @@ abstract final class IconSources {
           'twoTone' => 'twotone',
           _ => '',
         };
-        return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v${readInt(icon['version']) ?? 1}/24px.svg';
+        // Without a version (an icon written by hand or by an agent), the
+        // name's current one: not every icon exists at v1.
+        final version = readInt(icon['version']) ?? materialIconVersions[name] ?? 1;
+        return 'https://fonts.gstatic.com/s/i/materialicons$style/$name/v$version/24px.svg';
       case 'MATERIAL_SYMBOL':
         if (name.isEmpty) return null;
         final style = readString(icon['style']) ?? 'outlined';
