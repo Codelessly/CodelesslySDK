@@ -238,7 +238,11 @@ class FreeformAxisPlacement {
         // solver keeps a fixed size: a 585 wide decoration aligned in a 390
         // wide frame stays 585 wide and sits at the Alignment.inscribe
         // offset instead of being squashed to the frame.
-        final double designOverflow = math.max(0, extent - parentExtent);
+        // Filling children describe their breakpoint's fallback size, not
+        // an intentional fixed overhang. Adding that design difference to
+        // the runtime extent made a larger responsive variant grow twice
+        // and then center itself outside its actual viewport.
+        final double designOverflow = expands ? 0 : math.max(0, extent - parentExtent);
         final double max = s == null ? incomingMax : s + designOverflow;
         if (expands && max.isInfinite) return (extent, extent);
         return (0, max);
