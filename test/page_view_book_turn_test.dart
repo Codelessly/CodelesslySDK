@@ -120,6 +120,32 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  for (final reverse in [true, false]) {
+    testWidgets('a turn reports the page it lands on as \${result.index} (${reverse ? 'book' : 'plain'} pager)', (tester) async {
+      final nodes = pages();
+      if (!reverse) (nodes['col']!['props'] as Map).remove('paintOrder');
+      nodes['col']!['actions'] = [
+        support.reaction('changed', [
+          {'type': 'setVariable', 'variable': 'landed', 'value': r'${result.index}'},
+          {'type': 'setVariable', 'variable': 'legacy', 'value': r'${value}'},
+        ]),
+      ];
+      final screen = await support.show(tester, nodes, variables: [
+        support.v('landed', -1, api.VariableType.integer),
+        support.v('legacy', -1, api.VariableType.integer),
+      ]);
+      final viewport = tester.renderObject<RenderBox>(find.byType(Viewport));
+      final origin = viewport.localToGlobal(Offset.zero);
+      await tester.dragFrom(origin + const Offset(280, 100), const Offset(-260, 0));
+      await tester.pumpAndSettle();
+      expect(screen.scope.read('landed'), 1);
+      expect(screen.scope.read('legacy'), 1, reason: 'SDK 8.x actions read \${value}');
+      await tester.dragFrom(origin + const Offset(20, 100), const Offset(260, 0));
+      await tester.pumpAndSettle();
+      expect(screen.scope.read('landed'), 0);
+    });
+  }
+
   testWidgets('on the design canvas, pages read their distance from the page at rest', (tester) async {
     final nodes = pages();
     nodes['col']!['props'] = {...(nodes['col']!['props'] as Map), 'initialPage': 1};
