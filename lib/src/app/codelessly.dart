@@ -9,6 +9,7 @@ import '../services/services.dart';
 import 'config.dart';
 import 'fonts.dart';
 import 'loader.dart';
+import 'managed_components.dart';
 import 'navigation.dart';
 import 'paywalls.dart';
 import 'persisted_variables.dart';
@@ -50,16 +51,31 @@ class Codelessly extends ChangeNotifier {
   /// [cache] keeps the publish (default: in memory, for this run), [fonts]
   /// fetches the layouts' fonts (default: over HTTP), and [data] is what
   /// layouts read as `data.<key>`.
+  ///
+  /// With [managedComponents] (Firestore's on a Firebase app), the layouts'
+  /// linked, Codelessly-managed components take the newer same-major
+  /// versions their channel offers when a layout loads
+  /// ([ManagedComponentResolver]); without it they show the version they
+  /// were published with.
   Codelessly({
     this.config = const CodelesslyConfig(),
     PublishLoader? loader,
     PublishCache? cache,
     FontFetcher? fonts,
     Map<String, Object?> data = const {},
+    ManagedComponentSource? managedComponents,
   })  : loader = loader ?? _defaultLoader(config),
         cache = cache ?? MemoryPublishCache(),
         fonts = CodelesslyFonts(fetcher: fonts ?? HttpFontFetcher()),
-        data = MapValueScope(values: {'data': data});
+        data = MapValueScope(values: {'data': data}) {
+    if (managedComponents != null) {
+      managed = ManagedComponentResolver(source: managedComponents, cache: this.cache);
+    }
+  }
+
+  /// Resolves the layouts' managed components at load; null: each shows its
+  /// published snapshot.
+  ManagedComponentResolver? managed;
 
   /// A [Codelessly] showing [bundle] (a publish shipped with the app, or a
   /// test's), offline.
@@ -349,6 +365,11 @@ class Codelessly extends ChangeNotifier {
         layout = cached;
       }
     }
+    final resolver = managed;
+    if (resolver != null) {
+      // Never fails: an instance whose update fails keeps its snapshot.
+      layout = await resolver.resolve(layout, projectId: model.projectId, theme: layout.theme ?? model.theme);
+    }
     _layouts[layoutId] = layout;
     final fontsOf = {
       ...model.fontsOf(layoutId),
@@ -358,6 +379,17 @@ class Codelessly extends ChangeNotifier {
       await fonts.load(fontsOf).timeout(config.fontTimeout, onTimeout: () {});
     }
     return layout;
+  }
+
+  /// Asks again which versions the managed components' channels offer (a
+  /// release or a rollback since): loaded layouts that show managed
+  /// components reload when next shown.
+  void refreshManagedComponents() {
+    final resolver = managed;
+    if (resolver == null) return;
+    resolver.refresh();
+    _layouts.removeWhere((_, l) => managedInstancesOf(l.document).isNotEmpty);
+    notifyListeners();
   }
 
   /// Sets app data [key] (read by layouts as `data.<key>`).
@@ -427,7 +459,7 @@ class _ServiceValuesScope extends ValuesScope {
       (value) {
         if (_disposed) return;
         final user = s.auth.currentUser;
-        final uid = user == null || user.isAnonymous ? '' : user.uid;
+        final uid = AuthProfiles.hasProfile(user) ? user!.uid : '';
         if (value['uid'] != uid) return; // A queued snapshot from an earlier identity.
         _authFailed = false;
         _scopeAccount(user?.uid);
@@ -453,7 +485,7 @@ class _ServiceValuesScope extends ValuesScope {
   bool _authFailed = false;
 
   Map<String, Object?>? _matchingProfile(Object? snapshot, AppUser? user) {
-    if (user == null || user.isAnonymous || snapshot is! Map || snapshot['uid'] != user.uid) return null;
+    if (!AuthProfiles.hasProfile(user) || snapshot is! Map || snapshot['uid'] != user!.uid) return null;
     final profile = snapshot['profile'];
     return profile is Map ? profile.cast<String, Object?>() : null;
   }
@@ -464,7 +496,7 @@ class _ServiceValuesScope extends ValuesScope {
     if (service == null) return;
     final recovery = const {
       AuthOperation.signIn, AuthOperation.signUp, AuthOperation.signInWithGoogle,
-      AuthOperation.signInWithApple, AuthOperation.completeSignInLink,
+      AuthOperation.signInWithApple, AuthOperation.completeSignInLink, AuthOperation.signInAnonymously,
     }.contains(operation);
     // A stale currentUser after an auth stream error is not proof of a live
     // session. Only an explicit successful sign-in can recover that identity.

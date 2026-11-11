@@ -456,6 +456,25 @@ void main() {
       expect(h['err'], isNotEmpty);
       expect(h.errors, hasLength(1));
     });
+
+    test('auth: a guest session keeps its uid when it signs up', () async {
+      final auth = MemoryAuthService();
+      final h = Harness(services: Services(auth: auth), variables: [v('guest', ''), v('uid', '')]);
+      await h.click([
+        {'type': 'auth', 'operation': 'signInAnonymously'},
+        setVar('guest', r'${result}'),
+      ]);
+      expect(h.errors, isEmpty);
+      expect(auth.currentUser!.isGuest, isTrue);
+      expect(h['guest'], isNotEmpty);
+      await h.click([
+        {'type': 'auth', 'operation': 'signUp', 'email': 'g@b.c', 'password': 'secret1', 'displayName': 'Gus'},
+        setVar('uid', r'${result}'),
+      ]);
+      expect(h['uid'], h['guest'], reason: 'signing up as a guest upgrades the same account');
+      expect(auth.currentUser!.isGuest, isFalse);
+      expect(auth.currentUser!.email, 'g@b.c');
+    });
   });
 }
 

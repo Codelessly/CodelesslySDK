@@ -55,12 +55,31 @@ class _AudioTonePlayer implements NativeTonePlayer {
   }
 }
 
+/// One sample of [waveform] at [phase] radians, about −1..1. Instrument
+/// voices are their wave's harmonics (no filters on this path).
+double _wave(String waveform, double phase) {
+  final cycle = (phase / (2 * math.pi)) % 1;
+  double tri(double c) => 4 * (c - .5).abs() - 1;
+  return switch (waveform) {
+    'triangle' => tri(cycle),
+    'square' => cycle < .5 ? .7 : -.7,
+    'sawtooth' => (2 * cycle - 1) * .7,
+    'felt' => .85 * tri(cycle) + .15 * math.sin(2 * phase),
+    'reed' => .5 * (cycle < .5 ? 1 : -1) + .3 * math.sin(phase) + .2 * math.sin(3 * phase),
+    'pluck' => .6 * math.sin(phase) + .25 * math.sin(2 * phase) + .15 * math.sin(3 * phase),
+    _ => math.sin(phase),
+  };
+}
+
 /// PCM16 mono WAV. An integer number of periods makes a seamless loop.
-Uint8List toneWave(double frequency, double volume, {bool sustained = true, String waveform='sine'}) {
+Uint8List toneWave(double frequency, double volume, {bool sustained = true, String waveform = 'sine'}) {
   const rate = 48000;
   final hz = frequency.clamp(8, 24000).toDouble();
   final cycles = math.max(1, (hz / 4).round());
-  final samples = sustained ? (cycles * rate / hz).round() : rate ~/ 12;
+  // A pluck dies away by itself: 1.6 s, not looped.
+  final pluck = waveform == 'pluck';
+  if (pluck) sustained = false;
+  final samples = sustained ? (cycles * rate / hz).round() : (pluck ? rate * 8 ~/ 5 : rate ~/ 12);
   final radiansPerSample = sustained
       ? 2 * math.pi * cycles / samples
       : 2 * math.pi * hz / rate;
@@ -82,10 +101,10 @@ Uint8List toneWave(double frequency, double volume, {bool sustained = true, Stri
   text(36, 'data');
   data.setUint32(40, samples * 2, Endian.little);
   for (var i = 0; i < samples; i++) {
-    final envelope = sustained ? 1.0 : math.exp(-i / (rate * .015));
+    final envelope = sustained ? 1.0 : math.exp(-i / (rate * (pluck ? .55 : .015)));
     data.setInt16(
       44 + i * 2,
-      ((waveform=='triangle'?4*(((radiansPerSample*i/(2*math.pi))%1)-.5).abs()-1:math.sin(radiansPerSample * i)) *
+      (_wave(waveform, radiansPerSample * i) *
               volume.clamp(0, 2) *
               .1 *
               32767 *
@@ -144,12 +163,12 @@ class NativeSoundEngine
       try {
         await output.load(
           toneWave(frequency, volume, sustained: loop,waveform:waveform),
-          loop: loop,
+          loop: loop && waveform != 'pluck',
         );
         if (!identical(_voices[id], output)) return;
         _available = true;
         output.play();
-        if (!loop) {
+        if (!loop && waveform != 'pluck') {
           Timer(const Duration(milliseconds: 150), () {
             if (identical(_voices[id], output)) stopNote(id);
           });

@@ -8,10 +8,10 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
-import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
-import 'package:http/http.dart' as http;
+import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import 'action_error.dart' show CodedFailure;
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
@@ -586,6 +586,8 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
         await auth.sendSignInLink(email, continueUrl: Uri.base.toString());
       case AuthOperation.completeSignInLink:
         run.result = (await auth.signInWithLink(email, Uri.base.toString())).uid;
+      case AuthOperation.signInAnonymously:
+        run.result = (await auth.signInAsGuest()).uid;
     }
     final host = run.host;
     if (host is RuntimeActionContext) host.refreshAuthValues?.call(a.operation);
@@ -626,9 +628,22 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
   }
   final picked = await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple);
   for (final (i, f) in picked.indexed) {
-    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) throw StateError('${f.name} is larger than ${a.maxSizeMB} MB');
-    if (a.progressVariable.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, i / picked.length);
-    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes, contentType: f.contentType);
+    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
+      throw CodedFailure('file-too-large', '${f.name} is larger than ${_mb(a.maxSizeMB)} MB');
+    }
+    final type = f.contentType ?? '';
+    if (a.kind == CloudFileKind.image && type.isNotEmpty && !type.startsWith('image/')) {
+      throw CodedFailure('invalid-file-type', '${f.name} is not an image');
+    }
+    void progress(double sent) {
+      if (a.progressVariable.isNotEmpty) {
+        setVariableIn(run.context.scope, a.progressVariable, (i + sent.clamp(0, 1)) / picked.length);
+      }
+    }
+
+    progress(0);
+    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes,
+        contentType: f.contentType, onProgress: progress);
     await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
   }
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
@@ -636,39 +651,21 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
 
 // --- forms and text fields -------------------------------------------------------------
 
-String _fieldText(ActionRun run, String nodeId) {
-  final tree = run.host.tree;
-  if (tree == null || nodeId.isEmpty) return '';
-  return TextFieldHandle.of(tree, nodeId)?.controller.text ?? '';
-}
-
+/// A form submission. Only the local service runs: an older layout's
+/// built-in newsletter service (or an unknown one), decoded as
+/// [FormService.unsupported], sends nothing and fails as
+/// `unsupported_service` through the same result and callbacks.
+///
+/// Validation finishes before any response is stored. Persisting the
+/// response variable uses the SDK's normal variable persistence. Nothing is
+/// sent over the network.
 Future<void> _submitForm(SubmitFormAction a, ActionRun run) async {
-  if (a.service == FormService.local) return _submitLocalForm(a, run);
-  final email = _fieldText(run, a.emailField).trim();
-  if (email.isEmpty) throw StateError('No email to submit');
-  final response = await http.post(
-    Uri.parse('https://${a.dataCenter}.api.mailchimp.com/3.0/lists/${a.listId}/members'),
-    headers: {
-      'Authorization': 'Basic ${base64Encode(utf8.encode('codelessly:${a.apiKey}'))}',
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({
-      'email_address': email,
-      'status': 'subscribed',
-      'merge_fields': {
-        if (a.firstNameField.isNotEmpty) 'FNAME': _fieldText(run, a.firstNameField),
-        if (a.lastNameField.isNotEmpty) 'LNAME': _fieldText(run, a.lastNameField),
-      },
-    }),
-  );
-  if (response.statusCode >= 300) throw StateError('Submit failed: ${response.statusCode}');
-}
-
-/// Generic local submission: validation finishes before any response is stored.
-/// Persisting the response variable uses the SDK's normal variable persistence.
-Future<void> _submitLocalForm(SubmitFormAction a, ActionRun run) async {
   Json outcome;
   try {
+    if (a.service != FormService.local) {
+      throw const _FormSubmissionFailure('unsupported_service',
+          'This form uses a submission service that is no longer supported. Nothing was sent.');
+    }
     final destination = a.responseVariable.trim();
     if (destination.isNotEmpty) {
       final found = variableOf(run.context.scope, destination);
@@ -798,6 +795,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     AnimationCurve.easeOutCubic => Curves.easeOutCubic,
     AnimationCurve.easeInOutCubic => Curves.easeInOutCubic,
     AnimationCurve.decelerate => Curves.decelerate,
+    AnimationCurve.emphasized => const Cubic(0.2, 0, 0, 1),
     _ => Curves.easeInOut,
   };
   final scrolls = <Future<void>>[];
@@ -851,12 +849,32 @@ void _speak(SpeakAction a, ActionRun run) {
       pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2)));
 }
 
+/// The latest timed start of each voice id (see [_playSound]).
+final Map<String, Object> _soundTokens = {};
+
 void _playSound(PlaySoundAction a, ActionRun run) {
   double? number(String v) => double.tryParse(run.text(v).trim());
   final service = _require(run, 'Sound').sound;
   switch (a.operation) {
     case 'start':
-      service.startNoteWithWaveform(run.text(a.voiceId).trim(), frequency: number(a.frequency) ?? 440, volume: number(a.volume) ?? 1, waveform:run.text(a.waveform));
+      final id = run.text(a.voiceId).trim();
+      final note = a.note.isEmpty ? null : number(a.note);
+      final frequency = note != null ? midiToHz(note) : number(a.frequency) ?? 440;
+      service.startNoteWithWaveform(id, frequency: frequency, volume: number(a.volume) ?? 1, waveform: run.text(a.waveform).trim());
+      // A voice with a duration releases itself, unless something started
+      // another voice under its id in the meantime.
+      final ms = a.duration.isEmpty ? null : number(a.duration);
+      if (ms != null && ms >= 0) {
+        final token = _soundTokens[id] = Object();
+        Timer(Duration(milliseconds: ms.round()), () {
+          if (identical(_soundTokens[id], token)) {
+            _soundTokens.remove(id);
+            service.stopNote(id);
+          }
+        });
+      } else {
+        _soundTokens.remove(id);
+      }
       return;
     case 'stop':
       service.stopNote(run.text(a.voiceId).trim());
@@ -936,10 +954,18 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
   switch (result.outcome) {
     case PaywallOutcome.purchased || PaywallOutcome.restored:
       return;
-    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing || PaywallOutcome.skipped:
+    // Closing the paywall or nothing to show ends the chain quietly. A
+    // cancelled purchase and an empty restore end it too, without an error,
+    // but the screen's actionError reaction hears them
+    // (`${result.error.code}`) to say so.
+    case PaywallOutcome.closed || PaywallOutcome.skipped:
       throw const ActionsCanceled();
+    case PaywallOutcome.canceled:
+      throw const ActionsStopped('purchase-cancelled', 'Purchase cancelled');
+    case PaywallOutcome.restoreNothing:
+      throw const ActionsStopped('nothing-to-restore', 'No purchase to restore');
     case PaywallOutcome.failed:
-      throw StateError(result.error ?? 'Purchase failed');
+      throw CodedFailure(result.code.isEmpty ? 'purchase-failed' : result.code, result.error ?? 'Purchase failed');
   }
 }
 
@@ -1014,3 +1040,6 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
     return {'ok': false, 'error': '$error'};
   }
 }
+
+/// 5 for 5.0, 2.5 for 2.5.
+String _mb(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';

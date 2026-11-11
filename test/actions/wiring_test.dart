@@ -101,6 +101,25 @@ String textOf(NodeTree tree, String id) {
 }
 
 void main() {
+  testWidgets('a button with press feedback (a pressed state) still clicks', (tester) async {
+    final nodes = counter(actions: [reaction('click', [add('count')])]);
+    nodes['button'] = {
+      ...nodes['button']!,
+      'states': {
+        'pressed': {'button': {'scale': 0.97, 'opacity': 0.82}},
+        'hovered': {'button': {'scale': 1.012}},
+      },
+      'transitions': {'style': {'duration': 180, 'curve': 'easeOut'}},
+    };
+    final s = await show(tester, nodes, variables: [v('count', 0, VariableType.integer)]);
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    expect(s['count'], 1, reason: 'the pressed state re-applies the box mid-tap; the tap must survive');
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    expect(s['count'], 2);
+  });
+
   for (final expression in ['period', r'${period}']) {
     testWidgets('clock interval reads $expression and clamps tiny periods', (tester) async {
       final s=await show(tester,counter(actions:[reaction('clock',[add('count')],extra:{'every':expression})]),variables:[v('count',0,VariableType.integer),v('period',80,VariableType.decimal)]);
@@ -183,6 +202,50 @@ void main() {
     await tester.pump();
     expect(engine.notes, isEmpty);
     expect(s['cancelled'], isTrue);
+  });
+
+  testWidgets('a key plays an instrument voice by MIDI note; a duration releases it', (tester) async {
+    final engine = SilentSoundEngine();
+    final s = await show(tester, counter(actions: [
+      reaction('pointerDown', [
+        {'type': 'playSound', 'operation': 'start', 'voiceId': 'k60', 'note': r'${midi}', 'waveform': 'felt'},
+        {'type': 'playSound', 'operation': 'start', 'voiceId': 'tick', 'frequency': '1760', 'duration': '50'},
+      ]),
+      reaction('pointerUp', [
+        {'type': 'playSound', 'operation': 'stop', 'voiceId': 'k60'},
+      ]),
+    ]), services: Services(sound: SoundService(engine: engine)), variables: [
+      v('count', 0, VariableType.integer), v('midi', 60, VariableType.integer),
+    ]);
+    final g = await tester.startGesture(s.center('button'));
+    await tester.pump();
+    expect(engine.notes['k60']!.$1, closeTo(261.63, 0.01));
+    expect(engine.waveforms['k60'], 'felt');
+    expect(engine.notes.containsKey('tick'), isTrue);
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(engine.notes.containsKey('tick'), isFalse, reason: 'released after its duration');
+    expect(engine.notes.containsKey('k60'), isTrue, reason: 'no duration: held until stop');
+    await g.up();
+    await tester.pump();
+    expect(engine.notes, isEmpty);
+    expect(midiToHz(69), 440);
+  });
+
+  testWidgets('a restarted voice is not released by an earlier start\'s duration', (tester) async {
+    final engine = SilentSoundEngine();
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'playSound', 'operation': 'start', 'voiceId': 'g0', 'note': r'${= 60 + count}', 'waveform': 'pluck', 'duration': r'${= count == 0 ? 100 : 400}'},
+        add('count'),
+      ]),
+    ]), services: Services(sound: SoundService(engine: engine)), variables: [v('count', 0, VariableType.integer)]);
+    await tester.tapAt(s.center('button'));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(s.center('button'));
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(engine.waveforms['g0'], 'pluck', reason: 'the second start outlives the first one\'s 100 ms');
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(engine.notes, isEmpty);
   });
 
   testWidgets('pointer down and up expose local and global coordinates', (tester) async {

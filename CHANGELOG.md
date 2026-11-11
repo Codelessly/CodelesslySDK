@@ -4,6 +4,20 @@
 
 - Requires `codelessly_api` 23.0.0.
 
+**Breaking changes**
+
+- The SDK no longer calls Mailchimp. Requires the `codelessly_api` release that removes the Mailchimp service of
+  `SubmitFormAction` (`FormService.mailchimp`, `apiKey`, `dataCenter`, `listId`, `emailField`, `firstNameField`,
+  `lastNameField`). The SDK makes no calls to third-party services on its own.
+
+**Migration**
+
+- Published layouts still load and run. An old Mailchimp `submitForm` action (now `FormService.unsupported`) sends
+  nothing: it fails with `{ok: false, error: {code: 'unsupported_service', ...}}` in `${result}` and its
+  `resultVariable`, runs its `onError` if it has one, and otherwise stops its chain and is reported like any failed
+  action (`onError` of the context, the `actionError` trigger). To keep collecting sign-ups, replace it with a
+  `callApi` action to your own endpoint, which keeps the provider's key on your server.
+
 **New**
 
 - Paywalls: `codelessly.paywall.present(context, placement: 'onboarding')` shows the paywall published at a
