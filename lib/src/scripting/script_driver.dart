@@ -232,6 +232,7 @@ const String scriptDriver = r'''
       runAction: (action) => hostCall(run, 'runAction', [action], 'actions', 'app.runAction()'),
       toast: (message) => hostCall(run, 'toast', [String(message)], 'actions', 'app.toast()'),
       delay: (ms) => hostCall(run, 'delay', [Number(ms) || 0], 'actions', 'app.delay()'),
+      yield: (ms) => hostCall(run, 'yield', [Number(ms) || 0], 'actions', 'app.yield()'),
     });
   }
 
@@ -406,6 +407,9 @@ const String scriptDriver = r'''
     const run = runs.get(req.run);
     if (!run || run.status !== 'running') return '';
     current = run;
+    // The variables as they are now (other actions may have changed them
+    // while this run waited on the app).
+    if (req.vars && typeof req.vars === 'object') run.vars = req.vars;
     for (const r of req.responses || []) {
       const p = run.pending.get(r.id);
       if (!p) continue;

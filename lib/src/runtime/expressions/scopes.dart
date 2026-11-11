@@ -4,6 +4,7 @@
 // from the nearest scope that declares it, and each name can be watched on
 // its own, so a change re-applies only what read it.
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:codelessly_api/codelessly_api.dart' show Breakpoints, Variable, VariableType;
@@ -114,14 +115,105 @@ Listenable? watchName(ValueScope? scope, String name) {
 
   collect(name);
   if (watches.isEmpty) return null;
-  if (watches.length == 1) return watches.single;
+  // A computed variable notifies its readers only when its value changes:
+  // its inputs (a script's results, the clock, other variables) often
+  // notify without changing it, and re-applying everything that reads it
+  // (a list of 81 items) for nothing is costly.
+  final computed = _isComputedIn(scope, name);
+  if (watches.length == 1 && !computed) return watches.single;
   final inputs = watches.toList();
   final cache = _nameWatches[scope] ??= {};
   final previous = cache[name];
   if (previous != null && listEquals(previous.$1, inputs)) return previous.$2;
-  final merged = Listenable.merge(inputs);
+  // Whether a script result is still pending counts as part of the value:
+  // a script that completes with null still notifies.
+  int pendingReads() {
+    var n = 0;
+    for (ValueScope? s = scope; s != null; s = s.parent) {
+      if (s is FormulaReadStatus) n += (s as FormulaReadStatus).pendingReads;
+    }
+    return n;
+  }
+
+  Object? read() {
+    final before = pendingReads();
+    final value = readPath(scope, name);
+    return [value, pendingReads() != before];
+  }
+
+  // A clock passes through: the value it changes is read again only once
+  // the tick has reached the formulas (comparing during the tick reads the
+  // value before it), and a ticking reader expects every tick.
+  final clocks = inputs.whereType<FormulaClock>().toList();
+  final others = [for (final i in inputs) if (i is! FormulaClock) i];
+  final Listenable merged;
+  if (!computed) {
+    merged = Listenable.merge(inputs);
+  } else if (clocks.isEmpty) {
+    merged = DistinctValue(others, read);
+  } else {
+    merged = Listenable.merge([if (others.isNotEmpty) DistinctValue(others, read), ...clocks]);
+  }
   cache[name] = (inputs, merged);
   return merged;
+}
+
+bool _isComputedIn(ValueScope scope, String name) {
+  for (ValueScope? s = scope; s != null; s = s.parent) {
+    if (s is NamedScope && s.declares(name)) return s is VariableScope && (s._defs[name]?.isComputed ?? false);
+  }
+  return false;
+}
+
+/// Notifies when [read] gives a different value after one of [inputs]
+/// notified (values compared as JSON). Listens to its inputs only while it
+/// has listeners itself.
+class DistinctValue extends ChangeNotifier {
+  DistinctValue(this.inputs, this.read);
+
+  final List<Listenable> inputs;
+  final Object? Function() read;
+  String? _last;
+  bool _attached = false;
+
+  static String? _key(Object? v) {
+    try {
+      return jsonEncode(v);
+    } on Object {
+      return null;
+    }
+  }
+
+  void _changed() {
+    final next = _key(read());
+    // A value that can't be compared always notifies.
+    if (next != null && next == _last) return;
+    _last = next;
+    notifyListeners();
+  }
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (!_attached) {
+      _attached = true;
+      _last = _key(read());
+      for (final i in inputs) {
+        i.addListener(_changed);
+      }
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    super.removeListener(listener);
+    if (_attached && !hasListeners) {
+      _attached = false;
+      for (final i in inputs) {
+        i.removeListener(_changed);
+      }
+    }
+  }
 }
 
 // A reader owns these lazily-attached merged listenables. Repeated binding
