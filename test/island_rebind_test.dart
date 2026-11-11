@@ -68,4 +68,19 @@ void main() {
     // Restarted, the slider's state (and its thumb animation) is new, at 12.
     expect(identical(tester.state(find.byType(Slider)), before), !restarts);
   });
+
+  testWidgets('a compact radio scales its ring to its box', (tester) async {
+    for (final compact in [false, true]) {
+      await show(tester, {
+        'col': {'type': 'column', 'children': ['r'], 'layout': {'width': 100, 'height': 100}},
+        'r': {'type': 'radio', 'layout': {'width': 18, 'height': 18}, 'props': {'value': 'a', 'compact': compact}},
+      });
+      await tester.pumpAndSettle();
+      final scales = tester
+          .widgetList<Transform>(find.ancestor(of: find.byType(Radio<String>), matching: find.byType(Transform)))
+          .map((t) => double.parse(t.transform.storage[0].toStringAsFixed(4)));
+      expect(scales, contains(compact ? 1.0 : 0.5625));
+      if (compact) expect(scales, isNot(contains(0.5625)));
+    }
+  });
 }
