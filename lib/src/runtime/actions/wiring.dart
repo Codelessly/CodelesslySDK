@@ -451,7 +451,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
             : null;
     }
     if (_doubleTap == null && _has(TriggerType.doubleTap)) {
-      _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)..onDoubleTap = () => _fire(TriggerType.doubleTap);
+      // ${result.x} / ${result.y}: where the second tap went down (local).
+      Json? at;
+      _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)
+        ..onDoubleTapDown = ((d) => at = _where(d.localPosition, d.globalPosition))
+        ..onDoubleTap = () => _fire(TriggerType.doubleTap, at ?? const {});
     }
     if (_longPress == null && _has(TriggerType.longPress)) {
       _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = () => _fire(TriggerType.longPress);
@@ -461,7 +465,17 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
       _pan = PanGestureRecognizer(debugOwner: this)
         ..onUpdate = (_has(TriggerType.drag)
             ? (d) => _fire(TriggerType.drag, {
-                  'result': {'dx': d.delta.dx, 'dy': d.delta.dy, 'x': d.localPosition.dx, 'y': d.localPosition.dy},
+                  'result': {
+                    'dx': d.delta.dx,
+                    'dy': d.delta.dy,
+                    'deltaX': d.delta.dx,
+                    'deltaY': d.delta.dy,
+                    'x': d.localPosition.dx,
+                    'y': d.localPosition.dy,
+                    'globalX': d.globalPosition.dx,
+                    'globalY': d.globalPosition.dy,
+                    'pointerCount': 1,
+                  },
                 })
             : null)
         ..onEnd = (d) {
