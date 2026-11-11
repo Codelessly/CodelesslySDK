@@ -2,7 +2,6 @@
 // replayed when `motion.replayKey` changes.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'lists/support.dart' as support;

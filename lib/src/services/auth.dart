@@ -146,6 +146,11 @@ abstract interface class AuthService {
   /// Deletes the signed-in user's account.
   Future<void> deleteAccount();
 
+  /// Confirms the signed-in user's [password] (a recent sign-in, which
+  /// changing the password and deleting the account need). Fails with
+  /// `wrong-password` when it isn't theirs.
+  Future<void> reauthenticate(String password);
+
   /// Emails [email] a sign-in link back to [continueUrl].
   Future<void> sendSignInLink(String email, {required String continueUrl});
 
@@ -199,6 +204,9 @@ class SignedOutAuthService implements AuthService {
 
   @override
   Future<void> deleteAccount() => Future.error(_failure);
+
+  @override
+  Future<void> reauthenticate(String password) => Future.error(_failure);
 
   @override
   Future<void> sendSignInLink(String email, {required String continueUrl}) => Future.error(_failure);
@@ -321,6 +329,14 @@ class MemoryAuthService implements AuthService {
     }
     accounts.remove(_signedIn().email);
     _set(null);
+  }
+
+  @override
+  Future<void> reauthenticate(String password) async {
+    final u = _signedIn();
+    if (accounts[u.email]?.$1 != password) {
+      throw const AuthFailure('Wrong email or password.', code: 'wrong-password');
+    }
   }
 
   @override

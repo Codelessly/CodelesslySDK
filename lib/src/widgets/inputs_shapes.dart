@@ -413,3 +413,121 @@ class SignaturePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant SignaturePainter oldDelegate) => true;
 }
+
+/// A drafting ruler as a slider track: a strip in the inactive track color
+/// across the slider's whole width, a baseline with [ticks] ticks (every
+/// [majorEvery]th long), and the active color filled from zero (or the
+/// minimum) to the value just under the baseline.
+class RulerSliderTrackShape extends SliderTrackShape {
+  const RulerSliderTrackShape({
+    required this.ticks,
+    required this.majorEvery,
+    required this.tickColor,
+    required this.minorTickColor,
+    required this.zeroFraction,
+  });
+
+  final int ticks, majorEvery;
+  final Color tickColor, minorTickColor;
+
+  /// Where zero sits along the track (0 when the range doesn't include it).
+  final double zeroFraction;
+
+  @override
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    final size = parentBox.size;
+    return Rect.fromLTWH(offset.dx, offset.dy + size.height / 2 - 1, size.width, 2);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset offset, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required TextDirection textDirection,
+    required Offset thumbCenter,
+    Offset? secondaryOffset,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    double additionalActiveTrackHeight = 2,
+  }) {
+    final rect = getPreferredRect(parentBox: parentBox, offset: offset, sliderTheme: sliderTheme);
+    final canvas = context.canvas;
+    final cy = rect.center.dy;
+    final base = cy + 1;
+    canvas.drawRect(Rect.fromLTRB(rect.left, cy - 9, rect.right, base), Paint()..color = sliderTheme.inactiveTrackColor ?? const Color(0x00000000));
+    final major = Paint()
+      ..color = tickColor
+      ..strokeWidth = 1;
+    final minor = Paint()
+      ..color = minorTickColor
+      ..strokeWidth = 1;
+    canvas.drawLine(Offset(rect.left, base), Offset(rect.right, base), major);
+    for (var i = 0; i <= ticks; i++) {
+      final x = rect.left + (rect.width - 1) * i / ticks + 0.5;
+      final long = i % majorEvery == 0;
+      canvas.drawLine(Offset(x, base), Offset(x, base - (long ? 8 : 4)), long ? major : minor);
+    }
+    final zero = rect.left + rect.width * zeroFraction;
+    final a = math.min(zero, thumbCenter.dx), b = math.max(zero, thumbCenter.dx);
+    canvas.drawRect(Rect.fromLTRB(a, base + 1, b, base + 4), Paint()..color = sliderTheme.activeTrackColor ?? tickColor);
+  }
+}
+
+/// A ruler's index as a slider thumb: a 2px hairline down across the
+/// track and a triangle under it pointing up, in the thumb color, outlined
+/// in [strokeColor].
+class PointerSliderThumbShape extends SliderComponentShape {
+  const PointerSliderThumbShape({required this.strokeColor});
+
+  final Color strokeColor;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => const Size(14, 28);
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required Animation<double> activationAnimation,
+    required Animation<double> enableAnimation,
+    required bool isDiscrete,
+    required TextPainter labelPainter,
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required TextDirection textDirection,
+    required double value,
+    required double textScaleFactor,
+    required Size sizeWithOverflow,
+  }) {
+    final canvas = context.canvas;
+    final color = sliderTheme.thumbColor ?? strokeColor;
+    final x = center.dx, cy = center.dy;
+    canvas.drawLine(
+        Offset(x, cy - 13),
+        Offset(x, cy + 5),
+        Paint()
+          ..color = color
+          ..strokeWidth = 2);
+    final triangle = Path()
+      ..moveTo(x, cy + 5)
+      ..lineTo(x - 7, cy + 14)
+      ..lineTo(x + 7, cy + 14)
+      ..close();
+    canvas.drawPath(triangle, Paint()..color = color);
+    canvas.drawPath(
+        triangle,
+        Paint()
+          ..color = strokeColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1);
+  }
+}

@@ -1,7 +1,9 @@
-import 'dart:async';
 // Sounds: short synthesised voices for play sound actions, and the clock
 // clock triggers tick on. Web Audio in browsers; PCM through just_audio on
 // native platforms. Apps may supply their own [SoundEngine].
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'platform/sound_engine_stub.dart'
     if (dart.library.io) 'platform/sound_engine_native.dart'
     if (dart.library.js_interop) 'platform/sound_engine_web.dart';
@@ -85,6 +87,12 @@ abstract interface class SustainedSoundEngine {
   void stopAllNotes();
 }
 
+/// The sustained voices `playSound` can start: plain waves and instruments.
+const List<String> kSoundWaveforms = ['sine', 'triangle', 'square', 'sawtooth', 'felt', 'reed', 'pluck'];
+
+/// Hertz of MIDI note [note] (69 = A 440).
+double midiToHz(num note) => 440.0 * math.pow(2, (note - 69) / 12);
+
 /// Optional timbre support; older custom sustained engines remain compatible.
 abstract interface class WaveformSoundEngine {
   void startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'});
@@ -122,8 +130,8 @@ class SoundService {
 
   /// Requests a timbre when supported; legacy engines retain their original voice.
   bool startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'}) {
-    if(waveform!='triangle'||engine is! WaveformSoundEngine)return startNote(id,frequency:frequency,volume:volume);
-    return _startNote(id,frequency,volume,waveform);
+    if (waveform == 'sine' || engine is! WaveformSoundEngine) return startNote(id, frequency: frequency, volume: volume);
+    return _startNote(id, frequency, volume, waveform);
   }
   bool _startNote(String id,double frequency,double volume,String waveform) {
     final output = engine;
@@ -137,7 +145,7 @@ class SoundService {
     output.resume();
     final hz=frequency.clamp(8,24000).toDouble(),gain=volume.clamp(0,2).toDouble();
     if(output is WaveformSoundEngine){
-      (output as WaveformSoundEngine).startNoteWithWaveform(id,frequency:hz,volume:gain,waveform:waveform=='triangle'?'triangle':'sine');
+      (output as WaveformSoundEngine).startNoteWithWaveform(id, frequency: hz, volume: gain, waveform: kSoundWaveforms.contains(waveform) ? waveform : 'sine');
     }else{
       (output as SustainedSoundEngine).startNote(id,frequency:hz,volume:gain);
     }
@@ -177,15 +185,34 @@ class SoundService {
 }
 
 /// A silent engine on a stopwatch clock: off the web, and in tests.
-class SilentSoundEngine implements SoundEngine, SustainedSoundEngine {
+class SilentSoundEngine implements SoundEngine, SustainedSoundEngine, WaveformSoundEngine {
   final Map<String, (double, double)> notes = {};
+
+  /// The waveform each sounding voice was started with, for tests.
+  final Map<String, String> waveforms = {};
   @override
-  void startNote(String id, {double frequency = 440, double volume = 1}) =>
-      notes[id] = (frequency, volume);
+  void startNote(String id, {double frequency = 440, double volume = 1}) {
+    notes[id] = (frequency, volume);
+    waveforms[id] = 'sine';
+  }
+
   @override
-  void stopNote(String id) => notes.remove(id);
+  void startNoteWithWaveform(String id, {double frequency = 440, double volume = 1, String waveform = 'sine'}) {
+    notes[id] = (frequency, volume);
+    waveforms[id] = waveform;
+  }
+
   @override
-  void stopAllNotes() => notes.clear();
+  void stopNote(String id) {
+    notes.remove(id);
+    waveforms.remove(id);
+  }
+  @override
+  void stopAllNotes() {
+    notes.clear();
+    waveforms.clear();
+  }
+
   final Stopwatch _clock = Stopwatch()..start();
 
   /// Sounds played (voice, time, volume, pitch), for tests.
