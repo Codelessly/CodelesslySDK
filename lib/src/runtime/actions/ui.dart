@@ -456,9 +456,9 @@ Future<Object?> showScreenModal(
 /// opened it, or the pointer as an empty rect) at [placement], [gap] away
 /// from it and shifted [offset] along it.
 /// It flips to the other side when it doesn't fit and stays on screen. Below
-/// its anchor, it keeps [reserve] of room under its top: when that would pass
-/// the screen's bottom margin it moves up (a menu that may grow keeps its
-/// place).
+/// its anchor with a [reserve], it doesn't flip: it keeps that much room
+/// under its top, moving up when that would pass the screen's bottom margin
+/// (a menu that may grow keeps its place; a tall card overlaps its anchor).
 Future<Object?> showAnchoredModal(
   BuildContext context,
   Widget content, {
@@ -532,8 +532,10 @@ class PopoverLayout extends SingleChildLayoutDelegate {
       var below = side == 'below';
       final roomBelow = size.height - margin - (anchor.bottom + gap);
       final roomAbove = anchor.top - gap - margin;
-      if (below && childSize.height > roomBelow && roomAbove > roomBelow) below = false;
-      if (!below && childSize.height > roomAbove && roomBelow > roomAbove) below = true;
+      // A popover that reserves room stays below and moves up instead.
+      final flips = !(below && reserve > 0);
+      if (flips && below && childSize.height > roomBelow && roomAbove > roomBelow) below = false;
+      if (flips && !below && childSize.height > roomAbove && roomBelow > roomAbove) below = true;
       y = below ? anchor.bottom + gap : anchor.top - gap - childSize.height;
       if (below && reserve > 0 && y + reserve > size.height - margin) {
         y = math.max(margin, size.height - margin - reserve);
