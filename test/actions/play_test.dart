@@ -85,6 +85,18 @@ void main() {
     expect(effectTransformAt(EffectAnimationType.flash, 0.25, 1).opacity, closeTo(0, 1e-9));
   });
 
+  testWidgets('playAnimation particles waits for emission and particle lifetime', (tester) async {
+    final s = Screen({'n': box({'particles': {'count': 5, 'emit': 100, 'lifetime': 200}})});
+    await s.pump(tester);
+    var done = false;
+    unawaited(s.run([{'type': 'playAnimation', 'node': 'n', 'animation': 'particles'}]).then((_) => done = true));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(done, isFalse);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(done, isTrue);
+  });
+
   testWidgets('playAnimation plays the named effect; the chain waits for it', (tester) async {
     final s = Screen({
       'n': box({

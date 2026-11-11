@@ -69,6 +69,11 @@ class HttpFontFetcher implements FontFetcher {
   @override
   Future<Uint8List?> fetch(PublishFont font) async {
     try {
+      // Platform fallback families are not Google Fonts. An uploaded file
+      // with the same family still loads from its explicit URL.
+      const platformFamilies = {'arial', 'helvetica', 'sans-serif', 'serif', 'monospace',
+        'system-ui', 'times new roman', 'courier new'};
+      if (font.url == null && platformFamilies.contains(font.family.toLowerCase())) return null;
       var url = font.url == null ? null : Uri.tryParse(font.url!);
       if (url == null) {
         // Without a browser's user agent, the API serves TrueType files.
