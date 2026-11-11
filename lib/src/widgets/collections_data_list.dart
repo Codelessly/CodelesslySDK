@@ -116,6 +116,7 @@ void dataListRecipe(
   Widget Function()? separator,
   SliverGridDelegate? gridDelegate,
   bool scrollable = true,
+  bool hugMain = false,
 }) {
   final runtime = ListRuntime(b, n);
   final vertical = n.prop(CollectionScrollProps.scrollDirection) == api.Axis.vertical;
@@ -140,6 +141,7 @@ void dataListRecipe(
       separator: separator,
       gridDelegate: gridDelegate,
       physics: scrollPhysicsOf(n, scrollable: scrollable),
+      hugMain: hugMain,
     ),
   ));
 }
@@ -170,6 +172,7 @@ class DataListView extends StatefulWidget {
     this.separator,
     this.gridDelegate,
     this.physics,
+    this.hugMain = false,
   });
 
   final ListRuntime runtime;
@@ -192,6 +195,10 @@ class DataListView extends StatefulWidget {
   final Widget Function()? separator;
   final SliverGridDelegate? gridDelegate;
   final ScrollPhysics? physics;
+
+  /// Hugs its items along its scroll axis within the room it's given (a
+  /// flexible list): as long as they are, scrolling once they outgrow it.
+  final bool hugMain;
 
   @override
   State<DataListView> createState() => DataListViewState();
@@ -674,7 +681,7 @@ class DataListViewState extends State<DataListView> {
           controller: scrollController,
           scrollDirection: axis,
           reverse: _node.prop(CollectionScrollProps.reverse),
-          shrinkWrap: !bounded,
+          shrinkWrap: !bounded || widget.hugMain,
           center: center,
           physics: refreshable ? const AlwaysScrollableScrollPhysics().applyTo(widget.physics) : widget.physics,
           scrollCacheExtent: cache == null ? null : ScrollCacheExtent.pixels(cache),

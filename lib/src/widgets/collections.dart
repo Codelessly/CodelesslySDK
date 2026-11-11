@@ -460,6 +460,7 @@ void _dataList(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node
     separatorExtent: math.max(0, spacing),
     separator: separator == api.ListSeparator.none ? null : gap,
     scrollable: n.prop(ListViewProps.scrollable),
+    hugMain: _hugsMain(b, n),
   );
 }
 
