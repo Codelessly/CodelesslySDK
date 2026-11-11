@@ -191,23 +191,28 @@ class NodeTree {
         for (final box in pending) {
           if (identical(_boxes[box.key], box)) box._apply();
         }
-        // Paragraphs measured again inside stretched children of a hugging
-        // row/column stop at those relayout boundaries, and islands (chips,
-        // buttons) keep the size they measured: measure every box again,
-        // and the hugging layouts above it, as an edit would.
-        // Every render object below too: islands cache the intrinsic sizes
-        // they measured below their own relayout boundaries.
-        void markAll(RenderObject o) {
-          o.markNeedsLayout();
-          o.visitChildren(markAll);
-        }
-        for (final box in _boxes.values.toList()) {
-          if (!box.attached) continue;
-          markAll(box);
-          box._relayoutHuggingAncestors();
-        }
+        remeasure();
       });
     });
+  }
+
+  /// Lays every box out again from scratch, as after an edit: what fonts
+  /// changed (a family that loaded after the first layout) is measured
+  /// again. Paragraphs inside stretched children of a hugging row/column
+  /// sit behind relayout boundaries, and islands (chips, buttons) cache the
+  /// intrinsic sizes they measured, so every render object below each box
+  /// is marked, then the hugging layouts above it.
+  void remeasure() {
+    void markAll(RenderObject o) {
+      o.markNeedsLayout();
+      o.visitChildren(markAll);
+    }
+
+    for (final box in _boxes.values.toList()) {
+      if (!box.attached) continue;
+      markAll(box);
+      box._relayoutHuggingAncestors();
+    }
   }
 
   final NodeSource source;
