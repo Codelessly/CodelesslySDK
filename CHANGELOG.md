@@ -1,4 +1,8 @@
-## Unreleased
+## 23.0.0
+
+**Breaking changes**
+
+- Requires `codelessly_api` 23.0.0.
 
 **New**
 
@@ -11,6 +15,12 @@
 - The publish model's `paywall` setup (product slots, placements, legal links) reaches `Services.config.paywall`.
 - `codelesslyCloudServices(functions:)`; `firebase.dart` exports `FirebaseFunctions`. `LazyPurchaseService`.
   `PaywallOutcome.skipped`.
+
+**Improvements and fixes**
+
+- Form submission, action error triggers, accessible actions, media playback controls and status, and reactive audio waveforms.
+- More reliable rendering and disposal of retained subtrees, virtualized lists, render layers, audio resources and asynchronous services.
+- Refined scrolling, drag interactions, charts, dialog layouts, and authentication and purchase-service ownership.
 
 ## 22.0.0
 
