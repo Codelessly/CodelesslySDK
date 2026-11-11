@@ -201,6 +201,27 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       ..paintReversed = reversePaint
       ..itemConstraints = ((_) => const BoxConstraints())
       ..placeAt = ((_, _) => origin)
+      // An item with a position of its own (layout.x / layout.y, bound to
+      // its data: a timeline's clips, a chart's labels) sits there, in the
+      // padded box, as a freeform child would.
+      ..positionOf = ((child, box, it) {
+        final node = child is NodeBox ? child.node : null;
+        if (node == null) return (null, null);
+        double? place(api.AxisPosition? p, double extent, double size, double pad, double padEnd) {
+          if (p == null) return null;
+          final room = extent - pad - padEnd;
+          if (p.align case final a?) return pad + (room - size) * (a + 1) / 2;
+          if (p.relative case final r?) return pad + r;
+          if (p.start case final s?) return pad + s;
+          if (p.end case final e?) return pad + room - e - size;
+          return null;
+        }
+
+        return (
+          place(node.layout.x, box.width, it.width, padding.left, padding.right),
+          place(node.layout.y, box.height, it.height, padding.top, padding.bottom),
+        );
+      })
       ..onNeedItems = null
       ..changed();
     _syncItems(b, n, view, itemId, count ?? 0);

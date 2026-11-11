@@ -667,6 +667,10 @@ class RenderLayeredItems extends RenderCollection {
   /// Where an item of [item] size sits in a [box]-sized box.
   Offset Function(Size box, Size item) placeAt = (box, item) => Offset.zero;
 
+  /// An item's own position, when it has one (its bound `layout.x` /
+  /// `layout.y`): null keeps [placeAt]'s, per axis.
+  (double?, double?) Function(RenderBox child, Size box, Size item)? positionOf;
+
   void changed() => markNeedsLayout();
 
   @override
@@ -674,7 +678,11 @@ class RenderLayeredItems extends RenderCollection {
     size = constraints.biggest.isFinite ? constraints.biggest : constraints.smallest;
     for (final it in children) {
       it.layout(itemConstraints(size), parentUsesSize: true);
-      (it.parentData! as CollectionParentData).offset = placeAt(size, it.size);
+      var at = placeAt(size, it.size);
+      if (positionOf?.call(it, size, it.size) case (final double? x, final double? y)) {
+        at = Offset(x ?? at.dx, y ?? at.dy);
+      }
+      (it.parentData! as CollectionParentData).offset = at;
     }
     return _anyChildOutside;
   }
