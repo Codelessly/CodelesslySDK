@@ -579,10 +579,16 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void detach() {
     _ViewportWatcher.remove(this);
-    _disposeRecognizers();
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
     _hovering = false;
     super.detach();
+    // A chain rebuilt around this box (a pressed state adding a scale
+    // layer on pointer down) detaches and re-attaches it in the same frame:
+    // disposing the recognizers then lost the tap in progress, so a button
+    // with press feedback never clicked. Dispose only if it stays detached.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!attached) _disposeRecognizers();
+    });
   }
 
   @override
