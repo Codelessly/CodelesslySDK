@@ -15,6 +15,27 @@ import 'package:http/http.dart' as http;
 
 import '../convert.dart';
 
+/// Loads the image at [url] into Flutter's image cache (where image fills
+/// find it), completing with whether it loaded. SVGs and data URLs aren't
+/// preloaded (they're read when first drawn) and count as loaded.
+Future<bool> preloadImage(String url) {
+  final u = url.trim();
+  if (u.isEmpty || u.contains(r'${')) return Future.value(false);
+  if (LoadedImage._isSvg(u) || u.startsWith('data:')) return Future.value(true);
+  final done = Completer<bool>();
+  final stream = NetworkImage(u).resolve(ImageConfiguration.empty);
+  late final ImageStreamListener listener;
+  listener = ImageStreamListener((_, _) {
+    if (!done.isCompleted) done.complete(true);
+    stream.removeListener(listener);
+  }, onError: (Object _, StackTrace? _) {
+    if (!done.isCompleted) done.complete(false);
+    stream.removeListener(listener);
+  });
+  stream.addListener(listener);
+  return done.future;
+}
+
 /// One image source, loaded once and shared.
 class LoadedImage {
   LoadedImage._(this.url) : isSvg = _isSvg(url);
