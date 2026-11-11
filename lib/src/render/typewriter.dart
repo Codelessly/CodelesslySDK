@@ -88,8 +88,8 @@ class RenderTypewriter extends RenderProxyBox {
     markNeedsPaint();
     // Growing: the size follows the typed lines (and the whole text at the end).
     if (tw.grow && shownCharacters != before) markNeedsLayout();
-    // Held: it only blinks from here, and a line not begun has no caret.
-    if (_shown >= _text.length || (hold != null && clock >= hold && (!_begun || !tw.caret))) _stop();
+    // Held: a still, its caret steady (not blinking).
+    if (_shown >= _text.length || (hold != null && clock >= hold)) _stop();
   }
 
   @override
