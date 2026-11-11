@@ -2,7 +2,7 @@
    Scenes use the editor's tutorial toolkit (_toolkit -> tool/docs_images)
    plus these few classes for staged diagrams. One stage family: 800 wide,
    500 high (or 400 for short strips); one accent (the toolkit's blue).
-   No coloured left-edge bars anywhere: emphasis is a tinted fill, a full
+   No colored left-edge bars anywhere: emphasis is a tinted fill, a full
    1px border, an icon or a badge. */
 
 tut-stage { font-family: var(--tut-font); }
@@ -70,7 +70,7 @@ tut-stage { font-family: var(--tut-font); }
 /* A dashed outline marking where a CodelesslyWidget sits in a host screen. */
 .cw-zone { position: absolute; box-sizing: border-box; border: 2px dashed var(--t-blue); border-radius: 12px; background: color-mix(in srgb, var(--t-blue) 5%, transparent); }
 
-/* JSON / code keys emphasised inside tut-code windows. */
+/* JSON / code keys emphasized inside tut-code windows. */
 .tut-code { font-size: 13px; line-height: 21px; }
 
 /* An edge label: small text set above or beside a connector. */

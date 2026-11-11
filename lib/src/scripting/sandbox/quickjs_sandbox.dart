@@ -458,7 +458,7 @@ class QuickJsSandbox implements ScriptSandbox {
 
   @override
   void end(String run) {
-    // A run ended early (cancelled while waiting): its pending promises may
+    // A run ended early (canceled while waiting): its pending promises may
     // still reference its objects, so its runtime isn't reused.
     _finish(run, reuse: false);
   }

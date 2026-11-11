@@ -65,7 +65,7 @@ const _box = {
 };
 
 void main() {
-  testWidgets('a counted list spaces its items and centres them across', (tester) async {
+  testWidgets('a counted list spaces its items and centers them across', (tester) async {
     final r = await _items(tester, {
       'type': 'listView',
       'layout': {

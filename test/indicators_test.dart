@@ -49,7 +49,7 @@ void main() {
     tree.dispose();
   });
 
-  testWidgets('a spinner in a row: centred, as wide as its square', (tester) async {
+  testWidgets('a spinner in a row: centered, as wide as its square', (tester) async {
     final doc = LayoutDocument.fromJson({
       'roots': ['r'],
       'nodes': {

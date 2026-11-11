@@ -157,7 +157,7 @@ CodelesslyWidget(
 ```
 
 - `loadingBuilder` shows until the publish model and the layout are loaded. Default: `CodelesslyLoadingScreen`, a
-  centred `CircularProgressIndicator`.
+  centered `CircularProgressIndicator`.
 - `errorBuilder` gets the error, usually a `PublishLoadException`. Default: `CodelesslyErrorScreen`, a short
   message. In production, give your own.
 - `layoutBuilder` wraps the loaded layout.

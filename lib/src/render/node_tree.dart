@@ -15,7 +15,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
-import 'behaviours.dart';
+import 'behaviors.dart';
 import 'hero.dart';
 import 'play.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragAndDropLayers;
@@ -157,7 +157,7 @@ class NodeTree {
     }
   }
 
-  /// Whether behaviours play (a running app: entrances, loops, spins) or
+  /// Whether behaviors play (a running app: entrances, loops, spins) or
   /// rest (a design canvas).
   bool get animates => islands.environment.interactive;
 
@@ -176,7 +176,7 @@ class NodeTree {
     final next = {...current};
     on ? next.add(state) : next.remove(state);
     next.isEmpty ? _states.remove(key) : _states[key] = next;
-    final affected = {id, ...?source.node(id)?.behaviours.states.targets};
+    final affected = {id, ...?source.node(id)?.behaviors.states.targets};
     for (final b in _boxes.values.toList()) {
       if (b.instance == instance && affected.contains(b.id)) b._apply();
     }
@@ -244,7 +244,7 @@ class NodeTree {
     var out = n;
     for (final e in _states.entries) {
       if (e.key.$2 != instance) continue;
-      final patch = source.node(e.key.$1)?.behaviours.states.patchFor(id, e.value);
+      final patch = source.node(e.key.$1)?.behaviors.states.patchFor(id, e.value);
       if (patch != null) out = out.patched(patch);
     }
     return out;
@@ -580,7 +580,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     dragMotionLayers(this, n, chain);
 
     // Outer layers, outermost first: margin, constraints, motion and scale
-    // (render/behaviours.dart), rotation, loops, opacity, blurs and stroke
+    // (render/behaviors.dart), rotation, loops, opacity, blurs and stroke
     // path.
     final margin = n.layout.margin.flutter;
     if (margin != EdgeInsets.zero) {
@@ -771,7 +771,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
         ..decoration = d
         ..foreground = true);
     }
-    if (canStack && tree.animates && n.behaviours.inkWell != null) under.add(inkOverlay(this, n, radius));
+    if (canStack && tree.animates && n.behaviors.inkWell != null) under.add(inkOverlay(this, n, radius));
     if (content == null && under.isEmpty && over.isEmpty) return;
     final stack = _obtain<RenderStack>('shellStack',
         () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
@@ -796,7 +796,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     // The content of a shell with ink goes in its InkWell, filling
     // the shell (Positioned.fill) when the shell has a size on both axes:
     // its content then sizes nothing (no intrinsic size either).
-    if (n.behaviours.inkWell != null && n.hFit != SizeFit.hug && n.vFit != SizeFit.hug) _filledStacks.add(stack);
+    if (n.behaviors.inkWell != null && n.hFit != SizeFit.hug && n.vFit != SizeFit.hug) _filledStacks.add(stack);
     chain.add(stack);
   }
 

@@ -292,7 +292,7 @@ class ValuesScope extends NamedScope {
 }
 
 /// Names a node gives itself and the nodes inside it (a dragged node's
-/// `drag`): set by the behaviour that owns them, read before the scopes
+/// `drag`): set by the behavior that owns them, read before the scopes
 /// around. A name whose value here and around is a map reads both, merged
 /// (the node's own keys over the ones around: a drag's live values over the
 /// layout's drag and drop session).

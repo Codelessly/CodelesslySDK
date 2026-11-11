@@ -36,8 +36,8 @@ Iterable<Widget> _islandWidgets(NodeTree tree) sync* {
 
 T _widget<T extends Widget>(NodeTree tree) => _islandWidgets(tree).whereType<T>().single;
 
-/// The centre of node [id] on screen.
-Offset _centre(WidgetTester tester, NodeTree tree, String id) =>
+/// The center of node [id] on screen.
+Offset _center(WidgetTester tester, NodeTree tree, String id) =>
     tester.getTopLeft(find.byType(NodeView)) + tree.boxOf(id)!.rectIn(tester.renderObject(find.byType(NodeView)))!.center;
 
 void main() {
@@ -77,15 +77,15 @@ void main() {
       'w': {'type': 'switch', 'layout': {'width': 59, 'height': 40, 'x': {'start': 100}}},
     });
     var (tree, _) = await _show(tester, DocumentSource(doc));
-    await tester.tapAt(_centre(tester, tree, 'c'));
+    await tester.tapAt(_center(tester, tree, 'c'));
     await tester.pump();
     expect(_widget<Checkbox>(tree).value, isFalse);
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
 
     (tree, _) = await _show(tester, DocumentSource(doc), interactive: true);
-    await tester.tapAt(_centre(tester, tree, 'c'));
-    await tester.tapAt(_centre(tester, tree, 'w'));
+    await tester.tapAt(_center(tester, tree, 'c'));
+    await tester.tapAt(_center(tester, tree, 'w'));
     await tester.pump();
     expect(_widget<Checkbox>(tree).value, isTrue);
     expect(_widget<Switch>(tree).value, isTrue);

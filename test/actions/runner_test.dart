@@ -159,7 +159,7 @@ void main() {
       }
     });
 
-    testWidgets('a cancelled chain stops: a delay ends, nothing after it runs', (tester) async {
+    testWidgets('a canceled chain stops: a delay ends, nothing after it runs', (tester) async {
       {
         final h = Harness(variables: [v('n', 0, VariableType.integer)]);
         final cancel = ActionCancellation();

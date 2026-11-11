@@ -12,7 +12,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
 
-import '../render/behaviours.dart' show motionMatrix;
+import '../render/behaviors.dart' show motionMatrix;
 import '../render/node_tree.dart' show NodeTree;
 import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, dropSlotOf;
 
@@ -200,7 +200,7 @@ class ListDivider {
 ///   or the design extent of an item that fills), else its own extent;
 ///   [gap] goes between items (a separator); an item but the last takes
 ///   [overlap] less room, so the next is drawn over it.
-/// * Cross axis: the item is laid out loose and centred in the list's
+/// * Cross axis: the item is laid out loose and centered in the list's
 ///   cross extent, or tight when [stretch]. With [hugCross], the list is as
 ///   thick as its thickest item (stretched items: that thick).
 /// * Size: the incoming max on an axis, unless it hugs ([hugMain],
@@ -407,7 +407,7 @@ class RenderListItems extends RenderCollection {
     if (hugsCross && divider != null && maxCross.isFinite) crossSize = maxCross;
     size = RenderCollection.sizeOf(mainSize, crossSize, axis);
 
-    // The cross extent items are centred in.
+    // The cross extent items are centered in.
     final crossInner = hugsCross ? contentCross : math.max(0.0, crossSize - _padCross);
     final dividerCross = math.max(0.0, crossSize - _padCross);
 
@@ -1008,7 +1008,7 @@ class RenderPageItems extends RenderCollection {
 /// A table view at rest: its
 /// columns [columnWidths] wide and rows [rowHeights] tall (the header row
 /// and column first, when there are), each cell's template laid out loose
-/// and placed at its start, centred down (`Align.centerLeft`). Children are
+/// and placed at its start, centered down (`Align.centerLeft`). Children are
 /// the cells in [cells] order, row by row. Header backgrounds and stripes
 /// paint under the cells; a [gridLine] trails each column and row over them.
 class RenderTableItems extends RenderCollection {

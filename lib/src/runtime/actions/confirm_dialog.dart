@@ -280,7 +280,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
 }
 
 /// The built-in confirm dialog, in the app's look. Pops true when confirmed
-/// and false when cancelled.
+/// and false when canceled.
 class ThemedConfirmDialog extends StatelessWidget {
   const ThemedConfirmDialog({
     super.key,

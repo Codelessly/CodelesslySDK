@@ -287,7 +287,7 @@ void main() {
       expect(eval('"2026" == 2026'), true);
     });
 
-    test('Today, Upcoming, Overdue and due colours', () {
+    test('Today, Upcoming, Overdue and due colors', () {
       expect(titles('filter(tasks, t => t.due == today())'), [
         'Buy milk',
         null,
@@ -305,9 +305,9 @@ void main() {
       expect(
         eval(
           'map(tasks, t => t.due < today() ? "red" : '
-          't.due == today() ? "amber" : t.due ? "grey" : "none")',
+          't.due == today() ? "amber" : t.due ? "gray" : "none")',
         ),
-        ['amber', 'red', 'grey', 'none', 'amber'],
+        ['amber', 'red', 'gray', 'none', 'amber'],
       );
     });
   });

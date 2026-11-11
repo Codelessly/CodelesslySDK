@@ -10,13 +10,13 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'behaviours.dart' show RenderPose;
+import 'behaviors.dart' show RenderPose;
 import 'node_tree.dart' show NodeBox;
 import 'recipe.dart';
 
 /// Adds node [n]'s fly-in and one-shot effects to [chain].
 void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
-  final be = n.behaviours;
+  final be = n.behaviors;
   if (animates && be.flightKey.isNotEmpty) {
     final motion = be.motion;
     chain.add(

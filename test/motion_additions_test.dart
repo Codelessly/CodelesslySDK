@@ -1,11 +1,11 @@
-// Behaviours, at rest and running: motion swing,
+// Behaviors, at rest and running: motion swing,
 // phase, pause, arc, wrapping and paced paths, upright orientation and
 // shimmer; loop phases; drag tracks parked, relative and in their parent.
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/behaviours.dart' show RenderShimmer, swingPose;
+import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderShimmer, swingPose;
 import 'package:codelessly_sdk/src/render/paint/svg_path.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -133,7 +133,7 @@ void main() {
   });
 
   test('area pacing sweeps equal areas about the focus', () {
-    // An ellipse with its focus off-centre: half the area is swept before
+    // An ellipse with its focus off-center: half the area is swept before
     // half the length.
     const a = 100.0, b = 60.0;
     final c = math.sqrt(a * a - b * b);

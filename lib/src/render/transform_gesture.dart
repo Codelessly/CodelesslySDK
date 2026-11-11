@@ -24,12 +24,12 @@ import '../runtime/actions/context.dart' show setVariableIn, variableOf;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/gestures/physics.dart';
-import 'behaviours.dart' show RenderPose;
+import 'behaviors.dart' show RenderPose;
 import 'convert.dart';
 import 'node_tree.dart';
 
 /// Where a transform gesture draws its node: offset, scale, rotation and
-/// stretch, about the node's centre.
+/// stretch, about the node's center.
 @immutable
 class TransformPose {
   const TransformPose({this.x = 0, this.y = 0, this.scale = 1, this.rotation = 0, this.scaleX = 1, this.scaleY = 1});
@@ -81,7 +81,7 @@ class TransformPose {
 
   Map<String, num> toMap() => {for (final k in keys) k: rounded(k, this[k])};
 
-  /// The pose about the centre of a [size] box, in its coordinates.
+  /// The pose about the center of a [size] box, in its coordinates.
   Matrix4 matrixFor(Size size) {
     final c = size.center(Offset.zero);
     return Matrix4.translationValues(c.dx + x, c.dy + y, 0)

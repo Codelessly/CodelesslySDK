@@ -16,7 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
-import '../../render/behaviours.dart' show motionMatrix;
+import '../../render/behaviors.dart' show motionMatrix;
 import 'hero_flights.dart';
 
 /// The spring a released interactive transition settles with, and whether
@@ -143,7 +143,7 @@ class _RevealClipper extends CustomClipper<Path> {
     }
     final open = 1 - closed.clamp(0.0, 1.0);
     if (reveal.shape == RevealShape.circle) {
-      // The radius that covers the corner farthest from the centre.
+      // The radius that covers the corner farthest from the center.
       final far = [screen.topLeft, screen.topRight, screen.bottomLeft, screen.bottomRight]
           .map((corner) => (corner - center).distance)
           .reduce(math.max);

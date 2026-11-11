@@ -55,7 +55,7 @@ void main() {
 
   group('boundsRange', () {
     test('contain keeps a small box inside', () {
-      // A 100 wide box centred at 50 in a 0..300 view may move 0..200.
+      // A 100 wide box centered at 50 in a 0..300 view may move 0..200.
       final (lo, hi) = boundsRange(
         bounds: api.GestureBounds.contain,
         center: 50,
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('cover keeps a big box covering the view', () {
-      // A 600 wide box centred at 150 over a 0..300 view.
+      // A 600 wide box centered at 150 over a 0..300 view.
       final (lo, hi) = boundsRange(
         bounds: api.GestureBounds.cover,
         center: 150,
@@ -80,7 +80,7 @@ void main() {
       expect(hi, 150);
     });
 
-    test('cover centres a box too small to cover', () {
+    test('cover centers a box too small to cover', () {
       final (lo, hi) = boundsRange(
         bounds: api.GestureBounds.cover,
         center: 20,

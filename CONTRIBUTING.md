@@ -29,9 +29,9 @@ lives. Read the model's design first:
      `instances:` (one per id) scopes each item on its own. Leave the first
      repetition unscoped (null): the goldens, like the editor, measure a
      template at its first instance (`tree.boxOf(id)`).
-   The outer layers (margin, constraints, behaviours such as motion, scale
+   The outer layers (margin, constraints, behaviors such as motion, scale
    and loops, rotation, opacity, blurs, aspect ratio; see
-   `lib/src/render/behaviours.dart`) are already added by the tree; build
+   `lib/src/render/behaviors.dart`) are already added by the tree; build
    the widget's content inside them.
 3. **Tests**: unit and widget tests, plus parity where fixtures cover the type.
 
@@ -84,16 +84,16 @@ follows the pointer (`RenderDragMotion`, the outermost layer;
 and drop targets (`RenderDragSource`, `RenderDropTarget` before the
 reactions; `DragAndDrop.of(tree)` is the session `${drag}` reads; a list
 opens `dropSlotOf(tree, listId)`). Only an interactive tree adds them. A
-behaviour that gives the nodes inside it names (`drag`) registers in
+behavior that gives the nodes inside it names (`drag`) registers in
 `NodeBinder.localNames` and sets its `LocalScope`
 (`binder.localScopeOf`). `runTrigger` fires a trigger and waits for its
 chain.
 
-## Runtime (behaviours that take input)
+## Runtime (behaviors that take input)
 
-A behaviour that takes the pointer is a render object of the node's chain,
+A behavior that takes the pointer is a render object of the node's chain,
 configured on each apply with the node as shown (bindings applied) and its
-`NodeBox` (render/behaviours.dart creates it; `animates: false`, the
+`NodeBox` (render/behaviors.dart creates it; `animates: false`, the
 design canvas, gets the rest pose or no layer, never a recognizer or a
 ticker): `RenderDragTrack` (render/drag_track.dart), `RenderTransformGesture`
 (render/transform_gesture.dart), `RenderFlip` (render/flip_card.dart).
@@ -102,7 +102,7 @@ They read and watch their variables in the node's scope
 reactions with `fireTrigger(box, ...)` (`{'result': ...}`).
 
 * **Node scopes** (runtime/expressions/node_scopes.dart): a node whose
-  behaviour declares names (`track`, `transform`, `flip`, `tilt`) gets one
+  behavior declares names (`track`, `transform`, `flip`, `tilt`) gets one
   `NodeValuesScope` between the scope around it and its nodes'; its render
   object writes it (`binder.nodeScope(...).update(name, map)`), never while
   painting (from events and ticks; from `configure` after a microtask). A

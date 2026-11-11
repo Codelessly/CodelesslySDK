@@ -1,5 +1,5 @@
 // What a list reorder changes:
-// moved lists, the order value between two neighbours, and the
+// moved lists, the order value between two neighbors, and the
 // `${result}` of a reorder.
 
 /// [list] with the item at [from] moved so that it ends up at [to] (an
@@ -23,7 +23,7 @@ List<T> moveListItem<T>(List<T> list, int from, int to) {
 }
 
 /// An order value between [before] and [after] (the order values of the
-/// moved item's new neighbours, null at an end), so only the moved
+/// moved item's new neighbors, null at an end), so only the moved
 /// document is written: the midpoint, or one past the end.
 double orderBetween(num? before, num? after) {
   if (before == null && after == null) return 0;

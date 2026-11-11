@@ -23,7 +23,7 @@ import '../runtime/actions/variable_animator.dart';
 import '../runtime/contracts.dart';
 import '../runtime/expressions/node_scopes.dart';
 import '../runtime/expressions/scopes.dart';
-import 'behaviours.dart';
+import 'behaviors.dart';
 import 'islands.dart';
 import 'node_tree.dart';
 
@@ -74,7 +74,7 @@ class TrackPanGestureRecognizer extends PanGestureRecognizer {
 /// What a track's geometry gives besides the pose: the nearest point to the
 /// pointer, angles about an arc's pivot, the area it can be found in.
 extension TrackGeometryHits on TrackGeometry {
-  /// An arc's pivot, in pixels from the rest centre.
+  /// An arc's pivot, in pixels from the rest center.
   Offset get pivot => track.units == api.DragTrackUnits.parent && parent != null
       ? Offset(track.pivotX * parent!.width, track.pivotY * parent!.height)
       : Offset(track.pivotX, track.pivotY);
@@ -100,7 +100,7 @@ extension TrackGeometryHits on TrackGeometry {
     return (from - span) < (360 - from) ? 1 : 0;
   }
 
-  /// The circle an arc's node sweeps round its pivot (centre, radius), for
+  /// The circle an arc's node sweeps round its pivot (center, radius), for
   /// a node of [size].
   (Offset, double) sweptCircle(Size size) => (pivot, pivot.distance + size.longestSide / 2);
 
@@ -447,7 +447,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     void visit(String id) {
       final n = source.node(id);
       if (n == null) return;
-      if (n.behaviours.states.patches.containsKey(api.WidgetState.dragged)) {
+      if (n.behaviors.states.patches.containsKey(api.WidgetState.dragged)) {
         box.tree.setState(id, api.WidgetState.dragged, on, instance: box.instance);
       }
       n.childIds.forEach(visit);
@@ -685,7 +685,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       ..onCancel = _onEnd;
   }
 
-  /// [local] (in the node's untransformed box) relative to the rest centre.
+  /// [local] (in the node's untransformed box) relative to the rest center.
   Offset _rel(Offset local) => local - size.center(Offset.zero);
 
   TrackGeometry get _geometry => pose();
@@ -919,7 +919,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     _onEnd(speed.isFinite ? speed : 0);
   }
 
-  /// The pointer lifted (or the drag was cancelled) at [speed] along the
+  /// The pointer lifted (or the drag was canceled) at [speed] along the
   /// track (progress per second).
   void _onEnd([double speed = 0]) {
     _pointerActive = false;
@@ -1104,8 +1104,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     final rel = _rel(position);
     final g = _geometry;
     if (_track.shape == api.DragTrackShape.arc) {
-      final (centre, radius) = g.sweptCircle(size);
-      return (rel - centre).distance <= radius;
+      final (center, radius) = g.sweptCircle(size);
+      return (rel - center).distance <= radius;
     }
     return g.bounds(size).contains(rel);
   }

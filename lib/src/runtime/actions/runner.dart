@@ -7,7 +7,7 @@
 // * A failing action stops its chain. The failure is reported to the
 //   context ([ActionHost.reportError]); it never reaches the caller, so one
 //   reaction can't break another, or the gesture that fired it.
-// * A chain is cancelled with its [ActionCancellation] (the node that fired
+// * A chain is canceled with its [ActionCancellation] (the node that fired
 //   it left the tree): the action running finishes, and no other starts. A
 //   delay ends at once.
 // * `${result}` is what the previous action gave: an API's response, a
@@ -26,24 +26,24 @@ import 'ui.dart';
 
 /// Cancels the chains it's given to: [cancel] stops them between actions.
 class ActionCancellation {
-  bool _cancelled = false;
+  bool _canceled = false;
   final List<void Function()> _listeners = [];
 
-  bool get isCancelled => _cancelled;
+  bool get isCanceled => _canceled;
 
   void cancel() {
-    if (_cancelled) return;
-    _cancelled = true;
+    if (_canceled) return;
+    _canceled = true;
     for (final l in [..._listeners]) {
       l();
     }
     _listeners.clear();
   }
 
-  /// Calls [listener] on cancel (at once when cancelled already); returns
+  /// Calls [listener] on cancel (at once when canceled already); returns
   /// what removes it.
   void Function() onCancel(void Function() listener) {
-    if (_cancelled) {
+    if (_canceled) {
       listener();
       return () {};
     }
@@ -52,12 +52,12 @@ class ActionCancellation {
   }
 }
 
-/// A chain stopped because it was cancelled.
-class ActionsCancelled implements Exception {
-  const ActionsCancelled();
+/// A chain stopped because it was canceled.
+class ActionsCanceled implements Exception {
+  const ActionsCanceled();
 
   @override
-  String toString() => 'The actions were cancelled.';
+  String toString() => 'The actions were canceled.';
 }
 
 /// One running chain: what its actions read and share.
@@ -84,7 +84,7 @@ class ActionRun {
   Expressions get expressions =>
       context.expressions is Expressions ? context.expressions as Expressions : const Expressions();
 
-  bool get isCancelled => cancellation.isCancelled;
+  bool get isCanceled => cancellation.isCanceled;
 
   /// What `${result}` reads.
   Object? get result => scope['result'];
@@ -114,10 +114,10 @@ class ActionRun {
     return out is Map ? {for (final e in out.entries) '${e.key}': e.value} : const {};
   }
 
-  /// Waits [duration], unless cancelled first (then throws
-  /// [ActionsCancelled]).
+  /// Waits [duration], unless canceled first (then throws
+  /// [ActionsCanceled]).
   Future<void> wait(Duration duration) {
-    if (isCancelled) return Future.error(const ActionsCancelled());
+    if (isCanceled) return Future.error(const ActionsCanceled());
     final done = Completer<void>();
     late final void Function() remove;
     final timer = Timer(duration, () {
@@ -126,7 +126,7 @@ class ActionRun {
     });
     remove = cancellation.onCancel(() {
       timer.cancel();
-      if (!done.isCompleted) done.completeError(const ActionsCancelled());
+      if (!done.isCompleted) done.completeError(const ActionsCanceled());
     });
     return done.future;
   }
@@ -151,7 +151,7 @@ class CodelesslyActions implements ActionRunner {
 
   /// Runs [node]'s reactions to [trigger] (all of them, in order, as one
   /// chain), unless [cancellation] cancels them. A debounced trigger runs
-  /// once, after a burst. Completes when the chain ends (or is cancelled);
+  /// once, after a burst. Completes when the chain ends (or is canceled);
   /// never throws.
   Future<void> run(Node node, String trigger, ActionContext context,
       {Json event = const {}, ActionCancellation? cancellation, Object? instance}) {
@@ -170,7 +170,7 @@ class CodelesslyActions implements ActionRunner {
       final done = Completer<void>();
       final timer = Timer(Duration(milliseconds: debounce), () {
         _debounced[owner]?.remove(key);
-        if (cancellation?.isCancelled ?? false) return done.complete();
+        if (cancellation?.isCanceled ?? false) return done.complete();
         done.complete(_run(node, reactions, context, event, cancellation));
       });
       (_debounced[owner] ??= {})[key] = (timer, done);
@@ -200,7 +200,7 @@ class CodelesslyActions implements ActionRunner {
       await (scoped == null
           ? runActions([for (final r in reactions) ...r.actions], run)
           : runZoned(() => runActions([for (final r in reactions) ...r.actions], run), zoneValues: {#codelesslyHandlers: scoped}));
-    } on ActionsCancelled {
+    } on ActionsCanceled {
       // The node left: the rest doesn't run.
     } catch (error, stack) {
       host.reportError(error, stack, action: _failing(error));
@@ -228,15 +228,15 @@ class _HandlerOverrides {
 
 /// Runs [actions] in [run]: each enabled one whose `when` holds, blocking
 /// ones awaited. Throws (stopping the chain) when a blocking one fails or
-/// the chain is cancelled.
+/// the chain is canceled.
 Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
   for (final a in actions) {
-    if (run.isCancelled) throw const ActionsCancelled();
+    if (run.isCanceled) throw const ActionsCanceled();
     if (!a.enabled || a is UnknownAction) continue;
     if (a.when case final w? when !run.expressions.test(w, run.scope)) continue;
     if (a.nonBlocking) {
       unawaited(_perform(a, run).catchError((Object e, StackTrace s) {
-        if (e is! ActionsCancelled) run.host.reportError(e, s, action: a.type);
+        if (e is! ActionsCanceled) run.host.reportError(e, s, action: a.type);
       }));
     } else {
       await _perform(a, run);
@@ -253,7 +253,7 @@ Future<void> _perform(ActionDef a, ActionRun run) async {
     } else {
       await handleAction(a, run);
     }
-  } on ActionsCancelled {
+  } on ActionsCanceled {
     rethrow;
   } on ActionFailed {
     rethrow;

@@ -605,7 +605,7 @@ class RenderBadge extends RenderStack {
       return;
     }
     super.performLayout();
-    // Flutter's _RenderBadge: the dot's corner (the label's centre line)
+    // Flutter's _RenderBadge: the dot's corner (the label's center line)
     // at the alignment point, less the badge's width offset.
     final hasLabel = _label != null;
     var at = (hasLabel ? _offset + const Offset(0, 8) : Offset.zero) +

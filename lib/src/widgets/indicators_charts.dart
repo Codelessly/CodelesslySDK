@@ -803,7 +803,7 @@ class LineChartPainter extends NodePainter {
     }
   }
 
-  /// The y of [points] (sorted by x) at [x], linear between neighbours.
+  /// The y of [points] (sorted by x) at [x], linear between neighbors.
   static double? _interpolate(List<Offset> points, double x) {
     if (points.isEmpty) return null;
     if (x <= points.first.dx) return points.first.dy;
