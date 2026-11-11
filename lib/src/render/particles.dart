@@ -6,6 +6,8 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'paint/image_fill.dart';
+
 abstract final class ParticlePlayers {
   static final Map<String, Set<RenderParticles>> _nodes = {};
   static Future<void> play(String id, String name) async {
@@ -37,7 +39,7 @@ class _Burst {
   }
 }
 
-class RenderParticles extends RenderProxyBox {
+class RenderParticles extends RenderProxyBox with ImageClient {
   String _nodeId = '';
   set nodeId(String v) {
     if (v == _nodeId) return;
@@ -50,6 +52,8 @@ class RenderParticles extends RenderProxyBox {
   set emitter(api.ParticleEmitter v) {
     final old = _emitter;
     _emitter = v;
+    // Image particles load their picture before they're needed.
+    showImages([if (v.shapes.contains(api.ParticleShape.image)) v.image]);
     if (old != null && old.playKey != v.playKey && attached) unawaited(fire());
   }
 
@@ -183,6 +187,19 @@ class RenderParticles extends RenderProxyBox {
               ),
               paint,
             );
+          case api.ParticleShape.image:
+            final img = imageFor(e.image)?.image?.image;
+            if (img != null) {
+              final w = s, h = s * img.height / math.max(1, img.width);
+              canvas.drawImageRect(
+                img,
+                Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+                Rect.fromCenter(center: Offset.zero, width: w, height: h),
+                Paint()
+                  ..filterQuality = FilterQuality.medium
+                  ..color = Color.fromRGBO(0, 0, 0, paint.color.a),
+              );
+            }
           case api.ParticleShape.star:
             final path = Path();
             for (var j = 0; j < 10; j++) {

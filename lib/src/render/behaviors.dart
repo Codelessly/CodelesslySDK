@@ -413,6 +413,9 @@ class RenderPose extends RenderProxyBox {
   RenderPose();
 
   Matrix4 _transform = Matrix4.identity();
+
+  /// The pose it draws its child with.
+  Matrix4 get transform => _transform;
   set transform(Matrix4 v) {
     if (v == _transform) return;
     _transform = v;
