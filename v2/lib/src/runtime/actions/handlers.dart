@@ -800,11 +800,14 @@ Future<Object?> _mediaExport(CallFunctionAction action, ActionRun run) async {
       fileName: params['fileName'] as String? ?? 'video.webm',
       width: (params['width'] as num?)?.toInt() ?? 640,
       height: (params['height'] as num?)?.toInt() ?? 360);
+    final previousGeneration = service.generation;
     final operation = service.export(request, onProgress: (value) {
       if (progress.isNotEmpty) run.context.setVariable(progress, value);
     });
     final generation = service.generation;
-    run.host.onDispose(() { if (service.running && service.generation == generation) service.cancel(); });
+    if (generation != previousGeneration) {
+      run.host.onDispose(() { if (service.running && service.generation == generation) service.cancel(); });
+    }
     final result = await operation;
     return {'ok': true, ...result};
   } catch (error) {
