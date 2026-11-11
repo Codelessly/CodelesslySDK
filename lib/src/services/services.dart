@@ -17,6 +17,7 @@ import 'cloud/backend.dart';
 import 'cloud/database.dart';
 import 'links.dart';
 import 'file_exports.dart';
+import 'media_export.dart';
 import 'purchases.dart';
 import '../scripting/script_runner.dart';
 import 'scripts.dart';
@@ -35,6 +36,7 @@ export 'cloud/query.dart';
 export 'cloud/resolve.dart';
 export 'links.dart';
 export 'file_exports.dart';
+export 'media_export.dart';
 export 'purchases.dart';
 export 'scripts.dart';
 export 'sound.dart';
@@ -61,6 +63,7 @@ class Services implements CodelesslyServices {
     LinkOpener? links,
     FileExporter? exports,
     ScriptRunner? scripts,
+    MediaExportService? mediaExport,
   })  : config = config ?? ServiceConfig.empty,
         api = api ?? HttpApiService(),
         cache = cache ?? MemoryKeyValueCache(),
@@ -75,7 +78,8 @@ class Services implements CodelesslyServices {
         speech = speech ?? SpeechService(),
         links = links ?? const PlatformLinkOpener(),
         exports = exports ?? const PlatformFileExporter(),
-        scripts = scripts ?? const SandboxScriptRunner();
+        scripts = scripts ?? const SandboxScriptRunner(),
+        mediaExport = mediaExport ?? MediaExportService();
 
   /// What the publish model configures (APIs, paywall setup); the app
   /// shell sets it when a publish model loads.
@@ -113,6 +117,9 @@ class Services implements CodelesslyServices {
 
   /// Text-to-speech (speak actions, the `speech` value).
   final SpeechService speech;
+
+  /// Browser WebM export, or an encoder supplied by a native host.
+  final MediaExportService mediaExport;
   final LinkOpener links;
 
   /// Saves generated files with the browser or platform save picker.
@@ -177,6 +184,7 @@ class Services implements CodelesslyServices {
     sound.stopAllNotes();
     cloud.dispose();
     speech.dispose();
+    mediaExport.dispose();
     paywalls?.dispose();
     await purchases.dispose();
     if (storage case final ChangeNotifier n) n.dispose();

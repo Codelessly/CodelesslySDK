@@ -1,5 +1,7 @@
 // Interactive pages retain the design template and motion. Flutter's
 // viewport supplies drag arbitration, accessibility and page snapping.
+import 'dart:async';
+
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/widgets.dart';
 
@@ -7,8 +9,12 @@ import '../render/behaviours.dart' show motionMatrix;
 import '../render/convert.dart' show clip;
 import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart';
+import '../runtime/expressions/engine.dart' show Expressions;
+import '../runtime/expressions/scopes.dart' show watchName;
 import 'collections_layout.dart';
 import 'collections_list_runtime.dart';
+
+final Object _pageReportZone = Object();
 
 class RuntimePageView extends StatefulWidget {
   const RuntimePageView({
@@ -26,6 +32,11 @@ class RuntimePageView extends StatefulWidget {
 class _RuntimePageViewState extends State<RuntimePageView> {
   late PageController _controller;
   int? _itemCount;
+  Listenable? _pageWatch;
+  Object? _pageScope;
+  String _pageBinding = '';
+  int? _feedbackPage, _externalPage;
+  bool _externalRequestPending = false;
   final _provided = <ProvidedItem>{};
   ListRuntime get _r => widget.runtime;
   api.Node get _node => _r.node;
@@ -53,11 +64,13 @@ class _RuntimePageViewState extends State<RuntimePageView> {
     super.initState();
     _controller = _create();
     _itemCount = _r.data?.length;
+    _observePageBinding();
   }
 
   @override
   void didUpdateWidget(RuntimePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _observePageBinding();
     final count = _r.data?.length;
     final countChanged = count != _itemCount;
     _itemCount = count;
@@ -71,12 +84,27 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       final previous = oldWidget.runtime.node;
       if (previous.prop(api.PageViewProps.initialPage) !=
               _node.prop(api.PageViewProps.initialPage) ||
-          countChanged) {
+          countChanged ||
+          _externalRequestPending) {
         if (count == 0) return;
         // A shorter list can clamp the old viewport and emit changed during
         // layout. Capture this request before that feedback mutates the
         // bound node, rather than reading its new intermediate page later.
-        final requested = _node.prop(api.PageViewProps.initialPage);
+        final boundRequest = _node.prop(api.PageViewProps.initialPage);
+        final feedback = _feedbackPage == boundRequest;
+        final externalPending = _externalRequestPending;
+        _externalRequestPending = false;
+        _feedbackPage = null;
+        // A changed reaction may await speech, storage or a script before
+        // writing its report. Its value can be several pages behind by
+        // the time this widget rebuilds, so proximity is not provenance.
+        if (feedback && !countChanged && !externalPending) return;
+        // The island may coalesce an external request and a later echoed
+        // report into one rebuild. Preserve the genuine request even when
+        // the report became the bound node's last value before this frame.
+        final requested = feedback || externalPending
+            ? _externalPage ?? boundRequest
+            : boundRequest;
         final target = count == null
             ? requested
             : requested.clamp(0, count - 1);
@@ -95,10 +123,9 @@ class _RuntimePageViewState extends State<RuntimePageView> {
               !controller.hasClients) {
             return;
           }
-          // onPageChanged commonly writes this same bound variable. Its
-          // intermediate page reports are feedback, not navigation requests:
-          // retargeting to each report would cancel a multi-page animation.
-          if (target == _page.round()) return;
+          // A genuine target near the currently rounded page must still
+          // replace an in-flight animation to a different destination.
+          if ((target - _page).abs() < 0.000001) return;
           if (duration == 0) {
             _controller.jumpToPage(target);
           } else {
@@ -111,6 +138,58 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         });
       }
     }
+  }
+
+  int? _boundPage() {
+    final scope = _r.scope;
+    if (scope == null || _pageBinding.isEmpty) return null;
+    final value = _r.engine.evaluate(_pageBinding, scope);
+    return value is num ? value.toInt() : int.tryParse('$value');
+  }
+
+  void _pageValueChanged() {
+    final value = _boundPage();
+    if (value != null && Zone.current[_pageReportZone] == (this, value)) {
+      _feedbackPage = value;
+    } else {
+      _feedbackPage = null;
+      _externalPage = value;
+      _externalRequestPending = value != null;
+    }
+  }
+
+  void _observePageBinding() {
+    final binding = _node.bind['props.initialPage'] ?? '';
+    final scope = _r.scope;
+    if (binding == _pageBinding && identical(scope, _pageScope)) return;
+    _pageWatch?.removeListener(_pageValueChanged);
+    _pageScope = scope;
+    _pageBinding = binding;
+    _feedbackPage = null;
+    _externalRequestPending = false;
+    _externalPage = _boundPage();
+    final roots = {
+      for (final path in Expressions.readsOf(binding))
+        if (RegExp(r'^[A-Za-z_][A-Za-z0-9_]*').stringMatch(path)
+            case final String root)
+          root,
+    };
+    _pageWatch = scope == null
+        ? null
+        : Listenable.merge([for (final root in roots) ?watchName(scope, root)]);
+    _pageWatch?.addListener(_pageValueChanged);
+  }
+
+  void _reportPage(int index) {
+    // Zone values follow asynchronous action chains. The variable listener
+    // can therefore distinguish this pager's echoed report from a genuine
+    // button/API request, even after the reaction awaited another action.
+    unawaited(
+      runZoned(
+        () => _r.fire('changed', event: {'index': index, 'page': index}),
+        zoneValues: {_pageReportZone: (this, index)},
+      ),
+    );
   }
 
   void _scrolled() {
@@ -132,6 +211,7 @@ class _RuntimePageViewState extends State<RuntimePageView> {
 
   @override
   void dispose() {
+    _pageWatch?.removeListener(_pageValueChanged);
     _controller.dispose();
     for (final instance in _provided) {
       _r.binder?.forgetItem(instance);
@@ -157,8 +237,7 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       ),
       clipBehavior: clip(_node.prop(api.CollectionScrollProps.clipBehavior)),
       itemCount: data?.length,
-      onPageChanged: (index) =>
-          _r.fire('changed', event: {'index': index, 'page': index}),
+      onPageChanged: _reportPage,
       itemBuilder: (context, index) {
         final instance = ProvidedItem('page', _r.b.instance, _node.id, index);
         _provided.add(instance);

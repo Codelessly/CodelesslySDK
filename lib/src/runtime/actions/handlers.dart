@@ -63,8 +63,13 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await runScriptAction(a, run);
     case CallFunctionAction():
       final f = run.host.functions[a.name];
-      if (f == null) throw StateError('No function named [${a.name}]');
-      run.result = await f(run.context, run.json(a.params));
+      if (f != null) {
+        run.result = await f(run.context, run.json(a.params));
+      } else if (a.name == 'media.export' || a.name == 'media.cancelExport') {
+        run.result = await _mediaExport(a, run);
+      } else {
+        throw StateError('No function named [${a.name}]');
+      }
     case CallApiAction():
       await _callApi(a, run);
     case SetStorageAction():
@@ -845,3 +850,34 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
 
 /// Whether [text] holds `${...}` (an expression, not a literal).
 bool isExpression(String text) => text.contains(r'${') || FormulaEvaluator.exactExpression(text) != null;
+
+// Built-in callFunction names keep media encoding in the runtime host,
+// never in the script sandbox. An app may override them in functions.
+Future<Object?> _mediaExport(CallFunctionAction action, ActionRun run) async {
+  final services = run.context.services;
+  if (services is! Services) return {'ok': false, 'error': 'Video export is unavailable'};
+  final service = services.mediaExport;
+  if (action.name == 'media.cancelExport') {
+    service.cancel();
+    return {'cancelled': true};
+  }
+  final params = run.json(action.params);
+  final progress = params['progressVariable'] as String? ?? '';
+  try {
+    final raw = params['project'];
+    if (raw is! Map) throw ArgumentError('Export needs a project with source clips');
+    final request = MediaExportRequest.fromJson(raw.cast<String,Object?>(),
+      fileName: params['fileName'] as String? ?? 'video.webm',
+      width: (params['width'] as num?)?.toInt() ?? 640,
+      height: (params['height'] as num?)?.toInt() ?? 360);
+    final operation = service.export(request, onProgress: (value) {
+      if (progress.isNotEmpty) run.context.setVariable(progress, value);
+    });
+    final generation = service.generation;
+    run.host.onDispose(() { if (service.running && service.generation == generation) service.cancel(); });
+    final result = await operation;
+    return {'ok': true, ...result};
+  } catch (error) {
+    return {'ok': false, 'error': '$error', 'cancelled': error is MediaExportCancelled};
+  }
+}

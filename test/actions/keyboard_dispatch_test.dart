@@ -1,5 +1,7 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/services.dart';
+import 'wiring_test.dart' show show, counter, v, reaction, add;
 
 void main() {
   Node node(List<Map<String, Object?>> reactions) =>
@@ -92,5 +94,42 @@ void main() {
     final s = scope();
     await fire(node([key('Mod+?', 7)]), s, '?', meta: true, shift: true);
     expect(s.read('count'), 7);
+  });
+  test('the hardware space label matches the named Space shortcut', () async {
+    final s = scope();
+    await fire(node([key('Space', 1), key('h', 10)]), s, ' ');
+    expect(s.read('count'), 1);
+  });
+  testWidgets('hardware events dispatch one digit, each modifier and Space', (
+    tester,
+  ) async {
+    final nodes = counter();
+    nodes['col']!['actions'] = [
+      reaction('keyDown', [add('count', '1')], extra: {'key': '6'}),
+      reaction('keyDown', [add('count', '10')], extra: {'key': 'Mod+z'}),
+      reaction('keyDown', [add('count', '100')], extra: {'key': 'Mod+Shift+z'}),
+      reaction('keyDown', [add('count', '1000')], extra: {'key': 'Space'}),
+    ];
+    final screen = await show(
+      tester,
+      nodes,
+      variables: [v('count', 0, VariableType.integer)],
+    );
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit6);
+    await tester.pump();
+    expect(screen['count'], 1);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+    await tester.pump();
+    expect(screen['count'], 11);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+    await tester.pump();
+    expect(screen['count'], 111);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    expect(screen['count'], 1111);
   });
 }

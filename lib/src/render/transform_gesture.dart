@@ -483,13 +483,13 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
   }
 
   api.GesturePhysics get _physics => _model.effectivePhysics;
-  double get _minScale => math.max(0.01, _model.minScale);
+  double get _minScale => _model.minScale.isFinite && _model.minScale > 0 ? _model.minScale : 0.01;
   double get _maxScale => math.max(_minScale, _model.maxScale);
 
   /// [scale] held back past the scale limits, on a log scale.
   double _rubberScale(double scale) {
     final k = _physics.overscroll.clamp(0.0, 1.0);
-    final v = math.log(math.max(1e-4, scale));
+    final v = math.log(math.max(_minScale * 1e-6, scale));
     final lo = math.log(_minScale), hi = math.log(_maxScale);
     if (v >= lo && v <= hi) return scale;
     if (k <= 0) return scale.clamp(_minScale, _maxScale);

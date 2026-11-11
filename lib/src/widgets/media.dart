@@ -32,7 +32,7 @@ final Map<String, WidgetRecipe> mediaRecipes = {
   'path': buildPath,
   'video': (b, n, chain) => _player(b, n, chain, (preview) => MediaVideo(node: n, preview: preview)),
   'embeddedVideo': (b, n, chain) =>
-      _player(b, n, chain, (preview) => MediaEmbeddedVideo(key: ValueKey(n.props), node: n, preview: preview)),
+      _player(b, n, chain, (preview) => MediaEmbeddedVideo(node: n, preview: preview)),
   'audioPlayer': (b, n, chain) => _player(b, n, chain, (preview) => MediaAudioPlayer(node: n, preview: preview)),
   'webView': (b, n, chain) => _player(b, n, chain, (preview) => MediaWebViewNode(node: n, preview: preview)),
   'external': (b, n, chain) => _player(b, n, chain, (_) => _External(n)),
