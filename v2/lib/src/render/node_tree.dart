@@ -1406,9 +1406,19 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     // Property setters can dirty retained inner boxes before the chain changes.
     // Keep the owner and its ancestors dirty for both reuse and relinking.
     markNeedsLayout();
+    void dirtyOwners(RenderObject object) {
+      final parents = <RenderObject>[];
+      for (var parent = object.parent; parent != null && !identical(parent, this); parent = parent.parent) {
+        parents.add(parent);
+      }
+      for (final parent in parents.reversed) {
+        parent.markNeedsLayout();
+      }
+    }
     final relink = _alreadyWired(next);
     if (relink != null) {
       for (final o in relink) {
+        dirtyOwners(o);
         o.markNeedsLayout();
       }
       _previousInner = const [];
@@ -1417,6 +1427,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     }
     void unlink(List<RenderBox> chain) {
       for (final o in chain) {
+        dirtyOwners(o);
         if (o is IslandHost) {
           // Its child is the island's own widget tree.
         } else if (o is RenderObjectWithChildMixin<RenderBox>) {
@@ -1442,6 +1453,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     void link(List<RenderBox> chain) {
       for (var i = 0; i < chain.length - 1; i++) {
         final o = chain[i];
+        dirtyOwners(o);
         final nextObj = chain[i + 1];
         _detachFromAnyParent(nextObj);
         if (o is RenderStack && !identical(o, _container)) {
