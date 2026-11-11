@@ -607,8 +607,13 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
+            // Standard density: the node's height is the field's. A compact
+            // theme (desktop web's default) would draw it 8 px shorter.
             return field(constraints.hasBoundedHeight
-                ? decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))
+                ? decoration.copyWith(
+                    constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
+                    visualDensity: VisualDensity.standard,
+                  )
                 : decoration);
           })
         : field(decoration);
@@ -1528,11 +1533,26 @@ class _HoverDecoratorState extends State<_HoverDecorator> {
   Widget build(BuildContext context) => MouseRegion(
         onEnter: (_) => setState(() => hover = true),
         onExit: (_) => setState(() => hover = false),
-        child: InputDecorator(
-          decoration: widget.decoration.copyWith(enabled: widget.enabled),
-          isHovering: hover && widget.enabled,
-          isEmpty: false,
-          child: widget.child,
+        // The field takes the node's height (a 42-high field stays 42 with
+        // a dense decoration), its value centred, as a text field does.
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fills = constraints.hasBoundedHeight;
+            final decorator = InputDecorator(
+              // Standard density when it fills: a compact theme would draw
+              // the field 8 px shorter than its node.
+              decoration: widget.decoration.copyWith(
+                enabled: widget.enabled,
+                visualDensity: fills ? VisualDensity.standard : null,
+              ),
+              isHovering: hover && widget.enabled,
+              isEmpty: false,
+              expands: fills,
+              textAlignVertical: fills ? TextAlignVertical.center : null,
+              child: widget.child,
+            );
+            return fills ? SizedBox(height: constraints.maxHeight, child: decorator) : decorator;
+          },
         ),
       );
 }
