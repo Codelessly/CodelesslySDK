@@ -19,7 +19,7 @@ Actions reach the outside world through **services**: one `Services` object per 
 | `cloud` | Cloud data actions, data-bound lists | In memory (`MemoryDocumentBackend`) | `FirestoreDocumentBackend` |
 | `files` | `cloudFiles` (uploads) | In memory | `FirebaseFileStorage` |
 | `analytics` | Screen views, events, errors | Printed in debug builds, dropped in release | Yours |
-| `purchases`, `paywalls` | `paywall` actions | None | `StorePurchaseService`, `FirebasePaywallBackend` |
+| `purchases`, `paywalls` | `paywall` actions, `codelessly.paywall` | None | `StorePurchaseService`, `FirebasePaywallBackend` |
 | `sound` | `playSound` | The browser's audio on the web; silent elsewhere | Same |
 | `speech` | `speak` | The browser's voice on the web; none elsewhere | Same |
 | `links` | `openLink` | `url_launcher` | Same |
@@ -163,12 +163,13 @@ them in release builds.
 
 ## Purchases and paywalls
 
-`package:codelessly_sdk/store.dart` has `StorePurchaseService` (StoreKit and Play Billing through the
-`in_app_purchase` plugin). `firebase.dart` has `FirebasePaywallBackend`, which resolves paywall placements and
-verifies purchases on Codelessly's backend. They are given to `Services(purchases:, paywalls:)` with a
-`PaywallRuntime`. Paywalls need store products and the paywall configured for the project; without them, `paywall`
-actions fail and the rest of the app is unaffected. See the API docs of `PaywallRuntime` and
-`StorePurchaseService` for the constructor parameters.
+`codelessly.paywall.present(context, placement: ...)` shows a published paywall: see [Paywalls](16-paywalls.md).
+With cloud services (`codelesslyWithToken(..., cloudServices: true)`, or `codelesslyCloudServices(functions:)`)
+paywalls are managed by Codelessly: `codelesslyPaywalls` sets `Services(paywalls:, purchases:)` to a
+`PaywallRuntime` on `FirebasePaywallBackend` (placements resolved and purchases verified by Codelessly's backend)
+and a `StorePurchaseService` (`package:codelessly_sdk/store.dart`: StoreKit and Play Billing through the
+`in_app_purchase` plugin). Without them, `paywall` actions outside a presented paywall fail and the rest of the
+app is unaffected.
 
 ## Lifetime
 
