@@ -1,0 +1,384 @@
+{
+  "id": "sign_in",
+  "semver": "1.0.0",
+  "definition": {
+    "schema": 2,
+    "id": "sign_in",
+    "name": "Sign in",
+    "size": [
+      360,
+      420
+    ],
+    "document": {
+      "schema": 2,
+      "roots": [
+        "root"
+      ],
+      "nodes": {
+        "root": {
+          "type": "column",
+          "name": "Sign in",
+          "children": [
+            "header",
+            "title",
+            "email",
+            "password",
+            "error",
+            "submit",
+            "signUp"
+          ],
+          "layout": {
+            "width": 360,
+            "height": {
+              "hug": 420
+            },
+            "padding": 24
+          },
+          "decoration": {
+            "fills": [
+              {
+                "id": "bg",
+                "color": "#FFFFFFFF"
+              }
+            ],
+            "radius": 16
+          },
+          "props": {
+            "spacing": 12,
+            "crossAxisAlignment": "stretch"
+          }
+        },
+        "header": {
+          "type": "column",
+          "name": "slot:header",
+          "layout": {
+            "width": {
+              "fill": 312
+            },
+            "height": {
+              "hug": 0
+            }
+          }
+        },
+        "title": {
+          "type": "text",
+          "name": "Title",
+          "layout": {
+            "width": 0,
+            "height": 0
+          },
+          "props": {
+            "text": "Sign in",
+            "style": {
+              "fontWeight": 700,
+              "fontSize": 24
+            }
+          }
+        },
+        "email": {
+          "type": "textField",
+          "name": "Email",
+          "layout": {
+            "width": {
+              "fill": 312
+            },
+            "height": {
+              "hug": 56
+            }
+          },
+          "props": {
+            "decoration": {
+              "labelText": "Email",
+              "hintText": "you@example.com"
+            },
+            "keyboardType": "emailAddress",
+            "autocorrect": false,
+            "autofillHints": [
+              "email"
+            ],
+            "textInputAction": "next"
+          },
+          "bind": {
+            "props.initialValue": "${signInEmail}"
+          },
+          "actions": [
+            {
+              "trigger": {
+                "type": "changed"
+              },
+              "actions": []
+            }
+          ]
+        },
+        "password": {
+          "type": "textField",
+          "name": "Password",
+          "layout": {
+            "width": {
+              "fill": 312
+            },
+            "height": {
+              "hug": 56
+            }
+          },
+          "props": {
+            "decoration": {
+              "labelText": "Password"
+            },
+            "obscureText": true,
+            "autocorrect": false,
+            "autofillHints": [
+              "password"
+            ],
+            "textInputAction": "done"
+          },
+          "bind": {
+            "props.initialValue": "${signInPassword}"
+          },
+          "actions": [
+            {
+              "trigger": {
+                "type": "changed"
+              },
+              "actions": []
+            },
+            {
+              "trigger": {
+                "type": "submitted"
+              },
+              "actions": [
+                {
+                  "type": "auth",
+                  "operation": "signIn",
+                  "email": "${signInEmail}",
+                  "password": "${signInPassword}",
+                  "errorVariable": "signInError"
+                },
+                {
+                  "type": "componentEvent",
+                  "event": "onSuccess"
+                }
+              ]
+            }
+          ]
+        },
+        "error": {
+          "type": "text",
+          "name": "Error",
+          "layout": {
+            "width": 0,
+            "height": 0
+          },
+          "props": {
+            "style": {
+              "fontSize": 13,
+              "color": "#FFB3261E"
+            }
+          },
+          "bind": {
+            "props.text": "${signInError}",
+            "visible": "${= signInError != ''}",
+            "props.style.color": "${theme.error}"
+          },
+          "actions": [
+            {
+              "trigger": {
+                "type": "valueChanged",
+                "variable": "signInError"
+              },
+              "actions": [
+                {
+                  "type": "if",
+                  "condition": {
+                    "left": "${signInError}",
+                    "op": "isNotEmpty"
+                  },
+                  "then": [
+                    {
+                      "type": "componentEvent",
+                      "event": "onError"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "submit": {
+          "type": "filledButton",
+          "name": "Submit",
+          "layout": {
+            "width": {
+              "fill": 312
+            },
+            "height": 44
+          },
+          "props": {
+            "label": "Sign in"
+          },
+          "bind": {
+            "props.style.backgroundColor": "${theme.primary}"
+          },
+          "actions": [
+            {
+              "trigger": {
+                "type": "click"
+              },
+              "actions": [
+                {
+                  "type": "auth",
+                  "operation": "signIn",
+                  "email": "${signInEmail}",
+                  "password": "${signInPassword}",
+                  "errorVariable": "signInError"
+                },
+                {
+                  "type": "componentEvent",
+                  "event": "onSuccess"
+                }
+              ]
+            }
+          ]
+        },
+        "signUp": {
+          "type": "textButton",
+          "name": "Sign up link",
+          "layout": {
+            "width": {
+              "fill": 312
+            },
+            "height": 36
+          },
+          "props": {
+            "label": "No account? Sign up",
+            "textAlign": "center"
+          },
+          "actions": [
+            {
+              "trigger": {
+                "type": "click"
+              },
+              "actions": [
+                {
+                  "type": "componentEvent",
+                  "event": "onSignUp"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "contract": {
+    "settings": [
+      {
+        "key": "title",
+        "label": "Title",
+        "type": "string",
+        "targets": [
+          {
+            "node": "title",
+            "path": "props.text"
+          }
+        ],
+        "value": "Sign in"
+      },
+      {
+        "key": "buttonLabel",
+        "label": "Button label",
+        "type": "string",
+        "targets": [
+          {
+            "node": "submit",
+            "path": "props.label"
+          }
+        ],
+        "value": "Sign in"
+      },
+      {
+        "key": "showSignUpLink",
+        "label": "Sign up link",
+        "type": "bool",
+        "targets": [
+          {
+            "node": "signUp",
+            "path": "visible"
+          }
+        ],
+        "value": true
+      },
+      {
+        "key": "signUpLabel",
+        "label": "Link text",
+        "type": "string",
+        "targets": [
+          {
+            "node": "signUp",
+            "path": "props.label"
+          }
+        ],
+        "value": "No account? Sign up"
+      }
+    ],
+    "slots": [
+      {
+        "key": "header",
+        "label": "Header",
+        "node": "header"
+      }
+    ],
+    "events": [
+      {
+        "key": "onSuccess",
+        "label": "On success",
+        "description": "After the user signed in.",
+        "payload": {
+          "uid": "string"
+        }
+      },
+      {
+        "key": "onError",
+        "label": "On error",
+        "description": "Sign in failed; the message is in signInError."
+      },
+      {
+        "key": "onSignUp",
+        "label": "On sign up link",
+        "description": "The \"Sign up\" link was clicked."
+      }
+    ],
+    "tokens": [
+      "error",
+      "primary"
+    ],
+    "variables": [
+      {
+        "id": "managed_signInEmail",
+        "name": "signInEmail",
+        "value": ""
+      },
+      {
+        "id": "managed_signInPassword",
+        "name": "signInPassword",
+        "value": ""
+      },
+      {
+        "id": "managed_signInError",
+        "name": "signInError",
+        "value": ""
+      }
+    ],
+    "requires": {
+      "auth": [
+        "password"
+      ]
+    }
+  },
+  "channel": "beta",
+  "changelog": "First release.",
+  "name": "Sign in",
+  "description": "Email and password sign in with an error message and a sign up link.",
+  "category": "Accounts",
+  "feature": "auth.signIn"
+}

@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
+import 'package:codelessly_sdk/src/widgets/collections_table.dart' show tableRowHeight;
+
 import 'support.dart';
 
 Map<String, Json> table() => {
@@ -73,6 +75,61 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('rowHeightKey gives a row its own height; fillWidth spreads the columns', (tester) async {
+    // A week: an "open shifts" row as tall as its busiest day, then people.
+    final week = v('week', [
+      {'id': 'open', 'height': 150},
+      {'id': 'ana'},
+      {'id': 'bo', 'height': 'tall'},
+    ], VariableType.list);
+    final nodes = {
+      'table': {
+        'type': 'tableView',
+        'layout': {'width': 1000, 'height': 400},
+        'bind': {'data': r'${week}'},
+        'slots': {'cell': 'cell', 'columnHeader': 'colHeader', 'rowHeader': 'rowHeader'},
+        'props': {
+          'columns': [for (var d = 0; d < 5; d++) {'key': 'd$d', 'label': 'D$d'}],
+          'columnWidth': 100,
+          'rowHeaderWidth': 160,
+          'rowHeight': 70,
+          'headerHeight': 60,
+          'rowHeightKey': 'height',
+          'fillWidth': true,
+        },
+      },
+      'cell': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.row.id}${item.columnIndex}'}},
+      'colHeader': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.label}'}},
+      'rowHeader': {'type': 'text', 'layout': {'width': 60, 'height': 20}, 'props': {'text': r'${item.row.id}'}},
+    };
+    await show(tester, nodes, root: 'table', variables: [week]);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final at = cells(tester);
+    // Rows (texts centred in them): header 60, open 150, ana 70 (no
+    // height), bo 70 (not a number).
+    expect(at['ana']!.dy - at['open']!.dy, (150 + 70) / 2);
+    expect(at['bo']!.dy - at['ana']!.dy, 70);
+    // Columns: the 800 wide test view, 160 + 5 × 100 = 660, so each day
+    // gets 28 more.
+    expect(at['open1']!.dx - at['open0']!.dx, 128);
+    expect(at['open4']!.dx - at['open0']!.dx, 512);
+    expect(at['D0']!.dx, 160);
+    expect(tableRowHeight({'h': '12'}, 'h', 40), 12);
+    expect(tableRowHeight({'h': -3}, 'h', 40), 40);
+    expect(tableRowHeight('x', 'h', 40), 40);
+  });
+
+  testWidgets('fillWidth never makes a column narrower than its width', (tester) async {
+    final nodes = table();
+    (nodes['table']!['props'] as Map)['fillWidth'] = true;
+    await show(tester, nodes, root: 'table', variables: [rows]);
+    await tester.pumpAndSettle();
+    final at = cells(tester);
+    // 80 + 50 × 100 is wider than the 600 box: every column keeps its 100.
+    expect(at['r0c1']!.dx - at['r0c0']!.dx, 100);
+  });
+
   testWidgets('a design canvas keeps the table at rest, showing its bound rows', (tester) async {
     await show(tester, table(), root: 'table', variables: [rows], interactive: false);
     expect(find.byType(TableView), findsNothing);
@@ -126,5 +183,38 @@ void main() {
     await tester.pumpAndSettle();
     expect(s['selected'], 2);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('at rest a data-bound table shows its rows in each cell\'s scope', (tester) async {
+    await show(tester, table(), root: 'table', variables: [rows], interactive: false);
+    final shown = <String>{};
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.attached) shown.add(o.text.toPlainText());
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(NodeView)));
+    // Header labels, row headers and cell values of the first rows, as the
+    // running table shows them; only the cells that fit the design size.
+    expect(shown, containsAll(['Col 0', 'Col 4', 'R0', 'R1', 'r0c0', 'r1c3']));
+    expect(shown, isNot(contains('r999c0')));
+  });
+
+  testWidgets('at rest a table that fills its height builds the rows it has room for', (tester) async {
+    final t = table();
+    t['table'] = {...t['table']!, 'layout': {'width': 600, 'height': {'fill': 1}}};
+    await show(tester, {
+      'root': {'type': 'column', 'children': ['table'], 'layout': {'width': 600, 'height': 400},
+               'props': {'crossAxisAlignment': 'stretch'}},
+      ...t,
+    }, root: 'root', variables: [rows], interactive: false);
+    final shown = <String>{};
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.attached) shown.add(o.text.toPlainText());
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(NodeView)));
+    expect(shown, containsAll(['Col 0', 'R0', 'r0c0', 'r5c0']));
   });
 }

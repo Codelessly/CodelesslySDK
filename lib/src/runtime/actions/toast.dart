@@ -67,6 +67,7 @@ const toastBindableColors = [
   'iconColor',
   'iconDiscColor',
   'actionColor',
+  'actionBackgroundColor',
   'closeColor',
   'borderColor',
 ];
@@ -444,7 +445,7 @@ class _ToastViewState extends State<_ToastView> {
                 onPressed: _onActionPressed,
                 style: TextButton.styleFrom(
                   foregroundColor: actionColor,
-                  backgroundColor: look.color('actionBackgroundColor'),
+                  backgroundColor: bound['actionBackgroundColor'] ?? look.color('actionBackgroundColor'),
                   minimumSize: const Size(48, 36),
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   // The action's own font size wins over the message's.

@@ -3,6 +3,7 @@
 // raster).
 import 'package:codelessly_api/codelessly_api.dart' show Json, readDouble, readInt, readString;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import 'image_fill.dart';
 import 'material_icon_versions.dart';
@@ -21,11 +22,22 @@ abstract final class IconSources {
   /// drawn from, or null when it has none.
   static String? urlOf(Json icon) {
     if (readString(icon['source']) == 'image') return readString(icon['image']);
-    final name = (readString(icon['name']) ?? '').toLowerCase();
+    var name = (readString(icon['name']) ?? '').toLowerCase();
     switch (readString(icon['type'])) {
       case 'MATERIAL_ICON':
         if (name.isEmpty) return null;
-        final style = switch (readString(icon['style'])) {
+        // Flutter's names carry the style (`download_rounded`, `Icons.
+        // download_rounded`); the font serves the base name in that style's
+        // folder (`materialiconsround/download`), and 404s for the full name.
+        String? styleOfName;
+        for (final (suffix, s) in const [('_rounded', 'rounded'), ('_outlined', 'outlined'), ('_sharp', 'sharp')]) {
+          if (name.length > suffix.length && name.endsWith(suffix)) {
+            name = name.substring(0, name.length - suffix.length);
+            styleOfName = s;
+            break;
+          }
+        }
+        final style = switch (readString(icon['style']) ?? styleOfName) {
           'outlined' => 'outlined',
           'rounded' => 'round',
           'sharp' => 'sharp',
@@ -52,6 +64,21 @@ abstract final class IconSources {
     return null;
   }
 
+  /// Where a Material icon saved without its version (an icon named in
+  /// node JSON, `{"name": "calendar_view_week"}`) is drawn from when its
+  /// first SVG ([urlOf], `v1`) fails: icons added after Material's first
+  /// release have no `v1`. Null when [icon] names its version, isn't a
+  /// Material icon, or has no later version.
+  static String? fallbackUrlOf(Json icon) {
+    if (readString(icon['type']) != 'MATERIAL_ICON' || readString(icon['source']) == 'image') return null;
+    if (readInt(icon['version']) != null) return null;
+    final name = (readString(icon['name']) ?? '').toLowerCase();
+    final latest = materialIconVersions[name];
+    if (latest == null || latest <= 1) return null;
+    final url = urlOf({...icon, 'version': latest});
+    return url == urlOf(icon) ? null : url;
+  }
+
   /// The Material Symbols SVG variant nearest the axes (`wght700grad200fill1`,
   /// or `default`).
   static String symbolVariant({double? fill, double? weight, double? grade}) {
@@ -76,11 +103,32 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   static const Color defaultColor = Color(0xDD000000);
 
   Json _icon = const {};
+  Json get icon => _icon;
+  String? _url, _fallback;
+  bool _fallbackShown = false;
   set icon(Json v) {
     if (identical(v, _icon)) return;
     _icon = v;
-    showImages([IconSources.urlOf(v)]);
+    _url = IconSources.urlOf(v);
+    _fallback = IconSources.fallbackUrlOf(v);
+    _fallbackShown = false;
+    showImages([_url]);
     markNeedsPaint();
+  }
+
+  /// The icon's image: its SVG, or once that failed, the latest version's
+  /// (loaded from the frame after the failure is seen).
+  LoadedImage? _loaded() {
+    final loaded = imageFor(_url);
+    if (loaded != null || _fallback == null || !imageFailed(_url)) return loaded;
+    if (!_fallbackShown) {
+      _fallbackShown = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (attached && _fallbackShown) showImages([_url, _fallback]);
+      });
+      SchedulerBinding.instance.ensureVisualUpdate();
+    }
+    return imageFor(_fallback);
   }
 
   Color? _color;
@@ -108,7 +156,7 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_icon['show'] == false) return;
-    final loaded = imageFor(IconSources.urlOf(_icon));
+    final loaded = _loaded();
     if (loaded == null) return;
     final color = _color ?? defaultColor;
     final isImage = readString(_icon['source']) == 'image';

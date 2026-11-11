@@ -23,6 +23,7 @@ import '../../app/viewport.dart' show CanvasSizing, CanvasSizingScope;
 import 'confirm_dialog.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
+import 'presentation_scope.dart';
 import 'route_transition.dart';
 import 'toast.dart';
 
@@ -137,7 +138,7 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
 class NavigatorActionUi implements ActionUi {
-  NavigatorActionUi({required this.context, this.route, this.modal, this.files, this.breakpoints});
+  NavigatorActionUi({required this.context, this.route, this.modal, this.sheetModal, this.files, this.breakpoints});
 
   final BuildContext? Function() context;
 
@@ -149,6 +150,10 @@ class NavigatorActionUi implements ActionUi {
   api.Breakpoints get _breakpoints => breakpoints?.call() ?? api.Breakpoints.defaults;
   final ScreenRouteBuilder? route;
   final ScreenBuilder? modal;
+
+  /// A modal screen shown as a bottom sheet: as wide as the sheet (a dialog
+  /// keeps its design width). Null: [modal].
+  final ScreenBuilder? sheetModal;
 
   /// Picks files for uploads; none by default.
   final Future<List<PickedFile>> Function({bool images, bool multiple})? files;
@@ -189,28 +194,34 @@ class NavigatorActionUi implements ActionUi {
   @override
   Future<Object?> openModal(OpenModalAction action, {Json params = const {}}) async {
     final c = _context;
-    final content = modal?.call(action.to, params);
-    if (c == null || content == null) return null;
+    if (c == null) return null;
+    final sheetBelowWidth = action.sheetBelowWidthIn(_breakpoints);
+    final width = MediaQuery.maybeSizeOf(c)?.width;
+    final sheet = action.presentation == ModalPresentation.bottomSheet ||
+        (action.presentation == ModalPresentation.adaptive && (width == null || width < sheetBelowWidth));
+    final content = ((sheet ? sheetModal : null) ?? modal)?.call(action.to, params);
+    if (content == null) return null;
     // Preserve inherited localizations and themes across both modal routes.
     final inherited = InheritedTheme.captureAll(c, Localizations.override(context: c, child: content));
     final modalContent = Padding(
       padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
       child: inherited,
     );
+    final pointer = RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero;
     final anchor = switch (action.anchor) {
       api.ModalAnchor.trigger => RevealAnchor.lastTrigger,
-      api.ModalAnchor.pointer => RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero,
-      api.ModalAnchor.none => null,
+      api.ModalAnchor.pointer => pointer,
+      // A popover sits by the node that opened it (or the pointer) even
+      // when no anchor is named.
+      api.ModalAnchor.none => action.presentation == ModalPresentation.popover ? RevealAnchor.lastTrigger ?? pointer : null,
     };
-    final sheetBelowWidth = action.sheetBelowWidthIn(_breakpoints);
-    final width = MediaQuery.maybeSizeOf(c)?.width;
-    final sheet = action.presentation == ModalPresentation.bottomSheet ||
-        (action.presentation == ModalPresentation.adaptive && (width == null || width < sheetBelowWidth));
     // A popover: by the node that opened it, or the pointer.
     if (anchor != null &&
         action.routeTransition == null &&
         !sheet &&
-        (action.presentation == ModalPresentation.dialog || action.presentation == ModalPresentation.adaptive)) {
+        (action.presentation == ModalPresentation.popover ||
+            action.presentation == ModalPresentation.dialog ||
+            action.presentation == ModalPresentation.adaptive)) {
       return showAnchoredModal(c, modalContent,
           anchor: anchor,
           placement: action.placement,
@@ -227,6 +238,7 @@ class NavigatorActionUi implements ActionUi {
         showDragHandle: action.showDragHandle,
         alignment: Alignment(action.alignment[0], action.alignment[1]),
         sheetWidth: action.sheetWidth,
+        sheetRadius: action.sheetRadius,
         maxHeightFactor: action.maxHeightFactor == 1 ? null : action.maxHeightFactor,
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
@@ -239,6 +251,11 @@ class NavigatorActionUi implements ActionUi {
   bool closeModal(Object? result) {
     final c = _context;
     if (c == null) return false;
+    // A presented banner or full-screen layout closes the way it was shown.
+    if (CodelesslyPresentation.maybeOf(c)?.close case final close?) {
+      close(result);
+      return true;
+    }
     final route = ModalRoute.of(c);
     final modal = route is PopupRoute || (route is CodelesslyRouteTransitionRoute && route.modal);
     if (route == null || !modal || !route.isCurrent) return false;
@@ -333,6 +350,7 @@ Future<Object?> showScreenModal(
   required double sheetBelowWidth,
   RouteTransition? routeTransition,
   double? sheetWidth,
+  double? sheetRadius,
   double? maxHeightFactor,
   double barrierBlur = 0,
   double enterScale = 1,
@@ -359,9 +377,10 @@ Future<Object?> showScreenModal(
       },
     ));
   }
-  // Side sheets, sized bottom sheets and frosted or scaled dialogs.
+  // Side sheets, sized or rounded bottom sheets and frosted or scaled
+  // dialogs.
   final presented = presentation == ModalPresentation.sideSheet ||
-      (sheet && maxHeightFactor != null) ||
+      (sheet && (maxHeightFactor != null || sheetRadius != null)) ||
       (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
@@ -370,6 +389,7 @@ Future<Object?> showScreenModal(
       barrierDismissible: barrierDismissible,
       barrierColor: scrim ?? Colors.black54,
       sheetWidth: sheetWidth,
+      cornerRadius: sheetRadius,
       maxHeightFactor: maxHeightFactor ?? 1,
       showDragHandle: showDragHandle,
       barrierBlur: barrierBlur,
@@ -386,7 +406,16 @@ Future<Object?> showScreenModal(
       isDismissible: barrierDismissible,
       showDragHandle: showDragHandle,
       barrierColor: scrim,
-      builder: (_) => content,
+      // The screen draws its own surface (its fills, radius and shadow): a
+      // tinted Material sheet behind it showed above a screen whose content
+      // sits at the bottom of its canvas.
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      // The keyboard pushes the sheet up (a composer at its bottom).
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: content,
+      ),
     );
   }
   if (presentation == ModalPresentation.fullScreen) {

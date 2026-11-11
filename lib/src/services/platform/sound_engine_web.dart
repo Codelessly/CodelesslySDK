@@ -52,32 +52,109 @@ class _WebSoundEngine
     if (_ctx.state != 'closed') await _ctx.close().toDart;
   }
 
-  final Map<String, (web.OscillatorNode, web.GainNode)> _sustainedVoices = {};
+  /// Sustained voices by id: their oscillators, the envelope gain and the
+  /// release time (seconds) their sound fades over.
+  final Map<String, (List<web.OscillatorNode>, web.GainNode, double)> _sustainedVoices = {};
 
   @override
   void startNote(String id, {double frequency = 440, double volume = 1}) => startNoteWithWaveform(id,frequency:frequency,volume:volume);
+
+  /// Starts voice [id]: a plain wave (`sine`, `triangle`, `square`,
+  /// `sawtooth`) with a 5 ms attack, or an instrument voice: `felt` (a
+  /// triangle with a soft octave through a low-pass, decaying to a quiet
+  /// sustain), `reed` (square and detuned saw, resonant filter) or `pluck`
+  /// (a saw whose filter closes as it dies away). Sound starts on the next
+  /// audio frame, so a key sounds the moment it goes down.
   @override
   void startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'}){
     if (_disposed) return;
     stopNote(id);
-    final gain = _ctx.createGain()..gain.value = volume * 0.1;
-    final osc = _ctx.createOscillator()..frequency.value = frequency..type=waveform=='triangle'?'triangle':'sine';
-    osc.connect(gain);
+    final now = _ctx.currentTime;
+    final hz = frequency;
+    final gain = _ctx.createGain();
+    final filter = _ctx.createBiquadFilter()..type = 'lowpass';
+    final oscs = <web.OscillatorNode>[];
+    void osc(String type, double f, double level) {
+      final o = _ctx.createOscillator()
+        ..type = type
+        ..frequency.value = f;
+      final g = _ctx.createGain()..gain.value = level;
+      o.connect(g);
+      g.connect(filter);
+      oscs.add(o);
+    }
+
+    // The old sustained voice peaked at a tenth of volume; instruments keep
+    // that loudness at their peak.
+    final peak = 0.22 * volume.clamp(0, 2) * 0.5;
+    double release;
+    final g = gain.gain;
+    switch (waveform) {
+      case 'felt':
+        osc('triangle', hz, 1);
+        osc('sine', hz * 2, 0.18);
+        filter.frequency.value = math.min(3200, hz * 8);
+        filter.Q.value = 0.4;
+        g.setValueAtTime(0, now);
+        g.linearRampToValueAtTime(peak, now + 0.004);
+        g.setTargetAtTime(peak * 0.55, now + 0.004, 0.25);
+        g.setTargetAtTime(peak * 0.25, now + 1.2, 1.6);
+        release = 0.32;
+      case 'reed':
+        osc('square', hz, 0.55);
+        osc('sawtooth', hz * 1.003, 0.3);
+        filter.frequency.value = math.min(2200, hz * 5);
+        filter.Q.value = 1.2;
+        g.setValueAtTime(0, now);
+        g.linearRampToValueAtTime(peak * 0.8, now + 0.012);
+        g.setTargetAtTime(peak * 0.6, now + 0.012, 0.15);
+        release = 0.18;
+      case 'pluck':
+        osc('sawtooth', hz, 0.7);
+        osc('triangle', hz * 0.5, 0.35);
+        filter.frequency.setValueAtTime(math.min(6000, hz * 14), now);
+        filter.frequency.setTargetAtTime(hz * 2.2, now, 0.09);
+        filter.Q.value = 2;
+        g.setValueAtTime(0, now);
+        g.linearRampToValueAtTime(peak * 1.1, now + 0.002);
+        g.setTargetAtTime(0.0001, now + 0.002, 0.55);
+        release = 0.12;
+      default:
+        final type = const ['triangle', 'square', 'sawtooth'].contains(waveform) ? waveform : 'sine';
+        osc(type, hz, 1);
+        filter.frequency.value = 20000;
+        g.setValueAtTime(0, now);
+        g.linearRampToValueAtTime(volume.clamp(0, 2) * 0.1, now + 0.005);
+        release = 0.06;
+    }
+    filter.connect(gain);
     gain.connect(_out);
-    osc.onended = ((web.Event _) {
-      osc.disconnect();
+    final last = oscs.last;
+    last.onended = ((web.Event _) {
+      for (final o in oscs) {
+        o.disconnect();
+      }
+      filter.disconnect();
       gain.disconnect();
     }).toJS;
-    _sustainedVoices[id] = (osc, gain);
-    osc.start();
+    _sustainedVoices[id] = (oscs, gain, release);
+    for (final o in oscs) {
+      o.start(now);
+    }
   }
 
   @override
   void stopNote(String id) {
     final voice = _sustainedVoices.remove(id);
     if (voice == null) return;
-    voice.$2.gain.setTargetAtTime(0, _ctx.currentTime, 0.015);
-    voice.$1.stop(_ctx.currentTime + 0.1);
+    final t = _ctx.currentTime;
+    final (oscs, gain, release) = voice;
+    gain.gain
+      ..cancelScheduledValues(t)
+      ..setTargetAtTime(0, t, release / 4);
+    for (final o in oscs) {
+      o.stop(t + release * 2);
+    }
   }
 
   @override
