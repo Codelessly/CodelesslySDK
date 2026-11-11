@@ -678,6 +678,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     paragraph.text = _textSpan(n);
     _node = n;
     _applied = n;
+    // New words can wrap onto more lines: a hugging row above measures again
+    // (the paragraph relays out inside a stretched child, at its old height).
+    _relayoutHuggingAncestors();
     return true;
   }
 
