@@ -1326,6 +1326,18 @@ class StrokePathPainter extends CustomPainter {
     if (points.isEmpty) return out;
     var prev = at(points.first);
     out.moveTo(prev.dx, prev.dy);
+    if (path.curve == api.PathCurve.quadratic) {
+      for (var i = 1; i < points.length; i += 2) {
+        final control = at(points[i]);
+        if (i + 1 >= points.length) {
+          out.lineTo(control.dx, control.dy);
+          break;
+        }
+        final end = at(points[i + 1]);
+        out.quadraticBezierTo(control.dx, control.dy, end.dx, end.dy);
+      }
+      return out;
+    }
     for (final p in points.skip(1)) {
       final next = at(p);
       switch (path.curve) {
@@ -1337,6 +1349,8 @@ class StrokePathPainter extends CustomPainter {
         case api.PathCurve.horizontal:
           final midX = (prev.dx + next.dx) / 2;
           out.cubicTo(midX, prev.dy, midX, next.dy, next.dx, next.dy);
+        case api.PathCurve.quadratic:
+          break; // Drawn above.
       }
       prev = next;
     }
