@@ -837,6 +837,40 @@ void main() {
     expect(s['count'], 1);
   });
 
+  testWidgets('enter viewport can wait for the node to stay in view', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'col': {
+          'type': 'stack',
+          'children': ['target'],
+          'layout': {'width': 200, 'height': 400},
+        },
+        'target': {
+          'type': 'box',
+          'layout': {'width': 200, 'height': 100, 'x': {'start': 0}, 'y': {'start': 0}},
+          'bind': {'layout.y': r'${gap}'},
+          'actions': [
+            reaction('enterViewport', [add('shown')], extra: {'visibleMs': 500}),
+          ],
+        },
+      },
+      variables: [v('shown', 0, VariableType.integer), v('gap', 900, VariableType.integer)],
+    );
+    await tester.pump();
+    s.scope.set('gap', 0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    s.scope.set('gap', 900); // gone before 500 ms
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(s['shown'], 0);
+    s.scope.set('gap', 0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(s['shown'], 1);
+  });
+
   testWidgets('enter and exit viewport as a node moves in and out of view', (tester) async {
     final s = await show(
       tester,

@@ -13,6 +13,7 @@ import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import 'action_error.dart' show CodedFailure;
+import 'cloud_loads.dart';
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
@@ -94,6 +95,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _cloudDocuments(a, run);
     case LoadCloudDataAction():
       await _loadCloudData(a, run);
+    case ReloadCloudDataAction():
+      await reloadCloudData(a, run);
     case AuthAction():
       await _auth(a, run);
     case IfAction():
@@ -141,9 +144,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case CloudDataAction():
       await _cloudData(a, run);
     case CloudBatchAction():
-      for (final step in a.steps) {
-        await _cloudData(step, run);
-      }
+      await cloudBatch(a, run, _cloudData);
     case DownloadFileAction():
       final services = run.host.services;
       if (services is! Services) throw StateError('downloadFile needs Services.');
@@ -504,84 +505,16 @@ Future<void> _cloudDocuments(CloudDocumentsAction a, ActionRun run) async {
   }
 }
 
-/// Streams [a]'s document or query into its variable until the screen goes:
-/// `{status, isLoading, data, error}`.
+/// [a] with `scope: app` on a host with app data goes to the app's shared
+/// subscription; any other load is the screen's live load (cloud_loads.dart).
 Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
-  final db = _require(run, 'Cloud data').cloud;
-  final scope = run.context.scope;
   final variable = a.variable.trim();
   if (variable.isEmpty) return;
   final host = run.host;
   if (a.scope == CloudDataScope.app && host is RuntimeActionContext && host.appData != null) {
-    return _loadAppCloudData(a, run, db, host.appData!, variable);
+    return _loadAppCloudData(a, run, _require(run, 'Cloud data').cloud, host.appData!, variable);
   }
-  void put(String status, {Object? data, Object? error}) => setVariableIn(scope, variable, {
-        'status': status,
-        'isLoading': status == 'loading',
-        'data': data,
-        'error': ?error,
-      });
-  put('loading');
-  late final Stream<Object?> stream;
-  try {
-    final path = resolveCollectionPath(a.query, run.expressions, run.scope);
-    stream = a.single
-        ? db.watchDocument(path, run.text(a.id).trim())
-        : db.watchQuery(path, resolveCloudQuery(a.query, run.expressions, run.scope), loadRelated: a.query.loadRelated);
-  } catch (error) {
-    put('error', error: '$error');
-    rethrow;
-  }
-  final first = Completer<void>();
-  var active = true;
-  late final StreamSubscription<Object?> sub;
-  try {
-    sub = stream.listen(
-    (data) {
-      if (!active) return;
-      put('loaded', data: data);
-      if (!first.isCompleted) first.complete();
-    },
-    onError: (Object error, StackTrace stack) {
-      if (!active) return;
-      active = false;
-      put('error', error: '$error');
-      if (!first.isCompleted) {
-        first.completeError(error, stack);
-      } else {
-        // A later subscription error has no awaited action to throw through.
-        // Stop this invocation's remaining actions, report once and close it.
-        run.stop();
-        run.host.reportError(ActionFailed(a.type, error, nodeId: run.node?.id), stack, action: a.type);
-      }
-    },
-    onDone: () {
-      if (active && !first.isCompleted) {
-        active = false;
-        final error = StateError('Cloud data stream closed before a value');
-        put('error', error: '$error');
-        first.completeError(error);
-      }
-    },
-    cancelOnError: true,
-    );
-  } catch (error) {
-    active = false;
-    put('error', error: '$error');
-    rethrow;
-  }
-  void cancel() {
-    active = false;
-    unawaited(sub.cancel());
-    if (!first.isCompleted) first.completeError(const ActionsCanceled());
-  }
-  final removeCancellation = run.onCancel(cancel);
-  run.host.onDispose(cancel);
-  try {
-    await first.future;
-  } finally {
-    removeCancellation();
-  }
+  return loadCloudData(a, run);
 }
 
 /// [a] with `scope: app`: the app's one subscription to its source, shared

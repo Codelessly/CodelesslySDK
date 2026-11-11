@@ -257,6 +257,74 @@ PublishBundle sharedCards() {
     'layouts': {'list': screen('list'), 'badge': screen('badge')},
   });
 }
+/// A screen that loads [liveCloudLoads] and shows the unread count, with a
+/// [markAllRead] button.
+PublishBundle liveCards() => PublishBundle.fromJson({
+      'model': {
+        'schema': 2,
+        'projectId': 'test-project',
+        'entryLayoutId': 'cards',
+        'layouts': {
+          'cards': {
+            'canvases': [
+              {'id': 'cards-canvas', 'name': 'Cards'},
+            ],
+          },
+        },
+      },
+      'layouts': {
+        'cards': {
+          'schema': 2,
+          'id': 'cards',
+          'roots': ['cards-canvas'],
+          'variables': {
+            'cards-canvas': [
+              const Variable(name: 'cards', type: VariableType.map, value: <String, Object?>{}).toJson(),
+              const Variable(name: 'unread', type: VariableType.integer, value: 0).toJson(),
+              const Variable(name: 'shown', type: VariableType.integer, value: 20).toJson(),
+            ],
+          },
+          'nodes': {
+            'cards-canvas': {
+              'type': 'canvas',
+              'slots': {'body': 'cards-column'},
+              'layout': {'width': 390, 'height': 844},
+              'actions': [
+                {'id': 'load', 'trigger': {'type': 'load'}, 'actions': liveCloudLoads},
+              ],
+            },
+            'cards-column': {
+              'type': 'column',
+              'children': ['count', 'all-read'],
+              'layout': {
+                'width': {'fill': 390},
+                'height': {'fill': 844},
+              },
+            },
+            'count': {
+              'type': 'text',
+              'layout': {
+                'width': {'hug': 200},
+                'height': {'hug': 20},
+              },
+              'props': {'text': r'${unread} unread of ${= length(cards.data)}'},
+            },
+            'all-read': {
+              'type': 'box',
+              'layout': {'width': 390, 'height': 60},
+              'decoration': {
+                'fills': [
+                  {'color': '#FF2196F3'},
+                ],
+              },
+              'actions': [
+                {'id': 'all', 'trigger': {'type': 'click'}, 'actions': [markAllRead]},
+              ],
+            },
+          },
+        },
+      },
+    });
 
 /// Taps node [id] of the layout shown on top.
 Future<void> tapNode(WidgetTester tester, String id) async {
@@ -443,6 +511,31 @@ void main() {
     expect(codelessly.publishModel!.projectId, 'test-project');
     await reload(codelessly);
     expect(codelessly.status, isA<CLoaded>());
+  });
+
+  testWidgets('live cloud data: a joined list, a live count, and mark all read in one commit', (tester) async {
+    final backend = MemoryDocumentBackend();
+    backend.seed('data/default/cards', {
+      for (var i = 0; i < 3; i++) 'c$i': {'title': 'Card $i', 'read': false, 'sentAt': i},
+    });
+    final codelessly = Codelessly.fromBundle(
+      liveCards(),
+      config: CodelesslyConfig(services: Services(cloud: BackendCloudDatabase(backend: backend))),
+      fonts: const NoFontFetcher(),
+    );
+    addTearDown(codelessly.dispose);
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller)));
+    await frames(tester);
+    expect(controller.read('unread'), 3);
+    expect((controller.read('cards.data') as List).first['title'], 'Card 2', reason: 'newest first');
+    expect(controller.read('cards.hasMore'), isFalse);
+    final commits = backend.commits;
+    await controller.trigger('all-read', 'click');
+    await frames(tester);
+    expect(controller.read('unread'), 0);
+    expect(backend.commits - commits, 1);
   });
 
   testWidgets('a paywall: bought, the Pro screen opens; closed, nothing does', (tester) async {

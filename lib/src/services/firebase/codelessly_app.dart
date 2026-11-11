@@ -224,6 +224,8 @@ Services codelesslyCloudServices({
       root: root,
       rulesSource: firestoreDataRules(firestore, projectId),
       userId: () => auth?.currentUser?.uid,
+      // Live owner-only queries follow sign in and out.
+      userChanges: auth?.userChanges(),
     ),
     files: storage == null ? null : FirebaseFileStorage(storage, root: root),
   );

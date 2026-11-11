@@ -60,10 +60,40 @@ abstract interface class CloudDatabase implements Listenable {
   void dispose();
 }
 
+/// What one write of [BackendCloudDatabase.commitBatch] does.
+enum CloudBatchOperation {
+  /// Creates (or replaces) a document: a generated id when none is given.
+  create,
+
+  /// Merges fields into a document, creating it.
+  update,
+
+  /// Deletes a document.
+  delete,
+}
+
+/// One write of [BackendCloudDatabase.commitBatch]: [data] may hold
+/// [FieldOp]s (an increment, the server time).
+@immutable
+class CloudBatchWrite {
+  const CloudBatchWrite(this.operation, this.path, {this.id, this.data = const {}});
+
+  final CloudBatchOperation operation;
+
+  /// The app's collection path.
+  final String path;
+  final String? id;
+  final Json data;
+}
+
 /// A [CloudDatabase] on a [DocumentBackend]. Documents live under [root]
 /// (a document path such as `data/{projectId}`); [rules] come from
 /// [rulesSource] (they change without a publish); [userId] is the signed-in
 /// user, for owner stamps and owner-only reads.
+///
+/// [userChanges] tells it the user may have changed (signed in or out):
+/// live queries whose rules read the user ([watchQuery], [watchAggregate])
+/// subscribe again with the new user's filter.
 class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
   BackendCloudDatabase({
     required this.backend,
@@ -71,6 +101,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     this._rules = const DataRules(),
     Stream<DataRules>? rulesSource,
     String? Function()? userId,
+    Stream<Object?>? userChanges,
     DateTime Function()? now,
     this.onError,
   })  : userId = userId ?? _nobody,
@@ -79,6 +110,33 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
       _rules = r;
       notifyListeners();
     }, onError: (Object error, StackTrace stack) => onError?.call(error, stack));
+    _userSubscription = userChanges?.listen((_) => _userChanged.add(null),
+        onError: (Object error, StackTrace stack) => onError?.call(error, stack));
+  }
+
+  StreamSubscription<Object?>? _userSubscription;
+  final _userChanged = StreamController<void>.broadcast();
+  final _written = StreamController<String>.broadcast();
+
+  /// The full collection paths this database writes to, as it commits:
+  /// what a live aggregate re-runs on.
+  Stream<String> get writtenCollections => _written.stream;
+
+  void _wrote(Iterable<DocumentWrite> writes) {
+    for (final collection in {for (final w in writes) w.collection}) {
+      if (!_written.isClosed) _written.add(collection);
+    }
+  }
+
+  Future<void> _commit(List<DocumentWrite> writes) async {
+    await backend.commit(writes);
+    _wrote(writes);
+  }
+
+  /// Whether reads of [path] depend on who is signed in.
+  bool _readsUser(String path) {
+    final rule = rules.ruleFor(path);
+    return rule.readsOwnOnly || rule == DataRule.signedIn;
   }
 
   static String? _nobody() => null;
@@ -182,16 +240,31 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     return [for (final d in plan.finish(docs, data: (d) => d.data, id: (d) => d.id)) documentForUse(d.data, id: d.id)];
   }
 
+  /// Emits an empty list while the reader may not read [path] (signed out
+  /// of an owner-only collection); when the user changes, a query whose
+  /// rules read the user subscribes again, so it follows sign in and out.
   @override
   Stream<List<Json>> watchQuery(String path, CloudQuery query, {List<String> loadRelated = const []}) {
-    final filters = readFilters(path);
-    if (filters == null) return Stream.value(const []);
-    final full = filters.isEmpty ? query : query.copyWith(filters: [...filters, ...query.filters]);
     final collection = collectionPath(path);
     late StreamController<List<Json>> controller;
     StreamSubscription<List<CloudDocument>>? sub;
+    StreamSubscription<void>? users;
+    String? uid;
+    // Bumped by every subscription: what an earlier one still delivers is
+    // dropped.
+    var generation = 0;
 
     void listen({required bool forceClient}) {
+      sub?.cancel();
+      sub = null;
+      final current = ++generation;
+      uid = userId();
+      final filters = readFilters(path);
+      if (filters == null) {
+        controller.add(const []);
+        return;
+      }
+      final full = filters.isEmpty ? query : query.copyWith(filters: [...filters, ...query.filters]);
       final plan = full.plan(forceClient: forceClient, readyIndexes: rules.readyIndexesFor(path));
       sub = backend.watchQuery(collection, plan.server).listen(
         (docs) async {
@@ -200,14 +273,14 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
           ];
           try {
             final related = await _loadRelated(path, out, loadRelated);
-            if (!controller.isClosed) controller.add(related);
+            if (!controller.isClosed && current == generation) controller.add(related);
           } catch (error, stack) {
-            if (!controller.isClosed) controller.addError(error, stack);
+            if (!controller.isClosed && current == generation) controller.addError(error, stack);
           }
         },
         onError: (Object error, StackTrace stack) {
+          if (current != generation) return;
           if (!forceClient && error is CloudIndexMissing) {
-            sub?.cancel();
             listen(forceClient: true);
             return;
           }
@@ -217,10 +290,121 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     }
 
     controller = StreamController<List<Json>>(
-      onListen: () => listen(forceClient: false),
-      onCancel: () => sub?.cancel(),
+      onListen: () {
+        listen(forceClient: false);
+        users = _userChanged.stream.listen((_) {
+          if (userId() != uid && _readsUser(path)) listen(forceClient: false);
+        });
+      },
+      onCancel: () {
+        generation++;
+        users?.cancel();
+        return sub?.cancel();
+      },
     );
     return controller.stream;
+  }
+
+  /// [operation] over [query]'s documents, now and again after this
+  /// database writes to [path]'s collection, when the user changes, and
+  /// every [every] (writes made elsewhere): computed by the store (with
+  /// Firestore, a count costs one read per 1000 documents counted), so no
+  /// document is downloaded and no listener holds them. A count of a
+  /// collection the reader may not read is 0.
+  Stream<num?> watchAggregate(String path, CloudQuery query, CloudAggregate operation,
+      {String field = '', Duration? every}) {
+    final collection = collectionPath(path);
+    late StreamController<num?> controller;
+    final subs = <StreamSubscription<Object?>>[];
+    Timer? timer;
+    var running = false, again = false, scheduled = false;
+
+    Future<void> run() async {
+      if (running) {
+        again = true;
+        return;
+      }
+      running = true;
+      try {
+        do {
+          again = false;
+          final num? value = readFilters(path) == null
+              ? (operation == CloudAggregate.count ? 0 : null)
+              : await aggregate(path, CloudQuery(filters: query.filters), operation, field: field);
+          if (!controller.isClosed) controller.add(value);
+        } while (again && !controller.isClosed);
+      } catch (error, stack) {
+        if (!controller.isClosed) controller.addError(error, stack);
+      } finally {
+        running = false;
+      }
+    }
+
+    // A burst (a batch's writes, a write and a sign in) runs it once.
+    void soon() {
+      if (scheduled) return;
+      scheduled = true;
+      scheduleMicrotask(() {
+        scheduled = false;
+        if (!controller.isClosed) run();
+      });
+    }
+
+    controller = StreamController<num?>(
+      onListen: () {
+        run();
+        subs.add(_written.stream.listen((written) {
+          if (written == collection) soon();
+        }));
+        subs.add(_userChanged.stream.listen((_) {
+          if (_readsUser(path)) soon();
+        }));
+        if (every != null && every > Duration.zero) timer = Timer.periodic(every, (_) => soon());
+      },
+      onCancel: () {
+        timer?.cancel();
+        for (final s in subs) {
+          s.cancel();
+        }
+      },
+    );
+    return controller.stream;
+  }
+
+  /// Commits [writes] at once (with the rules' owner stamps and the
+  /// documents' dates, like the single writes) and returns the ids written.
+  /// More than [DocumentBackend.maxBatchWrites] go in commits of that size,
+  /// each all or none; with [atomic] they throw a [StateError] before
+  /// anything is written.
+  Future<List<String>> commitBatch(List<CloudBatchWrite> writes, {bool atomic = false}) async {
+    final max = backend.maxBatchWrites;
+    if (atomic && writes.length > max) {
+      throw StateError('A batch writes at most $max documents at once; this one has ${writes.length}.');
+    }
+    final ids = <String>[];
+    final out = <DocumentWrite>[];
+    for (final w in writes) {
+      final collection = collectionPath(w.path);
+      switch (w.operation) {
+        case CloudBatchOperation.create:
+          final given = w.id?.trim() ?? '';
+          final id = given.isEmpty ? backend.newId(collection) : given;
+          final data = documentToSend(prepareWrite(w.path, w.data), id: id, now: _now);
+          out.add(SetDocument(collection, id, resolveFieldOperations(data, now: _now)));
+          ids.add(id);
+        case CloudBatchOperation.update:
+          final id = _docId(w.id);
+          final data = documentToSend(prepareWrite(w.path, w.data), id: id, keepCreatedAt: true, now: _now);
+          out.add(SetDocument(collection, id, resolveFieldOperations(data, now: _now), merge: true));
+          ids.add(id);
+        case CloudBatchOperation.delete:
+          final id = _docId(w.id);
+          out.add(DeleteDocument(collection, id));
+          ids.add(id);
+      }
+    }
+    await _commitInBatches(out);
+    return ids;
   }
 
   @override
@@ -247,7 +431,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     final prepared = prepareWrite(path, value);
     final docId = id == null ? backend.newId(collection) : _docId(id);
     if (id != null && skipIfExists && await backend.get(collection, docId) != null) return docId;
-    await backend.commit([
+    await _commit([
       SetDocument(collection, docId, resolveFieldOperations(documentToSend(prepared, id: docId, now: _now), now: _now)),
     ]);
     return docId;
@@ -257,7 +441,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
   Future<void> updateDocument(String path, String id, Json value) async {
     final docId = _docId(id);
     final data = documentToSend(prepareWrite(path, value), id: docId, keepCreatedAt: true, now: _now);
-    await backend.commit([SetDocument(collectionPath(path), docId, resolveFieldOperations(data, now: _now), merge: true)]);
+    await _commit([SetDocument(collectionPath(path), docId, resolveFieldOperations(data, now: _now), merge: true)]);
   }
 
   @override
@@ -265,7 +449,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
     final collection = collectionPath(path);
     final docId = _docId(id);
     if (await backend.get(collection, docId) == null) return false;
-    await backend.commit([DeleteDocument(collection, docId)]);
+    await _commit([DeleteDocument(collection, docId)]);
     return true;
   }
 
@@ -318,7 +502,7 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
   Future<void> _commitInBatches(List<DocumentWrite> writes) async {
     final size = backend.maxBatchWrites;
     for (var start = 0; start < writes.length; start += size) {
-      await backend.commit(writes.sublist(start, (start + size).clamp(0, writes.length)));
+      await _commit(writes.sublist(start, (start + size).clamp(0, writes.length)));
     }
   }
 
@@ -351,6 +535,9 @@ class BackendCloudDatabase extends ChangeNotifier implements CloudDatabase {
   @override
   void dispose() {
     _rulesSubscription?.cancel();
+    _userSubscription?.cancel();
+    _userChanged.close();
+    _written.close();
     super.dispose();
   }
 }

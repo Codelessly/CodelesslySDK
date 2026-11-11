@@ -28,7 +28,7 @@ are made in the Editor and run by the SDK; your app takes part through **functio
 | State | `setVariable`, `animateVariable`, `setValue` (a node's properties), `setVariant`, `setStorage` |
 | Flow | `if`, `forEach`, `delay`, `confirm` |
 | Your code | `callFunction`, `runScript` |
-| Data | `callApi`, `loadCloudData`, `cloudData`, `cloudDocuments`, `cloudBatch`, `cloudFiles`, `paginate` |
+| Data | `callApi`, `loadCloudData`, `reloadCloudData`, `cloudData`, `cloudDocuments`, `cloudBatch`, `cloudFiles`, `paginate` |
 | Accounts and purchases | `auth`, `paywall` |
 | Feedback | `showToast`, `haptic`, `playSound`, `speak`, `copyToClipboard` |
 | Inputs and motion | `submitForm`, `editText`, `focus`, `scrollTo`, `playAnimation`, `controlDrag` |

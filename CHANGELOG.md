@@ -47,6 +47,39 @@
 - The publish model's `paywall` setup (product slots, placements, legal links) reaches `Services.config.paywall`.
 - `codelesslyCloudServices(functions:)`; `firebase.dart` exports `FirebaseFunctions`. `LazyPurchaseService`.
   `PaywallOutcome.skipped`.
+- Live cloud data bindings (guide: [Live cloud data in a layout](docs/guide/09-cloud-data-and-services.md#live-cloud-data-in-a-layout)):
+  - `loadCloudData` with `aggregate` (`count`, `sum`, `average`) keeps a live number in its variable without loading
+    the documents (`BackendCloudDatabase.watchAggregate`: the database's aggregate, run again after this app's
+    writes to the collection, on a sign in and every `refreshSeconds`).
+  - `query.joins` attach another collection's document to each item (`${item.state.read}`), by a key template or a
+    field, read live with `in` queries of 30 keys (`watchJoined`), not one read per item.
+  - A load runs again by itself when a value its query reads changes (`${auth.uid}`, a bound limit), with a guard
+    against loops; `"reactive": false` opts out. `BackendCloudDatabase(userChanges:)` makes live owner-only queries
+    and counts follow sign in and out (`codelesslyCloudServices` wires it).
+  - A query loads at most its `limit` (an expression), the query's limit, or 500, and its variable's `hasMore` says
+    truthfully whether more match. A list variable gets the documents; a number variable an aggregate.
+  - `reloadCloudData { variable }` subscribes a load afresh.
+  - `cloudBatch` commits its writes at once (`BackendCloudDatabase.commitBatch`), with `forEach` once per item of a
+    list; more than 500 writes go in chunks, or fail first with `transaction`.
+  - A list pulls to refresh without pagination (`pullToRefresh`, or a `refresh` reaction).
+  - Triggers: `onceKey` (a reaction runs once per key per app session) and `enterViewport`'s `visibleMs` (stays in
+    view that long first), for impressions.
+
+**Fixes**
+
+- Running `loadCloudData` again for the same variable replaced nothing: each run added a listener, and the older
+  ones kept writing the variable until the screen went. One variable now has one subscription.
+- A signed-out live query of an owner-only collection closed its stream; it now stays open and follows a sign in.
+
+**Migration**
+
+- A `loadCloudData` query without a limit now loads at most 500 documents (it loaded every one). Layouts with fewer
+  documents see no change; past 500, `hasMore` is true and a debug message names the collection. Set `"limit": "0"`
+  to load everything as before, or page with a bound limit.
+- A load whose query reads a variable now follows it. A layout that relied on a load keeping the values it started
+  with sets `"reactive": false`.
+- `cloudBatch` steps that only write now commit together instead of one by one; a batch with a read step runs as
+  before.
 
 **Improvements and fixes**
 
