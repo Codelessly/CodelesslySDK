@@ -380,6 +380,7 @@ Future<Object?> showScreenModal(
   }
   return showDialog<Object?>(
     context: context,
+    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: scrim,
     builder: (_) => Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)),
@@ -407,6 +408,7 @@ Future<Object?> showAnchoredModal(
       : anchor;
   return showDialog<Object?>(
     context: context,
+    useRootNavigator: false,
     barrierDismissible: barrierDismissible,
     barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
     useSafeArea: false,
