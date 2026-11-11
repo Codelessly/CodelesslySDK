@@ -29,6 +29,7 @@ class PaywallProduct {
     this.savingsPercent,
     this.availableOffers = const [],
     this.basePlanId,
+    this.test = false,
   });
 
   final String slot;
@@ -52,6 +53,10 @@ class PaywallProduct {
   final String? pricePerMonth;
   final int? savingsPercent;
 
+  /// Whether it's the test store's ([TestPurchaseService]): made up, never
+  /// charged. Its value has `test: true` so a paywall can badge it.
+  final bool test;
+
   PaywallProduct copyWith({int? savingsPercent, String? pricePerMonth}) => PaywallProduct(
         slot: slot,
         storeId: storeId,
@@ -65,6 +70,7 @@ class PaywallProduct {
         eligibleForTrial: eligibleForTrial,
         availableOffers: availableOffers,
         basePlanId: basePlanId,
+        test: test,
         savingsPercent: savingsPercent ?? this.savingsPercent,
         pricePerMonth: pricePerMonth ?? this.pricePerMonth,
       );
@@ -73,7 +79,7 @@ class PaywallProduct {
     slot: slot, storeId: storeId, price: price, currency: currency, period: period,
     trial: trial, introOffer: introOffer, rawPrice: rawPrice, currencySymbol: currencySymbol,
     eligibleForTrial: eligibleForTrial, pricePerMonth: pricePerMonth, savingsPercent: savingsPercent,
-    availableOffers: List.unmodifiable(offers), basePlanId: basePlanId,
+    availableOffers: List.unmodifiable(offers), basePlanId: basePlanId, test: test,
   );
 
   /// The `product` value bindings read.
@@ -89,6 +95,7 @@ class PaywallProduct {
         'eligibleForTrial': eligibleForTrial,
         'pricePerMonth': pricePerMonth ?? '',
         'savingsPercent': savingsPercent ?? 0,
+        'test': test,
       };
 
   /// An annual product's saving over twelve months of a monthly one, in
@@ -696,12 +703,19 @@ class PaywallRuntime {
     );
     _sessions.add(session);
     unawaited(session.result.then((result) {
-      if (_disposed || epoch != _accountEpoch || session.isDisposed) return;
-      if (result.outcome != PaywallOutcome.purchased && result.outcome != PaywallOutcome.restored) return;
-      final id = result.entitlementId;
-      if (id != null && id.isNotEmpty) entitlements.value = {...entitlements.value, id};
+      if (session.isDisposed) return;
+      _grant(result, epoch);
     }));
     return session;
+  }
+
+  /// Adds the entitlement verified [result] granted, unless the account
+  /// changed since [epoch].
+  void _grant(PaywallResult result, int epoch) {
+    if (_disposed || epoch != _accountEpoch) return;
+    if (result.outcome != PaywallOutcome.purchased && result.outcome != PaywallOutcome.restored) return;
+    final id = result.entitlementId;
+    if (id != null && id.isNotEmpty && !entitlements.value.contains(id)) entitlements.value = {...entitlements.value, id};
   }
 
   /// Resolve and load before presenting; failures never open a selling UI.
@@ -725,7 +739,12 @@ class PaywallRuntime {
       if (current.error != null || resolved.slots.any((slot) => !current.products.any((product) => product.slot == slot.id))) {
         throw StateError('Store products are unavailable');
       }
-      return await present(resolved, current) ?? const PaywallResult(PaywallOutcome.closed);
+      final result = await present(resolved, current) ?? const PaywallResult(PaywallOutcome.closed);
+      // The session is disposed below, before its result's listeners run:
+      // its verified grant (never one the presenter made up) joins
+      // [entitlements] here.
+      if (current.entitlements.contains(result.entitlementId)) _grant(result, epoch);
+      return result;
     } finally {
       _sessions.remove(current);
       current.dispose();
