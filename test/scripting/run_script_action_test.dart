@@ -380,7 +380,8 @@ class _Unavailable implements ScriptSandbox {
       throw const ScriptEngineUnavailable('none');
 
   @override
-  Map<String, Object?> resume(String run, List<Map<String, Object?>> responses, {required Duration cpuBudget}) =>
+  Map<String, Object?> resume(String run, List<Map<String, Object?>> responses,
+          {required Duration cpuBudget, Map<String, Object?>? vars}) =>
       throw const ScriptEngineUnavailable('none');
 
   @override

@@ -47,6 +47,16 @@ abstract final class IconSources {
     return null;
   }
 
+  /// The MaterialIcons font codepoint a Material icon draws while its SVG
+  /// isn't available, or null (other icon types, no codepoint).
+  static int? glyphOf(Json icon) {
+    final type = readString(icon['type']);
+    if (type != null && type != 'MATERIAL_ICON') return null;
+    if (readString(icon['source']) == 'image') return null;
+    final c = readInt(icon['codepoint']);
+    return c == null || c <= 0 ? null : c;
+  }
+
   /// The Material Symbols SVG variant nearest the axes (`wght700grad200fill1`,
   /// or `default`).
   static String symbolVariant({double? fill, double? weight, double? grade}) {
@@ -104,8 +114,14 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   void paint(PaintingContext context, Offset offset) {
     if (_icon['show'] == false) return;
     final loaded = imageFor(IconSources.urlOf(_icon));
-    if (loaded == null) return;
     final color = _color ?? defaultColor;
+    if (loaded == null) {
+      // Its SVG is loading or failed (a Material icon with no `version` 1):
+      // a Material icon with a codepoint draws that glyph of the bundled
+      // MaterialIcons font meanwhile, instead of nothing.
+      _paintGlyph(context.canvas, offset, color);
+      return;
+    }
     final isImage = readString(_icon['source']) == 'image';
     // A transparent color shows an image icon's own colors.
     final raw = isImage && _color != null && _color!.a == 0;
@@ -118,5 +134,22 @@ class RenderIconGlyph extends RenderBox with ImageClient {
       scale: isImage && !raw && !loaded.isSvg ? readDouble(_icon['scale']) ?? 1 : 1,
       colorFilter: raw ? null : ColorFilter.mode(color, BlendMode.srcIn),
     );
+  }
+
+  /// The font glyph of a Material icon with a `codepoint` (its SVG's
+  /// stand-in), filling the box; nothing for other icons.
+  void _paintGlyph(Canvas canvas, Offset offset, Color color) {
+    final codepoint = IconSources.glyphOf(_icon);
+    if (codepoint == null || size.isEmpty) return;
+    final extent = size.shortestSide;
+    final painter = TextPainter(
+      text: TextSpan(
+        text: String.fromCharCode(codepoint),
+        style: TextStyle(fontFamily: 'MaterialIcons', fontSize: extent, height: 1, color: color, inherit: false),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(canvas, offset + Offset((size.width - painter.width) / 2, (size.height - painter.height) / 2));
+    painter.dispose();
   }
 }

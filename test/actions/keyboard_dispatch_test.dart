@@ -42,6 +42,24 @@ void main() {
       'result': {'key': label, 'meta': meta, 'shift': shift, 'alt': alt},
     },
   );
+  test('a held key repeats only into reactions with repeat', () async {
+    final s = scope();
+    final n = node([
+      key('Arrow Right', 1),
+      {...key('Arrow Right', 10), 'trigger': {'type': 'keyDown', 'key': 'Arrow Right', 'repeat': true}},
+    ]);
+    // The first press runs both.
+    await const CodelesslyActions().run(n, 'keyDown', RuntimeActionContext(scope: s, services: Services()),
+        event: {'result': {'key': 'Arrow Right', 'repeat': false}});
+    expect(s.read('count'), 11);
+    // A repeat runs only the one that asked for repeats.
+    await const CodelesslyActions().run(n, 'keyDown', RuntimeActionContext(scope: s, services: Services()),
+        event: {'result': {'key': 'Arrow Right', 'repeat': true}});
+    expect(s.read('count'), 21);
+    expect(Trigger.fromJson({'type': 'keyDown', 'repeat': true})!.toJson(), {'type': 'keyDown', 'repeat': true});
+    expect(Trigger.fromJson({'type': 'keyDown'})!.repeat, isFalse);
+  });
+
   test('one digit runs only its matching reaction', () async {
     final s = scope();
     final n = node([key('1', 1), key('6', 6), key('9', 9)]);
@@ -131,5 +149,25 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
     expect(screen['count'], 1111);
+  });
+
+  testWidgets('a held arrow repeats into a repeat reaction, once into others', (tester) async {
+    final nodes = counter();
+    nodes['col']!['actions'] = [
+      reaction('keyDown', [add('count', '1')], extra: {'key': 'Arrow Right', 'repeat': true}),
+      reaction('keyDown', [add('count', '100')], extra: {'key': 'Arrow Left'}),
+    ];
+    final screen = await show(tester, nodes, variables: [v('count', 0, VariableType.integer)]);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump();
+    expect(screen['count'], 3);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyRepeatEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(screen['count'], 103);
   });
 }
