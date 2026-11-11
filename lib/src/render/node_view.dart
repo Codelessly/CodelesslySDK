@@ -21,7 +21,9 @@ class NodeView extends RenderObjectWidget {
   @override
   IslandOwnerElement createElement() => IslandOwnerElement(this);
 
-  void _configure() {
+  void _configure(BuildContext context) {
+    final visibility = TickerMode.getNotifier(context);
+    tree.runtimeVisibility = () => visibility.value;
     final env = tree.islands.environment;
     if (env.interactive != interactive) {
       tree.islands.environment = IslandEnvironment(interactive: interactive, wrap: env.wrap);
@@ -30,13 +32,13 @@ class NodeView extends RenderObjectWidget {
 
   @override
   RenderNodeView createRenderObject(BuildContext context) {
-    _configure();
+    _configure(context);
     return RenderNodeView(tree, rootId);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderNodeView renderObject) {
-    _configure();
+    _configure(context);
     renderObject.setRoot(tree, rootId);
   }
 }
