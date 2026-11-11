@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'convert.dart';
+import 'layout/design_scroll.dart';
 
 /// Types out the [RenderParagraph] below it. On the design canvas (and when
 /// it doesn't type) it paints the paragraph as is.
@@ -88,8 +89,8 @@ class RenderTypewriter extends RenderProxyBox {
     markNeedsPaint();
     // Growing: the size follows the typed lines (and the whole text at the end).
     if (tw.grow && shownCharacters != before) markNeedsLayout();
-    // Held: it only blinks from here, and a line not begun has no caret.
-    if (_shown >= _text.length || (hold != null && clock >= hold && (!_begun || !tw.caret))) _stop();
+    // Held: a still, its caret steady (not blinking).
+    if (_shown >= _text.length || (hold != null && clock >= hold)) _stop();
   }
 
   @override
@@ -131,43 +132,68 @@ class RenderTypewriter extends RenderProxyBox {
     }
   }
 
-  /// Lays out again the ancestors that sized themselves around this box.
-  /// Those its old height left with a tight height (a hugging column that
-  /// measured it at 0 gives its content exactly 0) are relayout boundaries
-  /// that stop the change: past them, the first ancestor free to change
-  /// height lays out again, and the change spreads from there as usual.
+  /// Lays out again every ancestor up to the scroll view it's in (or the
+  /// root): each sized itself around this box's old height, and one that
+  /// measured it before a change (a binding turning typing off mid-layout, a
+  /// hugging column that gave its content a tight height, a list placing
+  /// its items) is a relayout boundary the change would stop at.
   void _relayoutAncestors() {
     if (!attached) return;
     markNeedsLayout();
     RenderObject? o = parent;
-    var depth = 0;
-    while (o is RenderBox && depth++ < 64 && !(o.hasSize && o.constraints.hasTightHeight)) {
+    for (var depth = 0; o != null && depth < 200; depth++) {
+      o.markNeedsLayout();
+      if (o is RenderDesignScroll || o is RenderViewportBase) break;
       o = o.parent;
     }
-    // Only a tight height now too short for this box is a stale measure (a
-    // box sized on purpose clips or scrolls its content).
-    if (o is! RenderBox || depth >= 64 || o.size.height >= size.height) return;
-    while (o is RenderBox && o.hasSize && o.constraints.hasTightHeight) {
-      o = o.parent;
-    }
-    o?.markNeedsLayout();
   }
 
   void _growToTypedLines() {
     final tw = _tw;
     final p = _paragraph;
     if (tw == null || !tw.grow || !typing || p == null || !p.hasSize) return;
-    // As tall as the typed lines, plus what follows the text (padding).
+    // As tall as the typed text laid out on its own, as the paragraph lays
+    // out (summing its lines can be a pixel off), plus what follows the
+    // text (padding).
     final top = p.localToGlobal(Offset.zero, ancestor: this).dy;
     final after = size.height - top - p.size.height;
     final n = shownCharacters;
-    var bottom = 0.0;
+    var height = 0.0;
     if (n > 0) {
-      for (final b in p.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: n))) {
-        bottom = math.max(bottom, b.bottom);
-      }
+      final typed = TextPainter(
+        text: _firstCharacters(p.text, n),
+        textAlign: p.textAlign,
+        textDirection: p.textDirection,
+        textScaler: p.textScaler,
+        maxLines: p.maxLines,
+        locale: p.locale,
+        strutStyle: p.strutStyle,
+        textWidthBasis: p.textWidthBasis,
+        textHeightBehavior: p.textHeightBehavior,
+      )..layout(maxWidth: p.constraints.maxWidth);
+      height = typed.height;
+      typed.dispose();
     }
-    size = constraints.constrain(Size(size.width, n == 0 ? 0 : top + bottom + after));
+    size = constraints.constrain(Size(size.width, n == 0 ? 0 : top + height + after));
+  }
+
+  /// [span]'s first [n] characters, styles kept.
+  static InlineSpan _firstCharacters(InlineSpan span, int n) {
+    var left = n;
+    InlineSpan? cut(InlineSpan s) {
+      if (left <= 0) return null;
+      if (s is! TextSpan) {
+        left -= 1;
+        return s;
+      }
+      final own = s.text ?? '';
+      final text = own.length <= left ? own : own.substring(0, left);
+      left -= text.length;
+      final children = [for (final c in s.children ?? const <InlineSpan>[]) ?cut(c)];
+      return TextSpan(text: text, style: s.style, children: children.isEmpty ? null : children);
+    }
+
+    return cut(span) ?? const TextSpan(text: '');
   }
 
   RenderParagraph? get _paragraph {

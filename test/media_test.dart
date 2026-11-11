@@ -1,6 +1,9 @@
 // Painting and islands of the media group: image fills, SVG paths (the
 // `path` widget and a box's path), icons, and the players' islands.
+import 'dart:convert';
+
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/paint/image_fill.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart';
 import 'package:codelessly_sdk/src/render/paint/material_icon_versions.dart';
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
@@ -61,13 +64,20 @@ List<T> _find<T extends RenderObject>(RenderObject root) {
 String _text(RenderObject root) => _find<RenderParagraph>(root).map((p) => p.text.toPlainText()).join();
 
 void main() {
+  svgCacheTests();
   test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
-        'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
-    // Without a version (an icon named in data): its latest version, since
-    // gstatic doesn't keep v1 of every icon.
+        'https://fonts.gstatic.com/s/i/materialiconsround/home/v${materialIconVersions['home']}/24px.svg');
+    // Without a version, the icon is served from the version it was added in.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),
-        'https://fonts.gstatic.com/s/i/materialicons/home/v16/24px.svg');
+        'https://fonts.gstatic.com/s/i/materialicons/home/v${materialIconVersions['home']}/24px.svg');
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'check', 'style': 'rounded'}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/check/v18/24px.svg');
+    // A binding that renames an icon keeps the old icon's version: the name wins.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'lock_open', 'style': 'rounded', 'version': 1234}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/lock_open/v${materialIconVersions['lock_open']}/24px.svg');
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'not_an_icon_name'}),
+        'https://fonts.gstatic.com/s/i/materialicons/not_an_icon_name/v1/24px.svg');
     expect(IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': 'auto_awesome', 'style': 'rounded'}),
         'https://fonts.gstatic.com/s/i/materialiconsround/auto_awesome/v14/24px.svg');
     // A name bound at runtime keeps the design icon's version: the name's own is used.
@@ -317,5 +327,41 @@ void main() {
     expect(isRemoteMediaUrl('https://192.168.1.2/a.mp4', ['.mp4']), isFalse);
     expect(isRemoteMediaUrl('https://172.20.0.1/a.mp3', ['.mp3']), isFalse);
     expect(isRemoteMediaUrl('https://cdn.example.com/a.mov', ['.mp4']), isFalse);
+  });
+}
+
+class _IconBox extends LeafRenderObjectWidget {
+  const _IconBox(this.icon);
+  final Map<String, Object?> icon;
+  @override
+  RenderIconGlyph createRenderObject(BuildContext context) => RenderIconGlyph()..icon = icon;
+  @override
+  void updateRenderObject(BuildContext context, RenderIconGlyph r) => r.icon = icon;
+}
+
+void svgCacheTests() {
+  testWidgets('an icon swapped back shows from the SVG cache, not a new fetch', (tester) async {
+    LoadedImage.debugClearSvgCache();
+    final fetched = <String>[];
+    final client = MockClient((r) async {
+      fetched.add(r.url.pathSegments[3]);
+      return http.Response(utf8.decode(base64.decode(_svg.split(',').last)), 200);
+    });
+    const lock = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'lock', 'style': 'rounded'};
+    const open = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'lock_open', 'style': 'rounded'};
+    Future<void> show(Map<String, Object?> icon) async {
+      await http.runWithClient(() async {
+        await tester.pumpWidget(Center(child: SizedBox.square(dimension: 24, child: _IconBox(icon))));
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pump();
+      }, () => client);
+    }
+
+    await show(lock);
+    await show(open);
+    await show(lock);
+    await show(open);
+    expect(fetched, ['lock', 'lock_open']);
+    expect(LoadedImage.debugSvgCached(IconSources.urlOf(lock)!), isTrue);
   });
 }

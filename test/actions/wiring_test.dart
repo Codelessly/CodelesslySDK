@@ -645,6 +645,11 @@ void main() {
     final roomy = PopoverLayout(
         anchor: const Rect.fromLTWH(320, 375, 28, 28), placement: api.PopoverPlacement.belowEnd, gap: 6, reserve: 360);
     expect(roomy.getPositionForChild(const Size(390, 844), const Size(200, 112)).dy, 409);
+    // Too tall for the room below: still below its anchor's side, moved up
+    // to keep the reserve (overlapping the anchor), not flipped above.
+    final tall = PopoverLayout(
+        anchor: const Rect.fromLTWH(264, 664, 592, 34), placement: api.PopoverPlacement.belowStart, gap: 6, reserve: 400);
+    expect(tall.getPositionForChild(const Size(1440, 900), const Size(320, 301)).dy, 492);
     // No reserve: below.
     final plain =
         PopoverLayout(anchor: const Rect.fromLTWH(320, 575, 28, 28), placement: api.PopoverPlacement.belowEnd, gap: 6);

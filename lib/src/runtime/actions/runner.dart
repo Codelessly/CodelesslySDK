@@ -21,7 +21,6 @@ import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, Node, 
 
 import '../contracts.dart';
 import '../expressions/engine.dart';
-import '../expressions/formula.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
 import 'action_error.dart';
@@ -146,6 +145,10 @@ class ActionRun {
   /// [expression] evaluated (a value).
   Object? evaluate(String expression) => expressions.evaluate(expression, scope);
 
+  /// [value] (any JSON) with its strings evaluated: one `${...}` gives the
+  /// value as is, other text is interpolated.
+  Object? evaluateJson(Object? value) => expressions.substituteJson(value, scope);
+
   /// [json] with its strings evaluated (params).
   Json json(Json json) {
     final out = expressions.substituteJson(json, scope);
@@ -233,10 +236,11 @@ class CodelesslyActions implements ActionRunner {
     final result = event.containsKey('result') ? event['result'] : (event.containsKey('value') ? event['value'] : (event.isEmpty ? null : event));
     final scope = ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope);
     try {
-      final value = FormulaEvaluator.exactExpression(when) != null
+      // `${path}` and `${= formula}` as written; a bare one is a formula.
+      final value = when.contains(r'${')
           ? context.expressions.evaluate(when, scope)
           : context.expressions.evaluate('\${= $when}', scope);
-      return value == true;
+      return value == true || value == 'true';
     } finally {
       scope.dispose();
     }
@@ -272,7 +276,8 @@ class CodelesslyActions implements ActionRunner {
     final value = event['result'] is Map ? event['result'] as Map : event;
     // A held key's repeats run only the reactions that ask for them.
     if (value['repeat'] == true && !t.repeat) return false;
-    return runtimeKeyMatches(t.keyCombo, '${value['key'] ?? ''}',
+    return runtimeKeyEventMatches(t.keyCombo, '${value['key'] ?? ''}',
+        character: value['character'] as String?,
         meta: value['meta'] == true, shift: value['shift'] == true,
         alt: value['alt'] == true);
 

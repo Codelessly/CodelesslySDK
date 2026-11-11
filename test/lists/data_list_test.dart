@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
@@ -303,6 +304,60 @@ void main() {
     expect(texts(tester), ['#A 3', 'P0', 'P1', 'P2', '#B 2', 'P3', 'P4']);
   });
 
+  testWidgets('sections at rest: the design canvas shows the headers too', (tester) async {
+    await show(
+      tester,
+      screen(
+        extraList: {
+          'props': {
+            'sections': {'groupBy': 'group'},
+          },
+          'slots': {'sectionHeader': 'header'},
+        },
+        extra: {
+          'header': {
+            'type': 'text',
+            'layout': {'width': 300, 'height': 24},
+            'props': {'text': r'#${item.key} ${item.count}'},
+          },
+        },
+      ),
+      variables: [v('people', people(5), VariableType.list)],
+      interactive: false,
+    );
+    await tester.pumpAndSettle();
+    expect(texts(tester), ['#A 3', 'P0', 'P1', 'P2', '#B 2', 'P3', 'P4']);
+  });
+
+  testWidgets('the end footer sits after the last item, inside the bottom padding', (tester) async {
+    await show(
+      tester,
+      screen(
+        pagination: {'name': 'contacts', 'pageSize': 10},
+        extraList: {
+          'layout': {
+            'width': 300,
+            'height': 400,
+            'padding': [0, 0, 0, 120],
+          },
+          'slots': {'end': 'end'},
+        },
+        extra: footers(),
+      ),
+      variables: [v('people', people(3), VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    final at = <String, double>{};
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.attached) at[o.text.toPlainText()] = o.localToGlobal(Offset.zero).dy;
+      o.visitChildren(visit);
+    }
+
+    visit(tester.renderObject(find.byType(CustomScrollView)));
+    // Right under the third 40-high row, not 120 px further down.
+    expect(at['The end']! - at['P2']!, lessThan(60));
+  });
+
   testWidgets('swipe actions: a swipe past the threshold runs the first action, with undo', (tester) async {
     final s = await show(
       tester,
@@ -413,6 +468,114 @@ void main() {
     await tester.pumpAndSettle();
     final header = s.tree.boxOf('header', instance: const ProvidedItem('section', null, 'list', 'D'))!;
     expect(header.localToGlobal(Offset.zero).dy, tester.getTopLeft(find.byType(CustomScrollView)).dy);
+  });
+
+  testWidgets('index bar: its own keys, muted absent ones, and a jump that pages a data list in', (tester) async {
+    final contacts = [
+      for (final letter in ['A', 'C', 'E'])
+        for (var i = 0; i < 40; i++) {'id': '$letter$i', 'name': 'P$letter$i', 'group': letter},
+    ];
+    await show(
+      tester,
+      screen(
+        pagination: {'name': 'contacts', 'pageSize': 10},
+        extraList: {
+          'props': {
+            'sections': {
+              'groupBy': 'group',
+              'indexBar': true,
+              'indexKeys': ['A', 'B', 'C', 'D', 'E'],
+              'indexStyle': {'fontSize': 13, 'color': '#FFF7F5F0'},
+              'indexMutedColor': '#FF63636D',
+              'indexWidth': 30,
+              'indexBubble': true,
+            },
+          },
+          'slots': {'sectionHeader': 'header'},
+        },
+        extra: {
+          'header': {'type': 'text', 'layout': {'width': 300, 'height': 30}, 'props': {'text': r'#${item.key}'}},
+        },
+      ),
+      variables: [v('people', contacts, VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    final bar = tester.widget<SectionIndexBar>(find.byType(SectionIndexBar));
+    expect(bar.keys, ['A', 'B', 'C', 'D', 'E']);
+    expect(bar.present, {'A', 'C', 'E'});
+    expect(bar.width, 30);
+    Color colorOf(String key) => tester.widget<Text>(find.descendant(of: find.byType(SectionIndexBar), matching: find.text(key))).style!.color!;
+    expect(colorOf('B'), const Color(0xFF63636D));
+    expect(colorOf('C'), const Color(0xFFF7F5F0));
+    // E starts at item 80, pages away.
+    final state = tester.state<DataListViewState>(find.byType(DataListView));
+    expect(state.controller!.items.length, lessThan(80));
+    final rect = tester.getRect(find.byType(SectionIndexBar));
+    final gesture = await tester.startGesture(Offset(rect.center.dx, rect.bottom - 5));
+    // The tap competes with a drag along the bar: it lands after the press timeout.
+    await tester.pump(const Duration(milliseconds: 150));
+    // The bubble shows the touched key.
+    expect(find.descendant(of: find.byType(SectionIndexBar), matching: find.text('E')), findsNWidgets(2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(state.controller!.items.length, greaterThan(80));
+    expect(texts(tester), contains('PE0'));
+    // A muted key does nothing.
+    final offset = state.scrollController.offset;
+    await tester.tapAt(Offset(rect.center.dx, rect.top + rect.height * 0.3));
+    await tester.pumpAndSettle();
+    expect(state.scrollController.offset, offset);
+  });
+
+  testWidgets('swipe actions: an action is offered per item by its when', (tester) async {
+    final s = await show(
+      tester,
+      screen(
+        extraList: {
+          'props': {
+            'swipeActions': {
+              'radius': 18,
+              'armedScale': 1.12,
+              'startActions': [
+                {'id': 'in', 'label': 'CHECK IN', 'when': r'${= !item.done}', 'removes': false, 'inline': true},
+              ],
+              'endActions': [
+                {'id': 'undo', 'label': 'UNDO', 'when': r'${= item.done}', 'removes': false},
+                {'id': 'open', 'label': 'OPEN', 'when': r'${= !item.done}', 'removes': false},
+              ],
+            },
+          },
+          'actions': [
+            reaction('swipeAction', [
+              {'type': 'setVariable', 'variable': 'last', 'value': r'${result.action} ${result.item.name}'},
+            ]),
+          ],
+        },
+      ),
+      variables: [
+        v('people', [
+          {'id': 0, 'name': 'P0', 'done': false},
+          {'id': 1, 'name': 'P1', 'done': true},
+        ], VariableType.list),
+        v('last', ''),
+      ],
+    );
+    await tester.pumpAndSettle();
+    Offset row(int i) => s.center('row', instance: ProvidedItem('row', null, 'list', i));
+    // Toward the start: P0 isn't done, so OPEN runs; P1 is, so UNDO.
+    await tester.dragFrom(row(0), const Offset(-250, 0));
+    await tester.pumpAndSettle();
+    expect(s['last'], 'open P0');
+    await tester.dragFrom(row(1), const Offset(-250, 0));
+    await tester.pumpAndSettle();
+    expect(s['last'], 'undo P1');
+    // Toward the end: P1 is done, so nothing is offered and nothing runs.
+    await tester.dragFrom(row(1), const Offset(250, 0));
+    await tester.pumpAndSettle();
+    expect(s['last'], 'undo P1');
+    await tester.dragFrom(row(0), const Offset(250, 0));
+    await tester.pumpAndSettle();
+    expect(s['last'], 'in P0');
   });
 
   testWidgets('a grid with pagination pages lazily and loads near its end', (tester) async {

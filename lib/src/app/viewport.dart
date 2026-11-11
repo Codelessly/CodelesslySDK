@@ -22,6 +22,22 @@ enum CanvasSizing {
   fillWidth,
 }
 
+/// The sizing a modal asks of the screen it shows: a modal that covers the
+/// screen has its screen fill it ([CanvasSizing.fill]) rather than keep its
+/// design size.
+class CanvasSizingScope extends InheritedWidget {
+  const CanvasSizingScope({super.key, required this.sizing, required super.child});
+
+  /// Null below the screen it sized (layouts embedded in it size their own).
+  final CanvasSizing? sizing;
+
+  static CanvasSizing? maybeOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<CanvasSizingScope>()?.sizing;
+
+  @override
+  bool updateShouldNotify(CanvasSizingScope oldWidget) => sizing != oldWidget.sizing;
+}
+
 /// The box a canvas takes, and the size it's laid out at inside it.
 @immutable
 class CanvasBox {

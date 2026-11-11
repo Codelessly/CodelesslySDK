@@ -56,7 +56,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       final result = await run.host.ui.openModal(a, params: run.json(a.params));
       if (result != null) run.result = result;
     case CloseModalAction():
-      run.host.ui.closeModal(a.result.isEmpty ? null : run.json(a.result));
+      run.host.ui.closeModal(a.result == null ? null : run.evaluateJson(a.result));
     case PrintAction():
       await printNodeAction(a.node, run);
     case OpenLinkAction():
