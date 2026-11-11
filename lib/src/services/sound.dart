@@ -1,3 +1,4 @@
+import 'dart:async';
 // Sounds: short synthesised voices for play sound actions, and the clock
 // clock triggers tick on. Web Audio in browsers; PCM through just_audio on
 // native platforms. Apps may supply their own [SoundEngine].
@@ -91,7 +92,7 @@ abstract interface class WaveformSoundEngine {
 
 /// Optional cleanup for engines owning contexts, players or listeners.
 abstract interface class DisposableSoundEngine {
-  void dispose();
+  FutureOr<void> dispose();
 }
 
 /// The app's sounds, on an [engine] (the platform's by default).
@@ -100,14 +101,15 @@ class SoundService {
 
   final SoundEngine engine;
   bool _disposed = false;
-  void dispose() {
-    if (_disposed) return;
+  Future<void>? _closing;
+  Future<void> dispose() {
+    if (_closing case final pending?) return pending;
     _disposed = true;
     stopAllNotes();
     final output = engine;
-    if (output is DisposableSoundEngine) {
-      (output as DisposableSoundEngine).dispose();
-    }
+    return _closing = Future<void>.sync(() {
+      if (output is DisposableSoundEngine) return (output as DisposableSoundEngine).dispose();
+    });
   }
 
   /// Seconds on the sound clock.

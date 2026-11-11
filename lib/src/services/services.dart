@@ -198,12 +198,13 @@ class Services implements CodelesslyServices {
 
   /// Releases what the services hold.
   Future<void> dispose() async {
-    sound.dispose();
+    final audioClosing = sound.dispose();
     cloud.dispose();
     speech.dispose();
     mediaExport.dispose();
     paywalls?.dispose();
     await purchases.dispose();
     if (storage case final ChangeNotifier n) n.dispose();
+    await audioClosing;
   }
 }
