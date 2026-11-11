@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../../render/hero.dart';
 import '../../render/node_tree.dart';
+import '../../render/play.dart' show FlightRegistry;
 
 /// The routes the screens of each node tree show in, as the app shell
 /// reports them.
@@ -19,7 +20,18 @@ abstract final class HeroRoutes {
   static final Expando<ModalRoute<Object?>> _routeOf = Expando('heroRoute');
 
   /// [tree] shows in [route] now.
-  static void bind(NodeTree tree, ModalRoute<Object?>? route) => _routeOf[tree] = route;
+  static void bind(NodeTree tree, ModalRoute<Object?>? route) {
+    _routeOf[tree] = route;
+    FlightRegistry.leaving = leaving;
+  }
+
+  /// Whether [tree]'s route is closing (popped, its exit still playing) or
+  /// gone: what it shows is on its way out.
+  static bool leaving(NodeTree tree) {
+    final route = _routeOf[tree];
+    if (route == null) return false;
+    return !route.isActive || route.animation?.status == AnimationStatus.reverse;
+  }
 
   /// The marks with a tag on the screens [route] shows, the first per tag.
   static Map<String, RenderHeroMark> marksOf(ModalRoute<Object?> route) {
@@ -82,10 +94,23 @@ abstract final class HeroFlights {
     if (measure) upper.offstage = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (measure && upper.isActive) upper.offstage = false;
-      final lower = upper.heroRouteBelow;
-      if (lower == null || upper.navigator == null || !upper.isActive) return;
-      _start(lower: lower, upper: upper, push: true);
+      _startWhenShown(upper, framesLeft: 6);
     });
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
+  /// Starts [upper]'s push flights once its screen has drawn its shared
+  /// elements: a screen builds its tree a frame or two after its route goes
+  /// in (loading its layout, its data), so it is looked for again on the
+  /// next frames while the transition is still early.
+  static void _startWhenShown(CodelesslyHeroRoute<Object?> upper, {required int framesLeft}) {
+    final lower = upper.heroRouteBelow;
+    if (lower == null || upper.navigator == null || !upper.isActive) return;
+    if (HeroRoutes.marksOf(upper).isNotEmpty || framesLeft <= 0 || (upper.animation?.value ?? 1) > 0.35) {
+      _start(lower: lower, upper: upper, push: true);
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _startWhenShown(upper, framesLeft: framesLeft - 1));
     WidgetsBinding.instance.scheduleFrame();
   }
 
@@ -102,8 +127,8 @@ abstract final class HeroFlights {
     final animation = upper.animation;
     if (overlay == null || animation == null) return;
     final bottoms = HeroRoutes.marksOf(lower);
-    if (bottoms.isEmpty) return;
     final tops = HeroRoutes.marksOf(upper);
+    if (bottoms.isEmpty) return;
     for (final e in tops.entries) {
       final bottom = bottoms[e.key];
       if (bottom == null) continue;

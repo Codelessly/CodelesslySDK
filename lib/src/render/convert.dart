@@ -11,9 +11,10 @@ extension ColorToFlutter on api.Color {
 }
 
 extension InsetsToFlutter on api.EdgeInsets {
-  /// Flutter's insets. Flutter asserts insets (a margin, a padding) are
-  /// never negative, and one negative side would fail the whole screen's
-  /// layout; a negative side reads as 0, as the API reads a bad value.
+  /// Flutter's insets. Flutter asserts insets (a padding) are never
+  /// negative, and one negative side would fail the whole screen's layout;
+  /// a negative side reads as 0, as the API reads a bad value. (A margin
+  /// keeps its negative sides: RenderMargin lays them out.)
   EdgeInsets get flutter => EdgeInsets.fromLTRB(
         left < 0 ? 0 : left,
         top < 0 ? 0 : top,
