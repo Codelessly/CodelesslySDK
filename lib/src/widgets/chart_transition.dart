@@ -294,3 +294,21 @@ Node chartTransitionRestyle(Node from, Node to) => to.type == 'plotChart'
           .withProp(PlotChartProps.xMin, to.prop(PlotChartProps.xMin))
           .withProp(PlotChartProps.xMax, to.prop(PlotChartProps.xMax))
     : from;
+
+
+/// [n] with every plotted value at zero (where a chart grows in from).
+Node chartZeroed(Node n) {
+  switch (n.type) {
+    case 'chart':
+      final fields = _seriesFields(n);
+      return n.withProp(ChartProps.data, [
+        for (final row in n.prop(ChartProps.data)) {for (final e in row.entries) e.key: fields.contains(e.key) && e.value is num ? 0 : e.value},
+      ]);
+    case 'lineChart':
+      final y = n.prop(LineChartProps.yField);
+      return n.withProp(LineChartProps.data, [
+        for (final row in n.prop(LineChartProps.data)) {for (final e in row.entries) e.key: e.key == y && e.value is num ? 0 : e.value},
+      ]);
+  }
+  return n;
+}

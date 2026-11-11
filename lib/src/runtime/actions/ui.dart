@@ -20,6 +20,7 @@ import 'package:codelessly_api/codelessly_api.dart'
 import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:codelessly_api/codelessly_api.dart' show NavigationMode;
 
+import '../../app/viewport.dart' show CanvasSizing, CanvasSizingScope;
 import 'confirm_dialog.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
@@ -248,6 +249,7 @@ class NavigatorActionUi implements ActionUi {
         barrierBlur: action.barrierBlur,
         enterScale: action.enterScale,
         sheetBelowWidth: sheetBelowWidth,
+        cover: action.cover,
         routeTransition: action.routeTransition);
   }
 
@@ -358,6 +360,7 @@ Future<Object?> showScreenModal(
   double? maxHeightFactor,
   double barrierBlur = 0,
   double enterScale = 1,
+  bool cover = false,
 }) {
   final scrim = barrierColor == null ? null : Color(barrierColor.value);
   // A toast on screen goes under the modal's barrier.
@@ -425,6 +428,20 @@ Future<Object?> showScreenModal(
   }
   if (presentation == ModalPresentation.fullScreen) {
     return Navigator.of(context).push<Object?>(MaterialPageRoute(fullscreenDialog: true, builder: (_) => content));
+  }
+  if (cover && !sheet) {
+    // Covers the screen: the screen it shows fills it, at the device size.
+    return showDialog<Object?>(
+      context: context,
+      useRootNavigator: false,
+      useSafeArea: false,
+      barrierDismissible: barrierDismissible,
+      barrierColor: scrim,
+      builder: (_) => Material(
+        type: MaterialType.transparency,
+        child: CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content)),
+      ),
+    );
   }
   return showDialog<Object?>(
     context: context,

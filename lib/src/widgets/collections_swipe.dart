@@ -1,9 +1,11 @@
 // A list item swiped sideways to reveal its list's swipe actions.
 import 'dart:math' as math;
 
+import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show Json, SwipeAction, SwipeActions;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show CustomSemanticsAction;
+import 'package:flutter/services.dart' show HapticFeedback;
 
 import '../render/convert.dart';
 import '../render/paint/icon_glyph.dart';
@@ -23,11 +25,16 @@ class SwipeActionsBox extends StatefulWidget {
     required this.model,
     required this.onAction,
     required this.child,
+    this.offered,
     this.actionWidth = 80,
   });
 
   final SwipeActions model;
   final ValueChanged<SwipeAction> onAction;
+
+  /// Whether an action is offered for this item (its `when`); null offers
+  /// every one.
+  final bool Function(SwipeAction action)? offered;
   final Widget child;
 
   /// The width of each revealed action button.
@@ -55,7 +62,20 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox> with SingleTickerProv
   List<SwipeAction> _actionsFor(double offset) {
     // Swiping toward the end (right in LTR) reveals the start actions.
     final towardEnd = _rtl ? offset < 0 : offset > 0;
-    return towardEnd ? widget.model.startActions : widget.model.endActions;
+    final all = towardEnd ? widget.model.startActions : widget.model.endActions;
+    final offered = widget.offered;
+    return offered == null ? all : [for (final a in all) if (offered(a)) a];
+  }
+
+  bool _armed = false;
+
+  /// Notes when the swipe passes the threshold either way (haptics).
+  void _trackArmed() {
+    final armed = _width > 0 && _offset.abs() >= widget.model.threshold * _width && _actionsFor(_offset).isNotEmpty;
+    if (armed != _armed) {
+      _armed = armed;
+      if (widget.model.armHaptic) HapticFeedback.selectionClick();
+    }
   }
 
   void _onUpdate(DragUpdateDetails details) {
@@ -66,9 +86,11 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox> with SingleTickerProv
       return;
     }
     _animation.value = next.clamp(-_width, _width);
+    _trackArmed();
   }
 
   Future<void> _onEnd(DragEndDetails details) async {
+    _armed = false;
     final offset = _offset;
     final actions = _actionsFor(offset);
     final velocity = details.primaryVelocity ?? 0;
@@ -105,7 +127,8 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox> with SingleTickerProv
     final full = offset.abs() >= widget.model.threshold * _width;
     final atStart = (offset > 0) != _rtl;
     final shown = full ? [actions.first] : actions;
-    return Row(
+    final scale = full ? widget.model.armedScale : 1.0;
+    final row = Row(
       mainAxisAlignment: atStart ? MainAxisAlignment.start : MainAxisAlignment.end,
       children: [
         for (final action in shown)
@@ -118,13 +141,29 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox> with SingleTickerProv
                 child: Semantics(
                   button: true,
                   label: action.label,
-                  child: Center(child: _ActionLabel(action: action)),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      // A label wider than a narrow slot shrinks to fit.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: AnimatedScale(
+                          scale: scale,
+                          duration: const Duration(milliseconds: 120),
+                          child: _ActionLabel(action: action),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
       ],
     );
+    final radius = widget.model.radius;
+    if (radius == api.BorderRadius.zero) return row;
+    return ClipRRect(borderRadius: radius.flutter, child: row);
   }
 
   @override
@@ -135,7 +174,7 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox> with SingleTickerProv
         _width = constraints.maxWidth.isFinite ? constraints.maxWidth : 400;
         return Semantics(
           customSemanticsActions: {
-            for (final action in [...widget.model.startActions, ...widget.model.endActions])
+            for (final action in [..._actionsFor(1), ..._actionsFor(-1)])
               CustomSemanticsAction(label: action.label): () => widget.onAction(action),
           },
           child: GestureDetector(
@@ -166,16 +205,25 @@ class _ActionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = action.foreground.flutter;
     final icon = action.icon;
+    final own = action.labelStyle;
+    final style = const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)
+        .merge(own == api.TextStyle.empty ? null : textStyle(own))
+        .copyWith(color: color);
+    final glyph = icon != null && icon['show'] != false
+        ? SizedBox.square(dimension: action.iconSize, child: _Glyph(icon: icon, color: color))
+        : null;
+    final label = action.label.isNotEmpty ? Text(action.label, style: style) : null;
+    if (action.inline) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [?glyph, if (glyph != null && label != null) const SizedBox(width: 8), ?label],
+      );
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (icon != null && icon['show'] != false)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: SizedBox.square(dimension: 22, child: _Glyph(icon: icon, color: color)),
-          ),
-        if (action.label.isNotEmpty)
-          Text(action.label, style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w600)),
+        if (glyph != null) Padding(padding: const EdgeInsets.only(bottom: 4), child: glyph),
+        ?label,
       ],
     );
   }
