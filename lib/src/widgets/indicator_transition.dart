@@ -6,11 +6,15 @@ import 'package:codelessly_api/codelessly_api.dart'
         ProgressBarProps,
         RadialGaugeProps,
         GaugeMeterProps,
-        BarChartProps;
+        BarChartProps,
+        ChartProps,
+        LineChartProps,
+        PlotChartProps;
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'chart_transition.dart';
 import 'indicators_paint.dart';
 
 typedef IndicatorPainterFactory = NodePainter Function(Node node);
@@ -43,7 +47,11 @@ class RenderIndicatorTransition extends RenderCustomPaint {
     final enabled = interactive && _animated(node);
     final duration = _duration(node);
     final old = _target;
-    final changed = old != null && !listEquals(_values(old), _values(node));
+    final changed =
+        old != null &&
+        (isDataChart(node)
+            ? chartDataChanges(old, node)
+            : !listEquals(_values(old), _values(node)));
     if (old == null || !enabled || duration <= 0 || !_hasAttached) {
       _ticker.stop();
       _from = _target = node;
@@ -51,7 +59,10 @@ class RenderIndicatorTransition extends RenderCustomPaint {
     } else if (changed) {
       // Retarget a running feed from the value actually on screen, never
       // from the previous wave's destination.
-      _from = _sample();
+      final displayed = _sample();
+      _from = isDataChart(node)
+          ? chartDataFrame(displayed, node, 0)
+          : displayed;
       _target = node;
       _progress = 0;
       _durationMs = duration;
@@ -61,7 +72,20 @@ class RenderIndicatorTransition extends RenderCustomPaint {
       // A label, colour or another unrelated prop can change while values
       // glide. Use its new style without restarting the data transition.
       _target = node;
+      if (_from != null && isDataChart(node)) {
+        _from = chartTransitionRestyle(_from!, node);
+      }
       if (_progress == 1) _from = node;
+    }
+    // Clearing data, removing the only changing series, or switching a chart
+    // model can leave nothing to interpolate. Do not keep a no-op ticker.
+    if (_progress < 1 &&
+        isDataChart(node) &&
+        _from != null &&
+        !chartDataChanges(_from!, node)) {
+      _ticker.stop();
+      _progress = 1;
+      _from = node;
     }
     painter = factory(_sample());
     isComplex = true;
@@ -71,6 +95,7 @@ class RenderIndicatorTransition extends RenderCustomPaint {
   Node _sample() {
     final target = _target!;
     if (_progress >= 1 || _from == null) return target;
+    if (isDataChart(target)) return chartDataFrame(_from!, target, _progress);
     final a = _values(_from!), b = _values(target);
     final values = List<double?>.generate(b.length, (i) {
       final to = b[i];
@@ -131,6 +156,9 @@ bool _animated(Node n) => switch (n.type) {
   'radialGauge' => n.prop(RadialGaugeProps.animate),
   'gaugeMeter' => n.prop(GaugeMeterProps.animate),
   'barChart' => n.prop(BarChartProps.animate),
+  'chart' => n.prop(ChartProps.animate),
+  'lineChart' => n.prop(LineChartProps.animate),
+  'plotChart' => n.prop(PlotChartProps.animate),
   _ => false,
 };
 
@@ -139,6 +167,9 @@ int _duration(Node n) => switch (n.type) {
   'radialGauge' => n.prop(RadialGaugeProps.animationDuration),
   'gaugeMeter' => n.prop(GaugeMeterProps.animationDuration),
   'barChart' => n.prop(BarChartProps.animationDuration),
+  'chart' => n.prop(ChartProps.animationDuration),
+  'lineChart' => n.prop(LineChartProps.animationDuration),
+  'plotChart' => n.prop(PlotChartProps.animationDuration),
   _ => 0,
 };
 

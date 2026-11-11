@@ -36,10 +36,10 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
   ProgressBarProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, ProgressBarPainter.new),
   RadialGaugeProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, RadialGaugePainter.new),
   GaugeMeterProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, GaugeMeterPainter.new),
-  ChartProps.spec.type: (b, n, chain) => _painted(b, n, chain, ChartSeriesPainter(n)),
-  PlotChartProps.spec.type: (b, n, chain) => _painted(b, n, chain, PlotChartPainter(n)),
+  ChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, ChartSeriesPainter.new),
+  PlotChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, PlotChartPainter.new),
   BarChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, BarChartPainter.new),
-  LineChartProps.spec.type: (b, n, chain) => _painted(b, n, chain, LineChartPainter(n)),
+  LineChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, LineChartPainter.new),
   BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(n)),
 };
 
