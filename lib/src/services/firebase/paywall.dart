@@ -5,8 +5,48 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:codelessly_api/codelessly_api.dart' show PaywallPlacement, ProductSlot;
+import 'package:flutter/foundation.dart';
 
+import '../cache.dart';
 import '../purchases.dart';
+import '../storage.dart';
+import '../store/in_app_purchase.dart';
+
+/// Codelessly-managed paywalls of project [projectId], for
+/// `Services(paywalls:, purchases:)`: placements resolved by Codelessly's
+/// paywall server ([FirebasePaywallBackend] on [functions]), App Store and
+/// Google Play purchases ([StorePurchaseService], connected to the store
+/// when a paywall first needs it) journaled in [storage] and verified by
+/// that server before they grant an entitlement.
+///
+/// `codelesslyWithToken(token, cloudServices: true)` sets this up.
+/// [purchases] replaces the store adapter (tests, another store).
+({PaywallRuntime paywalls, PurchaseService purchases}) codelesslyPaywalls({
+  required String projectId,
+  required FirebaseFunctions functions,
+  LocalStorage? storage,
+  KeyValueCache? cache,
+  PurchaseService Function(PurchaseVerifier verify)? purchases,
+  TargetPlatform? platform,
+}) {
+  final backend = FirebasePaywallBackend(functions: functions, projectId: projectId);
+  final journal = storage ?? MemoryLocalStorage();
+  final store = LazyPurchaseService(() => purchases != null
+      ? purchases(backend.verify)
+      : StorePurchaseService(verify: backend.verify, queue: StoragePurchaseQueue(journal)));
+  final target = platform ?? defaultTargetPlatform;
+  return (
+    paywalls: PaywallRuntime(
+      backend: backend,
+      purchases: () => store,
+      ownsPurchaseServices: false,
+      cache: cache,
+      platform: target == TargetPlatform.iOS || target == TargetPlatform.macOS ? 'ios' : 'android',
+      projectId: projectId,
+    ),
+    purchases: store,
+  );
+}
 
 /// [PaywallBackend] on the Codelessly backend's callable functions. A
 /// resolved placement points at a published layout, never an editor draft.
