@@ -674,6 +674,9 @@ class RenderMotion extends RenderPose with _Ticking {
   bool _entered = false;
   bool _waitingForReveal = false;
 
+  /// The entrance waits at its start while the motion's `enterHeld` holds.
+  bool _held = false;
+
   /// The running transition: from [_from] to [_to] since [_since] (its
   /// delay not yet counted), [_offset] ms into its run (a loop's phase).
   api.Motion? _from;
@@ -710,6 +713,23 @@ class RenderMotion extends RenderPose with _Ticking {
     if (v == _motion) return;
     final old = _motion;
     _motion = v;
+    if (_held && !v.enterHeld) {
+      // Released: the entrance plays from its start now.
+      _held = false;
+      _entered = !_waitingForReveal;
+      _to = v;
+      _since = _clock;
+      _show();
+      syncTicker();
+      return;
+    }
+    if (_animates && _entered && !_loops(v) && v.hasEntrance && old.replayKey != v.replayKey) {
+      // A new replay key plays the entrance again.
+      _start(v.entranceStart, v, at: _clock);
+      _show();
+      syncTicker();
+      return;
+    }
     if (_animates && _entered && _loops(v)) {
       if (!_loops(old) ||
           old.loop != v.loop ||
@@ -766,12 +786,13 @@ class RenderMotion extends RenderPose with _Ticking {
     if (!_entered && _animates) {
       final m = _motion;
       _waitingForReveal = m.revealOnScroll && m.hasEntrance;
+      _held = m.enterHeld && m.hasEntrance && !_loops(m);
       if (_loops(m)) {
         _startLoop();
       } else if (m.hasEntrance && _transitionMs(m) > 0) {
         _start(m.entranceStart, m, at: _clock);
       }
-      _entered = !_waitingForReveal;
+      _entered = !_waitingForReveal && !_held;
     }
     super.attach(owner);
     _show();
@@ -803,7 +824,7 @@ class RenderMotion extends RenderPose with _Ticking {
   }
 
   @override
-  bool get ticking => _animates && !_waitingForReveal && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
+  bool get ticking => _animates && !_waitingForReveal && !_held && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
 
   @override
   void tick(Duration elapsed) {
