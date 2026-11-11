@@ -3189,7 +3189,7 @@ class FormulaFunction {
     if (node == null || _depth >= maxDepth) return null;
     _depth++;
     try {
-      return node.eval((path) {
+      final Object? value = node.eval((path) {
         for (int i = 0; i < parameters.length; i++) {
           final String name = parameters[i];
           if (!path.startsWith(name)) continue;
@@ -3207,6 +3207,12 @@ class FormulaFunction {
         }
         return scope(path);
       });
+      // A body written as the lambda itself, `(a, b) => ...`, with the
+      // same parameters declared: call it rather than return it.
+      if (value is _Closure && value.params.length == parameters.length) {
+        return value.callWith(arguments);
+      }
+      return value;
     } catch (_) {
       return null;
     } finally {
