@@ -368,7 +368,8 @@ class CodelesslyWidget extends StatefulWidget {
         final params = settings.arguments is Map ? (settings.arguments as Map).cast<String, Object?>() : const <String, Object?>{};
         final model = codelessly.publishModel;
         final named = model == null || name == '/' ? name : '/${CanvasLocation.named(model, name.substring(name.startsWith('/') ? 1 : 0))}';
-        return CodelesslyPageRoute<void>(
+        return CodelesslyPageRoute.of<void>(
+          translucent: model != null && name != '/' && CanvasLocation.isTranslucent(model, named),
           settings: named == name ? settings : RouteSettings(name: named, arguments: settings.arguments),
           builder: (_) => CodelesslyWidget(
             codelessly: codelessly,
@@ -383,6 +384,22 @@ class CodelesslyWidget extends StatefulWidget {
             onActionError: template?.onActionError,
           ),
         );
+      };
+
+  /// A navigator's `onGenerateInitialRoutes` for a link to [location]: the
+  /// screens beneath it ([CanvasLocation.beneath]) and then its own, so a
+  /// link opens a screen as navigating there would have (back lands on the
+  /// screen beneath; a translucent one shows it behind).
+  static List<Route<dynamic>> Function(String location) onGenerateInitialRoutes(Codelessly codelessly,
+          {CodelesslyWidget? template}) =>
+      (location) {
+        final route = onGenerateRoute(codelessly, template: template);
+        final model = codelessly.publishModel;
+        return [
+          if (model != null && location != '/')
+            for (final under in CanvasLocation.beneath(model, location)) route(RouteSettings(name: under))!,
+          route(RouteSettings(name: location))!,
+        ];
       };
 
   /// [location] with what can't stand in a URL as is (spaces, non-ASCII
@@ -435,6 +452,7 @@ class CodelesslyWidget extends StatefulWidget {
     final id = model.layoutIdForScreen(segments.isEmpty ? screen.trim() : Uri.encodeComponent(segments.last));
     return id == null ? null : (id, {...uri.queryParameters});
   }
+
 
   @override
   State<CodelesslyWidget> createState() => _CodelesslyWidgetState();
@@ -551,7 +569,14 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
       if (layoutId == null) {
         final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
         layoutId = screen?.$1 ?? model.entryLayoutId;
-        if (screen != null) params = {...screen.$2, ...params};
+        if (screen != null) {
+          params = {...screen.$2, ...params};
+          // A link opens the app in a state: its params set the app's
+          // variables of the same name, as they set the screen's.
+          for (final MapEntry(:key, :value) in screen.$2.entries) {
+            if (c.appVariables.declares(key)) c.appVariables.set(key, value);
+          }
+        }
       }
       if (layoutId == null) throw StateError('No layout to show: project [${model.projectId}] has no entry screen');
       final layout = await c.loadLayout(layoutId);
@@ -1192,6 +1217,42 @@ class _ScreenUi extends NavigatorActionUi {
 /// shared elements of the screens it moves between.
 class CodelesslyPageRoute<T> extends MaterialPageRoute<T> with CodelesslyHeroRoute<T> {
   CodelesslyPageRoute({required super.builder, super.settings, super.fullscreenDialog});
+
+  /// The route of a screen at [settings]: a [CodelesslyTranslucentRoute]
+  /// when [translucent] (a screen published so, [ScreenRoute.translucent]),
+  /// else a page.
+  static PageRoute<T> of<T>({required WidgetBuilder builder, RouteSettings? settings, bool translucent = false}) =>
+      translucent ? CodelesslyTranslucentRoute<T>(builder: builder, settings: settings) : CodelesslyPageRoute<T>(builder: builder, settings: settings);
+}
+
+/// The route of a screen drawn over the one beneath it, which stays visible
+/// behind (a lightbox, a dialog: [ScreenRoute.translucent]). It fades in.
+class CodelesslyTranslucentRoute<T> extends PageRoute<T> with CodelesslyHeroRoute<T> {
+  CodelesslyTranslucentRoute({required this.builder, super.settings});
+
+  final WidgetBuilder builder;
+
+  @override
+  bool get opaque => false;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => builder(context);
+
+  @override
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) =>
+      FadeTransition(opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut), child: child);
 }
 
 /// What shows while a layout loads.

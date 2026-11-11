@@ -20,6 +20,7 @@ Map<String, Object?> field() => {
 const searchBox = {"roots": ["col"], "nodes": {"ho20fb8xa0-d": {"id": "ho20fb8xa0-d", "type": "textField", "name": "searchField", "key": "searchField", "layout": {"width": {"fill": 100}, "height": 50}, "props": {"decoration": {"filled": true, "fillColor": "#FFF6F4EF", "isDense": true, "prefixIcon": {"icon": {"name": "search", "style": "rounded", "type": "MATERIAL_ICON"}, "color": "#FF7A808A", "size": 20}, "hintText": "Search 42 stations or a line", "enabledBorder": {"borderRadius": 12, "borderSide": {"color": "#00000000", "width": 2}}, "focusedBorder": {"borderSide": {"color": "#FF0E2747", "width": 2}, "borderRadius": 12}, "hintStyle": {"fontFamily": "Overpass", "fontWeight": 500, "fontSize": 15, "color": "#FF7A808A", "height": 1.25}, "prefixIconConstraints": {"minWidth": 44, "minHeight": 20}, "contentPadding": [0, 0, 40, 0]}, "textInputAction": "done", "textAlignVertical": "center", "autofocus": true, "style": {"fontFamily": "Overpass", "fontWeight": 700, "fontSize": 15, "color": "#FF15181D", "height": 1.25}, "cursorColor": "#FF0E2747"}, "bind": {"props.initialValue": "\${searchQuery}"}}, "ho20fb8xa0-e": {"id": "ho20fb8xa0-e", "type": "icon", "name": "clearBtn", "key": "clearBtn", "layout": {"width": 18, "height": 18, "x": {"end": 16}, "y": {"start": 16}}, "props": {"icon": {"name": "cancel", "style": "rounded", "type": "MATERIAL_ICON"}, "color": "#FF7A808A"}, "bind": {"visible": "\${= searchQuery != \"\"}"}}, "ho20fb8xa0-c": {"id": "ho20fb8xa0-c", "type": "stack", "name": "searchBox", "key": "searchBox", "layout": {"width": {"fill": 100}, "height": 50}, "children": ["ho20fb8xa0-d", "ho20fb8xa0-e"]}, "col": {"type": "column", "children": ["ho20fb8xa0-c"], "layout": {"width": 400, "height": 600}, "props": {"crossAxisAlignment": "stretch", "scrollable": true}}}};
 
 void main() {
+  _focusTests();
   testWidgets('the Lineworks search box (a 50 px field with a prefix icon, in a stack, in a column) is 50 px tall', variant: TargetPlatformVariant.only(TargetPlatform.linux), (tester) async {
     final tree = NodeTree(NodeValues(DocumentSource(LayoutDocument.fromJson(searchBox))));
     addTearDown(tree.dispose);
@@ -52,6 +53,43 @@ void main() {
       _expectFilled(tester);
     });
   }
+}
+
+void _focusTests() {
+  testWidgets('a fixed-height field shows its focused border once focused', (tester) async {
+    final doc = LayoutDocument.fromJson({
+      'roots': ['p'],
+      'nodes': {
+        'p': {'type': 'stack', 'children': ['f'], 'layout': {'width': 400, 'height': 200}},
+        'f': {
+          ...field(),
+          'props': {
+            ...(field()['props']! as Map<String, Object?>),
+            'decoration': {
+              ...((field()['props']! as Map)['decoration'] as Map<String, Object?>),
+              'focusedBorder': {'type': 'outline', 'borderSide': {'color': '#FF0E2747', 'width': 2}, 'borderRadius': 12},
+            },
+          },
+        },
+      },
+    });
+    final tree = NodeTree(NodeValues(DocumentSource(doc)));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'p', interactive: true)),
+    ));
+    Color side() {
+      final box = tester.widget<DecoratedBox>(find.ancestor(
+        of: find.byType(TextField),
+        matching: find.byWidgetPredicate((w) => w is DecoratedBox && w.decoration is ShapeDecoration),
+      ).first);
+      return ((box.decoration as ShapeDecoration).shape as OutlineInputBorder).borderSide.color;
+    }
+    expect(side(), const Color(0x00000000));
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(side(), const Color(0xFF0E2747), reason: 'the focused border, without another rebuild');
+  });
 }
 
 /// The field's fill and border are painted over its whole 50 px height,
