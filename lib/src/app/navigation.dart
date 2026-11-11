@@ -218,10 +218,10 @@ abstract final class CanvasLocation {
   }
 
   /// Whether the screen at [location] is drawn over the one beneath it
-  /// ([ScreenRoute.overlay]).
-  static bool isOverlay(PublishModel model, String location) {
+  /// ([ScreenRoute.translucent]).
+  static bool isTranslucent(PublishModel model, String location) {
     final m = match(model, location);
-    return m != null && (model.canvas(m.canvasId)?.route.overlay ?? false);
+    return m != null && (model.canvas(m.canvasId)?.route.translucent ?? false);
   }
 
   /// The location of screen [destinationId] (a canvas or layout id) opened

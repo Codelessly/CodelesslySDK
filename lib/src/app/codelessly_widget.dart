@@ -369,7 +369,7 @@ class CodelesslyWidget extends StatefulWidget {
         final model = codelessly.publishModel;
         final named = model == null || name == '/' ? name : '/${CanvasLocation.named(model, name.substring(name.startsWith('/') ? 1 : 0))}';
         return CodelesslyPageRoute.of<void>(
-          overlay: model != null && name != '/' && CanvasLocation.isOverlay(model, named),
+          translucent: model != null && name != '/' && CanvasLocation.isTranslucent(model, named),
           settings: named == name ? settings : RouteSettings(name: named, arguments: settings.arguments),
           builder: (_) => CodelesslyWidget(
             codelessly: codelessly,
@@ -389,7 +389,7 @@ class CodelesslyWidget extends StatefulWidget {
   /// A navigator's `onGenerateInitialRoutes` for a link to [location]: the
   /// screens beneath it ([CanvasLocation.beneath]) and then its own, so a
   /// link opens a screen as navigating there would have (back lands on the
-  /// screen beneath; an overlay shows it behind).
+  /// screen beneath; a translucent one shows it behind).
   static List<Route<dynamic>> Function(String location) onGenerateInitialRoutes(Codelessly codelessly,
           {CodelesslyWidget? template}) =>
       (location) {
@@ -1210,17 +1210,17 @@ class _ScreenUi extends NavigatorActionUi {
 class CodelesslyPageRoute<T> extends MaterialPageRoute<T> with CodelesslyHeroRoute<T> {
   CodelesslyPageRoute({required super.builder, super.settings, super.fullscreenDialog});
 
-  /// The route of a screen at [settings]: a [CodelesslyOverlayRoute] when
-  /// [overlay] (a screen published as one, [ScreenRoute.overlay]), else a
-  /// page.
-  static PageRoute<T> of<T>({required WidgetBuilder builder, RouteSettings? settings, bool overlay = false}) =>
-      overlay ? CodelesslyOverlayRoute<T>(builder: builder, settings: settings) : CodelesslyPageRoute<T>(builder: builder, settings: settings);
+  /// The route of a screen at [settings]: a [CodelesslyTranslucentRoute]
+  /// when [translucent] (a screen published so, [ScreenRoute.translucent]),
+  /// else a page.
+  static PageRoute<T> of<T>({required WidgetBuilder builder, RouteSettings? settings, bool translucent = false}) =>
+      translucent ? CodelesslyTranslucentRoute<T>(builder: builder, settings: settings) : CodelesslyPageRoute<T>(builder: builder, settings: settings);
 }
 
 /// The route of a screen drawn over the one beneath it, which stays visible
-/// behind (a lightbox, a dialog: [ScreenRoute.overlay]). It fades in.
-class CodelesslyOverlayRoute<T> extends PageRoute<T> with CodelesslyHeroRoute<T> {
-  CodelesslyOverlayRoute({required this.builder, super.settings});
+/// behind (a lightbox, a dialog: [ScreenRoute.translucent]). It fades in.
+class CodelesslyTranslucentRoute<T> extends PageRoute<T> with CodelesslyHeroRoute<T> {
+  CodelesslyTranslucentRoute({required this.builder, super.settings});
 
   final WidgetBuilder builder;
 
