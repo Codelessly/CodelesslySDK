@@ -526,12 +526,19 @@ class _ToastViewState extends State<_ToastView> {
       ),
     );
 
-    final sideMargin = numberValue(perBreakpointValue(look.map('sideMargins'), width, breakpoints)) ?? look.numberOr('sideMargin', 16);
+    // A side margin is a number (both sides) or [left, right]: a toast
+    // centred in the part of the screen beside a rail or sidebar.
+    final sides = perBreakpointValue(look.map('sideMargins'), width, breakpoints);
+    final sideMargin = numberValue(sides) ?? look.numberOr('sideMargin', 16);
+    final (leftMargin, rightMargin) = switch (sides) {
+      [final l, final r] when numberValue(l) != null && numberValue(r) != null => (numberValue(l)!, numberValue(r)!),
+      _ => (sideMargin, sideMargin),
+    };
     final bottomOffset =
         numberValue(perBreakpointValue(look.map('bottomOffsets'), width, breakpoints)) ?? look.numberOr('bottomOffset', 104);
     return Positioned(
-      left: sideMargin,
-      right: sideMargin,
+      left: leftMargin,
+      right: rightMargin,
       top: top ? media.padding.top + (widget.offset ?? 16) : null,
       bottom: top ? null : widget.offset ?? bottomOffset,
       // Only a toast with a button takes taps; the rest passes them through.
