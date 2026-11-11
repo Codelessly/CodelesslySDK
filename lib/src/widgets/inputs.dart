@@ -1329,7 +1329,7 @@ class _DatePickerIslandState extends State<_DatePickerIsland> {
       onPressed: !n.prop(DatePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final date = await showDatePicker(context: context, initialDate: initial, firstDate: first, lastDate: last);
+              final date = await showDatePicker(context: context, useRootNavigator: false, initialDate: initial, firstDate: first, lastDate: last);
               if (date == null || !mounted) return;
               setState(() => picked = _isoDate(date));
               if (context.mounted) _fire(context, 'changed', picked);
@@ -1359,7 +1359,7 @@ class _TimePickerIslandState extends State<_TimePickerIsland> {
       onPressed: !n.prop(TimePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final t = await showTimePicker(context: context, initialTime: time);
+              final t = await showTimePicker(context: context, useRootNavigator: false, initialTime: time);
               if (t == null || !mounted) return;
               setState(() => picked = _clock(t));
               if (context.mounted) _fire(context, 'changed', picked);
@@ -1421,13 +1421,13 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
           : () async {
               var chosen = initial;
               if (mode != DateTimeInputMode.time) {
-                final d = await showDatePicker(context: context, initialDate: initial, firstDate: first, lastDate: last);
+                final d = await showDatePicker(context: context, useRootNavigator: false, initialDate: initial, firstDate: first, lastDate: last);
                 if (d == null || !context.mounted) return;
                 chosen = d;
               }
               TimeOfDay? t;
               if (mode != DateTimeInputMode.date) {
-                t = await showTimePicker(context: context, initialTime: time ?? TimeOfDay.now());
+                t = await showTimePicker(context: context, useRootNavigator: false, initialTime: time ?? TimeOfDay.now());
                 if (t == null || !context.mounted) return;
               }
               setState(() => picked = switch (mode) {
