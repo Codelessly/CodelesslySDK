@@ -268,6 +268,15 @@ void main() {
       expect(check({}, notEmpty), isFalse);
     });
 
+    test('a number or boolean value is not empty (text read as a number too)', () {
+      const empty = Comparison(ConditionOperand(r'${offset}'), ConditionOp.isEmpty);
+      const notEmpty = Comparison(ConditionOperand(r'${offset}'), ConditionOp.isNotEmpty);
+      for (final value in ['900', 900, 0, true, false]) {
+        expect(check({'offset': value}, notEmpty), isTrue, reason: '$value');
+        expect(check({'offset': value}, empty), isFalse, reason: '$value');
+      }
+    });
+
     test('joined with and / or', () {
       const both = Junction(Join.and, [
         Comparison(ConditionOperand(r'${idError}'), ConditionOp.isEmpty),
