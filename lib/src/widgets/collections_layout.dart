@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
-import '../render/node_tree.dart' show NodeTree;
+import '../render/node_tree.dart' show NodeTree, NodeBox;
 import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, dropSlotOf;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
@@ -227,6 +227,10 @@ class RenderListItems extends RenderCollection {
   /// False for a scroll view: a viewport has no
   /// intrinsic size, so it reports none (a row squeezing it can take it to
   /// nothing). True when every item is laid out in a Flex.
+  /// Items that fill along the list share its length by their flex (a list
+  /// that doesn't scroll, as a Row/Column).
+  bool shareFill = false;
+
   bool _measurable = true;
   bool get measurable => _measurable;
   set measurable(bool v) {
@@ -368,6 +372,44 @@ class RenderListItems extends RenderCollection {
       final more = ((viewportMain + cacheExtent - used) / (per + gap)).ceil() + 1;
       if (!requestItems(childCount + more)) break;
       child = last == null ? firstChild : childAfter(last);
+    }
+
+    // A list that builds all its items and keeps its length lays the items
+    // that fill along it out as a Row/Column does its Expanded children:
+    // they share what the other items leave, by their flex (a bar of
+    // segments sized by data).
+    if (shareFill && itemCount != null && viewportMain.isFinite && !hugMain) {
+      final kids = children;
+      final flexOf = <int, int>{};
+      for (final (i, it) in kids.indexed) {
+        final n = it is NodeBox ? it.node : null;
+        if (n == null) continue;
+        final fit = axis == Axis.vertical ? n.layout.height.fit : n.layout.width.fit;
+        if (fit == api.SizeFit.fill) flexOf[i] = math.max(1, n.layout.flex);
+      }
+      if (flexOf.isNotEmpty) {
+        var fixed = 0.0;
+        for (final (i, a) in advances.indexed) {
+          if (!flexOf.containsKey(i)) fixed += a;
+        }
+        fixed += gap * math.max(0, kids.length - 1);
+        final free = math.max(0.0, viewportMain - fixed);
+        final total = flexOf.values.fold<int>(0, (a, b) => a + b);
+        used = fixed;
+        for (final e in flexOf.entries) {
+          final extent = free * e.value / total;
+          final it = kids[e.key];
+          final base = _childConstraints(crossAvail, tightCross: stretchNow ? crossAvail : null);
+          it.layout(
+            axis == Axis.vertical
+                ? base.copyWith(minHeight: extent, maxHeight: extent)
+                : base.copyWith(minWidth: extent, maxWidth: extent),
+            parentUsesSize: true,
+          );
+          advances[e.key] = extent;
+          used += extent;
+        }
+      }
     }
 
     final items = children;
