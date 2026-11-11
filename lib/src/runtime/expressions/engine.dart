@@ -151,12 +151,9 @@ class Expressions implements ExpressionEngine {
           final Map m => m.isEmpty,
           _ => false,
         },
-      ConditionOp.isNotEmpty => switch (left) {
-          final List l => l.isNotEmpty,
-          final String s => s.isNotEmpty,
-          final Map m => m.isNotEmpty,
-          _ => false,
-        },
+      // A number or a boolean (an operand like `${route.offset}` = "900" is
+      // read as 900) has a value: not empty.
+      ConditionOp.isNotEmpty => !compare(left, ConditionOp.isEmpty, right),
       ConditionOp.contains => switch (left) {
           final List l => l.contains(right),
           final String s when right != null => s.contains(right.toString()),
