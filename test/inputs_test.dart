@@ -105,6 +105,23 @@ void main() {
     expect(find.text('14:30'), findsOneWidget);
   });
 
+  testWidgets('an empty picker field shows its hint', (tester) async {
+    final tree = NodeTree(DocumentSource(_doc({
+      'time': {
+        'type': 'timePicker',
+        'layout': {'width': 160, 'height': 42},
+        'props': {
+          'value': '',
+          'decoration': {'hintText': '—', 'border': {'type': 'outline'}},
+        },
+      },
+    })));
+    await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
+    await tester.pumpAndSettle();
+    expect(find.text('—'), findsWidgets);
+    expect(find.text('00:00'), findsNothing);
+  });
+
   testWidgets('date and time pickers stay in their app navigator', (tester) async {
     final tree = NodeTree(DocumentSource(_doc({
       'date': {'type': 'datePicker', 'layout': {'width': 160, 'height': 50}},

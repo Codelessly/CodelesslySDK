@@ -3652,17 +3652,23 @@ class _Parser {
   }
 
   /// The quoted text at [pos], without its quotes: a backslash before the
-  /// quote (`'Won\'t'`) keeps the quote in the text; other backslashes are
-  /// kept as written.
+  /// quote (`'Won\'t'`) keeps the quote in the text, `\n` is a line break
+  /// and `\t` a tab (`join(lines, '\n')`); other backslashes are kept as
+  /// written (`matches(code, '\d+')`).
   String _quotedText() {
     final String quote = source[pos];
     final StringBuffer text = StringBuffer();
     int i = pos + 1;
     while (i < source.length && source[i] != quote) {
-      if (source[i] == r'\' &&
-          i + 1 < source.length &&
-          source[i + 1] == quote) {
-        i++;
+      if (source[i] == r'\' && i + 1 < source.length) {
+        final next = source[i + 1];
+        if (next == quote) {
+          i++;
+        } else if (next == 'n' || next == 't') {
+          text.write(next == 'n' ? '\n' : '\t');
+          i += 2;
+          continue;
+        }
       }
       text.write(source[i]);
       i++;
