@@ -16,6 +16,7 @@ import '../render/convert.dart';
 import '../render/layout/fit_box.dart';
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
+import '../runtime/expressions/bindings.dart' show ProvidedItem;
 import 'collections_data_list.dart';
 import 'collections_islands.dart';
 import 'collections_list_runtime.dart';
@@ -24,7 +25,6 @@ import 'collections_pagination.dart';
 import 'collections_page_runtime.dart';
 import 'collections_reorder.dart';
 import 'collections_table.dart';
-import '../runtime/expressions/bindings.dart' show ProvidedItem;
 
 /// Recipes for the collections group, by node type.
 final Map<String, WidgetRecipe> collectionsRecipes = {
@@ -183,7 +183,12 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(_viewportBox(b, n, canShrinkWrap: true));
     return;
   }
-  if (b.tree.animates && usesDataList(n)) return _dataList(b, n, chain, itemId, item);
+  // A sectioned list shows its section headers and index bar on the design
+  // canvas too (its items come from its data, as when it runs).
+  if ((b.tree.animates || (n.sectioned && n.bind.containsKey('data') && ListRuntime(b, n).data != null)) &&
+      usesDataList(n)) {
+    return _dataList(b, n, chain, itemId, item);
+  }
   if (b.tree.animates) {
     final handle = reorderHandleOf(b, itemId);
     if (reordersItems(n, hasData: ListRuntime(b, n).data != null, handle: handle)) {
@@ -582,6 +587,10 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
 /// size (none past it are shown).
 const int _maxTableSpans = 200;
 
+/// How tall a table that fills its height is built at rest: the tallest
+/// screen's worth of rows (the rest are cut by its box anyway).
+const double _restFillExtent = 1600;
+
 /// A table view at rest: its fit box → the cells that fit its design size,
 /// each a template slot repeated. Rows are its bound data (each cell in its
 /// own scope, `${item.value}`... as at runtime) when a binder shows the
@@ -595,6 +604,8 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final rowHeader = slot(TableViewProps.rowHeader), corner = slot(TableViewProps.corner);
   final headerRow = columnHeader != null, headerColumn = rowHeader != null;
   final columns = n.prop(TableViewProps.columns);
+  // Bound rows show on the design canvas too, each cell in its scope, as
+  // the running table shows them.
   final binder = b.tree.binder;
   final data = n.bind.containsKey('data') && binder != null ? binder.itemsOf(b.tree.source, n, b.instance) : null;
   final rowCount = data?.length ?? math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
@@ -611,28 +622,43 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     return out;
   }
 
-  // A table that fills its parent is drawn at the size it is given, not
-  // its design size: its data's rows and columns are all built (up to
-  // [_maxTableSpans]) and the box clips them.
-  final fillsWidth = data != null && n.layout.width.fit != SizeFit.fixed;
-  final fillsHeight = data != null && n.layout.height.fit != SizeFit.fixed;
-  final bodyWidths = <double>[for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth)];
-  if (n.prop(TableViewProps.fillWidth) && bodyWidths.isNotEmpty) {
-    // As at runtime: the columns share the width beyond their own.
-    final total = (headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0) + bodyWidths.fold<double>(0, (a, w) => a + w);
-    final extra = math.max(0.0, design.width - total) / bodyWidths.length;
-    for (var i = 0; i < bodyWidths.length; i++) {
-      bodyWidths[i] += extra;
+  final edge = n.prop(TableViewProps.horizontalPadding);
+  final rowHeaderWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0.0;
+  final fillWidth = n.prop(TableViewProps.fillWidth) && columns.isNotEmpty;
+  // The column widths at a width: a table that fills is laid out wider
+  // than its design size, and its flex columns take that width; with
+  // `fillWidth`, as at runtime, the columns share the width beyond their own.
+  List<double> widthsAt(double width) {
+    final widths = tableColumnWidths(columns, n.prop(TableViewProps.columnWidth), width - rowHeaderWidth - edge * 2);
+    if (fillWidth) {
+      final total = rowHeaderWidth + edge * 2 + widths.fold<double>(0, (a, w) => a + w);
+      final extra = math.max(0.0, width - total) / widths.length;
+      for (var i = 0; i < widths.length; i++) {
+        widths[i] += extra;
+      }
     }
+    return [
+      if (headerColumn) rowHeaderWidth,
+      for (var i = 0; i < columns.length; i++) widths[i] + (i == 0 ? edge : 0) + (i == columns.length - 1 ? edge : 0),
+    ];
   }
-  final columnWidths = fit([
-    if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
-    ...bodyWidths,
-  ], fillsWidth ? double.infinity : design.width);
+
+  // A table that fills its parent is drawn at the size it is given, not
+  // its design size: its rows and columns are built past it (bound data's
+  // all, up to [_maxTableSpans]; else the tallest screen's worth of rows)
+  // and the box clips them.
+  final fillsWidth = n.layout.width.fit == SizeFit.fill;
+  final allColumns = fillsWidth || (data != null && n.layout.width.fit != SizeFit.fixed);
+  final allRows = data != null && n.layout.height.fit != SizeFit.fixed;
+  final columnWidths = fit(widthsAt(design.width), allColumns ? double.infinity : design.width);
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
     for (var i = 0; i < math.min(rowCount, _maxTableSpans); i++) n.prop(TableViewProps.rowHeight),
-  ], fillsHeight ? double.infinity : design.height);
+  ], allRows
+      ? double.infinity
+      : n.layout.height.fit == SizeFit.fill
+          ? math.max(design.height, _restFillExtent)
+          : design.height);
 
   final ids = <String>[], instances = <Object?>[], cells = <(int, int)>[];
   final firsts = <String>{};
@@ -716,6 +742,7 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final view = b.obtain<RenderTableItems>('table', RenderTableItems.new)
     ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
     ..givenColumnWidths = columnWidths
+    ..widthsFor = fillsWidth ? widthsAt : null
     ..stretchLastColumn = n.prop(TableViewProps.stretchLastColumn)
     ..rowHeights = rowHeights
     ..cells = cells
@@ -724,6 +751,14 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..headerColor = n.prop(TableViewProps.headerColor)?.flutter
     ..stripeColor = n.prop(TableViewProps.stripeColor)?.flutter
     ..gridLine = lineColor.alpha == 0 || lineWidth <= 0 ? null : BorderSide(color: lineColor.flutter, width: lineWidth)
+    ..edge = edge
+    ..headerBorder = n.prop(TableViewProps.headerBorderColor) == null
+        ? null
+        : BorderSide(color: n.prop(TableViewProps.headerBorderColor)!.flutter, width: n.prop(TableViewProps.headerBorderWidth))
+    ..selectedRow = n.prop(TableViewProps.selectedRow)
+    ..selectedColor = n.prop(TableViewProps.selectedRowColor)?.flutter
+    ..selectedEdgeColor = n.prop(TableViewProps.selectedRowEdgeColor)?.flutter
+    ..selectedEdgeWidth = n.prop(TableViewProps.selectedRowEdgeWidth)
     ..changed();
   b.syncChildren(view as _Container, ids, Slot(SlotKind.root, n), instances: instances);
   chain.add(view);

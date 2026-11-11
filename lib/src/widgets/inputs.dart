@@ -19,6 +19,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         CheckboxProps,
         DatePickerProps,
         DateTimeInputMode,
+        DateTimeInputPicker,
         PickerFieldProps,
         DateTimeInputProps,
         DropdownProps,
@@ -40,6 +41,7 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
+import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 import '../runtime/actions/text_fields.dart';
 import '../runtime/actions/feedback_theme.dart';
 import '../render/paint/icon_glyph.dart';
@@ -538,7 +540,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     // border or fill change: it would keep painting the old one. A new
     // decorator shows the current decoration.
     final atRest = !TickerMode.valuesOf(context).enabled;
-    Widget field(InputDecoration decoration) => TextField(
+    Widget field(InputDecoration decoration, {TextAlignVertical? alignVertical}) => TextField(
           key: atRest ? ValueKey<InputDecoration>(decoration) : null,
           controller: controller,
           focusNode: focusNode,
@@ -549,7 +551,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
             final a => textAlign(a),
           },
           textAlignVertical: switch (n.prop(TextFieldProps.textAlignVertical)) {
-            null => null,
+            null => alignVertical,
             api.TextAlignVertical.top => TextAlignVertical.top,
             api.TextAlignVertical.center => TextAlignVertical.center,
             api.TextAlignVertical.bottom => TextAlignVertical.bottom,
@@ -609,12 +611,18 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
-            if (!constraints.hasBoundedHeight) return field(decoration);
+            // A fixed height is known without layout (a design board may
+            // lay islands out loosely); a filling one takes the room given.
+            final double? height = vFit == SizeFit.fixed
+                ? n.layout.height.value
+                : (constraints.hasBoundedHeight ? constraints.maxHeight : null);
+            if (height == null) return field(decoration);
             // InputDecorator doesn't stretch its container (fill, border) to
             // a height: a dense 50 px field painted a 20 px box at its top.
             // So the box paints them at full height and a borderless field
-            // sits in it where textAlignVertical puts the line (centred by
-            // default), as a Container around a TextField would.
+            // of that height sits in it, its line where textAlignVertical
+            // puts it (centred by default), as a Container around a
+            // TextField would.
             final error = decoration.errorText != null || decoration.error != null;
             final border = (error ? (focusNode.hasFocus ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
                 (focusNode.hasFocus ? decoration.focusedBorder : null) ??
@@ -622,16 +630,10 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
                 decoration.border ??
                 const UnderlineInputBorder();
             final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
-            final y = switch (n.prop(TextFieldProps.textAlignVertical)) {
-              api.TextAlignVertical.top => -1.0,
-              api.TextAlignVertical.bottom => 1.0,
-              _ => 0.0,
-            };
             return DecoratedBox(
               decoration: ShapeDecoration(color: fill, shape: border),
-              child: Align(
-                alignment: Alignment(-1, y),
-                child: field(decoration.copyWith(
+              child: field(
+                decoration.copyWith(
                   filled: false,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
@@ -639,8 +641,17 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
                   disabledBorder: InputBorder.none,
                   errorBorder: InputBorder.none,
                   focusedErrorBorder: InputBorder.none,
-                  isDense: true,
-                )),
+                  constraints: BoxConstraints.tightFor(height: height),
+                  // Its icons centre in the whole height, as the line does
+                  // (the decorator's own container is only 48 px tall).
+                  prefixIconConstraints: decoration.prefixIcon == null
+                      ? null
+                      : _tallIcon(decoration.prefixIconConstraints, height),
+                  suffixIconConstraints: decoration.suffixIcon == null
+                      ? null
+                      : _tallIcon(decoration.suffixIconConstraints, height),
+                ),
+                alignVertical: TextAlignVertical.center,
               ),
             );
           })
@@ -676,6 +687,10 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
 
 /// A [LayoutBuilder] that reports a zero intrinsic size instead of throwing,
 /// so a field built with it can sit under intrinsic measurement.
+/// An icon box as tall as a fixed-height field.
+BoxConstraints _tallIcon(BoxConstraints? c, double height) =>
+    (c ?? const BoxConstraints(minWidth: kMinInteractiveDimension)).copyWith(minHeight: height, maxHeight: height);
+
 class IntrinsicSafeLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const IntrinsicSafeLayoutBuilder({super.key, required super.builder});
 
@@ -757,10 +772,31 @@ class _CheckboxIslandState extends State<_CheckboxIsland> {
     final tristate = n.prop(CheckboxProps.tristate);
     final radius = n.prop(CheckboxProps.borderRadius);
     final side = n.prop(CheckboxProps.side);
+    final activeSide = n.prop(CheckboxProps.activeSide);
+    final fill = _color(n.prop(CheckboxProps.fillColor));
+    final compact = n.prop(CheckboxProps.compact);
+    final scale = n.layout.width.value / (compact ? Checkbox.width : _checkboxSize);
+    // A compact box's corners and sides are node pixels: drawn before the
+    // scale, they're shrunk by it.
+    final unscale = compact && scale > 0 ? 1 / scale : 1.0;
+    BorderSide? sideOf(api.BorderSide? s) {
+      if (s == null) return null;
+      final b = _side(s);
+      return unscale == 1 ? b : b.copyWith(width: b.width * unscale);
+    }
+
+    final shown = tristate ? value : (value ?? false);
+    final unchecked = sideOf(side), checked = sideOf(activeSide);
     return Transform.scale(
-      scale: n.layout.width.value / (n.prop(CheckboxProps.compact) ? Checkbox.width : _checkboxSize),
+      scale: scale,
       child: Checkbox(
-        value: tristate ? value : (value ?? false),
+        // Where tickers are off (a design canvas) the box can't animate: a
+        // new checkbox shows the current value.
+        key: TickerMode.valuesOf(context).enabled ? null : ValueKey<bool?>(shown),
+        value: shown,
+        fillColor: fill == null
+            ? null
+            : WidgetStateProperty.resolveWith((states) => states.contains(WidgetState.selected) ? null : fill),
         tristate: tristate,
         autofocus: n.prop(CheckboxProps.autofocus),
         checkColor: _color(n.prop(CheckboxProps.checkColor)),
@@ -769,8 +805,11 @@ class _CheckboxIslandState extends State<_CheckboxIsland> {
         focusColor: _color(n.prop(CheckboxProps.focusColor)),
         splashRadius: n.prop(CheckboxProps.splashRadius),
         visualDensity: VisualDensity.standard,
-        shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
-        side: side == null ? null : _side(side),
+        shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter * unscale),
+        side: checked == null
+            ? unchecked
+            : WidgetStateBorderSide.resolveWith(
+                (states) => states.contains(WidgetState.selected) ? checked : unchecked),
         onChanged: (v) {
           setState(() => value = v);
           _fire(context, 'changed', v);
@@ -801,16 +840,22 @@ class _SwitchIslandState extends State<_SwitchIsland> {
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
+    final enabled = n.prop(SwitchProps.enabled);
+    final controlled = n.prop(SwitchProps.controlled);
+    // A controlled switch shows only its value; its reactions set it.
+    final ValueChanged<bool>? onChanged = !enabled
+        ? null
+        : (v) {
+            if (!controlled) setState(() => value = v);
+            _fire(context, 'changed', v);
+          };
     // Material's switch can't cast a thumb shadow or take a thumb of another
     // size: a switch that asks for either is a plain toggle.
     if (drawsPlainToggle(n)) {
       return PlainToggle(
         node: n,
         value: value,
-        onChanged: (v) {
-          setState(() => value = v);
-          _fire(context, 'changed', v);
-        },
+        onChanged: onChanged,
       );
     }
     final fillTrack = n.prop(SwitchProps.fillTrack);
@@ -822,10 +867,7 @@ class _SwitchIslandState extends State<_SwitchIsland> {
       // new switch shows the current value.
       key: TickerMode.valuesOf(context).enabled ? null : ValueKey<bool>(value),
       value: value,
-      onChanged: (v) {
-        setState(() => value = v);
-        _fire(context, 'changed', v);
-      },
+      onChanged: onChanged,
       autofocus: n.prop(SwitchProps.autofocus),
       activeTrackColor: _color(n.prop(SwitchProps.activeTrackColor)),
       inactiveTrackColor: _color(n.prop(SwitchProps.inactiveTrackColor)),
@@ -1711,6 +1753,13 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
   String? picked;
 
   @override
+  void didUpdateWidget(covariant _DateTimeInputIsland old) {
+    super.didUpdateWidget(old);
+    // A new bound value (a reset, an action) wins over the last pick.
+    if (old.node.prop(DateTimeInputProps.value) != widget.node.prop(DateTimeInputProps.value)) picked = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final n = widget.node;
     final mode = n.prop(DateTimeInputProps.mode);
@@ -1733,10 +1782,17 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         },
     };
     final localizations = MaterialLocalizations.of(context);
+    // displayText wins; then the intl `format`, then its older name
+    // `displayFormat` (a formatDate pattern); else Material's own.
+    final displayText = n.prop(DateTimeInputProps.displayText);
     final pattern = n.prop(DateTimeInputProps.format);
-    final display = pattern != null && pattern.isNotEmpty && (date != null || time != null)
-        ? _formatPattern(pattern, mode, date, time)
-        : switch (mode) {
+    final displayFormat = n.prop(DateTimeInputProps.displayFormat);
+    final formatted = pattern != null && pattern.isNotEmpty
+        ? (date != null || time != null ? _formatPattern(pattern, mode, date, time) : null)
+        : displayFormat.isEmpty || raw.isEmpty
+            ? null
+            : FormulaEvaluator.formatDate(mode == DateTimeInputMode.time ? '2000-01-01T$raw' : raw, displayFormat);
+    final display = displayText.isNotEmpty ? displayText : formatted ?? switch (mode) {
       DateTimeInputMode.date => date == null ? '' : localizations.formatMediumDate(date),
       DateTimeInputMode.time => time == null ? '' : time.format(context),
       DateTimeInputMode.dateTime =>
@@ -1747,8 +1803,35 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     final initial = date == null || date.isBefore(first) || date.isAfter(last)
         ? (DateTime.now().isBefore(first) ? first : (DateTime.now().isAfter(last) ? last : DateTime.now()))
         : date;
+    final opens = n.prop(DateTimeInputProps.picker) == DateTimeInputPicker.dialog;
+    final d = n.prop(DateTimeInputProps.decoration);
+    final styled = d != api.InputDecoration.empty;
+    final vFit = n.layout.height.fit;
+    final hint = n.prop(DateTimeInputProps.hint);
+    final icon = _icon(n.prop(DateTimeInputProps.icon));
+    var decoration = styled
+        ? _withHintAndIcon(inputDecoration(d, n.layout.padding, focused: false), hint, icon)
+        : InputDecoration(
+            labelText: label,
+            hintText: label == null || label.isEmpty
+                ? hint ?? 'Select ${switch (mode) {
+                    DateTimeInputMode.date => 'date',
+                    DateTimeInputMode.time => 'time',
+                    DateTimeInputMode.dateTime => 'date and time',
+                  }}'
+                : null,
+            suffixIcon: icon ?? Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+            enabled: enabled,
+            border: const OutlineInputBorder(),
+          );
+    // A fixed height is the field's, as a text field's, for a field that
+    // draws its own decoration (older fields kept their natural height).
+    if (vFit == SizeFit.fixed && styled) {
+      decoration = decoration.copyWith(constraints: BoxConstraints.tightFor(height: n.layout.height.value));
+    }
+    final style = _styleOrNull(n.prop(DateTimeInputProps.style));
     return InkWell(
-      onTap: !enabled || !widget.interactive || first.isAfter(last)
+      onTap: !opens || !enabled || !widget.interactive || first.isAfter(last)
           ? null
           : () async {
               var chosen = initial;
@@ -1774,24 +1857,15 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
           ? _bare(n, mode, display)
           : InputDecorator(
         isEmpty: display.isEmpty,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: label == null || label.isEmpty
-              ? 'Select ${switch (mode) {
-                  DateTimeInputMode.date => 'date',
-                  DateTimeInputMode.time => 'time',
-                  DateTimeInputMode.dateTime => 'date and time',
-                }}'
-              : null,
-          suffixIcon: _icon(n.prop(DateTimeInputProps.icon)) ??
-              Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
-          enabled: enabled,
-          border: const OutlineInputBorder(),
-        ),
-        child: Text(display.isEmpty ? ' ' : display, style: _styleOrNull(n.prop(DateTimeInputProps.style))),
+        decoration: decoration,
+        child: Text(display.isEmpty ? ' ' : display, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     );
   }
+
+  /// [d] with the node's own hint and icon where it sets none.
+  static InputDecoration _withHintAndIcon(InputDecoration d, String? hint, Widget? icon) =>
+      d.copyWith(hintText: d.hintText ?? hint, suffixIcon: d.suffixIcon ?? icon);
 
   /// [bare]: the value (or hint) and its icon in a row, the box left to the
   /// node's own decoration.
@@ -2079,6 +2153,64 @@ class _SignatureIslandState extends State<_SignatureIsland> {
     final error = n.prop(SignatureProps.error);
     final radius = n.prop(SignatureProps.borderRadius).flutter;
     final borderWidth = error ? n.prop(SignatureProps.errorBorderWidth) : n.prop(SignatureProps.borderWidth);
+    final lineColor = n.prop(SignatureProps.signLineColor).flutter;
+    final markColor = n.prop(SignatureProps.signMarkColor)?.flutter ?? lineColor;
+    final markSize = n.prop(SignatureProps.signMarkSize);
+    final showSignLine = n.prop(SignatureProps.showSignLine);
+    // showSignMark is an older name for signLineMark: either off hides it.
+    final showMark = n.prop(SignatureProps.showSignMark) && n.prop(SignatureProps.signLineMark);
+    final iconJson = n.prop(SignatureProps.signMarkIcon);
+    final hasIcon = iconJson != null && iconJson.isNotEmpty && iconJson['show'] != false;
+    final placeholderFontSize = n.prop(SignatureProps.placeholderFontSize);
+    final placeholderStyle = n.prop(SignatureProps.placeholderStyle);
+    final captionStyle = n.prop(SignatureProps.captionStyle);
+    final painter = SignaturePainter(
+      strokes: [...strokes, ?current],
+      inkColor: n.prop(SignatureProps.inkColor).flutter,
+      inkWidth: n.prop(SignatureProps.inkWidth),
+      placeholder: n.prop(SignatureProps.placeholder),
+      placeholderColor: n.prop(SignatureProps.placeholderColor).flutter,
+      placeholderFontSize: placeholderFontSize,
+      placeholderStyle: placeholderStyle.isEmpty
+          ? null
+          : _signatureStyle(placeholderStyle,
+              color: n.prop(SignatureProps.placeholderColor).flutter,
+              fontSize: placeholderFontSize,
+              fontWeight: FontWeight.values[((n.prop(SignatureProps.placeholderFontWeight) ~/ 100) - 1).clamp(0, 8)],
+              letterSpacing: n.prop(SignatureProps.placeholderLetterSpacing) ??
+                  (placeholderStyle.fontSize ?? placeholderFontSize) * 0.12),
+      placeholderFontWeight: n.prop(SignatureProps.placeholderFontWeight),
+      placeholderLetterSpacing: n.prop(SignatureProps.placeholderLetterSpacing),
+      smooth: n.prop(SignatureProps.smooth),
+      placeholderBelowLine: n.prop(SignatureProps.placeholderPosition) == api.SignaturePlaceholderPosition.belowLine,
+      placeholderAlignment: n.prop(SignatureProps.placeholderAlignment).flutter,
+      placeholderOffset: Offset(n.prop(SignatureProps.placeholderOffset).dx, n.prop(SignatureProps.placeholderOffset).dy),
+      showSignLine: showSignLine,
+      signLineColor: lineColor,
+      signLineWidth: n.prop(SignatureProps.signLineWidth),
+      dashed: n.prop(SignatureProps.signLineStyle) == api.SignLineStyle.dashed,
+      dash: n.prop(SignatureProps.signLineDash),
+      gap: n.prop(SignatureProps.signLineGap),
+      signLineOffset: n.prop(SignatureProps.signLineOffset),
+      signLineBottom: n.prop(SignatureProps.signLineBottom),
+      signLineInset: n.prop(SignatureProps.signLineInset),
+      showMark: showMark,
+      markGlyph: !hasIcon,
+      markSize: markSize,
+      markColor: markColor,
+      leadingMark: n.prop(SignatureProps.signMarkPlacement) == api.SignMarkPlacement.leading,
+      markGap: n.prop(SignatureProps.signMarkGap),
+      caption: n.prop(SignatureProps.caption),
+      captionStyle: _signatureStyle(captionStyle, color: lineColor, fontSize: 11),
+      captionGap: n.prop(SignatureProps.captionGap),
+      captionAlign: textAlign(n.prop(SignatureProps.captionAlign)),
+      textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
+      normalized: n.prop(SignatureProps.normalized),
+    );
+    final paint = CustomPaint(painter: painter, child: const SizedBox.expand());
+    final markIcon = hasIcon && showMark && showSignLine
+        ? _icon(api.InputIcon(icon: iconJson, size: markSize, color: n.prop(SignatureProps.signMarkColor) ?? n.prop(SignatureProps.signLineColor)))
+        : null;
     final pad = DecoratedBox(
       decoration: BoxDecoration(
         color: n.prop(SignatureProps.backgroundColor).flutter,
@@ -2092,28 +2224,12 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       ),
       child: ClipRRect(
         borderRadius: radius,
-        child: CustomPaint(
-          painter: SignaturePainter(
-            strokes: [...strokes, ?current],
-            inkColor: n.prop(SignatureProps.inkColor).flutter,
-            inkWidth: n.prop(SignatureProps.inkWidth),
-            placeholder: n.prop(SignatureProps.placeholder),
-            placeholderColor: n.prop(SignatureProps.placeholderColor).flutter,
-            placeholderFontSize: n.prop(SignatureProps.placeholderFontSize),
-            showSignLine: n.prop(SignatureProps.showSignLine),
-            signLineColor: n.prop(SignatureProps.signLineColor).flutter,
-            textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
-            normalized: n.prop(SignatureProps.normalized),
-            signLineMark: n.prop(SignatureProps.signLineMark),
-            signLineInset: n.prop(SignatureProps.signLineInset),
-            signLineBottom: n.prop(SignatureProps.signLineBottom),
-            placeholderBelowLine: n.prop(SignatureProps.placeholderPosition) == api.SignaturePlaceholderPosition.belowLine,
-            placeholderFontWeight: n.prop(SignatureProps.placeholderFontWeight),
-            placeholderLetterSpacing: n.prop(SignatureProps.placeholderLetterSpacing),
-            smooth: n.prop(SignatureProps.smooth),
-          ),
-          child: const SizedBox.expand(),
-        ),
+        child: markIcon == null
+            ? paint
+            : Stack(fit: StackFit.expand, children: [
+                paint,
+                CustomSingleChildLayout(delegate: _SignMarkLayout(painter), child: markIcon),
+              ]),
       ),
     );
     if (!n.prop(SignatureProps.enabled) || n.prop(SignatureProps.readOnly)) return pad;
@@ -2144,6 +2260,43 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       },
     );
   }
+}
+
+/// [style] over a signature pad's fallbacks for what it leaves unset.
+TextStyle _signatureStyle(api.TextStyle style,
+    {required Color color, required double fontSize, FontWeight? fontWeight, double? letterSpacing}) {
+  final converted = textStyle(style);
+  return converted.copyWith(
+    color: style.color == null && style.foreground == null ? color : converted.color,
+    fontSize: style.fontSize ?? fontSize,
+    fontWeight: style.fontWeight == null ? fontWeight ?? converted.fontWeight : converted.fontWeight,
+    letterSpacing: style.letterSpacing ?? letterSpacing ?? converted.letterSpacing,
+  );
+}
+
+/// Lays a signature pad's icon mark where its painter puts the mark.
+class _SignMarkLayout extends SingleChildLayoutDelegate {
+  _SignMarkLayout(this.painter);
+  final SignaturePainter painter;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.tight(Size.square(painter.markSize));
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final g = painter.geometry();
+    // Off the pad where the line has no room (it isn't drawn).
+    return g.fits(size) ? g.markOrigin(size) : Offset(-childSize.width - size.width, 0);
+  }
+
+  @override
+  bool shouldRelayout(_SignMarkLayout old) =>
+      old.painter.markSize != painter.markSize ||
+      old.painter.signLineOffset != painter.signLineOffset ||
+      old.painter.signLineInset != painter.signLineInset ||
+      old.painter.leadingMark != painter.leadingMark ||
+      old.painter.markGap != painter.markGap;
 }
 
 /// Takes a drag at once, so a scroll view around the pad doesn't.

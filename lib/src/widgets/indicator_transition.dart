@@ -11,10 +11,14 @@ import 'package:codelessly_api/codelessly_api.dart'
         LineChartProps,
         PlotChartProps;
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart'
+    show MouseCursor, MouseTrackerAnnotation, PointerEnterEventListener, PointerExitEventListener;
 import 'package:flutter/scheduler.dart';
 
 import 'chart_transition.dart';
+import 'indicators_charts.dart' show ChartSeriesPainter, LineChartPainter;
 import 'indicators_paint.dart';
 
 typedef IndicatorPainterFactory = NodePainter Function(Node node);
@@ -22,7 +26,7 @@ typedef IndicatorPainterFactory = NodePainter Function(Node node);
 /// An indicator's painter, updated at paint time without widget rebuilds or
 /// layout. Initial values and design-canvas edits are drawn at rest; runtime
 /// changes use the node's animate/animationDuration contract.
-class RenderIndicatorTransition extends RenderCustomPaint {
+class RenderIndicatorTransition extends RenderCustomPaint implements MouseTrackerAnnotation {
   RenderIndicatorTransition() {
     _ticker = Ticker(_tick, debugLabel: 'indicator data transition');
   }
@@ -52,7 +56,14 @@ class RenderIndicatorTransition extends RenderCustomPaint {
         (isDataChart(node)
             ? chartDataChanges(old, node)
             : !listEquals(_values(old), _values(node)));
-    if (old == null || !enabled || duration <= 0 || !_hasAttached) {
+    _interactive = interactive;
+    if (old == null && enabled && duration > 0 && _animatesIn(node)) {
+      // Grows in from zero the first time it shows (starts once attached).
+      _from = chartZeroed(node);
+      _target = node;
+      _progress = 0;
+      _durationMs = duration;
+    } else if (old == null || !enabled || duration <= 0 || !_hasAttached) {
       _ticker.stop();
       _from = _target = node;
       _progress = 1;
@@ -92,7 +103,64 @@ class RenderIndicatorTransition extends RenderCustomPaint {
     willChange = _ticker.isActive;
   }
 
-  Node _sample() {
+  Node _sample() => _hovered(_sampleData());
+
+  // --- hover: a chart with selectOnHover selects the category under the
+  // pointer (its dimming and tooltip follow), a line chart with
+  // scrubEnabled the nearest point (its cursor and tooltip); off the
+  // chart, its own selection again.
+  bool _interactive = false;
+  int _hover = -1;
+  double? _hoverX;
+
+  bool get _hoverable =>
+      _interactive &&
+      switch (_target?.type) {
+        'chart' => _target!.prop(ChartProps.selectOnHover),
+        'lineChart' => _target!.prop(LineChartProps.scrubEnabled),
+        _ => false,
+      };
+
+  Node _hovered(Node n) {
+    if (!_hoverable) return n;
+    if (n.type == 'lineChart') return _hoverX == null ? n : n.withProp(LineChartProps.selectedX, _hoverX);
+    return _hover >= 0 ? n.withProp(ChartProps.selectedIndex, _hover) : n;
+  }
+
+  void _setHover(int index, [double? x]) {
+    if (index == _hover && x == _hoverX) return;
+    _hover = index;
+    _hoverX = x;
+    if (_target != null) painter = _factory!(_sample());
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => _hoverable || super.hitTestSelf(position);
+
+  @override
+  void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
+    if (_hoverable && (event is PointerHoverEvent || event is PointerMoveEvent || event is PointerDownEvent)) {
+      if (_target!.type == 'lineChart') {
+        _setHover(-1, LineChartPainter(_target!).xAt(event.localPosition, size));
+      } else {
+        _setHover(ChartSeriesPainter(_target!).categoryAt(event.localPosition, size));
+      }
+    }
+  }
+
+  @override
+  MouseCursor get cursor => MouseCursor.defer;
+
+  @override
+  PointerEnterEventListener? get onEnter => null;
+
+  @override
+  PointerExitEventListener? get onExit => (_) => _setHover(-1);
+
+  @override
+  bool get validForMouseTracker => attached;
+
+  Node _sampleData() {
     final target = _target!;
     if (_progress >= 1 || _from == null) return target;
     if (isDataChart(target)) return chartDataFrame(_from!, target, _progress);
@@ -159,6 +227,12 @@ bool _animated(Node n) => switch (n.type) {
   'chart' => n.prop(ChartProps.animate),
   'lineChart' => n.prop(LineChartProps.animate),
   'plotChart' => n.prop(PlotChartProps.animate),
+  _ => false,
+};
+
+bool _animatesIn(Node n) => switch (n.type) {
+  'chart' => n.prop(ChartProps.animateIn),
+  'lineChart' => n.prop(LineChartProps.animateIn),
   _ => false,
 };
 
