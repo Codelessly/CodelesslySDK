@@ -815,12 +815,16 @@ class RenderMotion extends RenderPose with _Ticking {
     if (!_motion.paused) _clock += step;
     final target = _motion.paused ? 0.0 : _motion.spin;
     if (_speed != target) {
-      final perSecond = _motion.spinRamp <= 0
-          ? double.infinity
-          : math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
-      final change = math.min((target - _speed).abs(), perSecond * dt);
-      _speed += (target - _speed).sign * change;
-      if ((target - _speed).abs() < 0.002) _speed = target;
+      if (_motion.spinRamp <= 0) {
+        // No ramp: at speed at once. (An infinite rate times a zero step,
+        // a first tick on the web, would be NaN and stop it for good.)
+        _speed = target;
+      } else if (dt > 0) {
+        final perSecond = math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
+        final change = math.min((target - _speed).abs(), perSecond * dt);
+        _speed += (target - _speed).sign * change;
+        if ((target - _speed).abs() < 0.002) _speed = target;
+      }
     }
     _turns = (_turns + _speed * dt) % 1;
     _show();

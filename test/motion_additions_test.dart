@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderShimmer, swingPose;
+import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderMotion, RenderShimmer, swingPose;
 import 'package:codelessly_sdk/src/render/paint/svg_path.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +48,37 @@ Map<String, Object?> box(Map<String, Object?> extra, {double x = 0, double y = 0
     };
 
 void main() {
+  testWidgets('a spin without a ramp survives a zero-length tick (a first frame on the web)', (tester) async {
+    final doc = api.LayoutDocument.fromJson({
+      'roots': ['s'],
+      'nodes': {
+        's': {'type': 'stack', 'children': ['b'], 'layout': {'width': 100, 'height': 100}},
+        'b': {
+          'type': 'box',
+          'layout': {'width': 56, 'height': 56, 'x': {'start': 0}, 'y': {'start': 0}},
+          'decoration': {'fills': [{'color': '#FFFF0000'}]},
+          'motion': {'spin': 0.7, 'spinRamp': 0},
+        },
+      },
+    });
+    final tree = NodeTree(NodeValues(DocumentSource(doc)));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's'))));
+    RenderMotion? motion;
+    void visit(RenderObject o) {
+      if (o is RenderMotion) motion ??= o;
+      o.visitChildren(visit);
+    }
+    visit(tester.renderObject(find.byType(NodeView)));
+    // A new ticker's first tick: no time has passed.
+    motion!.tick(Duration.zero);
+    motion!.tick(const Duration(milliseconds: 100));
+    final m = motion!.effectiveTransform.storage;
+    expect(m.every((v) => v.isFinite), isTrue, reason: '$m');
+    expect(m[1], isNot(0), reason: 'turned by 0.07 of a turn');
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('a swing rocks around rest on a sine', (tester) async {
     final (tree, view, _) = await show(
         tester,
