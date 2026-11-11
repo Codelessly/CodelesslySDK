@@ -905,6 +905,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
 
   MultiDragGestureRecognizer? _recognizer;
   _SourceDrag? _drag;
+  bool _disposed = false;
 
   bool get _longPress => switch (_model.start) {
     api.DragStart.press => false,
@@ -973,6 +974,11 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
   /// either took it ([_SourceDrag.dropped]) or refused it).
   void _ended(_SourceDrag drag, bool wasAccepted) {
     if (identical(_drag, drag)) _drag = null;
+    if (_disposed) {
+      final recognizer = _recognizer;
+      _recognizer = null;
+      scheduleMicrotask(() => recognizer?.dispose());
+    }
     final box = _box;
     if (box == null) return;
     final dnd = DragAndDrop.of(box.tree);
@@ -1034,8 +1040,15 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
 
   @override
   void dispose() {
-    _recognizer?.dispose();
-    _recognizer = null;
+    _disposed = true;
+    if (_box?.tree.isDisposed ?? false) _drag?.cancel();
+    // A virtualized source may disappear during an active drag. Its gesture
+    // client owns edge scrolling until pointer up/cancel; dropping its router
+    // here would strand the session and its ticker.
+    if (_drag == null) {
+      _recognizer?.dispose();
+      _recognizer = null;
+    }
     _ticker?.dispose();
     _ticker = null;
     super.dispose();

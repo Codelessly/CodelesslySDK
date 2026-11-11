@@ -337,6 +337,18 @@ mixin IslandParent on RenderBox, RenderObjectWithLayoutCallbackMixin {
   /// Unmounts the islands released since the last layout.
   @override
   void layoutCallback() => _islandOwner?._flushDrops();
+
+  /// The tree owns these render children. Detach them while their host can
+  /// still mutate, so a later tree disposal never touches a disposed host.
+  @override
+  void dispose() {
+    if (this case final RenderObjectWithChildMixin<RenderBox> host) {
+      host.child = null;
+    } else if (this case final ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>> host) {
+      host.removeAll();
+    }
+    super.dispose();
+  }
 }
 
 /// The element showing the node boxes [object] is in (a [NodeView]'s, or a

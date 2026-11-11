@@ -166,6 +166,7 @@ class NodeTree {
   bool _fontsPending = false;
   int _fontGeneration = 0;
   bool _disposed = false;
+  bool get isDisposed => _disposed;
   final Set<NodeBox> _afterFonts = {};
 
   void _listenForFonts() {
