@@ -275,7 +275,6 @@ class RenderListItems extends RenderCollection {
   /// The drop target's slot node, drawn in the open slot (under the items,
   /// taking no pointer input); null while no slot shows one.
   DropSlotNode? _slotNode;
-  Offset _slotOffset = Offset.zero;
 
   /// Shows slot node [id] ('' for none), inside layout.
   RenderBox? _showSlotNode(String id) {
@@ -335,7 +334,9 @@ class RenderListItems extends RenderCollection {
 
   @override
   void paintDecorations(PaintingContext context, Offset offset) {
-    if (_slotNode?.box case final box? when box.hasSize) context.paintChild(box, offset + _slotOffset);
+    if (_slotNode?.box case final box? when box.hasSize) {
+      context.paintChild(box, offset + (box.parentData! as CollectionParentData).offset);
+    }
     _paintDividers(context, offset);
   }
 
@@ -580,7 +581,7 @@ class RenderListItems extends RenderCollection {
           ? mainSize - _leading(_padMainEnd, mainSize) - slotLogical - slotExtent
           : _leading(_padMainStart, mainSize) + slotLogical;
       final crossPos = _padCrossStart + (crossInner - RenderCollection.cross(slotBox.size, axis)) / 2;
-      _slotOffset = RenderCollection.offsetOf(mainPos, crossPos, axis);
+      (slotBox.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(mainPos, crossPos, axis);
     }
     return _anyChildOutside || _dividers.any((r) => !(Offset.zero & size).contains(r.topLeft));
   }

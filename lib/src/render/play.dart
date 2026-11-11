@@ -189,10 +189,12 @@ class RenderEffects extends RenderPose {
       _set = true;
       return;
     }
-    // A changed cue plays the effect (not the first one it shows with).
+    // A changed cue plays the effect (not the first one it shows with, and
+    // not one that clears: nodes sharing a cue play only where it is set).
     for (final e in v) {
       final before = old.where((o) => o.name == e.name).firstOrNull;
-      if (before != null && before.playKey != e.playKey) play(e.name);
+      final cue = e.playKey;
+      if (before != null && before.playKey != cue && cue != null && cue.isNotEmpty) play(e.name);
     }
   }
 
