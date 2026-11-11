@@ -51,4 +51,29 @@ void main() {
     final texts = paragraphs(tester);
     expect(texts, containsAll(['x', 'y₁', '−3.0', '0.4234', '−2.5', '1.4962']));
   });
+
+  testWidgets('a filling table builds every bound row, not only those in its design size', (tester) async {
+    final doc = LayoutDocument.fromJson({
+      'roots': ['t'],
+      'nodes': {
+        't': {
+          'type': 'tableView',
+          'layout': {'width': {'fill': 100}, 'height': {'fill': 100}},
+          'props': {'rowHeight': 30, 'headerHeight': 30, 'columns': [{'key': 'x', 'label': 'x', 'width': 84}, {'key': 'y', 'label': 'y', 'width': 84}]},
+          'bind': {'data': r'${rows}'},
+          'slots': {'cell': 'cell'},
+        },
+        'cell': {'type': 'text', 'props': {'text': r'${item.value}'}},
+      },
+    });
+    final scope = VariableScope([
+      Variable(name: 'rows', type: api.VariableType.list, value: [for (var i = 0; i < 12; i++) {'x': 'x$i', 'y': 'y$i'}]),
+    ]);
+    final tree = NodeTree(NodeValues(DocumentSource(doc)), binder: NodeBinder(scope: scope));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(home: SizedBox(width: 400, height: 500, child: NodeView(tree: tree, rootId: 't', interactive: false))));
+    await tester.pump();
+    final texts = paragraphs(tester);
+    expect(texts, containsAll(['x0', 'y0', 'x11', 'y11']));
+  });
 }
