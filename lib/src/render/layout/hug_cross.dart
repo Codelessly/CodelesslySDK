@@ -1,4 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
+
+import 'fit_box.dart';
 
 /// A [Flex] that hugs its cross axis and stretches its children across it:
 /// as thick as its thickest child, every stretching child that thick.
@@ -16,6 +20,13 @@ import 'package:flutter/rendering.dart';
 /// calls [relayoutAbove] (the node tree does, for every node it re-applies),
 /// so the thickness is measured again and incremental layout gives what a
 /// fresh layout gives.
+///
+/// Children that fill the cross axis take their design thickness when
+/// measured unstretched. A [RenderCodelesslyFlex] with
+/// [RenderCodelesslyFlex.fillsAcross] also reports their content's
+/// thickness ([RenderCodelesslyFlex.fillContentCross]), which counts too, as
+/// under [IntrinsicHeight]: a flex of only such children isn't as thin as
+/// their design sizes (often 0) say.
 class RenderHugCross extends RenderProxyBox {
   /// Marks every [RenderHugCross] above [object] as needing layout. Call it
   /// outside the layout phase.
@@ -47,7 +58,8 @@ class RenderHugCross extends RenderProxyBox {
       (_) => box.crossAxisAlignment = CrossAxisAlignment.center,
     );
     box.layout(loose, parentUsesSize: true);
-    final double natural = row ? box.size.height : box.size.width;
+    double natural = row ? box.size.height : box.size.width;
+    if (box is RenderCodelesslyFlex) natural = math.max(natural, box.fillContentCross);
     final double cross = row
         ? constraints.constrainHeight(natural)
         : constraints.constrainWidth(natural);

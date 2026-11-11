@@ -1058,6 +1058,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final cross = n.prop(FlexProps.crossAxisAlignment);
     final stretches = cross == api.CrossAxisAlignment.stretch;
     var measureCross = false, stretchFallsBack = false, hugStretch = false;
+    bool Function(RenderBox)? fillsAcross;
     _dependsOnDescendants = crossMin == null && crossWraps;
     if (crossMin == null && crossWraps) {
       final anyAlign = children.any((ch) => ch.layout.align != null);
@@ -1074,7 +1075,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
           ? _obtain<RenderIntrinsicHeight>('intrH', RenderIntrinsicHeight.new)
           : _obtain<RenderIntrinsicWidth>('intrW', RenderIntrinsicWidth.new));
     } else if (hugStretch) {
+      // Its other children set its thickness. When every child fills
+      // across, their content does (at least), as under IntrinsicHeight /
+      // IntrinsicWidth, rather than their design sizes alone (unless
+      // intrinsics can't see into a child: scrolling content).
+      bool fills(Node c) => (isRow ? c.vFit : c.hFit) == SizeFit.fill;
+      final shown = children.where((c) => c.type != 'spacer');
+      final measureFills = shown.isNotEmpty && shown.every(fills) && !children.any(_subtreeBlocksIntrinsics);
       chain.add(_obtain<RenderHugCross>('hugCross', RenderHugCross.new));
+      fillsAcross = measureFills ? _fillsAcross(isRow) : null;
     }
     final crossAlign = stretchFallsBack ? CrossAxisAlignment.start : crossAxisAlignment(cross);
     final mainFit = isRow ? n.hFit : n.vFit;
@@ -1085,7 +1094,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..textBaseline = crossAlign == CrossAxisAlignment.baseline ? TextBaseline.alphabetic : null
       ..mainAxisSize = mainFit == SizeFit.hug ? MainAxisSize.min : MainAxisSize.max
       ..gap = n.prop(FlexProps.spacing)
-      ..squeeze = n.prop(FlexProps.squeezeChildren);
+      ..squeeze = n.prop(FlexProps.squeezeChildren)
+      ..fillsAcross = fillsAcross;
     _syncChildren(flex, n.children, Slot(SlotKind.flex, n));
     chain.add(flex);
   }
@@ -1126,6 +1136,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _syncChildren(wrap, n.children, Slot(SlotKind.flex, n));
     chain.add(wrap);
   }
+
+  /// Whether a laid-out flex child is a drawn node that fills the flex's
+  /// cross axis.
+  static bool Function(RenderBox) _fillsAcross(bool isRow) => isRow ? _fillsHeight : _fillsWidth;
+  static bool _fillsHeight(RenderBox b) =>
+      b is NodeBox && b.drawn && b.node?.type != 'spacer' && b.node?.vFit == SizeFit.fill;
+  static bool _fillsWidth(RenderBox b) =>
+      b is NodeBox && b.drawn && b.node?.type != 'spacer' && b.node?.hFit == SizeFit.fill;
 
   /// A child fills the cross axis of a wrapping row/column while another
   /// gives it a thickness (IntrinsicHeight(Row(...))).
@@ -1267,17 +1285,27 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   }
 
   /// Text (TextNodeBox): sized box → slack → min height → align → paragraph.
+  ///
+  /// A fixed height is the text's height, as `SizedBox(height:)` around a
+  /// `Text`: the paragraph is laid out within it and clips the lines that
+  /// don't fit (by its overflow). A flexible height is the least it takes.
   void _text(Node n, List<RenderBox> chain) {
     final hFit = n.hFit, vFit = n.vFit;
     final hugsWidth = hFit == SizeFit.hug || hFit == SizeFit.flexible;
-    final minHeight = vFit != SizeFit.hug && vFit != SizeFit.fill;
+    final minHeight = vFit == SizeFit.flexible;
+    // A filling axis takes the room offered, or hugs the text where that
+    // room is unbounded (a hugging parent measuring its children).
+    if (hFit == SizeFit.fill || vFit == SizeFit.fill) {
+      chain.add(_obtain<RenderFitBox>('textFill', RenderFitBox.new)
+        ..width = null
+        ..height = null
+        ..fillWidth = hFit == SizeFit.fill
+        ..fillHeight = vFit == SizeFit.fill
+        ..aspectRatio = null);
+    }
     final c = BoxConstraints.tightFor(
-      width: switch (hFit) {
-        SizeFit.hug || SizeFit.flexible => null,
-        SizeFit.fill => double.infinity,
-        SizeFit.fixed => n.layout.width.value,
-      },
-      height: vFit == SizeFit.fill ? double.infinity : null,
+      width: hFit == SizeFit.fixed ? n.layout.width.value : null,
+      height: vFit == SizeFit.fixed ? n.layout.height.value : null,
     );
     chain.add(_obtain<RenderConstrainedBox>('textSized', () => RenderConstrainedBox(additionalConstraints: c))
       ..additionalConstraints = c);
@@ -1300,7 +1328,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     chain.add(_obtain<RenderPositionedBox>('textAlign', () => RenderPositionedBox(textDirection: TextDirection.ltr))
       ..alignment = Alignment(x, y)
       ..widthFactor = hugsWidth ? 1 : null
-      ..heightFactor = vFit == SizeFit.fill ? null : 1);
+      ..heightFactor = vFit == SizeFit.fill || vFit == SizeFit.fixed ? null : 1);
     final span = _textSpan(n);
     final paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: TextDirection.ltr))
       ..text = span

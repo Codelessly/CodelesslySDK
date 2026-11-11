@@ -387,8 +387,42 @@ class RenderCodelesslyFlex extends RenderFlex {
     return false;
   }
 
+  /// Picks the children that fill the cross axis, whose content thickness
+  /// [fillContentCross] measures while the cross axis is unbounded (a
+  /// [RenderHugCross] measuring this flex). Null measures none.
+  bool Function(RenderBox child)? get fillsAcross => _fillsAcross;
+  bool Function(RenderBox child)? _fillsAcross;
+  set fillsAcross(bool Function(RenderBox child)? value) {
+    if (value == _fillsAcross) return;
+    _fillsAcross = value;
+    markNeedsLayout();
+  }
+
+  /// After a layout with an unbounded cross axis: the greatest max
+  /// intrinsic cross extent of the [fillsAcross] children, each at the main
+  /// extent it was laid out at (0 when there are none).
+  double get fillContentCross => _fillContentCross;
+  double _fillContentCross = 0;
+
   @override
   void performLayout() {
+    _layOut();
+    _fillContentCross = 0;
+    final bool Function(RenderBox)? fills = _fillsAcross;
+    final bool row = direction == Axis.horizontal;
+    if (fills == null || (row ? constraints.hasBoundedHeight : constraints.hasBoundedWidth)) return;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      if (!fills(child)) continue;
+      _fillContentCross = math.max(
+        _fillContentCross,
+        row
+            ? child.getMaxIntrinsicHeight(child.size.width)
+            : child.getMaxIntrinsicWidth(child.size.height),
+      );
+    }
+  }
+
+  void _layOut() {
     if (!_mainAxisBounded(constraints)) {
       if (_hasFlexChild) {
         _inflexible(_layOutWithGaps);
