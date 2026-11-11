@@ -3,7 +3,7 @@
 // Inputs are islands: real Flutter widgets (TextField, Checkbox, Slider...)
 // built from the node's props, inside their box: a fit box
 // for the ones that size to their node's fits, the design size for the ones
-// that always take it (checkbox, radio, slider, signature), nothing for the
+// that always take it (checkbox, radio, signature, and non-fill sliders), nothing for the
 // pickers (their button's own size).
 //
 // The widgets keep their own state (typed text, a toggled checkbox) and, in a
@@ -49,7 +49,7 @@ final Map<String, WidgetRecipe> inputsRecipes = {
   'checkbox': (b, n, chain) => _sized(b, n, chain, (context) => _CheckboxIsland(node: n)),
   'switch': (b, n, chain) => _fitted(b, n, chain, (context) => _SwitchIsland(node: n)),
   'radio': (b, n, chain) => _sized(b, n, chain, (context) => _RadioIsland(node: n)),
-  'slider': (b, n, chain) => _sized(b, n, chain, (context) => _SliderIsland(node: n)),
+  'slider': _slider,
   'dropdown': (b, n, chain) => _fitted(b, n, chain, (context) => _DropdownIsland(node: n)),
   'datePicker': (b, n, chain) => chain.add(_island(b, (context) => _DatePickerIsland(node: n, interactive: _interactive(b)))),
   'timePicker': (b, n, chain) => chain.add(_island(b, (context) => _TimePickerIsland(node: n, interactive: _interactive(b)))),
@@ -99,6 +99,18 @@ void _sized(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
   chain.add(b.obtain<RenderConstrainedBox>('sized', () => RenderConstrainedBox(additionalConstraints: c))
     ..additionalConstraints = c);
   chain.add(_island(b, build));
+}
+
+/// A fill slider reflows its native track to the available axis; hugging
+/// sliders retain their historical design size.
+void _slider(NodeBuilder b, Node n, List<RenderBox> chain) {
+  final vertical = n.prop(SliderProps.orientation) == api.Axis.vertical;
+  final fit = vertical ? n.layout.height.fit : n.layout.width.fit;
+  if (fit == SizeFit.fill) {
+    _fitted(b, n, chain, (context) => _SliderIsland(node: n));
+  } else {
+    _sized(b, n, chain, (context) => _SliderIsland(node: n));
+  }
 }
 
 void _segmentedButton(NodeBuilder b, Node n, List<RenderBox> chain) {
