@@ -1,17 +1,25 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:collection/collection.dart' show CombinedMapView;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show BuildContext, GlobalKey, Rect;
 
+import '../runtime/actions/app_data_sources.dart';
+import '../runtime/actions/app_events.dart';
+import '../runtime/actions/context.dart' show AppFunction;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/scopes.dart';
 import '../services/services.dart';
+import 'automations.dart';
 import 'config.dart';
 import 'fonts.dart';
 import 'loader.dart';
+import 'managed_components.dart';
 import 'navigation.dart';
 import 'paywalls.dart';
 import 'persisted_variables.dart';
+import 'presenter.dart';
 import 'runtime.dart';
 
 /// The publish model's key holding the project's paywall setup
@@ -50,16 +58,31 @@ class Codelessly extends ChangeNotifier {
   /// [cache] keeps the publish (default: in memory, for this run), [fonts]
   /// fetches the layouts' fonts (default: over HTTP), and [data] is what
   /// layouts read as `data.<key>`.
+  ///
+  /// With [managedComponents] (Firestore's on a Firebase app), the layouts'
+  /// linked, Codelessly-managed components take the newer same-major
+  /// versions their channel offers when a layout loads
+  /// ([ManagedComponentResolver]); without it they show the version they
+  /// were published with.
   Codelessly({
     this.config = const CodelesslyConfig(),
     PublishLoader? loader,
     PublishCache? cache,
     FontFetcher? fonts,
     Map<String, Object?> data = const {},
+    ManagedComponentSource? managedComponents,
   })  : loader = loader ?? _defaultLoader(config),
         cache = cache ?? MemoryPublishCache(),
         fonts = CodelesslyFonts(fetcher: fonts ?? HttpFontFetcher()),
-        data = MapValueScope(values: {'data': data});
+        data = MapValueScope(values: {'data': data}) {
+    if (managedComponents != null) {
+      managed = ManagedComponentResolver(source: managedComponents, cache: this.cache);
+    }
+  }
+
+  /// Resolves the layouts' managed components at load; null: each shows its
+  /// published snapshot.
+  ManagedComponentResolver? managed;
 
   /// A [Codelessly] showing [bundle] (a publish shipped with the app, or a
   /// test's), offline.
@@ -136,9 +159,23 @@ class Codelessly extends ChangeNotifier {
   /// `app_variables` scope, [declareAppVariables]).
   late final VariableScope appVariables = VariableScope(const [], parent: _storage);
 
+  /// The live data the whole app shares: `loadCloudData` actions with
+  /// `scope: app` open one subscription here, on first use, and every
+  /// screen of every [CodelesslyWidget] showing this project shares it
+  /// (its app variable reads the same values everywhere). Closed by
+  /// [dispose].
+  AppDataSources get appData => _appData ??= AppDataSources(appVariables, onError: (error, stack) {
+        final s = services;
+        if (s is Services) s.analytics.logError(error, stackTrace: stack, type: 'app_data');
+      });
+  AppDataSources? _appData;
+
   /// `storage`: what the app keeps on the device ([Services.storage], the
   /// `setStorage` action's), read live as `storage.<key>`.
-  late final _StorageScope _storage = _StorageScope(services, parent: _speech);
+  late final _StorageScope _storage = _StorageScope(services, parent: _usage);
+
+  /// `usage`: the per-user counters of [automations].
+  late final ValuesScope _usage = ValuesScope({'usage': CodelesslyAutomations.emptyUsage}, _speech);
 
   late final _SpeechScope _speech = _SpeechScope(services, parent: _serviceValues);
   late final _ServiceValuesScope _serviceValues = _ServiceValuesScope(services, parent: data);
@@ -212,6 +249,77 @@ class Codelessly extends ChangeNotifier {
   /// ```
   late final CodelesslyPaywalls paywall = CodelesslyPaywalls(this);
 
+  /// Shows its layouts above the host app, one at a time
+  /// ([CodelesslyPresenter.present]); a `CodelesslyPresenterHost` around the app
+  /// leads it to the app's navigator.
+  late final CodelesslyPresenter presenter = CodelesslyPresenter(this);
+
+  /// Its automations and app events: started by a `CodelesslyPresenterHost` (or
+  /// [CodelesslyAutomations.start]).
+  late final CodelesslyAutomations automations = CodelesslyAutomations(this, _usage);
+
+  /// Shows layout [layoutId] above the host app, from anywhere (no
+  /// [CodelesslyWidget] on the current screen needed), and completes with
+  /// what closed it: its close modal action's result, null when dismissed.
+  /// See [CodelesslyPresenter.present].
+  ///
+  /// ```dart
+  /// final answer = await codelessly.present('rate-us', params: {'orders': 3});
+  /// if (answer case {'rating': final int stars}) saveRating(stars);
+  /// ```
+  Future<Object?> present(
+    String layoutId, {
+    ModalPresentation presentation = ModalPresentation.dialog,
+    Map<String, Object?> params = const {},
+    Map<String, Object?> data = const {},
+    bool dismissible = true,
+    int priority = 0,
+    Rect? anchor,
+    GlobalKey? anchorKey,
+    PopoverPlacement placement = PopoverPlacement.belowCenter,
+    bool bottom = false,
+    OpenModalAction? modal,
+    BuildContext? context,
+  }) =>
+      presenter.present(layoutId,
+          presentation: presentation,
+          params: params,
+          data: data,
+          dismissible: dismissible,
+          priority: priority,
+          anchor: anchor,
+          anchorKey: anchorKey,
+          placement: placement,
+          bottom: bottom,
+          modal: modal,
+          context: context);
+
+  /// Fires app event [name] with [props] on the app's event bus: the
+  /// project's automations listening for it run, and [events] hears it.
+  /// Layouts fire them with `emitEvent` actions.
+  void emit(String name, [Map<String, Object?> props = const {}]) {
+    AppEventBus.register(services, automations);
+    automations.emit(name, props);
+  }
+
+  /// Every app event: the host's [emit]s and the layouts' `emitEvent`s.
+  Stream<AppEvent> get events => automations.events;
+
+  final Map<String, AppFunction> _registered = {};
+
+  /// The functions call function actions call, by name: the ones
+  /// [registerFunction] added, over [CodelesslyConfig.functions]. Live:
+  /// a screen already shown sees later registrations.
+  late final Map<String, AppFunction> functions = CombinedMapView([_registered, config.functions]);
+
+  /// Registers [function] as the handler of call function actions named
+  /// [name] (over the config's of that name), e.g. from a widget that has
+  /// the BuildContext a share sheet needs.
+  void registerFunction(String name, AppFunction function) => _registered[name] = function;
+
+  /// Removes what [registerFunction] registered as [name].
+  void unregisterFunction(String name) => _registered.remove(name);
+
   Future<void>? _initializing;
 
   /// Loads the publish model: from the cache when it has one (then
@@ -220,6 +328,8 @@ class Codelessly extends ChangeNotifier {
   Future<void> initialize() => _initializing ??= _initialize();
 
   Future<void> _initialize() async {
+    // `emitEvent` actions reach this instance's app events.
+    AppEventBus.register(services, automations);
     _setStatus(const CLoading());
     final key = publishSource.modelPath(config.uniqueId);
     PublishModel? cached;
@@ -349,6 +459,11 @@ class Codelessly extends ChangeNotifier {
         layout = cached;
       }
     }
+    final resolver = managed;
+    if (resolver != null) {
+      // Never fails: an instance whose update fails keeps its snapshot.
+      layout = await resolver.resolve(layout, projectId: model.projectId, theme: layout.theme ?? model.theme);
+    }
     _layouts[layoutId] = layout;
     final fontsOf = {
       ...model.fontsOf(layoutId),
@@ -358,6 +473,17 @@ class Codelessly extends ChangeNotifier {
       await fonts.load(fontsOf).timeout(config.fontTimeout, onTimeout: () {});
     }
     return layout;
+  }
+
+  /// Asks again which versions the managed components' channels offer (a
+  /// release or a rollback since): loaded layouts that show managed
+  /// components reload when next shown.
+  void refreshManagedComponents() {
+    final resolver = managed;
+    if (resolver == null) return;
+    resolver.refresh();
+    _layouts.removeWhere((_, l) => managedInstancesOf(l.document).isNotEmpty);
+    notifyListeners();
   }
 
   /// Sets app data [key] (read by layouts as `data.<key>`).
@@ -386,9 +512,12 @@ class Codelessly extends ChangeNotifier {
 
   @override
   void dispose() {
+    automations.dispose();
+    presenter.dismissAll();
     _watching?.cancel();
     _watching = null;
     route.dispose();
+    _appData?.dispose();
     for (final p in _persistedApp) {
       p.dispose();
     }
@@ -400,6 +529,7 @@ class Codelessly extends ChangeNotifier {
     }
     appVariables.dispose();
     _storage.dispose();
+    _usage.dispose();
     _speech.dispose();
     _serviceValues.dispose();
     data.dispose();
@@ -427,7 +557,7 @@ class _ServiceValuesScope extends ValuesScope {
       (value) {
         if (_disposed) return;
         final user = s.auth.currentUser;
-        final uid = user == null || user.isAnonymous ? '' : user.uid;
+        final uid = AuthProfiles.hasProfile(user) ? user!.uid : '';
         if (value['uid'] != uid) return; // A queued snapshot from an earlier identity.
         _authFailed = false;
         _scopeAccount(user?.uid);
@@ -453,7 +583,7 @@ class _ServiceValuesScope extends ValuesScope {
   bool _authFailed = false;
 
   Map<String, Object?>? _matchingProfile(Object? snapshot, AppUser? user) {
-    if (user == null || user.isAnonymous || snapshot is! Map || snapshot['uid'] != user.uid) return null;
+    if (!AuthProfiles.hasProfile(user) || snapshot is! Map || snapshot['uid'] != user!.uid) return null;
     final profile = snapshot['profile'];
     return profile is Map ? profile.cast<String, Object?>() : null;
   }
@@ -464,7 +594,7 @@ class _ServiceValuesScope extends ValuesScope {
     if (service == null) return;
     final recovery = const {
       AuthOperation.signIn, AuthOperation.signUp, AuthOperation.signInWithGoogle,
-      AuthOperation.signInWithApple, AuthOperation.completeSignInLink,
+      AuthOperation.signInWithApple, AuthOperation.completeSignInLink, AuthOperation.signInAnonymously,
     }.contains(operation);
     // A stale currentUser after an auth stream error is not proof of a live
     // session. Only an explicit successful sign-in can recover that identity.

@@ -14,6 +14,7 @@ import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'node_values.dart';
 import 'action_error.dart';
+import 'app_data_sources.dart';
 import 'ui.dart';
 import 'values.dart';
 
@@ -57,6 +58,7 @@ class RuntimeActionContext implements ActionHost {
     this.onError,
     this.onActionErrorEvent,
     this.refreshAuthValues,
+    this.appData,
     this.declareMissing = false,
     this.paywall,
     this.openPaywall,
@@ -103,6 +105,10 @@ class RuntimeActionContext implements ActionHost {
   /// before the next authored action reads them. Expression reads stay pure.
   final void Function(AuthOperation operation)? refreshAuthValues;
 
+  /// The app's shared live data (`loadCloudData` with `scope: app`); null:
+  /// such loads are the screen's.
+  final AppDataSources? appData;
+
   final List<VoidCallback> _disposers;
 
   /// The paywall a paywall screen's actions act on.
@@ -132,6 +138,7 @@ class RuntimeActionContext implements ActionHost {
         onError: onError,
         onActionErrorEvent: suppressErrorEvents ? null : onActionErrorEvent,
         refreshAuthValues: refreshAuthValues,
+        appData: appData,
         declareMissing: declareMissing,
         paywall: paywall,
         openPaywall: openPaywall,

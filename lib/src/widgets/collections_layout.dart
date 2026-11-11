@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
-import '../render/node_tree.dart' show NodeTree;
+import '../render/node_tree.dart' show NodeTree, NodeBox;
 import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, dropSlotOf;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
@@ -30,6 +30,17 @@ abstract class RenderCollection extends RenderBox
     _clipBehavior = v;
     markNeedsPaint();
   }
+
+  /// A collection of many items paints in a layer of its own: a change to
+  /// one of its items (a cell of a board stepping every tick) repaints the
+  /// collection, not the screen around it (shadows, gradients, other
+  /// widgets), and the collection's own change doesn't repaint them either.
+  /// Small lists stay in their parent's layer. Adding or removing items
+  /// updates the compositing bits, so crossing the threshold is safe.
+  static const int repaintBoundaryItems = 64;
+
+  @override
+  bool get isRepaintBoundary => childCount >= repaintBoundaryItems;
 
   /// Paints the last child first (the first on top).
   bool _paintReversed = false;
@@ -227,6 +238,10 @@ class RenderListItems extends RenderCollection {
   /// False for a scroll view: a viewport has no
   /// intrinsic size, so it reports none (a row squeezing it can take it to
   /// nothing). True when every item is laid out in a Flex.
+  /// Items that fill along the list share its length by their flex (a list
+  /// that doesn't scroll, as a Row/Column).
+  bool shareFill = false;
+
   bool _measurable = true;
   bool get measurable => _measurable;
   set measurable(bool v) {
@@ -368,6 +383,44 @@ class RenderListItems extends RenderCollection {
       final more = ((viewportMain + cacheExtent - used) / (per + gap)).ceil() + 1;
       if (!requestItems(childCount + more)) break;
       child = last == null ? firstChild : childAfter(last);
+    }
+
+    // A list that builds all its items and keeps its length lays the items
+    // that fill along it out as a Row/Column does its Expanded children:
+    // they share what the other items leave, by their flex (a bar of
+    // segments sized by data).
+    if (shareFill && itemCount != null && viewportMain.isFinite && !hugMain) {
+      final kids = children;
+      final flexOf = <int, int>{};
+      for (final (i, it) in kids.indexed) {
+        final n = it is NodeBox ? it.node : null;
+        if (n == null) continue;
+        final fit = axis == Axis.vertical ? n.layout.height.fit : n.layout.width.fit;
+        if (fit == api.SizeFit.fill) flexOf[i] = math.max(1, n.layout.flex);
+      }
+      if (flexOf.isNotEmpty) {
+        var fixed = 0.0;
+        for (final (i, a) in advances.indexed) {
+          if (!flexOf.containsKey(i)) fixed += a;
+        }
+        fixed += gap * math.max(0, kids.length - 1);
+        final free = math.max(0.0, viewportMain - fixed);
+        final total = flexOf.values.fold<int>(0, (a, b) => a + b);
+        used = fixed;
+        for (final e in flexOf.entries) {
+          final extent = free * e.value / total;
+          final it = kids[e.key];
+          final base = _childConstraints(crossAvail, tightCross: stretchNow ? crossAvail : null);
+          it.layout(
+            axis == Axis.vertical
+                ? base.copyWith(minHeight: extent, maxHeight: extent)
+                : base.copyWith(minWidth: extent, maxWidth: extent),
+            parentUsesSize: true,
+          );
+          advances[e.key] = extent;
+          used += extent;
+        }
+      }
     }
 
     final items = children;
@@ -667,6 +720,10 @@ class RenderLayeredItems extends RenderCollection {
   /// Where an item of [item] size sits in a [box]-sized box.
   Offset Function(Size box, Size item) placeAt = (box, item) => Offset.zero;
 
+  /// Where [child] sits, when it places itself (a stacked list's item at its
+  /// own x/y); null uses [placeAt].
+  Offset? Function(RenderBox child, Size box, Size item)? placeChild;
+
   void changed() => markNeedsLayout();
 
   @override
@@ -674,7 +731,7 @@ class RenderLayeredItems extends RenderCollection {
     size = constraints.biggest.isFinite ? constraints.biggest : constraints.smallest;
     for (final it in children) {
       it.layout(itemConstraints(size), parentUsesSize: true);
-      (it.parentData! as CollectionParentData).offset = placeAt(size, it.size);
+      (it.parentData! as CollectionParentData).offset = placeChild?.call(it, size, it.size) ?? placeAt(size, it.size);
     }
     return _anyChildOutside;
   }
@@ -694,6 +751,10 @@ class RenderGridItems extends RenderCollection {
   double? mainAxisExtent;
   bool shrinkWrapRows = false;
   bool masonry = false;
+
+  /// With [masonry]: each item in the shortest lane so far instead of in
+  /// turn.
+  bool masonryShortest = false;
 
   /// With [shrinkWrapRows]: cells stretch to their row's longest item.
   bool intrinsicRows = true;
@@ -731,8 +792,17 @@ class RenderGridItems extends RenderCollection {
     if (masonry) {
       final lanes = List<double>.filled(cols, 0);
       final offsets = <double>[];
+      final laneOf = <int>[];
       for (final (i, it) in children.indexed) {
-        final lane = i % cols;
+        var lane = i % cols;
+        if (masonryShortest) {
+          // The shortest lane; the first of lanes within half a pixel.
+          lane = 0;
+          for (var l = 1; l < cols; l++) {
+            if (lanes[l] < lanes[lane] - 0.5) lane = l;
+          }
+        }
+        laneOf.add(lane);
         it.layout(
           RenderCollection.constraintsOf(
             minMain: 0,
@@ -765,7 +835,7 @@ class RenderGridItems extends RenderCollection {
         (it.parentData! as CollectionParentData).offset =
             RenderCollection.offsetOf(
               pos,
-              padCrossStart + (i % cols) * (cellCross + crossAxisSpacing),
+              padCrossStart + laneOf[i] * (cellCross + crossAxisSpacing),
               axis,
             );
       }
@@ -874,6 +944,10 @@ class RenderPageItems extends RenderCollection {
   /// carousel); null: flat pages. See [pageMotionAt].
   api.Motion? pageMotion;
 
+  /// The pose one page before the current one, when it isn't [pageMotion]
+  /// mirrored (a book's turning page). See [pageMotionAt].
+  api.Motion? pageMotionBefore;
+
   void changed() {
     markNeedsLayout();
     markNeedsPaint();
@@ -887,19 +961,21 @@ class RenderPageItems extends RenderCollection {
 
   /// [motion] (the pose one page after the current one) for a page
   /// [offset] pages from it: at rest at 0, interpolated by the distance (up
-  /// to two pages), mirrored for pages before it; a [vertical] pager turns
-  /// around X and moves along Y.
-  static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false}) {
+  /// to two pages), mirrored for pages before it, or, given [before] (the
+  /// pose one page before), [before] interpolated the same way unmirrored;
+  /// a [vertical] pager turns around X and moves along Y.
+  static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false, api.Motion? before}) {
     final distance = offset.abs().clamp(0.0, 2.0);
-    var m = motion;
+    final source = offset < 0 && before != null ? before : motion;
+    var m = source;
     for (final p in _scaled) {
       final rest = api.Motion.none.valueOf(p);
-      var v = rest + (motion.valueOf(p) - rest) * distance;
+      var v = rest + (source.valueOf(p) - rest) * distance;
       if (p == 'opacity') v = v.clamp(0.0, 1.0);
       if (p == 'blur') v = math.max(0, v);
       m = m.withValue(p, v);
     }
-    if (offset < 0) {
+    if (offset < 0 && before == null) {
       for (final p in const ['translateX', 'shiftX', 'rotate', 'rotateY', 'originX']) {
         m = m.withValue(p, -m.valueOf(p));
       }
@@ -918,6 +994,11 @@ class RenderPageItems extends RenderCollection {
     return m;
   }
 
+  /// Whether a pose with [api.Motion.backfaceHidden] shows its back (turned
+  /// past 90 degrees about X or Y): such a page isn't drawn.
+  static bool facesAway(api.Motion m) =>
+      m.backfaceHidden && math.cos(m.rotateX * math.pi / 180) * math.cos(m.rotateY * math.pi / 180) < 0;
+
   /// The page at rest: the initial page, within the pages there are.
   double get _currentPage {
     final count = itemCount;
@@ -929,7 +1010,7 @@ class RenderPageItems extends RenderCollection {
   Matrix4? _poseOf(RenderBox child, int index) {
     final motion = pageMotion;
     if (motion == null) return null;
-    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical);
+    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical, before: pageMotionBefore);
     final o = Alignment(m.originX, m.originY).alongSize(child.size);
     return Matrix4.translationValues(m.shiftX * child.size.width + o.dx, m.shiftY * child.size.height + o.dy, 0)
       ..multiply(motionMatrix(m))
@@ -948,8 +1029,9 @@ class RenderPageItems extends RenderCollection {
   void paintItem(PaintingContext context, RenderBox child, Offset offset) {
     final pose = _poseOf(child, _indexOf(child));
     if (pose == null) return super.paintItem(context, child, offset);
-    final opacity = pageMotionAt(pageMotion!, _indexOf(child) - _currentPage).opacity;
-    if (opacity <= 0) return;
+    final at = pageMotionAt(pageMotion!, _indexOf(child) - _currentPage, vertical: axis == Axis.vertical, before: pageMotionBefore);
+    final opacity = at.opacity;
+    if (opacity <= 0 || facesAway(at)) return;
     void paintPosed(PaintingContext c, Offset o) =>
         c.pushTransform(needsCompositing, o, pose, (c, o) => c.paintChild(child, o));
     if (opacity >= 1) {
@@ -969,8 +1051,10 @@ class RenderPageItems extends RenderCollection {
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
     if (pageMotion == null) return super.hitTestChildren(result, position: position);
-    var i = firstIndex + childCount - 1;
-    for (var child = lastChild; child != null; child = childBefore(child), i--) {
+    // The page drawn on top takes taps first.
+    final reversed = paintReversed;
+    var i = reversed ? firstIndex : firstIndex + childCount - 1;
+    for (var child = reversed ? firstChild : lastChild; child != null; child = reversed ? childAfter(child) : childBefore(child), i += reversed ? 1 : -1) {
       final pd = child.parentData! as CollectionParentData;
       final pose = Matrix4.translationValues(pd.offset.dx, pd.offset.dy, 0)..multiply(_poseOf(child, i)!);
       final c = child;
@@ -1057,11 +1141,15 @@ class RenderPageItems extends RenderCollection {
 /// the cells in [cells] order, row by row. Header backgrounds and stripes
 /// paint under the cells; a [gridLine] trails each column and row over them.
 class RenderTableItems extends RenderCollection {
+  /// The columns as given; laid out, the last takes the width left over
+  /// when [stretchLastColumn].
+  List<double> givenColumnWidths = const [];
   List<double> columnWidths = const [];
 
   /// The column widths for the width the table is laid out at (a table
-  /// that fills shares its spare width by flex), or null: [columnWidths].
+  /// that fills shares its spare width by flex), or null: the given ones.
   List<double> Function(double width)? widthsFor;
+  bool stretchLastColumn = false;
   List<double> rowHeights = const [];
 
   /// (row, column) of each child, in child order.
@@ -1089,9 +1177,14 @@ class RenderTableItems extends RenderCollection {
   bool layoutItems() {
     final c = constraints;
     size = c.biggest.isFinite ? c.biggest : c.constrain(Size.zero);
+    columnWidths = [...givenColumnWidths];
     if (widthsFor case final f?) {
       final all = f(size.width);
       columnWidths = [for (var k = 0; k < columnWidths.length && k < all.length; k++) all[k]];
+    }
+    if (stretchLastColumn && columnWidths.isNotEmpty) {
+      final others = _start(columnWidths, columnWidths.length - 1);
+      columnWidths[columnWidths.length - 1] = math.max(columnWidths.last, size.width - others);
     }
     var i = 0;
     for (final it in children) {

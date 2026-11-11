@@ -71,6 +71,8 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
     final line = lineColor.alpha == 0 || lineWidth <= 0 ? BorderSide.none : BorderSide(color: lineColor.flutter, width: lineWidth);
     final headerColor = n.prop(TableViewProps.headerColor)?.flutter;
     final stripe = n.prop(TableViewProps.stripeColor)?.flutter;
+    final fill = n.prop(TableViewProps.fillWidth) && columns.isNotEmpty;
+    final rowHeightKey = n.prop(TableViewProps.rowHeightKey), rowHeight = n.prop(TableViewProps.rowHeight);
 
     Widget template(String? id, Object key, int index, Object? item) {
       if (id == null) return const SizedBox.shrink();
@@ -104,6 +106,9 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
         final width = constraints.hasBoundedWidth ? constraints.maxWidth : n.layout.width.value;
         final headerWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0.0;
         final widths = tableColumnWidths(columns, n.prop(TableViewProps.columnWidth), width - headerWidth - edge * 2);
+        // Every column's width with the edges: a `fillWidth` table shares
+        // what the viewport has beyond it.
+        final laidTotal = headerWidth + edge * 2 + widths.fold<double>(0, (a, w) => a + w);
         return SizedBox(
         width: constraints.hasBoundedWidth ? null : n.layout.width.value,
         height: constraints.hasBoundedHeight ? null : n.layout.height.value,
@@ -116,9 +121,14 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
           pinnedColumnCount: headerColumn && n.prop(TableViewProps.pinHeaderColumn) ? 1 : 0,
           columnBuilder: (index) {
             final header = headerColumn && index == 0;
-            final double width = header ? headerWidth : widths[index - columnOffset];
+            var width = header ? headerWidth : widths[index - columnOffset];
+            final count = columns.length + columnOffset;
+            if (n.prop(TableViewProps.stretchLastColumn) && index == count - 1 && constraints.hasBoundedWidth) {
+              // The last column takes what the others leave.
+              width = math.max(width, constraints.maxWidth - (laidTotal - width));
+            }
             return TableSpan(
-              extent: FixedTableSpanExtent(width),
+              extent: header || !fill ? FixedTableSpanExtent(width) : FillTableSpanExtent(width, laidTotal, columns.length),
               padding: SpanPadding(leading: index == 0 ? edge : 0, trailing: index == lastColumn ? edge : 0),
               foregroundDecoration: TableSpanDecoration(border: TableSpanBorder(trailing: line)),
               backgroundDecoration: header && headerColor != null ? TableSpanDecoration(color: headerColor) : null,
@@ -135,7 +145,8 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
                         ? hoverColor
                         : (stripe != null && body.isOdd ? stripe : null);
             return TableSpan(
-              extent: FixedTableSpanExtent(header ? n.prop(TableViewProps.headerHeight) : n.prop(TableViewProps.rowHeight)),
+              extent: FixedTableSpanExtent(
+                  header ? n.prop(TableViewProps.headerHeight) : tableRowHeight(rows[body], rowHeightKey, rowHeight)),
               foregroundDecoration: TableSpanDecoration(
                   border: TableSpanBorder(trailing: header && headerBorder != null ? headerBorder : line)),
               backgroundDecoration: background == null ? null : TableSpanDecoration(color: background),
@@ -207,4 +218,27 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
       },
     );
   }
+}
+
+/// A body row's height: its own number at [key] (when the row is a map that
+/// has one), else [fallback].
+double tableRowHeight(Object? row, String key, double fallback) {
+  if (key.isEmpty || row is! Map) return fallback;
+  final v = row[key];
+  final h = v is num ? v.toDouble() : double.tryParse('$v');
+  return h != null && h.isFinite && h > 0 ? h : fallback;
+}
+
+/// A body column of a `fillWidth` table: its [width] plus an equal share
+/// ([count] columns) of what the viewport has beyond the [total] width of
+/// every column.
+class FillTableSpanExtent extends TableSpanExtent {
+  const FillTableSpanExtent(this.width, this.total, this.count);
+
+  final double width, total;
+  final int count;
+
+  @override
+  double calculateExtent(TableSpanExtentDelegate delegate) =>
+      width + (count == 0 ? 0 : math.max(0.0, delegate.viewportExtent - total) / count);
 }

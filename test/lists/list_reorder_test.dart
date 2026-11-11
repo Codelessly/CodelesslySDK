@@ -117,6 +117,31 @@ void main() {
       expect(s['last'], '0>${order().indexOf('s0')}');
     });
 
+    testWidgets('a lifted row fires dragStart, letting go fires dragCompleted', (tester) async {
+      await pumpList(tester, {'start': 'press'}, extra: {
+        'list': {
+          ...list({'start': 'press'})['list']!,
+          'actions': [
+            reaction('dragStart', [
+              {'type': 'setVariable', 'variable': 'last', 'value': r'lifted ${result.index} ${result.item.id}'},
+            ]),
+            reaction('dragCompleted', [
+              {'type': 'setVariable', 'variable': 'last', 'value': r'${last}, dropped'},
+            ]),
+          ],
+        },
+      });
+      final drag = await tester.startGesture(row(2));
+      await tester.pump(kPressTimeout);
+      await drag.moveBy(const Offset(0, 30));
+      await tester.pump();
+      await tester.pump();
+      expect(s['last'], 'lifted 2 s2');
+      await drag.up();
+      await tester.pumpAndSettle();
+      expect(s['last'], 'lifted 2 s2, dropped');
+    });
+
     testWidgets('long press starts the drag; a tap does nothing', (tester) async {
       await pumpList(tester, {'start': 'longPress', 'apply': 'variable'});
       expect(find.byType(ReorderableDelayedDragStartListener), findsWidgets);

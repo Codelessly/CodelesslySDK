@@ -81,6 +81,10 @@ void main() {
       'donut': {'type': 'chart', 'layout': {'width': 100, 'height': 100}, 'props': {'chartType': 'donut', 'data': [{'value': 1}, {'value': 2}]}},
       'plot': {'type': 'plotChart', 'layout': {'width': 300, 'height': 120}, 'props': {'points': [1, 3, 2], 'xMax': 2, 'selectedX': 1}},
       'bars': {'type': 'barChart', 'layout': {'width': 200, 'height': 100}, 'props': {'values': [1, null, 3], 'labels': ['a', 'b', 'c']}},
+      'bars2': {'type': 'barChart', 'layout': {'width': 300, 'height': 160}, 'props': {
+        'values': [7, 12, 5], 'labels': ['Solo', 'Team', 'Enterprise'], 'max': 16, 'highlight': 1,
+        'gridLines': 4, 'gridLabels': ['4', '8', '12', '16'], 'gridLabelsLeft': true, 'maxBarWidth': 48, 'showValues': true,
+      }},
       'line': {'type': 'lineChart', 'layout': {'width': 300, 'height': 200}, 'props': {'data': [{'x': 0, 'y': 1}, {'x': 1, 'y': 3}], 'yAxisTitle': 'ft'}},
       'qr': {'type': 'barcode', 'layout': {'width': 120, 'height': 120}, 'props': {'data': 'hello'}},
       'ean': {'type': 'barcode', 'layout': {'width': 120, 'height': 60}, 'props': {'data': 'letters', 'symbology': 'ean13'}},
@@ -99,6 +103,28 @@ void main() {
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
+  });
+
+  testWidgets('a bar chart labels its baseline when given one grid label more than its lines', (tester) async {
+    Future<RenderCustomPaint> paintOf(List<String> gridLabels) async {
+      final doc = _doc({
+        'bars': {'type': 'barChart', 'layout': {'width': 300, 'height': 160}, 'props': {
+          'values': [7, 12, 5], 'labels': ['Solo', 'Team', 'Enterprise'], 'max': 16, 'highlight': 1,
+          'gridLines': 4, 'gridLabels': gridLabels, 'gridLabelsLeft': true, 'showValues': true,
+          'labelFontWeight': 600, 'highlightLabels': false, 'gridLabelFontSize': 11, 'gridLabelColor': '#FF6B7A8D',
+        }},
+      });
+      final tree = NodeTree(DocumentSource(doc));
+      addTearDown(tree.dispose);
+      await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's'))));
+      return _descendants(tree.boxOf('bars')!).whereType<RenderCustomPaint>().single;
+    }
+
+    // Values (3) and bar labels (3), then the grid labels.
+    expect(await paintOf(['4', '8', '12', '16']), paintsExactlyCountTimes(#drawParagraph, 3 + 3 + 4));
+    expect(await paintOf(['0', '4', '8', '12', '16']), paintsExactlyCountTimes(#drawParagraph, 3 + 3 + 5));
+    final n = Node.fromJson({'type': 'barChart', 'props': {'labelFontWeight': 600, 'highlightLabels': false}}, id: 'b')!;
+    expect((n.prop(BarChartProps.labelFontWeight), n.prop(BarChartProps.highlightLabels)), (600, false));
   });
 
   test('painters repaint only when their node changes', () {

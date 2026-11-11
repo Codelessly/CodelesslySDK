@@ -7,6 +7,7 @@ import '../../app/config.dart';
 import '../../app/fonts.dart';
 import '../../app/loader.dart';
 import '../auth.dart';
+import 'managed_components.dart';
 import 'project_auth.dart';
 import 'publish_loader.dart';
 
@@ -24,6 +25,9 @@ import 'publish_loader.dart';
 ///   without authenticating (for projects whose rules allow it).
 /// * With only a [CodelesslyConfig.slug]: the slug's bundle from storage,
 ///   as without Firebase.
+///
+/// Linked, Codelessly-managed components follow their channel
+/// ([FirestoreManagedComponentSource] on [firestore]).
 ///
 /// [cache] keeps the last publish between runs (default: memory).
 Codelessly codelesslyOnFirebase({
@@ -46,5 +50,12 @@ Codelessly codelesslyOnFirebase({
   final PublishLoader? loader = access != null || config.projectId != null
       ? FirestorePublishLoader(firestore, projectId: config.projectId, auth: access)
       : null;
-  return Codelessly(config: config, loader: loader, cache: cache, fonts: fonts, data: data);
+  return Codelessly(
+    config: config,
+    loader: loader,
+    cache: cache,
+    fonts: fonts,
+    data: data,
+    managedComponents: FirestoreManagedComponentSource(firestore),
+  );
 }

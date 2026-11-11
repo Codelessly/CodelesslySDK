@@ -192,4 +192,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(s.rectOf(tester, 'b'), const Rect.fromLTWH(200, 200, 80, 80));
   });
+
+  testWidgets('a timed flight arcs above both ends, swells mid-way and lands upright', (tester) async {
+    FlightRegistry.reset();
+    final flight = {'duration': 720, 'curve': 'linear', 'lift': 110, 'swell': 1.75, 'turns': 0.6, 'trail': 4};
+    final s = Screen({
+      'a': box({'layout': at(200, 300, 40, 40), 'flightKey': r'react', 'bind': {'visible': r'${!moved}'}}),
+      'b': box({'layout': at(40, 320, 40, 40), 'flightKey': r'react', 'flight': flight, 'bind': {'visible': r'${moved}'}}),
+    }, variables: [const Variable(name: 'moved', type: VariableType.boolean, value: false)]);
+    await s.pump(tester);
+    s.scope.set('moved', true);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 360));
+    final mid = s.rectOf(tester, 'b');
+    // Half-way along x, well above both ends (lift 110 over the higher, y 300).
+    expect(mid.center.dx, closeTo(140, 2));
+    expect(mid.center.dy, lessThan(300));
+    // Swollen: 1.75 times its size at the middle.
+    expect(mid.width, greaterThan(60));
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(s.rectOf(tester, 'b'), const Rect.fromLTWH(40, 320, 40, 40));
+  });
 }

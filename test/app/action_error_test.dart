@@ -57,7 +57,7 @@ class _Files extends MemoryFileStorage {
   }
 
   @override
-  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType}) async {
+  Future<CloudFile> upload(String path, Uint8List bytes, {String? contentType, void Function(double sent)? onProgress}) async {
     if (fail) throw StateError('sandbox upload unavailable');
     return super.upload(path, bytes, contentType: contentType);
   }
@@ -308,7 +308,7 @@ void main() {
       expect(errors, hasLength(1));
       expect((events.single['error'] as Map)['action'], 'loadCloudData');
       expect((events.single['error'] as Map)['nodeId'], 'button');
-      expect((events.single['error'] as Map).keys.toSet(), {'type', 'message', 'action', 'nodeId'});
+      expect((events.single['error'] as Map).keys.toSet(), {'type', 'code', 'message', 'action', 'nodeId'});
       context.dispose();
       scope.dispose();
       await cloud.close();

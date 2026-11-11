@@ -245,6 +245,21 @@ const String scriptDriver = r'''
       .replace(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"/g, '""');
   }
 
+  // Compiled scripts by source and params, kept across runs: a script
+  // ticking 30 times a second compiles once. A compiled script is a pure
+  // function of the host objects it's handed, so sharing it is safe.
+  const compiled = new Map();
+  function compileCached(source, paramNames) {
+    const key = paramNames.join(',') + '\u0000' + source;
+    let c = compiled.get(key);
+    if (!c) {
+      c = compile(source, paramNames);
+      if (compiled.size > 256) compiled.clear();
+      compiled.set(key, c);
+    }
+    return c;
+  }
+
   function compile(source, paramNames) {
     if (/\bimport\s*(\(|\.\s*meta\b)/.test(codeOnly(String(source)))) {
       throw new SyntaxError('Scripts can\'t import code. Call other scripts with script.name(...).');
@@ -275,7 +290,7 @@ const String scriptDriver = r'''
           if (run.depth > 32) throw new RangeError('Scripts called each other more than 32 deep.');
           let compiled = cache.get(name);
           if (!compiled) {
-            compiled = compile(def.source, def.paramNames || []);
+            compiled = compileCached(def.source, def.paramNames || []);
             cache.set(name, compiled);
           }
           const values = (def.paramNames || []).map((_, i) => plain(args[i], 'An argument of script.' + name));
@@ -369,7 +384,7 @@ const String scriptDriver = r'''
     paramNames.forEach((p, i) => { params[p] = values[i]; });
     let compiled;
     try {
-      compiled = compile(req.source, paramNames);
+      compiled = compileCached(req.source, paramNames);
       run.headLength = compiled.headLength;
     } catch (e) {
       finish(run, 'error', errorData(e, run));

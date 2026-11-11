@@ -3,7 +3,7 @@
 // package:codelessly_sdk/firebase.dart.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show CollectionSchema;
+import 'package:codelessly_api/codelessly_api.dart' show CollectionSchema, DataRules;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 
@@ -20,6 +20,7 @@ class AppUser {
     this.photoUrl = '',
     this.emailVerified = false,
     this.isAnonymous = false,
+    this.isGuest = false,
     this.providers = const [],
   });
 
@@ -33,6 +34,11 @@ class AppUser {
   /// signed out for the app.
   final bool isAnonymous;
 
+  /// An anonymous user the app signed in on purpose (a guest session, see
+  /// `AuthOperation.signInAnonymously`): it has a uid for its own data but
+  /// no email. Unlike the SDK's own anonymous user, `auth.uid` shows it.
+  final bool isGuest;
+
   /// Sign-in providers (`password`, `google.com`...).
   final List<String> providers;
 
@@ -45,27 +51,45 @@ class AppUser {
       other.photoUrl == photoUrl &&
       other.emailVerified == emailVerified &&
       other.isAnonymous == isAnonymous &&
+      other.isGuest == isGuest &&
       listEquals(other.providers, providers);
 
   @override
-  int get hashCode => Object.hash(uid, email, displayName, photoUrl, emailVerified, isAnonymous, Object.hashAll(providers));
+  int get hashCode => Object.hash(uid, email, displayName, photoUrl, emailVerified, isAnonymous, isGuest, Object.hashAll(providers));
+
+  /// This user marked as a guest session.
+  AppUser asGuest() => AppUser(
+        uid: uid,
+        email: email,
+        displayName: displayName,
+        photoUrl: photoUrl,
+        emailVerified: emailVerified,
+        isAnonymous: isAnonymous,
+        isGuest: true,
+        providers: providers,
+      );
 
   @override
-  String toString() => 'AppUser($uid${email.isEmpty ? '' : ', $email'}${isAnonymous ? ', anonymous' : ''})';
+  String toString() => 'AppUser($uid${email.isEmpty ? '' : ', $email'}${isGuest ? ', guest' : (isAnonymous ? ', anonymous' : '')})';
 }
 
 /// The `auth` value for [user] and their [profile] document: `isSignedIn`,
-/// `uid`, `email`, `displayName`, `initial`, `photoUrl`, `emailVerified`,
-/// `providers`, `profile` and `role` (a signed-in user without one is a
-/// `user`; signed out, empty). Anonymous users read as signed out.
+/// `isGuest`, `uid`, `email`, `displayName`, `initial`, `photoUrl`,
+/// `emailVerified`, `providers`, `profile` and `role` (a signed-in user
+/// without one is a `user`, a guest a `guest`; signed out, empty).
+/// Anonymous users read as signed out; a guest session (an anonymous user
+/// the app signed in on purpose) is not signed in either, but has its `uid`
+/// and `profile`, so it can keep data of its own.
 Map<String, Object?> authValue(AppUser? user, {Map<String, Object?>? profile}) {
+  final guest = user != null && user.isGuest;
   final signedIn = user != null && !user.isAnonymous;
   final displayName = signedIn ? user.displayName : '';
   final email = signedIn ? user.email : '';
   final initialSource = displayName.isNotEmpty ? displayName : email;
   return {
     'isSignedIn': signedIn,
-    'uid': signedIn ? user.uid : '',
+    'isGuest': guest,
+    'uid': signedIn || guest ? user.uid : '',
     'email': email,
     'displayName': displayName,
     'initial': initialSource.isEmpty ? '' : initialSource.characters.first.toUpperCase(),
@@ -73,7 +97,7 @@ Map<String, Object?> authValue(AppUser? user, {Map<String, Object?>? profile}) {
     'emailVerified': signedIn && user.emailVerified,
     'providers': signedIn ? user.providers : const <String>[],
     'profile': profile ?? const <String, Object?>{},
-    'role': '${profile?['role'] ?? (signedIn ? 'user' : '')}',
+    'role': '${profile?['role'] ?? (signedIn ? 'user' : (guest ? 'guest' : ''))}',
   };
 }
 
@@ -105,6 +129,11 @@ abstract interface class AuthService {
   Future<AppUser> signUp({required String email, required String password, String displayName = ''});
   Future<AppUser> signInWithProvider(AuthProviderKind provider);
 
+  /// Starts a guest session: an anonymous user marked [AppUser.isGuest]
+  /// (the one already signed in anonymously, when there is one). A
+  /// [signUp] during it keeps its uid.
+  Future<AppUser> signInAsGuest();
+
   /// Signs out (an implementation that reads published data as an
   /// anonymous user signs in anonymously again).
   Future<void> signOut();
@@ -116,6 +145,11 @@ abstract interface class AuthService {
 
   /// Deletes the signed-in user's account.
   Future<void> deleteAccount();
+
+  /// Confirms the signed-in user's [password] (a recent sign-in, which
+  /// changing the password and deleting the account need). Fails with
+  /// `wrong-password` when it isn't theirs.
+  Future<void> reauthenticate(String password);
 
   /// Emails [email] a sign-in link back to [continueUrl].
   Future<void> sendSignInLink(String email, {required String continueUrl});
@@ -151,6 +185,9 @@ class SignedOutAuthService implements AuthService {
   Future<AppUser> signInWithProvider(AuthProviderKind provider) => Future.error(_failure);
 
   @override
+  Future<AppUser> signInAsGuest() => Future.error(_failure);
+
+  @override
   Future<void> signOut() async {}
 
   @override
@@ -167,6 +204,9 @@ class SignedOutAuthService implements AuthService {
 
   @override
   Future<void> deleteAccount() => Future.error(_failure);
+
+  @override
+  Future<void> reauthenticate(String password) => Future.error(_failure);
 
   @override
   Future<void> sendSignInLink(String email, {required String continueUrl}) => Future.error(_failure);
@@ -218,6 +258,13 @@ class MemoryAuthService implements AuthService {
   }
 
   @override
+  Future<AppUser> signInAsGuest() async {
+    final user = _user;
+    if (user != null && user.isGuest) return user;
+    return _set(AppUser(uid: 'guest${++_ids}', isAnonymous: true, isGuest: true))!;
+  }
+
+  @override
   Future<AppUser> signIn({required String email, required String password}) async {
     final account = accounts[email.trim()];
     if (account == null || account.$1 != password) {
@@ -234,7 +281,9 @@ class MemoryAuthService implements AuthService {
       throw const AuthFailure('An account already exists for that email.', code: 'email-already-in-use');
     }
     if (password.length < 6) throw const AuthFailure('Password must be at least 6 characters.', code: 'weak-password');
-    final user = AppUser(uid: 'user${++_ids}', email: e, displayName: displayName, providers: const ['password']);
+    // A guest's account keeps the guest's uid (and so its data).
+    final guest = _user != null && _user!.isGuest ? _user!.uid : null;
+    final user = AppUser(uid: guest ?? 'user${++_ids}', email: e, displayName: displayName, providers: const ['password']);
     accounts[e] = (password, user);
     return _set(user)!;
   }
@@ -274,8 +323,20 @@ class MemoryAuthService implements AuthService {
 
   @override
   Future<void> deleteAccount() async {
+    if (_user?.isGuest ?? false) {
+      _set(null);
+      return;
+    }
     accounts.remove(_signedIn().email);
     _set(null);
+  }
+
+  @override
+  Future<void> reauthenticate(String password) async {
+    final u = _signedIn();
+    if (accounts[u.email]?.$1 != password) {
+      throw const AuthFailure('Wrong email or password.', code: 'wrong-password');
+    }
   }
 
   @override
@@ -305,13 +366,17 @@ abstract final class AuthProfiles {
         'email': user.email,
         'displayName': user.displayName,
         'photoUrl': user.photoUrl,
-        'role': 'user',
+        'role': user.isGuest ? 'guest' : 'user',
       };
+
+  /// Whether [user] has a profile: signed in, or a guest session.
+  static bool hasProfile(AppUser? user) => user != null && (!user.isAnonymous || user.isGuest);
 
   /// Creates [user]'s profile when it doesn't exist yet, with [newProfile],
   /// the defaults of the `users` schema and `createdAt`.
   static Future<void> ensure(CloudDatabase database, AppUser? user) async {
-    if (user == null || user.isAnonymous) return;
+    if (!hasProfile(user)) return;
+    user!;
     if (await database.getDocument(collection, user.uid) != null) return;
     final schema = database.rules.schemaFor(collection);
     final data = <String, Object?>{
@@ -329,7 +394,83 @@ abstract final class AuthProfiles {
 
   /// [user]'s profile, now and on every change (null signed out).
   static Stream<Map<String, Object?>?> watch(CloudDatabase database, AppUser? user) =>
-      user == null || user.isAnonymous ? Stream.value(null) : database.watchDocument(collection, user.uid);
+      hasProfile(user) ? database.watchDocument(collection, user!.uid) : Stream.value(null);
+}
+
+/// What the signed-in user of [users] matches in an `audience` list, for
+/// [BackendCloudDatabase.audience]: everyone, the user, the role in their
+/// profile ([AuthProfiles], `user` without one, as the database's rules
+/// read it) and, when not anonymous, signed-in users. [changes] fires when
+/// the user or their role changes (give it to
+/// [BackendCloudDatabase.userChanges]), so live audience queries follow
+/// both.
+class AuthAudience {
+  AuthAudience({required this.users, required this.currentUser, required this.profile});
+
+  /// The user, on every change ([AuthService.userChanges]).
+  final Stream<AppUser?> users;
+  final AppUser? Function() currentUser;
+
+  /// The profile of the user with this uid, now and on every change.
+  final Stream<Map<String, Object?>?> Function(String uid) profile;
+
+  /// The role a user without a profile role has.
+  static const defaultRole = 'user';
+
+  String? _uid;
+  String _role = defaultRole;
+  StreamSubscription<AppUser?>? _users;
+  StreamSubscription<Map<String, Object?>?>? _profile;
+  late final StreamController<void> _changes = StreamController<void>.broadcast(
+    onListen: _start,
+    onCancel: _stop,
+  );
+
+  /// Fires when the user or their role changes.
+  Stream<void> get changes => _changes.stream;
+
+  /// The role read from the current user's profile.
+  String get role => currentUser()?.uid == _uid ? _role : defaultRole;
+
+  /// The entries of an `audience` list the current user matches.
+  List<String> call() {
+    final user = currentUser();
+    if (user == null || user.uid.isEmpty) return const [];
+    return DataRules.audienceOf(user.uid, role: user.isAnonymous ? defaultRole : role, signedIn: !user.isAnonymous);
+  }
+
+  void _start() {
+    _users = users.listen(_onUser, onError: (Object error, StackTrace stack) {
+      if (!_changes.isClosed) _changes.addError(error, stack);
+    });
+  }
+
+  void _onUser(AppUser? user) {
+    final uid = user == null || user.isAnonymous ? null : user.uid;
+    if (uid != _uid) {
+      _profile?.cancel();
+      _profile = null;
+      _uid = uid;
+      _role = defaultRole;
+      if (uid != null) {
+        _profile = profile(uid).listen((p) {
+          final role = '${p?['role'] ?? ''}'.trim();
+          final next = role.isEmpty ? defaultRole : role;
+          if (next == _role) return;
+          _role = next;
+          if (!_changes.isClosed) _changes.add(null);
+        }, onError: (Object _) {});
+      }
+    }
+    if (!_changes.isClosed) _changes.add(null);
+  }
+
+  Future<void> _stop() async {
+    await _profile?.cancel();
+    await _users?.cancel();
+    _profile = null;
+    _users = null;
+  }
 }
 
 /// Access to a Codelessly project's published data, granted for the app's
