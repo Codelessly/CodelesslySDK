@@ -301,7 +301,14 @@ class NodeBinder {
   /// count, unless bound on its own); item scopes already made follow.
   Node _withItems(NodeSource source, Node n, Object? instance, Object? items) {
     final list = _listOf(items);
-    if (list == null) return n;
+    if (list == null) {
+      // A running app shows no items while its data isn't there yet (a
+      // script still answering), not the bare template with `${item...}`
+      // in it; a design preview keeps showing the template.
+      final def = n.spec?.prop('itemCount');
+      if (preview || def == null || n.bind.containsKey('props.itemCount')) return n;
+      return n.copyWith(props: n.props.set<Object?>(def, 0));
+    }
     // A snapshot: an item's update can rebind nodes that make or drop item
     // scopes (a list inside the item), changing [_items] mid-loop.
     for (final e in _items.entries.toList()) {
