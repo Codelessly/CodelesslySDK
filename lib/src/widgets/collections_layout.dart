@@ -667,6 +667,10 @@ class RenderLayeredItems extends RenderCollection {
   /// Where an item of [item] size sits in a [box]-sized box.
   Offset Function(Size box, Size item) placeAt = (box, item) => Offset.zero;
 
+  /// Where [child] sits, when it places itself (a stacked list's item at its
+  /// own x/y); null uses [placeAt].
+  Offset? Function(RenderBox child, Size box, Size item)? placeChild;
+
   void changed() => markNeedsLayout();
 
   @override
@@ -674,7 +678,7 @@ class RenderLayeredItems extends RenderCollection {
     size = constraints.biggest.isFinite ? constraints.biggest : constraints.smallest;
     for (final it in children) {
       it.layout(itemConstraints(size), parentUsesSize: true);
-      (it.parentData! as CollectionParentData).offset = placeAt(size, it.size);
+      (it.parentData! as CollectionParentData).offset = placeChild?.call(it, size, it.size) ?? placeAt(size, it.size);
     }
     return _anyChildOutside;
   }
