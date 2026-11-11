@@ -18,6 +18,7 @@ import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../render/play.dart' show EffectPlayers;
+import '../../render/paint/image_fill.dart' show preloadImage;
 import '../../render/particles.dart' show ParticlePlayers;
 import '../../scripting/formula_scripts.dart' show ScriptsScope;
 import '../../services/services.dart';
@@ -134,6 +135,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       for (final step in a.steps) {
         await _cloudData(step, run);
       }
+    case PreloadImagesAction():
+      run.result = await _preloadImages(a, run);
     case DownloadFileAction():
       final services = run.host.services;
       if (services is! Services) throw StateError('downloadFile needs Services.');
@@ -834,6 +837,32 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   // No scroll view of its own around it: as the render tree reveals it.
   if (viewports == 0 && a.axis == null) target.showOnScreen(duration: duration, curve: curve);
   await Future.wait(scrolls);
+}
+
+Future<Json> _preloadImages(PreloadImagesAction a, ActionRun run) async {
+  // A list from an expression, or comma-separated text.
+  final Object? value = a.urls.contains(r'${') ? run.evaluate(a.urls) : a.urls;
+  final urls = <String>{
+    ...switch (value) {
+      final List<Object?> l => [for (final u in l) if (u != null) '$u'],
+      final String t => t.split(','),
+      _ => const <String>[],
+    }.map((u) => u.trim()).where((u) => u.isNotEmpty),
+  }.toList();
+  final progress = a.progressVariable.trim();
+  var done = 0, failed = 0;
+  void report() {
+    if (progress.isNotEmpty && !run.isCanceled) setVariableIn(run.context.scope, progress, urls.isEmpty ? 1.0 : done / urls.length);
+  }
+
+  report();
+  await Future.wait(urls.map((u) async {
+    final ok = await preloadImage(u);
+    done++;
+    if (!ok) failed++;
+    report();
+  }));
+  return {'loaded': done - failed, 'failed': failed, 'total': urls.length};
 }
 
 // --- sound, speech, purchases ---------------------------------------------------------------
