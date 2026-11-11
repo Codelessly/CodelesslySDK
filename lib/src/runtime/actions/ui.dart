@@ -3,6 +3,7 @@
 // [ActionUi], which the app shell implements (or [NavigatorActionUi], a
 // Navigator-based default any NodeView can use).
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -231,6 +232,7 @@ class NavigatorActionUi implements ActionUi {
           placement: action.placement,
           gap: action.anchorGap,
           offset: action.anchorOffset,
+          reserve: action.anchorReserve,
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor);
     }
@@ -451,7 +453,10 @@ Future<Object?> showScreenModal(
 /// Shows [content] as a popover by [anchor] (a global rect: the node that
 /// opened it, or the pointer as an empty rect) at [placement], [gap] away
 /// from it and shifted [offset] along it.
-/// It flips to the other side when it doesn't fit and stays on screen.
+/// It flips to the other side when it doesn't fit and stays on screen. Below
+/// its anchor, it keeps [reserve] of room under its top: when that would pass
+/// the screen's bottom margin it moves up (a menu that may grow keeps its
+/// place).
 Future<Object?> showAnchoredModal(
   BuildContext context,
   Widget content, {
@@ -459,6 +464,7 @@ Future<Object?> showAnchoredModal(
   api.PopoverPlacement placement = api.PopoverPlacement.belowStart,
   double gap = 4,
   double offset = 0,
+  double reserve = 0,
   bool barrierDismissible = true,
   api.Color? barrierColor,
 }) {
@@ -474,7 +480,7 @@ Future<Object?> showAnchoredModal(
     barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
     useSafeArea: false,
     builder: (_) => CustomSingleChildLayout(
-      delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset),
+      delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset, reserve: reserve),
       child: Material(type: MaterialType.transparency, child: content),
     ),
   );
@@ -482,11 +488,16 @@ Future<Object?> showAnchoredModal(
 
 /// Lays a popover out by its anchor (see [showAnchoredModal]).
 class PopoverLayout extends SingleChildLayoutDelegate {
-  PopoverLayout({required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8});
+  PopoverLayout(
+      {required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8, this.reserve = 0});
 
   final Rect anchor;
   final api.PopoverPlacement placement;
   final double gap, offset, margin;
+
+  /// Room kept under the popover's top when it opens below its anchor
+  /// (`OpenModalAction.anchorReserve`).
+  final double reserve;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
@@ -522,6 +533,9 @@ class PopoverLayout extends SingleChildLayoutDelegate {
       if (below && childSize.height > roomBelow && roomAbove > roomBelow) below = false;
       if (!below && childSize.height > roomAbove && roomBelow > roomAbove) below = true;
       y = below ? anchor.bottom + gap : anchor.top - gap - childSize.height;
+      if (below && reserve > 0 && y + reserve > size.height - margin) {
+        y = math.max(margin, size.height - margin - reserve);
+      }
       x = switch (along) {
         -1 => anchor.left + offset,
         1 => anchor.right - childSize.width - offset,
@@ -547,6 +561,11 @@ class PopoverLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(PopoverLayout old) =>
-      old.anchor != anchor || old.placement != placement || old.gap != gap || old.offset != offset || old.margin != margin;
+      old.anchor != anchor ||
+      old.placement != placement ||
+      old.gap != gap ||
+      old.offset != offset ||
+      old.margin != margin ||
+      old.reserve != reserve;
 }
 
