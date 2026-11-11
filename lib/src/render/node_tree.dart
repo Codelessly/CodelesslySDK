@@ -210,6 +210,9 @@ class NodeTree {
 
     for (final box in _boxes.values.toList()) {
       if (!box.attached) continue;
+      // Applied again as after an edit: islands rebuild their widgets
+      // (a chip measures its label anew).
+      box._apply();
       markAll(box);
       box._relayoutHuggingAncestors();
     }
