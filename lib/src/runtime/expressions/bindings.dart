@@ -344,11 +344,14 @@ class NodeBinder {
   Node _withItems(NodeSource source, Node n, Object? instance, Object? items) {
     final list = _listOf(items);
     if (list == null) return n;
-    // A snapshot: an item's update can rebind nodes that make or drop item
-    // scopes (a list inside the item), changing [_items] mid-loop.
-    for (final e in _items.entries.toList()) {
-      if (e.key.$1 == n.id && e.key.$2 == instance) {
-        final i = e.key.$3;
+    // This list's item scopes only (a list of thousands of cells used to
+    // scan every item scope of every list, per bind). A snapshot: an item's
+    // update can rebind nodes that make or drop item scopes (a list inside
+    // the item), changing the map mid-loop.
+    final scopes = _items[(n.id, instance)];
+    if (scopes != null) {
+      for (final e in scopes.entries.toList(growable: false)) {
+        final i = e.key;
         e.value.update(index: i, item: i < list.length ? list[i] : null);
       }
     }
@@ -366,7 +369,8 @@ class NodeBinder {
         _ => null,
       };
 
-  final Map<(String, Object?, int), ItemScope> _items = {};
+  /// Item scopes by list (its id and instance), then by index.
+  final Map<(String, Object?), Map<int, ItemScope>> _items = {};
 
   static const _repeaters = {'listView', 'gridView', 'pageView'};
 
@@ -483,6 +487,12 @@ class NodeBinder {
       (final String tag, final Object? o, final String l, final int k) when tag == 'item' && l == listId => (k, o),
       _ => (-1, instance),
     };
+    final scopes = _items[(listId, outer)] ??= {};
+    // Known without reading the data: an item by index, or any list's first.
+    if (index >= 0 || !isPages) {
+      final known = scopes[index < 0 ? 0 : index];
+      if (known != null) return known;
+    }
     final parent = scopeFor(source, listId, outer) ?? root;
     final items = _listOf(_dataOf(listNode, parent));
     // The list's own (first built) item: item 0, or a page view's page at rest.
@@ -492,10 +502,9 @@ class NodeBinder {
               : listNode.prop(api.PageViewProps.initialPage).clamp(0, items.length - 1))
         : 0;
     final at = index < 0 ? restPage : index;
-    final key = (listId, outer, at);
-    final existing = _items[key];
+    final existing = scopes[at];
     if (existing != null) return existing;
-    final scope = _items[key] = ItemScope(
+    final scope = scopes[at] = ItemScope(
       index: at,
       item: items != null && at < items.length ? items[at] : null,
       parent: parent,
@@ -550,7 +559,7 @@ class NodeBinder {
 
   /// Lets go of the item, local and node scopes.
   void dispose() {
-    for (final s in [..._items.values, ..._provided.values]) {
+    for (final s in [for (final m in _items.values) ...m.values, ..._provided.values]) {
       s.dispose();
     }
     _items.clear();

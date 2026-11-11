@@ -31,6 +31,17 @@ abstract class RenderCollection extends RenderBox
     markNeedsPaint();
   }
 
+  /// A collection of many items paints in a layer of its own: a change to
+  /// one of its items (a cell of a board stepping every tick) repaints the
+  /// collection, not the screen around it (shadows, gradients, other
+  /// widgets), and the collection's own change doesn't repaint them either.
+  /// Small lists stay in their parent's layer. Adding or removing items
+  /// updates the compositing bits, so crossing the threshold is safe.
+  static const int repaintBoundaryItems = 64;
+
+  @override
+  bool get isRepaintBoundary => childCount >= repaintBoundaryItems;
+
   /// Paints the last child first (the first on top).
   bool _paintReversed = false;
   bool get paintReversed => _paintReversed;
