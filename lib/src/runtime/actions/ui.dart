@@ -209,7 +209,9 @@ class NavigatorActionUi implements ActionUi {
     if (anchor != null &&
         action.routeTransition == null &&
         !sheet &&
-        (action.presentation == ModalPresentation.dialog || action.presentation == ModalPresentation.adaptive)) {
+        (action.presentation == ModalPresentation.popover ||
+            action.presentation == ModalPresentation.dialog ||
+            action.presentation == ModalPresentation.adaptive)) {
       return showAnchoredModal(c, modalContent,
           anchor: anchor,
           placement: action.placement,
