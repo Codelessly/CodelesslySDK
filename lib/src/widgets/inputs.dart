@@ -25,6 +25,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         Node,
         RadioProps,
         SegmentedButtonProps,
+        SegmentedVariant,
         SignatureProps,
         SizeFit,
         SliderProps,
@@ -323,9 +324,10 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     },
     isCollapsed: d.isCollapsed,
     isDense: d.isDense,
-    // A collapsed decoration is the bare input: a compact density must not
-    // shrink its intrinsic height.
-    visualDensity: d.isCollapsed ? VisualDensity.standard : null,
+    // A collapsed decoration is the bare input, and a set content padding is
+    // the designed one: a platform's compact density (desktop) must not
+    // shrink either, or the field is ~8px shorter on desktop than designed.
+    visualDensity: d.isCollapsed || d.contentPadding != null ? VisualDensity.standard : null,
     contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
         error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
         focused: focused),
@@ -608,13 +610,38 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
             if (!constraints.hasBoundedHeight) return field(decoration);
-            // The node's height is the field's: the platform's density
-            // (compact on desktop and the web) would take 8px off the
-            // decorator's box, which then wouldn't fill the node.
-            final theme = Theme.of(context);
-            return Theme(
-              data: theme.copyWith(visualDensity: VisualDensity.standard),
-              child: field(decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))),
+            // InputDecorator doesn't stretch its container (fill, border) to
+            // a height: a dense 50 px field painted a 20 px box at its top.
+            // So the box paints them at full height and a borderless field
+            // sits in it where textAlignVertical puts the line (centred by
+            // default), as a Container around a TextField would.
+            final error = decoration.errorText != null || decoration.error != null;
+            final border = (error ? (focusNode.hasFocus ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
+                (focusNode.hasFocus ? decoration.focusedBorder : null) ??
+                decoration.enabledBorder ??
+                decoration.border ??
+                const UnderlineInputBorder();
+            final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
+            final y = switch (n.prop(TextFieldProps.textAlignVertical)) {
+              api.TextAlignVertical.top => -1.0,
+              api.TextAlignVertical.bottom => 1.0,
+              _ => 0.0,
+            };
+            return DecoratedBox(
+              decoration: ShapeDecoration(color: fill, shape: border),
+              child: Align(
+                alignment: Alignment(-1, y),
+                child: field(decoration.copyWith(
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  focusedErrorBorder: InputBorder.none,
+                  isDense: true,
+                )),
+              ),
             );
           })
         : field(decoration);
@@ -704,7 +731,7 @@ class _RenderIntrinsicSafeLayoutBuilder extends RenderBox
 // --- checkbox, switch, radio --------------------------------------------------
 
 /// Flutter's own sizes the toggles are scaled from.
-const double _checkboxSize = 40, _switchWidth = 59, _radioSize = 32;
+const double _checkboxSize = 40, _switchWidth = 59, _radioSize = 32, _radioRing = 18;
 
 class _CheckboxIsland extends StatefulWidget {
   const _CheckboxIsland({required this.node});
@@ -858,7 +885,8 @@ class _RadioIslandState extends State<_RadioIsland> {
     final active = _color(n.prop(RadioProps.activeColor));
     final inactive = _color(n.prop(RadioProps.inactiveColor));
     return Transform.scale(
-      scale: n.layout.width.value / _radioSize,
+      // Compact: the ring (18 px with its stroke) fills the box.
+      scale: n.layout.width.value / (n.prop(RadioProps.compact) ? _radioRing : _radioSize),
       child: RadioGroup<String>(
         groupValue: groupValue ?? '',
         onChanged: (v) {
@@ -1534,11 +1562,26 @@ class _HoverDecoratorState extends State<_HoverDecorator> {
   Widget build(BuildContext context) => MouseRegion(
         onEnter: (_) => setState(() => hover = true),
         onExit: (_) => setState(() => hover = false),
-        child: InputDecorator(
-          decoration: widget.decoration.copyWith(enabled: widget.enabled),
-          isHovering: hover && widget.enabled,
-          isEmpty: false,
-          child: widget.child,
+        // The field takes the node's height (a 42-high field stays 42 with
+        // a dense decoration), its value centred, as a text field does.
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final fills = constraints.hasBoundedHeight;
+            final decorator = InputDecorator(
+              // Standard density when it fills: a compact theme would draw
+              // the field 8 px shorter than its node.
+              decoration: widget.decoration.copyWith(
+                enabled: widget.enabled,
+                visualDensity: fills ? VisualDensity.standard : null,
+              ),
+              isHovering: hover && widget.enabled,
+              isEmpty: false,
+              expands: fills,
+              textAlignVertical: fills ? TextAlignVertical.center : null,
+              child: widget.child,
+            );
+            return fills ? SizedBox(height: constraints.maxHeight, child: decorator) : decorator;
+          },
         ),
       );
 }
@@ -1678,12 +1721,15 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         },
     };
     final localizations = MaterialLocalizations.of(context);
-    final display = switch (mode) {
+    final pattern = n.prop(DateTimeInputProps.format);
+    final display = pattern != null && pattern.isNotEmpty && (date != null || time != null)
+        ? _formatPattern(pattern, mode, date, time)
+        : switch (mode) {
       DateTimeInputMode.date => date == null ? '' : localizations.formatMediumDate(date),
       DateTimeInputMode.time => time == null ? '' : time.format(context),
       DateTimeInputMode.dateTime =>
         date == null || time == null ? '' : '${localizations.formatMediumDate(date)} · ${time.format(context)}',
-    };
+          };
     final enabled = n.prop(DateTimeInputProps.enabled);
     final label = n.prop(DateTimeInputProps.labelText);
     final initial = date == null || date.isBefore(first) || date.isAfter(last)
@@ -1712,7 +1758,9 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   });
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: InputDecorator(
+      child: n.prop(DateTimeInputProps.bare)
+          ? _bare(n, mode, display)
+          : InputDecorator(
         isEmpty: display.isEmpty,
         decoration: InputDecoration(
           labelText: label,
@@ -1723,13 +1771,46 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                   DateTimeInputMode.dateTime => 'date and time',
                 }}'
               : null,
-          suffixIcon: Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+          suffixIcon: _icon(n.prop(DateTimeInputProps.icon)) ??
+              Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
           enabled: enabled,
           border: const OutlineInputBorder(),
         ),
-        child: Text(display.isEmpty ? ' ' : display),
+        child: Text(display.isEmpty ? ' ' : display, style: _styleOrNull(n.prop(DateTimeInputProps.style))),
       ),
     );
+  }
+
+  /// [bare]: the value (or hint) and its icon in a row, the box left to the
+  /// node's own decoration.
+  Widget _bare(Node n, DateTimeInputMode mode, String display) {
+    final hint = n.prop(DateTimeInputProps.hint) ??
+        'Select ${switch (mode) {
+          DateTimeInputMode.date => 'date',
+          DateTimeInputMode.time => 'time',
+          DateTimeInputMode.dateTime => 'date and time',
+        }}';
+    final empty = display.isEmpty;
+    return Row(children: [
+      Expanded(
+        child: Text(empty ? hint : display,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style))),
+      ),
+      _icon(n.prop(DateTimeInputProps.icon)) ??
+          Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
+    ]);
+  }
+
+  /// [date] / [time] by an `intl` [pattern]; a broken pattern shows ISO.
+  static String _formatPattern(String pattern, DateTimeInputMode mode, DateTime? date, TimeOfDay? time) {
+    final at = DateTime(date?.year ?? 2000, date?.month ?? 1, date?.day ?? 1, time?.hour ?? 0, time?.minute ?? 0);
+    try {
+      return DateFormat(pattern).format(at);
+    } catch (_) {
+      return mode == DateTimeInputMode.time ? '${time?.hour}:${time?.minute.toString().padLeft(2, '0')}' : at.toIso8601String();
+    }
   }
 }
 
@@ -1778,7 +1859,11 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final side = n.prop(SegmentedButtonProps.side);
     final radius = n.prop(SegmentedButtonProps.borderRadius);
     final selectedIcon = _icon(n.prop(SegmentedButtonProps.selectedIcon));
-    return SegmentedButton<String>(
+    final segmentHeight = n.prop(SegmentedButtonProps.segmentHeight);
+    if (n.prop(SegmentedButtonProps.variant) == SegmentedVariant.track) {
+      return _track(context, n, selection, multi);
+    }
+    final button = SegmentedButton<String>(
       segments: segments,
       selected: selection,
       onSelectionChanged:
@@ -1802,7 +1887,99 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         side: side == null ? null : _side(side),
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
         padding: n.prop(SegmentedButtonProps.padding)?.flutter,
+        minimumSize: segmentHeight == null ? null : Size(0, segmentHeight),
+        maximumSize: segmentHeight == null ? null : Size(double.infinity, segmentHeight),
+        tapTargetSize: n.prop(SegmentedButtonProps.shrinkTapTarget) ? MaterialTapTargetSize.shrinkWrap : null,
+        visualDensity: segmentHeight == null ? null : VisualDensity.standard,
       ),
+      expandedInsets: n.prop(SegmentedButtonProps.expanded) ? EdgeInsets.zero : null,
+    );
+    // Segments sit on a canvas-type Material: a set background (transparent
+    // included) shows alone, as on chips.
+    if (n.prop(SegmentedButtonProps.backgroundColor) == null) return button;
+    return Theme(data: Theme.of(context).copyWith(canvasColor: Colors.transparent), child: button);
+  }
+
+  void _select(String value, bool multi) {
+    final next = multi
+        ? (selected.contains(value) ? ({...selected}..remove(value)) : {...selected, value})
+        : {value};
+    if (next.isEmpty && !widget.node.prop(SegmentedButtonProps.emptySelectionAllowed)) return;
+    setState(() => selected = next);
+    _fire(context, 'changed', next.toList());
+  }
+
+  /// The track variant: the segments on a tinted, bordered track, the
+  /// selected one raised (its own fill and shadows), no dividers. Segments
+  /// take their natural width (hug), or share a fixed or filling width equally.
+  Widget _track(BuildContext context, Node n, Set<String> selection, bool multi) {
+    final radius = n.prop(SegmentedButtonProps.borderRadius)?.flutter ?? BorderRadius.circular(4);
+    final side = n.prop(SegmentedButtonProps.side);
+    final enabled = n.prop(SegmentedButtonProps.enabled);
+    final base = _styleOrNull(n.prop(SegmentedButtonProps.textStyle)) ?? const TextStyle(fontSize: 13, fontWeight: FontWeight.w600);
+    final fg = _color(n.prop(SegmentedButtonProps.foregroundColor)) ?? const Color(0xFF6B7A8D);
+    final selectedFg = _color(n.prop(SegmentedButtonProps.selectedForegroundColor)) ?? const Color(0xFF0F1B2D);
+    final selectedBg = _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)) ?? Colors.white;
+    final shadows = [
+      for (final e in n.prop(SegmentedButtonProps.selectedShadows))
+        if (e.type == api.EffectType.dropShadow && e.visible) boxShadow(e),
+    ];
+    final padding = n.prop(SegmentedButtonProps.padding)?.flutter ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 5);
+    final expand = n.layout.width.fit != SizeFit.hug;
+    final vertical = n.prop(SegmentedButtonProps.direction) == api.Axis.vertical;
+    final children = <Widget>[
+      for (final s in n.prop(SegmentedButtonProps.segments))
+        () {
+          final on = selection.contains(s.value);
+          final color = on ? selectedFg : fg;
+          final icon = _icon(s.icon, color: color);
+          final label = s.label.isNotEmpty || icon == null ? s.label.isNotEmpty ? s.label : s.value : null;
+          Widget seg = Semantics(
+            button: true,
+            selected: on,
+            enabled: enabled && s.enabled,
+            label: label,
+            child: MouseRegion(
+              cursor: enabled && s.enabled ? SystemMouseCursors.click : MouseCursor.defer,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: enabled && s.enabled ? () => _select(s.value, multi) : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  padding: padding,
+                  decoration: BoxDecoration(
+                    color: on ? selectedBg : selectedBg.withValues(alpha: 0),
+                    borderRadius: radius,
+                    boxShadow: on ? shadows : null,
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                    if (icon != null) icon,
+                    if (icon != null && label != null) const SizedBox(width: 6),
+                    if (label != null)
+                      Flexible(
+                        child: Text(label,
+                            maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis, style: base.copyWith(color: color)),
+                      ),
+                  ]),
+                ),
+              ),
+            ),
+          );
+          if (s.tooltip != null && s.tooltip!.isNotEmpty) seg = Tooltip(message: s.tooltip!, child: seg);
+          return expand && !vertical ? Expanded(child: seg) : seg;
+        }(),
+    ];
+    return Container(
+      padding: EdgeInsets.all(n.prop(SegmentedButtonProps.trackPadding)),
+      decoration: BoxDecoration(
+        color: _color(n.prop(SegmentedButtonProps.backgroundColor)) ?? const Color(0xFFE2E7EE),
+        borderRadius: radius,
+        border: side == null ? null : Border.fromBorderSide(_side(side)),
+      ),
+      child: vertical
+          ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
+          : Row(mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min, children: children),
     );
   }
 }
@@ -1885,6 +2062,12 @@ class _SignatureIslandState extends State<_SignatureIsland> {
             signLineColor: n.prop(SignatureProps.signLineColor).flutter,
             textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
             normalized: n.prop(SignatureProps.normalized),
+            signLineMark: n.prop(SignatureProps.signLineMark),
+            signLineInset: n.prop(SignatureProps.signLineInset),
+            signLineBottom: n.prop(SignatureProps.signLineBottom),
+            placeholderBelowLine: n.prop(SignatureProps.placeholderPosition) == api.SignaturePlaceholderPosition.belowLine,
+            placeholderFontWeight: n.prop(SignatureProps.placeholderFontWeight),
+            placeholderLetterSpacing: n.prop(SignatureProps.placeholderLetterSpacing),
           ),
           child: const SizedBox.expand(),
         ),

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart'
     show
         Breakpoints,
+        ThemeTokens,
         CanvasProps,
         jsonEquality,
         Json,
@@ -20,7 +21,9 @@ import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
+import '../runtime/actions/capture.dart' show CaptureRegistry;
 import '../runtime/actions/feedback_theme.dart';
+import '../runtime/actions/presentation_scope.dart';
 import '../runtime/actions/hero_flights.dart';
 import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
@@ -32,6 +35,7 @@ import '../runtime/actions/runner.dart' show CodelesslyActions, ActionCancellati
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
+import '../runtime/expressions/perf_scope.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
@@ -381,12 +385,24 @@ class CodelesslyWidget extends StatefulWidget {
         );
       };
 
+  /// [location] with what can't stand in a URL as is (spaces, non-ASCII
+  /// characters, a `%` that starts no escape) percent-encoded, and its
+  /// escapes (`%20`) and URL punctuation kept.
+  @visibleForTesting
+  static String encodeRawLocation(String location) => location.replaceAllMapped(
+        RegExp(r"%(?![0-9A-Fa-f]{2})|[^A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]"),
+        (m) => Uri.encodeComponent(m[0]!),
+      );
+
   /// The layout and params [screen] opens.
   @visibleForTesting
   static (String, Map<String, Object?>)? resolveScreen(PublishModel model, String? screen) {
     if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
+    // Encode what a typed location may hold raw (spaces, `·`, a lone `%`),
+    // keeping its escapes: a link's location is already encoded, and
+    // encoding it again turned `?toast=Loaded%20%E2%80%9C...` into a toast
+    // reading `Loaded%20%E2%80%9C...`.
+    final location = encodeRawLocation(screen.trim());
     final CanvasLocationMatch? match;
     final Uri? uri;
     try {
@@ -498,6 +514,35 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
     final id = ++_loadId;
     final requested = widget.layoutId ?? _controller?.layoutId;
     _lastRequested = requested;
+    // A layout already loaded shows in this frame, not after a loading one:
+    // a screen opened with a route transition is there when the transition
+    // starts, so its shared elements fly.
+    if (c.publishModel case final model?) {
+      var params = {...?_controller?.params, ...widget.params};
+      var layoutId = requested;
+      if (layoutId == null) {
+        final screen = CodelesslyWidget.resolveScreen(model, widget.initialScreen);
+        layoutId = screen?.$1 ?? model.entryLayoutId;
+        if (screen != null) params = {...screen.$2, ...params};
+      }
+      final cached = layoutId == null ? null : c.layout(layoutId);
+      if (cached != null) {
+        void show() {
+          _layout = cached;
+          _routeParams = params;
+          _error = null;
+        }
+
+        mounted ? setState(show) : show();
+        final controller = _controller;
+        if (controller != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && id == _loadId) controller._update(layout: cached, clearError: true);
+          });
+        }
+        return;
+      }
+    }
     try {
       await c.initialize();
       final model = c.publishModel!;
@@ -612,6 +657,7 @@ class _ScreenState {
     nodeValues.dispose();
     scope.dispose();
     if (scope.parent case final ScriptsScope scripts) scripts.dispose();
+    if (values.parent case final PerfScope perf) perf.dispose();
     values.dispose();
   }
 }
@@ -646,6 +692,7 @@ class _LayoutView extends StatefulWidget {
 
 class _LayoutViewState extends State<_LayoutView> {
   late final _ScreenState _screen = _create();
+  final GlobalKey _captureKey = GlobalKey(debugLabel: 'Codelessly layout');
   final Set<String> _seeded = {};
   String? _shown;
 
@@ -664,6 +711,25 @@ class _LayoutViewState extends State<_LayoutView> {
     final screen = screenValues(mq.size.width, mq.size.height,
         dark: mq.platformBrightness == Brightness.dark, breakpoints: _breakpoints);
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
+    _updateTheme();
+  }
+
+  /// The project's theme as the layout shows it: its tokens, then a
+  /// layout's own.
+  ThemeTokens get _tokens => widget.layout.theme ?? _codelessly.publishModel?.theme ?? ThemeTokens.none;
+
+  /// Whether the layout shows in dark mode: the device's mode, or with
+  /// [CodelesslyConfig.useHostTheme] the app's theme's (so an app's own
+  /// dark mode switch applies).
+  bool get _dark => _codelessly.config.useHostTheme
+      ? Theme.of(context).brightness == Brightness.dark
+      : MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark;
+
+  /// `theme`: the project's theme tokens for the current mode
+  /// ([themeValues]), kept as the mode and the published theme change.
+  void _updateTheme() {
+    final theme = themeValues(_tokens, dark: _dark);
+    if (!jsonEquality.equals(theme, _screen.values['theme'])) _screen.values.set('theme', theme);
   }
 
   Map<String, Object?> _paywallValues() {
@@ -684,7 +750,8 @@ class _LayoutViewState extends State<_LayoutView> {
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
       ..._paywallValues(),
-    }, _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope)));
+      // `perf` (frame timings) sits between the page's variables and these.
+    }, PerfScope(parent: _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope))));
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
     final scripts = ScriptsScope(
@@ -711,7 +778,7 @@ class _LayoutViewState extends State<_LayoutView> {
       expressions: engine,
       services: _codelessly.services,
       ui: _ScreenUi(this),
-      functions: config.functions,
+      functions: _codelessly.functions,
       tree: tree,
       nodeValues: nodeValues,
       scripts: widget.layout.document.scripts,
@@ -720,6 +787,7 @@ class _LayoutViewState extends State<_LayoutView> {
       onError: widget.host.onActionError,
       onActionErrorEvent: _actionError,
       refreshAuthValues: _codelessly.refreshAuthValues,
+      appData: _codelessly.appData,
     );
     final session = widget.host.paywall;
     if (session != null) {
@@ -781,6 +849,15 @@ class _LayoutViewState extends State<_LayoutView> {
     final storage = services is Services ? services.storage : null;
     // A publish can keep the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
+    // A link's query parameters set the app variables they name too (not
+    // only this screen's), so app-wide state can come from a URL
+    // (`/edit/p1?t=2.5&sel=clip:c2`). Computed variables can't be set.
+    final app = _codelessly.appVariables;
+    for (final e in widget.params.entries) {
+      final v = app.variable(e.key);
+      if (v == null || v.formula.isNotEmpty || widget.layout.variablesOf(canvasId).any((c) => c.name == e.key)) continue;
+      app.set(e.key, v.type.coerce(e.value) ?? e.value);
+    }
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
       scope.define(v);
@@ -848,6 +925,8 @@ class _LayoutViewState extends State<_LayoutView> {
     if (ModalRoute.isCurrentOf(context) == false) return;
     // An overlay screen (no route) isn't the screen the app is on.
     if (OverlayScreenScope.of(context)) return;
+    // A presented layout (a banner, a popup) is not the app's screen.
+    if (CodelesslyPresentation.maybeOf(context) != null) return;
     final route = CodelesslyRoute(widget.layout.id, shown, widget.params);
     if (_codelessly.route.value != route) _codelessly.route.value = route;
   }
@@ -893,6 +972,19 @@ class _LayoutViewState extends State<_LayoutView> {
 
   Future<void> _navigate(NavigationRequest request) async {
     if (!mounted) return;
+    // Load the destination first (briefly), so the screen is there when its
+    // transition starts: no loading frame, and shared elements fly.
+    final destination = request.type == NavigationType.pop || request.destinationId.isEmpty
+        ? null
+        : _codelessly.publishModel?.resolveLayoutId(request.destinationId);
+    if (destination != null && _codelessly.layout(destination) == null) {
+      try {
+        await _codelessly.loadLayout(destination).timeout(const Duration(seconds: 2));
+      } catch (_) {
+        // It loads in its own screen, which shows the error if it fails.
+      }
+      if (!mounted) return;
+    }
     final handler = widget.host.onNavigate;
     if (handler != null && await handler(context, request)) return;
     if (!mounted) return;
@@ -971,6 +1063,8 @@ class _LayoutViewState extends State<_LayoutView> {
   void didUpdateWidget(_LayoutView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!jsonEquality.equals(oldWidget.data, widget.data)) _dataChanged(oldWidget.data);
+    // A republish can bring another theme.
+    _updateTheme();
     if (!identical(oldWidget.controller, widget.controller)) {
       if (identical(oldWidget.controller?._screen, _screen)) oldWidget.controller?._screen = null;
       widget.controller?._screen = _screen;
@@ -1030,9 +1124,20 @@ class _LayoutViewState extends State<_LayoutView> {
     // The look of the runtime's own toasts and dialogs: the project's
     // tokens, then what the layout's nodes show.
     content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
+    // What a captureScreenshot action of this screen captures.
+    CaptureRegistry.bindLayout(_screen.tree, _captureKey);
+    content = RepaintBoundary(key: _captureKey, child: content);
     if (!config.useHostTheme) {
       final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
-      if (theme != null) content = Theme(data: themeDataOf(theme), child: content);
+      // A theme with dark colors is a dark theme in dark mode; one without
+      // stays light, as it was designed.
+      if (theme != null) {
+        final dark = theme.hasDark && _dark;
+        content = Theme(
+          data: themeDataOf(theme.forBrightness(dark: dark), brightness: dark ? Brightness.dark : Brightness.light),
+          child: content,
+        );
+      }
     }
     final mq = MediaQuery.maybeOf(context);
     if (mq != null) {
