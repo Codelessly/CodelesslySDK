@@ -152,17 +152,48 @@ class RenderTypewriter extends RenderProxyBox {
     final tw = _tw;
     final p = _paragraph;
     if (tw == null || !tw.grow || !typing || p == null || !p.hasSize) return;
-    // As tall as the typed lines, plus what follows the text (padding).
+    // As tall as the typed text laid out on its own, as the paragraph lays
+    // out (summing its lines can be a pixel off), plus what follows the
+    // text (padding).
     final top = p.localToGlobal(Offset.zero, ancestor: this).dy;
     final after = size.height - top - p.size.height;
     final n = shownCharacters;
-    var bottom = 0.0;
+    var height = 0.0;
     if (n > 0) {
-      for (final b in p.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: n))) {
-        bottom = math.max(bottom, b.bottom);
-      }
+      final typed = TextPainter(
+        text: _firstCharacters(p.text, n),
+        textAlign: p.textAlign,
+        textDirection: p.textDirection,
+        textScaler: p.textScaler,
+        maxLines: p.maxLines,
+        locale: p.locale,
+        strutStyle: p.strutStyle,
+        textWidthBasis: p.textWidthBasis,
+        textHeightBehavior: p.textHeightBehavior,
+      )..layout(maxWidth: p.constraints.maxWidth);
+      height = typed.height;
+      typed.dispose();
     }
-    size = constraints.constrain(Size(size.width, n == 0 ? 0 : top + bottom + after));
+    size = constraints.constrain(Size(size.width, n == 0 ? 0 : top + height + after));
+  }
+
+  /// [span]'s first [n] characters, styles kept.
+  static InlineSpan _firstCharacters(InlineSpan span, int n) {
+    var left = n;
+    InlineSpan? cut(InlineSpan s) {
+      if (left <= 0) return null;
+      if (s is! TextSpan) {
+        left -= 1;
+        return s;
+      }
+      final own = s.text ?? '';
+      final text = own.length <= left ? own : own.substring(0, left);
+      left -= text.length;
+      final children = [for (final c in s.children ?? const <InlineSpan>[]) ?cut(c)];
+      return TextSpan(text: text, style: s.style, children: children.isEmpty ? null : children);
+    }
+
+    return cut(span) ?? const TextSpan(text: '');
   }
 
   RenderParagraph? get _paragraph {
