@@ -18,6 +18,8 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../render/convert.dart';
+import 'embedded_player.dart';
+import 'embedded_media_protocol.dart';
 
 /// Whether [url] is a remote HTTPS URL on a public host whose path ends
 /// with one of [extensions].
@@ -190,35 +192,7 @@ class _MediaVideoState extends State<MediaVideo> {
 // --- embedded video ------------------------------------------------------------
 
 /// The player URL of an embedded YouTube or Vimeo video.
-String embeddedVideoUrl(Node n) {
-  final id = Uri.encodeComponent(n.prop(EmbeddedVideoProps.videoId));
-  String flag(bool v) => v ? '1' : '0';
-  switch (n.prop(EmbeddedVideoProps.source)) {
-    case EmbeddedVideoSource.youtube:
-      final start = n.prop(EmbeddedVideoProps.startAt), end = n.prop(EmbeddedVideoProps.endAt);
-      return Uri.https('www.youtube.com', '/embed/$id', {
-        'autoplay': flag(n.prop(EmbeddedVideoProps.autoPlay)),
-        'mute': flag(n.prop(EmbeddedVideoProps.mute)),
-        if (n.prop(EmbeddedVideoProps.loop)) ...{'loop': '1', 'playlist': n.prop(EmbeddedVideoProps.videoId)},
-        'controls': flag(n.prop(EmbeddedVideoProps.showControls)),
-        'fs': flag(n.prop(EmbeddedVideoProps.showFullscreenButton)),
-        'iv_load_policy': n.prop(EmbeddedVideoProps.showVideoAnnotations) ? '1' : '3',
-        if (n.prop(EmbeddedVideoProps.showCaptions)) 'cc_load_policy': '1',
-        'cc_lang_pref': n.prop(EmbeddedVideoProps.captionLanguage),
-        'start': ?start?.toString(),
-        'end': ?end?.toString(),
-        'playsinline': '1',
-      }).toString();
-    case EmbeddedVideoSource.vimeo:
-      return Uri.https('player.vimeo.com', '/video/$id', {
-        'autoplay': flag(n.prop(EmbeddedVideoProps.autoPlay)),
-        'muted': flag(n.prop(EmbeddedVideoProps.mute)),
-        'loop': flag(n.prop(EmbeddedVideoProps.loop)),
-        'fullscreen': flag(n.prop(EmbeddedVideoProps.showFullscreenButton)),
-        'playsinline': '1',
-      }).toString();
-  }
-}
+String embeddedVideoUrl(Node n) => embeddedPlayerUrl(n);
 
 /// A YouTube or Vimeo video in a web view; on a design canvas (or without a
 /// web view) its thumbnail, or a player frame.
@@ -229,13 +203,8 @@ class MediaEmbeddedVideo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!preview && webViewSupported && node.prop(EmbeddedVideoProps.videoId).isNotEmpty) {
-      return MediaWebView(
-        key: ValueKey(embeddedVideoUrl(node)),
-        url: embeddedVideoUrl(node),
-        inlineMedia: true,
-        autoPlay: node.prop(EmbeddedVideoProps.autoPlay),
-      );
+    if (!preview && embeddedPlayerSupported && node.prop(EmbeddedVideoProps.videoId).isNotEmpty) {
+      return EmbeddedPlayer(node: node);
     }
     final metadata = node.prop(EmbeddedVideoProps.metadata);
     final cloud = api.readString(metadata['cloudThumbnailUrl']) ?? '';

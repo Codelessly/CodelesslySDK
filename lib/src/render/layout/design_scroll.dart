@@ -128,6 +128,7 @@ class RenderDesignScroll extends RenderProxyBox {
   }
 
   void _setPixels(double value) {
+    if (!interactive || !value.isFinite) return;
     final next = value.clamp(0.0, maxScrollExtent);
     if (next == _pixels) return;
     _pixels = next;
@@ -142,7 +143,7 @@ class RenderDesignScroll extends RenderProxyBox {
     Curve curve = Curves.easeInOut,
   }) {
     _stop();
-    if (duration == Duration.zero) {
+    if (!interactive || !value.isFinite || duration <= Duration.zero) {
       _setPixels(value);
       return Future.value();
     }
@@ -218,20 +219,48 @@ class RenderDesignScroll extends RenderProxyBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    if (!_interactive) return;
+    if (!interactive) return;
     config
       ..isSemanticBoundary = true
-      ..scrollPosition = _pixels
+      ..hasImplicitScrolling = true
+      ..scrollPosition = pixels
       ..scrollExtentMin = 0
       ..scrollExtentMax = maxScrollExtent;
-    void by(double delta) => _setPixels(_pixels + delta);
+    final extent = hasSize ? (_axis == Axis.vertical ? size.height : size.width) * .8 : 0.0;
+    void forward() => jumpTo(_pixels + extent);
+    void backward() => jumpTo(_pixels - extent);
+    final canForward = _pixels < maxScrollExtent;
+    final canBackward = _pixels > 0;
+    // Flutter names these as the content's drag direction: normal scrollUp
+    // increases pixels (ScrollPosition._updateSemanticActions).
     if (_axis == Axis.vertical) {
-      config.onScrollUp = () => by(-size.height * .8);
-      config.onScrollDown = () => by(size.height * .8);
+      if (_reverse ? canBackward : canForward) config.onScrollUp = _reverse ? backward : forward;
+      if (_reverse ? canForward : canBackward) config.onScrollDown = _reverse ? forward : backward;
     } else {
-      config.onScrollLeft = () => by(-size.width * .8);
-      config.onScrollRight = () => by(size.width * .8);
+      if (_reverse ? canBackward : canForward) config.onScrollLeft = _reverse ? backward : forward;
+      if (_reverse ? canForward : canBackward) config.onScrollRight = _reverse ? forward : backward;
     }
+  }
+
+  @override
+  void showOnScreen({
+    RenderObject? descendant,
+    Rect? rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    if (interactive && descendant != null && hasSize) {
+      final target = MatrixUtils.transformRect(descendant.getTransformTo(this), rect ?? descendant.paintBounds);
+      final start = _axis == Axis.vertical ? target.top : target.left;
+      final end = _axis == Axis.vertical ? target.bottom : target.right;
+      final extent = _axis == Axis.vertical ? size.height : size.width;
+      final delta = start < 0 ? start : (end > extent ? end - extent : 0.0);
+      if (delta != 0) {
+        unawaited(animateTo(_pixels + delta * (_reverse ? -1 : 1), duration: duration, curve: curve));
+      }
+    }
+    // Ancestor viewports still get the request; this viewport itself is visible.
+    super.showOnScreen(descendant: this, rect: Offset.zero & size, duration: duration, curve: curve);
   }
 
   @override
@@ -247,6 +276,7 @@ class RenderDesignScroll extends RenderProxyBox {
   Axis get axis => _axis;
   set axis(Axis v) {
     if (v == _axis) return;
+    _stop();
     _axis = v;
     _drag?.dispose();
     _drag = null;
