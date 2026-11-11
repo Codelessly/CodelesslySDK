@@ -55,6 +55,31 @@ class _Profiles extends BackendCloudDatabase {
 }
 
 void main() {
+  test('anonymous identity changes and repeated signed-out auth errors fail closed', () async {
+    final auth = _SingleSubscriptionAuth(const AppUser(uid: 'guest-one', isAnonymous: true));
+    final backend = Backend();
+    final runtime = PaywallRuntime(backend: backend, purchases: Store.new, platform: 'ios');
+    final app = Codelessly(config: CodelesslyConfig(services:
+      Services(auth: auth, paywalls: runtime, analytics: const NoAnalytics())));
+    expect(app.appVariables.read('auth.isSignedIn'), false);
+    await pumpEventQueue();
+    final session = runtime.session(backend.resolved);
+    runtime.entitlements.value = {'guest-grant'};
+    auth.emit(const AppUser(uid: 'guest-two', isAnonymous: true));
+    await pumpEventQueue();
+    expect(session.isDisposed, true);
+    expect(runtime.entitlements.value, isEmpty);
+    expect(app.appVariables.read('auth.uid'), '');
+    auth.emit(null);
+    await pumpEventQueue();
+    runtime.entitlements.value = {'stale-grant'};
+    auth.events.addError(StateError('auth unavailable'));
+    await pumpEventQueue();
+    expect(runtime.entitlements.value, isEmpty);
+    app.dispose();
+    runtime.dispose();
+    await auth.events.close();
+  });
   test('a second session cannot remove another session\'s verified grant', () async {
     final stores = <Store>[];
     final backend = Backend();

@@ -397,16 +397,16 @@ class _ServiceValuesScope extends ValuesScope {
     final s = _services;
     if (s == null) return;
     final current = s.auth.currentUser;
-    _scopeAccount(current == null || current.isAnonymous ? null : current.uid);
+    _scopeAccount(current?.uid);
     _auth = s.watchAuth().listen(
       (value) {
         if (_disposed) return;
-        _scopeAccount(value['isSignedIn'] == true ? value['uid'] as String? : null);
+        _scopeAccount(s.auth.currentUser?.uid);
         set('auth', value);
       },
       onError: (Object error, StackTrace stack) {
         if (_disposed) return;
-        _scopeAccount(null);
+        _scopeAccount(null, reset: true);
         set('auth', authValue(null));
         s.analytics.logError(error, stackTrace: stack, type: 'auth_scope');
       },
@@ -421,12 +421,12 @@ class _ServiceValuesScope extends ValuesScope {
   String? _uid;
   bool _accountInitialized = false;
 
-  void _scopeAccount(String? uid) {
-    if (_accountInitialized && _uid == uid) return;
+  void _scopeAccount(String? uid, {bool reset = false}) {
+    if (!reset && _accountInitialized && _uid == uid) return;
     _accountInitialized = true;
     _uid = uid;
     final runtime = _services?.paywalls;
-    runtime?.scopeToUser(uid);
+    runtime?.scopeToUser(uid, reset: reset);
     if (runtime != null) unawaited(runtime.refreshEntitlements());
   }
 
