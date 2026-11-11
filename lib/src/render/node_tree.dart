@@ -410,6 +410,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void performLayout() {
     final child = this.child;
     if (_collapsed) {
+      // Keep retained descendants layout-clean, like RenderOffstage. A
+      // paragraph still receives font notifications while hidden. Skipping
+      // its layout leaves it dirty under a clean parent, so the next font
+      // notification violates Flutter's relayout-boundary invariant.
+      child?.layout(constraints);
       size = constraints.smallest;
     } else if (child == null) {
       size = constraints.smallest;
