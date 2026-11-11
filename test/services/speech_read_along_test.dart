@@ -110,6 +110,26 @@ void main() {
     expect(await done, isTrue);
   });
 
+  test('a voice whose phrases end without ever sounding falls back to silent read-along', () async {
+    final voice = _Voice();
+    final speech = SpeechService(engine: voice);
+    addTearDown(speech.dispose);
+    speech.msPerSyllable = 12;
+    final seen = <int>[];
+    speech.addListener(() {
+      final w = speech.value['wordIndex'] as int;
+      if (w >= 0 && (seen.isEmpty || seen.last != w)) seen.add(w);
+    });
+    final done = speech.readAlong('Pitter, patter! Down came the rain.');
+    await until(() => voice.ends.isNotEmpty);
+    // The browser errors at once (no voices): the phrase ends, never started.
+    voice.ends.single.complete();
+    expect(await done, isTrue);
+    expect(speech.value['speaking'], isFalse);
+    expect(seen, [0, 1, 2, 3, 4, 5]);
+    expect(voice.phrases.length, 1, reason: 'silent from then on');
+  });
+
   test('a stop ends it unfinished; carrying on starts at a word', () async {
     final voice = _Voice();
     final speech = SpeechService(engine: voice);

@@ -241,7 +241,7 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
     final id = ++_utterance;
     engine.cancel();
     _clock?.cancel();
-    final silent = !engine.available;
+    var silent = !engine.available;
     final first = startWord.clamp(0, timing.words.length - 1);
     value = {..._state(engine, true, text), 'silent': silent};
     final watch = Stopwatch()..start();
@@ -283,7 +283,7 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
           show(from);
         }
 
-        if (silent) {
+        Future<bool> readSilently() async {
           start();
           final ms = timing.span(from, to) * msPerSyllable / rate;
           await Future<void>.delayed(Duration(milliseconds: ms.round()));
@@ -291,6 +291,11 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
           show(to);
           running = false;
           await Future<void>.delayed(const Duration(milliseconds: ReadAlongTiming.phrasePauseMs));
+          return true;
+        }
+
+        if (silent) {
+          if (!await readSilently()) return false;
           continue;
         }
         void boundary(SpeechBoundary bd) {
@@ -318,6 +323,15 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
         final voice = engine;
         if (voice is TimedSpeechEngine) {
           await voice.speakTimed(spoken, language: language, rate: rate, pitch: pitch, onStart: start, onBoundary: boundary);
+          if (id != _utterance) return false;
+          if (!running) {
+            // The phrase ended without ever sounding (no voice installed, or
+            // speech blocked): read along silently from here.
+            silent = true;
+            value = {...value, 'silent': true};
+            if (!await readSilently()) return false;
+            continue;
+          }
         } else {
           start();
           if (voice is BoundarySpeechEngine) {
