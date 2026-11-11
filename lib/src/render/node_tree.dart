@@ -366,7 +366,7 @@ extension _NodeLayout on Node {
 }
 
 /// One node in the render tree.
-class NodeBox extends RenderProxyBox implements NodeBuilder {
+class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout {
   NodeBox._(this.tree, this.id, this._slot, this.instance);
 
   @override
@@ -413,6 +413,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   /// Hidden by a binding or condition (not by its own `visible`): it takes
   /// no space, as Flutter's `Visibility` without `maintainSize`.
   bool get collapsed => _collapsed;
+
+  @override
+  bool get skipsChildLayout => _collapsed;
   bool _collapsed = false;
   List<Listenable> _bindingWatch = const [];
   Listenable? _bindingListenable;
@@ -676,21 +679,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   /// collapsed ancestor down: a dirty child must never have a clean parent
   /// between it and its relayout boundary. Do this before property setters
   /// too, since a changed paragraph can invalidate layout before `_wire`.
-  void _prepareLayoutChanges() {
-    final path = <RenderObject>[];
-    var collapsedAt = -1;
-    for (RenderObject? object = this; object != null; object = object.parent) {
-      path.add(object);
-      if (object is NodeBox && object.collapsed) collapsedAt = path.length - 1;
-    }
-    if (collapsedAt < 0) {
-      markNeedsLayout();
-      return;
-    }
-    for (var i = collapsedAt; i >= 0; i--) {
-      path[i].markNeedsLayout();
-    }
-  }
+  void _prepareLayoutChanges() => prepareSkippedLayoutChange(this);
 
   /// A row/column that hugs its cross axis and stretches its children
   /// measures them unstretched, then lays them out stretched, which makes
