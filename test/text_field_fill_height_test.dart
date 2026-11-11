@@ -62,11 +62,9 @@ void main() {
         matching: find.byWidgetPredicate((w) => w is DecoratedBox && w.decoration is ShapeDecoration),
       );
       expect(tester.getSize(box.first).height, 68);
-      // (Text much smaller than the box sits a few pixels low: not centred
-      // yet for 14 px in 68.)
-      if (size >= 18) {
-        expect(tester.getCenter(find.byType(EditableText)).dy, closeTo(tester.getCenter(box.first).dy, 1.5));
-      }
+      expect(tester.getCenter(find.byType(EditableText)).dy, closeTo(tester.getCenter(box.first).dy, 1.5));
+      // The text starts where the padding says (18 px in).
+      expect(tester.getTopLeft(find.byType(EditableText)).dx - tester.getTopLeft(box.first).dx, closeTo(18, 0.5));
     });
 
   testWidgets('its prefix icon centres in the whole height', (tester) async {
