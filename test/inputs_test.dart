@@ -279,6 +279,40 @@ void main() {
     tree.dispose();
   });
 
+  testWidgets('a caret at the end of the text stays at the end when a new value arrives', (tester) async {
+    // A dialog's name field autofocuses while its bound default is still
+    // empty: the caret sits at 0, the end. When the default arrives the
+    // caret belongs after it, as in a field created with that text.
+    final source = DocumentSource(_doc({
+      'f': {
+        'type': 'textField',
+        'layout': {'width': 200, 'height': 46},
+        'props': {'initialValue': '', 'autofocus': true},
+      },
+    }));
+    final (tree, _) = await _show(tester, source, interactive: true);
+    await tester.pump();
+    source.document = source.document.copyWith(nodes: {
+      ...source.document.nodes,
+      'f': source.document['f']!.withProp(api.TextFieldProps.initialValue, 'Untitled 8'),
+    });
+    await tester.pump();
+    final controller = _widget<TextField>(tree).controller!;
+    expect(controller.text, 'Untitled 8');
+    expect(controller.selection, const TextSelection.collapsed(offset: 10));
+
+    // A caret inside the text keeps its place.
+    controller.selection = const TextSelection.collapsed(offset: 3);
+    source.document = source.document.copyWith(nodes: {
+      ...source.document.nodes,
+      'f': source.document['f']!.withProp(api.TextFieldProps.initialValue, 'Untitled 9'),
+    });
+    await tester.pump();
+    expect(controller.selection, const TextSelection.collapsed(offset: 3));
+    await tester.pumpWidget(const SizedBox());
+    tree.dispose();
+  });
+
   testWidgets('a text field is a real TextField, sized by its fits', (tester) async {
     final source = DocumentSource(_doc({
       'f': {
