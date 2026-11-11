@@ -1403,10 +1403,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void _wire(List<RenderBox> next) {
     final relink = _alreadyWired(next);
     if (relink != null) {
+      // Dirty the boundary before async samples invalidate its inner layers.
+      markNeedsLayout();
       for (final o in relink) {
         o.markNeedsLayout();
       }
-      markNeedsLayout();
       _previousInner = const [];
       _finishWire(next);
       return;
