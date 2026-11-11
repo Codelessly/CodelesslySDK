@@ -5,6 +5,7 @@
 //
 // On a design canvas (not animating) the list keeps its render objects at
 // rest (collections.dart): this is the running app's.
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -98,13 +99,16 @@ extension ListFeatures on Node {
   bool get pullsToRefresh =>
       type == 'listView' &&
       (prop(ListViewProps.pullToRefresh) || actions.any((r) => r.trigger.type == TriggerType.refresh));
+
+  /// A list that opens at its end and keeps its place ([ListViewProps.stickToEnd]).
+  bool get sticksToEnd => type == 'listView' && prop(ListViewProps.stickToEnd);
 }
 
 /// Whether a running list [n] is a [DataListView]: it pages, groups into
 /// sections, has swipe actions or pulls to refresh, and lays its items in a
 /// line.
 bool usesDataList(Node n) =>
-    (n.pagination != null || n.sectioned || n.swipes || n.pullsToRefresh) &&
+    (n.pagination != null || n.sectioned || n.swipes || n.pullsToRefresh || n.sticksToEnd) &&
     !n.prop(ListViewProps.wrap) &&
     n.prop(ListViewProps.layout) == api.ListLayout.list;
 
@@ -238,6 +242,15 @@ class DataListViewState extends State<DataListView> {
 
   PaginationController? get controller => _controller;
 
+  // A list that sticks to its end: the item the list is anchored at (items
+  // before it grow up from it, so putting some there moves nothing), the
+  // last item and count seen, and whether it was at its end.
+  Object? _anchor;
+  Object? _lastKey;
+  int _lastCount = 0;
+  bool _atEnd = true, _scrollListening = false;
+  int _endFrames = 0;
+
   ListRuntime get _r => widget.runtime;
   Node get _node => _r.node;
   Pagination? get _model => _node.pagination;
@@ -314,6 +327,57 @@ class DataListViewState extends State<DataListView> {
 
   void _changed() {
     if (mounted) setState(() {});
+  }
+
+  /// A list that sticks to its end: it opens there, and an item added at
+  /// the end scrolls it there only while it was there.
+  void _followEnd(List<Object?> items) {
+    if (!_scrollListening) {
+      _scrollListening = true;
+      scrollController.addListener(_scrolled);
+    }
+    final last = items.isEmpty ? null : _keyOf(items.last);
+    final grew = items.length != _lastCount || last != _lastKey;
+    final first = _lastCount == 0 && items.isNotEmpty;
+    _lastCount = items.length;
+    _lastKey = last;
+    if (grew && _atEnd) _scrollToEnd(animate: !first, frames: 3);
+  }
+
+  void _scrolled() {
+    if (_endFrames > 0 || !scrollController.hasClients) return;
+    final p = scrollController.position;
+    _atEnd = p.pixels >= p.maxScrollExtent - 8;
+  }
+
+  /// Scrolls to the end after the frame, again on the next ones (lazily
+  /// built items only know their extent once laid out).
+  void _scrollToEnd({required bool animate, int frames = 1}) {
+    _endFrames = frames;
+    SchedulerBinding.instance.ensureVisualUpdate();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !scrollController.hasClients) {
+        _endFrames = 0;
+        return;
+      }
+      final p = scrollController.position;
+      if (animate && (p.maxScrollExtent - p.pixels) > 0) {
+        unawaited(scrollController
+            .animateTo(p.maxScrollExtent, duration: const Duration(milliseconds: 200), curve: Curves.easeOut)
+            .whenComplete(() {
+          _endFrames = 0;
+          if (mounted && scrollController.hasClients) _scrollToEnd(animate: false);
+        }));
+        return;
+      }
+      if (p.pixels != p.maxScrollExtent) p.jumpTo(p.maxScrollExtent);
+      _endFrames = frames - 1;
+      if (_endFrames > 0) {
+        _scrollToEnd(animate: false, frames: _endFrames);
+      } else {
+        _atEnd = true;
+      }
+    });
   }
 
   @override
@@ -649,6 +713,8 @@ class DataListViewState extends State<DataListView> {
     final sections = _sectionsFor(items);
     final footer = _footer(context);
     final twoWay = model?.mode == PaginationMode.bidirectional && sections == null;
+    final sticky = _node.sticksToEnd && !twoWay;
+    if (sticky) _followEnd(items);
 
     final List<Widget> slivers;
     Key? center;
@@ -670,6 +736,18 @@ class DataListViewState extends State<DataListView> {
           if (index <= math.max(0, model!.thresholdItems)) _requestPrevious();
         })),
         _sliverList(_delegate(after, onBuilt: (index) => _onItemBuilt(index, after.length)), key: _centerKey),
+      ];
+    } else if (sticky && sections == null) {
+      // Items put before the anchor grow up from it.
+      var at = items.indexWhere((item) => _keyOf(item) == _anchor);
+      if (at < 0) {
+        at = 0;
+        _anchor = items.isEmpty ? null : _keyOf(items.first);
+      }
+      center = _centerKey;
+      slivers = [
+        _sliverList(_delegate(items, count: at, reversed: true)),
+        _sliverList(_delegate(items, start: at, onBuilt: (index) => _onItemBuilt(index, items.length)), key: _centerKey),
       ];
     } else if (sections != null) {
       slivers = _sectionSlivers(context, items, sections);

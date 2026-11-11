@@ -9,6 +9,25 @@
   rest, live queries drop documents as they expire, and writes store the field as ISO text (empty or missing:
   `DataRules.neverExpires`). `BackendCloudDatabase(audience:)` gives what the user matches. `CloudQuery.plan`
   takes `keepOnServer`. See the guide's [Cloud data and services](docs/guide/09-cloud-data-and-services.md).
+- Presenting layouts from anywhere: `codelessly.present(layoutId, presentation:, params:, data:, dismissible:,
+  priority:, anchor:, ...)` shows a layout above the host app (dialog, sheet, side sheet, full screen, popover or
+  banner) and completes with its `closeModal` result (null when dismissed). One at a time, by priority.
+  `CodelesslyOverlay` (as `MaterialApp.builder`) leads it to the app's navigator; `codelessly.presenter`.
+- Banners: `openModal` with `presentation: banner`, along the top (or bottom) edge with no barrier; swipe to
+  dismiss. A presented full-screen layout or banner closes itself with `closeModal`.
+- Automations: the publish model's `automations` run on app start, session start, resume, app events,
+  intervals and screens shown, with a `when` formula and `maxRuns` / `maxPerSession` / `everyDays`
+  (`codelessly.automations`, started by the overlay). `${usage}` (launches, sessions, first launch, event and
+  automation counts per user) in every layout.
+- App events: `codelessly.emit(name, props)`, `codelessly.events`, and the `emitEvent` action.
+- `captureScreenshot` action (a screen, a node, or the whole app in a `CodelesslyCaptureScope`) giving a PNG
+  `data:` URL; `cloudFiles` with `source` uploads such a value instead of asking the user.
+- `codelessly.registerFunction` / `unregisterFunction` / `functions` (live, over `CodelesslyConfig.functions`);
+  `callFunction` with `optional: true` skips a function the app didn't register.
+- `listView` with `stickToEnd: true`: opens at its end, keeps its place when items are put in front, follows new
+  items at the end only while there (chats, logs).
+- A bottom sheet modal rises above the keyboard.
+- Guide: [Presenting, automations and host features](docs/guide/17-presenting-and-automations.md).
 
 ## 23.0.0
 

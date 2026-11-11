@@ -844,3 +844,80 @@ class MyPurchases implements PurchaseService {
 Codelessly ownPurchases() => Codelessly(
       config: CodelesslyConfig(slug: 'my-project', services: Services(purchases: MyPurchases())),
     );
+
+// ---------------------------------------------------------------------
+// Presenting layouts, app events and automations.
+// ---------------------------------------------------------------------
+
+/// The presenter's overlay around the app: `codelessly.present` and the
+/// project's automations show their layouts above any screen, and a
+/// screenshot action can capture the whole app.
+Widget appWithOverlay(Codelessly codelessly) => MaterialApp(
+      builder: (context, child) => CodelesslyOverlay(codelessly: codelessly, child: child!),
+      home: const Scaffold(body: Center(child: Text('Your app'))),
+    );
+
+/// A layout shown from anywhere (no CodelesslyWidget on the screen), with
+/// params its variables start from, and what its close modal action gave.
+Future<int?> askForRating(Codelessly codelessly, int orders) async {
+  final answer = await codelessly.present(
+    'rate-us',
+    presentation: ModalPresentation.bottomSheet,
+    params: {'orders': orders},
+  );
+  // `{"type": "closeModal", "result": {"stars": "${stars}"}}` in the layout;
+  // null when the user dismissed it.
+  return switch (answer) {
+    {'stars': final Object stars} => int.tryParse('$stars'),
+    _ => null,
+  };
+}
+
+/// A banner along the top that the app keeps working under.
+Future<void> showNotice(Codelessly codelessly) =>
+    codelessly.present('maintenance-notice', presentation: ModalPresentation.banner, priority: 10);
+
+/// App events: the project's automations listening for one run (a popup
+/// after the third order), and your code hears the layouts' `emitEvent`s.
+void appEvents(Codelessly codelessly) {
+  codelessly.emit('order_completed', {'total': 42.5, 'items': 3});
+  codelessly.events.listen((event) {
+    if (event.name == 'onboarding_done') debugPrint('plan: ${event.props['plan']}');
+  });
+}
+
+/// Host features a layout calls by name and branches on (`callFunction`
+/// with `${result.granted}`), registered where you have what they need.
+class PermissionHandlers extends StatefulWidget {
+  const PermissionHandlers({super.key, required this.codelessly, required this.child});
+
+  final Codelessly codelessly;
+  final Widget child;
+
+  @override
+  State<PermissionHandlers> createState() => _PermissionHandlersState();
+}
+
+class _PermissionHandlersState extends State<PermissionHandlers> {
+  @override
+  void initState() {
+    super.initState();
+    widget.codelessly.registerFunction('requestPermission', (context, params) async {
+      // Ask the OS with your permission plugin; answer what the layout reads.
+      final granted = await requestOsPermission('${params['kind']}');
+      return {'granted': granted};
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.codelessly.unregisterFunction('requestPermission');
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Stands for your permission plugin's call.
+Future<bool> requestOsPermission(String kind) async => kind == 'notifications';
