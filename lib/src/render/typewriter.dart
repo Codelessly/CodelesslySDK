@@ -56,6 +56,7 @@ class RenderTypewriter extends RenderProxyBox {
       _run(_from); // the clock restarts with the new hold
     }
     markNeedsPaint();
+    if (tw.grow || (old?.grow ?? false)) markNeedsLayout();
   }
 
   void _run(double from) {
@@ -82,8 +83,11 @@ class RenderTypewriter extends RenderProxyBox {
     if (hold != null) clock = math.min(clock, hold.toDouble());
     final ms = clock - tw.delayMs;
     _begun = ms >= 0;
+    final before = shownCharacters;
     _shown = math.min(_text.length.toDouble(), _from + math.max(0, ms) * tw.charsPerSecond / 1000);
     markNeedsPaint();
+    // Growing: the size follows the typed lines (and the whole text at the end).
+    if (tw.grow && shownCharacters != before) markNeedsLayout();
     // Held: it only blinks from here, and a line not begun has no caret.
     if (_shown >= _text.length || (hold != null && clock >= hold && (!_begun || !tw.caret))) _stop();
   }
@@ -108,6 +112,25 @@ class RenderTypewriter extends RenderProxyBox {
     _ticker?.dispose();
     _ticker = null;
     super.dispose();
+  }
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final tw = _tw;
+    final p = _paragraph;
+    if (tw == null || !tw.grow || !typing || p == null || !p.hasSize) return;
+    // As tall as the typed lines, plus what follows the text (padding).
+    final top = p.localToGlobal(Offset.zero, ancestor: this).dy;
+    final after = size.height - top - p.size.height;
+    final n = shownCharacters;
+    var bottom = 0.0;
+    if (n > 0) {
+      for (final b in p.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: n))) {
+        bottom = math.max(bottom, b.bottom);
+      }
+    }
+    size = constraints.constrain(Size(size.width, n == 0 ? 0 : top + bottom + after));
   }
 
   RenderParagraph? get _paragraph {
