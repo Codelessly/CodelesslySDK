@@ -133,7 +133,7 @@ class ChartSeriesPainter extends NodePainter {
     return Rect.fromLTRB(
       p(ChartProps.showYAxis) ? p(ChartProps.yAxisWidth) + 8 : 0,
       isLine ? inset : 0,
-      size.width - (isLine ? inset : 0),
+      size.width - (isLine ? inset : 0) - (isLine ? p(ChartProps.endLabelWidth) : 0),
       size.height - (p(ChartProps.showXAxis) ? _xAxisHeight : 0),
     );
   }
@@ -278,7 +278,16 @@ class ChartSeriesPainter extends NodePainter {
     final n = data.length;
     final catW = n == 0 ? plot.width : plot.width / n;
     final slots = _slots;
-    double cx(int i) => isLine ? plot.left + plot.width * i / slots : plot.left + catW * (i + 0.5);
+    // A line chart with an x field places each row at its value over the
+    // domain; otherwise rows sit in slots.
+    final xField = isLine ? p(ChartProps.xField) : null;
+    final dMin = p(ChartProps.domainMin), dMax = p(ChartProps.domainMax);
+    double xAt(double v) => plot.left + plot.width * (v - dMin) / (dMax - dMin == 0 ? 1 : dMax - dMin);
+    double cx(int i) => xField != null
+        ? xAt(chartNumber(data[i], xField) ?? dMin)
+        : isLine
+            ? plot.left + plot.width * i / slots
+            : plot.left + catW * (i + 0.5);
     final gridColor = p(ChartProps.gridColor).flutter;
 
     // Grid and y labels.
@@ -383,8 +392,24 @@ class ChartSeriesPainter extends NodePainter {
 
     List<Offset> points(ChartSeries s) => [
           for (var i = 0; i < n; i++)
-            if (chartNumber(data[i], s.field) case final double v) Offset(cx(i), y(v)),
+            if (chartNumber(data[i], s.field) case final double v)
+              if (xField == null || chartNumber(data[i], xField) != null) Offset(cx(i), y(v)),
         ];
+
+    // The "now" line (line charts): dashed, at nowValue (a value with an x
+    // field, else a slot).
+    final nowValue = p(ChartProps.nowValue);
+    if (isLine && nowValue != null) {
+      final nx = xField != null ? xAt(nowValue) : plot.left + plot.width * nowValue / slots;
+      if (nx >= plot.left - 0.5 && nx <= plot.right + 0.5) {
+        _dashedLine(canvas, Offset(nx, plot.top), Offset(nx, plot.bottom),
+            Paint()
+              ..color = p(ChartProps.nowColor)?.flutter ?? const Color(0x80000000)
+              ..strokeWidth = 1,
+            dash: 4, gap: 3);
+      }
+    }
+    final endLabels = <(double, String, Color)>[];
 
     // Areas (fills first, so lines sit on top).
     for (final s in series.where((s) => s.kind == ChartSeriesKind.area)) {
@@ -439,9 +464,37 @@ class ChartSeriesPainter extends NodePainter {
         canvas.drawPath(seriesPath(pts, curved: s.curved), paint);
       }
       if (s.endDot) {
-        canvas.drawCircle(pts.last, s.strokeWidth + 2.5,
-            Paint()..color = s.endDotHaloColor?.flutter ?? const Color(0xFF000000).withValues(alpha: 0.85));
+        final halo = s.endDotHaloColor?.flutter;
+        if (halo == null || halo.a > 0) {
+          canvas.drawCircle(pts.last, s.strokeWidth + 2.5,
+              Paint()..color = halo ?? const Color(0xFF000000).withValues(alpha: 0.85));
+        }
         canvas.drawCircle(pts.last, s.strokeWidth + 1, Paint()..color = s.color.flutter);
+      }
+      if (s.endLabel) {
+        final last = [for (var i = 0; i < n; i++) if (chartNumber(data[i], s.field) != null) i].last;
+        final v = chartNumber(data[last], s.field)!;
+        final text = '${s.name.isEmpty ? s.field : s.name} ${v.toStringAsFixed(p(ChartProps.endLabelDecimals))}';
+        endLabels.add((pts.last.dy, text, s.color.flutter));
+      }
+    }
+
+    // End labels: right of each line's end, pushed apart so none overlap.
+    if (endLabels.isNotEmpty) {
+      endLabels.sort((a, b) => a.$1.compareTo(b.$1));
+      final style = _axisStyle.copyWith(fontWeight: FontWeight.w700, fontFeatures: const [FontFeature.tabularFigures()]);
+      final gap = (style.fontSize ?? 10) * 1.25;
+      final ys = [for (final l in endLabels) l.$1];
+      for (var i = 1; i < ys.length; i++) {
+        if (ys[i] - ys[i - 1] < gap) ys[i] = ys[i - 1] + gap;
+      }
+      final endX = [
+        for (final s in series.where((s) => s.endLabel && (s.kind == ChartSeriesKind.line || s.kind == ChartSeriesKind.area)))
+          if (points(s) case final pts when pts.isNotEmpty) pts.last.dx,
+      ].fold<double>(plot.left, math.max);
+      for (var i = 0; i < endLabels.length; i++) {
+        _label(canvas, endLabels[i].$2, Offset(endX + 8, ys[i]),
+            align: TextAlign.left, style: style.copyWith(color: endLabels[i].$3));
       }
     }
 
@@ -465,7 +518,16 @@ class ChartSeriesPainter extends NodePainter {
     }
 
     // X labels.
-    if (p(ChartProps.showXAxis)) {
+    final xLabels = p(ChartProps.xLabels);
+    if (p(ChartProps.showXAxis) && xField != null && xLabels.isNotEmpty) {
+      for (final l in xLabels) {
+        final tp = TextPainter(text: TextSpan(text: l.label, style: _axisStyle), textDirection: TextDirection.ltr)
+          ..layout();
+        final lx = (xAt(l.x) - tp.width / 2).clamp(0.0, math.max(0.0, size.width - tp.width));
+        tp.paint(canvas, Offset(lx.toDouble(), plot.bottom + _xAxisHeight / 2 + 2 - tp.height / 2));
+        tp.dispose();
+      }
+    } else if (p(ChartProps.showXAxis)) {
       final style = _axisStyle;
       final selectedStyle = style.copyWith(color: selection.withValues(alpha: 1));
       final every = math.max(1, p(ChartProps.xLabelEvery));
@@ -610,7 +672,9 @@ class PlotChartPainter extends NodePainter {
     final labelHeight = originAxes ? 0.0 : math.max(0.0, p(PlotChartProps.labelHeight));
     final chartHeight = math.max(0.0, size.height - labelHeight);
     final span = xMax - xMin;
-    double x(double value) => span == 0 ? 0 : (value - xMin) / span * size.width;
+    // A gutter on the left holds the y lines' axis labels.
+    final gutter = math.max(0.0, p(PlotChartProps.yAxisWidth));
+    double x(double value) => gutter + (span == 0 ? 0 : (value - xMin) / span * (size.width - gutter));
     final points = this.points;
     final series = p(PlotChartProps.series);
     var low = p(PlotChartProps.yMin) ?? _extent(points, series, math.min) ?? 0;
@@ -710,14 +774,49 @@ class PlotChartPainter extends NodePainter {
 
     for (final range in p(PlotChartProps.ranges)) {
       canvas.drawRect(Rect.fromLTRB(x(range.from), 0, x(range.to), chartHeight), Paint()..color = range.color.flutter);
+      if (range.label.isNotEmpty) {
+        final text = _text(range.label,
+            _style(p(PlotChartProps.markerLabelStyle), color: range.labelColor?.flutter ?? labelStyle.color, weight: 800));
+        text.paint(canvas, Offset(x(range.from) + 5, 4));
+        text.dispose();
+      }
     }
 
-    // Curve and the area under it.
-    if (points.isNotEmpty) {
-      final offsets = [
-        for (var i = 0; i < points.length; i++)
-          Offset(points.length == 1 ? 0 : x(xMin + span * i / (points.length - 1)), y(points[i])),
-      ];
+    // Horizontal lines and their axis labels; inline labels go on top later.
+    final yLines = p(PlotChartProps.yLines);
+    for (final line in yLines) {
+      final ly = y(line.y);
+      final paint = Paint()
+        ..color = line.color.flutter
+        ..strokeWidth = line.width;
+      if (line.dashed) {
+        for (double dx = gutter; dx < size.width; dx += 10) {
+          canvas.drawLine(Offset(dx, ly), Offset(math.min(size.width, dx + 6), ly), paint);
+        }
+      } else {
+        canvas.drawLine(Offset(gutter, ly), Offset(size.width, ly), paint);
+      }
+      if (line.axisLabel.isNotEmpty && gutter > 0) {
+        final text = _text(line.axisLabel, labelStyle);
+        text.paint(canvas, Offset(gutter - 6 - text.width, ly - text.height / 2));
+        text.dispose();
+      }
+    }
+
+    // Curve and the area under it (up to lineEndX when set).
+    final lineEndX = p(PlotChartProps.lineEndX);
+    Offset? curveEnd;
+    if (points.isNotEmpty && (lineEndX == null || lineEndX >= xMin)) {
+      final offsets = <Offset>[];
+      for (var i = 0; i < points.length; i++) {
+        final px = points.length == 1 ? xMin : xMin + span * i / (points.length - 1);
+        if (lineEndX != null && px > lineEndX + 1e-9) {
+          offsets.add(Offset(x(lineEndX), y(valueAt(lineEndX)!)));
+          break;
+        }
+        offsets.add(Offset(points.length == 1 ? gutter : x(px), y(points[i])));
+      }
+      curveEnd = offsets.last;
       final line = Path()..moveTo(offsets.first.dx, offsets.first.dy);
       final smooth = p(PlotChartProps.smooth);
       for (var i = 1; i < offsets.length; i++) {
@@ -747,6 +846,29 @@ class PlotChartPainter extends NodePainter {
             ..strokeJoin = StrokeJoin.round,
         );
       }
+    }
+
+    // Inline labels of the y lines, above the line at the left.
+    for (final line in yLines) {
+      if (line.label.isEmpty) continue;
+      final text = _text(line.label, _style(p(PlotChartProps.markerLabelStyle), color: line.color.flutter, weight: 800));
+      final ly = y(line.y) - text.height - 3;
+      if (line.labelBackground case final api.Color bg) {
+        canvas.drawRect(Rect.fromLTWH(gutter + 3, ly - 1, text.width + 6, text.height + 2), Paint()..color = bg.flutter);
+      }
+      text.paint(canvas, Offset(gutter + 6, ly));
+      text.dispose();
+    }
+
+    final hollow = p(PlotChartProps.markerHollow);
+    final ringFill = p(PlotChartProps.selectionDotColor).flutter;
+    final endDot = p(PlotChartProps.endDotRadius);
+    if (curveEnd != null && endDot > 0) {
+      canvas.drawCircle(curveEnd, endDot, Paint()..color = p(PlotChartProps.lineColor).flutter);
+      canvas.drawCircle(curveEnd, endDot, Paint()
+        ..color = ringFill
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5);
     }
 
     // More curves, broken at gaps. Far-off points are clamped so a steep
@@ -864,7 +986,15 @@ class PlotChartPainter extends NodePainter {
       if (value == null) continue;
       final dot = Offset(x(marker.x), y(value));
       final r = marker.radius ?? markerRadius;
-      _paintMarker(canvas, marker, dot, r);
+      if (hollow && marker.shape == PlotChartMarkerShape.dot) {
+        canvas.drawCircle(dot, r, Paint()..color = ringFill);
+        canvas.drawCircle(dot, r, Paint()
+          ..color = marker.color.flutter
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6);
+      } else {
+        _paintMarker(canvas, marker, dot, r);
+      }
       if (marker.label.isEmpty) continue;
       final color = marker.color.flutter;
       final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
