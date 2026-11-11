@@ -562,8 +562,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
+            // The height is the design's: a platform's compact density
+            // (desktop) would take 8 px off the container inside it.
             return field(constraints.hasBoundedHeight
-                ? decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))
+                ? decoration.copyWith(
+                    constraints: BoxConstraints.tightFor(height: constraints.maxHeight),
+                    visualDensity: VisualDensity.standard)
                 : decoration);
           })
         : field(decoration);

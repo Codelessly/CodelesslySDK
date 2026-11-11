@@ -78,6 +78,33 @@ void main() {
     tree.dispose();
   });
 
+  testWidgets('a one-line field of fixed height keeps it under a compact density', (tester) async {
+    // Desktop platforms default to a compact density, which takes 8 px off
+    // an input's container: a 46 px field drew 38 px tall in the editor and
+    // on the web inside its 46 px box. The height the design fixed wins.
+    final tree = NodeTree(DocumentSource(_doc({
+      'f': {
+        'type': 'textField',
+        'layout': {'width': 300, 'height': 46},
+        'props': {
+          'initialValue': 'Untitled 1',
+          'decoration': {
+            'filled': true, 'isDense': true, 'contentPadding': [13, 12, 13, 12],
+            'enabledBorder': {'type': 'outline', 'borderSide': {'width': 2}, 'borderRadius': 8},
+          },
+        },
+      },
+    })));
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(visualDensity: VisualDensity.compact),
+      home: Center(child: NodeView(tree: tree, rootId: 's')),
+    ));
+    final border = find.descendant(of: find.byType(InputDecorator), matching: find.byType(CustomPaint)).last;
+    expect(tester.getSize(border).height, 46);
+    await tester.pumpWidget(const SizedBox());
+    tree.dispose();
+  });
+
   testWidgets('a text field is a real TextField, sized by its fits', (tester) async {
     final source = DocumentSource(_doc({
       'f': {
