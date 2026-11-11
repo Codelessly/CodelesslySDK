@@ -1789,7 +1789,8 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
           DateTimeInputMode.dateTime => 'date and time',
         }}';
     final empty = display.isEmpty;
-    return Row(children: [
+    // Centered down the box, as a field's value is.
+    return Align(alignment: AlignmentDirectional.centerStart, child: Row(children: [
       Expanded(
         child: Text(empty ? hint : display,
             maxLines: 1,
@@ -1798,7 +1799,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
       ),
       _icon(n.prop(DateTimeInputProps.icon)) ??
           Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
-    ]);
+    ]));
   }
 
   /// [date] / [time] by an `intl` [pattern]; a broken pattern shows ISO.
