@@ -31,6 +31,12 @@ Future<(NodeTree, VariableScope)> show(WidgetTester tester, {String pan = 'multi
         'decoration': {'fills': [{'color': '#FFEAD49A'}]},
         'actions': [
           {
+            'trigger': {'type': 'dragStart'},
+            'actions': [
+              {'type': 'setVariable', 'variable': 'downs', 'op': 'add', 'value': r'${= floor(drag.x)}'},
+            ],
+          },
+          {
             'trigger': {'type': 'drag'},
             'actions': [
               {'type': 'setVariable', 'variable': 'xs', 'op': 'add', 'value': r'${= floor(drag.x)}'},
@@ -46,6 +52,7 @@ Future<(NodeTree, VariableScope)> show(WidgetTester tester, {String pan = 'multi
     v('xs', [], VariableType.list),
     v('ys', [], VariableType.list),
     v('starts', [], VariableType.list),
+    v('downs', [], VariableType.list),
     v('zoom', 1, VariableType.decimal),
   ]);
   final values = NodeValues(DocumentSource(doc));
@@ -91,6 +98,8 @@ void main() {
     expect(xs.last, 80, reason: 'the pointer at x 180 is 80 into the grid');
     expect(ys.last, 60);
     expect((scope.read('starts') as List).first, 20, reason: 'the drag started 20 into the grid');
+    // dragStart: once, where the finger went down (a stroke's first cell).
+    expect(scope.read('downs'), [20]);
     expect(gestureOf(tree).pose.scale, 1);
     expect(gestureOf(tree).pose.x, 0);
   });
@@ -112,6 +121,9 @@ void main() {
     expect(pose.scale, closeTo(2, 0.05));
     expect(scope.read('zoom'), closeTo(2, 0.05));
     expect(scope.read('xs'), isEmpty, reason: 'a pinch paints nothing');
+    // Petri v2: a pinch dabbed a cell under each finger when strokes began
+    // on pointerDown (it fires per finger). dragStart doesn't fire for one.
+    expect(scope.read('downs'), isEmpty, reason: 'a pinch starts no stroke');
     // Paint across the middle: drag.x is in the grid's own coordinates, so
     // each 10 screen px is 5 grid px at 2x.
     final g = await tester.startGesture(const Offset(200, 200));

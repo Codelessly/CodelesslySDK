@@ -22,6 +22,7 @@ import 'play.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragAndDropLayers;
 import '../runtime/gestures/drag_motion.dart' show RenderDragMotion, dragMotionLayers;
 import 'convert.dart';
+import 'layout/margin_box.dart';
 import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
 import 'layout/freeform.dart';
@@ -495,6 +496,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   ValueListenable<Node?>? _listenable;
 
   static final Map<String, int> debugApplyCounts = {};
+
+  /// Nodes whose bound change was drawn in place, without a re-apply (a
+  /// text's new text, a fill's new colour), while [debugCountApplies].
+  static final Map<String, int> debugInPlaceCounts = {};
   static bool debugCountApplies = false;
 
   /// Paints per node id while [debugCountPaints] is on (tools, tests).
@@ -568,6 +573,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         return;
       }
       if (_repaintOnly(old, n) || _retextOnly(old, n)) {
+        // Updated in place (no re-apply): counted apart.
+        if (debugCountApplies) debugInPlaceCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
         _watchBindings(bound.watch);
         _noteDataChange();
         return;
@@ -858,10 +865,19 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     // Outer layers, outermost first: margin, constraints, motion and scale
     // (render/behaviors.dart), rotation, loops, opacity, blurs and stroke
     // path.
-    final margin = n.layout.margin.flutter;
+    // Not `.flutter`, which reads a negative side as 0: a margin may be
+    // negative (RenderMargin).
+    final m0 = n.layout.margin;
+    final margin = EdgeInsets.fromLTRB(m0.left, m0.top, m0.right, m0.bottom);
     if (margin != EdgeInsets.zero) {
-      chain.add(_obtain<RenderPadding>('margin', () => RenderPadding(padding: margin, textDirection: TextDirection.ltr))
-        ..padding = margin);
+      if (margin.isNonNegative) {
+        chain.add(_obtain<RenderPadding>('margin', () => RenderPadding(padding: margin, textDirection: TextDirection.ltr))
+          ..padding = margin);
+      } else {
+        // A negative side reaches past the node's box (RenderPadding takes
+        // none, and ignored it).
+        chain.add(_obtain<RenderMargin>('negativeMargin', () => RenderMargin(margin: margin))..margin = margin);
+      }
     }
     if (!n.layout.constraints.isEmpty) {
       final c = n.layout.constraints.flutter;
@@ -1132,8 +1148,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     if (canStack && tree.animates && n.behaviors.inkWell != null) under.add(inkOverlay(this, n, radius));
     if (content == null && under.isEmpty && over.isEmpty) return;
+    // Passthrough: the content gets the shell's own constraints, as it
+    // would with no decoration, so a size the parent forces (a fixed child
+    // stretched between two pins) reaches it instead of its design size.
     final stack = _obtain<RenderStack>('shellStack',
-        () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
+        () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none, fit: StackFit.passthrough));
     _stackExtras[stack] = (under, over);
     if (content == null) {
       _innerChains[stack] = const [];
