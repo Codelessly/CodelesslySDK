@@ -77,18 +77,47 @@ Object? readPath(ValueScope? scope, String path) {
 }
 
 /// What tells [scope]'s readers that [name] changed: the declaring scope's
-/// watcher, a scope that doesn't declare its names itself, or null when no
-/// scope declares it.
+/// watcher and foreign computed dependencies, a scope that doesn't declare
+/// its names itself, or null when no scope declares it.
 Listenable? watchName(ValueScope? scope, String name) {
-  for (ValueScope? s = scope; s != null; s = s.parent) {
-    if (s is NamedScope) {
-      if (s.declares(name)) return s.watch(name);
-    } else {
-      return s;
+  if (scope == null) return null;
+  final watches = <Listenable>{};
+  final seen = <String>{};
+  void collect(String name) {
+    // Resolve every dependency from the original reader: `script` and item
+    // scopes can sit above the scope declaring the computed variable.
+    if (!seen.add(name)) return;
+    for (ValueScope? s = scope; s != null; s = s.parent) {
+      if (s is NamedScope) {
+        if (!s.declares(name)) continue;
+        watches.add(s.watch(name));
+        if (s is VariableScope) {
+          for (final foreign in s.foreignReads(name)) {
+            collect(foreign);
+          }
+        }
+      } else {
+        watches.add(s);
+      }
+      return;
     }
   }
-  return null;
+
+  collect(name);
+  if (watches.isEmpty) return null;
+  if (watches.length == 1) return watches.single;
+  final inputs = watches.toList();
+  final cache = _nameWatches[scope] ??= {};
+  final previous = cache[name];
+  if (previous != null && listEquals(previous.$1, inputs)) return previous.$2;
+  final merged = Listenable.merge(inputs);
+  cache[name] = (inputs, merged);
+  return merged;
 }
+
+// A reader owns these lazily-attached merged listenables. Repeated binding
+// evaluations must get the same identity; listener removal detaches all inputs.
+final Expando<Map<String, (List<Listenable>, Listenable)>> _nameWatches = Expando();
 
 /// The root name of a path (`cart` of `cart[0].qty`).
 String rootOf(String path) {

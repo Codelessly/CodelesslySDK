@@ -9,7 +9,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node, TriggerType;
+import 'package:codelessly_api/codelessly_api.dart' show Json, Node, TriggerType, jsonEquality;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -256,8 +256,29 @@ class _BoxReactions {
       if (_watched.containsKey(name)) continue;
       final w = watchName(owner.contextFor(box).scope, rootOf(name));
       if (w == null) continue;
+      // Named computed watches can also be invalidated by a shared foreign
+      // dependency (e.g. any async script result). Fire only when this path's
+      // completed value changed; an unrelated completion must not restart a
+      // counting animation, and an unresolved result is not a real null.
+      (Object?, bool) readValue() {
+        final scope = owner.contextFor(box).scope;
+        final scripts = readPath(scope, 'script');
+        final status = scripts is FormulaReadStatus ? scripts : null;
+        final pendingBefore = status?.pendingReads;
+        final value = readPath(scope, name);
+        return (value, pendingBefore != status?.pendingReads);
+      }
+
+      final initial = readValue();
+      var lastValue = initial.$1;
+      var hasValue = !initial.$2;
       void changed() {
-        if (!_disposed && box.attached) owner.fire(box, 'valueChanged', event: {'result': readPath(owner.contextFor(box).scope, name)});
+        if (_disposed || !box.attached) return;
+        final (value, pending) = readValue();
+        if (pending || hasValue && jsonEquality.equals(value, lastValue)) return;
+        lastValue = value;
+        hasValue = true;
+        owner.fire(box, 'valueChanged', event: {'result': value});
       }
 
       w.addListener(changed);
