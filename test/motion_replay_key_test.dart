@@ -4,6 +4,7 @@
 import 'package:codelessly_api/codelessly_api.dart' show Json, LayoutDocument, Variable, VariableType;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<(VariableScope, NodeTree, RenderObject)> _show(WidgetTester tester, Map<String, Json> nodes) async {
@@ -57,6 +58,132 @@ void main() {
     scope.set('stamp', 1);
     await tester.pump(const Duration(milliseconds: 50));
     expect(top(), 100);
+  });
+
+  testWidgets('a list item that appears with its replay key set plays its entrance', (tester) async {
+    final scope = VariableScope(const [
+      Variable(name: 'items', type: VariableType.list, value: []),
+      Variable(name: 'stamp', type: VariableType.integer, value: 0),
+    ]);
+    final tree = NodeTree(
+      DocumentSource(LayoutDocument.fromJson({
+        'roots': ['list'],
+        'nodes': {
+          'list': {
+            'type': 'listView',
+            'children': ['item'],
+            'layout': {'width': 200, 'height': 300},
+            'bind': {'data': r'${items}'},
+          },
+          'item': {
+            'type': 'text',
+            'props': {'text': r'${item}'},
+            'layout': {'width': 200, 'height': 40},
+            'motion': {'enter': true, 'enterFrom': {'translateY': -100}, 'duration': 400, 'curve': 'linear'},
+            'bind': {'motion.replayKey': r"${= 'fill' + stamp}"},
+          },
+        },
+      })),
+      binder: NodeBinder(scope: scope),
+    );
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'list', interactive: true)),
+    ));
+    await tester.pumpAndSettle();
+    scope.set('items', ['a', 'b']);
+    scope.set('stamp', 1);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    // The new item is still coming in from above.
+    double? top;
+    void visit(RenderObject o) {
+      if (o is RenderParagraph && o.text.toPlainText() == 'a') top = o.localToGlobal(Offset.zero).dy;
+      o.visitChildren(visit);
+    }
+    visit(tester.renderObject(find.byType(NodeView)));
+    expect(top, lessThan(-50));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('an item that appears in a table cell\'s list plays its entrance', (tester) async {
+    final scope = VariableScope(const [
+      Variable(name: 'rows', type: VariableType.list, value: [
+        {'id': 'r0'},
+      ]),
+      Variable(name: 'cells', type: VariableType.map, value: {
+        'r0': ['z'],
+      }),
+      Variable(name: 'stamp', type: VariableType.integer, value: 0),
+      Variable(name: 'order', type: VariableType.map, value: {}),
+    ]);
+    final tree = NodeTree(
+      DocumentSource(LayoutDocument.fromJson({
+        'roots': ['table'],
+        'nodes': {
+          'table': {
+            'type': 'tableView',
+            'layout': {'width': 400, 'height': 300},
+            'bind': {'data': r'${rows}'},
+            'slots': {'cell': 'cell'},
+            'props': {
+              'columns': [
+                {'key': 'c', 'label': 'C'},
+              ],
+              'columnWidth': 300,
+              'rowHeight': 200,
+            },
+          },
+          'cell': {
+            'type': 'listView',
+            'children': ['item'],
+            'layout': {'width': {'fill': 300}, 'height': {'fill': 200}},
+            'bind': {'data': r'${= cells[item.row.id]}'},
+          },
+          'item': {
+            'type': 'text',
+            'props': {'text': r'${item}'},
+            'layout': {'width': 200, 'height': 40},
+            'motion': {'enter': true, 'enterFrom': {'translateY': -100, 'opacity': 0, 'scale': 0.7}, 'duration': 400, 'curve': 'linear'},
+            'bind': {
+              'motion.enter': r"${= order[item] != null}",
+              'motion.delay': r"${= 60 + coalesce(order[item], 0) * 45}",
+              'motion.replayKey': r"${= order[item] != null ? 'fill' + stamp : ''}",
+              'draggable.enabled': r'${= true}',
+            },
+            'draggable': {'group': 'shift', 'data': r'${item}', 'start': 'auto'},
+          },
+        },
+      })),
+      binder: NodeBinder(scope: scope),
+    );
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'table', interactive: true)),
+    ));
+    await tester.pumpAndSettle();
+    double? top(String text) {
+      double? at;
+      void visit(RenderObject o) {
+        if (o is RenderParagraph && o.text.toPlainText() == text) at = o.localToGlobal(Offset.zero).dy;
+        o.visitChildren(visit);
+      }
+
+      visit(tester.binding.rootElement!.renderObject!);
+      return at;
+    }
+
+    scope.set('cells', {
+      'r0': ['z', 'a'],
+    });
+    scope.set('order', {'a': 0});
+    scope.set('stamp', 1);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    final coming = top('a');
+    await tester.pumpAndSettle();
+    expect(coming, isNotNull);
+    expect(coming, lessThan(top('a')! - 50));
   });
 
   testWidgets('keyframes run on a new key: a shake there and back', (tester) async {
