@@ -47,6 +47,43 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
+  testWidgets('the Lineworks train runs its route at an even speed: equal time, equal track', (tester) async {
+    // 100 px straight then 100 px on the diagonal, with the train's motion:
+    // length pacing, oriented and upright, a linear looping run.
+    final doc = LayoutDocument.fromJson({
+      'roots': ['s'],
+      'nodes': {
+        's': {'type': 'stack', 'children': ['t'], 'layout': {'width': 400, 'height': 300}},
+        't': {
+          'type': 'box',
+          'layout': {'width': 20, 'height': 10, 'x': {'start': -10}, 'y': {'start': -5}},
+          'decoration': {'fills': [{'color': '#FF000000'}]},
+          'motion': {'path': 'M0 100 L100 100 L160 180', 'pathPacing': 'length', 'orientToPath': true, 'orientUpright': true,
+                     'uprightMirror': true, 'loop': 'restart', 'duration': 2000, 'curve': 'linear',
+                     'keyframes': [{'t': 0, 'pathProgress': 0}, {'t': 1, 'pathProgress': 1}]},
+        },
+      },
+    });
+    final tree = NodeTree(NodeValues(DocumentSource(doc)), binder: NodeBinder(scope: VariableScope(const [])));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's', interactive: true)),
+    ));
+    final view = tester.renderObject(find.byType(NodeView));
+    Offset at() => tree.boxOf('t')!.rectIn(view)!.center;
+    final samples = <Offset>[];
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 400));
+      samples.add(at());
+    }
+    // 400 ms of a 2 s run is 40 px of the 200 px track, straight or diagonal
+    // (the chord across the corner is a little shorter).
+    for (var i = 0; i < 3; i++) {
+      expect((samples[i + 1] - samples[i]).distance, inInclusiveRange(34, 41), reason: '$samples');
+    }
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('a looping motion hidden by a binding starts again when shown', (tester) async {
     final doc = LayoutDocument.fromJson({
       'roots': ['s'],

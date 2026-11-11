@@ -72,14 +72,13 @@ class RenderNodePaint extends RenderBox with ImageClient {
       path.addRRect(rrect.deflate(inset));
     } else {
       final r = rect.deflate(inset);
-      final lines = switch (decoration.strokeSides) {
-        api.StrokeSides.left => [(r.topLeft, r.bottomLeft)],
-        api.StrokeSides.top => [(r.topLeft, r.topRight)],
-        api.StrokeSides.right => [(r.topRight, r.bottomRight)],
-        api.StrokeSides.topBottom => [(r.topLeft, r.topRight), (r.bottomLeft, r.bottomRight)],
-        api.StrokeSides.leftRight => [(r.topLeft, r.bottomLeft), (r.topRight, r.bottomRight)],
-        _ => [(r.bottomLeft, r.bottomRight)],
-      };
+      final sides = decoration.strokeSides.sides;
+      final lines = [
+        if (sides.contains('top')) (r.topLeft, r.topRight),
+        if (sides.contains('right')) (r.topRight, r.bottomRight),
+        if (sides.contains('bottom')) (r.bottomLeft, r.bottomRight),
+        if (sides.contains('left')) (r.topLeft, r.bottomLeft),
+      ];
       for (final (a, b) in lines) {
         path
           ..moveTo(a.dx, a.dy)

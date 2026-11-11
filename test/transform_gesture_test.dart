@@ -160,6 +160,34 @@ void main() {
     expect(b.ends, isNotEmpty);
   });
 
+  testWidgets('the Lineworks map: pinch zooms, a drag pans, both write mapScale / mapX / mapY', (tester) async {
+    // The map's transformGesture as the app has it (editor/build/gen_map.py).
+    final b = await board(tester, {
+      'minScale': 0.3, 'maxScale': 4, 'bounds': 'none', 'wheel': 'zoom', 'doubleTapScale': 2,
+      'xVariable': 'mapX', 'yVariable': 'mapY', 'scaleVariable': 'mapScale',
+    }, variables: [v('mapX', 0), v('mapY', 0), v('mapScale', 1)]);
+    // Pinch out: fingers 50 px apart to 100 px apart, about (150, 150).
+    await twoFingers(tester, const Offset(125, 150), const Offset(175, 150), const Offset(100, 150), const Offset(200, 150));
+    await tester.pumpAndSettle();
+    expect(b['mapScale'] as double, closeTo(2, 0.02));
+    // One finger pans by its travel (in the parent's pixels).
+    final x0 = b['mapX'] as double, y0 = b['mapY'] as double;
+    final g = await tester.startGesture(const Offset(200, 200));
+    for (var i = 1; i <= 10; i++) {
+      await g.moveTo(Offset(200 - i * 6.0, 200 - i * 3.0));
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    await g.up();
+    await tester.pump(const Duration(milliseconds: 16));
+    expect((b['mapX'] as double) - x0, closeTo(-60, 6));
+    expect((b['mapY'] as double) - y0, closeTo(-30, 6));
+    await tester.pumpAndSettle();
+    // Pinch in past the minimum: it settles at minScale.
+    await twoFingers(tester, const Offset(50, 200), const Offset(350, 200), const Offset(195, 200), const Offset(205, 200));
+    await tester.pumpAndSettle();
+    expect(b['mapScale'] as double, closeTo(0.3, 0.01));
+  });
+
   testWidgets('the pose writes its variables and the node is drawn at it', (tester) async {
     final b = await board(
       tester,
