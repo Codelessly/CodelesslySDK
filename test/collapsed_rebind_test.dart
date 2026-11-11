@@ -32,7 +32,12 @@ void main() {
               'strokeWidth': 1,
             },
             'bind': {'visible': r'${shown}'},
-            'children': ['label'],
+            'children': ['label', 'field'],
+          },
+          'field': {
+            'type': 'textField',
+            'layout': {'width': 100, 'height': 40},
+            'bind': {'props.initialValue': r'${label}'},
           },
           'label': {
             'type': 'text',
@@ -47,6 +52,7 @@ void main() {
       );
       screen.scope.set('shown', false);
       await tester.pump();
+      expect(screen.tree.boxOf('card')!.child!.debugNeedsLayout, isFalse);
       for (var i = 0; i < 3; i++) {
         screen.scope.set('label', 'hidden $i');
         screen.scope.define(v('shown', false, VariableType.boolean));
