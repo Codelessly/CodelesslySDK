@@ -195,15 +195,23 @@ class CloudQuery {
   /// the database whole. Others (or all, with [forceClient], after the
   /// database reported a missing index anyway) send it their `==` filters,
   /// or their first filter when none is `==`, and leave the rest (and the
-  /// paging) to [CloudQueryPlan.finish].
-  CloudQueryPlan plan({bool forceClient = false, Set<String> readyIndexes = const {}}) {
+  /// paging) to [CloudQueryPlan.finish]. When [keepOnServer] is given (the
+  /// filters the database's rules need to see, such as an expiry bound),
+  /// those are what the database runs instead.
+  CloudQueryPlan plan({
+    bool forceClient = false,
+    Set<String> readyIndexes = const {},
+    List<CloudWhereFilter> keepOnServer = const [],
+  }) {
     if (!forceClient && (runsOnServer || readyIndexes.contains(requiredIndex?.key))) {
       return CloudQueryPlan._(server: this);
     }
-    final server = [
-      for (final f in filters)
-        if (f.operator == WhereOperator.equal) f,
-    ];
+    final server = keepOnServer.isNotEmpty
+        ? [...keepOnServer]
+        : [
+            for (final f in filters)
+              if (f.operator == WhereOperator.equal) f,
+          ];
     if (server.isEmpty && filters.isNotEmpty) server.add(filters.first);
     return CloudQueryPlan._(
       server: CloudQuery(filters: server),

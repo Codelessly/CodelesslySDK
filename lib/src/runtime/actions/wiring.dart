@@ -91,6 +91,9 @@ class TreeReactions implements NodeInteractions {
       ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
       ..holdMs = n.actions.firstWhere((r) => r.trigger.type == TriggerType.hold, orElse: () => n.actions.first).trigger.holdMs
       ..visibleFraction = viewport ? n.actions.firstWhere((r) => _isViewport(r.trigger.type)).trigger.visibleFraction : null
+      ..visibleMs = viewport
+          ? n.actions.firstWhere((r) => r.trigger.type == TriggerType.enterViewport, orElse: () => n.actions.first).trigger.visibleMs
+          : 0
       ..onTrigger = (type, event) => fire(box, type.name, event: event));
   }
 
@@ -426,6 +429,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     v == null ? _ViewportWatcher.remove(this) : (attached ? _ViewportWatcher.add(this) : null);
   }
 
+  /// How long (ms) it stays in view before enterViewport fires; leaving
+  /// sooner doesn't fire it.
+  int visibleMs = 0;
+  Timer? _dwell;
+
   void Function(TriggerType type, Json event)? onTrigger;
 
   bool _has(TriggerType t) => _triggers.contains(t);
@@ -489,21 +497,35 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     }
     final swipes = TriggerType.swipes.any(_has) || _has(TriggerType.drag) || _has(TriggerType.dragEnd);
     if (_pan == null && swipes) {
-      _pan = PanGestureRecognizer(debugOwner: this)
+      _pan = _OneFingerPanGestureRecognizer(debugOwner: this)
+        // Where the finger went down, not where the slop was crossed: a
+        // stroke paints from its first cell.
+        ..dragStartBehavior = DragStartBehavior.down
+        ..onStart = ((d) {
+          _dragStart = d.localPosition;
+        })
         ..onUpdate = (_has(TriggerType.drag)
-            ? (d) => _fire(TriggerType.drag, {
-                  'result': {
-                    'dx': d.delta.dx,
-                    'dy': d.delta.dy,
-                    'deltaX': d.delta.dx,
-                    'deltaY': d.delta.dy,
-                    'x': d.localPosition.dx,
-                    'y': d.localPosition.dy,
-                    'globalX': d.globalPosition.dx,
-                    'globalY': d.globalPosition.dy,
-                    'pointerCount': 1,
-                  },
-                })
+            ? (d) {
+                // `${drag.x}` / `${drag.y}`: where the pointer is in the node
+                // (painting on a board), `${drag.startX}` / `startY` where the
+                // drag began, `dx` / `dy` this move; `${result}` holds the
+                // same.
+                final start = _dragStart ?? d.localPosition;
+                final drag = {
+                  'dx': d.delta.dx,
+                  'dy': d.delta.dy,
+                  'deltaX': d.delta.dx,
+                  'deltaY': d.delta.dy,
+                  'x': d.localPosition.dx,
+                  'y': d.localPosition.dy,
+                  'globalX': d.globalPosition.dx,
+                  'globalY': d.globalPosition.dy,
+                  'pointerCount': 1,
+                  'startX': start.dx,
+                  'startY': start.dy,
+                };
+                _fire(TriggerType.drag, {'result': drag, 'drag': drag});
+              }
             : null)
         ..onEnd = (d) {
           final v = d.velocity.pixelsPerSecond;
@@ -516,6 +538,9 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         };
     }
   }
+
+  /// Where the current drag began, in the node.
+  Offset? _dragStart;
 
   void _disposeRecognizers() {
     _tap?.dispose();
@@ -635,6 +660,12 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void detach() {
     _ViewportWatcher.remove(this);
+    if (_dwell != null) {
+      // Not in view long enough: seen again, it waits again.
+      _dwell!.cancel();
+      _dwell = null;
+      _inView = false;
+    }
     _hold?.cancel();
     _hold = null;
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
@@ -666,6 +697,16 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     final inView = fraction <= 0 ? visible > 0 : visible >= fraction - 1e-6;
     if (inView == _inView) return;
     _inView = inView;
+    _dwell?.cancel();
+    _dwell = null;
+    if (inView && visibleMs > 0) {
+      // It must stay in view that long: leaving first cancels it.
+      _dwell = Timer(Duration(milliseconds: visibleMs), () {
+        _dwell = null;
+        if (_inView && attached) _fire(TriggerType.enterViewport);
+      });
+      return;
+    }
     final t = inView ? TriggerType.enterViewport : TriggerType.exitViewport;
     if (_triggersAll.contains(t)) _fire(t);
   }
@@ -725,5 +766,40 @@ abstract final class _ViewportWatcher {
       }
       _schedule();
     }, debugLabel: 'ViewportWatcher');
+  }
+}
+
+/// A drag reaction is a one-finger gesture: a second finger landing before
+/// the drag starts makes it a pinch, so this gives up and the pinch (a
+/// transform gesture around the node: zooming a board you paint on) takes
+/// it. Flutter's pan adds up every finger's travel, so two fingers
+/// spreading apart would otherwise win as a drag.
+class _OneFingerPanGestureRecognizer extends PanGestureRecognizer {
+  _OneFingerPanGestureRecognizer({super.debugOwner});
+
+  int _tracked = 0;
+  bool _accepted = false;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    if (_tracked > 0 && !_accepted) {
+      resolve(GestureDisposition.rejected);
+      return;
+    }
+    _tracked++;
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    _accepted = true;
+    super.acceptGesture(pointer);
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    _tracked = 0;
+    _accepted = false;
+    super.didStopTrackingLastPointer(pointer);
   }
 }

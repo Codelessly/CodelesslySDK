@@ -56,6 +56,8 @@ void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
   double t,
   double amount, {
   double cycles = 0,
+  List<api.MotionKeyframe> keyframes = const [],
+  api.AnimationCurve curve = api.AnimationCurve.linear,
 }) {
   final decay = 1 - t;
   double swings(double usual) => cycles > 0 ? cycles : usual;
@@ -79,7 +81,50 @@ void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
       return (dx: 0, dy: 0, sx: 1, sy: 1, rotation: 0, opacity: 0.5 + math.cos(t * math.pi * 2 * swings(2)) * 0.5);
     case api.EffectAnimationType.spin:
       return (dx: 0, dy: 0, sx: 1, sy: 1, rotation: Curves.easeInOutCubic.transform(t) * 2 * math.pi * amount, opacity: 1);
+    case api.EffectAnimationType.keyframes:
+      return keyframePoseAt(keyframes, curve.transform(t), amount);
   }
+}
+
+/// A `keyframes` effect's pose at [t] (0–1): each property runs from rest
+/// through the keyframes that give it, back to rest at 1, linearly between
+/// them; [amount] scales the offsets, rotation and the scales' distance
+/// from 1.
+({double dx, double dy, double sx, double sy, double rotation, double opacity}) keyframePoseAt(
+  List<api.MotionKeyframe> keyframes,
+  double t,
+  double amount,
+) {
+  final sorted = [...keyframes]..sort((a, b) => a.t.compareTo(b.t));
+  double at(double? Function(api.MotionKeyframe k) of, double rest) {
+    final points = <(double, double)>[(0, rest)];
+    for (final k in sorted) {
+      final v = of(k);
+      if (v != null && k.t > 0 && k.t < 1) points.add((k.t, v));
+      if (v != null && k.t >= 1) points.add((1, v));
+    }
+    if (points.last.$1 < 1) points.add((1, rest));
+    if (t <= 0) return points.first.$2;
+    for (var i = 1; i < points.length; i++) {
+      final (t1, v1) = points[i];
+      if (t <= t1) {
+        final (t0, v0) = points[i - 1];
+        final u = t1 == t0 ? 1.0 : (t - t0) / (t1 - t0);
+        return v0 + (v1 - v0) * u;
+      }
+    }
+    return points.last.$2;
+  }
+
+  final scale = at((k) => k.scale, 1);
+  return (
+    dx: at((k) => k.translateX, 0) * amount,
+    dy: at((k) => k.translateY, 0) * amount,
+    sx: 1 + (scale * at((k) => k.scaleX, 1) - 1) * amount,
+    sy: 1 + (scale * at((k) => k.scaleY, 1) - 1) * amount,
+    rotation: at((k) => k.rotate, 0) * math.pi / 180 * amount,
+    opacity: at((k) => k.opacity, 1).clamp(0.0, 1.0),
+  );
 }
 
 /// The nodes' effects on screen, by node id, for `playAnimation`.
@@ -204,7 +249,8 @@ class RenderEffects extends RenderPose {
     for (final effect in _effects) {
       final p = _playing[effect.name];
       if (p == null || p.start == null) continue;
-      final e = effectTransformAt(effect.type, p.t, effect.amount, cycles: effect.cycles);
+      final e = effectTransformAt(effect.type, p.t, effect.amount,
+          cycles: effect.cycles, keyframes: effect.keyframes, curve: effect.curve);
       final o = Alignment(effect.originX, effect.originY).alongSize(s);
       final step = Matrix4.translationValues(e.dx + o.dx, e.dy + o.dy, 0)
         ..rotateZ(e.rotation)
