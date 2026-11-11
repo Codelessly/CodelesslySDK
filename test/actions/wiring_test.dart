@@ -299,7 +299,9 @@ void main() {
     await tester.pump();
     expect(s['count'], 1);
     expect(textOf(s.tree, 'label'), 'Count 1');
-    expect(NodeBox.debugApplyCounts.keys, ['label']);
+    // The label's text is set in place (NodeBox._retextOnly): no box
+    // re-applies, the label included.
+    expect(NodeBox.debugApplyCounts.keys, isEmpty);
     await tester.tapAt(s.center('button'));
     await tester.tapAt(s.center('other'));
     await tester.pump();
@@ -553,7 +555,7 @@ void main() {
     );
     final s = await show(tester, counter(actions: [
       reaction('click', [
-        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet'},
+        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet', 'insets': [24, 24, 24, 24]},
       ]),
       reaction('secondaryClick', [
         {'type': 'openModal', 'to': 'newCard'},
@@ -564,6 +566,8 @@ void main() {
     await tester.pumpAndSettle();
     // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
     expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // A dialog's insets don't push a sheet off the screen's edge.
+    expect(tester.getBottomLeft(find.byKey(const ValueKey('sheet newCard'))).dy, 600);
     // No tinted Material surface behind the screen's own.
     expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
     Navigator.of(appContext).pop();
@@ -673,6 +677,108 @@ void main() {
     expect(s['lanePage'], 1);
   });
 
+  testWidgets('a flexible list in a running page view hugs its items', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'pages': {
+          'type': 'pageView',
+          'children': ['page'],
+          'layout': {'width': 300, 'height': 400},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}'},
+        },
+        'page': {
+          'type': 'column',
+          'children': ['cards', 'add'],
+          'layout': {'width': {'fill': 300}, 'height': {'fill': 400}},
+        },
+        'cards': {
+          'type': 'listView',
+          'children': ['card'],
+          'layout': {'width': {'fill': 300}, 'height': {'flexible': 360}},
+          'bind': {'data': r'${item.cards}'},
+        },
+        'card': {'type': 'box', 'layout': {'width': 300, 'height': 40}},
+        'add': {'type': 'box', 'layout': {'width': 300, 'height': 30}},
+      },
+      root: 'pages',
+      variables: [
+        v('lanes', const [
+          {'id': 'todo', 'cards': [1, 2]},
+        ], VariableType.list),
+      ],
+    );
+    await tester.pumpAndSettle();
+    final view = s.tree.boxOf('pages')!;
+    RenderBox? add;
+    void find(RenderObject o) {
+      if (o is NodeBox && o.id == 'add' && o.hasSize) add ??= o;
+      o.visitChildren(find);
+    }
+
+    find(view);
+    expect(add, isNotNull);
+    final top = add!.localToGlobal(Offset.zero).dy - view.localToGlobal(Offset.zero).dy;
+    expect(top, 80, reason: 'under the two cards');
+  });
+
+  for (final width in [<String, Object>{'hug': 0}, 320])
+  testWidgets('a track segmented button selects by tap, raises the selection and hugs or shares its width ($width)',
+      (tester) async {
+    final s = await show(
+      tester,
+      {
+        'col': {'type': 'column', 'children': ['seg'], 'layout': {'width': 400, 'height': {'hug': 40}}},
+        'seg': {
+          'type': 'segmentedButton',
+          'layout': {'width': width, 'height': {'hug': 0}},
+          'props': {
+            'variant': 'track',
+            'segments': [
+              for (final x in ['All', 'Live', 'Draft', 'Closed']) {'value': x.toLowerCase(), 'label': x},
+            ],
+            'selectedBackgroundColor': '#FFFFFFFF',
+            'backgroundColor': '#FFE2E7EE',
+            'selectedShadows': [
+              {'type': 'dropShadow', 'color': '#14000000', 'offset': [0, 2], 'blurRadius': 8},
+            ],
+          },
+          'bind': {'props.selected': r'${= [filter]}'},
+          'actions': [
+            reaction('changed', [
+              {'type': 'setVariable', 'variable': 'filter', 'value': r'${result[0]}'},
+            ]),
+          ],
+        },
+      },
+      variables: [v('filter', 'all')],
+    );
+    expect(find.byType(SegmentedButton<String>), findsNothing);
+    // Hugging, every label fits on one line; a narrower share ellipsizes.
+    for (final label in ['All', 'Live', 'Draft', 'Closed']) {
+      final p = tester.renderObject<RenderParagraph>(find.text(label));
+      if (width is! int) expect(p.didExceedMaxLines, isFalse);
+      expect(p.maxLines, 1);
+    }
+    final widths = [for (final l in ['All', 'Closed']) tester.getSize(find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).width];
+    if (width is int) {
+      // A filling track shares its width: 320 less the 3px inset each side, by 4.
+      expect(widths, everyElement(closeTo((320 - 6) / 4, 0.5)));
+    } else {
+      expect(widths[0], lessThan(widths[1]));
+    }
+    BoxDecoration deco(String l) => tester.widget<AnimatedContainer>(
+        find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).decoration! as BoxDecoration;
+    expect(deco('All').boxShadow, hasLength(1));
+    expect(deco('Draft').boxShadow, isNull);
+    await tester.tap(find.text('Draft'));
+    await tester.pumpAndSettle();
+    expect(s['filter'], 'draft');
+    expect(deco('Draft').boxShadow, hasLength(1));
+    expect(deco('All').boxShadow, isNull);
+  });
+
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
     final s = await show(
       tester,
@@ -731,6 +837,40 @@ void main() {
     await tester.tap(find.byType(ElevatedButton));
     await tester.pump();
     expect(s['count'], 1);
+  });
+
+  testWidgets('enter viewport can wait for the node to stay in view', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'col': {
+          'type': 'stack',
+          'children': ['target'],
+          'layout': {'width': 200, 'height': 400},
+        },
+        'target': {
+          'type': 'box',
+          'layout': {'width': 200, 'height': 100, 'x': {'start': 0}, 'y': {'start': 0}},
+          'bind': {'layout.y': r'${gap}'},
+          'actions': [
+            reaction('enterViewport', [add('shown')], extra: {'visibleMs': 500}),
+          ],
+        },
+      },
+      variables: [v('shown', 0, VariableType.integer), v('gap', 900, VariableType.integer)],
+    );
+    await tester.pump();
+    s.scope.set('gap', 0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    s.scope.set('gap', 900); // gone before 500 ms
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(s['shown'], 0);
+    s.scope.set('gap', 0);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(s['shown'], 1);
   });
 
   testWidgets('enter and exit viewport as a node moves in and out of view', (tester) async {

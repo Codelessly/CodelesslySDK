@@ -40,12 +40,37 @@ final codelessly = Codelessly(
 With `useHostTheme`, layouts render inside your app's `Theme`: Material widgets that keep their defaults take your
 color scheme and shapes. Designed colors don't change.
 
+## The theme in expressions
+
+Layouts read the project's theme at run time as `theme`, for the current light or dark mode:
+
+| Value | Meaning |
+|---|---|
+| `theme.primary`, `theme.onPrimary`, `theme.surface`, `theme.onSurface`, `theme.error`, `theme.success`, `theme.warning` | The role colors (from the color styles of those names), as `#AARRGGBB` text |
+| `theme.colors.<key>` | Every color style, by its name in camel case: "Brand Blue" is `theme.colors.brandBlue` |
+| `theme.text.<key>.<value>` | Every text style's values: `theme.text.title.fontSize`, `theme.text.body.fontFamily` |
+| `theme.fontFamily`, `theme.titleFontFamily`, `theme.radius`, `theme.buttonRadius` | The other tokens |
+| `theme.isDark`, `theme.brightness` | The mode the colors are for |
+| `theme.hasDark` | Whether the project's styles have dark values (without, dark mode reads the light ones) |
+
+A node whose color is bound to one (`${theme.surface}`, `${theme.colors.brandBlue}`) follows the theme: a new
+publish of the project's styles, and the device switching between light and dark, update it live. A role or
+color the project doesn't have reads as nothing (the node keeps its designed value).
+
+To see what a layout reads, `themeValues(codelessly.publishModel!.theme, dark: true)` gives the map.
+
 ## Dark mode
 
-The SDK does not restyle a layout for dark mode. A layout can adapt itself: `${screen.isDark}` and
-`${screen.brightness}` follow the platform's brightness, for conditions, bindings and variants. The project's
-theme is built with light brightness; use `useHostTheme` if the layout's Material widgets should follow your
-app's dark theme.
+A color style can have a **dark value** beside its light one (published as `ThemeTokens.dark`). In dark mode
+`theme.<role>` and `theme.colors.<key>` give the dark value where a style has one, and the light value
+elsewhere, so a layout bound to the theme needs no conditions for dark mode. A project whose styles have dark
+values also gets a dark Material theme in dark mode (for the runtime's dialogs, toasts and Material defaults);
+one without stays light, as designed.
+
+Which mode: the device's (`MediaQuery.platformBrightness`), or with `useHostTheme` your app's theme's brightness,
+so your app's own dark mode switch applies (`theme.isDark`). `${screen.isDark}` (also `${screen.dark}`) and
+`${screen.brightness}` are always the device's. Nodes whose colors are fixed values don't change with the mode;
+bind them to the theme, or use `screen.isDark` / `theme.isDark` in conditions and variants.
 
 ## Fonts
 
