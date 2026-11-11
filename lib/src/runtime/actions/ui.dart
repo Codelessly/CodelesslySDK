@@ -378,10 +378,12 @@ Future<Object?> showScreenModal(
       },
     ));
   }
-  // Side sheets, sized or rounded bottom sheets and frosted or scaled
-  // dialogs.
+  // Side sheets, sized or rounded bottom sheets, sheets with a drag handle
+  // and frosted or scaled dialogs. (Material's sheet put the handle above
+  // the screen, on its transparent background: invisible over the scrim,
+  // and a gap over the screen's own surface.)
   final presented = presentation == ModalPresentation.sideSheet ||
-      (sheet && (maxHeightFactor != null || sheetRadius != null)) ||
+      (sheet && (maxHeightFactor != null || sheetRadius != null || showDragHandle)) ||
       (!sheet && presentation == ModalPresentation.dialog && (barrierBlur > 0 || enterScale != 1));
   if (presented) {
     return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
