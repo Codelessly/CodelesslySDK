@@ -1,7 +1,7 @@
 // Sounds: short synthesised voices for play sound actions, and the clock
-// clock triggers tick on. Audible on the web (Web Audio); silent elsewhere,
-// where an app can plug in its own [SoundEngine].
-import 'platform/sound_engine_stub.dart' if (dart.library.js_interop) 'platform/sound_engine_web.dart';
+// clock triggers tick on. Web Audio in browsers; PCM through just_audio on
+// native platforms. Apps may supply their own [SoundEngine].
+import 'platform/sound_engine_stub.dart' if (dart.library.io) 'platform/sound_engine_native.dart' if (dart.library.js_interop) 'platform/sound_engine_web.dart';
 
 /// The voices a play sound action plays.
 enum SoundVoice {

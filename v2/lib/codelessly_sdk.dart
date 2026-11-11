@@ -152,3 +152,5 @@ export 'src/app/persisted_variables.dart';
 export 'src/app/runtime.dart';
 export 'src/app/theme.dart' show themeDataOf;
 export 'src/app/viewport.dart';
+
+export 'src/render/layout/design_scroll.dart' show RenderDesignScroll;

@@ -3,15 +3,68 @@
 // gesture detector or element tree. The design canvas shows content at its
 // start (the end, when reversed), clipped to the viewport.
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 
 class RenderDesignScroll extends RenderProxyBox {
-  RenderDesignScroll({required this._axis, this._reverse = false, Clip clipBehavior = Clip.hardEdge})
-      : _clip = clipBehavior;
+  RenderDesignScroll({
+    required this._axis,
+    this._reverse = false,
+    Clip clipBehavior = Clip.hardEdge,
+  }) : _clip = clipBehavior;
+
+  bool interactive = false;
+  double _offset = 0;
+  double get offset => _offset;
+  double get maxScrollExtent => child == null || !hasSize
+      ? 0
+      : ((_axis == Axis.vertical
+                ? child!.size.height - size.height
+                : child!.size.width - size.width)
+            .clamp(0, double.infinity));
+  void jumpBy(double delta) {
+    if (!interactive) return;
+    final next = (_offset + delta).clamp(0, maxScrollExtent).toDouble();
+    if (next == _offset) return;
+    _offset = next;
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  DragGestureRecognizer? _drag;
+  @override
+  bool hitTestSelf(Offset position) => interactive;
+  @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (!interactive) return;
+    if (event is PointerDownEvent) {
+      _drag ??=
+          (_axis == Axis.vertical
+                ? VerticalDragGestureRecognizer()
+                : HorizontalDragGestureRecognizer())
+            ..onUpdate = (details) =>
+                jumpBy((reverse ? 1 : -1) * (details.primaryDelta ?? 0));
+      _drag!.addPointer(event);
+    } else if (event is PointerScrollEvent) {
+      final delta =
+          (_axis == Axis.vertical
+              ? event.scrollDelta.dy
+              : event.scrollDelta.dx) *
+          (reverse ? -1 : 1);
+      final next = (_offset + delta).clamp(0, maxScrollExtent);
+      if (next != _offset)
+        GestureBinding.instance.pointerSignalResolver.register(
+          event,
+          (_) => jumpBy(delta),
+        );
+    }
+  }
 
   Axis _axis;
   Axis get axis => _axis;
   set axis(Axis v) {
     if (v == _axis) return;
+    _drag?.dispose();
+    _drag = null;
     _axis = v;
     markNeedsLayout();
   }
@@ -49,7 +102,9 @@ class RenderDesignScroll extends RenderProxyBox {
     final child = this.child;
     final cb = onViewport;
     if (cb != null) {
-      final extent = _axis == Axis.vertical ? constraints.maxHeight : constraints.maxWidth;
+      final extent = _axis == Axis.vertical
+          ? constraints.maxHeight
+          : constraints.maxWidth;
       // The content's extent depends on the viewport (LayoutBuilder-style):
       // mutating descendants is allowed inside a layout callback.
       invokeLayoutCallback<BoxConstraints>((_) => cb(extent));
@@ -60,37 +115,52 @@ class RenderDesignScroll extends RenderProxyBox {
     }
     child.layout(_contentConstraints(constraints), parentUsesSize: true);
     size = constraints.constrain(child.size);
+    _offset = _offset.clamp(0, maxScrollExtent).toDouble();
   }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     final child = this.child;
     if (child == null) return constraints.smallest;
-    return constraints.constrain(child.getDryLayout(_contentConstraints(constraints)));
+    return constraints.constrain(
+      child.getDryLayout(_contentConstraints(constraints)),
+    );
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => child?.getMinIntrinsicWidth(height) ?? 0;
+  double computeMinIntrinsicWidth(double height) =>
+      child?.getMinIntrinsicWidth(height) ?? 0;
   @override
-  double computeMaxIntrinsicWidth(double height) => child?.getMaxIntrinsicWidth(height) ?? 0;
+  double computeMaxIntrinsicWidth(double height) =>
+      child?.getMaxIntrinsicWidth(height) ?? 0;
   @override
-  double computeMinIntrinsicHeight(double width) => child?.getMinIntrinsicHeight(width) ?? 0;
+  double computeMinIntrinsicHeight(double width) =>
+      child?.getMinIntrinsicHeight(width) ?? 0;
   @override
-  double computeMaxIntrinsicHeight(double width) => child?.getMaxIntrinsicHeight(width) ?? 0;
+  double computeMaxIntrinsicHeight(double width) =>
+      child?.getMaxIntrinsicHeight(width) ?? 0;
 
   /// Offset 0: the content's start at the viewport's start; reversed, its
   /// end at the viewport's end.
   Offset get _paintOffset {
     final child = this.child;
-    if (child == null || !_reverse) return Offset.zero;
+    if (child == null) return Offset.zero;
+    final distance =
+        (_reverse
+            ? (_axis == Axis.vertical
+                  ? size.height - child.size.height
+                  : size.width - child.size.width)
+            : 0) +
+        (interactive ? (_reverse ? _offset : -_offset) : 0);
     return _axis == Axis.vertical
-        ? Offset(0, size.height - child.size.height)
-        : Offset(size.width - child.size.width, 0);
+        ? Offset(0, distance.toDouble())
+        : Offset(distance.toDouble(), 0);
   }
 
   bool get _overflows {
     final child = this.child;
-    return child != null && (child.size.width > size.width || child.size.height > size.height);
+    return child != null &&
+        (child.size.width > size.width || child.size.height > size.height);
   }
 
   final LayerHandle<ClipRectLayer> _clipLayer = LayerHandle();
@@ -99,10 +169,17 @@ class RenderDesignScroll extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     final child = this.child;
     if (child == null) return;
-    void paintContent(PaintingContext c, Offset o) => c.paintChild(child, o + _paintOffset);
+    void paintContent(PaintingContext c, Offset o) =>
+        c.paintChild(child, o + _paintOffset);
     if (_overflows && _clip != Clip.none) {
-      _clipLayer.layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContent,
-          clipBehavior: _clip, oldLayer: _clipLayer.layer);
+      _clipLayer.layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        paintContent,
+        clipBehavior: _clip,
+        oldLayer: _clipLayer.layer,
+      );
     } else {
       _clipLayer.layer = null;
       paintContent(context, offset);
@@ -111,6 +188,7 @@ class RenderDesignScroll extends RenderProxyBox {
 
   @override
   void dispose() {
+    _drag?.dispose();
     _clipLayer.layer = null;
     super.dispose();
   }
