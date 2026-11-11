@@ -9,7 +9,6 @@ import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
-import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
 import 'action_error.dart' show CodedFailure;
@@ -652,39 +651,21 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
 
 // --- forms and text fields -------------------------------------------------------------
 
-String _fieldText(ActionRun run, String nodeId) {
-  final tree = run.host.tree;
-  if (tree == null || nodeId.isEmpty) return '';
-  return TextFieldHandle.of(tree, nodeId)?.controller.text ?? '';
-}
-
+/// A form submission. Only the local service runs: an older layout's
+/// built-in newsletter service (or an unknown one), decoded as
+/// [FormService.unsupported], sends nothing and fails as
+/// `unsupported_service` through the same result and callbacks.
+///
+/// Validation finishes before any response is stored. Persisting the
+/// response variable uses the SDK's normal variable persistence. Nothing is
+/// sent over the network.
 Future<void> _submitForm(SubmitFormAction a, ActionRun run) async {
-  if (a.service == FormService.local) return _submitLocalForm(a, run);
-  final email = _fieldText(run, a.emailField).trim();
-  if (email.isEmpty) throw StateError('No email to submit');
-  final response = await http.post(
-    Uri.parse('https://${a.dataCenter}.api.mailchimp.com/3.0/lists/${a.listId}/members'),
-    headers: {
-      'Authorization': 'Basic ${base64Encode(utf8.encode('codelessly:${a.apiKey}'))}',
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode({
-      'email_address': email,
-      'status': 'subscribed',
-      'merge_fields': {
-        if (a.firstNameField.isNotEmpty) 'FNAME': _fieldText(run, a.firstNameField),
-        if (a.lastNameField.isNotEmpty) 'LNAME': _fieldText(run, a.lastNameField),
-      },
-    }),
-  );
-  if (response.statusCode >= 300) throw StateError('Submit failed: ${response.statusCode}');
-}
-
-/// Generic local submission: validation finishes before any response is stored.
-/// Persisting the response variable uses the SDK's normal variable persistence.
-Future<void> _submitLocalForm(SubmitFormAction a, ActionRun run) async {
   Json outcome;
   try {
+    if (a.service != FormService.local) {
+      throw const _FormSubmissionFailure('unsupported_service',
+          'This form uses a submission service that is no longer supported. Nothing was sent.');
+    }
     final destination = a.responseVariable.trim();
     if (destination.isNotEmpty) {
       final found = variableOf(run.context.scope, destination);
