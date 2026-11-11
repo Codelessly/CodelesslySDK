@@ -1,7 +1,6 @@
 // A project's automations: app-level triggers that run actions with no
 // screen of their own, their conditions, how-often limits and the usage
 // counters they read, deterministic (a fake clock, the test's timers).
-import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
