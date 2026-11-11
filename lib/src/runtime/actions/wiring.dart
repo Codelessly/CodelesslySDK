@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node, TriggerType;
+import 'package:codelessly_api/codelessly_api.dart' show Json, Node, TriggerType, Trigger;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -254,10 +254,13 @@ class _BoxReactions {
       if (r.trigger.type == TriggerType.timer) ms = math.min(ms ?? 1 << 30, r.trigger.effectiveIntervalMs);
       if (r.trigger.type == TriggerType.clock) {
         final condition=r.trigger.runWhen.trim();
-        if(condition.isNotEmpty && ctx.expressions.evaluate(condition,ctx.scope)!=true) continue;
-        final value=ctx.expressions.evaluate(r.trigger.every,ctx.scope);
+        Object? evaluateClock(String expression) => expression.contains(r'${')
+            ? ctx.expressions.evaluate(expression, ctx.scope)
+            : FormulaEvaluator.evaluate(expression, (path) => readPath(ctx.scope, path));
+        if (condition.isNotEmpty && evaluateClock(condition) != true) continue;
+        final value = evaluateClock(r.trigger.every.trim());
         final every=value is num ? value : num.tryParse('$value');
-        if (every != null && every.isFinite && every > 0) ms = math.min(ms ?? 1 << 30, every.round().clamp(16,86400000));
+        if (every != null && every.isFinite && every > 0) ms = math.min(ms ?? 1 << 30, every.round().clamp(Trigger.minIntervalMs,86400000));
       }
     }
     if (ms == _intervalMs) return;

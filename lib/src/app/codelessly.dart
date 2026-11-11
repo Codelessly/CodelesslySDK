@@ -111,7 +111,8 @@ class Codelessly extends ChangeNotifier {
   /// The services the layouts use: [CodelesslyConfig.services], else
   /// [Services] with their defaults. A [Services]' config follows the
   /// publish model (its APIs).
-  late final CodelesslyServices services = config.services ?? Services();
+  late final CodelesslyServices services = config.services ?? (_ownedServices = Services());
+  Services? _ownedServices;
 
   /// Where the publish model and the layouts come from.
   final PublishLoader loader;
@@ -403,9 +404,7 @@ class Codelessly extends ChangeNotifier {
     _serviceValues.dispose();
     data.dispose();
     // Lazy expression scopes must detach while the service notifiers live.
-    if (config.services == null && services is Services) {
-      unawaited((services as Services).dispose());
-    }
+    unawaited(_ownedServices?.dispose());
     if (identical(_instance, this)) _instance = null;
     super.dispose();
   }

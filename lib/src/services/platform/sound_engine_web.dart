@@ -38,7 +38,7 @@ class _WebSoundEngine
   late final JSFunction _unlock, _blur, _visibility;
   bool _disposed = false;
   @override
-  void dispose() {
+  Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
     stopAllNotes();
@@ -46,7 +46,10 @@ class _WebSoundEngine
     web.document.removeEventListener('keydown', _unlock, true.toJS);
     web.window.removeEventListener('blur', _blur);
     web.document.removeEventListener('visibilitychange', _visibility);
-    _ctx.close();
+    _stopwatch.stop();
+    _out.disconnect();
+    _noiseBuffer = null;
+    if (_ctx.state != 'closed') await _ctx.close().toDart;
   }
 
   final Map<String, (web.OscillatorNode, web.GainNode)> _sustainedVoices = {};
