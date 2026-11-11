@@ -73,6 +73,22 @@ void main() {
     expect(tester.takeException(),isNull);
   });
 
+  testWidgets('collapsed paragraphs tolerate repeated font updates after being shown', (tester) async {
+    final vars=VariableScope([v('shown',true,VariableType.boolean)]);
+    await show(tester,page({
+      'col':{'type':'column','children':['label'],'layout':{'width':300,'height':200}},
+      'label':{'type':'text','layout':{'width':300,'height':40},'props':{'text':'Alma Berg'},'bind':{'visible':r'${shown}'}},
+    }),NodeBinder(scope:vars));
+    vars.set('shown',false);await tester.pumpAndSettle();
+    for(var i=0;i<3;i++){
+      await tester.binding.handleSystemMessage({'type':'fontsChange'});
+      await tester.pump();
+      expect(tester.takeException(),isNull);
+    }
+    vars.set('shown',true);await tester.pumpAndSettle();
+    expect(tester.takeException(),isNull);
+  });
+
   testWidgets('a node a binding hides collapses: no space, no gap', (tester) async {
     final vars = VariableScope([v('shown', false, VariableType.boolean)]);
     final (tree, view) = await show(tester, page(column(bindB: {'visible': r'${shown}'})), NodeBinder(scope: vars));
