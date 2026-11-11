@@ -624,7 +624,7 @@ class _LayoutViewState extends State<_LayoutView> {
       if (widget.data.isNotEmpty) 'data': {...appData, ...widget.data},
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
-    }, _codelessly.appVariables);
+    }, _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope)));
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
     final scripts = ScriptsScope(
