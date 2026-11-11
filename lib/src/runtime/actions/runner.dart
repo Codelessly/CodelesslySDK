@@ -195,11 +195,19 @@ class CodelesslyActions implements ActionRunner {
       node,
       event['value'],
     );
+    // A clock can share its node with other clocks: gate each reaction,
+    // rather than the whole trigger chain, against the current scope.
+    bool clockRuns(Reaction reaction) {
+      if(reaction.trigger.type!=TriggerType.clock || reaction.trigger.runWhen.trim().isEmpty)return true;
+      final expression=reaction.trigger.runWhen;
+      return (expression.contains(r'${') ? run.evaluate(expression) : run.expressions.formula(expression,run.scope))==true;
+    }
+    final actions = [for (final reaction in reactions) if(clockRuns(reaction)) ...reaction.actions];
     final scoped = handlers.isEmpty ? null : _HandlerOverrides(handlers);
     try {
       await (scoped == null
-          ? runActions([for (final r in reactions) ...r.actions], run)
-          : runZoned(() => runActions([for (final r in reactions) ...r.actions], run), zoneValues: {#codelesslyHandlers: scoped}));
+          ? runActions(actions, run)
+          : runZoned(() => runActions(actions, run), zoneValues: {#codelesslyHandlers: scoped}));
     } on ActionsCancelled {
       // The node left: the rest doesn't run.
     } catch (error, stack) {

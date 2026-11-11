@@ -422,7 +422,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
       _doubleTap?.addPointer(event);
       _longPress?.addPointer(event);
       _pan?.addPointer(event);
-      if (_has(TriggerType.pointerDown)) _fire(TriggerType.pointerDown);
+      if (_has(TriggerType.pointerDown)) _fire(TriggerType.pointerDown, _where(event.localPosition, event.position));
       if (_has(TriggerType.hold)) {
         _holdStart = event.position;
         _hold?.cancel();
@@ -440,7 +440,7 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       _hold?.cancel();
       _hold = null;
-      if (_has(TriggerType.pointerUp)) _fire(TriggerType.pointerUp);
+      if (_has(TriggerType.pointerUp)) _fire(TriggerType.pointerUp, _where(event.localPosition, event.position));
     } else if (event is PointerScrollEvent && _has(TriggerType.wheel)) {
       _fire(TriggerType.wheel, {
         'result': {'deltaX': event.scrollDelta.dx, 'deltaY': event.scrollDelta.dy, 'x': event.localPosition.dx, 'y': event.localPosition.dy},
