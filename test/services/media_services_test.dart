@@ -24,6 +24,12 @@ class _Voice implements SpeechEngine {
 }
 
 void main() {
+ test('disposing services releases every sustained voice',()async{
+   final engine=SilentSoundEngine();final sound=SoundService(engine:engine);
+   final services=Services(sound:sound);sound.startNote('note');
+   await services.dispose();expect(engine.notes,isEmpty);
+ });
+
   test('sustained voices release independently and replace by id', () {
     final engine = SilentSoundEngine();
     final sound = SoundService(engine: engine);

@@ -194,6 +194,10 @@ class NodeTree {
 
   /// Whether behaviours play (a running app: entrances, loops, spins) or
   /// rest (a design canvas).
+  /// Whether the hosting route enables tickers (covered routes do not tick).
+  bool Function()? runtimeVisibility;
+  bool get runtimeVisible => runtimeVisibility?.call() ?? true;
+
   bool get animates => islands.environment.interactive;
 
   /// The interaction states held by each node (in a repeat instance).
