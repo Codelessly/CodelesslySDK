@@ -651,6 +651,8 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
   late final TapGestureRecognizer _tap;
   Offset? _doubleTapAt;
 
+  bool get _hasTransformGestures => _model.zoom || _model.rotate || _model.pan != api.TransformPan.never;
+
   bool _canAccept(int pointers) =>
       pointers > 1 ? (_model.zoom || _model.rotate || _model.pan != api.TransformPan.never) : _model.pansAt(_pose.scale);
 
@@ -759,7 +761,9 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     if (!_enabled) return;
     final handle = _handleAt(event.localPosition);
     if (handle != null) return _startHandle(handle, event);
-    _scale.addPointer(event);
+    if (_hasTransformGestures) {
+      _scale.addPointer(event);
+    }
     if (_model.zoom && _model.doubleTapScale > 0) _doubleTap.addPointer(event);
     if (_selectionName.isNotEmpty) _tap.addPointer(event);
   }
@@ -1026,7 +1030,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       _onPointerUp(event);
     } else if (event is PointerPanZoomStartEvent) {
-      if (_enabled) _scale.addPointerPanZoom(event);
+      if (_enabled && _hasTransformGestures) _scale.addPointerPanZoom(event);
     } else if (event is PointerSignalEvent) {
       _onSignal(event);
     } else if (event is PointerHoverEvent) {
