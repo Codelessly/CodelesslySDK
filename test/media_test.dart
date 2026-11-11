@@ -2,6 +2,7 @@
 // `path` widget and a box's path), icons, and the players' islands.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart';
+import 'package:codelessly_sdk/src/render/paint/material_icon_versions.dart';
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
 import 'package:codelessly_sdk/src/widgets/media_players.dart';
 import 'package:flutter/material.dart';
@@ -61,8 +62,13 @@ void main() {
   test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
         'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
+    // Without a version, the icon is served from the version it was added in.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),
-        'https://fonts.gstatic.com/s/i/materialicons/home/v1/24px.svg');
+        'https://fonts.gstatic.com/s/i/materialicons/home/v${materialIconVersions['home']}/24px.svg');
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'check', 'style': 'rounded'}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/check/v18/24px.svg');
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'not_an_icon_name'}),
+        'https://fonts.gstatic.com/s/i/materialicons/not_an_icon_name/v1/24px.svg');
     expect(
         IconSources.urlOf({
           'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star', 'style': 'rounded', //
