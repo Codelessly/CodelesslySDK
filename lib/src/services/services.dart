@@ -17,6 +17,7 @@ import 'cloud/backend.dart';
 import 'cloud/database.dart';
 import 'links.dart';
 import 'file_exports.dart';
+import 'file_picking.dart';
 import 'media_export.dart';
 import 'purchases.dart';
 import 'printing.dart';
@@ -38,6 +39,7 @@ export 'cloud/query.dart';
 export 'cloud/resolve.dart';
 export 'links.dart';
 export 'file_exports.dart';
+export 'file_picking.dart';
 export 'media_export.dart';
 export 'media_probe.dart';
 export 'purchases.dart';
@@ -66,6 +68,7 @@ class Services implements CodelesslyServices {
     SpeechService? speech,
     LinkOpener? links,
     FileExporter? exports,
+    FilePicker? filePicker,
     ScriptRunner? scripts,
     MediaExportService? mediaExport,
     PrintService? printing,
@@ -83,6 +86,7 @@ class Services implements CodelesslyServices {
         speech = speech ?? SpeechService(),
         links = links ?? const PlatformLinkOpener(),
         exports = exports ?? const PlatformFileExporter(),
+        filePicker = filePicker ?? const PlatformFilePicker(),
         scripts = scripts ?? const SandboxScriptRunner(),
         mediaExport = mediaExport ?? MediaExportService(),
         printing = printing ?? const PlatformPrintService();
@@ -131,6 +135,10 @@ class Services implements CodelesslyServices {
 
   /// Saves generated files with the browser or platform save picker.
   final FileExporter exports;
+
+  /// Lets the person choose files for an upload (a cloudFiles action
+  /// without a `source`): the platform's file dialog by default.
+  final FilePicker filePicker;
 
   /// Runs scripts (run script actions): the platform's sandbox by default
   /// (no engine without package:codelessly_quickjs on a device).

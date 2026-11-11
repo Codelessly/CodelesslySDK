@@ -35,7 +35,7 @@ import 'app_events.dart';
 import 'capture.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
-import 'ui.dart' show PickedFile;
+import 'ui.dart' show NavigatorActionUi, PickedFile;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
@@ -636,7 +636,7 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
     return;
   }
   final picked = a.source.trim().isEmpty
-      ? await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple)
+      ? await pickFiles(run, images: a.kind == CloudFileKind.image, multiple: a.allowMultiple)
       : sourceFiles(run.evaluate(a.source), name: run.text(a.fileName).trim());
   for (final (i, f) in picked.indexed) {
     if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
@@ -658,6 +658,18 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
     await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
   }
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
+}
+
+/// Lets the person choose files: the app shell's picker when it gives one
+/// (`NavigatorActionUi.files`, or another [ActionUi]), else the services'
+/// [FilePicker] (the platform's file dialog). Without either, none.
+Future<List<PickedFile>> pickFiles(ActionRun run, {required bool images, required bool multiple}) {
+  final ui = run.host.ui;
+  final services = run.context.services;
+  if (ui is NavigatorActionUi && ui.files == null && services is Services) {
+    return services.filePicker.pick(images: images, multiple: multiple);
+  }
+  return ui.pickFiles(images: images, multiple: multiple);
 }
 
 /// The files a cloudFiles action's `source` gives: a `data:` URL, a map
@@ -1103,18 +1115,21 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
     default:
   }
   if (session == null) throw StateError('Paywall action outside a paywall');
+  // The slot can be bound (`${sel}`, the plan the screen selected).
+  final slotText = a.slot == null ? '' : run.text(a.slot!).trim();
+  final slot = slotText.isEmpty ? null : slotText;
   switch (a.operation) {
     case PaywallOperation.purchase:
       final preference = run.text(a.offer ?? 'storeDefault').trim();
       final offer = PurchaseOfferPreference.values.where((value) => value.name == preference).firstOrNull;
       if (offer == null) throw StateError('Unknown purchase offer preference');
-      final result = await session.purchaseAndWait(slot: a.slot, offer: offer);
+      final result = await session.purchaseAndWait(slot: slot, offer: offer);
       _paywallOutcome(result, run);
     case PaywallOperation.restore:
       final result = await session.restoreAndWait();
       _paywallOutcome(result, run);
     case PaywallOperation.selectProduct:
-      if (a.slot != null) session.selectProduct(a.slot!);
+      if (slot != null) session.selectProduct(slot);
     default:
   }
 }
@@ -1190,7 +1205,7 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
         'Connect cloud file storage before choosing a device video. You can import a public HTTPS MP4 URL instead.',
       );
     }
-    final picked = await run.host.ui.pickFiles(images: false, multiple: false);
+    final picked = await pickFiles(run, images: false, multiple: false);
     if (run.isCanceled || picked.isEmpty) {
       return {'ok': false, 'cancelled': true};
     }
