@@ -61,8 +61,18 @@ void main() {
   test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
         'https://fonts.gstatic.com/s/i/materialiconsround/home/v16/24px.svg');
+    // Without a version (an icon named in data): its latest version, since
+    // gstatic doesn't keep v1 of every icon.
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'home', 'style': 'filled'}),
-        'https://fonts.gstatic.com/s/i/materialicons/home/v1/24px.svg');
+        'https://fonts.gstatic.com/s/i/materialicons/home/v16/24px.svg');
+    expect(IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': 'auto_awesome', 'style': 'rounded'}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/auto_awesome/v14/24px.svg');
+    // A name bound at runtime keeps the design icon's version: the name's own is used.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'bolt', 'style': 'rounded', 'version': 18}),
+        'https://fonts.gstatic.com/s/i/materialiconsround/bolt/v10/24px.svg');
+    // A name the table doesn't know keeps its stored version.
+    expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'brand_new_icon', 'version': 3}),
+        'https://fonts.gstatic.com/s/i/materialicons/brand_new_icon/v3/24px.svg');
     expect(
         IconSources.urlOf({
           'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star', 'style': 'rounded', //

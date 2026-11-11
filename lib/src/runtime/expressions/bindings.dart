@@ -310,8 +310,10 @@ class NodeBinder {
         e.value.update(index: i, item: i < list.length ? list[i] : null);
       }
     }
-    final def = n.spec?.prop('itemCount');
-    if (def == null || n.bind.containsKey('props.itemCount')) return n;
+    // A list's item count, a table's row count: as many as the items.
+    final countProp = n.type == 'tableView' ? 'rowCount' : 'itemCount';
+    final def = n.spec?.prop(countProp);
+    if (def == null || n.bind.containsKey('props.$countProp')) return n;
     return n.copyWith(props: n.props.set<Object?>(def, list.length));
   }
 
