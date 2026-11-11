@@ -408,6 +408,56 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   Slot _slot;
   @override
   Slot get slot => _slot;
+
+  // ---- adaptive repaint boundaries -------------------------------------------
+  //
+  // A running app's box that its data keeps changing (a readout ticking with
+  // a simulation, a live chart, a clock) gets a layer of its own after three
+  // changes within two seconds: its repaints then stay in that layer instead
+  // of repainting what's around it (shadows, gradients, big lists), as a
+  // Flutter author would place a RepaintBoundary. Items of a list don't: the
+  // list is the boundary (RenderCollection).
+  bool _ownLayer = false;
+  int _recentChanges = 0, _windowStartMs = 0;
+  static final Stopwatch _clock = Stopwatch()..start();
+  static const _repeaters = {'listView', 'gridView', 'pageView', 'tableView'};
+
+  /// Some boxes are worth a layer from the start: one whose content moves
+  /// on its own (a transform gesture: pinch, pan) and one that's expensive
+  /// to paint again (a large blurred shadow), so a change elsewhere on the
+  /// screen doesn't repaint them.
+  bool _heavy = false;
+
+  static bool _isHeavy(Node n) =>
+      n.behaviors.transformGesture != null ||
+      n.decoration.effects.any((e) => e.visible && e.type == api.EffectType.dropShadow && e.blurRadius >= 16);
+
+  void _updateHeavy(Node n) {
+    final heavy = tree.animates && _isHeavy(n);
+    if (heavy == _heavy) return;
+    _heavy = heavy;
+    markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
+  @override
+  bool get isRepaintBoundary => _ownLayer || _heavy;
+
+  /// Whether this box paints in a layer of its own (it changed often).
+  bool get hasOwnLayer => _ownLayer;
+
+  void _noteDataChange() {
+    if (_ownLayer || !tree.animates || _repeaters.contains(_slot.parent?.type)) return;
+    final now = _clock.elapsedMilliseconds;
+    if (now - _windowStartMs > 2000) {
+      _windowStartMs = now;
+      _recentChanges = 0;
+    }
+    if (++_recentChanges < 3) return;
+    _ownLayer = true;
+    markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
   Node? _node;
 
   /// The node as rendered.
@@ -416,6 +466,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   static final Map<String, int> debugApplyCounts = {};
   static bool debugCountApplies = false;
+
+  /// Paints per node id while [debugCountPaints] is on (tools, tests).
+  static final Map<String, int> debugPaintCounts = {};
+  static bool debugCountPaints = false;
 
   /// The node's own box (margin excluded).
   RenderBox? contentBox;
@@ -473,17 +527,45 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     // re-apply it.
     if (tree._fontsPending || old == null || _islands.isNotEmpty) {
       _apply();
+      if (old != null) _noteDataChange();
       return;
     }
     final bound = tree.resolveBound(id, instance: instance);
     final n = bound?.node;
     if (bound != null && n != null && bound.collapsed == _collapsed) {
-      if (n == old || _repaintOnly(old, n)) {
+      if (n == old) {
         _watchBindings(bound.watch);
+        return;
+      }
+      if (_repaintOnly(old, n) || _retextOnly(old, n)) {
+        _watchBindings(bound.watch);
+        _noteDataChange();
         return;
       }
     }
     _apply(given: (bound,));
+    _noteDataChange();
+  }
+
+  /// Applies [n] when it is a text that differs from [old] only in its
+  /// characters, runs or style (a readout ticking every frame): sets the
+  /// paragraph's text in place. Its layout, if it changes, propagates as any
+  /// Flutter text's does; nothing around it re-applies. False (nothing done)
+  /// for any other change.
+  bool _retextOnly(Node old, Node n) {
+    if (n.type != 'text' || old.type != 'text') return false;
+    if (old.copyWith(props: n.props) != n) return false;
+    final sameOtherwise = old.props
+        .set<Object?>(TextProps.text, n.prop(TextProps.text))
+        .set<Object?>(TextProps.runs, n.prop(TextProps.runs))
+        .set<Object?>(TextProps.style, n.prop(TextProps.style));
+    if (sameOtherwise != n.props) return false;
+    final paragraph = _objects['paragraph'];
+    if (paragraph is! RenderParagraph) return false;
+    paragraph.text = _textSpan(n);
+    _node = n;
+    _applied = n;
+    return true;
   }
 
   /// Applies [n] when it differs from [old] only in the colors of a native
@@ -550,6 +632,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (debugCountPaints) debugPaintCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
     tree.observer?.nodePainted(this);
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return;
     super.paint(context, offset);
@@ -706,6 +789,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _node = n;
     _applied = n;
     contentBox = null;
+    if (n != null) _updateHeavy(n);
     if (n == null) {
       _releaseContainerChildren();
       _wire(const []);
