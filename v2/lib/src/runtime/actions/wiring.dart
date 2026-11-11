@@ -24,6 +24,7 @@ import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
 import 'runner.dart';
+import 'key_matching.dart';
 
 /// Wires the reactions of a [NodeTree]'s nodes ([NodeTree.interactions]):
 /// each runs with [runner] in [context] (a list item's node in its item's
@@ -271,7 +272,7 @@ class _BoxReactions {
     for (final r in n.actions) {
       if (r.trigger.type != type) continue;
       final combo = r.trigger.keyCombo;
-      if (combo != null && !combo.matches(label, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) continue;
+      if (!runtimeKeyMatches(combo, label, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) continue;
       if (r.trigger.when.trim().isNotEmpty) {
         final ok = FormulaEvaluator.exactExpression(r.trigger.when) != null
             ? owner.contextFor(box).expressions.evaluate(r.trigger.when, owner.contextFor(box).scope)
