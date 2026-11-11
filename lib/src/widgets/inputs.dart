@@ -25,6 +25,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         Node,
         RadioProps,
         SegmentedButtonProps,
+        SegmentedVariant,
         SignatureProps,
         SizeFit,
         SliderProps,
@@ -1772,6 +1773,9 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final side = n.prop(SegmentedButtonProps.side);
     final radius = n.prop(SegmentedButtonProps.borderRadius);
     final selectedIcon = _icon(n.prop(SegmentedButtonProps.selectedIcon));
+    if (n.prop(SegmentedButtonProps.variant) == SegmentedVariant.track) {
+      return _track(context, n, selection, multi);
+    }
     return SegmentedButton<String>(
       segments: segments,
       selected: selection,
@@ -1797,6 +1801,89 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
         padding: n.prop(SegmentedButtonProps.padding)?.flutter,
       ),
+    );
+  }
+
+  void _select(String value, bool multi) {
+    final next = multi
+        ? (selected.contains(value) ? ({...selected}..remove(value)) : {...selected, value})
+        : {value};
+    if (next.isEmpty && !widget.node.prop(SegmentedButtonProps.emptySelectionAllowed)) return;
+    setState(() => selected = next);
+    _fire(context, 'changed', next.toList());
+  }
+
+  /// The track variant: the segments on a tinted, bordered track, the
+  /// selected one raised (its own fill and shadows), no dividers. Segments
+  /// take their natural width (hug), or share a fixed or filling width equally.
+  Widget _track(BuildContext context, Node n, Set<String> selection, bool multi) {
+    final radius = n.prop(SegmentedButtonProps.borderRadius)?.flutter ?? BorderRadius.circular(4);
+    final side = n.prop(SegmentedButtonProps.side);
+    final enabled = n.prop(SegmentedButtonProps.enabled);
+    final base = _styleOrNull(n.prop(SegmentedButtonProps.textStyle)) ?? const TextStyle(fontSize: 13, fontWeight: FontWeight.w600);
+    final fg = _color(n.prop(SegmentedButtonProps.foregroundColor)) ?? const Color(0xFF6B7A8D);
+    final selectedFg = _color(n.prop(SegmentedButtonProps.selectedForegroundColor)) ?? const Color(0xFF0F1B2D);
+    final selectedBg = _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)) ?? Colors.white;
+    final shadows = [
+      for (final e in n.prop(SegmentedButtonProps.selectedShadows))
+        if (e.type == api.EffectType.dropShadow && e.visible) boxShadow(e),
+    ];
+    final padding = n.prop(SegmentedButtonProps.padding)?.flutter ?? const EdgeInsets.symmetric(horizontal: 12, vertical: 5);
+    final expand = n.layout.width.fit != SizeFit.hug;
+    final vertical = n.prop(SegmentedButtonProps.direction) == api.Axis.vertical;
+    final children = <Widget>[
+      for (final s in n.prop(SegmentedButtonProps.segments))
+        () {
+          final on = selection.contains(s.value);
+          final color = on ? selectedFg : fg;
+          final icon = _icon(s.icon, color: color);
+          final label = s.label.isNotEmpty || icon == null ? s.label.isNotEmpty ? s.label : s.value : null;
+          Widget seg = Semantics(
+            button: true,
+            selected: on,
+            enabled: enabled && s.enabled,
+            label: label,
+            child: MouseRegion(
+              cursor: enabled && s.enabled ? SystemMouseCursors.click : MouseCursor.defer,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: enabled && s.enabled ? () => _select(s.value, multi) : null,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutCubic,
+                  padding: padding,
+                  decoration: BoxDecoration(
+                    color: on ? selectedBg : selectedBg.withValues(alpha: 0),
+                    borderRadius: radius,
+                    boxShadow: on ? shadows : null,
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.center, children: [
+                    if (icon != null) icon,
+                    if (icon != null && label != null) const SizedBox(width: 6),
+                    if (label != null)
+                      Flexible(
+                        child: Text(label,
+                            maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis, style: base.copyWith(color: color)),
+                      ),
+                  ]),
+                ),
+              ),
+            ),
+          );
+          if (s.tooltip != null && s.tooltip!.isNotEmpty) seg = Tooltip(message: s.tooltip!, child: seg);
+          return expand && !vertical ? Expanded(child: seg) : seg;
+        }(),
+    ];
+    return Container(
+      padding: EdgeInsets.all(n.prop(SegmentedButtonProps.trackPadding)),
+      decoration: BoxDecoration(
+        color: _color(n.prop(SegmentedButtonProps.backgroundColor)) ?? const Color(0xFFE2E7EE),
+        borderRadius: radius,
+        border: side == null ? null : Border.fromBorderSide(_side(side)),
+      ),
+      child: vertical
+          ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: children)
+          : Row(mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min, children: children),
     );
   }
 }
