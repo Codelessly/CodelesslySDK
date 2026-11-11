@@ -1130,7 +1130,11 @@ class RenderPageItems extends RenderCollection {
 /// the cells in [cells] order, row by row. Header backgrounds and stripes
 /// paint under the cells; a [gridLine] trails each column and row over them.
 class RenderTableItems extends RenderCollection {
+  /// The columns as given; laid out, the last takes the width left over
+  /// when [stretchLastColumn].
+  List<double> givenColumnWidths = const [];
   List<double> columnWidths = const [];
+  bool stretchLastColumn = false;
   List<double> rowHeights = const [];
 
   /// (row, column) of each child, in child order.
@@ -1158,6 +1162,11 @@ class RenderTableItems extends RenderCollection {
   bool layoutItems() {
     final c = constraints;
     size = c.biggest.isFinite ? c.biggest : c.constrain(Size.zero);
+    columnWidths = [...givenColumnWidths];
+    if (stretchLastColumn && columnWidths.isNotEmpty) {
+      final others = _start(columnWidths, columnWidths.length - 1);
+      columnWidths[columnWidths.length - 1] = math.max(columnWidths.last, size.width - others);
+    }
     var i = 0;
     for (final it in children) {
       if (i >= cells.length) {

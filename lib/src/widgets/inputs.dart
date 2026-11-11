@@ -19,6 +19,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         CheckboxProps,
         DatePickerProps,
         DateTimeInputMode,
+        PickerFieldProps,
         DateTimeInputProps,
         DropdownProps,
         Node,
@@ -34,6 +35,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart' show DateFormat;
 
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
@@ -308,7 +310,11 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     hintText: previewText(d.hintText),
     hintStyle: _styleOrNull(d.hintStyle),
     hintMaxLines: d.hintMaxLines,
-    error: errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle),
+    // In error without a message (an error text bound to `true`): the
+    // error border, nothing under the field.
+    error: errorText == api.kErrorWithoutMessage
+        ? const SizedBox.shrink()
+        : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle)),
     errorStyle: _styleOrNull(d.errorStyle),
     errorMaxLines: d.errorMaxLines,
     floatingLabelBehavior: switch (d.floatingLabelBehavior) {
@@ -321,7 +327,8 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     // shrink its intrinsic height.
     visualDensity: d.isCollapsed ? VisualDensity.standard : null,
     contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
-        error: error ?? (errorText != null && errorText.trim().isNotEmpty), focused: focused),
+        error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
+        focused: focused),
     prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
     prefixIconConstraints: iconConstraints(d.prefixIconConstraints, d.prefixIconPadding, prefixWidget, prefixIcon),
     prefix: always ? null : prefixWidget,
@@ -525,7 +532,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final style = _styleOrNull(n.prop(TextFieldProps.style));
     final cursorRadius = n.prop(TextFieldProps.cursorRadius);
 
+    // Where tickers are off (a design canvas) the decorator can't animate a
+    // border or fill change: it would keep painting the old one. A new
+    // decorator shows the current decoration.
+    final atRest = !TickerMode.valuesOf(context).enabled;
     Widget field(InputDecoration decoration) => TextField(
+          key: atRest ? ValueKey<InputDecoration>(decoration) : null,
           controller: controller,
           focusNode: focusNode,
           decoration: decoration,
@@ -601,7 +613,9 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
-    if (vFit == SizeFit.hug) result = IntrinsicHeight(child: result);
+    // A collapsed field sizes to its line on its own; under IntrinsicHeight
+    // Flutter's TextField reports the 48 px interactive minimum instead.
+    if (vFit == SizeFit.hug && !d.isCollapsed) result = IntrinsicHeight(child: result);
 
     // Always a DecoratedBox, empty without focus: a ring that came and went
     // as a wrapper would rebuild the field and drop its focus.
@@ -1378,6 +1392,151 @@ TimeOfDay? _time(String value) {
   return h < 24 && min < 60 ? TimeOfDay(hour: h, minute: min) : null;
 }
 
+/// A picker's dialog theme: the app's tokens ([_pickerTheme]), then the
+/// node's `pickerTheme` (colors, radii, font, headline), and a 24-hour
+/// clock when asked.
+Widget _nodePickerTheme(BuildContext context, Widget? child, Node n, {bool use24h = false}) {
+  final j = n.prop(PickerFieldProps.pickerTheme);
+  Widget themed = child ?? const SizedBox.shrink();
+  if (use24h) {
+    themed = MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: themed);
+  }
+  if (j == null || j.isEmpty) return _pickerTheme(context, themed);
+  Color? c(String key) => api.Color.fromJson(j[key])?.flutter;
+  double? d(String key) => j[key] is num ? (j[key] as num).toDouble() : double.tryParse('${j[key] ?? ''}');
+  final base = Theme.of(context);
+  final background = c('backgroundColor'), accent = c('accentColor'), onAccent = c('onAccentColor');
+  final text = c('textColor'), muted = c('mutedColor'), divider = c('dividerColor');
+  final radius = d('radius'), dayRadius = d('dayRadius');
+  final family = j['fontFamily'] is String ? j['fontFamily'] as String : null;
+  final headline = j['headlineStyle'] == null ? null : textStyle(api.TextStyle.fromJson(j['headlineStyle']));
+  TextStyle? font([double? size, Color? color, FontWeight? weight]) =>
+      family == null && color == null ? null : TextStyle(fontFamily: family, fontSize: size, color: color, fontWeight: weight);
+  final shape = radius == null ? null : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
+  ButtonStyle? button(Color? color) => color == null && family == null
+      ? null
+      : TextButton.styleFrom(foregroundColor: color, textStyle: TextStyle(fontFamily: family, fontWeight: FontWeight.w600, fontSize: 14));
+  return Builder(builder: (context) {
+    final scheme = base.colorScheme.copyWith(
+      primary: accent,
+      onPrimary: onAccent,
+      surface: background,
+      onSurface: text,
+      // Material 3 tints dialogs with the scheme's containers: keep them the surface.
+      surfaceContainerHigh: background,
+      surfaceContainerHighest: background,
+      surfaceTint: Colors.transparent,
+      outline: divider,
+      outlineVariant: divider,
+    );
+    final data = base.copyWith(
+      colorScheme: scheme,
+      textTheme: family == null ? base.textTheme : base.textTheme.apply(fontFamily: family),
+      datePickerTheme: DatePickerThemeData(
+        backgroundColor: background,
+        surfaceTintColor: Colors.transparent,
+        shape: shape,
+        headerBackgroundColor: background,
+        headerForegroundColor: text,
+        headerHeadlineStyle: headline,
+        headerHelpStyle: font(11, muted, FontWeight.w600)?.copyWith(letterSpacing: 0.9),
+        weekdayStyle: font(12, muted, FontWeight.w600),
+        dayStyle: font(13, null, FontWeight.w500),
+        yearStyle: font(13, null, FontWeight.w500),
+        dayShape: dayRadius == null
+            ? null
+            : WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(dayRadius))),
+        todayBorder: accent == null ? null : BorderSide(color: accent),
+        dividerColor: divider,
+        cancelButtonStyle: button(muted ?? text),
+        confirmButtonStyle: button(accent),
+      ),
+      timePickerTheme: TimePickerThemeData(
+        backgroundColor: background,
+        shape: shape,
+        hourMinuteShape: dayRadius == null
+            ? null
+            : RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(dayRadius), side: BorderSide(color: divider ?? Colors.transparent)),
+        hourMinuteTextColor: text,
+        dialHandColor: accent,
+        dialTextColor: text,
+        entryModeIconColor: muted,
+        helpTextStyle: font(11, muted, FontWeight.w600)?.copyWith(letterSpacing: 0.9),
+        hourMinuteTextStyle: headline?.copyWith(fontSize: 44) ?? font(44, text, FontWeight.w500),
+        cancelButtonStyle: button(muted ?? text),
+        confirmButtonStyle: button(accent),
+      ),
+    );
+    return Theme(data: data, child: themed);
+  });
+}
+
+/// A date's or a time's text in [pattern] (intl), or [fallback] when the
+/// pattern is empty or can't format it.
+String _formatted(DateTime value, String pattern, String fallback) {
+  if (pattern.trim().isEmpty) return fallback;
+  try {
+    return DateFormat(pattern).format(value);
+  } catch (_) {
+    return fallback;
+  }
+}
+
+/// A picker's face: the outlined button, or with a decoration a read-only
+/// field (hover and press feedback, the decoration's border, icons and
+/// error) that opens the picker.
+Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap, {bool empty = false}) {
+  var style = n.prop(PickerFieldProps.style);
+  final d = n.prop(PickerFieldProps.decoration);
+  // No value yet: the decoration's hint (`—`, "Pick a day") in its style.
+  final hint = d.hintText;
+  if (empty && hint != null) {
+    text = hint;
+    if (!d.hintStyle.isEmpty) style = d.hintStyle;
+  }
+  if (d.isEmpty) {
+    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style)));
+  }
+  final decoration = inputDecoration(d, n.layout.padding, error: d.errorText != null && d.errorText!.isNotEmpty);
+  return MouseRegion(
+    cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: _HoverDecorator(
+        decoration: decoration,
+        enabled: onTap != null,
+        child: Text(text, style: _styleOrNull(style), maxLines: 1, overflow: TextOverflow.ellipsis),
+      ),
+    ),
+  );
+}
+
+class _HoverDecorator extends StatefulWidget {
+  const _HoverDecorator({required this.decoration, required this.enabled, required this.child});
+  final InputDecoration decoration;
+  final bool enabled;
+  final Widget child;
+  @override
+  State<_HoverDecorator> createState() => _HoverDecoratorState();
+}
+
+class _HoverDecoratorState extends State<_HoverDecorator> {
+  bool hover = false;
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        onEnter: (_) => setState(() => hover = true),
+        onExit: (_) => setState(() => hover = false),
+        child: InputDecorator(
+          decoration: widget.decoration.copyWith(enabled: widget.enabled),
+          isHovering: hover && widget.enabled,
+          isEmpty: false,
+          child: widget.child,
+        ),
+      );
+}
+
 class _DatePickerIsland extends StatefulWidget {
   const _DatePickerIsland({required this.node, required this.interactive});
   final Node node;
@@ -1389,25 +1548,44 @@ class _DatePickerIsland extends StatefulWidget {
 
 class _DatePickerIslandState extends State<_DatePickerIsland> {
   String? picked;
+  String? _shown;
 
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
+    // A new bound value (another field changed it) wins over the last pick.
+    final value = n.prop(DatePickerProps.value);
+    if (value != _shown) {
+      _shown = value;
+      picked = null;
+    }
     final first = _date(n.prop(DatePickerProps.firstDate)) ?? DateTime(1);
     final last = _date(n.prop(DatePickerProps.lastDate)) ?? DateTime(9999, 12, 31);
-    var initial = _date(picked ?? n.prop(DatePickerProps.value)) ?? DateTime.now();
+    var initial = _date(picked ?? value) ?? DateTime.now();
     if (initial.isBefore(first)) initial = first;
     if (initial.isAfter(last)) initial = last;
-    return OutlinedButton(
-      onPressed: !n.prop(DatePickerProps.enabled) || !widget.interactive
+    final help = n.prop(PickerFieldProps.helpText);
+    return _pickerFace(
+      context,
+      n,
+      _formatted(initial, n.prop(PickerFieldProps.format), _isoDate(initial)),
+      empty: _date(picked ?? value) == null,
+      !n.prop(DatePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final date = await showDatePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialDate: initial, firstDate: first, lastDate: last);
+              final date = await showDatePicker(
+                context: context,
+                useRootNavigator: false,
+                builder: (_, child) => _nodePickerTheme(context, child, n),
+                helpText: help.isEmpty ? null : help,
+                initialDate: initial,
+                firstDate: first,
+                lastDate: last,
+              );
               if (date == null || !mounted) return;
               setState(() => picked = _isoDate(date));
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: Text(_isoDate(initial)),
     );
   }
 }
@@ -1423,21 +1601,38 @@ class _TimePickerIsland extends StatefulWidget {
 
 class _TimePickerIslandState extends State<_TimePickerIsland> {
   String? picked;
+  String? _shown;
 
   @override
   Widget build(BuildContext context) {
     final n = widget.node;
-    final time = _time(picked ?? n.prop(TimePickerProps.value)) ?? const TimeOfDay(hour: 0, minute: 0);
-    return OutlinedButton(
-      onPressed: !n.prop(TimePickerProps.enabled) || !widget.interactive
+    final value = n.prop(TimePickerProps.value);
+    if (value != _shown) {
+      _shown = value;
+      picked = null;
+    }
+    final time = _time(picked ?? value) ?? const TimeOfDay(hour: 0, minute: 0);
+    final help = n.prop(PickerFieldProps.helpText);
+    final use24h = n.prop(TimePickerProps.use24h);
+    return _pickerFace(
+      context,
+      n,
+      _formatted(DateTime(2000, 1, 1, time.hour, time.minute), n.prop(PickerFieldProps.format), _clock(time)),
+      empty: _time(picked ?? value) == null,
+      !n.prop(TimePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final t = await showTimePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialTime: time);
+              final t = await showTimePicker(
+                context: context,
+                useRootNavigator: false,
+                builder: (_, child) => _nodePickerTheme(context, child, n, use24h: use24h),
+                helpText: help.isEmpty ? null : help,
+                initialTime: time,
+              );
               if (t == null || !mounted) return;
               setState(() => picked = _clock(t));
               if (context.mounted) _fire(context, 'changed', picked);
             },
-      child: Text(_clock(time)),
     );
   }
 }

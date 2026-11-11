@@ -2,6 +2,7 @@
 // `path` widget and a box's path), icons, and the players' islands.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart';
+import 'package:codelessly_sdk/src/render/paint/material_icon_versions.dart';
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
 import 'package:codelessly_sdk/src/widgets/media_players.dart';
 import 'package:flutter/material.dart';
@@ -84,6 +85,32 @@ void main() {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'CUPERTINO_ICON', 'codepoint': 61708}),
         'https://icons.codelessly.com/cupertino/1.0.9/f10c.svg');
     expect(IconSources.urlOf({'source': 'image', 'image': 'https://x.com/a.png'}), 'https://x.com/a.png');
+  });
+
+  test("a Material icon named with Flutter's style suffix is served under its base name", () {
+    String? url(String name, [String? style]) =>
+        IconSources.urlOf({'type': 'MATERIAL_ICON', 'name': name, 'style': ?style});
+    expect(url('download_rounded', 'rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/download/'));
+    expect(url('check_circle_outline_rounded', 'rounded'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsround/check_circle_outline/'));
+    expect(url('theater_comedy_outlined', 'outlined'),
+        startsWith('https://fonts.gstatic.com/s/i/materialiconsoutlined/theater_comedy/'));
+    // With no style set, the suffix names it.
+    expect(url('playlist_add_rounded'), startsWith('https://fonts.gstatic.com/s/i/materialiconsround/playlist_add/'));
+    expect(url('memory_sharp'), startsWith('https://fonts.gstatic.com/s/i/materialiconssharp/memory/'));
+    // Names that only contain the words are untouched.
+    expect(url('outlined_flag'), startsWith('https://fonts.gstatic.com/s/i/materialicons/outlined_flag/'));
+  });
+
+  test('a Material icon saved without its version is drawn from its current SVG', () {
+    const week = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'calendar_view_week', 'style': 'rounded'};
+    // Icons added after Material's first release have no v1 SVG.
+    expect(IconSources.urlOf(week),
+        'https://fonts.gstatic.com/s/i/materialiconsround/calendar_view_week/v${materialIconVersions['calendar_view_week']}/24px.svg');
+    // urlOf already gives the current version: no second try.
+    expect(IconSources.fallbackUrlOf(week), isNull);
+    expect(IconSources.fallbackUrlOf({'source': 'icon', 'type': 'MATERIAL_SYMBOL', 'name': 'star'}), isNull);
+    expect(IconSources.fallbackUrlOf({'source': 'image', 'image': 'https://x.com/a.png'}), isNull);
   });
 
   test('SVG paths parse, trim and dash', () {

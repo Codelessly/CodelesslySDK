@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 
+import '../runtime/actions/app_data_sources.dart';
 import '../runtime/contracts.dart';
 import '../runtime/expressions/scopes.dart';
 import '../services/services.dart';
@@ -151,6 +152,17 @@ class Codelessly extends ChangeNotifier {
   /// Declared from the publish model's `variables` (and a publish's
   /// `app_variables` scope, [declareAppVariables]).
   late final VariableScope appVariables = VariableScope(const [], parent: _storage);
+
+  /// The live data the whole app shares: `loadCloudData` actions with
+  /// `scope: app` open one subscription here, on first use, and every
+  /// screen of every [CodelesslyWidget] showing this project shares it
+  /// (its app variable reads the same values everywhere). Closed by
+  /// [dispose].
+  AppDataSources get appData => _appData ??= AppDataSources(appVariables, onError: (error, stack) {
+        final s = services;
+        if (s is Services) s.analytics.logError(error, stackTrace: stack, type: 'app_data');
+      });
+  AppDataSources? _appData;
 
   /// `storage`: what the app keeps on the device ([Services.storage], the
   /// `setStorage` action's), read live as `storage.<key>`.
@@ -421,6 +433,7 @@ class Codelessly extends ChangeNotifier {
     _watching?.cancel();
     _watching = null;
     route.dispose();
+    _appData?.dispose();
     for (final p in _persistedApp) {
       p.dispose();
     }

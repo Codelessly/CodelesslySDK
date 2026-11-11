@@ -374,7 +374,7 @@ String? scriptTestFailure(ScriptTest t, ScriptRunResult run) {
   final expectError = t.expectError;
   if (expectError != null) {
     if (run.ok) return 'Expected a $expectError, but it returned ${_compared(run.value)}.';
-    if (run.error!['type'] != expectError) {
+    if (!expectedError(expectError, run.error!)) {
       return 'Expected a $expectError, but it failed with ${run.error!['type']}: ${run.error!['message']}';
     }
     return null;
@@ -385,6 +385,16 @@ String? scriptTestFailure(ScriptTest t, ScriptRunResult run) {
   }
   if (_compared(run.value) != _compared(t.expect)) return 'Expected ${_compared(t.expect)}, got ${_compared(run.value)}.';
   return null;
+}
+
+/// Whether a run's [error] is the one a test's `expectError` names: its
+/// type (`RangeError`), its message (`Pick a template`), or both as
+/// `Type: message` (`Error: Pick a template`). A validation script throws
+/// plain `Error`s, so only the message tells its failures apart.
+bool expectedError(String expected, Map<String, Object?> error) {
+  final type = '${error['type'] ?? ''}', message = '${error['message'] ?? ''}';
+  final want = expected.trim();
+  return want == type || want == message || want == '$type: $message';
 }
 
 String _compared(Object? v) => jsonEncode(_sorted(v));
