@@ -195,9 +195,15 @@ class NodeTree {
         // row/column stop at those relayout boundaries, and islands (chips,
         // buttons) keep the size they measured: measure every box again,
         // and the hugging layouts above it, as an edit would.
+        // Every render object below too: islands cache the intrinsic sizes
+        // they measured below their own relayout boundaries.
+        void markAll(RenderObject o) {
+          o.markNeedsLayout();
+          o.visitChildren(markAll);
+        }
         for (final box in _boxes.values.toList()) {
           if (!box.attached) continue;
-          box.markNeedsLayout();
+          markAll(box);
           box._relayoutHuggingAncestors();
         }
       });
