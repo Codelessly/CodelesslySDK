@@ -3,12 +3,31 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-/// Ticks once a second while anything listens, so widgets whose formulas call
-/// `now()` or `today()` rebuild and their clocks and countdowns stay live.
+/// How often a formula's value can change as time passes, finest first:
+/// what a widget showing it must be rebuilt on ([FormulaClock.of]).
 ///
-/// The timer only runs while there are listeners.
+/// * [frame]: `nowMs()`, a millisecond clock (every frame);
+/// * [second]: `now()`, a time of day or a countdown (every second);
+/// * [minute]: `today()`, `timeAgo(date)`, `isToday(date)`: values that
+///   change at most once a minute (every minute).
+enum ClockTick {
+  frame,
+  second,
+  minute;
+
+  /// The finer of this and [other] (either may be null).
+  ClockTick finer(ClockTick? other) => other == null || index <= other.index ? this : other;
+}
+
+/// Ticks while anything listens, so widgets whose formulas read the clock
+/// rebuild and their clocks, countdowns and relative times stay live:
+/// [instance] once a second (`now()`), [minutes] once a minute (`today()`,
+/// `timeAgo(date)`).
+///
+/// The timer only runs while there are listeners. Tests pin the time with
+/// [pinned] and step it with [tick].
 class FormulaClock extends ChangeNotifier {
-  FormulaClock._();
+  FormulaClock._(this._interval);
 
   /// Optional instant pinned by an editor or preview for deterministic dates.
   static DateTime? pinned;
@@ -16,18 +35,34 @@ class FormulaClock extends ChangeNotifier {
   /// The pinned instant, or the device clock for live formulas.
   static DateTime now() => pinned ?? DateTime.now();
 
-  /// The clock every formula-bound widget shares.
-  static final FormulaClock instance = FormulaClock._();
+  /// The clock every formula reading `now()` shares: ticks every [interval].
+  static final FormulaClock instance = FormulaClock._(() => interval);
 
-  /// Time between ticks.
+  /// The clock every formula whose value changes at most once a minute
+  /// shares (`today()`, `timeAgo(date)`): ticks every [minuteInterval].
+  static final FormulaClock minutes = FormulaClock._(() => minuteInterval);
+
+  /// Time between [instance]'s ticks.
   static Duration interval = const Duration(seconds: 1);
 
+  /// Time between [minutes]' ticks.
+  static Duration minuteInterval = const Duration(minutes: 1);
+
+  /// What a widget showing a formula that changes every [tick] listens to:
+  /// [FrameClock.instance], [instance] or [minutes].
+  static Listenable of(ClockTick tick) => switch (tick) {
+        ClockTick.frame => FrameClock.instance,
+        ClockTick.second => instance,
+        ClockTick.minute => minutes,
+      };
+
+  final Duration Function() _interval;
   Timer? _timer;
 
   @override
   void addListener(VoidCallback listener) {
     super.addListener(listener);
-    _timer ??= Timer.periodic(interval, (_) => notifyListeners());
+    _timer ??= Timer.periodic(_interval(), (_) => notifyListeners());
   }
 
   // Whether anything still listens is asked of the notifier: a count of
@@ -45,6 +80,14 @@ class FormulaClock extends ChangeNotifier {
   /// Whether the timer is running.
   @visibleForTesting
   bool get isTicking => _timer != null;
+
+  /// Whether anything listens.
+  @visibleForTesting
+  bool get isListened => hasListeners;
+
+  /// Ticks now, as the timer would: tests move [pinned] and call it.
+  @visibleForTesting
+  void tick() => notifyListeners();
 }
 
 /// Ticks on every frame while anything listens, so widgets whose formulas
