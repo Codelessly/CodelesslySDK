@@ -470,11 +470,12 @@ class Codelessly extends ChangeNotifier {
       ...model.fontsOf(layoutId),
       for (final f in layout.fonts) ?model.fonts[f],
     };
+    // The layout's characters: on the web those beyond a Google Font's
+    // `latin` subset come in a file of their own, for the fonts it lists and
+    // those asked for when first drawn.
+    if (kIsWeb) fonts.addText(jsonEncode(layout.toJson()));
     if (fontsOf.isNotEmpty) {
-      // The layout's characters: on the web those beyond a Google Font's
-      // `latin` subset come in a file of their own.
-      final text = kIsWeb ? jsonEncode(layout.toJson()) : '';
-      await fonts.load(fontsOf, text: text).timeout(config.fontTimeout, onTimeout: () {});
+      await fonts.load(fontsOf).timeout(config.fontTimeout, onTimeout: () {});
     }
     return layout;
   }
