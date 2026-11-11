@@ -740,6 +740,7 @@ class _LayoutViewState extends State<_LayoutView> {
       onError: widget.host.onActionError,
       onActionErrorEvent: _actionError,
       refreshAuthValues: _codelessly.refreshAuthValues,
+      appData: _codelessly.appData,
     );
     final session = widget.host.paywall;
     if (session != null) {
