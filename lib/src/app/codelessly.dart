@@ -136,6 +136,10 @@ class Codelessly extends ChangeNotifier {
 
   late final _ServiceValuesScope _serviceValues = _ServiceValuesScope(services, parent: data);
 
+  /// Makes completed native auth operations visible to the next action in
+  /// the same chain, without waiting for the asynchronous auth/profile stream.
+  void refreshAuthValues(AuthOperation operation) => _serviceValues.refreshAuth(operation);
+
   final List<PersistedVariable> _persistedApp = [];
 
   /// Declares [variables] in [appVariables], each once: a persisted one
@@ -372,11 +376,16 @@ class _ServiceValuesScope extends ValuesScope {
     _auth = s.watchAuth().listen(
       (value) {
         if (_disposed) return;
-        _scopeAccount(value['isSignedIn'] == true ? value['uid'] as String? : null);
-        set('auth', value);
+        final user = s.auth.currentUser;
+        final uid = user == null || user.isAnonymous ? '' : user.uid;
+        if (value['uid'] != uid) return; // A queued snapshot from an earlier identity.
+        _authFailed = false;
+        _scopeAccount(uid.isEmpty ? null : uid);
+        set('auth', authValue(user, profile: _matchingProfile(value, user)));
       },
       onError: (Object error, StackTrace stack) {
         if (_disposed) return;
+        _authFailed = true;
         _scopeAccount(null);
         set('auth', authValue(null));
         s.analytics.logError(error, stackTrace: stack, type: 'auth_scope');
@@ -391,6 +400,31 @@ class _ServiceValuesScope extends ValuesScope {
   bool _disposed = false;
   String? _uid;
   bool _accountInitialized = false;
+  bool _authFailed = false;
+
+  Map<String, Object?>? _matchingProfile(Object? snapshot, AppUser? user) {
+    if (user == null || user.isAnonymous || snapshot is! Map || snapshot['uid'] != user.uid) return null;
+    final profile = snapshot['profile'];
+    return profile is Map ? profile.cast<String, Object?>() : null;
+  }
+
+  void refreshAuth(AuthOperation operation) {
+    if (_disposed) return;
+    final service = _services;
+    if (service == null) return;
+    final recovery = const {
+      AuthOperation.signIn, AuthOperation.signUp, AuthOperation.signInWithGoogle,
+      AuthOperation.signInWithApple, AuthOperation.completeSignInLink,
+    }.contains(operation);
+    // A stale currentUser after an auth stream error is not proof of a live
+    // session. Only an explicit successful sign-in can recover that identity.
+    if (_authFailed && !recovery && operation != AuthOperation.signOut && operation != AuthOperation.deleteAccount) return;
+    if (recovery) _authFailed = false;
+    final user = service.auth.currentUser;
+    final profile = _matchingProfile(this['auth'], user);
+    _scopeAccount(user == null || user.isAnonymous ? null : user.uid);
+    set('auth', authValue(user, profile: profile));
+  }
 
   void _scopeAccount(String? uid) {
     if (_accountInitialized && _uid == uid) return;

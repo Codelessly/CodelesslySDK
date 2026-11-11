@@ -71,7 +71,7 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case CloudDocumentsAction():
       await _cloudDocuments(a, run);
     case LoadCloudDataAction():
-      _loadCloudData(a, run);
+      await _loadCloudData(a, run);
     case AuthAction():
       await _auth(a, run);
     case IfAction():
@@ -449,7 +449,7 @@ Future<void> _cloudDocuments(CloudDocumentsAction a, ActionRun run) async {
 
 /// Streams [a]'s document or query into its variable until the screen goes:
 /// `{status, isLoading, data, error}`.
-void _loadCloudData(LoadCloudDataAction a, ActionRun run) {
+Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
   final db = _require(run, 'Cloud data').cloud;
   final scope = run.context.scope;
   final variable = a.variable.trim();
@@ -461,15 +461,66 @@ void _loadCloudData(LoadCloudDataAction a, ActionRun run) {
         'error': ?error,
       });
   put('loading');
-  final path = resolveCollectionPath(a.query, run.expressions, run.scope);
-  final Stream<Object?> stream = a.single
-      ? db.watchDocument(path, run.text(a.id).trim())
-      : db.watchQuery(path, resolveCloudQuery(a.query, run.expressions, run.scope), loadRelated: a.query.loadRelated);
-  final sub = stream.listen(
-    (data) => put('loaded', data: data),
-    onError: (Object e) => put('error', error: '$e'),
-  );
-  run.host.onDispose(sub.cancel);
+  late final Stream<Object?> stream;
+  try {
+    final path = resolveCollectionPath(a.query, run.expressions, run.scope);
+    stream = a.single
+        ? db.watchDocument(path, run.text(a.id).trim())
+        : db.watchQuery(path, resolveCloudQuery(a.query, run.expressions, run.scope), loadRelated: a.query.loadRelated);
+  } catch (error) {
+    put('error', error: '$error');
+    rethrow;
+  }
+  final first = Completer<void>();
+  var active = true;
+  late final StreamSubscription<Object?> sub;
+  try {
+    sub = stream.listen(
+    (data) {
+      if (!active) return;
+      put('loaded', data: data);
+      if (!first.isCompleted) first.complete();
+    },
+    onError: (Object error, StackTrace stack) {
+      if (!active) return;
+      active = false;
+      put('error', error: '$error');
+      if (!first.isCompleted) {
+        first.completeError(error, stack);
+      } else {
+        // A later subscription error has no awaited action to throw through.
+        // Stop this invocation's remaining actions, report once and close it.
+        run.stop();
+        run.host.reportError(ActionFailed(a.type, error, nodeId: run.node?.id), stack, action: a.type);
+      }
+    },
+    onDone: () {
+      if (active && !first.isCompleted) {
+        active = false;
+        final error = StateError('Cloud data stream closed before a value');
+        put('error', error: '$error');
+        first.completeError(error);
+      }
+    },
+    cancelOnError: true,
+    );
+  } catch (error) {
+    active = false;
+    put('error', error: '$error');
+    rethrow;
+  }
+  void cancel() {
+    active = false;
+    unawaited(sub.cancel());
+    if (!first.isCompleted) first.completeError(const ActionsCancelled());
+  }
+  final removeCancellation = run.onCancel(cancel);
+  run.host.onDispose(cancel);
+  try {
+    await first.future;
+  } finally {
+    removeCancellation();
+  }
 }
 
 // --- auth -----------------------------------------------------------------------------
@@ -487,7 +538,12 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.signOut:
         await auth.signOut();
       case AuthOperation.updateProfile:
-        await auth.updateProfile(displayName: run.text(a.displayName), photoUrl: run.text(a.photoUrl));
+        // Empty authored fields are omitted, not destructive updates. A
+        // supplied expression resolving to empty still explicitly clears it.
+        await auth.updateProfile(
+          displayName: a.displayName.isEmpty ? null : run.text(a.displayName),
+          photoUrl: a.photoUrl.isEmpty ? null : run.text(a.photoUrl),
+        );
       case AuthOperation.updatePhoto:
         await auth.updateProfile(photoUrl: run.text(a.photoUrl));
       case AuthOperation.sendPasswordResetEmail:
@@ -507,6 +563,8 @@ Future<void> _auth(AuthAction a, ActionRun run) async {
       case AuthOperation.completeSignInLink:
         run.result = (await auth.signInWithLink(email, Uri.base.toString())).uid;
     }
+    final host = run.host;
+    if (host is RuntimeActionContext) host.refreshAuthValues?.call(a.operation);
   } catch (error) {
     if (a.errorVariable.isNotEmpty) {
       setVariableIn(run.context.scope, a.errorVariable, error is AuthFailure ? error.message : '$error');
@@ -761,7 +819,10 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
   if (session == null) throw StateError('Paywall action outside a paywall');
   switch (a.operation) {
     case PaywallOperation.purchase:
-      final result = await session.purchaseAndWait(slot: a.slot);
+      final preference = run.text(a.offer ?? 'storeDefault').trim();
+      final offer = PurchaseOfferPreference.values.where((value) => value.name == preference).firstOrNull;
+      if (offer == null) throw StateError('Unknown purchase offer preference');
+      final result = await session.purchaseAndWait(slot: a.slot, offer: offer);
       _paywallOutcome(result, run);
     case PaywallOperation.restore:
       final result = await session.restoreAndWait();

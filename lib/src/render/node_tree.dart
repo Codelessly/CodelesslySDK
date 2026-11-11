@@ -409,6 +409,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
   void performLayout() {
     final child = this.child;
     if (_collapsed) {
+      // Like RenderOffstage, retain a valid layout boundary for the hidden
+      // subtree. Skipping layout leaves dirty descendants under this clean
+      // box; their next binding update then violates Flutter's invariant.
+      // Its size is not used here, so the child can relayout independently.
+      child?.layout(constraints, parentUsesSize: false);
       size = constraints.smallest;
     } else if (child == null) {
       size = constraints.smallest;

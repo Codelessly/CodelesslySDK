@@ -21,6 +21,8 @@ import '../contracts.dart';
 import '../expressions/engine.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
+import 'action_error.dart';
+export 'action_error.dart' show ActionFailed;
 import 'handlers.dart';
 import 'ui.dart';
 
@@ -62,7 +64,21 @@ class ActionsCancelled implements Exception {
 
 /// One running chain: what its actions read and share.
 class ActionRun {
-  ActionRun._(this.context, this.host, this.scope, this.cancellation, this.node, this.value);
+  ActionRun._(this.context, this.host, this.scope, this.cancellation, this.node, this.value, [ActionCancellation? stopped])
+      : _stopped = stopped ?? ActionCancellation();
+
+  final ActionCancellation _stopped;
+
+  /// Stops only this invocation and nested actions, preserving later retries.
+  void stop() => _stopped.cancel();
+
+  void Function() onCancel(void Function() listener) {
+    var called = false;
+    void once() { if (!called) { called = true; listener(); } }
+    final removeParent = cancellation.onCancel(once);
+    final removeStop = _stopped.onCancel(once);
+    return () { removeParent(); removeStop(); };
+  }
 
   /// What the actions run with.
   final ActionContext context;
@@ -84,7 +100,7 @@ class ActionRun {
   Expressions get expressions =>
       context.expressions is Expressions ? context.expressions as Expressions : const Expressions();
 
-  bool get isCancelled => cancellation.isCancelled;
+  bool get isCancelled => cancellation.isCancelled || _stopped.isCancelled;
 
   /// What `${result}` reads.
   Object? get result => scope['result'];
@@ -100,7 +116,7 @@ class ActionRun {
   /// `${result}` starts as [result]; [names] are more names its actions
   /// read (a for-each turn's `loop`).
   ActionRun nested(Object? result, {Json names = const {}}) =>
-      ActionRun._(context, host, ValuesScope({...names, 'result': result}, scope), cancellation, node, value);
+      ActionRun._(context, host, ValuesScope({...names, 'result': result}, scope), cancellation, node, value, _stopped);
 
   /// [text] with its `${...}` evaluated (text).
   String text(String text) => expressions.interpolate(text, scope);
@@ -124,7 +140,7 @@ class ActionRun {
       remove();
       if (!done.isCompleted) done.complete();
     });
-    remove = cancellation.onCancel(() {
+    remove = onCancel(() {
       timer.cancel();
       if (!done.isCompleted) done.completeError(const ActionsCancelled());
     });
@@ -155,6 +171,9 @@ class CodelesslyActions implements ActionRunner {
   /// never throws.
   Future<void> run(Node node, String trigger, ActionContext context,
       {Json event = const {}, ActionCancellation? cancellation, Object? instance}) {
+    if (trigger == TriggerType.actionError.name && context is RuntimeActionContext) {
+      context = context.withoutActionErrorEvents();
+    }
     final reactions = [
       for (final r in node.actions)
         if (r.trigger.type.name == trigger) r,
@@ -210,17 +229,6 @@ class CodelesslyActions implements ActionRunner {
   static String? _failing(Object error) => error is ActionFailed ? error.action : null;
 }
 
-/// An action failed: [action] is its type, [error] why.
-class ActionFailed implements Exception {
-  const ActionFailed(this.action, this.error);
-
-  final String action;
-  final Object error;
-
-  @override
-  String toString() => 'Action $action failed: $error';
-}
-
 class _HandlerOverrides {
   const _HandlerOverrides(this.handlers);
   final Map<String, ActionHandler> handlers;
@@ -258,7 +266,7 @@ Future<void> _perform(ActionDef a, ActionRun run) async {
   } on ActionFailed {
     rethrow;
   } catch (error, stack) {
-    Error.throwWithStackTrace(ActionFailed(a.type, error), stack);
+    Error.throwWithStackTrace(ActionFailed(a.type, error, nodeId: run.node?.id), stack);
   }
 }
 

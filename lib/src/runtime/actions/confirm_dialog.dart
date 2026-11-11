@@ -208,6 +208,11 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
     return own == null || own == BorderSide.none ? BorderSide(color: c) : own.copyWith(color: c);
   }
 
+  double? gap(String key) {
+    final value = look.number(key);
+    return value != null && value.isFinite && value >= 0 ? value : null;
+  }
+
   final barrierColor = color('barrierColor');
   final layout = confirmLayoutOf(action, bound);
   final presentation = resolvePresentation(action.presentation, MediaQuery.maybeSizeOf(context)?.width,
@@ -253,6 +258,10 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
           iconDiscBorder: side('iconDiscBorder', 'iconDiscBorderColor'),
           centered: look.flag('centered'),
           expandButtons: look.flag('expandButtons'),
+          stackButtons: look.flag('stackButtons'),
+          titleMessageGap: gap('titleMessageGap') ?? 8,
+          actionsGap: gap('actionsGap') ?? 20,
+          buttonGap: gap('buttonGap'),
         ),
       );
 
@@ -263,6 +272,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
       barrierDismissible: action.barrierDismissible,
       barrierColor: barrierColor ?? Theme.of(context).dialogTheme.barrierColor ?? Colors.black54,
       sheetWidth: look.number('sheetWidth'),
+      cornerRadius: look.number('radius'),
       maxHeightFactor: look.numberOr('maxHeightFactor', 1),
       showDragHandle: look.flag('showDragHandle'),
       builder: buildDialog,
@@ -318,6 +328,10 @@ class ThemedConfirmDialog extends StatelessWidget {
     this.iconDiscBorder,
     this.centered = false,
     this.expandButtons = false,
+    this.stackButtons = false,
+    this.titleMessageGap = 8,
+    this.actionsGap = 20,
+    this.buttonGap,
     this.width,
     this.maxWidth,
     this.insets,
@@ -361,6 +375,17 @@ class ThemedConfirmDialog extends StatelessWidget {
 
   /// Whether the buttons share the dialog's width equally.
   final bool expandButtons;
+
+  /// Opt-in full-width vertical actions, confirm first then cancel.
+  /// Takes precedence over [expandButtons]; false preserves native layout.
+  final bool stackButtons;
+
+  /// Space between title and message, and between content and actions.
+  final double titleMessageGap, actionsGap;
+
+  /// Action spacing. Null keeps 8px for stacked/plain actions, and the
+  /// existing 12px for expanded rows or bordered/shadowed horizontal actions.
+  final double? buttonGap;
 
   final ResolvedFeedbackTheme theme;
 
@@ -501,7 +526,7 @@ class ThemedConfirmDialog extends StatelessWidget {
                 textAlign: textAlign,
                 style: applyTextStyle(titleStyle, theme.titleStyle.copyWith(fontSize: 18, height: 1.3, color: onSurface)),
               ),
-            if (title.isNotEmpty && message.isNotEmpty) const SizedBox(height: 8),
+            if (title.isNotEmpty && message.isNotEmpty) SizedBox(height: titleMessageGap),
             if (message.isNotEmpty)
               Flexible(
                 child: SingleChildScrollView(
@@ -515,16 +540,22 @@ class ThemedConfirmDialog extends StatelessWidget {
                   ),
                 ),
               ),
-            const SizedBox(height: 20),
-            if (expandButtons)
-              Row(children: [Expanded(child: buttons[0]), const SizedBox(width: 12), Expanded(child: buttons[1])])
+            SizedBox(height: actionsGap),
+            if (stackButtons)
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [buttons[1], SizedBox(height: buttonGap ?? 8), buttons[0]],
+              )
+            else if (expandButtons)
+              Row(children: [Expanded(child: buttons[0]), SizedBox(width: buttonGap ?? 12), Expanded(child: buttons[1])])
             else
               OverflowBar(
                 alignment: centered ? MainAxisAlignment.center : MainAxisAlignment.end,
                 overflowAlignment: centered ? OverflowBarAlignment.center : OverflowBarAlignment.end,
                 // Outlined or shadowed buttons need room between them.
-                spacing: buttonShadowList.isEmpty && confirmBorder == null && cancelBorder == null ? 8 : 12,
-                overflowSpacing: 8,
+                spacing: buttonGap ?? (buttonShadowList.isEmpty && confirmBorder == null && cancelBorder == null ? 8 : 12),
+                overflowSpacing: buttonGap ?? 8,
                 children: buttons,
               ),
           ],
