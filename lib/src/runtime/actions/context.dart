@@ -56,6 +56,7 @@ class RuntimeActionContext implements ActionHost {
     this.onError,
     this.declareMissing = false,
     this.paywall,
+    this.openPaywall,
     this.scripts = const [],
     List<VoidCallback>? disposers,
   })  : services = services ?? const _NoServices(),
@@ -96,6 +97,9 @@ class RuntimeActionContext implements ActionHost {
   /// The paywall a paywall screen's actions act on.
   final PaywallSession? paywall;
 
+  /// Opens a server-resolved placement; supplied by the app shell.
+  final Future<PaywallResult> Function(String placement)? openPaywall;
+
   /// The scripts its run script actions run (the layout's).
   final List<ScriptDef> scripts;
 
@@ -111,6 +115,7 @@ class RuntimeActionContext implements ActionHost {
         onError: onError,
         declareMissing: declareMissing,
         paywall: paywall,
+        openPaywall: openPaywall,
         scripts: scripts,
         disposers: _disposers,
       );

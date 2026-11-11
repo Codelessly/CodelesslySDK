@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart' show Curve, Curves, ScrollPosition;
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart' as audio;
 
+import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
@@ -825,6 +826,13 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
   final host = run.host;
   final session = host is RuntimeActionContext ? host.paywall : null;
   switch (a.operation) {
+    case PaywallOperation.openPaywall:
+      final placement = run.text(a.placement ?? '').trim();
+      final open = host is RuntimeActionContext ? host.openPaywall : null;
+      if (placement.isEmpty || open == null) throw StateError('No paywall placement presenter');
+      final result = await open(placement);
+      run.result = {'outcome': result.outcome.name, 'entitlementId': result.entitlementId};
+      return;
     case PaywallOperation.openLegalLink:
       final url = run.text(a.url ?? '').trim();
       if (!url.startsWith('https://')) throw StateError('Invalid legal URL');
@@ -839,12 +847,26 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
   if (session == null) throw StateError('Paywall action outside a paywall');
   switch (a.operation) {
     case PaywallOperation.purchase:
-      await session.purchase(slot: a.slot);
+      final result = await session.purchaseAndWait(slot: a.slot);
+      _paywallOutcome(result, run);
     case PaywallOperation.restore:
-      await session.restore();
+      final result = await session.restoreAndWait();
+      _paywallOutcome(result, run);
     case PaywallOperation.selectProduct:
       if (a.slot != null) session.selectProduct(a.slot!);
     default:
+  }
+}
+
+void _paywallOutcome(PaywallResult result, ActionRun run) {
+  run.result = {'outcome': result.outcome.name, 'entitlementId': result.entitlementId};
+  switch (result.outcome) {
+    case PaywallOutcome.purchased || PaywallOutcome.restored:
+      return;
+    case PaywallOutcome.canceled || PaywallOutcome.closed || PaywallOutcome.restoreNothing:
+      throw const ActionsCanceled();
+    case PaywallOutcome.failed:
+      throw StateError(result.error ?? 'Purchase failed');
   }
 }
 

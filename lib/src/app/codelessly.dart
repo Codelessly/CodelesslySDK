@@ -134,7 +134,8 @@ class Codelessly extends ChangeNotifier {
   /// `setStorage` action's), read live as `storage.<key>`.
   late final _StorageScope _storage = _StorageScope(services, parent: _speech);
 
-  late final _SpeechScope _speech = _SpeechScope(services, parent: data);
+  late final _SpeechScope _speech = _SpeechScope(services, parent: _serviceValues);
+  late final _ServiceValuesScope _serviceValues = _ServiceValuesScope(services, parent: data);
 
   final List<PersistedVariable> _persistedApp = [];
 
@@ -373,12 +374,73 @@ class Codelessly extends ChangeNotifier {
     appVariables.dispose();
     _storage.dispose();
     _speech.dispose();
+    _serviceValues.dispose();
     data.dispose();
     // Lazy expression scopes must detach while the service notifiers live.
     if (config.services == null && services is Services) {
       unawaited((services as Services).dispose());
     }
     if (identical(_instance, this)) _instance = null;
+    super.dispose();
+  }
+}
+
+/// Live account/profile and verified entitlement values, owned by the app.
+/// No app variables or persisted preview fixtures are declared for services.
+class _ServiceValuesScope extends ValuesScope {
+  _ServiceValuesScope(CodelesslyServices services, {ValueScope? parent})
+      : _services = services is Services ? services : null,
+        super({
+          'auth': authValue(services is Services ? services.auth.currentUser : null),
+          'entitlements': const <String, Object?>{},
+        }, parent) {
+    final s = _services;
+    if (s == null) return;
+    final current = s.auth.currentUser;
+    _scopeAccount(current == null || current.isAnonymous ? null : current.uid);
+    _auth = s.watchAuth().listen(
+      (value) {
+        if (_disposed) return;
+        _scopeAccount(value['isSignedIn'] == true ? value['uid'] as String? : null);
+        set('auth', value);
+      },
+      onError: (Object error, StackTrace stack) {
+        if (_disposed) return;
+        _scopeAccount(null);
+        set('auth', authValue(null));
+        s.analytics.logError(error, stackTrace: stack, type: 'auth_scope');
+      },
+    );
+    s.paywalls?.entitlements.addListener(_entitlementsChanged);
+    _entitlementsChanged();
+  }
+
+  final Services? _services;
+  StreamSubscription<Map<String, Object?>>? _auth;
+  bool _disposed = false;
+  String? _uid;
+  bool _accountInitialized = false;
+
+  void _scopeAccount(String? uid) {
+    if (_accountInitialized && _uid == uid) return;
+    _accountInitialized = true;
+    _uid = uid;
+    final runtime = _services?.paywalls;
+    runtime?.scopeToUser(uid);
+    if (runtime != null) unawaited(runtime.refreshEntitlements());
+  }
+
+  void _entitlementsChanged() {
+    if (!_disposed) {
+      set('entitlements', {for (final e in _services?.paywalls?.entitlements.value ?? <String>{}) e: true});
+    }
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    _auth?.cancel();
+    _services?.paywalls?.entitlements.removeListener(_entitlementsChanged);
     super.dispose();
   }
 }
