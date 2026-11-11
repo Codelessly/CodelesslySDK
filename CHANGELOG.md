@@ -7,7 +7,9 @@
   list names them, their role, signed-in users or everyone), and a collection's `expiry` field: queries filter
   `field > now` and keep that bound (and the owner or audience filter) on the database when the app finishes the
   rest, live queries drop documents as they expire, and writes store the field as ISO text (empty or missing:
-  `DataRules.neverExpires`). `BackendCloudDatabase(audience:)` gives what the user matches. `CloudQuery.plan`
+  `DataRules.neverExpires`). `BackendCloudDatabase(audience:)` gives what the user matches;
+  `codelesslyCloudServices` gives it an `AuthAudience` (the role in the user's profile, signed in unless anonymous),
+  and live queries, joins and live counts follow a change of user or role. `CloudQuery.plan`
   takes `keepOnServer`. See the guide's [Cloud data and services](docs/guide/09-cloud-data-and-services.md).
 - Presenting layouts from anywhere: `codelessly.present(layoutId, presentation:, params:, data:, dismissible:,
   priority:, anchor:, ...)` shows a layout above the host app (dialog, sheet, side sheet, full screen, popover or
