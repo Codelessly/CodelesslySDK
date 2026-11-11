@@ -343,6 +343,30 @@ void main() {
     expect(at['P1']!.top - at['P0']!.top, closeTo(48, 0.5));
   });
 
+  testWidgets('sections: the index bar sits inside its insets', (tester) async {
+    await show(
+      tester,
+      screen(
+        extraList: {
+          'props': {
+            'sections': {'groupBy': 'group', 'indexBar': true, 'indexWidth': 22, 'indexInsets': [0, 0, 4, 8]},
+          },
+          'slots': {'sectionHeader': 'header'},
+        },
+        extra: {
+          'header': {'type': 'text', 'layout': {'width': 300, 'height': 24}, 'props': {'text': r'#${item.key}'}},
+        },
+      ),
+      variables: [v('people', people(5), VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    final list = tester.getRect(find.byType(CustomScrollView));
+    final bar = tester.getRect(find.byType(SectionIndexBar));
+    expect(list.right - bar.right, 4);
+    expect(list.bottom - bar.bottom, 8);
+    expect(bar.width, 22);
+  });
+
   testWidgets('sections at rest: the design canvas shows the headers too', (tester) async {
     await show(
       tester,

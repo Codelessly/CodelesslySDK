@@ -695,16 +695,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     if (deco is! RenderDecoratedBox) return false;
     final current = deco.decoration;
     if (current is! BoxDecoration) return false;
-    final stroke = _objects['stroke'];
-    if (after.border != null && stroke is! RenderDecoratedBox) return false;
     deco.decoration = BoxDecoration(
       boxShadow: current.boxShadow,
       borderRadius: current.borderRadius,
       color: after.fill,
+      border: after.border,
     );
-    if (after.border != null) {
-      (stroke! as RenderDecoratedBox).decoration = BoxDecoration(borderRadius: current.borderRadius, border: after.border);
-    }
     _node = n;
     _applied = n;
     return true;
@@ -1171,16 +1167,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         boxShadow: [for (final sh in shadows) if (!spread.contains(sh)) sh],
         borderRadius: radius,
         color: plan.native ? plan.fill : null,
+        // One decoration, as a Container's: Flutter tucks the fill under an
+        // opaque border, so its anti-aliased edge doesn't show past the
+        // border (painted apart, a light sliver showed at fractional edges).
+        border: plan.native ? plan.border : null,
       )
       // A node that paints a fill is opaque to pointers, as Flutter's
       // Container(color:) is; one without lets them through its gaps to what
       // lies under it (a row of black keys over the white ones).
       ..opaque = d.fills.any((f) => f.visible));
-    if (plan.native && plan.border != null) {
-      chain.add(_obtain<RenderNodeDecoration>('stroke', () => RenderNodeDecoration(decoration: const BoxDecoration()))
-        ..decoration = BoxDecoration(borderRadius: radius, border: plan.border)
-        ..opaque = false);
-    }
     final clipBehavior = clip(d.clip);
     if (clipBehavior != Clip.none) {
       if (rounded) {

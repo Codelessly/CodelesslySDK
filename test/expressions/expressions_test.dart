@@ -311,6 +311,19 @@ void main() {
       expect(t(r'${missing}', ConditionOp.isNull, ''), isTrue);
     });
 
+    test('empty text equals an empty right side, as a missing value does', () {
+      bool t(String left, ConditionOp op, String right, Map<String, Object?> vars) => e.test(
+          Comparison(ConditionOperand(left), op, ConditionOperand(right)),
+          VariableScope([for (final x in vars.entries) v(x.key, x.value)]));
+      // A formula that gives '' against an empty operand.
+      expect(t(r"${= trim(coalesce(name, ''))}", ConditionOp.notEqualsTo, '', {}), isFalse);
+      expect(t(r"${= trim(coalesce(name, ''))}", ConditionOp.equalsTo, '', {'name': '  '}), isTrue);
+      expect(t(r"${= trim(coalesce(name, ''))}", ConditionOp.notEqualsTo, '', {'name': 'Ada'}), isTrue);
+      expect(t(r'${name}', ConditionOp.equalsTo, '', {'name': ''}), isTrue);
+      expect(t(r'${name}', ConditionOp.equalsTo, '', {}), isTrue);
+      expect(t(r'${name}', ConditionOp.equalsTo, '0', {'name': ''}), isFalse);
+    });
+
     test('raw values parse loosely', () {
       Object? parse(String raw) => e.operand(ConditionOperand(raw, raw: true), ValuesScope());
       expect(parse('hello'), 'hello');

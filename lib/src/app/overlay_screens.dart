@@ -4,6 +4,7 @@
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import 'backdrop_screens.dart';
 import 'codelessly.dart';
 import 'codelessly_widget.dart';
 
@@ -54,7 +55,7 @@ abstract final class CodelesslyOverlayHost {
     String? currentLayoutId,
     CodelesslyWidget? template,
   }) {
-    if (!context.mounted || OverlayScreenScope.of(context)) return;
+    if (!context.mounted || OverlayScreenScope.of(context) || BackdropScreenScope.of(context)) return;
     final overlay = Navigator.maybeOf(context)?.overlay;
     if (overlay == null) return;
     final hosts = _hosts[overlay] ??= {};
