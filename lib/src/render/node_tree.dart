@@ -1506,7 +1506,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
           );
       if (pos.align case final double a) return at(FreeformAxisMode.align, alignment: a);
       final relative = pos.relative;
-      if (expands) return at(FreeformAxisMode.fill);
+      // Pinned to both edges wins over fill (Flutter's Positioned(left,
+      // right)): the pins say where it spans.
+      if (expands && !(pos.isStretch && !isScrollAxis)) return at(FreeformAxisMode.fill);
       if (isScrollAxis) return at(FreeformAxisMode.start);
       if (pos.isStretch && !wraps) {
         final min = horizontal ? c.minWidth : c.minHeight;

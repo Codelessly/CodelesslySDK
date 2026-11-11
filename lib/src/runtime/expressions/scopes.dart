@@ -231,6 +231,10 @@ class VariableScope extends NamedScope {
   final Map<String, (int, Object?)> _cache = {};
   final Set<String> _computing = {};
 
+  /// Each computed variable's last value worked out with every script it
+  /// calls answered.
+  final Map<String, Object?> _lastValue = {};
+
   Object? _computed(Variable v, ValueScope reader) {
     // A formula reading only this scope's variables gives the same value
     // whoever reads it: worked out once per change. One reading the clock
@@ -242,7 +246,18 @@ class VariableScope extends NamedScope {
     }
     if (!_computing.add(v.name)) return null;
     try {
-      final value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local ? this : reader, p));
+      // A script the formula calls with new arguments (the clock's next
+      // minute) answers from a worker later, so the formula reads null for a
+      // frame or two: keep the last value meanwhile instead of blinking
+      // everything that reads it.
+      final status = readPath(reader, 'script');
+      final pendingBefore = status is FormulaReadStatus ? status.pendingReads : 0;
+      var value = FormulaEvaluator.evaluate(v.formula, (p) => readPath(local ? this : reader, p));
+      if (value == null && status is FormulaReadStatus && status.pendingReads > pendingBefore) {
+        value = _lastValue[v.name];
+      } else {
+        _lastValue[v.name] = value;
+      }
       // Only a top-level read: one inside a cycle saw a partial value.
       if (local && _computing.length == 1) _cache[v.name] = (_version, value);
       return value;

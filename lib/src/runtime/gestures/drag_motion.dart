@@ -202,7 +202,8 @@ abstract final class DragMotionControl {
         await target.reset();
       case api.DragCommand.shake:
         target.shake();
-      case api.DragCommand.step:
+      case api.DragCommand.step || api.DragCommand.zoom || api.DragCommand.pose:
+        // Drag tracks and transform gestures (actions/handlers.dart).
         break;
     }
     return true;
