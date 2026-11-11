@@ -985,6 +985,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     ));
     final axis = vertical ? Axis.vertical : Axis.horizontal;
     final viewport = _obtain<RenderDesignScroll>('scroll', () => RenderDesignScroll(axis: axis))
+      ..interactive = tree.animates && n.prop(ScrollProps.physics) != api.ScrollPhysicsType.never
+      ..onScroll = (event) { tree.interactions?.fire(this, 'scroll', event: event); }
+      ..onScrollEnd = (event) { tree.interactions?.fire(this, 'scrollEnd', event: event); }
       ..axis = axis
       ..reverse = n.prop(ScrollProps.reverse)
       ..clipBehavior = clip(n.prop(ScrollProps.clipBehavior));

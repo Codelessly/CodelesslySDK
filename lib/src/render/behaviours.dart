@@ -1068,16 +1068,31 @@ class StrokePathPainter extends CustomPainter {
     return out;
   }
 
+  Path visiblePathFor(Size size) {
+    final full = pathFor(size);
+    final progress = path.progress.clamp(0.0, 1.0);
+    if (progress >= 1) return full;
+    final visible = Path();
+    final metrics = full.computeMetrics().toList();
+    var remaining = metrics.fold(0.0, (double length, metric) => length + metric.length) * progress;
+    for (final metric in metrics) {
+      if (remaining <= 0) break;
+      visible.addPath(metric.extractPath(0, math.min(remaining, metric.length)), Offset.zero);
+      remaining -= metric.length;
+    }
+    return visible;
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
-    if (path.points.length < 2 || path.width <= 0) return;
+    if (path.points.length < 2 || path.width <= 0 || path.progress <= 0) return;
     final paint = Paint()
       ..color = path.color.flutter
       ..style = PaintingStyle.stroke
       ..strokeWidth = path.width
       ..strokeCap = StrokeCap.values.byName(path.cap.name)
       ..strokeJoin = StrokeJoin.round;
-    final full = pathFor(size);
+    final full = visiblePathFor(size);
     final dash = [
       for (final d in path.dashPattern)
         if (d > 0) d,
