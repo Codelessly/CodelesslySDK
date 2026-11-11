@@ -303,10 +303,11 @@ class WorkerSandbox implements ScriptSandbox {
     String run,
     List<Map<String, Object?>> responses, {
     required Duration cpuBudget,
+    Map<String, Object?>? vars,
   }) => _send(
     'resume',
     run,
-    jsonEncode({'run': run, 'responses': responses}),
+    jsonEncode({'run': run, 'responses': responses, 'vars': ?vars}),
     cpuBudget,
   );
 

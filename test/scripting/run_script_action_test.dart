@@ -78,6 +78,32 @@ void main() {
     expect(h['game'], {'count': 2, 'history': [1, 2]});
   });
 
+  test('app.yield lets another action change a variable that the run then reads', () async {
+    final h = Harness(scripts: [
+      ScriptDef.fromJson({
+        'id': 'long', 'name': 'long',
+        'capabilities': ['variables.read', 'variables.write', 'actions'],
+        'source': r"""
+          vars.set('token', 1);
+          await app.yield(30);
+          // A cancel set token to 0 while this one yielded.
+          vars.set('seen', vars.get('token'));
+        """,
+      })!,
+      ScriptDef.fromJson({
+        'id': 'cancel', 'name': 'cancel',
+        'capabilities': ['variables.read', 'variables.write'],
+        'source': "vars.set('token', 0);",
+      })!,
+    ], variables: [v('token', -1, VariableType.integer), v('seen', -1, VariableType.integer)]);
+    final long = h.click([{'type': 'runScript', 'script': 'long'}]);
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    await h.click([{'type': 'runScript', 'script': 'cancel'}]);
+    await long;
+    expect(h.errors, isEmpty);
+    expect(h['seen'], 0);
+  });
+
   test('A run script action passes typed arguments, writes variables and leaves its result', () async {
     final h = Harness(
       scripts: [addTip],
@@ -401,7 +427,8 @@ class _Unavailable implements ScriptSandbox {
       throw const ScriptEngineUnavailable('none');
 
   @override
-  Map<String, Object?> resume(String run, List<Map<String, Object?>> responses, {required Duration cpuBudget}) =>
+  Map<String, Object?> resume(String run, List<Map<String, Object?>> responses,
+          {required Duration cpuBudget, Map<String, Object?>? vars}) =>
       throw const ScriptEngineUnavailable('none');
 
   @override
