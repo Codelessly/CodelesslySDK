@@ -59,6 +59,25 @@ Future<void> reloadCloudData(ReloadCloudDataAction a, ActionRun run) async {
   await load.reload();
 }
 
+/// [a]'s source as the app's shared data keeps it (`scope: app`): a key
+/// naming what it reads now (the same key is the same data) and what opens
+/// it, with the screen loads' limit, aggregate and joins. The documents come
+/// trimmed to the limit.
+({String key, Stream<Object?> Function() open}) appCloudSource(LoadCloudDataAction a, ActionRun run, CloudDatabase db) {
+  final load = LiveCloudLoad._(a.variable.trim(), {})
+    .._action = a
+    .._run = run
+    .._db = db;
+  final r = load._resolve();
+  return (
+    key: r.signature,
+    open: () => load._stream(r).map((data) {
+          final limit = r.limit;
+          return data is List && limit != null && data.length > limit ? data.sublist(0, limit) : data;
+        }),
+  );
+}
+
 /// A variable's live cloud data: what a [LoadCloudDataAction] streams in.
 class LiveCloudLoad {
   LiveCloudLoad._(this.variable, this._registry);

@@ -59,6 +59,7 @@
   - A query loads at most its `limit` (an expression), the query's limit, or 500, and its variable's `hasMore` says
     truthfully whether more match. A list variable gets the documents; a number variable an aggregate.
   - `reloadCloudData { variable }` subscribes a load afresh.
+  - An app-scoped load (`"scope": "app"`) takes the same limit, aggregate and joins (a live unread badge).
   - `cloudBatch` commits its writes at once (`BackendCloudDatabase.commitBatch`), with `forEach` once per item of a
     list; more than 500 writes go in chunks, or fail first with `transaction`.
   - A list pulls to refresh without pagination (`pullToRefresh`, or a `refresh` reaction).

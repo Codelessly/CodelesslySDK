@@ -149,6 +149,8 @@ holds the documents themselves, and with an `aggregate`, a number variable holds
   loading a document: the database computes it (with Firestore, one read per 1000 documents counted), again after
   this app writes to that collection, and every `refreshSeconds` when set (for writes made elsewhere). Streaming the
   documents to count them would read every one, and again on each change.
+- **App-wide.** With `"scope": "app"` (above) the load keeps the same limit, aggregate and joins, shared by
+  every screen: a live unread count for a badge on any screen.
 
 ```json
 {"type": "loadCloudData", "variable": "unread", "single": false, "aggregate": "count",

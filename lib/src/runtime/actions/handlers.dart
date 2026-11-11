@@ -521,21 +521,9 @@ Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
 /// by every screen that loads the same ([AppDataSources]). Waits for the
 /// first value; the subscription outlives the screen.
 Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDatabase db, AppDataSources sources, String variable) async {
-  final path = resolveCollectionPath(a.query, run.expressions, run.scope);
-  final id = a.single ? run.text(a.id).trim() : '';
-  final query = a.single ? null : resolveCloudQuery(a.query, run.expressions, run.scope);
-  final key = [
-    a.single ? 'document' : 'query',
-    path,
-    id,
-    if (query != null) _cloudQueryKey(query),
-    ...a.query.loadRelated,
-  ].join('\u0000');
-  final loaded = sources.load(
-    variable,
-    key,
-    () => query == null ? db.watchDocument(path, id) : db.watchQuery(path, query, loadRelated: a.query.loadRelated),
-  );
+  // The same limit, aggregate and joins as a screen's load (cloud_loads.dart).
+  final source = appCloudSource(a, run, db);
+  final loaded = sources.load(variable, source.key, source.open);
   // Stopping this run stops waiting, not the app's subscription.
   final waiting = Completer<void>();
   loaded.then((_) {
@@ -552,14 +540,6 @@ Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDataba
     removeCancellation();
   }
 }
-
-/// [q] as text: the same query gives the same text.
-String _cloudQueryKey(CloudQuery q) => [
-      for (final f in q.filters) '${f.field} ${f.operator.name} ${jsonEncode(f.value, toEncodable: (v) => '$v')}',
-      for (final o in q.orderBy) '${o.field} ${o.descending ? 'desc' : 'asc'}',
-      'limit ${q.limit}',
-      'after ${q.startAfter}',
-    ].join(';');
 
 // --- auth -----------------------------------------------------------------------------
 
