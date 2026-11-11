@@ -22,6 +22,7 @@ import 'package:codelessly_api/codelessly_api.dart' show NavigationMode;
 import 'confirm_dialog.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
+import 'presentation_scope.dart';
 import 'route_transition.dart';
 import 'toast.dart';
 
@@ -248,6 +249,11 @@ class NavigatorActionUi implements ActionUi {
   bool closeModal(Object? result) {
     final c = _context;
     if (c == null) return false;
+    // A presented banner or full-screen layout closes the way it was shown.
+    if (CodelesslyPresentation.maybeOf(c)?.close case final close?) {
+      close(result);
+      return true;
+    }
     final route = ModalRoute.of(c);
     final modal = route is PopupRoute || (route is CodelesslyRouteTransitionRoute && route.modal);
     if (route == null || !modal || !route.isCurrent) return false;
@@ -402,7 +408,11 @@ Future<Object?> showScreenModal(
       // sits at the bottom of its canvas.
       backgroundColor: Colors.transparent,
       elevation: 0,
-      builder: (_) => content,
+      // The keyboard pushes the sheet up (a composer at its bottom).
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+        child: content,
+      ),
     );
   }
   if (presentation == ModalPresentation.fullScreen) {

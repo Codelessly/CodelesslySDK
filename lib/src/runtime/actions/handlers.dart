@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
-import 'package:flutter/rendering.dart' show RenderObject, RenderViewportBase;
+import 'package:flutter/rendering.dart' show RenderBox, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
@@ -29,8 +29,11 @@ import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'app_data_sources.dart';
+import 'app_events.dart';
+import 'capture.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
+import 'ui.dart' show PickedFile;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
@@ -84,6 +87,9 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
         run.result = await _mediaImport(a, run);
       } else if (a.name == 'media.export' || a.name == 'media.cancelExport') {
         run.result = await _mediaExport(a, run);
+      } else if (a.optional) {
+        // The app hasn't registered it: the chain goes on without it.
+        run.result = null;
       } else {
         throw StateError('No function named [${a.name}]');
       }
@@ -198,6 +204,11 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       break;
     case PaginateAction():
       await paginateAction(a, run);
+    case EmitEventAction():
+      final name = run.text(a.event).trim();
+      if (name.isNotEmpty) AppEventBus.of(run.context.services)?.emit(name, run.json(a.props));
+    case CaptureScreenshotAction():
+      run.result = await _captureScreenshot(a, run);
     case UnknownAction():
       break;
   }
@@ -622,7 +633,9 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
     await files.delete(folder);
     return;
   }
-  final picked = await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple);
+  final picked = a.source.trim().isEmpty
+      ? await run.host.ui.pickFiles(images: a.kind == CloudFileKind.image, multiple: a.allowMultiple)
+      : sourceFiles(run.evaluate(a.source), name: run.text(a.fileName).trim());
   for (final (i, f) in picked.indexed) {
     if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
       throw CodedFailure('file-too-large', '${f.name} is larger than ${_mb(a.maxSizeMB)} MB');
@@ -643,6 +656,67 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
     await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
   }
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
+}
+
+/// The files a cloudFiles action's `source` gives: a `data:` URL, a map
+/// `{"data": "data:...", "name"}`, or a list of them. [name] names them
+/// (numbered when several); else a map's `name`, else `file-<time>.<ext>`.
+List<PickedFile> sourceFiles(Object? value, {String name = ''}) {
+  final items = value is List ? value : [value];
+  final out = <PickedFile>[];
+  for (final (i, item) in items.indexed) {
+    final data = item is Map ? item['data'] : item;
+    if (data is! String || !data.trim().startsWith('data:')) {
+      throw const CodedFailure('invalid-source', 'The file to upload is not a data: URL');
+    }
+    final UriData uri;
+    try {
+      uri = UriData.parse(data.trim());
+    } on FormatException {
+      throw const CodedFailure('invalid-source', 'The file to upload is not a valid data: URL');
+    }
+    final type = uri.mimeType;
+    final ext = switch (type) {
+      'image/png' => 'png',
+      'image/jpeg' => 'jpg',
+      'image/gif' => 'gif',
+      'image/webp' => 'webp',
+      'application/pdf' => 'pdf',
+      'application/json' => 'json',
+      'text/plain' => 'txt',
+      _ => 'bin',
+    };
+    final given = name.isNotEmpty
+        ? (items.length > 1 ? _numbered(name, i + 1) : name)
+        : (item is Map && item['name'] is String && (item['name'] as String).trim().isNotEmpty
+            ? (item['name'] as String).trim()
+            : 'file-${DateTime.now().millisecondsSinceEpoch}${items.length > 1 ? '-${i + 1}' : ''}.$ext');
+    out.add(PickedFile(name: given, bytes: uri.contentAsBytes(), contentType: type));
+  }
+  return out;
+}
+
+String _numbered(String name, int n) {
+  final dot = name.lastIndexOf('.');
+  return dot <= 0 ? '$name-$n' : '${name.substring(0, dot)}-$n${name.substring(dot)}';
+}
+
+// --- capture -------------------------------------------------------------------------------
+
+Future<Object?> _captureScreenshot(CaptureScreenshotAction a, ActionRun run) async {
+  // Let a change the chain just made paint first.
+  if (SchedulerBinding.instance.hasScheduledFrame) await SchedulerBinding.instance.endOfFrame;
+  final tree = run.host.tree;
+  final layout = CaptureRegistry.layoutOf(tree);
+  final boundary = a.target == CaptureTarget.app ? CaptureRegistry.app ?? layout : layout ?? CaptureRegistry.app;
+  if (boundary == null) throw StateError('Nothing to capture: no layout or capture scope is shown');
+  RenderBox? box;
+  if (a.target == CaptureTarget.node) {
+    final id = run.text(a.node).trim();
+    box = tree?.boxOf(id);
+    if (box == null) throw StateError('No node [$id] on screen to capture');
+  }
+  return captureImage(boundary, box: box, pixelRatio: a.pixelRatio);
 }
 
 // --- forms and text fields -------------------------------------------------------------
