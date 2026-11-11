@@ -545,6 +545,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
     _watchBindings(bound?.watch ?? const []);
     if ((bound?.collapsed ?? false) != _collapsed) {
       _collapsed = !_collapsed;
+      // Retain cached layers, but take a collapsed subtree out of the
+      // pipeline. Skipping its layout while leaving it attached gives its
+      // dirty descendants a clean relayout boundary after this box lays out.
+      if (_collapsed) child = null;
       markNeedsLayout();
       _applyParentData();
     }
@@ -1456,7 +1460,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder {
       }
     }
     if (next.isNotEmpty) _detachFromAnyParent(next.first);
-    child = next.isEmpty ? null : next.first;
+    child = _collapsed || next.isEmpty ? null : next.first;
     _finishWire(next);
   }
 

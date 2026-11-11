@@ -46,6 +46,11 @@ void main() {
       setVariableIn(s.scope, change.$1, change.$2);
       await tester.pump();
       expect(tester.takeException(), isNull, reason: 'after $change');
+      if (change == ('view', 'glossary')) {
+        setVariableIn(s.scope, 'currentLayer', 1);
+        await tester.pump();
+        expect(tester.takeException(), isNull, reason: 'hidden gauge text changed');
+      }
     }
   });
 }
