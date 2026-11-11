@@ -28,6 +28,7 @@ import '../runtime/actions/script_host.dart' show scriptNodeValues;
 import '../runtime/actions/ui.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
+import '../runtime/actions/runner.dart' show CodelesslyActions, ActionCancellation;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
@@ -692,6 +693,8 @@ class _LayoutViewState extends State<_LayoutView> {
       paywall: widget.host.paywall,
       openPaywall: _openPaywall,
       onError: widget.host.onActionError,
+      onActionErrorEvent: _actionError,
+      refreshAuthValues: _codelessly.refreshAuthValues,
     );
     final session = widget.host.paywall;
     if (session != null) {
@@ -720,6 +723,28 @@ class _LayoutViewState extends State<_LayoutView> {
     );
     widget.controller?._screen = screen;
     return screen;
+  }
+
+  void _actionError(Json event) {
+    if (!mounted) return;
+    final id = _shown ?? widget.canvasId ?? widget.layout.canvasIds.firstOrNull;
+    final canvas = id == null ? null : _screen.tree.resolve(id);
+    if (canvas == null) return;
+    final context = _screen.context.withoutActionErrorEvents();
+    final cancellation = ActionCancellation();
+    context.onDispose(cancellation.cancel);
+    final actions = _screen.actions;
+    unawaited(() async {
+      try {
+        if (actions is CodelesslyActions) {
+          await actions.run(canvas, TriggerType.actionError.name, context, event: event, cancellation: cancellation);
+        } else {
+          await actions.trigger(canvas, TriggerType.actionError.name, context, event: event);
+        }
+      } catch (error, stack) {
+        context.reportError(error, stack, action: TriggerType.actionError.name);
+      }
+    }());
   }
 
   /// Declares canvas [canvasId]'s variables (once per canvas), starting at

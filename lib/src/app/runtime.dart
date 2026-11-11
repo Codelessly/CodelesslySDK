@@ -244,6 +244,8 @@ class ScreenActionContext extends RuntimeActionContext {
     super.tree,
     super.nodeValues,
     super.onError,
+    super.onActionErrorEvent,
+    super.refreshAuthValues,
     super.paywall,
     super.openPaywall,
     super.scripts,

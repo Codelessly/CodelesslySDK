@@ -28,6 +28,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
     required this.builder,
     required BuildContext context,
     this.sheetWidth,
+    this.cornerRadius,
     this.maxHeightFactor = 1,
     this.insets = EdgeInsets.zero,
     this.showDragHandle = false,
@@ -52,8 +53,13 @@ class PresentationRoute<T> extends PopupRoute<T> {
   final ModalPresentation presentation;
   final WidgetBuilder builder;
 
-  /// Width of a side sheet; null: [defaultSheetWidth].
+  /// Width of a side sheet (null: [defaultSheetWidth]); maximum width of
+  /// a bottom sheet (null: the screen width). Both stay within the screen.
   final double? sheetWidth;
+
+  /// Radius of a bottom sheet's top corners. Null preserves
+  /// [bottomSheetRadius]; other presentations keep their own shape.
+  final double? cornerRadius;
 
   /// The most of the screen's height a bottom sheet takes.
   final double maxHeightFactor;
@@ -94,6 +100,8 @@ class PresentationRoute<T> extends PopupRoute<T> {
       explicitChildNodes: true,
       child: switch (presentation) {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => _BottomSheet(
+            width: sheetWidth,
+            cornerRadius: cornerRadius ?? bottomSheetRadius,
             maxHeightFactor: maxHeightFactor,
             showDragHandle: showDragHandle,
             builder: builder,
@@ -137,8 +145,10 @@ class PresentationRoute<T> extends PopupRoute<T> {
 }
 
 class _BottomSheet extends StatelessWidget {
-  const _BottomSheet({required this.maxHeightFactor, required this.showDragHandle, required this.builder});
+  const _BottomSheet({this.width, required this.cornerRadius, required this.maxHeightFactor, required this.showDragHandle, required this.builder});
 
+  final double? width;
+  final double cornerRadius;
   final double maxHeightFactor;
   final bool showDragHandle;
   final WidgetBuilder builder;
@@ -154,10 +164,10 @@ class _BottomSheet extends StatelessWidget {
       child: Align(
         alignment: Alignment.bottomCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: media.size.width, maxHeight: maxHeight),
+          constraints: BoxConstraints(maxWidth: math.min(width ?? media.size.width, media.size.width), maxHeight: maxHeight),
           child: ClipRRect(
             key: const ValueKey('Codelessly bottom sheet'),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(PresentationRoute.bottomSheetRadius)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(cornerRadius)),
             child: MediaQuery.removePadding(
               context: context,
               removeTop: true,
