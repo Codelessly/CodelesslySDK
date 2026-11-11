@@ -48,17 +48,48 @@ class LoadedImage {
     return uri.path.toLowerCase().endsWith('.svg');
   }
 
+  /// Failed loads are tried again (after 1, 2, 4 s) while something still
+  /// shows the image: a dropped connection mustn't blank the URL for every
+  /// node that shares it for as long as one of them is on screen.
+  static const maxAttempts = 4;
+  int _attempts = 0;
+  Timer? _retry;
+  bool _released = false;
+
+  void _fail() {
+    failed = true;
+    _changed();
+    if (_attempts < maxAttempts && _clients.isNotEmpty && !_released) {
+      _retry?.cancel();
+      _retry = Timer(Duration(seconds: 1 << (_attempts - 1)), () {
+        if (_released || _clients.isEmpty || ready) return;
+        if (_listener != null) _stream?.removeListener(_listener!);
+        _stream = null;
+        _listener = null;
+        if (!isSvg && !url.startsWith('data:')) {
+          // Flutter's image cache keeps a failed completer: drop it.
+          NetworkImage(url).evict();
+        }
+        _started = false;
+        failed = false;
+        _start();
+      });
+    }
+  }
+
   void _start() {
     if (_started) return;
     _started = true;
+    _attempts++;
     if (isSvg) {
       _loadSvg().then((p) {
+        if (_released) {
+          p.picture.dispose();
+          return;
+        }
         picture = p;
         _changed();
-      }, onError: (Object _) {
-        failed = true;
-        _changed();
-      });
+      }, onError: (Object _) => _fail());
       return;
     }
     final ImageProvider provider;
@@ -66,8 +97,8 @@ class LoadedImage {
       try {
         provider = MemoryImage(UriData.parse(url).contentAsBytes());
       } on FormatException {
-        failed = true;
-        _changed();
+        _attempts = maxAttempts; // bad data: no point retrying
+        _fail();
         return;
       }
     } else {
@@ -78,10 +109,7 @@ class LoadedImage {
       image?.dispose();
       image = info;
       _changed();
-    }, onError: (Object _, StackTrace? _) {
-      failed = true;
-      _changed();
-    });
+    }, onError: (Object _, StackTrace? _) => _fail());
     _stream = stream;
     _listener = listener;
     stream.addListener(listener);
@@ -110,6 +138,8 @@ class LoadedImage {
       });
 
   void _release() {
+    _released = true;
+    _retry?.cancel();
     if (_listener != null) _stream?.removeListener(_listener!);
     _stream = null;
     _listener = null;
@@ -149,6 +179,18 @@ abstract final class PaintImages {
 
   @visibleForTesting
   static int get debugEntries => _entries.length;
+
+  /// Whether an image a render object shows is still loading.
+  static bool get loading => _entries.values.any((e) => e._started && !e.ready && !e.failed);
+
+  /// Completes once no shown image is loading, or after [timeout]: a
+  /// screenshot taken then has every icon and image that will arrive.
+  static Future<void> settled({Duration timeout = const Duration(seconds: 5)}) async {
+    final end = DateTime.now().add(timeout);
+    while (loading && DateTime.now().isBefore(end)) {
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+    }
+  }
 }
 
 /// A render object that paints images: it holds the ones it shows while

@@ -33,6 +33,7 @@ import '../runtime/actions/runner.dart' show CodelesslyActions, ActionCancellati
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
+import '../runtime/expressions/perf_scope.dart';
 import '../runtime/expressions/scopes.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
@@ -613,6 +614,7 @@ class _ScreenState {
     nodeValues.dispose();
     scope.dispose();
     if (scope.parent case final ScriptsScope scripts) scripts.dispose();
+    if (values.parent case final PerfScope perf) perf.dispose();
     values.dispose();
   }
 }
@@ -704,7 +706,8 @@ class _LayoutViewState extends State<_LayoutView> {
       // The layout's drag and drop (runtime/gestures/drag_and_drop.dart).
       'drag': dragIdleValues,
       ..._paywallValues(),
-    }, _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope)));
+      // `perf` (frame timings) sits between the page's variables and these.
+    }, PerfScope(parent: _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope))));
     // `script.name(args)` in formulas reads the layout's scripts.
     final services = _codelessly.services;
     final scripts = ScriptsScope(
@@ -802,6 +805,15 @@ class _LayoutViewState extends State<_LayoutView> {
     final storage = services is Services ? services.storage : null;
     // A publish can keep the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
+    // A link's query parameters set the app variables they name too (not
+    // only this screen's), so app-wide state can come from a URL
+    // (`/edit/p1?t=2.5&sel=clip:c2`). Computed variables can't be set.
+    final app = _codelessly.appVariables;
+    for (final e in widget.params.entries) {
+      final v = app.variable(e.key);
+      if (v == null || v.formula.isNotEmpty || widget.layout.variablesOf(canvasId).any((c) => c.name == e.key)) continue;
+      app.set(e.key, v.type.coerce(e.value) ?? e.value);
+    }
     for (final v in widget.layout.variablesOf(canvasId)) {
       if (scope.declares(v.name)) continue;
       scope.define(v);
