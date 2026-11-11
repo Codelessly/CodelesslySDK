@@ -67,8 +67,9 @@ class RenderParticles extends RenderProxyBox {
 
   Future<void> fire() {
     final e = _emitter;
-    if (!attached || e == null || e.count <= 0 || e.lifetime <= 0)
+    if (!attached || e == null || e.count <= 0 || e.lifetime <= 0) {
       return Future.value();
+    }
     // Bound repeated cues so a held interaction cannot grow memory forever.
     if (_bursts.length >= 16) _bursts.removeAt(0).finish();
     final burst = _Burst(e, ++_seed);

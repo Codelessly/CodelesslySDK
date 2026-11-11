@@ -76,8 +76,9 @@ class SpeechService extends ValueNotifier<Map<String, Object?>> {
     if (id != _utterance ||
         !speaking ||
         boundary.charIndex < 0 ||
-        boundary.charIndex >= text.length)
+        boundary.charIndex >= text.length) {
       return;
+    }
     final words = RegExp(r'\S+').allMatches(text).toList();
     final index = words.indexWhere(
       (w) => boundary.charIndex >= w.start && boundary.charIndex < w.end,
