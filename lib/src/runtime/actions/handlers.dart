@@ -121,6 +121,10 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       for (final step in a.steps) {
         await _cloudData(step, run);
       }
+    case DownloadFileAction():
+      final services = run.host.services;
+      if (services is! Services) throw StateError('downloadFile needs Services.');
+      run.result = {'saved': await services.exports.saveText(fileName: run.text(a.fileName), text: run.text(a.text), mimeType: run.text(a.mimeType))};
     case CopyToClipboardAction():
       await Clipboard.setData(ClipboardData(text: run.text(a.text)));
     case EditTextAction():

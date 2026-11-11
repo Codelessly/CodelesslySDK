@@ -16,6 +16,7 @@ import 'cache.dart';
 import 'cloud/backend.dart';
 import 'cloud/database.dart';
 import 'links.dart';
+import 'file_exports.dart';
 import 'purchases.dart';
 import '../scripting/script_runner.dart';
 import 'scripts.dart';
@@ -33,6 +34,7 @@ export 'cloud/fields.dart';
 export 'cloud/query.dart';
 export 'cloud/resolve.dart';
 export 'links.dart';
+export 'file_exports.dart';
 export 'purchases.dart';
 export 'scripts.dart';
 export 'sound.dart';
@@ -57,6 +59,7 @@ class Services implements CodelesslyServices {
     SoundService? sound,
     SpeechService? speech,
     LinkOpener? links,
+    FileExporter? exports,
     ScriptRunner? scripts,
   })  : config = config ?? ServiceConfig.empty,
         api = api ?? HttpApiService(),
@@ -71,6 +74,7 @@ class Services implements CodelesslyServices {
         sound = sound ?? SoundService(),
         speech = speech ?? SpeechService(),
         links = links ?? const PlatformLinkOpener(),
+        exports = exports ?? const PlatformFileExporter(),
         scripts = scripts ?? const SandboxScriptRunner();
 
   /// What the publish model configures (APIs, paywall setup); the app
@@ -110,6 +114,9 @@ class Services implements CodelesslyServices {
   /// Text-to-speech (speak actions, the `speech` value).
   final SpeechService speech;
   final LinkOpener links;
+
+  /// Saves generated files with the browser or platform save picker.
+  final FileExporter exports;
 
   /// Runs scripts (run script actions): the platform's sandbox by default
   /// (no engine without package:codelessly_quickjs on a device).

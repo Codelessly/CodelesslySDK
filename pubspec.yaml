@@ -37,6 +37,7 @@ dependencies:
   archive: ^4.6.0
   barcode: ^2.2.9
   codelessly_api: ^21.0.0
+  file_selector: ^1.1.0
   collection: ^1.19.1
   flutter_svg: ^2.3.2
   http: ^1.6.0
