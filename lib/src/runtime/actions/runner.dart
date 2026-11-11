@@ -19,6 +19,7 @@ import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, Node, 
 
 import '../contracts.dart';
 import '../expressions/engine.dart';
+import '../expressions/formula.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
 import 'handlers.dart';
@@ -157,7 +158,7 @@ class CodelesslyActions implements ActionRunner {
       {Json event = const {}, ActionCancellation? cancellation, Object? instance}) {
     final reactions = [
       for (final r in node.actions)
-        if (r.trigger.type.name == trigger &&
+        if (r.trigger.type.name == trigger && _allowed(r, context, event) &&
             (trigger != 'valueChanged' || event['changedVariable'] == null || r.trigger.variable.trim() == event['changedVariable'])) r,
     ];
     if (reactions.isEmpty) return Future.value();
@@ -179,6 +180,24 @@ class CodelesslyActions implements ActionRunner {
       return done.future;
     }
     return _run(node, reactions, context, event, cancellation);
+  }
+
+  // A trigger guard applies to every trigger, not only the keyboard's
+  // event listener. Evaluate against the triggering event before any action
+  // runs, so timer/click/change reactions obey the same condition contract.
+  static bool _allowed(Reaction reaction, ActionContext context, Json event) {
+    final when = reaction.trigger.when.trim();
+    if (when.isEmpty) return true;
+    final result = event.containsKey('result') ? event['result'] : (event.containsKey('value') ? event['value'] : (event.isEmpty ? null : event));
+    final scope = ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope);
+    try {
+      final value = FormulaEvaluator.exactExpression(when) != null
+          ? context.expressions.evaluate(when, scope)
+          : readPath(scope, when);
+      return value == true;
+    } finally {
+      scope.dispose();
+    }
   }
 
   static final Expando<Map<Object, (Timer, Completer<void>)>> _debounced = Expando('debounce');
