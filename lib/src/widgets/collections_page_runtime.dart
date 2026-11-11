@@ -25,6 +25,7 @@ class RuntimePageView extends StatefulWidget {
 
 class _RuntimePageViewState extends State<RuntimePageView> {
   late PageController _controller;
+  int? _itemCount;
   final _provided = <ProvidedItem>{};
   ListRuntime get _r => widget.runtime;
   api.Node get _node => _r.node;
@@ -51,11 +52,15 @@ class _RuntimePageViewState extends State<RuntimePageView> {
   void initState() {
     super.initState();
     _controller = _create();
+    _itemCount = _r.data?.length;
   }
 
   @override
   void didUpdateWidget(RuntimePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final count = _r.data?.length;
+    final countChanged = count != _itemCount;
+    _itemCount = count;
     if (oldWidget.runtime.node.prop(api.PageViewProps.viewportFraction) !=
             _node.prop(api.PageViewProps.viewportFraction) ||
         oldWidget.runtime.node.prop(api.PageViewProps.keepPage) !=
@@ -64,29 +69,38 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       _controller = _create();
     } else {
       final previous = oldWidget.runtime.node;
-      final count = _r.data?.length;
       if (previous.prop(api.PageViewProps.initialPage) !=
               _node.prop(api.PageViewProps.initialPage) ||
-          oldWidget.runtime.data?.length != count) {
+          countChanged) {
+        if (count == 0) return;
+        // A shorter list can clamp the old viewport and emit changed during
+        // layout. Capture this request before that feedback mutates the
+        // bound node, rather than reading its new intermediate page later.
+        final requested = _node.prop(api.PageViewProps.initialPage);
+        final target = count == null
+            ? requested
+            : requested.clamp(0, count - 1);
+        final duration = _node.prop(api.PageViewProps.animationDuration);
+        final curve = switch (_node.prop(api.PageViewProps.animationCurve)) {
+          'linear' => Curves.linear,
+          'easeIn' => Curves.easeIn,
+          'easeOut' => Curves.easeOut,
+          'easeInOut' => Curves.easeInOut,
+          _ => Curves.easeOutCubic,
+        };
+        final controller = _controller;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted || !_controller.hasClients || count == 0) return;
-          final requested = _node.prop(api.PageViewProps.initialPage);
-          final target = count == null
-              ? requested
-              : requested.clamp(0, count - 1);
-          final duration = _node.prop(api.PageViewProps.animationDuration);
+          if (!mounted ||
+              !identical(controller, _controller) ||
+              !controller.hasClients)
+            return;
+          // onPageChanged commonly writes this same bound variable. Its
+          // intermediate page reports are feedback, not navigation requests:
+          // retargeting to each report would cancel a multi-page animation.
+          if (target == _page.round()) return;
           if (duration == 0) {
             _controller.jumpToPage(target);
           } else {
-            final curve = switch (_node.prop(
-              api.PageViewProps.animationCurve,
-            )) {
-              'linear' => Curves.linear,
-              'easeIn' => Curves.easeIn,
-              'easeOut' => Curves.easeOut,
-              'easeInOut' => Curves.easeInOut,
-              _ => Curves.easeOutCubic,
-            };
             _controller.animateToPage(
               target,
               duration: Duration(milliseconds: duration),
