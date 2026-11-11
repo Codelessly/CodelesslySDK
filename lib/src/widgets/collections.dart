@@ -553,7 +553,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
   );
   final view = b.obtain<RenderPageItems>('pages', RenderPageItems.new)
     ..clipBehavior = _clip(n)
-    ..paintReversed = false
+    ..paintReversed = n.prop(PageViewProps.paintOrder) == api.PagePaintOrder.reverse
     ..onNeedItems = null
     ..axis = n.axis
     ..reverse = n.prop(CollectionScrollProps.reverse)
@@ -563,6 +563,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..firstIndex = first
     ..itemCount = count
     ..pageMotion = n.prop(PageViewProps.pageMotion)
+    ..pageMotionBefore = n.prop(PageViewProps.pageMotionBefore)
     ..changed();
   _syncItems(b, n, view, itemId, last - first + 1, first: first);
   chain.add(view);
