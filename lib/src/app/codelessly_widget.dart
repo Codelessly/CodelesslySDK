@@ -383,12 +383,24 @@ class CodelesslyWidget extends StatefulWidget {
         );
       };
 
+  /// [location] with what can't stand in a URL as is (spaces, non-ASCII
+  /// characters, a `%` that starts no escape) percent-encoded, and its
+  /// escapes (`%20`) and URL punctuation kept.
+  @visibleForTesting
+  static String encodeRawLocation(String location) => location.replaceAllMapped(
+        RegExp(r"%(?![0-9A-Fa-f]{2})|[^A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]"),
+        (m) => Uri.encodeComponent(m[0]!),
+      );
+
   /// The layout and params [screen] opens.
   @visibleForTesting
   static (String, Map<String, Object?>)? resolveScreen(PublishModel model, String? screen) {
     if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
+    // Encode what a typed location may hold raw (spaces, `·`, a lone `%`),
+    // keeping its escapes: a link's location is already encoded, and
+    // encoding it again turned `?toast=Loaded%20%E2%80%9C...` into a toast
+    // reading `Loaded%20%E2%80%9C...`.
+    final location = encodeRawLocation(screen.trim());
     final CanvasLocationMatch? match;
     final Uri? uri;
     try {
