@@ -579,6 +579,8 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void detach() {
     _ViewportWatcher.remove(this);
+    _hold?.cancel();
+    _hold = null;
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
     _hovering = false;
     super.detach();
