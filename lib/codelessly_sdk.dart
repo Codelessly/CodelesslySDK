@@ -146,6 +146,7 @@ export 'src/app/codelessly_widget.dart';
 export 'src/app/config.dart';
 export 'src/app/fonts.dart';
 export 'src/app/loader.dart';
+export 'src/app/managed_components.dart';
 export 'src/app/navigation.dart';
 export 'src/app/page_transitions.dart';
 export 'src/app/paywalls.dart';
