@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/widgets/inputs.dart';
+import 'package:codelessly_sdk/src/runtime/actions/feedback_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,13 +52,17 @@ void main() {
     await tester.pumpWidget(MaterialApp(navigatorKey: outer, home: Navigator(
       key: inner,
       onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => Material(
-        child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)),
+        child: Center(child: FeedbackThemeScope(
+          theme: const FeedbackTheme(primary: Color(0xFF147D68), surface: Colors.white, bodyStyle: TextStyle(fontFamily: 'Arial')),
+          child: NodeView(tree: tree, rootId: 's', interactive: true),
+        )),
       )),
     )));
     await tester.pumpAndSettle();
     await tester.tapAt(_centre(tester, tree, 'date'));
     await tester.pumpAndSettle();
     expect(find.byType(DatePickerDialog), findsOneWidget);
+    expect(Theme.of(tester.element(find.byType(DatePickerDialog))).colorScheme.primary, const Color(0xFF147D68));
     expect(inner.currentState!.canPop(), isTrue);
     expect(outer.currentState!.canPop(), isFalse);
     inner.currentState!.pop(DateTime(2026, 6, 1));
@@ -65,6 +70,7 @@ void main() {
     await tester.tapAt(_centre(tester, tree, 'time'));
     await tester.pumpAndSettle();
     expect(find.byType(TimePickerDialog), findsOneWidget);
+    expect(Theme.of(tester.element(find.byType(TimePickerDialog))).colorScheme.primary, const Color(0xFF147D68));
     expect(inner.currentState!.canPop(), isTrue);
     expect(outer.currentState!.canPop(), isFalse);
     inner.currentState!.pop(const TimeOfDay(hour: 9, minute: 30));

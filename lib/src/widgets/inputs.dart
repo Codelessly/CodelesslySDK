@@ -38,10 +38,27 @@ import 'package:flutter/services.dart';
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
 import '../runtime/actions/text_fields.dart';
+import '../runtime/actions/feedback_theme.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
 import 'inputs_shapes.dart';
 import 'inputs_toggle.dart';
+
+// Pickers follow the same app tokens and inferred styling as runtime dialogs.
+Widget _pickerTheme(BuildContext context, Widget? child) {
+  final base = Theme.of(context);
+  if (FeedbackThemeScope.maybeOf(context) == null && base.extension<FeedbackTheme>() == null) {
+    return child ?? const SizedBox.shrink();
+  }
+  final app = FeedbackTheme.of(context);
+  final scheme = ColorScheme.fromSeed(seedColor: app.primary, brightness: base.brightness).copyWith(
+    primary: app.primary, onPrimary: app.onPrimary, surface: app.surface, onSurface: app.onSurface, error: app.error,
+  );
+  return Theme(
+    data: base.copyWith(colorScheme: scheme, textTheme: base.textTheme.apply(fontFamily: app.bodyStyle.fontFamily)),
+    child: child ?? const SizedBox.shrink(),
+  );
+}
 
 /// Recipes for the inputs group, by node type.
 final Map<String, WidgetRecipe> inputsRecipes = {
@@ -1329,7 +1346,7 @@ class _DatePickerIslandState extends State<_DatePickerIsland> {
       onPressed: !n.prop(DatePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final date = await showDatePicker(context: context, useRootNavigator: false, initialDate: initial, firstDate: first, lastDate: last);
+              final date = await showDatePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialDate: initial, firstDate: first, lastDate: last);
               if (date == null || !mounted) return;
               setState(() => picked = _isoDate(date));
               if (context.mounted) _fire(context, 'changed', picked);
@@ -1359,7 +1376,7 @@ class _TimePickerIslandState extends State<_TimePickerIsland> {
       onPressed: !n.prop(TimePickerProps.enabled) || !widget.interactive
           ? null
           : () async {
-              final t = await showTimePicker(context: context, useRootNavigator: false, initialTime: time);
+              final t = await showTimePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialTime: time);
               if (t == null || !mounted) return;
               setState(() => picked = _clock(t));
               if (context.mounted) _fire(context, 'changed', picked);
@@ -1421,13 +1438,13 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
           : () async {
               var chosen = initial;
               if (mode != DateTimeInputMode.time) {
-                final d = await showDatePicker(context: context, useRootNavigator: false, initialDate: initial, firstDate: first, lastDate: last);
+                final d = await showDatePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialDate: initial, firstDate: first, lastDate: last);
                 if (d == null || !context.mounted) return;
                 chosen = d;
               }
               TimeOfDay? t;
               if (mode != DateTimeInputMode.date) {
-                t = await showTimePicker(context: context, useRootNavigator: false, initialTime: time ?? TimeOfDay.now());
+                t = await showTimePicker(context: context, useRootNavigator: false, builder: (_, child) => _pickerTheme(context, child), initialTime: time ?? TimeOfDay.now());
                 if (t == null || !context.mounted) return;
               }
               setState(() => picked = switch (mode) {
