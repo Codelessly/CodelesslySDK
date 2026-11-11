@@ -34,6 +34,7 @@ import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
 import 'reveal.dart';
+import 'view_scroll.dart';
 import 'source.dart';
 import '../runtime/expressions/bindings.dart' show BoundNode, NodeBinder;
 import '../widgets/collections.dart' show listBuildsAllItems;
@@ -673,6 +674,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     outsideHitTest = null;
     // A node that follows the pointer moves with its margin (outermost).
     dragMotionLayers(this, n, chain);
+    // Pinned while its parent is in view (render/view_scroll.dart): the
+    // whole node, margin included, moves.
+    if (n.behaviors.sticky case final api.Sticky sticky) {
+      chain.add(_obtain<RenderSticky>('sticky', RenderSticky.new)
+        ..onStuck = ((stuck) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('sticky', {'stuck': stuck}))
+        ..configure(sticky, interactive: tree.animates));
+    }
 
     // Outer layers, outermost first: margin, constraints, motion and scale
     // (render/behaviors.dart), rotation, loops, opacity, blurs and stroke
@@ -690,6 +698,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final reveal = n.behaviors.reveal;
     if (tree.animates && reveal != null) {
       chain.add(_obtain<RenderReveal>('reveal', RenderReveal.new)..configure(reveal, n.visible));
+    }
+    // `${view.progress}` as it scrolls through its view.
+    if (n.behaviors.viewProgress case final api.ViewProgress progress) {
+      chain.add(_obtain<RenderViewProgress>('viewProgress', RenderViewProgress.new)
+        ..onValues = ((values) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('view', values))
+        ..configure(this, progress, interactive: tree.animates));
     }
     playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);
