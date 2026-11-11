@@ -35,6 +35,7 @@ import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
 import 'reveal.dart';
+import 'view_scroll.dart';
 import 'source.dart';
 import '../runtime/expressions/bindings.dart' show BoundNode, NodeBinder;
 import '../widgets/collections.dart' show listBuildsAllItems;
@@ -322,6 +323,10 @@ class NodeTree {
   bool _sweepScheduled = false;
 
   NodeBox? boxOf(String id, {Object? instance}) => _boxes[keyOf(id, instance)];
+
+  /// Every box of node [id]: one per copy a list (or grid, page view...)
+  /// repeats it in, and the single one of a node that doesn't repeat.
+  Iterable<NodeBox> boxesOf(String id) => _boxes.values.where((b) => b.id == id);
   int get length => _boxes.length;
 
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
@@ -674,6 +679,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     outsideHitTest = null;
     // A node that follows the pointer moves with its margin (outermost).
     dragMotionLayers(this, n, chain);
+    // Pinned while its parent is in view (render/view_scroll.dart): the
+    // whole node, margin included, moves.
+    if (n.behaviors.sticky case final api.Sticky sticky) {
+      chain.add(_obtain<RenderSticky>('sticky', RenderSticky.new)
+        ..onStuck = ((stuck) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('sticky', {'stuck': stuck}))
+        ..configure(sticky, interactive: tree.animates));
+    }
 
     // Outer layers, outermost first: margin, constraints, motion and scale
     // (render/behaviors.dart), rotation, loops, opacity, blurs and stroke
@@ -691,6 +703,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final reveal = n.behaviors.reveal;
     if (tree.animates && reveal != null) {
       chain.add(_obtain<RenderReveal>('reveal', RenderReveal.new)..configure(reveal, n.visible));
+    }
+    // `${view.progress}` as it scrolls through its view.
+    if (n.behaviors.viewProgress case final api.ViewProgress progress) {
+      chain.add(_obtain<RenderViewProgress>('viewProgress', RenderViewProgress.new)
+        ..onValues = ((values) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('view', values))
+        ..configure(this, progress, interactive: tree.animates));
+    }
+    // Its laid-out box, written to a variable.
+    if (n.behaviors.measure case final api.Measure measure) {
+      chain.add(_obtain<RenderMeasure>('measure', RenderMeasure.new)..configure(this, measure));
     }
     playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);

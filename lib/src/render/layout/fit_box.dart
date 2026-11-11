@@ -150,7 +150,11 @@ class RenderFitBox extends RenderProxyBox {
       return;
     }
     child.layout(childConstraints, parentUsesSize: true);
-    size = childConstraints.constrain(child.size);
+    // A child whose own layout threw has no size: take the smallest, so
+    // one broken node doesn't break its ancestors' layout and hit tests too
+    // (in a debug build such a throw inside a pointer update leaves the
+    // mouse tracker unusable).
+    size = childConstraints.constrain(child.hasSize ? child.size : childConstraints.smallest);
   }
 
   @override

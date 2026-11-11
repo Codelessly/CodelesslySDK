@@ -215,7 +215,20 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     final view = b.obtain<RenderLayeredItems>('stack', RenderLayeredItems.new)
       ..clipBehavior = _clip(n)
       ..paintReversed = reversePaint
-      ..itemConstraints = ((_) => const BoxConstraints())
+      // Unbounded, so an item may be any size, except along an axis it
+      // fills: there it takes the padded box (a layered figure whose items
+      // fill the list), not its design size.
+      ..itemConstraints = ((box) {
+        final w = math.max(0.0, box.width - padding.horizontal - (at?.dx ?? 0));
+        final h = math.max(0.0, box.height - padding.vertical - (at?.dy ?? 0));
+        final fillW = item.layout.width.fit == SizeFit.fill, fillH = item.layout.height.fit == SizeFit.fill;
+        return BoxConstraints(
+          minWidth: fillW ? w : 0,
+          maxWidth: fillW ? w : double.infinity,
+          minHeight: fillH ? h : 0,
+          maxHeight: fillH ? h : double.infinity,
+        );
+      })
       ..placeAt = ((_, _) => origin)
       // Each item at its own x/y (bound per item: a map's rooms), else at
       // the list's itemPosition.
@@ -589,9 +602,18 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   // [_maxTableSpans]) and the box clips them.
   final fillsWidth = data != null && n.layout.width.fit != SizeFit.fixed;
   final fillsHeight = data != null && n.layout.height.fit != SizeFit.fixed;
+  final bodyWidths = <double>[for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth)];
+  if (n.prop(TableViewProps.fillWidth) && bodyWidths.isNotEmpty) {
+    // As at runtime: the columns share the width beyond their own.
+    final total = (headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0) + bodyWidths.fold<double>(0, (a, w) => a + w);
+    final extra = math.max(0.0, design.width - total) / bodyWidths.length;
+    for (var i = 0; i < bodyWidths.length; i++) {
+      bodyWidths[i] += extra;
+    }
+  }
   final columnWidths = fit([
     if (headerColumn) n.prop(TableViewProps.rowHeaderWidth),
-    for (final c in columns) c.width ?? n.prop(TableViewProps.columnWidth),
+    ...bodyWidths,
   ], fillsWidth ? double.infinity : design.width);
   final rowHeights = fit([
     if (headerRow) n.prop(TableViewProps.headerHeight),
@@ -658,7 +680,8 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final lineColor = n.prop(TableViewProps.gridLineColor), lineWidth = n.prop(TableViewProps.gridLineWidth);
   final view = b.obtain<RenderTableItems>('table', RenderTableItems.new)
     ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
-    ..columnWidths = columnWidths
+    ..givenColumnWidths = columnWidths
+    ..stretchLastColumn = n.prop(TableViewProps.stretchLastColumn)
     ..rowHeights = rowHeights
     ..cells = cells
     ..headerRow = headerRow

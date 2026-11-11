@@ -150,11 +150,12 @@ export 'src/app/fonts.dart';
 export 'src/app/loader.dart';
 export 'src/app/managed_components.dart';
 export 'src/app/navigation.dart';
+export 'src/app/overlay_screens.dart';
 export 'src/app/page_transitions.dart';
 export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
 export 'src/app/runtime.dart';
-export 'src/app/theme.dart' show themeDataOf;
+export 'src/app/theme.dart' show themeDataOf, themeValues;
 export 'src/app/viewport.dart';
 
 export 'src/render/layout/design_scroll.dart' show RenderDesignScroll;

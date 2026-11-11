@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 
 import '../contracts.dart';
 import 'formula.dart';
+import 'formula_clock.dart';
 import 'paths.dart';
 
 /// A scope that declares its names: the nearest scope declaring a path's
@@ -81,7 +82,11 @@ Object? readPath(ValueScope? scope, String path) {
 
 /// What tells [scope]'s readers that [name] changed: the declaring scope's
 /// watcher and foreign computed dependencies, a scope that doesn't declare
-/// its names itself, or null when no scope declares it.
+/// its names itself, or null when no scope declares it. A computed or
+/// function variable that reads the clock (`now()`, `timeAgo(t)`, directly
+/// or through the variables it reads) also brings that clock
+/// ([FormulaClock.of]), so a binding calling `ago(t)` ticks like one
+/// calling `timeAgo(t)`.
 Listenable? watchName(ValueScope? scope, String name) {
   if (scope == null) return null;
   final watches = <Listenable>{};
@@ -95,6 +100,7 @@ Listenable? watchName(ValueScope? scope, String name) {
         if (!s.declares(name)) continue;
         watches.add(s.watch(name));
         if (s is VariableScope) {
+          if (s.clockOf(name) case final ClockTick tick) watches.add(FormulaClock.of(tick));
           for (final foreign in s.foreignReads(name)) {
             collect(foreign);
           }
@@ -250,11 +256,32 @@ class VariableScope extends NamedScope {
     if (v == null) return false;
     if (!v.isComputed) return true;
     if (!seen.add(name)) return true;
-    if (FormulaEvaluator.readsClock(v.formula) || FormulaEvaluator.readsFrameClock(v.formula)) return false;
+    if (FormulaEvaluator.clockTick(v.formula) != null) return false;
     return (_reads[name] ?? const {}).every((r) => _isLocal(r, seen));
   }
 
+  /// How often computed or function variable [name]'s value changes as
+  /// time passes, through the variables of this scope it reads (those of
+  /// other scopes answer for themselves, [foreignReads]); null when it
+  /// doesn't read the clock.
+  ClockTick? clockOf(String name) => _clocks.putIfAbsent(name, () {
+        ClockTick? out;
+        final seen = <String>{};
+        final stack = [name];
+        while (stack.isNotEmpty) {
+          final n = stack.removeLast();
+          final v = _defs[n];
+          if (v == null || !v.isComputed || !seen.add(n)) continue;
+          out = FormulaEvaluator.clockTick(v.formula)?.finer(out) ?? out;
+          stack.addAll(_reads[n] ?? const <String>{});
+        }
+        return out;
+      });
+
+  final Map<String, ClockTick?> _clocks = {};
+
   void _indexDependents() {
+    _clocks.clear();
     _reads.clear();
     _dependents.clear();
     for (final v in _defs.values) {
@@ -465,7 +492,8 @@ class ItemScope extends NamedScope {
 }
 
 /// The value of the `screen` name for a screen [width] × [height]
-/// (DESIGN.md §5.3): its size, orientation and brightness, and its
+/// (DESIGN.md §5.3): its size, orientation and brightness (`isDark`, also
+/// read as `dark`; `brightness`), and its
 /// breakpoint among the project's [breakpoints] (default:
 /// [Breakpoints.defaults]):
 ///
@@ -516,6 +544,8 @@ Map<String, Object?> screenValues(double width, double height,
     'isLandscape': !portrait,
     'brightness': dark ? 'dark' : 'light',
     'isDark': dark,
+    // What some guides and tools called it.
+    'dark': dark,
   };
 }
 
