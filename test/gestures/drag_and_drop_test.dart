@@ -224,6 +224,42 @@ void main() {
     expect(b.lane('b'), ['c1', 'c4']);
   });
 
+  testWidgets('the slot shows the target\'s slot node, hidden in its own place', (tester) async {
+    final b = await pump(tester, wrapped: true, bTarget: {'slot': 'node', 'slotNodeId': 'slot'}, extraNodes: {
+      // Designed hidden where it sits (a sibling of the columns), as an
+      // editor keeps a slot node out of the way.
+      'slot': {
+        'type': 'row',
+        'children': ['slot_text'],
+        'layout': {'width': {'fill': 100}, 'height': {'fill': 100}},
+        'decoration': {'fills': [{'color': '#FF4B4DED'}]},
+        'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+        'bind': {'visible': r'${= false}'},
+      },
+      'slot_text': {
+        'type': 'text',
+        'layout': {'width': {'hug': 60}, 'height': {'hug': 16}},
+        'props': {'text': r"${= drag.count > 1 ? 'Drop ' + drag.count + ' here' : 'Drop here'}"},
+      },
+    });
+    expect(paragraphs(tester, 'Drop here'), 0);
+    final start = textRect(tester, 'One').center;
+    final four = textRect(tester, 'Four').topCenter;
+    final gesture = await dragTo(tester, start, four + const Offset(0, 4), release: false);
+    expect(b.drag['over'], 'b');
+    await tester.pump();
+    // In the slot: as big as the dragged card, where Four was.
+    final label = textRect(tester, 'Drop here');
+    expect(label.center.dx, closeTo(240, 1));
+    expect(label.center.dy, closeTo(four.dy + 20, 1));
+    expect(textRect(tester, 'Four').top, greaterThanOrEqualTo(four.dy + 40 - 0.5));
+    expect(tester.takeException(), isNull);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(paragraphs(tester, 'Drop here'), 0);
+    expect(b.lane('b'), ['c1', 'c4']);
+  });
+
   testWidgets('a feedback node that hugs takes its content\'s size, not its design size', (tester) async {
     await pump(tester, cardDraggable: {'feedbackNodeId': 'fb'}, extraNodes: {
       // Designed 40 × 40 (the size a hug node is saved with), hugging

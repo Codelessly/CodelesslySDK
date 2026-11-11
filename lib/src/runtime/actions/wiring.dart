@@ -16,6 +16,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' show EditableText, FocusManager;
 
 import '../../render/node_tree.dart';
 import '../../widgets/material.dart' show selfTappedTypes;
@@ -365,6 +366,10 @@ class _BoxReactions {
     if (n == null || _disposed || !box.attached || e is KeyRepeatEvent) return false;
     final down = e is KeyDownEvent;
     final type = down ? TriggerType.keyDown : TriggerType.keyUp;
+    // Keys belong to the field being typed in, except Escape, which leaves
+    // it (`${result.typing}` tells the actions).
+    final typing = isTyping();
+    if (typing && e.logicalKey != LogicalKeyboardKey.escape) return false;
     final keys = HardwareKeyboard.instance;
     final meta = keys.isMetaPressed || keys.isControlPressed;
     final label = e.logicalKey.keyLabel;
@@ -383,7 +388,7 @@ class _BoxReactions {
     }
     if (!handled) return false;
     owner.fire(box, type.name, event: {
-      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta},
+      'result': {'key': label, 'shift': keys.isShiftPressed, 'alt': keys.isAltPressed, 'meta': meta, 'typing': typing},
     });
     return true;
   }
@@ -817,4 +822,11 @@ class _OneFingerPanGestureRecognizer extends PanGestureRecognizer {
     _accepted = false;
     super.didStopTrackingLastPointer(pointer);
   }
+}
+
+/// Whether the keyboard focus is in a text field (someone is typing).
+bool isTyping() {
+  final focused = FocusManager.instance.primaryFocus?.context;
+  return focused != null &&
+      (focused.widget is EditableText || focused.findAncestorWidgetOfExactType<EditableText>() != null);
 }

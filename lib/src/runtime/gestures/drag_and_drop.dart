@@ -361,6 +361,24 @@ DropSlotSpec? dropSlotOf(NodeTree tree, String listNodeId) {
   );
 }
 
+/// The node a drop target draws in the slot its list opens
+/// ([api.DropTarget.slotNodeId]): a tree of its own over the same nodes and
+/// bindings (it reads the drag as it would in its own place), with the node
+/// shown even though it's designed hidden where it sits. A list holds one
+/// while it shows the slot and [dispose]s it when done.
+class DropSlotNode {
+  DropSlotNode(NodeTree tree, this.id)
+    : _tree = NodeTree(_FeedbackSource(tree.source, rootId: id, reveal: true), binder: tree.binder);
+
+  final String id;
+  final NodeTree _tree;
+
+  /// The slot node's box.
+  late final NodeBox box = _tree.obtain(id, const Slot.root());
+
+  void dispose() => _tree.dispose();
+}
+
 /// The scope node [box] reads, and its expressions.
 ValueScope? _scopeOf(NodeBox box) => box.tree.binder?.scopeFor(box.tree.source, box.id, box.instance);
 
@@ -680,15 +698,21 @@ class _SourceDrag implements Drag {
 /// own visibility) and, for a feedback node of its own, read as if inside
 /// the dragged node (its list item, its drag).
 class _FeedbackSource implements NodeSource {
-  _FeedbackSource(this.base, {required this.rootId, this.under});
+  _FeedbackSource(this.base, {required this.rootId, this.under, this.reveal = false});
 
   final NodeSource base;
   final String rootId;
   final String? under;
+
+  /// Shows the root even where it's designed hidden when it's read where it
+  /// is (a drop slot's node, kept hidden in its own place).
+  final bool reveal;
   final Map<String, ValueNotifier<Node?>> _watched = {};
 
+  bool get _reshows => under != null || reveal;
+
   Node? _shown(Node? n) {
-    if (n == null || n.id != rootId || under == null) return n;
+    if (n == null || n.id != rootId || !_reshows) return n;
     return n.copyWith(visible: true, bind: {...n.bind}..remove('visible'));
   }
 
@@ -700,7 +724,7 @@ class _FeedbackSource implements NodeSource {
 
   @override
   ValueListenable<Node?> watch(String id) {
-    if (id != rootId || under == null) return base.watch(id);
+    if (id != rootId || !_reshows) return base.watch(id);
     return _watched[id] ??= () {
       final from = base.watch(id);
       final out = ValueNotifier<Node?>(_shown(from.value));
@@ -1294,6 +1318,8 @@ class RenderDropTarget extends RenderProxyBox {
     if (list == null || !list.attached) return const [];
     final out = <_ListItem>[];
     void visit(RenderObject o) {
+      // Not an item: the slot's node, drawn from a tree of its own.
+      if (o is NodeBox && !identical(o.tree, tree)) return;
       if (o is NodeBox && !identical(o, list)) {
         if (!o.attached || !o.hasSize) return;
         final scope = tree.binder?.scopeFor(tree.source, o.id, o.instance);
