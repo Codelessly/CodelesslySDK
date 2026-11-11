@@ -409,6 +409,23 @@ void main() {
     });
   });
 
+  test('neutral buttons do not hide a light-canvas accent; dark canvases may use white', () {
+    for (final dark in [false, true]) {
+      final doc = LayoutDocument.fromJson({
+        'roots': ['c'],
+        'nodes': {
+          'c': {'type': 'canvas', 'children': ['b0', 'b1', 'b2', 'b3'],
+            if (dark) 'decoration': {'fills': [{'color': '#101010'}]}},
+          for (var i = 0; i < 4; i++) 'b$i': {
+            'type': 'box', 'decoration': {'fills': [{'color': i < 3 ? '#FFFFFF' : '#147D68'}]},
+            'actions': [{'trigger': {'type': 'click'}, 'actions': []}],
+          },
+        },
+      });
+      expect(FeedbackTheme.fromDocument(doc).primary, dark ? Colors.white : const Color(0xFF147D68));
+    }
+  });
+
   test('a layout\'s look, read from its nodes and tokens', () {
     final doc = LayoutDocument.fromJson({
       'roots': ['c'],
