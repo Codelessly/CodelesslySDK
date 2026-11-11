@@ -124,16 +124,13 @@ class SandboxScriptRunner implements ScriptRunner {
     } on Object catch (e) {
       return ScriptRunResult.failure('EngineUnavailable', '$e');
     }
-    // Runs that change variables take turns: each reads the variables only
-    // once the one before has finished or is waiting on the app, so two
-    // read-modify-write runs (a timer tick and a tap) can't overwrite each
-    // other's changes. A run waiting on the app lets others go, and reads
-    // the variables afresh when it resumes.
+    // A run waiting on the app reads the variables afresh when it resumes:
+    // what they are after its own writes and whatever else changed them
+    // meanwhile (the run script action serializes writers; app.yield lets
+    // others run during a wait).
     final grants = script.capabilities.toSet();
-    final writer = host != null && grants.contains(ScriptCapability.variablesWrite);
-    final readsVars = host != null && (writer || grants.contains(ScriptCapability.variablesRead));
-    void Function()? release = writer ? await _takeTurn() : null;
-    try {
+    final readsVars = host != null &&
+        (grants.contains(ScriptCapability.variablesWrite) || grants.contains(ScriptCapability.variablesRead));
     final req = request(script, args: args, scripts: scripts, host: host, seed: seed, now: now);
     final run = req['run'] as String;
     final budget = Duration(milliseconds: script.timeoutMs);
@@ -156,9 +153,6 @@ class SandboxScriptRunner implements ScriptRunner {
               logs.add({'level': 'error', 'message': 'vars.set("$name"): ${e.message}'});
             }
           } else if (event['type'] == 'call') {
-            // Others may change variables while this one waits.
-            release?.call();
-            release = null;
             responses.add(await _call(host, event));
           }
         }
@@ -203,7 +197,6 @@ class SandboxScriptRunner implements ScriptRunner {
             writes: writes,
           );
         }
-        if (writer && release == null) release = await _takeTurn();
         state = await box.resume(run, responses, cpuBudget: budget,
             vars: readsVars ? (jsonData(host.variables()) as Map).cast<String, Object?>() : null);
       }
@@ -215,26 +208,6 @@ class SandboxScriptRunner implements ScriptRunner {
         writes: writes,
       );
     }
-    } finally {
-      release?.call();
-    }
-  }
-
-  static Future<void> _turns = Future<void>.value();
-
-  /// Waits for this runner's variable-writing runs before this one to
-  /// finish or wait on the app; returns the function that lets the next go.
-  static Future<void Function()> _takeTurn() async {
-    final done = Completer<void>();
-    final before = _turns;
-    _turns = done.future;
-    await before;
-    var released = false;
-    return () {
-      if (released) return;
-      released = true;
-      done.complete();
-    };
   }
 
   /// Checks [script]'s source compiles, without running it. Returns null,
