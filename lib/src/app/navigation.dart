@@ -326,3 +326,28 @@ enum NavigationType {
   /// Clears the history and opens the screen (above its base screen, if set).
   reset,
 }
+
+/// [location] with what a URI can't hold raw (spaces, `·`) percent-encoded,
+/// and its existing escapes kept: a typed `/a b?x=1 2` and a browser's
+/// `/a%20b?x=1%202` are the same location (encoding the second again would
+/// read its query as `1%202`).
+String encodeLocation(String location) {
+  bool hex(int c) => (c >= 0x30 && c <= 0x39) || (c >= 0x41 && c <= 0x46) || (c >= 0x61 && c <= 0x66);
+  const legal = "-._~:/?#[]@!\$&'()*+,;=";
+  final out = StringBuffer();
+  final units = location.codeUnits;
+  for (var i = 0; i < location.length; i++) {
+    final c = units[i];
+    if (c == 0x25) {
+      out.write(i + 2 < units.length && hex(units[i + 1]) && hex(units[i + 2]) ? '%' : '%25');
+    } else if ((c >= 0x30 && c <= 0x39) || (c >= 0x41 && c <= 0x5A) || (c >= 0x61 && c <= 0x7A) || legal.contains(location[i])) {
+      out.write(location[i]);
+    } else {
+      // A surrogate pair is one character.
+      final pair = c >= 0xD800 && c <= 0xDBFF && i + 1 < units.length;
+      out.write(Uri.encodeComponent(pair ? location.substring(i, i + 2) : location[i]));
+      if (pair) i++;
+    }
+  }
+  return out.toString();
+}

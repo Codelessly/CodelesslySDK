@@ -487,8 +487,9 @@ class _CodelesslyWidgetState extends State<CodelesslyWidget> {
   /// The layout and params [screen] opens.
   static (String, Map<String, Object?>)? _resolveScreen(PublishModel model, String? screen) {
     if (screen == null || screen.trim().isEmpty || screen.trim() == '/') return null;
-    // Encode what a typed location may hold raw (spaces, `·`).
-    final location = Uri.encodeFull(screen.trim());
+    // Encode what a typed location may hold raw (spaces, `·`), keeping a
+    // browser's escapes.
+    final location = encodeLocation(screen.trim());
     final CanvasLocationMatch? match;
     final Uri? uri;
     try {
