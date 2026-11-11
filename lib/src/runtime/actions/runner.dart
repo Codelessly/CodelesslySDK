@@ -15,11 +15,12 @@
 //   first.
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
+
 import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, Node, Reaction, TriggerType, UnknownAction;
 
 import '../contracts.dart';
 import '../expressions/engine.dart';
-import '../expressions/formula.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
 import 'action_error.dart';
@@ -62,6 +63,19 @@ class ActionsCanceled implements Exception {
 
   @override
   String toString() => 'The actions were canceled.';
+}
+
+/// A chain stopped by an outcome the person chose (a cancelled purchase,
+/// nothing to restore): not a failure, so nothing is logged as an error,
+/// but the screen's actionError reaction still hears it, with [code], to
+/// say so.
+class ActionsStopped extends ActionsCanceled {
+  const ActionsStopped(this.code, this.message);
+  final String code;
+  final String message;
+
+  @override
+  String toString() => message;
 }
 
 /// One running chain: what its actions read and share.
@@ -179,7 +193,8 @@ class CodelesslyActions implements ActionRunner {
     final reactions = [
       for (final r in node.actions)
         if (_matchesReaction(r, trigger, event) && _allowed(r, context, event) &&
-            (trigger != 'valueChanged' || event['changedVariable'] == null || r.trigger.variable.trim() == event['changedVariable'])) r,
+            (trigger != 'valueChanged' || event['changedVariable'] == null || r.trigger.variable.trim() == event['changedVariable']) &&
+            _firstForKey(node, r, context, event)) r,
     ];
     if (reactions.isEmpty) return Future.value();
     final debounce = reactions.fold<int>(0, (m, r) => r.trigger.debounceMs > m ? r.trigger.debounceMs : m);
@@ -222,6 +237,29 @@ class CodelesslyActions implements ActionRunner {
     }
   }
 
+  /// The `onceKey`s reactions ran for, by node and reaction, for as long as
+  /// the app runs.
+  static final Set<String> _ranOnce = {};
+
+  /// Forgets which keys ran (tests, a sign out that should count again).
+  static void resetOnceKeys() => _ranOnce.clear();
+
+  /// Whether [reaction] may run: always without a `onceKey`, else the first
+  /// time for its key (evaluated in the reaction's scope, a list item's).
+  static bool _firstForKey(Node node, Reaction reaction, ActionContext context, Json event) {
+    final template = reaction.trigger.onceKey.trim();
+    if (template.isEmpty) return true;
+    final result = event.containsKey('result') ? event['result'] : (event.containsKey('value') ? event['value'] : null);
+    final scope = ValuesScope({'result': result}, context.scope);
+    final String key;
+    try {
+      key = context.expressions.interpolate(template, scope).trim();
+    } finally {
+      scope.dispose();
+    }
+    return _ranOnce.add('${node.id}\u0000${reaction.id}\u0000${reaction.trigger.type.name}\u0000$key');
+  }
+
   bool _matchesReaction(Reaction reaction, String trigger, Json event) {
     final t = reaction.trigger;
     if (t.type.name != trigger) return false;
@@ -244,7 +282,12 @@ class CodelesslyActions implements ActionRunner {
       host,
       // `value` too: an input's new value is also read by that name (a
       // search field's `query = \${value}`).
-      ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope),
+      // `drag` too: a drag trigger's pointer (`\${drag.x}`, `\${drag.y}`).
+      ValuesScope({
+        'result': result,
+        if (event.containsKey('value')) 'value': event['value'],
+        if (event.containsKey('drag')) 'drag': event['drag'],
+      }, context.scope),
       cancellation ?? ActionCancellation(),
       node,
       event['value'],
@@ -262,8 +305,18 @@ class CodelesslyActions implements ActionRunner {
       await (scoped == null
           ? runActions(actions, run)
           : runZoned(() => runActions(actions, run), zoneValues: {#codelesslyHandlers: scoped}));
+    } on ActionsStopped catch (stop) {
+      if (host case final RuntimeActionContext context) {
+        context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall'));
+      }
     } on ActionsCanceled {
-      // The node left: the rest doesn't run.
+      // The node left: the rest doesn't run. Said in debug builds, so a
+      // chain that stops for this isn't a mystery.
+      assert(() {
+        debugPrint('Codelessly: the actions of ${node.name.isEmpty ? node.id : node.name} stopped: its node left '
+            'the screen while they ran.');
+        return true;
+      }());
     } catch (error, stack) {
       host.reportError(error, stack, action: _failing(error));
     }

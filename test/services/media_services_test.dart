@@ -28,8 +28,20 @@ class _Voice implements SpeechEngine {
   void cancel() => cancels++;
 }
 
+/// A custom engine from before waveforms: sustained sines only.
+class _SineOnlyEngine implements SoundEngine, SustainedSoundEngine {
+  final SilentSoundEngine _inner = SilentSoundEngine();
+  @override bool get available => false;
+  @override double get now => _inner.now;
+  @override void resume() {}
+  @override void play(SoundVoice voice, {double? time, double volume = 1, double pitch = 1}) {}
+  @override void startNote(String id, {double frequency = 440, double volume = 1}) => _inner.startNote(id);
+  @override void stopNote(String id) => _inner.stopNote(id);
+  @override void stopAllNotes() => _inner.stopAllNotes();
+}
+
 class LegacySoundService extends SoundService {
- LegacySoundService():super(engine:SilentSoundEngine());
+ LegacySoundService():super(engine:_SineOnlyEngine());
  int starts=0;
  @override bool startNote(String id,{double frequency=440,double volume=1}){starts++;return true;}
 }

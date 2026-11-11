@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderShimmer, swingPose;
+import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderMotion, RenderShimmer, swingPose;
 import 'package:codelessly_sdk/src/render/paint/svg_path.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +48,37 @@ Map<String, Object?> box(Map<String, Object?> extra, {double x = 0, double y = 0
     };
 
 void main() {
+  testWidgets('a spin without a ramp survives a zero-length tick (a first frame on the web)', (tester) async {
+    final doc = api.LayoutDocument.fromJson({
+      'roots': ['s'],
+      'nodes': {
+        's': {'type': 'stack', 'children': ['b'], 'layout': {'width': 100, 'height': 100}},
+        'b': {
+          'type': 'box',
+          'layout': {'width': 56, 'height': 56, 'x': {'start': 0}, 'y': {'start': 0}},
+          'decoration': {'fills': [{'color': '#FFFF0000'}]},
+          'motion': {'spin': 0.7, 'spinRamp': 0},
+        },
+      },
+    });
+    final tree = NodeTree(NodeValues(DocumentSource(doc)));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's'))));
+    RenderMotion? motion;
+    void visit(RenderObject o) {
+      if (o is RenderMotion) motion ??= o;
+      o.visitChildren(visit);
+    }
+    visit(tester.renderObject(find.byType(NodeView)));
+    // A new ticker's first tick: no time has passed.
+    motion!.tick(Duration.zero);
+    motion!.tick(const Duration(milliseconds: 100));
+    final m = motion!.effectiveTransform.storage;
+    expect(m.every((v) => v.isFinite), isTrue, reason: '$m');
+    expect(m[1], isNot(0), reason: 'turned by 0.07 of a turn');
+    await tester.pumpWidget(const SizedBox());
+  });
+
   testWidgets('a swing rocks around rest on a sine', (tester) async {
     final (tree, view, _) = await show(
         tester,
@@ -130,6 +161,40 @@ void main() {
     expect(tree.boxOf('w')!.rectIn(view)!.left, closeTo(25, 0.5));
     // Heading left, drawn upright: a 20×20 box's corners stay put.
     expect(tree.boxOf('u')!.rectIn(view)!, rectMoreOrLessEquals(const Rect.fromLTWH(150, 100, 20, 20), epsilon: 0.01));
+  });
+
+  testWidgets('upright and mirrored: heading left, the node faces left (its front leads)', (tester) async {
+    // A 40×20 carriage with its nose (n, 10×10) at the right end.
+    Map<String, Map<String, Object?>> carriage(String path, {required bool mirror}) => {
+          't': {
+            'type': 'stack',
+            'children': ['n'],
+            'layout': {'width': 40, 'height': 20, 'x': {'start': 200}, 'y': {'start': 100}},
+            'motion': {'path': path, 'orientToPath': true, 'orientUpright': true, 'uprightMirror': mirror, 'pathProgress': 0.5},
+          },
+          'n': {'type': 'box', 'layout': {'width': 10, 'height': 10, 'x': {'start': 30}, 'y': {'start': 5}}},
+        };
+    Future<Rect> nose(String path, {required bool mirror}) async {
+      final nodes = carriage(path, mirror: mirror);
+      final (tree, view, _) = await showDoc(tester, {
+        'roots': ['s'],
+        'nodes': {
+          's': {'type': 'stack', 'children': ['t'], 'layout': {'width': 400, 'height': 300}},
+          ...nodes,
+        },
+      });
+      final r = tree.boxOf('n')!.rectIn(view)!;
+      await tester.pumpWidget(const SizedBox());
+      return r;
+    }
+
+    // Heading left at the path's middle (-50, 0): mirrored, the nose is at the left end.
+    expect(await nose('M0 0 L-100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(150, 105, 10, 10), epsilon: 0.01));
+    // Not mirrored it stays at the right end, facing backwards.
+    expect(await nose('M0 0 L-100 0', mirror: false), rectMoreOrLessEquals(const Rect.fromLTWH(180, 105, 10, 10), epsilon: 0.01));
+    // Heading right nothing is mirrored.
+    expect(await nose('M0 0 L100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(280, 105, 10, 10), epsilon: 0.01));
+    expect(api.Motion.fromJson({'uprightMirror': true})!.toJson()['uprightMirror'], isTrue);
   });
 
   test('area pacing sweeps equal areas about the focus', () {

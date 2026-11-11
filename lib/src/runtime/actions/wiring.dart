@@ -84,10 +84,17 @@ class TreeReactions implements NodeInteractions {
     }
     final viewport = types.contains(TriggerType.enterViewport) || types.contains(TriggerType.exitViewport);
     if (pointer.isEmpty && !viewport) return;
+    final g = n.behaviors.effectiveTransformGesture;
     chain.add(box.obtain<RenderReactions>('reactions', RenderReactions.new)
       ..triggers = pointer
+      // A plain drag is one finger: on a node that also pinches, a second
+      // finger hands the gesture to the pinch.
+      ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
       ..holdMs = n.actions.firstWhere((r) => r.trigger.type == TriggerType.hold, orElse: () => n.actions.first).trigger.holdMs
       ..visibleFraction = viewport ? n.actions.firstWhere((r) => _isViewport(r.trigger.type)).trigger.visibleFraction : null
+      ..visibleMs = viewport
+          ? n.actions.firstWhere((r) => r.trigger.type == TriggerType.enterViewport, orElse: () => n.actions.first).trigger.visibleMs
+          : 0
       ..onTrigger = (type, event) => fire(box, type.name, event: event));
   }
 
@@ -158,15 +165,30 @@ class TreeReactions implements NodeInteractions {
 
   /// A removed view stops its chains and timers. Conditional hiding only
   /// pauses screen triggers: the reaction that hid the node may finish.
+  ///
+  /// A box that leaves and comes back in the same frame (a layer added or
+  /// taken away above it re-parents it, as a hover style adding a motion
+  /// does) keeps its chains: whether it left is decided after the frame.
   @override
   void attachChanged(NodeBox box) {
     final state = _boxes[box];
     if (state == null) return;
     if (box.attached) {
+      state.leaving = false;
       state.resume();
-    } else {
-      state.pause(cancelActions: !box.tree.preservingActions);
+      return;
     }
+    if (box.tree.preservingActions) {
+      state.pause(cancelActions: false);
+      return;
+    }
+    state.leaving = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!state.leaving || box.attached) return;
+      state.leaving = false;
+      state.pause();
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
   }
 
   /// Stops everything the boxes run.
@@ -186,6 +208,9 @@ class _BoxReactions {
   final TreeReactions owner;
   final NodeBox box;
   ActionCancellation cancellation = ActionCancellation();
+
+  /// Detached, waiting for the end of the frame to see whether it is back.
+  bool leaving = false;
 
   /// Stops screen timers; a retained conditional subtree keeps its active
   /// reactions, whereas a removed view cancels them.
@@ -403,6 +428,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   int holdMs = 1200;
 
+  /// A second finger cancels a plain drag (and its swipes), so a pinch on
+  /// this node (a transform gesture's zoom, pinch reactions) wins.
+  bool yieldsToPinch = false;
+  final Set<int> _down = {};
+
   /// The visible share (0–1) that counts as in view; null: not watched.
   double? get visibleFraction => _visibleFraction;
   double? _visibleFraction;
@@ -411,6 +441,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     _visibleFraction = v;
     v == null ? _ViewportWatcher.remove(this) : (attached ? _ViewportWatcher.add(this) : null);
   }
+
+  /// How long (ms) it stays in view before enterViewport fires; leaving
+  /// sooner doesn't fire it.
+  int visibleMs = 0;
+  Timer? _dwell;
 
   void Function(TriggerType type, Json event)? onTrigger;
 
@@ -464,18 +499,46 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
             : null;
     }
     if (_doubleTap == null && _has(TriggerType.doubleTap)) {
-      _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)..onDoubleTap = () => _fire(TriggerType.doubleTap);
+      // ${result.x} / ${result.y}: where the second tap went down (local).
+      Json? at;
+      _doubleTap = DoubleTapGestureRecognizer(debugOwner: this)
+        ..onDoubleTapDown = ((d) => at = _where(d.localPosition, d.globalPosition))
+        ..onDoubleTap = () => _fire(TriggerType.doubleTap, at ?? const {});
     }
     if (_longPress == null && _has(TriggerType.longPress)) {
       _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = () => _fire(TriggerType.longPress);
     }
     final swipes = TriggerType.swipes.any(_has) || _has(TriggerType.drag) || _has(TriggerType.dragEnd);
     if (_pan == null && swipes) {
-      _pan = PanGestureRecognizer(debugOwner: this)
+      _pan = _OneFingerPanGestureRecognizer(debugOwner: this)
+        // Where the finger went down, not where the slop was crossed: a
+        // stroke paints from its first cell.
+        ..dragStartBehavior = DragStartBehavior.down
+        ..onStart = ((d) {
+          _dragStart = d.localPosition;
+        })
         ..onUpdate = (_has(TriggerType.drag)
-            ? (d) => _fire(TriggerType.drag, {
-                  'result': {'dx': d.delta.dx, 'dy': d.delta.dy, 'x': d.localPosition.dx, 'y': d.localPosition.dy},
-                })
+            ? (d) {
+                // `${drag.x}` / `${drag.y}`: where the pointer is in the node
+                // (painting on a board), `${drag.startX}` / `startY` where the
+                // drag began, `dx` / `dy` this move; `${result}` holds the
+                // same.
+                final start = _dragStart ?? d.localPosition;
+                final drag = {
+                  'dx': d.delta.dx,
+                  'dy': d.delta.dy,
+                  'deltaX': d.delta.dx,
+                  'deltaY': d.delta.dy,
+                  'x': d.localPosition.dx,
+                  'y': d.localPosition.dy,
+                  'globalX': d.globalPosition.dx,
+                  'globalY': d.globalPosition.dy,
+                  'pointerCount': 1,
+                  'startX': start.dx,
+                  'startY': start.dy,
+                };
+                _fire(TriggerType.drag, {'result': drag, 'drag': drag});
+              }
             : null)
         ..onEnd = (d) {
           final v = d.velocity.pixelsPerSecond;
@@ -488,6 +551,9 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         };
     }
   }
+
+  /// Where the current drag began, in the node.
+  Offset? _dragStart;
 
   void _disposeRecognizers() {
     _tap?.dispose();
@@ -516,7 +582,22 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (event is PointerUpEvent || event is PointerCancelEvent) _down.remove(event.pointer);
     if (event is PointerDownEvent) {
+      _down.add(event.pointer);
+      if (yieldsToPinch && _down.length > 1 && _pan != null) {
+        // Disposing rejects its pointers in the arena; it is made again on
+        // the next first finger.
+        _pan!.dispose();
+        _pan = null;
+      }
+      if (yieldsToPinch && _down.length > 1) {
+        _tap?.addPointer(event);
+        _doubleTap?.addPointer(event);
+        _longPress?.addPointer(event);
+        if (_has(TriggerType.pointerDown)) _fire(TriggerType.pointerDown, _pointerScope(event));
+        return;
+      }
       _ensureRecognizers();
       _tap?.addPointer(event);
       _doubleTap?.addPointer(event);
@@ -592,10 +673,24 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   @override
   void detach() {
     _ViewportWatcher.remove(this);
-    _disposeRecognizers();
+    if (_dwell != null) {
+      // Not in view long enough: seen again, it waits again.
+      _dwell!.cancel();
+      _dwell = null;
+      _inView = false;
+    }
+    _hold?.cancel();
+    _hold = null;
     if (_hovering && _has(TriggerType.cursorExit)) _fire(TriggerType.cursorExit);
     _hovering = false;
     super.detach();
+    // A chain rebuilt around this box (a pressed state adding a scale
+    // layer on pointer down) detaches and re-attaches it in the same frame:
+    // disposing the recognizers then lost the tap in progress, so a button
+    // with press feedback never clicked. Dispose only if it stays detached.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!attached) _disposeRecognizers();
+    });
   }
 
   @override
@@ -615,6 +710,16 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     final inView = fraction <= 0 ? visible > 0 : visible >= fraction - 1e-6;
     if (inView == _inView) return;
     _inView = inView;
+    _dwell?.cancel();
+    _dwell = null;
+    if (inView && visibleMs > 0) {
+      // It must stay in view that long: leaving first cancels it.
+      _dwell = Timer(Duration(milliseconds: visibleMs), () {
+        _dwell = null;
+        if (_inView && attached) _fire(TriggerType.enterViewport);
+      });
+      return;
+    }
     final t = inView ? TriggerType.enterViewport : TriggerType.exitViewport;
     if (_triggersAll.contains(t)) _fire(t);
   }
@@ -688,4 +793,39 @@ bool triggerWhenHolds(String when, ActionContext context) {
     value = readPath(context.scope, t) ?? context.expressions.evaluate('\${= $t}', context.scope);
   }
   return value == true || value == 1 || value == 'true' || value == '1';
+}
+
+/// A drag reaction is a one-finger gesture: a second finger landing before
+/// the drag starts makes it a pinch, so this gives up and the pinch (a
+/// transform gesture around the node: zooming a board you paint on) takes
+/// it. Flutter's pan adds up every finger's travel, so two fingers
+/// spreading apart would otherwise win as a drag.
+class _OneFingerPanGestureRecognizer extends PanGestureRecognizer {
+  _OneFingerPanGestureRecognizer({super.debugOwner});
+
+  int _tracked = 0;
+  bool _accepted = false;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    if (_tracked > 0 && !_accepted) {
+      resolve(GestureDisposition.rejected);
+      return;
+    }
+    _tracked++;
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    _accepted = true;
+    super.acceptGesture(pointer);
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    _tracked = 0;
+    _accepted = false;
+    super.didStopTrackingLastPointer(pointer);
+  }
 }
