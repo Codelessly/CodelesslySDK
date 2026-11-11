@@ -141,6 +141,9 @@ class RenderParticles extends RenderProxyBox with ImageClient {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _register();
+    // Back from a re-parenting (a hover style lifting its card, an
+    // entrance's layer): the bursts in the air carry on.
+    _ticker?.muted = false;
     if (!_appeared && (_emitter?.playOnAppear ?? false)) {
       _appeared = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -152,17 +155,29 @@ class RenderParticles extends RenderProxyBox with ImageClient {
   @override
   void detach() {
     _unregister();
-    _ticker?.stop();
-    for (final b in _bursts) {
-      b.finish();
-    }
-    _bursts.clear();
+    // Muted, not stopped: a box only moved to another parent comes back in
+    // the same frame, and its confetti mustn't vanish mid-air. Gone for
+    // good (not back by the next frame), its bursts end.
+    _ticker?.muted = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (attached) return;
+      _ticker?.stop();
+      for (final b in _bursts) {
+        b.finish();
+      }
+      _bursts.clear();
+    });
     super.detach();
   }
 
   @override
   void dispose() {
     _ticker?.dispose();
+    _ticker = null;
+    for (final b in _bursts) {
+      b.finish();
+    }
+    _bursts.clear();
     for (final tp in _glyphs.values) {
       tp.dispose();
     }
