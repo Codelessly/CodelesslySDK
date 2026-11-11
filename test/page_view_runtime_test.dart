@@ -114,6 +114,122 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  Future<support.Screen> twoWay(WidgetTester tester) async {
+    final nodes = pages(count: 12);
+    nodes['col']!['props'] = {
+      'itemCount': 12,
+      'scrollDirection': 'horizontal',
+      'animationDuration': 650,
+      'animationCurve': 'linear',
+    };
+    nodes['col']!['bind'] = {'props.initialPage': r'${bookmark}'};
+    nodes['col']!['actions'] = [
+      support.reaction('changed', [
+        {
+          'type': 'setVariable',
+          'variable': 'bookmark',
+          'value': r'${result.index}',
+        },
+      ]),
+    ];
+    return support.show(
+      tester,
+      nodes,
+      variables: [support.v('bookmark', 0, VariableType.integer)],
+    );
+  }
+
+  testWidgets('two-way page feedback does not cancel a long navigation', (
+    tester,
+  ) async {
+    final screen = await twoWay(tester);
+    final controller = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+    screen.scope.set('bookmark', 11);
+    await tester.pump();
+    // Pump intermediate frames so every onPageChanged write rebuilds the
+    // bound pager, as it does while the app animates in a browser.
+    for (var frame = 0; frame < 22; frame++) {
+      await tester.pump(const Duration(milliseconds: 40));
+    }
+    expect(controller.page, closeTo(11, .001));
+    expect(screen.scope.read('bookmark'), 11);
+  });
+
+  testWidgets(
+    'an external target can replace an in-flight two-way navigation',
+    (tester) async {
+      final screen = await twoWay(tester);
+      final controller = tester
+          .widget<PageView>(find.byType(PageView))
+          .controller!;
+      screen.scope.set('bookmark', 11);
+      await tester.pump();
+      for (var frame = 0; frame < 7; frame++) {
+        await tester.pump(const Duration(milliseconds: 40));
+      }
+      expect(controller.page, greaterThan(3));
+      screen.scope.set('bookmark', 2);
+      await tester.pump();
+      for (var frame = 0; frame < 22; frame++) {
+        await tester.pump(const Duration(milliseconds: 40));
+      }
+      expect(controller.page, closeTo(2, .001));
+      expect(screen.scope.read('bookmark'), 2);
+    },
+  );
+
+  testWidgets(
+    'a shorter data set keeps the requested page despite clamp feedback',
+    (tester) async {
+      final nodes = pages(count: 12, initial: 11);
+      nodes['col']!['props'] = {
+        'initialPage': 11,
+        'scrollDirection': 'horizontal',
+        'animationDuration': 650,
+        'animationCurve': 'linear',
+      };
+      nodes['col']!['bind'] = {
+        'props.initialPage': r'${bookmark}',
+        'data': r'${story}',
+      };
+      nodes['col']!['actions'] = [
+        support.reaction('changed', [
+          {
+            'type': 'setVariable',
+            'variable': 'bookmark',
+            'value': r'${result.index}',
+          },
+        ]),
+      ];
+      final screen = await support.show(
+        tester,
+        nodes,
+        variables: [
+          support.v('bookmark', 11, VariableType.integer),
+          support.v(
+            'story',
+            List.generate(12, (index) => index),
+            VariableType.list,
+          ),
+        ],
+      );
+      final controller = tester
+          .widget<PageView>(find.byType(PageView))
+          .controller!;
+      expect(controller.page, 11);
+      screen.scope.set('story', [0, 1, 2, 3]);
+      screen.scope.set('bookmark', 0);
+      await tester.pump();
+      for (var frame = 0; frame < 22; frame++) {
+        await tester.pump(const Duration(milliseconds: 40));
+      }
+      expect(controller.page, closeTo(0, .001));
+      expect(screen.scope.read('bookmark'), 0);
+    },
+  );
+
   testWidgets('empty page view builds no item', (tester) async {
     await support.show(tester, pages(count: 0, initial: 8));
     expect(find.byType(PageView), findsOneWidget);
