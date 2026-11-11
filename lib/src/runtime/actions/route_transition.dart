@@ -54,6 +54,10 @@ class RevealAnchor {
   /// The box (global) of the node whose trigger fired last: what a modal
   /// anchored to its trigger sits by.
   static Rect? lastTrigger;
+
+  /// The box (global) of the node a modal anchored to a named node sits by
+  /// (`ModalAnchor.node`), found by the action that opens it.
+  static Rect? named;
   static bool _tracking = false;
 
   static void track() {

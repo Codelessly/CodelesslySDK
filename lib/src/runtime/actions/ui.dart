@@ -216,6 +216,7 @@ class NavigatorActionUi implements ActionUi {
     final anchor = switch (action.anchor) {
       api.ModalAnchor.trigger => RevealAnchor.lastTrigger,
       api.ModalAnchor.pointer => pointer,
+      api.ModalAnchor.node => RevealAnchor.named,
       // A popover sits by the node that opened it (or the pointer) even
       // when no anchor is named.
       api.ModalAnchor.none => action.presentation == ModalPresentation.popover ? RevealAnchor.lastTrigger ?? pointer : null,
