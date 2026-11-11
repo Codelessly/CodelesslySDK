@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -246,6 +247,20 @@ void main() {
         await tester.pump(const Duration(milliseconds: 310));
         expect(h['done'], isTrue);
       }
+    });
+
+    testWidgets('keeps time with slowed animations', (tester) async {
+      final h = Harness(variables: [v('done', false, VariableType.boolean)]);
+      timeDilation = 10;
+      h.click([
+        {'type': 'delay', 'ms': 100},
+        setVar('done', 'true'),
+      ]);
+      await tester.pump(const Duration(milliseconds: 900));
+      expect(h['done'], isFalse);
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(h['done'], isTrue);
+      timeDilation = 1;
     });
   });
 
