@@ -66,6 +66,8 @@ dependencies:
   webview_flutter_wkwebview: ^3.17.0
 
 dev_dependencies:
+  just_audio_platform_interface: ^4.6.0
+  video_player_platform_interface: ^6.9.0
   flutter_test:
     sdk: flutter
   lints: ^6.0.0

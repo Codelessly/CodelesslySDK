@@ -72,6 +72,7 @@ class _MediaVideoState extends State<MediaVideo> {
   VideoPlayerController? _controller;
   bool _ready = false, _failed = false;
   int _generation = 0;
+  Future<void> _pendingControls = Future<void>.value();
 
   String get _url => widget.node.prop(VideoProps.url);
 
@@ -84,11 +85,16 @@ class _MediaVideoState extends State<MediaVideo> {
   @override
   void didUpdateWidget(MediaVideo old) {
     super.didUpdateWidget(old);
-    if (old.preview != widget.preview || old.node.prop(VideoProps.url) != _url) _load();
+    if (old.preview != widget.preview || old.node.prop(VideoProps.url) != _url) {
+      _load();
+    } else {
+      _applyControls(previous: old.node);
+    }
   }
 
   void _load() {
     final generation = ++_generation;
+    _pendingControls = Future<void>.value();
     _controller?.dispose();
     _controller = null;
     _ready = _failed = false;
@@ -100,10 +106,47 @@ class _MediaVideoState extends State<MediaVideo> {
     c.initialize().then((_) {
       if (!mounted || generation != _generation) return;
       setState(() => _ready = true);
-      // A remote URL never autoplays (SDK 8.x).
+      // Legacy autoPlay remains unchanged. Explicit controls are application
+      // requests, still subject to the platform's playback rules.
+      _applyControls();
     }, onError: (Object _) {
       if (mounted && generation == _generation) setState(() => _failed = true);
     });
+  }
+
+  void _applyControls({Node? previous}) {
+    final c = _controller;
+    if (c == null || !_ready) return;
+    final node = widget.node, generation = _generation;
+    bool current() => mounted && generation == _generation && identical(c, _controller);
+    _pendingControls = _pendingControls
+        .then((_) async {
+          if (!current()) return;
+          if (previous == null || previous.prop(VideoProps.volume) != node.prop(VideoProps.volume)) {
+            await c.setVolume(node.prop(VideoProps.volume));
+          }
+          if (!current()) return;
+          if (previous == null || previous.prop(VideoProps.loop) != node.prop(VideoProps.loop)) {
+            await c.setLooping(node.prop(VideoProps.loop));
+          }
+          if (!current()) return;
+          final seconds = node.prop(VideoProps.positionSeconds);
+          if (seconds != null && (previous == null || previous.prop(VideoProps.positionSeconds) != seconds)) {
+            await c.seekTo(Duration(milliseconds: (seconds * 1000).round()));
+          }
+          if (!current()) return;
+          final playing = node.prop(VideoProps.playing);
+          if (playing != null && (previous == null || previous.prop(VideoProps.playing) != playing)) {
+            if (playing) {
+              await c.play();
+            } else {
+              await c.pause();
+            }
+          }
+        })
+        .catchError((Object _) {
+          if (current()) setState(() => _failed = true);
+        });
   }
 
   @override
@@ -270,7 +313,7 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
     if (old.preview != widget.preview || old.node.prop(AudioPlayerProps.url) != _url) {
       _load();
     } else {
-      _apply();
+      _apply(previous: old.node);
     }
   }
 
@@ -310,19 +353,28 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
       ..add(p.durationStream.listen((v) {
         if (current()) setState(() => _duration = v ?? Duration.zero);
       }, onError: failed));
-    p.setUrl(_url).then((_) {
+    p.setUrl(_url).then((duration) {
       if (!current()) return;
-      setState(() => _ready = true);
+      setState(() { _ready = true; _duration = duration ?? Duration.zero; });
       _apply();
-      if (_node.prop(AudioPlayerProps.autoPlay)) _run(p.play);
+      if (_node.prop(AudioPlayerProps.playing) == null && _node.prop(AudioPlayerProps.autoPlay)) _run(p.play);
     }, onError: failed);
   }
 
-  void _apply() {
+  void _apply({Node? previous}) {
     final p = _player;
     if (p == null || !_ready) return;
     _run(() => p.setLoopMode(_node.prop(AudioPlayerProps.loop) ? LoopMode.one : LoopMode.off));
     _run(() => p.setVolume(_node.prop(AudioPlayerProps.volume)));
+    final seconds = _node.prop(AudioPlayerProps.positionSeconds);
+    if (seconds != null && (previous == null || previous.prop(AudioPlayerProps.positionSeconds) != seconds)) {
+      final requested = Duration(milliseconds: (seconds * 1000).round());
+      _run(() => p.seek(_duration > Duration.zero && requested > _duration ? _duration : requested));
+    }
+    final playing = _node.prop(AudioPlayerProps.playing);
+    if (playing != null && (previous == null || previous.prop(AudioPlayerProps.playing) != playing)) {
+      _run(playing ? p.play : p.pause);
+    }
   }
 
   void _run(Future<void> Function() action) {
