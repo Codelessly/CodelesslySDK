@@ -105,7 +105,10 @@ class TreeReactions implements NodeInteractions {
     if (node == null) return;
     // What a modal anchored to its trigger (or the pointer) sits by.
     RevealAnchor.track();
-    RevealAnchor.lastTrigger = box.attached && box.hasSize ? box.localToGlobal(Offset.zero) & box.size : null;
+    // The box as the screen shows it: its size scales with it too (a running
+    // app inside a scaled preview), not only its origin.
+    RevealAnchor.lastTrigger =
+        box.attached && box.hasSize ? MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size) : null;
     final ctx = contextFor(box);
     if (trigger == 'changed' && event.containsKey('value')) _writeBack(node, event['value'], ctx);
     final state = _boxes[box];
