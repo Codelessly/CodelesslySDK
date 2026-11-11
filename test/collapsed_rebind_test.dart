@@ -52,7 +52,9 @@ void main() {
       );
       screen.scope.set('shown', false);
       await tester.pump();
-      expect(screen.tree.boxOf('card')!.child!.debugNeedsLayout, isFalse);
+      expect(screen.tree.boxOf('card')!.collapsed, isTrue);
+      expect(screen.tree.boxOf('card')!.child, isNull,
+          reason: 'runtime hiding retains cached layers outside the pipeline');
       for (var i = 0; i < 3; i++) {
         screen.scope.set('label', 'hidden $i');
         screen.scope.define(v('shown', false, VariableType.boolean));
@@ -61,6 +63,8 @@ void main() {
       }
       screen.scope.set('shown', true);
       await tester.pump();
+      expect(screen.tree.boxOf('card')!.child, isNotNull);
+      expect(screen.tree.boxOf('label')!.node!.prop(TextProps.text), 'hidden 2');
       expect(tester.takeException(), isNull);
     },
   );
