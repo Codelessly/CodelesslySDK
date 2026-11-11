@@ -607,9 +607,15 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
               };
               return Align(alignment: Alignment(-1, y), child: field(decoration));
             }
-            return field(constraints.hasBoundedHeight
-                ? decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))
-                : decoration);
+            if (!constraints.hasBoundedHeight) return field(decoration);
+            // The node's height is the field's: the platform's density
+            // (compact on desktop and the web) would take 8px off the
+            // decorator's box, which then wouldn't fill the node.
+            final theme = Theme.of(context);
+            return Theme(
+              data: theme.copyWith(visualDensity: VisualDensity.standard),
+              child: field(decoration.copyWith(constraints: BoxConstraints.tightFor(height: constraints.maxHeight))),
+            );
           })
         : field(decoration);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
