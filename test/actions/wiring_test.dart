@@ -1,3 +1,4 @@
+import 'dart:async';
 // Triggers in the render tree: nodes tapped (pressed, hovered, swiped...)
 // in a NodeView(interactive: true) run their reactions; a variable they set
 // re-applies only the boxes that read it.
@@ -100,6 +101,42 @@ String textOf(NodeTree tree, String id) {
 }
 
 void main() {
+  testWidgets('an offstage route does not run a second transport clock', (tester) async {
+    final nodes=counter();nodes['other']={...nodes['other']!,'actions':[reaction('clock',[add('ticks')],extra:{'every':'100'})]};
+    final s=await show(tester,nodes,variables:[v('count',0,VariableType.integer),v('ticks',0,VariableType.integer)]);
+    await tester.pump(const Duration(milliseconds:100));expect(s['ticks'],1);
+    final nav=Navigator.of(tester.element(find.byType(Scaffold)));
+    unawaited(nav.push(MaterialPageRoute<void>(builder:(_)=>const Scaffold(body:Text('next')))));
+    await tester.pumpAndSettle();final before=s['ticks'];
+    await tester.pump(const Duration(milliseconds:400));expect(s['ticks'],before);
+    nav.pop();await tester.pumpAndSettle();final resumed=s['ticks'] as int;
+    await tester.pump(const Duration(milliseconds:100));expect(s['ticks'],resumed+1);
+  });
+
+  testWidgets('clock evaluates interval and starts/stops with its runWhen variable', (tester) async {
+    final nodes=counter();nodes['other']={...nodes['other']!, 'actions':[reaction('clock',[add('ticks')],extra:{'every':r'${period}','runWhen':r'${playing}'})]};
+    final s=await show(tester,nodes,variables:[v('count',0,VariableType.integer),v('ticks',0,VariableType.integer),v('period',100,VariableType.integer),v('playing',false,VariableType.boolean)]);
+    await tester.pump(const Duration(milliseconds:350));expect(s['ticks'],0);
+    s.scope.set('playing',true);await tester.pump(const Duration(milliseconds:100));expect(s['ticks'],1);
+    s.scope.set('period',50);await tester.pump(const Duration(milliseconds:100));expect(s['ticks'],3);
+    s.scope.set('playing',false);await tester.pump(const Duration(milliseconds:300));expect(s['ticks'],3);
+  });
+
+  testWidgets('valueChanged is scoped to its path and ignores sibling writes', (tester) async {
+    final nodes=counter();
+    nodes['other']={...nodes['other']!, 'actions':[
+      reaction('valueChanged',[add('keySeen'), {'type':'setVariable','variable':'session.key','value':'0'}],extra:{'variable':'fifthIndex'}),
+      reaction('valueChanged',[add('playSeen')],extra:{'variable':'session.playing'}),
+    ]};
+    final s=await show(tester,nodes,variables:[v('count',0,VariableType.integer),v('fifthIndex',0,VariableType.integer),v('session',{'key':0,'playing':false,'notes':[]},VariableType.map),v('keySeen',0,VariableType.integer),v('playSeen',0,VariableType.integer)]);
+    s.scope.set('session',{'key':0,'playing':false,'notes':[60,64,67]});await tester.pump();
+    expect(s['keySeen'],0);expect(s['playSeen'],0);
+    s.scope.set('fifthIndex',1);await tester.pump();await tester.pump();
+    expect(s['keySeen'],1);expect(s['playSeen'],0);
+    s.scope.set('session',{'key':0,'playing':true,'notes':[60,64,67]});await tester.pump();
+    expect(s['keySeen'],1);expect(s['playSeen'],1);
+  });
+
   testWidgets('two pointers sustain the same pitch independently and cancel releases', (tester) async {
     final engine = SilentSoundEngine();
     final s = await show(tester, counter(actions: [
