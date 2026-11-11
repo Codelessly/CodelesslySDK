@@ -1520,6 +1520,7 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
       selectedIcon: selectedIcon,
       direction: n.prop(SegmentedButtonProps.direction) == api.Axis.vertical ? Axis.vertical : Axis.horizontal,
       style: SegmentedButton.styleFrom(
+        textStyle: _styleOrNull(n.prop(SegmentedButtonProps.textStyle)),
         backgroundColor: _color(n.prop(SegmentedButtonProps.backgroundColor)),
         selectedBackgroundColor: _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)),
         foregroundColor: _color(n.prop(SegmentedButtonProps.foregroundColor)),
