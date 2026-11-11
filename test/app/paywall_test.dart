@@ -155,7 +155,7 @@ void main() {
         services: Services(
           analytics: analytics,
           purchases: purchases,
-          paywalls: PaywallRuntime(backend: server, purchases: () => purchases, platform: 'ios', projectId: 'paywall_demo'),
+          paywalls: PaywallRuntime(backend: server, purchases: () => purchases, ownsPurchaseServices: false, platform: 'ios', projectId: 'paywall_demo'),
           links: _Links(),
         ),
       ),
@@ -246,9 +246,12 @@ void main() {
     await tap(tester, 'restore');
     expect(result, isNull, reason: 'nothing restored: the paywall stays');
     expect(find.byType(NodeView), findsOneWidget);
+    final shown = tester.widget<CodelesslyWidget>(find.byType(CodelesslyWidget));
+    expect(shown.paywall!.restoring, isFalse, reason: 'restoreNothing must clear progress');
     store.owned = true;
     await tap(tester, 'restore');
-    expect(result?.outcome, PaywallOutcome.restored);
+    expect(analytics.errors, isEmpty, reason: '${analytics.records}');
+    expect(result?.outcome, PaywallOutcome.restored, reason: 'events: ${server.events}');
     expect(result?.entitlementId, 'pro');
     expect(find.byType(NodeView), findsNothing);
     expect(analytics.errors, isEmpty);
@@ -273,6 +276,19 @@ void main() {
     expect(result?.outcome, PaywallOutcome.closed);
     expect(find.byType(NodeView), findsNothing);
     expect(store.bought, isEmpty);
+    expect(analytics.errors, isEmpty);
+  });
+
+  testWidgets('a managed shared store remains usable after closing and reopening', (tester) async {
+    final server = _Server(), store = _Store();
+    await pumpApp(tester, managed(server, store));
+    await tap(tester, 'close');
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('Go pro'));
+    await settle(tester);
+    await tap(tester, 'buy');
+    expect(result?.outcome, PaywallOutcome.purchased);
+    expect(store.bought, ['com.example.pro.annual']);
     expect(analytics.errors, isEmpty);
   });
 

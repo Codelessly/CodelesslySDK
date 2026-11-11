@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
-import '../app/paywall_test.dart' show Backend, Store;
+import '../app/northstar_paywall_test.dart' show Backend, Store, bundle;
 
 class _EntitlementBackend extends Backend {
   Set<String> grants = {};
@@ -55,6 +55,27 @@ class _Profiles extends BackendCloudDatabase {
 }
 
 void main() {
+  test('public paywall resolver binds account scope before any SDK widget exists', () async {
+    final auth = _SingleSubscriptionAuth(const AppUser(uid: 'one'));
+    final backend = Backend()..pending = Completer<ResolvedPaywall>();
+    final runtime = PaywallRuntime(backend: backend, purchases: Store.new, platform: 'ios');
+    final app = Codelessly(
+      config: CodelesslyConfig(services: Services(auth: auth, paywalls: runtime, analytics: const NoAnalytics())),
+      loader: MemoryPublishLoader(bundle()),
+    );
+    final resolving = app.paywall.resolve('onboarding');
+    await pumpEventQueue();
+    expect(backend.calls, isNotEmpty);
+    auth.emit(const AppUser(uid: 'two'));
+    await pumpEventQueue();
+    backend.pending!.complete(backend.resolved);
+    expect(await resolving, isNull);
+    expect(auth.subscriptions, 1);
+    app.dispose();
+    runtime.dispose();
+    await auth.events.close();
+  });
+
   test('anonymous identity changes and repeated signed-out auth errors fail closed', () async {
     final auth = _SingleSubscriptionAuth(const AppUser(uid: 'guest-one', isAnonymous: true));
     final backend = Backend();
