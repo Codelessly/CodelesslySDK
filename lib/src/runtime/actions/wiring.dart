@@ -458,11 +458,30 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     }
     final swipes = TriggerType.swipes.any(_has) || _has(TriggerType.drag) || _has(TriggerType.dragEnd);
     if (_pan == null && swipes) {
-      _pan = PanGestureRecognizer(debugOwner: this)
+      _pan = _OneFingerPanGestureRecognizer(debugOwner: this)
+        // Where the finger went down, not where the slop was crossed: a
+        // stroke paints from its first cell.
+        ..dragStartBehavior = DragStartBehavior.down
+        ..onStart = ((d) {
+          _dragStart = d.localPosition;
+        })
         ..onUpdate = (_has(TriggerType.drag)
-            ? (d) => _fire(TriggerType.drag, {
-                  'result': {'dx': d.delta.dx, 'dy': d.delta.dy, 'x': d.localPosition.dx, 'y': d.localPosition.dy},
-                })
+            ? (d) {
+                // `${drag.x}` / `${drag.y}`: where the pointer is in the node
+                // (painting on a board), `${drag.startX}` / `startY` where the
+                // drag began, `dx` / `dy` this move; `${result}` holds the
+                // same.
+                final start = _dragStart ?? d.localPosition;
+                final drag = {
+                  'dx': d.delta.dx,
+                  'dy': d.delta.dy,
+                  'x': d.localPosition.dx,
+                  'y': d.localPosition.dy,
+                  'startX': start.dx,
+                  'startY': start.dy,
+                };
+                _fire(TriggerType.drag, {'result': drag, 'drag': drag});
+              }
             : null)
         ..onEnd = (d) {
           final v = d.velocity.pixelsPerSecond;
@@ -475,6 +494,9 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         };
     }
   }
+
+  /// Where the current drag began, in the node.
+  Offset? _dragStart;
 
   void _disposeRecognizers() {
     _tap?.dispose();
@@ -661,5 +683,40 @@ abstract final class _ViewportWatcher {
       }
       _schedule();
     }, debugLabel: 'ViewportWatcher');
+  }
+}
+
+/// A drag reaction is a one-finger gesture: a second finger landing before
+/// the drag starts makes it a pinch, so this gives up and the pinch (a
+/// transform gesture around the node: zooming a board you paint on) takes
+/// it. Flutter's pan adds up every finger's travel, so two fingers
+/// spreading apart would otherwise win as a drag.
+class _OneFingerPanGestureRecognizer extends PanGestureRecognizer {
+  _OneFingerPanGestureRecognizer({super.debugOwner});
+
+  int _tracked = 0;
+  bool _accepted = false;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    if (_tracked > 0 && !_accepted) {
+      resolve(GestureDisposition.rejected);
+      return;
+    }
+    _tracked++;
+    super.addAllowedPointer(event);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    _accepted = true;
+    super.acceptGesture(pointer);
+  }
+
+  @override
+  void didStopTrackingLastPointer(int pointer) {
+    _tracked = 0;
+    _accepted = false;
+    super.didStopTrackingLastPointer(pointer);
   }
 }

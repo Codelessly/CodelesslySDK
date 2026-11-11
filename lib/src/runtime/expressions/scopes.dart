@@ -421,13 +421,18 @@ class ItemScope extends NamedScope {
 
   /// Moves to [item] at [index] (the data changed).
   void update({required int index, Object? item, bool deferNotifications = false}) {
+    // Most items of a big list (a board of cells) are numbers or text that
+    // didn't change: compare those directly, without the deep equality.
+    final sameItem = identical(item, _item) ||
+        ((item is num || item is String || item is bool) && item == _item) ||
+        (item is! num && item is! String && item is! bool && const DeepCollectionEquality().equals(item, _item));
+    if (sameItem && index == _index) return;
     final names = <String>[
-      if (!const DeepCollectionEquality().equals(item, _item)) 'item',
+      if (!sameItem) 'item',
       if (index != _index) 'index',
     ];
     _index = index;
     _item = item;
-    if (names.isEmpty) return;
     if (!deferNotifications) {
       changed(names);
       return;
