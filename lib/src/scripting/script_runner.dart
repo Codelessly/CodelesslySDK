@@ -374,8 +374,11 @@ String? scriptTestFailure(ScriptTest t, ScriptRunResult run) {
   final expectError = t.expectError;
   if (expectError != null) {
     if (run.ok) return 'Expected a $expectError, but it returned ${_compared(run.value)}.';
-    if (run.error!['type'] != expectError) {
-      return 'Expected a $expectError, but it failed with ${run.error!['type']}: ${run.error!['message']}';
+    // The error's type (`RangeError`), its message (`No slide nope`), or
+    // both (`Error: No slide nope`).
+    final type = '${run.error!['type']}', message = '${run.error!['message']}';
+    if (expectError != type && expectError != message && expectError != '$type: $message') {
+      return 'Expected a $expectError, but it failed with $type: $message';
     }
     return null;
   }
