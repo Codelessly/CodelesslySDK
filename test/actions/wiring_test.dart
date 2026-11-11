@@ -101,6 +101,25 @@ String textOf(NodeTree tree, String id) {
 }
 
 void main() {
+  for (final expression in ['period', r'${period}']) {
+    testWidgets('clock interval reads $expression and clamps tiny periods', (tester) async {
+      final s=await show(tester,counter(actions:[reaction('clock',[add('count')],extra:{'every':expression})]),variables:[v('count',0,VariableType.integer),v('period',80,VariableType.decimal)]);
+      await tester.pump(const Duration(milliseconds:160));expect(s['count'],2);
+      s.scope.set('period',.1);await tester.pump(const Duration(milliseconds:api.Trigger.minIntervalMs * 5));expect(s['count'],7);
+      s.scope.set('period',-1);await tester.pump(const Duration(milliseconds:50));expect(s['count'],7);
+    });
+  }
+  testWidgets('clock interval formulas reschedule on variable changes and stop when detached', (tester) async {
+    final s=await show(tester,counter(actions:[reaction('clock',[add('count')],extra:{'every':r'${= 1000 / speed}'})]),variables:[v('count',0,VariableType.integer),v('speed',10,VariableType.integer)]);
+    await tester.pump(const Duration(milliseconds:250));expect(s['count'],2);
+    s.scope.set('speed',20);await tester.pump(const Duration(milliseconds:150));expect(s['count'],5);
+    s.scope.set('speed',0);await tester.pump(const Duration(seconds:1));expect(s['count'],5);
+    s.scope.set('speed',5);await tester.pump(const Duration(milliseconds:400));expect(s['count'],7);
+    await tester.pumpWidget(const SizedBox());s.scope.set('speed',10);
+    await tester.pump(const Duration(seconds:1));expect(s['count'],7);
+  });
+
+
   testWidgets('an offstage route does not run a second transport clock', (tester) async {
     final nodes=counter();nodes['other']={...nodes['other']!,'actions':[reaction('clock',[add('ticks')],extra:{'every':'100'})]};
     final s=await show(tester,nodes,variables:[v('count',0,VariableType.integer),v('ticks',0,VariableType.integer)]);

@@ -29,16 +29,33 @@ Future<bool> printPng(Uint8List png) async {
     }).toJS,
   );
   web.document.body!.appendChild(frame);
+  final previousFocus = web.document.activeElement;
+  Timer? cleanupTimer;
+  var finished = false;
+  void finish() {
+    if (finished) return;
+    finished = true;
+    cleanupTimer?.cancel();
+    final restoreFocus = web.document.activeElement == frame;
+    frame.remove();
+    if (restoreFocus) {
+      web.window.focus();
+      if (previousFocus != null && previousFocus.isA<web.HTMLElement>() && previousFocus.isConnected) {
+        (previousFocus as web.HTMLElement).focus();
+      }
+    }
+  }
   try {
     await loaded.future.timeout(const Duration(seconds: 15));
+    frame.contentWindow!.addEventListener('afterprint', ((web.Event _) => finish()).toJS);
+    // Some browsers return before the dialog closes. Keep the frame alive
+    // until afterprint, with a fallback for browsers that omit that event.
+    cleanupTimer = Timer(const Duration(minutes: 2), finish);
     frame.contentWindow!.focus();
     frame.contentWindow!.print();
-    // Some browsers return before the dialog closes. Retain the image while
-    // the dialog is active, then remove the isolated document.
-    Timer(const Duration(minutes: 2), () => frame.remove());
     return true;
   } catch (_) {
-    frame.remove();
+    finish();
     return false;
   }
 }
