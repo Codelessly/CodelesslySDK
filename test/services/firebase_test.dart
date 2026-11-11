@@ -194,6 +194,27 @@ void main() {
       auth.dispose();
     });
 
+    test('waits for the restored user instead of signing in a new anonymous one', () async {
+      // On the web the persisted user arrives just after start.
+      final restored = StreamController<User?>();
+      final fake = _FakeAuth(null, restored.stream);
+      final auth = FirebaseProjectAuth(
+        config: const ProjectAuthConfig(authToken: 'token'),
+        auth: fake,
+        client: granting(),
+        claimsPropagationTimeout: const Duration(milliseconds: 50),
+        claimsPollInterval: const Duration(milliseconds: 10),
+      );
+      final pending = auth.authenticate().then<Object?>((a) => a, onError: (Object e) => e);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      fake.currentUser = _FakeUser(() async => _FakeIdTokenResult({}));
+      restored.add(fake.currentUser);
+      await pending;
+      expect(fake.anonymousSignIns, 0, reason: 'the restored user is kept: a guest keeps their session');
+      await restored.close();
+      auth.dispose();
+    });
+
     test('a refused token fails', () async {
       final fake = _FakeAuth(null, const Stream.empty());
       final auth = projectAuth(fake);

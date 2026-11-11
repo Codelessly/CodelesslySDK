@@ -81,6 +81,26 @@ Things to know:
   in-memory ones.
 - **The signed-in user in layouts**: see [Data and variables](05-data-and-variables.md#the-signed-in-user).
 
+### Live data every screen shares
+
+A "Load cloud data" action streams a document or a query into a variable. By default the subscription is the
+screen's: it ends when the screen goes, and each screen that loads opens its own. With the action's **app** scope
+(`"scope": "app"` in the published JSON) the subscription is the `Codelessly` instance's:
+
+- the first load opens it and waits for the first value; a load of the same source (the same collection,
+  document or query, after expressions) from any screen or any `CodelesslyWidget` of the instance shares it and
+  opens nothing;
+- it writes `{status, isLoading, data, error}` into an **app variable** of that name (declared as a map if the
+  project has none), so every screen reads the same live value;
+- it lives until `codelessly.dispose()`, until a load for the same variable asks for another source (the old
+  subscription closes), or until it fails (the next load opens it again; a failure after the first value is
+  logged through `Services.analytics` and shows in the variable's `status` and `error`);
+- when the signed-in user changes, it is opened again, so a collection the data rules keep to each user's own
+  documents follows the new user.
+
+Older SDKs ignore the scope and load per screen. `codelessly.appData` holds the shared sources
+(`appData.close('cards')` closes one).
+
 ### Cloud data without a backend
 
 The default cloud database is in memory: cloud data actions and data-bound lists work, and the data is gone when

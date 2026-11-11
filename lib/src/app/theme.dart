@@ -31,3 +31,29 @@ ThemeData themeDataOf(api.ThemeTokens tokens, {Brightness brightness = Brightnes
     textButtonTheme: buttonShape == null ? null : TextButtonThemeData(style: ButtonStyle(shape: buttonShape)),
   );
 }
+
+/// The value of the `theme` name layouts read: [tokens] for a light or
+/// [dark] screen ([api.ThemeTokens.forBrightness]):
+///
+/// * the roles: `primary`, `onPrimary`, `surface`, `onSurface`, `error`,
+///   `success`, `warning` (colors as `#AARRGGBB` text), `fontFamily`,
+///   `titleFontFamily`, `radius`, `buttonRadius`, when the project has them;
+/// * `colors`: every named color by key (`${theme.colors.brandBlue}`);
+/// * `text`: every named text style by key, its values by name
+///   (`${theme.text.title.fontSize}`, `${theme.text.body.fontFamily}`);
+/// * `isDark` and `brightness` (`light` or `dark`);
+/// * `hasDark`: whether the project's theme has dark colors (else in dark
+///   mode the colors are the light ones, and a layout may pick its own).
+Map<String, Object?> themeValues(api.ThemeTokens tokens, {required bool dark}) {
+  final json = tokens.forBrightness(dark: dark).toJson()..remove('dark');
+  final colors = json.remove('colors');
+  final text = json.remove('textStyles');
+  return {
+    ...json,
+    'colors': colors ?? const <String, Object?>{},
+    'text': text ?? const <String, Object?>{},
+    'isDark': dark,
+    'brightness': dark ? 'dark' : 'light',
+    'hasDark': tokens.hasDark,
+  };
+}

@@ -159,12 +159,12 @@ Object? scriptArgument(String text, ActionRun run) {
 
 /// The variables a script reads in [scope] (and the scopes around it),
 /// computed ones read from [reader]; function variables aren't values.
-Map<String, Object?> scriptVariables(ValueScope? scope, ValueScope reader) {
+Map<String, Object?> scriptVariables(ValueScope? scope, ValueScope reader, {Set<String>? only}) {
   final out = <String, Object?>{};
   for (ValueScope? s = scope; s != null; s = s.parent) {
     if (s is! VariableScope) continue;
     for (final v in s.variables) {
-      if (v.isFunction || out.containsKey(v.name)) continue;
+      if (v.isFunction || out.containsKey(v.name) || (only != null && !only.contains(v.name))) continue;
       out[v.name] = s.valueOf(v.name, reader);
     }
   }
@@ -187,13 +187,16 @@ Map<String, Object?> scriptNodeValues(NodeTree? tree) {
 }
 
 /// A [ScriptHost] over a running chain.
-class RuntimeScriptHost implements ScriptHost {
+class RuntimeScriptHost implements NamedVariablesScriptHost {
   RuntimeScriptHost(this.run);
 
   final ActionRun run;
 
   @override
   Map<String, Object?> variables() => scriptVariables(run.context.scope, run.scope);
+
+  @override
+  Map<String, Object?> variablesNamed(Set<String> names) => scriptVariables(run.context.scope, run.scope, only: names);
 
   @override
   Map<String, Object?> nodeValues() => scriptNodeValues(run.host.tree);

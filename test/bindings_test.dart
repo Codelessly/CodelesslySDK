@@ -339,4 +339,45 @@ void main() {
     visit(tree.boxOf('list')!);
     expect(texts, ['#0 Zed', '#1 Yan']);
   });
+
+  testWidgets('a stacked list places each item at its own bound x and y', (tester) async {
+    final vars = VariableScope([
+      v('rooms', [
+        {'x': 40, 'y': 10},
+        {'x': 120, 'y': 70},
+        {'right': 5},
+      ], VariableType.list),
+    ]);
+    final (tree, view) = await show(
+      tester,
+      page({
+        'map': {
+          'type': 'listView',
+          'children': ['room'],
+          'layout': {'width': 300, 'height': 200},
+          'props': {'layout': 'stack', 'scrollable': false},
+          'bind': {'data': r'${rooms}'},
+        },
+        'room': {
+          'type': 'box',
+          'layout': {'width': 30, 'height': 20},
+          'bind': {
+            'layout.x': r'${= item.right == null ? object("start", item.x) : object("end", item.right)}',
+            'layout.y': r'${= item.y == null ? object("align", 1) : item.y}',
+          },
+        },
+      }, root: 'map'),
+      NodeBinder(scope: vars),
+      root: 'map',
+    );
+    final boxes = <RenderBox>[];
+    void visit(RenderObject o) {
+      if (o is NodeBox && o.id == 'room') boxes.add(o);
+      o.visitChildren(visit);
+    }
+
+    visit(tree.boxOf('map')!);
+    final at = [for (final b in boxes) b.localToGlobal(Offset.zero, ancestor: view)];
+    expect(at, const [Offset(40, 10), Offset(120, 70), Offset(265, 180)]);
+  });
 }

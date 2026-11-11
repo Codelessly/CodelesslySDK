@@ -299,7 +299,9 @@ void main() {
     await tester.pump();
     expect(s['count'], 1);
     expect(textOf(s.tree, 'label'), 'Count 1');
-    expect(NodeBox.debugApplyCounts.keys, ['label']);
+    // The label's text is set in place (NodeBox._retextOnly): no box
+    // re-applies, the label included.
+    expect(NodeBox.debugApplyCounts.keys, isEmpty);
     await tester.tapAt(s.center('button'));
     await tester.tapAt(s.center('other'));
     await tester.pump();
@@ -343,6 +345,33 @@ void main() {
     await tester.longPressAt(s.center('button'));
     await tester.pump();
     expect(s['count'], 111);
+  });
+
+  testWidgets('a double tap reports where it landed; a drag its step and position', (tester) async {
+    Json set(String name, String value) => {'type': 'setVariable', 'variable': name, 'value': value};
+    final s = await show(tester, counter(actions: [
+      reaction('doubleTap', [set('tapX', r'${result.x}'), set('tapY', r'${result.y}')]),
+      reaction('drag', [set('stepX', r'${result.deltaX}'), set('atX', r'${result.x}')]),
+    ]), variables: [
+      v('tapX', 0, VariableType.decimal), v('tapY', 0, VariableType.decimal),
+      v('stepX', 0, VariableType.decimal), v('atX', 0, VariableType.decimal),
+    ]);
+    final box = s.tree.boxOf('button')!;
+    final topLeft = box.localToGlobal(Offset.zero);
+    await tester.tapAt(topLeft + const Offset(7, 5));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(topLeft + const Offset(7, 5));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect((s['tapX'], s['tapY']), (7.0, 5.0));
+    final g = await tester.startGesture(topLeft + const Offset(4, 4));
+    for (var i = 0; i < 6; i++) {
+      await g.moveBy(const Offset(10, 0));
+      await tester.pump();
+    }
+    await g.up();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(s['stepX'], 10.0);
+    expect(s['atX'], 64.0);
   });
 
   testWidgets('hover: the cursor, and enter and exit', (tester) async {
@@ -440,6 +469,32 @@ void main() {
     expect(ui.log, ['navigate push details {n: 3}', 'modal sheet bottomSheet']);
   });
 
+  testWidgets('a popover opens by the node that opened it, above it, and answers its result', (tester) async {
+    late BuildContext appContext;
+    late NavigatorActionUi ui;
+    ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 40),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'picker', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'aboveStart', 'anchorGap': 8},
+        {'type': 'setVariable', 'variable': 'count', 'value': r'${result.n}'},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    final box = s.tree.boxOf('button')!;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // By the button, left edges aligned, 8 px off: no room above it at
+    // the top of the screen, so below.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('picker'))), Offset(rect.left, rect.bottom + 8));
+    Navigator.of(tester.element(find.byKey(const ValueKey('picker')))).pop({'n': 7});
+    await tester.pumpAndSettle();
+    expect(s['count'], 7);
+  });
+
   testWidgets('a modal anchored to its trigger or the pointer opens by it', (tester) async {
     late BuildContext appContext;
     final ui = NavigatorActionUi(
@@ -469,6 +524,55 @@ void main() {
     await tester.tapAt(at, buttons: kSecondaryButton);
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.byKey(const ValueKey('pointerMenu'))), Offset(at.dx, at.dy + 4));
+  });
+
+  testWidgets('a popover presentation opens by its trigger, not centered', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey(to), width: 120, height: 80),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'menu', 'presentation': 'popover', 'anchor': 'trigger', 'placement': 'belowStart', 'anchorGap': 6},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    final box = s.tree.boxOf('button')!;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    await tester.tapAt(rect.center);
+    await tester.pumpAndSettle();
+    // Below the button, its start edges aligned.
+    expect(tester.getTopLeft(find.byKey(const ValueKey('menu'))), Offset(rect.left, rect.bottom + 6));
+  });
+
+  testWidgets('a modal shown as a bottom sheet is as wide as the sheet; a dialog keeps its design width', (tester) async {
+    late BuildContext appContext;
+    final ui = NavigatorActionUi(
+      context: () => appContext,
+      modal: (to, params) => SizedBox(key: ValueKey('dialog $to'), width: 120, height: 80),
+      sheetModal: (to, params) => SizedBox(key: ValueKey('sheet $to'), width: double.infinity, height: 80),
+    );
+    final s = await show(tester, counter(actions: [
+      reaction('click', [
+        {'type': 'openModal', 'to': 'newCard', 'presentation': 'bottomSheet'},
+      ]),
+      reaction('secondaryClick', [
+        {'type': 'openModal', 'to': 'newCard'},
+      ]),
+    ]), variables: [v('count', 0, VariableType.integer)], ui: ui);
+    appContext = tester.element(find.byType(NodeView));
+    await tester.tapAt(s.center('button'));
+    await tester.pumpAndSettle();
+    // The sheet's own width (Material 3 caps it at 640; a phone is narrower).
+    expect(tester.getSize(find.byKey(const ValueKey('sheet newCard'))).width, 640);
+    // No tinted Material surface behind the screen's own.
+    expect(tester.widget<BottomSheet>(find.byType(BottomSheet)).backgroundColor, Colors.transparent);
+    Navigator.of(appContext).pop();
+    await tester.pumpAndSettle();
+    await tester.tapAt(s.center('button'), buttons: kSecondaryButton);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byKey(const ValueKey('dialog newCard'))).width, 120);
   });
 
   testWidgets('a popover flips above when there is no room below and stays on screen', (tester) async {
@@ -519,6 +623,158 @@ void main() {
     await tester.tapAt(top + const Offset(100, 75));
     await tester.pump();
     expect(s['picked'], 'c:2');
+  });
+
+  testWidgets('a running page view swipes, follows its bound page and reports the page shown', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'pages': {
+          'type': 'pageView',
+          'children': ['page'],
+          'layout': {'width': 300, 'height': 200},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}', 'props.initialPage': r'${lanePage}'},
+          'actions': [reaction('changed', [{'type': 'setVariable', 'variable': 'lanePage', 'value': r'${value}'}])],
+        },
+        'page': {
+          'type': 'text',
+          'layout': {'width': 300, 'height': 200},
+          'props': {'text': r'Lane ${item}'},
+        },
+      },
+      root: 'pages',
+      variables: [v('lanes', const ['todo', 'doing', 'done'], VariableType.list), v('lanePage', 0, VariableType.integer)],
+    );
+    // The texts of the pages on screen.
+    List<String> shown() {
+      final view = s.tree.boxOf('pages')!;
+      final area = view.localToGlobal(Offset.zero) & view.size;
+      final out = <String>[];
+      void visit(RenderObject o) {
+        if (o is RenderParagraph && o.hasSize && area.overlaps(o.localToGlobal(Offset.zero) & o.size)) {
+          out.add(o.text.toPlainText());
+        }
+        o.visitChildren(visit);
+      }
+
+      visit(view);
+      return out;
+    }
+
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane todo']);
+    // The app moves the page (a tab, a link).
+    s.scope.set('lanePage', 2);
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane done']);
+    // A swipe back shows the page before and sets the variable.
+    await tester.timedDrag(find.byType(PageView), const Offset(200, 0), const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+    expect(shown(), ['Lane doing']);
+    expect(s['lanePage'], 1);
+  });
+
+  testWidgets('a flexible list in a running page view hugs its items', (tester) async {
+    final s = await show(
+      tester,
+      {
+        'pages': {
+          'type': 'pageView',
+          'children': ['page'],
+          'layout': {'width': 300, 'height': 400},
+          'props': {'scrollDirection': 'horizontal'},
+          'bind': {'data': r'${lanes}'},
+        },
+        'page': {
+          'type': 'column',
+          'children': ['cards', 'add'],
+          'layout': {'width': {'fill': 300}, 'height': {'fill': 400}},
+        },
+        'cards': {
+          'type': 'listView',
+          'children': ['card'],
+          'layout': {'width': {'fill': 300}, 'height': {'flexible': 360}},
+          'bind': {'data': r'${item.cards}'},
+        },
+        'card': {'type': 'box', 'layout': {'width': 300, 'height': 40}},
+        'add': {'type': 'box', 'layout': {'width': 300, 'height': 30}},
+      },
+      root: 'pages',
+      variables: [
+        v('lanes', const [
+          {'id': 'todo', 'cards': [1, 2]},
+        ], VariableType.list),
+      ],
+    );
+    await tester.pumpAndSettle();
+    final view = s.tree.boxOf('pages')!;
+    RenderBox? add;
+    void find(RenderObject o) {
+      if (o is NodeBox && o.id == 'add' && o.hasSize) add ??= o;
+      o.visitChildren(find);
+    }
+
+    find(view);
+    expect(add, isNotNull);
+    final top = add!.localToGlobal(Offset.zero).dy - view.localToGlobal(Offset.zero).dy;
+    expect(top, 80, reason: 'under the two cards');
+  });
+
+  for (final width in [<String, Object>{'hug': 0}, 320])
+  testWidgets('a track segmented button selects by tap, raises the selection and hugs or shares its width ($width)',
+      (tester) async {
+    final s = await show(
+      tester,
+      {
+        'col': {'type': 'column', 'children': ['seg'], 'layout': {'width': 400, 'height': {'hug': 40}}},
+        'seg': {
+          'type': 'segmentedButton',
+          'layout': {'width': width, 'height': {'hug': 0}},
+          'props': {
+            'variant': 'track',
+            'segments': [
+              for (final x in ['All', 'Live', 'Draft', 'Closed']) {'value': x.toLowerCase(), 'label': x},
+            ],
+            'selectedBackgroundColor': '#FFFFFFFF',
+            'backgroundColor': '#FFE2E7EE',
+            'selectedShadows': [
+              {'type': 'dropShadow', 'color': '#14000000', 'offset': [0, 2], 'blurRadius': 8},
+            ],
+          },
+          'bind': {'props.selected': r'${= [filter]}'},
+          'actions': [
+            reaction('changed', [
+              {'type': 'setVariable', 'variable': 'filter', 'value': r'${result[0]}'},
+            ]),
+          ],
+        },
+      },
+      variables: [v('filter', 'all')],
+    );
+    expect(find.byType(SegmentedButton<String>), findsNothing);
+    // Hugging, every label fits on one line; a narrower share ellipsizes.
+    for (final label in ['All', 'Live', 'Draft', 'Closed']) {
+      final p = tester.renderObject<RenderParagraph>(find.text(label));
+      if (width is! int) expect(p.didExceedMaxLines, isFalse);
+      expect(p.maxLines, 1);
+    }
+    final widths = [for (final l in ['All', 'Closed']) tester.getSize(find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).width];
+    if (width is int) {
+      // A filling track shares its width: 320 less the 3px inset each side, by 4.
+      expect(widths, everyElement(closeTo((320 - 6) / 4, 0.5)));
+    } else {
+      expect(widths[0], lessThan(widths[1]));
+    }
+    BoxDecoration deco(String l) => tester.widget<AnimatedContainer>(
+        find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).decoration! as BoxDecoration;
+    expect(deco('All').boxShadow, hasLength(1));
+    expect(deco('Draft').boxShadow, isNull);
+    await tester.tap(find.text('Draft'));
+    await tester.pumpAndSettle();
+    expect(s['filter'], 'draft');
+    expect(deco('Draft').boxShadow, hasLength(1));
+    expect(deco('All').boxShadow, isNull);
   });
 
   testWidgets('an input reports changed and writes its bound variable', (tester) async {
