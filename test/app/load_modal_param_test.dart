@@ -127,4 +127,68 @@ void main() {
     expect(grip.top - shown.top, lessThan(16));
     expect(tester.takeException(), isNull);
   });
+
+  Future<String?> shownAs(WidgetTester tester, Size size) async {
+    setScreen(tester, size);
+    final home = PublishLayout.fromJson({
+      'schema': 2,
+      'id': 'home',
+      'roots': ['h'],
+      'nodes': {
+        'h': {
+          'type': 'canvas',
+          'layout': {'width': size.width, 'height': size.height},
+          'actions': [
+            {
+              'trigger': {'type': 'load'},
+              'actions': [
+                {'type': 'openModal', 'to': 'm', 'presentation': 'adaptive', 'showDragHandle': true},
+              ],
+            },
+          ],
+        },
+      },
+    });
+    final sheet = PublishLayout.fromJson({
+      'schema': 2,
+      'id': 'tutorial',
+      'roots': ['m'],
+      'nodes': {
+        'm': {
+          'type': 'canvas',
+          'layout': {'width': 600, 'height': {'hug': 400}},
+          'actions': [
+            {
+              'trigger': {'type': 'load'},
+              'actions': [
+                {'type': 'setVariable', 'variable': 'shownAs', 'value': r"${= screen.sheet ? 'sheet' : (screen.modal ? 'dialog' : 'screen')}"},
+              ],
+            },
+          ],
+        },
+      },
+    });
+    final app = Codelessly.fromBundle(
+      PublishBundle(
+        model: PublishModel(
+          projectId: 'p',
+          entryLayoutId: 'home',
+          layouts: {'home': PublishLayoutInfo.of(home), 'tutorial': PublishLayoutInfo.of(sheet)},
+          variables: {
+            's': {'id': 's', 'name': 'shownAs', 'type': 'text', 'value': ''},
+          },
+        ),
+        layouts: {'home': home, 'tutorial': sheet},
+      ),
+    );
+    addTearDown(app.dispose);
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app)));
+    await settle(tester);
+    return app.appVariables.read('shownAs') as String?;
+  }
+
+  testWidgets('a modal screen reads how it is shown: screen.sheet on a phone, a dialog on a wide screen', (tester) async {
+    expect(await shownAs(tester, const Size(390, 844)), 'sheet');
+    expect(await shownAs(tester, const Size(1000, 900)), 'dialog');
+  });
 }

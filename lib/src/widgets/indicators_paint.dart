@@ -692,12 +692,15 @@ class BarChartPainter extends NodePainter {
       color: p(BarChartProps.gridLabelColor) ?? p(BarChartProps.labelColor),
     )).copyWith(height: 1);
     final gridFontSize = p(BarChartProps.gridLabelFontSize) ?? fontSize;
-    final labelHeight = hasLabels ? fontSize * 1.2 + labelGap : 0.0;
+    final labelHeight = p(BarChartProps.labelAreaHeight) ?? (hasLabels ? fontSize * 1.2 + labelGap : 0.0);
     final showValues = p(BarChartProps.showValues);
-    // Room above the tallest bar for its value.
-    final valueRoom = showValues ? fontSize * 1.2 + 4 : 0.0;
+    final valueFontSize = p(BarChartProps.valueFontSize) ?? fontSize;
+    // Room above the top grid line (by default, the tallest bar's value).
+    final valueRoom = p(BarChartProps.plotTopInset) ?? (showValues ? valueFontSize * 1.2 + 4 : 0.0);
     final height = math.max(0.0, size.height - labelHeight - 1);
     final plotHeight = math.max(0.0, height - valueRoom);
+    // Bars scale to the plot less the headroom kept above a full bar.
+    final barScale = math.max(0.0, plotHeight - p(BarChartProps.barHeadroom));
     final width = math.max(0.0, size.width - right - plotLeft);
     canvas.save();
     canvas.translate(plotLeft, 0);
@@ -740,7 +743,7 @@ class BarChartPainter extends NodePainter {
             Paint()..color = p(BarChartProps.emptyColor).flutter);
         continue;
       }
-      final h = max <= 0 ? 0.0 : (plotHeight * (value / max).clamp(0.0, 1.0)).clamp(emptyHeight, height).toDouble();
+      final h = max <= 0 ? 0.0 : (barScale * (value / max).clamp(0.0, 1.0)).clamp(emptyHeight, height).toDouble();
       final baseColor = i < palette.length ? palette[i].flutter : color;
       final barColor = highlight == null || highlight < 0 || i == highlight
           ? baseColor
@@ -755,13 +758,14 @@ class BarChartPainter extends NodePainter {
           text: TextSpan(
             text: text,
             style: style.copyWith(
+                fontSize: valueFontSize,
                 fontWeight: FontWeight.w600,
                 color: i == highlight ? p(BarChartProps.highlightLabelColor).flutter : null),
           ),
           textDirection: TextDirection.ltr,
           maxLines: 1,
         )..layout();
-        tp.paint(canvas, Offset(left + (bar - tp.width) / 2, height - h - tp.height - 2));
+        tp.paint(canvas, Offset(left + (bar - tp.width) / 2, height - h - tp.height - p(BarChartProps.valueGap)));
         tp.dispose();
       }
     }
