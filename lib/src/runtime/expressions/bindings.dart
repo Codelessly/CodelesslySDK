@@ -470,7 +470,7 @@ class NodeBinder {
     if (root == null) return null;
     final existing = _provided[instance];
     if (existing != null) {
-      existing.update(index: index, item: item);
+      existing.update(index: index, item: item, deferNotifications: true);
       return existing;
     }
     return _provided[instance] = ItemScope(

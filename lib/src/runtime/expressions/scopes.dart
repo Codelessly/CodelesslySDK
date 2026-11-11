@@ -3,6 +3,9 @@
 // (`route`, `screen`, `storage`, `auth`...). Scopes nest; a name is read
 // from the nearest scope that declares it, and each name can be watched on
 // its own, so a change re-applies only what read it.
+import 'dart:async';
+
+import 'package:collection/collection.dart';
 import 'package:codelessly_api/codelessly_api.dart' show Breakpoints, Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
@@ -408,14 +411,39 @@ class ItemScope extends NamedScope {
   }
 
   /// Moves to [item] at [index] (the data changed).
-  void update({required int index, Object? item}) {
+  void update({required int index, Object? item, bool deferNotifications = false}) {
     final names = <String>[
-      if (!identical(item, _item) && item != _item) 'item',
+      if (!const DeepCollectionEquality().equals(item, _item)) 'item',
       if (index != _index) 'index',
     ];
     _index = index;
     _item = item;
-    if (names.isNotEmpty) changed(names);
+    if (names.isEmpty) return;
+    if (!deferNotifications) {
+      changed(names);
+      return;
+    }
+    final scheduled = _pendingNames.isNotEmpty;
+    _pendingNames.addAll(names);
+    if (!scheduled) {
+      scheduleMicrotask(() {
+        if (_pendingNames.isEmpty) return;
+        final pending = _pendingNames.toList();
+        _pendingNames.clear();
+        changed(pending);
+      });
+    }
+  }
+
+  // Providers update scopes while lazily building collection children during
+  // layout. Existing readers can belong to a pooled cell outside the active
+  // layout subtree; notify them only after that synchronous layout completes.
+  final Set<String> _pendingNames = {};
+
+  @override
+  void dispose() {
+    _pendingNames.clear();
+    super.dispose();
   }
 }
 
