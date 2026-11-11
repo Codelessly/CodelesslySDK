@@ -38,4 +38,38 @@ void main() {
     expect(s['cb'], 1);
     expect(s['c1'], 0, reason: 'the black key covers the white one under it');
   });
+
+  testWidgets('keys held by several fingers at once, each pressing its own note, recolour as they go down', (tester) async {
+    Json key(String id, int midi) => {
+          'type': 'column', 'children': ['${id}gap'],
+          'layout': {'width': {'fill': 100}, 'height': {'fill': 200}},
+          'decoration': {'fills': [{'color': '#FFF3E8CF'}]},
+          'bind': {'decoration.fills[0]': '\${= contains(held, $midi) ? \'#FFFFC768\' : \'#FFF3E8CF\'}'},
+          'actions': [
+            reaction('pointerDown', [{'type': 'setVariable', 'variable': 'held', 'value': '\${= append(held, $midi)}'}]),
+            reaction('pointerUp', [{'type': 'setVariable', 'variable': 'held', 'value': '\${= without(held, $midi)}'}]),
+          ],
+        };
+    final s = await show(tester, {
+      'col': {'type': 'row', 'children': ['k0', 'k1', 'k2'], 'layout': {'width': 300, 'height': 200}},
+      'k0': key('k0', 60), 'k0gap': {'type': 'spacer', 'layout': {'width': 1, 'height': {'fill': 10}}},
+      'k1': key('k1', 64), 'k1gap': {'type': 'spacer', 'layout': {'width': 1, 'height': {'fill': 10}}},
+      'k2': key('k2', 67), 'k2gap': {'type': 'spacer', 'layout': {'width': 1, 'height': {'fill': 10}}},
+    }, variables: [v('held', <int>[], VariableType.list)]);
+    final origin = tester.getTopLeft(find.byType(NodeView));
+    final a = await tester.startGesture(origin + const Offset(50, 100), pointer: 1);
+    await tester.pump();
+    final b = await tester.startGesture(origin + const Offset(150, 100), pointer: 2);
+    await tester.pump();
+    final c = await tester.startGesture(origin + const Offset(250, 100), pointer: 3);
+    await tester.pump();
+    expect(s['held'], [60, 64, 67]);
+    await b.up();
+    await tester.pump();
+    expect(s['held'], [60, 67]);
+    await a.up();
+    await c.up();
+    await tester.pump();
+    expect(s['held'], isEmpty);
+  });
 }
