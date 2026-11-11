@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart' show PublishFont;
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show listEquals, visibleForTesting;
+import 'package:flutter/foundation.dart' show kIsWeb, listEquals, visibleForTesting;
 import 'package:http/http.dart' as http;
 
 import '../render/convert.dart' show FontDemand;
@@ -159,6 +159,7 @@ class CodelesslyFonts {
   }) : _register = register ?? _registerWithEngine {
     // Families only bindings reach are fetched when first drawn (Google
     // Fonts by name; a project's uploaded fonts are in the publish).
+    if (fetcher is GlyphFontFetcher && kIsWeb) FontDemand.glyphFallback = true;
     if (fetcher is! NoFontFetcher) {
       FontDemand.handler ??= (family, weight, italic) => load([
             PublishFont(id: 'demand:$family/$weight/$italic', family: family, weight: weight, italic: italic),
@@ -261,7 +262,7 @@ class CodelesslyFonts {
       for (final e in byFamily.entries)
         Future.wait(e.value.map((f) => glyphs.fetchGlyphs(f, fresh))).then((files) async {
           final ok = [...files.nonNulls];
-          if (ok.isNotEmpty) await _register(e.key, ok);
+          if (ok.isNotEmpty) await _register(FontDemand.glyphFamily(e.key), ok);
         }).catchError((Object _) {}),
     ]));
   }
@@ -281,8 +282,8 @@ class CodelesslyFonts {
     final pending = <Future<bool>>[];
     for (final e in byFamily.entries) {
       final glyphs = fetcher;
-      final files = Future.wait([
-        ...e.value.map(fetcher.fetch),
+      final files = Future.wait(e.value.map(fetcher.fetch));
+      final extraFiles = Future.wait([
         if (extra.isNotEmpty && glyphs is GlyphFontFetcher)
           for (final f in e.value) glyphs.fetchGlyphs(f, extra),
       ]);
@@ -292,6 +293,10 @@ class CodelesslyFonts {
             if (ok.isEmpty) return false;
             await _register(e.key, ok);
             _registered.addAll(e.value);
+            // Characters beyond latin: a family of their own the styles
+            // fall back to (FontDemand.glyphFamily).
+            final more = [...(await extraFiles).nonNulls];
+            if (more.isNotEmpty) await _register(FontDemand.glyphFamily(e.key), more);
             return true;
           })
           .catchError((Object _) => false);
