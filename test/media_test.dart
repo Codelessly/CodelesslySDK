@@ -7,6 +7,8 @@ import 'package:codelessly_sdk/src/widgets/media_players.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 
 /// A 4×2 red PNG.
 const _png = 'data:image/png;base64,'
@@ -192,6 +194,32 @@ void main() {
         paints
           ..clipRect(rect: const Rect.fromLTWH(10, 0, 20, 20))
           ..something((m, args) => m == #drawPicture));
+  });
+
+  testWidgets('an SVG icon whose first fetch fails loads on a retry', (tester) async {
+    var calls = 0;
+    final svg = UriData.parse(_svg).contentAsBytes();
+    final client = MockClient((request) async {
+      calls++;
+      return calls == 1 ? http.Response('dropped', 502) : http.Response.bytes(svg, 200);
+    });
+    await http.runWithClient(() async {
+      final tree = await _show(tester, _doc({
+        'i': {
+          'type': 'icon',
+          'layout': {'width': 20, 'height': 20},
+          'props': {'icon': {'source': 'image', 'image': 'https://cdn.example.com/icons/flaky.svg'}, 'color': '#FF00FF00'},
+        },
+      }));
+      await _loadImages(tester);
+      expect(calls, 1);
+      expect(tree.boxOf('i')!, isNot(paints..something((m, args) => m == #drawPicture)));
+      // The retry after a second loads it.
+      await tester.pump(const Duration(milliseconds: 1100)); // the retry timer
+      await _loadImages(tester);
+      expect(calls, 2);
+      expect(tree.boxOf('i')!, paints..something((m, args) => m == #drawPicture));
+    }, () => client);
   });
 
   testWidgets('players are islands showing their design-time preview', (tester) async {
