@@ -77,4 +77,45 @@ void main() {
       expect(errors.map((e) => e.exceptionAsString()).where((m) => m.contains('overflowed')), isEmpty);
     });
   }
+
+  for (final start in ['none', 'iss']) {
+    testWidgets('desktop event, bound: ev from $start to the Leonids, the tip row follows', (tester) async {
+      tester.view.physicalSize = const Size(1440, 1800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final fx = jsonDecode(File('test/fixtures/event_desktop_bound.json').readAsStringSync()) as Map<String, Object?>;
+      final doc = fx['doc'] as Map<String, Object?>;
+      final vars = ValuesScope({
+        'pal': fx['pal'],
+        'screen': {...screenValues(1360, 800), 'backdrop': false},
+        'ev': start == 'iss' ? fx['iss'] : null,
+        'favIds': const <Object?>[],
+        'locked': false,
+        'loadState': 'ready',
+      });
+      addTearDown(vars.dispose);
+      final tree = NodeTree(DocumentSource(LayoutDocument.fromJson(doc)), binder: NodeBinder(scope: vars));
+      addTearDown(tree.dispose);
+      final errors = <FlutterErrorDetails>[];
+      final previous = FlutterError.onError;
+      FlutterError.onError = errors.add;
+      await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(width: 1360, height: 800, child: NodeView(tree: tree, rootId: (doc['roots'] as List).first as String)),
+        ),
+      ));
+      vars.set('ev', fx['leonids']);
+      for (var i = 0; i < 4; i++) {
+        await tester.pump();
+      }
+      FlutterError.onError = previous;
+      expect(errors.map((e) => e.exceptionAsString()).where((m) => m.contains('overflowed')), isEmpty);
+      final view = tester.renderObject(find.byType(NodeView));
+      final row = tree.boxOf('ho204jxrko-6w')!.rectIn(view)!;
+      final tip = tree.boxOf('ho204jxrko-72')!.rectIn(view)!;
+      expect(tip.height, greaterThan(30), reason: 'two lines');
+      expect(tip.bottom, lessThanOrEqualTo(row.bottom), reason: 'the tip row holds its text');
+    });
+  }
 }
