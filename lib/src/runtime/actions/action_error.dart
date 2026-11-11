@@ -33,8 +33,9 @@ String errorCodeOf(Object error) {
 }
 
 /// Stable, JSON-only event for the canvas's actionError reaction:
-/// `{error: {type, code, message, action, nodeId}}`.
-Json actionErrorEvent(Object error, {String? action}) {
+/// `{error: {type, code, message, action, nodeId, retryable}}`;
+/// [retryable]: the failed chain can run again (`retryFailed`).
+Json actionErrorEvent(Object error, {String? action, bool retryable = false}) {
   String? nodeId;
   while (error is ActionFailed) {
     action = error.action;
@@ -47,5 +48,6 @@ Json actionErrorEvent(Object error, {String? action}) {
     'message': '$error',
     'action': action ?? '',
     'nodeId': nodeId ?? '',
+    'retryable': retryable,
   })});
 }
