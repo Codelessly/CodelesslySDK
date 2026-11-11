@@ -59,6 +59,20 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
           ..configure(b is NodeBox ? b : null, gesture),
       );
     }
+  } else if (n.type != 'canvas') {
+    // The design canvas draws a pose given by data (a sticker or a caption
+    // placed by its record: `transformGesture.x` bound), as a running app
+    // starts at it: translate, then rotate, then scale, about the center.
+    if (be.effectiveTransformGesture case final api.TransformGesture g
+        when g.x != null || g.y != null || g.scale != null || g.rotation != null || g.scaleX != null || g.scaleY != null) {
+      final s = g.scale ?? 1;
+      chain.add(
+        b.obtain<RenderPose>('transformPose', RenderPose.new)
+          ..transform = (Matrix4.translationValues(g.x ?? 0, g.y ?? 0, 0)
+            ..rotateZ((g.rotation ?? 0) * math.pi / 180)
+            ..scaleByDouble(s * (g.scaleX ?? 1), s * (g.scaleY ?? 1), 1, 1)),
+      );
+    }
   }
   if (be.motion case final api.Motion motion) {
     chain.add(
