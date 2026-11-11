@@ -150,16 +150,13 @@ class Codelessly extends ChangeNotifier {
   /// each screen's own scope, so a value one screen sets the next one reads.
   /// Declared from the publish model's `variables` (and a publish's
   /// `app_variables` scope, [declareAppVariables]).
-  late final VariableScope appVariables = VariableScope(const [], parent: _auth);
+  late final VariableScope appVariables = VariableScope(const [], parent: _storage);
 
   /// App user accounts, Supabase-style: sign up, sign in, sign out, the current
   /// user and session, and their changes ([Services.auth]; signed out without one).
   late final CodelesslyAuth auth = CodelesslyAuth(services is Services
       ? (services as Services).auth
       : const SignedOutAuthService());
-
-  /// `auth` in expressions: the signed-in user ([authValue]), live.
-  late final _AuthScope _auth = _AuthScope(services, parent: _storage);
 
   /// `storage`: what the app keeps on the device ([Services.storage], the
   /// `setStorage` action's), read live as `storage.<key>`.
@@ -440,7 +437,6 @@ class Codelessly extends ChangeNotifier {
       scope.dispose();
     }
     appVariables.dispose();
-    _auth.dispose();
     _storage.dispose();
     _speech.dispose();
     _serviceValues.dispose();
@@ -454,11 +450,16 @@ class Codelessly extends ChangeNotifier {
 
 /// Live account/profile and verified entitlement values, owned by the app.
 /// No app variables or persisted preview fixtures are declared for services.
+/// Its one [Services.watchAuth] subscription drives both `auth` in
+/// expressions ([authValue]: status, isAnonymous, role...) and the paywall
+/// account scope.
 class _ServiceValuesScope extends ValuesScope {
   _ServiceValuesScope(CodelesslyServices services, {ValueScope? parent})
       : _services = services is Services ? services : null,
         super({
-          'auth': authValue(services is Services ? services.auth.currentUser : null),
+          'auth': services is Services
+              ? authValue(services.auth.currentUser, loading: _restoring(services.auth))
+              : authValue(null),
           'entitlements': const <String, Object?>{},
         }, parent) {
     final s = _services;
@@ -486,6 +487,10 @@ class _ServiceValuesScope extends ValuesScope {
     s.paywalls?.entitlements.addListener(_entitlementsChanged);
     _entitlementsChanged();
   }
+
+  /// Whether the last run's session is still being restored: `auth.status`
+  /// reads `loading` until the auth stream's first value.
+  static bool _restoring(AuthService auth) => auth is CodelesslyAuthService && !auth.restored;
 
   final Services? _services;
   StreamSubscription<Map<String, Object?>>? _auth;
@@ -515,7 +520,7 @@ class _ServiceValuesScope extends ValuesScope {
     final user = service.auth.currentUser;
     final profile = _matchingProfile(this['auth'], user);
     _scopeAccount(user?.uid);
-    set('auth', authValue(user, profile: profile));
+    set('auth', authValue(user, profile: profile, loading: _restoring(service.auth)));
   }
 
   void _scopeAccount(String? uid, {bool reset = false}) {
@@ -582,40 +587,6 @@ class _SpeechScope extends NamedScope {
   @override
   void dispose() {
     _speech?.removeListener(_changed);
-    super.dispose();
-  }
-}
-
-/// `auth` in expressions: [Services.watchAuth] (the user, their profile and
-/// the session's status), followed from the first read.
-class _AuthScope extends NamedScope {
-  _AuthScope(CodelesslyServices services, {super.parent}) : _services = services is Services ? services : null;
-
-  final Services? _services;
-  StreamSubscription<Map<String, Object?>>? _subscription;
-  Map<String, Object?>? _value;
-
-  @override
-  bool declares(String name) => name == 'auth';
-
-  @override
-  Object? valueOf(String name, ValueScope reader) {
-    final services = _services;
-    if (services == null) return authValue(null);
-    _subscription ??= services.watchAuth().listen((value) {
-      _value = value;
-      changed(const ['auth']);
-    }, onError: (Object error, StackTrace stack) {
-      services.analytics.logError(error, stackTrace: stack, message: 'Could not follow the user', type: 'auth');
-    });
-    final auth = services.auth;
-    return _value ??
-        authValue(auth.currentUser, loading: auth is CodelesslyAuthService && !auth.restored);
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
     super.dispose();
   }
 }
