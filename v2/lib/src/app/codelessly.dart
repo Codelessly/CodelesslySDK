@@ -346,6 +346,9 @@ class _StorageScope extends NamedScope {
 /// under, in each layout's `variables`.
 const String kV1AppVariablesScope = 'app_variables';
 
+/// The scope of a page's shared variables in a published layout.
+const String kPageVariablesScope = 'page_variables';
+
 /// The storage bucket Codelessly publishes to.
 const String kCodelesslyStorageBucket = 'codeless-app.appspot.com';
 

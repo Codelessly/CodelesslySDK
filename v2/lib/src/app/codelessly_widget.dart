@@ -619,7 +619,9 @@ class _LayoutViewState extends State<_LayoutView> {
     final storage = services is Services ? services.storage : null;
     // A converted v1 publish keeps the app's variables with each layout.
     _codelessly.declareAppVariables(widget.layout.variablesOf(kV1AppVariablesScope));
-    for (final v in widget.layout.variablesOf(canvasId)) {
+    // The page's shared variables (published with each of its layouts), then
+    // the canvas's own: a canvas variable of the same name wins.
+    for (final v in [...widget.layout.variablesOf(canvasId), ...widget.layout.variablesOf(kPageVariablesScope)]) {
       if (scope.declares(v.name)) continue;
       scope.define(v);
       // A persisted variable starts from what it was last time, and keeps
