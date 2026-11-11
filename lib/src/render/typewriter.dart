@@ -114,9 +114,46 @@ class RenderTypewriter extends RenderProxyBox {
     super.dispose();
   }
 
+  /// The size a growing typewriter last reported.
+  Size? _grownSize;
+
   @override
   void performLayout() {
     super.performLayout();
+    _growToTypedLines();
+    // Its size changed (typed another line, or stopped typing): an ancestor
+    // that measured it earlier in this pass (before a binding turned typing
+    // off, say) lays out again next frame with what it is now.
+    if ((_tw?.grow ?? false) && size != _grownSize) {
+      final first = _grownSize == null;
+      _grownSize = size;
+      if (!first) SchedulerBinding.instance.addPostFrameCallback((_) => _relayoutAncestors());
+    }
+  }
+
+  /// Lays out again the ancestors that sized themselves around this box.
+  /// Those its old height left with a tight height (a hugging column that
+  /// measured it at 0 gives its content exactly 0) are relayout boundaries
+  /// that stop the change: past them, the first ancestor free to change
+  /// height lays out again, and the change spreads from there as usual.
+  void _relayoutAncestors() {
+    if (!attached) return;
+    markNeedsLayout();
+    RenderObject? o = parent;
+    var depth = 0;
+    while (o is RenderBox && depth++ < 64 && !(o.hasSize && o.constraints.hasTightHeight)) {
+      o = o.parent;
+    }
+    // Only a tight height now too short for this box is a stale measure (a
+    // box sized on purpose clips or scrolls its content).
+    if (o is! RenderBox || depth >= 64 || o.size.height >= size.height) return;
+    while (o is RenderBox && o.hasSize && o.constraints.hasTightHeight) {
+      o = o.parent;
+    }
+    o?.markNeedsLayout();
+  }
+
+  void _growToTypedLines() {
     final tw = _tw;
     final p = _paragraph;
     if (tw == null || !tw.grow || !typing || p == null || !p.hasSize) return;
