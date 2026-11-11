@@ -730,8 +730,13 @@ Map<String, Object?> screenWithMinWidths(Map<String, Object?> screen, Map<String
   if (minWidths.isEmpty) return screen;
   final w = screen['width'], h = screen['height'];
   if (w is! num || h is! num) return screen;
-  return screenValues(w.toDouble(), h.toDouble(),
-      dark: screen['isDark'] == true, breakpoints: breakpointsOfScreen(screen), minWidths: minWidths);
+  // The breakpoint values again for this layout's own widths; the rest of
+  // the screen (screen.modal, screen.sheet) as it was.
+  return {
+    ...screen,
+    ...screenValues(w.toDouble(), h.toDouble(),
+        dark: screen['isDark'] == true, breakpoints: breakpointsOfScreen(screen), minWidths: minWidths),
+  };
 }
 
 extension<T> on T {

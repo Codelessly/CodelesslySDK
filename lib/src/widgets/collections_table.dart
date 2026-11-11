@@ -9,7 +9,8 @@
 // rest (collections.dart).
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' show Node, TableColumn, TableViewProps, TriggerType;
+import 'package:codelessly_api/codelessly_api.dart' as api show AxisSize, Decoration, EdgeInsets;
+import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit, TableColumn, TableViewProps, TriggerType;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
@@ -25,12 +26,43 @@ List<Object?> tableRowsOf(ListRuntime r) {
   return List<Object?>.generate(math.max(0, r.node.prop(TableViewProps.rowCount) ?? 0), (i) => i);
 }
 
+/// Whether table [n] draws a fill, stroke, shadow or rounded corners: the
+/// node's shell around the table (a bordered, rounded week grid).
+bool tableDecorated(Node n) {
+  final d = n.decoration;
+  return d.fills.any((f) => f.visible) ||
+      d.strokes.any((s) => s.visible) ||
+      d.effects.any((e) => e.visible) ||
+      !d.radius.isZero;
+}
+
 /// A running table view [n]: its fit box, then a [TableView] island.
-void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
+void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) => _tableIsland(b, n, chain);
+
+void _tableIsland(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, Size(n.layout.width.value, n.layout.height.value)));
   final runtime = ListRuntime(b, n);
   final rows = tableRowsOf(runtime);
   chain.add(b.island('table', (context) => RuntimeTableView(runtime: runtime, rows: rows)));
+}
+
+/// [n] as the table inside its shell: filling the padded box, without the
+/// shell's padding, margin or decoration.
+Node tableContent(Node n) {
+  final l = n.layout;
+  final p = l.padding;
+  api.AxisSize inner(api.AxisSize s, double pad) => s.fit == SizeFit.hug
+      ? api.AxisSize.hug(math.max(0, s.value - pad))
+      : api.AxisSize.fill(math.max(0, s.value - pad));
+  return n.copyWith(
+    layout: l.copyWith(
+      width: inner(l.width, p.horizontal),
+      height: inner(l.height, p.vertical),
+      padding: api.EdgeInsets.zero,
+      margin: api.EdgeInsets.zero,
+    ),
+    decoration: api.Decoration.none,
+  );
 }
 
 /// The widths of [columns] in [available] pixels: their own (or

@@ -313,7 +313,7 @@ void dragAndDropLayers(NodeBox box, Node n, List<RenderBox> chain) {
 /// The slot a list opens where a drag over its drop target would land.
 @immutable
 class DropSlotSpec {
-  const DropSlotSpec({required this.before, required this.size, this.slotNodeId = '', this.ownSize = false});
+  const DropSlotSpec({required this.before, required this.size, this.slotNodeId = '', this.ownSize = false, this.inGap = false});
 
   /// The raw index of the item the slot goes before (the item count at the
   /// end).
@@ -331,16 +331,21 @@ class DropSlotSpec {
   /// rather than the dragged node's ([api.DropSlotSize.node]).
   final bool ownSize;
 
+  /// Whether [slotNodeId] is drawn in the gap before the item, at its own
+  /// size, taking no room ([api.DropSlotSize.inGap]).
+  final bool inGap;
+
   @override
   bool operator ==(Object other) =>
       other is DropSlotSpec &&
       other.before == before &&
       other.size == size &&
       other.slotNodeId == slotNodeId &&
-      other.ownSize == ownSize;
+      other.ownSize == ownSize &&
+      other.inGap == inGap;
 
   @override
-  int get hashCode => Object.hash(before, size, slotNodeId, ownSize);
+  int get hashCode => Object.hash(before, size, slotNodeId, ownSize, inGap);
 }
 
 /// The slot list [listNodeId] of [tree] opens now, while a drag is over its
@@ -365,7 +370,8 @@ DropSlotSpec? dropSlotOf(NodeTree tree, String listNodeId, {Object? instance}) {
     before: before,
     size: session.size,
     slotNodeId: hasNode ? m.slotNodeId : '',
-    ownSize: hasNode && m.slotSize == api.DropSlotSize.node,
+    ownSize: hasNode && m.slotSize != api.DropSlotSize.dragged,
+    inGap: hasNode && m.slotSize == api.DropSlotSize.inGap,
   );
 }
 
@@ -1003,7 +1009,15 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     dnd.start(session);
     _fire(api.TriggerType.dragStart.name, session.toMap());
     drag.showFeedback();
-    drag._moved();
+    // Starting re-applies what reads the drag (a column dimmed while its
+    // grip drags it adds a layer): look for targets once that is laid out,
+    // not in the stale tree, whose hit test would throw and drop the
+    // gesture.
+    drag._placeFeedback();
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!drag._finished) drag._moved();
+    }, debugLabel: 'drag start targets');
+    SchedulerBinding.instance.ensureVisualUpdate();
     return drag;
   }
 
