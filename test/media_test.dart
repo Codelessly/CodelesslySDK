@@ -1,3 +1,7 @@
+import 'package:codelessly_sdk/src/render/paint/image_fill.dart';
+import 'package:http/testing.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 // Painting and islands of the media group: image fills, SVG paths (the
 // `path` widget and a box's path), icons, and the players' islands.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -59,6 +63,7 @@ List<T> _find<T extends RenderObject>(RenderObject root) {
 String _text(RenderObject root) => _find<RenderParagraph>(root).map((p) => p.text.toPlainText()).join();
 
 void main() {
+  svgCacheTests();
   test('symbol, material and cupertino icon URLs', () {
     expect(IconSources.urlOf({'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'Home', 'style': 'rounded', 'version': 16}),
         'https://fonts.gstatic.com/s/i/materialiconsround/home/v${materialIconVersions['home']}/24px.svg');
@@ -256,5 +261,41 @@ void main() {
     expect(isRemoteMediaUrl('https://192.168.1.2/a.mp4', ['.mp4']), isFalse);
     expect(isRemoteMediaUrl('https://172.20.0.1/a.mp3', ['.mp3']), isFalse);
     expect(isRemoteMediaUrl('https://cdn.example.com/a.mov', ['.mp4']), isFalse);
+  });
+}
+
+class _IconBox extends LeafRenderObjectWidget {
+  const _IconBox(this.icon);
+  final Map<String, Object?> icon;
+  @override
+  RenderIconGlyph createRenderObject(BuildContext context) => RenderIconGlyph()..icon = icon;
+  @override
+  void updateRenderObject(BuildContext context, RenderIconGlyph r) => r.icon = icon;
+}
+
+void svgCacheTests() {
+  testWidgets('an icon swapped back shows from the SVG cache, not a new fetch', (tester) async {
+    LoadedImage.debugClearSvgCache();
+    final fetched = <String>[];
+    final client = MockClient((r) async {
+      fetched.add(r.url.pathSegments[3]);
+      return http.Response(utf8.decode(base64.decode(_svg.split(',').last)), 200);
+    });
+    const lock = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'lock', 'style': 'rounded'};
+    const open = {'source': 'icon', 'type': 'MATERIAL_ICON', 'name': 'lock_open', 'style': 'rounded'};
+    Future<void> show(Map<String, Object?> icon) async {
+      await http.runWithClient(() async {
+        await tester.pumpWidget(Center(child: SizedBox.square(dimension: 24, child: _IconBox(icon))));
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pump();
+      }, () => client);
+    }
+
+    await show(lock);
+    await show(open);
+    await show(lock);
+    await show(open);
+    expect(fetched, ['lock', 'lock_open']);
+    expect(LoadedImage.debugSvgCached(IconSources.urlOf(lock)!), isTrue);
   });
 }
