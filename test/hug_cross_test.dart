@@ -64,4 +64,35 @@ void main() {
     expect(await _rects(tester, tree), fresh);
     expect(fresh['r']!.height, 12);
   });
+
+  testWidgets('a hugging stretch row follows a child changed while the tree lays out (a design board edit)', (tester) async {
+    final fresh = await _rects(tester, await _show(tester, DocumentSource(_doc(tall: true))));
+    final source = DocumentSource(_doc(tall: false));
+    final tree = NodeTree(source);
+    addTearDown(tree.dispose);
+    var change = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Align(alignment: Alignment.topLeft, child: NodeView(key: UniqueKey(), tree: tree, rootId: 'r')),
+        // Laid out after the node view: changes the document mid-layout,
+        // as the design board does when a capture's values change a screen.
+        LayoutBuilder(builder: (context, _) {
+          if (change) {
+            change = false;
+            source.document = _doc(tall: true);
+          }
+          return const SizedBox.shrink();
+        }),
+      ]),
+    ));
+    expect((await _rects(tester, tree))['r']!.height, 30);
+    change = true;
+    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
+    await tester.pump();
+    await tester.pump();
+    final view = tester.renderObject(find.byType(NodeView));
+    final got = {for (final id in ['r', 'c', 'b', 'side']) id: tree.boxOf(id)!.rectIn(view)!};
+    expect(got['r']!.height, fresh['r']!.height, reason: 'the row measured its child again');
+    expect(got, fresh);
+  });
 }
