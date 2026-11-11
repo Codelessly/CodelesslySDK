@@ -83,8 +83,12 @@ class TreeReactions implements NodeInteractions {
     }
     final viewport = types.contains(TriggerType.enterViewport) || types.contains(TriggerType.exitViewport);
     if (pointer.isEmpty && !viewport) return;
+    final g = n.behaviors.effectiveTransformGesture;
     chain.add(box.obtain<RenderReactions>('reactions', RenderReactions.new)
       ..triggers = pointer
+      // A plain drag is one finger: on a node that also pinches, a second
+      // finger hands the gesture to the pinch.
+      ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
       ..holdMs = n.actions.firstWhere((r) => r.trigger.type == TriggerType.hold, orElse: () => n.actions.first).trigger.holdMs
       ..visibleFraction = viewport ? n.actions.firstWhere((r) => _isViewport(r.trigger.type)).trigger.visibleFraction : null
       ..onTrigger = (type, event) => fire(box, type.name, event: event));
@@ -390,6 +394,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   int holdMs = 1200;
 
+  /// A second finger cancels a plain drag (and its swipes), so a pinch on
+  /// this node (a transform gesture's zoom, pinch reactions) wins.
+  bool yieldsToPinch = false;
+  final Set<int> _down = {};
+
   /// The visible share (0–1) that counts as in view; null: not watched.
   double? get visibleFraction => _visibleFraction;
   double? _visibleFraction;
@@ -517,7 +526,22 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
+    if (event is PointerUpEvent || event is PointerCancelEvent) _down.remove(event.pointer);
     if (event is PointerDownEvent) {
+      _down.add(event.pointer);
+      if (yieldsToPinch && _down.length > 1 && _pan != null) {
+        // Disposing rejects its pointers in the arena; it is made again on
+        // the next first finger.
+        _pan!.dispose();
+        _pan = null;
+      }
+      if (yieldsToPinch && _down.length > 1) {
+        _tap?.addPointer(event);
+        _doubleTap?.addPointer(event);
+        _longPress?.addPointer(event);
+        if (_has(TriggerType.pointerDown)) _fire(TriggerType.pointerDown, _pointerScope(event));
+        return;
+      }
       _ensureRecognizers();
       _tap?.addPointer(event);
       _doubleTap?.addPointer(event);
