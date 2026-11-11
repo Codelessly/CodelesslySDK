@@ -629,6 +629,16 @@ const double _restFillExtent = 1600;
 /// own scope, `${item.value}`... as at runtime) when a binder shows the
 /// canvas's values, else [TableViewProps.rowCount].
 void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
+  // A decorated table: the node's shell (fill, border, rounded corners,
+  // clip, padding) around the table, at rest and running.
+  if (tableDecorated(n)) {
+    b.shell(n, chain, content: (inner) => _tableViewInner(b, tableContent(n), inner));
+    return;
+  }
+  _tableViewInner(b, n, chain);
+}
+
+void _tableViewInner(NodeBuilder b, Node n, List<RenderBox> chain) {
   if (b.tree.animates) return tableViewRuntimeRecipe(b, n, chain);
   final design = Size(n.layout.width.value, n.layout.height.value);
   chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, design));
