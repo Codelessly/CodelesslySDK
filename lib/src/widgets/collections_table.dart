@@ -76,9 +76,18 @@ class RuntimeTableView extends StatelessWidget {
           pinnedColumnCount: headerColumn && n.prop(TableViewProps.pinHeaderColumn) ? 1 : 0,
           columnBuilder: (index) {
             final header = headerColumn && index == 0;
-            final double width = header
+            double widthOf(int i) => headerColumn && i == 0
                 ? n.prop(TableViewProps.rowHeaderWidth)
-                : columns[index - columnOffset].width ?? n.prop(TableViewProps.columnWidth);
+                : columns[i - columnOffset].width ?? n.prop(TableViewProps.columnWidth);
+            var width = widthOf(index);
+            final count = columns.length + columnOffset;
+            if (n.prop(TableViewProps.stretchLastColumn) && index == count - 1 && constraints.hasBoundedWidth) {
+              var others = 0.0;
+              for (var i = 0; i < count - 1; i++) {
+                others += widthOf(i);
+              }
+              width = math.max(width, constraints.maxWidth - others);
+            }
             return TableSpan(
               extent: FixedTableSpanExtent(width),
               foregroundDecoration: TableSpanDecoration(border: TableSpanBorder(trailing: line)),

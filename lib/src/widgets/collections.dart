@@ -657,7 +657,8 @@ void _tableView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final lineColor = n.prop(TableViewProps.gridLineColor), lineWidth = n.prop(TableViewProps.gridLineWidth);
   final view = b.obtain<RenderTableItems>('table', RenderTableItems.new)
     ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
-    ..columnWidths = columnWidths
+    ..givenColumnWidths = columnWidths
+    ..stretchLastColumn = n.prop(TableViewProps.stretchLastColumn)
     ..rowHeights = rowHeights
     ..cells = cells
     ..headerRow = headerRow
