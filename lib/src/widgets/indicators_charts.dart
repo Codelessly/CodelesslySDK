@@ -11,6 +11,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         ChartProps,
         ChartSeries,
         ChartSeriesKind,
+        ChartStackGapEdge,
         ChartType,
         ChartYLabelAlign,
         LineChartProps,
@@ -228,7 +229,7 @@ class ChartSeriesPainter extends NodePainter {
   /// Paints [text] centred vertically on [anchor] (or, with [xAxisBottom],
   /// as an x label below a plot ending there: see [_xLabelY]).
   void _label(Canvas canvas, String text, Offset anchor,
-      {TextAlign align = TextAlign.center, TextStyle? style, double? xAxisBottom}) {
+      {TextAlign align = TextAlign.center, TextStyle? style, double? xAxisBottom, double? bottomAt}) {
     final tp = TextPainter(text: TextSpan(text: text, style: style ?? _axisStyle), textDirection: TextDirection.ltr)
       ..layout();
     final dx = switch (align) {
@@ -236,7 +237,11 @@ class ChartSeriesPainter extends NodePainter {
       TextAlign.left || TextAlign.start => 0.0,
       _ => -tp.width / 2,
     };
-    final cy = xAxisBottom == null ? anchor.dy : _xLabelY(xAxisBottom, tp.height);
+    final cy = bottomAt != null
+        ? bottomAt - tp.height / 2
+        : xAxisBottom == null
+            ? anchor.dy
+            : _xLabelY(xAxisBottom, tp.height);
     tp.paint(canvas, Offset(anchor.dx + dx, cy - tp.height / 2));
     tp.dispose();
   }
@@ -322,11 +327,17 @@ class ChartSeriesPainter extends NodePainter {
       final grid = Paint()
         ..color = gridColor
         ..strokeWidth = 1;
+      final baselineColor = p(ChartProps.baselineColor)?.flutter;
+      final baseline = baselineColor == null
+          ? grid
+          : (Paint()
+            ..color = baselineColor
+            ..strokeWidth = 1);
       final yFamily = p(ChartProps.yAxisFontFamily);
       for (var k = 0; k <= gridLines; k++) {
         final v = lo + (hi - lo) * k / gridLines;
         final gy = _lineY(y(v), 1, bottom: k == 0);
-        canvas.drawLine(Offset(plot.left, gy), Offset(plot.right, gy), grid);
+        canvas.drawLine(Offset(plot.left, gy), Offset(plot.right, gy), k == 0 ? baseline : grid);
         if (p(ChartProps.showYAxis)) {
           final start = p(ChartProps.yLabelAlign) == ChartYLabelAlign.start;
           _label(
@@ -378,6 +389,7 @@ class ChartSeriesPainter extends NodePainter {
     final groupW = groups.isEmpty ? 0.0 : (total - barGap * (groups.length - 1)) / groups.length;
     final firstTick = series.where((s) => s.kind == ChartSeriesKind.tick).firstOrNull;
     final barRadius = p(ChartProps.barRadius);
+    final gapOnTop = p(ChartProps.stackGapEdge) == ChartStackGapEdge.top;
     if (!isLine) {
       for (var i = 0; i < n; i++) {
         final item = data[i];
@@ -403,24 +415,35 @@ class ChartSeriesPainter extends NodePainter {
         for (var g = 0; g < groups.length; g++) {
           double base = 0;
           final left = left0 + g * (groupW + barGap);
+          final segments = <(Rect, Color)>[];
           for (final s in groups[g]) {
             final v = chartNumber(item, s.field);
             if (v == null || v == 0) continue;
             final colorField = s.colorField;
             final full = chartColor(colorField == null ? null : item[colorField]) ?? s.color.flutter;
             final color = dim && i != selected ? full.withValues(alpha: full.a * 0.45) : full;
-            final r = Rect.fromLTRB(left, y(base + v), left + groupW, y(base) - (base > 0 ? stackGap : 0));
-            final top = s == groups[g].last;
-            canvas.drawRRect(
-              RRect.fromRectAndCorners(
-                r,
-                topLeft: Radius.circular(top ? barRadius : 0),
-                topRight: Radius.circular(top ? barRadius : 0),
-              ),
-              Paint()..color = color,
-            );
+            final r = gapOnTop
+                ? Rect.fromLTRB(left, y(base + v) + stackGap, left + groupW, y(base))
+                : Rect.fromLTRB(left, y(base + v), left + groupW, y(base) - (base > 0 ? stackGap : 0));
+            segments.add((r, color));
             base += v;
           }
+          if (segments.isEmpty) continue;
+          // The whole bar's top corners are round (its top segment's, and
+          // the one below where that is thinner than the radius), whichever
+          // series are empty.
+          canvas.save();
+          if (barRadius > 0) {
+            canvas.clipRRect(RRect.fromRectAndCorners(
+              Rect.fromLTRB(left, y(base), left + groupW, y(0)),
+              topLeft: Radius.circular(barRadius),
+              topRight: Radius.circular(barRadius),
+            ));
+          }
+          for (final (r, color) in segments) {
+            canvas.drawRect(r, Paint()..color = color);
+          }
+          canvas.restore();
         }
       }
     }
@@ -430,6 +453,7 @@ class ChartSeriesPainter extends NodePainter {
       final color = p(ChartProps.totalsColor)?.flutter ?? p(ChartProps.axisLabelColor).flutter;
       final selectedColor = p(ChartProps.totalsSelectedColor)?.flutter ?? color;
       final base = _labelStyle(p(ChartProps.axisFontFamily)).copyWith(fontWeight: FontWeight.w700);
+      final totalsGap = p(ChartProps.totalsGap);
       for (var i = 0; i < n; i++) {
         double sum = 0;
         for (final g in groups) {
@@ -439,6 +463,7 @@ class ChartSeriesPainter extends NodePainter {
         }
         if (sum <= 0) continue;
         _label(canvas, compactNumber(sum), Offset(cx(i), y(sum) - 10),
+            bottomAt: totalsGap == null ? null : y(sum) - totalsGap,
             style: base.copyWith(color: i == selected ? selectedColor : color));
       }
     }

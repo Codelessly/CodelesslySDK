@@ -95,13 +95,25 @@ class ProgressBarPainter extends NodePainter {
     canvas.drawRRect(radius.toRRect(box), Paint()..color = p(ProgressBarProps.backgroundColor).flutter);
     final value = p(ProgressBarProps.value), max = p(ProgressBarProps.max);
     final fraction = value == 0 || max == 0 ? 0.0 : value / max;
-    // The filled part is an Expanded with flex (fraction * 100).toInt().
-    final percent = (fraction * 100).toInt().clamp(0, 100);
-    if (percent == 0) return;
+    // The filled part is an Expanded with flex (fraction * 100).toInt(),
+    // or the exact fraction (exactFill).
+    final share = p(ProgressBarProps.exactFill)
+        ? fraction.clamp(0.0, 1.0)
+        : (fraction * 100).toInt().clamp(0, 100) / 100;
+    if (share == 0) return;
     final Rect fill = p(ProgressBarProps.direction) == api.Axis.vertical
-        ? Rect.fromLTRB(0, size.height * (1 - percent / 100), size.width, size.height)
-        : Rect.fromLTWH(0, 0, size.width * percent / 100, size.height);
-    canvas.drawRRect(radius.toRRect(fill), Paint()..color = p(ProgressBarProps.color).flutter);
+        ? Rect.fromLTRB(0, size.height * (1 - share), size.width, size.height)
+        : Rect.fromLTWH(0, 0, size.width * share, size.height);
+    final paint = Paint()..color = p(ProgressBarProps.color).flutter;
+    if (p(ProgressBarProps.clipFill)) {
+      // Cut by the track's shape: round where the track is, square at its end.
+      canvas.save();
+      canvas.clipRRect(radius.toRRect(box));
+      canvas.drawRect(fill, paint);
+      canvas.restore();
+    } else {
+      canvas.drawRRect(radius.toRRect(fill), paint);
+    }
   }
 
   void _paintArc(Canvas canvas, Size size, double progress) {
