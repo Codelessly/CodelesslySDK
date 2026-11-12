@@ -9,7 +9,7 @@ import 'package:codelessly_sdk/src/widgets/indicators_charts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Map<String, Object?> _chart(String edge, {double? totalsGap}) => {
+Map<String, Object?> _chart(String edge, {double? totalsGap, bool baseline = false}) => {
       'type': 'chart',
       'layout': {'width': 300, 'height': 200},
       'props': {
@@ -31,13 +31,15 @@ Map<String, Object?> _chart(String edge, {double? totalsGap}) => {
         // Room above the bar for its total.
         if (totalsGap != null) ...{'showTotals': true, 'totalsGap': totalsGap, 'maxY': 30},
         'gridColor': '#00000000',
+        if (baseline) 'baselineColor': '#FFFF0000',
         'axisColor': '#00000000',
       },
     };
 
 /// The first row from the top, in column [x], that isn't white.
-Future<(int Function(int x), Rect)> _render(WidgetTester tester, String edge, {double? totalsGap}) async {
-  final painter = ChartSeriesPainter(Node.fromJson(_chart(edge, totalsGap: totalsGap), id: 'c')!);
+Future<(int Function(int x), Rect)> _render(WidgetTester tester, String edge,
+    {double? totalsGap, bool baseline = false, void Function(bool Function(int x, int y) red)? redAt}) async {
+  final painter = ChartSeriesPainter(Node.fromJson(_chart(edge, totalsGap: totalsGap, baseline: baseline), id: 'c')!);
   const size = Size(300, 200);
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder)..drawColor(Colors.white, BlendMode.src);
@@ -55,6 +57,10 @@ Future<(int Function(int x), Rect)> _render(WidgetTester tester, String edge, {d
     return 200;
   }
 
+  redAt?.call((x, y) {
+    final i = (y * 300 + x) * 4;
+    return bytes.getUint8(i) > 200 && bytes.getUint8(i + 1) < 80 && bytes.getUint8(i + 2) < 80;
+  });
   return (firstInk, painter.plotRect(size));
 }
 
@@ -85,5 +91,14 @@ void main() {
     final cx = plot.center.dx.round();
     // The label's top row moves up by the difference.
     expect(near(cx) - far(cx), 8);
+  });
+
+  testWidgets('baselineColor colours the grid\'s bottom line, under the bars', (tester) async {
+    late bool Function(int x, int y) red;
+    final (_, plot) = await _render(tester, 'between', baseline: true, redAt: (f) => red = f);
+    bool anyRed(int x) => [for (var y = 0; y < 200; y++) y].any((y) => red(x, y));
+    // Beside the bar the baseline shows; under the bar it is covered.
+    expect(anyRed(plot.left.round() + 3), isTrue);
+    expect(anyRed(plot.center.dx.round()), isFalse);
   });
 }
