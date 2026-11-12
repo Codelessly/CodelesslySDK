@@ -9,6 +9,7 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderBox, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
+import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 import 'package:just_audio/just_audio.dart' as audio;
@@ -1138,6 +1139,21 @@ Future<void> _paywall(PaywallAction a, ActionRun run) async {
       host.ui.closeModal(null);
       return;
     default:
+  }
+  if (session == null && a.operation == PaywallOperation.restore) {
+    // Restore purchases outside a paywall (Settings): through the action's
+    // placement, else the project's first.
+    final services = run.context.services;
+    final runtime = services is Services ? services.paywalls : null;
+    if (services is Services && runtime != null) {
+      var placement = run.text(a.placement ?? '').trim();
+      if (placement.isEmpty) placement = services.config.paywall.placements.firstOrNull?.id ?? '';
+      if (placement.isEmpty) throw StateError('No paywall placement to restore from');
+      final result = await runtime.restoreAt(placement,
+          locale: PlatformDispatcher.instance.locale.toLanguageTag(), appVersion: '');
+      _paywallOutcome(result, run);
+      return;
+    }
   }
   if (session == null) throw StateError('Paywall action outside a paywall');
   // The slot can be bound (`${sel}`, the plan the screen selected).

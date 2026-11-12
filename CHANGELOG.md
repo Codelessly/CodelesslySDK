@@ -1,3 +1,12 @@
+## Unreleased
+
+**Fixes**
+
+- A paywall `restore` action outside a paywall screen (a Restore purchases row in Settings) restores through
+  the action's `placement`, or the project's first placement, instead of failing with "Paywall action outside a
+  paywall". It never opens the paywall; an empty restore reaches the screen's `actionError` reaction as
+  `nothing-to-restore`. New: `PaywallRuntime.restoreAt`.
+
 ## 24.0.0
 
 **Breaking changes**
