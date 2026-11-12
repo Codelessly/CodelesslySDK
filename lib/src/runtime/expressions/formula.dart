@@ -6,7 +6,7 @@ import 'package:intl/date_symbols.dart';
 import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
 
-import 'package:meta/meta.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'formula_clock.dart';
 

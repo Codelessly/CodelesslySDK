@@ -1,4 +1,12 @@
-## Unreleased
+## 24.0.0
+
+**Breaking changes**
+
+- Requires `codelessly_api` 24.0.0.
+- A `submitForm` action with the removed Mailchimp service (or no service and the removed fields) sends nothing
+  and fails as `unsupported_service`, through the same result and error callbacks. Use a `callApi` action to your
+  own endpoint, which keeps the provider's key server-side.
+- A canvas's `actionError` event has `retryable` beside `type`, `code`, `message`, `action` and `nodeId`.
 
 **New**
 
@@ -54,6 +62,20 @@
 - A plain box as a canvas's body keeps its own size (it had none): it paints and runs its click reactions, as a
   stack does.
 - Guide: [Presenting, automations and host features](docs/guide/17-presenting-and-automations.md).
+
+- `screen.backdrop`: whether the app draws backdrop screens beneath the screen (false inside a backdrop, in dialogs
+  and sheets), so a screen can hide its own background where one is drawn (`${= !screen.backdrop}`).
+- `Services.filePicker` (`PlatformFilePicker`, the browser's or platform's file dialog, by default;
+  `FixedFilePicker` for tests and previews): a `cloudFiles` upload without a `source` asks it for the files.
+
+**Improvements and fixes**
+
+- A row or column that hugs its height and stretches its children measures again when a child changes while the
+  tree lays out, and when a bound text changes only its words: longer text no longer overflows at the old height.
+- A paywall `purchase` with a bound slot (`${sel}`) buys the selected plan.
+- A toast raised from a dialog shows above the dialog's barrier, not dimmed under it.
+- Confirm sheets take gradient confirm colors, cancel-only shadows and a floating margin.
+- More reliable layout of hugging lists, tables, text fields and typewriters, and of links and their parameters.
 
 ## 23.0.0
 

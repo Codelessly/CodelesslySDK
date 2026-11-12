@@ -164,6 +164,21 @@ class NodeTree {
     _interactions = interactions;
   }
 
+  /// Whether text without a line height takes its font's own, as Flutter's
+  /// does, rather than the SDK's 1.33 (the project's
+  /// `ThemeTokens.naturalLineHeight`). A run's own height, or its
+  /// `naturalHeight`, still wins.
+  bool get naturalLineHeight => _naturalLineHeight;
+  bool _naturalLineHeight = false;
+  set naturalLineHeight(bool value) {
+    if (value == _naturalLineHeight) return;
+    _naturalLineHeight = value;
+    for (final box in _boxes.values.toList()) {
+      box._applied = null;
+      box._apply();
+    }
+  }
+
   // Font loading defers RenderParagraph's relayout to the next frame. Flutter
   // forbids detaching it before that callback drains. Source edits normally
   // apply synchronously; hold only those arriving during a font notification.
@@ -1165,7 +1180,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..heightFactor = n.layout.heightFactor);
 
     final d = n.decoration;
-    final radius = d.radius.isZero ? null : d.radius.flutter;
+    // A circle (BoxShape.circle) takes no corner radius.
+    final circle = d.shape == api.DecorationShape.circle;
+    final radius = circle || d.radius.isZero ? null : d.radius.flutter;
     final rounded = radius != null;
     final shadows = [
       for (final e in d.effects)
@@ -1181,6 +1198,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..decoration = BoxDecoration(
         boxShadow: [for (final sh in shadows) if (!spread.contains(sh)) sh],
         borderRadius: radius,
+        shape: circle ? BoxShape.circle : BoxShape.rectangle,
         color: plan.native ? plan.fill : null,
         // One decoration, as a Container's: Flutter tucks the fill under an
         // opaque border, so its anti-aliased edge doesn't show past the
@@ -1193,7 +1211,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..opaque = d.fills.any((f) => f.visible));
     final clipBehavior = clip(d.clip);
     if (clipBehavior != Clip.none) {
-      if (rounded) {
+      if (circle) {
+        chain.add(_obtain<RenderClipOval>('clipOval', () => RenderClipOval(clipper: const _CircleClipper(), clipBehavior: clipBehavior))
+          ..clipBehavior = clipBehavior);
+      } else if (rounded) {
         chain.add(_obtain<RenderClipRRect>('clipRRect', () => RenderClipRRect(clipBehavior: clipBehavior))
           ..borderRadius = radius
           ..clipBehavior = clipBehavior);
@@ -1673,9 +1694,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   /// The node's text as spans: each run's characters in its style, merged
   /// over the text's base style.
-  static TextSpan _textSpan(Node n) {
+  TextSpan _textSpan(Node n) {
     final text = n.prop(TextProps.text);
-    final base = n.prop(TextProps.style);
+    var base = n.prop(TextProps.style);
+    if (tree.naturalLineHeight && base.height == null && base.naturalHeight == null) {
+      base = base.merge(const api.TextStyle(naturalHeight: true));
+    }
     final runs = n.prop(TextProps.runs);
     if (runs.isEmpty) return TextSpan(text: text, style: textStyle(base));
     // Runs style ranges; they do not replace the unstyled characters.
@@ -2169,6 +2193,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 /// anything richer is a [RenderNodePaint] layer.
 Color? _visible(Color? c) => c == null || c.a == 0 ? null : c;
 
+/// A circle the box's shortest side across, in its middle (BoxShape.circle).
+class _CircleClipper extends CustomClipper<Rect> {
+  const _CircleClipper();
+  @override
+  Rect getClip(Size size) => Rect.fromCircle(center: size.center(Offset.zero), radius: size.shortestSide / 2);
+  @override
+  bool shouldReclip(_CircleClipper oldClipper) => false;
+}
+
 class _PaintPlan {
   _PaintPlan(this.native, this.fill, this.border, this.foreground);
 
@@ -2184,6 +2217,10 @@ class _PaintPlan {
     if (n.bind.keys.any((k) => k.startsWith('fill-') || k.startsWith('stroke-paint-'))) {
       return _PaintPlan(false, null, null, foreground);
     }
+    // A circle paints as a painter's two drawCircles (fill, then stroke):
+    // the layered paint, not the decoration (which shrinks the fill under
+    // an opaque border).
+    if (d.shape == api.DecorationShape.circle) return _PaintPlan(false, null, null, foreground);
     final fills = d.visibleFills.toList();
     final simpleFill =
         fills.length <= 1 && fills.every((f) => f.type == api.PaintType.solid && f.blendMode == api.BlendMode.srcOver);
