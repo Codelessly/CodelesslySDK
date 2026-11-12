@@ -60,7 +60,24 @@ class RenderNodePaint extends RenderBox with ImageClient {
     final canvas = context.canvas;
     final rect = offset & size;
     final rrect = decoration.radius.flutter.toRRect(rect);
-    final fillShape = _clipped ? RRect.fromRectAndRadius(rect, Radius.zero) : rrect;
+    var fillShape = _clipped ? RRect.fromRectAndRadius(rect, Radius.zero) : rrect;
+    // Solid, undashed rules on some sides of a square box paint as
+    // Flutter's Border(bottom: ...) does: each side a filled band the box's
+    // whole length, the fill tucked under an opaque one by half its inset.
+    final ruled = _ruledSides();
+    if (ruled != null && !_foreground) {
+      final (sides, w, inset) = ruled;
+      // Only under an opaque rule, as Flutter's BoxDecoration does.
+      final opaque = decoration.visibleStrokes.every((p) => (p.effectiveColor?.flutter.a ?? 0) >= 1);
+      final tuck = opaque ? inset / 2 : 0.0;
+      fillShape = RRect.fromLTRBR(
+        fillShape.left + (sides.contains('left') ? tuck : 0),
+        fillShape.top + (sides.contains('top') ? tuck : 0),
+        fillShape.right - (sides.contains('right') ? tuck : 0),
+        fillShape.bottom - (sides.contains('bottom') ? tuck : 0),
+        Radius.zero,
+      );
+    }
     if (_foreground) {
       for (final p in decoration.foregroundFills) {
         _fill(canvas, fillShape, p);
@@ -79,17 +96,39 @@ class RenderNodePaint extends RenderBox with ImageClient {
       api.StrokeAlign.center => 0.0,
       api.StrokeAlign.outside => -w / 2,
     };
+    if (ruled != null) {
+      final (sides, w, inset) = ruled;
+      // The band's inner edge `inset` in from the box edge (inside: the
+      // whole width in; centre: half; outside: none), `w` wide.
+      final bands = [
+        if (sides.contains('top')) Rect.fromLTRB(rect.left, rect.top + inset - w, rect.right, rect.top + inset),
+        if (sides.contains('right')) Rect.fromLTRB(rect.right - inset, rect.top, rect.right - inset + w, rect.bottom),
+        if (sides.contains('bottom')) Rect.fromLTRB(rect.left, rect.bottom - inset, rect.right, rect.bottom - inset + w),
+        if (sides.contains('left')) Rect.fromLTRB(rect.left + inset - w, rect.top, rect.left + inset, rect.bottom),
+      ];
+      for (final p in strokes) {
+        final paint = paintFor(p, rect)..style = PaintingStyle.fill;
+        for (final band in bands) {
+          canvas.drawRect(band, paint);
+        }
+      }
+      return;
+    }
     final path = Path();
     if (decoration.strokeSides == api.StrokeSides.all) {
       path.addRRect(rrect.deflate(inset));
     } else {
-      final r = rect.deflate(inset);
+      // Each side runs the box's whole length, inset only across itself,
+      // as Flutter's Border(bottom: ...) paints it (deflating the whole
+      // rect cut half a stroke off each end).
       final sides = decoration.strokeSides.sides;
+      final top = rect.top + inset, bottom = rect.bottom - inset;
+      final left = rect.left + inset, right = rect.right - inset;
       final lines = [
-        if (sides.contains('top')) (r.topLeft, r.topRight),
-        if (sides.contains('right')) (r.topRight, r.bottomRight),
-        if (sides.contains('bottom')) (r.bottomLeft, r.bottomRight),
-        if (sides.contains('left')) (r.topLeft, r.bottomLeft),
+        if (sides.contains('top')) (Offset(rect.left, top), Offset(rect.right, top)),
+        if (sides.contains('right')) (Offset(right, rect.top), Offset(right, rect.bottom)),
+        if (sides.contains('bottom')) (Offset(rect.left, bottom), Offset(rect.right, bottom)),
+        if (sides.contains('left')) (Offset(left, rect.top), Offset(left, rect.bottom)),
       ];
       for (final (a, b) in lines) {
         path
@@ -105,6 +144,23 @@ class RenderNodePaint extends RenderBox with ImageClient {
         ..strokeCap = StrokeCap.values.byName(decoration.strokeCap.name);
       canvas.drawPath(dashed, paint);
     }
+  }
+
+  /// The sides a square box rules with solid, undashed strokes, the
+  /// stroke width and its inset (Flutter's BorderSide.strokeInset: the
+  /// whole width inside, half centred, none outside); null otherwise.
+  (List<String>, double, double)? _ruledSides() {
+    final d = decoration;
+    if (d.strokeSides == api.StrokeSides.all || !d.radius.isZero || d.dashPattern.any((v) => v > 0)) return null;
+    final strokes = d.visibleStrokes.toList();
+    if (strokes.isEmpty || d.strokeWidth <= 0 || strokes.any((p) => p.type != api.PaintType.solid)) return null;
+    final w = d.strokeWidth;
+    final inset = switch (d.strokeAlign) {
+      api.StrokeAlign.inside => w,
+      api.StrokeAlign.center => w / 2,
+      api.StrokeAlign.outside => 0.0,
+    };
+    return (d.strokeSides.sides.toList(), w, inset);
   }
 
   void _fill(Canvas canvas, RRect rrect, api.Paint p) {
