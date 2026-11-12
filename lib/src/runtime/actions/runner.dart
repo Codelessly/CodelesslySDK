@@ -319,7 +319,8 @@ class CodelesslyActions implements ActionRunner {
           : runZoned(() => runActions(actions, run), zoneValues: {#codelesslyHandlers: scoped}));
     } on ActionsStopped catch (stop) {
       if (host case final RuntimeActionContext context) {
-        context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall'));
+        context.failed.last = () => _run(node, reactions, context, event, ActionCancellation(), instance);
+        context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall', retryable: true));
       }
     } on ActionsCanceled {
       // The node left: the rest doesn't run. Said in debug builds, so a
@@ -330,6 +331,11 @@ class CodelesslyActions implements ActionRunner {
         return true;
       }());
     } catch (error, stack) {
+      // Kept so the screen's error reaction can run the chain again
+      // (`retryFailed`): the same reactions, event and list item.
+      if (host case final RuntimeActionContext context) {
+        context.failed.pending = () => _run(node, reactions, context, event, ActionCancellation(), instance);
+      }
       host.reportError(error, stack, action: _failing(error));
     }
   }

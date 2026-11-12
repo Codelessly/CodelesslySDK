@@ -66,8 +66,14 @@ class RuntimeActionContext implements ActionHost {
     this.presentPaywall,
     this.scripts = const [],
     List<VoidCallback>? disposers,
+    FailedActions? failed,
   })  : services = services ?? const _NoServices(),
-        _disposers = disposers ?? [];
+        _disposers = disposers ?? [],
+        failed = failed ?? FailedActions();
+
+  /// The failed action chain the screen's `actionError` reaction can run
+  /// again (`retryFailed`); shared by this context's copies.
+  final FailedActions failed;
 
   @override
   final ValueScope scope;
@@ -152,6 +158,7 @@ class RuntimeActionContext implements ActionHost {
         presentPaywall: presentPaywall,
         scripts: scripts,
         disposers: _disposers,
+        failed: failed,
       );
 
   /// Sets variable [name] (or a path into one: `draft.title`, `rows[1]`) in
@@ -189,8 +196,13 @@ class RuntimeActionContext implements ActionHost {
       // Reporting must not break another gesture or recursively report itself.
       _logError(callbackError, callbackStack, 'host_error_callback');
     }
+    // The chain that just failed (the runner set it), if it can run again:
+    // the error reaction's `retryFailed` runs it.
+    final retry = failed.pending;
+    failed.pending = null;
+    failed.last = retry;
     try {
-      onActionErrorEvent?.call(actionErrorEvent(error, action: action));
+      onActionErrorEvent?.call(actionErrorEvent(error, action: action, retryable: retry != null));
     } catch (callbackError, callbackStack) {
       _logError(callbackError, callbackStack, 'action_error_callback');
     }
@@ -303,4 +315,22 @@ class PaywallPresentation {
 
   @override
   int get hashCode => Object.hash(routeTransition, transition, transitionMs, reverseTransitionMs);
+}
+
+/// A failed action chain that can run again (see [RuntimeActionContext.failed]).
+class FailedActions {
+  /// Set by the runner just before it reports the chain's failure.
+  Future<void> Function()? pending;
+
+  /// The latest reported failure's chain, if it can run again.
+  Future<void> Function()? last;
+
+  /// Runs [last] again (once); whether there was one.
+  bool retry() {
+    final run = last;
+    last = null;
+    if (run == null) return false;
+    unawaited(run());
+    return true;
+  }
 }

@@ -211,7 +211,14 @@ class RenderTypewriter extends RenderProxyBox {
     final n = shownCharacters;
     // Where the paragraph sits in this box (an align or fit box between).
     final at = p.localToGlobal(Offset.zero, ancestor: this);
-    if (n > 0) {
+    // With a caret height the typed text is laid out on its own, with the
+    // caret's span (as a reference built with Text.rich shows it): paint
+    // that, glyphs whole. Clipping the whole paragraph to the typed
+    // characters' boxes cut the last glyph's overhang (a handwriting 's').
+    final ownLayout = tw.caretHeight > 0 && caretShown && (p.textAlign == TextAlign.start || p.textAlign == TextAlign.left);
+    if (n > 0 && ownLayout) {
+      _typed(p, n, tw).paint(context.canvas, offset + at);
+    } else if (n > 0) {
       final clip = Path();
       for (final b in p.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: n))) {
         clip.addRect(b.toRect().inflate(1).shift(at));

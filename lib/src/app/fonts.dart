@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart' show PublishFont;
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/foundation.dart' show kIsWeb, listEquals, visibleForTesting;
 import 'package:http/http.dart' as http;
 
 import '../render/convert.dart' show FontDemand;
@@ -17,6 +17,14 @@ import '../render/convert.dart' show FontDemand;
 abstract interface class FontFetcher {
   /// The font file's bytes (TTF/OTF), or null when it can't be had.
   Future<Uint8List?> fetch(PublishFont font);
+}
+
+/// A [FontFetcher] that can also fetch a file holding just some characters
+/// of a font: those a browser's subset files leave out (see
+/// [CodelesslyFonts.glyphsBeyondLatin]).
+abstract interface class GlyphFontFetcher implements FontFetcher {
+  /// A file of [font] holding [text]'s characters, or null.
+  Future<Uint8List?> fetchGlyphs(PublishFont font, String text);
 }
 
 /// Fetches nothing: fonts fall back to the platform's. For tests and apps
@@ -30,7 +38,7 @@ class NoFontFetcher implements FontFetcher {
 
 /// Fetches fonts over HTTP: an uploaded font from its URL, a Google Font
 /// through the Google Fonts CSS API.
-class HttpFontFetcher implements FontFetcher {
+class HttpFontFetcher implements GlyphFontFetcher {
   HttpFontFetcher({
     http.Client? client,
     this.googleFontsApi = 'https://fonts.googleapis.com/css2',
@@ -69,6 +77,32 @@ class HttpFontFetcher implements FontFetcher {
       if (urlIn(b.group(2)!) case final String u) return u;
     }
     return clean(RegExp(r'url\(([^)]+)\)').firstMatch(css)?.group(1));
+  }
+
+  /// The Google Fonts CSS URL of [font] cut to [text]'s characters.
+  Uri googleFontsTextUrl(PublishFont font, String text) => Uri.parse(
+    '${googleFontsUrl(font)}&text=${Uri.encodeQueryComponent(text)}',
+  );
+
+  /// A Google Font's file holding [text]'s characters (in a browser the
+  /// API's subsets leave out characters such as → and ⇧, which the font
+  /// draws: without this they fell back to the platform's font, with its
+  /// own glyphs and line height). Null for an uploaded font (its file holds
+  /// every glyph) or when the font has none of them.
+  @override
+  Future<Uint8List?> fetchGlyphs(PublishFont font, String text) async {
+    if (font.url != null || text.isEmpty) return null;
+    try {
+      final css = await _get(googleFontsTextUrl(font, text));
+      if (css.statusCode != 200) return null;
+      final file = fontFileOf(css.body);
+      final url = file == null ? null : Uri.tryParse(file);
+      if (url == null) return null;
+      final res = await _get(url);
+      return res.statusCode == 200 ? res.bodyBytes : null;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<http.Response> _get(Uri url) async {
@@ -125,6 +159,7 @@ class CodelesslyFonts {
   }) : _register = register ?? _registerWithEngine {
     // Families only bindings reach are fetched when first drawn (Google
     // Fonts by name; a project's uploaded fonts are in the publish).
+    if (fetcher is GlyphFontFetcher && kIsWeb) FontDemand.glyphFallback = true;
     if (fetcher is! NoFontFetcher) {
       FontDemand.handler ??= (family, weight, italic) => load([
             PublishFont(id: 'demand:$family/$weight/$italic', family: family, weight: weight, italic: italic),
@@ -161,9 +196,84 @@ class CodelesslyFonts {
     return load;
   }
 
+  /// The characters of [text] that Google Fonts' `latin` subset leaves out
+  /// (its `unicode-range`), each once, in order: in a browser the API serves
+  /// a file per subset and only the `latin` one is loaded, so these come in
+  /// a file of their own ([GlyphFontFetcher.fetchGlyphs]).
+  static String glyphsBeyondLatin(String text) {
+    bool latin(int c) =>
+        c <= 0xFF ||
+        c == 0x131 ||
+        c == 0x152 ||
+        c == 0x153 ||
+        c == 0x2BB ||
+        c == 0x2BC ||
+        c == 0x2C6 ||
+        c == 0x2DA ||
+        c == 0x2DC ||
+        c == 0x304 ||
+        c == 0x308 ||
+        c == 0x329 ||
+        (c >= 0x2000 && c <= 0x206F) ||
+        c == 0x20AC ||
+        c == 0x2122 ||
+        c == 0x2191 ||
+        c == 0x2193 ||
+        c == 0x2212 ||
+        c == 0x2215 ||
+        c == 0xFEFF ||
+        c == 0xFFFD;
+    final out = <int>{};
+    for (final c in text.runes) {
+      // Not a lone surrogate or a variation selector.
+      if (!latin(c) && !(c >= 0xFE00 && c <= 0xFE0F)) out.add(c);
+    }
+    return String.fromCharCodes(out);
+  }
+
+  /// Characters beyond `latin` of the layouts shown so far ([addText]), in
+  /// any app: the engine's fonts are global, and the fonts asked for when
+  /// first drawn load through the first [CodelesslyFonts] made.
+  static String _glyphs = '';
+
+  /// Forgets the characters noted (tests).
+  @visibleForTesting
+  static void resetGlyphs() => _glyphs = '';
+
+  /// The fonts this registered, for characters noted later.
+  final List<PublishFont> _registered = [];
+
+  /// Notes what a layout shows: the fonts loaded from then on (listed by a
+  /// publish or asked for when first drawn) fetch its characters beyond a
+  /// browser's `latin` subset too, and those loaded already (drawn on an
+  /// earlier screen) fetch the ones new to them now.
+  Future<void> addText(String text) async {
+    if (text.isEmpty) return;
+    final before = _glyphs;
+    _glyphs = glyphsBeyondLatin(before + text);
+    final fresh = String.fromCharCodes(_glyphs.runes.skip(before.runes.length));
+    final glyphs = fetcher;
+    if (fresh.isEmpty || glyphs is! GlyphFontFetcher || _registered.isEmpty) return;
+    final byFamily = <String, List<PublishFont>>{};
+    for (final f in _registered) {
+      byFamily.putIfAbsent(f.family, () => []).add(f);
+    }
+    await track(Future.wait([
+      for (final e in byFamily.entries)
+        Future.wait(e.value.map((f) => glyphs.fetchGlyphs(f, fresh))).then((files) async {
+          final ok = [...files.nonNulls];
+          if (ok.isNotEmpty) await _register(FontDemand.glyphFamily(e.key), ok);
+        }).catchError((Object _) {}),
+    ]));
+  }
+
   /// Fetches and registers [fonts] not registered yet; completes when they
-  /// are (a font that can't be fetched is skipped).
-  Future<void> load(Iterable<PublishFont> fonts) async {
+  /// are (a font that can't be fetched is skipped). With [text] (what the
+  /// layout shows) and a [GlyphFontFetcher], the characters of it beyond a
+  /// browser's `latin` subset come too, registered with their family.
+  Future<void> load(Iterable<PublishFont> fonts, {String text = ''}) async {
+    addText(text);
+    final extra = fetcher is GlyphFontFetcher ? _glyphs : '';
     final byFamily = <String, List<PublishFont>>{};
     for (final f in fonts) {
       if (_fonts.containsKey(f.id)) continue;
@@ -171,12 +281,22 @@ class CodelesslyFonts {
     }
     final pending = <Future<bool>>[];
     for (final e in byFamily.entries) {
+      final glyphs = fetcher;
       final files = Future.wait(e.value.map(fetcher.fetch));
+      final extraFiles = Future.wait([
+        if (extra.isNotEmpty && glyphs is GlyphFontFetcher)
+          for (final f in e.value) glyphs.fetchGlyphs(f, extra),
+      ]);
       final done = files
           .then((bytes) async {
             final ok = [...bytes.nonNulls];
             if (ok.isEmpty) return false;
             await _register(e.key, ok);
+            _registered.addAll(e.value);
+            // Characters beyond latin: a family of their own the styles
+            // fall back to (FontDemand.glyphFamily).
+            final more = [...(await extraFiles).nonNulls];
+            if (more.isNotEmpty) await _register(FontDemand.glyphFamily(e.key), more);
             return true;
           })
           .catchError((Object _) => false);

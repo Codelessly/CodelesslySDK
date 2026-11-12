@@ -59,6 +59,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       if (result != null) run.result = result;
     case CloseModalAction():
       run.host.ui.closeModal(a.result == null ? null : run.evaluateJson(a.result));
+    case RetryFailedAction():
+      if (run.host case final RuntimeActionContext context) context.failed.retry();
     case PrintAction():
       await printNodeAction(a.node, run);
     case OpenLinkAction():

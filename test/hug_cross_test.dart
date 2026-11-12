@@ -64,4 +64,77 @@ void main() {
     expect(await _rects(tester, tree), fresh);
     expect(fresh['r']!.height, 12);
   });
+
+  testWidgets('a hugging stretch row follows a child changed while the tree lays out (a design board edit)', (tester) async {
+    final fresh = await _rects(tester, await _show(tester, DocumentSource(_doc(tall: true))));
+    final source = DocumentSource(_doc(tall: false));
+    final tree = NodeTree(source);
+    addTearDown(tree.dispose);
+    var change = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Align(alignment: Alignment.topLeft, child: NodeView(key: UniqueKey(), tree: tree, rootId: 'r')),
+        // Laid out after the node view: changes the document mid-layout,
+        // as the design board does when a capture's values change a screen.
+        LayoutBuilder(builder: (context, _) {
+          if (change) {
+            change = false;
+            source.document = _doc(tall: true);
+          }
+          return const SizedBox.shrink();
+        }),
+      ]),
+    ));
+    expect((await _rects(tester, tree))['r']!.height, 30);
+    change = true;
+    tester.element(find.byType(LayoutBuilder)).markNeedsBuild();
+    await tester.pump();
+    await tester.pump();
+    final view = tester.renderObject(find.byType(NodeView));
+    final got = {for (final id in ['r', 'c', 'b', 'side']) id: tree.boxOf(id)!.rectIn(view)!};
+    expect(got['r']!.height, fresh['r']!.height, reason: 'the row measured its child again');
+    expect(got, fresh);
+  });
+
+  testWidgets('a hugging stretch row follows a bound text that only changes its words (updated in place)', (tester) async {
+    final vars = ValuesScope({'tip': 'One line.'});
+    addTearDown(vars.dispose);
+    final doc = LayoutDocument.fromJson({
+      'roots': ['r'],
+      'nodes': {
+        'r': {
+          'type': 'row',
+          'children': ['bar', 'c'],
+          'layout': {'width': 200, 'height': {'hug': 0}},
+          'props': {'crossAxisAlignment': 'stretch'},
+        },
+        'bar': {'type': 'box', 'layout': {'width': 4, 'height': {'fill': 10}}},
+        'c': {
+          'type': 'column',
+          'children': ['t'],
+          'layout': {'width': {'fill': 100}, 'height': {'hug': 0}},
+        },
+        't': {
+          'type': 'text',
+          'layout': {'width': {'fill': 100}, 'height': {'hug': 12}},
+          'props': {'style': {'fontSize': 14}},
+          'bind': {'props.text': r'${tip}'},
+        },
+      },
+    });
+    final tree = NodeTree(DocumentSource(doc), binder: NodeBinder(scope: vars));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(MaterialApp(
+      home: Align(alignment: Alignment.topLeft, child: NodeView(key: UniqueKey(), tree: tree, rootId: 'r')),
+    ));
+    final view = tester.renderObject(find.byType(NodeView));
+    final before = tree.boxOf('r')!.rectIn(view)!.height;
+    vars.set('tip', 'Many words now, enough to wrap onto several lines in a narrow column of text.');
+    await tester.pump();
+    await tester.pump();
+    final row = tree.boxOf('r')!.rectIn(view)!;
+    final text = tree.boxOf('t')!.rectIn(view)!;
+    expect(text.height, greaterThan(before), reason: 'the text wraps');
+    expect(row.height, greaterThanOrEqualTo(text.height), reason: 'the row holds it');
+  });
 }
