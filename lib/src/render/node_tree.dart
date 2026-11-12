@@ -164,6 +164,21 @@ class NodeTree {
     _interactions = interactions;
   }
 
+  /// Whether text without a line height takes its font's own, as Flutter's
+  /// does, rather than the SDK's 1.33 (the project's
+  /// `ThemeTokens.naturalLineHeight`). A run's own height, or its
+  /// `naturalHeight`, still wins.
+  bool get naturalLineHeight => _naturalLineHeight;
+  bool _naturalLineHeight = false;
+  set naturalLineHeight(bool value) {
+    if (value == _naturalLineHeight) return;
+    _naturalLineHeight = value;
+    for (final box in _boxes.values.toList()) {
+      box._applied = null;
+      box._apply();
+    }
+  }
+
   // Font loading defers RenderParagraph's relayout to the next frame. Flutter
   // forbids detaching it before that callback drains. Source edits normally
   // apply synchronously; hold only those arriving during a font notification.
@@ -1673,9 +1688,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   /// The node's text as spans: each run's characters in its style, merged
   /// over the text's base style.
-  static TextSpan _textSpan(Node n) {
+  TextSpan _textSpan(Node n) {
     final text = n.prop(TextProps.text);
-    final base = n.prop(TextProps.style);
+    var base = n.prop(TextProps.style);
+    if (tree.naturalLineHeight && base.height == null && base.naturalHeight == null) {
+      base = base.merge(const api.TextStyle(naturalHeight: true));
+    }
     final runs = n.prop(TextProps.runs);
     if (runs.isEmpty) return TextSpan(text: text, style: textStyle(base));
     // Runs style ranges; they do not replace the unstyled characters.
