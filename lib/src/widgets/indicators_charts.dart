@@ -327,11 +327,17 @@ class ChartSeriesPainter extends NodePainter {
       final grid = Paint()
         ..color = gridColor
         ..strokeWidth = 1;
+      final baselineColor = p(ChartProps.baselineColor)?.flutter;
+      final baseline = baselineColor == null
+          ? grid
+          : (Paint()
+            ..color = baselineColor
+            ..strokeWidth = 1);
       final yFamily = p(ChartProps.yAxisFontFamily);
       for (var k = 0; k <= gridLines; k++) {
         final v = lo + (hi - lo) * k / gridLines;
         final gy = _lineY(y(v), 1, bottom: k == 0);
-        canvas.drawLine(Offset(plot.left, gy), Offset(plot.right, gy), grid);
+        canvas.drawLine(Offset(plot.left, gy), Offset(plot.right, gy), k == 0 ? baseline : grid);
         if (p(ChartProps.showYAxis)) {
           final start = p(ChartProps.yLabelAlign) == ChartYLabelAlign.start;
           _label(
