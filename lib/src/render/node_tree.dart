@@ -678,6 +678,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     paragraph.text = _textSpan(n);
     _node = n;
     _applied = n;
+    // New words can wrap onto more lines: a hugging row above measures again
+    // (the paragraph relays out inside a stretched child, at its old height).
+    _relayoutHuggingAncestors();
     return true;
   }
 
@@ -1015,18 +1018,30 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// measures them unstretched, then lays them out stretched, which makes
   /// them relayout boundaries: a change inside one stops there. This node
   /// changed, so the hugging layouts above it measure again (as a fresh
-  /// render would). Not while the tree lays out (a node built inside an
-  /// island or a list item): the layout under way measures it already, and
-  /// marking its ancestors would assert.
+  /// render would). While the tree lays out (a node built inside an island
+  /// or a list item, or a design board changing a screen mid-layout),
+  /// marking its ancestors would assert, and a hugging layout above may
+  /// already have measured this frame (the changed child, a relayout
+  /// boundary, then lays out alone at the old thickness): measure again
+  /// after the frame.
   void _relayoutHuggingAncestors() {
     if (!attached) return;
-    var laying = false;
-    assert(() {
-      laying = owner?.debugDoingLayout ?? false;
-      return true;
-    }());
-    if (!laying) RenderHugCross.relayoutAbove(this);
+    final binding = SchedulerBinding.instance;
+    if (binding.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      if (_relayoutQueued) return;
+      _relayoutQueued = true;
+      binding.addPostFrameCallback((_) {
+        _relayoutQueued = false;
+        if (!attached) return;
+        RenderHugCross.relayoutAbove(this);
+        binding.scheduleFrame();
+      });
+      return;
+    }
+    RenderHugCross.relayoutAbove(this);
   }
+
+  bool _relayoutQueued = false;
 
   /// [a] and [b] differ at most in their position.
   static bool _onlyMoved(Node a, Node b) {
