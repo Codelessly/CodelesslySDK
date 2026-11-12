@@ -9,7 +9,7 @@ import 'package:codelessly_sdk/src/widgets/indicators_charts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Map<String, Object?> _chart(String edge) => {
+Map<String, Object?> _chart(String edge, {double? totalsGap}) => {
       'type': 'chart',
       'layout': {'width': 300, 'height': 200},
       'props': {
@@ -23,19 +23,21 @@ Map<String, Object?> _chart(String edge) => {
           {'field': 'b', 'name': 'B', 'color': '#FF00FF00', 'stack': 's'},
           {'field': 'c', 'name': 'C', 'color': '#FFFF0000', 'stack': 's'},
         ],
-        'yMax': 10,
+        'maxY': 10,
         'barRadius': 8,
         'barWidthFraction': 0.5,
         'stackGap': 2,
         'stackGapEdge': edge,
+        // Room above the bar for its total.
+        if (totalsGap != null) ...{'showTotals': true, 'totalsGap': totalsGap, 'maxY': 30},
         'gridColor': '#00000000',
         'axisColor': '#00000000',
       },
     };
 
 /// The first row from the top, in column [x], that isn't white.
-Future<(int Function(int x), Rect)> _render(WidgetTester tester, String edge) async {
-  final painter = ChartSeriesPainter(Node.fromJson(_chart(edge), id: 'c')!);
+Future<(int Function(int x), Rect)> _render(WidgetTester tester, String edge, {double? totalsGap}) async {
+  final painter = ChartSeriesPainter(Node.fromJson(_chart(edge, totalsGap: totalsGap), id: 'c')!);
   const size = Size(300, 200);
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder)..drawColor(Colors.white, BlendMode.src);
@@ -75,5 +77,13 @@ void main() {
     final cx = plot.center.dx.round();
     // The bar's top row moves down by the gap.
     expect(top(cx) - between(cx), inInclusiveRange(1, 2));
+  });
+
+  testWidgets('totalsGap sets the space between a bar and its total', (tester) async {
+    final (near, plot) = await _render(tester, 'between', totalsGap: 4);
+    final (far, _) = await _render(tester, 'between', totalsGap: 12);
+    final cx = plot.center.dx.round();
+    // The label's top row moves up by the difference.
+    expect(near(cx) - far(cx), 8);
   });
 }

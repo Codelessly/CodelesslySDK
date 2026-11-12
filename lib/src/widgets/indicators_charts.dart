@@ -229,7 +229,7 @@ class ChartSeriesPainter extends NodePainter {
   /// Paints [text] centred vertically on [anchor] (or, with [xAxisBottom],
   /// as an x label below a plot ending there: see [_xLabelY]).
   void _label(Canvas canvas, String text, Offset anchor,
-      {TextAlign align = TextAlign.center, TextStyle? style, double? xAxisBottom}) {
+      {TextAlign align = TextAlign.center, TextStyle? style, double? xAxisBottom, double? bottomAt}) {
     final tp = TextPainter(text: TextSpan(text: text, style: style ?? _axisStyle), textDirection: TextDirection.ltr)
       ..layout();
     final dx = switch (align) {
@@ -237,7 +237,11 @@ class ChartSeriesPainter extends NodePainter {
       TextAlign.left || TextAlign.start => 0.0,
       _ => -tp.width / 2,
     };
-    final cy = xAxisBottom == null ? anchor.dy : _xLabelY(xAxisBottom, tp.height);
+    final cy = bottomAt != null
+        ? bottomAt - tp.height / 2
+        : xAxisBottom == null
+            ? anchor.dy
+            : _xLabelY(xAxisBottom, tp.height);
     tp.paint(canvas, Offset(anchor.dx + dx, cy - tp.height / 2));
     tp.dispose();
   }
@@ -443,6 +447,7 @@ class ChartSeriesPainter extends NodePainter {
       final color = p(ChartProps.totalsColor)?.flutter ?? p(ChartProps.axisLabelColor).flutter;
       final selectedColor = p(ChartProps.totalsSelectedColor)?.flutter ?? color;
       final base = _labelStyle(p(ChartProps.axisFontFamily)).copyWith(fontWeight: FontWeight.w700);
+      final totalsGap = p(ChartProps.totalsGap);
       for (var i = 0; i < n; i++) {
         double sum = 0;
         for (final g in groups) {
@@ -452,6 +457,7 @@ class ChartSeriesPainter extends NodePainter {
         }
         if (sum <= 0) continue;
         _label(canvas, compactNumber(sum), Offset(cx(i), y(sum) - 10),
+            bottomAt: totalsGap == null ? null : y(sum) - totalsGap,
             style: base.copyWith(color: i == selected ? selectedColor : color));
       }
     }
