@@ -769,6 +769,7 @@ class _LayoutViewState extends State<_LayoutView> {
   /// `theme`: the project's theme tokens for the current mode
   /// ([themeValues]), kept as the mode and the published theme change.
   void _updateTheme() {
+    _screen.tree.naturalLineHeight = _tokens.naturalLineHeight ?? false;
     // A project variable named `theme` (an app's own light/dark choice) is
     // the project's: the built-in doesn't hide it from reads or writes.
     final page = _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope));
