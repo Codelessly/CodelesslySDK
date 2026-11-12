@@ -20,7 +20,7 @@ import 'loader.dart';
 
 /// This SDK's version (pubspec.yaml's): what managed component versions'
 /// `minSdk` is checked against.
-const String kCodelesslySdkVersion = '23.0.0';
+const String kCodelesslySdkVersion = '24.0.0';
 
 /// Where managed component masters and versions come from
 /// (`managed_components/{id}` and its `versions/{n}`): Firestore in
