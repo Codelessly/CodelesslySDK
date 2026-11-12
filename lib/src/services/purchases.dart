@@ -718,6 +718,27 @@ class PaywallRuntime {
     if (id != null && id.isNotEmpty && !entitlements.value.contains(id)) entitlements.value = {...entitlements.value, id};
   }
 
+  /// Restores the user's earlier purchases of [placement]'s products without
+  /// showing its paywall (a Restore purchases row in Settings): resolves the
+  /// placement, restores through a session of its own and adds what that
+  /// verifies to [entitlements].
+  Future<PaywallResult> restoreAt(String placement, {required String locale, required String appVersion}) async {
+    final epoch = _accountEpoch;
+    final resolved = await resolve(placement, locale: locale, appVersion: appVersion);
+    if (_disposed || epoch != _accountEpoch) return const PaywallResult(PaywallOutcome.closed);
+    if (resolved == null || resolved.slots.isEmpty) throw StateError('Paywall placement is unavailable');
+    final current = session(resolved);
+    try {
+      await current.load();
+      final result = await current.restoreAndWait();
+      if (current.entitlements.contains(result.entitlementId)) _grant(result, epoch);
+      return result;
+    } finally {
+      _sessions.remove(current);
+      current.dispose();
+    }
+  }
+
   /// Resolve and load before presenting; failures never open a selling UI.
   /// The session belongs to this call and is disposed on every exit path.
   /// [details] are more `paywall` values for its screen (the legal links,
