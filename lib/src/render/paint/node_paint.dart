@@ -59,7 +59,10 @@ class RenderNodePaint extends RenderBox with ImageClient {
   void paint(PaintingContext context, Offset offset) {
     final canvas = context.canvas;
     final rect = offset & size;
-    final rrect = decoration.radius.flutter.toRRect(rect);
+    // A circle: the box's shortest side across, in its middle.
+    final rrect = decoration.shape == api.DecorationShape.circle
+        ? RRect.fromRectAndRadius(Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2), Radius.circular(rect.shortestSide / 2))
+        : decoration.radius.flutter.toRRect(rect);
     var fillShape = _clipped ? RRect.fromRectAndRadius(rect, Radius.zero) : rrect;
     // Solid, undashed rules on some sides of a square box paint as
     // Flutter's Border(bottom: ...) does: each side a filled band the box's
@@ -114,6 +117,19 @@ class RenderNodePaint extends RenderBox with ImageClient {
       }
       return;
     }
+    final circle = decoration.shape == api.DecorationShape.circle;
+    if (circle && decoration.dashPattern.every((d) => d <= 0) && decoration.strokeSides == api.StrokeSides.all) {
+      // A circle's stroke as a circle (drawn as an oval, like drawCircle).
+      for (final p in strokes) {
+        canvas.drawRRect(
+          rrect.deflate(inset),
+          paintFor(p, rect)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = w,
+        );
+      }
+      return;
+    }
     final path = Path();
     if (decoration.strokeSides == api.StrokeSides.all) {
       path.addRRect(rrect.deflate(inset));
@@ -151,7 +167,10 @@ class RenderNodePaint extends RenderBox with ImageClient {
   /// whole width inside, half centred, none outside); null otherwise.
   (List<String>, double, double)? _ruledSides() {
     final d = decoration;
-    if (d.strokeSides == api.StrokeSides.all || !d.radius.isZero || d.dashPattern.any((v) => v > 0)) return null;
+    if (d.strokeSides == api.StrokeSides.all || !d.radius.isZero || d.shape == api.DecorationShape.circle ||
+        d.dashPattern.any((v) => v > 0)) {
+      return null;
+    }
     final strokes = d.visibleStrokes.toList();
     if (strokes.isEmpty || d.strokeWidth <= 0 || strokes.any((p) => p.type != api.PaintType.solid)) return null;
     final w = d.strokeWidth;
