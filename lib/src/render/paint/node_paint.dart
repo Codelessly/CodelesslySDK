@@ -59,7 +59,10 @@ class RenderNodePaint extends RenderBox with ImageClient {
   void paint(PaintingContext context, Offset offset) {
     final canvas = context.canvas;
     final rect = offset & size;
-    final rrect = decoration.radius.flutter.toRRect(rect);
+    // A circle: the box's shortest side across, in its middle.
+    final rrect = decoration.shape == api.DecorationShape.circle
+        ? RRect.fromRectAndRadius(Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2), Radius.circular(rect.shortestSide / 2))
+        : decoration.radius.flutter.toRRect(rect);
     final fillShape = _clipped ? RRect.fromRectAndRadius(rect, Radius.zero) : rrect;
     if (_foreground) {
       for (final p in decoration.foregroundFills) {
@@ -79,6 +82,19 @@ class RenderNodePaint extends RenderBox with ImageClient {
       api.StrokeAlign.center => 0.0,
       api.StrokeAlign.outside => -w / 2,
     };
+    final circle = decoration.shape == api.DecorationShape.circle;
+    if (circle && decoration.dashPattern.every((d) => d <= 0) && decoration.strokeSides == api.StrokeSides.all) {
+      // A circle's stroke as a circle (drawn as an oval, like drawCircle).
+      for (final p in strokes) {
+        canvas.drawRRect(
+          rrect.deflate(inset),
+          paintFor(p, rect)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = w,
+        );
+      }
+      return;
+    }
     final path = Path();
     if (decoration.strokeSides == api.StrokeSides.all) {
       path.addRRect(rrect.deflate(inset));
