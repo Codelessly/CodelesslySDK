@@ -6,8 +6,6 @@
 // paper and the greys between them: nothing is Material's default (its
 // purple seed, tints, ripples, elevation, Roboto) and nothing comes from the
 // app the layout is shown in.
-import 'dart:collection';
-
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/material.dart';
@@ -71,7 +69,7 @@ class CodelesslyThemeTokens extends ThemeExtension<CodelesslyThemeTokens> {
 
 /// The themes made lately, by what they're made of (making one is costly
 /// and islands ask on every rebuild).
-final Map<(api.ThemeTokens, Brightness, Color?), ThemeData> _made = LinkedHashMap();
+final Map<(api.ThemeTokens, Brightness, Color?), ThemeData> _made = {};
 
 /// The theme of a layout's controls and of the runtime's dialogs, toasts,
 /// sheets, pickers, menus and tooltips: every [ColorScheme] role and every
