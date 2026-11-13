@@ -5,7 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'wiring_test.dart' show counter, reaction, show;
+import '../support/screen.dart' show counter, reaction, show;
 
 void main() {
   testWidgets('a schema-2 setValue path sets nothing and is said once, with the schema-3 path', (tester) async {

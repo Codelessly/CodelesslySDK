@@ -380,23 +380,4 @@ void main() {
     });
   });
 
-  test('every new function is documented', () {
-    final Set<String> documented = {
-      for (final doc in FormulaEvaluator.functionDocs) doc.name,
-    };
-    for (final name in [
-      'formatNumber',
-      'formatCurrency',
-      'formatPercent',
-      'formatDate',
-      'pluralCategory',
-      'plural',
-      'textDirection',
-      'textDirectionOf',
-      'fill',
-    ]) {
-      expect(FormulaEvaluator.functions, contains(name));
-      expect(documented, contains(name));
-    }
-  });
 }

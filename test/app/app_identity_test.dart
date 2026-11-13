@@ -36,7 +36,7 @@ void main() {
     },
   });
 
-  test('titles and descriptions per screen', () {
+  test('each screen has its own title and description', () {
     expect(CodelesslyAppIdentity.resolve(model).title, 'Hive');
     expect(CodelesslyAppIdentity.resolve(model, layoutId: 'home'), const ScreenIdentity(title: 'Hive', description: 'Bees', layoutId: 'home'));
     final log = CodelesslyAppIdentity.resolve(model, layoutId: 'log');
@@ -48,7 +48,7 @@ void main() {
     expect(CodelesslyAppIdentity.resolve(none, fallbackName: 'App').title, 'App');
   });
 
-  testWidgets('the updater applies the shown screen\'s title', (tester) async {
+  testWidgets('the browser tab takes the shown screen\'s title', (tester) async {
     final labels = <String>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
       if (call.method == 'SystemChrome.setApplicationSwitcherDescription') labels.add('${(call.arguments as Map)['label']}');

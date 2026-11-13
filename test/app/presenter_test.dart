@@ -29,7 +29,7 @@ void main() {
     return c;
   }
 
-  testWidgets('presents a layout from anywhere and gives back what closed it', (tester) async {
+  testWidgets('a layout can be presented from anywhere and gives back what closed it', (tester) async {
     setSize(tester);
     codelessly = app([
       screen('rate', variables: [const Variable(name: 'orders', type: VariableType.integer, value: 0)], onClick: [
@@ -55,7 +55,7 @@ void main() {
     expect(codelessly.route.value, isNull);
   });
 
-  testWidgets('a dismissed presentation gives null; an unknown screen gives null without throwing', (tester) async {
+  testWidgets('a dismissed presentation gives null, and an unknown screen gives null without failing', (tester) async {
     setSize(tester);
     codelessly = app([screen('promo')]);
     await tester.pumpWidget(hostApp(codelessly));
@@ -68,7 +68,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('one at a time: higher priority first, then in the order asked', (tester) async {
+  testWidgets('presentations show one at a time, higher priority first, then in the order asked', (tester) async {
     setSize(tester);
     final shown = <String>[];
     codelessly = app([
@@ -97,7 +97,7 @@ void main() {
     expect([for (final r in results) ((await r) as Map)['id']], ['a', 'b', 'c', 'd']);
   });
 
-  testWidgets('waits for a presenter host, then shows on the app navigator (MaterialApp.builder)', (tester) async {
+  testWidgets('a presentation waits for the app to be ready, then shows on its navigator', (tester) async {
     setSize(tester);
     codelessly = app([screen('later')]);
     final pending = codelessly.present('later');
@@ -114,7 +114,7 @@ void main() {
     expect(await pending, isNull);
   });
 
-  testWidgets('a banner leaves the app usable, closes itself, and a swipe dismisses it', (tester) async {
+  testWidgets('a banner leaves the app usable, closes itself and can be swiped away', (tester) async {
     setSize(tester);
     tester.view.padding = const FakeViewPadding(top: 24);
     var hostTaps = 0;

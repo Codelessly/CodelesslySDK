@@ -4,7 +4,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/drag_track.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'drag_track_test.dart' as support;
+import 'gestures/sliders_and_knobs_test.dart' as support;
 
 void main() {
   testWidgets('controlTrack animateTo moves a track to a value, snapped, and reports it', (tester) async {
