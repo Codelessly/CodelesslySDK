@@ -1,0 +1,23 @@
+{
+ "schema": 2,
+ "pages": [
+  "pages/home.json"
+ ],
+ "components": [
+  "components/Chip.json"
+ ],
+ "variables": [
+  {
+   "name": "tags",
+   "type": "list",
+   "value": [
+    {
+     "name": "Design"
+    },
+    {
+     "name": "Code"
+    }
+   ]
+  }
+ ]
+}

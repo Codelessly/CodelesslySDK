@@ -9,13 +9,20 @@ import 'package:codelessly_api/codelessly_api.dart';
 typedef Page = ({String name, Json json});
 
 /// The published bundle of [pages], and each canvas's layout.
+///
+/// [variables] are the project's (a site manifest's, as a publish model's
+/// `variables`); [breakpoints] the project's, over the pages' own;
+/// [components] the site's component documents: a layout lists the fonts of
+/// those it calls (directly or through others) with its own, so they load
+/// before it shows.
 ({PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) publishPages(
-    List<Page> pages) {
+    List<Page> pages, {Json variables = const {}, Object? breakpoints, List<Json> components = const []}) {
+  final library = ComponentLibrary.of([for (final c in components) LayoutDocument.fromJson(c)]);
+  final rawOf = {for (final c in components) readString(readMap(c['widget'])?['type']) ?? '': c};
   final layouts = <String, Json>{};
   final layoutOfCanvas = <String, String>{};
   final screens = <String, List<String>>{}; // layout id → its canvases
   final usedPaths = <String>{};
-  Object? breakpoints;
   String? entry;
   final fonts = <String, Json>{};
   for (final page in pages) {
@@ -59,7 +66,9 @@ typedef Page = ({String name, Json json});
       }
       final grouped = cs.length > 1 && cs.any((c) => doc[c]!.prop(CanvasProps.screen).isNotEmpty);
       final fontIds = <String>[];
-      for (final f in fontsUsedBy(nodes.values)) {
+      final called = library.closureOf(LayoutDocument(nodes: {for (final c in cs) for (final n in doc.subtree(c)) n.id: n}));
+      final componentNodes = [for (final t in called) ...(readMap(rawOf[t]?['nodes']) ?? const {}).values];
+      for (final f in fontsUsedBy([...nodes.values, ...componentNodes])) {
         final key = '${f.family}/${f.weight}/${f.italic}';
         fonts[key] = {'family': f.family, 'weight': f.weight, if (f.italic) 'italic': true};
         fontIds.add(key);
@@ -106,6 +115,7 @@ typedef Page = ({String name, Json json});
       for (final e in fonts.entries) e.key: {'id': e.key, ...e.value},
     },
     'breakpoints': ?breakpoints,
+    if (variables.isNotEmpty) 'variables': variables,
     'lastUpdated': 0,
   };
   return (
