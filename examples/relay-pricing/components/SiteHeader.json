@@ -1,0 +1,410 @@
+{
+ "schema": 2,
+ "id": "SiteHeader",
+ "roots": [
+  "hdr"
+ ],
+ "widget": {
+  "type": "SiteHeader",
+  "doc": "The site header: logo, navigation at desktop, a menu button below it.",
+  "props": [
+   {
+    "key": "menuOpen",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "boolean"
+     }
+    },
+    "default": ""
+   }
+  ]
+ },
+ "nodes": {
+  "hdr": {
+   "type": "column",
+   "children": [
+    "hdrIn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": 72,
+    "padding": [
+     18,
+     0,
+     18,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF080D0E"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        28,
+        0,
+        28,
+        0
+       ]
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        40,
+        0,
+        40,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "hdrIn": {
+   "type": "row",
+   "children": [
+    "logo",
+    "hdrRight",
+    "menuBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "fill": 72
+    },
+    "constraints": {
+     "maxWidth": 1320
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "logo": {
+   "type": "row",
+   "children": [
+    "logoMark",
+    "logoText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "logoMark": {
+   "type": "box",
+   "layout": {
+    "width": 34,
+    "height": 30
+   },
+   "props": {
+    "path": "M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z M20 30L26.9 0H33.4L26.5 30Z"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFB9F34C"
+     }
+    ]
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "text": "relay.",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "letterSpacing": -1.4,
+     "color": "#FFF0F4ED",
+     "height": 1.1
+    },
+    "runs": [
+     {
+      "start": 5,
+      "end": 6,
+      "style": {
+       "color": "#FFB9F34C"
+      }
+     }
+    ]
+   }
+  },
+  "hdrRight": {
+   "type": "row",
+   "children": [
+    "nav1",
+    "nav2",
+    "nav3",
+    "nav4",
+    "hdrCta"
+   ],
+   "visible": false,
+   "layout": {
+    "width": {
+     "hug": 560
+    },
+    "height": {
+     "hug": 42
+    }
+   },
+   "props": {
+    "spacing": 34
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "visible": true
+     }
+    }
+   ]
+  },
+  "nav1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Platform",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 15,
+     "color": "#FFA2B0A9"
+    }
+   }
+  },
+  "nav2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Pricing",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FFF0F4ED"
+    }
+   }
+  },
+  "nav3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Customers",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 15,
+     "color": "#FFA2B0A9"
+    }
+   }
+  },
+  "nav4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Changelog",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 15,
+     "color": "#FFA2B0A9"
+    }
+   }
+  },
+  "hdrCta": {
+   "type": "row",
+   "children": [
+    "hdrCtaLabel",
+    "hdrCtaIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 148
+    },
+    "height": 42,
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 20
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "hdrCta": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "#FFB9F34C"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "hdrCtaLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Talk to sales",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "color": "#FFF0F4ED"
+    }
+   }
+  },
+  "hdrCtaIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FFF0F4ED"
+   }
+  },
+  "menuBtn": {
+   "type": "row",
+   "children": [
+    "menuBtnIcon"
+   ],
+   "layout": {
+    "width": 42,
+    "height": 42
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF080D0E"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "visible": false
+     }
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.menuOpen",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "menuBtnIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": "menu",
+    "color": "#FFF0F4ED"
+   }
+  }
+ }
+}

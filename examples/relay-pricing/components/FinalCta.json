@@ -1,0 +1,393 @@
+{
+ "schema": 2,
+ "id": "FinalCta",
+ "roots": [
+  "ctaSec"
+ ],
+ "widget": {
+  "type": "FinalCta",
+  "doc": "The closing call to action.",
+  "props": []
+ },
+ "nodes": {
+  "ctaSec": {
+   "type": "stack",
+   "children": [
+    "ctaGrid",
+    "ctaMark",
+    "ctaCol"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 600
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       0,
+       -1
+      ],
+      "end": [
+       0,
+       1
+      ],
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF080D0E"
+       },
+       {
+        "position": 1,
+        "color": "#FF060B0B"
+       }
+      ]
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ],
+    "strokeSides": "top",
+    "clip": "hardEdge"
+   }
+  },
+  "ctaGrid": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 600
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "path": "M40 0V1200M120 0V1200M200 0V1200M280 0V1200M360 0V1200M440 0V1200M520 0V1200M600 0V1200M680 0V1200M760 0V1200M840 0V1200M920 0V1200M1000 0V1200M1080 0V1200M1160 0V1200M1240 0V1200M1320 0V1200M1400 0V1200M1480 0V1200M1560 0V1200M1640 0V1200M1720 0V1200M1800 0V1200M1880 0V1200M1960 0V1200M0 80H2000M0 160H2000M0 240H2000M0 320H2000M0 400H2000M0 480H2000M0 560H2000M0 640H2000M0 720H2000M0 800H2000M0 880H2000M0 960H2000M0 1040H2000M0 1120H2000"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF111A1A"
+     }
+    ],
+    "strokeWidth": 1
+   }
+  },
+  "ctaMark": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 200
+    },
+    "x": {
+     "end": 20
+    },
+    "y": {
+     "end": 50
+    }
+   },
+   "props": {
+    "text": "R/",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 140,
+     "fontWeight": 700,
+     "letterSpacing": -10,
+     "height": 1,
+     "color": "#FF18261F"
+    }
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 230
+       }
+      },
+      "layout": {
+       "y": {
+        "end": 50
+       }
+      }
+     }
+    }
+   ]
+  },
+  "ctaCol": {
+   "type": "column",
+   "children": [
+    "ctaIn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 600
+    },
+    "padding": [
+     18,
+     96,
+     18,
+     90
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        28,
+        118,
+        28,
+        118
+       ]
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        40,
+        118,
+        40,
+        120
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "ctaIn": {
+   "type": "column",
+   "children": [
+    "ctaEyebrow",
+    "ctaTitle",
+    "ctaBody",
+    "ctaBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 360
+    },
+    "constraints": {
+     "maxWidth": 1320
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "ctaEyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "READY WHEN IT COUNTS",
+    "style": {
+     "fontFamily": "IBM Plex Mono",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "letterSpacing": 2.4,
+     "color": "#FFB9F34C"
+    }
+   }
+  },
+  "ctaTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 190
+    },
+    "margin": [
+     0,
+     26,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "Make the next incident\nyour best response.",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 44,
+     "fontWeight": 700,
+     "letterSpacing": -2.4,
+     "height": 1.08,
+     "color": "#FFF0F4ED"
+    },
+    "runs": [
+     {
+      "start": 23,
+      "end": 42,
+      "style": {
+       "color": "#FFB9F34C"
+      }
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 54,
+        "letterSpacing": -3
+       }
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 88,
+        "letterSpacing": -4.5
+       }
+      },
+      "layout": {
+       "margin": [
+        0,
+        30,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "ctaBody": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 600
+    },
+    "height": {
+     "hug": 28
+    },
+    "margin": [
+     0,
+     24,
+     0,
+     0
+    ],
+    "constraints": {
+     "maxWidth": 600
+    }
+   },
+   "props": {
+    "text": "Bring the whole team into one clear response.",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 18,
+     "height": 1.6,
+     "color": "#FFA2B0A9"
+    }
+   }
+  },
+  "ctaBtn": {
+   "type": "row",
+   "children": [
+    "ctaBtnLabel",
+    "ctaBtnIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 172
+    },
+    "height": 52,
+    "padding": [
+     20,
+     0,
+     20,
+     0
+    ],
+    "margin": [
+     0,
+     34,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFB9F34C"
+     }
+    ]
+   }
+  },
+  "ctaBtnLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Talk to sales",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "color": "#FF0A1006"
+    }
+   }
+  },
+  "ctaBtnIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FF0A1006"
+   }
+  }
+ }
+}

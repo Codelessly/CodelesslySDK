@@ -1,0 +1,320 @@
+{
+ "schema": 2,
+ "id": "MobileMenu",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "MobileMenu",
+  "doc": "The full-screen menu below desktop, open while menuOpen holds.",
+  "props": [
+   {
+    "key": "menuOpen",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "boolean"
+     }
+    },
+    "default": ""
+   }
+  ]
+ },
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "menuHdr",
+    "menuList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF080D0E"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.menuOpen && !screen.atLeast.desktop}"
+   }
+  },
+  "menuHdr": {
+   "type": "row",
+   "children": [
+    "logoM",
+    "menuClose"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": 72,
+    "padding": [
+     18,
+     0,
+     18,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        28,
+        0,
+        28,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "logoM": {
+   "type": "row",
+   "children": [
+    "logoMMark",
+    "logoMText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "logoMMark": {
+   "type": "box",
+   "layout": {
+    "width": 34,
+    "height": 30
+   },
+   "props": {
+    "path": "M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z M20 30L26.9 0H33.4L26.5 30Z"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFB9F34C"
+     }
+    ]
+   }
+  },
+  "logoMText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "text": "relay.",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "letterSpacing": -1.4,
+     "color": "#FFF0F4ED",
+     "height": 1.1
+    },
+    "runs": [
+     {
+      "start": 5,
+      "end": 6,
+      "style": {
+       "color": "#FFB9F34C"
+      }
+     }
+    ]
+   }
+  },
+  "menuClose": {
+   "type": "row",
+   "children": [
+    "menuCloseIcon"
+   ],
+   "layout": {
+    "width": 42,
+    "height": 42
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF080D0E"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.menuOpen",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "menuCloseIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": "close",
+    "color": "#FFF0F4ED"
+   }
+  },
+  "menuList": {
+   "type": "listView",
+   "children": [
+    "mi"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 400
+    },
+    "padding": [
+     28,
+     34,
+     28,
+     0
+    ]
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${menuLinks}"
+   }
+  },
+  "mi": {
+   "type": "row",
+   "children": [
+    "miText",
+    "miIcon"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1380
+    },
+    "height": 76
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.menuOpen",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "miText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 22,
+     "fontWeight": 700,
+     "color": "#FFF0F4ED"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.accent == true ? '#FFB9F34C' : '#FFF0F4ED'}"
+   }
+  },
+  "miIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FFF0F4ED"
+   },
+   "bind": {
+    "props.color": "${= item.accent == true ? '#FFB9F34C' : '#FFF0F4ED'}"
+   }
+  }
+ }
+}
