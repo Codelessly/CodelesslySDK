@@ -1,18 +1,20 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// ignore: depend_on_referenced_packages
 import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
+
+// ignore: depend_on_referenced_packages
 class RejectWrites extends InMemorySharedPreferencesStore {
  RejectWrites():super.empty();
  @override Future<bool> setValue(String valueType,String key,Object value)async=>false;
 }
 
-
 void main() {
-  test('rejected preference writes fail without notifying or changing runtime data',()async{
+  test('a write the device refuses fails, changes nothing and tells no one',()async{
     SharedPreferences.setMockInitialValues({});
     final original=SharedPreferencesStorePlatform.instance;
     SharedPreferencesStorePlatform.instance=RejectWrites();
@@ -26,7 +28,7 @@ void main() {
     reopened.dispose();
     storage.dispose();
   });
-  test('memory caches', () async {
+  test('a cache keeps and removes what it is given', () async {
     final cache = MemoryKeyValueCache();
     await cache.write('auth', {'projectId': 'p'});
     expect(await cache.contains('auth'), isTrue);
@@ -45,7 +47,7 @@ void main() {
     expect(await files.read('fonts', 'b.ttf'), isNull);
   });
 
-  test('memory local storage notifies per key', () async {
+  test('storage tells the readers of a key when it changes', () async {
     final storage = MemoryLocalStorage();
     var all = 0, name = 0;
     storage.addListener(() => all++);
@@ -60,7 +62,7 @@ void main() {
     storage.dispose();
   });
 
-  test('preferences local storage persists JSON under its prefix', () async {
+  test('stored values persist on the device under the app\'s prefix', () async {
     SharedPreferences.setMockInitialValues({'codelessly.p1.cart': '[1,2]', 'other': 'x'});
     final storage = await PreferencesLocalStorage.open(prefix: 'codelessly.p1.');
     expect(storage.getAll(), {
@@ -74,7 +76,7 @@ void main() {
     expect(prefs.getKeys(), {'other'});
   });
 
-  test('cloud file paths stay in their root', () {
+  test('a cloud file path cannot leave its root folder', () {
     expect(CloudFilePaths.folderFor(root: 'data/p', folder: '../a//b/'), 'data/p/a/b');
     expect(CloudFilePaths.folderFor(root: 'data/p', folder: 'pics', access: CloudFileAccess.private, uid: 'u1'),
         'data/p/users/u1/pics');
@@ -83,7 +85,7 @@ void main() {
     expect(CloudFilePaths.contentTypeFor('zip'), 'application/octet-stream');
   });
 
-  test('memory file storage', () async {
+  test('files can be stored, read and removed', () async {
     final files = MemoryFileStorage();
     final file = await files.upload('pics/../a.png', Uint8List(4), contentType: 'image/png');
     expect(file.path, 'pics/a.png');
@@ -93,5 +95,27 @@ void main() {
     expect(await files.downloadUrl('pics/a.png'), 'memory://pics/a.png');
     await files.delete(file.url);
     expect(files.files.keys, ['pics/deep/b.png']);
+  });
+
+  group('closing a project', () {
+    test('closing a project closes the services it created', () async {
+      final project = Codelessly();
+      final services = project.services as Services;
+      final storage = services.storage as ChangeNotifier;
+      project.dispose();
+      await Future<void>.delayed(Duration.zero);
+      // A FlutterError up to Flutter 3.47; a StateError once ChangeNotifier moved to package:listen.
+      expect(() => storage.addListener(() {}), throwsA(anyOf(isFlutterError, isStateError)));
+    });
+    test('closing a project leaves the services the app passed in to the app', () async {
+      final services = Services();
+      final project = Codelessly(config: CodelesslyConfig(services: services));
+      project.dispose();
+      final storage = services.storage as ChangeNotifier;
+      void listener() {}
+      storage.addListener(listener);
+      storage.removeListener(listener);
+      await services.dispose();
+    });
   });
 }

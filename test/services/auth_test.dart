@@ -3,8 +3,8 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('the auth value', () {
-    test('reads as signed out with no user, or an anonymous one', () {
+  group('what a screen reads about the user', () {
+    test('signed out with no user, or with an anonymous one', () {
       for (final user in [null, const AppUser(uid: 'anon', isAnonymous: true)]) {
         final value = authValue(user);
         expect(value['isSignedIn'], false);
@@ -14,7 +14,7 @@ void main() {
       }
     });
 
-    test('a guest is not signed in but has its uid, profile and role', () {
+    test('a guest is not signed in but has an id, a profile and a role', () {
       const guest = AppUser(uid: 'g1', isAnonymous: true, isGuest: true);
       final value = authValue(guest, profile: {'favourites': ['a']});
       expect(value['isSignedIn'], false);
@@ -28,7 +28,7 @@ void main() {
       expect(AuthProfiles.newProfile(guest)['role'], 'guest');
     });
 
-    test('describes a signed-in user and their profile', () {
+    test('a signed-in user with their profile', () {
       const user = AppUser(uid: 'u1', email: 'ana@x.dev', providers: ['password'], emailVerified: true);
       final value = authValue(user);
       expect(value['initial'], 'A');
@@ -40,8 +40,8 @@ void main() {
     });
   });
 
-  group('memory accounts', () {
-    test('sign up, out and in, with readable failures', () async {
+  group('accounts', () {
+    test('a user signs up, out and in, and failures have readable messages', () async {
       final auth = MemoryAuthService();
       final user = await auth.signUp(email: 'ana@x.dev', password: 'secret1', displayName: 'Ana');
       expect(auth.currentUser, user);
@@ -60,7 +60,7 @@ void main() {
       auth.dispose();
     });
 
-    test('a guest session: sign out ends it, delete removes it', () async {
+    test('a guest session ends on sign-out and is removed on delete', () async {
       final auth = MemoryAuthService();
       final guest = await auth.signInAsGuest();
       expect(guest.isGuest, isTrue);
@@ -74,7 +74,7 @@ void main() {
       auth.dispose();
     });
 
-    test('signed out by default', () async {
+    test('nobody is signed in to begin with', () async {
       const auth = SignedOutAuthService();
       expect(auth.currentUser, isNull);
       await expectLater(auth.signIn(email: 'a', password: 'b'), throwsA(isA<AuthFailure>()));
@@ -82,7 +82,7 @@ void main() {
   });
 
   group('profiles', () {
-    test('a new user gets a profile with the schema defaults, once', () async {
+    test('a new user gets a profile with the default values, once', () async {
       final db = BackendCloudDatabase(
         backend: MemoryDocumentBackend(),
         rules: DataRules.fromJson({
@@ -110,7 +110,7 @@ void main() {
       db.dispose();
     });
 
-    test('Services.watchAuth follows the user and their profile', () async {
+    test('a screen follows the user and their profile as they change', () async {
       final auth = MemoryAuthService();
       final services = Services(auth: auth, analytics: RecordingAnalytics());
       final values = <Map<String, Object?>>[];

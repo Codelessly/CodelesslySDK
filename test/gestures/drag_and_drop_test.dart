@@ -1,7 +1,3 @@
-// Drag and drop (`draggable`, `dropTarget`) on the render tree. A two-column board: each column is a list of
-// `cards` filtered by lane and a drop target that owns its list; each card
-// is draggable. Dropping runs `moveItems` on `cards`. Column b takes at
-// most 2 cards (a WIP limit).
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart';
@@ -9,6 +5,13 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/screen.dart' as harness;
+
+// Drag and drop (`draggable`, `dropTarget`) on the render tree. A two-column board: each column is a list of
+// `cards` filtered by lane and a drop target that owns its list; each card
+// is draggable. Dropping runs `moveItems` on `cards`. Column b takes at
+// most 2 cards (a WIP limit).
 
 class Board {
   Board(this.tree, this.scope);
@@ -153,124 +156,6 @@ Future<Board> pump(WidgetTester tester,
   return Board(tree, scope);
 }
 
-/// A board whose columns are one column repeated over `lanes` (a horizontal
-/// list), each the drop target of the card list inside it, which draws
-/// `slot` in its slot.
-Future<Board> pumpRepeated(WidgetTester tester, {bool tabs = false}) async {
-  tester.view.physicalSize = const Size(400, 500);
-  tester.view.devicePixelRatio = 1;
-  addTearDown(tester.view.reset);
-  final doc = api.LayoutDocument.fromJson({
-    'roots': ['board'],
-    'nodes': {
-      'board': {
-        'type': 'column',
-        'children': [if (tabs) 'tabs', 'lanes', 'slot'],
-        'layout': {'width': 320, 'height': 400},
-      },
-      // A tab per lane, beside the columns: dropping on one adds to the end
-      // of its column.
-      'tabs': {
-        'type': 'listView',
-        'children': ['tab'],
-        'layout': {'width': 320, 'height': 30},
-        'props': {'scrollDirection': 'horizontal', 'scrollable': false},
-        'bind': {'data': r'${lanes}'},
-      },
-      'tab': {
-        'type': 'text',
-        'layout': {'width': 160, 'height': 30},
-        'props': {'text': r'Tab ${item}'},
-        'dropTarget': {'accepts': ['card'], 'key': r'${item}', 'listNodeId': 'list', 'slot': 'node', 'slotNodeId': 'slot'},
-        'actions': [
-          {
-            'trigger': {'type': 'drop'},
-            'actions': [
-              {
-                'type': 'setVariable',
-                'variable': 'cards',
-                'value': r"${= moveItems(cards, result.ids, result.beforeId, object('lane', result.key))}",
-              },
-            ],
-          },
-        ],
-      },
-      'lanes': {
-        'type': 'listView',
-        'children': ['col'],
-        'layout': {'width': 320, 'height': 370},
-        'props': {'scrollDirection': 'horizontal', 'scrollable': false},
-        'bind': {'data': r'${lanes}'},
-      },
-      'col': {
-        'type': 'column',
-        'children': ['list'],
-        'layout': {'width': 160, 'height': 370},
-        'dropTarget': {'accepts': ['card'], 'key': r'${item}', 'listNodeId': 'list', 'slot': 'node', 'slotNodeId': 'slot'},
-        'actions': [
-          {
-            'trigger': {'type': 'drop'},
-            'actions': [
-              {
-                'type': 'setVariable',
-                'variable': 'cards',
-                'value': r"${= moveItems(cards, result.ids, result.beforeId, object('lane', result.key))}",
-              },
-            ],
-          },
-        ],
-      },
-      'list': {
-        'type': 'listView',
-        'children': ['card'],
-        'layout': {'width': 160, 'height': 370},
-        'bind': {'data': r'${= filter(cards, c => c.lane == item)}'},
-      },
-      'card': {
-        'type': 'text',
-        'layout': {'width': 160, 'height': 40},
-        'props': {'text': r'${item.title}'},
-        'draggable': {'group': 'card', 'data': r'${item.id}', 'start': 'press', 'whileDragging': 'hidden'},
-      },
-      'slot': {
-        'type': 'row',
-        'children': ['slot_text'],
-        'layout': {'width': {'fill': 100}, 'height': {'fill': 100}},
-        'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
-        'bind': {'visible': r'${= false}'},
-      },
-      'slot_text': {
-        'type': 'text',
-        'layout': {'width': {'hug': 60}, 'height': {'hug': 16}},
-        'props': {'text': 'Drop here'},
-      },
-    },
-  });
-  final values = ValuesScope({'drag': dragIdleValues});
-  final scope = VariableScope([
-    const Variable(name: 'lanes', type: VariableType.list, value: ['a', 'b']),
-    const Variable(name: 'cards', type: VariableType.list, value: [
-      {'id': 'c1', 'title': 'One', 'lane': 'a'},
-      {'id': 'c2', 'title': 'Two', 'lane': 'a'},
-      {'id': 'c4', 'title': 'Four', 'lane': 'b'},
-    ]),
-  ], parent: values);
-  final source = NodeValues(DocumentSource(doc));
-  final tree = NodeTree(source, binder: NodeBinder(scope: scope));
-  final context = RuntimeActionContext(scope: scope, tree: tree, nodeValues: source, services: Services());
-  final reactions = TreeReactions(runner: const CodelesslyActions(), context: context);
-  tree.interactions = reactions;
-  addTearDown(() {
-    reactions.dispose();
-    tree.dispose();
-  });
-  await tester.pumpWidget(MaterialApp(
-    home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'board', interactive: true)),
-  ));
-  await tester.pump();
-  return Board(tree, scope);
-}
-
 Json log(String what) => {
       'type': 'setVariable',
       'variable': 'log',
@@ -292,8 +177,12 @@ Future<TestGesture> dragTo(WidgetTester tester, Offset start, Offset to, {bool r
   return gesture;
 }
 
+// A drag handle (draggable on press) inside a list item whose own draggable
+// is disabled (long press, phones only), inside a clickable card: dragging
+// the handle starts the drag.
+
 void main() {
-  testWidgets('a card dragged into the other column lands before the card under the pointer', (tester) async {
+  testWidgets('a card dragged into another column lands before the card under the pointer', (tester) async {
     final b = await pump(tester);
     final start = textRect(tester, 'One').center;
     final four = textRect(tester, 'Four').topCenter;
@@ -328,22 +217,7 @@ void main() {
     expect(dropSlotOf(b.tree, 'list_b'), isNull);
   });
 
-  testWidgets('a column that names its card list opens the slot in that list', (tester) async {
-    final b = await pump(tester, wrapped: true);
-    final start = textRect(tester, 'One').center;
-    final four = textRect(tester, 'Four').topCenter;
-    final gesture = await dragTo(tester, start, four + const Offset(0, 4), release: false);
-    expect(b.drag['over'], 'b');
-    expect(dropSlotOf(b.tree, 'list_b'), const DropSlotSpec(before: 0, size: Size(160, 40)));
-    await tester.pump();
-    // The data-bound list draws the slot: the card below it moves down.
-    expect(textRect(tester, 'Four').top, greaterThanOrEqualTo(four.dy + 40 - 0.5));
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(b.lane('b'), ['c1', 'c4']);
-  });
-
-  testWidgets('the slot shows the target\'s slot node, hidden in its own place', (tester) async {
+  testWidgets('the gap where the card will land shows the target\'s placeholder, and the card is hidden in its old place', (tester) async {
     final b = await pump(tester, wrapped: true, bTarget: {'slot': 'node', 'slotNodeId': 'slot'}, extraNodes: {
       // Designed hidden where it sits (a sibling of the columns), as an
       // editor keeps a slot node out of the way.
@@ -379,138 +253,7 @@ void main() {
     expect(b.lane('b'), ['c1', 'c4']);
   });
 
-  testWidgets('of a column repeated over the lanes, only the one under the drag opens its slot', (tester) async {
-    final b = await pumpRepeated(tester);
-    final start = textRect(tester, 'One').center;
-    final four = textRect(tester, 'Four').topCenter;
-    final gesture = await dragTo(tester, start, four + const Offset(0, 4), release: false);
-    expect(b.drag['over'], 'b');
-    await tester.pump();
-    // One slot, in the second column, where Four was; the first column's
-    // Two keeps its place.
-    expect(paragraphs(tester, 'Drop here'), 1);
-    expect(textRect(tester, 'Drop here').center.dx, closeTo(240, 1));
-    expect(textRect(tester, 'Four').top, greaterThanOrEqualTo(four.dy + 40 - 0.5));
-    expect(textRect(tester, 'Two').top, closeTo(0, 0.5));
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(b.lane('b'), ['c1', 'c4']);
-  });
-
-  testWidgets('the first tab opens the slot at the end of the first column', (tester) async {
-    final b = await pumpRepeated(tester, tabs: true);
-    final gesture = await dragTo(tester, textRect(tester, 'Four').center, textRect(tester, 'Tab a').center, release: false);
-    expect(b.drag['over'], 'a');
-    await tester.pump();
-    // After One and Two.
-    expect(textRect(tester, 'Drop here').center, offsetMoreOrLessEquals(const Offset(80, 30 + 80 + 20), epsilon: 1));
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(b.lane('a'), ['c1', 'c2', 'c4']);
-  });
-
-  testWidgets('drag.target names the node of the target the drag is over, a tab or its column', (tester) async {
-    final b = await pumpRepeated(tester, tabs: true);
-    final gesture = await dragTo(tester, textRect(tester, 'One').center, textRect(tester, 'Tab b').center, release: false);
-    expect(b.drag['over'], 'b');
-    expect(b.drag['target'], 'tab');
-    await gesture.moveTo(textRect(tester, 'Four').center);
-    await tester.pump();
-    expect(b.drag['over'], 'b');
-    expect(b.drag['target'], 'col');
-    await gesture.up();
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('a tab beside the columns opens the slot at the end of its column', (tester) async {
-    final b = await pumpRepeated(tester, tabs: true);
-    final four = textRect(tester, 'Four');
-    final gesture = await dragTo(tester, textRect(tester, 'One').center, textRect(tester, 'Tab b').center, release: false);
-    expect(b.drag['over'], 'b');
-    await tester.pump();
-    expect(paragraphs(tester, 'Drop here'), 1);
-    final slot = textRect(tester, 'Drop here');
-    expect(slot.center.dx, closeTo(240, 1));
-    // After Four, which stays put.
-    expect(textRect(tester, 'Four').top, closeTo(four.top, 0.5));
-    // Four's card is 40 tall; the slot (40) right after it.
-    expect(slot.center.dy, closeTo(four.top + 60, 1));
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(b.lane('b'), ['c4', 'c1']);
-  });
-
-  testWidgets('a running list a drop target opens its slot in still scrolls', (tester) async {
-    final b = await pump(tester, wrapped: true, extraNodes: {});
-    // Lane a holds three 40 px cards in a 400 px list: give it more than fits.
-    b.scope.set('cards', [
-      for (var i = 0; i < 14; i++) {'id': 'm$i', 'title': 'Card $i', 'lane': 'a'},
-    ]);
-    await tester.pump();
-    RenderBox? scroll;
-    void visit(RenderObject o) {
-      if (scroll == null && o.runtimeType.toString() == 'RenderDesignScroll' && o.attached) scroll = o as RenderBox;
-      o.visitChildren(visit);
-    }
-    visit(b.tree.boxOf('list_a')!);
-    expect(scroll, isNotNull);
-    final before = textRect(tester, 'Card 0').top;
-    await tester.sendEventToBinding(PointerScrollEvent(position: textRect(tester, 'Card 2').center, scrollDelta: const Offset(0, 120)));
-    await tester.pump();
-    expect(textRect(tester, 'Card 0').top, closeTo(before - 120, 0.5));
-  });
-
-  testWidgets('an in-gap slot draws its node between the items and moves nothing', (tester) async {
-    final b = await pump(tester, wrapped: true, bTarget: {'slot': 'node', 'slotNodeId': 'bar', 'slotSize': 'inGap'}, extraNodes: {
-      'bar': {
-        'type': 'text',
-        'visible': false,
-        'layout': {'width': 160, 'height': 10},
-        'props': {'text': 'Insert'},
-      },
-    });
-    // Lane b: Four only; spaced cards would leave a gap, here 0: the bar sits on the boundary.
-    final four = textRect(tester, 'Four');
-    final gesture = await dragTo(tester, textRect(tester, 'One').center, four.topCenter + const Offset(0, 4), release: false);
-    expect(b.drag['over'], 'b');
-    await tester.pump();
-    // Nothing moves; the bar is centred on Four's top edge (before it).
-    expect(textRect(tester, 'Four').top, closeTo(four.top, 0.5));
-    final bar = textRect(tester, 'Insert');
-    expect(bar.center.dy, closeTo(four.top, 1));
-    await gesture.up();
-    await tester.pumpAndSettle();
-    expect(b.lane('b'), ['c1', 'c4']);
-  });
-
-  testWidgets('a feedback node that hugs takes its content\'s size, not its design size', (tester) async {
-    await pump(tester, cardDraggable: {'feedbackNodeId': 'fb'}, extraNodes: {
-      // Designed 40 × 40 (the size a hug node is saved with), hugging
-      // a label that reads the drag: it must grow with the text.
-      'fb': {
-        'type': 'column',
-        'children': ['fb_text'],
-        'visible': false,
-        'layout': {'width': {'hug': 40}, 'height': {'hug': 40}},
-      },
-      'fb_text': {
-        'type': 'text',
-        'layout': {'width': {'hug': 40}, 'height': {'hug': 20}},
-        'props': {'text': r"${item.title} over ${= drag.over == '' ? 'nothing yet' : drag.over}"},
-      },
-    });
-    final start = textRect(tester, 'One').center;
-    final gesture = await dragTo(tester, start, start + const Offset(20, 30), release: false);
-    await tester.pump();
-    final label = textRect(tester, 'One over a', feedback: true);
-    expect(label.width, greaterThan(60));
-    expect(label.height, lessThan(30)); // one line, not squeezed into 40 wide
-    expect(tester.takeException(), isNull);
-    await gesture.up();
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('a full column refuses the drop (acceptIf) and nothing moves', (tester) async {
+  testWidgets('a column whose condition refuses the drop takes nothing', (tester) async {
     final b = await pump(tester, bActions: [
       {
         'trigger': {'type': 'dropRejected'},
@@ -535,22 +278,7 @@ void main() {
     expect(b.scope.read('log'), ['rejected c2 b', 'cancel c2']);
   });
 
-  testWidgets('a slot node at its own size, and none for a refused drop when asked', (tester) async {
-    final b = await pump(tester, bTarget: {'slot': 'node', 'slotNodeId': 'line', 'slotSize': 'node', 'slotWhenRefused': false});
-    var g = await dragTo(tester, textRect(tester, 'One').center, const Offset(240, 300), release: false);
-    expect(dropSlotOf(b.tree, 'list_b'),
-        const DropSlotSpec(before: 1, size: Size(160, 40), slotNodeId: 'line', ownSize: true));
-    await g.up();
-    await tester.pumpAndSettle();
-    g = await dragTo(tester, textRect(tester, 'Two').center, const Offset(240, 300), release: false);
-    // Column b is full: refused, and it opens nothing.
-    expect(b.drag['accepted'], isFalse);
-    expect(dropSlotOf(b.tree, 'list_b'), const DropSlotSpec(before: 2, size: Size.zero));
-    await g.up();
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('drag.x/y and fx/fy give where the dragged node lands', (tester) async {
+  testWidgets('reactions can read where the dragged node is and where it will land', (tester) async {
     final b = await pump(tester);
     // The dragged node's center is the pointer less the grab's distance
     // from the node's center. Column b spans x 160..320, y 0..400.
@@ -580,7 +308,7 @@ void main() {
     expect(b.drag['fy'] as double, closeTo(center.dy / 400, 0.01));
   });
 
-  testWidgets('reordering within a column', (tester) async {
+  testWidgets('a card can be reordered within its column', (tester) async {
     final b = await pump(tester);
     final start = textRect(tester, 'Three').center;
     final to = textRect(tester, 'One').topCenter + const Offset(0, 2);
@@ -591,7 +319,7 @@ void main() {
     expect(b.lane('a'), ['c3', 'c1', 'c2']);
   });
 
-  testWidgets('the source fires start and completed; the target enter, exit and drop', (tester) async {
+  testWidgets('the dragged node reports start and completed, and the target reports enter, exit and drop', (tester) async {
     final b = await pump(tester, cardActions: [
       {
         'trigger': {'type': 'dragStart'},
@@ -627,7 +355,7 @@ void main() {
     expect(logged.skip(4), unorderedEquals(['drop b 1', 'completed c1']));
   });
 
-  testWidgets('let go over no target springs back and cancels', (tester) async {
+  testWidgets('a card let go over no target springs back and reports a cancel', (tester) async {
     final b = await pump(tester, cardActions: [
       {
         'trigger': {'type': 'dragCancel'},
@@ -708,19 +436,7 @@ void main() {
       return found!;
     }
 
-    testWidgets('a centered copy is held by its center: drag.x/y is the pointer', (tester) async {
-      final (tree, scope) = await stack(tester, source: {'feedbackAnchor': 'center'});
-      final g = await dragTo(tester, const Offset(30, 30), const Offset(280, 230), release: false);
-      expect(DragAndDrop.of(tree).value['x'], closeTo(100, 0.01));
-      expect(DragAndDrop.of(tree).value['y'], closeTo(50, 0.01));
-      await g.up();
-      await tester.pumpAndSettle();
-      expect(scope.read('log'), ['drop 100.0 50.0']);
-    });
-
-    // Removed in schema 3: fullIf and the dropFull trigger.
-
-    testWidgets('the source ghosts while dragged and flies back on its spring', (tester) async {
+    testWidgets('the dragged node leaves a ghost while dragged and flies back on its spring', (tester) async {
       final (tree, scope) = await stack(tester, source: {'ghostOpacity': 0.3});
       final g = await dragTo(tester, const Offset(30, 30), const Offset(120, 60), release: false);
       final layers = <OpacityLayer>[];
@@ -750,7 +466,7 @@ void main() {
 
     // Removed in schema 3: hoverDelay and the dragHover trigger.
 
-    testWidgets('a disabled source, a target that takes another group', (tester) async {
+    testWidgets('a disabled node does not drag, and a target for another group does not take it', (tester) async {
       var (tree, scope) = await stack(tester, source: {'enabled': false});
       await dragTo(tester, const Offset(30, 30), const Offset(280, 280));
       expect(scope.read('log'), isEmpty);
@@ -763,7 +479,7 @@ void main() {
       expect(scope.read('log'), ['cancel']);
     });
 
-    testWidgets('the design canvas takes no drag', (tester) async {
+    testWidgets('on the design canvas nothing drags', (tester) async {
       final (tree, _) = await stack(tester, interactive: false);
       var found = false;
       void visit(RenderObject o) {
@@ -773,6 +489,171 @@ void main() {
 
       visit(tree.boxOf('s')!);
       expect(found, isFalse);
+    });
+  });
+
+  group('scrolling while dragging', () {
+    Future<(NodeTree, ScrollController, ScrollController)> board(WidgetTester tester, {bool enabled = true}) async {
+      tester.view.physicalSize = const Size(600, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final scope = VariableScope(const []);
+      final doc = api.LayoutDocument.fromJson({
+        'roots': ['board'],
+        'nodes': {
+          'board': {
+            'type': 'column',
+            'children': ['card', 'target'],
+            'layout': {'width': 1200, 'height': 1600},
+          },
+          'card': {
+            'type': 'text',
+            'layout': {'width': 1200, 'height': 40},
+            'props': {'text': 'Drag me'},
+            'draggable': {'group': 'shift', 'data': 'shift1', 'start': 'press'},
+          },
+          'target': {
+            'type': 'container',
+            'layout': {'width': 1200, 'height': 1560},
+            'dropTarget': {
+              'accepts': ['shift'],
+              'key': 'schedule',
+            },
+          },
+        },
+      });
+      final tree = NodeTree(DocumentSource(doc), binder: NodeBinder(scope: scope));
+      final reactions = TreeReactions(
+        runner: const CodelesslyActions(),
+        context: RuntimeActionContext(scope: scope, tree: tree, services: Services()),
+      );
+      tree.interactions = reactions;
+      addTearDown(reactions.dispose);
+      final h = ScrollController(), v = ScrollController();
+      addTearDown(() {
+        tree.dispose();
+        h.dispose();
+        v.dispose();
+      });
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 600,
+              height: 400,
+              child: SingleChildScrollView(
+                controller: h,
+                scrollDirection: Axis.horizontal,
+                physics: enabled ? null : const NeverScrollableScrollPhysics(),
+                child: SizedBox(
+                  width: 1200,
+                  height: 400,
+                  child: SingleChildScrollView(
+                    controller: v,
+                    physics: enabled ? null : const NeverScrollableScrollPhysics(),
+                    child: NodeView(tree: tree, rootId: 'board', interactive: true),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      return (tree, h, v);
+    }
+
+    testWidgets('holding a dragged item near an edge scrolls the lists under it, and letting go stops', (tester) async {
+      final (tree, h, v) = await board(tester);
+      final gesture = await tester.startGesture(textRect(tester, 'Drag me').center);
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump();
+      await gesture.moveTo(const Offset(60, 20));
+      await tester.pump();
+      await gesture.moveTo(const Offset(570, 370));
+      await tester.pump();
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(h.offset, greaterThan(10));
+      expect(v.offset, greaterThan(10));
+      expect(DragAndDrop.of(tree).value['over'], 'schedule');
+      await gesture.up();
+      await tester.pumpAndSettle();
+      final after = (h.offset, v.offset);
+      await tester.pump(const Duration(seconds: 1));
+      expect((h.offset, v.offset), after);
+    });
+  });
+
+  group('nested drags', () {
+    for (final kind in [PointerDeviceKind.mouse, PointerDeviceKind.touch])
+    for (final scrolls in [false, true])
+    for (final outerEnabled in [false, null])
+    testWidgets('a handle drags inside an item whose own drag is ${outerEnabled == null ? 'absent' : 'disabled'} (scrolling page: $scrolls, ${kind.name})',
+        (tester) async {
+      final s = await harness.show(
+        tester,
+        {
+          // A scrolling page, as a form builder's canvas is.
+          'col': {'type': 'column', 'children': ['list'], 'layout': {'width': 300, 'height': 400}, 'props': {'scrollable': scrolls}},
+          'list': {
+            'type': 'listView',
+            'children': ['item'],
+            'layout': {'width': 300, 'height': {'hug': 0}},
+            'bind': {'data': r'${items}'},
+            'props': {'scrollable': false},
+            'dropTarget': {'accepts': ['card'], 'key': 'canvas', 'listNodeId': 'list'},
+          },
+          'item': {
+            'type': 'column',
+            'children': ['card', 'ghost'],
+            'layout': {'width': {'fill': 0}, 'height': {'hug': 0}},
+            if (outerEnabled != null)
+              'draggable': {'group': 'card', 'data': r'${item}', 'start': 'longPress', 'enabled': outerEnabled,
+                            'whileDragging': 'hidden', 'feedbackNodeId': 'ghost'},
+          },
+          'card': {
+            'type': 'row',
+            'children': ['handle', 'label'],
+            'layout': {'width': {'fill': 0}, 'height': 50},
+            'actions': [
+              {'trigger': {'type': 'click'}, 'actions': [{'type': 'setVariable', 'variable': 'picked', 'value': r'${item}'}]},
+            ],
+          },
+          // No fill of its own: only its icon takes the press.
+          'handle': {
+            'type': 'row',
+            'children': ['grip'],
+            'layout': {'width': 24, 'height': 24},
+            'props': {'mainAxisAlignment': 'center'},
+            'draggable': {'group': 'card', 'data': r'${item}', 'start': 'press', 'whileDragging': 'hidden',
+                          'feedbackNodeId': 'ghost', 'feedbackElevation': 16},
+          },
+          'grip': {
+            'type': 'icon',
+            'layout': {'width': 18, 'height': 18},
+            'props': {'icon': {'type': 'MATERIAL_ICON', 'name': 'drag_indicator', 'style': 'rounded', 'size': 18}},
+          },
+          // The lifted chip a drag shows (hidden at rest).
+          'ghost': {'type': 'box', 'visible': false, 'layout': {'width': 120, 'height': 30}},
+          'label': {'type': 'text', 'layout': {'width': 100, 'height': 20}, 'props': {'text': r'${item}'}},
+        },
+        variables: [harness.v('items', ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], VariableType.list), harness.v('picked', '')],
+      );
+      await tester.pumpAndSettle();
+      final handle = s.tree.boxOf('handle', instance: ('item', null, 'list', 2)) ?? s.tree.boxOf('handle')!;
+      final at = handle.localToGlobal(handle.size.center(Offset.zero));
+      final g = await tester.startGesture(at, kind: kind);
+      await tester.pump(const Duration(milliseconds: 450));
+      for (var i = 1; i <= 8; i++) {
+        await g.moveBy(const Offset(0, -12));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(DragAndDrop.of(s.tree).value['active'], isTrue);
+      await g.cancel();
+      await tester.pumpAndSettle();
     });
   });
 }

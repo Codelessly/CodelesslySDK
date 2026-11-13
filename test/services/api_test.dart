@@ -10,8 +10,8 @@ HttpApi api(String url, {List<HttpParam> query = const [], List<ApiInput> inputs
     HttpApi(id: 'tides', name: 'Tides', url: url, query: query, inputs: inputs);
 
 void main() {
-  group('requests', () {
-    test('an API URL gets its query parameters and inputs', () {
+  group('building a request', () {
+    test('a URL gets its query parameters and inputs', () {
       final request = ApiRequest.build(
         api('https://api.example.com/data?format=json', query: const [
           HttpParam('station', r'${station}'),
@@ -26,12 +26,12 @@ void main() {
       expect(uri.queryParameters, {'format': 'json', 'station': '9414131', 'interval': 'hilo'});
     });
 
-    test('an API without query parameters keeps its URL', () {
+    test('a URL without query parameters is unchanged', () {
       expect(ApiRequest.build(api(r'https://x.dev/a?d=${day}'), params: {'day': '2026-10-22'}).url,
           'https://x.dev/a?d=2026-10-22');
     });
 
-    test('inputs fall back to their defaults; unknown placeholders stay', () {
+    test('an input falls back to its default, and an unknown placeholder is left as written', () {
       final definition = api(r'https://x.dev/${station}/${unknown}', inputs: const [
         ApiInput('station', defaultValue: '1'),
       ]);
@@ -40,7 +40,7 @@ void main() {
       expect(ApiRequest.build(definition, params: {'station': 7}).url, r'https://x.dev/7/${unknown}');
     });
 
-    test('headers, a JSON body and its content type', () {
+    test('a request carries its headers, a JSON body and the body\'s content type', () {
       const definition = HttpApi(
         method: HttpMethod.post,
         url: 'https://x.dev',
@@ -59,7 +59,7 @@ void main() {
       expect(explicit.headers, {'content-type': 'text/csv'});
     });
 
-    test('form fields; GET sends no body', () {
+    test('a form request sends its fields, and a GET sends no body', () {
       const definition = HttpApi(
         method: HttpMethod.put,
         url: 'https://x.dev',
@@ -72,8 +72,8 @@ void main() {
     });
   });
 
-  group('calls', () {
-    test('a call leaves its response as the result value', () async {
+  group('calling an API', () {
+    test('a call gives its response as the result', () async {
       late http.Request sent;
       final service = HttpApiService(
         client: MockClient((request) async {
@@ -96,7 +96,7 @@ void main() {
       expect((value['data']! as Map)['results'], {'sunrise': '7:25'});
     });
 
-    test('an error response is a result, keeping the previous data', () async {
+    test('an error response is a result too, and the earlier data stays', () async {
       final service = HttpApiService(client: MockClient((r) async => http.Response('{"message": "down"}', 503)));
       final response = await service.call(api('https://x.dev'), previousData: [1]);
       expect(response.isError, isTrue);
@@ -106,7 +106,7 @@ void main() {
       expect(response.toValue()['hasData'], isTrue);
     });
 
-    test('a failed request leaves an error value and throws', () async {
+    test('a request that fails gives an error and fails the call', () async {
       final service = HttpApiService(client: MockClient((request) async => throw http.ClientException('offline')));
       final states = <ApiResponse>[];
       Object? thrown;
@@ -122,7 +122,7 @@ void main() {
       expect(states.last, same(failure));
     });
 
-    test('through a proxy', () async {
+    test('a call can go through a proxy', () async {
       final service = HttpApiService(
         proxy: Uri.parse('https://proxy.dev/makeApiRequest'),
         client: MockClient((request) async {
@@ -140,8 +140,8 @@ void main() {
     });
   });
 
-  group('Services.callApi', () {
-    test('calls a configured API by id', () async {
+  group('an API the project configured', () {
+    test('is called by its id', () async {
       final services = Services(
         config: ServiceConfig.fromJson({
           'apis': {
@@ -155,14 +155,14 @@ void main() {
       expect(value['data'], '/42');
     });
 
-    test('an unknown API is reported and throws', () async {
+    test('that does not exist is reported and fails', () async {
       final analytics = RecordingAnalytics();
       final services = Services(analytics: analytics);
       await expectLater(services.callApi('nope'), throwsStateError);
       expect(analytics.errors, ['api_not_found']);
     });
 
-    test('opens links', () async {
+    test('links open through the app', () async {
       final links = RecordingLinkOpener();
       final services = Services(links: links);
       expect(await services.openUrl(' https://x.dev '), isTrue);

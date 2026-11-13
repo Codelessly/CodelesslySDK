@@ -1,11 +1,15 @@
-// Run script actions on the real engine (QuickJS on the VM), through the
-// runtime's action chain and the app shell; script test cases; the
-// catalog.
+import 'dart:async';
+
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/engine_setup.dart';
+
+// Run script actions on the real engine (QuickJS on the VM), through the
+// runtime's action chain and the app shell; script test cases; the
+// catalog.
+
 
 Variable v(String name, Object? value, [VariableType type = VariableType.text]) =>
     Variable(name: name, type: type, value: type.coerce(value));
@@ -53,371 +57,6 @@ final addTip = ScriptDef.fromJson({
   ''',
 })!;
 
-void main() {
-  setUpAll(setUpScriptEngine);
-
-  test('Services run scripts in the platform engine by default', () {
-    expect(Services().scripts, isA<SandboxScriptRunner>());
-  });
-
-  test('overlapping sandbox actions preserve complete state-map updates', () async {
-    final h = Harness(scripts: [ScriptDef.fromJson({
-      'id': 'edit', 'name': 'edit',
-      'capabilities': ['variables.read', 'variables.write', 'actions'],
-      'source': r"""
-        const game = vars.get('game');
-        await app.delay(15);
-        vars.set('game', {count: game.count + 1, history: [...game.history, game.count + 1]});
-      """,
-    })!], variables: [v('game', {'count': 0, 'history': []}, VariableType.map)]);
-    await Future.wait([
-      h.click([{'type': 'runScript', 'script': 'edit'}]),
-      h.click([{'type': 'runScript', 'script': 'edit'}]),
-    ]);
-    expect(h.errors, isEmpty);
-    expect(h['game'], {'count': 2, 'history': [1, 2]});
-  });
-
-  test('app.yield lets another action change a variable that the run then reads', () async {
-    final h = Harness(scripts: [
-      ScriptDef.fromJson({
-        'id': 'long', 'name': 'long',
-        'capabilities': ['variables.read', 'variables.write', 'actions'],
-        'source': r"""
-          vars.set('token', 1);
-          await app.yield(30);
-          // A cancel set token to 0 while this one yielded.
-          vars.set('seen', vars.get('token'));
-        """,
-      })!,
-      ScriptDef.fromJson({
-        'id': 'cancel', 'name': 'cancel',
-        'capabilities': ['variables.read', 'variables.write'],
-        'source': "vars.set('token', 0);",
-      })!,
-    ], variables: [v('token', -1, VariableType.integer), v('seen', -1, VariableType.integer)]);
-    final long = h.click([{'type': 'runScript', 'script': 'long'}]);
-    await Future<void>.delayed(const Duration(milliseconds: 10));
-    await h.click([{'type': 'runScript', 'script': 'cancel'}]);
-    await long;
-    expect(h.errors, isEmpty);
-    expect(h['seen'], 0);
-  });
-
-  test('A run script action passes typed arguments, writes variables and leaves its result', () async {
-    final h = Harness(
-      scripts: [addTip],
-      variables: [
-        v('people', 4, VariableType.integer),
-        v('total', 0, VariableType.decimal),
-        v('history', <Object?>[], VariableType.list),
-        v('stored', null, VariableType.map),
-        v('people2', 0, VariableType.integer),
-      ],
-    );
-    await h.click([
-      {'type': 'runScript', 'script': 'tip', 'arguments': {'bill': r'${people}0'}, 'resultVariable': 'stored'},
-      {'type': 'setVariable', 'variable': 'people2', 'value': r'${result.people}'},
-    ]);
-    expect(h.errors, isEmpty);
-    // `${people}0` is the text "40", which reads as the number 40.
-    expect(h['total'], 47.2);
-    expect(h['history'], [47.2]);
-    expect(h['stored'], {'total': 47.2, 'people': 4});
-    expect(h['people2'], 4);
-  });
-
-  test('A failing script runs its onError actions with the error and logs as the result', () async {
-    final h = Harness(
-      scripts: [
-        ScriptDef.fromJson({
-          'id': 'bad',
-          'name': 'bad',
-          'source': 'console.log("before");\nfunction f() {\n  throw new TypeError("nope");\n}\nf();',
-        })!,
-      ],
-      variables: [v('message', ''), v('log', ''), v('after', '')],
-    );
-    await h.click([
-      {
-        'type': 'runScript',
-        'script': 'bad',
-        'onError': [
-          {'type': 'setVariable', 'variable': 'message', 'value': r'${result.error.type} at line ${result.error.line}: ${result.error.message}'},
-          {'type': 'setVariable', 'variable': 'log', 'value': r'${result.logs[0].message}'},
-        ],
-      },
-      {'type': 'setVariable', 'variable': 'after', 'value': 'ran'},
-    ]);
-    expect(h['message'], 'TypeError at line 3: nope');
-    expect(h['log'], 'before');
-    expect(h['after'], 'ran');
-  });
-
-  test('A failing script without onError actions stops the chain', () async {
-    final h = Harness(
-      scripts: [ScriptDef.fromJson({'id': 'loop', 'name': 'loop', 'source': 'while (true) {}', 'timeoutMs': 100})!],
-      variables: [v('after', '')],
-    );
-    await h.click([
-      {'type': 'runScript', 'script': 'loop'},
-      {'type': 'setVariable', 'variable': 'after', 'value': 'ran'},
-    ]);
-    expect(h['after'], '');
-    expect(h.errors.single, isA<ScriptFailed>());
-    expect((h.errors.single as ScriptFailed).error['type'], 'LimitError');
-    expect((h.errors.single as ScriptFailed).error['limit'], 'time');
-  });
-
-  test('A script that is missing fails cleanly', () async {
-    final h = Harness();
-    await h.click([
-      {'type': 'runScript', 'script': 'ghost'},
-    ]);
-    expect(h.errors.single.toString(), contains('There is no script "ghost"'));
-  });
-
-  test('Writes to a computed or mistyped variable are logged, not applied', () async {
-    final h = Harness(
-      scripts: [
-        ScriptDef.fromJson({
-          'id': 'w',
-          'name': 'w',
-          'capabilities': ['variables.write'],
-          'source': 'vars.set("n", "abc"); vars.set("ok", 2); return 1',
-        })!,
-      ],
-      variables: [v('n', 1, VariableType.integer), v('ok', 0, VariableType.integer), v('logs', '')],
-    );
-    await h.click([
-      {'type': 'runScript', 'script': 'w'},
-    ]);
-    expect(h.errors, isEmpty);
-    expect(h['n'], 1);
-    expect(h['ok'], 2);
-  });
-
-  test('Scripts call the app: actions, delays and other scripts, within their capabilities', () async {
-    final h = Harness(
-      scripts: [
-        ScriptDef.fromJson({
-          'id': 'a',
-          'name': 'flow',
-          'capabilities': ['actions'],
-          'source': '''
-            await app.runAction({type: "setVariable", variable: "flag", value: "set"});
-            await app.delay(5);
-            const doubled = await script.twice(21);
-            let denied;
-            try { await app.callApi("x"); } catch (e) { denied = e.name; }
-            return {doubled, denied};
-          ''',
-        })!,
-        ScriptDef.fromJson({
-          'id': 'b',
-          'name': 'twice',
-          'params': [
-            {'name': 'n'},
-          ],
-          'source': 'return n * 2',
-        })!,
-      ],
-      variables: [v('flag', ''), v('out', null, VariableType.map)],
-    );
-    await h.click([
-      {'type': 'runScript', 'script': 'flow', 'resultVariable': 'out'},
-    ]);
-    expect(h.errors, isEmpty);
-    expect(h['flag'], 'set');
-    final out = h['out']! as Map;
-    expect(out['doubled'], 42);
-    expect(out['denied'], isNotNull);
-  });
-
-  testWidgets('A tap in the app shell runs a layout script on the engine', (tester) async {
-    final bundle = PublishBundle.fromJson({
-      'schema': 2,
-      'model': {
-        'projectId': 'p',
-        'entryLayoutId': 'home',
-        'layouts': {
-          'home': {
-            'canvases': [
-              {'id': 'c', 'name': 'home'},
-            ],
-          },
-        },
-      },
-      'layouts': {
-        'home': {
-          'schema': 2,
-          'id': 'home',
-          'roots': ['c'],
-          'nodes': {
-            'c': {
-              'type': 'canvas',
-              'name': 'home',
-              'slots': {'body': 'body'},
-              'layout': {'width': 400, 'height': 600},
-            },
-            'body': {
-              'type': 'stack',
-              'children': ['b'],
-              'layout': {'width': {'fill': 400}, 'height': {'fill': 600}},
-            },
-            'b': {
-              'type': 'box',
-              'layout': {'width': 200, 'height': 100},
-              'decoration': {
-                'fills': [
-                  {'color': '#FF2196F3'},
-                ],
-              },
-              'actions': [
-                {
-                  'trigger': {'type': 'click'},
-                  'actions': [
-                    {'type': 'runScript', 'script': 'addTip', 'arguments': {'bill': '100'}, 'resultVariable': 'stored'},
-                  ],
-                },
-              ],
-            },
-          },
-          'variables': {
-            'c': [
-              {'name': 'people', 'type': 'integer', 'value': 2},
-              {'name': 'total', 'type': 'decimal', 'value': 0},
-              {'name': 'history', 'type': 'list', 'value': <Object?>[]},
-              {'name': 'stored', 'type': 'map'},
-            ],
-          },
-          'scripts': [addTip.toJson()],
-        },
-      },
-    });
-    final codelessly = Codelessly(
-      config: const CodelesslyConfig(projectId: 'p'),
-      loader: MemoryPublishLoader(bundle),
-      fonts: const NoFontFetcher(),
-    );
-    final controller = CodelesslyWidgetController();
-    addTearDown(controller.dispose);
-    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller)));
-    await tester.pumpAndSettle();
-    final box = controller.tree!.boxOf('b')!;
-    await tester.tapAt(box.localToGlobal(box.size.center(Offset.zero)));
-    await tester.pumpAndSettle();
-    expect(controller.read('total'), 118.0);
-    expect(controller.read('history'), [118.0]);
-    expect(controller.read('stored'), {'total': 118.0, 'people': 2});
-  });
-
-  test('A script runs its stored test cases with sample variables', () async {
-    const model = ScriptDef(
-      id: 'v',
-      name: 'validate',
-      params: [ScriptParam(name: 'form')],
-      capabilities: [ScriptCapability.variablesRead],
-      source: """
-        const errors = {};
-        if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+\$/.test(form.email)) errors.email = 'Invalid email';
-        if (form.age < vars.get('minAge')) errors.age = 'Too young';
-        if (form.age > 150) throw new RangeError('age');
-        return {valid: Object.keys(errors).length === 0, errors};
-      """,
-      tests: [
-        ScriptTest(
-          name: 'ok',
-          args: {
-            'form': {'email': 'a@b.co', 'age': 30},
-          },
-          vars: {'minAge': 13},
-          expect: {'errors': <String, Object?>{}, 'valid': true},
-        ),
-        ScriptTest(
-          name: 'bad',
-          args: {
-            'form': {'email': 'nope', 'age': 9},
-          },
-          vars: {'minAge': 13},
-          expect: {
-            'valid': false,
-            'errors': {'email': 'Invalid email', 'age': 'Too young'},
-          },
-        ),
-        ScriptTest(
-          name: 'throws',
-          args: {
-            'form': {'email': 'a@b.co', 'age': 200},
-          },
-          vars: {'minAge': 13},
-          expectError: 'RangeError',
-        ),
-        ScriptTest(
-          name: 'wrong on purpose',
-          args: {
-            'form': {'email': 'a@b.co', 'age': 30},
-          },
-          vars: {'minAge': 13},
-          expect: {'valid': false},
-        ),
-      ],
-    );
-    final results = await runScriptTests(model);
-    expect([for (final r in results) r.passed], [true, true, true, false]);
-    expect(results.last.reason, contains('Expected'));
-    expect(results.first.toJson()['result'], containsPair('ok', true));
-    expect(ScriptDef.fromJson(model.toJson())!.tests, model.tests);
-  });
-
-  test('expectError names the error by type, message or both', () async {
-    final model = ScriptDef(
-      id: 'v',
-      name: 'validate',
-      params: const [ScriptParam(name: 'start'), ScriptParam(name: 'end')],
-      source: 'if (end <= start) throw new Error("Ends before it starts"); return end - start;',
-      tests: const [
-        ScriptTest(name: 'type', args: {'start': 9, 'end': 8}, expectError: 'Error'),
-        ScriptTest(name: 'message', args: {'start': 9, 'end': 8}, expectError: 'Ends before it starts'),
-        ScriptTest(name: 'type and message', args: {'start': 9, 'end': 8}, expectError: 'Error: Ends before it starts'),
-        ScriptTest(name: 'another message', args: {'start': 9, 'end': 8}, expectError: 'Pick a template'),
-        ScriptTest(name: 'another type', args: {'start': 9, 'end': 8}, expectError: 'RangeError'),
-      ],
-    );
-    final results = await runScriptTests(model);
-    expect([for (final r in results) r.passed], [true, true, true, false, false]);
-    expect(results[3].reason, 'Expected a Pick a template, but it failed with Error: Ends before it starts');
-    expect(expectedError('RangeError: too big', {'type': 'RangeError', 'message': 'too big'}), isTrue);
-    expect(expectedError('too', {'type': 'RangeError', 'message': 'too big'}), isFalse);
-  });
-
-  test('Check compiles a script without running it', () async {
-    const runner = SandboxScriptRunner();
-    expect(await runner.check(const ScriptDef(id: 'a', name: 'a', source: 'while (true) {}')), isNull);
-    final error = await runner.check(const ScriptDef(id: 'a', name: 'a', source: 'let a = 1;\nlet b = ;'));
-    expect(error?['type'], 'SyntaxError');
-    expect(error?['line'], 2);
-  });
-
-  test('The catalog describes every host API with its capability', () {
-    final json = ScriptCatalog.toJson();
-    final api = json['api']! as List;
-    expect(
-      api.map((e) => (e as Map)['signature']),
-      containsAll(['vars.get(name)', 'app.callApi(name, inputs?)', 'fmt.currency(n, code?, digits?)']),
-    );
-    for (final c in ScriptCapability.values) {
-      expect((json['capabilities']! as Map).containsKey(c.id), isTrue, reason: c.id);
-    }
-    expect(ScriptCatalog.entries.firstWhere((e) => e.signature == 'vars.set(name, value)').parameters, ['name', 'value']);
-  });
-
-  test('Without the native library a run fails with EngineUnavailable', () async {
-    final r = await SandboxScriptRunner(sandbox: _Unavailable()).run(addTip, args: {'bill': 1});
-    expect(r.error?['type'], 'EngineUnavailable');
-  });
-}
-
 class _Unavailable implements ScriptSandbox {
   @override
   bool get isSynchronous => true;
@@ -436,4 +75,423 @@ class _Unavailable implements ScriptSandbox {
 
   @override
   void end(String run) {}
+}
+
+const writer = ScriptDef(
+  id: 'write',
+  name: 'write',
+  source: '',
+  capabilities: [
+    ScriptCapability.variablesRead,
+    ScriptCapability.variablesWrite,
+  ],
+);
+
+VariableScope scope([ValueScope? parent]) => VariableScope(const [
+  Variable(name: 'count', type: VariableType.integer, value: 0),
+], parent: parent);
+Node button(String script) => Node.fromJson({
+  'type': 'box',
+  'actions': [
+    {
+      'trigger': {'type': 'click'},
+      'actions': [
+        {'type': 'runScript', 'script': script},
+      ],
+    },
+  ],
+}, id: script)!;
+Future<void> click(
+  RuntimeActionContext context,
+  String script, {
+  ActionCancellation? cancellation,
+}) => const CodelesslyActions().run(
+  button(script),
+  'click',
+  context,
+  cancellation: cancellation,
+);
+
+void main() {
+  {
+    setUpAll(setUpScriptEngine);
+
+    test('a run-script action passes typed arguments, writes variables and gives its result to the chain', () async {
+      final h = Harness(
+        scripts: [addTip],
+        variables: [
+          v('people', 4, VariableType.integer),
+          v('total', 0, VariableType.decimal),
+          v('history', <Object?>[], VariableType.list),
+          v('stored', null, VariableType.map),
+          v('people2', 0, VariableType.integer),
+        ],
+      );
+      await h.click([
+        {'type': 'runScript', 'script': 'tip', 'arguments': {'bill': r'${people}0'}, 'resultVariable': 'stored'},
+        {'type': 'setVariable', 'variable': 'people2', 'value': r'${result.people}'},
+      ]);
+      expect(h.errors, isEmpty);
+      // `${people}0` is the text "40", which reads as the number 40.
+      expect(h['total'], 47.2);
+      expect(h['history'], [47.2]);
+      expect(h['stored'], {'total': 47.2, 'people': 4});
+      expect(h['people2'], 4);
+    });
+
+    test('a failing script runs its error actions with the error and its console output', () async {
+      final h = Harness(
+        scripts: [
+          ScriptDef.fromJson({
+            'id': 'bad',
+            'name': 'bad',
+            'source': 'console.log("before");\nfunction f() {\n  throw new TypeError("nope");\n}\nf();',
+          })!,
+        ],
+        variables: [v('message', ''), v('log', ''), v('after', '')],
+      );
+      await h.click([
+        {
+          'type': 'runScript',
+          'script': 'bad',
+          'onError': [
+            {'type': 'setVariable', 'variable': 'message', 'value': r'${result.error.type} at line ${result.error.line}: ${result.error.message}'},
+            {'type': 'setVariable', 'variable': 'log', 'value': r'${result.logs[0].message}'},
+          ],
+        },
+        {'type': 'setVariable', 'variable': 'after', 'value': 'ran'},
+      ]);
+      expect(h['message'], 'TypeError at line 3: nope');
+      expect(h['log'], 'before');
+      expect(h['after'], 'ran');
+    });
+
+    test('a failing script without error actions stops the chain', () async {
+      final h = Harness(
+        scripts: [ScriptDef.fromJson({'id': 'loop', 'name': 'loop', 'source': 'while (true) {}', 'timeoutMs': 100})!],
+        variables: [v('after', '')],
+      );
+      await h.click([
+        {'type': 'runScript', 'script': 'loop'},
+        {'type': 'setVariable', 'variable': 'after', 'value': 'ran'},
+      ]);
+      expect(h['after'], '');
+      expect(h.errors.single, isA<ScriptFailed>());
+      expect((h.errors.single as ScriptFailed).error['type'], 'LimitError');
+      expect((h.errors.single as ScriptFailed).error['limit'], 'time');
+    });
+
+    test('a script that does not exist fails without crashing', () async {
+      final h = Harness();
+      await h.click([
+        {'type': 'runScript', 'script': 'ghost'},
+      ]);
+      expect(h.errors.single.toString(), contains('There is no script "ghost"'));
+    });
+
+    test('a write to a computed variable, or of the wrong type, is logged and not applied', () async {
+      final h = Harness(
+        scripts: [
+          ScriptDef.fromJson({
+            'id': 'w',
+            'name': 'w',
+            'capabilities': ['variables.write'],
+            'source': 'vars.set("n", "abc"); vars.set("ok", 2); return 1',
+          })!,
+        ],
+        variables: [v('n', 1, VariableType.integer), v('ok', 0, VariableType.integer), v('logs', '')],
+      );
+      await h.click([
+        {'type': 'runScript', 'script': 'w'},
+      ]);
+      expect(h.errors, isEmpty);
+      expect(h['n'], 1);
+      expect(h['ok'], 2);
+    });
+
+    test('a script runs actions, waits and calls other scripts, within what it is allowed', () async {
+      final h = Harness(
+        scripts: [
+          ScriptDef.fromJson({
+            'id': 'a',
+            'name': 'flow',
+            'capabilities': ['actions'],
+            'source': '''
+            await app.runAction({type: "setVariable", variable: "flag", value: "set"});
+            await app.delay(5);
+            const doubled = await script.twice(21);
+            let denied;
+            try { await app.callApi("x"); } catch (e) { denied = e.name; }
+            return {doubled, denied};
+          ''',
+          })!,
+          ScriptDef.fromJson({
+            'id': 'b',
+            'name': 'twice',
+            'params': [
+              {'name': 'n'},
+            ],
+            'source': 'return n * 2',
+          })!,
+        ],
+        variables: [v('flag', ''), v('out', null, VariableType.map)],
+      );
+      await h.click([
+        {'type': 'runScript', 'script': 'flow', 'resultVariable': 'out'},
+      ]);
+      expect(h.errors, isEmpty);
+      expect(h['flag'], 'set');
+      final out = h['out']! as Map;
+      expect(out['doubled'], 42);
+      expect(out['denied'], isNotNull);
+    });
+
+    testWidgets('a tap in a running app runs its layout\'s script', (tester) async {
+      final bundle = PublishBundle.fromJson({
+        'schema': 2,
+        'model': {
+          'projectId': 'p',
+          'entryLayoutId': 'home',
+          'layouts': {
+            'home': {
+              'canvases': [
+                {'id': 'c', 'name': 'home'},
+              ],
+            },
+          },
+        },
+        'layouts': {
+          'home': {
+            'schema': 2,
+            'id': 'home',
+            'roots': ['c'],
+            'nodes': {
+              'c': {
+                'type': 'canvas',
+                'name': 'home',
+                'slots': {'body': 'body'},
+                'layout': {'width': 400, 'height': 600},
+              },
+              'body': {
+                'type': 'stack',
+                'children': ['b'],
+                'layout': {'width': {'fill': 400}, 'height': {'fill': 600}},
+              },
+              'b': {
+                'type': 'box',
+                'layout': {'width': 200, 'height': 100},
+                'decoration': {
+                  'fills': [
+                    {'color': '#FF2196F3'},
+                  ],
+                },
+                'actions': [
+                  {
+                    'trigger': {'type': 'click'},
+                    'actions': [
+                      {'type': 'runScript', 'script': 'addTip', 'arguments': {'bill': '100'}, 'resultVariable': 'stored'},
+                    ],
+                  },
+                ],
+              },
+            },
+            'variables': {
+              'c': [
+                {'name': 'people', 'type': 'integer', 'value': 2},
+                {'name': 'total', 'type': 'decimal', 'value': 0},
+                {'name': 'history', 'type': 'list', 'value': <Object?>[]},
+                {'name': 'stored', 'type': 'map'},
+              ],
+            },
+            'scripts': [addTip.toJson()],
+          },
+        },
+      });
+      final codelessly = Codelessly(
+        config: const CodelesslyConfig(projectId: 'p'),
+        loader: MemoryPublishLoader(bundle),
+        fonts: const NoFontFetcher(),
+      );
+      final controller = CodelesslyWidgetController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller)));
+      await tester.pumpAndSettle();
+      final box = controller.tree!.boxOf('b')!;
+      await tester.tapAt(box.localToGlobal(box.size.center(Offset.zero)));
+      await tester.pumpAndSettle();
+      expect(controller.read('total'), 118.0);
+      expect(controller.read('history'), [118.0]);
+      expect(controller.read('stored'), {'total': 118.0, 'people': 2});
+    });
+
+    test('a script\'s saved test cases run against sample variables', () async {
+      const model = ScriptDef(
+        id: 'v',
+        name: 'validate',
+        params: [ScriptParam(name: 'form')],
+        capabilities: [ScriptCapability.variablesRead],
+        source: """
+        const errors = {};
+        if (!/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+\$/.test(form.email)) errors.email = 'Invalid email';
+        if (form.age < vars.get('minAge')) errors.age = 'Too young';
+        if (form.age > 150) throw new RangeError('age');
+        return {valid: Object.keys(errors).length === 0, errors};
+      """,
+        tests: [
+          ScriptTest(
+            name: 'ok',
+            args: {
+              'form': {'email': 'a@b.co', 'age': 30},
+            },
+            vars: {'minAge': 13},
+            expect: {'errors': <String, Object?>{}, 'valid': true},
+          ),
+          ScriptTest(
+            name: 'bad',
+            args: {
+              'form': {'email': 'nope', 'age': 9},
+            },
+            vars: {'minAge': 13},
+            expect: {
+              'valid': false,
+              'errors': {'email': 'Invalid email', 'age': 'Too young'},
+            },
+          ),
+          ScriptTest(
+            name: 'throws',
+            args: {
+              'form': {'email': 'a@b.co', 'age': 200},
+            },
+            vars: {'minAge': 13},
+            expectError: 'RangeError',
+          ),
+          ScriptTest(
+            name: 'wrong on purpose',
+            args: {
+              'form': {'email': 'a@b.co', 'age': 30},
+            },
+            vars: {'minAge': 13},
+            expect: {'valid': false},
+          ),
+        ],
+      );
+      final results = await runScriptTests(model);
+      expect([for (final r in results) r.passed], [true, true, true, false]);
+      expect(results.last.reason, contains('Expected'));
+      expect(results.first.toJson()['result'], containsPair('ok', true));
+      expect(ScriptDef.fromJson(model.toJson())!.tests, model.tests);
+    });
+
+    test('a test case can expect an error by its type, its message or both', () async {
+      final model = ScriptDef(
+        id: 'v',
+        name: 'validate',
+        params: const [ScriptParam(name: 'start'), ScriptParam(name: 'end')],
+        source: 'if (end <= start) throw new Error("Ends before it starts"); return end - start;',
+        tests: const [
+          ScriptTest(name: 'type', args: {'start': 9, 'end': 8}, expectError: 'Error'),
+          ScriptTest(name: 'message', args: {'start': 9, 'end': 8}, expectError: 'Ends before it starts'),
+          ScriptTest(name: 'type and message', args: {'start': 9, 'end': 8}, expectError: 'Error: Ends before it starts'),
+          ScriptTest(name: 'another message', args: {'start': 9, 'end': 8}, expectError: 'Pick a template'),
+          ScriptTest(name: 'another type', args: {'start': 9, 'end': 8}, expectError: 'RangeError'),
+        ],
+      );
+      final results = await runScriptTests(model);
+      expect([for (final r in results) r.passed], [true, true, true, false, false]);
+      expect(results[3].reason, 'Expected a Pick a template, but it failed with Error: Ends before it starts');
+      expect(expectedError('RangeError: too big', {'type': 'RangeError', 'message': 'too big'}), isTrue);
+      expect(expectedError('too', {'type': 'RangeError', 'message': 'too big'}), isFalse);
+    });
+
+    test('every host API is listed with the capability it needs', () {
+      final json = ScriptCatalog.toJson();
+      final api = json['api']! as List;
+      expect(
+        api.map((e) => (e as Map)['signature']),
+        containsAll(['vars.get(name)', 'app.callApi(name, inputs?)', 'fmt.currency(n, code?, digits?)']),
+      );
+      for (final c in ScriptCapability.values) {
+        expect((json['capabilities']! as Map).containsKey(c.id), isTrue, reason: c.id);
+      }
+      expect(ScriptCatalog.entries.firstWhere((e) => e.signature == 'vars.set(name, value)').parameters, ['name', 'value']);
+    });
+
+    test('without the engine\'s native library a run fails saying the engine is unavailable', () async {
+      final r = await SandboxScriptRunner(sandbox: _Unavailable()).run(addTip, args: {'bill': 1});
+      expect(r.error?['type'], 'EngineUnavailable');
+    });
+  }
+
+  group('scripts that write at the same time', () {
+    test(
+      'two scripts that write at once each see what the other finished writing',
+      () async {
+        final app = scope();
+        final entered = Completer<void>(), release = Completer<void>();
+        final snapshots = <int>[];
+        final runner = FunctionScriptRunner({
+          'write': (_, host) async {
+            final before = host!.variables()['count'] as int;
+            snapshots.add(before);
+            if (snapshots.length == 1) {
+              entered.complete();
+              await release.future;
+            }
+            host.setVariable('count', before + 1);
+            return before + 1;
+          },
+        });
+        RuntimeActionContext context() => RuntimeActionContext(
+          scope: VariableScope(const [], parent: app),
+          services: Services(scripts: runner),
+          scripts: const [writer],
+        );
+        final first = click(context(), 'write');
+        await entered.future;
+        final second = click(context(), 'write');
+        await Future<void>.delayed(Duration.zero);
+        release.complete();
+        await Future.wait([first, second]);
+        expect(snapshots, [0, 1]);
+        expect(app.read('count'), 2);
+      },
+    );
+
+    test(
+      'a cancelled script waiting to write neither runs nor holds up the next',
+      () async {
+        final app = scope(),
+            entered = Completer<void>(),
+            release = Completer<void>();
+        var calls = 0;
+        final runner = FunctionScriptRunner({
+          'write': (_, host) async {
+            calls++;
+            if (calls == 1) {
+              entered.complete();
+              await release.future;
+            }
+            final n = host!.variables()['count'] as int;
+            host.setVariable('count', n + 1);
+            return n + 1;
+          },
+        });
+        final context = RuntimeActionContext(
+          scope: app,
+          services: Services(scripts: runner),
+          scripts: const [writer],
+        );
+        final first = click(context, 'write');
+        await entered.future;
+        final cancellation = ActionCancellation();
+        final canceled = click(context, 'write', cancellation: cancellation);
+        cancellation.cancel();
+        final third = click(context, 'write');
+        release.complete();
+        await Future.wait([first, canceled, third]);
+        expect(calls, 2);
+        expect(app.read('count'), 2);
+      },
+    );
+  });
 }

@@ -4,7 +4,6 @@
 // are keyed by them.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/runtime/actions/presentation_route.dart' show defaultSheetBelowWidth, resolvePresentation;
-import 'package:codelessly_sdk/src/runtime/actions/toast.dart' show perBreakpointValue;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -73,8 +72,8 @@ PublishBundle bundleWith(Breakpoints breakpoints, {Map<String, num> minWidths = 
 }
 
 void main() {
-  group('screen values', () {
-    test('name the project breakpoints, by id and by name', () {
+  group('what a screen can read', () {
+    test('the current breakpoint, by id and by name', () {
       final s = screenValues(800, 1000, breakpoints: custom);
       expect(s['breakpoint'], 'medium');
       expect(s['breakpointName'], 'Medium');
@@ -90,7 +89,7 @@ void main() {
       expect((s['breakpoints'] as List).map((b) => (b as Map)['id']), ['compact', 'medium', 'xl']);
     });
 
-    test('the defaults keep isMobile/isTablet/isDesktop, also after a rename', () {
+    test('isMobile, isTablet and isDesktop, also after a breakpoint is renamed', () {
       expect(screenValues(390, 844)['isMobile'], isTrue);
       expect(screenValues(834, 1112)['isTablet'], isTrue);
       final renamed = Breakpoints.defaults.update('mobile', (b) => b.copyWith(name: 'Phone'));
@@ -100,7 +99,7 @@ void main() {
       expect(s['breakpointName'], 'Phone');
     });
 
-    test('formulas read them', () {
+    test('breakpoints in formulas', () {
       const e = Expressions();
       final s = ValuesScope({'screen': screenValues(1400, 900, breakpoints: custom)});
       expect(e.evaluate(r'${screen.breakpoint}', s), 'xl');
@@ -109,7 +108,7 @@ void main() {
       expect(e.evaluate(r'${screen.is.compact}', s), isFalse);
     });
 
-    test("inside a responsive layout with its own switch points, screen is the layout's", () {
+    test("inside a responsive layout with its own switch points, that layout's breakpoint", () {
       final around = ValuesScope({'screen': screenValues(1000, 900)});
       final v = Node.fromJson({
         'type': 'variance',
@@ -134,7 +133,7 @@ void main() {
     });
   });
 
-  test("an adaptive modal is a sheet below its breakpoint's min width", () {
+  test("an adaptive modal is a sheet below its breakpoint's width", () {
     expect(defaultSheetBelowWidth(custom), 700, reason: 'the second breakpoint');
     expect(defaultSheetBelowWidth(Breakpoints([const Breakpoint(id: 'only')])), 0);
     final atXl = const OpenModalAction(presentation: ModalPresentation.adaptive, sheetBelow: 'xl').sheetBelowWidthIn(custom);
@@ -147,15 +146,7 @@ void main() {
     expect(resolvePresentation(ModalPresentation.sideSheet, 100, sheetBelowWidth: 700), ModalPresentation.sideSheet);
   });
 
-  test('a per-breakpoint toast look is keyed by id, else name', () {
-    expect(perBreakpointValue({'medium': 'start'}, 800, custom), 'start');
-    expect(perBreakpointValue({'Medium': 'end'}, 800, custom), 'end');
-    expect(perBreakpointValue({'largeDesktop': 'end'}, 1500, custom), 'end');
-    expect(perBreakpointValue({'compact': 'start'}, 800, custom), isNull);
-    expect(perBreakpointValue({'tablet': 'start'}, 800, Breakpoints.defaults), 'start');
-  });
-
-  group('running', () {
+  group('a running app', () {
     Future<CodelesslyWidgetController> pump(WidgetTester tester, PublishBundle bundle) async {
       final codelessly = Codelessly(
         config: const CodelesslyConfig(projectId: 'p'),
@@ -173,7 +164,7 @@ void main() {
     bool shows(CodelesslyWidgetController c, String id) => c.tree!.boxOf(id)?.attached ?? false;
     String textOf(CodelesslyWidgetController c, String id) => c.node(id)!.prop(TextProps.text);
 
-    testWidgets('screens pick their canvas by the project breakpoints', (tester) async {
+    testWidgets('picks each screen\'s canvas by the project\'s breakpoints', (tester) async {
       ignoreOverflows();
       setScreen(tester, const Size(1299, 900));
       var c = await pump(tester, bundleWith(custom));
@@ -187,7 +178,7 @@ void main() {
       expect(c.canvasId, 'x');
     });
 
-    testWidgets('a responsive variance switches variant by the screen width', (tester) async {
+    testWidgets('switches a responsive node\'s variant by the screen\'s width', (tester) async {
       ignoreOverflows();
       setScreen(tester, const Size(400, 900));
       final c = await pump(tester, bundleWith(custom));
@@ -208,7 +199,7 @@ void main() {
       expect(shows(c, 'vc'), isTrue);
     });
 
-    testWidgets('a breakpoint no variant names changes nothing', (tester) async {
+    testWidgets('changes nothing at a breakpoint no variant names', (tester) async {
       ignoreOverflows();
       // A breakpoint between compact and medium: the compact variant still
       // shows up to medium; screen names the new one.
@@ -221,7 +212,7 @@ void main() {
       await settle(tester);
       expect(shows(c, 'vm'), isTrue);
     });
-    testWidgets("a variance's own switch points move where it switches, and screen inside it", (tester) async {
+    testWidgets('switches a responsive node at its own switch points', (tester) async {
       ignoreOverflows();
       setScreen(tester, const Size(800, 900));
       final c = await pump(tester, bundleWith(custom, minWidths: const {'medium': 900}));

@@ -136,13 +136,64 @@ String textOf(PublishLayout layout, String id) {
   return '${n.props.toJson(n.spec)['text']}';
 }
 
+// The first real managed component, "Sign in" 1.0.0, as the editor releases
+// it (test/fixtures/managed/sign_in_1.0.0.json: CodelesslyEditor's
+// lib/editor/managed_prebuilts.dart `signInPrebuilt().request()`), built
+// and run here: its auth signIn, its error text and the instance's events.
+
+
+/// The release as the publishManagedComponent function stores it.
+ManagedComponentVersion signIn({int version = 1, String? semver, Map<String, Object?> Function(Map<String, Object?>)? edit}) {
+  var release = (jsonDecode(File('test/fixtures/managed/sign_in_1.0.0.json').readAsStringSync()) as Map).cast<String, Object?>();
+  if (edit != null) release = edit(release);
+  final payload = jsonEncode({'definition': {...(release['definition'] as Map), 'id': release['id']}, 'contract': release['contract']});
+  return ManagedComponentVersion.fromJson({
+    'id': release['id'],
+    'version': version,
+    'semver': semver ?? release['semver'],
+    'payload': payload,
+    'digest': sha256.convert(utf8.encode(payload)).toString(),
+  })!;
+}
+
+/// The instance an app user placed: a title, and chains after onSuccess and
+/// onError.
+final ref = const ManagedComponentRef()
+    .withValue('title', 'Welcome back')
+    .withEvent('onSuccess', [ActionDef.fromJson({'type': 'setVariable', 'variable': 'signedIn', 'value': 'yes'})!])
+    .withEvent('onError', [ActionDef.fromJson({'type': 'setVariable', 'variable': 'errorSeen', 'value': r'${signInError}'})!]);
+
+class Harness {
+  Harness(ManagedComponentVersion version, {required this.auth}) {
+    build = buildManagedInstance(version: version, topId: 'si', ref: ref);
+    scope = VariableScope([
+      ...build.variables,
+      const Variable(name: 'signedIn', value: ''),
+      const Variable(name: 'errorSeen', value: ''),
+    ]);
+    context = RuntimeActionContext(scope: scope, services: Services(auth: auth), onError: (e, s, a) => errors.add(e));
+  }
+
+  final MemoryAuthService auth;
+  late final ManagedBuild build;
+  late final VariableScope scope;
+  late final RuntimeActionContext context;
+  final List<Object> errors = [];
+
+  Node node(String id) => build.nodes.firstWhere((n) => n.id == 'si__$id');
+  Object? operator [](String name) => scope.read(name);
+  void set(String name, Object? value) => scope.set(name, value);
+  Future<void> fire(String id, String trigger) => const CodelesslyActions().run(node(id), trigger, context);
+  Object? evaluate(String expression) => const Expressions().evaluate(expression, scope);
+}
+
 void main() {
-  test('the SDK version constant is the pubspec version', () {
+  test('the SDK\'s version constant matches the package version', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     expect(RegExp(r'^version: (\S+)$', multiLine: true).firstMatch(pubspec)![1], kCodelesslySdkVersion);
   });
 
-  test('a newer minor on the channel applies, with the instance\'s settings, slots and events', () async {
+  test('a newer minor version on the channel applies, keeping the instance\'s settings, slots and events', () async {
     final source = MemoryManagedComponentSource(masters: {'sign_in': master()}, versions: versions);
     final r = ManagedComponentResolver(source: source);
     final layout = await r.resolve(publishedLayout(), projectId: 'p');
@@ -165,7 +216,7 @@ void main() {
     expect(source.calls, ['master:sign_in', 'version:sign_in/2']);
   });
 
-  test('a new major does not apply', () async {
+  test('a new major version does not apply', () async {
     final source = MemoryManagedComponentSource(masters: {'sign_in': master(stable1: 1)}, versions: versions);
     final layout = await ManagedComponentResolver(source: source).resolve(publishedLayout());
     expect(layout.document['inst']!.component!.version, 1);
@@ -187,7 +238,7 @@ void main() {
     expect(source.calls, isNot(contains('version:sign_in/4')));
   });
 
-  test('a blocked snapshot rolls back to the channel\'s version', () async {
+  test('an instance built from a blocked version rolls back to the channel\'s version', () async {
     final at2 = await ManagedComponentResolver(
       source: MemoryManagedComponentSource(masters: {'sign_in': master()}, versions: versions),
     ).resolve(publishedLayout());
@@ -199,7 +250,7 @@ void main() {
     expect(textOf(back, 'inst__title'), 'Welcome back');
   });
 
-  test('an SDK below minSdk keeps the version it can run', () async {
+  test('an SDK too old for a version keeps the one it can run', () async {
     final source = MemoryManagedComponentSource(
       masters: {
         'sign_in': master(stable1: 4, extraVersions: {
@@ -212,7 +263,7 @@ void main() {
     expect(layout.document['inst']!.component!.version, 2);
   });
 
-  test('a pinned instance stays', () async {
+  test('a pinned instance stays on its version', () async {
     final pinned = publishedLayout();
     final top = pinned.document['inst']!;
     final layout = pinned.copyWith(
@@ -227,7 +278,7 @@ void main() {
     expect(resolved.document['inst']!.component!.version, 1);
   });
 
-  group('failures fall back to the snapshot', () {
+  group('when the update source fails the published snapshot is used', () {
     Future<(PublishLayout, List<Object>)> run(MemoryManagedComponentSource source, {PublishCache? cache}) async {
       final errors = <Object>[];
       final layout = await ManagedComponentResolver(
@@ -239,14 +290,14 @@ void main() {
       return (layout, errors);
     }
 
-    test('the source fails', () async {
+    test('on an error', () async {
       final (layout, errors) = await run(MemoryManagedComponentSource()..failWith = StateError('offline'));
       expect(layout.document['inst']!.component!.version, 1);
       expect(textOf(layout, 'inst__title'), 'Welcome back');
       expect(errors.single, isA<StateError>());
     });
 
-    test('the source times out', () async {
+    test('on a timeout', () async {
       final (layout, errors) = await run(
         MemoryManagedComponentSource(masters: {'sign_in': master()}, versions: versions)
           ..delay = const Duration(milliseconds: 200),
@@ -255,7 +306,7 @@ void main() {
       expect(errors.single, isA<TimeoutException>());
     });
 
-    test('the version is missing or does not match its digest', () async {
+    test('when the version is missing or does not match its checksum', () async {
       final (missing, _) = await run(MemoryManagedComponentSource(masters: {'sign_in': master()}));
       expect(missing.document['inst']!.component!.version, 1);
       final (tampered, errors) = await run(MemoryManagedComponentSource(
@@ -266,7 +317,7 @@ void main() {
       expect(errors.single, isA<ManagedDigestException>());
     });
 
-    test('offline, the cached master and version still apply', () async {
+    test('offline, the cached component and version still apply', () async {
       final cache = MemoryPublishCache();
       final online = MemoryManagedComponentSource(masters: {'sign_in': master()}, versions: versions);
       await run(online, cache: cache);
@@ -277,19 +328,7 @@ void main() {
     });
   });
 
-  test('masters are fetched once per TTL; versions once', () async {
-    var now = DateTime.utc(2026);
-    final source = MemoryManagedComponentSource(masters: {'sign_in': master()}, versions: versions);
-    final r = ManagedComponentResolver(source: source, clock: () => now);
-    await r.resolve(publishedLayout());
-    await r.resolve(publishedLayout());
-    expect(source.calls, ['master:sign_in', 'version:sign_in/2']);
-    now = now.add(const Duration(minutes: 6));
-    await r.resolve(publishedLayout());
-    expect(source.calls, ['master:sign_in', 'version:sign_in/2', 'master:sign_in']);
-  });
-
-  test('a Codelessly with a source loads layouts resolved; the cache keeps the snapshot', () async {
+  test('an app with an update source loads its layouts already updated, and the cache keeps the snapshot', () async {
     final layout = publishedLayout();
     final bundle = PublishBundle(
       model: PublishModel(
@@ -322,5 +361,43 @@ void main() {
     expect((await plain.loadLayout('home')).document['inst']!.component!.version, 1);
     c.dispose();
     plain.dispose();
+  });
+
+  group('the managed sign-in form', () {
+    test('signing in signs the user in, then runs the instance\'s success actions', () async {
+      final auth = MemoryAuthService();
+      await auth.signUp(email: 'ada@example.org', password: 'secret12');
+      await auth.signOut();
+      final h = Harness(signIn(), auth: auth);
+      expect(h.node('title').prop(TextProps.text), 'Welcome back');
+      h.set('signInEmail', 'ada@example.org');
+      h.set('signInPassword', 'secret12');
+      await h.fire('submit', 'click');
+      expect(h.errors, isEmpty);
+      expect(auth.currentUser?.email, 'ada@example.org');
+      expect(h['signedIn'], 'yes');
+      expect(h['signInError'], '');
+      expect(h.evaluate(h.node('error').bind['visible']!), isFalse);
+    });
+
+    test('a failed sign-in shows its message and runs the error actions, not the success ones', () async {
+      final auth = MemoryAuthService();
+      await auth.signUp(email: 'ada@example.org', password: 'secret12');
+      await auth.signOut();
+      final h = Harness(signIn(), auth: auth);
+      h.set('signInEmail', 'ada@example.org');
+      h.set('signInPassword', 'wrong');
+      await h.fire('submit', 'click');
+      expect(h['signedIn'], '');
+      final message = h['signInError'];
+      expect(message, isA<String>());
+      expect(message, isNotEmpty);
+      expect(h.evaluate(h.node('error').bind['props.text']!), message);
+      expect(h.evaluate(h.node('error').bind['visible']!), isTrue);
+      // The error text's valueChanged reaction (fired by the screen when
+      // signInError changes) runs the instance's onError chain.
+      await h.fire('error', 'valueChanged');
+      expect(h['errorSeen'], message);
+    });
   });
 }

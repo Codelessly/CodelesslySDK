@@ -44,7 +44,7 @@ void main() {
 
   List<Object?> whats() => [for (final c in calls) c['what']];
 
-  testWidgets('app start runs once per user, and the launch is counted on the device', (tester) async {
+  testWidgets('an app-start automation runs once per user, and the launch is counted on the device', (tester) async {
     final storage = MemoryLocalStorage();
     final automations = [
       Automation(id: 'welcome', trigger: AutomationTrigger.appStart, maxRuns: 1, actions: [
@@ -114,7 +114,7 @@ void main() {
     });
   });
 
-  testWidgets('events fired before start wait for it', (tester) async {
+  testWidgets('events fired before the app starts wait for it', (tester) async {
     final c = app([
       Automation(id: 'early', event: 'opened', actions: [ActionDef.fromJson(seen('opened'))!]),
     ]);
@@ -125,7 +125,7 @@ void main() {
     expect(whats(), ['opened']);
   });
 
-  testWidgets('a layout fires app events with emitEvent; an automation presents a layout', (tester) async {
+  testWidgets('a layout fires app events, and an automation presents a layout', (tester) async {
     setSize(tester);
     final c = app(
       [
@@ -160,7 +160,7 @@ void main() {
     expect(find.byType(CodelesslyWidget), findsOneWidget);
   });
 
-  testWidgets('at most every n days, and per session', (tester) async {
+  testWidgets('an automation can be limited to once every n days, and once per session', (tester) async {
     final c = app([
       Automation(id: 'weekly', event: 'tick', everyDays: 7, actions: [ActionDef.fromJson(seen('weekly'))!]),
       Automation(id: 'session', event: 'tick', maxPerSession: 2, actions: [ActionDef.fromJson(seen('session'))!]),
@@ -181,7 +181,7 @@ void main() {
     });
   });
 
-  testWidgets('resume, and a new session after the session timeout in the background', (tester) async {
+  testWidgets('resuming runs resume automations, and a long time in the background starts a new session', (tester) async {
     final c = app([
       Automation(id: 'resume', trigger: AutomationTrigger.resume, actions: [
         ActionDef.fromJson(seen('resume', {'away': r'${result.awayMs}'}))!,
@@ -217,7 +217,7 @@ void main() {
     expect(c.automations.usage['isFirstSession'], isFalse);
   });
 
-  testWidgets('intervals run in the foreground only; a delay waits and checks again', (tester) async {
+  testWidgets('interval automations run only in the foreground, and a delay waits and checks its condition again', (tester) async {
     final c = app([
       Automation(id: 'poll', trigger: AutomationTrigger.interval, intervalMs: 10000, actions: [
         ActionDef.fromJson(seen('poll', {'tick': r'${result.tick}'}))!,
@@ -244,7 +244,7 @@ void main() {
     c.automations.handleLifecycle(AppLifecycleState.paused);
   });
 
-  testWidgets('a screen shown runs the automations for it', (tester) async {
+  testWidgets('showing a screen runs the automations for it', (tester) async {
     setSize(tester);
     final c = app(
       [
@@ -270,7 +270,7 @@ void main() {
     ]);
   });
 
-  testWidgets('counters are per user', (tester) async {
+  testWidgets('automation counters are kept per user', (tester) async {
     final auth = MemoryAuthService();
     final storage = MemoryLocalStorage();
     final c = Codelessly.fromBundle(
