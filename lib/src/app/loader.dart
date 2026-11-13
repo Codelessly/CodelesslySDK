@@ -41,10 +41,15 @@ abstract interface class LivePublishLoader implements PublishLoader {
   Stream<PublishModel> watchModel(PublishSource source);
 }
 
-/// The stored-document marker of publish data (`schema: 2`): a document
-/// at a publish path without it is in another format, which this SDK
-/// can't read.
+/// The stored-document marker of publish data (`schema`): a document at a
+/// publish path without it is in an older format, which this SDK can't
+/// read. Schema 2 (what published apps hold) and 3 load; a schema-2 document
+/// is migrated to 3 in memory when it decodes (`migrate2to3`), never written
+/// back.
 const String kStoredSchemaField = 'schema';
+
+/// The stored schemas this SDK loads: 2 (migrated in memory) and 3.
+const Set<int> kLoadableSchemas = {2, kSchemaVersion};
 
 /// Where a stored layout too large for one Firestore document keeps its
 /// nodes: `{"nodes": {...}}` (and any field Firestore couldn't store as it
@@ -55,8 +60,12 @@ const String kCompressedNodesField = 'compressedNodes';
 /// Throws unless [data] (a stored publish document) is in the current format.
 void _requireCurrentFormat(Map<String, Object?> data, String what) {
   final schema = data[kStoredSchemaField];
-  if (schema is num && schema.toInt() >= 2) return;
-  throw PublishLoadException('$what is not in the current format (no "schema": 2). Publish the project '
+  if (schema is num && kLoadableSchemas.contains(schema.toInt())) return;
+  if (schema is num && schema.toInt() > kSchemaVersion) {
+    throw PublishLoadException('$what is in schema ${schema.toInt()}, newer than this SDK reads (2 and 3). '
+        'Update codelessly_sdk.');
+  }
+  throw PublishLoadException('$what is not in the current format (no "schema": 2 or 3). Publish the project '
       'again from the Codelessly Editor.');
 }
 
