@@ -14,7 +14,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader;
+import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
@@ -1031,8 +1031,71 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final ms = int.tryParse(step.target) ?? 0;
       await tester.pump(Duration(milliseconds: ms));
       return null;
+    case 'unfocus':
+      final focused = FocusManager.instance.primaryFocus;
+      if (focused == null || focused.context == null) return null;
+      focused.unfocus();
+      tester.testTextInput.hide();
+      await tester.pump();
+      return null;
+    case 'key':
+      final parts = step.target.split('+').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+      if (parts.isEmpty) return '--key: name a key (ArrowRight, Enter, Escape, Tab, shift+Tab...).';
+      final key = _keyNamed(parts.last);
+      if (key == null) {
+        return '--key ${step.target}: "${parts.last}" is not a key the command knows. Keys: ${_keyNames.keys.join(', ')}, a letter or a digit; modifiers: shift, ctrl, alt, meta.';
+      }
+      final modifiers = <LogicalKeyboardKey>[];
+      for (final m in parts.take(parts.length - 1)) {
+        final k = switch (m.toLowerCase()) {
+          'shift' => LogicalKeyboardKey.shiftLeft,
+          'ctrl' || 'control' => LogicalKeyboardKey.controlLeft,
+          'alt' || 'option' => LogicalKeyboardKey.altLeft,
+          'meta' || 'cmd' || 'command' => LogicalKeyboardKey.metaLeft,
+          _ => null,
+        };
+        if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta).';
+        modifiers.add(k);
+      }
+      for (final m in modifiers) {
+        await tester.sendKeyDownEvent(m);
+      }
+      await tester.sendKeyEvent(key);
+      for (final m in modifiers.reversed) {
+        await tester.sendKeyUpEvent(m);
+      }
+      await tester.pump();
+      return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+const _keyNames = <String, LogicalKeyboardKey>{
+  'ArrowLeft': LogicalKeyboardKey.arrowLeft,
+  'ArrowRight': LogicalKeyboardKey.arrowRight,
+  'ArrowUp': LogicalKeyboardKey.arrowUp,
+  'ArrowDown': LogicalKeyboardKey.arrowDown,
+  'Enter': LogicalKeyboardKey.enter,
+  'Escape': LogicalKeyboardKey.escape,
+  'Tab': LogicalKeyboardKey.tab,
+  'Space': LogicalKeyboardKey.space,
+  'Home': LogicalKeyboardKey.home,
+  'End': LogicalKeyboardKey.end,
+  'Backspace': LogicalKeyboardKey.backspace,
+  'Delete': LogicalKeyboardKey.delete,
+  'PageUp': LogicalKeyboardKey.pageUp,
+  'PageDown': LogicalKeyboardKey.pageDown,
+};
+
+/// The key named [name] (as the web's `KeyboardEvent.key`: `ArrowRight`,
+/// `Enter`; any case), a letter or a digit.
+LogicalKeyboardKey? _keyNamed(String name) {
+  for (final e in _keyNames.entries) {
+    if (e.key.toLowerCase() == name.toLowerCase() || (name.toLowerCase() == 'esc' && e.key == 'Escape')) return e.value;
+  }
+  if (RegExp(r'^[A-Za-z]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + name.toLowerCase().codeUnitAt(0) - 0x61);
+  if (RegExp(r'^[0-9]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30);
+  return null;
 }
 
 bool _isInside(RenderObject o, RenderObject ancestor) {
