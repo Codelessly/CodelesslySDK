@@ -1,4 +1,4 @@
-import 'package:codelessly_api/codelessly_api.dart' show Json;
+import 'package:codelessly_api/core.dart' show Json;
 
 /// An action failed: [action] is its type, [error] why. Node identity is
 /// metadata only; authored error events never expose raw objects or stacks.

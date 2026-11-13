@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node, SwitchProps, TriggerType, Trigger;
+import 'package:codelessly_api/core.dart' show Json, Node, SwitchProps, TriggerType, Trigger;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';

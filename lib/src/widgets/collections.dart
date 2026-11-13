@@ -6,8 +6,8 @@
 // expansion tiles are material controls, built as islands.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show Node, SizeFit, CollectionScrollProps, ListViewProps, GridViewProps, PageViewProps, ScrollProps, TableViewProps;
 import 'package:flutter/material.dart' show Divider, VerticalDivider, SizedBox, Widget, SliverGridDelegate, SliverGridDelegateWithFixedCrossAxisCount, SliverGridDelegateWithMaxCrossAxisExtent;
 import 'package:flutter/rendering.dart';

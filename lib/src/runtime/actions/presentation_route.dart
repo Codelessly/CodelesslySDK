@@ -3,7 +3,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:codelessly_api/codelessly_api.dart' show Breakpoints, ModalPresentation;
+import 'package:codelessly_api/core.dart' show Breakpoints, ModalPresentation;
 import 'package:flutter/material.dart';
 
 /// The width below which an adaptive modal with no breakpoint of its own is

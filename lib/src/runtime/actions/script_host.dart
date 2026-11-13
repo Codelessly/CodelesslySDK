@@ -4,7 +4,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_api/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart' show RenderTree;
@@ -279,7 +279,7 @@ class RuntimeScriptHost implements NamedVariablesScriptHost {
         final response = await run.context.services.callApi('${arg(0)}', params: map(arg(1)));
         return response;
       case 'runAction':
-        final action = ActionDef.fromJson(arg(0));
+        final action = ActionDef.fromJson(arg(0), catalog: run.catalog);
         if (action == null || action is UnknownAction) throw const ScriptHostError('app.runAction() needs an action object.');
         if (action is RunScriptAction) {
           throw const ScriptHostError('Scripts call other scripts with script.name(...), not app.runAction().');
@@ -294,7 +294,7 @@ class RuntimeScriptHost implements NamedVariablesScriptHost {
       case 'cloudData':
         final json = arg(0);
         if (json is! Map) throw const ScriptHostError('app.cloudData() needs a request object.');
-        return _runActions([?ActionDef.fromJson({...map(json), 'type': CloudDataAction.typeName})]);
+        return _runActions([?ActionDef.fromJson({...map(json), 'type': 'cloudData'}, catalog: run.catalog)]);
     }
     throw ScriptHostError('Unknown host call "$name".');
   }

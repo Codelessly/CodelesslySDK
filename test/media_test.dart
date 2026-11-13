@@ -7,7 +7,7 @@ import 'package:codelessly_sdk/src/render/paint/image_fill.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart';
 import 'package:codelessly_sdk/src/render/paint/material_icon_versions.dart';
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
-import 'package:codelessly_sdk/src/widgets/media_players.dart';
+import 'package:codelessly_sdk/src/features/media/players.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,7 +31,7 @@ Map<String, Object?> _doc(Map<String, Object?> nodes, {double w = 300, double h 
     };
 
 Future<NodeTree> _show(WidgetTester tester, Map<String, Object?> json, {bool interactive = false}) async {
-  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson(json)));
+  final tree = NodeTree(DocumentSource(LayoutDocument.fromJson(json)), recipes: mediaFeature.recipes);
   await tester.pumpWidget(MaterialApp(
       home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's', interactive: interactive))));
   addTearDown(() async {

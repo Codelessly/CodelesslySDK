@@ -9,7 +9,7 @@
 // No BuildContext crosses these seams: the runtime runs headless and in tests.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, Node;
+import 'package:codelessly_api/core.dart' show Json, Node;
 import 'package:flutter/foundation.dart';
 
 /// Values expressions read: variables, the current list item, route
