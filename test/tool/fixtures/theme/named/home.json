@@ -1,0 +1,105 @@
+{
+ "schema": 2,
+ "roots": [
+  "home"
+ ],
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "paper"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "eb",
+    "t",
+    "p",
+    "q"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 24
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "eb": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 342
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "OUR MENU",
+    "style": "eyebrow"
+   }
+  },
+  "t": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 342
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "text": "Fire, smoke and season",
+    "style": "title"
+   }
+  },
+  "p": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 342
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Cooked over oak, served at the counter.",
+    "style": "body"
+   }
+  },
+  "q": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "ember"
+     }
+    ]
+   }
+  }
+ }
+}

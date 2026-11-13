@@ -152,8 +152,28 @@ class RenderFitBox extends RenderProxyBox {
     return null;
   }
 
+  /// Whether a layout of this box filled an axis with no room to fill (its
+  /// parent measured it unbounded: a hugging row or column, a wrapping
+  /// line, a grid row sized to its content, a scroll view) and so took its
+  /// design size there: the number in `{"fill": n}` decided its extent. For
+  /// tools to report; not cleared by a later bounded layout, since the
+  /// unbounded one may have decided the parent's size.
+  bool designWidthUsed = false, designHeightUsed = false;
+
+  void _noteDesignFallback(BoxConstraints constraints) {
+    if (_fillWidth && !constraints.maxWidth.isFinite && _widthFactor == null &&
+        measureContentAlong != Axis.horizontal && _width != null && _width!.isFinite) {
+      designWidthUsed = true;
+    }
+    if (_fillHeight && !constraints.maxHeight.isFinite && _heightFactor == null &&
+        measureContentAlong != Axis.vertical && _height != null && _height!.isFinite) {
+      designHeightUsed = true;
+    }
+  }
+
   @override
   void performLayout() {
+    _noteDesignFallback(constraints);
     final BoxConstraints childConstraints = _childConstraints(constraints);
     final RenderBox? child = this.child;
     if (child == null) {

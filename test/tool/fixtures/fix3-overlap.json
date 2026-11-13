@@ -1,0 +1,100 @@
+{
+ "schema": 2,
+ "roots": [
+  "overlap"
+ ],
+ "nodes": {
+  "overlap": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "hero",
+    "card",
+    "after"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   }
+  },
+  "hero": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 200
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF00FF00"
+     }
+    ]
+   }
+  },
+  "card": {
+   "type": "box",
+   "layout": {
+    "width": 200,
+    "height": 100
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFF0000"
+     }
+    ]
+   },
+   "motion": {
+    "translateY": -36
+   },
+   "media": [
+    {
+     "minWidth": 1024,
+     "patch": {
+      "motion": {
+       "translateY": 0
+      }
+     }
+    }
+   ]
+  },
+  "after": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 50
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF0000FF"
+     }
+    ]
+   }
+  }
+ }
+}

@@ -14,12 +14,13 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader;
+import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 
 import 'args.dart';
+import 'compare.dart';
 import 'fonts.dart';
 import 'prepare.dart';
 import 'publish.dart';
@@ -67,6 +68,8 @@ const runtimeCodes = <(String, String, String)>[
   ('expression_not_evaluated', 'warning', 'A text shows "\${" on screen: an expression that did not evaluate (a formula error, or a binding that replaced the text).'),
   ('path_overflow', 'warning', 'A path draws outside its node\'s box: a path is not clipped to its box (as Flutter\'s CustomPaint). Give it a viewBox, or clip an ancestor.'),
   ('layout_overflow', 'warning', 'A node extends past its parent\'s box (by the pixels shown) where the parent does not scroll that way.'),
+  ('fill_fallback', 'warning', 'A node fills an axis its parent measures with no limit (a hugging row or column, a wrapping line, a grid row sized to its content): it takes the design number of its {"fill": n}. The message names the parent and the fix.'),
+  ('compare_failed', 'warning', '--compare found no reference screenshot for a capture (or could not read it).'),
   ('offscreen', 'warning', 'A node extends past the screen edge where nothing scrolls: on a device it is cut off.'),
   ('text_clipped', 'warning', 'A text does not fit its box: its lines are taller than the box, or a word is wider.'),
   ('text_truncated', 'warning', 'A text was cut at maxLines with overflow "clip" (an ellipsis or fade is taken as meant).'),
@@ -82,6 +85,9 @@ const runtimeCodes = <(String, String, String)>[
 final class RenderReport {
   final List<api.Json> diagnostics = [];
   final List<String> images = [];
+
+  /// `--compare`: each capture against its reference.
+  final List<ImageComparison> comparisons = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -174,6 +180,11 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
   final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   report.diagnostics.addAll(diagnostics.map((d) => d.toJson()));
+  // The site's theme: its named colors and text styles.
+  final themeJson = api.readMap(site.manifest?['theme']);
+  report.diagnostics.addAll(validateTheme(themeJson,
+          breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
+      .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
@@ -253,7 +264,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final published = publishPages(pages,
       variables: publishVariables(site.manifest),
       breakpoints: site.manifest?['breakpoints'],
-      components: [for (final t in components.types) components[t]!.document.toJson()]);
+      components: [for (final t in components.types) components[t]!.document.toJson()],
+      theme: themeJson == null ? null : prepareTheme(themeJson, defaultFamily: 'Roboto'));
   final fileOfNode = <String, String>{
     for (final e in docs.entries)
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
@@ -430,42 +442,25 @@ Future<void> _renderAll(
             'To reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
             screen: label, size: sizeName));
       }
-      // The page's own scroll view only (the largest one a user can
-      // scroll): a decorative list that does not scroll, or one inside the
-      // page, adds nothing. Content fixed to the window (outside the page's
-      // scroll view: a bar pinned to the bottom, a canvas's bottom bar or
-      // button) is drawn where a user first sees it, in the first window.
-      final shifted = <NodeBox>[];
+      // Full page: the page's own scroll view (the largest one a user can
+      // scroll; a decorative list that does not scroll, or one inside the
+      // page, adds nothing) captured over its whole extent while the window
+      // keeps its size, as a browser's full-page screenshot does: the
+      // window's height, `screen.height` and whatever is sized or pinned to
+      // the window stay as on the device, and content fixed to the window
+      // (a header, a drawer, a bar pinned to the bottom) is drawn where a
+      // user first sees it, in the first window. The capture starts at the
+      // page's top, whatever a step scrolled it to.
+      RenderDesignScroll? fullPage;
       if (args.fullPage) {
         var page = _pageScroll(binding);
-        // A full page is the whole page from its top, whatever the steps
-        // scrolled it to (a tap scrolls its node into view first).
         if (page != null && page.pixels.abs() > 0.01) {
           page.jumpTo(0);
           await _settle(tester);
           collect();
           page = _pageScroll(binding);
         }
-        if (page != null && page.maxScrollExtent >= 1) {
-          final pageBox = _nodeBoxAbove(page);
-          final fixed = pageBox == null ? const <NodeBox>[] : _fixedAround(binding, pageBox);
-          final before = {for (final b in fixed) b: _rectOf(b).topLeft};
-          for (var round = 0; round < 3; round++) {
-            if (!page.attached || page.maxScrollExtent < 1) break;
-            final h = math.min(20000.0, tester.view.physicalSize.height + page.maxScrollExtent);
-            tester.view.physicalSize = ui.Size(size.width, h.ceilToDouble());
-            await _settle(tester);
-            collect();
-          }
-          for (final b in fixed) {
-            if (!b.attached || !b.hasSize) continue;
-            final delta = before[b]! - _rectOf(b).topLeft;
-            if (delta.distance < 0.5) continue;
-            b.capturePaintShift = delta;
-            shifted.add(b);
-          }
-          if (shifted.isNotEmpty) await tester.pump();
-        }
+        if (page != null && page.maxScrollExtent >= 1) fullPage = page;
       }
 
       // 6. Runtime checks, then the PNG.
@@ -500,16 +495,34 @@ Future<void> _renderAll(
       }
       final name = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';
-      await tester.runAsync(() async {
-        final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-        final image = await ro.toImage(pixelRatio: 1);
-        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-        image.dispose();
-        File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
-      });
+      final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+      final page = fullPage;
+      if (page == null || !page.attached) {
+        await tester.runAsync(() async {
+          final image = await ro.toImage(pixelRatio: 1);
+          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          image.dispose();
+          File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
+        });
+      } else {
+        File(file).writeAsBytesSync(await _captureFullPage(tester, ro, page, binding));
+      }
       report.images.add(file);
-      for (final b in shifted) {
-        b.capturePaintShift = Offset.zero;
+      if (args.compare case final String reference) {
+        final found = referenceFor(file, reference);
+        if (found.file == null) {
+          issue(RuntimeIssue('compare_failed', 'warning',
+              '--compare: no reference for $name in $reference${found.candidates.isEmpty ? '' : ' among ${found.candidates.map((c) => c.split('/').last).join(', ')}'}: '
+              'name the file, or give the state a --label the reference file names.',
+              screen: label, size: sizeName));
+        } else {
+          try {
+            report.comparisons.add((await tester.runAsync(() => compareImages(file, found.file!)))!);
+          } catch (e) {
+            issue(RuntimeIssue('compare_failed', 'warning', '--compare: ${found.file} could not be compared: ${_firstLine('$e')}',
+                screen: label, size: sizeName));
+          }
+        }
       }
       if (args.dumpLayout) {
         final boxes = [
@@ -681,6 +694,87 @@ ui.Rect? _visibleClip(RenderBox b) {
     out = out == null ? global : out.intersect(global);
   }
   return out;
+}
+
+/// The PNG of the whole of [page] (the page's scroll view) as a window
+/// [ro] keeps its size: the first window as it shows, then the rest of the
+/// page a viewport at a time, scrolled into the window with the boxes fixed
+/// to the window over the page (painted after it: a header, a drawer, a
+/// bottom bar) left out, stitched below; the window's part below the page
+/// view as it is at the page's end. As tall as the window plus what the
+/// page scrolls. The page is left at its top.
+Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro, RenderDesignScroll page, WidgetsBinding binding) async {
+  final window = ro.size;
+  final view = _rectOf(page);
+  final max = page.maxScrollExtent;
+  final pageBox = _nodeBoxAbove(page);
+  final all = _boxes(binding);
+  final pageIndex = pageBox == null ? -1 : all.indexOf(pageBox);
+  final over = pageBox == null
+      ? const <NodeBox>[]
+      : [for (final b in _fixedAround(binding, pageBox)) if (all.indexOf(b) > pageIndex && !_isInside(b, page)) b];
+  Future<ui.Image> shot() async => (await tester.runAsync(() => ro.toImage(pixelRatio: 1)))!;
+  final first = await shot();
+  final slices = <(ui.Image, double)>[];
+  const hidden = Offset(0, -1e6);
+  for (final b in over) {
+    b.capturePaintShift = hidden;
+  }
+  try {
+    for (var o = view.height; ; o += view.height) {
+      final at = math.min(o, max);
+      page.jumpTo(at);
+      await _settle(tester);
+      slices.add((await shot(), at));
+      if (at >= max) break;
+    }
+  } finally {
+    for (final b in over) {
+      b.capturePaintShift = Offset.zero;
+    }
+    page.jumpTo(0);
+    await _settle(tester);
+  }
+  final total = (window.height + max).ceilToDouble();
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+  final paint = Paint()..filterQuality = FilterQuality.none;
+  for (final (img, at) in slices) {
+    // The viewport's rows: the page from offset [at].
+    canvas.drawImageRect(img, Rect.fromLTWH(0, view.top, window.width, view.height),
+        Rect.fromLTWH(0, view.top + at, window.width, view.height), paint);
+  }
+  // Below the page view at the page's end (the fixed boxes left out).
+  final (last, lastAt) = slices.last;
+  canvas.drawImageRect(last, Rect.fromLTWH(0, view.bottom, window.width, window.height - view.bottom),
+      Rect.fromLTWH(0, view.bottom + lastAt, window.width, window.height - view.bottom), paint);
+  // The first window on top, as it shows.
+  canvas.drawImage(first, Offset.zero, paint);
+  final picture = recorder.endRecording();
+  return (await tester.runAsync(() async {
+    final image = await picture.toImage(window.width.ceil(), total.toInt());
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    picture.dispose();
+    first.dispose();
+    for (final (img, _) in slices) {
+      img.dispose();
+    }
+    return bytes!.buffer.asUint8List();
+  }))!;
+}
+
+/// The fit boxes of node box [b]'s own chain (not those of the nodes
+/// inside it).
+Iterable<RenderFitBox> _ownFitBoxes(NodeBox b) sync* {
+  final stack = <RenderObject>[];
+  b.visitChildren(stack.add);
+  while (stack.isNotEmpty) {
+    final o = stack.removeLast();
+    if (o is NodeBox) continue;
+    if (o is RenderFitBox) yield o;
+    o.visitChildren(stack.add);
+  }
 }
 
 /// [o] or its nearest ancestor that is a node box.
@@ -958,8 +1052,71 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final ms = int.tryParse(step.target) ?? 0;
       await tester.pump(Duration(milliseconds: ms));
       return null;
+    case 'unfocus':
+      final focused = FocusManager.instance.primaryFocus;
+      if (focused == null || focused.context == null) return null;
+      focused.unfocus();
+      tester.testTextInput.hide();
+      await tester.pump();
+      return null;
+    case 'key':
+      final parts = step.target.split('+').map((p) => p.trim()).where((p) => p.isNotEmpty).toList();
+      if (parts.isEmpty) return '--key: name a key (ArrowRight, Enter, Escape, Tab, shift+Tab...).';
+      final key = _keyNamed(parts.last);
+      if (key == null) {
+        return '--key ${step.target}: "${parts.last}" is not a key the command knows. Keys: ${_keyNames.keys.join(', ')}, a letter or a digit; modifiers: shift, ctrl, alt, meta.';
+      }
+      final modifiers = <LogicalKeyboardKey>[];
+      for (final m in parts.take(parts.length - 1)) {
+        final k = switch (m.toLowerCase()) {
+          'shift' => LogicalKeyboardKey.shiftLeft,
+          'ctrl' || 'control' => LogicalKeyboardKey.controlLeft,
+          'alt' || 'option' => LogicalKeyboardKey.altLeft,
+          'meta' || 'cmd' || 'command' => LogicalKeyboardKey.metaLeft,
+          _ => null,
+        };
+        if (k == null) return '--key ${step.target}: "$m" is not a modifier (shift, ctrl, alt, meta).';
+        modifiers.add(k);
+      }
+      for (final m in modifiers) {
+        await tester.sendKeyDownEvent(m);
+      }
+      await tester.sendKeyEvent(key);
+      for (final m in modifiers.reversed) {
+        await tester.sendKeyUpEvent(m);
+      }
+      await tester.pump();
+      return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+const _keyNames = <String, LogicalKeyboardKey>{
+  'ArrowLeft': LogicalKeyboardKey.arrowLeft,
+  'ArrowRight': LogicalKeyboardKey.arrowRight,
+  'ArrowUp': LogicalKeyboardKey.arrowUp,
+  'ArrowDown': LogicalKeyboardKey.arrowDown,
+  'Enter': LogicalKeyboardKey.enter,
+  'Escape': LogicalKeyboardKey.escape,
+  'Tab': LogicalKeyboardKey.tab,
+  'Space': LogicalKeyboardKey.space,
+  'Home': LogicalKeyboardKey.home,
+  'End': LogicalKeyboardKey.end,
+  'Backspace': LogicalKeyboardKey.backspace,
+  'Delete': LogicalKeyboardKey.delete,
+  'PageUp': LogicalKeyboardKey.pageUp,
+  'PageDown': LogicalKeyboardKey.pageDown,
+};
+
+/// The key named [name] (as the web's `KeyboardEvent.key`: `ArrowRight`,
+/// `Enter`; any case), a letter or a digit.
+LogicalKeyboardKey? _keyNamed(String name) {
+  for (final e in _keyNames.entries) {
+    if (e.key.toLowerCase() == name.toLowerCase() || (name.toLowerCase() == 'esc' && e.key == 'Escape')) return e.value;
+  }
+  if (RegExp(r'^[A-Za-z]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + name.toLowerCase().codeUnitAt(0) - 0x61);
+  if (RegExp(r'^[0-9]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30);
+  return null;
 }
 
 bool _isInside(RenderObject o, RenderObject ancestor) {
@@ -984,10 +1141,13 @@ List<RuntimeIssue> _check(
   // The glyphs a family has: its regular face's (else Roboto's).
   Set<int>? coverage(String? family) {
     final fam = (family == null || family.isEmpty) ? 'Roboto' : family;
-    final face = faces.where((f) => f.family.toLowerCase() == fam.toLowerCase() && !f.italic).firstOrNull ??
-        faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
-    if (face == null) return null;
-    return _coverage.putIfAbsent(face.path, () => fontCoverage(face.path));
+    // The file the fetcher serves for the family's regular face.
+    final face = DirectoryFontFetcher(faces).match(fam, 400, false);
+    final used = face != null && face.family.toLowerCase() == fam.toLowerCase()
+        ? face
+        : faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
+    if (used == null) return null;
+    return _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
   }
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));
@@ -1006,17 +1166,10 @@ List<RuntimeIssue> _check(
     return null;
   }
 
-  String? parentOf(String id) {
-    for (final l in layouts.values) {
-      final p = l.document.parentOf(id);
-      if (p != null) return p;
-    }
-    for (final b in boxes) {
-      if (b.id == id) return b.source.parentOf(id);
-    }
-    return null;
-  }
 
+
+  String? fileOfComponent(String type) =>
+      docs.entries.where((e) => api.readMap(e.value[api.kWidgetKey])?['type'] == type).firstOrNull?.key;
   final view = binding.renderViews.first.size;
   final byKey = <String, NodeBox>{for (final b in boxes) '${b.id}|${b.instance}': b};
   const repeaters = {'listView', 'gridView', 'pageView', 'tableView', 'tabs'};
@@ -1053,39 +1206,78 @@ List<RuntimeIssue> _check(
     if (node == null || node.type == 'canvas') continue;
     final r = _rectOf(b);
     if (r.width <= 0 && r.height <= 0) continue;
-    final file = fileOfNode[b.id];
+    final component = componentInstanceOf(b.instance);
+    // A node of a component is its definition's (ids are local to it).
+    final file = component == null ? fileOfNode[b.id] : fileOfComponent(component.component);
     // What of it can be seen: its box within every ancestor's clip.
     final clip = _visibleClip(b);
     final seen = clip == null ? r : r.intersect(clip);
     // Past its parent.
-    final pid = parentOf(b.id);
-    final parentBox = pid == null ? null : (byKey['$pid|${b.instance}'] ?? byKey['$pid|null']);
-    final parent = parentBox?.node ?? (pid == null ? null : nodeOf(pid));
+    // Its parent in its own document (a page's, or the component's
+    // definition), found as the node box around it: a page node and a
+    // component's node of the same id are never confused.
+    final pid = b.source.parentOf(b.id);
+    NodeBox? parentBox;
+    for (RenderObject? o = b.parent; o != null && pid != null; o = o.parent) {
+      if (o is NodeBox && o.id == pid) {
+        parentBox = o;
+        break;
+      }
+    }
+    parentBox ??= pid == null ? null : byKey['$pid|${b.instance}'];
+    final parent = parentBox?.node ?? (pid == null ? null : b.source.node(pid));
+    final parentName = parentBox == null ? pid : nameOf(parentBox);
     if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack' && !seen.isEmpty) {
       final pr = _rectOf(parentBox);
       final dx = math.max(pr.left - seen.left, seen.right - pr.right);
       final dy = math.max(pr.top - seen.top, seen.bottom - pr.bottom);
       if (dx > 1 && !scrollsAlong(b, true, upTo: parentBox)) {
         out.add(RuntimeIssue('layout_overflow', 'warning',
-            '"${nameOf(b)}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$pid" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            '"${nameOf(b)}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$parentName" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       if (dy > 1 && !scrollsAlong(b, false, upTo: parentBox)) {
         out.add(RuntimeIssue('layout_overflow', 'warning',
-            '"${nameOf(b)}" (${node.type}, ${r.height.toStringAsFixed(0)} tall) overflows its parent "$pid" (${parent.type}, ${pr.height.toStringAsFixed(0)} tall) by ${dy.toStringAsFixed(0)} px vertically.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            '"${nameOf(b)}" (${node.type}, ${r.height.toStringAsFixed(0)} tall) overflows its parent "$parentName" (${parent.type}, ${pr.height.toStringAsFixed(0)} tall) by ${dy.toStringAsFixed(0)} px vertically.',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
+      }
+    }
+    // A fill with no room to fill: its parent measured it unbounded on
+    // that axis, so the number in {"fill": n} decided its size.
+    for (final fb in _ownFitBoxes(b)) {
+      for (final horizontal in const [true, false]) {
+        final used = horizontal ? fb.designWidthUsed : fb.designHeightUsed;
+        final design = horizontal ? fb.width : fb.height;
+        // A spacer (or a fill of design size 0) with no room takes none, as
+        // Flutter's Spacer in a hugging column: that is what it is for.
+        if (!used || design == null || design <= 0 || node.type == 'spacer' || !fb.hasSize) continue;
+        final actual = horizontal ? fb.size.width : fb.size.height;
+        if ((actual - design).abs() > 0.5) continue;
+        final dim = horizontal ? 'width' : 'height';
+        final why = parent == null
+            ? 'what holds it measures it with no $dim limit'
+            : (horizontal ? parent.layout.width : parent.layout.height).fit == api.SizeFit.hug && const {'row', 'column', 'flex'}.contains(parent.type) && !parent.prop(api.FlexProps.wrap)
+                ? 'its parent "$parentName" (${parent.type}) hugs its $dim, so there is no $dim to fill'
+                : parent.type == 'gridView'
+                    ? 'its grid "$parentName" sizes each row to its content, so there is no $dim to fill'
+                    : 'its parent "$parentName" (${parent.type}) measures it with no $dim limit (a hugging or wrapping parent, a grid row sized to its content, or a scroll view)';
+        out.add(RuntimeIssue('fill_fallback', 'warning',
+            '"${nameOf(b)}" (${node.type}) fills its $dim, but $why: it takes its design $dim, ${design.toStringAsFixed(0)} px (the number in {"fill": ${design.toStringAsFixed(0)}}). '
+            '${horizontal ? '' : 'To line up the bottoms of cards in a row, put the decoration on the stretched child itself and push its footer with a spacer (a spacer fills what stretching adds); or '}'
+            'give the parent a definite $dim (fixed, or fill inside a parent that has one), or make this node hug its $dim.',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
     }
     // Past the screen (the part not clipped away by an ancestor).
     if (!seen.isEmpty && seen.right > view.width + 1 && !scrollsAlong(b, true)) {
       out.add(RuntimeIssue('offscreen', 'warning',
           '"${nameOf(b)}" (${node.type}) ends at x=${seen.right.toStringAsFixed(0)}, past the ${view.width.toStringAsFixed(0)} px wide screen.',
-          nodeId: b.id, screen: screen, size: size, file: file));
+          nodeId: nameOf(b), screen: screen, size: size, file: file));
     }
     if (!seen.isEmpty && seen.bottom > view.height + 1 && !scrollsAlong(b, false)) {
       out.add(RuntimeIssue('offscreen', 'warning',
           '"${nameOf(b)}" (${node.type}) ends at y=${seen.bottom.toStringAsFixed(0)}, below the ${view.height.toStringAsFixed(0)} px tall screen, and nothing scrolls: make the body column scrollable ("scrollable": true).',
-          nodeId: b.id, screen: screen, size: size, file: file));
+          nodeId: nameOf(b), screen: screen, size: size, file: file));
     }
     // Icons that draw nothing.
     if (node.type == 'icon' && b.drawn) {
@@ -1096,7 +1288,7 @@ List<RuntimeIssue> _check(
         out.add(RuntimeIssue('icon_not_drawn', 'warning',
             'Icon "${nameOf(b)}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows'}. '
             'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
     }
     // A path drawn past its box, where that part shows (no ancestor clips
@@ -1116,7 +1308,7 @@ List<RuntimeIssue> _check(
               'The path of "${nameOf(b)}" reaches ${past.toStringAsFixed(0)} px past its ${b.size.width.toStringAsFixed(0)}x${b.size.height.toStringAsFixed(0)} box '
               '(path coordinates are the box\'s own pixels, from its top left), and nothing clips that part away. '
               '${node.type == 'path' ? 'Give it "viewBox": [w, h] to scale it into the box, or ' : 'Make the box as large as the path, or '}set "decoration": {"clip": "hardEdge"} on an ancestor.',
-              nodeId: b.id, screen: screen, size: size, file: file));
+              nodeId: nameOf(b), screen: screen, size: size, file: file));
         }
       }
     }
@@ -1131,7 +1323,7 @@ List<RuntimeIssue> _check(
         out.add(RuntimeIssue('expression_not_evaluated', 'warning',
             'Text "${nameOf(b)}" shows "$short" on screen: its expression did not evaluate. Check the formula (names, functions, quotes); '
             'a binding of "props.text" or "props.runs" must not also be written as text, and a "\${...}" inside a formula is not read.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final missing = <String>{};
       p.text.visitChildren((span) {
@@ -1149,7 +1341,7 @@ List<RuntimeIssue> _check(
         out.add(RuntimeIssue('missing_glyph', 'warning',
             'Text "${nameOf(b)}" has ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')}, which its font has no glyph for: drawn as an empty box. '
             'Use a character the font has, an icon node, or a box with a "path" for a small mark.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       var colorless = false;
       p.text.visitChildren((span) {
@@ -1161,25 +1353,25 @@ List<RuntimeIssue> _check(
       final rootStyle = p.text.style;
       if (colorless && (rootStyle?.color == null && rootStyle?.foreground == null)) {
         out.add(RuntimeIssue('text_no_color', 'warning', 'Text "${nameOf(b)}" ("$short") has no color, so it is painted white: set props.style.color.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final cut = node.prop(api.TextProps.overflow) != api.TextOverflow.clip;
       if (p.didExceedMaxLines && !cut) {
         out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${nameOf(b)}" ("$short") is cut at maxLines: set "overflow": "ellipsis" if that is meant, or give it more lines.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final needH = p.getMaxIntrinsicHeight(b.size.width);
       final needW = p.getMinIntrinsicWidth(double.infinity);
       if (needH > b.size.height + 1.5 && !p.didExceedMaxLines) {
         out.add(RuntimeIssue('text_clipped', 'warning',
             'Text "${nameOf(b)}" ("$short") needs ${needH.toStringAsFixed(0)} px of height at ${b.size.width.toStringAsFixed(0)} wide but its box is ${b.size.height.toStringAsFixed(0)}: give it {"hug": n} height or more room.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       if (needW > b.size.width + 1.5 && node.prop(api.TextProps.maxLines) == null) {
         out.add(RuntimeIssue('text_clipped', 'warning',
             'Text "${nameOf(b)}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: it is cut. '
             'Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.',
-            nodeId: b.id, screen: screen, size: size, file: file));
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
     }
   }
@@ -1198,6 +1390,7 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     'errors': report.errors,
     'warnings': report.warnings,
     'images': [for (final i in report.images) i.split('/').last],
+    if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -1218,6 +1411,9 @@ String formatReport(RenderReport report) {
   }
   for (final i in report.images) {
     b.writeln('wrote $i');
+  }
+  for (final c in report.comparisons) {
+    b.writeln(c.summary());
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();
