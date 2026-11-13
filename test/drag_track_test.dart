@@ -218,13 +218,8 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
   });
 
-  testWidgets('double tap resets to the default and the wheel steps', (tester) async {
-    final s = await plate(tester, fader, variables: [v('accent', -30)]);
-    await tester.tapAt(s.center('k'));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.tapAt(s.center('k'));
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(s['accent'], 0);
+  testWidgets('the wheel steps (a double tap reset is gone in schema 3)', (tester) async {
+    final s = await plate(tester, fader, variables: [v('accent', 0)]);
     final pointer = TestPointer(1, PointerDeviceKind.mouse);
     await tester.sendEventToBinding(pointer.hover(s.center('k')));
     await tester.sendEventToBinding(pointer.scroll(const Offset(0, -20)));
@@ -409,38 +404,7 @@ void main() {
     expect(s['g'] as double, greaterThan(40));
   });
 
-  testWidgets('Shift turns fine mode on, writing fineVariable', (tester) async {
-    final s = await plate(
-      tester,
-      {
-        'variable': 'x',
-        'min': 0,
-        'max': 100,
-        'step': 10,
-        'fineStep': 1,
-        'input': 'horizontal',
-        'pixelsPerRange': 100,
-        'fineVariable': 'fine',
-        'fineHold': 0,
-        'x2': 0,
-        'y2': 0,
-      },
-      variables: [v('x', 0), v('fine', false, VariableType.boolean)],
-    );
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-    final gesture = await tester.startGesture(s.center('k'));
-    await gesture.moveBy(const Offset(10, 0));
-    await tester.pump();
-    await gesture.moveBy(const Offset(40, 0));
-    await tester.pump();
-    expect(s['fine'], true);
-    // 50px at 4 × 100px per range: 12.5, in steps of 1 (not 10).
-    expect(s['x'], 13);
-    await gesture.up();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-    await tester.pump(const Duration(seconds: 1));
-    expect(s['fine'], false);
-  });
+  // Removed in schema 3: the fine mode (fineStep, finePixelsPerRange, fineHold, fineVariable).
 
   testWidgets('momentum: a flick coasts on, then settles once (changeEnd)', (tester) async {
     final s = await plate(
@@ -553,11 +517,7 @@ void main() {
     expect(s.center('k').dy, closeTo(61, 0.01));
   });
 
-  testWidgets('a parked track draws an empty value at parkedProgress', (tester) async {
-    final s = await plate(tester, {...fader, 'parkedProgress': -0.2}, variables: [v('accent', null)]);
-    // 20% of the throw below its start.
-    expect(s.center('k').dy, closeTo(311 + 50, 0.01));
-  });
+  // Removed in schema 3: parkedProgress.
 
   testWidgets('a relative scrub area maps a tap to that fraction across', (tester) async {
     final s = await plate(
@@ -685,23 +645,7 @@ void main() {
       expect(s['dial'], 100);
     });
 
-    testWidgets('smooth: drawn between numbers while dragged, snapped at rest', (t) async {
-      final s = await face(t, {...dial, 'momentum': false});
-      Offset pt(double a) => const Offset(200, 200) + Offset(math.sin(a * math.pi / 180), -math.cos(a * math.pi / 180)) * 150;
-      final g = await t.startGesture(pt(0));
-      for (var i = 1; i <= 10; i++) {
-        await g.moveTo(pt(i * 2.0));
-        await t.pump(const Duration(milliseconds: 40));
-      }
-      // Drawn at 20°, not at the 18° of the 2 the variable holds.
-      expect(angle(s), closeTo(20, 0.5));
-      expect(s['dial'], 2);
-      await t.pump(const Duration(milliseconds: 200));
-      await g.up();
-      await t.pumpAndSettle();
-      expect(angle(s), closeTo(18, 0.05));
-      expect(s['settled'], [2]);
-    });
+    // Removed in schema 3: smooth (drawn between numbers).
 
     testWidgets('momentum: a flick coasts on, crossing every number, then settles', (t) async {
       final s = await face(t, dial);
@@ -722,12 +666,7 @@ void main() {
       expect(s['settled'], [16]);
     });
 
-    testWidgets('gain: half the gain turns half as far', (t) async {
-      final s = await face(t, {...dial, 'momentum': false, 'gain': 0.5});
-      await arc(t, 0, 144, steps: 40, ms: 40);
-      await t.pumpAndSettle();
-      expect(s['dial'], 8);
-    });
+    // Removed in schema 3: gain round an arc.
 
     testWidgets('step: an action turns it a number, as a drag would', (t) async {
       final s = await face(t, dial);
@@ -745,24 +684,6 @@ void main() {
       expect(s['dial'], 3);
     });
 
-    testWidgets('a value set from elsewhere glides there, reporting nothing', (t) async {
-      final s = await plate(
-        t,
-        {'shape': 'arc', 'variable': 'pull', 'min': 0, 'max': 1, 'startAngle': 0, 'endAngle': 90, 'smooth': true},
-        size: const Size(400, 400),
-        at: Offset.zero,
-        variables: [v('pull', 1), v('n', 0, VariableType.integer)],
-        actions: [
-          reaction('changed', [add('n')]),
-        ],
-      );
-      s.set('pull', 0);
-      await t.pump();
-      await t.pump(const Duration(milliseconds: 30));
-      expect(angle(s), inExclusiveRange(1, 89));
-      await t.pumpAndSettle();
-      expect(angle(s), closeTo(0, 0.1));
-      expect(s['n'], 0);
-    });
+    // Removed in schema 3: a smooth track's glide to a value set from elsewhere.
   });
 }

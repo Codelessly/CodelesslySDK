@@ -7,8 +7,7 @@
 //
 // Its physics are the shared gesture physics (render/physics.dart): a
 // release coasts on the track's GesturePhysics as Flutter's
-// FrictionSimulation; snapping onto a step and a smooth track's glide are
-// critically damped SpringSimulations; a settle spring is its own Spring.
+// FrictionSimulation; a settle spring is its own Spring.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -17,7 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
-import 'physics.dart' show describeSpring, gestureTolerance;
+import 'physics.dart' show describeSpring;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -64,7 +63,7 @@ List<double> crossedSteps(double step, double from, double to) {
 /// The pan a track turns its value with. It claims the pointer after half
 /// the movement any drag or scroll needs, so a control wins over what
 /// holds it (a knob on a draggable pedal, a fader in a scrolling page).
-/// Holding still is not claiming, so a double tap still resets the value.
+/// Holding still is not claiming.
 class TrackPanGestureRecognizer extends PanGestureRecognizer {
   TrackPanGestureRecognizer({super.debugOwner});
 
@@ -292,23 +291,13 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     _refresh();
   }
 
-  /// Moves to a new value [next] (was [old] on
-  /// [oldTrack]): a smooth track glides there without reporting the values
-  /// it passes; any other glides from where it's drawn now (a spring at the
-  /// speed it moves). A change while the pointer holds it waits.
+  /// Moves to a new value [next] (was [old] on [oldTrack]): glides from
+  /// where it's drawn now (a spring at the speed it moves). A change while
+  /// the pointer holds it waits.
   void _valueChanged(api.Track oldTrack, double old, double next) {
     _value = next;
     if (!_interactive) return;
-    if (_track.smooth && !_pointerActive && !_same(next, _dragValue ?? old)) {
-      final from = _drawProgress ?? _track.progressOf(_dragValue ?? old);
-      _velocity = 0;
-      _snapTo = null;
-      _settleWhenDone = false;
-      _dragValue = null;
-      _drawProgress = from;
-      _glideTo = _track.progressOf(next);
-      _startLoop();
-    } else if (!_track.smooth && _dragValue == null) {
+    if (_dragValue == null) {
       final from = _settling ? _lerpSettle : oldTrack.restProgressOf(old);
       _glide(from, _track.restProgressOf(next), velocity: _settleVelocity);
     }
@@ -344,17 +333,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   /// `changeEnd` once it has come to rest.
   void _onSettled(double v) => _fire('changeEnd', {'value': v});
 
-  void _onFine(bool fine) {
-    final name = _track.fineVariable.trim();
-    final scope = _scope;
-    if (name.isNotEmpty && scope != null) scope.write(name, fine);
-  }
-
   // --- what's shown --------------------------------------------------------------------
 
-  /// Fine mode: from Shift or a press held still.
-  bool _fine = false, _heldFine = false;
-  Timer? _hold;
   bool _focused = false;
   double? _stepValue;
   double _startValue = 0;
@@ -369,21 +349,11 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   Offset _grab = Offset.zero;
   Offset? _lastLocal;
 
-  /// Where a smooth track is drawn while it moves (null: at its value).
-  double? _drawProgress;
-
   /// Coasting speed in progress per second.
   double _velocity = 0;
 
-  /// Progress a snap is heading for.
-  double? _snapTo;
   bool _settleWhenDone = false;
 
-  /// Where a value set from elsewhere is drawn gliding to (smooth).
-  double? _glideTo;
-  bool _pointerActive = false;
-
-  double get _gain => _track.gain;
   double get _shownValue => _dragValue ?? _value;
 
   static bool _same(double a, double b) => a == b || (a.isNaN && b.isNaN);
@@ -393,10 +363,9 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
 
   bool get _glides => _track.settle > 0 || _track.settleCurve == api.AnimationCurve.spring;
 
-  /// Where the node is along the track: where a smooth track draws it,
-  /// following the pointer, gliding to its value, or at its value (parked).
+  /// Where the node is along the track: following the pointer, gliding to
+  /// its value, or at its value.
   double get _progress {
-    if (_drawProgress case final double drawn) return drawn;
     if (_dragValue != null) return _dragProgress;
     if (_settling) return _lerpSettle;
     return _track.restProgressOf(_value);
@@ -445,7 +414,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     if (box == null) return;
     final dragging = _dragValue != null;
     final values = trackValues(_track, _shownValue,
-        progress: _progress, dragging: dragging, fine: _fine, focused: _focused);
+        progress: _progress, dragging: dragging, focused: _focused);
     if (!mapEquals(values, _published)) {
       _published = values;
       box.tree.bindings?.publish(box.source, box.id, box.instance, 'track', values);
@@ -520,10 +489,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   void _stopAll() {
     _settleActive = _snapActive = _loopActive = false;
     _settleT = _snapT = 1;
-    _dragValue = _drawProgress = _glideTo = _snapTo = null;
+    _dragValue = null;
     _velocity = 0;
-    _pointerActive = false;
-    _hold?.cancel();
     _ticker?.stop();
   }
 
@@ -593,7 +560,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     }
     _from = _drawn;
     _to = target;
-    _snapMs = _fine ? (_track.snap / 2).round() : _track.snap;
+    _snapMs = _track.snap;
     _snapT = 0;
     _snapStart = null;
     _snapActive = true;
@@ -609,8 +576,6 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   void _startLoop() {
     _coast = null;
     _coastT = 0;
-    _approach = null;
-    _approachTo = null;
     if (_loopActive) return;
     _loopActive = true;
     _last = null;
@@ -622,51 +587,10 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   FrictionSimulation? _coast;
   double _coastT = 0;
 
-  /// The approach to a snap target or a glide target: a critically damped
-  /// spring (no overshoot past a step) from where it is, and its time.
-  SpringSimulation? _approach;
-  double _approachT = 0;
-  double? _approachTo;
-
-  /// A critically damped spring of [omega] radians a second.
-  static SpringDescription _critical(double omega) =>
-      SpringDescription(mass: 1, stiffness: omega * omega, damping: 2 * omega);
-
-  /// Moves a [_approach] toward [to] (from [from]) on, giving where it is
-  /// after [dt] more seconds; null once it is there.
-  double? _approachStep(double from, double to, double omega, double dt) {
-    if (_approach == null || _approachTo != to) {
-      _approach = SpringSimulation(_critical(omega), from, to, 0, tolerance: gestureTolerance);
-      _approachT = 0;
-      _approachTo = to;
-    }
-    _approachT += dt;
-    final sim = _approach!;
-    if (sim.isDone(_approachT) || (sim.x(_approachT) - to).abs() < 0.0005) {
-      _approach = null;
-      _approachTo = null;
-      return null;
-    }
-    return sim.x(_approachT);
-  }
-
   void _stepLoop(Duration now) {
     final last = _last;
     final dt = last == null ? 1 / 60 : (now - last).inMicroseconds / 1e6;
     _last = now;
-    final glide = _glideTo;
-    if (glide != null) {
-      final at = _drawProgress ?? glide;
-      final next = (glide - at).abs() < 0.0005 ? null : _approachStep(at, glide, 20, dt);
-      if (next == null) {
-        _loopActive = false;
-        _glideTo = null;
-        _drawProgress = null;
-      } else {
-        _drawProgress = next;
-      }
-      return;
-    }
     if (_velocity != 0) {
       final before = _raw;
       final coast = _coast ??= FrictionSimulation(_track.physics?.frictionDrag ?? 0.135, _raw, _velocity);
@@ -678,50 +602,26 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
         _velocity = 0;
         _coast = null;
         _coastT = 0;
-        _track.smooth ? _beginSnap() : _finish();
+        _finish();
       }
       return;
     }
-    final to = _snapTo;
-    if (to == null) return _finish();
-    // About 1/1000 of a step, or of the whole track.
-    final done = _track.step > 0 && _track.max != _track.min ? (_track.step / (_track.max - _track.min)).abs() / 1000 : 0.0005;
-    final next = (to - _raw).abs() <= done ? null : _approachStep(_raw, to, 32, dt);
-    if (next == null) {
-      _emit(to);
-      return _finish();
-    }
-    _emit(next);
-  }
-
-  void _beginSnap([double? toProgress]) {
-    _velocity = 0;
-    _snapTo = toProgress ?? _track.progressOf(_track.valueAt(_raw));
-    _startLoop();
+    _finish();
   }
 
   void _finish() {
     _loopActive = false;
-    _snapTo = null;
     final v = _shownValue;
-    _drawProgress = null;
     _dragValue = null;
     if (_settleWhenDone) {
       _settleWhenDone = false;
       _onSettled(v);
-    }
-    // Reset from elsewhere while it was settling: glide to the new value.
-    if (_track.smooth && !_same(_value, v)) {
-      _drawProgress = _track.progressOf(v);
-      _glideTo = _track.progressOf(_value);
-      _startLoop();
     }
   }
 
   // --- the pointer ---------------------------------------------------------------------
 
   DragGestureRecognizer? _drag;
-  DoubleTapGestureRecognizer? _doubleTap;
 
   DragGestureRecognizer _makeDrag() {
     final DragGestureRecognizer r = switch (_track.input) {
@@ -731,7 +631,6 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     };
     return r
       ..dragStartBehavior = DragStartBehavior.down
-      ..onDown = _onDown
       ..onStart = _onStart
       ..onUpdate = _onUpdate
       ..onEnd = _onPanEnd
@@ -763,9 +662,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
 
   void _emit(double raw) {
     _raw = _track.overscroll > 0 && !_track.unbounded ? raw : _track.clampProgress(raw);
-    if (_track.smooth) _drawProgress = _raw;
-    final at = _track.clampProgress(_raw);
-    final v = _fine ? _track.snapTo(_track.min + (_track.max - _track.min) * at, _track.fineStep) : _track.valueAt(at);
+    final v = _track.valueAt(_track.clampProgress(_raw));
     final from = _shownValue;
     if (v != from) {
       _dragValue = v;
@@ -786,11 +683,6 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     if (_loopActive) {
       _loopActive = false;
       _velocity = 0;
-      _snapTo = null;
-      if (_glideTo != null) {
-        _glideTo = null;
-        _drawProgress = null;
-      }
     }
     if (_track.jumpOnTap && _track.input == api.TrackInput.follow) {
       if (_track.shape == api.TrackShape.arc) {
@@ -813,41 +705,12 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       }
     }
     (_drag ??= _makeDrag()).addPointer(event);
-    if (_track.doubleTapValues.isNotEmpty || _track.defaultValue != null) {
-      (_doubleTap ??= DoubleTapGestureRecognizer(debugOwner: this)..onDoubleTap = _onDoubleTap).addPointer(event);
-    }
   }
-
-  void _onDown(DragDownDetails d) {
-    _hold?.cancel();
-    if (!_track.hasFine || _track.fineHold <= 0) return;
-    // Pressed and held still: fine mode for the drag that follows.
-    _hold = Timer(Duration(milliseconds: _track.fineHold), () {
-      if (!attached) return;
-      _heldFine = true;
-      _setFine(true);
-      _refresh();
-    });
-  }
-
-  void _setFine(bool fine) {
-    if (fine == _fine) return;
-    _fine = fine;
-    _onFine(fine);
-  }
-
-  bool get _wantFine => _track.hasFine && (_heldFine || HardwareKeyboard.instance.isShiftPressed);
 
   void _onStart(DragStartDetails d) {
-    _hold?.cancel();
     final p = _rel(d.localPosition);
-    _pointerActive = true;
-    if (_glideTo != null) {
-      _glideTo = null;
-      _drawProgress = null;
-    }
-    // Caught mid-glide, the drag goes on from where the node is drawn; a
-    // parked node from the nearest end; after a tap jump from there.
+    // Caught mid-glide, the drag goes on from where the node is drawn;
+    // after a tap jump from there.
     final jumped = _dragValue != null;
     final from = _track.clampProgress(_progress);
     _settleActive = false;
@@ -855,8 +718,6 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       _raw = from;
       _dragValue = _shownValue;
     }
-    if (_track.smooth) _drawProgress = _raw;
-    _setFine(_wantFine);
     final g = _geometry;
     _lastAngle = g.angleOf(p);
     _lastLocal = d.localPosition;
@@ -865,28 +726,22 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   }
 
   void _onUpdate(DragUpdateDetails d) {
-    final fine = _wantFine;
-    if (fine != _fine) {
-      // Switching mode mid-drag: carry on from where the node is.
-      _raw = _progress;
-      _setFine(fine);
-    }
     final p = _rel(d.localPosition);
     _lastLocal = d.localPosition;
-    final ppr = _fine ? _track.effectiveFinePixelsPerRange : _track.pixelsPerRange;
+    final ppr = _track.pixelsPerRange;
     switch (_track.input) {
       case api.TrackInput.vertical:
-        _emit(_raw - d.delta.dy * _gain / ppr);
+        _emit(_raw - d.delta.dy / ppr);
       case api.TrackInput.horizontal:
-        _emit(_raw + d.delta.dx * _gain / ppr);
+        _emit(_raw + d.delta.dx / ppr);
       case api.TrackInput.both:
-        _emit(_raw + (d.delta.dx - d.delta.dy) * _gain / ppr);
+        _emit(_raw + (d.delta.dx - d.delta.dy) / ppr);
       case api.TrackInput.follow:
         if (_track.shape == api.TrackShape.arc) {
           final g = _geometry;
           if ((p - g.pivot).distance < size.shortestSide * 0.12) {
             // Too close to the pivot for a steady angle: vertical travel.
-            _emit(_raw - d.delta.dy * _gain / ppr);
+            _emit(_raw - d.delta.dy / ppr);
             _lastAngle = g.angleOf(p);
             return;
           }
@@ -896,7 +751,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
           if (delta < -180) delta += 360;
           _lastAngle = angle;
           final sweep = _track.sweepAngle;
-          if (sweep != 0) _emit(_raw + delta * _gain / sweep);
+          if (sweep != 0) _emit(_raw + delta / sweep);
         } else {
           _emit(_nearest(p + _grab, unclamped: _track.overscroll > 0));
         }
@@ -910,11 +765,11 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     if (local == null) return 0;
     switch (_track.input) {
       case api.TrackInput.vertical:
-        return -v.dy * _gain / _track.pixelsPerRange;
+        return -v.dy / _track.pixelsPerRange;
       case api.TrackInput.horizontal:
-        return v.dx * _gain / _track.pixelsPerRange;
+        return v.dx / _track.pixelsPerRange;
       case api.TrackInput.both:
-        return (v.dx - v.dy) * _gain / _track.pixelsPerRange;
+        return (v.dx - v.dy) / _track.pixelsPerRange;
       case api.TrackInput.follow:
         final g = _geometry;
         if (_track.shape == api.TrackShape.arc) {
@@ -923,7 +778,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
           if (r2 < 1) return 0;
           final degPerSec = (r.dx * v.dy - r.dy * v.dx) / r2 * 180 / math.pi;
           final sweep = _track.sweepAngle;
-          return sweep == 0 ? 0 : degPerSec * _gain / sweep;
+          return sweep == 0 ? 0 : degPerSec / sweep;
         }
         // Along a line or path: the velocity's share of the track's
         // direction where the node is.
@@ -956,12 +811,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   void _ended(double v, {double? start, double velocity = 0}) => _onRelease(v, start ?? _startValue, velocity);
 
   void _onPanEnd(DragEndDetails d) {
-    _pointerActive = false;
     final speed = _dragValue == null ? 0.0 : _releaseSpeed(d.velocity);
-    if (_track.momentum && _dragValue != null && !_fine && speed.abs() > _coastStart) {
-      _hold?.cancel();
-      _heldFine = false;
-      _setFine(false);
+    if (_track.momentum && _dragValue != null && speed.abs() > _coastStart) {
       _velocity = speed.clamp(-_coastStart * 4, _coastStart * 4);
       _settleWhenDone = true;
       _ended(_shownValue, velocity: speed * (_track.max - _track.min));
@@ -975,19 +826,9 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   /// The pointer lifted (or the drag was canceled) at [speed] along the
   /// track (progress per second).
   void _onEnd([double speed = 0]) {
-    _pointerActive = false;
-    _hold?.cancel();
-    _heldFine = false;
-    _setFine(false);
     if (_dragValue == null) return _refresh();
     final v = _shownValue;
     final velocity = speed * (_track.max - _track.min);
-    if (_track.smooth && _drawProgress != null) {
-      _ended(v, velocity: velocity);
-      _settleWhenDone = true;
-      _beginSnap();
-      return _refresh();
-    }
     final drawn = _dragProgress;
     // A spring settle starts at the release speed, so a fling carries on.
     _dragValue = null;
@@ -1002,27 +843,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   /// and settling.
   Future<bool> stepBy(int steps, {double? by}) async {
     if (!attached || steps == 0) return attached;
-    // Gliding to a value set from elsewhere: finish there, then step on.
-    if (_glideTo != null) {
-      _raw = _track.progressOf(_value);
-      _drawProgress = _raw;
-      _glideTo = null;
-      _dragValue = _value;
-    }
     final unit = by ?? (_track.step > 0 ? _track.step : _track.effectiveWheelStep);
-    final base = _snapTo != null ? _track.valueAt(_snapTo!) : _shownValue;
-    final target = _track.snapValue(base + steps * unit);
-    if (_track.smooth) {
-      if (!_loopActive) {
-        _raw = _track.progressOf(_shownValue);
-        _drawProgress = _raw;
-        _dragValue = _shownValue;
-      }
-      _settleWhenDone = true;
-      _beginSnap(_track.progressOf(target));
-      _refresh();
-      return true;
-    }
+    final target = _track.snapValue(_shownValue + steps * unit);
     final from = _shownValue;
     if (target != from) {
       _onChanged(target);
@@ -1033,13 +855,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     return true;
   }
 
-  void _onDoubleTap() {
-    if (!_enabled) return;
-    final v = _track.doubleTapTarget(_value);
-    if (v != null) _set(v, always: true);
-  }
-
-  /// Reports [v] as a whole change (a wheel notch, a key, a double tap);
+  /// Reports [v] as a whole change (a wheel notch, a key);
   /// nothing when it's the value already, unless [always].
   void _set(double v, {bool always = false}) {
     final from = _stepValue ?? _value;
@@ -1093,22 +909,17 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       if (s.scrollDelta.dy == 0 || !attached) return;
       final dir = s.scrollDelta.dy < 0 ? 1 : -1;
       final up = _track.max >= _track.min ? 1 : -1;
-      final fine = _track.hasFine && HardwareKeyboard.instance.isShiftPressed;
-      // A stepped or smooth track turns one step, as a drag would; a set
-      // wheelStep is the notch's size.
-      if (!fine && (_track.step > 0 || _track.smooth) && _inRange(_value)) {
+      // A stepped track turns one step, as a drag would; a set wheelStep is
+      // the notch's size.
+      if (_track.step > 0 && _inRange(_value)) {
         final from = _value;
         stepBy(dir * up, by: _track.wheelStep);
         _ended(_track.snapValue(from + dir * up * _track.effectiveWheelStep), start: from);
         return;
       }
-      final by = fine ? _track.fineStep : _track.effectiveWheelStep;
+      final by = _track.effectiveWheelStep;
       final from = _stepValue ?? _value;
-      final v = !_inRange(from)
-          ? _stepped(by, dir)
-          : fine
-          ? _track.snapTo(from + dir * up * by, _track.fineStep)
-          : _track.snapValue(from + dir * up * by);
+      final v = !_inRange(from) ? _stepped(by, dir) : _track.snapValue(from + dir * up * by);
       if (!_same(v, from)) {
         _onChanged(v);
         _stepValue = v;
@@ -1332,11 +1143,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   void detach() {
     _watched?.removeListener(_onVariable);
     _ticker?.stop();
-    _hold?.cancel();
     _drag?.dispose();
     _drag = null;
-    _doubleTap?.dispose();
-    _doubleTap = null;
     if (_registered) _unregister();
     super.detach();
     _focusSoon();
@@ -1346,9 +1154,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   void dispose() {
     _ticker?.dispose();
     _ticker = null;
-    _hold?.cancel();
     _drag?.dispose();
-    _doubleTap?.dispose();
     _watched?.removeListener(_onVariable);
     _watched = null;
     final f = _focus;

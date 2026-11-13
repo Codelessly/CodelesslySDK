@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/widgets/collections_layout.dart' show RenderPageItems;
 
 import 'lists/support.dart' as support;
+import 'support/legacy.dart';
 
 const book = {
   'paintOrder': 'reverse',
@@ -55,7 +56,7 @@ RenderParagraph paragraph(WidgetTester tester, String text) {
 void main() {
   test('the before-pose is interpolated by distance and not mirrored', () {
     final after = api.Pose.fromJson(book['pageMotion'])!;
-    final before = api.Pose.fromJson(book['pageMotionBefore'])!;
+    final before = migratedNode({'type': 'pageView', 'props': book})!.prop(api.PageViewProps.pageMotionBefore)!;
     final leaving = RenderPageItems.pageMotionAt(after, -0.5, before: before);
     expect(leaving.motion.rotateY, -50);
     expect(leaving.motion.shiftX, 0.5);
@@ -71,7 +72,7 @@ void main() {
   });
 
   test('pageMotionBefore and paintOrder round-trip', () {
-    final n = api.Node.fromJson({'type': 'pageView', 'props': book})!;
+    final n = migratedNode({'type': 'pageView', 'props': book})!;
     expect(n.prop(api.PageViewProps.paintOrder), api.PagePaintOrder.reverse);
     expect(n.prop(api.PageViewProps.pageMotionBefore)!.motion.rotateY, -100);
     // Written in the current shape: the legacy originX as the alignment.

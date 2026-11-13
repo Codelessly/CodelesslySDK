@@ -1,5 +1,5 @@
 // Published apps on Cloud Firestore: the publish model and its layouts at
-// the publish paths, in the current format the editor's publish writes (`schema: 2`; a large layout's nodes gzipped in `compressedNodes`).
+// the publish paths, in the current format the editor's publish writes (`schema: 2` or `3`, schema 2 migrated in memory; a large layout's nodes gzipped in `compressedNodes`).
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';

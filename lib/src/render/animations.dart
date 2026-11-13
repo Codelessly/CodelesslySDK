@@ -803,15 +803,6 @@ class RenderAnimations extends RenderPose {
       _startTween(e.key, t, from: _drawnAt(e.key, was), to: e.value);
       started.add(t);
     }
-    // An arc bends a position on both axes: the other one runs too.
-    for (final (x, y) in const [('motion.translateX', 'motion.translateY'), ('motion.shiftX', 'motion.shiftY')]) {
-      for (final (moved, other) in [(x, y), (y, x)]) {
-        final t = _tweens[moved]?.transition;
-        if (t == null || t.arc == 0 || !started.contains(t) || _tweens[other] != null) continue;
-        final own = after[other] ?? 0;
-        _startTween(other, t, from: _drawnAt(other, own), to: own);
-      }
-    }
     // A prefix moves as one value: its other numbers in flight restart from
     // where they are, and the ones its keyframes name run too.
     for (final t in started) {
@@ -865,22 +856,6 @@ class RenderAnimations extends RenderPose {
       tw.since ??= _now;
       final ms = (_now - tw.since!).inMicroseconds / 1000 - tw.transition.delay;
       if (tw.advance(math.max(0.0, ms))) _tweens.remove(e.key);
-    }
-    _bendArcs();
-  }
-
-  /// A `motion` transition's (deprecated) arc: its position changes bend
-  /// off the straight line, to the right of the way they go.
-  void _bendArcs() {
-    for (final (x, y) in const [('motion.translateX', 'motion.translateY'), ('motion.shiftX', 'motion.shiftY')]) {
-      final a = _tweens[x], b = _tweens[y];
-      final t = a?.transition ?? b?.transition;
-      if (t == null || t.arc == 0 || (a?.keyframes.isNotEmpty ?? false) || (b?.keyframes.isNotEmpty ?? false)) continue;
-      final u = (a ?? b)!.eased;
-      final bend = t.arc * 2 * u * (1 - u);
-      final dx = a == null ? 0.0 : a.to - a.from, dy = b == null ? 0.0 : b.to - b.from;
-      a?.value = a.straight - dy * bend;
-      b?.value = b.straight + dx * bend;
     }
   }
 

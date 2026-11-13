@@ -10,6 +10,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/legacy.dart';
 
 const Map<String, Object?> swipeCard = {
   'release': 'dismiss',
@@ -109,7 +110,7 @@ Variable listVar(String name) => Variable(name: name, type: VariableType.list, v
 List<Map> ends(Shown s) => [...(s.scope.read('ends') as List? ?? const []).cast<Map>()];
 
 void main() {
-  testWidgets('follows the pointer, tilts and shares its progress', (tester) async {
+  testWidgets('follows the pointer and shares its progress (no tilt: rotateFactor is gone in schema 3)', (tester) async {
     final s = await show(tester);
     final gesture = await tester.startGesture(const Offset(100, 150));
     await gesture.moveBy(const Offset(20, 0));
@@ -118,9 +119,8 @@ void main() {
     final m = s.drag().debugTransform;
     // Moved right by 60 (DragStartBehavior.down: no slop lost).
     expect(m.getTranslation().x, greaterThan(30));
-    // Tilted clockwise: 15° per card width.
-    final angle = math.atan2(m.storage[1], m.storage[0]) * 180 / math.pi;
-    expect(angle, closeTo(s.values().offset.dx / 200 * 15, 0.01));
+    // Not tilted: the migration keeps rotateFactor as legacy.dismissible.rotateFactor, unread.
+    expect(math.atan2(m.storage[1], m.storage[0]), 0);
     final values = s.values();
     expect(values.dragging, isTrue);
     expect(values.right, greaterThan(0));
@@ -184,7 +184,7 @@ void main() {
     expect(s.values().offset, Offset.zero);
   });
 
-  testWidgets('a disabled drag does not move; disabledFollow follows a little and reports blocked', (tester) async {
+  testWidgets('a disabled drag does not move and reports blocked (disabledFollow is gone in schema 3)', (tester) async {
     final s = await show(tester, drag: {...swipeCard, 'enabled': false, 'shakeWhenDisabled': true});
     await tester.timedDragFrom(const Offset(100, 150), const Offset(-150, 0), const Duration(milliseconds: 400));
     await tester.pumpAndSettle();
@@ -200,8 +200,8 @@ void main() {
       await gesture.moveBy(const Offset(-30, 0));
     }
     await tester.pump();
-    // 150px of pointer travel at 30%.
-    expect(f.values().offset.dx, closeTo(-45, 0.5));
+    // It no longer follows a share of the travel.
+    expect(f.values().offset.dx, 0);
     await gesture.up();
     await tester.pumpAndSettle();
     expect(ends(f).last['blocked'], isTrue);
@@ -256,7 +256,7 @@ void main() {
       const Variable(name: 'swiped', type: VariableType.text, value: ''),
     ]);
     Future<void> control(String command) => const CodelesslyActions().run(
-          api.Node.fromJson({
+          migratedNode({
             'type': 'box',
             'actions': [
               react('click', [
@@ -290,22 +290,7 @@ void main() {
     expect(s.values().offset, Offset.zero);
   });
 
-  testWidgets('spins as it flies off', (tester) async {
-    final s = await show(tester, drag: {...swipeCard, 'flyOutRotate': 20, 'rotateFactor': 0});
-    final gesture = await tester.startGesture(const Offset(100, 150));
-    await gesture.moveBy(const Offset(30, 0));
-    await gesture.moveBy(const Offset(30, 0));
-    await gesture.moveBy(const Offset(100, 0));
-    await gesture.up();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    final m = s.drag().debugTransform;
-    final angle = math.atan2(m.storage[1], m.storage[0]) * 180 / math.pi;
-    // No tilt from the drag: the turn is the fly-off spin, on its way to 20°.
-    expect(angle, greaterThan(1));
-    expect(angle, lessThanOrEqualTo(20));
-    await tester.pumpAndSettle();
-  });
+  // Removed in schema 3: flyOutRotate (the fly-off spin).
 
   testWidgets('up and down can have their own threshold', (tester) async {
     var s = await show(tester, actions: [react('swipeUp', [record('swiped', 'up')])], variables: [
@@ -328,26 +313,10 @@ void main() {
     expect(s.scope.read('swiped'), 'up');
   });
 
-  testWidgets('rests where data puts it and moves when it changes', (tester) async {
-    final s = await show(tester,
-        bind: {'drag.restX': r'${peek}'},
-        variables: [const Variable(name: 'peek', type: VariableType.decimal, value: 40)]);
-    await tester.pump();
-    expect(s.values().offset, const Offset(40, 0));
-    expect(s.values().right, closeTo(40 / 70, 0.001));
-    expect(s.drag().debugTransform.getTranslation().x, 40);
-    s.scope.set('peek', 0);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(s.values().offset.dx, inExclusiveRange(-20, 40));
-    await tester.pumpAndSettle();
-    expect(s.values().offset, Offset.zero);
-  });
+  // Removed in schema 3: a dismissible's restX/restY (a pan's x/y stay).
 
-  testWidgets('writes shareAs, xVariable and yVariable; fires drag with deltas', (tester) async {
+  testWidgets('a pan writes xVariable and yVariable; fires drag with deltas (shareAs is gone in schema 3)', (tester) async {
     final s = await show(tester, drag: {
-      ...swipeCard,
-      'shareAs': 'live',
       'xVariable': 'x',
       'yVariable': 'y',
     }, actions: [
@@ -366,13 +335,11 @@ void main() {
     await tester.pump();
     expect(s.scope.read('x'), 45.33);
     expect(s.scope.read('y'), 0);
-    expect((s.scope.read('live') as Map)['dragging'], isTrue);
-    expect((s.scope.read('live') as Map)['direction'], 'right');
+    expect(s.scope.read('live'), isEmpty);
     expect(s.scope.read('lastDx'), closeTo(45.333, 0.001));
     await g.up();
     await tester.pumpAndSettle();
     expect(s.scope.read('x'), 0);
-    expect((s.scope.read('live') as Map)['dragging'], isFalse);
   });
 
   testWidgets('the dragged state styles the node while held', (tester) async {
