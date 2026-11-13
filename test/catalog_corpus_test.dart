@@ -1,6 +1,6 @@
 // The JSON documents in this repository (test fixtures, benchmark bundles)
 // decode and encode byte for byte as they did before catalogs existed
-// (codelessly_api 24.0.0): each line of fixtures/catalog_corpus.digests is
+// (codelessly_api without the catalog work, at the base it merged onto): each line of fixtures/catalog_corpus.digests is
 // `file#pointer kind digest`, the digest of a value's encoding after a decode
 // (tool/corpus_roundtrip.dart in codelessly_api makes the same lines).
 import 'dart:convert';

@@ -1,0 +1,28 @@
+{
+  "schema": 2,
+  "roots": ["home-m", "home-d"],
+  "nodes": {
+    "home-m": {"type": "canvas", "name": "Home", "props": {"screen": "home", "breakpoint": "mobile"}, "slots": {"body": "m-col"},
+               "layout": {"width": 390, "height": 844}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "m-col": {"type": "column", "children": ["m-title", "m-count", "m-add", "m-tall"],
+              "layout": {"width": {"fill": 390}, "height": {"fill": 844}, "padding": 24},
+              "props": {"spacing": 12, "crossAxisAlignment": "start", "scrollable": true}},
+    "m-title": {"type": "text", "layout": {"width": {"fill": 342}, "height": {"hug": 32}},
+                "props": {"text": "Mobile home", "style": {"fontSize": 24, "fontWeight": 700, "color": "#FF111827"}}},
+    "m-count": {"type": "text", "layout": {"width": {"hug": 100}, "height": {"hug": 20}},
+                "props": {"text": "Count ${count}", "style": {"fontSize": 16, "color": "#FF111827"}}},
+    "m-add": {"type": "box", "layout": {"width": 120, "height": 40}, "decoration": {"fills": [{"color": "#FF2563EB"}], "radius": 8},
+              "actions": [{"trigger": "click", "actions": [{"type": "setVariable", "variable": "count", "op": "add", "value": "1"}]}]},
+    "m-tall": {"type": "box", "layout": {"width": {"fill": 342}, "height": 1200}, "decoration": {"fills": [{"color": "#FFF3F4F6"}]}},
+    "home-d": {"type": "canvas", "name": "Home", "props": {"screen": "home", "breakpoint": "desktop"}, "slots": {"body": "d-col"},
+               "layout": {"width": 1440, "height": 900}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "d-col": {"type": "column", "children": ["d-title", "d-go"],
+              "layout": {"width": {"fill": 1440}, "height": {"fill": 900}, "padding": 48},
+              "props": {"spacing": 12, "crossAxisAlignment": "start"}},
+    "d-title": {"type": "text", "layout": {"width": {"hug": 300}, "height": {"hug": 40}},
+                "props": {"text": "Desktop home", "style": {"fontSize": 32, "fontWeight": 700, "color": "#FF111827"}}},
+    "d-go": {"type": "box", "layout": {"width": 120, "height": 40}, "decoration": {"fills": [{"color": "#FF16A34A"}]},
+             "actions": [{"trigger": "click", "actions": [{"type": "navigate", "to": "contact"}]}]}
+  },
+  "variables": {"page_variables": [{"name": "count", "type": "integer", "value": 0}]}
+}

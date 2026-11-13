@@ -1,0 +1,11 @@
+{
+  "schema": 2,
+  "roots": ["contact"],
+  "nodes": {
+    "contact": {"type": "canvas", "name": "Contact", "path": "contact", "slots": {"body": "c-col"},
+                "layout": {"width": 390, "height": 844}, "decoration": {"fills": [{"color": "#FFFDF2F8"}]}},
+    "c-col": {"type": "column", "children": ["c-title"], "layout": {"width": {"fill": 390}, "height": {"fill": 844}, "padding": 24}},
+    "c-title": {"type": "text", "layout": {"width": {"hug": 200}, "height": {"hug": 32}},
+                "props": {"text": "Contact", "style": {"fontSize": 24, "color": "#FF111827"}}}
+  }
+}

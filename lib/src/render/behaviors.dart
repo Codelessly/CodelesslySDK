@@ -2,20 +2,23 @@
 // outer layers). Outermost first:
 //
 //   constraints → track pose → transform gesture → motion → scale → rotation → [ignore pointer]
-//   → loops → opacity → blurs → stroke path → content
+//   → animations (render/animations.dart) → opacity → blurs → stroke path → content
 //
 // The design canvas (a tree that doesn't animate) draws each at rest: the
-// motion's values, the first frame of each loop, a track at its variable's
-// value. A running app plays them (tickers in the render objects).
+// motion's values, an animation at its previewAt (a loop's first frame), a
+// track at its variable's value. A running app plays them (tickers in the
+// render objects).
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Node;
+import 'package:flutter/foundation.dart' show protected;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'animations.dart';
 import 'convert.dart';
 import 'drag_track.dart';
 import 'flip_card.dart';
@@ -74,7 +77,10 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
       );
     }
   }
-  if (be.motion case final api.Motion motion) {
+  // A motion layer for the node's motion, or for the motion values its
+  // animations set.
+  if (be.motion != null || replacedMotionProperties(n).isNotEmpty) {
+    final motion = be.motion ?? api.Motion.none;
     chain.add(
       b.obtain<RenderMotion>('motion', RenderMotion.new)
         ..animates = animates
@@ -101,7 +107,7 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
   }
 }
 
-/// Loops, between the rotation and the opacity.
+/// The animations, between the rotation and the opacity.
 void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviors;
   if (be.ignorePointer && animates) chain.add(b.obtain<RenderIgnorePointer>('ignorePointer', RenderIgnorePointer.new));
@@ -127,13 +133,9 @@ void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
         ..onPointerCancel = ((_) => press(false)),
     );
   }
-  if (be.loops.isNotEmpty) {
-    chain.add(
-      b.obtain<RenderLoops>('loops', RenderLoops.new)
-        ..animates = animates
-        ..loops = be.loops,
-    );
-  }
+  final hasMotion = be.motion != null || replacedMotionProperties(n).isNotEmpty;
+  animationLayers(b, n, chain,
+      animates: animates, motion: hasMotion ? b.obtain<RenderMotion>('motion', RenderMotion.new) : null);
 }
 
 /// Blurs and the stroke path, inside the opacity, around the content.
@@ -583,7 +585,12 @@ class RenderPose extends RenderProxyBox {
     markNeedsPaint();
   }
 
-  bool get _moved => _shift != Offset.zero || !_transform.isIdentity();
+  /// Whether it draws its child moved (a subclass with a pose of its own
+  /// says so).
+  @protected
+  bool get posed => _shift != Offset.zero || !_transform.isIdentity();
+
+  bool get _moved => posed;
 
   /// The transform from the child to this box.
   Matrix4 get effectiveTransform {
@@ -739,71 +746,6 @@ mixin _Ticking on RenderPose {
   }
 }
 
-/// A node's [api.LoopAnimation]s, combined. At rest (the design canvas) it
-/// draws each loop's first frame.
-class RenderLoops extends RenderPose with _Ticking {
-  List<api.LoopAnimation> _loops = const [];
-  set loops(List<api.LoopAnimation> v) {
-    if (api.jsonEquality.equals(v, _loops)) return;
-    _loops = v;
-    _ticker?.stop();
-    _show(Duration.zero);
-    syncTicker();
-  }
-
-  bool _animates = false;
-  set animates(bool v) {
-    if (v == _animates) return;
-    _animates = v;
-    _show(Duration.zero);
-    syncTicker();
-  }
-
-  /// The platform asks for no animation (the web's prefers-reduced-motion,
-  /// a device's "remove animations"): loops rest at their first frame, as
-  /// the design canvas draws them.
-  static bool get reducedMotion => SchedulerBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
-
-  @override
-  bool get ticking => _animates && !reducedMotion && _loops.any((l) => l.enabled);
-
-  @override
-  void tick(Duration elapsed) {
-    if (reducedMotion) {
-      _show(Duration.zero);
-      syncTicker();
-      return;
-    }
-    _show(elapsed);
-  }
-
-  /// The run phase (0–1) of [l] [elapsed] after it started: from its
-  /// [api.LoopAnimation.startFraction] of a whole loop, after its delay.
-  static double phase(api.LoopAnimation l, Duration elapsed) {
-    final ms = math.max(0.0, elapsed.inMicroseconds / 1000 - l.delay);
-    final d = math.max(1, l.duration);
-    final runs = ms / d + l.startFraction * (l.reverse ? 2 : 1);
-    final f = runs - runs.floorToDouble();
-    return l.reverse && runs.floor().isOdd ? 1 - f : f;
-  }
-
-  void _show(Duration elapsed) {
-    var m = Matrix4.identity();
-    var opacity = 1.0;
-    for (final l in _loops) {
-      final p = l.poseAt(phase(l, elapsed));
-      m = m
-        ..translateByDouble(0, p.dy, 0, 1)
-        ..scaleByDouble(p.scale, p.scale, 1, 1)
-        ..rotateZ(p.turns * 2 * math.pi);
-      opacity *= p.opacity;
-    }
-    transform = m;
-    origin = Alignment.center;
-    this.opacity = opacity.clamp(0.0, 1.0);
-  }
-}
-
 /// A node's [api.Motion]. At rest (the design canvas) it draws its values;
 /// a running app plays its entrance, loop and spin, and transitions to new
 /// values when they change.
@@ -825,6 +767,16 @@ class RenderMotion extends RenderPose with _Ticking {
   }
 
   api.Motion _motion = api.Motion.none;
+
+  /// Values the node's animations set (render/animations.dart), by
+  /// property: drawn over the motion's own.
+  Map<String, double> _overrides = const {};
+  set overrides(Map<String, double> v) {
+    if (v.length == _overrides.length && v.entries.every((e) => _overrides[e.key] == e.value)) return;
+    _overrides = v;
+    _show();
+  }
+
   bool _animates = false;
   bool _entered = false;
   bool _waitingForReveal = false;
@@ -1044,8 +996,8 @@ class RenderMotion extends RenderPose with _Ticking {
     if (m.curve == api.AnimationCurve.spring) {
       final spring = SpringDescription(
         mass: 1,
-        stiffness: m.springStiffness <= 0 ? 380 : m.springStiffness,
-        damping: m.springDamping < 0 ? 20 : m.springDamping,
+        stiffness: m.spring.effectiveStiffness <= 0 ? 380 : m.spring.effectiveStiffness,
+        damping: m.spring.effectiveDamping < 0 ? 20 : m.spring.effectiveDamping,
       );
       final sim = SpringSimulation(spring, 0, 1, 0);
       final t = ms / 1000;
@@ -1087,6 +1039,9 @@ class RenderMotion extends RenderPose with _Ticking {
           _from = null;
         }
       }
+    }
+    for (final e in _overrides.entries) {
+      m = m.withValue(e.key, e.value);
     }
     _shown = m;
     var shown = m;

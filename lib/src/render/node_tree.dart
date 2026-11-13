@@ -15,6 +15,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show WidgetBuilder;
 
+import 'animations.dart' show RenderAnimations, animatesOpacity;
 import 'behaviors.dart';
 import 'typewriter.dart';
 import 'hero.dart';
@@ -295,6 +296,43 @@ class RenderTree {
   /// The interaction states held by each node (in a repeat instance).
   final Map<(String, Object?), Set<api.WidgetState>> _states = {};
 
+  /// The values animations give node paths (render/animations.dart), by
+  /// node (in a repeat instance): applied over the node as shown.
+  final Map<(String, Object?), Map<String, Object?>> _animated = {};
+  final Set<(String, Object?)> _animatedDirty = {};
+  bool _animatedFlushScheduled = false;
+
+  /// Sets the binding paths node [id] (in [instance]) shows animated
+  /// ([values] empty: none); its boxes re-apply, before the frame lays out.
+  void setAnimatedValues(String id, Map<String, Object?> values, {Object? instance}) {
+    final key = (id, instance);
+    values.isEmpty ? _animated.remove(key) : _animated[key] = values;
+    _animatedDirty.add(key);
+    if (_animatedFlushScheduled) return;
+    _animatedFlushScheduled = true;
+    scheduleMicrotask(() {
+      _animatedFlushScheduled = false;
+      final dirty = _animatedDirty.toList();
+      _animatedDirty.clear();
+      if (_disposed) return;
+      for (final (id, instance) in dirty) {
+        final b = _boxes[keyOf(id, instance)] ?? (instance == null ? null : _boxes[keyOf(id, null)]);
+        b?._apply();
+      }
+    });
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
+  BoundNode _withAnimated(String id, Object? instance, BoundNode bound) {
+    final values = _animated[(id, instance)] ?? (instance == null ? null : _animated[(id, null)]);
+    if (values == null) return bound;
+    var n = bound.node;
+    for (final e in values.entries) {
+      n = api.BindPaths.apply(n, e.key, e.value);
+    }
+    return BoundNode(n, collapsed: bound.collapsed, watch: bound.watch, states: bound.states);
+  }
+
   /// The interaction states node [id] is in.
   Set<api.WidgetState> statesOf(String id, {Object? instance}) => _states[(id, instance)] ?? const {};
 
@@ -368,7 +406,7 @@ class RenderTree {
     var n = _patched(id, instance);
     if (n == null) return null;
     final binder = _bindings;
-    if (binder == null) return BoundNode(n);
+    if (binder == null) return _withAnimated(id, instance, BoundNode(n));
     var bound = binder.bind(source, n, instance);
     // States driven by data (`selected`, `disabled`): held like hover, so
     // the node's state styles patch it (bind it again) and its targets.
@@ -376,7 +414,7 @@ class RenderTree {
       n = _patched(id, instance)!;
       bound = binder.bind(source, n, instance);
     }
-    return bound;
+    return _withAnimated(id, instance, bound);
   }
 
   /// Turns node [id]'s bound [states] on or off without re-applying it
@@ -470,6 +508,9 @@ class RenderTree {
   Iterable<NodeBox> boxesOf(String id) => _boxes.values.where((b) => b.id == id);
   int get length => _boxes.length;
 
+  /// Every box of the tree.
+  Iterable<NodeBox> get boxes => _boxes.values;
+
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
     _listenForFonts();
     final key = keyOf(id, instance);
@@ -520,6 +561,7 @@ class RenderTree {
     _boxes.clear();
     _orphans.clear();
     _states.clear();
+    _animated.clear();
     islands.dispose();
   }
 }
@@ -627,6 +669,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   List<RenderBox> _chain = const [];
   final Map<String, RenderBox> _objects = {};
+
+  /// The player of the node's animations (render/animations.dart), when it
+  /// has any.
+  RenderAnimations? get animations => switch (_objects['animations']) {
+        final RenderAnimations a => a,
+        _ => null,
+      };
   final Set<RenderBox> _retiredObjects = {};
   bool _released = false;
   _Container? _container;
@@ -1028,7 +1077,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     tree.gestures?.addDragAndDropLayers(this, n, chain);
     if (tree.animates) tree.interactions?.addLayers(this, n, chain);
     loopLayers(this, n, chain, animates: tree.animates);
-    if (n.opacity < 0.99) {
+    // A node whose animations set its opacity has it drawn by their player.
+    if (n.opacity < 0.99 && !animatesOpacity(n)) {
       chain.add(_obtain<RenderOpacity>('opacity', () => RenderOpacity(opacity: n.opacity))..opacity = n.opacity);
     }
     paintLayers(this, n, chain);

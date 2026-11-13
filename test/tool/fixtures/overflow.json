@@ -1,0 +1,16 @@
+{
+  "schema": 2,
+  "roots": ["tight"],
+  "nodes": {
+    "tight": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 400},
+              "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "col": {"type": "column", "children": ["row", "squashed", "tall"], "layout": {"width": {"fill": 390}, "height": {"fill": 400}},
+            "props": {"crossAxisAlignment": "start", "squeezeChildren": false}},
+    "row": {"type": "row", "children": ["a", "b"], "layout": {"width": 200, "height": 40}, "props": {"squeezeChildren": false}},
+    "a": {"type": "box", "layout": {"width": 150, "height": 40}, "decoration": {"fills": [{"color": "#FFEF4444"}]}},
+    "b": {"type": "box", "layout": {"width": 150, "height": 40}, "decoration": {"fills": [{"color": "#FF3B82F6"}]}},
+    "squashed": {"type": "text", "layout": {"width": 120, "height": 16},
+                 "props": {"text": "This sentence needs several lines but its box has room for one.", "style": {"fontSize": 14, "color": "#FF000000"}}},
+    "tall": {"type": "box", "layout": {"width": 100, "height": 600}, "decoration": {"fills": [{"color": "#FF22C55E"}]}}
+  }
+}

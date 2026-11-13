@@ -323,7 +323,8 @@ class CoreActions implements ActionRunner {
 
   bool _matchesReaction(Reaction reaction, String trigger, Json event) {
     final t = reaction.trigger;
-    if (t.type.name != trigger) return false;
+    // The legacy clock is a timer now.
+    if (t.type.name != trigger && !(trigger == 'clock' && t.type == TriggerType.timer)) return false;
     if (t.type != TriggerType.keyDown && t.type != TriggerType.keyUp) return true;
     final value = event['result'] is Map ? event['result'] as Map : event;
     // A held key's repeats run only the reactions that ask for them.
@@ -357,14 +358,7 @@ class CoreActions implements ActionRunner {
       event['value'],
       _Registry(handlers, features),
     )..instance = instance;
-    // A clock can share its node with other clocks: gate each reaction,
-    // rather than the whole trigger chain, against the current scope.
-    bool clockRuns(Reaction reaction) {
-      if(reaction.trigger.type!=TriggerType.clock || reaction.trigger.runWhen.trim().isEmpty)return true;
-      final expression=reaction.trigger.runWhen;
-      return (expression.contains(r'${') ? run.evaluate(expression) : run.expressions.formula(expression,run.scope))==true;
-    }
-    final actions = [for (final reaction in reactions) if(clockRuns(reaction)) ...reaction.actions];
+    final actions = [for (final reaction in reactions) ...reaction.actions];
     try {
       await runActions(actions, run);
     } on ActionsStopped catch (stop) {
