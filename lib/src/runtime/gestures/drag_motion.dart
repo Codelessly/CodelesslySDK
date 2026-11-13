@@ -20,8 +20,8 @@
 //   `pointerCount`; with physics `targetX`, `targetY`, `snapIndex`), and
 //   the swipe of the direction it flew off in (`direction`).
 // * The `dragged` interaction state of it and the nodes in it, while held.
-// * [DragMotionControl.control]: the controlDrag action's fling, return,
-//   reset and shake.
+// * [DragMotionControl.control]: the controlDismissible action's dismiss,
+//   returnFrom, reset and shake.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -296,20 +296,18 @@ extension on FollowSpec {
       release == FollowRelease.dismiss && directions.contains(direction) && onAxis(direction);
 }
 
-/// The drags of nodes in the running app, for the controlDrag action.
+/// The drags of nodes in the running app, for the controlDismissible action.
 abstract final class DragMotionControl {
   static final Map<String, List<RenderDragMotion>> _instances = {};
   static final Map<String, api.DragDirection> _pendingReturns = {};
 
   /// Runs [command] on the enabled instance of node [nodeId] that comes
-  /// first (in [tree], when given). For [api.DragCommand.returnFrom] an
+  /// first (in [tree], when given). For [api.DismissCommand.returnFrom] an
   /// instance built in the next frame (the card an undo puts back) starts
-  /// off-screen instead of flashing at rest. False when no drag of the node
-  /// took it ([api.DragCommand.step] is a track's).
-  static Future<bool> control(String nodeId, api.DragCommand command, api.DragDirection direction,
+  /// off-screen instead of flashing at rest. False when no such node took it.
+  static Future<bool> control(String nodeId, api.DismissCommand command, api.DragDirection direction,
       {RenderTree? tree}) async {
-    if (command == api.DragCommand.step) return false;
-    if (command == api.DragCommand.returnFrom) {
+    if (command == api.DismissCommand.returnFrom) {
       _pendingReturns[nodeId] = direction;
       await SchedulerBinding.instance.endOfFrame;
       // Consumed by an instance built in that frame.
@@ -318,17 +316,14 @@ abstract final class DragMotionControl {
     final target = instanceOf(nodeId, tree: tree);
     if (target == null) return false;
     switch (command) {
-      case api.DragCommand.fling:
+      case api.DismissCommand.dismiss:
         await target.fling(direction);
-      case api.DragCommand.returnFrom:
+      case api.DismissCommand.returnFrom:
         await target.returnFrom(direction);
-      case api.DragCommand.reset:
+      case api.DismissCommand.reset:
         await target.reset();
-      case api.DragCommand.shake:
+      case api.DismissCommand.shake:
         target.shake();
-      case api.DragCommand.step || api.DragCommand.zoom || api.DragCommand.pose:
-        // Drag tracks and transform gestures (actions/handlers.dart).
-        break;
     }
     return true;
   }
