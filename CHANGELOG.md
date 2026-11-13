@@ -11,10 +11,16 @@
   children grow by `flex` to share their line (shrinking to a line narrower than the basis). Tests assert the
   rects CSS gives for `flex: 1 1 280px` at several widths.
 - `gridView.minCrossAxisExtent`: auto-fit columns (CSS `repeat(auto-fit, minmax(min, 1fr))`).
-- **Bug fix (behaviour change):** in a running screen a node hidden by its own `"visible": false` (or a media rule)
-  now takes no room, as one hidden by a binding already did and as Flutter's `Visibility` does; before, it kept
-  its box empty. And a hidden child no longer takes a slot in `spaceBetween` / `spaceAround` / `spaceEvenly`: the
-  shown children are spread as the Flutter Row without it would spread them (it already took no `spacing`).
+- A node hidden by a media rule (or an interaction state's patch) takes no room, as one hidden by a binding does;
+  one hidden in its own data (`"visible": false`) with no media rule about `visible` keeps its room, as before.
+- **Bug fix (behaviour change):** a collapsed (hidden) child no longer takes a slot in `spaceBetween` /
+  `spaceAround` / `spaceEvenly`: the shown children are spread as the Flutter Row without it would spread them (it
+  already took no `spacing`). Tests compare every `MainAxisAlignment` with the real Row.
+- **Bug fix (behaviour change):** a canvas's `appBar`, `bottomNavigationBar` and `floatingActionButton` slots are
+  drawn, where Flutter's Scaffold puts them (they validated and drew nothing). A canvas with only a body lays out
+  exactly as before. Tests compare with a real Scaffold.
+- **Bug fix (behaviour change):** a `text` node's `layout.padding` is space inside its box around its lines, as
+  `Container(padding:, child: Text())`: a hugging text grows by it (it was ignored).
 
 **New: catalogs and plugins** (codelessly_api's `Catalog` and feature libraries; its docs/design/05-plugins-and-layers.md)
 

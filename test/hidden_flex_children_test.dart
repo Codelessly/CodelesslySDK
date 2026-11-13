@@ -1,5 +1,5 @@
-// A hidden child of a row (its own `visible: false`, a binding, or a
-// media rule) takes no room and no slot: the row lays out as the
+// A hidden child of a row (by a binding or a media rule; or hidden in its
+// own data while a media rule shows it at other sizes) takes no room and no slot: the row lays out as the
 // Flutter Row without it (`if (visible) child`, or Visibility's default
 // SizedBox.shrink for the room), for every main-axis alignment.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -23,7 +23,14 @@ Map<String, Object?> doc(String align) => {
         'a': {'type': 'box', 'layout': {'width': 50, 'height': 20}},
         'b': {'type': 'box', 'layout': {'width': 80, 'height': 20}},
         'c': {'type': 'box', 'layout': {'width': 30, 'height': 20}},
-        'h1': {'type': 'box', 'visible': false, 'layout': {'width': 28, 'height': 28}},
+        'h1': {
+          'type': 'box',
+          'visible': false,
+          'layout': {'width': 28, 'height': 28},
+          'media': [
+            {'maxWidth': 'mobile', 'patch': {'visible': true}},
+          ],
+        },
         'h2': {'type': 'box', 'layout': {'width': 28, 'height': 28}, 'bind': {'visible': r'${= show}'}},
         'h3': {
           'type': 'box',
