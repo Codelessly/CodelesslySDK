@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 
 import '../runtime/contracts.dart';
 import '../features/auth/auth.dart' show watchAuthValue;
+import '../features/data/cloud_list_source.dart' show DatabaseListSource;
 import 'analytics.dart';
 import 'api.dart';
 import 'auth.dart';
@@ -150,7 +151,7 @@ class Services implements CodelesslyServices, ServiceLocator, PaywallsSource {
   T? service<T extends Object>() {
     for (final Object? s in <Object?>[
       api, cache, fileCache, storage, auth, cloud, files, analytics, purchases, paywalls, sound, speech,
-      mediaExport, links, printing, exports, filePicker, scripts, config, ...extras,
+      mediaExport, links, printing, exports, filePicker, scripts, config, _lists, ...extras,
     ]) {
       if (s is T) return s;
     }
@@ -158,6 +159,9 @@ class Services implements CodelesslyServices, ServiceLocator, PaywallsSource {
     if (this case final T self) return self;
     return null;
   }
+
+  /// Cloud-bound lists read and write [cloud] (the list widgets' CloudListSource).
+  late final DatabaseListSource _lists = DatabaseListSource(cloud);
 
   /// HTTP API calls.
   final ApiService api;

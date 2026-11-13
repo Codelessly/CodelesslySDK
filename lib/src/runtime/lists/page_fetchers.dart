@@ -2,9 +2,6 @@
 // call per page, or the list's cloud query a page at a time.
 import 'package:codelessly_api/codelessly_api.dart' show Json, Pagination;
 
-import '../../services/cloud/backend.dart' show CloudAggregate;
-import '../../services/cloud/database.dart';
-import '../../services/cloud/query.dart';
 import '../contracts.dart';
 import 'pagination.dart';
 
@@ -67,35 +64,6 @@ PageFetcher apiPageFetcher(Pagination model, ApiCaller call, {Object? Function(S
         nextCursor: cursor == '' ? null : cursor,
       );
     };
-
-/// Reads a page of a cloud query: [PageRequest.pageSize] documents after
-/// the cursor (the id of the page before's last document). The documents
-/// the query matches are counted once, for page numbers and "of 312".
-PageFetcher cloudPageFetcher(CloudDatabase database, String path, CloudQuery query, {bool countTotal = true}) {
-  int? total;
-  var counted = false;
-  return (request) async {
-    final cursor = request.cursor;
-    final docs = await database.query(
-      path,
-      query.copyWith(limit: request.pageSize, startAfter: cursor is String ? cursor : null),
-    );
-    if (countTotal && !counted) {
-      counted = true;
-      try {
-        total = (await database.aggregate(path, CloudQuery(filters: query.filters), CloudAggregate.count))?.toInt();
-      } catch (_) {
-        // Pages still load; the total stays unknown.
-      }
-    }
-    final last = docs.isEmpty ? null : docs.last['id'];
-    return PageResult(
-      docs,
-      totalCount: total,
-      nextCursor: docs.length == request.pageSize && last is String ? last : null,
-    );
-  };
-}
 
 /// Resolves the `${...}` in an API parameter (a lone one keeps its type).
 Object? Function(String) resolverIn(ExpressionEngine engine, ValueScope scope) => (text) {
