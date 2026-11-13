@@ -28,7 +28,8 @@
     "p1",
     "p2",
     "card",
-    "fixedCard"
+    "fixedCard",
+    "spacerCard"
    ],
    "props": {
     "scrollable": true,
@@ -199,6 +200,57 @@
     "fills": [
      {
       "color": "#FFCCCCCC"
+     }
+    ]
+   }
+  },
+  "spacerCard": {
+   "type": "column",
+   "children": [
+    "sTop",
+    "sGap",
+    "sBottom"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "sTop": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDDDDDD"
+     }
+    ]
+   }
+  },
+  "sGap": {
+   "type": "spacer"
+  },
+  "sBottom": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDDDDDD"
      }
     ]
    }

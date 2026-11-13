@@ -1248,7 +1248,9 @@ List<RuntimeIssue> _check(
       for (final horizontal in const [true, false]) {
         final used = horizontal ? fb.designWidthUsed : fb.designHeightUsed;
         final design = horizontal ? fb.width : fb.height;
-        if (!used || design == null || !fb.hasSize) continue;
+        // A spacer (or a fill of design size 0) with no room takes none, as
+        // Flutter's Spacer in a hugging column: that is what it is for.
+        if (!used || design == null || design <= 0 || node.type == 'spacer' || !fb.hasSize) continue;
         final actual = horizontal ? fb.size.width : fb.size.height;
         if ((actual - design).abs() > 0.5) continue;
         final dim = horizontal ? 'width' : 'height';
