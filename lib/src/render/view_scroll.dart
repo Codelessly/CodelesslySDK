@@ -161,7 +161,7 @@ class RenderViewProgress extends RenderProxyBox with _FollowsScroll {
     _lastVisible = visible;
     onValues?.call({'progress': p, 'visible': visible});
     final name = _model.variable.trim();
-    final scope = _node?.tree.bindings?.valuesFor(_node!.tree.source, _node!.id, _node!.instance);
+    final scope = _node?.tree.bindings?.valuesFor(_node!.source, _node!.id, _node!.instance);
     if (_interactive && name.isNotEmpty && scope != null) {
       final key = _model.key.trim();
       scope.write(key.isEmpty ? name : '$name.$key', p);
@@ -359,7 +359,7 @@ class RenderMeasure extends RenderProxyBox {
     };
     if (mapEquals(value, _last)) return;
     _last = value;
-    final scope = node.tree.bindings?.valuesFor(node.tree.source, node.id, node.instance);
+    final scope = node.tree.bindings?.valuesFor(node.source, node.id, node.instance);
     if (scope == null) return;
     final key = _model.key.trim();
     scope.write(key.isEmpty ? name : '$name.$key', value);

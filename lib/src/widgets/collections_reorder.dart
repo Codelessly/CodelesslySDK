@@ -112,7 +112,7 @@ ProvidedItem _rowInstance(ListRuntime r, Object key) => ProvidedItem('row', r.b.
 
 Widget _rowNode(ListRuntime r, String itemId, List<Object?> items, int index) {
   final instance = _rowInstance(r, _rowKey(items, index));
-  r.binder?.provideItem(r.tree.source, instance, index: index, item: items.elementAtOrNull(index));
+  r.binder?.provideItem(r.b.source, instance, index: index, item: items.elementAtOrNull(index));
   return NodeChild(tree: r.tree, id: itemId, instance: instance);
 }
 
@@ -263,7 +263,7 @@ class _ReorderListViewState extends State<ReorderListView> {
 
   Widget _proxy(int index) {
     final instance = _proxyInstance(index);
-    _r.binder?.provideItem(_r.tree.source, instance, index: index, item: widget.items.elementAtOrNull(index));
+    _r.binder?.provideItem(_r.b.source, instance, index: index, item: widget.items.elementAtOrNull(index));
     return MetaData(
       behavior: HitTestBehavior.opaque,
       child: ListItemBox(
@@ -652,7 +652,7 @@ class GroupReorderListState extends State<GroupReorderList> {
     if (tag != 'row') {
       // The feedback has boxes of its own: the row's stay in the list.
       final instance = ProvidedItem(tag, _r.b.instance, _r.node.id, _rowKey(widget.items, index));
-      _r.binder?.provideItem(_r.tree.source, instance, index: index, item: widget.items.elementAtOrNull(index));
+      _r.binder?.provideItem(_r.b.source, instance, index: index, item: widget.items.elementAtOrNull(index));
       node = NodeChild(tree: _r.tree, id: widget.itemId, instance: instance);
     }
     return MetaData(

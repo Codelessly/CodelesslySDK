@@ -72,7 +72,7 @@ class RenderFlip extends RenderPose {
         _dragging = false;
       }
     }
-    _scope = box?.tree.bindings?.valuesFor(box.tree.source, box.id, box.instance);
+    _scope = box?.tree.bindings?.valuesFor(box.source, box.id, box.instance);
     _watch();
     final wanted = _wanted;
     if (_target == null || !_animates) {
@@ -224,7 +224,7 @@ class RenderFlip extends RenderPose {
     final values = {'flipped': _target ?? false, 'progress': _progress};
     if (mapEquals(values, _published)) return;
     _published = values;
-    box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'flip', values);
+    box.tree.bindings?.publish(box.source, box.id, box.instance, 'flip', values);
   }
 
   // --- the pointer ------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'islands.dart';
 import 'layout/fit_box.dart';
 import 'node_tree.dart';
+import 'source.dart';
 
 /// Builds the content of a node of one widget type: appends render objects
 /// to [chain], outermost first, below the outer layers (margin, constraints,
@@ -45,6 +46,10 @@ abstract interface class NodeBuilder {
 
   /// Another node of the document.
   Node? nodeOf(String id);
+
+  /// The document this node is in: the tree's, or (inside a component
+  /// instance) the definition's. What bindings resolve its ids with.
+  NodeSource get source;
 
   /// The render object made under [key] on the last build if it has type
   /// T, else a new one: reuse keeps layout and paint state across edits.

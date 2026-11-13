@@ -17,6 +17,7 @@ import '../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../render/layout/fit_box.dart';
 import '../render/layout/list_measure.dart';
 import '../render/node_tree.dart';
+import '../render/source.dart' show NodeSource;
 import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart' show ProvidedItem, RenderTreeBinder;
 import 'collections_data_list.dart';
@@ -113,8 +114,8 @@ Clip _clip(Node n) => clip(n.prop(CollectionScrollProps.clipBehavior));
 /// Whether a drop target around [n] names it as the list its drop slot
 /// opens in: only the render-object list draws that slot.
 bool _opensDropSlots(NodeBuilder b, Node n) {
-  for (String? id = b.tree.source.parentOf(n.id); id != null; id = b.tree.source.parentOf(id)) {
-    if (b.tree.source.node(id)?.behaviors.dropTarget?.listNodeId == n.id) return true;
+  for (String? id = b.source.parentOf(n.id); id != null; id = b.source.parentOf(id)) {
+    if (b.source.node(id)?.behaviors.dropTarget?.listNodeId == n.id) return true;
   }
   return false;
 }
@@ -135,7 +136,12 @@ int _startCount(RenderCollection view, double designMain, double itemMain) {
 }
 
 /// Whether intrinsic measurement can't see into [node]'s subtree: a viewport, or scrolling content.
-bool _blocksIntrinsics(NodeBuilder b, Node node) {
+bool _blocksIntrinsics(NodeBuilder b, Node node, [NodeSource? source]) {
+  // A component call: its definition's nodes.
+  if (b.tree.components?[node.type] case final def?) {
+    final root = def.document[def.root];
+    return root != null && _blocksIntrinsics(b, root, def.source);
+  }
   if (node.type == 'listView') {
     if (!listBuildsAllItems(node)) return true;
   } else if (const {'gridView', 'pageView', 'webView'}.contains(node.type)) {
@@ -144,8 +150,8 @@ bool _blocksIntrinsics(NodeBuilder b, Node node) {
     return true;
   }
   for (final c in node.childIds) {
-    final child = b.nodeOf(c);
-    if (child != null && _blocksIntrinsics(b, child)) return true;
+    final child = source == null ? b.nodeOf(c) : source.node(c);
+    if (child != null && _blocksIntrinsics(b, child, source)) return true;
   }
   return false;
 }
@@ -640,7 +646,7 @@ void _tableViewInner(NodeBuilder b, Node n, List<RenderBox> chain) {
   // Bound rows show on the design canvas too, each cell in its scope, as
   // the running table shows them.
   final binder = b.tree.binder;
-  final data = n.bind.containsKey('data') && binder != null ? binder.itemsOf(b.tree.source, n, b.instance) : null;
+  final data = n.bind.containsKey('data') && binder != null ? binder.itemsOf(b.source, n, b.instance) : null;
   final rowCount = data?.length ?? math.max(0, n.prop(TableViewProps.rowCount) ?? 0);
 
   // The spans that show in the design size (a cell past it is cut off).
@@ -738,7 +744,7 @@ void _tableViewInner(NodeBuilder b, Node n, List<RenderBox> chain) {
     // Bound rows: each cell in the scope the running table gives it.
     final (Object key, int index, Object? item) = cellItem(data, r, c);
     final instance = ProvidedItem('cell', b.instance, n.id, key);
-    binder!.provideItem(b.tree.source, instance, index: index, item: item);
+    binder!.provideItem(b.source, instance, index: index, item: item);
     instances.add(instance);
   }
 
@@ -767,7 +773,7 @@ void _tableViewInner(NodeBuilder b, Node n, List<RenderBox> chain) {
     binder!.onItemsChanged(n.id, b.instance, (items) {
       for (final (r, c) in shown) {
         final (key, index, item) = cellItem(items, r, c);
-        binder.provideItem(b.tree.source, ProvidedItem('cell', b.instance, n.id, key), index: index, item: item);
+        binder.provideItem(b.source, ProvidedItem('cell', b.instance, n.id, key), index: index, item: item);
       }
     });
   }

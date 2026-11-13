@@ -254,7 +254,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       _drag?.dispose();
       _drag = null;
     }
-    _scope = box?.tree.bindings?.valuesFor(box.tree.source, box.id, box.instance);
+    _scope = box?.tree.bindings?.valuesFor(box.source, box.id, box.instance);
     _watch();
     final value = trackValueFrom(track, _scope?.read);
     if (!_configured) {
@@ -448,7 +448,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
         progress: _progress, dragging: dragging, fine: _fine, focused: _focused);
     if (!mapEquals(values, _published)) {
       _published = values;
-      box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'track', values);
+      box.tree.bindings?.publish(box.source, box.id, box.instance, 'track', values);
     }
     if (dragging != _draggedState) {
       _draggedState = dragging;
@@ -459,7 +459,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   /// The node and the nodes inside it are `dragged` while it's dragged
   /// (their `states.dragged` styles apply).
   static void _setDragged(NodeBox box, bool on) {
-    final source = box.tree.source;
+    final source = box.source;
     void visit(String id) {
       final n = source.node(id);
       if (n == null) return;
@@ -1168,7 +1168,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   RenderBox? get _hitAreaBox {
     final box = _box;
     if (box == null || _track.hitArea != api.TrackHitArea.parent) return null;
-    final parentId = box.tree.source.parentOf(box.id);
+    final parentId = box.source.parentOf(box.id);
     if (parentId == null) return null;
     final p = box.tree.boxOf(parentId, instance: box.instance) ?? box.tree.boxOf(parentId);
     return p?.contentBox ?? p;

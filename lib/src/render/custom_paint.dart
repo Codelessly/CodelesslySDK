@@ -35,7 +35,7 @@ import 'recipe.dart';
 void customPaintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
   final paint = n.behaviors.customPaint;
   if (paint == null) return;
-  final values = b.tree.bindings?.valuesFor(b.tree.source, b.id, b.instance);
+  final values = b.tree.bindings?.valuesFor(b.source, b.id, b.instance);
   chain.add(
     b.obtain<RenderCustomPaintLayer>('customPaint', RenderCustomPaintLayer.new)
       ..configure(paint, values is ExpressionValues ? values : null),

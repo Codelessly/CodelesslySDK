@@ -480,7 +480,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
     final current = values;
     if (current != _published) {
       _published = current;
-      final local = box.tree.binder?.localScopeOf(box.tree.source, box.id, box.instance);
+      final local = box.tree.binder?.localScopeOf(box.source, box.id, box.instance);
       final map = current.toMap();
       local?.set('drag', map);
       if (local?.names.contains(_model.scopeName) ?? false) local!.set(_model.scopeName, map);
@@ -507,7 +507,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
 
   ValueScope? get _scope {
     final box = _box;
-    return box?.tree.binder?.scopeFor(box.tree.source, box.id, box.instance);
+    return box?.tree.binder?.scopeFor(box.source, box.id, box.instance);
   }
 
   void _share(DragValues values) {

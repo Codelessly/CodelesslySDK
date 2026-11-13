@@ -203,7 +203,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final modelChanged = model != _model;
     _model = model;
     _enabled = model.enabled;
-    _scope = box?.tree.bindings?.valuesFor(box.tree.source, box.id, box.instance);
+    _scope = box?.tree.bindings?.valuesFor(box.source, box.id, box.instance);
     _variables
       ..clear()
       ..addAll({
@@ -448,7 +448,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final values = {..._pose.toMap(), 'active': _active, 'selected': _selected};
     if (mapEquals(values, _published)) return;
     _published = values;
-    box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'transform', values);
+    box.tree.bindings?.publish(box.source, box.id, box.instance, 'transform', values);
   }
 
   // --- geometry ---------------------------------------------------------------------------
