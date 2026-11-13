@@ -152,7 +152,11 @@ class NodeTree {
   /// let the reaction that hid it finish. Removing a view still cancels it.
   bool get preservingActions => _preservingActions;
   NodeTree(this.source,
-      {this.observer, IslandEnvironment environment = const IslandEnvironment(), NodeBinder? binder, NodeInteractions? interactions})
+      {this.observer,
+      IslandEnvironment environment = const IslandEnvironment(),
+      NodeBinder? binder,
+      NodeInteractions? interactions,
+      this.recipes = const {}})
       : islands = _TreeIslands(environment) {
     (islands as _TreeIslands).onEnvironment = () {
       for (final box in _boxes.values.toList()) {
@@ -163,6 +167,12 @@ class NodeTree {
     _binder = binder;
     _interactions = interactions;
   }
+
+  /// The app's own recipes by node type, over the built-in ones: a type the
+  /// API doesn't declare (its props are [Props.unknown]), or another build
+  /// of a declared one. The core layout types (canvas, stack, box, row,
+  /// column, text, icon, spacer, variance) are always the tree's own.
+  final Map<String, WidgetRecipe> recipes;
 
   /// Whether text without a line height takes its font's own, as Flutter's
   /// does, rather than the SDK's 1.33 (the project's
@@ -1117,7 +1127,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       case 'icon':
         _icon(n, chain);
       default:
-        final recipe = widgetRecipes[n.type];
+        final recipe = tree.recipes[n.type] ?? widgetRecipes[n.type];
         if (recipe != null && _inputInShell(n)) {
           // An input with its own fill, border, shadow or padding: the node's
           // shell around it, the widget filling (or hugging) the padded box.

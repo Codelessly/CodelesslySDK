@@ -54,6 +54,42 @@ Json setVar(String name, String value, {String? op, String? index, String? mapKe
     };
 
 void main() {
+  group('app-defined action types', () {
+    test('an unknown type runs the handler the app registered for it, in chain order', () async {
+      final h = Harness(variables: [v('n', 0, VariableType.integer)]);
+      final seen = <Object?>[];
+      final actions = CodelesslyActions(handlers: {
+        'acme.track': (a, run) {
+          seen.add(((a as UnknownAction).json['event'], h['n']));
+        },
+      });
+      await actions.run(
+        clickNode([
+          setVar('n', '1', op: 'add'),
+          {'type': 'acme.track', 'event': 'tapped'},
+          setVar('n', '1', op: 'add'),
+        ]),
+        'click',
+        h.context,
+      );
+      expect(seen, [('tapped', 1)]);
+      expect(h['n'], 2);
+      expect(h.errors, isEmpty);
+    });
+    test('an unknown type with no handler is skipped, and so is a disabled one with a handler', () async {
+      final h = Harness(variables: [v('n', 0, VariableType.integer)]);
+      var calls = 0;
+      await h.click([{'type': 'acme.track'}, setVar('n', '1', op: 'add')]);
+      await CodelesslyActions(handlers: {'acme.track': (a, run) => calls++}).run(
+        clickNode([{'type': 'acme.track', 'enabled': false}, setVar('n', '1', op: 'add')]),
+        'click',
+        h.context,
+      );
+      expect(calls, 0);
+      expect(h['n'], 2);
+      expect(h.errors, isEmpty);
+    });
+  });
   group('trigger guards', () {
     test('a timer stops updating after its reveal limit', () async {
       final h = Harness(variables: [v('reveal', 0, VariableType.integer)]);

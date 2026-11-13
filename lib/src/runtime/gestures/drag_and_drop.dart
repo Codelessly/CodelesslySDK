@@ -382,7 +382,7 @@ DropSlotSpec? dropSlotOf(NodeTree tree, String listNodeId, {Object? instance}) {
 /// while it shows the slot and [dispose]s it when done.
 class DropSlotNode {
   DropSlotNode(NodeTree tree, this.id)
-    : _tree = NodeTree(_FeedbackSource(tree.source, rootId: id, reveal: true), binder: tree.binder);
+    : _tree = NodeTree(_FeedbackSource(tree.source, rootId: id, reveal: true), binder: tree.binder, recipes: tree.recipes);
 
   final String id;
   final NodeTree _tree;
@@ -640,6 +640,7 @@ class _SourceDrag implements Drag {
       _FeedbackSource(box.tree.source, rootId: rootId, under: feedbackId.isEmpty ? null : box.id),
       binder: box.tree.binder,
       environment: const IslandEnvironment(interactive: true),
+      recipes: box.tree.recipes,
     );
     final size = feedbackId.isEmpty ? source.size : (source._feedbackSize ?? source.size);
     // A feedback node of its own that hugs its content on an axis (a chip

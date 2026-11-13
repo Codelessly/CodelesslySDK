@@ -178,7 +178,9 @@ class ActionRun {
 
 /// The default [ActionRunner]: runs a node's reactions with the typed
 /// handlers of [handlers] (the built-in ones, which an app can override or
-/// extend by action type).
+/// extend by action type: a type the API doesn't declare decodes as an
+/// [UnknownAction], whose handler reads its fields from
+/// [UnknownAction.json]).
 class CodelesslyActions implements ActionRunner {
   const CodelesslyActions({this.handlers = const {}});
 
@@ -354,7 +356,10 @@ class _HandlerOverrides {
 Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
   for (final a in actions) {
     if (run.isCanceled) throw const ActionsCanceled();
-    if (!a.enabled || a is UnknownAction) continue;
+    if (!a.enabled) continue;
+    // A type this SDK doesn't know runs only when the app gave a handler
+    // for it ([CodelesslyActions.handlers]); otherwise it's skipped.
+    if (a is UnknownAction && !_hasHandler(a.type)) continue;
     if (a.when case final w? when !run.expressions.test(w, run.scope)) continue;
     if (a.nonBlocking) {
       unawaited(_perform(a, run).catchError((Object e, StackTrace s) {
@@ -365,6 +370,9 @@ Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
     }
   }
 }
+
+bool _hasHandler(String type) =>
+    (Zone.current[#codelesslyHandlers] as _HandlerOverrides?)?.handlers.containsKey(type) ?? false;
 
 Future<void> _perform(ActionDef a, ActionRun run) async {
   final overrides = Zone.current[#codelesslyHandlers] as _HandlerOverrides?;
