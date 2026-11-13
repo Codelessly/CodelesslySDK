@@ -68,10 +68,6 @@ const Map<String, Map<String, String>> renderStatics = {
   'render/hero.dart': {
     '_byTree': 'HeroMarks: the shared elements of every tree on screen; a flight pairs marks of two trees (exported)',
   },
-  // The frame's queue of motions waiting to be revealed.
-  'render/behaviors.dart': {
-    '_waiting': '_MotionRevealWatcher: motions checked once after the frame, whatever tree they are in',
-  },
   // Caches of pure work, by its input.
   'render/paint/image_fill.dart': {
     '_entries': 'PaintImages: the loaded images by URL, shared by every tree as Flutter\'s image cache is (exported)',

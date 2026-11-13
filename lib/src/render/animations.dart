@@ -12,9 +12,15 @@
 //   * any other binding path patches the node as shown (the tree re-applies
 //     it); a `variable` track writes the variable.
 //
+// Its transitions (api.Transition, docs/design/03-motion.md §3.2) are the
+// node's implicit animations, played on the same ticker: when a value they
+// ease changes, it tweens from what is drawn to the new value (a `motion`
+// number into the motion layer, `opacity` into this layer, any other path
+// as a patch).
+//
 // A design canvas (a tree that doesn't animate) runs no clock: it draws an
 // animation only at its `previewAt`, else the node's own values (an
-// entrance at its end).
+// entrance at its end), and new values at once.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -26,17 +32,16 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-import 'behaviors.dart' show RenderMotion, RenderPose;
+import 'behaviors.dart' show RenderMotion, RenderPose, RenderShimmer;
 import 'contracts.dart';
 import 'node_tree.dart' show NodeBox;
 import 'physics.dart' show describeSpring;
 import 'recipe.dart';
+import 'visible_share.dart';
 
-/// The `motion.*` properties a track can drive.
-const Set<String> motionTrackProperties = {
-  'translateX', 'translateY', 'scale', 'scaleX', 'scaleY', 'shiftX', 'shiftY', 'opacity', 'rotate', 'rotateX', //
-  'rotateY', 'pathProgress', 'blur',
-};
+/// The `motion.*` properties a track or a transition can drive
+/// ([api.Motion.properties]).
+const Set<String> motionTrackProperties = {...api.Motion.properties};
 
 /// The properties of [n]'s motion its animations replace (their tracks set
 /// them): the node needs a motion layer for them.
@@ -48,19 +53,24 @@ Set<String> replacedMotionProperties(Node n) => {
               if (motionTrackProperties.contains(t.path.substring(7))) t.path.substring(7),
     };
 
-/// Whether [n]'s animations replace its own opacity.
-bool animatesOpacity(Node n) => n.behaviors.animations.any((a) =>
-    a.enabled &&
-    a.expanded.tracks.any((t) => t.variable.isEmpty && t.node.isEmpty && t.path == 'opacity' && t.blend == api.TrackBlend.replace));
+/// Whether [n]'s animations replace its own opacity, or a transition eases
+/// it: its player draws it (the node has no opacity layer of its own).
+bool animatesOpacity(Node n) =>
+    api.Transition.of(n.behaviors.transitions, 'opacity') != null ||
+    n.behaviors.animations.any((a) =>
+        a.enabled &&
+        a.expanded.tracks.any((t) => t.variable.isEmpty && t.node.isEmpty && t.path == 'opacity' && t.blend == api.TrackBlend.replace));
 
 /// Adds [n]'s animation player to [chain] (where the loops were: inside the
-/// motion and rotation, outside the opacity).
-void animationLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates, RenderMotion? motion}) {
-  if (n.behaviors.animations.isEmpty) return;
+/// motion and rotation, outside the opacity): for its animations and its
+/// transitions.
+void animationLayers(NodeBuilder b, Node n, List<RenderBox> chain,
+    {required bool animates, RenderMotion? motion, RenderShimmer? shimmer}) {
+  if (n.behaviors.animations.isEmpty && n.behaviors.transitions.isEmpty) return;
   final box = b is NodeBox ? b : null;
   chain.add(
     b.obtain<RenderAnimations>('animations', RenderAnimations.new)
-      ..configure(box, n, animates: animates, motion: motion),
+      ..configure(box, n, animates: animates, motion: motion, shimmer: shimmer),
   );
 }
 
@@ -81,15 +91,20 @@ class _RepeatSimulation extends Simulation {
   double runs(double t) => t / period + start;
 
   @override
-  double x(double time) {
-    final r = runs(time);
-    if (count > 0 && r >= count) return reverse && (count - 1).isOdd ? 0 : 1;
+  double x(double time) => valueAt(runs(time), reverse, count);
+
+  /// The value [r] runs in: as Flutter's `repeat(count:)` ends, at the start
+  /// of the run after the last (0 for a restart, a reverse's end of its
+  /// last way).
+  static double valueAt(double r, bool reverse, int count) {
+    if (count > 0 && r >= count) r = count.toDouble();
     final k = r.floor(), f = r - k;
     return reverse && k.isOdd ? 1 - f : f;
   }
 
-  bool backward(double time) {
-    final r = runs(time);
+  bool backward(double time) => isBackward(runs(time), reverse, count);
+
+  static bool isBackward(double r, bool reverse, int count) {
     if (count > 0 && r >= count) return reverse && (count - 1).isOdd;
     return reverse && r.floor().isOdd;
   }
@@ -99,6 +114,58 @@ class _RepeatSimulation extends Simulation {
 
   @override
   bool isDone(double time) => count > 0 && runs(time) >= count;
+}
+
+/// A repeat whose pace eases ([api.NodeAnimation.ramp]): its speed (runs a
+/// second) moves toward [targetSpeed] (its full pace, 0 while paused) over
+/// the ramp, and the runs it has gone are the sum of it. Stateful: read once
+/// a tick, in order.
+class _RampedRepeat extends Simulation {
+  _RampedRepeat({
+    required this.runs,
+    required this.speed,
+    required this.rampSeconds,
+    required this.reverse,
+    required this.count,
+    required this.targetSpeed,
+  });
+
+  double runs, speed;
+  final double rampSeconds;
+  final bool reverse;
+  final int count;
+  final double Function() targetSpeed;
+  double? _last;
+
+  /// It wound down to a stop (paused), rather than finished its count.
+  bool get stopped => speed == 0 && targetSpeed() == 0 && !(count > 0 && runs >= count);
+
+  @override
+  double x(double time) {
+    final dt = _last == null ? 0.0 : math.max(0.0, time - _last!);
+    _last = time;
+    final target = targetSpeed();
+    if (speed != target) {
+      if (rampSeconds <= 0) {
+        speed = target;
+      } else if (dt > 0) {
+        final perSecond = math.max(target.abs(), speed.abs()) / rampSeconds;
+        final change = math.min((target - speed).abs(), perSecond * dt);
+        speed += (target - speed).sign * change;
+        if ((target - speed).abs() < 0.002) speed = target;
+      }
+    }
+    runs += speed * dt;
+    return _RepeatSimulation.valueAt(runs, reverse, count);
+  }
+
+  bool get backward => _RepeatSimulation.isBackward(runs, reverse, count);
+
+  @override
+  double dx(double time) => (backward ? -1 : 1) * speed;
+
+  @override
+  bool isDone(double time) => (count > 0 && runs >= count) || stopped;
 }
 
 /// `forward`/`reverse`/`animateTo`: [begin] to [end] over [seconds] on
@@ -212,13 +279,34 @@ class AnimationClock {
   }
 
   /// `repeat(reverse:, count:)` as the animation's [api.NodeAnimation.repeat]
-  /// says, from [startRuns] runs into a cycle (null: where it is now).
+  /// says, from [startRuns] runs into a cycle (null: where it is now). With
+  /// a [api.NodeAnimation.ramp] it speeds up from still (or from its pace
+  /// now) and slows to a stop while paused; with no duration it holds still.
   Future<void> repeat({double? startRuns, int delay = 0}) {
     final r = spec.repeat ?? api.AnimationRepeat.forever;
     final start = startRuns ?? (r.reverse && _direction == _Direction.reverse ? 2 - value : value);
+    if (spec.ramp > 0) {
+      final running = _simulation;
+      final sim = _RampedRepeat(
+        runs: start,
+        speed: running is _RampedRepeat ? running.speed : 0,
+        rampSeconds: spec.ramp / 1000,
+        reverse: r.reverse,
+        count: r.count,
+        targetSpeed: () => spec.paused || !spec.enabled || spec.durationMs <= 0 ? 0 : 1000 / spec.durationMs,
+      );
+      return _run(sim, sim.backward ? _Direction.reverse : _Direction.forward, delay: delay);
+    }
+    if (spec.durationMs <= 0) {
+      stop();
+      return Future.value();
+    }
     final sim = _RepeatSimulation(math.max(1, spec.durationMs) / 1000, r.reverse, r.count, start);
     return _run(sim, sim.backward(0) ? _Direction.reverse : _Direction.forward, delay: delay);
   }
+
+  /// Whether it eases its pace to a stop rather than stopping at once.
+  bool get windsDown => spec.ramp > 0 && _simulation is _RampedRepeat;
 
   /// `stop()`: holds where it is; a chain waiting on it goes on.
   void stop() {
@@ -259,15 +347,20 @@ class AnimationClock {
     final before = value;
     // A spring isn't held to 0–1: its bounce shows.
     value = sim is SpringSimulation ? sim.x(t) : sim.x(t).clamp(0.0, 1.0);
-    if (sim is _RepeatSimulation) {
-      _direction = sim.backward(t) ? _Direction.reverse : _Direction.forward;
+    if (sim is _RepeatSimulation || sim is _RampedRepeat) {
+      final back = sim is _RampedRepeat ? sim.backward : (sim as _RepeatSimulation).backward(t);
+      _direction = back ? _Direction.reverse : _Direction.forward;
       status = _direction == _Direction.forward ? AnimationStatus.forward : AnimationStatus.reverse;
     }
-    if (sim.isDone(t)) {
+    if (sim is _RampedRepeat && sim.stopped) {
+      // Wound down (paused): it holds there, as `stop()` does.
+      _simulation = null;
+      _finish();
+    } else if (sim.isDone(t)) {
       if (sim is SpringSimulation) value = sim.x(double.infinity).isFinite ? (_direction == _Direction.forward ? 1 : 0) : value;
       _simulation = null;
+      // As `repeat(count:)` ends: completed going forward, dismissed back.
       status = _direction == _Direction.forward ? AnimationStatus.completed : AnimationStatus.dismissed;
-      if (sim is _RepeatSimulation) status = value >= 1 ? AnimationStatus.completed : AnimationStatus.dismissed;
       _finish();
     }
     moved = value != before || _simulation == null;
@@ -278,6 +371,54 @@ class AnimationClock {
   Map<String, Object?> get state => {'value': curved, 'status': status.name, 'isAnimating': isAnimating};
 
   void dispose() => stop();
+}
+
+// --- transitions -----------------------------------------------------------------
+
+/// One running transition: [from] to [to] on its [transition]'s timing,
+/// through its [keyframes].
+class _Tween {
+  _Tween(this.transition, this.from, this.to, this.keyframes);
+
+  final api.Transition transition;
+  final double from, to;
+  final List<api.Keyframe> keyframes;
+
+  /// The ticker time it started at (its delay not yet counted); null until
+  /// its first tick.
+  Duration? since;
+
+  /// The value drawn now, and the eased share it's at.
+  double value = 0, eased = 0;
+
+  /// The value on the straight way (before an arc bends it).
+  double straight = 0;
+
+  late final Simulation? _spring = transition.spring == null
+      ? null
+      : SpringSimulation(describeSpring(transition.spring!), 0, 1, 0);
+
+  /// Moves to [ms] into its run; whether it's done.
+  bool advance(double ms) {
+    final bool done;
+    if (_spring case final Simulation s) {
+      final t = ms / 1000;
+      done = ms > 0 && s.isDone(t);
+      eased = done ? 1 : s.x(t);
+    } else {
+      final u = (ms / math.max(1, transition.duration)).clamp(0.0, 1.0);
+      done = ms >= transition.duration;
+      eased = done ? 1 : transition.curve.transform(u);
+    }
+    if (keyframes.isEmpty) {
+      straight = from + (to - from) * eased;
+    } else {
+      final track = api.AnimationTrack(keyframes: keyframes, interpolation: transition.interpolation);
+      straight = api.readDouble(track.valueAt(eased.clamp(0.0, 1.0), begin: from, end: to)) ?? to;
+    }
+    value = done ? to : straight;
+    return done;
+  }
 }
 
 // --- the player ------------------------------------------------------------------
@@ -300,6 +441,7 @@ class RenderAnimations extends RenderPose {
   NodeBox? _box;
   Node? _node;
   RenderMotion? _motion;
+  RenderShimmer? _shimmer;
   bool _animates = false;
   bool _appeared = false;
   final Map<String, AnimationClock> _clocks = {};
@@ -317,10 +459,12 @@ class RenderAnimations extends RenderPose {
   /// they start, as the design canvas draws them.
   static bool get reducedMotion => SchedulerBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
 
-  void configure(NodeBox? box, Node n, {required bool animates, RenderMotion? motion}) {
+  void configure(NodeBox? box, Node n, {required bool animates, RenderMotion? motion, RenderShimmer? shimmer}) {
     _box = box;
+    final previous = _node;
     _node = n;
     _motion = motion;
+    _shimmer = shimmer;
     final wasAnimating = _animates;
     _animates = animates;
     final specs = [for (final a in n.behaviors.animations) a.expanded];
@@ -359,6 +503,7 @@ class RenderAnimations extends RenderPose {
       for (final id in cues) {
         unawaited(play(id));
       }
+      if (previous != null && wasAnimating) _transition(previous, n);
     }
     _show();
     _sync();
@@ -405,16 +550,64 @@ class RenderAnimations extends RenderPose {
     return api.readDouble(v);
   }
 
-  /// Starts the animations that play when the node appears.
+  /// Starts the animations that play when the node appears; one that waits
+  /// for the node to be in view ([api.NodeAnimation.visibleFraction])
+  /// starts once it is.
   void _appear() {
     _appeared = true;
+    _tweens.clear();
+    _waitingInView.clear();
     for (final a in _specs) {
       if (!a.enabled) continue;
       final clock = _clocks[a.id]!;
       clock.reset();
       _seedPhase(clock);
-      if (a.autoplays && !a.paused) _autoplay(clock);
+      if (a.autoplays && a.visibleFraction != null) {
+        _waitingInView.add(a.id);
+      } else if (a.autoplays && !a.paused) {
+        _autoplay(clock);
+      }
     }
+    if (_waitingInView.isNotEmpty) {
+      _watchInView();
+      SchedulerBinding.instance.scheduleFrame();
+    }
+  }
+
+  /// Animations waiting for the node to be in view.
+  final Set<String> _waitingInView = {};
+  bool _inViewScheduled = false;
+
+  /// Checks after each frame, while some wait, how much of the node shows.
+  void _watchInView() {
+    if (_inViewScheduled || _waitingInView.isEmpty) return;
+    _inViewScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _inViewScheduled = false;
+      if (!attached || !_animates) return;
+      _checkInView();
+      _watchInView();
+    });
+  }
+
+  void _checkInView() {
+    // The node's box as laid out (outside its motion), as a reveal measured.
+    final RenderBox target = _motion ?? this;
+    if (!target.hasSize) return;
+    final share = visibleShare(target);
+    for (final id in _waitingInView.toList()) {
+      final clock = _clocks[id];
+      final a = clock?.spec;
+      if (clock == null || a == null || !a.enabled) {
+        _waitingInView.remove(id);
+        continue;
+      }
+      if (share <= 0 || share < a.visibleFraction!.clamp(0.0, 1.0)) continue;
+      _waitingInView.remove(id);
+      if (!a.paused) _autoplay(clock);
+    }
+    _show();
+    _sync();
   }
 
   void _seedPhase(AnimationClock clock) {
@@ -450,14 +643,17 @@ class RenderAnimations extends RenderPose {
       clock.reset();
       return;
     }
+    if (_waitingInView.contains(id)) return;
     if (a.paused) {
-      clock.stop();
+      // A ramped repeat slows to a stop; anything else holds at once.
+      if (!clock.windsDown) clock.stop();
       return;
     }
     if (a.repeats) {
       if (!reducedMotion) unawaited(clock.repeat());
     } else if (a.autoplays && clock.status != AnimationStatus.completed) {
-      unawaited(clock.forward());
+      // Released before it ever started: from its start, after its delay.
+      unawaited(clock.forward(delay: clock.value == 0 && clock.status == AnimationStatus.dismissed ? a.delay : 0));
     }
   }
 
@@ -516,19 +712,31 @@ class RenderAnimations extends RenderPose {
 
   // --- ticking ------------------------------------------------------------------
 
-  bool get _ticking => attached && _animates && _clocks.values.any((c) => c.isAnimating);
+  bool get _ticking => attached && _animates && (_clocks.values.any((c) => c.isAnimating) || _tweens.isNotEmpty);
 
   void _sync() {
     if (_ticking) {
       _ticker ??= Ticker(_tick, debugLabel: 'animations');
-      if (!_ticker!.isActive) _ticker!.start();
+      if (!_ticker!.isActive) {
+        // A ticker started now counts from this frame: what waits to start
+        // starts at its 0 (as a motion's own ticker did), not a tick late.
+        _now = Duration.zero;
+        for (final c in _clocks.values) {
+          if (c.isAnimating) c._start ??= Duration(milliseconds: c._delayMs);
+        }
+        for (final t in _tweens.values) {
+          t.since ??= Duration.zero;
+        }
+        _ticker!.start();
+      }
     } else if (_ticker?.isActive ?? false) {
       _ticker!.stop();
     }
   }
 
   void _tick(Duration elapsed) {
-    var changed = false;
+    _now = elapsed;
+    var changed = _tweens.isNotEmpty;
     for (final c in _clocks.values) {
       if (c.tick(elapsed)) changed = true;
     }
@@ -536,8 +744,143 @@ class RenderAnimations extends RenderPose {
     for (final c in _clocks.values) {
       c.moved = false;
     }
-    if (!_clocks.values.any((c) => c.isAnimating)) {
+    if (!_clocks.values.any((c) => c.isAnimating) && _tweens.isEmpty) {
       _ticker?.stop();
+    }
+  }
+
+  /// The ticker's time at its last tick (a transition starts on the tick
+  /// after it's asked for, as a clock's play does).
+  Duration _now = Duration.zero;
+
+  // --- transitions --------------------------------------------------------------
+
+  /// Running transitions, by binding path.
+  final Map<String, _Tween> _tweens = {};
+
+  /// What is drawn now at [path] (a transition starts there): a running
+  /// transition's value, else what was last drawn, else [own].
+  double _drawnAt(String path, double own) => _tweens[path]?.value ?? _lastDrawn[path] ?? own;
+
+  /// The values last drawn, by path (motion numbers and opacity).
+  Map<String, double> _lastDrawn = const {};
+
+  /// The numbers [n] has at the paths its transitions ease: its motion's,
+  /// its opacity, and the single paths they name.
+  Map<String, double> _eased(Node n) {
+    final out = <String, double>{};
+    final list = n.behaviors.transitions;
+    final motion = n.behaviors.motion ?? api.Motion.none;
+    for (final p in api.Motion.properties) {
+      if (api.Transition.of(list, 'motion.$p') != null) out['motion.$p'] = motion.valueOf(p);
+    }
+    if (api.Transition.of(list, 'opacity') != null) out['opacity'] = n.opacity;
+    for (final t in list) {
+      final path = t.property;
+      if (path == '*' || path == 'opacity' || path.startsWith('motion') || out.containsKey(path)) continue;
+      if (api.readDouble(_ownValue(n.id, path, node: n)) case final double v) out[path] = v;
+    }
+    return out;
+  }
+
+  /// Starts the transitions [previous] → [next] calls for: each eased path
+  /// whose value changed, unless an animation is playing it. A prefix's
+  /// transition (`motion`) moves what's under it as one: a change restarts
+  /// every number it is moving, and runs the ones its keyframes name.
+  void _transition(Node previous, Node next) {
+    if (next.behaviors.transitions.isEmpty) {
+      _tweens.clear();
+      return;
+    }
+    final before = _eased(previous), after = _eased(next);
+    final list = next.behaviors.transitions;
+    final started = <api.Transition>{};
+    for (final e in after.entries) {
+      final was = before[e.key];
+      if (was == null || was == e.value) continue;
+      final t = api.Transition.of(list, e.key);
+      if (t == null || _playing(e.key)) continue;
+      _startTween(e.key, t, from: _drawnAt(e.key, was), to: e.value);
+      started.add(t);
+    }
+    // An arc bends a position on both axes: the other one runs too.
+    for (final (x, y) in const [('motion.translateX', 'motion.translateY'), ('motion.shiftX', 'motion.shiftY')]) {
+      for (final (moved, other) in [(x, y), (y, x)]) {
+        final t = _tweens[moved]?.transition;
+        if (t == null || t.arc == 0 || !started.contains(t) || _tweens[other] != null) continue;
+        final own = after[other] ?? 0;
+        _startTween(other, t, from: _drawnAt(other, own), to: own);
+      }
+    }
+    // A prefix moves as one value: its other numbers in flight restart from
+    // where they are, and the ones its keyframes name run too.
+    for (final t in started) {
+      if (t.property.contains('.') && !t.property.startsWith('motion')) continue;
+      for (final e in after.entries) {
+        if (_tweens[e.key]?.since == null && _tweens[e.key]?.transition == t) continue;
+        if (api.Transition.of(list, e.key) != t || _playing(e.key)) continue;
+        final running = _tweens[e.key];
+        final keyed = t.keyframesOf(_keyUnder(t, e.key)).isNotEmpty;
+        if (running != null || keyed) _startTween(e.key, t, from: _drawnAt(e.key, e.value), to: e.value);
+      }
+    }
+    if (_tweens.isNotEmpty) _sync();
+  }
+
+  /// [path]'s key under [t]'s property (`motion.rotate` under `motion`:
+  /// `rotate`); empty for the property itself.
+  static String _keyUnder(api.Transition t, String path) =>
+      path == t.property || t.property == '*' ? (t.property == '*' ? path : '') : path.substring(t.property.length + 1);
+
+  void _startTween(String path, api.Transition t, {required double from, required double to}) {
+    final keyframes = t.keyframesOf(_keyUnder(t, path));
+    if (t.spring == null && t.duration <= 0) {
+      _tweens.remove(path);
+      return;
+    }
+    _tweens[path] = _Tween(t, from, to, keyframes)..value = from;
+  }
+
+  /// Whether an animation is playing a track that replaces [path] (a
+  /// transition leaves it to the animation).
+  bool _playing(String path) {
+    for (final c in _clocks.values) {
+      if (!c.isAnimating || !c.spec.enabled) continue;
+      if (c.spec.tracks.any((t) => t.variable.isEmpty && t.node.isEmpty && t.path == path && t.blend == api.TrackBlend.replace)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Moves the running transitions to the ticker's time; done ones end.
+  void _advanceTweens() {
+    if (_tweens.isEmpty) return;
+    for (final e in _tweens.entries.toList()) {
+      final tw = e.value;
+      if (_playing(e.key)) {
+        _tweens.remove(e.key);
+        continue;
+      }
+      tw.since ??= _now;
+      final ms = (_now - tw.since!).inMicroseconds / 1000 - tw.transition.delay;
+      if (tw.advance(math.max(0.0, ms))) _tweens.remove(e.key);
+    }
+    _bendArcs();
+  }
+
+  /// A `motion` transition's (deprecated) arc: its position changes bend
+  /// off the straight line, to the right of the way they go.
+  void _bendArcs() {
+    for (final (x, y) in const [('motion.translateX', 'motion.translateY'), ('motion.shiftX', 'motion.shiftY')]) {
+      final a = _tweens[x], b = _tweens[y];
+      final t = a?.transition ?? b?.transition;
+      if (t == null || t.arc == 0 || (a?.keyframes.isNotEmpty ?? false) || (b?.keyframes.isNotEmpty ?? false)) continue;
+      final u = (a ?? b)!.eased;
+      final bend = t.arc * 2 * u * (1 - u);
+      final dx = a == null ? 0.0 : a.to - a.from, dy = b == null ? 0.0 : b.to - b.from;
+      a?.value = a.straight - dy * bend;
+      b?.value = b.straight + dx * bend;
     }
   }
 
@@ -602,6 +945,7 @@ class RenderAnimations extends RenderPose {
   void _show() {
     final n = _node;
     if (n == null) return;
+    if (_animates) _advanceTweens();
     final ownMotion = n.behaviors.motion ?? api.Motion.none;
     final parts = <(Alignment, Matrix4)>[];
     var opacity = 1.0;
@@ -609,11 +953,25 @@ class RenderAnimations extends RenderPose {
     final motion = <String, double>{};
     final patches = <String, Map<String, Object?>>{};
     final values = _animates ? _values : null;
+    // Transitions first: a playing animation's track is drawn over them.
+    for (final e in _tweens.entries) {
+      if (e.key.startsWith('motion.')) {
+        motion[e.key.substring(7)] = e.value.value;
+      } else if (e.key == 'opacity') {
+        opacityOverride = e.value.value.clamp(0.0, 1.0);
+      } else {
+        (patches[n.id] ??= {})[e.key] = e.value.value;
+      }
+    }
+    double? shimmerAt;
+    var pushed = false;
     for (final clock in _clocks.values.toList()) {
       final v = _drawn(clock);
       if (v == null) continue;
       final a = clock.spec;
       var dx = 0.0, dy = 0.0, sc = 1.0, sx = 1.0, sy = 1.0, rot = 0.0;
+      // A settled track leaves what a transition is moving to it.
+      bool eased(String path) => !clock.isAnimating && _tweens.containsKey(path);
       for (final t in a.tracks) {
         if (t.variable.isNotEmpty) {
           if (!_animates || values == null) continue;
@@ -645,15 +1003,23 @@ class RenderAnimations extends RenderPose {
           continue;
         }
         if (t.node.isEmpty && prop == 'opacity!') {
+          if (eased('opacity')) continue;
           final x = api.readDouble(t.valueAt(v, own: n.opacity, begin: _resolved(t.from), end: _resolved(t.to)));
           if (x != null) opacityOverride = x.clamp(0.0, 1.0);
           continue;
         }
         if (t.node.isEmpty && prop != null && motionTrackProperties.contains(prop)) {
+          if (eased(path)) continue;
           final x = api.readDouble(t.valueAt(v, own: ownMotion.valueOf(prop), begin: _resolved(t.from), end: _resolved(t.to)));
           if (x != null) motion[prop] = x;
+          if (clock.isAnimating && t.keyframes.isNotEmpty && (prop == 'translateX' || prop == 'translateY')) pushed = true;
           continue;
         }
+        if (t.node.isEmpty && path == 'shimmer.position') {
+          shimmerAt = api.readDouble(t.valueAt(v, own: n.behaviors.shimmer?.position, begin: _resolved(t.from), end: _resolved(t.to)));
+          continue;
+        }
+        if (t.node.isEmpty && eased(path)) continue;
         // Any other path: a patch of the node (or of node [t.node]).
         final target = t.node.isEmpty ? n.id : t.node;
         final value = t.valueAt(v, own: _ownValue(target, path), begin: _resolved(t.from), end: _resolved(t.to));
@@ -674,17 +1040,28 @@ class RenderAnimations extends RenderPose {
     // has no opacity layer of its own); else that layer, inside, does.
     final own = animatesOpacity(n) && n.opacity < 0.99 ? n.opacity : 1.0;
     this.opacity = (opacity * (opacityOverride ?? own)).clamp(0.0, 1.0);
+    for (final e in _tweens.entries) {
+      if ((e.key == 'motion.translateX' || e.key == 'motion.translateY') && e.value.keyframes.isNotEmpty) pushed = true;
+    }
     if (!_sameMap(motion, _lastMotion)) {
       _lastMotion = motion;
       _motion?.overrides = motion;
     }
+    _motion?.headingFromMovement = pushed;
+    _shimmer?.position = shimmerAt;
+    _lastDrawn = {
+      for (final p in api.Motion.properties) 'motion.$p': motion[p] ?? ownMotion.valueOf(p),
+      'opacity': opacityOverride ?? n.opacity,
+      for (final e in patches[n.id]?.entries ?? const <MapEntry<String, Object?>>[])
+        if (api.readDouble(e.value) case final double d) e.key: d,
+    };
     _patch(patches);
     _publish();
   }
 
   /// The node's own [path] value as stored (an omitted `from` or `to`).
-  Object? _ownValue(String id, String path) {
-    final node = id == _node?.id ? _node : _box?.nodeOf(id);
+  Object? _ownValue(String id, String path, {Node? node}) {
+    node ??= id == _node?.id ? _node : _box?.nodeOf(id);
     if (node == null) return null;
     Object? at = node.toJson();
     for (final k in api.BindPaths.parse(path)) {

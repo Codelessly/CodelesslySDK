@@ -54,17 +54,17 @@ RenderParagraph paragraph(WidgetTester tester, String text) {
 
 void main() {
   test('the before-pose is interpolated by distance and not mirrored', () {
-    final after = api.Motion.fromJson(book['pageMotion'])!;
-    final before = api.Motion.fromJson(book['pageMotionBefore'])!;
+    final after = api.Pose.fromJson(book['pageMotion'])!;
+    final before = api.Pose.fromJson(book['pageMotionBefore'])!;
     final leaving = RenderPageItems.pageMotionAt(after, -0.5, before: before);
-    expect(leaving.rotateY, -50);
-    expect(leaving.shiftX, 0.5);
-    expect(leaving.originX, -1);
+    expect(leaving.motion.rotateY, -50);
+    expect(leaving.motion.shiftX, 0.5);
+    expect(leaving.motion.alignment.x, -1);
     final coming = RenderPageItems.pageMotionAt(after, 0.5, before: before);
-    expect(coming.shiftX, -0.5);
-    expect(coming.rotateY, 0);
+    expect(coming.motion.shiftX, -0.5);
+    expect(coming.motion.rotateY, 0);
     // Without a before-pose, pages before are mirrored as before.
-    expect(RenderPageItems.pageMotionAt(api.Motion.fromJson({'rotateY': 30})!, -1).rotateY, -30);
+    expect(RenderPageItems.pageMotionAt(api.Pose.fromJson({'rotateY': 30})!, -1).motion.rotateY, -30);
     // Turned past 90 degrees, a page with backfaceHidden faces away.
     expect(RenderPageItems.facesAway(RenderPageItems.pageMotionAt(after, -0.95, before: before)), isTrue);
     expect(RenderPageItems.facesAway(RenderPageItems.pageMotionAt(after, -0.5, before: before)), isFalse);
@@ -73,8 +73,12 @@ void main() {
   test('pageMotionBefore and paintOrder round-trip', () {
     final n = api.Node.fromJson({'type': 'pageView', 'props': book})!;
     expect(n.prop(api.PageViewProps.paintOrder), api.PagePaintOrder.reverse);
-    expect(n.prop(api.PageViewProps.pageMotionBefore)!.rotateY, -100);
-    expect(n.toJson()['props'], book);
+    expect(n.prop(api.PageViewProps.pageMotionBefore)!.motion.rotateY, -100);
+    // Written in the current shape: the legacy originX as the alignment.
+    expect(n.toJson()['props'], {
+      ...book,
+      'pageMotionBefore': {'shiftX': 1, 'rotateY': -100, 'perspective': 0.9, 'alignment': [-1, 0], 'backfaceHidden': true},
+    });
   });
 
   testWidgets('mid-turn: the next page lies still beneath, the turning page on top takes taps', (tester) async {

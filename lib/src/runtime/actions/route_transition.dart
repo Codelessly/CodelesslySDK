@@ -9,7 +9,7 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart'
-    show DragDirection, Motion, RevealOrigin, RevealShape, RouteDismiss, RouteSwipeBack, RouteTransition, TransitionReveal,
+    show DragDirection, Pose, RevealOrigin, RevealShape, RouteDismiss, RouteSwipeBack, RouteTransition, TransitionReveal,
         TransitionSide;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -92,12 +92,13 @@ class TransitionSideView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (amount <= 0 || side.isStill) return child;
-    final m = Motion.lerp(Motion.none, side.motion, amount);
+    final pose = Pose.lerp(Pose.none, side.motion, amount);
+    final m = pose.motion;
     var out = child;
-    if (m.opacity < 1) out = IgnorePointer(ignoring: m.opacity == 0, child: Opacity(opacity: m.opacity, child: out));
-    if (m.blur > 0) out = ImageFiltered(imageFilter: ui.ImageFilter.blur(sigmaX: m.blur, sigmaY: m.blur), child: out);
+    if (pose.opacity < 1) out = IgnorePointer(ignoring: pose.opacity == 0, child: Opacity(opacity: pose.opacity, child: out));
+    if (pose.blur > 0) out = ImageFiltered(imageFilter: ui.ImageFilter.blur(sigmaX: pose.blur, sigmaY: pose.blur), child: out);
     if (m.translateX != 0 || m.translateY != 0 || m.scale != 1 || m.scaleX != 1 || m.scaleY != 1 || m.rotate != 0 || m.rotateX != 0 || m.rotateY != 0) {
-      out = Transform(alignment: Alignment(m.originX, m.originY), transform: motionMatrix(m), child: out);
+      out = Transform(alignment: Alignment(m.alignment.x, m.alignment.y), transform: motionMatrix(m), child: out);
     }
     if (m.shiftX != 0 || m.shiftY != 0) out = FractionalTranslation(translation: Offset(m.shiftX, m.shiftY), child: out);
     final reveal = side.reveal;

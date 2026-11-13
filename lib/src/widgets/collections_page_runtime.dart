@@ -267,17 +267,15 @@ class _RuntimePageViewState extends State<RuntimePageView> {
               return IgnorePointer(child: Opacity(opacity: 0, child: child));
             }
             final size = constraints.biggest;
-            final origin = Alignment(
-              pose.originX,
-              pose.originY,
-            ).alongSize(size);
+            final m = pose.motion;
+            final origin = Alignment(m.alignment.x, m.alignment.y).alongSize(size);
             final transform =
                 Matrix4.translationValues(
-                    pose.shiftX * size.width + origin.dx,
-                    pose.shiftY * size.height + origin.dy,
+                    m.shiftX * size.width + origin.dx,
+                    m.shiftY * size.height + origin.dy,
                     0,
                   )
-                  ..multiply(motionMatrix(pose))
+                  ..multiply(motionMatrix(m))
                   ..translateByDouble(-origin.dx, -origin.dy, 0, 1);
             return Opacity(
               opacity: pose.opacity.clamp(0, 1),

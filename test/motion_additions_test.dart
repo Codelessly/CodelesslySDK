@@ -1,11 +1,12 @@
 // Behaviors, at rest and running: motion swing,
 // phase, pause, arc, wrapping and paced paths, upright orientation and
 // shimmer; loop phases; drag tracks parked, relative and in their parent.
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderMotion, RenderShimmer, swingPose;
+import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderShimmer;
 import 'package:codelessly_sdk/src/render/paint/svg_path.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -64,18 +65,15 @@ void main() {
     final tree = NodeTree(NodeValues(DocumentSource(doc)));
     addTearDown(tree.dispose);
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's'))));
-    RenderMotion? motion;
-    void visit(RenderObject o) {
-      if (o is RenderMotion) motion ??= o;
-      o.visitChildren(visit);
-    }
-    visit(tester.renderObject(find.byType(NodeView)));
-    // A new ticker's first tick: no time has passed.
-    motion!.tick(Duration.zero);
-    motion!.tick(const Duration(milliseconds: 100));
-    final m = motion!.effectiveTransform.storage;
-    expect(m.every((v) => v.isFinite), isTrue, reason: '$m');
-    expect(m[1], isNot(0), reason: 'turned by 0.07 of a turn');
+    // The spin is the animation `spin` on the node's player.
+    final spin = tree.boxOf('b')!.animations!.clockOf('spin')!;
+    // Played by hand (the design canvas plays nothing). A new ticker's first
+    // tick: no time has passed.
+    unawaited(spin.repeat());
+    spin.tick(Duration.zero);
+    spin.tick(const Duration(milliseconds: 100));
+    expect(spin.value.isFinite, isTrue, reason: '${spin.value}');
+    expect(spin.value, closeTo(0.07, 1e-3), reason: 'turned by 0.07 of a turn');
     await tester.pumpWidget(const SizedBox());
   });
 
@@ -98,11 +96,13 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  test('swingPose', () {
-    const rest = api.Motion();
-    const values = api.Motion(rotate: 20, opacity: 0.5);
-    expect(swingPose(rest, values, -1).rotate, -20);
-    expect(swingPose(rest, values, 1).opacity, 0.5);
+  test('a swing track: rest ± (values − rest)', () {
+    // The legacy swingPose, now a replacing track's wave between its from
+    // (rest) and the property's own value.
+    const rotate = api.AnimationTrack(path: 'motion.rotate', from: 0, wave: [api.Wave()]);
+    expect(rotate.valueAt(0.75, own: 20) as double, closeTo(-20, 1e-9));
+    const opacity = api.AnimationTrack(path: 'opacity', from: 1, wave: [api.Wave()]);
+    expect(opacity.valueAt(0.25, own: 0.5) as double, closeTo(0.5, 1e-9));
   });
 
   testWidgets('a loop starts at its phase; paused holds it, resumed carries on', (tester) async {
@@ -152,7 +152,9 @@ void main() {
   testWidgets('a wrapping path reads its progress modulo 1; upright never turns over', (tester) async {
     final (tree, view, _) = await show(tester, {
       'w': box({
-        'motion': {'path': 'M0 0 L100 0', 'pathProgress': 1.25, 'pathWrap': true},
+        // A closed path wraps (pathWrap is how it is read now; an open one
+        // stops at its ends).
+        'motion': {'path': 'M0 0 L100 0 L0 0', 'pathProgress': 1.125, 'pathWrap': true},
       }),
       'u': box({
         'motion': {'path': 'M0 0 L-100 0', 'orientToPath': true, 'orientUpright': true, 'pathProgress': 0.5},
@@ -216,7 +218,8 @@ void main() {
     expect(await nose('M0 0 L-100 0', mirror: false), rectMoreOrLessEquals(const Rect.fromLTWH(180, 105, 10, 10), epsilon: 0.01));
     // Heading right nothing is mirrored.
     expect(await nose('M0 0 L100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(280, 105, 10, 10), epsilon: 0.01));
-    expect(api.Motion.fromJson({'uprightMirror': true})!.toJson()['uprightMirror'], isTrue);
+    expect(api.Motion.fromJson({'orientToPath': true, 'orientUpright': true, 'uprightMirror': true})!.toJson()['path'],
+        {'path': '', 'orient': 'uprightFlip'});
   });
 
   test('area pacing sweeps equal areas about the focus', () {
