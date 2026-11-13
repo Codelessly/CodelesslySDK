@@ -612,10 +612,6 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final target = scale.clamp(_minScale, _maxScale);
     var settled = _pose;
     if (target != scale) settled = _around(_pose, _lastFocal, factor: target / scale);
-    var turn = settled.rotation;
-    final snap = _model.rotationSnap;
-    if (snap > 0) turn = (turn / snap).round() * snap;
-    settled = settled.copyWith(rotation: turn);
     if (settled != _pose) {
       _gesture = 'settle';
       _springTo(_clamped(settled), velocity: velocity);
