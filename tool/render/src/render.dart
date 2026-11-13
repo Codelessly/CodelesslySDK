@@ -61,7 +61,7 @@ const runtimeCodes = <(String, String, String)>[
   ('layout_overflow', 'warning', 'A node extends past its parent\'s box (by the pixels shown) where the parent does not scroll that way.'),
   ('offscreen', 'warning', 'A node extends past the screen edge where nothing scrolls: on a device it is cut off.'),
   ('text_clipped', 'warning', 'A text does not fit its box: its lines are taller than the box, or a word is wider.'),
-  ('text_truncated', 'warning', 'A text was cut at maxLines.'),
+  ('text_truncated', 'warning', 'A text was cut at maxLines with overflow "clip" (an ellipsis or fade is taken as meant).'),
   ('text_no_color', 'warning', 'A text has no color: the engine paints it white (invisible on a light background). Set props.style.color.'),
   ('font_fallback', 'warning', 'A font family (or weight/style) is not in the fonts directories: the text is drawn in another font.'),
   ('image_failed', 'error', 'An image could not be loaded or decoded (missing file, bad data: URL).'),
@@ -162,7 +162,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   report.diagnostics.addAll(diagnostics.map((d) => d.toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
 
-  // 2. Fonts and assets.
+  // 2. Fonts and assets. A font handler left by an earlier run in this
+  // process would load into a disposed instance.
+  FontDemand.handler = null;
   final root = flutterRoot ?? Platform.environment['FLUTTER_ROOT'] ?? '';
   final faces = [...defaultFonts(root), ...scanFonts(args.fontDirs)];
   final fetcher = DirectoryFontFetcher(faces);
@@ -277,10 +279,21 @@ Future<void> _renderAll(
           home: CodelesslyWidget(codelessly: codelessly, layoutId: screen, controller: controller),
         ),
       ));
+      // Loading waits for the layout's fonts (registered with the engine in
+      // real time) up to its font timeout (on the test's clock): let both run.
+      for (var i = 0; i < 100 && !controller.isLoaded && controller.error == null; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
       await _settle(tester);
       collect();
       if (!controller.isLoaded) {
-        issue(RuntimeIssue('render_exception', 'error', 'Screen "$screen" did not load: ${controller.error}', screen: screen, size: sizeName));
+        issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}',
+            screen: label, size: sizeName));
+        await tester.pumpWidget(const SizedBox());
+        await tester.pump(const Duration(seconds: 10));
+        controller.dispose();
+        codelessly.dispose();
         continue;
       }
 
@@ -389,7 +402,8 @@ Future<void> _settle(WidgetTester tester) async {
     await tester.pump(const Duration(milliseconds: 100));
   }
   await tester.runAsync(() async {
-    await CodelesslyFonts.settled;
+    // Bounded: a load started under another test's fake clock never ends.
+    await CodelesslyFonts.settled.timeout(const Duration(milliseconds: 500), onTimeout: () {});
     await PaintImages.settled(timeout: const Duration(seconds: 3));
   });
   for (var i = 0; i < 4; i++) {
@@ -686,8 +700,9 @@ List<RuntimeIssue> _check(
         out.add(RuntimeIssue('text_no_color', 'warning', 'Text "${b.id}" ("$short") has no color, so it is painted white: set props.style.color.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
-      if (p.didExceedMaxLines) {
-        out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${b.id}" ("$short") is cut at maxLines.',
+      final cut = node.prop(api.TextProps.overflow) != api.TextOverflow.clip;
+      if (p.didExceedMaxLines && !cut) {
+        out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${b.id}" ("$short") is cut at maxLines: set "overflow": "ellipsis" if that is meant, or give it more lines.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
       final needH = p.getMaxIntrinsicHeight(b.size.width);
@@ -697,7 +712,7 @@ List<RuntimeIssue> _check(
             'Text "${b.id}" ("$short") needs ${needH.toStringAsFixed(0)} px of height at ${b.size.width.toStringAsFixed(0)} wide but its box is ${b.size.height.toStringAsFixed(0)}: give it {"hug": n} height or more room.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
-      if (needW > b.size.width + 1.5) {
+      if (needW > b.size.width + 1.5 && node.prop(api.TextProps.maxLines) == null) {
         out.add(RuntimeIssue('text_clipped', 'warning',
             'Text "${b.id}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide.',
             nodeId: b.id, screen: screen, size: size, file: file));
