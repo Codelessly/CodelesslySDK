@@ -378,6 +378,32 @@ class _Compiler {
     if (p.d != null) {
       final d = text(p.d);
       path = (s) => parseSvgPath(d(s))?.let((path) => Path()..addPath(path, Offset.zero));
+    } else if (p.commands case final commands?) {
+      // Flutter's Path builder, call by call.
+      final calls = [
+        for (final c in commands) (c.method, [for (final a in c.args) number(a, 0)], c.when == null ? null : boolean(c.when, true)),
+      ];
+      path = (s) {
+        final out = Path();
+        for (final (method, args, test) in calls) {
+          if (test != null && !test(s)) continue;
+          double a(int i) => args[i](s);
+          switch (method) {
+            case 'moveTo':
+              out.moveTo(a(0), a(1));
+            case 'lineTo':
+              out.lineTo(a(0), a(1));
+            case 'quadraticBezierTo':
+              out.quadraticBezierTo(a(0), a(1), a(2), a(3));
+            case 'cubicTo':
+              out.cubicTo(a(0), a(1), a(2), a(3), a(4), a(5));
+            case 'close':
+              out.close();
+          }
+        }
+        if (p.close) out.close();
+        return out;
+      };
     } else {
       final pts = points(p.points);
       final close = p.close;

@@ -165,6 +165,10 @@ void paintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
   }
 }
 
+/// **Schema 3 only**: schema 4 migrates a stroke path to a `customPaint`
+/// path op (codelessly_api's `paintSteps4`), drawn by
+/// RenderCustomPaintLayer; this goes with schema 4's version gate.
+///
 /// A node's [api.StrokePath], behind its content or in front. A running app
 /// draws it along its length over [api.StrokePath.drawMs]: when it first
 /// shows, from nothing when [api.StrokePath.drawKey] changes, and from where
@@ -956,7 +960,8 @@ class RenderImageFilter extends RenderProxyBox {
       (oldLayer ?? ImageFilterLayer())..imageFilter = _filter;
 }
 
-/// Paints a [api.StrokePath] in the box.
+/// Paints a [api.StrokePath] in the box. **Schema 3 only** (see
+/// [RenderStrokePath]).
 class StrokePathPainter extends CustomPainter {
   StrokePathPainter(this.path);
 

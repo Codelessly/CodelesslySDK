@@ -27,6 +27,19 @@ schema 4.
   timing; setValue paths), hero and in-place flight tests, schema 4 in the loading and relay-site tests. The
   catalog corpus digests of the five files whose documents hold a moved field were taken again at schema 4.
 
+**Schema 4's paint:** `strokePath`, a box's `path`, `subpathColors` and `gradientPerSubpath` are migrated onto
+`customPaint` and the path node (codelessly_api's `paintSteps4`).
+
+- **A `customPaint` path op's `commands`** draw: Flutter's `Path` calls (`moveTo`, `lineTo`,
+  `quadraticBezierTo`, `cubicTo`, `close`) in order, each number a literal or a formula, a call skipped while its
+  `when` is false. This is what draws a migrated `strokePath`'s curves and `untilWidth`.
+- **The path node reads `strokeMiterLimit`** (`Paint.strokeMiterLimit` of its strokes, default 4 as before).
+- The stroke path layer (`RenderStrokePath`, `StrokePathPainter`), the box path painter and the path painter's
+  per-shape colors and gradients are marked schema 3 only: a migrated document draws through `customPaint` and the
+  path node instead, and they go with schema 4's version gate.
+- `test/custom_paint/migrated_paint_test.dart`: each schema-3 feature drawn as schema 3 drew it and as the steps
+  rewrote it, pixel for pixel.
+
 ## Unreleased
 
 - **The reference is one base plus links** (codelessly_api's `docs/reference`). The chat example's compact prompt
