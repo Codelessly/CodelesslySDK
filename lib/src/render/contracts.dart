@@ -79,6 +79,18 @@ abstract interface class BoundValues {
   String interpolate(String text);
 }
 
+/// [BoundValues] that also work out expressions with names of the
+/// caller's own over the node's: a draw list's `item`, `index` and `size`
+/// (render/custom_paint.dart). The runtime's values are these.
+abstract interface class ExpressionValues implements BoundValues {
+  /// The value of [expression] (`${path}`, `${= formula}`, or text holding
+  /// them), [locals] read before the node's names.
+  Object? evaluate(String expression, [Map<String, Object?> locals = const {}]);
+
+  /// The root names [expression] reads (`cells` for `${cells[index]}`).
+  Set<String> namesRead(String expression);
+}
+
 /// A variable a node's render objects write.
 abstract interface class BoundVariable {
   /// Worked out from a formula: it can't be written.

@@ -18,6 +18,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show EditableText, FocusManager;
 
+import '../../render/custom_paint.dart' show customPaintEvent;
 import '../../render/node_tree.dart';
 import '../../render/visible_share.dart';
 import '../../widgets/material.dart' show selfTappedTypes;
@@ -114,6 +115,8 @@ class TreeReactions implements NodeInteractions {
   Future<void> fire(NodeBox box, String trigger, {Json event = const {}}) async {
     final node = box.node;
     if (node == null) return;
+    // What a custom paint has under the pointer (render/custom_paint.dart).
+    if (node.behaviors.customPaint != null) event = customPaintEvent(box, event);
     // What a modal anchored to its trigger (or the pointer) sits by.
     RevealAnchor.track();
     // The box as the screen shows it: its size scales with it too (a running
