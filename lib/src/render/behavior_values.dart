@@ -6,22 +6,20 @@ import 'package:codelessly_api/core.dart' as api;
 /// `${track}` for [track] drawn at [value] (NaN: empty) at [progress]
 /// (its rest place when null).
 Map<String, Object?> trackValues(api.Track track, double value,
-        {double? progress, bool dragging = false, bool fine = false, bool focused = false}) {
+        {double? progress, bool dragging = false, bool focused = false}) {
   final shown = progress ?? track.restProgressOf(value);
   return {
     'value': value.isNaN ? null : value,
     // An endless track reports where it is within one turn.
     'progress': track.unbounded ? shown - shown.floorToDouble() : shown,
     'dragging': dragging,
-    'fine': fine,
     'focused': focused,
   };
 }
 
 /// The value [track] is drawn at: its bound value (`track.value`),
 /// else its variable's ([read]; null: there are no values to read), else
-/// its default or start; NaN (empty) for a track that parks such a value
-/// ([api.Track.parkedProgress]).
+/// its start.
 double trackValueFrom(api.Track track, Object? Function(String path)? read) {
   final Object? raw = track.value ?? (track.hasVariable && read != null ? read(track.variable.trim()) : null);
   final double? value = switch (raw) {
@@ -29,9 +27,7 @@ double trackValueFrom(api.Track track, Object? Function(String path)? read) {
     final String s => double.tryParse(s.trim()),
     _ => null,
   };
-  if (value != null) return value;
-  if (track.parkedProgress != null) return double.nan;
-  return track.defaultValue ?? track.min;
+  return value ?? track.min;
 }
 
 /// Whether [flip] shows its back: its variable's value ([read]; null:

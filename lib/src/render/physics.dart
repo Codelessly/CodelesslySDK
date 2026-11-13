@@ -197,9 +197,7 @@ SnapTarget? snapTargetOf({
 }) {
   final snap = physics.snap;
   if (snap == null) return null;
-  final projected = snap.projectVelocity
-      ? Offset(physics.projectFling(position.dx, velocity.dx), physics.projectFling(position.dy, velocity.dy))
-      : position;
+  final projected = Offset(physics.projectFling(position.dx, velocity.dx), physics.projectFling(position.dy, velocity.dy));
   Offset keepAxis(Offset p) => switch (axis) {
         api.DragAxis.free => p,
         api.DragAxis.horizontal => Offset(p.dx, position.dy),

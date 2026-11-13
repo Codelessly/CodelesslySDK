@@ -179,7 +179,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
   final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
-  report.diagnostics.addAll(diagnostics.map((d) => d.toJson()));
+  // Notes (a schema-2 document, migrated as it loads) are not findings.
+  report.diagnostics.addAll(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()));
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
   report.diagnostics.addAll(validateTheme(themeJson,
