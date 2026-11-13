@@ -74,8 +74,6 @@ List<ui.FontFeature>? fontFeatures(api.TextStyle style) {
   ];
 }
 
-/// [style] as Flutter's `TextStyle`, over the base text style
-/// ([kTextBase]).
 /// Fonts a text style asks for while it renders. A family can reach a
 /// style only through a binding (a caption's look from data), which no
 /// publish lists: [handler] (installed by the app's font loader) fetches
@@ -102,14 +100,16 @@ abstract final class FontDemand {
   }
 }
 
-TextStyle textStyle(api.TextStyle style) {
+/// [style] as Flutter's, merged over [inherited] (the default text style the
+/// node inherits: `Node.behaviors.defaultTextStyle` on the node a tree
+/// renders) and the base style ([kTextBase]).
+TextStyle textStyle(api.TextStyle style, [api.TextStyle? inherited]) {
+  if (inherited != null) style = inherited.merge(style);
   final weight = style.fontWeight;
   if (style.fontFamily case final String family) {
     FontDemand.need(family, ((weight ?? 400) ~/ 100 * 100).clamp(100, 900), style.fontStyle == api.FontStyle.italic);
   }
-  // No height and naturalHeight: the font's own line height, not the base's.
-  final natural = style.height == null && style.naturalHeight == true;
-  return (natural ? kTextBaseNatural : kTextBase).merge(TextStyle(
+  return kTextBase.merge(TextStyle(
     fontFamily: style.fontFamily,
       fontFamilyFallback: FontDemand.glyphFallback && style.fontFamily != null
           ? [FontDemand.glyphFamily(style.fontFamily!), ...style.fontFamilyFallback]

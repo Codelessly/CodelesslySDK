@@ -38,7 +38,12 @@ class RenderTypewriter extends RenderProxyBox {
   /// Whether it's still typing.
   bool get typing => _animates && (_tw?.types ?? false) && _shown < _text.length;
 
-  void configure(api.Typewriter tw, String text, {required bool animates}) {
+  /// [textDefault]: the default text style the node inherits, under the
+  /// caret's alignment style.
+  api.TextStyle? _textDefault;
+
+  void configure(api.Typewriter tw, String text, {required bool animates, api.TextStyle? textDefault}) {
+    _textDefault = textDefault;
     final old = _tw;
     final oldText = _text;
     _tw = tw;
@@ -266,7 +271,7 @@ class RenderTypewriter extends RenderProxyBox {
     if (_typedPainter != null && _typedKey == key) return _typedPainter!;
     _typedPainter?.dispose();
     final text = _firstCharacters(p.text, n);
-    final align = tw.caretAlignStyle.isEmpty ? _styleAt(p.text, n) : textStyle(tw.caretAlignStyle);
+    final align = tw.caretAlignStyle.isEmpty ? _styleAt(p.text, n) : textStyle(tw.caretAlignStyle, _textDefault);
     final painter = TextPainter(
       text: withCaret ? TextSpan(style: align, children: [text, const WidgetSpan(alignment: PlaceholderAlignment.middle, child: SizedBox())]) : text,
       textAlign: p.textAlign,

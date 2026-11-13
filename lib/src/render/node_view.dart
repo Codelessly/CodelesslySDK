@@ -60,7 +60,7 @@ class RenderNodeView extends RenderProxyBox with RenderObjectWithLayoutCallbackM
     }
     _tree = tree;
     _rootId = rootId;
-    final box = tree.obtain(rootId, const Slot.root());
+    final box = tree.obtain(rootId, tree.rootSlot(rootId));
     // Another view showed it (a view rebuilt elsewhere in the app): it's
     // this one's now.
     if (box.parent != null) box.detachFromParent();

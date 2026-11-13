@@ -135,7 +135,7 @@ OutlinedBorder _shape(api.ShapeBorder s, {Color? sideColor}) {
   };
 }
 
-TextStyle? _textStyle(api.TextStyle s) => s.isEmpty ? null : textStyle(s);
+TextStyle? _textStyle(api.TextStyle s, [api.TextStyle? inherited]) => s.isEmpty ? null : textStyle(s, inherited);
 
 /// The types whose island takes a tap itself and reports it as the node's
 /// `click` (the node's own tap layer leaves it to them).
@@ -175,7 +175,7 @@ Widget _buildButton(BuildContext context, Node n) {
   final padding = n.layout.padding.flutter;
   final shape = s.shape == null ? null : _shape(s.shape!);
   // An empty style is the base text style.
-  final text = textStyle(s.textStyle);
+  final text = textStyle(s.textStyle, n.behaviors.defaultTextStyle);
   final elevation = s.elevation;
   final ButtonStyle style = switch (n.type) {
     'elevatedButton' => ElevatedButton.styleFrom(
@@ -315,7 +315,7 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
           hoverColor: hoverColor,
           splashColor: splashColor,
           extendedIconLabelSpacing: n.prop(FloatingActionButtonProps.extendedIconLabelSpacing),
-          extendedTextStyle: _textStyle(n.prop(FloatingActionButtonProps.extendedTextStyle)),
+          extendedTextStyle: _textStyle(n.prop(FloatingActionButtonProps.extendedTextStyle), n.behaviors.defaultTextStyle),
           shape: s,
           icon: icon,
           label: Text(n.prop(FloatingActionButtonProps.label)),
@@ -415,7 +415,7 @@ class _ChipIslandState extends State<_ChipIsland> {
 
 Widget _buildChip(BuildContext context, Node n, {required bool selection, required ValueChanged<bool> onSelected}) {
   final label = Text(n.prop(ChipProps.label));
-  final labelStyle = textStyle(n.prop(ChipProps.labelStyle));
+  final labelStyle = textStyle(n.prop(ChipProps.labelStyle), n.behaviors.defaultTextStyle);
   final avatarGlyph = n.prop(ChipProps.avatar);
   final image = readString(avatarGlyph['image']);
   final Widget? avatar = image != null && avatarGlyph['codepoint'] == null
@@ -637,7 +637,7 @@ void _badge(NodeBuilder b, Node n, List<RenderBox> chain) {
   final count = n.prop(BadgeProps.count);
   final maxCount = n.prop(BadgeProps.maxCount);
   final label = count != null ? (count > maxCount ? '$maxCount+' : '$count') : n.prop(BadgeProps.label);
-  final style = textStyle(n.prop(BadgeProps.textStyle));
+  final style = textStyle(n.prop(BadgeProps.textStyle), n.behaviors.defaultTextStyle);
   final badge = b.obtain<RenderBadge>('badge', RenderBadge.new)
     ..label = label
     ..isLabelVisible = n.prop(BadgeProps.isLabelVisible)
@@ -844,7 +844,7 @@ void _appBar(NodeBuilder b, Node n, List<RenderBox> chain) {
       centerTitle: n.prop(AppBarProps.centerTitle),
       leadingWidth: n.prop(AppBarProps.leadingWidth),
       leading: leadingIcon == null ? null : Center(child: leadingIcon),
-      titleTextStyle: _textStyle(n.prop(AppBarProps.titleTextStyle)),
+      titleTextStyle: _textStyle(n.prop(AppBarProps.titleTextStyle), n.behaviors.defaultTextStyle),
       surfaceTintColor: _color(n.prop(AppBarProps.surfaceTintColor)),
       backgroundColor: _color(n.prop(AppBarProps.backgroundColor)),
       elevation: n.prop(AppBarProps.elevation),
@@ -909,8 +909,8 @@ Widget _materialNavigationBar(BuildContext context, Node n) {
   };
   final iconColor = _color(n.prop(NavigationBarProps.iconColor));
   final selectedIconColor = _color(n.prop(NavigationBarProps.selectedIconColor));
-  final label = textStyle(n.prop(NavigationBarProps.labelTextStyle));
-  final selectedLabel = textStyle(n.prop(NavigationBarProps.selectedLabelTextStyle));
+  final label = textStyle(n.prop(NavigationBarProps.labelTextStyle), n.behaviors.defaultTextStyle);
+  final selectedLabel = textStyle(n.prop(NavigationBarProps.selectedLabelTextStyle), n.behaviors.defaultTextStyle);
   final destinations = n.prop(NavigationBarProps.destinations);
   return NavigationBarTheme(
     data: NavigationBarThemeData(
@@ -964,8 +964,8 @@ Widget _bottomNavigationBar(BuildContext context, Node n) {
       backgroundColor: background,
       selectedItemColor: _color(selectedLabel.color),
       unselectedItemColor: _color(label.color),
-      selectedLabelStyle: textStyle(uncolored(selectedLabel)),
-      unselectedLabelStyle: textStyle(uncolored(label)),
+      selectedLabelStyle: textStyle(uncolored(selectedLabel), n.behaviors.defaultTextStyle),
+      unselectedLabelStyle: textStyle(uncolored(label), n.behaviors.defaultTextStyle),
       selectedIconTheme: IconThemeData(
         color: _color(n.prop(NavigationBarProps.selectedIconColor)),
         size: n.prop(NavigationBarProps.selectedIconSize),
