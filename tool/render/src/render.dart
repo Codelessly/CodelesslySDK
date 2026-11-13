@@ -279,7 +279,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       variables: publishVariables(site.manifest),
       breakpoints: site.manifest?['breakpoints'],
       components: [for (final t in components.types) components[t]!.document.toJson()],
-      theme: themeJson == null ? null : prepareTheme(themeJson, defaultFamily: 'Roboto'));
+      theme: prepareTheme(themeJson ?? const {}, defaultFamily: 'Roboto'));
   final fileOfNode = <String, String>{
     for (final e in docs.entries)
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
@@ -401,8 +401,9 @@ Future<void> _renderAll(
         child: MaterialApp(
           navigatorKey: navigator,
           debugShowCheckedModeBanner: false,
-          // Material widgets (buttons, fields) draw their text in the
-          // platform's font: Roboto, as on Android and the web.
+          // The layout's controls take the project's theme, never this one;
+          // their font without one is the platform's (Roboto, as on Android
+          // and the web), given to the published theme ([prepareTheme]).
           theme: ThemeData(fontFamily: 'Roboto'),
           builder: (context, child) => DefaultTextStyle.merge(style: const TextStyle(fontFamily: 'Roboto'), child: child!),
           onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),

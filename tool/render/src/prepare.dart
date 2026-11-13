@@ -167,8 +167,11 @@ String _image(String text, String path, String nodeId, String dir, List<ImageRef
 
 /// A theme's JSON (a site manifest's `theme`) with the default family given
 /// to every text style that names none and starts from no other, as a text
-/// style in a page gets it.
+/// style in a page gets it, and as the theme's own `fontFamily` when it has
+/// none (the controls' font: an app's platform font, which a layout's
+/// controls no longer take from the app's theme).
 Json prepareTheme(Json theme, {required String defaultFamily}) {
+  if (theme['fontFamily'] == null) theme = {...theme, 'fontFamily': defaultFamily};
   final styles = readMap(theme['textStyles']);
   if (styles == null) return theme;
   return {
