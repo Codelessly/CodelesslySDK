@@ -76,7 +76,12 @@ abstract final class IconSources {
     final type = readString(icon['type']);
     if (type != null && type != 'MATERIAL_ICON') return null;
     if (readString(icon['source']) == 'image') return null;
-    final c = readInt(icon['codepoint']) ?? codepointOf?.call(readString(icon['name']) ?? '', readString(icon['style']) ?? 'filled');
+    // A codepoint of 0 is none (an icon chosen by name, whose SVG is
+    // fetched): the host's table, by name.
+    final own = readInt(icon['codepoint']);
+    final c = own != null && own > 0
+        ? own
+        : codepointOf?.call(readString(icon['name']) ?? '', readString(icon['style']) ?? 'filled');
     return c == null || c <= 0 ? null : c;
   }
 
