@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'support.dart';
 
 void main() {
-  testWidgets('\${result} after a setVariable is still the trigger\'s (a text field\'s text)', (tester) async {
+  testWidgets('the trigger\'s result is still the text field\'s text after a set-variable action', (tester) async {
     final s = await show(tester, {
       'col': {'type': 'column', 'children': ['f'], 'layout': {'width': 300, 'height': {'hug': 100}}},
       'f': {'type': 'textField', 'layout': {'width': 300, 'height': 50},

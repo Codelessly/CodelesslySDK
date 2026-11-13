@@ -89,20 +89,20 @@ void main() {
   });
 
   for (final schema in [2, 3]) {
-    group('schema $schema', () {
-      test('memory', () async {
+    group('a schema-$schema document', () {
+      test('loads from memory', () async {
         final loader = MemoryPublishLoader(PublishBundle.fromJson(bundle(schema), catalog: standardCatalog));
         final layout = await loader.loadLayout(PublishSource.publish, layoutId);
         expect(layout.document.toJson(), expected());
         expect((await loader.loadModel(PublishSource.publish)).toJson()['schema'], 3);
       });
 
-      test('asset bundle', () async {
+      test('loads from the asset bundle', () async {
         final loader = AssetPublishLoader('a.json', bundle: _Assets({'a.json': jsonEncode(bundle(schema))}));
         expect((await loader.loadLayout(PublishSource.publish, layoutId)).document.toJson(), expected());
       });
 
-      test('http, files and bundle', () async {
+      test('loads over HTTP, from files and from a bundle', () async {
         final b = bundle(schema);
         for (final asBundle in [false, true]) {
           final client = MockClient((r) async {
@@ -120,7 +120,7 @@ void main() {
         }
       });
 
-      test('firestore, migrated in memory and not written back', () async {
+      test('loads from Firestore, migrated in memory and not written back', () async {
         final db = FakeFirebaseFirestore();
         final b = bundle(schema);
         await db.doc('publish/p1').set(b['model'] as Json);

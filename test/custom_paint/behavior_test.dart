@@ -30,7 +30,7 @@ RenderCustomPaintLayer _layer(NodeTree tree, String id) {
 const _red = Color(0xFFFF0000), _blue = Color(0xFF0000FF), _green = Color(0xFF00FF00), _white = Color(0xFFFFFFFF);
 
 void main() {
-  testWidgets('painter behind the content, foreground painter over it', (tester) async {
+  testWidgets('the painter draws behind the content and the foreground painter over it', (tester) async {
     pixelRatioOne(tester);
     final doc = LayoutDocument.fromJson({
       'roots': ['s'],
@@ -150,7 +150,7 @@ void main() {
     expect(_at(px, 45, 45), _blue);
   });
 
-  testWidgets('a view box fits by BoxFit: contain centers it', (tester) async {
+  testWidgets('a view box is fitted to the node, centered when contained', (tester) async {
     pixelRatioOne(tester);
     final tree = paintTree(paintDoc({
       'viewBox': [10, 20],
@@ -256,7 +256,7 @@ void main() {
     expect(scope.read('downs'), 3);
   });
 
-  testWidgets('a 48 × 48 board as one node: paints once, repaints only for its data', (tester) async {
+  testWidgets('a 48 by 48 board drawn by one node paints once and repaints only when its data changes', (tester) async {
     pixelRatioOne(tester);
     tester.view.physicalSize = const Size(600, 600);
     final cells = List<int>.generate(48 * 48, (i) => (i * 7 + i ~/ 48) % 3);

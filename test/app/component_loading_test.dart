@@ -164,7 +164,7 @@ Future<CodelesslyWidgetController> pumpApp(WidgetTester tester, Codelessly codel
 }
 
 void main() {
-  test('the publish lists each component (version, digest, fonts) and each layout its closure', () {
+  test('a publish lists each component with its version, digest and fonts, and each layout the components it needs', () {
     final bundle = publish([home()], [card(), badge()]);
     final model = bundle.model;
     expect(model.components.keys, unorderedEquals(['Card', 'Badge']));
@@ -239,7 +239,7 @@ void main() {
     expect(analytics.errors, contains('component_missing'));
   });
 
-  testWidgets('live: a republished component updates every instance in place', (tester) async {
+  testWidgets('with live updates, a republished component updates every instance in place', (tester) async {
     setScreen(tester, const Size(390, 844));
     final v1 = publish([home()], [card(), badge()]);
     final v2 = publish([home()], [card(prefix: 'Fresh'), badge()], version: 2);
@@ -314,7 +314,7 @@ void main() {
     expect(app.publishedComponents['Card']!.digest, bundle.components['Card']!.digest);
   });
 
-  test('HTTP: a slug\'s bundle, and the files of a self-hosted mirror', () async {
+  test('components load over HTTP from a published bundle or from a self-hosted mirror', () async {
     final bundle = publish([home()], [card(), badge()]);
     final requested = <String>[];
     final files = <String, Object?>{
@@ -347,7 +347,7 @@ void main() {
         throwsA(isA<PublishLoadException>()));
   });
 
-  test('Firestore: each component at publish/{p}/components/{type}, a large one compressed', () async {
+  test('components load from Firestore, each from its own document and a large one compressed', () async {
     final bundle = publish([home()], [card(), badge()]);
     final FirebaseFirestore db = FakeFirebaseFirestore();
     await db.doc('publish/p').set({...bundle.model.toJson(), 'schema': 2});

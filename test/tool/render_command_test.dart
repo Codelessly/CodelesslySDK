@@ -27,7 +27,7 @@ void main() {
   setUp(() => out = Directory.systemTemp.createTempSync('render_command_test'));
   tearDown(() => out.deleteSync(recursive: true));
 
-  test('arguments: sizes, steps in order, required values', () {
+  test('the render command reads its sizes and steps in order and requires its values', () {
     final a = parseArgs(['site', '--out', 'o', '--sizes', '390x844,1440x900', '--tap', 'b#2', '--set', 'n=3', '--scroll', 'screen=400', '--full-page']);
     expect(a.sizes.map((s) => s.width), [390, 1440]);
     expect(a.steps.map((s) => s.toString()), ['--tap b#2', '--set n=3', '--scroll screen=400']);
@@ -80,7 +80,7 @@ void main() {
     expect(File('${out.path}/home@1440x900-contact.png').existsSync(), isTrue);
   });
 
-  testWidgets('mistakes: validation codes with paths and suggestions, exit status error', (tester) async {
+  testWidgets('a document with mistakes gets validation codes with paths and suggestions, and an error exit status', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/mistakes.json'], out: out.path, sizes: const [Size(390, 844)]));
     final found = codes(report);
     expect(
@@ -99,7 +99,7 @@ void main() {
     expect(formula['message'], contains('does not parse'));
   });
 
-  testWidgets('runtime checks: overflow, offscreen and clipped text are warnings', (tester) async {
+  testWidgets('overflow, offscreen and clipped text are reported as warnings', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/overflow.json'], out: out.path, sizes: const [Size(390, 400)]));
     expect(report.errors, 0, reason: '${report.diagnostics}');
     final warnings = codes(report, 'warning');
@@ -138,7 +138,7 @@ void main() {
     const a = '$fixtures/authoring';
     List<Map> diag(RenderReport r, String code) => [for (final d in r.diagnostics) if (d['code'] == code) d];
 
-    testWidgets('--tap reveals its target below an overlaid header, and hits it', (tester) async {
+    testWidgets('a tap step reveals its target below an overlaid header and hits it', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'target'), Step('tap', 'target')], dumpLayout: true, label: 'two'));
       expect(report.errors, 0, reason: '${report.diagnostics}');
@@ -169,7 +169,7 @@ void main() {
       expect(diag(through, 'interaction_failed').single['message'], contains('no fill and no reaction'));
     });
 
-    testWidgets('--type types into a text field: its bound variable follows, so does the text showing it', (tester) async {
+    testWidgets('a type step types into a text field, and its bound variable and the text showing it follow', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/checks.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('focus', 'field'), Step('type', 'field', 'cauliflower')], dumpLayout: true));
       expect(diag(report, 'interaction_failed'), isEmpty, reason: '${report.diagnostics}');
@@ -192,7 +192,7 @@ void main() {
       expect(diag(report, 'icon_not_drawn').where((d) => d['nodeId'] == 'field'), isEmpty, reason: 'the prefix icon by name draws');
     });
 
-    testWidgets('--full-page: the page\'s own scroll height only; a bar fixed to the window drawn in the first window', (tester) async {
+    testWidgets('a full-page capture takes the page\'s own scroll height, and a bar fixed to the window is drawn in the first window', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/fullpage.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       final bytes = File('${out.path}/long@390x844.png').readAsBytesSync();
@@ -235,7 +235,7 @@ void main() {
       }
     });
 
-    testWidgets('--full-page after a tap that scrolled: the whole page from its top', (tester) async {
+    testWidgets('a full-page capture after a tap that scrolled shows the whole page from its top', (tester) async {
       final report = await runRender(tester,
           RenderArgs(inputs: ['$t/tap_far_down.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true, steps: const [Step('tap', 'button')]));
       expect(report.errors, 0, reason: '${report.diagnostics}');
@@ -296,7 +296,7 @@ void main() {
   // a site of pages and components.
   group('a site with components', () {
     const site = '$fixtures/components';
-    test('arguments: --component, --props, --slots', () {
+    test('the render command reads a component with its props and slots', () {
       final a = parseArgs([site, '--out', 'o', '--component', 'Card', '--props', '{"title": "x"}', '--slots', 's.json']);
       expect([a.component, a.props, a.slots], ['Card', '{"title": "x"}', 's.json']);
     });
@@ -311,7 +311,7 @@ void main() {
       expect(paths, isNot(contains('card1/none')), reason: 'the call passes children: the slot shows them');
     });
 
-    testWidgets('--component renders each preview at its size, or --props with --slots at each size', (tester) async {
+    testWidgets('a component renders each of its previews at its size, or the given props and slots at each size', (tester) async {
       var report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, component: 'Card'));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(report.images.map((f) => f.split('/').last), ['Card-hello@320x240.png']);
@@ -325,7 +325,7 @@ void main() {
       expect(codes(report), ['unknown_screen_arg']);
     });
 
-    testWidgets('--components-all renders every component of the site alone, each preview at its size', (tester) async {
+    testWidgets('every component of a site can be rendered alone, each preview at its size', (tester) async {
       expect(parseArgs([site, '--out', 'o', '--components-all']).componentsAll, isTrue);
       final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path, componentsAll: true,
           sizes: const [Size(390, 844)]));
@@ -397,7 +397,7 @@ void main() {
     });
   });
 
-  group('authoring fixes, cycle 3', () {
+  group('more authoring fixes', () {
     const f = '$fixtures/fix3';
     testWidgets('a fill with no room to fill is reported; a page id and a component id never collide', (tester) async {
       final r = await runRender(tester, RenderArgs(inputs: [f], out: out.path, sizes: const [Size(390, 844)]));
@@ -423,7 +423,7 @@ void main() {
     });
   });
 
-  testWidgets('--full-page keeps the window: a drawer pinned to its top and bottom covers the first window only', (tester) async {
+  testWidgets('a full-page capture keeps the window, so a drawer pinned to its top and bottom covers the first window only', (tester) async {
     final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
         fullPage: true, dumpLayout: true));
     expect(r.errors, 0, reason: '${r.diagnostics}');
@@ -441,7 +441,7 @@ void main() {
     expect([px(195, 1500, 0), px(195, 1500, 1)], [0, 255], reason: 'the page below it');
   });
 
-  testWidgets('--unfocus takes the focus from a field; --key presses a key on what has the focus', (tester) async {
+  testWidgets('an unfocus step takes the focus from a field, and a key step presses a key on what has the focus', (tester) async {
     Future<double> moved(List<Step> steps) async {
       final o = Directory('${out.path}/${steps.length}-${steps.first.kind}')..createSync();
       final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-keys.json'], out: o.path, sizes: const [Size(390, 844)],
@@ -457,7 +457,7 @@ void main() {
     expect(parseArgs(['k.json', '--out', 'o', '--unfocus', '--key', 'shift+Tab']).steps.map((s) => s.kind), ['unfocus', 'key']);
   });
 
-  testWidgets('--compare: the same page matches; one pushed down is found shifted, its height difference said', (tester) async {
+  testWidgets('comparing renders matches the same page and finds one pushed down, saying by how much', (tester) async {
     final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
         fullPage: true, compare: '$fixtures/fix3-drawer.json'.replaceFirst('fix3-drawer.json', 'none.png')));
     expect(codes(r), ['compare_failed'], reason: '${r.diagnostics}');

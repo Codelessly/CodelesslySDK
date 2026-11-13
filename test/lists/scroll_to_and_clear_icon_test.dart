@@ -17,7 +17,7 @@ class _Recorder implements AnalyticsService {
 }
 
 void main() {
-  testWidgets('scrollTo "node": an expression; a node not on screen is reported', (tester) async {
+  testWidgets('scroll-to can name its node with a formula, and a node not on screen is reported', (tester) async {
     final recorder = _Recorder();
     final s = await show(tester, {
       'col': {'type': 'column', 'children': ['strip', 'next', 'bad'], 'layout': {'width': 300, 'height': {'hug': 200}}},

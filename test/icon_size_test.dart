@@ -30,7 +30,7 @@ void main() {
     return found!;
   }
 
-  testWidgets('size centres the glyph in the box, as Flutter Icon does', (tester) async {
+  testWidgets('an icon\'s size centres the glyph in its box, as Flutter\'s Icon does', (tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Align(alignment: Alignment.topLeft, child: SizedBox(width: 40, height: 40, child: m.Icon(Icons.search, size: 18))),
     ));

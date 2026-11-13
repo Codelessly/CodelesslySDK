@@ -43,7 +43,9 @@ PublishBundle _bundle({required int schema}) {
 
 void main() {
   for (final schema in [3, 2]) {
-    testWidgets('a schema-$schema layout', (tester) async {
+    testWidgets(
+        'a published app lays out text without a line height in a schema-$schema layout '
+        '${schema == 3 ? "at the font's own height" : "at 1.33, as before"}', (tester) async {
       final app = Codelessly.fromBundle(_bundle(schema: schema),
           config: CodelesslyConfig(services: Services(analytics: const NoAnalytics())), fonts: const NoFontFetcher());
       final controller = CodelesslyWidgetController();

@@ -82,7 +82,7 @@ void main() {
     }
   }
 
-  testWidgets('shrinkWrapRows wins over mainAxisExtent (validation reports the pair)', (tester) async {
+  testWidgets('rows that shrink-wrap their cards win over a fixed item extent', (tester) async {
     tester.view.physicalSize = const Size(1000, 1400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);

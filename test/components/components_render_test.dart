@@ -228,7 +228,7 @@ void main() {
     expect(xs, orderedEquals([...xs]..sort()));
   });
 
-  testWidgets('per-instance state, variable parameters and events', (tester) async {
+  testWidgets('each instance has its own state, variable parameters and events', (tester) async {
     final s = await show(
       tester,
       page({
@@ -260,7 +260,7 @@ void main() {
     expect(s.text('b/count'), startsWith('0 '), reason: 'one set of variables per instance');
   });
 
-  testWidgets('a component as a list\'s item template, and a list inside a component', (tester) async {
+  testWidgets('a component can be a list\'s item template and hold a list', (tester) async {
     final list = {
       'schema': 2,
       'roots': ['col'],
@@ -287,7 +287,7 @@ void main() {
     expect(s.text('item#1/label'), 'q');
   });
 
-  testWidgets('a component inside a component, a list inside a component', (tester) async {
+  testWidgets('a component can call another component and hold a list', (tester) async {
     final outer = {
       'schema': 2,
       'roots': ['box'],
@@ -338,7 +338,7 @@ void main() {
     expect(tree.boxOf('a')!.id, 'chip');
   });
 
-  testWidgets('a cycle stops at the depth guard', (tester) async {
+  testWidgets('a component that calls itself stops at the depth limit', (tester) async {
     final loop = {
       'schema': 2,
       'roots': ['r'],

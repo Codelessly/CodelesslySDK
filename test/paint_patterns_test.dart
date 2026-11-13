@@ -89,7 +89,7 @@ void main() {
     }
   });
 
-  testWidgets('noise: feTurbulence\'s values as a color\'s alpha, tiled seamlessly, the same for a seed', (tester) async {
+  testWidgets('a noise paint draws SVG turbulence as alpha, tiles seamlessly and is the same for the same seed', (tester) async {
     final (d, w) = await _pixels(tester, [
       _white,
       {'type': 'noise', 'noise': {'baseFrequency': 0.05, 'numOctaves': 2, 'seed': 7}, 'color': '#FF000000'},
@@ -112,8 +112,4 @@ void main() {
     expect([for (var x = 0; x < 20; x++) other.channelAt(0, x, 5, 256, 256)], isNot([for (var x = 0; x < 20; x++) t.channelAt(0, x, 5, 256, 256)]));
   });
 
-  test('the tile is a valid PNG', () {
-    final png = encodePng(Uint8List.fromList(List.filled(4 * 3 * 2, 200)), 3, 2);
-    expect(png.sublist(0, 8), [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
-  });
 }

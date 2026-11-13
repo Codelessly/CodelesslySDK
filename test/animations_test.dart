@@ -58,9 +58,9 @@ Future<NodeTree> plain(WidgetTester tester, Map<String, Json> nodes, {bool inter
 }
 
 void main() {
-  group('the controller is Flutter\'s AnimationController', () {
+  group('an animation plays as Flutter\'s AnimationController does', () {
     // The clock and a real controller, ticked by the same frames.
-    testWidgets('forward, reverse, animateTo, repeat and a spring at sampled times', (tester) async {
+    testWidgets('forward, reverse, animate-to, repeat and a spring give Flutter\'s values at sampled times', (tester) async {
       Future<void> compare(
         api.NodeAnimation spec,
         void Function(AnimationController c) startFlutter,
@@ -111,8 +111,8 @@ void main() {
     });
   });
 
-  group('tracks', () {
-    testWidgets('an entrance with two tracks plays; the design canvas rests at the end', (tester) async {
+  group('animation tracks', () {
+    testWidgets('an entrance with two tracks plays, and the design canvas shows it at its end', (tester) async {
       final nodes = stack([
         box('card', {
           'animations': [
@@ -148,7 +148,7 @@ void main() {
       expect(tester.binding.transientCallbackCount, 0);
     });
 
-    testWidgets('previewAt draws a resting animation on the design canvas', (tester) async {
+    testWidgets('an animation at rest is drawn on the design canvas at its preview point', (tester) async {
       final tree = await plain(
           tester,
           stack([
@@ -162,7 +162,7 @@ void main() {
       expect(rectOf(tester, tree, 'k').width, closeTo(60, 0.01));
     });
 
-    testWidgets('a paint path and a variable follow the controller', (tester) async {
+    testWidgets('a paint\'s path and a variable can follow an animation', (tester) async {
       final s = await show(
           tester,
           stack([
@@ -196,7 +196,7 @@ void main() {
   });
 
   group('cues and commands', () {
-    testWidgets('animate drives a node\'s animation; the chain waits; a play key cues it', (tester) async {
+    testWidgets('the animate action plays a node\'s animation while the chain waits, and a play key cues it', (tester) async {
       final s = await show(
           tester,
           stack([
@@ -258,7 +258,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
     });
 
-    testWidgets('motion.pulseKey now plays its keyframes there and back (it never did)', (tester) async {
+    testWidgets('a motion\'s pulse key plays its keyframes there and back', (tester) async {
       final s = await show(
           tester,
           stack([
@@ -285,7 +285,7 @@ void main() {
       expect(rectOf(tester, s.tree, 'k').left, 0);
     });
 
-    testWidgets('state is read as animation.<id>: value, status, isAnimating', (tester) async {
+    testWidgets('an animation\'s value, status and whether it is running can be read in formulas', (tester) async {
       final s = await show(
           tester,
           {
@@ -322,7 +322,7 @@ void main() {
   });
 
   group('frame and timer triggers', () {
-    testWidgets('frame: dt, elapsed and frame while when holds', (tester) async {
+    testWidgets('a frame trigger runs every frame while its condition holds, with the time since the last frame and since it started', (tester) async {
       final s = await show(
           tester,
           stack([
@@ -351,7 +351,7 @@ void main() {
       expect(s['frames'], stopped);
     });
 
-    testWidgets('a timer\'s interval may be an expression', (tester) async {
+    testWidgets('a timer\'s interval can be a formula', (tester) async {
       final s = await show(
           tester,
           stack([
@@ -375,7 +375,7 @@ void main() {
     });
   });
 
-  testWidgets('legacy loops and the same loop as an explicit animation draw the same', (tester) async {
+  testWidgets('an older loop and the same loop written as an animation draw the same', (tester) async {
     final legacy = await plain(
         tester,
         stack([
