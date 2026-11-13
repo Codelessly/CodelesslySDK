@@ -6,8 +6,8 @@ import 'package:collection/collection.dart' show CombinedMapView;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show BuildContext, GlobalKey, Rect;
 
-import '../runtime/actions/app_data_sources.dart';
-import '../features/first_party.dart' show kFirstPartyFeatures;
+import '../features/data/app_data_sources.dart';
+import '../features/first_party.dart' show AuthScope, kFirstPartyFeatures;
 import '../runtime/actions/app_events.dart';
 import '../runtime/actions/feature.dart';
 import '../runtime/actions/runner.dart' show CoreActions;
@@ -161,7 +161,7 @@ class Codelessly extends ChangeNotifier {
   /// each screen's own scope, so a value one screen sets the next one reads.
   /// Declared from the publish model's `variables` (and a publish's
   /// `app_variables` scope, [declareAppVariables]).
-  late final VariableScope appVariables = VariableScope(const [], parent: _featureScopes.build(features, _storage));
+  late final VariableScope appVariables = VariableScope(const [], parent: _featureScopes.build([_entitlements, ...features], _usage));
 
   /// The feature layers this instance runs: those of its action runner
   /// ([CoreActions.features]; `CodelesslyActions` installs the first-party
@@ -174,6 +174,11 @@ class Codelessly extends ChangeNotifier {
 
   late final FeatureScopeHost _featureScopes = FeatureScopeHost(services);
 
+  static final CodelesslyFeature _entitlements = CodelesslyFeature(
+    name: 'commerce',
+    scopes: {'entitlements': (host, parent) => _EntitlementsScope(host.services, parent: parent)},
+  );
+
   /// The live data the whole app shares: `loadCloudData` actions with
   /// `scope: app` open one subscription here, on first use, and every
   /// screen of every [CodelesslyWidget] showing this project shares it
@@ -185,17 +190,15 @@ class Codelessly extends ChangeNotifier {
       });
   AppDataSources? _appData;
 
-  /// `storage`: what the app keeps on the device ([Services.storage], the
-  /// `setStorage` action's), read live as `storage.<key>`.
-  late final _StorageScope _storage = _StorageScope(services, parent: _usage);
-
   /// `usage`: the per-user counters of [automations].
-  late final ValuesScope _usage = ValuesScope({'usage': CodelesslyAutomations.emptyUsage}, _serviceValues);
-  late final _ServiceValuesScope _serviceValues = _ServiceValuesScope(services, parent: data);
+  late final ValuesScope _usage = ValuesScope({'usage': CodelesslyAutomations.emptyUsage}, data);
 
   /// Makes completed native auth operations visible to the next action in
   /// the same chain, without waiting for the asynchronous auth/profile stream.
-  void refreshAuthValues(AuthOperation operation) => _serviceValues.refreshAuth(operation);
+  void refreshAuthValues(AuthOperation operation) {
+    appVariables; // The feature scopes are built with it.
+    if (_featureScopes['auth'] case final AuthScope auth) auth.refreshAuth(operation);
+  }
 
   final List<PersistedVariable> _persistedApp = [];
 
@@ -548,9 +551,7 @@ class Codelessly extends ChangeNotifier {
     }
     appVariables.dispose();
     _featureScopes.dispose();
-    _storage.dispose();
     _usage.dispose();
-    _serviceValues.dispose();
     data.dispose();
     // Lazy expression scopes must detach while the service notifiers live.
     unawaited(_ownedServices?.dispose());
@@ -559,37 +560,14 @@ class Codelessly extends ChangeNotifier {
   }
 }
 
-/// Live account/profile and verified entitlement values, owned by the app.
-/// No app variables or persisted preview fixtures are declared for services.
-class _ServiceValuesScope extends ValuesScope {
-  _ServiceValuesScope(CodelesslyServices services, {ValueScope? parent})
-      : _services = services is Services ? services : null,
-        super({
-          'auth': authValue(services is Services ? services.auth.currentUser : null),
-          'entitlements': const <String, Object?>{},
-        }, parent) {
-    final s = _services;
+/// `entitlements` in expressions: the verified entitlements of the signed-in
+/// account (the app's paywalls', or the test store's while it's on).
+class _EntitlementsScope extends ValuesScope implements AccountBound {
+  _EntitlementsScope(CodelesslyServices services, {ValueScope? parent})
+      : _source = services.lookup<PaywallsSource>(),
+        super({'entitlements': const <String, Object?>{}}, parent) {
+    final s = _source;
     if (s == null) return;
-    final current = s.auth.currentUser;
-    _scopeAccount(current?.uid);
-    _auth = s.watchAuth().listen(
-      (value) {
-        if (_disposed) return;
-        final user = s.auth.currentUser;
-        final uid = AuthProfiles.hasProfile(user) ? user!.uid : '';
-        if (value['uid'] != uid) return; // A queued snapshot from an earlier identity.
-        _authFailed = false;
-        _scopeAccount(user?.uid);
-        set('auth', authValue(user, profile: _matchingProfile(value, user)));
-      },
-      onError: (Object error, StackTrace stack) {
-        if (_disposed) return;
-        _authFailed = true;
-        _scopeAccount(null, reset: true);
-        set('auth', authValue(null));
-        s.analytics.logError(error, stackTrace: stack, type: 'auth_scope');
-      },
-    );
     _runtime = s.paywalls;
     _runtime?.entitlements.addListener(_entitlementsChanged);
     s.paywallsChanged.addListener(_paywallsChanged);
@@ -603,54 +581,29 @@ class _ServiceValuesScope extends ValuesScope {
   /// The paywalls switched between the test store and the app's: follow
   /// the new one's entitlements, scoped to the current account.
   void _paywallsChanged() {
-    final s = _services;
+    final s = _source;
     if (_disposed || s == null || identical(s.paywalls, _runtime)) return;
     _runtime?.entitlements.removeListener(_entitlementsChanged);
     _runtime = s.paywalls;
     _runtime?.entitlements.addListener(_entitlementsChanged);
     if (_accountInitialized) {
       _accountInitialized = false;
-      _scopeAccount(_uid);
+      accountChanged(_uid);
     }
     _entitlementsChanged();
   }
 
-  final Services? _services;
-  StreamSubscription<Map<String, Object?>>? _auth;
+  final PaywallsSource? _source;
   bool _disposed = false;
   String? _uid;
   bool _accountInitialized = false;
-  bool _authFailed = false;
 
-  Map<String, Object?>? _matchingProfile(Object? snapshot, AppUser? user) {
-    if (!AuthProfiles.hasProfile(user) || snapshot is! Map || snapshot['uid'] != user!.uid) return null;
-    final profile = snapshot['profile'];
-    return profile is Map ? profile.cast<String, Object?>() : null;
-  }
-
-  void refreshAuth(AuthOperation operation) {
-    if (_disposed) return;
-    final service = _services;
-    if (service == null) return;
-    final recovery = const {
-      AuthOperation.signIn, AuthOperation.signUp, AuthOperation.signInWithGoogle,
-      AuthOperation.signInWithApple, AuthOperation.completeSignInLink, AuthOperation.signInAnonymously,
-    }.contains(operation);
-    // A stale currentUser after an auth stream error is not proof of a live
-    // session. Only an explicit successful sign-in can recover that identity.
-    if (_authFailed && !recovery && operation != AuthOperation.signOut && operation != AuthOperation.deleteAccount) return;
-    if (recovery) _authFailed = false;
-    final user = service.auth.currentUser;
-    final profile = _matchingProfile(this['auth'], user);
-    _scopeAccount(user?.uid);
-    set('auth', authValue(user, profile: profile));
-  }
-
-  void _scopeAccount(String? uid, {bool reset = false}) {
-    if (!reset && _accountInitialized && _uid == uid) return;
+  @override
+  void accountChanged(String? uid, {bool reset = false}) {
+    if (_disposed || (!reset && _accountInitialized && _uid == uid)) return;
     _accountInitialized = true;
     _uid = uid;
-    final runtime = _services?.paywalls;
+    final runtime = _source?.paywalls;
     runtime?.scopeToUser(uid, reset: reset);
     if (runtime != null) unawaited(runtime.refreshEntitlements());
   }
@@ -664,34 +617,8 @@ class _ServiceValuesScope extends ValuesScope {
   @override
   void dispose() {
     _disposed = true;
-    _auth?.cancel();
     _runtime?.entitlements.removeListener(_entitlementsChanged);
-    _services?.paywallsChanged.removeListener(_paywallsChanged);
-    super.dispose();
-  }
-}
-
-/// `storage` in expressions: the app's [LocalStorage] values by key,
-/// notifying its readers when any changes.
-class _StorageScope extends NamedScope {
-  _StorageScope(CodelesslyServices services, {super.parent})
-      : _store = services is Services ? services.storage : null {
-    _store?.addListener(_storeChanged);
-  }
-
-  final LocalStorage? _store;
-
-  void _storeChanged() => changed(const ['storage']);
-
-  @override
-  bool declares(String name) => name == 'storage';
-
-  @override
-  Object? valueOf(String name, ValueScope reader) => _store?.getAll() ?? const <String, Object?>{};
-
-  @override
-  void dispose() {
-    _store?.removeListener(_storeChanged);
+    _source?.paywallsChanged.removeListener(_paywallsChanged);
     super.dispose();
   }
 }

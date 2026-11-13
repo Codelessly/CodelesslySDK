@@ -14,7 +14,6 @@ import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeed
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 
 import 'action_error.dart' show CodedFailure;
-import 'cloud_loads.dart';
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
@@ -30,7 +29,6 @@ import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
-import 'app_data_sources.dart';
 import 'app_events.dart';
 import 'capture.dart';
 import 'context.dart';
@@ -41,7 +39,6 @@ import 'script_host.dart';
 import 'text_fields.dart';
 import 'values.dart';
 import 'variable_animator.dart';
-import 'files.dart';
 export 'files.dart' show pickFiles, sourceFiles;
 import '../../app/fonts.dart' show CodelesslyFonts;
 
@@ -57,12 +54,10 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
     case CloseModalAction():
       run.host.ui.closeModal(a.result == null ? null : run.evaluateJson(a.result));
     case RetryFailedAction():
-      if (run.host case final RuntimeActionContext context) context.failed.retry();
+      if (run.host case final CoreActionContext context) context.failed.retry();
     case OpenLinkAction():
       final url = run.text(a.url).trim();
       if (url.isNotEmpty) await run.context.services.openUrl(url);
-    case SubmitFormAction():
-      await _submitForm(a, run);
     case SetValueAction():
       _setValue(a.node, a.values, run);
     case SetVariantAction():
@@ -88,26 +83,12 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       } else {
         throw StateError('No function named [${a.name}]');
       }
-    case CallApiAction():
-      await _callApi(a, run);
-    case SetStorageAction():
-      await _setStorage(a, run);
-    case CloudDocumentsAction():
-      await _cloudDocuments(a, run);
-    case LoadCloudDataAction():
-      await _loadCloudData(a, run);
-    case ReloadCloudDataAction():
-      await reloadCloudData(a, run);
-    case AuthAction():
-      await _auth(a, run);
     case IfAction():
       // A condition reading a script formula waits for its answer.
       final holds = a.condition != null && await _withScripts(run, () => run.expressions.test(a.condition!, run.scope));
       await run.run(holds ? a.then : a.orElse);
     case ForEachAction():
       await _forEach(a, run);
-    case CloudFilesAction():
-      await _cloudFiles(a, run);
     case ShowToastAction():
       final runner = run.nested(run.result);
       final label = run.text(a.actionLabel);
@@ -144,10 +125,6 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       // On the animation clock, as the motion it's usually timed against:
       // slowed animations (timeDilation) slow the chain with them.
       await run.wait(Duration(milliseconds: delayMilliseconds(a, run)) * timeDilation);
-    case CloudDataAction():
-      await _cloudData(a, run);
-    case CloudBatchAction():
-      await cloudBatch(a, run, _cloudData);
     case PreloadImagesAction():
       run.result = await _preloadImages(a, run);
     case CopyToClipboardAction():
@@ -221,14 +198,6 @@ Future<void> _deferred(List<ActionDef> actions, ActionRun run) async {
   }
 }
 
-Services? _services(ActionRun run) => switch (run.context.services) {
-      final Services s => s,
-      _ => null,
-    };
-
-Services _require(ActionRun run, String what) =>
-    _services(run) ?? (throw StateError('$what needs the app\'s Services.'));
-
 // --- delay ---------------------------------------------------------------------
 
 /// How long [a] waits: its duration formula when that gives a number, else
@@ -265,7 +234,7 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   if (found == null) {
     // Not one of the screen's variables: the app's (a context with its own
     // variables), set as is.
-    if (run.host is! RuntimeActionContext) run.context.setVariable(name, run.evaluate(a.write.value));
+    if (run.host is! CoreActionContext) run.context.setVariable(name, run.evaluate(a.write.value));
     return;
   }
   final (scope, variable) = found;
@@ -388,220 +357,6 @@ void _setValue(String nodeId, List<NodeValue> values, ActionRun run) {
   }
 }
 
-// --- APIs ------------------------------------------------------------------------
-
-Future<void> _callApi(CallApiAction a, ActionRun run) async {
-  final params = {for (final e in a.params.entries) e.key: e.value.trim().isEmpty ? null : run.evaluate(e.value)}
-    ..removeWhere((_, v) => v == null);
-  Object? response;
-  var ok = true;
-  try {
-    response = await run.context.services.callApi(a.api, params: params);
-    if (response case {'isSuccess': final bool success}) ok = success;
-  } on ApiRequestFailed catch (failed) {
-    if (a.onError.isEmpty) rethrow;
-    ok = false;
-    response = failed.response.toValue();
-  }
-  run.result = response;
-  if (ok) {
-    await run.run(a.onSuccess);
-  } else {
-    await run.run(a.onError);
-  }
-}
-
-// --- storage ----------------------------------------------------------------------
-
-Future<void> _setStorage(SetStorageAction a, ActionRun run) async {
-  final storage = _require(run, 'Storage').storage;
-  if (a.operation == StorageOperation.clear) return storage.clear();
-  final key = run.text(a.key).trim();
-  final path = ValuePath.parse(key);
-  if (key.isEmpty) return;
-  if (a.operation == StorageOperation.remove) {
-    if (path == null || path.keys.isEmpty) return storage.remove(key);
-    return storage.put(path.root, removeAtPath(storage.get(path.root), path.keys));
-  }
-  final nested = path != null && path.keys.isNotEmpty;
-  final current = nested ? path.readFrom(storage.get(path.root)) : storage.get(key);
-  if (a.skipIfExists && current != null) return;
-  final next = applyWrite(current, a.valueType, a.write, run.expressions, run.scope);
-  if (!nested) return storage.put(key, next);
-  final root = setAtPath(storage.get(path.root), path.keys, next);
-  if (root != null) await storage.put(path.root, root);
-}
-
-// --- cloud data ---------------------------------------------------------------------
-
-CloudQuery _query(List<WhereFilter> where, List<OrderBy> orderBy, int? limit, ActionRun run) => resolveCloudQuery(
-      CloudQueryDef(enabled: true, where: where, orderBy: orderBy, limit: limit),
-      run.expressions,
-      run.scope,
-    );
-
-Future<void> _cloudData(CloudDataAction a, ActionRun run) async {
-  final db = _require(run, 'Cloud data').cloud;
-  final path = run.text(a.collection).trim();
-  final id = run.text(a.id).trim();
-  Json fields({required bool create}) => CloudFieldValues.buildWrite(
-        fields: a.fields,
-        schema: db.rules.schemaFor(path),
-        evaluate: run.evaluate,
-        create: create,
-      );
-  final Object? result = switch (a.operation) {
-    CloudDataOperation.create => await db.addDocument(path, fields(create: true), id: id.isEmpty ? null : id, skipIfExists: false),
-    CloudDataOperation.update => await db.updateDocument(path, id, fields(create: false)).then((_) => id),
-    CloudDataOperation.delete => await db.removeDocument(path, id),
-    CloudDataOperation.get => await db.getDocument(path, id),
-    CloudDataOperation.query =>
-      await db.query(path, _query(a.where, a.orderBy, a.limit, run), loadRelated: a.loadRelated),
-    CloudDataOperation.count => await db.aggregate(path, _query(a.where, const [], null, run), CloudAggregate.count),
-    CloudDataOperation.sum =>
-      await db.aggregate(path, _query(a.where, const [], null, run), CloudAggregate.sum, field: a.aggregateField),
-    CloudDataOperation.average =>
-      await db.aggregate(path, _query(a.where, const [], null, run), CloudAggregate.average, field: a.aggregateField),
-  };
-  run.result = result;
-  if (a.resultVariable.isNotEmpty) setVariableIn(run.context.scope, a.resultVariable, result);
-}
-
-
-Future<void> _cloudDocuments(CloudDocumentsAction a, ActionRun run) async {
-  final db = _require(run, 'Cloud data').cloud;
-  final path = run.text(a.path).trim();
-  final id = run.text(a.id).trim();
-  Object? document() => a.raw ? parseLoose(a.value) : evaluateValue(a.value, run.expressions, run.scope);
-  switch (a.operation) {
-    case CloudDocumentsOperation.add:
-      final value = document();
-      final doc = value is Map ? {for (final e in value.entries) '${e.key}': e.value} : <String, Object?>{'value': value};
-      run.result = await db.addDocument(path, doc, id: a.autoId || id.isEmpty ? null : id, skipIfExists: a.skipIfExists);
-    case CloudDocumentsOperation.update:
-      final current = await db.getDocument(path, id);
-      final field = run.text(a.field).trim();
-      final fieldPath = ValuePath.parse(field);
-      final old = fieldPath?.readFrom(current?[fieldPath.root]);
-      final write = a.raw ? ValueWrite(op: a.write.op, value: a.value, index: a.write.index, mapKey: a.write.mapKey) : a.write;
-      final next = applyWrite(old, a.valueType, write, run.expressions, run.scope);
-      if (fieldPath == null) return;
-      final value = fieldPath.keys.isEmpty ? next : setAtPath(current?[fieldPath.root], fieldPath.keys, next);
-      await db.updateDocument(path, id, {fieldPath.root: value});
-      run.result = id;
-    case CloudDocumentsOperation.remove:
-      run.result = await db.removeDocument(path, id);
-    case CloudDocumentsOperation.removeMany:
-      final ids = run.evaluate(a.ids);
-      final list = switch (ids) {
-        final List l => [for (final x in l) '$x'],
-        final String s when s.trim().isNotEmpty => [for (final x in s.split(',')) if (x.trim().isNotEmpty) x.trim()],
-        _ => null,
-      };
-      run.result = await db.removeDocuments(path,
-          ids: list, filters: list != null ? const [] : _query(a.where, const [], null, run).filters);
-    case CloudDocumentsOperation.setMany:
-      final value = document();
-      final docs = [
-        if (value is List)
-          for (final d in value)
-            if (d is Map) {for (final e in d.entries) '${e.key}': e.value},
-      ];
-      run.result = await db.setDocuments(path, docs,
-          idField: a.idField, merge: a.merge, replaceCollection: a.replaceCollection);
-  }
-}
-
-/// [a] with `scope: app` on a host with app data goes to the app's shared
-/// subscription; any other load is the screen's live load (cloud_loads.dart).
-Future<void> _loadCloudData(LoadCloudDataAction a, ActionRun run) async {
-  final variable = a.variable.trim();
-  if (variable.isEmpty) return;
-  final host = run.host;
-  if (a.scope == CloudDataScope.app && host is RuntimeActionContext && host.appData != null) {
-    return _loadAppCloudData(a, run, _require(run, 'Cloud data').cloud, host.appData!, variable);
-  }
-  return loadCloudData(a, run);
-}
-
-/// [a] with `scope: app`: the app's one subscription to its source, shared
-/// by every screen that loads the same ([AppDataSources]). Waits for the
-/// first value; the subscription outlives the screen.
-Future<void> _loadAppCloudData(LoadCloudDataAction a, ActionRun run, CloudDatabase db, AppDataSources sources, String variable) async {
-  // The same limit, aggregate and joins as a screen's load (cloud_loads.dart).
-  final source = appCloudSource(a, run, db);
-  final loaded = sources.load(variable, source.key, source.open);
-  // Stopping this run stops waiting, not the app's subscription.
-  final waiting = Completer<void>();
-  loaded.then((_) {
-    if (!waiting.isCompleted) waiting.complete();
-  }, onError: (Object error, StackTrace stack) {
-    if (!waiting.isCompleted) waiting.completeError(error, stack);
-  });
-  final removeCancellation = run.onCancel(() {
-    if (!waiting.isCompleted) waiting.completeError(const ActionsCanceled());
-  });
-  try {
-    await waiting.future;
-  } finally {
-    removeCancellation();
-  }
-}
-
-// --- auth -----------------------------------------------------------------------------
-
-Future<void> _auth(AuthAction a, ActionRun run) async {
-  final auth = _require(run, 'Auth').auth;
-  final email = run.text(a.email).trim(), password = run.text(a.password);
-  if (a.errorVariable.isNotEmpty) setVariableIn(run.context.scope, a.errorVariable, '');
-  try {
-    switch (a.operation) {
-      case AuthOperation.signIn:
-        run.result = (await auth.signIn(email: email, password: password)).uid;
-      case AuthOperation.signUp:
-        run.result = (await auth.signUp(email: email, password: password, displayName: run.text(a.displayName))).uid;
-      case AuthOperation.signOut:
-        await auth.signOut();
-      case AuthOperation.updateProfile:
-        // Empty authored fields are omitted, not destructive updates. A
-        // supplied expression resolving to empty still explicitly clears it.
-        await auth.updateProfile(
-          displayName: a.displayName.isEmpty ? null : run.text(a.displayName),
-          photoUrl: a.photoUrl.isEmpty ? null : run.text(a.photoUrl),
-        );
-      case AuthOperation.updatePhoto:
-        await auth.updateProfile(photoUrl: run.text(a.photoUrl));
-      case AuthOperation.sendPasswordResetEmail:
-        await auth.sendPasswordResetEmail(email);
-      case AuthOperation.sendEmailVerification:
-        await auth.sendEmailVerification();
-      case AuthOperation.updatePassword:
-        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
-        await auth.updatePassword(password);
-      case AuthOperation.deleteAccount:
-        if (a.currentPassword.isNotEmpty) await auth.reauthenticate(run.text(a.currentPassword));
-        await auth.deleteAccount();
-      case AuthOperation.signInWithGoogle:
-        run.result = (await auth.signInWithProvider(AuthProviderKind.google)).uid;
-      case AuthOperation.signInWithApple:
-        run.result = (await auth.signInWithProvider(AuthProviderKind.apple)).uid;
-      case AuthOperation.sendSignInLink:
-        await auth.sendSignInLink(email, continueUrl: Uri.base.toString());
-      case AuthOperation.completeSignInLink:
-        run.result = (await auth.signInWithLink(email, Uri.base.toString())).uid;
-      case AuthOperation.signInAnonymously:
-        run.result = (await auth.signInAsGuest()).uid;
-    }
-    final host = run.host;
-    if (host is RuntimeActionContext) host.refreshAuthValues?.call(a.operation);
-  } catch (error) {
-    if (a.errorVariable.isNotEmpty) {
-      setVariableIn(run.context.scope, a.errorVariable, error is AuthFailure ? error.message : '$error');
-    }
-    rethrow;
-  }
-}
-
 // --- flow --------------------------------------------------------------------------------
 
 Future<void> _forEach(ForEachAction a, ActionRun run) async {
@@ -618,40 +373,6 @@ Future<void> _forEach(ForEachAction a, ActionRun run) async {
     final turn = {'item': items[i], 'index': i};
     await run.nested(turn, names: {'loop': turn}).run(a.actions);
   }
-}
-
-// --- files ---------------------------------------------------------------------------------
-
-Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
-  final files = _require(run, 'Cloud files').files;
-  final folder = run.text(a.path).trim();
-  if (a.operation == CloudFilesOperation.delete) {
-    await files.delete(folder);
-    return;
-  }
-  final picked = a.source.trim().isEmpty
-      ? await pickFiles(run, images: a.kind == CloudFileKind.image, multiple: a.allowMultiple)
-      : sourceFiles(run.evaluate(a.source), name: run.text(a.fileName).trim());
-  for (final (i, f) in picked.indexed) {
-    if (f.bytes.length > a.maxSizeMB * 1024 * 1024) {
-      throw CodedFailure('file-too-large', '${f.name} is larger than ${_mb(a.maxSizeMB)} MB');
-    }
-    final type = f.contentType ?? '';
-    if (a.kind == CloudFileKind.image && type.isNotEmpty && !type.startsWith('image/')) {
-      throw CodedFailure('invalid-file-type', '${f.name} is not an image');
-    }
-    void progress(double sent) {
-      if (a.progressVariable.isNotEmpty) {
-        setVariableIn(run.context.scope, a.progressVariable, (i + sent.clamp(0, 1)) / picked.length);
-      }
-    }
-
-    progress(0);
-    final uploaded = await files.upload(folder.isEmpty ? f.name : '$folder/${f.name}', f.bytes,
-        contentType: f.contentType, onProgress: progress);
-    await run.nested({'url': uploaded.url, 'path': uploaded.path, 'name': uploaded.name, 'index': i}).run(a.actions);
-  }
-  if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
 }
 
 // --- capture -------------------------------------------------------------------------------
@@ -673,76 +394,6 @@ Future<Object?> _captureScreenshot(CaptureScreenshotAction a, ActionRun run) asy
 }
 
 // --- forms and text fields -------------------------------------------------------------
-
-/// A form submission. Only the local service runs: an older layout's
-/// built-in newsletter service (or an unknown one), decoded as
-/// [FormService.unsupported], sends nothing and fails as
-/// `unsupported_service` through the same result and callbacks.
-///
-/// Validation finishes before any response is stored. Persisting the
-/// response variable uses the SDK's normal variable persistence. Nothing is
-/// sent over the network.
-Future<void> _submitForm(SubmitFormAction a, ActionRun run) async {
-  Json outcome;
-  try {
-    if (a.service != FormService.local) {
-      throw const _FormSubmissionFailure('unsupported_service',
-          'This form uses a submission service that is no longer supported. Nothing was sent.');
-    }
-    final destination = a.responseVariable.trim();
-    if (destination.isNotEmpty) {
-      final found = variableOf(run.context.scope, destination);
-      if (found == null || found.$2.isComputed || found.$2.type != VariableType.list ||
-          (ValuePath.parse(destination)?.keys.isNotEmpty ?? true)) {
-        throw const _FormSubmissionFailure('invalid_response_variable', 'The response variable must be a mutable list.');
-      }
-    }
-    Object? payload = a.payload.trim().isEmpty ? <String, Object?>{} : run.evaluate(a.payload);
-    if (a.validationScript.trim().isNotEmpty) {
-      await runScriptAction(RunScriptAction(script: a.validationScript, arguments: a.validationArguments), run);
-      final validation = readMap(run.result);
-      if (validation == null || validation['valid'] is! bool) {
-        throw const _FormSubmissionFailure('invalid_validation_result', 'The validator must return {valid, errors?, payload?}.');
-      }
-      if (validation['valid'] != true) {
-        throw _FormSubmissionFailure('validation_failed', 'Please check the form answers.', readMap(validation['errors']) ?? const {});
-      }
-      if (validation.containsKey('payload')) payload = validation['payload'];
-    }
-    if (payload is! Map) throw const _FormSubmissionFailure('invalid_payload', 'The submission payload must be a JSON object.');
-    // Copy at the boundary: the response is a snapshot, not an alias of answers.
-    final snapshot = (jsonDecode(jsonEncode(payload)) as Map).cast<String, Object?>();
-    if (run.isCanceled) return;
-    if (destination.isNotEmpty) {
-      final current = run.context.scope.read(destination);
-      final rows = current is List ? [...current] : <Object?>[];
-      a.prepend ? rows.insert(0, snapshot) : rows.add(snapshot);
-      setVariableIn(run.context.scope, destination, rows);
-    }
-    outcome = {'ok': true, 'value': snapshot, 'error': null, 'errors': <String, Object?>{}};
-  } on _FormSubmissionFailure catch (e) {
-    outcome = {'ok': false, 'value': null, 'error': {'code': e.code, 'message': e.message}, 'errors': e.errors};
-  } on ScriptFailed catch (e) {
-    outcome = {'ok': false, 'value': null, 'error': {'code': 'validation_script_failed', 'message': e.message}, 'errors': <String, Object?>{}};
-  } catch (e) {
-    outcome = {'ok': false, 'value': null, 'error': {'code': 'invalid_payload', 'message': '$e'}, 'errors': <String, Object?>{}};
-  }
-  run.result = outcome;
-  if (a.resultVariable.trim().isNotEmpty) setVariableIn(run.context.scope, a.resultVariable.trim(), outcome);
-  if (outcome['ok'] == true) {
-    await run.run(a.onSuccess);
-  } else if (a.onError.isNotEmpty) {
-    await run.run(a.onError);
-  } else {
-    throw StateError((outcome['error'] as Map)['message'] as String);
-  }
-}
-
-class _FormSubmissionFailure implements Exception {
-  const _FormSubmissionFailure(this.code, this.message, [this.errors = const {}]);
-  final String code, message;
-  final Json errors;
-}
 
 Future<void> _focus(FocusAction a, ActionRun run) async {
   final tree = run.host.tree;
@@ -966,12 +617,12 @@ Future<Json> _preloadImages(PreloadImagesAction a, ActionRun run) async {
 
 Future<void> _paywall(PaywallAction a, ActionRun run) async {
   final host = run.host;
-  final session = host is RuntimeActionContext ? host.paywall : null;
+  final session = host is CoreActionContext ? host.paywall : null;
   switch (a.operation) {
     case PaywallOperation.openPaywall:
       final placement = run.text(a.placement ?? '').trim();
-      final present = host is RuntimeActionContext ? host.presentPaywall : null;
-      final open = host is RuntimeActionContext ? host.openPaywall : null;
+      final present = host is CoreActionContext ? host.presentPaywall : null;
+      final open = host is CoreActionContext ? host.openPaywall : null;
       if (placement.isEmpty || (present == null && open == null)) throw StateError('No paywall placement presenter');
       // Its screen opens as the action's transition says, when the shell can.
       final result = present != null ? await present(placement, PaywallPresentation.of(a)) : await open!(placement);
@@ -1045,9 +696,6 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
 
 /// Whether [text] holds `${...}` (an expression, not a literal).
 bool isExpression(String text) => text.contains(r'${') || FormulaEvaluator.exactExpression(text) != null;
-
-/// 5 for 5.0, 2.5 for 2.5.
-String _mb(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';
 
 /// A pose from an action's value: a map, or its JSON text; numbers only.
 Map<String, double> _poseOf(Object? v) {

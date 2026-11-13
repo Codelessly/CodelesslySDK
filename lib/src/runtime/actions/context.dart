@@ -4,7 +4,7 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart'
-    show ActionDef, AuthOperation, Json, NavigateAction, PageTransition, PaywallAction, RouteTransition, ScriptDef, Variable, VariableType;
+    show ActionDef, Json, NavigateAction, PageTransition, PaywallAction, RouteTransition, ScriptDef, Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart';
@@ -15,7 +15,6 @@ import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'node_values.dart';
 import 'action_error.dart';
-import 'app_data_sources.dart';
 import 'ui.dart';
 import 'values.dart';
 
@@ -46,9 +45,13 @@ abstract interface class ActionHost implements ActionContext {
   void reportError(Object error, StackTrace stack, {String? action});
 }
 
-/// The [ActionContext] (and [ActionHost]) of a screen.
-class RuntimeActionContext implements ActionHost {
-  RuntimeActionContext({
+/// The [ActionContext] (and [ActionHost]) of a screen, as the core runtime
+/// knows it: no feature's fields. What the app shell gives a feature's
+/// handlers rides in [extensions], found by type. `RuntimeActionContext`
+/// (features/context.dart) is this with the first-party features' fields
+/// as named parameters.
+class CoreActionContext implements ActionHost {
+  CoreActionContext({
     required this.scope,
     this.expressions = const Expressions(),
     CodelesslyServices? services,
@@ -58,8 +61,6 @@ class RuntimeActionContext implements ActionHost {
     this.nodeValues,
     this.onError,
     this.onActionErrorEvent,
-    this.refreshAuthValues,
-    this.appData,
     this.declareMissing = false,
     this.paywall,
     this.openPaywall,
@@ -110,15 +111,11 @@ class RuntimeActionContext implements ActionHost {
   /// callback. Omitted while running an error reaction to prevent recursion.
   final void Function(Json event)? onActionErrorEvent;
 
-  /// Synchronizes host-owned auth values after a completed native operation,
-  /// before the next authored action reads them. Expression reads stay pure.
-  final void Function(AuthOperation operation)? refreshAuthValues;
-
-  /// The app's shared live data (`loadCloudData` with `scope: app`); null:
-  /// such loads are the screen's.
-  final AppDataSources? appData;
-
   final List<VoidCallback> _disposers;
+
+  /// What [onDispose] registered: shared by this context's copies ([copy]).
+  @protected
+  List<VoidCallback> get disposers => _disposers;
 
   /// The paywall a paywall screen's actions act on.
   final PaywallSession? paywall;
@@ -147,13 +144,16 @@ class RuntimeActionContext implements ActionHost {
   }
 
   @override
-  RuntimeActionContext withScope(ValueScope scope) => _copy(scope);
+  CoreActionContext withScope(ValueScope scope) => copy(scope);
 
   /// An error reaction keeps the same services, variables and host error
   /// callback, but cannot recursively dispatch more authored error events.
-  RuntimeActionContext withoutActionErrorEvents() => _copy(scope, suppressErrorEvents: true);
+  CoreActionContext withoutActionErrorEvents() => copy(scope, suppressErrorEvents: true);
 
-  RuntimeActionContext _copy(ValueScope scope, {bool suppressErrorEvents = false}) => RuntimeActionContext(
+  /// This context over [scope] (without its error events, with
+  /// [suppressErrorEvents]). A subclass overrides it to stay itself.
+  @protected
+  CoreActionContext copy(ValueScope scope, {bool suppressErrorEvents = false}) => CoreActionContext(
         scope: scope,
         expressions: expressions,
         services: services,
@@ -163,8 +163,6 @@ class RuntimeActionContext implements ActionHost {
         nodeValues: nodeValues,
         onError: onError,
         onActionErrorEvent: suppressErrorEvents ? null : onActionErrorEvent,
-        refreshAuthValues: refreshAuthValues,
-        appData: appData,
         declareMissing: declareMissing,
         paywall: paywall,
         openPaywall: openPaywall,
@@ -331,7 +329,7 @@ class PaywallPresentation {
   int get hashCode => Object.hash(routeTransition, transition, transitionMs, reverseTransitionMs);
 }
 
-/// A failed action chain that can run again (see [RuntimeActionContext.failed]).
+/// A failed action chain that can run again (see [CoreActionContext.failed]).
 class FailedActions {
   /// Set by the runner just before it reports the chain's failure.
   Future<void> Function()? pending;

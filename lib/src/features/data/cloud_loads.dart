@@ -18,12 +18,12 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart' show VoidCallback, debugPrint, visibleForTesting;
 
+import '../../runtime/actions/context.dart';
+import '../../runtime/actions/runner.dart';
+import '../../runtime/contracts.dart' show ValueScope;
+import '../../runtime/expressions/engine.dart';
+import '../../runtime/expressions/scopes.dart';
 import '../../services/services.dart';
-import '../contracts.dart' show ValueScope;
-import '../expressions/engine.dart';
-import '../expressions/scopes.dart';
-import 'context.dart';
-import 'runner.dart';
 
 /// The live loads of a scope's variables, by variable name.
 final Expando<Map<String, LiveCloudLoad>> _loads = Expando('cloudLoads');
@@ -41,14 +41,13 @@ const int _maxRerunsPerSecond = 20;
 /// Runs a [LoadCloudDataAction]: replaces [a]'s variable's live load with
 /// this one and waits for its first value.
 Future<void> loadCloudData(LoadCloudDataAction a, ActionRun run) async {
-  final services = run.context.services;
-  if (services is! Services) throw StateError('Cloud data needs the app\'s Services.');
+  final cloud = run.require<CloudDatabase>('Cloud data');
   final variable = a.variable.trim();
   if (variable.isEmpty) return;
   final owner = _ownerOf(run.context.scope, variable);
   final byName = _loads[owner] ??= {};
   final load = byName[variable] ??= LiveCloudLoad._(variable, byName);
-  await load._start(a, run, services.cloud);
+  await load._start(a, run, cloud);
 }
 
 /// Runs a [ReloadCloudDataAction]: its variable's live load subscribes
@@ -467,8 +466,7 @@ Future<void> cloudBatch(CloudBatchAction a, ActionRun run, Future<void> Function
     }
   }
   const writes = {CloudDataOperation.create, CloudDataOperation.update, CloudDataOperation.delete};
-  final services = run.context.services;
-  final db = services is Services ? services.cloud : null;
+  final db = run.service<CloudDatabase>();
   if (db is! BackendCloudDatabase || a.steps.any((s) => !writes.contains(s.operation))) {
     for (final turn in turns) {
       for (final step in a.steps) {

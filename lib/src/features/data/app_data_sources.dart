@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart' show Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
-import '../expressions/scopes.dart';
-import 'runner.dart' show ActionsCanceled;
+import '../../runtime/actions/runner.dart' show ActionsCanceled;
+import '../../runtime/expressions/scopes.dart';
 
 /// The app's shared live data sources ([CloudDataScope.app] loads): one
 /// subscription per app variable, opened by the first load and shared by
