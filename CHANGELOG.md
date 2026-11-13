@@ -1,5 +1,43 @@
 ## Unreleased
 
+**New: one animation player** (codelessly_api's `animations`, `animate`, `frame`, `Spring`; its
+docs/design/02-animation.md)
+
+- `RenderAnimations` (`lib/src/render/animations.dart`): a node's animations, each an `AnimationClock` (Flutter's
+  `AnimationController`: value, status, forward/reverse/toggle/repeat/stop/reset/animateTo/set, springs) ticking
+  inside the node's render object. Tracks that add or multiply on `motion.*`/`opacity` pose that layer (about the
+  animation's alignment); tracks that replace a `motion.*` value set the node's motion layer
+  (`RenderMotion.overrides`); any other binding path patches the node as shown (`RenderTree.setAnimatedValues`);
+  variable tracks write through the render-owned `BoundValues`. `${animation.<id>.value|status|isAnimating}` is
+  published to the node's scope. A design canvas draws an animation only at its `previewAt`. Under reduced motion
+  repeating animations rest at their start. `NodeBox.animations` and `RenderTree.boxes` are new.
+- The legacy `loops` and `effectAnimations` (and `playAnimation`) now play on this player, unchanged in what
+  they draw: the loops' and effects' presets reproduce their old formulas exactly.
+- `animate` action handler (node animations on every shown instance, a node key works too, particles by their
+  reserved name on `forward`; number variables on `VariableAnimator`).
+- `frame` trigger: a `Ticker` per node with frame reactions (`${result.dt}`, `elapsed`, `frame`), muted off stage
+  and while `when` is false, skipping a frame while its chain still runs. `timer` intervals may be expressions;
+  timer chains get `${result.tick}`.
+- One spring: `describeSpring(Spring)` in `render/physics.dart` is the `SpringDescription` of every spring
+  (gestures, drag track settle, flip card, route dismiss).
+
+**Behaviour fixes**
+
+- `motion.pulseKey` (bound in seven reference apps, never read before) now plays the motion's keyframes from its
+  values and back each time it changes.
+- A play key that changes to `0`, `false` or `null` no longer plays (it did for effects; apps cue with
+  `${= cond ? tick : 0}`).
+
+**Breaking changes for Dart callers**
+
+- Removed: `RenderLoops`, `RenderEffects`, `EffectPlayers` (a process-wide registry; the action finds a node's
+  player through its tree), `effectTransformAt`, `keyframePoseAt` (the presets in codelessly_api's
+  `AnimationPresets` are the shapes now). `springOf` stays and reads `GesturePhysics.spring`.
+- Exports: `codelessly_sdk.dart` exports `RenderAnimations` and `AnimationClock` instead of `EffectPlayers`,
+  `RenderEffects` and `effectTransformAt`.
+- A node with animations draws its loops and effects inside its motion and rotation layers (where loops were);
+  effects used to sit outside them.
+
 **New**
 
 - `customPaint` (codelessly_api's `CustomPaint` behavior): a node's draw lists, behind and over its content,

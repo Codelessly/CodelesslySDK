@@ -18,7 +18,6 @@ import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
-import '../../render/play.dart' show EffectPlayers;
 import '../../render/paint/image_fill.dart' show preloadImage;
 import '../../render/particles.dart' show ParticlePlayers;
 import '../../scripting/formula_scripts.dart' show ScriptsScope;
@@ -62,8 +61,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       _setValue(a.node, [NodeValue('props.current', value: a.variant)], run);
     case SetVariableAction():
       await _setVariable(a, run);
-    case AnimateVariableAction():
-      await _animateVariable(a, run);
+    case AnimateAction():
+      await _animate(a, run);
     case HapticAction():
       _haptic(a.kind);
     case RunScriptAction():
@@ -160,12 +159,6 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
         for (final id in a.node.split(','))
           if (id.trim().isNotEmpty) DragMotionControl.control(id.trim(), a.command, a.direction, tree: tree),
       ]);
-    case PlayAnimationAction():
-      // A node's one-shot effect, on every shown instance; the chain waits
-      // for it, including a particle burst with the reserved particles name.
-      await Future.wait([EffectPlayers.play(a.node, a.animation), ParticlePlayers.play(a.node, a.animation)]);
-
-      break;
     case PaginateAction():
       await paginateAction(a, run);
     case EmitEventAction():
@@ -268,50 +261,73 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   setVariableIn(run.context.scope, name, next);
 }
 
-/// Plays, pauses, resumes, stops or seeks a number variable's timeline.
-/// A play or a resume completes when the
-/// timeline ends; a variable that isn't there (or is computed) is skipped.
-Future<void> _animateVariable(AnimateVariableAction a, ActionRun run, {bool fromCurrentPlace = false}) async {
+/// Runs an `AnimationController` command: on node [AnimateAction.node]'s
+/// animation, on every shown instance (and its particles, by their reserved
+/// name, for `forward`), or on a number variable's timeline. The chain waits
+/// for it to end.
+Future<void> _animate(AnimateAction a, ActionRun run) async {
+  if (a.variable.trim().isNotEmpty) return _animateVariable(a, run);
+  final name = run.text(a.animation).trim();
+  final named = run.text(a.node).trim();
+  final id = named.isEmpty ? (run.node?.id ?? '') : named;
+  double? number(String text) => text.trim().isEmpty ? null : numberOfExpression(text, run);
+  final from = number(a.from), target = number(a.target), ms = number(a.duration)?.round();
+  final tree = run.host.tree;
+  final plays = <Future<void>>[];
+  if (tree != null) {
+    var boxes = tree.boxesOf(id).toList();
+    // A node key names it too.
+    if (boxes.isEmpty) boxes = [for (final b in tree.boxes.toList()) if (b.node?.key == id) b];
+    for (final b in boxes) {
+      final player = b.animations;
+      if (player == null || !b.attached) continue;
+      plays.add(player.command(name, a.command, from: from, target: target, durationMs: ms, curve: a.curve, spring: a.spring));
+    }
+  }
+  if (a.command == AnimateCommand.forward && named.isNotEmpty) plays.add(ParticlePlayers.play(id, name));
+  await Future.wait(plays);
+}
+
+/// `animate` on a number variable: its timeline (an unbounded controller)
+/// plays to a target (`animateTo`, `animateBack`), holds (`stop`), carries
+/// on (`forward`: what it holds, else to the target from where it is) or
+/// jumps (`set`). A variable that isn't there (or is computed) is skipped.
+Future<void> _animateVariable(AnimateAction a, ActionRun run) async {
   final found = variableOf(run.context.scope, a.variable.trim());
   if (found == null || found.$2.isComputed) return;
   final (scope, variable) = found;
   final name = variable.name;
-  double? number(String text) => numberOfExpression(text, run);
+  double? number(String text) => text.trim().isEmpty ? null : numberOfExpression(text, run);
+  final target = number(a.target);
+  Duration duration() {
+    final ms = number(a.duration);
+    return Duration(milliseconds: ms != null && ms >= 0 ? ms.round() : 300);
+  }
 
-  switch (a.mode) {
-    case AnimateVariableMode.resume:
+  switch (a.command) {
+    case AnimateCommand.forward:
       if (VariableAnimator.resume(scope, name) || VariableAnimator.isPlaying(scope, name)) {
         await VariableAnimator.of(scope, name)?.done.future;
         return;
       }
-      // Nothing to resume: play from where the value is.
-      return _animateVariable(
-        AnimateVariableAction(
-            variable: a.variable, from: a.from, to: a.to, durationMs: a.durationMs, duration: a.duration, curve: a.curve),
-        run,
-        fromCurrentPlace: true,
-      );
-    case AnimateVariableMode.play:
-      final to = number(a.to);
-      if (to == null) return;
-      var ms = a.durationMs;
-      if (a.duration.trim().isNotEmpty) {
-        final bound = number(a.duration);
-        if (bound != null && bound >= 0) ms = bound.round();
-      }
+      // Nothing to carry on: to the target from where the value is.
+      if (target == null) return;
       await VariableAnimator.play(scope, name,
-          from: number(a.from),
-          to: to,
-          duration: Duration(milliseconds: ms),
-          curve: a.curve,
-          fromCurrentPlace: fromCurrentPlace);
-    case AnimateVariableMode.pause:
+          from: number(a.from), to: target, duration: duration(), curve: a.curve ?? AnimationCurve.linear, fromCurrentPlace: true);
+    case AnimateCommand.animateTo || AnimateCommand.animateBack:
+      if (target == null) return;
+      await VariableAnimator.play(scope, name,
+          from: number(a.from), to: target, duration: duration(), curve: a.curve ?? AnimationCurve.linear);
+    case AnimateCommand.stop:
       VariableAnimator.pause(scope, name);
-    case AnimateVariableMode.stop:
+    case AnimateCommand.set:
+      if (target != null) VariableAnimator.seek(scope, name, target);
+    case AnimateCommand.reset:
       VariableAnimator.stop(scope, name);
-    case AnimateVariableMode.seek:
-      final to = number(a.to);
-      if (to != null) VariableAnimator.seek(scope, name, to);
+      if (number(a.from) case final double from) VariableAnimator.write(scope, name, from);
+    case AnimateCommand.reverse || AnimateCommand.toggle || AnimateCommand.repeat:
+      // A variable's timeline has no bounds to reverse or repeat between.
+      break;
   }
 }
 
