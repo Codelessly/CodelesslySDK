@@ -1,0 +1,177 @@
+{
+ "schema": 2,
+ "id": "FaqItem",
+ "roots": [
+  "fq"
+ ],
+ "widget": {
+  "type": "FaqItem",
+  "doc": "One question; tapping it opens or closes its answer in the open list.",
+  "props": [
+   {
+    "key": "item",
+    "type": {
+     "kind": "json",
+     "flutter": "Faq"
+    },
+    "default": {}
+   },
+   {
+    "key": "index",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0
+   },
+   {
+    "key": "open",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "list"
+     }
+    },
+    "default": ""
+   }
+  ]
+ },
+ "nodes": {
+  "fq": {
+   "type": "column",
+   "children": [
+    "fqRow",
+    "fqA"
+   ],
+   "layout": {
+    "width": {
+     "fill": 697
+    },
+    "height": {
+     "hug": 69
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.open",
+       "value": "${= contains(props.open, props.index) ? without(props.open, props.index) : append(props.open, props.index)}"
+      }
+     ]
+    }
+   ]
+  },
+  "fqRow": {
+   "type": "row",
+   "children": [
+    "fqQ",
+    "fqIcon"
+   ],
+   "layout": {
+    "width": {
+     "fill": 697
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": [
+     0,
+     24,
+     0,
+     24
+    ]
+   },
+   "props": {
+    "spacing": 16
+   }
+  },
+  "fqQ": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${props.item.q}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 16,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "#FFF0F4ED"
+    }
+   }
+  },
+  "fqIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "add",
+    "color": "#FFB9F34C"
+   },
+   "bind": {
+    "props.icon": "${= contains(props.open, props.index) ? 'close' : 'add'}"
+   }
+  },
+  "fqA": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 560
+    },
+    "height": {
+     "hug": 44
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     24
+    ],
+    "constraints": {
+     "maxWidth": 560
+    }
+   },
+   "props": {
+    "text": "${props.item.a}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 14.5,
+     "height": 1.6,
+     "color": "#FFA2B0A9"
+    }
+   },
+   "bind": {
+    "visible": "${= contains(props.open, props.index)}"
+   }
+  }
+ }
+}

@@ -1,0 +1,289 @@
+{
+ "schema": 2,
+ "id": "FaqSection",
+ "roots": [
+  "faqSec"
+ ],
+ "widget": {
+  "type": "FaqSection",
+  "doc": "Questions and answers in two columns from tablet up; several may be open.",
+  "props": []
+ },
+ "variables": {
+  "faqSec": [
+   {
+    "name": "faqOpen",
+    "type": "list",
+    "value": [
+     0
+    ]
+   }
+  ]
+ },
+ "nodes": {
+  "faqSec": {
+   "type": "column",
+   "children": [
+    "faqIn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 900
+    },
+    "padding": [
+     18,
+     80,
+     18,
+     80
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF080D0E"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        28,
+        128,
+        28,
+        128
+       ]
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        40,
+        128,
+        40,
+        128
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "faqIn": {
+   "type": "flex",
+   "children": [
+    "faqHead",
+    "faqListWrap"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 800
+    },
+    "constraints": {
+     "maxWidth": 1320
+    }
+   },
+   "props": {
+    "direction": "vertical",
+    "crossAxisAlignment": "start",
+    "spacing": 34
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "props": {
+       "direction": "horizontal",
+       "spacing": 0
+      }
+     }
+    }
+   ]
+  },
+  "faqHead": {
+   "type": "column",
+   "children": [
+    "faqEyebrow",
+    "faqTitle"
+   ],
+   "layout": {
+    "width": {
+     "fill": 620
+    },
+    "height": {
+     "hug": 200
+    },
+    "flex": 8,
+    "margin": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 20
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "margin": [
+        0,
+        8,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "faqEyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "GOOD TO KNOW / 004",
+    "style": {
+     "fontFamily": "IBM Plex Mono",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "letterSpacing": 2.4,
+     "color": "#FFB9F34C"
+    }
+   }
+  },
+  "faqTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 40
+    },
+    "constraints": {
+     "maxWidth": 420
+    }
+   },
+   "props": {
+    "text": "Questions, answered.",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 34,
+     "fontWeight": 700,
+     "letterSpacing": -2,
+     "height": 1.05,
+     "color": "#FFF0F4ED"
+    }
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 56,
+        "letterSpacing": -3
+       }
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 72,
+        "letterSpacing": -4
+       }
+      }
+     }
+    }
+   ]
+  },
+  "faqListWrap": {
+   "type": "column",
+   "children": [
+    "faqList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 697
+    },
+    "height": {
+     "hug": 600
+    },
+    "flex": 9
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "faqList": {
+   "type": "listView",
+   "children": [
+    "fq"
+   ],
+   "layout": {
+    "width": {
+     "fill": 697
+    },
+    "height": {
+     "hug": 500
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${faqs}"
+   }
+  },
+  "fq": {
+   "type": "FaqItem",
+   "layout": {
+    "width": {
+     "fill": 697
+    },
+    "height": {
+     "hug": 69
+    }
+   },
+   "props": {
+    "open": "faqOpen"
+   },
+   "bind": {
+    "props.item": "${item}",
+    "props.index": "${index}"
+   }
+  }
+ }
+}

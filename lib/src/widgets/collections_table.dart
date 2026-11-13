@@ -22,7 +22,7 @@ import 'collections_list_runtime.dart';
 
 /// The rows of a running table [r]: its bound data, or `rowCount` indexes.
 List<Object?> tableRowsOf(ListRuntime r) {
-  if (r.node.bind.containsKey('data')) return r.binder?.itemsOf(r.tree.source, r.node, r.b.instance) ?? const [];
+  if (r.node.bind.containsKey('data')) return r.binder?.itemsOf(r.b.source, r.node, r.b.instance) ?? const [];
   return List<Object?>.generate(math.max(0, r.node.prop(TableViewProps.rowCount) ?? 0), (i) => i);
 }
 
@@ -109,7 +109,7 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
     Widget template(String? id, Object key, int index, Object? item) {
       if (id == null) return const SizedBox.shrink();
       final instance = ProvidedItem('cell', r.b.instance, n.id, key);
-      r.binder?.provideItem(r.tree.source, instance, index: index, item: item);
+      r.binder?.provideItem(r.b.source, instance, index: index, item: item);
       return SizedBox.expand(
         child: Align(alignment: Alignment.centerLeft, child: NodeChild(tree: r.tree, id: id, instance: instance)),
       );

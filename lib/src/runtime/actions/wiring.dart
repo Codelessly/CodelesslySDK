@@ -174,7 +174,7 @@ class TreeReactions implements NodeInteractions {
     final c = context;
     final binder = box.tree.binder;
     if (c is! ActionHost || binder == null) return c;
-    final scope = binder.scopeFor(box.tree.source, box.id, box.instance);
+    final scope = binder.scopeFor(box.source, box.id, box.instance);
     return scope == null || identical(scope, c.scope) ? c : c.withScope(scope);
   }
 

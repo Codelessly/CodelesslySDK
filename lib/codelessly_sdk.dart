@@ -131,6 +131,7 @@ export 'src/render/play.dart' show FlightRegistry, RenderFlightBox;
 export 'src/render/animations.dart' show AnimationClock, RenderAnimations;
 export 'src/render/recipe.dart' show NodeChild, NodeBuilder, RecipeCatalog, WidgetRecipe;
 export 'src/render/source.dart';
+export 'src/render/components.dart' show RegisteredComponent, ComponentInstance, ComponentRegistry, InstanceSource, componentInstanceOf, componentPath, kMaxComponentDepth;
 export 'src/widgets/media.dart' show ExternalComponents;
 export 'src/services/services.dart';
 // The script engine (Services.scripts' default) and what scripts can call.

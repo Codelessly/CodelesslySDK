@@ -40,12 +40,12 @@ class ListRuntime {
   /// The scope the list itself reads from (a list item's, for a nested
   /// list).
   ValueScope? get scope =>
-      binder?.scopeFor(tree.source, node.id, b.instance) ?? binder?.scope ?? _context?.scope;
+      binder?.scopeFor(b.source, node.id, b.instance) ?? binder?.scope ?? _context?.scope;
 
   /// The items the list is bound to (`data`), else one per index of its
   /// item count, else null.
   List<Object?>? get data {
-    final bound = binder?.itemsOf(tree.source, node, b.instance);
+    final bound = binder?.itemsOf(b.source, node, b.instance);
     if (bound != null) return bound;
     final count = node.prop(CollectionScrollProps.itemCount);
     if (count != null && !node.bind.containsKey('data')) return List<Object?>.generate(count, (i) => i);

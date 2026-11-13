@@ -1,0 +1,204 @@
+{
+ "schema": 2,
+ "id": "pricing",
+ "roots": [
+  "pricing"
+ ],
+ "variables": {
+  "pricing": [
+   {
+    "name": "annual",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "menuOpen",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "nodes": {
+  "pricing": {
+   "type": "canvas",
+   "name": "Pricing",
+   "slots": {
+    "body": "root"
+   },
+   "layout": {
+    "width": 1440,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF080D0E"
+     }
+    ]
+   }
+  },
+  "root": {
+   "type": "stack",
+   "children": [
+    "page",
+    "menu"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "header",
+    "hero",
+    "plans",
+    "compare",
+    "faq",
+    "cta",
+    "footer"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "header": {
+   "type": "SiteHeader",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": 72
+   },
+   "props": {
+    "menuOpen": "menuOpen"
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "height": 92
+      }
+     }
+    }
+   ]
+  },
+  "menu": {
+   "type": "MobileMenu",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "menuOpen": "menuOpen"
+   }
+  },
+  "hero": {
+   "type": "PricingHero",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 640
+    }
+   },
+   "props": {
+    "annual": "annual"
+   }
+  },
+  "plans": {
+   "type": "PlansSection",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 1400
+    }
+   },
+   "props": {
+    "annual": "annual"
+   }
+  },
+  "compare": {
+   "type": "CompareSection",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 1500
+    }
+   }
+  },
+  "faq": {
+   "type": "FaqSection",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 900
+    }
+   }
+  },
+  "cta": {
+   "type": "FinalCta",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 600
+    }
+   }
+  },
+  "footer": {
+   "type": "SiteFooter",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 420
+    }
+   }
+  }
+ }
+}

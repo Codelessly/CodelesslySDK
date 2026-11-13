@@ -10,12 +10,14 @@ import 'package:codelessly_api/core.dart'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show TextStyle;
 
+import '../../render/components.dart' show InstanceSource, NestedInstance;
 import '../../render/contracts.dart';
 import '../../render/convert.dart' as convert;
 import '../../render/node_tree.dart' show RenderTree;
 import '../../render/source.dart' show NodeSource;
 import '../actions/variable_animator.dart';
 import '../contracts.dart';
+import 'component_scopes.dart';
 import 'engine.dart';
 import 'formula_clock.dart';
 import 'node_scopes.dart';
@@ -32,10 +34,11 @@ export '../../render/contracts.dart' show BoundNode;
 /// instance). Box keys print it, so [key] prints as what tells repeats
 /// apart.
 @immutable
-final class ProvidedItem {
+final class ProvidedItem implements NestedInstance {
   const ProvidedItem(this.tag, this.outer, this.owner, this.key);
 
   final String tag;
+  @override
   final Object? outer;
   final String owner;
   final Object? key;
@@ -234,7 +237,15 @@ class NodeBinder implements TreeBindings {
     LayoutLogic logic = LayoutLogic.none,
     this.engine = const Expressions(),
     this.preview = false,
+    this.projectScope,
   }) : _conditions = ConditionIndex(logic);
+
+  /// The project's variables (and the app scopes around them), which a
+  /// component definition reads besides its parameters and its own
+  /// variables; null: the outermost variable scope around [scope], when
+  /// there are several (a page's and the app's), else none. A definition
+  /// never reads the page's (or canvas's) variables.
+  final ValueScope? projectScope;
 
   /// Where names are read; null: no bindings apply (a canvas without
   /// defaults still shows placeholders in [preview]).
@@ -274,7 +285,7 @@ class NodeBinder implements TreeBindings {
   @override
   BoundNode bind(NodeSource source, Node node, Object? instance) {
     final b = NodeBindings.of(node);
-    final targets = _conditions.byNode[node.id] ?? const [];
+    final targets = _conditionsFor(source).byNode[node.id] ?? const [];
     if (b.isEmpty && targets.isEmpty) return BoundNode(node);
     final s = _binds ? scopeFor(source, node.id, instance) : null;
     final reads = <String>{};
@@ -420,10 +431,45 @@ class NodeBinder implements TreeBindings {
 
   static const _repeaters = {'listView', 'gridView', 'pageView'};
 
-  bool _repeats(Node n) =>
+  bool _repeats(NodeSource source, Node n) =>
       _repeaters.contains(n.type) &&
       (n.bind.containsKey(BindPaths.data) ||
-          (_conditions.byNode[n.id]?.any((t) => t.path == BindPaths.data) ?? false));
+          (_conditionsFor(source).byNode[n.id]?.any((t) => t.path == BindPaths.data) ?? false));
+
+  // --- components --------------------------------------------------------------
+
+  /// The conditions of the document [source] is: the page's, or a
+  /// component definition's (one index per definition document).
+  ConditionIndex _conditionsFor(NodeSource source) {
+    if (source is! InstanceSource) return _conditions;
+    final doc = source.definition.document;
+    return _definitionConditions[doc] ??= ConditionIndex(doc.logic);
+  }
+
+  final Expando<ConditionIndex> _definitionConditions = Expando('definition conditions');
+
+  /// The scope node [id] of [source] reads names from outside its lists and
+  /// node scopes: a component instance's own ([componentScope]), else
+  /// [rootScopeOf].
+  ValueScope? _rootScope(NodeSource source, String id) =>
+      source is InstanceSource ? componentScope(source) : rootScopeOf(id);
+
+  final Map<Object, ComponentScopes> _componentScopes = {};
+
+  /// The scope the nodes of component instance [source] read from: its own
+  /// variables (one set per instance), over its parameters (`props`, bound
+  /// in the caller's scope), over the project's variables and the runtime's
+  /// scopes (`screen`, `route`, `theme`...). Never the caller's variables.
+  ValueScope? componentScope(InstanceSource source) {
+    final existing = _componentScopes[source.instance];
+    if (existing != null) return existing.variables;
+    if (!_binds) return null;
+    final caller = _rootScope(source.callSource, source.instance.call);
+    if (caller == null) return null;
+    final scopes = ComponentScopes(source, caller, project: projectScope, callerScope: () => scopeFor(source.callSource, source.instance.call, source.instance.outer));
+    _componentScopes[source.instance] = scopes;
+    return scopes.variables;
+  }
 
   /// The names a node gives itself and the nodes inside it, by what gives
   /// them: a node that follows the pointer shares its drag as `dismiss`
@@ -456,7 +502,7 @@ class NodeBinder implements TreeBindings {
     final parentId = source.parentOf(id);
     final parentNode = parentId == null ? null : source.node(parentId);
     // An item's root reads around it what the item does.
-    final around = parentId == null || parentNode == null || _repeats(parentNode)
+    final around = parentId == null || parentNode == null || _repeats(source, parentNode)
         ? _itemScopeFor(source, id, instance)
         : scopeFor(source, parentId, instance);
     return _locals[(id, instance)] = LocalScope(names, parent: around);
@@ -472,14 +518,14 @@ class NodeBinder implements TreeBindings {
       final pn = source.node(p);
       if (pn == null) break;
       // Past the list it repeats in, the item scope reads what's around.
-      if (p != id && _repeats(pn)) break;
+      if (p != id && _repeats(source, pn)) break;
       if (_localNamesOf(pn).isNotEmpty) return localScopeOf(source, p, instance) ?? base;
     }
     return base;
   }
 
   ValueScope? _itemScopeFor(NodeSource source, String id, Object? instance) {
-    final root = rootScopeOf(id);
+    final root = _rootScope(source, id);
     if (root == null) return null;
     String? listId;
     // The item a repeat's widget gives it (a paged list's row, a section
@@ -496,7 +542,7 @@ class NodeBinder implements TreeBindings {
         break;
       }
       final pn = source.node(p);
-      if (pn != null && _repeats(pn)) {
+      if (pn != null && _repeats(source, pn)) {
         listId = p;
         break;
       }
@@ -539,7 +585,7 @@ class NodeBinder implements TreeBindings {
       if (known != null) return known;
     }
     final parent = scopeFor(source, listId, outer) ?? root;
-    final items = _listOf(_dataOf(listNode, parent));
+    final items = _listOf(_dataOf(source, listNode, parent));
     // The list's own (first built) item: item 0, or a page view's page at rest.
     final restPage = isPages
         ? (items == null || items.isEmpty
@@ -560,8 +606,8 @@ class NodeBinder implements TreeBindings {
     return scope;
   }
 
-  Object? _dataOf(Node list, ValueScope s) {
-    for (final t in _conditions.byNode[list.id] ?? const <ConditionTarget>[]) {
+  Object? _dataOf(NodeSource source, Node list, ValueScope s) {
+    for (final t in _conditionsFor(source).byNode[list.id] ?? const <ConditionTarget>[]) {
       if (t.path == BindPaths.data) {
         final v = t.valueIn(engine, s);
         if (v != null) return v;
@@ -576,7 +622,7 @@ class NodeBinder implements TreeBindings {
   /// [item] at [index]: the scope its nodes read `item` and `index` from,
   /// made or moved to them (the boxes that read them re-apply).
   ItemScope? provideItem(NodeSource source, ProvidedItem instance, {required int index, Object? item}) {
-    final root = rootScopeOf(instance.owner);
+    final root = _rootScope(source, instance.owner);
     if (root == null) return null;
     final existing = _provided[instance];
     if (existing != null) {
@@ -615,7 +661,7 @@ class NodeBinder implements TreeBindings {
   List<Object?>? itemsOf(NodeSource source, Node list, Object? instance) {
     final s = _binds ? scopeFor(source, list.id, instance) : null;
     if (s == null) return null;
-    return _listOf(_dataOf(list, s));
+    return _listOf(_dataOf(source, list, s));
   }
 
   /// Lets go of the item, local and node scopes.
@@ -633,6 +679,10 @@ class NodeBinder implements TreeBindings {
     }
     _nodeScopes.clear();
     _provided.clear();
+    for (final s in _componentScopes.values) {
+      s.dispose();
+    }
+    _componentScopes.clear();
   }
 }
 

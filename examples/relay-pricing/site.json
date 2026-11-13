@@ -1,0 +1,360 @@
+{
+ "schema": 2,
+ "pages": [
+  "pages/pricing.json"
+ ],
+ "variables": [
+  {
+   "name": "billing",
+   "type": "map",
+   "value": {
+    "annual": "Annual billing shown. The displayed per-responder price is the monthly equivalent; your team is billed for 12 months at once.",
+    "monthly": "Monthly billing shown. Your team is billed each month at the displayed per-responder price."
+   }
+  },
+  {
+   "name": "estimator",
+   "type": "map",
+   "value": {
+    "limitMessage": "Starter is designed for up to 5 responders. Team supports larger rotations.",
+    "starterAlternativeLabel": "See Team plan",
+    "annualLabel": "Estimated annual commitment",
+    "monthlyLabel": "Estimated monthly total",
+    "annualSavingsLabel": "Estimated annual savings vs monthly billing"
+   }
+  },
+  {
+   "name": "plans",
+   "type": "list",
+   "value": [
+    {
+     "name": "Starter",
+     "description": "A focused home for growing on-call teams.",
+     "monthly": 29,
+     "annual": 23,
+     "max": 5,
+     "cta": "Start with Starter",
+     "features": [
+      "Unlimited incidents",
+      "Up to 5 responders",
+      "Timeline and tasks",
+      "Public status pages",
+      "30-day history"
+     ]
+    },
+    {
+     "name": "Team",
+     "description": "Coordination for teams with more moving parts.",
+     "monthly": 59,
+     "annual": 47,
+     "max": 0,
+     "cta": "Choose Team",
+     "popular": true,
+     "features": [
+      "Everything in Starter",
+      "Unlimited responders",
+      "Automated workflows",
+      "Stakeholder updates",
+      "1-year history"
+     ]
+    },
+    {
+     "name": "Scale",
+     "description": "Advanced control for complex operations.",
+     "monthly": 99,
+     "annual": 79,
+     "max": 0,
+     "cta": "Choose Scale",
+     "features": [
+      "Everything in Team",
+      "Advanced analytics",
+      "Custom roles",
+      "Audit export",
+      "Unlimited history"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "cmp",
+   "type": "list",
+   "value": [
+    {
+     "s": true,
+     "l": "Response"
+    },
+    {
+     "l": "Incidents",
+     "v": [
+      "Unlimited",
+      "Unlimited",
+      "Unlimited",
+      "Unlimited"
+     ]
+    },
+    {
+     "l": "Responders",
+     "v": [
+      "Up to 5",
+      "Unlimited",
+      "Unlimited",
+      "Unlimited"
+     ]
+    },
+    {
+     "l": "Timeline and tasks",
+     "v": [
+      "Yes",
+      "Yes",
+      "Yes",
+      "Yes"
+     ]
+    },
+    {
+     "l": "Automated workflows",
+     "v": [
+      "—",
+      "Yes",
+      "Yes",
+      "Yes"
+     ]
+    },
+    {
+     "l": "Custom roles",
+     "v": [
+      "—",
+      "—",
+      "Yes",
+      "Yes"
+     ]
+    },
+    {
+     "s": true,
+     "l": "Communication"
+    },
+    {
+     "l": "Public status pages",
+     "v": [
+      "1",
+      "3",
+      "Unlimited",
+      "Unlimited"
+     ]
+    },
+    {
+     "l": "Stakeholder updates",
+     "v": [
+      "Manual",
+      "Automated",
+      "Automated",
+      "Automated"
+     ]
+    },
+    {
+     "l": "Private status pages",
+     "v": [
+      "—",
+      "—",
+      "Yes",
+      "Yes"
+     ]
+    },
+    {
+     "s": true,
+     "l": "Insights and control"
+    },
+    {
+     "l": "Incident history",
+     "v": [
+      "30 days",
+      "1 year",
+      "Unlimited",
+      "Unlimited"
+     ]
+    },
+    {
+     "l": "Advanced analytics",
+     "v": [
+      "—",
+      "—",
+      "Yes",
+      "Yes"
+     ]
+    },
+    {
+     "l": "Audit export",
+     "v": [
+      "—",
+      "—",
+      "Yes",
+      "Yes"
+     ]
+    },
+    {
+     "l": "SAML SSO",
+     "v": [
+      "—",
+      "—",
+      "—",
+      "Yes"
+     ]
+    },
+    {
+     "l": "Dedicated support",
+     "v": [
+      "—",
+      "—",
+      "—",
+      "Yes"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "faqs",
+   "type": "list",
+   "value": [
+    {
+     "q": "Can I change plans later?",
+     "a": "Yes. Move between plans as your team changes. Your incident history and configuration stay in place."
+    },
+    {
+     "q": "How does annual billing work?",
+     "a": "Annual plans are billed once a year at the displayed per-responder monthly equivalent. The discount is approximately 20% compared with monthly billing."
+    },
+    {
+     "q": "What counts as a responder?",
+     "a": "A responder is someone who can be assigned to incidents and take response actions. View-only stakeholders are free."
+    },
+    {
+     "q": "Can I try a plan before buying?",
+     "a": "This reference site has no account creation or billing. Selecting a plan prepares a local-only contact request, so you can explore the plan discussion flow without payment details."
+    },
+    {
+     "q": "Do you offer security reviews?",
+     "a": "Yes. Contact sales for a security packet, deployment details, and a conversation with our team."
+    },
+    {
+     "q": "Can I estimate a larger response team?",
+     "a": "Yes. The estimator supports up to 500 responders. For larger rollouts, contact sales for a custom Enterprise proposal."
+    },
+    {
+     "q": "Are view-only stakeholders billed?",
+     "a": "No. People who only receive updates or view incident progress do not count as responders in these estimates."
+    }
+   ]
+  },
+  {
+   "name": "footer",
+   "type": "list",
+   "value": [
+    {
+     "title": "Product",
+     "links": [
+      [
+       "Platform",
+       "index.html#platform"
+      ],
+      [
+       "Pricing",
+       "pricing.html"
+      ],
+      [
+       "Changelog",
+       "changelog.html"
+      ],
+      [
+       "Talk to sales",
+       "contact.html"
+      ]
+     ]
+    },
+    {
+     "title": "Solutions",
+     "links": [
+      [
+       "Engineering",
+       "index.html#platform"
+      ],
+      [
+       "Security",
+       "index.html#coordination"
+      ],
+      [
+       "Operations",
+       "index.html#visibility"
+      ],
+      [
+       "Enterprise",
+       "pricing.html#enterprise"
+      ]
+     ]
+    },
+    {
+     "title": "Resources",
+     "links": [
+      [
+       "Customer stories",
+       "customers.html"
+      ],
+      [
+       "How Relay works",
+       "index.html#method"
+      ],
+      [
+       "FAQ",
+       "pricing.html#faq"
+      ],
+      [
+       "Release notes",
+       "changelog.html"
+      ]
+     ]
+    },
+    {
+     "title": "Company",
+     "links": [
+      [
+       "Our approach",
+       "index.html#method"
+      ],
+      [
+       "Contact",
+       "contact.html"
+      ],
+      [
+       "Privacy note",
+       "contact.html#privacy"
+      ],
+      [
+       "Terms note",
+       "contact.html#terms"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "name": "menuLinks",
+   "type": "list",
+   "value": [
+    {
+     "label": "Platform"
+    },
+    {
+     "label": "Pricing"
+    },
+    {
+     "label": "Customers"
+    },
+    {
+     "label": "Changelog"
+    },
+    {
+     "label": "Talk to sales",
+     "accent": true
+    }
+   ]
+  }
+ ]
+}

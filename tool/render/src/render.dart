@@ -23,6 +23,7 @@ import 'args.dart';
 import 'fonts.dart';
 import 'prepare.dart';
 import 'publish.dart';
+import 'site.dart';
 
 /// A problem found while rendering (validation's [Diagnostic]s have the
 /// same JSON shape).
@@ -74,6 +75,7 @@ const runtimeCodes = <(String, String, String)>[
   ('image_failed', 'error', 'An image could not be loaded or decoded (missing file, bad data: URL).'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
+  ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
 
 /// The result of a run.
@@ -138,7 +140,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   }
 
   Directory(args.out).createSync(recursive: true);
-  final inputs = loadInputs(args.inputs);
+  // A directory with site.json (or components/) is a site: pages and components.
+  final site = loadSite(args.inputs, loadInputs);
+  final inputs = site.inputs;
   if (inputs.isEmpty) {
     issue(RuntimeIssue('no_documents', 'error', 'No .json documents at ${args.inputs.join(', ')}.'));
     return _finish(report, args);
@@ -162,10 +166,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       for (final scope in (api.readMap(d['variables']) ?? const {}).values)
         for (final v in api.readList(scope) ?? const [])
           if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
+    for (final v in api.readList(site.manifest?['variables']) ?? const [])
+      if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
   };
   FormulaReport check(String formula) =>
       (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
-  final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions));
+  final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
+  final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   report.diagnostics.addAll(diagnostics.map((d) => d.toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
 
@@ -189,9 +196,36 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   });
   final codepoints = materialCodepoints(root);
   final pages = <Page>[];
+  // The site's components: what its pages' calls render.
+  final components = ComponentRegistry();
+  // `--component <Type>`: that component alone, on a page of its own per
+  // parameter set (each preview at its size).
+  final alone = <({String name, api.Json page, double? width, double? height})>[];
+  if (args.component case final String type) {
+    final def = docs.values.where((d) => isComponentJson(d) && api.readMap(d[api.kWidgetKey])?['type'] == type).firstOrNull;
+    if (def == null) {
+      issue(RuntimeIssue('unknown_screen_arg', 'error', '--component $type: no component of that type in ${args.inputs.join(', ')}.'));
+      return _finish(report, args);
+    }
+    try {
+      final slots = args.slots == null ? null : jsonDecode(File(args.slots!).readAsStringSync()) as api.Json;
+      alone.addAll(componentPages(type, def, props: args.props, slots: slots));
+    } catch (e) {
+      issue(RuntimeIssue('invalid_json', 'error', '--props or --slots: ${_firstLine('$e')}'));
+      return _finish(report, args);
+    }
+    for (final a in alone) {
+      docs[a.name] = a.page;
+      dirs[a.name] = Directory.current.path;
+    }
+  }
   for (final e in docs.entries) {
     final p = prepare(e.value, dir: dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
-    pages.add((name: e.key, json: p.json));
+    if (isComponentJson(e.value)) {
+      components.define(api.LayoutDocument.fromJson(p.json));
+    } else if (alone.isEmpty || alone.any((a) => a.name == e.key)) {
+      pages.add((name: e.key, json: p.json));
+    }
     for (final img in p.images) {
       if (img.status == 'failed') {
         issue(RuntimeIssue('image_failed', 'error', 'Image ${img.url}: ${img.detail}.', nodeId: img.nodeId, file: e.key, path: img.path));
@@ -215,7 +249,10 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       }
     });
   }
-  final published = publishPages(pages);
+  final published = publishPages(pages,
+      variables: publishVariables(site.manifest),
+      breakpoints: site.manifest?['breakpoints'],
+      components: [for (final t in components.types) components[t]!.document.toJson()]);
   final fileOfNode = <String, String>{
     for (final e in docs.entries)
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
@@ -234,7 +271,21 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
   try {
-    await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report);
+    if (alone.isEmpty) {
+      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report, components: components);
+    }
+    for (final a in alone) {
+      // A preview renders at its own size; ad-hoc parameters at each size.
+      final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
+      await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
+          report, components: components);
+    }
+    for (final e in components.missing.entries) {
+      for (final path in e.value) {
+        issue(RuntimeIssue('component_missing', 'error', 'Call "$path" renders ${e.key}, which no component document of the site defines.',
+            nodeId: path));
+      }
+    }
   } finally {
     debugDisableShadows = true;
     FlutterError.onError = previousOnError;
@@ -255,8 +306,9 @@ Future<void> _renderAll(
   Map<String, String> fileOfNode,
   DirectoryFontFetcher fetcher,
   void Function(RuntimeIssue) issue,
-  RenderReport report,
-) async {
+  RenderReport report, {
+  ComponentRegistry? components,
+}) async {
   // 3. Which screens.
   final screens = _screens(published, docs, args.screens, (s) => issue(s));
   final recorder = _Recorder();
@@ -267,6 +319,7 @@ Future<void> _renderAll(
       final sizeName = '${size.width.round()}x${size.height.round()}';
       final codelessly = Codelessly(
         loader: MemoryPublishLoader(published.bundle),
+        components: components,
         fonts: fetcher,
         config: CodelesslyConfig(services: Services(analytics: recorder), fontTimeout: const Duration(seconds: 5)),
       );
@@ -302,7 +355,7 @@ Future<void> _renderAll(
           issue(RuntimeIssue('render_exception', 'error',
               node == null
                   ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
-                  : 'Node "${node.id}" (${node.node?.type ?? '?'}): $text',
+                  : 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
               nodeId: node?.id, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node.id]));
         }
         for (final (err, message) in recorder.errors) {
@@ -449,6 +502,7 @@ Future<void> _renderAll(
             {
               'id': b.id,
               if (b.instance != null) 'instance': '${b.instance}',
+              if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
               'x': _rectOf(b).left.round(),
               'y': _rectOf(b).top.round(),
               'w': double.parse(b.size.width.toStringAsFixed(1)),
@@ -656,6 +710,14 @@ List<NodeBox> _boxes(WidgetsBinding binding) => [
 /// The box of node [id] on screen: the topmost (the last painted), or with
 /// `id#n` the n-th (0-based) of the copies a list repeats.
 NodeBox? _boxOf(WidgetsBinding binding, String id) {
+  // A node inside a component, by path: `plans/card1/cta`.
+  if (id.contains('/')) {
+    for (final b in _boxes(binding)) {
+      final found = b.tree.boxAtPath(id);
+      if (found != null && found.attached && found.hasSize) return found;
+    }
+    return null;
+  }
   final hash = id.lastIndexOf('#');
   final index = hash < 0 ? null : int.tryParse(id.substring(hash + 1));
   final name = index == null ? id : id.substring(0, hash);
@@ -922,6 +984,10 @@ List<RuntimeIssue> _check(
       final n = l.document[id];
       if (n != null) return n;
     }
+    // A node of a component definition (inside an instance).
+    for (final b in boxes) {
+      if (b.id == id) return b.source.node(id);
+    }
     return null;
   }
 
@@ -929,6 +995,9 @@ List<RuntimeIssue> _check(
     for (final l in layouts.values) {
       final p = l.document.parentOf(id);
       if (p != null) return p;
+    }
+    for (final b in boxes) {
+      if (b.id == id) return b.source.parentOf(id);
     }
     return null;
   }
@@ -959,6 +1028,9 @@ List<RuntimeIssue> _check(
     return false;
   }
 
+  // A node inside a component instance is named by its instance path.
+  String nameOf(NodeBox b) => componentInstanceOf(b.instance) != null ? b.tree.pathOf(b.id, b.instance) : b.id;
+
   for (final b in boxes) {
     // The node as it is shown at this size: its media rules and any active
     // state applied (the document's own node is its base).
@@ -980,24 +1052,24 @@ List<RuntimeIssue> _check(
       final dy = math.max(pr.top - seen.top, seen.bottom - pr.bottom);
       if (dx > 1 && !scrollsAlong(b, true, upTo: parentBox)) {
         out.add(RuntimeIssue('layout_overflow', 'warning',
-            '"${b.id}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$pid" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.',
+            '"${nameOf(b)}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$pid" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
       if (dy > 1 && !scrollsAlong(b, false, upTo: parentBox)) {
         out.add(RuntimeIssue('layout_overflow', 'warning',
-            '"${b.id}" (${node.type}, ${r.height.toStringAsFixed(0)} tall) overflows its parent "$pid" (${parent.type}, ${pr.height.toStringAsFixed(0)} tall) by ${dy.toStringAsFixed(0)} px vertically.',
+            '"${nameOf(b)}" (${node.type}, ${r.height.toStringAsFixed(0)} tall) overflows its parent "$pid" (${parent.type}, ${pr.height.toStringAsFixed(0)} tall) by ${dy.toStringAsFixed(0)} px vertically.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
     }
     // Past the screen (the part not clipped away by an ancestor).
     if (!seen.isEmpty && seen.right > view.width + 1 && !scrollsAlong(b, true)) {
       out.add(RuntimeIssue('offscreen', 'warning',
-          '"${b.id}" (${node.type}) ends at x=${seen.right.toStringAsFixed(0)}, past the ${view.width.toStringAsFixed(0)} px wide screen.',
+          '"${nameOf(b)}" (${node.type}) ends at x=${seen.right.toStringAsFixed(0)}, past the ${view.width.toStringAsFixed(0)} px wide screen.',
           nodeId: b.id, screen: screen, size: size, file: file));
     }
     if (!seen.isEmpty && seen.bottom > view.height + 1 && !scrollsAlong(b, false)) {
       out.add(RuntimeIssue('offscreen', 'warning',
-          '"${b.id}" (${node.type}) ends at y=${seen.bottom.toStringAsFixed(0)}, below the ${view.height.toStringAsFixed(0)} px tall screen, and nothing scrolls: make the body column scrollable ("scrollable": true).',
+          '"${nameOf(b)}" (${node.type}) ends at y=${seen.bottom.toStringAsFixed(0)}, below the ${view.height.toStringAsFixed(0)} px tall screen, and nothing scrolls: make the body column scrollable ("scrollable": true).',
           nodeId: b.id, screen: screen, size: size, file: file));
     }
     // Icons that draw nothing.
@@ -1007,7 +1079,7 @@ List<RuntimeIssue> _check(
       final image = icon['image'] ?? icon['svg'];
       if (glyph != null && image == null && IconSources.glyphOf(icon) == null) {
         out.add(RuntimeIssue('icon_not_drawn', 'warning',
-            'Icon "${b.id}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows'}. '
+            'Icon "${nameOf(b)}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows'}. '
             'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
@@ -1026,7 +1098,7 @@ List<RuntimeIssue> _check(
             : math.max(math.max(r.left - shown.left, shown.right - r.right), math.max(r.top - shown.top, shown.bottom - r.bottom));
         if (past > 1) {
           out.add(RuntimeIssue('path_overflow', 'warning',
-              'The path of "${b.id}" reaches ${past.toStringAsFixed(0)} px past its ${b.size.width.toStringAsFixed(0)}x${b.size.height.toStringAsFixed(0)} box '
+              'The path of "${nameOf(b)}" reaches ${past.toStringAsFixed(0)} px past its ${b.size.width.toStringAsFixed(0)}x${b.size.height.toStringAsFixed(0)} box '
               '(path coordinates are the box\'s own pixels, from its top left), and nothing clips that part away. '
               '${node.type == 'path' ? 'Give it "viewBox": [w, h] to scale it into the box, or ' : 'Make the box as large as the path, or '}set "decoration": {"clip": "hardEdge"} on an ancestor.',
               nodeId: b.id, screen: screen, size: size, file: file));
@@ -1042,7 +1114,7 @@ List<RuntimeIssue> _check(
       final short = text.length > 30 ? '${text.substring(0, 30)}...' : text;
       if (text.contains(r'${')) {
         out.add(RuntimeIssue('expression_not_evaluated', 'warning',
-            'Text "${b.id}" shows "$short" on screen: its expression did not evaluate. Check the formula (names, functions, quotes); '
+            'Text "${nameOf(b)}" shows "$short" on screen: its expression did not evaluate. Check the formula (names, functions, quotes); '
             'a binding of "props.text" or "props.runs" must not also be written as text, and a "\${...}" inside a formula is not read.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
@@ -1060,7 +1132,7 @@ List<RuntimeIssue> _check(
       });
       if (missing.isNotEmpty) {
         out.add(RuntimeIssue('missing_glyph', 'warning',
-            'Text "${b.id}" has ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')}, which its font has no glyph for: drawn as an empty box. '
+            'Text "${nameOf(b)}" has ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')}, which its font has no glyph for: drawn as an empty box. '
             'Use a character the font has, an icon node, or a box with a "path" for a small mark.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
@@ -1073,24 +1145,24 @@ List<RuntimeIssue> _check(
       });
       final rootStyle = p.text.style;
       if (colorless && (rootStyle?.color == null && rootStyle?.foreground == null)) {
-        out.add(RuntimeIssue('text_no_color', 'warning', 'Text "${b.id}" ("$short") has no color, so it is painted white: set props.style.color.',
+        out.add(RuntimeIssue('text_no_color', 'warning', 'Text "${nameOf(b)}" ("$short") has no color, so it is painted white: set props.style.color.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
       final cut = node.prop(api.TextProps.overflow) != api.TextOverflow.clip;
       if (p.didExceedMaxLines && !cut) {
-        out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${b.id}" ("$short") is cut at maxLines: set "overflow": "ellipsis" if that is meant, or give it more lines.',
+        out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${nameOf(b)}" ("$short") is cut at maxLines: set "overflow": "ellipsis" if that is meant, or give it more lines.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
       final needH = p.getMaxIntrinsicHeight(b.size.width);
       final needW = p.getMinIntrinsicWidth(double.infinity);
       if (needH > b.size.height + 1.5 && !p.didExceedMaxLines) {
         out.add(RuntimeIssue('text_clipped', 'warning',
-            'Text "${b.id}" ("$short") needs ${needH.toStringAsFixed(0)} px of height at ${b.size.width.toStringAsFixed(0)} wide but its box is ${b.size.height.toStringAsFixed(0)}: give it {"hug": n} height or more room.',
+            'Text "${nameOf(b)}" ("$short") needs ${needH.toStringAsFixed(0)} px of height at ${b.size.width.toStringAsFixed(0)} wide but its box is ${b.size.height.toStringAsFixed(0)}: give it {"hug": n} height or more room.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
       if (needW > b.size.width + 1.5 && node.prop(api.TextProps.maxLines) == null) {
         out.add(RuntimeIssue('text_clipped', 'warning',
-            'Text "${b.id}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: it is cut. '
+            'Text "${nameOf(b)}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: it is cut. '
             'Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }

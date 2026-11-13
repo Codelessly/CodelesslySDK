@@ -1,0 +1,1 @@
+{"children": ["passed"], "nodes": {"passed": {"type": "text", "props": {"text": "Passed in a slot", "style": {"color": "#FF006600"}}, "layout": {"width": {"hug": 120}, "height": {"hug": 20}}}}}

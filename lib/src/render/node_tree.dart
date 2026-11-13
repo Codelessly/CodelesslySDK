@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart' show WidgetBuilder;
 
 import 'animations.dart' show RenderAnimations, animatesOpacity;
 import 'behaviors.dart';
+import 'components.dart';
 import 'typewriter.dart';
 import 'hero.dart';
 import 'play.dart';
@@ -162,8 +163,10 @@ class RenderTree {
       this.recipes = const {},
       this.catalog = RecipeCatalog.none,
       this.gestures,
-      this.imageLoader})
+      this.imageLoader,
+      this.components})
       : islands = _TreeIslands(environment) {
+    components?.addListener(_componentsChanged);
     (islands as _TreeIslands).onEnvironment = () {
       for (final box in _boxes.values.toList()) {
         box._applied = null;
@@ -272,6 +275,135 @@ class RenderTree {
   final NodeSource source;
   NodeTreeObserver? observer;
 
+  /// The component definitions calls render with (DESIGN.md §4.2): a call
+  /// node's box is its definition root's, in a [ComponentInstance]. Null:
+  /// a call renders as the empty box of an unknown type.
+  final ComponentRegistry? components;
+
+  final Map<ComponentInstance, InstanceSource> _instanceSources = {};
+
+  /// Where the ids of [instance] are: the page's [source], or the definition
+  /// of the innermost component instance it is in.
+  NodeSource sourceOf(Object? instance) {
+    if (components == null) return source;
+    final ci = componentInstanceOf(instance);
+    if (ci == null) return source;
+    final existing = _instanceSources[ci];
+    if (existing != null) return existing;
+    final def = components![ci.component];
+    if (def == null) return source;
+    final callSource = sourceOf(ci.outer);
+    return _instanceSources[ci] = InstanceSource(ci, def, callSource, () => resolveBound(ci.call, instance: ci.outer));
+  }
+
+  /// The box key node [id] of [instance]'s document renders at: a call
+  /// renders as its definition's root in a [ComponentInstance] (through
+  /// calls that are roots of definitions, up to [kMaxComponentDepth]).
+  (String, Object?) _rendersAt(String id, Object? instance) {
+    final registry = components;
+    if (registry == null) return (id, instance);
+    var at = (id, instance);
+    while (true) {
+      final n = sourceOf(at.$2).node(at.$1);
+      if (n == null || !api.isComponentTypeName(n.type)) return at;
+      final def = registry[n.type];
+      if (def == null) {
+        registry.reportMissing(n.type, nodePath(at.$1, at.$2));
+        return at;
+      }
+      final ci = ComponentInstance(at.$2, at.$1, n.type);
+      if (ci.depth > kMaxComponentDepth) {
+        registry.reportMissing(n.type, '${nodePath(at.$1, at.$2)} (component_depth: more than $kMaxComponentDepth nested)');
+        return at;
+      }
+      at = (def.root, ci);
+    }
+  }
+
+  /// Whether [id] in [instance] is the root of the definition [instance]
+  /// renders: its box is also its call's.
+  bool isInstanceRoot(String id, Object? instance) => instance is ComponentInstance && _rootOf(instance) == id;
+
+  String? _rootOf(ComponentInstance instance) {
+    final registry = components;
+    return registry == null ? null : registry[instance.component]?.root;
+  }
+
+  /// The path tools name node [id] of [instance] by (`plans/card1/cta`).
+  String pathOf(String id, Object? instance) =>
+      nodePath(id, instance, rootOf: instance is ComponentInstance ? _rootOf(instance) : null);
+
+  /// What a call passes for slot [name] of [instance]: ids in the caller's
+  /// document (its `children`, or `slots[name]`).
+  List<String> _slotContent(ComponentInstance instance, String name) {
+    final call = sourceOf(instance.outer).node(instance.call);
+    if (call == null) return const [];
+    if (name == api.kChildrenSlot) return call.children;
+    final id = call.slots[name];
+    return id == null ? const [] : [id];
+  }
+
+  /// [id] of [instance]'s document as placed in its parent: a definition's
+  /// `slot` node is replaced by what its call passes (in the caller's
+  /// instance), or by its own children when the call passes nothing.
+  void _placed(String id, Object? instance, List<(String, Object?)> out, [int depth = 0]) {
+    final n = sourceOf(instance).node(id);
+    if (n == null) return;
+    if (n.type != api.SlotProps.spec.type || depth > kMaxComponentDepth) {
+      out.add((id, instance));
+      return;
+    }
+    final ci = componentInstanceOf(instance);
+    final content = ci == null ? const <String>[] : _slotContent(ci, n.prop(api.SlotProps.name));
+    if (content.isNotEmpty) {
+      for (final c in content) {
+        _placed(c, ci!.outer, out, depth + 1);
+      }
+    } else {
+      for (final c in n.children) {
+        _placed(c, instance, out, depth + 1);
+      }
+    }
+  }
+
+  /// Node [id] of [instance]'s document as its parent lays it out: a call as
+  /// its definition's root seamed with it (unbound), else the node.
+  Node? _laidOut(String id, Object? instance) {
+    final n = sourceOf(instance).node(id);
+    if (n == null || components == null) return n;
+    final (rid, rinstance) = _rendersAt(id, instance);
+    if (rinstance is! ComponentInstance || identical(rinstance, instance)) return n;
+    final root = sourceOf(rinstance).node(rid);
+    return root == null ? n : api.seamCall(root, n);
+  }
+
+  /// A definition arrived, left or changed its declaration: the boxes of
+  /// calls to it (and of its instances) are placed again by their parents.
+  void _componentsChanged() {
+    final types = components?.changed ?? const <String>{};
+    if (types.isEmpty) return;
+    _instanceSources.removeWhere((ci, _) => types.contains(ci.component));
+    final parents = <NodeBox>{};
+    for (final b in _boxes.values.toList()) {
+      final callType = b.instance is ComponentInstance && isInstanceRoot(b.id, b.instance)
+          ? (b.instance! as ComponentInstance).component
+          : b.source.node(b.id)?.type;
+      if (callType == null || !types.contains(callType)) continue;
+      for (RenderObject? p = b.parent; p != null; p = p.parent) {
+        if (p is NodeBox) {
+          parents.add(p);
+          break;
+        }
+      }
+    }
+    for (final p in parents) {
+      // Its own node didn't change: apply it anew, so its children are
+      // placed again.
+      p._applied = null;
+      p._apply();
+    }
+  }
+
   /// The islands (widget-built nodes) of this tree.
   final IslandManager islands;
 
@@ -350,7 +482,7 @@ class RenderTree {
     final next = {...current};
     on ? next.add(state) : next.remove(state);
     next.isEmpty ? _states.remove(key) : _states[key] = next;
-    final affected = {id, ...?source.node(id)?.behaviors.states.targets};
+    final affected = {id, ...?sourceOf(instance).node(id)?.behaviors.states.targets};
     for (final b in _boxes.values.toList()) {
       if (b.instance == instance && affected.contains(b.id)) b._apply();
     }
@@ -386,15 +518,15 @@ class RenderTree {
         [for (final m in n.media) w != null && m.holds(w.width, w.height, w.breakpoints)];
     final parents = <String>{};
     for (final b in _boxes.values.toList()) {
-      final n = source.node(b.id);
+      final n = b.source.node(b.id);
       if (n == null || n.media.isEmpty) continue;
       if (listEquals(holding(n, before), holding(n, value))) continue;
       b._apply();
-      if (source.parentOf(b.id) case final String p) parents.add(p);
+      if (b.source.parentOf(b.id) case final String p) parents.add(p);
     }
     if (parents.isNotEmpty) reapply(parents);
     for (final b in _boxes.values.toList()) {
-      final n = source.node(b.id);
+      final n = b.source.node(b.id);
       if (n == null) continue;
       if (!n.isResponsive) continue;
       // Only the ones that now show another variant.
@@ -420,8 +552,20 @@ class RenderTree {
   /// states that style it, its bindings applied ([binder]).
   Node? resolve(String id, {Object? instance}) => resolveBound(id, instance: instance)?.node;
 
-  /// [resolve], with whether a binding hides the node and what it read.
+  /// [resolve], with whether a binding hides the node and what it read. The
+  /// root of a component instance is seamed with its call (bound in the
+  /// caller's scope): the call's size and placement, the root's inside.
   BoundNode? resolveBound(String id, {Object? instance}) {
+    final bound = _resolveBoundOwn(id, instance);
+    if (bound == null || !isInstanceRoot(id, instance)) return bound;
+    final ci = instance! as ComponentInstance;
+    final call = resolveBound(ci.call, instance: ci.outer);
+    if (call == null) return bound;
+    return BoundNode(api.seamCall(bound.node, call.node),
+        collapsed: bound.collapsed || call.collapsed, watch: [...bound.watch, ...call.watch], states: bound.states);
+  }
+
+  BoundNode? _resolveBoundOwn(String id, Object? instance) {
     var n = _patched(id, instance);
     if (n == null) return null;
     final binder = _bindings;
@@ -432,12 +576,13 @@ class RenderTree {
     // binding or a condition: it takes no room (CSS `display: none`,
     // Flutter's `Visibility`). Hidden in its own data with no media rule
     // about it, it keeps its room, as before.
-    final own = source.node(id);
+    final own = sourceOf(instance).node(id);
     final dynamic = own == null || own.visible || own.media.any((m) => m.patch.containsKey('visible'));
     return dynamic ? BoundNode(bound.node, collapsed: true, watch: bound.watch, states: bound.states) : bound;
   }
 
   BoundNode _resolveBound(String id, Object? instance, Node n, TreeBindings binder) {
+    final source = sourceOf(instance);
     var bound = binder.bind(source, n, instance);
     // States driven by data (`selected`, `disabled`): held like hover, so
     // the node's state styles patch it (bind it again) and its targets.
@@ -460,7 +605,7 @@ class RenderTree {
     }
     if (setEquals(next, current)) return false;
     next.isEmpty ? _states.remove(key) : _states[key] = next;
-    final targets = {...?source.node(id)?.behaviors.states.targets}..remove(id);
+    final targets = {...?sourceOf(instance).node(id)?.behaviors.states.targets}..remove(id);
     if (targets.isNotEmpty) {
       _pendingStateTargets.add((targets, instance));
       if (!_stateFlushScheduled) {
@@ -486,6 +631,7 @@ class RenderTree {
   }
 
   Node? _patched(String id, Object? instance) {
+    final source = sourceOf(instance);
     var n = source.node(id);
     if (n == null) return null;
     // Its own fields at the screen's size (its media rules),
@@ -537,7 +683,66 @@ class RenderTree {
   final Set<NodeBox> _orphans = {};
   bool _sweepScheduled = false;
 
-  NodeBox? boxOf(String id, {Object? instance}) => _boxes[keyOf(id, instance)];
+  NodeBox? boxOf(String id, {Object? instance}) {
+    final box = _boxes[keyOf(id, instance)];
+    if (box != null || components == null) return box;
+    // A call's box is its definition root's.
+    final (rid, rinstance) = _rendersAt(id, instance);
+    return _boxes[keyOf(rid, rinstance)];
+  }
+
+  /// The box of the node at tool path [path]: call ids from the page down,
+  /// then the node's id (`plans/card1/cta`; `plans/card1` is the call's
+  /// box, its definition's root); `<segment>#<n>` picks the n-th copy
+  /// (from 0) a list repeats there (`faq/faqItem#2/q`). The first copy when
+  /// a segment has no `#`.
+  NodeBox? boxAtPath(String path) {
+    final segments = path.split('/');
+    final plain = [for (final s in segments) s.split('#').first].join('/');
+    var found = [for (final b in _boxes.values) if (_plainPath(b) == plain) b];
+    for (var d = 0; d < segments.length && found.isNotEmpty; d++) {
+      final hash = segments[d].indexOf('#');
+      if (hash < 0) continue;
+      final n = int.tryParse(segments[d].substring(hash + 1));
+      if (n == null) return null;
+      final copies = <Object?>[];
+      for (final b in found) {
+        final c = _copyAt(b, d);
+        if (!copies.contains(c)) copies.add(c);
+      }
+      if (n >= copies.length) return null;
+      // The n-th on screen (top to bottom, then left to right), as a
+      // person counts them; the order they were made in otherwise.
+      final at = {for (final c in copies) c: _topLeftOf(found.firstWhere((b) => _copyAt(b, d) == c))};
+      if (at.values.every((o) => o != null)) {
+        copies.sort((a, b) => at[a]!.dy != at[b]!.dy ? at[a]!.dy.compareTo(at[b]!.dy) : at[a]!.dx.compareTo(at[b]!.dx));
+      }
+      found = [for (final b in found) if (_copyAt(b, d) == copies[n]) b];
+    }
+    return found.firstOrNull;
+  }
+
+  static Offset? _topLeftOf(NodeBox b) => b.attached && b.hasSize ? b.localToGlobal(Offset.zero) : null;
+
+  /// [b]'s path without copy indexes.
+  String _plainPath(NodeBox b) {
+    final calls = _callsOf(b.instance);
+    final ids = [for (final c in calls) c.call, if (!isInstanceRoot(b.id, b.instance)) b.id];
+    return ids.join('/');
+  }
+
+  /// The component instances [instance] is in, outermost first.
+  static List<ComponentInstance> _callsOf(Object? instance) => [
+        for (Object? i = instance; i != null; i = outerInstanceOf(i))
+          if (i is ComponentInstance) i,
+      ].reversed.toList();
+
+  /// What tells the copies of [b]'s path segment [depth] apart: the
+  /// instance of the call there, or (its last segment) the box's own.
+  Object? _copyAt(NodeBox b, int depth) {
+    final calls = _callsOf(b.instance);
+    return depth < calls.length ? calls[depth] : b.instance;
+  }
 
   /// Every box of node [id]: one per copy a list (or grid, page view...)
   /// repeats it in, and the single one of a node that doesn't repeat.
@@ -549,6 +754,8 @@ class RenderTree {
 
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
     _listenForFonts();
+    // A call renders as its definition's root, in its instance.
+    if (components != null) (id, instance) = _rendersAt(id, instance);
     final key = keyOf(id, instance);
     final existing = _boxes[key];
     if (existing != null) {
@@ -589,6 +796,7 @@ class RenderTree {
 
   void dispose() {
     _disposed = true;
+    components?.removeListener(_componentsChanged);
     _fontNotifications?.removeListener(_fontsChanged);
     _afterFonts.clear();
     for (final b in _boxes.values.toList()) {
@@ -630,6 +838,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   @override
   final Object? instance;
   String get key => RenderTree.keyOf(id, instance);
+
+  /// The document this box's node is in: the page's, or a component
+  /// definition's (inside an instance).
+  @override
+  late final NodeSource source = tree.sourceOf(instance);
   Slot _slot;
   @override
   Slot get slot => _slot;
@@ -939,11 +1152,22 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   // --- reconciliation ---------------------------------------------------------
 
-  void _subscribe() => _listenable = tree.source.watch(id)..addListener(_apply);
+  void _subscribe() {
+    _listenable = source.watch(id)..addListener(_apply);
+    // An instance's root is also its call: an edit to the call re-applies it.
+    if (tree.isInstanceRoot(id, instance)) {
+      final ci = instance! as ComponentInstance;
+      _callListenable = tree.sourceOf(ci.outer).watch(ci.call)..addListener(_apply);
+    }
+  }
+
+  ValueListenable<Node?>? _callListenable;
 
   void _unsubscribe() {
     _listenable?.removeListener(_apply);
     _listenable = null;
+    _callListenable?.removeListener(_apply);
+    _callListenable = null;
     _watchBindings(const []);
   }
 
@@ -954,7 +1178,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   }
 
   @override
-  Node? nodeOf(String id) => tree.source.node(id);
+  Node? nodeOf(String id) => source.node(id);
 
   @override
   T obtain<T extends RenderBox>(String key, T Function() create) => _obtain(key, create);
@@ -1070,7 +1294,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     // whole node, margin included, moves.
     if (n.behaviors.sticky case final api.Sticky sticky) {
       chain.add(_obtain<RenderSticky>('sticky', RenderSticky.new)
-        ..onStuck = ((stuck) => tree.bindings?.publish(tree.source, id, instance, 'sticky', {'stuck': stuck}))
+        ..onStuck = ((stuck) => tree.bindings?.publish(source, id, instance, 'sticky', {'stuck': stuck}))
         ..configure(sticky, interactive: tree.animates));
     }
 
@@ -1103,7 +1327,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     // `${view.progress}` as it scrolls through its view.
     if (n.behaviors.viewProgress case final api.ViewProgress progress) {
       chain.add(_obtain<RenderViewProgress>('viewProgress', RenderViewProgress.new)
-        ..onValues = ((values) => tree.bindings?.publish(tree.source, id, instance, 'view', values))
+        ..onValues = ((values) => tree.bindings?.publish(source, id, instance, 'view', values))
         ..configure(this, progress, interactive: tree.animates));
     }
     // Its laid-out box, written to a variable.
@@ -1195,11 +1419,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// Row/columns above whose structure depends on their descendants
   /// re-decide it (coalesced, after the current change).
   void _notifyDependentAncestors() {
-    var p = tree.source.parentOf(id);
+    var p = source.parentOf(id);
     while (p != null) {
       final box = tree._boxes[RenderTree.keyOf(p, instance)];
       if (box != null && box._dependsOnDescendants) box._reapplySoon();
-      p = tree.source.parentOf(p);
+      p = source.parentOf(p);
     }
   }
 
@@ -1483,7 +1707,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         ..additionalConstraints = bc);
     }
 
-    final children = [for (final cid in n.children) ?tree.source.node(cid)];
+    final children = _shownChildren(n.children);
     if (n.wraps) {
       _dependsOnDescendants = false;
       _wrap(n, chain, scrolls: scrolls);
@@ -1608,12 +1832,52 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     if (const {'gridView', 'pageView', 'webView'}.contains(node.type)) return true;
     if (node.type == 'listView' && !listBuildsAllItems(node)) return true;
     if (node.type != 'canvas' && node.scrolls) return true;
+    final inside = _shownInstances[node] ?? instance;
     for (final c in node.childIds) {
-      final child = tree.source.node(c);
+      final child = _shownChild(c, inside);
       if (child != null && _subtreeBlocksIntrinsics(child)) return true;
     }
     return false;
   }
+
+  /// The instance each node [_shownChildren] gave is in (identity).
+  final Map<Node, Object?> _shownInstances = Map.identity();
+
+  /// The nodes [ids] (of this box's document) place as children, as their
+  /// parent lays them out: slots replaced by what the call passes, calls as
+  /// their definitions' roots.
+  List<Node> _shownChildren(List<String> ids) {
+    if (tree.components == null) return [for (final cid in ids) ?source.node(cid)];
+    _shownInstances.clear();
+    final placed = <(String, Object?)>[];
+    for (final cid in ids) {
+      tree._placed(cid, instance, placed);
+    }
+    final out = <Node>[];
+    for (final (pid, pinstance) in placed) {
+      final c = tree._laidOut(pid, pinstance);
+      if (c == null) continue;
+      _shownInstances[c] = _innerInstance(pid, pinstance);
+      out.add(c);
+    }
+    return out;
+  }
+
+  /// A child of a node [_shownChildren] gave, and the instance it is in.
+  Node? _shownChild(String id, Object? instance) {
+    if (tree.components == null) return source.node(id);
+    final placed = <(String, Object?)>[];
+    tree._placed(id, instance, placed);
+    if (placed.isEmpty) return null;
+    final (pid, pinstance) = placed.first;
+    final n = tree._laidOut(pid, pinstance);
+    if (n != null) _shownInstances[n] = _innerInstance(pid, pinstance);
+    return n;
+  }
+
+  /// The instance the children of node [id] of [instance] are in: a call's
+  /// are its definition's.
+  Object? _innerInstance(String id, Object? instance) => tree._rendersAt(id, instance).$2;
 
   /// A scroll view at rest: fit box → viewport → padding → content extent.
   void _scrollView(Node n, List<RenderBox> chain, List<Node> children,
@@ -1989,8 +2253,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// The axis [node]'s children scroll along, if any.
   Axis? _scrollAxisFor(Node node) {
     if (node.scrolls) return node.scrollDirection == api.Axis.vertical ? Axis.vertical : Axis.horizontal;
-    final pid = tree.source.parentOf(node.id);
-    final p = pid == null ? null : tree.source.node(pid);
+    final pid = source.parentOf(node.id);
+    final p = pid == null ? null : source.node(pid);
     if (p != null && p.type == 'canvas' && p.slots['body'] == node.id && p.scrolls) {
       return p.scrollDirection == api.Axis.vertical ? Axis.vertical : Axis.horizontal;
     }
@@ -2064,11 +2328,25 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _container = container;
     RenderBox? after;
     final placed = <NodeBox>{};
+    final components = tree.components != null;
+    final shown = <(String, Object?)>[];
     for (var i = 0; i < ids.length; i++) {
       final cid = ids[i];
-      if (tree.source.node(cid) == null) continue;
       final scope = instances != null && i < instances.length ? instances[i] : null;
-      final box = tree.obtain(cid, childSlot, instance: scope ?? instance ?? this.instance);
+      final inst = scope ?? instance ?? this.instance;
+      if (!components) {
+        if (source.node(cid) == null) continue;
+        shown
+          ..clear()
+          ..add((cid, inst));
+      } else {
+        // A definition's slot places what its call passes (in the caller's
+        // instance); a call renders as its definition's root.
+        shown.clear();
+        tree._placed(cid, inst, shown);
+      }
+      for (final (pid, pinstance) in shown) {
+      final box = tree.obtain(pid, childSlot, instance: pinstance);
       if (identical(box, this) || !placed.add(box)) continue;
       if (box.parent != container) {
         if (box.parent != null) box.detachFromParent();
@@ -2078,6 +2356,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       }
       box._applyParentData();
       after = box;
+      }
     }
     var extra = after == null ? container.firstChild : container.childAfter(after);
     while (extra != null) {
