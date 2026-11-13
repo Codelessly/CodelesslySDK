@@ -1,0 +1,197 @@
+{
+ "schema": 2,
+ "id": "FeatureCard",
+ "roots": [
+  "fc"
+ ],
+ "widget": {
+  "type": "FeatureCard",
+  "doc": "One platform feature: its number, title, body and points.",
+  "props": [
+   {
+    "key": "feature",
+    "type": {
+     "kind": "json",
+     "flutter": "Feature"
+    },
+    "default": {}
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Command",
+   "size": [
+    420,
+    420
+   ],
+   "props": {
+    "feature": {
+     "number": "01 / COMMAND",
+     "title": "The whole response, in one command center.",
+     "body": "Open an incident and the right people come together.",
+     "points": [
+      "Live event timeline",
+      "One-click status updates"
+     ]
+    }
+   }
+  }
+ ],
+ "nodes": {
+  "fc": {
+   "type": "column",
+   "children": [
+    "fcNum",
+    "fcTitle",
+    "fcBody",
+    "fcPoints"
+   ],
+   "layout": {
+    "width": {
+     "fill": 420
+    },
+    "height": {
+     "hug": 380
+    },
+    "padding": 28
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 6
+   }
+  },
+  "fcNum": {
+   "type": "text",
+   "props": {
+    "text": "${props.feature.number}",
+    "style": "eyebrow"
+   },
+   "layout": {
+    "width": {
+     "fill": 364
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "fcTitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.feature.title}",
+    "style": "title"
+   },
+   "layout": {
+    "width": {
+     "fill": 364
+    },
+    "height": {
+     "hug": 64
+    }
+   }
+  },
+  "fcBody": {
+   "type": "text",
+   "props": {
+    "text": "${props.feature.body}",
+    "style": "body"
+   },
+   "layout": {
+    "width": {
+     "fill": 364
+    },
+    "height": {
+     "hug": 72
+    }
+   }
+  },
+  "fcPoints": {
+   "type": "listView",
+   "children": [
+    "fcPoint"
+   ],
+   "bind": {
+    "data": "${props.feature.points}"
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 364
+    },
+    "height": {
+     "hug": 80
+    }
+   }
+  },
+  "fcPoint": {
+   "type": "row",
+   "children": [
+    "fcDot",
+    "fcPointText"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 364
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "fcDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "lime"
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "fcPointText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "body",
+     "color": "ink",
+     "fontSize": 15
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  }
+ }
+}

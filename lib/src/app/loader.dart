@@ -8,8 +8,11 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart' show GZipDecoder;
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:crypto/crypto.dart' show sha256;
 import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:http/http.dart' as http;
+
+import 'hosted_plugins.dart' show PluginSource;
 
 /// Loading published data failed.
 class PublishLoadException implements Exception {
@@ -22,20 +25,28 @@ class PublishLoadException implements Exception {
   String toString() => 'PublishLoadException: $message${cause == null ? '' : ' ($cause)'}';
 }
 
-/// Loads a project's publish model and its layouts from [PublishSource]s.
+/// Loads a project's publish model, its layouts and its components from
+/// [PublishSource]s.
 abstract interface class PublishLoader {
   /// The project's publish model.
   Future<PublishModel> loadModel(PublishSource source);
 
   /// Layout [layoutId] (a layout id the model lists).
   Future<PublishLayout> loadLayout(PublishSource source, String layoutId);
+
+  /// Component [type] (a type name the model's `components` lists): the
+  /// definition stored at [PublishSource.componentPath]. Throws a
+  /// [PublishLoadException] when there is none.
+  Future<PublishComponent> loadComponent(PublishSource source, String type);
 }
 
 /// A [PublishLoader] that also watches the publish model: each publish (or
 /// preview save) arrives as a new model, as the
 /// `publish/{projectId}` document changes. [Codelessly] follows it while
 /// [CodelesslyConfig.liveUpdates] is on: layouts republished since are
-/// dropped and load again when shown.
+/// dropped and load again when shown; components republished since (their
+/// entry's digest changed) load again at once and every instance on screen
+/// updates in place.
 abstract interface class LivePublishLoader implements PublishLoader {
   /// The project's publish model, now and on every change.
   Stream<PublishModel> watchModel(PublishSource source);
@@ -102,16 +113,74 @@ PublishLayout decodeStoredPublishLayout(Map<String, Object?> data, {String? layo
       catalog: standardCatalog);
 }
 
+/// Where a stored component too large for one Firestore document keeps its
+/// document: its JSON, gzipped, base64 encoded (as [kCompressedNodesField]
+/// keeps a layout's nodes).
+const String kCompressedDocumentField = 'compressedDocument';
+
+/// A stored component document ([PublishSource.componentPath]) as a
+/// [PublishComponent]: current format only, a compressed document expanded,
+/// its document decoded with [catalog] (default: the standard catalog).
+/// [type] (the document's id) fills a missing `id`. Throws a
+/// [PublishLoadException] when it isn't a component definition.
+PublishComponent decodeStoredPublishComponent(Map<String, Object?> data, {String? type, Catalog? catalog}) {
+  if (data.isEmpty) throw PublishLoadException('Component [${type ?? '?'}] does not exist');
+  _requireCurrentFormat(data, 'Component [${type ?? data['id']}]');
+  var json = data;
+  final zipped = data[kCompressedDocumentField];
+  if (zipped is String) {
+    try {
+      json = {
+        for (final e in data.entries)
+          if (e.key != kCompressedDocumentField) e.key: e.value,
+        'document': decodeJsonBytes(base64Decode(zipped)),
+      };
+    } catch (e) {
+      throw PublishLoadException('Component [${type ?? data['id']}] has an unreadable compressed document', e);
+    }
+  }
+  final component = PublishComponent.fromJson(json, catalog: catalog ?? standardCatalog, id: type);
+  if (!component.isComponent) {
+    throw PublishLoadException('Component [${component.id}] is not a component definition (one root and a "widget" declaration)');
+  }
+  return component;
+}
+
+/// The sha256 hex digest of [component]'s document ([PublishComponent.digestInput]):
+/// what its `digest` is, set by the publish that wrote it.
+String componentDigest(PublishComponent component) => sha256.convert(utf8.encode(component.digestInput)).toString();
+
+/// Whether [component] is what its publisher wrote: its digest (when it
+/// carries one) is its document's.
+bool componentIntact(PublishComponent component) => component.digest.isEmpty || componentDigest(component) == component.digest;
+
+/// Version [version] of plugin [id], as [bundle] embeds it; null when it
+/// doesn't.
+PluginVersion? _bundledPlugin(PublishBundle bundle, String id, int version) {
+  for (final v in bundle.pluginVersions) {
+    if (v.id == id && v.version == version) return v;
+  }
+  return null;
+}
+
+/// Component [type] of [bundle], or a [PublishLoadException] naming [where].
+PublishComponent _bundled(PublishBundle bundle, String type, String where) {
+  final c = bundle.components[type];
+  if (c == null) throw PublishLoadException('Component [$type] is not in $where');
+  return c;
+}
+
 /// A [PublishLoader] over bundles in memory: tests, previews, and apps that
 /// ship their layouts. [bundles] holds one bundle per source; a source
 /// without one uses [PublishSource.publish]'s.
-class MemoryPublishLoader implements PublishLoader {
+class MemoryPublishLoader implements PublishLoader, PluginSource {
   MemoryPublishLoader(PublishBundle bundle, {Map<PublishSource, PublishBundle> others = const {}})
       : bundles = {PublishSource.publish: bundle, ...others};
 
   final Map<PublishSource, PublishBundle> bundles;
 
-  /// Calls made, for tests: `model:<source>` and `layout:<source>:<id>`.
+  /// Calls made, for tests: `model:<source>`, `layout:<source>:<id>` and
+  /// `component:<source>:<type>`.
   final List<String> calls = [];
 
   PublishBundle _bundle(PublishSource source) => bundles[source] ?? bundles[PublishSource.publish]!;
@@ -129,6 +198,19 @@ class MemoryPublishLoader implements PublishLoader {
     if (layout == null) throw PublishLoadException('Layout [$layoutId] is not in the bundle');
     return layout;
   }
+
+  @override
+  Future<PublishComponent> loadComponent(PublishSource source, String type) async {
+    calls.add('component:${source.name}:$type');
+    return _bundled(_bundle(source), type, 'the bundle');
+  }
+
+  /// The plugin versions the publish bundle embeds.
+  @override
+  Future<PluginVersion?> loadPlugin(String id, int version) async {
+    calls.add('plugin:$id:$version');
+    return _bundledPlugin(_bundle(PublishSource.publish), id, version);
+  }
 }
 
 /// Decodes a bundle file: JSON, gzipped or not.
@@ -143,7 +225,7 @@ Object? decodeJsonBytes(List<int> bytes) {
 
 /// A [PublishLoader] over a bundle shipped as an asset (`.json` or
 /// `.json.gz`): runs offline. Loaded once.
-class AssetPublishLoader implements PublishLoader {
+class AssetPublishLoader implements PublishLoader, PluginSource {
   AssetPublishLoader(this.asset, {AssetBundle? bundle}) : _assets = bundle;
 
   final String asset;
@@ -169,20 +251,29 @@ class AssetPublishLoader implements PublishLoader {
     if (layout == null) throw PublishLoadException('Layout [$layoutId] is not in [$asset]');
     return layout;
   }
+
+  @override
+  Future<PublishComponent> loadComponent(PublishSource source, String type) async => _bundled(await bundle, type, '[$asset]');
+
+  /// The plugin versions the bundle embeds.
+  @override
+  Future<PluginVersion?> loadPlugin(String id, int version) async => _bundledPlugin(await bundle, id, version);
 }
 
 /// A [PublishLoader] over HTTP. With [bundle] set (a slug), the whole
 /// publish is one file ([PublishSource.bundlePath], `publish/{slug}.json`
-/// in Codelessly's storage bucket): what a project's slug serves. Without it, the publish model and
-/// each layout are JSON files under [baseUrl] at the publish paths
-/// ([PublishSource.modelPath], [PublishSource.layoutPath], with `.json`):
+/// in Codelessly's storage bucket), its components in its `components` map:
+/// what a project's slug serves. Without it, the publish model, each layout
+/// and each component are JSON files under [baseUrl] at the publish paths
+/// ([PublishSource.modelPath], [PublishSource.layoutPath],
+/// [PublishSource.componentPath], with `.json`):
 /// for a self-hosted mirror; Codelessly itself keeps them in Firestore
 /// (FirestorePublishLoader).
 ///
 /// [urlFor] maps a storage path to a URL; the default joins it to
 /// [baseUrl] (a Firebase Storage bucket's `.../o/` endpoint encodes the
 /// path, see [HttpPublishLoader.firebaseStorage]).
-class HttpPublishLoader implements PublishLoader {
+class HttpPublishLoader implements PublishLoader, PluginSource {
   HttpPublishLoader({
     required this.projectId,
     this.baseUrl = '',
@@ -266,10 +357,34 @@ class HttpPublishLoader implements PublishLoader {
     }
     return PublishLayout.fromJson(await _get('${source.layoutPath(projectId, layoutId)}.json'), catalog: standardCatalog);
   }
+
+  @override
+  Future<PublishComponent> loadComponent(PublishSource source, String type) async {
+    if (bundle) return _bundled(await _bundle(source), type, 'the bundle');
+    final json = await _get('${source.componentPath(projectId, type)}.json');
+    if (json is! Map) throw PublishLoadException('Component [$type] is not a JSON object');
+    return decodeStoredPublishComponent(json.cast<String, Object?>(), type: type);
+  }
+
+  /// A [bundle]'s embedded version, else `plugins/{id}/versions/{n}.json`
+  /// under [baseUrl] (null when there is none).
+  @override
+  Future<PluginVersion?> loadPlugin(String id, int version) async {
+    if (bundle) {
+      final embedded = _bundledPlugin(await _bundle(PublishSource.publish), id, version);
+      if (embedded != null) return embedded;
+    }
+    try {
+      return PluginVersion.fromJson(await _get('$kPluginsCollection/$id/versions/$version.json'), id: id, version: version);
+    } on PublishLoadException {
+      return null;
+    }
+  }
 }
 
 /// Stores published JSON between runs, so an app opens on its last publish
-/// and works offline. Keys are storage paths ([PublishSource.modelPath]...).
+/// and works offline. Keys are storage paths ([PublishSource.modelPath],
+/// [PublishSource.layoutPath], [PublishSource.componentPath]...).
 abstract interface class PublishCache {
   Future<Json?> read(String key);
   Future<void> write(String key, Json value);

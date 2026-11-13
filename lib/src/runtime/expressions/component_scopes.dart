@@ -34,7 +34,17 @@ final class ComponentScopes {
   /// The definition's variables, this instance's values.
   late final VariableScope variables;
 
+  final List<VoidCallback> _onDispose = [];
+
+  /// Calls [f] when these scopes are disposed (a persisted variable stops
+  /// being saved).
+  void onDispose(VoidCallback f) => _onDispose.add(f);
+
   void dispose() {
+    for (final f in _onDispose) {
+      f();
+    }
+    _onDispose.clear();
     variables.dispose();
     props.dispose();
     ambient.dispose();

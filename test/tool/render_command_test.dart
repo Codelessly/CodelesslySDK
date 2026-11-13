@@ -325,6 +325,17 @@ void main() {
       expect(codes(report), ['unknown_screen_arg']);
     });
 
+    testWidgets('--components-all renders every component of the site alone, each preview at its size', (tester) async {
+      expect(parseArgs([site, '--out', 'o', '--components-all']).componentsAll, isTrue);
+      final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path, componentsAll: true,
+          sizes: const [Size(390, 844)]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.images.map((f) => f.split('/').last), isNotEmpty);
+      expect(report.images.every((f) => f.split('/').last.startsWith('Chip')), isTrue, reason: '${report.images}');
+      final again = await runRender(tester, RenderArgs(inputs: [site], out: out.path, componentsAll: true));
+      expect(again.images.map((f) => f.split('/').last), ['Card-hello@320x240.png']);
+    });
+
     testWidgets('a call to a component the site lacks: validation names it, the render reports it', (tester) async {
       final dir = Directory('${out.path}/site')..createSync();
       File('${dir.path}/home.json').writeAsStringSync(jsonEncode({
@@ -356,7 +367,7 @@ void main() {
     testWidgets('the rewritten Relay pricing page renders pixel-identical to the original', (tester) async {
       final o = await runRender(tester, RenderArgs(inputs: ['$fixtures/sections/original'], out: '${out.path}/o', sizes: const [Size(390, 844)],
           fullPage: true, steps: const [Step('tap', 'fq#1')]));
-      final s = await runRender(tester, RenderArgs(inputs: ['examples/relay-pricing'], out: '${out.path}/s', sizes: const [Size(390, 844)],
+      final s = await runRender(tester, RenderArgs(inputs: ['examples/relay-pricing'], out: '${out.path}/s', sizes: const [Size(390, 844)], screens: const ['pricing'],
           fullPage: true, steps: const [Step('tap', 'faq/fq#1')]));
       expect(s.errors, 0, reason: '${s.diagnostics}');
       expect(codes(s, 'error'), codes(o, 'error'));

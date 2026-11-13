@@ -847,7 +847,17 @@ class _LayoutViewState extends State<_LayoutView> {
     if (engine is Expressions) {
       // A component instance reads the project's variables (and the app's
       // scopes around them), never the page's.
-      binder = NodeBinder(scope: scope, logic: widget.layout.logic, engine: engine, projectScope: _codelessly.appVariables);
+      final storage = services is Services ? services.storage : null;
+      binder = NodeBinder(
+        scope: scope,
+        logic: widget.layout.logic,
+        engine: engine,
+        projectScope: _codelessly.appVariables,
+        // `persist: true` on a component variable: kept per instance path.
+        persistComponentVariable: storage == null
+            ? null
+            : (variables, variable, key) => PersistedVariable.attach(variables, variable, storage, key: key).dispose,
+      );
     } else if (engine is! NoopExpressionEngine) {
       source = bound = BoundSource(nodeValues, engine, scope);
     }
@@ -881,7 +891,7 @@ class _LayoutViewState extends State<_LayoutView> {
       session.addListener(changed);
       context.onDispose(() => session.removeListener(changed));
     }
-    final reactions = TreeReactions(runner: config.actions, context: context);
+    final reactions = TreeReactions(runner: _codelessly.actions, context: context);
     tree.interactions = reactions;
     final screen = _ScreenState(
       layout: widget.layout,
@@ -892,7 +902,7 @@ class _LayoutViewState extends State<_LayoutView> {
       bound: bound,
       tree: tree,
       context: context,
-      actions: config.actions,
+      actions: _codelessly.actions,
       reactions: reactions,
     );
     widget.controller?._screen = screen;
