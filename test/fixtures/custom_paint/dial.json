@@ -1,0 +1,152 @@
+{
+ "schema": 2,
+ "id": "dial",
+ "roots": [
+  "dial"
+ ],
+ "nodes": {
+  "dial": {
+   "type": "box",
+   "name": "Dial",
+   "layout": {
+    "width": 220,
+    "height": 220
+   },
+   "customPaint": {
+    "viewBox": [
+     200,
+     200
+    ],
+    "painter": [
+     {
+      "op": "circle",
+      "id": "face",
+      "c": [
+       100,
+       100
+      ],
+      "radius": 96,
+      "paint": [
+       "#FF1C2833",
+       {
+        "color": "#FF5D6D7E",
+        "style": "stroke",
+        "strokeWidth": 3
+       }
+      ]
+     },
+     {
+      "op": "repeat",
+      "count": "${ticks}",
+      "ops": [
+       {
+        "op": "group",
+        "translate": [
+         100,
+         100
+        ],
+        "rotate": "${= radians(index * 360 / count)}",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           0,
+           -90
+          ],
+          "p2": [
+           0,
+           "${= index % 5 == 0 ? -76 : -84}"
+          ],
+          "paint": {
+           "color": "#FFE8ECEE",
+           "style": "stroke",
+           "strokeWidth": "${= index % 5 == 0 ? 3 : 1.5}",
+           "strokeCap": "round"
+          }
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "op": "repeat",
+      "count": 12,
+      "ops": [
+       {
+        "op": "paragraph",
+        "text": "${= index == 0 ? 12 : index}",
+        "offset": [
+         "${= 100 + 62 * sin(radians(index * 30))}",
+         "${= 100 - 62 * cos(radians(index * 30))}"
+        ],
+        "anchor": [
+         0,
+         0
+        ],
+        "style": {
+         "fontSize": 14,
+         "fontWeight": 600,
+         "color": "#FFE8ECEE",
+         "fontFamily": "Roboto"
+        }
+       }
+      ]
+     }
+    ],
+    "foregroundPainter": [
+     {
+      "op": "group",
+      "id": "needle",
+      "translate": [
+       100,
+       100
+      ],
+      "rotate": "${= radians(value * 6)}",
+      "ops": [
+       {
+        "op": "line",
+        "p1": [
+         0,
+         14
+        ],
+        "p2": [
+         0,
+         -80
+        ],
+        "paint": {
+         "color": "#FFE74C3C",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "circle",
+      "c": [
+       100,
+       100
+      ],
+      "radius": 6,
+      "paint": "#FFE74C3C"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "dial": [
+   {
+    "name": "ticks",
+    "type": "integer",
+    "value": 60
+   },
+   {
+    "name": "value",
+    "type": "decimal",
+    "value": 17.5
+   }
+  ]
+ }
+}

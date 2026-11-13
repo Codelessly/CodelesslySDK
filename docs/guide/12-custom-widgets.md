@@ -182,6 +182,53 @@ CodelesslyWidget(
 With `CodelesslyWidget.onGenerateRoute(codelessly, template: ...)`, the template's `layoutBuilder` wraps every
 screen.
 
+## Drawing: `customPaint`
+
+Before writing a widget to draw something (a chart, a dial, a game board), try a `customPaint`: Flutter's
+`CustomPaint` as data, a behavior any node can carry. Its `painter` list draws behind the node's content (its
+decoration and children) and its `foregroundPainter` list over it, each op one `Canvas` call with Flutter's
+parameter names and a `paint` with Flutter's `Paint` fields. Values may be expressions, so a drawing follows the
+screen's variables:
+
+```json
+{"type": "box", "layout": {"width": 220, "height": 220},
+ "customPaint": {"viewBox": [200, 200], "painter": [
+   {"op": "circle", "c": [100, 100], "radius": 96, "paint": "#FF1C2833"},
+   {"op": "repeat", "count": "${ticks}", "ops": [
+     {"op": "group", "translate": [100, 100], "rotate": "${= radians(index * 360 / count)}", "ops": [
+       {"op": "line", "p1": [0, -90], "p2": [0, "${= index % 5 == 0 ? -76 : -84}"],
+        "paint": {"color": "#FFE8ECEE", "style": "stroke", "strokeWidth": "${= index % 5 == 0 ? 3 : 1.5}"}}]}]}],
+  "foregroundPainter": [
+   {"op": "group", "translate": [100, 100], "rotate": "${= radians(value * 6)}", "ops": [
+     {"op": "line", "p1": [0, 14], "p2": [0, -80], "paint": {"color": "#FFE74C3C", "style": "stroke", "strokeWidth": 3}}]}]}}
+```
+
+| A function plot | A dial | A board of 384 cells |
+|---|---|---|
+| ![A sine curve from a bound list of points over a grid, with axes and labels](images/12-custom-widgets/function_plot.png) | ![A clock face: 60 ticks and 12 numbers by repeat and rotate, a needle at a bound value](images/12-custom-widgets/dial.png) | ![A 24 by 16 board of rounded cells colored from a bound list](images/12-custom-widgets/cell_grid.png) |
+
+*The three, from `test/fixtures/custom_paint`, each one node.*
+
+How the SDK draws it (`lib/src/render/custom_paint.dart`):
+
+- **One render object** in the node's chain, just outside its content, as Flutter's `RenderCustomPaint`.
+  Neither list clips; use `decoration.clip` or a `group`'s `clipRect`.
+- **Compiled once** per value: literals are read up front, each expression becomes a closure over the node's
+  values (variables, list item...) with `size` and a `repeat`'s `item`, `index` and `count` as names of its own.
+- **Repaints only for data.** Each top-level op is recorded into a picture and replayed until a name it reads
+  changes, the box changes size or an image it waits for arrives. Nothing ticks: an animated drawing reads a
+  changing variable. A 48 × 48 board drawn by one `repeat` records once, and once per generation of its data.
+- **Hit regions.** An op with `hit` (`"hit": "cell-${index}"`) is a region: the node's pointer reactions
+  (`click`, `pointerDown`/`Up`, `hover`, `drag`...) get `${result.region}` (the topmost region under the
+  pointer, else `""`), `${result.x}`/`${result.y}` (in the node), `${result.viewX}`/`${result.viewY}` (in its
+  view box) and the region's `${result.item}` and `${result.index}`. An op with `hit` and no `paint` is an
+  invisible target.
+- **Expressions need values.** A tree without bindings (a bare `NodeTree(source)`) draws the literals only.
+- The model's `CustomPaint`, `PaintingStyle`, `PathFillType` and `PointMode` share Flutter's names: this
+  library doesn't export them; import `package:codelessly_api/codelessly_api.dart` with a prefix.
+
+The full vocabulary (every op and field, defaults, JSON) is in the API's guide, "Drawing with `customPaint`".
+
 ## Lower-level building blocks
 
 The SDK exports its render layer for hosts that show nodes without a publish (an editor's canvas, a preview
