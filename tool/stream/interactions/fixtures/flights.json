@@ -1,0 +1,182 @@
+{
+ "ops": [
+  {
+   "op": "roots",
+   "roots": [
+    "c"
+   ]
+  },
+  {
+   "op": "set",
+   "id": "c",
+   "node": {
+    "type": "canvas",
+    "slots": {
+     "body": "p"
+    },
+    "layout": {
+     "width": 390,
+     "height": 760
+    }
+   }
+  },
+  {
+   "op": "vars",
+   "scope": "c",
+   "set": {
+    "sel": {
+     "type": "integer",
+     "value": 0
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "p",
+   "node": {
+    "type": "column",
+    "children": [
+     "o1",
+     "o2",
+     "go"
+    ],
+    "layout": {
+     "width": {
+      "fill": 390
+     },
+     "height": {
+      "fill": 760
+     },
+     "padding": 16
+    },
+    "props": {
+     "spacing": 12,
+     "crossAxisAlignment": "start"
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFFFFFFF"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "o1",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "07:10 TAP",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "bind": {
+     "props.style.fontWeight": "${= sel == 0 ? 700 : 400}"
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "sel",
+        "value": "0"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "o2",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "13:45 easyJet",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "bind": {
+     "props.style.fontWeight": "${= sel == 1 ? 700 : 400}"
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "sel",
+        "value": "1"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "go",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Confirm",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "componentEvent",
+        "event": "confirm",
+        "value": {
+         "option": "${sel}"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

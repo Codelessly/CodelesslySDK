@@ -1,0 +1,232 @@
+{
+ "ops": [
+  {
+   "op": "roots",
+   "roots": [
+    "c"
+   ]
+  },
+  {
+   "op": "set",
+   "id": "c",
+   "node": {
+    "type": "canvas",
+    "slots": {
+     "body": "p"
+    },
+    "layout": {
+     "width": 390,
+     "height": 760
+    }
+   }
+  },
+  {
+   "op": "vars",
+   "scope": "c",
+   "set": {
+    "fields": {
+     "type": "integer",
+     "value": 0
+    },
+    "tried": {
+     "type": "boolean",
+     "value": false
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "p",
+   "node": {
+    "type": "column",
+    "children": [
+     "a",
+     "b",
+     "n",
+     "s",
+     "e"
+    ],
+    "layout": {
+     "width": {
+      "fill": 390
+     },
+     "height": {
+      "fill": 760
+     },
+     "padding": 16
+    },
+    "props": {
+     "spacing": 12,
+     "crossAxisAlignment": "start"
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFFFFFFF"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "a",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Short text",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "fields",
+        "value": "1",
+        "op": "add"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "b",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Checkbox",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "fields",
+        "value": "1",
+        "op": "add"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "n",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Fields: 0",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "bind": {
+     "props.text": "Fields: ${fields}"
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "s",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Submit",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "tried",
+        "value": "true"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "e",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "This field is required",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "bind": {
+     "visible": "${= tried}"
+    }
+   }
+  }
+ ]
+}

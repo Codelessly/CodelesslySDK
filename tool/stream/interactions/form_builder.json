@@ -1,0 +1,1 @@
+{"steps": [{"tap": {"text": "short text"}}, {"tap": {"text": "checkbox"}}, {"tap": {"text": "^\\s*submit"}}], "expectText": "required"}

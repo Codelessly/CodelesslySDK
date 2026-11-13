@@ -1,0 +1,124 @@
+{
+ "ops": [
+  {
+   "op": "roots",
+   "roots": [
+    "c"
+   ]
+  },
+  {
+   "op": "set",
+   "id": "c",
+   "node": {
+    "type": "canvas",
+    "slots": {
+     "body": "p"
+    },
+    "layout": {
+     "width": 390,
+     "height": 760
+    }
+   }
+  },
+  {
+   "op": "vars",
+   "scope": "c",
+   "set": {
+    "shots": {
+     "type": "integer",
+     "value": 0
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "p",
+   "node": {
+    "type": "column",
+    "children": [
+     "score",
+     "ball"
+    ],
+    "layout": {
+     "width": {
+      "fill": 390
+     },
+     "height": {
+      "fill": 760
+     },
+     "padding": 16
+    },
+    "props": {
+     "spacing": 12,
+     "crossAxisAlignment": "start"
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFFFFFFF"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "score",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Shots: 0",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "bind": {
+     "props.text": "Shots: ${shots}"
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "ball",
+   "node": {
+    "type": "box",
+    "layout": {
+     "width": 60,
+     "height": 60
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFF97316"
+      }
+     ],
+     "radius": 8
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "dragEnd"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "shots",
+        "value": "1",
+        "op": "add"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

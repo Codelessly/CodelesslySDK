@@ -122,9 +122,10 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _syncVariables();
     _changes = _session.changes.listen((_) => _documentChanged());
     _detachProbe = _session.attachLayoutProbe(_sizes);
+    _detachValues = _session.attachValuesProbe(() => _scope.values);
   }
 
-  VoidCallback? _detachProbe;
+  VoidCallback? _detachProbe, _detachValues;
 
   /// Every node box this view laid out, with its size.
   Iterable<(String, double, double)> _sizes() {
@@ -239,6 +240,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
   void _dispose() {
     _changes?.cancel();
     _detachProbe?.call();
+    _detachValues?.call();
     _reactions.dispose();
     _context.dispose();
     _tree.dispose();

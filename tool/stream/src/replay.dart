@@ -12,6 +12,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources;
+import 'package:codelessly_sdk/src/scripting/sandbox/quickjs_sandbox.dart' show QuickJsLibrary;
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show FontLoader;
@@ -19,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../render/src/fonts.dart';
 import '../../render/src/prepare.dart';
+import 'interact.dart';
 
 /// One recorded stream: its meta line and its timed deltas.
 class RecordedStream {
@@ -97,10 +99,19 @@ Future<Map<String, Object?>> runReplay(WidgetTester tester, ReplayArgs args) asy
     return node == null ? op : api.SetOp(op.id, node, parent: op.parent, index: op.index, slot: op.slot, placeholders: op.placeholders);
   }
 
+  // What the loaded fonts can draw (a family no file has is drawn with
+  // Roboto): the session reports text they cannot (missing_glyph).
+  final coverage = <String, Set<int>>{};
+  Set<int> covered(String family) => coverage[family] ??= () {
+        var files = [for (final f in faces) if (f.family == family) f.path];
+        if (files.isEmpty) files = [for (final f in faces) if (f.family == 'Roboto') f.path];
+        return {for (final p in files.take(2)) ...api.fontCodepoints(File(p).readAsBytesSync())};
+      }();
+  bool glyphs(String? family, int cp) => covered(family ?? 'Roboto').contains(cp);
   final results = <String, Object?>{};
   try {
     for (final size in args.sizes) {
-      results['${size.width.round()}x${size.height.round()}'] = await _replayAt(tester, stream, bases, size, args, prepareOp);
+      results['${size.width.round()}x${size.height.round()}'] = await _replayAt(tester, stream, bases, size, args, prepareOp, glyphs);
     }
   } finally {
     debugDisableShadows = true;
@@ -113,22 +124,29 @@ Future<Map<String, Object?>> runReplay(WidgetTester tester, ReplayArgs args) asy
 }
 
 Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream stream, List<RecordedStream> bases, ui.Size size, ReplayArgs args,
-    api.EditOp Function(api.EditOp) prepareOp) async {
+    api.EditOp Function(api.EditOp) prepareOp, api.GlyphCoverage glyphs) async {
   final sizeName = '${size.width.round()}x${size.height.round()}';
   final out = Directory('${args.out}/$sizeName')..createSync(recursive: true);
   final framesDir = Directory('${out.path}/frames')..createSync(recursive: true);
   for (final f in framesDir.listSync()) {
     f.deleteSync();
   }
+  final apps = stream.meta['profile'] == 'agentApps';
+  if (apps) ReplayServices.useLocalQuickJs();
   final session = UiSession(
     catalog: api.Catalog.core,
+    profile: apps ? api.TrustProfile.agentApps : api.TrustProfile.agent,
     check: strictEditCheck(ValidateOptions(formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)))),
+    glyphCoverage: glyphs,
   );
+  final baseRetries = <Map<String, Object?>>[];
   for (final b in bases) {
     // The UI the follow-up edits, as it was when its streams ended.
-    await session.applyStream(Stream.value(b.text), map: prepareOp);
+    final r = await session.applyStream(Stream.value(b.text), map: prepareOp);
+    baseRetries.add({'stream': b.meta['turn'], 'applied': r.applied.length, 'rejected': r.rejected.length});
   }
   final kind = stream.meta['kind'] ?? 'page';
+  // An app fills the window like a page.
   final card = kind == 'card';
   final boundary = GlobalKey();
   tester.view.devicePixelRatio = 1;
@@ -166,7 +184,9 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     child: MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(fontFamily: 'Roboto'),
-      home: Material(color: card ? const Color(0xFFF1F5F9) : Colors.white, child: frame(CodelesslyView(session: session))),
+      home: Material(
+          color: card ? const Color(0xFFF1F5F9) : Colors.white,
+          child: frame(CodelesslyView(session: session, services: apps ? const ReplayServices() : null))),
     ),
   ));
 
@@ -187,7 +207,7 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
   NodeBox.debugCountApplies = true;
   NodeBox.debugApplyCounts.clear();
   final done = session.applyStream(controller.stream, map: prepareOp, onOp: (p) => pendingOps.add(p));
-  int? firstPaint, firstSection, complete;
+  int? firstPaint, firstText, firstSection, complete;
   String? newest;
   final watch = Stopwatch();
   final errors = <Object>[];
@@ -231,9 +251,25 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     final doc = session.document;
     final rootId = doc.roots.isEmpty ? null : doc.roots.first;
     // First paint: the canvas shows (it has content: a canvas whose
-    // children have not arrived waits for them).
+    // children have not arrived waits for them, but its card surface shows
+    // at once).
     if (firstPaint == null && rootId != null && session.node(rootId)?.type == 'canvas') {
       firstPaint = tMs;
+    }
+    // First text: a node a person can read.
+    if (firstText == null && rootId != null) {
+      bool shown(String id) {
+        for (String? x = id; x != null; x = doc.parentOf(x)) {
+          if (!identical(session.node(x), doc[x])) return false;
+        }
+        return true;
+      }
+      for (final n in doc.subtree(rootId)) {
+        if (n.type == 'text' && shown(n.id)) {
+          firstText = tMs;
+          break;
+        }
+      }
     }
     if (firstSection == null && rootId != null) {
       final container = _sectionContainer(doc, rootId);
@@ -292,6 +328,12 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     now += frameMs;
   }
   final result = await done;
+  // What only layout can tell, after the last frame.
+  final layout = session.layoutDiagnostics();
+  final end = session.lastStreamEnd;
+  // Works when used: the brief's scripted interaction, on the final UI.
+  final script = stream.meta['followup'] == null || stream.meta['turn'] == 'retry' ? interactionsFor('${stream.meta['ui']}') : null;
+  final used = script == null ? null : await runInteractions(tester, session, boundary, script);
   final applied = times.where((t) => t.ok).toList();
   final re = [for (final t in applied) t.reapplied]..sort();
   int pct(List<int> l, double p) => l.isEmpty ? 0 : l[math.min(l.length - 1, (p * l.length).floor())];
@@ -303,6 +345,7 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     'rateTokensPerSecond': ?stream.meta['rateTokensPerSecond'],
     'ttftMs': stream.meta['ttftMs'] ?? (deltas.isEmpty ? null : deltas.first.tMs),
     'timeToFirstPaintMs': firstPaint,
+    'timeToFirstTextMs': firstText,
     'timeToFirstSectionMs': firstSection,
     'timeToCompleteMs': complete,
     'outputTokens': outputTokens.round(),
@@ -311,6 +354,17 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     'deltas': deltas.length,
     'opsApplied': result.applied.length,
     'opsRejected': result.rejected.length,
+    'opsRecoveredFromMalformed': end?.recovered ?? 0,
+    'jsonRepairs': end?.repairs ?? 0,
+    'pending': result.pending.length,
+    'renderDiagnostics': [
+      for (final d in [...result.warnings.where((d) => const {'empty_button', 'low_contrast', 'missing_glyph'}.contains(d.code)), ...layout])
+        '${d.code} ${d.nodeId ?? d.path}',
+    ],
+    'finalDiagnostics': [for (final d in [...result.errors, ...layout, ...result.warnings.where((d) => const {'empty_button', 'low_contrast', 'missing_glyph'}.contains(d.code))]) '${d.code} ${d.path}'],
+    'scripts': (session.document.extra['scripts'] as List?)?.length ?? 0,
+    'worksWhenUsed': ?used,
+    if (baseRetries.isNotEmpty) 'bases': baseRetries,
     'streamedOps': times.length,
     'rejections': [for (final d in result.errors) d.toJson()],
     'nodes': session.document.nodes.length,
@@ -381,4 +435,34 @@ void _follow(WidgetTester tester, UiSession session, String? newest) {
   // Ease toward it: no jump cuts in the video.
   final next = p.offset + (target - p.offset) * 0.5;
   if ((next - p.offset).abs() > 0.5) p.jumpTo(next);
+}
+
+/// The replay's services: scripts run in the sandbox the platform has
+/// (QuickJS through dart:ffi on the VM, built by tool/build_quickjs.sh).
+class ReplayServices implements CodelesslyServices, ServiceLocator {
+  const ReplayServices();
+
+  /// Points the sandbox at the QuickJS build for this machine
+  /// (`tool/build_quickjs.sh`), when there is one; false when not.
+  static bool useLocalQuickJs() {
+    for (final ext in const ['so', 'dylib']) {
+      final path = '${Directory.current.path}/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.$ext';
+      if (File(path).existsSync()) {
+        QuickJsLibrary.libraryPath = path;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static const _runner = SandboxScriptRunner();
+
+  @override
+  T? service<T extends Object>() => T == ScriptRunner ? _runner as T : null;
+
+  @override
+  Future<Object?> callApi(String apiId, {Json params = const {}}) async => null;
+
+  @override
+  Future<bool> openUrl(String url) async => false;
 }
