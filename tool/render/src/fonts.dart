@@ -233,12 +233,18 @@ class DirectoryFontFetcher implements FontFetcher {
 
   /// The face for [family] nearest [weight] and [italic]; null when the
   /// family has no file at all.
+  ///
+  /// A font package splits a face into subset files of the same family,
+  /// weight and style (`latin`, `latin-ext`, `cyrillic`, `vietnamese`...):
+  /// the one with the most of Latin text's characters is taken (ASCII
+  /// first), so Latin text is not drawn from a Cyrillic subset as boxes.
   FontFace? match(String family, int weight, bool italic) {
     final same = [for (final f in faces) if (f.family.toLowerCase() == family.toLowerCase()) f];
     if (same.isEmpty) return null;
+    int score(FontFace f) => (f.weight - weight).abs() + (f.italic == italic ? 0 : 1000);
     same.sort((a, b) {
-      int score(FontFace f) => (f.weight - weight).abs() + (f.italic == italic ? 0 : 1000);
-      return score(a).compareTo(score(b));
+      final s = score(a).compareTo(score(b));
+      return s != 0 ? s : latinScore(b.path).compareTo(latinScore(a.path));
     });
     return same.first;
   }
@@ -262,6 +268,21 @@ class DirectoryFontFetcher implements FontFetcher {
     return File(face.path).readAsBytesSync();
   }
 }
+
+final Map<String, int> _latinScores = {};
+
+/// How much of Latin text font file [path] covers: each printable ASCII
+/// character counts 100, each other character up to U+024F (Latin-1 and
+/// Latin Extended) 1.
+int latinScore(String path) => _latinScores.putIfAbsent(path, () {
+      final cov = fontCoverage(path);
+      if (cov == null) return 0;
+      var n = 0;
+      for (var c = 0x20; c <= 0x24F; c++) {
+        if (cov.contains(c)) n += c < 0x7F ? 100 : 1;
+      }
+      return n;
+    });
 
 /// Material icon names → their MaterialIcons font codepoints (Flutter's
 /// `codepoints` file).

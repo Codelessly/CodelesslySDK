@@ -1141,10 +1141,13 @@ List<RuntimeIssue> _check(
   // The glyphs a family has: its regular face's (else Roboto's).
   Set<int>? coverage(String? family) {
     final fam = (family == null || family.isEmpty) ? 'Roboto' : family;
-    final face = faces.where((f) => f.family.toLowerCase() == fam.toLowerCase() && !f.italic).firstOrNull ??
-        faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
-    if (face == null) return null;
-    return _coverage.putIfAbsent(face.path, () => fontCoverage(face.path));
+    // The file the fetcher serves for the family's regular face.
+    final face = DirectoryFontFetcher(faces).match(fam, 400, false);
+    final used = face != null && face.family.toLowerCase() == fam.toLowerCase()
+        ? face
+        : faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
+    if (used == null) return null;
+    return _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
   }
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));
