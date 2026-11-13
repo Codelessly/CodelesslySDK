@@ -1,6 +1,6 @@
 // Published apps in production hold schema 2: every loader (Firestore, HTTP,
-// an asset bundle, memory) loads it, migrated to schema 3 in memory, and
-// loads schema 3 the same; nothing is written back. A stored document in a
+// an asset bundle, memory) loads it, migrated to schema 4 in memory, and
+// loads schemas 3 and 4 the same; nothing is written back. A stored document in a
 // schema newer than this SDK reads is refused, saying so.
 import 'dart:convert';
 import 'dart:typed_data';
@@ -65,11 +65,18 @@ Json model2() => {
 
 Json bundle(int schema) {
   final b = {'schema': 2, 'model': model2(), 'layouts': {layoutId: layout2()}};
-  return schema == 2 ? b : migratePublish2to3(b);
+  if (schema == 2) return b;
+  final three = migratePublish2to3(b);
+  if (schema == 3) return three;
+  // Schema 4 is the documents' (the publish model's own shape is 3's).
+  return {
+    ...three,
+    'layouts': {layoutId: migrate3to4((three['layouts'] as Map)[layoutId] as Json)},
+  };
 }
 
 /// What schema 2 must decode to: the migrated document, as JSON.
-Json expected() => LayoutDocument.fromJson(migrate2to3(layout2()), catalog: standardCatalog).toJson();
+Json expected() => LayoutDocument.fromJson(migrateDocument(layout2()), catalog: standardCatalog).toJson();
 
 class _Assets extends CachingAssetBundle {
   _Assets(this.files);
@@ -80,15 +87,15 @@ class _Assets extends CachingAssetBundle {
 }
 
 void main() {
-  test('the expected document is schema 3 and has no legacy key', () {
+  test('the expected document is schema 4 and has no legacy key', () {
     final json = expected();
-    expect(json['schema'], 3);
+    expect(json['schema'], 4);
     final card = (json['nodes'] as Map)['card'] as Map;
     expect(card.keys, isNot(contains('loops')));
     expect(card.keys, isNot(contains('drag')));
   });
 
-  for (final schema in [2, 3]) {
+  for (final schema in [2, 3, 4]) {
     group('a schema-$schema document', () {
       test('loads from memory', () async {
         final loader = MemoryPublishLoader(PublishBundle.fromJson(bundle(schema), catalog: standardCatalog));
@@ -136,15 +143,15 @@ void main() {
 
   test('a stored document newer than this SDK reads is refused, saying so', () async {
     final db = FakeFirebaseFirestore();
-    await db.doc('publish/p1').set({...model2(), 'schema': 4});
+    await db.doc('publish/p1').set({...model2(), 'schema': 5});
     await expectLater(FirestorePublishLoader(db, projectId: 'p1').loadModel(PublishSource.publish),
         throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('newer than this SDK'))));
   });
 
   test('a bundle newer than this SDK reads is refused, saying so', () async {
     final bundle = {
-      'schema': 4,
-      'model': {...model2(), 'schema': 4},
+      'schema': 5,
+      'model': {...model2(), 'schema': 5},
       'layouts': {layoutId: layout2()},
     };
     final loader = HttpPublishLoader(

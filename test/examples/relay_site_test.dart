@@ -21,10 +21,15 @@ const dir = 'examples/relay-pricing';
 
 Json read(String path) => jsonDecode(File('$dir/$path').readAsStringSync()) as Json;
 
-/// The site published as written (schema 2), or rewritten as schema 3 first
-/// ([schema3]: what `tool/migrate.dart --write` does to its files).
-PublishBundle publishRelay({bool schema3 = false}) {
-  Json load(Json j) => schema3 ? migrateJson2to3(j)! as Json : j;
+/// The site published as written (schema 2), or its files rewritten as
+/// schema 3 or 4 first ([schema] 4: what `tool/migrate.dart --write` does to
+/// them).
+PublishBundle publishRelay({int schema = 2}) {
+  Json load(Json j) => switch (schema) {
+        3 => migrateJson2to3(j)! as Json,
+        4 => migrateJson(j)! as Json,
+        _ => j,
+      };
   final site = load(read('site.json'));
   final pages = [for (final p in (site['pages']! as List).cast<String>()) (name: p, json: load(read(p)))];
   final components = [
@@ -109,7 +114,7 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
   });
 
-  testWidgets('schema 2 through the migration and schema 3 rewritten render the same', (tester) async {
+  testWidgets('schema 2 through the migrations, and schema 3 and 4 rewritten, render the same', (tester) async {
     setScreen(tester, const Size(390, 844));
     ignoreOverflows();
     Future<Map<String, String>> render(PublishBundle bundle, String layout) async {
@@ -131,12 +136,13 @@ void main() {
       };
     }
 
-    final two = publishRelay(), three = publishRelay(schema3: true);
+    final two = publishRelay(), three = publishRelay(schema: 3), four = publishRelay(schema: 4);
     expect(three.toJson()['schema'], 3);
     for (final layout in two.model.layouts.keys) {
-      final a = await render(two, layout), b = await render(three, layout);
+      final a = await render(two, layout);
       expect(a.length, greaterThan(20));
-      expect(b, a, reason: layout);
+      expect(await render(three, layout), a, reason: layout);
+      expect(await render(four, layout), a, reason: layout);
     }
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 3));

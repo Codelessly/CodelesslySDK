@@ -1,16 +1,17 @@
-// Schema-2 JSON as schema 3 reads it: through the migration (migrate2to3).
+// Schema-2 JSON as the current schema reads it: through the migrations
+// (migrate2to3, then migrate3to4).
 // The SDK's tests are written in schema 2; those that decode a node or a
 // behavior directly (not a whole document, which LayoutDocument.fromJson
 // migrates) go through these.
 import 'package:codelessly_api/codelessly_api.dart';
 
-/// [Node.fromJson] of schema-2 node JSON (migrated first; a schema-3 node
-/// is unchanged by it).
+/// [Node.fromJson] of schema-2 node JSON (migrated first; a node already in
+/// the current schema is unchanged by it).
 Node? migratedNode(Object? json, {String? id, Catalog? catalog}) =>
-    Node.fromJson(json is Map ? migrateNode2to3(readMap(json)!, id: id ?? '') : json, id: id, catalog: catalog);
+    Node.fromJson(json is Map ? migrateNode(readMap(json)!, id: id ?? '') : json, id: id, catalog: catalog);
 
 /// [Behaviors.fromJson] of schema-2 node JSON.
-Behaviors migratedBehaviors(Json m) => Behaviors.fromJson(migrateNode2to3(m));
+Behaviors migratedBehaviors(Json m) => Behaviors.fromJson(migrateNode(m));
 
 /// A schema-2 `effectAnimations[index]` entry, as the animation it became.
 NodeAnimation? legacyEffect(Json effect, int index) => migratedBehaviors({
