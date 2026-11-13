@@ -22,6 +22,8 @@
 - **Bug fix (behaviour change):** a `spacer` with no size along its row's or column's main axis is Flutter's
   `Spacer()`: it takes the free space by its `layout.flex` (it was 0 long and did nothing). A spacer with a size
   there is unchanged. Tests compare with Flutter's Spacer in a Row and a Column.
+- **Bug fix (behaviour change):** `crossAxisAlignment: stretch` on a wrapping row/column/flex stretches each child to
+  its line's thickest (CSS `align-items: stretch`; equal-height cards per line); it acted as `start`.
 - Render command: a step may name a node by its `name` (the same name on each breakpoint canvas of a screen
   reaches whichever is shown); steps for nodes on another breakpoint's canvas are summarised in one warning per
   size instead of one per step.

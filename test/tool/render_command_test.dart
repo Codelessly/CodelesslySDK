@@ -204,4 +204,32 @@ void main() {
       expect(red(195, 2000 - 12 - 26), isNot(255), reason: 'not at the bottom of the page');
     });
   });
+
+  // The guide's responsive example (codelessly_api tool/reference/examples/
+  // responsive_web.json, copied): the four web patterns at three widths.
+  testWidgets('the guide\'s responsive example: header, 3-2-1 grid from one list, stacking split, type scale', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['$a0/responsive_web.json'], out: out.path, dumpLayout: true));
+    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    Map<String, List<Map>> boxes(String size) {
+      final out0 = <String, List<Map>>{};
+      for (final b in jsonDecode(File('${out.path}/home@$size.layout.json').readAsStringSync()) as List) {
+        (out0[(b as Map)['id'] as String] ??= []).add(b);
+      }
+      return out0;
+    }
+    int columns(Map<String, List<Map>> b) => b['plan']!.where((p) => p['y'] == b['plan']!.first['y']).length;
+    final m = boxes('390x844'), t = boxes('834x1112'), d = boxes('1440x900');
+    expect([columns(m), columns(t), columns(d)], [1, 2, 3], reason: 'auto-fit columns from one bound list');
+    expect(d['plan']!.map((p) => p['h']).toSet(), hasLength(1), reason: 'equal heights per row');
+    // Desktop: text and photo side by side; phone: stacked, photo first.
+    expect(d['split-text']!.single['x'], lessThan(d['split-photo']!.single['x'] as num));
+    expect(m['split-photo']!.single['y'], lessThan(m['split-text']!.single['y'] as num));
+    expect(m['split-photo']!.single['w'], 358);
+    // Nav collapses to the menu icon below desktop: the hidden one takes no room.
+    expect(d['nav']!.single['w'], greaterThan(0));
+    expect(m['nav']!.single['w'], 0);
+    // The content column is capped at 1200 and centered.
+    expect(d['content']!.single['w'], 1200);
+    expect(d['content']!.single['x'], 120);
+  });
 }
