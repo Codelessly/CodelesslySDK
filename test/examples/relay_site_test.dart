@@ -21,12 +21,15 @@ const dir = 'examples/relay-pricing';
 
 Json read(String path) => jsonDecode(File('$dir/$path').readAsStringSync()) as Json;
 
-PublishBundle publishRelay() {
-  final site = read('site.json');
-  final pages = [for (final p in (site['pages']! as List).cast<String>()) (name: p, json: read(p))];
+/// The site published as written (schema 2), or rewritten as schema 3 first
+/// ([schema3]: what `tool/migrate.dart --write` does to its files).
+PublishBundle publishRelay({bool schema3 = false}) {
+  Json load(Json j) => schema3 ? migrateJson2to3(j)! as Json : j;
+  final site = load(read('site.json'));
+  final pages = [for (final p in (site['pages']! as List).cast<String>()) (name: p, json: load(read(p)))];
   final components = [
     for (final f in Directory('$dir/components').listSync().whereType<File>().toList()..sort((a, b) => a.path.compareTo(b.path)))
-      jsonDecode(f.readAsStringSync()) as Json,
+      load(jsonDecode(f.readAsStringSync()) as Json),
   ];
   return publishPages(pages,
           variables: publishVariables(site), components: components, theme: site['theme'] as Json?, projectId: 'relay')
@@ -102,6 +105,39 @@ void main() {
     expect(textUnder(c.tree!.boxAtPath('homeMetric#2/mValue')!), '100%');
     expect(textUnder(c.tree!.boxAtPath('homeFooter')!), contains('Stay ready for what comes next.'));
     expect(second.components.missing, isEmpty);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 3));
+  });
+
+  testWidgets('schema 2 through the migration and schema 3 rewritten render the same', (tester) async {
+    setScreen(tester, const Size(390, 844));
+    ignoreOverflows();
+    Future<Map<String, String>> render(PublishBundle bundle, String layout) async {
+      final codelessly = Codelessly(
+          config: const CodelesslyConfig(slug: 'relay'), loader: MemoryPublishLoader(bundle), fonts: const NoFontFetcher());
+      addTearDown(codelessly.dispose);
+      final controller = CodelesslyWidgetController(layoutId: layout);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: codelessly, controller: controller, layoutId: layout)));
+      await settle(tester);
+      expect(controller.isLoaded, isTrue, reason: '${controller.error}');
+      final view = tester.renderObject(find.byType(CodelesslyWidget));
+      final tree = controller.tree!;
+      return {
+        for (final b in tree.boxes.toList())
+          if (b.rectIn(view) case final r?) '${b.key}': '$r',
+        'text': textUnder(view),
+      };
+    }
+
+    final two = publishRelay(), three = publishRelay(schema3: true);
+    expect(three.toJson()['schema'], 3);
+    for (final layout in two.model.layouts.keys) {
+      final a = await render(two, layout), b = await render(three, layout);
+      expect(a.length, greaterThan(20));
+      expect(b, a, reason: layout);
+    }
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 3));
   });

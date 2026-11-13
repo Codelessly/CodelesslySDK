@@ -9,12 +9,13 @@ import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import '../support/legacy.dart';
 
 Variable v(String name, Object? value, [VariableType type = VariableType.text]) =>
     Variable(name: name, type: type, value: type.coerce(value));
 
 /// A node whose `click` runs [actions] (JSON).
-Node clickNode(List<Json> actions, {String trigger = 'click', Map<String, Object?> extra = const {}}) => Node.fromJson({
+Node clickNode(List<Json> actions, {String trigger = 'click', Map<String, Object?> extra = const {}}) => migratedNode({
       'type': 'box',
       'actions': [
         {'trigger': {'type': trigger, ...extra}, 'actions': actions},
@@ -121,7 +122,7 @@ void main() {
 
   test('clock runWhen gates each reaction and reads the current variable', () async {
     final h=Harness(variables:[v('playing',false,VariableType.boolean),v('count',0,VariableType.integer),v('other',0,VariableType.integer)]);
-    final node=Node.fromJson({'type':'box','actions':[
+    final node=migratedNode({'type':'box','actions':[
       {'trigger':{'type':'clock','runWhen':r'${= playing}'},'actions':[setVar('count','1',op:'add')]},
       {'trigger':{'type':'clock','runWhen':r'${playing}'},'actions':[setVar('count','10',op:'add')]},
       {'trigger':{'type':'clock','runWhen':'playing'},'actions':[setVar('count','100',op:'add')]},
@@ -200,7 +201,7 @@ void main() {
 
     test('all reactions to a trigger run, in order, as one chain', () async {
       final h = Harness(variables: [v('log', '')]);
-      final node = Node.fromJson({
+      final node = migratedNode({
         'type': 'box',
         'actions': [
           {'trigger': {'type': 'click'}, 'actions': [setVar('log', r'${log}a')]},

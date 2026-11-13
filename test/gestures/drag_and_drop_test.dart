@@ -718,21 +718,7 @@ void main() {
       expect(scope.read('log'), ['drop 100.0 50.0']);
     });
 
-    testWidgets('a full target says so, refuses the drop and the source springs back', (tester) async {
-      final (tree, scope) = await stack(tester, target: {'fullIf': r'${= true}'});
-      final g = await dragTo(tester, const Offset(30, 30), const Offset(280, 280), release: false);
-      expect(DragAndDrop.of(tree).value['over'], 'dst');
-      expect(DragAndDrop.of(tree).value['full'], isTrue);
-      expect(DragAndDrop.of(tree).value['accepted'], isFalse);
-      await g.up();
-      await tester.pump();
-      // Flying home from where it was let go.
-      await tester.pump(const Duration(milliseconds: 16));
-      expect(sourceOf(tree).debugReturnShift.dx, greaterThan(100));
-      await tester.pumpAndSettle();
-      expect(sourceOf(tree).debugReturnShift, Offset.zero);
-      expect(scope.read('log'), ['full true', 'cancel']);
-    });
+    // Removed in schema 3: fullIf and the dropFull trigger.
 
     testWidgets('the source ghosts while dragged and flies back on its spring', (tester) async {
       final (tree, scope) = await stack(tester, source: {'ghostOpacity': 0.3});
@@ -762,16 +748,7 @@ void main() {
       expect(DragAndDrop.of(tree).session, isNull);
     });
 
-    testWidgets('a target with a hover delay fires dragHover after it', (tester) async {
-      final (_, scope) = await stack(tester, target: {'hoverDelay': 200});
-      final g = await dragTo(tester, const Offset(30, 30), const Offset(280, 280), release: false);
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(scope.read('log'), isEmpty);
-      await tester.pump(const Duration(milliseconds: 150));
-      expect(scope.read('log'), ['hover']);
-      await g.up();
-      await tester.pumpAndSettle();
-    });
+    // Removed in schema 3: hoverDelay and the dragHover trigger.
 
     testWidgets('a disabled source, a target that takes another group', (tester) async {
       var (tree, scope) = await stack(tester, source: {'enabled': false});

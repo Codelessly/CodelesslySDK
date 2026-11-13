@@ -353,8 +353,8 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   });
 
-  testWidgets('two fingers rotate and the rotation snaps on release', (tester) async {
-    final b = await board(tester, {'rotate': true, 'zoom': false, 'bounds': 'none', 'rotationSnap': 15});
+  testWidgets('two fingers rotate; the rotation stays where let go (rotationSnap is gone in schema 3)', (tester) async {
+    final b = await board(tester, {'rotate': true, 'zoom': false, 'bounds': 'none'});
     const c = Offset(200, 200);
     Offset at(double degrees, double r) {
       final a = degrees * math.pi / 180;
@@ -367,7 +367,7 @@ void main() {
     await g1.up();
     await g2.up();
     await tester.pumpAndSettle();
-    expect(b.pose.rotation, closeTo(45, 0.05));
+    expect(b.pose.rotation, closeTo(40, 1.5));
   });
 
   testWidgets('a given pose springs the node there; a scale alone zooms the middle', (tester) async {

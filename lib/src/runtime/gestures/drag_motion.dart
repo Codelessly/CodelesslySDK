@@ -1,5 +1,5 @@
 // A node that follows the pointer: `dismissible` (Flutter's `Dismissible`)
-// or `pan` (the legacy `drag` reads as one of them). A render object, the
+// or `pan`. A render object, the
 // outermost layer of the node's chain (around its margin). It follows the
 // pointer within its bounds and limits, locked to its axis and held back by
 // resistance; and on release springs back, stays, or flies off past a
@@ -12,8 +12,8 @@
 //   (itself and the nodes in it): its live values ([DragValues.toMap]) over
 //   the layout's drag and drop session, through the node's [LocalScope]
 //   (NodeBinder.localNames).
-// * `shareAs` (the same map), `xVariable` and `yVariable` (its offset,
-//   rounded to hundredths) written after each frame it changed in.
+// * A pan's `xVariable` and `yVariable` (its offset, rounded to
+//   hundredths) written after each frame it changed in.
 // * Triggers: `drag` on every move (`dx`, `dy` from rest, `deltaX`,
 //   `deltaY`, `pointerCount`), `dragEnd` when let go (`dx`, `dy`,
 //   `velocityX`, `velocityY`, `dismissed`, `direction`, `blocked`,
@@ -149,7 +149,6 @@ class FollowSpec {
     this.snapCurve = api.AnimationCurve.spring,
     this.flyOut = 320,
     this.flyOutCurve = api.AnimationCurve.easeIn,
-    this.flyOutRotate = 0,
     this.restX = 0,
     this.restY = 0,
     this.xVariable = '',
@@ -160,13 +159,6 @@ class FollowSpec {
     this.maxX,
     this.minY,
     this.maxY,
-    this.rotateFactor = 0,
-    this.originX = 0,
-    this.originY = 0,
-    this.shakeWhenDisabled = false,
-    this.disabledFollow = 0,
-    this.shareAs = '',
-    this.follow = true,
     this.defaultThreshold = 0.35,
   });
 
@@ -180,14 +172,11 @@ class FollowSpec {
   final double defaultThreshold, velocityThreshold, resistance;
   final int snapBack, flyOut;
   final api.AnimationCurve snapCurve, flyOutCurve;
-  final double flyOutRotate, restX, restY;
+  final double restX, restY;
   final String xVariable, yVariable;
   final api.GesturePhysics? physics;
   final api.GestureBounds bounds;
   final double? minX, maxX, minY, maxY;
-  final double rotateFactor, originX, originY, disabledFollow;
-  final bool shakeWhenDisabled, follow;
-  final String shareAs;
 
   bool get hasBounds => bounds != api.GestureBounds.none || minX != null || maxX != null || minY != null || maxY != null;
 
@@ -210,19 +199,7 @@ class FollowSpec {
         snapCurve: d.effectiveReturnCurve,
         flyOut: d.movementDuration,
         flyOutCurve: d.curve,
-        flyOutRotate: d.flyOutRotate,
-        restX: d.restX,
-        restY: d.restY,
-        xVariable: d.xVariable,
-        yVariable: d.yVariable,
         physics: d.returnSpring == null ? null : api.GesturePhysics(spring: d.returnSpring!),
-        rotateFactor: d.rotateFactor,
-        originX: d.originX,
-        originY: d.originY,
-        shakeWhenDisabled: d.shakeWhenDisabled,
-        disabledFollow: d.disabledFollow,
-        shareAs: d.shareAs,
-        follow: d.follow,
       );
     }
     if (n.behaviors.pan case final p?) {
@@ -242,13 +219,6 @@ class FollowSpec {
         maxX: p.maxX,
         minY: p.minY,
         maxY: p.maxY,
-        rotateFactor: p.rotateFactor,
-        originX: p.originX,
-        originY: p.originY,
-        shakeWhenDisabled: p.shakeWhenDisabled,
-        disabledFollow: p.disabledFollow,
-        shareAs: p.shareAs,
-        follow: p.follow,
       );
     }
     return null;
@@ -426,10 +396,6 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   int _pointers = 0;
   int _maxPointers = 0;
 
-  /// Extra turn while flying off, in degrees, eased in with the flight.
-  double _spin = 0;
-  double _spinTo = 0;
-  double _spinFrom = 0;
   double _shake = 0;
 
   bool get _enabled => _model.enabled;
@@ -486,7 +452,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
       if (local?.names.contains(_model.scopeName) ?? false) local!.set(_model.scopeName, map);
     }
     final m = _model;
-    if (m.shareAs.trim().isEmpty && m.xVariable.trim().isEmpty && m.yVariable.trim().isEmpty) return;
+    if (m.xVariable.trim().isEmpty && m.yVariable.trim().isEmpty) return;
     // Only the instance an action would move (the top card of a stack), or
     // one moving now, shares: the cards resting behind it would otherwise
     // overwrite the live drag with their rest values.
@@ -514,7 +480,6 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
     final scope = _scope;
     if (scope == null) return;
     final m = _model;
-    if (m.shareAs.trim().isNotEmpty) setVariableIn(scope, m.shareAs.trim(), values.toMap());
     _writeOffset(scope, m.xVariable, values.offset.dx);
     _writeOffset(scope, m.yVariable, values.offset.dy);
   }
@@ -617,11 +582,6 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
       _offset = _rest + Offset(math.sin(value * math.pi * 6) * _shake * (1 - value), 0);
     } else {
       _offset = Offset.lerp(_from, _to, t)!;
-      if (_spinTo != 0) {
-        _spin = _spinTo * t;
-      } else if (_spinFrom != 0) {
-        _spin = _spinFrom * (1 - t);
-      }
     }
     if (value >= 1) {
       _animOn = false;
@@ -642,14 +602,12 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   Future<void> _animateTo(Offset to, int ms, api.AnimationCurve curve) async {
     _stopPhysics();
     final physics = _model.physics;
-    if (physics != null && !_dismissed && to == _rest && _spin == 0) {
+    if (physics != null && !_dismissed && to == _rest) {
       // A spring back with physics springs, at any speed it already has.
       _settle(_springSims(physics, to, Offset.zero));
       return;
     }
     _shake = 0;
-    // Unwind any turn left over (a returning card).
-    _spinFrom = _spinTo == 0 && _spin != 0 ? _spin : 0;
     _from = _offset;
     _to = to;
     _curve = curve;
@@ -821,9 +779,6 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   Offset _raw = Offset.zero;
   Offset? _lastGlobal;
 
-  /// Whether the current drag is of a disabled node, which only follows by
-  /// [FollowSpec.disabledFollow] and always springs back.
-  bool _blocked = false;
 
   DragGestureRecognizer _ensureRecognizer() => _recognizer ??= (switch (_model.axis) {
         // A drag locked to one axis only claims moves along it, so a scroll
@@ -853,9 +808,8 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
 
   void _onStart(DragStartDetails details) {
     if (_dismissed) return;
-    _blocked = !_enabled;
-    if (_blocked && _model.disabledFollow <= 0) {
-      if (_model.shakeWhenDisabled && !_animOn) _shakeOnce();
+    // A disabled node doesn't move; its drag ends at once.
+    if (!_enabled) {
       _fire('dragEnd', {'blocked': true, 'dismissed': false, 'direction': ''});
       return;
     }
@@ -878,7 +832,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
     _lastGlobal = details.globalPosition;
     _raw += delta;
     final before = _offset;
-    _offset = _blocked ? _raw * _model.disabledFollow.clamp(0, 1).toDouble() : _band(_resist(_raw));
+    _offset = _band(_resist(_raw));
     _maxPointers = math.max(_maxPointers, _pointers);
     _changed();
     _fire('drag', {
@@ -896,21 +850,6 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
     _setDragged(false);
     _changed();
     final velocity = details.velocity.pixelsPerSecond;
-    if (_blocked) {
-      _fire('dragEnd', {
-        'dx': _offset.dx,
-        'dy': _offset.dy,
-        'velocityX': velocity.dx,
-        'velocityY': velocity.dy,
-        'dismissed': false,
-        'direction': '',
-        'blocked': true,
-      });
-      _animateTo(_rest, _model.snapBack, _model.snapCurve).then((_) {
-        if (attached && _model.shakeWhenDisabled) _shakeOnce();
-      });
-      return;
-    }
     final direction = _dismissDirection(velocity);
     final physics = _model.physics;
     final settle = direction == null && physics != null ? _releaseSims(physics, velocity) : null;
@@ -987,10 +926,6 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   }
 
   Future<void> _flyOff(api.DragDirection direction, [Offset? velocity]) async {
-    _spinTo = switch (direction) {
-      api.DragDirection.left || api.DragDirection.up => -_model.flyOutRotate,
-      api.DragDirection.right || api.DragDirection.down => _model.flyOutRotate,
-    };
     final target = _offscreen(direction, _size, velocity == null || velocity == Offset.zero ? _offset : velocity);
     await _animateTo(target, _model.flyOut, _model.flyOutCurve);
     if (!attached) return;
@@ -1009,7 +944,6 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
     // Still here: the node shows its next content, back at rest.
     _dismissed = false;
     _offset = _rest;
-    _spin = _spinTo = 0;
     _changed();
   }
 
@@ -1037,15 +971,8 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   /// Flies in from off-screen toward [direction] to rest.
   Future<void> returnFrom(api.DragDirection direction) async {
     _stopAnim();
-    // Comes back unwinding the turn it left with.
-    final turn = switch (direction) {
-      api.DragDirection.left || api.DragDirection.up => -_model.flyOutRotate,
-      api.DragDirection.right || api.DragDirection.down => _model.flyOutRotate,
-    };
     _dismissed = false;
     _offset = _offscreen(direction, _size) - _offset;
-    _spin = turn;
-    _spinTo = 0;
     _changed();
     await _animateTo(_rest, math.max(_model.flyOut, 380), api.AnimationCurve.easeOutCubic);
   }
@@ -1060,25 +987,12 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
 
   // --- render ---------------------------------------------------------------------
 
-  /// The tilt, in degrees.
-  double get _angle => _offset.dx / math.max(1, _size.width) * _model.rotateFactor + _spin;
+  /// The transform over the node's layout: none while at rest.
+  Matrix4? get _transform => _offset == Offset.zero ? null : Matrix4.translationValues(_offset.dx, _offset.dy, 0);
 
-  /// The transform over the node's layout: none while at rest or when the
-  /// drag only reports ([FollowSpec.follow] off).
-  Matrix4? get _transform {
-    final angle = _angle;
-    if (!_model.follow || (_offset == Offset.zero && angle == 0)) return null;
-    final origin = Alignment(_model.originX, _model.originY).alongSize(_size);
-    return Matrix4.translationValues(origin.dx, origin.dy, 0)
-      ..translateByDouble(_offset.dx, _offset.dy, 0, 1)
-      ..rotateZ(angle * math.pi / 180)
-      ..translateByDouble(-origin.dx, -origin.dy, 0, 1);
-  }
-
-  /// The translation and turn it draws the node with now, about its
-  /// origin (tests).
+  /// The translation it draws the node with now (tests).
   @visibleForTesting
-  Matrix4 get debugTransform => Matrix4.translationValues(_offset.dx, _offset.dy, 0)..rotateZ(_angle * math.pi / 180);
+  Matrix4 get debugTransform => Matrix4.translationValues(_offset.dx, _offset.dy, 0);
 
   final LayerHandle<TransformLayer> _layer = LayerHandle();
 
