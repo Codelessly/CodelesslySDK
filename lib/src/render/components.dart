@@ -206,6 +206,11 @@ class ComponentRegistry extends ChangeNotifier {
     _notify({type});
   }
 
+  /// Told of each call rendered without its definition, once per call
+  /// path (`component_missing`): an app logs it and may fetch the
+  /// definition, whose arrival ([define]) renders the call.
+  void Function(String type, String path)? onMissing;
+
   /// Records that the call at [path] has no definition [type].
   void reportMissing(String type, String path) {
     final paths = missing[type] ??= {};
@@ -214,6 +219,7 @@ class ComponentRegistry extends ChangeNotifier {
         debugPrint('Codelessly: component_missing: "$path" calls $type, which is not defined.');
         return true;
       }());
+      onMissing?.call(type, path);
     }
   }
 

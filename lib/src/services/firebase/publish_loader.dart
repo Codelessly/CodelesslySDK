@@ -10,8 +10,10 @@ import '../auth.dart';
 /// A [LivePublishLoader] on Cloud Firestore: the publish model is the
 /// document [PublishSource.modelPath] (`publish/{projectId}`;
 /// `publish_preview/...` for the editor's preview), each layout
-/// [PublishSource.layoutPath] (`.../layouts/{layoutId}`). [watchModel]
-/// follows the model document.
+/// [PublishSource.layoutPath] (`.../layouts/{layoutId}`), each component
+/// [PublishSource.componentPath] (`.../components/{type}`). [watchModel]
+/// follows the model document: a republished component changes its entry
+/// there.
 ///
 /// The project is [projectId], else the one [auth] grants access to: the
 /// app's project token ([CodelesslyConfig.authToken]) resolves to its
@@ -77,6 +79,21 @@ class FirestorePublishLoader implements LivePublishLoader {
     final data = snapshot.data();
     if (!snapshot.exists || data == null) throw PublishLoadException('Layout [$layoutId] does not exist ($path)');
     return decodeStoredPublishLayout(storedJson(data), layoutId: snapshot.id);
+  }
+
+  @override
+  Future<PublishComponent> loadComponent(PublishSource source, String type) async {
+    final t = await _target(source);
+    final path = t.source.componentPath(t.projectId, type);
+    final DocumentSnapshot<Map<String, dynamic>> snapshot;
+    try {
+      snapshot = await firestore.doc(path).get();
+    } catch (e) {
+      throw PublishLoadException('Could not read $path', e);
+    }
+    final data = snapshot.data();
+    if (!snapshot.exists || data == null) throw PublishLoadException('Component [$type] does not exist ($path)');
+    return decodeStoredPublishComponent(storedJson(data), type: snapshot.id);
   }
 
   @override
