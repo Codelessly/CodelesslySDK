@@ -19,6 +19,12 @@
 - **Bug fix (behaviour change):** a canvas's `appBar`, `bottomNavigationBar` and `floatingActionButton` slots are
   drawn, where Flutter's Scaffold puts them (they validated and drew nothing). A canvas with only a body lays out
   exactly as before. Tests compare with a real Scaffold.
+- **Bug fix (behaviour change):** a `spacer` with no size along its row's or column's main axis is Flutter's
+  `Spacer()`: it takes the free space by its `layout.flex` (it was 0 long and did nothing). A spacer with a size
+  there is unchanged. Tests compare with Flutter's Spacer in a Row and a Column.
+- Render command: a step may name a node by its `name` (the same name on each breakpoint canvas of a screen
+  reaches whichever is shown); steps for nodes on another breakpoint's canvas are summarised in one warning per
+  size instead of one per step.
 - **Bug fix:** a text whose `props.runs` is bound shows its evaluated text, styled by the bound runs (it showed
   the formula's source: written runs split the template, bound runs are computed for the shown text).
 - `IconSources.codepointOf`: a host's MaterialIcons codepoint table, so a Material icon named without a codepoint
@@ -31,8 +37,6 @@
   window-fixed content in the first window; every `render_exception` names its node and sub-pixel (< 0.01 px)
   flex overflows are not errors; new warnings `missing_glyph`, `icon_not_drawn`, `expression_not_evaluated`,
   `path_overflow`. Fixtures under `test/tool/fixtures/authoring`.
-- **Bug fix (behaviour change):** a `text` node's `layout.padding` is space inside its box around its lines, as
-  `Container(padding:, child: Text())`: a hugging text grows by it (it was ignored).
 
 **New: catalogs and plugins** (codelessly_api's `Catalog` and feature libraries; its docs/design/05-plugins-and-layers.md)
 

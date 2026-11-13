@@ -1724,6 +1724,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     });
   }
 
+  /// A spacer's fit along its row's or column's main axis: with no size
+  /// there (fixed at 0) it is Flutter's `Spacer()`, filling the free space.
+  static SizeFit _spacerMainFit(Node n, bool isRow) {
+    final size = isRow ? n.layout.width : n.layout.height;
+    return size.fit == SizeFit.fixed && size.value == 0 ? SizeFit.fill : size.fit;
+  }
+
   void _spacer(Node n, List<RenderBox> chain) {
     final parent = _slot.parent;
     if (_slot.kind == SlotKind.flex && parent != null && parent.wraps) {
@@ -1736,7 +1743,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     if (_slot.kind == SlotKind.flex && parent != null && parent.isFlex) {
       final isRow = parent.isRow;
-      final mainFit = isRow ? n.hFit : n.vFit;
+      final mainFit = _spacerMainFit(n, isRow);
       final outer = isRow ? n.outerWidth : n.outerHeight;
       if (mainFit == SizeFit.fill || mainFit == SizeFit.flexible) {
         chain.add(_obtain<RenderFitBox>('spacerFit', () => RenderFitBox())
@@ -1800,13 +1807,6 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..alignment = Alignment(x, y)
       ..widthFactor = hugsWidth ? 1 : null
       ..heightFactor = vFit == SizeFit.fill || vFit == SizeFit.fixed ? null : 1);
-    // Padding: space inside the text's box around its lines (a Container's
-    // padding around a Text), so a hugging text grows by it.
-    final padding = n.layout.padding.flutter;
-    if (padding != EdgeInsets.zero) {
-      chain.add(_obtain<RenderPadding>('textPad', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
-        ..padding = padding);
-    }
     final countUp = n.prop(TextProps.countUp);
     final RenderParagraph paragraph;
     final span = _textSpan(n);
@@ -1947,6 +1947,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       if (parentNode.wraps) {
         // Nothing flexes in a run.
       } else if (n.type == 'spacer') {
+        final mainFit = _spacerMainFit(n, isRow);
         if (mainFit == SizeFit.fill) (flex, fit) = (flexValue, FlexFit.tight);
         if (mainFit == SizeFit.flexible) (flex, fit) = (flexValue, FlexFit.loose);
       } else if (n.hFit == n.vFit) {

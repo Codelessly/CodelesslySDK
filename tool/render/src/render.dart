@@ -325,6 +325,7 @@ Future<void> _renderAll(
       }
 
       // 4. Interactions, in order.
+      final skipped = <String>[];
       for (final step in args.steps) {
         final problem = await _apply(tester, step, controller, navigator, codelessly,
             warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
@@ -332,16 +333,29 @@ Future<void> _renderAll(
         if (problem != null) {
           // A node of another canvas of the screen (another breakpoint's
           // design) is absent here by design: a warning, not an error.
-          final elsewhere = problem.contains('no node') && fileOfNode.containsKey(step.target.split('#').first);
-          issue(RuntimeIssue('interaction_failed', elsewhere ? 'warning' : 'error',
-              elsewhere ? '$problem It is in the document but not on the canvas shown at this size.' : problem,
-              screen: label, size: sizeName));
+          final target = step.target.split('#').first;
+          final elsewhere = problem.contains('no node') &&
+              (fileOfNode.containsKey(target) ||
+                  docs.values.any((d) => (api.readMap(d['nodes']) ?? const {}).values.any((n) => api.readMap(n)?['name'] == target)));
+          if (elsewhere) {
+            skipped.add('$step');
+          } else {
+            issue(RuntimeIssue('interaction_failed', 'error', problem, screen: label, size: sizeName));
+          }
         }
         await _settle(tester);
         collect();
       }
 
       // 5. Full page: the view as tall as the content scrolls.
+      if (skipped.isNotEmpty) {
+        // One line per size, not one per step: these nodes are on another
+        // breakpoint's canvas of the screen.
+        issue(RuntimeIssue('interaction_failed', 'warning',
+            'Skipped at this size (their nodes are on another breakpoint\'s canvas): ${skipped.join(', ')}. '
+            'To reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
+            screen: label, size: sizeName));
+      }
       // The page's own scroll view only (the largest one a user can
       // scroll): a decorative list that does not scroll, or one inside the
       // page, adds nothing. Content fixed to the window (outside the page's
@@ -595,7 +609,10 @@ NodeBox? _boxOf(WidgetsBinding binding, String id) {
   final hash = id.lastIndexOf('#');
   final index = hash < 0 ? null : int.tryParse(id.substring(hash + 1));
   final name = index == null ? id : id.substring(0, hash);
-  final all = [for (final b in _boxes(binding)) if (b.id == name) b];
+  var all = [for (final b in _boxes(binding)) if (b.id == name) b];
+  // A node may be named by its `name` too: the same name on a screen's
+  // breakpoint canvases reaches whichever is shown.
+  if (all.isEmpty) all = [for (final b in _boxes(binding)) if (b.node?.name == name) b];
   if (all.isEmpty) return null;
   if (index == null) return all.last;
   return index < all.length ? all[index] : null;
@@ -1006,7 +1023,8 @@ List<RuntimeIssue> _check(
       }
       if (needW > b.size.width + 1.5 && node.prop(api.TextProps.maxLines) == null) {
         out.add(RuntimeIssue('text_clipped', 'warning',
-            'Text "${b.id}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide.',
+            'Text "${b.id}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: it is cut. '
+            'Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
     }
