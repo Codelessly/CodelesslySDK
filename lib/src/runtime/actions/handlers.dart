@@ -33,6 +33,7 @@ import 'route_transition.dart' show RevealAnchor;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
+import 'ui.dart' show ThemeModeUi;
 import 'values.dart';
 import 'variable_animator.dart';
 export 'files.dart' show pickFiles, sourceFiles;
@@ -141,6 +142,12 @@ Future<void> _handleCore(CoreAction a, ActionRun run) async {
       await run.wait(Duration(milliseconds: delayMilliseconds(a, run)) * timeDilation);
     case CopyToClipboardAction():
       await Clipboard.setData(ClipboardData(text: run.text(a.text)));
+    case SetThemeModeAction():
+      final written = run.text(a.mode);
+      final mode = ThemeMode.tryParse(written) ??
+          (throw StateError('setThemeMode: "$written" is not a theme mode: write system, light or dark '
+              "(\${= theme.isDark ? 'light' : 'dark'} toggles)."));
+      if (run.host.ui case final ThemeModeUi ui) ui.setThemeMode(mode, persist: a.persist);
     case EditTextAction():
       _editText(a, run);
     case FocusAction():

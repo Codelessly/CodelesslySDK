@@ -376,6 +376,48 @@ class Codelessly extends ChangeNotifier {
   /// The screen shown last (by any [CodelesslyWidget] of this instance).
   final ValueNotifier<CodelesslyRoute?> route = ValueNotifier(null);
 
+  /// The local storage key the site's theme mode is kept under
+  /// ([setThemeMode] with `persist`).
+  static const String themeModeStorageKey = 'codelessly.themeMode';
+
+  /// The theme mode chosen while the app runs (a `setThemeMode` action, or
+  /// the app's own [setThemeMode]), else the one kept from an earlier visit;
+  /// null: the site's own (`theme.mode`, else `system`). Every screen of
+  /// this instance listens to it.
+  late final ValueNotifier<ThemeMode?> themeModeChoice = ValueNotifier(_storedThemeMode());
+
+  /// The theme mode the screens show: the choice ([themeModeChoice]), else
+  /// the published theme's `mode`, else `system` (the device's setting), as
+  /// `MaterialApp.themeMode`. A layout with a theme of its own reads its
+  /// own `mode` when nothing was chosen.
+  ThemeMode get themeMode => themeModeChoice.value ?? _model?.theme.mode ?? ThemeMode.system;
+
+  /// Shows every screen of this instance in [mode] (the `setThemeMode`
+  /// action): their named colors, text styles and controls redraw at once
+  /// and `${theme.mode}` / `${theme.isDark}` change. With [persist] the
+  /// choice is kept in the services' local storage, so a reload starts in
+  /// it; null [mode] forgets the choice (the site's own mode again).
+  void setThemeMode(ThemeMode? mode, {bool persist = false}) {
+    themeModeChoice.value = mode;
+    final s = services;
+    if (!persist || s is! Services) return;
+    if (mode == null) {
+      unawaited(s.storage.remove(themeModeStorageKey));
+    } else {
+      unawaited(s.storage.put(themeModeStorageKey, mode.name));
+    }
+  }
+
+  ThemeMode? _storedThemeMode() {
+    final s = services;
+    if (s is! Services) return null;
+    try {
+      return ThemeMode.tryParse(s.storage.get(themeModeStorageKey));
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Its paywalls: [CodelesslyPaywalls.present] shows the paywall published
   /// at a placement and returns how it ended.
   ///
@@ -804,6 +846,7 @@ class Codelessly extends ChangeNotifier {
     _watching?.cancel();
     _watching = null;
     route.dispose();
+    themeModeChoice.dispose();
     _appData?.dispose();
     for (final p in _persistedApp) {
       p.dispose();

@@ -12,13 +12,16 @@ export '../render/control_theme.dart' show colorOf, kInk, kInkOnDark, kPaper, kP
 /// * `text`: every named text style by key, its values by name
 ///   (`${theme.text.title.fontSize}`, `${theme.text.body.fontFamily}`);
 /// * `isDark` and `brightness` (`light` or `dark`);
+/// * `mode`: the site's theme mode (`system`, `light` or `dark`: Flutter's
+///   `ThemeMode`), which a `setThemeMode` action changes;
 /// * `hasDark`: whether the project's theme has dark colors (else in dark
 ///   mode the colors are the light ones, and a layout may pick its own).
-Map<String, Object?> themeValues(api.ThemeTokens tokens, {required bool dark}) {
+Map<String, Object?> themeValues(api.ThemeTokens tokens, {required bool dark, api.ThemeMode? mode}) {
   final t = tokens.forBrightness(dark: dark);
   final json = t.toJson()
     ..remove('dark')
-    ..remove('media');
+    ..remove('media')
+    ..remove('mode');
   final colors = {for (final k in t.colors.keys) k: ?t.color(k)?.toJson()};
   json.remove('colors');
   json.remove('textStyles');
@@ -30,6 +33,7 @@ Map<String, Object?> themeValues(api.ThemeTokens tokens, {required bool dark}) {
     'text': text,
     'isDark': dark,
     'brightness': dark ? 'dark' : 'light',
+    'mode': (mode ?? tokens.mode).name,
     'hasDark': tokens.hasDark,
   };
 }

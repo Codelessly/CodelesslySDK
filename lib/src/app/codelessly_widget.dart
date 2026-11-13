@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:codelessly_api/codelessly_api.dart' as api show ThemeMode;
 import 'package:codelessly_api/codelessly_api.dart'
     show
         Breakpoints,
@@ -732,15 +733,35 @@ class _LayoutViewState extends State<_LayoutView> {
   Breakpoints get _breakpoints => _codelessly.publishModel?.breakpoints ?? Breakpoints.defaults;
 
   @override
+  void initState() {
+    super.initState();
+    // The site's theme mode (a setThemeMode action on any screen of the
+    // project): every screen follows it at once.
+    _codelessly.themeModeChoice.addListener(_themeModeChanged);
+  }
+
+  void _themeModeChanged() {
+    if (!mounted) return;
+    _updateScreen();
+    _updateTheme();
+    setState(() {});
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // `screen`: the device's size, breakpoint, orientation and light or
-    // dark mode, kept as they change.
+    _updateScreen();
+    _updateTheme();
+  }
+
+  /// `screen`: the device's size, breakpoint, orientation and light or
+  /// dark mode (the site's theme mode over the device's), kept as they
+  /// change.
+  void _updateScreen() {
     final mq = MediaQuery.maybeOf(context);
     if (mq == null) return;
     final screen = {
-      ...screenValues(mq.size.width, mq.size.height,
-          dark: mq.platformBrightness == Brightness.dark, breakpoints: _breakpoints),
+      ...screenValues(mq.size.width, mq.size.height, dark: _dark, breakpoints: _breakpoints),
       // How the screen is shown: as a modal (dialog or sheet), and as a
       // bottom sheet, whose drag handle sits over its top edge.
       'modal': widget.sizing != CanvasSizing.fill,
@@ -755,16 +776,20 @@ class _LayoutViewState extends State<_LayoutView> {
           CodelesslyBackdropHost.showsBackdrop(context),
     };
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
-    _updateTheme();
   }
 
   /// The project's theme as the layout shows it: its tokens, then a
   /// layout's own.
   ThemeTokens get _tokens => widget.layout.theme ?? _codelessly.publishModel?.theme ?? ThemeTokens.none;
 
-  /// Whether the layout shows in dark mode: the device's mode (never the
-  /// app's theme).
-  bool get _dark => MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark;
+  /// The site's theme mode (Flutter's `ThemeMode`): the one chosen while
+  /// the app runs (a `setThemeMode` action, kept from an earlier visit),
+  /// else the layout's theme's own `mode`, else the project's.
+  api.ThemeMode get _mode => _codelessly.themeModeChoice.value ?? widget.layout.theme?.mode ?? _codelessly.themeMode;
+
+  /// Whether the layout shows in dark mode: the site's theme mode, `system`
+  /// following the device's (never the app's theme).
+  bool get _dark => _mode.isDark(platformDark: MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark);
 
   /// `theme`: the project's theme tokens for the current mode
   /// ([themeValues]), kept as the mode and the published theme change.
@@ -778,7 +803,7 @@ class _LayoutViewState extends State<_LayoutView> {
       return;
     }
     final size = MediaQuery.maybeSizeOf(context);
-    final theme = themeValues(size == null ? _tokens : _tokens.atScreen(size.width, size.height, _breakpoints), dark: _dark);
+    final theme = themeValues(size == null ? _tokens : _tokens.atScreen(size.width, size.height, _breakpoints), dark: _dark, mode: _mode);
     if (!jsonEquality.equals(theme, _screen.values['theme'])) _screen.values.set('theme', theme);
   }
 
@@ -1193,6 +1218,7 @@ class _LayoutViewState extends State<_LayoutView> {
 
   @override
   void dispose() {
+    _codelessly.themeModeChoice.removeListener(_themeModeChanged);
     if (identical(widget.controller?._screen, _screen)) widget.controller?._screen = null;
     for (final p in _persisted) {
       p.dispose();
@@ -1274,10 +1300,13 @@ class _LayoutViewState extends State<_LayoutView> {
 
 /// The UI of a screen's actions: navigation through the app's routes (and
 /// [CodelesslyWidget.onNavigate]), modals showing the app's screens.
-class _ScreenUi extends NavigatorActionUi {
+class _ScreenUi extends NavigatorActionUi implements ThemeModeUi {
   _ScreenUi(this.view) : super(context: () => view.mounted ? view._chromeContext : null, breakpoints: () => view._breakpoints);
 
   final _LayoutViewState view;
+
+  @override
+  void setThemeMode(api.ThemeMode mode, {bool persist = true}) => view._codelessly.setThemeMode(mode, persist: persist);
 
   @override
   ScreenBuilder get modal => _modal(CanvasSizing.design);

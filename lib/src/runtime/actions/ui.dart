@@ -48,6 +48,15 @@ class PickedFile {
   final String? contentType;
 }
 
+/// The site's light or dark choice (`setThemeMode`), implemented by a UI
+/// that shows a project's screens: every screen of the project redraws in
+/// [mode] at once. Without one (a headless runtime) the action does nothing.
+abstract interface class ThemeModeUi {
+  /// Sets the project's theme mode; with [persist] it is kept in local
+  /// storage for the next visit.
+  void setThemeMode(api.ThemeMode mode, {bool persist = true});
+}
+
 /// The UI effects of actions, implemented by the app shell.
 abstract interface class ActionUi {
   /// Moves between screens as [action] says ([NavigateAction.mode]), with
