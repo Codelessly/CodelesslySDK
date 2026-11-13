@@ -45,13 +45,19 @@ ThemeData themeDataOf(api.ThemeTokens tokens, {Brightness brightness = Brightnes
 /// * `hasDark`: whether the project's theme has dark colors (else in dark
 ///   mode the colors are the light ones, and a layout may pick its own).
 Map<String, Object?> themeValues(api.ThemeTokens tokens, {required bool dark}) {
-  final json = tokens.forBrightness(dark: dark).toJson()..remove('dark');
-  final colors = json.remove('colors');
-  final text = json.remove('textStyles');
+  final t = tokens.forBrightness(dark: dark);
+  final json = t.toJson()
+    ..remove('dark')
+    ..remove('media');
+  final colors = {for (final k in t.colors.keys) k: ?t.color(k)?.toJson()};
+  json.remove('colors');
+  json.remove('textStyles');
+  // Each style resolved: what it starts from, and the colors it names.
+  final text = {for (final k in t.textStyles.keys) k: ?t.textStyle(k)?.toJson()};
   return {
     ...json,
-    'colors': colors ?? const <String, Object?>{},
-    'text': text ?? const <String, Object?>{},
+    'colors': colors,
+    'text': text,
     'isDark': dark,
     'brightness': dark ? 'dark' : 'light',
     'hasDark': tokens.hasDark,

@@ -359,4 +359,25 @@ void main() {
       expect(b, a);
     });
   });
+
+  group('named colors and text styles (the site manifest\'s theme)', () {
+    const t = '$fixtures/theme';
+    testWidgets('a page naming the theme renders as the page with the styles written out, at each size', (tester) async {
+      for (final size in const [Size(390, 844), Size(1440, 900)]) {
+        final named = await runRender(tester, RenderArgs(inputs: ['$t/named'], out: '${out.path}/n', sizes: [size]));
+        final inline = await runRender(tester, RenderArgs(inputs: ['$t/inline/home.json'], out: '${out.path}/i', sizes: [size]));
+        expect(named.diagnostics, isEmpty, reason: '${named.diagnostics}');
+        expect(File(named.images.single).readAsBytesSync(), File(inline.images.single).readAsBytesSync(), reason: '$size');
+      }
+    });
+
+    testWidgets('an unknown name is an error naming the nearest', (tester) async {
+      final dir = Directory('${out.path}/site')..createSync();
+      File('$t/named/site.json').copySync('${dir.path}/site.json');
+      File('${dir.path}/home.json').writeAsStringSync(File('$t/named/home.json').readAsStringSync().replaceFirst('"style": "body"', '"style": "bdy"'));
+      final r = await runRender(tester, RenderArgs(inputs: [dir.path], out: '${out.path}/o', sizes: const [Size(390, 844)], validateOnly: true));
+      final d = r.diagnostics.singleWhere((d) => d['code'] == 'unknown_theme_name');
+      expect(d['suggestion'], 'body');
+    });
+  });
 }

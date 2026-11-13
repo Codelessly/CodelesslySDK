@@ -114,7 +114,9 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
       final next = {
         for (final e in m.entries) e.key: fields[e.key] == null ? e.value : _typed(fields[e.key]!.type, e.value, family, codepoints),
       };
-      if (type.name == 'TextStyle' && next['fontFamily'] == null) next['fontFamily'] = family;
+      // A style starting from a named one takes its family from there (the
+      // theme's styles get the default: [prepareTheme]).
+      if (type.name == 'TextStyle' && next['fontFamily'] == null && next['from'] == null) next['fontFamily'] = family;
       if (type.name == 'ButtonStyle' && readMap(next['textStyle']) == null) next['textStyle'] = {'fontFamily': family};
       return next;
     case PropKind.list:
@@ -161,4 +163,22 @@ String _image(String text, String path, String nodeId, String dir, List<ImageRef
   }
   images.add((nodeId: nodeId, path: path, url: t, status: 'local', detail: file.path));
   return 'data:$mime;base64,${base64Encode(file.readAsBytesSync())}';
+}
+
+/// A theme's JSON (a site manifest's `theme`) with the default family given
+/// to every text style that names none and starts from no other, as a text
+/// style in a page gets it.
+Json prepareTheme(Json theme, {required String defaultFamily}) {
+  final styles = readMap(theme['textStyles']);
+  if (styles == null) return theme;
+  return {
+    ...theme,
+    'textStyles': {
+      for (final e in styles.entries)
+        e.key: switch (readMap(e.value)) {
+          final Json m when m['fontFamily'] == null && m['from'] == null => {...m, 'fontFamily': defaultFamily},
+          _ => e.value,
+        },
+    },
+  };
 }

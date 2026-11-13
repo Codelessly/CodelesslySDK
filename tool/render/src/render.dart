@@ -174,6 +174,11 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
   final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   report.diagnostics.addAll(diagnostics.map((d) => d.toJson()));
+  // The site's theme: its named colors and text styles.
+  final themeJson = api.readMap(site.manifest?['theme']);
+  report.diagnostics.addAll(validateTheme(themeJson,
+          breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
+      .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
@@ -253,7 +258,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final published = publishPages(pages,
       variables: publishVariables(site.manifest),
       breakpoints: site.manifest?['breakpoints'],
-      components: [for (final t in components.types) components[t]!.document.toJson()]);
+      components: [for (final t in components.types) components[t]!.document.toJson()],
+      theme: themeJson == null ? null : prepareTheme(themeJson, defaultFamily: 'Roboto'));
   final fileOfNode = <String, String>{
     for (final e in docs.entries)
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
