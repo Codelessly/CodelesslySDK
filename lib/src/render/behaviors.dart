@@ -1083,8 +1083,8 @@ void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
   final be = n.behaviors;
   // A face of the flip card it sits in: the front hides when turned away,
   // the back is turned over in advance.
-  final parentId = b.tree.source.parentOf(b.id);
-  final parent = parentId == null ? null : b.tree.source.node(parentId);
+  final parentId = b.source.parentOf(b.id);
+  final parent = parentId == null ? null : b.source.node(parentId);
   if (parent?.behaviors.flip case final api.FlipCard card) {
     final face = parent!.children.indexOf(b.id);
     if (face == 0 || face == 1) {
@@ -1108,7 +1108,7 @@ void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
       // `${tilt.*}` for the nodes inside it, as it moves.
       ..onValues = box == null
           ? null
-          : (values) => box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'tilt', values);
+          : (values) => box.tree.bindings?.publish(box.source, box.id, box.instance, 'tilt', values);
     if (animates && tilt.hover) {
       chain.add(
         b.obtain<RenderMouseRegion>('tiltHover', RenderMouseRegion.new)
@@ -1236,9 +1236,9 @@ class RenderTilt extends RenderPose with _Ticking {
 bool _stateScales(NodeBuilder b, Node n) {
   bool scales(Node? owner) =>
       owner != null && owner.behaviors.states.patches.values.any((p) => p[n.id]?.containsKey('scale') ?? false);
-  if (scales(b.tree.source.node(n.id))) return true;
-  for (String? id = b.tree.source.parentOf(n.id); id != null; id = b.tree.source.parentOf(id)) {
-    if (scales(b.tree.source.node(id))) return true;
+  if (scales(b.source.node(n.id))) return true;
+  for (String? id = b.source.parentOf(n.id); id != null; id = b.source.parentOf(id)) {
+    if (scales(b.source.node(id))) return true;
   }
   return false;
 }

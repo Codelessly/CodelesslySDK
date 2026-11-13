@@ -33,6 +33,7 @@ class NodeTree extends RenderTree {
     RecipeCatalog? catalog,
     super.gestures = const DragGestures(),
     super.imageLoader = const HttpImageLoader(),
+    super.components,
   }) : super(catalog: catalog ?? builtInCatalog);
 
   /// See [RenderTree.withoutBindsUnder].

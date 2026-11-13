@@ -402,7 +402,7 @@ class DropSlotNode {
 }
 
 /// The scope node [box] reads, and its expressions.
-ValueScope? _scopeOf(NodeBox box) => box.tree.binder?.scopeFor(box.tree.source, box.id, box.instance);
+ValueScope? _scopeOf(NodeBox box) => box.tree.binder?.scopeFor(box.source, box.id, box.instance);
 
 /// Evaluates [text] (a `${...}` path, a `${= ...}` formula or text with
 /// paths) to a value where [box] reads.
@@ -638,14 +638,14 @@ class _SourceDrag implements Drag {
     if (overlay == null || box == null) return;
     _overlayBox = overlay.context.findRenderObject() as RenderBox?;
     final model = source._model;
-    final feedbackId = model.feedback.isNotEmpty && box.tree.source.node(model.feedback) != null
+    final feedbackId = model.feedback.isNotEmpty && box.source.node(model.feedback) != null
         ? model.feedback
         : '';
     final rootId = feedbackId.isEmpty ? box.id : feedbackId;
     // A tree of its own over the same nodes and bindings: what the node
     // reads where it is (its list item) it reads in the overlay too.
     final tree = _feedbackTree = RenderTree(
-      _FeedbackSource(box.tree.source, rootId: rootId, under: feedbackId.isEmpty ? null : box.id),
+      _FeedbackSource(box.source, rootId: rootId, under: feedbackId.isEmpty ? null : box.id),
       binder: box.tree.bindings,
       environment: const IslandEnvironment(interactive: true),
       recipes: box.tree.recipes,
@@ -816,7 +816,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     _box = box;
     _model = model;
     _data = n.bind['draggable.data'] ?? model.data;
-    final f = model.feedback.isEmpty ? null : box.tree.source.node(model.feedback);
+    final f = model.feedback.isEmpty ? null : box.source.node(model.feedback);
     _feedbackSize = f == null ? null : Size(f.layout.width.value, f.layout.height.value);
     _feedbackHugs = f == null ? (false, false) : (f.layout.width.isHug, f.layout.height.isHug);
     if (restart) {
@@ -1326,7 +1326,7 @@ class RenderDropTarget extends RenderProxyBox {
         ..rawBefore = items.isEmpty ? 0 : items.map((e) => e.index).reduce(math.max) + 1;
       return;
     }
-    final list = _box!.tree.source.node(_model.listNodeId);
+    final list = _box!.source.node(_model.listNodeId);
     final axis = list == null
         ? Axis.vertical
         : switch (list.type) {
@@ -1368,7 +1368,7 @@ class RenderDropTarget extends RenderProxyBox {
   /// a copy of it is in this target's own list item.
   bool get _holdsList {
     final box = _box!;
-    final source = box.tree.source;
+    final source = box.source;
     for (String? id = _model.listNodeId; id != null; id = source.parentOf(id)) {
       if (id == box.id) return true;
     }
@@ -1403,7 +1403,7 @@ class RenderDropTarget extends RenderProxyBox {
       if (o is NodeBox && !identical(o.tree, tree)) return;
       if (o is NodeBox && !identical(o, list)) {
         if (!o.attached || !o.hasSize) return;
-        final scope = tree.binder?.scopeFor(tree.source, o.id, o.instance);
+        final scope = tree.binder?.scopeFor(o.source, o.id, o.instance);
         ItemScope? item;
         for (ValueScope? s = scope; s != null; s = s.parent) {
           if (s is ItemScope) {

@@ -1,0 +1,159 @@
+{
+ "schema": 2,
+ "id": "home",
+ "roots": [
+  "home"
+ ],
+ "variables": {
+  "home": [
+   {
+    "name": "tag",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "removed",
+    "type": "text",
+    "value": "none"
+   }
+  ]
+ },
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "name": "Home",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "design",
+    "status",
+    "tags"
+   ],
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 16
+   }
+  },
+  "status": {
+   "type": "text",
+   "props": {
+    "text": "Removed: ${removed}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF333333"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "design": {
+   "type": "Chip",
+   "props": {
+    "label": "Design",
+    "selected": "tag"
+   },
+   "slots": {
+    "leading": "dot"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": 36
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onRemove"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "removed",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF4CAF50"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "tags": {
+   "type": "listView",
+   "children": [
+    "tagChip"
+   ],
+   "bind": {
+    "data": "${tags}"
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 36
+   }
+  },
+  "tagChip": {
+   "type": "Chip",
+   "bind": {
+    "props.label": "${item.name}"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "fill": 36
+    }
+   }
+  }
+ }
+}

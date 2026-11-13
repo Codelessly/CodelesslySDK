@@ -208,7 +208,7 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       final data = _r.data;
       _r.binder
           ?.provideItem(
-            _r.tree.source,
+            _r.b.source,
             instance,
             index: index,
             item: data != null && index < data.length ? data[index] : index,
@@ -238,7 +238,7 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       _provided.add(instance);
       _r.binder
           ?.provideItem(
-            _r.tree.source,
+            _r.b.source,
             instance,
             index: index,
             item: data != null ? data[index] : index,

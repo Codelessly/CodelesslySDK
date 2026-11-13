@@ -817,11 +817,13 @@ class _LayoutViewState extends State<_LayoutView> {
     BoundSource? bound;
     NodeSource source = nodeValues;
     if (engine is Expressions) {
-      binder = NodeBinder(scope: scope, logic: widget.layout.logic, engine: engine);
+      // A component instance reads the project's variables (and the app's
+      // scopes around them), never the page's.
+      binder = NodeBinder(scope: scope, logic: widget.layout.logic, engine: engine, projectScope: _codelessly.appVariables);
     } else if (engine is! NoopExpressionEngine) {
       source = bound = BoundSource(nodeValues, engine, scope);
     }
-    final tree = NodeTree(source, binder: binder, recipes: config.allRecipes);
+    final tree = NodeTree(source, binder: binder, recipes: config.allRecipes, components: _codelessly.components);
     scripts.nodeValues = () => scriptNodeValues(tree);
     final context = ScreenActionContext(
       scope: scope,

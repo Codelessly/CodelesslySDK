@@ -65,6 +65,8 @@ Future<void> _handleCore(CoreAction a, ActionRun run) async {
       run.host.ui.closeModal(a.result == null ? null : run.evaluateJson(a.result));
     case RetryFailedAction():
       if (run.host case final CoreActionContext context) context.failed.retry();
+    case ComponentEventAction():
+      await fireComponentEvent(a, run);
     case OpenLinkAction():
       final url = run.text(a.url).trim();
       if (url.isNotEmpty) await run.context.services.openUrl(url);
@@ -230,9 +232,11 @@ double? numberOfExpression(String text, ActionRun run) {
 // --- variables and values ----------------------------------------------------------
 
 Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
-  final name = a.variable.trim();
-  if (name.isEmpty) return;
-  final found = variableOf(run.context.scope, name);
+  final written = a.variable.trim();
+  if (written.isEmpty) return;
+  // A component's `variable` parameter (`props.open`) names the caller's.
+  final (target, name) = referencedVariable(run.context.scope, written);
+  final found = variableOf(target, name);
   if (found == null) {
     // Not one of the screen's variables: the app's (a context with its own
     // variables), set as is.
@@ -271,7 +275,7 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   }
   // A plain set takes over from a glide.
   VariableAnimator.stopGlide(scope, path.root);
-  setVariableIn(run.context.scope, name, next);
+  setVariableIn(target, name, next);
 }
 
 /// Runs an `AnimationController` command: on node [AnimateAction.node]'s
@@ -495,7 +499,7 @@ NodeBox? repeatOf(RenderTree tree, String id, String item) {
   final index = int.tryParse(item);
   for (final b in tree.boxesOf(id)) {
     if (!b.attached) continue;
-    final scope = binder.scopeFor(tree.source, b.id, b.instance);
+    final scope = binder.scopeFor(b.source, b.id, b.instance);
     if (scope == null) continue;
     final value = readPath(scope, 'item');
     final key = value is Map ? (value['id'] ?? value['key']) : value;

@@ -1,5 +1,30 @@
 ## Unreleased
 
+**Sections and components by reference (codelessly_api docs/design/06, phase 1)**
+
+- A call node (a node whose `type` is a component's) renders as its definition's nodes, each an ordinary box of
+  the screen's render tree keyed by (node id, `ComponentInstance`), as list items are: lists of components, lists
+  inside components and components inside components compose. `ComponentRegistry` (the definitions, by type;
+  `define` replaces one in place, re-applying only the nodes that changed in every instance; `missing` lists calls
+  rendered without one), `RegisteredComponent`, `InstanceSource`, `componentInstanceOf`, `componentPath`,
+  `kMaxComponentDepth` (a cycle stops at 32 nested instances, as an empty box).
+- `RenderTree(components:)`, `RenderTree.sourceOf`, `isInstanceRoot`, `pathOf`, `boxAtPath` (`plans/card1/cta`,
+  `faq/fq#1`); `boxOf(callId)` finds the call's box (its definition root's). `NodeBox.source` and
+  `NodeBuilder.source`: the document a box's node is in (recipes and render objects pass it to the binder instead
+  of `tree.source`).
+- `NodeBinder(projectScope:)`: a definition reads `${props.x}` (the call's parameters, bound in the caller's scope),
+  its own variables (one set per instance), the project's variables and the runtime's scopes, never the caller's
+  variables; a `variable` parameter reads and writes the caller's variable; conditions per definition.
+  `ComponentScopes`, `ComponentProps`, `AmbientScope`, `ReferenceScope`, `referencedVariable`.
+- `componentEvent` runs the call's `{"type": "event", "event": key}` reactions in the caller's scope with the payload
+  as `${result}` (`fireComponentEvent`).
+- `Codelessly(components:)` / `Codelessly.fromBundle(components:)`: the project's definitions, in memory; layouts
+  decode with their catalog. Loading them from a publish is not done yet.
+- Render command: a directory with `site.json` (or `components/`) is a site of pages and components;
+  `--component <Type>` (`--props`, `--slots`) renders one component alone; steps name nodes inside instances by
+  path; `component_missing`. Example: `examples/relay-pricing`, the m05 Relay pricing page split into sections,
+  rendering pixel-identical to the original.
+
 **Authoring fixes from the first direct-authoring experiment (cycle 1)**
 
 - Renders the API's new `flex` node (Flutter `Flex`) with the row/column render object, its main axis from

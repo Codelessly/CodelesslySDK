@@ -1,0 +1,894 @@
+{
+ "schema": 2,
+ "id": "PlanCard",
+ "roots": [
+  "pc"
+ ],
+ "widget": {
+  "type": "PlanCard",
+  "doc": "One pricing plan: name, price for the billing period, the estimate for the seats, call to action, features.",
+  "props": [
+   {
+    "key": "plan",
+    "type": {
+     "kind": "json",
+     "flutter": "Plan"
+    },
+    "default": {}
+   },
+   {
+    "key": "annual",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false
+   },
+   {
+    "key": "seats",
+    "type": {
+     "kind": "integer",
+     "flutter": "int",
+     "min": 1
+    },
+    "default": 10
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Team, annual",
+   "size": [
+    432,
+    980
+   ],
+   "props": {
+    "plan": {
+     "name": "Team",
+     "description": "Coordination for teams with more moving parts.",
+     "monthly": 59,
+     "annual": 47,
+     "max": 0,
+     "cta": "Choose Team",
+     "popular": true,
+     "features": [
+      "Everything in Starter",
+      "Unlimited responders",
+      "Automated workflows",
+      "Stakeholder updates",
+      "1-year history"
+     ]
+    },
+    "annual": true,
+    "seats": 10
+   }
+  }
+ ],
+ "nodes": {
+  "pc": {
+   "type": "column",
+   "children": [
+    "pcBadge",
+    "pcCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 432
+    },
+    "height": {
+     "hug": 760
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "pcBadge": {
+   "type": "row",
+   "children": [
+    "pcBadgeText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 432
+    },
+    "height": 28
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFB9F34C"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.plan.popular == true || screen.atLeast.tablet}",
+    "opacity": "${= props.plan.popular == true ? 1 : 0}"
+   }
+  },
+  "pcBadgeText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "props": {
+    "text": "MOST POPULAR",
+    "style": {
+     "fontFamily": "IBM Plex Mono",
+     "fontSize": 10,
+     "fontWeight": 500,
+     "letterSpacing": 1.6,
+     "color": "#FF0A1006"
+    }
+   }
+  },
+  "pcCard": {
+   "type": "column",
+   "children": [
+    "pcEyebrow",
+    "pcName",
+    "pcDesc",
+    "pcPriceRow",
+    "pcUnit",
+    "pcDiv1",
+    "pcSum",
+    "pcSpacer",
+    "pcCta",
+    "pcDiv2",
+    "pcIncl",
+    "pcFeats"
+   ],
+   "layout": {
+    "width": {
+     "fill": 432
+    },
+    "height": {
+     "hug": 732
+    },
+    "padding": [
+     26,
+     30,
+     26,
+     30
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF121A1B"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.plan.popular == true ? '#FF172423' : '#FF121A1B'}",
+    "decoration.strokes[0].color": "${= props.plan.popular == true ? '#FFB9F34C' : '#FF2C3C38'}"
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        20,
+        26,
+        20,
+        30
+       ]
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        30,
+        30,
+        30,
+        30
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "pcEyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= upper(props.plan.name)}",
+    "style": {
+     "fontFamily": "IBM Plex Mono",
+     "fontSize": 11.5,
+     "fontWeight": 500,
+     "letterSpacing": 2,
+     "color": "#FFB9F34C"
+    }
+   }
+  },
+  "pcName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 36
+    },
+    "margin": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "${props.plan.name}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 28,
+     "fontWeight": 700,
+     "letterSpacing": -1.2,
+     "color": "#FFF0F4ED"
+    }
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 30
+       }
+      }
+     }
+    }
+   ]
+  },
+  "pcDesc": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": {
+     "hug": 26
+    },
+    "margin": [
+     0,
+     12,
+     0,
+     0
+    ],
+    "constraints": {
+     "minHeight": 52
+    }
+   },
+   "props": {
+    "text": "${props.plan.description}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 15,
+     "height": 1.65,
+     "color": "#FFA2B0A9"
+    }
+   }
+  },
+  "pcPriceRow": {
+   "type": "row",
+   "children": [
+    "pcDollar",
+    "pcPrice",
+    "pcPer"
+   ],
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 70
+    },
+    "margin": [
+     0,
+     30,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "margin": [
+        0,
+        38,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "pcDollar": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 28
+    },
+    "margin": [
+     0,
+     6,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "$",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 24,
+     "fontWeight": 500,
+     "color": "#FFF0F4ED"
+    }
+   }
+  },
+  "pcPrice": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 64
+    }
+   },
+   "props": {
+    "text": "${= props.annual ? props.plan.annual : props.plan.monthly}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 52,
+     "fontWeight": 700,
+     "letterSpacing": -3.5,
+     "height": 1.05,
+     "color": "#FFF0F4ED"
+    }
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 64,
+        "letterSpacing": -4.5
+       }
+      }
+     }
+    }
+   ]
+  },
+  "pcPer": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 22
+    },
+    "margin": [
+     4,
+     32,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "/ mo",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 16,
+     "color": "#FFA2B0A9"
+    }
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "margin": [
+        4,
+        42,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "pcUnit": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     6,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "per responder / month, billed ${= props.annual ? 'annually' : 'monthly'}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 11.5,
+     "color": "#FFA2B0A9"
+    }
+   }
+  },
+  "pcDiv1": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": 1,
+    "margin": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ]
+   }
+  },
+  "pcSum": {
+   "type": "column",
+   "children": [
+    "pcSeats",
+    "pcLimit",
+    "pcTotalRow",
+    "pcTotalNote"
+   ],
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": {
+     "hug": 90
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "constraints": {
+        "minHeight": 120
+       }
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "constraints": {
+        "minHeight": 118
+       }
+      }
+     }
+    }
+   ]
+  },
+  "pcSeats": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 14
+    },
+    "margin": [
+     0,
+     22,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "${= (props.plan.max > 0 && props.seats > props.plan.max) ? props.seats + ' RESPONDERS' : 'FOR ' + props.seats + ' RESPONDERS'}",
+    "style": {
+     "fontFamily": "IBM Plex Mono",
+     "fontSize": 10.5,
+     "fontWeight": 600,
+     "letterSpacing": 1.6,
+     "color": "#FFB9F34C"
+    }
+   }
+  },
+  "pcLimit": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": {
+     "hug": 32
+    },
+    "margin": [
+     0,
+     10,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "${estimator.limitMessage}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 11.5,
+     "height": 1.45,
+     "color": "#FFC9D3CC"
+    }
+   },
+   "bind": {
+    "visible": "${= props.plan.max > 0 && props.seats > props.plan.max}"
+   }
+  },
+  "pcTotalRow": {
+   "type": "row",
+   "children": [
+    "pcTotal",
+    "pcTotalUnit"
+   ],
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 30
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 6
+   },
+   "bind": {
+    "visible": "${= !(props.plan.max > 0 && props.seats > props.plan.max)}"
+   }
+  },
+  "pcTotal": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "text": "${= '$' + thousands((props.annual ? props.plan.annual : props.plan.monthly) * props.seats)}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 24,
+     "fontWeight": 700,
+     "letterSpacing": -1.2,
+     "color": "#FFF0F4ED"
+    }
+   }
+  },
+  "pcTotalUnit": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     4
+    ]
+   },
+   "props": {
+    "text": "${= props.annual ? '/ month equivalent' : '/ month'}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 11.5,
+     "color": "#FFA2B0A9"
+    }
+   }
+  },
+  "pcTotalNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "${= props.annual ? estimator.annualLabel + ': $' + thousands(props.plan.annual * props.seats * 12) + ' · ' + estimator.annualSavingsLabel + ': $' + thousands((props.plan.monthly - props.plan.annual) * props.seats * 12) : estimator.monthlyLabel + ': $' + thousands(props.plan.monthly * props.seats)}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 11.5,
+     "height": 1.45,
+     "color": "#FFA2B0A9"
+    }
+   },
+   "bind": {
+    "visible": "${= !(props.plan.max > 0 && props.seats > props.plan.max)}"
+   }
+  },
+  "pcSpacer": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 26
+   }
+  },
+  "pcCta": {
+   "type": "row",
+   "children": [
+    "pcCtaLabel",
+    "pcCtaIcon"
+   ],
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": 52,
+    "padding": [
+     20,
+     0,
+     20,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.plan.popular == true ? '#FFB9F34C' : '#00000000'}",
+    "decoration.strokes[0].color": "${= props.plan.popular == true ? '#FFB9F34C' : '#FF2C3C38'}"
+   }
+  },
+  "pcCtaLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${= (props.plan.max > 0 && props.seats > props.plan.max) ? estimator.starterAlternativeLabel : props.plan.cta}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "color": "#FFF0F4ED"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.plan.popular == true ? '#FF0A1006' : '#FFF0F4ED'}"
+   }
+  },
+  "pcCtaIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FFF0F4ED"
+   },
+   "bind": {
+    "props.color": "${= props.plan.popular == true ? '#FF0A1006' : '#FFF0F4ED'}"
+   }
+  },
+  "pcDiv2": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": 1,
+    "margin": [
+     0,
+     30,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2C3C38"
+     }
+    ]
+   }
+  },
+  "pcIncl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 14
+    },
+    "margin": [
+     0,
+     28,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "WHAT'S INCLUDED",
+    "style": {
+     "fontFamily": "IBM Plex Mono",
+     "fontSize": 9.5,
+     "letterSpacing": 1.6,
+     "color": "#FF91A39A"
+    }
+   }
+  },
+  "pcFeats": {
+   "type": "listView",
+   "children": [
+    "pcFeat"
+   ],
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": {
+     "hug": 160
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${props.plan.features}"
+   }
+  },
+  "pcFeat": {
+   "type": "row",
+   "children": [
+    "pcFeatIcon",
+    "pcFeatText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 372
+    },
+    "height": 32
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "pcFeatIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "check",
+    "color": "#FFB9F34C"
+   }
+  },
+  "pcFeatText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Space Grotesk",
+     "fontSize": 13.5,
+     "fontWeight": 500,
+     "color": "#FFF0F4ED"
+    }
+   }
+  }
+ }
+}

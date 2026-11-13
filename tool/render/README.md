@@ -20,6 +20,12 @@ It:
    state keeps each state's) and **exits 1 when there are errors**, 0 when there are only warnings or none, 2 for
    bad arguments.
 
+A directory with a `site.json` is a site of pages and components (codelessly_api guide §19): its pages (the
+manifest's `pages`, else its `.json` files), its components (the manifest's `components`, else the files under
+`components/`, each named after its type) and its project variables. Steps name a node inside a component instance
+by its path, the call ids from the page down and then its id (`--tap plans/card1/cta`; `#n` picks the n-th copy a
+list repeats: `--tap faq/fq#1`); `--dump-layout` writes each such node's `path`.
+
 A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics*.json`), as the pages of one
 site: navigation may name a canvas of another page.
 
@@ -42,6 +48,9 @@ site: navigation may name a canvas of another page.
 | `--wait <ms>` | Let time pass (animations, delays, toasts). |
 | `--label <text>` | Add `-<text>` to the PNG names and write `diagnostics-<text>.json`, to keep states apart. |
 | `--dump-layout` | Also write `<png name>.layout.json`: every node's box on screen (`id`, `x`, `y`, `w`, `h`). |
+| `--component <Type>` | Render one component of the site alone: once per preview (at its size), else with its defaults at each size. |
+| `--props '<json>'` | With `--component`: its parameters, as a call's `props`, at each size. A `variable` parameter becomes a page variable of the same name. |
+| `--slots <file>` | With `--component`: what the call passes, `{"children": [ids], "slots": {"name": id}, "nodes": {...}}`. |
 | `--validate-only` | Only validate. |
 
 Steps (`--tap`, `--hover`, `--focus`, `--type`, `--set`, `--scroll`, `--navigate`, `--wait`) run in the order given, after the screen
@@ -84,6 +93,7 @@ step adds:
 | `image_failed` | error | An image file is missing, or an image does not decode. |
 | `image_network` | warning | An image is on the network: not fetched, so blank in the screenshot. |
 | `empty_screen` | warning | The screen drew no nodes. |
+| `component_missing` | error | A call rendered without its component's definition (or nested more than 32 deep): an empty box of its size. Named by its path. |
 
 `test/tool/render_command_test.dart` checks that these codes are reported for the fixtures in
 `test/tool/fixtures`.

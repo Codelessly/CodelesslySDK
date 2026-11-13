@@ -463,7 +463,7 @@ class DataListViewState extends State<DataListView> {
   Widget _node$(String tag, String id, Object? key, int index, Object? item) {
     final instance = ProvidedItem(tag, _r.b.instance, _node.id, key);
     _provided.add(instance);
-    _r.binder?.provideItem(_r.tree.source, instance, index: index, item: item);
+    _r.binder?.provideItem(_r.b.source, instance, index: index, item: item);
     return NodeChild(tree: _r.tree, id: id, instance: instance);
   }
 
