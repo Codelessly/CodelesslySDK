@@ -16,7 +16,14 @@ typedef Page = ({String name, Json json});
 /// those it calls (directly or through others) with its own, so they load
 /// before it shows.
 ({PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) publishPages(
-    List<Page> pages, {Json variables = const {}, Object? breakpoints, List<Json> components = const []}) {
+    List<Page> pages, {Json variables = const {}, Object? breakpoints, List<Json> components = const [], Json? theme}) {
+  // The theme as each of its media rules makes it (the fonts its named
+  // styles use at every size).
+  final tokens = ThemeTokens.fromJson(theme);
+  final themes = [
+    tokens,
+    for (final r in tokens.media) ThemeTokens.fromJson(mergePatch(tokens.toJson()..remove('media'), r.patch)),
+  ];
   final library = ComponentLibrary.of([for (final c in components) LayoutDocument.fromJson(c)]);
   final rawOf = {for (final c in components) readString(readMap(c['widget'])?['type']) ?? '': c};
   final layouts = <String, Json>{};
@@ -68,7 +75,13 @@ typedef Page = ({String name, Json json});
       final fontIds = <String>[];
       final called = library.closureOf(LayoutDocument(nodes: {for (final c in cs) for (final n in doc.subtree(c)) n.id: n}));
       final componentNodes = [for (final t in called) ...(readMap(rawOf[t]?['nodes']) ?? const {}).values];
-      for (final f in fontsUsedBy([...nodes.values, ...componentNodes])) {
+      // Text styles naming the theme's: their fonts as resolved.
+      final named = [
+        for (final t in themes)
+          for (final n in [...nodes.values, ...componentNodes])
+            if (readMap(n) case final Json m) ThemeRefs(t).node(m, Catalog.current.widget(readString(m['type']) ?? '') ?? library.catalog.widget(readString(m['type']) ?? '')),
+      ];
+      for (final f in fontsUsedBy([...nodes.values, ...componentNodes, ...named])) {
         final key = '${f.family}/${f.weight}/${f.italic}';
         fonts[key] = {'family': f.family, 'weight': f.weight, if (f.italic) 'italic': true};
         fontIds.add(key);
@@ -116,6 +129,7 @@ typedef Page = ({String name, Json json});
     },
     'breakpoints': ?breakpoints,
     if (variables.isNotEmpty) 'variables': variables,
+    'theme': ?theme,
     'lastUpdated': 0,
   };
   return (

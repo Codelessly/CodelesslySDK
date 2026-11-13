@@ -23,11 +23,11 @@ for a in "$@"; do
     continue
   fi
   case "$a" in
-    --out|--fonts|--slots) expect_path=1; prev="$a"; args+=("$a") ;;
+    --out|--fonts|--slots|--compare) expect_path=1; prev="$a"; args+=("$a") ;;
     --*) args+=("$a") ;;
     *)
       # A positional argument right after a value-taking option is that option's value.
-      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|type|set|scroll|navigate|wait|label|component|props)$ ]]; then
+      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|navigate|wait|label|component|props)$ ]]; then
         args+=("$a")
       else
         case "$a" in /*) ;; *) a="$PWD/$a" ;; esac

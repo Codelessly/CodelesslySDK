@@ -1,25 +1,22 @@
 ## Unreleased
 
-**UI an agent builds and edits, rendered while it streams (codelessly_api docs/design/08, phase 4)**
+**Authoring fixes from the third direct-authoring experiment (cycle 3)**
 
-- `UiSession`: a document changed only by edit ops (codelessly_api's `applyOps`), a `NodeSource` over it, so an op
-  re-applies only the boxes it changed. `apply` (one batch, one revision, one undo step), `applyStream` (a
-  `ui_apply` tool call's raw text deltas; each op applies the moment it is complete; dangling ids reported at the
-  end; `map`, `onOp`), `outline`, `read`, `tools`, `describeForModel`, `events` (`UiEvent`), `undo`/`redo`,
-  `rev`/`revision`, `streaming`, `changes`, `pending`. The trust profile defaults to `TrustProfile.agent`; the
-  check to the core's `catalogCheck` (pass `strictEditCheck()` for the strict validator).
-- Progressive rendering: a pending child takes no room (or the size an op's `placeholders` gave it); a container
-  none of whose children shows yet waits for its first (`holdEmptyContainers`); optional `arrivalFade`.
-- `CodelesslyView(session:)`: the session's canvas with the core runtime alone (`CoreActions`); `vars` ops update
-  bindings live; `componentEvent` outside a component (and `emitEvent`) reaches `session.events` with the node id
-  and the evaluated payload; `navigate` switches between the session's canvases; media rules follow the view's
-  width.
-- New layer `lib/src/session` (architecture test); the core-only test proves its import closure reaches no feature.
-- `tool/stream`: the replay command (`replay.sh`: a recorded stream through `applyStream` on a virtual clock, at
-  phone and desktop sizes, to a video with an overlay, a contact sheet and metrics), `make_streams.dart`
-  (synthetic streams of the four demo UIs at 60, 150 and 400 tokens/s, and two follow-up edits),
-  `run_all.sh`; the outputs in `tool/stream/out/`.
-- `examples/stream_chat`: a chat whose replies carry inline UI that fills in as the stream arrives, from recorded
-  streams (`RecordedStreamSource`, with a widget test) or live (`LlmStreamSource`, Anthropic's Messages API through
-  `anthropic_sdk_dart`, eager tool input streaming; the example's dependency only); `tool/record.dart` records a
-  real generation (timed deltas, usage, one retry with the diagnostics, a follow-up edit).
+- Named colors and text styles resolve against the published theme as the screen shows it (its media rules at
+  the screen's size, its dark colors in dark mode), on the page and in components (`ComponentRegistry.theme`); a
+  change of theme re-applies only the nodes whose resolved values differ. `${theme.text.*}` reads resolved styles.
+- Icon `size`: the glyph at that size, centred in the node's box; a hugging icon takes it.
+- Actions naming a node from inside a component instance (`scrollTo`, `animate`, `focus`, `editText`) act on that
+  instance's node. **Behaviour change (bug fix):** they acted on every instance's (or none).
+- A node written `visible: false` whose media rule binds `visible` collapses when hidden.
+- `RenderFitBox.designWidthUsed` / `designHeightUsed`: a fill laid out with no room took its design size.
+- Render command: `fill_fallback` (a fill whose size came from its design number, naming the parent and the fix);
+  diagnostics find a node's parent in its own document and name component nodes by path (no more false
+  `layout_overflow` when a page and a component share an id); `--full-page` captures the whole page while the
+  window keeps its size (**behaviour change:** `screen.height` and anything pinned to the window's top and bottom
+  are no longer stretched to the page; page content is unchanged), and `--dump-layout` reports boxes where the PNG
+  draws them; `--unfocus`, `--key`; `--compare` (side-by-side and diff images, bands, height difference); of a
+  font package's subset files the one with Latin text's characters is served; the site manifest's theme is
+  validated, published and its fonts loaded.
+
+**Authoring fixes from the second direct-authoring experiment (cycle 2)**

@@ -13,6 +13,7 @@ import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeed
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
+import '../../render/components.dart' show componentInstanceOf;
 import '../../render/node_tree.dart' show NodeBox, RenderTree;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
@@ -292,7 +293,7 @@ Future<void> _animate(AnimateAction a, ActionRun run) async {
   final tree = run.host.tree;
   final plays = <Future<void>>[];
   if (tree != null) {
-    var boxes = tree.boxesOf(id).toList();
+    var boxes = scopedBoxesOf(tree, id, run.instance);
     // A node key names it too.
     if (boxes.isEmpty) boxes = [for (final b in tree.boxes.toList()) if (b.node?.key == id) b];
     for (final b in boxes) {
@@ -446,7 +447,7 @@ Future<void> _focus(FocusAction a, ActionRun run) async {
 
 void _editText(EditTextAction a, ActionRun run) {
   final tree = run.host.tree;
-  final handle = tree == null ? null : TextFieldHandle.of(tree, a.node);
+  final handle = tree == null ? null : TextFieldHandle.near(tree, a.node, run.instance);
   if (handle == null) return;
   final c = handle.controller;
   final v = c.value;
@@ -488,16 +489,28 @@ void _editText(EditTextAction a, ActionRun run) {
   }
 }
 
+/// Node [id]'s boxes as an action run in [instance] names it: ids are local
+/// to a component's definition, so inside an instance, that instance's own
+/// (two cards of one component each scroll, animate and focus their own
+/// nodes); on a page, the page's. When none is there, every box of that id
+/// (a page action naming a node inside a component).
+List<NodeBox> scopedBoxesOf(RenderTree tree, String id, Object? instance) {
+  final all = tree.boxesOf(id).toList();
+  final here = componentInstanceOf(instance);
+  final own = [for (final b in all) if (componentInstanceOf(b.instance) == here) b];
+  return own.isNotEmpty ? own : all;
+}
+
 /// The copy of repeated node [id] that a list built for its item [item]:
 /// the one whose `${item.id}` (or `${item.key}`, or the item itself, as
 /// text) reads [item], else the one whose `${index}` is [item]. Each copy is
 /// asked in its own scope, so a node inside an item template matches too.
-NodeBox? repeatOf(RenderTree tree, String id, String item) {
+NodeBox? repeatOf(RenderTree tree, String id, String item, {Object? instance}) {
   final binder = tree.binder;
   if (binder == null) return null;
   NodeBox? byIndex;
   final index = int.tryParse(item);
-  for (final b in tree.boxesOf(id)) {
+  for (final b in scopedBoxesOf(tree, id, instance)) {
     if (!b.attached) continue;
     final scope = binder.scopeFor(b.source, b.id, b.instance);
     if (scope == null) continue;
@@ -544,7 +557,8 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final tree = run.host.tree;
   final id = run.text(a.node).trim();
   final item = run.text(a.item).trim();
-  final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
+  NodeBox? named() => tree == null ? null : (tree.boxOf(id, instance: run.instance) ?? scopedBoxesOf(tree, id, run.instance).lastOrNull);
+  final box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance)) ?? named();
   if (box == null || !box.attached) {
     // Nothing to reveal: said, not skipped silently (the chain goes on).
     if (tree != null) {

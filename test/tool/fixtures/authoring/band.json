@@ -1,0 +1,261 @@
+{
+ "schema": 2,
+ "roots": [
+  "home"
+ ],
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 1440,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "band"
+   ],
+   "props": {
+    "scrollable": true
+   },
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    }
+   }
+  },
+  "band": {
+   "type": "column",
+   "children": [
+    "rail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 200
+    },
+    "padding": [
+     24,
+     48,
+     24,
+     48
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1F2937"
+     }
+    ]
+   }
+  },
+  "rail": {
+   "type": "column",
+   "children": [
+    "title",
+    "table"
+   ],
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 160
+    },
+    "constraints": {
+     "maxWidth": 1200
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "Compare plans",
+    "style": {
+     "fontSize": 28,
+     "fontWeight": 700,
+     "color": "#FFFFFFFF"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "table": {
+   "type": "listView",
+   "children": [
+    "tr"
+   ],
+   "bind": {
+    "data": "${rows}"
+   },
+   "props": {
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "tr": {
+   "type": "row",
+   "children": [
+    "label",
+    "cells"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF374151"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "label": {
+   "type": "text",
+   "bind": {
+    "props.text": "${item.label}"
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "fontSize": 14,
+     "color": "#FFD1D5DB"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 20
+    },
+    "flex": 2
+   }
+  },
+  "cells": {
+   "type": "gridView",
+   "children": [
+    "cell"
+   ],
+   "bind": {
+    "data": "${item.values}",
+    "props.crossAxisCount": "${= length(item.values)}"
+   },
+   "props": {
+    "physics": "never",
+    "crossAxisCount": 3,
+    "shrinkWrapRows": true
+   },
+   "layout": {
+    "width": {
+     "fill": 600
+    },
+    "height": {
+     "hug": 44
+    },
+    "flex": 3
+   }
+  },
+  "cell": {
+   "type": "text",
+   "bind": {
+    "props.text": "${item}"
+   },
+   "props": {
+    "text": "",
+    "textAlign": "center",
+    "style": {
+     "fontSize": 14,
+     "color": "#FFFFFFFF"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    },
+    "margin": [
+     0,
+     12,
+     0,
+     12
+    ]
+   }
+  }
+ },
+ "variables": {
+  "home": [
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "label": "Seats",
+      "values": [
+       "5",
+       "25",
+       "Unlimited"
+      ]
+     },
+     {
+      "label": "SSO",
+      "values": [
+       "\u2013",
+       "Yes",
+       "Yes"
+      ]
+     },
+     {
+      "label": "Support",
+      "values": [
+       "Email",
+       "Chat",
+       "24/7"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}
