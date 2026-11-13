@@ -523,6 +523,22 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     return visible.center;
   }
 
+  // A node scrolled out of view is scrolled into it first, as a person
+  // would before tapping it.
+  Future<void> reveal(String id) async {
+    final b = _boxOf(binding, id);
+    if (b == null || centerOf(id) != null) return;
+    for (RenderObject? o = b.parent; o != null; o = o.parent) {
+      if (o is RenderDesignScroll && o.interactive) {
+        final top = b.localToGlobal(ui.Offset.zero, ancestor: o).dy;
+        o.jumpTo(o.pixels + top - 16);
+        await tester.pump(const Duration(milliseconds: 100));
+        return;
+      }
+    }
+  }
+
+  if (step.kind == 'tap' || step.kind == 'hover') await reveal(step.target);
   switch (step.kind) {
     case 'tap':
       final at = centerOf(step.target);
