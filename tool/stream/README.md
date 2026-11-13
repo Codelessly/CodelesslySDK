@@ -121,6 +121,11 @@ All runs (`tool/stream/out/summary.md`, written by `run_all.sh`):
 
 ## Live recordings, replayed (`out/live/`)
 
+The system prompt of a live generation is codelessly_api's base in its runtime form (`runtimeStarter()`, the same
+document as `docs/reference/STARTER.md` with the op rules and examples in place of the render command), ending
+with the index of `ui_docs` topics; `ui_docs` answers with the reference's pages, one section at a time
+(`docsTopic`). The recordings below predate that base.
+
 Three generations recorded 2026-11-13 with the old 28.8k-token prompt, before this hardening, replayed through
 the current decoder, session and checks (390 × 844; first paint: the card's surface shows; first text: the first
 text node shows):

@@ -7,6 +7,10 @@ so a person or an agent writing documents by hand can see what they made and wha
 tool/render/render.sh <document.json | directory> [...] --out <dir> [options]
 ```
 
+The documents themselves are described by codelessly_api's reference: start with `docs/reference/STARTER.md` (the
+base, which ends with an index of the feature pages); `docs/reference/render.md` is this command's page there
+(the loop of checking, capturing states, every validation code).
+
 It:
 
 1. **validates** every document strictly (`validateProject` from `package:codelessly_api/validate.dart`, with the
@@ -74,8 +78,8 @@ tool/render/render.sh site/ --out shots/ --screen contact --tap submit --label e
 
 ## What it reports
 
-Validation codes are listed in the API reference (`docs/reference/index.md`, "Checking your work"). The render
-step adds:
+Validation codes are listed in the API reference (codelessly_api's `docs/reference/render.md`, "Validation
+codes"; the reference starts with `docs/reference/STARTER.md`, the base). The render step adds:
 
 | Code | Severity | Meaning |
 |---|---|---|

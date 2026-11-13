@@ -27,22 +27,24 @@ flutter run --dart-define=ANTHROPIC_API_KEY=<key> \
 | `lib/main.dart` | The chat screen. |
 | `lib/src/sources.dart` | `StreamSource`, `RecordedStreamSource` (plays `assets/streams/*.jsonl` at their recorded pace), `LlmStreamSource` (live, compact prompt). |
 | `lib/src/llm.dart` | The live request (pure Dart, shared with the record command): Anthropic's Messages API through `anthropic_sdk_dart`, the tools with `eager_input_streaming`, the `input_json_delta` text of the `ui_apply` call fed straight to `UiSession.applyStream`; `UiModel.turn` answers `ui_docs` and `ui_read` calls before the `ui_apply` call of the same turn; the briefs. |
-| `assets/system_prompt.md` | The **full** system prompt (`dart run tool/system_prompt.dart`: the op rules, the node and action types, codelessly_api's STARTER): 72,898 characters. |
+| `assets/system_prompt.md` | The **full** system prompt (`dart run tool/system_prompt.dart`: the op rules, the node and action types, and codelessly_api's base in its file form, `docs/reference/STARTER.md`): 49,442 characters. |
 | `tool/record.dart` | Records one real generation, its retries and its follow-up in the replay format. |
 | `tool/record_all.sh` | The live matrix: records, replays and writes one summary table. |
 
 ## Prompts
 
-`PromptVariant.compact` (the default, `--prompt compact`) sends the **base set**, `runtimeStarter()` of
-codelessly_api, generated from the declarations at run time: the rules, the ops, layout, decoration and text
-essentials, one table of the base node types (which take children, slots or none; the props that matter, the
-button family, `textField`, `checkbox`, `switch`, `radio`, `slider`, `dropdown`, `segmentedButton`, `listView`,
-`gridView` included), state, bindings and reactions, two examples that apply cleanly, and the index of `ui_docs`,
-the third tool, which returns the generated reference of one topic (a node type, action type, trigger, behavior or
-feature area: responsive, lists, forms, animation, gestures, customPaint, scripts...). 15,125 characters of prompt
-and 2,126 of tools, against 72,898 and 8,369 for `--prompt full`. Without a tokenizer here: ≈ 4,900 tokens at
-3.5 characters per token; ≈ 7,300 at the 2.37 characters per token the API counted for the full prompt before
-(28,768 tokens for 68,038 characters). The record command counts both with the API when it runs
+`PromptVariant.compact` (the default, `--prompt compact`) sends codelessly_api's **base** in its runtime form,
+`runtimeStarter()` (`docs/reference/RUNTIME_STARTER.md`), generated at run time from the same template and
+declarations as the base an agent reads as a file (`STARTER.md`): the answering rules, the document and the node
+map, layout, decoration and text, the theme, one table of the base node types (the button family, `textField`,
+`checkbox`, `switch`, `radio`, `slider`, `dropdown`, `segmentedButton`, `listView`, `gridView` included) and one
+of which types take children or slots, variables, bindings and reactions, media rules, the rules that are easy to
+get wrong, the ops and two examples that apply cleanly, and the index: a task table and the pages, each entry a
+`ui_docs` topic. `ui_docs`, the third tool, answers with the reference's pages, one section at a time (a page's
+"When to use", minimal example and pitfalls; a section by its anchor; any node type, action, trigger or behavior
+by name). 43,792 characters of prompt and 2,126 of tools, against 49,442 and 8,391 for `--prompt full`. Without a
+tokenizer here: ≈ 12,500 tokens at 3.5 characters per token; ≈ 18,400 at the 2.37 characters per token the API
+counted for the earlier full prompt. The record command counts both with the API when it runs
 (`systemPromptAndToolsTokens`).
 
 App briefs (`form_builder`, `sudoku`, `basketball`, `kanban`, `habits`, `memory`) get `TrustProfile.agentApps`
