@@ -166,9 +166,10 @@ variables) answers `script.name(args)` in formulas. Tests run real scripts:
   flights, but can be the screen they fly from or to.
 * `effectAnimations` (render/play.dart, `RenderEffects`, outside motion):
   `playAnimation` (`EffectPlayers.play`), a changed bound `playKey`, or
-  `playOnAppear`. `flightKey`: `RenderFlightBox` records where it's drawn
-  (`FlightRegistry`, `recordDrop` for a drag let go) and springs in from
-  where another holder was. Particles aren't drawn yet.
+  `playOnAppear`. A hero that flies in place (`hero` with `flies: inPlace`):
+  `RenderFlightBox` records where it's drawn (`FlightRegistry`, `recordDrop`
+  for a drag let go) and springs in (or flies as its `flight` says) from
+  where another holder of its tag was. Particles aren't drawn yet.
 * Navigation (`app/navigation.dart`): optional trailing params (`:id?`),
   `CanvasLocation.defaultPathOf` (the path the editor publishes for a
   screen without one), a link by id named at the screen's path

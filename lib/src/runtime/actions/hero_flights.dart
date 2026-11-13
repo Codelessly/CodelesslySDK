@@ -3,7 +3,7 @@
 // routes ([CodelesslyHeroRoute]) find the hero marks (render/hero.dart) with
 // the same tag on the screen below and the screen on top, hide both, and fly
 // a drawing of the node in the navigator's overlay on the route's
-// animation, as each node's `hero.flight` says.
+// animation, as each node's `hero.flightShuttle` says.
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
@@ -158,7 +158,8 @@ class _Flight {
   bool involves(RenderHeroMark m) => identical(m, bottom) || identical(m, top);
 
   /// The flight the two ends make: the more specific one when they differ.
-  HeroFlightShuttle get flight => bottom.flight.index > top.flight.index ? bottom.flight : top.flight;
+  HeroFlightShuttle get flight =>
+      bottom.flightShuttle.index > top.flightShuttle.index ? bottom.flightShuttle : top.flightShuttle;
 
   RenderHeroMark get destination => push ? top : bottom;
   RenderHeroMark get origin => push ? bottom : top;
@@ -176,7 +177,7 @@ class _Flight {
     _curved = CurvedAnimation(parent: route, curve: Curves.fastOutSlowIn, reverseCurve: Curves.fastOutSlowIn.flipped);
     // The destination's path, as Flutter flies on the destination hero's
     // tween: an arc, a straight line for a container, else Material's arc.
-    _tween = switch (destination.flight) {
+    _tween = switch (destination.flightShuttle) {
       HeroFlightShuttle.arc => HeroArcRectTween(begin: from, end: to),
       HeroFlightShuttle.containerTransform => RectTween(begin: from, end: to),
       _ => MaterialRectArcTween(begin: from, end: to),

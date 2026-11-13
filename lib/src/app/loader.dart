@@ -54,13 +54,13 @@ abstract interface class LivePublishLoader implements PublishLoader {
 
 /// The stored-document marker of publish data (`schema`): a document at a
 /// publish path without it is in an older format, which this SDK can't
-/// read. Schema 2 (what published apps hold) and 3 load; a schema-2 document
-/// is migrated to 3 in memory when it decodes (`migrate2to3`), never written
-/// back.
+/// read. Schemas 2 (what published apps hold), 3 and 4 load; a schema-2 or
+/// schema-3 document is migrated to 4 in memory when it decodes
+/// (`migrate2to3`, `migrate3to4`), never written back.
 const String kStoredSchemaField = 'schema';
 
-/// The stored schemas this SDK loads: 2 (migrated in memory) and 3.
-const Set<int> kLoadableSchemas = {2, kSchemaVersion};
+/// The stored schemas this SDK loads: 2 and 3 (migrated in memory) and 4.
+const Set<int> kLoadableSchemas = {2, 3, kSchemaVersion};
 
 /// Where a stored layout too large for one Firestore document keeps its
 /// nodes: `{"nodes": {...}}` (and any field Firestore couldn't store as it
@@ -73,10 +73,10 @@ void _requireCurrentFormat(Map<String, Object?> data, String what) {
   final schema = data[kStoredSchemaField];
   if (schema is num && kLoadableSchemas.contains(schema.toInt())) return;
   if (schema is num && schema.toInt() > kSchemaVersion) {
-    throw PublishLoadException('$what is in schema ${schema.toInt()}, newer than this SDK reads (2 and 3). '
+    throw PublishLoadException('$what is in schema ${schema.toInt()}, newer than this SDK reads (2, 3 and 4). '
         'Update codelessly_sdk.');
   }
-  throw PublishLoadException('$what is not in the current format (no "schema": 2 or 3). Publish the project '
+  throw PublishLoadException('$what is not in the current format (no "schema": 2, 3 or 4). Publish the project '
       'again from the Codelessly Editor.');
 }
 
@@ -232,7 +232,7 @@ PublishBundle decodeBundleJson(Object? json) {
     final model = json['model'];
     for (final schema in [json[kStoredSchemaField], if (model is Map) model[kStoredSchemaField]]) {
       if (schema is num && schema.toInt() > kSchemaVersion) {
-        throw PublishLoadException('The bundle is in schema ${schema.toInt()}, newer than this SDK reads (2 and 3). '
+        throw PublishLoadException('The bundle is in schema ${schema.toInt()}, newer than this SDK reads (2, 3 and 4). '
             'Update codelessly_sdk.');
       }
     }

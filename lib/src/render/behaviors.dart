@@ -1,7 +1,7 @@
 // A node's behaviors as layers of its render chain (see node_tree.dart's
 // outer layers). Outermost first:
 //
-//   constraints → track pose → transform gesture → motion → scale → rotation → [ignore pointer]
+//   constraints → track pose → transform gesture → motion → shimmer → flip / tilt → [ignore pointer]
 //   → animations (render/animations.dart) → opacity → blurs → stroke path → content
 //
 // The design canvas (a tree that doesn't animate) draws each at rest: the
@@ -26,8 +26,10 @@ import 'node_tree.dart' show NodeBox;
 import 'paint/svg_path.dart';
 import 'recipe.dart';
 
-/// Track pose, motion and scale: the layers between the constraints and
-/// the rotation.
+/// Track pose, transform gesture, motion, shimmer, flip and tilt: the
+/// layers between the constraints and the animations. The motion is the
+/// node's one transform (Flutter's `Transform`): schema 4 folded the node's
+/// own scale and rotation into it.
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviors;
   if (be.track case final api.Track track) {
@@ -75,8 +77,8 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     }
   }
   // A motion layer for the node's motion, or for the motion values its
-  // animations set.
-  if (be.motion != null || replacedMotionProperties(n).isNotEmpty) {
+  // animations or state styles set.
+  if (_hasMotionLayer(b, n, animates)) {
     final motion = be.motion ?? api.Motion.none;
     chain.add(b.obtain<RenderMotion>('motion', RenderMotion.new)..motion = motion);
   }
@@ -84,17 +86,15 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     chain.add(b.obtain<RenderShimmer>('shimmer', RenderShimmer.new)..shimmer = shimmer);
   }
   cardLayers(b, n, chain, animates: animates);
-  // A state style that scales the node (a press shrink) keeps the layer at
-  // rest too: adding it mid-press rewired the chain under the pointer and
-  // the tap was lost.
-  if (be.scale != 1 || (animates && _stateScales(b, n))) {
-    chain.add(
-      b.obtain<RenderPose>('scale', RenderPose.new)
-        ..transform = Matrix4.diagonal3Values(be.scale, be.scale, 1)
-        ..origin = Alignment.center,
-    );
-  }
 }
+
+/// Whether node [n] has a motion layer: for its motion, the motion values its
+/// animations set, or (in a running app) a state style that moves it. A
+/// state style that moves the node (a press shrink) keeps the layer at rest
+/// too: adding it mid-press rewired the chain under the pointer and the tap
+/// was lost.
+bool _hasMotionLayer(NodeBuilder b, Node n, bool animates) =>
+    n.behaviors.motion != null || replacedMotionProperties(n).isNotEmpty || (animates && _stateMoves(b, n));
 
 /// The animations, between the rotation and the opacity.
 void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
@@ -122,7 +122,7 @@ void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
         ..onPointerCancel = ((_) => press(false)),
     );
   }
-  final hasMotion = be.motion != null || replacedMotionProperties(n).isNotEmpty;
+  final hasMotion = _hasMotionLayer(b, n, animates);
   animationLayers(b, n, chain,
       animates: animates,
       motion: hasMotion ? b.obtain<RenderMotion>('motion', RenderMotion.new) : null,
@@ -1227,13 +1227,13 @@ class RenderTilt extends RenderPose with _Ticking {
 }
 
 /// Whether a state style (the node's own, or one of a node around it that
-/// targets it) can set node [n]'s scale.
-bool _stateScales(NodeBuilder b, Node n) {
-  bool scales(Node? owner) =>
-      owner != null && owner.behaviors.states.patches.values.any((p) => p[n.id]?.containsKey('scale') ?? false);
-  if (scales(b.source.node(n.id))) return true;
+/// targets it) can set node [n]'s motion.
+bool _stateMoves(NodeBuilder b, Node n) {
+  bool moves(Node? owner) =>
+      owner != null && owner.behaviors.states.patches.values.any((p) => p[n.id]?.containsKey('motion') ?? false);
+  if (moves(b.source.node(n.id))) return true;
   for (String? id = b.source.parentOf(n.id); id != null; id = b.source.parentOf(id)) {
-    if (scales(b.source.node(id))) return true;
+    if (moves(b.source.node(id))) return true;
   }
   return false;
 }

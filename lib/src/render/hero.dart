@@ -1,4 +1,6 @@
-// Shared elements (a node's `hero`): a mark in the node's chain that the
+// Shared elements between screens (a node's `hero` that flies
+// `betweenScreens`, Flutter's `Hero`; one that flies `inPlace` is
+// render/play.dart's RenderFlightBox): a mark in the node's chain that the
 // app shell's flights (app/hero_flights.dart) find on the screens a
 // navigation moves between, hide while they fly a drawing of the node in
 // the navigator's overlay, and, with `placeholder: source`, that keeps the
@@ -14,17 +16,17 @@ import 'node_tree.dart';
 import 'paint/image_fill.dart';
 import 'recipe.dart';
 
-/// Adds node [n]'s hero mark to [chain] (inside its rotation and motion, so
-/// a flight starts where the node is drawn). A design canvas has none.
+/// Adds node [n]'s hero mark to [chain] (inside its motion, so a flight
+/// starts where the node is drawn). A design canvas has none.
 void heroLayer(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final hero = n.behaviors.hero;
-  if (!animates || hero == null) return;
+  if (!animates || hero == null || hero.flies != api.HeroFlies.betweenScreens) return;
   chain.add(
     b.obtain<RenderHeroMark>('hero', RenderHeroMark.new)
       ..tree = b.tree
       // A hidden node stays to keep its state; it doesn't fly.
       ..tag = n.visible ? hero.tag.trim() : ''
-      ..flight = hero.flight
+      ..flightShuttle = hero.flightShuttle
       ..placeholder = hero.placeholder
       ..corners = n.decoration.radius.flutter
       ..glow = _glowOf(n),
@@ -88,7 +90,8 @@ class RenderHeroMark extends RenderProxyBox {
 
   /// The tag it flies with now (bound); empty: it doesn't fly.
   String tag = '';
-  api.HeroFlightShuttle flight = api.HeroFlightShuttle.standard;
+  /// What its flight draws (`Hero.flightShuttleBuilder`).
+  api.HeroFlightShuttle flightShuttle = api.HeroFlightShuttle.standard;
   api.HeroPlaceholder placeholder = api.HeroPlaceholder.none;
 
   /// The node's corners (a morphing flight turns one into the other).
