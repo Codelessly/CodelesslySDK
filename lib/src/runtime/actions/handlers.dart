@@ -374,23 +374,24 @@ final Set<String> _schema2PathsSaid = {};
 
 /// [values] without the schema-2 paths (an action's paths are not migrated):
 /// each is refused, with the schema-3 path to write, said once.
-List<NodeValue> _schema3Values(String nodeId, List<NodeValue> values) {
-  if (!values.any((v) => schema2PathHint(v.path) != null)) return values;
+List<NodeValue> _currentValues(String nodeId, List<NodeValue> values) {
+  if (!values.any((v) => olderSchemaPathHint(v.path) != null)) return values;
   final out = <NodeValue>[];
   for (final v in values) {
-    final hint = schema2PathHint(v.path);
+    final hint = olderSchemaPathHint(v.path);
     if (hint == null) {
       out.add(v);
     } else if (_schema2PathsSaid.add('$nodeId/${v.path}')) {
-      debugPrint('Codelessly: setValue on $nodeId: "${v.path}" is a schema-2 path, which schema 3 does not read '
-          '(nothing set); write $hint.');
+      final schema = schema2PathHint(v.path) != null ? 2 : 3;
+      debugPrint('Codelessly: setValue on $nodeId: "${v.path}" is a schema-$schema path, which schema $kSchemaVersion '
+          'does not read (nothing set); write $hint.');
     }
   }
   return out;
 }
 
 void _setValue(String nodeId, List<NodeValue> values, ActionRun run) {
-  values = _schema3Values(nodeId, values);
+  values = _currentValues(nodeId, values);
   final tree = run.host.tree;
   final inInstance = tree == null
       ? const <NodeBox>[]

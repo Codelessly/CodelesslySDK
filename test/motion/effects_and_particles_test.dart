@@ -246,6 +246,30 @@ void main() {
       expect(tester.binding.hasScheduledFrame, isFalse);
     });
 
+    testWidgets('a hero that flies in place flies in from where the node with its tag was', (tester) async {
+      FlightRegistry.reset();
+      final hero = {'tag': 'tile', 'flies': 'inPlace', 'flight': {'duration': 300}};
+      final s = Screen({
+        'a': box({'layout': at(0, 0, 40, 40), 'hero': hero, 'bind': {'visible': r'${!moved}'}}),
+        'b': box({'layout': at(200, 200, 80, 80), 'hero': hero, 'bind': {'visible': r'${moved}'}}),
+      }, variables: [const Variable(name: 'moved', type: VariableType.boolean, value: false)]);
+      await s.pump(tester);
+      s.scope.set('moved', true);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+      final early = s.rectOf(tester, 'b');
+      expect(early.center.dx, lessThan(200));
+      expect(early.width, lessThan(80));
+      await tester.pump(const Duration(milliseconds: 150));
+      // Timed (its flight's 300 ms): half way, not home yet.
+      final mid = s.rectOf(tester, 'b');
+      expect(mid.center.dx, greaterThan(early.center.dx));
+      expect(mid.center.dx, lessThan(240));
+      await tester.pumpAndSettle();
+      expect(s.rectOf(tester, 'b'), const Rect.fromLTWH(200, 200, 80, 80));
+    });
+
     testWidgets('a node flies in from where the node sharing its flight key was', (tester) async {
       FlightRegistry.reset();
       final s = Screen({

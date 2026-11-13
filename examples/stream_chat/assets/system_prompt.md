@@ -72,7 +72,7 @@ flat map:
 
 | Key | Meaning |
 |---|---|
-| `schema` | Always 3 (`kSchemaVersion`). A schema-2 document (or one with none) loads, migrated in memory (`migrate2to3`). |
+| `schema` | Always 4 (`kSchemaVersion`). A schema-2 or schema-3 document (or one with none) loads, migrated in memory (`migrate2to3`, `migrate3to4`). |
 | `id` | The layout's id (optional). |
 | `roots` | Canvas ids, in order: the screens of this page. |
 | `nodes` | Every node, by id: `{"<id>": {"type": ..., ...}}`. A node's id is its key here. |
@@ -86,7 +86,7 @@ its default.
 
 ```json
 {
-  "schema": 3,
+  "schema": 4,
   "roots": ["home"],
   "nodes": {
     "home": {
@@ -133,7 +133,7 @@ The theme is the `theme` of the site manifest, `site.json`, next to the pages:
 
 ```json
 {
-  "schema": 3,
+  "schema": 4,
   "pages": ["home.json"],
   "theme": {
     "colors": {"ink": "#FF1B1B1B", "ember": "#FFE4572E", "paper": "#FFF6F1E9"},
@@ -241,7 +241,7 @@ under a stack (`layout_field_ignored`).
 
 ```json
 {
-  "schema": 3,
+  "schema": 4,
   "roots": ["board"],
   "nodes": {
     "board": {"type": "canvas", "slots": {"body": "stage"}, "layout": {"width": 400, "height": 300}},
@@ -303,7 +303,7 @@ Colours are `"#AARRGGBB"` (alpha first: `#FF` opaque, `#80` half), `"#RRGGBB"` o
 
 ```json
 {
-  "schema": 3,
+  "schema": 4,
   "roots": ["deco"],
   "nodes": {
     "deco": {
@@ -645,7 +645,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 - [navigation.md](navigation.md): Screens, navigation, modals and toasts. Documents appBar, navigationBar, bottomNavigationBar, tabs, tabBar, accordion, expansionTile, modal, load, backPressed, navigate, openModal, closeModal, showToast, confirm, openLink.
 - [state.md](state.md): State and logic. Documents valueChanged, actionError, setVariable, setValue, setVariant, callFunction, if, forEach, delay, runScript, retryFailed.
 - [interaction.md](interaction.md): Interaction: reactions, states and gestures. Documents states, inkWell, tooltip, ignorePointer, draggable, dropTarget, track, dismissible, pan, transformGesture, click, doubleTap, longPress, hold, secondaryClick, pointerDown, pointerUp, hover, cursorEnter, cursorExit, swipeLeft, swipeRight, swipeUp, swipeDown, drag, dragEnd, wheel, pinch, dragStart, dragCancel, dragCompleted, drop, dragEnter, dragExit, dropRejected, controlTrack, controlDismissible, controlTransform, copyToClipboard, haptic.
-- [animation.md](animation.md): Animation and motion. Documents motion, scale, animations, transitions, shimmer, reveal, typewriter, particles, flip, tilt, hero, flightKey, flight, viewProgress, timer, frame, animate.
+- [animation.md](animation.md): Animation and motion. Documents motion, animations, transitions, shimmer, reveal, typewriter, particles, flip, tilt, hero, viewProgress, timer, frame, animate.
 - [components.md](components.md): Components and sections. Documents slot, external, placeholder, singlePlaceholder, event, componentEvent.
 - [charts.md](charts.md): Charts, gauges and indicators. Documents progressBar, circularProgressIndicator, activityIndicator, badge, radialGauge, gaugeMeter, chart, barChart, lineChart, plotChart, barcode.
 - [data.md](data.md): Data: APIs, cloud data, storage and form submission. Documents callApi, setStorage, cloudDocuments, loadCloudData, reloadCloudData, cloudFiles, cloudData, cloudBatch, submitForm.
