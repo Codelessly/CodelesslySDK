@@ -1,0 +1,444 @@
+// A UI an agent builds and edits at runtime: a document plus a catalog and a
+// trust profile, changed only by edit ops (codelessly_api's applyOps), and a
+// NodeSource over it, so the render tree's per-node watching re-applies
+// only the boxes an op changed (docs/design/08-ai-developer-experience.md
+// §2b). It imports the model through core.dart alone and no feature: a
+// core-only build can host agent UI.
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:codelessly_api/core.dart';
+import 'package:codelessly_api/core.dart' as api show outline;
+import 'package:flutter/foundation.dart';
+
+import '../render/source.dart' show NodeSource;
+
+/// An interaction the UI routes to its host (the agent): a
+/// `componentEvent` action fired outside any component instance, or an
+/// `emitEvent` (when the catalog has it), with the node it came from.
+@immutable
+class UiEvent {
+  const UiEvent({required this.event, this.value, this.source, this.rev = 0});
+
+  /// The event's name (`confirm`, `choosePlan`).
+  final String event;
+
+  /// Its payload, evaluated (`{"flight": "BA117"}`).
+  final Object? value;
+
+  /// The id of the node whose reaction fired it.
+  final String? source;
+
+  /// The session's revision when it fired.
+  final int rev;
+
+  Json toJson() => {'event': event, 'value': ?value, 'source': ?source, 'rev': rev};
+
+  /// The message a model reads about it (a user turn or a tool result).
+  String toModelMessage() => 'The user acted on the UI: ${_encode(toJson())}';
+
+  @override
+  String toString() => 'UiEvent($event${value == null ? '' : ' $value'} from $source)';
+}
+
+String _encode(Object? v) {
+  try {
+    return jsonEncode(v);
+  } catch (_) {
+    return '$v';
+  }
+}
+
+/// One applied batch, for undo.
+class _Step {
+  _Step(this.author, this.inverse, this.rev);
+  final String author;
+  final List<EditOp> inverse;
+  final int rev;
+}
+
+/// What a stream did, op by op: for metrics and progress UIs.
+@immutable
+class StreamProgress {
+  const StreamProgress({required this.op, required this.result, required this.charsReceived, required this.nodes});
+
+  /// The op just applied (or rejected).
+  final StreamedOp op;
+
+  /// Its result.
+  final EditResult result;
+
+  /// The characters of the tool input received so far.
+  final int charsReceived;
+
+  /// The nodes in the document now.
+  final int nodes;
+}
+
+/// A document an agent writes and edits with ops, shown by
+/// `CodelesslyView(session: ...)`.
+///
+/// ```dart
+/// final session = UiSession(catalog: Catalog.core);
+/// final result = await session.applyStream(toolInputDeltas); // renders as each op arrives
+/// llm.toolResult(result.toModelJson());
+/// session.events.listen((e) => llm.send(e.toModelMessage()));
+/// ```
+///
+/// It is a [NodeSource]: each applied op notifies only the nodes it
+/// changed, so the render tree re-applies only their boxes. A child listed
+/// before its node arrives is a box that takes no room (or a placeholder of
+/// the size an op gave), so its arrival re-applies only that box.
+class UiSession implements NodeSource {
+  UiSession({
+    LayoutDocument? document,
+    this.catalog = Catalog.core,
+    TrustProfile? profile,
+    this.check = catalogCheck,
+    this.placeholderColor = 0x14808080,
+    this.arrivalFade,
+  })  : profile = profile ?? TrustProfile.agent,
+        _document = document ?? LayoutDocument(catalog: catalog);
+
+  /// What node and action types decode with.
+  final Catalog catalog;
+
+  /// What the document may use ([TrustProfile.agent] by default).
+  final TrustProfile profile;
+
+  /// The check each op's nodes pass ([catalogCheck] by default;
+  /// `strictEditCheck()` from `package:codelessly_api/validate.dart` runs the
+  /// strict validator); null: structure and the profile only.
+  final EditCheck? check;
+
+  /// The color (ARGB) of a placeholder: the box shown for a pending child
+  /// an op gave a size for ([SetOp.placeholders]).
+  final int placeholderColor;
+
+  /// When set, a node that arrives while a stream runs fades in over this
+  /// long (an `enter` animation from opacity 0). Off by default.
+  final Duration? arrivalFade;
+
+  LayoutDocument _document;
+  EditRevisions _revisions = const EditRevisions();
+  final List<_Step> _undo = [], _redo = [];
+  final Map<String, Json> _placeholders = {};
+  final Set<String> _arrived = {};
+  final Map<String, _Watch> _watched = {};
+  final StreamController<UiEvent> _events = StreamController.broadcast();
+  final StreamController<EditResult> _changes = StreamController.broadcast(sync: true);
+  final ValueNotifier<bool> _streaming = ValueNotifier(false);
+  final ValueNotifier<int> _revision = ValueNotifier(0);
+  bool _disposed = false;
+
+  /// The document now.
+  LayoutDocument get document => _document;
+
+  /// The document's revision: the number of batches (calls, streams) that
+  /// changed it.
+  int get rev => _revisions.rev;
+
+  /// [rev], as it changes.
+  ValueListenable<int> get revision => _revision;
+
+  /// Whether a stream is being applied.
+  ValueListenable<bool> get streaming => _streaming;
+
+  /// Every batch's result, as it applies (each op of a stream too).
+  Stream<EditResult> get changes => _changes.stream;
+
+  /// Interactions the UI routes to its host ([UiEvent]).
+  Stream<UiEvent> get events => _events.stream;
+
+  /// The ids referenced but not yet defined.
+  Set<String> get pending => pendingIds(_document);
+
+  /// The two tools a model is given (`ui_apply`, `ui_read`), for [catalog]
+  /// restricted by [profile].
+  List<Json> get tools => uiTools(profile.restrict(catalog));
+
+  /// Reports an interaction (what `CodelesslyView` does for the UI's
+  /// events).
+  void emit(UiEvent event) {
+    if (!_disposed) _events.add(event);
+  }
+
+  // --- ops ------------------------------------------------------------------
+
+  EditResult _run(Object? ops, {required String author, int? baseRev, bool atomic = false, bool incomplete = false, EditRevisions? revisions}) =>
+      applyOps(_document, ops,
+          catalog: catalog,
+          profile: profile,
+          check: check,
+          atomic: atomic,
+          revisions: revisions ?? _revisions,
+          baseRev: baseRev,
+          author: author,
+          incomplete: incomplete);
+
+  /// Applies [ops] (a list of [EditOp]s, or the `ui_apply` tool input JSON)
+  /// as one batch: one revision, one undo step. Rejected ops change nothing;
+  /// the result says why ([EditResult.toModelJson] is the tool result).
+  EditResult apply(Object? ops, {String author = 'agent', int? baseRev, bool atomic = false}) {
+    final before = _document;
+    final r = _run(ops, author: author, baseRev: baseRev, atomic: atomic);
+    _commit(r, before, author, notify: true);
+    return r;
+  }
+
+  void _commit(EditResult r, LayoutDocument before, String author, {required bool notify, bool record = true}) {
+    if (identical(r.document, _document) && r.changed.isEmpty) {
+      if (notify && !_changes.isClosed) _changes.add(r);
+      return;
+    }
+    _revisions = r.revisions;
+    for (final op in r.appliedOps) {
+      if (op is SetOp) _placeholders.addAll(op.placeholders);
+    }
+    _setDocument(r.document);
+    if (record && r.appliedOps.isNotEmpty) {
+      _undo.add(_Step(author, r.inverse, r.rev));
+      _redo.clear();
+    }
+    _revision.value = r.rev;
+    if (notify && !_changes.isClosed) _changes.add(r);
+  }
+
+  /// Applies a streamed `ui_apply` tool input: [deltas] are the raw text
+  /// chunks as the model's API delivers them. Each op is applied the moment
+  /// it is complete (a `set` with `nodes`, node by node), so the UI paints as
+  /// the answer arrives; the whole stream is one revision and one undo step.
+  /// At the end, ids still pending are `dangling_child` errors in the
+  /// result, so the model can send them.
+  ///
+  /// [map] rewrites each op before it applies (asset URLs to a CDN, say);
+  /// [onOp] hears of each op applied or rejected.
+  Future<EditResult> applyStream(
+    Stream<String> deltas, {
+    String author = 'agent',
+    int? baseRev,
+    EditOp Function(EditOp op)? map,
+    void Function(StreamProgress progress)? onOp,
+  }) async {
+    final decoder = OpStreamDecoder();
+    final before = _document;
+    final startRevisions = _revisions;
+    var fields = _revisions;
+    final applied = <int>{}, rejected = <int>{};
+    final appliedOps = <EditOp>[];
+    final diagnostics = <EditDiagnostic>[];
+    final created = <String>{};
+    var chars = 0;
+    _streaming.value = true;
+    _arrived.clear();
+    void one(StreamedOp s) {
+      final op = map == null ? s.op : map(s.op);
+      // Every op of the stream is in the same revision.
+      final r = _run([op], author: author, baseRev: baseRev, incomplete: true, revisions: EditRevisions(rev: startRevisions.rev, fields: fields.fields));
+      for (final d in r.diagnostics) {
+        diagnostics.add(d.atOp(s.index));
+      }
+      if (r.applied.isNotEmpty) {
+        applied.add(s.index);
+        appliedOps.add(op);
+        created.addAll(r.created);
+        fields = r.revisions;
+        if (arrivalFade != null) _arrived.addAll(r.created);
+        _commit(r, _document, author, notify: true, record: false);
+      } else {
+        rejected.add(s.index);
+      }
+      onOp?.call(StreamProgress(op: s, result: r, charsReceived: chars, nodes: _document.nodes.length));
+    }
+
+    try {
+      await for (final delta in deltas) {
+        if (_disposed) break;
+        chars += delta.length;
+        for (final s in decoder.add(delta)) {
+          one(s);
+        }
+      }
+    } finally {
+      _streaming.value = false;
+    }
+    final end = decoder.close();
+    diagnostics.addAll(end.diagnostics);
+    for (final d in end.diagnostics) {
+      if (d.error && d.op >= 0) rejected.add(d.op);
+    }
+    diagnostics.addAll(endOfStream(_document));
+    final result = EditResult(
+      document: _document,
+      applied: (applied.difference(rejected)).toList()..sort(),
+      rejected: rejected.toList()..sort(),
+      appliedOps: appliedOps,
+      inverse: inverseOps(before, _document),
+      diagnostics: diagnostics,
+      pending: pendingIds(_document),
+      rev: identical(before, _document) ? startRevisions.rev : startRevisions.rev + 1,
+      revisions: fields,
+      changed: {
+        for (final id in {...before.nodes.keys, ..._document.nodes.keys})
+          if (before[id] != _document[id]) id,
+      },
+      created: created,
+    );
+    if (!identical(before, _document)) {
+      _undo.add(_Step(author, result.inverse, result.rev));
+      _redo.clear();
+      _revision.value = result.rev;
+    }
+    return result;
+  }
+
+  /// Undoes the last batch (of [author], when given): its inverse ops,
+  /// applied atomically and checked like any batch (a field someone else
+  /// changed since is `stale_rev`). False when there is nothing to undo or
+  /// the inverse was rejected.
+  bool undo({String? author}) => _step(_undo, _redo, author);
+
+  /// The undo and redo stack depths (for tests).
+  @visibleForTesting
+  (int, int) get debugUndoDepth => (_undo.length, _redo.length);
+
+  /// Re-applies the last undone batch.
+  bool redo({String? author}) => _step(_redo, _undo, author);
+
+  bool _step(List<_Step> from, List<_Step> to, String? author) {
+    final i = from.lastIndexWhere((s) => author == null || s.author == author);
+    if (i < 0) return false;
+    final s = from[i];
+    final before = _document;
+    final r = applyOps(_document, s.inverse,
+        catalog: catalog, profile: TrustProfile.none, check: null, atomic: true, revisions: _revisions, baseRev: s.rev, author: s.author);
+    if (!r.ok) return false;
+    from.removeAt(i);
+    _revisions = r.revisions;
+    _setDocument(r.document);
+    to.add(_Step(s.author, inverseOps(before, r.document), r.rev));
+    _revision.value = r.rev;
+    if (!_changes.isClosed) _changes.add(r);
+    return true;
+  }
+
+  /// The outline a model reads before it edits ([outline]).
+  Json outline() => api.outline(_document, rev: rev);
+
+  /// Answers a `ui_read` tool call.
+  Json read(Object? input) => readUi(_document, input, rev: rev);
+
+  /// What to tell a model about this UI: [starter] (the authoring guide it
+  /// writes from), the node and action types it may use (compact), and the
+  /// rules of the ops. The tools themselves are [tools].
+  String describeForModel({String starter = ''}) {
+    final slice = profile.restrict(catalog);
+    final b = StringBuffer();
+    if (starter.isNotEmpty) b.writeln(starter.trim());
+    b.writeln();
+    b.writeln('## Node types you may use');
+    b.writeln([for (final w in slice.widgets) w.type].join(', '));
+    b.writeln();
+    b.writeln('## Action types you may use');
+    b.writeln([for (final a in slice.actions) a.type].join(', '));
+    return b.toString();
+  }
+
+  // --- NodeSource -----------------------------------------------------------
+
+  void _setDocument(LayoutDocument next) {
+    _document = next;
+    for (final e in _watched.entries.toList()) {
+      final shown = node(e.key);
+      if (!identical(e.value.node, shown) && e.value.node != shown) e.value.set(shown);
+    }
+  }
+
+  final Expando<Node> _faded = Expando('arrival fade');
+
+  @override
+  Node? node(String id) {
+    final n = _document[id];
+    if (n == null) {
+      // A pending child: a box that takes no room (hidden as a binding
+      // hides, so a row's spacing skips it), or the placeholder an op gave
+      // a size for. Its box is in its parent from the start, so when the
+      // node arrives only that box re-applies.
+      if (_document.parentOf(id) == null) return null;
+      final hint = _placeholders[id];
+      return hint == null ? (_pendingNodes[id] ??= _pendingNode(id)) : _placeholderNode(id, hint);
+    }
+    if (arrivalFade != null && _arrived.contains(id)) {
+      return _faded[n] ??= Node.fromJson(
+              mergePatch(n.toJson(), {
+                'animations': [
+                  ...?readList(n.toJson()['animations']),
+                  {
+                    'id': '_arrive',
+                    'preset': 'enter',
+                    'params': {
+                      'from': {'opacity': 0}
+                    },
+                    'duration': arrivalFade!.inMilliseconds,
+                  },
+                ],
+              }),
+              id: id,
+              catalog: n.catalog) ??
+          n;
+    }
+    return n;
+  }
+
+  final Map<String, Node> _pendingNodes = {};
+
+  Node _pendingNode(String id) => Node.fromJson(const {
+        'type': 'box',
+        'bind': {'visible': r'${= false}'},
+      }, id: id, catalog: Catalog.core)!;
+
+  final Map<String, Node> _placeholderNodes = {};
+
+  Node _placeholderNode(String id, Json layout) => _placeholderNodes[id] ??= Node.fromJson({
+        'type': 'box',
+        'layout': layout,
+        'decoration': {
+          'fills': [
+            {'color': '#${placeholderColor.toRadixString(16).padLeft(8, '0').toUpperCase()}'}
+          ],
+          'radius': 8,
+        },
+      }, id: id, catalog: Catalog.core)!;
+
+  @override
+  String? parentOf(String id) => _document.parentOf(id);
+
+  @override
+  ValueListenable<Node?> watch(String id) => _watched[id] ??= _Watch(node(id));
+
+  /// Closes [events] and [changes].
+  void dispose() {
+    _disposed = true;
+    _events.close();
+    _changes.close();
+    for (final w in _watched.values) {
+      w.dispose();
+    }
+    _watched.clear();
+  }
+}
+
+/// A node's notifier.
+class _Watch extends ChangeNotifier implements ValueListenable<Node?> {
+  _Watch(this.node);
+  Node? node;
+
+  @override
+  Node? get value => node;
+
+  void set(Node? n) {
+    node = n;
+    notifyListeners();
+  }
+
+}
