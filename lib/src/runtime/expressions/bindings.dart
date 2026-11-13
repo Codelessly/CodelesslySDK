@@ -364,6 +364,10 @@ class NodeBinder implements TreeBindings {
       );
     }
 
+    // Bound runs are computed for the text as shown: the whole text is
+    // interpolated, and they style its result. Written runs style ranges of
+    // the text as written (an expression inside a run keeps that run).
+    if (n.bind.containsKey('props.runs')) return n.withProp(TextProps.text, f(text));
     final (nextText, nextRuns) = interpolateRuns(text, runs, f);
     return n.withProp(TextProps.text, nextText).withProp(TextProps.runs, nextRuns);
   }
