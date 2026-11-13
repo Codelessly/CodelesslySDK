@@ -8,6 +8,14 @@
 - An app's own action types: a handler in `CodelesslyActions(handlers:)` for a type the API doesn't declare now
   runs (the action is an `UnknownAction`; its fields are `json`). Before, an unknown type was skipped even with a
   handler, so handlers could only replace built-in types.
+- The render core (`lib/src/render`) stands on its own: it imports Flutter, the model and drawing packages
+  only, and takes what it needs from the layers above through interfaces it owns (`TreeBindings`, `BoundValues`,
+  `NodeGestures`, `ImageBytesLoader`, `RecipeCatalog`). `RenderTree` is its tree; `NodeTree` is a `RenderTree`
+  with the SDK's widgets, gestures and HTTP image loader, so `NodeTree(source)` renders as before. Boxes, views
+  and recipes name their tree as `RenderTree` (`NodeBox.tree`, `NodeView.tree`, `ActionHost.tree`): code that
+  held one in a `NodeTree` variable types it `RenderTree`. `tree.binder` is unchanged. A render object that
+  paints images outside any tree (a bare `RenderIconGlyph`) fetches SVGs only when given an `imageLoader`.
+  `test/architecture_test.dart` checks the layering.
 
 **Fixes**
 
