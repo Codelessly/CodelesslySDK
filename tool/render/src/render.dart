@@ -20,6 +20,7 @@ import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSource
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 
 import 'args.dart';
+import 'compare.dart';
 import 'fonts.dart';
 import 'prepare.dart';
 import 'publish.dart';
@@ -68,6 +69,7 @@ const runtimeCodes = <(String, String, String)>[
   ('path_overflow', 'warning', 'A path draws outside its node\'s box: a path is not clipped to its box (as Flutter\'s CustomPaint). Give it a viewBox, or clip an ancestor.'),
   ('layout_overflow', 'warning', 'A node extends past its parent\'s box (by the pixels shown) where the parent does not scroll that way.'),
   ('fill_fallback', 'warning', 'A node fills an axis its parent measures with no limit (a hugging row or column, a wrapping line, a grid row sized to its content): it takes the design number of its {"fill": n}. The message names the parent and the fix.'),
+  ('compare_failed', 'warning', '--compare found no reference screenshot for a capture (or could not read it).'),
   ('offscreen', 'warning', 'A node extends past the screen edge where nothing scrolls: on a device it is cut off.'),
   ('text_clipped', 'warning', 'A text does not fit its box: its lines are taller than the box, or a word is wider.'),
   ('text_truncated', 'warning', 'A text was cut at maxLines with overflow "clip" (an ellipsis or fade is taken as meant).'),
@@ -83,6 +85,9 @@ const runtimeCodes = <(String, String, String)>[
 final class RenderReport {
   final List<api.Json> diagnostics = [];
   final List<String> images = [];
+
+  /// `--compare`: each capture against its reference.
+  final List<ImageComparison> comparisons = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -503,6 +508,22 @@ Future<void> _renderAll(
         File(file).writeAsBytesSync(await _captureFullPage(tester, ro, page, binding));
       }
       report.images.add(file);
+      if (args.compare case final String reference) {
+        final found = referenceFor(file, reference);
+        if (found.file == null) {
+          issue(RuntimeIssue('compare_failed', 'warning',
+              '--compare: no reference for $name in $reference${found.candidates.isEmpty ? '' : ' among ${found.candidates.map((c) => c.split('/').last).join(', ')}'}: '
+              'name the file, or give the state a --label the reference file names.',
+              screen: label, size: sizeName));
+        } else {
+          try {
+            report.comparisons.add((await tester.runAsync(() => compareImages(file, found.file!)))!);
+          } catch (e) {
+            issue(RuntimeIssue('compare_failed', 'warning', '--compare: ${found.file} could not be compared: ${_firstLine('$e')}',
+                screen: label, size: sizeName));
+          }
+        }
+      }
       if (args.dumpLayout) {
         final boxes = [
           for (final b in _boxes(binding))
@@ -1364,6 +1385,7 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     'errors': report.errors,
     'warnings': report.warnings,
     'images': [for (final i in report.images) i.split('/').last],
+    if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -1384,6 +1406,9 @@ String formatReport(RenderReport report) {
   }
   for (final i in report.images) {
     b.writeln('wrote $i');
+  }
+  for (final c in report.comparisons) {
+    b.writeln(c.summary());
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();
