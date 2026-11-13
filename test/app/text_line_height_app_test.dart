@@ -1,6 +1,6 @@
-// A project whose theme sets natural line height (the style sheet's
-// "Text uses the font's line height"): a published app lays out text without
-// a line height at its font's own height, as Flutter does, not at 1.33.
+// A published app lays out text without a line height at its font's own
+// height, as Flutter does, in a schema-3 layout; a schema-2 layout keeps
+// 1.33 through the migration.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart' show settle;
 
-PublishBundle _bundle({bool? natural}) {
+PublishBundle _bundle({required int schema}) {
   final layout = PublishLayout.fromJson({
-    'schema': 2,
+    'schema': schema,
     'id': 'home',
     'roots': ['canvas'],
     'nodes': {
@@ -36,16 +36,15 @@ PublishBundle _bundle({bool? natural}) {
       projectId: 'p',
       entryLayoutId: 'home',
       layouts: {'home': PublishLayoutInfo.of(layout)},
-      theme: ThemeTokens(naturalLineHeight: natural),
     ),
     layouts: {'home': layout},
   );
 }
 
 void main() {
-  for (final natural in [true, null]) {
-    testWidgets('theme naturalLineHeight $natural', (tester) async {
-      final app = Codelessly.fromBundle(_bundle(natural: natural),
+  for (final schema in [3, 2]) {
+    testWidgets('a schema-$schema layout', (tester) async {
+      final app = Codelessly.fromBundle(_bundle(schema: schema),
           config: CodelesslyConfig(services: Services(analytics: const NoAnalytics())), fonts: const NoFontFetcher());
       final controller = CodelesslyWidgetController();
       await tester.pumpWidget(MaterialApp(
@@ -64,7 +63,7 @@ void main() {
       }
       walk(tester.renderObject(find.byType(NodeView)));
       final label = paragraphs.firstWhere((p) => p.text.toPlainText() == 'Backlog').size.height;
-      if (natural == true) {
+      if (schema == 3) {
         expect(label, flutter);
       } else {
         expect(label, closeTo(15 * 1.33, 0.5));

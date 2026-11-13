@@ -698,7 +698,7 @@ class ChartSeriesPainter extends NodePainter {
   /// node's style merged over [base].
   TextStyle _tooltipStyle(api.PropDef<api.TextStyle> def, TextStyle plain, api.TextStyle base) {
     final style = p(def);
-    return style.isEmpty ? plain : textStyle(base.merge(style));
+    return style.isEmpty ? plain : textStyle(base.merge(style), n.behaviors.defaultTextStyle);
   }
 
   /// The category under [local] (the painter's coordinates), or -1.
@@ -1597,7 +1597,7 @@ class LineChartPainter extends NodePainter {
 
     final lineColor = p(LineChartProps.lineColor).flutter;
     final axisColor = p(LineChartProps.axisColor).flutter;
-    final axisLabelStyle = textStyle(p(LineChartProps.axisLabelStyle));
+    final axisLabelStyle = textStyle(p(LineChartProps.axisLabelStyle), n.behaviors.defaultTextStyle);
 
     // 1. Bands.
     for (final b in p(LineChartProps.bands)) {
@@ -1628,7 +1628,7 @@ class LineChartPainter extends NodePainter {
     }
     final title = p(LineChartProps.yAxisTitle);
     if (title.isNotEmpty) {
-      final tp = _layout(title, textStyle(p(LineChartProps.axisTitleStyle)));
+      final tp = _layout(title, textStyle(p(LineChartProps.axisTitleStyle), n.behaviors.defaultTextStyle));
       tp.paint(canvas, Offset(plot.left - tp.width - 10, plot.top - 20));
       tp.dispose();
     }
@@ -1739,7 +1739,7 @@ class LineChartPainter extends NodePainter {
       ..color = lineColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
-    final markerStyle = textStyle(p(LineChartProps.markerLabelStyle));
+    final markerStyle = textStyle(p(LineChartProps.markerLabelStyle), n.behaviors.defaultTextStyle);
     for (final m in p(LineChartProps.markers)) {
       final (mx, my) = (_x(m['x']), _num(m['y']));
       if (mx == null || my == null) continue;
@@ -1776,7 +1776,7 @@ class LineChartPainter extends NodePainter {
     }
 
     // 9. Vertical lines.
-    final tagStyle = textStyle(p(LineChartProps.tagTextStyle));
+    final tagStyle = textStyle(p(LineChartProps.tagTextStyle), n.behaviors.defaultTextStyle);
     for (final v in p(LineChartProps.verticalLines)) {
       final vx = _x(v['x']);
       if (vx == null) continue;
@@ -1861,11 +1861,11 @@ class LineChartPainter extends NodePainter {
     final label = _layout(
         _tooltipLabel(row, x),
         textStyle(const api.TextStyle(fontSize: 11, fontWeight: 600, letterSpacing: 0.6, color: muted)
-            .merge(p(LineChartProps.tooltipLabelStyle))));
+            .merge(p(LineChartProps.tooltipLabelStyle)), n.behaviors.defaultTextStyle));
     final val = _layout(
         value,
         textStyle(const api.TextStyle(fontSize: 16, fontWeight: 700, color: white)
-            .merge(p(LineChartProps.tooltipValueStyle))));
+            .merge(p(LineChartProps.tooltipValueStyle)), n.behaviors.defaultTextStyle));
     const padX = 10.0, padY = 8.0, gap = 2.0;
     final w = math.max(label.width, val.width) + padX * 2;
     final h = label.height + gap + val.height + padY * 2;
