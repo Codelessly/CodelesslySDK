@@ -19,12 +19,14 @@ const String kDefaultModel = 'claude-haiku-5-5';
 
 /// Which system prompt and tools a request sends.
 enum PromptVariant {
-  /// The base set ([api.runtimeStarter], ≈ 15k characters) with the
-  /// compact tools and `ui_docs`, the link to the rest.
+  /// The base, runtime form ([api.runtimeStarter]: codelessly_api's
+  /// RUNTIME_STARTER.md, ≈ 44k characters) with the compact tools and
+  /// `ui_docs`, which serves the reference's pages, the link to the rest.
   compact,
 
-  /// The whole authoring STARTER (assets/system_prompt.md, ≈ 60k
-  /// characters) with tool schemas that enumerate every node type.
+  /// The rules plus the base's file form (codelessly_api's STARTER.md,
+  /// assets/system_prompt.md, ≈ 50k characters) with tool schemas that
+  /// enumerate every node type.
   full,
 }
 
