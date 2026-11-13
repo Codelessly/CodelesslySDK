@@ -190,9 +190,9 @@ class ActionRun {
   T require<T extends Object>(String what) => service<T>() ?? (throw StateError('$what needs the app\'s Services.'));
 
   /// What the app shell attached to the chain's context for a feature
-  /// ([RuntimeActionContext.extensions]): a paywall's session, say.
+  /// ([CoreActionContext.extensions]): a paywall's session, say.
   T? extension<T extends Object>() => switch (host) {
-        final RuntimeActionContext context => context.extension<T>(),
+        final CoreActionContext context => context.extension<T>(),
         _ => null,
       };
 
@@ -229,7 +229,7 @@ class CoreActions implements ActionRunner {
   /// never throws.
   Future<void> run(Node node, String trigger, ActionContext context,
       {Json event = const {}, ActionCancellation? cancellation, Object? instance}) {
-    if (trigger == TriggerType.actionError.name && context is RuntimeActionContext) {
+    if (trigger == TriggerType.actionError.name && context is CoreActionContext) {
       context = context.withoutActionErrorEvents();
     }
     final reactions = [
@@ -349,7 +349,7 @@ class CoreActions implements ActionRunner {
     try {
       await runActions(actions, run);
     } on ActionsStopped catch (stop) {
-      if (host case final RuntimeActionContext context) {
+      if (host case final CoreActionContext context) {
         context.failed.last = () => _run(node, reactions, context, event, ActionCancellation(), instance);
         context.onActionErrorEvent?.call(actionErrorEvent(stop, action: 'paywall', retryable: true));
       }
@@ -364,7 +364,7 @@ class CoreActions implements ActionRunner {
     } catch (error, stack) {
       // Kept so the screen's error reaction can run the chain again
       // (`retryFailed`): the same reactions, event and list item.
-      if (host case final RuntimeActionContext context) {
+      if (host case final CoreActionContext context) {
         context.failed.pending = () => _run(node, reactions, context, event, ActionCancellation(), instance);
       }
       host.reportError(error, stack, action: _failing(error));

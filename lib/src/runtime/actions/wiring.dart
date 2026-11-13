@@ -157,7 +157,7 @@ class TreeReactions implements NodeInteractions {
     final variable = bound == null ? null : exactPath(bound);
     if (variable == null) return;
     if (setVariableIn(ctx.scope, variable, value)) return;
-    if (ctx is! RuntimeActionContext) ctx.setVariable(variable, value);
+    if (ctx is! CoreActionContext) ctx.setVariable(variable, value);
   }
 
   /// [box]'s context: [context], in the scope of the list item it's in.

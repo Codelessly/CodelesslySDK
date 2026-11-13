@@ -791,3 +791,10 @@ class PaywallRuntime {
     entitlements.dispose();
   }
 }
+
+/// Where the paywalls in use come from: the app's, or the test store's
+/// while it's on. Notifies when they switch (`Services` is one).
+abstract interface class PaywallsSource {
+  PaywallRuntime? get paywalls;
+  Listenable get paywallsChanged;
+}

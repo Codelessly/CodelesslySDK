@@ -38,7 +38,7 @@ class ScriptFailed implements Exception {
 /// the chain without them.
 Future<void> runScriptAction(RunScriptAction a, ActionRun run) {
   final host = run.host;
-  final scripts = host is RuntimeActionContext
+  final scripts = host is CoreActionContext
       ? host.scripts
       : const <ScriptDef>[];
   final script = findScript(scripts, a.script.trim());

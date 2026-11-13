@@ -9,6 +9,7 @@ import 'package:codelessly_api/codelessly_api.dart' show Json, ServiceConfig;
 import 'package:flutter/foundation.dart';
 
 import '../runtime/contracts.dart';
+import '../features/auth/auth.dart' show watchAuthValue;
 import 'analytics.dart';
 import 'api.dart';
 import 'auth.dart';
@@ -53,7 +54,7 @@ export 'test_store.dart';
 
 /// The app's services. Implements the runtime's [CodelesslyServices] seam;
 /// actions and data sources reach the rest through the typed fields.
-class Services implements CodelesslyServices, ServiceLocator {
+class Services implements CodelesslyServices, ServiceLocator, PaywallsSource {
   Services({
     ServiceConfig? config,
     ApiService? api,
@@ -135,6 +136,7 @@ class Services implements CodelesslyServices, ServiceLocator {
 
   /// Notifies when [paywalls] (and [purchases]) switch between the test
   /// store and the app's.
+  @override
   Listenable get paywallsChanged => _paywallsChanged;
   final _paywallsChanged = _Notifier();
 
@@ -152,6 +154,8 @@ class Services implements CodelesslyServices, ServiceLocator {
     ]) {
       if (s is T) return s;
     }
+    // A view of the services themselves (PaywallsSource).
+    if (this case final T self) return self;
     return null;
   }
 
@@ -183,6 +187,7 @@ class Services implements CodelesslyServices, ServiceLocator {
 
   /// Server-resolved paywalls and entitlements, when the app has a paywall
   /// backend; the test store's while [usesTestStore].
+  @override
   PaywallRuntime? get paywalls => usesTestStore ? _test.runtime : _paywalls;
   final PaywallRuntime? _paywalls;
   final SoundService sound;
@@ -229,43 +234,7 @@ class Services implements CodelesslyServices, ServiceLocator {
 
   /// The `auth` value ([authValue]): the user and their profile document,
   /// now and on every change of either.
-  Stream<Map<String, Object?>> watchAuth() {
-    late StreamController<Map<String, Object?>> controller;
-    StreamSubscription<AppUser?>? users;
-    StreamSubscription<Map<String, Object?>?>? profiles;
-    AppUser? user;
-    var generation = 0;
-    controller = StreamController(
-      onListen: () {
-        users = auth.userChanges.listen((u) {
-          user = u;
-          final currentGeneration = ++generation;
-          profiles?.cancel();
-          controller.add(authValue(u));
-          if (!AuthProfiles.hasProfile(u)) return;
-          profiles = AuthProfiles.watch(cloud, u).listen(
-            (profile) {
-              if (currentGeneration == generation) controller.add(authValue(user, profile: profile));
-            },
-            onError: (Object error, StackTrace stack) =>
-                analytics.logError(error, stackTrace: stack, message: 'Could not read the user profile', type: 'profile'),
-          );
-        }, onError: (Object error, StackTrace stack) {
-          generation++;
-          user = null;
-          profiles?.cancel();
-          profiles = null;
-          controller.addError(error, stack);
-        });
-      },
-      onCancel: () async {
-        generation++;
-        await profiles?.cancel();
-        await users?.cancel();
-      },
-    );
-    return controller.stream;
-  }
+  Stream<Map<String, Object?>> watchAuth() => watchAuthValue(auth, cloud, analytics);
 
   /// Releases what the services hold.
   Future<void> dispose() async {

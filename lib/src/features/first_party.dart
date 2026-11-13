@@ -4,12 +4,19 @@
 // CoreActions (or `CodelesslyActions(features: const [])`).
 import '../runtime/actions/feature.dart';
 import '../runtime/actions/runner.dart';
+import 'auth/auth.dart';
+import 'data/data.dart';
 import 'media/media.dart';
 
+export 'auth/auth.dart' show AuthScope, AuthValuesRefresh, authFeature, watchAuthValue;
+export 'context.dart';
+export 'data/app_data_sources.dart';
+export 'data/cloud_loads.dart' show LiveCloudLoad, liveCloudLoadOf;
+export 'data/data.dart' show StorageScope, dataFeature;
 export 'media/media.dart' show SpeechScope, mediaFeature;
 
 /// The first-party features, as a default [CodelesslyActions] installs them.
-const List<CodelesslyFeature> kFirstPartyFeatures = [mediaFeature];
+const List<CodelesslyFeature> kFirstPartyFeatures = [mediaFeature, authFeature, dataFeature];
 
 /// The default [ActionRunner]: [CoreActions] with the first-party features
 /// ([kFirstPartyFeatures]: auth, cloud data and APIs, commerce, media,
