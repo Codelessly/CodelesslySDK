@@ -1338,9 +1338,9 @@ List<RuntimeIssue> _check(
     }
     // A path drawn past its box, where that part shows (no ancestor clips
     // it away).
-    if ((node.type == 'path' || (node.type == 'box' && node.prop(api.BoxProps.path).isNotEmpty)) && b.drawn) {
-      final data = node.type == 'path' ? node.prop(api.PathProps.data) : node.prop(api.BoxProps.path);
-      final viewBox = node.type == 'path' ? node.prop(api.PathProps.viewBox) : null;
+    if (node.type == 'path' && b.drawn) {
+      final data = node.prop(api.PathProps.data);
+      final viewBox = node.prop(api.PathProps.viewBox);
       final bounds = _pathBounds(data);
       if (bounds != null && viewBox == null) {
         final drawn = bounds.shift(r.topLeft);
@@ -1352,7 +1352,7 @@ List<RuntimeIssue> _check(
           out.add(RuntimeIssue('path_overflow', 'warning',
               'The path of "${nameOf(b)}" reaches ${past.toStringAsFixed(0)} px past its ${b.size.width.toStringAsFixed(0)}x${b.size.height.toStringAsFixed(0)} box '
               '(path coordinates are the box\'s own pixels, from its top left), and nothing clips that part away. '
-              '${node.type == 'path' ? 'Give it "viewBox": [w, h] to scale it into the box, or ' : 'Make the box as large as the path, or '}set "decoration": {"clip": "hardEdge"} on an ancestor.',
+              'Give it "viewBox": [w, h] to scale it into the box, or set "decoration": {"clip": "hardEdge"} on an ancestor.',
               nodeId: nameOf(b), screen: screen, size: size, file: file));
         }
       }

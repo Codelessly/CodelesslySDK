@@ -34,11 +34,18 @@ schema 4.
   `quadraticBezierTo`, `cubicTo`, `close`) in order, each number a literal or a formula, a call skipped while its
   `when` is false. This is what draws a migrated `strokePath`'s curves and `untilWidth`.
 - **The path node reads `strokeMiterLimit`** (`Paint.strokeMiterLimit` of its strokes, default 4 as before).
-- The stroke path layer (`RenderStrokePath`, `StrokePathPainter`), the box path painter and the path painter's
-  per-shape colors and gradients are marked schema 3 only: a migrated document draws through `customPaint` and the
-  path node instead, and they go with schema 4's version gate.
-- `test/custom_paint/migrated_paint_test.dart`: each schema-3 feature drawn as schema 3 drew it and as the steps
-  rewrote it, pixel for pixel.
+- **Breaking: the schema-3 paint painters are gone.** A schema-3 document loads through schema 4's paint steps, so
+  `RenderStrokePath` and `StrokePathPainter` (and their place in `paintLayers`), a box drawn as a path
+  (`buildBoxPath`, `RenderShapePath`'s box painter, the box-path case of the paint plan and of the render tool's
+  `path_overflow`), the path painter's per-shape colors and gradients (`PathShapes`) and `dashPath` (the box
+  path's dashes) are deleted. A stroke path's draw-on animation (`drawMs`) is not drawn: the migration keeps it as
+  `legacy.strokePath.draw` and the line shows at its progress at once.
+- `test/custom_paint/migrated_paint_test.dart`: each schema-3 feature as the migration rewrites it, matched
+  against a golden (test/custom_paint/goldens) taken while schema 3's painters still drew it and agreed (pixel
+  for pixel; a fading fill within 1/255, a box path's fill edge within 3/255). The stroke path and box path tests
+  of test/paint/paths_test.dart check the migrated document's pixels against Flutter's own `Path` calls. The
+  catalog corpus digests of strata_tabs' document and its diagram_0 node were taken again (2 lines). The parity
+  goldens are unchanged.
 
 ## Unreleased
 

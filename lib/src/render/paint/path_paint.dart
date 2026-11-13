@@ -1,10 +1,9 @@
 import 'dart:math' as math;
-// SVG paths: the `path` widget (a vector shape) and a box's `path` prop (a
-// box drawn as a shape).
+// SVG paths: the `path` widget (a vector shape).
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/core.dart' as api;
-import 'package:codelessly_api/core.dart' show Node, BoxProps, PathProps;
+import 'package:codelessly_api/core.dart' show Node, PathProps;
 import 'package:flutter/rendering.dart';
 import 'package:path_parsing/path_parsing.dart';
 
@@ -79,26 +78,6 @@ ui.Path trimPath(ui.Path path, double start, double end, [List<double> dashes = 
   return out;
 }
 
-/// [path] in dashes of [length] and gaps of [gap] (the distance carries over from one contour to the next).
-ui.Path dashPath(ui.Path path, double length, [double? gap]) {
-  gap ??= length;
-  final dest = ui.Path();
-  var distance = 0.0;
-  for (final metric in path.computeMetrics()) {
-    var draw = true;
-    while (distance < metric.length) {
-      if (draw) {
-        dest.addPath(metric.extractPath(distance, distance + length), Offset.zero);
-        distance += length;
-      } else {
-        distance += gap;
-      }
-      draw = !draw;
-    }
-  }
-  return dest;
-}
-
 StrokeCap _cap(api.StrokeCap c) => StrokeCap.values.byName(c.name);
 StrokeJoin _join(api.StrokeJoin j) => StrokeJoin.values.byName(j.name);
 
@@ -130,20 +109,14 @@ class RenderShapePath extends RenderBox with ImageClient {
     final canvas = context.canvas;
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
-    if (n.type == 'path') {
-      _paintVector(canvas, n);
-    } else {
-      _paintBox(canvas, n);
-    }
+    _paintVector(canvas, n);
     canvas.restore();
   }
 
   /// The `path` widget: its data scaled from
   /// its view box to the size; its drop shadows along the outline (fill and
   /// stroke); its fills in order (solid colors, gradients, images clipped to
-  /// the path), each gradient in every shape with `gradientPerSubpath` and
-  /// the solid ones colored shape by shape with `subpathColors`; its inner
-  /// shadows; its strokes, trimmed and dashed.
+  /// the path); its inner shadows; its strokes, trimmed and dashed.
   void _paintVector(Canvas canvas, Node n) {
     final data = n.prop(PathProps.data);
     var path = parseSvgPath(data);
@@ -172,10 +145,6 @@ class RenderShapePath extends RenderBox with ImageClient {
     paintPathShadows(canvas, path, _shadows(d, api.EffectType.dropShadow),
         filled: filled, stroke: outline, strokeWidth: stroked ? strokeWidth : 0, cap: cap, join: join);
 
-    // Per-shape gradients and subpathColors are schema 3 only: schema 4
-    // draws them as customPaint path ops (codelessly_api's `paintSteps4`).
-    PathShapes? shapes() => PathShapes.of(data, viewBox, size);
-    final colors = n.prop(PathProps.subpathColors).map((c) => c?.flutter).toList();
     // Blending fills blend with the fills under them, not with what is under
     // the node.
     final blends = fills.any((f) => f.blendMode != api.BlendMode.srcOver);
@@ -186,17 +155,6 @@ class RenderShapePath extends RenderBox with ImageClient {
         canvas.clipPath(path);
         paintImageFill(canvas, RRect.fromRectAndRadius(bounds, Radius.zero), f, this);
         canvas.restore();
-      } else if (f.isGradient && f.gradientPerSubpath) {
-        shapes()?.paintEach(canvas, (r) => RenderNodePaint.paintFor(f, r));
-      } else if (!f.isGradient && colors.isNotEmpty) {
-        final base = f.effectiveColor!.flutter;
-        for (final (color, part) in shapes()?.byColor(colors) ?? const <(Color?, ui.Path)>[]) {
-          canvas.drawPath(
-              part,
-              Paint()
-                ..blendMode = blendMode(f.blendMode)
-                ..color = color == null ? base : color.withValues(alpha: color.a * base.a));
-        }
       } else {
         canvas.drawPath(path, RenderNodePaint.paintFor(f, bounds));
       }
@@ -204,84 +162,21 @@ class RenderShapePath extends RenderBox with ImageClient {
     if (blends) canvas.restore();
     if (filled) paintPathInnerShadows(canvas, path, _shadows(d, api.EffectType.innerShadow));
     if (!stroked) return;
-    Paint strokePaint(api.Paint p, Rect r) => RenderNodePaint.paintFor(p, r)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = cap
-      ..strokeJoin = join
-      ..strokeMiterLimit = n.prop(PathProps.strokeMiterLimit);
     for (final p in strokes) {
-      // A trimmed or dashed outline is one line along the whole path, so its
-      // gradient spans the box.
-      if (p.isGradient && p.gradientPerSubpath && identical(outline, path)) {
-        shapes()?.paintEach(canvas, (r) => strokePaint(p, r));
-      } else {
-        canvas.drawPath(outline, strokePaint(p, bounds));
-      }
+      canvas.drawPath(
+          outline,
+          RenderNodePaint.paintFor(p, bounds)
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = strokeWidth
+            ..strokeCap = cap
+            ..strokeJoin = join
+            ..strokeMiterLimit = n.prop(PathProps.strokeMiterLimit));
     }
   }
 
   /// The visible shadows of [type] in [d], as Flutter's.
   static List<BoxShadow> _shadows(api.Decoration d, api.EffectType type) =>
       [for (final e in d.effects) if (e.visible && e.type == type) boxShadow(e)];
-
-  /// **Schema 3 only**: schema 4 makes a box with a path a `path` node
-  /// ([_paintVector]); this goes with schema 4's version gate.
-  ///
-  /// A box drawn as its path (PassiveRectangleWidget with a path): its drop
-  /// shadows following the path (its fill and its stroke), its fills (and
-  /// foreground fills) clipped to the path, its strokes along it, centered;
-  /// no clip.
-  void _paintBox(Canvas canvas, Node n) {
-    final path = parseSvgPath(n.prop(BoxProps.path));
-    final d = n.decoration;
-    final rect = Offset.zero & size;
-    final rrect = d.radius.flutter.toRRect(rect);
-    if (path != null) {
-      final stroked = d.strokeWidth > 0 && d.strokes.any((p) => p.visible);
-      paintPathShadows(canvas, path, _shadows(d, api.EffectType.dropShadow),
-          filled: d.fills.any((p) => p.visible),
-          strokeWidth: stroked ? d.strokeWidth : 0,
-          cap: _cap(d.strokeCap),
-          join: _join(n.prop(BoxProps.strokeJoin)));
-    }
-    void fills(Iterable<api.Paint> paints, {required bool images}) {
-      final visible = paints.where((p) => p.visible).toList();
-      if (visible.isEmpty) return;
-      canvas.save();
-      canvas.clipPath(path ?? ui.Path());
-      for (final p in visible) {
-        if (p.type == api.PaintType.image) {
-          if (images) paintImageFill(canvas, rrect, p, this);
-        } else {
-          canvas.drawRRect(rrect, RenderNodePaint.paintFor(p, rect));
-        }
-      }
-      canvas.restore();
-    }
-
-    fills(d.fills, images: true);
-    if (path != null && d.strokeWidth > 0) {
-      final dashes = d.dashPattern.where((v) => v > 0).toList();
-      final outline = dashes.isEmpty ? path : dashPath(path, dashes.first, dashes.length > 1 ? dashes[1] : null);
-      for (final p in d.visibleStrokes) {
-        final Color? color = p.isGradient
-            ? (p.stops.isEmpty ? null : p.stops.first.color.multiplyOpacity(p.opacity).flutter)
-            : p.effectiveColor?.flutter;
-        if (color == null) continue;
-        canvas.drawPath(
-            outline,
-            Paint()
-              ..style = PaintingStyle.stroke
-              ..color = color
-              ..strokeWidth = d.strokeWidth
-              ..strokeCap = _cap(d.strokeCap)
-              ..strokeJoin = _join(n.prop(BoxProps.strokeJoin))
-              ..strokeMiterLimit = n.prop(BoxProps.strokeMiterLimit));
-      }
-    }
-    fills(d.foregroundFills, images: false);
-  }
 }
 
 /// How much a path's stroke grows when drawn at [size] from [viewBox]: the
@@ -295,11 +190,5 @@ double pathStrokeScale(Size? viewBox, Size size, {required bool scaleStroke}) =>
 /// the design size, a path having no content to hug) → the painted path.
 void buildPath(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(b.fitBox('pathFit', n.layout.width.fit, n.layout.height.fit, Size(n.layout.width.value, n.layout.height.value)));
-  chain.add(b.obtain<RenderShapePath>('shape', RenderShapePath.new)..node = n);
-}
-
-/// A box with a path: the shell's fit box → the painted path.
-void buildBoxPath(NodeBuilder b, Node n, List<RenderBox> chain) {
-  chain.add(b.fitBox('shellFit', n.layout.width.fit, n.layout.height.fit, Size(n.layout.width.value, n.layout.height.value)));
   chain.add(b.obtain<RenderShapePath>('shape', RenderShapePath.new)..node = n);
 }

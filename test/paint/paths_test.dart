@@ -1,8 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/behaviors.dart';
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -55,27 +53,6 @@ Future<int> _alphaAt(WidgetTester tester, bool scale, Offset at) async {
 
 // strokePath.fillColor fills the shape its points enclose, behind the line
 // (a hand-drawn box with its own wobble), fading in as the line draws.
-
-Future<List<int>> _rgbaAt(WidgetTester tester, api.StrokePath path, List<Offset> at) async {
-  final key = GlobalKey();
-  await tester.pumpWidget(Directionality(
-    textDirection: TextDirection.ltr,
-    child: Align(
-      alignment: Alignment.topLeft,
-      child: RepaintBoundary(key: key, child: CustomPaint(size: const Size(100, 60), painter: StrokePathPainter(path))),
-    ),
-  ));
-  final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-  final bytes = (await tester.runAsync(() async {
-    final image = await boundary.toImage();
-    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    image.dispose();
-    return data!;
-  }))!;
-  return [for (final p in at) ...[for (var c = 0; c < 4; c++) bytes.getUint8((p.dy.toInt() * 100 + p.dx.toInt()) * 4 + c)]];
-}
-
-api.StrokePath _box({double progress = 1, String? fill = '#FFFF0000'}) => api.StrokePath.fromJson(_strokeBox(progress: progress, fill: fill))!;
 
 Map<String, Object?> _strokeBox({double progress = 1, String? fill = '#FFFF0000'}) => {
       'points': [[10, 10], [90, 12], [88, 50], [12, 48]],
@@ -165,19 +142,6 @@ Path _head(Path path, double share) {
   return m.extractPath(0, m.length * share);
 }
 
-// PathCurve.quadratic: after the first point, (control, end) pairs drawn
-// with quadraticBezierTo, so a hand-drawn outline matches a painter's
-// curves exactly instead of a polyline sampled from them.
-
-Path _path(List<api.Offset> points) => StrokePathPainter(api.StrokePath(
-      points: points,
-      xUnit: api.PathUnit.pixels,
-      yUnit: api.PathUnit.pixels,
-      curve: api.PathCurve.quadratic,
-    )).pathFor(const Size(200, 200));
-
-double _length(Path p) => p.computeMetrics().fold(0.0, (l, m) => l + m.length);
-
 // Painting and islands of the media group: image fills, SVG paths (the
 // `path` widget and a box's path), icons, and the players' islands.
 
@@ -242,13 +206,6 @@ void main() {
   });
 
   group('a path drawn along its points', () {
-    testWidgets('a drawn path with a fill color paints its inside and leaves its outside clear', (tester) async {
-      final px = await _rgbaAt(tester, _box(), const [Offset(50, 30), Offset(5, 5), Offset(95, 55)]);
-      expect(px.sublist(0, 4), [255, 0, 0, 255], reason: 'inside');
-      expect(px[7], 0, reason: 'outside, top left');
-      expect(px[11], 0, reason: 'outside, bottom right');
-    });
-
     testWidgets('migrated to a custom paint, a drawn path with a fill color paints its inside and leaves its outside clear', (tester) async {
       final b = await _showStroke(tester, _strokeBox(), const Size(100, 60));
       final px = await _pixels(tester, b, const [Offset(50, 30), Offset(5, 5), Offset(95, 55)]);
@@ -323,92 +280,16 @@ void main() {
       }
     });
 
-    test('curved segments read their points in pairs: a control point and an end point', () {
-      final got = _path(const [api.Offset(0, 0), api.Offset(50, 100), api.Offset(100, 0), api.Offset(150, -100), api.Offset(200, 0)]);
-      final want = Path()
-        ..moveTo(0, 0)
-        ..quadraticBezierTo(50, 100, 100, 0)
-        ..quadraticBezierTo(150, -100, 200, 0);
-      expect(_length(got), closeTo(_length(want), 1e-6));
-      // Through (50, 50) at the first curve's middle, not the control point.
-      final m = got.computeMetrics().first;
-      final mid = m.getTangentForOffset(m.length / 4)!.position;
-      expect(mid.dx, closeTo(50, 0.5));
-      expect(mid.dy, closeTo(50, 0.5));
-    });
-
-    test(
-      'a partly drawn stroke, solid or dashed, paints nothing past where it has reached',
-      () async {
-        for (final dash in [
-          <double>[],
-          <double>[8, 4],
-        ]) {
-          final recorder = ui.PictureRecorder();
-          final canvas = Canvas(recorder);
-          StrokePathPainter(
-            api.StrokePath(
-              points: const [api.Offset(0, 10), api.Offset(1, 10)],
-              color: api.Color.white,
-              width: 2,
-              cap: api.StrokeCap.butt,
-              progress: .5,
-              dashPattern: dash,
-            ),
-          ).paint(canvas, const Size(100, 20));
-          final picture = recorder.endRecording();
-          final image = await picture.toImage(100, 20);
-          final bytes = (await image.toByteData())!;
-          expect(bytes.getUint8((10 * 100 + 4) * 4 + 3), greaterThan(0));
-          expect(bytes.getUint8((10 * 100 + 75) * 4 + 3), 0);
-          image.dispose();
-          picture.dispose();
-        }
-      },
-    );
-  
-
-    test('a partly drawn stroke measures its progress along the path\'s length, curves included', () {
-      for (final curve in api.PathCurve.values) {
-        StrokePathPainter painter(double p) => StrokePathPainter(
-          api.StrokePath(
-            points: const [
-              api.Offset(0, 0),
-              api.Offset(.3, 30),
-              api.Offset(1, 10),
-            ],
-            curve: curve,
-            progress: p,
-          ),
-        );
-        final full = painter(1)
-            .pathFor(const Size(100, 40))
-            .computeMetrics()
-            .fold(0.0, (double sum, m) => sum + m.length);
-        final half = painter(.5)
-            .visiblePathFor(const Size(100, 40))
-            .computeMetrics()
-            .fold(0.0, (double sum, m) => sum + m.length);
-        expect(half, closeTo(full * .5, 0.3));
-        expect(
-          painter(0).visiblePathFor(const Size(100, 40)).computeMetrics(),
-          isEmpty,
-        );
-      }
-    });
-  
   });
 
   group('path nodes', () {
 
-    test('an SVG path parses, trims and dashes', () {
+    test('an SVG path parses and trims', () {
       expect(parseSvgPath(''), isNull);
       expect(parseSvgPath('M0 0 L'), isNull);
       final line = parseSvgPath('M0 0 H100')!;
       expect(line.getBounds(), const Rect.fromLTRB(0, 0, 100, 0));
       expect(trimPath(line, 0.25, 0.5).getBounds(), const Rect.fromLTRB(25, 0, 50, 0));
-      final dashed = dashPath(line, 10, 30);
-      expect(dashed.computeMetrics().length, 3);
     });
 
     testWidgets('a path fills and strokes its shape, scaled from its view box', (tester) async {
@@ -461,7 +342,7 @@ void main() {
 
     // With shadows the per-shape colors have no exact custom paint form: the
     // migration keeps them as `legacy.props.subpathColors` and reports it.
-    testWidgets('a path\'s shapes in turn colors are custom paint path ops, each color times the fill\'s alpha', (tester) async {
+    testWidgets('a path\'s shapes colored in turn are custom paint path ops, each color times the fill\'s alpha', (tester) async {
       final b = await _showNode(tester, {
         'type': 'path',
         'layout': {'width': 30, 'height': 10},
