@@ -82,4 +82,16 @@ void main() {
     expect(fallbacks.single, allOf(contains('"Fraunces" 600 italic'), contains('fontStyle italic'), contains('${dir.path}/fonts'),
         contains('fraunces-latin-600-normal.woff2: WOFF2')));
   });
+
+  test('of a font package\'s subset files for one face, the one with Latin text\'s characters is served', () {
+    final root = '${Platform.environment['FLUTTER_ROOT'] ?? '/opt/flutter'}/bin/cache/artifacts/material_fonts';
+    // Two files of the same family, weight and style: the first (an icon
+    // font standing in for a Cyrillic subset) has no Latin letters.
+    final faces = <FontFace>[
+      (family: 'Body', weight: 400, italic: false, path: '$root/MaterialIcons-Regular.otf'),
+      (family: 'Body', weight: 400, italic: false, path: '$root/Roboto-Regular.ttf'),
+    ];
+    expect(DirectoryFontFetcher(faces).match('Body', 400, false)!.path, endsWith('Roboto-Regular.ttf'));
+    expect(DirectoryFontFetcher(faces.reversed.toList()).match('Body', 400, false)!.path, endsWith('Roboto-Regular.ttf'));
+  });
 }

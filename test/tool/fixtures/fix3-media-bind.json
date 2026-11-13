@@ -1,0 +1,75 @@
+{
+ "schema": 2,
+ "roots": [
+  "mb"
+ ],
+ "nodes": {
+  "mb": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "bar"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   }
+  },
+  "bar": {
+   "type": "box",
+   "visible": false,
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 60
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFF0000"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 599,
+     "patch": {
+      "bind": {
+       "visible": "${= !open}"
+      }
+     }
+    }
+   ]
+  }
+ },
+ "variables": {
+  "mb": [
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

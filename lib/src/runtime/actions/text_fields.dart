@@ -3,6 +3,7 @@
 // focus node on its node's box while it lives.
 import 'package:flutter/widgets.dart';
 
+import '../../render/components.dart' show componentInstanceOf;
 import '../../render/node_tree.dart';
 import '../../render/recipe.dart';
 import '../expressions/bindings.dart' show ProvidedItem;
@@ -35,14 +36,18 @@ class TextFieldHandle {
       return false;
     }
 
-    TextFieldHandle? related;
+    TextFieldHandle? related, sameComponent;
+    final component = componentInstanceOf(instance);
     for (final box in tree.boxesOf(id)) {
       final handle = _handles[box];
       if (handle == null) continue;
       if (box.instance == instance) return handle;
+      // Ids are local to a component's definition: the field of the
+      // instance the action runs in.
+      if (sameComponent == null && component != null && componentInstanceOf(box.instance) == component) sameComponent = handle;
       if (related == null && (within(box.instance, instance) || within(instance, box.instance))) related = handle;
     }
-    return related ?? of(tree, id);
+    return related ?? sameComponent ?? of(tree, id);
   }
 
   static void register(NodeBuilder box, TextFieldHandle handle) => _handles[box] = handle;
