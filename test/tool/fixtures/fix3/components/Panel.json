@@ -1,0 +1,161 @@
+{
+ "schema": 2,
+ "id": "Panel",
+ "roots": [
+  "panel"
+ ],
+ "widget": {
+  "type": "Panel",
+  "doc": "A panel with a label that scrolls to its own end, and a filling body.",
+  "children": "none",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Panel"
+   }
+  ]
+ },
+ "nodes": {
+  "panel": {
+   "type": "column",
+   "children": [
+    "label",
+    "list",
+    "go"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.title} label that is long enough to be wide",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "list": {
+   "type": "column",
+   "children": [
+    "a",
+    "b",
+    "end"
+   ],
+   "props": {
+    "scrollable": true,
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 80
+   }
+  },
+  "a": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 60
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDDDDDD"
+     }
+    ]
+   }
+  },
+  "b": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 60
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFBBBBBB"
+     }
+    ]
+   }
+  },
+  "end": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2962FF"
+     }
+    ]
+   }
+  },
+  "go": {
+   "type": "box",
+   "layout": {
+    "width": 80,
+    "height": 30
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF111111"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "end"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,207 @@
+{
+ "schema": 2,
+ "roots": [
+  "home"
+ ],
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF0F0F0"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "narrow",
+    "p1",
+    "p2",
+    "card",
+    "fixedCard"
+   ],
+   "props": {
+    "scrollable": true,
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 15
+   }
+  },
+  "narrow": {
+   "type": "column",
+   "children": [
+    "label"
+   ],
+   "layout": {
+    "width": 60,
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "Hi",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "p1": {
+   "type": "Panel",
+   "props": {
+    "title": "One"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 200
+    }
+   }
+  },
+  "p2": {
+   "type": "Panel",
+   "props": {
+    "title": "Two"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 200
+    }
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "banner",
+    "cardBody"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 300
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "banner": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFB9F34C"
+     }
+    ]
+   }
+  },
+  "cardBody": {
+   "type": "column",
+   "children": [
+    "cardText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "fill": 280
+    }
+   }
+  },
+  "cardText": {
+   "type": "text",
+   "props": {
+    "text": "Body",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "fixedCard": {
+   "type": "column",
+   "children": [
+    "fixedBody"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 200
+   }
+  },
+  "fixedBody": {
+   "type": "column",
+   "children": [],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "fill": 150
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFCCCCCC"
+     }
+    ]
+   }
+  }
+ }
+}
