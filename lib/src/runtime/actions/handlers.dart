@@ -378,9 +378,15 @@ void _haptic(HapticKind kind) {
 }
 
 /// Sets node values: a property bound to one variable sets the variable;
-/// others go in the context's node values.
+/// others go in the context's node values. Inside a component instance the
+/// node is that instance's (ids are local to its definition): its values are
+/// set on that instance's box only.
 void _setValue(String nodeId, List<NodeValue> values, ActionRun run) {
   final tree = run.host.tree;
+  final inInstance = tree == null
+      ? const <NodeBox>[]
+      : [for (final b in scopedBoxesOf(tree, nodeId, run.instance)) if (componentInstanceOf(b.instance) != null) b];
+  if (inInstance.isNotEmpty) return _setInstanceValues(tree!, nodeId, inInstance, values, run);
   final node = tree?.resolve(nodeId) ?? tree?.source.node(nodeId);
   for (final v in values) {
     Object? value;
@@ -400,6 +406,34 @@ void _setValue(String nodeId, List<NodeValue> values, ActionRun run) {
       continue;
     }
     run.host.nodeValues?.set(nodeId, v.path, value);
+  }
+}
+
+void _setInstanceValues(RenderTree tree, String nodeId, List<NodeBox> boxes, List<NodeValue> values, ActionRun run) {
+  for (final box in boxes) {
+    final node = tree.resolve(nodeId, instance: box.instance);
+    for (final v in values) {
+      Object? value;
+      switch (v.mode) {
+        case NodeValueMode.set:
+          value = v.value is String ? run.evaluate(v.value! as String) : v.value;
+        case NodeValueMode.toggle:
+          final current = node == null ? null : readJsonPath(node.toJson(), v.path);
+          value = !(current == true || current == 'true');
+        case NodeValueMode.sync:
+          value = run.value;
+      }
+      // A property bound to one variable sets that variable, where the node
+      // reads it (the instance's own variables, a `variable` parameter).
+      final bound = box.source.node(nodeId)?.bind[v.path];
+      final variable = bound == null ? null : exactPath(bound);
+      final scope = tree.binder?.scopeFor(box.source, nodeId, box.instance);
+      if (variable != null && scope != null && variableOf(scope, variable) != null) {
+        setVariableIn(scope, variable, value);
+        continue;
+      }
+      tree.setInstanceValue(nodeId, box.instance, v.path, value);
+    }
   }
 }
 

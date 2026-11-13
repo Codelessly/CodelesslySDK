@@ -213,23 +213,36 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // `--component <Type>`: that component alone, on a page of its own per
   // parameter set (each preview at its size).
   final alone = <({String name, api.Json page, double? width, double? height})>[];
-  if (args.component case final String type) {
+  // `--components-all`: every component of the site, so (an AI author
+  // above all) can see each part it may call.
+  final aloneTypes = [
+    ?args.component,
+    if (args.componentsAll)
+      for (final d in docs.values)
+        if (isComponentJson(d))
+          if (api.readMap(d[api.kWidgetKey])?['type'] case final String t when t != args.component) t,
+  ];
+  if (args.componentsAll && aloneTypes.isEmpty) {
+    issue(RuntimeIssue('unknown_screen_arg', 'error', '--components-all: no component documents in ${args.inputs.join(', ')}.'));
+    return _finish(report, args);
+  }
+  for (final type in aloneTypes) {
     final def = docs.values.where((d) => isComponentJson(d) && api.readMap(d[api.kWidgetKey])?['type'] == type).firstOrNull;
     if (def == null) {
       issue(RuntimeIssue('unknown_screen_arg', 'error', '--component $type: no component of that type in ${args.inputs.join(', ')}.'));
       return _finish(report, args);
     }
     try {
-      final slots = args.slots == null ? null : jsonDecode(File(args.slots!).readAsStringSync()) as api.Json;
-      alone.addAll(componentPages(type, def, props: args.props, slots: slots));
+      final slots = args.slots == null || type != args.component ? null : jsonDecode(File(args.slots!).readAsStringSync()) as api.Json;
+      alone.addAll(componentPages(type, def, props: type == args.component ? args.props : null, slots: slots));
     } catch (e) {
       issue(RuntimeIssue('invalid_json', 'error', '--props or --slots: ${_firstLine('$e')}'));
       return _finish(report, args);
     }
-    for (final a in alone) {
-      docs[a.name] = a.page;
-      dirs[a.name] = Directory.current.path;
-    }
+  }
+  for (final a in alone) {
+    docs[a.name] = a.page;
+    dirs[a.name] = Directory.current.path;
   }
   for (final e in docs.entries) {
     final p = prepare(e.value, dir: dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
@@ -369,7 +382,10 @@ Future<void> _renderAll(
               node == null
                   ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
                   : 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
-              nodeId: node?.id, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node.id]));
+              nodeId: node?.tree.pathOf(node.id, node.instance),
+              screen: label,
+              size: sizeName,
+              file: node == null ? null : _fileOf(node, fileOfNode, docs)));
         }
         for (final (err, message) in recorder.errors) {
           final node = err is ActionFailed ? err.nodeId : null;
@@ -819,8 +835,10 @@ List<NodeBox> _boxes(WidgetsBinding binding) => [
 /// The box of node [id] on screen: the topmost (the last painted), or with
 /// `id#n` the n-th (0-based) of the copies a list repeats.
 NodeBox? _boxOf(WidgetsBinding binding, String id) {
-  // A node inside a component, by path: `plans/card1/cta`.
-  if (id.contains('/')) {
+  // A node inside a component, by path: `plans/card1/cta`; a call by its
+  // id (its box is its definition root's): `send`, `sizes#3`.
+  final byPath = id.contains('/') || _boxes(binding).any((b) => b.id != id.split('#').first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == id.split('#').first);
+  if (byPath) {
     for (final b in _boxes(binding)) {
       final found = b.tree.boxAtPath(id);
       if (found != null && found.attached && found.hasSize) return found;
@@ -1417,4 +1435,12 @@ String formatReport(RenderReport report) {
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();
+}
+
+/// The file node box [b] comes from: its component's for a node inside an
+/// instance (ids are local to their document), else its page's.
+String? _fileOf(NodeBox b, Map<String, String> fileOfNode, Map<String, api.Json> docs) {
+  final c = componentInstanceOf(b.instance);
+  if (c == null) return fileOfNode[b.id];
+  return docs.entries.where((e) => api.readMap(e.value[api.kWidgetKey])?['type'] == c.component).firstOrNull?.key;
 }

@@ -1,0 +1,411 @@
+{
+ "schema": 2,
+ "id": "home",
+ "roots": [
+  "home"
+ ],
+ "variables": {
+  "home": [
+   {
+    "name": "menuOpen",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "name": "Home",
+   "path": "home",
+   "slots": {
+    "body": "homeRoot"
+   },
+   "layout": {
+    "width": 1440,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "bg"
+     }
+    ]
+   }
+  },
+  "homeRoot": {
+   "type": "stack",
+   "children": [
+    "homePage",
+    "homeMenu"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    }
+   }
+  },
+  "homePage": {
+   "type": "column",
+   "children": [
+    "homeHeader",
+    "homeHero",
+    "homeFeatures",
+    "homeMetrics",
+    "homeCta",
+    "homeFooter"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "homeHeader": {
+   "type": "SiteHeader",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": 72
+   },
+   "props": {
+    "menuOpen": "menuOpen"
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "height": 92
+      }
+     }
+    }
+   ]
+  },
+  "homeMenu": {
+   "type": "MobileMenu",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "menuOpen": "menuOpen"
+   }
+  },
+  "homeCta": {
+   "type": "FinalCta",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 600
+    }
+   }
+  },
+  "homeFooter": {
+   "type": "SiteFooter",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 420
+    }
+   }
+  },
+  "homeHero": {
+   "type": "PageHero",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 560
+    }
+   },
+   "bind": {
+    "props.eyebrow": "${homeCopy.eyebrow}",
+    "props.headline": "${homeCopy.headline}",
+    "props.intro": "${homeCopy.intro}"
+   },
+   "slots": {
+    "actions": "homeActs"
+   }
+  },
+  "homeActs": {
+   "type": "row",
+   "children": [
+    "homeSales",
+    "homePricing"
+   ],
+   "props": {
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 46
+    }
+   }
+  },
+  "homeSales": {
+   "type": "Button",
+   "props": {
+    "label": "Talk to sales"
+   },
+   "layout": {
+    "width": {
+     "hug": 168
+    },
+    "height": 46
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPress"
+     },
+     "actions": [
+      {
+       "type": "navigate",
+       "to": "contact"
+      }
+     ]
+    }
+   ]
+  },
+  "homePricing": {
+   "type": "Button",
+   "props": {
+    "label": "See pricing",
+    "primary": false
+   },
+   "layout": {
+    "width": {
+     "hug": 168
+    },
+    "height": 46
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPress"
+     },
+     "actions": [
+      {
+       "type": "navigate",
+       "to": "pricing"
+      }
+     ]
+    }
+   ]
+  },
+  "homeFeatures": {
+   "type": "column",
+   "children": [
+    "homeFeatGrid"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 600
+    },
+    "padding": [
+     18,
+     24,
+     18,
+     56
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        28,
+        32,
+        28,
+        72
+       ]
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        40,
+        40,
+        40,
+        96
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "homeFeatGrid": {
+   "type": "gridView",
+   "children": [
+    "homeFeature"
+   ],
+   "bind": {
+    "data": "${features}"
+   },
+   "props": {
+    "physics": "never",
+    "minCrossAxisExtent": 340,
+    "shrinkWrapRows": true,
+    "crossAxisSpacing": 20,
+    "mainAxisSpacing": 20
+   },
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 420
+    },
+    "constraints": {
+     "maxWidth": 1320
+    }
+   }
+  },
+  "homeFeature": {
+   "type": "FeatureCard",
+   "bind": {
+    "props.feature": "${item}"
+   },
+   "layout": {
+    "width": {
+     "fill": 420
+    },
+    "height": {
+     "hug": 380
+    }
+   }
+  },
+  "homeMetrics": {
+   "type": "column",
+   "children": [
+    "homeMetricGrid"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 200
+    },
+    "padding": [
+     24,
+     24,
+     24,
+     72
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        60,
+        24,
+        60,
+        96
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "homeMetric": {
+   "type": "Metric",
+   "bind": {
+    "props.value": "${item.value}",
+    "props.label": "${item.label}"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "homeMetricGrid": {
+   "type": "gridView",
+   "children": [
+    "homeMetric"
+   ],
+   "bind": {
+    "data": "${metrics}"
+   },
+   "props": {
+    "physics": "never",
+    "minCrossAxisExtent": 260,
+    "shrinkWrapRows": true,
+    "crossAxisSpacing": 20,
+    "mainAxisSpacing": 20
+   },
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 140
+    },
+    "constraints": {
+     "maxWidth": 1320
+    }
+   }
+  }
+ }
+}

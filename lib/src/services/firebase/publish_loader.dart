@@ -4,14 +4,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 
+import '../../app/hosted_plugins.dart' show PluginSource;
 import '../../app/loader.dart';
 import '../auth.dart';
 
 /// A [LivePublishLoader] on Cloud Firestore: the publish model is the
 /// document [PublishSource.modelPath] (`publish/{projectId}`;
 /// `publish_preview/...` for the editor's preview), each layout
-/// [PublishSource.layoutPath] (`.../layouts/{layoutId}`). [watchModel]
-/// follows the model document.
+/// [PublishSource.layoutPath] (`.../layouts/{layoutId}`), each component
+/// [PublishSource.componentPath] (`.../components/{type}`). [watchModel]
+/// follows the model document: a republished component changes its entry
+/// there.
 ///
 /// The project is [projectId], else the one [auth] grants access to: the
 /// app's project token ([CodelesslyConfig.authToken]) resolves to its
@@ -22,7 +25,7 @@ import '../auth.dart';
 ///
 /// A document not in the current format fails with a [PublishLoadException]
 /// saying so.
-class FirestorePublishLoader implements LivePublishLoader {
+class FirestorePublishLoader implements LivePublishLoader, PluginSource {
   FirestorePublishLoader(this.firestore, {this.projectId, this.auth})
       : assert(projectId != null || auth != null, 'A project id or a ProjectAuth is needed');
 
@@ -77,6 +80,30 @@ class FirestorePublishLoader implements LivePublishLoader {
     final data = snapshot.data();
     if (!snapshot.exists || data == null) throw PublishLoadException('Layout [$layoutId] does not exist ($path)');
     return decodeStoredPublishLayout(storedJson(data), layoutId: snapshot.id);
+  }
+
+  @override
+  Future<PublishComponent> loadComponent(PublishSource source, String type) async {
+    final t = await _target(source);
+    final path = t.source.componentPath(t.projectId, type);
+    final DocumentSnapshot<Map<String, dynamic>> snapshot;
+    try {
+      snapshot = await firestore.doc(path).get();
+    } catch (e) {
+      throw PublishLoadException('Could not read $path', e);
+    }
+    final data = snapshot.data();
+    if (!snapshot.exists || data == null) throw PublishLoadException('Component [$type] does not exist ($path)');
+    return decodeStoredPublishComponent(storedJson(data), type: snapshot.id);
+  }
+
+  /// The document `plugins/{id}/versions/{n}`; null when there is none.
+  @override
+  Future<PluginVersion?> loadPlugin(String id, int version) async {
+    final snapshot = await firestore.doc('$kPluginsCollection/$id/versions/$version').get();
+    final data = snapshot.data();
+    if (!snapshot.exists || data == null) return null;
+    return PluginVersion.fromJson(storedJson(data), id: id, version: version);
   }
 
   @override
