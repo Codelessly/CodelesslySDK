@@ -1,6 +1,8 @@
 // Images painted by render objects: image fills and image icons. Raster
 // images resolve through Flutter's image cache (`NetworkImage`,
-// `MemoryImage` for data URLs); SVGs through flutter_svg's picture loader.
+// `MemoryImage` for data URLs); SVGs through flutter_svg's picture loader,
+// their bytes fetched by the [ImageBytesLoader] of the tree that shows them
+// (the render core doesn't fetch on its own).
 // A render object that paints images mixes in [ImageClient]: it repaints
 // when one it shows arrives.
 import 'dart:async';
@@ -11,9 +13,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http/http.dart' as http;
 
+import '../contracts.dart';
 import '../convert.dart';
+import '../node_tree.dart' show NodeBox;
 
 /// Loads the image at [url] into Flutter's image cache (where image fills
 /// find it), completing with whether it loaded. SVGs and data URLs aren't
@@ -145,10 +148,14 @@ class LoadedImage {
   @visibleForTesting
   static bool debugSvgCached(String url) => _svgBytes.containsKey(url);
 
-  static Future<Uint8List> _fetch(String url) async {
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode != 200) throw http.ClientException('HTTP ${response.statusCode}', Uri.parse(url));
-    return response.bodyBytes;
+  /// Fetched by the loader of a render object that shows it; fails (and is
+  /// tried again, as any failed load) while none of them has one.
+  Future<Uint8List> _fetch(String url) {
+    for (final c in _clients) {
+      final loader = c._loader();
+      if (loader != null) return loader.load(url);
+    }
+    return Future.error(StateError('No image loader for $url'));
   }
 
   // Fetched here rather than by flutter_svg's network loader, whose cache
@@ -241,6 +248,23 @@ mixin ImageClient on RenderObject {
 
   final Map<String, String> _reported = {};
   bool _statusQueued = false;
+
+  /// Fetches the images Flutter's image cache doesn't (SVG documents) when
+  /// this object isn't inside a tree that has a loader
+  /// ([RenderTree.imageLoader]): an icon in an overlay, or in a widget used
+  /// on its own.
+  ImageBytesLoader? imageLoader;
+
+  /// The loader of the nearest tree around this object, else its own.
+  ImageBytesLoader? _loader() {
+    for (RenderObject? p = this; p != null; p = p.parent) {
+      if (p is NodeBox) {
+        final loader = p.tree.imageLoader;
+        if (loader != null) return loader;
+      }
+    }
+    return imageLoader;
+  }
 
   /// Actual fetch state for each image URL; delivered outside layout and
   /// paint so a reaction can safely change another node's bindings.

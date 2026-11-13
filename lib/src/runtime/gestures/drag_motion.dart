@@ -4,7 +4,7 @@
 // its axis and held back by resistance; tilts by `rotateFactor`; and on
 // release springs back, stays, or flies off past a threshold (a swiped
 // card), with `physics` a fling, a spring settle and snap points. Only a
-// running app adds it (NodeTree.animates): the design canvas draws the
+// running app adds it (RenderTree.animates): the design canvas draws the
 // node where its layout puts it.
 //
 // What it gives the layout:
@@ -32,8 +32,10 @@ import 'package:flutter/physics.dart' show Simulation;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../../render/contracts.dart' show HitTestedWhereDrawn;
 import '../../render/node_tree.dart';
 import '../actions/context.dart' show setVariableIn;
+import '../expressions/bindings.dart' show RenderTreeBinder;
 import '../contracts.dart';
 import 'physics.dart';
 
@@ -183,7 +185,7 @@ abstract final class DragMotionControl {
   /// off-screen instead of flashing at rest. False when no drag of the node
   /// took it ([api.DragCommand.step] is a track's).
   static Future<bool> control(String nodeId, api.DragCommand command, api.DragDirection direction,
-      {NodeTree? tree}) async {
+      {RenderTree? tree}) async {
     if (command == api.DragCommand.step) return false;
     if (command == api.DragCommand.returnFrom) {
       _pendingReturns[nodeId] = direction;
@@ -211,7 +213,7 @@ abstract final class DragMotionControl {
 
   /// The instance of [nodeId] an action moves: the first enabled one by
   /// its item index, or the first one when none is enabled.
-  static RenderDragMotion? instanceOf(String nodeId, {NodeTree? tree}) {
+  static RenderDragMotion? instanceOf(String nodeId, {RenderTree? tree}) {
     final all = [
       for (final r in _instances[nodeId] ?? const <RenderDragMotion>[])
         if (r.attached && !r._dismissed && (tree == null || identical(r._box?.tree, tree))) r,
@@ -223,7 +225,7 @@ abstract final class DragMotionControl {
 
 /// The drag layer of a node that follows the pointer (see the top of this
 /// file). [configure]d by its node box on every apply.
-class RenderDragMotion extends RenderProxyBox {
+class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   RenderDragMotion();
 
   NodeBox? _box;

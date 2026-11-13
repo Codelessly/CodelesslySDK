@@ -16,10 +16,10 @@ abstract final class CaptureRegistry {
   static final List<GlobalKey> _apps = [];
 
   /// Layout [tree] is painted in the [RepaintBoundary] keyed [key].
-  static void bindLayout(NodeTree tree, GlobalKey key) => _layouts[tree] = key;
+  static void bindLayout(RenderTree tree, GlobalKey key) => _layouts[tree] = key;
 
   /// The boundary layout [tree] is painted in, while shown.
-  static RenderRepaintBoundary? layoutOf(NodeTree? tree) => tree == null ? null : _boundary(_layouts[tree]);
+  static RenderRepaintBoundary? layoutOf(RenderTree? tree) => tree == null ? null : _boundary(_layouts[tree]);
 
   /// The innermost [CodelesslyCaptureScope] shown (the app's), if any.
   static RenderRepaintBoundary? get app {
