@@ -437,42 +437,25 @@ Future<void> _renderAll(
             'To reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
             screen: label, size: sizeName));
       }
-      // The page's own scroll view only (the largest one a user can
-      // scroll): a decorative list that does not scroll, or one inside the
-      // page, adds nothing. Content fixed to the window (outside the page's
-      // scroll view: a bar pinned to the bottom, a canvas's bottom bar or
-      // button) is drawn where a user first sees it, in the first window.
-      final shifted = <NodeBox>[];
+      // Full page: the page's own scroll view (the largest one a user can
+      // scroll; a decorative list that does not scroll, or one inside the
+      // page, adds nothing) captured over its whole extent while the window
+      // keeps its size, as a browser's full-page screenshot does: the
+      // window's height, `screen.height` and whatever is sized or pinned to
+      // the window stay as on the device, and content fixed to the window
+      // (a header, a drawer, a bar pinned to the bottom) is drawn where a
+      // user first sees it, in the first window. The capture starts at the
+      // page's top, whatever a step scrolled it to.
+      RenderDesignScroll? fullPage;
       if (args.fullPage) {
         var page = _pageScroll(binding);
-        // A full page is the whole page from its top, whatever the steps
-        // scrolled it to (a tap scrolls its node into view first).
         if (page != null && page.pixels.abs() > 0.01) {
           page.jumpTo(0);
           await _settle(tester);
           collect();
           page = _pageScroll(binding);
         }
-        if (page != null && page.maxScrollExtent >= 1) {
-          final pageBox = _nodeBoxAbove(page);
-          final fixed = pageBox == null ? const <NodeBox>[] : _fixedAround(binding, pageBox);
-          final before = {for (final b in fixed) b: _rectOf(b).topLeft};
-          for (var round = 0; round < 3; round++) {
-            if (!page.attached || page.maxScrollExtent < 1) break;
-            final h = math.min(20000.0, tester.view.physicalSize.height + page.maxScrollExtent);
-            tester.view.physicalSize = ui.Size(size.width, h.ceilToDouble());
-            await _settle(tester);
-            collect();
-          }
-          for (final b in fixed) {
-            if (!b.attached || !b.hasSize) continue;
-            final delta = before[b]! - _rectOf(b).topLeft;
-            if (delta.distance < 0.5) continue;
-            b.capturePaintShift = delta;
-            shifted.add(b);
-          }
-          if (shifted.isNotEmpty) await tester.pump();
-        }
+        if (page != null && page.maxScrollExtent >= 1) fullPage = page;
       }
 
       // 6. Runtime checks, then the PNG.
@@ -507,17 +490,19 @@ Future<void> _renderAll(
       }
       final name = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';
-      await tester.runAsync(() async {
-        final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-        final image = await ro.toImage(pixelRatio: 1);
-        final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-        image.dispose();
-        File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
-      });
-      report.images.add(file);
-      for (final b in shifted) {
-        b.capturePaintShift = Offset.zero;
+      final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+      final page = fullPage;
+      if (page == null || !page.attached) {
+        await tester.runAsync(() async {
+          final image = await ro.toImage(pixelRatio: 1);
+          final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+          image.dispose();
+          File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
+        });
+      } else {
+        File(file).writeAsBytesSync(await _captureFullPage(tester, ro, page, binding));
       }
+      report.images.add(file);
       if (args.dumpLayout) {
         final boxes = [
           for (final b in _boxes(binding))
@@ -688,6 +673,74 @@ ui.Rect? _visibleClip(RenderBox b) {
     out = out == null ? global : out.intersect(global);
   }
   return out;
+}
+
+/// The PNG of the whole of [page] (the page's scroll view) as a window
+/// [ro] keeps its size: the first window as it shows, then the rest of the
+/// page a viewport at a time, scrolled into the window with the boxes fixed
+/// to the window over the page (painted after it: a header, a drawer, a
+/// bottom bar) left out, stitched below; the window's part below the page
+/// view as it is at the page's end. As tall as the window plus what the
+/// page scrolls. The page is left at its top.
+Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro, RenderDesignScroll page, WidgetsBinding binding) async {
+  final window = ro.size;
+  final view = _rectOf(page);
+  final max = page.maxScrollExtent;
+  final pageBox = _nodeBoxAbove(page);
+  final all = _boxes(binding);
+  final pageIndex = pageBox == null ? -1 : all.indexOf(pageBox);
+  final over = pageBox == null
+      ? const <NodeBox>[]
+      : [for (final b in _fixedAround(binding, pageBox)) if (all.indexOf(b) > pageIndex && !_isInside(b, page)) b];
+  Future<ui.Image> shot() async => (await tester.runAsync(() => ro.toImage(pixelRatio: 1)))!;
+  final first = await shot();
+  final slices = <(ui.Image, double)>[];
+  const hidden = Offset(0, -1e6);
+  for (final b in over) {
+    b.capturePaintShift = hidden;
+  }
+  try {
+    for (var o = view.height; ; o += view.height) {
+      final at = math.min(o, max);
+      page.jumpTo(at);
+      await _settle(tester);
+      slices.add((await shot(), at));
+      if (at >= max) break;
+    }
+  } finally {
+    for (final b in over) {
+      b.capturePaintShift = Offset.zero;
+    }
+    page.jumpTo(0);
+    await _settle(tester);
+  }
+  final total = (window.height + max).ceilToDouble();
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+  final paint = Paint()..filterQuality = FilterQuality.none;
+  for (final (img, at) in slices) {
+    // The viewport's rows: the page from offset [at].
+    canvas.drawImageRect(img, Rect.fromLTWH(0, view.top, window.width, view.height),
+        Rect.fromLTWH(0, view.top + at, window.width, view.height), paint);
+  }
+  // Below the page view at the page's end (the fixed boxes left out).
+  final (last, lastAt) = slices.last;
+  canvas.drawImageRect(last, Rect.fromLTWH(0, view.bottom, window.width, window.height - view.bottom),
+      Rect.fromLTWH(0, view.bottom + lastAt, window.width, window.height - view.bottom), paint);
+  // The first window on top, as it shows.
+  canvas.drawImage(first, Offset.zero, paint);
+  final picture = recorder.endRecording();
+  return (await tester.runAsync(() async {
+    final image = await picture.toImage(window.width.ceil(), total.toInt());
+    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    picture.dispose();
+    first.dispose();
+    for (final (img, _) in slices) {
+      img.dispose();
+    }
+    return bytes!.buffer.asUint8List();
+  }))!;
 }
 
 /// The fit boxes of node box [b]'s own chain (not those of the nodes

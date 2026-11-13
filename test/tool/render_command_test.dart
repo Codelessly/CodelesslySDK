@@ -3,6 +3,7 @@
 // on the fixtures next to this file.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui' show Size;
 
@@ -59,7 +60,9 @@ void main() {
     expect(report.errors, 0, reason: '${report.diagnostics}');
     final boxes = jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List;
     final canvas = boxes.firstWhere((b) => b['id'] == 'home-m') as Map;
-    expect(canvas['h'] as num, greaterThan(844), reason: 'full page: taller than the viewport');
+    expect(canvas['h'], 844, reason: 'full page: the window keeps its size (as a browser\'s full-page capture)');
+    expect(boxes.cast<Map>().map((b) => (b['y'] as num) + (b['h'] as num)).reduce(math.max), greaterThan(844),
+        reason: 'the page\'s content below the window, where the PNG draws it');
     final bytes = File('${out.path}/home@390x844.png').readAsBytesSync();
     // PNG height (big-endian at 20..23) is the full page.
     expect((bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23], greaterThan(844));
@@ -405,5 +408,23 @@ void main() {
       expect(shows('p2'), isTrue, reason: 'the tapped instance scrolled its own list: $boxes');
       expect(shows('p1'), isFalse, reason: 'the other instance did not move');
     });
+  });
+
+  testWidgets('--full-page keeps the window: a drawer pinned to its top and bottom covers the first window only', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
+        fullPage: true, dumpLayout: true));
+    expect(r.errors, 0, reason: '${r.diagnostics}');
+    final boxes = (jsonDecode(File('${out.path}/drawerScreen@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
+    final drawer = boxes.singleWhere((b) => b['id'] == 'drawer');
+    expect([drawer['y'], drawer['h']], [72, 772]);
+    final bytes = File(r.images.single).readAsBytesSync();
+    final image = await tester.runAsync(() async {
+      final frame = await (await ui.instantiateImageCodec(bytes)).getNextFrame();
+      return (await frame.image.toByteData(), frame.image.width, frame.image.height);
+    });
+    int px(int x, int y, int c) => image!.$1!.getUint8((y * image.$2 + x) * 4 + c);
+    expect(image!.$3, 2400);
+    expect([px(195, 500, 0), px(195, 500, 1)], [255, 0], reason: 'the drawer over the first window');
+    expect([px(195, 1500, 0), px(195, 1500, 1)], [0, 255], reason: 'the page below it');
   });
 }

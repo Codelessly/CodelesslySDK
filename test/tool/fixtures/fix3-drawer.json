@@ -1,0 +1,128 @@
+{
+ "schema": 2,
+ "roots": [
+  "drawerScreen"
+ ],
+ "nodes": {
+  "drawerScreen": {
+   "type": "canvas",
+   "slots": {
+    "body": "frame"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "frame": {
+   "type": "stack",
+   "children": [
+    "page",
+    "drawer"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "tall"
+   ],
+   "props": {
+    "scrollable": true
+   },
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   }
+  },
+  "tall": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 2400
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF00FF00"
+     }
+    ]
+   }
+  },
+  "drawer": {
+   "type": "column",
+   "children": [
+    "h"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 772
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 72,
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFF0000"
+     }
+    ]
+   }
+  },
+  "h": {
+   "type": "text",
+   "props": {
+    "text": "${screen.height}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF000000"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  }
+ }
+}
