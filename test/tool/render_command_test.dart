@@ -504,4 +504,20 @@ void main() {
     expect(await heights(const []), {'390x844': 60, '1440x900': 0});
     expect(await heights(const [Step('set', 'open', 'true')]), {'390x844': 0, '1440x900': 0});
   });
+
+  // The guide's band example (codelessly_api tool/reference/examples/band.json, copied): a full-width band whose
+  // content is capped at 1200 and centered, and a table from one row and one cell template.
+  testWidgets('the guide\'s band example: full-width band, content capped and centered, a table from one template', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$a0/band.json'], out: out.path, sizes: const [Size(390, 844), Size(1700, 900)],
+        dumpLayout: true));
+    expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
+    List<Map> boxes(String size) => (jsonDecode(File('${out.path}/home@$size.layout.json').readAsStringSync()) as List).cast<Map>();
+    final wide = boxes('1700x900');
+    final band = wide.singleWhere((b) => b['id'] == 'band'), rail = wide.singleWhere((b) => b['id'] == 'rail');
+    expect([band['x'], band['w']], [0, 1700.0]);
+    expect([rail['x'], rail['w']], [250, 1200.0]);
+    expect(wide.where((b) => b['id'] == 'cell'), hasLength(9), reason: 'three rows of three cells from one cell node');
+    final narrow = boxes('390x844').singleWhere((b) => b['id'] == 'rail');
+    expect([narrow['x'], narrow['w']], [24, 342.0]);
+  });
 }
