@@ -545,7 +545,17 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final id = run.text(a.node).trim();
   final item = run.text(a.item).trim();
   final box = tree == null ? null : (item.isEmpty ? tree.boxOf(id) : repeatOf(tree, id, item)) ?? tree.boxOf(id);
-  if (box == null || !box.attached) return;
+  if (box == null || !box.attached) {
+    // Nothing to reveal: said, not skipped silently (the chain goes on).
+    if (tree != null) {
+      run.host.reportError(
+          ActionFailed(a.type, 'no node "$id"${item.isEmpty ? '' : ' (item $item)'} is on screen to scroll to${a.node.contains(r'${') ? ' ("${a.node}" gave "$id")' : ''}',
+              nodeId: run.node?.id),
+          StackTrace.current,
+          action: a.type);
+    }
+    return;
+  }
   // Fonts still loading (a layout shows after waiting a while for them)
   // re-measure the text above the target when they arrive: wait for them,
   // so a jump from a screen's `load` lands where it means.

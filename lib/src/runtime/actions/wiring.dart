@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
-import 'package:codelessly_api/core.dart' show Json, Node, SwitchProps, TriggerType, Trigger;
+import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, Node, PropDef, SwitchProps, TriggerType, Trigger;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -115,8 +115,16 @@ class TreeReactions implements NodeInteractions {
 
   @override
   Future<void> fire(NodeBox box, String trigger, {Json event = const {}}) async {
-    final node = box.node;
+    var node = box.node;
     if (node == null) return;
+    // A tap on an input's prefix or suffix icon runs that icon's own
+    // reactions (`InputIcon.actions`), as a click of the node.
+    if (trigger == iconTapPrefix || trigger == iconTapSuffix) {
+      final icon = _inputIcon(node, prefix: trigger == iconTapPrefix);
+      if (icon == null || icon.actions.isEmpty) return;
+      node = node.copyWith(actions: icon.actions);
+      trigger = 'click';
+    }
     // What a custom paint has under the pointer (render/custom_paint.dart).
     if (node.behaviors.customPaint != null) event = customPaintEvent(box, event);
     // What a modal anchored to its trigger (or the pointer) sits by.
@@ -896,4 +904,19 @@ bool isTyping() {
   final focused = FocusManager.instance.primaryFocus?.context;
   return focused != null &&
       (focused.widget is EditableText || focused.findAncestorWidgetOfExactType<EditableText>() != null);
+}
+
+/// The trigger an input reports for a tap on its prefix icon.
+const iconTapPrefix = 'prefixIconTap';
+
+/// The trigger an input reports for a tap on its suffix icon.
+const iconTapSuffix = 'suffixIconTap';
+
+/// The prefix (or suffix) icon of [node]'s input decoration, if it has one.
+InputIcon? _inputIcon(Node node, {required bool prefix}) {
+  for (final def in node.spec?.props ?? const <PropDef<Object?>>[]) {
+    final v = node.props.get(def);
+    if (v is InputDecoration) return prefix ? v.prefixIcon : v.suffixIcon;
+  }
+  return null;
 }

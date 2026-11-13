@@ -43,6 +43,7 @@ import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
 import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 import '../runtime/actions/text_fields.dart';
+import '../runtime/actions/wiring.dart' show iconTapPrefix, iconTapSuffix;
 import '../runtime/actions/feedback_theme.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
@@ -280,10 +281,18 @@ Widget _affix(Widget? icon, Widget text, {required bool before}) {
 /// when the decoration sets none. [focused] and [error] pick the border a
 /// padding that includes it grows by.
 InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
-    {bool focused = false, bool? error}) {
+    {bool focused = false, bool? error, void Function(bool prefix)? onIconTap}) {
   Widget? affixIcon(api.InputIcon? icon, api.EdgeInsets? iconPadding) {
-    final glyph = _icon(icon);
+    var glyph = _icon(icon);
     if (glyph == null) return null;
+    // An icon with reactions (a clear "×") runs them when tapped.
+    if (onIconTap != null && icon!.actions.isNotEmpty) {
+      final prefix = identical(icon, d.prefixIcon);
+      glyph = MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => onIconTap(prefix), child: glyph),
+      );
+    }
     final Widget aligned = Align(widthFactor: 1, heightFactor: 1, child: glyph);
     return iconPadding == null ? aligned : Padding(padding: iconPadding.flutter, child: aligned);
   }
@@ -534,7 +543,10 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final expands = fillsHeight && !oneLine;
     final (maxLines, minLines) =
         textFieldLines(maxLines: maxLinesProp == 0 ? null : maxLinesProp, minLines: minLinesProp, expands: expands);
-    final decoration = inputDecoration(d, n.layout.padding, focused: focusNode.hasFocus);
+    final decoration = inputDecoration(d, n.layout.padding, focused: focusNode.hasFocus, onIconTap: (prefix) {
+      final b = _builderOf(context);
+      if (b != null) fireTrigger(b, prefix ? iconTapPrefix : iconTapSuffix);
+    });
     final maxLength = n.prop(TextFieldProps.maxLength);
     final style = _styleOrNull(n.prop(TextFieldProps.style));
     final cursorRadius = n.prop(TextFieldProps.cursorRadius);
