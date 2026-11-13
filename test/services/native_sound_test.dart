@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:codelessly_sdk/src/services/platform/sound_engine_native.dart';
+import 'package:codelessly_sdk/src/features/media/platform/sound_engine_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/services/sound.dart';
 

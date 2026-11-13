@@ -12,7 +12,6 @@ import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
-import 'package:just_audio/just_audio.dart' as audio;
 
 import 'action_error.dart' show CodedFailure;
 import 'cloud_loads.dart';
@@ -37,17 +36,14 @@ import 'capture.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
 import 'route_transition.dart' show RevealAnchor;
-import 'ui.dart' show NavigatorActionUi, PickedFile;
 import 'runner.dart';
 import 'script_host.dart';
 import 'text_fields.dart';
 import 'values.dart';
 import 'variable_animator.dart';
-import 'printing.dart';
+import 'files.dart';
+export 'files.dart' show pickFiles, sourceFiles;
 import '../../app/fonts.dart' show CodelesslyFonts;
-
-/// Runs one action of a chain. Throws to stop the chain.
-typedef ActionHandler = FutureOr<void> Function(ActionDef action, ActionRun run);
 
 /// Runs [a] with its built-in handler.
 Future<void> handleAction(ActionDef a, ActionRun run) async {
@@ -62,8 +58,6 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       run.host.ui.closeModal(a.result == null ? null : run.evaluateJson(a.result));
     case RetryFailedAction():
       if (run.host case final RuntimeActionContext context) context.failed.retry();
-    case PrintAction():
-      await printNodeAction(a.node, run);
     case OpenLinkAction():
       final url = run.text(a.url).trim();
       if (url.isNotEmpty) await run.context.services.openUrl(url);
@@ -85,10 +79,9 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       final f = run.host.functions[a.name];
       if (f != null) {
         run.result = await f(run.context, run.json(a.params));
-      } else if (a.name == 'media.probe' || a.name == 'media.import') {
-        run.result = await _mediaImport(a, run);
-      } else if (a.name == 'media.export' || a.name == 'media.cancelExport') {
-        run.result = await _mediaExport(a, run);
+      } else if (run.function(a.name) case final builtIn?) {
+        // A feature's function (`media.probe`); the app's own came first.
+        run.result = await builtIn(a, run);
       } else if (a.optional) {
         // The app hasn't registered it: the chain goes on without it.
         run.result = null;
@@ -157,10 +150,6 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await cloudBatch(a, run, _cloudData);
     case PreloadImagesAction():
       run.result = await _preloadImages(a, run);
-    case DownloadFileAction():
-      final services = run.host.services;
-      if (services is! Services) throw StateError('downloadFile needs Services.');
-      run.result = {'saved': await services.exports.saveText(fileName: run.text(a.fileName), text: run.text(a.text), mimeType: run.text(a.mimeType))};
     case CopyToClipboardAction():
       await Clipboard.setData(ClipboardData(text: run.text(a.text)));
     case EditTextAction():
@@ -169,13 +158,8 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await _paywall(a, run);
     case FocusAction():
       await _focus(a, run);
-    case SpeakAction():
-      final r = await _speak(a, run);
-      if (r != null) run.result = r;
     case ScrollToAction():
       await _scrollTo(a, run);
-    case PlaySoundAction():
-      _playSound(a, run);
     case ControlDragAction(command: DragCommand.step):
       // Turns a drag track by its steps, as if dragged (render/drag_track.dart).
       final tree = run.host.tree;
@@ -218,6 +202,11 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       run.result = await _captureScreenshot(a, run);
     case UnknownAction():
       break;
+    default:
+      // A feature's action type: its handler is registered by the feature
+      // (feature.dart) and runs before this is reached.
+      throw StateError("No handler for action '${a.type}': the feature that runs it isn't installed "
+          '(CodelesslyActions installs the first-party features; CoreActions none).');
   }
 }
 
@@ -665,61 +654,6 @@ Future<void> _cloudFiles(CloudFilesAction a, ActionRun run) async {
   if (a.progressVariable.isNotEmpty && picked.isNotEmpty) setVariableIn(run.context.scope, a.progressVariable, 1);
 }
 
-/// Lets the person choose files: the app shell's picker when it gives one
-/// (`NavigatorActionUi.files`, or another [ActionUi]), else the services'
-/// [FilePicker] (the platform's file dialog). Without either, none.
-Future<List<PickedFile>> pickFiles(ActionRun run, {required bool images, required bool multiple}) {
-  final ui = run.host.ui;
-  final services = run.context.services;
-  if (ui is NavigatorActionUi && ui.files == null && services is Services) {
-    return services.filePicker.pick(images: images, multiple: multiple);
-  }
-  return ui.pickFiles(images: images, multiple: multiple);
-}
-
-/// The files a cloudFiles action's `source` gives: a `data:` URL, a map
-/// `{"data": "data:...", "name"}`, or a list of them. [name] names them
-/// (numbered when several); else a map's `name`, else `file-<time>.<ext>`.
-List<PickedFile> sourceFiles(Object? value, {String name = ''}) {
-  final items = value is List ? value : [value];
-  final out = <PickedFile>[];
-  for (final (i, item) in items.indexed) {
-    final data = item is Map ? item['data'] : item;
-    if (data is! String || !data.trim().startsWith('data:')) {
-      throw const CodedFailure('invalid-source', 'The file to upload is not a data: URL');
-    }
-    final UriData uri;
-    try {
-      uri = UriData.parse(data.trim());
-    } on FormatException {
-      throw const CodedFailure('invalid-source', 'The file to upload is not a valid data: URL');
-    }
-    final type = uri.mimeType;
-    final ext = switch (type) {
-      'image/png' => 'png',
-      'image/jpeg' => 'jpg',
-      'image/gif' => 'gif',
-      'image/webp' => 'webp',
-      'application/pdf' => 'pdf',
-      'application/json' => 'json',
-      'text/plain' => 'txt',
-      _ => 'bin',
-    };
-    final given = name.isNotEmpty
-        ? (items.length > 1 ? _numbered(name, i + 1) : name)
-        : (item is Map && item['name'] is String && (item['name'] as String).trim().isNotEmpty
-            ? (item['name'] as String).trim()
-            : 'file-${DateTime.now().millisecondsSinceEpoch}${items.length > 1 ? '-${i + 1}' : ''}.$ext');
-    out.add(PickedFile(name: given, bytes: uri.contentAsBytes(), contentType: type));
-  }
-  return out;
-}
-
-String _numbered(String name, int n) {
-  final dot = name.lastIndexOf('.');
-  return dot <= 0 ? '$name-$n' : '${name.substring(0, dot)}-$n${name.substring(dot)}';
-}
-
 // --- capture -------------------------------------------------------------------------------
 
 Future<Object?> _captureScreenshot(CaptureScreenshotAction a, ActionRun run) async {
@@ -1028,93 +962,7 @@ Future<Json> _preloadImages(PreloadImagesAction a, ActionRun run) async {
   return {'loaded': done - failed, 'failed': failed, 'total': urls.length};
 }
 
-// --- sound, speech, purchases ---------------------------------------------------------------
-
-Future<Object?> _speak(SpeakAction a, ActionRun run) async {
-  final speech = _require(run, 'Speech').speech;
-  if (a.stop) {
-    speech.stop();
-    return null;
-  }
-  double number(String text, double min, double max) =>
-      (double.tryParse(run.text(text).trim()) ?? 1).clamp(min, max).toDouble();
-  if (a.readAlong) {
-    // Waits for the text to be said: a chain can go on (turn the page) only
-    // when it was said to the end, not stopped.
-    final completed = await speech.readAlong(run.text(a.text),
-        language: run.text(a.language).trim(),
-        rate: number(a.rate, 0.1, 10),
-        pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2),
-        startWord: int.tryParse(run.text(a.startWord).trim()) ?? double.tryParse(run.text(a.startWord).trim())?.round() ?? 0);
-    return {'completed': completed};
-  }
-  unawaited(speech.speak(run.text(a.text),
-      language: run.text(a.language).trim(),
-      rate: number(a.rate, 0.1, 10),
-      pitch: a.pitch.isEmpty ? 1 : number(a.pitch, 0.5, 2)));
-  return null;
-}
-
-/// The latest timed start of each voice id (see [_playSound]).
-final Map<String, Object> _soundTokens = {};
-
-void _playSound(PlaySoundAction a, ActionRun run) {
-  double? number(String v) => double.tryParse(run.text(v).trim());
-  final service = _require(run, 'Sound').sound;
-  switch (a.operation) {
-    case 'start':
-      final id = run.text(a.voiceId).trim();
-      final note = a.note.isEmpty ? null : number(a.note);
-      final frequency = note != null ? midiToHz(note) : number(a.frequency) ?? 440;
-      service.startNoteWithWaveform(id, frequency: frequency, volume: number(a.volume) ?? 1, waveform: run.text(a.waveform).trim());
-      // A voice with a duration releases itself, unless something started
-      // another voice under its id in the meantime.
-      final ms = a.duration.isEmpty ? null : number(a.duration);
-      if (ms != null && ms >= 0) {
-        final token = _soundTokens[id] = Object();
-        Timer(Duration(milliseconds: ms.round()), () {
-          if (identical(_soundTokens[id], token)) {
-            _soundTokens.remove(id);
-            service.stopNote(id);
-          }
-        });
-      } else {
-        _soundTokens.remove(id);
-      }
-      return;
-    case 'stop':
-      service.stopNote(run.text(a.voiceId).trim());
-      return;
-    case 'stopAll':
-      service.stopAllNotes();
-      return;
-  }
-  final url = run.text(a.url).trim();
-  if (url.isNotEmpty) {
-    unawaited(_playFile(url, (number(a.volume) ?? 1).clamp(0, 1).toDouble()));
-    return;
-  }
-  final at = run.text(a.at).trim();
-  _require(run, 'Sound').sound.play(
-        SoundVoice.named(run.text(a.sound)),
-        time: at.isEmpty ? null : double.tryParse(at),
-        volume: number(a.volume) ?? 1,
-        pitch: number(a.pitch) ?? 1,
-      );
-}
-
-Future<void> _playFile(String url, double volume) async {
-  final player = audio.AudioPlayer();
-  try {
-    await player.setUrl(url);
-    await player.setVolume(volume);
-    await player.play();
-  } catch (_) {
-    // A sound that can't play is skipped.
-  } finally {
-    await player.dispose();
-  }
-}
+// --- purchases ---------------------------------------------------------------
 
 Future<void> _paywall(PaywallAction a, ActionRun run) async {
   final host = run.host;
@@ -1197,75 +1045,6 @@ void _paywallOutcome(PaywallResult result, ActionRun run) {
 
 /// Whether [text] holds `${...}` (an expression, not a literal).
 bool isExpression(String text) => text.contains(r'${') || FormulaEvaluator.exactExpression(text) != null;
-
-// Built-in callFunction names keep media encoding in the runtime host,
-// never in the script sandbox. An app may override them in functions.
-Future<Object?> _mediaExport(CallFunctionAction action, ActionRun run) async {
-  final services = run.context.services;
-  if (services is! Services) return {'ok': false, 'error': 'Video export is unavailable'};
-  final service = services.mediaExport;
-  if (action.name == 'media.cancelExport') {
-    service.cancel();
-    return {'cancelled': true};
-  }
-  final params = run.json(action.params);
-  final progress = params['progressVariable'] as String? ?? '';
-  try {
-    final raw = params['project'];
-    if (raw is! Map) throw ArgumentError('Export needs a project with source clips');
-    final request = MediaExportRequest.fromJson(raw.cast<String,Object?>(),
-      fileName: params['fileName'] as String? ?? 'video.webm',
-      width: (params['width'] as num?)?.toInt() ?? 640,
-      height: (params['height'] as num?)?.toInt() ?? 360);
-    final previousGeneration = service.generation;
-    final operation = service.export(request, onProgress: (value) {
-      if (progress.isNotEmpty) run.context.setVariable(progress, value);
-    });
-    final generation = service.generation;
-    if (generation != previousGeneration) {
-      run.host.onDispose(() { if (service.running && service.generation == generation) service.cancel(); });
-    }
-    final result = await operation;
-    return {'ok': true, ...result};
-  } catch (error) {
-    return {'ok': false, 'error': '$error', 'cancelled': error is MediaExportCancelled};
-  }
-}
-
-// Imported bytes are inspected before uploading. Public URL probing keeps the
-// same HTTPS/MP4 restriction as the player; neither exposes DOM to scripts.
-Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
-  try {
-    final params = run.json(action.params);
-    if (action.name == 'media.probe') {
-      return {'ok': true, ...await probeMedia(params['url'] as String? ?? '')};
-    }
-    final files = _require(run, 'Video import').files;
-    if (files is MemoryFileStorage) {
-      throw StateError(
-        'Connect cloud file storage before choosing a device video. You can import a public HTTPS MP4 URL instead.',
-      );
-    }
-    final picked = await pickFiles(run, images: false, multiple: false);
-    if (run.isCanceled || picked.isEmpty) {
-      return {'ok': false, 'cancelled': true};
-    }
-    final file = picked.first;
-    final metadata = await probePickedVideo(file.name, file.bytes, contentType: file.contentType);
-    if (run.isCanceled) {
-      return {'ok': false, 'cancelled': true};
-    }
-    final name = file.name.replaceAll(RegExp(r'[^A-Za-z0-9_.-]'), '_');
-    final uploaded = await files.upload(
-      'media/imports/${DateTime.now().microsecondsSinceEpoch}-$name',
-      file.bytes,
-      contentType: 'video/mp4',
-    );
-    return {'ok': true, ...metadata, 'url': uploaded.url, 'name': file.name};
-  } catch (error) {
-    return {'ok': false, 'error': '$error'};
-  }
-}
 
 /// 5 for 5.0, 2.5 for 2.5.
 String _mb(double v) => v == v.roundToDouble() ? '${v.round()}' : '$v';

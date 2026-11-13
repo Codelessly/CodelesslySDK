@@ -16,7 +16,11 @@ SoundEngine createSoundEngine() {
 
 /// Short synthesised voices, each under 80 ms, through a gentle compressor.
 class _WebSoundEngine
-    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine, WaveformSoundEngine {
+    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine, WaveformSoundEngine, InstrumentSoundEngine {
+  final Map<String, SoundInstrument> _instruments = {};
+  @override
+  void addInstrument(SoundInstrument instrument) => _instruments[instrument.name] = instrument;
+
   _WebSoundEngine(this._ctx) {
     // Browsers start audio only inside a user gesture, and Play Sound runs
     // from timers and clocks: resume on the first press or key anywhere.
@@ -60,10 +64,9 @@ class _WebSoundEngine
   void startNote(String id, {double frequency = 440, double volume = 1}) => startNoteWithWaveform(id,frequency:frequency,volume:volume);
 
   /// Starts voice [id]: a plain wave (`sine`, `triangle`, `square`,
-  /// `sawtooth`) with a 5 ms attack, or an instrument voice: `felt` (a
-  /// triangle with a soft octave through a low-pass, decaying to a quiet
-  /// sustain), `reed` (square and detuned saw, resonant filter) or `pluck`
-  /// (a saw whose filter closes as it dies away). Sound starts on the next
+  /// `sawtooth`) with a 5 ms attack, or a registered instrument voice
+  /// ([addInstrument]): its oscillators through a low-pass filter, under its
+  /// envelope. Sound starts on the next
   /// audio frame, so a key sounds the moment it goes down.
   @override
   void startNoteWithWaveform(String id,{double frequency=440,double volume=1,String waveform='sine'}){
@@ -89,43 +92,32 @@ class _WebSoundEngine
     final peak = 0.22 * volume.clamp(0, 2) * 0.5;
     double release;
     final g = gain.gain;
-    switch (waveform) {
-      case 'felt':
-        osc('triangle', hz, 1);
-        osc('sine', hz * 2, 0.18);
-        filter.frequency.value = math.min(3200, hz * 8);
-        filter.Q.value = 0.4;
-        g.setValueAtTime(0, now);
-        g.linearRampToValueAtTime(peak, now + 0.004);
-        g.setTargetAtTime(peak * 0.55, now + 0.004, 0.25);
-        g.setTargetAtTime(peak * 0.25, now + 1.2, 1.6);
-        release = 0.32;
-      case 'reed':
-        osc('square', hz, 0.55);
-        osc('sawtooth', hz * 1.003, 0.3);
-        filter.frequency.value = math.min(2200, hz * 5);
-        filter.Q.value = 1.2;
-        g.setValueAtTime(0, now);
-        g.linearRampToValueAtTime(peak * 0.8, now + 0.012);
-        g.setTargetAtTime(peak * 0.6, now + 0.012, 0.15);
-        release = 0.18;
-      case 'pluck':
-        osc('sawtooth', hz, 0.7);
-        osc('triangle', hz * 0.5, 0.35);
-        filter.frequency.setValueAtTime(math.min(6000, hz * 14), now);
-        filter.frequency.setTargetAtTime(hz * 2.2, now, 0.09);
-        filter.Q.value = 2;
-        g.setValueAtTime(0, now);
-        g.linearRampToValueAtTime(peak * 1.1, now + 0.002);
-        g.setTargetAtTime(0.0001, now + 0.002, 0.55);
-        release = 0.12;
-      default:
-        final type = const ['triangle', 'square', 'sawtooth'].contains(waveform) ? waveform : 'sine';
-        osc(type, hz, 1);
-        filter.frequency.value = 20000;
-        g.setValueAtTime(0, now);
-        g.linearRampToValueAtTime(volume.clamp(0, 2) * 0.1, now + 0.005);
-        release = 0.06;
+    final instrument = _instruments[waveform];
+    if (instrument != null) {
+      for (final o in instrument.oscillators) {
+        osc(o.wave, hz * o.ratio, o.level);
+      }
+      final cutoff = math.min(instrument.cutoffMax, hz * instrument.cutoffRatio);
+      if (instrument.cutoffSweepTo case final to?) {
+        filter.frequency.setValueAtTime(cutoff, now);
+        filter.frequency.setTargetAtTime(hz * to, now, instrument.cutoffSweepTau);
+      } else {
+        filter.frequency.value = cutoff;
+      }
+      filter.Q.value = instrument.resonance;
+      g.setValueAtTime(0, now);
+      g.linearRampToValueAtTime(peak * instrument.attackLevel, now + instrument.attack);
+      for (final step in instrument.envelope) {
+        g.setTargetAtTime(step.absolute ? step.level : peak * step.level, now + step.at, step.tau);
+      }
+      release = instrument.release;
+    } else {
+      final type = const ['triangle', 'square', 'sawtooth'].contains(waveform) ? waveform : 'sine';
+      osc(type, hz, 1);
+      filter.frequency.value = 20000;
+      g.setValueAtTime(0, now);
+      g.linearRampToValueAtTime(volume.clamp(0, 2) * 0.1, now + 0.005);
+      release = 0.06;
     }
     filter.connect(gain);
     gain.connect(_out);

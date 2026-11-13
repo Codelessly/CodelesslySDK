@@ -31,7 +31,7 @@ import '../runtime/actions/script_host.dart' show scriptNodeValues;
 import '../runtime/actions/ui.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
-import '../runtime/actions/runner.dart' show CodelesslyActions, ActionCancellation;
+import '../runtime/actions/runner.dart' show ActionCancellation, CoreActions;
 import '../runtime/actions/context.dart' show PaywallPresentation;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
@@ -879,7 +879,7 @@ class _LayoutViewState extends State<_LayoutView> {
     final actions = _screen.actions;
     unawaited(() async {
       try {
-        if (actions is CodelesslyActions) {
+        if (actions is CoreActions) {
           await actions.run(canvas, TriggerType.actionError.name, context, event: event, cancellation: cancellation);
         } else {
           await actions.trigger(canvas, TriggerType.actionError.name, context, event: event);

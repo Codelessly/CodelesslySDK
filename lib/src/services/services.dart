@@ -53,7 +53,7 @@ export 'test_store.dart';
 
 /// The app's services. Implements the runtime's [CodelesslyServices] seam;
 /// actions and data sources reach the rest through the typed fields.
-class Services implements CodelesslyServices {
+class Services implements CodelesslyServices, ServiceLocator {
   Services({
     ServiceConfig? config,
     ApiService? api,
@@ -76,6 +76,7 @@ class Services implements CodelesslyServices {
     ScriptRunner? scripts,
     MediaExportService? mediaExport,
     PrintService? printing,
+    this.extras = const [],
   })  : _config = config ?? ServiceConfig.empty,
         web = web ?? kIsWeb,
         api = api ?? HttpApiService(),
@@ -136,6 +137,23 @@ class Services implements CodelesslyServices {
   /// store and the app's.
   Listenable get paywallsChanged => _paywallsChanged;
   final _paywallsChanged = _Notifier();
+
+  /// More services, of the app's own features: found by type, as the
+  /// built-in ones are ([service]).
+  final List<Object> extras;
+
+  /// The service of type [T]: one of the typed fields below (the paywalls
+  /// and purchases in use now), [config], or one of [extras].
+  @override
+  T? service<T extends Object>() {
+    for (final Object? s in <Object?>[
+      api, cache, fileCache, storage, auth, cloud, files, analytics, purchases, paywalls, sound, speech,
+      mediaExport, links, printing, exports, filePicker, scripts, config, ...extras,
+    ]) {
+      if (s is T) return s;
+    }
+    return null;
+  }
 
   /// HTTP API calls.
   final ApiService api;
