@@ -40,7 +40,6 @@ class CodelesslyConfig {
     this.services,
     this.functions = const {},
     this.recipes = const {},
-    this.useHostTheme = false,
     this.maxTextScaleFactor = 1,
     this.fontTimeout = const Duration(seconds: 2),
     this.debugLog = false,
@@ -97,10 +96,6 @@ class CodelesslyConfig {
   /// ([NodeTree.recipes]): how a layout shows a node type the app defines.
   final Map<String, WidgetRecipe> recipes;
 
-  /// Whether layouts render with the app's [Theme] instead of their own
-  /// (from the project's theme tokens).
-  final bool useHostTheme;
-
   /// The largest text scale factor layouts follow from the platform's text
   /// size setting. Layouts are designed at fixed sizes: 1 ignores it.
   final double maxTextScaleFactor;
@@ -149,7 +144,6 @@ class CodelesslyConfig {
     CodelesslyServices? services,
     Map<String, AppFunction>? functions,
     Map<String, WidgetRecipe>? recipes,
-    bool? useHostTheme,
     double? maxTextScaleFactor,
     Duration? fontTimeout,
     bool? debugLog,
@@ -166,7 +160,6 @@ class CodelesslyConfig {
         services: services ?? this.services,
         functions: functions ?? this.functions,
         recipes: recipes ?? this.recipes,
-        useHostTheme: useHostTheme ?? this.useHostTheme,
         maxTextScaleFactor: maxTextScaleFactor ?? this.maxTextScaleFactor,
         fontTimeout: fontTimeout ?? this.fontTimeout,
         debugLog: debugLog ?? this.debugLog,

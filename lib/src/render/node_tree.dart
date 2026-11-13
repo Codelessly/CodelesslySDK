@@ -13,7 +13,7 @@ import 'package:codelessly_api/core.dart' show Json, Node, SizeFit, FlexProps, S
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart' show WidgetBuilder;
+import 'package:flutter/widgets.dart' show Builder, WidgetBuilder;
 
 import 'animations.dart' show RenderAnimations, animatesOpacity;
 import 'behaviors.dart';
@@ -22,6 +22,7 @@ import 'typewriter.dart';
 import 'hero.dart';
 import 'play.dart';
 import 'contracts.dart';
+import 'control_theme.dart' show ControlTheme, backdropOf;
 import 'convert.dart';
 import 'count_up.dart';
 import 'custom_paint.dart' show customPaintLayers;
@@ -1282,6 +1283,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       final inner = build;
       build = (context) => TextDefaultScope(style: style, child: inner(context));
     }
+    // Its Material widgets take the layout's theme, made for what they're
+    // drawn on (ControlTheme): never Material's defaults or the app's.
+    final surface = backdropOf(source.node, source.parentOf, id);
+    final themed = build;
+    build = (context) => ControlTheme(surface: surface, child: Builder(builder: themed));
     final existing = _islands[key];
     if (existing != null && !existing.disposed) {
       existing.builder = build;

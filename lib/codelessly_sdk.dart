@@ -174,7 +174,7 @@ export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
 export 'src/app/presenter.dart';
 export 'src/app/runtime.dart';
-export 'src/app/theme.dart' show themeDataOf, themeValues;
+export 'src/app/theme.dart' show kInk, kInkOnDark, kPaper, kPaperDark, themeDataOf, themeValues;
 export 'src/app/viewport.dart';
 // Agent-written UI: a document edited by ops, and the widget that shows it.
 export 'src/session/ui_session.dart';

@@ -762,12 +762,9 @@ class _LayoutViewState extends State<_LayoutView> {
   /// layout's own.
   ThemeTokens get _tokens => widget.layout.theme ?? _codelessly.publishModel?.theme ?? ThemeTokens.none;
 
-  /// Whether the layout shows in dark mode: the device's mode, or with
-  /// [CodelesslyConfig.useHostTheme] the app's theme's (so an app's own
-  /// dark mode switch applies).
-  bool get _dark => _codelessly.config.useHostTheme
-      ? Theme.of(context).brightness == Brightness.dark
-      : MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark;
+  /// Whether the layout shows in dark mode: the device's mode (never the
+  /// app's theme).
+  bool get _dark => MediaQuery.maybePlatformBrightnessOf(context) == Brightness.dark;
 
   /// `theme`: the project's theme tokens for the current mode
   /// ([themeValues]), kept as the mode and the published theme change.
@@ -980,8 +977,17 @@ class _LayoutViewState extends State<_LayoutView> {
     }
   }
 
-  late final FeedbackTheme _feedbackTheme = FeedbackTheme.fromTokens(widget.layout.theme ?? _codelessly.publishModel?.theme)
-      .merge(FeedbackTheme.fromDocument(widget.layout.document));
+  /// The look the layout's nodes show ([FeedbackTheme.fromDocument]).
+  late final FeedbackTheme _documentLook = FeedbackTheme.fromDocument(widget.layout.document);
+
+  /// The look of the runtime's toasts and dialogs in the current mode: the
+  /// project's tokens, then what the layout's nodes show.
+  FeedbackTheme _feedbackTheme(bool dark) => FeedbackTheme.fromTokens(_tokens.forBrightness(dark: dark)).merge(_documentLook);
+
+  /// Where the layout's actions show dialogs, toasts and sheets from: under
+  /// its theme and look ([build]).
+  final GlobalKey _chromeKey = GlobalKey(debugLabel: 'Codelessly chrome');
+  BuildContext get _chromeContext => _chromeKey.currentContext ?? context;
 
   /// Whether canvas [canvasId] keeps the user on it when they go back now:
   /// its `blockBack`, read through its bindings.
@@ -1240,23 +1246,21 @@ class _LayoutViewState extends State<_LayoutView> {
       return view;
     });
     // The look of the runtime's own toasts and dialogs: the project's
-    // tokens, then what the layout's nodes show.
-    content = FeedbackThemeScope(theme: _feedbackTheme, child: content);
+    // tokens, then what the layout's nodes show. Its actions show them from
+    // inside it ([_ScreenUi]), where this theme and look apply.
+    // The layout's own theme, always: the project's tokens, neutral where it
+    // has none; never the app's. A theme with dark colors is a dark theme in
+    // dark mode; one without stays light, as it was designed.
+    final theme = _tokens;
+    final dark = theme.hasDark && _dark;
+    content = FeedbackThemeScope(theme: _feedbackTheme(dark), child: KeyedSubtree(key: _chromeKey, child: content));
     // What a captureScreenshot action of this screen captures.
     CaptureRegistry.bindLayout(_screen.tree, _captureKey);
     content = RepaintBoundary(key: _captureKey, child: content);
-    if (!config.useHostTheme) {
-      final theme = widget.layout.theme ?? _codelessly.publishModel?.theme;
-      // A theme with dark colors is a dark theme in dark mode; one without
-      // stays light, as it was designed.
-      if (theme != null) {
-        final dark = theme.hasDark && _dark;
-        content = Theme(
-          data: themeDataOf(theme.forBrightness(dark: dark), brightness: dark ? Brightness.dark : Brightness.light),
-          child: content,
-        );
-      }
-    }
+    content = Theme(
+      data: themeDataOf(theme.forBrightness(dark: dark), brightness: dark ? Brightness.dark : Brightness.light),
+      child: content,
+    );
     final mq = MediaQuery.maybeOf(context);
     if (mq != null) {
       content = MediaQuery(
@@ -1271,7 +1275,7 @@ class _LayoutViewState extends State<_LayoutView> {
 /// The UI of a screen's actions: navigation through the app's routes (and
 /// [CodelesslyWidget.onNavigate]), modals showing the app's screens.
 class _ScreenUi extends NavigatorActionUi {
-  _ScreenUi(this.view) : super(context: () => view.mounted ? view.context : null, breakpoints: () => view._breakpoints);
+  _ScreenUi(this.view) : super(context: () => view.mounted ? view._chromeContext : null, breakpoints: () => view._breakpoints);
 
   final _LayoutViewState view;
 

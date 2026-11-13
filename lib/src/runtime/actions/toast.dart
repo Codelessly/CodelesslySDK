@@ -154,13 +154,6 @@ abstract final class CodelesslyToast {
     if (overlay == null) return false;
     final action = request.action;
     final theme = FeedbackTheme.of(context);
-    // Without a font of its own, the toast takes the app's text style where
-    // the action ran, not Material's default.
-    final appText = DefaultTextStyle.of(context).style;
-    final themeFamily = Theme.of(context).textTheme.bodyMedium?.fontFamily;
-    final appFont = theme.bodyStyle.fontFamily == themeFamily && appText.fontFamily != null
-        ? theme.bodyStyle.copyWith(fontFamily: appText.fontFamily, fontFamilyFallback: appText.fontFamilyFallback)
-        : theme.bodyStyle;
     final bound = request.bound;
     final hasButton = request.actionLabel.trim().isNotEmpty && request.onAction != null;
 
@@ -169,8 +162,11 @@ abstract final class CodelesslyToast {
     // above that one's barrier: only those opened after it cover it.
     final shownOver = List<ModalRoute<Object?>>.of(covers.value);
     late final OverlayEntry entry;
+    // The toast's buttons take the layout's look, not the app's theme the
+    // overlay is in.
+    final themeData = theme.themeData;
     entry = OverlayEntry(
-      builder: (context) => _ToastView(
+      builder: (context) => Theme(data: themeData, child: _ToastView(
         shownOver: shownOver,
         action: action,
         message: request.message,
@@ -179,7 +175,7 @@ abstract final class CodelesslyToast {
         colors: boundColors(bound, toastBindableColors),
         actionLabel: hasButton ? request.actionLabel : '',
         theme: theme,
-        font: fontForAction(action, appFont),
+        font: fontForAction(action, theme.bodyStyle),
         offset: numberValue(bound['offset']),
         duration: durationOf(action, bound),
         onAction: hasButton ? request.onAction : null,
@@ -188,7 +184,7 @@ abstract final class CodelesslyToast {
           if (_current == entry) _current = null;
           if (entry.mounted) entry.remove();
         },
-      ),
+      )),
     );
     _current = entry;
     overlay.insert(entry);
