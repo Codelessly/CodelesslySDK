@@ -5,7 +5,7 @@ import 'dart:ui' show Size;
 final class Step {
   const Step(this.kind, this.target, [this.value]);
 
-  /// tap, hover, set, scroll, navigate or wait.
+  /// tap, hover, focus, type, set, scroll, navigate or wait.
   final String kind;
   final String target;
   final String? value;
@@ -62,14 +62,19 @@ Options:
   --tap <nodeId>          Tap the node (where it shows on screen). <nodeId>#<n>
                           picks the n-th copy (0-based) of a node a list repeats.
   --hover <nodeId>        Move a mouse over the node.
+  --focus <nodeId>        Focus a text field (or the field inside the node).
+  --type <nodeId>=<text>  Focus a text field and type text into it, as a user
+                          would (its changed reactions run; a field bound to a
+                          variable through props.initialValue sets it).
   --set <name>=<json>     Set a variable of the screen (value as JSON: 1, true, "a").
   --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px.
   --navigate <screen>     Push a screen (canvas id, layout id or URL path).
   --wait <ms>             Let time pass (animations, delays, toasts).
-  --label <text>          Append -<text> to the PNG names (state screenshots).
+  --label <text>          Append -<text> to the PNG names (state screenshots);
+                          diagnostics go to diagnostics-<text>.json.
   --validate-only         Only validate; render nothing.
   --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h).
-Steps (--tap, --hover, --set, --scroll, --navigate, --wait) run in the order given.
+Steps (--tap, --hover, --focus, --type, --set, --scroll, --navigate, --wait) run in the order given.
 ''';
 
 /// Parses [argv]; throws a [FormatException] with a message for bad input.
@@ -112,9 +117,9 @@ RenderArgs parseArgs(List<String> argv) {
         fonts.add(next(i++, a));
       case '--label':
         label = next(i++, a);
-      case '--tap' || '--hover' || '--navigate' || '--wait':
+      case '--tap' || '--hover' || '--focus' || '--navigate' || '--wait':
         steps.add(Step(a.substring(2), next(i++, a)));
-      case '--set' || '--scroll':
+      case '--set' || '--scroll' || '--type':
         final v = next(i++, a);
         final eq = v.indexOf('=');
         if (eq < 0) throw FormatException('$a takes <target>=<value>, got "$v".');

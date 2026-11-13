@@ -3,6 +3,7 @@
 // on the fixtures next to this file.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'dart:ui' show Size;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -110,5 +111,81 @@ void main() {
     );
     expect(codes(report, 'error'), containsAll(<String>['unknown_screen_arg', 'interaction_failed']));
     expect(formatReport(report), contains('error(s)'));
+  });
+
+  group('authoring fixes', () {
+    const a = '$fixtures/authoring';
+    List<Map> diag(RenderReport r, String code) => [for (final d in r.diagnostics) if (d['code'] == code) d];
+
+    testWidgets('--tap reveals its target below an overlaid header, and hits it', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'target'), Step('tap', 'target')], dumpLayout: true, label: 'two'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(diag(report, 'tap_no_reaction'), isEmpty);
+      // The header was not tapped (its menu would open); the counter shows 2.
+      final boxes = jsonDecode(File('${out.path}/taps@390x844-two.layout.json').readAsStringSync()) as List;
+      final target = boxes.firstWhere((b) => b['id'] == 'target') as Map;
+      expect(target['y'] as num, greaterThan(64), reason: 'below the header');
+      expect(File('${out.path}/diagnostics-two.json').existsSync(), isTrue, reason: 'a labelled run keeps its own diagnostics');
+      expect(File('${out.path}/diagnostics.json').existsSync(), isFalse);
+    });
+
+    testWidgets('a tap on a node with a margin hits its content; a tap with no reaction is reported', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'margined'), Step('tap', 'plain')]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(diag(report, 'tap_no_reaction').map((d) => d['nodeId']), ['plain']);
+    });
+
+    testWidgets('a tap on a covered node names what covers it', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'last')]));
+      final failed = diag(report, 'interaction_failed');
+      expect(failed, hasLength(1), reason: '${report.diagnostics}');
+      expect(failed.single['message'], contains('"veil"'));
+      final through = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'spacer-top')]));
+      expect(diag(through, 'interaction_failed').single['message'], contains('no fill and no reaction'));
+    });
+
+    testWidgets('--type types into a text field: its bound variable follows, so does the text showing it', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/checks.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('focus', 'field'), Step('type', 'field', 'cauliflower')], dumpLayout: true));
+      expect(diag(report, 'interaction_failed'), isEmpty, reason: '${report.diagnostics}');
+      final shown = [
+        for (final d in report.diagnostics)
+          if (d['nodeId'] == 'echo') d,
+      ];
+      expect(shown, isEmpty);
+      final echo = (jsonDecode(File('${out.path}/checks@390x844.layout.json').readAsStringSync()) as List).firstWhere((b) => b['id'] == 'echo') as Map;
+      expect(echo['w'] as num, greaterThan(100), reason: '"Query: cauliflower" is wider than "Query: "');
+    });
+
+    testWidgets('what draws nothing is reported: missing glyphs, unknown icons, unevaluated text, paths past their box', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/checks.json'], out: out.path, sizes: const [Size(390, 844)]));
+      expect(diag(report, 'missing_glyph').single['nodeId'], 'star');
+      expect(diag(report, 'missing_glyph').single['message'], contains('U+2726'));
+      expect(diag(report, 'icon_not_drawn').single['nodeId'], 'bad-icon');
+      expect(diag(report, 'expression_not_evaluated'), isEmpty, reason: 'bound runs style the evaluated text');
+      expect(diag(report, 'path_overflow').single['nodeId'], 'mark');
+      expect(diag(report, 'icon_not_drawn').where((d) => d['nodeId'] == 'field'), isEmpty, reason: 'the prefix icon by name draws');
+    });
+
+    testWidgets('--full-page: the page\'s own scroll height only; a bar fixed to the window drawn in the first window', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/fullpage.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final bytes = File('${out.path}/long@390x844.png').readAsBytesSync();
+      final height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+      expect(height, 2000, reason: 'hero 400 + rest 1600, not the inner list\'s 640');
+      final image = await tester.runAsync(() async {
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        final data = await frame.image.toByteData();
+        return (data!, frame.image.width);
+      });
+      int red(int x, int y) => image!.$1.getUint8((y * image.$2 + x) * 4);
+      expect(red(195, 844 - 12 - 26), 255, reason: 'the bar where a user first sees it');
+      expect(red(195, 2000 - 12 - 26), isNot(255), reason: 'not at the bottom of the page');
+    });
   });
 }

@@ -73,9 +73,15 @@ abstract final class IconSources {
     final type = readString(icon['type']);
     if (type != null && type != 'MATERIAL_ICON') return null;
     if (readString(icon['source']) == 'image') return null;
-    final c = readInt(icon['codepoint']);
+    final c = readInt(icon['codepoint']) ?? codepointOf?.call(readString(icon['name']) ?? '', readString(icon['style']) ?? 'filled');
     return c == null || c <= 0 ? null : c;
   }
+
+  /// A host's MaterialIcons codepoint table (an offline renderer with the
+  /// font but no network): a Material icon named without a codepoint (a
+  /// bound name) draws that glyph while its SVG isn't available. Null:
+  /// none.
+  static int? Function(String name, String style)? codepointOf;
 
   /// Where a Material icon saved without its version (an icon named in
   /// node JSON, `{"name": "calendar_view_week"}`) is drawn from when its

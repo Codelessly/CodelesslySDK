@@ -19,6 +19,18 @@
 - **Bug fix (behaviour change):** a canvas's `appBar`, `bottomNavigationBar` and `floatingActionButton` slots are
   drawn, where Flutter's Scaffold puts them (they validated and drew nothing). A canvas with only a body lays out
   exactly as before. Tests compare with a real Scaffold.
+- **Bug fix:** a text whose `props.runs` is bound shows its evaluated text, styled by the bound runs (it showed
+  the formula's source: written runs split the template, bound runs are computed for the shown text).
+- `IconSources.codepointOf`: a host's MaterialIcons codepoint table, so a Material icon named without a codepoint
+  (a bound name) draws from the font offline. `NodeBox.capturePaintShift` (render command only).
+- Render command (`tool/render`): `--tap`/`--hover` aim at a point a hit test proves reaches the node (a narrow
+  text or icon in a wide slot, a node with a margin), scroll a node under an overlay to the middle of its scroll
+  view, and report a tap that would land on another node (`interaction_failed`, naming it) or on nothing that
+  reacts (`tap_no_reaction`); `--focus <id>` and `--type <id>=<text>` produce form states by real input;
+  `--label` writes `diagnostics-<label>.json`; `--full-page` measures the page's own scroll view only and draws
+  window-fixed content in the first window; every `render_exception` names its node and sub-pixel (< 0.01 px)
+  flex overflows are not errors; new warnings `missing_glyph`, `icon_not_drawn`, `expression_not_evaluated`,
+  `path_overflow`. Fixtures under `test/tool/fixtures/authoring`.
 - **Bug fix (behaviour change):** a `text` node's `layout.padding` is space inside its box around its lines, as
   `Container(padding:, child: Text())`: a hugging text grows by it (it was ignored).
 

@@ -873,7 +873,18 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     if (debugCountPaints) debugPaintCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
     tree.observer?.nodePainted(this);
     if (_hidden || _collapsed || (_node != null && !_node!.visible)) return;
-    super.paint(context, offset);
+    super.paint(context, offset + capturePaintShift);
+  }
+
+  /// Moves where this box paints (not where it is hit): the render
+  /// command's full-page capture draws content fixed to the window where a
+  /// user first sees it. Zero in an app.
+  Offset get capturePaintShift => _capturePaintShift;
+  Offset _capturePaintShift = Offset.zero;
+  set capturePaintShift(Offset value) {
+    if (value == _capturePaintShift) return;
+    _capturePaintShift = value;
+    markNeedsPaint();
   }
 
   /// Takes a hit outside the box's size (a drag track's area or hit area,

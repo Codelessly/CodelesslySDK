@@ -1,0 +1,308 @@
+{
+ "schema": 2,
+ "roots": [
+  "taps"
+ ],
+ "nodes": {
+  "taps": {
+   "type": "canvas",
+   "slots": {
+    "body": "frame"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "frame": {
+   "type": "stack",
+   "children": [
+    "page",
+    "header",
+    "veil"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "spacer-top",
+    "target",
+    "plain",
+    "margined",
+    "spacer-bottom",
+    "last"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "spacer-top": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 1200
+   }
+  },
+  "target": {
+   "type": "row",
+   "children": [
+    "target-label"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 48
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "hits",
+       "op": "add",
+       "value": "1"
+      }
+     ]
+    }
+   ]
+  },
+  "target-label": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Hits: ${hits}",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "plain": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Nothing here",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "margined": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     40
+    ]
+   },
+   "props": {
+    "text": "Clear",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "hits",
+       "value": "100"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer-bottom": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 1200
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "menu"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 64,
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "end"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF111827"
+     }
+    ]
+   }
+  },
+  "menu": {
+   "type": "icon",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "icon": "menu",
+    "color": "#FFFFFFFF"
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "menuOpen",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "veil": {
+   "type": "box",
+   "layout": {
+    "width": 390,
+    "height": 100,
+    "x": {
+     "start": 0
+    },
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   }
+  },
+  "last": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 60
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "hits",
+       "value": "7"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "taps": [
+   {
+    "name": "hits",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "menuOpen",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
