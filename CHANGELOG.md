@@ -36,6 +36,8 @@ mapping; a schema-2 document is migrated to the one spelling when it loads).
 - **Guard:** test/app/no_material_look_test.dart renders every control type of the inputs, material, collections
   and indicators groups unstyled, with no theme and with a brand theme, light and dark, and fails on any pixel of
   Material 3's baseline palette, on a ripple when a button is pressed, or on a control text not in the theme's font.
+- **Render tool:** the published theme's `fontFamily` defaults to Roboto, as its text styles' does (the controls
+  took the tool's own `ThemeData(fontFamily: 'Roboto')` before).
 - **A node's scale and rotation are its motion.** The chain's own `scale` layer and the `RenderTransform` of
   `layout.rotation` are gone: `RenderMotion` draws `motion.scale` and `motion.rotate` (the migration keeps
   30.0.0's rotation pivot, moved by half an uneven margin, as a translation). A state style that moves a node
