@@ -1,0 +1,92 @@
+{
+ "stream": "flights@claude-sonnet-5-5.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1580,
+ "timeToFirstPaintMs": 2442,
+ "timeToFirstTextMs": 2442,
+ "timeToFirstSectionMs": 2442,
+ "timeToCompleteMs": 4351,
+ "outputTokens": 663,
+ "tokensEstimated": false,
+ "chars": 1111,
+ "deltas": 73,
+ "opsApplied": 3,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [
+  "missing_glyph o0t"
+ ],
+ "finalDiagnostics": [
+  "unknown_field /nodes/confirm/props/style/radius",
+  "dangling_child /nodes/footer/children/1",
+  "missing_glyph /nodes/o0t/props/text"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "13:45|easyJet|option 2"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "confirm"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 30,
+   "rejected": 4
+  }
+ ],
+ "streamedOps": 4,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "unknown_field",
+   "path": "/nodes/confirm/props/style/radius",
+   "message": "ButtonStyle has no \"radius\". It takes: backgroundColor, foregroundColor, shadowColor, elevation, textStyle, side, shape, iconSize, iconColor.",
+   "nodeId": "confirm"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/footer/children/1",
+   "message": "Child \"confirm\" of \"footer\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "footer"
+  }
+ ],
+ "nodes": 31,
+ "reappliedBoxesPerOp": {
+  "min": 2,
+  "median": 5,
+  "p90": 5,
+  "max": 5
+ },
+ "frames": 79,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 153,
+ "pumpMsMedian": 0.163,
+ "renderExceptions": [],
+ "warnings": 1
+}

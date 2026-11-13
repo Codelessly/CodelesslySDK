@@ -39,8 +39,9 @@ JSON lines: `{"meta": {...}}`, then one `{"tMs": 1234, "delta": "..."}` per delt
   large data variable just before the first node that reads it), as compact JSON one op per line, cut into deltas
   of 1 to 4 tokens at 60, 150 and 400 tokens/s, after a 500 ms time to first token. Tokens are estimated at 4
   characters each.
-* **Live** (`examples/stream_chat/tool/record.dart`): a real generation's exact deltas and arrival times, with the
-  API's usage. None are committed: the environment this was built in could not run them (see that README).
+* **Live** (`examples/stream_chat/tool/record.dart`, the matrix: `tool/record_all.sh`): a real generation's exact
+  deltas and arrival times, with the API's usage, then its retries and follow-up. Three are committed
+  (`streams/live/`), replayed into `out/live/` (below).
 
 The UIs (`ui/`): `restaurant_menu.json` (147 nodes) and `saas_pricing.json` (196 nodes), pages written by AI agents
 in the m05 authoring experiment (copied unchanged; `ui/assets` are the restaurant's images); `flights.json` (43
@@ -61,6 +62,10 @@ dark." (five `patch` ops).
 | `reappliedBoxesPerOp` | Boxes the render tree applied after each op (`NodeBox.debugApplyCounts`, the frame pumped after every delta that completed an op): min, median, 90th percentile, max. New boxes count: an op that brings a list's data applies its items. |
 | `pumpsOverBudget16ms` | Frames whose build, layout and paint took more than 16.7 ms of real time in the headless pump (not a device measurement). |
 | `renderExceptions` | Flutter errors (overflows above 0.01 px included) during the replay: none in any run. |
+| `timeToFirstTextMs` | When the first text node shows (the first paint may be the card's surface). |
+| `opsRecoveredFromMalformed`, `jsonRepairs` | Ops read after the tool input stopped being valid JSON, and the repairs (`malformed_input`). |
+| `renderDiagnostics`, `finalDiagnostics` | `UiSession.renderDiagnostics` (`empty_button`, `low_contrast`, `missing_glyph` from the loaded fonts' cmaps) and `layoutDiagnostics` (`no_size`); with the errors and pending ids: what the tool result would send back. |
+| `worksWhenUsed` | For a brief with `interactions/<ui>.json`: the scripted interaction on the final UI (`src/interact.dart`): each tap or drag must change the views' variables, texts or layout, or send an event; `ok` when all do and the expected text appears. Scripts run in QuickJS (`tool/build_quickjs.sh`; `TrustProfile.agentApps`). |
 
 All runs (`tool/stream/out/summary.md`, written by `run_all.sh`):
 
@@ -113,3 +118,38 @@ All runs (`tool/stream/out/summary.md`, written by `run_all.sh`):
 * **Edits are small**: the follow-ups are 17 and 156 tokens against 2,825 and 2,692 to regenerate the cards.
 * One op of the restaurant page is rejected by the agent profile (a `print` action, a feature of the data library):
   the stream goes on and the result tells the model which op, why, and what is allowed.
+
+## Live recordings, replayed (`out/live/`)
+
+Three generations recorded 2026-11-13 with the old 28.8k-token prompt, before this hardening, replayed through
+the current decoder, session and checks (390 × 844; first paint: the card's surface shows; first text: the first
+text node shows):
+
+| Stream | Ops applied / rejected (before → after) | Recovered from malformed JSON | First paint ms (before → after) | First text ms | Complete ms | Final diagnostics (after) | Works when used |
+|---|---|---|---|---|---|---|---|
+| flights@claude-haiku-5-5 | 6 / 0 → 23 / 1 (4 → 21 nodes) | 18 ops, 3 repairs | 2,459 → 2,055 | 2,459 | 10,210 | `invalid_parent` (the button's label under a box), `missing_glyph` ×4 (→), `empty_button` | no: the button has no label |
+| flights@claude-sonnet-5-5 | 30 / 4 → 30 / 4 | 0 | 6,270 → 5,330 | 6,270 | 23,515 | `unknown_layout_key hug`, `children_not_allowed` ×2, `unknown_prop text` (the button), `dangling_child` ×4, `missing_glyph` ×3 | no: the confirm button was rejected |
+| weather@claude-haiku-5-5 | 50 / 0 → 50 / 0 | 0 | 3,071 → 2,050 | 3,071 | 14,888 | `empty_button` (alertBtn) | no: the button has no label |
+
+How they look now (`out/live/<stream>/390x844/contact.png`):
+
+* **flights@haiku** renders whole: header, three bordered options (the first selected in blue through its bound
+  stroke), the total and a blue confirm bar with no label (its text was set under a `box`, which takes no
+  children: rejected with the types that do). The arrows are missing-glyph boxes. Before: the header and a
+  shell of the first option only.
+* **flights@sonnet** is as before: the option rows lack their times (the `hug` layout key) and tags
+  (children on a `box`), the confirm button is missing (`text` on a filledButton), arrows are boxes. Each now has
+  a diagnostic that says the fix as JSON; the recorded retry fixed the times and tags and failed again on the
+  button's style (`radius`).
+* **weather@haiku** is clean but for the empty yellow bar: the model wrote the alert button as a `box` with a click
+  reaction and no label (a model mistake no check reported; `empty_button` now does). One forecast icon is missing:
+  "rainy" is not a Material icon name.
+* The retries: haiku's (`.retry`) rebuilt the card under a new root and is answered with `start_over` (the card
+  stays); sonnet's patched four ops. The follow-ups: haiku's ended with text only (now: forced tool use, a nudge).
+
+The first paint moved earlier because the canvas's body with a fill (the card) shows on arrival; it can show as an
+empty band for a moment (weather at 15%). What delayed sonnet's first text (6.3 s after a 1.7 s first token) was
+not the session: a sentence of text before the tool call (0.9 s), then a `vars` op with the flight data inlined
+before any node (1.4 s; the old prompt said to declare variables right after the canvas), then the canvas, the
+card column and the header column, each waiting for a child. The base prompt now says to declare data just before
+the first node that reads it, and Haiku's tool choice is forced (no text first).
