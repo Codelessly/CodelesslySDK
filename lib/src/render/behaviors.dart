@@ -362,7 +362,8 @@ class TrackGeometry {
   /// A path point (relative to the path's start) as an offset from rest.
   Offset _place(Offset point, Offset start) {
     if (_inViewBox) {
-      final sx = parent!.width / track.viewBoxWidth, sy = parent!.height / track.viewBoxHeight;
+      final (w, h) = track.path!.viewBoxSize!;
+      final sx = parent!.width / w, sy = parent!.height / h;
       return Offset((point.dx + start.dx) * sx, (point.dy + start.dy) * sy) - rest;
     }
     return Offset(_x(point.dx), _y(point.dy));
@@ -382,9 +383,10 @@ class TrackGeometry {
         final r = -pivot;
         return pivot + Offset(r.dx * math.cos(a) - r.dy * math.sin(a), r.dx * math.sin(a) + r.dy * math.cos(a));
       case api.TrackShape.path:
-        final path = track.path == null ? null : MeasuredPath.of(track.path!);
+        final path = track.path == null ? null : MeasuredPath.of(track.path!.path);
         if (path == null) return Offset.zero;
-        final p = track.clampProgress(progress);
+        // An unbounded path goes round again.
+        final p = track.unbounded ? progress - progress.floorToDouble() : progress.clamp(0.0, 1.0);
         if (_inViewBox) return _alongStretched(path, p);
         return _place(path.at(p)?.$1 ?? Offset.zero, path.start);
     }
@@ -420,15 +422,17 @@ class TrackGeometry {
       case api.TrackShape.arc:
         return track.rotate ? _angle(progress) : 0;
       case api.TrackShape.path:
-        if (!track.orientToPath || track.path == null) return 0;
-        final at = MeasuredPath.of(track.path!)?.at(track.clampProgress(progress));
+        final orient = track.path?.orient ?? api.PathOrient.none;
+        if (orient == api.PathOrient.none) return 0;
+        final at = MeasuredPath.of(track.path!.path)?.at(
+            track.unbounded ? progress - progress.floorToDouble() : progress.clamp(0.0, 1.0));
         if (at == null) return 0;
         var angle = at.$2;
         // A path stretched unevenly turns as drawn.
         if (_inParent && !_inViewBox && parent!.width != parent!.height) {
           angle = math.atan2(math.sin(angle) * parent!.height, math.cos(angle) * parent!.width);
         }
-        return (track.orientUpright ? api.Motion.uprightAngle(angle) : angle) * 180 / math.pi;
+        return (orient == api.PathOrient.upright ? api.Motion.uprightAngle(angle) : angle) * 180 / math.pi;
     }
   }
 
