@@ -1,6 +1,6 @@
 // The SDK's node tree: the render core's tree ([RenderTree]) with what the
-// layers above it give every tree: the built-in widgets (registry.dart) and
-// the runtime's gesture layers.
+// layers above it give every tree: the built-in widgets (registry.dart),
+// the runtime's gesture layers and its image loader.
 import 'package:codelessly_api/codelessly_api.dart' show Node;
 import 'package:flutter/foundation.dart';
 
@@ -8,6 +8,7 @@ import '../render/node_tree.dart';
 import '../render/recipe.dart';
 import '../render/source.dart';
 import '../runtime/gestures/gestures.dart';
+import '../runtime/http_image_loader.dart';
 import 'inputs.dart' show inputsRecipes;
 import 'registry.dart';
 
@@ -17,7 +18,7 @@ final RecipeCatalog builtInCatalog = RecipeCatalog(recipes: widgetRecipes, input
 /// Owns the boxes built from one [NodeSource], building every widget type
 /// the SDK has.
 ///
-/// A [RenderTree] with the SDK's own [catalog] and [gestures]: the render
+/// A [RenderTree] with the SDK's own [catalog], [gestures] and [imageLoader]: the render
 /// core's tree draws only the core layout types on its own, and takes the
 /// rest from the layers above it. The boxes, views and recipes of a tree
 /// name it by [RenderTree].
@@ -31,6 +32,7 @@ class NodeTree extends RenderTree {
     super.recipes,
     RecipeCatalog? catalog,
     super.gestures = const DragGestures(),
+    super.imageLoader = const HttpImageLoader(),
   }) : super(catalog: catalog ?? builtInCatalog);
 
   /// See [RenderTree.withoutBindsUnder].

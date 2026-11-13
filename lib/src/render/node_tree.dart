@@ -154,7 +154,8 @@ class RenderTree {
       NodeInteractions? interactions,
       this.recipes = const {},
       this.catalog = RecipeCatalog.none,
-      this.gestures})
+      this.gestures,
+      this.imageLoader})
       : islands = _TreeIslands(environment) {
     (islands as _TreeIslands).onEnvironment = () {
       for (final box in _boxes.values.toList()) {
@@ -174,6 +175,12 @@ class RenderTree {
   /// The gesture layers the runtime adds to its boxes (a node that follows
   /// the pointer, drag and drop); null: none.
   final NodeGestures? gestures;
+
+  /// Fetches the images Flutter's image cache doesn't load (SVG documents)
+  /// for the render objects of this tree; null: they fetch nothing here
+  /// (such an image shows as failed unless its render object has a loader
+  /// of its own).
+  final ImageBytesLoader? imageLoader;
 
   /// The app's own recipes by node type, over the built-in ones: a type the
   /// API doesn't declare (its props are [Props.unknown]), or another build

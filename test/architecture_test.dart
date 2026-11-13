@@ -45,11 +45,7 @@ const renderLayers = {'render', 'leaf'};
 
 /// Imports of render files the rules refuse, kept until they're removed:
 /// file (under lib/src) → the imports it may still have, each with why.
-const Map<String, Map<String, String>> renderExceptions = {
-  'render/paint/image_fill.dart': {
-    'package:http/http.dart': 'fetches SVG images',
-  },
-};
+const Map<String, Map<String, String>> renderExceptions = {};
 
 /// The layers a widgets file may not import.
 const widgetsForbiddenLayers = {'services', 'app', 'scripting'};
