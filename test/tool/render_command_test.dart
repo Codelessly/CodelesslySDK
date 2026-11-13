@@ -380,4 +380,30 @@ void main() {
       expect(d['suggestion'], 'body');
     });
   });
+
+  group('authoring fixes, cycle 3', () {
+    const f = '$fixtures/fix3';
+    testWidgets('a fill with no room to fill is reported; a page id and a component id never collide', (tester) async {
+      final r = await runRender(tester, RenderArgs(inputs: [f], out: out.path, sizes: const [Size(390, 844)]));
+      expect(codes(r), ['fill_fallback'], reason: '${r.diagnostics}');
+      final d = r.diagnostics.single;
+      expect(d['nodeId'], 'cardBody');
+      expect(d['message'], contains('parent "card" (column) hugs its height'));
+      expect(d['message'], contains('280 px'));
+    });
+
+    testWidgets('an action naming a node of a component acts on its own instance', (tester) async {
+      final r = await runRender(tester, RenderArgs(inputs: [f], out: out.path, sizes: const [Size(390, 844)], dumpLayout: true,
+          steps: const [Step('tap', 'p2/go'), Step('wait', '12000')]));
+      expect(codes(r, 'error'), isEmpty, reason: '${r.diagnostics}');
+      final boxes = (jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
+      Map at(String path) => boxes.singleWhere((b) => b['path'] == path);
+      bool shows(String panel) {
+        final list = at('$panel/list'), end = at('$panel/end');
+        return (end['y'] as num) >= (list['y'] as num) && (end['y'] as num) + (end['h'] as num) <= (list['y'] as num) + (list['h'] as num) + 0.5;
+      }
+      expect(shows('p2'), isTrue, reason: 'the tapped instance scrolled its own list: $boxes');
+      expect(shows('p1'), isFalse, reason: 'the other instance did not move');
+    });
+  });
 }
