@@ -10,6 +10,8 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/legacy.dart';
+
 Map<String, Object?> at(double x, double y, double w, double h) =>
     {'width': w, 'height': h, 'x': {'start': x}, 'y': {'start': y}};
 
@@ -42,7 +44,7 @@ class Screen {
   }
 
   Future<void> run(List<Json> actions) => const CodelesslyActions().run(
-        Node.fromJson({
+        migratedNode({
           'type': 'box',
           'actions': [
             {'trigger': {'type': 'click'}, 'actions': actions},
@@ -77,7 +79,7 @@ Map<String, Object?> box(Map<String, Object?> extra) => {
 /// preset tracks (effectTransformAt is gone), composed as the player does.
 ({double dx, double sx, double rotation, double opacity}) effectTransformAt(String type, double t, double amount,
     {double cycles = 0}) {
-  final a = AnimationPresets.fromEffect({'type': type, 'amount': amount, 'cycles': cycles}, 0)!.expanded;
+  final a = legacyEffect({'type': type, 'amount': amount, 'cycles': cycles}, 0)!.expanded;
   var dx = 0.0, sx = 1.0, rotation = 0.0, opacity = 1.0;
   for (final track in a.tracks) {
     final v = readDouble(track.valueAt(t))!;

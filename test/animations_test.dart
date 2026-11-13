@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'actions/wiring_test.dart' show reaction, show, v;
+import 'support/legacy.dart';
 
 Json box(String id, Json extra, {double x = 0, double y = 0, double size = 40}) => {
       id: {
@@ -232,7 +233,7 @@ void main() {
       expect(s['done'], 'yes');
       // Reverse from a command elsewhere.
       await const CodelesslyActions().run(
-          Node.fromJson({
+          migratedNode({
             'type': 'box',
             'actions': [
               reaction('click', [
