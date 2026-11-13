@@ -1,3 +1,32 @@
+## Unreleased: schema 4
+
+Requires the codelessly_api of the same release (schema 4).
+
+**Schema 4: one Transform, one Hero.** Every loader reads `"schema": 2`, `3` and `4`, migrating 2 and 3 in
+memory (`migrate2to3`, `migrate3to4`), never writing back; a stored document or bundle in a newer schema is
+refused, the message naming 2, 3 and 4 (`kLoadableSchemas` is `{2, 3, 4}`). The render command publishes
+schema 4.
+
+- **A node's scale and rotation are its motion.** The chain's own `scale` layer and the `RenderTransform` of
+  `layout.rotation` are gone: `RenderMotion` draws them (schema 4 folded them into `motion.scale` and
+  `motion.rotate`; the migration keeps schema 3's rotation pivot, moved by half an uneven margin, as a
+  translation). A state style that moves a node (`states.pressed.<id>.motion`) keeps its motion layer at rest,
+  as the scale layer was kept (a layer added mid-press lost the tap). Older documents draw pixel for pixel as
+  before: the parity goldens are unchanged, and 48 renders of 16 corpus documents (reference apps, an
+  experiment, the SDK's benchmark and example) and a schema-3 page of state scales and rotations (at rest,
+  hovered, selected) match codelessly_sdk 30.0.0's (codelessly_api docs/design/03-motion.md).
+- **One shared element.** `hero` with `flies: betweenScreens` (Flutter's `Hero`) is the navigation flight, its
+  look `flightShuttle` (`RenderHeroMark.flightShuttle`, was `flight`); `flies: inPlace` is what `flightKey`
+  was: `RenderFlightBox` flies it in from where the node with its tag was, on a spring or as its `flight`
+  says, and a dropped drag copy records its place under that tag. The two kinds don't fly to each other.
+- **Run time:** a `setValue` path schema 4 moved (`scale`, `layout.rotation`, `flightKey`, `flight.*`) that
+  reaches a running app unmigrated (from a script or another document) sets nothing and says, once, what to
+  write (`olderSchemaPathHint`), as schema-2 paths already did.
+- **Tests:** test/motion/schema4_transform_test.dart (an older document's scale, rotation and uneven margin
+  drawn where 30.0.0 drew them; a state's scale snapping beside an easing motion; a scale transition on its own
+  timing; setValue paths), hero and in-place flight tests, schema 4 in the loading and relay-site tests. The
+  catalog corpus digests of the five files whose documents hold a moved field were taken again at schema 4.
+
 ## Unreleased
 
 - **The reference is one base plus links** (codelessly_api's `docs/reference`). The chat example's compact prompt

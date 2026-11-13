@@ -1,5 +1,5 @@
-// A node's particles and its fly-in by flight key, as layers of its chain
-// outside its motion. (Its one-shot effects are animations now:
+// A node's particles and its in-place hero flight (`hero` with
+// `flies: inPlace`), as layers of its chain outside its motion. (Its one-shot effects are animations now:
 // render/animations.dart.) A design canvas draws them at rest.
 import 'dart:math' as math;
 
@@ -15,7 +15,7 @@ import 'node_tree.dart' show NodeBox, RenderTree;
 import 'recipe.dart';
 import 'particles.dart';
 
-/// Adds node [n]'s particles and fly-in to [chain].
+/// Adds node [n]'s particles and in-place hero flight to [chain].
 void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviors;
   if (animates && be.particles != null) {
@@ -23,7 +23,8 @@ void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
       ..nodeId = b.id
       ..emitter = be.particles!);
   }
-  if (animates && be.flightKey.isNotEmpty) {
+  final hero = be.hero;
+  if (animates && hero != null && hero.flies == api.HeroFlies.inPlace && hero.tag.trim().isNotEmpty) {
     // The spring of the node's motion transition, when it has one.
     final spring = api.Transition.of(be.transitions, 'motion')?.spring;
     chain.add(
@@ -35,13 +36,13 @@ void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
                 damping: spring.effectiveDamping < 0 ? 20 : spring.effectiveDamping,
               )
             : const SpringDescription(mass: 1, stiffness: 420, damping: 24)
-        ..flight = be.flight
-        ..flightKey = be.flightKey,
+        ..flight = hero.flight
+        ..flightKey = hero.tag.trim(),
     );
   }
 }
 
-// --- flights: moves between nodes with the same flight key ---------------------
+// --- in-place hero flights: moves between nodes with the same tag ------------
 
 class _FlightRecord {
   _FlightRecord(this.rect, this.time, this.owner);
@@ -53,8 +54,8 @@ class _FlightRecord {
   final RenderFlightBox? owner;
 }
 
-/// Where each flight key was last seen, by every box that has it, plus
-/// where dragged copies were let go.
+/// Where each in-place hero tag was last seen, by every box that has it,
+/// plus where dragged copies were let go.
 abstract final class FlightRegistry {
   static final Map<String, List<_FlightRecord>> _records = {};
 
@@ -128,9 +129,9 @@ abstract final class FlightRegistry {
   static void reset() => _records.clear();
 }
 
-/// Records where its node is drawn under its flight key and, the first time
-/// it's drawn, flies it in from where another node with the key was, on a
-/// spring.
+/// Records where its node is drawn under its in-place hero tag and, the
+/// first time it's drawn, flies it in from where another node with the tag
+/// was, on a spring (or as its hero's `flight` says).
 class RenderFlightBox extends RenderPose {
   String _flightKey = '';
   bool _placed = false;

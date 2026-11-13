@@ -153,6 +153,17 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('heroes that fly in place do not fly between screens', (tester) async {
+    final inPlace = {'tag': 'card', 'flies': 'inPlace'};
+    final (a, b, nav) = await pump(tester, inPlace, inPlace);
+    expect(HeroMarks.of(a), isEmpty);
+    nav.currentState!.push(CodelesslyPageRoute<void>(builder: (_) => show(b)));
+    await tester.pump();
+    await tester.pump();
+    expect(HeroFlights.flying, isFalse);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('custom screen transitions fly shared nodes too, and the design canvas marks none', (tester) async {
     final (_, b, nav) = await pump(tester, 'card', 'card');
     nav.currentState!.push(CodelesslyRouteTransitionRoute<void>(

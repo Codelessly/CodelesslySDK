@@ -3,6 +3,13 @@
 // (codelessly_api without the catalog work, at the base it merged onto): each line of fixtures/catalog_corpus.digests is
 // `file#pointer kind digest`, the digest of a value's encoding after a decode
 // (tool/corpus_roundtrip.dart in codelessly_api makes the same lines).
+//
+// Schema 4 moved fields, so the encoding of the documents holding one
+// changed on purpose: the 178 lines of the five files whose documents have a
+// node rotation, a node scale (a state's included) or a hero's flight look
+// (petri_bench_full, event_desktop_bound, event_desktop_tip, ninefold_board,
+// strata_tabs) were taken again at schema 4; the others are as taken before
+// catalogs.
 import 'dart:convert';
 import 'dart:io';
 
@@ -21,7 +28,7 @@ String _digest(Object? json) {
 
 /// Schema-2 reaction [r] migrated (as a box's reaction).
 Json _migrated(Map r) =>
-    readMap((migrateNode2to3({'type': 'box', 'actions': [r]})['actions'] as List).single)!;
+    readMap((migrateNode({'type': 'box', 'actions': [r]})['actions'] as List).single)!;
 
 /// What a file's documents, nodes, reactions and actions encode to, as the
 /// digest lines.
@@ -32,7 +39,8 @@ List<String> _lines(String path, Catalog catalog) {
       final nodes = v['nodes'];
       if (nodes is Map && nodes.values.any((n) => n is Map && n['type'] is String)) {
         // The digests were taken in schema 2: a document now encodes as
-        // schema 3, and (migrated when it decodes) otherwise the same.
+        // schema 4, and (migrated when it decodes) otherwise the same but for
+        // the fields schema 4 moved (above).
         final doc = LayoutDocument.fromJson(v, catalog: catalog).toJson();
         if (doc['schema'] == kSchemaVersion) doc['schema'] = 2;
         // Schema 2's line height, which the migration writes on the
@@ -47,7 +55,7 @@ List<String> _lines(String path, Catalog catalog) {
       }
       // A node, reaction or action alone is schema 2 too: migrated first.
       if (v['type'] is String && v['layout'] is Map) {
-        out.add('$path#$at node ${_digest(Node.fromJson(migrateNode2to3(readMap(v)!), catalog: catalog)?.toJson())}');
+        out.add('$path#$at node ${_digest(Node.fromJson(migrateNode(readMap(v)!), catalog: catalog)?.toJson())}');
       }
       final acts = v['actions'];
       if (acts is List) {

@@ -1051,9 +1051,11 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     if (box == null) return;
     final dnd = DragAndDrop.of(box.tree);
     if (wasAccepted && drag.dropped) {
-      // Where the copy was let go, for the node with the same flight key
-      // that shows the drop next (render/play.dart's FlightRegistry).
-      final key = box.node?.behaviors.flightKey ?? '';
+      // Where the copy was let go, for the node with the same in-place
+      // hero tag that shows the drop next (render/play.dart's
+      // FlightRegistry).
+      final hero = box.node?.behaviors.hero;
+      final key = hero != null && hero.flies == api.HeroFlies.inPlace ? hero.tag.trim() : '';
       if (key.isNotEmpty && box.hasSize) {
         final dropped = drag.session.size;
         FlightRegistry.recordDrop(

@@ -90,7 +90,7 @@ class Slot {
 /// used only while the tree is interactive (see [RenderTree.animates]).
 abstract interface class NodeInteractions {
   /// Adds [box]'s interaction layers for node [n] (as shown) to [chain],
-  /// between its rotation and its loops.
+  /// between its motion and its animations.
   void addLayers(NodeBox box, Node n, List<RenderBox> chain);
 
   /// An event of [box]'s node from inside it: an input's `changed` or
@@ -1374,8 +1374,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         ..configure(sticky, interactive: tree.animates));
     }
 
-    // Outer layers, outermost first: margin, constraints, motion and scale
-    // (render/behaviors.dart), rotation, loops, opacity, blurs and stroke
+    // Outer layers, outermost first: margin, constraints, motion
+    // (render/behaviors.dart: the node's one transform, its scale and
+    // rotation included), hero mark, animations, opacity, blurs and stroke
     // path.
     // Not `.flutter`, which reads a negative side as 0: a margin may be
     // negative (RenderMargin).
@@ -1412,13 +1413,6 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);
-    if (n.layout.rotation != 0) {
-      final m = n.layout.margin;
-      chain.add(_obtain<RenderTransform>('rotation', () => RenderTransform(transform: Matrix4.identity()))
-        ..transform = Matrix4.rotationZ(n.layout.rotation * math.pi / 180)
-        ..origin = Offset(m.left / 2 - m.right / 2, m.top / 2 - m.bottom / 2)
-        ..alignment = Alignment.center);
-    }
     heroLayer(this, n, chain, animates: tree.animates);
     // Drag and drop around the reactions (gestures/drag_and_drop.dart).
     tree.gestures?.addDragAndDropLayers(this, n, chain);
