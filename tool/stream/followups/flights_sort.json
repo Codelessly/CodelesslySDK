@@ -1,0 +1,12 @@
+{
+ "prompt": "Sort them by price.",
+ "ui": "flights",
+ "ops": [
+  {
+   "op": "move",
+   "id": "opt3",
+   "parent": "fcOpts",
+   "index": 1
+  }
+ ]
+}

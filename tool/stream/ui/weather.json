@@ -1,0 +1,1119 @@
+{
+ "schema": 2,
+ "roots": [
+  "weather"
+ ],
+ "nodes": {
+  "weather": {
+   "type": "canvas",
+   "name": "Forecast",
+   "slots": {
+    "body": "wxCard"
+   },
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 420
+    }
+   }
+  },
+  "wxCard": {
+   "type": "column",
+   "children": [
+    "wxNow",
+    "wxHours",
+    "wxDays",
+    "wxAlert"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "hug": 420
+    },
+    "padding": [
+     20,
+     20,
+     20,
+     20
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       -1,
+       -1
+      ],
+      "end": [
+       1,
+       1
+      ],
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF1E3A8A"
+       },
+       {
+        "position": 1,
+        "color": "#FF0EA5E9"
+       }
+      ]
+     }
+    ],
+    "radius": 24,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#331E3A8A",
+      "offset": [
+       0,
+       10
+      ],
+      "blurRadius": 30
+     }
+    ]
+   },
+   "props": {
+    "spacing": 18,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "wxNow": {
+   "type": "row",
+   "children": [
+    "wxNowText",
+    "wxNowIcon"
+   ],
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": {
+     "hug": 96
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "wxNowText": {
+   "type": "column",
+   "children": [
+    "wxCity",
+    "wxTemp",
+    "wxCond"
+   ],
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 96
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "wxCity": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Lisbon \u00b7 Now",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#CCFFFFFF"
+    }
+   }
+  },
+  "wxTemp": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 73
+    }
+   },
+   "props": {
+    "text": "19\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 56,
+     "fontWeight": 300,
+     "color": "#FFFFFFFF",
+     "height": 1.05
+    }
+   }
+  },
+  "wxCond": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Partly cloudy \u00b7 H 21\u00b0 L 14\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#E6FFFFFF"
+    }
+   }
+  },
+  "wxNowIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 64,
+    "height": 64
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "wb_cloudy"
+    },
+    "color": "#FFFDE68A"
+   }
+  },
+  "wxHours": {
+   "type": "row",
+   "children": [
+    "h0",
+    "h1",
+    "h2",
+    "h3",
+    "h4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": {
+     "hug": 88
+    },
+    "padding": [
+     6,
+     12,
+     6,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#26FFFFFF"
+     }
+    ],
+    "radius": 16
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "h0": {
+   "type": "column",
+   "children": [
+    "h0T",
+    "h0I",
+    "h0D"
+   ],
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 76
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "h0T": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Now",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#CCFFFFFF"
+    }
+   }
+  },
+  "h0I": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "wb_cloudy"
+    },
+    "color": "#FFFDE68A"
+   }
+  },
+  "h0D": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "19\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "h1": {
+   "type": "column",
+   "children": [
+    "h1T",
+    "h1I",
+    "h1D"
+   ],
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 76
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "h1T": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "15:00",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#CCFFFFFF"
+    }
+   }
+  },
+  "h1I": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "wb_sunny"
+    },
+    "color": "#FFFDE68A"
+   }
+  },
+  "h1D": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "21\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "h2": {
+   "type": "column",
+   "children": [
+    "h2T",
+    "h2I",
+    "h2D"
+   ],
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 76
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "h2T": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "16:00",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#CCFFFFFF"
+    }
+   }
+  },
+  "h2I": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "wb_sunny"
+    },
+    "color": "#FFFDE68A"
+   }
+  },
+  "h2D": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "21\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "h3": {
+   "type": "column",
+   "children": [
+    "h3T",
+    "h3I",
+    "h3D"
+   ],
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 76
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "h3T": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "17:00",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#CCFFFFFF"
+    }
+   }
+  },
+  "h3I": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "cloud"
+    },
+    "color": "#FFFFFFFF"
+   }
+  },
+  "h3D": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "20\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "h4": {
+   "type": "column",
+   "children": [
+    "h4T",
+    "h4I",
+    "h4D"
+   ],
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 76
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "h4T": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "18:00",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#CCFFFFFF"
+    }
+   }
+  },
+  "h4I": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "water_drop"
+    },
+    "color": "#FFFFFFFF"
+   }
+  },
+  "h4D": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "17\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "wxDays": {
+   "type": "column",
+   "children": [
+    "d0",
+    "d1",
+    "d2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "d0": {
+   "type": "row",
+   "children": [
+    "d0N",
+    "d0I",
+    "d0L",
+    "d0Bar",
+    "d0H"
+   ],
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "d0N": {
+   "type": "text",
+   "layout": {
+    "width": 44,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Sat",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "d0I": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "water_drop"
+    },
+    "color": "#FFFFFFFF"
+   }
+  },
+  "d0L": {
+   "type": "text",
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "13\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#B3FFFFFF"
+    }
+   }
+  },
+  "d0Bar": {
+   "type": "stack",
+   "children": [
+    "d0Fill"
+   ],
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#33FFFFFF"
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "d0Fill": {
+   "type": "box",
+   "layout": {
+    "width": 48,
+    "height": 6,
+    "x": {
+     "relative": 40.0
+    },
+    "y": {
+     "start": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF7DD3FC"
+       },
+       {
+        "position": 1,
+        "color": "#FFFDE68A"
+       }
+      ]
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "d0H": {
+   "type": "text",
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "17\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "d1": {
+   "type": "row",
+   "children": [
+    "d1N",
+    "d1I",
+    "d1L",
+    "d1Bar",
+    "d1H"
+   ],
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "d1N": {
+   "type": "text",
+   "layout": {
+    "width": 44,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Sun",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "d1I": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "cloud"
+    },
+    "color": "#FFFFFFFF"
+   }
+  },
+  "d1L": {
+   "type": "text",
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "14\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#B3FFFFFF"
+    }
+   }
+  },
+  "d1Bar": {
+   "type": "stack",
+   "children": [
+    "d1Fill"
+   ],
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#33FFFFFF"
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "d1Fill": {
+   "type": "box",
+   "layout": {
+    "width": 64,
+    "height": 6,
+    "x": {
+     "relative": 56.0
+    },
+    "y": {
+     "start": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF7DD3FC"
+       },
+       {
+        "position": 1,
+        "color": "#FFFDE68A"
+       }
+      ]
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "d1H": {
+   "type": "text",
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "19\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "d2": {
+   "type": "row",
+   "children": [
+    "d2N",
+    "d2I",
+    "d2L",
+    "d2Bar",
+    "d2H"
+   ],
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "d2N": {
+   "type": "text",
+   "layout": {
+    "width": 44,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Mon",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "d2I": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "wb_sunny"
+    },
+    "color": "#FFFDE68A"
+   }
+  },
+  "d2L": {
+   "type": "text",
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "15\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#B3FFFFFF"
+    }
+   }
+  },
+  "d2Bar": {
+   "type": "stack",
+   "children": [
+    "d2Fill"
+   ],
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#33FFFFFF"
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "d2Fill": {
+   "type": "box",
+   "layout": {
+    "width": 88,
+    "height": 6,
+    "x": {
+     "relative": 72.0
+    },
+    "y": {
+     "start": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF7DD3FC"
+       },
+       {
+        "position": 1,
+        "color": "#FFFDE68A"
+       }
+      ]
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "d2H": {
+   "type": "text",
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "23\u00b0",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "wxAlert": {
+   "type": "row",
+   "children": [
+    "wxAlertIcon",
+    "wxAlertText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": 44,
+    "padding": [
+     14,
+     0,
+     14,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 12
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "rainAlert",
+       "value": {
+        "city": "Lisbon",
+        "from": "18:00"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "wxAlertIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "notifications_active"
+    },
+    "color": "#FF1E3A8A"
+   }
+  },
+  "wxAlertText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 170
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Alert me before it rains",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF1E3A8A"
+    }
+   }
+  }
+ }
+}

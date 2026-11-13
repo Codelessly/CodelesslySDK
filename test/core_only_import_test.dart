@@ -112,6 +112,24 @@ void main() {
     expect([for (final f in seen) if (f.startsWith('$_sdkRoot/lib/src/features/')) path(f)], isEmpty);
   });
 
+  test('agent UI (UiSession, CodelesslyView) is core-only: it compiles no feature of either package', () {
+    final session = sdkFiles.where((f) => f.startsWith('$_sdkRoot/lib/src/session/')).toList();
+    expect(session, isNotEmpty);
+    final (seen, from) = _closure(session);
+    String path(String f) => [for (String? x = f; x != null; x = from[x]) x.replaceFirst(_sdkRoot, 'sdk').replaceFirst(_apiRoot, 'api/')]
+        .reversed
+        .join(' -> ');
+    expect([for (final f in seen) if (f.startsWith('${_apiRoot}lib/') && !f.startsWith('${_apiRoot}lib/src/core/') && f != '${_apiRoot}lib/core.dart') path(f)],
+        isEmpty);
+    expect([for (final f in seen) if (f.startsWith('$_sdkRoot/lib/src/features/')) path(f)], isEmpty);
+    // It imports the model through core.dart only.
+    for (final f in session) {
+      for (final m in _directive.allMatches(File(f).readAsStringSync())) {
+        if (m[1]!.startsWith('package:codelessly_api/')) expect(m[1], 'package:codelessly_api/core.dart', reason: f);
+      }
+    }
+  });
+
   test('every action type a first-party feature declares has a handler in it', () {
     for (final feature in kFirstPartyFeatures) {
       expect(feature.catalog.actions, isNotEmpty, reason: feature.name);

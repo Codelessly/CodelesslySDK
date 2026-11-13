@@ -1,0 +1,5082 @@
+{
+ "schema": 2,
+ "id": "menu-page",
+ "roots": [
+  "menu"
+ ],
+ "nodes": {
+  "menu": {
+   "type": "canvas",
+   "name": "Menu",
+   "slots": {
+    "body": "root"
+   },
+   "layout": {
+    "width": 1440,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF4EFE5"
+     }
+    ]
+   }
+  },
+  "root": {
+   "type": "stack",
+   "children": [
+    "page",
+    "reserveBar"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "header",
+    "mobileNav",
+    "hero",
+    "menuSection",
+    "cta",
+    "footer"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "logo",
+    "nav",
+    "headerReserve",
+    "burger"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": 88,
+    "padding": [
+     80,
+     0,
+     80,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1B1C1A"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#33F4EFE5"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        0,
+        32,
+        0
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "height": 70,
+       "padding": [
+        18,
+        0,
+        18,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "logo": {
+   "type": "row",
+   "children": [
+    "logoDot",
+    "logoText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 124
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "spacing": 3,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "logoDot": {
+   "type": "box",
+   "layout": {
+    "width": 9,
+    "height": 10,
+    "margin": [
+     0,
+     0,
+     0,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD86636"
+     }
+    ],
+    "radius": [
+     5,
+     2,
+     5,
+     5
+    ]
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "text": "casa brasa.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 23,
+     "fontWeight": 500,
+     "letterSpacing": -0.8,
+     "color": "#FFF4EFE5"
+    },
+    "runs": [
+     {
+      "start": 10,
+      "end": 11,
+      "style": {
+       "color": "#FFD86636"
+      }
+     }
+    ]
+   }
+  },
+  "nav": {
+   "type": "row",
+   "children": [
+    "nav1",
+    "nav2",
+    "nav3",
+    "nav4",
+    "nav5",
+    "nav6"
+   ],
+   "visible": false,
+   "layout": {
+    "width": {
+     "hug": 574
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 29
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "visible": true
+     }
+    }
+   ]
+  },
+  "nav1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 42
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "HOME",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "nav2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 42
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "MENU",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "nav3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "RESERVATIONS",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "nav4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "PRIVATE DINING",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "nav5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "VISIT",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "nav6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 86
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "GIFT CARDS",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "headerReserve": {
+   "type": "row",
+   "children": [
+    "headerReserveLabel",
+    "headerReserveArrow"
+   ],
+   "visible": false,
+   "layout": {
+    "width": {
+     "hug": 197
+    },
+    "height": 42,
+    "padding": [
+     17,
+     0,
+     17,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD86636"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "headerReserve": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFE5814F"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "visible": true
+     }
+    }
+   ]
+  },
+  "headerReserveLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 134
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "RESERVE A TABLE",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FF191B19"
+    }
+   }
+  },
+  "headerReserveArrow": {
+   "type": "icon",
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FF191B19"
+   }
+  },
+  "burger": {
+   "type": "icon",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "icon": "menu",
+    "color": "#FFF4EFE5"
+   },
+   "bind": {
+    "props.icon": "${= menuOpen ? 'close' : 'menu'}"
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "visible": false
+     }
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "menuOpen",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "mobileNav": {
+   "type": "column",
+   "children": [
+    "mnav1",
+    "mnav2",
+    "mnav3",
+    "mnav4",
+    "mnav5",
+    "mnav6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 320
+    },
+    "padding": [
+     18,
+     16,
+     18,
+     32
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1B1C1A"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#33F4EFE5"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "visible": "${= menuOpen && !screen.isDesktop}"
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        16,
+        32,
+        32
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "mnav1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 354
+    },
+    "height": 50
+   },
+   "props": {
+    "text": "HOME",
+    "textAlignVertical": "center",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "mnav2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 354
+    },
+    "height": 50
+   },
+   "props": {
+    "text": "MENU",
+    "textAlignVertical": "center",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "mnav3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 354
+    },
+    "height": 50
+   },
+   "props": {
+    "text": "RESERVATIONS",
+    "textAlignVertical": "center",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "mnav4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 354
+    },
+    "height": 50
+   },
+   "props": {
+    "text": "PRIVATE DINING",
+    "textAlignVertical": "center",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "mnav5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 354
+    },
+    "height": 50
+   },
+   "props": {
+    "text": "VISIT",
+    "textAlignVertical": "center",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "mnav6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 354
+    },
+    "height": 50
+   },
+   "props": {
+    "text": "GIFT CARDS",
+    "textAlignVertical": "center",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "hero": {
+   "type": "flex",
+   "children": [
+    "heroText",
+    "heroMedia"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 670
+    },
+    "padding": [
+     80,
+     55,
+     80,
+     72
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 86,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1D1F1C"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "assets/grain.png",
+       "fit": "none",
+       "repeat": "repeat",
+       "alignment": [
+        -1,
+        -1
+       ]
+      }
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        62,
+        32,
+        80
+       ]
+      },
+      "props": {
+       "spacing": 40
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "padding": [
+        18,
+        62,
+        18,
+        64
+       ]
+      },
+      "props": {
+       "direction": "vertical",
+       "spacing": 44,
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "heroText": {
+   "type": "column",
+   "children": [
+    "heroEyebrow",
+    "heroTitle",
+    "heroIntro",
+    "heroRule",
+    "heroService"
+   ],
+   "layout": {
+    "width": {
+     "fill": 627
+    },
+    "height": {
+     "hug": 440
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "heroEyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 627
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "AT THE TABLE",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 2.4,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "heroTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 627
+    },
+    "height": {
+     "hug": 250
+    },
+    "margin": [
+     0,
+     20,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "The good stuff,\nstraight from the fire.",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 80,
+     "fontWeight": 400,
+     "height": 1.02,
+     "letterSpacing": -3,
+     "color": "#FFF4EFE5"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 50,
+        "letterSpacing": -1.5
+       }
+      },
+      "layout": {
+       "margin": [
+        0,
+        18,
+        0,
+        0
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 46,
+        "letterSpacing": -1.2
+       }
+      }
+     }
+    }
+   ]
+  },
+  "heroIntro": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 520
+    },
+    "height": {
+     "hug": 60
+    },
+    "margin": [
+     0,
+     28,
+     0,
+     0
+    ],
+    "constraints": {
+     "maxWidth": 520
+    }
+   },
+   "props": {
+    "text": "A menu shaped by the market, the seasons and whatever tastes best over embers.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 19,
+     "height": 1.55,
+     "color": "#FFE6E0D4"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 17.5
+       }
+      },
+      "layout": {
+       "margin": [
+        0,
+        22,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "heroRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 627
+    },
+    "height": 1,
+    "margin": [
+     0,
+     40,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#40F4EFE5"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "margin": [
+        0,
+        32,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "heroService": {
+   "type": "flex",
+   "children": [
+    "serviceLunch",
+    "serviceDinner"
+   ],
+   "layout": {
+    "width": {
+     "fill": 627
+    },
+    "height": {
+     "hug": 20
+    },
+    "margin": [
+     0,
+     16,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 30,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "serviceLunch": {
+   "type": "row",
+   "children": [
+    "starLunch",
+    "serviceLunchText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "starLunch": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "props": {
+    "path": "M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8 Z"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5814F"
+     }
+    ]
+   }
+  },
+  "serviceLunchText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "LUNCH · THURSDAY TO SUNDAY",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "serviceDinner": {
+   "type": "row",
+   "children": [
+    "starDinner",
+    "serviceDinnerText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "starDinner": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "props": {
+    "path": "M5 0 L6.2 3.8 L10 5 L6.2 6.2 L5 10 L3.8 6.2 L0 5 L3.8 3.8 Z"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5814F"
+     }
+    ]
+   }
+  },
+  "serviceDinnerText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "DINNER · TUESDAY TO SUNDAY",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "heroMedia": {
+   "type": "stack",
+   "children": [
+    "heroFrame",
+    "heroPhoto",
+    "heroShade",
+    "heroCaption"
+   ],
+   "layout": {
+    "width": {
+     "fill": 585
+    },
+    "height": 543
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "height": 378
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "height": 268
+      }
+     }
+    }
+   ]
+  },
+  "heroFrame": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 567
+    },
+    "height": {
+     "fill": 525
+    },
+    "x": {
+     "start": 18,
+     "end": -18
+    },
+    "y": {
+     "start": 0,
+     "end": 18
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFD86636"
+     }
+    ],
+    "strokeWidth": 1
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "x": {
+        "start": 10,
+        "end": -10
+       },
+       "y": {
+        "start": 0,
+        "end": 10
+       }
+      }
+     }
+    }
+   ]
+  },
+  "heroPhoto": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 567
+    },
+    "height": {
+     "fill": 525
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 18,
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2A2622"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "assets/fire-fish.jpg",
+       "fit": "cover",
+       "alignment": [
+        0.2,
+        0
+       ]
+      }
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "y": {
+        "start": 10,
+        "end": 0
+       }
+      }
+     }
+    }
+   ]
+  },
+  "heroShade": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 567
+    },
+    "height": 120,
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       0,
+       -1
+      ],
+      "end": [
+       0,
+       1
+      ],
+      "stops": [
+       {
+        "position": 0,
+        "color": "#00191B19"
+       },
+       {
+        "position": 1,
+        "color": "#B3191B19"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "heroCaption": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 16
+    },
+    "x": {
+     "start": 19
+    },
+    "y": {
+     "end": 22
+    }
+   },
+   "props": {
+    "text": "WHOLE DAY-BOAT FISH · DINNER MENU",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "menuSection": {
+   "type": "column",
+   "children": [
+    "menuBody"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 2400
+    },
+    "padding": [
+     80,
+     96,
+     80,
+     112
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        96,
+        32,
+        112
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "padding": [
+        18,
+        72,
+        18,
+        96
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "menuBody": {
+   "type": "flex",
+   "children": [
+    "mainCol",
+    "side"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 2400
+    },
+    "constraints": {
+     "maxWidth": 1280
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 72,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "spacing": 32
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 44,
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "mainCol": {
+   "type": "column",
+   "children": [
+    "tabs",
+    "introRow",
+    "sectionsList",
+    "emptyState",
+    "notesRule",
+    "pricingNote",
+    "allergyNote"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 2200
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "tabs": {
+   "type": "row",
+   "children": [
+    "tabLunch",
+    "tabDinner",
+    "tabDrinks",
+    "tabDessert"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": 70
+   },
+   "props": {
+    "spacing": 44,
+    "crossAxisAlignment": "end"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFCDC5B6"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "spacing": 26
+      },
+      "layout": {
+       "height": 62
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "spacing": 22
+      },
+      "layout": {
+       "height": 60
+      }
+     }
+    }
+   ]
+  },
+  "tabLunch": {
+   "type": "column",
+   "children": [
+    "tabLunchText",
+    "tabLunchBar"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 50
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "stretch"
+   },
+   "states": {
+    "hovered": {
+     "tabLunchText": {
+      "props": {
+       "style": {
+        "color": "#FF1F1F1C"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "Lunch"
+      }
+     ]
+    }
+   ]
+  },
+  "tabLunchText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 76
+    },
+    "height": {
+     "hug": 32
+    },
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "props": {
+    "text": "Lunch",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 26,
+     "color": "#FF6E6960"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= tab == 'Lunch' ? '#FF1F1F1C' : '#FF6E6960'}"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 20
+       }
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 18
+       }
+      }
+     }
+    }
+   ]
+  },
+  "tabLunchBar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00D86636"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= tab == 'Lunch' ? '#FFD86636' : '#00D86636'}"
+   }
+  },
+  "tabDinner": {
+   "type": "column",
+   "children": [
+    "tabDinnerText",
+    "tabDinnerBar"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 50
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "stretch"
+   },
+   "states": {
+    "hovered": {
+     "tabDinnerText": {
+      "props": {
+       "style": {
+        "color": "#FF1F1F1C"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "Dinner"
+      }
+     ]
+    }
+   ]
+  },
+  "tabDinnerText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 76
+    },
+    "height": {
+     "hug": 32
+    },
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "props": {
+    "text": "Dinner",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 26,
+     "color": "#FF6E6960"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= tab == 'Dinner' ? '#FF1F1F1C' : '#FF6E6960'}"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 20
+       }
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 18
+       }
+      }
+     }
+    }
+   ]
+  },
+  "tabDinnerBar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00D86636"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= tab == 'Dinner' ? '#FFD86636' : '#00D86636'}"
+   }
+  },
+  "tabDrinks": {
+   "type": "column",
+   "children": [
+    "tabDrinksText",
+    "tabDrinksBar"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 50
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "stretch"
+   },
+   "states": {
+    "hovered": {
+     "tabDrinksText": {
+      "props": {
+       "style": {
+        "color": "#FF1F1F1C"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "Drinks"
+      }
+     ]
+    }
+   ]
+  },
+  "tabDrinksText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 76
+    },
+    "height": {
+     "hug": 32
+    },
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "props": {
+    "text": "Drinks",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 26,
+     "color": "#FF6E6960"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= tab == 'Drinks' ? '#FF1F1F1C' : '#FF6E6960'}"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 20
+       }
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 18
+       }
+      }
+     }
+    }
+   ]
+  },
+  "tabDrinksBar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00D86636"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= tab == 'Drinks' ? '#FFD86636' : '#00D86636'}"
+   }
+  },
+  "tabDessert": {
+   "type": "column",
+   "children": [
+    "tabDessertText",
+    "tabDessertBar"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 50
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "stretch"
+   },
+   "states": {
+    "hovered": {
+     "tabDessertText": {
+      "props": {
+       "style": {
+        "color": "#FF1F1F1C"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "Dessert"
+      }
+     ]
+    }
+   ]
+  },
+  "tabDessertText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 76
+    },
+    "height": {
+     "hug": 32
+    },
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "props": {
+    "text": "Dessert",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 26,
+     "color": "#FF6E6960"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= tab == 'Dessert' ? '#FF1F1F1C' : '#FF6E6960'}"
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 20
+       }
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 18
+       }
+      }
+     }
+    }
+   ]
+  },
+  "tabDessertBar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00D86636"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= tab == 'Dessert' ? '#FFD86636' : '#00D86636'}"
+   }
+  },
+  "introRow": {
+   "type": "flex",
+   "children": [
+    "introText",
+    "printLink"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 60
+    },
+    "margin": [
+     0,
+     38,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "end"
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "crossAxisAlignment": "start",
+       "spacing": 24
+      },
+      "layout": {
+       "margin": [
+        0,
+        30,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "introText": {
+   "type": "column",
+   "children": [
+    "tabIntro",
+    "countLabel"
+   ],
+   "layout": {
+    "width": {
+     "hug": 500
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "tabIntro": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 400
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "text": "${= get(intros, tab)}",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 23,
+     "letterSpacing": -0.4,
+     "color": "#FF1F1F1C"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 20
+       }
+      }
+     }
+    }
+   ]
+  },
+  "countLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${countLabel}",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 2,
+     "color": "#FF5B574F"
+    }
+   }
+  },
+  "printLink": {
+   "type": "row",
+   "children": [
+    "printText",
+    "printArrow"
+   ],
+   "layout": {
+    "width": {
+     "hug": 98
+    },
+    "height": {
+     "hug": 26
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     7
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFD86636"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "print"
+      }
+     ]
+    }
+   ]
+  },
+  "printText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 76
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "PRINT MENU",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "printArrow": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FF1F1F1C"
+   }
+  },
+  "sectionsList": {
+   "type": "listView",
+   "children": [
+    "section"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 1800
+    },
+    "margin": [
+     0,
+     40,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 48
+   },
+   "bind": {
+    "data": "${sections}",
+    "visible": "${= length(shown) > 0}"
+   }
+  },
+  "section": {
+   "type": "column",
+   "children": [
+    "sectionHead",
+    "dishList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 500
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "sectionHead": {
+   "type": "row",
+   "children": [
+    "sectionTitle",
+    "sectionCount"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     12
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "end"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFCDC5B6"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "sectionTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 38
+    }
+   },
+   "props": {
+    "text": "${item.key}",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 30,
+     "letterSpacing": -0.6,
+     "color": "#FF1F1F1C"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 26
+       }
+      }
+     }
+    }
+   ]
+  },
+  "sectionCount": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     6
+    ]
+   },
+   "props": {
+    "text": "${= item.count + (item.count == 1 ? ' ITEM' : ' ITEMS')}",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 11,
+     "letterSpacing": 2,
+     "color": "#FF5B574F"
+    }
+   }
+  },
+  "dishList": {
+   "type": "listView",
+   "children": [
+    "dish"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 400
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${item.items}"
+   }
+  },
+  "dish": {
+   "type": "column",
+   "children": [
+    "dishTop",
+    "dishDesc",
+    "dishTags"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 120
+    },
+    "padding": [
+     0,
+     22,
+     0,
+     22
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFCDC5B6"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "dishTop": {
+   "type": "row",
+   "children": [
+    "dishNameRow",
+    "dishPrice"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "start",
+    "spacing": 16
+   }
+  },
+  "dishNameRow": {
+   "type": "row",
+   "children": [
+    "dishName",
+    "dishBadge"
+   ],
+   "layout": {
+    "width": {
+     "flexible": 700
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "wrap": false
+   }
+  },
+  "dishName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "flexible": 500
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 17,
+     "fontWeight": 700,
+     "height": 1.35,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "dishBadge": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "${item.badge}",
+    "style": {
+     "fontFamily": "Caveat",
+     "fontSize": 20,
+     "fontStyle": "italic",
+     "color": "#FFC4552A"
+    }
+   },
+   "bind": {
+    "visible": "${= isNotEmpty(coalesce(item.badge, ''))}"
+   }
+  },
+  "dishPrice": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "£${item.price}",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 18,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "dishDesc": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "${item.description}",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "height": 1.4,
+     "color": "#FF5B574F"
+    }
+   }
+  },
+  "dishTags": {
+   "type": "listView",
+   "children": [
+    "tagChip"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 22
+    },
+    "margin": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "scrollable": false,
+    "wrap": true,
+    "scrollDirection": "horizontal",
+    "wrapSpacing": 6,
+    "runSpacing": 6
+   },
+   "bind": {
+    "data": "${item.tags}",
+    "visible": "${= length(item.tags) > 0}"
+   }
+  },
+  "tagChip": {
+   "type": "row",
+   "children": [
+    "tagText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     9,
+     4,
+     9,
+     4
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFB9AF9F"
+     }
+    ],
+    "radius": 20
+   }
+  },
+  "tagText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "props": {
+    "text": "${= upper(item)}",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 10,
+     "letterSpacing": 1,
+     "color": "#FF5B574F"
+    }
+   }
+  },
+  "emptyState": {
+   "type": "column",
+   "children": [
+    "emptyEyebrow",
+    "emptyTitle",
+    "emptyCopy",
+    "emptyButton"
+   ],
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 328
+    },
+    "padding": [
+     32,
+     64,
+     32,
+     64
+    ],
+    "margin": [
+     0,
+     36,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF8F2E9"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFB9AF9F"
+     }
+    ],
+    "dashPattern": [
+     3,
+     3
+    ]
+   },
+   "bind": {
+    "visible": "${= length(shown) == 0}"
+   }
+  },
+  "emptyEyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Nothing on this list",
+    "style": {
+     "fontFamily": "Caveat",
+     "fontSize": 19,
+     "fontStyle": "italic",
+     "color": "#FFD86636"
+    }
+   }
+  },
+  "emptyTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 790
+    },
+    "height": {
+     "hug": 50
+    }
+   },
+   "props": {
+    "text": "No matches this time.",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 44,
+     "letterSpacing": -1,
+     "color": "#FF1F1F1C"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 28,
+        "letterSpacing": -0.5
+       }
+      }
+     }
+    }
+   ]
+  },
+  "emptyCopy": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 790
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Try another search, menu or dietary preference.",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 17,
+     "height": 1.5,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "emptyButton": {
+   "type": "row",
+   "children": [
+    "emptyButtonText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 264
+    },
+    "height": 52,
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ],
+    "margin": [
+     0,
+     18,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD86636"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "emptyButton": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFE5814F"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "filters",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ]
+  },
+  "emptyButtonText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 216
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "CLEAR SEARCH AND FILTERS",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FF191B19"
+    }
+   }
+  },
+  "notesRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": 2,
+    "margin": [
+     0,
+     64,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1F1F1C"
+     }
+    ]
+   }
+  },
+  "pricingNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 918
+    },
+    "height": {
+     "hug": 18
+    },
+    "margin": [
+     0,
+     28,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "Prices include VAT. A discretionary 12.5% service charge is added to tables of six or more.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "height": 1.5,
+     "color": "#FF5B574F"
+    }
+   }
+  },
+  "allergyNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 520
+    },
+    "height": {
+     "hug": 36
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "constraints": {
+     "maxWidth": 530
+    }
+   },
+   "props": {
+    "text": "Dietary labels are a guide, not an allergy guarantee. Our kitchen handles wheat, dairy, nuts, shellfish and other allergens. Please speak to the team before ordering.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "height": 1.5,
+     "color": "#FF5B574F"
+    }
+   }
+  },
+  "side": {
+   "type": "column",
+   "children": [
+    "sideToggle",
+    "sideBody"
+   ],
+   "layout": {
+    "width": 290,
+    "height": {
+     "hug": 520
+    },
+    "padding": [
+     26,
+     30,
+     26,
+     30
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEAE2D5"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFD86636"
+     }
+    ],
+    "strokeWidth": 4,
+    "strokeSides": "top",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1A3B2A18",
+      "offset": [
+       0,
+       14
+      ],
+      "blurRadius": 30
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": 240,
+       "padding": [
+        20,
+        30,
+        20,
+        30
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 354
+       },
+       "padding": [
+        18,
+        0,
+        18,
+        0
+       ],
+       "order": -1
+      }
+     }
+    }
+   ]
+  },
+  "sideToggle": {
+   "type": "row",
+   "children": [
+    "sideToggleLabel",
+    "sideToggleStatus",
+    "sideToggleIcon"
+   ],
+   "visible": false,
+   "layout": {
+    "width": {
+     "fill": 354
+    },
+    "height": 58
+   },
+   "props": {
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "visible": true
+     }
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "filtersOpen",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "sideToggleLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "SEARCH & DIETARY FILTERS",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12.5,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "sideToggleStatus": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= activeCount > 0 ? activeCount + ' ACTIVE' : 'OPEN'}",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 11,
+     "fontWeight": 700,
+     "letterSpacing": 1.6,
+     "color": "#FFB2481F"
+    }
+   }
+  },
+  "sideToggleIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": "expand_more",
+    "color": "#FF1F1F1C"
+   },
+   "bind": {
+    "props.icon": "${= filtersOpen ? 'expand_less' : 'expand_more'}"
+   }
+  },
+  "sideBody": {
+   "type": "column",
+   "children": [
+    "findRow",
+    "searchLabel",
+    "searchWrap",
+    "eatLabel",
+    "eatHelp",
+    "filterGrid",
+    "clearLink",
+    "noteRule",
+    "noteTitle",
+    "noteText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 600
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "padding": [
+        0,
+        0,
+        0,
+        34
+       ]
+      }
+     }
+    }
+   ],
+   "bind": {
+    "visible": "${= !screen.isMobile || filtersOpen}"
+   }
+  },
+  "findRow": {
+   "type": "row",
+   "children": [
+    "findText",
+    "asterisk"
+   ],
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 20
+    },
+    "margin": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "margin": [
+        0,
+        0,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "findText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 130
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "FIND YOUR PLATE",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 2.4,
+     "color": "#FFB2481F"
+    }
+   }
+  },
+  "asterisk": {
+   "type": "box",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "path": "M9 0 L9 18 M0 9 L18 9 M2.6 2.6 L15.4 15.4 M15.4 2.6 L2.6 15.4",
+    "strokeJoin": "round"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFD86636"
+     }
+    ],
+    "strokeWidth": 1.2
+   }
+  },
+  "searchLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 18
+    },
+    "margin": [
+     0,
+     32,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "SEARCH THE MENU",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12.5,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "searchWrap": {
+   "type": "stack",
+   "children": [
+    "search",
+    "searchClear"
+   ],
+   "layout": {
+    "width": {
+     "fill": 238
+    },
+    "height": 46,
+    "margin": [
+     0,
+     12,
+     0,
+     0
+    ]
+   }
+  },
+  "search": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 238
+    },
+    "height": {
+     "fill": 46
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "color": "#FF1F1F1C"
+    },
+    "cursorColor": "#FFD86636",
+    "focusRingColor": "#FFD86636",
+    "focusRingWidth": 2,
+    "decoration": {
+     "hintText": "Search dishes or ingredients",
+     "hintStyle": {
+      "fontFamily": "DM Sans",
+      "fontSize": 14,
+      "color": "#FF6E6960"
+     },
+     "filled": true,
+     "fillColor": "#FFFCF9F3",
+     "isDense": true,
+     "contentPadding": [
+      0,
+      14,
+      34,
+      14
+     ],
+     "prefixIcon": {
+      "icon": "search",
+      "size": 20,
+      "color": "#FF3B3833"
+     },
+     "border": {
+      "type": "outline",
+      "borderSide": {
+       "color": "#FF8F877A",
+       "width": 1
+      },
+      "borderRadius": 0
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderSide": {
+       "color": "#FF8F877A",
+       "width": 1
+      },
+      "borderRadius": 0
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderSide": {
+       "color": "#FF8F877A",
+       "width": 1
+      },
+      "borderRadius": 0
+     }
+    }
+   },
+   "bind": {
+    "props.initialValue": "${query}"
+   }
+  },
+  "searchClear": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18,
+    "x": {
+     "end": 14
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "icon": "close",
+    "color": "#FF2C4A8A"
+   },
+   "bind": {
+    "visible": "${= query != ''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "eatLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 18
+    },
+    "margin": [
+     2,
+     34,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "EAT YOUR WAY",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12.5,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "eatHelp": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 36
+    },
+    "margin": [
+     0,
+     10,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "Select more than one preference to narrow the menu.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12.5,
+     "height": 1.5,
+     "color": "#FF6E6960"
+    }
+   }
+  },
+  "filterGrid": {
+   "type": "gridView",
+   "children": [
+    "filterOption"
+   ],
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 150
+    },
+    "margin": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "physics": "never",
+    "minCrossAxisExtent": 140,
+    "mainAxisExtent": 37,
+    "crossAxisSpacing": 16
+   },
+   "bind": {
+    "data": "${tags}"
+   }
+  },
+  "filterOption": {
+   "type": "row",
+   "children": [
+    "filterCheck",
+    "filterText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "fill": 37
+    }
+   },
+   "props": {
+    "spacing": 12
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "filters",
+       "value": "${= contains(filters, item) ? without(filters, item) : append(filters, item)}"
+      }
+     ]
+    }
+   ]
+  },
+  "filterCheck": {
+   "type": "checkbox",
+   "layout": {
+    "width": 18,
+    "height": 18,
+    "margin": [
+     4,
+     0,
+     0,
+     0
+    ]
+   },
+   "ignorePointer": true,
+   "props": {
+    "compact": true,
+    "value": false,
+    "activeColor": "#FFD86636",
+    "checkColor": "#FFFFFFFF",
+    "fillColor": "#FFFCF9F3",
+    "side": {
+     "color": "#FF3B3833",
+     "width": 1.2
+    },
+    "borderRadius": 2
+   },
+   "bind": {
+    "props.value": "${= contains(filters, item)}"
+   }
+  },
+  "filterText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "color": "#FF1F1F1C"
+    }
+   }
+  },
+  "clearLink": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": {
+     "hug": 18
+    },
+    "margin": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "Clear search and filters",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "decoration": "underline",
+     "color": "#FFB2481F"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "filters",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ]
+  },
+  "noteRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": 1,
+    "margin": [
+     0,
+     40,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFC8BFB0"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "noteTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 30
+    },
+    "margin": [
+     0,
+     16,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "A note from us",
+    "style": {
+     "fontFamily": "Caveat",
+     "fontSize": 23,
+     "fontStyle": "italic",
+     "color": "#FFD86636"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "noteText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 54
+    },
+    "margin": [
+     0,
+     6,
+     0,
+     2
+    ]
+   },
+   "props": {
+    "text": "Questions about an ingredient? Ask us before ordering. We’re happy to talk it through.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12.5,
+     "height": 1.5,
+     "color": "#FF5B574F"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "cta": {
+   "type": "flex",
+   "children": [
+    "ctaText",
+    "ctaPhoto"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 410
+    },
+    "padding": [
+     80,
+     0,
+     80,
+     0
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 45,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1D1F1C"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "assets/grain.png",
+       "fit": "none",
+       "repeat": "repeat",
+       "alignment": [
+        -1,
+        -1
+       ]
+      }
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        0,
+        32,
+        0
+       ]
+      },
+      "props": {
+       "spacing": 32
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "padding": [
+        0,
+        0,
+        0,
+        64
+       ]
+      },
+      "props": {
+       "direction": "vertical",
+       "spacing": 56,
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "ctaText": {
+   "type": "column",
+   "children": [
+    "ctaEyebrow",
+    "ctaTitle",
+    "ctaCopy",
+    "ctaButton"
+   ],
+   "layout": {
+    "width": {
+     "fill": 617
+    },
+    "height": {
+     "hug": 280
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "padding": [
+        18,
+        0,
+        18,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "ctaEyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "A TABLE IS WAITING",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 2.4,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "ctaTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 560
+    },
+    "height": {
+     "hug": 128
+    },
+    "margin": [
+     0,
+     16,
+     0,
+     0
+    ],
+    "constraints": {
+     "maxWidth": 560
+    }
+   },
+   "props": {
+    "text": "The best way to enjoy it? Together.",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 60,
+     "height": 1.07,
+     "letterSpacing": -1.8,
+     "color": "#FFF4EFE5"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 40,
+        "letterSpacing": -1
+       }
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 40
+       }
+      }
+     }
+    }
+   ]
+  },
+  "ctaCopy": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 560
+    },
+    "height": {
+     "hug": 24
+    },
+    "margin": [
+     0,
+     20,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "Bring your favourite people. We’ll take care of the rest.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 17,
+     "height": 1.45,
+     "color": "#FFE6E0D4"
+    }
+   }
+  },
+  "ctaButton": {
+   "type": "row",
+   "children": [
+    "ctaButtonText",
+    "ctaButtonArrow"
+   ],
+   "layout": {
+    "width": {
+     "hug": 186
+    },
+    "height": 52,
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ],
+    "margin": [
+     0,
+     34,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD86636"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "ctaButton": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFE5814F"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "ctaButtonText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "BOOK A TABLE",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FF191B19"
+    }
+   }
+  },
+  "ctaButtonArrow": {
+   "type": "icon",
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FF191B19"
+   }
+  },
+  "ctaPhoto": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 608
+    },
+    "height": 410
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2A2622"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "assets/ember-vegetables.jpg",
+       "fit": "cover",
+       "alignment": [
+        0.3,
+        0
+       ]
+      }
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "order": -1,
+       "height": 230,
+       "margin": [
+        0,
+        0,
+        36,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "footer": {
+   "type": "column",
+   "children": [
+    "footerTop",
+    "footerRule",
+    "footerBottom"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 380
+    },
+    "padding": [
+     80,
+     60,
+     80,
+     40
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1D1F1C"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "assets/grain.png",
+       "fit": "none",
+       "repeat": "repeat",
+       "alignment": [
+        -1,
+        -1
+       ]
+      }
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        80,
+        32,
+        40
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "padding": [
+        18,
+        80,
+        18,
+        90
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "footerTop": {
+   "type": "flex",
+   "children": [
+    "footerBrand",
+    "footerFind",
+    "footerExplore"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "crossAxisAlignment": "start",
+    "spacing": 0
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 56
+      }
+     }
+    }
+   ]
+  },
+  "footerBrand": {
+   "type": "column",
+   "children": [
+    "footerTitle",
+    "footerTagline"
+   ],
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 150
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "footerTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 400
+    },
+    "height": {
+     "hug": 128
+    }
+   },
+   "props": {
+    "text": "Gather round\nthe fire.",
+    "style": {
+     "fontFamily": "Roboto Slab",
+     "fontSize": 64,
+     "height": 1.0,
+     "letterSpacing": -2,
+     "color": "#FFF4EFE5"
+    },
+    "runs": [
+     {
+      "start": 21,
+      "end": 22,
+      "style": {
+       "color": "#FFD86636"
+      }
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 44,
+        "letterSpacing": -1.2
+       }
+      }
+     }
+    }
+   ]
+  },
+  "footerTagline": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "A neighbourhood table, close to the fire.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "footerFind": {
+   "type": "column",
+   "children": [
+    "findUsLabel",
+    "findUsAddress",
+    "findUsPhone",
+    "findUsEmail"
+   ],
+   "layout": {
+    "width": 344,
+    "height": {
+     "hug": 140
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": 240
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 354
+       }
+      }
+     }
+    }
+   ]
+  },
+  "findUsLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     4
+    ]
+   },
+   "props": {
+    "text": "FIND US",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 2,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "findUsAddress": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 48
+    }
+   },
+   "props": {
+    "text": "18 Willow Lane\nEast Borough, EB 2QH",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "height": 1.55,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "findUsPhone": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 22
+    },
+    "margin": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "+44 (0)20 7946 0842",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "findUsEmail": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "hello@casabrasa.example",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "footerExplore": {
+   "type": "column",
+   "children": [
+    "exploreLabel",
+    "ex1",
+    "ex2",
+    "ex3",
+    "ex4",
+    "ex5"
+   ],
+   "layout": {
+    "width": 296,
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 8
+   },
+   "media": [
+    {
+     "maxWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": 160
+      }
+     }
+    },
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 354
+       }
+      }
+     }
+    }
+   ]
+  },
+  "exploreLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     6
+    ]
+   },
+   "props": {
+    "text": "EXPLORE",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 2,
+     "color": "#FFE5814F"
+    }
+   }
+  },
+  "ex1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Menu",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "ex2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Reservations",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "ex3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Private dining",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "ex4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Visit",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "ex5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Gift cards",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "color": "#FFF4EFE5"
+    }
+   }
+  },
+  "footerRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": 1,
+    "margin": [
+     0,
+     80,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#40F4EFE5"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "layout": {
+       "margin": [
+        0,
+        48,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "footerBottom": {
+   "type": "flex",
+   "children": [
+    "copyright",
+    "footerMotto"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 18
+    },
+    "margin": [
+     0,
+     26,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "crossAxisAlignment": "start",
+       "spacing": 20
+      }
+     }
+    }
+   ]
+  },
+  "copyright": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 350
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "© 2026 Casa Brasa. An independent neighbourhood restaurant.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "color": "#FFD9D2C5"
+    }
+   }
+  },
+  "footerMotto": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Good food. Good company. Always.",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "color": "#FFD9D2C5"
+    }
+   }
+  },
+  "reserveBar": {
+   "type": "row",
+   "children": [
+    "reserveBarText",
+    "reserveBarArrow"
+   ],
+   "visible": false,
+   "layout": {
+    "width": {
+     "fill": 366
+    },
+    "height": 52,
+    "x": {
+     "start": 12,
+     "end": 12
+    },
+    "y": {
+     "end": 12
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD86636"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#59000000",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 24
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "visible": true
+     }
+    }
+   ]
+  },
+  "reserveBarText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 134
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "RESERVE A TABLE",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "letterSpacing": 1.8,
+     "color": "#FF191B19"
+    }
+   }
+  },
+  "reserveBarArrow": {
+   "type": "icon",
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FF191B19"
+   }
+  }
+ },
+ "variables": {
+  "menu": [
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "Dinner"
+   },
+   {
+    "name": "query",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "filters",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "menuOpen",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "filtersOpen",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "tags",
+    "type": "list",
+    "value": [
+     "Vegetarian",
+     "Vegan",
+     "Gluten-free",
+     "Dairy-free"
+    ]
+   },
+   {
+    "name": "intros",
+    "type": "map",
+    "value": {
+     "Lunch": "A midday pause worth taking slowly.",
+     "Dinner": "Bring an appetite. Pass the plates.",
+     "Drinks": "Something bright before dinner, something slow after.",
+     "Dessert": "There is always room for one last thing."
+    }
+   },
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": "l1",
+      "tab": "Lunch",
+      "section": "To begin",
+      "name": "Warm sourdough & cultured butter",
+      "description": "Sea salt, smoked honey",
+      "price": 6,
+      "tags": [
+       "Vegetarian"
+      ]
+     },
+     {
+      "id": "l2",
+      "tab": "Lunch",
+      "section": "To begin",
+      "name": "Ember carrots",
+      "description": "Whipped chickpea, preserved lemon, coriander",
+      "price": 11,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "l3",
+      "tab": "Lunch",
+      "section": "To begin",
+      "name": "Crisp chicken skins",
+      "description": "Green peppercorn mayonnaise, pickled shallot",
+      "price": 9,
+      "tags": [
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "l4",
+      "tab": "Lunch",
+      "section": "Mains",
+      "name": "Hearth-roasted squash",
+      "description": "Barley, cavolo nero, sage and pumpkin seed",
+      "price": 18,
+      "tags": [
+       "Vegetarian"
+      ]
+     },
+     {
+      "id": "l5",
+      "tab": "Lunch",
+      "section": "Mains",
+      "name": "Coal-fired sea bream",
+      "description": "Lemon, braised fennel, parsley oil",
+      "price": 24,
+      "tags": [
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "l6",
+      "tab": "Lunch",
+      "section": "Mains",
+      "name": "Brasa cheeseburger",
+      "description": "Aged cheddar, onion jam, rosemary fries",
+      "price": 19,
+      "tags": []
+     },
+     {
+      "id": "l7",
+      "tab": "Lunch",
+      "section": "Mains",
+      "name": "Roast aubergine flatbread",
+      "description": "Tahini, pickled cucumber, chilli crisp",
+      "price": 17,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "l8",
+      "tab": "Lunch",
+      "section": "Alongside",
+      "name": "Little gem & herbs",
+      "description": "Sharp lemon dressing, toasted seeds",
+      "price": 7,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "l9",
+      "tab": "Lunch",
+      "section": "Alongside",
+      "name": "Rosemary fries",
+      "description": "Sea salt, smoked garlic aioli",
+      "price": 6,
+      "tags": [
+       "Vegetarian",
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "d1",
+      "tab": "Dinner",
+      "section": "Small plates",
+      "name": "Sourdough & whipped smoked butter",
+      "description": "House bread, Maldon salt",
+      "price": 7,
+      "tags": [
+       "Vegetarian"
+      ]
+     },
+     {
+      "id": "d2",
+      "tab": "Dinner",
+      "section": "Small plates",
+      "name": "Charred hispi cabbage",
+      "description": "White bean cream, hazelnut, chive",
+      "price": 13,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "d3",
+      "tab": "Dinner",
+      "section": "Small plates",
+      "name": "Beetroot, blood orange & labneh",
+      "description": "Pistachio and mint",
+      "price": 12,
+      "tags": [
+       "Vegetarian",
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "d4",
+      "tab": "Dinner",
+      "section": "From the fire",
+      "name": "Whole day-boat fish",
+      "description": "Lemon, caper butter, market greens",
+      "price": 29,
+      "tags": [
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "d5",
+      "tab": "Dinner",
+      "section": "From the fire",
+      "name": "Slow-cooked lamb shoulder",
+      "description": "Charred onion, rosemary jus, flatbread",
+      "price": 32,
+      "tags": []
+     },
+     {
+      "id": "d6",
+      "tab": "Dinner",
+      "section": "From the fire",
+      "name": "Wood-roasted cauliflower",
+      "description": "Smoky lentils, almond, salsa verde",
+      "price": 22,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "d7",
+      "tab": "Dinner",
+      "section": "Alongside",
+      "name": "Crisp potatoes",
+      "description": "Garlic, parsley, sea salt",
+      "price": 7,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "d8",
+      "tab": "Dinner",
+      "section": "Alongside",
+      "name": "Little gem salad",
+      "description": "Buttermilk dressing, herbs",
+      "price": 7,
+      "tags": [
+       "Vegetarian",
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "d9",
+      "tab": "Dinner",
+      "section": "Small plates",
+      "name": "Wood-fired mussels",
+      "description": "Tomato, fennel, grilled bread",
+      "price": 15,
+      "tags": [
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "d10",
+      "tab": "Dinner",
+      "section": "From the fire",
+      "name": "Aged rib-eye for two",
+      "description": "Bone marrow butter, watercress, crisp potatoes",
+      "price": 68,
+      "tags": [
+       "Gluten-free"
+      ],
+      "badge": "For sharing"
+     },
+     {
+      "id": "d11",
+      "tab": "Dinner",
+      "section": "Alongside",
+      "name": "Blistered green beans",
+      "description": "Almond, garlic, sherry vinegar",
+      "price": 8,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b1",
+      "tab": "Drinks",
+      "section": "Cocktails",
+      "name": "The Brasa Martini",
+      "description": "Gin, smoked olive brine, rosemary",
+      "price": 13,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b2",
+      "tab": "Drinks",
+      "section": "Cocktails",
+      "name": "Blood Orange Spritz",
+      "description": "Bitter orange, sparkling wine, soda",
+      "price": 12,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b3",
+      "tab": "Drinks",
+      "section": "Wine by the glass",
+      "name": "La Grange Rouge",
+      "description": "Languedoc, France · juicy & bright",
+      "price": 9,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b4",
+      "tab": "Drinks",
+      "section": "Wine by the glass",
+      "name": "Picpoul de Pinet",
+      "description": "Languedoc, France · citrus & sea air",
+      "price": 9,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b5",
+      "tab": "Drinks",
+      "section": "No alcohol",
+      "name": "Hearthside Cooler",
+      "description": "Apple, ginger, smoked lemon",
+      "price": 7,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b6",
+      "tab": "Drinks",
+      "section": "No alcohol",
+      "name": "Seasonal shrub & soda",
+      "description": "Ask for today’s fruit",
+      "price": 6,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b7",
+      "tab": "Drinks",
+      "section": "Cocktails",
+      "name": "Ember Old Fashioned",
+      "description": "Bourbon, burnt orange, maple, aromatic bitters",
+      "price": 14,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b8",
+      "tab": "Drinks",
+      "section": "Wine by the glass",
+      "name": "Garnacha Rosado",
+      "description": "Navarra, Spain · red berries & spice",
+      "price": 10,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "b9",
+      "tab": "Drinks",
+      "section": "No alcohol",
+      "name": "Spiced pear fizz",
+      "description": "Pear, cardamom, sparkling apple",
+      "price": 7,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "s1",
+      "tab": "Dessert",
+      "section": "Something sweet",
+      "name": "Burnt Basque cheesecake",
+      "description": "Roasted plum, crème fraîche",
+      "price": 10,
+      "tags": [
+       "Vegetarian",
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "s2",
+      "tab": "Dessert",
+      "section": "Something sweet",
+      "name": "Dark chocolate pot",
+      "description": "Olive oil, sea salt, cocoa nib",
+      "price": 9,
+      "tags": [
+       "Vegetarian",
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "s3",
+      "tab": "Dessert",
+      "section": "Something sweet",
+      "name": "Poached pear",
+      "description": "Blackberry, oat crumble, lemon sorbet",
+      "price": 9,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "s4",
+      "tab": "Dessert",
+      "section": "After dinner",
+      "name": "Affogato",
+      "description": "Vanilla ice cream, espresso",
+      "price": 7,
+      "tags": [
+       "Vegetarian",
+       "Gluten-free"
+      ]
+     },
+     {
+      "id": "s5",
+      "tab": "Dessert",
+      "section": "After dinner",
+      "name": "House amaro",
+      "description": "A small, warming pour",
+      "price": 6,
+      "tags": [
+       "Vegetarian",
+       "Vegan",
+       "Gluten-free",
+       "Dairy-free"
+      ]
+     },
+     {
+      "id": "s6",
+      "tab": "Dessert",
+      "section": "Something sweet",
+      "name": "Sticky date pudding",
+      "description": "Toffee sauce, vanilla ice cream",
+      "price": 10,
+      "tags": [
+       "Vegetarian"
+      ]
+     },
+     {
+      "id": "s7",
+      "tab": "Dessert",
+      "section": "After dinner",
+      "name": "Espresso & chocolate truffle",
+      "description": "A small finish, made in-house",
+      "price": 6,
+      "tags": [
+       "Vegetarian",
+       "Gluten-free"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "shown",
+    "type": "list",
+    "formula": "filter(items, i => i.tab == tab && (trim(query) == '' || contains(lower(i.name + ' ' + i.description), lower(trim(query)))) && all(filters, f => contains(i.tags, f)))"
+   },
+   {
+    "name": "sections",
+    "type": "list",
+    "formula": "groupBy(shown, 'section')"
+   },
+   {
+    "name": "activeCount",
+    "type": "integer",
+    "formula": "length(filters) + (trim(query) == '' ? 0 : 1)"
+   },
+   {
+    "name": "countLabel",
+    "type": "text",
+    "formula": "length(shown) + (length(shown) == 1 ? ' ITEM' : ' ITEMS') + (activeCount > 0 ? ' MATCHING YOUR CHOICES' : ' ON THIS MENU')"
+   }
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "stream": "weather@400tps.jsonl",
+ "size": "390x844",
+ "source": "synthetic",
+ "rateTokensPerSecond": 400,
+ "ttftMs": 500,
+ "timeToFirstPaintMs": 1278,
+ "timeToFirstSectionMs": 1670,
+ "timeToCompleteMs": 7229,
+ "outputTokens": 2692,
+ "tokensEstimated": true,
+ "chars": 10767,
+ "deltas": 1083,
+ "opsApplied": 55,
+ "opsRejected": 0,
+ "streamedOps": 55,
+ "rejections": [],
+ "nodes": 54,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 6,
+  "max": 13
+ },
+ "frames": 122,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 6,
+ "pumps": 1206,
+ "pumpMsMedian": 0.109,
+ "renderExceptions": [],
+ "warnings": 0
+}

@@ -1,0 +1,9 @@
+{"meta":{"ui":"flights","kind":"card","followup":"Sort them by price.","base":"flights@150tps.jsonl","source":"synthetic","rateTokensPerSecond":150,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"chars":65,"outputTokens":17}}
+{"tMs":507,"delta":"{\"op"}
+{"tMs":527,"delta":"s\":[\n{\"op\":\""}
+{"tMs":533,"delta":"move"}
+{"tMs":547,"delta":"\",\"id\":\""}
+{"tMs":567,"delta":"opt3\",\"paren"}
+{"tMs":580,"delta":"t\":\"fcOp"}
+{"tMs":607,"delta":"ts\",\"index\":1}\n]"}
+{"tMs":608,"delta":"}"}

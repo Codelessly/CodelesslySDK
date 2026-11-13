@@ -1,0 +1,1078 @@
+{
+ "schema": 2,
+ "roots": [
+  "flights"
+ ],
+ "nodes": {
+  "flights": {
+   "type": "canvas",
+   "name": "Flight options",
+   "slots": {
+    "body": "fcCard"
+   },
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 520
+    }
+   }
+  },
+  "fcCard": {
+   "type": "column",
+   "children": [
+    "fcHead",
+    "fcOpts",
+    "fcFoot"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "hug": 520
+    },
+    "padding": [
+     16,
+     16,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 20,
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#140F172A",
+      "offset": [
+       0,
+       6
+      ],
+      "blurRadius": 24
+     }
+    ]
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "fcHead": {
+   "type": "row",
+   "children": [
+    "fcBadge",
+    "fcHeadText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "fcBadge": {
+   "type": "row",
+   "children": [
+    "fcPlane"
+   ],
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEFF6FF"
+     }
+    ],
+    "radius": 12
+   }
+  },
+  "fcPlane": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "flight_takeoff"
+    },
+    "color": "#FF2563EB"
+   }
+  },
+  "fcHeadText": {
+   "type": "column",
+   "children": [
+    "fcTitle",
+    "fcSub"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "fcTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "London \u2192 Lisbon",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 18,
+     "fontWeight": 700,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "fcSub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Fri 14 Nov \u00b7 1 adult \u00b7 Economy",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 13,
+     "fontWeight": 400,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "fcOpts": {
+   "type": "column",
+   "children": [
+    "opt1",
+    "opt2",
+    "opt3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 240
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "opt1": {
+   "type": "row",
+   "children": [
+    "opt1Radio",
+    "opt1Times",
+    "opt1Price"
+   ],
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 14,
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ],
+    "strokeWidth": 1.5
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= selected == \"TP1351\" ? \"#FFF5F9FF\" : \"#FFFFFFFF\"}",
+    "decoration.strokes[0].color": "${= selected == \"TP1351\" ? \"#FF2563EB\" : \"#FFE2E8F0\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selected",
+       "value": "TP1351"
+      }
+     ]
+    }
+   ]
+  },
+  "opt1Radio": {
+   "type": "row",
+   "children": [
+    "opt1Dot"
+   ],
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "shape": "circle",
+    "strokes": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ],
+    "strokeWidth": 2
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= selected == \"TP1351\" ? \"#FF2563EB\" : \"#FFCBD5E1\"}"
+   }
+  },
+  "opt1Dot": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= selected == \"TP1351\"}"
+   }
+  },
+  "opt1Times": {
+   "type": "column",
+   "children": [
+    "opt1Time",
+    "opt1Meta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "opt1Time": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "07:10 \u2192 09:55",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "opt1Meta": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "TAP Air Portugal \u00b7 Direct \u00b7 2h 45m",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 400,
+     "color": "#FF64748B"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "opt1Price": {
+   "type": "column",
+   "children": [
+    "opt1Amount",
+    "opt1Tag"
+   ],
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "opt1Amount": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "\u00a384",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 18,
+     "fontWeight": 700,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "opt1Tag": {
+   "type": "row",
+   "children": [
+    "opt1TagText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDCFCE7"
+     }
+    ],
+    "radius": 10
+   }
+  },
+  "opt1TagText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "props": {
+    "text": "Cheapest",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "color": "#FF16A34A"
+    }
+   }
+  },
+  "opt2": {
+   "type": "row",
+   "children": [
+    "opt2Radio",
+    "opt2Times",
+    "opt2Price"
+   ],
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 14,
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ],
+    "strokeWidth": 1.5
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= selected == \"BA500\" ? \"#FFF5F9FF\" : \"#FFFFFFFF\"}",
+    "decoration.strokes[0].color": "${= selected == \"BA500\" ? \"#FF2563EB\" : \"#FFE2E8F0\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selected",
+       "value": "BA500"
+      }
+     ]
+    }
+   ]
+  },
+  "opt2Radio": {
+   "type": "row",
+   "children": [
+    "opt2Dot"
+   ],
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "shape": "circle",
+    "strokes": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ],
+    "strokeWidth": 2
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= selected == \"BA500\" ? \"#FF2563EB\" : \"#FFCBD5E1\"}"
+   }
+  },
+  "opt2Dot": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= selected == \"BA500\"}"
+   }
+  },
+  "opt2Times": {
+   "type": "column",
+   "children": [
+    "opt2Time",
+    "opt2Meta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "opt2Time": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "11:40 \u2192 14:20",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "opt2Meta": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "British Airways \u00b7 Direct \u00b7 2h 40m",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 400,
+     "color": "#FF64748B"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "opt2Price": {
+   "type": "column",
+   "children": [
+    "opt2Amount",
+    "opt2Tag"
+   ],
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "opt2Amount": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "\u00a3129",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 18,
+     "fontWeight": 700,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "opt2Tag": {
+   "type": "row",
+   "children": [
+    "opt2TagText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDBEAFE"
+     }
+    ],
+    "radius": 10
+   }
+  },
+  "opt2TagText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "props": {
+    "text": "Best time",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "opt3": {
+   "type": "row",
+   "children": [
+    "opt3Radio",
+    "opt3Times",
+    "opt3Price"
+   ],
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 14,
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ],
+    "strokeWidth": 1.5
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= selected == \"EZY8611\" ? \"#FFF5F9FF\" : \"#FFFFFFFF\"}",
+    "decoration.strokes[0].color": "${= selected == \"EZY8611\" ? \"#FF2563EB\" : \"#FFE2E8F0\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selected",
+       "value": "EZY8611"
+      }
+     ]
+    }
+   ]
+  },
+  "opt3Radio": {
+   "type": "row",
+   "children": [
+    "opt3Dot"
+   ],
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "shape": "circle",
+    "strokes": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ],
+    "strokeWidth": 2
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= selected == \"EZY8611\" ? \"#FF2563EB\" : \"#FFCBD5E1\"}"
+   }
+  },
+  "opt3Dot": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= selected == \"EZY8611\"}"
+   }
+  },
+  "opt3Times": {
+   "type": "column",
+   "children": [
+    "opt3Time",
+    "opt3Meta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "opt3Time": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "18:05 \u2192 21:00",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "opt3Meta": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "easyJet \u00b7 Direct \u00b7 2h 55m",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 400,
+     "color": "#FF64748B"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "opt3Price": {
+   "type": "column",
+   "children": [
+    "opt3Amount"
+   ],
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "opt3Amount": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "\u00a397",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 18,
+     "fontWeight": 700,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "fcFoot": {
+   "type": "row",
+   "children": [
+    "fcTotal",
+    "fcCta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 48
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "fcTotal": {
+   "type": "column",
+   "children": [
+    "fcTotalLabel",
+    "fcTotalPrice"
+   ],
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "fcTotalLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Total",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 12,
+     "fontWeight": 400,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "fcTotalPrice": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 27
+    }
+   },
+   "props": {
+    "text": "\u00a384",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 20,
+     "fontWeight": 700,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "props.text": "${= \"\u00a3\" + prices[selected]}"
+   }
+  },
+  "fcCta": {
+   "type": "row",
+   "children": [
+    "fcCtaText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 170
+    },
+    "height": 48,
+    "padding": [
+     20,
+     0,
+     20,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ],
+    "radius": 12
+   },
+   "states": {
+    "hovered": {
+     "fcCta": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FF1D4ED8"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirmFlight",
+       "value": {
+        "flight": "${selected}",
+        "price": "${= prices[selected]}"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "fcCtaText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Confirm TP1351",
+    "style": {
+     "fontFamily": "DM Sans",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   },
+   "bind": {
+    "props.text": "${= \"Confirm \" + selected}"
+   }
+  }
+ },
+ "variables": {
+  "flights": [
+   {
+    "name": "selected",
+    "type": "text",
+    "value": "TP1351"
+   },
+   {
+    "name": "prices",
+    "type": "map",
+    "value": {
+     "TP1351": 84,
+     "BA500": 129,
+     "EZY8611": 97
+    }
+   }
+  ]
+ }
+}
