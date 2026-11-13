@@ -1,5 +1,13 @@
 ## Unreleased
 
+**Authoring fixes from the first direct-authoring experiment (cycle 1)**
+
+- Renders the API's new `flex` node (Flutter `Flex`) with the row/column render object, its main axis from
+  `props.direction` (bound or patched: a direction change re-lays the same child boxes).
+- Applies a node's `responsive` patches for the screen's breakpoint before interaction states, bindings and
+  conditions; a breakpoint change re-applies only the nodes that have patches. A patched `children` order moves the
+  same boxes (state kept). Tests compare each breakpoint with the hand-written Row / Column.
+
 **New: catalogs and plugins** (codelessly_api's `Catalog` and feature libraries; its docs/design/05-plugins-and-layers.md)
 
 - `CodelesslyFeature.catalog` and `recipes`: a feature (or native plugin) declares its node and action types and

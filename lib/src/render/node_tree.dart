@@ -375,9 +375,16 @@ class RenderTree {
     if (value == _responsive) return;
     final before = _responsive;
     _responsive = value;
+    final beforeBp = before?.breakpoints.forWidth(before.width).id;
+    final afterBp = value?.breakpoints.forWidth(value.width).id;
     for (final b in _boxes.values.toList()) {
       final n = source.node(b.id);
-      if (n == null || !n.isResponsive) continue;
+      if (n == null) continue;
+      if (n.responsive.isNotEmpty && (beforeBp != afterBp || before?.breakpoints != value?.breakpoints)) {
+        b._apply();
+        continue;
+      }
+      if (!n.isResponsive) continue;
       // Only the ones that now show another variant.
       if (before != null && value != null && n.variantForWidth(before.width, before.breakpoints)?['id'] == n.variantForWidth(value.width, value.breakpoints)?['id']) {
         continue;
@@ -455,8 +462,13 @@ class RenderTree {
   }
 
   Node? _patched(String id, Object? instance) {
-    final n = source.node(id);
-    if (n == null || _states.isEmpty) return n;
+    var n = source.node(id);
+    if (n == null) return null;
+    // Its own fields at the screen's breakpoint (its responsive patches),
+    // under any interaction state's patch, its bindings and conditions.
+    final r = _responsive;
+    if (r != null && n.responsive.isNotEmpty) n = n.atBreakpoint(r.breakpoints.forWidth(r.width), r.breakpoints);
+    if (_states.isEmpty) return n;
     var out = n;
     for (final e in _states.entries) {
       if (e.key.$2 != instance) continue;
@@ -567,8 +579,8 @@ class RenderTree {
 }
 
 extension _NodeLayout on Node {
-  bool get isFlex => type == 'row' || type == 'column';
-  bool get isRow => type == 'row';
+  bool get isFlex => FlexProps.types.contains(type);
+  bool get isRow => api.flexAxisOf(this) == api.Axis.horizontal;
   SizeFit get hFit => layout.width.fit;
   SizeFit get vFit => layout.height.fit;
   Size get designSize => Size(layout.width.value, layout.height.value);
@@ -1175,7 +1187,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         _variance(n, chain);
       case 'canvas':
         _canvas(n, chain);
-      case 'row' || 'column':
+      case 'row' || 'column' || 'flex':
         _shell(n, chain, content: (inner) => _rowColumn(n, inner));
       case 'stack':
         if (n.scrolls) {
