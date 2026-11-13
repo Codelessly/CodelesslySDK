@@ -8,7 +8,9 @@
 // changed on purpose: the 178 lines of the five files whose documents have a
 // node rotation, a node scale (a state's included) or a hero's flight look
 // (petri_bench_full, event_desktop_bound, event_desktop_tip, ninefold_board,
-// strata_tabs) were taken again at schema 4; the others are as taken before
+// strata_tabs) were taken again at schema 4, and strata_tabs' document and
+// its diagram_0 node (a stroke path, a custom paint path op in schema 4)
+// again with schema 4's paint steps; the others are as taken before
 // catalogs.
 import 'dart:convert';
 import 'dart:io';

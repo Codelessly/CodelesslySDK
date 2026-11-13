@@ -235,77 +235,45 @@ void main() {
             'strokePath': {
               'points': [
                 [0, 0],
-                [1, 40]
+                [100, 40]
               ],
+              'xUnit': 'pixels',
             },
           },
         }));
     expect(tree.boxOf('t')!.rectIn(view), isNotNull);
-    expect(find.byType(NodeView), paints..path());
+    // The drawn path is a custom paint path op (recorded as a picture).
+    expect(find.byType(NodeView), paints..something((m, _) => m == #drawPicture));
     expect(tree.boxOf('p')!.rectIn(view), const Rect.fromLTWH(50, 0, 100, 50));
   });
 
-  testWidgets('a drawn path draws itself in a running app and is fully drawn on the design canvas', (tester) async {
-    Map<String, Map<String, Object?>> nodes(String key, double progress) => {
+  testWidgets('a drawn path with a draw-on time shows at its progress at once in a running app', (tester) async {
+    // Schema 4 has no draw-on animation: the migration keeps it as
+    // `legacy.strokePath.draw` and draws the line as a custom paint path op.
+    final (tree, _) = await show(
+        tester,
+        page({
           'p': {
             'type': 'box',
             'layout': {'width': 100, 'height': 50},
             'strokePath': {
               'points': [
                 [0, 0],
-                [1, 40]
+                [100, 40]
               ],
-              'progress': progress,
+              'xUnit': 'pixels',
+              'progress': 0.5,
               'drawMs': 400,
-              'drawDelayMs': 100,
-              'drawCurve': 'linear',
-              'drawKey': key,
+              'drawKey': 'a',
             },
           },
-        };
-    RenderStrokePath stroke() {
-      final found = <RenderStrokePath>[];
-      void visit(RenderObject o) {
-        if (o is RenderStrokePath) found.add(o);
-        o.visitChildren(visit);
-      }
-
-      visit(tester.renderObject(find.byType(NodeView)));
-      return found.single;
-    }
-
-    // At rest: drawn at its progress at once.
-    await show(tester, page(nodes('a', 1)));
-    expect(stroke().shown, 1);
-
-    // Running: from nothing, after its delay, over drawMs.
-    final (tree, _) = await show(tester, page(nodes('a', 1)), interactive: true);
-    expect(stroke().shown, 0);
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.pump(const Duration(milliseconds: 100));
-    expect(stroke().shown, 0);
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(stroke().shown, closeTo(0.5, 0.05));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(stroke().shown, 1);
-
-    // A lower progress glides there from where it is.
-    (tree.source as DocumentSource).document = page(nodes('a', 0.5));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump(const Duration(milliseconds: 300));
-    expect(stroke().shown, closeTo(0.75, 0.05));
-    await tester.pump(const Duration(milliseconds: 400));
-    expect(stroke().shown, 0.5);
-
-    // A new key draws it again from nothing.
-    (tree.source as DocumentSource).document = page(nodes('b', 0.5));
-    await tester.pump();
-    expect(stroke().shown, 0);
-    await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump(const Duration(milliseconds: 600));
-    expect(stroke().shown, 0.5);
-    expect(api.StrokePath.fromJson(nodes('b', 0.5)['p']!['strokePath'])!.toJson()['drawKey'], 'b');
+        }),
+        interactive: true);
+    final node = (tree.source as DocumentSource).document.nodes['p']!;
+    expect(node.extra['legacy.strokePath.draw'], {'drawMs': 400, 'drawKey': 'a'});
+    final op = node.behaviors.customPaint!.painter.single as api.PathOp;
+    expect(op.trimEnd.value, 0.5);
+    expect(find.byType(NodeView), paints..something((m, _) => m == #drawPicture));
   });
 
   group('loops and effects', () {

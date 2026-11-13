@@ -1329,7 +1329,7 @@ test/fixtures/paywall/paywall.json#/layouts/paywall/nodes/close/actions/0/action
 test/fixtures/paywall/paywall.json#/layouts/paywall/nodes/terms node -7fab10bc0aef43c9:262
 test/fixtures/paywall/paywall.json#/layouts/paywall/nodes/terms/actions/0 reaction -652e309180fd9076:130
 test/fixtures/paywall/paywall.json#/layouts/paywall/nodes/terms/actions/0/actions/0 action -53854b3dbe241fbc:74
-test/fixtures/strata_tabs.json# doc 42c499c22467b8cf:45275
+test/fixtures/strata_tabs.json# doc 1d7bf04103894d67:45447
 test/fixtures/strata_tabs.json#/nodes/brand node 317b5ae6ff21fbe1:220
 test/fixtures/strata_tabs.json#/nodes/nav_space node 7f1f6ae1101a2621:96
 test/fixtures/strata_tabs.json#/nodes/tab_descent_text node -65c7e7bce59b6c45:325
@@ -1368,7 +1368,7 @@ test/fixtures/strata_tabs.json#/nodes/layer_heading_0 node -379f85ba8b50da36:259
 test/fixtures/strata_tabs.json#/nodes/gap_7 node 28ae56d4697a6804:89
 test/fixtures/strata_tabs.json#/nodes/layer_story_0 node 36038412bde75389:424
 test/fixtures/strata_tabs.json#/nodes/gap_8 node -10a4dafd51876982:89
-test/fixtures/strata_tabs.json#/nodes/diagram_0 node 2e9a451c2a6c06a3:535
+test/fixtures/strata_tabs.json#/nodes/diagram_0 node -191e4389e4d8beb5:707
 test/fixtures/strata_tabs.json#/nodes/diagram_marker_0 node 7945387b926201a7:270
 test/fixtures/strata_tabs.json#/nodes/diagram_stage_0 node 6e9833a47e2dcc8a:236
 test/fixtures/strata_tabs.json#/nodes/card_gap_0 node -7fd336f18d48d1aa:88
