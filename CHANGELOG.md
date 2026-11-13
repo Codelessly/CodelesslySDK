@@ -1,4 +1,4 @@
-## 30.1.0 (unreleased)
+## 30.1.0
 
 Requires codelessly_api 30.1.0. **The schema stays 3**: every loader reads `"schema": 2` and `3`, migrating 2 in
 memory (`migrate2to3`), never writing back (`kLoadableSchemas` is `{2, 3}`). 30.0.0's schema-3 documents keep
