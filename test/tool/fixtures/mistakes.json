@@ -1,0 +1,15 @@
+{
+  "schema": 2,
+  "roots": ["page"],
+  "nodes": {
+    "page": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 844}},
+    "col": {"type": "column", "children": ["title", "ghost", "card"],
+            "layout": {"width": {"fill": 390}, "height": {"fill": 844}, "padding": [16, 8]},
+            "props": {"gap": 12, "crossAxisAlignment": "begin"}},
+    "title": {"type": "text", "layout": {"width": {"hug": 10}, "height": {"hug": 10}},
+              "props": {"text": "Hello ${usr.name}", "style": {"colour": "#FF000000"}}},
+    "card": {"type": "box", "layout": {"width": 100, "height": 40, "x": 10},
+             "bind": {"props.text": "${= count + }"},
+             "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "navigate", "to": "nowhere"}, {"type": "delay", "durationMs": 300}]}]}
+  }
+}
