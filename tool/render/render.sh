@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Validate and render Codelessly layout documents. See tool/render/README.md.
 #   tool/render/render.sh <document.json | dir> --out <dir> [--sizes 390x844,...] [--screen id]
-#       [--full-page] [--fonts dir] [--tap id] [--hover id] [--set name=json]
+#       [--full-page] [--fonts dir] [--tap id] [--hover id] [--focus id] [--type id=text] [--set name=json]
 #       [--scroll id=px] [--navigate screen] [--wait ms] [--label text] [--validate-only]
 # Exit status: 0 no errors (warnings allowed), 1 errors, 2 bad arguments or a crash.
 set -u
@@ -26,7 +26,7 @@ for a in "$@"; do
     --*) args+=("$a") ;;
     *)
       # A positional argument right after a value-taking option is that option's value.
-      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|set|scroll|navigate|wait|label)$ ]]; then
+      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|type|set|scroll|navigate|wait|label)$ ]]; then
         args+=("$a")
       else
         case "$a" in /*) ;; *) a="$PWD/$a" ;; esac

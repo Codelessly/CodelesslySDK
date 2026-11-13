@@ -3,6 +3,7 @@
 // on the fixtures next to this file.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'dart:ui' show Size;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,7 @@ import '../../tool/render/src/args.dart';
 import '../../tool/render/src/render.dart';
 
 const fixtures = 'test/tool/fixtures';
+const a0 = '$fixtures/authoring';
 
 List<String> codes(RenderReport r, [String? severity]) => [
       for (final d in r.diagnostics)
@@ -110,5 +112,124 @@ void main() {
     );
     expect(codes(report, 'error'), containsAll(<String>['unknown_screen_arg', 'interaction_failed']));
     expect(formatReport(report), contains('error(s)'));
+  });
+
+  testWidgets('steps for another breakpoint\'s canvas are summarised in one warning', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(390, 844)], screens: const ['home'],
+        steps: const [Step('tap', 'd-go'), Step('hover', 'd-go')]));
+    final skipped = [for (final d in report.diagnostics) if (d['code'] == 'interaction_failed') d];
+    expect(skipped, hasLength(1), reason: '${report.diagnostics}');
+    expect(skipped.single['severity'], 'warning');
+    expect(skipped.single['message'], allOf(contains('--tap d-go'), contains('--hover d-go')));
+  });
+
+  testWidgets('a step may name a node by its name: the same name on each breakpoint canvas', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['$a0/named.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)],
+        steps: const [Step('tap', 'go-button')], dumpLayout: true));
+    expect(report.diagnostics.where((d) => d['severity'] == 'error' || d['code'] == 'interaction_failed'), isEmpty, reason: '${report.diagnostics}');
+  });
+
+  group('authoring fixes', () {
+    const a = '$fixtures/authoring';
+    List<Map> diag(RenderReport r, String code) => [for (final d in r.diagnostics) if (d['code'] == code) d];
+
+    testWidgets('--tap reveals its target below an overlaid header, and hits it', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'target'), Step('tap', 'target')], dumpLayout: true, label: 'two'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(diag(report, 'tap_no_reaction'), isEmpty);
+      // The header was not tapped (its menu would open); the counter shows 2.
+      final boxes = jsonDecode(File('${out.path}/taps@390x844-two.layout.json').readAsStringSync()) as List;
+      final target = boxes.firstWhere((b) => b['id'] == 'target') as Map;
+      expect(target['y'] as num, greaterThan(64), reason: 'below the header');
+      expect(File('${out.path}/diagnostics-two.json').existsSync(), isTrue, reason: 'a labelled run keeps its own diagnostics');
+      expect(File('${out.path}/diagnostics.json').existsSync(), isFalse);
+    });
+
+    testWidgets('a tap on a node with a margin hits its content; a tap with no reaction is reported', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'margined'), Step('tap', 'plain')]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(diag(report, 'tap_no_reaction').map((d) => d['nodeId']), ['plain']);
+    });
+
+    testWidgets('a tap on a covered node names what covers it', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'last')]));
+      final failed = diag(report, 'interaction_failed');
+      expect(failed, hasLength(1), reason: '${report.diagnostics}');
+      expect(failed.single['message'], contains('"veil"'));
+      final through = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'spacer-top')]));
+      expect(diag(through, 'interaction_failed').single['message'], contains('no fill and no reaction'));
+    });
+
+    testWidgets('--type types into a text field: its bound variable follows, so does the text showing it', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/checks.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('focus', 'field'), Step('type', 'field', 'cauliflower')], dumpLayout: true));
+      expect(diag(report, 'interaction_failed'), isEmpty, reason: '${report.diagnostics}');
+      final shown = [
+        for (final d in report.diagnostics)
+          if (d['nodeId'] == 'echo') d,
+      ];
+      expect(shown, isEmpty);
+      final echo = (jsonDecode(File('${out.path}/checks@390x844.layout.json').readAsStringSync()) as List).firstWhere((b) => b['id'] == 'echo') as Map;
+      expect(echo['w'] as num, greaterThan(100), reason: '"Query: cauliflower" is wider than "Query: "');
+    });
+
+    testWidgets('what draws nothing is reported: missing glyphs, unknown icons, unevaluated text, paths past their box', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/checks.json'], out: out.path, sizes: const [Size(390, 844)]));
+      expect(diag(report, 'missing_glyph').single['nodeId'], 'star');
+      expect(diag(report, 'missing_glyph').single['message'], contains('U+2726'));
+      expect(diag(report, 'icon_not_drawn').single['nodeId'], 'bad-icon');
+      expect(diag(report, 'expression_not_evaluated'), isEmpty, reason: 'bound runs style the evaluated text');
+      expect(diag(report, 'path_overflow').single['nodeId'], 'mark');
+      expect(diag(report, 'icon_not_drawn').where((d) => d['nodeId'] == 'field'), isEmpty, reason: 'the prefix icon by name draws');
+    });
+
+    testWidgets('--full-page: the page\'s own scroll height only; a bar fixed to the window drawn in the first window', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/fullpage.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final bytes = File('${out.path}/long@390x844.png').readAsBytesSync();
+      final height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+      expect(height, 2000, reason: 'hero 400 + rest 1600, not the inner list\'s 640');
+      final image = await tester.runAsync(() async {
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        final data = await frame.image.toByteData();
+        return (data!, frame.image.width);
+      });
+      int red(int x, int y) => image!.$1.getUint8((y * image.$2 + x) * 4);
+      expect(red(195, 844 - 12 - 26), 255, reason: 'the bar where a user first sees it');
+      expect(red(195, 2000 - 12 - 26), isNot(255), reason: 'not at the bottom of the page');
+    });
+  });
+
+  // The guide's responsive example (codelessly_api tool/reference/examples/
+  // responsive_web.json, copied): the four web patterns at three widths.
+  testWidgets('the guide\'s responsive example: header, 3-2-1 grid from one list, stacking split, type scale', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['$a0/responsive_web.json'], out: out.path, dumpLayout: true));
+    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    Map<String, List<Map>> boxes(String size) {
+      final out0 = <String, List<Map>>{};
+      for (final b in jsonDecode(File('${out.path}/home@$size.layout.json').readAsStringSync()) as List) {
+        (out0[(b as Map)['id'] as String] ??= []).add(b);
+      }
+      return out0;
+    }
+    int columns(Map<String, List<Map>> b) => b['plan']!.where((p) => p['y'] == b['plan']!.first['y']).length;
+    final m = boxes('390x844'), t = boxes('834x1112'), d = boxes('1440x900');
+    expect([columns(m), columns(t), columns(d)], [1, 2, 3], reason: 'auto-fit columns from one bound list');
+    expect(d['plan']!.map((p) => p['h']).toSet(), hasLength(1), reason: 'equal heights per row');
+    // Desktop: text and photo side by side; phone: stacked, photo first.
+    expect(d['split-text']!.single['x'], lessThan(d['split-photo']!.single['x'] as num));
+    expect(m['split-photo']!.single['y'], lessThan(m['split-text']!.single['y'] as num));
+    expect(m['split-photo']!.single['w'], 358);
+    // Nav collapses to the menu icon below desktop: the hidden one takes no room.
+    expect(d['nav']!.single['w'], greaterThan(0));
+    expect(m['nav']!.single['w'], 0);
+    // The content column is capped at 1200 and centered.
+    expect(d['content']!.single['w'], 1200);
+    expect(d['content']!.single['x'], 120);
   });
 }

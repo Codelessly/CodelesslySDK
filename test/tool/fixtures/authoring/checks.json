@@ -1,0 +1,217 @@
+{
+ "schema": 2,
+ "roots": [
+  "checks"
+ ],
+ "nodes": {
+  "checks": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "star",
+    "bad-icon",
+    "mark",
+    "tight",
+    "field",
+    "echo",
+    "runs"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 16
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   }
+  },
+  "star": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "\u2726 Lunch",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "bad-icon": {
+   "type": "icon",
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "props": {
+    "icon": "not_an_icon_name",
+    "color": "#FF111827"
+   }
+  },
+  "mark": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "props": {
+    "path": "M0 0 L40 0 L40 40 Z"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD86636"
+     }
+    ]
+   }
+  },
+  "tight": {
+   "type": "row",
+   "children": [
+    "w1",
+    "w2"
+   ],
+   "layout": {
+    "width": 100,
+    "height": 20
+   }
+  },
+  "w1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Unbreakable",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "w2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Wordsonly",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": 48
+   },
+   "props": {
+    "decoration": {
+     "hintText": "Search",
+     "prefixIcon": {
+      "icon": "search",
+      "size": 18
+     }
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   }
+  },
+  "echo": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Query: ${q}",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "runs": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${= money(price, '$', 0) + ' / month'}",
+    "style": {
+     "fontSize": 16,
+     "color": "#FF111827"
+    }
+   },
+   "bind": {
+    "props.runs": "${= [{'start': 0, 'end': length(money(price, '$', 0)), 'style': {'fontSize': 30}}]}"
+   }
+  }
+ },
+ "variables": {
+  "checks": [
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "price",
+    "type": "decimal",
+    "value": 590
+   }
+  ]
+ }
+}

@@ -234,8 +234,16 @@ class CodelesslyFlexParentData extends FlexParentData {
   /// gets no [CodelesslyFlex.spacing] on either side.
   bool collapsed = false;
 
+  /// In a wrapping row/column: CSS `flex-basis`, the main size the child
+  /// counts when lines are broken (null: its own size).
+  double? basis;
+
+  /// In a wrapping row/column, with a [basis]: CSS `flex-grow`, its share
+  /// of the room left on its line (0: none).
+  int grow = 0;
+
   @override
-  String toString() => '${super.toString()}; collapsed=$collapsed';
+  String toString() => '${super.toString()}; collapsed=$collapsed${basis == null ? '' : '; basis=$basis grow=$grow'}';
 }
 
 
@@ -376,8 +384,54 @@ class RenderCodelesslyFlex extends RenderFlex {
     Axis.vertical => verticalDirection == VerticalDirection.up,
   };
 
-  /// [RenderFlex]'s layout, with [gap] between consecutive shown children.
+  /// [RenderFlex]'s layout, with [gap] between consecutive shown children,
+  /// and the free space of a spread alignment shared among the shown ones.
   void _layOutWithGaps() {
+    _layOutWithGapsOnly();
+    _spreadAmongShown();
+  }
+
+  /// A collapsed child (hidden: the Flutter author leaves it out of the
+  /// children, `if (visible) child`) takes no part in [MainAxisAlignment.spaceBetween],
+  /// [MainAxisAlignment.spaceAround] or [MainAxisAlignment.spaceEvenly]:
+  /// [RenderFlex] counted it as a zero-length slot; the shown children are
+  /// placed again as they would be without it.
+  void _spreadAmongShown() {
+    final MainAxisAlignment align = mainAxisAlignment;
+    if (align != MainAxisAlignment.spaceBetween && align != MainAxisAlignment.spaceAround && align != MainAxisAlignment.spaceEvenly) {
+      return;
+    }
+    int shown = 0;
+    bool anyCollapsed = false;
+    double used = 0;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      if (_collapsed(child)) {
+        anyCollapsed = true;
+      } else {
+        shown++;
+        used += _mainExtent(child.size);
+      }
+    }
+    if (!anyCollapsed || shown == 0) return;
+    final double free = _mainExtent(size) - used - _gap * (shown - 1);
+    if (free <= precisionErrorTolerance) return;
+    final (double lead, double between) = switch (align) {
+      MainAxisAlignment.spaceBetween => (0.0, shown > 1 ? free / (shown - 1) : 0.0),
+      MainAxisAlignment.spaceAround => (free / shown / 2, free / shown),
+      _ => (free / (shown + 1), free / (shown + 1)),
+    };
+    final bool flip = _flipMainAxis;
+    double position = lead;
+    RenderBox? child = flip ? lastChild : firstChild;
+    while (child != null) {
+      final FlexParentData data = child.parentData! as FlexParentData;
+      data.offset = direction == Axis.horizontal ? Offset(position, data.offset.dy) : Offset(data.offset.dx, position);
+      if (!_collapsed(child)) position += _mainExtent(child.size) + _gap + between;
+      child = flip ? data.previousSibling : data.nextSibling;
+    }
+  }
+
+  void _layOutWithGapsOnly() {
     final double gaps = _gaps;
     if (gaps <= 0) {
       super.performLayout();

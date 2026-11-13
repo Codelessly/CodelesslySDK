@@ -1,0 +1,75 @@
+{
+  "schema": 2,
+  "roots": ["home"],
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "page"}, "layout": {"width": 1440, "height": 900},
+             "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "page": {"type": "column", "children": ["header", "content"],
+             "layout": {"width": {"fill": 1440}, "height": {"fill": 900}},
+             "props": {"scrollable": true}},
+
+    "header": {"type": "row", "children": ["logo", "nav", "menu"],
+               "layout": {"width": {"fill": 1440}, "height": 64, "padding": [16, 0, 16, 0]},
+               "props": {"mainAxisAlignment": "spaceBetween"},
+               "decoration": {"fills": [{"color": "#FF111827"}]},
+               "media": [{"minWidth": "desktop", "patch": {"layout": {"padding": [32, 0, 32, 0]}}}]},
+    "logo": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 24}},
+             "props": {"text": "Relay", "style": {"fontSize": 20, "fontWeight": 700, "color": "#FFFFFFFF"}}},
+    "nav": {"type": "row", "children": ["nav-1", "nav-2", "nav-3"], "visible": false,
+            "layout": {"width": {"hug": 300}, "height": {"hug": 20}}, "props": {"spacing": 32},
+            "media": [{"minWidth": "desktop", "patch": {"visible": true}}]},
+    "nav-1": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}},
+              "props": {"text": "Product", "style": {"fontSize": 15, "color": "#FFD1D5DB"}}},
+    "nav-2": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}},
+              "props": {"text": "Pricing", "style": {"fontSize": 15, "color": "#FFFFFFFF"}}},
+    "nav-3": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}},
+              "props": {"text": "Docs", "style": {"fontSize": 15, "color": "#FFD1D5DB"}}},
+    "menu": {"type": "icon", "layout": {"width": 28, "height": 28},
+             "props": {"icon": "menu", "color": "#FFFFFFFF"},
+             "media": [{"minWidth": "desktop", "patch": {"visible": false}}]},
+
+    "content": {"type": "column", "children": ["title", "plans", "split"],
+                "layout": {"width": {"fill": 1440}, "height": {"hug": 800}, "padding": [16, 24, 16, 24],
+                           "constraints": {"maxWidth": 1200}},
+                "props": {"crossAxisAlignment": "stretch", "spacing": 24},
+                "media": [{"minWidth": "tablet", "patch": {"layout": {"padding": [32, 48, 32, 48]}, "props": {"spacing": 32}}}]},
+    "title": {"type": "text", "layout": {"width": {"fill": 1136}, "height": {"hug": 64}},
+              "props": {"text": "Plans that scale with your team",
+                        "style": {"fontSize": 32, "fontWeight": 700, "height": 1.1, "color": "#FF111827"}},
+              "media": [
+                {"minWidth": "tablet", "patch": {"props": {"style": {"fontSize": 40}}}},
+                {"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 56}}}}
+              ]},
+
+    "plans": {"type": "gridView", "children": ["plan"],
+              "layout": {"width": {"fill": 1136}, "height": {"hug": 200}},
+              "props": {"physics": "never", "minCrossAxisExtent": 280, "shrinkWrapRows": true,
+                        "crossAxisSpacing": 24, "mainAxisSpacing": 24},
+              "bind": {"data": "${plans}"}},
+    "plan": {"type": "column", "children": ["plan-name", "plan-price"],
+             "layout": {"width": {"fill": 360}, "height": {"fill": 160}, "padding": 24},
+             "props": {"crossAxisAlignment": "start", "spacing": 8},
+             "decoration": {"fills": [{"color": "#FFF3F4F6"}], "radius": 12}},
+    "plan-name": {"type": "text", "layout": {"width": {"fill": 312}, "height": {"hug": 24}},
+                  "props": {"text": "${item.name}", "style": {"fontSize": 18, "fontWeight": 600, "color": "#FF111827"}}},
+    "plan-price": {"type": "text", "layout": {"width": {"fill": 312}, "height": {"hug": 40}},
+                   "props": {"text": "${item.price}", "style": {"fontSize": 32, "fontWeight": 700, "color": "#FF2563EB"}}},
+
+    "split": {"type": "row", "children": ["split-text", "split-photo"],
+              "layout": {"width": {"fill": 1136}, "height": {"hug": 240}},
+              "props": {"wrap": true, "spacing": 48, "runSpacing": 16, "crossAxisAlignment": "center"}},
+    "split-text": {"type": "text", "layout": {"width": {"fill": 544}, "height": {"hug": 60}, "basis": 320},
+                   "props": {"text": "Every plan includes on-call schedules, escalation policies and status pages.",
+                             "style": {"fontSize": 18, "height": 1.5, "color": "#FF374151"}}},
+    "split-photo": {"type": "box", "layout": {"width": {"fill": 544}, "height": 240, "basis": 320},
+                    "decoration": {"fills": [{"color": "#FF93C5FD"}], "radius": 12},
+                    "media": [{"maxWidth": "mobile", "patch": {"layout": {"order": -1}}}]}
+  },
+  "variables": {"home": [
+    {"name": "plans", "type": "list", "value": [
+      {"name": "Starter", "price": "$0"},
+      {"name": "Team", "price": "$29"},
+      {"name": "Enterprise", "price": "Talk to us"}
+    ]}
+  ]}
+}

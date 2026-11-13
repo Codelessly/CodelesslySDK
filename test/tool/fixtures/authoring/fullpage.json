@@ -1,0 +1,28 @@
+{
+  "schema": 2,
+  "roots": ["long"],
+  "nodes": {
+    "long": {"type": "canvas", "slots": {"body": "frame"}, "layout": {"width": 390, "height": 844},
+             "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "frame": {"type": "stack", "children": ["page", "bar"], "layout": {"width": {"fill": 390}, "height": {"fill": 844}}},
+    "page": {"type": "column", "children": ["hero", "rest"],
+             "layout": {"width": {"fill": 390}, "height": {"fill": 844}, "x": {"start": 0, "end": 0}, "y": {"start": 0, "end": 0}},
+             "props": {"scrollable": true}},
+    "hero": {"type": "stack", "children": ["lines"], "layout": {"width": {"fill": 390}, "height": 400},
+             "decoration": {"fills": [{"color": "#FFE5E7EB"}], "clip": "hardEdge"}},
+    "lines": {"type": "column", "children": ["l1", "l2", "l3", "l4", "l5", "l6", "l7", "l8"],
+              "layout": {"width": {"fill": 390}, "height": {"fill": 400}, "x": {"start": 0, "end": 0}, "y": {"start": 0, "end": 0}},
+              "props": {"scrollable": true, "physics": "never"}},
+    "l1": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "l2": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "l3": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "l4": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "l5": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "l6": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "l7": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "l8": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}},
+    "rest": {"type": "box", "layout": {"width": {"fill": 390}, "height": 1600}, "decoration": {"fills": [{"color": "#FFF9FAFB"}]}},
+    "bar": {"type": "box", "layout": {"width": 366, "height": 52, "x": {"start": 12}, "y": {"end": 12}},
+            "decoration": {"fills": [{"color": "#FFFF0000"}]}}
+  }
+}
