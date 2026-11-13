@@ -1,4 +1,26 @@
-## Unreleased
+## 30.0.0
+
+Requires `codelessly_api: ^30.0.0`.
+
+**Schema 3.** Published apps hold schema 2: every loader (Firestore, HTTP files and bundle, asset bundle,
+memory) reads `"schema": 2` and `3`, migrating 2 in memory (`migrate2to3`), never writing back; a stored
+component is checked against its digest as stored, then migrated. A stored document in a newer schema is
+refused (`PublishLoadException`, naming the SDK update). Schema 2 documents load and are migrated in memory;
+write schema 3. The render command publishes schema 3 and leaves the validator's notes (`schema_outdated`)
+out of its findings.
+
+- **Breaking:** the code of the removed one-app fields is gone (see codelessly_api 30.0.0): the track's fine
+  mode, double tap, parking (`defaultValue`, `parkedProgress`), `smooth` glide and arc `gain`; a dismissible's
+  and pan's tilt (`rotateFactor`, `originX/Y`), disabled follow and shake, `shareAs`, `follow: false` and the
+  fly-off spin; area path pacing and the upright flip (`MeasuredPath.at` takes no `byArea`); a transition's
+  arc; a drop target's `fullIf`, `hoverDelay`, refused slot and the `dropFull`/`dragHover` triggers
+  (`${drag.full}` is gone); snap `projectVelocity` and `rotationSnap`. The `setVariable` glide (`animateMs`)
+  is an `animate` action (the migration rewrites it). `trackValues` loses `fine`.
+- **Behaviour changes:** a track with no value is drawn at its minimum (the `drag_misc` parity golden moves
+  three thumbs: `fader cap`, `knob`, `path track`); the other dropped fields no longer act. Everything else
+  renders as before: the 66 parity pages, the m05 experiments' sites (byte-identical PNGs), the Relay site
+  (schema 2 through the migration and schema 3 rewritten draw the same boxes).
+
 
 **Components in published apps, hosted plugins as components (sections and components, phase 2)**
 
