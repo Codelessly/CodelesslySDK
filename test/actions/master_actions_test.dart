@@ -77,6 +77,31 @@ void main() {
       expect(h.errors, isEmpty);
     });
 
+    testWidgets('a glide is the animate variable driver; a spring there settles on the target', (tester) async {
+      // The legacy glide decodes as `animate` (animateTo); a spring drives it
+      // instead of a duration.
+      expect(ActionDef.fromJson({'type': 'setVariable', 'variable': 't', 'value': '1', 'animateMs': '300'}), isA<AnimateAction>());
+      final h = Harness(variables: [v('t', 0, VariableType.decimal)]);
+      var done = false;
+      unawaited(h.click([
+        {'type': 'animate', 'variable': 't', 'command': 'animateTo', 'target': '10', 'spring': {'duration': 400, 'bounce': 0.4}},
+      ]).then((_) => done = true));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      final mid = h['t'] as double;
+      expect(mid, inExclusiveRange(0, 14));
+      var peak = mid;
+      for (var i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 20));
+        peak = (h['t'] as double) > peak ? h['t'] as double : peak;
+      }
+      expect(peak, greaterThan(10), reason: 'a bouncy spring overshoots');
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+      expect(h['t'], 10.0);
+      expect(done, isTrue);
+    });
+
     testWidgets('text sets at once', (tester) async {
       final h = Harness(variables: [v('s', 'a')]);
       await h.click([

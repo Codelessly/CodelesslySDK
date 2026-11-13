@@ -4,8 +4,11 @@
 // every frame writes the variable, so everything bound to it follows.
 import 'dart:async';
 
-import 'package:codelessly_api/core.dart' show AnimationCurve, VariableType;
+import 'package:codelessly_api/core.dart' show AnimationCurve, Spring, VariableType;
+import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
+
+import '../../render/physics.dart' show describeSpring;
 
 import '../expressions/scopes.dart';
 
@@ -33,11 +36,13 @@ abstract final class VariableAnimator {
     AnimationCurve curve = AnimationCurve.linear,
     bool fromCurrentPlace = false,
     bool glide = false,
+    Spring? spring,
   }) {
     of(scope, name)?.finish(false);
     final start = from ?? valueOf(scope, name) ?? 0;
     if (!fromCurrentPlace) write(scope, name, start);
-    final tween = VariableTween._(scope, name, from: start, to: to, duration: duration, curve: curve, glide: glide);
+    final tween = VariableTween._(scope, name,
+        from: start, to: to, duration: duration, curve: curve, glide: glide, spring: spring);
     (_tweens[scope] ??= {})[name] = tween;
     tween._start();
     return tween.done.future;
@@ -114,7 +119,13 @@ abstract final class VariableAnimator {
 /// One variable's timeline from [from] to [to].
 class VariableTween {
   VariableTween._(this.scope, this.name,
-      {required this.from, required this.to, required this.duration, required this.curve, this.glide = false});
+      {required this.from, required this.to, required this.duration, required this.curve, this.glide = false, this.spring});
+
+  /// Runs on this spring (`animateWith(SpringSimulation)`) instead of
+  /// [duration] and [curve].
+  final Spring? spring;
+  late final SpringSimulation? _simulation =
+      spring == null ? null : SpringSimulation(describeSpring(spring!), from, to, 0);
 
   /// A set variable's glide (not an animate variable's timeline).
   final bool glide;
@@ -155,6 +166,11 @@ class VariableTween {
   void _start() {
     _ticker?.dispose();
     _ticker = null;
+    if (_simulation != null) {
+      _base = Duration.zero;
+      _ticker = Ticker(_tick, debugLabel: 'animateVariable')..start();
+      return;
+    }
     final t = duration <= Duration.zero ? 1.0 : _progressOfCurrent();
     if (t >= 1) {
       VariableAnimator.write(scope, name, to);
@@ -166,6 +182,13 @@ class VariableTween {
   }
 
   void _tick(Duration elapsed) {
+    if (_simulation case final SpringSimulation s) {
+      final t = (_base + elapsed).inMicroseconds / Duration.microsecondsPerSecond;
+      final done = s.isDone(t);
+      VariableAnimator.write(scope, name, done ? to : s.x(t));
+      if (done) finish(true);
+      return;
+    }
     final at = _base + elapsed;
     final t = (at.inMicroseconds / duration.inMicroseconds).clamp(0.0, 1.0);
     VariableAnimator.write(scope, name, from + (to - from) * curve.transform(t));
