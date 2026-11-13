@@ -223,7 +223,22 @@ class MemoryPublishLoader implements PublishLoader, PluginSource {
 }
 
 /// Decodes a bundle file: JSON, gzipped or not.
-PublishBundle decodeBundle(List<int> bytes) => PublishBundle.fromJson(decodeJsonBytes(bytes), catalog: standardCatalog);
+PublishBundle decodeBundle(List<int> bytes) => decodeBundleJson(decodeJsonBytes(bytes));
+
+/// A bundle's JSON as a [PublishBundle]. A bundle (or its model) in a schema
+/// newer than this SDK reads is refused, as a stored document is.
+PublishBundle decodeBundleJson(Object? json) {
+  if (json is Map) {
+    final model = json['model'];
+    for (final schema in [json[kStoredSchemaField], if (model is Map) model[kStoredSchemaField]]) {
+      if (schema is num && schema.toInt() > kSchemaVersion) {
+        throw PublishLoadException('The bundle is in schema ${schema.toInt()}, newer than this SDK reads (2 and 3). '
+            'Update codelessly_sdk.');
+      }
+    }
+  }
+  return PublishBundle.fromJson(json, catalog: standardCatalog);
+}
 
 /// [bytes] as JSON, gunzipped first when they're gzipped.
 Object? decodeJsonBytes(List<int> bytes) {
@@ -344,7 +359,7 @@ class HttpPublishLoader implements PublishLoader, PluginSource {
 
   Future<PublishBundle> _bundle(PublishSource source) => _bundles[source] ??= () async {
         try {
-          return PublishBundle.fromJson(await _get(source.bundlePath(projectId)), catalog: standardCatalog);
+          return decodeBundleJson(await _get(source.bundlePath(projectId)));
         } catch (_) {
           _bundles.remove(source);
           rethrow;
