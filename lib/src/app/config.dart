@@ -1,6 +1,7 @@
 import 'package:codelessly_api/codelessly_api.dart' show PublishSource;
 import 'package:flutter/foundation.dart';
 
+import '../render/recipe.dart' show WidgetRecipe;
 import '../runtime/contracts.dart';
 import '../runtime/actions/context.dart' show AppFunction;
 import '../runtime/actions/runner.dart' show CodelesslyActions;
@@ -37,6 +38,7 @@ class CodelesslyConfig {
     this.actions = const CodelesslyActions(),
     this.services,
     this.functions = const {},
+    this.recipes = const {},
     this.useHostTheme = false,
     this.maxTextScaleFactor = 1,
     this.fontTimeout = const Duration(seconds: 2),
@@ -90,6 +92,10 @@ class CodelesslyConfig {
   /// The functions call function actions call, by name.
   final Map<String, AppFunction> functions;
 
+  /// The app's own widget recipes by node type, over the built-in ones
+  /// ([NodeTree.recipes]): how a layout shows a node type the app defines.
+  final Map<String, WidgetRecipe> recipes;
+
   /// Whether layouts render with the app's [Theme] instead of their own
   /// (from the project's theme tokens).
   final bool useHostTheme;
@@ -124,6 +130,7 @@ class CodelesslyConfig {
     ActionRunner? actions,
     CodelesslyServices? services,
     Map<String, AppFunction>? functions,
+    Map<String, WidgetRecipe>? recipes,
     bool? useHostTheme,
     double? maxTextScaleFactor,
     Duration? fontTimeout,
@@ -140,6 +147,7 @@ class CodelesslyConfig {
         actions: actions ?? this.actions,
         services: services ?? this.services,
         functions: functions ?? this.functions,
+        recipes: recipes ?? this.recipes,
         useHostTheme: useHostTheme ?? this.useHostTheme,
         maxTextScaleFactor: maxTextScaleFactor ?? this.maxTextScaleFactor,
         fontTimeout: fontTimeout ?? this.fontTimeout,

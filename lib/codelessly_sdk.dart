@@ -120,7 +120,7 @@ export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';
 export 'src/render/hero.dart' show HeroMarkPaint, HeroMarks, RenderHeroMark;
 export 'src/render/play.dart' show EffectPlayers, FlightRegistry, RenderEffects, RenderFlightBox, effectTransformAt;
-export 'src/render/recipe.dart' show NodeChild;
+export 'src/render/recipe.dart' show NodeChild, NodeBuilder, WidgetRecipe;
 export 'src/render/source.dart';
 export 'src/widgets/media.dart' show ExternalComponents;
 export 'src/services/services.dart';
@@ -164,3 +164,5 @@ export 'src/app/theme.dart' show themeDataOf, themeValues;
 export 'src/app/viewport.dart';
 
 export 'src/render/layout/design_scroll.dart' show RenderDesignScroll;
+// What a WidgetRecipe's NodeBuilder.fitBox gives.
+export 'src/render/layout/fit_box.dart' show RenderFitBox;

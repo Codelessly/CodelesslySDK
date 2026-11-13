@@ -1257,7 +1257,7 @@ Future<Object?> _mediaImport(CallFunctionAction action, ActionRun run) async {
     }
     final name = file.name.replaceAll(RegExp(r'[^A-Za-z0-9_.-]'), '_');
     final uploaded = await files.upload(
-      'cutroom/imports/${DateTime.now().microsecondsSinceEpoch}-$name',
+      'media/imports/${DateTime.now().microsecondsSinceEpoch}-$name',
       file.bytes,
       contentType: 'video/mp4',
     );

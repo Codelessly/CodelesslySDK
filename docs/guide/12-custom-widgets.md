@@ -2,7 +2,8 @@
 
 [Guide](README.md) · Previous: [Theming and fonts](11-theming-and-fonts.md) · Next: [Publishing and environments](13-publishing-and-environments.md)
 
-Three ways to extend what a layout can do, from most to least common:
+Four ways to extend what a layout can do, from most to least common (the fourth,
+[your own node and action types](#your-own-node-and-action-types), is below the first three):
 
 1. [Your Flutter widgets inside a layout](#your-widgets-inside-a-layout) (external components).
 2. [Your code behind a layout](#your-code-behind-a-layout) (functions, services).
@@ -12,9 +13,9 @@ Three ways to extend what a layout can do, from most to least common:
 
 *Three ways to extend, from most to least common.*
 
-What is **not** supported: registering a new node type with its own renderer from outside the SDK. Widget types
-are part of the SDK ([`CONTRIBUTING.md`](../../CONTRIBUTING.md) is the contributor's guide to adding one). A node type
-this version doesn't know still decodes and round-trips, and renders as an empty box of its size.
+An app can also define [its own node and action types](#your-own-node-and-action-types). A node type nothing
+gives a recipe for still decodes and round-trips, and renders as an empty box of its size; an action type nothing
+gives a handler for is skipped.
 
 ## Your widgets inside a layout
 
@@ -87,6 +88,51 @@ final codelessly = Codelessly(
 The SDK ships in-memory and recording implementations of most interfaces (`MemoryLocalStorage`,
 `MemoryAuthService`, `MemoryDocumentBackend`, `MemoryFileStorage`, `RecordingAnalytics`, `RecordingLinkOpener`),
 which make good starting points and test doubles.
+
+## Your own node and action types
+
+A layout document can hold node types and action types the API doesn't declare. They decode and round-trip as they
+are; the app says what they do.
+
+**A node type** gets a recipe, by its type, in `CodelesslyConfig.recipes` (or `NodeTree(recipes:)` for a tree you
+build yourself). A recipe appends render objects to the node's chain; `NodeBuilder.island` hosts a Flutter widget,
+and `NodeChild` shows a child node inside it. The node's layout, decoration bindings, behaviors and reactions are the
+tree's as for any node; its own `props` are `node.props.unknown`.
+
+```dart
+void rating(NodeBuilder b, Node n, List<RenderBox> chain) {
+  final size = Size(n.layout.width.value, n.layout.height.value);
+  chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, size));
+  chain.add(b.island('rating', (context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < (n.props.unknown['stars'] as num? ?? 0); i++) const Icon(Icons.star),
+          for (final child in n.children) NodeChild(tree: b.tree, id: child, instance: b.instance),
+        ],
+      )));
+}
+
+final codelessly = Codelessly(
+  config: const CodelesslyConfig(slug: 'my-project', recipes: {'acme.rating': rating}),
+);
+```
+
+A recipe for a type the SDK already builds replaces the built-in one. The core layout types (`canvas`, `stack`,
+`box`, `row`, `column`, `text`, `icon`, `spacer`, `variance`) are always the tree's own.
+
+**An action type** gets a handler in `CodelesslyActions(handlers:)`. An action whose type the API doesn't declare
+is an `UnknownAction`: its fields are `json`, and `enabled`, `nonBlocking` and `when` apply as for any action.
+
+```dart
+CodelesslyConfig(
+  slug: 'my-project',
+  actions: CodelesslyActions(handlers: {
+    'acme.track': (action, run) => analytics.log((action as UnknownAction).json['event'] as String),
+  }),
+)
+```
+
+Name your own types with a prefix (`acme.rating`), so a later SDK type can't take the name.
 
 ## Wrapping a layout
 

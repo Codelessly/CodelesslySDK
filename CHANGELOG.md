@@ -1,5 +1,14 @@
 ## Unreleased
 
+**New**
+
+- An app's own node types: `CodelesslyConfig.recipes` (and `NodeTree(recipes:)`) map a node type to a
+  `WidgetRecipe`, over the built-in ones. `WidgetRecipe`, `NodeBuilder` and `RenderFitBox` are exported. Recipes
+  are per tree, not a global table.
+- An app's own action types: a handler in `CodelesslyActions(handlers:)` for a type the API doesn't declare now
+  runs (the action is an `UnknownAction`; its fields are `json`). Before, an unknown type was skipped even with a
+  handler, so handlers could only replace built-in types.
+
 **Fixes**
 
 - A paywall `restore` action outside a paywall screen (a Restore purchases row in Settings) restores through
