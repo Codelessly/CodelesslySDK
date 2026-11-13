@@ -25,6 +25,7 @@ final class RenderArgs {
     this.fontDirs = const [],
     this.label,
     this.validateOnly = false,
+    this.dumpLayout = false,
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -38,6 +39,9 @@ final class RenderArgs {
   final List<String> fontDirs;
   final String? label;
   final bool validateOnly;
+
+  /// Also write each capture's node boxes (`<png name>.layout.json`).
+  final bool dumpLayout;
 }
 
 const usage = '''
@@ -55,7 +59,8 @@ Options:
   --full-page             Capture the whole scrollable height, not the viewport.
   --fonts <dir>           Font files (.ttf/.otf, read by their real family and
                           weight). Repeatable. Roboto and Material Icons are built in.
-  --tap <nodeId>          Tap the node (where it shows on screen).
+  --tap <nodeId>          Tap the node (where it shows on screen). <nodeId>#<n>
+                          picks the n-th copy (0-based) of a node a list repeats.
   --hover <nodeId>        Move a mouse over the node.
   --set <name>=<json>     Set a variable of the screen (value as JSON: 1, true, "a").
   --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px.
@@ -63,6 +68,7 @@ Options:
   --wait <ms>             Let time pass (animations, delays, toasts).
   --label <text>          Append -<text> to the PNG names (state screenshots).
   --validate-only         Only validate; render nothing.
+  --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h).
 Steps (--tap, --hover, --set, --scroll, --navigate, --wait) run in the order given.
 ''';
 
@@ -74,7 +80,7 @@ RenderArgs parseArgs(List<String> argv) {
   final screens = <String>[];
   final steps = <Step>[];
   final fonts = <String>[];
-  var fullPage = false, validateOnly = false;
+  var fullPage = false, validateOnly = false, dumpLayout = false;
   String? label;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
@@ -100,6 +106,8 @@ RenderArgs parseArgs(List<String> argv) {
         fullPage = true;
       case '--validate-only':
         validateOnly = true;
+      case '--dump-layout':
+        dumpLayout = true;
       case '--fonts':
         fonts.add(next(i++, a));
       case '--label':
@@ -130,5 +138,6 @@ RenderArgs parseArgs(List<String> argv) {
     fontDirs: fonts,
     label: label,
     validateOnly: validateOnly,
+    dumpLayout: dumpLayout,
   );
 }

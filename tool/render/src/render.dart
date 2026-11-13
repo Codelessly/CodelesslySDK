@@ -212,6 +212,27 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
   };
 
+  // Tests draw shadows without blur unless told otherwise (an app blurs them).
+  debugDisableShadows = false;
+  try {
+    await _renderAll(tester, args, published, docs, fileOfNode, fetcher, issue, report);
+  } finally {
+    debugDisableShadows = true;
+  }
+  tester.view.reset();
+  return _finish(report, args);
+}
+
+Future<void> _renderAll(
+  WidgetTester tester,
+  RenderArgs args,
+  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
+  Map<String, api.Json> docs,
+  Map<String, String> fileOfNode,
+  DirectoryFontFetcher fetcher,
+  void Function(RuntimeIssue) issue,
+  RenderReport report,
+) async {
   // 3. Which screens.
   final screens = _screens(published, docs, args.screens, (s) => issue(s));
   final recorder = _Recorder();
@@ -248,6 +269,10 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         child: MaterialApp(
           navigatorKey: navigator,
           debugShowCheckedModeBanner: false,
+          // Material widgets (buttons, fields) draw their text in the
+          // platform's font: Roboto, as on Android and the web.
+          theme: ThemeData(fontFamily: 'Roboto'),
+          builder: (context, child) => DefaultTextStyle.merge(style: const TextStyle(fontFamily: 'Roboto'), child: child!),
           onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
           home: CodelesslyWidget(codelessly: codelessly, layoutId: screen, controller: controller),
         ),
@@ -265,7 +290,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         if (problem != null) {
           // A node of another canvas of the screen (another breakpoint's
           // design) is absent here by design: a warning, not an error.
-          final elsewhere = problem.contains('no node') && fileOfNode.containsKey(step.target);
+          final elsewhere = problem.contains('no node') && fileOfNode.containsKey(step.target.split('#').first);
           issue(RuntimeIssue('interaction_failed', elsewhere ? 'warning' : 'error',
               elsewhere ? '$problem It is in the document but not on the canvas shown at this size.' : problem,
               screen: label, size: sizeName));
@@ -291,6 +316,12 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         issue(i);
       }
       for (final m in fetcher.misses) {
+        // A weight next to one the family has is drawn with it, as on a
+        // device whose font lacks it: not worth a warning.
+        final near = m.substitute != null && RegExp(r' (\d+)').firstMatch(m.substitute!) != null &&
+            (int.parse(RegExp(r' (\d+)').firstMatch(m.substitute!)!.group(1)!) - m.weight).abs() <= 100 &&
+            m.substitute!.contains('italic') == m.italic;
+        if (near) continue;
         issue(RuntimeIssue('font_fallback', 'warning',
             m.substitute == null
                 ? 'Font "${m.family}" ${m.weight}${m.italic ? ' italic' : ''} is not in the fonts directories: its text is drawn in the default font. Add the font file with --fonts <dir>, or use Roboto.'
@@ -306,6 +337,21 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
       });
       report.images.add(file);
+      if (args.dumpLayout) {
+        final boxes = [
+          for (final b in _boxes(binding))
+            {
+              'id': b.id,
+              if (b.instance != null) 'instance': '${b.instance}',
+              'x': _rectOf(b).left.round(),
+              'y': _rectOf(b).top.round(),
+              'w': double.parse(b.size.width.toStringAsFixed(1)),
+              'h': double.parse(b.size.height.toStringAsFixed(1)),
+            },
+        ];
+        File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'))
+            .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(boxes));
+      }
 
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 10));
@@ -314,8 +360,6 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       codelessly.dispose();
     }
   }
-  tester.view.reset();
-  return _finish(report, args);
 }
 
 Object? _valueAt(api.Json json, String pointer) {
@@ -421,12 +465,16 @@ List<NodeBox> _boxes(WidgetsBinding binding) => [
           if (o is NodeBox && o.attached && o.hasSize) o,
     ];
 
+/// The box of node [id] on screen: the topmost (the last painted), or with
+/// `id#n` the n-th (0-based) of the copies a list repeats.
 NodeBox? _boxOf(WidgetsBinding binding, String id) {
-  NodeBox? hit;
-  for (final b in _boxes(binding)) {
-    if (b.id == id) hit = b;
-  }
-  return hit;
+  final hash = id.lastIndexOf('#');
+  final index = hash < 0 ? null : int.tryParse(id.substring(hash + 1));
+  final name = index == null ? id : id.substring(0, hash);
+  final all = [for (final b in _boxes(binding)) if (b.id == name) b];
+  if (all.isEmpty) return null;
+  if (index == null) return all.last;
+  return index < all.length ? all[index] : null;
 }
 
 RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
