@@ -17,6 +17,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../contracts.dart';
 import '../convert.dart';
 import '../node_tree.dart' show NodeBox;
+import 'noise.dart' show noiseTileUrl;
 
 /// Loads the image at [url] into Flutter's image cache (where image fills
 /// find it), completing with whether it loaded. SVGs and data URLs aren't
@@ -377,8 +378,32 @@ List<double> saturationMatrix(double s) {
   ];
 }
 
-/// The URL an image paint shows.
-String? imageUrlOf(api.Paint p) => p.type == api.PaintType.image ? p.image?.url : null;
+/// The URL an image paint shows (a noise paint: its tile's).
+String? imageUrlOf(api.Paint p) => switch (p.type) {
+      api.PaintType.image => p.image?.url,
+      api.PaintType.noise => noiseTileUrl(p),
+      _ => null,
+    };
+
+/// Paints noise paint [p] in [rrect]: its tile repeated from the box's top
+/// left (a shader: no seams between tiles), its opacity and blend mode
+/// applied, inside the rounded corners.
+void paintNoiseFill(Canvas canvas, RRect rrect, api.Paint p, ImageClient client) {
+  final url = noiseTileUrl(p);
+  final info = client.imageFor(url)?.image;
+  if (info == null) return;
+  final box = rrect.outerRect;
+  final paint = Paint()
+    ..shader = ImageShader(info.image, TileMode.repeated, TileMode.repeated,
+        Matrix4.translationValues(box.left, box.top, 0).storage, filterQuality: FilterQuality.none)
+    ..color = Color.fromRGBO(0, 0, 0, p.opacity.clamp(0.0, 1.0))
+    ..blendMode = blendMode(p.blendMode);
+  if (rrect.isRect) {
+    canvas.drawRect(box, paint);
+  } else {
+    canvas.drawRRect(rrect, paint);
+  }
+}
 
 /// Paints image fill [p] in [rrect] (the box, its corners rounded): placed by its fit and alignment (or its own rect),
 /// repeated, scaled, flipped, saturated, tinted and faded, inside the

@@ -184,6 +184,10 @@ class RenderNodePaint extends RenderBox with ImageClient {
 
   void _fill(Canvas canvas, RRect rrect, api.Paint p) {
     if (!p.visible) return;
+    if (p.type == api.PaintType.noise) {
+      if (!_foreground) paintNoiseFill(canvas, rrect, p, this);
+      return;
+    }
     if (p.type == api.PaintType.image) {
       // Foreground images aren't drawn.
       if (!_foreground) paintImageFill(canvas, rrect, p, this);
@@ -218,8 +222,18 @@ class RenderNodePaint extends RenderBox with ImageClient {
     }
 
     final tile = TileMode.values.byName(p.tileMode.name);
+    // A length in pixels: the axis from its start, in its direction, that
+    // long (a repeating pattern's period, whatever the box's size).
+    Offset linearEnd() {
+      final a = at(0, 0.5), b = at(1, 0.5), d = b - a;
+      final length = p.length;
+      if (length == null || d.distance == 0) return b;
+      return a + d / d.distance * length;
+    }
+
     paint.shader = switch (p.type) {
-      api.PaintType.linear => ui.Gradient.linear(at(0, 0.5), at(1, 0.5), colors, stops, tile),
+      api.PaintType.linear => ui.Gradient.linear(at(0, 0.5), linearEnd(), colors, stops, tile),
+      api.PaintType.radial when p.length != null => ui.Gradient.radial(at(0.5, 0.5), p.length!, colors, stops, tile),
       // A radius given as a share of the shortest side (Flutter's
       // RadialGradient), centered where the transform puts the center (the
       // box's without one); else the transform's: to the box's edge.
