@@ -75,7 +75,8 @@ echo "${#cells[@]} cells -> $streams"
 for cell in "${cells[@]}"; do
   set -- $cell
   ui=$1; model=$2; prompt=$3; scripts=$4; rep=$5; shift 5
-  name="$ui@$model.$prompt$([ "$scripts" = off ] && echo .scripts-off).r$rep"
+  suffix=""; if [ "$scripts" = off ]; then suffix=".scripts-off"; fi
+  name="$ui@$model.$prompt$suffix.r$rep"
   out="$streams/$name.jsonl"
   echo "== $name"
   if [ $dry = 1 ]; then
