@@ -32,8 +32,8 @@ import 'visible_share.dart';
 /// the rotation.
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviors;
-  if (be.drag?.track case final api.DragTrack track) {
-    // At its value (`drag.track.value`, else its variable's, else its
+  if (be.track case final api.Track track) {
+    // At its value (`track.value`, else its variable's, else its
     // default or start; parked when out of range or empty), and in a
     // running app dragged along the track (render/drag_track.dart).
     final box = b is NodeBox ? b : null;
@@ -43,13 +43,13 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
         reads ||
         track.parkedProgress != null ||
         track.relative ||
-        track.units == api.DragTrackUnits.parent ||
+        track.units == api.TrackUnits.parent ||
         track.usesViewBox ||
         trackPose(track, p) != null;
     if (moves) {
       chain.add(
         b.obtain<RenderDragTrack>('trackPose', RenderDragTrack.new)
-          ..configure(box, track, enabled: be.drag!.enabled, interactive: animates),
+          ..configure(box, track, enabled: track.enabled, interactive: animates),
       );
     }
   }
@@ -326,16 +326,16 @@ class RenderInkOverlay extends RenderBox {
   }
 }
 
-/// Where a [api.DragTrack] puts its node, in the node's coordinates with
+/// Where a [api.Track] puts its node, in the node's coordinates with
 /// the origin at its rest center: a line,
 /// an arc about its pivot, or a path, measured in pixels, in the node's own
-/// size ([api.DragTrack.relative]), in its parent's
-/// ([api.DragTrackUnits.parent]) or in a viewBox stretched to the parent
-/// ([api.DragTrack.usesViewBox]).
+/// size ([api.Track.relative]), in its parent's
+/// ([api.TrackUnits.parent]) or in a viewBox stretched to the parent
+/// ([api.Track.usesViewBox]).
 class TrackGeometry {
   TrackGeometry(this.track, {this.size = Size.zero, this.parent, this.rest = Offset.zero});
 
-  final api.DragTrack track;
+  final api.Track track;
 
   /// The node's size, the parent's (null unknown), and the node's rest
   /// center in the parent (for a viewBox).
@@ -343,7 +343,7 @@ class TrackGeometry {
   final Size? parent;
   final Offset rest;
 
-  bool get _inParent => track.units == api.DragTrackUnits.parent && parent != null;
+  bool get _inParent => track.units == api.TrackUnits.parent && parent != null;
   bool get _inViewBox => track.usesViewBox && parent != null;
 
   /// A length along x or y in pixels.
@@ -372,16 +372,16 @@ class TrackGeometry {
   /// goes on past its ends (overscroll, a parked node); a path stops there.
   Offset offsetAt(double progress) {
     switch (track.shape) {
-      case api.DragTrackShape.line:
+      case api.TrackShape.line:
         return Offset.lerp(_lineStart, _lineEnd, progress)!;
-      case api.DragTrackShape.arc:
+      case api.TrackShape.arc:
         // Round the pivot, on a circle through rest.
         final pivot = Offset(_x(track.pivotX), _y(track.pivotY));
         if (pivot == Offset.zero) return Offset.zero;
         final a = _angle(progress) * math.pi / 180;
         final r = -pivot;
         return pivot + Offset(r.dx * math.cos(a) - r.dy * math.sin(a), r.dx * math.sin(a) + r.dy * math.cos(a));
-      case api.DragTrackShape.path:
+      case api.TrackShape.path:
         final path = track.path == null ? null : MeasuredPath.of(track.path!);
         if (path == null) return Offset.zero;
         final p = track.clampProgress(progress);
@@ -415,11 +415,11 @@ class TrackGeometry {
   /// How much the node turns at [progress] (degrees).
   double rotationAt(double progress) {
     switch (track.shape) {
-      case api.DragTrackShape.line:
+      case api.TrackShape.line:
         return 0;
-      case api.DragTrackShape.arc:
+      case api.TrackShape.arc:
         return track.rotate ? _angle(progress) : 0;
-      case api.DragTrackShape.path:
+      case api.TrackShape.path:
         if (!track.orientToPath || track.path == null) return 0;
         final at = MeasuredPath.of(track.path!)?.at(track.clampProgress(progress));
         if (at == null) return 0;
@@ -444,14 +444,14 @@ class TrackGeometry {
 /// Where [track] puts its node at [progress] (in pixels; see
 /// [TrackGeometry] for a track measured in its node or parent): a move (and
 /// a turn) about its center. Null at its place.
-Matrix4? trackPose(api.DragTrack track, double progress) => TrackGeometry(track).poseAt(progress);
+Matrix4? trackPose(api.Track track, double progress) => TrackGeometry(track).poseAt(progress);
 
-/// A node drawn where its [api.DragTrack] puts it at [progress], worked out
+/// A node drawn where its [api.Track] puts it at [progress], worked out
 /// from its laid-out size and its parent's.
 class RenderTrackPose extends RenderPose {
-  api.DragTrack _track = const api.DragTrack();
-  api.DragTrack get track => _track;
-  set track(api.DragTrack v) {
+  api.Track _track = const api.Track();
+  api.Track get track => _track;
+  set track(api.Track v) {
     if (v == _track) return;
     _track = v;
     markNeedsPaint();
@@ -466,7 +466,7 @@ class RenderTrackPose extends RenderPose {
   }
 
   /// Whether the pose needs the parent's size and the node's place in it.
-  bool get _measuresParent => _track.units == api.DragTrackUnits.parent || _track.usesViewBox;
+  bool get _measuresParent => _track.units == api.TrackUnits.parent || _track.usesViewBox;
 
   /// The box this node sits in (its parent's layout), and where this
   /// node's center is in it.

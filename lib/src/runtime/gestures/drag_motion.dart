@@ -1,16 +1,17 @@
-// A node that follows the pointer (`DragMotion`, node key `drag`):
-// a render object, the outermost layer of the node's chain (around its
-// margin). It follows the pointer within its bounds and limits, locked to
-// its axis and held back by resistance; tilts by `rotateFactor`; and on
-// release springs back, stays, or flies off past a threshold (a swiped
-// card), with `physics` a fling, a spring settle and snap points. Only a
-// running app adds it (RenderTree.animates): the design canvas draws the
-// node where its layout puts it.
+// A node that follows the pointer: `dismissible` (Flutter's `Dismissible`)
+// or `pan` (the legacy `drag` reads as one of them). A render object, the
+// outermost layer of the node's chain (around its margin). It follows the
+// pointer within its bounds and limits, locked to its axis and held back by
+// resistance; and on release springs back, stays, or flies off past a
+// threshold (a swiped card), with `physics` a fling, a spring settle and
+// snap points. Only a running app adds it (RenderTree.animates): the design
+// canvas draws the node where its layout puts it.
 //
 // What it gives the layout:
-// * `${drag}` inside the node (itself and the nodes in it): its live
-//   values ([DragValues.toMap]) over the layout's drag and drop session,
-//   through the node's [LocalScope] (NodeBinder.localNames).
+// * `${dismiss}` / `${pan}` (and the legacy `${drag}`) inside the node
+//   (itself and the nodes in it): its live values ([DragValues.toMap]) over
+//   the layout's drag and drop session, through the node's [LocalScope]
+//   (NodeBinder.localNames).
 // * `shareAs` (the same map), `xVariable` and `yVariable` (its offset,
 //   rounded to hundredths) written after each frame it changed in.
 // * Triggers: `drag` on every move (`dx`, `dy` from rest, `deltaX`,
@@ -68,7 +69,7 @@ class DragValues {
   final bool dismissed;
 
   /// Whether the node is flinging or springing on its own after release
-  /// ([api.DragMotion.physics]).
+  /// ([api.Pan.physics]).
   final bool settling;
 
   /// The [api.GestureSnap.points] index the last release settles on; −1
@@ -124,13 +125,135 @@ class DragValues {
   int get hashCode => Object.hash(offset, left, right, up, down, dragging, dismissed, settling, snapIndex);
 }
 
-/// Whether node [n] follows the pointer as a [RenderDragMotion]: it has a
-/// drag that is neither a track (a value control) nor a list's reorder
-/// handle. The screen itself doesn't.
-bool followsPointer(Node n) => switch (n.behaviors.drag) {
-      final api.DragMotion d => d.track == null && !d.reorder && n.type != 'canvas',
-      null => false,
-    };
+/// Whether node [n] follows the pointer as a [RenderDragMotion]: it is
+/// dismissible or pans. The screen itself doesn't.
+bool followsPointer(Node n) => (n.behaviors.dismissible != null || n.behaviors.pan != null) && n.type != 'canvas';
+
+/// The release a [RenderDragMotion] runs: [api.PanRelease]'s two, or
+/// flying off.
+enum FollowRelease { snapBack, stay, dismiss }
+
+/// What a node that follows the pointer does, from its
+/// [api.DismissibleBehavior] or [api.Pan]: one engine for both.
+@immutable
+class FollowSpec {
+  const FollowSpec({
+    this.enabled = true,
+    this.axis = api.DragAxis.free,
+    this.release = FollowRelease.snapBack,
+    this.directions = const [],
+    this.thresholds = const {},
+    this.velocityThreshold = 800,
+    this.resistance = 0,
+    this.snapBack = 450,
+    this.snapCurve = api.AnimationCurve.spring,
+    this.flyOut = 320,
+    this.flyOutCurve = api.AnimationCurve.easeIn,
+    this.flyOutRotate = 0,
+    this.restX = 0,
+    this.restY = 0,
+    this.xVariable = '',
+    this.yVariable = '',
+    this.physics,
+    this.bounds = api.GestureBounds.none,
+    this.minX,
+    this.maxX,
+    this.minY,
+    this.maxY,
+    this.rotateFactor = 0,
+    this.originX = 0,
+    this.originY = 0,
+    this.shakeWhenDisabled = false,
+    this.disabledFollow = 0,
+    this.shareAs = '',
+    this.follow = true,
+    this.defaultThreshold = 0.35,
+  });
+
+  static const FollowSpec none = FollowSpec();
+
+  final bool enabled;
+  final api.DragAxis axis;
+  final FollowRelease release;
+  final List<api.DragDirection> directions;
+  final Map<api.DragDirection, double> thresholds;
+  final double defaultThreshold, velocityThreshold, resistance;
+  final int snapBack, flyOut;
+  final api.AnimationCurve snapCurve, flyOutCurve;
+  final double flyOutRotate, restX, restY;
+  final String xVariable, yVariable;
+  final api.GesturePhysics? physics;
+  final api.GestureBounds bounds;
+  final double? minX, maxX, minY, maxY;
+  final double rotateFactor, originX, originY, disabledFollow;
+  final bool shakeWhenDisabled, follow;
+  final String shareAs;
+
+  bool get hasBounds => bounds != api.GestureBounds.none || minX != null || maxX != null || minY != null || maxY != null;
+
+  /// The scope name its values are given under besides `drag`.
+  String get scopeName => release == FollowRelease.dismiss ? 'dismiss' : 'pan';
+
+  /// [n]'s, or null when it doesn't follow the pointer.
+  static FollowSpec? of(Node n) {
+    if (n.behaviors.dismissible case final d?) {
+      return FollowSpec(
+        enabled: d.enabled,
+        axis: d.axis,
+        release: FollowRelease.dismiss,
+        directions: d.directions,
+        thresholds: d.dismissThresholds,
+        defaultThreshold: api.DismissibleBehavior.defaultThreshold,
+        velocityThreshold: d.flingVelocity,
+        resistance: d.resistance,
+        snapBack: d.effectiveReturnDuration,
+        snapCurve: d.effectiveReturnCurve,
+        flyOut: d.movementDuration,
+        flyOutCurve: d.curve,
+        flyOutRotate: d.flyOutRotate,
+        restX: d.restX,
+        restY: d.restY,
+        xVariable: d.xVariable,
+        yVariable: d.yVariable,
+        physics: d.returnSpring == null ? null : api.GesturePhysics(spring: d.returnSpring!),
+        rotateFactor: d.rotateFactor,
+        originX: d.originX,
+        originY: d.originY,
+        shakeWhenDisabled: d.shakeWhenDisabled,
+        disabledFollow: d.disabledFollow,
+        shareAs: d.shareAs,
+        follow: d.follow,
+      );
+    }
+    if (n.behaviors.pan case final p?) {
+      return FollowSpec(
+        enabled: p.enabled,
+        axis: p.axis,
+        release: p.release == api.PanRelease.stay ? FollowRelease.stay : FollowRelease.snapBack,
+        snapBack: p.returnDuration,
+        snapCurve: p.returnCurve,
+        restX: p.x,
+        restY: p.y,
+        xVariable: p.xVariable,
+        yVariable: p.yVariable,
+        physics: p.physics,
+        bounds: p.bounds,
+        minX: p.minX,
+        maxX: p.maxX,
+        minY: p.minY,
+        maxY: p.maxY,
+        rotateFactor: p.rotateFactor,
+        originX: p.originX,
+        originY: p.originY,
+        shakeWhenDisabled: p.shakeWhenDisabled,
+        disabledFollow: p.disabledFollow,
+        shareAs: p.shareAs,
+        follow: p.follow,
+      );
+    }
+    return null;
+  }
+}
 
 /// Adds [n]'s drag layer to [chain] (outermost) when it follows the
 /// pointer; a running app's tree only.
@@ -157,11 +280,10 @@ extension on api.DragDirection {
   bool get horizontal => this == api.DragDirection.left || this == api.DragDirection.right;
 }
 
-extension on api.DragMotion {
+extension on FollowSpec {
   /// The fraction of the node's size a drag toward [direction] must travel
   /// to dismiss.
-  double thresholdFor(api.DragDirection direction) =>
-      direction.horizontal ? distanceThreshold : verticalThreshold ?? distanceThreshold;
+  double thresholdFor(api.DragDirection direction) => thresholds[direction] ?? defaultThreshold;
 
   bool onAxis(api.DragDirection d) => switch (axis) {
         api.DragAxis.free => true,
@@ -171,7 +293,7 @@ extension on api.DragMotion {
 
   /// Whether a release can fly off toward [direction].
   bool canDismiss(api.DragDirection direction) =>
-      release == api.DragRelease.dismiss && directions.contains(direction) && onAxis(direction);
+      release == FollowRelease.dismiss && directions.contains(direction) && onAxis(direction);
 }
 
 /// The drags of nodes in the running app, for the controlDrag action.
@@ -230,13 +352,13 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
 
   NodeBox? _box;
   Node? _node;
-  api.DragMotion _model = const api.DragMotion();
+  FollowSpec _model = FollowSpec.none;
   bool _configured = false;
   String? _registeredAs;
 
-  /// Where the node rests, from where its layout puts it ([api.DragMotion.restX],
-  /// [api.DragMotion.restY], bindable as `drag.restX`/`drag.restY`): it
-  /// springs back here, and a new value moves it there.
+  /// Where the node rests, from where its layout puts it ([api.Pan.x],
+  /// [api.Pan.y], bindable as `pan.x`/`pan.y`): it springs back here, and a
+  /// new value moves it there.
   Offset _rest = Offset.zero;
 
   /// Its place among the node's instances: its list item's index.
@@ -247,7 +369,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
 
   /// Takes node [n] (as shown) of [box].
   void configure(NodeBox box, Node n) {
-    final model = n.behaviors.drag!;
+    final model = FollowSpec.of(n)!;
     _box = box;
     _node = n;
     final axisChanged = model.axis != _model.axis;
@@ -363,7 +485,10 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
     final current = values;
     if (current != _published) {
       _published = current;
-      box.tree.binder?.localScopeOf(box.tree.source, box.id, box.instance)?.set('drag', current.toMap());
+      final local = box.tree.binder?.localScopeOf(box.tree.source, box.id, box.instance);
+      final map = current.toMap();
+      local?.set('drag', map);
+      if (local?.names.contains(_model.scopeName) ?? false) local!.set(_model.scopeName, map);
     }
     final m = _model;
     if (m.shareAs.trim().isEmpty && m.xVariable.trim().isEmpty && m.yVariable.trim().isEmpty) return;
@@ -644,7 +769,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
       api.DragAxis.horizontal => Offset(velocity.dx, 0),
       api.DragAxis.vertical => Offset(0, velocity.dy),
     };
-    if (_model.release != api.DragRelease.stay) {
+    if (_model.release != FollowRelease.stay) {
       return (sims: _springSims(physics, _rest, v), target: _rest, snap: -1);
     }
     final range = _range;
@@ -670,7 +795,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   /// Whether the pointer may pull toward [direction] freely.
   bool _free(api.DragDirection direction) {
     if (!_model.onAxis(direction)) return false;
-    if (_model.release != api.DragRelease.dismiss) return true;
+    if (_model.release != FollowRelease.dismiss) return true;
     return _model.directions.contains(direction);
   }
 
@@ -702,7 +827,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   Offset? _lastGlobal;
 
   /// Whether the current drag is of a disabled node, which only follows by
-  /// [api.DragMotion.disabledFollow] and always springs back.
+  /// [FollowSpec.disabledFollow] and always springs back.
   bool _blocked = false;
 
   DragGestureRecognizer _ensureRecognizer() => _recognizer ??= (switch (_model.axis) {
@@ -814,7 +939,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
       _flyOff(direction, velocity);
     } else if (settle != null) {
       _settle(settle.sims);
-    } else if (_model.release != api.DragRelease.stay) {
+    } else if (_model.release != FollowRelease.stay) {
       _animateTo(_rest, _model.snapBack, _model.snapCurve);
     }
   }
@@ -825,7 +950,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
 
   /// The direction a release at [velocity] dismisses toward, if any.
   api.DragDirection? _dismissDirection(Offset velocity) {
-    if (_model.release != api.DragRelease.dismiss) return null;
+    if (_model.release != FollowRelease.dismiss) return null;
     final size = _size;
     if (_offset != Offset.zero) {
       final d = _directionOf(_offset);
@@ -871,21 +996,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
       api.DragDirection.left || api.DragDirection.up => -_model.flyOutRotate,
       api.DragDirection.right || api.DragDirection.down => _model.flyOutRotate,
     };
-    final distance = _model.flyOutDistance;
-    final Offset target;
-    if (distance != null) {
-      // A set distance: that many of its own sizes along the direction it
-      // leaves in, keeping where it is across it.
-      final size = _size;
-      target = switch (direction) {
-        api.DragDirection.left => Offset(-distance * size.width, _offset.dy),
-        api.DragDirection.right => Offset(distance * size.width, _offset.dy),
-        api.DragDirection.up => Offset(_offset.dx, -distance * size.height),
-        api.DragDirection.down => Offset(_offset.dx, distance * size.height),
-      };
-    } else {
-      target = _offscreen(direction, _size, velocity == null || velocity == Offset.zero ? _offset : velocity);
-    }
+    final target = _offscreen(direction, _size, velocity == null || velocity == Offset.zero ? _offset : velocity);
     await _animateTo(target, _model.flyOut, _model.flyOutCurve);
     if (!attached) return;
     _dismissed = true;
@@ -958,7 +1069,7 @@ class RenderDragMotion extends RenderProxyBox implements HitTestedWhereDrawn {
   double get _angle => _offset.dx / math.max(1, _size.width) * _model.rotateFactor + _spin;
 
   /// The transform over the node's layout: none while at rest or when the
-  /// drag only reports ([api.DragMotion.follow] off).
+  /// drag only reports ([FollowSpec.follow] off).
   Matrix4? get _transform {
     final angle = _angle;
     if (!_model.follow || (_offset == Offset.zero && angle == 0)) return null;
