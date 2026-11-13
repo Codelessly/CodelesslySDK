@@ -227,6 +227,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final previousOnError = FlutterError.onError;
   FlutterError.onError = (details) {
     _errorDetails[details.exception] = details;
+    _errorLog.add(details);
     previousOnError?.call(details);
   };
   // Icons named without a codepoint (a bound name) draw from the font.
@@ -239,6 +240,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
     _errorDetails.clear();
+    _errorLog.clear();
   }
   tester.view.reset();
   return _finish(report, args);
@@ -274,15 +276,33 @@ Future<void> _renderAll(
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = ui.Size(size.width, size.height);
       void collect() {
+        // Every error Flutter reported since the last look, each with its
+        // own details (flutter_test keeps only one: several in a frame
+        // become "Multiple exceptions (n) were detected", which names none).
+        final taken = <Object>[];
         Object? e;
         while ((e = tester.takeException()) != null) {
-          final text = _firstLine('$e');
+          taken.add(e!);
+        }
+        final reported = [..._errorLog];
+        _errorLog.clear();
+        final errors = <(Object, FlutterErrorDetails?)>[
+          for (final d in reported) (d.exception, d),
+          // One flutter_test caught some other way (not reported to FlutterError).
+          for (final t in taken)
+            if (!reported.any((d) => identical(d.exception, t)) && !'$t'.startsWith('Multiple exceptions (')) (t, null),
+        ];
+        for (final (err, details) in errors) {
+          final text = _firstLine('$err');
           // A flex "overflowed by 1.04e-7 pixels" is rounding, not a problem.
           final by = RegExp(r'overflowed by ([0-9.eE+-]+) pixels').firstMatch(text);
           if (by != null && (double.tryParse(by[1]!) ?? 1) < 0.01) continue;
-          final node = _nodeOfError(_errorDetails.remove(e));
+          final node = _nodeOfError(details ?? _errorDetails[err]);
+          _errorDetails.remove(err);
           issue(RuntimeIssue('render_exception', 'error',
-              node == null ? text : 'Node "${node.id}" (${node.node?.type ?? '?'}): $text',
+              node == null
+                  ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
+                  : 'Node "${node.id}" (${node.node?.type ?? '?'}): $text',
               nodeId: node?.id, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node.id]));
         }
         for (final (err, message) in recorder.errors) {
@@ -363,7 +383,15 @@ Future<void> _renderAll(
       // button) is drawn where a user first sees it, in the first window.
       final shifted = <NodeBox>[];
       if (args.fullPage) {
-        final page = _pageScroll(binding);
+        var page = _pageScroll(binding);
+        // A full page is the whole page from its top, whatever the steps
+        // scrolled it to (a tap scrolls its node into view first).
+        if (page != null && page.pixels.abs() > 0.01) {
+          page.jumpTo(0);
+          await _settle(tester);
+          collect();
+          page = _pageScroll(binding);
+        }
         if (page != null && page.maxScrollExtent >= 1) {
           final pageBox = _nodeBoxAbove(page);
           final fixed = pageBox == null ? const <NodeBox>[] : _fixedAround(binding, pageBox);
@@ -552,6 +580,9 @@ ui.Rect? _pathBounds(String data) {
 /// The details Flutter reported each error with (to name its node).
 final Map<Object, FlutterErrorDetails> _errorDetails = Map.identity();
 
+/// The errors reported since the last collection, in order.
+final List<FlutterErrorDetails> _errorLog = [];
+
 /// The node box an error came from: the render object its details name
 /// (the overflowing flex, the object being laid out), up to its node.
 NodeBox? _nodeOfError(FlutterErrorDetails? details) {
@@ -562,6 +593,25 @@ NodeBox? _nodeOfError(FlutterErrorDetails? details) {
     if (v is RenderObject) return _nodeBoxAbove(v);
   }
   return null;
+}
+
+/// The part of the screen [b] can be drawn in: the intersection of the
+/// paint clips the document asks for above it (a clipping decoration, a
+/// scroll view's viewport), in global coordinates; null when none clips it.
+/// The screen's own edge (its canvas, the app around it) is not one: what
+/// that cuts off is what `offscreen` reports.
+ui.Rect? _visibleClip(RenderBox b) {
+  ui.Rect? out;
+  RenderObject child = b;
+  for (RenderObject? p = b.parent; p != null; child = p, p = p.parent) {
+    if (p is NodeBox && (p.node?.type == 'canvas' || p.node == null)) break;
+    ui.Rect? local = p.describeApproximatePaintClip(child);
+    if (local == null && p is RenderDesignScroll && p.clipBehavior != Clip.none && p.hasSize) local = ui.Offset.zero & p.size;
+    if (local == null || p is! RenderBox || !p.hasSize) continue;
+    final global = MatrixUtils.transformRect(p.getTransformTo(null), local);
+    out = out == null ? global : out.intersect(global);
+  }
+  return out;
 }
 
 /// [o] or its nearest ancestor that is a node box.
@@ -885,56 +935,69 @@ List<RuntimeIssue> _check(
 
   final view = binding.renderViews.first.size;
   final byKey = <String, NodeBox>{for (final b in boxes) '${b.id}|${b.instance}': b};
-  // Nodes inside something that scrolls (or a list) along an axis.
-  bool scrollsAlong(String id, bool horizontal) {
-    for (var p = parentOf(id); p != null; p = parentOf(p)) {
-      final n = nodeOf(p);
-      if (n == null) continue;
-      if (const {'listView', 'gridView', 'pageView', 'tableView', 'tabs'}.contains(n.type)) return true;
-      final scrollable = n.spec?.prop('scrollable') != null && n.props.get(n.spec!.prop('scrollable')!) == true;
-      if (scrollable) {
-        final dir = n.spec!.prop('scrollDirection');
-        final h = dir != null && n.props.get(dir) == api.Axis.horizontal;
-        if (h == horizontal) return true;
+  const repeaters = {'listView', 'gridView', 'pageView', 'tableView', 'tabs'};
+  // Whether something between [b] and [upTo] (included; null: the screen)
+  // scrolls along an axis, as rendered: a scroll view or viewport on that
+  // axis, or a node that scrolls (or repeats items) that way as shown at
+  // this size, its media rules and states applied.
+  bool scrollsAlong(NodeBox b, bool horizontal, {RenderObject? upTo}) {
+    for (RenderObject? o = b.parent; o != null; o = o.parent) {
+      if (o is RenderDesignScroll && (o.axis == Axis.horizontal) == horizontal) return true;
+      if (o is RenderViewportBase && (axisDirectionToAxis(o.axisDirection) == Axis.horizontal) == horizontal) return true;
+      if (o is NodeBox) {
+        final n = o.node;
+        if (n != null && repeaters.contains(n.type)) return true;
+        final sp = n?.spec?.prop('scrollable');
+        if (n != null && sp != null && n.props.get(sp) == true) {
+          final dir = n.spec!.prop('scrollDirection');
+          final h = dir != null && n.props.get(dir) == api.Axis.horizontal;
+          if (h == horizontal) return true;
+        }
       }
+      if (identical(o, upTo)) break;
     }
     return false;
   }
 
   for (final b in boxes) {
-    final node = nodeOf(b.id);
+    // The node as it is shown at this size: its media rules and any active
+    // state applied (the document's own node is its base).
+    final node = b.node ?? nodeOf(b.id);
     if (node == null || node.type == 'canvas') continue;
     final r = _rectOf(b);
     if (r.width <= 0 && r.height <= 0) continue;
     final file = fileOfNode[b.id];
+    // What of it can be seen: its box within every ancestor's clip.
+    final clip = _visibleClip(b);
+    final seen = clip == null ? r : r.intersect(clip);
     // Past its parent.
     final pid = parentOf(b.id);
     final parentBox = pid == null ? null : (byKey['$pid|${b.instance}'] ?? byKey['$pid|null']);
-    final parent = pid == null ? null : nodeOf(pid);
-    if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack') {
+    final parent = parentBox?.node ?? (pid == null ? null : nodeOf(pid));
+    if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack' && !seen.isEmpty) {
       final pr = _rectOf(parentBox);
-      final dx = math.max(pr.left - r.left, r.right - pr.right);
-      final dy = math.max(pr.top - r.top, r.bottom - pr.bottom);
-      if (dx > 1 && !scrollsAlong(b.id, true)) {
+      final dx = math.max(pr.left - seen.left, seen.right - pr.right);
+      final dy = math.max(pr.top - seen.top, seen.bottom - pr.bottom);
+      if (dx > 1 && !scrollsAlong(b, true, upTo: parentBox)) {
         out.add(RuntimeIssue('layout_overflow', 'warning',
             '"${b.id}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$pid" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
-      if (dy > 1 && !scrollsAlong(b.id, false)) {
+      if (dy > 1 && !scrollsAlong(b, false, upTo: parentBox)) {
         out.add(RuntimeIssue('layout_overflow', 'warning',
             '"${b.id}" (${node.type}, ${r.height.toStringAsFixed(0)} tall) overflows its parent "$pid" (${parent.type}, ${pr.height.toStringAsFixed(0)} tall) by ${dy.toStringAsFixed(0)} px vertically.',
             nodeId: b.id, screen: screen, size: size, file: file));
       }
     }
-    // Past the screen.
-    if (r.right > view.width + 1 && !scrollsAlong(b.id, true)) {
+    // Past the screen (the part not clipped away by an ancestor).
+    if (!seen.isEmpty && seen.right > view.width + 1 && !scrollsAlong(b, true)) {
       out.add(RuntimeIssue('offscreen', 'warning',
-          '"${b.id}" (${node.type}) ends at x=${r.right.toStringAsFixed(0)}, past the ${view.width.toStringAsFixed(0)} px wide screen.',
+          '"${b.id}" (${node.type}) ends at x=${seen.right.toStringAsFixed(0)}, past the ${view.width.toStringAsFixed(0)} px wide screen.',
           nodeId: b.id, screen: screen, size: size, file: file));
     }
-    if (r.bottom > view.height + 1 && !scrollsAlong(b.id, false)) {
+    if (!seen.isEmpty && seen.bottom > view.height + 1 && !scrollsAlong(b, false)) {
       out.add(RuntimeIssue('offscreen', 'warning',
-          '"${b.id}" (${node.type}) ends at y=${r.bottom.toStringAsFixed(0)}, below the ${view.height.toStringAsFixed(0)} px tall screen, and nothing scrolls: make the body column scrollable ("scrollable": true).',
+          '"${b.id}" (${node.type}) ends at y=${seen.bottom.toStringAsFixed(0)}, below the ${view.height.toStringAsFixed(0)} px tall screen, and nothing scrolls: make the body column scrollable ("scrollable": true).',
           nodeId: b.id, screen: screen, size: size, file: file));
     }
     // Icons that draw nothing.
@@ -949,18 +1012,22 @@ List<RuntimeIssue> _check(
             nodeId: b.id, screen: screen, size: size, file: file));
       }
     }
-    // A path drawn past its box.
+    // A path drawn past its box, where that part shows (no ancestor clips
+    // it away).
     if ((node.type == 'path' || (node.type == 'box' && node.prop(api.BoxProps.path).isNotEmpty)) && b.drawn) {
       final data = node.type == 'path' ? node.prop(api.PathProps.data) : node.prop(api.BoxProps.path);
       final viewBox = node.type == 'path' ? node.prop(api.PathProps.viewBox) : null;
       final bounds = _pathBounds(data);
       if (bounds != null && viewBox == null) {
-        final inner = ui.Offset.zero & b.size;
-        final past = math.max(math.max(inner.left - bounds.left, bounds.right - inner.right), math.max(inner.top - bounds.top, bounds.bottom - inner.bottom));
+        final drawn = bounds.shift(r.topLeft);
+        final shown = clip == null ? drawn : drawn.intersect(clip);
+        final past = shown.isEmpty
+            ? 0.0
+            : math.max(math.max(r.left - shown.left, shown.right - r.right), math.max(r.top - shown.top, shown.bottom - r.bottom));
         if (past > 1) {
           out.add(RuntimeIssue('path_overflow', 'warning',
               'The path of "${b.id}" reaches ${past.toStringAsFixed(0)} px past its ${b.size.width.toStringAsFixed(0)}x${b.size.height.toStringAsFixed(0)} box '
-              '(path coordinates are the box\'s own pixels, from its top left) and is not clipped to it. '
+              '(path coordinates are the box\'s own pixels, from its top left), and nothing clips that part away. '
               '${node.type == 'path' ? 'Give it "viewBox": [w, h] to scale it into the box, or ' : 'Make the box as large as the path, or '}set "decoration": {"clip": "hardEdge"} on an ancestor.',
               nodeId: b.id, screen: screen, size: size, file: file));
         }

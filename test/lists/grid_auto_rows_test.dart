@@ -5,6 +5,7 @@
 // grid-auto-rows: auto; gap: 12px` over cards whose content differs, at
 // three widths, with items whose subtree a viewport hides from intrinsic
 // measurement (a bound list) and items that can be measured.
+import 'package:codelessly_sdk/codelessly_sdk.dart' show VariableType;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support.dart';
@@ -90,5 +91,22 @@ void main() {
     final s = await show(tester, g);
     await tester.pumpAndSettle();
     expect(s.tree.boxesOf('card').map((b) => b.size.height).toList(), [170.0, 170.0, 170.0, 50.0]);
+  });
+
+  testWidgets('a card whose content grows later measures its row again', (tester) async {
+    tester.view.physicalSize = const Size(1000, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final g = grid(900, fit: 'hug', boundList: true);
+    g['grid']!['bind'] = {'data': r'${counts}'};
+    final s = await show(tester, g, variables: [v('counts', [2, 5, 3, 1], VariableType.list)]);
+    await tester.pumpAndSettle();
+    expect(s.tree.boxesOf('card').map((b) => b.size.height).toList(), [170.0, 170.0, 170.0, 50.0]);
+    s.scope.set('counts', [2, 5, 3, 4]);
+    await tester.pumpAndSettle();
+    expect(s.tree.boxesOf('card').map((b) => b.size.height).toList(), [170.0, 170.0, 170.0, 140.0]);
+    s.scope.set('counts', [2, 2, 3, 4]);
+    await tester.pumpAndSettle();
+    expect(s.tree.boxesOf('card').map((b) => b.size.height).toList(), [110.0, 110.0, 110.0, 140.0], reason: 'and shrinks again');
   });
 }

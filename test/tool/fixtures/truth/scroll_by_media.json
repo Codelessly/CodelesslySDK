@@ -1,0 +1,199 @@
+{
+ "schema": 2,
+ "roots": [
+  "table"
+ ],
+ "nodes": {
+  "table": {
+   "type": "canvas",
+   "slots": {
+    "body": "tcol"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "tcol": {
+   "type": "column",
+   "children": [
+    "plans"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   }
+  },
+  "plans": {
+   "type": "row",
+   "children": [
+    "c0",
+    "c1",
+    "c2",
+    "c3",
+    "c4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 40
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal"
+   },
+   "media": [
+    {
+     "maxWidth": "mobile",
+     "patch": {
+      "props": {
+       "scrollable": true
+      }
+     }
+    }
+   ]
+  },
+  "c0": {
+   "type": "box",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF3366FF"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 150
+       }
+      }
+     }
+    }
+   ]
+  },
+  "c1": {
+   "type": "box",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF3366FF"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 150
+       }
+      }
+     }
+    }
+   ]
+  },
+  "c2": {
+   "type": "box",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF3366FF"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 150
+       }
+      }
+     }
+    }
+   ]
+  },
+  "c3": {
+   "type": "box",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF3366FF"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 150
+       }
+      }
+     }
+    }
+   ]
+  },
+  "c4": {
+   "type": "box",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF3366FF"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 150
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+}
