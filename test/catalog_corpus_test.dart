@@ -27,7 +27,11 @@ List<String> _lines(String path, Catalog catalog) {
     if (v is Map) {
       final nodes = v['nodes'];
       if (nodes is Map && nodes.values.any((n) => n is Map && n['type'] is String)) {
-        out.add('$path#$at doc ${_digest(LayoutDocument.fromJson(v, catalog: catalog).toJson())}');
+        // The digests were taken in schema 2: a document now encodes as
+        // schema 3, and (migrated when it decodes) otherwise the same.
+        final doc = LayoutDocument.fromJson(v, catalog: catalog).toJson();
+        if (doc['schema'] == kSchemaVersion) doc['schema'] = 2;
+        out.add('$path#$at doc ${_digest(doc)}');
       }
       if (v['type'] is String && v['layout'] is Map) {
         out.add('$path#$at node ${_digest(Node.fromJson(v, catalog: catalog)?.toJson())}');
