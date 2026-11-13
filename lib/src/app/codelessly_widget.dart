@@ -847,7 +847,17 @@ class _LayoutViewState extends State<_LayoutView> {
     if (engine is Expressions) {
       // A component instance reads the project's variables (and the app's
       // scopes around them), never the page's.
-      binder = NodeBinder(scope: scope, logic: widget.layout.logic, engine: engine, projectScope: _codelessly.appVariables);
+      final storage = services is Services ? services.storage : null;
+      binder = NodeBinder(
+        scope: scope,
+        logic: widget.layout.logic,
+        engine: engine,
+        projectScope: _codelessly.appVariables,
+        // `persist: true` on a component variable: kept per instance path.
+        persistComponentVariable: storage == null
+            ? null
+            : (variables, variable, key) => PersistedVariable.attach(variables, variable, storage, key: key).dispose,
+      );
     } else if (engine is! NoopExpressionEngine) {
       source = bound = BoundSource(nodeValues, engine, scope);
     }

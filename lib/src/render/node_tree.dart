@@ -356,8 +356,12 @@ class RenderTree {
     final ci = componentInstanceOf(instance);
     final content = ci == null ? const <String>[] : _slotContent(ci, n.prop(api.SlotProps.name));
     if (content.isNotEmpty) {
+      // In the instance itself, the content is the caller's nodes as they
+      // are; in a copy a list of the definition repeats, one copy of them
+      // per copy (still the caller's, reading the caller's scope).
+      final at = identical(instance, ci) || instance == ci ? ci!.outer : SlotContent(ci!.outer, instance);
       for (final c in content) {
-        _placed(c, ci!.outer, out, depth + 1);
+        _placed(c, at, out, depth + 1);
       }
     } else {
       for (final c in n.children) {
@@ -402,6 +406,45 @@ class RenderTree {
       p._applied = null;
       p._apply();
     }
+  }
+
+  /// Values set at run time on nodes inside component instances (a set
+  /// value action acting in the instance it runs in), by (node id,
+  /// instance): applied over the definition's node for that instance only,
+  /// as a page's node values are over the page's.
+  final Map<(String, Object?), Map<String, Object?>> _instanceValues = {};
+
+  /// The values set on node [id] of [instance], by path.
+  Map<String, Object?> instanceValuesOf(String id, Object? instance) =>
+      Map.unmodifiable(_instanceValues[(id, instance)] ?? const {});
+
+  /// Sets property [path] of node [id] in [instance] (a component instance,
+  /// or a copy inside one) to [value]; its box re-applies.
+  void setInstanceValue(String id, Object? instance, String path, Object? value) {
+    (_instanceValues[(id, instance)] ??= {})[path] = value;
+    _boxes[keyOf(id, instance)]?._apply();
+  }
+
+  /// How many instances have their definition's source kept (one per
+  /// instance on screen).
+  @visibleForTesting
+  int get instanceSourceCount => _instanceSources.length;
+
+  /// Component instance [instance] left the tree (its root's box was
+  /// released): what was kept for it and the instances inside it goes.
+  void _instanceReleased(ComponentInstance instance) {
+    bool inside(Object? i) {
+      for (Object? x = i; x != null; x = outerInstanceOf(x)) {
+        if (x == instance) return true;
+      }
+      return false;
+    }
+
+    _instanceSources.removeWhere((ci, _) => inside(ci));
+    _instanceValues.removeWhere((k, _) => inside(k.$2));
+    _states.removeWhere((k, _) => inside(k.$2));
+    _animated.removeWhere((k, _) => inside(k.$2));
+    if (_bindings case final InstanceBindings b) b.releaseInstance(instance);
   }
 
   /// The islands (widget-built nodes) of this tree.
@@ -635,6 +678,13 @@ class RenderTree {
     final source = sourceOf(instance);
     var n = source.node(id);
     if (n == null) return null;
+    if (_instanceValues[(id, instance)] case final Map<String, Object?> values) {
+      var v = n;
+      for (final e in values.entries) {
+        v = api.BindPaths.apply(v, e.key, e.value);
+      }
+      n = v;
+    }
     // Its own fields at the screen's size (its media rules),
     // under any interaction state's patch, its bindings and conditions.
     final r = _responsive;
@@ -2593,6 +2643,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     _islands.clear();
     if (identical(tree._boxes[key], this)) tree._boxes.remove(key);
+    // The root of a component instance: the instance left the tree.
+    if (instance case final ComponentInstance ci when !tree._disposed && tree.isInstanceRoot(id, ci)) tree._instanceReleased(ci);
     child = null;
     _disposeObjects({..._objects.values, ..._retiredObjects});
     _objects.clear();

@@ -6,11 +6,12 @@
 // values land through `BindPaths.apply` on the typed node.
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
-    show BindPaths, BindValue, Condition, ConditionOperand, LayoutLogic, Node, PropertySet, SizeFit, TextProps, TextRun;
+    show BindPaths, BindValue, Condition, ConditionOperand, LayoutLogic, Node, PropertySet, SizeFit, TextProps, TextRun, Variable;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show TextStyle;
 
-import '../../render/components.dart' show InstanceSource, NestedInstance;
+import '../../render/components.dart'
+    show ComponentInstance, InstanceSource, NestedInstance, SlotContent, componentPath, outerInstanceOf;
 import '../../render/contracts.dart';
 import '../../render/convert.dart' as convert;
 import '../../render/node_tree.dart' show RenderTree;
@@ -230,7 +231,7 @@ final class ConditionTarget {
 ///
 /// It is the runtime's [TreeBindings]: what a [RenderTree] takes its nodes
 /// as shown from, and its render objects their values.
-class NodeBinder implements TreeBindings {
+class NodeBinder implements TreeBindings, InstanceBindings {
   NodeBinder({
     this.scope,
     this.scopeOf,
@@ -238,7 +239,20 @@ class NodeBinder implements TreeBindings {
     this.engine = const Expressions(),
     this.preview = false,
     this.projectScope,
+    this.persistComponentVariable,
   }) : _conditions = ConditionIndex(logic);
+
+  /// Keeps a component variable declared `persist: true` in the app's
+  /// storage, per instance: called with the instance's variable scope, the
+  /// variable and the storage key of that instance's value
+  /// ([componentVariableKey]); returns what stops keeping it. Null: such a
+  /// variable starts from its value in every instance, every time.
+  final VoidCallback? Function(VariableScope variables, Variable variable, String key)? persistComponentVariable;
+
+  /// The storage key of persisted variable [variable] of component instance
+  /// [instance]: `codelessly.component.<Type>.<instance path>.<name>`.
+  static String componentVariableKey(ComponentInstance instance, Variable variable) =>
+      'codelessly.component.${instance.component}.${componentPath(instance)}.${variable.id.isEmpty ? variable.name : variable.id}';
 
   /// The project's variables (and the app scopes around them), which a
   /// component definition reads besides its parameters and its own
@@ -468,7 +482,61 @@ class NodeBinder implements TreeBindings {
     if (caller == null) return null;
     final scopes = ComponentScopes(source, caller, project: projectScope, callerScope: () => scopeFor(source.callSource, source.instance.call, source.instance.outer));
     _componentScopes[source.instance] = scopes;
+    final persist = persistComponentVariable;
+    if (persist != null) {
+      for (final v in source.definition.document.componentVariables) {
+        if (!v.persists) continue;
+        if (persist(scopes.variables, v, componentVariableKey(source.instance, v)) case final VoidCallback stop) scopes.onDispose(stop);
+      }
+    }
     return scopes.variables;
+  }
+
+  /// How many component instances have their scopes kept.
+  @visibleForTesting
+  int get componentScopeCount => _componentScopes.length;
+
+  /// Lets go of the scopes of [instance] and of every instance, list item
+  /// and node scope inside it: it left the tree. Showing it again starts it
+  /// afresh, as a Flutter `State` does when its element is unmounted (a
+  /// persisted variable starts from its stored value).
+  @override
+  void releaseInstance(Object instance) {
+    bool inside(Object? i) {
+      for (Object? x = i; x != null; x = outerInstanceOf(x)) {
+        if (x == instance) return true;
+      }
+      return false;
+    }
+
+    for (final e in _componentScopes.entries.toList()) {
+      if (!inside(e.key)) continue;
+      _componentScopes.remove(e.key);
+      e.value.dispose();
+    }
+    _items.removeWhere((k, scopes) {
+      if (!inside(k.$2)) return false;
+      for (final s in scopes.values) {
+        s.dispose();
+      }
+      return true;
+    });
+    _locals.removeWhere((k, s) {
+      if (!inside(k.$2)) return false;
+      s.dispose();
+      return true;
+    });
+    _nodeScopes.removeWhere((k, s) {
+      if (!inside(k.$2)) return false;
+      s.dispose();
+      return true;
+    });
+    _provided.removeWhere((k, s) {
+      if (!inside(k)) return false;
+      s.dispose();
+      return true;
+    });
+    _itemRefreshers.removeWhere((k, _) => inside(k.$2));
   }
 
   /// The names a node gives itself and the nodes inside it, by what gives
@@ -512,6 +580,9 @@ class NodeBinder implements TreeBindings {
   /// of the data-bound list it repeats in, or the [LocalScope] of the
   /// nearest node around it (or itself) that gives one ([localNames]).
   ValueScope? scopeFor(NodeSource source, String id, Object? instance) {
+    // Slot content repeated by a list of the definition reads what it reads
+    // in the caller (a child widget, built in the caller's context).
+    if (instance is SlotContent) return scopeFor(source, id, instance.outer);
     final base = _itemScopeFor(source, id, instance);
     if (base == null || localNames.isEmpty) return base;
     for (String? p = id; p != null; p = source.parentOf(p)) {

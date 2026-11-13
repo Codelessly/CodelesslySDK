@@ -27,6 +27,7 @@ final class RenderArgs {
     this.validateOnly = false,
     this.dumpLayout = false,
     this.component,
+    this.componentsAll = false,
     this.props,
     this.slots,
     this.compare,
@@ -49,6 +50,11 @@ final class RenderArgs {
 
   /// Render this component alone (its type), not the site's pages.
   final String? component;
+
+  /// Render every component of the site alone, each once per preview (at
+  /// its size; without previews, with its defaults at each size), not the
+  /// site's pages.
+  final bool componentsAll;
 
   /// The parameters to render [component] with (a JSON object); null: each
   /// of its previews, else its defaults.
@@ -75,6 +81,7 @@ final class RenderArgs {
         validateOnly: validateOnly,
         dumpLayout: dumpLayout,
         component: component,
+        componentsAll: componentsAll,
         props: props,
         slots: slots,
         compare: compare,
@@ -127,6 +134,9 @@ Options:
   --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h).
   --component <Type>      Render one component of the site alone: once per preview
                           (at its size), or with --props at each size.
+  --components-all        Render every component of the site alone, each once per
+                          preview (at its size; without one, at each size with its
+                          defaults): <Type>-<preview>@<w>x<h>.png.
   --props '<json>'        The component's parameters, as a call's "props".
   --slots <file>          What the call passes to the component's slots:
                           {"children": [ids], "slots": {name: id}, "nodes": {...}}.
@@ -145,7 +155,7 @@ RenderArgs parseArgs(List<String> argv) {
   final screens = <String>[];
   final steps = <Step>[];
   final fonts = <String>[];
-  var fullPage = false, validateOnly = false, dumpLayout = false;
+  var fullPage = false, validateOnly = false, dumpLayout = false, componentsAll = false;
   String? label, component, props, slots, compare;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
@@ -179,6 +189,8 @@ RenderArgs parseArgs(List<String> argv) {
         label = next(i++, a);
       case '--component':
         component = next(i++, a);
+      case '--components-all':
+        componentsAll = true;
       case '--props':
         props = next(i++, a);
       case '--slots':
@@ -215,6 +227,7 @@ RenderArgs parseArgs(List<String> argv) {
     validateOnly: validateOnly,
     dumpLayout: dumpLayout,
     component: component,
+    componentsAll: componentsAll,
     props: props,
     slots: slots,
     compare: compare,

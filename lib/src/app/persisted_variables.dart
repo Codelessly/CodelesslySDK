@@ -12,17 +12,20 @@ String persistedVariableKey(Variable v) => 'codelessly.variable.${v.id.isEmpty ?
 
 /// Keeps variable [variable] of [scope] in [storage] while attached.
 class PersistedVariable {
-  PersistedVariable._(this.scope, this.variable, this.storage, this._watch);
+  PersistedVariable._(this.scope, this.variable, this.storage, this._watch, this.key);
 
   /// Starts [variable] (declared in [scope]) from its stored value, if
   /// any, and saves each change. Does nothing (but [dispose]) without
   /// [storage] or when it doesn't persist.
-  factory PersistedVariable.attach(VariableScope scope, Variable variable, LocalStorage? storage) {
-    if (storage == null || !variable.persists) return PersistedVariable._(scope, variable, null, null);
-    final key = persistedVariableKey(variable);
-    if (storage.containsKey(key)) scope.set(variable.name, storage.get(key));
+  ///
+  /// [key] is the storage key (default: [persistedVariableKey]); a component
+  /// variable is kept per instance under its instance's key.
+  factory PersistedVariable.attach(VariableScope scope, Variable variable, LocalStorage? storage, {String? key}) {
+    if (storage == null || !variable.persists) return PersistedVariable._(scope, variable, null, null, '');
+    final at = key ?? persistedVariableKey(variable);
+    if (storage.containsKey(at)) scope.set(variable.name, storage.get(at));
     final watch = scope.watch(variable.name);
-    final p = PersistedVariable._(scope, variable, storage, watch);
+    final p = PersistedVariable._(scope, variable, storage, watch, at);
     watch.addListener(p._save);
     return p;
   }
@@ -32,7 +35,10 @@ class PersistedVariable {
   final LocalStorage? storage;
   final Listenable? _watch;
 
-  void _save() => storage?.put(persistedVariableKey(variable), scope.valueOf(variable.name, scope));
+  /// Where its value is kept.
+  final String key;
+
+  void _save() => storage?.put(key, scope.valueOf(variable.name, scope));
 
   void dispose() => _watch?.removeListener(_save);
 }

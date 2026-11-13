@@ -392,6 +392,27 @@ void main() {
     expect(loader.calls, contains('component:publish:Badge'));
     expect(own['Card']!.document['t']!.prop(TextProps.text), startsWith('Mine'));
   });
+
+  test('a changed declaration decodes the loaded layouts that call it again', () async {
+    final bundle = publish([home()], [card(), badge()]);
+    final app = Codelessly(loader: MemoryPublishLoader(bundle), fonts: const NoFontFetcher(), config: cfg());
+    addTearDown(app.dispose);
+    await app.loadLayout('home');
+    final c1 = app.layout('home')!.document['c1']!;
+    expect(c1.prop(app.components.catalog.widget('Card')!.prop('title')!), 'T1');
+    // Card now declares `subtitle` too.
+    final changed = card()..['widget'] = {
+        ...(card()['widget']! as Json),
+        'props': [
+          ...((card()['widget']! as Json)['props']! as List),
+          {'key': 'subtitle', 'type': {'kind': 'string'}, 'default': 'none'},
+        ],
+      };
+    app.components.define(LayoutDocument.fromJson(changed));
+    final again = app.layout('home')!.document['c1']!;
+    expect(identical(again, c1), isFalse, reason: 'decoded again');
+    expect(again.spec?.prop('subtitle'), isNotNull, reason: 'typed by the new declaration');
+  });
 }
 
 List<int> gzipJson(Object? json) => const GZipEncoder().encodeBytes(utf8.encode(jsonEncode(json)));
