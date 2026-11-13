@@ -4,6 +4,13 @@ import 'package:flutter/rendering.dart';
 
 import 'fit_box.dart';
 
+/// A box that measures its children's content and then lays them out with
+/// tight constraints (so each is a relayout boundary): a change inside one
+/// must reach it to measure again ([RenderHugCross.relayoutAbove]).
+abstract interface class MeasuresContent {
+  bool get measuresContent;
+}
+
 /// A [Flex] that hugs its cross axis and stretches its children across it:
 /// as thick as its thickest child, every stretching child that thick.
 ///
@@ -28,11 +35,13 @@ import 'fit_box.dart';
 /// under [IntrinsicHeight]: a flex of only such children isn't as thin as
 /// their design sizes (often 0) say.
 class RenderHugCross extends RenderProxyBox {
-  /// Marks every [RenderHugCross] above [object] as needing layout. Call it
-  /// outside the layout phase.
+  /// Marks every [RenderHugCross] above [object] as needing layout, and
+  /// every other box that sizes its children from their content
+  /// ([MeasuresContent]). Call it outside the layout phase.
   static void relayoutAbove(RenderObject object) {
     for (RenderObject? p = object.parent; p != null; p = p.parent) {
-      if (p is RenderHugCross) p.markNeedsLayout();
+      final RenderObject box = p;
+      if (box is RenderHugCross || (box is MeasuresContent && (box as MeasuresContent).measuresContent)) box.markNeedsLayout();
     }
   }
 

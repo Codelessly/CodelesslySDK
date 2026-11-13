@@ -205,6 +205,60 @@ void main() {
     });
   });
 
+  group('every diagnostic is true for the document as it renders at that size', () {
+    const t = '$fixtures/truth';
+    List<Map<String, Object?>> diag(RenderReport r, String code) =>
+        [for (final d in r.diagnostics) if (d['code'] == code) d.cast<String, Object?>()];
+
+    testWidgets('a row a media rule makes scroll on phones: its cells are not offscreen nor overflowing', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$t/scroll_by_media.json'], out: out.path));
+      expect(report.diagnostics, isEmpty);
+    });
+
+    testWidgets('a path past its box is reported only where no ancestor clips it away', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$t/clipped_paths.json'], out: out.path, sizes: const [Size(390, 844)]));
+      expect(diag(report, 'path_overflow').map((d) => d['nodeId']), ['grid2']);
+    });
+
+    testWidgets('several exceptions in one frame: each named by its node', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$t/overflowing_cards.json'], out: out.path, sizes: const [Size(390, 844)]));
+      final errors = diag(report, 'render_exception');
+      expect(errors, isNotEmpty);
+      for (final e in errors) {
+        expect(e['nodeId'], 'card', reason: '${e['message']}');
+        expect(e['message'] as String, isNot(contains('Multiple exceptions')));
+      }
+    });
+
+    testWidgets('--full-page after a tap that scrolled: the whole page from its top', (tester) async {
+      final report = await runRender(tester,
+          RenderArgs(inputs: ['$t/tap_far_down.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true, steps: const [Step('tap', 'button')]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final bytes = File('${out.path}/long@390x844.png').readAsBytesSync();
+      final height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
+      expect(height, 2100);
+      final image = await tester.runAsync(() async {
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        final data = await frame.image.toByteData();
+        return (data!, frame.image.width);
+      });
+      int px(int x, int y, int c) => image!.$1.getUint8((y * image.$2 + x) * 4 + c);
+      expect([px(195, 10, 0), px(195, 10, 1)], [255, 0], reason: 'the red top band at the top of the PNG');
+      expect([px(195, 2050, 0), px(195, 2050, 1)], [0, 255], reason: 'the green button at the bottom');
+      // A viewport capture shows where the tap scrolled to.
+      final view = await runRender(tester,
+          RenderArgs(inputs: ['$t/tap_far_down.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'button')], label: 'v'));
+      expect(view.errors, 0);
+      final vb = File('${out.path}/long@390x844-v.png').readAsBytesSync();
+      final vimage = await tester.runAsync(() async {
+        final frame = await (await ui.instantiateImageCodec(vb)).getNextFrame();
+        return (await frame.image.toByteData())!;
+      });
+      expect(vimage!.getUint8((10 * 390 + 195) * 4 + 1), isNot(0), reason: 'scrolled past the red band');
+    });
+  });
+
   // The guide's responsive example (codelessly_api tool/reference/examples/
   // responsive_web.json, copied): the four web patterns at three widths.
   testWidgets('the guide\'s responsive example: header, 3-2-1 grid from one list, stacking split, type scale', (tester) async {

@@ -1,0 +1,87 @@
+{
+ "schema": 2,
+ "roots": [
+  "boom"
+ ],
+ "nodes": {
+  "boom": {
+   "type": "canvas",
+   "slots": {
+    "body": "grid"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "grid": {
+   "type": "gridView",
+   "children": [
+    "card"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisExtent": 50,
+    "itemCount": 3
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "tall",
+    "tall2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 50
+    }
+   },
+   "props": {}
+  },
+  "tall": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": 120
+   }
+  },
+  "tall2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "A line of text that will not fit",
+    "style": {
+     "color": "#FF000000",
+     "fontSize": 30
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,115 @@
+{
+ "schema": 2,
+ "roots": [
+  "long"
+ ],
+ "nodes": {
+  "long": {
+   "type": "canvas",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "top",
+    "middle",
+    "button"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   },
+   "props": {
+    "scrollable": true
+   }
+  },
+  "top": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 300
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFF0000"
+     }
+    ]
+   }
+  },
+  "middle": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 1700
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEEEEEE"
+     }
+    ]
+   }
+  },
+  "button": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 100
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF00FF00"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "n",
+       "value": "${= n + 1}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "long": [
+   {
+    "name": "n",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

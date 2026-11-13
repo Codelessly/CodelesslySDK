@@ -1,0 +1,130 @@
+{
+ "schema": 2,
+ "roots": [
+  "paths"
+ ],
+ "nodes": {
+  "paths": {
+   "type": "canvas",
+   "slots": {
+    "body": "pcol"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "pcol": {
+   "type": "column",
+   "children": [
+    "clipped",
+    "open"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "clipped": {
+   "type": "stack",
+   "children": [
+    "grid1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 200
+   },
+   "decoration": {
+    "clip": "hardEdge"
+   }
+  },
+  "grid1": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 200
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "path": "M0 0 L0 600 M80 0 L80 600 M160 0 L160 600 M240 0 L240 600 M320 0 L320 600 M400 0 L400 600 M480 0 L480 600 M560 0 L560 600 M640 0 L640 600 M720 0 L720 600"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF888888"
+     }
+    ],
+    "strokeWidth": 1
+   }
+  },
+  "open": {
+   "type": "stack",
+   "children": [
+    "grid2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 200
+   }
+  },
+  "grid2": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 200
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "path": "M0 0 L0 600 M80 0 L80 600 M160 0 L160 600 M240 0 L240 600 M320 0 L320 600 M400 0 L400 600 M480 0 L480 600 M560 0 L560 600 M640 0 L640 600 M720 0 L720 600"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF888888"
+     }
+    ],
+    "strokeWidth": 1
+   }
+  }
+ }
+}

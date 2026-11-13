@@ -14,6 +14,7 @@ import 'package:flutter/rendering.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
 import '../render/layout/fit_box.dart' show RenderFitBox;
+import '../render/layout/hug_cross.dart' show MeasuresContent;
 import '../render/node_tree.dart' show RenderTree, NodeBox;
 import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, DropSlotNode, dropSlotOf;
 
@@ -855,7 +856,13 @@ class RenderLayeredItems extends RenderCollection {
 /// cells (or as many as fit [maxCrossAxisExtent]) per row, each
 /// [mainAxisExtent] long (else its width over [childAspectRatio]), or, with
 /// [shrinkWrapRows], each row as long as its longest item.
-class RenderGridItems extends RenderCollection {
+class RenderGridItems extends RenderCollection implements MeasuresContent {
+  /// Rows that shrink-wrap are measured from the items' content: a change
+  /// inside an item (laid out stretched, so a relayout boundary) measures
+  /// the rows again ([RenderHugCross.relayoutAbove]).
+  @override
+  bool get measuresContent => shrinkWrapRows && !masonry;
+
   Axis axis = Axis.vertical;
   bool reverse = false;
   EdgeInsets padding = EdgeInsets.zero;
