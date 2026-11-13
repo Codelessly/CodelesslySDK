@@ -122,6 +122,16 @@ class RenderCodelesslyWrap extends RenderBox
     markNeedsSemanticsUpdate();
   }
 
+  /// CSS `align-items: stretch` in a wrapping flex: every child of a run
+  /// as thick as the run's thickest (equal-height cards on each line).
+  bool get stretch => _stretch;
+  bool _stretch = false;
+  set stretch(bool value) {
+    if (_stretch == value) return;
+    _stretch = value;
+    markNeedsLayout();
+  }
+
   bool get _isHorizontal => _direction == Axis.horizontal;
 
   @override
@@ -256,6 +266,22 @@ class RenderCodelesslyWrap extends RenderBox
         }
       }
       runs = _regroup(runs, sizes);
+    }
+
+    if (_stretch) {
+      for (final _Run run in runs) {
+        if (run.children.length < 2 && run.crossExtent <= 0) continue;
+        for (final int i in run.children) {
+          final Size own = sizes[i]!;
+          if ((_cross(own) - run.crossExtent).abs() < precisionErrorTolerance) continue;
+          sizes[i] = layoutChild(
+            children[i],
+            _isHorizontal
+                ? BoxConstraints.tightFor(width: own.width, height: run.crossExtent)
+                : BoxConstraints.tightFor(width: run.crossExtent, height: own.height),
+          );
+        }
+      }
     }
 
     double longest = 0;

@@ -1569,6 +1569,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         api.CrossAxisAlignment.end => WrapCrossAlignment.end,
         _ => WrapCrossAlignment.start,
       }
+      // CSS align-items: stretch, per line.
+      ..stretch = cross == api.CrossAxisAlignment.stretch
       ..textDirection = TextDirection.ltr;
     _syncChildren(wrap, _inOrder(n.children), Slot(SlotKind.flex, n));
     chain.add(wrap);

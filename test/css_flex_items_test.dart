@@ -98,6 +98,23 @@ void main() {
     expect(r(t, tester, 'c0').width, closeTo(320, 0.01));
   });
 
+  // CSS Flexbox §9.4 step 11 (align-items: stretch): each item as thick
+  // as its line.
+  testWidgets('align-items: stretch in a wrapping row: equal heights per line', (tester) async {
+    final nodes = cards(700);
+    (nodes['w'] as Map)['props'] = {'wrap': true, 'spacing': 20, 'runSpacing': 10, 'crossAxisAlignment': 'stretch'};
+    ((nodes['c0'] as Map)['layout'] as Map)['height'] = {'hug': 50};
+    (nodes['c0'] as Map)['type'] = 'column';
+    (nodes['c0'] as Map)['children'] = ['tall'];
+    nodes['tall'] = {'type': 'box', 'layout': {'width': 10, 'height': 90}};
+    ((nodes['c1'] as Map)['layout'] as Map)['height'] = {'hug': 50};
+    (nodes['c1'] as Map)['type'] = 'column';
+    final t = await pump(tester, nodes);
+    expect(r(t, tester, 'c0').height, 90);
+    expect(r(t, tester, 'c1').height, 90, reason: 'stretched to its line');
+    expect(r(t, tester, 'c2').top, 100, reason: 'the next line starts below the tallest');
+  });
+
   group('grid auto-fit (CSS grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px)', () {
     Map<String, Object?> grid(double width, int items) => {
           'w': {
