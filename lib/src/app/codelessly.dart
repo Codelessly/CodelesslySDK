@@ -161,7 +161,7 @@ class Codelessly extends ChangeNotifier {
   /// each screen's own scope, so a value one screen sets the next one reads.
   /// Declared from the publish model's `variables` (and a publish's
   /// `app_variables` scope, [declareAppVariables]).
-  late final VariableScope appVariables = VariableScope(const [], parent: _featureScopes.build(features, _usage));
+  late final VariableScope appVariables = VariableScope(const [], parent: _featureScopes.build(features, data));
 
   /// The feature layers this instance runs: those of its action runner
   /// ([CoreActions.features]; `CodelesslyActions` installs the first-party
@@ -185,8 +185,16 @@ class Codelessly extends ChangeNotifier {
       });
   AppDataSources? _appData;
 
-  /// `usage`: the per-user counters of [automations].
-  late final ValuesScope _usage = ValuesScope({'usage': CodelesslyAutomations.emptyUsage}, data);
+  /// `usage`: the per-user counters of [automations] (the engage feature's
+  /// scope; without it, counted but not read by layouts).
+  late final ValuesScope _usage = () {
+    appVariables; // The feature scopes are built with it.
+    return switch (_featureScopes['usage']) {
+      final ValuesScope usage => usage,
+      _ => _detachedUsage = ValuesScope({'usage': CodelesslyAutomations.emptyUsage}),
+    };
+  }();
+  ValuesScope? _detachedUsage;
 
   /// Makes completed native auth operations visible to the next action in
   /// the same chain, without waiting for the asynchronous auth/profile stream.
@@ -546,7 +554,7 @@ class Codelessly extends ChangeNotifier {
     }
     appVariables.dispose();
     _featureScopes.dispose();
-    _usage.dispose();
+    _detachedUsage?.dispose();
     data.dispose();
     // Lazy expression scopes must detach while the service notifiers live.
     unawaited(_ownedServices?.dispose());
