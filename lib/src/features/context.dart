@@ -7,6 +7,8 @@ import 'package:codelessly_api/codelessly_api.dart' show AuthOperation;
 import '../runtime/actions/context.dart';
 import '../runtime/contracts.dart';
 import 'auth/auth.dart' show AuthValuesRefresh;
+import '../services/purchases.dart' show PaywallResult, PaywallSession;
+import 'commerce/commerce.dart' show PaywallHost, PaywallPresentation;
 import 'data/app_data_sources.dart';
 
 /// The [ActionContext] (and [ActionHost]) of a screen: [CoreActionContext]
@@ -25,9 +27,9 @@ class RuntimeActionContext extends CoreActionContext {
     this.refreshAuthValues,
     this.appData,
     super.declareMissing,
-    super.paywall,
-    super.openPaywall,
-    super.presentPaywall,
+    this.paywall,
+    this.openPaywall,
+    this.presentPaywall,
     super.scripts,
     List<Object> extensions = const [],
     super.disposers,
@@ -37,6 +39,8 @@ class RuntimeActionContext extends CoreActionContext {
           ...extensions,
           if (refreshAuthValues != null) AuthValuesRefresh(refreshAuthValues),
           ?appData,
+          if (paywall != null || openPaywall != null || presentPaywall != null)
+            PaywallHost(session: paywall, open: openPaywall, present: presentPaywall),
         ]);
 
   /// The extensions it was given, without those its fields make.
@@ -49,6 +53,17 @@ class RuntimeActionContext extends CoreActionContext {
   /// The app's shared live data (`loadCloudData` with `scope: app`); null:
   /// such loads are the screen's.
   final AppDataSources? appData;
+
+  /// The paywall a paywall screen's actions act on.
+  final PaywallSession? paywall;
+
+  /// Opens a server-resolved placement; supplied by the app shell.
+  final Future<PaywallResult> Function(String placement)? openPaywall;
+
+  /// Opens a placement as [PaywallPresentation] says (the `openPaywall`
+  /// action's transition); supplied by the app shell. Without it,
+  /// [openPaywall] opens it with the default transition.
+  final Future<PaywallResult> Function(String placement, PaywallPresentation presentation)? presentPaywall;
 
   @override
   RuntimeActionContext withScope(ValueScope scope) => copy(scope);

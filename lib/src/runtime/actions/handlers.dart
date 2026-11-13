@@ -9,11 +9,9 @@ import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderBox, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
-import 'dart:ui' show PlatformDispatcher;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 
-import 'action_error.dart' show CodedFailure;
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/node_tree.dart' show NodeBox, NodeTree;
 import '../../render/drag_track.dart' show DragTracks;
@@ -24,7 +22,6 @@ import '../../render/play.dart' show EffectPlayers;
 import '../../render/paint/image_fill.dart' show preloadImage;
 import '../../render/particles.dart' show ParticlePlayers;
 import '../../scripting/formula_scripts.dart' show ScriptsScope;
-import '../../services/services.dart';
 import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
@@ -131,8 +128,6 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       await Clipboard.setData(ClipboardData(text: run.text(a.text)));
     case EditTextAction():
       _editText(a, run);
-    case PaywallAction():
-      await _paywall(a, run);
     case FocusAction():
       await _focus(a, run);
     case ScrollToAction():
@@ -611,87 +606,6 @@ Future<Json> _preloadImages(PreloadImagesAction a, ActionRun run) async {
     report();
   }));
   return {'loaded': done - failed, 'failed': failed, 'total': urls.length};
-}
-
-// --- purchases ---------------------------------------------------------------
-
-Future<void> _paywall(PaywallAction a, ActionRun run) async {
-  final host = run.host;
-  final session = host is CoreActionContext ? host.paywall : null;
-  switch (a.operation) {
-    case PaywallOperation.openPaywall:
-      final placement = run.text(a.placement ?? '').trim();
-      final present = host is CoreActionContext ? host.presentPaywall : null;
-      final open = host is CoreActionContext ? host.openPaywall : null;
-      if (placement.isEmpty || (present == null && open == null)) throw StateError('No paywall placement presenter');
-      // Its screen opens as the action's transition says, when the shell can.
-      final result = present != null ? await present(placement, PaywallPresentation.of(a)) : await open!(placement);
-      run.result = {'outcome': result.outcome.name, 'entitlementId': result.entitlementId};
-      return;
-    case PaywallOperation.openLegalLink:
-      final url = run.text(a.url ?? '').trim();
-      if (!url.startsWith('https://')) throw StateError('Invalid legal URL');
-      await run.context.services.openUrl(url);
-      return;
-    case PaywallOperation.closePaywall:
-      session?.close();
-      host.ui.closeModal(null);
-      return;
-    default:
-  }
-  if (session == null && a.operation == PaywallOperation.restore) {
-    // Restore purchases outside a paywall (Settings): through the action's
-    // placement, else the project's first.
-    final services = run.context.services;
-    final runtime = services is Services ? services.paywalls : null;
-    if (services is Services && runtime != null) {
-      var placement = run.text(a.placement ?? '').trim();
-      if (placement.isEmpty) placement = services.config.paywall.placements.firstOrNull?.id ?? '';
-      if (placement.isEmpty) throw StateError('No paywall placement to restore from');
-      final result = await runtime.restoreAt(placement,
-          locale: PlatformDispatcher.instance.locale.toLanguageTag(), appVersion: '');
-      _paywallOutcome(result, run);
-      return;
-    }
-  }
-  if (session == null) throw StateError('Paywall action outside a paywall');
-  // The slot can be bound (`${sel}`, the plan the screen selected).
-  final slotText = a.slot == null ? '' : run.text(a.slot!).trim();
-  final slot = slotText.isEmpty ? null : slotText;
-  switch (a.operation) {
-    case PaywallOperation.purchase:
-      final preference = run.text(a.offer ?? 'storeDefault').trim();
-      final offer = PurchaseOfferPreference.values.where((value) => value.name == preference).firstOrNull;
-      if (offer == null) throw StateError('Unknown purchase offer preference');
-      final result = await session.purchaseAndWait(slot: slot, offer: offer);
-      _paywallOutcome(result, run);
-    case PaywallOperation.restore:
-      final result = await session.restoreAndWait();
-      _paywallOutcome(result, run);
-    case PaywallOperation.selectProduct:
-      if (slot != null) session.selectProduct(slot);
-    default:
-  }
-}
-
-void _paywallOutcome(PaywallResult result, ActionRun run) {
-  run.result = {'outcome': result.outcome.name, 'entitlementId': result.entitlementId};
-  switch (result.outcome) {
-    case PaywallOutcome.purchased || PaywallOutcome.restored:
-      return;
-    // Closing the paywall or nothing to show ends the chain quietly. A
-    // cancelled purchase and an empty restore end it too, without an error,
-    // but the screen's actionError reaction hears them
-    // (`${result.error.code}`) to say so.
-    case PaywallOutcome.closed || PaywallOutcome.skipped:
-      throw const ActionsCanceled();
-    case PaywallOutcome.canceled:
-      throw const ActionsStopped('purchase-cancelled', 'Purchase cancelled');
-    case PaywallOutcome.restoreNothing:
-      throw const ActionsStopped('nothing-to-restore', 'No purchase to restore');
-    case PaywallOutcome.failed:
-      throw CodedFailure(result.code.isEmpty ? 'purchase-failed' : result.code, result.error ?? 'Purchase failed');
-  }
 }
 
 /// Whether [text] holds `${...}` (an expression, not a literal).

@@ -4,11 +4,11 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart'
-    show ActionDef, Json, NavigateAction, PageTransition, PaywallAction, RouteTransition, ScriptDef, Variable, VariableType;
+    show ActionDef, Json, NavigateAction, ScriptDef, Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart';
-import '../../services/services.dart';
+import '../../services/analytics.dart' show AnalyticsService;
 import '../contracts.dart';
 import '../expressions/engine.dart';
 import '../expressions/paths.dart';
@@ -62,9 +62,6 @@ class CoreActionContext implements ActionHost {
     this.onError,
     this.onActionErrorEvent,
     this.declareMissing = false,
-    this.paywall,
-    this.openPaywall,
-    this.presentPaywall,
     this.scripts = const [],
     this.extensions = const [],
     List<VoidCallback>? disposers,
@@ -117,17 +114,6 @@ class CoreActionContext implements ActionHost {
   @protected
   List<VoidCallback> get disposers => _disposers;
 
-  /// The paywall a paywall screen's actions act on.
-  final PaywallSession? paywall;
-
-  /// Opens a server-resolved placement; supplied by the app shell.
-  final Future<PaywallResult> Function(String placement)? openPaywall;
-
-  /// Opens a placement as [PaywallPresentation] says (the `openPaywall`
-  /// action's transition); supplied by the app shell. Without it,
-  /// [openPaywall] opens it with the default transition.
-  final Future<PaywallResult> Function(String placement, PaywallPresentation presentation)? presentPaywall;
-
   /// The scripts its run script actions run (the layout's).
   final List<ScriptDef> scripts;
 
@@ -164,9 +150,6 @@ class CoreActionContext implements ActionHost {
         onError: onError,
         onActionErrorEvent: suppressErrorEvents ? null : onActionErrorEvent,
         declareMissing: declareMissing,
-        paywall: paywall,
-        openPaywall: openPaywall,
-        presentPaywall: presentPaywall,
         scripts: scripts,
         extensions: extensions,
         disposers: _disposers,
@@ -221,9 +204,9 @@ class CoreActionContext implements ActionHost {
   }
 
   void _logError(Object error, StackTrace stack, String? action) {
-    final s = services;
-    if (s is Services) {
-      s.analytics.logError(error, stackTrace: stack, message: 'Action ${action ?? ''} failed', type: 'action_failed');
+    final analytics = services.lookup<AnalyticsService>();
+    if (analytics != null) {
+      analytics.logError(error, stackTrace: stack, message: 'Action ${action ?? ''} failed', type: 'action_failed');
       return;
     }
     debugPrint('Codelessly: action ${action ?? ''} failed: $error');
@@ -290,43 +273,6 @@ class _NoServices implements CodelesslyServices {
 
   @override
   Future<bool> openUrl(String url) async => false;
-}
-
-/// How an `openPaywall` action shows its placement's screen: as a
-/// navigation would ([NavigateAction]'s transition and durations), the
-/// transition reversing when the paywall closes.
-@immutable
-class PaywallPresentation {
-  const PaywallPresentation({
-    this.routeTransition,
-    this.transition = PageTransition.platform,
-    this.transitionMs,
-    this.reverseTransitionMs,
-  });
-
-  /// [action]'s.
-  factory PaywallPresentation.of(PaywallAction action) => PaywallPresentation(
-        routeTransition: action.routeTransition,
-        transition: action.transition,
-        transitionMs: action.transitionMs,
-        reverseTransitionMs: action.reverseTransitionMs,
-      );
-
-  /// A custom transition; replaces [transition] and its durations.
-  final RouteTransition? routeTransition;
-  final PageTransition transition;
-  final int? transitionMs, reverseTransitionMs;
-
-  @override
-  bool operator ==(Object other) =>
-      other is PaywallPresentation &&
-      other.routeTransition == routeTransition &&
-      other.transition == transition &&
-      other.transitionMs == transitionMs &&
-      other.reverseTransitionMs == reverseTransitionMs;
-
-  @override
-  int get hashCode => Object.hash(routeTransition, transition, transitionMs, reverseTransitionMs);
 }
 
 /// A failed action chain that can run again (see [CoreActionContext.failed]).
