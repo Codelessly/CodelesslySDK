@@ -142,7 +142,22 @@ class ComponentRegistry extends ChangeNotifier {
   }
 
   final Map<String, RegisteredComponent> _definitions = {};
+  final Map<String, LayoutDocument> _written = {};
   final Set<String> _changed = {};
+
+  /// The project's theme as the screen shows it: the definitions' named
+  /// colors and text styles are resolved against it ([resolveThemeRefs]);
+  /// a change re-applies only the nodes whose values differ.
+  ThemeTokens get theme => _theme;
+  ThemeTokens _theme = ThemeTokens.none;
+  set theme(ThemeTokens value) {
+    if (value == _theme) return;
+    _theme = value;
+    for (final e in _definitions.entries) {
+      final written = _written[e.key];
+      if (written != null) e.value.source.document = resolveThemeRefs(written, value);
+    }
+  }
 
   /// The types the last notification was about.
   Set<String> get changed => Set.unmodifiable(_changed);
@@ -165,6 +180,8 @@ class ComponentRegistry extends ChangeNotifier {
   void define(LayoutDocument document) {
     final type = document.componentType;
     if (type == null) return;
+    _written[type] = document;
+    document = resolveThemeRefs(document, _theme);
     final existing = _definitions[type];
     if (existing != null) {
       final declared = jsonEquality.equals(existing.document.extra[kWidgetKey], document.extra[kWidgetKey]) &&
@@ -183,6 +200,7 @@ class ComponentRegistry extends ChangeNotifier {
 
   /// Removes definition [type]: its calls render as empty boxes.
   void remove(String type) {
+    _written.remove(type);
     if (_definitions.remove(type) == null) return;
     _catalog = null;
     _notify({type});

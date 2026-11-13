@@ -1,14 +1,17 @@
 // The render command (tool/render): strict validation, rendering every
 // screen at each size, interactions, and the runtime checks, run in-process
 // on the fixtures next to this file.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui' show Size;
 
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/render/src/args.dart';
+import '../../tool/render/src/compare.dart';
 import '../../tool/render/src/render.dart';
 
 const fixtures = 'test/tool/fixtures';
@@ -59,7 +62,9 @@ void main() {
     expect(report.errors, 0, reason: '${report.diagnostics}');
     final boxes = jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List;
     final canvas = boxes.firstWhere((b) => b['id'] == 'home-m') as Map;
-    expect(canvas['h'] as num, greaterThan(844), reason: 'full page: taller than the viewport');
+    expect(canvas['h'], 844, reason: 'full page: the window keeps its size (as a browser\'s full-page capture)');
+    expect(boxes.cast<Map>().map((b) => (b['y'] as num) + (b['h'] as num)).reduce(math.max), greaterThan(844),
+        reason: 'the page\'s content below the window, where the PNG draws it');
     final bytes = File('${out.path}/home@390x844.png').readAsBytesSync();
     // PNG height (big-endian at 20..23) is the full page.
     expect((bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23], greaterThan(844));
@@ -358,5 +363,161 @@ void main() {
       final a = File(o.images.single).readAsBytesSync(), b = File(s.images.single).readAsBytesSync();
       expect(b, a);
     });
+  });
+
+  group('named colors and text styles (the site manifest\'s theme)', () {
+    const t = '$fixtures/theme';
+    testWidgets('a page naming the theme renders as the page with the styles written out, at each size', (tester) async {
+      for (final size in const [Size(390, 844), Size(1440, 900)]) {
+        final named = await runRender(tester, RenderArgs(inputs: ['$t/named'], out: '${out.path}/n', sizes: [size]));
+        final inline = await runRender(tester, RenderArgs(inputs: ['$t/inline/home.json'], out: '${out.path}/i', sizes: [size]));
+        expect(named.diagnostics, isEmpty, reason: '${named.diagnostics}');
+        expect(File(named.images.single).readAsBytesSync(), File(inline.images.single).readAsBytesSync(), reason: '$size');
+      }
+    });
+
+    testWidgets('an unknown name is an error naming the nearest', (tester) async {
+      final dir = Directory('${out.path}/site')..createSync();
+      File('$t/named/site.json').copySync('${dir.path}/site.json');
+      File('${dir.path}/home.json').writeAsStringSync(File('$t/named/home.json').readAsStringSync().replaceFirst('"style": "body"', '"style": "bdy"'));
+      final r = await runRender(tester, RenderArgs(inputs: [dir.path], out: '${out.path}/o', sizes: const [Size(390, 844)], validateOnly: true));
+      final d = r.diagnostics.singleWhere((d) => d['code'] == 'unknown_theme_name');
+      expect(d['suggestion'], 'body');
+    });
+  });
+
+  group('authoring fixes, cycle 3', () {
+    const f = '$fixtures/fix3';
+    testWidgets('a fill with no room to fill is reported; a page id and a component id never collide', (tester) async {
+      final r = await runRender(tester, RenderArgs(inputs: [f], out: out.path, sizes: const [Size(390, 844)]));
+      expect(codes(r), ['fill_fallback'], reason: '${r.diagnostics}');
+      final d = r.diagnostics.single;
+      expect(d['nodeId'], 'cardBody');
+      expect(d['message'], contains('parent "card" (column) hugs its height'));
+      expect(d['message'], contains('280 px'));
+    });
+
+    testWidgets('an action naming a node of a component acts on its own instance', (tester) async {
+      final r = await runRender(tester, RenderArgs(inputs: [f], out: out.path, sizes: const [Size(390, 844)], dumpLayout: true,
+          steps: const [Step('tap', 'p2/go'), Step('wait', '12000')]));
+      expect(codes(r, 'error'), isEmpty, reason: '${r.diagnostics}');
+      final boxes = (jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
+      Map at(String path) => boxes.singleWhere((b) => b['path'] == path);
+      bool shows(String panel) {
+        final list = at('$panel/list'), end = at('$panel/end');
+        return (end['y'] as num) >= (list['y'] as num) && (end['y'] as num) + (end['h'] as num) <= (list['y'] as num) + (list['h'] as num) + 0.5;
+      }
+      expect(shows('p2'), isTrue, reason: 'the tapped instance scrolled its own list: $boxes');
+      expect(shows('p1'), isFalse, reason: 'the other instance did not move');
+    });
+  });
+
+  testWidgets('--full-page keeps the window: a drawer pinned to its top and bottom covers the first window only', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
+        fullPage: true, dumpLayout: true));
+    expect(r.errors, 0, reason: '${r.diagnostics}');
+    final boxes = (jsonDecode(File('${out.path}/drawerScreen@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
+    final drawer = boxes.singleWhere((b) => b['id'] == 'drawer');
+    expect([drawer['y'], drawer['h']], [72, 772]);
+    final bytes = File(r.images.single).readAsBytesSync();
+    final image = await tester.runAsync(() async {
+      final frame = await (await ui.instantiateImageCodec(bytes)).getNextFrame();
+      return (await frame.image.toByteData(), frame.image.width, frame.image.height);
+    });
+    int px(int x, int y, int c) => image!.$1!.getUint8((y * image.$2 + x) * 4 + c);
+    expect(image!.$3, 2400);
+    expect([px(195, 500, 0), px(195, 500, 1)], [255, 0], reason: 'the drawer over the first window');
+    expect([px(195, 1500, 0), px(195, 1500, 1)], [0, 255], reason: 'the page below it');
+  });
+
+  testWidgets('--unfocus takes the focus from a field; --key presses a key on what has the focus', (tester) async {
+    Future<double> moved(List<Step> steps) async {
+      final o = Directory('${out.path}/${steps.length}-${steps.first.kind}')..createSync();
+      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-keys.json'], out: o.path, sizes: const [Size(390, 844)],
+          dumpLayout: true, steps: steps));
+      expect(r.errors, 0, reason: '${r.diagnostics}');
+      final boxes = (jsonDecode(File('${o.path}/keys@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
+      return (boxes.singleWhere((b) => b['id'] == 'moved')['h'] as num).toDouble();
+    }
+
+    expect(await moved(const [Step('key', 'ArrowRight')]), 40, reason: 'the screen\'s keyDown reaction ran');
+    expect(await moved(const [Step('type', 'field', 'abc'), Step('key', 'ArrowRight')]), 0, reason: 'the focused field took the key');
+    expect(await moved(const [Step('type', 'field', 'abc'), Step('unfocus', ''), Step('key', 'ArrowRight')]), 40);
+    expect(parseArgs(['k.json', '--out', 'o', '--unfocus', '--key', 'shift+Tab']).steps.map((s) => s.kind), ['unfocus', 'key']);
+  });
+
+  testWidgets('--compare: the same page matches; one pushed down is found shifted, its height difference said', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
+        fullPage: true, compare: '$fixtures/fix3-drawer.json'.replaceFirst('fix3-drawer.json', 'none.png')));
+    expect(codes(r), ['compare_failed'], reason: '${r.diagnostics}');
+    final capture = r.images.single;
+    // A reference: the capture 20 px lower under a 20 px band.
+    final reference = '${out.path}/ref.png';
+    await tester.runAsync(() async {
+      final img = await decodePng(File(capture).readAsBytesSync());
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 390, 20), ui.Paint()..color = const ui.Color(0xFF000000));
+      final c = Completer<ui.Image>();
+      ui.decodeImageFromPixels(img.rgba, img.width, img.height, ui.PixelFormat.rgba8888, c.complete);
+      canvas.drawImage(await c.future, const ui.Offset(0, 20), ui.Paint());
+      final out = await recorder.endRecording().toImage(390, img.height + 20);
+      File(reference).writeAsBytesSync((await out.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List());
+    });
+    final same = (await tester.runAsync(() => compareImages(capture, capture)))!;
+    expect(same.matching, 1.0);
+    expect(same.bands, isEmpty);
+    final shifted = (await tester.runAsync(() => compareImages(capture, reference)))!;
+    expect(shifted.referenceHeight - shifted.captureHeight, 20);
+    expect(shifted.bands.any((b) => b.shift == 20), isTrue, reason: shifted.summary());
+    expect(shifted.summary(), contains('20 px shorter than the reference'));
+    expect(File(capture.replaceFirst('.png', '.compare.png')).existsSync() && File(capture.replaceFirst('.png', '.diff.png')).existsSync(), isTrue);
+  });
+
+  testWidgets('overlapping a neighbour: motion moves what is painted, not the layout; a media rule patches it', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-overlap.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)]));
+    expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
+    Future<List<int>> column(String png, int x, List<int> ys) async => (await tester.runAsync(() async {
+          final img = await decodePng(File('${out.path}/$png').readAsBytesSync());
+          return [for (final y in ys) img.rgba[(y * img.width + x) * 4] << 16 | img.rgba[(y * img.width + x) * 4 + 1] << 8 | img.rgba[(y * img.width + x) * 4 + 2]];
+        }))!;
+    // On a phone the card is drawn 36 px up, over the hero's bottom; its
+    // slot (and the box after it, at 300) do not move.
+    expect(await column('overlap@390x844.png', 195, [160, 170, 260, 270, 310]), [0x00FF00, 0xFF0000, 0xFF0000, 0xFFFFFF, 0x0000FF]);
+    // At desktop width the media rule puts it back.
+    expect(await column('overlap@1440x900.png', 720, [180, 280, 310]), [0x00FF00, 0xFF0000, 0x0000FF]);
+  });
+
+  testWidgets('a media rule may bind: visible on phones only while a variable allows, hidden elsewhere', (tester) async {
+    Future<Map<String, double>> heights(List<Step> steps) async {
+      final o = Directory('${out.path}/${steps.length}')..createSync();
+      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-media-bind.json'], out: o.path,
+          sizes: const [Size(390, 844), Size(1440, 900)], dumpLayout: true, steps: steps));
+      expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
+      return {
+        for (final w in ['390x844', '1440x900'])
+          w: ((jsonDecode(File('${o.path}/mb@$w.layout.json').readAsStringSync()) as List).cast<Map>().singleWhere((b) => b['id'] == 'bar')['h'] as num)
+              .toDouble(),
+      };
+    }
+
+    expect(await heights(const []), {'390x844': 60, '1440x900': 0});
+    expect(await heights(const [Step('set', 'open', 'true')]), {'390x844': 0, '1440x900': 0});
+  });
+
+  // The guide's band example (codelessly_api tool/reference/examples/band.json, copied): a full-width band whose
+  // content is capped at 1200 and centered, and a table from one row and one cell template.
+  testWidgets('the guide\'s band example: full-width band, content capped and centered, a table from one template', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$a0/band.json'], out: out.path, sizes: const [Size(390, 844), Size(1700, 900)],
+        dumpLayout: true));
+    expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
+    List<Map> boxes(String size) => (jsonDecode(File('${out.path}/home@$size.layout.json').readAsStringSync()) as List).cast<Map>();
+    final wide = boxes('1700x900');
+    final band = wide.singleWhere((b) => b['id'] == 'band'), rail = wide.singleWhere((b) => b['id'] == 'rail');
+    expect([band['x'], band['w']], [0, 1700.0]);
+    expect([rail['x'], rail['w']], [250, 1200.0]);
+    expect(wide.where((b) => b['id'] == 'cell'), hasLength(9), reason: 'three rows of three cells from one cell node');
+    final narrow = boxes('390x844').singleWhere((b) => b['id'] == 'rail');
+    expect([narrow['x'], narrow['w']], [24, 342.0]);
   });
 }

@@ -1,0 +1,134 @@
+{
+ "schema": 2,
+ "roots": [
+  "home"
+ ],
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F1E9"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "eb",
+    "t",
+    "p",
+    "q"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 24
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "eb": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 342
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "OUR MENU",
+    "style": {
+     "fontFamily": "Roboto",
+     "fontSize": 12,
+     "height": 1.5,
+     "color": "#FFE4572E",
+     "letterSpacing": 2
+    }
+   }
+  },
+  "t": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 342
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "text": "Fire, smoke and season",
+    "style": {
+     "fontFamily": "Roboto",
+     "fontSize": 32,
+     "height": 1.2,
+     "color": "#FF1B1B1B",
+     "fontWeight": 700
+    }
+   },
+   "media": [
+    {
+     "minWidth": 1024,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 56
+       }
+      }
+     }
+    }
+   ]
+  },
+  "p": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 342
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Cooked over oak, served at the counter.",
+    "style": {
+     "fontFamily": "Roboto",
+     "fontSize": 16,
+     "height": 1.5,
+     "color": "#FF1B1B1B"
+    }
+   }
+  },
+  "q": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE4572E"
+     }
+    ]
+   }
+  }
+ }
+}

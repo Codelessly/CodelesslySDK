@@ -1,0 +1,44 @@
+{
+ "schema": 2,
+ "pages": [
+  "home.json"
+ ],
+ "theme": {
+  "colors": {
+   "ink": "#FF1B1B1B",
+   "ember": "#FFE4572E",
+   "paper": "#FFF6F1E9"
+  },
+  "textStyles": {
+   "body": {
+    "fontSize": 16,
+    "height": 1.5,
+    "color": "ink"
+   },
+   "title": {
+    "from": "body",
+    "fontSize": 32,
+    "fontWeight": 700,
+    "height": 1.2
+   },
+   "eyebrow": {
+    "from": "body",
+    "fontSize": 12,
+    "letterSpacing": 2,
+    "color": "ember"
+   }
+  },
+  "media": [
+   {
+    "minWidth": 1024,
+    "patch": {
+     "textStyles": {
+      "title": {
+       "fontSize": 56
+      }
+     }
+    }
+   }
+  ]
+ }
+}

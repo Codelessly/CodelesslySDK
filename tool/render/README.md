@@ -26,6 +26,9 @@ manifest's `pages`, else its `.json` files), its components (the manifest's `com
 by its path, the call ids from the page down and then its id (`--tap plans/card1/cta`; `#n` picks the n-th copy a
 list repeats: `--tap faq/fq#1`); `--dump-layout` writes each such node's `path`.
 
+The manifest's `theme` (named colors and text styles, codelessly_api guide "the theme") is validated, published as
+the project's theme and resolved as an app resolves it: at each size its media rules, the fonts its styles name.
+
 A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics*.json`), as the pages of one
 site: navigation may name a canvas of another page.
 
@@ -36,24 +39,27 @@ site: navigation may name a canvas of another page.
 | `--out <dir>` | Where PNGs and `diagnostics.json` go (required). |
 | `--sizes <WxH,...>` | Screen sizes, default `390x844,834x1112,1440x900`. |
 | `--screen <id or name>` | Only this screen: a canvas id, a layout id, a `props.screen` name, a canvas name or path. Repeatable. |
-| `--full-page` | Capture the whole page: the window is made as tall as the page's own scroll view scrolls (the largest one a user can scroll; lists and decorations that do not scroll add nothing). Content fixed to the window (outside that scroll view: a bar pinned to the bottom of a stack over the page, a canvas's bottom bar or floating button) is drawn where a user first sees it, in the first window, as a browser's full-page screenshot shows it. The capture always starts at the page's top, whatever a step scrolled it to (a `--tap` scrolls its node into view first); without `--full-page` the capture is the window where the steps left the page. |
-| `--fonts <dir>` | Font files (`.ttf`, `.otf`, `.woff`), searched recursively and read by the family, weight and style inside each file: a font package folder (`node_modules/@fontsource/<family>`), a site's fonts folder, or `system` (the system's font directories). Repeatable. `.woff2` is not read (it is reported, with the `.woff` to use instead). |
+| `--full-page` | Capture the whole page: its own scroll view (the largest one a user can scroll; lists and decorations that do not scroll add nothing) over its whole extent, while the window keeps the size asked for, as a browser's full-page screenshot does. `${screen.height}` and anything sized or pinned to the window (a drawer pinned to the window's top and bottom) stay as on the device; content fixed to the window over the page (a header, a drawer, a bar pinned to the bottom, a canvas's bottom bar or floating button) is drawn where a user first sees it, in the first window, and the page continues below it. The capture always starts at the page's top, whatever a step scrolled it to (a `--tap` scrolls its node into view first); without `--full-page` the capture is the window where the steps left the page. `--dump-layout` gives every box where the PNG draws it. |
+| `--fonts <dir>` | Font files (`.ttf`, `.otf`, `.woff`), searched recursively and read by the family, weight and style inside each file: a font package folder (`node_modules/@fontsource/<family>`, or the whole `node_modules/@fontsource`), a site's fonts folder, or `system` (the system's font directories). Repeatable. Of a package's subset files for one face (`latin`, `latin-ext`, `cyrillic`...), the one with Latin text's characters is used. `.woff2` is not read (it is reported, with the `.woff` to use instead). |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats. |
 | `--hover <id>` | Move a mouse over the node (hover states, `cursorEnter`). |
 | `--focus <id>` | Focus the text field (a `textField`, or the one inside the node). |
+| `--unfocus` | Take the focus from the focused field: no caret in the capture (an error state after `--type`); its blur reactions run. |
+| `--key <key>` | Press a key on what has the focus, as a keyboard does: `ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`, `Enter`, `Escape`, `Tab`, `Space`, `Home`, `End`, `Backspace`, `Delete`, `PageUp`, `PageDown`, a letter or a digit, with modifiers (`shift+Tab`, `ctrl+a`). A canvas's `keyDown` reactions run when no field has the focus. |
 | `--type <id>=<text>` | Focus the text field and type the text, as a user would: its `changed` reactions run, and a field whose `props.initialValue` is bound to a variable sets it. |
 | `--set <name>=<json>` | Set a variable of the screen: `--set annual=true`, `--set 'email="a@b.co"'`. |
 | `--scroll <id or screen>=<px>` | Scroll a scrolling node, or the page, to an offset. |
 | `--navigate <screen>` | Push a screen (a canvas id, a layout id or a URL path). |
 | `--wait <ms>` | Let time pass (animations, delays, toasts). |
 | `--label <text>` | Add `-<text>` to the PNG names and write `diagnostics-<text>.json`, to keep states apart. |
+| `--compare <png or dir>` | Compare each capture with a reference screenshot: the file, or in a directory the PNG whose name has the screen, the size (`390x844`) and the state (the `--label`, else `default`). Writes `<png>.compare.png` (the capture left, the reference right) and `<png>.diff.png` (the capture dimmed, differing pixels red), and prints the share of matching pixels, the height difference, the first differing row and the vertical bands where they differ, each with the offset at which it matches the reference when it is only shifted. Images of different heights compare; a reference of another width is scaled to the capture's. The figures go to the diagnostics file's `comparisons`. |
 | `--dump-layout` | Also write `<png name>.layout.json`: every node's box on screen (`id`, `x`, `y`, `w`, `h`). |
 | `--component <Type>` | Render one component of the site alone: once per preview (at its size), else with its defaults at each size. |
 | `--props '<json>'` | With `--component`: its parameters, as a call's `props`, at each size. A `variable` parameter becomes a page variable of the same name. |
 | `--slots <file>` | With `--component`: what the call passes, `{"children": [ids], "slots": {"name": id}, "nodes": {...}}`. |
 | `--validate-only` | Only validate. |
 
-Steps (`--tap`, `--hover`, `--focus`, `--type`, `--set`, `--scroll`, `--navigate`, `--wait`) run in the order given, after the screen
+Steps (`--tap`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--navigate`, `--wait`) run in the order given, after the screen
 has loaded and before the capture, at every size. A step that names a node the current canvas does not have (it
 is in another breakpoint's canvas) is a warning, not an error.
 
@@ -84,7 +90,9 @@ step adds:
 | `icon_not_drawn` | warning | An icon names no glyph the renderer can draw. |
 | `expression_not_evaluated` | warning | A text shows `${` on screen: an expression that did not evaluate. |
 | `path_overflow` | warning | A `path` (or a box's `path`) draws outside its box; it is not clipped to it, as Flutter's `CustomPaint` is not. |
-| `layout_overflow` | warning | A node extends past its parent's box where the parent does not scroll that way. |
+| `layout_overflow` | warning | A node extends past its parent's box where the parent does not scroll that way. A node of a component instance is named by its path, and its parent is the one in its own document. |
+| `fill_fallback` | warning | A node fills an axis its parent measures with no limit (a column that hugs its height, a wrapping row's line, a grid row sized to its content): it takes the design number of its `{"fill": n}`. The message names the parent and the fix. |
+| `compare_failed` | warning | `--compare` found no reference for a capture, or could not read it: the message lists the candidates. |
 | `offscreen` | warning | A node extends past the screen's edge where nothing scrolls: on a device it is cut off. |
 | `text_clipped` | warning | A text's lines are taller than its box, or a word is wider than it. |
 | `text_truncated` | warning | A text is cut at `maxLines` with overflow `clip`. |

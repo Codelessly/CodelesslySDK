@@ -1,0 +1,96 @@
+{
+ "schema": 2,
+ "roots": [
+  "keys"
+ ],
+ "nodes": {
+  "keys": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "ArrowRight"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "n",
+       "op": "add",
+       "value": "1"
+      }
+     ]
+    }
+   ]
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "field",
+    "moved"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 20
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 350
+    },
+    "height": 48
+   }
+  },
+  "moved": {
+   "type": "box",
+   "visible": false,
+   "bind": {
+    "visible": "${= n > 0}"
+   },
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2962FF"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "keys": [
+   {
+    "name": "n",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

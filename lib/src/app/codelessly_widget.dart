@@ -6,6 +6,8 @@ import 'package:codelessly_api/codelessly_api.dart'
         ThemeTokens,
         CanvasProps,
         jsonEquality,
+        LayoutDocument,
+        resolveThemeRefs,
         Json,
         LayoutDocumentScripts,
         NavigateAction,
@@ -771,6 +773,7 @@ class _LayoutViewState extends State<_LayoutView> {
   /// ([themeValues]), kept as the mode and the published theme change.
   void _updateTheme() {
     _screen.tree.naturalLineHeight = _tokens.naturalLineHeight ?? false;
+    _resolveThemeNames();
     // A project variable named `theme` (an app's own light/dark choice) is
     // the project's: the built-in doesn't hide it from reads or writes.
     final page = _codelessly.pageVariables(widget.layout.pageId, widget.layout.variablesOf(kPageVariablesScope));
@@ -778,8 +781,32 @@ class _LayoutViewState extends State<_LayoutView> {
       if (_screen.values.declares('theme')) _screen.values.remove('theme');
       return;
     }
-    final theme = themeValues(_tokens, dark: _dark);
+    final size = MediaQuery.maybeSizeOf(context);
+    final theme = themeValues(size == null ? _tokens : _tokens.atScreen(size.width, size.height, _breakpoints), dark: _dark);
     if (!jsonEquality.equals(theme, _screen.values['theme'])) _screen.values.set('theme', theme);
+  }
+
+  DocumentSource? _pageSource;
+  LayoutDocument? _resolvedFrom;
+  ThemeTokens? _resolvedWith;
+
+  /// The page's (and its components') named colors and text styles
+  /// resolved against the theme as it is on this screen: its media rules
+  /// at the screen's size, its dark colors in dark mode. A change of theme
+  /// re-applies only the nodes whose resolved values differ.
+  void _resolveThemeNames() {
+    final source = _pageSource;
+    if (source == null) return;
+    final size = MediaQuery.maybeSizeOf(context);
+    var theme = _tokens;
+    if (size != null) theme = theme.atScreen(size.width, size.height, _breakpoints);
+    theme = theme.forBrightness(dark: _dark);
+    final doc = widget.layout.document;
+    if (identical(doc, _resolvedFrom) && theme == _resolvedWith) return;
+    _resolvedFrom = doc;
+    _resolvedWith = theme;
+    source.document = resolveThemeRefs(doc, theme);
+    _codelessly.components.theme = theme;
   }
 
   Map<String, Object?> _paywallValues() {
@@ -811,7 +838,8 @@ class _LayoutViewState extends State<_LayoutView> {
     );
     final scope = VariableScope(const [], parent: scripts);
     scripts.reader = scope;
-    final nodeValues = NodeValues(DocumentSource(widget.layout.document));
+    final pageSource = _pageSource = DocumentSource(widget.layout.document);
+    final nodeValues = NodeValues(pageSource);
     final engine = config.expressions;
     NodeBinder? binder;
     BoundSource? bound;

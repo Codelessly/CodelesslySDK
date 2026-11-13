@@ -5,7 +5,7 @@ import 'dart:ui' show Size;
 final class Step {
   const Step(this.kind, this.target, [this.value]);
 
-  /// tap, hover, focus, type, set, scroll, navigate or wait.
+  /// tap, hover, focus, unfocus, key, type, set, scroll, navigate or wait.
   final String kind;
   final String target;
   final String? value;
@@ -29,6 +29,7 @@ final class RenderArgs {
     this.component,
     this.props,
     this.slots,
+    this.compare,
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -56,6 +57,11 @@ final class RenderArgs {
   /// A fixture file with what [component]'s call passes to its slots.
   final String? slots;
 
+  /// A reference screenshot (or a directory of them) each capture is
+  /// compared with: a side-by-side and a diff image, and the bands where
+  /// they differ.
+  final String? compare;
+
   /// These arguments with other [sizes] and [screens].
   RenderArgs copyWith({List<Size>? sizes, List<String>? screens}) => RenderArgs(
         inputs: inputs,
@@ -71,6 +77,7 @@ final class RenderArgs {
         component: component,
         props: props,
         slots: slots,
+        compare: compare,
       );
 }
 
@@ -104,6 +111,16 @@ Options:
   --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px.
   --navigate <screen>     Push a screen (canvas id, layout id or URL path).
   --wait <ms>             Let time pass (animations, delays, toasts).
+  --unfocus               Take the focus from the focused field (no caret in the
+                          capture; its blur/unfocus reactions run).
+  --key <key>             Press a key on what has the focus: ArrowLeft, ArrowRight,
+                          ArrowUp, ArrowDown, Enter, Escape, Tab, Space, Home, End,
+                          Backspace, PageUp, PageDown, a letter or digit; with
+                          modifiers: shift+Tab, ctrl+a.
+  --compare <png|dir>     Compare each capture with a reference screenshot (a
+                          file, or a directory holding <screen>...<w>x<h>...png):
+                          writes <png>.compare.png (side by side) and
+                          <png>.diff.png, and prints the bands where they differ.
   --label <text>          Append -<text> to the PNG names (state screenshots);
                           diagnostics go to diagnostics-<text>.json.
   --validate-only         Only validate; render nothing.
@@ -117,7 +134,7 @@ A directory with site.json (or a components/ directory) is a site: its pages
 and its components (one file each, the file named after the component type).
 Steps name nodes inside components by path: --tap plans/card1/cta (the call
 ids from the page down, then the node's id; <segment>#<n> picks a list copy).
-Steps (--tap, --hover, --focus, --type, --set, --scroll, --navigate, --wait) run in the order given.
+Steps (--tap, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --navigate, --wait) run in the order given.
 ''';
 
 /// Parses [argv]; throws a [FormatException] with a message for bad input.
@@ -129,7 +146,7 @@ RenderArgs parseArgs(List<String> argv) {
   final steps = <Step>[];
   final fonts = <String>[];
   var fullPage = false, validateOnly = false, dumpLayout = false;
-  String? label, component, props, slots;
+  String? label, component, props, slots, compare;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
     return argv[i + 1];
@@ -166,7 +183,11 @@ RenderArgs parseArgs(List<String> argv) {
         props = next(i++, a);
       case '--slots':
         slots = next(i++, a);
-      case '--tap' || '--hover' || '--focus' || '--navigate' || '--wait':
+      case '--compare':
+        compare = next(i++, a);
+      case '--unfocus':
+        steps.add(const Step('unfocus', ''));
+      case '--tap' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
         steps.add(Step(a.substring(2), next(i++, a)));
       case '--set' || '--scroll' || '--type':
         final v = next(i++, a);
@@ -196,5 +217,6 @@ RenderArgs parseArgs(List<String> argv) {
     component: component,
     props: props,
     slots: slots,
+    compare: compare,
   );
 }

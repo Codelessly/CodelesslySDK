@@ -577,7 +577,8 @@ class RenderTree {
     // Flutter's `Visibility`). Hidden in its own data with no media rule
     // about it, it keeps its room, as before.
     final own = sourceOf(instance).node(id);
-    final dynamic = own == null || own.visible || own.media.any((m) => m.patch.containsKey('visible'));
+    final dynamic = own == null || own.visible ||
+        own.media.any((m) => m.patch.containsKey('visible') || (api.readMap(m.patch['bind'])?.containsKey('visible') ?? false));
     return dynamic ? BoundNode(bound.node, collapsed: true, watch: bound.watch, states: bound.states) : bound;
   }
 
@@ -2141,6 +2142,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final glyph = _obtain<RenderIconGlyph>('glyph', RenderIconGlyph.new)
       ..icon = n.prop(IconProps.icon)
       ..color = n.prop(IconProps.color)?.flutter
+      ..glyphSize = n.prop(IconProps.size)
       ..designSize = n.designSize;
     chain.add(glyph);
   }
