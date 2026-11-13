@@ -58,7 +58,7 @@ void main() {
     expect(cached.single, isA<HostedPluginSkipped>());
   });
 
-  test('an SDK older than its minSdk skips it; so does a host without its types', () async {
+  test('a plugin is skipped by an SDK older than it needs, or by an app without the types it uses', () async {
     final (version, ref) = _published();
     final old = await loadHostedPlugins([ref], source: MemoryPluginSource([version]), host: host, sdkVersion: '23.9.0');
     expect(old.single, isA<HostedPluginSkipped>().having((s) => s.reason, 'reason', contains('24.0.0')));

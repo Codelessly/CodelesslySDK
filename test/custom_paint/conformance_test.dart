@@ -251,7 +251,7 @@ void main() {
     });
   }
 
-  testWidgets('image (drawImageRect) of a data URL', (tester) async {
+  testWidgets('an image operation draws a data URL as Flutter\'s canvas does', (tester) async {
     pixelRatioOne(tester);
     // A 4×4 image: a red top half, a blue bottom half.
     final (image, url) = (await tester.runAsync(() async {

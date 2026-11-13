@@ -4,7 +4,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('if() inside a ternary parses', () {
+  test('a formula can use if() inside a ternary', () {
     for (final f in [
       "true ? (1 + if(2 == 1, 3, 4)) : 5",
       "true ? if(1 == 1, 'a', 'b') : 'c'",

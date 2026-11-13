@@ -71,13 +71,13 @@ const List<String> _pluginHomes = [
 final _plugin = RegExp(r'^package:(just_audio|in_app_purchase\w*|firebase\w*|cloud_firestore|cloud_functions|webview\w*|video_player)/');
 
 void main() {
-  test('the import graph was read', () {
+  test('the import graph of the SDK is found', () {
     expect(_uris.length, greaterThan(150));
     expect(_uris.keys, contains('lib/src/features/first_party.dart'));
     expect(_imports('lib/src/features/first_party.dart'), contains('lib/src/features/auth/auth.dart'));
   });
 
-  test('(a) the core imports no feature, directly', () {
+  test('the core imports no feature directly', () {
     final bad = [
       for (final file in _uris.keys.where(_core))
         for (final to in _imports(file))
@@ -86,7 +86,7 @@ void main() {
     expect(bad, isEmpty);
   });
 
-  test('(a) the core action runtime reaches no feature through anything it imports', () {
+  test('the core action runtime reaches no feature through its imports', () {
     // What a core-only app compiles in for its actions: CoreActions, the
     // core handlers, the action context and wiring.
     final seen = <String>{};
@@ -106,7 +106,7 @@ void main() {
     expect([for (final f in seen) if (f == 'lib/src/services/services.dart') path(f)], isEmpty);
   });
 
-  test('(b) a feature imports no other feature', () {
+  test('a feature imports no other feature', () {
     final bad = [
       for (final file in _uris.keys)
         if (_featureOf(file) case final String feature)
@@ -117,7 +117,7 @@ void main() {
     expect(bad, isEmpty);
   });
 
-  test('(c) native plugins are imported only where they belong', () {
+  test('native plugins are imported only where they belong', () {
     final bad = [
       for (final e in _uris.entries)
         if (!_pluginHomes.any(e.key.startsWith))

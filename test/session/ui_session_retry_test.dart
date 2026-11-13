@@ -108,7 +108,7 @@ void main() {
     expect(session.docs({'topic': 'runScript'}), contains('Not available here'));
   });
 
-  testWidgets('a node with content laid out with no size: no_size', (tester) async {
+  testWidgets('a node with content but no size is reported (no_size)', (tester) async {
     final session = UiSession(catalog: Catalog.core);
     session.apply({
       'ops': [
@@ -132,7 +132,7 @@ void main() {
     expect(d.single.nodeId, 'title');
   });
 
-  test('the apps profile takes the scripts op; the default does not', () {
+  test('the apps profile accepts scripts, and the default profile does not', () {
     const op = {
       'op': 'scripts',
       'set': {

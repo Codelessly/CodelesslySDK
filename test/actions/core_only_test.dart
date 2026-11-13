@@ -112,7 +112,7 @@ void main() {
     });
   }
 
-  test('decoded with the core catalog, a feature action is a type nobody declared: skipped', () async {
+  test('with only the core catalog, a feature action decodes as an unknown type and is skipped', () async {
     await const CoreActions().run(
         clickNode([setVar('n', '1', op: 'add'), {'type': 'callApi'}, setVar('n', '1', op: 'add')], catalog: Catalog.core),
         'click',

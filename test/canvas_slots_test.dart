@@ -28,7 +28,7 @@ Map<String, Object?> doc({bool appBar = true, bool bottom = true, bool fab = tru
 
 void main() {
   for (final (appBar, bottom, fab) in [(true, true, true), (false, true, true), (true, false, true), (true, true, false), (false, false, true)]) {
-    testWidgets('slots as Scaffold lays them out: appBar $appBar, bottom bar $bottom, button $fab', (tester) async {
+    testWidgets('a canvas lays out its slots as Scaffold does: app bar $appBar, bottom bar $bottom, button $fab', (tester) async {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(390, 844);
       addTearDown(tester.view.reset);

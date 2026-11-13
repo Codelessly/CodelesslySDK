@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'gestures/sliders_and_knobs_test.dart' as support;
 
 void main() {
-  testWidgets('controlTrack animateTo moves a track to a value, snapped, and reports it', (tester) async {
+  testWidgets('the control-track action animates a track to a value, snapped, and reports it', (tester) async {
     final s = await support.plate(
       tester,
       {'variable': 'level', 'min': 0, 'max': 10, 'step': 1, 'y2': -200},

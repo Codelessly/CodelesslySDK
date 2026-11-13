@@ -26,7 +26,7 @@ Future<(NodeTree, double)> _show(WidgetTester tester, Map<String, Object?> doc) 
 }
 
 void main() {
-  testWidgets('schema 3: no height is the font\'s own, as a Flutter Text; a stated height wins; runs inherit', (tester) async {
+  testWidgets('a text without a height takes its font\'s own line height as Flutter\'s Text does, and a stated height wins', (tester) async {
     final (tree, flutter) = await _show(tester, {
       'schema': 3,
       'roots': ['s'],
@@ -46,7 +46,7 @@ void main() {
     expect(flutter, isNot(closeTo(15 * 1.33, 0.5)));
   });
 
-  testWidgets('schema 2 through the migration: 1.33 as before; naturalHeight is the font\'s own', (tester) async {
+  testWidgets('a schema-2 text keeps its 1.33 line height through the migration, and natural height becomes the font\'s own', (tester) async {
     final (tree, flutter) = await _show(tester, {
       'roots': ['s'],
       'nodes': {
@@ -66,7 +66,7 @@ void main() {
     expect(h('stated'), 30);
   });
 
-  testWidgets('defaultTextStyle: inherited by the text below, the nearest one wins ({} gives Flutter\'s back)', (tester) async {
+  testWidgets('a default text style is inherited by the text below it, the nearest one winning', (tester) async {
     final (tree, flutter) = await _show(tester, {
       'schema': 3,
       'roots': ['s'],

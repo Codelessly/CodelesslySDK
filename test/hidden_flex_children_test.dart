@@ -44,7 +44,7 @@ Map<String, Object?> doc(String align) => {
 
 void main() {
   for (final align in MainAxisAlignment.values) {
-    testWidgets('hidden children take no slot: ${align.name}', (tester) async {
+    testWidgets('hidden children of a flex take no space when it aligns ${align.name}', (tester) async {
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = const Size(1440, 100);
       addTearDown(tester.view.reset);

@@ -79,7 +79,7 @@ void main() {
     expect(got.size, want.size);
   });
 
-  testWidgets('schema 2: a text\'s padding did nothing, and after the migration still does nothing', (tester) async {
+  testWidgets('a schema-2 text\'s padding did nothing, and after the migration still does nothing', (tester) async {
     await tester.pumpWidget(const Directionality(
         textDirection: TextDirection.ltr,
         child: Align(alignment: Alignment.topLeft, child: Text('Hello padding', key: ValueKey('t'), style: style))));

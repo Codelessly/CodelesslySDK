@@ -135,7 +135,7 @@ void main() {
     expect(tree.boxOf('b')!.rectIn(view)!.height, 50);
   });
 
-  testWidgets('direction is bindable too', (tester) async {
+  testWidgets('a flex\'s direction can be bound', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1440, 900);
     addTearDown(tester.view.reset);

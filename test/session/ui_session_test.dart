@@ -154,7 +154,7 @@ void main() {
     expect(_boxes(tester, session).containsKey('note'), isFalse);
   });
 
-  testWidgets('applyStream: ops apply as their text completes, whatever the chunks; the result is the tool result', (tester) async {
+  testWidgets('streamed operations apply as their text completes, whatever the chunks, and the result is the tool result', (tester) async {
     final session = UiSession();
     await _show(tester, session);
     final text = jsonEncode({'ops': _ops()});
@@ -211,7 +211,7 @@ void main() {
     expect(_boxes(tester, session)['body']!.node!.type, 'text');
   });
 
-  testWidgets('vars ops update bindings live; events reach the session with the node and payload', (tester) async {
+  testWidgets('variable operations update bindings live, and events reach the session with their node and payload', (tester) async {
     final session = UiSession();
     session.apply({
       'ops': [
@@ -299,7 +299,7 @@ void main() {
     expect(session.outline()['outline'], hasLength(5));
   });
 
-  test('baseRev: a stale edit of a field another author changed is rejected with the current value', () {
+  test('an edit to a field another author changed since is rejected with the current value', () {
     final session = UiSession();
     session.apply({'ops': _ops()});
     final read = session.rev;
@@ -316,7 +316,7 @@ void main() {
     expect(session.document['title']!.props.toJson(null)['text'], 'Mine');
   });
 
-  test('arrival fade: off by default; on, a node that arrives in a stream gets an enter animation from opacity 0', () async {
+  test('with arrival fades on, a node that arrives in a stream fades in; they are off by default', () async {
     final plain = UiSession();
     await plain.applyStream(Stream.value(jsonEncode({'ops': _ops()})));
     expect(plain.node('title')!.behaviors.animations, isEmpty);

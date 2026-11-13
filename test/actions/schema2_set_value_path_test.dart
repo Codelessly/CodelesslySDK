@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/screen.dart' show counter, reaction, show;
 
 void main() {
-  testWidgets('a schema-2 setValue path sets nothing and is said once, with the schema-3 path', (tester) async {
+  testWidgets('a set-value action naming a schema-2 path sets nothing and reports the schema-3 path once', (tester) async {
     final said = <String>[];
     final before = debugPrint;
     debugPrint = (String? m, {int? wrapWidth}) => said.add(m ?? '');

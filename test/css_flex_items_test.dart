@@ -43,27 +43,27 @@ void main() {
   // CSS Flexbox §9.3 (collect items into lines by their hypothetical main
   // size = flex-basis) and §9.7 (resolve flexible lengths per line):
   // `display:flex; flex-wrap:wrap; gap:20px` with three `flex: 1 1 280px`.
-  testWidgets('flex: 1 1 280px, 1000 wide: one line, each (1000 - 40) / 3', (tester) async {
+  testWidgets('three growing children with a 280 px basis share one line 1000 wide equally', (tester) async {
     final t = await pump(tester, cards(1000));
     expect(r(t, tester, 'c0'), const Rect.fromLTWH(0, 0, 320, 50));
     expect(r(t, tester, 'c1'), const Rect.fromLTWH(340, 0, 320, 50));
     expect(r(t, tester, 'c2'), const Rect.fromLTWH(680, 0, 320, 50));
   });
 
-  testWidgets('flex: 1 1 280px, 700 wide: two on the first line, the third grows to the whole second', (tester) async {
+  testWidgets('at 700 wide two fit on the first line, and the third grows to fill the second', (tester) async {
     final t = await pump(tester, cards(700));
     expect(r(t, tester, 'c0'), const Rect.fromLTWH(0, 0, 340, 50));
     expect(r(t, tester, 'c1'), const Rect.fromLTWH(360, 0, 340, 50));
     expect(r(t, tester, 'c2'), const Rect.fromLTWH(0, 60, 700, 50));
   });
 
-  testWidgets('flex: 1 1 280px, 250 wide: one per line, shrunk to the line (flex-shrink)', (tester) async {
+  testWidgets('at 250 wide each takes its own line, shrunk to fit it', (tester) async {
     final t = await pump(tester, cards(250));
     expect(r(t, tester, 'c0'), const Rect.fromLTWH(0, 0, 250, 50));
     expect(r(t, tester, 'c2'), const Rect.fromLTWH(0, 120, 250, 50));
   });
 
-  testWidgets('grow factors share the free space: flex 2 1 1 at 1000 wide', (tester) async {
+  testWidgets('grow factors of 2, 1 and 1 share the free space in that ratio', (tester) async {
     // Free space 1000 - 3*280 - 40 = 120: 60, 30, 30.
     final t = await pump(tester, cards(1000, grow: [2, 1, 1]));
     expect(r(t, tester, 'c0').width, 340);
@@ -71,7 +71,7 @@ void main() {
     expect(r(t, tester, 'c2').width, 310);
   });
 
-  testWidgets('a fixed-width child with a basis keeps its basis (flex-grow 0)', (tester) async {
+  testWidgets('a fixed-width child with a basis keeps its basis and does not grow', (tester) async {
     final nodes = cards(1000);
     (nodes['c1'] as Map)['layout'] = {'width': 100, 'height': 50, 'basis': 280};
     final t = await pump(tester, nodes);
@@ -81,7 +81,7 @@ void main() {
     expect(r(t, tester, 'c2').width, 340);
   });
 
-  testWidgets('CSS order: children laid out by ascending order, equal orders as listed', (tester) async {
+  testWidgets('children are laid out by their order, those with equal orders as listed', (tester) async {
     final nodes = cards(1000);
     ((nodes['c2'] as Map)['layout'] as Map)['order'] = -1;
     final t = await pump(tester, nodes);
@@ -90,7 +90,7 @@ void main() {
     expect(r(t, tester, 'c1').left, 680);
   });
 
-  testWidgets('a row without wrap: children keep their own sizes (basis is a wrapping flex\'s)', (tester) async {
+  testWidgets('in a row that does not wrap, children keep their own sizes and the basis is ignored', (tester) async {
     // Flutter Row: a fill child is Expanded; basis plays no part.
     final nodes = cards(1000);
     (nodes['w'] as Map)['props'] = {'spacing': 20};
@@ -100,7 +100,7 @@ void main() {
 
   // CSS Flexbox §9.4 step 11 (align-items: stretch): each item as thick
   // as its line.
-  testWidgets('align-items: stretch in a wrapping row: equal heights per line', (tester) async {
+  testWidgets('stretched children of a wrapping row are as tall as the tallest on their line', (tester) async {
     final nodes = cards(700);
     (nodes['w'] as Map)['props'] = {'wrap': true, 'spacing': 20, 'runSpacing': 10, 'crossAxisAlignment': 'stretch'};
     ((nodes['c0'] as Map)['layout'] as Map)['height'] = {'hug': 50};
@@ -115,7 +115,7 @@ void main() {
     expect(r(t, tester, 'c2').top, 100, reason: 'the next line starts below the tallest');
   });
 
-  group('grid auto-fit (CSS grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px)', () {
+  group('a grid that fits as many columns of at least 280 px as it can', () {
     Map<String, Object?> grid(double width, int items) => {
           'w': {
             'type': 'gridView',
@@ -133,7 +133,7 @@ void main() {
           'cell': {'type': 'box', 'layout': {'width': {'fill': 10}, 'height': {'fill': 10}}},
         };
     for (final (width, items, columns) in [(1000.0, 6, 3), (700.0, 6, 2), (500.0, 6, 1), (1400.0, 2, 2)]) {
-      testWidgets('$width wide, $items items: $columns columns', (tester) async {
+      testWidgets('$items items at $width wide fall into $columns columns', (tester) async {
         final t = await pump(tester, grid(width, items), width: width);
         final cell = (width - 20 * (columns - 1)) / columns;
         expect(t.boxOf('w')!.rectIn(tester.renderObject(find.byType(NodeView)))!.width, width);

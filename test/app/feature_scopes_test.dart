@@ -50,7 +50,7 @@ void main() {
     expect(app.appVariables.read('entitlements'), isNull);
   });
 
-  test('instrument voices are registered with the sound service, not known to it', () {
+  test('an app adds instruments to the sound service, and an unknown one plays as a sine', () {
     final engine = SilentSoundEngine();
     final sound = SoundService(engine: engine);
     expect(kSoundWaveforms, ['sine', 'triangle', 'square', 'sawtooth']);
