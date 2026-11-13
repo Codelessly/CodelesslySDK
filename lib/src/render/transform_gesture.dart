@@ -20,13 +20,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-import '../runtime/actions/context.dart' show setVariableIn, variableOf;
-import '../runtime/contracts.dart';
-import '../runtime/expressions/scopes.dart';
-import '../runtime/gestures/physics.dart';
 import 'behaviors.dart' show RenderPose;
+import 'contracts.dart';
 import 'convert.dart';
 import 'node_tree.dart';
+import 'physics.dart';
 
 /// Where a transform gesture draws its node: offset, scale, rotation and
 /// stretch, about the node's center.
@@ -135,14 +133,14 @@ abstract final class TransformGestures {
   static final Expando<Map<String, Set<RenderTransformGesture>>> _byTree = Expando('transformGestures');
 
   /// Whether node [nodeId] of [tree] has a transform gesture on screen.
-  static bool has(NodeTree tree, String nodeId) => _byTree[tree]?[nodeId]?.isNotEmpty ?? false;
+  static bool has(RenderTree tree, String nodeId) => _byTree[tree]?[nodeId]?.isNotEmpty ?? false;
 
   /// [has], for a tree that may be missing.
-  static bool hasIn(NodeTree? tree, String nodeId) => tree != null && has(tree, nodeId);
+  static bool hasIn(RenderTree? tree, String nodeId) => tree != null && has(tree, nodeId);
 
   /// Springs every instance of [nodeId] back to its rest pose (no offset,
   /// scale 1, no rotation or stretch), writing its variables.
-  static Future<void> reset(NodeTree tree, String nodeId) async {
+  static Future<void> reset(RenderTree tree, String nodeId) async {
     for (final t in [...?_byTree[tree]?[nodeId]]) {
       if (t.attached) t.reset();
     }
@@ -150,7 +148,7 @@ abstract final class TransformGestures {
 
   /// Zooms every instance of [nodeId] by [factor] about the middle of what
   /// its viewport shows, springing there (zoom buttons).
-  static Future<void> zoom(NodeTree tree, String nodeId, double factor) async {
+  static Future<void> zoom(RenderTree tree, String nodeId, double factor) async {
     for (final t in [...?_byTree[tree]?[nodeId]]) {
       if (t.attached) t.zoomBy(factor);
     }
@@ -160,7 +158,7 @@ abstract final class TransformGestures {
   /// `rotation`, `scaleX`, `scaleY`; keys left out are kept), within its
   /// scale limits and bounds, even when that's where a bound pose already
   /// says (a "fit" button after the user panned away).
-  static Future<void> moveTo(NodeTree tree, String nodeId, Map<String, double> pose) async {
+  static Future<void> moveTo(RenderTree tree, String nodeId, Map<String, double> pose) async {
     for (final t in [...?_byTree[tree]?[nodeId]]) {
       if (t.attached) t.moveTo(pose);
     }
@@ -187,7 +185,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
 
   NodeBox? _box;
   api.TransformGesture _model = const api.TransformGesture();
-  ValueScope? _scope;
+  BoundValues? _scope;
 
   /// The pose's variables (two-way), by pose key, and their watchers.
   final Map<String, String> _variables = {};
@@ -205,7 +203,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final modelChanged = model != _model;
     _model = model;
     _enabled = model.enabled;
-    _scope = box?.tree.binder?.scopeFor(box.tree.source, box.id, box.instance);
+    _scope = box?.tree.bindings?.valuesFor(box.tree.source, box.id, box.instance);
     _variables
       ..clear()
       ..addAll({
@@ -249,7 +247,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final out = <String, double>{};
     for (final k in TransformPose.keys) {
       final name = _variables[k];
-      var v = name == null || _scope == null ? null : _number(readPath(_scope, name));
+      var v = name == null ? null : _number(_scope?.read(name));
       v ??= switch (k) {
         'x' => _model.x,
         'y' => _model.y,
@@ -270,9 +268,10 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     _watched.clear();
     final scope = _scope;
     if (scope == null) return;
-    final names = {..._variables.values.map(rootOf), if (_selectionName.isNotEmpty) rootOf(_selectionName)};
+    // One watcher per name (paths into one variable share theirs).
+    final names = {..._variables.values, if (_selectionName.isNotEmpty) _selectionName};
     for (final n in names) {
-      final w = watchName(scope, n);
+      final w = scope.watch(n);
       if (w != null && !_watched.contains(w)) _watched.add(w);
     }
     if (attached) {
@@ -328,13 +327,13 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final key = _model.handles?.selectionKey ?? '';
     if (key.trim().isEmpty || _scope == null) return key.trim().isEmpty ? (_box?.id ?? '') : key;
     final box = _box;
-    return box == null ? key : (box.tree.binder?.engine.interpolate(key, _scope!) ?? key);
+    return box == null ? key : _scope!.interpolate(key);
   }
 
   bool _isSelected() {
     final name = _selectionName;
     if (name.isEmpty || _scope == null) return true;
-    return '${readPath(_scope, name)}' == _selectionKey;
+    return '${_scope!.read(name)}' == _selectionKey;
   }
 
   void _select() {
@@ -342,8 +341,8 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final scope = _scope;
     if (name.isEmpty || scope == null) return;
     final key = _selectionKey;
-    if ('${readPath(scope, name)}' == key) return;
-    setVariableIn(scope, name, key);
+    if ('${scope.read(name)}' == key) return;
+    scope.write(name, key);
   }
 
   // --- reporting --------------------------------------------------------------------------
@@ -392,14 +391,14 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
 
   bool _writing = false;
 
-  void _writeEach(ValueScope scope, TransformPose pose) {
+  void _writeEach(BoundValues scope, TransformPose pose) {
     // A write can synchronously reconfigure this node through its bindings.
     for (final e in _variables.entries.toList()) {
-      final found = variableOf(scope, e.value);
-      if (found == null || found.$2.isComputed) continue;
+      final found = scope.variable(e.value);
+      if (found == null || found.isComputed) continue;
       final value = TransformPose.rounded(e.key, pose[e.key]);
-      if ('${readPath(scope, e.value)}' == '$value') continue;
-      setVariableIn(scope, e.value, value);
+      if ('${scope.read(e.value)}' == '$value') continue;
+      scope.write(e.value, value);
     }
   }
 
@@ -449,7 +448,7 @@ class RenderTransformGesture extends RenderPose implements MouseTrackerAnnotatio
     final values = {..._pose.toMap(), 'active': _active, 'selected': _selected};
     if (mapEquals(values, _published)) return;
     _published = values;
-    box.tree.binder?.nodeScope(box.tree.source, box.id, instance: box.instance)?.update('transform', values);
+    box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'transform', values);
   }
 
   // --- geometry ---------------------------------------------------------------------------

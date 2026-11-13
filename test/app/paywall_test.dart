@@ -188,7 +188,7 @@ void main() {
     await settle(tester);
   }
 
-  NodeTree tree(WidgetTester tester) => tester.widget<NodeView>(find.byType(NodeView)).tree;
+  RenderTree tree(WidgetTester tester) => tester.widget<NodeView>(find.byType(NodeView)).tree;
 
   Future<void> tap(WidgetTester tester, String id) async {
     final box = tree(tester).boxOf(id)!;

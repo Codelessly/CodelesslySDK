@@ -112,7 +112,10 @@ export 'package:codelessly_api/codelessly_api.dart'
 // way: their element is an IslandOwnerElement and their render object mixes
 // in IslandParent.
 export 'src/render/islands.dart' show IslandEnvironment, IslandHost, IslandOwnerElement, IslandParent;
-export 'src/render/node_tree.dart' show NodeTree, NodeBox, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
+export 'src/render/contracts.dart';
+export 'src/render/node_tree.dart' show RenderTree, NodeBox, NodeInteractions, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
+export 'src/widgets/tree.dart' show NodeTree, builtInCatalog;
+export 'src/runtime/gestures/gestures.dart' show DragGestures;
 // Text as the SDK renders it, for a host's own text (an in-place editor).
 export 'src/render/convert.dart' show textStyle, FontDemand;
 export 'src/render/paint/image_fill.dart' show imagesPendingUnder;
@@ -120,7 +123,7 @@ export 'src/text_defaults.dart' show kTextBase;
 export 'src/render/node_view.dart';
 export 'src/render/hero.dart' show HeroMarkPaint, HeroMarks, RenderHeroMark;
 export 'src/render/play.dart' show EffectPlayers, FlightRegistry, RenderEffects, RenderFlightBox, effectTransformAt;
-export 'src/render/recipe.dart' show NodeChild, NodeBuilder, WidgetRecipe;
+export 'src/render/recipe.dart' show NodeChild, NodeBuilder, RecipeCatalog, WidgetRecipe;
 export 'src/render/source.dart';
 export 'src/widgets/media.dart' show ExternalComponents;
 export 'src/services/services.dart';
