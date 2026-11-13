@@ -19,6 +19,10 @@ String _digest(Object? json) {
   return '${h.toUnsigned(64).toRadixString(16)}:${s.length}';
 }
 
+/// Schema-2 reaction [r] migrated (as a box's reaction).
+Json _migrated(Map r) =>
+    readMap((migrateNode2to3({'type': 'box', 'actions': [r]})['actions'] as List).single)!;
+
 /// What a file's documents, nodes, reactions and actions encode to, as the
 /// digest lines.
 List<String> _lines(String path, Catalog catalog) {
@@ -33,17 +37,19 @@ List<String> _lines(String path, Catalog catalog) {
         if (doc['schema'] == kSchemaVersion) doc['schema'] = 2;
         out.add('$path#$at doc ${_digest(doc)}');
       }
+      // A node, reaction or action alone is schema 2 too: migrated first.
       if (v['type'] is String && v['layout'] is Map) {
-        out.add('$path#$at node ${_digest(Node.fromJson(v, catalog: catalog)?.toJson())}');
+        out.add('$path#$at node ${_digest(Node.fromJson(migrateNode2to3(readMap(v)!), catalog: catalog)?.toJson())}');
       }
       final acts = v['actions'];
       if (acts is List) {
         for (var i = 0; i < acts.length; i++) {
           final a = acts[i];
           if (a is Map && a['trigger'] != null) {
-            out.add('$path#$at/actions/$i reaction ${_digest(Reaction.fromJson(a, catalog: catalog)?.toJson())}');
+            out.add('$path#$at/actions/$i reaction ${_digest(Reaction.fromJson(_migrated(a), catalog: catalog)?.toJson())}');
           } else if (a is Map && a['type'] is String) {
-            out.add('$path#$at/actions/$i action ${_digest(ActionDef.fromJson(a, catalog: catalog)?.toJson())}');
+            final r = _migrated({'trigger': {'type': 'click'}, 'actions': [a]});
+            out.add('$path#$at/actions/$i action ${_digest(ActionDef.fromJson((r['actions'] as List).single, catalog: catalog)?.toJson())}');
           }
         }
       }

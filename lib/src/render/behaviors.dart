@@ -54,7 +54,7 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
   // Pinch, pan and rotate in a running app (render/transform_gesture.dart),
   // inside the track.
   if (animates && n.type != 'canvas') {
-    if (be.effectiveTransformGesture case final api.TransformGesture gesture) {
+    if (be.transformGesture case final api.TransformGesture gesture) {
       chain.add(
         b.obtain<RenderTransformGesture>('transformGesture', RenderTransformGesture.new)
           ..configure(b is NodeBox ? b : null, gesture),
@@ -64,7 +64,7 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     // The design canvas draws a pose given by data (a sticker or a caption
     // placed by its record: `transformGesture.x` bound), as a running app
     // starts at it: translate, then rotate, then scale, about the center.
-    if (be.effectiveTransformGesture case final api.TransformGesture g
+    if (be.transformGesture case final api.TransformGesture g
         when g.x != null || g.y != null || g.scale != null || g.rotation != null || g.scaleX != null || g.scaleY != null) {
       final s = g.scale ?? 1;
       chain.add(

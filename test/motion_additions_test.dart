@@ -11,6 +11,7 @@ import 'package:codelessly_sdk/src/render/paint/svg_path.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'support/legacy.dart';
 
 Map<String, Object?> doc(Map<String, Map<String, Object?>> nodes) => {
       'roots': ['s'],
@@ -218,7 +219,7 @@ void main() {
     expect(await nose('M0 0 L-100 0', mirror: false), rectMoreOrLessEquals(const Rect.fromLTWH(180, 105, 10, 10), epsilon: 0.01));
     // Heading right nothing is mirrored.
     expect(await nose('M0 0 L100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(280, 105, 10, 10), epsilon: 0.01));
-    expect(api.Motion.fromJson({'orientToPath': true, 'orientUpright': true, 'uprightMirror': true})!.toJson()['path'],
+    expect(migratedBehaviors({'motion': {'orientToPath': true, 'orientUpright': true, 'uprightMirror': true}}).motion!.toJson()['path'],
         {'path': '', 'orient': 'uprightFlip'});
   });
 

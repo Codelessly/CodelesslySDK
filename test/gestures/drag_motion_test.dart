@@ -10,6 +10,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/legacy.dart';
 
 const Map<String, Object?> swipeCard = {
   'release': 'dismiss',
@@ -256,7 +257,7 @@ void main() {
       const Variable(name: 'swiped', type: VariableType.text, value: ''),
     ]);
     Future<void> control(String command) => const CodelesslyActions().run(
-          api.Node.fromJson({
+          migratedNode({
             'type': 'box',
             'actions': [
               react('click', [
