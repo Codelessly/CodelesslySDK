@@ -22,6 +22,46 @@
 - Layouts a test or app decodes itself with `LayoutDocument.fromJson(json)` decode with codelessly_api's core
   catalog: pass `catalog: standardCatalog` (the runner still types their feature actions when they run).
 
+### Motion
+
+**New: a node's motion plays on the one animation player** (codelessly_api's slim `Motion`, `transitions`,
+`Shimmer`; its docs/design/03-motion.md)
+
+- `RenderMotion` is the motion's matrix and its path (`overrides`, `headingFromMovement`, `shown`); its ticker,
+  entrance, loop, swing, spin ramp, keyframes, hold, reveal and transition code is gone, as is the static
+  `_MotionRevealWatcher` (and its exception in test/architecture_test.dart).
+- `RenderAnimations` plays the node's `transitions` (motion numbers into the motion layer, opacity in its own
+  layer, any single path as a patch; a prefix moves as one, through its keyframes; the deprecated `arc`), a
+  `ramp`ed repeat, an animation that waits until `visibleFraction` of the node is in view, and the shimmer's
+  `position`; a counted repeat ends as Flutter's `repeat(count:)`; a play asked for before its ticker starts
+  counts from that frame. `animatesOpacity` is true for a node with an opacity transition.
+- `RenderShimmer.position` (no ticker of its own); `MeasuredPath.isClosed`; `motionMatrix(Motion)` (no spin).
+- `animate {variable}` runs on a `spring`; an `animateTo` on a variable is a glide (a plain set takes over, it
+  stops with its chain); a non-number variable takes the target at once. `VariableAnimator.play(spring:)`.
+- Flip cards take their turn's duration, curve and lift from the node's `motion.rotateY` transition; a flight's
+  spring from its `motion` transition; route sides and page views draw `Pose`s.
+
+**Breaking changes**
+
+- `RenderMotion.animates`, `tick`, `ticking` and `swingPose` are gone; `RenderShimmer.animates` is gone.
+  `motionMatrix` lost `spinTurns`. `RenderPageItems.pageMotionAt`/`facesAway` and `pageMotion`/`pageMotionBefore`
+  take `api.Pose`. `RenderFlip.configure` takes `transition:`. `motionTrackProperties` is
+  `{...api.Motion.properties}` (`path.progress`, no `opacity`/`blur`).
+
+**Behaviour changes** (documents with legacy motion keys; the SDK's tests keep their assertions except where
+listed)
+
+- A counted motion loop ends where its last run ends as `repeat(count:)` does (a restart at its start), not
+  snapping to rest for a frame; a reverse loop's way back eases on its curve run backwards, and its keyframes too.
+- A closed path wraps its progress, an open one clamps, whatever `pathWrap` said (test/motion_additions_test.dart:
+  the wrapping test uses a closed path).
+- A motion's transitions are per property: a change of one number no longer restarts the others' unchanged
+  ones (except under the `motion` prefix, which still moves as one).
+- A replay key changing to an empty, `0`, `false` or `null` value no longer replays an entrance (the play-key rule
+  of the animations).
+- A legacy spin turns in the animation layer (inside flip/tilt/scale/rotation) and its pace rounds to whole ms a
+  turn; a plain `setVariable` stops an `animateVariable` play of that variable.
+
 ### Animation
 
 **New: one animation player** (codelessly_api's `animations`, `animate`, `frame`, `Spring`; its
