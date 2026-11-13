@@ -109,8 +109,11 @@ class DirectoryFontFetcher implements FontFetcher {
 
   @override
   Future<Uint8List?> fetch(PublishFont font) async {
-    final face = match(font.family, font.weight, font.italic);
-    if (face == null || face.weight != font.weight || face.italic != font.italic) {
+    // A family with no file at all is drawn in Roboto (the test
+    // environment's own fallback draws boxes, which nobody can review).
+    final face = match(font.family, font.weight, font.italic) ?? match('Roboto', font.weight, font.italic);
+    if (face == null || face.family.toLowerCase() != font.family.toLowerCase() ||
+        face.weight != font.weight || face.italic != font.italic) {
       final miss = (
         family: font.family,
         weight: font.weight,
