@@ -305,8 +305,11 @@ class RenderTree {
     var at = (id, instance);
     while (true) {
       final n = sourceOf(at.$2).node(at.$1);
-      if (n == null || !api.isComponentTypeName(n.type)) return at;
+      if (n == null) return at;
       final def = registry[n.type];
+      // A registered type is a call whatever its name (a hosted plugin's
+      // `vendor.name`); an unregistered UpperCamelCase one is a missing one.
+      if (def == null && !api.isComponentTypeName(n.type)) return at;
       if (def == null) {
         registry.reportMissing(n.type, nodePath(at.$1, at.$2));
         return at;

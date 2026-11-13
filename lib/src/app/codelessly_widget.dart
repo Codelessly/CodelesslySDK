@@ -891,7 +891,7 @@ class _LayoutViewState extends State<_LayoutView> {
       session.addListener(changed);
       context.onDispose(() => session.removeListener(changed));
     }
-    final reactions = TreeReactions(runner: config.actions, context: context);
+    final reactions = TreeReactions(runner: _codelessly.actions, context: context);
     tree.interactions = reactions;
     final screen = _ScreenState(
       layout: widget.layout,
@@ -902,7 +902,7 @@ class _LayoutViewState extends State<_LayoutView> {
       bound: bound,
       tree: tree,
       context: context,
-      actions: config.actions,
+      actions: _codelessly.actions,
       reactions: reactions,
     );
     widget.controller?._screen = screen;

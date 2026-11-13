@@ -19,6 +19,7 @@ import '../services/services.dart';
 import 'automations.dart';
 import 'config.dart';
 import 'fonts.dart';
+import 'hosted_plugins.dart';
 import 'loader.dart';
 import 'managed_components.dart';
 import 'navigation.dart';
@@ -77,6 +78,7 @@ class Codelessly extends ChangeNotifier {
     Map<String, Object?> data = const {},
     ManagedComponentSource? managedComponents,
     ComponentRegistry? components,
+    PluginSource? plugins,
   })  : loader = loader ?? _defaultLoader(config),
         cache = cache ?? MemoryPublishCache(),
         fonts = CodelesslyFonts(fetcher: fonts ?? HttpFontFetcher()),
@@ -84,6 +86,15 @@ class Codelessly extends ChangeNotifier {
         components = components ?? ComponentRegistry() {
     if (managedComponents != null) {
       managed = ManagedComponentResolver(source: managedComponents, cache: this.cache);
+    }
+    final l = this.loader;
+    pluginSource = plugins ?? (l is PluginSource ? l as PluginSource : null);
+    // Node types the installed features implement as data (hosted plugins
+    // installed in the app's runner).
+    for (final f in features) {
+      for (final d in f.components) {
+        this.components.define(d);
+      }
     }
     _ownComponents.addAll(this.components.types);
     this.components.onMissing = _componentMissing;
@@ -107,6 +118,66 @@ class Codelessly extends ChangeNotifier {
   /// Resolves the layouts' managed components at load; null: each shows its
   /// published snapshot.
   ManagedComponentResolver? managed;
+
+  /// Where the hosted plugins the publish lists (`model.plugins`) come from:
+  /// the loader's (a bundle's embedded versions, `plugins/{id}/versions/{n}`
+  /// over HTTP or in Firestore), unless the app gives another. Null: none
+  /// are installed (their node types render as empty boxes).
+  late final PluginSource? pluginSource;
+
+  final List<CodelesslyFeature> _hosted = [];
+  final List<HostedPluginLoad> _pluginLoads = [];
+
+  /// What loading each plugin the publish lists gave: installed, or skipped
+  /// and why.
+  List<HostedPluginLoad> get hostedPlugins => List.unmodifiable(_pluginLoads);
+
+  /// The runner the screens run reactions with: [CodelesslyConfig.actions],
+  /// with the action types of the hosted plugins installed (when it is a
+  /// [CoreActions]).
+  ActionRunner get actions {
+    final a = config.actions;
+    if (_hosted.isEmpty || a is! CoreActions) return a;
+    return _actions ??= CoreActions(handlers: a.handlers, features: [...a.features, ..._hosted]);
+  }
+
+  ActionRunner? _actions;
+
+  /// Installs the hosted plugins [model] lists that aren't yet: through the
+  /// loader's [pluginSource], the cache, their digests, the SDK version and
+  /// the app's catalog (loadHostedPlugins); their node types become component
+  /// definitions, their action types join [actions], their declarations the
+  /// catalog layouts decode with. A plugin that fails a check is skipped and
+  /// logged (`plugin_skipped`).
+  Future<void> _installPlugins(PublishModel model) async {
+    final source = pluginSource;
+    final installed = {for (final l in _pluginLoads) (l.ref.id, l.ref.version)};
+    final refs = [
+      for (final r in model.plugins)
+        if (!installed.contains((r.id, r.version))) r,
+    ];
+    if (source == null || refs.isEmpty) return;
+    final loads = await loadHostedPlugins(refs, source: source, host: config.catalog, cache: cache);
+    for (final load in loads) {
+      _pluginLoads.add(load);
+      switch (load) {
+        case HostedPluginInstalled(:final feature):
+          _hosted.add(feature);
+          _actions = null;
+          for (final d in feature.components) {
+            final type = d.componentType;
+            if (type == null) continue;
+            _ownComponents.add(type);
+            components.define(d);
+          }
+        case HostedPluginSkipped(:final ref, :final reason):
+          final s = services;
+          if (s is Services) {
+            s.analytics.logError(PublishLoadException('plugin_skipped: ${ref.id} ${ref.version}: $reason'), type: 'plugin_skipped');
+          }
+      }
+    }
+  }
 
   /// The project's component definitions (docs/design/06 §4): what a call
   /// node in a layout renders, as ordinary boxes of the screen's tree.
@@ -408,6 +479,7 @@ class Codelessly extends ChangeNotifier {
       _model = cached;
       _configureServices(cached);
       _declareModelVariables(cached);
+      await _installPlugins(cached);
       _setStatus(const CLoaded());
       unawaited(_refresh(key).catchError((Object _) {}));
     } else {
@@ -451,6 +523,7 @@ class Codelessly extends ChangeNotifier {
     _model = fresh;
     _configureServices(fresh);
     _declareModelVariables(fresh);
+    await _installPlugins(fresh);
     await cache.write(key, fresh.toJson());
     if (old != null) {
       // Layouts republished since: drop them, they reload when shown.
@@ -508,7 +581,13 @@ class Codelessly extends ChangeNotifier {
 
   /// What layouts decode with: the installed features' catalog, and the
   /// project's components' declarations (so a call's props are typed).
-  Catalog get _layoutCatalog => components.isEmpty ? config.catalog : config.catalog + components.catalog;
+  Catalog get _layoutCatalog {
+    var c = config.catalog;
+    for (final f in _hosted) {
+      c = c + f.catalog;
+    }
+    return components.isEmpty ? c : c + components.catalog;
+  }
 
   /// Whether [loaded] is older than the model's entry for it says.
   static bool _republished(PublishComponent loaded, PublishComponentInfo info) {

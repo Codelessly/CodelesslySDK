@@ -12,6 +12,8 @@ import 'package:crypto/crypto.dart' show sha256;
 import 'package:flutter/services.dart' show AssetBundle, rootBundle;
 import 'package:http/http.dart' as http;
 
+import 'hosted_plugins.dart' show PluginSource;
+
 /// Loading published data failed.
 class PublishLoadException implements Exception {
   const PublishLoadException(this.message, [this.cause]);
@@ -152,6 +154,15 @@ String componentDigest(PublishComponent component) => sha256.convert(utf8.encode
 /// carries one) is its document's.
 bool componentIntact(PublishComponent component) => component.digest.isEmpty || componentDigest(component) == component.digest;
 
+/// Version [version] of plugin [id], as [bundle] embeds it; null when it
+/// doesn't.
+PluginVersion? _bundledPlugin(PublishBundle bundle, String id, int version) {
+  for (final v in bundle.pluginVersions) {
+    if (v.id == id && v.version == version) return v;
+  }
+  return null;
+}
+
 /// Component [type] of [bundle], or a [PublishLoadException] naming [where].
 PublishComponent _bundled(PublishBundle bundle, String type, String where) {
   final c = bundle.components[type];
@@ -162,7 +173,7 @@ PublishComponent _bundled(PublishBundle bundle, String type, String where) {
 /// A [PublishLoader] over bundles in memory: tests, previews, and apps that
 /// ship their layouts. [bundles] holds one bundle per source; a source
 /// without one uses [PublishSource.publish]'s.
-class MemoryPublishLoader implements PublishLoader {
+class MemoryPublishLoader implements PublishLoader, PluginSource {
   MemoryPublishLoader(PublishBundle bundle, {Map<PublishSource, PublishBundle> others = const {}})
       : bundles = {PublishSource.publish: bundle, ...others};
 
@@ -193,6 +204,13 @@ class MemoryPublishLoader implements PublishLoader {
     calls.add('component:${source.name}:$type');
     return _bundled(_bundle(source), type, 'the bundle');
   }
+
+  /// The plugin versions the publish bundle embeds.
+  @override
+  Future<PluginVersion?> loadPlugin(String id, int version) async {
+    calls.add('plugin:$id:$version');
+    return _bundledPlugin(_bundle(PublishSource.publish), id, version);
+  }
 }
 
 /// Decodes a bundle file: JSON, gzipped or not.
@@ -207,7 +225,7 @@ Object? decodeJsonBytes(List<int> bytes) {
 
 /// A [PublishLoader] over a bundle shipped as an asset (`.json` or
 /// `.json.gz`): runs offline. Loaded once.
-class AssetPublishLoader implements PublishLoader {
+class AssetPublishLoader implements PublishLoader, PluginSource {
   AssetPublishLoader(this.asset, {AssetBundle? bundle}) : _assets = bundle;
 
   final String asset;
@@ -236,6 +254,10 @@ class AssetPublishLoader implements PublishLoader {
 
   @override
   Future<PublishComponent> loadComponent(PublishSource source, String type) async => _bundled(await bundle, type, '[$asset]');
+
+  /// The plugin versions the bundle embeds.
+  @override
+  Future<PluginVersion?> loadPlugin(String id, int version) async => _bundledPlugin(await bundle, id, version);
 }
 
 /// A [PublishLoader] over HTTP. With [bundle] set (a slug), the whole
@@ -251,7 +273,7 @@ class AssetPublishLoader implements PublishLoader {
 /// [urlFor] maps a storage path to a URL; the default joins it to
 /// [baseUrl] (a Firebase Storage bucket's `.../o/` endpoint encodes the
 /// path, see [HttpPublishLoader.firebaseStorage]).
-class HttpPublishLoader implements PublishLoader {
+class HttpPublishLoader implements PublishLoader, PluginSource {
   HttpPublishLoader({
     required this.projectId,
     this.baseUrl = '',
@@ -342,6 +364,21 @@ class HttpPublishLoader implements PublishLoader {
     final json = await _get('${source.componentPath(projectId, type)}.json');
     if (json is! Map) throw PublishLoadException('Component [$type] is not a JSON object');
     return decodeStoredPublishComponent(json.cast<String, Object?>(), type: type);
+  }
+
+  /// A [bundle]'s embedded version, else `plugins/{id}/versions/{n}.json`
+  /// under [baseUrl] (null when there is none).
+  @override
+  Future<PluginVersion?> loadPlugin(String id, int version) async {
+    if (bundle) {
+      final embedded = _bundledPlugin(await _bundle(PublishSource.publish), id, version);
+      if (embedded != null) return embedded;
+    }
+    try {
+      return PluginVersion.fromJson(await _get('$kPluginsCollection/$id/versions/$version.json'), id: id, version: version);
+    } on PublishLoadException {
+      return null;
+    }
   }
 }
 
