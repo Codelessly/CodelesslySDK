@@ -1,5 +1,29 @@
 ## Unreleased
 
+**New: catalogs and plugins** (codelessly_api's `Catalog` and feature libraries; its docs/design/05-plugins-and-layers.md)
+
+- `CodelesslyFeature.catalog` and `recipes`: a feature (or native plugin) declares its node and action types and
+  builds its node types. `CoreActions.catalog` / `recipes`, `CodelesslyConfig.catalog` / `allRecipes`. The first-party
+  features carry `dataCatalog`, `authCatalog`, `commerceCatalog`, `mediaCatalog`, `engageCatalog`.
+- The runner types an action decoded with a smaller catalog (`Catalog.upgrade`); `ActionRun.catalog`.
+- Hosted plugins: `loadHostedPlugins`, `PluginSource`, `MemoryPluginSource`, `pluginDigest`, `pluginCacheKey`,
+  `HostedPluginLoad` (`HostedPluginInstalled`, `HostedPluginSkipped`), `hostedPluginFeature`.
+- `test/core_only_import_test.dart`, `test/catalog_corpus_test.dart`, `test/hosted_plugins_test.dart`.
+
+**Breaking changes**
+
+- The video, embedded video, audio player and web view widgets moved to `lib/src/features/media`
+  (`players.dart`, `embedded_*.dart`) and render through `mediaFeature.recipes`: a `NodeTree` built without
+  `CodelesslyConfig` needs `recipes: mediaFeature.recipes` to show them. `CodelesslyWidget` installs them.
+- `captureScreenshot` and `preloadImages` are run by `mediaFeature`, `emitEvent` by `engageFeature`; `CoreActions()`
+  alone fails them as feature actions.
+- `CloudListSource.pages` and `cloudCollectionPath` take the list's query as `Json` (the data feature reads it).
+- `CodelesslyFonts.settled`/`loading`/`track` forward to `FontLoads` (lib/src/runtime/font_loads.dart).
+- Layouts a test or app decodes itself with `LayoutDocument.fromJson(json)` decode with codelessly_api's core
+  catalog: pass `catalog: standardCatalog` (the runner still types their feature actions when they run).
+
+### Animation
+
 **New: one animation player** (codelessly_api's `animations`, `animate`, `frame`, `Spring`; its
 docs/design/02-animation.md)
 
