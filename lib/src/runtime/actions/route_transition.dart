@@ -10,11 +10,13 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show DragDirection, Motion, RevealOrigin, RevealShape, RouteDismiss, RouteSwipeBack, RouteTransition, TransitionReveal,
-        TransitionSide, TransitionSpring;
+        TransitionSide;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+
+import '../../render/physics.dart' show describeSpring;
 
 import '../../render/behaviors.dart' show motionMatrix;
 import 'hero_flights.dart';
@@ -22,13 +24,9 @@ import 'hero_flights.dart';
 /// The spring a released interactive transition settles with, and whether
 /// a release closes the route.
 abstract final class TransitionPhysics {
-  static SpringDescription describe(TransitionSpring spring) => SpringDescription(
-        mass: spring.mass <= 0 ? 1 : spring.mass,
-        stiffness: spring.stiffness <= 0 ? 1 : spring.stiffness,
-        damping: spring.damping < 0 ? 0 : spring.damping,
-      );
+  static SpringDescription describe(api.Spring spring) => describeSpring(spring, stiffnessIfNone: 1);
 
-  static Simulation settle(TransitionSpring spring, {required double from, required double to, required double velocity}) =>
+  static Simulation settle(api.Spring spring, {required double from, required double to, required double velocity}) =>
       SpringSimulation(describe(spring), from, to, velocity, tolerance: const Tolerance(distance: 0.001, velocity: 0.01));
 
   /// A fling faster than [flingVelocity] decides by its direction; a slow
@@ -254,7 +252,7 @@ class CodelesslyRouteTransitionRoute<T> extends PageRoute<T> with CodelesslyHero
           direction: DragDirection.right,
           distance: 0.5,
           velocity: 600,
-          spring: transition.dismiss?.spring ?? const TransitionSpring(),
+          spring: transition.dismiss?.spring ?? api.RouteDismiss.defaultSpring,
         ),
         edgeWidth: 24,
         child: page,
@@ -332,7 +330,7 @@ class CodelesslyRouteTransitionRoute<T> extends PageRoute<T> with CodelesslyHero
 
   void dragTo(double progress) => controller?.value = progress.clamp(0.0, 1.0);
 
-  void endDrag({required bool close, required double velocity, required TransitionSpring spring}) {
+  void endDrag({required bool close, required double velocity, required api.Spring spring}) {
     final controller = this.controller;
     final navigator = this.navigator;
     if (controller == null || navigator == null) {

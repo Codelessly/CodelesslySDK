@@ -49,6 +49,7 @@ class NodeValuesScope extends ValuesScope {
 /// behaviors declares all their names in one scope).
 final List<NodeScopeDeclarer> nodeScopeDeclarers = [
   trackScopeValues, flipScopeValues, tiltScopeValues, transformScopeValues, stickyScopeValues, viewScopeValues, //
+  animationScopeValues,
 ];
 
 /// What [node] declares (empty: nothing), read in [parent].
@@ -71,6 +72,7 @@ bool declaresNodeScope(Node node) {
       be.zoomable ||
       be.sticky != null ||
       be.viewProgress != null ||
+      be.animations.isNotEmpty ||
       ownSwitchPoints(node).isNotEmpty;
 }
 
@@ -107,6 +109,19 @@ class ResponsiveScreenScope extends NodeValuesScope {
 
   @override
   Listenable watch(String name) => name == 'screen' ? (watchName(parent, 'screen') ?? super.watch(name)) : super.watch(name);
+}
+
+/// A node's `animation`: each animation's value, status and whether it
+/// runs, by id (`${animation.spin.value}`), at rest until its player
+/// publishes them (render/animations.dart).
+Map<String, Object?>? animationScopeValues(Node node, ValueScope parent) {
+  final animations = node.behaviors.animations;
+  if (animations.isEmpty) return null;
+  return {
+    'animation': {
+      for (final a in animations) a.id: {'value': 0.0, 'status': 'dismissed', 'isAnimating': false},
+    },
+  };
 }
 
 /// A drag track's `track`: the value it's drawn at and its progress (as

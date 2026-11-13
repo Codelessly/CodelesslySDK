@@ -238,12 +238,14 @@ class _BoxReactions {
     _timer?.cancel();
     _timer = null;
     _intervalMs = null;
+    _frames?.stop();
   }
 
   /// Back in the render tree.
   void resume() {
     final n = _node;
     if (n != null && _timer == null) _updateTimer(n, {for (final r in n.actions) r.trigger.type});
+    if (n != null) _updateFrames(n, {for (final r in n.actions) r.trigger.type});
   }
 
   bool _loaded = false;
@@ -265,6 +267,7 @@ class _BoxReactions {
       SchedulerBinding.instance.ensureVisualUpdate();
     }
     _updateTimer(n, types);
+    _updateFrames(n, types);
     _updateWatches(n, types);
     final keys = types.contains(TriggerType.keyDown) || types.contains(TriggerType.keyUp);
     if (keys != _keys) {
@@ -273,12 +276,16 @@ class _BoxReactions {
     }
   }
 
+  /// The one periodic timer of the node's timer triggers, at the shortest
+  /// interval among those whose `when` holds (an interval may be an
+  /// expression: it's worked out again when a name it reads changes).
   void _updateTimer(Node n, Set<TriggerType> types) {
     final ctx = owner.contextFor(box);
     final reads = <String>{};
     for (final r in n.actions) {
-      if (r.trigger.type != TriggerType.clock) continue;
-      for (final expression in [r.trigger.every, r.trigger.runWhen]) {
+      if (r.trigger.type != TriggerType.timer) continue;
+      for (final expression in [r.trigger.intervalMs.source ?? '', r.trigger.when]) {
+        if (expression.trim().isEmpty) continue;
         reads.addAll(FormulaEvaluator.referencedPaths(FormulaEvaluator.exactExpression(expression) ?? exactPath(expression) ?? expression).map(rootOf));
       }
     }
@@ -295,17 +302,14 @@ class _BoxReactions {
     }
     int? ms;
     for (final r in n.actions) {
-      if (r.trigger.type == TriggerType.timer) ms = math.min(ms ?? 1 << 30, r.trigger.effectiveIntervalMs);
-      if (r.trigger.type == TriggerType.clock) {
-        final condition=r.trigger.runWhen.trim();
-        Object? evaluateClock(String expression) => expression.contains(r'${')
-            ? ctx.expressions.evaluate(expression, ctx.scope)
-            : FormulaEvaluator.evaluate(expression, (path) => readPath(ctx.scope, path));
-        if (condition.isNotEmpty && evaluateClock(condition) != true) continue;
-        final value = evaluateClock(r.trigger.every.trim());
-        final every=value is num ? value : num.tryParse('$value');
-        if (every != null && every.isFinite && every > 0) ms = math.min(ms ?? 1 << 30, every.round().clamp(Trigger.minIntervalMs,86400000));
-      }
+      if (r.trigger.type != TriggerType.timer) continue;
+      final condition = r.trigger.when.trim();
+      if (condition.isNotEmpty && !triggerWhenHolds(condition, ctx)) continue;
+      final source = r.trigger.intervalMs.source;
+      final every = source == null
+          ? r.trigger.effectiveIntervalMs
+          : Trigger.intervalMsOf(ctx.expressions.evaluate(source, ctx.scope));
+      if (every != null) ms = math.min(ms ?? 1 << 30, every);
     }
     if (ms == _intervalMs) return;
     _timer?.cancel();
@@ -314,9 +318,59 @@ class _BoxReactions {
     var tick = 0;
     _timer = Timer.periodic(Duration(milliseconds: ms), (_) {
       if (_disposed || !box.attached || !box.tree.runtimeVisible || !_onstage) return;
-      if (types.contains(TriggerType.timer)) owner.fire(box, 'timer');
-      if (types.contains(TriggerType.clock)) owner.fire(box, 'clock', event: {'result': {'tick': tick++, 'waitMs': 0}});
+      owner.fire(box, 'timer', event: {'result': {'tick': tick++, 'waitMs': 0}});
     });
+  }
+
+  // --- the frame trigger: a Ticker -----------------------------------------------
+
+  Ticker? _frames;
+  Duration _lastFrame = Duration.zero;
+  int _frameCount = 0;
+  bool _frameRunning = false;
+
+  /// Runs the node's frame reactions each frame while it's on stage
+  /// (`${result.dt}`, `${result.elapsed}`, `${result.frame}`); a frame that
+  /// comes while the chain still runs is skipped, its time added to the
+  /// next dt. While no reaction's `when` holds, nothing runs and no time
+  /// adds up.
+  void _updateFrames(Node n, Set<TriggerType> types) {
+    if (!types.contains(TriggerType.frame)) {
+      _frames?.dispose();
+      _frames = null;
+      return;
+    }
+    if (_frames == null) {
+      _frames = Ticker(_frame, debugLabel: 'frame trigger');
+      _lastFrame = Duration.zero;
+      _frameCount = 0;
+    }
+    if (box.attached && !_frames!.isActive) _frames!.start();
+  }
+
+  void _frame(Duration elapsed) {
+    final n = _node;
+    if (n == null || _disposed || !box.attached) return;
+    if (!box.tree.runtimeVisible || !_onstage) {
+      _lastFrame = elapsed;
+      return;
+    }
+    if (_frameRunning) return;
+    final ctx = owner.contextFor(box);
+    final holds = n.actions.any((r) =>
+        r.trigger.type == TriggerType.frame && (r.trigger.when.trim().isEmpty || triggerWhenHolds(r.trigger.when, ctx)));
+    if (!holds) {
+      _lastFrame = elapsed;
+      return;
+    }
+    final dt = (elapsed - _lastFrame).inMicroseconds / 1000;
+    _lastFrame = elapsed;
+    _frameRunning = true;
+    owner
+        .fire(box, 'frame', event: {
+          'result': {'dt': dt, 'elapsed': elapsed.inMicroseconds / 1000, 'frame': _frameCount++},
+        })
+        .whenComplete(() => _frameRunning = false);
   }
 
   bool get _onstage {
@@ -425,6 +479,8 @@ class _BoxReactions {
     _timerUnwatch.clear();
     cancellation.cancel();
     _timer?.cancel();
+    _frames?.dispose();
+    _frames = null;
     for (final u in _unwatch.values) {
       u();
     }

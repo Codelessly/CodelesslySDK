@@ -1,6 +1,6 @@
-benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b doc -61afdde39df8219f:194193
-benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b node -55960619b31835f5:327
-benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b/actions/0 reaction 1bd6ff6858493b66:143
+benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b doc -344d40a162dff719:194195
+benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b node 41af40cbc1af579:329
+benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b/actions/0 reaction -5052d6d6b7805684:145
 benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b/actions/0/actions/0 action 7e44828363559812:39
 benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-a node -10033155d4d1092e:123
 benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1yw2rrow-1sr node -1d269e35c1ba2242:474
@@ -1023,9 +1023,9 @@ benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1yw2rrow-29
 benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1yw2rrow-29j node -70f0e16f270bacda:242
 benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1yw2rrow-29k node -5b82190f19f8767:235
 benchmark/assets/petri_bench_full.json#/layouts/ho1xmez1t4-b/nodes/ho1yw2rrow-29l node ac30d8f54f9f617:589
-benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b doc 107a464202cacaf5:12335
-benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b node -4ea36f79215b6de4:313
-benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b/actions/0 reaction 1bd6ff6858493b66:143
+benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b doc 56b0730800d8ce67:12337
+benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b node -58293137d911f9fe:315
+benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b/actions/0 reaction -5052d6d6b7805684:145
 benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-b/actions/0/actions/0 action 7e44828363559812:39
 benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-a node 33b4aac9b397e987:122
 benchmark/assets/petri_bundle.json#/layouts/ho1xmez1t4-b/nodes/ho1xmez1t4-17 node 5ee184b617b63fe8:204
@@ -1250,7 +1250,7 @@ test/fixtures/managed/sign_in_1.0.0.json#/definition/document/nodes/submit/actio
 test/fixtures/managed/sign_in_1.0.0.json#/definition/document/nodes/signUp node -76d34f5aebcfda3:254
 test/fixtures/managed/sign_in_1.0.0.json#/definition/document/nodes/signUp/actions/0 reaction -7a0514bfa32c49d8:85
 test/fixtures/managed/sign_in_1.0.0.json#/definition/document/nodes/signUp/actions/0/actions/0 action 724d369b7887b87:44
-test/fixtures/ninefold_board.json# doc -2223d211198e2d12:53114
+test/fixtures/ninefold_board.json# doc -54ffb5799b808b1b:53116
 test/fixtures/ninefold_board.json#/nodes/n0 node 7b1a24ed93a04cc7:241
 test/fixtures/ninefold_board.json#/nodes/n1 node 1260a6df53dc8811:383
 test/fixtures/ninefold_board.json#/nodes/n2 node -744ae61f52187b7b:384
@@ -1277,7 +1277,7 @@ test/fixtures/ninefold_board.json#/nodes/sqSel node 6d5c50b81ca574ea:159
 test/fixtures/ninefold_board.json#/nodes/sqFlash node 6b56f3206792e077:271
 test/fixtures/ninefold_board.json#/nodes/sqRing node -5b56c0d2bac66a5f:276
 test/fixtures/ninefold_board.json#/nodes/sqSelRing node 4289fc0652b42c79:204
-test/fixtures/ninefold_board.json#/nodes/digit node 1b9fa534096a8aaa:604
+test/fixtures/ninefold_board.json#/nodes/digit node -3038ae8fbc4153e9:606
 test/fixtures/ninefold_board.json#/nodes/ghost node -686aa397f55c0f34:260
 test/fixtures/ninefold_board.json#/nodes/sq node -b6985e9cc7e9e3:499
 test/fixtures/ninefold_board.json#/nodes/sq/actions/0 reaction 67da696b576a8339:126
