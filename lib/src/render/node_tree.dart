@@ -118,15 +118,19 @@ abstract class NodeTreeObserver {
 /// project's [breakpoints] and the screen's [width].
 @immutable
 final class ResponsiveWidth {
-  const ResponsiveWidth(this.breakpoints, this.width);
+  const ResponsiveWidth(this.breakpoints, this.width, {this.height});
   final api.Breakpoints breakpoints;
   final double width;
 
-  @override
-  bool operator ==(Object other) => other is ResponsiveWidth && other.width == width && other.breakpoints == breakpoints;
+  /// The screen's height (media rules' `orientation`); null: unknown.
+  final double? height;
 
   @override
-  int get hashCode => Object.hash(breakpoints, width);
+  bool operator ==(Object other) =>
+      other is ResponsiveWidth && other.width == width && other.height == height && other.breakpoints == breakpoints;
+
+  @override
+  int get hashCode => Object.hash(breakpoints, width, height);
 }
 
 typedef _Container = ContainerRenderObjectMixin<RenderBox, ContainerBoxParentData<RenderBox>>;
@@ -375,15 +379,22 @@ class RenderTree {
     if (value == _responsive) return;
     final before = _responsive;
     _responsive = value;
-    final beforeBp = before?.breakpoints.forWidth(before.width).id;
-    final afterBp = value?.breakpoints.forWidth(value.width).id;
+    // Nodes with media rules whose set of holding rules changed re-apply,
+    // with their parents (a child's `layout.order` may have changed).
+    List<bool> holding(Node n, ResponsiveWidth? w) =>
+        [for (final m in n.media) w != null && m.holds(w.width, w.height, w.breakpoints)];
+    final parents = <String>{};
+    for (final b in _boxes.values.toList()) {
+      final n = source.node(b.id);
+      if (n == null || n.media.isEmpty) continue;
+      if (listEquals(holding(n, before), holding(n, value))) continue;
+      b._apply();
+      if (source.parentOf(b.id) case final String p) parents.add(p);
+    }
+    if (parents.isNotEmpty) reapply(parents);
     for (final b in _boxes.values.toList()) {
       final n = source.node(b.id);
       if (n == null) continue;
-      if (n.responsive.isNotEmpty && (beforeBp != afterBp || before?.breakpoints != value?.breakpoints)) {
-        b._apply();
-        continue;
-      }
       if (!n.isResponsive) continue;
       // Only the ones that now show another variant.
       if (before != null && value != null && n.variantForWidth(before.width, before.breakpoints)?['id'] == n.variantForWidth(value.width, value.breakpoints)?['id']) {
@@ -414,6 +425,16 @@ class RenderTree {
     if (n == null) return null;
     final binder = _bindings;
     if (binder == null) return _withAnimated(id, instance, BoundNode(n));
+    return _collapseHidden(_resolveBound(id, instance, n, binder));
+  }
+
+  /// A running screen's hidden node takes no room, however it is hidden (a
+  /// binding, a condition, its own `visible: false` or a responsive patch),
+  /// as Flutter's `Visibility` (default: not maintaining size) takes none.
+  static BoundNode _collapseHidden(BoundNode b) =>
+      b.collapsed || b.node.visible ? b : BoundNode(b.node, collapsed: true, watch: b.watch, states: b.states);
+
+  BoundNode _resolveBound(String id, Object? instance, Node n, TreeBindings binder) {
     var bound = binder.bind(source, n, instance);
     // States driven by data (`selected`, `disabled`): held like hover, so
     // the node's state styles patch it (bind it again) and its targets.
@@ -464,10 +485,10 @@ class RenderTree {
   Node? _patched(String id, Object? instance) {
     var n = source.node(id);
     if (n == null) return null;
-    // Its own fields at the screen's breakpoint (its responsive patches),
+    // Its own fields at the screen's size (its media rules),
     // under any interaction state's patch, its bindings and conditions.
     final r = _responsive;
-    if (r != null && n.responsive.isNotEmpty) n = n.atBreakpoint(r.breakpoints.forWidth(r.width), r.breakpoints);
+    if (r != null && n.media.isNotEmpty) n = n.atScreen(r.width, r.height, r.breakpoints);
     if (_states.isEmpty) return n;
     var out = n;
     for (final e in _states.entries) {
@@ -1498,7 +1519,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..gap = n.prop(FlexProps.spacing)
       ..squeeze = n.prop(FlexProps.squeezeChildren)
       ..fillsAcross = fillsAcross;
-    _syncChildren(flex, n.children, Slot(SlotKind.flex, n));
+    _syncChildren(flex, _inOrder(n.children), Slot(SlotKind.flex, n));
     chain.add(flex);
   }
 
@@ -1535,8 +1556,19 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         _ => WrapCrossAlignment.start,
       }
       ..textDirection = TextDirection.ltr;
-    _syncChildren(wrap, n.children, Slot(SlotKind.flex, n));
+    _syncChildren(wrap, _inOrder(n.children), Slot(SlotKind.flex, n));
     chain.add(wrap);
+  }
+
+  /// [ids] by their nodes' `layout.order` (CSS `order`), as shown at this
+  /// size; equal orders keep their place.
+  List<String> _inOrder(List<String> ids) {
+    if (ids.length < 2) return ids;
+    final orders = [for (final id in ids) tree._patched(id, instance)?.layout.order ?? 0];
+    if (orders.every((o) => o == 0)) return ids;
+    final index = [for (var i = 0; i < ids.length; i++) i]
+      ..sort((a, b) => orders[a] != orders[b] ? orders[a].compareTo(orders[b]) : a.compareTo(b));
+    return [for (final i in index) ids[i]];
   }
 
   /// Whether a laid-out flex child is a drawn node that fills the flex's
@@ -1849,7 +1881,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// can't be measured. Its own alignment doesn't apply.
   void _inRun(Node n, List<RenderBox> chain) {
     bool flexes(SizeFit f) => f == SizeFit.fill || f == SizeFit.flexible;
-    final fh = flexes(n.hFit), fv = flexes(n.vFit);
+    final parentRow = _slot.parent?.isRow ?? true;
+    // A child with a basis takes the main size its line gives it.
+    final basis = n.layout.basis != null;
+    final fh = flexes(n.hFit) && !(basis && parentRow), fv = flexes(n.vFit) && !(basis && !parentRow);
     if (!fh && !fv) return;
     if (!n.isFlex || _subtreeBlocksIntrinsics(n)) {
       final c = BoxConstraints.tightFor(width: fh ? n.outerWidth : null, height: fv ? n.outerHeight : null);
@@ -1890,11 +1925,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       if (mainFit == SizeFit.hug && n.layout.squeezable && !parentNode.wraps) (flex, fit) = (flexValue, FlexFit.loose);
       // Collapsed: no flex, no gaps (flex 0).
       if (_collapsed) (flex, fit) = (null, null);
-      if (pd.flex != flex || pd.fit != fit || pd.collapsed != _collapsed) {
+      // In a wrapping row/column: CSS flex-basis, and flex-grow for a child
+      // that fills the main axis.
+      final basis = parentNode.wraps ? n.layout.basis : null;
+      final grow = basis != null && mainFit == SizeFit.fill ? flexValue : 0;
+      if (pd.flex != flex || pd.fit != fit || pd.collapsed != _collapsed || pd.basis != basis || pd.grow != grow) {
         pd
           ..flex = flex
           ..fit = fit
-          ..collapsed = _collapsed;
+          ..collapsed = _collapsed
+          ..basis = basis
+          ..grow = grow;
         p?.markNeedsLayout();
       }
     } else if (pd is FreeformParentData && parentNode != null) {
