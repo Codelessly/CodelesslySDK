@@ -105,6 +105,7 @@ export 'package:codelessly_api/codelessly_api.dart'
         TextLeadingDistribution,
         TextOverflow,
         TextStyle,
+        ThemeMode,
         TileMode,
         VerticalDirection,
         VisualDensity,
