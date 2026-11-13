@@ -1,3 +1,11 @@
+## Unreleased
+
+- **The reference is one base plus links** (codelessly_api's `docs/reference`). The chat example's compact prompt
+  is the base's runtime form (`runtimeStarter()`, ≈ 43.7k characters, ending with the index of `ui_docs`
+  topics) and `ui_docs` answers with the reference's pages (`UiSession.docs`, unchanged); its full prompt carries
+  the base's file form (`assets/system_prompt.md`, regenerated). The render and stream READMEs point at the base
+  and at the reference's render page.
+
 ## 30.0.0
 
 Requires `codelessly_api: ^30.0.0`.

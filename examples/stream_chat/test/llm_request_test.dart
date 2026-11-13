@@ -40,14 +40,15 @@ void main() {
       expect([for (final t in tools) t['name']], ['ui_apply', 'ui_read', 'ui_docs']);
       expect((j['tool_choice']! as Map)['type'], m == 'claude-haiku-5-5' ? 'any' : 'auto', reason: m);
       final text = ((j['system']! as List).single as Map)['text'] as String;
-      expect(text, contains('# Everything else: ui_docs'));
-      expect(text.length, lessThan(20000));
+      // The base, runtime form: it ends with the index of ui_docs topics.
+      expect(text, allOf(contains('## Index'), contains('"forms-validation-and-an-error-state"')));
+      expect(text.length, lessThan(50000));
       model.close();
     }
     // An app brief with scripts on gets the scripts op and its rule.
     final apps = systemPromptFor(PromptVariant.compact, full: '', kind: 'app', profile: profileFor('app'));
-    expect(apps, contains('`scripts`'));
-    expect(systemPromptFor(PromptVariant.compact, full: '', kind: 'app', profile: profileFor('app', scripts: false)), isNot(contains('`scripts`')));
+    expect(apps, contains('- `scripts` ('));
+    expect(systemPromptFor(PromptVariant.compact, full: '', kind: 'app', profile: profileFor('app', scripts: false)), isNot(contains('- `scripts` (')));
     // Lookups are answered from the declarations.
     expect('${answerLookup('ui_docs', {'topic': 'slider'}, document: LayoutDocument())}', contains('`value`'));
   });
