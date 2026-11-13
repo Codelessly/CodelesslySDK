@@ -487,4 +487,21 @@ void main() {
     // At desktop width the media rule puts it back.
     expect(await column('overlap@1440x900.png', 720, [180, 280, 310]), [0x00FF00, 0xFF0000, 0x0000FF]);
   });
+
+  testWidgets('a media rule may bind: visible on phones only while a variable allows, hidden elsewhere', (tester) async {
+    Future<Map<String, double>> heights(List<Step> steps) async {
+      final o = Directory('${out.path}/${steps.length}')..createSync();
+      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-media-bind.json'], out: o.path,
+          sizes: const [Size(390, 844), Size(1440, 900)], dumpLayout: true, steps: steps));
+      expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
+      return {
+        for (final w in ['390x844', '1440x900'])
+          w: ((jsonDecode(File('${o.path}/mb@$w.layout.json').readAsStringSync()) as List).cast<Map>().singleWhere((b) => b['id'] == 'bar')['h'] as num)
+              .toDouble(),
+      };
+    }
+
+    expect(await heights(const []), {'390x844': 60, '1440x900': 0});
+    expect(await heights(const [Step('set', 'open', 'true')]), {'390x844': 0, '1440x900': 0});
+  });
 }
