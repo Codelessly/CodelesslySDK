@@ -346,6 +346,19 @@ class UiSession implements NodeSource {
     return () => _probes.remove(p);
   }
 
+  final Set<Map<String, Object?> Function()> _valueProbes = {};
+
+  /// Registers a view's variable values (what [values] reads); the returned
+  /// callback unregisters it.
+  VoidCallback attachValuesProbe(Map<String, Object?> Function() values) {
+    _valueProbes.add(values);
+    return () => _valueProbes.remove(values);
+  }
+
+  /// The variable values of the views showing this session, as they run
+  /// (for tools and tests: what an interaction changed).
+  Map<String, Object?> get values => {for (final p in _valueProbes) ...p()};
+
   /// `no_size` warnings: nodes with content (text, an icon, a fill, children
   /// that show) that the views showing this session laid out with no width
   /// or no height. Call it after a frame.

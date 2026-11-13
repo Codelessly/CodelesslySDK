@@ -1,0 +1,134 @@
+{
+ "ops": [
+  {
+   "op": "roots",
+   "roots": [
+    "c"
+   ]
+  },
+  {
+   "op": "set",
+   "id": "c",
+   "node": {
+    "type": "canvas",
+    "slots": {
+     "body": "p"
+    },
+    "layout": {
+     "width": 390,
+     "height": 760
+    }
+   }
+  },
+  {
+   "op": "vars",
+   "scope": "c",
+   "set": {
+    "done": {
+     "type": "boolean",
+     "value": false
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "p",
+   "node": {
+    "type": "column",
+    "children": [
+     "mon",
+     "tue"
+    ],
+    "layout": {
+     "width": {
+      "fill": 390
+     },
+     "height": {
+      "fill": 760
+     },
+     "padding": 16
+    },
+    "props": {
+     "spacing": 12,
+     "crossAxisAlignment": "start"
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFFFFFFF"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "mon",
+   "node": {
+    "type": "box",
+    "layout": {
+     "width": 60,
+     "height": 60
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFE5E7EB"
+      }
+     ],
+     "radius": 8
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "done",
+        "value": "true"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "tue",
+   "node": {
+    "type": "box",
+    "layout": {
+     "width": 60,
+     "height": 60
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFE5E7EB"
+      }
+     ],
+     "radius": 8
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "done",
+        "value": "true"
+       }
+      ]
+     }
+    ],
+    "bind": {
+     "decoration.fills[0].color": "${= done ? '#FF22C55E' : '#FFE5E7EB'}"
+    }
+   }
+  }
+ ]
+}

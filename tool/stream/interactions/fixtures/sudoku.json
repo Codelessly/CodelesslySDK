@@ -1,0 +1,183 @@
+{
+ "ops": [
+  {
+   "op": "roots",
+   "roots": [
+    "c"
+   ]
+  },
+  {
+   "op": "set",
+   "id": "c",
+   "node": {
+    "type": "canvas",
+    "slots": {
+     "body": "p"
+    },
+    "layout": {
+     "width": 390,
+     "height": 760
+    }
+   }
+  },
+  {
+   "op": "vars",
+   "scope": "c",
+   "set": {
+    "sel": {
+     "type": "integer",
+     "value": -1
+    },
+    "last": {
+     "type": "integer",
+     "value": 0
+    }
+   }
+  },
+  {
+   "op": "scripts",
+   "set": {
+    "place": {
+     "params": [
+      "digit"
+     ],
+     "source": "vars.set('last', digit); return digit;",
+     "capabilities": [
+      "variables.write"
+     ]
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "p",
+   "node": {
+    "type": "column",
+    "children": [
+     "cell",
+     "pad",
+     "shown"
+    ],
+    "layout": {
+     "width": {
+      "fill": 390
+     },
+     "height": {
+      "fill": 760
+     },
+     "padding": 16
+    },
+    "props": {
+     "spacing": 12,
+     "crossAxisAlignment": "start"
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFFFFFFF"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "cell",
+   "node": {
+    "type": "box",
+    "layout": {
+     "width": 60,
+     "height": 60
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFF3F4F6"
+      }
+     ],
+     "radius": 8
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "sel",
+        "value": "0"
+       }
+      ]
+     }
+    ],
+    "bind": {
+     "decoration.fills[0].color": "${= sel == 0 ? '#FFDBEAFE' : '#FFF3F4F6'}"
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "pad",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 20
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "5",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "runScript",
+        "script": "place",
+        "arguments": {
+         "digit": 5
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "shown",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Cell: 0",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "bind": {
+     "props.text": "Cell: ${last}"
+    }
+   }
+  }
+ ]
+}

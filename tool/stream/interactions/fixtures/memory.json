@@ -1,0 +1,159 @@
+{
+ "ops": [
+  {
+   "op": "roots",
+   "roots": [
+    "c"
+   ]
+  },
+  {
+   "op": "set",
+   "id": "c",
+   "node": {
+    "type": "canvas",
+    "slots": {
+     "body": "p"
+    },
+    "layout": {
+     "width": 390,
+     "height": 760
+    }
+   }
+  },
+  {
+   "op": "vars",
+   "scope": "c",
+   "set": {
+    "moves": {
+     "type": "integer",
+     "value": 0
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "p",
+   "node": {
+    "type": "column",
+    "children": [
+     "a",
+     "b",
+     "m"
+    ],
+    "layout": {
+     "width": {
+      "fill": 390
+     },
+     "height": {
+      "fill": 760
+     },
+     "padding": 16
+    },
+    "props": {
+     "spacing": 12,
+     "crossAxisAlignment": "start"
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FFFFFFFF"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "set",
+   "id": "a",
+   "node": {
+    "type": "box",
+    "layout": {
+     "width": 60,
+     "height": 60
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FF1E3A8A"
+      }
+     ],
+     "radius": 8
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "moves",
+        "value": "1",
+        "op": "add"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "b",
+   "node": {
+    "type": "box",
+    "layout": {
+     "width": 60,
+     "height": 60
+    },
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FF1E3A8A"
+      }
+     ],
+     "radius": 8
+    },
+    "actions": [
+     {
+      "trigger": {
+       "type": "click"
+      },
+      "actions": [
+       {
+        "type": "setVariable",
+        "variable": "moves",
+        "value": "1",
+        "op": "add"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "op": "set",
+   "id": "m",
+   "node": {
+    "type": "text",
+    "layout": {
+     "width": {
+      "hug": 200
+     },
+     "height": {
+      "hug": 24
+     }
+    },
+    "props": {
+     "text": "Moves: 0",
+     "style": {
+      "fontSize": 18,
+      "color": "#FF111827"
+     }
+    },
+    "bind": {
+     "props.text": "Moves: ${moves}"
+    }
+   }
+  }
+ ]
+}
