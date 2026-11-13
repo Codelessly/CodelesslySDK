@@ -389,7 +389,7 @@ class DropSlotNode {
   final RenderTree _tree;
 
   /// The slot node's box.
-  late final NodeBox box = _tree.obtain(id, const Slot.root());
+  late final NodeBox box = _tree.obtain(id, _tree.rootSlot(id));
 
   void dispose() => _tree.dispose();
 }
@@ -767,7 +767,7 @@ class _NodeInstanceView extends RenderObjectWidget {
 
   @override
   _RenderInstanceView createRenderObject(BuildContext context) =>
-      _RenderInstanceView(tree.obtain(id, const Slot.root(), instance: instance));
+      _RenderInstanceView(tree.obtain(id, tree.rootSlot(id), instance: instance));
 
   @override
   void updateRenderObject(BuildContext context, _RenderInstanceView renderObject) {}

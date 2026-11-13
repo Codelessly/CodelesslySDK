@@ -35,6 +35,14 @@ List<String> _lines(String path, Catalog catalog) {
         // schema 3, and (migrated when it decodes) otherwise the same.
         final doc = LayoutDocument.fromJson(v, catalog: catalog).toJson();
         if (doc['schema'] == kSchemaVersion) doc['schema'] = 2;
+        // Schema 2's line height, which the migration writes on the
+        // top-level nodes (step text.lineHeight), is what it drew anyway.
+        for (final e in (doc['nodes'] as Map).entries) {
+          final n = e.value as Map;
+          if (jsonEncode(n['defaultTextStyle']) == '{"height":1.33}' && (nodes[e.key] as Map?)?['defaultTextStyle'] == null) {
+            n.remove('defaultTextStyle');
+          }
+        }
         out.add('$path#$at doc ${_digest(doc)}');
       }
       // A node, reaction or action alone is schema 2 too: migrated first.

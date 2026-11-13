@@ -696,13 +696,13 @@ class BarChartPainter extends NodePainter {
       fontWeight: p(BarChartProps.labelFontWeight),
       fontSize: fontSize,
       color: p(BarChartProps.labelColor),
-    )).copyWith(height: 1.2);
+    ), n.behaviors.defaultTextStyle).copyWith(height: 1.2);
     final gridStyle = textStyle(api.TextStyle(
       fontFamily: p(BarChartProps.labelFontFamily),
       fontWeight: p(BarChartProps.gridLabelFontWeight) ?? p(BarChartProps.labelFontWeight),
       fontSize: p(BarChartProps.gridLabelFontSize) ?? fontSize,
       color: p(BarChartProps.gridLabelColor) ?? p(BarChartProps.labelColor),
-    )).copyWith(height: 1);
+    ), n.behaviors.defaultTextStyle).copyWith(height: 1);
     final gridFontSize = p(BarChartProps.gridLabelFontSize) ?? fontSize;
     final labelHeight = p(BarChartProps.labelAreaHeight) ?? (hasLabels ? fontSize * 1.2 + labelGap : 0.0);
     final showValues = p(BarChartProps.showValues);

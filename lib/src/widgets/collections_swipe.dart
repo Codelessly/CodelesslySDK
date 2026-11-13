@@ -28,9 +28,13 @@ class SwipeActionsBox extends StatefulWidget {
     required this.child,
     this.offered,
     this.actionWidth = 80,
+    this.textDefault,
   });
 
   final SwipeActions model;
+
+  /// The default text style the list inherits, under the labels' styles.
+  final api.TextStyle? textDefault;
   final ValueChanged<SwipeAction> onAction;
 
   /// Whether an action is offered for this item (its `when`); null offers
@@ -151,7 +155,7 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox> with SingleTickerProv
                         child: AnimatedScale(
                           scale: scale,
                           duration: const Duration(milliseconds: 120),
-                          child: _ActionLabel(action: action),
+                          child: _ActionLabel(action: action, textDefault: widget.textDefault),
                         ),
                       ),
                     ),
@@ -199,8 +203,9 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox> with SingleTickerProv
 }
 
 class _ActionLabel extends StatelessWidget {
-  const _ActionLabel({required this.action});
+  const _ActionLabel({required this.action, this.textDefault});
   final SwipeAction action;
+  final api.TextStyle? textDefault;
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +213,7 @@ class _ActionLabel extends StatelessWidget {
     final icon = action.icon;
     final own = action.labelStyle;
     final style = const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)
-        .merge(own == api.TextStyle.empty ? null : textStyle(own))
+        .merge(own == api.TextStyle.empty ? null : textStyle(own, textDefault))
         .copyWith(color: color);
     final glyph = icon != null && icon['show'] != false
         ? SizedBox.square(dimension: action.iconSize, child: _Glyph(icon: icon, color: color))
