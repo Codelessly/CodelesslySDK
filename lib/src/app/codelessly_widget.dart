@@ -32,7 +32,7 @@ import '../runtime/actions/ui.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
 import '../runtime/actions/runner.dart' show ActionCancellation, CoreActions;
-import '../runtime/actions/context.dart' show PaywallPresentation;
+import '../features/commerce/commerce.dart' show PaywallPresentation;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';

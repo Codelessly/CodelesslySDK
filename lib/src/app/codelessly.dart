@@ -161,7 +161,7 @@ class Codelessly extends ChangeNotifier {
   /// each screen's own scope, so a value one screen sets the next one reads.
   /// Declared from the publish model's `variables` (and a publish's
   /// `app_variables` scope, [declareAppVariables]).
-  late final VariableScope appVariables = VariableScope(const [], parent: _featureScopes.build([_entitlements, ...features], _usage));
+  late final VariableScope appVariables = VariableScope(const [], parent: _featureScopes.build(features, _usage));
 
   /// The feature layers this instance runs: those of its action runner
   /// ([CoreActions.features]; `CodelesslyActions` installs the first-party
@@ -173,11 +173,6 @@ class Codelessly extends ChangeNotifier {
       };
 
   late final FeatureScopeHost _featureScopes = FeatureScopeHost(services);
-
-  static final CodelesslyFeature _entitlements = CodelesslyFeature(
-    name: 'commerce',
-    scopes: {'entitlements': (host, parent) => _EntitlementsScope(host.services, parent: parent)},
-  );
 
   /// The live data the whole app shares: `loadCloudData` actions with
   /// `scope: app` open one subscription here, on first use, and every
@@ -556,69 +551,6 @@ class Codelessly extends ChangeNotifier {
     // Lazy expression scopes must detach while the service notifiers live.
     unawaited(_ownedServices?.dispose());
     if (identical(_instance, this)) _instance = null;
-    super.dispose();
-  }
-}
-
-/// `entitlements` in expressions: the verified entitlements of the signed-in
-/// account (the app's paywalls', or the test store's while it's on).
-class _EntitlementsScope extends ValuesScope implements AccountBound {
-  _EntitlementsScope(CodelesslyServices services, {ValueScope? parent})
-      : _source = services.lookup<PaywallsSource>(),
-        super({'entitlements': const <String, Object?>{}}, parent) {
-    final s = _source;
-    if (s == null) return;
-    _runtime = s.paywalls;
-    _runtime?.entitlements.addListener(_entitlementsChanged);
-    s.paywallsChanged.addListener(_paywallsChanged);
-    _entitlementsChanged();
-  }
-
-  /// The paywalls whose entitlements this follows: the app's, or the test
-  /// store's while it's on ([Services.usesTestStore]).
-  PaywallRuntime? _runtime;
-
-  /// The paywalls switched between the test store and the app's: follow
-  /// the new one's entitlements, scoped to the current account.
-  void _paywallsChanged() {
-    final s = _source;
-    if (_disposed || s == null || identical(s.paywalls, _runtime)) return;
-    _runtime?.entitlements.removeListener(_entitlementsChanged);
-    _runtime = s.paywalls;
-    _runtime?.entitlements.addListener(_entitlementsChanged);
-    if (_accountInitialized) {
-      _accountInitialized = false;
-      accountChanged(_uid);
-    }
-    _entitlementsChanged();
-  }
-
-  final PaywallsSource? _source;
-  bool _disposed = false;
-  String? _uid;
-  bool _accountInitialized = false;
-
-  @override
-  void accountChanged(String? uid, {bool reset = false}) {
-    if (_disposed || (!reset && _accountInitialized && _uid == uid)) return;
-    _accountInitialized = true;
-    _uid = uid;
-    final runtime = _source?.paywalls;
-    runtime?.scopeToUser(uid, reset: reset);
-    if (runtime != null) unawaited(runtime.refreshEntitlements());
-  }
-
-  void _entitlementsChanged() {
-    if (!_disposed) {
-      set('entitlements', {for (final e in _runtime?.entitlements.value ?? <String>{}) e: true});
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposed = true;
-    _runtime?.entitlements.removeListener(_entitlementsChanged);
-    _source?.paywallsChanged.removeListener(_paywallsChanged);
     super.dispose();
   }
 }

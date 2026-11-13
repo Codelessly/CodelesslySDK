@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart' show NodeTree;
 import '../../render/source.dart';
-import '../../services/services.dart';
+import '../../services/scripts.dart';
 import '../contracts.dart' show ValueScope;
 import '../expressions/formula.dart';
 import '../expressions/paths.dart';
@@ -147,8 +147,7 @@ Future<void> _executeScriptAction(
   ScriptDef? script,
   List<ScriptDef> scripts,
 ) async {
-  final services = run.context.services;
-  final runner = services is Services ? services.scripts : const NoScriptRunner();
+  final runner = run.service<ScriptRunner>() ?? const NoScriptRunner();
   final result = script == null
       ? ScriptRunResult.failure('ReferenceError', 'There is no script "${a.script}".')
       : await runner.run(
