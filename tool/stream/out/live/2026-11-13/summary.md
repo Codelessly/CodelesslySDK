@@ -6,8 +6,8 @@
 | basketball@claude-sonnet-5-5.compact.scripts-off.r1 | 7626 | 1647 | - | - | 26477 | 3892 | 182.5 | 21 | 19 | 2 | 0 | drag, conditions | 2 | - | - | 0 | True | - | - | 1142 | 15094 | 0 |
 | flights@claude-haiku-5-5.compact.r1 | 7630 | 530 | 2024 | 2555 | 7906 | 2567 | 349.5 | 23 | 23 | 0 | 0 | - | 0 | - | - | 0 | True | 368 | 1374 | 315 | 0 | 7551 |
 | flights@claude-haiku-5-5.full.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
-| flights@claude-opus-5-5.compact.r1 | 7630 | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
-| flights@claude-opus-5-5.full.r1 | 34262 | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
+| flights@claude-opus-5-5.compact.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
+| flights@claude-opus-5-5.full.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
 | flights@claude-sonnet-5-5.compact.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
 | flights@claude-sonnet-5-5.full.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
 | form_builder@claude-haiku-5-5.compact.r1 | 7864 | 521 | 1765 | 1765 | 6720 | 2149 | 348.2 | 20 | 18 | 2 | 0 | - | 0 | unknown_prop /nodes/fieldsList/props/padding, unknown_prop /nodes/preview/props/padding, dangling_child /nodes/main/children/3, dangling_child /nodes/main/children/5 | - | 0 | False | - | - | 326 | 0 | 7785 |
