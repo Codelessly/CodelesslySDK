@@ -486,6 +486,7 @@ class DataListViewState extends State<DataListView> {
         model: swipe,
         offered: (action) => _r.holds(action.when, item: item, index: index),
         onAction: (action) => _onSwipe(action, index, item),
+        textDefault: _node.behaviors.defaultTextStyle,
         child: child,
       );
     }
@@ -887,13 +888,13 @@ class DataListViewState extends State<DataListView> {
               return SectionIndexBar(
                 keys: keys,
                 present: _presentKeys(sections),
-                style: style == api.TextStyle.empty ? null : textStyle(style),
+                style: style == api.TextStyle.empty ? null : textStyle(style, _node.behaviors.defaultTextStyle),
                 activeColor: model.indexActiveColor?.flutter,
                 mutedColor: model.indexMutedColor?.flutter,
                 width: model.indexWidth,
                 bubble: model.indexBubble,
                 bubbleColor: model.indexBubbleColor?.flutter,
-                bubbleStyle: model.indexBubbleStyle == api.TextStyle.empty ? null : textStyle(model.indexBubbleStyle),
+                bubbleStyle: model.indexBubbleStyle == api.TextStyle.empty ? null : textStyle(model.indexBubbleStyle, _node.behaviors.defaultTextStyle),
                 onSelected: (i) => jumpToKey(keys[i]),
               );
             }(),

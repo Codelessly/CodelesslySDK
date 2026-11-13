@@ -18,7 +18,14 @@ out of its findings.
   is an `animate` action (the migration rewrites it). `trackValues` loses `fine`.
 - **Flutter's reading:** a text node applies its `layout.padding` around its lines, as `Padding(child: Text)` (a
   hugging text grows by it; a fixed one insets its lines). Schema-2 documents are unchanged: the migration drops
-  the padding schema 2 ignored (step `text.padding`).
+  the padding schema 2 ignored (step `text.padding`). A text style without a `height` is laid out at the
+  font's own line height, as Flutter's `Text` (`kTextBase` has no height), under the nearest `defaultTextStyle`
+  (Flutter's `DefaultTextStyle`), which every text style a node draws merges over: a text's style and runs, a
+  widget's label and field styles, a painter's paragraphs, a typewriter's caret, a chart's tooltips, the nodes
+  an island shows again (`TextDefaultScope`) and a view's root (`RenderTree.rootSlot`). Schema-2 documents keep
+  1.33 through the migration (the 66 parity pages and the m05 sites render byte-identical PNGs).
+  **Breaking:** `RenderTree.naturalLineHeight` and `kTextBaseNatural` are removed; `textStyle(style, [inherited])`;
+  `Slot.textDefault`.
 - **Behaviour changes:** a track with no value is drawn at its minimum (the `drag_misc` parity golden moves
   three thumbs: `fader cap`, `knob`, `path track`); the other dropped fields no longer act. Everything else
   renders as before: the 66 parity pages, the m05 experiments' sites (byte-identical PNGs), the Relay site

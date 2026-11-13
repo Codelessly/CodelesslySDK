@@ -1,5 +1,6 @@
 // The API a widget recipe uses to build a node's render objects.
 import 'package:codelessly_api/core.dart' show Node, SizeFit;
+import 'package:codelessly_api/core.dart' as api show TextStyle;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -98,16 +99,34 @@ class NodeChild extends RenderObjectWidget {
   final Slot slot;
   final Object? instance;
 
-  NodeBox _box() => tree.obtain(id, slot, instance: instance);
+  /// Its box, inheriting the default text style of the node whose island it
+  /// is in ([TextDefaultScope]) unless [slot] gives one.
+  NodeBox _box(BuildContext context) =>
+      tree.obtain(id, slot.textDefault != null ? slot : slot.inheriting(TextDefaultScope.of(context)), instance: instance);
 
   @override
   IslandOwnerElement createElement() => IslandOwnerElement(this);
 
   @override
-  RenderBox createRenderObject(BuildContext context) => _RenderNodeChild().._hold(_box());
+  RenderBox createRenderObject(BuildContext context) => _RenderNodeChild().._hold(_box(context));
 
   @override
-  void updateRenderObject(BuildContext context, RenderBox renderObject) => (renderObject as _RenderNodeChild)._hold(_box());
+  void updateRenderObject(BuildContext context, RenderBox renderObject) => (renderObject as _RenderNodeChild)._hold(_box(context));
+}
+
+/// The default text style of the node an island belongs to (its
+/// `defaultTextStyle`, inherited: Flutter's `DefaultTextStyle`), for the
+/// nodes the island shows again ([NodeChild]: a list's items, a button's
+/// label).
+class TextDefaultScope extends InheritedWidget {
+  const TextDefaultScope({super.key, required this.style, required super.child});
+
+  final api.TextStyle? style;
+
+  static api.TextStyle? of(BuildContext context) => context.dependOnInheritedWidgetOfExactType<TextDefaultScope>()?.style;
+
+  @override
+  bool updateShouldNotify(TextDefaultScope oldWidget) => style != oldWidget.style;
 }
 
 /// Holds a node's box inside an island. The box belongs to the tree: it's

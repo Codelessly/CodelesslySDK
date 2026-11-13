@@ -61,7 +61,7 @@ enum SlotKind {
 
 @immutable
 class Slot {
-  const Slot(this.kind, [this.parent]);
+  const Slot(this.kind, [this.parent, this.textDefault]);
   const Slot.root() : this(SlotKind.root);
 
   final SlotKind kind;
@@ -70,11 +70,19 @@ class Slot {
   /// since their wrappers depend on it).
   final Node? parent;
 
-  @override
-  bool operator ==(Object other) => other is Slot && other.kind == kind && identical(other.parent, parent);
+  /// The default text style the child inherits (the nearest
+  /// `defaultTextStyle` above it: Flutter's `DefaultTextStyle`); null: none.
+  final api.TextStyle? textDefault;
+
+  /// This slot with [style] as the inherited default text style.
+  Slot inheriting(api.TextStyle? style) => style == textDefault ? this : Slot(kind, parent, style);
 
   @override
-  int get hashCode => Object.hash(kind, identityHashCode(parent));
+  bool operator ==(Object other) =>
+      other is Slot && other.kind == kind && identical(other.parent, parent) && other.textDefault == textDefault;
+
+  @override
+  int get hashCode => Object.hash(kind, identityHashCode(parent), textDefault);
 }
 
 /// A running app's interaction layers: what wires a node's reactions (taps,
@@ -197,21 +205,6 @@ class RenderTree {
   /// of a declared one. The core layout types (canvas, stack, box, row,
   /// column, text, icon, spacer, variance) are always the tree's own.
   final Map<String, WidgetRecipe> recipes;
-
-  /// Whether text without a line height takes its font's own, as Flutter's
-  /// does, rather than the SDK's 1.33 (the project's
-  /// `ThemeTokens.naturalLineHeight`). A run's own height, or its
-  /// `naturalHeight`, still wins.
-  bool get naturalLineHeight => _naturalLineHeight;
-  bool _naturalLineHeight = false;
-  set naturalLineHeight(bool value) {
-    if (value == _naturalLineHeight) return;
-    _naturalLineHeight = value;
-    for (final box in _boxes.values.toList()) {
-      box._applied = null;
-      box._apply();
-    }
-  }
 
   // Font loading defers RenderParagraph's relayout to the next frame. Flutter
   // forbids detaching it before that callback drains. Source edits normally
@@ -806,6 +799,19 @@ class RenderTree {
   /// Every box of the tree.
   Iterable<NodeBox> get boxes => _boxes.values;
 
+  /// The slot of a node shown at the top of a view ([NodeView], a drag's
+  /// feedback): it inherits the nearest `defaultTextStyle` above the node in
+  /// the source, as it does where it sits (null for a top-level node).
+  Slot rootSlot(String id) {
+    var at = source.parentOf(id);
+    for (var i = 0; at != null && i < 256; i++) {
+      final style = source.node(at)?.behaviors.defaultTextStyle;
+      if (style != null) return const Slot.root().inheriting(style);
+      at = source.parentOf(at);
+    }
+    return const Slot.root();
+  }
+
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
     _listenForFonts();
     // A call renders as its definition's root, in its instance.
@@ -1034,7 +1040,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       return;
     }
     final bound = tree.resolveBound(id, instance: instance);
-    final n = bound?.node;
+    final n = _withTextDefault(bound?.node);
     if (bound != null && n != null && bound.collapsed == _collapsed) {
       if (n == old) {
         _watchBindings(bound.watch);
@@ -1050,6 +1056,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     _apply(given: (bound,));
     _noteDataChange();
+  }
+
+  /// [n] carrying the default text style it inherits (Flutter's
+  /// DefaultTextStyle: the nearest `defaultTextStyle` above it, its own
+  /// replacing it), so every text style it draws (its recipes' too) merges
+  /// over it.
+  Node? _withTextDefault(Node? n) {
+    final inherited = _slot.textDefault;
+    if (n == null || inherited == null || n.behaviors.defaultTextStyle != null) return n;
+    return n.copyWith(behaviors: n.behaviors.copyWith(defaultTextStyle: inherited));
   }
 
   /// Applies [n] when it is a text that differs from [old] only in its
@@ -1261,6 +1277,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   @override
   RenderBox island(String key, WidgetBuilder build) {
     _islandsUsed.add(key);
+    // The nodes it shows again (NodeChild) inherit this node's default text
+    // style.
+    if (_node?.behaviors.defaultTextStyle case final api.TextStyle style) {
+      final inner = build;
+      build = (context) => TextDefaultScope(style: style, child: inner(context));
+    }
     final existing = _islands[key];
     if (existing != null && !existing.disposed) {
       existing.builder = build;
@@ -1294,7 +1316,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
     final bound = given != null ? given.$1 : tree.resolveBound(id, instance: instance);
-    final resolved = bound?.node;
+    final resolved = _withTextDefault(bound?.node);
     // Bindings give a new node each time: the same one keeps its identity,
     // which the children's slots compare (else re-applying a row whose
     // structure depends on its children re-applies them, and so on).
@@ -2168,7 +2190,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     if (n.behaviors.typewriter case final api.Typewriter tw) {
       chain.add(_obtain<RenderTypewriter>('typewriter', RenderTypewriter.new)
-        ..configure(tw, plainText(span), animates: tree.animates));
+        ..configure(tw, plainText(span), animates: tree.animates, textDefault: n.behaviors.defaultTextStyle));
     }
     chain.add(paragraph);
   }
@@ -2179,10 +2201,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// over the text's base style.
   TextSpan _textSpan(Node n) {
     final text = n.prop(TextProps.text);
-    var base = n.prop(TextProps.style);
-    if (tree.naturalLineHeight && base.height == null && base.naturalHeight == null) {
-      base = base.merge(const api.TextStyle(naturalHeight: true));
-    }
+    final inherited = n.behaviors.defaultTextStyle;
+    final base = inherited == null ? n.prop(TextProps.style) : inherited.merge(n.prop(TextProps.style));
     final runs = n.prop(TextProps.runs);
     if (runs.isEmpty) return TextSpan(text: text, style: textStyle(base));
     // Runs style ranges; they do not replace the unstyled characters.
@@ -2388,6 +2408,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   void _syncChildren(_Container container, List<String> ids, Slot childSlot,
       {Object? instance, List<Object?>? instances}) {
+    childSlot = childSlot.inheriting(_node?.behaviors.defaultTextStyle);
     if (!identical(_container, container) && _container != null) _releaseContainerChildren();
     _container = container;
     RenderBox? after;

@@ -38,7 +38,7 @@ void customPaintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
   final values = b.tree.bindings?.valuesFor(b.source, b.id, b.instance);
   chain.add(
     b.obtain<RenderCustomPaintLayer>('customPaint', RenderCustomPaintLayer.new)
-      ..configure(paint, values is ExpressionValues ? values : null),
+      ..configure(paint, values is ExpressionValues ? values : null, textDefault: n.behaviors.defaultTextStyle),
   );
 }
 
@@ -153,6 +153,7 @@ typedef _F<T> = T Function(_Scope s);
 class _Compiler {
   _Compiler(this.values);
   final ExpressionValues? values;
+  api.TextStyle? textDefault;
   Set<String> names = {};
 
   void _read(String source) {
@@ -414,7 +415,7 @@ class _Compiler {
     final content = text(t.text);
     final at = offset(t.offset);
     final maxWidth = optionalNumber(t.maxWidth);
-    final style = textStyle(t.style);
+    final style = textStyle(t.style, textDefault);
     final base = t.style.color == null && t.style.foreground == null ? style.copyWith(color: const Color(0xFF000000)) : style;
     final align = textAlign(t.textAlign);
     return _ParagraphOp(info, (s, bounds) {
@@ -853,6 +854,7 @@ class _Segment {
 class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
   api.CustomPaint? _paint;
   ExpressionValues? _values;
+  api.TextStyle? _textDefault;
   List<_Segment> _painter = const [], _foreground = const [];
   final Map<String, Listenable> _watched = {};
   Size? _recordedSize;
@@ -868,12 +870,15 @@ class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
 
   /// Draws [paint], reading its expressions from [values] (null: only its
   /// literals draw).
-  void configure(api.CustomPaint paint, ExpressionValues? values) {
-    if (paint == _paint && values == _values) return;
+  /// [textDefault]: the default text style the node inherits (its
+  /// `defaultTextStyle`), under the paragraphs' styles.
+  void configure(api.CustomPaint paint, ExpressionValues? values, {api.TextStyle? textDefault}) {
+    if (paint == _paint && values == _values && textDefault == _textDefault) return;
     _paint = paint;
     _values = values;
+    _textDefault = textDefault;
     _unwatch();
-    final compiler = _Compiler(values);
+    final compiler = _Compiler(values)..textDefault = textDefault;
     List<_Segment> compile(List<api.DrawOp> ops) {
       final out = <_Segment>[];
       for (final o in ops) {

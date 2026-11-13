@@ -69,9 +69,11 @@ int differingPixels(List<int> a, List<int> b, {int tolerance = 1}) {
 }
 
 /// A document with one box [id] of [w] × [h] carrying [customPaint] (and
-/// [extra] node keys), plus [more] nodes.
+/// [extra] node keys), plus [more] nodes. Schema 3: its text is Flutter's
+/// (the font's own line height), as the reference painters draw it.
 LayoutDocument paintDoc(Json customPaint, {double w = 60, double h = 60, String id = 'b', Json extra = const {}, Map<String, Json> more = const {}}) =>
     LayoutDocument.fromJson({
+      'schema': 3,
       'roots': [id],
       'nodes': {
         id: {'type': 'box', 'layout': {'width': w, 'height': h}, 'customPaint': customPaint, ...extra},

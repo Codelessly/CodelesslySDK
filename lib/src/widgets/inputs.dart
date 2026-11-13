@@ -149,12 +149,13 @@ void _segmentedButton(NodeBuilder b, Node n, List<RenderBox> chain) {
 // --- shared -------------------------------------------------------------------
 
 /// [s] as Flutter's style, or null when unset (the theme's).
-TextStyle? _styleOrNull(api.TextStyle s) => s.isEmpty ? null : textStyle(s);
+TextStyle? _styleOrNull(api.TextStyle s, [api.TextStyle? inherited]) => s.isEmpty ? null : textStyle(s, inherited);
 
 /// [text] in [style], as a decoration's texts are built (a span in a
 /// `Text.rich`).
-Widget _text(String text, api.TextStyle style, {TextAlign? textAlign, int? maxLines, TextOverflow? overflow}) =>
-    Text.rich(TextSpan(children: [TextSpan(text: text, style: _styleOrNull(style))]),
+Widget _text(String text, api.TextStyle style,
+        {TextAlign? textAlign, int? maxLines, TextOverflow? overflow, api.TextStyle? textDefault}) =>
+    Text.rich(TextSpan(children: [TextSpan(text: text, style: _styleOrNull(style, textDefault))]),
         textAlign: textAlign, maxLines: maxLines, overflow: overflow);
 
 /// An input's icon: its glyph (or image) in a square of its size.
@@ -281,7 +282,7 @@ Widget _affix(Widget? icon, Widget text, {required bool before}) {
 /// when the decoration sets none. [focused] and [error] pick the border a
 /// padding that includes it grows by.
 InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
-    {bool focused = false, bool? error, void Function(bool prefix)? onIconTap}) {
+    {bool focused = false, bool? error, void Function(bool prefix)? onIconTap, api.TextStyle? textDefault}) {
   Widget? affixIcon(api.InputIcon? icon, api.EdgeInsets? iconPadding) {
     var glyph = _icon(icon);
     if (glyph == null) return null;
@@ -303,8 +304,8 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
   // Units that show before anything is typed go in the icon slots, which
   // Flutter always shows.
   final always = d.affixesAlwaysVisible;
-  final prefixWidget = prefix == null || prefix.isEmpty ? null : _text(prefix, d.prefixStyle);
-  final suffixWidget = suffix == null || suffix.isEmpty ? null : _text(suffix, d.suffixStyle);
+  final prefixWidget = prefix == null || prefix.isEmpty ? null : _text(prefix, d.prefixStyle, textDefault: textDefault);
+  final suffixWidget = suffix == null || suffix.isEmpty ? null : _text(suffix, d.suffixStyle, textDefault: textDefault);
   final prefixIcon = affixIcon(d.prefixIcon, d.prefixIconPadding);
   final suffixIcon = affixIcon(d.suffixIcon, d.suffixIconPadding);
   // Unset constraints keep Flutter's 48 px icon slot, unless the icon has a
@@ -317,20 +318,20 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
               : null;
   return InputDecoration(
     icon: _icon(d.icon),
-    label: label == null || label.isEmpty ? null : _text(label, d.labelStyle),
-    floatingLabelStyle: _styleOrNull(d.floatingLabelStyle),
+    label: label == null || label.isEmpty ? null : _text(label, d.labelStyle, textDefault: textDefault),
+    floatingLabelStyle: _styleOrNull(d.floatingLabelStyle, textDefault),
     helperText: previewText(d.helperText),
-    helperStyle: _styleOrNull(d.helperStyle),
+    helperStyle: _styleOrNull(d.helperStyle, textDefault),
     helperMaxLines: d.helperMaxLines,
     hintText: previewText(d.hintText),
-    hintStyle: _styleOrNull(d.hintStyle),
+    hintStyle: _styleOrNull(d.hintStyle, textDefault),
     hintMaxLines: d.hintMaxLines,
     // In error without a message (an error text bound to `true`): the
     // error border, nothing under the field.
     error: errorText == api.kErrorWithoutMessage
         ? const SizedBox.shrink()
-        : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle)),
-    errorStyle: _styleOrNull(d.errorStyle),
+        : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle, textDefault: textDefault)),
+    errorStyle: _styleOrNull(d.errorStyle, textDefault),
     errorMaxLines: d.errorMaxLines,
     floatingLabelBehavior: switch (d.floatingLabelBehavior) {
       null => null,
@@ -348,14 +349,14 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
     prefixIconConstraints: iconConstraints(d.prefixIconConstraints, d.prefixIconPadding, prefixWidget, prefixIcon),
     prefix: always ? null : prefixWidget,
-    prefixStyle: _styleOrNull(d.prefixStyle),
+    prefixStyle: _styleOrNull(d.prefixStyle, textDefault),
     suffixIcon: always && suffixWidget != null ? _affix(suffixIcon, suffixWidget, before: false) : suffixIcon,
     suffixIconConstraints: iconConstraints(d.suffixIconConstraints, d.suffixIconPadding, suffixWidget, suffixIcon),
     suffix: always ? null : suffixWidget,
-    suffixStyle: _styleOrNull(d.suffixStyle),
-    counter: counter == null || counter.isEmpty ? null : _text(counter, d.counterStyle),
+    suffixStyle: _styleOrNull(d.suffixStyle, textDefault),
+    counter: counter == null || counter.isEmpty ? null : _text(counter, d.counterStyle, textDefault: textDefault),
     counterText: counter != null && counter.isEmpty ? '' : null,
-    counterStyle: _styleOrNull(d.counterStyle),
+    counterStyle: _styleOrNull(d.counterStyle, textDefault),
     filled: d.filled,
     fillColor: _color(d.fillColor),
     focusColor: _color(d.focusColor),
@@ -456,7 +457,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
   static (int, int, TextStyle?)? _highlight(Node n) {
     final start = n.prop(TextFieldProps.highlightStart), end = n.prop(TextFieldProps.highlightEnd);
     if (start == null || end == null || end <= start) return null;
-    return (start, end, _styleOrNull(n.prop(TextFieldProps.highlightStyle)));
+    return (start, end, _styleOrNull(n.prop(TextFieldProps.highlightStyle), n.behaviors.defaultTextStyle));
   }
 
   @override
@@ -543,12 +544,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final expands = fillsHeight && !oneLine;
     final (maxLines, minLines) =
         textFieldLines(maxLines: maxLinesProp == 0 ? null : maxLinesProp, minLines: minLinesProp, expands: expands);
-    final decoration = inputDecoration(d, n.layout.padding, focused: focusNode.hasFocus, onIconTap: (prefix) {
+    final decoration = inputDecoration(d, n.layout.padding, textDefault: n.behaviors.defaultTextStyle, focused: focusNode.hasFocus, onIconTap: (prefix) {
       final b = _builderOf(context);
       if (b != null) fireTrigger(b, prefix ? iconTapPrefix : iconTapSuffix);
     });
     final maxLength = n.prop(TextFieldProps.maxLength);
-    final style = _styleOrNull(n.prop(TextFieldProps.style));
+    final style = _styleOrNull(n.prop(TextFieldProps.style), n.behaviors.defaultTextStyle);
     final cursorRadius = n.prop(TextFieldProps.cursorRadius);
 
     // Where tickers are off (a design canvas) the decorator can't animate a
@@ -1244,8 +1245,8 @@ class _DropdownIslandState extends State<_DropdownIsland> {
     final matches = [for (final item in items) if (api.jsonEquality.equals(item, selected)) item];
     final value = matches.length == 1 ? matches.single : null;
     final itemAlignment = n.prop(DropdownProps.itemAlignment).flutter;
-    final itemStyle = _styleOrNull(n.prop(DropdownProps.style));
-    final selectedStyle = _styleOrNull(n.prop(DropdownProps.selectedItemStyle));
+    final itemStyle = _styleOrNull(n.prop(DropdownProps.style), n.behaviors.defaultTextStyle);
+    final selectedStyle = _styleOrNull(n.prop(DropdownProps.selectedItemStyle), n.behaviors.defaultTextStyle);
     final hint = n.prop(DropdownProps.hint);
     final iconSize = n.prop(DropdownProps.iconSize);
     final enabled = n.prop(DropdownProps.enabled);
@@ -1259,7 +1260,7 @@ class _DropdownIslandState extends State<_DropdownIsland> {
       alignment: n.prop(DropdownProps.alignment).flutter,
       hint: hint == null || hint.isEmpty
           ? null
-          : Text(hint, style: _styleOrNull(n.prop(DropdownProps.hintStyle)), overflow: TextOverflow.ellipsis),
+          : Text(hint, style: _styleOrNull(n.prop(DropdownProps.hintStyle), n.behaviors.defaultTextStyle), overflow: TextOverflow.ellipsis),
       iconDisabledColor: _color(n.prop(DropdownProps.iconDisabledColor)),
       iconEnabledColor: _color(n.prop(DropdownProps.iconEnabledColor)),
       iconSize: iconSize,
@@ -1405,8 +1406,8 @@ class _AnchoredMenuState extends State<_AnchoredMenu> {
     final shadows = s['shadows'] != null
         ? [for (final e in api.Effect.listFromJson(s['shadows'])) if (e.visible && e.type == api.EffectType.dropShadow) boxShadow(e)]
         : kElevationToShadow[n.prop(DropdownProps.elevation).clamp(0, 24)] ?? kElevationToShadow[8]!;
-    final itemStyle = _styleOrNull(n.prop(DropdownProps.style)) ?? const TextStyle();
-    final selectedStyle = itemStyle.merge(_styleOrNull(api.TextStyle.fromJson(s['selectedTextStyle'])));
+    final itemStyle = _styleOrNull(n.prop(DropdownProps.style), n.behaviors.defaultTextStyle) ?? const TextStyle();
+    final selectedStyle = itemStyle.merge(_styleOrNull(api.TextStyle.fromJson(s['selectedTextStyle']), n.behaviors.defaultTextStyle));
     final hover = _hex('hoverItemColor') ?? _color(n.prop(DropdownProps.hoverColor));
     final itemPadding = _insets('itemPadding') ?? const EdgeInsets.symmetric(horizontal: 14);
     final showCheck = s['showCheck'] == true;
@@ -1519,7 +1520,7 @@ Widget _nodePickerTheme(BuildContext context, Widget? child, Node n, {bool use24
   final text = c('textColor'), muted = c('mutedColor'), divider = c('dividerColor');
   final radius = d('radius'), dayRadius = d('dayRadius');
   final family = j['fontFamily'] is String ? j['fontFamily'] as String : null;
-  final headline = j['headlineStyle'] == null ? null : textStyle(api.TextStyle.fromJson(j['headlineStyle']));
+  final headline = j['headlineStyle'] == null ? null : textStyle(api.TextStyle.fromJson(j['headlineStyle']), n.behaviors.defaultTextStyle);
   TextStyle? font([double? size, Color? color, FontWeight? weight]) =>
       family == null && color == null ? null : TextStyle(fontFamily: family, fontSize: size, color: color, fontWeight: weight);
   final shape = radius == null ? null : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
@@ -1606,9 +1607,9 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
     if (!d.hintStyle.isEmpty) style = d.hintStyle;
   }
   if (d.isEmpty) {
-    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style)));
+    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style, n.behaviors.defaultTextStyle)));
   }
-  final decoration = inputDecoration(d, n.layout.padding, error: d.errorText != null && d.errorText!.isNotEmpty);
+  final decoration = inputDecoration(d, n.layout.padding, textDefault: n.behaviors.defaultTextStyle, error: d.errorText != null && d.errorText!.isNotEmpty);
   return MouseRegion(
     cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
     child: GestureDetector(
@@ -1621,7 +1622,7 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
         // unbounded (in a column), where constraints don't carry it.
         height: n.layout.height.fit == SizeFit.fixed ? n.layout.height.value : null,
         fills: n.layout.height.fit == SizeFit.fill,
-        child: Text(text, style: _styleOrNull(style), maxLines: 1, overflow: TextOverflow.ellipsis),
+        child: Text(text, style: _styleOrNull(style, n.behaviors.defaultTextStyle), maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     ),
   );
@@ -1844,7 +1845,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     final hint = n.prop(DateTimeInputProps.hint);
     final icon = _icon(n.prop(DateTimeInputProps.icon));
     var decoration = styled
-        ? _withHintAndIcon(inputDecoration(d, n.layout.padding, focused: false), hint, icon)
+        ? _withHintAndIcon(inputDecoration(d, n.layout.padding, textDefault: n.behaviors.defaultTextStyle, focused: false), hint, icon)
         : InputDecoration(
             labelText: label,
             hintText: label == null || label.isEmpty
@@ -1861,7 +1862,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     // A fixed height is the field's, as a text field's, for a field that
     // draws its own decoration (older fields kept their natural height).
     final fixedHeight = vFit == SizeFit.fixed && styled ? n.layout.height.value : null;
-    final style = _styleOrNull(n.prop(DateTimeInputProps.style));
+    final style = _styleOrNull(n.prop(DateTimeInputProps.style), n.behaviors.defaultTextStyle);
     return InkWell(
       onTap: !opens || !enabled || !widget.interactive || first.isAfter(last)
           ? null
@@ -1928,7 +1929,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         child: Text(empty ? hint : display,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style))),
+            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style), n.behaviors.defaultTextStyle)),
       ),
       _icon(n.prop(DateTimeInputProps.icon)) ??
           Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
@@ -2011,7 +2012,7 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
       selectedIcon: selectedIcon,
       direction: n.prop(SegmentedButtonProps.direction) == api.Axis.vertical ? Axis.vertical : Axis.horizontal,
       style: SegmentedButton.styleFrom(
-        textStyle: _styleOrNull(n.prop(SegmentedButtonProps.textStyle)),
+        textStyle: _styleOrNull(n.prop(SegmentedButtonProps.textStyle), n.behaviors.defaultTextStyle),
         backgroundColor: _color(n.prop(SegmentedButtonProps.backgroundColor)),
         selectedBackgroundColor: _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)),
         foregroundColor: _color(n.prop(SegmentedButtonProps.foregroundColor)),
@@ -2048,7 +2049,7 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final radius = n.prop(SegmentedButtonProps.borderRadius)?.flutter ?? BorderRadius.circular(4);
     final side = n.prop(SegmentedButtonProps.side);
     final enabled = n.prop(SegmentedButtonProps.enabled);
-    final base = _styleOrNull(n.prop(SegmentedButtonProps.textStyle)) ?? const TextStyle(fontSize: 13, fontWeight: FontWeight.w600);
+    final base = _styleOrNull(n.prop(SegmentedButtonProps.textStyle), n.behaviors.defaultTextStyle) ?? const TextStyle(fontSize: 13, fontWeight: FontWeight.w600);
     final fg = _color(n.prop(SegmentedButtonProps.foregroundColor)) ?? const Color(0xFF6B7A8D);
     final selectedFg = _color(n.prop(SegmentedButtonProps.selectedForegroundColor)) ?? const Color(0xFF0F1B2D);
     final selectedBg = _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)) ?? Colors.white;
@@ -2219,6 +2220,7 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       placeholderStyle: placeholderStyle.isEmpty
           ? null
           : _signatureStyle(placeholderStyle,
+              textDefault: n.behaviors.defaultTextStyle,
               color: n.prop(SignatureProps.placeholderColor).flutter,
               fontSize: placeholderFontSize,
               fontWeight: FontWeight.values[((n.prop(SignatureProps.placeholderFontWeight) ~/ 100) - 1).clamp(0, 8)],
@@ -2246,7 +2248,7 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       leadingMark: n.prop(SignatureProps.signMarkPlacement) == api.SignMarkPlacement.leading,
       markGap: n.prop(SignatureProps.signMarkGap),
       caption: n.prop(SignatureProps.caption),
-      captionStyle: _signatureStyle(captionStyle, color: lineColor, fontSize: 11),
+      captionStyle: _signatureStyle(captionStyle, color: lineColor, fontSize: 11, textDefault: n.behaviors.defaultTextStyle),
       captionGap: n.prop(SignatureProps.captionGap),
       captionAlign: textAlign(n.prop(SignatureProps.captionAlign)),
       textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,
@@ -2309,8 +2311,8 @@ class _SignatureIslandState extends State<_SignatureIsland> {
 
 /// [style] over a signature pad's fallbacks for what it leaves unset.
 TextStyle _signatureStyle(api.TextStyle style,
-    {required Color color, required double fontSize, FontWeight? fontWeight, double? letterSpacing}) {
-  final converted = textStyle(style);
+    {required Color color, required double fontSize, FontWeight? fontWeight, double? letterSpacing, api.TextStyle? textDefault}) {
+  final converted = textStyle(style, textDefault);
   return converted.copyWith(
     color: style.color == null && style.foreground == null ? color : converted.color,
     fontSize: style.fontSize ?? fontSize,
