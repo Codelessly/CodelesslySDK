@@ -23,7 +23,8 @@ void main() {
       final storage = (app.services as Services).storage as ChangeNotifier;
       app.dispose();
       await Future<void>.delayed(Duration.zero);
-      expect(() => storage.addListener(() {}), throwsFlutterError);
+      // A FlutterError up to Flutter 3.47; a StateError once ChangeNotifier moved to package:listen.
+    expect(() => storage.addListener(() {}), throwsA(anyOf(isFlutterError, isStateError)));
     }
   });
   test('borrowed services remain usable; their owner releases sound exactly once', () async {
