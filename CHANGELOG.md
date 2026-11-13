@@ -1,5 +1,25 @@
 ## Unreleased
 
+**Streaming generative UI, hardened against real model output**
+
+- `UiSession`: a batch or stream applied to a UI that already has roots cannot replace them or add a canvas
+  (`protectRoots`, on: `start_over`), so a retry patches the UI; the end of a stream adds `renderDiagnostics`
+  (`empty_button`, `low_contrast`, and with `glyphCoverage`, `missing_glyph`) to the result, and
+  `layoutDiagnostics()` reports nodes with content laid out with no size (`no_size`); `lastStreamEnd` (repairs
+  of malformed JSON, ops recovered); `docs()` answers `ui_docs`; `values` (the views' variable values). A canvas's
+  body with a fill (the card) shows as soon as it arrives instead of waiting for its first child: first paint of
+  the recorded live cards 0.4 to 1.0 s earlier.
+- `CodelesslyView(services:)`: with a `ScriptRunner` among the services, the session's own scripts run
+  (`runScript`, where the profile allows them: `TrustProfile.agentApps`).
+- Replay command (`tool/stream`): ops recovered from malformed input, JSON repairs, first text, render
+  diagnostics, scripts, and "works when used" (a scripted interaction per brief, `tool/stream/interactions`;
+  scripts run in QuickJS); `tool/stream/live_summary.py`. The three live recordings re-replayed
+  (`tool/stream/out/live`).
+- `examples/stream_chat`: the compact prompt (the generated base set, compact tools, `ui_docs`), lookups answered
+  within the turn, the retry protocol with a cap, forced tool use where the model allows it, six app briefs,
+  `tool/record_all.sh` (the live matrix), `tool/use_local_api.sh` and `tool/check.sh` (CI: the example builds
+  against the sibling `codelessly_api`).
+
 **Authoring fixes from the third direct-authoring experiment (cycle 3)**
 
 - Named colors and text styles resolve against the published theme as the screen shows it (its media rules at

@@ -108,7 +108,8 @@ Offset? _find(WidgetTester tester, UiSession session, Map<String, Object?> f) {
   if (f['text'] case final String pattern) {
     final re = RegExp(pattern, caseSensitive: false);
     final hits = <RenderParagraph>[];
-    _visit(tester, (o) {
+    // Only the UI's own text (inside a node box), not the chat around it.
+    _visitInUi(tester, (o) {
       if (o is RenderParagraph && o.attached && o.hasSize && re.hasMatch(o.text.toPlainText())) hits.add(o);
     });
     final n = (f['index'] as num? ?? 0).toInt();
@@ -149,10 +150,23 @@ String _encode(Object? v) {
 
 Iterable<String> _texts(WidgetTester tester) {
   final out = <String>[];
-  _visit(tester, (o) {
+  _visitInUi(tester, (o) {
     if (o is RenderParagraph && o.attached) out.add(o.text.toPlainText());
   });
   return out;
+}
+
+/// [f] on every render object inside a node box.
+void _visitInUi(WidgetTester tester, void Function(RenderObject) f) {
+  void visit(RenderObject o, bool inUi) {
+    final inside = inUi || o is NodeBox;
+    if (inside) f(o);
+    o.visitChildren((c) => visit(c, inside));
+  }
+
+  for (final v in tester.binding.renderViews) {
+    visit(v, false);
+  }
 }
 
 void _visit(WidgetTester tester, void Function(RenderObject) f) {

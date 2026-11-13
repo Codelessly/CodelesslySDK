@@ -1,0 +1,108 @@
+{
+ "stream": "flights@claude-haiku-5-5.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 539,
+ "timeToFirstPaintMs": 976,
+ "timeToFirstTextMs": 976,
+ "timeToFirstSectionMs": 976,
+ "timeToCompleteMs": 3148,
+ "outputTokens": 800,
+ "tokensEstimated": false,
+ "chars": 1443,
+ "deltas": 104,
+ "opsApplied": 3,
+ "opsRejected": 4,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "missing_glyph title"
+ ],
+ "finalDiagnostics": [
+  "start_over /ops/0",
+  "start_over /ops/1",
+  "unknown_id /ops/2/scope",
+  "would_orphan /nodes/card/children",
+  "missing_glyph /nodes/title/props/text"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "13:45|easyJet|option 2"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "confirm"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 23,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 7,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "start_over",
+   "path": "/ops/0",
+   "message": "This roots op replaces \"card\", but the UI already exists: root \"card\" with 21 nodes (rev 1). Do not start over: fix the existing document by patching it (patch fields, set missing nodes under their existing parents with the same ids, remove what is wrong)."
+  },
+  {
+   "op": 1,
+   "code": "start_over",
+   "path": "/ops/1",
+   "message": "This set creates a new canvas \"flights\", but the UI already exists: root \"card\" with 21 nodes (rev 1). Do not start over: fix the existing document by patching it (patch fields, set missing nodes under their existing parents with the same ids, remove what is wrong)."
+  },
+  {
+   "op": 2,
+   "code": "unknown_id",
+   "path": "/ops/2/scope",
+   "message": "Variables are kept per canvas id or \"page_variables\"; \"flights\" is neither."
+  },
+  {
+   "op": 3,
+   "code": "would_orphan",
+   "path": "/nodes/card/children",
+   "message": "Replacing \"card\" drops its children \"wrap\", which exist: they would be left under no parent. To change \"card\", patch it ({\"op\": \"patch\", \"id\": \"card\", \"patch\": {...}}: it keeps its children); to replace it, keep them in \"children\" (or move or remove them first).",
+   "nodeId": "card",
+   "expected": [
+    "wrap"
+   ]
+  }
+ ],
+ "nodes": 23,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 3,
+  "max": 3
+ },
+ "frames": 60,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 165,
+ "pumpMsMedian": 0.148,
+ "renderExceptions": [],
+ "warnings": 4
+}

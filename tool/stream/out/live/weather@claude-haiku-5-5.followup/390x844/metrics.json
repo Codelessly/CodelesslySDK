@@ -1,0 +1,50 @@
+{
+ "stream": "weather@claude-haiku-5-5.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 834,
+ "timeToFirstPaintMs": 1464,
+ "timeToFirstTextMs": 1464,
+ "timeToFirstSectionMs": 1464,
+ "timeToCompleteMs": 1692,
+ "outputTokens": 217,
+ "tokensEstimated": false,
+ "chars": 227,
+ "deltas": 18,
+ "opsApplied": 2,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "empty_button alertBtn"
+ ],
+ "finalDiagnostics": [
+  "empty_button /nodes/alertBtn"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 50,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [],
+ "nodes": 49,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 10,
+  "p90": 10,
+  "max": 10
+ },
+ "frames": 38,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 57,
+ "pumpMsMedian": 0.192,
+ "renderExceptions": [],
+ "warnings": 1
+}

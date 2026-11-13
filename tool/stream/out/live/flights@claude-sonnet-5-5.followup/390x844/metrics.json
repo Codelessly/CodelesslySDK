@@ -1,0 +1,70 @@
+{
+ "stream": "flights@claude-sonnet-5-5.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 2323,
+ "timeToFirstPaintMs": 3261,
+ "timeToFirstTextMs": 3261,
+ "timeToFirstSectionMs": 3261,
+ "timeToCompleteMs": 5978,
+ "outputTokens": 975,
+ "tokensEstimated": false,
+ "chars": 1661,
+ "deltas": 112,
+ "opsApplied": 6,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_field /nodes/confirm/props/style/shape/radius",
+  "dangling_child /nodes/footer/children/1"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 30,
+   "rejected": 4
+  },
+  {
+   "stream": "retry",
+   "applied": 3,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 7,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "unknown_field",
+   "path": "/nodes/confirm/props/style/shape/radius",
+   "message": "ShapeBorder has no \"radius\". It takes: type, borderRadius, side.",
+   "nodeId": "confirm",
+   "suggestion": "borderRadius"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/footer/children/1",
+   "message": "Child \"confirm\" of \"footer\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "footer"
+  }
+ ],
+ "nodes": 31,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 4,
+  "p90": 4,
+  "max": 4
+ },
+ "frames": 103,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 216,
+ "pumpMsMedian": 0.142,
+ "renderExceptions": [],
+ "warnings": 0
+}
