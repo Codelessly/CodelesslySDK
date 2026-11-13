@@ -1,0 +1,102 @@
+{
+ "schema": 2,
+ "id": "Metric",
+ "roots": [
+  "m"
+ ],
+ "widget": {
+  "type": "Metric",
+  "doc": "A figure and what it measures.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "42%"
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "less time spent coordinating"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    140
+   ]
+  }
+ ],
+ "nodes": {
+  "m": {
+   "type": "column",
+   "children": [
+    "mValue",
+    "mLabel"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 120
+    },
+    "padding": [
+     0,
+     20,
+     0,
+     20
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "mValue": {
+   "type": "text",
+   "props": {
+    "text": "${props.value}",
+    "style": "display"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 64
+    }
+   }
+  },
+  "mLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "body"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  }
+ }
+}

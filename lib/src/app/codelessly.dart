@@ -19,6 +19,7 @@ import '../services/services.dart';
 import 'automations.dart';
 import 'config.dart';
 import 'fonts.dart';
+import 'hosted_plugins.dart';
 import 'loader.dart';
 import 'managed_components.dart';
 import 'navigation.dart';
@@ -77,6 +78,7 @@ class Codelessly extends ChangeNotifier {
     Map<String, Object?> data = const {},
     ManagedComponentSource? managedComponents,
     ComponentRegistry? components,
+    PluginSource? plugins,
   })  : loader = loader ?? _defaultLoader(config),
         cache = cache ?? MemoryPublishCache(),
         fonts = CodelesslyFonts(fetcher: fonts ?? HttpFontFetcher()),
@@ -85,21 +87,122 @@ class Codelessly extends ChangeNotifier {
     if (managedComponents != null) {
       managed = ManagedComponentResolver(source: managedComponents, cache: this.cache);
     }
+    final l = this.loader;
+    pluginSource = plugins ?? (l is PluginSource ? l as PluginSource : null);
+    // Node types the installed features implement as data (hosted plugins
+    // installed in the app's runner).
+    for (final f in features) {
+      for (final d in f.components) {
+        this.components.define(d);
+      }
+    }
+    _ownComponents.addAll(this.components.types);
+    this.components.onMissing = _componentMissing;
+    this.components.addListener(_declarationsChanged);
+  }
+
+  /// A definition arrived or changed its declaration: the loaded layouts
+  /// that call it are decoded again, so their calls' props are typed by the
+  /// declaration as it is now (the screens on show read their values through
+  /// the new declaration already).
+  void _declarationsChanged() {
+    final types = components.changed;
+    if (types.isEmpty || _layouts.isEmpty) return;
+    final catalog = _layoutCatalog;
+    for (final e in _layouts.entries.toList()) {
+      if (!e.value.document.nodes.values.any((n) => types.contains(n.type))) continue;
+      _layouts[e.key] = PublishLayout.fromJson(e.value.toJson(), catalog: catalog);
+    }
   }
 
   /// Resolves the layouts' managed components at load; null: each shows its
   /// published snapshot.
   ManagedComponentResolver? managed;
 
+  /// Where the hosted plugins the publish lists (`model.plugins`) come from:
+  /// the loader's (a bundle's embedded versions, `plugins/{id}/versions/{n}`
+  /// over HTTP or in Firestore), unless the app gives another. Null: none
+  /// are installed (their node types render as empty boxes).
+  late final PluginSource? pluginSource;
+
+  final List<CodelesslyFeature> _hosted = [];
+  final List<HostedPluginLoad> _pluginLoads = [];
+
+  /// What loading each plugin the publish lists gave: installed, or skipped
+  /// and why.
+  List<HostedPluginLoad> get hostedPlugins => List.unmodifiable(_pluginLoads);
+
+  /// The runner the screens run reactions with: [CodelesslyConfig.actions],
+  /// with the action types of the hosted plugins installed (when it is a
+  /// [CoreActions]).
+  ActionRunner get actions {
+    final a = config.actions;
+    if (_hosted.isEmpty || a is! CoreActions) return a;
+    return _actions ??= CoreActions(handlers: a.handlers, features: [...a.features, ..._hosted]);
+  }
+
+  ActionRunner? _actions;
+
+  /// Installs the hosted plugins [model] lists that aren't yet: through the
+  /// loader's [pluginSource], the cache, their digests, the SDK version and
+  /// the app's catalog (loadHostedPlugins); their node types become component
+  /// definitions, their action types join [actions], their declarations the
+  /// catalog layouts decode with. A plugin that fails a check is skipped and
+  /// logged (`plugin_skipped`).
+  Future<void> _installPlugins(PublishModel model) async {
+    final source = pluginSource;
+    final installed = {for (final l in _pluginLoads) (l.ref.id, l.ref.version)};
+    final refs = [
+      for (final r in model.plugins)
+        if (!installed.contains((r.id, r.version))) r,
+    ];
+    if (source == null || refs.isEmpty) return;
+    final loads = await loadHostedPlugins(refs, source: source, host: config.catalog, cache: cache);
+    for (final load in loads) {
+      _pluginLoads.add(load);
+      switch (load) {
+        case HostedPluginInstalled(:final feature):
+          _hosted.add(feature);
+          _actions = null;
+          for (final d in feature.components) {
+            final type = d.componentType;
+            if (type == null) continue;
+            _ownComponents.add(type);
+            components.define(d);
+          }
+        case HostedPluginSkipped(:final ref, :final reason):
+          final s = services;
+          if (s is Services) {
+            s.analytics.logError(PublishLoadException('plugin_skipped: ${ref.id} ${ref.version}: $reason'), type: 'plugin_skipped');
+          }
+      }
+    }
+  }
+
   /// The project's component definitions (docs/design/06 §4): what a call
   /// node in a layout renders, as ordinary boxes of the screen's tree.
-  /// Filled in memory (a site's files, a bundle shipped with the app, an
-  /// editor's store) with [ComponentRegistry.define]; a definition defined
-  /// or replaced while a screen shows updates its instances in place. A
-  /// call to a type it doesn't have renders as the call's empty box and is
-  /// listed in [ComponentRegistry.missing]. Loading definitions from a
-  /// publish (`PublishModel.components`) is not done yet.
+  ///
+  /// The published ones (`PublishModel.components`) load with the screens
+  /// that call them ([loadLayout] loads a layout's closure before it shows),
+  /// each cached on its own by its digest, and a republished one replaces
+  /// its definition: every instance on screen updates in place. An app may
+  /// also define its own (a site's files, an editor's store) with
+  /// [ComponentRegistry.define]; one it defined before loading wins over the
+  /// published one of the same type. A call to a type no one defines renders
+  /// as the call's empty box, is listed in [ComponentRegistry.missing] and
+  /// logged (`component_missing`); it renders when the definition arrives.
   final ComponentRegistry components;
+
+  /// Types the app defined itself (before any publish loaded): never
+  /// replaced by a published definition.
+  final Set<String> _ownComponents = {};
+
+  /// The published definitions loaded, by type.
+  final Map<String, PublishComponent> _published = {};
+  final Map<String, Future<PublishComponent?>> _componentLoads = {};
+
+  /// The published components loaded so far, by type.
+  Map<String, PublishComponent> get publishedComponents => Map.unmodifiable(_published);
 
   /// A [Codelessly] showing [bundle] (a publish shipped with the app, or a
   /// test's), offline.
@@ -376,6 +479,7 @@ class Codelessly extends ChangeNotifier {
       _model = cached;
       _configureServices(cached);
       _declareModelVariables(cached);
+      await _installPlugins(cached);
       _setStatus(const CLoaded());
       unawaited(_refresh(key).catchError((Object _) {}));
     } else {
@@ -419,6 +523,7 @@ class Codelessly extends ChangeNotifier {
     _model = fresh;
     _configureServices(fresh);
     _declareModelVariables(fresh);
+    await _installPlugins(fresh);
     await cache.write(key, fresh.toJson());
     if (old != null) {
       // Layouts republished since: drop them, they reload when shown.
@@ -426,6 +531,13 @@ class Codelessly extends ChangeNotifier {
         final t = fresh.layouts[id]?.lastUpdated;
         return t != null && (l.lastUpdated == null || l.lastUpdated!.isBefore(t));
       });
+      // Components republished since: load them again now; each instance
+      // on screen updates in place when its definition is replaced.
+      await Future.wait([
+        for (final e in _published.entries)
+          if (fresh.components[e.key] case final PublishComponentInfo info when _republished(e.value, info))
+            _loadComponent(fresh, e.key).then<void>((_) {}, onError: (Object _) {}),
+      ]);
       notifyListeners();
     }
   }
@@ -469,7 +581,127 @@ class Codelessly extends ChangeNotifier {
 
   /// What layouts decode with: the installed features' catalog, and the
   /// project's components' declarations (so a call's props are typed).
-  Catalog get _layoutCatalog => components.isEmpty ? config.catalog : config.catalog + components.catalog;
+  Catalog get _layoutCatalog {
+    var c = config.catalog;
+    for (final f in _hosted) {
+      c = c + f.catalog;
+    }
+    return components.isEmpty ? c : c + components.catalog;
+  }
+
+  /// Whether [loaded] is older than the model's entry for it says.
+  static bool _republished(PublishComponent loaded, PublishComponentInfo info) {
+    if (info.digest.isNotEmpty) return info.digest != loaded.digest;
+    if (info.version != 0 && info.version != loaded.version) return true;
+    final t = info.lastUpdated;
+    return t != null && (loaded.lastUpdated == null || loaded.lastUpdated!.isBefore(t));
+  }
+
+  /// Loads published component [type] (its definition, as the publish model
+  /// lists it) and defines it in [components]; resolves to it, or to null
+  /// when it can't be loaded (logged as `component_missing`). Loads its
+  /// closure too: the components it calls.
+  Future<PublishComponent?> loadComponent(String type) async {
+    await initialize();
+    final model = _model!;
+    final loaded = await _loadComponent(model, type);
+    if (loaded != null) await _loadClosure(model, [loaded.document]);
+    return loaded;
+  }
+
+  /// The component types [document] calls that the app doesn't define
+  /// itself: types the model lists, and any UpperCamelCase type the installed
+  /// features don't declare.
+  Iterable<String> _callsIn(PublishModel model, LayoutDocument document) => {
+        for (final n in document.nodes.values)
+          if (!_ownComponents.contains(n.type) &&
+              (model.components.containsKey(n.type) || (isComponentTypeName(n.type) && config.catalog.widget(n.type) == null)))
+            n.type,
+      };
+
+  /// Loads every published component [documents] call, and every one those
+  /// call, in parallel by depth, before a screen of them shows. A component
+  /// that fails stays missing (its calls render empty) and is logged.
+  Future<void> _loadClosure(PublishModel model, Iterable<LayoutDocument> documents, [Iterable<String> listed = const []]) async {
+    final seen = <String>{};
+    var next = {...listed.where((t) => !_ownComponents.contains(t)), for (final d in documents) ..._callsIn(model, d)};
+    while (next.isNotEmpty) {
+      seen.addAll(next);
+      final loaded = await Future.wait([for (final t in next) _loadComponent(model, t)]);
+      next = {
+        for (final c in loaded.nonNulls) ..._callsIn(model, c.document),
+      }..removeAll(seen);
+    }
+  }
+
+  Future<PublishComponent?> _loadComponent(PublishModel model, String type) {
+    if (_ownComponents.contains(type)) return Future.value(null);
+    final info = model.components[type];
+    final current = _published[type];
+    if (current != null && (info == null || !_republished(current, info))) return Future.value(current);
+    return _componentLoads[type] ??= _fetchComponent(model, type, info).whenComplete(() {
+      _componentLoads.remove(type);
+    });
+  }
+
+  Future<PublishComponent?> _fetchComponent(PublishModel model, String type, PublishComponentInfo? info) async {
+    final key = publishSource.componentPath(config.uniqueId, type);
+    PublishComponent? cached;
+    try {
+      final json = await cache.read(key);
+      if (json != null) cached = PublishComponent.fromJson(json, catalog: config.catalog, id: type);
+      if (cached != null && (!cached.isComponent || !componentIntact(cached))) cached = null;
+    } catch (_) {
+      cached = null;
+    }
+    PublishComponent? component;
+    if (cached != null && (info == null || !_republished(cached, info))) {
+      component = cached;
+    } else {
+      try {
+        final fetched = await loader.loadComponent(publishSource, type);
+        if (!fetched.isComponent) throw PublishLoadException('Component [$type] is not a component definition');
+        if (!componentIntact(fetched)) {
+          throw PublishLoadException('Component [$type] does not match its digest (${fetched.digest})');
+        }
+        component = fetched;
+        await cache.write(key, fetched.toJson());
+      } catch (e, stack) {
+        // Offline, or a failed fetch: the cached copy, however old.
+        component = cached;
+        if (component == null) {
+          _logComponentError(type, e, stack);
+          return null;
+        }
+      }
+    }
+    _published[type] = component;
+    if (!_ownComponents.contains(type)) components.define(component.document);
+    final fonts = {
+      for (final f in [...?info?.fonts, ...component.fonts]) ?model.fonts[f],
+    };
+    if (fonts.isNotEmpty) await this.fonts.load(fonts).timeout(config.fontTimeout, onTimeout: () {});
+    return component;
+  }
+
+  void _logComponentError(String type, Object error, [StackTrace? stack]) {
+    final s = services;
+    if (s is Services) {
+      s.analytics.logError(PublishLoadException('component_missing: $type could not be loaded', error), stackTrace: stack, type: 'component_missing');
+    }
+  }
+
+  /// A call rendered without its definition: logged, and fetched when the
+  /// publish lists it (the call renders when it arrives).
+  void _componentMissing(String type, String path) {
+    final model = _model;
+    if (model != null && model.components.containsKey(type) && !_ownComponents.contains(type)) {
+      if (_published.containsKey(type) || _componentLoads.containsKey(type)) return;
+      scheduleMicrotask(() => unawaited(loadComponent(type).then<void>((_) {}, onError: (Object _) {})));
+      return;
+    }
+    scheduleMicrotask(() => _logComponentError(type, 'the call at "$path" names a component no one defines'));
+  }
 
   Future<PublishLayout> _loadLayout(PublishModel model, String layoutId) async {
     final key = publishSource.layoutPath(config.uniqueId, layoutId);
@@ -496,8 +728,12 @@ class Codelessly extends ChangeNotifier {
         layout = cached;
       }
     }
+    // The components it calls (listed by the model, and found in it), and
+    // those they call, before it shows.
+    await _loadClosure(model, [layout.document], model.layouts[layoutId]?.components ?? const []);
     // A loader decodes with the standard catalog; the installed features may
-    // declare more (a native plugin's types): decode again with theirs.
+    // declare more (a native plugin's types), and the components their
+    // parameters: decode again with theirs.
     final catalog = _layoutCatalog;
     if (!(layout.document.catalog?.includes(catalog) ?? false)) {
       layout = PublishLayout.fromJson(layout.toJson(), catalog: catalog);
@@ -561,6 +797,8 @@ class Codelessly extends ChangeNotifier {
 
   @override
   void dispose() {
+    components.removeListener(_declarationsChanged);
+    if (components.onMissing == _componentMissing) components.onMissing = null;
     automations.dispose();
     presenter.dismissAll();
     _watching?.cancel();
@@ -613,4 +851,7 @@ class _NoLoader implements PublishLoader {
 
   @override
   Future<PublishLayout> loadLayout(PublishSource source, String layoutId) => Future.error(_error);
+
+  @override
+  Future<PublishComponent> loadComponent(PublishSource source, String type) => Future.error(_error);
 }
