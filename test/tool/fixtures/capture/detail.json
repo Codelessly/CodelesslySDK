@@ -1,0 +1,80 @@
+{
+ "schema": 3,
+ "roots": [
+  "detail"
+ ],
+ "nodes": {
+  "detail": {
+   "type": "canvas",
+   "name": "Detail",
+   "path": "/detail",
+   "slots": {
+    "body": "dcol"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "dcol": {
+   "type": "column",
+   "children": [
+    "dtop",
+    "dmore"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   },
+   "props": {
+    "scrollable": true
+   }
+  },
+  "dtop": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 400
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= route.id == '42' ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "dmore": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 1000
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFF00FF"
+     }
+    ]
+   }
+  }
+ }
+}

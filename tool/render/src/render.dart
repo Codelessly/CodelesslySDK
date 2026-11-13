@@ -14,10 +14,11 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey;
+import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
+import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 
 import 'args.dart';
 import 'compare.dart';
@@ -88,8 +89,36 @@ final class RenderReport {
 
   /// `--compare`: each capture against its reference.
   final List<ImageComparison> comparisons = [];
+
+  /// Files a `downloadFile` action saved (written under `<out>/downloads`).
+  final List<api.Json> downloads = [];
+
+  /// Texts a `copyToClipboard` action copied, in order.
+  final List<api.Json> clipboard = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
+}
+
+/// Saves a `downloadFile` action's file under `<out>/downloads/<capture>/`
+/// (a headless run has no save dialog), and lists it in the report.
+final class _OutDirExporter implements FileExporter {
+  _OutDirExporter(this.out, this.report);
+  final String out;
+  final RenderReport report;
+
+  /// The capture's name (`home@390x844-label`), set per screen and size.
+  String capture = '';
+  String screen = '', size = '';
+
+  @override
+  Future<bool> saveText({required String fileName, required String text, String mimeType = 'text/plain'}) async {
+    final name = exportFileName(fileName);
+    final file = File('$out/downloads/$capture/$name');
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(text);
+    report.downloads.add({'file': file.path, 'fileName': name, 'mimeType': mimeType, 'bytes': utf8.encode(text).length, 'screen': screen, 'size': size});
+    return true;
+  }
 }
 
 final class _Recorder implements AnalyticsService {
@@ -294,6 +323,24 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     _errorLog.add(details);
     previousOnError?.call(details);
   };
+  // The clipboard, in memory (a headless run has none): what is copied is
+  // listed in the report, and reads give it back.
+  String? clipboardText;
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall call) async {
+    switch (call.method) {
+      case 'Clipboard.setData':
+        clipboardText = (call.arguments as Map?)?['text'] as String?;
+        report.clipboard.add({'text': clipboardText, if (clipboardAt != null) 'screen': clipboardAt!.$1, if (clipboardAt != null) 'size': clipboardAt!.$2});
+        return null;
+      case 'Clipboard.getData':
+        return clipboardText == null ? null : {'text': clipboardText};
+      case 'Clipboard.hasStrings':
+        return {'value': clipboardText?.isNotEmpty ?? false};
+    }
+    return null;
+  });
+  // `--now`: the time now() returns.
+  FormulaClock.pinned = args.now;
   // Icons named without a codepoint (a bound name) draw from the font.
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
@@ -317,6 +364,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     debugDisableShadows = true;
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
+    FormulaClock.pinned = null;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     _errorDetails.clear();
     _errorLog.clear();
   }
@@ -340,15 +389,21 @@ Future<void> _renderAll(
   final screens = _screens(published, docs, args.screens, (s) => issue(s));
   final recorder = _Recorder();
   final binding = tester.binding;
+  final exporter = _OutDirExporter(args.out, report);
   for (final screen in screens) {
     final label = _screenName(published, docs, screen);
     for (final size in args.sizes) {
       final sizeName = '${size.width.round()}x${size.height.round()}';
+      exporter
+        ..capture = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}'
+        ..screen = label
+        ..size = sizeName;
+      clipboardAt = (label, sizeName);
       final codelessly = Codelessly(
         loader: MemoryPublishLoader(published.bundle),
         components: components,
         fonts: fetcher,
-        config: CodelesslyConfig(services: Services(analytics: recorder), fontTimeout: const Duration(seconds: 5)),
+        config: CodelesslyConfig(services: Services(analytics: recorder, exports: exporter), fontTimeout: const Duration(seconds: 5)),
       );
       final controller = CodelesslyWidgetController();
       final navigator = GlobalKey<NavigatorState>();
@@ -431,7 +486,7 @@ Future<void> _renderAll(
       // 4. Interactions, in order.
       final skipped = <String>[];
       for (final step in args.steps) {
-        final problem = await _apply(tester, step, controller, navigator, codelessly,
+        final problem = await _apply(tester, step, controller, navigator, codelessly, screens: _screenList(published, docs),
             warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
                 nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
         if (problem != null) {
@@ -479,6 +534,27 @@ Future<void> _renderAll(
           page = _pageScroll(binding);
         }
         if (page != null && page.maxScrollExtent >= 1) fullPage = page;
+      }
+
+      // A --set holds against what no step did: a timer or a load reaction
+      // that wrote the variable after it (a clock) is undone, and said.
+      final held = <String, Object?>{};
+      for (final step in args.steps) {
+        if (step.kind == 'set') {
+          held[step.target] = _stepValue(step);
+        } else if (!const {'wait', 'set'}.contains(step.kind)) {
+          held.clear();
+        }
+      }
+      for (final e in held.entries) {
+        final now = _readVariable(binding, controller, e.key);
+        if (jsonEncode(now) == jsonEncode(e.value)) continue;
+        _writeVariable(binding, controller, e.key, e.value);
+        await tester.pump();
+        issue(RuntimeIssue('set_overwritten', 'warning',
+            '--set ${e.key}: a reaction (a timer, a load) set it to ${jsonEncode(now)} after the step; the capture shows it as set, ${jsonEncode(e.value)}. '
+            'A clock written from now() stays put with --now <ISO time> (now() returns it).',
+            screen: label, size: sizeName));
       }
 
       // 6. Runtime checks, then the PNG.
@@ -619,6 +695,19 @@ String _screenName(
   return layout;
 }
 
+/// Every screen by what a step may name it: its canvases' paths, else
+/// their screen names, else the canvas ids.
+List<String> _screenList(
+  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
+  Map<String, api.Json> docs,
+) =>
+    [
+      for (final d in docs.values)
+        for (final e in (api.readMap(d['nodes']) ?? const {}).entries)
+          if (api.readMap(e.value) case final api.Json n when n['type'] == 'canvas' && published.layoutOfCanvas.containsKey(e.key))
+            n['path'] is String && (n['path'] as String).isNotEmpty ? n['path'] as String : e.key,
+    ];
+
 /// The layouts to render: those [wanted] names (a canvas id, a layout id,
 /// a screen name or a canvas name), else every screen.
 List<String> _screens(
@@ -654,10 +743,11 @@ List<String> _screens(
   return out;
 }
 
-Iterable<RenderObject> _descendants(RenderObject root) sync* {
+Iterable<RenderObject> _descendants(RenderObject root, {Set<RenderObject> skip = const {}}) sync* {
   final stack = <RenderObject>[root];
   while (stack.isNotEmpty) {
     final o = stack.removeLast();
+    if (skip.contains(o)) continue;
     yield o;
     final kids = <RenderObject>[];
     o.visitChildren(kids.add);
@@ -666,6 +756,9 @@ Iterable<RenderObject> _descendants(RenderObject root) sync* {
 }
 
 final Map<String, Set<int>?> _coverage = {};
+
+/// The screen and size a copy to the clipboard happens at.
+(String, String)? clipboardAt;
 
 /// The bounds of SVG path [data] in its own units, or null.
 ui.Rect? _pathBounds(String data) {
@@ -716,11 +809,16 @@ ui.Rect? _visibleClip(RenderBox b) {
 
 /// The PNG of the whole of [page] (the page's scroll view) as a window
 /// [ro] keeps its size: the first window as it shows, then the rest of the
-/// page a viewport at a time, scrolled into the window with the boxes fixed
-/// to the window over the page (painted after it: a header, a drawer, a
-/// bottom bar) left out, stitched below; the window's part below the page
-/// view as it is at the page's end. As tall as the window plus what the
-/// page scrolls. The page is left at its top.
+/// page a viewport at a time, stitched below it; the window's part below
+/// the page view as it is at the page's end. As tall as the window plus
+/// what the page scrolls. The page is left at its top.
+///
+/// What a reader sees once is drawn once: in the windows after the first,
+/// the boxes fixed to the window over the page (painted after it: a header,
+/// a drawer, a bottom bar) are left out, a sticky node is drawn where it is
+/// in the page (not pinned at the top of each window), and only the page's
+/// own route is drawn (a modal, a dialog or a sheet open over it, and its
+/// barrier, show in the first window only).
 Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro, RenderDesignScroll page, WidgetsBinding binding) async {
   final window = ro.size;
   final view = _rectOf(page);
@@ -731,8 +829,20 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   final over = pageBox == null
       ? const <NodeBox>[]
       : [for (final b in _fixedAround(binding, pageBox)) if (all.indexOf(b) > pageIndex && !_isInside(b, page)) b];
-  Future<ui.Image> shot() async => (await tester.runAsync(() => ro.toImage(pixelRatio: 1)))!;
-  final first = await shot();
+  // The page's route alone: the outermost repaint boundary between the
+  // page and its navigator's theater (routes over it are its siblings).
+  final theaters = {for (final (_, t) in _theaters()) t};
+  RenderRepaintBoundary? route;
+  for (RenderObject? p = page; p != null && !identical(p, ro); p = p.parent) {
+    if (theaters.contains(p)) break;
+    if (p is RenderRepaintBoundary) route = p;
+  }
+  // Only when something is open over the page; else the window is the route.
+  final covered = route != null && _boxes(binding).any((b) => !_isInside(b, route!) && !over.contains(b) && all.indexOf(b) > pageIndex);
+  final layer = covered ? route : ro;
+  final layerAt = covered ? route.localToGlobal(Offset.zero) - ro.localToGlobal(Offset.zero) : Offset.zero;
+  Future<ui.Image> shot(RenderRepaintBoundary b) async => (await tester.runAsync(() => b.toImage(pixelRatio: 1)))!;
+  final first = await shot(ro);
   final slices = <(ui.Image, double)>[];
   const hidden = Offset(0, -1e6);
   for (final b in over) {
@@ -743,7 +853,19 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
       final at = math.min(o, max);
       page.jumpTo(at);
       await _settle(tester);
-      slices.add((await shot(), at));
+      // Sticky nodes in place, as the page lays them out.
+      var unpinned = false;
+      for (final s in _descendants(page).whereType<RenderSticky>()) {
+        if (s.shift == 0) continue;
+        s.shift = 0;
+        s.markNeedsPaint();
+        unpinned = true;
+      }
+      if (unpinned) {
+        page.markNeedsPaint();
+        await tester.pump();
+      }
+      slices.add((await shot(layer), at));
       if (at >= max) break;
     }
   } finally {
@@ -757,15 +879,16 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   final paint = Paint()..filterQuality = FilterQuality.none;
+  // Rows of [img] (a capture of [layer]) in window coordinates.
+  void rows(ui.Image img, double top, double height, double to) => canvas.drawImageRect(
+      img, Rect.fromLTWH(-layerAt.dx, top - layerAt.dy, window.width, height), Rect.fromLTWH(0, to, window.width, height), paint);
   for (final (img, at) in slices) {
     // The viewport's rows: the page from offset [at].
-    canvas.drawImageRect(img, Rect.fromLTWH(0, view.top, window.width, view.height),
-        Rect.fromLTWH(0, view.top + at, window.width, view.height), paint);
+    rows(img, view.top, view.height, view.top + at);
   }
   // Below the page view at the page's end (the fixed boxes left out).
   final (last, lastAt) = slices.last;
-  canvas.drawImageRect(last, Rect.fromLTWH(0, view.bottom, window.width, window.height - view.bottom),
-      Rect.fromLTWH(0, view.bottom + lastAt, window.width, window.height - view.bottom), paint);
+  rows(last, view.bottom, window.height - view.bottom, view.bottom + lastAt);
   // The first window on top, as it shows.
   canvas.drawImage(first, Offset.zero, paint);
   final picture = recorder.endRecording();
@@ -827,12 +950,51 @@ List<NodeBox> _fixedAround(WidgetsBinding binding, NodeBox page) {
   return out;
 }
 
-/// Every node box on screen, in paint order (later ones are on top).
-List<NodeBox> _boxes(WidgetsBinding binding) => [
-      for (final view in binding.renderViews)
-        for (final o in _descendants(view))
-          if (o is NodeBox && o.attached && o.hasSize) o,
-    ];
+/// The overlays' theaters (each navigator's stack of routes).
+List<(Element, RenderObject)> _theaters() {
+  final out = <(Element, RenderObject)>[];
+  for (final overlay in find.byType(Overlay, skipOffstage: false).evaluate()) {
+    Element? el = overlay;
+    while (el != null && el is! RenderObjectElement) {
+      Element? next;
+      el.visitChildren((c) => next ??= c);
+      el = next;
+    }
+    final ro = el?.renderObject;
+    if (el != null && ro != null) out.add((el, ro));
+  }
+  return out;
+}
+
+/// The render objects of the routes a navigator keeps offstage (a page
+/// covered by the page pushed over it): still attached with their last
+/// layout, but neither painted nor hit. Steps, checks and captures skip them.
+Set<RenderObject> _offstage() {
+  final out = <RenderObject>{};
+  for (final (theater, _) in _theaters()) {
+    final all = <Element>[];
+    theater.visitChildren(all.add);
+    final onstage = <Element>{};
+    theater.debugVisitOnstageChildren(onstage.add);
+    for (final e in all) {
+      if (onstage.contains(e)) continue;
+      final ro = e.renderObject;
+      if (ro != null) out.add(ro);
+    }
+  }
+  return out;
+}
+
+/// Every node box on screen, in paint order (later ones are on top); not
+/// those of a page covered by another.
+List<NodeBox> _boxes(WidgetsBinding binding) {
+  final skip = _offstage();
+  return [
+    for (final view in binding.renderViews)
+      for (final o in _descendants(view, skip: skip))
+        if (o is NodeBox && o.attached && o.hasSize) o,
+  ];
+}
 
 /// The box of node [id] on screen: the topmost (the last painted), or with
 /// `id#n` the n-th (0-based) of the copies a list repeats.
@@ -864,8 +1026,9 @@ NodeBox? _boxOf(WidgetsBinding binding, String id) {
 /// tie).
 RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
   RenderDesignScroll? best;
+  final skip = _offstage();
   for (final view in binding.renderViews) {
-    for (final o in _descendants(view)) {
+    for (final o in _descendants(view, skip: skip)) {
       if (o is RenderDesignScroll && o.attached && o.hasSize && o.interactive && o.userScrollable && o.maxScrollExtent > 0) {
         final vertical = o.child != null && o.child!.size.height > o.size.height;
         if (!vertical) continue;
@@ -901,7 +1064,7 @@ ui.Rect _rectOf(RenderBox b) {
 
 Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller,
     GlobalKey<NavigatorState> navigator, Codelessly codelessly,
-    {required void Function(String code, String message, String? nodeId) warn}) async {
+    {required void Function(String code, String message, String? nodeId) warn, List<String> screens = const []}) async {
   final binding = tester.binding;
   ui.Rect viewRect() => ui.Offset.zero & (tester.view.physicalSize / tester.view.devicePixelRatio);
 
@@ -1049,13 +1212,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       }
       return null;
     case 'set':
-      Object? value;
-      try {
-        value = jsonDecode(step.value ?? 'null');
-      } catch (_) {
-        value = step.value;
-      }
-      controller.setVariable(step.target, value);
+      _writeVariable(binding, controller, step.target, _stepValue(step));
       return null;
     case 'scroll':
       final px = double.tryParse(step.value ?? '');
@@ -1082,7 +1239,16 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       scroll.jumpTo(px);
       return null;
     case 'navigate':
-      final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: '/${step.target}'));
+      // A URL path (`/project?id=x`), a canvas id or a screen name, with a
+      // query string the screen reads as `${route.<name>}`.
+      final location = step.target.trim().replaceFirst(RegExp(r'^/+'), '');
+      final model = codelessly.publishModel;
+      // ignore: invalid_use_of_visible_for_testing_member
+      if (model != null && location.isNotEmpty && CodelesslyWidget.resolveScreen(model, location) == null) {
+        return '--navigate ${step.target}: no screen "${location.split('?').first}". Name a canvas id, a screen name or a URL path '
+            '(with a query string for its params: speaker?id=ada). Screens: ${screens.join(', ')}.';
+      }
+      final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: '/$location'));
       if (route == null) return '--navigate ${step.target}: no such screen.';
       unawaited(navigator.currentState!.push(route));
       return null;
@@ -1155,6 +1321,42 @@ LogicalKeyboardKey? _keyNamed(String name) {
   if (RegExp(r'^[A-Za-z]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + name.toLowerCase().codeUnitAt(0) - 0x61);
   if (RegExp(r'^[0-9]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30);
   return null;
+}
+
+/// A `--set` step's value: JSON, else the text as it is.
+Object? _stepValue(Step step) {
+  try {
+    return jsonDecode(step.value ?? 'null');
+  } catch (_) {
+    return step.value;
+  }
+}
+
+/// The root scope of the screen shown when it is not [controller]'s (a
+/// screen navigated to), else null: steps act on the screen in view.
+ValueScope? _shownScope(WidgetsBinding binding, CodelesslyWidgetController controller) {
+  final own = controller.tree;
+  final canvases = [for (final b in _boxes(binding)) if (b.node?.type == 'canvas') b];
+  if (own == null || canvases.isEmpty || canvases.any((b) => identical(b.tree, own))) return null;
+  final top = canvases.last;
+  final bindings = top.tree.bindings;
+  return bindings is NodeBinder ? bindings.rootScopeOf(top.id) : null;
+}
+
+/// Sets variable [name] of the screen in view.
+void _writeVariable(WidgetsBinding binding, CodelesslyWidgetController controller, String name, Object? value) {
+  final scope = _shownScope(binding, controller);
+  if (scope != null) {
+    setVariableIn(scope, name, value);
+  } else {
+    controller.setVariable(name, value);
+  }
+}
+
+/// Variable [name] of the screen in view.
+Object? _readVariable(WidgetsBinding binding, CodelesslyWidgetController controller, String name) {
+  final scope = _shownScope(binding, controller);
+  return scope != null ? readPath(scope, name) : controller.read(name);
 }
 
 bool _isInside(RenderObject o, RenderObject ancestor) {
@@ -1437,6 +1639,8 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     'warnings': report.warnings,
     'images': [for (final i in report.images) i.split('/').last],
     if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
+    if (report.downloads.isNotEmpty) 'downloads': report.downloads,
+    if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -1460,6 +1664,13 @@ String formatReport(RenderReport report) {
   }
   for (final c in report.comparisons) {
     b.writeln(c.summary());
+  }
+  for (final d in report.downloads) {
+    b.writeln('downloaded ${d['file']} (${d['bytes']} bytes, ${d['mimeType']}) [screen ${d['screen']} ${d['size']}]');
+  }
+  for (final c in report.clipboard) {
+    final t = '${c['text']}';
+    b.writeln('copied to the clipboard: ${jsonEncode(t.length > 120 ? '${t.substring(0, 120)}...' : t)}${c['screen'] == null ? '' : ' [screen ${c['screen']} ${c['size']}]'}');
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();
