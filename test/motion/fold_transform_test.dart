@@ -1,7 +1,6 @@
-// Schema 4 folded the node's scale and layout.rotation into its motion (one
-// Transform). An older document (these are written in schema 2, which has
-// the same fields as schema 3) is migrated when it loads and must draw what
-// it drew: the corners below were measured with codelessly_sdk 30.0.0,
+// 30.1.0 folded the node's scale and layout.rotation into its motion (one
+// Transform). A schema-2 document (these are; 30.0.0's schema 3 had the
+// same fields) is migrated when it loads and must draw what it drew: the corners below were measured with codelessly_sdk 30.0.0,
 // which drew the scale and the rotation as layers of their own.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +84,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     final mid = corners(s, 'b');
-    // Half its width at once, as schema 3's own scale layer had no transition.
+    // Half its width at once, as 30.0.0's own scale layer had no transition.
     expect((mid[1] - mid[0]).dx, closeTo(80, 0.01));
     // Moving down, not there yet.
     final moved = (mid[0] + mid[1]) / 2 - (rest[0] + rest[1]) / 2;
@@ -143,7 +142,7 @@ void main() {
     expect(s.tree.resolve('other')!.behaviors.motion!.scale, 2);
   });
 
-  testWidgets('a schema-3 path that reaches a running app unmigrated sets nothing and says what to write, once', (tester) async {
+  testWidgets('a 30.0.0 path that reaches a running app unmigrated sets nothing and says what to write, once', (tester) async {
     final said = <String>[];
     final before = debugPrint;
     debugPrint = (String? m, {int? wrapWidth}) => said.add(m ?? '');
@@ -168,7 +167,7 @@ void main() {
     final other = s.tree.resolve('other')!;
     expect(other.opacity, 0.5);
     expect(other.behaviors.motion, isNull);
-    final notes = said.where((m) => m.contains('schema-3 path')).toList();
+    final notes = said.where((m) => m.contains('30.0.0\'s spelling')).toList();
     expect(notes, hasLength(1));
     expect(notes.single, contains('motion.scale'));
   });

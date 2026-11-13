@@ -4,14 +4,13 @@
 // `file#pointer kind digest`, the digest of a value's encoding after a decode
 // (tool/corpus_roundtrip.dart in codelessly_api makes the same lines).
 //
-// Schema 4 moved fields, so the encoding of the documents holding one
-// changed on purpose: the 178 lines of the five files whose documents have a
-// node rotation, a node scale (a state's included) or a hero's flight look
-// (petri_bench_full, event_desktop_bound, event_desktop_tip, ninefold_board,
-// strata_tabs) were taken again at schema 4, and strata_tabs' document and
-// its diagram_0 node (a stroke path, a custom paint path op in schema 4)
-// again with schema 4's paint steps; the others are as taken before
-// catalogs.
+// 30.1.0's one-way migration steps moved fields, so the encoding of the
+// documents holding one changed on purpose: the 178 lines of the five files
+// whose documents have a node rotation, a node scale (a state's included) or
+// a hero's flight look (petri_bench_full, event_desktop_bound,
+// event_desktop_tip, ninefold_board, strata_tabs), and strata_tabs' document
+// and its diagram_0 node again for its stroke path (a custom paint path op),
+// were taken again with them; the others are as taken before catalogs.
 import 'dart:convert';
 import 'dart:io';
 
@@ -41,8 +40,8 @@ List<String> _lines(String path, Catalog catalog) {
       final nodes = v['nodes'];
       if (nodes is Map && nodes.values.any((n) => n is Map && n['type'] is String)) {
         // The digests were taken in schema 2: a document now encodes as
-        // schema 4, and (migrated when it decodes) otherwise the same but for
-        // the fields schema 4 moved (above).
+        // schema 3, and (migrated when it decodes) otherwise the same but for
+        // the fields 30.1.0 moved (above).
         final doc = LayoutDocument.fromJson(v, catalog: catalog).toJson();
         if (doc['schema'] == kSchemaVersion) doc['schema'] = 2;
         // Schema 2's line height, which the migration writes on the

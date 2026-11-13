@@ -72,7 +72,7 @@ flat map:
 
 | Key | Meaning |
 |---|---|
-| `schema` | Always 4 (`kSchemaVersion`). A schema-2 or schema-3 document (or one with none) loads, migrated in memory (`migrate2to3`, `migrate3to4`). |
+| `schema` | Always 3 (`kSchemaVersion`). A schema-2 document (or one with none) loads, migrated in memory (`migrate2to3`). |
 | `id` | The layout's id (optional). |
 | `roots` | Canvas ids, in order: the screens of this page. |
 | `nodes` | Every node, by id: `{"<id>": {"type": ..., ...}}`. A node's id is its key here. |
@@ -86,7 +86,7 @@ its default.
 
 ```json
 {
-  "schema": 4,
+  "schema": 3,
   "roots": ["home"],
   "nodes": {
     "home": {
@@ -133,7 +133,7 @@ The theme is the `theme` of the site manifest, `site.json`, next to the pages:
 
 ```json
 {
-  "schema": 4,
+  "schema": 3,
   "pages": ["home.json"],
   "theme": {
     "colors": {"ink": "#FF1B1B1B", "ember": "#FFE4572E", "paper": "#FFF6F1E9"},
@@ -241,7 +241,7 @@ under a stack (`layout_field_ignored`).
 
 ```json
 {
-  "schema": 4,
+  "schema": 3,
   "roots": ["board"],
   "nodes": {
     "board": {"type": "canvas", "slots": {"body": "stage"}, "layout": {"width": 400, "height": 300}},
@@ -303,7 +303,7 @@ Colours are `"#AARRGGBB"` (alpha first: `#FF` opaque, `#80` half), `"#RRGGBB"` o
 
 ```json
 {
-  "schema": 4,
+  "schema": 3,
   "roots": ["deco"],
   "nodes": {
     "deco": {
@@ -639,7 +639,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 
 - [layout.md](layout.md): Responsive layout. Documents canvas, row, column, flex, stack, box, spacer, divider, verticalDivider, variance, sticky, floating, measure, scroll, scrollEnd, enterViewport, exitViewport, scrollTo.
 - [theme.md](theme.md): Theme and text. Documents text, textDirection, defaultTextStyle.
-- [decoration.md](decoration.md): Decoration, images, icons and drawing. Documents icon, path, customPaint, strokePath, imageLoading, imageLoaded, imageError.
+- [decoration.md](decoration.md): Decoration, images, icons and drawing. Documents icon, path, customPaint, imageLoading, imageLoaded, imageError.
 - [forms.md](forms.md): Buttons, forms and inputs. Documents filledButton, elevatedButton, outlinedButton, textButton, iconButton, floatingActionButton, textField, checkbox, switch, radio, slider, dropdown, segmentedButton, datePicker, timePicker, dateTimeInput, signature, chip, actionChip, choiceChip, filterChip, inputChip, changed, changeEnd, submitted, editingComplete, focusGained, focusLost, keyDown, keyUp, editText, focus.
 - [lists.md](lists.md): Lists, grids, tables and repeated data. Documents listView, gridView, pageView, tableView, listTile, pagination, reorderHandle, reorder, refresh, swipeAction, rowTap, paginate.
 - [navigation.md](navigation.md): Screens, navigation, modals and toasts. Documents appBar, navigationBar, bottomNavigationBar, tabs, tabBar, accordion, expansionTile, modal, load, backPressed, navigate, openModal, closeModal, showToast, confirm, openLink.

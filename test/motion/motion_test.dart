@@ -248,7 +248,7 @@ void main() {
   });
 
   testWidgets('a drawn path with a draw-on time shows at its progress at once in a running app', (tester) async {
-    // Schema 4 has no draw-on animation: the migration keeps it as
+    // Since 30.1.0 there is no draw-on animation: the migration keeps it as
     // `legacy.strokePath.draw` and draws the line as a custom paint path op.
     final (tree, _) = await show(
         tester,

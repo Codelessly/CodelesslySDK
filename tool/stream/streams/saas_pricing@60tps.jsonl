@@ -1,4 +1,4 @@
-{"meta":{"ui":"saas_pricing","kind":"page","brief":"A SaaS pricing page (m05 experiment, saas-landing-B).","source":"synthetic","rateTokensPerSecond":60,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":60616,"outputTokens":15154}}
+{"meta":{"ui":"saas_pricing","kind":"page","brief":"A SaaS pricing page (m05 experiment, saas-landing-B).","source":"synthetic","rateTokensPerSecond":60,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":60621,"outputTokens":15154}}
 {"tMs":517,"delta":"{\"op"}
 {"tMs":567,"delta":"s\":[\n{\"op\":\""}
 {"tMs":600,"delta":"roots\",\""}
@@ -259,7 +259,7 @@
 {"tMs":11183,"delta":",\"id"}
 {"tMs":11217,"delta":"\":\"logoM"}
 {"tMs":11283,"delta":"ark\",\"node\":{\"ty"}
-{"tMs":11350,"delta":"pe\":\"box\",\"layou"}
+{"tMs":11350,"delta":"pe\":\"path\",\"layou"}
 {"tMs":11367,"delta":"t\":{"}
 {"tMs":11433,"delta":"\"width\":34,\"heig"}
 {"tMs":11467,"delta":"ht\":30},"}
@@ -268,7 +268,7 @@
 {"tMs":11567,"delta":"ills\":[{"}
 {"tMs":11633,"delta":"\"color\":\"#FFB9F3"}
 {"tMs":11700,"delta":"4C\"}]},\"props\":{"}
-{"tMs":11767,"delta":"\"path\":\"M0 30L3."}
+{"tMs":11767,"delta":"\"data\":\"M0 30L3."}
 {"tMs":11783,"delta":"5 15"}
 {"tMs":11817,"delta":"H10L6.5 "}
 {"tMs":11850,"delta":"30Z M10 "}
@@ -589,7 +589,7 @@
 {"tMs":24250,"delta":"et\",\"id\":\"he"}
 {"tMs":24317,"delta":"roGrid\",\"node\":{"}
 {"tMs":24350,"delta":"\"type\":\""}
-{"tMs":24367,"delta":"box\""}
+{"tMs":24367,"delta":"path\""}
 {"tMs":24433,"delta":",\"layout\":{\"widt"}
 {"tMs":24467,"delta":"h\":{\"fil"}
 {"tMs":24533,"delta":"l\":1440},\"height"}
@@ -604,7 +604,7 @@
 {"tMs":24950,"delta":"olor\":\"#"}
 {"tMs":25000,"delta":"FF131C1C\"}]}"}
 {"tMs":25017,"delta":",\"pr"}
-{"tMs":25067,"delta":"ops\":{\"path\""}
+{"tMs":25067,"delta":"ops\":{\"data\""}
 {"tMs":25133,"delta":":\"M40 0V1200M120"}
 {"tMs":25183,"delta":" 0V1200M200 "}
 {"tMs":25250,"delta":"0V1200M280 0V120"}
@@ -4758,8 +4758,8 @@
 {"tMs":198633,"delta":"e\"}}},\n{"}
 {"tMs":198683,"delta":"\"op\":\"set\",\""}
 {"tMs":198750,"delta":"id\":\"ctaGrid\",\"n"}
-{"tMs":198817,"delta":"ode\":{\"type\":\"bo"}
-{"tMs":198883,"delta":"x\",\"layout\":{\"wi"}
+{"tMs":198817,"delta":"ode\":{\"type\":\"path"}
+{"tMs":198883,"delta":"\",\"layout\":{\"wi"}
 {"tMs":198933,"delta":"dth\":{\"fill\""}
 {"tMs":198967,"delta":":1440},\""}
 {"tMs":199017,"delta":"height\":{\"fi"}
@@ -4772,8 +4772,8 @@
 {"tMs":199400,"delta":"\":[{\"color\":"}
 {"tMs":199433,"delta":"\"#FF111A"}
 {"tMs":199450,"delta":"1A\"}"}
-{"tMs":199517,"delta":"]},\"props\":{\"pat"}
-{"tMs":199550,"delta":"h\":\"M40 "}
+{"tMs":199517,"delta":"]},\"props\":{\"dat"}
+{"tMs":199550,"delta":"a\":\"M40 "}
 {"tMs":199583,"delta":"0V1200M1"}
 {"tMs":199600,"delta":"20 0"}
 {"tMs":199617,"delta":"V120"}
@@ -5239,7 +5239,7 @@
 {"tMs":218317,"delta":"et\","}
 {"tMs":218350,"delta":"\"id\":\"lo"}
 {"tMs":218417,"delta":"goFMark\",\"node\":"}
-{"tMs":218467,"delta":"{\"type\":\"box"}
+{"tMs":218467,"delta":"{\"type\":\"path"}
 {"tMs":218483,"delta":"\",\"l"}
 {"tMs":218500,"delta":"ayou"}
 {"tMs":218533,"delta":"t\":{\"wid"}
@@ -5251,8 +5251,8 @@
 {"tMs":218733,"delta":"\":[{\"col"}
 {"tMs":218783,"delta":"or\":\"#FFB9F3"}
 {"tMs":218817,"delta":"4C\"}]},\""}
-{"tMs":218867,"delta":"props\":{\"pat"}
-{"tMs":218900,"delta":"h\":\"M0 3"}
+{"tMs":218867,"delta":"props\":{\"dat"}
+{"tMs":218900,"delta":"a\":\"M0 3"}
 {"tMs":218967,"delta":"0L3.5 15H10L6.5 "}
 {"tMs":219033,"delta":"30Z M10 30L15.3 "}
 {"tMs":219100,"delta":"7H21.8L16.5 30Z "}
@@ -5850,7 +5850,7 @@
 {"tMs":243767,"delta":",\"no"}
 {"tMs":243783,"delta":"de\":"}
 {"tMs":243800,"delta":"{\"ty"}
-{"tMs":243833,"delta":"pe\":\"box"}
+{"tMs":243833,"delta":"pe\":\"path"}
 {"tMs":243867,"delta":"\",\"layou"}
 {"tMs":243933,"delta":"t\":{\"width\":34,\""}
 {"tMs":244000,"delta":"height\":30},\"dec"}
@@ -5858,8 +5858,8 @@
 {"tMs":244100,"delta":"\":[{\"col"}
 {"tMs":244167,"delta":"or\":\"#FFB9F34C\"}"}
 {"tMs":244183,"delta":"]},\""}
-{"tMs":244233,"delta":"props\":{\"pat"}
-{"tMs":244267,"delta":"h\":\"M0 3"}
+{"tMs":244233,"delta":"props\":{\"dat"}
+{"tMs":244267,"delta":"a\":\"M0 3"}
 {"tMs":244333,"delta":"0L3.5 15H10L6.5 "}
 {"tMs":244350,"delta":"30Z "}
 {"tMs":244383,"delta":"M10 30L1"}

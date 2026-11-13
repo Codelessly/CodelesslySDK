@@ -1,4 +1,4 @@
-{"meta":{"ui":"restaurant_menu","kind":"page","brief":"A restaurant menu page (m05 experiment, restaurant-B).","source":"synthetic","rateTokensPerSecond":60,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":51360,"outputTokens":12840}}
+{"meta":{"ui":"restaurant_menu","kind":"page","brief":"A restaurant menu page (m05 experiment, restaurant-B).","source":"synthetic","rateTokensPerSecond":60,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":51363,"outputTokens":12840}}
 {"tMs":517,"delta":"{\"op"}
 {"tMs":550,"delta":"s\":[\n{\"o"}
 {"tMs":567,"delta":"p\":\""}
@@ -1032,7 +1032,7 @@
 {"tMs":44300,"delta":"et\",\"id\":\"st"}
 {"tMs":44350,"delta":"arLunch\",\"no"}
 {"tMs":44383,"delta":"de\":{\"ty"}
-{"tMs":44450,"delta":"pe\":\"box\",\"layou"}
+{"tMs":44450,"delta":"pe\":\"path\",\"layou"}
 {"tMs":44517,"delta":"t\":{\"width\":10,\""}
 {"tMs":44567,"delta":"height\":10},"}
 {"tMs":44583,"delta":"\"dec"}
@@ -1040,7 +1040,7 @@
 {"tMs":44700,"delta":"ills\":[{\"color\":"}
 {"tMs":44733,"delta":"\"#FFE581"}
 {"tMs":44800,"delta":"4F\"}]},\"props\":{"}
-{"tMs":44867,"delta":"\"path\":\"M5 0 L6."}
+{"tMs":44867,"delta":"\"data\":\"M5 0 L6."}
 {"tMs":44933,"delta":"2 3.8 L10 5 L6.2"}
 {"tMs":44950,"delta":" 6.2"}
 {"tMs":44983,"delta":" L5 10 L"}
@@ -1089,16 +1089,16 @@
 {"tMs":46950,"delta":"{\"op"}
 {"tMs":47017,"delta":"\":\"set\",\"id\":\"st"}
 {"tMs":47067,"delta":"arDinner\",\"n"}
-{"tMs":47133,"delta":"ode\":{\"type\":\"bo"}
-{"tMs":47200,"delta":"x\",\"layout\":{\"wi"}
+{"tMs":47133,"delta":"ode\":{\"type\":\"path"}
+{"tMs":47200,"delta":"\",\"layout\":{\"wi"}
 {"tMs":47267,"delta":"dth\":10,\"height\""}
 {"tMs":47333,"delta":":10},\"decoration"}
 {"tMs":47383,"delta":"\":{\"fills\":["}
 {"tMs":47417,"delta":"{\"color\""}
 {"tMs":47483,"delta":":\"#FFE5814F\"}]},"}
 {"tMs":47500,"delta":"\"pro"}
-{"tMs":47533,"delta":"ps\":{\"pa"}
-{"tMs":47600,"delta":"th\":\"M5 0 L6.2 3"}
+{"tMs":47533,"delta":"ps\":{\"da"}
+{"tMs":47600,"delta":"ta\":\"M5 0 L6.2 3"}
 {"tMs":47617,"delta":".8 L"}
 {"tMs":47683,"delta":"10 5 L6.2 6.2 L5"}
 {"tMs":47700,"delta":" 10 "}
@@ -3670,8 +3670,8 @@
 {"tMs":154567,"delta":"risk"}
 {"tMs":154583,"delta":"\",\"n"}
 {"tMs":154617,"delta":"ode\":{\"t"}
-{"tMs":154650,"delta":"ype\":\"bo"}
-{"tMs":154700,"delta":"x\",\"layout\":"}
+{"tMs":154650,"delta":"ype\":\"path"}
+{"tMs":154700,"delta":"\",\"layout\":"}
 {"tMs":154767,"delta":"{\"width\":18,\"hei"}
 {"tMs":154817,"delta":"ght\":18},\"de"}
 {"tMs":154833,"delta":"cora"}
@@ -3681,14 +3681,13 @@
 {"tMs":155033,"delta":"roke"}
 {"tMs":155067,"delta":"Width\":1"}
 {"tMs":155100,"delta":".2},\"pro"}
-{"tMs":155167,"delta":"ps\":{\"path\":\"M9 "}
+{"tMs":155167,"delta":"ps\":{\"strokeJoin\":\"round\",\"data\":\"M9 "}
 {"tMs":155200,"delta":"0 L9 18 "}
 {"tMs":155250,"delta":"M0 9 L18 9 M"}
 {"tMs":155283,"delta":"2.6 2.6 "}
 {"tMs":155350,"delta":"L15.4 15.4 M15.4"}
-{"tMs":155417,"delta":" 2.6 L2.6 15.4\","}
-{"tMs":155483,"delta":"\"strokeJoin\":\"ro"}
-{"tMs":155517,"delta":"und\"}}},"}
+{"tMs":155417,"delta":" 2.6 L2.6 15.4\""}
+{"tMs":155517,"delta":"}}},"}
 {"tMs":155583,"delta":"\n{\"op\":\"set\",\"id"}
 {"tMs":155650,"delta":"\":\"searchLabel\","}
 {"tMs":155683,"delta":"\"node\":{"}

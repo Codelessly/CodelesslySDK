@@ -1,54 +1,45 @@
-## Unreleased: schema 4
+## 30.1.0 (unreleased)
 
-Requires the codelessly_api of the same release (schema 4).
-
-**Schema 4: one Transform, one Hero.** Every loader reads `"schema": 2`, `3` and `4`, migrating 2 and 3 in
-memory (`migrate2to3`, `migrate3to4`), never writing back; a stored document or bundle in a newer schema is
-refused, the message naming 2, 3 and 4 (`kLoadableSchemas` is `{2, 3, 4}`). The render command publishes
-schema 4.
+Requires codelessly_api 30.1.0. **The schema stays 3**: every loader reads `"schema": 2` and `3`, migrating 2 in
+memory (`migrate2to3`), never writing back (`kLoadableSchemas` is `{2, 3}`). 30.0.0's schema-3 documents keep
+loading, read as they are: one written with 30.0.0's spellings of a node's scale and rotation, its flight key, a
+stroke path, a box drawn as a path or per-shape paints must be updated (codelessly_api's changelog has the
+mapping; a schema-2 document is migrated to the one spelling when it loads).
 
 - **A node's scale and rotation are its motion.** The chain's own `scale` layer and the `RenderTransform` of
-  `layout.rotation` are gone: `RenderMotion` draws them (schema 4 folded them into `motion.scale` and
-  `motion.rotate`; the migration keeps schema 3's rotation pivot, moved by half an uneven margin, as a
-  translation). A state style that moves a node (`states.pressed.<id>.motion`) keeps its motion layer at rest,
-  as the scale layer was kept (a layer added mid-press lost the tap). Older documents draw pixel for pixel as
-  before: the parity goldens are unchanged, and 48 renders of 16 corpus documents (reference apps, an
-  experiment, the SDK's benchmark and example) and a schema-3 page of state scales and rotations (at rest,
-  hovered, selected) match codelessly_sdk 30.0.0's (codelessly_api docs/design/03-motion.md).
+  `layout.rotation` are gone: `RenderMotion` draws `motion.scale` and `motion.rotate` (the migration keeps
+  30.0.0's rotation pivot, moved by half an uneven margin, as a translation). A state style that moves a node
+  (`states.pressed.<id>.motion`) keeps its motion layer at rest, as the scale layer was kept (a layer added
+  mid-press lost the tap). Migrated documents draw pixel for pixel as before: the parity goldens are unchanged,
+  and 48 renders of 16 corpus documents and a page of state scales and rotations (at rest, hovered, selected)
+  match codelessly_sdk 30.0.0's (codelessly_api docs/design/03-motion.md).
 - **One shared element.** `hero` with `flies: betweenScreens` (Flutter's `Hero`) is the navigation flight, its
   look `flightShuttle` (`RenderHeroMark.flightShuttle`, was `flight`); `flies: inPlace` is what `flightKey`
   was: `RenderFlightBox` flies it in from where the node with its tag was, on a spring or as its `flight`
   says, and a dropped drag copy records its place under that tag. The two kinds don't fly to each other.
-- **Run time:** a `setValue` path schema 4 moved (`scale`, `layout.rotation`, `flightKey`, `flight.*`) that
-  reaches a running app unmigrated (from a script or another document) sets nothing and says, once, what to
-  write (`olderSchemaPathHint`), as schema-2 paths already did.
-- **Tests:** test/motion/schema4_transform_test.dart (an older document's scale, rotation and uneven margin
-  drawn where 30.0.0 drew them; a state's scale snapping beside an easing motion; a scale transition on its own
-  timing; setValue paths), hero and in-place flight tests, schema 4 in the loading and relay-site tests. The
-  catalog corpus digests of the five files whose documents hold a moved field were taken again at schema 4.
-
-**Schema 4's paint:** `strokePath`, a box's `path`, `subpathColors` and `gradientPerSubpath` are migrated onto
-`customPaint` and the path node (codelessly_api's `paintSteps4`).
-
 - **A `customPaint` path op's `commands`** draw: Flutter's `Path` calls (`moveTo`, `lineTo`,
   `quadraticBezierTo`, `cubicTo`, `close`) in order, each number a literal or a formula, a call skipped while its
-  `when` is false. This is what draws a migrated `strokePath`'s curves and `untilWidth`.
-- **The path node reads `strokeMiterLimit`** (`Paint.strokeMiterLimit` of its strokes, default 4 as before).
-- **Breaking: the schema-3 paint painters are gone.** A schema-3 document loads through schema 4's paint steps, so
-  `RenderStrokePath` and `StrokePathPainter` (and their place in `paintLayers`), a box drawn as a path
-  (`buildBoxPath`, `RenderShapePath`'s box painter, the box-path case of the paint plan and of the render tool's
-  `path_overflow`), the path painter's per-shape colors and gradients (`PathShapes`) and `dashPath` (the box
-  path's dashes) are deleted. A stroke path's draw-on animation (`drawMs`) is not drawn: the migration keeps it as
-  `legacy.strokePath.draw` and the line shows at its progress at once.
-- `test/custom_paint/migrated_paint_test.dart`: each schema-3 feature as the migration rewrites it, matched
-  against a golden (test/custom_paint/goldens) taken while schema 3's painters still drew it and agreed (pixel
-  for pixel; a fading fill within 1/255, a box path's fill edge within 3/255). The stroke path and box path tests
-  of test/paint/paths_test.dart check the migrated document's pixels against Flutter's own `Path` calls. The
-  catalog corpus digests of strata_tabs' document and its diagram_0 node were taken again (2 lines). The parity
-  goldens are unchanged.
-
-## Unreleased
-
+  `when` is false; what draws a migrated stroke path's curves and `untilWidth`. **The path node reads
+  `strokeMiterLimit`** (default 4 as before).
+- **Breaking: the 30.0.0 paint painters are gone.** `RenderStrokePath` and `StrokePathPainter` (and their place
+  in `paintLayers`), a box drawn as a path (`buildBoxPath`, `RenderShapePath`'s box painter, the box-path case of
+  the paint plan and of the render tool's `path_overflow`), the path painter's per-shape colors and gradients
+  (`PathShapes`) and `dashPath` (the box path's dashes). A stroke path's draw-on animation (`drawMs`) is not
+  drawn: the migration keeps it as `legacy.strokePath.draw` and the line shows at its progress at once.
+- **Run time:** a `setValue` path 30.1.0 moved (`scale`, `layout.rotation`, `flightKey`, `flight.*`,
+  `strokePath.*`, `props.path`, `props.subpathColors`) that reaches a running app (from a script or another
+  document) sets nothing and says, once, what to write (`olderSchemaPathHint`), as schema-2 paths already did.
+- **Tests:** test/motion/fold_transform_test.dart (a migrated scale, rotation and uneven margin drawn where
+  30.0.0 drew them; a state's scale snapping beside an easing motion; a scale transition on its own timing;
+  setValue paths); hero and in-place flight tests; test/custom_paint/migrated_paint_test.dart (each 30.0.0 paint
+  feature as the migration rewrites it, matched against a golden in test/custom_paint/goldens taken while the
+  30.0.0 painters still drew it and agreed: pixel for pixel, a fading fill within 1/255, a box path's fill edge
+  within 3/255); test/paint/paths_test.dart's stroke path and box path tests check the migrated document's pixels
+  against Flutter's own `Path` calls. The catalog corpus digests of the five files whose documents hold a moved
+  field, and strata_tabs' stroke path, were taken again (179 lines). The recorded op streams of
+  `restaurant_menu` and `saas_pricing` (3 rates each) say their box paths as path nodes (`"type": "path"`,
+  `props.data`), each delta and its time kept but for the characters that changed. The stream chat example's
+  `assets/system_prompt.md` is regenerated.
 - **The reference is one base plus links** (codelessly_api's `docs/reference`). The chat example's compact prompt
   is the base's runtime form (`runtimeStarter()`, ≈ 43.7k characters, ending with the index of `ui_docs`
   topics) and `ui_docs` answers with the reference's pages (`UiSession.docs`, unchanged); its full prompt carries
