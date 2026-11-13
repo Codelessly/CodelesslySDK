@@ -1,0 +1,32 @@
+{
+ "stream": "flights@150tps.jsonl",
+ "size": "1440x900",
+ "source": "synthetic",
+ "rateTokensPerSecond": 150,
+ "ttftMs": 500,
+ "timeToFirstPaintMs": 2653,
+ "timeToFirstSectionMs": 3720,
+ "timeToCompleteMs": 19328,
+ "outputTokens": 2825,
+ "tokensEstimated": true,
+ "chars": 11297,
+ "deltas": 1129,
+ "opsApplied": 45,
+ "opsRejected": 0,
+ "streamedOps": 45,
+ "rejections": [],
+ "nodes": 43,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 6,
+  "max": 9
+ },
+ "frames": 180,
+ "frameMs": 112,
+ "pumpsOverBudget16ms": 0,
+ "pumps": 1310,
+ "pumpMsMedian": 0.072,
+ "renderExceptions": [],
+ "warnings": 0
+}

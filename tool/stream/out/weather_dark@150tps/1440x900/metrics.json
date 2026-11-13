@@ -1,0 +1,32 @@
+{
+ "stream": "weather_dark@150tps.jsonl",
+ "size": "1440x900",
+ "source": "synthetic",
+ "rateTokensPerSecond": 150,
+ "ttftMs": 500,
+ "timeToFirstPaintMs": 973,
+ "timeToFirstSectionMs": 973,
+ "timeToCompleteMs": 1538,
+ "outputTokens": 156,
+ "tokensEstimated": true,
+ "chars": 623,
+ "deltas": 63,
+ "opsApplied": 5,
+ "opsRejected": 0,
+ "streamedOps": 5,
+ "rejections": [],
+ "nodes": 54,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 3,
+  "p90": 7,
+  "max": 7
+ },
+ "frames": 36,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 100,
+ "pumpMsMedian": 0.14,
+ "renderExceptions": [],
+ "warnings": 0
+}

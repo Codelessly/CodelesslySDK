@@ -1,0 +1,32 @@
+{
+ "stream": "saas_pricing@60tps.jsonl",
+ "size": "390x844",
+ "source": "synthetic",
+ "rateTokensPerSecond": 60,
+ "ttftMs": 500,
+ "timeToFirstPaintMs": 12100,
+ "timeToFirstSectionMs": 23350,
+ "timeToCompleteMs": 253067,
+ "outputTokens": 15154,
+ "tokensEstimated": true,
+ "chars": 60616,
+ "deltas": 6062,
+ "opsApplied": 202,
+ "opsRejected": 0,
+ "streamedOps": 202,
+ "rejections": [],
+ "nodes": 196,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 14,
+  "max": 51
+ },
+ "frames": 181,
+ "frameMs": 1411,
+ "pumpsOverBudget16ms": 52,
+ "pumps": 6244,
+ "pumpMsMedian": 0.097,
+ "renderExceptions": [],
+ "warnings": 8
+}
