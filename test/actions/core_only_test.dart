@@ -11,12 +11,14 @@ import 'package:codelessly_sdk/src/runtime/contracts.dart';
 import 'package:codelessly_sdk/src/runtime/expressions/scopes.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Node clickNode(List<Json> actions) => Node.fromJson({
+/// A node with [actions] on click, decoded as a published layout is (with
+/// the standard catalog: the full editor's types, typed).
+Node clickNode(List<Json> actions, {Catalog catalog = standardCatalog}) => Node.fromJson({
       'type': 'box',
       'actions': [
         {'trigger': {'type': 'click'}, 'actions': actions},
       ],
-    }, id: 'n')!;
+    }, id: 'n', catalog: catalog)!;
 
 Json setVar(String name, String value, {String op = 'set'}) =>
     {'type': 'setVariable', 'variable': name, 'value': value, 'op': op};
@@ -109,6 +111,16 @@ void main() {
       expect('${failure.error}', contains("isn't installed"));
     });
   }
+
+  test('decoded with the core catalog, a feature action is a type nobody declared: skipped', () async {
+    await const CoreActions().run(
+        clickNode([setVar('n', '1', op: 'add'), {'type': 'callApi'}, setVar('n', '1', op: 'add')], catalog: Catalog.core),
+        'click',
+        context);
+    expect(scope.read('n'), 2);
+    expect(errors, isEmpty);
+    expect(const CoreActions().catalog, same(Catalog.core));
+  });
 
   test('a feature function that is not installed is a missing function', () async {
     await click([

@@ -4,7 +4,7 @@
 // moves as it types.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' show SizedBox, WidgetSpan;
 import 'package:flutter/scheduler.dart';

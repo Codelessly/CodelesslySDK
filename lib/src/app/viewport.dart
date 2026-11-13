@@ -3,7 +3,7 @@
 // autoScale one at its design size, scaled to fit the width.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' show CanvasProps, Node, ScaleMode, SizeFit;
+import 'package:codelessly_api/core.dart' show CanvasProps, Node, ScaleMode, SizeFit;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 

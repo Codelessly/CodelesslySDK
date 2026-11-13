@@ -1,6 +1,6 @@
 // What a script run can reach by name, so a run is sent only that: the
 // other scripts it calls and the variables they read or write.
-import 'package:codelessly_api/codelessly_api.dart' show ScriptDef;
+import 'package:codelessly_api/core.dart' show ScriptDef;
 
 /// What a run of a script can reach by name: the other scripts it calls
 /// (`script.name(...)`, transitively) and the variables it and they read or

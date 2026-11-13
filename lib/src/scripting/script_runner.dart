@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, ScriptCapability, ScriptDef, ScriptParam, ScriptTest;
+import 'package:codelessly_api/core.dart' show Json, ScriptCapability, ScriptDef, ScriptParam, ScriptTest;
 
 import '../services/scripts.dart';
 import 'sandbox/script_sandbox.dart';

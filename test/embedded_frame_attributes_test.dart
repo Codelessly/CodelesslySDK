@@ -1,6 +1,6 @@
 // The embedded player's iframe can load under a cross-origin-isolated site
 // (site.codelessly.com sends Cross-Origin-Embedder-Policy: credentialless).
-import 'package:codelessly_sdk/src/widgets/embedded_media_protocol.dart';
+import 'package:codelessly_sdk/src/features/media/embedded_media_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

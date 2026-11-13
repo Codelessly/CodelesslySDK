@@ -3,8 +3,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/animation.dart' show Curves;
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/physics.dart';

@@ -1,8 +1,8 @@
 // A list item swiped sideways to reveal its list's swipe actions.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Json, SwipeAction, SwipeActions;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Json, SwipeAction, SwipeActions;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show CustomSemanticsAction;
 import 'package:flutter/services.dart' show HapticFeedback;

@@ -1,6 +1,6 @@
 // Data-change motion for the indicator types whose contract includes animate.
 // Reuse the render object so bound values can change without restarting from 0.
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart'
     show
         Node,
         ProgressBarProps,

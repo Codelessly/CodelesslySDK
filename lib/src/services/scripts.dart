@@ -6,7 +6,7 @@
 // web), the default; [FunctionScriptRunner] runs Dart instead.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, ScriptDef;
+import 'package:codelessly_api/core.dart' show Json, ScriptDef;
 
 /// What a script can reach in the app: the screen's variables and inputs,
 /// and host calls (`navigate`, `back`, `callApi`, `cloudData`, `runAction`,

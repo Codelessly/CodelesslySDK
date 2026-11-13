@@ -1,6 +1,6 @@
 // The expression language: `${path}` reads a value, `${= formula}` computes
 // one, and any other `${...}` in a text is replaced by its value's text.
-import 'package:codelessly_api/codelessly_api.dart' show Node, Predicate, Comparison, Junction, Join, ConditionOp,
+import 'package:codelessly_api/core.dart' show Node, Predicate, Comparison, Junction, Join, ConditionOp,
     ConditionOperand;
 
 import '../contracts.dart';

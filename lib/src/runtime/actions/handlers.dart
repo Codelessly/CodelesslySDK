@@ -5,9 +5,9 @@ import 'dart:async';
 
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_api/core.dart';
 import 'package:flutter/rendering.dart' as rendering show Axis;
-import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderBox, RenderObject, RenderViewportBase;
+import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
@@ -19,7 +19,6 @@ import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
 import '../../render/transform_gesture.dart' show TransformGestures;
 import '../../render/play.dart' show EffectPlayers;
-import '../../render/paint/image_fill.dart' show preloadImage;
 import '../../render/particles.dart' show ParticlePlayers;
 import '../../scripting/formula_scripts.dart' show ScriptsScope;
 import '../expressions/bindings.dart' show RenderTreeBinder;
@@ -27,8 +26,6 @@ import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
-import 'app_events.dart';
-import 'capture.dart';
 import 'context.dart';
 import 'feedback_theme.dart' show Look;
 import 'route_transition.dart' show RevealAnchor;
@@ -38,10 +35,26 @@ import 'text_fields.dart';
 import 'values.dart';
 import 'variable_animator.dart';
 export 'files.dart' show pickFiles, sourceFiles;
-import '../../app/fonts.dart' show CodelesslyFonts;
+import '../font_loads.dart';
 
-/// Runs [a] with its built-in handler.
+/// Runs [a] with its built-in handler: the core action types
+/// ([CoreAction]). Every other declared type is a feature's: its handler is
+/// registered by the feature (feature.dart) and runs before this is reached.
 Future<void> handleAction(ActionDef a, ActionRun run) async {
+  switch (a) {
+    case CoreAction():
+      await _handleCore(a, run);
+    case UnknownAction():
+      break;
+    default:
+      throw StateError("No handler for action '${a.type}': the feature that runs it isn't installed "
+          '(CodelesslyActions installs the first-party features; CoreActions none).');
+  }
+}
+
+/// The core action types, one case each: exhaustive, so a core type added
+/// to the API without a handler doesn't compile.
+Future<void> _handleCore(CoreAction a, ActionRun run) async {
   switch (a) {
     case NavigateAction():
       await run.host.ui.navigate(a, params: run.json(a.params), baseParams: run.json(a.baseParams));
@@ -123,8 +136,6 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       // On the animation clock, as the motion it's usually timed against:
       // slowed animations (timeDilation) slow the chain with them.
       await run.wait(Duration(milliseconds: delayMilliseconds(a, run)) * timeDilation);
-    case PreloadImagesAction():
-      run.result = await _preloadImages(a, run);
     case CopyToClipboardAction():
       await Clipboard.setData(ClipboardData(text: run.text(a.text)));
     case EditTextAction():
@@ -168,18 +179,6 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
       break;
     case PaginateAction():
       await paginateAction(a, run);
-    case EmitEventAction():
-      final name = run.text(a.event).trim();
-      if (name.isNotEmpty) AppEventBus.of(run.context.services)?.emit(name, run.json(a.props));
-    case CaptureScreenshotAction():
-      run.result = await _captureScreenshot(a, run);
-    case UnknownAction():
-      break;
-    default:
-      // A feature's action type: its handler is registered by the feature
-      // (feature.dart) and runs before this is reached.
-      throw StateError("No handler for action '${a.type}': the feature that runs it isn't installed "
-          '(CodelesslyActions installs the first-party features; CoreActions none).');
   }
 }
 
@@ -371,24 +370,6 @@ Future<void> _forEach(ForEachAction a, ActionRun run) async {
   }
 }
 
-// --- capture -------------------------------------------------------------------------------
-
-Future<Object?> _captureScreenshot(CaptureScreenshotAction a, ActionRun run) async {
-  // Let a change the chain just made paint first.
-  if (SchedulerBinding.instance.hasScheduledFrame) await SchedulerBinding.instance.endOfFrame;
-  final tree = run.host.tree;
-  final layout = CaptureRegistry.layoutOf(tree);
-  final boundary = a.target == CaptureTarget.app ? CaptureRegistry.app ?? layout : layout ?? CaptureRegistry.app;
-  if (boundary == null) throw StateError('Nothing to capture: no layout or capture scope is shown');
-  RenderBox? box;
-  if (a.target == CaptureTarget.node) {
-    final id = run.text(a.node).trim();
-    box = tree?.boxOf(id);
-    if (box == null) throw StateError('No node [$id] on screen to capture');
-  }
-  return captureImage(boundary, box: box, pixelRatio: a.pixelRatio);
-}
-
 // --- forms and text fields -------------------------------------------------------------
 
 Future<void> _focus(FocusAction a, ActionRun run) async {
@@ -518,8 +499,8 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   // Fonts still loading (a layout shows after waiting a while for them)
   // re-measure the text above the target when they arrive: wait for them,
   // so a jump from a screen's `load` lands where it means.
-  if (CodelesslyFonts.loading) {
-    await CodelesslyFonts.settled.timeout(const Duration(seconds: 10), onTimeout: () {});
+  if (FontLoads.loading) {
+    await FontLoads.settled.timeout(const Duration(seconds: 10), onTimeout: () {});
     SchedulerBinding.instance.scheduleFrame();
     await SchedulerBinding.instance.endOfFrame;
     if (!box.attached) return;
@@ -581,32 +562,6 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   // No scroll view of its own around it: as the render tree reveals it.
   if (viewports == 0 && a.axis == null) target.showOnScreen(duration: duration, curve: curve);
   await Future.wait(scrolls);
-}
-
-Future<Json> _preloadImages(PreloadImagesAction a, ActionRun run) async {
-  // A list from an expression, or comma-separated text.
-  final Object? value = a.urls.contains(r'${') ? run.evaluate(a.urls) : a.urls;
-  final urls = <String>{
-    ...switch (value) {
-      final List<Object?> l => [for (final u in l) if (u != null) '$u'],
-      final String t => t.split(','),
-      _ => const <String>[],
-    }.map((u) => u.trim()).where((u) => u.isNotEmpty),
-  }.toList();
-  final progress = a.progressVariable.trim();
-  var done = 0, failed = 0;
-  void report() {
-    if (progress.isNotEmpty && !run.isCanceled) setVariableIn(run.context.scope, progress, urls.isEmpty ? 1.0 : done / urls.length);
-  }
-
-  report();
-  await Future.wait(urls.map((u) async {
-    final ok = await preloadImage(u);
-    done++;
-    if (!ok) failed++;
-    report();
-  }));
-  return {'loaded': done - failed, 'failed': failed, 'total': urls.length};
 }
 
 /// Whether [text] holds `${...}` (an expression, not a literal).

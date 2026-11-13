@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_sdk/src/widgets/media_players.dart';
+import 'package:codelessly_sdk/src/features/media/players.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

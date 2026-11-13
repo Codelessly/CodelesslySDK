@@ -1,6 +1,6 @@
 // The paginate action: moves the
 // pagination controller it names on the action's screen.
-import 'package:codelessly_api/codelessly_api.dart' show PaginateAction, PaginateCommand;
+import 'package:codelessly_api/core.dart' show PaginateAction, PaginateCommand;
 import 'package:flutter/foundation.dart';
 
 import '../actions/runner.dart';

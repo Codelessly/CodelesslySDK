@@ -8,7 +8,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/physics.dart';
 
 /// The spring [physics] settles on: Flutter's

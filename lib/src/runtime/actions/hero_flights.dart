@@ -7,7 +7,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:codelessly_api/codelessly_api.dart' show HeroFlightShuttle, HeroPlaceholder;
+import 'package:codelessly_api/core.dart' show HeroFlightShuttle, HeroPlaceholder;
 import 'package:flutter/material.dart';
 
 import '../../render/hero.dart';

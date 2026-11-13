@@ -22,6 +22,7 @@ const CodelesslyFeature commerceFeature = CodelesslyFeature(
   name: 'commerce',
   actions: {PaywallAction.typeName: _paywall},
   scopes: {'entitlements': _entitlementsScope},
+  catalog: commerceCatalog,
 );
 
 /// What the app shell attaches to an action context

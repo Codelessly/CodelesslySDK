@@ -1,8 +1,8 @@
 // Whether a list view can be measured: a list that lays every item out (a
 // Flex or a Wrap) has intrinsic sizes; one that builds its items as they
 // scroll into view (a viewport) doesn't.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show CollectionScrollProps, ListViewProps, Node, SizeFit;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show CollectionScrollProps, ListViewProps, Node, SizeFit;
 
 /// The list flows its items onto runs (a Wrap); only a plain list layout does.
 bool listWraps(Node n) => n.prop(ListViewProps.wrap) && n.prop(ListViewProps.layout) == api.ListLayout.list;

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'package:video_player/video_player.dart';
-import '../../widgets/media_players.dart' show isRemoteMediaUrl;
+import 'players.dart' show isRemoteMediaUrl;
 import 'media_probe_metadata.dart';
 import 'platform/media_probe_stub.dart' if (dart.library.js_interop) 'platform/media_probe_web.dart' as platform;
 

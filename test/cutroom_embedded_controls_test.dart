@@ -1,5 +1,5 @@
 import 'package:codelessly_api/codelessly_api.dart';
-import 'package:codelessly_sdk/src/widgets/embedded_media_protocol.dart';
+import 'package:codelessly_sdk/src/features/media/embedded_media_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Node node(Map<String, Object?> props) => Node.fromJson({

@@ -2,7 +2,7 @@
 // number, boolean, list and map operations, on typed values.
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show ValueWrite, VariableType, WriteOp;
+import 'package:codelessly_api/core.dart' show ValueWrite, VariableType, WriteOp;
 
 import '../contracts.dart';
 import '../expressions/engine.dart';

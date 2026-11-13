@@ -12,7 +12,7 @@
 //
 // `NodeInteractions` (node_tree.dart) is the fourth: a running app's
 // reactions.
-import 'package:codelessly_api/codelessly_api.dart' show Node, WidgetState;
+import 'package:codelessly_api/core.dart' show Node, WidgetState;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart' show RenderBox;
 
