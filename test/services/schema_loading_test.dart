@@ -140,4 +140,19 @@ void main() {
     await expectLater(FirestorePublishLoader(db, projectId: 'p1').loadModel(PublishSource.publish),
         throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('newer than this SDK'))));
   });
+
+  test('a bundle newer than this SDK reads is refused, saying so', () async {
+    final bundle = {
+      'schema': 4,
+      'model': {...model2(), 'schema': 4},
+      'layouts': {layoutId: layout2()},
+    };
+    final loader = HttpPublishLoader(
+        projectId: 'p1',
+        baseUrl: 'http://x',
+        bundle: true,
+        client: MockClient((_) async => http.Response(jsonEncode(bundle), 200)));
+    await expectLater(loader.loadModel(PublishSource.publish),
+        throwsA(isA<PublishLoadException>().having((e) => e.message, 'message', contains('newer than this SDK'))));
+  });
 }
