@@ -86,8 +86,10 @@ class TreeReactions implements NodeInteractions {
     }
     if (selfTappedTypes.contains(n.type)) pointer.remove(TriggerType.click);
     // A node with a drag drags itself: it fires its swipes when it flies
-    // off, and its drag and drag end (gestures/drag_motion.dart).
-    if (n.behaviors.drag != null) pointer.removeAll({...TriggerType.swipes, TriggerType.dragStart, TriggerType.drag, TriggerType.dragEnd});
+    // off, and its drag and drag end (gestures/drag_motion.dart,
+    // render/drag_track.dart); a reorder handle's list takes its drag.
+    final be = n.behaviors;
+    if (be.track != null || be.dismissible != null || be.pan != null || be.reorderHandle) pointer.removeAll({...TriggerType.swipes, TriggerType.dragStart, TriggerType.drag, TriggerType.dragEnd});
     // A transform gesture that zooms on a double tap fires its doubleTap
     // (render/transform_gesture.dart).
     if (n.behaviors.effectiveTransformGesture case final g? when g.zoom && g.doubleTapScale > 0) {

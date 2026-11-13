@@ -229,12 +229,12 @@ void main() {
     final s = await show(tester, actions: [react('swipeRight', [record('swiped', 'right')])], variables: [
       const Variable(name: 'swiped', type: VariableType.text, value: ''),
     ]);
-    final flung = DragMotionControl.control('card', api.DragCommand.fling, api.DragDirection.right);
+    final flung = DragMotionControl.control('card', api.DismissCommand.dismiss, api.DragDirection.right);
     await tester.pumpAndSettle();
     expect(await flung, isTrue);
     expect(s.scope.read('swiped'), 'right');
 
-    final back = DragMotionControl.control('card', api.DragCommand.returnFrom, api.DragDirection.left);
+    final back = DragMotionControl.control('card', api.DismissCommand.returnFrom, api.DragDirection.left);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 16));
     // Starts off-screen on the left and glides in.
@@ -243,7 +243,7 @@ void main() {
     await back;
     expect(s.values().offset, Offset.zero);
 
-    await DragMotionControl.control('card', api.DragCommand.shake, api.DragDirection.right);
+    await DragMotionControl.control('card', api.DismissCommand.shake, api.DragDirection.right);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 40));
     expect(s.values().offset.dx, isNot(0));
@@ -282,7 +282,7 @@ void main() {
 
   testWidgets('a returning card built in the next frame starts off-screen', (tester) async {
     await tester.pumpWidget(const SizedBox());
-    final back = DragMotionControl.control('card', api.DragCommand.returnFrom, api.DragDirection.up);
+    final back = DragMotionControl.control('card', api.DismissCommand.returnFrom, api.DragDirection.up);
     final s = await show(tester);
     expect(s.values().offset.dy, lessThan(-300));
     await tester.pumpAndSettle();

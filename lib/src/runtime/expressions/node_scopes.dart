@@ -65,11 +65,10 @@ Map<String, Object?> nodeScopeValues(Node node, ValueScope parent) {
 /// Whether [node] declares any name for the nodes inside it.
 bool declaresNodeScope(Node node) {
   final be = node.behaviors;
-  return be.drag?.track != null ||
+  return be.track != null ||
       be.flip != null ||
       be.tilt != null ||
       be.transformGesture != null ||
-      be.zoomable ||
       be.sticky != null ||
       be.viewProgress != null ||
       be.animations.isNotEmpty ||
@@ -127,17 +126,17 @@ Map<String, Object?>? animationScopeValues(Node node, ValueScope parent) {
 /// A drag track's `track`: the value it's drawn at and its progress (as
 /// the design canvas draws it), not dragged, fine or focused.
 Map<String, Object?>? trackScopeValues(Node node, ValueScope parent) {
-  final track = node.behaviors.drag?.track;
+  final track = node.behaviors.track;
   if (track == null) return null;
   final value = trackValueIn(track, parent);
   return {'track': trackValues(track, value)};
 }
 
 /// The value [track] is drawn at, read in [scope]: its bound value
-/// (`drag.track.value`), else its variable's, else its default or start;
+/// (`track.value`), else its variable's, else its default or start;
 /// NaN (empty) for a track that parks such a value
-/// ([api.DragTrack.parkedProgress]).
-double trackValueIn(api.DragTrack track, ValueScope? scope) =>
+/// ([api.Track.parkedProgress]).
+double trackValueIn(api.Track track, ValueScope? scope) =>
     trackValueFrom(track, scope == null ? null : (path) => readPath(scope, path));
 
 /// A flip card's `flip`: on its back or not, and the turn (0 front, 1
@@ -169,7 +168,7 @@ Map<String, Object?>? tiltScopeValues(Node node, ValueScope parent) {
 /// the live pose).
 Map<String, Object?>? transformScopeValues(Node node, ValueScope parent) {
   final be = node.behaviors;
-  if (be.transformGesture == null && !be.zoomable) return null;
+  if (be.transformGesture == null) return null;
   return const {
     'transform': {'x': 0, 'y': 0, 'scale': 1, 'rotation': 0, 'scaleX': 1, 'scaleY': 1, 'active': false, 'selected': true},
   };

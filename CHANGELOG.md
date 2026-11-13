@@ -1,5 +1,32 @@
 ## Unreleased
 
+**Drag and track** (codelessly_api's docs/design/04-drag-and-track.md)
+
+- A node's `track`, `dismissible`, `pan` and `reorderHandle` are rendered from their own keys; the legacy `drag`
+  reads into them (in codelessly_api), so existing documents behave as before. The three-way
+  `drag.track == null && !drag.reorder` switches are gone.
+- `${dismiss.*}` inside a dismissible and `${pan.*}` inside a pan, beside the legacy `${drag.*}` (same values).
+- Actions `controlTrack` (`step`, and new `animateTo`), `controlDismissible`, `controlTransform`;
+  `controlDrag` runs as the one its command names (a `reset` on a node without a transform gesture resets its
+  dismissible or pan, as before).
+- A track's coast runs on its `GesturePhysics` as Flutter's `FrictionSimulation`; snapping onto a step and a
+  smooth track's glide are critically damped `SpringSimulation`s (the private exponential loops are gone).
+  An unbounded (`clamp: false`) path track goes round again.
+
+**Behaviour changes**
+
+- `flyOutDistance` (no users) is gone: a dismissed card always flies past the screen edge.
+- A pan's `${drag.left/right/up/down/progress}` measure toward the default 0.35 threshold (a non-dismissing
+  drag's `distanceThreshold`, which did nothing else, is not read).
+- A coast and a snap follow the shared simulations: the same end values, slightly different timing.
+
+**Breaking changes for Dart callers**
+
+- `DragMotionControl.control` takes an `api.DismissCommand` (was `api.DragCommand`).
+- `followsPointer` is true for a dismissible or a pan; `FollowSpec` (new) is what `RenderDragMotion` runs.
+- `DragTracks.animateTo` (new). `trackValues`, `trackValueFrom`, `trackValueIn`, `TrackGeometry`,
+  `RenderTrackPose`, `RenderDragTrack` take `api.Track` (was `api.DragTrack`).
+
 **New: catalogs and plugins** (codelessly_api's `Catalog` and feature libraries; its docs/design/05-plugins-and-layers.md)
 
 - `CodelesslyFeature.catalog` and `recipes`: a feature (or native plugin) declares its node and action types and

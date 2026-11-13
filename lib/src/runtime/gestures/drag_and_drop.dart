@@ -122,7 +122,7 @@ class DragSession {
   final Size size;
 
   /// Where the pointer holds the dragged node, from its top left: where it
-  /// was grabbed, or its center ([api.FeedbackAnchor.center]).
+  /// was grabbed, or its center ([api.DragAnchor.center]).
   Offset grab = Offset.zero;
 
   /// Where the feedback is held from its top left: [grab], or zero for a
@@ -638,8 +638,8 @@ class _SourceDrag implements Drag {
     if (overlay == null || box == null) return;
     _overlayBox = overlay.context.findRenderObject() as RenderBox?;
     final model = source._model;
-    final feedbackId = model.feedbackNodeId.isNotEmpty && box.tree.source.node(model.feedbackNodeId) != null
-        ? model.feedbackNodeId
+    final feedbackId = model.feedback.isNotEmpty && box.tree.source.node(model.feedback) != null
+        ? model.feedback
         : '';
     final rootId = feedbackId.isEmpty ? box.id : feedbackId;
     // A tree of its own over the same nodes and bindings: what the node
@@ -701,7 +701,7 @@ class _SourceDrag implements Drag {
       );
     }
     feedback = Material(type: MaterialType.transparency, child: feedback);
-    if (model.feedbackAnchor == api.FeedbackAnchor.center) {
+    if (model.dragAnchor == api.DragAnchor.center) {
       feedback = FractionalTranslation(translation: const Offset(-0.5, -0.5), child: feedback);
     }
     feedback = IgnorePointer(child: feedback);
@@ -816,7 +816,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     _box = box;
     _model = model;
     _data = n.bind['draggable.data'] ?? model.data;
-    final f = model.feedbackNodeId.isEmpty ? null : box.tree.source.node(model.feedbackNodeId);
+    final f = model.feedback.isEmpty ? null : box.tree.source.node(model.feedback);
     _feedbackSize = f == null ? null : Size(f.layout.width.value, f.layout.height.value);
     _feedbackHugs = f == null ? (false, false) : (f.layout.width.isHug, f.layout.height.isHug);
     if (restart) {
@@ -860,7 +860,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     var collapsed = false;
     double? ghost;
     if (dragged) {
-      switch (_model.whileDragging) {
+      switch (_model.childWhenDragging) {
         // Collapses while over a target that would take it, so the slot
         // there is the only place it shows; ghosts elsewhere (and over a
         // full target) so it can be found again.
@@ -1012,7 +1012,7 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     )..grab = globalToLocal(position);
     // A centered copy is held by the center of what is dragged (the feedback
     // node at its own size): `drag.x` and `drag.y` are then the pointer.
-    final centered = _model.feedbackAnchor == api.FeedbackAnchor.center;
+    final centered = _model.dragAnchor == api.DragAnchor.center;
     if (centered) session.grab = session.size.center(Offset.zero);
     session.feedbackAnchor = centered ? Offset.zero : session.grab;
     final drag = _drag = _SourceDrag(this, session, position);
