@@ -1,3 +1,17 @@
+## Unreleased: schema 4's paint steps
+
+Requires codelessly_api with `paintSteps4` (its unreleased "schema 4's paint steps").
+
+- **A `customPaint` path op's `commands`** draw: Flutter's `Path` calls (`moveTo`, `lineTo`,
+  `quadraticBezierTo`, `cubicTo`, `close`) in order, each number a literal or a formula, a call skipped while its
+  `when` is false. This is what draws a migrated `strokePath`'s curves and `untilWidth`.
+- **The path node reads `strokeMiterLimit`** (`Paint.strokeMiterLimit` of its strokes, default 4 as before).
+- The stroke path layer (`RenderStrokePath`, `StrokePathPainter`), the box path painter and the path painter's
+  per-shape colors and gradients are marked schema 3 only: a migrated document draws through `customPaint` and the
+  path node instead, and they go with schema 4's version gate.
+- `test/custom_paint/migrated_paint_test.dart`: each schema-3 feature drawn as schema 3 drew it and as the steps
+  rewrote it, pixel for pixel.
+
 ## Unreleased
 
 - **The reference is one base plus links** (codelessly_api's `docs/reference`). The chat example's compact prompt
