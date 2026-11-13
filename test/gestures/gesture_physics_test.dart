@@ -10,19 +10,19 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('springOf', () {
     test('bounce and duration use withDurationAndBounce', () {
-      final spring = springOf(const api.GesturePhysics(bounce: 0.3, duration: 300));
+      final spring = springOf(const api.GesturePhysics(spring: api.Spring(duration: 300, bounce: 0.3)));
       const double k = 4 * math.pi * math.pi / (0.3 * 0.3);
       expect(spring.stiffness, closeTo(k, 1e-6));
       expect(spring.damping, closeTo(0.7 * 2 * math.sqrt(k), 1e-6));
       // The API's numbers are the same as Flutter's.
-      const api.GesturePhysics model = api.GesturePhysics(bounce: 0.3, duration: 300);
+      const api.GesturePhysics model = api.GesturePhysics(spring: api.Spring(duration: 300, bounce: 0.3));
       expect(model.effectiveStiffness, closeTo(spring.stiffness, 1e-6));
       expect(model.effectiveDamping, closeTo(spring.damping, 1e-6));
     });
 
     test('a plain spring keeps its stiffness, damping and mass', () {
       final spring = springOf(
-        const api.GesturePhysics(stiffness: 200, damping: 30, mass: 2),
+        const api.GesturePhysics(spring: api.Spring.physical(stiffness: 200, damping: 30, mass: 2)),
       );
       expect(spring.stiffness, 200);
       expect(spring.damping, 30);

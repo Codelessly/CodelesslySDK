@@ -12,6 +12,8 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+
+import 'physics.dart' show describeSpring;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -249,11 +251,7 @@ class RenderFlip extends RenderPose {
     final back = commits ? fromFront : !fromFront;
     final s = _flip.spring;
     _spring = SpringSimulation(
-      SpringDescription(
-        mass: s.mass <= 0 ? 1 : s.mass,
-        stiffness: s.stiffness <= 0 ? 1 : s.stiffness,
-        damping: s.damping < 0 ? 0 : s.damping,
-      ),
+      describeSpring(s, stiffnessIfNone: 1),
       _progress,
       back ? 1 : 0,
       velocity,

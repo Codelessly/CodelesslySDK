@@ -2,7 +2,7 @@
 // back) and image particles (petals, seeds, raindrops).
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/play.dart' show keyframePoseAt, RenderEffects;
+import 'package:codelessly_sdk/src/render/animations.dart' show RenderAnimations;
 import 'package:codelessly_sdk/src/render/particles.dart' show RenderParticles;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,9 +16,31 @@ const hop = [
   {'t': 0.88, 'scaleY': 0.9, 'scaleX': 1.05},
 ];
 
+/// A `keyframes` effect's pose at [t]: its preset's tracks (keyframePoseAt
+/// is gone), composed as the player does.
+({double dx, double dy, double sx, double sy, double rotation, double opacity}) keyframePoseAt(
+    List<Map<String, Object?>> keyframes, double t, double amount) {
+  final a = api.AnimationPresets.fromEffect({'type': 'keyframes', 'keyframes': keyframes, 'amount': amount}, 0)!.expanded;
+  final v = {
+    for (final p in ['translateX', 'translateY', 'rotate']) p: 0.0,
+    for (final p in ['scale', 'scaleX', 'scaleY', 'opacity']) p: 1.0,
+  };
+  for (final track in a.tracks) {
+    v[track.id] = api.readDouble(track.valueAt(t))!;
+  }
+  return (
+    dx: v['translateX']!,
+    dy: v['translateY']!,
+    sx: v['scale']! * v['scaleX']!,
+    sy: v['scale']! * v['scaleY']!,
+    rotation: v['rotate']!,
+    opacity: v['opacity']!,
+  );
+}
+
 void main() {
   test('a keyframes pose runs from rest through its keyframes back to rest', () {
-    final kf = [for (final k in hop) api.MotionKeyframe.fromJson(k)!];
+    final kf = hop;
     expect(keyframePoseAt(kf, 0, 1).dy, 0);
     expect(keyframePoseAt(kf, 0.45, 1).dy, -110);
     expect(keyframePoseAt(kf, 0.12, 1).sy, closeTo(0.86, 1e-9));
@@ -33,13 +55,14 @@ void main() {
   });
 
   test('keyframes and curve round-trip; keyframes also read from JSON text (a binding)', () {
-    final e = api.EffectAnimation.fromJson({'name': 'hop', 'type': 'keyframes', 'duration': 700, 'keyframes': hop, 'curve': 'easeOut'})!;
-    expect(e.type, api.EffectAnimationType.keyframes);
-    expect(e.keyframes.length, 4);
+    // The effect reads as a `keyframes` animation.
+    final e = api.AnimationPresets.fromEffect({'name': 'hop', 'type': 'keyframes', 'duration': 700, 'keyframes': hop, 'curve': 'easeOut'}, 0)!;
+    expect(e.preset, 'keyframes');
+    expect((e.params['frames']! as List).length, 4);
     expect(e.curve, api.AnimationCurve.easeOut);
-    expect(api.EffectAnimation.fromJson(e.toJson()), e);
-    final text = api.EffectAnimation.fromJson({'name': 'hop', 'type': 'keyframes', 'keyframes': '[{"t": 0.5, "translateY": -40}]'})!;
-    expect(text.keyframes.single.translateY, -40);
+    expect(api.NodeAnimation.fromJson(e.toJson()), e);
+    final text = api.AnimationPresets.fromEffect({'name': 'hop', 'type': 'keyframes', 'keyframes': '[{"t": 0.5, "translateY": -40}]'}, 0)!;
+    expect(text.expanded.tracks.single.keyframes.single.value, -40);
     final p = api.ParticleEmitter.fromJson({'shapes': ['image'], 'image': 'https://example.com/petal.png'})!;
     expect(p.shapes, [api.ParticleShape.image]);
     expect(api.ParticleEmitter.fromJson(p.toJson()), p);
@@ -68,10 +91,10 @@ void main() {
       root: 'col',
       variables: [support.v('taps', 0, api.VariableType.integer)],
     );
-    RenderEffects effects() {
-      RenderEffects? found;
+    RenderAnimations effects() {
+      RenderAnimations? found;
       void visit(RenderObject o) {
-        if (o is RenderEffects) found = o;
+        if (o is RenderAnimations) found = o;
         o.visitChildren(visit);
       }
 
@@ -92,11 +115,11 @@ void main() {
     screen.scope.set('taps', 1);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 450));
-    final mid = effects().transform.getTranslation();
+    final mid = effects().effectiveTransform.getTranslation();
     expect(mid.y, lessThan(-60), reason: 'up in the air at 45%');
     expect(particles.activeBursts, 1);
     await tester.pump(const Duration(milliseconds: 700));
-    expect(effects().transform.getTranslation().y, closeTo(0, 0.01));
+    expect(effects().effectiveTransform.getTranslation().y, closeTo(0, 0.01));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
   });

@@ -73,18 +73,40 @@ Map<String, Object?> box(Map<String, Object?> extra) => {
       ...extra,
     };
 
+/// A one-shot effect's pose at [t]: the legacy `effectAnimations` entry's
+/// preset tracks (effectTransformAt is gone), composed as the player does.
+({double dx, double sx, double rotation, double opacity}) effectTransformAt(String type, double t, double amount,
+    {double cycles = 0}) {
+  final a = AnimationPresets.fromEffect({'type': type, 'amount': amount, 'cycles': cycles}, 0)!.expanded;
+  var dx = 0.0, sx = 1.0, rotation = 0.0, opacity = 1.0;
+  for (final track in a.tracks) {
+    final v = readDouble(track.valueAt(t))!;
+    switch (track.path) {
+      case 'motion.translateX':
+        dx += v;
+      case 'motion.scaleX' || 'motion.scale':
+        sx *= v;
+      case 'motion.rotate':
+        rotation += v * math.pi / 180;
+      case 'opacity':
+        opacity *= v;
+    }
+  }
+  return (dx: dx, sx: sx, rotation: rotation, opacity: opacity);
+}
+
 void main() {
   test('a shake swings its own count unless cycles says', () {
-    expect(effectTransformAt(EffectAnimationType.shake, 1 / 16, 1).dx, closeTo(12 * (1 - 1 / 16), 1e-9));
+    expect(effectTransformAt('shake', 1 / 16, 1).dx, closeTo(12 * (1 - 1 / 16), 1e-9));
     const t = 1 / 12;
     expect(
-      effectTransformAt(EffectAnimationType.shake, t, 8 / 12, cycles: 3).dx,
+      effectTransformAt('shake', t, 8 / 12, cycles: 3).dx,
       closeTo(math.sin(t * math.pi * 6) * 8 * (1 - t), 1e-9),
     );
     // A wiggle's three swings, a jelly's two, unless cycles says.
-    expect(effectTransformAt(EffectAnimationType.wiggle, 1 / 12, 1).rotation, closeTo(0.14 * (1 - 1 / 12), 1e-9));
-    expect(effectTransformAt(EffectAnimationType.jelly, 1 / 20, 1, cycles: 5).sx, closeTo(1 + 0.16 * 0.95, 1e-9));
-    expect(effectTransformAt(EffectAnimationType.flash, 0.25, 1).opacity, closeTo(0, 1e-9));
+    expect(effectTransformAt('wiggle', 1 / 12, 1).rotation, closeTo(0.14 * (1 - 1 / 12), 1e-9));
+    expect(effectTransformAt('jelly', 1 / 20, 1, cycles: 5).sx, closeTo(1 + 0.16 * 0.95, 1e-9));
+    expect(effectTransformAt('flash', 0.25, 1).opacity, closeTo(0, 1e-9));
   });
 
   testWidgets('playAnimation particles waits for emission and particle lifetime', (tester) async {
