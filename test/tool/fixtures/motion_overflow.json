@@ -1,0 +1,113 @@
+{
+ "schema": 3,
+ "roots": [
+  "canvas"
+ ],
+ "nodes": {
+  "canvas": {
+   "type": "canvas",
+   "layout": {
+    "width": 390,
+    "height": 400
+   },
+   "slots": {
+    "body": "page"
+   }
+  },
+  "page": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 400
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row",
+    "gap",
+    "holder"
+   ]
+  },
+  "row": {
+   "type": "row",
+   "layout": {
+    "width": 200,
+    "height": 60
+   },
+   "props": {
+    "squeezeChildren": false
+   },
+   "children": [
+    "a",
+    "b"
+   ]
+  },
+  "a": {
+   "type": "box",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   }
+  },
+  "b": {
+   "type": "box",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDC2626"
+     }
+    ]
+   }
+  },
+  "holder": {
+   "type": "column",
+   "layout": {
+    "width": 200,
+    "height": 60
+   },
+   "children": [
+    "lifted"
+   ],
+   "motion": {
+    "translateY": -30
+   }
+  },
+  "lifted": {
+   "type": "box",
+   "layout": {
+    "width": 80,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF16A34A"
+     }
+    ]
+   }
+  },
+  "gap": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 60
+   }
+  }
+ }
+}

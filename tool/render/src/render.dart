@@ -875,6 +875,24 @@ RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
   return best;
 }
 
+/// [b]'s box in [parent]'s coordinates by layout alone (the parent data
+/// offsets between them, no paint transform; a proxy places its child at
+/// its own origin); null when something between them positions its child
+/// another way (a sliver).
+ui.Rect? _laidOutIn(RenderBox b, RenderBox parent) {
+  var offset = ui.Offset.zero;
+  for (RenderObject? o = b; o != null && !identical(o, parent); o = o.parent) {
+    final data = o.parentData;
+    if (data is BoxParentData) {
+      offset += data.offset;
+    } else if (data.runtimeType != ParentData) {
+      // Not a box offset, and not a proxy's bare parent data (no offset).
+      return null;
+    }
+  }
+  return offset & b.size;
+}
+
 ui.Rect _rectOf(RenderBox b) {
   final o = b.localToGlobal(ui.Offset.zero);
   return o & b.size;
@@ -1248,8 +1266,16 @@ List<RuntimeIssue> _check(
     final parentName = parentBox == null ? pid : nameOf(parentBox);
     if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack' && !seen.isEmpty) {
       final pr = _rectOf(parentBox);
-      final dx = math.max(pr.left - seen.left, seen.right - pr.right);
-      final dy = math.max(pr.top - seen.top, seen.bottom - pr.bottom);
+      var dx = math.max(pr.left - seen.left, seen.right - pr.right);
+      var dy = math.max(pr.top - seen.top, seen.bottom - pr.bottom);
+      // Laid out inside its parent and only painted past it (a `motion`
+      // translate, scale or rotation, as a Transform in Flutter): not a
+      // layout overflow.
+      final laid = _laidOutIn(b, parentBox);
+      if (laid != null) {
+        if (laid.left >= -1 && laid.right <= parentBox.size.width + 1) dx = 0;
+        if (laid.top >= -1 && laid.bottom <= parentBox.size.height + 1) dy = 0;
+      }
       if (dx > 1 && !scrollsAlong(b, true, upTo: parentBox)) {
         out.add(RuntimeIssue('layout_overflow', 'warning',
             '"${nameOf(b)}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$parentName" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.',

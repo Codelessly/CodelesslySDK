@@ -99,6 +99,15 @@ void main() {
     expect(formula['message'], contains('does not parse'));
   });
 
+  testWidgets('the children of a node moved by its motion do not overflow it; a child laid out past its parent does', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/motion_overflow.json'], out: out.path, sizes: const [Size(390, 400)]));
+    final overflowing = [
+      for (final d in report.diagnostics)
+        if (d['code'] == 'layout_overflow') d['nodeId'],
+    ];
+    expect(overflowing, ['b'], reason: '${report.diagnostics}');
+  });
+
   testWidgets('overflow, offscreen and clipped text are reported as warnings', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/overflow.json'], out: out.path, sizes: const [Size(390, 400)]));
     expect(report.errors, 0, reason: '${report.diagnostics}');
