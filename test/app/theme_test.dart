@@ -147,32 +147,24 @@ void main() {
       expect(Theme.of(tester.element(find.byType(NodeView))).brightness, Brightness.light);
     });
 
-    testWidgets('set to use the host app\'s theme, the host decides the mode', (tester) async {
+    testWidgets('the app\'s theme decides nothing: the device\'s mode and the project\'s tokens do', (tester) async {
       addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
       tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
-      final app = Codelessly.fromBundle(
-        _bundle(_theme),
-        config: const CodelesslyConfig(useHostTheme: true),
-        fonts: const NoFontFetcher(),
-      );
+      final app = Codelessly.fromBundle(_bundle(_theme), fonts: const NoFontFetcher());
       addTearDown(app.dispose);
       final controller = CodelesslyWidgetController();
       addTearDown(controller.dispose);
-      Widget host(ThemeMode mode) => MaterialApp(
-            theme: ThemeData.light(),
-            darkTheme: ThemeData.dark(),
-            themeMode: mode,
-            home: CodelesslyWidget(codelessly: app, controller: controller),
-          );
-      await tester.pumpWidget(host(ThemeMode.dark));
+      await tester.pumpWidget(MaterialApp(
+        theme: ThemeData.dark(),
+        themeMode: ThemeMode.dark,
+        home: CodelesslyWidget(codelessly: app, controller: controller),
+      ));
       await tester.pumpAndSettle();
-      expect(controller.scope!.read('theme.isDark'), isTrue);
-      expect(controller.scope!.read('theme.surface'), '#FF121212');
-      expect(controller.scope!.read('screen.isDark'), isFalse, reason: 'screen is the device');
-      await tester.pumpWidget(host(ThemeMode.light));
-      await tester.pumpAndSettle();
-      expect(controller.scope!.read('theme.isDark'), isFalse);
-      expect(controller.scope!.read('theme.surface'), '#FFFFFFFF');
+      expect(controller.scope!.read('theme.isDark'), isFalse, reason: 'the device is light');
+      final theme = Theme.of(tester.element(find.byType(NodeView)));
+      expect(theme.brightness, Brightness.light);
+      expect(theme.colorScheme.primary, const Color(0xFF2F6BFF));
+      expect(theme.colorScheme.surface, const Color(0xFFFFFFFF));
     });
 
     testWidgets('a project\'s own variable named theme wins over the built-in one', (tester) async {

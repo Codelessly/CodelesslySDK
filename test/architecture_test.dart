@@ -71,6 +71,9 @@ const Map<String, Map<String, String>> renderStatics = {
     '_byTree': 'HeroMarks: the shared elements of every tree on screen; a flight pairs marks of two trees (exported)',
   },
   // Caches of pure work, by its input.
+  'render/control_theme.dart': {
+    '_made': 'the controls\' ThemeData by tokens, mode and surface (64 at most): islands ask on every rebuild',
+  },
   'render/paint/image_fill.dart': {
     '_entries': 'PaintImages: the loaded images by URL, shared by every tree as Flutter\'s image cache is (exported)',
     '_svgBytes': 'the bytes of the SVGs fetched, by URL',

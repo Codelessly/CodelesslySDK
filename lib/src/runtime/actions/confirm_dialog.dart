@@ -649,7 +649,7 @@ class ThemedConfirmDialog extends StatelessWidget {
     }
 
     return Theme(
-      data: theme.apply(Theme.of(context)),
+      data: theme.themeData,
       child: switch (presentation) {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => SizedBox(
             width: double.infinity,

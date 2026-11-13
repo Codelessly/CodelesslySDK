@@ -603,11 +603,6 @@ Codelessly noScripts() => Codelessly(
 // Theming and fonts.
 // ---------------------------------------------------------------------
 
-/// Layouts follow the app's theme instead of the project's.
-Codelessly hostTheme() => Codelessly(
-      config: const CodelesslyConfig(slug: 'my-project', useHostTheme: true),
-    );
-
 /// Layouts follow the platform's text size, up to 1.3 times.
 Codelessly textScale() => Codelessly(
       config: const CodelesslyConfig(slug: 'my-project', maxTextScaleFactor: 1.3),

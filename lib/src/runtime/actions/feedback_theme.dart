@@ -6,12 +6,15 @@ import 'package:codelessly_api/core.dart' show ButtonProps, Json, LayoutDocument
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
+import '../../render/control_theme.dart' as theme show onColor;
+import '../../render/control_theme.dart' show contrastRatio, kInk, kInkOnDark, themeDataOf;
 import '../../render/convert.dart';
 
 /// The look of the runtime's own dialogs and toasts. A layout provides one
 /// read from its nodes ([FeedbackTheme.fromDocument]) and its theme tokens
-/// through a [FeedbackThemeScope]; an app sets any value by adding a
-/// [FeedbackTheme] to its [ThemeData.extensions], which wins.
+/// through a [FeedbackThemeScope]. A [FeedbackTheme] in the [ThemeData.extensions]
+/// of the theme the layout renders in wins; the layout's theme is its own
+/// (`themeDataOf`), so an app's theme doesn't reach it.
 @immutable
 class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
   const FeedbackTheme({
@@ -72,8 +75,9 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     );
   }
 
-  /// The theme at [context], every value set: the app's extension, then
-  /// the layout's ([FeedbackThemeScope]), then [Theme].
+  /// The theme at [context], every value set: an extension of [Theme]'s,
+  /// then the layout's ([FeedbackThemeScope]), then [Theme]'s colors and
+  /// fonts (the layout's tokens, neutral without).
   static ResolvedFeedbackTheme of(BuildContext context) {
     final theme = Theme.of(context);
     final combined = (theme.extension<FeedbackTheme>() ?? const FeedbackTheme()).merge(FeedbackThemeScope.maybeOf(context));
@@ -372,7 +376,7 @@ class ResolvedFeedbackTheme {
     final dark = ThemeData.estimateBrightnessForColor(surface) == Brightness.dark;
     var onSurface = t.onSurface ?? scheme.onSurface;
     // Text the layout uses on another background may not read here.
-    if (_contrast(onSurface, surface) < 3) onSurface = dark ? Colors.white : const Color(0xFF1C1B1F);
+    if (contrastRatio(onSurface, surface) < 3) onSurface = dark ? kInkOnDark : kInk;
     final primary = t.primary ?? scheme.primary;
     final buttonRadius = t.buttonRadius ?? 12;
     final base = theme.textTheme.bodyMedium ?? const TextStyle();
@@ -406,29 +410,29 @@ class ResolvedFeedbackTheme {
   final BorderSide? buttonBorder;
   final List<BoxShadow>? buttonShadows;
 
-  /// Black or white, whichever reads on [background].
-  static Color onColor(Color background) =>
-      ThemeData.estimateBrightnessForColor(background) == Brightness.dark ? Colors.white : const Color(0xFF1C1B1F);
+  /// Ink or near-white, whichever reads on [background].
+  static Color onColor(Color background) => theme.onColor(background);
 
-  static double _contrast(Color a, Color b) {
-    final la = a.computeLuminance(), lb = b.computeLuminance();
-    return (la > lb ? la + 0.05 : lb + 0.05) / (la > lb ? lb + 0.05 : la + 0.05);
-  }
-
-  /// [theme] with this theme's colors and fonts, for the Material widgets
-  /// in a dialog or toast.
-  ThemeData apply(ThemeData theme) => theme.copyWith(
-        colorScheme: theme.colorScheme.copyWith(
-          primary: primary,
-          onPrimary: onPrimary,
-          surface: surface,
-          onSurface: onSurface,
-          error: error,
-          onError: onError,
-          surfaceTint: Colors.transparent,
+  /// The theme of the Material widgets in a dialog, toast or picker: this
+  /// look's colors, fonts and radii as theme tokens ([themeDataOf]).
+  ThemeData get themeData => themeDataOf(
+        api.ThemeTokens(
+          primary: _api(primary),
+          onPrimary: _api(onPrimary),
+          surface: _api(surface),
+          onSurface: _api(onSurface),
+          error: _api(error),
+          success: _api(success),
+          warning: _api(warning),
+          fontFamily: bodyStyle.fontFamily,
+          titleFontFamily: titleStyle.fontFamily,
+          radius: radius,
+          buttonRadius: buttonRadius,
         ),
-        textTheme: theme.textTheme.apply(fontFamily: bodyStyle.fontFamily, fontFamilyFallback: bodyStyle.fontFamilyFallback),
+        brightness: ThemeData.estimateBrightnessForColor(surface),
       );
+
+  static api.Color _api(Color c) => api.Color(c.toARGB32());
 }
 
 /// Provides the [FeedbackTheme] of the layout below it.
