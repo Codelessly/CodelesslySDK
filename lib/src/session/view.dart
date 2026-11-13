@@ -4,6 +4,7 @@
 // Built from the core runtime alone (CoreActions, no feature), so it shows
 // agent UI in a core-only build.
 import 'dart:async';
+import 'dart:collection' show ListBase;
 
 import 'package:codelessly_api/core.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +13,8 @@ import 'package:flutter/widgets.dart' hide NavigationMode;
 import '../app/viewport.dart' show CanvasSizing, CanvasViewport, CanvasViewportBox;
 import '../render/components.dart' show componentInstanceOf;
 import '../render/contracts.dart' show ImageBytesLoader;
-import '../render/node_tree.dart' show ResponsiveWidth;
+import '../render/node_tree.dart' show NodeBox, ResponsiveWidth;
+import '../runtime/contracts.dart' show CodelesslyServices;
 import '../render/node_view.dart';
 import '../runtime/actions/actions.dart';
 import '../runtime/expressions/bindings.dart' show NodeBinder;
@@ -43,6 +45,7 @@ class CodelesslyView extends StatefulWidget {
     this.imageLoader,
     this.data = const {},
     this.handlers = const {},
+    this.services,
   });
 
   final UiSession session;
@@ -58,6 +61,11 @@ class CodelesslyView extends StatefulWidget {
 
   /// Action handlers by type, over the core's and the session's own.
   final Map<String, ActionHandler> handlers;
+
+  /// The app's services: with a `ScriptRunner` among them (a
+  /// `ServiceLocator`), the session's own scripts run (`runScript`, where
+  /// its trust profile allows them). Null: none.
+  final CodelesslyServices? services;
 
   @override
   State<CodelesslyView> createState() => _CodelesslyViewState();
@@ -94,6 +102,8 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _tree = NodeTree(_nodeValues, binder: _binder, imageLoader: widget.imageLoader ?? const HttpImageLoader());
     _context = CoreActionContext(
       scope: _scope,
+      services: widget.services,
+      scripts: _SessionScripts(_session),
       expressions: const Expressions(),
       ui: _SessionUi(this),
       tree: _tree,
@@ -111,6 +121,22 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _tree.interactions = _reactions;
     _syncVariables();
     _changes = _session.changes.listen((_) => _documentChanged());
+    _detachProbe = _session.attachLayoutProbe(_sizes);
+  }
+
+  VoidCallback? _detachProbe;
+
+  /// Every node box this view laid out, with its size.
+  Iterable<(String, double, double)> _sizes() {
+    final out = <(String, double, double)>[];
+    void visit(RenderObject o) {
+      if (o is NodeBox && o.hasSize) out.add((o.id, o.size.width, o.size.height));
+      o.visitChildren(visit);
+    }
+
+    final root = mounted ? context.findRenderObject() : null;
+    if (root != null) visit(root);
+    return out;
   }
 
   Future<void> _componentEvent(ActionDef a, ActionRun run) async {
@@ -212,6 +238,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
 
   void _dispose() {
     _changes?.cancel();
+    _detachProbe?.call();
     _reactions.dispose();
     _context.dispose();
     _tree.dispose();
@@ -343,4 +370,30 @@ class _Forward extends ChangeNotifier implements ValueListenable<Node?> {
     source.removeListener(_changed);
     super.dispose();
   }
+}
+
+/// The session's scripts as they are now: a list the action context reads
+/// at each run, so a scripts op takes effect without rebuilding the view.
+class _SessionScripts extends ListBase<ScriptDef> {
+  _SessionScripts(this.session);
+  final UiSession session;
+  Object? _raw;
+  List<ScriptDef> _list = const [];
+  List<ScriptDef> get _now {
+    final raw = session.document.extra[LayoutDocumentScripts.key];
+    if (!identical(raw, _raw)) {
+      _raw = raw;
+      _list = session.document.scripts;
+    }
+    return _list;
+  }
+
+  @override
+  int get length => _now.length;
+  @override
+  set length(int _) => throw UnsupportedError('read only');
+  @override
+  ScriptDef operator [](int i) => _now[i];
+  @override
+  void operator []=(int i, ScriptDef v) => throw UnsupportedError('read only');
 }

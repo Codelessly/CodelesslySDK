@@ -98,6 +98,8 @@ class UiSession implements NodeSource {
     this.placeholderColor = 0x14808080,
     this.arrivalFade,
     this.holdEmptyContainers = true,
+    this.protectRoots = true,
+    this.glyphCoverage,
   })  : profile = profile ?? TrustProfile.agent,
         _document = document ?? LayoutDocument(catalog: catalog);
 
@@ -120,6 +122,17 @@ class UiSession implements NodeSource {
   /// or held the same way), is held back (shown as nothing) until one does,
   /// so a stream shows no empty shells. A node without children shows as soon as it arrives.
   final bool holdEmptyContainers;
+
+  /// Whether a batch (or stream) applied to a UI that already has roots may
+  /// not replace them or add a canvas: `start_over`, so a model fixes the
+  /// UI by patching it instead of rebuilding it under new ids. A new UI
+  /// (no roots yet) is never limited.
+  final bool protectRoots;
+
+  /// Which characters the fonts the app loaded can draw; with it, the end
+  /// of a stream reports text with characters they cannot
+  /// (`missing_glyph`, [renderDiagnostics]).
+  final GlyphCoverage? glyphCoverage;
 
   /// When set, a node that arrives while a stream runs fades in over this
   /// long (an `enter` animation from opacity 0). Off by default.
@@ -171,7 +184,8 @@ class UiSession implements NodeSource {
 
   // --- ops ------------------------------------------------------------------
 
-  EditResult _run(Object? ops, {required String author, int? baseRev, bool atomic = false, bool incomplete = false, EditRevisions? revisions}) =>
+  EditResult _run(Object? ops,
+          {required String author, int? baseRev, bool atomic = false, bool incomplete = false, EditRevisions? revisions, bool? protect}) =>
       applyOps(_document, ops,
           catalog: catalog,
           profile: profile,
@@ -180,7 +194,8 @@ class UiSession implements NodeSource {
           revisions: revisions ?? _revisions,
           baseRev: baseRev,
           author: author,
-          incomplete: incomplete);
+          incomplete: incomplete,
+          protectRoots: protect ?? (protectRoots && _document.roots.isNotEmpty));
 
   /// Applies [ops] (a list of [EditOp]s, or the `ui_apply` tool input JSON)
   /// as one batch: one revision, one undo step. Rejected ops change nothing;
@@ -235,12 +250,16 @@ class UiSession implements NodeSource {
     final diagnostics = <EditDiagnostic>[];
     final created = <String>{};
     var chars = 0;
+    // A UI that existed when the stream began is fixed, not rebuilt; a new
+    // one may set its roots and canvases as it streams.
+    final protect = protectRoots && _document.roots.isNotEmpty;
     _streaming.value = true;
     _arrived.clear();
     void one(StreamedOp s) {
       final op = map == null ? s.op : map(s.op);
       // Every op of the stream is in the same revision.
-      final r = _run([op], author: author, baseRev: baseRev, incomplete: true, revisions: EditRevisions(rev: startRevisions.rev, fields: fields.fields));
+      final r = _run([op],
+          author: author, baseRev: baseRev, incomplete: true, protect: protect, revisions: EditRevisions(rev: startRevisions.rev, fields: fields.fields));
       for (final d in r.diagnostics) {
         diagnostics.add(d.atOp(s.index));
       }
@@ -274,6 +293,9 @@ class UiSession implements NodeSource {
       if (d.error && d.op >= 0) rejected.add(d.op);
     }
     diagnostics.addAll(endOfStream(_document));
+    // What the finished UI gets wrong that no declaration catches.
+    diagnostics.addAll(renderDiagnostics(ids: {..._document.nodes.keys.where((id) => before[id] != _document[id])}));
+    lastStreamEnd = end;
     final result = EditResult(
       document: _document,
       applied: (applied.difference(rejected)).toList()..sort(),
@@ -296,6 +318,60 @@ class UiSession implements NodeSource {
       _revision.value = result.rev;
     }
     return result;
+  }
+
+  /// How the last stream's text ended: repairs of malformed JSON, ops
+  /// recovered, the truncated tail ([OpStreamEnd]).
+  OpStreamEnd? lastStreamEnd;
+
+  /// What the UI gets wrong that no declaration catches, as warnings in the
+  /// result's shape (so a host returns them with validation and the model
+  /// fixes them on its retry): a tappable box with no label
+  /// (`empty_button`), text in its background's colour (`low_contrast`),
+  /// with [glyphCoverage] characters the fonts cannot draw
+  /// (`missing_glyph`), and, once a [CodelesslyView] has laid it out, nodes
+  /// with content laid out with no size (`no_size`, [layoutDiagnostics]).
+  /// [ids]: only these nodes (default: all).
+  List<EditDiagnostic> renderDiagnostics({Iterable<String>? ids}) => [
+        ...uiLints(_document, ids: ids, hasGlyph: glyphCoverage),
+      ];
+
+  final Set<_LayoutProbe> _probes = {};
+
+  /// Registers a laid-out view of this session (what [layoutDiagnostics]
+  /// reads); the returned callback unregisters it.
+  VoidCallback attachLayoutProbe(Iterable<(String, double, double)> Function() sizes) {
+    final p = _LayoutProbe(sizes);
+    _probes.add(p);
+    return () => _probes.remove(p);
+  }
+
+  /// `no_size` warnings: nodes with content (text, an icon, a fill, children
+  /// that show) that the views showing this session laid out with no width
+  /// or no height. Call it after a frame.
+  List<EditDiagnostic> layoutDiagnostics() {
+    final out = <EditDiagnostic>[];
+    final seen = <String>{};
+    for (final p in _probes) {
+      for (final (id, w, h) in p.sizes()) {
+        if ((w > 0.5 && h > 0.5) || !seen.add(id)) continue;
+        final n = _document[id];
+        if (n == null || !n.visible || _held(id)) continue;
+        final json = n.toJson();
+        if ((readMap(json['bind']) ?? const {}).containsKey('visible')) continue;
+        final props = readMap(json['props']) ?? const {};
+        final hasContent = (n.type == 'text' && '${props['text'] ?? ''}'.trim().isNotEmpty) ||
+            n.type == 'icon' ||
+            (readList(readMap(json['decoration'])?['fills'])?.isNotEmpty ?? false) ||
+            n.childIds.any((c) => _document[c] != null);
+        if (!hasContent) continue;
+        out.add(EditDiagnostic.of(EditCodes.noSize, -1,
+            '"$id" (${n.type}) was laid out ${w.toStringAsFixed(0)} × ${h.toStringAsFixed(0)}: nothing of it shows. Give it a '
+            'width and a height (a number, {"hug": n} or {"fill": n}), or check that its parent has room.',
+            path: editPointer(editPointer('/nodes', id), 'layout'), nodeId: id));
+      }
+    }
+    return out;
   }
 
   /// Undoes the last batch (of [author], when given): its inverse ops,
@@ -332,7 +408,11 @@ class UiSession implements NodeSource {
   Json outline() => api.outline(_document, rev: rev);
 
   /// Answers a `ui_read` tool call.
-  Json read(Object? input) => readUi(_document, input, rev: rev);
+  Json read(Object? input) => readUi(_document, input, rev: rev, catalog: profile.restrict(catalog));
+
+  /// Answers a `ui_docs` tool call (`{"topic": ...}`): one topic of the
+  /// reference, for what [profile] allows ([docsTopic]).
+  String docs(Object? input) => docsTopic(readString(readMap(input)?['topic']) ?? '', catalog: catalog, profile: profile);
 
   /// What to tell a model about this UI: [starter] (the authoring guide it
   /// writes from), the node and action types it may use (compact), and the
@@ -410,8 +490,16 @@ class UiSession implements NodeSource {
         final n = _document[id];
         if (n == null) return false;
         final kids = n.childIds.toList();
-        return kids.isNotEmpty && kids.every((c) => _document[c] == null || _held(c));
+        if (kids.isEmpty || !kids.every((c) => _document[c] == null || _held(c))) return false;
+        // The surface of a screen (a canvas's body with a fill: the card)
+        // shows as soon as it arrives: it is what the person is waiting
+        // for, not an empty shell inside content.
+        final parent = _document.parentOf(id);
+        if (parent != null && _document[parent]?.type == 'canvas' && _hasFill(n)) return false;
+        return true;
       }();
+
+  static bool _hasFill(Node n) => readList(readMap(n.toJson()['decoration'])?['fills'])?.isNotEmpty ?? false;
   final Map<String, bool> _heldMemo = {};
 
   Node _pendingNode(String id) => Node.fromJson(const {
@@ -448,6 +536,11 @@ class UiSession implements NodeSource {
     }
     _watched.clear();
   }
+}
+
+class _LayoutProbe {
+  _LayoutProbe(this.sizes);
+  final Iterable<(String, double, double)> Function() sizes;
 }
 
 /// A node's notifier.
