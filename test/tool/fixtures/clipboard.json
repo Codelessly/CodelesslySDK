@@ -1,0 +1,24 @@
+{
+  "schema": 3,
+  "roots": ["home"],
+  "variables": {"page_variables": [{"name": "copied", "type": "boolean", "value": false}]},
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 300}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "col": {"type": "column", "children": ["copy", "done"], "layout": {"width": {"fill": 390}, "height": {"fill": 300}, "padding": 24}},
+    "copy": {
+      "type": "filledButton",
+      "layout": {"width": 200, "height": 48},
+      "props": {"label": "Copy the address"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "copyToClipboard", "text": "12 Main St"},
+        {"type": "setVariable", "variable": "copied", "value": "${= true}"}
+      ]}]
+    },
+    "done": {
+      "type": "text",
+      "layout": {"width": {"hug": 100}, "height": {"hug": 20}},
+      "props": {"text": "Copied", "style": {"fontSize": 16, "color": "#FF000000"}},
+      "bind": {"visible": "${copied}"}
+    }
+  }
+}

@@ -70,6 +70,18 @@ void main() {
     expect((bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23], greaterThan(844));
   });
 
+  testWidgets('a tap that copies to the clipboard runs the rest of its chain', (tester) async {
+    final report = await runRender(
+      tester,
+      RenderArgs(inputs: ['$fixtures/clipboard.json'], out: out.path, sizes: const [Size(390, 300)],
+          steps: const [Step('tap', 'copy')], dumpLayout: true),
+    ).timeout(const Duration(seconds: 30));
+    expect(report.errors, 0, reason: '${report.diagnostics}');
+    final boxes = jsonDecode(File('${out.path}/home@390x300.layout.json').readAsStringSync()) as List;
+    final done = boxes.cast<Map>().firstWhere((b) => b['id'] == 'done');
+    expect(done['h'], greaterThan(0), reason: 'the variable set after the copy shows "Copied"');
+  });
+
   testWidgets('navigating to a screen of another document', (tester) async {
     final report = await runRender(
       tester,

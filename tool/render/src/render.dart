@@ -22,6 +22,7 @@ import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPa
 import 'args.dart';
 import 'compare.dart';
 import 'fonts.dart';
+import 'platform.dart';
 import 'prepare.dart';
 import 'publish.dart';
 import 'site.dart';
@@ -297,6 +298,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // Icons named without a codepoint (a bound name) draw from the font.
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
+  final removeClipboard = installMemoryClipboard(tester);
   try {
     if (alone.isEmpty) {
       await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report, components: components);
@@ -317,6 +319,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     debugDisableShadows = true;
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
+    removeClipboard();
     _errorDetails.clear();
     _errorLog.clear();
   }
