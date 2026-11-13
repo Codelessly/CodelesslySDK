@@ -26,6 +26,7 @@ class RenderFlip extends RenderPose {
   NodeBox? _box;
   api.FlipCard _flip = const api.FlipCard();
   api.Motion? _motion;
+  api.Transition? _transition;
   bool _animates = false;
   BoundValues? _scope;
   Listenable? _watched;
@@ -54,8 +55,9 @@ class RenderFlip extends RenderPose {
   /// The turn now: 0 front, 1 back.
   double get progress => _progress;
 
-  void configure(NodeBox? box, api.FlipCard flip, api.Motion? motion, {required bool animates}) {
+  void configure(NodeBox? box, api.FlipCard flip, api.Motion? motion, {required bool animates, api.Transition? transition}) {
     _box = box;
+    _transition = transition;
     final axisChanged = flip.axis != _flip.axis;
     _flip = flip;
     _motion = motion;
@@ -166,8 +168,9 @@ class RenderFlip extends RenderPose {
       }
     } else if (_turning) {
       final ms = (elapsed - since).inMicroseconds / 1000;
-      final d = api.FlipCard.durationOf(_motion);
-      final curve = _motion?.curve ?? api.AnimationCurve.easeInOutCubic;
+      final d = api.FlipCard.durationOf(_transition);
+      // The node's motion transition's curve (a motion's was easeInOut).
+      final curve = _transition?.curve ?? (_motion != null ? api.AnimationCurve.easeInOut : api.AnimationCurve.easeInOutCubic);
       final to = (_target ?? false) ? 1.0 : 0.0;
       if (ms >= d) {
         _progress = to;
@@ -185,8 +188,13 @@ class RenderFlip extends RenderPose {
 
   void _show() {
     final t = _progress;
-    final keyframes = _motion?.keyframes ?? const <api.MotionKeyframe>[];
-    final scale = api.Motion.keyframed(keyframes, 'scale', 1, 1, t.clamp(0.0, 1.0)) ?? 1;
+    // A lift the motion transition's keyframes give as it turns.
+    final keyframes = _transition?.keyframesOf('scale') ?? const <api.Keyframe>[];
+    final scale = keyframes.isEmpty
+        ? 1.0
+        : api.readDouble(api.AnimationTrack(keyframes: keyframes, interpolation: api.KeyframeInterpolation.monotoneCubic)
+                .valueAt(t.clamp(0.0, 1.0), begin: 1, end: 1)) ??
+            1.0;
     transform = motionMatrix(
       api.Motion(
         rotateY: _flip.axis == api.FlipAxis.y ? t * 180 : 0,

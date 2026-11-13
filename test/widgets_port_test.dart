@@ -140,16 +140,16 @@ void main() {
     });
 
     test('page motion: rest at the current page, scaled by distance, mirrored before it', () {
-      final m = api.Motion.fromJson({'rotateY': -50, 'scale': 0.8, 'translateX': 10})!;
-      expect(RenderPageItems.pageMotionAt(m, 0).rotateY, 0);
-      expect(RenderPageItems.pageMotionAt(m, 0).scale, 1);
-      expect(RenderPageItems.pageMotionAt(m, 1).rotateY, -50);
-      expect(RenderPageItems.pageMotionAt(m, 0.5).scale, closeTo(0.9, 1e-9));
-      expect(RenderPageItems.pageMotionAt(m, -1).rotateY, 50);
-      expect(RenderPageItems.pageMotionAt(m, -1).translateX, -10);
+      final m = api.Pose.fromJson({'rotateY': -50, 'scale': 0.8, 'translateX': 10})!;
+      expect(RenderPageItems.pageMotionAt(m, 0).motion.rotateY, 0);
+      expect(RenderPageItems.pageMotionAt(m, 0).motion.scale, 1);
+      expect(RenderPageItems.pageMotionAt(m, 1).motion.rotateY, -50);
+      expect(RenderPageItems.pageMotionAt(m, 0.5).motion.scale, closeTo(0.9, 1e-9));
+      expect(RenderPageItems.pageMotionAt(m, -1).motion.rotateY, 50);
+      expect(RenderPageItems.pageMotionAt(m, -1).motion.translateX, -10);
       // Two pages at most.
-      expect(RenderPageItems.pageMotionAt(m, 5).rotateY, -100);
-      final v = RenderPageItems.pageMotionAt(m, 1, vertical: true);
+      expect(RenderPageItems.pageMotionAt(m, 5).motion.rotateY, -100);
+      final v = RenderPageItems.pageMotionAt(m, 1, vertical: true).motion;
       expect((v.rotateX, v.rotateY, v.translateY, v.translateX), (50, 0, 10, 0));
     });
 

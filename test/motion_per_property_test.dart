@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart' show BoxHitTestResult, RenderConstrained
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  late RenderAnimations player;
   Future<RenderMotion> mount(WidgetTester tester, Map<String, Object?> motion) async {
     final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
       'roots': ['card'],
@@ -21,6 +22,8 @@ void main() {
     RenderMotion? found;
     void visit(RenderObject o) {
       if (o is RenderMotion) found = o;
+      // The opacity is the node's now, drawn by its animation player.
+      if (o is RenderAnimations) player = o;
       o.visitChildren(visit);
     }
 
@@ -44,15 +47,15 @@ void main() {
     final m = await mount(tester, {...entrance, 'rotateCurve': 'elasticOut', 'fadeShare': 0.35});
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 175));
-    expect(m.opacity, closeTo(AnimationCurve.easeOut.transform(0.5), 0.03));
+    expect(player.opacity, closeTo(AnimationCurve.easeOut.transform(0.5), 0.03));
     await tester.pump(const Duration(milliseconds: 75));
     // elasticOut overshoots past upright by a quarter of the way in.
     expect(degrees(m), lessThan(-0.3));
     await tester.pump(const Duration(milliseconds: 150));
-    expect(m.opacity, 1);
+    expect(player.opacity, 1);
     await tester.pump(const Duration(seconds: 1));
     expect(degrees(m), closeTo(0, 1e-6));
-    expect(m.opacity, 1);
+    expect(player.opacity, 1);
   });
 
   testWidgets('without them every property follows the one curve', (tester) async {
@@ -60,7 +63,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
     expect(degrees(m), greaterThan(0.5));
-    expect(m.opacity, lessThan(1));
+    expect(player.opacity, lessThan(1));
   });
 
   test('a pose layer not laid out yet is not hit (and does not throw)', () {

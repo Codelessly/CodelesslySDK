@@ -14,7 +14,6 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show Node;
 import 'package:flutter/foundation.dart' show protected;
-import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -26,7 +25,6 @@ import 'transform_gesture.dart';
 import 'node_tree.dart' show NodeBox;
 import 'paint/svg_path.dart';
 import 'recipe.dart';
-import 'visible_share.dart';
 
 /// Track pose, motion and scale: the layers between the constraints and
 /// the rotation.
@@ -81,18 +79,10 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
   // animations set.
   if (be.motion != null || replacedMotionProperties(n).isNotEmpty) {
     final motion = be.motion ?? api.Motion.none;
-    chain.add(
-      b.obtain<RenderMotion>('motion', RenderMotion.new)
-        ..animates = animates
-        ..motion = motion,
-    );
-    if (motion.shimmer case final api.MotionShimmer shimmer) {
-      chain.add(
-        b.obtain<RenderShimmer>('shimmer', RenderShimmer.new)
-          ..animates = animates
-          ..shimmer = shimmer,
-      );
-    }
+    chain.add(b.obtain<RenderMotion>('motion', RenderMotion.new)..motion = motion);
+  }
+  if (be.shimmer case final api.Shimmer shimmer) {
+    chain.add(b.obtain<RenderShimmer>('shimmer', RenderShimmer.new)..shimmer = shimmer);
   }
   cardLayers(b, n, chain, animates: animates);
   // A state style that scales the node (a press shrink) keeps the layer at
@@ -135,7 +125,9 @@ void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
   }
   final hasMotion = be.motion != null || replacedMotionProperties(n).isNotEmpty;
   animationLayers(b, n, chain,
-      animates: animates, motion: hasMotion ? b.obtain<RenderMotion>('motion', RenderMotion.new) : null);
+      animates: animates,
+      motion: hasMotion ? b.obtain<RenderMotion>('motion', RenderMotion.new) : null,
+      shimmer: be.shimmer != null ? b.obtain<RenderShimmer>('shimmer', RenderShimmer.new) : null);
 }
 
 /// Blurs and the stroke path, inside the opacity, around the content.
@@ -746,10 +738,11 @@ mixin _Ticking on RenderPose {
   }
 }
 
-/// A node's [api.Motion]. At rest (the design canvas) it draws its values;
-/// a running app plays its entrance, loop and spin, and transitions to new
-/// values when they change.
-class RenderMotion extends RenderPose with _Ticking {
+/// A node's [api.Motion]: its transform, drawn over its layout, and the
+/// path it sits on. What moves it is the node's animation player
+/// (render/animations.dart): its animations and transitions hand this layer
+/// the values it draws over the motion's own ([overrides]).
+class RenderMotion extends RenderPose {
   /// The size of the node's parent node (the second node box above it), for
   /// a path in a viewBox; null before layout.
   Size? _parentSize() {
@@ -767,9 +760,14 @@ class RenderMotion extends RenderPose with _Ticking {
   }
 
   api.Motion _motion = api.Motion.none;
+  set motion(api.Motion v) {
+    if (v == _motion) return;
+    _motion = v;
+    _show();
+  }
 
-  /// Values the node's animations set (render/animations.dart), by
-  /// property: drawn over the motion's own.
+  /// Values the node's animations and transitions set, by property
+  /// ([api.Motion.properties]): drawn over the motion's own.
   Map<String, double> _overrides = const {};
   set overrides(Map<String, double> v) {
     if (v.length == _overrides.length && v.entries.every((e) => _overrides[e.key] == e.value)) return;
@@ -777,159 +775,25 @@ class RenderMotion extends RenderPose with _Ticking {
     _show();
   }
 
-  bool _animates = false;
-  bool _entered = false;
-  bool _waitingForReveal = false;
+  /// While the node is pushed off its path (keyframes on its translation
+  /// playing), a path that turns it follows where it actually goes.
+  bool _headingFromMovement = false;
+  set headingFromMovement(bool v) {
+    if (v == _headingFromMovement) return;
+    _headingFromMovement = v;
+    _show();
+  }
 
-  /// The entrance waits at its start while the motion's `enterHeld` holds.
-  bool _held = false;
-
-  /// The running transition: from [_from] to [_to] since [_since] (its
-  /// delay not yet counted), [_offset] ms into its run (a loop's phase).
-  api.Motion? _from;
-  api.Motion _to = api.Motion.none;
-  Duration _since = Duration.zero;
-  double _offset = 0;
-  int _runs = 0;
-
-  /// Whether the loop's current run goes from its values back to its start.
-  bool _backward = false;
-
-  /// The motion's own time: the ticker's, less what it spent paused.
-  Duration _clock = Duration.zero;
-
-  /// The pose drawn last (a new transition starts there).
-  api.Motion _shown = api.Motion.none;
-  double _turns = 0, _speed = 0;
-  Duration _lastTick = Duration.zero;
-
-  /// Where the node last was on its path and the way it moved, for
-  /// [api.Motion.orientToPath] under keyframes that push it off the path.
   Offset? _lastPathPosition;
   double? _pathHeading;
 
-  set animates(bool v) {
-    if (v == _animates) return;
-    _animates = v;
-    _from = null;
-    _show();
-    syncTicker();
-  }
-
-  set motion(api.Motion v) {
-    if (v == _motion) return;
-    final old = _motion;
-    _motion = v;
-    if (_held && !v.enterHeld) {
-      // Released: the entrance plays from its start now.
-      _held = false;
-      _entered = !_waitingForReveal;
-      _to = v;
-      _since = _clock;
-      _show();
-      syncTicker();
-      return;
+  /// The motion as drawn: its own values with the [overrides].
+  api.Motion get shown {
+    var m = _motion;
+    for (final e in _overrides.entries) {
+      m = m.withValue(e.key, e.value);
     }
-    if (_animates && _entered && !_loops(v) && v.hasEntrance && old.replayKey != v.replayKey) {
-      // A new replay key plays the entrance again.
-      _start(v.entranceStart, v, at: _clock);
-      _show();
-      syncTicker();
-      return;
-    }
-    if (_animates && _entered && _loops(v)) {
-      if (!_loops(old) ||
-          old.loop != v.loop ||
-          old.repeat != v.repeat ||
-          old.duration != v.duration ||
-          old.phase != v.phase ||
-          _from == null && !_samePose(old, v)) {
-        _startLoop();
-      } else if (_from != null) {
-        // The loop runs on (or holds, paused) toward the new values.
-        _setLoopEnds();
-      }
-    } else {
-      _to = v;
-      if (_animates && _entered && _replays(old, v)) {
-        // A new replay key plays the entrance again (from its start, after
-        // its delay, through its keyframes): a list's items falling into
-        // place one after another when the data they show is refilled.
-        _start(v.entranceStart, v, at: _clock);
-      } else if (_animates && _entered && !_samePose(old, v) && _transitionMs(v) > 0) {
-        _start(_shown, v, at: _clock);
-      }
-    }
-    _show();
-    syncTicker();
-  }
-
-  /// Whether [v] replays its entrance: its replay key changed to a new one
-  /// on a motion with an entrance (or keyframes to run through).
-  static bool _replays(api.Motion old, api.Motion v) =>
-      v.replayKey != null &&
-      v.replayKey!.isNotEmpty &&
-      v.replayKey != old.replayKey &&
-      (v.hasEntrance || v.keyframes.isNotEmpty) &&
-      _transitionMs(v) > 0;
-
-  static bool _loops(api.Motion m) => m.loop != api.MotionLoop.none && m.duration > 0;
-
-  static bool _samePose(api.Motion a, api.Motion b) =>
-      api.Motion.properties.every((p) => p == 'spin' || a.valueOf(p) == b.valueOf(p)) && a.path == b.path;
-
-  static int _transitionMs(api.Motion m) => m.curve == api.AnimationCurve.spring ? 1 : m.duration;
-
-  void _start(api.Motion from, api.Motion to, {required Duration at, double offset = 0}) {
-    _from = from;
-    _to = to;
-    _since = at;
-    _offset = offset;
-  }
-
-  /// Starts the loop over, at its phase.
-  void _startLoop() {
-    final m = _motion;
-    _runs = 0;
-    _backward = false;
-    final phase = m.phase.isFinite ? m.phase - m.phase.floorToDouble() : 0.0;
-    _start(m.loopStart, m, at: _clock, offset: phase * m.duration);
-  }
-
-  void _setLoopEnds() {
-    final start = _motion.loopStart;
-    _from = _backward ? _motion : start;
-    _to = _backward ? start : _motion;
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    if (!_entered && _animates) {
-      final m = _motion;
-      _waitingForReveal = m.revealOnScroll && m.hasEntrance;
-      _held = m.enterHeld && m.hasEntrance && !_loops(m);
-      if (_loops(m)) {
-        _startLoop();
-      } else if (m.hasEntrance && _transitionMs(m) > 0) {
-        _start(m.entranceStart, m, at: _clock);
-      }
-      _entered = !_waitingForReveal && !_held;
-    }
-    super.attach(owner);
-    _show();
-    if (_waitingForReveal) _MotionRevealWatcher.add(this);
-  }
-
-  void _checkReveal() {
-    if (!attached || !hasSize || !_waitingForReveal) return;
-    final share = visibleShare(this);
-    if (share <= 0 || share < _motion.revealFraction.clamp(0.0, 1.0)) return;
-    _waitingForReveal = false;
-    _entered = true;
-    _since = _clock;
-    _MotionRevealWatcher.remove(this);
-    _show();
-    syncTicker();
+    return m;
   }
 
   /// A path in a viewBox follows the parent's size: placed again once laid
@@ -938,7 +802,7 @@ class RenderMotion extends RenderPose with _Ticking {
   @override
   void performLayout() {
     super.performLayout();
-    if (_motion.hasPath && _motion.pathViewBox.length >= 2) {
+    if (_motion.hasPath && _motion.path!.effectiveViewBox != null) {
       SchedulerBinding.instance.addPostFrameCallback((_) {
         if (!attached) return;
         final stage = _parentSize();
@@ -950,129 +814,35 @@ class RenderMotion extends RenderPose with _Ticking {
     }
   }
 
-  @override
-  void detach() {
-    _MotionRevealWatcher.remove(this);
-    super.detach();
-  }
-
-  @override
-  void dispose() {
-    _MotionRevealWatcher.remove(this);
-    super.dispose();
-  }
-
-  @override
-  bool get ticking => _animates && !_waitingForReveal && !_held && ((!_motion.paused && (_from != null || _motion.spin != 0)) || _speed != 0);
-
-  @override
-  void tick(Duration elapsed) {
-    if (elapsed < _lastTick) _lastTick = Duration.zero;
-    final step = elapsed - _lastTick;
-    final dt = step.inMicroseconds / 1e6;
-    _lastTick = elapsed;
-    // A paused motion holds its time; its spin winds down.
-    if (!_motion.paused) _clock += step;
-    final target = _motion.paused ? 0.0 : _motion.spin;
-    if (_speed != target) {
-      if (_motion.spinRamp <= 0) {
-        // No ramp: at speed at once. (An infinite rate times a zero step,
-        // a first tick on the web, would be NaN and stop it for good.)
-        _speed = target;
-      } else if (dt > 0) {
-        final perSecond = math.max(target.abs(), _speed.abs()) / (_motion.spinRamp / 1000);
-        final change = math.min((target - _speed).abs(), perSecond * dt);
-        _speed += (target - _speed).sign * change;
-        if ((target - _speed).abs() < 0.002) _speed = target;
-      }
-    }
-    _turns = (_turns + _speed * dt) % 1;
-    _show();
-    if (!ticking) _ticker?.stop();
-  }
-
-  double _eased(double ms) {
-    final m = _motion;
-    if (m.curve == api.AnimationCurve.spring) {
-      final spring = SpringDescription(
-        mass: 1,
-        stiffness: m.spring.effectiveStiffness <= 0 ? 380 : m.spring.effectiveStiffness,
-        damping: m.spring.effectiveDamping < 0 ? 20 : m.spring.effectiveDamping,
-      );
-      final sim = SpringSimulation(spring, 0, 1, 0);
-      final t = ms / 1000;
-      return sim.isDone(t) ? 1 : sim.x(t);
-    }
-    return m.curve.transform(ms / math.max(1, m.duration));
-  }
-
   void _show() {
-    var m = _motion;
-    final from = _from;
-    var moving = false;
-    if (_animates && from != null) {
-      moving = true;
-      var ms = (_clock - _since).inMicroseconds / 1000 - m.delay;
-      ms = math.max(0.0, ms) + _offset;
-      final bool done;
-      if (m.loop == api.MotionLoop.swing && _loops(m)) {
-        // Around rest on a sine, linear in time.
-        final runs = ms / math.max(1, m.duration);
-        done = runs >= 1;
-        m = swingPose(from, _to, done ? 0 : math.sin(2 * math.pi * runs));
-      } else {
-        final t = ms <= 0 ? 0.0 : _eased(ms);
-        done = ms > 0 && (m.curve == api.AnimationCurve.spring ? t == 1 : ms >= m.duration);
-        m = _between(from, _to, done ? 1 : t);
-        if (!done) m = _perProperty(m, from, _to, _motion, ms);
-      }
-      if (done) {
-        if (_loops(_motion) && (_motion.repeat == 0 || ++_runs < _motion.repeat)) {
-          // The next run, without the delay: again, or back.
-          final next = _clock - Duration(milliseconds: _motion.delay);
-          if (_motion.loop == api.MotionLoop.reverse) _backward = !_backward;
-          _start(_from!, _to, at: next);
-          _setLoopEnds();
-        } else {
-          // A counted loop that's done rests.
-          if (_loops(_motion)) m = _motion.atRest;
-          _from = null;
-        }
-      }
-    }
-    for (final e in _overrides.entries) {
-      m = m.withValue(e.key, e.value);
-    }
-    _shown = m;
-    var shown = m;
-    if (m.hasPath) {
-      final progress = m.pathWrap ? api.Motion.wrapProgress(m.pathProgress) : m.pathProgress;
-      final measured = MeasuredPath.of(m.path!);
-      final at = measured?.at(
-        progress,
-        byArea: m.pathPacing == api.MotionPathPacing.area,
-        focus: Offset(m.pathFocusX, m.pathFocusY),
-      );
+    final m = shown;
+    var pose = m;
+    final path = m.path;
+    if (path != null && path.hasPath) {
+      final measured = MeasuredPath.of(path.path);
+      // A closed path wraps its progress; an open one stops at its ends.
+      final progress = measured != null && measured.isClosed ? api.PathFollow.wrap(path.progress) : path.progress;
+      final at = measured?.at(progress, byArea: path.pacedByArea, focus: Offset(path.focus.first, path.focus.length > 1 ? path.focus[1] : 0));
       if (at != null) {
         // A path in a viewBox is stretched over the node's parent.
         var point = at.$1;
         var heading = at.$2;
-        final stage = m.pathViewBox.length >= 2 ? _parentSize() : null;
-        if (stage != null && m.pathViewBox[0] > 0 && m.pathViewBox[1] > 0) {
+        final box = path.effectiveViewBox;
+        final stage = box != null ? _parentSize() : null;
+        if (stage != null && box != null) {
           // In a viewBox the path is placed over the parent: its points are
           // where the node goes (from the parent's origin), not offsets from
           // the path's start, so the node is laid out at the origin.
-          final sx = stage.width / m.pathViewBox[0], sy = stage.height / m.pathViewBox[1];
+          final sx = stage.width / box[0], sy = stage.height / box[1];
           final absolute = point + measured!.start;
           point = Offset(absolute.dx * sx, absolute.dy * sy);
           heading = math.atan2(math.sin(heading) * sy, math.cos(heading) * sx);
         }
         final total = Offset(m.translateX + point.dx, m.translateY + point.dy);
+        final turns = path.orient != api.PathOrient.none;
         // Keyframes that push the node off its path turn it too: its nose
         // follows where it actually goes.
-        final pushed =
-            m.orientToPath && moving && m.keyframes.any((k) => k.translateX != null || k.translateY != null);
-        if (pushed) {
+        if (turns && _headingFromMovement) {
           final previous = _lastPathPosition;
           if (previous != null && (total - previous).distance > 0.25) _pathHeading = (total - previous).direction;
           _lastPathPosition = total;
@@ -1081,79 +851,28 @@ class RenderMotion extends RenderPose with _Ticking {
           _lastPathPosition = null;
           _pathHeading = null;
         }
-        final turn = m.orientUpright ? api.Motion.uprightAngle(heading) : heading;
-        shown = shown
+        final upright = path.orient == api.PathOrient.upright || path.orient == api.PathOrient.uprightFlip;
+        final turn = upright ? api.PathFollow.uprightAngle(heading) : heading;
+        pose = pose
             .withValue('translateX', total.dx)
             .withValue('translateY', total.dy)
-            .withValue('rotate', m.orientToPath ? m.rotate + turn * 180 / math.pi : m.rotate);
-        // Upright and mirrored: heading left faces left, nose first.
-        if (m.orientToPath && m.orientUpright && m.uprightMirror && api.Motion.headsLeft(heading)) {
-          shown = shown.withValue('scaleX', -shown.scaleX);
+            .withValue('rotate', turns ? m.rotate + turn * 180 / math.pi : m.rotate);
+        // Upright and flipped: heading left faces left, nose first.
+        if (path.orient == api.PathOrient.uprightFlip && api.PathFollow.headsLeft(heading)) {
+          pose = pose.withValue('scaleX', -pose.scaleX);
         }
       }
     }
-    transform = motionMatrix(shown, spinTurns: _turns);
-    origin = Alignment(shown.originX, shown.originY);
-    shift = Offset(shown.shiftX, shown.shiftY);
-    opacity = shown.opacity;
-    blur = shown.blur;
-    backfaceHidden = shown.backfaceHidden;
-  }
-
-  /// [m] with the rotation on [api.Motion.rotateCurve] and the opacity in
-  /// the first [api.Motion.fadeShare] of the run, [ms] into it.
-  static api.Motion _perProperty(api.Motion m, api.Motion a, api.Motion b, api.Motion timing, double ms) {
-    final raw = (ms / math.max(1, timing.duration)).clamp(0.0, 1.0);
-    if (timing.rotateCurve case final curve?) {
-      final t = curve.transform(raw);
-      m = m.withValue('rotate', a.rotate + (b.rotate - a.rotate) * t);
-    }
-    if (timing.fadeShare < 1) {
-      final t = api.AnimationCurve.easeOut.transform((raw / timing.fadeShare).clamp(0.0, 1.0));
-      m = m.withValue('opacity', a.opacity + (b.opacity - a.opacity) * t);
-    }
-    return m;
-  }
-
-  /// [t] (eased) of the way from [a] to [b]: bent by [api.Motion.arc], the
-  /// short way round a [api.Motion.pathWrap] path.
-  static api.Motion _between(api.Motion a, api.Motion b, double t) {
-    var m = api.Motion.lerp(a, b, t);
-    if (b.arc != 0) {
-      // On a quadratic curve whose middle is `arc` of the distance off the
-      // line, to the right of the way it goes: (-dy, dx) · arc · 2t(1 − t).
-      final bend = b.arc * 2 * t * (1 - t);
-      for (final (x, y) in const [('translateX', 'translateY'), ('shiftX', 'shiftY')]) {
-        if (b.keyframes.any((k) => k.valueOf(x) != null || k.valueOf(y) != null)) continue;
-        final dx = b.valueOf(x) - a.valueOf(x), dy = b.valueOf(y) - a.valueOf(y);
-        m = m.withValue(x, m.valueOf(x) - dy * bend).withValue(y, m.valueOf(y) + dx * bend);
-      }
-    }
-    if (b.pathWrap) {
-      final from = api.Motion.wrapProgress(a.pathProgress);
-      var to = api.Motion.wrapProgress(b.pathProgress);
-      if (to - from > 0.5) to -= 1;
-      if (from - to > 0.5) to += 1;
-      m = m.withValue('pathProgress', api.Motion.wrapProgress(from + (to - from) * t));
-    }
-    return m;
+    transform = motionMatrix(pose);
+    origin = Alignment(pose.alignment.x, pose.alignment.y);
+    shift = Offset(pose.shiftX, pose.shiftY);
+    backfaceHidden = pose.backfaceHidden;
   }
 }
 
-/// A [api.MotionLoop.swing] at [s] (−1–1 on its sine): [rest] ± ([values] −
-/// [rest]), keyframes aside.
-api.Motion swingPose(api.Motion rest, api.Motion values, double s) {
-  var m = values;
-  for (final p in api.Motion.properties) {
-    if (p == 'spin') continue;
-    m = m.withValue(p, rest.valueOf(p) + (values.valueOf(p) - rest.valueOf(p)) * s);
-  }
-  return m;
-}
-
-/// [api.MotionShimmer]'s band of light swept across what the node paints
-/// (blended over its own pixels only), over and over in a running app;
-/// still, halfway across, on the design canvas.
+/// [api.Shimmer]'s band of light across what the node paints (blended over
+/// its own pixels only), at its [position]: the `shimmer` animation preset
+/// sweeps it across (render/animations.dart).
 class RenderShimmer extends RenderShaderMask {
   RenderShimmer() : super(shaderCallback: _clear, blendMode: BlendMode.srcATop);
 
@@ -1162,64 +881,33 @@ class RenderShimmer extends RenderShaderMask {
     Color(0x00000000),
   ]);
 
-  api.MotionShimmer _shimmer = const api.MotionShimmer();
-  set shimmer(api.MotionShimmer v) {
+  api.Shimmer _shimmer = const api.Shimmer();
+  set shimmer(api.Shimmer v) {
     if (v == _shimmer) return;
     _shimmer = v;
     _sync();
   }
 
-  bool _animates = false;
-  set animates(bool v) {
-    if (v == _animates) return;
-    _animates = v;
+  /// Where the band is, set by the node's animations; null: the shimmer's
+  /// own position.
+  double? _position;
+  set position(double? v) {
+    if (v == _position) return;
+    _position = v;
     _sync();
   }
 
-  Ticker? _ticker;
-  double _t = 0.5;
-
-  Shader _shader(Rect bounds) => shimmerShader(_shimmer, _t, bounds);
+  Shader _shader(Rect bounds) => shimmerShader(_shimmer, _position ?? _shimmer.position, bounds);
 
   void _sync() {
     shaderCallback = _shader;
-    if (attached && _animates) {
-      _ticker ??= Ticker((e) {
-        final f = e.inMicroseconds / 1000 / math.max(1, _shimmer.duration);
-        _t = f - f.floorToDouble();
-        markNeedsPaint();
-      });
-      if (!_ticker!.isActive) _ticker!.start();
-    } else {
-      _ticker?.stop();
-      _t = 0.5;
-    }
     markNeedsPaint();
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _sync();
-  }
-
-  @override
-  void detach() {
-    _ticker?.stop();
-    super.detach();
-  }
-
-  @override
-  void dispose() {
-    _ticker?.dispose();
-    _ticker = null;
-    super.dispose();
   }
 }
 
 /// The shader of [s]'s band [t] (0–1) of the way across [bounds]: from
 /// fully off one side to fully off the other, along its angle.
-Shader shimmerShader(api.MotionShimmer s, double t, Rect bounds) {
+Shader shimmerShader(api.Shimmer s, double t, Rect bounds) {
   final color = s.color.flutter;
   final glow = color.withValues(alpha: color.a * s.strength.clamp(0.0, 1.0));
   final clear = color.withValues(alpha: 0);
@@ -1233,14 +921,17 @@ Shader shimmerShader(api.MotionShimmer s, double t, Rect bounds) {
   return ui.Gradient.linear(at(center - half), at(center + half), [clear, glow, clear], const [0, 0.5, 1]);
 }
 
-/// The transform [m] draws (without its shift), plus [spinTurns] turns.
-Matrix4 motionMatrix(api.Motion m, {double spinTurns = 0}) {
+/// The transform [m] draws, without its shift and about the box's origin
+/// (a [RenderPose] puts it about the motion's alignment): its translation,
+/// then the scale, the rotation about z, and the 3D rotations seen with its
+/// perspective (outermost first).
+Matrix4 motionMatrix(api.Motion m) {
   final matrix = Matrix4.identity();
   if (m.perspective > 0 && (m.rotateX != 0 || m.rotateY != 0)) matrix.setEntry(3, 2, 0.0012 * m.perspective);
   return matrix
     ..translateByDouble(m.translateX, m.translateY, 0, 1)
     ..scaleByDouble(m.scale * m.scaleX, m.scale * m.scaleY, 1, 1)
-    ..rotateZ(m.rotate * math.pi / 180 + spinTurns * 2 * math.pi)
+    ..rotateZ(m.rotate * math.pi / 180)
     ..rotateX(m.rotateX * math.pi / 180)
     ..rotateY(m.rotateY * math.pi / 180);
 }
@@ -1435,7 +1126,8 @@ void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
     // Turned by its variable, a tap or a drag (render/flip_card.dart).
     chain.add(
       b.obtain<RenderFlip>('flip', RenderFlip.new)
-        ..configure(b is NodeBox ? b : null, flip, be.motion, animates: animates),
+        ..configure(b is NodeBox ? b : null, flip, be.motion,
+            animates: animates, transition: api.Transition.of(be.transitions, 'motion.rotateY')),
     );
   }
 }
@@ -1530,27 +1222,7 @@ class RenderTilt extends RenderPose with _Ticking {
         translateY: max.translateY * active,
       ),
     );
-    origin = Alignment(max.originX, max.originY);
-  }
-}
-
-abstract final class _MotionRevealWatcher {
-  static final Set<RenderMotion> _waiting = {};
-  static bool _scheduled = false;
-  static void add(RenderMotion motion) {
-    _waiting.add(motion);_schedule();SchedulerBinding.instance.scheduleFrame();
-  }
-  static void remove(RenderMotion motion) => _waiting.remove(motion);
-  static void _schedule() {
-    if(_scheduled||_waiting.isEmpty)return;
-    _scheduled=true;
-    SchedulerBinding.instance.addPostFrameCallback((_){
-      _scheduled=false;
-      for(final motion in _waiting.toList()) {
-        motion._checkReveal();
-      }
-      _schedule();
-    });
+    origin = Alignment(max.alignment.x, max.alignment.y);
   }
 }
 

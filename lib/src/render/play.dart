@@ -24,14 +24,15 @@ void playLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
       ..emitter = be.particles!);
   }
   if (animates && be.flightKey.isNotEmpty) {
-    final motion = be.motion;
+    // The spring of the node's motion transition, when it has one.
+    final spring = api.Transition.of(be.transitions, 'motion')?.spring;
     chain.add(
       b.obtain<RenderFlightBox>('flight', RenderFlightBox.new)
-        ..spring = motion != null && motion.curve == api.AnimationCurve.spring
+        ..spring = spring != null
             ? SpringDescription(
                 mass: 1,
-                stiffness: motion.spring.effectiveStiffness <= 0 ? 380 : motion.spring.effectiveStiffness,
-                damping: motion.spring.effectiveDamping < 0 ? 20 : motion.spring.effectiveDamping,
+                stiffness: spring.effectiveStiffness <= 0 ? 380 : spring.effectiveStiffness,
+                damping: spring.effectiveDamping < 0 ? 20 : spring.effectiveDamping,
               )
             : const SpringDescription(mass: 1, stiffness: 420, damping: 24)
         ..flight = be.flight

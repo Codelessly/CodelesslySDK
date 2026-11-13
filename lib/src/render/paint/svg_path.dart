@@ -22,6 +22,16 @@ class MeasuredPath {
     return metrics.isEmpty ? null : MeasuredPath._(metrics, parsed.$2);
   });
 
+  /// Whether it ends where it starts (a `Z`, or the same point): a node on
+  /// it wraps round.
+  late final bool isClosed = () {
+    final last = metrics.last;
+    if (last.isClosed) return true;
+    final from = metrics.first.getTangentForOffset(0)?.position;
+    final to = last.getTangentForOffset(last.length)?.position;
+    return from != null && to != null && (to - from).distance < 1e-3;
+  }();
+
   /// Samples of the area swept about each focus asked for, as (distance
   /// along the path, area swept so far), for area pacing.
   final Map<Offset, List<(double, double)>> _areas = {};

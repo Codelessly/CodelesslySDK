@@ -23,7 +23,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: TransitionSideView(
         side: TransitionSide(
-          motion: Motion(shiftX: 1, opacity: 0, rotateY: 90),
+          motion: Pose(motion: Motion(shiftX: 1, rotateY: 90), opacity: 0),
           reveal: TransitionReveal(origin: RevealOrigin.center),
         ),
         amount: 0.5,
@@ -36,7 +36,7 @@ void main() {
     expect(find.byType(ClipPath), findsOneWidget);
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
-      child: TransitionSideView(side: TransitionSide(motion: Motion(opacity: 0)), amount: 0, child: SizedBox.expand()),
+      child: TransitionSideView(side: TransitionSide(motion: Pose(opacity: 0)), amount: 0, child: SizedBox.expand()),
     ));
     expect(find.byType(Opacity), findsNothing);
   });

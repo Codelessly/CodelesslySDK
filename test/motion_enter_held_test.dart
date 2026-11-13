@@ -8,10 +8,13 @@ import 'lists/support.dart' as support;
 
 void main() {
   test('enterHeld round-trips', () {
-    final m = api.Motion.fromJson({'enter': true, 'enterFrom': {'translateY': 40}, 'enterHeld': true})!;
-    expect(m.enterHeld, isTrue);
-    expect(m.toJson()['enterHeld'], true);
-    expect(api.Motion.fromJson({'enter': true})!.enterHeld, isFalse);
+    // The legacy enterHeld: the entrance animation's `paused`.
+    api.NodeAnimation enter(Map<String, Object?> motion) =>
+        api.Behaviors.fromJson({'motion': {'duration': 300, ...motion}}).animations.single;
+    final m = enter({'enter': true, 'enterFrom': {'translateY': 40}, 'enterHeld': true});
+    expect(m.paused, isTrue);
+    expect(m.toJson()['paused'], true);
+    expect(enter({'enter': true, 'translateX': 4}).paused, isFalse);
   });
 
   testWidgets('a held entrance waits at its start, plays when released, and does not hold again', (tester) async {

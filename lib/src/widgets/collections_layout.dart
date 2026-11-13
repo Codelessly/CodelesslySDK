@@ -1055,43 +1055,42 @@ class RenderPageItems extends RenderCollection {
 
   /// The pose a page has one page after the current one (coverflow, cube,
   /// carousel); null: flat pages. See [pageMotionAt].
-  api.Motion? pageMotion;
+  api.Pose? pageMotion;
 
   /// The pose one page before the current one, when it isn't [pageMotion]
   /// mirrored (a book's turning page). See [pageMotionAt].
-  api.Motion? pageMotionBefore;
+  api.Pose? pageMotionBefore;
 
   void changed() {
     markNeedsLayout();
     markNeedsPaint();
   }
 
-  /// The properties a page's motion moves by its distance; the others (origin, perspective) stay the motion's.
+  /// The numbers a page's pose moves by its distance; the others (the
+  /// alignment, the perspective) stay the pose's.
   static const _scaled = [
-    'translateX', 'translateY', 'shiftX', 'shiftY', 'scale', 'scaleX', 'scaleY', 'opacity', 'rotate', //
-    'rotateX', 'rotateY', 'blur',
+    'translateX', 'translateY', 'shiftX', 'shiftY', 'scale', 'scaleX', 'scaleY', 'rotate', 'rotateX', 'rotateY', //
   ];
 
-  /// [motion] (the pose one page after the current one) for a page
-  /// [offset] pages from it: at rest at 0, interpolated by the distance (up
-  /// to two pages), mirrored for pages before it, or, given [before] (the
-  /// pose one page before), [before] interpolated the same way unmirrored;
-  /// a [vertical] pager turns around X and moves along Y.
-  static api.Motion pageMotionAt(api.Motion motion, double offset, {bool vertical = false, api.Motion? before}) {
+  /// [pose] (the pose one page after the current one) for a page [offset]
+  /// pages from it: at rest at 0, interpolated by the distance (up to two
+  /// pages), mirrored for pages before it, or, given [before] (the pose one
+  /// page before), [before] interpolated the same way unmirrored; a
+  /// [vertical] pager turns around X and moves along Y.
+  static api.Pose pageMotionAt(api.Pose pose, double offset, {bool vertical = false, api.Pose? before}) {
     final distance = offset.abs().clamp(0.0, 2.0);
-    final source = offset < 0 && before != null ? before : motion;
-    var m = source;
+    final source = offset < 0 && before != null ? before : pose;
+    var m = source.motion;
     for (final p in _scaled) {
-      final rest = api.Motion.none.valueOf(p);
-      var v = rest + (source.valueOf(p) - rest) * distance;
-      if (p == 'opacity') v = v.clamp(0.0, 1.0);
-      if (p == 'blur') v = math.max(0, v);
-      m = m.withValue(p, v);
+      final rest = api.Motion.restOf(p);
+      m = m.withValue(p, rest + (source.motion.valueOf(p) - rest) * distance);
     }
+    var ax = m.alignment.x, ay = m.alignment.y;
     if (offset < 0 && before == null) {
-      for (final p in const ['translateX', 'shiftX', 'rotate', 'rotateY', 'originX']) {
+      for (final p in const ['translateX', 'shiftX', 'rotate', 'rotateY']) {
         m = m.withValue(p, -m.valueOf(p));
       }
+      ax = -ax;
     }
     if (vertical) {
       m = m
@@ -1100,17 +1099,25 @@ class RenderPageItems extends RenderCollection {
           .withValue('translateY', m.translateX)
           .withValue('translateX', 0)
           .withValue('shiftY', m.shiftX)
-          .withValue('shiftX', 0)
-          .withValue('originY', m.originX)
-          .withValue('originX', 0);
+          .withValue('shiftX', 0);
+      ay = ax;
+      ax = 0;
     }
-    return m;
+    return api.Pose(
+      motion: api.Motion(
+        translateX: m.translateX, translateY: m.translateY, shiftX: m.shiftX, shiftY: m.shiftY, scale: m.scale, //
+        scaleX: m.scaleX, scaleY: m.scaleY, rotate: m.rotate, rotateX: m.rotateX, rotateY: m.rotateY,
+        perspective: m.perspective, alignment: api.Alignment(ax, ay), backfaceHidden: m.backfaceHidden, path: m.path,
+      ),
+      opacity: (1 + (source.opacity - 1) * distance).clamp(0.0, 1.0),
+      blur: math.max(0, source.blur * distance),
+    );
   }
 
   /// Whether a pose with [api.Motion.backfaceHidden] shows its back (turned
   /// past 90 degrees about X or Y): such a page isn't drawn.
-  static bool facesAway(api.Motion m) =>
-      m.backfaceHidden && math.cos(m.rotateX * math.pi / 180) * math.cos(m.rotateY * math.pi / 180) < 0;
+  static bool facesAway(api.Pose p) =>
+      p.motion.backfaceHidden && math.cos(p.motion.rotateX * math.pi / 180) * math.cos(p.motion.rotateY * math.pi / 180) < 0;
 
   /// The page at rest: the initial page, within the pages there are.
   double get _currentPage {
@@ -1123,8 +1130,8 @@ class RenderPageItems extends RenderCollection {
   Matrix4? _poseOf(RenderBox child, int index) {
     final motion = pageMotion;
     if (motion == null) return null;
-    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical, before: pageMotionBefore);
-    final o = Alignment(m.originX, m.originY).alongSize(child.size);
+    final m = pageMotionAt(motion, index - _currentPage, vertical: axis == Axis.vertical, before: pageMotionBefore).motion;
+    final o = Alignment(m.alignment.x, m.alignment.y).alongSize(child.size);
     return Matrix4.translationValues(m.shiftX * child.size.width + o.dx, m.shiftY * child.size.height + o.dy, 0)
       ..multiply(motionMatrix(m))
       ..multiply(Matrix4.translationValues(-o.dx, -o.dy, 0));
