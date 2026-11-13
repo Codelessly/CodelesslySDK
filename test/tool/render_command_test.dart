@@ -427,4 +427,20 @@ void main() {
     expect([px(195, 500, 0), px(195, 500, 1)], [255, 0], reason: 'the drawer over the first window');
     expect([px(195, 1500, 0), px(195, 1500, 1)], [0, 255], reason: 'the page below it');
   });
+
+  testWidgets('--unfocus takes the focus from a field; --key presses a key on what has the focus', (tester) async {
+    Future<double> moved(List<Step> steps) async {
+      final o = Directory('${out.path}/${steps.length}-${steps.first.kind}')..createSync();
+      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-keys.json'], out: o.path, sizes: const [Size(390, 844)],
+          dumpLayout: true, steps: steps));
+      expect(r.errors, 0, reason: '${r.diagnostics}');
+      final boxes = (jsonDecode(File('${o.path}/keys@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
+      return (boxes.singleWhere((b) => b['id'] == 'moved')['h'] as num).toDouble();
+    }
+
+    expect(await moved(const [Step('key', 'ArrowRight')]), 40, reason: 'the screen\'s keyDown reaction ran');
+    expect(await moved(const [Step('type', 'field', 'abc'), Step('key', 'ArrowRight')]), 0, reason: 'the focused field took the key');
+    expect(await moved(const [Step('type', 'field', 'abc'), Step('unfocus', ''), Step('key', 'ArrowRight')]), 40);
+    expect(parseArgs(['k.json', '--out', 'o', '--unfocus', '--key', 'shift+Tab']).steps.map((s) => s.kind), ['unfocus', 'key']);
+  });
 }
