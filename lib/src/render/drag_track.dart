@@ -194,6 +194,21 @@ abstract final class DragTracks {
     final target = all.firstWhere((t) => t._enabled, orElse: () => all.first);
     return target.stepBy(steps);
   }
+
+  /// Moves the track of node [nodeId] of [tree] to [value] (snapped to its
+  /// step), reporting it as a whole change (`changed`, `dragEnd`,
+  /// `changeEnd`); false when no such track is on screen.
+  static Future<bool> animateTo(RenderTree tree, String nodeId, double value) async {
+    final all = [
+      for (final id in nodeId.split(','))
+        for (final t in _byTree[tree]?[id.trim()] ?? const <RenderDragTrack>{})
+          if (t.attached) t,
+    ];
+    if (all.isEmpty) return false;
+    final target = all.firstWhere((t) => t._enabled, orElse: () => all.first);
+    target._set(target._track.snapValue(value), always: true);
+    return true;
+  }
 }
 
 /// A node moved along its [api.Track] and, in a running app, dragged

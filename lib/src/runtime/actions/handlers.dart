@@ -143,36 +143,50 @@ Future<void> _handleCore(CoreAction a, ActionRun run) async {
       await _focus(a, run);
     case ScrollToAction():
       await _scrollTo(a, run);
-    case ControlDragAction(command: DragCommand.step):
-      // Turns a drag track by its steps, as if dragged (render/drag_track.dart).
+    case ControlTrackAction(command: TrackCommand.step):
+      // Turns a track by its steps, as if dragged (render/drag_track.dart).
       final tree = run.host.tree;
       final steps = double.tryParse(run.text(a.steps).trim())?.round() ?? 0;
       if (tree != null) await DragTracks.step(tree, a.node, steps);
-    case ControlDragAction(command: DragCommand.reset) when TransformGestures.hasIn(run.host.tree, a.node):
+    case ControlTrackAction(command: TrackCommand.animateTo):
+      // Moves a track to a value, reporting it as a whole change.
+      final tree = run.host.tree;
+      final value = numberOfExpression(a.value, run);
+      if (tree != null && value != null) await DragTracks.animateTo(tree, a.node, value.toDouble());
+    case ControlTransformAction(command: TransformCommand.reset) when TransformGestures.hasIn(run.host.tree, a.node):
       // A node with a transform gesture springs back to its rest pose.
       await TransformGestures.reset(run.host.tree!, a.node);
-    case ControlDragAction(command: DragCommand.zoom):
+    case ControlTransformAction(command: TransformCommand.reset):
+      // No transform gesture: a dismissible or pan springs back (the legacy
+      // controlDrag reset, which named either).
+      await _controlFollow(run, a.node, DismissCommand.reset, DragDirection.right);
+    case ControlTransformAction(command: TransformCommand.scaleBy):
       // Zoom buttons: scale a transform gesture about its viewport's middle.
       final tree = run.host.tree;
       final factor = double.tryParse(run.text(a.value).trim());
       if (tree != null && factor != null) await TransformGestures.zoom(tree, a.node, factor);
-    case ControlDragAction(command: DragCommand.pose):
+    case ControlTransformAction(command: TransformCommand.animateTo):
       // Spring a transform gesture to a pose: {x, y, scale, rotation...}.
       final tree = run.host.tree;
       final pose = _poseOf(a.value.trim().startsWith(r'${') ? await _withScripts(run, () => run.evaluate(a.value)) : a.value);
       if (tree != null && pose.isNotEmpty) await TransformGestures.moveTo(tree, a.node, pose);
-    case ControlDragAction():
+    case ControlDismissibleAction():
       // A node that follows the pointer (gestures/drag_motion.dart): fling it
-      // off, bring it back from a side, or reset or shake it; each of the
-      // comma-separated nodes.
-      final tree = run.host.tree;
-      await Future.wait([
-        for (final id in a.node.split(','))
-          if (id.trim().isNotEmpty) DragMotionControl.control(id.trim(), a.command, a.direction, tree: tree),
-      ]);
+      // off, bring it back from a side, or reset or shake it.
+      await _controlFollow(run, a.node, a.command, a.direction);
     case PaginateAction():
       await paginateAction(a, run);
   }
+}
+
+/// Runs [command] on each of the comma-separated nodes [ids] that follows
+/// the pointer.
+Future<void> _controlFollow(ActionRun run, String ids, DismissCommand command, DragDirection direction) async {
+  final tree = run.host.tree;
+  await Future.wait([
+    for (final id in ids.split(','))
+      if (id.trim().isNotEmpty) DragMotionControl.control(id.trim(), command, direction, tree: tree),
+  ]);
 }
 
 /// Runs [actions] later on [run] (a toast's button), reporting a failure.
