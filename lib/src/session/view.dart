@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart' hide NavigationMode;
 import '../app/viewport.dart' show CanvasSizing, CanvasViewport, CanvasViewportBox;
 import '../render/components.dart' show componentInstanceOf;
 import '../render/contracts.dart' show ImageBytesLoader;
+import '../render/node_tree.dart' show ResponsiveWidth;
 import '../render/node_view.dart';
 import '../runtime/actions/actions.dart';
 import '../runtime/expressions/bindings.dart' show NodeBinder;
@@ -238,6 +239,9 @@ class _CodelesslyViewState extends State<CodelesslyView> {
       _shown = id;
       final canvas = id == null ? null : _session.document[id];
       if (id == null || canvas == null) return const SizedBox.shrink();
+      // Media rules follow the width the canvas is shown at.
+      final width = CanvasViewport.breakpointWidth(context, constraints);
+      _tree.responsive = ResponsiveWidth(_session.document.breakpoints, width, height: MediaQuery.maybeSizeOf(context)?.height);
       for (final v in _session.document.extra.isEmpty ? const <Variable>[] : LayoutLogic.fromJson(_session.document.extra).variablesOf(id)) {
         if (!_scope.declares(v.name)) _scope.define(v);
       }
