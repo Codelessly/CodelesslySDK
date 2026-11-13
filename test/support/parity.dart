@@ -63,7 +63,8 @@ Future<ParityReport> parity(WidgetTester tester, {String project = '', String se
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = Size(size[0].toDouble(), size[1].toDouble());
       // The runtime set renders with the layout's variables and conditions.
-      final tree = NodeTree(DocumentSource(doc), binder: set == runtimeSet ? runtimeBinder(doc, e.key) : null);
+      final tree = NodeTree(DocumentSource(doc),
+          binder: set == runtimeSet ? runtimeBinder(doc, e.key) : null, recipes: mediaFeature.recipes);
       await tester.pumpWidget(MaterialApp(debugShowCheckedModeBanner: false, home: NodeView(tree: tree, rootId: e.key)));
       await tester.pump();
       final view = tester.renderObject(find.byType(NodeView));

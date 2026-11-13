@@ -64,8 +64,8 @@ const List<String> _pluginHomes = [
   'lib/store.dart',
   // The media node widgets: the players a layout's audio, video and embed
   // nodes show. Part of the renderer today.
-  'lib/src/widgets/media_players.dart',
-  'lib/src/widgets/embedded_player_native.dart',
+  'lib/src/features/media/players.dart',
+  'lib/src/features/media/embedded_player_native.dart',
 ];
 
 final _plugin = RegExp(r'^package:(just_audio|in_app_purchase\w*|firebase\w*|cloud_firestore|cloud_functions|webview\w*|video_player)/');

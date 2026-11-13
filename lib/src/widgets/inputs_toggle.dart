@@ -2,8 +2,8 @@
 // filling its box with a round thumb that slides between inset gaps from
 // its edges, casting the switch's thumb shadows. Material's Switch has no
 // thumb shadow, and scaling it to the node makes its thumb smaller and oval.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node, SwitchProps;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Node, SwitchProps;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';

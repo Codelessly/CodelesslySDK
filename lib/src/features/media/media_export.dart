@@ -1,5 +1,5 @@
 // A host media export service; scripts keep their normal no-DOM sandbox.
-import '../../widgets/media_players.dart' show isRemoteMediaUrl;
+import 'players.dart' show isRemoteMediaUrl;
 import 'platform/media_export_stub.dart' if (dart.library.js_interop) 'platform/media_export_web.dart';
 
 class MediaExportRequest {

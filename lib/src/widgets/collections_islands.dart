@@ -2,8 +2,8 @@
 // expansion tiles are material controls, built with Flutter's widgets. Their child nodes go back in as NodeChild boxes.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show Json, Node, SizeFit, TabsProps, TabBarProps, AccordionProps, ExpansionTileProps, readDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

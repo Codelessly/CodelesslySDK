@@ -2,7 +2,7 @@
 // automation's openModal) knows about where it shows: how its close modal
 // action closes it (a banner, a full-screen presentation), and that it is
 // not the app's current screen.
-import 'package:codelessly_api/codelessly_api.dart' show ModalPresentation;
+import 'package:codelessly_api/core.dart' show ModalPresentation;
 import 'package:flutter/widgets.dart';
 
 /// Marks a presented layout: [close] (when given) is what its close modal

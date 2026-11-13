@@ -3,7 +3,7 @@
 // the screen's node tree.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart'
     show ActionDef, Json, NavigateAction, ScriptDef;
 import 'package:flutter/foundation.dart';
 

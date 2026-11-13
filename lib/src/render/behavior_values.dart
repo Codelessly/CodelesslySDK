@@ -1,7 +1,7 @@
 // What a behavior shows for a value it is given or reads: a drag track's
 // place, a flip card's side. Pure: [read] gives the value at a path (a
 // variable), wherever values come from.
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 
 /// `${track}` for [track] drawn at [value] (NaN: empty) at [progress]
 /// (its rest place when null).

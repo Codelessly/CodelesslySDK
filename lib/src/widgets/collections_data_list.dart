@@ -8,8 +8,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, ListApply, ListSections, ListViewProps, Node, Pagination,
         PaginationMode, PaginationSource, SwipeAction, SwipeActions, TriggerType;
 import 'package:flutter/material.dart';

@@ -9,8 +9,8 @@
 // rest (collections.dart).
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api show AxisSize, Decoration, EdgeInsets;
-import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit, TableColumn, TableViewProps, TriggerType;
+import 'package:codelessly_api/core.dart' as api show AxisSize, Decoration, EdgeInsets;
+import 'package:codelessly_api/core.dart' show Node, SizeFit, TableColumn, TableViewProps, TriggerType;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';

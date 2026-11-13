@@ -1,15 +1,13 @@
-// Widget recipes: media (vector paths, video, audio, web views) and slots the
-// app fills (placeholders, external components). See
-// lib/src/render/recipe.dart.
-import 'package:codelessly_api/codelessly_api.dart' show ExternalProps, Node;
+// Widget recipes: vector paths and slots the app fills (placeholders,
+// external components). See lib/src/render/recipe.dart. Video, audio and web
+// views are the media feature's (features/media/recipes.dart).
+import 'package:codelessly_api/core.dart' show ExternalProps, Node;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../render/node_tree.dart' show Slot, SlotKind;
 import '../render/paint/path_paint.dart';
 import '../render/recipe.dart';
-import '../render/node_tree.dart' show fireTrigger;
-import 'media_players.dart';
 
 /// The widgets an app builds for its `external` nodes, by builder id. Put it
 /// above the [NodeView]s that show them.
@@ -28,15 +26,9 @@ class ExternalComponents extends InheritedTheme {
   bool updateShouldNotify(ExternalComponents oldWidget) => !identical(oldWidget.builders, builders);
 }
 
-/// Recipes for the media group, by node type.
+/// Recipes for paths and slots, by node type.
 final Map<String, WidgetRecipe> mediaRecipes = {
   'path': buildPath,
-  'video': (b, n, chain) => _player(b, n, chain, (preview) => MediaVideo(node: n, preview: preview,onStatus:(status)=>fireTrigger(b,'changed',event:{'value':status}))),
-  'embeddedVideo': (b, n, chain) =>
-      _player(b, n, chain, (preview) => MediaEmbeddedVideo(node: n, preview: preview)),
-  'audioPlayer': (b, n, chain) => _player(b, n, chain,
-      (preview) => MediaAudioPlayer(node: n, preview: preview, onStatus: (status) => fireTrigger(b, 'changed', event: {'value': status}))),
-  'webView': (b, n, chain) => _player(b, n, chain, (preview) => MediaWebViewNode(node: n, preview: preview)),
   'external': (b, n, chain) => _player(b, n, chain, (_) => _External(n)),
   'placeholder': _placeholder,
   'singlePlaceholder': _singlePlaceholder,
