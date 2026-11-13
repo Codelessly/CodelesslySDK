@@ -69,7 +69,6 @@ bool declaresNodeScope(Node node) {
       be.flip != null ||
       be.tilt != null ||
       be.transformGesture != null ||
-      be.zoomable ||
       be.sticky != null ||
       be.viewProgress != null ||
       be.animations.isNotEmpty ||
@@ -169,7 +168,7 @@ Map<String, Object?>? tiltScopeValues(Node node, ValueScope parent) {
 /// the live pose).
 Map<String, Object?>? transformScopeValues(Node node, ValueScope parent) {
   final be = node.behaviors;
-  if (be.transformGesture == null && !be.zoomable) return null;
+  if (be.transformGesture == null) return null;
   return const {
     'transform': {'x': 0, 'y': 0, 'scale': 1, 'rotation': 0, 'scaleX': 1, 'scaleY': 1, 'active': false, 'selected': true},
   };
