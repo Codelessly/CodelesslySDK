@@ -46,7 +46,8 @@ void main() {
     final storage = services.storage as ChangeNotifier;
     project.dispose();
     await Future<void>.delayed(Duration.zero);
-    expect(() => storage.addListener(() {}), throwsFlutterError);
+    // A FlutterError up to Flutter 3.47; a StateError once ChangeNotifier moved to package:listen.
+    expect(() => storage.addListener(() {}), throwsA(anyOf(isFlutterError, isStateError)));
   });
   test('closing a project leaves injected services to their owner', () async {
     final services = Services();
