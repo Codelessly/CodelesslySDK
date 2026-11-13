@@ -5,7 +5,7 @@
 # writes ONE summary table (Markdown + JSON).
 #
 #   ANTHROPIC_API_KEY=... examples/stream_chat/tool/record_all.sh [--repeats 2] [--app-repeats 1]
-#       [--only cards|pages|apps] [--date YYYY-MM-DD] [--no-replay] [--dry-run]
+#       [--only cards|pages|apps|usecases] [--date YYYY-MM-DD] [--no-replay] [--dry-run]
 #
 # Cells (each repeated --repeats times; apps --app-repeats times):
 #   cards  flights, weather x claude-haiku-5-5, claude-sonnet-5-5, claude-opus-5-5 x --prompt compact, full;
@@ -13,6 +13,7 @@
 #   pages  restaurant_menu, saas_pricing x claude-haiku-5-5, claude-sonnet-5-5, compact
 #   apps   form_builder, sudoku, basketball, kanban, habits, memory x claude-sonnet-5-5, claude-opus-5-5, compact,
 #          scripts on; claude-haiku-5-5 once each; sudoku and basketball also with scripts off (sonnet)
+#   usecases  the fifteen inline use cases (dashboard ... image_gallery) x claude-haiku-5-5, claude-sonnet-5-5, compact
 # Recordings: tool/stream/streams/live/<date>/; replays: tool/stream/out/live/<date>/; the table:
 # tool/stream/out/live/<date>/summary.md and summary.json.
 #
@@ -69,6 +70,13 @@ if [ -z "$only" ] || [ "$only" = apps ]; then
     add "$ui claude-haiku-5-5 compact on 1"
   done
   for ui in sudoku basketball; do add "$ui claude-sonnet-5-5 compact off 1"; done
+fi
+
+if [ -z "$only" ] || [ "$only" = usecases ]; then
+  for ui in dashboard order_summary approval question_flow reservation checkout map_list carousel itinerary comparison \
+      data_table message_draft plan_progress code_diff image_gallery; do
+    for m in claude-haiku-5-5 claude-sonnet-5-5; do add "$ui $m compact on 1 --followup"; done
+  done
 fi
 
 echo "${#cells[@]} cells -> $streams"
