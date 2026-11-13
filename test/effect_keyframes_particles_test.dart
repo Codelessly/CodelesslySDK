@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'lists/support.dart' as support;
+import 'support/legacy.dart';
 
 const hop = [
   {'t': 0.12, 'scaleX': 1.07, 'scaleY': 0.86},
@@ -20,7 +21,7 @@ const hop = [
 /// is gone), composed as the player does.
 ({double dx, double dy, double sx, double sy, double rotation, double opacity}) keyframePoseAt(
     List<Map<String, Object?>> keyframes, double t, double amount) {
-  final a = api.AnimationPresets.fromEffect({'type': 'keyframes', 'keyframes': keyframes, 'amount': amount}, 0)!.expanded;
+  final a = legacyEffect({'type': 'keyframes', 'keyframes': keyframes, 'amount': amount}, 0)!.expanded;
   final v = {
     for (final p in ['translateX', 'translateY', 'rotate']) p: 0.0,
     for (final p in ['scale', 'scaleX', 'scaleY', 'opacity']) p: 1.0,
@@ -56,12 +57,12 @@ void main() {
 
   test('keyframes and curve round-trip; keyframes also read from JSON text (a binding)', () {
     // The effect reads as a `keyframes` animation.
-    final e = api.AnimationPresets.fromEffect({'name': 'hop', 'type': 'keyframes', 'duration': 700, 'keyframes': hop, 'curve': 'easeOut'}, 0)!;
+    final e = legacyEffect({'name': 'hop', 'type': 'keyframes', 'duration': 700, 'keyframes': hop, 'curve': 'easeOut'}, 0)!;
     expect(e.preset, 'keyframes');
     expect((e.params['frames']! as List).length, 4);
     expect(e.curve, api.AnimationCurve.easeOut);
     expect(api.NodeAnimation.fromJson(e.toJson()), e);
-    final text = api.AnimationPresets.fromEffect({'name': 'hop', 'type': 'keyframes', 'keyframes': '[{"t": 0.5, "translateY": -40}]'}, 0)!;
+    final text = legacyEffect({'name': 'hop', 'type': 'keyframes', 'keyframes': '[{"t": 0.5, "translateY": -40}]'}, 0)!;
     expect(text.expanded.tracks.single.keyframes.single.value, -40);
     final p = api.ParticleEmitter.fromJson({'shapes': ['image'], 'image': 'https://example.com/petal.png'})!;
     expect(p.shapes, [api.ParticleShape.image]);

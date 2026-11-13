@@ -8,11 +8,12 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/legacy.dart';
 
 Variable v(String name, Object? value, [VariableType type = VariableType.text]) =>
     Variable(name: name, type: type, value: type.coerce(value));
 
-Node clickNode(List<Json> actions) => Node.fromJson({
+Node clickNode(List<Json> actions) => migratedNode({
       'type': 'box',
       'actions': [
         {'trigger': {'type': 'click'}, 'actions': actions},
@@ -80,7 +81,7 @@ void main() {
     testWidgets('a glide is the animate variable driver; a spring there settles on the target', (tester) async {
       // The legacy glide decodes as `animate` (animateTo); a spring drives it
       // instead of a duration.
-      expect(ActionDef.fromJson({'type': 'setVariable', 'variable': 't', 'value': '1', 'animateMs': '300'}), isA<AnimateAction>());
+      expect(legacyAction({'type': 'setVariable', 'variable': 't', 'value': '1', 'animateMs': '300'}), isA<AnimateAction>());
       final h = Harness(variables: [v('t', 0, VariableType.decimal)]);
       var done = false;
       unawaited(h.click([

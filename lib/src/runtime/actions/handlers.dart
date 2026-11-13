@@ -261,19 +261,6 @@ Future<void> _setVariable(SetVariableAction a, ActionRun run) async {
   final scripts = readPath(run.scope, 'script');
   final (current, type, next) = scripts is ScriptsScope ? await scripts.resolve(calculate) : calculate();
   if (run.isCanceled) return;
-  // A number glides to its new value over animateMs.
-  final ms = a.animateMs.trim().isEmpty ? 0 : (double.tryParse(run.text(a.animateMs).trim()) ?? 0).round();
-  final number = type == VariableType.integer || type == VariableType.decimal;
-  if (ms > 0 && number && path.keys.isEmpty && current is num && next is num) {
-    if (next == current) return;
-    final done = VariableAnimator.play(scope, path.root,
-        from: current.toDouble(), to: next.toDouble(), duration: Duration(milliseconds: ms), curve: a.curve, glide: true);
-    // The chain stops (its node left): so does the glide.
-    final remove = run.onCancel(() => VariableAnimator.stopGlide(scope, path.root));
-    await done;
-    remove();
-    return;
-  }
   // A plain set takes over from a glide.
   VariableAnimator.stopGlide(scope, path.root);
   setVariableIn(target, name, next);

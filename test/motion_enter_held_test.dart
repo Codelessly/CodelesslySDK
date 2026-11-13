@@ -5,12 +5,13 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'lists/support.dart' as support;
+import 'support/legacy.dart';
 
 void main() {
   test('enterHeld round-trips', () {
     // The legacy enterHeld: the entrance animation's `paused`.
     api.NodeAnimation enter(Map<String, Object?> motion) =>
-        api.Behaviors.fromJson({'motion': {'duration': 300, ...motion}}).animations.single;
+        migratedBehaviors({'motion': {'duration': 300, ...motion}}).animations.single;
     final m = enter({'enter': true, 'enterFrom': {'translateY': 40}, 'enterHeld': true});
     expect(m.paused, isTrue);
     expect(m.toJson()['paused'], true);
