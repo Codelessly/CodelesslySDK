@@ -36,7 +36,6 @@ import 'layout/text_box.dart';
 import 'layout/wrap.dart';
 import 'paint/icon_glyph.dart';
 import 'paint/node_paint.dart';
-import 'paint/path_paint.dart';
 import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
@@ -1525,11 +1524,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
           _shell(n, chain, content: (inner) => _freeform(n, inner));
         }
       case 'box':
-        if (n.prop(api.BoxProps.path).isNotEmpty) {
-          buildBoxPath(this, n, chain);
-        } else {
-          _shell(n, chain);
-        }
+        _shell(n, chain);
       case 'text':
         _text(n, chain);
       case 'icon':
@@ -2754,13 +2749,11 @@ class _PaintPlan {
     final simpleFill =
         fills.length <= 1 && fills.every((f) => f.type == api.PaintType.solid && f.blendMode == api.BlendMode.srcOver);
     final strokes = d.visibleStrokes.toList();
-    final path = n.type == 'box' && n.prop(api.BoxProps.path).isNotEmpty;
     final simpleStroke = strokes.isEmpty ||
         (strokes.length == 1 &&
             strokes.first.type == api.PaintType.solid &&
             d.dashPattern.isEmpty &&
-            d.strokeSides == api.StrokeSides.all &&
-            !path);
+            d.strokeSides == api.StrokeSides.all);
     if (!simpleFill || !simpleStroke) return _PaintPlan(false, null, null, foreground);
     final strokeColor = strokes.isEmpty ? null : strokes.first.effectiveColor?.flutter;
     return _PaintPlan(

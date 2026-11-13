@@ -76,7 +76,6 @@ const Map<String, Map<String, String>> renderStatics = {
     '_svgBytes': 'the bytes of the SVGs fetched, by URL',
   },
   'render/paint/path_paint.dart': {'_parsed': 'parsed SVG path data, by its text'},
-  'render/paint/path_shapes.dart': {'_cache': 'the shapes of path data, by its text and size'},
   'render/paint/svg_path.dart': {'_cache': 'measured paths, by their data'},
   'render/convert.dart': {'_asked': 'FontDemand: the font families asked for, once each'},
   // Debug counters, off unless a tool turns them on.

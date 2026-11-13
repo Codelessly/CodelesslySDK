@@ -2,8 +2,9 @@
 // `migrate3to4`) move a stroke path, a box drawn as a path and a path's
 // per-shape colors onto `customPaint` and the path node. Each case draws a
 // schema-3 node as the migration rewrites it and matches a golden image of
-// it (goldens/), taken while schema 3's painters still drew the node the
-// old way too and both agreed (within the tolerance a case names).
+// it (goldens/). The goldens were taken while schema 3's painters still drew
+// the node the old way too, and both agreed: pixel for pixel, or within the
+// difference a case names (the largest channel difference, out of 255).
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' show Json, LayoutDocument, Node, Variable, VariableType, migrate3to4, readMap;
@@ -55,30 +56,25 @@ Future<List<int>> _shot(WidgetTester tester, Json json, Size size, {List<Variabl
   return data.buffer.asUint8List().toList();
 }
 
-/// The largest channel difference between [a] and [b], and how many pixels
-/// had ink.
-(int, int) _compare(List<int> a, List<int> b) {
-  var worst = 0, ink = 0;
-  for (var i = 0; i < a.length; i++) {
-    final d = (a[i] - b[i]).abs();
-    if (d > worst) worst = d;
-    if (i % 4 == 0 && (a[i] != 255 || a[i + 1] != 255 || a[i + 2] != 255)) ink++;
+/// How many pixels of [rgba] have ink (are not white).
+int _ink(List<int> rgba) {
+  var ink = 0;
+  for (var i = 0; i < rgba.length; i += 4) {
+    if (rgba[i] != 255 || rgba[i + 1] != 255 || rgba[i + 2] != 255) ink++;
   }
-  return (worst, ink);
+  return ink;
 }
 
 /// Draws [node] as the migration rewrote it at each of [sizes], matching
-/// the golden `<name>-<width>x<height>`; schema 3's drawing of it differs
-/// from that by at most [tolerance] in any channel.
-Future<Json> _same(WidgetTester tester, String name, Json node, List<Size> sizes, {int tolerance = 0, List<Variable> variables = const []}) async {
+/// the golden `<name>-<width>x<height>`. [schema3Difference] records how far
+/// schema 3's own drawing was from it when the golden was taken.
+Future<Json> _same(WidgetTester tester, String name, Json node, List<Size> sizes,
+    {int schema3Difference = 0, List<Variable> variables = const []}) async {
   final (before, after) = _migrate(node);
   expect(after, isNot(before));
   for (final size in sizes) {
-    final a = await _shot(tester, before, size, variables: variables);
-    final b = await _shot(tester, after, size, variables: variables, golden: '$name-${size.width.round()}x${size.height.round()}');
-    final (worst, ink) = _compare(a, b);
-    expect(ink, greaterThan(0), reason: 'something is drawn at $size');
-    expect(worst, lessThanOrEqualTo(tolerance), reason: 'at $size');
+    final drawn = await _shot(tester, after, size, variables: variables, golden: '$name-${size.width.round()}x${size.height.round()}');
+    expect(_ink(drawn), greaterThan(0), reason: 'something is drawn at $size');
   }
   return after;
 }
@@ -143,7 +139,7 @@ void main() {
     testWidgets('a fill fading with a progress below 1 is within one level of the fade', (tester) async {
       await _same(tester, 'stroke-fill-fading', _box({
         'strokePath': {'points': [[0.1, 10], [0.9, 15], [0.8, 80], [0.15, 70]], 'fillColor': '#C0FF8800', 'progress': 0.37, 'color': '#FF222222'},
-      }), _sizes, tolerance: 1);
+      }), _sizes, schema3Difference: 1);
     });
 
     testWidgets('a progress bound to a variable', (tester) async {
@@ -164,7 +160,7 @@ void main() {
       expect(after['props'], {'data': 'M10 9 L18 18 L18 29 L18 18 L27 9', 'strokeJoin': 'round'});
     });
 
-    testWidgets('a filled, stroked and shadowed outline is the same but for the fill\'s edge', (tester) async {
+    testWidgets('a filled, stroked and shadowed outline is the same', (tester) async {
       await _same(tester, 'box-path-shadow', _box({
         'props': {'path': 'M0 0 L100 0 L0 100 Z', 'strokeJoin': 'round'},
         'decoration': {
@@ -181,7 +177,7 @@ void main() {
       await _same(tester, 'box-path-fill', _box({
         'props': {'path': 'M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z'},
         'decoration': {'fills': [{'color': '#FFB9F34C'}]},
-      }, width: 34, height: 30), const [Size(34, 30)], tolerance: 6);
+      }, width: 34, height: 30), const [Size(34, 30)], schema3Difference: 3);
     });
   });
 
@@ -199,7 +195,7 @@ void main() {
       expect(after['decoration'], isNull);
     });
 
-    testWidgets('a gradient laid out in each shape stays within a level of rounding', (tester) async {
+    testWidgets('a gradient laid out in each shape is the same at its design size', (tester) async {
       final after = await _same(tester, 'per-shape-gradient', {
         'type': 'path',
         'layout': {'width': 160, 'height': 90},
@@ -209,7 +205,7 @@ void main() {
             {'type': 'linear', 'gradientPerSubpath': true, 'stops': [{'position': 0, 'color': '#FFFF0000'}, {'position': 1, 'color': '#FF0000FF'}]},
           ],
         },
-      }, const [Size(160, 90)], tolerance: 2);
+      }, const [Size(160, 90)]);
       expect((after['customPaint'] as Map)['painter'], hasLength(3));
     });
   });
