@@ -26,6 +26,8 @@ out of its findings.
   1.33 through the migration (the 66 parity pages and the m05 sites render byte-identical PNGs).
   **Breaking:** `RenderTree.naturalLineHeight` and `kTextBaseNatural` are removed; `textStyle(style, [inherited])`;
   `Slot.textDefault`.
+- **A schema-2 path a `setValue` names** (not migrated: it is read against its target when it runs) sets nothing
+  and is said once, with the schema-3 path to write (`schema2PathHint`); the action's other values apply.
 - **Behaviour changes:** a track with no value is drawn at its minimum (the `drag_misc` parity golden moves
   three thumbs: `fader cap`, `knob`, `path track`); the other dropped fields no longer act. Everything else
   renders as before: the 66 parity pages, the m05 experiments' sites (byte-identical PNGs), the Relay site
