@@ -74,7 +74,7 @@ class TrackPanGestureRecognizer extends PanGestureRecognizer {
 /// pointer, angles about an arc's pivot, the area it can be found in.
 extension TrackGeometryHits on TrackGeometry {
   /// An arc's pivot, in pixels from the rest center.
-  Offset get pivot => track.units == api.DragTrackUnits.parent && parent != null
+  Offset get pivot => track.units == api.TrackUnits.parent && parent != null
       ? Offset(track.pivotX * parent!.width, track.pivotY * parent!.height)
       : Offset(track.pivotX, track.pivotY);
 
@@ -88,7 +88,7 @@ extension TrackGeometryHits on TrackGeometry {
   /// sweep where it is, in the gap the nearer end. Null for a track that
   /// isn't an arc or has no sweep.
   double? progressAtAngle(double angle) {
-    if (track.shape != api.DragTrackShape.arc) return null;
+    if (track.shape != api.TrackShape.arc) return null;
     final start = track.startAngle, end = track.endAngle;
     final sweep = end - start;
     if (sweep == 0) return null;
@@ -120,14 +120,14 @@ extension TrackGeometryHits on TrackGeometry {
   /// progress (see [pathSamples]).
   double nearest(Offset p, {bool unclamped = false, List<Offset> samples = const []}) {
     switch (track.shape) {
-      case api.DragTrackShape.line:
+      case api.TrackShape.line:
         final a = offsetAt(0), d = offsetAt(1) - a;
         final len2 = d.distanceSquared;
         if (len2 == 0) return 0;
         final ap = p - a;
         final t = (ap.dx * d.dx + ap.dy * d.dy) / len2;
         return unclamped ? t : t.clamp(0.0, 1.0);
-      case api.DragTrackShape.path:
+      case api.TrackShape.path:
         if (samples.length < 2) return 0;
         // By length along the placed path: the samples are even in it.
         var best = double.infinity, at = 0.0;
@@ -143,7 +143,7 @@ extension TrackGeometryHits on TrackGeometry {
           }
         }
         return at;
-      case api.DragTrackShape.arc:
+      case api.TrackShape.arc:
         // The pointer's angle round the pivot, from where the node rests,
         // in whichever turn lands inside the sweep (or nearest an end).
         final sweep = track.endAngle - track.startAngle;
@@ -196,7 +196,7 @@ abstract final class DragTracks {
   }
 }
 
-/// A node moved along its [api.DragTrack] and, in a running app, dragged
+/// A node moved along its [api.Track] and, in a running app, dragged
 /// along it ([configure]'s `interactive`); on the design canvas it's the
 /// static pose at its variable's value, taking no input and never ticking.
 class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation {
@@ -212,12 +212,12 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   BoundValues? _scope;
   Listenable? _watched;
 
-  api.DragTrack get _track => track;
+  api.Track get _track => track;
 
   /// Sets the track up from its node, as shown: [box] is the node's box
-  /// (null outside a tree), [enabled] its `drag.enabled`, [interactive]
+  /// (null outside a tree), [enabled] its `track.enabled`, [interactive]
   /// whether the tree runs (an app) or rests (a design canvas).
-  void configure(NodeBox? box, api.DragTrack track, {bool enabled = true, required bool interactive}) {
+  void configure(NodeBox? box, api.Track track, {bool enabled = true, required bool interactive}) {
     final oldTrack = _track;
     final oldValue = _value;
     final oldInput = oldTrack.input;
@@ -248,7 +248,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       _valueChanged(oldTrack, oldValue, value);
     }
     _animateTo(_progress);
-    if (_interactive && (track.jumpOnTap || track.hitArea == api.DragTrackHitArea.parent)) _box?.outsideHitTest = _hitOutside;
+    if (_interactive && (track.jumpOnTap || track.hitArea == api.TrackHitArea.parent)) _box?.outsideHitTest = _hitOutside;
     if (attached) _syncRegistration();
     _refresh(later: true);
   }
@@ -278,7 +278,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   /// [oldTrack]): a smooth track glides there without reporting the values
   /// it passes; any other glides from where it's drawn now (a spring at the
   /// speed it moves). A change while the pointer holds it waits.
-  void _valueChanged(api.DragTrack oldTrack, double old, double next) {
+  void _valueChanged(api.Track oldTrack, double old, double next) {
     _value = next;
     if (!_interactive) return;
     if (_track.smooth && !_pointerActive && !_same(next, _dragValue ?? old)) {
@@ -296,7 +296,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     }
   }
 
-  /// Writes [v] to the variable (unless [api.DragTrack.write] is off, or
+  /// Writes [v] to the variable (unless [api.Track.write] is off, or
   /// it's computed): whole for an integer one. Scrubbing a variable an
   /// animation plays pauses it.
   void _onChanged(double v) {
@@ -471,7 +471,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   double get _lerpSettle => _settleFrom + (_settleTo - _settleFrom) * _settleT;
   double get _settleVelocity => _settling ? _settleV * (_settleTo - _settleFrom) : 0;
 
-  /// The snap to a new value ([api.DragTrack.snap] ms).
+  /// The snap to a new value ([api.Track.snap] ms).
   bool _snapActive = false;
   double _snapT = 1, _from = 0, _to = 0;
   int _snapMs = 0;
@@ -667,9 +667,9 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
 
   DragGestureRecognizer _makeDrag() {
     final DragGestureRecognizer r = switch (_track.input) {
-      api.DragTrackInput.vertical => VerticalDragGestureRecognizer(debugOwner: this),
-      api.DragTrackInput.horizontal => HorizontalDragGestureRecognizer(debugOwner: this),
-      api.DragTrackInput.follow || api.DragTrackInput.both => TrackPanGestureRecognizer(debugOwner: this),
+      api.TrackInput.vertical => VerticalDragGestureRecognizer(debugOwner: this),
+      api.TrackInput.horizontal => HorizontalDragGestureRecognizer(debugOwner: this),
+      api.TrackInput.follow || api.TrackInput.both => TrackPanGestureRecognizer(debugOwner: this),
     };
     return r
       ..dragStartBehavior = DragStartBehavior.down
@@ -689,7 +689,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   Object? _samplesKey;
 
   List<Offset> _pathSamples(TrackGeometry g) {
-    if (_track.shape != api.DragTrackShape.path) return const [];
+    if (_track.shape != api.TrackShape.path) return const [];
     final key = (g.track, g.size, g.parent, g.rest);
     if (key != _samplesKey) {
       _samplesKey = key;
@@ -734,8 +734,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
         _drawProgress = null;
       }
     }
-    if (_track.jumpOnTap && _track.input == api.DragTrackInput.follow) {
-      if (_track.shape == api.DragTrackShape.arc) {
+    if (_track.jumpOnTap && _track.input == api.TrackInput.follow) {
+      if (_track.shape == api.TrackShape.arc) {
         // A dial turns to the angle tapped, then drags from there. Too near
         // the pivot there is no steady angle.
         final p = _rel(local);
@@ -746,7 +746,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
           _raw = _progress;
           _emit(jump);
         }
-      } else if (!onNode || (_track.relative && _track.shape == api.DragTrackShape.line)) {
+      } else if (!onNode || (_track.relative && _track.shape == api.TrackShape.line)) {
         // Tapped the track off the node (or a relative scrub area): jump
         // there, then drag from there.
         _settleActive = false;
@@ -817,14 +817,14 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     _lastLocal = d.localPosition;
     final ppr = _fine ? _track.effectiveFinePixelsPerRange : _track.pixelsPerRange;
     switch (_track.input) {
-      case api.DragTrackInput.vertical:
+      case api.TrackInput.vertical:
         _emit(_raw - d.delta.dy * _gain / ppr);
-      case api.DragTrackInput.horizontal:
+      case api.TrackInput.horizontal:
         _emit(_raw + d.delta.dx * _gain / ppr);
-      case api.DragTrackInput.both:
+      case api.TrackInput.both:
         _emit(_raw + (d.delta.dx - d.delta.dy) * _gain / ppr);
-      case api.DragTrackInput.follow:
-        if (_track.shape == api.DragTrackShape.arc) {
+      case api.TrackInput.follow:
+        if (_track.shape == api.TrackShape.arc) {
           final g = _geometry;
           if ((p - g.pivot).distance < size.shortestSide * 0.12) {
             // Too close to the pivot for a steady angle: vertical travel.
@@ -851,15 +851,15 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     final local = _lastLocal;
     if (local == null) return 0;
     switch (_track.input) {
-      case api.DragTrackInput.vertical:
+      case api.TrackInput.vertical:
         return -v.dy * _gain / _track.pixelsPerRange;
-      case api.DragTrackInput.horizontal:
+      case api.TrackInput.horizontal:
         return v.dx * _gain / _track.pixelsPerRange;
-      case api.DragTrackInput.both:
+      case api.TrackInput.both:
         return (v.dx - v.dy) * _gain / _track.pixelsPerRange;
-      case api.DragTrackInput.follow:
+      case api.TrackInput.follow:
         final g = _geometry;
-        if (_track.shape == api.DragTrackShape.arc) {
+        if (_track.shape == api.TrackShape.arc) {
           final r = _rel(local) - g.pivot;
           final r2 = r.distanceSquared;
           if (r2 < 1) return 0;
@@ -880,16 +880,16 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
 
   /// A coast starts above this speed (about 230°/s on an arc; 400 px/s
   /// along a line or drag input), and ends below the next.
-  double get _coastStart => _speedOf(_track.shape == api.DragTrackShape.arc ? 230 : 400);
-  double get _coastStop => _speedOf(_track.shape == api.DragTrackShape.arc ? 52 : 60);
+  double get _coastStart => _speedOf(_track.shape == api.TrackShape.arc ? 230 : 400);
+  double get _coastStop => _speedOf(_track.shape == api.TrackShape.arc ? 52 : 60);
 
   /// [units] (°/s on an arc, px/s otherwise) in progress per second.
   double _speedOf(double units) {
-    if (_track.shape == api.DragTrackShape.arc && _track.input == api.DragTrackInput.follow) {
+    if (_track.shape == api.TrackShape.arc && _track.input == api.TrackInput.follow) {
       final sweep = (_track.endAngle - _track.startAngle).abs();
       return sweep == 0 ? double.infinity : units / sweep;
     }
-    if (_track.input != api.DragTrackInput.follow) return units / _track.pixelsPerRange;
+    if (_track.input != api.TrackInput.follow) return units / _track.pixelsPerRange;
     final g = _geometry;
     final len = (g.offsetAt(1) - g.offsetAt(0)).distance;
     return len == 0 ? double.infinity : units / len;
@@ -1098,18 +1098,18 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   bool _onTrack(Offset position) {
     final rel = _rel(position);
     final g = _geometry;
-    if (_track.shape == api.DragTrackShape.arc) {
+    if (_track.shape == api.TrackShape.arc) {
       final (center, radius) = g.sweptCircle(size);
       return (rel - center).distance <= radius;
     }
     return g.bounds(size).contains(rel);
   }
 
-  /// The box that takes the pointer for [api.DragTrackHitArea.parent]: the
+  /// The box that takes the pointer for [api.TrackHitArea.parent]: the
   /// node's parent's.
   RenderBox? get _hitAreaBox {
     final box = _box;
-    if (box == null || _track.hitArea != api.DragTrackHitArea.parent) return null;
+    if (box == null || _track.hitArea != api.TrackHitArea.parent) return null;
     final parentId = box.tree.source.parentOf(box.id);
     if (parentId == null) return null;
     final p = box.tree.boxOf(parentId, instance: box.instance) ?? box.tree.boxOf(parentId);

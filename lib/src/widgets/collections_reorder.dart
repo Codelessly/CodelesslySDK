@@ -30,7 +30,7 @@ import 'collections_list_runtime.dart';
 String? reorderHandleOf(NodeBuilder b, String id) {
   final n = b.nodeOf(id);
   if (n == null) return null;
-  if (n.behaviors.drag?.reorder ?? false) return id;
+  if (n.behaviors.reorderHandle) return id;
   for (final c in [...n.children, ...n.slots.values]) {
     final found = reorderHandleOf(b, c);
     if (found != null) return found;
