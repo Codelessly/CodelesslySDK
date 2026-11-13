@@ -86,9 +86,13 @@ Options:
   --sizes <WxH,...>       Screen sizes (default 390x844,834x1112,1440x900).
   --screen <id|name>      Only this screen: a canvas id, a layout id, a screen
                           name (props.screen), a canvas name or path. Repeatable.
-  --full-page             Capture the whole scrollable height, not the viewport.
-  --fonts <dir>           Font files (.ttf/.otf, read by their real family and
-                          weight). Repeatable. Roboto and Material Icons are built in.
+  --full-page             Capture the whole page from its top (whatever the steps
+                          scrolled it to), not the window where they left it.
+  --fonts <dir|system>    Font files (.ttf, .otf, .woff; read by their real family,
+                          weight and style), searched recursively: a font package
+                          folder (node_modules/@fontsource/<family>), a site's fonts.
+                          `system`: the system's font directories. Repeatable.
+                          Roboto and Material Icons are built in.
   --tap <nodeId>          Tap the node (where it shows on screen). <nodeId>#<n>
                           picks the n-th copy (0-based) of a node a list repeats.
   --hover <nodeId>        Move a mouse over the node.
