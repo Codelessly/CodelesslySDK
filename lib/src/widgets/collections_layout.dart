@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
+import '../render/layout/fit_box.dart' show RenderFitBox;
 import '../render/node_tree.dart' show RenderTree, NodeBox;
 import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, DropSlotNode, dropSlotOf;
 
@@ -990,20 +991,27 @@ class RenderGridItems extends RenderCollection {
             it.layout(BoxConstraints.tight(RenderCollection.sizeOf(extent, cellCross, axis)), parentUsesSize: true);
           }
         } else {
-          for (final it in row) {
-            it.layout(
-              RenderCollection.constraintsOf(
-                minMain: 0,
-                maxMain: double.infinity,
-                minCross: cellCross,
-                maxCross: cellCross,
-                axis: axis,
-              ),
-              parentUsesSize: true,
-            );
-          }
+          // CSS grid's auto rows: each item at its content's length (an
+          // item that fills measures its content, as a CSS percentage of
+          // an indefinite row does), the row as long as the longest, then
+          // every item stretched to it (`align-items: stretch`).
+          RenderFitBox.measuringContent(axis, () {
+            for (final it in row) {
+              it.layout(
+                RenderCollection.constraintsOf(
+                  minMain: 0,
+                  maxMain: double.infinity,
+                  minCross: cellCross,
+                  maxCross: cellCross,
+                  axis: axis,
+                ),
+                parentUsesSize: true,
+              );
+            }
+          });
           // IntrinsicHeight around the row: its longest item's intrinsic
-          // extent at the cell's width.
+          // extent at the cell's width, where the items can be measured;
+          // else their laid-out lengths.
           extent = intrinsicRows
               ? row.fold<double>(
                   0,
@@ -1011,10 +1019,8 @@ class RenderGridItems extends RenderCollection {
                       math.max(s, vertical ? it.getMaxIntrinsicHeight(cellCross) : it.getMaxIntrinsicWidth(cellCross)),
                 )
               : row.fold<double>(0, (s, it) => math.max(s, RenderCollection.main(it.size, axis)));
-          if (intrinsicRows) {
-            for (final it in row) {
-              it.layout(BoxConstraints.tight(RenderCollection.sizeOf(extent, cellCross, axis)), parentUsesSize: true);
-            }
+          for (final it in row) {
+            it.layout(BoxConstraints.tight(RenderCollection.sizeOf(extent, cellCross, axis)), parentUsesSize: true);
           }
         }
         if (rowExtents.isNotEmpty) used += mainAxisSpacing;
