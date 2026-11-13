@@ -1,0 +1,67 @@
+{
+ "stream": "restaurant_menu@60tps.jsonl",
+ "size": "390x844",
+ "source": "synthetic",
+ "rateTokensPerSecond": 60,
+ "ttftMs": 500,
+ "timeToFirstPaintMs": 11100,
+ "timeToFirstSectionMs": 24483,
+ "timeToCompleteMs": 214500,
+ "outputTokens": 12840,
+ "tokensEstimated": true,
+ "chars": 51360,
+ "deltas": 5098,
+ "opsApplied": 149,
+ "opsRejected": 1,
+ "streamedOps": 150,
+ "rejections": [
+  {
+   "op": 65,
+   "code": "capability_not_allowed",
+   "path": "/nodes/printLink/actions/0/actions/0",
+   "message": "Action \"print\" is not allowed here.",
+   "nodeId": "printLink",
+   "expected": [
+    "setVariable",
+    "setValue",
+    "setVariant",
+    "navigate",
+    "openModal",
+    "closeModal",
+    "showToast",
+    "confirm",
+    "if",
+    "forEach",
+    "delay",
+    "focus",
+    "scrollTo",
+    "animate",
+    "haptic",
+    "componentEvent",
+    "retryFailed",
+    "paginate"
+   ]
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/introRow/children/1",
+   "message": "Child \"printLink\" of \"introRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "introRow"
+  }
+ ],
+ "nodes": 146,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 7,
+  "max": 113
+ },
+ "frames": 181,
+ "frameMs": 1197,
+ "pumpsOverBudget16ms": 31,
+ "pumps": 5280,
+ "pumpMsMedian": 0.092,
+ "renderExceptions": [],
+ "warnings": 6
+}
