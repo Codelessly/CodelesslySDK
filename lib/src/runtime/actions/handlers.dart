@@ -13,7 +13,7 @@ import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeed
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
-import '../../render/node_tree.dart' show NodeBox, NodeTree;
+import '../../render/node_tree.dart' show NodeBox, RenderTree;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
@@ -22,6 +22,7 @@ import '../../render/play.dart' show EffectPlayers;
 import '../../render/paint/image_fill.dart' show preloadImage;
 import '../../render/particles.dart' show ParticlePlayers;
 import '../../scripting/formula_scripts.dart' show ScriptsScope;
+import '../expressions/bindings.dart' show RenderTreeBinder;
 import '../expressions/formula.dart';
 import '../lists/paginate_action.dart';
 import '../expressions/paths.dart';
@@ -460,7 +461,7 @@ void _editText(EditTextAction a, ActionRun run) {
 /// the one whose `${item.id}` (or `${item.key}`, or the item itself, as
 /// text) reads [item], else the one whose `${index}` is [item]. Each copy is
 /// asked in its own scope, so a node inside an item template matches too.
-NodeBox? repeatOf(NodeTree tree, String id, String item) {
+NodeBox? repeatOf(RenderTree tree, String id, String item) {
   final binder = tree.binder;
   if (binder == null) return null;
   NodeBox? byIndex;

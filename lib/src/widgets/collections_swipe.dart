@@ -9,6 +9,7 @@ import 'package:flutter/services.dart' show HapticFeedback;
 
 import '../render/convert.dart';
 import '../render/paint/icon_glyph.dart';
+import '../runtime/http_image_loader.dart';
 
 /// A list item that can be swiped sideways to reveal [SwipeActions] behind
 /// it.
@@ -237,6 +238,8 @@ class _Glyph extends LeafRenderObjectWidget {
 
   @override
   RenderIconGlyph createRenderObject(BuildContext context) => RenderIconGlyph()
+    // Outside a tree with a loader of its own, its SVG is fetched as the SDK does.
+    ..imageLoader = const HttpImageLoader()
     ..icon = icon
     ..color = color;
 

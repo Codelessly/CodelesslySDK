@@ -4,19 +4,19 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart'
-    show ActionDef, Json, NavigateAction, ScriptDef, Variable, VariableType;
+    show ActionDef, Json, NavigateAction, ScriptDef;
 import 'package:flutter/foundation.dart';
 
 import '../../render/node_tree.dart';
 import '../../services/analytics.dart' show AnalyticsService;
 import '../contracts.dart';
 import '../expressions/engine.dart';
-import '../expressions/paths.dart';
-import '../expressions/scopes.dart';
+import '../expressions/variable_writes.dart';
 import 'node_values.dart';
 import 'action_error.dart';
 import 'ui.dart';
-import 'values.dart';
+
+export '../expressions/variable_writes.dart' show setVariableIn, typeOf, variableOf;
 
 /// A function the app registers for call function actions: [params]
 /// evaluated; its result is the chain's `${result}`.
@@ -30,7 +30,7 @@ abstract interface class ActionHost implements ActionContext {
   Map<String, AppFunction> get functions;
 
   /// The screen's node tree (scroll to a node, its text fields).
-  NodeTree? get tree;
+  RenderTree? get tree;
 
   /// Where set value and set variant actions put node values.
   NodeValues? get nodeValues;
@@ -90,7 +90,7 @@ class CoreActionContext implements ActionHost {
   final Map<String, AppFunction> functions;
 
   @override
-  final NodeTree? tree;
+  final RenderTree? tree;
 
   @override
   final NodeValues? nodeValues;
@@ -211,58 +211,6 @@ class CoreActionContext implements ActionHost {
     }
     debugPrint('Codelessly: action ${action ?? ''} failed: $error');
   }
-}
-
-/// Sets [name] (a variable, or a path into one) in the [VariableScope] of
-/// [scope]'s chain that declares its root. With [declare], a variable no
-/// scope declares is declared on the nearest variable scope. Returns
-/// whether a variable changed.
-bool setVariableIn(ValueScope scope, String name, Object? value, {bool declare = false}) {
-  final path = ValuePath.parse(name.trim());
-  if (path == null) return false;
-  for (ValueScope? s = scope; s != null; s = s.parent) {
-    if (s is VariableScope && s.declares(path.root)) {
-      if (path.keys.isEmpty) return s.set(path.root, value);
-      final root = s.valueOf(path.root, s);
-      final next = setAtPath(root, path.keys, value);
-      return next != null && s.set(path.root, next);
-    }
-    if (s is NamedScope && s.declares(path.root)) {
-      if (s is ValuesScope && path.keys.isEmpty) {
-        s.set(path.root, value);
-        return true;
-      }
-      return false;
-    }
-  }
-  if (!declare || path.keys.isNotEmpty) return false;
-  for (ValueScope? s = scope; s != null; s = s.parent) {
-    if (s is VariableScope) {
-      s.define(Variable(name: path.root, type: typeOf(value), value: value));
-      return true;
-    }
-  }
-  return false;
-}
-
-/// The variable type that holds [value].
-VariableType typeOf(Object? value) => switch (value) {
-      int() => VariableType.integer,
-      double() => VariableType.decimal,
-      bool() => VariableType.boolean,
-      List() => VariableType.list,
-      Map() => VariableType.map,
-      _ => VariableType.text,
-    };
-
-/// The variable [name]'s root declares, and its scope, from [scope].
-(VariableScope, Variable)? variableOf(ValueScope scope, String name) {
-  final root = rootOf(name);
-  for (ValueScope? s = scope; s != null; s = s.parent) {
-    if (s is VariableScope && s.declares(root)) return (s, s.variable(root)!);
-    if (s is NamedScope && s.declares(root)) return null;
-  }
-  return null;
 }
 
 class _NoServices implements CodelesslyServices {

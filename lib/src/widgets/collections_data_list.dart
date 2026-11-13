@@ -21,7 +21,6 @@ import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/lists/page_fetchers.dart';
 import '../runtime/lists/pagination.dart';
-import '../services/cloud/resolve.dart';
 import 'collections_list_runtime.dart';
 import 'collections_swipe.dart';
 
@@ -318,10 +317,10 @@ class DataListViewState extends State<DataListView> {
     final database = _r.database, def = _r.cloudQuery;
     if (database == null || def == null || scope == null) return null;
     final path = _r.collectionPath;
-    final query = resolveCloudQuery(def, _r.engine, scope);
-    final key = ('cloud', path, query.filters.toString(), query.orderBy.toString());
+    final pages = database.pages(path, def, _r.engine, scope);
+    final key = pages.key;
     if (_fetcher?.$1 == key) return _fetcher!.$2;
-    final f = cloudPageFetcher(database, path, query);
+    final f = pages.fetcher();
     _fetcher = (key, f);
     return f;
   }

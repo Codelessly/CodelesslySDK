@@ -18,12 +18,9 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show BuildContext, FocusAttachment, FocusNode, KeyEventResult;
 
-import '../runtime/actions/context.dart' show setVariableIn, variableOf;
-import '../runtime/actions/variable_animator.dart';
-import '../runtime/contracts.dart';
-import '../runtime/expressions/node_scopes.dart';
-import '../runtime/expressions/scopes.dart';
+import 'behavior_values.dart';
 import 'behaviors.dart';
+import 'contracts.dart';
 import 'islands.dart';
 import 'node_tree.dart';
 
@@ -173,9 +170,9 @@ extension TrackGeometryHits on TrackGeometry {
 abstract final class DragTracks {
   static final Expando<Map<String, Set<RenderDragTrack>>> _byTree = Expando('dragTracks');
 
-  static void _add(NodeTree tree, String id, RenderDragTrack t) => ((_byTree[tree] ??= {})[id] ??= {}).add(t);
+  static void _add(RenderTree tree, String id, RenderDragTrack t) => ((_byTree[tree] ??= {})[id] ??= {}).add(t);
 
-  static void _remove(NodeTree tree, String id, RenderDragTrack t) {
+  static void _remove(RenderTree tree, String id, RenderDragTrack t) {
     final m = _byTree[tree];
     m?[id]?.remove(t);
     if (m?[id]?.isEmpty ?? false) m!.remove(id);
@@ -185,7 +182,7 @@ abstract final class DragTracks {
   /// dragged there; false when no such
   /// track is on screen. [nodeId] may list several ids separated by commas
   /// (the copies of one control in a screen's layouts).
-  static Future<bool> step(NodeTree tree, String nodeId, int steps) async {
+  static Future<bool> step(RenderTree tree, String nodeId, int steps) async {
     final all = [
       for (final id in nodeId.split(','))
         for (final t in _byTree[tree]?[id.trim()] ?? const <RenderDragTrack>{})
@@ -210,7 +207,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   double _value = 0;
 
   /// The scope the track reads in (its own node scope, over the variables).
-  ValueScope? _scope;
+  BoundValues? _scope;
   Listenable? _watched;
 
   api.DragTrack get _track => track;
@@ -237,9 +234,9 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       _drag?.dispose();
       _drag = null;
     }
-    _scope = box?.tree.binder?.scopeFor(box.tree.source, box.id, box.instance);
+    _scope = box?.tree.bindings?.valuesFor(box.tree.source, box.id, box.instance);
     _watch();
-    final value = trackValueIn(track, _scope);
+    final value = trackValueFrom(track, _scope?.read);
     if (!_configured) {
       _configured = true;
       _value = value;
@@ -258,7 +255,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
 
   void _watch() {
     final name = _track.variable.trim();
-    final w = _track.value == null && name.isNotEmpty && _scope != null ? watchName(_scope, rootOf(name)) : null;
+    final w = _track.value == null && name.isNotEmpty ? _scope?.watch(name) : null;
     if (identical(w, _watched)) return;
     _watched?.removeListener(_onVariable);
     _watched = w;
@@ -267,7 +264,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
 
   /// The variable changed (from the drag, an action, a key...).
   void _onVariable() {
-    final v = trackValueIn(_track, _scope);
+    final v = trackValueFrom(_track, _scope?.read);
     _stepValue = null;
     if (_same(v, _value)) return;
     _valueChanged(_track, _value, v);
@@ -304,10 +301,10 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     final name = _track.variable.trim();
     final scope = _scope;
     if (!_track.write || name.isEmpty || scope == null) return;
-    final found = variableOf(scope, name);
-    if (found == null || found.$2.isComputed) return;
-    VariableAnimator.pause(found.$1, rootOf(name));
-    setVariableIn(scope, name, found.$2.type == api.VariableType.integer ? v.round() : v);
+    final found = scope.variable(name);
+    if (found == null || found.isComputed) return;
+    found.pauseAnimation();
+    scope.write(name, found.isInteger ? v.round() : v);
   }
 
   void _fire(String trigger, Map<String, Object?> result, {Object? value}) {
@@ -331,7 +328,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   void _onFine(bool fine) {
     final name = _track.fineVariable.trim();
     final scope = _scope;
-    if (name.isNotEmpty && scope != null) setVariableIn(scope, name, fine);
+    if (name.isNotEmpty && scope != null) scope.write(name, fine);
   }
 
   // --- what's shown --------------------------------------------------------------------
@@ -432,7 +429,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
         progress: _progress, dragging: dragging, fine: _fine, focused: _focused);
     if (!mapEquals(values, _published)) {
       _published = values;
-      box.tree.binder?.nodeScope(box.tree.source, box.id, instance: box.instance)?.update('track', values);
+      box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'track', values);
     }
     if (dragging != _draggedState) {
       _draggedState = dragging;

@@ -4,14 +4,14 @@ import 'package:flutter/widgets.dart';
 import 'islands.dart';
 import 'node_tree.dart';
 
-/// Hosts the render tree of one node of a [NodeTree] (a screen, or any
+/// Hosts the render tree of one node of a [RenderTree] (a screen, or any
 /// node). No widget or element exists per node below it; its element owns
 /// the islands (widget-built nodes) of the boxes it shows, so they live
 /// under the app's element tree (see islands.dart).
 class NodeView extends RenderObjectWidget {
   const NodeView({super.key, required this.tree, required this.rootId, this.interactive = false});
 
-  final NodeTree tree;
+  final RenderTree tree;
   final String rootId;
 
   /// Islands (inputs, embeds) take pointer input and focus: a running app.
@@ -44,14 +44,14 @@ class NodeView extends RenderObjectWidget {
 }
 
 class RenderNodeView extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin, IslandParent {
-  RenderNodeView(NodeTree tree, String rootId) {
+  RenderNodeView(RenderTree tree, String rootId) {
     setRoot(tree, rootId);
   }
 
-  NodeTree? _tree;
+  RenderTree? _tree;
   String? _rootId;
 
-  void setRoot(NodeTree tree, String rootId) {
+  void setRoot(RenderTree tree, String rootId) {
     if (identical(tree, _tree) && rootId == _rootId) return;
     final old = child;
     if (old is NodeBox) {

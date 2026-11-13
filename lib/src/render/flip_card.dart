@@ -15,11 +15,9 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../runtime/actions/context.dart' show setVariableIn, variableOf;
-import '../runtime/contracts.dart';
-import '../runtime/expressions/node_scopes.dart';
-import '../runtime/expressions/scopes.dart';
+import 'behavior_values.dart';
 import 'behaviors.dart' show RenderPose, motionMatrix;
+import 'contracts.dart';
 import 'node_tree.dart';
 
 class RenderFlip extends RenderPose {
@@ -27,7 +25,7 @@ class RenderFlip extends RenderPose {
   api.FlipCard _flip = const api.FlipCard();
   api.Motion? _motion;
   bool _animates = false;
-  ValueScope? _scope;
+  BoundValues? _scope;
   Listenable? _watched;
 
   /// Whether the card is (or is turning to be) on its back.
@@ -70,7 +68,7 @@ class RenderFlip extends RenderPose {
         _dragging = false;
       }
     }
-    _scope = box?.tree.binder?.scopeFor(box.tree.source, box.id, box.instance);
+    _scope = box?.tree.bindings?.valuesFor(box.tree.source, box.id, box.instance);
     _watch();
     final wanted = _wanted;
     if (_target == null || !_animates) {
@@ -85,11 +83,11 @@ class RenderFlip extends RenderPose {
   }
 
   /// The variable's value when it has one, else `flipped`.
-  bool get _wanted => flipWantedIn(_flip, _scope);
+  bool get _wanted => flipWantedFrom(_flip, _scope?.read);
 
   void _watch() {
     final name = _flip.variable.trim();
-    final w = name.isEmpty || _scope == null ? null : watchName(_scope, rootOf(name));
+    final w = name.isEmpty ? null : _scope?.watch(name);
     if (identical(w, _watched)) return;
     _watched?.removeListener(_onVariable);
     _watched = w;
@@ -141,9 +139,9 @@ class RenderFlip extends RenderPose {
     final name = _flip.variable.trim();
     final scope = _scope;
     if (name.isEmpty || scope == null) return false;
-    final found = variableOf(scope, name);
-    if (found == null || found.$2.isComputed) return false;
-    setVariableIn(scope, name, back);
+    final found = scope.variable(name);
+    if (found == null || found.isComputed) return false;
+    scope.write(name, back);
     return true;
   }
 
@@ -216,7 +214,7 @@ class RenderFlip extends RenderPose {
     final values = {'flipped': _target ?? false, 'progress': _progress};
     if (mapEquals(values, _published)) return;
     _published = values;
-    box.tree.binder?.nodeScope(box.tree.source, box.id, instance: box.instance)?.update('flip', values);
+    box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'flip', values);
   }
 
   // --- the pointer ------------------------------------------------------------------------

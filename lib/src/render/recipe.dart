@@ -13,9 +13,28 @@ import 'node_tree.dart';
 /// lib/src/widgets, one file per widget group.
 typedef WidgetRecipe = void Function(NodeBuilder b, Node n, List<RenderBox> chain);
 
+/// The recipes a tree builds its nodes with, beyond the core layout types
+/// (which the tree builds itself) and under the app's own
+/// ([RenderTree.recipes]). The SDK's catalog is in lib/src/widgets.
+@immutable
+final class RecipeCatalog {
+  const RecipeCatalog({this.recipes = const {}, this.inputs = const {}});
+
+  /// No recipes: every other type draws as its box, at its size.
+  static const RecipeCatalog none = RecipeCatalog();
+
+  /// The recipe of each node type.
+  final Map<String, WidgetRecipe> recipes;
+
+  /// The types that are inputs: one the model lets carry a fill, border,
+  /// shadow or padding (a dropdown, a date input) is drawn inside the
+  /// node's shell.
+  final Set<String> inputs;
+}
+
 /// What a [WidgetRecipe] builds with: the node's box in the tree.
 abstract interface class NodeBuilder {
-  NodeTree get tree;
+  RenderTree get tree;
   String get id;
 
   /// Repeated-template scope (a list item); null outside one.
@@ -69,7 +88,7 @@ abstract interface class NodeBuilder {
 class NodeChild extends RenderObjectWidget {
   const NodeChild({super.key, required this.tree, required this.id, this.slot = const Slot.root(), this.instance});
 
-  final NodeTree tree;
+  final RenderTree tree;
   final String id;
   final Slot slot;
   final Object? instance;

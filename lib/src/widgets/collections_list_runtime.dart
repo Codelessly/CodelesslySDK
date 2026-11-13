@@ -14,9 +14,7 @@ import '../runtime/contracts.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/scopes.dart';
-import '../services/cloud/database.dart';
-import '../services/cloud/resolve.dart';
-import '../services/services.dart' show Services;
+import '../runtime/lists/cloud_list_source.dart';
 
 /// A running list node [node] as its box [b] builds it.
 class ListRuntime {
@@ -25,7 +23,7 @@ class ListRuntime {
   final NodeBuilder b;
   final Node node;
 
-  NodeTree get tree => b.tree;
+  RenderTree get tree => b.tree;
   NodeBinder? get binder => tree.binder;
   ExpressionEngine get engine => _context?.expressions ?? binder?.engine ?? const Expressions();
 
@@ -117,14 +115,11 @@ class ListRuntime {
   String get collectionPath {
     final def = cloudQuery, s = scope;
     if (def == null || s == null) return '';
-    return resolveCollectionPath(def, engine, s);
+    return cloudCollectionPath(def, engine, s);
   }
 
   /// The app's cloud database.
-  CloudDatabase? get database => switch (services) {
-        final Services s => s.cloud,
-        _ => null,
-      };
+  CloudListSource? get database => CloudListSource.of(services);
 
   /// The name of the variable the list writes its status into.
   String? get statusVariable {

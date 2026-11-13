@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 import 'package:flutter/rendering.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
-import '../render/node_tree.dart' show NodeTree, NodeBox;
+import '../render/node_tree.dart' show RenderTree, NodeBox;
 import '../runtime/gestures/drag_and_drop.dart' show DragAndDrop, DropSlotNode, dropSlotOf;
 
 class CollectionParentData extends ContainerBoxParentData<RenderBox> {}
@@ -255,7 +255,7 @@ class RenderListItems extends RenderCollection {
   /// `listNodeId`), the list opens the target's slot: room for the dragged
   /// node before the item it would land before (gestures/drag_and_drop.dart
   /// `dropSlotOf`). Set in a running tree only.
-  void dropTarget(NodeTree? tree, String listId, [Object? instance]) {
+  void dropTarget(RenderTree? tree, String listId, [Object? instance]) {
     _dropInstance = instance;
     if (identical(tree, _dropTree) && listId == _dropListId) return;
     if (attached && _dropTree != null) DragAndDrop.of(_dropTree!).removeListener(markNeedsLayout);
@@ -265,7 +265,7 @@ class RenderListItems extends RenderCollection {
     markNeedsLayout();
   }
 
-  NodeTree? _dropTree;
+  RenderTree? _dropTree;
   String _dropListId = '';
 
   /// The copy of the list this is (a list repeated in every column of a

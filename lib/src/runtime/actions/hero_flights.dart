@@ -20,14 +20,14 @@ abstract final class HeroRoutes {
   static final Expando<ModalRoute<Object?>> _routeOf = Expando('heroRoute');
 
   /// [tree] shows in [route] now.
-  static void bind(NodeTree tree, ModalRoute<Object?>? route) {
+  static void bind(RenderTree tree, ModalRoute<Object?>? route) {
     _routeOf[tree] = route;
     FlightRegistry.leaving = leaving;
   }
 
   /// Whether [tree]'s route is closing (popped, its exit still playing) or
   /// gone: what it shows is on its way out.
-  static bool leaving(NodeTree tree) {
+  static bool leaving(RenderTree tree) {
     final route = _routeOf[tree];
     if (route == null) return false;
     return !route.isActive || route.animation?.status == AnimationStatus.reverse;

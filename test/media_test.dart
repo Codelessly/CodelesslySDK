@@ -334,7 +334,10 @@ class _IconBox extends LeafRenderObjectWidget {
   const _IconBox(this.icon);
   final Map<String, Object?> icon;
   @override
-  RenderIconGlyph createRenderObject(BuildContext context) => RenderIconGlyph()..icon = icon;
+  // Outside a tree: the glyph is given the loader a tree gives its own.
+  RenderIconGlyph createRenderObject(BuildContext context) => RenderIconGlyph()
+    ..imageLoader = const HttpImageLoader()
+    ..icon = icon;
   @override
   void updateRenderObject(BuildContext context, RenderIconGlyph r) => r.icon = icon;
 }
