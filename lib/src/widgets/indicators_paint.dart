@@ -3,8 +3,8 @@
 import 'dart:math' as math;
 
 import 'package:barcode/barcode.dart' as bc;
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show
         ArcFit,
         BarChartProps,

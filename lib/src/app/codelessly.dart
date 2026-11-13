@@ -459,7 +459,7 @@ class Codelessly extends ChangeNotifier {
     PublishLayout? cached;
     try {
       final json = await cache.read(key);
-      if (json != null) cached = PublishLayout.fromJson(json);
+      if (json != null) cached = PublishLayout.fromJson(json, catalog: config.catalog);
     } catch (_) {
       cached = null;
     }
@@ -477,6 +477,12 @@ class Codelessly extends ChangeNotifier {
         if (cached == null) rethrow;
         layout = cached;
       }
+    }
+    // A loader decodes with the standard catalog; the installed features may
+    // declare more (a native plugin's types): decode again with theirs.
+    final catalog = config.catalog;
+    if (!(layout.document.catalog?.includes(catalog) ?? false)) {
+      layout = PublishLayout.fromJson(layout.toJson(), catalog: catalog);
     }
     final resolver = managed;
     if (resolver != null) {

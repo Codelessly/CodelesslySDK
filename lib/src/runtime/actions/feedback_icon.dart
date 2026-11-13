@@ -1,7 +1,7 @@
 // The icon of a toast or a confirm dialog: an icon glyph's JSON (as icon
 // nodes hold it), drawn [size] square.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Json;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Json;
 import 'package:flutter/widgets.dart';
 
 import '../../render/paint/icon_glyph.dart';

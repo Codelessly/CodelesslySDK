@@ -2,7 +2,7 @@
 // with reveal.follow, kept in view while the content moves until the user
 // scrolls away.
 import 'dart:async';
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';

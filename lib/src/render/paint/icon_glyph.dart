@@ -1,7 +1,7 @@
 // An icon, painted at its box's size: Material Icons, Material Symbols and
 // Cupertino icons drawn from their published SVGs, and image icons (SVG or
 // raster).
-import 'package:codelessly_api/codelessly_api.dart' show Json, readDouble, readInt, readString;
+import 'package:codelessly_api/core.dart' show Json, readDouble, readInt, readString;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 

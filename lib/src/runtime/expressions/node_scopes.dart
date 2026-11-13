@@ -4,8 +4,8 @@
 // one [NodeValuesScope] (made by [NodeBinder.scopeFor]) between the scope
 // around it and the scopes of the nodes inside it, which its render
 // objects write as the node moves.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Node;
 
 import 'package:flutter/foundation.dart' show Listenable;
 

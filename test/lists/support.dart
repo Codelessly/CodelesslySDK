@@ -41,7 +41,7 @@ Future<Screen> show(
   final scope = VariableScope(variables);
   declarePaginationVariables(scope, doc.nodes.values);
   final values = NodeValues(DocumentSource(doc));
-  final tree = NodeTree(values, binder: NodeBinder(scope: scope));
+  final tree = NodeTree(values, binder: NodeBinder(scope: scope), recipes: mediaFeature.recipes);
   final context = RuntimeActionContext(scope: scope, ui: ui, tree: tree, nodeValues: values, services: services ?? Services());
   final reactions = TreeReactions(runner: const CodelesslyActions(), context: context);
   tree.interactions = reactions;

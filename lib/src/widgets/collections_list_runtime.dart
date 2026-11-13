@@ -2,8 +2,8 @@
 // objects: its items, its scope and expressions, its triggers, the variable
 // its data is bound to and its cloud query. Used by the islands of a list
 // that pages, groups into sections, swipes or reorders.
-import 'package:codelessly_api/codelessly_api.dart'
-    show CloudQueryDef, CollectionScrollProps, Json, Node, ScrollPhysicsType, SizeFit;
+import 'package:codelessly_api/core.dart'
+    show CollectionScrollProps, Json, Node, ScrollPhysicsType, SizeFit, readString;
 import 'package:flutter/widgets.dart';
 
 import '../render/node_tree.dart';
@@ -105,10 +105,11 @@ class ListRuntime {
     return s != null && setVariableIn(s, name, value);
   }
 
-  /// The list's cloud query, when it reads from the cloud database.
-  CloudQueryDef? get cloudQuery {
-    final def = CloudQueryDef.fromJson(node.prop(CollectionScrollProps.query));
-    return def.collectionPath.trim().isEmpty ? null : def;
+  /// The list's cloud query (its JSON: the data library reads it), when it
+  /// reads from the cloud database.
+  Json? get cloudQuery {
+    final query = node.prop(CollectionScrollProps.query);
+    return (readString(query['collectionPath']) ?? '').trim().isEmpty ? null : query;
   }
 
   /// The collection path of [cloudQuery], resolved.

@@ -1,6 +1,6 @@
 // Writing a variable from a scope: the scope of the chain that declares it
 // takes the value.
-import 'package:codelessly_api/codelessly_api.dart' show Variable, VariableType;
+import 'package:codelessly_api/core.dart' show Variable, VariableType;
 
 import '../actions/values.dart' show setAtPath;
 import '../contracts.dart';

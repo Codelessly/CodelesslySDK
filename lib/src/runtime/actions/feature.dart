@@ -4,7 +4,9 @@
 // core runtime, imports a feature (test/feature_isolation_test.dart).
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show ActionDef, CallFunctionAction;
+import 'package:codelessly_api/core.dart' show ActionDef, CallFunctionAction, Catalog;
+
+import '../../render/recipe.dart' show WidgetRecipe;
 
 import '../contracts.dart';
 import '../expressions/scopes.dart' show NamedScope;
@@ -22,16 +24,21 @@ typedef FeatureFunction = FutureOr<Object?> Function(CallFunctionAction action, 
 /// [parent], for the app [host] describes.
 typedef FeatureScopeBuilder = NamedScope Function(FeatureScopeHost host, ValueScope parent);
 
-/// One feature layer over the core runtime: the action types it runs, the
-/// functions it gives call function actions, and the named values it gives
-/// expressions. The core runs a document's `auth` action by finding the
-/// handler some installed feature registered for `auth`; with no such
-/// feature the action fails saying so.
+/// One feature layer (or native plugin) over the core runtime: what it
+/// declares ([catalog]: node and action types, with their fields) and what
+/// implements them: the action types it runs, the node types it builds
+/// ([recipes]), the functions it gives call function actions and the named
+/// values it gives expressions. The core runs a document's `auth` action by
+/// finding the handler some installed feature registered for `auth`; with no
+/// such feature the action fails saying so. Layouts are decoded with the
+/// catalogs of the installed features ([CoreActions.catalog]).
 ///
 /// ```dart
-/// const analytics = CodelesslyFeature(
-///   name: 'analytics',
-///   actions: {'acme.track': _track},
+/// const acme = CodelesslyFeature(
+///   name: 'acme',
+///   catalog: Catalog(id: 'acme', widgets: [RatingProps.spec], actions: [ShareAction.spec]),
+///   recipes: {'acme.rating': buildRating},
+///   actions: {ShareAction.typeName: _share},
 ///   functions: {'acme.sessionId': _sessionId},
 /// );
 ///
@@ -43,6 +50,8 @@ class CodelesslyFeature {
     this.actions = const {},
     this.functions = const {},
     this.scopes = const {},
+    this.catalog = const Catalog(),
+    this.recipes = const {},
   });
 
   /// What it's called (`auth`, `commerce`), for messages.
@@ -57,6 +66,15 @@ class CodelesslyFeature {
 
   /// Its value scopes by the name expressions read (`auth`, `storage`).
   final Map<String, FeatureScopeBuilder> scopes;
+
+  /// What it declares: its node types and action types with their fields
+  /// (the first-party features: the API's feature libraries' catalogs, such
+  /// as `dataCatalog`). Layouts decode with it, so its actions are typed.
+  final Catalog catalog;
+
+  /// How its node types render, by type (under the app's own
+  /// `CodelesslyConfig.recipes`).
+  final Map<String, WidgetRecipe> recipes;
 
   @override
   String toString() => 'CodelesslyFeature($name)';

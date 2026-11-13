@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:codelessly_api/codelessly_api.dart' show Breakpoints, Variable, VariableType;
+import 'package:codelessly_api/core.dart' show Breakpoints, Variable, VariableType;
 import 'package:flutter/foundation.dart';
 
 import '../contracts.dart';

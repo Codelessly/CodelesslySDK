@@ -821,7 +821,7 @@ class _LayoutViewState extends State<_LayoutView> {
     } else if (engine is! NoopExpressionEngine) {
       source = bound = BoundSource(nodeValues, engine, scope);
     }
-    final tree = NodeTree(source, binder: binder, recipes: config.recipes);
+    final tree = NodeTree(source, binder: binder, recipes: config.allRecipes);
     scripts.nodeValues = () => scriptNodeValues(tree);
     final context = ScreenActionContext(
       scope: scope,

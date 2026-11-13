@@ -1,6 +1,6 @@
 // Page sources of a pagination: an API
 // call per page, or the list's cloud query a page at a time.
-import 'package:codelessly_api/codelessly_api.dart' show Json, Pagination;
+import 'package:codelessly_api/core.dart' show Json, Pagination;
 
 import '../contracts.dart';
 import 'pagination.dart';

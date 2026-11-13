@@ -3,8 +3,8 @@
 // shows and moves the controller its `controller` names (a list on the
 // screen makes it); until one does, and on a design canvas, it shows its
 // preview state (page 1 of 10, 200 items), disabled.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node, PaginationProps, TriggerType;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Node, PaginationProps, TriggerType;
 import 'package:flutter/material.dart';
 
 import '../render/convert.dart';

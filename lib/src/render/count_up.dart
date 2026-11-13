@@ -1,7 +1,7 @@
 // A text node's number counting up to each new value (TextProps.countUp):
 // the paragraph re-lays out its text every frame of the count, the
 // characters around the number kept.
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 

@@ -1,8 +1,8 @@
 // The look of the UI the runtime draws itself (toasts, the confirm dialog):
 // the app's fonts, primary color, surface and corner radii, read from the
 // project's theme tokens and the layout's own nodes.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show ButtonProps, Json, LayoutDocument, Node, TextProps, TriggerType;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show ButtonProps, Json, LayoutDocument, Node, TextProps, TriggerType;
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 

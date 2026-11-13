@@ -1,0 +1,192 @@
+{
+  "schema": 2,
+  "id": "acme.stars",
+  "semver": "1.0.0",
+  "minSdk": "24.0.0",
+  "requires": [],
+  "catalog": {
+    "widgets": [
+      {
+        "type": "acme.rating",
+        "doc": "A five-star rating.",
+        "children": "none",
+        "props": [
+          {
+            "key": "value",
+            "type": {
+              "kind": "number",
+              "flutter": "double",
+              "min": 0,
+              "max": 5
+            },
+            "default": 0,
+            "doc": "Stars filled."
+          },
+          {
+            "key": "color",
+            "type": {
+              "kind": "value",
+              "flutter": "Color"
+            },
+            "default": "#FFFFC83D"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "type": "acme.cheer",
+        "label": "Cheer",
+        "doc": "Adds twice the amount to the cheers variable.",
+        "fields": [
+          {
+            "key": "amount",
+            "type": {
+              "kind": "number",
+              "flutter": "double"
+            },
+            "default": 1
+          }
+        ]
+      }
+    ]
+  },
+  "implementation": {
+    "widgets": {
+      "acme.rating": {
+        "document": {
+          "roots": [
+            "root"
+          ],
+          "nodes": {
+            "root": {
+              "type": "row",
+              "layout": {
+                "width": {
+                  "hug": 120
+                },
+                "height": {
+                  "hug": 24
+                }
+              },
+              "children": [
+                "s1",
+                "s2",
+                "s3",
+                "s4",
+                "s5"
+              ]
+            },
+            "s1": {
+              "type": "icon",
+              "layout": {
+                "width": {
+                  "fixed": 24
+                },
+                "height": {
+                  "fixed": 24
+                }
+              },
+              "props": {
+                "icon": "star_border",
+                "size": 24
+              },
+              "bind": {
+                "props.icon": "${= props.value >= 1 ? 'star' : 'star_border'}",
+                "props.color": "${props.color}"
+              }
+            },
+            "s2": {
+              "type": "icon",
+              "layout": {
+                "width": {
+                  "fixed": 24
+                },
+                "height": {
+                  "fixed": 24
+                }
+              },
+              "props": {
+                "icon": "star_border",
+                "size": 24
+              },
+              "bind": {
+                "props.icon": "${= props.value >= 2 ? 'star' : 'star_border'}",
+                "props.color": "${props.color}"
+              }
+            },
+            "s3": {
+              "type": "icon",
+              "layout": {
+                "width": {
+                  "fixed": 24
+                },
+                "height": {
+                  "fixed": 24
+                }
+              },
+              "props": {
+                "icon": "star_border",
+                "size": 24
+              },
+              "bind": {
+                "props.icon": "${= props.value >= 3 ? 'star' : 'star_border'}",
+                "props.color": "${props.color}"
+              }
+            },
+            "s4": {
+              "type": "icon",
+              "layout": {
+                "width": {
+                  "fixed": 24
+                },
+                "height": {
+                  "fixed": 24
+                }
+              },
+              "props": {
+                "icon": "star_border",
+                "size": 24
+              },
+              "bind": {
+                "props.icon": "${= props.value >= 4 ? 'star' : 'star_border'}",
+                "props.color": "${props.color}"
+              }
+            },
+            "s5": {
+              "type": "icon",
+              "layout": {
+                "width": {
+                  "fixed": 24
+                },
+                "height": {
+                  "fixed": 24
+                }
+              },
+              "props": {
+                "icon": "star_border",
+                "size": 24
+              },
+              "bind": {
+                "props.icon": "${= props.value >= 5 ? 'star' : 'star_border'}",
+                "props.color": "${props.color}"
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "acme.cheer": {
+        "chain": [
+          {
+            "type": "setVariable",
+            "variable": "cheers",
+            "op": "add",
+            "value": "${= params.amount * 2}"
+          }
+        ]
+      }
+    }
+  }
+}

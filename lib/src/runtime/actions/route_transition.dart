@@ -7,8 +7,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show DragDirection, Motion, RevealOrigin, RevealShape, RouteDismiss, RouteSwipeBack, RouteTransition, TransitionReveal,
         TransitionSide;
 import 'package:flutter/foundation.dart';
