@@ -5,7 +5,7 @@ import 'package:codelessly_api/core.dart' as api;
 
 /// `${track}` for [track] drawn at [value] (NaN: empty) at [progress]
 /// (its rest place when null).
-Map<String, Object?> trackValues(api.DragTrack track, double value,
+Map<String, Object?> trackValues(api.Track track, double value,
         {double? progress, bool dragging = false, bool fine = false, bool focused = false}) {
   final shown = progress ?? track.restProgressOf(value);
   return {
@@ -18,11 +18,11 @@ Map<String, Object?> trackValues(api.DragTrack track, double value,
   };
 }
 
-/// The value [track] is drawn at: its bound value (`drag.track.value`),
+/// The value [track] is drawn at: its bound value (`track.value`),
 /// else its variable's ([read]; null: there are no values to read), else
 /// its default or start; NaN (empty) for a track that parks such a value
-/// ([api.DragTrack.parkedProgress]).
-double trackValueFrom(api.DragTrack track, Object? Function(String path)? read) {
+/// ([api.Track.parkedProgress]).
+double trackValueFrom(api.Track track, Object? Function(String path)? read) {
   final Object? raw = track.value ?? (track.hasVariable && read != null ? read(track.variable.trim()) : null);
   final double? value = switch (raw) {
     final num n when n.isFinite => n.toDouble(),

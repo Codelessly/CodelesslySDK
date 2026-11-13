@@ -422,15 +422,14 @@ class NodeBinder implements TreeBindings {
           (_conditions.byNode[n.id]?.any((t) => t.path == BindPaths.data) ?? false));
 
   /// The names a node gives itself and the nodes inside it, by what gives
-  /// them: a node that follows the pointer shares its drag as `drag`
-  /// ([api.DragMotion], not a track or a list's reorder handle). Each such
-  /// node reads from a [LocalScope] of its own ([localScopeOf]), which the
-  /// behavior sets.
+  /// them: a node that follows the pointer shares its drag as `dismiss`
+  /// ([api.DismissibleBehavior]) or `pan` ([api.Pan]), and as the legacy
+  /// `drag` for both. Each such node reads from a [LocalScope] of its own
+  /// ([localScopeOf]), which the behavior sets.
   static final Map<String, bool Function(Node n)> localNames = {
-    'drag': (n) => switch (n.behaviors.drag) {
-          final api.DragMotion d => d.track == null && !d.reorder,
-          null => false,
-        },
+    'drag': (n) => n.behaviors.dismissible != null || n.behaviors.pan != null,
+    'dismiss': (n) => n.behaviors.dismissible != null,
+    'pan': (n) => n.behaviors.pan != null,
   };
 
   static Set<String> _localNamesOf(Node n) => {

@@ -2,8 +2,8 @@
 // GestureSnap, DESIGN.md §4.1): the spring a settle runs on, friction
 // flings that spring back at their bounds, rubber-banding past the bounds,
 // the range bounds allow, and velocity-projected snapping to points, a grid
-// or the parent's edges. Used by a drag (DragMotion.physics), a drag
-// source's return (DragSource.physics) and a transform gesture
+// or the parent's edges. Used by a pan (Pan.physics), a drag
+// source's return (DragSource.returnSpring) and a transform gesture
 // (TransformGesture.physics).
 import 'dart:math' as math;
 import 'dart:ui';
