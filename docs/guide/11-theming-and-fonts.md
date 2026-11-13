@@ -2,43 +2,51 @@
 
 [Guide](README.md) · Previous: [Scripting](10-scripting.md) · Next: [Custom widgets and extending](12-custom-widgets.md)
 
-![Designed colors, text styles, radii and shadows on each node, versus a Theme for Material defaults and the runtime's own UI](images/11-theming-and-fonts/hero.png)
+![Designed colors, text styles, radii and shadows on each node, versus the project's theme for what the design leaves unset](images/11-theming-and-fonts/hero.png)
 
-*Most of a layout's look is designed; a Theme covers the rest.*
+*Most of a layout's look is designed; the project's theme covers the rest.*
 
 ## What a layout's look comes from
 
 Almost everything you see in a layout is designed: each node carries its own colors, text styles, radii and
-shadows, and renders with them wherever it is embedded. A Flutter `Theme` matters only for what the design leaves
-to Material:
+shadows, and renders with them wherever it is embedded. The project's theme matters only for what the design
+leaves unset:
 
-- Material widgets in the layout that keep default colors and shapes (buttons, switches, text fields, app bars);
-- the runtime's own UI: toasts, confirmation dialogs, date pickers.
+- controls that leave a color, a font or a shape unset (buttons, chips, switches, sliders, text fields,
+  pickers, tabs, navigation bars);
+- the runtime's own UI: toasts, confirmation dialogs, date and time pickers, menus, tooltips.
 
-## The project's theme (default)
+Controls take their colors and fonts from the project's theme. Without a theme they are neutral: ink on paper
+(near-black on white, near-white on near-black in dark mode) and the greys between, in no font family of their
+own. Nothing is inherited from Material's defaults (no purple, no tints, no ripples, no elevation, no Roboto) or
+from your app's `Theme`.
+
+## The project's theme
 
 A project has theme tokens, published with it: `primary`, `onPrimary`, `surface`, `onSurface`, `error`,
-`success`, `warning`, `fontFamily`, `titleFontFamily`, `radius` and `buttonRadius`. By default each
-`CodelesslyWidget` wraps its layout in a `Theme` built from them (Flutter's default `ThemeData` with the tokens
-over it), so a layout looks the same in every app. Your app's theme is not used inside the layout and is not
-changed outside it.
+`success`, `warning`, `fontFamily`, `titleFontFamily`, `radius` and `buttonRadius`. Each `CodelesslyWidget`
+wraps its layout in a `Theme` built from them, where every color role is a token or derived from one:
+
+| Role | From |
+|---|---|
+| surface | `surface`, else paper (white; near-black in dark mode) |
+| text and marks on it | `onSurface` when it reads there (3:1), else ink |
+| what controls draw on the surface (checks, thumbs, text button labels, focus rings) | `primary` when it reads on the surface, else ink |
+| filled buttons, floating action buttons | `primary` as it is (ink without one), labelled in `onPrimary`, else ink or paper, whichever reads |
+| selected tints, outlines, disabled states | `primary` or ink at low strength over the surface |
+| fonts | `fontFamily`; titles `titleFontFamily` |
+| shapes | `buttonRadius` for every kind of button, chip and segmented button; `radius` for dialogs, menus, pickers and the default text field border |
+
+Controls choose their text and marks for what they sit on: an unstyled text button on a dark band of a light
+page is labelled light, and one with a fill of its own but no label color gets one that reads on that fill.
+Nothing splashes or casts a shadow unless a node asks for it (its `elevation`). Your app's theme is not used
+inside the layout and is not changed outside it.
 
 `themeDataOf(tokens)` is that conversion, if you want the same `ThemeData` for your own widgets:
 
 ```dart
 final theme = themeDataOf(codelessly.publishModel!.theme);
 ```
-
-## Your app's theme
-
-```dart
-final codelessly = Codelessly(
-  config: const CodelesslyConfig(slug: 'my-project', useHostTheme: true),
-);
-```
-
-With `useHostTheme`, layouts render inside your app's `Theme`: Material widgets that keep their defaults take your
-color scheme and shapes. Designed colors don't change.
 
 ## The theme in expressions
 
@@ -64,12 +72,11 @@ To see what a layout reads, `themeValues(codelessly.publishModel!.theme, dark: t
 A color style can have a **dark value** beside its light one (published as `ThemeTokens.dark`). In dark mode
 `theme.<role>` and `theme.colors.<key>` give the dark value where a style has one, and the light value
 elsewhere, so a layout bound to the theme needs no conditions for dark mode. A project whose styles have dark
-values also gets a dark Material theme in dark mode (for the runtime's dialogs, toasts and Material defaults);
-one without stays light, as designed.
+values also gets a dark theme in dark mode (for its controls and the runtime's dialogs and toasts); one without
+stays light, as designed.
 
-Which mode: the device's (`MediaQuery.platformBrightness`), or with `useHostTheme` your app's theme's brightness,
-so your app's own dark mode switch applies (`theme.isDark`). `${screen.isDark}` (also `${screen.dark}`) and
-`${screen.brightness}` are always the device's. Nodes whose colors are fixed values don't change with the mode;
+Which mode: the device's (`MediaQuery.platformBrightness`, `theme.isDark`), never your app's theme's.
+`${screen.isDark}` (also `${screen.dark}`) and `${screen.brightness}` are the device's too. Nodes whose colors are fixed values don't change with the mode;
 bind them to the theme, or use `screen.isDark` / `theme.isDark` in conditions and variants.
 
 ## Fonts
