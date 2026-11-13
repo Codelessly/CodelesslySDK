@@ -538,7 +538,7 @@ class RenderAnimations extends RenderPose {
   /// The values a binding reads, for expressions in tracks.
   BoundValues? get _values {
     final box = _box;
-    return box?.tree.bindings?.valuesFor(box.tree.source, box.id, box.instance);
+    return box?.tree.bindings?.valuesFor(box.source, box.id, box.instance);
   }
 
   double? _number(Object? v) {
@@ -1105,7 +1105,7 @@ class RenderAnimations extends RenderPose {
       final state = {for (final c in _clocks.entries) c.key: c.value.state};
       if (_sameState(state, _lastState)) return;
       _lastState = state;
-      box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'animation', state);
+      box.tree.bindings?.publish(box.source, box.id, box.instance, 'animation', state);
     });
   }
 

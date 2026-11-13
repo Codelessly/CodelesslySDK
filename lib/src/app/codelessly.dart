@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show BuildContext, GlobalKey, Rect;
 
 import '../features/data/app_data_sources.dart';
+import '../render/components.dart' show ComponentRegistry;
 import '../features/first_party.dart' show AuthScope, kFirstPartyFeatures;
 import '../runtime/actions/app_events.dart';
 import '../runtime/actions/feature.dart';
@@ -75,10 +76,12 @@ class Codelessly extends ChangeNotifier {
     FontFetcher? fonts,
     Map<String, Object?> data = const {},
     ManagedComponentSource? managedComponents,
+    ComponentRegistry? components,
   })  : loader = loader ?? _defaultLoader(config),
         cache = cache ?? MemoryPublishCache(),
         fonts = CodelesslyFonts(fetcher: fonts ?? HttpFontFetcher()),
-        data = MapValueScope(values: {'data': data}) {
+        data = MapValueScope(values: {'data': data}),
+        components = components ?? ComponentRegistry() {
     if (managedComponents != null) {
       managed = ManagedComponentResolver(source: managedComponents, cache: this.cache);
     }
@@ -88,6 +91,16 @@ class Codelessly extends ChangeNotifier {
   /// published snapshot.
   ManagedComponentResolver? managed;
 
+  /// The project's component definitions (docs/design/06 §4): what a call
+  /// node in a layout renders, as ordinary boxes of the screen's tree.
+  /// Filled in memory (a site's files, a bundle shipped with the app, an
+  /// editor's store) with [ComponentRegistry.define]; a definition defined
+  /// or replaced while a screen shows updates its instances in place. A
+  /// call to a type it doesn't have renders as the call's empty box and is
+  /// listed in [ComponentRegistry.missing]. Loading definitions from a
+  /// publish (`PublishModel.components`) is not done yet.
+  final ComponentRegistry components;
+
   /// A [Codelessly] showing [bundle] (a publish shipped with the app, or a
   /// test's), offline.
   factory Codelessly.fromBundle(
@@ -95,8 +108,9 @@ class Codelessly extends ChangeNotifier {
     CodelesslyConfig config = const CodelesslyConfig(),
     FontFetcher? fonts,
     Map<String, Object?> data = const {},
+    ComponentRegistry? components,
   }) =>
-      Codelessly(config: config, loader: MemoryPublishLoader(bundle), fonts: fonts, data: data);
+      Codelessly(config: config, loader: MemoryPublishLoader(bundle), fonts: fonts, data: data, components: components);
 
   /// A [Codelessly] showing the bundle in asset [asset] (`.json` or
   /// `.json.gz`).
@@ -453,13 +467,17 @@ class Codelessly extends ChangeNotifier {
     });
   }
 
+  /// What layouts decode with: the installed features' catalog, and the
+  /// project's components' declarations (so a call's props are typed).
+  Catalog get _layoutCatalog => components.isEmpty ? config.catalog : config.catalog + components.catalog;
+
   Future<PublishLayout> _loadLayout(PublishModel model, String layoutId) async {
     final key = publishSource.layoutPath(config.uniqueId, layoutId);
     final wanted = model.layouts[layoutId]?.lastUpdated;
     PublishLayout? cached;
     try {
       final json = await cache.read(key);
-      if (json != null) cached = PublishLayout.fromJson(json, catalog: config.catalog);
+      if (json != null) cached = PublishLayout.fromJson(json, catalog: _layoutCatalog);
     } catch (_) {
       cached = null;
     }
@@ -480,7 +498,7 @@ class Codelessly extends ChangeNotifier {
     }
     // A loader decodes with the standard catalog; the installed features may
     // declare more (a native plugin's types): decode again with theirs.
-    final catalog = config.catalog;
+    final catalog = _layoutCatalog;
     if (!(layout.document.catalog?.includes(catalog) ?? false)) {
       layout = PublishLayout.fromJson(layout.toJson(), catalog: catalog);
     }

@@ -18,7 +18,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show debugPrint;
 
-import 'package:codelessly_api/core.dart' show ActionDef, Catalog, Json, Node, Reaction, TriggerType, UnknownAction;
+import 'package:codelessly_api/core.dart' show ActionDef, Catalog, ComponentEventAction, Json, Node, Reaction, TriggerType, UnknownAction;
 
 import '../contracts.dart';
 import '../expressions/engine.dart';
@@ -31,6 +31,8 @@ import 'handlers.dart';
 import 'key_matching.dart';
 import 'ui.dart';
 import '../../render/recipe.dart' show WidgetRecipe;
+import '../../render/components.dart' show componentInstanceOf;
+import '../expressions/bindings.dart' show RenderTreeBinder;
 
 /// Cancels the chains it's given to: [cancel] stops them between actions.
 class ActionCancellation {
@@ -325,6 +327,8 @@ class CoreActions implements ActionRunner {
     final t = reaction.trigger;
     // The legacy clock is a timer now.
     if (t.type.name != trigger && !(trigger == 'clock' && t.type == TriggerType.timer)) return false;
+    // A component call's handler of one of its events.
+    if (t.type == TriggerType.event) return t.event.isNotEmpty && t.event == event['event'];
     if (t.type != TriggerType.keyDown && t.type != TriggerType.keyUp) return true;
     final value = event['result'] is Map ? event['result'] as Map : event;
     // A held key's repeats run only the reactions that ask for them.
@@ -385,6 +389,31 @@ class CoreActions implements ActionRunner {
   }
 
   static String? _failing(Object error) => error is ActionFailed ? error.action : null;
+}
+
+/// Runs a [ComponentEventAction] fired inside a component instance: the
+/// call's reactions to that event (`{"type": "event", "event": key}`), in
+/// the caller's scope and instance, with the evaluated value as
+/// `${result}`. Outside an instance it does nothing.
+Future<void> fireComponentEvent(ComponentEventAction a, ActionRun run) async {
+  final tree = run.host.tree;
+  final instance = componentInstanceOf(run.instance);
+  if (tree == null || instance == null || a.event.isEmpty) return;
+  final callSource = tree.sourceOf(instance.outer);
+  final call = callSource.node(instance.call);
+  if (call == null || !call.actions.any((r) => r.trigger.type == TriggerType.event)) return;
+  final value = a.value == null ? null : run.evaluateJson(a.value);
+  final scope = tree.binder?.scopeFor(callSource, instance.call, instance.outer);
+  final context = run.context;
+  final caller = scope == null || context is! ActionHost ? context : context.withScope(scope);
+  await CoreActions(handlers: run._registry.handlers, features: run._registry.features).run(
+    call,
+    TriggerType.event.name,
+    caller,
+    event: {'event': a.event, 'result': value},
+    cancellation: run.cancellation,
+    instance: instance.outer,
+  );
 }
 
 /// The handlers and functions of one runner: the app's handlers over its

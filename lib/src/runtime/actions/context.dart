@@ -16,7 +16,7 @@ import 'node_values.dart';
 import 'action_error.dart';
 import 'ui.dart';
 
-export '../expressions/variable_writes.dart' show setVariableIn, typeOf, variableOf;
+export '../expressions/variable_writes.dart' show referencedVariable, setVariableIn, typeOf, variableOf;
 
 /// A function the app registers for call function actions: [params]
 /// evaluated; its result is the chain's `${result}`.
