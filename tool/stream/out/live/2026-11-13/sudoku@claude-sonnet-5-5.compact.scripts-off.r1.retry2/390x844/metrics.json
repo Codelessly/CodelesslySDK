@@ -1,0 +1,126 @@
+{
+ "stream": "sudoku@claude-sonnet-5-5.compact.scripts-off.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 2437,
+ "timeToFirstPaintMs": 4376,
+ "timeToFirstTextMs": 4376,
+ "timeToFirstSectionMs": 4376,
+ "timeToCompleteMs": 10562,
+ "outputTokens": 1633,
+ "tokensEstimated": false,
+ "chars": 3057,
+ "deltas": 191,
+ "opsApplied": 4,
+ "opsRejected": 4,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/padKey/actions/0/actions/0/then/0/then/0/value",
+  "expression_syntax /nodes/padKey/actions/0/actions/0/then/0/else/1/value",
+  "structural_key_in_patch /nodes/main/children",
+  "structural_key_in_patch /nodes/sudoku/slots",
+  "structural_key_in_patch /nodes/grid/children",
+  "dangling_child /nodes/pad1/children/0"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^5$"
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 0,
+   "rejected": 0
+  },
+  {
+   "stream": "retry",
+   "applied": 15,
+   "rejected": 4
+  }
+ ],
+ "streamedOps": 8,
+ "rejections": [
+  {
+   "op": 2,
+   "code": "expression_syntax",
+   "path": "/nodes/padKey/actions/0/actions/0/then/0/then/0/value",
+   "message": "The formula \"${= concat(slice(notes, 0, sel), [contains(notes[sel], string(item)) ? replace(notes[sel], string(item), '') : notes[sel] + string(item)], slice(notes, sel + 1, 81))}\" does not parse: Unknown function \"string\".",
+   "nodeId": "padKey"
+  },
+  {
+   "op": 2,
+   "code": "expression_syntax",
+   "path": "/nodes/padKey/actions/0/actions/0/then/0/else/1/value",
+   "message": "The formula \"${= substring(board, 0, sel) + string(item) + substring(board, sel + 1, 81)}\" does not parse: Unknown function \"string\".",
+   "nodeId": "padKey"
+  },
+  {
+   "op": 5,
+   "code": "structural_key_in_patch",
+   "path": "/nodes/main/children",
+   "message": "A patch cannot change \"children\": use set (with parent), move and remove.",
+   "nodeId": "main"
+  },
+  {
+   "op": 6,
+   "code": "structural_key_in_patch",
+   "path": "/nodes/sudoku/slots",
+   "message": "A patch cannot change \"slots\": use set (with parent), move and remove.",
+   "nodeId": "sudoku"
+  },
+  {
+   "op": 7,
+   "code": "structural_key_in_patch",
+   "path": "/nodes/grid/children",
+   "message": "A patch cannot change \"children\": use set (with parent), move and remove.",
+   "nodeId": "grid"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/pad1/children/0",
+   "message": "Child \"padKey\" of \"pad1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "pad1"
+  }
+ ],
+ "nodes": 15,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 244,
+  "max": 244
+ },
+ "frames": 173,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 365,
+ "pumpMsMedian": 0.155,
+ "renderExceptions": [],
+ "warnings": 1
+}

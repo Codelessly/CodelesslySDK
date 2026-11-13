@@ -1,0 +1,95 @@
+{
+ "stream": "memory@claude-haiku-5-5.compact.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 438,
+ "timeToFirstPaintMs": 1766,
+ "timeToFirstTextMs": 1766,
+ "timeToFirstSectionMs": 1766,
+ "timeToCompleteMs": 2269,
+ "outputTokens": 708,
+ "tokensEstimated": false,
+ "chars": 1428,
+ "deltas": 87,
+ "opsApplied": 1,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/card/actions/0/actions/0/then/0/value",
+  "dangling_child /nodes/grid/children/0"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     },
+     "settleMs": 1500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 10,
+   "rejected": 3
+  },
+  {
+   "stream": "retry",
+   "applied": 1,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "expression_syntax",
+   "path": "/nodes/card/actions/0/actions/0/then/0/value",
+   "message": "The formula \"${= faces.map((f, i) => i == index ? true : f)}\" does not parse: Unexpected \"(\" at 10.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/grid/children/0",
+   "message": "Child \"card\" of \"grid\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "grid"
+  }
+ ],
+ "nodes": 10,
+ "reappliedBoxesPerOp": {
+  "min": 3,
+  "median": 3,
+  "p90": 3,
+  "max": 3
+ },
+ "frames": 47,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 0,
+ "pumps": 135,
+ "pumpMsMedian": 0.12,
+ "renderExceptions": [],
+ "warnings": 1
+}

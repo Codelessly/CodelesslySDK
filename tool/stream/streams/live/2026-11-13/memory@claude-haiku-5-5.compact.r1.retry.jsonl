@@ -1,0 +1,96 @@
+{"meta":{"ui":"memory","kind":"app","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["memory@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":747,"usage":{"inputTokens":4036,"outputTokens":747,"cacheReadInputTokens":7785,"cacheCreationInputTokens":0,"ttftMs":511,"firstToolDeltaMs":611,"totalMs":2506,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":511,"check":{"ops":3,"opsApplied":1,"opsRejected":2,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":2,"errors":["wrong_type /nodes/winPanel/visible","unknown_id /ops/2/id","dangling_child /nodes/body/children/3","dangling_child /nodes/grid/children/0"],"lints":[],"warnings":2,"nodes":9,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":611,"delta":"{\"ops\": [{\"op"}
+{"tMs":672,"delta":"\": \"set\", \"id\": \""}
+{"tMs":695,"delta":"grid\", \"par"}
+{"tMs":712,"delta":"ent\": \"body\", \"index"}
+{"tMs":738,"delta":"\": 2, \"node\": {"}
+{"tMs":747,"delta":"\"type\": \"gridView\","}
+{"tMs":758,"delta":" \"children\": [\"card\"],"}
+{"tMs":772,"delta":" \"layout\": {\"width\":"}
+{"tMs":785,"delta":" {\"fill\": 358}"}
+{"tMs":796,"delta":", \"height\": 358},"}
+{"tMs":812,"delta":" \"props\": {\"crossA"}
+{"tMs":818,"delta":"xisCount\": 4,"}
+{"tMs":830,"delta":" \"mainAxisSp"}
+{"tMs":840,"delta":"acing\": 8, \"cr"}
+{"tMs":855,"delta":"ossAxisSpacing"}
+{"tMs":863,"delta":"\": 8, \"childAsp"}
+{"tMs":879,"delta":"ectRatio\": 0."}
+{"tMs":896,"delta":"75}"}
+{"tMs":918,"delta":", \"bind\": {\"data"}
+{"tMs":937,"delta":"\": \"${[0,1,"}
+{"tMs":958,"delta":"2,3,4,5,"}
+{"tMs":979,"delta":"6,7,8,9,"}
+{"tMs":999,"delta":"10,11,12,13,"}
+{"tMs":1020,"delta":"14,15]}\"}}"}
+{"tMs":1040,"delta":"}, {\"op\": \"set"}
+{"tMs":1061,"delta":"\", \"id\": \"winPan"}
+{"tMs":1081,"delta":"el\", \"parent\": \"body"}
+{"tMs":1102,"delta":"\", \"index\": 3, \""}
+{"tMs":1122,"delta":"node\": {\"type\": \"column"}
+{"tMs":1142,"delta":"\", \"children\": [\"winText"}
+{"tMs":1162,"delta":"\", \"winTime\"], \""}
+{"tMs":1192,"delta":"layout\": {\"width\": {"}
+{"tMs":1203,"delta":"\"fill\": 358},"}
+{"tMs":1224,"delta":" \"height\": {\"hug\":"}
+{"tMs":1244,"delta":" 80}, \"padding\":"}
+{"tMs":1265,"delta":" 16}, \"props\": {"}
+{"tMs":1285,"delta":"\"crossAxisAl"}
+{"tMs":1306,"delta":"ignment\": \"center\", \"sp"}
+{"tMs":1326,"delta":"acing\": 8}, \""}
+{"tMs":1347,"delta":"decoration\": {\"fills"}
+{"tMs":1367,"delta":"\": [{\"color\": \"#"}
+{"tMs":1387,"delta":"FF10B981\"}],"}
+{"tMs":1408,"delta":" \"radius\": 14},"}
+{"tMs":1428,"delta":" \"visible\": \""}
+{"tMs":1448,"delta":"${="}
+{"tMs":1468,"delta":" won}\"}}, {\""}
+{"tMs":1489,"delta":"op\": \"patch\", \"id"}
+{"tMs":1509,"delta":"\": \"card\", \"patch\":"}
+{"tMs":1530,"delta":" {\"actions\": [{\""}
+{"tMs":1550,"delta":"trigger\": {\"type\":"}
+{"tMs":1571,"delta":" \"click\"}, \"actions"}
+{"tMs":1591,"delta":"\": [{\"type\": \"if"}
+{"tMs":1611,"delta":"\", \"condition\": {\"and"}
+{"tMs":1632,"delta":"\": [{\"left\": \"${"}
+{"tMs":1653,"delta":"busy}\", \"op\": \""}
+{"tMs":1673,"delta":"equalsTo\", \"right"}
+{"tMs":1693,"delta":"\": \"false\"}, {\""}
+{"tMs":1713,"delta":"left\": \"${="}
+{"tMs":1734,"delta":" faces[index]}\", \""}
+{"tMs":1754,"delta":"op\": \"equalsTo"}
+{"tMs":1776,"delta":"\", \"right\": \"false\"}"}
+{"tMs":1795,"delta":","}
+{"tMs":1815,"delta":" {\"left\": \"${won"}
+{"tMs":1835,"delta":"}\", \"op\": \"equal"}
+{"tMs":1856,"delta":"sTo\", \"right\": \""}
+{"tMs":1876,"delta":"false\"}]},"}
+{"tMs":1897,"delta":" \"then\": [{\"type\":"}
+{"tMs":1917,"delta":" \"setVariable\", \"vari"}
+{"tMs":1938,"delta":"able\": \"faces\", \"value"}
+{"tMs":1960,"delta":"\": \"${= faces.map"}
+{"tMs":1979,"delta":"((f, i) => i =="}
+{"tMs":1999,"delta":" index ? true : f)}"}
+{"tMs":2019,"delta":"\"}, {\"type\": \""}
+{"tMs":2040,"delta":"setVariable\", \"variable"}
+{"tMs":2060,"delta":"\": \"moves\", \"value\":"}
+{"tMs":2081,"delta":" \"${= moves + 1"}
+{"tMs":2102,"delta":"}\"}, {\"type\":"}
+{"tMs":2122,"delta":" \"if\", \"condition\": {"}
+{"tMs":2142,"delta":"\"left\": \"${first"}
+{"tMs":2163,"delta":"}\", \"op\": \"l"}
+{"tMs":2183,"delta":"essThan\", \"right\": \""}
+{"tMs":2203,"delta":"0\"}, \"then\": ["}
+{"tMs":2224,"delta":"{\"type\": \"setVari"}
+{"tMs":2244,"delta":"able\", \"variable\": \"first"}
+{"tMs":2265,"delta":"\", \"value\": \"${index}"}
+{"tMs":2285,"delta":"\"}], \"else\": [{"}
+{"tMs":2305,"delta":"\"type\": \"setVariable"}
+{"tMs":2325,"delta":"\", \"variable\": \"second\","}
+{"tMs":2346,"delta":" \"value\": \"${index}\""}
+{"tMs":2366,"delta":"}, {\"type\": \"set"}
+{"tMs":2387,"delta":"Variable\", \"variable\":"}
+{"tMs":2407,"delta":" \"busy\", \"value\": \""}
+{"tMs":2428,"delta":"true\"}]}]}]"}
+{"tMs":2448,"delta":"}]}}]"}
+{"tMs":2505,"delta":"}"}

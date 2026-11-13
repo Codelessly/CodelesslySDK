@@ -1,0 +1,193 @@
+{
+ "stream": "sudoku@claude-sonnet-5-5.compact.scripts-off.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 3226,
+ "timeToFirstPaintMs": 8002,
+ "timeToFirstTextMs": 8854,
+ "timeToFirstSectionMs": 9598,
+ "timeToCompleteMs": 22395,
+ "outputTokens": 3997,
+ "tokensEstimated": false,
+ "chars": 7738,
+ "deltas": 550,
+ "opsApplied": 15,
+ "opsRejected": 4,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 4,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/grid/props/scrollable",
+  "invalid_condition /nodes/padKey/actions/0/actions/0/condition",
+  "invalid_condition /nodes/padKey/actions/0/actions/0/then/0/condition",
+  "expression_syntax /nodes/padKey/actions/0/actions/0/then/0/then/0/values/0/value",
+  "unknown_bind_path /nodes/padKey/actions/0/actions/0/then/0/then/0/values/0/path",
+  "expression_syntax /nodes/padKey/actions/0/actions/0/then/0/else/1/value",
+  "invalid_condition /nodes/undo/actions/0/actions/0/condition",
+  "invalid_condition /nodes/erase/actions/0/actions/0/condition",
+  "dangling_child /nodes/main/children/1",
+  "dangling_child /nodes/pad1/children/0",
+  "dangling_child /nodes/tools/children/0",
+  "dangling_child /nodes/tools/children/2"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^5$"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 0,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 19,
+ "rejections": [
+  {
+   "op": 8,
+   "code": "unknown_prop",
+   "path": "/nodes/grid/props/scrollable",
+   "message": "A gridView has no prop \"scrollable\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, masonry, masonryPlacement, pagination, reorder.",
+   "nodeId": "grid",
+   "expected": [
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "primary",
+    "keyboardDismissBehavior",
+    "clipBehavior",
+    "itemCount",
+    "cacheExtent",
+    "query",
+    "crossAxisCount",
+    "maxCrossAxisExtent",
+    "minCrossAxisExtent",
+    "mainAxisSpacing",
+    "crossAxisSpacing",
+    "childAspectRatio",
+    "mainAxisExtent",
+    "shrinkWrapRows",
+    "masonry",
+    "masonryPlacement",
+    "pagination",
+    "reorder"
+   ]
+  },
+  {
+   "op": 13,
+   "code": "invalid_condition",
+   "path": "/nodes/padKey/actions/0/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "padKey"
+  },
+  {
+   "op": 13,
+   "code": "invalid_condition",
+   "path": "/nodes/padKey/actions/0/actions/0/then/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "padKey"
+  },
+  {
+   "op": 13,
+   "code": "expression_syntax",
+   "path": "/nodes/padKey/actions/0/actions/0/then/0/then/0/values/0/value",
+   "message": "The formula \"${= contains(notes[sel], string(item)) ? replace(notes[sel], string(item), '') : notes[sel] + string(item)}\" does not parse: Unknown function \"string\".",
+   "nodeId": "padKey"
+  },
+  {
+   "op": 13,
+   "code": "unknown_bind_path",
+   "path": "/nodes/padKey/actions/0/actions/0/then/0/then/0/values/0/path",
+   "message": "\"vars.notes[${sel}]\" is not a binding path.",
+   "nodeId": "padKey"
+  },
+  {
+   "op": 13,
+   "code": "expression_syntax",
+   "path": "/nodes/padKey/actions/0/actions/0/then/0/else/1/value",
+   "message": "The formula \"${= substring(board, 0, sel) + string(item) + substring(board, sel + 1, 81)}\" does not parse: Unknown function \"string\".",
+   "nodeId": "padKey"
+  },
+  {
+   "op": 15,
+   "code": "invalid_condition",
+   "path": "/nodes/undo/actions/0/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "undo"
+  },
+  {
+   "op": 17,
+   "code": "invalid_condition",
+   "path": "/nodes/erase/actions/0/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "erase"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/1",
+   "message": "Child \"grid\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/pad1/children/0",
+   "message": "Child \"padKey\" of \"pad1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "pad1"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tools/children/0",
+   "message": "Child \"undo\" of \"tools\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tools"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tools/children/2",
+   "message": "Child \"erase\" of \"tools\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tools"
+  }
+ ],
+ "nodes": 12,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 4,
+  "max": 7
+ },
+ "frames": 180,
+ "frameMs": 129,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 731,
+ "pumpMsMedian": 0.12,
+ "renderExceptions": [],
+ "warnings": 9
+}
