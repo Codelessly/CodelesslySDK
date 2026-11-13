@@ -2,6 +2,13 @@
 
 **New**
 
+- `customPaint` (codelessly_api's `CustomPaint` behavior): a node's draw lists, behind and over its content,
+  drawn by one render object (`lib/src/render/custom_paint.dart`). Each op is the `Canvas` call it names, pixel
+  for pixel (`test/custom_paint/conformance_test.dart`); expressions read the node's values with `size`, `item`,
+  `index` and `count`; each top-level op is a cached picture redrawn only when a name it reads changes. Ops with
+  `hit` are hit regions: pointer reactions get `${result.region}`, `viewX`/`viewY`, `item` and `index`. New
+  render contract `ExpressionValues` (the runtime's values implement it). The SDK library hides the model's
+  `CustomPaint`, `PaintingStyle`, `PathFillType` and `PointMode`, which share Flutter's names.
 - An app's own node types: `CodelesslyConfig.recipes` (and `NodeTree(recipes:)`) map a node type to a
   `WidgetRecipe`, over the built-in ones. `WidgetRecipe`, `NodeBuilder` and `RenderFitBox` are exported. Recipes
   are per tree, not a global table.
