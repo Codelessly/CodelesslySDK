@@ -331,14 +331,14 @@ Future<void> _renderAll(
       for (final m in fetcher.misses) {
         // A weight next to one the family has is drawn with it, as on a
         // device whose font lacks it: not worth a warning.
-        final near = m.substitute != null && RegExp(r' (\d+)').firstMatch(m.substitute!) != null &&
+        final near = m.substitute != null && m.substitute!.toLowerCase().startsWith('${m.family.toLowerCase()} ') && RegExp(r' (\d+)').firstMatch(m.substitute!) != null &&
             (int.parse(RegExp(r' (\d+)').firstMatch(m.substitute!)!.group(1)!) - m.weight).abs() <= 100 &&
             m.substitute!.contains('italic') == m.italic;
         if (near) continue;
         issue(RuntimeIssue('font_fallback', 'warning',
             m.substitute == null
                 ? 'Font "${m.family}" ${m.weight}${m.italic ? ' italic' : ''} is not in the fonts directories: its text is drawn in the default font. Add the font file with --fonts <dir>, or use Roboto.'
-                : 'Font "${m.family}" ${m.weight}${m.italic ? ' italic' : ''} is not in the fonts directories: drawn with ${m.substitute}.'));
+                : 'Font "${m.family}" ${m.weight}${m.italic ? ' italic' : ''} is not in the fonts directories: drawn with ${m.substitute}. Add the font file with --fonts <dir> to see the real one.'));
       }
       final name = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';
