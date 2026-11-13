@@ -1,0 +1,38 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["dashboard@claude-haiku-5-5.compact.r1.jsonl","dashboard@claude-haiku-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":303,"usage":{"inputTokens":8599,"outputTokens":303,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":592,"firstToolDeltaMs":633,"totalMs":1390,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":592,"check":{"ops":2,"opsApplied":1,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":1,"errors":["wrong_type /nodes/revChart/props/data","dangling_child /nodes/card/children/4"],"lints":[],"warnings":2,"nodes":26,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":633,"delta":"{\"ops\": [{\"op"}
+{"tMs":653,"delta":"\": \"set\", \"id\": \""}
+{"tMs":672,"delta":"revChart\", \"parent\":"}
+{"tMs":693,"delta":" \"card\", \"index\": 4"}
+{"tMs":713,"delta":", \"node\": {\"type\":"}
+{"tMs":733,"delta":" \"lineChart\", \"lay"}
+{"tMs":754,"delta":"out\": {\"width\": {\""}
+{"tMs":774,"delta":"fill\": 358}, \""}
+{"tMs":794,"delta":"height\": 140}, \"props"}
+{"tMs":815,"delta":"\": {\"data\": \"${rev"}
+{"tMs":836,"delta":"enue}\", \"xField\":"}
+{"tMs":855,"delta":" \"x\", \"yField\": \""}
+{"tMs":876,"delta":"y\"}}}, {\""}
+{"tMs":896,"delta":"op\": \"set\", \"id\":"}
+{"tMs":917,"delta":" \"plansTable\", \"par"}
+{"tMs":938,"delta":"ent\": \"card\", \"index\":"}
+{"tMs":957,"delta":" 8, \"node\": {\""}
+{"tMs":978,"delta":"type\": \"tableView\", \""}
+{"tMs":998,"delta":"layout\": {\"width\": {"}
+{"tMs":1019,"delta":"\"fill\": 358},"}
+{"tMs":1039,"delta":" \"height\": {\"hug\":"}
+{"tMs":1060,"delta":" 200}}, \"props\":"}
+{"tMs":1081,"delta":" {\"rowCount\": "}
+{"tMs":1101,"delta":"5, \"columns\": [{"}
+{"tMs":1120,"delta":"\"label"}
+{"tMs":1141,"delta":"\": \"Plan\", \"key"}
+{"tMs":1162,"delta":"\": \"plan\"}, {"}
+{"tMs":1182,"delta":"\"label\": \"Revenue"}
+{"tMs":1203,"delta":"\", \"key\": \"revenue"}
+{"tMs":1223,"delta":"\"}, {\"label\": \""}
+{"tMs":1243,"delta":"Subs\", \"key\": \""}
+{"tMs":1263,"delta":"subs\"}, {\"label"}
+{"tMs":1284,"delta":"\": \"Churn %\", \""}
+{"tMs":1304,"delta":"key\": \"churn\"}]"}
+{"tMs":1341,"delta":"}}}"}
+{"tMs":1354,"delta":"]"}
+{"tMs":1390,"delta":"}"}

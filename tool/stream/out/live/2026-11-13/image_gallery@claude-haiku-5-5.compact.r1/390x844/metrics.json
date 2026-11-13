@@ -1,0 +1,95 @@
+{
+ "stream": "image_gallery@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 612,
+ "timeToFirstPaintMs": 1480,
+ "timeToFirstTextMs": 1480,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 4132,
+ "outputTokens": 1110,
+ "tokensEstimated": false,
+ "chars": 2232,
+ "deltas": 162,
+ "opsApplied": 8,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/grid/props/scrollable",
+  "invalid_parent /ops/9/parent",
+  "dangling_child /nodes/page/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 10,
+ "rejections": [
+  {
+   "op": 5,
+   "code": "unknown_prop",
+   "path": "/nodes/grid/props/scrollable",
+   "message": "A gridView has no prop \"scrollable\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, masonry, masonryPlacement, pagination, reorder.",
+   "nodeId": "grid",
+   "expected": [
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "primary",
+    "keyboardDismissBehavior",
+    "clipBehavior",
+    "itemCount",
+    "cacheExtent",
+    "query",
+    "crossAxisCount",
+    "maxCrossAxisExtent",
+    "minCrossAxisExtent",
+    "mainAxisSpacing",
+    "crossAxisSpacing",
+    "childAspectRatio",
+    "mainAxisExtent",
+    "shrinkWrapRows",
+    "masonry",
+    "masonryPlacement",
+    "pagination",
+    "reorder"
+   ]
+  },
+  {
+   "op": 9,
+   "code": "invalid_parent",
+   "path": "/ops/9/parent",
+   "message": "A canvas takes no children list: give a \"slot\" (body, appBar, floatingActionButton, bottomNavigationBar).",
+   "nodeId": "gallery",
+   "expected": [
+    "body",
+    "appBar",
+    "floatingActionButton",
+    "bottomNavigationBar"
+   ]
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/page/children/1",
+   "message": "Child \"grid\" of \"page\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "page"
+  }
+ ],
+ "nodes": 6,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 4,
+  "max": 4
+ },
+ "frames": 75,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 238,
+ "pumpMsMedian": 0.172,
+ "renderExceptions": [],
+ "warnings": 1
+}

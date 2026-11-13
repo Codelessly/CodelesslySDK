@@ -1,0 +1,59 @@
+{
+ "ui": "plan_progress",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 43792,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 19412,
+ "generate": {
+  "inputTokens": 1182,
+  "outputTokens": 3336,
+  "cacheReadInputTokens": 38666,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1308,
+  "firstToolDeltaMs": 4681,
+  "totalMs": 21553,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "timer"
+    },
+    "ms": 1918,
+    "outputTokens": 77,
+    "resultChars": 1558
+   }
+  ],
+  "ops": 25,
+  "opsApplied": 25,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 23,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [],
+ "final": {
+  "ops": 25,
+  "opsApplied": 25,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 23,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

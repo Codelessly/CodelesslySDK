@@ -1,0 +1,58 @@
+{"meta":{"ui":"question_flow","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["question_flow@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":523,"usage":{"inputTokens":4404,"outputTokens":523,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":1033,"firstToolDeltaMs":1104,"totalMs":3137,"stopReason":"StopReason.toolUse"},"text":"The three conditions used the wrong operator name, so the `opt` node was rejected. I'm re-sending it with `equalsTo`.","ttftMs":1033,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":16,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1104,"delta":"{\"ops\": [{\"op"}
+{"tMs":1140,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1176,"delta":"opt\", \"node"}
+{"tMs":1212,"delta":"\": {\"type\": \"row\","}
+{"tMs":1248,"delta":" \"children\": [\"optText\","}
+{"tMs":1286,"delta":" \"optIcon\"], \""}
+{"tMs":1320,"delta":"layout\": {\"width\": {"}
+{"tMs":1355,"delta":"\"fill\": 350},"}
+{"tMs":1391,"delta":" \"height\": 52, \"pad"}
+{"tMs":1429,"delta":"ding\": [16, 0,"}
+{"tMs":1462,"delta":" 16, 0]},"}
+{"tMs":1499,"delta":" \"props\": {\"mainA"}
+{"tMs":1535,"delta":"xisAlignment\": \""}
+{"tMs":1570,"delta":"spaceBetween\", \""}
+{"tMs":1606,"delta":"crossAxisAlign"}
+{"tMs":1641,"delta":"ment\": \"center\"}, \""}
+{"tMs":1677,"delta":"decoration\": {\"fills"}
+{"tMs":1713,"delta":"\": [{\"color\": \"#"}
+{"tMs":1749,"delta":"FFF3F4F6"}
+{"tMs":1786,"delta":"\"}], \"radius\": "}
+{"tMs":1821,"delta":"12}, \"actions\": ["}
+{"tMs":1856,"delta":"{\"trigger\": {\""}
+{"tMs":1891,"delta":"type\": \"click\"}, \""}
+{"tMs":1929,"delta":"actions\": [{\"type\":"}
+{"tMs":1963,"delta":" \"if\", \"condition\": {"}
+{"tMs":1999,"delta":"\"left\": \"${step}\","}
+{"tMs":2035,"delta":" \"op\": \"equalsT"}
+{"tMs":2070,"delta":"o\", \"right\": \"0\""}
+{"tMs":2106,"delta":"}, \"then\": [{\""}
+{"tMs":2148,"delta":"type\": \"setVariable\","}
+{"tMs":2177,"delta":" \"variable\": \"use\", \""}
+{"tMs":2214,"delta":"value\": \"${item}\"}"}
+{"tMs":2249,"delta":"]}, {\"type\": \""}
+{"tMs":2285,"delta":"if\", \"condition\": {\""}
+{"tMs":2321,"delta":"left\": \"${step}\", \""}
+{"tMs":2356,"delta":"op\": \"equalsTo"}
+{"tMs":2392,"delta":"\", \"right\": \"1\"}"}
+{"tMs":2428,"delta":", \"then\": [{\"type"}
+{"tMs":2463,"delta":"\": \"setVariable\", \""}
+{"tMs":2499,"delta":"variable\": \"focus\", \""}
+{"tMs":2536,"delta":"value\": \"${item}\"}"}
+{"tMs":2572,"delta":"]}, {\"type\": \""}
+{"tMs":2606,"delta":"if\", \"condition\": {\""}
+{"tMs":2644,"delta":"left\": \"${step}\", \""}
+{"tMs":2681,"delta":"op\": \"equalsTo"}
+{"tMs":2713,"delta":"\", \"right\": \"2\"}"}
+{"tMs":2751,"delta":", \"then\": [{\"type"}
+{"tMs":2787,"delta":"\": \"setVariable\", \""}
+{"tMs":2822,"delta":"variable\": \"budget\", \""}
+{"tMs":2858,"delta":"value\": \"${item}\"}"}
+{"tMs":2892,"delta":"]}, {\"type\": \""}
+{"tMs":2927,"delta":"setVariable\", \"variable"}
+{"tMs":2966,"delta":"\": \"step\", \"op\": \""}
+{"tMs":2999,"delta":"add\", \"value\": \"1\""}
+{"tMs":3035,"delta":"}]}]}}"}
+{"tMs":3070,"delta":"]"}
+{"tMs":3136,"delta":"}"}

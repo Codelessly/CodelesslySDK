@@ -1,0 +1,56 @@
+{
+ "stream": "dashboard@claude-sonnet-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1632,
+ "timeToFirstPaintMs": 4287,
+ "timeToFirstTextMs": 4287,
+ "timeToFirstSectionMs": 4287,
+ "timeToCompleteMs": 4289,
+ "outputTokens": 621,
+ "tokensEstimated": false,
+ "chars": 935,
+ "deltas": 70,
+ "opsApplied": 2,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "dangling_child /nodes/card/children/1"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 29,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/1",
+   "message": "Child \"seg\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 27,
+ "reappliedBoxesPerOp": {
+  "min": 6,
+  "median": 9,
+  "p90": 9,
+  "max": 9
+ },
+ "frames": 78,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 149,
+ "pumpMsMedian": 0.122,
+ "renderExceptions": [],
+ "warnings": 0
+}

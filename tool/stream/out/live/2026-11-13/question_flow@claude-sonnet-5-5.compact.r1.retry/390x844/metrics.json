@@ -1,0 +1,46 @@
+{
+ "stream": "question_flow@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1033,
+ "timeToFirstPaintMs": 3035,
+ "timeToFirstTextMs": 3035,
+ "timeToFirstSectionMs": 3035,
+ "timeToCompleteMs": 3136,
+ "outputTokens": 523,
+ "tokensEstimated": false,
+ "chars": 923,
+ "deltas": 57,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 17,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 13,
+  "median": 13,
+  "p90": 13,
+  "max": 13
+ },
+ "frames": 60,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 118,
+ "pumpMsMedian": 0.142,
+ "renderExceptions": [],
+ "warnings": 0
+}

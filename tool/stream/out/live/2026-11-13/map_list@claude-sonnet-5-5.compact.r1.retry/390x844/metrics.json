@@ -1,0 +1,64 @@
+{
+ "stream": "map_list@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 2522,
+ "timeToFirstPaintMs": 2527,
+ "timeToFirstTextMs": 2527,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 15094,
+ "outputTokens": 2619,
+ "tokensEstimated": false,
+ "chars": 4779,
+ "deltas": 320,
+ "opsApplied": 13,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "structural_key_in_patch /nodes/map/children",
+  "dangling_child /nodes/map/children/5"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 21,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 14,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "structural_key_in_patch",
+   "path": "/nodes/map/children",
+   "message": "A patch cannot change \"children\": use set (with parent), move and remove.",
+   "nodeId": "map"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/map/children/5",
+   "message": "Child \"pins\" of \"map\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "map"
+  }
+ ],
+ "nodes": 29,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 10,
+  "max": 15
+ },
+ "frames": 179,
+ "frameMs": 89,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 500,
+ "pumpMsMedian": 0.106,
+ "renderExceptions": [],
+ "warnings": 15
+}

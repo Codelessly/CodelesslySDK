@@ -1,0 +1,72 @@
+{
+ "stream": "image_gallery@claude-haiku-5-5.compact.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 369,
+ "timeToFirstPaintMs": 646,
+ "timeToFirstTextMs": 646,
+ "timeToFirstSectionMs": 646,
+ "timeToCompleteMs": 882,
+ "outputTokens": 196,
+ "tokensEstimated": false,
+ "chars": 342,
+ "deltas": 22,
+ "opsApplied": 1,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "would_orphan /nodes/gallery/slots/body",
+  "unknown_id /ops/1/parent"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 8,
+   "rejected": 2
+  },
+  {
+   "stream": "retry",
+   "applied": 1,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 3,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "would_orphan",
+   "path": "/nodes/gallery/slots/body",
+   "message": "Slot \"body\" of \"gallery\" holds \"page\": remove or move it first.",
+   "nodeId": "gallery",
+   "expected": [
+    "page"
+   ]
+  },
+  {
+   "op": 1,
+   "code": "unknown_id",
+   "path": "/ops/1/parent",
+   "message": "No node \"lightbox\" to place \"page\" under.",
+   "nodeId": "page"
+  }
+ ],
+ "nodes": 7,
+ "reappliedBoxesPerOp": {
+  "min": 9,
+  "median": 9,
+  "p90": 9,
+  "max": 9
+ },
+ "frames": 26,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 49,
+ "pumpMsMedian": 0.158,
+ "renderExceptions": [],
+ "warnings": 0
+}

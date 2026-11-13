@@ -1,0 +1,73 @@
+{
+ "stream": "reservation@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 557,
+ "timeToFirstPaintMs": 2406,
+ "timeToFirstTextMs": 2673,
+ "timeToFirstSectionMs": 4327,
+ "timeToCompleteMs": 9550,
+ "outputTokens": 3120,
+ "tokensEstimated": false,
+ "chars": 6283,
+ "deltas": 440,
+ "opsApplied": 18,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_bind_path /nodes/times/bind/data",
+  "wrong_type /nodes/confirm/props/enabled",
+  "dangling_child /nodes/card/children/6",
+  "dangling_child /nodes/card/children/7"
+ ],
+ "scripts": 0,
+ "streamedOps": 20,
+ "rejections": [
+  {
+   "op": 15,
+   "code": "unknown_bind_path",
+   "path": "/nodes/times/bind/data",
+   "message": "\"data\" is read by a listView, gridView, pageView or tableView (the items it repeats its first child for); a column does not read it.",
+   "nodeId": "times"
+  },
+  {
+   "op": 18,
+   "code": "wrong_type",
+   "path": "/nodes/confirm/props/enabled",
+   "message": "Expected a boolean (true or false), got the text \"${= timeIndex >= 0}\".",
+   "nodeId": "confirm"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/6",
+   "message": "Child \"times\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/7",
+   "message": "Child \"confirm\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 11,
+  "max": 15
+ },
+ "frames": 157,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 9,
+ "pumps": 598,
+ "pumpMsMedian": 0.127,
+ "renderExceptions": [],
+ "warnings": 2
+}

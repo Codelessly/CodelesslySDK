@@ -1,0 +1,89 @@
+{
+ "stream": "reservation@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1199,
+ "timeToFirstPaintMs": 3505,
+ "timeToFirstTextMs": 3952,
+ "timeToFirstSectionMs": 9347,
+ "timeToCompleteMs": 17371,
+ "outputTokens": 3073,
+ "tokensEstimated": false,
+ "chars": 5780,
+ "deltas": 409,
+ "opsApplied": 16,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/slotItem/bind/decoration.fills[0].color",
+  "expression_syntax /nodes/slotItem/bind/disabled",
+  "expression_syntax /nodes/slotItem/actions/0/actions/0/condition/left",
+  "expression_syntax /nodes/slotTxt/bind/props.style.color",
+  "expression_syntax /nodes/slotTxt/bind/props.text",
+  "dangling_child /nodes/slots/children/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 18,
+ "rejections": [
+  {
+   "op": 15,
+   "code": "expression_syntax",
+   "path": "/nodes/slotItem/bind/decoration.fills[0].color",
+   "message": "The formula \"${= full(item.i, day, size) ? '#FFE5E7EB' : (item.t == slot ? '#FF2563EB' : '#FFEFF6FF')}\" does not parse: Unknown function \"full\".",
+   "nodeId": "slotItem"
+  },
+  {
+   "op": 15,
+   "code": "expression_syntax",
+   "path": "/nodes/slotItem/bind/disabled",
+   "message": "The formula \"${= full(item.i, day, size)}\" does not parse: Unknown function \"full\".",
+   "nodeId": "slotItem"
+  },
+  {
+   "op": 15,
+   "code": "expression_syntax",
+   "path": "/nodes/slotItem/actions/0/actions/0/condition/left",
+   "message": "The formula \"${= full(item.i, day, size)}\" does not parse: Unknown function \"full\".",
+   "nodeId": "slotItem"
+  },
+  {
+   "op": 16,
+   "code": "expression_syntax",
+   "path": "/nodes/slotTxt/bind/props.style.color",
+   "message": "The formula \"${= full(item.i, day, size) ? '#FF9CA3AF' : (item.t == slot ? '#FFFFFFFF' : '#FF1D4ED8')}\" does not parse: Unknown function \"full\".",
+   "nodeId": "slotTxt"
+  },
+  {
+   "op": 16,
+   "code": "expression_syntax",
+   "path": "/nodes/slotTxt/bind/props.text",
+   "message": "The formula \"${= full(item.i, day, size) ? item.t + ' full' : item.t}\" does not parse: Unknown function \"full\".",
+   "nodeId": "slotTxt"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/slots/children/0",
+   "message": "Child \"slotItem\" of \"slots\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "slots"
+  }
+ ],
+ "nodes": 14,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 15,
+  "max": 17
+ },
+ "frames": 180,
+ "frameMs": 101,
+ "pumpsOverBudget16ms": 6,
+ "pumps": 590,
+ "pumpMsMedian": 0.111,
+ "renderExceptions": [],
+ "warnings": 3
+}

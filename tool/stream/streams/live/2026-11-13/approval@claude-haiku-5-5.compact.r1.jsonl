@@ -1,0 +1,275 @@
+{"meta":{"ui":"approval","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","source":"live","outputTokens":1865,"usage":{"inputTokens":322,"outputTokens":1865,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":840,"firstToolDeltaMs":865,"totalMs":6493,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":840,"check":{"ops":17,"opsApplied":17,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":15,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":865,"delta":"{\"ops\": [{\"op"}
+{"tMs":885,"delta":"\":\"roots\",\"roots\":"}
+{"tMs":905,"delta":"[\"approval\"]},{\""}
+{"tMs":923,"delta":"op\":\"v"}
+{"tMs":944,"delta":"ars\",\"scope\":\"approval"}
+{"tMs":964,"delta":"\",\"set\":{\"decision\":"}
+{"tMs":987,"delta":"{\"type\":\"text\",\"value"}
+{"tMs":1006,"delta":"\":\"pending\"}"}
+{"tMs":1027,"delta":"}},{\"op\":\"set"}
+{"tMs":1046,"delta":"\",\"id\":\"approval\",\"node"}
+{"tMs":1066,"delta":"\":{\"type\":\"canv"}
+{"tMs":1087,"delta":"as\",\"name"}
+{"tMs":1106,"delta":"\":\"Del"}
+{"tMs":1127,"delta":"ete approval\",\"slots\":{"}
+{"tMs":1147,"delta":"\"body\":\"card\"},\""}
+{"tMs":1168,"delta":"layout\":{\"width\":390"}
+{"tMs":1188,"delta":",\"height\":{\"hug"}
+{"tMs":1208,"delta":"\":420"}
+{"tMs":1229,"delta":"}},\"decoration\":{"}
+{"tMs":1248,"delta":"}"}
+{"tMs":1268,"delta":"}},{\"op\":\"set"}
+{"tMs":1289,"delta":"\",\"id\":\"card\",\"node\":"}
+{"tMs":1309,"delta":"{\"type\":\"column\",\"children"}
+{"tMs":1330,"delta":"\":[\"title\",\"summ"}
+{"tMs":1350,"delta":"ary\",\"fol"}
+{"tMs":1372,"delta":"der\",\"preview\",\"war"}
+{"tMs":1390,"delta":"ning\",\"status"}
+{"tMs":1410,"delta":"\",\"bu"}
+{"tMs":1431,"delta":"ttons\"],\"layout\":"}
+{"tMs":1451,"delta":"{\"width\":{\"fill"}
+{"tMs":1471,"delta":"\":390},\"height\":{\""}
+{"tMs":1496,"delta":"hug\":420"}
+{"tMs":1512,"delta":"},\"padding\":20"}
+{"tMs":1533,"delta":"},\"props\":{\"cross"}
+{"tMs":1553,"delta":"AxisAlignment\":"}
+{"tMs":1573,"delta":"\"stretch\",\"spacing"}
+{"tMs":1594,"delta":"\":12},\"decoration\":"}
+{"tMs":1615,"delta":"{\"fills\":[{\""}
+{"tMs":1635,"delta":"color\":\"#FFFF"}
+{"tMs":1656,"delta":"FFFF\"}],\""}
+{"tMs":1677,"delta":"radius\":16,\"strok"}
+{"tMs":1697,"delta":"es\":[{\"color"}
+{"tMs":1717,"delta":"\":\"#F"}
+{"tMs":1737,"delta":"FE5"}
+{"tMs":1757,"delta":"E7EB\"}]"}
+{"tMs":1778,"delta":"}}},{\"op\":\""}
+{"tMs":1799,"delta":"set\",\"id\":\"title\",\"node"}
+{"tMs":1820,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":1840,"delta":"layout\":{\"width\":{"}
+{"tMs":1860,"delta":"\"fill\":350},\"height"}
+{"tMs":1884,"delta":"\":{\"hug\":28"}
+{"tMs":1901,"delta":"}},\"props\":{\"text"}
+{"tMs":1937,"delta":"\":\"Appro"}
+{"tMs":1946,"delta":"ve perm"}
+{"tMs":1963,"delta":"anent deletion?\",\"style"}
+{"tMs":1983,"delta":"\":{\"fontSize\":"}
+{"tMs":2003,"delta":"20,\"fontWeight"}
+{"tMs":2023,"delta":"\":700,\"color\":\"#"}
+{"tMs":2044,"delta":"FF111827\"}}}"}
+{"tMs":2064,"delta":"},{\"op\":\"set\",\""}
+{"tMs":2085,"delta":"id\":\"summary\",\"node\":"}
+{"tMs":2106,"delta":"{\"type\":\"text\",\"lay"}
+{"tMs":2126,"delta":"out\":{\"width\":{\""}
+{"tMs":2146,"delta":"fill\":350},\"height\":"}
+{"tMs":2166,"delta":"{\"hug\":40}},"}
+{"tMs":2187,"delta":"\"props\":{\"text\":\""}
+{"tMs":2207,"delta":"214"}
+{"tMs":2228,"delta":" old files will be permanently"}
+{"tMs":2248,"delta":" deleted,"}
+{"tMs":2268,"delta":" freeing about 3"}
+{"tMs":2289,"delta":".2 GB of"}
+{"tMs":2309,"delta":" shared dr"}
+{"tMs":2343,"delta":"ive space.\",\"style\":{\""}
+{"tMs":2360,"delta":"fontSize\":15,\""}
+{"tMs":2371,"delta":"height\":1.4,\"color"}
+{"tMs":2392,"delta":"\":\"#FF4B5"}
+{"tMs":2411,"delta":"563\"}}}},{\""}
+{"tMs":2432,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":2452,"delta":"folder\",\"node\":{\"type"}
+{"tMs":2472,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":2493,"delta":"\"width\":{\"fill\":"}
+{"tMs":2514,"delta":"350},\"height\":{\"h"}
+{"tMs":2534,"delta":"ug\":20}},\"props\":"}
+{"tMs":2555,"delta":"{\"text\":\"Folder"}
+{"tMs":2576,"delta":": Shared"}
+{"tMs":2595,"delta":" Drive / Archive /"}
+{"tMs":2616,"delta":" Old"}
+{"tMs":2636,"delta":" Projects\",\"style\":{\"f"}
+{"tMs":2657,"delta":"ontSize\":14"}
+{"tMs":2678,"delta":",\"color\":\"#FF"}
+{"tMs":2697,"delta":"374151\"}}}},{"}
+{"tMs":2718,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":2739,"delta":"\"preview\",\"node\":{\""}
+{"tMs":2758,"delta":"type\":\"column"}
+{"tMs":2779,"delta":"\",\"children"}
+{"tMs":2799,"delta":"\":[\"p"}
+{"tMs":2819,"delta":"1\",\"p2\",\"p3\",\""}
+{"tMs":2839,"delta":"previ"}
+{"tMs":2860,"delta":"ewNote\"],\"layout"}
+{"tMs":2881,"delta":"\":{\"width\":{\"f"}
+{"tMs":2904,"delta":"ill\":350},\"height\":{"}
+{"tMs":2922,"delta":"\"hug\":110"}
+{"tMs":2942,"delta":"},\"padding\":12"}
+{"tMs":2962,"delta":"},"}
+{"tMs":2984,"delta":"\"props\":{\"cr"}
+{"tMs":3004,"delta":"ossAxisAlignment"}
+{"tMs":3023,"delta":"\":\"start"}
+{"tMs":3044,"delta":"\",\"spacing\":4},\""}
+{"tMs":3064,"delta":"decoration\":{\"fills"}
+{"tMs":3085,"delta":"\":[{\"color\":\"#"}
+{"tMs":3105,"delta":"FFF3F4F"}
+{"tMs":3125,"delta":"6\"}],\"radius\":"}
+{"tMs":3146,"delta":"10}}},"}
+{"tMs":3166,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":3186,"delta":"\":\"p1\",\"node\":{"}
+{"tMs":3207,"delta":"\"type\":\"text\",\"layout"}
+{"tMs":3227,"delta":"\":{\"width\":{\"f"}
+{"tMs":3248,"delta":"ill\":326},\"height\":{"}
+{"tMs":3268,"delta":"\"hug\":20}},\""}
+{"tMs":3289,"delta":"props\":{\"text\":\"2"}
+{"tMs":3309,"delta":"019"}
+{"tMs":3330,"delta":"-bud"}
+{"tMs":3350,"delta":"get-final"}
+{"tMs":3370,"delta":"-"}
+{"tMs":3390,"delta":"v2.x"}
+{"tMs":3410,"delta":"lsx\",\"style\":{\""}
+{"tMs":3431,"delta":"fontSize\":14,\""}
+{"tMs":3452,"delta":"color\":\"#FF111827"}
+{"tMs":3472,"delta":"\"}}}},{\"op"}
+{"tMs":3493,"delta":"\":\"set\",\"id\":\"p"}
+{"tMs":3513,"delta":"2\",\"node\":{\"type\":"}
+{"tMs":3534,"delta":"\"text\",\"layout\":{\""}
+{"tMs":3554,"delta":"width\":{\"fill\":326"}
+{"tMs":3574,"delta":"},\"height\":{\"hug"}
+{"tMs":3595,"delta":"\":20}},\"props\":{"}
+{"tMs":3616,"delta":"\"text\":\"client-not"}
+{"tMs":3636,"delta":"es-2018"}
+{"tMs":3655,"delta":".doc"}
+{"tMs":3676,"delta":"x\",\"style\":{\"font"}
+{"tMs":3696,"delta":"Size\":14,\"color\":"}
+{"tMs":3717,"delta":"\"#FF111827\"}"}
+{"tMs":3737,"delta":"}}},{\"op\":\""}
+{"tMs":3758,"delta":"set\",\"id\":\"p3\",\""}
+{"tMs":3778,"delta":"node\":{\"type\":\"text"}
+{"tMs":3800,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":3819,"delta":"{\"fill\":326},\""}
+{"tMs":3840,"delta":"height\":{\"hug\":20"}
+{"tMs":3861,"delta":"}},\"props\":{\"text"}
+{"tMs":3880,"delta":"\":\"old-log"}
+{"tMs":3901,"delta":"o-dr"}
+{"tMs":3921,"delta":"af"}
+{"tMs":3941,"delta":"ts.z"}
+{"tMs":3962,"delta":"ip\",\"style\":{\"font"}
+{"tMs":3982,"delta":"Size\":14,\"color\":"}
+{"tMs":4003,"delta":"\"#FF111827\"}"}
+{"tMs":4023,"delta":"}}},{\"op\":\""}
+{"tMs":4043,"delta":"set\",\"id\":\"previewN"}
+{"tMs":4064,"delta":"ote\",\"node\":{\"type\":"}
+{"tMs":4085,"delta":"\"text\",\"layout\":{\""}
+{"tMs":4105,"delta":"width\":{\"fill\":326"}
+{"tMs":4125,"delta":"},\"height\":{\"hug"}
+{"tMs":4145,"delta":"\":20}},\"props\":{"}
+{"tMs":4166,"delta":"\"text\":\"and"}
+{"tMs":4186,"delta":" 211 more files\",\""}
+{"tMs":4207,"delta":"style\":{\"fontSize"}
+{"tMs":4227,"delta":"\":13,\"color\":\"#"}
+{"tMs":4247,"delta":"FF6B7"}
+{"tMs":4268,"delta":"280\"}}}},{\""}
+{"tMs":4289,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":4309,"delta":"warning\",\"node\":{\"type"}
+{"tMs":4330,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":4350,"delta":"\"width\":{\"fill\":"}
+{"tMs":4370,"delta":"350},\"height\":{\"h"}
+{"tMs":4391,"delta":"ug\":20"}
+{"tMs":4411,"delta":"}},\"props\":{\"text"}
+{"tMs":4431,"delta":"\":\"This c"}
+{"tMs":4452,"delta":"annot be undone."}
+{"tMs":4473,"delta":"\",\"style\":{\"fontS"}
+{"tMs":4492,"delta":"ize\":14,\"fontW"}
+{"tMs":4513,"delta":"eight\":700,\"color\":"}
+{"tMs":4533,"delta":"\"#FF"}
+{"tMs":4554,"delta":"B91C1C\"}}"}
+{"tMs":4575,"delta":"}},{\"op\":\"set"}
+{"tMs":4595,"delta":"\",\"id\":\"status\",\"node\":"}
+{"tMs":4616,"delta":"{\"type\":\"text\",\"lay"}
+{"tMs":4636,"delta":"out\":{\"width\":{\""}
+{"tMs":4658,"delta":"fill\":350},\"height\":"}
+{"tMs":4676,"delta":"{\"hug\":20}},"}
+{"tMs":4697,"delta":"\"props\":{\"text\":\""}
+{"tMs":4717,"delta":"${="}
+{"tMs":4737,"delta":" decision =="}
+{"tMs":4757,"delta":" 'appro"}
+{"tMs":4778,"delta":"ved' ? 'Dec"}
+{"tMs":4799,"delta":"ision:"}
+{"tMs":4819,"delta":" Approved. Files"}
+{"tMs":4839,"delta":" are"}
+{"tMs":4860,"delta":" being"}
+{"tMs":4880,"delta":" deleted.' : decision"}
+{"tMs":4900,"delta":" == 'denied' ?"}
+{"tMs":4921,"delta":" 'Decision: Den"}
+{"tMs":4941,"delta":"ied. No"}
+{"tMs":4962,"delta":" files were deleted.' :"}
+{"tMs":4982,"delta":" "}
+{"tMs":5002,"delta":"''}\",\"style\":{\"f"}
+{"tMs":5023,"delta":"ontSize\":14,\"f"}
+{"tMs":5043,"delta":"ontWeight\":600,\""}
+{"tMs":5064,"delta":"color\":\"#FF374"}
+{"tMs":5084,"delta":"151\"}},\"bind\":"}
+{"tMs":5105,"delta":"{\"visible\":\"${="}
+{"tMs":5125,"delta":" decision != 'pending'"}
+{"tMs":5146,"delta":"}\"}}"}
+{"tMs":5166,"delta":"},{\"op\":\"set\",\""}
+{"tMs":5186,"delta":"id\":\"buttons\",\"node"}
+{"tMs":5207,"delta":"\":{\"type\":\"row\",\""}
+{"tMs":5227,"delta":"children\":[\"deny\",\"approve"}
+{"tMs":5248,"delta":"\"],\"layout\":{\""}
+{"tMs":5268,"delta":"width\":{\"fill\":350"}
+{"tMs":5289,"delta":"},\"height\":{\"hug"}
+{"tMs":5308,"delta":"\":48}"}
+{"tMs":5329,"delta":"},\"props\":{\"main"}
+{"tMs":5350,"delta":"AxisAlignment\":"}
+{"tMs":5370,"delta":"\"end\",\"spacing\":12"}
+{"tMs":5391,"delta":"},"}
+{"tMs":5410,"delta":"\"bind\":{\"visible"}
+{"tMs":5432,"delta":"\":\"${= decision =="}
+{"tMs":5452,"delta":" 'pending'}\"}"}
+{"tMs":5472,"delta":"}"}
+{"tMs":5492,"delta":"},{\"op\":\"set\",\""}
+{"tMs":5512,"delta":"id\":\"deny\",\"node\":"}
+{"tMs":5533,"delta":"{\"type\":\"out"}
+{"tMs":5554,"delta":"linedButton\",\"layout"}
+{"tMs":5574,"delta":"\":{\"width\":{\"h"}
+{"tMs":5596,"delta":"ug\":120},\"height\":44"}
+{"tMs":5614,"delta":"},\"props\":{\"label\":"}
+{"tMs":5636,"delta":"\"Deny\",\"style\":{"}
+{"tMs":5656,"delta":"\"fo"}
+{"tMs":5676,"delta":"regroundColor\":\"#"}
+{"tMs":5696,"delta":"FF374"}
+{"tMs":5717,"delta":"151\",\"shape\":{\"type"}
+{"tMs":5737,"delta":"\":\"roundedRectang"}
+{"tMs":5769,"delta":"le\",\"borderRadius\":"}
+{"tMs":5789,"delta":"10}}},\"actions\":"}
+{"tMs":5799,"delta":"[{\"trigger\":{"}
+{"tMs":5819,"delta":"\"type\":\"click\"},\""}
+{"tMs":5839,"delta":"actions\":[{\"type\":"}
+{"tMs":5860,"delta":"\"setVariable\",\"variable"}
+{"tMs":5880,"delta":"\":\"decision\",\"value"}
+{"tMs":5901,"delta":"\":\"denied\"}]}"}
+{"tMs":5921,"delta":"]}},{\"op\":\""}
+{"tMs":5941,"delta":"set\",\"id\":\"approve\",\""}
+{"tMs":5962,"delta":"node\":{\"type\":\"fil"}
+{"tMs":5983,"delta":"ledButton\",\"layout\":{"}
+{"tMs":6003,"delta":"\"width\":{\"hug\":"}
+{"tMs":6023,"delta":"140"}
+{"tMs":6045,"delta":"},\"height\":44},\"props"}
+{"tMs":6064,"delta":"\":{\"label\":\"Appro"}
+{"tMs":6084,"delta":"ve\",\"style\":{\"backg"}
+{"tMs":6105,"delta":"roundColor\":\"#F"}
+{"tMs":6125,"delta":"FDC2626\",\"foreg"}
+{"tMs":6146,"delta":"roundColor\":\"#F"}
+{"tMs":6167,"delta":"FFFFFFF\",\""}
+{"tMs":6187,"delta":"shape\":{\"type\":\""}
+{"tMs":6210,"delta":"roundedRectangle\",\""}
+{"tMs":6228,"delta":"borderRadius\":10}"}
+{"tMs":6259,"delta":"}"}
+{"tMs":6268,"delta":"},\"actions\":[{\""}
+{"tMs":6289,"delta":"trigger\":{\"type\":"}
+{"tMs":6309,"delta":"\"click\"},\"actions\":"}
+{"tMs":6329,"delta":"[{\"type\":\"setV"}
+{"tMs":6350,"delta":"ariable\",\"variable\":\"dec"}
+{"tMs":6371,"delta":"ision\",\"value\":\"approved\""}
+{"tMs":6391,"delta":"}]}]"}
+{"tMs":6411,"delta":"}}]"}
+{"tMs":6481,"delta":"}"}

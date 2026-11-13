@@ -1,0 +1,57 @@
+{
+ "stream": "dashboard@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1889,
+ "timeToFirstPaintMs": 13439,
+ "timeToFirstTextMs": 13880,
+ "timeToFirstSectionMs": 18048,
+ "timeToCompleteMs": 32501,
+ "outputTokens": 5238,
+ "tokensEstimated": false,
+ "chars": 9715,
+ "deltas": 698,
+ "opsApplied": 29,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/seg/actions/0/actions/0/value",
+  "dangling_child /nodes/card/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 30,
+ "rejections": [
+  {
+   "op": 5,
+   "code": "expression_syntax",
+   "path": "/nodes/seg/actions/0/actions/0/value",
+   "message": "The formula \"${= toNumber(result[0])}\" does not parse: Unknown function \"toNumber\".",
+   "nodeId": "seg"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/1",
+   "message": "Child \"seg\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 27,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 8,
+  "max": 26
+ },
+ "frames": 180,
+ "frameMs": 186,
+ "pumpsOverBudget16ms": 15,
+ "pumps": 879,
+ "pumpMsMedian": 0.107,
+ "renderExceptions": [],
+ "warnings": 0
+}

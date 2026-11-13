@@ -1,0 +1,90 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 43792,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 19412,
+ "generate": {
+  "inputTokens": 3838,
+  "outputTokens": 5238,
+  "cacheReadInputTokens": 38666,
+  "cacheCreationInputTokens": 19333,
+  "ttftMs": 1889,
+  "firstToolDeltaMs": 5649,
+  "totalMs": 32505,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "lineChart"
+    },
+    "ms": 2205,
+    "outputTokens": 65,
+    "resultChars": 2077
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "barChart"
+    },
+    "ms": 1604,
+    "outputTokens": 68,
+    "resultChars": 1452
+   }
+  ],
+  "ops": 30,
+  "opsApplied": 30,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 28,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [],
+ "final": {
+  "ops": 30,
+  "opsApplied": 30,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 28,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "followup": {
+  "inputTokens": 8023,
+  "outputTokens": 621,
+  "cacheReadInputTokens": 19333,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1632,
+  "firstToolDeltaMs": 1700,
+  "totalMs": 4290,
+  "stopReason": "StopReason.toolUse",
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 28,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

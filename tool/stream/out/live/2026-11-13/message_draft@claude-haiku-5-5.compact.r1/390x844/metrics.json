@@ -1,0 +1,58 @@
+{
+ "stream": "message_draft@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 611,
+ "timeToFirstPaintMs": 2551,
+ "timeToFirstTextMs": 2830,
+ "timeToFirstSectionMs": 6200,
+ "timeToCompleteMs": 6626,
+ "outputTokens": 2015,
+ "tokensEstimated": false,
+ "chars": 4417,
+ "deltas": 279,
+ "opsApplied": 12,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 5,
+ "jsonRepairs": 1,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_enum /nodes/toneRow/actions/0/actions/1/condition/op",
+  "dangling_child /nodes/card/children/3"
+ ],
+ "scripts": 0,
+ "streamedOps": 13,
+ "rejections": [
+  {
+   "op": 7,
+   "code": "invalid_enum",
+   "path": "/nodes/toneRow/actions/0/actions/1/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "toneRow",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/3",
+   "message": "Child \"toneRow\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 10,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 3,
+  "max": 9
+ },
+ "frames": 113,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 393,
+ "pumpMsMedian": 0.147,
+ "renderExceptions": [],
+ "warnings": 1
+}

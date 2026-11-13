@@ -1,0 +1,67 @@
+{"meta":{"ui":"message_draft","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["message_draft@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":407,"usage":{"inputTokens":1010,"outputTokens":407,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":477,"firstToolDeltaMs":520,"totalMs":1925,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":477,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":1,"pending":0,"errors":[],"lints":[],"warnings":1,"nodes":11,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":520,"delta":"{\"ops\": [{\"op"}
+{"tMs":541,"delta":"\":\"set\",\"id\":\"to"}
+{"tMs":560,"delta":"neRow\",\"par"}
+{"tMs":582,"delta":"ent\":\"card\",\"index\":3"}
+{"tMs":605,"delta":",\"node\":{\"type\":"}
+{"tMs":623,"delta":"\"seg"}
+{"tMs":646,"delta":"mentedButton\",\"lay"}
+{"tMs":666,"delta":"out\":{\"width\":{\""}
+{"tMs":688,"delta":"fill\":358},\"height\":"}
+{"tMs":724,"delta":"40"}
+{"tMs":730,"delta":"},\"props\":{\"segments"}
+{"tMs":752,"delta":"\":[{\"value\":\"pol"}
+{"tMs":773,"delta":"ite\",\"label\":\"Polite"}
+{"tMs":795,"delta":"\"},{\"value\":\"fir"}
+{"tMs":817,"delta":"m\",\"label\":\"Firm"}
+{"tMs":839,"delta":"\"}],\"selected\":[\""}
+{"tMs":860,"delta":"polite\"]},\"actions"}
+{"tMs":882,"delta":"\":[{\"trigger\":"}
+{"tMs":903,"delta":"{\"type\":\"changed\""}
+{"tMs":928,"delta":"},\"actions\":[{\""}
+{"tMs":950,"delta":"type\":\"setVariable\",\""}
+{"tMs":968,"delta":"variable\":\"t"}
+{"tMs":989,"delta":"one\",\"value\":\"${result}"}
+{"tMs":1011,"delta":"\"},{\"type\":\"if"}
+{"tMs":1032,"delta":"\",\"condition\":{\"left\":"}
+{"tMs":1053,"delta":"\"${result"}
+{"tMs":1076,"delta":"}\",\"op\":\"equals"}
+{"tMs":1096,"delta":"To\",\"right\":\"firm"}
+{"tMs":1118,"delta":"\"},\"then\":[{\""}
+{"tMs":1140,"delta":"type\":\"setVariable\",\""}
+{"tMs":1160,"delta":"variable\":\"body"}
+{"tMs":1182,"delta":"\",\"value\":\"H"}
+{"tMs":1203,"delta":"ello,"}
+{"tMs":1224,"delta":"\\n\\nTh"}
+{"tMs":1245,"delta":"e heating in"}
+{"tMs":1266,"delta":" my"}
+{"tMs":1287,"delta":" flat has been"}
+{"tMs":1308,"delta":" broken for"}
+{"tMs":1329,"delta":" several"}
+{"tMs":1350,"delta":" days and"}
+{"tMs":1372,"delta":" it"}
+{"tMs":1393,"delta":" is not"}
+{"tMs":1414,"delta":" working. Please ar"}
+{"tMs":1435,"delta":"range a repair as soon"}
+{"tMs":1456,"delta":" as possible."}
+{"tMs":1478,"delta":"\\n\\nThank you,"}
+{"tMs":1499,"delta":"\""}
+{"tMs":1520,"delta":"}"}
+{"tMs":1542,"delta":"],\"else\":[{\"type"}
+{"tMs":1563,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":1586,"delta":"able\":\"body\",\"value\":\""}
+{"tMs":1606,"delta":"Hello"}
+{"tMs":1631,"delta":",\\n\\nI hope"}
+{"tMs":1649,"delta":" you are"}
+{"tMs":1670,"delta":" well. I w"}
+{"tMs":1693,"delta":"anted to let you know that the"}
+{"tMs":1714,"delta":" heating in my flat has st"}
+{"tMs":1736,"delta":"opped working."}
+{"tMs":1756,"delta":" Could"}
+{"tMs":1778,"delta":" you please arrange a repair"}
+{"tMs":1799,"delta":" when conv"}
+{"tMs":1821,"delta":"enient?\\n\\nK"}
+{"tMs":1842,"delta":"ind regards,\"}]}"}
+{"tMs":1864,"delta":"]}]}}}"}
+{"tMs":1886,"delta":"]"}
+{"tMs":1924,"delta":"}"}

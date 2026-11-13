@@ -1,0 +1,76 @@
+{
+ "stream": "question_flow@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 649,
+ "timeToFirstPaintMs": 5497,
+ "timeToFirstTextMs": 7275,
+ "timeToFirstSectionMs": 7275,
+ "timeToCompleteMs": 15162,
+ "outputTokens": 2831,
+ "tokensEstimated": false,
+ "chars": 5744,
+ "deltas": 391,
+ "opsApplied": 17,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_enum /nodes/opt/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/opt/actions/0/actions/1/condition/op",
+  "invalid_enum /nodes/opt/actions/0/actions/2/condition/op",
+  "dangling_child /nodes/opts/children/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 18,
+ "rejections": [
+  {
+   "op": 10,
+   "code": "invalid_enum",
+   "path": "/nodes/opt/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "opt",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 10,
+   "code": "invalid_enum",
+   "path": "/nodes/opt/actions/0/actions/1/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "opt",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 10,
+   "code": "invalid_enum",
+   "path": "/nodes/opt/actions/0/actions/2/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "opt",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/opts/children/0",
+   "message": "Child \"opt\" of \"opts\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "opts"
+  }
+ ],
+ "nodes": 15,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 5,
+  "max": 7
+ },
+ "frames": 180,
+ "frameMs": 89,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 572,
+ "pumpMsMedian": 0.141,
+ "renderExceptions": [],
+ "warnings": 2
+}

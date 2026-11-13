@@ -1,0 +1,14 @@
+{"meta":{"ui":"itinerary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Swap the two days.","base":["itinerary@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":129,"usage":{"inputTokens":7598,"outputTokens":129,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":671,"firstToolDeltaMs":711,"totalMs":995,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":671,"check":{"ops":3,"opsApplied":3,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":47,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":711,"delta":"{\"ops\": [{\"op"}
+{"tMs":732,"delta":"\": \"move\", \"id\": \""}
+{"tMs":752,"delta":"day2Head\", \"parent"}
+{"tMs":772,"delta":"\": \"card\", \"index\": "}
+{"tMs":792,"delta":"1}, {\"op\": \""}
+{"tMs":812,"delta":"move\", \"id\": \"day2"}
+{"tMs":833,"delta":"Tl\", \"parent\":"}
+{"tMs":853,"delta":" \"card\", \"index\": 2"}
+{"tMs":874,"delta":"}, {\"op\": \"move"}
+{"tMs":895,"delta":"\", \"id\": \"day2"}
+{"tMs":915,"delta":"Check\", \"parent\": \"card"}
+{"tMs":935,"delta":"\", \"index\": 3}]"}
+{"tMs":994,"delta":"}"}

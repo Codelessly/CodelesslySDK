@@ -1,9 +1,23 @@
 | Cell | Prompt+tools tok | TTFT ms | First paint ms | First text ms | Complete ms | Out tok | tok/s | Ops | Applied | Rejected | Recovered | Lookups | Retries | Final errors | Final lints | Scripts | Works when used | Follow-up tok | Follow-up ms | In tok (uncached) | Cache read | Cache write |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| approval@claude-haiku-5-5.compact.r1 | 19412 | 840 | 1778 | 2064 | 6493 | 1865 | 331.4 | 17 | 17 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 322 | 19333 | 0 |
+| approval@claude-sonnet-5-5.compact.r1 | 19412 | 1994 | 5379 | 6877 | 21786 | 3462 | 179.0 | 30 | 30 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 199 | 19333 | 0 |
 | basketball@claude-haiku-5-5.compact.r1 | 7864 | 409 | 2581 | 2581 | 6945 | 2188 | 336.4 | 18 | 18 | 0 | 15 | - | 0 | - | - | 0 | False | - | - | 309 | 7785 | 0 |
 | basketball@claude-opus-5-5.compact.r1 | 7864 | 654 | 38859 | 40310 | 61721 | 7368 | 214.9 | 29 | 28 | 1 | 0 | drag, scripts | 1 | - | - | 5 | False | - | - | 2705 | 23358 | 0 |
 | basketball@claude-sonnet-5-5.compact.r1 | 7864 | 845 | - | - | 23020 | 4117 | 209.7 | 21 | 19 | 2 | 0 | drag | 2 | - | - | 1 | False | - | - | 1146 | 15570 | 0 |
 | basketball@claude-sonnet-5-5.compact.scripts-off.r1 | 7626 | 1647 | - | - | 26477 | 3892 | 182.5 | 21 | 19 | 2 | 0 | drag, conditions | 2 | - | - | 0 | True | - | - | 1142 | 15094 | 0 |
+| carousel@claude-haiku-5-5.compact.r1 | 19412 | 536 | 1136 | 3131 | 8836 | 2841 | 343.6 | 22 | 22 | 0 | 16 | - | 0 | - | - | 0 | - | - | - | 316 | 19333 | 0 |
+| carousel@claude-sonnet-5-5.compact.r1 | 19412 | 771 | 10734 | 11763 | 26843 | 4493 | 236.1 | 29 | 29 | 0 | 0 | lists-a-carousel-pages-and-pagination, pageView, paginate, pagination | 2 | - | - | 0 | - | - | - | 4982 | 96665 | 0 |
+| checkout@claude-haiku-5-5.compact.r1 | 19657 | 636 | 2313 | 2313 | 22466 | 7810 | 358.3 | 64 | 64 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 331 | 0 | 19578 |
+| checkout@claude-sonnet-5-5.compact.r1 | 19657 | 1518 | 9297 | 9297 | 46461 | 8010 | 182.0 | 54 | 49 | 5 | 0 | - | 1 | - | - | 0 | - | - | - | 208 | 0 | 19578 |
+| code_diff@claude-haiku-5-5.compact.r1 | 19412 | 453 | 1605 | 1890 | 8898 | 3037 | 361.0 | 28 | 27 | 1 | 0 | - | 1 | - | - | 0 | - | - | - | 324 | 19333 | 0 |
+| code_diff@claude-sonnet-5-5.compact.r1 | 19412 | 1376 | 4107 | 5007 | 37992 | 7418 | 205.0 | 61 | 61 | 1 | 0 | ui_read | 1 | - | - | 0 | - | - | - | 201 | 19333 | 0 |
+| comparison@claude-haiku-5-5.compact.r1 | 19412 | 509 | 1207 | 1474 | 10833 | 3756 | 364.9 | 38 | 38 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 312 | 19333 | 0 |
+| comparison@claude-sonnet-5-5.compact.r1 | 19412 | 735 | 2431 | 2896 | 27475 | 5628 | 215.4 | 56 | 56 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 189 | 19333 | 0 |
+| dashboard@claude-haiku-5-5.compact.r1 | 19412 | 828 | 1651 | 3159 | 9934 | 3126 | 344.5 | 30 | 26 | 4 | 0 | - | 2 | wrong_type /nodes/revChart/props/data, dangling_child /nodes/card/children/4 | - | 0 | - | 745 | 2634 | 342 | 0 | 19333 |
+| dashboard@claude-sonnet-5-5.compact.r1 | 19412 | 1889 | 13439 | 13880 | 32505 | 5238 | 195.0 | 30 | 30 | 0 | 0 | lineChart, barChart | 0 | - | - | 0 | - | 621 | 4290 | 3838 | 38666 | 19333 |
+| data_table@claude-haiku-5-5.compact.r1 | 19412 | 374 | 1066 | 10252 | 13933 | 4601 | 340.0 | 33 | 32 | 1 | 0 | - | 1 | - | - | 0 | - | - | - | 328 | 19333 | 0 |
+| data_table@claude-sonnet-5-5.compact.r1 | 19412 | 1417 | 9301 | 9772 | 31575 | 5223 | 178.8 | 29 | 29 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 205 | 19333 | 0 |
 | flights@claude-haiku-5-5.compact.r1 | 7630 | 530 | 2024 | 2555 | 7906 | 2567 | 349.5 | 23 | 23 | 0 | 0 | - | 0 | - | - | 0 | True | 368 | 1374 | 315 | 0 | 7551 |
 | flights@claude-haiku-5-5.full.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
 | flights@claude-opus-5-5.compact.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
@@ -16,12 +30,28 @@
 | habits@claude-haiku-5-5.compact.r1 | 7864 | 442 | 1959 | 1959 | 11099 | 3766 | 354.4 | 31 | 23 | 8 | 0 | - | 2 | - | - | 0 | False | - | - | 283 | 7785 | 0 |
 | habits@claude-opus-5-5.compact.r1 | 7864 | 1174 | 11327 | 11931 | 42845 | 5569 | 168.9 | 42 | 42 | 0 | 0 | scripts | 0 | - | - | 2 | True | - | - | 1003 | 15572 | 0 |
 | habits@claude-sonnet-5-5.compact.r1 | 7864 | 856 | 3084 | 3546 | 18948 | 3812 | 218.0 | 29 | 28 | 1 | 0 | - | 2 | - | - | 0 | False | - | - | 160 | 7785 | 0 |
+| image_gallery@claude-haiku-5-5.compact.r1 | 19412 | 612 | 1480 | 1480 | 4146 | 1110 | 317.1 | 10 | 8 | 2 | 0 | - | 2 | would_orphan /nodes/gallery/slots/body, unknown_id /ops/1/parent | - | 0 | - | - | - | 319 | 19333 | 0 |
+| image_gallery@claude-sonnet-5-5.compact.r1 | 19412 | 1285 | 10027 | 10027 | 21111 | 3358 | 192.7 | 22 | 22 | 0 | 0 | keyDown | 0 | - | - | 0 | - | - | - | 1218 | 38666 | 0 |
+| itinerary@claude-haiku-5-5.compact.r1 | 19412 | 847 | 1588 | 2730 | 20197 | 6248 | 323.4 | 49 | 49 | 0 | 0 | - | 0 | - | - | 0 | - | 129 | 995 | 313 | 19333 | 0 |
+| itinerary@claude-sonnet-5-5.compact.r1 | 19412 | 3743 | 5289 | 5785 | 20967 | 3077 | 186.1 | 23 | 23 | 0 | 0 | - | 0 | - | - | 0 | - | 958 | 5484 | 190 | 19333 | 0 |
 | kanban@claude-haiku-5-5.compact.r1 | 7864 | 455 | 1886 | 1886 | 9835 | 3328 | 356.4 | 24 | 20 | 4 | 16 | - | 1 | - | - | 0 | False | - | - | 287 | 7785 | 0 |
 | kanban@claude-opus-5-5.compact.r1 | 7864 | 1354 | 10652 | 11256 | 30028 | 3584 | 174.5 | 22 | 19 | 3 | 0 | draggable, drop | 1 | - | - | 2 | False | - | - | 2127 | 23358 | 0 |
 | kanban@claude-sonnet-5-5.compact.r1 | 7864 | 759 | 8813 | 9227 | 20918 | 3640 | 228.9 | 25 | 22 | 3 | 0 | draggable, dropTarget, drop, scripts | 1 | - | - | 2 | False | - | - | 5446 | 38925 | 0 |
+| map_list@claude-haiku-5-5.compact.r1 | 19412 | 779 | 2327 | 6835 | 12920 | 4123 | 340.5 | 30 | 30 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 322 | 19333 | 0 |
+| map_list@claude-sonnet-5-5.compact.r1 | 19412 | 1650 | 5930 | 6486 | 18324 | 2830 | 179.6 | 22 | 21 | 1 | 0 | - | 2 | - | - | 0 | - | - | - | 199 | 19333 | 0 |
 | memory@claude-haiku-5-5.compact.r1 | 7864 | 501 | 2741 | 2741 | 6160 | 1750 | 349.6 | 13 | 10 | 3 | 0 | scripts | 3 | - | - | 0 | False | - | - | 1109 | 15570 | 0 |
 | memory@claude-opus-5-5.compact.r1 | 7864 | 611 | 16124 | 17475 | 26076 | 3343 | 176.1 | 16 | 16 | 0 | 0 | scripts | 0 | - | - | 3 | True | - | - | 918 | 15572 | 0 |
 | memory@claude-sonnet-5-5.compact.r1 | 7864 | 1454 | - | - | 19899 | 2966 | 203.5 | 18 | 16 | 2 | 0 | scripts | 1 | - | - | 4 | True | - | - | 891 | 15570 | 0 |
+| message_draft@claude-haiku-5-5.compact.r1 | 19412 | 611 | 2551 | 2830 | 6637 | 2015 | 336.3 | 13 | 12 | 1 | 5 | - | 1 | - | - | 0 | - | - | - | 332 | 19333 | 0 |
+| message_draft@claude-sonnet-5-5.compact.r1 | 19412 | 1280 | 4834 | 6218 | 19400 | 3405 | 197.3 | 24 | 23 | 1 | 0 | - | 1 | - | - | 0 | - | - | - | 209 | 19333 | 0 |
+| order_summary@claude-haiku-5-5.compact.r1 | 19412 | 756 | 2558 | 2823 | 12440 | 4111 | 352.8 | 36 | 36 | 0 | 0 | - | 0 | - | - | 0 | - | 802 | 3031 | 331 | 19333 | 0 |
+| order_summary@claude-sonnet-5-5.compact.r1 | 19412 | 953 | 4602 | 5027 | 20108 | 3993 | 217.0 | 34 | 34 | 0 | 0 | - | 0 | - | - | 0 | - | 982 | 5299 | 208 | 19333 | 0 |
+| plan_progress@claude-haiku-5-5.compact.r1 | 19412 | 355 | 1078 | 1363 | 9114 | 3069 | 351.7 | 28 | 28 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 319 | 19333 | 0 |
+| plan_progress@claude-sonnet-5-5.compact.r1 | 19412 | 1308 | - | - | 21553 | 3336 | 197.7 | 25 | 25 | 0 | 0 | timer | 0 | - | - | 0 | - | - | - | 1182 | 38666 | 0 |
+| question_flow@claude-haiku-5-5.compact.r1 | 19412 | 631 | 1497 | 2190 | 13068 | 4219 | 341.8 | 29 | 29 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 304 | 19333 | 0 |
+| question_flow@claude-sonnet-5-5.compact.r1 | 19412 | 649 | 5497 | 7275 | 15174 | 2831 | 202.4 | 18 | 17 | 1 | 0 | - | 1 | - | - | 0 | - | - | - | 181 | 19333 | 0 |
+| reservation@claude-haiku-5-5.compact.r1 | 19412 | 557 | 2406 | 2673 | 9565 | 3120 | 347.1 | 20 | 18 | 2 | 0 | - | 1 | - | - | 0 | - | 249 | 1251 | 313 | 19333 | 0 |
+| reservation@claude-sonnet-5-5.compact.r1 | 19412 | 1199 | 3505 | 3952 | 17385 | 3073 | 200.7 | 18 | 18 | 0 | 0 | - | 0 | - | - | 0 | - | 586 | 4034 | 190 | 19333 | 0 |
 | restaurant_menu@claude-haiku-5-5.compact.r1 | 7628 | 477 | 1900 | 1900 | 15635 | 5082 | 336.0 | 46 | 46 | 0 | 0 | - | 0 | - | - | 0 | - | - | - | 347 | 0 | 7549 |
 | restaurant_menu@claude-sonnet-5-5.compact.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |
 | saas_pricing@claude-haiku-5-5.compact.r1 | - | - | - | - | - | 0 | - | - | - | - | - | - | 0 | - | - | - | - | - | - | - | - | - |

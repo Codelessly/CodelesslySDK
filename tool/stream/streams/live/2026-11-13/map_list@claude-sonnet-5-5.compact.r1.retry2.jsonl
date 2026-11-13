@@ -1,0 +1,22 @@
+{"meta":{"ui":"map_list","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["map_list@claude-sonnet-5-5.compact.r1.jsonl","map_list@claude-sonnet-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":254,"usage":{"inputTokens":8677,"outputTokens":254,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":1904,"firstToolDeltaMs":1915,"totalMs":2701,"stopReason":"StopReason.toolUse"},"text":"The map still lists the missing `pins` child, and the five pins aren't attached. I'll move each pin under the map, then re-set the map's children without `pins`.","ttftMs":1904,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":29,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1915,"delta":"{\"ops\": [{\"op"}
+{"tMs":1925,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1959,"delta":"map\", \"node\": {\"type"}
+{"tMs":1992,"delta":"\": \"stack\", \"children\":"}
+{"tMs":2025,"delta":" [\"st1\", \"st2"}
+{"tMs":2059,"delta":"\", \"st3\", \"st4"}
+{"tMs":2093,"delta":"\", \"st5\", \"pin"}
+{"tMs":2126,"delta":"0\", \"pin1\", \""}
+{"tMs":2383,"delta":"pin2\", \"pin3"}
+{"tMs":2697,"delta":"\", \"pin4\"], \""}
+{"tMs":2697,"delta":"layout\": {\"width\": {"}
+{"tMs":2697,"delta":"\"fill\": 358},"}
+{"tMs":2697,"delta":" \"height\": 220, \"fl"}
+{"tMs":2697,"delta":"ex\": 1}, \"dec"}
+{"tMs":2697,"delta":"oration\": {\"fills\":"}
+{"tMs":2697,"delta":" [{\"color\": \"#F"}
+{"tMs":2697,"delta":"FE8F0E4\""}
+{"tMs":2697,"delta":"}], \"radius\": 12"}
+{"tMs":2697,"delta":", \"clip\": \"anti"}
+{"tMs":2697,"delta":"Alias\"}}}]"}
+{"tMs":2700,"delta":"}"}

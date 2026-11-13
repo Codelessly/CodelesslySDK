@@ -1,0 +1,93 @@
+{
+ "ui": "code_diff",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 43792,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 19412,
+ "generate": {
+  "inputTokens": 201,
+  "outputTokens": 7418,
+  "cacheReadInputTokens": 19333,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1376,
+  "firstToolDeltaMs": 1809,
+  "totalMs": 37992,
+  "stopReason": "StopReason.toolUse",
+  "ops": 61,
+  "opsApplied": 61,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 120,
+  "pending": 2,
+  "errors": [
+   "truncated_op /ops/61",
+   "dangling_child /nodes/card/children/4",
+   "dangling_child /nodes/card/children/5"
+  ],
+  "lints": [],
+  "warnings": 21,
+  "nodes": 59,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 6239,
+   "outputTokens": 597,
+   "cacheReadInputTokens": 38666,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1541,
+   "firstToolDeltaMs": 3945,
+   "totalMs": 5991,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_read",
+     "input": {
+      "ids": [
+       "card",
+       "h1Status",
+       "h1Keep",
+       "h1Discard",
+       "h1Bar"
+      ],
+      "variables": true
+     },
+     "ms": 1870,
+     "outputTokens": 120,
+     "resultChars": 1673
+    }
+   ],
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 61,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 61,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

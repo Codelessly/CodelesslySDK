@@ -1,0 +1,72 @@
+{
+ "stream": "order_summary@claude-sonnet-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1043,
+ "timeToFirstPaintMs": 1793,
+ "timeToFirstTextMs": 1793,
+ "timeToFirstSectionMs": 1793,
+ "timeToCompleteMs": 5297,
+ "outputTokens": 982,
+ "tokensEstimated": false,
+ "chars": 1835,
+ "deltas": 118,
+ "opsApplied": 6,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/tipSeg/bind/props.selected",
+  "dangling_child /nodes/promoRow/children/1",
+  "dangling_child /nodes/tipRow/children/1"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 33,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 7,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "expression_syntax",
+   "path": "/nodes/tipSeg/bind/props.selected",
+   "message": "The formula \"${= [string(tipPct)]}\" does not parse: Unknown function \"string\".",
+   "nodeId": "tipSeg"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/1",
+   "message": "Child \"promoMsg\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tipRow/children/1",
+   "message": "Child \"tipSeg\" of \"tipRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tipRow"
+  }
+ ],
+ "nodes": 36,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 4,
+  "p90": 12,
+  "max": 12
+ },
+ "frames": 93,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 212,
+ "pumpMsMedian": 0.127,
+ "renderExceptions": [],
+ "warnings": 0
+}
