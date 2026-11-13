@@ -1,0 +1,81 @@
+{
+ "stream": "sudoku@claude-opus-5-5.compact.r1.retry3.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 593,
+ "timeToFirstPaintMs": 1709,
+ "timeToFirstTextMs": 1709,
+ "timeToFirstSectionMs": 1709,
+ "timeToCompleteMs": 1906,
+ "outputTokens": 165,
+ "tokensEstimated": false,
+ "chars": 135,
+ "deltas": 10,
+ "opsApplied": 2,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 6,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^5$"
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 21,
+   "rejected": 1
+  },
+  {
+   "stream": "retry",
+   "applied": 2,
+   "rejected": 1
+  },
+  {
+   "stream": "retry",
+   "applied": 2,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [],
+ "nodes": 20,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 7,
+  "p90": 7,
+  "max": 7
+ },
+ "frames": 42,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 3,
+ "pumps": 53,
+ "pumpMsMedian": 0.178,
+ "renderExceptions": [],
+ "warnings": 0
+}

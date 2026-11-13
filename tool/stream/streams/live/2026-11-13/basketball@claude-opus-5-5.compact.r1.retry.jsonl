@@ -1,0 +1,27 @@
+{"meta":{"ui":"basketball","kind":"app","model":"claude-opus-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["basketball@claude-opus-5-5.compact.r1.jsonl"],"source":"live","outputTokens":238,"usage":{"inputTokens":11410,"outputTokens":238,"cacheReadInputTokens":7786,"cacheCreationInputTokens":0,"ttftMs":908,"firstToolDeltaMs":957,"totalMs":2298,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":908,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":26,"scripts":5,"scriptChars":1954},"assets":null}}
+{"tMs":957,"delta":"{\"ops\": [{"}
+{"tMs":1275,"delta":"\"op\": \"set\", \"id"}
+{"tMs":1275,"delta":"\": \"court\", \"node\": {"}
+{"tMs":1275,"delta":"\"type\": \"stack\", \""}
+{"tMs":1275,"delta":"children\": [\"floor\", \""}
+{"tMs":1275,"delta":"board\", \"boardIn\","}
+{"tMs":1275,"delta":" \"rim\", \"net\", \""}
+{"tMs":1307,"delta":"d1\", \"d2\", \""}
+{"tMs":1357,"delta":"d3\", \"d4\", \""}
+{"tMs":1407,"delta":"d5\", \"ball\", \""}
+{"tMs":1457,"delta":"capture\", \"msgT\","}
+{"tMs":1508,"delta":" \"hint\", \"overlay"}
+{"tMs":1557,"delta":"\"], \"layout\": {\""}
+{"tMs":1651,"delta":"width\": 390, \"height\":"}
+{"tMs":1657,"delta":" 700}, \"decoration"}
+{"tMs":1708,"delta":"\": {\"fills\": [{"}
+{"tMs":1757,"delta":"\"type\": \"linear\", \""}
+{"tMs":1808,"delta":"stops\": [{\"position\":"}
+{"tMs":1857,"delta":" 0, \"color\": \"#"}
+{"tMs":1907,"delta":"FF1E293B\"}"}
+{"tMs":1957,"delta":", {\"position\": 1,"}
+{"tMs":2007,"delta":" \"color\": \"#FF334"}
+{"tMs":2063,"delta":"155\"}]}], \"cl"}
+{"tMs":2107,"delta":"ip\": \"hardEdge"}
+{"tMs":2160,"delta":"\"}}}]"}
+{"tMs":2296,"delta":"}"}

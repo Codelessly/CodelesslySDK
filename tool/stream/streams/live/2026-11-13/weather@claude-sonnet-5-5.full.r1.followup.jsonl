@@ -1,0 +1,118 @@
+{"meta":{"ui":"weather","kind":"card","model":"claude-sonnet-5-5","promptVariant":"full","profile":"agent","scripts":false,"turn":"followup","followup":"Make it dark.","base":["weather@claude-sonnet-5-5.full.r1.jsonl"],"source":"live","outputTokens":963,"usage":{"inputTokens":6910,"outputTokens":963,"cacheReadInputTokens":34183,"cacheCreationInputTokens":0,"ttftMs":1224,"firstToolDeltaMs":1296,"totalMs":5475,"stopReason":"StopReason.toolUse"},"text":"I'll swap the card's blue gradient for a dark one and soften the accents.","ttftMs":1224,"check":{"ops":14,"opsApplied":14,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":61,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1296,"delta":"{\"ops\": [{\"op\": \"patch"}
+{"tMs":1331,"delta":"\", \"id\": \"card\", \""}
+{"tMs":1367,"delta":"patch\": {\"decoration"}
+{"tMs":1403,"delta":"\": {\"fills\": [{"}
+{"tMs":1439,"delta":"\"type\": \"linear\", \""}
+{"tMs":1474,"delta":"begin\": [0, -1"}
+{"tMs":1510,"delta":"], \"end\": [0, "}
+{"tMs":1545,"delta":"1], \"stops\": [{"}
+{"tMs":1582,"delta":"\"position\": 0, \"color"}
+{"tMs":1619,"delta":"\": \"#FF1F"}
+{"tMs":1653,"delta":"2937\"}, {\"position"}
+{"tMs":1691,"delta":"\": 1, \"color\": \""}
+{"tMs":1840,"delta":"#FF0B0F1"}
+{"tMs":1840,"delta":"A\"}]}]"}
+{"tMs":1840,"delta":"}}}, {\"op\":"}
+{"tMs":1840,"delta":" \"patch\", \"id\": \""}
+{"tMs":1867,"delta":"hourly\", \"patch\":"}
+{"tMs":1900,"delta":" {\"decoration\": {\""}
+{"tMs":1936,"delta":"fills\": [{\"color\":"}
+{"tMs":1971,"delta":" \"#14F"}
+{"tMs":2007,"delta":"FFFFF\"}]"}
+{"tMs":2043,"delta":"}}}, {\"op\":"}
+{"tMs":2078,"delta":" \"patch\", \"id\": \""}
+{"tMs":2114,"delta":"alertBtn\", \"pat"}
+{"tMs":2163,"delta":"ch\": {\"bind\": {"}
+{"tMs":2185,"delta":"\"decoration.fills["}
+{"tMs":2220,"delta":"0].color\": \"${= al"}
+{"tMs":2257,"delta":"ert ? '#FF86"}
+{"tMs":2291,"delta":"EFAC' : '#"}
+{"tMs":2326,"delta":"FF60"}
+{"tMs":2362,"delta":"A5FA'}\"}"}
+{"tMs":2398,"delta":","}
+{"tMs":2432,"delta":" \"decoration\": {\"f"}
+{"tMs":2468,"delta":"ills\": [{\"color\": \""}
+{"tMs":2503,"delta":"#FF60A5FA"}
+{"tMs":2539,"delta":"\"}]}}}, {"}
+{"tMs":2574,"delta":"\"op\": \"patch\", \""}
+{"tMs":2610,"delta":"id\": \"abIcon\","}
+{"tMs":2645,"delta":" \"patch\": {\"props\":"}
+{"tMs":2685,"delta":" {\"color\": \"#FF"}
+{"tMs":2722,"delta":"0B"}
+{"tMs":2752,"delta":"0F1A\"}}}"}
+{"tMs":2787,"delta":", {\"op\": \"patch"}
+{"tMs":2823,"delta":"\", \"id\": \"abText\","}
+{"tMs":2858,"delta":" \"patch\": {\"props\":"}
+{"tMs":2894,"delta":" {\"style\": {\"f"}
+{"tMs":2929,"delta":"ontSize\": 15, \""}
+{"tMs":2965,"delta":"fontWeight\": 600"}
+{"tMs":3007,"delta":", \"color\": \"#FF"}
+{"tMs":3036,"delta":"0B0F1A\"}"}
+{"tMs":3075,"delta":"}}},"}
+{"tMs":3107,"delta":" {\"op\": \"patch\","}
+{"tMs":3144,"delta":" \"id\": \"hl\", \""}
+{"tMs":3179,"delta":"patch\": {\"props\": {"}
+{"tMs":3213,"delta":"\"style\": {\"fontS"}
+{"tMs":3250,"delta":"ize\": 14, \"color"}
+{"tMs":3284,"delta":"\": \"#FF9"}
+{"tMs":3329,"delta":"CA3AF\"}}"}
+{"tMs":3355,"delta":"}}, {\"op\": \""}
+{"tMs":3391,"delta":"patch\", \"id\": \"h"}
+{"tMs":3426,"delta":"1t\", \"patch\": {"}
+{"tMs":3472,"delta":"\"props\": {\"style\": {"}
+{"tMs":3496,"delta":"\"fontSize\": 13"}
+{"tMs":3532,"delta":", \"color\": \"#FF"}
+{"tMs":3568,"delta":"9CA3AF\"}"}
+{"tMs":3603,"delta":"}}}, {\"op\":"}
+{"tMs":3639,"delta":" \"patch\", \"id\": \""}
+{"tMs":3674,"delta":"h2t\", \"patch\":"}
+{"tMs":3719,"delta":" {\"props\": {\"style\":"}
+{"tMs":3745,"delta":" {\"fontSize\": "}
+{"tMs":3780,"delta":"13, \"color\": \"#F"}
+{"tMs":3816,"delta":"F9CA3AF\""}
+{"tMs":3851,"delta":"}}}}, {\"op"}
+{"tMs":3887,"delta":"\": \"patch\", \"id\":"}
+{"tMs":3922,"delta":" \"h3t\", \"patch"}
+{"tMs":3958,"delta":"\": {\"props\": {\"style"}
+{"tMs":4001,"delta":"\": {\"fontSize\":"}
+{"tMs":4029,"delta":" 13, \"color\": \"#"}
+{"tMs":4064,"delta":"FF9CA3A"}
+{"tMs":4107,"delta":"F\"}}}}, {"}
+{"tMs":4135,"delta":"\"op\": \"patch\", \""}
+{"tMs":4174,"delta":"id\": \"h4t\", \""}
+{"tMs":4206,"delta":"patch\": {\"props\": {"}
+{"tMs":4245,"delta":"\"style\": {\"fontS"}
+{"tMs":4277,"delta":"ize\": 13, \"color\":"}
+{"tMs":4313,"delta":" \"#FF9CA3"}
+{"tMs":4348,"delta":"AF\"}}}},"}
+{"tMs":4383,"delta":" {\"op\": \"patch\","}
+{"tMs":4419,"delta":" \"id\": \"h5t\","}
+{"tMs":4456,"delta":" \"patch\": {\"props\":"}
+{"tMs":4489,"delta":" {\"style\": {\"font"}
+{"tMs":4525,"delta":"Size\": 13, \"color"}
+{"tMs":4561,"delta":"\": \"#FF9CA"}
+{"tMs":4604,"delta":"3AF\"}}}}"}
+{"tMs":4631,"delta":", {\"op\": \"patch"}
+{"tMs":4668,"delta":"\", \"id\": \"d1l"}
+{"tMs":4703,"delta":"\", \"patch\": {\"props"}
+{"tMs":4739,"delta":"\": {\"style\": {\"f"}
+{"tMs":4773,"delta":"ontSize\": 15, \""}
+{"tMs":4809,"delta":"color\": \"#FF9C"}
+{"tMs":4845,"delta":"A3AF\"}}}"}
+{"tMs":4880,"delta":"}, {\"op\": \"pat"}
+{"tMs":4916,"delta":"ch\", \"id\": \"d2"}
+{"tMs":4951,"delta":"l\", \"patch\": {\""}
+{"tMs":4997,"delta":"props\": {\"style\": {\""}
+{"tMs":5022,"delta":"fontSize\": 15,"}
+{"tMs":5058,"delta":" \"color\": \"#FF9"}
+{"tMs":5093,"delta":"CA3AF\"}}"}
+{"tMs":5128,"delta":"}}, {\"op\": \""}
+{"tMs":5164,"delta":"patch\", \"id\": \"d"}
+{"tMs":5199,"delta":"3l\", \"patch\": {"}
+{"tMs":5237,"delta":"\"props\": {\"style\": {"}
+{"tMs":5271,"delta":"\"fontSize\": 15"}
+{"tMs":5306,"delta":", \"color\": \"#FF"}
+{"tMs":5341,"delta":"9CA3AF\"}"}
+{"tMs":5376,"delta":"}}}]"}
+{"tMs":5474,"delta":"}"}

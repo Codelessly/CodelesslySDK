@@ -1,0 +1,39 @@
+{
+ "ui": "form_builder",
+ "kind": "app",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 326,
+  "outputTokens": 2149,
+  "cacheReadInputTokens": 0,
+  "cacheCreationInputTokens": 7785,
+  "ttftMs": 521,
+  "firstToolDeltaMs": 548,
+  "totalMs": 6720,
+  "stopReason": "StopReason.toolUse",
+  "ops": 20,
+  "opsApplied": 18,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "unknown_prop /nodes/fieldsList/props/padding",
+   "unknown_prop /nodes/preview/props/padding",
+   "dangling_child /nodes/main/children/3",
+   "dangling_child /nodes/main/children/5"
+  ],
+  "lints": [],
+  "warnings": 4,
+  "nodes": 16,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "error": "ApiException(503): credential validation failed"
+}

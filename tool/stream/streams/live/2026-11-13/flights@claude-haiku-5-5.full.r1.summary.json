@@ -1,0 +1,11 @@
+{
+ "ui": "flights",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "full",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 72898,
+ "toolsChars": 8369,
+ "error": "ApiException(503): credential validation failed"
+}

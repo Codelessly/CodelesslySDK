@@ -1,0 +1,140 @@
+{
+ "ui": "memory",
+ "kind": "app",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 1109,
+  "outputTokens": 1750,
+  "cacheReadInputTokens": 15570,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 501,
+  "firstToolDeltaMs": 1154,
+  "totalMs": 6160,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 727,
+    "outputTokens": 40,
+    "resultChars": 1132
+   }
+  ],
+  "ops": 13,
+  "opsApplied": 10,
+  "opsRejected": 3,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "unknown_prop /nodes/grid/props/scrollable",
+   "invalid_condition /nodes/card/actions/0/actions/0/condition",
+   "invalid_condition /nodes/card/actions/0/actions/0/then/2/condition",
+   "wrong_type /nodes/winPanel/visible",
+   "dangling_child /nodes/body/children/2",
+   "dangling_child /nodes/body/children/3"
+  ],
+  "lints": [],
+  "warnings": 2,
+  "nodes": 8,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 4036,
+   "outputTokens": 747,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 511,
+   "firstToolDeltaMs": 611,
+   "totalMs": 2506,
+   "stopReason": "StopReason.toolUse",
+   "ops": 3,
+   "opsApplied": 1,
+   "opsRejected": 2,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 2,
+   "errors": [
+    "wrong_type /nodes/winPanel/visible",
+    "unknown_id /ops/2/id",
+    "dangling_child /nodes/body/children/3",
+    "dangling_child /nodes/grid/children/0"
+   ],
+   "lints": [],
+   "warnings": 2,
+   "nodes": 9,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 5517,
+   "outputTokens": 708,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 438,
+   "firstToolDeltaMs": 527,
+   "totalMs": 2270,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [
+    "empty_button card"
+   ],
+   "warnings": 2,
+   "nodes": 11,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 6851,
+   "outputTokens": 701,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 384,
+   "firstToolDeltaMs": 423,
+   "totalMs": 2218,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 12,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 12,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

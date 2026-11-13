@@ -1,0 +1,82 @@
+{
+ "stream": "basketball@claude-sonnet-5-5.compact.scripts-off.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1884,
+ "timeToFirstPaintMs": 8740,
+ "timeToFirstTextMs": 8740,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 10175,
+ "outputTokens": 1394,
+ "tokensEstimated": false,
+ "chars": 2551,
+ "deltas": 155,
+ "opsApplied": 1,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_id /ops/1/id",
+  "dangling_child /nodes/root/children/7"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 0,
+      "dy": 140
+     },
+     "settleMs": 2500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 19,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [
+  {
+   "op": 1,
+   "code": "unknown_id",
+   "path": "/ops/1/id",
+   "message": "No node \"ball\" to patch (it is listed by \"root\" but has not arrived: set it first).",
+   "nodeId": "ball"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/root/children/7",
+   "message": "Child \"ball\" of \"root\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "root"
+  }
+ ],
+ "nodes": 18,
+ "reappliedBoxesPerOp": {
+  "min": 19,
+  "median": 19,
+  "p90": 19,
+  "max": 19
+ },
+ "frames": 167,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 323,
+ "pumpMsMedian": 0.168,
+ "renderExceptions": [],
+ "warnings": 0
+}

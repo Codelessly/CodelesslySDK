@@ -1,0 +1,94 @@
+{
+ "ui": "basketball",
+ "kind": "app",
+ "model": "claude-opus-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 2705,
+  "outputTokens": 7368,
+  "cacheReadInputTokens": 23358,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 654,
+  "firstToolDeltaMs": 27440,
+  "totalMs": 61721,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "drag"
+    },
+    "ms": 1603,
+    "outputTokens": 123,
+    "resultChars": 1532
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 985,
+    "outputTokens": 50,
+    "resultChars": 1132
+   }
+  ],
+  "ops": 29,
+  "opsApplied": 28,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 1,
+  "errors": [
+   "invalid_enum /nodes/court/decoration/clip",
+   "dangling_child /nodes/main/children/1"
+  ],
+  "lints": [],
+  "warnings": 45,
+  "nodes": 25,
+  "scripts": 5,
+  "scriptChars": 1954
+ },
+ "retries": [
+  {
+   "inputTokens": 11410,
+   "outputTokens": 238,
+   "cacheReadInputTokens": 7786,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 908,
+   "firstToolDeltaMs": 957,
+   "totalMs": 2298,
+   "stopReason": "StopReason.toolUse",
+   "ops": 1,
+   "opsApplied": 1,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 26,
+   "scripts": 5,
+   "scriptChars": 1954
+  }
+ ],
+ "final": {
+  "ops": 1,
+  "opsApplied": 1,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 26,
+  "scripts": 5,
+  "scriptChars": 1954
+ }
+}

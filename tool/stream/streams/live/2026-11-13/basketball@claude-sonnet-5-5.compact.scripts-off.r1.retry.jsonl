@@ -1,0 +1,156 @@
+{"meta":{"ui":"basketball","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["basketball@claude-sonnet-5-5.compact.scripts-off.r1.jsonl"],"source":"live","outputTokens":1394,"usage":{"inputTokens":16860,"outputTokens":1394,"cacheReadInputTokens":15094,"cacheCreationInputTokens":0,"ttftMs":1884,"firstToolDeltaMs":4167,"totalMs":10176,"stopReason":"StopReason.toolUse","lookups":[{"tool":"ui_docs","input":{"topic":"conditions"},"ms":1985,"outputTokens":90,"resultChars":1291}]},"text":"I need to re-send root with predicate-object conditions, and fix the ball's drag conditions. Let me check the condition format.I'll send the root with predicate objects (using `${= ...}` expressions as `left` with `isTrue`), and patch the ball.","ttftMs":1884,"check":{"ops":2,"opsApplied":1,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":1,"errors":["unknown_id /ops/1/id","dangling_child /nodes/root/children/7"],"lints":[],"warnings":0,"nodes":18,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":4167,"delta":"{\"ops\": ["}
+{"tMs":4167,"delta":"{\"op\":"}
+{"tMs":4167,"delta":"\"set\",\"id\":\"root\",\""}
+{"tMs":4167,"delta":"node\":{\"type\":\"st"}
+{"tMs":4167,"delta":"ack\",\"children\":[\"hud\",\""}
+{"tMs":4167,"delta":"hoopBoard\",\"r"}
+{"tMs":4167,"delta":"im\",\"net\",\"aimDot"}
+{"tMs":4167,"delta":"1\",\"aimDot2\",\""}
+{"tMs":4167,"delta":"aimDot3\",\"ball"}
+{"tMs":4649,"delta":"\",\"hint\",\"overlay\""}
+{"tMs":4649,"delta":"],\"layout\":{\"width"}
+{"tMs":4649,"delta":"\":390,\"height\":760},"}
+{"tMs":4649,"delta":"\"decoration\":{\"f"}
+{"tMs":4649,"delta":"ills\":[{\"type\":\""}
+{"tMs":4649,"delta":"linear\",\"stops\":[{"}
+{"tMs":4649,"delta":"\"position\":0,\"color\":"}
+{"tMs":4649,"delta":"\"#FF1E"}
+{"tMs":4649,"delta":"1B4B\"},{\""}
+{"tMs":4649,"delta":"position\":1,\"color\":\""}
+{"tMs":4649,"delta":"#FF7C"}
+{"tMs":4649,"delta":"2D12\"}]}]"}
+{"tMs":5145,"delta":"},\"actions\":[{\""}
+{"tMs":5146,"delta":"trigger\":{\"type\":"}
+{"tMs":5146,"delta":"\"timer\",\"intervalM"}
+{"tMs":5146,"delta":"s\":1000,\"when\":"}
+{"tMs":5146,"delta":"\"${= !over}\"},"}
+{"tMs":5146,"delta":"\"actions\":[{\"type"}
+{"tMs":5146,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":5146,"delta":"able\":\"time\",\"value\":\""}
+{"tMs":5146,"delta":"${= time - 1}\""}
+{"tMs":5146,"delta":"},{\"type\":\"if\",\""}
+{"tMs":5146,"delta":"condition\":{\"left\":\""}
+{"tMs":5146,"delta":"${= time <= 0}"}
+{"tMs":5639,"delta":"\",\"op\":\"isTrue"}
+{"tMs":5639,"delta":"\"},\"then\":[{\""}
+{"tMs":5639,"delta":"type\":\"setVariable\",\""}
+{"tMs":5639,"delta":"variable\":\"over\",\"value\":"}
+{"tMs":5639,"delta":"\"true\"},{\"type\":"}
+{"tMs":5639,"delta":"\"setVariable\",\"variable"}
+{"tMs":5639,"delta":"\":\"best\",\"value\":\"${"}
+{"tMs":5639,"delta":"= score > best ? score :"}
+{"tMs":5639,"delta":" best}\"}]}]},"}
+{"tMs":5640,"delta":"{\"trigger\":{\""}
+{"tMs":5640,"delta":"type\":\"frame\",\"when\":"}
+{"tMs":5640,"delta":"\"${= fly && !over"}
+{"tMs":6132,"delta":"}\"},\"actions\":["}
+{"tMs":6132,"delta":"{\"type\":\"setVari"}
+{"tMs":6132,"delta":"able\",\"variable\":\"vy"}
+{"tMs":6132,"delta":"\",\"value\":\"${= vy"}
+{"tMs":6132,"delta":" + 0.0016 *"}
+{"tMs":6132,"delta":" result.dt}\"},{"}
+{"tMs":6132,"delta":"\"type\":\"setVariable"}
+{"tMs":6132,"delta":"\",\"variable\":\"bx\",\""}
+{"tMs":6132,"delta":"value\":\"${= bx +"}
+{"tMs":6132,"delta":" vx * result.dt}"}
+{"tMs":6132,"delta":"\"},{\"type\":\"set"}
+{"tMs":6132,"delta":"Variable\",\"variable\":\""}
+{"tMs":6734,"delta":"by\",\"value\":\"${= by"}
+{"tMs":6734,"delta":" + vy * result.dt"}
+{"tMs":6734,"delta":"}\"},{\"type\":\""}
+{"tMs":6734,"delta":"if\",\"condition\":{\"left"}
+{"tMs":6734,"delta":"\":\"${= !scored &&"}
+{"tMs":6734,"delta":" vy > 0 && by"}
+{"tMs":6734,"delta":" > 168 && by < "}
+{"tMs":6734,"delta":"190 && bx > 122"}
+{"tMs":6734,"delta":" && bx < 188}"}
+{"tMs":6734,"delta":"\",\"op\":\"isTrue"}
+{"tMs":6734,"delta":"\"},\"then\":[{\""}
+{"tMs":6734,"delta":"type\":\"setVariable\",\""}
+{"tMs":7261,"delta":"variable\":\"scored\",\"value"}
+{"tMs":7261,"delta":"\":\"true\"},{\"type"}
+{"tMs":7261,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":7261,"delta":"able\":\"score\",\"value\":\""}
+{"tMs":7261,"delta":"${= score + 1 +"}
+{"tMs":7261,"delta":" (streak >= 2 "}
+{"tMs":7261,"delta":"? 1 : 0"}
+{"tMs":7261,"delta":")}\"},{\"type\":"}
+{"tMs":7261,"delta":"\"setVariable\",\"variable"}
+{"tMs":7261,"delta":"\":\"streak\",\"value\":\""}
+{"tMs":7261,"delta":"${= streak + 1}"}
+{"tMs":7261,"delta":"\"}]},{\"type\":"}
+{"tMs":7750,"delta":"\"if\",\"condition\":{\""}
+{"tMs":7750,"delta":"left\":\"${= by > "}
+{"tMs":7750,"delta":"660 || bx < -40"}
+{"tMs":7750,"delta":" || bx > 420}"}
+{"tMs":7750,"delta":"\",\"op\":\"isTrue"}
+{"tMs":7750,"delta":"\"},\"then\":[{\""}
+{"tMs":7750,"delta":"type\":\"if\",\"condition\":"}
+{"tMs":7750,"delta":"{\"left\":\"${= !"}
+{"tMs":7750,"delta":"scored}\",\"op\":\"is"}
+{"tMs":7750,"delta":"True\"},\"then\":"}
+{"tMs":7750,"delta":"[{\"type\":\"setV"}
+{"tMs":7750,"delta":"ariable\",\"variable\":\"stre"}
+{"tMs":8235,"delta":"ak\",\"value\":\"0\"}"}
+{"tMs":8236,"delta":"]},{\"type\":\"set"}
+{"tMs":8236,"delta":"Variable\",\"variable\":\""}
+{"tMs":8236,"delta":"fly\",\"value\":\"false\""}
+{"tMs":8236,"delta":"},{\"type\":\"setV"}
+{"tMs":8236,"delta":"ariable\",\"variable\":\"sc"}
+{"tMs":8236,"delta":"ored\",\"value\":\"false\"},"}
+{"tMs":8236,"delta":"{\"type\":\"setVari"}
+{"tMs":8236,"delta":"able\",\"variable\":\"bx"}
+{"tMs":8236,"delta":"\",\"value\":\"175\"},{"}
+{"tMs":8236,"delta":"\"type\":\"setVariable"}
+{"tMs":8236,"delta":"\",\"variable\":\"by\",\"value"}
+{"tMs":8740,"delta":"\":\"620\"}]}]"}
+{"tMs":8740,"delta":"}]}},{\"op\":"}
+{"tMs":8740,"delta":"\"patch\",\"id\":\""}
+{"tMs":8740,"delta":"ball\",\"patch\":{\"act"}
+{"tMs":8740,"delta":"ions\":[{\"trigger"}
+{"tMs":8740,"delta":"\":{\"type\":\"drag"}
+{"tMs":8740,"delta":"\"},\"actions\":[{"}
+{"tMs":8740,"delta":"\"type\":\"if\",\"condition"}
+{"tMs":8741,"delta":"\":{\"left\":\"${="}
+{"tMs":8741,"delta":" !fly && !over}\",\""}
+{"tMs":8741,"delta":"op\":\"isTrue\""}
+{"tMs":8741,"delta":"},\"then\":[{\"type"}
+{"tMs":9334,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":9334,"delta":"able\":\"px\",\"value\":\""}
+{"tMs":9334,"delta":"${= max(-160, min"}
+{"tMs":9334,"delta":"(160, px + result.d"}
+{"tMs":9334,"delta":"x))}\"},{\"type"}
+{"tMs":9334,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":9334,"delta":"able\":\"py\",\"value\":\""}
+{"tMs":9334,"delta":"${= max(0, min("}
+{"tMs":9334,"delta":"200, py + result.dy"}
+{"tMs":9334,"delta":"))}\"}]}]},"}
+{"tMs":9334,"delta":"{\"trigger\":{\""}
+{"tMs":9334,"delta":"type\":\"dragEnd"}
+{"tMs":9816,"delta":"\"},\"actions\":[{"}
+{"tMs":9816,"delta":"\"type\":\"if\",\"condition"}
+{"tMs":9816,"delta":"\":{\"left\":\"${="}
+{"tMs":9816,"delta":" !fly && !over && py"}
+{"tMs":9816,"delta":" > 15}\",\"op\":\""}
+{"tMs":9817,"delta":"isTrue\"},\"then"}
+{"tMs":9817,"delta":"\":[{\"type\":\"set"}
+{"tMs":9817,"delta":"Variable\",\"variable\":\""}
+{"tMs":9817,"delta":"vx\",\"value\":\"${="}
+{"tMs":9817,"delta":" -px * 0.0035"}
+{"tMs":9817,"delta":"}\"},{\"type\":\""}
+{"tMs":9817,"delta":"setVariable\",\"variable\":"}
+{"tMs":10173,"delta":"\"vy\",\"value\":\"${"}
+{"tMs":10173,"delta":"= -py * 0.0"}
+{"tMs":10173,"delta":"105 - 1.2}"}
+{"tMs":10173,"delta":"\"},{\"type\":\"set"}
+{"tMs":10173,"delta":"Variable\",\"variable\":\""}
+{"tMs":10173,"delta":"fly\",\"value\":\"true\""}
+{"tMs":10173,"delta":"}]},{\"type\":\""}
+{"tMs":10173,"delta":"setVariable\",\"variable\":"}
+{"tMs":10173,"delta":"\"px\",\"value\":\"0\""}
+{"tMs":10173,"delta":"},{\"type\":\"setV"}
+{"tMs":10173,"delta":"ariable\",\"variable\":\"py"}
+{"tMs":10173,"delta":"\",\"value\":\"0\"}]"}
+{"tMs":10173,"delta":"}]}}]"}
+{"tMs":10175,"delta":"}"}

@@ -1,0 +1,331 @@
+{
+ "stream": "form_builder@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 992,
+ "timeToFirstPaintMs": 7054,
+ "timeToFirstTextMs": 15758,
+ "timeToFirstSectionMs": 9502,
+ "timeToCompleteMs": 26942,
+ "outputTokens": 5369,
+ "tokensEstimated": false,
+ "chars": 10937,
+ "deltas": 720,
+ "opsApplied": 23,
+ "opsRejected": 15,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 15,
+ "renderDiagnostics": [
+  "no_size flist",
+  "no_size ftype"
+ ],
+ "finalDiagnostics": [
+  "unknown_action_key /nodes/a1/actions/0/actions/0/args",
+  "unknown_action_key /nodes/a2/actions/0/actions/0/args",
+  "unknown_action_key /nodes/a3/actions/0/actions/0/args",
+  "unknown_action_key /nodes/a4/actions/0/actions/0/args",
+  "unknown_action_key /nodes/a5/actions/0/actions/0/args",
+  "unknown_action_key /nodes/a6/actions/0/actions/0/args",
+  "unknown_action_key /nodes/freq/actions/0/actions/0/args",
+  "unknown_action_key /nodes/fup/actions/0/actions/0/args",
+  "unknown_action_key /nodes/fdown/actions/0/actions/0/args",
+  "unknown_action_key /nodes/fdel/actions/0/actions/0/args",
+  "unknown_action_key /nodes/flabel/actions/0/actions/0/args",
+  "unknown_action_key /nodes/fopts/actions/0/actions/0/args",
+  "expression_syntax /nodes/pdd/bind/props.items",
+  "unknown_action_key /nodes/pdd/actions/0/actions/0/args",
+  "unknown_action_key /nodes/ptf/actions/0/actions/0/args",
+  "unknown_action_key /nodes/pcb/actions/0/actions/0/args",
+  "dangling_child /nodes/addRow/children/0",
+  "dangling_child /nodes/addRow/children/1",
+  "dangling_child /nodes/addRow/children/2",
+  "dangling_child /nodes/addRow2/children/0",
+  "dangling_child /nodes/addRow2/children/1",
+  "dangling_child /nodes/addRow2/children/2",
+  "dangling_child /nodes/fcard/children/1",
+  "dangling_child /nodes/fcard/children/2",
+  "dangling_child /nodes/fhead/children/2",
+  "dangling_child /nodes/fhead/children/3",
+  "dangling_child /nodes/fhead/children/4",
+  "dangling_child /nodes/fhead/children/5",
+  "dangling_child /nodes/pitem/children/1",
+  "dangling_child /nodes/pitem/children/2",
+  "dangling_child /nodes/pitem/children/3",
+  "no_size /nodes/flist/layout",
+  "no_size /nodes/ftype/layout"
+ ],
+ "scripts": 6,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "short text"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "checkbox"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^\\s*submit"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ],
+  "expectText": "required",
+  "textFound": true
+ },
+ "streamedOps": 38,
+ "rejections": [
+  {
+   "op": 11,
+   "code": "unknown_action_key",
+   "path": "/nodes/a1/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "a1"
+  },
+  {
+   "op": 12,
+   "code": "unknown_action_key",
+   "path": "/nodes/a2/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "a2"
+  },
+  {
+   "op": 13,
+   "code": "unknown_action_key",
+   "path": "/nodes/a3/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "a3"
+  },
+  {
+   "op": 14,
+   "code": "unknown_action_key",
+   "path": "/nodes/a4/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "a4"
+  },
+  {
+   "op": 15,
+   "code": "unknown_action_key",
+   "path": "/nodes/a5/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "a5"
+  },
+  {
+   "op": 16,
+   "code": "unknown_action_key",
+   "path": "/nodes/a6/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "a6"
+  },
+  {
+   "op": 22,
+   "code": "unknown_action_key",
+   "path": "/nodes/freq/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "freq"
+  },
+  {
+   "op": 23,
+   "code": "unknown_action_key",
+   "path": "/nodes/fup/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "fup"
+  },
+  {
+   "op": 24,
+   "code": "unknown_action_key",
+   "path": "/nodes/fdown/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "fdown"
+  },
+  {
+   "op": 25,
+   "code": "unknown_action_key",
+   "path": "/nodes/fdel/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "fdel"
+  },
+  {
+   "op": 26,
+   "code": "unknown_action_key",
+   "path": "/nodes/flabel/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "flabel"
+  },
+  {
+   "op": 27,
+   "code": "unknown_action_key",
+   "path": "/nodes/fopts/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "fopts"
+  },
+  {
+   "op": 32,
+   "code": "expression_syntax",
+   "path": "/nodes/pdd/bind/props.items",
+   "message": "The formula \"${= item.opts.split(',')}\" does not parse: Unexpected \"(\" at 16.",
+   "nodeId": "pdd"
+  },
+  {
+   "op": 32,
+   "code": "unknown_action_key",
+   "path": "/nodes/pdd/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "pdd"
+  },
+  {
+   "op": 33,
+   "code": "unknown_action_key",
+   "path": "/nodes/ptf/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "ptf"
+  },
+  {
+   "op": 34,
+   "code": "unknown_action_key",
+   "path": "/nodes/pcb/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "pcb"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addRow/children/0",
+   "message": "Child \"a1\" of \"addRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addRow/children/1",
+   "message": "Child \"a2\" of \"addRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addRow/children/2",
+   "message": "Child \"a3\" of \"addRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addRow2/children/0",
+   "message": "Child \"a4\" of \"addRow2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addRow2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addRow2/children/1",
+   "message": "Child \"a5\" of \"addRow2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addRow2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addRow2/children/2",
+   "message": "Child \"a6\" of \"addRow2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addRow2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fcard/children/1",
+   "message": "Child \"flabel\" of \"fcard\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fcard"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fcard/children/2",
+   "message": "Child \"fopts\" of \"fcard\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fcard"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fhead/children/2",
+   "message": "Child \"freq\" of \"fhead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fhead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fhead/children/3",
+   "message": "Child \"fup\" of \"fhead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fhead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fhead/children/4",
+   "message": "Child \"fdown\" of \"fhead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fhead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fhead/children/5",
+   "message": "Child \"fdel\" of \"fhead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fhead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/pitem/children/1",
+   "message": "Child \"pdd\" of \"pitem\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "pitem"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/pitem/children/2",
+   "message": "Child \"ptf\" of \"pitem\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "pitem"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/pitem/children/3",
+   "message": "Child \"pcb\" of \"pitem\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "pitem"
+  }
+ ],
+ "nodes": 20,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 4,
+  "max": 24
+ },
+ "frames": 179,
+ "frameMs": 155,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 900,
+ "pumpMsMedian": 0.115,
+ "renderExceptions": [],
+ "warnings": 13
+}

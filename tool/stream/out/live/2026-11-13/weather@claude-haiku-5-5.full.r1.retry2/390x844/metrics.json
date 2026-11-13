@@ -1,0 +1,68 @@
+{
+ "stream": "weather@claude-haiku-5-5.full.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 440,
+ "timeToFirstPaintMs": 1112,
+ "timeToFirstTextMs": 1112,
+ "timeToFirstSectionMs": 1112,
+ "timeToCompleteMs": 1524,
+ "outputTokens": 411,
+ "tokensEstimated": false,
+ "chars": 789,
+ "deltas": 51,
+ "opsApplied": 2,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": [
+     "alert_before_rain"
+    ]
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 56,
+   "rejected": 2
+  },
+  {
+   "stream": "retry",
+   "applied": 1,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [],
+ "nodes": 56,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 2,
+  "p90": 2,
+  "max": 2
+ },
+ "frames": 36,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 3,
+ "pumps": 88,
+ "pumpMsMedian": 0.137,
+ "renderExceptions": [],
+ "warnings": 0
+}

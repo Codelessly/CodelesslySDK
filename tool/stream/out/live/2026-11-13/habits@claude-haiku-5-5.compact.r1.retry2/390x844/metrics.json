@@ -1,0 +1,66 @@
+{
+ "stream": "habits@claude-haiku-5-5.compact.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 413,
+ "timeToFirstPaintMs": 799,
+ "timeToFirstTextMs": 799,
+ "timeToFirstSectionMs": 799,
+ "timeToCompleteMs": 1777,
+ "outputTokens": 525,
+ "tokensEstimated": false,
+ "chars": 970,
+ "deltas": 65,
+ "opsApplied": 3,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 23,
+   "rejected": 8
+  },
+  {
+   "stream": "retry",
+   "applied": 7,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 3,
+ "rejections": [],
+ "nodes": 30,
+ "reappliedBoxesPerOp": {
+  "min": 3,
+  "median": 6,
+  "p90": 6,
+  "max": 6
+ },
+ "frames": 40,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 106,
+ "pumpMsMedian": 0.134,
+ "renderExceptions": [],
+ "warnings": 0
+}

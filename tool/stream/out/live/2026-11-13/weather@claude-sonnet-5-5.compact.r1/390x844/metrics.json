@@ -1,0 +1,56 @@
+{
+ "stream": "weather@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1033,
+ "timeToFirstPaintMs": 4779,
+ "timeToFirstTextMs": 6051,
+ "timeToFirstSectionMs": 6051,
+ "timeToCompleteMs": 16776,
+ "outputTokens": 3165,
+ "tokensEstimated": false,
+ "chars": 5981,
+ "deltas": 432,
+ "opsApplied": 29,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": [
+     "rainAlert"
+    ]
+   }
+  ]
+ },
+ "streamedOps": 29,
+ "rejections": [],
+ "nodes": 27,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 9,
+  "max": 21
+ },
+ "frames": 180,
+ "frameMs": 98,
+ "pumpsOverBudget16ms": 12,
+ "pumps": 613,
+ "pumpMsMedian": 0.146,
+ "renderExceptions": [],
+ "warnings": 2
+}

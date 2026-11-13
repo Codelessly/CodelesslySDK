@@ -1,0 +1,10 @@
+{"meta":{"ui":"sudoku","kind":"app","model":"claude-opus-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["sudoku@claude-opus-5-5.compact.r1.jsonl","sudoku@claude-opus-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":99,"usage":{"inputTokens":10392,"outputTokens":99,"cacheReadInputTokens":7786,"cacheCreationInputTokens":0,"ttftMs":599,"firstToolDeltaMs":648,"totalMs":1089,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":599,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":1,"errors":["dangling_child /nodes/body/children/3"],"lints":[],"warnings":1,"nodes":20,"scripts":6,"scriptChars":2238},"assets":null}}
+{"tMs":648,"delta":"{\"ops\": [{"}
+{"tMs":848,"delta":"\"op\": \"move\", \"id"}
+{"tMs":848,"delta":"\": \"gridFrame\","}
+{"tMs":848,"delta":" \"parent\": \"body\", \""}
+{"tMs":848,"delta":"index\": 2}, {\""}
+{"tMs":898,"delta":"op\": \"remove\", \""}
+{"tMs":948,"delta":"ids\": [\"grid\"]"}
+{"tMs":998,"delta":"}]"}
+{"tMs":1088,"delta":"}"}

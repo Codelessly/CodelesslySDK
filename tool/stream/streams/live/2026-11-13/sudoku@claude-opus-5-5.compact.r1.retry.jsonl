@@ -1,0 +1,37 @@
+{"meta":{"ui":"sudoku","kind":"app","model":"claude-opus-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["sudoku@claude-opus-5-5.compact.r1.jsonl"],"source":"live","outputTokens":319,"usage":{"inputTokens":9549,"outputTokens":319,"cacheReadInputTokens":7786,"cacheCreationInputTokens":0,"ttftMs":993,"firstToolDeltaMs":1096,"totalMs":2889,"stopReason":"StopReason.toolUse"},"text":"Wrap grid in a decorated column.","ttftMs":993,"check":{"ops":3,"opsApplied":2,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":1,"errors":["structural_key_in_patch /nodes/body/children","dangling_child /nodes/body/children/2"],"lints":[],"warnings":1,"nodes":20,"scripts":6,"scriptChars":2238},"assets":null}}
+{"tMs":1096,"delta":"{\"ops\": [{\"op\":\"set\",\""}
+{"tMs":1146,"delta":"id\":\"g"}
+{"tMs":1195,"delta":"ridFrame\",\"node\":{"}
+{"tMs":1361,"delta":"\"type\":\"column\",\"children\":"}
+{"tMs":1361,"delta":"[\"g"}
+{"tMs":1361,"delta":"ridIn"}
+{"tMs":1392,"delta":"ner\"],\"layout\":{"}
+{"tMs":1443,"delta":"\"width\":360,\"height\":"}
+{"tMs":1494,"delta":"360,\"padding\":2},"}
+{"tMs":1545,"delta":"\"decoration\":{\"f"}
+{"tMs":1595,"delta":"ills\":[{\"color\":\""}
+{"tMs":1648,"delta":"#FF334155\"}],"}
+{"tMs":1696,"delta":"\"radius\":6,\"cl"}
+{"tMs":1746,"delta":"ip\":\"antiAlias"}
+{"tMs":1800,"delta":"\"}}},{\"op\":"}
+{"tMs":1847,"delta":"\"set\",\"id\":\"g"}
+{"tMs":1897,"delta":"ridInner\",\"node\":{\""}
+{"tMs":1947,"delta":"type\":\"gridView\",\"children"}
+{"tMs":1998,"delta":"\":[\"cell\"],\"lay"}
+{"tMs":2048,"delta":"out\":{\"width\":356"}
+{"tMs":2099,"delta":",\"height\":356},\"props"}
+{"tMs":2148,"delta":"\":{\"crossAxis"}
+{"tMs":2198,"delta":"Count\":9,\"main"}
+{"tMs":2251,"delta":"AxisSpacing\":"}
+{"tMs":2299,"delta":"1,\"crossAxis"}
+{"tMs":2349,"delta":"Spacing\":1,\""}
+{"tMs":2399,"delta":"childAspectRatio\":"}
+{"tMs":2449,"delta":"1},\"bind\":{\""}
+{"tMs":2499,"delta":"data\":\"${cells}\""}
+{"tMs":2549,"delta":"}}},{\"op\":\""}
+{"tMs":2601,"delta":"patch\",\"id\":\"body\",\""}
+{"tMs":2650,"delta":"patch\":{\"children\":[\""}
+{"tMs":2700,"delta":"head\",\"status\",\"gridFr"}
+{"tMs":2750,"delta":"ame\",\"tools\",\"pad\""}
+{"tMs":2799,"delta":"]}}]"}
+{"tMs":2888,"delta":"}"}

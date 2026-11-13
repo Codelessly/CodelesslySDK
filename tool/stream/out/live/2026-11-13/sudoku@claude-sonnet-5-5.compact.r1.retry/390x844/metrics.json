@@ -1,0 +1,97 @@
+{
+ "stream": "sudoku@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1793,
+ "timeToFirstPaintMs": 3148,
+ "timeToFirstTextMs": 3148,
+ "timeToFirstSectionMs": 3148,
+ "timeToCompleteMs": 4850,
+ "outputTokens": 664,
+ "tokensEstimated": false,
+ "chars": 1161,
+ "deltas": 81,
+ "opsApplied": 7,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 3,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "dangling_child /nodes/main/children/4",
+  "dangling_child /nodes/head/children/1",
+  "dangling_child /nodes/gridWrap/children/0"
+ ],
+ "scripts": 4,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^5$"
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 14,
+   "rejected": 6
+  }
+ ],
+ "streamedOps": 7,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/4",
+   "message": "Child \"msg\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/head/children/1",
+   "message": "Child \"time\" of \"head\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "head"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/gridWrap/children/0",
+   "message": "Child \"cell\" of \"gridWrap\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "gridWrap"
+  }
+ ],
+ "nodes": 13,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 10,
+  "max": 10
+ },
+ "frames": 86,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 168,
+ "pumpMsMedian": 0.138,
+ "renderExceptions": [],
+ "warnings": 3
+}

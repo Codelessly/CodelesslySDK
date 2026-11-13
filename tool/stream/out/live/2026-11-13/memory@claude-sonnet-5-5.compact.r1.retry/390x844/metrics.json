@@ -1,0 +1,72 @@
+{
+ "stream": "memory@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 2912,
+ "timeToFirstPaintMs": 4582,
+ "timeToFirstTextMs": 4582,
+ "timeToFirstSectionMs": 4582,
+ "timeToCompleteMs": 4585,
+ "outputTokens": 504,
+ "tokensEstimated": false,
+ "chars": 788,
+ "deltas": 54,
+ "opsApplied": 3,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 4,
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     },
+     "settleMs": 1500
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 16,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 3,
+ "rejections": [],
+ "nodes": 15,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 16,
+  "p90": 47,
+  "max": 47
+ },
+ "frames": 82,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 137,
+ "pumpMsMedian": 0.132,
+ "renderExceptions": [],
+ "warnings": 0
+}

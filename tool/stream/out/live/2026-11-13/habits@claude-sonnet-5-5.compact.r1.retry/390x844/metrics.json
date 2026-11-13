@@ -1,0 +1,79 @@
+{
+ "stream": "habits@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1272,
+ "timeToFirstPaintMs": 2675,
+ "timeToFirstTextMs": 2675,
+ "timeToFirstSectionMs": 2675,
+ "timeToCompleteMs": 2740,
+ "outputTokens": 392,
+ "tokensEstimated": false,
+ "chars": 638,
+ "deltas": 40,
+ "opsApplied": 0,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/add/actions/0/actions/0/then/0/value",
+  "dangling_child /nodes/addrow/children/1"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 28,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "expression_syntax",
+   "path": "/nodes/add/actions/0/actions/0/then/0/value",
+   "message": "The formula \"${= habits.concat([{name: newName, days: [0,0,0,0,0,0,0], streak: 0}])}\" does not parse: Unexpected \"(\" at 14.",
+   "nodeId": "add"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addrow/children/1",
+   "message": "Child \"add\" of \"addrow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addrow"
+  }
+ ],
+ "nodes": 26,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 0
+ },
+ "frames": 54,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 95,
+ "pumpMsMedian": 0.144,
+ "renderExceptions": [],
+ "warnings": 0
+}

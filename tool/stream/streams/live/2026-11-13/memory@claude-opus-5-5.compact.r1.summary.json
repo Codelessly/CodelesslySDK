@@ -1,0 +1,59 @@
+{
+ "ui": "memory",
+ "kind": "app",
+ "model": "claude-opus-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 918,
+  "outputTokens": 3343,
+  "cacheReadInputTokens": 15572,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 611,
+  "firstToolDeltaMs": 7096,
+  "totalMs": 26076,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 1575,
+    "outputTokens": 105,
+    "resultChars": 1132
+   }
+  ],
+  "ops": 16,
+  "opsApplied": 16,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 1,
+  "nodes": 13,
+  "scripts": 3,
+  "scriptChars": 1078
+ },
+ "retries": [],
+ "final": {
+  "ops": 16,
+  "opsApplied": 16,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 1,
+  "nodes": 13,
+  "scripts": 3,
+  "scriptChars": 1078
+ }
+}

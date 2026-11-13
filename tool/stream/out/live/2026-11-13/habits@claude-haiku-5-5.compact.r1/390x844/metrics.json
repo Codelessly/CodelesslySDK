@@ -1,0 +1,247 @@
+{
+ "stream": "habits@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 442,
+ "timeToFirstPaintMs": 1959,
+ "timeToFirstTextMs": 1959,
+ "timeToFirstSectionMs": 4368,
+ "timeToCompleteMs": 11085,
+ "outputTokens": 3766,
+ "tokensEstimated": false,
+ "chars": 7493,
+ "deltas": 520,
+ "opsApplied": 23,
+ "opsRejected": 8,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 8,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/ringBar/props/value",
+  "unknown_action_key /nodes/d0/actions/0/actions/0/target",
+  "unknown_action_key /nodes/d0/actions/0/actions/0/value",
+  "unknown_action_key /nodes/d1/actions/0/actions/0/target",
+  "unknown_action_key /nodes/d1/actions/0/actions/0/value",
+  "unknown_action_key /nodes/d2/actions/0/actions/0/target",
+  "unknown_action_key /nodes/d2/actions/0/actions/0/value",
+  "unknown_action_key /nodes/d3/actions/0/actions/0/target",
+  "unknown_action_key /nodes/d3/actions/0/actions/0/value",
+  "unknown_action_key /nodes/d4/actions/0/actions/0/target",
+  "unknown_action_key /nodes/d4/actions/0/actions/0/value",
+  "unknown_action_key /nodes/d5/actions/0/actions/0/target",
+  "unknown_action_key /nodes/d5/actions/0/actions/0/value",
+  "unknown_action_key /nodes/d6/actions/0/actions/0/target",
+  "unknown_action_key /nodes/d6/actions/0/actions/0/value",
+  "dangling_child /nodes/habitRow/children/1",
+  "dangling_child /nodes/habitRow/children/2",
+  "dangling_child /nodes/habitRow/children/3",
+  "dangling_child /nodes/habitRow/children/4",
+  "dangling_child /nodes/habitRow/children/5",
+  "dangling_child /nodes/habitRow/children/6",
+  "dangling_child /nodes/habitRow/children/7",
+  "dangling_child /nodes/ring/children/0"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 31,
+ "rejections": [
+  {
+   "op": 18,
+   "code": "wrong_type",
+   "path": "/nodes/ringBar/props/value",
+   "message": "Expected a number, got the text \"${item.progress}\" (to compute it, put the expression in \"bind\").",
+   "nodeId": "ringBar"
+  },
+  {
+   "op": 21,
+   "code": "unknown_action_key",
+   "path": "/nodes/d0/actions/0/actions/0/target",
+   "message": "A setValue action has no \"target\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d0"
+  },
+  {
+   "op": 21,
+   "code": "unknown_action_key",
+   "path": "/nodes/d0/actions/0/actions/0/value",
+   "message": "A setValue action has no \"value\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d0",
+   "suggestion": "values"
+  },
+  {
+   "op": 22,
+   "code": "unknown_action_key",
+   "path": "/nodes/d1/actions/0/actions/0/target",
+   "message": "A setValue action has no \"target\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d1"
+  },
+  {
+   "op": 22,
+   "code": "unknown_action_key",
+   "path": "/nodes/d1/actions/0/actions/0/value",
+   "message": "A setValue action has no \"value\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d1",
+   "suggestion": "values"
+  },
+  {
+   "op": 23,
+   "code": "unknown_action_key",
+   "path": "/nodes/d2/actions/0/actions/0/target",
+   "message": "A setValue action has no \"target\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d2"
+  },
+  {
+   "op": 23,
+   "code": "unknown_action_key",
+   "path": "/nodes/d2/actions/0/actions/0/value",
+   "message": "A setValue action has no \"value\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d2",
+   "suggestion": "values"
+  },
+  {
+   "op": 24,
+   "code": "unknown_action_key",
+   "path": "/nodes/d3/actions/0/actions/0/target",
+   "message": "A setValue action has no \"target\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d3"
+  },
+  {
+   "op": 24,
+   "code": "unknown_action_key",
+   "path": "/nodes/d3/actions/0/actions/0/value",
+   "message": "A setValue action has no \"value\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d3",
+   "suggestion": "values"
+  },
+  {
+   "op": 25,
+   "code": "unknown_action_key",
+   "path": "/nodes/d4/actions/0/actions/0/target",
+   "message": "A setValue action has no \"target\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d4"
+  },
+  {
+   "op": 25,
+   "code": "unknown_action_key",
+   "path": "/nodes/d4/actions/0/actions/0/value",
+   "message": "A setValue action has no \"value\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d4",
+   "suggestion": "values"
+  },
+  {
+   "op": 26,
+   "code": "unknown_action_key",
+   "path": "/nodes/d5/actions/0/actions/0/target",
+   "message": "A setValue action has no \"target\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d5"
+  },
+  {
+   "op": 26,
+   "code": "unknown_action_key",
+   "path": "/nodes/d5/actions/0/actions/0/value",
+   "message": "A setValue action has no \"value\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d5",
+   "suggestion": "values"
+  },
+  {
+   "op": 27,
+   "code": "unknown_action_key",
+   "path": "/nodes/d6/actions/0/actions/0/target",
+   "message": "A setValue action has no \"target\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d6"
+  },
+  {
+   "op": 27,
+   "code": "unknown_action_key",
+   "path": "/nodes/d6/actions/0/actions/0/value",
+   "message": "A setValue action has no \"value\". It takes: node, values (and enabled, nonBlocking, when).",
+   "nodeId": "d6",
+   "suggestion": "values"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/habitRow/children/1",
+   "message": "Child \"d0\" of \"habitRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "habitRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/habitRow/children/2",
+   "message": "Child \"d1\" of \"habitRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "habitRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/habitRow/children/3",
+   "message": "Child \"d2\" of \"habitRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "habitRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/habitRow/children/4",
+   "message": "Child \"d3\" of \"habitRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "habitRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/habitRow/children/5",
+   "message": "Child \"d4\" of \"habitRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "habitRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/habitRow/children/6",
+   "message": "Child \"d5\" of \"habitRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "habitRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/habitRow/children/7",
+   "message": "Child \"d6\" of \"habitRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "habitRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/ring/children/0",
+   "message": "Child \"ringBar\" of \"ring\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "ring"
+  }
+ ],
+ "nodes": 21,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 6,
+  "max": 43
+ },
+ "frames": 178,
+ "frameMs": 67,
+ "pumpsOverBudget16ms": 8,
+ "pumps": 699,
+ "pumpMsMedian": 0.124,
+ "renderExceptions": [],
+ "warnings": 0
+}
