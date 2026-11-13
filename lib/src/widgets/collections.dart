@@ -15,9 +15,10 @@ import 'package:flutter/rendering.dart';
 import '../render/convert.dart';
 import '../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../render/layout/fit_box.dart';
+import '../render/layout/list_measure.dart';
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
-import '../runtime/expressions/bindings.dart' show ProvidedItem;
+import '../runtime/expressions/bindings.dart' show ProvidedItem, RenderTreeBinder;
 import 'collections_data_list.dart';
 import 'collections_islands.dart';
 import 'collections_list_runtime.dart';
@@ -149,21 +150,8 @@ bool _blocksIntrinsics(NodeBuilder b, Node node) {
   return false;
 }
 
-bool _knownCount(Node n) => _itemCount(n) != null;
-
 /// The list flows its items onto runs (a Wrap); only a plain list layout does.
-bool _wraps(Node n) => n.prop(ListViewProps.wrap) && n.prop(ListViewProps.layout) == api.ListLayout.list;
-
-/// Whether the list lays every item out in a Flex (or
-/// a Wrap) rather than a viewport, so it can be measured.
-bool listBuildsAllItems(Node n) {
-  if (_wraps(n)) return true;
-  final stretchesHuggedCross =
-      n.prop(ListViewProps.stretchItems) &&
-      n.prop(ListViewProps.layout) == api.ListLayout.list &&
-      n.crossFit == SizeFit.hug;
-  return !n.prop(ListViewProps.scrollable) && (n.mainFit == SizeFit.hug || stretchesHuggedCross) && _knownCount(n);
-}
+bool _wraps(Node n) => listWraps(n);
 
 /// A list item's extent along the list when the list sets it: its fixed
 /// item extent, or the design extent of an item that fills.

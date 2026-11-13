@@ -10,8 +10,11 @@ import 'package:codelessly_api/codelessly_api.dart'
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart' show TextStyle;
 
+import '../../render/contracts.dart';
 import '../../render/convert.dart' as convert;
+import '../../render/node_tree.dart' show RenderTree;
 import '../../render/source.dart' show NodeSource;
+import '../actions/variable_animator.dart';
 import '../contracts.dart';
 import 'engine.dart';
 import 'formula_clock.dart';
@@ -19,6 +22,9 @@ import 'node_scopes.dart';
 import 'paths.dart';
 import 'preview.dart';
 import 'scopes.dart';
+import 'variable_writes.dart';
+
+export '../../render/contracts.dart' show BoundNode;
 
 /// The instance of a repeated box whose item its widget gives itself
 /// ([NodeBinder.provideItem]): repeat [key] (a row's item key, a section, a
@@ -210,26 +216,6 @@ final class ConditionTarget {
   }
 }
 
-/// A node as shown: its bound values applied.
-@immutable
-final class BoundNode {
-  const BoundNode(this.node, {this.collapsed = false, this.watch = const [], this.states = const {}});
-
-  final Node node;
-
-  /// Interaction states its bindings or conditions turn on or off
-  /// (`selected`, `disabled`); the node tree holds them as it holds hover.
-  final Map<api.WidgetState, bool> states;
-
-  /// Hidden by a binding or condition: takes no space (Flutter's
-  /// `Visibility` without `maintainSize`). A node hidden in its own data
-  /// keeps its space.
-  final bool collapsed;
-
-  /// What tells the node it may show differently: one per name it read.
-  final List<Listenable> watch;
-}
-
 /// Applies bindings, conditions and text interpolation to the nodes of a
 /// node tree (from its [NodeSource]), reading from [scope] (a screen's variables, with the app's
 /// values around them) and, inside data-bound lists, from each item's
@@ -238,7 +224,10 @@ final class BoundNode {
 /// [preview] is a design canvas: a text's `${...}` shows the value the
 /// [scope] (the variables' defaults, if the editor gives one) has, else a
 /// placeholder (`${user.name}` shows "Name"); nothing ticks.
-class NodeBinder {
+///
+/// It is the runtime's [TreeBindings]: what a [RenderTree] takes its nodes
+/// as shown from, and its render objects their values.
+class NodeBinder implements TreeBindings {
   NodeBinder({
     this.scope,
     this.scopeOf,
@@ -268,7 +257,21 @@ class NodeBinder {
   /// Replaces the conditions (an edit); the tree re-applies its boxes.
   set logic(LayoutLogic logic) => _conditions = ConditionIndex(logic);
 
+  @override
+  bool get hasValues => scope != null;
+
+  @override
+  BoundValues? valuesFor(NodeSource source, String id, Object? instance) {
+    final s = scopeFor(source, id, instance);
+    return s == null ? null : _ScopeValues(s, engine);
+  }
+
+  @override
+  void publish(NodeSource source, String id, Object? instance, String name, Object? value) =>
+      nodeScope(source, id, instance: instance)?.update(name, value);
+
   /// [node] (in repeat [instance]) as shown.
+  @override
   BoundNode bind(NodeSource source, Node node, Object? instance) {
     final b = NodeBindings.of(node);
     final targets = _conditions.byNode[node.id] ?? const [];
@@ -628,6 +631,61 @@ class NodeBinder {
     _nodeScopes.clear();
     _provided.clear();
   }
+}
+
+/// The binder a tree was given, when it is the runtime's.
+extension RenderTreeBinder on RenderTree {
+  /// Applies the nodes' bindings (variables, conditions, `${...}` text) when
+  /// set; null renders the nodes as stored. Setting it re-applies every box.
+  NodeBinder? get binder {
+    final b = bindings;
+    return b is NodeBinder ? b : null;
+  }
+
+  set binder(NodeBinder? value) => bindings = value;
+}
+
+/// A [ValueScope] as the values a node's render objects read and write.
+final class _ScopeValues implements BoundValues {
+  const _ScopeValues(this.scope, this.engine);
+
+  final ValueScope scope;
+  final Expressions engine;
+
+  @override
+  Object? read(String path) => readPath(scope, path);
+
+  @override
+  Listenable? watch(String path) => watchName(scope, rootOf(path));
+
+  @override
+  BoundVariable? variable(String path) {
+    final found = variableOf(scope, path);
+    return found == null ? null : _ScopeVariable(found.$1, found.$2, rootOf(path));
+  }
+
+  @override
+  bool write(String path, Object? value) => setVariableIn(scope, path, value);
+
+  @override
+  String interpolate(String text) => engine.interpolate(text, scope);
+}
+
+final class _ScopeVariable implements BoundVariable {
+  const _ScopeVariable(this.scope, this.variable, this.name);
+
+  final VariableScope scope;
+  final api.Variable variable;
+  final String name;
+
+  @override
+  bool get isComputed => variable.isComputed;
+
+  @override
+  bool get isInteger => variable.type == api.VariableType.integer;
+
+  @override
+  void pauseAnimation() => VariableAnimator.pause(scope, name);
 }
 
 /// [text] with [f] applied to each styled run (and the plain text between

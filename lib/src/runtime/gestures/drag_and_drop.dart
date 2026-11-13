@@ -42,6 +42,7 @@ import '../../render/node_tree.dart';
 import '../../render/play.dart' show FlightRegistry;
 import '../../render/source.dart';
 import '../contracts.dart';
+import '../expressions/bindings.dart' show RenderTreeBinder;
 import '../expressions/formula.dart' show FormulaEvaluator;
 import '../expressions/scopes.dart';
 import 'drag_motion.dart' show DragValues;
@@ -198,12 +199,12 @@ final Map<String, Object?> dragIdleValues = Map.unmodifiable({...DragValues.rest
 class DragAndDrop extends ChangeNotifier {
   DragAndDrop._(this.tree);
 
-  final NodeTree tree;
+  final RenderTree tree;
 
   static final Expando<DragAndDrop> _of = Expando('DragAndDrop');
 
   /// [tree]'s drag and drop.
-  static DragAndDrop of(NodeTree tree) => _of[tree] ??= DragAndDrop._(tree);
+  static DragAndDrop of(RenderTree tree) => _of[tree] ??= DragAndDrop._(tree);
 
   /// The value of `${drag}`'s session keys when nothing is being dragged.
   static const Map<String, Object?> idle = {
@@ -354,7 +355,7 @@ class DropSlotSpec {
 ///
 /// A list repeated in several copies (each column of a board has its card
 /// list) gives its [instance]: only the copy the target names opens it.
-DropSlotSpec? dropSlotOf(NodeTree tree, String listNodeId, {Object? instance}) {
+DropSlotSpec? dropSlotOf(RenderTree tree, String listNodeId, {Object? instance}) {
   final session = DragAndDrop.of(tree).session;
   final target = session?.overTarget;
   if (session == null || target == null) return null;
@@ -381,11 +382,18 @@ DropSlotSpec? dropSlotOf(NodeTree tree, String listNodeId, {Object? instance}) {
 /// shown even though it's designed hidden where it sits. A list holds one
 /// while it shows the slot and [dispose]s it when done.
 class DropSlotNode {
-  DropSlotNode(NodeTree tree, this.id)
-    : _tree = NodeTree(_FeedbackSource(tree.source, rootId: id, reveal: true), binder: tree.binder, recipes: tree.recipes);
+  DropSlotNode(RenderTree tree, this.id)
+    : _tree = RenderTree(
+        _FeedbackSource(tree.source, rootId: id, reveal: true),
+        binder: tree.bindings,
+        recipes: tree.recipes,
+        catalog: tree.catalog,
+        gestures: tree.gestures,
+        imageLoader: tree.imageLoader,
+      );
 
   final String id;
-  final NodeTree _tree;
+  final RenderTree _tree;
 
   /// The slot node's box.
   late final NodeBox box = _tree.obtain(id, const Slot.root());
@@ -613,7 +621,7 @@ class _SourceDrag implements Drag {
 
   // --- feedback ------------------------------------------------------------
 
-  NodeTree? _feedbackTree;
+  RenderTree? _feedbackTree;
   RenderBox? _overlayBox;
 
   void _placeFeedback() {
@@ -636,11 +644,14 @@ class _SourceDrag implements Drag {
     final rootId = feedbackId.isEmpty ? box.id : feedbackId;
     // A tree of its own over the same nodes and bindings: what the node
     // reads where it is (its list item) it reads in the overlay too.
-    final tree = _feedbackTree = NodeTree(
+    final tree = _feedbackTree = RenderTree(
       _FeedbackSource(box.tree.source, rootId: rootId, under: feedbackId.isEmpty ? null : box.id),
-      binder: box.tree.binder,
+      binder: box.tree.bindings,
       environment: const IslandEnvironment(interactive: true),
       recipes: box.tree.recipes,
+      catalog: box.tree.catalog,
+      gestures: box.tree.gestures,
+      imageLoader: box.tree.imageLoader,
     );
     final size = feedbackId.isEmpty ? source.size : (source._feedbackSize ?? source.size);
     // A feedback node of its own that hugs its content on an axis (a chip
@@ -754,7 +765,7 @@ class _FeedbackSource implements NodeSource {
 class _NodeInstanceView extends RenderObjectWidget {
   const _NodeInstanceView({required this.tree, required this.id, required this.instance});
 
-  final NodeTree tree;
+  final RenderTree tree;
   final String id;
   final Object? instance;
 

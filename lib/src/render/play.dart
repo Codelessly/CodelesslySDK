@@ -12,7 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'behaviors.dart' show RenderPose;
-import 'node_tree.dart' show NodeBox, NodeTree;
+import 'node_tree.dart' show NodeBox, RenderTree;
 import 'recipe.dart';
 import 'particles.dart';
 
@@ -328,8 +328,8 @@ abstract final class FlightRegistry {
   /// Whether a tree's screen is on its way out (its route closing): a
   /// holder there is as good as gone, so a picked emoji flies from a
   /// popover while it fades. Set by the runtime that knows the routes.
-  static bool Function(NodeTree tree) leaving = _never;
-  static bool _never(NodeTree tree) => false;
+  static bool Function(RenderTree tree) leaving = _never;
+  static bool _never(RenderTree tree) => false;
 
   /// A dragged copy with [key] was let go at [rect] (global): the node that
   /// shows the drop next flies from there.
