@@ -1,0 +1,1037 @@
+{
+ "schema": 2,
+ "roots": [
+  "contact"
+ ],
+ "nodes": {
+  "c-logo-mark": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF4F46E5"
+       },
+       {
+        "position": 1,
+        "color": "#FFEC4899"
+       }
+      ]
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "c-logo-text": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Lumen",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "fontWeight": 800,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "c-logo": {
+   "type": "row",
+   "children": [
+    "c-logo-mark",
+    "c-logo-text"
+   ],
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "spacing": 10
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "navigate",
+       "to": "m-home"
+      }
+     ]
+    }
+   ]
+  },
+  "c-back-t": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "\u2190 Back to home",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "c-back": {
+   "type": "row",
+   "children": [
+    "c-back-t"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     8,
+     8,
+     8,
+     8
+    ]
+   },
+   "states": {
+    "hovered": {
+     "c-back-t": {
+      "props": {
+       "style": {
+        "color": "#FF0F172A"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "navigate",
+       "to": "m-home"
+      }
+     ]
+    }
+   ]
+  },
+  "c-header": {
+   "type": "row",
+   "children": [
+    "c-logo",
+    "c-back"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     0,
+     16,
+     0,
+     16
+    ],
+    "constraints": {
+     "maxWidth": 1100
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "c-submit-label": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Send message",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "c-submit": {
+   "type": "row",
+   "children": [
+    "c-submit-label"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 44
+    },
+    "padding": [
+     20,
+     12,
+     20,
+     12
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF4F46E5"
+     }
+    ],
+    "radius": 10
+   },
+   "states": {
+    "hovered": {
+     "c-submit": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FF4338CA"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "c-submit": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tried",
+       "value": "true"
+      },
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (length(trim(name)) > 0) && (matches(trim(email), '^[^@ ]+@[^@ ]+[.][^@ ]+$')) && (length(trim(message)) >= 10)}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "sent",
+         "value": "true"
+        },
+        {
+         "type": "showToast",
+         "message": "Message sent",
+         "style": "success"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "c-title": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Talk to us",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 32,
+     "fontWeight": 800,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "c-sub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${= route.plan == null ? \"Tell us what you are building and we will get back to you within a day.\" : \"You picked the \" + route.plan + \" plan. Tell us about your team and we will set up your trial.\"}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 400,
+     "color": "#FF475569",
+     "height": 1.5
+    }
+   }
+  },
+  "c-name": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": 56
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Your name",
+     "hintText": "Ada Lovelace",
+     "filled": true,
+     "fillColor": "#FFFFFFFF",
+     "border": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FFE2E8F0"
+      }
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FFE2E8F0"
+      }
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FF4F46E5",
+       "width": 2
+      }
+     },
+     "labelStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 15,
+      "fontWeight": 400,
+      "color": "#FF475569"
+     },
+     "contentPadding": [
+      14,
+      16,
+      14,
+      16
+     ]
+    },
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 400,
+     "color": "#FF0F172A"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "c-name-error": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Please enter your name.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FFDC2626"
+    }
+   },
+   "bind": {
+    "visible": "${= tried && !(length(trim(name)) > 0)}"
+   }
+  },
+  "c-name-group": {
+   "type": "column",
+   "children": [
+    "c-name",
+    "c-name-error"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "c-email": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": 56
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Work email",
+     "hintText": "ada@company.com",
+     "filled": true,
+     "fillColor": "#FFFFFFFF",
+     "border": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FFE2E8F0"
+      }
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FFE2E8F0"
+      }
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FF4F46E5",
+       "width": 2
+      }
+     },
+     "labelStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 15,
+      "fontWeight": 400,
+      "color": "#FF475569"
+     },
+     "contentPadding": [
+      14,
+      16,
+      14,
+      16
+     ]
+    },
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 400,
+     "color": "#FF0F172A"
+    },
+    "keyboardType": "emailAddress"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "c-email-error": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Enter a valid email address, like name@company.com.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FFDC2626"
+    }
+   },
+   "bind": {
+    "visible": "${= tried && !(matches(trim(email), '^[^@ ]+@[^@ ]+[.][^@ ]+$'))}"
+   }
+  },
+  "c-email-group": {
+   "type": "column",
+   "children": [
+    "c-email",
+    "c-email-error"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "c-message": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": 140
+   },
+   "props": {
+    "decoration": {
+     "labelText": "How can we help?",
+     "hintText": "A few words about your project",
+     "filled": true,
+     "fillColor": "#FFFFFFFF",
+     "border": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FFE2E8F0"
+      }
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FFE2E8F0"
+      }
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderRadius": 10,
+      "borderSide": {
+       "color": "#FF4F46E5",
+       "width": 2
+      }
+     },
+     "labelStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 15,
+      "fontWeight": 400,
+      "color": "#FF475569"
+     },
+     "contentPadding": [
+      14,
+      16,
+      14,
+      16
+     ]
+    },
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 400,
+     "color": "#FF0F172A"
+    },
+    "maxLines": 5,
+    "minLines": 5,
+    "keyboardType": "multiline"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "message",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "c-message-error": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Tell us a little more (at least 10 characters).",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FFDC2626"
+    }
+   },
+   "bind": {
+    "visible": "${= tried && !(length(trim(message)) >= 10)}"
+   }
+  },
+  "c-message-group": {
+   "type": "column",
+   "children": [
+    "c-message",
+    "c-message-error"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "c-form": {
+   "type": "column",
+   "children": [
+    "c-title",
+    "c-sub",
+    "c-name-group",
+    "c-email-group",
+    "c-message-group",
+    "c-submit"
+   ],
+   "layout": {
+    "width": {
+     "fill": 560
+    },
+    "height": {
+     "hug": 600
+    },
+    "padding": 32,
+    "constraints": {
+     "maxWidth": 560
+    }
+   },
+   "props": {
+    "spacing": 18,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 20,
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#140F172A",
+      "offset": [
+       0,
+       16
+      ],
+      "blurRadius": 40
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "c-thanks-icon": {
+   "type": "icon",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "icon": "check_circle",
+    "color": "#FF16A34A"
+   }
+  },
+  "c-thanks-icon-bg": {
+   "type": "row",
+   "children": [
+    "c-thanks-icon"
+   ],
+   "layout": {
+    "width": 56,
+    "height": 56
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDCFCE7"
+     }
+    ],
+    "radius": 28
+   }
+  },
+  "c-thanks-title": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Thanks, ${name}!",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 26,
+     "fontWeight": 800,
+     "color": "#FF0F172A"
+    },
+    "textAlign": "center"
+   }
+  },
+  "c-thanks-body": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "We got your message and will reply to ${email} within one business day.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 400,
+     "color": "#FF475569",
+     "height": 1.5
+    },
+    "textAlign": "center"
+   }
+  },
+  "c-thanks-home-label": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Back to home",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "c-thanks-home": {
+   "type": "row",
+   "children": [
+    "c-thanks-home-label"
+   ],
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 44
+    },
+    "padding": [
+     20,
+     12,
+     20,
+     12
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 10,
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "c-thanks-home": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFF1F5F9"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "c-thanks-home": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "navigate",
+       "to": "m-home"
+      }
+     ]
+    }
+   ]
+  },
+  "c-thanks": {
+   "type": "column",
+   "children": [
+    "c-thanks-icon-bg",
+    "c-thanks-title",
+    "c-thanks-body",
+    "c-thanks-home"
+   ],
+   "layout": {
+    "width": {
+     "fill": 560
+    },
+    "height": {
+     "hug": 300
+    },
+    "padding": 40,
+    "constraints": {
+     "maxWidth": 560
+    }
+   },
+   "props": {
+    "spacing": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 20,
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${sent}"
+   }
+  },
+  "c-header-band": {
+   "type": "column",
+   "children": [
+    "c-header"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1000
+    },
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE2E8F0"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "c-main": {
+   "type": "column",
+   "children": [
+    "c-form",
+    "c-thanks"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1000
+    },
+    "height": {
+     "hug": 700
+    },
+    "padding": [
+     24,
+     48,
+     24,
+     64
+    ]
+   }
+  },
+  "c-body": {
+   "type": "column",
+   "children": [
+    "c-header-band",
+    "c-main"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   },
+   "props": {
+    "scrollable": true
+   }
+  },
+  "contact": {
+   "type": "canvas",
+   "name": "Contact",
+   "path": "contact",
+   "slots": {
+    "body": "c-body"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "contact": [
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "message",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "tried",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
