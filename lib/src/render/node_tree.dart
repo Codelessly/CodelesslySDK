@@ -2141,6 +2141,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final glyph = _obtain<RenderIconGlyph>('glyph', RenderIconGlyph.new)
       ..icon = n.prop(IconProps.icon)
       ..color = n.prop(IconProps.color)?.flutter
+      ..glyphSize = n.prop(IconProps.size)
       ..designSize = n.designSize;
     chain.add(glyph);
   }

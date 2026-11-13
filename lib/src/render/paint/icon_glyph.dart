@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 // An icon, painted at its box's size: Material Icons, Material Symbols and
 // Cupertino icons drawn from their published SVGs, and image icons (SVG or
 // raster).
 import 'package:codelessly_api/core.dart' show Json, readDouble, readInt, readString;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -164,6 +167,27 @@ class RenderIconGlyph extends RenderBox with ImageClient {
     markNeedsLayout();
   }
 
+  /// Flutter's `Icon.size`: the glyph's extent, centred in the box (at
+  /// most the box); null: the glyph fills the box.
+  double? _glyphSize;
+  set glyphSize(double? v) {
+    if (v == _glyphSize) return;
+    _glyphSize = v;
+    markNeedsLayout();
+  }
+
+  /// Where the glyph is drawn within the box at [offset].
+  Rect _glyphRect(Offset offset) {
+    final g = _glyphSize;
+    if (g == null) return offset & size;
+    final w = math.min(g, size.width), h = math.min(g, size.height);
+    return Rect.fromLTWH(offset.dx + (size.width - w) / 2, offset.dy + (size.height - h) / 2, w, h);
+  }
+
+  /// Where the glyph is drawn, in this box's coordinates.
+  @visibleForTesting
+  Rect get glyphRect => _glyphRect(Offset.zero);
+
   @override
   bool get sizedByParent => true;
 
@@ -175,7 +199,17 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   /// The icon box: the size its fit box gives it, nothing of its
   /// own (so a row out of room can squeeze it).
   @override
-  Size computeDryLayout(BoxConstraints constraints) => constraints.smallest;
+  Size computeDryLayout(BoxConstraints constraints) =>
+      _glyphSize == null ? constraints.smallest : constraints.constrain(Size.square(_glyphSize!));
+
+  @override
+  double computeMinIntrinsicWidth(double height) => _glyphSize ?? 0;
+  @override
+  double computeMaxIntrinsicWidth(double height) => _glyphSize ?? 0;
+  @override
+  double computeMinIntrinsicHeight(double width) => _glyphSize ?? 0;
+  @override
+  double computeMaxIntrinsicHeight(double width) => _glyphSize ?? 0;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -186,7 +220,7 @@ class RenderIconGlyph extends RenderBox with ImageClient {
       // Its SVG is loading (or neither version loaded):
       // a Material icon with a codepoint draws that glyph of the bundled
       // MaterialIcons font meanwhile, instead of nothing.
-      _paintGlyph(context.canvas, offset, color);
+      _paintGlyph(context.canvas, _glyphRect(offset), color);
       return;
     }
     final isImage = readString(_icon['source']) == 'image';
@@ -194,7 +228,7 @@ class RenderIconGlyph extends RenderBox with ImageClient {
     final raw = isImage && _color != null && _color!.a == 0;
     paintLoaded(
       context.canvas,
-      offset & size,
+      _glyphRect(offset),
       loaded,
       // SvgPicture contains its picture; Image(Icon)s scale down.
       fit: loaded.isSvg ? BoxFit.contain : BoxFit.scaleDown,
@@ -205,10 +239,12 @@ class RenderIconGlyph extends RenderBox with ImageClient {
 
   /// The font glyph of a Material icon with a `codepoint` (its SVG's
   /// stand-in), filling the box; nothing for other icons.
-  void _paintGlyph(Canvas canvas, Offset offset, Color color) {
+  void _paintGlyph(Canvas canvas, Rect rect, Color color) {
     final codepoint = IconSources.glyphOf(_icon);
-    if (codepoint == null || size.isEmpty) return;
-    final extent = size.shortestSide;
+    if (codepoint == null || rect.isEmpty) return;
+    final extent = rect.shortestSide;
+    final offset = rect.topLeft;
+    final size = rect.size;
     final painter = TextPainter(
       text: TextSpan(
         text: String.fromCharCode(codepoint),
