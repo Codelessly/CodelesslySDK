@@ -1,0 +1,57 @@
+{
+ "stream": "basketball@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 409,
+ "timeToFirstPaintMs": 2581,
+ "timeToFirstTextMs": 2581,
+ "timeToFirstSectionMs": 3118,
+ "timeToCompleteMs": 6933,
+ "outputTokens": 2188,
+ "tokensEstimated": false,
+ "chars": 4508,
+ "deltas": 303,
+ "opsApplied": 18,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 15,
+ "jsonRepairs": 1,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 0,
+      "dy": 140
+     },
+     "settleMs": 2500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 18,
+ "rejections": [],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 4,
+  "max": 13
+ },
+ "frames": 118,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 422,
+ "pumpMsMedian": 0.155,
+ "renderExceptions": [],
+ "warnings": 3
+}

@@ -1,0 +1,93 @@
+{
+ "stream": "form_builder@claude-opus-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 922,
+ "timeToFirstPaintMs": 2168,
+ "timeToFirstTextMs": 2168,
+ "timeToFirstSectionMs": 2168,
+ "timeToCompleteMs": 3607,
+ "outputTokens": 430,
+ "tokensEstimated": false,
+ "chars": 830,
+ "deltas": 53,
+ "opsApplied": 2,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "dangling_child /nodes/prevView/children/1"
+ ],
+ "scripts": 7,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "short text"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "checkbox"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^\\s*submit"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ],
+  "expectText": "required",
+  "textFound": true
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 46,
+   "rejected": 3
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/prevView/children/1",
+   "message": "Child \"pMsg\" of \"prevView\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "prevView"
+  }
+ ],
+ "nodes": 45,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 2,
+  "p90": 2,
+  "max": 2
+ },
+ "frames": 67,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 121,
+ "pumpMsMedian": 0.183,
+ "renderExceptions": [],
+ "warnings": 0
+}

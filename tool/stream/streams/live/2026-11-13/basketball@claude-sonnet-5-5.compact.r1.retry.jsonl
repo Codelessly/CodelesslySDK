@@ -1,0 +1,156 @@
+{"meta":{"ui":"basketball","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["basketball@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":1292,"usage":{"inputTokens":8089,"outputTokens":1292,"cacheReadInputTokens":7785,"cacheCreationInputTokens":0,"ttftMs":1294,"firstToolDeltaMs":1331,"totalMs":6826,"stopReason":"StopReason.toolUse"},"text":"I'll resend the root stack with predicate-object conditions, text values, `arguments` for the script, and a valid clip, and fix the dragzone conditions.","ttftMs":1294,"check":{"ops":3,"opsApplied":2,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":1,"errors":["unknown_id /ops/2/id","dangling_child /nodes/root/children/6"],"lints":[],"warnings":0,"nodes":17,"scripts":1,"scriptChars":739},"assets":null}}
+{"tMs":1331,"delta":"{\"ops\": ["}
+{"tMs":1366,"delta":"{\"op\": \"set\", \""}
+{"tMs":1402,"delta":"id\": \"root\", \"node\":"}
+{"tMs":1437,"delta":" {\"type\": \"stack\","}
+{"tMs":1479,"delta":" \"children\": [\"bg\","}
+{"tMs":1605,"delta":" \"hud\", \"rim\","}
+{"tMs":1606,"delta":" \"board\", \"net\", \""}
+{"tMs":1606,"delta":"ball\", \"dragzone\","}
+{"tMs":1616,"delta":" \"hint\", \"overlay"}
+{"tMs":1651,"delta":"\"], \"layout\": {\""}
+{"tMs":1691,"delta":"width\": 390, \"height\":"}
+{"tMs":1722,"delta":" 760}, \"decoration"}
+{"tMs":1758,"delta":"\": {\"fills\": [{"}
+{"tMs":1794,"delta":"\"type\": \"linear\", \""}
+{"tMs":1829,"delta":"stops\": [{\"position\":"}
+{"tMs":1922,"delta":" 0, \"color\": \"#"}
+{"tMs":1922,"delta":"FF1E3A8A"}
+{"tMs":1936,"delta":"\"}, {\"position\": "}
+{"tMs":1971,"delta":"1, \"color\": \"#F"}
+{"tMs":2007,"delta":"F0F172A\"}]"}
+{"tMs":2042,"delta":"}], \"clip\": \"h"}
+{"tMs":2078,"delta":"ardEdge\"}, \""}
+{"tMs":2113,"delta":"actions\": [{\"trig"}
+{"tMs":2149,"delta":"ger\": {\"type\": \"tim"}
+{"tMs":2184,"delta":"er\", \"intervalMs"}
+{"tMs":2220,"delta":"\": 1000, \"when\":"}
+{"tMs":2259,"delta":" \"${= phase == '"}
+{"tMs":2291,"delta":"play'}\"}, \"act"}
+{"tMs":2326,"delta":"ions\": [{\"type\": \""}
+{"tMs":2363,"delta":"setVariable\", \"variable"}
+{"tMs":2398,"delta":"\": \"time\", \"value\": \""}
+{"tMs":2433,"delta":"${= time - 1}\""}
+{"tMs":2468,"delta":"}, {\"type\": \"if"}
+{"tMs":2504,"delta":"\", \"condition\": {\"left"}
+{"tMs":2539,"delta":"\": \"${time"}
+{"tMs":2575,"delta":"}\", \"op\": \"l"}
+{"tMs":2614,"delta":"essThanOrEqual"}
+{"tMs":2646,"delta":"To\", \"right\": \"0"}
+{"tMs":2681,"delta":"\"}, \"then\": [{"}
+{"tMs":2716,"delta":"\"type\": \"setVariable"}
+{"tMs":2752,"delta":"\", \"variable\": \"phase"}
+{"tMs":2787,"delta":"\", \"value\": \"over\"}"}
+{"tMs":2825,"delta":", {\"type\": \"setV"}
+{"tMs":2858,"delta":"ariable\", \"variable\": \""}
+{"tMs":2896,"delta":"flying\", \"value\": \"false"}
+{"tMs":2930,"delta":"\"}, {\"type\": \""}
+{"tMs":2966,"delta":"setVariable\", \"variable"}
+{"tMs":3001,"delta":"\": \"best\", \"value\": \""}
+{"tMs":3036,"delta":"${= score > best ? score"}
+{"tMs":3084,"delta":" : best}\"}]}]"}
+{"tMs":3107,"delta":"}, {\"trigger\":"}
+{"tMs":3145,"delta":" {\"type\": \"frame\","}
+{"tMs":3178,"delta":" \"when\": \"${= flying"}
+{"tMs":3213,"delta":" && phase == 'play'"}
+{"tMs":3265,"delta":"}\"}, \"actions\":"}
+{"tMs":3284,"delta":" [{\"type\": \"runSc"}
+{"tMs":3320,"delta":"ript\", \"script\": \"step\","}
+{"tMs":3355,"delta":" \"arguments\": {\"d"}
+{"tMs":3391,"delta":"t\": \"${result.dt"}
+{"tMs":3426,"delta":"}\"}}]}]}"}
+{"tMs":3462,"delta":"}, {\"op\": \"set"}
+{"tMs":3511,"delta":"\", \"id\": \"game"}
+{"tMs":3538,"delta":"\", \"node"}
+{"tMs":3576,"delta":"\": {\"type\": \"canv"}
+{"tMs":3610,"delta":"as\", \"slots\": {\""}
+{"tMs":3639,"delta":"body\": \"root\"}, \""}
+{"tMs":3674,"delta":"layout\": {\"width\": "}
+{"tMs":3710,"delta":"390, \"height\": 760}"}
+{"tMs":3745,"delta":"}}, {\"op\": \""}
+{"tMs":3781,"delta":"patch\", \"id\": \"d"}
+{"tMs":3817,"delta":"ragzone\", \"patch\":"}
+{"tMs":3851,"delta":" {\"actions\": [{\""}
+{"tMs":3888,"delta":"trigger\": {\"type\":"}
+{"tMs":3923,"delta":" \"dragStart\"},"}
+{"tMs":3962,"delta":" \"actions\": [{\"type"}
+{"tMs":3994,"delta":"\": \"setVariable\", \""}
+{"tMs":4032,"delta":"variable\": \"aiming\","}
+{"tMs":4065,"delta":" \"value\": \"${= phase"}
+{"tMs":4100,"delta":" == 'play' && !fl"}
+{"tMs":4136,"delta":"ying}\"}]}, {"}
+{"tMs":4171,"delta":"\"trigger\": {\"type"}
+{"tMs":4206,"delta":"\": \"drag\"}, \""}
+{"tMs":4245,"delta":"actions\": [{\"type\":"}
+{"tMs":4286,"delta":" \"if"}
+{"tMs":4313,"delta":"\", \"condition\": {\"left"}
+{"tMs":4348,"delta":"\": \"${aiming}\","}
+{"tMs":4390,"delta":" \"op\": \"equalsT"}
+{"tMs":4419,"delta":"o\", \"right\": \"true\""}
+{"tMs":4454,"delta":"}, \"then\": [{\""}
+{"tMs":4490,"delta":"type\": \"setVariable\","}
+{"tMs":4526,"delta":" \"variable\": \"px\", \""}
+{"tMs":4562,"delta":"value\": \"${= Math."}
+{"tMs":4597,"delta":"max(-70, Math."}
+{"tMs":4632,"delta":"min(0, px + result."}
+{"tMs":4668,"delta":"dx))}\"}, {"}
+{"tMs":4703,"delta":"\"type\": \"setVariable"}
+{"tMs":4738,"delta":"\", \"variable\": \"py\","}
+{"tMs":4779,"delta":" \"value\": \"${= Math"}
+{"tMs":4809,"delta":".max(0, Math."}
+{"tMs":4845,"delta":"min(70, py + result."}
+{"tMs":4880,"delta":"dy))}\"}]}"}
+{"tMs":4920,"delta":"]}, {\"trigger"}
+{"tMs":4951,"delta":"\": {\"type\": \"drag"}
+{"tMs":4987,"delta":"End\"}, \"act"}
+{"tMs":5022,"delta":"ions\": [{\"type\": \""}
+{"tMs":5058,"delta":"if\", \"condition\": {\""}
+{"tMs":5093,"delta":"left\": \"${="}
+{"tMs":5129,"delta":" aiming && (px*px"}
+{"tMs":5164,"delta":" + py*py) > 100"}
+{"tMs":5200,"delta":"}\", \"op\": \"equal"}
+{"tMs":5235,"delta":"sTo\", \"right\": \""}
+{"tMs":5271,"delta":"true\"}, \"then\": ["}
+{"tMs":5306,"delta":"{\"type\": \"setVari"}
+{"tMs":5342,"delta":"able\", \"variable\": \"v"}
+{"tMs":5378,"delta":"x\", \"value\": \"${="}
+{"tMs":5412,"delta":" -px * 0.2}"}
+{"tMs":5448,"delta":"\"}, {\"type\": \""}
+{"tMs":5483,"delta":"setVariable\", \"variable"}
+{"tMs":5519,"delta":"\": \"vy\", \"value\":"}
+{"tMs":5554,"delta":" \"${= -py * 0"}
+{"tMs":5590,"delta":".3 - 4}\""}
+{"tMs":5625,"delta":"}, {\"type\": \"set"}
+{"tMs":5660,"delta":"Variable\", \"variable\":"}
+{"tMs":5699,"delta":" \"bx\", \"value\": \""}
+{"tMs":5731,"delta":"${= bx + px}\""}
+{"tMs":5767,"delta":"}, {\"type\": \"set"}
+{"tMs":5802,"delta":"Variable\", \"variable\":"}
+{"tMs":5838,"delta":" \"by\", \"value\": \"${"}
+{"tMs":5873,"delta":"= by + py}\"},"}
+{"tMs":5909,"delta":" {\"type\": \"setVari"}
+{"tMs":5944,"delta":"able\", \"variable\": \"px"}
+{"tMs":5981,"delta":"\", \"value\": \"0\"}"}
+{"tMs":6015,"delta":", {\"type\": \"setV"}
+{"tMs":6051,"delta":"ariable\", \"variable\": \""}
+{"tMs":6086,"delta":"py\", \"value\": \"0\""}
+{"tMs":6121,"delta":"}, {\"type\": \"set"}
+{"tMs":6166,"delta":"Variable\", \"variable\":"}
+{"tMs":6200,"delta":" \"scored\", \"value\": \""}
+{"tMs":6243,"delta":"false\"}, {\"type\":"}
+{"tMs":6266,"delta":" \"setVariable\", \"vari"}
+{"tMs":6299,"delta":"able\": \"flying\", \"value"}
+{"tMs":6339,"delta":"\": \"true\"}], \"else"}
+{"tMs":6386,"delta":"\": [{\"type\": \"set"}
+{"tMs":6405,"delta":"Variable\", \"variable\":"}
+{"tMs":6441,"delta":" \"px\", \"value\": \"0"}
+{"tMs":6477,"delta":"\"}, {\"type\": \""}
+{"tMs":6512,"delta":"setVariable\", \"variable"}
+{"tMs":6548,"delta":"\": \"py\", \"value\": \""}
+{"tMs":6584,"delta":"0\"}]}, {\""}
+{"tMs":6618,"delta":"type\": \"setVariable\","}
+{"tMs":6653,"delta":" \"variable\": \"aiming"}
+{"tMs":6689,"delta":"\", \"value\": \"false\"}"}
+{"tMs":6724,"delta":"]}]}}"}
+{"tMs":6760,"delta":"]"}
+{"tMs":6824,"delta":"}"}

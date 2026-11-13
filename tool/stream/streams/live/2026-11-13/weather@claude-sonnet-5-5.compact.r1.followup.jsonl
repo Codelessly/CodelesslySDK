@@ -1,0 +1,33 @@
+{"meta":{"ui":"weather","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Make it dark.","base":["weather@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":269,"usage":{"inputTokens":4148,"outputTokens":269,"cacheReadInputTokens":7551,"cacheCreationInputTokens":0,"ttftMs":1371,"firstToolDeltaMs":1791,"totalMs":2504,"stopReason":"StopReason.toolUse"},"text":"I'll swap the card's blue gradient for a dark one and soften the translucent accents.","ttftMs":1371,"check":{"ops":3,"opsApplied":3,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":27,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1791,"delta":"{\"ops\": [{\"op"}
+{"tMs":1791,"delta":"\":"}
+{"tMs":1791,"delta":"\"patch\",\"id\":\"card"}
+{"tMs":1791,"delta":"\",\"pat"}
+{"tMs":1791,"delta":"ch\":{\"decoration\":"}
+{"tMs":1791,"delta":"{\"fills\":[{\""}
+{"tMs":1791,"delta":"type\":\"linear\",\"stops"}
+{"tMs":1791,"delta":"\":[{\"position\":0,"}
+{"tMs":1791,"delta":"\"color\":\"#FF0"}
+{"tMs":2393,"delta":"B"}
+{"tMs":2393,"delta":"1020"}
+{"tMs":2393,"delta":"\"},{\"position\":1,"}
+{"tMs":2393,"delta":"\"color\":\"#FF1"}
+{"tMs":2393,"delta":"F2937"}
+{"tMs":2393,"delta":"\"}]}]"}
+{"tMs":2393,"delta":"}}},{\"op\":\""}
+{"tMs":2393,"delta":"patch\",\"id\":\"go\",\""}
+{"tMs":2393,"delta":"patch\":{\"props\":{"}
+{"tMs":2393,"delta":"\"style\":{\"backgro"}
+{"tMs":2393,"delta":"undColor\":\"#FF"}
+{"tMs":2393,"delta":"60A5FA\",\"foreg"}
+{"tMs":2393,"delta":"roundColor\":\"#F"}
+{"tMs":2393,"delta":"F0B"}
+{"tMs":2393,"delta":"1020\"}}}},{"}
+{"tMs":2393,"delta":"\"op\":\"patch\",\"id"}
+{"tMs":2393,"delta":"\":\"hl\",\"patch\":"}
+{"tMs":2393,"delta":"{\"props\":{\"style\":"}
+{"tMs":2393,"delta":"{\"color\":\"#FF"}
+{"tMs":2393,"delta":"9CA3AF\"}"}
+{"tMs":2411,"delta":"}}}"}
+{"tMs":2447,"delta":"]"}
+{"tMs":2500,"delta":"}"}

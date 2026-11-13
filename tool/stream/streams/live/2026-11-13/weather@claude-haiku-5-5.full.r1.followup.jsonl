@@ -1,0 +1,19 @@
+{"meta":{"ui":"weather","kind":"card","model":"claude-haiku-5-5","promptVariant":"full","profile":"agent","scripts":false,"turn":"followup","followup":"Make it dark.","base":["weather@claude-haiku-5-5.full.r1.jsonl","weather@claude-haiku-5-5.full.r1.retry.jsonl","weather@claude-haiku-5-5.full.r1.retry2.jsonl"],"source":"live","outputTokens":141,"usage":{"inputTokens":9299,"outputTokens":141,"cacheReadInputTokens":34183,"cacheCreationInputTokens":0,"ttftMs":635,"firstToolDeltaMs":675,"totalMs":1036,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":635,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":56,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":675,"delta":"{\"ops\": [{\"op"}
+{"tMs":695,"delta":"\": \"patch\", \"id\":"}
+{"tMs":716,"delta":" \"panel\", \"patch\":"}
+{"tMs":736,"delta":" {\"decoration\": {\""}
+{"tMs":757,"delta":"fills\": [{\"color\":"}
+{"tMs":775,"delta":" \"#F"}
+{"tMs":794,"delta":"F020"}
+{"tMs":812,"delta":"617"}
+{"tMs":833,"delta":"\"}]}}}, {"}
+{"tMs":854,"delta":"\"op\": \"patch\", \""}
+{"tMs":875,"delta":"id\": \"alertBtn"}
+{"tMs":896,"delta":"\", \"patch\": {\"dec"}
+{"tMs":917,"delta":"oration\": {\"fills\":"}
+{"tMs":937,"delta":" [{\"color\": \"#F"}
+{"tMs":956,"delta":"F0E"}
+{"tMs":978,"delta":"A5E9\"}]"}
+{"tMs":997,"delta":"}}}]"}
+{"tMs":1035,"delta":"}"}

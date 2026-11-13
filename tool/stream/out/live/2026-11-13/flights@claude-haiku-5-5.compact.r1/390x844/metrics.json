@@ -1,0 +1,70 @@
+{
+ "stream": "flights@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 530,
+ "timeToFirstPaintMs": 2024,
+ "timeToFirstTextMs": 2555,
+ "timeToFirstSectionMs": 3393,
+ "timeToCompleteMs": 7895,
+ "outputTokens": 2567,
+ "tokensEstimated": false,
+ "chars": 5146,
+ "deltas": 358,
+ "opsApplied": 23,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "no_size itemTag"
+ ],
+ "finalDiagnostics": [
+  "no_size /nodes/itemTag/layout"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "13:45|easyJet|option 2"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "confirm"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": [
+     "confirm"
+    ]
+   }
+  ]
+ },
+ "streamedOps": 23,
+ "rejections": [],
+ "nodes": 21,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 7,
+  "max": 19
+ },
+ "frames": 132,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 12,
+ "pumps": 491,
+ "pumpMsMedian": 0.143,
+ "renderExceptions": [],
+ "warnings": 0
+}

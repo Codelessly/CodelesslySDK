@@ -1,0 +1,54 @@
+{"meta":{"ui":"form_builder","kind":"app","model":"claude-opus-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["form_builder@claude-opus-5-5.compact.r1.jsonl"],"source":"live","outputTokens":430,"usage":{"inputTokens":2845,"outputTokens":430,"cacheReadInputTokens":7786,"cacheCreationInputTokens":0,"ttftMs":922,"firstToolDeltaMs":972,"totalMs":3609,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":922,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":46,"scripts":7,"scriptChars":1221},"assets":null}}
+{"tMs":972,"delta":"{\"ops\": [{"}
+{"tMs":1252,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":1252,"delta":"\"tabs\",\"node\":{"}
+{"tMs":1252,"delta":"\"type\":\"segmented"}
+{"tMs":1252,"delta":"Button\",\"layout\":{\""}
+{"tMs":1252,"delta":"width\":{\"fill\":358"}
+{"tMs":1273,"delta":"},\"height\":40},\"props"}
+{"tMs":1321,"delta":"\":{\"segments\":[{"}
+{"tMs":1371,"delta":"\"value\":\"build\",\"label\":"}
+{"tMs":1421,"delta":"\"Build\"},{\"value"}
+{"tMs":1471,"delta":"\":\"preview\",\"label\":\""}
+{"tMs":1522,"delta":"Preview\"}],\"sel"}
+{"tMs":1571,"delta":"ected\":[\"build\"]},\""}
+{"tMs":1621,"delta":"bind\":{\"props.sel"}
+{"tMs":1670,"delta":"ected\":\"${"}
+{"tMs":1718,"delta":"= ["}
+{"tMs":1768,"delta":"mode]}\"},\"act"}
+{"tMs":1818,"delta":"ions\":[{\"trigger"}
+{"tMs":1871,"delta":"\":{\"type\":\"changed"}
+{"tMs":1926,"delta":"\"},\"actions\":[{"}
+{"tMs":1968,"delta":"\"type\":\"setVariable"}
+{"tMs":2018,"delta":"\",\"variable\":\"mode\",\""}
+{"tMs":2069,"delta":"value\":\"${= result[0"}
+{"tMs":2119,"delta":"]}\"}]}]}"}
+{"tMs":2168,"delta":"},{\"op\":\"set\",\""}
+{"tMs":2219,"delta":"id\":\"pDate\",\"node"}
+{"tMs":2269,"delta":"\":{\"type\":\"textField"}
+{"tMs":2319,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":2368,"delta":"{\"fill\":326"}
+{"tMs":2423,"delta":"},\"height\":56},\"props"}
+{"tMs":2468,"delta":"\":{\"ke"}
+{"tMs":2518,"delta":"yboardType\":\"datet"}
+{"tMs":2569,"delta":"ime\",\"decoration\":{\""}
+{"tMs":2618,"delta":"hintText\":\"YYY"}
+{"tMs":2669,"delta":"Y-MM-DD\""}
+{"tMs":2718,"delta":"}},\"bind\":{\""}
+{"tMs":2769,"delta":"visible\":\"${= item."}
+{"tMs":2820,"delta":"type == 'date'}\",\""}
+{"tMs":2870,"delta":"props.initialValue\":\""}
+{"tMs":2918,"delta":"${item.value}\",\""}
+{"tMs":2969,"delta":"props.decoration.label"}
+{"tMs":3018,"delta":"Text\":\"${"}
+{"tMs":3069,"delta":"item.label}\"},\"act"}
+{"tMs":3118,"delta":"ions\":[{\"trigger"}
+{"tMs":3168,"delta":"\":{\"type\":\"changed"}
+{"tMs":3218,"delta":"\"},\"actions\":[{"}
+{"tMs":3269,"delta":"\"type\":\"runScript\",\""}
+{"tMs":3319,"delta":"script\":\"setVal\",\"ar"}
+{"tMs":3369,"delta":"guments\":{\"i\":\""}
+{"tMs":3419,"delta":"${index}\",\"v\":\"${"}
+{"tMs":3475,"delta":"result}\"}}]}]"}
+{"tMs":3519,"delta":"}}]"}
+{"tMs":3607,"delta":"}"}

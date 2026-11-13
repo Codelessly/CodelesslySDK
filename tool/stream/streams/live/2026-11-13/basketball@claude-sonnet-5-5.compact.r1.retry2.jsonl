@@ -1,0 +1,91 @@
+{"meta":{"ui":"basketball","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["basketball@claude-sonnet-5-5.compact.r1.jsonl","basketball@claude-sonnet-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":766,"usage":{"inputTokens":9791,"outputTokens":766,"cacheReadInputTokens":7785,"cacheCreationInputTokens":0,"ttftMs":1030,"firstToolDeltaMs":1104,"totalMs":4289,"stopReason":"StopReason.toolUse"},"text":"The dragzone never got created, so I'll set it now.","ttftMs":1030,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":18,"scripts":1,"scriptChars":739},"assets":null}}
+{"tMs":1104,"delta":"{\"ops\": [{\"op\": \""}
+{"tMs":1137,"delta":"set\", \"id\": \"drag"}
+{"tMs":1172,"delta":"zone\", \"node\": {\""}
+{"tMs":1208,"delta":"type\": \"box\", \"layout"}
+{"tMs":1245,"delta":"\": {\"x\": 20,"}
+{"tMs":1279,"delta":" \"y\": 480, \"width"}
+{"tMs":1315,"delta":"\": 150, \"height\": "}
+{"tMs":1350,"delta":"160}, \"actions\": ["}
+{"tMs":1389,"delta":"{\"trigger\": {\""}
+{"tMs":1421,"delta":"type\": \"dragStart\""}
+{"tMs":1456,"delta":"}, \"actions\": [{"}
+{"tMs":1492,"delta":"\"type\": \"setVariable"}
+{"tMs":1652,"delta":"\", \"variable\": \"ai"}
+{"tMs":1652,"delta":"ming\", \"value\": \"${="}
+{"tMs":1652,"delta":" phase == 'play' &&"}
+{"tMs":1652,"delta":" !flying}\"}]}"}
+{"tMs":1670,"delta":", {\"trigger\": {"}
+{"tMs":1705,"delta":"\"type\": \"drag\"}"}
+{"tMs":1741,"delta":", \"actions\": [{\""}
+{"tMs":1776,"delta":"type\": \"if\", \"condition"}
+{"tMs":1812,"delta":"\": {\"left\": \"${a"}
+{"tMs":1912,"delta":"iming}\", \"op\": \""}
+{"tMs":1912,"delta":"equalsTo\", \"right"}
+{"tMs":1918,"delta":"\": \"true\"}, \"then"}
+{"tMs":1971,"delta":"\": [{\"type\": \"set"}
+{"tMs":1989,"delta":"Variable\", \"variable\":"}
+{"tMs":2028,"delta":" \"px\", \"value\": \"${"}
+{"tMs":2068,"delta":"= Math.max(-70"}
+{"tMs":2096,"delta":", Math.min(0,"}
+{"tMs":2131,"delta":" px + result.dx))}"}
+{"tMs":2166,"delta":"\"}, {\"type\": \""}
+{"tMs":2202,"delta":"setVariable\", \"variable"}
+{"tMs":2242,"delta":"\": \"py\", \"value\": \""}
+{"tMs":2276,"delta":"${= Math.max(0"}
+{"tMs":2308,"delta":", Math.min(70,"}
+{"tMs":2343,"delta":" py + result.dy))}"}
+{"tMs":2379,"delta":"\"}]}]},"}
+{"tMs":2428,"delta":" {\"trigger\": {\""}
+{"tMs":2450,"delta":"type\": \"dragEnd"}
+{"tMs":2489,"delta":"\"}, \"actions\": ["}
+{"tMs":2522,"delta":"{\"type\": \"if\", \""}
+{"tMs":2559,"delta":"condition\": {\"left\": \""}
+{"tMs":2592,"delta":"${= aiming && (px"}
+{"tMs":2628,"delta":"*px + py*py) >"}
+{"tMs":2665,"delta":" 100}\", \"op\": \""}
+{"tMs":2700,"delta":"equalsTo\", \"right"}
+{"tMs":2734,"delta":"\": \"true\"}, \"then"}
+{"tMs":2770,"delta":"\": [{\"type\": \"set"}
+{"tMs":2805,"delta":"Variable\", \"variable\":"}
+{"tMs":2841,"delta":" \"vx\", \"value\": \""}
+{"tMs":2876,"delta":"${= -px * 0."}
+{"tMs":2911,"delta":"2}\"}, {\"type"}
+{"tMs":2948,"delta":"\": \"setVariable\", \""}
+{"tMs":2982,"delta":"variable\": \"vy\", \""}
+{"tMs":3018,"delta":"value\": \"${= -py *"}
+{"tMs":3054,"delta":" 0.3 - 4"}
+{"tMs":3088,"delta":"}\"}, {\"type\":"}
+{"tMs":3127,"delta":" \"setVariable\", \"vari"}
+{"tMs":3161,"delta":"able\": \"bx\", \"value"}
+{"tMs":3195,"delta":"\": \"${= bx + px"}
+{"tMs":3231,"delta":"}\"}, {\"type\":"}
+{"tMs":3267,"delta":" \"setVariable\", \"vari"}
+{"tMs":3302,"delta":"able\": \"by\", \"value\":"}
+{"tMs":3338,"delta":" \"${= by + py}\""}
+{"tMs":3372,"delta":"}, {\"type\": \"set"}
+{"tMs":3408,"delta":"Variable\", \"variable\":"}
+{"tMs":3444,"delta":" \"px\", \"value\": \"0"}
+{"tMs":3479,"delta":"\"}, {\"type\": \""}
+{"tMs":3515,"delta":"setVariable\", \"variable"}
+{"tMs":3550,"delta":"\": \"py\", \"value\": \""}
+{"tMs":3585,"delta":"0\"}, {\"type\":"}
+{"tMs":3622,"delta":" \"setVariable\", \"vari"}
+{"tMs":3656,"delta":"able\": \"scored\", \"value"}
+{"tMs":3691,"delta":"\": \"false\"}, {\""}
+{"tMs":3727,"delta":"type\": \"setVariable\","}
+{"tMs":3762,"delta":" \"variable\": \"flying\","}
+{"tMs":3805,"delta":" \"value\": \"true\"}],"}
+{"tMs":3833,"delta":" \"else\": [{\"type\":"}
+{"tMs":3869,"delta":" \"setVariable\", \"vari"}
+{"tMs":3904,"delta":"able\": \"px\", \"value\":"}
+{"tMs":3945,"delta":" \"0\"}, {\"type"}
+{"tMs":3975,"delta":"\": \"setVariable\", \""}
+{"tMs":4011,"delta":"variable\": \"py\", \"value"}
+{"tMs":4046,"delta":"\": \"0\"}]},"}
+{"tMs":4081,"delta":" {\"type\": \"setVari"}
+{"tMs":4133,"delta":"able\", \"variable\": \"a"}
+{"tMs":4153,"delta":"iming\", \"value\": \"false"}
+{"tMs":4192,"delta":"\"}]}]}}"}
+{"tMs":4223,"delta":"]"}
+{"tMs":4288,"delta":"}"}

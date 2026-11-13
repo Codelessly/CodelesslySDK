@@ -1,0 +1,82 @@
+{
+ "stream": "sudoku@claude-opus-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 487,
+ "timeToFirstPaintMs": 39247,
+ "timeToFirstTextMs": 39247,
+ "timeToFirstSectionMs": 41245,
+ "timeToCompleteMs": 54787,
+ "outputTokens": 6814,
+ "tokensEstimated": false,
+ "chars": 9464,
+ "deltas": 671,
+ "opsApplied": 21,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_enum /nodes/grid/decoration/clip",
+  "dangling_child /nodes/body/children/2"
+ ],
+ "scripts": 6,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^5$"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 22,
+ "rejections": [
+  {
+   "op": 11,
+   "code": "invalid_enum",
+   "path": "/nodes/grid/decoration/clip",
+   "message": "a boolean (true) is not a Clip. Allowed: none, hardEdge, antiAlias, antiAliasWithSaveLayer.",
+   "nodeId": "grid"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/body/children/2",
+   "message": "Child \"grid\" of \"body\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "body"
+  }
+ ],
+ "nodes": 18,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 5,
+  "max": 19
+ },
+ "frames": 180,
+ "frameMs": 309,
+ "pumpsOverBudget16ms": 9,
+ "pumps": 852,
+ "pumpMsMedian": 0.111,
+ "renderExceptions": [],
+ "warnings": 4
+}

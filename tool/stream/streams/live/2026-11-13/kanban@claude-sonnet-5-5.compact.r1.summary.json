@@ -1,0 +1,116 @@
+{
+ "ui": "kanban",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 5446,
+  "outputTokens": 3640,
+  "cacheReadInputTokens": 38925,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 759,
+  "firstToolDeltaMs": 5013,
+  "totalMs": 20918,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "draggable"
+    },
+    "ms": 1111,
+    "outputTokens": 62,
+    "resultChars": 704
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "dropTarget"
+    },
+    "ms": 706,
+    "outputTokens": 52,
+    "resultChars": 508
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "drop"
+    },
+    "ms": 976,
+    "outputTokens": 67,
+    "resultChars": 1533
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 1160,
+    "outputTokens": 92,
+    "resultChars": 1132
+   }
+  ],
+  "ops": 25,
+  "opsApplied": 22,
+  "opsRejected": 3,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 3,
+  "errors": [
+   "children_not_allowed /nodes/card0/children",
+   "children_not_allowed /nodes/card1/children",
+   "children_not_allowed /nodes/card2/children",
+   "dangling_child /nodes/l0/children/0",
+   "dangling_child /nodes/l1/children/0",
+   "dangling_child /nodes/l2/children/0"
+  ],
+  "lints": [],
+  "warnings": 8,
+  "nodes": 19,
+  "scripts": 2,
+  "scriptChars": 470
+ },
+ "retries": [
+  {
+   "inputTokens": 8097,
+   "outputTokens": 765,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 906,
+   "firstToolDeltaMs": 978,
+   "totalMs": 4153,
+   "stopReason": "StopReason.toolUse",
+   "ops": 8,
+   "opsApplied": 8,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 22,
+   "scripts": 2,
+   "scriptChars": 470
+  }
+ ],
+ "final": {
+  "ops": 8,
+  "opsApplied": 8,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 22,
+  "scripts": 2,
+  "scriptChars": 470
+ }
+}

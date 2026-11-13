@@ -1,0 +1,12 @@
+{
+ "ui": "flights",
+ "kind": "card",
+ "model": "claude-opus-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 15125,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7630,
+ "error": "ApiException(503): credential validation failed"
+}

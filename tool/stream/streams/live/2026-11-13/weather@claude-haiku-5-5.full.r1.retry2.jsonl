@@ -1,0 +1,52 @@
+{"meta":{"ui":"weather","kind":"card","model":"claude-haiku-5-5","promptVariant":"full","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["weather@claude-haiku-5-5.full.r1.jsonl","weather@claude-haiku-5-5.full.r1.retry.jsonl"],"source":"live","outputTokens":411,"usage":{"inputTokens":8785,"outputTokens":411,"cacheReadInputTokens":34183,"cacheCreationInputTokens":0,"ttftMs":440,"firstToolDeltaMs":480,"totalMs":1525,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":440,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":56,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":480,"delta":"{\"ops\": [{\"op"}
+{"tMs":501,"delta":"\": \"set\", \"id\": \""}
+{"tMs":521,"delta":"alertBtn\", \"par"}
+{"tMs":541,"delta":"ent\": \"panel\", \"node"}
+{"tMs":562,"delta":"\": {\"type\": \"row\","}
+{"tMs":582,"delta":" \"children\": [\"alertB"}
+{"tMs":603,"delta":"tnLabel\"], \""}
+{"tMs":623,"delta":"layout\": {\"width\": {"}
+{"tMs":643,"delta":"\"fill\": 326},"}
+{"tMs":664,"delta":" \"height\": 48}, \""}
+{"tMs":692,"delta":"props\": {\"mainAx"}
+{"tMs":711,"delta":"isAlignment\": \"center"}
+{"tMs":725,"delta":"\", \"crossAxisA"}
+{"tMs":746,"delta":"lignment\": \"center\"}"}
+{"tMs":766,"delta":", \"decoration\": {\""}
+{"tMs":786,"delta":"fills\": [{\"color\":"}
+{"tMs":807,"delta":" \"#FF38BD"}
+{"tMs":827,"delta":"F8\"}], \"radius"}
+{"tMs":847,"delta":"\": 12}, \"actions"}
+{"tMs":868,"delta":"\": [{\"trigger\":"}
+{"tMs":888,"delta":" {\"type\": \"click\"}"}
+{"tMs":909,"delta":", \"actions\": [{\""}
+{"tMs":929,"delta":"type\": \"componentEvent"}
+{"tMs":949,"delta":"\", \"event\": \"alert_"}
+{"tMs":970,"delta":"before_rain\", \"value\":"}
+{"tMs":990,"delta":" {\"city\": \"Lis"}
+{"tMs":1011,"delta":"bon\"}}, {\""}
+{"tMs":1031,"delta":"type\": \"showToast\", \""}
+{"tMs":1052,"delta":"message\": \"We'll alert"}
+{"tMs":1072,"delta":" you before it rains in L"}
+{"tMs":1093,"delta":"isbon\"}]}]"}
+{"tMs":1112,"delta":"}}, {"}
+{"tMs":1133,"delta":"\"op\": \"set\", \"id"}
+{"tMs":1153,"delta":"\": \"alertBtnL"}
+{"tMs":1174,"delta":"abel\", \"parent\": \""}
+{"tMs":1195,"delta":"alertBtn\", \"node"}
+{"tMs":1215,"delta":"\": {\"type\": \"text\","}
+{"tMs":1235,"delta":" \"layout\": {\"width\":"}
+{"tMs":1255,"delta":" {\"hug\": 200"}
+{"tMs":1276,"delta":"}, \"height\": {\"h"}
+{"tMs":1296,"delta":"ug\": 20}}, \""}
+{"tMs":1317,"delta":"props\": {\"text\": \""}
+{"tMs":1337,"delta":"Alert me before it rains\","}
+{"tMs":1357,"delta":" \"style"}
+{"tMs":1377,"delta":"\": {\"fontSize\":"}
+{"tMs":1398,"delta":" 15, \"fontWe"}
+{"tMs":1419,"delta":"ight\": 600, \"color\":"}
+{"tMs":1439,"delta":" \"#FF0F172A"}
+{"tMs":1459,"delta":"\"}}}}"}
+{"tMs":1479,"delta":"]"}
+{"tMs":1524,"delta":"}"}

@@ -1,0 +1,90 @@
+{"meta":{"ui":"kanban","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["kanban@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":765,"usage":{"inputTokens":8097,"outputTokens":765,"cacheReadInputTokens":7785,"cacheCreationInputTokens":0,"ttftMs":906,"firstToolDeltaMs":978,"totalMs":4153,"stopReason":"StopReason.toolUse"},"text":"I'll recreate the cards as rows, and give the nodes that had no size a width or height.","ttftMs":906,"check":{"ops":8,"opsApplied":8,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":22,"scripts":2,"scriptChars":470},"assets":null}}
+{"tMs":978,"delta":"{\"ops\": [{\"op\": \"set"}
+{"tMs":1014,"delta":"\", \"id\": \"card0\","}
+{"tMs":1050,"delta":" \"node\": {\"type\": \""}
+{"tMs":1085,"delta":"row\", \"children\": [\""}
+{"tMs":1132,"delta":"ct0\"], \"layout\":"}
+{"tMs":1162,"delta":" {\"width\": {\"fill"}
+{"tMs":1193,"delta":"\": 100}, \"height\":"}
+{"tMs":1228,"delta":" {\"hug\": 50}"}
+{"tMs":1265,"delta":", \"padding\": 8}"}
+{"tMs":1300,"delta":", \"decoration\": {\""}
+{"tMs":1336,"delta":"fills\": [{\"color\":"}
+{"tMs":1372,"delta":" \"#FFFFFF"}
+{"tMs":1408,"delta":"FF\"}], \"radius"}
+{"tMs":1444,"delta":"\": 8}, \"dragg"}
+{"tMs":1479,"delta":"able\": {\"group\": \"card"}
+{"tMs":1515,"delta":"\", \"start\": \"press\", \""}
+{"tMs":1551,"delta":"ghostOpacity\":"}
+{"tMs":1587,"delta":" 0.4}, \"b"}
+{"tMs":1624,"delta":"ind\": {\"draggable."}
+{"tMs":1659,"delta":"data\": \"${item.id}"}
+{"tMs":1698,"delta":"\"}}}, {\"op"}
+{"tMs":1731,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1765,"delta":"card1\", \"node\": {\""}
+{"tMs":1801,"delta":"type\": \"row\", \"children\":"}
+{"tMs":1845,"delta":" [\"ct1\"], \""}
+{"tMs":1873,"delta":"layout\": {\"width\": {"}
+{"tMs":1908,"delta":"\"fill\": 100},"}
+{"tMs":1946,"delta":" \"height\": {\"hug\":"}
+{"tMs":1980,"delta":" 50}, \"padding\":"}
+{"tMs":2015,"delta":" 8}, \"decoration"}
+{"tMs":2051,"delta":"\": {\"fills\": [{"}
+{"tMs":2089,"delta":"\"color\": \"#FFF"}
+{"tMs":2123,"delta":"FFFFF\"}],"}
+{"tMs":2159,"delta":" \"radius\": 8},"}
+{"tMs":2194,"delta":" \"draggable\": {\"group"}
+{"tMs":2230,"delta":"\": \"card\", \"start\": \""}
+{"tMs":2266,"delta":"press\", \"ghostOp"}
+{"tMs":2302,"delta":"acity\": 0.4}"}
+{"tMs":2337,"delta":", \"bind\": {\"dra"}
+{"tMs":2372,"delta":"ggable.data\": \"${item"}
+{"tMs":2408,"delta":".id}\"}}},"}
+{"tMs":2444,"delta":" {\"op\": \"set\", \""}
+{"tMs":2497,"delta":"id\": \"card2\", \"node"}
+{"tMs":2516,"delta":"\": {\"type\": \"row\","}
+{"tMs":2552,"delta":" \"children\": [\"ct2"}
+{"tMs":2587,"delta":"\"], \"layout\": {\""}
+{"tMs":2622,"delta":"width\": {\"fill\": "}
+{"tMs":2666,"delta":"100}, \"height\": {\""}
+{"tMs":2694,"delta":"hug\": 50}, \""}
+{"tMs":2730,"delta":"padding\": 8}, \""}
+{"tMs":2768,"delta":"decoration\": {\"fills"}
+{"tMs":2802,"delta":"\": [{\"color\": \"#"}
+{"tMs":2837,"delta":"FFF"}
+{"tMs":2873,"delta":"FFFFF\"}],"}
+{"tMs":2908,"delta":" \"radius\": 8},"}
+{"tMs":2944,"delta":" \"draggable\": {\"group"}
+{"tMs":2980,"delta":"\": \"card\", \"start\": \""}
+{"tMs":3015,"delta":"press\", \"ghostOp"}
+{"tMs":3051,"delta":"acity\": 0.4}"}
+{"tMs":3087,"delta":", \"bind\": {\"dra"}
+{"tMs":3123,"delta":"ggable.data\": \"${item"}
+{"tMs":3159,"delta":".id}\"}}},"}
+{"tMs":3196,"delta":" {\"op\": \"patch\","}
+{"tMs":3230,"delta":" \"id\": \"addField\", \""}
+{"tMs":3266,"delta":"patch\": {\"layout\":"}
+{"tMs":3301,"delta":" {\"width\": {\"fill"}
+{"tMs":3337,"delta":"\": 270"}
+{"tMs":3373,"delta":"}}}}, {\"op"}
+{"tMs":3408,"delta":"\": \"patch\", \"id\":"}
+{"tMs":3444,"delta":" \"board\", \"patch\": {"}
+{"tMs":3480,"delta":"\"layout\": {\"height\":"}
+{"tMs":3516,"delta":" {\"fill\": 600}"}
+{"tMs":3570,"delta":"}}}, {\"op\":"}
+{"tMs":3587,"delta":" \"patch\", \"id\": \""}
+{"tMs":3623,"delta":"col0\", \"patch\": {"}
+{"tMs":3659,"delta":"\"layout\": {\"width\":"}
+{"tMs":3694,"delta":" {\"fill\": 118"}
+{"tMs":3730,"delta":"}}}}, {\"op"}
+{"tMs":3766,"delta":"\": \"patch\", \"id\":"}
+{"tMs":3801,"delta":" \"col1\", \"patch\":"}
+{"tMs":3837,"delta":" {\"layout\": {\"width"}
+{"tMs":3873,"delta":"\": {\"fill\": 118"}
+{"tMs":3908,"delta":"}}}}, {\"op"}
+{"tMs":3945,"delta":"\": \"patch\", \"id\":"}
+{"tMs":3981,"delta":" \"col2\", \"patch\":"}
+{"tMs":4016,"delta":" {\"layout\": {\"width"}
+{"tMs":4051,"delta":"\": {\"fill\": 118"}
+{"tMs":4087,"delta":"}}}}]"}
+{"tMs":4151,"delta":"}"}

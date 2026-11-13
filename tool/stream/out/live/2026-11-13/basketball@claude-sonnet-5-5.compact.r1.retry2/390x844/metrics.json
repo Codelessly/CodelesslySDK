@@ -1,0 +1,95 @@
+{
+ "stream": "basketball@claude-sonnet-5-5.compact.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1030,
+ "timeToFirstPaintMs": 4192,
+ "timeToFirstTextMs": 4192,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 4288,
+ "outputTokens": 766,
+ "tokensEstimated": false,
+ "chars": 1509,
+ "deltas": 90,
+ "opsApplied": 0,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/dragzone/actions/1/actions/0/then/0/value",
+  "expression_syntax /nodes/dragzone/actions/1/actions/0/then/1/value",
+  "dangling_child /nodes/root/children/6"
+ ],
+ "scripts": 1,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 0,
+      "dy": 140
+     },
+     "settleMs": 2500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 19,
+   "rejected": 2
+  },
+  {
+   "stream": "retry",
+   "applied": 2,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "expression_syntax",
+   "path": "/nodes/dragzone/actions/1/actions/0/then/0/value",
+   "message": "The formula \"${= Math.max(-70, Math.min(0, px + result.dx))}\" does not parse: Unexpected \"(\" at 9.",
+   "nodeId": "dragzone"
+  },
+  {
+   "op": 0,
+   "code": "expression_syntax",
+   "path": "/nodes/dragzone/actions/1/actions/0/then/1/value",
+   "message": "The formula \"${= Math.max(0, Math.min(70, py + result.dy))}\" does not parse: Unexpected \"(\" at 9.",
+   "nodeId": "dragzone"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/root/children/6",
+   "message": "Child \"dragzone\" of \"root\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "root"
+  }
+ ],
+ "nodes": 17,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 0
+ },
+ "frames": 78,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 0,
+ "pumps": 169,
+ "pumpMsMedian": 0.849,
+ "renderExceptions": [],
+ "warnings": 0
+}

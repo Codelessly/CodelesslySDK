@@ -1,0 +1,230 @@
+{
+ "stream": "kanban@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 455,
+ "timeToFirstPaintMs": 1886,
+ "timeToFirstTextMs": 1886,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 9820,
+ "outputTokens": 3328,
+ "tokensEstimated": false,
+ "chars": 6738,
+ "deltas": 456,
+ "opsApplied": 11,
+ "opsRejected": 13,
+ "opsRecoveredFromMalformed": 16,
+ "jsonRepairs": 1,
+ "pending": 4,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_condition /nodes/addBtn/actions/0/actions/0/condition",
+  "expression_syntax /nodes/addBtn/actions/0/actions/0/then/0/value",
+  "expression_syntax /nodes/colTodo/actions/0/actions/0/value",
+  "expression_syntax /nodes/colDoing/actions/0/actions/0/value",
+  "expression_syntax /nodes/colDone/actions/0/actions/0/value",
+  "expression_syntax /nodes/hdrTodo/props/text",
+  "expression_syntax /nodes/hdrDoing/props/text",
+  "expression_syntax /nodes/hdrDone/props/text",
+  "expression_syntax /nodes/listTodo/bind/data",
+  "expression_syntax /nodes/listDoing/bind/data",
+  "expression_syntax /nodes/listDone/bind/data",
+  "children_not_allowed /nodes/cardTodo/children",
+  "children_not_allowed /nodes/cardDoing/children",
+  "children_not_allowed /nodes/cardDone/children",
+  "dangling_child /nodes/addRow/children/1",
+  "dangling_child /nodes/cols/children/0",
+  "dangling_child /nodes/cols/children/1",
+  "dangling_child /nodes/cols/children/2"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 120,
+      "dy": 0
+     },
+     "settleMs": 800
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 24,
+ "rejections": [
+  {
+   "op": 7,
+   "code": "invalid_condition",
+   "path": "/nodes/addBtn/actions/0/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "addBtn"
+  },
+  {
+   "op": 7,
+   "code": "expression_syntax",
+   "path": "/nodes/addBtn/actions/0/actions/0/then/0/value",
+   "message": "The formula \"${= [...cards, {id: nextId, title: newTitle, col: 'todo'}]}\" does not parse: Unexpected \".\" at 2.",
+   "nodeId": "addBtn"
+  },
+  {
+   "op": 9,
+   "code": "expression_syntax",
+   "path": "/nodes/colTodo/actions/0/actions/0/value",
+   "message": "The formula \"${= cards.map(c => c.id == dragId ? {...c, col: 'todo'} : c)}\" does not parse: Unexpected \"(\" at 10.",
+   "nodeId": "colTodo"
+  },
+  {
+   "op": 10,
+   "code": "expression_syntax",
+   "path": "/nodes/colDoing/actions/0/actions/0/value",
+   "message": "The formula \"${= cards.map(c => c.id == dragId ? {...c, col: 'doing'} : c)}\" does not parse: Unexpected \"(\" at 10.",
+   "nodeId": "colDoing"
+  },
+  {
+   "op": 11,
+   "code": "expression_syntax",
+   "path": "/nodes/colDone/actions/0/actions/0/value",
+   "message": "The formula \"${= cards.map(c => c.id == dragId ? {...c, col: 'done'} : c)}\" does not parse: Unexpected \"(\" at 10.",
+   "nodeId": "colDone"
+  },
+  {
+   "op": 12,
+   "code": "expression_syntax",
+   "path": "/nodes/hdrTodo/props/text",
+   "message": "The formula \"${= cards.filter(c => c.col == 'todo').length}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "hdrTodo"
+  },
+  {
+   "op": 13,
+   "code": "expression_syntax",
+   "path": "/nodes/hdrDoing/props/text",
+   "message": "The formula \"${= cards.filter(c => c.col == 'doing').length}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "hdrDoing"
+  },
+  {
+   "op": 14,
+   "code": "expression_syntax",
+   "path": "/nodes/hdrDone/props/text",
+   "message": "The formula \"${= cards.filter(c => c.col == 'done').length}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "hdrDone"
+  },
+  {
+   "op": 15,
+   "code": "expression_syntax",
+   "path": "/nodes/listTodo/bind/data",
+   "message": "The formula \"${= cards.filter(c => c.col == 'todo')}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "listTodo"
+  },
+  {
+   "op": 16,
+   "code": "expression_syntax",
+   "path": "/nodes/listDoing/bind/data",
+   "message": "The formula \"${= cards.filter(c => c.col == 'doing')}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "listDoing"
+  },
+  {
+   "op": 17,
+   "code": "expression_syntax",
+   "path": "/nodes/listDone/bind/data",
+   "message": "The formula \"${= cards.filter(c => c.col == 'done')}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "listDone"
+  },
+  {
+   "op": 18,
+   "code": "children_not_allowed",
+   "path": "/nodes/cardTodo/children",
+   "message": "A box takes no children. Types that take children: column, row, stack, listView, gridView, flex. For a filled or bordered box with content (a button, a tag, a chip), use a row (or column, or stack) with the decoration and padding: {\"type\": \"row\", \"layout\": {\"padding\": [12, 6, 12, 6]}, \"decoration\": {\"fills\": [{\"color\": \"#FFDCFCE7\"}], \"radius\": 12}, \"children\": [\"tagText\"]}.",
+   "nodeId": "cardTodo",
+   "expected": [
+    "column",
+    "row",
+    "stack",
+    "listView",
+    "gridView",
+    "flex"
+   ],
+   "suggestion": "row"
+  },
+  {
+   "op": 20,
+   "code": "children_not_allowed",
+   "path": "/nodes/cardDoing/children",
+   "message": "A box takes no children. Types that take children: column, row, stack, listView, gridView, flex. For a filled or bordered box with content (a button, a tag, a chip), use a row (or column, or stack) with the decoration and padding: {\"type\": \"row\", \"layout\": {\"padding\": [12, 6, 12, 6]}, \"decoration\": {\"fills\": [{\"color\": \"#FFDCFCE7\"}], \"radius\": 12}, \"children\": [\"tagText\"]}.",
+   "nodeId": "cardDoing",
+   "expected": [
+    "column",
+    "row",
+    "stack",
+    "listView",
+    "gridView",
+    "flex"
+   ],
+   "suggestion": "row"
+  },
+  {
+   "op": 22,
+   "code": "children_not_allowed",
+   "path": "/nodes/cardDone/children",
+   "message": "A box takes no children. Types that take children: column, row, stack, listView, gridView, flex. For a filled or bordered box with content (a button, a tag, a chip), use a row (or column, or stack) with the decoration and padding: {\"type\": \"row\", \"layout\": {\"padding\": [12, 6, 12, 6]}, \"decoration\": {\"fills\": [{\"color\": \"#FFDCFCE7\"}], \"radius\": 12}, \"children\": [\"tagText\"]}.",
+   "nodeId": "cardDone",
+   "expected": [
+    "column",
+    "row",
+    "stack",
+    "listView",
+    "gridView",
+    "flex"
+   ],
+   "suggestion": "row"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addRow/children/1",
+   "message": "Child \"addBtn\" of \"addRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/0",
+   "message": "Child \"colTodo\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/1",
+   "message": "Child \"colDoing\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/2",
+   "message": "Child \"colDone\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  }
+ ],
+ "nodes": 9,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 3,
+  "max": 5
+ },
+ "frames": 161,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 618,
+ "pumpMsMedian": 0.129,
+ "renderExceptions": [],
+ "warnings": 4
+}
