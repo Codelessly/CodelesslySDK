@@ -93,17 +93,24 @@ void main() {
     expect(_boxes(tester, session).keys, ['home']);
     session.apply([ops[2]]);
     await tester.pump();
-    // The column's children have not arrived: they render nothing, no errors.
-    expect(_boxes(tester, session).keys.toSet(), {'home', 'page'});
+    // The column's children have not arrived: it waits for its first (no
+    // empty shell), and so does the canvas; no errors.
+    expect(_boxes(tester, session).keys.toSet(), {'home'});
     expect(tester.takeException(), isNull);
     NodeBox.debugCountApplies = true;
     NodeBox.debugApplyCounts.clear();
     session.apply([ops[3]]);
     await tester.pump();
     expect(_boxes(tester, session).keys.toSet(), {'home', 'page', 'title'});
-    // The arrival re-applies only the box that waited for it.
-    expect(NodeBox.debugApplyCounts, {'title': 1});
-    session.apply(ops.sublist(4));
+    // The first child of a container that showed nothing yet: the container
+    // shows (its waiting children get their boxes).
+    expect(NodeBox.debugApplyCounts, {'home': 1, 'page': 1, 'title': 1, 'body': 1, 'cta': 1});
+    NodeBox.debugApplyCounts.clear();
+    session.apply([ops[4]]);
+    await tester.pump();
+    // Any later child: only the box that waited for it.
+    expect(NodeBox.debugApplyCounts, {'body': 1});
+    session.apply(ops.sublist(5));
     await tester.pump();
     expect(_boxes(tester, session).keys.toSet(), {'home', 'page', 'title', 'body', 'cta'});
     expect(tester.takeException(), isNull);
@@ -159,7 +166,7 @@ void main() {
       controller.add(text.substring(i, i + 7 > cut ? cut : i + 7));
       await tester.pump();
     }
-    expect(_boxes(tester, session).keys.toSet(), {'home', 'page'});
+    expect(_boxes(tester, session).keys.toSet(), {'home'});
     expect(session.streaming.value, isTrue);
     controller.add(text.substring(cut));
     await controller.close();
@@ -307,5 +314,18 @@ void main() {
     });
     expect(r.errors.single.code, 'stale_rev');
     expect(session.document['title']!.props.toJson(null)['text'], 'Mine');
+  });
+
+  test('arrival fade: off by default; on, a node that arrives in a stream gets an enter animation from opacity 0', () async {
+    final plain = UiSession();
+    await plain.applyStream(Stream.value(jsonEncode({'ops': _ops()})));
+    expect(plain.node('title')!.behaviors.animations, isEmpty);
+    final faded = UiSession(arrivalFade: const Duration(milliseconds: 180));
+    await faded.applyStream(Stream.value(jsonEncode({'ops': _ops()})));
+    final a = faded.node('title')!.behaviors.animations.single;
+    expect(a.preset, 'enter');
+    expect(a.duration, 180);
+    // The document itself is as the model wrote it.
+    expect(faded.document['title']!.behaviors.animations, isEmpty);
   });
 }

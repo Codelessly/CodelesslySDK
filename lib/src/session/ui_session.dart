@@ -97,6 +97,7 @@ class UiSession implements NodeSource {
     this.check = catalogCheck,
     this.placeholderColor = 0x14808080,
     this.arrivalFade,
+    this.holdEmptyContainers = true,
   })  : profile = profile ?? TrustProfile.agent,
         _document = document ?? LayoutDocument(catalog: catalog);
 
@@ -114,6 +115,11 @@ class UiSession implements NodeSource {
   /// The color (ARGB) of a placeholder: the box shown for a pending child
   /// an op gave a size for ([SetOp.placeholders]).
   final int placeholderColor;
+
+  /// Whether a node with children, none of which shows yet (each pending,
+  /// or held the same way), is held back (shown as nothing) until one does,
+  /// so a stream shows no empty shells. A node without children shows as soon as it arrives.
+  final bool holdEmptyContainers;
 
   /// When set, a node that arrives while a stream runs fades in over this
   /// long (an `enter` animation from opacity 0). Off by default.
@@ -348,6 +354,7 @@ class UiSession implements NodeSource {
 
   void _setDocument(LayoutDocument next) {
     _document = next;
+    _heldMemo.clear();
     for (final e in _watched.entries.toList()) {
       final shown = node(e.key);
       if (!identical(e.value.node, shown) && e.value.node != shown) e.value.set(shown);
@@ -367,6 +374,11 @@ class UiSession implements NodeSource {
       if (_document.parentOf(id) == null) return null;
       final hint = _placeholders[id];
       return hint == null ? (_pendingNodes[id] ??= _pendingNode(id)) : _placeholderNode(id, hint);
+    }
+    // A container none of whose children has arrived waits for its first:
+    // no empty shells (a bordered row with nothing in it) while streaming.
+    if (holdEmptyContainers && _held(id)) {
+      return _pendingNodes[id] ??= _pendingNode(id);
     }
     if (arrivalFade != null && _arrived.contains(id)) {
       return _faded[n] ??= Node.fromJson(
@@ -391,6 +403,16 @@ class UiSession implements NodeSource {
   }
 
   final Map<String, Node> _pendingNodes = {};
+
+  /// Whether node [id] has children and none of them shows yet (each is
+  /// pending, or held itself). Memoized per document.
+  bool _held(String id) => _heldMemo[id] ??= () {
+        final n = _document[id];
+        if (n == null) return false;
+        final kids = n.childIds.toList();
+        return kids.isNotEmpty && kids.every((c) => _document[c] == null || _held(c));
+      }();
+  final Map<String, bool> _heldMemo = {};
 
   Node _pendingNode(String id) => Node.fromJson(const {
         'type': 'box',
