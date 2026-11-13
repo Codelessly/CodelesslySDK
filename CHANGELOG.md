@@ -1,5 +1,26 @@
 ## Unreleased
 
+**Authoring fixes from the second direct-authoring experiment (cycle 2)**
+
+- Grid auto rows: a `gridView` with `shrinkWrapRows` whose items intrinsic measurement can't see into (a list bound
+  to data in a card) stretches every item to its row's longest, and measures a filling item at its content (CSS
+  grid's auto rows). **Behaviour change (bug fix, the documented "equal heights"):** hugging items kept their own
+  heights and a filling item's row took its design number. Rows measure again when an item's content changes
+  (`MeasuresContent`).
+- A child with `constraints.maxWidth` (`maxHeight` in a row) under `crossAxisAlignment: stretch` keeps its cap, at
+  the start unless `layout.align` places it (CSS `max-width` over `align-items: stretch`). **Behaviour change (bug
+  fix):** the cap was silently ignored. Parity goldens unchanged.
+- Paints: a gradient's `length` in pixels; the `noise` paint (feTurbulence's reference algorithm, a stitched 256 px
+  tile repeated by a shader); `strokeSides: none` draws no side.
+- An input's prefix/suffix icon runs its own reactions when tapped (they were never run). `scrollTo` reports a node
+  that is not on screen instead of doing nothing.
+- Render command: diagnostics are about the page as it renders at each size: `layout_overflow`/`offscreen` read each
+  node with its media rules and states applied and the scroll views actually rendered; what an ancestor clips away
+  is not reported, nor a path past its box under a clipping ancestor; several exceptions in one frame are reported
+  one by one, each naming its node (by instance path inside a component). `--full-page` always captures from the
+  page's top. `--fonts` reads `.woff` (decoded by the command), font package folders and `system`; `.woff2` is
+  reported, not read; `font_fallback` names the family, weight and style asked for and where it looked.
+
 **Sections and components by reference (codelessly_api docs/design/06, phase 1)**
 
 - A call node (a node whose `type` is a component's) renders as its definition's nodes, each an ordinary box of
