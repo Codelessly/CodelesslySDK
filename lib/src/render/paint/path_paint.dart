@@ -172,6 +172,8 @@ class RenderShapePath extends RenderBox with ImageClient {
     paintPathShadows(canvas, path, _shadows(d, api.EffectType.dropShadow),
         filled: filled, stroke: outline, strokeWidth: stroked ? strokeWidth : 0, cap: cap, join: join);
 
+    // Per-shape gradients and subpathColors are schema 3 only: schema 4
+    // draws them as customPaint path ops (codelessly_api's `paintSteps4`).
     PathShapes? shapes() => PathShapes.of(data, viewBox, size);
     final colors = n.prop(PathProps.subpathColors).map((c) => c?.flutter).toList();
     // Blending fills blend with the fills under them, not with what is under
@@ -206,7 +208,8 @@ class RenderShapePath extends RenderBox with ImageClient {
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = cap
-      ..strokeJoin = join;
+      ..strokeJoin = join
+      ..strokeMiterLimit = n.prop(PathProps.strokeMiterLimit);
     for (final p in strokes) {
       // A trimmed or dashed outline is one line along the whole path, so its
       // gradient spans the box.
@@ -222,6 +225,9 @@ class RenderShapePath extends RenderBox with ImageClient {
   static List<BoxShadow> _shadows(api.Decoration d, api.EffectType type) =>
       [for (final e in d.effects) if (e.visible && e.type == type) boxShadow(e)];
 
+  /// **Schema 3 only**: schema 4 makes a box with a path a `path` node
+  /// ([_paintVector]); this goes with schema 4's version gate.
+  ///
   /// A box drawn as its path (PassiveRectangleWidget with a path): its drop
   /// shadows following the path (its fill and its stroke), its fills (and
   /// foreground fills) clipped to the path, its strokes along it, centered;
