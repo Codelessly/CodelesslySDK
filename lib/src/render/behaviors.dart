@@ -28,7 +28,7 @@ import 'recipe.dart';
 
 /// Track pose, transform gesture, motion, shimmer, flip and tilt: the
 /// layers between the constraints and the animations. The motion is the
-/// node's one transform (Flutter's `Transform`): schema 4 folded the node's
+/// node's one transform (Flutter's `Transform`): 30.1.0 folded the node's
 /// own scale and rotation into it.
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviors;

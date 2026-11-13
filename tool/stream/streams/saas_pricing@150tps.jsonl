@@ -1,4 +1,4 @@
-{"meta":{"ui":"saas_pricing","kind":"page","brief":"A SaaS pricing page (m05 experiment, saas-landing-B).","source":"synthetic","rateTokensPerSecond":150,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":60616,"outputTokens":15154}}
+{"meta":{"ui":"saas_pricing","kind":"page","brief":"A SaaS pricing page (m05 experiment, saas-landing-B).","source":"synthetic","rateTokensPerSecond":150,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":60621,"outputTokens":15154}}
 {"tMs":527,"delta":"{\"ops\":[\n{\"op\":\""}
 {"tMs":547,"delta":"roots\",\"root"}
 {"tMs":553,"delta":"s\":["}
@@ -272,7 +272,7 @@
 {"tMs":4780,"delta":",\"id\":\"l"}
 {"tMs":4793,"delta":"ogoMark\""}
 {"tMs":4800,"delta":",\"no"}
-{"tMs":4827,"delta":"de\":{\"type\":\"box"}
+{"tMs":4827,"delta":"de\":{\"type\":\"path"}
 {"tMs":4847,"delta":"\",\"layout\":{"}
 {"tMs":4853,"delta":"\"wid"}
 {"tMs":4873,"delta":"th\":34,\"heig"}
@@ -282,7 +282,7 @@
 {"tMs":4933,"delta":"\"col"}
 {"tMs":4953,"delta":"or\":\"#FFB9F3"}
 {"tMs":4980,"delta":"4C\"}]},\"props\":{"}
-{"tMs":5007,"delta":"\"path\":\"M0 30L3."}
+{"tMs":5007,"delta":"\"data\":\"M0 30L3."}
 {"tMs":5020,"delta":"5 15H10L"}
 {"tMs":5040,"delta":"6.5 30Z M10 "}
 {"tMs":5053,"delta":"30L15.3 "}
@@ -583,7 +583,7 @@
 {"tMs":9993,"delta":"\":\"set\",\"id\""}
 {"tMs":10013,"delta":":\"heroGrid\","}
 {"tMs":10040,"delta":"\"node\":{\"type\":\""}
-{"tMs":10067,"delta":"box\",\"layout\":{\""}
+{"tMs":10067,"delta":"path\",\"layout\":{\""}
 {"tMs":10087,"delta":"width\":{\"fil"}
 {"tMs":10093,"delta":"l\":1"}
 {"tMs":10100,"delta":"440}"}
@@ -600,8 +600,8 @@
 {"tMs":10260,"delta":":{\"strokes\":"}
 {"tMs":10287,"delta":"[{\"color\":\"#FF13"}
 {"tMs":10307,"delta":"1C1C\"}]},\"pr"}
-{"tMs":10320,"delta":"ops\":{\"p"}
-{"tMs":10347,"delta":"ath\":\"M40 0V1200"}
+{"tMs":10320,"delta":"ops\":{\"d"}
+{"tMs":10347,"delta":"ata\":\"M40 0V1200"}
 {"tMs":10367,"delta":"M120 0V1200M"}
 {"tMs":10373,"delta":"200 "}
 {"tMs":10380,"delta":"0V12"}
@@ -4775,7 +4775,7 @@
 {"tMs":79780,"delta":"t\",\"id\":"}
 {"tMs":79807,"delta":"\"ctaGrid\",\"node\""}
 {"tMs":79820,"delta":":{\"type\""}
-{"tMs":79840,"delta":":\"box\",\"layo"}
+{"tMs":79840,"delta":":\"path\",\"layo"}
 {"tMs":79867,"delta":"ut\":{\"width\":{\"f"}
 {"tMs":79873,"delta":"ill\""}
 {"tMs":79900,"delta":":1440},\"height\":"}
@@ -4790,8 +4790,8 @@
 {"tMs":80067,"delta":"or\":\"#FF"}
 {"tMs":80087,"delta":"111A1A\"}]},\""}
 {"tMs":80100,"delta":"props\":{"}
-{"tMs":80107,"delta":"\"pat"}
-{"tMs":80120,"delta":"h\":\"M40 "}
+{"tMs":80107,"delta":"\"dat"}
+{"tMs":80120,"delta":"a\":\"M40 "}
 {"tMs":80140,"delta":"0V1200M120 0"}
 {"tMs":80147,"delta":"V120"}
 {"tMs":80167,"delta":"0M200 0V1200"}
@@ -5242,7 +5242,7 @@
 {"tMs":87647,"delta":"\"id\":\"logoFM"}
 {"tMs":87660,"delta":"ark\",\"no"}
 {"tMs":87667,"delta":"de\":"}
-{"tMs":87693,"delta":"{\"type\":\"box\",\"l"}
+{"tMs":87693,"delta":"{\"type\":\"path\",\"l"}
 {"tMs":87720,"delta":"ayout\":{\"width\":"}
 {"tMs":87733,"delta":"34,\"heig"}
 {"tMs":87760,"delta":"ht\":30},\"decorat"}
@@ -5250,8 +5250,8 @@
 {"tMs":87807,"delta":"\"color\":\"#FF"}
 {"tMs":87827,"delta":"B9F34C\"}]},\""}
 {"tMs":87840,"delta":"props\":{"}
-{"tMs":87847,"delta":"\"pat"}
-{"tMs":87867,"delta":"h\":\"M0 30L3."}
+{"tMs":87847,"delta":"\"dat"}
+{"tMs":87867,"delta":"a\":\"M0 30L3."}
 {"tMs":87887,"delta":"5 15H10L6.5 "}
 {"tMs":87907,"delta":"30Z M10 30L1"}
 {"tMs":87933,"delta":"5.3 7H21.8L16.5 "}
@@ -5864,7 +5864,7 @@
 {"tMs":97800,"delta":"\"id\":\"logoMMark\""}
 {"tMs":97807,"delta":",\"no"}
 {"tMs":97827,"delta":"de\":{\"type\":"}
-{"tMs":97833,"delta":"\"box"}
+{"tMs":97833,"delta":"\"path"}
 {"tMs":97847,"delta":"\",\"layou"}
 {"tMs":97867,"delta":"t\":{\"width\":"}
 {"tMs":97880,"delta":"34,\"heig"}
@@ -5873,8 +5873,8 @@
 {"tMs":97947,"delta":"\":[{\"color\":"}
 {"tMs":97960,"delta":"\"#FFB9F3"}
 {"tMs":97973,"delta":"4C\"}]},\""}
-{"tMs":97993,"delta":"props\":{\"pat"}
-{"tMs":98013,"delta":"h\":\"M0 30L3."}
+{"tMs":97993,"delta":"props\":{\"dat"}
+{"tMs":98013,"delta":"a\":\"M0 30L3."}
 {"tMs":98040,"delta":"5 15H10L6.5 30Z "}
 {"tMs":98047,"delta":"M10 "}
 {"tMs":98053,"delta":"30L1"}

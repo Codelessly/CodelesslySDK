@@ -64,20 +64,20 @@ Map<String, Object?> _strokeBox({double progress = 1, String? fill = '#FFFF0000'
       'fillColor': ?fill,
     };
 
-/// A box of [size] with schema-3 stroke path [strokePath], as a schema-3
-/// document loads it (migrated to schema 4), drawn by a running app's
+/// A box of [size] with 30.0.0's stroke path [strokePath], as a schema-2
+/// document loads it (migrated to its custom paint op), drawn by a running app's
 /// binder (a migrated line's fractions of the box are formulas of its size).
 Future<RenderRepaintBoundary> _showStroke(WidgetTester tester, Map<String, Object?> strokePath, Size size) =>
     _showNode(tester, {'type': 'box', 'layout': {'width': size.width, 'height': size.height}, 'strokePath': strokePath}, size);
 
-/// Schema-3 [node] in a document of its own, loaded (migrated to schema 4)
-/// and drawn at [size] by a running app's binder.
+/// [node] (30.0.0's spellings) in a schema-2 document of its own, loaded
+/// (migrated) and drawn at [size] by a running app's binder.
 Future<RenderRepaintBoundary> _showNode(WidgetTester tester, Map<String, Object?> node, Size size) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = size;
   addTearDown(tester.view.reset);
   final doc = LayoutDocument.fromJson({
-    'schema': 3,
+    'schema': 2,
     'roots': ['n'],
     'nodes': {'n': node},
   });

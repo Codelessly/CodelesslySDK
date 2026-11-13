@@ -1,4 +1,4 @@
-{"meta":{"ui":"saas_pricing","kind":"page","brief":"A SaaS pricing page (m05 experiment, saas-landing-B).","source":"synthetic","rateTokensPerSecond":400,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":60616,"outputTokens":15154}}
+{"meta":{"ui":"saas_pricing","kind":"page","brief":"A SaaS pricing page (m05 experiment, saas-landing-B).","source":"synthetic","rateTokensPerSecond":400,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":60621,"outputTokens":15154}}
 {"tMs":503,"delta":"{\"op"}
 {"tMs":508,"delta":"s\":[\n{\"o"}
 {"tMs":513,"delta":"p\":\"root"}
@@ -260,7 +260,7 @@
 {"tMs":2115,"delta":"ark\",\"node\":"}
 {"tMs":2118,"delta":"{\"ty"}
 {"tMs":2120,"delta":"pe\":"}
-{"tMs":2125,"delta":"\"box\",\"l"}
+{"tMs":2125,"delta":"\"path\",\"l"}
 {"tMs":2128,"delta":"ayou"}
 {"tMs":2133,"delta":"t\":{\"wid"}
 {"tMs":2143,"delta":"th\":34,\"height\":"}
@@ -270,7 +270,7 @@
 {"tMs":2165,"delta":"or\":"}
 {"tMs":2168,"delta":"\"#FF"}
 {"tMs":2178,"delta":"B9F34C\"}]},\"prop"}
-{"tMs":2185,"delta":"s\":{\"path\":\""}
+{"tMs":2185,"delta":"s\":{\"data\":\""}
 {"tMs":2188,"delta":"M0 3"}
 {"tMs":2190,"delta":"0L3."}
 {"tMs":2200,"delta":"5 15H10L6.5 30Z "}
@@ -581,7 +581,7 @@
 {"tMs":4063,"delta":":\"he"}
 {"tMs":4073,"delta":"roGrid\",\"node\":{"}
 {"tMs":4075,"delta":"\"typ"}
-{"tMs":4083,"delta":"e\":\"box\",\"la"}
+{"tMs":4083,"delta":"e\":\"path\",\"la"}
 {"tMs":4090,"delta":"yout\":{\"widt"}
 {"tMs":4093,"delta":"h\":{"}
 {"tMs":4100,"delta":"\"fill\":1440}"}
@@ -599,7 +599,7 @@
 {"tMs":4160,"delta":":{\"strokes\":"}
 {"tMs":4170,"delta":"[{\"color\":\"#FF13"}
 {"tMs":4180,"delta":"1C1C\"}]},\"props\""}
-{"tMs":4188,"delta":":{\"path\":\"M4"}
+{"tMs":4188,"delta":":{\"data\":\"M4"}
 {"tMs":4198,"delta":"0 0V1200M120 0V1"}
 {"tMs":4208,"delta":"200M200 0V1200M2"}
 {"tMs":4215,"delta":"80 0V1200M36"}
@@ -4729,7 +4729,7 @@
 {"tMs":30233,"delta":":\"set\",\"id\":\"cta"}
 {"tMs":30235,"delta":"Grid"}
 {"tMs":30243,"delta":"\",\"node\":{\"t"}
-{"tMs":30250,"delta":"ype\":\"box\",\""}
+{"tMs":30250,"delta":"ype\":\"path\",\""}
 {"tMs":30255,"delta":"layout\":"}
 {"tMs":30258,"delta":"{\"wi"}
 {"tMs":30265,"delta":"dth\":{\"fill\""}
@@ -4748,8 +4748,8 @@
 {"tMs":30340,"delta":"\"color\":\"#FF111A"}
 {"tMs":30343,"delta":"1A\"}"}
 {"tMs":30345,"delta":"]},\""}
-{"tMs":30353,"delta":"props\":{\"pat"}
-{"tMs":30358,"delta":"h\":\"M40 "}
+{"tMs":30353,"delta":"props\":{\"dat"}
+{"tMs":30358,"delta":"a\":\"M40 "}
 {"tMs":30368,"delta":"0V1200M120 0V120"}
 {"tMs":30375,"delta":"0M200 0V1200"}
 {"tMs":30378,"delta":"M280"}
@@ -5210,7 +5210,7 @@
 {"tMs":33180,"delta":"\"id\":\"logoFM"}
 {"tMs":33185,"delta":"ark\",\"no"}
 {"tMs":33193,"delta":"de\":{\"type\":"}
-{"tMs":33200,"delta":"\"box\",\"layou"}
+{"tMs":33200,"delta":"\"path\",\"layou"}
 {"tMs":33208,"delta":"t\":{\"width\":"}
 {"tMs":33210,"delta":"34,\""}
 {"tMs":33215,"delta":"height\":"}
@@ -5219,8 +5219,8 @@
 {"tMs":33228,"delta":"ion\":{\"f"}
 {"tMs":33235,"delta":"ills\":[{\"col"}
 {"tMs":33245,"delta":"or\":\"#FFB9F34C\"}"}
-{"tMs":33255,"delta":"]},\"props\":{\"pat"}
-{"tMs":33258,"delta":"h\":\""}
+{"tMs":33255,"delta":"]},\"props\":{\"dat"}
+{"tMs":33258,"delta":"a\":\""}
 {"tMs":33263,"delta":"M0 30L3."}
 {"tMs":33268,"delta":"5 15H10L"}
 {"tMs":33275,"delta":"6.5 30Z M10 "}
@@ -5819,7 +5819,7 @@
 {"tMs":36983,"delta":"\":\"set\",\"id\":\"lo"}
 {"tMs":36990,"delta":"goMMark\",\"no"}
 {"tMs":36998,"delta":"de\":{\"type\":"}
-{"tMs":37008,"delta":"\"box\",\"layout\":{"}
+{"tMs":37008,"delta":"\"path\",\"layout\":{"}
 {"tMs":37010,"delta":"\"wid"}
 {"tMs":37018,"delta":"th\":34,\"heig"}
 {"tMs":37028,"delta":"ht\":30},\"decorat"}
@@ -5828,7 +5828,7 @@
 {"tMs":37048,"delta":"\"color\":\"#FFB9F3"}
 {"tMs":37050,"delta":"4C\"}"}
 {"tMs":37058,"delta":"]},\"props\":{"}
-{"tMs":37065,"delta":"\"path\":\"M0 3"}
+{"tMs":37065,"delta":"\"data\":\"M0 3"}
 {"tMs":37070,"delta":"0L3.5 15"}
 {"tMs":37078,"delta":"H10L6.5 30Z "}
 {"tMs":37088,"delta":"M10 30L15.3 7H21"}

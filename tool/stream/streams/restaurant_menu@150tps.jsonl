@@ -1,4 +1,4 @@
-{"meta":{"ui":"restaurant_menu","kind":"page","brief":"A restaurant menu page (m05 experiment, restaurant-B).","source":"synthetic","rateTokensPerSecond":150,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":51360,"outputTokens":12840}}
+{"meta":{"ui":"restaurant_menu","kind":"page","brief":"A restaurant menu page (m05 experiment, restaurant-B).","source":"synthetic","rateTokensPerSecond":150,"ttftMs":500,"tokensEstimated":true,"charsPerToken":4,"assets":"tool/stream/ui/assets","chars":51363,"outputTokens":12840}}
 {"tMs":513,"delta":"{\"ops\":["}
 {"tMs":527,"delta":"\n{\"op\":\""}
 {"tMs":553,"delta":"roots\",\"roots\":["}
@@ -1039,7 +1039,7 @@
 {"tMs":18033,"delta":"nch\""}
 {"tMs":18047,"delta":",\"node\":"}
 {"tMs":18053,"delta":"{\"ty"}
-{"tMs":18080,"delta":"pe\":\"box\",\"layou"}
+{"tMs":18080,"delta":"pe\":\"path\",\"layou"}
 {"tMs":18087,"delta":"t\":{"}
 {"tMs":18100,"delta":"\"width\":"}
 {"tMs":18120,"delta":"10,\"height\":"}
@@ -1049,7 +1049,7 @@
 {"tMs":18200,"delta":"or\":\"#FFE5814F\"}"}
 {"tMs":18213,"delta":"]},\"prop"}
 {"tMs":18220,"delta":"s\":{"}
-{"tMs":18247,"delta":"\"path\":\"M5 0 L6."}
+{"tMs":18247,"delta":"\"data\":\"M5 0 L6."}
 {"tMs":18267,"delta":"2 3.8 L10 5 "}
 {"tMs":18293,"delta":"L6.2 6.2 L5 10 L"}
 {"tMs":18320,"delta":"3.8 6.2 L0 5 L3."}
@@ -1103,8 +1103,8 @@
 {"tMs":19100,"delta":"{\"op\":\"set\",\"id\""}
 {"tMs":19120,"delta":":\"starDinner"}
 {"tMs":19147,"delta":"\",\"node\":{\"type\""}
-{"tMs":19153,"delta":":\"bo"}
-{"tMs":19173,"delta":"x\",\"layout\":"}
+{"tMs":19153,"delta":":\"path"}
+{"tMs":19173,"delta":"\",\"layout\":"}
 {"tMs":19193,"delta":"{\"width\":10,"}
 {"tMs":19200,"delta":"\"hei"}
 {"tMs":19220,"delta":"ght\":10},\"de"}
@@ -1116,7 +1116,7 @@
 {"tMs":19293,"delta":"FE5814F\"}]},"}
 {"tMs":19300,"delta":"\"pro"}
 {"tMs":19307,"delta":"ps\":"}
-{"tMs":19320,"delta":"{\"path\":"}
+{"tMs":19320,"delta":"{\"data\":"}
 {"tMs":19347,"delta":"\"M5 0 L6.2 3.8 L"}
 {"tMs":19373,"delta":"10 5 L6.2 6.2 L5"}
 {"tMs":19387,"delta":" 10 L3.8"}
@@ -3712,8 +3712,8 @@
 {"tMs":62120,"delta":"d\":\"aste"}
 {"tMs":62133,"delta":"risk\",\"n"}
 {"tMs":62140,"delta":"ode\""}
-{"tMs":62160,"delta":":{\"type\":\"bo"}
-{"tMs":62167,"delta":"x\",\""}
+{"tMs":62160,"delta":":{\"type\":\"path"}
+{"tMs":62167,"delta":"\",\""}
 {"tMs":62193,"delta":"layout\":{\"width\""}
 {"tMs":62220,"delta":":18,\"height\":18}"}
 {"tMs":62233,"delta":",\"decora"}
@@ -3723,17 +3723,15 @@
 {"tMs":62320,"delta":",\"strokeWidt"}
 {"tMs":62333,"delta":"h\":1.2},"}
 {"tMs":62347,"delta":"\"props\":"}
-{"tMs":62353,"delta":"{\"pa"}
-{"tMs":62360,"delta":"th\":"}
+{"tMs":62353,"delta":"{\"strokeJoin\":\"round\",\"da"}
+{"tMs":62360,"delta":"ta\":"}
 {"tMs":62387,"delta":"\"M9 0 L9 18 M0 9"}
 {"tMs":62393,"delta":" L18"}
 {"tMs":62407,"delta":" 9 M2.6 "}
 {"tMs":62413,"delta":"2.6 "}
 {"tMs":62440,"delta":"L15.4 15.4 M15.4"}
 {"tMs":62460,"delta":" 2.6 L2.6 15"}
-{"tMs":62467,"delta":".4\","}
-{"tMs":62480,"delta":"\"strokeJ"}
-{"tMs":62500,"delta":"oin\":\"round\""}
+{"tMs":62467,"delta":".4\""}
 {"tMs":62527,"delta":"}}},\n{\"op\":\"set\""}
 {"tMs":62533,"delta":",\"id"}
 {"tMs":62540,"delta":"\":\"s"}

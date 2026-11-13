@@ -1,22 +1,23 @@
-// The schema-4 paint steps (codelessly_api's `paintSteps4`, run by
-// `migrate3to4`) move a stroke path, a box drawn as a path and a path's
+// 30.1.0's paint steps (codelessly_api's `paintSteps`, among the one-way
+// steps that end `migrate2to3`) move a stroke path, a box drawn as a path and a path's
 // per-shape colors onto `customPaint` and the path node. Each case draws a
-// schema-3 node as the migration rewrites it and matches a golden image of
-// it (goldens/). The goldens were taken while schema 3's painters still drew
+// 30.0.0 node as the migration rewrites it and matches a golden image of
+// it (goldens/). The goldens were taken while 30.0.0's painters still drew
 // the node the old way too, and both agreed: pixel for pixel, or within the
 // difference a case names (the largest channel difference, out of 255).
 import 'dart:ui' as ui;
 
-import 'package:codelessly_api/codelessly_api.dart' show Json, LayoutDocument, Node, Variable, VariableType, migrate3to4, readMap;
+import 'package:codelessly_api/codelessly_api.dart' show Json, LayoutDocument, Node, Variable, VariableType, migrate2to3, readMap;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Schema-3 [node] and the node `migrate3to4` makes of it.
+/// [node] (30.0.0's spellings, in a schema-2 document) and the node
+/// `migrate2to3` makes of it.
 (Json, Json) _migrate(Json node) {
-  final doc = migrate3to4({
-    'schema': 3,
+  final doc = migrate2to3({
+    'schema': 2,
     'nodes': {'n': node},
   });
   return (node, readMap(readMap(doc['nodes'])!['n'])!);
@@ -66,10 +67,10 @@ int _ink(List<int> rgba) {
 }
 
 /// Draws [node] as the migration rewrote it at each of [sizes], matching
-/// the golden `<name>-<width>x<height>`. [schema3Difference] records how far
-/// schema 3's own drawing was from it when the golden was taken.
+/// the golden `<name>-<width>x<height>`. [oldPainterDifference] records how far
+/// 30.0.0's own drawing was from it when the golden was taken.
 Future<Json> _same(WidgetTester tester, String name, Json node, List<Size> sizes,
-    {int schema3Difference = 0, List<Variable> variables = const []}) async {
+    {int oldPainterDifference = 0, List<Variable> variables = const []}) async {
   final (before, after) = _migrate(node);
   expect(after, isNot(before));
   for (final size in sizes) {
@@ -139,7 +140,7 @@ void main() {
     testWidgets('a fill fading with a progress below 1 is within one level of the fade', (tester) async {
       await _same(tester, 'stroke-fill-fading', _box({
         'strokePath': {'points': [[0.1, 10], [0.9, 15], [0.8, 80], [0.15, 70]], 'fillColor': '#C0FF8800', 'progress': 0.37, 'color': '#FF222222'},
-      }), _sizes, schema3Difference: 1);
+      }), _sizes, oldPainterDifference: 1);
     });
 
     testWidgets('a progress bound to a variable', (tester) async {
@@ -177,7 +178,7 @@ void main() {
       await _same(tester, 'box-path-fill', _box({
         'props': {'path': 'M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z'},
         'decoration': {'fills': [{'color': '#FFB9F34C'}]},
-      }, width: 34, height: 30), const [Size(34, 30)], schema3Difference: 3);
+      }, width: 34, height: 30), const [Size(34, 30)], oldPainterDifference: 3);
     });
   });
 
