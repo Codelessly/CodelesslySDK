@@ -6,6 +6,36 @@ loading, read as they are: one written with 30.0.0's spellings of a node's scale
 stroke path, a box drawn as a path or per-shape paints must be updated (codelessly_api's changelog has the
 mapping; a schema-2 document is migrated to the one spelling when it loads).
 
+- **No Material defaults reach the screen.** Controls (the Material islands: buttons, chips, fields, switches,
+  sliders, pickers, tabs, navigation bars, progress) and the runtime's chrome (dialogs, toasts, sheets, menus,
+  tooltips, date and time pickers) take every color and font their node leaves unset from one theme,
+  `themeDataOf(tokens)` (lib/src/render/control_theme.dart): every `ColorScheme` role is a token or derived from
+  one, and without a theme the set is neutral (`kInk` near-black on `kPaper` white; near-white on `kPaperDark`
+  in dark mode; greys between). No purple seed, no tints (`surfaceTint` transparent), no splashes
+  (`NoSplash`), no elevation unless a node sets one, and text in the tokens' `fontFamily` (`titleFontFamily` for
+  titles) or no family at all, never Roboto. A token `primary` that doesn't read on the surface (3:1) gives way to
+  the surface's ink for what controls draw on it; filled buttons and floating action buttons keep it as their
+  fill. `buttonRadius` shapes every kind of button, chip and segmented button; `radius` dialogs, menus, pickers
+  and (when set) the default text field border.
+- **Controls read what they sit on.** Each island's theme is made for the surface under it (the node's and its
+  ancestors' fills, `ControlTheme`): an unstyled text, outlined or icon button, a check or a thumb on a dark band of
+  a light page is drawn light. A button, floating action button or chip with a fill of its own but no label color
+  is labelled in ink or paper, whichever reads on it; a button's `style.textStyle.color` is its label color when
+  `foregroundColor` is unset (Flutter drew the theme's over it). Labels Flutter dropped the color of (a chip's, a
+  navigation bar's, an input's text in a style of its own) are in the theme's ink instead of white.
+- **The icon button is a plain button** (a `TextButton` around the glyph): no raised lavender tile. A tonal
+  filled button is the theme's selected tint. An unset divider is the theme's faint outline over what it's drawn
+  on, an unset badge the theme's error color, an unset activity indicator the theme's muted ink.
+- **Breaking: `CodelesslyConfig.useHostTheme` is removed.** Layouts never render with the app's `Theme`; the mode
+  is always the device's. Islands hosted outside a `CodelesslyWidget` (a `NodeView` in an app) get the neutral
+  theme, not the app's. The runtime's dialogs, toasts and sheets open from inside the layout's theme (they opened
+  from above it, so they took the app's), and the confirm dialog's and toast's buttons, the pickers and their
+  `pickerTheme` start from the layout's look (`ResolvedFeedbackTheme.themeData`; `apply(ThemeData)` and the
+  inputs' `ColorScheme.fromSeed` are gone). A `FeedbackTheme` in the app's `ThemeData.extensions` no longer reaches
+  a layout. `themeDataOf` takes an optional `surface`; `kInk`, `kInkOnDark`, `kPaper`, `kPaperDark` are exported.
+- **Guard:** test/app/no_material_look_test.dart renders every control type of the inputs, material, collections
+  and indicators groups unstyled, with no theme and with a brand theme, light and dark, and fails on any pixel of
+  Material 3's baseline palette, on a ripple when a button is pressed, or on a control text not in the theme's font.
 - **A node's scale and rotation are its motion.** The chain's own `scale` layer and the `RenderTransform` of
   `layout.rotation` are gone: `RenderMotion` draws `motion.scale` and `motion.rotate` (the migration keeps
   30.0.0's rotation pivot, moved by half an uneven margin, as a translation). A state style that moves a node
