@@ -4,9 +4,17 @@
 
 - Renders the API's new `flex` node (Flutter `Flex`) with the row/column render object, its main axis from
   `props.direction` (bound or patched: a direction change re-lays the same child boxes).
-- Applies a node's `responsive` patches for the screen's breakpoint before interaction states, bindings and
-  conditions; a breakpoint change re-applies only the nodes that have patches. A patched `children` order moves the
-  same boxes (state kept). Tests compare each breakpoint with the hand-written Row / Column.
+- Applies a node's `media` rules (CSS media queries) for the screen's size before interaction states, bindings and
+  conditions; a resize re-applies only the nodes whose holding rules changed (and their parents). Rows, columns
+  and flex nodes lay their children out by `layout.order` (CSS order).
+- A wrapping row/column/flex reads `layout.basis` (CSS flex-basis): lines are broken by the basis and filling
+  children grow by `flex` to share their line (shrinking to a line narrower than the basis). Tests assert the
+  rects CSS gives for `flex: 1 1 280px` at several widths.
+- `gridView.minCrossAxisExtent`: auto-fit columns (CSS `repeat(auto-fit, minmax(min, 1fr))`).
+- **Bug fix (behaviour change):** in a running screen a node hidden by its own `"visible": false` (or a media rule)
+  now takes no room, as one hidden by a binding already did and as Flutter's `Visibility` does; before, it kept
+  its box empty. And a hidden child no longer takes a slot in `spaceBetween` / `spaceAround` / `spaceEvenly`: the
+  shown children are spread as the Flutter Row without it would spread them (it already took no `spacing`).
 
 **New: catalogs and plugins** (codelessly_api's `Catalog` and feature libraries; its docs/design/05-plugins-and-layers.md)
 

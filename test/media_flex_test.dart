@@ -1,7 +1,8 @@
-// A `flex` node (Flutter's Flex) whose direction, spacing, padding and
-// child order are patched per breakpoint (`responsive`): at each width it
-// lays out exactly as the hand-written Row / Column would, and a change of
-// breakpoint keeps every child's render box (and so its state).
+// A `flex` node (Flutter's Flex) whose direction, spacing and padding are
+// patched by media rules (CSS media queries), its children reordered by
+// their own `layout.order` (CSS order) at a width: at each width it lays
+// out exactly as the hand-written Row / Column would, and a change of
+// width keeps every child's render box (and so its state).
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart' hide Axis;
 import 'package:flutter/material.dart' as m show Axis;
@@ -26,25 +27,30 @@ Map<String, Object?> doc({Map<String, Object?> extra = const {}}) => {
             'padding': 40,
           },
           'props': {'spacing': 24, 'crossAxisAlignment': 'start'},
-          'responsive': [
-            {'smallerThan': 'desktop', 'patch': {'layout': {'padding': 24}}},
+          'media': [
+            {'maxWidth': 'tablet', 'patch': {'layout': {'padding': 24}}},
             {
-              'equals': 'mobile',
+              'maxWidth': 599,
               'patch': {
                 'props': {'direction': 'vertical', 'spacing': 8},
-                'children': ['c', 'b', 'a'],
                 'layout': {'padding': 16},
               },
             },
           ],
           ...extra,
         },
-        'a': {'type': 'box', 'layout': {'width': 100, 'height': 50}},
+        'a': {
+          'type': 'box',
+          'layout': {'width': 100, 'height': 50},
+          'media': [
+            {'maxWidth': 'mobile', 'patch': {'layout': {'order': 2}}},
+          ],
+        },
         'b': {
           'type': 'box',
           'layout': {'width': {'fill': 10}, 'height': 50, 'flex': 2},
-          'responsive': [
-            {'equals': 'mobile', 'patch': {'layout': {'height': 70}}},
+          'media': [
+            {'maxWidth': 'mobile', 'patch': {'layout': {'height': 70, 'order': 1}}},
           ],
         },
         'c': {'type': 'box', 'layout': {'width': 100, 'height': 30}},
@@ -134,7 +140,7 @@ void main() {
     tester.view.physicalSize = const Size(1440, 900);
     addTearDown(tester.view.reset);
     final json = doc();
-    final f = ((json['nodes'] as Map)['f'] as Map)..remove('responsive');
+    final f = ((json['nodes'] as Map)['f'] as Map)..remove('media');
     f['props'] = {'direction': 'vertical', 'spacing': 24, 'crossAxisAlignment': 'start'};
     final tree = NodeTree(DocumentSource(LayoutDocument.fromJson(json)));
     addTearDown(tree.dispose);

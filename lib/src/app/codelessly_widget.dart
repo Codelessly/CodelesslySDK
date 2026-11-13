@@ -1176,7 +1176,8 @@ class _LayoutViewState extends State<_LayoutView> {
       // A modal covering the screen asks its screen to fill it.
       final sizing = CanvasSizingScope.maybeOf(context) ?? widget.sizing;
       _screen.tree.responsive = ResponsiveWidth(
-          breakpoints, sizing == CanvasSizing.design ? MediaQuery.sizeOf(context).width : width);
+          breakpoints, sizing == CanvasSizing.design ? MediaQuery.sizeOf(context).width : width,
+          height: MediaQuery.sizeOf(context).height);
       final canvas = canvasId == null ? null : layout.document[canvasId];
       if (canvasId == null || canvas == null) return const SizedBox.shrink();
       _seed(canvasId);

@@ -180,6 +180,15 @@ class RenderCodelesslyWrap extends RenderBox
     return runs;
   }
 
+  /// [runs] with the same children, measured again from [sizes].
+  List<_Run> _regroup(List<_Run> runs, List<Size?> sizes) => [
+        for (final _Run old in runs)
+          _Run()
+            ..children.addAll(old.children)
+            ..mainExtent = old.children.fold<double>(0, (sum, i) => sum + _main(sizes[i]!)) + _spacing * (old.children.length - 1)
+            ..crossExtent = old.children.fold<double>(0, (m, i) => math.max(m, _cross(sizes[i]!))),
+      ];
+
   /// The leading space and the space between items for [alignment] with
   /// [free] space and [count] items.
   static (double, double) _distribute(
@@ -206,13 +215,48 @@ class RenderCodelesslyWrap extends RenderBox
         : constraints.maxHeight;
     final BoxConstraints childConstraints = _childConstraints(mainLimit);
     // Collapsed children are laid out too, so they have a size, but take no
-    // part in the runs.
+    // part in the runs. A child with a basis (CSS flex-basis) counts as its
+    // basis (no longer than a line: it shrinks, as a CSS item does) when
+    // the lines are broken, and is laid out once its line is known.
+    double? basisOf(RenderBox child) {
+      final CodelesslyFlexParentData data = child.parentData! as CodelesslyFlexParentData;
+      final double? b = data.basis;
+      if (b == null || _collapsed(child)) return null;
+      return mainLimit.isFinite ? math.min(b, mainLimit) : b;
+    }
+
     final List<Size?> sizes = <Size?>[
       for (final RenderBox child in children)
-        if (layoutChild(child, childConstraints) case final Size size)
+        if (basisOf(child) case final double b)
+          _isHorizontal ? Size(b, 0) : Size(0, b)
+        else if (layoutChild(child, childConstraints) case final Size size)
           _collapsed(child) ? null : size,
     ];
-    final List<_Run> runs = _runs(sizes, mainLimit);
+    List<_Run> runs = _runs(sizes, mainLimit);
+    if (children.any((c) => basisOf(c) != null)) {
+      // Each line's free room goes to its growing children by their grow
+      // factors (CSS flex-grow); then every basis child is laid out at its
+      // final main size, and the lines measured again.
+      for (final _Run run in runs) {
+        final double free = mainLimit.isFinite ? math.max(0, mainLimit - run.mainExtent) : 0;
+        int grows = 0;
+        for (final int i in run.children) {
+          if (basisOf(children[i]) != null) grows += (children[i].parentData! as CodelesslyFlexParentData).grow;
+        }
+        for (final int i in run.children) {
+          final RenderBox child = children[i];
+          final double? b = basisOf(child);
+          if (b == null) continue;
+          final int g = (child.parentData! as CodelesslyFlexParentData).grow;
+          final double main = b + (grows > 0 ? free * g / grows : 0);
+          sizes[i] = layoutChild(
+            child,
+            _isHorizontal ? BoxConstraints.tightFor(width: main) : BoxConstraints.tightFor(height: main),
+          );
+        }
+      }
+      runs = _regroup(runs, sizes);
+    }
 
     double longest = 0;
     double thickness = 0;

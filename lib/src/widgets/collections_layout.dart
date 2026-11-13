@@ -860,6 +860,10 @@ class RenderGridItems extends RenderCollection {
   EdgeInsets padding = EdgeInsets.zero;
   int crossAxisCount = 2;
   double? maxCrossAxisExtent;
+
+  /// CSS `repeat(auto-fit, minmax(min, 1fr))`: as many columns as fit at
+  /// least this wide, never more than [itemCount]; wins over the others.
+  double? minCrossAxisExtent;
   double mainAxisSpacing = 0, crossAxisSpacing = 0, childAspectRatio = 1;
   double? mainAxisExtent;
   bool shrinkWrapRows = false;
@@ -878,6 +882,13 @@ class RenderGridItems extends RenderCollection {
   void changed() => markNeedsLayout();
 
   int _columns(double crossInner) {
+    final min = minCrossAxisExtent;
+    if (min != null) {
+      if (!crossInner.isFinite) return 1;
+      final fit = math.max(1, ((crossInner + crossAxisSpacing) / (min + crossAxisSpacing) + 1e-9).floor());
+      final items = itemCount;
+      return items != null && items > 0 ? math.min(fit, items) : fit;
+    }
     final max = maxCrossAxisExtent;
     if (max == null) return math.max(1, crossAxisCount);
     if (shrinkWrapRows) return crossInner.isFinite ? math.max(1, (crossInner / (max + crossAxisSpacing)).ceil()) : 1;

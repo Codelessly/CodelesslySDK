@@ -530,7 +530,8 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(_viewportBox(b, n, canShrinkWrap: true));
     return;
   }
-  if (b.tree.animates && n.pagination != null && !n.prop(GridViewProps.shrinkWrapRows) && !n.prop(GridViewProps.masonry)) {
+  if (b.tree.animates && n.pagination != null && !n.prop(GridViewProps.shrinkWrapRows) && !n.prop(GridViewProps.masonry) &&
+      n.prop(GridViewProps.minCrossAxisExtent) == null) {
     return _pagedGrid(b, n, chain, itemId);
   }
   final count = _itemCount(n);
@@ -543,6 +544,7 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..padding = n.layout.padding.flutter
     ..crossAxisCount = n.prop(GridViewProps.crossAxisCount)
     ..maxCrossAxisExtent = n.prop(GridViewProps.maxCrossAxisExtent)
+    ..minCrossAxisExtent = n.prop(GridViewProps.minCrossAxisExtent)
     ..mainAxisSpacing = n.prop(GridViewProps.mainAxisSpacing)
     ..crossAxisSpacing = n.prop(GridViewProps.crossAxisSpacing)
     ..childAspectRatio = n.prop(GridViewProps.childAspectRatio)
