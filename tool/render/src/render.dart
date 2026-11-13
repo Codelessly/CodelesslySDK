@@ -835,8 +835,10 @@ List<NodeBox> _boxes(WidgetsBinding binding) => [
 /// The box of node [id] on screen: the topmost (the last painted), or with
 /// `id#n` the n-th (0-based) of the copies a list repeats.
 NodeBox? _boxOf(WidgetsBinding binding, String id) {
-  // A node inside a component, by path: `plans/card1/cta`.
-  if (id.contains('/')) {
+  // A node inside a component, by path: `plans/card1/cta`; a call by its
+  // id (its box is its definition root's): `send`, `sizes#3`.
+  final byPath = id.contains('/') || _boxes(binding).any((b) => b.id != id.split('#').first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == id.split('#').first);
+  if (byPath) {
     for (final b in _boxes(binding)) {
       final found = b.tree.boxAtPath(id);
       if (found != null && found.attached && found.hasSize) return found;

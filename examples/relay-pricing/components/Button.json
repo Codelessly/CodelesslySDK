@@ -1,0 +1,150 @@
+{
+ "schema": 2,
+ "id": "Button",
+ "roots": [
+  "btn"
+ ],
+ "widget": {
+  "type": "Button",
+  "doc": "A pill button: filled (primary) or outlined; tapping it fires onPress with its label.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Talk to sales"
+   },
+   {
+    "key": "primary",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onPress",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Primary",
+   "size": [
+    220,
+    48
+   ],
+   "props": {
+    "label": "Talk to sales"
+   }
+  },
+  {
+   "name": "Outlined",
+   "size": [
+    220,
+    48
+   ],
+   "props": {
+    "label": "See pricing",
+    "primary": false
+   }
+  }
+ ],
+ "nodes": {
+  "btn": {
+   "type": "row",
+   "children": [
+    "btnLabel",
+    "btnIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 168
+    },
+    "height": 46,
+    "padding": [
+     20,
+     0,
+     18,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 10,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "lime"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lime"
+     }
+    ],
+    "radius": 23
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.primary ? theme.colors.lime : theme.colors.bg}",
+    "decoration.strokes[0].color": "${= props.primary ? theme.colors.lime : theme.colors.line}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPress",
+       "value": "${props.label}"
+      }
+     ]
+    }
+   ]
+  },
+  "btnLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "button"
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.primary ? theme.colors.bg : theme.colors.ink}"
+   }
+  },
+  "btnIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward",
+    "color": "bg"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.color": "${= props.primary ? theme.colors.bg : theme.colors.ink}"
+   }
+  }
+ }
+}

@@ -1,7 +1,9 @@
 {
  "schema": 2,
  "pages": [
-  "pages/pricing.json"
+  "pages/pricing.json",
+  "pages/home.json",
+  "pages/contact.json"
  ],
  "variables": [
   {
@@ -355,6 +357,144 @@
      "accent": true
     }
    ]
+  },
+  {
+   "name": "homeCopy",
+   "type": "map",
+   "value": {
+    "eyebrow": "INCIDENT RESPONSE, IN SYNC",
+    "headline": "When systems break, teams move as one.",
+    "intro": "Relay turns a scattered response into a clear, coordinated operation. Declare, assign, communicate, and learn from every incident in one place."
+   }
+  },
+  {
+   "name": "features",
+   "type": "list",
+   "value": [
+    {
+     "number": "01 / COMMAND",
+     "title": "The whole response, in one command center.",
+     "body": "Open an incident and the right people, timeline, and next actions come together instantly. No more reconstructing the story from six tools.",
+     "points": [
+      "Role-based incident assignments",
+      "Live event timeline",
+      "One-click status updates"
+     ]
+    },
+    {
+     "number": "02 / COORDINATION",
+     "title": "Keep every handoff moving.",
+     "body": "Give responders a shared picture of what matters now. Owners, tasks, and decisions stay visible as the situation changes.",
+     "points": [
+      "Clear owner and severity controls",
+      "Fast stakeholder briefings",
+      "Actions with due times"
+     ]
+    },
+    {
+     "number": "03 / LEARNING",
+     "title": "Close the loop without losing the details.",
+     "body": "The timeline you built during response becomes the start of a useful review. See patterns, follow through on fixes, and make the next incident less likely.",
+     "points": [
+      "Review-ready incident history",
+      "Follow-up tracking",
+      "Response trend reporting"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "metrics",
+   "type": "list",
+   "value": [
+    {
+     "value": "42%",
+     "label": "less time spent coordinating"
+    },
+    {
+     "value": "3.1×",
+     "label": "faster stakeholder updates"
+    },
+    {
+     "value": "100%",
+     "label": "response history in one place"
+    }
+   ]
+  },
+  {
+   "name": "contactCopy",
+   "type": "map",
+   "value": {
+    "teamSizes": [
+     "1–20",
+     "21–100",
+     "101–500",
+     "501–2,000",
+     "2,000+"
+    ],
+    "response": "Your request has been saved in this browser. This reference site does not send it to a sales team."
+   }
   }
- ]
+ ],
+ "theme": {
+  "colors": {
+   "bg": "#FF080D0E",
+   "card": "#FF131C1C",
+   "line": "#FF2C3C38",
+   "ink": "#FFF0F4ED",
+   "muted": "#FFA2B0A9",
+   "lime": "#FFB9F34C"
+  },
+  "textStyles": {
+   "body": {
+    "fontFamily": "Space Grotesk",
+    "fontSize": 16,
+    "height": 1.5,
+    "color": "muted"
+   },
+   "eyebrow": {
+    "fontFamily": "IBM Plex Mono",
+    "fontSize": 12,
+    "fontWeight": 500,
+    "letterSpacing": 2.4,
+    "color": "lime"
+   },
+   "display": {
+    "fontFamily": "Space Grotesk",
+    "fontSize": 44,
+    "fontWeight": 700,
+    "letterSpacing": -1.5,
+    "height": 1.05,
+    "color": "ink"
+   },
+   "title": {
+    "from": "display",
+    "fontSize": 24,
+    "fontWeight": 600,
+    "letterSpacing": -0.5,
+    "height": 1.2
+   },
+   "button": {
+    "fontFamily": "Space Grotesk",
+    "fontSize": 15,
+    "fontWeight": 600,
+    "color": "bg"
+   }
+  },
+  "media": [
+   {
+    "minWidth": "desktop",
+    "patch": {
+     "textStyles": {
+      "display": {
+       "fontSize": 72
+      },
+      "title": {
+       "fontSize": 28
+      }
+     }
+    }
+   }
+  ]
+ }
 }

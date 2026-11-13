@@ -367,7 +367,7 @@ void main() {
     testWidgets('the rewritten Relay pricing page renders pixel-identical to the original', (tester) async {
       final o = await runRender(tester, RenderArgs(inputs: ['$fixtures/sections/original'], out: '${out.path}/o', sizes: const [Size(390, 844)],
           fullPage: true, steps: const [Step('tap', 'fq#1')]));
-      final s = await runRender(tester, RenderArgs(inputs: ['examples/relay-pricing'], out: '${out.path}/s', sizes: const [Size(390, 844)],
+      final s = await runRender(tester, RenderArgs(inputs: ['examples/relay-pricing'], out: '${out.path}/s', sizes: const [Size(390, 844)], screens: const ['pricing'],
           fullPage: true, steps: const [Step('tap', 'faq/fq#1')]));
       expect(s.errors, 0, reason: '${s.diagnostics}');
       expect(codes(s, 'error'), codes(o, 'error'));
