@@ -473,4 +473,18 @@ void main() {
     expect(shifted.summary(), contains('20 px shorter than the reference'));
     expect(File(capture.replaceFirst('.png', '.compare.png')).existsSync() && File(capture.replaceFirst('.png', '.diff.png')).existsSync(), isTrue);
   });
+
+  testWidgets('overlapping a neighbour: motion moves what is painted, not the layout; a media rule patches it', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-overlap.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)]));
+    expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
+    Future<List<int>> column(String png, int x, List<int> ys) async => (await tester.runAsync(() async {
+          final img = await decodePng(File('${out.path}/$png').readAsBytesSync());
+          return [for (final y in ys) img.rgba[(y * img.width + x) * 4] << 16 | img.rgba[(y * img.width + x) * 4 + 1] << 8 | img.rgba[(y * img.width + x) * 4 + 2]];
+        }))!;
+    // On a phone the card is drawn 36 px up, over the hero's bottom; its
+    // slot (and the box after it, at 300) do not move.
+    expect(await column('overlap@390x844.png', 195, [160, 170, 260, 270, 310]), [0x00FF00, 0xFF0000, 0xFF0000, 0xFFFFFF, 0x0000FF]);
+    // At desktop width the media rule puts it back.
+    expect(await column('overlap@1440x900.png', 720, [180, 280, 310]), [0x00FF00, 0xFF0000, 0x0000FF]);
+  });
 }
