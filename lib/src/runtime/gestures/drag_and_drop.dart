@@ -389,6 +389,7 @@ class DropSlotNode {
         recipes: tree.recipes,
         catalog: tree.catalog,
         gestures: tree.gestures,
+        imageLoader: tree.imageLoader,
       );
 
   final String id;
@@ -650,6 +651,7 @@ class _SourceDrag implements Drag {
       recipes: box.tree.recipes,
       catalog: box.tree.catalog,
       gestures: box.tree.gestures,
+      imageLoader: box.tree.imageLoader,
     );
     final size = feedbackId.isEmpty ? source.size : (source._feedbackSize ?? source.size);
     // A feedback node of its own that hugs its content on an axis (a chip

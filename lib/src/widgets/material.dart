@@ -32,6 +32,7 @@ import '../render/node_tree.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/paint/icon_names.dart';
 import '../render/recipe.dart';
+import '../runtime/http_image_loader.dart';
 
 /// Recipes for the material group, by node type.
 final Map<String, WidgetRecipe> materialRecipes = {
@@ -106,6 +107,8 @@ class _Glyph extends LeafRenderObjectWidget {
 
   @override
   RenderIconGlyph createRenderObject(BuildContext context) => RenderIconGlyph()
+    // Outside a tree with a loader of its own, its SVG is fetched as the SDK does.
+    ..imageLoader = const HttpImageLoader()
     ..icon = glyph
     ..color = color;
 

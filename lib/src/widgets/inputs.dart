@@ -48,6 +48,7 @@ import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
 import 'inputs_shapes.dart';
 import 'inputs_toggle.dart';
+import '../runtime/http_image_loader.dart';
 
 // Pickers follow the same app tokens and inferred styling as runtime dialogs.
 Widget _pickerTheme(BuildContext context, Widget? child) {
@@ -183,6 +184,8 @@ class _Glyph extends LeafRenderObjectWidget {
 
   @override
   RenderIconGlyph createRenderObject(BuildContext context) => RenderIconGlyph()
+    // Outside a tree with a loader of its own, its SVG is fetched as the SDK does.
+    ..imageLoader = const HttpImageLoader()
     ..icon = icon
     ..color = _color(context);
 

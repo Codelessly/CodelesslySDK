@@ -116,6 +116,7 @@ export 'src/render/contracts.dart';
 export 'src/render/node_tree.dart' show RenderTree, NodeBox, NodeInteractions, ResponsiveWidth, NodeTreeObserver, Slot, SlotKind;
 export 'src/widgets/tree.dart' show NodeTree, builtInCatalog;
 export 'src/runtime/gestures/gestures.dart' show DragGestures;
+export 'src/runtime/http_image_loader.dart';
 // Text as the SDK renders it, for a host's own text (an in-place editor).
 export 'src/render/convert.dart' show textStyle, FontDemand;
 export 'src/render/paint/image_fill.dart' show imagesPendingUnder;
