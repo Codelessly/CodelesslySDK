@@ -1,0 +1,68 @@
+{
+ "ui": "flights",
+ "model": "claude-sonnet-5-5",
+ "systemPromptAndToolsTokens": 28768,
+ "generate": {
+  "inputTokens": 192,
+  "outputTokens": 4083,
+  "cacheReadInputTokens": 0,
+  "cacheCreationInputTokens": 28689,
+  "ttftMs": 1673,
+  "firstToolDeltaMs": 2547,
+  "totalMs": 23520,
+  "stopReason": "StopReason.toolUse",
+  "ops": 34,
+  "opsApplied": 30,
+  "opsRejected": 4,
+  "errors": [
+   "unknown_layout_key /nodes/o0t/layout/hug",
+   "children_not_allowed /nodes/o0g/children",
+   "children_not_allowed /nodes/o1g/children",
+   "unknown_prop /nodes/confirm/props/text",
+   "dangling_child /nodes/o0a/children/0",
+   "dangling_child /nodes/o0c/children/0",
+   "dangling_child /nodes/o1c/children/0",
+   "dangling_child /nodes/footer/children/1"
+  ],
+  "warnings": 3,
+  "nodes": 28
+ },
+ "retry": {
+  "inputTokens": 5823,
+  "outputTokens": 663,
+  "cacheReadInputTokens": 28689,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1580,
+  "firstToolDeltaMs": 1650,
+  "totalMs": 4351,
+  "stopReason": "StopReason.toolUse",
+  "ops": 4,
+  "opsApplied": 3,
+  "opsRejected": 1,
+  "errors": [
+   "unknown_field /nodes/confirm/props/style/radius",
+   "dangling_child /nodes/footer/children/1"
+  ],
+  "warnings": 0,
+  "nodes": 31
+ },
+ "followup": {
+  "inputTokens": 7290,
+  "outputTokens": 975,
+  "cacheReadInputTokens": 28689,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 2323,
+  "firstToolDeltaMs": 2327,
+  "totalMs": 5978,
+  "stopReason": "StopReason.toolUse",
+  "ops": 7,
+  "opsApplied": 6,
+  "opsRejected": 1,
+  "errors": [
+   "unknown_field /nodes/confirm/props/style/shape/radius",
+   "dangling_child /nodes/footer/children/1"
+  ],
+  "warnings": 0,
+  "nodes": 31
+ }
+}

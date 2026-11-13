@@ -1,0 +1,113 @@
+{"meta":{"ui":"flights","kind":"card","followup":"Sort them by price.","model":"claude-sonnet-5-5","turn":"followup","base":["flights@claude-sonnet-5-5.jsonl","flights@claude-sonnet-5-5.retry.jsonl"],"source":"live","outputTokens":975,"usage":{"inputTokens":7290,"outputTokens":975,"cacheReadInputTokens":28689,"cacheCreationInputTokens":0,"ttftMs":2323,"firstToolDeltaMs":2327,"totalMs":5978,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":2323,"check":{"ops":7,"opsApplied":6,"opsRejected":1,"errors":["unknown_field /nodes/confirm/props/style/shape/radius","dangling_child /nodes/footer/children/1"],"warnings":0,"nodes":31},"assets":null}}
+{"tMs":2327,"delta":"{\"ops\": [{\"op\": \"set"}
+{"tMs":2327,"delta":"\", \"id\": \"confirm"}
+{"tMs":2327,"delta":"\", \"par"}
+{"tMs":2327,"delta":"ent\": \"footer\", \"node"}
+{"tMs":2327,"delta":"\": {\"type\": \"filled"}
+{"tMs":2327,"delta":"Button\", \"layout\": {"}
+{"tMs":2327,"delta":"\"width\": {\"fill\":"}
+{"tMs":2327,"delta":" 350}, \"height\": "}
+{"tMs":2327,"delta":"48}, \"props\": {\""}
+{"tMs":2384,"delta":"label\": \"Confirm fl"}
+{"tMs":2384,"delta":"ight\", \"style\": {\"back"}
+{"tMs":2384,"delta":"groundColor\": \"#"}
+{"tMs":2831,"delta":"FF2563EB\", \""}
+{"tMs":2831,"delta":"foregroundColor\": \""}
+{"tMs":2831,"delta":"#FFFFFFF"}
+{"tMs":2831,"delta":"F\","}
+{"tMs":2831,"delta":" \"shape\": {\"radius"}
+{"tMs":2831,"delta":"\": 12}}}, \""}
+{"tMs":2831,"delta":"actions\": [{\"tr"}
+{"tMs":2831,"delta":"igger\": {\"type\": \""}
+{"tMs":2831,"delta":"click\"}, \"actions\":"}
+{"tMs":2831,"delta":" [{\"type\": \"component"}
+{"tMs":2831,"delta":"Event\", \"event\": \""}
+{"tMs":2831,"delta":"flightConfirmed\","}
+{"tMs":3261,"delta":" \"value\": {\"index\": \""}
+{"tMs":3261,"delta":"${sel}\", \"airline"}
+{"tMs":3261,"delta":"\": \"${airline}\", \""}
+{"tMs":3261,"delta":"price\": \"${total}\"}"}
+{"tMs":3261,"delta":"}]}]"}
+{"tMs":3261,"delta":"}}, {\"op\": \""}
+{"tMs":3261,"delta":"move\", \"id\": \"o1"}
+{"tMs":3261,"delta":"\", \"parent\": \"list\","}
+{"tMs":3261,"delta":" \"index\": 0}, {"}
+{"tMs":3261,"delta":"\"op\": \"move\", \"id"}
+{"tMs":3261,"delta":"\": \"o0\", \"parent"}
+{"tMs":3261,"delta":"\": \"list\", \"index\": "}
+{"tMs":3774,"delta":"1}, {\"op\": \""}
+{"tMs":3774,"delta":"v"}
+{"tMs":3774,"delta":"ars\", \"scope\": \"card"}
+{"tMs":3774,"delta":"\", \"set\": {\"opts"}
+{"tMs":3774,"delta":"\": {\"type\": \"list\","}
+{"tMs":3774,"delta":" \"value\": [{\"airline"}
+{"tMs":3774,"delta":"\": \"easyJet\", \""}
+{"tMs":3774,"delta":"price\": 98, \"dep"}
+{"tMs":3774,"delta":"\": \"11:15\", \"ar"}
+{"tMs":3774,"delta":"r\": \"13:45\"}"}
+{"tMs":3774,"delta":", {\"airline\": \"T"}
+{"tMs":3774,"delta":"AP Air Portugal"}
+{"tMs":4212,"delta":"\", \"price\": 142, \""}
+{"tMs":4212,"delta":"dep\": \"07:30\","}
+{"tMs":4212,"delta":" \"arr\": \"09:50"}
+{"tMs":4212,"delta":"\"}, {\"airline\":"}
+{"tMs":4212,"delta":" \"British Airways\", \"price"}
+{"tMs":4212,"delta":"\": 176, \"dep\":"}
+{"tMs":4212,"delta":" \"16:40\", \"arr"}
+{"tMs":4212,"delta":"\": \"19:00\"}]"}
+{"tMs":4212,"delta":"}}}, {\"op\":"}
+{"tMs":4212,"delta":" \"patch\", \"id\": \""}
+{"tMs":4212,"delta":"o1\", \"pat"}
+{"tMs":4212,"delta":"ch\": {\"bind\": {"}
+{"tMs":4658,"delta":"\"decoration.strokes"}
+{"tMs":4658,"delta":"[0].color\": \"${="}
+{"tMs":4658,"delta":" sel == 0 ?"}
+{"tMs":4658,"delta":" '#FF2563EB"}
+{"tMs":4658,"delta":"' : '#FFE5"}
+{"tMs":4658,"delta":"E7EB'}\", \""}
+{"tMs":4658,"delta":"decoration.fills[0"}
+{"tMs":4658,"delta":"].color\": \"${= sel"}
+{"tMs":4658,"delta":" == 0 ? '#"}
+{"tMs":4658,"delta":"FFEFF6F"}
+{"tMs":4658,"delta":"F' : '#FFF"}
+{"tMs":4658,"delta":"9FAFB'}\""}
+{"tMs":5100,"delta":"}, \"actions\": [{"}
+{"tMs":5100,"delta":"\"trigger\": {\"type"}
+{"tMs":5100,"delta":"\": \"click\"}, \"act"}
+{"tMs":5100,"delta":"ions\": [{\"type\": \""}
+{"tMs":5100,"delta":"setVariable\", \"variable"}
+{"tMs":5100,"delta":"\": \"sel\", \"op\":"}
+{"tMs":5100,"delta":" \"set\", \"value\": \"0"}
+{"tMs":5100,"delta":"\"}]}]}},"}
+{"tMs":5100,"delta":" {\"op\": \"patch\","}
+{"tMs":5100,"delta":" \"id\": \"o0\", \""}
+{"tMs":5100,"delta":"patch\": {\"bind\":"}
+{"tMs":5100,"delta":" {\"decoration.strok"}
+{"tMs":5558,"delta":"es[0].color\": \"${"}
+{"tMs":5558,"delta":"= sel == 1 "}
+{"tMs":5558,"delta":"? '#FF2563E"}
+{"tMs":5558,"delta":"B' : '#FFE"}
+{"tMs":5558,"delta":"5E7EB'}\","}
+{"tMs":5558,"delta":" \"decoration.fills["}
+{"tMs":5558,"delta":"0].color\": \"${= s"}
+{"tMs":5558,"delta":"el == 1 ? '"}
+{"tMs":5558,"delta":"#FFEFF6F"}
+{"tMs":5558,"delta":"F' : '#FFF"}
+{"tMs":5558,"delta":"9FAFB'}\""}
+{"tMs":5558,"delta":"}, \"actions\": [{"}
+{"tMs":5976,"delta":"\"trigger\": {\"type"}
+{"tMs":5976,"delta":"\": \"click\"}, \"act"}
+{"tMs":5976,"delta":"ions\": [{\"type\": \""}
+{"tMs":5976,"delta":"setVariable\", \"variable"}
+{"tMs":5976,"delta":"\": \"sel\", \"op\":"}
+{"tMs":5976,"delta":" \"set\", \"value\": \"1"}
+{"tMs":5976,"delta":"\"}]}]}},"}
+{"tMs":5976,"delta":" {\"op\": \"patch\","}
+{"tMs":5976,"delta":" \"id\": \"hSub\","}
+{"tMs":5976,"delta":" \"patch\": {\"props\":"}
+{"tMs":5976,"delta":" {\"text\": \"Friday"}
+{"tMs":5976,"delta":" \\u00b7 1 "}
+{"tMs":5976,"delta":"adult \\u00b7 "}
+{"tMs":5976,"delta":"Sorted by price\"}"}
+{"tMs":5976,"delta":"}}]"}
+{"tMs":5978,"delta":"}"}

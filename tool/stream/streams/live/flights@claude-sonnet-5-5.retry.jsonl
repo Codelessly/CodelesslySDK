@@ -1,0 +1,74 @@
+{"meta":{"ui":"flights","kind":"card","prompt":"Fix the rejected ops.","model":"claude-sonnet-5-5","turn":"retry","base":["flights@claude-sonnet-5-5.jsonl"],"source":"live","outputTokens":663,"usage":{"inputTokens":5823,"outputTokens":663,"cacheReadInputTokens":28689,"cacheCreationInputTokens":0,"ttftMs":1580,"firstToolDeltaMs":1650,"totalMs":4351,"stopReason":"StopReason.toolUse"},"text":"I'll resend the rejected nodes: the badges become a row (with the tag text inside) instead of a box with children, the time text drops the stray key, and the button uses `label`.","ttftMs":1580,"check":{"ops":4,"opsApplied":3,"opsRejected":1,"errors":["unknown_field /nodes/confirm/props/style/radius","dangling_child /nodes/footer/children/1"],"warnings":0,"nodes":31},"assets":null}}
+{"tMs":1650,"delta":"{\"ops\": [{\"op\": \""}
+{"tMs":1684,"delta":"set\", \"id\": \"o0"}
+{"tMs":1719,"delta":"t\", \"node\": {\"type"}
+{"tMs":2007,"delta":"\": \"text\", \"layout\":"}
+{"tMs":2007,"delta":" {\"width\": {\"hug"}
+{"tMs":2007,"delta":"\": 160}, \"height\":"}
+{"tMs":2007,"delta":" {\"hug\": 26}"}
+{"tMs":2442,"delta":"}, \"props\": {\"text"}
+{"tMs":2442,"delta":"\": \"07:30 \\u"}
+{"tMs":2442,"delta":"2192 09:50\", \""}
+{"tMs":2442,"delta":"style\": {\"fontSize"}
+{"tMs":2442,"delta":"\": 19, \"fontW"}
+{"tMs":2442,"delta":"eight\": 700, \"color"}
+{"tMs":2442,"delta":"\": \"#FF111827\""}
+{"tMs":2442,"delta":"}}}},"}
+{"tMs":2442,"delta":" {\"op\": \"set\", \""}
+{"tMs":2442,"delta":"id\": \"o0g\", \""}
+{"tMs":2442,"delta":"node\": {\"type\": \"row"}
+{"tMs":2442,"delta":"\", \"children\": [\"o0"}
+{"tMs":2878,"delta":"gt\"], \"layout\":"}
+{"tMs":2878,"delta":" {\"width\": {\"hug"}
+{"tMs":2878,"delta":"\": 90}, \"height\":"}
+{"tMs":2878,"delta":" {\"hug\": 24}"}
+{"tMs":2878,"delta":", \"padding\": [10,"}
+{"tMs":2878,"delta":" 4, 10, 4"}
+{"tMs":2878,"delta":"]}, \"dec"}
+{"tMs":2878,"delta":"oration\": {\"fills\":"}
+{"tMs":2878,"delta":" [{\"color\": \"#F"}
+{"tMs":2878,"delta":"FDCFCE7\""}
+{"tMs":2878,"delta":"}], \"radius\": 12"}
+{"tMs":2878,"delta":"}}}, {\"op\":"}
+{"tMs":3376,"delta":" \"set\", \"id\": \"o"}
+{"tMs":3376,"delta":"1g\", \"node\": {\""}
+{"tMs":3376,"delta":"type\": \"row\", \"children\":"}
+{"tMs":3376,"delta":" [\"o1gt\"],"}
+{"tMs":3376,"delta":" \"layout\": {\"width\":"}
+{"tMs":3376,"delta":" {\"hug\": 90}"}
+{"tMs":3376,"delta":", \"height\": {\"hug"}
+{"tMs":3376,"delta":"\": 24}, \"padding"}
+{"tMs":3376,"delta":"\": [10, 4, "}
+{"tMs":3376,"delta":"10, 4]}, \""}
+{"tMs":3376,"delta":"decoration\": {\"fills"}
+{"tMs":3376,"delta":"\": [{\"color\": \"#"}
+{"tMs":3811,"delta":"FFFE"}
+{"tMs":3811,"delta":"F3C7\"}], \""}
+{"tMs":3811,"delta":"radius\": 12}}}"}
+{"tMs":3811,"delta":", {\"op\": \"set\","}
+{"tMs":3811,"delta":" \"id\": \"confirm\","}
+{"tMs":3811,"delta":" \"node\": {\"type\": \""}
+{"tMs":3811,"delta":"filledButton\", \"layout"}
+{"tMs":3811,"delta":"\": {\"width\": {\"f"}
+{"tMs":3811,"delta":"ill\": 350}, \"height"}
+{"tMs":3811,"delta":"\": 48}, \"props\":"}
+{"tMs":3811,"delta":" {\"label\": \"Confir"}
+{"tMs":3811,"delta":"m flight\", \"style\": {"}
+{"tMs":4348,"delta":"\"backgroundColor\":"}
+{"tMs":4348,"delta":" \"#FF2563EB"}
+{"tMs":4348,"delta":"\", \"foregroundColor"}
+{"tMs":4348,"delta":"\": \"#FFFFF"}
+{"tMs":4348,"delta":"FFF\","}
+{"tMs":4348,"delta":" \"radius\": 12}}"}
+{"tMs":4348,"delta":", \"actions\": [{\""}
+{"tMs":4348,"delta":"trigger\": {\"type\":"}
+{"tMs":4348,"delta":" \"click\"}, \"actions"}
+{"tMs":4348,"delta":"\": [{\"type\": \"compon"}
+{"tMs":4348,"delta":"entEvent\", \"event\":"}
+{"tMs":4348,"delta":" \"flightConfirmed"}
+{"tMs":4348,"delta":"\", \"value\": {\"index\":"}
+{"tMs":4348,"delta":" \"${sel}\", \"air"}
+{"tMs":4348,"delta":"line\": \"${airline}\","}
+{"tMs":4348,"delta":" \"price\": \"${total}\""}
+{"tMs":4348,"delta":"}}]}]}}]"}
+{"tMs":4351,"delta":"}"}

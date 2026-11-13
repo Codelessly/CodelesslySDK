@@ -1,0 +1,19 @@
+{"meta":{"ui":"weather","kind":"card","followup":"Make it dark.","model":"claude-haiku-5-5","turn":"followup","base":["weather@claude-haiku-5-5.jsonl"],"source":"live","outputTokens":217,"usage":{"inputTokens":6382,"outputTokens":217,"cacheReadInputTokens":28689,"cacheCreationInputTokens":0,"ttftMs":834,"firstToolDeltaMs":1298,"totalMs":1692,"stopReason":"StopReason.toolUse"},"text":"I'll darken the card by changing its fill and the alert button's color. Since the text is light on blue, I'll switch the card to a near-black slate and keep the text readable.","ttftMs":834,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"errors":[],"warnings":0,"nodes":49},"assets":null}}
+{"tMs":1298,"delta":"{\"ops\": [{\"op\": \"pat"}
+{"tMs":1319,"delta":"ch\", \"id\": \"card\","}
+{"tMs":1340,"delta":" \"patch\": {\"deco"}
+{"tMs":1361,"delta":"ration\": {\"fills\": ["}
+{"tMs":1382,"delta":"{\"color\": \"#F"}
+{"tMs":1403,"delta":"F0F172"}
+{"tMs":1425,"delta":"A\"}],"}
+{"tMs":1444,"delta":" \"radius\": 20}}"}
+{"tMs":1464,"delta":"}, {\"op\": \"pat"}
+{"tMs":1485,"delta":"ch\", \"id\": \"alert"}
+{"tMs":1506,"delta":"Btn\", \"patch\":"}
+{"tMs":1526,"delta":" {\"decoration\": {\""}
+{"tMs":1547,"delta":"fills\": [{\"color\":"}
+{"tMs":1567,"delta":" \"#FF"}
+{"tMs":1589,"delta":"38BDF8\"}],"}
+{"tMs":1609,"delta":" \"radius\": 12}}"}
+{"tMs":1643,"delta":"}]"}
+{"tMs":1692,"delta":"}"}
