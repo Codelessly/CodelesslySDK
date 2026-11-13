@@ -218,7 +218,7 @@ void main() {
     final layout = pinned.copyWith(
       document: pinned.document.copyWith(nodes: {
         ...pinned.document.nodes,
-        'inst': top.withComponent(top.component!.copyWith(managed: top.component!.managed!.copyWith(pin: () => 1))),
+        'inst': top.withComponent(top.component!.withManaged(top.component!.managed!.copyWith(pin: () => 1))),
       }),
     );
     final resolved = await ManagedComponentResolver(

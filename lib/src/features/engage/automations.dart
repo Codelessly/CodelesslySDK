@@ -6,12 +6,13 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart'
-    show Automation, AutomationTrigger, Node, PublishModelAutomations, Reaction, Trigger, TriggerType;
+    show ActionDef, Automation, AutomationTrigger, EmitEventAction, Node, PublishModelAutomations, Reaction, Trigger, TriggerType, engageCatalog;
 import 'package:flutter/widgets.dart';
 
 import '../../app/codelessly.dart';
 import '../../runtime/actions/app_events.dart';
 import '../../runtime/actions/feature.dart';
+import '../../runtime/actions/runner.dart' show ActionRun;
 import '../../runtime/contracts.dart';
 import '../../runtime/expressions/formula.dart' show FormulaEvaluator;
 import '../../runtime/expressions/scopes.dart';
@@ -22,7 +23,21 @@ import '../context.dart';
 /// Automations and the `usage` value. The feature gives the `usage` scope;
 /// [CodelesslyAutomations] (the app's [Codelessly.automations]) counts into
 /// it and runs the project's automations.
-const CodelesslyFeature engageFeature = CodelesslyFeature(name: 'engage', scopes: {'usage': _usageScope});
+/// App events (`emitEvent`) and the `usage` values automations count: the
+/// API's engage library ([engageCatalog]) run.
+const CodelesslyFeature engageFeature = CodelesslyFeature(
+  name: 'engage',
+  scopes: {'usage': _usageScope},
+  actions: {EmitEventAction.typeName: _emitEvent},
+  catalog: engageCatalog,
+);
+
+/// Hands the event to the app's event bus (automations listen on it).
+void _emitEvent(ActionDef action, ActionRun run) {
+  final a = action as EmitEventAction;
+  final name = run.text(a.event).trim();
+  if (name.isNotEmpty) AppEventBus.of(run.context.services)?.emit(name, run.json(a.props));
+}
 
 NamedScope _usageScope(FeatureScopeHost host, ValueScope parent) =>
     ValuesScope({'usage': CodelesslyAutomations.emptyUsage}, parent);

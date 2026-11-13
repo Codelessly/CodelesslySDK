@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show
         CloseModalAction,
         ConfirmAction,
@@ -18,7 +18,7 @@ import 'package:codelessly_api/codelessly_api.dart'
         RouteTransition,
         ShowToastAction;
 import 'package:flutter/material.dart' hide NavigationMode;
-import 'package:codelessly_api/codelessly_api.dart' show NavigationMode;
+import 'package:codelessly_api/core.dart' show NavigationMode;
 
 import '../../app/viewport.dart' show CanvasSizing, CanvasSizingScope;
 import 'confirm_dialog.dart';

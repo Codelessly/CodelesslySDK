@@ -1,7 +1,7 @@
 // The SDK's node tree: the render core's tree ([RenderTree]) with what the
 // layers above it give every tree: the built-in widgets (registry.dart),
 // the runtime's gesture layers and its image loader.
-import 'package:codelessly_api/codelessly_api.dart' show Node;
+import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/foundation.dart';
 
 import '../render/node_tree.dart';

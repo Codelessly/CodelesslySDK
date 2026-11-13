@@ -1,7 +1,7 @@
 // The runtime's gesture layers, as the render core takes them
 // ([NodeGestures]): a node that follows the pointer (drag_motion.dart) and
 // drag and drop (drag_and_drop.dart).
-import 'package:codelessly_api/codelessly_api.dart' show Node;
+import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/rendering.dart' show RenderBox;
 
 import '../../render/contracts.dart';

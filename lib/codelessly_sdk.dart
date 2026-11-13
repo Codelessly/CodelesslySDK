@@ -164,6 +164,8 @@ export 'src/app/config.dart';
 export 'src/app/fonts.dart';
 export 'src/app/loader.dart';
 export 'src/app/managed_components.dart';
+export 'src/app/hosted_plugins.dart';
+export 'src/features/hosted/hosted.dart' show hostedPluginFeature;
 export 'src/app/navigation.dart';
 export 'src/app/overlay_screens.dart';
 export 'src/app/page_transitions.dart';

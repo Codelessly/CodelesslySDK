@@ -15,13 +15,17 @@ import '../../runtime/contracts.dart';
 import '../../runtime/expressions/scopes.dart';
 import '../../services/file_exports.dart' show FileExporter;
 import '../../services/storage.dart' show CloudFileStorage, MemoryFileStorage;
+import 'capture.dart';
 import 'media_export.dart';
+import 'recipes.dart';
 import 'media_probe.dart';
 import 'printing.dart';
 import 'sound.dart';
 import 'speech.dart';
 
-/// Speech, sound, printing, file saving and the `media.*` functions.
+/// Speech, sound, printing, file saving, screenshots, image preloading, the
+/// video, audio and web view node types, and the `media.*` functions: the
+/// API's media library ([mediaCatalog]) run.
 const CodelesslyFeature mediaFeature = CodelesslyFeature(
   name: 'media',
   actions: {
@@ -29,6 +33,8 @@ const CodelesslyFeature mediaFeature = CodelesslyFeature(
     PlaySoundAction.typeName: _playSound,
     PrintAction.typeName: _print,
     DownloadFileAction.typeName: _downloadFile,
+    PreloadImagesAction.typeName: preloadImagesAction,
+    CaptureScreenshotAction.typeName: captureScreenshotAction,
   },
   functions: {
     'media.probe': _mediaImport,
@@ -37,6 +43,8 @@ const CodelesslyFeature mediaFeature = CodelesslyFeature(
     'media.cancelExport': _mediaExport,
   },
   scopes: {'speech': _speechScope},
+  catalog: mediaCatalog,
+  recipes: mediaPlayerRecipes,
 );
 
 Future<void> _print(ActionDef action, ActionRun run) => printNodeAction((action as PrintAction).node, run);

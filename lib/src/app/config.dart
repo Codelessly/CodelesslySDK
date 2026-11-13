@@ -1,9 +1,10 @@
-import 'package:codelessly_api/codelessly_api.dart' show PublishSource;
+import 'package:codelessly_api/codelessly_api.dart' show Catalog, PublishSource, standardCatalog;
 import 'package:flutter/foundation.dart';
 
 import '../render/recipe.dart' show WidgetRecipe;
 import '../runtime/contracts.dart';
 import '../runtime/actions/context.dart' show AppFunction;
+import '../runtime/actions/runner.dart' show CoreActions;
 import '../features/first_party.dart' show CodelesslyActions;
 import '../runtime/expressions/engine.dart' show Expressions;
 import 'runtime.dart';
@@ -111,6 +112,23 @@ class CodelesslyConfig {
   /// Reserved: the SDK doesn't read it yet. Errors go to the services'
   /// analytics ([Services.analytics]; printed in debug builds).
   final bool debugLog;
+
+  /// What layouts are decoded with: [Catalog.core] and the catalogs of the
+  /// features [actions] installs ([CoreActions.catalog]: the standard
+  /// catalog's types for [CodelesslyActions]); [standardCatalog] for a runner
+  /// that isn't a [CoreActions].
+  Catalog get catalog => switch (actions) {
+        final CoreActions a => a.catalog,
+        _ => standardCatalog,
+      };
+
+  /// The recipes layouts build their nodes with beyond the built-in ones:
+  /// the installed features' ([CodelesslyFeature.recipes]: the media
+  /// feature's players), then the app's own [recipes] over them.
+  Map<String, WidgetRecipe> get allRecipes => switch (actions) {
+        final CoreActions a when a.recipes.isNotEmpty => {...a.recipes, ...recipes},
+        _ => recipes,
+      };
 
   /// Whether this shows the editor's preview.
   bool get isPreview => publishSource == PublishSource.preview;

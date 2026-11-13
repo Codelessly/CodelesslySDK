@@ -18,7 +18,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show debugPrint;
 
-import 'package:codelessly_api/codelessly_api.dart' show ActionDef, Json, Node, Reaction, TriggerType, UnknownAction;
+import 'package:codelessly_api/core.dart' show ActionDef, Catalog, Json, Node, Reaction, TriggerType, UnknownAction;
 
 import '../contracts.dart';
 import '../expressions/engine.dart';
@@ -30,6 +30,7 @@ import 'feature.dart';
 import 'handlers.dart';
 import 'key_matching.dart';
 import 'ui.dart';
+import '../../render/recipe.dart' show WidgetRecipe;
 
 /// Cancels the chains it's given to: [cancel] stops them between actions.
 class ActionCancellation {
@@ -198,6 +199,10 @@ class ActionRun {
 
   /// The function a feature registered as [name] for call function actions.
   FeatureFunction? function(String name) => _registry.function(name);
+
+  /// What its runner decodes actions with: the core and its features'
+  /// catalogs ([CoreActions.catalog]).
+  Catalog get catalog => _registry.catalog;
 }
 
 /// The core [ActionRunner]: runs a node's reactions with the core handlers
@@ -218,6 +223,20 @@ class CoreActions implements ActionRunner {
   /// The feature layers installed: their handlers, functions and scopes. A
   /// later feature's handler for a type replaces an earlier one's.
   final List<CodelesslyFeature> features;
+
+  /// What layouts run by this decode with: [Catalog.core] and the catalog of
+  /// each of [features].
+  Catalog get catalog => catalogOf(features);
+
+  /// The recipes of [features], by node type (a later feature's win).
+  Map<String, WidgetRecipe> get recipes => _recipes[features] ??= {for (final f in features) ...f.recipes};
+  static final Expando<Map<String, WidgetRecipe>> _recipes = Expando('feature recipes');
+
+  /// [Catalog.core] with [features]' catalogs over it.
+  static Catalog catalogOf(List<CodelesslyFeature> features) => features.isEmpty
+      ? Catalog.core
+      : _catalogs[features] ??= Catalog(id: 'runtime', parts: [Catalog.core, for (final f in features) f.catalog]);
+  static final Expando<Catalog> _catalogs = Expando('feature catalogs');
 
   @override
   Future<void> trigger(Node node, String trigger, ActionContext context, {Json event = const {}}) =>
@@ -387,6 +406,9 @@ class _Registry {
 
   ActionHandler? handler(String type) => handlers[type] ?? (features.isEmpty ? null : _features.actions[type]);
 
+  /// What the actions are decoded with ([CoreActions.catalog]).
+  Catalog get catalog => CoreActions.catalogOf(features);
+
   FeatureFunction? function(String name) => features.isEmpty ? null : _features.functions[name];
 }
 
@@ -394,8 +416,11 @@ class _Registry {
 /// ones awaited. Throws (stopping the chain) when a blocking one fails or
 /// the chain is canceled.
 Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
-  for (final a in actions) {
+  for (final declared in actions) {
     if (run.isCanceled) throw const ActionsCanceled();
+    // An action decoded with a smaller catalog than the runner's (a layout
+    // decoded with the core alone) is typed now.
+    final a = run._registry.catalog.upgrade(declared);
     if (!a.enabled) continue;
     // A type this SDK doesn't know runs only when the app (or a feature)
     // gave a handler for it; otherwise it's skipped.

@@ -11,8 +11,8 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/foundation.dart' show protected;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';

@@ -1,7 +1,7 @@
 // Match data by its plotted identity, not by the previous row's position.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart'
     show
         Node,
         Json,

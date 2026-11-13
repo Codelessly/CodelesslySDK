@@ -98,7 +98,8 @@ PublishLayout decodeStoredPublishLayout(Map<String, Object?> data, {String? layo
   _requireCurrentFormat(data, 'Layout [${layoutId ?? data['id']}]');
   final json = expandStoredLayout(data);
   final id = json['id'];
-  return PublishLayout.fromJson(id is String && id.isNotEmpty || layoutId == null ? json : {...json, 'id': layoutId});
+  return PublishLayout.fromJson(id is String && id.isNotEmpty || layoutId == null ? json : {...json, 'id': layoutId},
+      catalog: standardCatalog);
 }
 
 /// A [PublishLoader] over bundles in memory: tests, previews, and apps that
@@ -131,7 +132,7 @@ class MemoryPublishLoader implements PublishLoader {
 }
 
 /// Decodes a bundle file: JSON, gzipped or not.
-PublishBundle decodeBundle(List<int> bytes) => PublishBundle.fromJson(decodeJsonBytes(bytes));
+PublishBundle decodeBundle(List<int> bytes) => PublishBundle.fromJson(decodeJsonBytes(bytes), catalog: standardCatalog);
 
 /// [bytes] as JSON, gunzipped first when they're gzipped.
 Object? decodeJsonBytes(List<int> bytes) {
@@ -243,7 +244,7 @@ class HttpPublishLoader implements PublishLoader {
 
   Future<PublishBundle> _bundle(PublishSource source) => _bundles[source] ??= () async {
         try {
-          return PublishBundle.fromJson(await _get(source.bundlePath(projectId)));
+          return PublishBundle.fromJson(await _get(source.bundlePath(projectId)), catalog: standardCatalog);
         } catch (_) {
           _bundles.remove(source);
           rethrow;
@@ -263,7 +264,7 @@ class HttpPublishLoader implements PublishLoader {
       if (layout == null) throw PublishLoadException('Layout [$layoutId] is not in the bundle');
       return layout;
     }
-    return PublishLayout.fromJson(await _get('${source.layoutPath(projectId, layoutId)}.json'));
+    return PublishLayout.fromJson(await _get('${source.layoutPath(projectId, layoutId)}.json'), catalog: standardCatalog);
   }
 }
 

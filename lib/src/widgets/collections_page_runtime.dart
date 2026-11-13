@@ -2,7 +2,7 @@
 // viewport supplies drag arbitration, accessibility and page snapping.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';

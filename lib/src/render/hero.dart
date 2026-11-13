@@ -4,8 +4,8 @@
 // the navigator's overlay, and, with `placeholder: source`, that keeps the
 // node it flew from drawn under it until its own images have loaded. On
 // render objects: there is no widget per node to give Flutter's `Hero`.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show Node;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 

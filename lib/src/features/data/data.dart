@@ -43,6 +43,7 @@ const CodelesslyFeature dataFeature = CodelesslyFeature(
     SubmitFormAction.typeName: _submitForm,
   },
   scopes: {'storage': _storageScope},
+  catalog: dataCatalog,
 );
 
 // --- APIs ------------------------------------------------------------------------
