@@ -16,6 +16,9 @@ out of its findings.
   arc; a drop target's `fullIf`, `hoverDelay`, refused slot and the `dropFull`/`dragHover` triggers
   (`${drag.full}` is gone); snap `projectVelocity` and `rotationSnap`. The `setVariable` glide (`animateMs`)
   is an `animate` action (the migration rewrites it). `trackValues` loses `fine`.
+- **Flutter's reading:** a text node applies its `layout.padding` around its lines, as `Padding(child: Text)` (a
+  hugging text grows by it; a fixed one insets its lines). Schema-2 documents are unchanged: the migration drops
+  the padding schema 2 ignored (step `text.padding`).
 - **Behaviour changes:** a track with no value is drawn at its minimum (the `drag_misc` parity golden moves
   three thumbs: `fader cap`, `knob`, `path track`); the other dropped fields no longer act. Everything else
   renders as before: the 66 parity pages, the m05 experiments' sites (byte-identical PNGs), the Relay site
