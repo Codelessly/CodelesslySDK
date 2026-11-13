@@ -1,0 +1,882 @@
+{
+  "schema": 2,
+  "id": "pricing",
+  "roots": ["pricing"],
+  "nodes": {
+    "pricing": {
+      "type": "canvas",
+      "name": "Pricing",
+      "slots": {"body": "root"},
+      "layout": {"width": 1440, "height": 900},
+      "decoration": {"fills": [{"color": "#FF080D0E"}]}
+    },
+    "root": {
+      "type": "stack",
+      "children": ["page", "menu"],
+      "layout": {"width": {"fill": 1440}, "height": {"fill": 900}}
+    },
+    "page": {
+      "type": "column",
+      "children": ["hdr", "hero", "plansSec", "cmpSec", "faqSec", "ctaSec", "foot"],
+      "layout": {"width": {"fill": 1440}, "height": {"fill": 900}, "x": {"start": 0, "end": 0}, "y": {"start": 0, "end": 0}},
+      "props": {"scrollable": true, "crossAxisAlignment": "stretch"}
+    },
+
+    "hdr": {
+      "type": "column",
+      "children": ["hdrIn"],
+      "layout": {"width": {"fill": 1440}, "height": 72, "padding": [18, 0, 18, 0]},
+      "decoration": {"fills": [{"color": "#FF080D0E"}], "strokes": [{"color": "#FF2C3C38"}], "strokeSides": "bottom"},
+      "media": [
+        {"minWidth": "tablet", "patch": {"layout": {"padding": [28, 0, 28, 0]}}},
+        {"minWidth": "desktop", "patch": {"layout": {"height": 92, "padding": [40, 0, 40, 0]}}}
+      ]
+    },
+    "hdrIn": {
+      "type": "row",
+      "children": ["logo", "hdrRight", "menuBtn"],
+      "layout": {"width": {"fill": 1320}, "height": {"fill": 72}, "constraints": {"maxWidth": 1320}},
+      "props": {"mainAxisAlignment": "spaceBetween"}
+    },
+    "logo": {
+      "type": "row",
+      "children": ["logoMark", "logoText"],
+      "layout": {"width": {"hug": 120}, "height": {"hug": 32}},
+      "props": {"spacing": 10}
+    },
+    "logoMark": {
+      "type": "box",
+      "layout": {"width": 34, "height": 30},
+      "props": {"path": "M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z M20 30L26.9 0H33.4L26.5 30Z"},
+      "decoration": {"fills": [{"color": "#FFB9F34C"}]}
+    },
+    "logoText": {
+      "type": "text",
+      "layout": {"width": {"hug": 70}, "height": {"hug": 30}},
+      "props": {
+        "text": "relay.",
+        "style": {"fontFamily": "Space Grotesk", "fontSize": 26, "fontWeight": 700, "letterSpacing": -1.4, "color": "#FFF0F4ED", "height": 1.1},
+        "runs": [{"start": 5, "end": 6, "style": {"color": "#FFB9F34C"}}]
+      }
+    },
+    "hdrRight": {
+      "type": "row",
+      "children": ["nav1", "nav2", "nav3", "nav4", "hdrCta"],
+      "visible": false,
+      "layout": {"width": {"hug": 560}, "height": {"hug": 42}},
+      "props": {"spacing": 34},
+      "media": [{"minWidth": "desktop", "patch": {"visible": true}}]
+    },
+    "nav1": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Platform", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "color": "#FFA2B0A9"}}},
+    "nav2": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Pricing", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "fontWeight": 500, "color": "#FFF0F4ED"}}},
+    "nav3": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Customers", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "color": "#FFA2B0A9"}}},
+    "nav4": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Changelog", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "color": "#FFA2B0A9"}}},
+    "hdrCta": {
+      "type": "row",
+      "children": ["hdrCtaLabel", "hdrCtaIcon"],
+      "layout": {"width": {"hug": 148}, "height": 42, "padding": [16, 0, 16, 0]},
+      "props": {"spacing": 20},
+      "decoration": {"strokes": [{"color": "#FF2C3C38"}]},
+      "states": {"hovered": {"hdrCta": {"decoration": {"strokes": [{"color": "#FFB9F34C"}]}}}}
+    },
+    "hdrCtaLabel": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 20}}, "props": {"text": "Talk to sales", "style": {"fontFamily": "Space Grotesk", "fontSize": 14, "fontWeight": 700, "color": "#FFF0F4ED"}}},
+    "hdrCtaIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "arrow_forward", "color": "#FFF0F4ED"}},
+    "menuBtn": {
+      "type": "row",
+      "children": ["menuBtnIcon"],
+      "layout": {"width": 42, "height": 42},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#FF080D0E"}], "strokes": [{"color": "#FF2C3C38"}]},
+      "media": [{"minWidth": "desktop", "patch": {"visible": false}}],
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "menuOpen", "op": "toggle"}]}]
+    },
+    "menuBtnIcon": {"type": "icon", "layout": {"width": 22, "height": 22}, "props": {"icon": "menu", "color": "#FFF0F4ED"}},
+
+    "hero": {
+      "type": "stack",
+      "children": ["heroGrid", "heroCol"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 640}},
+      "decoration": {"fills": [{"color": "#FF080D0E"}], "clip": "hardEdge"}
+    },
+    "heroGrid": {
+      "type": "box",
+      "layout": {"width": {"fill": 1440}, "height": {"fill": 640}, "x": {"start": 0, "end": 0}, "y": {"start": 0, "end": 0}},
+      "props": {"path": "M40 0V1200M120 0V1200M200 0V1200M280 0V1200M360 0V1200M440 0V1200M520 0V1200M600 0V1200M680 0V1200M760 0V1200M840 0V1200M920 0V1200M1000 0V1200M1080 0V1200M1160 0V1200M1240 0V1200M1320 0V1200M1400 0V1200M1480 0V1200M1560 0V1200M1640 0V1200M1720 0V1200M1800 0V1200M1880 0V1200M1960 0V1200M0 80H2000M0 160H2000M0 240H2000M0 320H2000M0 400H2000M0 480H2000M0 560H2000M0 640H2000M0 720H2000M0 800H2000M0 880H2000M0 960H2000M0 1040H2000M0 1120H2000"},
+      "decoration": {"strokes": [{"color": "#FF131C1C"}], "strokeWidth": 1}
+    },
+    "heroCol": {
+      "type": "column",
+      "children": ["heroIn"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 640}, "padding": [18, 93, 18, 70]},
+      "media": [
+        {"minWidth": "tablet", "patch": {"layout": {"padding": [28, 125, 28, 64]}}},
+        {"minWidth": "desktop", "patch": {"layout": {"padding": [40, 125, 40, 64]}}}
+      ]
+    },
+    "heroIn": {
+      "type": "column",
+      "children": ["heroEyebrow", "heroTitle", "heroIntro", "billRow", "billNote"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 460}, "constraints": {"maxWidth": 1320}},
+      "props": {"crossAxisAlignment": "start"}
+    },
+    "heroEyebrow": {
+      "type": "text",
+      "layout": {"width": {"hug": 260}, "height": {"hug": 16}},
+      "props": {"text": "SIMPLE, SCALABLE PRICING / 002", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 12, "fontWeight": 500, "letterSpacing": 2.4, "color": "#FFB9F34C"}}
+    },
+    "heroTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 110}, "margin": [0, 26, 0, 0]},
+      "props": {
+        "text": "Prepared for\nevery scale.",
+        "style": {"fontFamily": "Space Grotesk", "fontSize": 50, "fontWeight": 700, "letterSpacing": -2.5, "height": 1.08, "color": "#FFF0F4ED"},
+        "runs": [{"start": 13, "end": 25, "style": {"color": "#FFB9F34C"}}]
+      },
+      "media": [
+        {"minWidth": "tablet", "patch": {"props": {"style": {"fontSize": 58, "letterSpacing": -3}}, "layout": {"margin": [0, 22, 0, 0]}}},
+        {"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 88, "letterSpacing": -4.5}}, "layout": {"margin": [0, 36, 0, 0]}}}
+      ]
+    },
+    "heroIntro": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 60}, "margin": [0, 28, 0, 0], "constraints": {"maxWidth": 560}},
+      "props": {"text": "One clear system for every response team. Start with the essentials, then scale the way you operate.", "style": {"fontFamily": "Space Grotesk", "fontSize": 16, "height": 1.62, "color": "#FFA2B0A9"}},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"style": {"fontSize": 18.5}}, "layout": {"margin": [0, 26, 0, 0]}}}]
+    },
+    "billRow": {
+      "type": "row",
+      "children": ["billMonthly", "billSwitch", "billAnnual", "billSave"],
+      "layout": {"width": {"hug": 270}, "height": {"hug": 30}, "margin": [0, 44, 0, 0]},
+      "props": {"spacing": 14},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "annual", "op": "toggle"}]}]
+    },
+    "billMonthly": {
+      "type": "text",
+      "layout": {"width": {"hug": 56}, "height": {"hug": 20}},
+      "props": {"text": "Monthly", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "fontWeight": 500, "color": "#FFF0F4ED"}},
+      "bind": {"props.style.color": "${= annual ? '#FFA2B0A9' : '#FFF0F4ED'}"}
+    },
+    "billSwitch": {
+      "type": "row",
+      "children": ["billKnob"],
+      "layout": {"width": 54, "height": 30, "padding": 4},
+      "props": {"mainAxisAlignment": "start"},
+      "decoration": {"fills": [{"color": "#FF1B2929"}], "strokes": [{"color": "#FF2C3C38"}], "radius": 15},
+      "bind": {"props.mainAxisAlignment": "${= annual ? 'end' : 'start'}"}
+    },
+    "billKnob": {
+      "type": "box",
+      "layout": {"width": 22, "height": 22},
+      "decoration": {"fills": [{"color": "#FFB9F34C"}], "shape": "circle"}
+    },
+    "billAnnual": {
+      "type": "text",
+      "layout": {"width": {"hug": 50}, "height": {"hug": 20}},
+      "props": {"text": "Annual", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "fontWeight": 500, "color": "#FFA2B0A9"}},
+      "bind": {"props.style.color": "${= annual ? '#FFF0F4ED' : '#FFA2B0A9'}"}
+    },
+    "billSave": {
+      "type": "row",
+      "children": ["billSaveText"],
+      "layout": {"width": {"hug": 64}, "height": 26, "padding": [8, 0, 8, 0]},
+      "decoration": {"fills": [{"color": "#FF22351A"}]}
+    },
+    "billSaveText": {
+      "type": "text",
+      "layout": {"width": {"hug": 50}, "height": {"hug": 14}},
+      "props": {"text": "Save 20%", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 10, "fontWeight": 600, "color": "#FFB9F34C"}}
+    },
+    "billNote": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 18}, "margin": [0, 20, 0, 0], "constraints": {"maxWidth": 560}},
+      "props": {"text": "", "style": {"fontFamily": "Space Grotesk", "fontSize": 12.5, "height": 1.5, "color": "#FFA2B0A9"}},
+      "bind": {"props.text": "${= annual ? billing.annual : billing.monthly}"},
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"constraints": {"maxWidth": 600}}}}]
+    },
+
+    "plansSec": {
+      "type": "column",
+      "children": ["plansIn"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 1400}, "padding": [18, 50, 18, 80]},
+      "decoration": {"fills": [{"color": "#FF0A0F10"}], "strokes": [{"color": "#FF1E2B28"}], "strokeSides": "top"},
+      "media": [
+        {"minWidth": "tablet", "patch": {"layout": {"padding": [28, 0, 28, 110]}}},
+        {"minWidth": "desktop", "patch": {"layout": {"padding": [40, 0, 40, 110]}}}
+      ]
+    },
+    "plansIn": {
+      "type": "column",
+      "children": ["est", "cards", "ent", "disclaimer"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 1400}, "constraints": {"maxWidth": 1320}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 20}
+    },
+
+    "est": {
+      "type": "flex",
+      "children": ["estText", "estCtl"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 174}, "padding": [25, 32, 25, 32]},
+      "props": {"direction": "vertical", "crossAxisAlignment": "start", "spacing": 24},
+      "decoration": {"fills": [{"type": "linear", "begin": [-1, -1], "end": [1, 1], "stops": [{"position": 0, "color": "#FF1C2E27"}, {"position": 1, "color": "#FF1A2726"}]}], "strokes": [{"color": "#FF34503C"}]},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"direction": "horizontal", "mainAxisAlignment": "spaceBetween"}, "layout": {"padding": [35, 36, 35, 36]}}}]
+    },
+    "estText": {
+      "type": "column",
+      "children": ["estEyebrow", "estTitle", "estBody"],
+      "layout": {"width": {"fill": 640}, "height": {"hug": 100}, "constraints": {"maxWidth": 640}},
+      "props": {"crossAxisAlignment": "start", "spacing": 10}
+    },
+    "estEyebrow": {"type": "text", "layout": {"width": {"hug": 200}, "height": {"hug": 16}}, "props": {"text": "PLAN ESTIMATOR / LIVE", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 12, "fontWeight": 500, "letterSpacing": 2.4, "color": "#FFB9F34C"}}},
+    "estTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 640}, "height": {"hug": 36}},
+      "props": {"text": "Plan for your response team.", "style": {"fontFamily": "Space Grotesk", "fontSize": 28, "fontWeight": 700, "letterSpacing": -1.4, "height": 1.12, "color": "#FFF0F4ED"}},
+      "media": [{"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 34, "letterSpacing": -1.8}}}}]
+    },
+    "estBody": {"type": "text", "layout": {"width": {"fill": 620}, "height": {"hug": 40}}, "props": {"text": "Adjust the number of people who can be assigned to an incident. View-only stakeholders do not count as responders.", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "height": 1.5, "color": "#FFA2B0A9"}}},
+    "estCtl": {
+      "type": "column",
+      "children": ["estLabel", "stepper", "estRange", "estError"],
+      "layout": {"width": {"hug": 176}, "height": {"hug": 90}},
+      "props": {"crossAxisAlignment": "start", "spacing": 8}
+    },
+    "estLabel": {"type": "text", "layout": {"width": {"hug": 90}, "height": {"hug": 14}}, "props": {"text": "RESPONDERS", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 10, "fontWeight": 600, "letterSpacing": 1.4, "color": "#FFB9F34C"}}},
+    "stepper": {
+      "type": "row",
+      "children": ["stepMinus", "seatCell", "stepPlus"],
+      "layout": {"width": 176, "height": 45},
+      "decoration": {"fills": [{"color": "#FF101819"}], "strokes": [{"color": "#FF4A6052"}]}
+    },
+    "stepMinus": {
+      "type": "row",
+      "children": ["stepMinusIcon"],
+      "layout": {"width": 45, "height": {"fill": 45}},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#FF4A6052"}], "strokeSides": "right"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "seats", "value": "${= max(1, seats - 1)}"},
+        {"type": "setVariable", "variable": "seatsText", "value": "${= text(seats)}"}
+      ]}]
+    },
+    "stepMinusIcon": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "remove", "color": "#FFF0F4ED"}},
+    "seatCell": {
+      "type": "row",
+      "children": ["seatInput"],
+      "layout": {"width": {"fill": 86}, "height": {"fill": 45}},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"strokes": [{"color": "#00000000"}], "strokeWidth": 2},
+      "bind": {"decoration.strokes[0].color": "${= seatsValid ? '#00000000' : '#FFFF9389'}"}
+    },
+    "seatInput": {
+      "type": "textField",
+      "layout": {"width": {"fill": 80}, "height": 40},
+      "props": {
+        "keyboardType": "number",
+        "textAlign": "center",
+        "textAlignVertical": "center",
+        "cursorColor": "#FFB9F34C",
+        "style": {"fontFamily": "Space Grotesk", "fontSize": 16, "fontWeight": 700, "color": "#FFF0F4ED"},
+        "decoration": {"border": {"type": "none"}, "enabledBorder": {"type": "none"}, "focusedBorder": {"type": "none"}, "isDense": true, "contentPadding": [0, 10, 0, 10]}
+      },
+      "bind": {"props.initialValue": "${seatsText}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [
+        {"type": "setVariable", "variable": "seatsText", "value": "${result}"},
+        {"type": "if", "condition": {"left": "${seatsValid}", "op": "isTrue"}, "then": [
+          {"type": "setVariable", "variable": "seats", "value": "${= number(seatsText)}"}
+        ]}
+      ]}]
+    },
+    "stepPlus": {
+      "type": "row",
+      "children": ["stepPlusIcon"],
+      "layout": {"width": 45, "height": {"fill": 45}},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#FF4A6052"}], "strokeSides": "left"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "seats", "value": "${= min(500, seats + 1)}"},
+        {"type": "setVariable", "variable": "seatsText", "value": "${= text(seats)}"}
+      ]}]
+    },
+    "stepPlusIcon": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "add", "color": "#FFF0F4ED"}},
+    "estRange": {"type": "text", "layout": {"width": {"hug": 100}, "height": {"hug": 14}}, "props": {"text": "1–500 responders", "style": {"fontFamily": "Space Grotesk", "fontSize": 10.5, "color": "#FF91A39A"}}},
+    "estError": {
+      "type": "text",
+      "layout": {"width": {"hug": 176}, "height": {"hug": 14}},
+      "props": {"text": "Enter a whole number from 1 to 500.", "style": {"fontFamily": "Space Grotesk", "fontSize": 10.5, "color": "#FFFF9389"}},
+      "bind": {"visible": "${= !seatsValid}"}
+    },
+
+    "cards": {
+      "type": "gridView",
+      "children": ["pc"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 1000}, "margin": [0, 0, 0, 0]},
+      "props": {"physics": "never", "minCrossAxisExtent": 240, "shrinkWrapRows": true, "crossAxisSpacing": 12, "mainAxisSpacing": 12},
+      "bind": {"data": "${plans}"}
+    },
+    "pc": {
+      "type": "column",
+      "children": ["pcBadge", "pcCard"],
+      "layout": {"width": {"fill": 432}, "height": {"hug": 760}},
+      "props": {"crossAxisAlignment": "stretch"}
+    },
+    "pcBadge": {
+      "type": "row",
+      "children": ["pcBadgeText"],
+      "layout": {"width": {"fill": 432}, "height": 28},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#FFB9F34C"}]},
+      "bind": {"visible": "${= item.popular == true || screen.atLeast.tablet}", "opacity": "${= item.popular == true ? 1 : 0}"}
+    },
+    "pcBadgeText": {"type": "text", "layout": {"width": {"hug": 90}, "height": {"hug": 14}}, "props": {"text": "MOST POPULAR", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 10, "fontWeight": 500, "letterSpacing": 1.6, "color": "#FF0A1006"}}},
+    "pcCard": {
+      "type": "column",
+      "children": ["pcEyebrow", "pcName", "pcDesc", "pcPriceRow", "pcUnit", "pcDiv1", "pcSum", "pcSpacer", "pcCta", "pcDiv2", "pcIncl", "pcFeats"],
+      "layout": {"width": {"fill": 432}, "height": {"hug": 732}, "padding": [26, 30, 26, 30]},
+      "props": {"crossAxisAlignment": "start"},
+      "decoration": {"fills": [{"color": "#FF121A1B"}], "strokes": [{"color": "#FF2C3C38"}]},
+      "bind": {
+        "decoration.fills[0].color": "${= item.popular == true ? '#FF172423' : '#FF121A1B'}",
+        "decoration.strokes[0].color": "${= item.popular == true ? '#FFB9F34C' : '#FF2C3C38'}"
+      },
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"padding": [20, 26, 20, 30]}}}, {"minWidth": "desktop", "patch": {"layout": {"padding": [30, 30, 30, 30]}}}]
+    },
+    "pcEyebrow": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 16}}, "props": {"text": "${= upper(item.name)}", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11.5, "fontWeight": 500, "letterSpacing": 2, "color": "#FFB9F34C"}}},
+    "pcName": {"type": "text", "layout": {"width": {"hug": 120}, "height": {"hug": 36}, "margin": [0, 12, 0, 0]}, "props": {"text": "${item.name}", "style": {"fontFamily": "Space Grotesk", "fontSize": 28, "fontWeight": 700, "letterSpacing": -1.2, "color": "#FFF0F4ED"}}, "media": [{"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 30}}}}]},
+    "pcDesc": {"type": "text", "layout": {"width": {"fill": 372}, "height": {"hug": 26}, "margin": [0, 12, 0, 0], "constraints": {"minHeight": 52}}, "props": {"text": "${item.description}", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "height": 1.65, "color": "#FFA2B0A9"}}},
+    "pcPriceRow": {
+      "type": "row",
+      "children": ["pcDollar", "pcPrice", "pcPer"],
+      "layout": {"width": {"hug": 200}, "height": {"hug": 70}, "margin": [0, 30, 0, 0]},
+      "props": {"crossAxisAlignment": "start", "spacing": 2},
+      "media": [{"minWidth": "desktop", "patch": {"layout": {"margin": [0, 38, 0, 0]}}}]
+    },
+    "pcDollar": {"type": "text", "layout": {"width": {"hug": 14}, "height": {"hug": 28}, "margin": [0, 6, 0, 0]}, "props": {"text": "$", "style": {"fontFamily": "Space Grotesk", "fontSize": 24, "fontWeight": 500, "color": "#FFF0F4ED"}}},
+    "pcPrice": {
+      "type": "text",
+      "layout": {"width": {"hug": 90}, "height": {"hug": 64}},
+      "props": {"text": "${= annual ? item.annual : item.monthly}", "style": {"fontFamily": "Space Grotesk", "fontSize": 52, "fontWeight": 700, "letterSpacing": -3.5, "height": 1.05, "color": "#FFF0F4ED"}},
+      "media": [{"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 64, "letterSpacing": -4.5}}}}]
+    },
+    "pcPer": {"type": "text", "layout": {"width": {"hug": 40}, "height": {"hug": 22}, "margin": [4, 32, 0, 0]}, "props": {"text": "/ mo", "style": {"fontFamily": "Space Grotesk", "fontSize": 16, "color": "#FFA2B0A9"}}, "media": [{"minWidth": "desktop", "patch": {"layout": {"margin": [4, 42, 0, 0]}}}]},
+    "pcUnit": {"type": "text", "layout": {"width": {"fill": 372}, "height": {"hug": 16}, "margin": [0, 6, 0, 0]}, "props": {"text": "per responder / month, billed ${= annual ? 'annually' : 'monthly'}", "style": {"fontFamily": "Space Grotesk", "fontSize": 11.5, "color": "#FFA2B0A9"}}},
+    "pcDiv1": {"type": "box", "layout": {"width": {"fill": 372}, "height": 1, "margin": [0, 4, 0, 0]}, "decoration": {"fills": [{"color": "#FF2C3C38"}]}},
+    "pcSum": {
+      "type": "column",
+      "children": ["pcSeats", "pcLimit", "pcTotalRow", "pcTotalNote"],
+      "layout": {"width": {"fill": 372}, "height": {"hug": 90}},
+      "props": {"crossAxisAlignment": "start"},
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"constraints": {"minHeight": 120}}}}, {"minWidth": "desktop", "patch": {"layout": {"constraints": {"minHeight": 118}}}}]
+    },
+    "pcSeats": {
+      "type": "text",
+      "layout": {"width": {"hug": 160}, "height": {"hug": 14}, "margin": [0, 22, 0, 0]},
+      "props": {"text": "${= (item.max > 0 && seats > item.max) ? seats + ' RESPONDERS' : 'FOR ' + seats + ' RESPONDERS'}", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 10.5, "fontWeight": 600, "letterSpacing": 1.6, "color": "#FFB9F34C"}}
+    },
+    "pcLimit": {
+      "type": "text",
+      "layout": {"width": {"fill": 372}, "height": {"hug": 32}, "margin": [0, 10, 0, 0]},
+      "props": {"text": "${estimator.limitMessage}", "style": {"fontFamily": "Space Grotesk", "fontSize": 11.5, "height": 1.45, "color": "#FFC9D3CC"}},
+      "bind": {"visible": "${= item.max > 0 && seats > item.max}"}
+    },
+    "pcTotalRow": {
+      "type": "row",
+      "children": ["pcTotal", "pcTotalUnit"],
+      "layout": {"width": {"hug": 200}, "height": {"hug": 30}, "margin": [0, 8, 0, 0]},
+      "props": {"crossAxisAlignment": "end", "spacing": 6},
+      "bind": {"visible": "${= !(item.max > 0 && seats > item.max)}"}
+    },
+    "pcTotal": {"type": "text", "layout": {"width": {"hug": 70}, "height": {"hug": 30}}, "props": {"text": "${= '$' + thousands((annual ? item.annual : item.monthly) * seats)}", "style": {"fontFamily": "Space Grotesk", "fontSize": 24, "fontWeight": 700, "letterSpacing": -1.2, "color": "#FFF0F4ED"}}},
+    "pcTotalUnit": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 16}, "margin": [0, 0, 0, 4]}, "props": {"text": "${= annual ? '/ month equivalent' : '/ month'}", "style": {"fontFamily": "Space Grotesk", "fontSize": 11.5, "color": "#FFA2B0A9"}}},
+    "pcTotalNote": {
+      "type": "text",
+      "layout": {"width": {"fill": 372}, "height": {"hug": 16}, "margin": [0, 8, 0, 0]},
+      "props": {"text": "${= annual ? estimator.annualLabel + ': $' + thousands(item.annual * seats * 12) + ' · ' + estimator.annualSavingsLabel + ': $' + thousands((item.monthly - item.annual) * seats * 12) : estimator.monthlyLabel + ': $' + thousands(item.monthly * seats)}", "style": {"fontFamily": "Space Grotesk", "fontSize": 11.5, "height": 1.45, "color": "#FFA2B0A9"}},
+      "bind": {"visible": "${= !(item.max > 0 && seats > item.max)}"}
+    },
+    "pcSpacer": {"type": "spacer", "layout": {"width": 1, "height": 26}},
+    "pcCta": {
+      "type": "row",
+      "children": ["pcCtaLabel", "pcCtaIcon"],
+      "layout": {"width": {"fill": 372}, "height": 52, "padding": [20, 0, 20, 0]},
+      "props": {"mainAxisAlignment": "spaceBetween"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#FF2C3C38"}]},
+      "bind": {
+        "decoration.fills[0].color": "${= item.popular == true ? '#FFB9F34C' : '#00000000'}",
+        "decoration.strokes[0].color": "${= item.popular == true ? '#FFB9F34C' : '#FF2C3C38'}"
+      }
+    },
+    "pcCtaLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 120}, "height": {"hug": 20}},
+      "props": {"text": "${= (item.max > 0 && seats > item.max) ? estimator.starterAlternativeLabel : item.cta}", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "fontWeight": 700, "color": "#FFF0F4ED"}},
+      "bind": {"props.style.color": "${= item.popular == true ? '#FF0A1006' : '#FFF0F4ED'}"}
+    },
+    "pcCtaIcon": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "arrow_forward", "color": "#FFF0F4ED"}, "bind": {"props.color": "${= item.popular == true ? '#FF0A1006' : '#FFF0F4ED'}"}},
+    "pcDiv2": {"type": "box", "layout": {"width": {"fill": 372}, "height": 1, "margin": [0, 30, 0, 0]}, "decoration": {"fills": [{"color": "#FF2C3C38"}]}},
+    "pcIncl": {"type": "text", "layout": {"width": {"hug": 120}, "height": {"hug": 14}, "margin": [0, 28, 0, 0]}, "props": {"text": "WHAT'S INCLUDED", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 9.5, "letterSpacing": 1.6, "color": "#FF91A39A"}}},
+    "pcFeats": {
+      "type": "listView",
+      "children": ["pcFeat"],
+      "layout": {"width": {"fill": 372}, "height": {"hug": 160}, "margin": [0, 8, 0, 0]},
+      "props": {"scrollable": false},
+      "bind": {"data": "${item.features}"}
+    },
+    "pcFeat": {
+      "type": "row",
+      "children": ["pcFeatIcon", "pcFeatText"],
+      "layout": {"width": {"fill": 372}, "height": 32},
+      "props": {"spacing": 10}
+    },
+    "pcFeatIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "check", "color": "#FFB9F34C"}},
+    "pcFeatText": {"type": "text", "layout": {"width": {"fill": 340}, "height": {"hug": 18}}, "props": {"text": "${item}", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "fontWeight": 500, "color": "#FFF0F4ED"}}},
+
+    "ent": {
+      "type": "flex",
+      "children": ["entText", "entBtn"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 148}, "padding": [30, 32, 30, 32]},
+      "props": {"direction": "vertical", "crossAxisAlignment": "stretch", "spacing": 28},
+      "decoration": {"fills": [{"color": "#FF162121"}], "strokes": [{"color": "#FF2C3C38"}]},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"direction": "horizontal", "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center"}, "layout": {"padding": [30, 36, 30, 36]}}}]
+    },
+    "entText": {
+      "type": "column",
+      "children": ["entEyebrow", "entTitle", "entBody"],
+      "layout": {"width": {"fill": 700}, "height": {"hug": 80}},
+      "props": {"crossAxisAlignment": "start", "spacing": 10}
+    },
+    "entEyebrow": {"type": "text", "layout": {"width": {"hug": 160}, "height": {"hug": 16}}, "props": {"text": "ENTERPRISE / CUSTOM", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 12, "fontWeight": 500, "letterSpacing": 2.4, "color": "#FFB9F34C"}}},
+    "entTitle": {"type": "text", "layout": {"width": {"fill": 700}, "height": {"hug": 30}}, "props": {"text": "Built for the way you operate.", "style": {"fontFamily": "Space Grotesk", "fontSize": 25, "fontWeight": 700, "letterSpacing": -1.2, "height": 1.15, "color": "#FFF0F4ED"}}},
+    "entBody": {"type": "text", "layout": {"width": {"fill": 700}, "height": {"hug": 18}}, "props": {"text": "Dedicated support, SAML SSO, procurement support, and tailored rollout.", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "height": 1.55, "color": "#FFA2B0A9"}}},
+    "entBtn": {
+      "type": "row",
+      "children": ["entBtnLabel", "entBtnIcon"],
+      "layout": {"width": {"fill": 218}, "height": 52, "padding": [20, 0, 20, 0]},
+      "props": {"mainAxisAlignment": "spaceBetween"},
+      "decoration": {"strokes": [{"color": "#FF2C3C38"}]},
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"width": 218}}}]
+    },
+    "entBtnLabel": {"type": "text", "layout": {"width": {"hug": 130}, "height": {"hug": 20}}, "props": {"text": "Contact enterprise", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "fontWeight": 700, "color": "#FFF0F4ED"}}},
+    "entBtnIcon": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "arrow_forward", "color": "#FFF0F4ED"}},
+    "disclaimer": {"type": "text", "layout": {"width": {"fill": 1320}, "height": {"hug": 16}, "margin": [0, 6, 0, 0]}, "props": {"text": "Estimates exclude taxes and reflect list prices. Contact sales to discuss your exact team setup.", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "height": 1.5, "color": "#FF91A39A"}}},
+
+    "cmpSec": {
+      "type": "column",
+      "children": ["cmpIn"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 1500}, "padding": [18, 80, 18, 80]},
+      "decoration": {"fills": [{"color": "#FF101819"}]},
+      "media": [
+        {"minWidth": "tablet", "patch": {"layout": {"padding": [28, 128, 28, 128]}}},
+        {"minWidth": "desktop", "patch": {"layout": {"padding": [40, 128, 40, 128]}}}
+      ]
+    },
+    "cmpIn": {
+      "type": "column",
+      "children": ["cmpEyebrow", "cmpTitle", "cmpBody", "cmpHint", "tbl"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 1300}, "constraints": {"maxWidth": 1320}},
+      "props": {"crossAxisAlignment": "start"}
+    },
+    "cmpEyebrow": {"type": "text", "layout": {"width": {"hug": 160}, "height": {"hug": 16}}, "props": {"text": "THE DETAILS / 003", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 12, "fontWeight": 500, "letterSpacing": 2.4, "color": "#FFB9F34C"}}},
+    "cmpTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 600}, "height": {"hug": 90}, "margin": [0, 20, 0, 0], "constraints": {"maxWidth": 600}},
+      "props": {"text": "Compare every capability.", "style": {"fontFamily": "Space Grotesk", "fontSize": 40, "fontWeight": 700, "letterSpacing": -2, "height": 1.08, "color": "#FFF0F4ED"}},
+      "media": [{"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 70, "letterSpacing": -3.6}}}}]
+    },
+    "cmpBody": {"type": "text", "layout": {"width": {"fill": 600}, "height": {"hug": 22}, "margin": [0, 22, 0, 0]}, "props": {"text": "A full view of what each plan includes.", "style": {"fontFamily": "Space Grotesk", "fontSize": 16.5, "height": 1.5, "color": "#FFA2B0A9"}}},
+    "cmpHint": {
+      "type": "row",
+      "children": ["cmpHintText", "cmpPrev", "cmpNext"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 36}, "margin": [0, 36, 0, 0]},
+      "props": {"spacing": 6},
+      "media": [{"minWidth": "tablet", "patch": {"visible": false}}]
+    },
+    "cmpHintText": {"type": "text", "layout": {"width": {"fill": 260}, "height": {"hug": 36}}, "props": {"text": "Scroll horizontally to compare all plans. The capability column stays in view.", "style": {"fontFamily": "Space Grotesk", "fontSize": 11.5, "height": 1.55, "color": "#FFA2B0A9"}}},
+    "cmpPrev": {
+      "type": "row", "children": ["cmpPrevIcon"], "layout": {"width": 36, "height": 36}, "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#FF1E2B28"}]},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "scrollTo", "node": "colStarter", "axis": "horizontal", "alignment": 0}]}]
+    },
+    "cmpPrevIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "arrow_back", "color": "#FF91A39A"}},
+    "cmpNext": {
+      "type": "row", "children": ["cmpNextIcon"], "layout": {"width": 36, "height": 36}, "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#FF2C3C38"}]},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "scrollTo", "node": "colEnt", "axis": "horizontal", "alignment": 1}]}]
+    },
+    "cmpNextIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "arrow_forward", "color": "#FFF0F4ED"}},
+
+    "tbl": {
+      "type": "row",
+      "children": ["colCap", "tblScroll"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 870}, "margin": [0, 18, 0, 0], "padding": 1},
+      "props": {"crossAxisAlignment": "start"},
+      "decoration": {"strokes": [{"color": "#FF2C3C38"}]},
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"margin": [0, 60, 0, 0]}}}]
+    },
+    "colCap": {
+      "type": "column",
+      "children": ["capHead", "capList"],
+      "layout": {"width": 242, "height": {"hug": 870}},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {"fills": [{"color": "#FF121A1B"}], "strokes": [{"color": "#FF2C3C38"}], "strokeSides": "right"},
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"width": {"fill": 440}, "flex": 2}, "decoration": {"strokes": [{"color": "#00000000"}]}}}]
+    },
+    "capHead": {"type": "row", "children": ["capHeadText"], "layout": {"width": {"fill": 242}, "height": 47, "padding": [17, 0, 12, 0]}, "decoration": {"fills": [{"color": "#FF1B2727"}]}},
+    "capHeadText": {"type": "text", "layout": {"width": {"hug": 100}, "height": {"hug": 14}}, "props": {"text": "CAPABILITY", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "fontWeight": 500, "letterSpacing": 1.6, "color": "#FFB9F34C"}}},
+    "capList": {"type": "listView", "children": ["capCell"], "layout": {"width": {"fill": 242}, "height": {"hug": 820}}, "props": {"scrollable": false}, "bind": {"data": "${cmp}"}},
+    "capCell": {
+      "type": "row",
+      "children": ["capSec", "capLabel"],
+      "layout": {"width": {"fill": 242}, "height": 52, "padding": [17, 0, 12, 0]},
+      "decoration": {"fills": [{"color": "#FF121A1B"}], "strokes": [{"color": "#FF1E2B28"}], "strokeSides": "top"},
+      "bind": {"layout.height": "${= item.s ? 41 : 52}", "decoration.fills[0].color": "${= item.s ? '#FF1E2A28' : '#FF121A1B'}"}
+    },
+    "capSec": {"type": "text", "layout": {"width": {"hug": 160}, "height": {"hug": 14}}, "props": {"text": "${= upper(item.l)}", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "fontWeight": 500, "letterSpacing": 1.6, "color": "#FFB9F34C"}}, "bind": {"visible": "${= item.s == true}"}},
+    "capLabel": {"type": "text", "layout": {"width": {"fill": 200}, "height": {"hug": 18}}, "props": {"text": "${item.l}", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "fontWeight": 700, "color": "#FFF0F4ED"}}, "bind": {"visible": "${= item.s != true}"}},
+
+    "tblScroll": {
+      "type": "row",
+      "children": ["colStarter", "colTeam", "colScale", "colEnt"],
+      "layout": {"width": {"fill": 880}, "height": {"hug": 870}, "flex": 4},
+      "props": {"crossAxisAlignment": "start", "scrollable": true, "scrollDirection": "horizontal"},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"scrollable": false}}}]
+    },
+    "colStarter": {"type": "column", "children": ["hS", "lS"], "layout": {"width": 128, "height": {"hug": 870}}, "props": {"crossAxisAlignment": "stretch"}, "media": [{"minWidth": "tablet", "patch": {"layout": {"width": {"fill": 220}}}}]},
+    "colTeam": {"type": "column", "children": ["hT", "lT"], "layout": {"width": 128, "height": {"hug": 870}}, "props": {"crossAxisAlignment": "stretch"}, "media": [{"minWidth": "tablet", "patch": {"layout": {"width": {"fill": 220}}}}]},
+    "colScale": {"type": "column", "children": ["hC", "lC"], "layout": {"width": 128, "height": {"hug": 870}}, "props": {"crossAxisAlignment": "stretch"}, "media": [{"minWidth": "tablet", "patch": {"layout": {"width": {"fill": 220}}}}]},
+    "colEnt": {"type": "column", "children": ["hE", "lE"], "layout": {"width": 128, "height": {"hug": 870}}, "props": {"crossAxisAlignment": "stretch"}, "media": [{"minWidth": "tablet", "patch": {"layout": {"width": {"fill": 220}}}}]},
+
+    "hS": {"type": "row", "children": ["hSt"], "layout": {"width": {"fill": 128}, "height": 47, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF1B2727"}]}},
+    "hSt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 14}}, "props": {"text": "STARTER", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "fontWeight": 500, "letterSpacing": 1.6, "color": "#FFB9F34C"}}},
+    "hT": {"type": "row", "children": ["hTt"], "layout": {"width": {"fill": 128}, "height": 47, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF1B2727"}]}},
+    "hTt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 14}}, "props": {"text": "TEAM", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "fontWeight": 500, "letterSpacing": 1.6, "color": "#FFB9F34C"}}},
+    "hC": {"type": "row", "children": ["hCt"], "layout": {"width": {"fill": 128}, "height": 47, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF1B2727"}]}},
+    "hCt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 14}}, "props": {"text": "SCALE", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "fontWeight": 500, "letterSpacing": 1.6, "color": "#FFB9F34C"}}},
+    "hE": {"type": "row", "children": ["hEt"], "layout": {"width": {"fill": 128}, "height": 47, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF1B2727"}]}},
+    "hEt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 14}}, "props": {"text": "ENTERPRISE", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "fontWeight": 500, "letterSpacing": 1.6, "color": "#FFB9F34C"}}},
+
+    "lS": {"type": "listView", "children": ["cS"], "layout": {"width": {"fill": 128}, "height": {"hug": 820}}, "props": {"scrollable": false}, "bind": {"data": "${cmp}"}},
+    "cS": {"type": "row", "children": ["cSi", "cSt"], "layout": {"width": {"fill": 128}, "height": 52, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF121A1B"}], "strokes": [{"color": "#FF1E2B28"}], "strokeSides": "top"}, "bind": {"layout.height": "${= item.s ? 41 : 52}", "decoration.fills[0].color": "${= item.s ? '#FF1E2A28' : '#FF121A1B'}"}},
+    "cSi": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "check", "color": "#FFB9F34C"}, "bind": {"visible": "${= item.s != true && item.v[0] == 'Yes'}"}},
+    "cSt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 18}}, "props": {"text": "${= item.s ? '' : item.v[0]}", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "color": "#FFA2B0A9"}}, "bind": {"visible": "${= item.s != true && item.v[0] != 'Yes'}"}},
+    "lT": {"type": "listView", "children": ["cT"], "layout": {"width": {"fill": 128}, "height": {"hug": 820}}, "props": {"scrollable": false}, "bind": {"data": "${cmp}"}},
+    "cT": {"type": "row", "children": ["cTi", "cTt"], "layout": {"width": {"fill": 128}, "height": 52, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF121A1B"}], "strokes": [{"color": "#FF1E2B28"}], "strokeSides": "top"}, "bind": {"layout.height": "${= item.s ? 41 : 52}", "decoration.fills[0].color": "${= item.s ? '#FF1E2A28' : '#FF121A1B'}"}},
+    "cTi": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "check", "color": "#FFB9F34C"}, "bind": {"visible": "${= item.s != true && item.v[1] == 'Yes'}"}},
+    "cTt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 18}}, "props": {"text": "${= item.s ? '' : item.v[1]}", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "color": "#FFA2B0A9"}}, "bind": {"visible": "${= item.s != true && item.v[1] != 'Yes'}"}},
+    "lC": {"type": "listView", "children": ["cC"], "layout": {"width": {"fill": 128}, "height": {"hug": 820}}, "props": {"scrollable": false}, "bind": {"data": "${cmp}"}},
+    "cC": {"type": "row", "children": ["cCi", "cCt"], "layout": {"width": {"fill": 128}, "height": 52, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF121A1B"}], "strokes": [{"color": "#FF1E2B28"}], "strokeSides": "top"}, "bind": {"layout.height": "${= item.s ? 41 : 52}", "decoration.fills[0].color": "${= item.s ? '#FF1E2A28' : '#FF121A1B'}"}},
+    "cCi": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "check", "color": "#FFB9F34C"}, "bind": {"visible": "${= item.s != true && item.v[2] == 'Yes'}"}},
+    "cCt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 18}}, "props": {"text": "${= item.s ? '' : item.v[2]}", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "color": "#FFA2B0A9"}}, "bind": {"visible": "${= item.s != true && item.v[2] != 'Yes'}"}},
+    "lE": {"type": "listView", "children": ["cE"], "layout": {"width": {"fill": 128}, "height": {"hug": 820}}, "props": {"scrollable": false}, "bind": {"data": "${cmp}"}},
+    "cE": {"type": "row", "children": ["cEi", "cEt"], "layout": {"width": {"fill": 128}, "height": 52, "padding": [18, 0, 8, 0]}, "decoration": {"fills": [{"color": "#FF121A1B"}], "strokes": [{"color": "#FF1E2B28"}], "strokeSides": "top"}, "bind": {"layout.height": "${= item.s ? 41 : 52}", "decoration.fills[0].color": "${= item.s ? '#FF1E2A28' : '#FF121A1B'}"}},
+    "cEi": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "check", "color": "#FFB9F34C"}, "bind": {"visible": "${= item.s != true && item.v[3] == 'Yes'}"}},
+    "cEt": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 18}}, "props": {"text": "${= item.s ? '' : item.v[3]}", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "color": "#FFA2B0A9"}}, "bind": {"visible": "${= item.s != true && item.v[3] != 'Yes'}"}},
+
+    "faqSec": {
+      "type": "column",
+      "children": ["faqIn"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 900}, "padding": [18, 80, 18, 80]},
+      "decoration": {"fills": [{"color": "#FF080D0E"}]},
+      "media": [
+        {"minWidth": "tablet", "patch": {"layout": {"padding": [28, 128, 28, 128]}}},
+        {"minWidth": "desktop", "patch": {"layout": {"padding": [40, 128, 40, 128]}}}
+      ]
+    },
+    "faqIn": {
+      "type": "flex",
+      "children": ["faqHead", "faqListWrap"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 800}, "constraints": {"maxWidth": 1320}},
+      "props": {"direction": "vertical", "crossAxisAlignment": "start", "spacing": 34},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"direction": "horizontal", "spacing": 0}}}]
+    },
+    "faqHead": {
+      "type": "column",
+      "children": ["faqEyebrow", "faqTitle"],
+      "layout": {"width": {"fill": 620}, "height": {"hug": 200}, "flex": 8, "margin": [0, 0, 0, 0]},
+      "props": {"crossAxisAlignment": "start", "spacing": 20},
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"margin": [0, 8, 0, 0]}}}]
+    },
+    "faqEyebrow": {"type": "text", "layout": {"width": {"hug": 160}, "height": {"hug": 16}}, "props": {"text": "GOOD TO KNOW / 004", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 12, "fontWeight": 500, "letterSpacing": 2.4, "color": "#FFB9F34C"}}},
+    "faqTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 400}, "height": {"hug": 40}, "constraints": {"maxWidth": 420}},
+      "props": {"text": "Questions, answered.", "style": {"fontFamily": "Space Grotesk", "fontSize": 34, "fontWeight": 700, "letterSpacing": -2, "height": 1.05, "color": "#FFF0F4ED"}},
+      "media": [
+        {"minWidth": "tablet", "patch": {"props": {"style": {"fontSize": 56, "letterSpacing": -3}}}},
+        {"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 72, "letterSpacing": -4}}}}
+      ]
+    },
+    "faqListWrap": {
+      "type": "column",
+      "children": ["faqList"],
+      "layout": {"width": {"fill": 697}, "height": {"hug": 600}, "flex": 9},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {"strokes": [{"color": "#FF2C3C38"}], "strokeSides": "bottom"}
+    },
+    "faqList": {"type": "listView", "children": ["fq"], "layout": {"width": {"fill": 697}, "height": {"hug": 500}}, "props": {"scrollable": false}, "bind": {"data": "${faqs}"}},
+    "fq": {
+      "type": "column",
+      "children": ["fqRow", "fqA"],
+      "layout": {"width": {"fill": 697}, "height": {"hug": 69}},
+      "props": {"crossAxisAlignment": "start"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#FF2C3C38"}], "strokeSides": "top"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "faqOpen", "value": "${= contains(faqOpen, index) ? without(faqOpen, index) : append(faqOpen, index)}"}
+      ]}]
+    },
+    "fqRow": {
+      "type": "row",
+      "children": ["fqQ", "fqIcon"],
+      "layout": {"width": {"fill": 697}, "height": {"hug": 68}, "padding": [0, 24, 0, 24]},
+      "props": {"spacing": 16}
+    },
+    "fqQ": {"type": "text", "layout": {"width": {"fill": 640}, "height": {"hug": 20}}, "props": {"text": "${item.q}", "style": {"fontFamily": "Space Grotesk", "fontSize": 16, "fontWeight": 700, "height": 1.3, "color": "#FFF0F4ED"}}},
+    "fqIcon": {"type": "icon", "layout": {"width": 20, "height": 20}, "props": {"icon": "add", "color": "#FFB9F34C"}, "bind": {"props.icon": "${= contains(faqOpen, index) ? 'close' : 'add'}"}},
+    "fqA": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 44}, "margin": [0, 0, 0, 24], "constraints": {"maxWidth": 560}},
+      "props": {"text": "${item.a}", "style": {"fontFamily": "Space Grotesk", "fontSize": 14.5, "height": 1.6, "color": "#FFA2B0A9"}},
+      "bind": {"visible": "${= contains(faqOpen, index)}"}
+    },
+
+    "ctaSec": {
+      "type": "stack",
+      "children": ["ctaGrid", "ctaMark", "ctaCol"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 600}},
+      "decoration": {"fills": [{"type": "linear", "begin": [0, -1], "end": [0, 1], "stops": [{"position": 0, "color": "#FF080D0E"}, {"position": 1, "color": "#FF060B0B"}]}], "strokes": [{"color": "#FF2C3C38"}], "strokeSides": "top", "clip": "hardEdge"}
+    },
+    "ctaGrid": {
+      "type": "box",
+      "layout": {"width": {"fill": 1440}, "height": {"fill": 600}, "x": {"start": 0, "end": 0}, "y": {"start": 0, "end": 0}},
+      "props": {"path": "M40 0V1200M120 0V1200M200 0V1200M280 0V1200M360 0V1200M440 0V1200M520 0V1200M600 0V1200M680 0V1200M760 0V1200M840 0V1200M920 0V1200M1000 0V1200M1080 0V1200M1160 0V1200M1240 0V1200M1320 0V1200M1400 0V1200M1480 0V1200M1560 0V1200M1640 0V1200M1720 0V1200M1800 0V1200M1880 0V1200M1960 0V1200M0 80H2000M0 160H2000M0 240H2000M0 320H2000M0 400H2000M0 480H2000M0 560H2000M0 640H2000M0 720H2000M0 800H2000M0 880H2000M0 960H2000M0 1040H2000M0 1120H2000"},
+      "decoration": {"strokes": [{"color": "#FF111A1A"}], "strokeWidth": 1}
+    },
+    "ctaMark": {
+      "type": "text",
+      "layout": {"width": {"hug": 200}, "height": {"hug": 200}, "x": {"end": 20}, "y": {"end": 50}},
+      "props": {"text": "R/", "style": {"fontFamily": "Space Grotesk", "fontSize": 140, "fontWeight": 700, "letterSpacing": -10, "height": 1, "color": "#FF18261F"}},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"style": {"fontSize": 230}}, "layout": {"y": {"end": 50}}}}]
+    },
+    "ctaCol": {
+      "type": "column",
+      "children": ["ctaIn"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 600}, "padding": [18, 96, 18, 90]},
+      "media": [
+        {"minWidth": "tablet", "patch": {"layout": {"padding": [28, 118, 28, 118]}}},
+        {"minWidth": "desktop", "patch": {"layout": {"padding": [40, 118, 40, 120]}}}
+      ]
+    },
+    "ctaIn": {
+      "type": "column",
+      "children": ["ctaEyebrow", "ctaTitle", "ctaBody", "ctaBtn"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 360}, "constraints": {"maxWidth": 1320}},
+      "props": {"crossAxisAlignment": "start"}
+    },
+    "ctaEyebrow": {"type": "text", "layout": {"width": {"hug": 200}, "height": {"hug": 16}}, "props": {"text": "READY WHEN IT COUNTS", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 12, "fontWeight": 500, "letterSpacing": 2.4, "color": "#FFB9F34C"}}},
+    "ctaTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 190}, "margin": [0, 26, 0, 0]},
+      "props": {
+        "text": "Make the next incident\nyour best response.",
+        "style": {"fontFamily": "Space Grotesk", "fontSize": 44, "fontWeight": 700, "letterSpacing": -2.4, "height": 1.08, "color": "#FFF0F4ED"},
+        "runs": [{"start": 23, "end": 42, "style": {"color": "#FFB9F34C"}}]
+      },
+      "media": [
+        {"minWidth": "tablet", "patch": {"props": {"style": {"fontSize": 54, "letterSpacing": -3}}}},
+        {"minWidth": "desktop", "patch": {"props": {"style": {"fontSize": 88, "letterSpacing": -4.5}}, "layout": {"margin": [0, 30, 0, 0]}}}
+      ]
+    },
+    "ctaBody": {"type": "text", "layout": {"width": {"fill": 600}, "height": {"hug": 28}, "margin": [0, 24, 0, 0], "constraints": {"maxWidth": 600}}, "props": {"text": "Bring the whole team into one clear response.", "style": {"fontFamily": "Space Grotesk", "fontSize": 18, "height": 1.6, "color": "#FFA2B0A9"}}},
+    "ctaBtn": {
+      "type": "row",
+      "children": ["ctaBtnLabel", "ctaBtnIcon"],
+      "layout": {"width": {"hug": 172}, "height": 52, "padding": [20, 0, 20, 0], "margin": [0, 34, 0, 0]},
+      "props": {"spacing": 28},
+      "decoration": {"fills": [{"color": "#FFB9F34C"}]}
+    },
+    "ctaBtnLabel": {"type": "text", "layout": {"width": {"hug": 90}, "height": {"hug": 20}}, "props": {"text": "Talk to sales", "style": {"fontFamily": "Space Grotesk", "fontSize": 15, "fontWeight": 700, "color": "#FF0A1006"}}},
+    "ctaBtnIcon": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "arrow_forward", "color": "#FF0A1006"}},
+
+    "foot": {
+      "type": "column",
+      "children": ["footIn"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 420}, "padding": [18, 70, 18, 28]},
+      "decoration": {"fills": [{"color": "#FF101819"}], "strokes": [{"color": "#FF2C3C38"}], "strokeSides": "top"},
+      "media": [
+        {"minWidth": "tablet", "patch": {"layout": {"padding": [28, 70, 28, 28]}}},
+        {"minWidth": "desktop", "patch": {"layout": {"padding": [40, 70, 40, 28]}}}
+      ]
+    },
+    "footIn": {
+      "type": "column",
+      "children": ["footTop", "footRule", "footBottom", "footLegal"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 360}, "constraints": {"maxWidth": 1320}},
+      "props": {"crossAxisAlignment": "stretch"}
+    },
+    "footTop": {
+      "type": "flex",
+      "children": ["footBrand", "footCols"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 200}},
+      "props": {"direction": "vertical", "crossAxisAlignment": "start", "spacing": 54},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"direction": "horizontal", "spacing": 0}}}]
+    },
+    "footBrand": {
+      "type": "column",
+      "children": ["logoF", "footTag", "footTalk"],
+      "layout": {"width": {"fill": 550}, "height": {"hug": 150}, "flex": 2},
+      "props": {"crossAxisAlignment": "start", "spacing": 22}
+    },
+    "logoF": {"type": "row", "children": ["logoFMark", "logoFText"], "layout": {"width": {"hug": 120}, "height": {"hug": 32}}, "props": {"spacing": 10}},
+    "logoFMark": {"type": "box", "layout": {"width": 34, "height": 30}, "props": {"path": "M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z M20 30L26.9 0H33.4L26.5 30Z"}, "decoration": {"fills": [{"color": "#FFB9F34C"}]}},
+    "logoFText": {"type": "text", "layout": {"width": {"hug": 70}, "height": {"hug": 30}}, "props": {"text": "relay.", "style": {"fontFamily": "Space Grotesk", "fontSize": 26, "fontWeight": 700, "letterSpacing": -1.4, "color": "#FFF0F4ED", "height": 1.1}, "runs": [{"start": 5, "end": 6, "style": {"color": "#FFB9F34C"}}]}},
+    "footTag": {"type": "text", "layout": {"width": {"fill": 400}, "height": {"hug": 24}}, "props": {"text": "Stay ready for what comes next.", "style": {"fontFamily": "Space Grotesk", "fontSize": 16.5, "height": 1.4, "color": "#FFA2B0A9"}}},
+    "footTalk": {
+      "type": "row",
+      "children": ["footTalkText", "footTalkIcon"],
+      "layout": {"width": {"hug": 107}, "height": 36},
+      "props": {"spacing": 18},
+      "decoration": {"strokes": [{"color": "#FFB9F34C"}], "strokeSides": "bottom"}
+    },
+    "footTalkText": {"type": "text", "layout": {"width": {"hug": 70}, "height": {"hug": 20}}, "props": {"text": "Let’s talk", "style": {"fontFamily": "Space Grotesk", "fontSize": 16, "fontWeight": 700, "color": "#FFB9F34C"}}},
+    "footTalkIcon": {"type": "icon", "layout": {"width": 17, "height": 17}, "props": {"icon": "arrow_forward", "color": "#FFB9F34C"}},
+    "footCols": {
+      "type": "gridView",
+      "children": ["fc"],
+      "layout": {"width": {"fill": 770}, "height": {"hug": 200}, "flex": 3},
+      "props": {"physics": "never", "minCrossAxisExtent": 150, "shrinkWrapRows": true, "crossAxisSpacing": 8, "mainAxisSpacing": 40},
+      "bind": {"data": "${footer}"},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"minCrossAxisExtent": 100}}}]
+    },
+    "fc": {
+      "type": "column",
+      "children": ["fcTitle", "fcLinks"],
+      "layout": {"width": {"fill": 190}, "height": {"hug": 160}},
+      "props": {"crossAxisAlignment": "start", "spacing": 14}
+    },
+    "fcTitle": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 16}}, "props": {"text": "${item.title}", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11.5, "fontWeight": 500, "letterSpacing": 1, "color": "#FFB9F34C"}}},
+    "fcLinks": {"type": "listView", "children": ["fcLink"], "layout": {"width": {"fill": 190}, "height": {"hug": 128}}, "props": {"scrollable": false}, "bind": {"data": "${item.links}"}},
+    "fcLink": {"type": "text", "layout": {"width": {"fill": 190}, "height": 32}, "props": {"text": "${item[0]}", "textAlignVertical": "center", "style": {"fontFamily": "Space Grotesk", "fontSize": 13.5, "color": "#FFA2B0A9"}}},
+    "footRule": {"type": "box", "layout": {"width": {"fill": 1320}, "height": 1, "margin": [0, 70, 0, 0]}, "decoration": {"fills": [{"color": "#FF2C3C38"}]}},
+    "footBottom": {
+      "type": "flex",
+      "children": ["footCopy", "footSync"],
+      "layout": {"width": {"fill": 1320}, "height": {"hug": 20}, "margin": [0, 24, 0, 0]},
+      "props": {"direction": "vertical", "crossAxisAlignment": "start", "spacing": 16},
+      "media": [{"minWidth": "tablet", "patch": {"props": {"direction": "horizontal", "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center", "spacing": 0}}}]
+    },
+    "footCopy": {"type": "text", "layout": {"width": {"hug": 240}, "height": {"hug": 16}}, "props": {"text": "© 2026 Relay. A reference concept.", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "color": "#FF91A39A"}}},
+    "footSync": {"type": "row", "children": ["footDot", "footSyncText"], "layout": {"width": {"hug": 130}, "height": {"hug": 16}}, "props": {"spacing": 10}},
+    "footDot": {"type": "box", "layout": {"width": 8, "height": 8}, "decoration": {"fills": [{"color": "#FFB9F34C"}], "shape": "circle", "effects": [{"type": "dropShadow", "color": "#66B9F34C", "blurRadius": 6, "spreadRadius": 2}]}},
+    "footSyncText": {"type": "text", "layout": {"width": {"hug": 110}, "height": {"hug": 16}}, "props": {"text": "SYSTEMS IN SYNC", "style": {"fontFamily": "IBM Plex Mono", "fontSize": 11, "fontWeight": 500, "letterSpacing": 0.6, "color": "#FFB9F34C"}}},
+    "footLegal": {"type": "text", "layout": {"width": {"fill": 1320}, "height": {"hug": 16}, "margin": [0, 22, 0, 0]}, "props": {"text": "Relay is a fictional product concept created as a design and implementation reference. All organizations, people, metrics and incidents shown are illustrative.", "style": {"fontFamily": "Space Grotesk", "fontSize": 10.5, "height": 1.5, "color": "#FF91A39A"}}},
+
+    "menu": {
+      "type": "column",
+      "children": ["menuHdr", "menuList"],
+      "layout": {"width": {"fill": 1440}, "height": {"fill": 900}, "x": {"start": 0, "end": 0}, "y": {"start": 0, "end": 0}},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {"fills": [{"color": "#FF080D0E"}]},
+      "bind": {"visible": "${= menuOpen && !screen.atLeast.desktop}"}
+    },
+    "menuHdr": {
+      "type": "row",
+      "children": ["logoM", "menuClose"],
+      "layout": {"width": {"fill": 1440}, "height": 72, "padding": [18, 0, 18, 0]},
+      "props": {"mainAxisAlignment": "spaceBetween"},
+      "decoration": {"strokes": [{"color": "#FF2C3C38"}], "strokeSides": "bottom"},
+      "media": [{"minWidth": "tablet", "patch": {"layout": {"padding": [28, 0, 28, 0]}}}]
+    },
+    "logoM": {"type": "row", "children": ["logoMMark", "logoMText"], "layout": {"width": {"hug": 120}, "height": {"hug": 32}}, "props": {"spacing": 10}},
+    "logoMMark": {"type": "box", "layout": {"width": 34, "height": 30}, "props": {"path": "M0 30L3.5 15H10L6.5 30Z M10 30L15.3 7H21.8L16.5 30Z M20 30L26.9 0H33.4L26.5 30Z"}, "decoration": {"fills": [{"color": "#FFB9F34C"}]}},
+    "logoMText": {"type": "text", "layout": {"width": {"hug": 70}, "height": {"hug": 30}}, "props": {"text": "relay.", "style": {"fontFamily": "Space Grotesk", "fontSize": 26, "fontWeight": 700, "letterSpacing": -1.4, "color": "#FFF0F4ED", "height": 1.1}, "runs": [{"start": 5, "end": 6, "style": {"color": "#FFB9F34C"}}]}},
+    "menuClose": {
+      "type": "row",
+      "children": ["menuCloseIcon"],
+      "layout": {"width": 42, "height": 42},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#FF080D0E"}], "strokes": [{"color": "#FF2C3C38"}]},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "menuOpen", "value": "${= false}"}]}]
+    },
+    "menuCloseIcon": {"type": "icon", "layout": {"width": 22, "height": 22}, "props": {"icon": "close", "color": "#FFF0F4ED"}},
+    "menuList": {
+      "type": "listView",
+      "children": ["mi"],
+      "layout": {"width": {"fill": 1440}, "height": {"hug": 400}, "padding": [28, 34, 28, 0]},
+      "props": {"scrollable": false},
+      "bind": {"data": "${menuLinks}"}
+    },
+    "mi": {
+      "type": "row",
+      "children": ["miText", "miIcon"],
+      "layout": {"width": {"fill": 1380}, "height": 76},
+      "props": {"mainAxisAlignment": "spaceBetween"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#FF2C3C38"}], "strokeSides": "bottom"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "menuOpen", "value": "${= false}"}]}]
+    },
+    "miText": {"type": "text", "layout": {"width": {"hug": 140}, "height": {"hug": 28}}, "props": {"text": "${item.label}", "style": {"fontFamily": "Space Grotesk", "fontSize": 22, "fontWeight": 700, "color": "#FFF0F4ED"}}, "bind": {"props.style.color": "${= item.accent == true ? '#FFB9F34C' : '#FFF0F4ED'}"}},
+    "miIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "arrow_forward", "color": "#FFF0F4ED"}, "bind": {"props.color": "${= item.accent == true ? '#FFB9F34C' : '#FFF0F4ED'}"}}
+  },
+  "variables": {
+    "pricing": [
+      {"name": "annual", "type": "boolean", "value": false},
+      {"name": "menuOpen", "type": "boolean", "value": false},
+      {"name": "seats", "type": "integer", "value": 10},
+      {"name": "seatsText", "type": "text", "value": "10"},
+      {"name": "seatsValid", "type": "boolean", "formula": "matches(seatsText, '^[0-9]+$') && number(seatsText) >= 1 && number(seatsText) <= 500"},
+      {"name": "faqOpen", "type": "list", "value": [0]},
+      {"name": "billing", "type": "map", "value": {
+        "annual": "Annual billing shown. The displayed per-responder price is the monthly equivalent; your team is billed for 12 months at once.",
+        "monthly": "Monthly billing shown. Your team is billed each month at the displayed per-responder price."
+      }},
+      {"name": "estimator", "type": "map", "value": {
+        "limitMessage": "Starter is designed for up to 5 responders. Team supports larger rotations.",
+        "starterAlternativeLabel": "See Team plan",
+        "annualLabel": "Estimated annual commitment",
+        "monthlyLabel": "Estimated monthly total",
+        "annualSavingsLabel": "Estimated annual savings vs monthly billing"
+      }},
+      {"name": "plans", "type": "list", "value": [
+        {"name": "Starter", "description": "A focused home for growing on-call teams.", "monthly": 29, "annual": 23, "max": 5, "cta": "Start with Starter",
+         "features": ["Unlimited incidents", "Up to 5 responders", "Timeline and tasks", "Public status pages", "30-day history"]},
+        {"name": "Team", "description": "Coordination for teams with more moving parts.", "monthly": 59, "annual": 47, "max": 0, "cta": "Choose Team", "popular": true,
+         "features": ["Everything in Starter", "Unlimited responders", "Automated workflows", "Stakeholder updates", "1-year history"]},
+        {"name": "Scale", "description": "Advanced control for complex operations.", "monthly": 99, "annual": 79, "max": 0, "cta": "Choose Scale",
+         "features": ["Everything in Team", "Advanced analytics", "Custom roles", "Audit export", "Unlimited history"]}
+      ]},
+      {"name": "cmp", "type": "list", "value": [
+        {"s": true, "l": "Response"},
+        {"l": "Incidents", "v": ["Unlimited", "Unlimited", "Unlimited", "Unlimited"]},
+        {"l": "Responders", "v": ["Up to 5", "Unlimited", "Unlimited", "Unlimited"]},
+        {"l": "Timeline and tasks", "v": ["Yes", "Yes", "Yes", "Yes"]},
+        {"l": "Automated workflows", "v": ["—", "Yes", "Yes", "Yes"]},
+        {"l": "Custom roles", "v": ["—", "—", "Yes", "Yes"]},
+        {"s": true, "l": "Communication"},
+        {"l": "Public status pages", "v": ["1", "3", "Unlimited", "Unlimited"]},
+        {"l": "Stakeholder updates", "v": ["Manual", "Automated", "Automated", "Automated"]},
+        {"l": "Private status pages", "v": ["—", "—", "Yes", "Yes"]},
+        {"s": true, "l": "Insights and control"},
+        {"l": "Incident history", "v": ["30 days", "1 year", "Unlimited", "Unlimited"]},
+        {"l": "Advanced analytics", "v": ["—", "—", "Yes", "Yes"]},
+        {"l": "Audit export", "v": ["—", "—", "Yes", "Yes"]},
+        {"l": "SAML SSO", "v": ["—", "—", "—", "Yes"]},
+        {"l": "Dedicated support", "v": ["—", "—", "—", "Yes"]}
+      ]},
+      {"name": "faqs", "type": "list", "value": [
+        {"q": "Can I change plans later?", "a": "Yes. Move between plans as your team changes. Your incident history and configuration stay in place."},
+        {"q": "How does annual billing work?", "a": "Annual plans are billed once a year at the displayed per-responder monthly equivalent. The discount is approximately 20% compared with monthly billing."},
+        {"q": "What counts as a responder?", "a": "A responder is someone who can be assigned to incidents and take response actions. View-only stakeholders are free."},
+        {"q": "Can I try a plan before buying?", "a": "This reference site has no account creation or billing. Selecting a plan prepares a local-only contact request, so you can explore the plan discussion flow without payment details."},
+        {"q": "Do you offer security reviews?", "a": "Yes. Contact sales for a security packet, deployment details, and a conversation with our team."},
+        {"q": "Can I estimate a larger response team?", "a": "Yes. The estimator supports up to 500 responders. For larger rollouts, contact sales for a custom Enterprise proposal."},
+        {"q": "Are view-only stakeholders billed?", "a": "No. People who only receive updates or view incident progress do not count as responders in these estimates."}
+      ]},
+      {"name": "footer", "type": "list", "value": [
+        {"title": "Product", "links": [["Platform", "index.html#platform"], ["Pricing", "pricing.html"], ["Changelog", "changelog.html"], ["Talk to sales", "contact.html"]]},
+        {"title": "Solutions", "links": [["Engineering", "index.html#platform"], ["Security", "index.html#coordination"], ["Operations", "index.html#visibility"], ["Enterprise", "pricing.html#enterprise"]]},
+        {"title": "Resources", "links": [["Customer stories", "customers.html"], ["How Relay works", "index.html#method"], ["FAQ", "pricing.html#faq"], ["Release notes", "changelog.html"]]},
+        {"title": "Company", "links": [["Our approach", "index.html#method"], ["Contact", "contact.html"], ["Privacy note", "contact.html#privacy"], ["Terms note", "contact.html#terms"]]}
+      ]},
+      {"name": "menuLinks", "type": "list", "value": [
+        {"label": "Platform"}, {"label": "Pricing"}, {"label": "Customers"}, {"label": "Changelog"}, {"label": "Talk to sales", "accent": true}
+      ]}
+    ]
+  }
+}
