@@ -859,8 +859,16 @@ final class _ScopeVariable implements BoundVariable {
 /// [text] with [f] applied to each styled run (and the plain text between
 /// runs) on its own, the runs moved to where their text now is: a run's
 /// `${...}` stays in its style.
+///
+/// A run that starts or ends inside an expression cannot style the text as
+/// written (the expression has no characters of its own to split): its
+/// offsets count characters of the text as shown, as bound runs do. A drop
+/// cap on a bound paragraph is `{"start": 0, "end": 1}`.
 (String, List<TextRun>) interpolateRuns(String text, List<TextRun> runs, String Function(String) f) {
   if (runs.isEmpty) return (f(text), runs);
+  final spans = [for (final m in expressionSyntax.allMatches(text)) (m.start, m.end)];
+  bool inside(int i) => spans.any((s) => i > s.$1 && i < s.$2);
+  if (runs.any((r) => inside(r.start) || inside(r.end))) return (f(text), runs);
   final sorted = [...runs]..sort((a, b) => a.start.compareTo(b.start));
   final out = StringBuffer();
   final next = <TextRun>[];
