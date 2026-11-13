@@ -57,10 +57,9 @@ const Map<String, Map<String, String>> renderExceptions = {};
 /// the test.
 const Map<String, Map<String, String>> renderStatics = {
   // Registries: what plays or flies is found by node id or tag from the
-  // actions (`EffectPlayers.play(node, name)` has no tree to ask), and all
-  // four are exported API. Per-tree state needs the action side to change.
+  // actions (`ParticlePlayers.play(node, name)` has no tree to ask), and all
+  // three are exported API. Per-tree state needs the action side to change.
   'render/play.dart': {
-    '_byNode': 'EffectPlayers: the effects on screen by node id, played by an action (exported)',
     '_records': 'FlightRegistry: where nodes last were, for flights between screens (exported)',
   },
   'render/particles.dart': {

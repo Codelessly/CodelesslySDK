@@ -2,13 +2,13 @@
 // loop rests at its first frame, as the design canvas draws it.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderLoops;
+import 'package:codelessly_sdk/src/render/animations.dart' show RenderAnimations;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Future<RenderLoops> show(WidgetTester tester) async {
+  Future<RenderAnimations> show(WidgetTester tester) async {
     final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
       'roots': ['g'],
       'nodes': {
@@ -22,9 +22,9 @@ void main() {
     })));
     addTearDown(tree.dispose);
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'g', interactive: true))));
-    RenderLoops? loops;
+    RenderAnimations? loops;
     void visit(RenderObject o) {
-      if (o is RenderLoops) loops ??= o;
+      if (o is RenderAnimations) loops ??= o;
       o.visitChildren(visit);
     }
 

@@ -11,22 +11,26 @@ import 'dart:ui';
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/physics.dart';
 
-/// The spring [physics] settles on: Flutter's
-/// `SpringDescription.withDurationAndBounce` when it gives a bounce or a
-/// duration, its stiffness, damping and mass otherwise.
-SpringDescription springOf(api.GesturePhysics physics) {
-  if (physics.usesBounce) {
+/// Flutter's `SpringDescription` for [spring]: `withDurationAndBounce` when
+/// it's given by duration and bounce, else its mass, stiffness and damping
+/// ([stiffnessIfNone] for a stiffness not above 0, [dampingIfNegative] for
+/// a negative damping).
+SpringDescription describeSpring(api.Spring spring, {double stiffnessIfNone = 380, double dampingIfNegative = 0}) {
+  if (!spring.isPhysical) {
     return SpringDescription.withDurationAndBounce(
-      duration: Duration(milliseconds: math.max(1, physics.duration ?? 500)),
-      bounce: (physics.bounce ?? 0).clamp(-0.95, 1.0),
+      duration: Duration(milliseconds: math.max(1, spring.duration)),
+      bounce: spring.bounce.clamp(-0.95, 1.0),
     );
   }
   return SpringDescription(
-    mass: physics.mass <= 0 ? 1 : physics.mass,
-    stiffness: physics.stiffness <= 0 ? 380 : physics.stiffness,
-    damping: physics.damping < 0 ? 0 : physics.damping,
+    mass: spring.mass <= 0 ? 1 : spring.mass,
+    stiffness: spring.stiffness! <= 0 ? stiffnessIfNone : spring.stiffness!,
+    damping: spring.damping! < 0 ? dampingIfNegative : spring.damping!,
   );
 }
+
+/// The spring [physics] settles on.
+SpringDescription springOf(api.GesturePhysics physics) => describeSpring(physics.spring);
 
 /// How close a settle must come to be done: within a hundredth of a unit
 /// (pixel, degree or scale) and slower than one unit a second.

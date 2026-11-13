@@ -13,6 +13,8 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
+
+import 'physics.dart' show describeSpring;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -529,11 +531,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       _settleFrom = 0;
       _settleTo = 1;
       _settleSim = SpringSimulation(
-        SpringDescription(
-          mass: 1,
-          stiffness: _track.settleStiffness <= 0 ? 380 : _track.settleStiffness,
-          damping: _track.settleDamping < 0 ? 20 : _track.settleDamping,
-        ),
+        describeSpring(_track.settleSpring, dampingIfNegative: 20),
         from,
         to,
         velocity,
