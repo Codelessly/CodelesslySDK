@@ -107,6 +107,10 @@ several agents can run it at once on different `--out` directories. A run takes 
 compiled the harness (the first run after the SDK changes takes 20 to 30 seconds), plus about half a second per
 screen and size.
 
+Limits: an icon whose name comes from a binding (`"bind": {"props.icon": ...}`) draws nothing, because an app
+fetches its SVG; use icons with fixed names and `visible` bindings. A `--tap` or `--hover` on a node scrolled out
+of view first scrolls its scrolling ancestor to bring it into view.
+
 Differences from an app that matter: the window is exactly the size given, at a pixel ratio of 1; text with no
 font family is drawn in Roboto; there is no network; `openLink` opens nothing; platform services (storage,
 clipboard) are in memory.
