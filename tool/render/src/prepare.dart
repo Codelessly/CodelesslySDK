@@ -69,22 +69,44 @@ Prepared prepare(Json doc, {required String dir, required String defaultFamily, 
             p.key: spec.prop(p.key) == null ? p.value : _typed(spec.prop(p.key)!.type, p.value, defaultFamily, codepoints),
         },
       };
+      // Material widgets draw an unstyled label without a family: give
+      // their style one (a ButtonStyle's textStyle, a TextStyle prop).
+      _labelStyles(spec, node['props'] as Json, defaultFamily);
       // A text node with no style still gets the default family.
       if (spec.type == TextProps.spec.type && readMap(node['props'])!['style'] == null) {
         (node['props'] as Json)['style'] = {'fontFamily': defaultFamily};
       }
     } else if (spec?.type == TextProps.spec.type) {
       node = {...node, 'props': {'style': {'fontFamily': defaultFamily}}};
+    } else if (spec != null) {
+      final props = <String, Object?>{};
+      _labelStyles(spec, props, defaultFamily);
+      if (props.isNotEmpty) node = {...node, 'props': props};
     }
     out[e.key] = node;
   }
   return Prepared({...doc, 'nodes': out}, images);
 }
 
+/// Props of [spec] that style a Material widget's label, added to [props]
+/// with the default family when absent.
+void _labelStyles(WidgetSpec spec, Json props, String family) {
+  for (final def in spec.props) {
+    if (props.containsKey(def.key)) continue;
+    if (def.type.name == 'ButtonStyle') {
+      props[def.key] = {'textStyle': {'fontFamily': family}};
+    } else if (def.type.name == 'TextStyle' && spec.type != TextProps.spec.type && def.key != 'style') {
+      props[def.key] = {'fontFamily': family};
+    }
+  }
+}
+
 /// [json] of [type] with default families and icon codepoints filled in.
 Object? _typed(PropType type, Object? json, String family, Map<String, int> codepoints) {
   if (json == null) return null;
   switch (type.kind) {
+    case PropKind.object when type.name == 'TextRun':
+      return json; // a run's style is merged over the text's: no family of its own
     case PropKind.object:
       final m = readMap(json);
       if (m == null) return json;
@@ -93,6 +115,7 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
         for (final e in m.entries) e.key: fields[e.key] == null ? e.value : _typed(fields[e.key]!.type, e.value, family, codepoints),
       };
       if (type.name == 'TextStyle' && next['fontFamily'] == null) next['fontFamily'] = family;
+      if (type.name == 'ButtonStyle' && readMap(next['textStyle']) == null) next['textStyle'] = {'fontFamily': family};
       return next;
     case PropKind.list:
       return json is List ? [for (final v in json) _typed(type.item!, v, family, codepoints)] : json;
@@ -101,7 +124,8 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
       if (icon == null || icon['type'] != 'MATERIAL_ICON' || icon['codepoint'] != null) return json;
       final style = readString(icon['style']) ?? 'filled';
       final name = readString(icon['name']) ?? '';
-      final cp = codepoints[style == 'filled' ? name : '${name}_$style'] ?? codepoints[name];
+      // Flutter's codepoints name the filled style `_baseline`.
+      final cp = codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
       return cp == null ? json : {...icon, 'codepoint': cp};
     default:
       return json;
@@ -112,7 +136,7 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
 String _image(String text, String path, String nodeId, String dir, List<ImageRef> images) {
   final t = text.trim();
   if (t.startsWith('http://') || t.startsWith('https://')) {
-    if (_mimeOf(Uri.tryParse(t)?.path ?? '') != null || path.endsWith('/url') || path.contains('/image')) {
+    if (_mimeOf(Uri.tryParse(t)?.path ?? '') != null || path.contains('/image')) {
       images.add((nodeId: nodeId, path: path, url: t, status: 'network', detail: null));
     }
     return text;
