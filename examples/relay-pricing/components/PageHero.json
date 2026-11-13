@@ -1,0 +1,195 @@
+{
+ "schema": 2,
+ "id": "PageHero",
+ "roots": [
+  "ph"
+ ],
+ "widget": {
+  "type": "PageHero",
+  "doc": "A page's opening band: eyebrow, headline, intro and an optional slot for actions.",
+  "slots": [
+   "actions"
+  ],
+  "props": [
+   {
+    "key": "eyebrow",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": ""
+   },
+   {
+    "key": "headline",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Headline"
+   },
+   {
+    "key": "intro",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": ""
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Home",
+   "size": [
+    1440,
+    520
+   ],
+   "props": {
+    "eyebrow": "INCIDENT RESPONSE, IN SYNC",
+    "headline": "When systems break, teams move as one.",
+    "intro": "Relay turns a scattered response into a clear, coordinated operation."
+   }
+  }
+ ],
+ "nodes": {
+  "ph": {
+   "type": "column",
+   "children": [
+    "phIn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 520
+    },
+    "padding": [
+     18,
+     72,
+     18,
+     56
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "bg"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": "tablet",
+     "patch": {
+      "layout": {
+       "padding": [
+        28,
+        96,
+        28,
+        72
+       ]
+      }
+     }
+    },
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        40,
+        128,
+        40,
+        96
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "phIn": {
+   "type": "column",
+   "children": [
+    "phEyebrow",
+    "phTitle",
+    "phIntro",
+    "phActs"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 360
+    },
+    "constraints": {
+     "maxWidth": 1320
+    }
+   },
+   "props": {
+    "spacing": 22,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "phEyebrow": {
+   "type": "text",
+   "props": {
+    "text": "${props.eyebrow}",
+    "style": "eyebrow"
+   },
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "phTitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.headline}",
+    "style": "display"
+   },
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 150
+    },
+    "constraints": {
+     "maxWidth": 980
+    }
+   }
+  },
+  "phIntro": {
+   "type": "text",
+   "props": {
+    "text": "${props.intro}",
+    "style": "body"
+   },
+   "layout": {
+    "width": {
+     "fill": 1320
+    },
+    "height": {
+     "hug": 48
+    },
+    "constraints": {
+     "maxWidth": 640
+    }
+   }
+  },
+  "phActs": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  }
+ }
+}

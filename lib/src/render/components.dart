@@ -64,6 +64,32 @@ abstract interface class NestedInstance {
   Object? get outer;
 }
 
+/// Slot content a definition places at [at] (a copy a list of the
+/// definition repeats, inside instance [instance]): the caller's nodes, in
+/// the caller's instance [outer], once per copy. Flutter: a `child` widget
+/// placed in each item a builder builds: the same configuration, built in the
+/// caller's context, so it reads the caller's scope, not the item's.
+@immutable
+final class SlotContent implements NestedInstance {
+  const SlotContent(this.outer, this.at);
+
+  /// The caller's instance: where the content's ids are, and what it reads.
+  @override
+  final Object? outer;
+
+  /// Where the definition places it: the copy's instance.
+  final Object? at;
+
+  @override
+  bool operator ==(Object other) => other is SlotContent && other.outer == outer && other.at == at;
+
+  @override
+  int get hashCode => Object.hash(outer, at);
+
+  @override
+  String toString() => '$at>slot';
+}
+
 /// The instance [instance] is nested in: a component instance's call
 /// instance, a list item's list instance (`('item', outer, list, k)`), a
 /// [NestedInstance]'s outer; null for none.
@@ -206,6 +232,11 @@ class ComponentRegistry extends ChangeNotifier {
     _notify({type});
   }
 
+  /// Told of each call rendered without its definition, once per call
+  /// path (`component_missing`): an app logs it and may fetch the
+  /// definition, whose arrival ([define]) renders the call.
+  void Function(String type, String path)? onMissing;
+
   /// Records that the call at [path] has no definition [type].
   void reportMissing(String type, String path) {
     final paths = missing[type] ??= {};
@@ -214,6 +245,7 @@ class ComponentRegistry extends ChangeNotifier {
         debugPrint('Codelessly: component_missing: "$path" calls $type, which is not defined.');
         return true;
       }());
+      onMissing?.call(type, path);
     }
   }
 

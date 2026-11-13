@@ -3,7 +3,12 @@
 // that share `props.screen` are one layout (one screen, a canvas per
 // breakpoint); every other canvas is a layout of its own. A layout's id is
 // its first canvas's id, so `navigate` may name any canvas of a screen.
+// The site's components are published beside the layouts
+// (`publish/{p}/components/{type}`, the bundle's `components`), each with its
+// version, digest and fonts, and each layout lists the closure it calls: an
+// app loads them with the screens, through its PublishLoader.
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_sdk/codelessly_sdk.dart' show componentDigest;
 
 /// One page to publish: its name (the file it came from) and its JSON.
 typedef Page = ({String name, Json json});
@@ -12,11 +17,13 @@ typedef Page = ({String name, Json json});
 ///
 /// [variables] are the project's (a site manifest's, as a publish model's
 /// `variables`); [breakpoints] the project's, over the pages' own;
-/// [components] the site's component documents: a layout lists the fonts of
-/// those it calls (directly or through others) with its own, so they load
-/// before it shows.
+/// [components] the site's component documents, published in the bundle
+/// (version [componentVersion]): a layout lists the ones it calls (directly
+/// or through others) and their fonts with its own, so they load before it
+/// shows.
 ({PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) publishPages(
-    List<Page> pages, {Json variables = const {}, Object? breakpoints, List<Json> components = const [], Json? theme}) {
+    List<Page> pages,
+    {Json variables = const {}, Object? breakpoints, List<Json> components = const [], Json? theme, int componentVersion = 1, String projectId = 'render'}) {
   // The theme as each of its media rules makes it (the fonts its named
   // styles use at every size).
   final tokens = ThemeTokens.fromJson(theme);
@@ -26,12 +33,32 @@ typedef Page = ({String name, Json json});
   ];
   final library = ComponentLibrary.of([for (final c in components) LayoutDocument.fromJson(c)]);
   final rawOf = {for (final c in components) readString(readMap(c['widget'])?['type']) ?? '': c};
+  final fonts = <String, Json>{};
+  // The fonts [nodes] (node JSON) use, as ids of the model's `fonts`: their
+  // text styles' and those of the theme's named styles they name, at every
+  // size the theme has.
+  List<String> fontIdsOf(Iterable<Object?> nodes) {
+    final named = [
+      for (final t in themes)
+        for (final n in nodes)
+          if (readMap(n) case final Json m)
+            ThemeRefs(t).node(m, Catalog.current.widget(readString(m['type']) ?? '') ?? library.catalog.widget(readString(m['type']) ?? '')),
+    ];
+    final ids = <String>[];
+    for (final f in fontsUsedBy([...nodes, ...named])) {
+      final key = '${f.family}/${f.weight}/${f.italic}';
+      fonts[key] = {'family': f.family, 'weight': f.weight, if (f.italic) 'italic': true};
+      ids.add(key);
+    }
+    return ids;
+  }
+
   final layouts = <String, Json>{};
+  final closures = <String, List<String>>{};
   final layoutOfCanvas = <String, String>{};
   final screens = <String, List<String>>{}; // layout id → its canvases
   final usedPaths = <String>{};
   String? entry;
-  final fonts = <String, Json>{};
   for (final page in pages) {
     final json = page.json;
     breakpoints ??= json[LayoutDocumentBreakpoints.key];
@@ -76,16 +103,8 @@ typedef Page = ({String name, Json json});
       final called = library.closureOf(LayoutDocument(nodes: {for (final c in cs) for (final n in doc.subtree(c)) n.id: n}));
       final componentNodes = [for (final t in called) ...(readMap(rawOf[t]?['nodes']) ?? const {}).values];
       // Text styles naming the theme's: their fonts as resolved.
-      final named = [
-        for (final t in themes)
-          for (final n in [...nodes.values, ...componentNodes])
-            if (readMap(n) case final Json m) ThemeRefs(t).node(m, Catalog.current.widget(readString(m['type']) ?? '') ?? library.catalog.widget(readString(m['type']) ?? '')),
-      ];
-      for (final f in fontsUsedBy([...nodes.values, ...componentNodes, ...named])) {
-        final key = '${f.family}/${f.weight}/${f.italic}';
-        fonts[key] = {'family': f.family, 'weight': f.weight, if (f.italic) 'italic': true};
-        fontIds.add(key);
-      }
+      fontIds.addAll(fontIdsOf([...nodes.values, ...componentNodes]));
+      closures[id] = called;
       layouts[id] = {
         'schema': kSchemaVersion,
         'id': id,
@@ -93,7 +112,7 @@ typedef Page = ({String name, Json json});
         'nodes': nodes,
         'scripts': ?json['scripts'],
         'pageId': page.name,
-        'projectId': 'render',
+        'projectId': projectId,
         if (grouped)
           'breakpoints': [
             for (final c in cs)
@@ -118,22 +137,38 @@ typedef Page = ({String name, Json json});
       };
     }
   }
+  // The components, each with the fonts of its own text.
+  final published = <String, Json>{};
+  for (final e in rawOf.entries) {
+    if (e.key.isEmpty) continue;
+    final c = PublishComponent(
+      document: LayoutDocument.fromJson(e.value),
+      version: componentVersion,
+      lastUpdated: DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+      fonts: fontIdsOf((readMap(e.value['nodes']) ?? const {}).values),
+    );
+    published[e.key] = c.copyWith(digest: componentDigest(c)).toJson();
+  }
   final model = <String, Object?>{
     'schema': kPublishSchemaVersion,
-    'projectId': 'render',
+    'projectId': projectId,
     'entryLayoutId': ?entry,
     'pages': [for (final p in pages) p.name],
-    'layouts': {for (final e in layouts.entries) e.key: PublishLayoutInfo.of(PublishLayout.fromJson(e.value)).toJson()},
+    'layouts': {
+      for (final e in layouts.entries) e.key: PublishLayoutInfo.of(PublishLayout.fromJson(e.value), components: closures[e.key] ?? const []).toJson(),
+    },
     'fonts': {
       for (final e in fonts.entries) e.key: {'id': e.key, ...e.value},
     },
     'breakpoints': ?breakpoints,
     if (variables.isNotEmpty) 'variables': variables,
     'theme': ?theme,
+    if (published.isNotEmpty)
+      'components': {for (final e in published.entries) e.key: PublishComponentInfo.of(PublishComponent.fromJson(e.value)).toJson()},
     'lastUpdated': 0,
   };
   return (
-    bundle: PublishBundle.fromJson({'model': model, 'layouts': layouts}),
+    bundle: PublishBundle.fromJson({'model': model, 'layouts': layouts, 'components': published}),
     layoutOfCanvas: layoutOfCanvas,
     screens: screens,
   );

@@ -4,7 +4,7 @@
 // core runtime, imports a feature (test/feature_isolation_test.dart).
 import 'dart:async';
 
-import 'package:codelessly_api/core.dart' show ActionDef, CallFunctionAction, Catalog;
+import 'package:codelessly_api/core.dart' show ActionDef, CallFunctionAction, Catalog, LayoutDocument;
 
 import '../../render/recipe.dart' show WidgetRecipe;
 
@@ -52,6 +52,7 @@ class CodelesslyFeature {
     this.scopes = const {},
     this.catalog = const Catalog(),
     this.recipes = const {},
+    this.components = const [],
   });
 
   /// What it's called (`auth`, `commerce`), for messages.
@@ -75,6 +76,11 @@ class CodelesslyFeature {
   /// How its node types render, by type (under the app's own
   /// `CodelesslyConfig.recipes`).
   final Map<String, WidgetRecipe> recipes;
+
+  /// Its node types implemented as data: component definitions (a hosted
+  /// plugin's widgets, docs/design/06 §6.5), each rendered as a component
+  /// call is, as ordinary boxes of the screen's tree.
+  final List<LayoutDocument> components;
 
   @override
   String toString() => 'CodelesslyFeature($name)';

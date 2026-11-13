@@ -58,6 +58,14 @@ abstract interface class TreeBindings {
   void publish(NodeSource source, String id, Object? instance, String name, Object? value);
 }
 
+/// [TreeBindings] that keep state per component instance (its scopes): told
+/// when an instance leaves the tree, so they let go of it.
+abstract interface class InstanceBindings {
+  /// Component instance [instance] (and every instance nested in it) left
+  /// the tree: release what was kept for it.
+  void releaseInstance(Object instance);
+}
+
 /// The values one node reads and writes, by name or path (`volume`,
 /// `item.price`, `draft.title`).
 abstract interface class BoundValues {

@@ -1,0 +1,331 @@
+{
+ "schema": 2,
+ "id": "contact",
+ "roots": [
+  "contact"
+ ],
+ "variables": {
+  "contact": [
+   {
+    "name": "menuOpen",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": "21–100"
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "nodes": {
+  "contact": {
+   "type": "canvas",
+   "name": "Contact",
+   "path": "contact",
+   "slots": {
+    "body": "contactRoot"
+   },
+   "layout": {
+    "width": 1440,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "bg"
+     }
+    ]
+   }
+  },
+  "contactRoot": {
+   "type": "stack",
+   "children": [
+    "contactPage",
+    "contactMenu"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    }
+   }
+  },
+  "contactPage": {
+   "type": "column",
+   "children": [
+    "contactHeader",
+    "contactHero",
+    "contactForm",
+    "contactCta",
+    "contactFooter"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "contactHeader": {
+   "type": "SiteHeader",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": 72
+   },
+   "props": {
+    "menuOpen": "menuOpen"
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "height": 92
+      }
+     }
+    }
+   ]
+  },
+  "contactMenu": {
+   "type": "MobileMenu",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "fill": 900
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "props": {
+    "menuOpen": "menuOpen"
+   }
+  },
+  "contactCta": {
+   "type": "FinalCta",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 600
+    }
+   }
+  },
+  "contactFooter": {
+   "type": "SiteFooter",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 420
+    }
+   }
+  },
+  "contactHero": {
+   "type": "PageHero",
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 480
+    }
+   },
+   "props": {
+    "eyebrow": "TALK TO SALES / 006",
+    "headline": "Plan a calmer response.",
+    "intro": "Tell us about your team and what you want to improve. We will follow up with a tailored walkthrough."
+   }
+  },
+  "contactForm": {
+   "type": "column",
+   "children": [
+    "contactSizesLabel",
+    "contactSizes",
+    "contactSend",
+    "contactNote"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1440
+    },
+    "height": {
+     "hug": 360
+    },
+    "padding": [
+     18,
+     24,
+     18,
+     72
+    ]
+   },
+   "props": {
+    "spacing": 18,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "minWidth": "desktop",
+     "patch": {
+      "layout": {
+       "padding": [
+        160,
+        24,
+        160,
+        96
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "contactSizesLabel": {
+   "type": "text",
+   "props": {
+    "text": "TEAM SIZE",
+    "style": "eyebrow"
+   },
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "contactSizes": {
+   "type": "gridView",
+   "children": [
+    "contactSize"
+   ],
+   "bind": {
+    "data": "${contactCopy.teamSizes}"
+   },
+   "props": {
+    "physics": "never",
+    "minCrossAxisExtent": 130,
+    "shrinkWrapRows": true,
+    "crossAxisSpacing": 10,
+    "mainAxisSpacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 46
+    },
+    "constraints": {
+     "maxWidth": 760
+    }
+   }
+  },
+  "contactSize": {
+   "type": "Button",
+   "bind": {
+    "props.label": "${item}",
+    "props.primary": "${= item == size}"
+   },
+   "layout": {
+    "width": {
+     "fill": 130
+    },
+    "height": 46
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPress"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "size",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "contactSend": {
+   "type": "Button",
+   "props": {
+    "label": "Send request"
+   },
+   "layout": {
+    "width": {
+     "hug": 168
+    },
+    "height": 46
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPress"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "contactNote": {
+   "type": "text",
+   "props": {
+    "text": "${contactCopy.response}",
+    "style": "body"
+   },
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "bind": {
+    "visible": "${sent}"
+   }
+  }
+ }
+}
