@@ -20,7 +20,7 @@ jobs:
         with:
           repository: Codelessly/CodelesslyAPI
           # Paired model revision for these runtime actions and widget fields.
-          ref: 42c290972dd0789971d12eb97378f0952824afc5
+          ref: c3a8109b4448a66bbc97a1b839b7b5f9981b08b6
           path: CodelesslyAPI
       - name: Use the sibling CodelesslyAPI checkout
         run: |
