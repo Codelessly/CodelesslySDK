@@ -87,6 +87,21 @@ class Codelessly extends ChangeNotifier {
     }
     _ownComponents.addAll(this.components.types);
     this.components.onMissing = _componentMissing;
+    this.components.addListener(_declarationsChanged);
+  }
+
+  /// A definition arrived or changed its declaration: the loaded layouts
+  /// that call it are decoded again, so their calls' props are typed by the
+  /// declaration as it is now (the screens on show read their values through
+  /// the new declaration already).
+  void _declarationsChanged() {
+    final types = components.changed;
+    if (types.isEmpty || _layouts.isEmpty) return;
+    final catalog = _layoutCatalog;
+    for (final e in _layouts.entries.toList()) {
+      if (!e.value.document.nodes.values.any((n) => types.contains(n.type))) continue;
+      _layouts[e.key] = PublishLayout.fromJson(e.value.toJson(), catalog: catalog);
+    }
   }
 
   /// Resolves the layouts' managed components at load; null: each shows its
@@ -703,6 +718,8 @@ class Codelessly extends ChangeNotifier {
 
   @override
   void dispose() {
+    components.removeListener(_declarationsChanged);
+    if (components.onMissing == _componentMissing) components.onMissing = null;
     automations.dispose();
     presenter.dismissAll();
     _watching?.cancel();

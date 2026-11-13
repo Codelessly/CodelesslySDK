@@ -325,6 +325,17 @@ void main() {
       expect(codes(report), ['unknown_screen_arg']);
     });
 
+    testWidgets('--components-all renders every component of the site alone, each preview at its size', (tester) async {
+      expect(parseArgs([site, '--out', 'o', '--components-all']).componentsAll, isTrue);
+      final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path, componentsAll: true,
+          sizes: const [Size(390, 844)]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.images.map((f) => f.split('/').last), isNotEmpty);
+      expect(report.images.every((f) => f.split('/').last.startsWith('Chip')), isTrue, reason: '${report.images}');
+      final again = await runRender(tester, RenderArgs(inputs: [site], out: out.path, componentsAll: true));
+      expect(again.images.map((f) => f.split('/').last), ['Card-hello@320x240.png']);
+    });
+
     testWidgets('a call to a component the site lacks: validation names it, the render reports it', (tester) async {
       final dir = Directory('${out.path}/site')..createSync();
       File('${dir.path}/home.json').writeAsStringSync(jsonEncode({
