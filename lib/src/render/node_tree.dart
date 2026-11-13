@@ -22,6 +22,7 @@ import 'play.dart';
 import 'contracts.dart';
 import 'convert.dart';
 import 'count_up.dart';
+import 'custom_paint.dart' show customPaintLayers;
 import 'layout/margin_box.dart';
 import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
@@ -1031,6 +1032,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       chain.add(_obtain<RenderOpacity>('opacity', () => RenderOpacity(opacity: n.opacity))..opacity = n.opacity);
     }
     paintLayers(this, n, chain);
+    customPaintLayers(this, n, chain);
     final contentStart = chain.length;
     final ratio = n.layout.aspectRatio;
     if (ratio != null && ratio.isFinite && ratio > 0) {

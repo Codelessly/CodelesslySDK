@@ -646,11 +646,32 @@ extension RenderTreeBinder on RenderTree {
 }
 
 /// A [ValueScope] as the values a node's render objects read and write.
-final class _ScopeValues implements BoundValues {
-  const _ScopeValues(this.scope, this.engine);
+final class _ScopeValues implements ExpressionValues {
+  _ScopeValues(this.scope, this.engine);
 
   final ValueScope scope;
   final Expressions engine;
+
+  /// The scope [evaluate] reads its locals from, over [scope]: one, reused.
+  late final _LocalNames _locals = _LocalNames(scope);
+
+  @override
+  Object? evaluate(String expression, [Map<String, Object?> locals = const {}]) {
+    if (locals.isEmpty) return engine.evaluate(expression, scope);
+    _locals.names = locals;
+    return engine.evaluate(expression, _locals);
+  }
+
+  @override
+  Set<String> namesRead(String expression) => {for (final p in Expressions.readsOf(expression)) rootOf(p)};
+
+  // The same values each time the tree asks for them: a render object
+  // keeps what it read while they are.
+  @override
+  bool operator ==(Object other) => other is _ScopeValues && identical(other.scope, scope) && identical(other.engine, engine);
+
+  @override
+  int get hashCode => Object.hash(identityHashCode(scope), identityHashCode(engine));
 
   @override
   Object? read(String path) => readPath(scope, path);
@@ -669,6 +690,29 @@ final class _ScopeValues implements BoundValues {
 
   @override
   String interpolate(String text) => engine.interpolate(text, scope);
+}
+
+/// Names given by the caller ([ExpressionValues.evaluate]'s locals) over
+/// [parent]'s.
+final class _LocalNames implements ValueScope {
+  _LocalNames(this.parent);
+
+  @override
+  final ValueScope parent;
+  Map<String, Object?> names = const {};
+
+  @override
+  Object? read(String path) {
+    final p = ValuePath.parse(path);
+    if (p == null || !names.containsKey(p.root)) return null;
+    return p.readFrom(names[p.root]);
+  }
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
 }
 
 final class _ScopeVariable implements BoundVariable {
