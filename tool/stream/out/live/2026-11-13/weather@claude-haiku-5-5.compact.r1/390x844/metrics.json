@@ -1,0 +1,56 @@
+{
+ "stream": "weather@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 1646,
+ "timeToFirstPaintMs": 2262,
+ "timeToFirstTextMs": 2873,
+ "timeToFirstSectionMs": 4444,
+ "timeToCompleteMs": 15566,
+ "outputTokens": 5120,
+ "tokensEstimated": false,
+ "chars": 10054,
+ "deltas": 682,
+ "opsApplied": 57,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": [
+     "alertBeforeRain"
+    ]
+   }
+  ]
+ },
+ "streamedOps": 57,
+ "rejections": [],
+ "nodes": 56,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 3,
+  "p90": 6,
+  "max": 11
+ },
+ "frames": 180,
+ "frameMs": 91,
+ "pumpsOverBudget16ms": 11,
+ "pumps": 863,
+ "pumpMsMedian": 0.122,
+ "renderExceptions": [],
+ "warnings": 0
+}

@@ -1,0 +1,50 @@
+{
+ "stream": "flights@claude-haiku-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 379,
+ "timeToFirstPaintMs": 1212,
+ "timeToFirstTextMs": 1212,
+ "timeToFirstSectionMs": 1212,
+ "timeToCompleteMs": 1372,
+ "outputTokens": 368,
+ "tokensEstimated": false,
+ "chars": 648,
+ "deltas": 47,
+ "opsApplied": 2,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "no_size itemTag"
+ ],
+ "finalDiagnostics": [
+  "no_size /nodes/itemTag/layout"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 23,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [],
+ "nodes": 21,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 0
+ },
+ "frames": 33,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 0,
+ "pumps": 81,
+ "pumpMsMedian": 0.169,
+ "renderExceptions": [],
+ "warnings": 0
+}

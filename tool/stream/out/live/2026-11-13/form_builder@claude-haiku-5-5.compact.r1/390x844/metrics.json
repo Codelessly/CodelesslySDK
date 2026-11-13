@@ -1,0 +1,142 @@
+{
+ "stream": "form_builder@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 521,
+ "timeToFirstPaintMs": 1765,
+ "timeToFirstTextMs": 1765,
+ "timeToFirstSectionMs": 3789,
+ "timeToCompleteMs": 6708,
+ "outputTokens": 2149,
+ "tokensEstimated": false,
+ "chars": 4367,
+ "deltas": 302,
+ "opsApplied": 18,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/fieldsList/props/padding",
+  "unknown_prop /nodes/preview/props/padding",
+  "dangling_child /nodes/main/children/3",
+  "dangling_child /nodes/main/children/5"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "short text"
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "checkbox"
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^\\s*submit"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ],
+  "expectText": "required",
+  "textFound": false
+ },
+ "streamedOps": 20,
+ "rejections": [
+  {
+   "op": 13,
+   "code": "unknown_prop",
+   "path": "/nodes/fieldsList/props/padding",
+   "message": "A column has no prop \"padding\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, fillViewport.",
+   "nodeId": "fieldsList",
+   "expected": [
+    "mainAxisAlignment",
+    "crossAxisAlignment",
+    "spacing",
+    "wrap",
+    "runSpacing",
+    "squeezeChildren",
+    "scrollable",
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "clipBehavior",
+    "fillViewport"
+   ],
+   "suggestion": "layout.padding"
+  },
+  {
+   "op": 16,
+   "code": "unknown_prop",
+   "path": "/nodes/preview/props/padding",
+   "message": "A column has no prop \"padding\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, fillViewport.",
+   "nodeId": "preview",
+   "expected": [
+    "mainAxisAlignment",
+    "crossAxisAlignment",
+    "spacing",
+    "wrap",
+    "runSpacing",
+    "squeezeChildren",
+    "scrollable",
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "clipBehavior",
+    "fillViewport"
+   ],
+   "suggestion": "layout.padding"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/3",
+   "message": "Child \"fieldsList\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/5",
+   "message": "Child \"preview\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  }
+ ],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 7,
+  "max": 8
+ },
+ "frames": 114,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 417,
+ "pumpMsMedian": 0.148,
+ "renderExceptions": [],
+ "warnings": 4
+}

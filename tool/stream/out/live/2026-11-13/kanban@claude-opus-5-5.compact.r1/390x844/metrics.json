@@ -1,0 +1,131 @@
+{
+ "stream": "kanban@claude-opus-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 1354,
+ "timeToFirstPaintMs": 10652,
+ "timeToFirstTextMs": 11256,
+ "timeToFirstSectionMs": 18164,
+ "timeToCompleteMs": 30023,
+ "outputTokens": 3584,
+ "tokensEstimated": false,
+ "chars": 6370,
+ "deltas": 411,
+ "opsApplied": 19,
+ "opsRejected": 3,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 3,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_action_key /nodes/colTodo/actions/0/actions/0/args",
+  "unknown_field /nodes/colTodo/dropTarget/group",
+  "unknown_action_key /nodes/colDoing/actions/0/actions/0/args",
+  "unknown_field /nodes/colDoing/dropTarget/group",
+  "unknown_action_key /nodes/colDone/actions/0/actions/0/args",
+  "unknown_field /nodes/colDone/dropTarget/group",
+  "dangling_child /nodes/cols/children/0",
+  "dangling_child /nodes/cols/children/1",
+  "dangling_child /nodes/cols/children/2"
+ ],
+ "scripts": 2,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 120,
+      "dy": 0
+     },
+     "settleMs": 800
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 22,
+ "rejections": [
+  {
+   "op": 10,
+   "code": "unknown_action_key",
+   "path": "/nodes/colTodo/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "colTodo"
+  },
+  {
+   "op": 10,
+   "code": "unknown_field",
+   "path": "/nodes/colTodo/dropTarget/group",
+   "message": "DropTarget has no \"group\". It takes: accepts, key, acceptIf, listNodeId, slot, slotNodeId, slotSize, slotWhenRefused, hoverDelay, fullIf, enabled.",
+   "nodeId": "colTodo"
+  },
+  {
+   "op": 14,
+   "code": "unknown_action_key",
+   "path": "/nodes/colDoing/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "colDoing"
+  },
+  {
+   "op": 14,
+   "code": "unknown_field",
+   "path": "/nodes/colDoing/dropTarget/group",
+   "message": "DropTarget has no \"group\". It takes: accepts, key, acceptIf, listNodeId, slot, slotNodeId, slotSize, slotWhenRefused, hoverDelay, fullIf, enabled.",
+   "nodeId": "colDoing"
+  },
+  {
+   "op": 18,
+   "code": "unknown_action_key",
+   "path": "/nodes/colDone/actions/0/actions/0/args",
+   "message": "A runScript action has no \"args\". It takes: script, arguments, resultVariable, onError (and enabled, nonBlocking, when).",
+   "nodeId": "colDone"
+  },
+  {
+   "op": 18,
+   "code": "unknown_field",
+   "path": "/nodes/colDone/dropTarget/group",
+   "message": "DropTarget has no \"group\". It takes: accepts, key, acceptIf, listNodeId, slot, slotNodeId, slotSize, slotWhenRefused, hoverDelay, fullIf, enabled.",
+   "nodeId": "colDone"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/0",
+   "message": "Child \"colTodo\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/1",
+   "message": "Child \"colDoing\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/2",
+   "message": "Child \"colDone\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  }
+ ],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 3,
+  "max": 5
+ },
+ "frames": 180,
+ "frameMs": 172,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 592,
+ "pumpMsMedian": 0.122,
+ "renderExceptions": [],
+ "warnings": 12
+}

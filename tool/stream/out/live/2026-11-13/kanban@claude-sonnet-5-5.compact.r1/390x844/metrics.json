@@ -1,0 +1,206 @@
+{
+ "stream": "kanban@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 759,
+ "timeToFirstPaintMs": 8813,
+ "timeToFirstTextMs": 9227,
+ "timeToFirstSectionMs": 10942,
+ "timeToCompleteMs": 20913,
+ "outputTokens": 3640,
+ "tokensEstimated": false,
+ "chars": 6582,
+ "deltas": 445,
+ "opsApplied": 16,
+ "opsRejected": 9,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 6,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/h0/bind/props.text",
+  "expression_syntax /nodes/l0/bind/data",
+  "children_not_allowed /nodes/card0/children",
+  "expression_syntax /nodes/h1/bind/props.text",
+  "expression_syntax /nodes/l1/bind/data",
+  "children_not_allowed /nodes/card1/children",
+  "expression_syntax /nodes/h2/bind/props.text",
+  "expression_syntax /nodes/l2/bind/data",
+  "children_not_allowed /nodes/card2/children",
+  "dangling_child /nodes/col0/children/0",
+  "dangling_child /nodes/col0/children/1",
+  "dangling_child /nodes/col1/children/0",
+  "dangling_child /nodes/col1/children/1",
+  "dangling_child /nodes/col2/children/0",
+  "dangling_child /nodes/col2/children/1"
+ ],
+ "scripts": 2,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 120,
+      "dy": 0
+     },
+     "settleMs": 800
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 25,
+ "rejections": [
+  {
+   "op": 11,
+   "code": "expression_syntax",
+   "path": "/nodes/h0/bind/props.text",
+   "message": "The formula \"${= 'To do (' + cards.filter(x => x.c == 0).length + ')'}\" does not parse: Unexpected \"(\" at 25.",
+   "nodeId": "h0"
+  },
+  {
+   "op": 12,
+   "code": "expression_syntax",
+   "path": "/nodes/l0/bind/data",
+   "message": "The formula \"${= cards.filter(x => x.c == 0)}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "l0"
+  },
+  {
+   "op": 13,
+   "code": "children_not_allowed",
+   "path": "/nodes/card0/children",
+   "message": "A box takes no children. Types that take children: column, row, stack, listView, gridView, flex. For a filled or bordered box with content (a button, a tag, a chip), use a row (or column, or stack) with the decoration and padding: {\"type\": \"row\", \"layout\": {\"padding\": [12, 6, 12, 6]}, \"decoration\": {\"fills\": [{\"color\": \"#FFDCFCE7\"}], \"radius\": 12}, \"children\": [\"tagText\"]}.",
+   "nodeId": "card0",
+   "expected": [
+    "column",
+    "row",
+    "stack",
+    "listView",
+    "gridView",
+    "flex"
+   ],
+   "suggestion": "row"
+  },
+  {
+   "op": 16,
+   "code": "expression_syntax",
+   "path": "/nodes/h1/bind/props.text",
+   "message": "The formula \"${= 'Doing (' + cards.filter(x => x.c == 1).length + ')'}\" does not parse: Unexpected \"(\" at 25.",
+   "nodeId": "h1"
+  },
+  {
+   "op": 17,
+   "code": "expression_syntax",
+   "path": "/nodes/l1/bind/data",
+   "message": "The formula \"${= cards.filter(x => x.c == 1)}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "l1"
+  },
+  {
+   "op": 18,
+   "code": "children_not_allowed",
+   "path": "/nodes/card1/children",
+   "message": "A box takes no children. Types that take children: column, row, stack, listView, gridView, flex. For a filled or bordered box with content (a button, a tag, a chip), use a row (or column, or stack) with the decoration and padding: {\"type\": \"row\", \"layout\": {\"padding\": [12, 6, 12, 6]}, \"decoration\": {\"fills\": [{\"color\": \"#FFDCFCE7\"}], \"radius\": 12}, \"children\": [\"tagText\"]}.",
+   "nodeId": "card1",
+   "expected": [
+    "column",
+    "row",
+    "stack",
+    "listView",
+    "gridView",
+    "flex"
+   ],
+   "suggestion": "row"
+  },
+  {
+   "op": 21,
+   "code": "expression_syntax",
+   "path": "/nodes/h2/bind/props.text",
+   "message": "The formula \"${= 'Done (' + cards.filter(x => x.c == 2).length + ')'}\" does not parse: Unexpected \"(\" at 24.",
+   "nodeId": "h2"
+  },
+  {
+   "op": 22,
+   "code": "expression_syntax",
+   "path": "/nodes/l2/bind/data",
+   "message": "The formula \"${= cards.filter(x => x.c == 2)}\" does not parse: Unexpected \"(\" at 13.",
+   "nodeId": "l2"
+  },
+  {
+   "op": 23,
+   "code": "children_not_allowed",
+   "path": "/nodes/card2/children",
+   "message": "A box takes no children. Types that take children: column, row, stack, listView, gridView, flex. For a filled or bordered box with content (a button, a tag, a chip), use a row (or column, or stack) with the decoration and padding: {\"type\": \"row\", \"layout\": {\"padding\": [12, 6, 12, 6]}, \"decoration\": {\"fills\": [{\"color\": \"#FFDCFCE7\"}], \"radius\": 12}, \"children\": [\"tagText\"]}.",
+   "nodeId": "card2",
+   "expected": [
+    "column",
+    "row",
+    "stack",
+    "listView",
+    "gridView",
+    "flex"
+   ],
+   "suggestion": "row"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/col0/children/0",
+   "message": "Child \"h0\" of \"col0\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "col0"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/col0/children/1",
+   "message": "Child \"l0\" of \"col0\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "col0"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/col1/children/0",
+   "message": "Child \"h1\" of \"col1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "col1"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/col1/children/1",
+   "message": "Child \"l1\" of \"col1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "col1"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/col2/children/0",
+   "message": "Child \"h2\" of \"col2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "col2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/col2/children/1",
+   "message": "Child \"l2\" of \"col2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "col2"
+  }
+ ],
+ "nodes": 13,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 3,
+  "max": 5
+ },
+ "frames": 180,
+ "frameMs": 121,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 626,
+ "pumpMsMedian": 0.131,
+ "renderExceptions": [],
+ "warnings": 8
+}

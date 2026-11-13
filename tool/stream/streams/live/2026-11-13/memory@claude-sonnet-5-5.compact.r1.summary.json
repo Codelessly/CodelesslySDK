@@ -1,0 +1,88 @@
+{
+ "ui": "memory",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 891,
+  "outputTokens": 2966,
+  "cacheReadInputTokens": 15570,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1454,
+  "firstToolDeltaMs": 5322,
+  "totalMs": 19899,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 2122,
+    "outputTokens": 78,
+    "resultChars": 1132
+   }
+  ],
+  "ops": 18,
+  "opsApplied": 16,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "unknown_trigger_key /nodes/game/actions/1/trigger/interval",
+   "unknown_trigger_key /nodes/game/actions/2/trigger/interval",
+   "unknown_prop /nodes/grid/props/scrollable",
+   "dangling_child /nodes/main/children/2",
+   "dangling_child /roots/0"
+  ],
+  "lints": [],
+  "warnings": 3,
+  "nodes": 13,
+  "scripts": 4,
+  "scriptChars": 972
+ },
+ "retries": [
+  {
+   "inputTokens": 5195,
+   "outputTokens": 504,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 2912,
+   "firstToolDeltaMs": 2916,
+   "totalMs": 4586,
+   "stopReason": "StopReason.toolUse",
+   "ops": 3,
+   "opsApplied": 3,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 15,
+   "scripts": 4,
+   "scriptChars": 972
+  }
+ ],
+ "final": {
+  "ops": 3,
+  "opsApplied": 3,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 15,
+  "scripts": 4,
+  "scriptChars": 972
+ }
+}

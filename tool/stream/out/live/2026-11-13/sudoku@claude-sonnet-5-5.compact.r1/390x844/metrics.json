@@ -1,0 +1,170 @@
+{
+ "stream": "sudoku@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1130,
+ "timeToFirstPaintMs": 15159,
+ "timeToFirstTextMs": 16146,
+ "timeToFirstSectionMs": 25956,
+ "timeToCompleteMs": 29016,
+ "outputTokens": 4414,
+ "tokensEstimated": false,
+ "chars": 8076,
+ "deltas": 607,
+ "opsApplied": 14,
+ "opsRejected": 6,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 4,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/time/bind/props.text",
+  "invalid_enum /nodes/gridWrap/decoration/clip",
+  "unknown_id /ops/9/id",
+  "expression_syntax /nodes/cell/bind/decoration.fills[0].color",
+  "unknown_prop /nodes/pad/props/scrollable",
+  "expression_syntax /nodes/msg/bind/props.text",
+  "dangling_child /nodes/main/children/1",
+  "dangling_child /nodes/main/children/3",
+  "dangling_child /nodes/main/children/4",
+  "dangling_child /nodes/head/children/1"
+ ],
+ "scripts": 4,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^5$"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 20,
+ "rejections": [
+  {
+   "op": 7,
+   "code": "expression_syntax",
+   "path": "/nodes/time/bind/props.text",
+   "message": "The formula \"${= Math.floor(secs/60) + ':' + (secs%60 < 10 ? '0' : '') + (secs%60)}\" does not parse: Unexpected \"(\" at 11.",
+   "nodeId": "time"
+  },
+  {
+   "op": 8,
+   "code": "invalid_enum",
+   "path": "/nodes/gridWrap/decoration/clip",
+   "message": "a boolean (true) is not a Clip. Allowed: none, hardEdge, antiAlias, antiAliasWithSaveLayer.",
+   "nodeId": "gridWrap"
+  },
+  {
+   "op": 9,
+   "code": "unknown_id",
+   "path": "/ops/9/id",
+   "message": "No node \"gridWrap\" to patch (it is listed by \"main\" but has not arrived: set it first).",
+   "nodeId": "gridWrap"
+  },
+  {
+   "op": 10,
+   "code": "expression_syntax",
+   "path": "/nodes/cell/bind/decoration.fills[0].color",
+   "message": "The formula \"${= index == sel ? '#FFBFDBFE' : (item.c ? '#FFFECACA' : (sel >= 0 && (Math.floor(index/9) == Math.floor(sel/9) || index%9 == sel%9 || (Math.floor(index/27) == Math.floor(sel/27) && Math.floor((index%9)/3) == Math.floor((sel%9)/3))) ? '#FFEFF6FF' : ((Math.floor(index/27)+Math.floor((index%9)/3))%2 == 0 ? '#FFFFFFFF' : '#FFF1F5F9')))}\" does not parse: Expected \")\" at 78.",
+   "nodeId": "cell"
+  },
+  {
+   "op": 17,
+   "code": "unknown_prop",
+   "path": "/nodes/pad/props/scrollable",
+   "message": "A gridView has no prop \"scrollable\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, masonry, masonryPlacement, pagination, reorder.",
+   "nodeId": "pad",
+   "expected": [
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "primary",
+    "keyboardDismissBehavior",
+    "clipBehavior",
+    "itemCount",
+    "cacheExtent",
+    "query",
+    "crossAxisCount",
+    "maxCrossAxisExtent",
+    "minCrossAxisExtent",
+    "mainAxisSpacing",
+    "crossAxisSpacing",
+    "childAspectRatio",
+    "mainAxisExtent",
+    "shrinkWrapRows",
+    "masonry",
+    "masonryPlacement",
+    "pagination",
+    "reorder"
+   ]
+  },
+  {
+   "op": 19,
+   "code": "expression_syntax",
+   "path": "/nodes/msg/bind/props.text",
+   "message": "The formula \"${= solved ? 'Solved in ' + Math.floor(secs/60) + ':' + (secs%60 < 10 ? '0' : '') + (secs%60) + '! Well done!' : 'Tap a cell, then a number.'}\" does not parse: Expected \":\" at 35.",
+   "nodeId": "msg"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/1",
+   "message": "Child \"gridWrap\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/3",
+   "message": "Child \"pad\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/4",
+   "message": "Child \"msg\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/head/children/1",
+   "message": "Child \"time\" of \"head\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "head"
+  }
+ ],
+ "nodes": 11,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 4,
+  "max": 7
+ },
+ "frames": 180,
+ "frameMs": 166,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 788,
+ "pumpMsMedian": 0.125,
+ "renderExceptions": [],
+ "warnings": 12
+}

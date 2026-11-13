@@ -1,0 +1,83 @@
+{
+ "stream": "habits@claude-haiku-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 420,
+ "timeToFirstPaintMs": 621,
+ "timeToFirstTextMs": 621,
+ "timeToFirstSectionMs": 621,
+ "timeToCompleteMs": 3661,
+ "outputTokens": 1197,
+ "tokensEstimated": false,
+ "chars": 2191,
+ "deltas": 157,
+ "opsApplied": 7,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [
+  "empty_button d0"
+ ],
+ "finalDiagnostics": [
+  "unknown_id /ops/0/id",
+  "dangling_child /nodes/ring/children/0",
+  "empty_button /nodes/d0"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 23,
+   "rejected": 8
+  }
+ ],
+ "streamedOps": 8,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "unknown_id",
+   "path": "/ops/0/id",
+   "message": "No node \"ringBar\" to patch (it is listed by \"ring\" but has not arrived: set it first).",
+   "nodeId": "ringBar",
+   "suggestion": "ring"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/ring/children/0",
+   "message": "Child \"ringBar\" of \"ring\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "ring"
+  }
+ ],
+ "nodes": 28,
+ "reappliedBoxesPerOp": {
+  "min": 3,
+  "median": 3,
+  "p90": 3,
+  "max": 3
+ },
+ "frames": 68,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 226,
+ "pumpMsMedian": 0.121,
+ "renderExceptions": [],
+ "warnings": 1
+}

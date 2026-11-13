@@ -1,0 +1,46 @@
+{"meta":{"ui":"weather","kind":"card","model":"claude-haiku-5-5","promptVariant":"full","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["weather@claude-haiku-5-5.full.r1.jsonl"],"source":"live","outputTokens":377,"usage":{"inputTokens":7729,"outputTokens":377,"cacheReadInputTokens":34183,"cacheCreationInputTokens":0,"ttftMs":520,"firstToolDeltaMs":581,"totalMs":1479,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":520,"check":{"ops":2,"opsApplied":1,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":["invalid_parent /ops/1/parent"],"lints":["empty_button alertBtn"],"warnings":1,"nodes":55,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":581,"delta":"{\"ops\": [{\"op"}
+{"tMs":581,"delta":"\": \"set\", \"id\": \""}
+{"tMs":601,"delta":"alertBtn\", \"par"}
+{"tMs":622,"delta":"ent\": \"panel\", \"node"}
+{"tMs":642,"delta":"\": {\"type\": \"box\","}
+{"tMs":662,"delta":" \"layout\": {\"width\":"}
+{"tMs":682,"delta":" {\"fill\": 326}"}
+{"tMs":703,"delta":", \"height\": 48},"}
+{"tMs":723,"delta":" \"decoration\": {\"f"}
+{"tMs":743,"delta":"ills\": [{\"color\": \""}
+{"tMs":764,"delta":"#FF38BDF8"}
+{"tMs":785,"delta":"\"}], \"radius\": "}
+{"tMs":805,"delta":"12}, \"actions\": ["}
+{"tMs":825,"delta":"{\"trigger\": {\""}
+{"tMs":846,"delta":"type\": \"click\"}, \""}
+{"tMs":866,"delta":"actions\": [{\"type\":"}
+{"tMs":887,"delta":" \"componentEvent\", \""}
+{"tMs":907,"delta":"event\": \"alert_before_"}
+{"tMs":928,"delta":"rain\", \"value\": {\""}
+{"tMs":948,"delta":"city\": \"Lisbon"}
+{"tMs":968,"delta":"\"}}, {\"type\":"}
+{"tMs":989,"delta":" \"showToast\", \"message\":"}
+{"tMs":1009,"delta":" \"We'll alert you before"}
+{"tMs":1030,"delta":" it rains in Lisb"}
+{"tMs":1050,"delta":"on\"}]}]}}"}
+{"tMs":1070,"delta":", {\"op\": \"set\","}
+{"tMs":1090,"delta":" \"id\": \"alertBt"}
+{"tMs":1110,"delta":"nLabel\", \"parent"}
+{"tMs":1131,"delta":"\": \"alertBtn\","}
+{"tMs":1152,"delta":" \"node\": {\"type\": \""}
+{"tMs":1172,"delta":"text\", \"layout\": {\""}
+{"tMs":1192,"delta":"width\": {\"fill\": "}
+{"tMs":1213,"delta":"326}, \"height\": {\""}
+{"tMs":1233,"delta":"hug\": 20},"}
+{"tMs":1254,"delta":" \"y\": 14}, \""}
+{"tMs":1276,"delta":"props\": {\"text\": \""}
+{"tMs":1299,"delta":"Alert me before it rains\","}
+{"tMs":1316,"delta":" \"textAlign\": \"center"}
+{"tMs":1337,"delta":"\", \"style\": {\"font"}
+{"tMs":1356,"delta":"Size\": 15, \"f"}
+{"tMs":1376,"delta":"ontWeight\": 600,"}
+{"tMs":1397,"delta":" \"color\": \"#FF0"}
+{"tMs":1418,"delta":"F172A\"}}}}"}
+{"tMs":1437,"delta":"]"}
+{"tMs":1477,"delta":"}"}

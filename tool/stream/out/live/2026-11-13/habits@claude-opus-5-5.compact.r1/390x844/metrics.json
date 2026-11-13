@@ -1,0 +1,54 @@
+{
+ "stream": "habits@claude-opus-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 1174,
+ "timeToFirstPaintMs": 11327,
+ "timeToFirstTextMs": 11931,
+ "timeToFirstSectionMs": 17643,
+ "timeToCompleteMs": 42835,
+ "outputTokens": 5569,
+ "tokensEstimated": false,
+ "chars": 10140,
+ "deltas": 659,
+ "opsApplied": 42,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 2,
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 42,
+ "rejections": [],
+ "nodes": 39,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 6,
+  "max": 40
+ },
+ "frames": 180,
+ "frameMs": 243,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 840,
+ "pumpMsMedian": 0.118,
+ "renderExceptions": [],
+ "warnings": 9
+}

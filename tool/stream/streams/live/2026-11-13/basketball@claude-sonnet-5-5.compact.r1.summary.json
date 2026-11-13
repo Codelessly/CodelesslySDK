@@ -1,0 +1,115 @@
+{
+ "ui": "basketball",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 1146,
+  "outputTokens": 4117,
+  "cacheReadInputTokens": 15570,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 845,
+  "firstToolDeltaMs": 3387,
+  "totalMs": 23020,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "drag"
+    },
+    "ms": 1188,
+    "outputTokens": 69,
+    "resultChars": 1532
+   }
+  ],
+  "ops": 21,
+  "opsApplied": 19,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 1,
+  "errors": [
+   "invalid_enum /nodes/root/decoration/clip",
+   "invalid_condition /nodes/root/actions/0/actions/1/condition",
+   "wrong_type /nodes/root/actions/0/actions/1/then/1/value",
+   "unknown_action_key /nodes/root/actions/1/actions/0/args",
+   "invalid_condition /nodes/dragzone/actions/1/actions/0/condition",
+   "invalid_condition /nodes/dragzone/actions/2/actions/0/condition",
+   "dangling_child /nodes/game/slots/body"
+  ],
+  "lints": [],
+  "warnings": 26,
+  "nodes": 16,
+  "scripts": 1,
+  "scriptChars": 739
+ },
+ "retries": [
+  {
+   "inputTokens": 8089,
+   "outputTokens": 1292,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1294,
+   "firstToolDeltaMs": 1331,
+   "totalMs": 6826,
+   "stopReason": "StopReason.toolUse",
+   "ops": 3,
+   "opsApplied": 2,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 1,
+   "errors": [
+    "unknown_id /ops/2/id",
+    "dangling_child /nodes/root/children/6"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 17,
+   "scripts": 1,
+   "scriptChars": 739
+  },
+  {
+   "inputTokens": 9791,
+   "outputTokens": 766,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1030,
+   "firstToolDeltaMs": 1104,
+   "totalMs": 4289,
+   "stopReason": "StopReason.toolUse",
+   "ops": 1,
+   "opsApplied": 1,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 18,
+   "scripts": 1,
+   "scriptChars": 739
+  }
+ ],
+ "final": {
+  "ops": 1,
+  "opsApplied": 1,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 18,
+  "scripts": 1,
+  "scriptChars": 739
+ }
+}

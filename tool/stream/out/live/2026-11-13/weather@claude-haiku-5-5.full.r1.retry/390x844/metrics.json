@@ -1,0 +1,74 @@
+{
+ "stream": "weather@claude-haiku-5-5.full.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 520,
+ "timeToFirstPaintMs": 1050,
+ "timeToFirstTextMs": 1050,
+ "timeToFirstSectionMs": 1050,
+ "timeToCompleteMs": 1477,
+ "outputTokens": 377,
+ "tokensEstimated": false,
+ "chars": 717,
+ "deltas": 45,
+ "opsApplied": 1,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "empty_button alertBtn"
+ ],
+ "finalDiagnostics": [
+  "invalid_parent /ops/1/parent",
+  "empty_button /nodes/alertBtn"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 56,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [
+  {
+   "op": 1,
+   "code": "invalid_parent",
+   "path": "/ops/1/parent",
+   "message": "A box takes no children: place \"alertBtnLabel\" under a column, row, stack, listView. For a filled box with content (a button, a tag), make the box a row or column with the decoration and padding.",
+   "nodeId": "alertBtn"
+  }
+ ],
+ "nodes": 55,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 1,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 35,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 81,
+ "pumpMsMedian": 0.186,
+ "renderExceptions": [],
+ "warnings": 1
+}

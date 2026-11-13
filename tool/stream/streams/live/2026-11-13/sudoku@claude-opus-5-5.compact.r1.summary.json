@@ -1,0 +1,143 @@
+{
+ "ui": "sudoku",
+ "kind": "app",
+ "model": "claude-opus-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 2525,
+  "outputTokens": 6814,
+  "cacheReadInputTokens": 23358,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 487,
+  "firstToolDeltaMs": 21232,
+  "totalMs": 54792,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 1734,
+    "outputTokens": 140,
+    "resultChars": 1132
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "timer"
+    },
+    "ms": 667,
+    "outputTokens": 49,
+    "resultChars": 1532
+   }
+  ],
+  "ops": 22,
+  "opsApplied": 21,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 1,
+  "errors": [
+   "invalid_enum /nodes/grid/decoration/clip",
+   "dangling_child /nodes/body/children/2"
+  ],
+  "lints": [],
+  "warnings": 4,
+  "nodes": 18,
+  "scripts": 6,
+  "scriptChars": 2238
+ },
+ "retries": [
+  {
+   "inputTokens": 9549,
+   "outputTokens": 319,
+   "cacheReadInputTokens": 7786,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 993,
+   "firstToolDeltaMs": 1096,
+   "totalMs": 2889,
+   "stopReason": "StopReason.toolUse",
+   "ops": 3,
+   "opsApplied": 2,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 1,
+   "errors": [
+    "structural_key_in_patch /nodes/body/children",
+    "dangling_child /nodes/body/children/2"
+   ],
+   "lints": [],
+   "warnings": 1,
+   "nodes": 20,
+   "scripts": 6,
+   "scriptChars": 2238
+  },
+  {
+   "inputTokens": 10392,
+   "outputTokens": 99,
+   "cacheReadInputTokens": 7786,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 599,
+   "firstToolDeltaMs": 648,
+   "totalMs": 1089,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 1,
+   "errors": [
+    "dangling_child /nodes/body/children/3"
+   ],
+   "lints": [],
+   "warnings": 1,
+   "nodes": 20,
+   "scripts": 6,
+   "scriptChars": 2238
+  },
+  {
+   "inputTokens": 10897,
+   "outputTokens": 165,
+   "cacheReadInputTokens": 7786,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 593,
+   "firstToolDeltaMs": 1405,
+   "totalMs": 1907,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 20,
+   "scripts": 6,
+   "scriptChars": 2238
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 20,
+  "scripts": 6,
+  "scriptChars": 2238
+ }
+}

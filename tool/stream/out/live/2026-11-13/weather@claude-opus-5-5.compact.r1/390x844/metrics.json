@@ -1,0 +1,56 @@
+{
+ "stream": "weather@claude-opus-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 2107,
+ "timeToFirstPaintMs": 4151,
+ "timeToFirstTextMs": 5955,
+ "timeToFirstSectionMs": 8455,
+ "timeToCompleteMs": 23344,
+ "outputTokens": 3136,
+ "tokensEstimated": false,
+ "chars": 5980,
+ "deltas": 423,
+ "opsApplied": 29,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 16,
+ "jsonRepairs": 1,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": [
+     "rainAlert"
+    ]
+   }
+  ]
+ },
+ "streamedOps": 29,
+ "rejections": [],
+ "nodes": 27,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 10,
+  "max": 21
+ },
+ "frames": 179,
+ "frameMs": 135,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 603,
+ "pumpMsMedian": 0.153,
+ "renderExceptions": [],
+ "warnings": 2
+}
