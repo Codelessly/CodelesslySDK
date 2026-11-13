@@ -1,0 +1,88 @@
+{
+ "ui": "form_builder",
+ "kind": "app",
+ "model": "claude-opus-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 1516,
+  "outputTokens": 8848,
+  "cacheReadInputTokens": 7786,
+  "cacheCreationInputTokens": 7786,
+  "ttftMs": 5111,
+  "firstToolDeltaMs": 21185,
+  "totalMs": 71412,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 12942,
+    "outputTokens": 669,
+    "resultChars": 1132
+   }
+  ],
+  "ops": 49,
+  "opsApplied": 47,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "wrong_type /nodes/tabs/props/segments/0/icon",
+   "wrong_type /nodes/tabs/props/segments/1/icon",
+   "wrong_type /nodes/pDate/props/decoration/icon",
+   "dangling_child /nodes/main/children/1",
+   "dangling_child /nodes/pItem/children/6"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 44,
+  "scripts": 7,
+  "scriptChars": 1221
+ },
+ "retries": [
+  {
+   "inputTokens": 2845,
+   "outputTokens": 430,
+   "cacheReadInputTokens": 7786,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 922,
+   "firstToolDeltaMs": 972,
+   "totalMs": 3609,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 46,
+   "scripts": 7,
+   "scriptChars": 1221
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 46,
+  "scripts": 7,
+  "scriptChars": 1221
+ }
+}

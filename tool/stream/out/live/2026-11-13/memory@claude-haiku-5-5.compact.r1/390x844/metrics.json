@@ -1,0 +1,147 @@
+{
+ "stream": "memory@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 501,
+ "timeToFirstPaintMs": 2741,
+ "timeToFirstTextMs": 2741,
+ "timeToFirstSectionMs": 3538,
+ "timeToCompleteMs": 6152,
+ "outputTokens": 1750,
+ "tokensEstimated": false,
+ "chars": 3504,
+ "deltas": 245,
+ "opsApplied": 10,
+ "opsRejected": 3,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/grid/props/scrollable",
+  "invalid_condition /nodes/card/actions/0/actions/0/condition",
+  "expression_syntax /nodes/card/actions/0/actions/0/then/0/value",
+  "invalid_condition /nodes/card/actions/0/actions/0/then/2/condition",
+  "wrong_type /nodes/winPanel/visible",
+  "dangling_child /nodes/body/children/2",
+  "dangling_child /nodes/body/children/3"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     },
+     "settleMs": 1500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 13,
+ "rejections": [
+  {
+   "op": 8,
+   "code": "unknown_prop",
+   "path": "/nodes/grid/props/scrollable",
+   "message": "A gridView has no prop \"scrollable\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, masonry, masonryPlacement, pagination, reorder.",
+   "nodeId": "grid",
+   "expected": [
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "primary",
+    "keyboardDismissBehavior",
+    "clipBehavior",
+    "itemCount",
+    "cacheExtent",
+    "query",
+    "crossAxisCount",
+    "maxCrossAxisExtent",
+    "minCrossAxisExtent",
+    "mainAxisSpacing",
+    "crossAxisSpacing",
+    "childAspectRatio",
+    "mainAxisExtent",
+    "shrinkWrapRows",
+    "masonry",
+    "masonryPlacement",
+    "pagination",
+    "reorder"
+   ]
+  },
+  {
+   "op": 9,
+   "code": "invalid_condition",
+   "path": "/nodes/card/actions/0/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "card"
+  },
+  {
+   "op": 9,
+   "code": "expression_syntax",
+   "path": "/nodes/card/actions/0/actions/0/then/0/value",
+   "message": "The formula \"${= faces.map((f, i) => i == index ? true : f)}\" does not parse: Unexpected \"(\" at 10.",
+   "nodeId": "card"
+  },
+  {
+   "op": 9,
+   "code": "invalid_condition",
+   "path": "/nodes/card/actions/0/actions/0/then/2/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "card"
+  },
+  {
+   "op": 10,
+   "code": "wrong_type",
+   "path": "/nodes/winPanel/visible",
+   "message": "Expected a boolean (true or false), got the text \"${won}\".",
+   "nodeId": "winPanel"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/body/children/2",
+   "message": "Child \"grid\" of \"body\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "body"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/body/children/3",
+   "message": "Child \"winPanel\" of \"body\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "body"
+  }
+ ],
+ "nodes": 8,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 6,
+  "max": 6
+ },
+ "frames": 106,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 352,
+ "pumpMsMedian": 0.143,
+ "renderExceptions": [],
+ "warnings": 2
+}

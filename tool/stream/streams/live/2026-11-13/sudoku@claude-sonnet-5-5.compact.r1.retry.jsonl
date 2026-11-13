@@ -1,0 +1,82 @@
+{"meta":{"ui":"sudoku","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["sudoku@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":664,"usage":{"inputTokens":8112,"outputTokens":664,"cacheReadInputTokens":7785,"cacheCreationInputTokens":0,"ttftMs":1793,"firstToolDeltaMs":1838,"totalMs":4852,"stopReason":"StopReason.toolUse"},"text":"I'll set the two missing nodes and fix the button widths and the text layout warnings.","ttftMs":1793,"check":{"ops":7,"opsApplied":7,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":1,"nodes":16,"scripts":4,"scriptChars":1546},"assets":null}}
+{"tMs":1838,"delta":"{\"ops\": [{\"op\": \""}
+{"tMs":1881,"delta":"set\", \"id\": \"grid"}
+{"tMs":1905,"delta":"Wrap\", \"node\": {"}
+{"tMs":1939,"delta":"\"type\": \"gridView\","}
+{"tMs":1973,"delta":" \"children\": [\"cell\""}
+{"tMs":2006,"delta":"], \"layout\": {\"width"}
+{"tMs":2042,"delta":"\": {\"fill\": 358"}
+{"tMs":2073,"delta":"}, \"height\": 358,"}
+{"tMs":2235,"delta":" \"padding\": 1},"}
+{"tMs":2686,"delta":" \"props\": {\"crossA"}
+{"tMs":2686,"delta":"xisCount\": 9,"}
+{"tMs":2686,"delta":" \"mainAxisSp"}
+{"tMs":2686,"delta":"acing\": 1, \"cr"}
+{"tMs":2686,"delta":"ossAxisSpacing"}
+{"tMs":2686,"delta":"\": 1, \"childAsp"}
+{"tMs":2686,"delta":"ectRatio\": 1,"}
+{"tMs":2686,"delta":" \"physics\": \"never"}
+{"tMs":2686,"delta":"\"}, \"dec"}
+{"tMs":2686,"delta":"oration\": {\"fills\":"}
+{"tMs":2686,"delta":" [{\"color\": \"#F"}
+{"tMs":2686,"delta":"F0F172A\"}],"}
+{"tMs":3148,"delta":" \"radius\": 6, \""}
+{"tMs":3148,"delta":"clip\": \"hardEd"}
+{"tMs":3148,"delta":"ge\"}, \"bind\":"}
+{"tMs":3148,"delta":" {\"data\": \"${board}"}
+{"tMs":3148,"delta":"\"}},"}
+{"tMs":3148,"delta":" \"parent\": \"main\", \""}
+{"tMs":3148,"delta":"index\": 1}, {\""}
+{"tMs":3148,"delta":"op\": \"set\", \"id\":"}
+{"tMs":3148,"delta":" \"pad\", \"node\": {"}
+{"tMs":3148,"delta":"\"type\": \"gridView\","}
+{"tMs":3148,"delta":" \"children\": [\"key\"],"}
+{"tMs":3148,"delta":" \"layout\": {\"width\":"}
+{"tMs":3593,"delta":" {\"fill\": 358}"}
+{"tMs":3593,"delta":", \"height\": "}
+{"tMs":3593,"delta":"110"}
+{"tMs":3593,"delta":"}, \"props\": {\"cr"}
+{"tMs":3593,"delta":"ossAxisCount\": "}
+{"tMs":3593,"delta":"9, \"mainAxis"}
+{"tMs":3593,"delta":"Spacing\": 4,"}
+{"tMs":3593,"delta":" \"crossAxisSp"}
+{"tMs":3593,"delta":"acing\": 4, \"child"}
+{"tMs":3593,"delta":"AspectRatio\": "}
+{"tMs":3593,"delta":"0.7, \"physics\":"}
+{"tMs":3593,"delta":" \"never\"}, \"bind"}
+{"tMs":4133,"delta":"\": {\"data\": \"${["}
+{"tMs":4133,"delta":"1,2,3,4,"}
+{"tMs":4133,"delta":"5,6,7,8,"}
+{"tMs":4133,"delta":"9]}\"}}, \""}
+{"tMs":4133,"delta":"parent\": \"main\", \"index"}
+{"tMs":4133,"delta":"\": 3}, {\"op"}
+{"tMs":4133,"delta":"\": \"patch\", \"id\":"}
+{"tMs":4133,"delta":" \"notesBtn\", \""}
+{"tMs":4133,"delta":"patch\": {\"layout\":"}
+{"tMs":4133,"delta":" {\"width\": "}
+{"tMs":4133,"delta":"110"}
+{"tMs":4133,"delta":"}"}
+{"tMs":4581,"delta":"}}, {\"op\": \""}
+{"tMs":4581,"delta":"patch\", \"id\": \"und"}
+{"tMs":4581,"delta":"oBtn\", \"patch"}
+{"tMs":4581,"delta":"\": {\"layout\": {\""}
+{"tMs":4581,"delta":"width\": 110}}},"}
+{"tMs":4581,"delta":" {\"op\": \"patch\","}
+{"tMs":4581,"delta":" \"id\": \"eraseB"}
+{"tMs":4581,"delta":"tn\", \"patch\": {"}
+{"tMs":4581,"delta":"\"layout\": {\"width\":"}
+{"tMs":4582,"delta":" 110}}}, {\""}
+{"tMs":4582,"delta":"op\": \"patch\", \"id"}
+{"tMs":4582,"delta":"\": \"cellV\", \"pat"}
+{"tMs":4848,"delta":"ch\": {\"layout\": {"}
+{"tMs":4848,"delta":"\"align\": null}}},"}
+{"tMs":4848,"delta":" {\"op\": \"patch\","}
+{"tMs":4848,"delta":" \"id\": \"cellN\","}
+{"tMs":4848,"delta":" \"patch\": {\"layout"}
+{"tMs":4848,"delta":"\": {\"align\": null, \""}
+{"tMs":4848,"delta":"padding\": null,"}
+{"tMs":4848,"delta":" \"margin\": 2,"}
+{"tMs":4848,"delta":" \"width\": "}
+{"tMs":4848,"delta":"35, \"height\": 35}"}
+{"tMs":4848,"delta":"}}]"}
+{"tMs":4850,"delta":"}"}

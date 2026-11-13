@@ -1,0 +1,114 @@
+{
+ "stream": "kanban@claude-haiku-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 415,
+ "timeToFirstPaintMs": 963,
+ "timeToFirstTextMs": 963,
+ "timeToFirstSectionMs": 963,
+ "timeToCompleteMs": 2179,
+ "outputTokens": 642,
+ "tokensEstimated": false,
+ "chars": 1206,
+ "deltas": 84,
+ "opsApplied": 1,
+ "opsRejected": 3,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 3,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_id /ops/1/parent",
+  "unknown_id /ops/2/parent",
+  "unknown_id /ops/3/parent",
+  "dangling_child /nodes/cols/children/0",
+  "dangling_child /nodes/cols/children/1",
+  "dangling_child /nodes/cols/children/2"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 120,
+      "dy": 0
+     },
+     "settleMs": 800
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 11,
+   "rejected": 13
+  }
+ ],
+ "streamedOps": 4,
+ "rejections": [
+  {
+   "op": 1,
+   "code": "unknown_id",
+   "path": "/ops/1/parent",
+   "message": "No node \"listTodo\" to place \"cardTodo\" under.",
+   "nodeId": "cardTodo"
+  },
+  {
+   "op": 2,
+   "code": "unknown_id",
+   "path": "/ops/2/parent",
+   "message": "No node \"listDoing\" to place \"cardDoing\" under.",
+   "nodeId": "cardDoing"
+  },
+  {
+   "op": 3,
+   "code": "unknown_id",
+   "path": "/ops/3/parent",
+   "message": "No node \"listDone\" to place \"cardDone\" under.",
+   "nodeId": "cardDone"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/0",
+   "message": "Child \"colTodo\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/1",
+   "message": "Child \"colDoing\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/cols/children/2",
+   "message": "Child \"colDone\" of \"cols\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "cols"
+  }
+ ],
+ "nodes": 10,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 1,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 46,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 131,
+ "pumpMsMedian": 0.134,
+ "renderExceptions": [],
+ "warnings": 5
+}

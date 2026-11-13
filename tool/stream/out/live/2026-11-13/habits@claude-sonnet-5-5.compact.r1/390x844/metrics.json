@@ -1,0 +1,95 @@
+{
+ "stream": "habits@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 856,
+ "timeToFirstPaintMs": 3084,
+ "timeToFirstTextMs": 3546,
+ "timeToFirstSectionMs": 7129,
+ "timeToCompleteMs": 18931,
+ "outputTokens": 3812,
+ "tokensEstimated": false,
+ "chars": 7300,
+ "deltas": 498,
+ "opsApplied": 28,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [
+  "empty_button c0",
+  "empty_button c1",
+  "empty_button c2",
+  "empty_button c3",
+  "empty_button c4",
+  "empty_button c5",
+  "empty_button c6"
+ ],
+ "finalDiagnostics": [
+  "invalid_condition /nodes/add/actions/0/actions/0/condition",
+  "expression_syntax /nodes/add/actions/0/actions/0/then/0/value",
+  "dangling_child /nodes/addrow/children/1",
+  "empty_button /nodes/c0",
+  "empty_button /nodes/c1",
+  "empty_button /nodes/c2",
+  "empty_button /nodes/c3",
+  "empty_button /nodes/c4",
+  "empty_button /nodes/c5",
+  "empty_button /nodes/c6"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 29,
+ "rejections": [
+  {
+   "op": 28,
+   "code": "invalid_condition",
+   "path": "/nodes/add/actions/0/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "add"
+  },
+  {
+   "op": 28,
+   "code": "expression_syntax",
+   "path": "/nodes/add/actions/0/actions/0/then/0/value",
+   "message": "The formula \"${= habits.concat([{name: newName, days: [0,0,0,0,0,0,0], streak: 0}])}\" does not parse: Unexpected \"(\" at 14.",
+   "nodeId": "add"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/addrow/children/1",
+   "message": "Child \"add\" of \"addrow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "addrow"
+  }
+ ],
+ "nodes": 26,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 6,
+  "max": 37
+ },
+ "frames": 180,
+ "frameMs": 110,
+ "pumpsOverBudget16ms": 11,
+ "pumps": 679,
+ "pumpMsMedian": 0.12,
+ "renderExceptions": [],
+ "warnings": 7
+}

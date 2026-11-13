@@ -1,0 +1,82 @@
+{
+ "stream": "basketball@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1294,
+ "timeToFirstPaintMs": 3462,
+ "timeToFirstTextMs": 3462,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 6824,
+ "outputTokens": 1292,
+ "tokensEstimated": false,
+ "chars": 2569,
+ "deltas": 155,
+ "opsApplied": 2,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_id /ops/2/id",
+  "dangling_child /nodes/root/children/6"
+ ],
+ "scripts": 1,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 0,
+      "dy": 140
+     },
+     "settleMs": 2500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 19,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 3,
+ "rejections": [
+  {
+   "op": 2,
+   "code": "unknown_id",
+   "path": "/ops/2/id",
+   "message": "No node \"dragzone\" to patch (it is listed by \"root\" but has not arrived: set it first).",
+   "nodeId": "dragzone"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/root/children/6",
+   "message": "Child \"dragzone\" of \"root\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "root"
+  }
+ ],
+ "nodes": 17,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 18,
+  "p90": 18,
+  "max": 18
+ },
+ "frames": 116,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 272,
+ "pumpMsMedian": 0.582,
+ "renderExceptions": [],
+ "warnings": 0
+}

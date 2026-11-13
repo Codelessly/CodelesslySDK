@@ -1,0 +1,101 @@
+{
+ "stream": "form_builder@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1165,
+ "timeToFirstPaintMs": 1417,
+ "timeToFirstTextMs": 1417,
+ "timeToFirstSectionMs": 1417,
+ "timeToCompleteMs": 13235,
+ "outputTokens": 2748,
+ "tokensEstimated": false,
+ "chars": 5611,
+ "deltas": 339,
+ "opsApplied": 21,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/pdd/bind/props.items",
+  "dangling_child /nodes/pitem/children/1"
+ ],
+ "scripts": 6,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "short text"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "checkbox"
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^\\s*submit"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ],
+  "expectText": "required",
+  "textFound": true
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 23,
+   "rejected": 15
+  }
+ ],
+ "streamedOps": 22,
+ "rejections": [
+  {
+   "op": 19,
+   "code": "expression_syntax",
+   "path": "/nodes/pdd/bind/props.items",
+   "message": "The formula \"${= item.opts.split(',')}\" does not parse: Unexpected \"(\" at 16.",
+   "nodeId": "pdd"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/pitem/children/1",
+   "message": "Child \"pdd\" of \"pitem\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "pitem"
+  }
+ ],
+ "nodes": 34,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 4,
+  "max": 4
+ },
+ "frames": 180,
+ "frameMs": 78,
+ "pumpsOverBudget16ms": 14,
+ "pumps": 520,
+ "pumpMsMedian": 0.148,
+ "renderExceptions": [],
+ "warnings": 0
+}

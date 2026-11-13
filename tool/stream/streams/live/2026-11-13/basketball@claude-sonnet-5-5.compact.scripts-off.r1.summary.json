@@ -1,0 +1,126 @@
+{
+ "ui": "basketball",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 15132,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7626,
+ "generate": {
+  "inputTokens": 1142,
+  "outputTokens": 3892,
+  "cacheReadInputTokens": 15094,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1647,
+  "firstToolDeltaMs": 5150,
+  "totalMs": 26477,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "drag"
+    },
+    "ms": 1922,
+    "outputTokens": 65,
+    "resultChars": 1532
+   }
+  ],
+  "ops": 21,
+  "opsApplied": 19,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 1,
+  "errors": [
+   "invalid_condition /nodes/root/actions/0/actions/1/condition",
+   "invalid_condition /nodes/root/actions/1/actions/3/condition",
+   "invalid_condition /nodes/root/actions/1/actions/4/condition",
+   "invalid_condition /nodes/root/actions/1/actions/4/then/0/condition",
+   "invalid_condition /nodes/ball/actions/0/actions/0/condition",
+   "invalid_condition /nodes/ball/actions/1/actions/0/condition",
+   "dangling_child /nodes/game/slots/body"
+  ],
+  "lints": [],
+  "warnings": 29,
+  "nodes": 17,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 16860,
+   "outputTokens": 1394,
+   "cacheReadInputTokens": 15094,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1884,
+   "firstToolDeltaMs": 4167,
+   "totalMs": 10176,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_docs",
+     "input": {
+      "topic": "conditions"
+     },
+     "ms": 1985,
+     "outputTokens": 90,
+     "resultChars": 1291
+    }
+   ],
+   "ops": 2,
+   "opsApplied": 1,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 1,
+   "errors": [
+    "unknown_id /ops/1/id",
+    "dangling_child /nodes/root/children/7"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 18,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 10569,
+   "outputTokens": 612,
+   "cacheReadInputTokens": 7547,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1741,
+   "firstToolDeltaMs": 2310,
+   "totalMs": 4493,
+   "stopReason": "StopReason.toolUse",
+   "ops": 1,
+   "opsApplied": 1,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 19,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 1,
+  "opsApplied": 1,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 19,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

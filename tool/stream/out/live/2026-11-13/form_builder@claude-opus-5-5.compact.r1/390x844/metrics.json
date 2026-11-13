@@ -1,0 +1,134 @@
+{
+ "stream": "form_builder@claude-opus-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 5111,
+ "timeToFirstPaintMs": 30296,
+ "timeToFirstTextMs": 30296,
+ "timeToFirstSectionMs": 55551,
+ "timeToCompleteMs": 71403,
+ "outputTokens": 8848,
+ "tokensEstimated": false,
+ "chars": 15623,
+ "deltas": 1005,
+ "opsApplied": 46,
+ "opsRejected": 3,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 3,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/tabs/props/segments/0/icon",
+  "wrong_type /nodes/tabs/props/segments/1/icon",
+  "wrong_type /nodes/pDate/props/decoration/icon",
+  "expression_syntax /nodes/pMsg/bind/props.style.color",
+  "dangling_child /nodes/main/children/1",
+  "dangling_child /nodes/prevView/children/1",
+  "dangling_child /nodes/pItem/children/6"
+ ],
+ "scripts": 7,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "short text"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "checkbox"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^\\s*submit"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ],
+  "expectText": "required",
+  "textFound": true
+ },
+ "streamedOps": 49,
+ "rejections": [
+  {
+   "op": 6,
+   "code": "wrong_type",
+   "path": "/nodes/tabs/props/segments/0/icon",
+   "message": "Expected a InputIcon object, got the text \"build\".",
+   "nodeId": "tabs"
+  },
+  {
+   "op": 6,
+   "code": "wrong_type",
+   "path": "/nodes/tabs/props/segments/1/icon",
+   "message": "Expected a InputIcon object, got the text \"visibility\".",
+   "nodeId": "tabs"
+  },
+  {
+   "op": 45,
+   "code": "wrong_type",
+   "path": "/nodes/pDate/props/decoration/icon",
+   "message": "Expected a InputIcon object, got the text \"event\".",
+   "nodeId": "pDate"
+  },
+  {
+   "op": 48,
+   "code": "expression_syntax",
+   "path": "/nodes/pMsg/bind/props.style.color",
+   "message": "The formula \"${= msg.indexOf('missing') >= 0 ? '#FFDC2626' : '#FF059669'}\" does not parse: Unexpected \"(\" at 12.",
+   "nodeId": "pMsg"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/1",
+   "message": "Child \"tabs\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/prevView/children/1",
+   "message": "Child \"pMsg\" of \"prevView\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "prevView"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/pItem/children/6",
+   "message": "Child \"pDate\" of \"pItem\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "pItem"
+  }
+ ],
+ "nodes": 43,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 6,
+  "max": 19
+ },
+ "frames": 180,
+ "frameMs": 402,
+ "pumpsOverBudget16ms": 20,
+ "pumps": 1186,
+ "pumpMsMedian": 0.108,
+ "renderExceptions": [],
+ "warnings": 0
+}

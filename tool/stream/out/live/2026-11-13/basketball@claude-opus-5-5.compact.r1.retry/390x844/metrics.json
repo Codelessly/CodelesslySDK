@@ -1,0 +1,64 @@
+{
+ "stream": "basketball@claude-opus-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 908,
+ "timeToFirstPaintMs": 2160,
+ "timeToFirstTextMs": 2160,
+ "timeToFirstSectionMs": 2160,
+ "timeToCompleteMs": 2296,
+ "outputTokens": 238,
+ "tokensEstimated": false,
+ "chars": 396,
+ "deltas": 26,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 5,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 0,
+      "dy": 140
+     },
+     "settleMs": 2500
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 28,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 26,
+ "reappliedBoxesPerOp": {
+  "min": 20,
+  "median": 20,
+  "p90": 20,
+  "max": 20
+ },
+ "frames": 47,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 74,
+ "pumpMsMedian": 1.035,
+ "renderExceptions": [],
+ "warnings": 0
+}

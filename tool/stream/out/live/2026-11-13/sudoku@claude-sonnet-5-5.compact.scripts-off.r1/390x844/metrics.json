@@ -1,0 +1,73 @@
+{
+ "stream": "sudoku@claude-sonnet-5-5.compact.scripts-off.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1243,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 0,
+ "outputTokens": 574,
+ "tokensEstimated": false,
+ "chars": 0,
+ "deltas": 0,
+ "opsApplied": 0,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "missing_field /ops"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "^5$"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 0,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "missing_field",
+   "path": "/ops",
+   "message": "The tool input is empty: the turn ended without ops. Call ui_apply with {\"ops\": [...]}."
+  }
+ ],
+ "nodes": 0,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 0
+ },
+ "frames": 13,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 0,
+ "pumps": 14,
+ "pumpMsMedian": 0.152,
+ "renderExceptions": [],
+ "warnings": 0
+}

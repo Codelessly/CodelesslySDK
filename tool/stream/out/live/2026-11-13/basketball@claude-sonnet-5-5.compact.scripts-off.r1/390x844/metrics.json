@@ -1,0 +1,115 @@
+{
+ "stream": "basketball@claude-sonnet-5-5.compact.scripts-off.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1647,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 26471,
+ "outputTokens": 3892,
+ "tokensEstimated": false,
+ "chars": 7523,
+ "deltas": 524,
+ "opsApplied": 19,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_condition /nodes/root/actions/0/actions/1/condition",
+  "invalid_condition /nodes/root/actions/1/actions/3/condition",
+  "invalid_condition /nodes/root/actions/1/actions/4/condition",
+  "invalid_condition /nodes/root/actions/1/actions/4/then/0/condition",
+  "invalid_condition /nodes/ball/actions/0/actions/0/condition",
+  "invalid_condition /nodes/ball/actions/1/actions/0/condition",
+  "dangling_child /nodes/game/slots/body"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 0,
+      "dy": 140
+     },
+     "settleMs": 2500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 21,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "invalid_condition",
+   "path": "/nodes/root/actions/0/actions/1/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "root"
+  },
+  {
+   "op": 3,
+   "code": "invalid_condition",
+   "path": "/nodes/root/actions/1/actions/3/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "root"
+  },
+  {
+   "op": 3,
+   "code": "invalid_condition",
+   "path": "/nodes/root/actions/1/actions/4/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "root"
+  },
+  {
+   "op": 3,
+   "code": "invalid_condition",
+   "path": "/nodes/root/actions/1/actions/4/then/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "root"
+  },
+  {
+   "op": 14,
+   "code": "invalid_condition",
+   "path": "/nodes/ball/actions/0/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "ball"
+  },
+  {
+   "op": 14,
+   "code": "invalid_condition",
+   "path": "/nodes/ball/actions/1/actions/0/condition",
+   "message": "A predicate is an object: {\"left\": \"${x}\", \"op\": \"equalsTo\", \"right\": \"1\"} or {\"and\"|\"or\": [...]}, not text.",
+   "nodeId": "ball"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/game/slots/body",
+   "message": "Slot \"body\" of \"game\" names \"root\", which never arrived.",
+   "nodeId": "game"
+  }
+ ],
+ "nodes": 17,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 1
+ },
+ "frames": 180,
+ "frameMs": 152,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 705,
+ "pumpMsMedian": 0.111,
+ "renderExceptions": [],
+ "warnings": 29
+}

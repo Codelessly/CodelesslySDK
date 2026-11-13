@@ -1,0 +1,64 @@
+{
+ "stream": "kanban@claude-opus-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-opus-5-5",
+ "ttftMs": 4678,
+ "timeToFirstPaintMs": 8714,
+ "timeToFirstTextMs": 8714,
+ "timeToFirstSectionMs": 8714,
+ "timeToCompleteMs": 12327,
+ "outputTokens": 1018,
+ "tokensEstimated": false,
+ "chars": 1566,
+ "deltas": 101,
+ "opsApplied": 6,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 2,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "drag": {
+      "draggable": 0,
+      "dx": 120,
+      "dy": 0
+     },
+     "settleMs": 800
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 19,
+   "rejected": 3
+  }
+ ],
+ "streamedOps": 6,
+ "rejections": [],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 2,
+  "median": 5,
+  "p90": 9,
+  "max": 9
+ },
+ "frames": 180,
+ "frameMs": 73,
+ "pumpsOverBudget16ms": 3,
+ "pumps": 282,
+ "pumpMsMedian": 0.137,
+ "renderExceptions": [],
+ "warnings": 0
+}

@@ -1,0 +1,48 @@
+{"meta":{"ui":"flights","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Sort them by price.","base":["flights@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":368,"usage":{"inputTokens":3397,"outputTokens":368,"cacheReadInputTokens":7551,"cacheCreationInputTokens":0,"ttftMs":379,"firstToolDeltaMs":418,"totalMs":1374,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":379,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":21,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":418,"delta":"{\"ops\": [{\"op"}
+{"tMs":439,"delta":"\": \"vars\", \"scope"}
+{"tMs":459,"delta":"\": \"trip\", \"set\":"}
+{"tMs":480,"delta":" {\"flights\": {\"type"}
+{"tMs":500,"delta":"\": \"list\", \"value\": ["}
+{"tMs":520,"delta":"{\"time\": \"18"}
+{"tMs":540,"delta":":30 to 21:40"}
+{"tMs":561,"delta":"\", \"airline\": \""}
+{"tMs":582,"delta":"Ryanair\", \"direct\":"}
+{"tMs":601,"delta":" \"1 stop\", \"du"}
+{"tMs":622,"delta":"ration\": \"3h 10m"}
+{"tMs":643,"delta":"\", \"price\": \"\\u00"}
+{"tMs":662,"delta":"a396"}
+{"tMs":683,"delta":"\", \"tag\": \"\", \""}
+{"tMs":706,"delta":"pr\": \"96\"},"}
+{"tMs":724,"delta":" {\"time\": \"13:45"}
+{"tMs":745,"delta":" to 17:00\", \""}
+{"tMs":764,"delta":"airline\": \"easyJet"}
+{"tMs":786,"delta":"\", \"direct\": \"Dire"}
+{"tMs":805,"delta":"ct\", \"duration\": \"2"}
+{"tMs":826,"delta":"h 15m\", \"price\":"}
+{"tMs":852,"delta":" \"\\u00a3122\","}
+{"tMs":866,"delta":" \"tag\": \"Best time"}
+{"tMs":893,"delta":"\", \"pr\": \"122\""}
+{"tMs":910,"delta":"}, {\"time\": \"07"}
+{"tMs":931,"delta":":10 to 10:25"}
+{"tMs":953,"delta":"\", \"airline\": \"TA"}
+{"tMs":970,"delta":"P Air Portugal\","}
+{"tMs":1016,"delta":" \"direct\": \"Direct"}
+{"tMs":1020,"delta":"\", \"duration\": \"2h"}
+{"tMs":1031,"delta":" 15m\", \"price\": \""}
+{"tMs":1050,"delta":"\\u00a3148\", \""}
+{"tMs":1071,"delta":"tag\": \"Cheap"}
+{"tMs":1091,"delta":"est\", \"pr\": \"148"}
+{"tMs":1112,"delta":"\"}]}}, \"set"}
+{"tMs":1132,"delta":"\": {\"sel\": 0"}
+{"tMs":1155,"delta":","}
+{"tMs":1172,"delta":" \"total\": \""}
+{"tMs":1192,"delta":"\\u00a396"}
+{"tMs":1212,"delta":"\"}},"}
+{"tMs":1233,"delta":" {\"op\": \"pat"}
+{"tMs":1253,"delta":"ch\", \"id\": \"item"}
+{"tMs":1275,"delta":"Tag\", \"patch\": {"}
+{"tMs":1294,"delta":"\"props\": {\"text\": \""}
+{"tMs":1315,"delta":"${item.tag}\"}"}
+{"tMs":1335,"delta":"}}]"}
+{"tMs":1372,"delta":"}"}

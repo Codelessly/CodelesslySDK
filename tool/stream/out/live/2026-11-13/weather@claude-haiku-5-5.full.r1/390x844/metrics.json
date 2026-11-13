@@ -1,0 +1,86 @@
+{
+ "stream": "weather@claude-haiku-5-5.full.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 983,
+ "timeToFirstPaintMs": 2633,
+ "timeToFirstTextMs": 2633,
+ "timeToFirstSectionMs": 4207,
+ "timeToCompleteMs": 17104,
+ "outputTokens": 5710,
+ "tokensEstimated": false,
+ "chars": 11085,
+ "deltas": 789,
+ "opsApplied": 56,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/alertBtn/props/text",
+  "unknown_id /ops/57/parent",
+  "dangling_child /nodes/panel/children/6"
+ ],
+ "scripts": 0,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 58,
+ "rejections": [
+  {
+   "op": 56,
+   "code": "unknown_prop",
+   "path": "/nodes/alertBtn/props/text",
+   "message": "A box has no prop \"text\". Its props: path, strokeJoin, strokeMiterLimit.",
+   "nodeId": "alertBtn",
+   "expected": [
+    "path",
+    "strokeJoin",
+    "strokeMiterLimit"
+   ]
+  },
+  {
+   "op": 57,
+   "code": "unknown_id",
+   "path": "/ops/57/parent",
+   "message": "No node \"alertBtn\" to place \"alertBtnLabel\" under (it is listed by \"panel\" but has not arrived: set it first).",
+   "nodeId": "alertBtnLabel",
+   "suggestion": "alertBtnLabel"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/panel/children/6",
+   "message": "Child \"alertBtn\" of \"panel\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "panel"
+  }
+ ],
+ "nodes": 54,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 6,
+  "max": 11
+ },
+ "frames": 180,
+ "frameMs": 100,
+ "pumpsOverBudget16ms": 19,
+ "pumps": 970,
+ "pumpMsMedian": 0.122,
+ "renderExceptions": [],
+ "warnings": 1
+}

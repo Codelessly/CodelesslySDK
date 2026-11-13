@@ -1,0 +1,97 @@
+{
+ "ui": "sudoku",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "systemPromptChars": 15753,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7864,
+ "generate": {
+  "inputTokens": 2490,
+  "outputTokens": 4414,
+  "cacheReadInputTokens": 23355,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1130,
+  "firstToolDeltaMs": 5571,
+  "totalMs": 29019,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 1898,
+    "outputTokens": 89,
+    "resultChars": 1132
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "timer"
+    },
+    "ms": 1946,
+    "outputTokens": 116,
+    "resultChars": 1532
+   }
+  ],
+  "ops": 20,
+  "opsApplied": 17,
+  "opsRejected": 3,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "invalid_enum /nodes/gridWrap/decoration/clip",
+   "unknown_id /ops/9/id",
+   "unknown_prop /nodes/pad/props/scrollable",
+   "dangling_child /nodes/main/children/1",
+   "dangling_child /nodes/main/children/3"
+  ],
+  "lints": [],
+  "warnings": 9,
+  "nodes": 14,
+  "scripts": 4,
+  "scriptChars": 1546
+ },
+ "retries": [
+  {
+   "inputTokens": 8112,
+   "outputTokens": 664,
+   "cacheReadInputTokens": 7785,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1793,
+   "firstToolDeltaMs": 1838,
+   "totalMs": 4852,
+   "stopReason": "StopReason.toolUse",
+   "ops": 7,
+   "opsApplied": 7,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 1,
+   "nodes": 16,
+   "scripts": 4,
+   "scriptChars": 1546
+  }
+ ],
+ "final": {
+  "ops": 7,
+  "opsApplied": 7,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 1,
+  "nodes": 16,
+  "scripts": 4,
+  "scriptChars": 1546
+ }
+}

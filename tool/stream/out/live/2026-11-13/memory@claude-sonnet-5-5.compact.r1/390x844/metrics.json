@@ -1,0 +1,132 @@
+{
+ "stream": "memory@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1454,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 19890,
+ "outputTokens": 2966,
+ "tokensEstimated": false,
+ "chars": 5577,
+ "deltas": 387,
+ "opsApplied": 16,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_trigger_key /nodes/game/actions/1/trigger/interval",
+  "unknown_trigger_key /nodes/game/actions/2/trigger/interval",
+  "unknown_prop /nodes/grid/props/scrollable",
+  "dangling_child /nodes/main/children/2",
+  "dangling_child /roots/0"
+ ],
+ "scripts": 4,
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "reactive": 0
+     }
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "reactive": 1
+     },
+     "settleMs": 1500
+    },
+    "found": false,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 18,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "unknown_trigger_key",
+   "path": "/nodes/game/actions/1/trigger/interval",
+   "message": "A trigger has no \"interval\". It takes: type, debounceMs, variable, intervalMs, key, when, holdMs, visibleFraction, repeat, visibleMs, onceKey, event.",
+   "nodeId": "game",
+   "suggestion": "intervalMs"
+  },
+  {
+   "op": 3,
+   "code": "unknown_trigger_key",
+   "path": "/nodes/game/actions/2/trigger/interval",
+   "message": "A trigger has no \"interval\". It takes: type, debounceMs, variable, intervalMs, key, when, holdMs, visibleFraction, repeat, visibleMs, onceKey, event.",
+   "nodeId": "game",
+   "suggestion": "intervalMs"
+  },
+  {
+   "op": 10,
+   "code": "unknown_prop",
+   "path": "/nodes/grid/props/scrollable",
+   "message": "A gridView has no prop \"scrollable\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, masonry, masonryPlacement, pagination, reorder.",
+   "nodeId": "grid",
+   "expected": [
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "primary",
+    "keyboardDismissBehavior",
+    "clipBehavior",
+    "itemCount",
+    "cacheExtent",
+    "query",
+    "crossAxisCount",
+    "maxCrossAxisExtent",
+    "minCrossAxisExtent",
+    "mainAxisSpacing",
+    "crossAxisSpacing",
+    "childAspectRatio",
+    "mainAxisExtent",
+    "shrinkWrapRows",
+    "masonry",
+    "masonryPlacement",
+    "pagination",
+    "reorder"
+   ]
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/2",
+   "message": "Child \"grid\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/roots/0",
+   "message": "Root \"game\" never arrived."
+  }
+ ],
+ "nodes": 13,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 0
+ },
+ "frames": 180,
+ "frameMs": 115,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 568,
+ "pumpMsMedian": 0.118,
+ "renderExceptions": [],
+ "warnings": 3
+}
