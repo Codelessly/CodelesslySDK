@@ -64,7 +64,10 @@ void main() {
     ..writeln()
     ..write(starter);
   File('assets/system_prompt.md').writeAsStringSync(text.toString());
-  final tools = jsonEncode(uiToolsForAgent());
+  final tools = jsonEncode(uiToolsFor(PromptVariant.full));
+  final compact = systemPromptFor(PromptVariant.compact, full: '');
+  final compactTools = jsonEncode(uiToolsFor(PromptVariant.compact));
+  stdout.writeln('compact (generated at run time): ${compact.length} characters; tools: ${compactTools.length} characters');
   stdout.writeln('assets/system_prompt.md: ${text.length} characters (~${(text.length / 4).round()} tokens at 4 per token); '
       'tools: ${tools.length} characters');
 }

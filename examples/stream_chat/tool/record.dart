@@ -1,15 +1,21 @@
-// Records one real generation as a replayable stream: the exact ui_apply
-// input deltas with their times, plus usage. Then checks the ops as a
-// session would (strict validation per op, then the end of the stream);
-// when ops were rejected or children are missing, sends the diagnostics
-// back once and records the retry; then, if asked, a follow-up edit.
+// Records one real generation as replayable streams: the exact ui_apply
+// input deltas with their times, plus usage and every lookup (ui_docs,
+// ui_read) the model made first. Then checks the ops as a session applies
+// them (strict validation per op, the end of the stream, the lints a
+// finished UI gets: a button with no label, text in its background's colour,
+// characters the font cannot draw), and while anything is rejected, pending
+// or linted, sends the tool result back (what the document holds, and "fix
+// by patching") and records the retry, at most --retries times; then, if
+// asked, a follow-up edit.
 //
-//   ANTHROPIC_API_KEY=... dart run tool/record.dart --ui flights --model claude-haiku-5-5 --out <file.jsonl> [--followup]
+//   ANTHROPIC_API_KEY=... dart run tool/record.dart --ui flights --model claude-haiku-5-5 --out <file.jsonl>
+//       [--prompt compact|full] [--scripts on|off] [--retries 2] [--followup] [--brief-text "..."]
 //
-// Writes <out> (the generation), <out minus .jsonl>.retry.jsonl and
-// .followup.jsonl when they happen, in the format tool/stream/replay.sh
-// plays: a {"meta": ...} line, then {"tMs", "delta"} lines. Nothing else
-// from the request is saved: no headers, no key.
+// Writes <out> (the generation), <out minus .jsonl>.retry.jsonl,
+// .retry2.jsonl... and .followup.jsonl when they happen, in the format
+// tool/stream/replay.sh plays (a {"meta": ...} line, then {"tMs", "delta"}
+// lines), and .summary.json. Nothing else from the requests is saved: no
+// headers, no key.
 import 'dart:convert';
 import 'dart:io';
 
@@ -37,83 +43,120 @@ Future<void> main(List<String> args) async {
     exitCode = 2;
     return;
   }
+  final variant = opt('--prompt') == 'full' ? PromptVariant.full : PromptVariant.compact;
+  final scripts = opt('--scripts') != 'off';
+  final app = brief.kind == 'app';
+  final profile = profileFor(brief.kind, scripts: scripts);
   final model = opt('--model') ?? kDefaultModel;
   final out = opt('--out') ?? 'recordings/$ui@$model.jsonl';
-  final prompt = opt('--prompt') ?? brief.prompt;
+  final prompt = opt('--brief-text') ?? brief.prompt;
+  final retries = int.tryParse(opt('--retries') ?? '') ?? (app ? 3 : 2);
   final followup = args.contains('--followup') ? (opt('--followup-text') ?? brief.followup) : null;
-  final system = File('assets/system_prompt.md').readAsStringSync();
-  final llm = UiModel(
-      apiKey: key, model: model, systemPrompt: system, tools: uiToolsForAgent(), maxTokens: brief.kind == 'card' ? 16000 : 32000);
-  final summary = <String, Object?>{'ui': ui, 'model': model};
+  final system = systemPromptFor(variant, full: File('assets/system_prompt.md').readAsStringSync(), kind: brief.kind, profile: profile);
+  final tools = uiToolsFor(variant, profile: profile);
+  final maxTokens = int.tryParse(opt('--max-tokens') ?? '') ?? switch (brief.kind) { 'card' => 16000, 'app' => 64000, _ => 32000 };
+  final llm = UiModel(apiKey: key, model: model, systemPrompt: system, tools: tools, maxTokens: maxTokens);
+  final base = <String, Object?>{
+    'ui': ui,
+    'kind': brief.kind,
+    'model': model,
+    'promptVariant': variant.name,
+    'profile': profile == TrustProfile.agentApps ? 'agentApps' : 'agent',
+    'scripts': profile.scripts,
+  };
+  final summary = <String, Object?>{...base, 'systemPromptChars': system.length, 'toolsChars': jsonEncode(tools).length};
+  final coverage = _robotoCoverage();
+  var doc = LayoutDocument(catalog: Catalog.core);
+  var rev = 0;
   try {
     // The system prompt and tools, counted by the API (no output).
     summary['systemPromptAndToolsTokens'] = await llm.countInputTokens();
+    Object? lookup(String tool, Map<String, Object?> input) => answerLookup(tool, input, document: doc, rev: rev, profile: profile);
+
     // 1. The generation.
-    final first = await llm.send(user: userMessage(prompt, brief.kind));
-    var doc = LayoutDocument(catalog: Catalog.core);
-    var check = _check(doc, first.toolInput);
+    var turn = await llm.turn(user: userMessage(prompt, brief.kind), lookup: lookup);
+    var check = _check(doc, turn.toolInput, profile: profile, protect: false, rev: rev + 1, coverage: coverage);
     doc = check.document;
-    _save(out, first, {'ui': ui, 'kind': brief.kind, 'prompt': prompt, 'model': model, 'turn': 'generate'}, check);
-    summary['generate'] = {...first.usageJson(), ..._counts(check)};
-    var lastTurn = first;
-    var file = out;
-    // 2. One retry with the diagnostics, when anything was rejected or is missing.
-    if (check.errors.isNotEmpty && first.toolUseId != null) {
-      final retry = await llm.send(
-          toolResult: check.toolResult(rev: 1),
-          toolUseId: first.toolUseId,
-          user: 'Some ops were rejected or children never arrived (see the tool result). Fix them with one ui_apply call: resend only what is needed.');
-      final again = _check(doc, retry.toolInput);
-      doc = again.document;
-      final retryFile = out.replaceFirst(RegExp(r'\.jsonl$'), '.retry.jsonl');
-      _save(retryFile, retry,
-          {'ui': ui, 'kind': brief.kind, 'prompt': 'Fix the rejected ops.', 'model': model, 'turn': 'retry', 'base': [_name(out)]}, again);
-      summary['retry'] = {...retry.usageJson(), ..._counts(again)};
-      lastTurn = retry;
-      file = retryFile;
+    rev++;
+    _save(out, turn, {...base, 'turn': 'generate', 'prompt': prompt}, check);
+    summary['generate'] = {...turn.usageJson(), ...check.counts()};
+    final files = [out];
+
+    // 2. Retries: the tool result says what the document holds and how to
+    // fix it; the model patches.
+    final retryList = <Object?>[];
+    for (var n = 1; n <= retries && check.needsFix && turn.toolUseId != null; n++) {
+      turn = await llm.turn(
+          toolResult: check.toolResult(rev),
+          toolUseId: turn.toolUseId,
+          user: 'The UI has the problems the tool result lists. Fix them by patching it, in one ui_apply call: same ids, '
+              'never start over.',
+          lookup: lookup);
+      check = _check(doc, turn.toolInput, profile: profile, protect: true, rev: rev + 1, coverage: coverage);
+      doc = check.document;
+      rev++;
+      final file = out.replaceFirst(RegExp(r'\.jsonl$'), n == 1 ? '.retry.jsonl' : '.retry$n.jsonl');
+      _save(file, turn, {...base, 'turn': 'retry', 'retry': n, 'followup': 'Fix the problems the tool result lists.', 'base': [for (final f in files) _name(f)]},
+          check);
+      retryList.add({...turn.usageJson(), ...check.counts()});
+      files.add(file);
     }
+    summary['retries'] = retryList;
+    summary['final'] = check.counts();
+
     // 3. A follow-up edit.
-    if (followup != null && lastTurn.toolUseId != null) {
-      final result = {...?_lastCheck?.toolResult(rev: 2), ...outline(doc, rev: 2)};
-      final edit = await llm.send(toolResult: result, toolUseId: lastTurn.toolUseId, user: followup);
-      final checked = _check(doc, edit.toolInput);
-      _save(out.replaceFirst(RegExp(r'\.jsonl$'), '.followup.jsonl'), edit, {
-        'ui': ui,
-        'kind': brief.kind,
-        'followup': followup,
-        'model': model,
-        'turn': 'followup',
-        'base': [_name(out), if (file != out) _name(file)],
-      }, checked);
-      summary['followup'] = {...edit.usageJson(), ..._counts(checked)};
+    if (followup != null && turn.toolUseId != null) {
+      final edit = await llm.turn(toolResult: check.toolResult(rev), toolUseId: turn.toolUseId, user: followup, lookup: lookup);
+      final checked = _check(doc, edit.toolInput, profile: profile, protect: true, rev: rev + 1, coverage: coverage);
+      _save(out.replaceFirst(RegExp(r'\.jsonl$'), '.followup.jsonl'), edit,
+          {...base, 'turn': 'followup', 'followup': followup, 'base': [for (final f in files) _name(f)]}, checked);
+      summary['followup'] = {...edit.usageJson(), ...checked.counts()};
     }
+  } catch (e) {
+    summary['error'] = '$e'.split('\n').first;
+    exitCode = 1;
   } finally {
     llm.close();
   }
-  stdout.writeln(const JsonEncoder.withIndent(' ').convert(summary));
-  File(out.replaceFirst(RegExp(r'\.jsonl$'), '.summary.json')).writeAsStringSync(const JsonEncoder.withIndent(' ').convert(summary));
+  final text = const JsonEncoder.withIndent(' ').convert(summary);
+  stdout.writeln(text);
+  File(out.replaceFirst(RegExp(r'\.jsonl$'), '.summary.json')).writeAsStringSync(text);
 }
 
 String _name(String path) => File(path).uri.pathSegments.last;
 
-_Checked? _lastCheck;
+/// What Roboto (the font the app draws text with) covers, when the Flutter
+/// SDK's copy is found; null: no glyph check.
+GlyphCoverage? _robotoCoverage() {
+  final root = Platform.environment['FLUTTER_ROOT'] ?? '/opt/flutter';
+  final f = File('$root/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf');
+  if (!f.existsSync()) return null;
+  final cps = fontCodepoints(f.readAsBytesSync());
+  return (family, cp) => cps.contains(cp);
+}
 
 /// The ops of [toolInput] applied to [doc] as a session applies a stream:
-/// one by one (incomplete), strictly validated, then the end of the stream.
-_Checked _check(LayoutDocument doc, String toolInput) {
+/// one by one (incomplete), strictly validated, then the end of the stream
+/// and the lints.
+_Checked _check(LayoutDocument doc, String toolInput,
+    {required TrustProfile profile, required bool protect, required int rev, GlyphCoverage? coverage}) {
+  final before = doc;
   final decoder = OpStreamDecoder();
   final streamed = decoder.add(toolInput);
   final end = decoder.close();
   final diagnostics = <EditDiagnostic>[...end.diagnostics];
   final applied = <int>{}, rejected = <int>{};
+  final appliedOps = <EditOp>[];
   final check = strictEditCheck();
   for (final s in streamed) {
-    final r = applyOps(doc, [s.op], catalog: Catalog.core, profile: TrustProfile.agent, check: check, incomplete: true);
+    final r = applyOps(doc, [s.op],
+        catalog: Catalog.core, profile: profile, check: check, incomplete: true, protectRoots: protect && before.roots.isNotEmpty);
     for (final d in r.diagnostics) {
       diagnostics.add(d.atOp(s.index));
     }
     if (r.applied.isNotEmpty) {
       applied.add(s.index);
+      appliedOps.add(s.op);
       doc = r.document;
     } else {
       rejected.add(s.index);
@@ -123,34 +166,55 @@ _Checked _check(LayoutDocument doc, String toolInput) {
     if (d.error && d.op >= 0) rejected.add(d.op);
   }
   diagnostics.addAll(endOfStream(doc));
-  return _lastCheck = _Checked(doc, streamed.length, applied.difference(rejected).length, rejected.length, diagnostics, pendingIds(doc));
+  final lints = uiLints(doc, hasGlyph: coverage);
+  diagnostics.addAll(lints);
+  final result = EditResult(
+    document: doc,
+    applied: applied.difference(rejected).toList()..sort(),
+    rejected: rejected.toList()..sort(),
+    appliedOps: appliedOps,
+    inverse: const [],
+    diagnostics: diagnostics,
+    pending: pendingIds(doc),
+    rev: rev,
+    revisions: const EditRevisions(),
+    changed: const {},
+  );
+  return _Checked(result, streamed.length, end, lints.length);
 }
 
 class _Checked {
-  _Checked(this.document, this.ops, this.applied, this.rejected, this.diagnostics, this.pending);
-  final LayoutDocument document;
-  final int ops, applied, rejected;
-  final List<EditDiagnostic> diagnostics;
-  final Set<String> pending;
-  List<EditDiagnostic> get errors => [for (final d in diagnostics) if (d.error) d];
+  _Checked(this.result, this.ops, this.end, this.lints);
+  final EditResult result;
+  final int ops;
+  final OpStreamEnd end;
+  final int lints;
+  LayoutDocument get document => result.document;
 
-  Map<String, Object?> toolResult({required int rev}) => {
-        'rev': rev,
-        'applied': applied,
-        'rejected': [for (final d in errors) d.toJson()],
-        'warnings': [for (final d in diagnostics) if (!d.error) d.toJson()].take(20).toList(),
-        if (pending.isNotEmpty) 'pending': [...pending],
+  /// Rejected, pending or linted: worth a retry.
+  bool get needsFix => result.errors.isNotEmpty || result.pending.isNotEmpty || lints > 0;
+
+  Map<String, Object?> toolResult(int rev) {
+    final j = result.toModelJson();
+    if (lints > 0 && !j.containsKey('next')) j['next'] = fixInstruction(rev: rev, pending: result.pending);
+    return j;
+  }
+
+  Map<String, Object?> counts() => {
+        'ops': ops,
+        'opsApplied': result.applied.length,
+        'opsRejected': result.rejected.length,
+        'opsRecoveredFromMalformed': end.recovered,
+        'jsonRepairs': end.repairs,
+        'pending': result.pending.length,
+        'errors': [for (final d in result.errors) '${d.code} ${d.path}'],
+        'lints': [for (final d in result.warnings) if (const {'empty_button', 'low_contrast', 'missing_glyph'}.contains(d.code)) '${d.code} ${d.nodeId}'],
+        'warnings': result.warnings.length,
+        'nodes': document.nodes.length,
+        'scripts': (document.extra['scripts'] as List?)?.length ?? 0,
+        'scriptChars': [for (final s in (document.extra['scripts'] as List?) ?? const []) '${(s as Map)['source'] ?? ''}'.length].fold<int>(0, (a, b) => a + b),
       };
 }
-
-Map<String, Object?> _counts(_Checked c) => {
-      'ops': c.ops,
-      'opsApplied': c.applied,
-      'opsRejected': c.rejected,
-      'errors': [for (final d in c.errors) '${d.code} ${d.path}'],
-      'warnings': c.diagnostics.where((d) => !d.error).length,
-      'nodes': c.document.nodes.length,
-    };
 
 void _save(String path, LlmTurn turn, Map<String, Object?> meta, _Checked check) {
   File(path).parent.createSync(recursive: true);
@@ -163,7 +227,7 @@ void _save(String path, LlmTurn turn, Map<String, Object?> meta, _Checked check)
         'usage': turn.usageJson(),
         'text': turn.text.toString(),
         'ttftMs': turn.ttftMs,
-        'check': _counts(check),
+        'check': check.counts(),
         'assets': null,
       },
     }));

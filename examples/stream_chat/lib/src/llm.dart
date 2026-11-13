@@ -1,6 +1,6 @@
 // The live model path, in pure Dart (the app and tool/record.dart share it):
-// a streaming Messages request with the two UI tools, whose ui_apply tool
-// input arrives as input_json_delta text that goes straight into
+// a streaming Messages request with the UI tools, whose ui_apply tool input
+// arrives as input_json_delta text that goes straight into
 // UiSession.applyStream. Anthropic's API through package:anthropic_sdk_dart.
 //
 // The API key is read from the environment (ANTHROPIC_API_KEY) or a
@@ -17,6 +17,26 @@ import 'package:codelessly_api/core.dart' as api;
 const List<String> kModels = ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5', 'claude-fable-5-2'];
 const String kDefaultModel = 'claude-haiku-5-5';
 
+/// Which system prompt and tools a request sends.
+enum PromptVariant {
+  /// The base set ([api.runtimeStarter], ≈ 15k characters) with the
+  /// compact tools and `ui_docs`, the link to the rest.
+  compact,
+
+  /// The whole authoring STARTER (assets/system_prompt.md, ≈ 60k
+  /// characters) with tool schemas that enumerate every node type.
+  full,
+}
+
+/// One tool call a turn made before (or instead of) ui_apply: a lookup.
+class Lookup {
+  Lookup(this.tool, this.input, this.ms, this.outputTokens, this.resultChars);
+  final String tool;
+  final Map<String, Object?> input;
+  final int ms, outputTokens, resultChars;
+  Map<String, Object?> toJson() => {'tool': tool, 'input': input, 'ms': ms, 'outputTokens': outputTokens, 'resultChars': resultChars};
+}
+
 /// One streamed model turn: its text, the ui_apply tool input as it
 /// arrived, and what the API reported.
 class LlmTurn {
@@ -28,6 +48,16 @@ class LlmTurn {
   int? ttftMs, firstToolDeltaMs, totalMs;
   int inputTokens = 0, outputTokens = 0, cacheReadTokens = 0, cacheWriteTokens = 0;
   String? stopReason, toolUseId, toolName;
+
+  /// The tool call's input, when it was not ui_apply (a lookup).
+  Map<String, Object?>? toolInputJson;
+
+  /// The lookups (ui_docs, ui_read) answered before the ui_apply call, in
+  /// order, with their requests' times and tokens.
+  final List<Lookup> lookups = [];
+
+  /// Whether the turn ended without a ui_apply call after a nudge.
+  bool nudged = false;
 
   /// The assistant message, to continue the conversation.
   InputMessage? assistant;
@@ -43,6 +73,8 @@ class LlmTurn {
         'firstToolDeltaMs': firstToolDeltaMs,
         'totalMs': totalMs,
         'stopReason': stopReason,
+        if (lookups.isNotEmpty) 'lookups': [for (final l in lookups) l.toJson()],
+        if (nudged) 'nudged': true,
       };
 }
 
@@ -83,20 +115,30 @@ class UiModel {
       );
 
   /// Thinking per model: off where the model allows it (fast inline
-  /// answers), adaptive at low effort where it can't be turned off.
+  /// answers), off between tools on Sonnet 5.5 (it cannot be disabled), and
+  /// the model's default (adaptive, low effort) where it cannot be turned
+  /// off.
   ThinkingConfig? get _thinking => switch (model) {
         'claude-haiku-5-5' => ThinkingConfig.disabled(),
         'claude-sonnet-5-5' => const ThinkingConfig.betweenTools(),
         _ => null,
       };
 
-  /// The request [send] streams (for a check without a network).
+  /// Whether this model takes a forced tool choice: only with thinking off
+  /// (Haiku 5.5 here). Sonnet 5.5, Opus 5.5 and Fable 5.2 reject `any` and
+  /// `tool` with a 400; they get `auto`, the prompt's rule and a nudge when
+  /// a turn ends without the call.
+  static bool canForceTools(String model) => model == 'claude-haiku-5-5';
+
+  /// The request [send] streams (for a check without a network). A forced
+  /// choice is `any` (a lookup or ui_apply), so a turn cannot end without a
+  /// tool call where the model allows forcing it.
   MessageCreateRequest buildRequest() => MessageCreateRequest(
         model: model,
         maxTokens: maxTokens,
         system: SystemPrompt.blocks([SystemTextBlock(text: systemPrompt, cacheControl: const CacheControlEphemeral())]),
         tools: _tools,
-        toolChoice: ToolChoice.auto(disableParallelToolUse: true),
+        toolChoice: canForceTools(model) ? ToolChoice.any(disableParallelToolUse: true) : ToolChoice.auto(disableParallelToolUse: true),
         thinking: _thinking,
         outputConfig: const OutputConfig(effort: EffortLevel.low),
         messages: messages,
@@ -116,10 +158,11 @@ class UiModel {
   /// Sends [user] (a text turn, or the tool result for the last call with
   /// [toolResult]) and streams the reply: [onToolDelta] gets each ui_apply
   /// input delta as it arrives.
-  Future<LlmTurn> send({String? user, Map<String, Object?>? toolResult, String? toolUseId, void Function(String delta)? onToolDelta}) async {
+  Future<LlmTurn> send({String? user, Object? toolResult, String? toolUseId, void Function(String delta)? onToolDelta}) async {
     if (toolResult != null && toolUseId != null) {
       messages.add(InputMessage.userBlocks([
-        ToolResultInputBlock(toolUseId: toolUseId, content: [ToolResultContent.text(jsonEncode(toolResult))]),
+        ToolResultInputBlock(
+            toolUseId: toolUseId, content: [ToolResultContent.text(toolResult is String ? toolResult : jsonEncode(toolResult))]),
         if (user != null) InputContentBlock.text(user),
       ]));
     } else {
@@ -129,6 +172,8 @@ class UiModel {
     final clock = Stopwatch()..start();
     final acc = MessageStreamAccumulator();
     var toolIndex = -1;
+    var otherIndex = -1;
+    final otherJson = StringBuffer();
     await for (final event in _client.messages.createStream(buildRequest())) {
       acc.add(event);
       switch (event) {
@@ -143,6 +188,7 @@ class UiModel {
             turn.toolUseId = contentBlock.id;
             turn.toolName = contentBlock.name;
           } else if (contentBlock is ToolUseBlock && turn.toolUseId == null) {
+            otherIndex = index;
             turn.toolUseId = contentBlock.id;
             turn.toolName = contentBlock.name;
           }
@@ -152,6 +198,8 @@ class UiModel {
             turn.firstToolDeltaMs ??= clock.elapsedMilliseconds;
             turn.deltas.add((tMs: clock.elapsedMilliseconds, delta: delta.partialJson));
             onToolDelta?.call(delta.partialJson);
+          } else if (delta is InputJsonDelta && index == otherIndex) {
+            otherJson.write(delta.partialJson);
           } else if (delta is TextDelta) {
             turn.text.write(delta.text);
           }
@@ -163,17 +211,87 @@ class UiModel {
       }
     }
     turn.totalMs = clock.elapsedMilliseconds;
+    if (otherIndex >= 0) {
+      try {
+        turn.toolInputJson = (jsonDecode(otherJson.isEmpty ? '{}' : otherJson.toString()) as Map).cast<String, Object?>();
+      } catch (_) {
+        turn.toolInputJson = const {};
+      }
+    }
     final message = acc.toMessage();
     turn.assistant = message.toInputMessage();
     messages.add(turn.assistant!);
     return turn;
   }
 
+  /// One user turn as a UI needs it: [send], then, while the model calls a
+  /// lookup tool (ui_docs, ui_read), answer it with [lookup] and continue
+  /// (at most [maxLookups]); if the turn ends with no tool call, nudge it
+  /// once to make the ui_apply call. The returned turn is the one that made
+  /// the ui_apply call (or the last), with every lookup before it and the
+  /// times and tokens summed over the requests.
+  Future<LlmTurn> turn({
+    String? user,
+    Object? toolResult,
+    String? toolUseId,
+    void Function(String delta)? onToolDelta,
+    required Object? Function(String tool, Map<String, Object?> input) lookup,
+    int maxLookups = 6,
+  }) async {
+    final clock = Stopwatch()..start();
+    var t = await send(user: user, toolResult: toolResult, toolUseId: toolUseId, onToolDelta: onToolDelta);
+    final lookups = <Lookup>[];
+    var ttft = t.ttftMs, input = t.inputTokens, output = t.outputTokens, cacheRead = t.cacheReadTokens, cacheWrite = t.cacheWriteTokens;
+    var nudged = false;
+    final text = StringBuffer(t.text);
+    for (var i = 0; i < maxLookups + 1; i++) {
+      final offset = clock.elapsedMilliseconds;
+      if (t.toolName != null && t.toolName != 'ui_apply' && lookups.length < maxLookups) {
+        final answer = lookup(t.toolName!, t.toolInputJson ?? const {});
+        final result = answer is String ? answer : jsonEncode(answer);
+        lookups.add(Lookup(t.toolName!, t.toolInputJson ?? const {}, t.totalMs ?? 0, t.outputTokens, result.length));
+        t = await send(toolResult: result, toolUseId: t.toolUseId, onToolDelta: onToolDelta);
+      } else if (t.toolName == null && !nudged) {
+        nudged = true;
+        t = await send(user: 'Answer with the ui_apply tool call now: build the UI (or the change) with edit ops.', onToolDelta: onToolDelta);
+      } else {
+        break;
+      }
+      // Times of the request that made the ui_apply call, from the turn's start.
+      t.ttftMs = t.ttftMs == null ? null : t.ttftMs! + offset;
+      t.firstToolDeltaMs = t.firstToolDeltaMs == null ? null : t.firstToolDeltaMs! + offset;
+      for (var k = 0; k < t.deltas.length; k++) {
+        t.deltas[k] = (tMs: t.deltas[k].tMs + offset, delta: t.deltas[k].delta);
+      }
+      input += t.inputTokens;
+      output += t.outputTokens;
+      cacheRead += t.cacheReadTokens;
+      cacheWrite += t.cacheWriteTokens;
+      text.write(t.text);
+    }
+    t.lookups.addAll(lookups);
+    t.nudged = nudged && t.toolName == null;
+    t.ttftMs = ttft;
+    t.totalMs = clock.elapsedMilliseconds;
+    t.inputTokens = input;
+    t.outputTokens = output;
+    t.cacheReadTokens = cacheRead;
+    t.cacheWriteTokens = cacheWrite;
+    t.text
+      ..clear()
+      ..write(text);
+    return t;
+  }
+
   void close() => _client.close();
 }
 
-/// The demo's four UIs: what the user asks for (generic briefs only).
-const Map<String, ({String kind, String prompt, String? followup})> kBriefs = {
+/// A brief: what a person asks for, the kind of UI, a follow-up edit, and
+/// for apps the interaction that shows it works (tool/stream's checker).
+typedef Brief = ({String kind, String prompt, String? followup});
+
+/// The demo's UIs: what the user asks for, as a person would type it.
+const Map<String, Brief> kBriefs = {
   'flights': (
     kind: 'card',
     prompt: 'Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options '
@@ -201,12 +319,84 @@ const Map<String, ({String kind, String prompt, String? followup})> kBriefs = {
         'It must work on a phone and on a desktop.',
     followup: null,
   ),
+  // Small interactive apps from one prompt: they need what the base set
+  // only starts (drag and drop, timers, frames, animation, custom drawing,
+  // validation, multi-step state), through ui_docs.
+  'form_builder': (
+    kind: 'app',
+    prompt: 'Make me a little form builder. On one side I pick field types to add: short text, long text, number, dropdown, '
+        'checkbox and date. I can edit each field\'s label, mark it required, give a dropdown its options, reorder fields and '
+        'remove them. Next to it, a live preview of the form that checks the required fields when I submit it.',
+    followup: null,
+  ),
+  'sudoku': (
+    kind: 'app',
+    prompt: 'I want to play sudoku. Give me a 9 by 9 puzzle to solve: I tap a cell and then a number on a pad to fill it in, '
+        'there\'s a notes mode for pencil marks, conflicting numbers are highlighted, and I can undo. Show a timer, and tell '
+        'me when I\'ve solved it.',
+    followup: null,
+  ),
+  'basketball': (
+    kind: 'app',
+    prompt: 'Make a basketball shooting mini game. I drag back on the ball to aim and set the power, let go and it flies in an '
+        'arc toward the hoop. Keep score and my streak, give me 30 seconds per round with a countdown, and a play again screen '
+        'at the end.',
+    followup: null,
+  ),
+  'kanban': (
+    kind: 'app',
+    prompt: 'A small kanban board for my week: three columns, To do, Doing and Done, with a few cards in each. I can drag cards '
+        'between columns, add a card with a title, and see how many cards each column has.',
+    followup: null,
+  ),
+  'habits': (
+    kind: 'app',
+    prompt: 'A habit tracker: my habits down the side and this week\'s days across, tap a day to check it off, and show each '
+        'habit\'s current streak with a little progress ring. Let me add a habit too.',
+    followup: null,
+  ),
+  'memory': (
+    kind: 'app',
+    prompt: 'A memory card game: a 4 by 4 grid of face-down cards with pairs of pictures. Tap two to flip them; if they match '
+        'they stay up, if not they flip back after a moment. Count my moves and show a win screen with the time when all '
+        'pairs are found.',
+    followup: null,
+  ),
 };
 
 /// What the user's message says about the UI, beyond the brief.
-String userMessage(String brief, String kind) => kind == 'card'
-    ? '$brief\n\n(Answer with one ui_apply call: an inline card, canvas width 390 with a hug height.)'
-    : '$brief\n\n(Answer with one ui_apply call: one page, canvas 1440 × 900, responsive down to 390.)';
+String userMessage(String brief, String kind) => switch (kind) {
+      'card' => '$brief\n\n(Answer with one ui_apply call: an inline card, canvas width 390 with a hug height.)',
+      'app' => '$brief\n\n(Answer with one ui_apply call: one app screen, canvas 390 × 760.)',
+      _ => '$brief\n\n(Answer with one ui_apply call: one page, canvas 1440 × 900, responsive down to 390.)',
+    };
 
-/// The tools for the agent profile over the core catalog.
-List<Map<String, Object?>> uiToolsForAgent() => api.uiTools(api.TrustProfile.agent.restrict(api.Catalog.core));
+/// The trust profile a brief's UI gets: [api.TrustProfile.agentApps] for
+/// apps when [scripts] is on, else [api.TrustProfile.agent].
+api.TrustProfile profileFor(String kind, {bool scripts = true}) =>
+    kind == 'app' && scripts ? api.TrustProfile.agentApps : api.TrustProfile.agent;
+
+/// The tools for [variant] and [profile] over the core catalog: compact
+/// tools with ui_docs, or the full schemas.
+List<Map<String, Object?>> uiToolsFor(PromptVariant variant, {api.TrustProfile? profile}) => api.uiTools(
+    (profile ?? api.TrustProfile.agent).restrict(api.Catalog.core),
+    compact: variant == PromptVariant.compact,
+    docs: variant == PromptVariant.compact);
+
+/// The tools for the agent profile over the core catalog (the full ones).
+List<Map<String, Object?>> uiToolsForAgent() => uiToolsFor(PromptVariant.full);
+
+/// The system prompt for [variant]: the base set generated now, or [full]
+/// (assets/system_prompt.md).
+String systemPromptFor(PromptVariant variant, {required String full, String kind = 'card', api.TrustProfile? profile}) =>
+    variant == PromptVariant.full ? full : api.runtimeStarter(profile: profile, kind: kind);
+
+/// The answer to a lookup tool call, from the document the session holds.
+Object? answerLookup(String tool, Map<String, Object?> input, {required api.LayoutDocument document, int rev = 0, api.TrustProfile? profile}) {
+  final p = profile ?? api.TrustProfile.agent;
+  return switch (tool) {
+    'ui_docs' => api.docsTopic('${input['topic'] ?? ''}', profile: p),
+    'ui_read' => api.readUi(document, input, rev: rev, catalog: p.restrict(api.Catalog.core)),
+    _ => {'error': 'No tool "$tool".'},
+  };
+}
