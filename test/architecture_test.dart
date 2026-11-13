@@ -16,7 +16,8 @@
 // between the layers (`flutter test test/architecture_test.dart`).
 //
 // Debt is listed, not hidden: [renderExceptions] and [widgetsExceptions]
-// name every import the rules would refuse (file → import), and the test
+// name every import the rules would refuse (file → import), [renderStatics]
+// every process-wide collection the render core still keeps, and the test
 // also fails when a listed exception is no longer needed.
 import 'dart:io';
 
@@ -47,20 +48,51 @@ const renderLayers = {'render', 'leaf'};
 /// file (under lib/src) → the imports it may still have, each with why.
 const Map<String, Map<String, String>> renderExceptions = {};
 
+/// Process-wide collections in render files (a static or top-level `final`
+/// Map, Set or List): DESIGN.md keeps registries out of the render core, so
+/// each one left is named here (file → name → why it's still there). State
+/// kept per tree (an `Expando` keyed by the tree) isn't one. A new one fails
+/// the test.
+const Map<String, Map<String, String>> renderStatics = {
+  // Registries: what plays or flies is found by node id or tag from the
+  // actions (`EffectPlayers.play(node, name)` has no tree to ask), and all
+  // four are exported API. Per-tree state needs the action side to change.
+  'render/play.dart': {
+    '_byNode': 'EffectPlayers: the effects on screen by node id, played by an action (exported)',
+    '_records': 'FlightRegistry: where nodes last were, for flights between screens (exported)',
+  },
+  'render/particles.dart': {
+    '_nodes': 'ParticlePlayers: the particle layers on screen by node id, played by an action',
+  },
+  'render/hero.dart': {
+    '_byTree': 'HeroMarks: the shared elements of every tree on screen; a flight pairs marks of two trees (exported)',
+  },
+  // The frame's queue of motions waiting to be revealed.
+  'render/behaviors.dart': {
+    '_waiting': '_MotionRevealWatcher: motions checked once after the frame, whatever tree they are in',
+  },
+  // Caches of pure work, by its input.
+  'render/paint/image_fill.dart': {
+    '_entries': 'PaintImages: the loaded images by URL, shared by every tree as Flutter\'s image cache is (exported)',
+    '_svgBytes': 'the bytes of the SVGs fetched, by URL',
+  },
+  'render/paint/path_paint.dart': {'_parsed': 'parsed SVG path data, by its text'},
+  'render/paint/path_shapes.dart': {'_cache': 'the shapes of path data, by its text and size'},
+  'render/paint/svg_path.dart': {'_cache': 'measured paths, by their data'},
+  'render/convert.dart': {'_asked': 'FontDemand: the font families asked for, once each'},
+  // Debug counters, off unless a tool turns them on.
+  'render/node_tree.dart': {
+    'debugApplyCounts': 'applies per node id while NodeBox.debugCountApplies',
+    'debugInPlaceCounts': 'in-place updates per node id while NodeBox.debugCountApplies',
+    'debugPaintCounts': 'paints per node id while NodeBox.debugCountPaints',
+  },
+};
+
 /// The layers a widgets file may not import.
 const widgetsForbiddenLayers = {'services', 'app', 'scripting'};
 
 /// Imports of widgets files the rule refuses, kept until they're removed.
-const Map<String, Map<String, String>> widgetsExceptions = {
-  'widgets/collections_list_runtime.dart': {
-    'services/cloud/database.dart': 'a cloud-bound list reads its pages from the cloud database',
-    'services/cloud/resolve.dart': 'a cloud-bound list finds the cloud database of its services',
-    'services/services.dart': 'a cloud-bound list finds the cloud database of its services',
-  },
-  'widgets/collections_data_list.dart': {
-    'services/cloud/resolve.dart': 'a cloud-bound list finds the cloud database of its services',
-  },
-};
+const Map<String, Map<String, String>> widgetsExceptions = {};
 
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.
@@ -177,6 +209,25 @@ void main() {
 
   test('leaf utilities (files directly in lib/src) obey the render rules', () {
     expect(violations((d) => layerOf(d.file) == 'leaf', renderAllows, const {}), isEmpty);
+  });
+
+  test('render keeps no process-wide collections but the listed ones', () {
+    final declaration = RegExp(r'^(?:\s+static\s+)?final\s+(?:Map|Set|List)<.*>\s+(\w+)\s*=');
+    final found = <String>{};
+    for (final f in Directory('lib/src/render').listSync(recursive: true).whereType<File>()) {
+      if (!f.path.endsWith('.dart')) continue;
+      final file = f.path.replaceAll(r'\', '/').substring('lib/src/'.length);
+      for (final line in f.readAsLinesSync()) {
+        final name = declaration.firstMatch(line)?[1];
+        if (name != null) found.add('$file: $name');
+      }
+    }
+    final listed = {
+      for (final e in renderStatics.entries)
+        for (final name in e.value.keys) '${e.key}: $name',
+    };
+    expect(found.difference(listed), isEmpty, reason: 'new process-wide state in render');
+    expect(listed.difference(found), isEmpty, reason: 'listed, but gone: remove it from renderStatics');
   });
 
   test('widgets import no services, app or scripting', () {
