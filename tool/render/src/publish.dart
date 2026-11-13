@@ -60,7 +60,8 @@ typedef Page = ({String name, Json json});
   final usedPaths = <String>{};
   String? entry;
   for (final page in pages) {
-    final json = page.json;
+    // Written as schema 3: a schema-2 page is migrated first.
+    final json = migrate2to3(page.json);
     breakpoints ??= json[LayoutDocumentBreakpoints.key];
     final doc = LayoutDocument.fromJson(json);
     final rawNodes = readMap(json['nodes']) ?? const {};
