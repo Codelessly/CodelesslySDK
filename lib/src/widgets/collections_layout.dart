@@ -856,6 +856,20 @@ class RenderLayeredItems extends RenderCollection {
 /// cells (or as many as fit [maxCrossAxisExtent]) per row, each
 /// [mainAxisExtent] long (else its width over [childAspectRatio]), or, with
 /// [shrinkWrapRows], each row as long as its longest item.
+/// The fit boxes of item [item]'s own node (in its own chain, before any
+/// node inside it).
+List<RenderFitBox> _ownFitBoxes(RenderBox item) {
+  final found = <RenderFitBox>[];
+  void visit(RenderObject o) {
+    if (o is NodeBox) return;
+    if (o is RenderFitBox) found.add(o);
+    o.visitChildren(visit);
+  }
+
+  item.visitChildren(visit);
+  return found;
+}
+
 class RenderGridItems extends RenderCollection implements MeasuresContent {
   /// Rows that shrink-wrap are measured from the items' content: a change
   /// inside an item (laid out stretched, so a relayout boundary) measures
@@ -883,6 +897,11 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
 
   /// With [shrinkWrapRows]: cells stretch to their row's longest item.
   bool intrinsicRows = true;
+
+  /// With [shrinkWrapRows]: an item that fills the rows' axis is measured
+  /// at its content (false for an item that can't be laid out unbounded
+  /// that way: it takes its design length).
+  bool measureFillItems = true;
   bool hugMain = false;
   int? itemCount;
   double cacheExtent = 250;
@@ -1002,20 +1021,25 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
           // item that fills measures its content, as a CSS percentage of
           // an indefinite row does), the row as long as the longest, then
           // every item stretched to it (`align-items: stretch`).
-          RenderFitBox.measuringContent(axis, () {
-            for (final it in row) {
-              it.layout(
-                RenderCollection.constraintsOf(
-                  minMain: 0,
-                  maxMain: double.infinity,
-                  minCross: cellCross,
-                  maxCross: cellCross,
-                  axis: axis,
-                ),
-                parentUsesSize: true,
-              );
+          for (final it in row) {
+            final fits = measureFillItems ? _ownFitBoxes(it) : const <RenderFitBox>[];
+            for (final f in fits) {
+              f.measureContentAlong = axis;
             }
-          });
+            it.layout(
+              RenderCollection.constraintsOf(
+                minMain: 0,
+                maxMain: double.infinity,
+                minCross: cellCross,
+                maxCross: cellCross,
+                axis: axis,
+              ),
+              parentUsesSize: true,
+            );
+            for (final f in fits) {
+              f.measureContentAlong = null;
+            }
+          }
           // IntrinsicHeight around the row: its longest item's intrinsic
           // extent at the cell's width, where the items can be measured;
           // else their laid-out lengths.

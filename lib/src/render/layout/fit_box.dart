@@ -69,24 +69,12 @@ class RenderFitBox extends RenderProxyBox {
     markNeedsLayout();
   }
 
-  /// While set, a box filling this axis under no bound (a grid measuring
-  /// the items of a row that shrink-wraps, CSS grid's auto rows) takes its
-  /// content's extent, as a CSS `height: 100%` against an indefinite height
-  /// computes to `auto`, instead of its design size. Set only around such a
-  /// measuring layout ([measuringContent]).
-  static Axis? _contentAxis;
-
-  /// Runs [body] (a measuring layout) with a box that fills [axis] under no
-  /// bound measuring its content (see [_contentAxis]).
-  static T measuringContent<T>(Axis axis, T Function() body) {
-    final Axis? before = _contentAxis;
-    _contentAxis = axis;
-    try {
-      return body();
-    } finally {
-      _contentAxis = before;
-    }
-  }
+  /// While set, this box, filling this axis under no bound, takes its
+  /// content's extent, as a CSS `height: 100%` against an indefinite
+  /// height computes to `auto`, instead of its design size: a grid
+  /// measuring the items of a row that shrink-wraps (CSS grid's auto rows)
+  /// sets it on each item's own box for that measuring layout only.
+  Axis? measureContentAlong;
 
   /// The extent on one axis, or null when the axis hugs.
   static double? _extent({
@@ -109,14 +97,14 @@ class RenderFitBox extends RenderProxyBox {
       design: _width,
       max: constraints.maxWidth,
       factor: _widthFactor,
-      contentWhenUnbounded: _contentAxis == Axis.horizontal,
+      contentWhenUnbounded: measureContentAlong == Axis.horizontal,
     );
     final double? h = _extent(
       fill: _fillHeight,
       design: _height,
       max: constraints.maxHeight,
       factor: _heightFactor,
-      contentWhenUnbounded: _contentAxis == Axis.vertical,
+      contentWhenUnbounded: measureContentAlong == Axis.vertical,
     );
     final double? ratio = _aspectRatio;
     if (ratio != null && ratio.isFinite && ratio > 0) {

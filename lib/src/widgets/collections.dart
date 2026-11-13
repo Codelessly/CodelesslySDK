@@ -134,6 +134,14 @@ int _startCount(RenderCollection view, double designMain, double itemMain) {
   return math.max(estimate, view.childCount).clamp(1, RenderCollection.maxEndlessItems);
 }
 
+/// Whether [item] is a row/column that stretches its children along
+/// [gridMain] (its cross axis): it can't be laid out unbounded that way.
+bool _stretchesAcross(Node item, Axis gridMain) {
+  if (!api.FlexProps.types.contains(item.type)) return false;
+  final across = api.flexAxisOf(item) == (gridMain == Axis.vertical ? api.Axis.horizontal : api.Axis.vertical);
+  return across && item.prop(api.FlexProps.crossAxisAlignment) == api.CrossAxisAlignment.stretch;
+}
+
 /// Whether intrinsic measurement can't see into [node]'s subtree: a viewport, or scrolling content.
 bool _blocksIntrinsics(NodeBuilder b, Node node) {
   if (node.type == 'listView') {
@@ -553,6 +561,7 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..masonry = n.prop(GridViewProps.masonry)
     ..masonryShortest = n.prop(GridViewProps.masonryPlacement) == api.MasonryPlacement.shortest
     ..intrinsicRows = !_blocksIntrinsics(b, item)
+    ..measureFillItems = !_stretchesAcross(item, n.axis)
     ..hugMain = n.mainFit == SizeFit.hug && count != null
     ..itemCount = count
     ..cacheExtent = n.prop(CollectionScrollProps.cacheExtent) ?? 250
