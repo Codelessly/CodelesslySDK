@@ -7,5 +7,5 @@
  "scripts": false,
  "systemPromptChars": 15125,
  "toolsChars": 2126,
- "error": "ApiException(529): System is overloaded. You can try again later."
+ "error": "ApiException(503): credential validation failed"
 }

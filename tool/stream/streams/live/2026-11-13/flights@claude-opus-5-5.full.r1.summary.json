@@ -7,6 +7,5 @@
  "scripts": false,
  "systemPromptChars": 72898,
  "toolsChars": 8369,
- "systemPromptAndToolsTokens": 34262,
- "error": "ApiException(503): Unknown error"
+ "error": "ApiException(503): credential validation failed"
 }
