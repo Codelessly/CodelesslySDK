@@ -40,7 +40,8 @@ You write Codelessly user interfaces directly as JSON files: screens, their layo
 behavior. This file is the **base**: read it in full first; it is enough to build most pages. Everything else is on
 a page of its own in this folder, linked from here and listed in the [index](#base-index) at the end (the same
 index, with an A–Z of every name, is `index.md`). Open a page when you need what it covers; do not read the folder
-end to end. This describes `codelessly_api` 30.0.0; every example here is checked by a test.
+end to end. On a page, *Patterns* is usually what you need; *Reference* holds the generated tables to look one prop
+up. This describes `codelessly_api` 30.0.0; every example here is checked by a test.
 
 <a id="base-the-model-in-one-table"></a>
 ## The model in one table
@@ -222,7 +223,7 @@ only in a row or column that has some (a fill or fixed main size).
 ### Padding, margin, constraints, a capped width
 
 - `padding` is space inside the node's box, `margin` outside it: a number (all sides) or **four** numbers
-  `[left, top, right, bottom]` (two numbers are not read). A `text` has no padding: use `margin` or a row around it.
+  `[left, top, right, bottom]` (two numbers are not read).
 - `constraints`: `{"minWidth", "maxWidth", "minHeight", "maxHeight"}`. `aspectRatio`: width / height.
 - **A full-width band with capped, centered content** (CSS `max-width: 1200px; margin: 0 auto`): the band fills
   the width and holds the background; its one child fills with `"constraints": {"maxWidth": 1200}`, centered by the
@@ -356,7 +357,8 @@ A `text` node has `props.text` and `props.style`: a theme style's name (`"style"
 `decoration`, `fontStyle`), plus `textAlign`, `maxLines` and `overflow` (`ellipsis`).
 
 - **No `color`: the text is painted white.** Always set it (in the style or the named style).
-- No `fontSize`: 12. No `fontWeight`: 400. No `fontFamily`: the platform's default (Roboto).
+- No `fontSize`: 12. No `fontWeight`: 400. No `fontFamily`: the platform's default (Roboto). No `height`: the
+  nearest `defaultTextStyle`'s, else the font's own line height ([text](theme.md#theme-text)).
 - Size: one line `{"hug": n}` × `{"hug": n}`; a paragraph `{"fill": n}` wide (it wraps) × `{"hug": n}` high.
 - `text` may hold expressions: `"Hello, ${user.name}"`; `"$${price}"` shows `$47`.
 - Symbols the font has no glyph for (✦, ✓, →) draw as empty boxes (`missing_glyph`): use an `icon` node.
@@ -405,7 +407,8 @@ The props that matter most; each type's page lists all of them.
   others). A text field's label, hint, border and fill are in `props.decoration` (an
   [InputDecoration](forms.md#type-InputDecoration)). Styling every control, validation: [forms](forms.md#page-forms).
 - **Lists**: a `listView` or `gridView` repeats its **first child** once per item of its `data` binding:
-  `"bind": {"data": "${plans}"}`; inside, `${item.name}` and `${index}`. In a page that scrolls, give the list
+  `"bind": {"data": "${plans}"}`; inside, `${item.name}` and `${index}`. An item fills the list across (its
+  cross-axis size is `fill`). In a page that scrolls, give the list
   `"scrollable": false` (a gridView: `"physics": "never"`). A grid of as many equal columns as fit:
   `minCrossAxisExtent` (CSS `repeat(auto-fit, minmax(280px, 1fr))`); equal-height cards: `"shrinkWrapRows": true`.
   Nested lists, tables, pagination: [lists](lists.md#page-lists).
@@ -434,8 +437,8 @@ Types: `integer`, `text`, `decimal`, `boolean`, `color`, `list`, `map`, `image`,
 binding.
 
 **Expressions**: `${name}` or `${path}` reads a value (`${user.name}`, `${items[0].price}`, `${item.title}`);
-`${= formula}` computes one (`${= count * price}`, `${= annual ? 'Yearly' : 'Monthly'}`). A text that is exactly
-one expression keeps the value's type. `${false}` reads a variable called `false`: a literal is `${= false}`.
+`${= formula}` computes one (`${= count * price}`, `${= annual ? 'Yearly' : 'Monthly'}`, a list
+`${= popular ? [0, 0, 0, 0] : [0, 28, 0, 0]}`). A text that is exactly one expression keeps the value's type. `${false}` reads a variable called `false`: a literal is `${= false}`.
 Every formula function, grouped (text, numbers, money, lists, dates): [formula functions](state.md#state-formula-functions).
 
 **Bindings** put an expression on a field: `"bind": {path: expression}`, updated whenever what it reads changes.
@@ -464,7 +467,8 @@ A node's `actions` is a list of **reactions**: a trigger and the actions it runs
   `timer`... (all of them: [triggers](interaction.md#interaction-triggers)).
 - `setVariable` (`op`: `set` (default), `toggle`, `add`, `subtract`, `insert`, `removeAt`...; `value` is an
   expression), `navigate` (`to`: a canvas id; `"mode": "pop"` goes back), `openModal` / `closeModal`, `showToast`,
-  `if` (`condition`, `then`, `else`), `scrollTo`, `componentEvent` (a component's event, or at run time the event
+  `if` (`"condition"`: a predicate, `{"left": "${count}", "op": "greaterThan", "right": "5"}` or `{"left":
+  "${= valid}", "op": "isTrue"}`; `then` and `else`: action lists), `scrollTo`, `componentEvent` (a component's event, or at run time the event
   to the host app). Action types here: `navigate`, `openModal`, `closeModal`, `retryFailed`, `openLink`, `setValue`, `setVariant`, `setVariable`, `callFunction`, `if`, `forEach`, `showToast`, `confirm`, `delay`, `copyToClipboard`, `editText`, `focus`, `controlTrack`, `controlDismissible`, `controlTransform`, `scrollTo`, `animate`, `haptic`, `runScript`, `paginate`, `componentEvent`, `callApi`, `setStorage`, `cloudDocuments`, `loadCloudData`, `reloadCloudData`, `cloudFiles`, `cloudData`, `cloudBatch`, `submitForm`, `auth`, `paywall`, `print`, `preloadImages`, `speak`, `playSound`, `captureScreenshot`, `downloadFile`, `emitEvent`.
 - In a chain `${result}` is the trigger's event (a text field's text) until an action gives another value.
 - A tap on a control inside a tappable row runs the control's reaction only: to toggle from the whole row, give the
@@ -572,6 +576,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | Background grid lines, a repeating pattern in pixels, grain | [decoration-a-pattern-in-pixels-a-background-grid-grain](decoration.md#decoration-a-pattern-in-pixels-a-background-grid-grain) |
 | A border on one side, a rule under a text, dashed borders, shadows, frosted glass | [decoration-borders-rules-and-shadows](decoration.md#decoration-borders-rules-and-shadows) |
 | A dark gradient over a photo with a caption | [decoration-a-scrim-over-a-photo](decoration.md#decoration-a-scrim-over-a-photo) |
+| A border hidden by a child's fill (paint order) | [decoration-borders-rules-and-shadows](decoration.md#decoration-borders-rules-and-shadows) |
 | Images (local files, cover, aspect ratio) | [decoration-images](decoration.md#decoration-images) |
 | Icons, their size and style | [decoration-icons](decoration.md#decoration-icons) |
 | A star, sparkle or other mark the font does not have; a custom shape | [decoration-small-marks-and-shapes](decoration.md#decoration-small-marks-and-shapes) |
@@ -586,7 +591,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | A button's label, colours, corners and label size | [forms-buttons](forms.md#forms-buttons) |
 | Every prop of a text field | [node-textField](forms.md#node-textField) |
 | Repeat one template per item of a list | [lists-one-template-from-data](lists.md#lists-one-template-from-data) |
-| A grid of cards from data, as many columns as fit | [lists-a-grid-of-cards](lists.md#lists-a-grid-of-cards) |
+| A grid of cards from data, as many columns as fit; gaps between wrapped items | [lists-a-grid-of-cards](lists.md#lists-a-grid-of-cards) |
 | Nested lists; the outer item inside the inner list (`parent`) | [lists-nested-lists](lists.md#lists-nested-lists) |
 | A comparison table from one row and one cell template | [lists-a-table-from-one-template](lists.md#lists-a-table-from-one-template) |
 | A weekly grid (days × habits) | [lists-a-weekly-grid](lists.md#lists-a-weekly-grid) |
@@ -633,7 +638,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | How one value type is written (colour, alignment, insets) | [values-colours-and-alignments](values.md#values-colours-and-alignments) |
 
 - [layout.md](layout.md): Responsive layout. Documents canvas, row, column, flex, stack, box, spacer, divider, verticalDivider, variance, sticky, floating, measure, scroll, scrollEnd, enterViewport, exitViewport, scrollTo.
-- [theme.md](theme.md): Theme and text. Documents text, textDirection.
+- [theme.md](theme.md): Theme and text. Documents text, textDirection, defaultTextStyle.
 - [decoration.md](decoration.md): Decoration, images, icons and drawing. Documents icon, path, customPaint, strokePath, imageLoading, imageLoaded, imageError.
 - [forms.md](forms.md): Buttons, forms and inputs. Documents filledButton, elevatedButton, outlinedButton, textButton, iconButton, floatingActionButton, textField, checkbox, switch, radio, slider, dropdown, segmentedButton, datePicker, timePicker, dateTimeInput, signature, chip, actionChip, choiceChip, filterChip, inputChip, changed, changeEnd, submitted, editingComplete, focusGained, focusLost, keyDown, keyUp, editText, focus.
 - [lists.md](lists.md): Lists, grids, tables and repeated data. Documents listView, gridView, pageView, tableView, listTile, pagination, reorderHandle, reorder, refresh, swipeAction, rowTap, paginate.
