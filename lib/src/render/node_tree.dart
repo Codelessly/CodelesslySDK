@@ -25,6 +25,7 @@ import 'convert.dart';
 import 'count_up.dart';
 import 'custom_paint.dart' show customPaintLayers;
 import 'layout/margin_box.dart';
+import 'layout/scaffold_slots.dart';
 import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
 import 'layout/freeform.dart';
@@ -425,14 +426,16 @@ class RenderTree {
     if (n == null) return null;
     final binder = _bindings;
     if (binder == null) return _withAnimated(id, instance, BoundNode(n));
-    return _collapseHidden(_resolveBound(id, instance, n, binder));
+    final bound = _resolveBound(id, instance, n, binder);
+    if (bound.collapsed || bound.node.visible) return bound;
+    // Hidden by a media rule or an interaction state's patch, as by a
+    // binding or a condition: it takes no room (CSS `display: none`,
+    // Flutter's `Visibility`). Hidden in its own data with no media rule
+    // about it, it keeps its room, as before.
+    final own = source.node(id);
+    final dynamic = own == null || own.visible || own.media.any((m) => m.patch.containsKey('visible'));
+    return dynamic ? BoundNode(bound.node, collapsed: true, watch: bound.watch, states: bound.states) : bound;
   }
-
-  /// A running screen's hidden node takes no room, however it is hidden (a
-  /// binding, a condition, its own `visible: false` or a responsive patch),
-  /// as Flutter's `Visibility` (default: not maintaining size) takes none.
-  static BoundNode _collapseHidden(BoundNode b) =>
-      b.collapsed || b.node.visible ? b : BoundNode(b.node, collapsed: true, watch: b.watch, states: b.states);
 
   BoundNode _resolveBound(String id, Object? instance, Node n, TreeBindings binder) {
     var bound = binder.bind(source, n, instance);
@@ -1691,10 +1694,22 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   void _canvas(Node n, List<RenderBox> chain) {
     _shell(n, chain, content: (inner) {
       final body = n.slots['body'];
-      final stack = _obtain<RenderStack>('bodyStack',
-          () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
-      _syncChildren(stack, [if (body != null && tree.source.node(body) != null) body], Slot(SlotKind.canvasBody, n));
-      inner.add(stack);
+      // The other Scaffold slots, where Scaffold puts them.
+      final others = [
+        for (final slot in const ['appBar', 'bottomNavigationBar', 'floatingActionButton'])
+          if (n.slots[slot] case final String id when tree.source.node(id) != null) (slot, id),
+      ];
+      if (others.isEmpty) {
+        final stack = _obtain<RenderStack>('bodyStack',
+            () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none));
+        _syncChildren(stack, [if (body != null && tree.source.node(body) != null) body], Slot(SlotKind.canvasBody, n));
+        inner.add(stack);
+        return;
+      }
+      final slots = [if (body != null && tree.source.node(body) != null) ('body', body), ...others];
+      final scaffold = _obtain<RenderScaffoldSlots>('scaffold', RenderScaffoldSlots.new)..slots = [for (final s in slots) s.$1];
+      _syncChildren(scaffold, [for (final s in slots) s.$2], Slot(SlotKind.canvasBody, n));
+      inner.add(scaffold);
     });
   }
 
@@ -1774,6 +1789,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..alignment = Alignment(x, y)
       ..widthFactor = hugsWidth ? 1 : null
       ..heightFactor = vFit == SizeFit.fill || vFit == SizeFit.fixed ? null : 1);
+    // Padding: space inside the text's box around its lines (a Container's
+    // padding around a Text), so a hugging text grows by it.
+    final padding = n.layout.padding.flutter;
+    if (padding != EdgeInsets.zero) {
+      chain.add(_obtain<RenderPadding>('textPad', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
+        ..padding = padding);
+    }
     final countUp = n.prop(TextProps.countUp);
     final RenderParagraph paragraph;
     final span = _textSpan(n);
