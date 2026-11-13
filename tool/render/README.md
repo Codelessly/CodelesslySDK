@@ -36,8 +36,8 @@ site: navigation may name a canvas of another page.
 | `--out <dir>` | Where PNGs and `diagnostics.json` go (required). |
 | `--sizes <WxH,...>` | Screen sizes, default `390x844,834x1112,1440x900`. |
 | `--screen <id or name>` | Only this screen: a canvas id, a layout id, a `props.screen` name, a canvas name or path. Repeatable. |
-| `--full-page` | Capture the whole page: the window is made as tall as the page's own scroll view scrolls (the largest one a user can scroll; lists and decorations that do not scroll add nothing). Content fixed to the window (outside that scroll view: a bar pinned to the bottom of a stack over the page, a canvas's bottom bar or floating button) is drawn where a user first sees it, in the first window, as a browser's full-page screenshot shows it. |
-| `--fonts <dir>` | Font files (`.ttf`, `.otf`), read by the family, weight and style inside each file. Repeatable. |
+| `--full-page` | Capture the whole page: the window is made as tall as the page's own scroll view scrolls (the largest one a user can scroll; lists and decorations that do not scroll add nothing). Content fixed to the window (outside that scroll view: a bar pinned to the bottom of a stack over the page, a canvas's bottom bar or floating button) is drawn where a user first sees it, in the first window, as a browser's full-page screenshot shows it. The capture always starts at the page's top, whatever a step scrolled it to (a `--tap` scrolls its node into view first); without `--full-page` the capture is the window where the steps left the page. |
+| `--fonts <dir>` | Font files (`.ttf`, `.otf`, `.woff`), searched recursively and read by the family, weight and style inside each file: a font package folder (`node_modules/@fontsource/<family>`), a site's fonts folder, or `system` (the system's font directories). Repeatable. `.woff2` is not read (it is reported, with the `.woff` to use instead). |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats. |
 | `--hover <id>` | Move a mouse over the node (hover states, `cursorEnter`). |
 | `--focus <id>` | Focus the text field (a `textField`, or the one inside the node). |
@@ -107,8 +107,15 @@ Flutter SDK ships: 100, 300, 400, 500, 700, 900) and the Material Icons font, fr
 
 Text that names no family is drawn in Roboto, the default family of a Flutter app on Android and on the web (in
 an app it is the platform's font). A family the command does not have is drawn in Roboto and reported as
-`font_fallback`; a missing weight next to one the family has (600 when there are 500 and 700) is drawn with the
-nearest and not reported.
+`font_fallback`, whose message names the family, weight and style asked for, the weights the family has, the
+directories searched and any file of that family found but not read; a missing weight next to one the family has
+(600 when there are 500 and 700) is drawn with the nearest and not reported.
+
+Web fonts: a `.woff` file is decoded by the command (its tables are zlib streams) and read as the TrueType or
+OpenType file it wraps. A `.woff2` file (Brotli-compressed) is not read: it is reported, and an npm
+`@fontsource/<family>` package has a `.woff` of every face beside its `.woff2`, so `--fonts
+node_modules/@fontsource/<family>` works as it is. `--fonts system` adds the system's font directories
+(`/usr/share/fonts`, `~/.fonts`, `/Library/Fonts`, `C:\Windows\Fonts`...). The command downloads nothing.
 
 ## Images
 

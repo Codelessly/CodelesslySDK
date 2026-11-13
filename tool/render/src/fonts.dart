@@ -1,8 +1,12 @@
-// Fonts for the render command: font files found in directories, each
-// read for its real family, weight and style (the OpenType `name` and
-// `OS/2` tables, not the file name), served to the SDK through a
-// FontFetcher. Families a document names that no file provides are
-// recorded, so the report can say which text fell back.
+// Fonts for the render command: font files found in directories (an npm
+// `@fontsource/*` package, a site's fonts folder, the system's font
+// directories), each read for its real family, weight and style (the
+// OpenType `name` and `OS/2` tables, not the file name), served to the SDK
+// through a FontFetcher. TrueType/OpenType files are read as they are; a
+// WOFF web font is decoded to the TrueType/OpenType file it wraps (its
+// tables are zlib streams). Families a document names that no file
+// provides are recorded, so the report can say which text fell back and
+// where the command looked.
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -63,17 +67,149 @@ typedef FontFace = ({String family, int weight, bool italic, String path});
   }
 }
 
-/// The font files in [dirs] (searched recursively): `.ttf` and `.otf`.
+/// The system's font directories (Linux, macOS, Windows): what
+/// `--fonts system` searches.
+List<String> systemFontDirs() {
+  final home = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'] ?? '';
+  return [
+    '/usr/share/fonts', '/usr/local/share/fonts', '$home/.fonts', '$home/.local/share/fonts', //
+    '/System/Library/Fonts', '/Library/Fonts', '$home/Library/Fonts',
+    '${Platform.environment['WINDIR'] ?? r'C:\Windows'}\\Fonts',
+  ];
+}
+
+/// [dirs] with `system` replaced by the system's font directories.
+List<String> fontDirsOf(Iterable<String> dirs) => [
+      for (final d in dirs)
+        if (d == 'system') ...systemFontDirs() else d,
+    ];
+
+/// A font file the command found but cannot read, and why.
+typedef UnreadFont = ({String path, String reason});
+
+/// What [scanFonts] found: the faces, and the font files it could not use.
+final List<UnreadFont> unreadFonts = [];
+
+/// The TrueType/OpenType bytes of font file [bytes]: as they are, or
+/// decoded from WOFF (zlib-compressed tables). Null for anything else
+/// (WOFF2, a collection), with the reason in [why].
+Uint8List? sfntOf(Uint8List bytes, {void Function(String reason)? why}) {
+  if (bytes.length < 12) return null;
+  final sig = String.fromCharCodes(bytes.sublist(0, 4));
+  if (sig == 'wOFF') {
+    try {
+      return _woff(bytes);
+    } catch (e) {
+      why?.call('not a readable WOFF file ($e)');
+      return null;
+    }
+  }
+  if (sig == 'wOF2') {
+    why?.call('WOFF2 (Brotli-compressed): not read by this command. Use the .woff or .ttf of the same face '
+        '(an npm @fontsource package ships a .woff beside each .woff2)');
+    return null;
+  }
+  if (sig == 'ttcf') {
+    why?.call('a font collection (.ttc): not read');
+    return null;
+  }
+  final tag = ByteData.sublistView(bytes).getUint32(0);
+  if (tag == 0x00010000 || sig == 'OTTO' || sig == 'true') return bytes;
+  why?.call('not a font file');
+  return null;
+}
+
+/// A WOFF file's TrueType/OpenType file (W3C WOFF 1.0): its tables
+/// inflated, under an sfnt header and table directory.
+Uint8List _woff(Uint8List bytes) {
+  final b = ByteData.sublistView(bytes);
+  final flavor = b.getUint32(4);
+  final numTables = b.getUint16(12);
+  final tables = <(String, int, Uint8List)>[];
+  for (var i = 0; i < numTables; i++) {
+    final rec = 44 + 20 * i;
+    final tag = String.fromCharCodes(bytes.sublist(rec, rec + 4));
+    final offset = b.getUint32(rec + 4), compLength = b.getUint32(rec + 8), origLength = b.getUint32(rec + 12);
+    final checksum = b.getUint32(rec + 16);
+    final raw = Uint8List.sublistView(bytes, offset, offset + compLength);
+    tables.add((tag, checksum, compLength < origLength ? Uint8List.fromList(zlib.decode(raw)) : Uint8List.fromList(raw)));
+  }
+  tables.sort((a, c) => a.$1.compareTo(c.$1));
+  final n = tables.length;
+  var entrySelector = 0;
+  while ((1 << (entrySelector + 1)) <= n) {
+    entrySelector++;
+  }
+  final searchRange = (1 << entrySelector) * 16;
+  final head = ByteData(12 + 16 * n)
+    ..setUint32(0, flavor)
+    ..setUint16(4, n)
+    ..setUint16(6, searchRange)
+    ..setUint16(8, entrySelector)
+    ..setUint16(10, n * 16 - searchRange);
+  var offset = 12 + 16 * n;
+  for (var i = 0; i < n; i++) {
+    final (tag, checksum, data) = tables[i];
+    final rec = 12 + 16 * i;
+    for (var k = 0; k < 4; k++) {
+      head.setUint8(rec + k, tag.codeUnitAt(k));
+    }
+    head
+      ..setUint32(rec + 4, checksum)
+      ..setUint32(rec + 8, offset)
+      ..setUint32(rec + 12, data.length);
+    offset += (data.length + 3) & ~3;
+  }
+  final out = BytesBuilder(copy: false)..add(head.buffer.asUint8List());
+  for (final (_, _, data) in tables) {
+    out.add(data);
+    final pad = ((data.length + 3) & ~3) - data.length;
+    if (pad > 0) out.add(Uint8List(pad));
+  }
+  return out.takeBytes();
+}
+
+/// Where decoded web fonts are written (a TrueType/OpenType file each).
+final Directory _decoded = Directory.systemTemp.createTempSync('codelessly-render-fonts');
+
+/// The font files in [dirs] (searched recursively; `system`: the system's
+/// font directories): `.ttf` and `.otf`, and `.woff` decoded. A font file
+/// it cannot read is listed in [unreadFonts].
 List<FontFace> scanFonts(Iterable<String> dirs) {
   final out = <FontFace>[];
-  for (final dir in dirs) {
-    final d = Directory(dir);
-    if (!d.existsSync()) continue;
-    for (final f in d.listSync(recursive: true, followLinks: true).whereType<File>()) {
+  for (final dir in fontDirsOf(dirs)) {
+    final type = FileSystemEntity.typeSync(dir);
+    final files = type == FileSystemEntityType.file
+        ? [File(dir)]
+        : type == FileSystemEntityType.directory
+            ? Directory(dir).listSync(recursive: true, followLinks: true).whereType<File>()
+            : const <File>[];
+    for (final f in files) {
       final lower = f.path.toLowerCase();
-      if (!lower.endsWith('.ttf') && !lower.endsWith('.otf')) continue;
-      final face = readFontFace(f.readAsBytesSync());
-      if (face != null) out.add((family: face.family, weight: face.weight, italic: face.italic, path: f.path));
+      if (!const ['.ttf', '.otf', '.woff', '.woff2', '.ttc'].any(lower.endsWith)) continue;
+      final Uint8List bytes;
+      try {
+        bytes = f.readAsBytesSync();
+      } catch (_) {
+        continue;
+      }
+      String? reason;
+      final sfnt = sfntOf(bytes, why: (r) => reason = r);
+      if (sfnt == null) {
+        unreadFonts.add((path: f.path, reason: reason ?? 'not read'));
+        continue;
+      }
+      final face = readFontFace(sfnt);
+      if (face == null) {
+        unreadFonts.add((path: f.path, reason: 'its family name could not be read'));
+        continue;
+      }
+      var path = f.path;
+      if (!identical(sfnt, bytes)) {
+        path = '${_decoded.path}/${out.length}-${f.uri.pathSegments.last}.ttf';
+        File(path).writeAsBytesSync(sfnt);
+      }
+      out.add((family: face.family, weight: face.weight, italic: face.italic, path: path));
     }
   }
   return out;

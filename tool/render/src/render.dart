@@ -180,6 +180,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // process would load into a disposed instance.
   FontDemand.handler = null;
   final root = flutterRoot ?? Platform.environment['FLUTTER_ROOT'] ?? '';
+  unreadFonts.clear();
   final faces = [...defaultFonts(root), ...scanFonts(args.fontDirs)];
   final fetcher = DirectoryFontFetcher(faces);
   await tester.runAsync(() async {
@@ -478,10 +479,24 @@ Future<void> _renderAll(
             (int.parse(RegExp(r' (\d+)').firstMatch(m.substitute!)!.group(1)!) - m.weight).abs() <= 100 &&
             m.substitute!.contains('italic') == m.italic;
         if (near) continue;
+        final style = '${m.weight}${m.italic ? ' italic' : ''}';
+        final has = [for (final f in faces) if (f.family.toLowerCase() == m.family.toLowerCase()) '${f.weight}${f.italic ? ' italic' : ''}'];
+        final slug = m.family.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
+        final unread = [
+          for (final u in unreadFonts)
+            if (u.path.toLowerCase().replaceAll(RegExp(r'[^a-z0-9/]+'), '').contains(slug)) '${u.path}: ${u.reason}',
+        ];
+        final looked = [
+          'the built-in Roboto and Material Icons',
+          if (args.fontDirs.isNotEmpty) fontDirsOf(args.fontDirs).join(', ') else 'no --fonts directory',
+        ].join('; ');
         issue(RuntimeIssue('font_fallback', 'warning',
-            m.substitute == null
-                ? 'Font "${m.family}" ${m.weight}${m.italic ? ' italic' : ''} is not in the fonts directories: its text is drawn in the default font. Add the font file with --fonts <dir>, or use Roboto.'
-                : 'Font "${m.family}" ${m.weight}${m.italic ? ' italic' : ''} is not in the fonts directories: drawn with ${m.substitute}. Add the font file with --fonts <dir> to see the real one.'));
+            'Font "${m.family}" $style (fontFamily "${m.family}", fontWeight ${m.weight}, fontStyle ${m.italic ? 'italic' : 'normal'}) was asked for; '
+            '${has.isEmpty ? 'no file of that family was found' : 'the family has only ${has.join(', ')}'} in $looked. '
+            '${m.substitute == null ? 'Its text is drawn in the default font.' : 'Drawn with ${m.substitute}.'}'
+            '${unread.isEmpty ? '' : ' Found but not read: ${unread.take(3).join('; ')}.'}'
+            ' Add its files with --fonts <dir> (.ttf, .otf or .woff: a font package folder such as node_modules/@fontsource/<family>, '
+            'or `--fonts system` for the system\'s fonts).'));
       }
       final name = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';
