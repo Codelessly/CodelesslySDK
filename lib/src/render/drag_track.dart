@@ -5,7 +5,10 @@
 // writes the track's variable, gives the nodes inside it `${track.*}`,
 // and fires the node's `changed`, `dragEnd` and `changeEnd` reactions.
 //
-// The physics are coast, glide and snap loops with fixed thresholds; a settle spring is Flutter's SpringSimulation.
+// Its physics are the shared gesture physics (render/physics.dart): a
+// release coasts on the track's GesturePhysics as Flutter's
+// FrictionSimulation; snapping onto a step and a smooth track's glide are
+// critically damped SpringSimulations; a settle spring is its own Spring.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -14,7 +17,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
-import 'physics.dart' show describeSpring;
+import 'physics.dart' show describeSpring, gestureTolerance;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -146,7 +149,7 @@ extension TrackGeometryHits on TrackGeometry {
       case api.TrackShape.arc:
         // The pointer's angle round the pivot, from where the node rests,
         // in whichever turn lands inside the sweep (or nearest an end).
-        final sweep = track.endAngle - track.startAngle;
+        final sweep = track.sweepAngle;
         if (sweep == 0) return 0;
         final raw = angleOf(p) - angleOf(Offset.zero);
         final lo = math.min(track.startAngle, track.endAngle), hi = math.max(track.startAngle, track.endAngle);
@@ -311,13 +314,12 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     }
   }
 
-  /// Writes [v] to the variable (unless [api.Track.write] is off, or
-  /// it's computed): whole for an integer one. Scrubbing a variable an
+  /// Writes [v] to the variable (unless it has none, or it's computed): whole for an integer one. Scrubbing a variable an
   /// animation plays pauses it.
   void _onChanged(double v) {
     final name = _track.variable.trim();
     final scope = _scope;
-    if (!_track.write || name.isEmpty || scope == null) return;
+    if (name.isEmpty || scope == null) return;
     final found = scope.variable(name);
     if (found == null || found.isComputed) return;
     found.pauseAnimation();
@@ -605,10 +607,47 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   }
 
   void _startLoop() {
+    _coast = null;
+    _coastT = 0;
+    _approach = null;
+    _approachTo = null;
     if (_loopActive) return;
     _loopActive = true;
     _last = null;
     _syncTicker();
+  }
+
+  /// The coast: a friction simulation in progress from the release, on the
+  /// track's physics, and how long it has run.
+  FrictionSimulation? _coast;
+  double _coastT = 0;
+
+  /// The approach to a snap target or a glide target: a critically damped
+  /// spring (no overshoot past a step) from where it is, and its time.
+  SpringSimulation? _approach;
+  double _approachT = 0;
+  double? _approachTo;
+
+  /// A critically damped spring of [omega] radians a second.
+  static SpringDescription _critical(double omega) =>
+      SpringDescription(mass: 1, stiffness: omega * omega, damping: 2 * omega);
+
+  /// Moves a [_approach] toward [to] (from [from]) on, giving where it is
+  /// after [dt] more seconds; null once it is there.
+  double? _approachStep(double from, double to, double omega, double dt) {
+    if (_approach == null || _approachTo != to) {
+      _approach = SpringSimulation(_critical(omega), from, to, 0, tolerance: gestureTolerance);
+      _approachT = 0;
+      _approachTo = to;
+    }
+    _approachT += dt;
+    final sim = _approach!;
+    if (sim.isDone(_approachT) || (sim.x(_approachT) - to).abs() < 0.0005) {
+      _approach = null;
+      _approachTo = null;
+      return null;
+    }
+    return sim.x(_approachT);
   }
 
   void _stepLoop(Duration now) {
@@ -618,37 +657,41 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     final glide = _glideTo;
     if (glide != null) {
       final at = _drawProgress ?? glide;
-      final diff = glide - at;
-      if (diff.abs() < 0.0005) {
+      final next = (glide - at).abs() < 0.0005 ? null : _approachStep(at, glide, 20, dt);
+      if (next == null) {
         _loopActive = false;
         _glideTo = null;
         _drawProgress = null;
       } else {
-        _drawProgress = at + diff * (1 - math.exp(-14 * dt));
+        _drawProgress = next;
       }
       return;
     }
     if (_velocity != 0) {
       final before = _raw;
-      _emit(_raw + _velocity * dt);
-      _velocity *= math.exp(-_track.friction * dt);
+      final coast = _coast ??= FrictionSimulation(_track.physics?.frictionDrag ?? 0.135, _raw, _velocity);
+      _coastT += dt;
+      _emit(coast.x(_coastT));
+      _velocity = coast.dx(_coastT);
       final stuck = !_track.unbounded && _raw == before;
       if (_velocity.abs() < _coastStop || stuck) {
         _velocity = 0;
+        _coast = null;
+        _coastT = 0;
         _track.smooth ? _beginSnap() : _finish();
       }
       return;
     }
     final to = _snapTo;
     if (to == null) return _finish();
-    final diff = to - _raw;
     // About 1/1000 of a step, or of the whole track.
     final done = _track.step > 0 && _track.max != _track.min ? (_track.step / (_track.max - _track.min)).abs() / 1000 : 0.0005;
-    if (diff.abs() <= done) {
+    final next = (to - _raw).abs() <= done ? null : _approachStep(_raw, to, 32, dt);
+    if (next == null) {
       _emit(to);
       return _finish();
     }
-    _emit(_raw + diff * (1 - math.exp(-22 * dt)));
+    _emit(next);
   }
 
   void _beginSnap([double? toProgress]) {
@@ -852,7 +895,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
           if (delta > 180) delta -= 360;
           if (delta < -180) delta += 360;
           _lastAngle = angle;
-          final sweep = _track.endAngle - _track.startAngle;
+          final sweep = _track.sweepAngle;
           if (sweep != 0) _emit(_raw + delta * _gain / sweep);
         } else {
           _emit(_nearest(p + _grab, unclamped: _track.overscroll > 0));
@@ -879,7 +922,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
           final r2 = r.distanceSquared;
           if (r2 < 1) return 0;
           final degPerSec = (r.dx * v.dy - r.dy * v.dx) / r2 * 180 / math.pi;
-          final sweep = _track.endAngle - _track.startAngle;
+          final sweep = _track.sweepAngle;
           return sweep == 0 ? 0 : degPerSec * _gain / sweep;
         }
         // Along a line or path: the velocity's share of the track's
@@ -901,7 +944,7 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   /// [units] (°/s on an arc, px/s otherwise) in progress per second.
   double _speedOf(double units) {
     if (_track.shape == api.TrackShape.arc && _track.input == api.TrackInput.follow) {
-      final sweep = (_track.endAngle - _track.startAngle).abs();
+      final sweep = _track.sweepAngle.abs();
       return sweep == 0 ? double.infinity : units / sweep;
     }
     if (_track.input != api.TrackInput.follow) return units / _track.pixelsPerRange;
