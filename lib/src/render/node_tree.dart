@@ -496,7 +496,7 @@ class RenderTree {
     var out = n;
     for (final e in _states.entries) {
       if (e.key.$2 != instance) continue;
-      final patch = source.node(e.key.$1)?.behaviors.states.patchFor(id, e.value);
+      final patch = source.node(e.key.$1)?.behaviors.states.patchFor(id, e.value, props: n.spec?.props);
       if (patch != null) out = withoutBindsUnder(out.patched(patch), patch);
     }
     return out;
