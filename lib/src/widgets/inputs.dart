@@ -52,19 +52,21 @@ import 'inputs_toggle.dart';
 import '../runtime/http_image_loader.dart';
 
 // Pickers follow the same app tokens and inferred styling as runtime dialogs.
-Widget _pickerTheme(BuildContext context, Widget? child) {
-  final base = Theme.of(context);
-  if (FeedbackThemeScope.maybeOf(context) == null && base.extension<FeedbackTheme>() == null) {
-    return child ?? const SizedBox.shrink();
-  }
-  final app = FeedbackTheme.of(context);
-  final scheme = ColorScheme.fromSeed(seedColor: app.primary, brightness: base.brightness).copyWith(
-    primary: app.primary, onPrimary: app.onPrimary, surface: app.surface, onSurface: app.onSurface, error: app.error,
-  );
-  return Theme(
-    data: base.copyWith(colorScheme: scheme, textTheme: base.textTheme.apply(fontFamily: app.bodyStyle.fontFamily)),
-    child: child ?? const SizedBox.shrink(),
-  );
+Widget _pickerTheme(BuildContext context, Widget? child) =>
+    Theme(data: FeedbackTheme.of(context).themeData, child: child ?? const SizedBox.shrink());
+
+/// What an input's texts inherit: the node's default text style, over the
+/// theme's font (the project's: a label that names no family isn't in the
+/// platform's) and ink.
+api.TextStyle? _textDefault(BuildContext context, Node n) {
+  final own = n.behaviors.defaultTextStyle;
+  final theme = Theme.of(context);
+  final family = theme.textTheme.bodyMedium?.fontFamily;
+  // A style that names no color is in the theme's ink for what the input
+  // sits on (Flutter would draw it white: a style of its own replaces the
+  // field's).
+  final ink = api.Color(theme.colorScheme.onSurface.toARGB32());
+  return api.TextStyle(fontFamily: family, color: ink).merge(own);
 }
 
 /// Recipes for the inputs group, by node type.
@@ -544,12 +546,12 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final expands = fillsHeight && !oneLine;
     final (maxLines, minLines) =
         textFieldLines(maxLines: maxLinesProp == 0 ? null : maxLinesProp, minLines: minLinesProp, expands: expands);
-    final decoration = inputDecoration(d, n.layout.padding, textDefault: n.behaviors.defaultTextStyle, focused: focusNode.hasFocus, onIconTap: (prefix) {
+    final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: focusNode.hasFocus, onIconTap: (prefix) {
       final b = _builderOf(context);
       if (b != null) fireTrigger(b, prefix ? iconTapPrefix : iconTapSuffix);
     });
     final maxLength = n.prop(TextFieldProps.maxLength);
-    final style = _styleOrNull(n.prop(TextFieldProps.style), n.behaviors.defaultTextStyle);
+    final style = _styleOrNull(n.prop(TextFieldProps.style), _textDefault(context, n));
     final cursorRadius = n.prop(TextFieldProps.cursorRadius);
 
     // Where tickers are off (a design canvas) the decorator can't animate a
@@ -1245,8 +1247,8 @@ class _DropdownIslandState extends State<_DropdownIsland> {
     final matches = [for (final item in items) if (api.jsonEquality.equals(item, selected)) item];
     final value = matches.length == 1 ? matches.single : null;
     final itemAlignment = n.prop(DropdownProps.itemAlignment).flutter;
-    final itemStyle = _styleOrNull(n.prop(DropdownProps.style), n.behaviors.defaultTextStyle);
-    final selectedStyle = _styleOrNull(n.prop(DropdownProps.selectedItemStyle), n.behaviors.defaultTextStyle);
+    final itemStyle = _styleOrNull(n.prop(DropdownProps.style), _textDefault(context, n));
+    final selectedStyle = _styleOrNull(n.prop(DropdownProps.selectedItemStyle), _textDefault(context, n));
     final hint = n.prop(DropdownProps.hint);
     final iconSize = n.prop(DropdownProps.iconSize);
     final enabled = n.prop(DropdownProps.enabled);
@@ -1260,7 +1262,7 @@ class _DropdownIslandState extends State<_DropdownIsland> {
       alignment: n.prop(DropdownProps.alignment).flutter,
       hint: hint == null || hint.isEmpty
           ? null
-          : Text(hint, style: _styleOrNull(n.prop(DropdownProps.hintStyle), n.behaviors.defaultTextStyle), overflow: TextOverflow.ellipsis),
+          : Text(hint, style: _styleOrNull(n.prop(DropdownProps.hintStyle), _textDefault(context, n)), overflow: TextOverflow.ellipsis),
       iconDisabledColor: _color(n.prop(DropdownProps.iconDisabledColor)),
       iconEnabledColor: _color(n.prop(DropdownProps.iconEnabledColor)),
       iconSize: iconSize,
@@ -1406,8 +1408,8 @@ class _AnchoredMenuState extends State<_AnchoredMenu> {
     final shadows = s['shadows'] != null
         ? [for (final e in api.Effect.listFromJson(s['shadows'])) if (e.visible && e.type == api.EffectType.dropShadow) boxShadow(e)]
         : kElevationToShadow[n.prop(DropdownProps.elevation).clamp(0, 24)] ?? kElevationToShadow[8]!;
-    final itemStyle = _styleOrNull(n.prop(DropdownProps.style), n.behaviors.defaultTextStyle) ?? const TextStyle();
-    final selectedStyle = itemStyle.merge(_styleOrNull(api.TextStyle.fromJson(s['selectedTextStyle']), n.behaviors.defaultTextStyle));
+    final itemStyle = _styleOrNull(n.prop(DropdownProps.style), _textDefault(context, n)) ?? const TextStyle();
+    final selectedStyle = itemStyle.merge(_styleOrNull(api.TextStyle.fromJson(s['selectedTextStyle']), _textDefault(context, n)));
     final hover = _hex('hoverItemColor') ?? _color(n.prop(DropdownProps.hoverColor));
     final itemPadding = _insets('itemPadding') ?? const EdgeInsets.symmetric(horizontal: 14);
     final showCheck = s['showCheck'] == true;
@@ -1515,12 +1517,12 @@ Widget _nodePickerTheme(BuildContext context, Widget? child, Node n, {bool use24
   if (j == null || j.isEmpty) return _pickerTheme(context, themed);
   Color? c(String key) => api.Color.fromJson(j[key])?.flutter;
   double? d(String key) => j[key] is num ? (j[key] as num).toDouble() : double.tryParse('${j[key] ?? ''}');
-  final base = Theme.of(context);
+  final base = FeedbackTheme.of(context).themeData;
   final background = c('backgroundColor'), accent = c('accentColor'), onAccent = c('onAccentColor');
   final text = c('textColor'), muted = c('mutedColor'), divider = c('dividerColor');
   final radius = d('radius'), dayRadius = d('dayRadius');
   final family = j['fontFamily'] is String ? j['fontFamily'] as String : null;
-  final headline = j['headlineStyle'] == null ? null : textStyle(api.TextStyle.fromJson(j['headlineStyle']), n.behaviors.defaultTextStyle);
+  final headline = j['headlineStyle'] == null ? null : textStyle(api.TextStyle.fromJson(j['headlineStyle']), _textDefault(context, n));
   TextStyle? font([double? size, Color? color, FontWeight? weight]) =>
       family == null && color == null ? null : TextStyle(fontFamily: family, fontSize: size, color: color, fontWeight: weight);
   final shape = radius == null ? null : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
@@ -1543,7 +1545,7 @@ Widget _nodePickerTheme(BuildContext context, Widget? child, Node n, {bool use24
     final data = base.copyWith(
       colorScheme: scheme,
       textTheme: family == null ? base.textTheme : base.textTheme.apply(fontFamily: family),
-      datePickerTheme: DatePickerThemeData(
+      datePickerTheme: base.datePickerTheme.copyWith(
         backgroundColor: background,
         surfaceTintColor: Colors.transparent,
         shape: shape,
@@ -1562,7 +1564,7 @@ Widget _nodePickerTheme(BuildContext context, Widget? child, Node n, {bool use24
         cancelButtonStyle: button(muted ?? text),
         confirmButtonStyle: button(accent),
       ),
-      timePickerTheme: TimePickerThemeData(
+      timePickerTheme: base.timePickerTheme.copyWith(
         backgroundColor: background,
         shape: shape,
         hourMinuteShape: dayRadius == null
@@ -1607,9 +1609,9 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
     if (!d.hintStyle.isEmpty) style = d.hintStyle;
   }
   if (d.isEmpty) {
-    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style, n.behaviors.defaultTextStyle)));
+    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style, _textDefault(context, n))));
   }
-  final decoration = inputDecoration(d, n.layout.padding, textDefault: n.behaviors.defaultTextStyle, error: d.errorText != null && d.errorText!.isNotEmpty);
+  final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), error: d.errorText != null && d.errorText!.isNotEmpty);
   return MouseRegion(
     cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
     child: GestureDetector(
@@ -1622,7 +1624,7 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
         // unbounded (in a column), where constraints don't carry it.
         height: n.layout.height.fit == SizeFit.fixed ? n.layout.height.value : null,
         fills: n.layout.height.fit == SizeFit.fill,
-        child: Text(text, style: _styleOrNull(style, n.behaviors.defaultTextStyle), maxLines: 1, overflow: TextOverflow.ellipsis),
+        child: Text(text, style: _styleOrNull(style, _textDefault(context, n)), maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     ),
   );
@@ -1845,7 +1847,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     final hint = n.prop(DateTimeInputProps.hint);
     final icon = _icon(n.prop(DateTimeInputProps.icon));
     var decoration = styled
-        ? _withHintAndIcon(inputDecoration(d, n.layout.padding, textDefault: n.behaviors.defaultTextStyle, focused: false), hint, icon)
+        ? _withHintAndIcon(inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: false), hint, icon)
         : InputDecoration(
             labelText: label,
             hintText: label == null || label.isEmpty
@@ -1862,7 +1864,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     // A fixed height is the field's, as a text field's, for a field that
     // draws its own decoration (older fields kept their natural height).
     final fixedHeight = vFit == SizeFit.fixed && styled ? n.layout.height.value : null;
-    final style = _styleOrNull(n.prop(DateTimeInputProps.style), n.behaviors.defaultTextStyle);
+    final style = _styleOrNull(n.prop(DateTimeInputProps.style), _textDefault(context, n));
     return InkWell(
       onTap: !opens || !enabled || !widget.interactive || first.isAfter(last)
           ? null
@@ -1929,7 +1931,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         child: Text(empty ? hint : display,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style), n.behaviors.defaultTextStyle)),
+            style: _styleOrNull(n.prop(empty ? DateTimeInputProps.hintStyle : DateTimeInputProps.style), _textDefault(context, n))),
       ),
       _icon(n.prop(DateTimeInputProps.icon)) ??
           Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 16),
@@ -2012,7 +2014,7 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
       selectedIcon: selectedIcon,
       direction: n.prop(SegmentedButtonProps.direction) == api.Axis.vertical ? Axis.vertical : Axis.horizontal,
       style: SegmentedButton.styleFrom(
-        textStyle: _styleOrNull(n.prop(SegmentedButtonProps.textStyle), n.behaviors.defaultTextStyle),
+        textStyle: _styleOrNull(n.prop(SegmentedButtonProps.textStyle), _textDefault(context, n)),
         backgroundColor: _color(n.prop(SegmentedButtonProps.backgroundColor)),
         selectedBackgroundColor: _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)),
         foregroundColor: _color(n.prop(SegmentedButtonProps.foregroundColor)),
@@ -2049,7 +2051,7 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     final radius = n.prop(SegmentedButtonProps.borderRadius)?.flutter ?? BorderRadius.circular(4);
     final side = n.prop(SegmentedButtonProps.side);
     final enabled = n.prop(SegmentedButtonProps.enabled);
-    final base = _styleOrNull(n.prop(SegmentedButtonProps.textStyle), n.behaviors.defaultTextStyle) ?? const TextStyle(fontSize: 13, fontWeight: FontWeight.w600);
+    final base = _styleOrNull(n.prop(SegmentedButtonProps.textStyle), _textDefault(context, n)) ?? const TextStyle(fontSize: 13, fontWeight: FontWeight.w600);
     final fg = _color(n.prop(SegmentedButtonProps.foregroundColor)) ?? const Color(0xFF6B7A8D);
     final selectedFg = _color(n.prop(SegmentedButtonProps.selectedForegroundColor)) ?? const Color(0xFF0F1B2D);
     final selectedBg = _color(n.prop(SegmentedButtonProps.selectedBackgroundColor)) ?? Colors.white;
@@ -2220,7 +2222,7 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       placeholderStyle: placeholderStyle.isEmpty
           ? null
           : _signatureStyle(placeholderStyle,
-              textDefault: n.behaviors.defaultTextStyle,
+              textDefault: _textDefault(context, n),
               color: n.prop(SignatureProps.placeholderColor).flutter,
               fontSize: placeholderFontSize,
               fontWeight: FontWeight.values[((n.prop(SignatureProps.placeholderFontWeight) ~/ 100) - 1).clamp(0, 8)],
@@ -2248,7 +2250,7 @@ class _SignatureIslandState extends State<_SignatureIsland> {
       leadingMark: n.prop(SignatureProps.signMarkPlacement) == api.SignMarkPlacement.leading,
       markGap: n.prop(SignatureProps.signMarkGap),
       caption: n.prop(SignatureProps.caption),
-      captionStyle: _signatureStyle(captionStyle, color: lineColor, fontSize: 11, textDefault: n.behaviors.defaultTextStyle),
+      captionStyle: _signatureStyle(captionStyle, color: lineColor, fontSize: 11, textDefault: _textDefault(context, n)),
       captionGap: n.prop(SignatureProps.captionGap),
       captionAlign: textAlign(n.prop(SignatureProps.captionAlign)),
       textDirection: Directionality.maybeOf(context) ?? TextDirection.ltr,

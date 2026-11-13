@@ -20,7 +20,7 @@ import 'package:codelessly_api/core.dart'
         ProgressBarProps,
         RadialGaugeProps;
 import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
-import 'package:flutter/material.dart' show CircularProgressIndicator;
+import 'package:flutter/material.dart' show CircularProgressIndicator, Theme;
 import 'package:flutter/rendering.dart';
 
 import '../render/convert.dart';
@@ -111,7 +111,9 @@ void _activityIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
   final animating = n.prop(ActivityIndicatorProps.animating);
   chain.add(b.island(
     'activity',
-    (_) => CupertinoActivityIndicator(radius: radius, color: color, animating: animating),
+    // Unset: the theme's muted ink, not Cupertino's tinted grey.
+    (context) => CupertinoActivityIndicator(
+        radius: radius, color: color ?? Theme.of(context).colorScheme.onSurfaceVariant, animating: animating),
   ));
 }
 

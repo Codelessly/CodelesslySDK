@@ -27,6 +27,7 @@ import 'package:codelessly_api/core.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../render/control_theme.dart' show backdropOf, onColor, themeDataOf, themeFont;
 import '../render/convert.dart';
 import '../render/node_tree.dart';
 import '../render/paint/icon_glyph.dart';
@@ -170,16 +171,27 @@ void _button(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(_pressable(b, 'button', (context) => _buildButton(context, n)));
 }
 
+/// A control's label color when its node sets none: its own text style's,
+/// else one that reads on its own [background] when it has one; null
+/// leaves it to the theme, made for what the control is drawn on.
+Color? labelColor(api.Color? foreground, api.TextStyle? label, api.Color? background) {
+  final own = _color(foreground) ?? label?.color?.flutter;
+  if (own != null) return own;
+  final fill = _color(background);
+  return fill != null && fill.a > .9 ? onColor(fill) : null;
+}
+
 Widget _buildButton(BuildContext context, Node n) {
   final s = n.prop(ButtonProps.style);
   final padding = n.layout.padding.flutter;
   final shape = s.shape == null ? null : _shape(s.shape!);
-  // An empty style is the base text style.
-  final text = textStyle(s.textStyle, n.behaviors.defaultTextStyle);
+  // An empty style is the base text style, in the theme's font.
+  final text = themeFont(context, textStyle(s.textStyle, n.behaviors.defaultTextStyle));
   final elevation = s.elevation;
+  final foreground = labelColor(s.foregroundColor, s.textStyle, s.backgroundColor);
   final ButtonStyle style = switch (n.type) {
     'elevatedButton' => ElevatedButton.styleFrom(
-        foregroundColor: _color(s.foregroundColor),
+        foregroundColor: foreground,
         backgroundColor: _color(s.backgroundColor),
         shadowColor: _color(s.shadowColor),
         elevation: elevation,
@@ -192,7 +204,7 @@ Widget _buildButton(BuildContext context, Node n) {
         shape: shape,
       ),
     'filledButton' => FilledButton.styleFrom(
-        foregroundColor: _color(s.foregroundColor),
+        foregroundColor: foreground,
         backgroundColor: _color(s.backgroundColor),
         shadowColor: _color(s.shadowColor),
         elevation: elevation,
@@ -205,7 +217,7 @@ Widget _buildButton(BuildContext context, Node n) {
         shape: shape,
       ),
     'outlinedButton' => OutlinedButton.styleFrom(
-        foregroundColor: _color(s.foregroundColor),
+        foregroundColor: foreground,
         backgroundColor: _color(s.backgroundColor),
         shadowColor: _color(s.shadowColor),
         elevation: elevation,
@@ -219,7 +231,7 @@ Widget _buildButton(BuildContext context, Node n) {
         shape: shape,
       ),
     _ => TextButton.styleFrom(
-        foregroundColor: _color(s.foregroundColor),
+        foregroundColor: foreground,
         backgroundColor: _color(s.backgroundColor),
         shadowColor: _color(s.shadowColor),
         elevation: elevation,
@@ -251,8 +263,14 @@ Widget _buildButton(BuildContext context, Node n) {
   final onPressed = n.prop(ButtonProps.enabled) ? _press(context) : null;
   return switch (n.type) {
     'elevatedButton' => ElevatedButton(onPressed: onPressed, style: effective, child: child),
-    'filledButton' when n.prop(ButtonProps.tonal) =>
-      FilledButton.tonal(onPressed: onPressed, style: effective, child: child),
+    // Tonal: the theme's selected tint, unless the node sets its colors.
+    'filledButton' when n.prop(ButtonProps.tonal) => FilledButton.tonal(
+        onPressed: onPressed,
+        style: effective.merge(FilledButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+          foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+        )),
+        child: child),
     'filledButton' => FilledButton(onPressed: onPressed, style: effective, child: child),
     'outlinedButton' => OutlinedButton(onPressed: onPressed, style: effective, child: child),
     _ => TextButton(onPressed: onPressed, style: effective, child: child),
@@ -265,7 +283,7 @@ void _iconButton(NodeBuilder b, Node n, List<RenderBox> chain) {
     final s = n.prop(IconButtonProps.style);
     final elevation = s.elevation;
     var style = TextButton.styleFrom(
-      foregroundColor: _color(s.foregroundColor),
+      foregroundColor: labelColor(s.foregroundColor, null, s.backgroundColor),
       backgroundColor: _color(s.backgroundColor),
       shadowColor: _color(s.shadowColor),
       elevation: elevation,
@@ -276,10 +294,11 @@ void _iconButton(NodeBuilder b, Node n, List<RenderBox> chain) {
       textStyle: const TextStyle(),
     );
     if (elevation != null) style = style.copyWith(elevation: WidgetStatePropertyAll(elevation));
-    return ElevatedButton(
+    // A plain button around the glyph: no raised surface, no tint.
+    return TextButton(
       onPressed: n.prop(IconButtonProps.enabled) ? _press(context) : null,
       style: style,
-      child: _icon(n.prop(IconButtonProps.icon), size: s.iconSize, color: _color(s.iconColor)),
+      child: _icon(n.prop(IconButtonProps.icon), size: s.iconSize, color: _color(s.iconColor)) ?? const SizedBox.shrink(),
     );
   }));
 }
@@ -289,9 +308,10 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(_pressable(b, 'fab', (context) {
     final type = n.prop(FloatingActionButtonProps.type);
     final shape = n.prop(FloatingActionButtonProps.shape);
-    final icon = _icon(n.prop(FloatingActionButtonProps.icon), color: _color(n.prop(FloatingActionButtonProps.foregroundColor)));
     final background = _color(n.prop(FloatingActionButtonProps.backgroundColor));
-    final foreground = _color(n.prop(FloatingActionButtonProps.foregroundColor));
+    final foreground = labelColor(
+        n.prop(FloatingActionButtonProps.foregroundColor), null, n.prop(FloatingActionButtonProps.backgroundColor));
+    final icon = _icon(n.prop(FloatingActionButtonProps.icon), color: foreground);
     final elevation = n.prop(FloatingActionButtonProps.elevation);
     final focusElevation = n.prop(FloatingActionButtonProps.focusElevation);
     final hoverElevation = n.prop(FloatingActionButtonProps.hoverElevation);
@@ -315,7 +335,7 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
           hoverColor: hoverColor,
           splashColor: splashColor,
           extendedIconLabelSpacing: n.prop(FloatingActionButtonProps.extendedIconLabelSpacing),
-          extendedTextStyle: _textStyle(n.prop(FloatingActionButtonProps.extendedTextStyle), n.behaviors.defaultTextStyle),
+          extendedTextStyle: themeFont(context, _textStyle(n.prop(FloatingActionButtonProps.extendedTextStyle), n.behaviors.defaultTextStyle)),
           shape: s,
           icon: icon,
           label: Text(n.prop(FloatingActionButtonProps.label)),
@@ -415,7 +435,20 @@ class _ChipIslandState extends State<_ChipIsland> {
 
 Widget _buildChip(BuildContext context, Node n, {required bool selection, required ValueChanged<bool> onSelected}) {
   final label = Text(n.prop(ChipProps.label));
-  final labelStyle = textStyle(n.prop(ChipProps.labelStyle), n.behaviors.defaultTextStyle);
+  // The label in the theme's font, in a color that reads on a fill the
+  // node sets (else the theme's, made for what the chip sits on).
+  final ownLabel = n.prop(ChipProps.labelStyle);
+  var labelStyle = themeFont(context, textStyle(ownLabel, n.behaviors.defaultTextStyle))!;
+  if (labelStyle.color == null) {
+    // Flutter's chip drops its own label color for a style without one.
+    final scheme = Theme.of(context).colorScheme;
+    final fill = selection ? n.prop(ChipProps.selectedColor) ?? n.prop(ChipProps.backgroundColor) : n.prop(ChipProps.backgroundColor);
+    labelStyle = labelStyle.copyWith(
+      color: !n.prop(ChipProps.isEnabled)
+          ? scheme.onSurface.withValues(alpha: .45)
+          : labelColor(null, null, fill) ?? (selection ? scheme.onSecondaryContainer : scheme.onSurface),
+    );
+  }
   final avatarGlyph = n.prop(ChipProps.avatar);
   final image = readString(avatarGlyph['image']);
   final Widget? avatar = image != null && avatarGlyph['codepoint'] == null
@@ -632,6 +665,11 @@ Widget _plainChip(
 
 // --- badge --------------------------------------------------------------------
 
+/// The neutral colors (no theme reaches a render object) for what [b]'s
+/// node is drawn on.
+ColorScheme _neutral(NodeBuilder b) =>
+    themeDataOf(api.ThemeTokens.none, surface: backdropOf(b.source.node, b.source.parentOf, b.id)).colorScheme;
+
 void _badge(NodeBuilder b, Node n, List<RenderBox> chain) {
   _fit(b, n, chain);
   final count = n.prop(BadgeProps.count);
@@ -641,7 +679,7 @@ void _badge(NodeBuilder b, Node n, List<RenderBox> chain) {
   final badge = b.obtain<RenderBadge>('badge', RenderBadge.new)
     ..label = label
     ..isLabelVisible = n.prop(BadgeProps.isLabelVisible)
-    ..backgroundColor = _color(n.prop(BadgeProps.backgroundColor)) ?? const Color(0xFFB3261E)
+    ..backgroundColor = _color(n.prop(BadgeProps.backgroundColor)) ?? _neutral(b).error
     // Flutter applies textColor over the style's color.
     ..textStyle = style.copyWith(color: _color(n.prop(BadgeProps.textColor)) ?? style.color ?? const Color(0xFFFFFFFF))
     ..smallSize = n.prop(BadgeProps.smallSize)
@@ -675,7 +713,7 @@ class RenderBadge extends RenderStack {
     markNeedsLayout();
   }
 
-  Color _backgroundColor = const Color(0xFFB3261E);
+  Color _backgroundColor = const Color(0xFFC4302B);
   set backgroundColor(Color v) {
     if (v == _backgroundColor) return;
     _backgroundColor = v;
@@ -844,7 +882,7 @@ void _appBar(NodeBuilder b, Node n, List<RenderBox> chain) {
       centerTitle: n.prop(AppBarProps.centerTitle),
       leadingWidth: n.prop(AppBarProps.leadingWidth),
       leading: leadingIcon == null ? null : Center(child: leadingIcon),
-      titleTextStyle: _textStyle(n.prop(AppBarProps.titleTextStyle), n.behaviors.defaultTextStyle),
+      titleTextStyle: themeFont(context, _textStyle(n.prop(AppBarProps.titleTextStyle), n.behaviors.defaultTextStyle)),
       surfaceTintColor: _color(n.prop(AppBarProps.surfaceTintColor)),
       backgroundColor: _color(n.prop(AppBarProps.backgroundColor)),
       elevation: n.prop(AppBarProps.elevation),
@@ -909,8 +947,16 @@ Widget _materialNavigationBar(BuildContext context, Node n) {
   };
   final iconColor = _color(n.prop(NavigationBarProps.iconColor));
   final selectedIconColor = _color(n.prop(NavigationBarProps.selectedIconColor));
-  final label = textStyle(n.prop(NavigationBarProps.labelTextStyle), n.behaviors.defaultTextStyle);
-  final selectedLabel = textStyle(n.prop(NavigationBarProps.selectedLabelTextStyle), n.behaviors.defaultTextStyle);
+  // Labels without a color in the theme's (Flutter's bar drops its own for
+  // a style without one).
+  final scheme = Theme.of(context).colorScheme;
+  TextStyle label0(TextStyle s, Color c) => s.color == null ? s.copyWith(color: c) : s;
+  final label = label0(
+      themeFont(context, textStyle(n.prop(NavigationBarProps.labelTextStyle), n.behaviors.defaultTextStyle))!,
+      scheme.onSurfaceVariant);
+  final selectedLabel = label0(
+      themeFont(context, textStyle(n.prop(NavigationBarProps.selectedLabelTextStyle), n.behaviors.defaultTextStyle))!,
+      scheme.onSurface);
   final destinations = n.prop(NavigationBarProps.destinations);
   return NavigationBarTheme(
     data: NavigationBarThemeData(
@@ -964,8 +1010,8 @@ Widget _bottomNavigationBar(BuildContext context, Node n) {
       backgroundColor: background,
       selectedItemColor: _color(selectedLabel.color),
       unselectedItemColor: _color(label.color),
-      selectedLabelStyle: textStyle(uncolored(selectedLabel), n.behaviors.defaultTextStyle),
-      unselectedLabelStyle: textStyle(uncolored(label), n.behaviors.defaultTextStyle),
+      selectedLabelStyle: themeFont(context, textStyle(uncolored(selectedLabel), n.behaviors.defaultTextStyle)),
+      unselectedLabelStyle: themeFont(context, textStyle(uncolored(label), n.behaviors.defaultTextStyle)),
       selectedIconTheme: IconThemeData(
         color: _color(n.prop(NavigationBarProps.selectedIconColor)),
         size: n.prop(NavigationBarProps.selectedIconSize),
@@ -1001,7 +1047,8 @@ void _divider(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..vertical = vertical
     ..extent = vertical ? n.layout.width.value : n.layout.height.value
     ..thickness = n.prop(DividerProps.thickness)
-    ..color = _color(n.prop(DividerProps.color)) ?? const Color(0xFFCAC4D0)
+    // Unset: the theme's faint outline over what it's drawn on.
+    ..color = _color(n.prop(DividerProps.color)) ?? _neutral(b).outlineVariant
     ..indent = n.prop(DividerProps.indent)
     ..endIndent = n.prop(DividerProps.endIndent));
 }
@@ -1030,7 +1077,7 @@ class RenderDivider extends RenderBox {
     markNeedsPaint();
   }
 
-  Color _color = const Color(0xFFCAC4D0);
+  Color _color = const Color(0xFFD1D1D1);
   set color(Color v) {
     if (v == _color) return;
     _color = v;

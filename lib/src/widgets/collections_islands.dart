@@ -8,6 +8,7 @@ import 'package:codelessly_api/core.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../render/control_theme.dart' show themeFont;
 import '../render/convert.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
@@ -220,8 +221,8 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
       indicatorSize: TabBarIndicatorSize.values.byName(n.prop(TabBarProps.indicatorSize).name),
       isScrollable: isScrollable,
       indicatorWeight: indicator != null ? 0 : n.prop(TabBarProps.indicatorWeight),
-      labelStyle: textStyle(n.prop(TabBarProps.labelStyle), n.behaviors.defaultTextStyle),
-      unselectedLabelStyle: textStyle(n.prop(TabBarProps.unselectedLabelStyle), n.behaviors.defaultTextStyle),
+      labelStyle: themeFont(context, textStyle(n.prop(TabBarProps.labelStyle), n.behaviors.defaultTextStyle)),
+      unselectedLabelStyle: themeFont(context, textStyle(n.prop(TabBarProps.unselectedLabelStyle), n.behaviors.defaultTextStyle)),
       indicator: indicator,
       splashBorderRadius: n.prop(TabBarProps.indicatorRadius).flutter,
       splashFactory: NoSplash.splashFactory,
