@@ -31,6 +31,7 @@ New here? Read [Introduction](01-introduction.md), then do the [Quickstart](02-q
 | 15 | [Troubleshooting and FAQ](15-troubleshooting.md) | Decode an error message |
 | 16 | [Paywalls](16-paywalls.md) | Sell subscriptions with a paywall designed in the Editor |
 | 17 | [Presenting, automations and host features](17-presenting-and-automations.md) | Show popups, banners and flows from anywhere; run them on app events; call your app's native features; capture the screen |
+| 18 | [UI an agent builds and edits](18-agent-ui.md) | `UiSession` and `CodelesslyView`: a model's ui_apply tool call rendered while it streams, edited with ops, events back to the model, undo, the trust profile |
 
 Related:
 
