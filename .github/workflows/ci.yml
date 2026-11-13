@@ -49,3 +49,9 @@ jobs:
       - name: Test the example
         working-directory: CodelesslySDK/example
         run: flutter test
+      # The streaming chat example resolves codelessly_api from the sibling
+      # checkout (tool/use_local_api.sh writes its pubspec_overrides.yaml),
+      # then analyzes with no issue and runs its offline tests.
+      - name: Check the stream_chat example
+        working-directory: CodelesslySDK/examples/stream_chat
+        run: tool/check.sh ../../../CodelesslyAPI

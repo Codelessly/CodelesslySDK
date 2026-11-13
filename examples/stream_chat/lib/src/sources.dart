@@ -124,8 +124,16 @@ class RecordedStreamSource implements StreamSource {
 /// The key comes from the caller (`--dart-define=ANTHROPIC_API_KEY=...`);
 /// it is never written anywhere.
 class LlmStreamSource implements StreamSource {
-  LlmStreamSource({required String apiKey, String model = kDefaultModel, required String systemPrompt})
-      : _model = UiModel(apiKey: apiKey, model: model, systemPrompt: systemPrompt, tools: uiToolsForAgent());
+  /// [systemPrompt]: the full prompt (assets/system_prompt.md), sent with
+  /// [variant] full; the compact variant (the default) generates the base
+  /// set and offers ui_docs.
+  LlmStreamSource(
+      {required String apiKey, String model = kDefaultModel, required String systemPrompt, PromptVariant variant = PromptVariant.compact})
+      : _model = UiModel(
+            apiKey: apiKey,
+            model: model,
+            systemPrompt: systemPromptFor(variant, full: systemPrompt),
+            tools: uiToolsFor(variant));
 
   final UiModel _model;
   String? _lastToolUseId;
@@ -143,25 +151,28 @@ class LlmStreamSource implements StreamSource {
         final LlmTurn t;
         switch (turn) {
           case AskTurn(:final text):
-            t = await _model.send(
+            t = await _model.turn(
               user: userMessage(text, 'card'),
               toolResult: _lastToolUseId == null ? null : const {'ok': true},
               toolUseId: _lastToolUseId,
               onToolDelta: deltas.add,
+              lookup: (tool, input) => answerLookup(tool, input, document: LayoutDocument()),
             );
           case EditTurn(:final text, :final session, :final lastResult):
-            t = await _model.send(
+            t = await _model.turn(
               toolResult: {...?lastResult?.toModelJson(), ...session.outline()},
               toolUseId: _lastToolUseId,
               user: text,
               onToolDelta: deltas.add,
+              lookup: (tool, input) => answerLookup(tool, input, document: session.document, rev: session.rev),
             );
           case ActionTurn(:final event, :final session):
-            t = await _model.send(
+            t = await _model.turn(
               toolResult: {'rev': session.rev, 'ok': true},
               toolUseId: _lastToolUseId,
               user: event.toModelMessage(),
               onToolDelta: deltas.add,
+              lookup: (tool, input) => answerLookup(tool, input, document: session.document, rev: session.rev),
             );
         }
         // The next turn answers this one's tool call, if it made one.
