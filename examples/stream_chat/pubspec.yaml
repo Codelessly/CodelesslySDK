@@ -1,0 +1,26 @@
+name: stream_chat
+description: A chat whose replies carry inline generative UI that renders as the model streams it (UiSession + CodelesslyView).
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  codelessly_sdk:
+    path: ../..
+  codelessly_api: ^24.0.0
+  # The live source only: the SDK itself has no LLM dependency.
+  anthropic_sdk_dart: ^11.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/streams/
+    - assets/system_prompt.md

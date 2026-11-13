@@ -1,0 +1,94 @@
+{
+ "prompt": "Make it dark.",
+ "ui": "weather",
+ "ops": [
+  {
+   "op": "patch",
+   "id": "wxCard",
+   "patch": {
+    "decoration": {
+     "fills": [
+      {
+       "type": "linear",
+       "begin": [
+        -1,
+        -1
+       ],
+       "end": [
+        1,
+        1
+       ],
+       "stops": [
+        {
+         "position": 0,
+         "color": "#FF0B1120"
+        },
+        {
+         "position": 1,
+         "color": "#FF1E293B"
+        }
+       ]
+      }
+     ],
+     "effects": [
+      {
+       "type": "dropShadow",
+       "color": "#66000000",
+       "offset": [
+        0,
+        10
+       ],
+       "blurRadius": 30
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "patch",
+   "id": "wxHours",
+   "patch": {
+    "decoration": {
+     "fills": [
+      {
+       "color": "#14FFFFFF"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "patch",
+   "id": "wxAlert",
+   "patch": {
+    "decoration": {
+     "fills": [
+      {
+       "color": "#FF38BDF8"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "op": "patch",
+   "id": "wxAlertText",
+   "patch": {
+    "props": {
+     "style": {
+      "color": "#FF0B1120"
+     }
+    }
+   }
+  },
+  {
+   "op": "patch",
+   "id": "wxAlertIcon",
+   "patch": {
+    "props": {
+     "color": "#FF0B1120"
+    }
+   }
+  }
+ ]
+}

@@ -8,6 +8,8 @@
 //   scripting The script sandbox.
 //   features  Auth, data, commerce, media, engage: plugins over the runtime
 //             (their own rules: test/feature_isolation_test.dart).
+//   session   UiSession, CodelesslyView: agent-written UI over the core
+//             runtime (core-only: test/core_only_import_test.dart).
 //   app       Codelessly, CodelesslyWidget. Over everything.
 //
 // The render core is what an app that only draws nodes needs: it imports
@@ -27,7 +29,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// The layers: the directories of lib/src. A file directly in lib/src is in
 /// the `leaf` layer (small utilities any layer may import).
-const layers = ['render', 'widgets', 'runtime', 'services', 'scripting', 'features', 'app', 'leaf'];
+const layers = ['render', 'widgets', 'runtime', 'services', 'scripting', 'features', 'session', 'app', 'leaf'];
 
 /// The packages a render file may import: Flutter, the model, and pure
 /// drawing or collection helpers. No network, storage or platform plugins.

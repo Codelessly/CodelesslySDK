@@ -176,6 +176,9 @@ export 'src/app/presenter.dart';
 export 'src/app/runtime.dart';
 export 'src/app/theme.dart' show themeDataOf, themeValues;
 export 'src/app/viewport.dart';
+// Agent-written UI: a document edited by ops, and the widget that shows it.
+export 'src/session/ui_session.dart';
+export 'src/session/view.dart';
 
 export 'src/render/layout/design_scroll.dart' show RenderDesignScroll;
 // What a WidgetRecipe's NodeBuilder.fitBox gives.
