@@ -134,6 +134,33 @@ CodelesslyConfig(
 
 Name your own types with a prefix (`acme.rating`), so a later SDK type can't take the name.
 
+**A feature** packages handlers with the functions and values that go with them: a `CodelesslyFeature`, installed
+beside the first-party ones (auth, data, commerce, media and engage are features too:
+[Actions and functions](06-actions-and-functions.md#core-and-features)). A handler reaches its own service by type
+(`run.service<T>()`, from `Services(extras: [...])` or any `ServiceLocator`), a function gives a `callFunction`
+name its result, and a scope gives expressions a value by name.
+
+```dart
+const tracking = CodelesslyFeature(
+  name: 'tracking',
+  actions: {'acme.track': _track},
+  functions: {'acme.sessionId': _sessionId},
+);
+
+void _track(ActionDef action, ActionRun run) =>
+    run.require<Tracker>('Tracking').log((action as UnknownAction).json['event'] as String);
+
+Object? _sessionId(CallFunctionAction action, ActionRun run) => run.service<Tracker>()?.sessionId;
+
+final codelessly = Codelessly(
+  config: CodelesslyConfig(
+    slug: 'my-project',
+    actions: const CodelesslyActions(features: [...kFirstPartyFeatures, tracking]),
+    services: Services(extras: [Tracker()]),
+  ),
+);
+```
+
 ## Wrapping a layout
 
 `layoutBuilder` wraps the loaded layout with any widgets: a `SafeArea`, an overlay, a `RefreshIndicator`, a

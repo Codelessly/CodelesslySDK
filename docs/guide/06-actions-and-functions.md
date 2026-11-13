@@ -1,8 +1,6 @@
 # 6. Actions and functions
 
-[Guide](README.md) · Previous: [Data and variables](05-data-and-variables.md) · Next: [Navigation](07-navigation.md)
-
-A layout reacts to things. A **reaction** is a **trigger** and the chain of **actions** it runs, in order. They
+[Guide](README.md) · Previous: [Data and variables](05-data-and-variables.md) · A layout reacts to things. A **reaction** is a **trigger** and the chain of **actions** it runs, in order. They
 are made in the Editor and run by the SDK; your app takes part through **functions**.
 
 ![A click trigger runs setVariable, then callFunction, which calls your Dart function, then showToast; each action can read ${result}](images/06-actions-and-functions/hero.png)
@@ -138,9 +136,39 @@ final browseOnly = Codelessly(
 | `actions` | Runs |
 |---|---|
 | `CodelesslyActions()` (default) | Every action type |
+| `CoreActions()` | The core ones only (navigation, modals, variables, flow, focus, scroll, animation, scripts); no feature |
 | `NavigationActionRunner()` | `navigate` and `openLink` only |
 | `NoopActionRunner()` | Nothing |
 
 You can also implement `ActionRunner` or `ExpressionEngine` yourself; that is rarely needed.
+
+### Core and features
+
+The runtime is a core and feature layers over it. The core is the renderer and core interactivity: navigation,
+modals, toasts, variables, conditions and loops, focus and text editing, scrolling, animation, gestures, scripts.
+Everything else is a feature, a `CodelesslyFeature` in its own folder under `lib/src/features`:
+
+| Feature | Action types | Values | Functions |
+|---|---|---|---|
+| `authFeature` | `auth` | `auth` | |
+| `dataFeature` | `callApi`, `setStorage`, `cloudData`, `cloudDocuments`, `cloudBatch`, `cloudFiles`, `loadCloudData`, `reloadCloudData`, `submitForm` | `storage` | |
+| `commerceFeature` | `paywall` | `entitlements` | |
+| `mediaFeature` | `speak`, `playSound`, `print`, `downloadFile` | `speech` | `media.probe`, `media.import`, `media.export`, `media.cancelExport` |
+| `engageFeature` | | `usage` (automations) | |
+
+`CodelesslyActions()` installs all five (`kFirstPartyFeatures`), so a default `Codelessly` runs everything.
+`CoreActions()` installs none: the core never imports a feature (`test/feature_isolation_test.dart` checks it), so
+an action of a feature that isn't installed stops its chain with an error that says so (`No handler for action
+'paywall': the feature that runs it isn't installed`), and the feature's value reads as nothing.
+
+```dart
+// The renderer and core interactivity, plus cloud data and auth; no commerce, media or automations.
+const CodelesslyConfig(
+  slug: 'my-project',
+  actions: CodelesslyActions(features: [authFeature, dataFeature]),
+);
+```
+
+Your own feature is the same object ([Custom widgets](12-custom-widgets.md#your-own-node-and-action-types)).
 
 Next: [Navigation](07-navigation.md)

@@ -16,6 +16,39 @@
   held one in a `NodeTree` variable types it `RenderTree`. `tree.binder` is unchanged. A render object that
   paints images outside any tree (a bare `RenderIconGlyph`) fetches SVGs only when given an `imageLoader`.
   `test/architecture_test.dart` checks the layering.
+- Feature layers are plugins over a core runtime. A `CodelesslyFeature` contributes action handlers by type,
+  `callFunction` names and value scopes; auth, data (cloud data and files, APIs, storage, forms), commerce
+  (paywalls, entitlements), media (speech, sound, print, download, `media.*`) and engage (automations, usage)
+  are five of them, each in `lib/src/features/<name>` (`authFeature`, `dataFeature`, `commerceFeature`,
+  `mediaFeature`, `engageFeature`; together `kFirstPartyFeatures`). `CodelesslyActions()` installs all five, as
+  before; `CodelesslyActions(features: [...])` installs the ones given (and an app's own), and the new
+  `CoreActions()` none: the renderer and core interactivity alone. An action of a feature that isn't installed
+  fails its chain with "No handler for action '<type>': the feature that runs it isn't installed"; a
+  `callFunction` of one is a missing function (skipped when `optional`). `Codelessly.features` is what an
+  instance runs. `test/feature_isolation_test.dart` checks that the core imports no feature and no feature
+  imports another.
+- `run.service<T>()` / `run.require<T>(what)` give a handler one service by type (`ServiceLocator`, which
+  `Services` implements; `Services(extras: [...])` holds an app's own). `CoreActionContext` is the action
+  context without feature fields; what the app shell gives a feature rides in its `extensions`
+  (`PaywallHost`, `AuthValuesRefresh`, `AppDataSources`).
+- Instrument voices are data: a `SoundInstrument` registered with `SoundService(instruments:)` or
+  `addInstrument`, played when a sustained voice's `waveform` names it. `kSoundInstruments` (`felt`, `reed`,
+  `pluck`, in the media feature) are registered by default.
+
+**Changed**
+
+- `RuntimeActionContext` is now a `CoreActionContext` with the first-party features' fields (`paywall`,
+  `openPaywall`, `presentPaywall`, `refreshAuthValues`, `appData`); its constructor and fields are unchanged.
+  `ActionHandler` and `CodelesslyActions` are declared in other files and exported as before.
+- `kSoundWaveforms` lists the four plain waves only; `felt`, `reed` and `pluck` are `kSoundInstruments`. A
+  `playSound` action naming them sounds as before. A custom `SoundEngine` that wants instrument voices
+  implements `InstrumentSoundEngine`; one that doesn't still gets the name as `waveform`.
+- A handler in `CodelesslyActions(handlers:)` now also applies to chains that run later (a toast's button);
+  before, those ran the built-in handler.
+- Moved, with the old import paths re-exporting: the sound, speech, media export and media probe services
+  (`lib/src/features/media`), automations (`lib/src/features/engage`). Moved without one (never exported by
+  path): `runtime/actions/cloud_loads.dart`, `app_data_sources.dart`, `printing.dart`,
+  `services/platform/sound_engine_*`.
 
 **Fixes**
 
