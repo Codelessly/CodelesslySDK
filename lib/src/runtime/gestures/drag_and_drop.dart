@@ -14,11 +14,10 @@
 //   open there (`slot`, `slotSize`, `slotWhenRefused`).
 // * The session is the layout's `${drag}` ([DragAndDrop]): active, group,
 //   data, ids, count, source, over, index, beforeId, before, accepted, x,
-//   y, fx, fy, full, width, height; the last drop's values stay readable.
+//   y, fx, fy, width, height; the last drop's values stay readable.
 // * Triggers with the session as `${result}`: on the source `dragStart`,
-//   `dragCancel`, `dragCompleted`; on the target `dragEnter`, `dragHover`
-//   (after its `hoverDelay`), `dragExit`, `drop` (with `key`),
-//   `dropRejected` (its `acceptIf` refused) and `dropFull`.
+//   `dragCancel`, `dragCompleted`; on the target `dragEnter`, `dragExit`,
+//   `drop` (with `key`) and `dropRejected` (its `acceptIf` refused).
 //
 // Scroll views under the pointer scroll near their edges while dragging,
 // including nested horizontal/vertical views. Targets are hit-tested again
@@ -157,10 +156,6 @@ class DragSession {
   /// size, 0 to 1 ([fx], [fy]). 0 while over no target.
   double x = 0, y = 0, fx = 0, fy = 0;
 
-  /// Whether [overTarget] is full (`fullIf`): it takes no drop, but still
-  /// reports itself in [over] so a binding can say why.
-  bool full = false;
-
   /// Number of things dragged.
   int get count => data is Iterable ? ids.length : 1;
 
@@ -184,7 +179,6 @@ class DragSession {
     'y': y,
     'fx': fx,
     'fy': fy,
-    'full': full,
     'width': size.width,
     'height': size.height,
   };
@@ -224,7 +218,6 @@ class DragAndDrop extends ChangeNotifier {
     'y': 0.0,
     'fx': 0.0,
     'fy': 0.0,
-    'full': false,
     'width': 0.0,
     'height': 0.0,
   };
@@ -364,8 +357,8 @@ DropSlotSpec? dropSlotOf(RenderTree tree, String listNodeId, {Object? instance})
   if (!identical(target._listBox, tree.boxOf(listNodeId, instance: instance))) return null;
   final before = session.rawBefore;
   if (before == null) return null;
-  // A refused drop opens no slot when the target says so.
-  if (!m.slotWhenRefused && !session.accepted) return DropSlotSpec(before: before, size: Size.zero);
+  // A refused drop opens no slot.
+  if (!session.accepted) return DropSlotSpec(before: before, size: Size.zero);
   final hasNode = m.slot == api.DropSlot.node && m.slotNodeId.isNotEmpty;
   return DropSlotSpec(
     before: before,
@@ -861,10 +854,9 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
     double? ghost;
     if (dragged) {
       switch (_model.childWhenDragging) {
-        // Collapses while over a target that would take it, so the slot
-        // there is the only place it shows; ghosts elsewhere (and over a
-        // full target) so it can be found again.
-        case api.DragSourceStyle.hidden when session.overTarget != null && !session.full:
+        // Collapses while over a target, so the slot there is the only place
+        // it shows; ghosts elsewhere so it can be found again.
+        case api.DragSourceStyle.hidden when session.overTarget != null:
           collapsed = true;
         case api.DragSourceStyle.hidden || api.DragSourceStyle.ghost:
           ghost = _model.ghostOpacity.clamp(0, 1).toDouble();
@@ -1168,17 +1160,8 @@ class RenderDropTarget extends RenderProxyBox {
   }
 
   /// Whether a drag of [group] may come onto this target at all: a group it
-  /// accepts, while it is enabled. A full target still takes the drag onto
-  /// it (so `drag.over` and `drag.full` can say why) and refuses the drop.
+  /// accepts, while it is enabled.
   bool _takes(String group) => _model.enabled && (_model.accepts.isEmpty || _model.accepts.contains(group));
-
-  /// Whether it takes no drops now (`fullIf`), reading the session as it is.
-  bool _isFull(DragAndDrop dnd) {
-    final condition = _model.fullIf.trim();
-    if (condition.isEmpty) return false;
-    dnd.publish();
-    return _holds(_evaluate(_box!, condition));
-  }
 
   bool _evaluateAccept(DragAndDrop dnd) {
     final condition = _model.acceptIf.trim();
@@ -1187,7 +1170,6 @@ class RenderDropTarget extends RenderProxyBox {
     return _holds(_evaluate(_box!, condition));
   }
 
-  Timer? _hoverTimer;
   bool _entered = false;
 
   /// Sets where the dragged node's center is over this target, from the
@@ -1217,11 +1199,9 @@ class RenderDropTarget extends RenderProxyBox {
     final oldBefore = session.rawBefore;
     final oldAccepted = session.accepted;
     final entering = !identical(session.overTarget, this);
-    final oldFull = session.full;
     session.overTarget = this;
     session.over = key;
-    session.full = _isFull(dnd);
-    if (_model.listNodeId.isNotEmpty && !session.full) {
+    if (_model.listNodeId.isNotEmpty) {
       _place(session, position);
     } else {
       session
@@ -1230,33 +1210,21 @@ class RenderDropTarget extends RenderProxyBox {
         ..before = null
         ..beforeId = '';
     }
-    session.accepted = !session.full && _evaluateAccept(dnd);
+    session.accepted = _evaluateAccept(dnd);
     if (entering ||
         moved ||
         oldOver != session.over ||
         oldBefore != session.rawBefore ||
-        oldAccepted != session.accepted ||
-        oldFull != session.full) {
+        oldAccepted != session.accepted) {
       dnd.changed();
     }
-    // A full target reports itself (drag.over, drag.full) but isn't
-    // entered: enter, hover and exit are for targets that would take it.
-    if (entering && !_entered && !session.full) {
+    if (entering && !_entered) {
       _entered = true;
       _fire(api.TriggerType.dragEnter.name, session.toMap());
-      if (_model.hoverDelay > 0) {
-        _hoverTimer?.cancel();
-        _hoverTimer = Timer(Duration(milliseconds: _model.hoverDelay), () {
-          if (attached && identical(dnd.session?.overTarget, this)) {
-            _fire(api.TriggerType.dragHover.name, session.toMap());
-          }
-        });
-      }
     }
   }
 
   void _onLeave(_SourceDrag drag) {
-    _hoverTimer?.cancel();
     final wasEntered = _entered;
     _entered = false;
     final session = drag.session;
@@ -1269,14 +1237,12 @@ class RenderDropTarget extends RenderProxyBox {
       ..y = 0
       ..fx = 0
       ..fy = 0
-      ..full = false
       ..rawBefore = null;
     DragAndDrop.of(_box!.tree).changed();
     if (wasEntered) _fire(api.TriggerType.dragExit.name, session.toMap());
   }
 
   void _onDrop(_SourceDrag drag) {
-    _hoverTimer?.cancel();
     _entered = false;
     final session = drag.session;
     final dnd = DragAndDrop.of(_box!.tree);
@@ -1286,20 +1252,14 @@ class RenderDropTarget extends RenderProxyBox {
       session
         ..overTarget = this
         ..over = key;
-      session.full = _isFull(dnd);
-      session.accepted = !session.full && _evaluateAccept(dnd);
+      session.accepted = _evaluateAccept(dnd);
     }
-    final full = session.full;
     final accepted = session.accepted;
     final result = session.toMap(active: false)..['key'] = session.over;
     drag.dropped = accepted;
     dnd.end(dropped: accepted);
     if (accepted) {
       _fire(api.TriggerType.drop.name, result);
-    } else if (full) {
-      // Let go on a full target: not a wrong answer, but say so.
-      _fire(api.TriggerType.dropFull.name, result);
-      drag.source._canceled(session);
     } else {
       // Of a group it takes, but its acceptIf refused it: a wrong answer.
       _fire(api.TriggerType.dropRejected.name, result);
@@ -1450,7 +1410,6 @@ class RenderDropTarget extends RenderProxyBox {
   void detach() {
     _registered?._targets.remove(this);
     _registered = null;
-    _hoverTimer?.cancel();
     super.detach();
   }
 }

@@ -2,16 +2,13 @@
 // phase, pause, arc, wrapping and paced paths, upright orientation and
 // shimmer; loop phases; drag tracks parked, relative and in their parent.
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/behaviors.dart' show RenderShimmer;
-import 'package:codelessly_sdk/src/render/paint/svg_path.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'support/legacy.dart';
 
 Map<String, Object?> doc(Map<String, Map<String, Object?>> nodes) => {
       'roots': ['s'],
@@ -129,26 +126,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('a change of position bends along an arc', (tester) async {
-    Map<String, Map<String, Object?>> nodes(double x) => {
-          'a': box({
-            'motion': {'translateX': x, 'duration': 1000, 'curve': 'linear', 'arc': 0.5},
-          }, y: 100),
-        };
-    final (tree, view, source) = await show(tester, nodes(0), interactive: true);
-    await tester.pump();
-    source.document = api.LayoutDocument.fromJson(doc(nodes(100)));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    final r = tree.boxOf('a')!.rectIn(view)!;
-    // Half way along, half its arc (0.5 · 2 · 0.25 of 100) off the line,
-    // to the right of the way it goes (down, on screen).
-    expect(r.left, closeTo(50, 1));
-    expect(r.top, closeTo(125, 1));
-    await tester.pump(const Duration(milliseconds: 600));
-    expect(tree.boxOf('a')!.rectIn(view)!.top, closeTo(100, 0.5));
-    await tester.pumpWidget(const SizedBox());
-  });
+  // Removed in schema 3: a transition's arc.
 
   testWidgets('a wrapping path reads its progress modulo 1; upright never turns over', (tester) async {
     final (tree, view, _) = await show(tester, {
@@ -188,54 +166,9 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('upright and mirrored: heading left, the node faces left (its front leads)', (tester) async {
-    // A 40×20 carriage with its nose (n, 10×10) at the right end.
-    Map<String, Map<String, Object?>> carriage(String path, {required bool mirror}) => {
-          't': {
-            'type': 'stack',
-            'children': ['n'],
-            'layout': {'width': 40, 'height': 20, 'x': {'start': 200}, 'y': {'start': 100}},
-            'motion': {'path': path, 'orientToPath': true, 'orientUpright': true, 'uprightMirror': mirror, 'pathProgress': 0.5},
-          },
-          'n': {'type': 'box', 'layout': {'width': 10, 'height': 10, 'x': {'start': 30}, 'y': {'start': 5}}},
-        };
-    Future<Rect> nose(String path, {required bool mirror}) async {
-      final nodes = carriage(path, mirror: mirror);
-      final (tree, view, _) = await showDoc(tester, {
-        'roots': ['s'],
-        'nodes': {
-          's': {'type': 'stack', 'children': ['t'], 'layout': {'width': 400, 'height': 300}},
-          ...nodes,
-        },
-      });
-      final r = tree.boxOf('n')!.rectIn(view)!;
-      await tester.pumpWidget(const SizedBox());
-      return r;
-    }
-
-    // Heading left at the path's middle (-50, 0): mirrored, the nose is at the left end.
-    expect(await nose('M0 0 L-100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(150, 105, 10, 10), epsilon: 0.01));
-    // Not mirrored it stays at the right end, facing backwards.
-    expect(await nose('M0 0 L-100 0', mirror: false), rectMoreOrLessEquals(const Rect.fromLTWH(180, 105, 10, 10), epsilon: 0.01));
-    // Heading right nothing is mirrored.
-    expect(await nose('M0 0 L100 0', mirror: true), rectMoreOrLessEquals(const Rect.fromLTWH(280, 105, 10, 10), epsilon: 0.01));
-    expect(migratedBehaviors({'motion': {'orientToPath': true, 'orientUpright': true, 'uprightMirror': true}}).motion!.toJson()['path'],
-        {'path': '', 'orient': 'uprightFlip'});
-  });
-
-  test('area pacing sweeps equal areas about the focus', () {
-    // An ellipse with its focus off-center: half the area is swept before
-    // half the length.
-    const a = 100.0, b = 60.0;
-    final c = math.sqrt(a * a - b * b);
-    final path = MeasuredPath.of('M${a + c} 0 A$a $b 0 1 1 ${-a + c} 0 A$a $b 0 1 1 ${a + c} 0')!;
-    final byLength = path.at(0.25)!.$1;
-    final byArea = path.at(0.25, byArea: true)!.$1;
-    expect(byArea, isNot(byLength));
-    // Far from the focus (aphelion at the start) it moves slowly: a quarter
-    // of the area is less far along than a quarter of the length.
-    expect(byArea.dx, greaterThan(byLength.dx));
-  });
+  // Removed in schema 3: `uprightMirror` (`orient: uprightFlip`) and `area`
+  // pacing (docs/guide/12-migrating-to-schema-3.md); their tests went with
+  // them.
 
   testWidgets('a shimmer sweeps in a running app and sits halfway at rest', (tester) async {
     final (tree, _, _) = await show(tester, {
@@ -334,13 +267,8 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('a drag track parks, goes relative and measures in its parent', (tester) async {
+  testWidgets('a drag track goes relative and measures in its parent (parking is gone in schema 3)', (tester) async {
     final (tree, view, _) = await show(tester, {
-      'parked': box({
-        'drag': {
-          'track': {'shape': 'line', 'x2': 100, 'y2': 0, 'min': 1, 'max': 5, 'parkedProgress': -0.25, 'value': 0}
-        },
-      }, x: 100, y: 10),
       'rel': box({
         'drag': {
           'track': {'shape': 'line', 'x1': -0.5, 'x2': 0.5, 'y2': 0, 'relative': true, 'value': 1}
@@ -357,8 +285,6 @@ void main() {
         },
       }, y: 150),
     });
-    // Parked a quarter of the line before its start.
-    expect(tree.boxOf('parked')!.rectIn(view)!.left, closeTo(75, 0.5));
     // Half its own width to the right.
     expect(tree.boxOf('rel')!.rectIn(view)!.left, closeTo(120, 0.5));
     // Half its parent's width.

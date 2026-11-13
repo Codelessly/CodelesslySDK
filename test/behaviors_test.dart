@@ -45,7 +45,7 @@ void main() {
             'type': 'box',
             'layout': {'width': 20, 'height': 20, 'x': {'start': 200}, 'y': {'start': 200}},
             'drag': {
-              'track': {'variable': 'v', 'x2': 100, 'y2': 0, 'max': 10, 'defaultValue': 5}
+              'track': {'variable': 'v', 'x2': 100, 'y2': 0, 'max': 10, 'value': 5}
             },
           },
         }));

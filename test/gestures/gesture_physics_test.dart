@@ -237,20 +237,7 @@ void main() {
       expect(throwDown.index, 0);
     });
 
-    test('without projection the release point decides', () {
-      final target = snapTargetOf(
-        physics: const api.GesturePhysics(
-          snap: api.GestureSnap(
-            points: [api.Offset.zero, api.Offset(0, -280)],
-            projectVelocity: false,
-          ),
-        ),
-        position: const Offset(0, -20),
-        velocity: const Offset(0, -5000),
-        axis: api.DragAxis.vertical,
-      )!;
-      expect(target.index, 0);
-    });
+    // Removed in schema 3: `projectVelocity: false` (a snap always projects the fling).
 
     test('a grid rounds each axis', () {
       final target = snapTargetOf(

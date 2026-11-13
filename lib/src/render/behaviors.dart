@@ -31,15 +31,14 @@ import 'recipe.dart';
 void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviors;
   if (be.track case final api.Track track) {
-    // At its value (`track.value`, else its variable's, else its
-    // default or start; parked when out of range or empty), and in a
-    // running app dragged along the track (render/drag_track.dart).
+    // At its value (`track.value`, else its variable's, else its start),
+    // and in a running app dragged along the track
+    // (render/drag_track.dart).
     final box = b is NodeBox ? b : null;
     final reads = track.value == null && track.hasVariable && (box?.tree.bindings?.hasValues ?? false);
-    final p = track.restProgressOf(track.value ?? track.defaultValue ?? track.min);
+    final p = track.restProgressOf(track.value ?? track.min);
     final moves = animates ||
         reads ||
-        track.parkedProgress != null ||
         track.relative ||
         track.units == api.TrackUnits.parent ||
         track.usesViewBox ||
@@ -424,7 +423,7 @@ class TrackGeometry {
         if (_inParent && !_inViewBox && parent!.width != parent!.height) {
           angle = math.atan2(math.sin(angle) * parent!.height, math.cos(angle) * parent!.width);
         }
-        final upright = orient == api.PathOrient.upright || orient == api.PathOrient.uprightFlip;
+        final upright = orient == api.PathOrient.upright;
         return (upright ? api.Motion.uprightAngle(angle) : angle) * 180 / math.pi;
     }
   }
@@ -827,7 +826,7 @@ class RenderMotion extends RenderPose {
       final measured = MeasuredPath.of(path.path);
       // A closed path wraps its progress; an open one stops at its ends.
       final progress = measured != null && measured.isClosed ? api.PathFollow.wrap(path.progress) : path.progress;
-      final at = measured?.at(progress, byArea: path.pacedByArea, focus: Offset(path.focus.first, path.focus.length > 1 ? path.focus[1] : 0));
+      final at = measured?.at(progress);
       if (at != null) {
         // A path in a viewBox is stretched over the node's parent.
         var point = at.$1;
@@ -856,16 +855,12 @@ class RenderMotion extends RenderPose {
           _lastPathPosition = null;
           _pathHeading = null;
         }
-        final upright = path.orient == api.PathOrient.upright || path.orient == api.PathOrient.uprightFlip;
+        final upright = path.orient == api.PathOrient.upright;
         final turn = upright ? api.PathFollow.uprightAngle(heading) : heading;
         pose = pose
             .withValue('translateX', total.dx)
             .withValue('translateY', total.dy)
             .withValue('rotate', turns ? m.rotate + turn * 180 / math.pi : m.rotate);
-        // Upright and flipped: heading left faces left, nose first.
-        if (path.orient == api.PathOrient.uprightFlip && api.PathFollow.headsLeft(heading)) {
-          pose = pose.withValue('scaleX', -pose.scaleX);
-        }
       }
     }
     transform = motionMatrix(pose);
