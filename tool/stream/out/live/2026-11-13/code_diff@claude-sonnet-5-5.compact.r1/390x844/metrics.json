@@ -1,0 +1,64 @@
+{
+ "stream": "code_diff@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1376,
+ "timeToFirstPaintMs": 4107,
+ "timeToFirstTextMs": 5007,
+ "timeToFirstSectionMs": 5465,
+ "timeToCompleteMs": 37982,
+ "outputTokens": 7418,
+ "tokensEstimated": false,
+ "chars": 14170,
+ "deltas": 952,
+ "opsApplied": 61,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 120,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "truncated_op /ops/61",
+  "dangling_child /nodes/card/children/4",
+  "dangling_child /nodes/card/children/5"
+ ],
+ "scripts": 0,
+ "streamedOps": 61,
+ "rejections": [
+  {
+   "op": 61,
+   "code": "truncated_op",
+   "path": "/ops/61",
+   "message": "The input ended inside op 61 (702 characters arrived): it was not applied. Resend it."
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/4",
+   "message": "Child \"summary\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/5",
+   "message": "Child \"apply\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 59,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 5,
+  "max": 10
+ },
+ "frames": 180,
+ "frameMs": 216,
+ "pumpsOverBudget16ms": 23,
+ "pumps": 1133,
+ "pumpMsMedian": 0.118,
+ "renderExceptions": [],
+ "warnings": 21
+}

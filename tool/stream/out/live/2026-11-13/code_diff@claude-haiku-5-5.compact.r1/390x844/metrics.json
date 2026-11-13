@@ -1,0 +1,71 @@
+{
+ "stream": "code_diff@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 453,
+ "timeToFirstPaintMs": 1605,
+ "timeToFirstTextMs": 1890,
+ "timeToFirstSectionMs": 4176,
+ "timeToCompleteMs": 8885,
+ "outputTokens": 3037,
+ "tokensEstimated": false,
+ "chars": 5930,
+ "deltas": 412,
+ "opsApplied": 27,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [
+  "no_size h1del",
+  "no_size h1add",
+  "no_size h2del",
+  "no_size h2add",
+  "no_size h3del",
+  "no_size h3add"
+ ],
+ "finalDiagnostics": [
+  "unknown_node_key /nodes/apply/enabled",
+  "dangling_child /nodes/card/children/5",
+  "no_size /nodes/h1del/layout",
+  "no_size /nodes/h1add/layout",
+  "no_size /nodes/h2del/layout",
+  "no_size /nodes/h2add/layout",
+  "no_size /nodes/h3del/layout",
+  "no_size /nodes/h3add/layout"
+ ],
+ "scripts": 0,
+ "streamedOps": 28,
+ "rejections": [
+  {
+   "op": 27,
+   "code": "unknown_node_key",
+   "path": "/nodes/apply/enabled",
+   "message": "A node has no \"enabled\"; it belongs in \"props.enabled\".",
+   "nodeId": "apply",
+   "suggestion": "props.enabled"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/5",
+   "message": "Child \"apply\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 25,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 5,
+  "max": 8
+ },
+ "frames": 147,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 12,
+ "pumps": 560,
+ "pumpMsMedian": 0.126,
+ "renderExceptions": [],
+ "warnings": 1
+}

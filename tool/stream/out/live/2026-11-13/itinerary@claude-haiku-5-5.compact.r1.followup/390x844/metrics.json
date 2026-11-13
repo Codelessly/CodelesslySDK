@@ -1,0 +1,46 @@
+{
+ "stream": "itinerary@claude-haiku-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 671,
+ "timeToFirstPaintMs": 792,
+ "timeToFirstTextMs": 792,
+ "timeToFirstSectionMs": 792,
+ "timeToCompleteMs": 994,
+ "outputTokens": 129,
+ "tokensEstimated": false,
+ "chars": 200,
+ "deltas": 13,
+ "opsApplied": 3,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 49,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 3,
+ "rejections": [],
+ "nodes": 47,
+ "reappliedBoxesPerOp": {
+  "min": 8,
+  "median": 8,
+  "p90": 8,
+  "max": 8
+ },
+ "frames": 28,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 3,
+ "pumps": 42,
+ "pumpMsMedian": 0.163,
+ "renderExceptions": [],
+ "warnings": 0
+}

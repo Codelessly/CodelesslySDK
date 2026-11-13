@@ -1,0 +1,60 @@
+{
+ "stream": "code_diff@claude-haiku-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 366,
+ "timeToFirstPaintMs": 772,
+ "timeToFirstTextMs": 772,
+ "timeToFirstSectionMs": 772,
+ "timeToCompleteMs": 847,
+ "outputTokens": 174,
+ "tokensEstimated": false,
+ "chars": 288,
+ "deltas": 21,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "no_size h1del",
+  "no_size h1add",
+  "no_size h2del",
+  "no_size h2add",
+  "no_size h3del",
+  "no_size h3add"
+ ],
+ "finalDiagnostics": [
+  "no_size /nodes/h1del/layout",
+  "no_size /nodes/h1add/layout",
+  "no_size /nodes/h2del/layout",
+  "no_size /nodes/h2add/layout",
+  "no_size /nodes/h3del/layout",
+  "no_size /nodes/h3add/layout"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 27,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 26,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 1,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 25,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 47,
+ "pumpMsMedian": 0.14,
+ "renderExceptions": [],
+ "warnings": 0
+}

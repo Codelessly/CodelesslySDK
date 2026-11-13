@@ -1,0 +1,57 @@
+{
+ "stream": "map_list@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1650,
+ "timeToFirstPaintMs": 5930,
+ "timeToFirstTextMs": 6486,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 18313,
+ "outputTokens": 2830,
+ "tokensEstimated": false,
+ "chars": 5337,
+ "deltas": 387,
+ "opsApplied": 21,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_bind_path /nodes/pins/bind/data",
+  "dangling_child /nodes/map/children/5"
+ ],
+ "scripts": 0,
+ "streamedOps": 22,
+ "rejections": [
+  {
+   "op": 12,
+   "code": "unknown_bind_path",
+   "path": "/nodes/pins/bind/data",
+   "message": "\"data\" is read by a listView, gridView, pageView or tableView (the items it repeats its first child for); a stack does not read it.",
+   "nodeId": "pins"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/map/children/5",
+   "message": "Child \"pins\" of \"map\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "map"
+  }
+ ],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 10,
+  "max": 31
+ },
+ "frames": 179,
+ "frameMs": 107,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 567,
+ "pumpMsMedian": 0.116,
+ "renderExceptions": [],
+ "warnings": 5
+}

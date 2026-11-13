@@ -1,0 +1,80 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["dashboard@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":611,"usage":{"inputTokens":6295,"outputTokens":611,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":802,"firstToolDeltaMs":842,"totalMs":2458,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":802,"check":{"ops":7,"opsApplied":5,"opsRejected":2,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":2,"errors":["unknown_prop /nodes/revChart/props/values","unknown_field /nodes/plansTable/props/columns/0/title","unknown_field /nodes/plansTable/props/columns/1/title","unknown_field /nodes/plansTable/props/columns/2/title","unknown_field /nodes/plansTable/props/columns/3/title","dangling_child /nodes/card/children/4","dangling_child /nodes/card/children/8"],"lints":[],"warnings":2,"nodes":25,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":842,"delta":"{\"ops\": [{\"op"}
+{"tMs":863,"delta":"\": \"patch\", \"id\":"}
+{"tMs":902,"delta":" \"tiles\", \"patch"}
+{"tMs":902,"delta":"\": {\"props"}
+{"tMs":921,"delta":"\": {\"w"}
+{"tMs":941,"delta":"rap\": true, \"spac"}
+{"tMs":964,"delta":"ing\": 10, \"runS"}
+{"tMs":983,"delta":"pacing\": 10}}"}
+{"tMs":1006,"delta":"}, {\"op\": \"pat"}
+{"tMs":1037,"delta":"ch\", \"id\": \"t1"}
+{"tMs":1044,"delta":"\", \"patch\": {\"lay"}
+{"tMs":1065,"delta":"out\": {\"bas"}
+{"tMs":1084,"delta":"is\": "}
+{"tMs":1103,"delta":"174"}
+{"tMs":1124,"delta":"}}}, {\"op\":"}
+{"tMs":1145,"delta":" \"patch\", \"id\": \""}
+{"tMs":1165,"delta":"t2\", \"patch\": {"}
+{"tMs":1186,"delta":"\"layout\": {\"basis"}
+{"tMs":1206,"delta":"\": 174}}}, {"}
+{"tMs":1228,"delta":"\"op\": \"patch\", \""}
+{"tMs":1248,"delta":"id\": \"range\", \"patch"}
+{"tMs":1268,"delta":"\": {\"props\": {\"seg"}
+{"tMs":1289,"delta":"ments\": [{\"value\": \""}
+{"tMs":1310,"delta":"7\", \"label\": \"7 "}
+{"tMs":1330,"delta":"days\"}, {\"value\":"}
+{"tMs":1350,"delta":" \"30\", \"label\": \"30"}
+{"tMs":1373,"delta":" days\"}, {\"value"}
+{"tMs":1391,"delta":"\": \"90\", \"label\": \""}
+{"tMs":1411,"delta":"90 days\"}],"}
+{"tMs":1432,"delta":" \"selected\": [\"30\""}
+{"tMs":1452,"delta":"]}}}, {\"op"}
+{"tMs":1473,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1493,"delta":"revChart\", \"par"}
+{"tMs":1513,"delta":"ent\": \"card\", \"index"}
+{"tMs":1534,"delta":"\": 4, \"node\": {"}
+{"tMs":1554,"delta":"\"type\": \"lineChart"}
+{"tMs":1575,"delta":"\", \"layout\": {\"width"}
+{"tMs":1595,"delta":"\": {\"fill\": 358"}
+{"tMs":1616,"delta":"}, \"height\": 140}"}
+{"tMs":1636,"delta":", \"props\": {\"values\":"}
+{"tMs":1656,"delta":" [12"}
+{"tMs":1677,"delta":", 15, 14, "}
+{"tMs":1697,"delta":"18, 22, 20,"}
+{"tMs":1717,"delta":" 25, 28, 27"}
+{"tMs":1738,"delta":", 31]}}},"}
+{"tMs":1758,"delta":" {\"op\": \"set\", \""}
+{"tMs":1780,"delta":"id\": \"chanChart\","}
+{"tMs":1799,"delta":" \"parent\": \"card\", \""}
+{"tMs":1820,"delta":"index\": 6, \"node\":"}
+{"tMs":1842,"delta":" {\"type\": \"barChart"}
+{"tMs":1861,"delta":"\", \"layout\": {\"width"}
+{"tMs":1882,"delta":"\": {\"fill\": 358"}
+{"tMs":1904,"delta":"}, \"height\": 140}"}
+{"tMs":1922,"delta":", \"props\": {\"values\":"}
+{"tMs":1943,"delta":" [420, 310, 180"}
+{"tMs":1963,"delta":", 140], \"labels\":"}
+{"tMs":1985,"delta":" [\"Organic\", \""}
+{"tMs":2004,"delta":"Paid\", \"Referral\","}
+{"tMs":2025,"delta":" \"Social\"]}}}"}
+{"tMs":2045,"delta":", {\"op\": \"set\","}
+{"tMs":2065,"delta":" \"id\": \"plansTable"}
+{"tMs":2085,"delta":"\", \"parent\": \"card\","}
+{"tMs":2106,"delta":" \"index\": 8, \"node"}
+{"tMs":2127,"delta":"\": {\"type\": \"table"}
+{"tMs":2147,"delta":"View\", \"layout\": {\""}
+{"tMs":2167,"delta":"width\": {\"fill\": "}
+{"tMs":2188,"delta":"358}, \"height\": {\""}
+{"tMs":2209,"delta":"hug\": 200}},"}
+{"tMs":2228,"delta":" \"props\": {\"r"}
+{"tMs":2249,"delta":"owCount\": 5, \""}
+{"tMs":2270,"delta":"columns\": [{\"title"}
+{"tMs":2290,"delta":"\": \"Plan\""}
+{"tMs":2310,"delta":"}, {\"title\": \""}
+{"tMs":2331,"delta":"Revenue\"}, {\""}
+{"tMs":2351,"delta":"title\": \"Subs\"}"}
+{"tMs":2372,"delta":", {\"title\": \"Chur"}
+{"tMs":2392,"delta":"n %"}
+{"tMs":2414,"delta":"\"}]}}}]"}
+{"tMs":2455,"delta":"}"}

@@ -1,0 +1,57 @@
+{
+ "stream": "order_summary@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 953,
+ "timeToFirstPaintMs": 4602,
+ "timeToFirstTextMs": 5027,
+ "timeToFirstSectionMs": 10420,
+ "timeToCompleteMs": 20095,
+ "outputTokens": 3993,
+ "tokensEstimated": false,
+ "chars": 7985,
+ "deltas": 526,
+ "opsApplied": 33,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/promoMsg/bind/props.text",
+  "dangling_child /nodes/promoRow/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 34,
+ "rejections": [
+  {
+   "op": 17,
+   "code": "expression_syntax",
+   "path": "/nodes/promoMsg/bind/props.text",
+   "message": "The formula \"${= applied ? '10% off applied' : (len(promo) > 0 ? 'Invalid code' : '')}\" does not parse: Unknown function \"len\".",
+   "nodeId": "promoMsg"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/1",
+   "message": "Child \"promoMsg\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  }
+ ],
+ "nodes": 31,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 11,
+  "max": 21
+ },
+ "frames": 179,
+ "frameMs": 117,
+ "pumpsOverBudget16ms": 18,
+ "pumps": 706,
+ "pumpMsMedian": 0.125,
+ "renderExceptions": [],
+ "warnings": 0
+}

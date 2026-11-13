@@ -1,0 +1,135 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 43792,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 19412,
+ "generate": {
+  "inputTokens": 4982,
+  "outputTokens": 4493,
+  "cacheReadInputTokens": 96665,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 771,
+  "firstToolDeltaMs": 7815,
+  "totalMs": 26843,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "lists-a-carousel-pages-and-pagination"
+    },
+    "ms": 1329,
+    "outputTokens": 111,
+    "resultChars": 367
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "pageView"
+    },
+    "ms": 1143,
+    "outputTokens": 64,
+    "resultChars": 1101
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "paginate"
+    },
+    "ms": 1272,
+    "outputTokens": 80,
+    "resultChars": 400
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "pagination"
+    },
+    "ms": 1268,
+    "outputTokens": 76,
+    "resultChars": 1162
+   }
+  ],
+  "ops": 29,
+  "opsApplied": 29,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [
+   "empty_button dot"
+  ],
+  "warnings": 3,
+  "nodes": 27,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 7442,
+   "outputTokens": 415,
+   "cacheReadInputTokens": 19333,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 2206,
+   "firstToolDeltaMs": 2209,
+   "totalMs": 3180,
+   "stopReason": "StopReason.toolUse",
+   "ops": 3,
+   "opsApplied": 3,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [
+    "empty_button dot"
+   ],
+   "warnings": 1,
+   "nodes": 27,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 8367,
+   "outputTokens": 197,
+   "cacheReadInputTokens": 19333,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1169,
+   "firstToolDeltaMs": 1243,
+   "totalMs": 1784,
+   "stopReason": "StopReason.toolUse",
+   "ops": 1,
+   "opsApplied": 1,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 28,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 1,
+  "opsApplied": 1,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 28,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

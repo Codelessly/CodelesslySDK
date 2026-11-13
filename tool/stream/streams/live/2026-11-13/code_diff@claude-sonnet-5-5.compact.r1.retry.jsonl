@@ -1,0 +1,59 @@
+{"meta":{"ui":"code_diff","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["code_diff@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":597,"usage":{"inputTokens":6239,"outputTokens":597,"cacheReadInputTokens":38666,"cacheCreationInputTokens":0,"ttftMs":1541,"firstToolDeltaMs":3945,"totalMs":5991,"stopReason":"StopReason.toolUse","lookups":[{"tool":"ui_read","input":{"ids":["card","h1Status","h1Keep","h1Discard","h1Bar"],"variables":true},"ms":1870,"outputTokens":120,"resultChars":1673}]},"text":"I need to see the current state of the variables and the card before sending the missing nodes.Variables `keptCount` and `allDecided` exist; only `summary` and `apply` are missing.","ttftMs":1541,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":61,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":3945,"delta":"{\"ops\": [{\"op\":\""}
+{"tMs":4390,"delta":"set\",\"id\":\"summary\",\""}
+{"tMs":4390,"delta":"par"}
+{"tMs":4390,"delta":"ent\":\"card\",\"index"}
+{"tMs":4390,"delta":"\":4"}
+{"tMs":4390,"delta":",\"node\":{\"type\":"}
+{"tMs":4390,"delta":"\"text\",\"layout\":{\""}
+{"tMs":4390,"delta":"width\":{\"fill\":358"}
+{"tMs":4390,"delta":"},\"height\":{\"hug"}
+{"tMs":4390,"delta":"\":20}},\"props\":{"}
+{"tMs":4836,"delta":"\"text\":\"0"}
+{"tMs":4836,"delta":" of 3 hunks"}
+{"tMs":4836,"delta":" kept\",\"style\":{\"f"}
+{"tMs":4836,"delta":"ontSize\":14"}
+{"tMs":4836,"delta":",\"fontWeight\":"}
+{"tMs":4836,"delta":"600,\"color\":\"#F"}
+{"tMs":4836,"delta":"F111827\"}},\"b"}
+{"tMs":4836,"delta":"ind\":{\"props.text\":"}
+{"tMs":4836,"delta":"\"${= ke"}
+{"tMs":4836,"delta":"ptCount + ' of "}
+{"tMs":4836,"delta":"3 hunks kept'"}
+{"tMs":4836,"delta":" + (allDecided ?"}
+{"tMs":5275,"delta":" '' : ' (dec"}
+{"tMs":5275,"delta":"ide all"}
+{"tMs":5275,"delta":" to apply)')}\"}"}
+{"tMs":5275,"delta":"}},{\"op\":\"set"}
+{"tMs":5275,"delta":"\",\"id\":\"apply\",\"par"}
+{"tMs":5275,"delta":"ent\":\"card\",\"index\":5"}
+{"tMs":5275,"delta":",\"node\":{\"type\":"}
+{"tMs":5275,"delta":"\"filledButton\",\"layout"}
+{"tMs":5275,"delta":"\":{\"width\":{"}
+{"tMs":5275,"delta":"\"fill\":358},\"height"}
+{"tMs":5275,"delta":"\":48},\"props\":{\""}
+{"tMs":5275,"delta":"label\":\"Apply chang"}
+{"tMs":5735,"delta":"es\",\"en"}
+{"tMs":5735,"delta":"abled\":false,\"style\":"}
+{"tMs":5735,"delta":"{\"backgroundColor"}
+{"tMs":5735,"delta":"\":\"#F"}
+{"tMs":5735,"delta":"F2563EB\",\"foreg"}
+{"tMs":5735,"delta":"roundColor\":\"#F"}
+{"tMs":5735,"delta":"FFFFFFF\",\""}
+{"tMs":5735,"delta":"shape\":{\"type"}
+{"tMs":5735,"delta":"\":\"roundedRectang"}
+{"tMs":5735,"delta":"le\",\"borderRadius\":"}
+{"tMs":5735,"delta":"10}}},\"bind\":"}
+{"tMs":5735,"delta":"{\"props.enabled\":"}
+{"tMs":5981,"delta":"\"${= allDecided}"}
+{"tMs":5981,"delta":"\"},\"actions\":[{"}
+{"tMs":5981,"delta":"\"trigger\":{\"type"}
+{"tMs":5981,"delta":"\":\"click\"},\"actions"}
+{"tMs":5981,"delta":"\":[{\"type\":\"show"}
+{"tMs":5981,"delta":"Toast\",\"message\":\"${"}
+{"tMs":5981,"delta":"= 'Appl"}
+{"tMs":5981,"delta":"ied ' + keptCount"}
+{"tMs":5981,"delta":" + ' hunks'}"}
+{"tMs":5981,"delta":"\"}]}]"}
+{"tMs":5981,"delta":"}}]"}
+{"tMs":5987,"delta":"}"}

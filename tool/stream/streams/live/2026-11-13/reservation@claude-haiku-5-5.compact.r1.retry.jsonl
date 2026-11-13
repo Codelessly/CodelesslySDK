@@ -1,0 +1,65 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["reservation@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":500,"usage":{"inputTokens":4577,"outputTokens":500,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":559,"firstToolDeltaMs":600,"totalMs":1906,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":559,"check":{"ops":3,"opsApplied":3,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":1,"nodes":18,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":600,"delta":"{\"ops\": [{\"op"}
+{"tMs":616,"delta":"\": \"set"}
+{"tMs":638,"delta":"\", \"id\": \"times\", \""}
+{"tMs":654,"delta":"par"}
+{"tMs":677,"delta":"ent\": \"card\", \"index"}
+{"tMs":696,"delta":"\": 6, \"node\": {"}
+{"tMs":716,"delta":"\"type\": \"list"}
+{"tMs":737,"delta":"View\", \"children\": [\"sl"}
+{"tMs":758,"delta":"ot\"], \"layout\": {"}
+{"tMs":779,"delta":"\"width\": {\"fill\":"}
+{"tMs":799,"delta":" 350}, \"height\": {"}
+{"tMs":820,"delta":"\"hug\": 200}}"}
+{"tMs":841,"delta":", \"props\": {\"scr"}
+{"tMs":862,"delta":"ollable\": false, \"spac"}
+{"tMs":882,"delta":"ing\": 8}, \"b"}
+{"tMs":903,"delta":"ind\": {\"data\": \"${"}
+{"tMs":923,"delta":"slots}\"}}},"}
+{"tMs":948,"delta":" {\"op\": \"set\", \""}
+{"tMs":964,"delta":"id\": \"confirm\", \""}
+{"tMs":985,"delta":"parent\": \"card\", \"index"}
+{"tMs":1006,"delta":"\": 7, \"node\": {"}
+{"tMs":1026,"delta":"\"type\": \"filledButton"}
+{"tMs":1046,"delta":"\", \"layout\": {\"width"}
+{"tMs":1067,"delta":"\": {\"fill\": 350"}
+{"tMs":1087,"delta":"}, \"height\": 48}"}
+{"tMs":1108,"delta":", \"props\": {\"label\":"}
+{"tMs":1128,"delta":" \"Confirm booking\","}
+{"tMs":1149,"delta":" \"style\": {\"backgro"}
+{"tMs":1169,"delta":"undColor\": \"#FF"}
+{"tMs":1190,"delta":"2563EB\", \"foreg"}
+{"tMs":1210,"delta":"roundColor\": \"#F"}
+{"tMs":1231,"delta":"FFFFFFF\","}
+{"tMs":1251,"delta":" \"shape\": {\"type\":"}
+{"tMs":1271,"delta":" \"roundedRectangle"}
+{"tMs":1292,"delta":"\", \"borderRadius\":"}
+{"tMs":1312,"delta":" 10}}}, \"b"}
+{"tMs":1333,"delta":"ind\": {\"props"}
+{"tMs":1353,"delta":".enabled\": \"${="}
+{"tMs":1373,"delta":" timeIndex >= "}
+{"tMs":1394,"delta":"0}\"}, \"actions"}
+{"tMs":1415,"delta":"\": [{\"trigger\":"}
+{"tMs":1435,"delta":" {\"type\": \"click\"}"}
+{"tMs":1455,"delta":", \"actions\": [{\""}
+{"tMs":1476,"delta":"type\": \"showToast\", \""}
+{"tMs":1499,"delta":"message\": \"${= '"}
+{"tMs":1517,"delta":"Booked: ' + days["}
+{"tMs":1537,"delta":"dayIndex].label +"}
+{"tMs":1557,"delta":" ', ' + partySize"}
+{"tMs":1578,"delta":" + (partySize == 1"}
+{"tMs":1599,"delta":" ? ' guest'"}
+{"tMs":1619,"delta":" : ' guests') + "}
+{"tMs":1639,"delta":"' at ' + slots["}
+{"tMs":1660,"delta":"timeIndex].time}"}
+{"tMs":1680,"delta":"\"}]}]}}"}
+{"tMs":1700,"delta":", {\"op\": \"patch"}
+{"tMs":1721,"delta":"\", \"id\": \"dayCh"}
+{"tMs":1741,"delta":"ip\", \"patch\": {\""}
+{"tMs":1761,"delta":"layout\": {\"width"}
+{"tMs":1782,"delta":"\": {\"hug\": 80"}
+{"tMs":1804,"delta":"},"}
+{"tMs":1822,"delta":" \"height\": {\"h"}
+{"tMs":1843,"delta":"ug\": 40}}}}"}
+{"tMs":1863,"delta":"]"}
+{"tMs":1904,"delta":"}"}

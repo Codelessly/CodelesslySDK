@@ -1,0 +1,104 @@
+{
+ "stream": "plan_progress@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1308,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 21547,
+ "outputTokens": 3336,
+ "tokensEstimated": false,
+ "chars": 6531,
+ "deltas": 451,
+ "opsApplied": 21,
+ "opsRejected": 4,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 4,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/mig/actions/0/trigger/when",
+  "expression_syntax /nodes/item/bind/decoration.fills[0].color",
+  "expression_syntax /nodes/spin/bind/visible",
+  "expression_syntax /nodes/num/bind/visible",
+  "dangling_child /nodes/list/children/0",
+  "dangling_child /nodes/mark/children/0",
+  "dangling_child /nodes/mark/children/2",
+  "dangling_child /roots/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 25,
+ "rejections": [
+  {
+   "op": 2,
+   "code": "expression_syntax",
+   "path": "/nodes/mig/actions/0/trigger/when",
+   "message": "The formula \"${= running and not finished}\" does not parse: Unexpected \"a\" at 9.",
+   "nodeId": "mig"
+  },
+  {
+   "op": 7,
+   "code": "expression_syntax",
+   "path": "/nodes/item/bind/decoration.fills[0].color",
+   "message": "The formula \"${= index < done ? '#FFECFDF5' : (index == done and running ? '#FFDBEAFE' : '#FFF3F4F6')}\" does not parse: Expected \")\" at 45.",
+   "nodeId": "item"
+  },
+  {
+   "op": 9,
+   "code": "expression_syntax",
+   "path": "/nodes/spin/bind/visible",
+   "message": "The formula \"${= index == done and running and not finished}\" does not parse: Unexpected \"a\" at 15.",
+   "nodeId": "spin"
+  },
+  {
+   "op": 11,
+   "code": "expression_syntax",
+   "path": "/nodes/num/bind/visible",
+   "message": "The formula \"${= index > done or (index == done and not running)}\" does not parse: Unexpected \"o\" at 14.",
+   "nodeId": "num"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/list/children/0",
+   "message": "Child \"item\" of \"list\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "list"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/mark/children/0",
+   "message": "Child \"spin\" of \"mark\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "mark"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/mark/children/2",
+   "message": "Child \"num\" of \"mark\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "mark"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/roots/0",
+   "message": "Root \"mig\" never arrived."
+  }
+ ],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 0
+ },
+ "frames": 179,
+ "frameMs": 125,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 631,
+ "pumpMsMedian": 0.109,
+ "renderExceptions": [],
+ "warnings": 3
+}

@@ -1,0 +1,71 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Add a tile for average order value.","base":["dashboard@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":621,"usage":{"inputTokens":8023,"outputTokens":621,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":1632,"firstToolDeltaMs":1700,"totalMs":4290,"stopReason":"StopReason.toolUse"},"text":"The tiles come from the `stats` list, so I'll add a fifth entry there. With two columns the grid would leave an empty slot, so I'll also make the tile area taller.","ttftMs":1632,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":28,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1700,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1734,"delta":"\"vars\",\"scope\":\""}
+{"tMs":1768,"delta":"dash\",\"set\":{\"st"}
+{"tMs":1802,"delta":"ats\":{\"type\":\"list"}
+{"tMs":2084,"delta":"\",\"formula\":\"[{'"}
+{"tMs":2084,"delta":"label':'Revenue','"}
+{"tMs":2084,"delta":"value':'$' + round("}
+{"tMs":2084,"delta":"48200 * mult),'"}
+{"tMs":2534,"delta":"change':range == 7 "}
+{"tMs":2534,"delta":"? '+2.1%'"}
+{"tMs":2534,"delta":" : (range == 30 "}
+{"tMs":2534,"delta":"? '+8.4%'"}
+{"tMs":2534,"delta":" : '+15.2%'"}
+{"tMs":2534,"delta":"),'up':true},{'"}
+{"tMs":2534,"delta":"label':'Sign-"}
+{"tMs":2534,"delta":"ups','value':'' + round"}
+{"tMs":2534,"delta":"(1240 * mult),"}
+{"tMs":2534,"delta":"'change':range == 7 "}
+{"tMs":2534,"delta":"? '+1.4%"}
+{"tMs":2534,"delta":"' : (range == 30 "}
+{"tMs":2977,"delta":"? '+5.9%"}
+{"tMs":2977,"delta":"' : '+11.0%"}
+{"tMs":2977,"delta":"'),'up':true},{"}
+{"tMs":2977,"delta":"'label':'Churn','"}
+{"tMs":2977,"delta":"value':(range == 7 "}
+{"tMs":2977,"delta":"? '1.9' :"}
+{"tMs":2977,"delta":" (range == 30 ?"}
+{"tMs":2977,"delta":" '2.4' : '3"}
+{"tMs":2977,"delta":".1')) + '%','"}
+{"tMs":2977,"delta":"change':range == 7 "}
+{"tMs":2977,"delta":"? '-0.1%'"}
+{"tMs":2977,"delta":" : (range == 30 "}
+{"tMs":3517,"delta":"? '-0.3%'"}
+{"tMs":3517,"delta":" : '+0.4%'"}
+{"tMs":3517,"delta":"),'up':range != 90"}
+{"tMs":3517,"delta":"},{'label':'Active"}
+{"tMs":3517,"delta":" users','value':'' + round"}
+{"tMs":3517,"delta":"(9800 * (range =="}
+{"tMs":3517,"delta":" 7 ? 0."}
+{"tMs":3517,"delta":"9 : (range == 30"}
+{"tMs":3517,"delta":" ? 1 : "}
+{"tMs":3517,"delta":"1.12))),'change':"}
+{"tMs":3517,"delta":"range == 7 ? '"}
+{"tMs":3517,"delta":"+0.8%' : ("}
+{"tMs":3960,"delta":"range == 30 ? '"}
+{"tMs":3960,"delta":"+3.2%' : '"}
+{"tMs":3960,"delta":"+7.5%'),'"}
+{"tMs":3960,"delta":"up':true},{'label':"}
+{"tMs":3960,"delta":"'Avg order value','value"}
+{"tMs":3960,"delta":"':'$' + (range =="}
+{"tMs":3960,"delta":" 7 ? '"}
+{"tMs":3960,"delta":"61."}
+{"tMs":3960,"delta":"20' : (range == 30"}
+{"tMs":3960,"delta":" ? '64"}
+{"tMs":3960,"delta":".80' : '67.50"}
+{"tMs":3960,"delta":"')),'change':range == "}
+{"tMs":4286,"delta":"7 ? '+0."}
+{"tMs":4286,"delta":"9%' : (range == "}
+{"tMs":4286,"delta":"30 ? '+2."}
+{"tMs":4286,"delta":"6%' : '+4."}
+{"tMs":4286,"delta":"3"}
+{"tMs":4287,"delta":"%'),'up':true}"}
+{"tMs":4287,"delta":"]\"}}"}
+{"tMs":4287,"delta":"},{\"op\":\"patch"}
+{"tMs":4287,"delta":"\",\"id\":\"tiles\",\""}
+{"tMs":4287,"delta":"patch\":{\"layout\":"}
+{"tMs":4287,"delta":"{\"height\":{\"hug"}
+{"tMs":4287,"delta":"\":280"}
+{"tMs":4287,"delta":"}}}}]"}
+{"tMs":4289,"delta":"}"}

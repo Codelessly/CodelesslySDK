@@ -1,0 +1,46 @@
+{
+ "stream": "message_draft@claude-haiku-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 477,
+ "timeToFirstPaintMs": 1864,
+ "timeToFirstTextMs": 1864,
+ "timeToFirstSectionMs": 1864,
+ "timeToCompleteMs": 1924,
+ "outputTokens": 407,
+ "tokensEstimated": false,
+ "chars": 891,
+ "deltas": 66,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 1,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 12,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 11,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 1,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 42,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 109,
+ "pumpMsMedian": 0.128,
+ "renderExceptions": [],
+ "warnings": 1
+}

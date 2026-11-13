@@ -1,0 +1,27 @@
+{"meta":{"ui":"data_table","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["data_table@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":226,"usage":{"inputTokens":5995,"outputTokens":226,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":344,"firstToolDeltaMs":384,"totalMs":932,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":344,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":31,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":384,"delta":"{\"ops\": [{\"op"}
+{"tMs":405,"delta":"\": \"set\", \"id\": \""}
+{"tMs":425,"delta":"search\", \"node\": {\"type"}
+{"tMs":445,"delta":"\": \"textField\", \"layout"}
+{"tMs":466,"delta":"\": {\"width\": {\"f"}
+{"tMs":486,"delta":"ill\": 366}, \"height"}
+{"tMs":506,"delta":"\": 48}, \"props\":"}
+{"tMs":526,"delta":" {\"decoration\": {\""}
+{"tMs":547,"delta":"hintText\": \"Search custom"}
+{"tMs":567,"delta":"er\", \"icon\": {\""}
+{"tMs":588,"delta":"icon\": \"search\"}}"}
+{"tMs":608,"delta":"}, \"bind\": {\""}
+{"tMs":629,"delta":"props.initialValue\": \""}
+{"tMs":649,"delta":"${q}\"}, \"act"}
+{"tMs":669,"delta":"ions\": [{\"trigger"}
+{"tMs":690,"delta":"\": {\"type\": \"changed"}
+{"tMs":710,"delta":"\"}, \"actions\": ["}
+{"tMs":731,"delta":"{\"type\": \"setVari"}
+{"tMs":752,"delta":"able\", \"variable\": \"q"}
+{"tMs":772,"delta":"\", \"value\": \"${result}"}
+{"tMs":792,"delta":"\"}, {\"type\": \""}
+{"tMs":818,"delta":"setVariable\", \"variable"}
+{"tMs":832,"delta":"\": \"page\", \"value\": \""}
+{"tMs":853,"delta":"0\"}]}]}}"}
+{"tMs":873,"delta":"]"}
+{"tMs":931,"delta":"}"}

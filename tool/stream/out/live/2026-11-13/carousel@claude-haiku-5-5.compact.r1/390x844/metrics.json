@@ -1,0 +1,44 @@
+{
+ "stream": "carousel@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 536,
+ "timeToFirstPaintMs": 1136,
+ "timeToFirstTextMs": 3131,
+ "timeToFirstSectionMs": 6460,
+ "timeToCompleteMs": 8826,
+ "outputTokens": 2841,
+ "tokensEstimated": false,
+ "chars": 5610,
+ "deltas": 404,
+ "opsApplied": 22,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 16,
+ "jsonRepairs": 1,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "streamedOps": 22,
+ "rejections": [],
+ "nodes": 20,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 5,
+  "max": 28
+ },
+ "frames": 146,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 551,
+ "pumpMsMedian": 0.137,
+ "renderExceptions": [
+  {
+   "tMs": 6072,
+   "error": "Multiple exceptions (4) were detected during the running of the current test, and at least one was unexpected."
+  }
+ ],
+ "warnings": 4
+}

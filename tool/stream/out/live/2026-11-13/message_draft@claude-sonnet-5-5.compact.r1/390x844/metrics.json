@@ -1,0 +1,58 @@
+{
+ "stream": "message_draft@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1280,
+ "timeToFirstPaintMs": 4834,
+ "timeToFirstTextMs": 6218,
+ "timeToFirstSectionMs": 6218,
+ "timeToCompleteMs": 19389,
+ "outputTokens": 3405,
+ "tokensEstimated": false,
+ "chars": 7227,
+ "deltas": 471,
+ "opsApplied": 23,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_enum /nodes/toneSeg/actions/0/actions/1/condition/op",
+  "dangling_child /nodes/form/children/3"
+ ],
+ "scripts": 0,
+ "streamedOps": 24,
+ "rejections": [
+  {
+   "op": 11,
+   "code": "invalid_enum",
+   "path": "/nodes/toneSeg/actions/0/actions/1/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "toneSeg",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/form/children/3",
+   "message": "Child \"toneSeg\" of \"form\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "form"
+  }
+ ],
+ "nodes": 21,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 4,
+  "max": 8
+ },
+ "frames": 179,
+ "frameMs": 113,
+ "pumpsOverBudget16ms": 12,
+ "pumps": 651,
+ "pumpMsMedian": 0.126,
+ "renderExceptions": [],
+ "warnings": 0
+}

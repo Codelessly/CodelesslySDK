@@ -1,0 +1,122 @@
+{
+ "stream": "checkout@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1518,
+ "timeToFirstPaintMs": 9297,
+ "timeToFirstTextMs": 9297,
+ "timeToFirstSectionMs": 10238,
+ "timeToCompleteMs": 46445,
+ "outputTokens": 8010,
+ "tokensEstimated": false,
+ "chars": 15975,
+ "deltas": 1074,
+ "opsApplied": 49,
+ "opsRejected": 5,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 5,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_layout_key /nodes/p2/layout/scrollable",
+  "wrong_type /nodes/shipBack/layout/width",
+  "wrong_type /nodes/shipNext/layout/width",
+  "wrong_type /nodes/payBack/layout/width",
+  "wrong_type /nodes/payNow/layout/width",
+  "dangling_child /nodes/main/children/2",
+  "dangling_child /nodes/shipBtns/children/0",
+  "dangling_child /nodes/shipBtns/children/1",
+  "dangling_child /nodes/payBtns/children/0",
+  "dangling_child /nodes/payBtns/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 54,
+ "rejections": [
+  {
+   "op": 18,
+   "code": "unknown_layout_key",
+   "path": "/nodes/p2/layout/scrollable",
+   "message": "layout has no \"scrollable\". It takes: width, height, constraints, margin, padding, rotation, aspectRatio, flex, squeezable, x, y, align, order, basis, widthFactor, heightFactor.",
+   "nodeId": "p2",
+   "suggestion": "props.scrollable"
+  },
+  {
+   "op": 30,
+   "code": "wrong_type",
+   "path": "/nodes/shipBack/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "shipBack"
+  },
+  {
+   "op": 31,
+   "code": "wrong_type",
+   "path": "/nodes/shipNext/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "shipNext"
+  },
+  {
+   "op": 46,
+   "code": "wrong_type",
+   "path": "/nodes/payBack/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "payBack"
+  },
+  {
+   "op": 47,
+   "code": "wrong_type",
+   "path": "/nodes/payNow/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "payNow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/main/children/2",
+   "message": "Child \"p2\" of \"main\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "main"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/shipBtns/children/0",
+   "message": "Child \"shipBack\" of \"shipBtns\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "shipBtns"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/shipBtns/children/1",
+   "message": "Child \"shipNext\" of \"shipBtns\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "shipBtns"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/payBtns/children/0",
+   "message": "Child \"payBack\" of \"payBtns\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "payBtns"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/payBtns/children/1",
+   "message": "Child \"payNow\" of \"payBtns\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "payBtns"
+  }
+ ],
+ "nodes": 47,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 5,
+  "max": 25
+ },
+ "frames": 180,
+ "frameMs": 263,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 1255,
+ "pumpMsMedian": 0.084,
+ "renderExceptions": [],
+ "warnings": 11
+}

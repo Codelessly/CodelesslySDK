@@ -1,0 +1,62 @@
+{"meta":{"ui":"message_draft","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["message_draft@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":551,"usage":{"inputTokens":4602,"outputTokens":551,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":1404,"firstToolDeltaMs":1470,"totalMs":3629,"stopReason":"StopReason.toolUse"},"text":"I'll resend the rejected tone switch with the correct condition op (`equalsTo`).","ttftMs":1404,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":22,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1470,"delta":"{\"ops\": [{\"op"}
+{"tMs":1909,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1909,"delta":"toneSeg\", \"node"}
+{"tMs":1909,"delta":"\": {\"type\": \"segm"}
+{"tMs":1909,"delta":"entedButton\", \"layout"}
+{"tMs":1909,"delta":"\": {\"width\": {\"f"}
+{"tMs":1909,"delta":"ill\": 358}, \"height"}
+{"tMs":1909,"delta":"\": 40}, \"props\":"}
+{"tMs":1909,"delta":" {\"segments\": [{\""}
+{"tMs":1909,"delta":"value\": \"polite\", \"label"}
+{"tMs":1909,"delta":"\": \"Polite\"},"}
+{"tMs":2333,"delta":" {\"value\": \"firm\","}
+{"tMs":2334,"delta":" \"label\": \"Firm\""}
+{"tMs":2334,"delta":"}], \"selected\": [\""}
+{"tMs":2334,"delta":"polite\"]}, \"b"}
+{"tMs":2334,"delta":"ind\": {\"props.selected"}
+{"tMs":2334,"delta":"\": \"${= [tone]"}
+{"tMs":2334,"delta":"}\"}, \"actions\":"}
+{"tMs":2334,"delta":" [{\"trigger\": {"}
+{"tMs":2334,"delta":"\"type\": \"changed\"}"}
+{"tMs":2334,"delta":", \"actions\": [{\""}
+{"tMs":2334,"delta":"type\": \"setVariable\","}
+{"tMs":2334,"delta":" \"variable\": \"tone\","}
+{"tMs":2767,"delta":" \"value\": \"${= result["}
+{"tMs":2767,"delta":"0]}\"}, {\""}
+{"tMs":2767,"delta":"type\": \"if\", \"condition"}
+{"tMs":2767,"delta":"\": {\"left\": \"${t"}
+{"tMs":2767,"delta":"one}\", \"op\": \"equ"}
+{"tMs":2767,"delta":"alsTo\", \"right\":"}
+{"tMs":2767,"delta":" \"firm\"}, \"then"}
+{"tMs":2767,"delta":"\": [{\"type\": \"set"}
+{"tMs":2767,"delta":"Variable\", \"variable\":"}
+{"tMs":2767,"delta":" \"body\", \"value\": \""}
+{"tMs":2767,"delta":"Dear landlord,\\n"}
+{"tMs":2767,"delta":"\\nThe heating in my"}
+{"tMs":3198,"delta":" flat has been broken for several"}
+{"tMs":3198,"delta":" days. This is your responsib"}
+{"tMs":3198,"delta":"ility to repair. Please ar"}
+{"tMs":3198,"delta":"range for an engineer to"}
+{"tMs":3198,"delta":" attend within 48 hours"}
+{"tMs":3198,"delta":". If I do not hear from"}
+{"tMs":3198,"delta":" you by then, I will escal"}
+{"tMs":3198,"delta":"ate the matter.\\n\\"}
+{"tMs":3198,"delta":"nRegards\"}], \""}
+{"tMs":3198,"delta":"else\": [{\"type\": \""}
+{"tMs":3198,"delta":"setVariable\", \"variable"}
+{"tMs":3198,"delta":"\": \"body\", \"value\": \""}
+{"tMs":3628,"delta":"Dear landlord,\\"}
+{"tMs":3628,"delta":"n\\nI hope you are"}
+{"tMs":3628,"delta":" well. Unfortunately"}
+{"tMs":3628,"delta":" the heating in my flat has"}
+{"tMs":3628,"delta":" stopped working. Could you"}
+{"tMs":3628,"delta":" please arrange for an engine"}
+{"tMs":3628,"delta":"er to take a look when conven"}
+{"tMs":3628,"delta":"ient?\\n\\nThank"}
+{"tMs":3628,"delta":" you very much for your help.\\"}
+{"tMs":3628,"delta":"n\\nKind regards\""}
+{"tMs":3628,"delta":"}]}]}]},"}
+{"tMs":3628,"delta":" \"parent\": \"form\", \""}
+{"tMs":3628,"delta":"index\": 3}]"}
+{"tMs":3628,"delta":"}"}

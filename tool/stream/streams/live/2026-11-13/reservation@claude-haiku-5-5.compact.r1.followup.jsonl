@@ -1,0 +1,37 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Add a field for a note to the restaurant.","base":["reservation@claude-haiku-5-5.compact.r1.jsonl","reservation@claude-haiku-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":249,"usage":{"inputTokens":5272,"outputTokens":249,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":486,"firstToolDeltaMs":525,"totalMs":1251,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":486,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":1,"nodes":19,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":525,"delta":"{\"ops\": [{\"op"}
+{"tMs":545,"delta":"\": \"set\", \"id\": \""}
+{"tMs":563,"delta":"noteField"}
+{"tMs":580,"delta":"\", \"par"}
+{"tMs":602,"delta":"ent\": \"card\", \"index\":"}
+{"tMs":623,"delta":" 8, \"node\": {\""}
+{"tMs":644,"delta":"type\": \"textField\", \"lay"}
+{"tMs":665,"delta":"out\": {\"width\": {\""}
+{"tMs":685,"delta":"fill\": 350}, \""}
+{"tMs":706,"delta":"height\": {\"hug\": "}
+{"tMs":726,"delta":"56}}, \"props\": {"}
+{"tMs":746,"delta":"\"dec"}
+{"tMs":766,"delta":"oration\": {\"h"}
+{"tMs":786,"delta":"intText\": \"Add"}
+{"tMs":805,"delta":" a"}
+{"tMs":824,"delta":" note for"}
+{"tMs":845,"delta":" the restaurant (opt"}
+{"tMs":865,"delta":"ional)\""}
+{"tMs":885,"delta":"},"}
+{"tMs":905,"delta":" \"keyboardType\": \""}
+{"tMs":926,"delta":"text\"}, \"act"}
+{"tMs":947,"delta":"ions\": [{\"trigger"}
+{"tMs":967,"delta":"\": {\"type\": \"changed"}
+{"tMs":987,"delta":"\""}
+{"tMs":1008,"delta":"}, \"actions\": [{"}
+{"tMs":1029,"delta":"\"type\": \"setVariable"}
+{"tMs":1051,"delta":"\", \"variable\": \"note\","}
+{"tMs":1070,"delta":" \"value\": \"${result}\""}
+{"tMs":1090,"delta":"}]}]}}"}
+{"tMs":1111,"delta":", {\"op\": \"v"}
+{"tMs":1131,"delta":"ars\", \"scope\": \"boo"}
+{"tMs":1152,"delta":"king\", \"set\": {\"note"}
+{"tMs":1174,"delta":"\": {\"type\": \"text\","}
+{"tMs":1193,"delta":" \"value\": \"\"}}}"}
+{"tMs":1214,"delta":"]"}
+{"tMs":1250,"delta":"}"}

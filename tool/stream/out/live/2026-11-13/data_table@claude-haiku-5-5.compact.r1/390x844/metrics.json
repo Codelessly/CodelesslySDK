@@ -1,0 +1,73 @@
+{
+ "stream": "data_table@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 374,
+ "timeToFirstPaintMs": 1066,
+ "timeToFirstTextMs": 10252,
+ "timeToFirstSectionMs": 6026,
+ "timeToCompleteMs": 13921,
+ "outputTokens": 4601,
+ "tokensEstimated": false,
+ "chars": 9515,
+ "deltas": 663,
+ "opsApplied": 31,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/search/props/decoration/icon",
+  "expression_syntax /nodes/rTick/bind/props.value",
+  "dangling_child /nodes/card/children/0",
+  "dangling_child /nodes/row/children/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 33,
+ "rejections": [
+  {
+   "op": 4,
+   "code": "wrong_type",
+   "path": "/nodes/search/props/decoration/icon",
+   "message": "Expected a InputIcon object, got the text \"search\".",
+   "nodeId": "search"
+  },
+  {
+   "op": 20,
+   "code": "expression_syntax",
+   "path": "/nodes/rTick/bind/props.value",
+   "message": "The formula \"${= allSel || selected.indexOf(item.no) >= 0}\" does not parse: Unexpected \"(\" at 27.",
+   "nodeId": "rTick"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/0",
+   "message": "Child \"search\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/row/children/0",
+   "message": "Child \"rTick\" of \"row\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "row"
+  }
+ ],
+ "nodes": 29,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 24,
+  "max": 97
+ },
+ "frames": 180,
+ "frameMs": 82,
+ "pumpsOverBudget16ms": 24,
+ "pumps": 844,
+ "pumpMsMedian": 0.117,
+ "renderExceptions": [],
+ "warnings": 0
+}

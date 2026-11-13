@@ -1,0 +1,115 @@
+{"meta":{"ui":"itinerary","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Swap the two days.","base":["itinerary@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":958,"usage":{"inputTokens":3778,"outputTokens":958,"cacheReadInputTokens":19333,"cacheCreationInputTokens":0,"ttftMs":1370,"firstToolDeltaMs":1713,"totalMs":5484,"stopReason":"StopReason.toolUse"},"text":"The days are a list variable, so I'll re-declare it with the two entries in the opposite order.","ttftMs":1370,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":20,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1713,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1713,"delta":" \"vars\", \"scope\":"}
+{"tMs":1713,"delta":" \"kyoto\", \"set"}
+{"tMs":1713,"delta":"\": {\"days\": {\"type"}
+{"tMs":1713,"delta":"\": \"list\", \"value\": ["}
+{"tMs":1713,"delta":"{\"day\": \"Day "}
+{"tMs":1713,"delta":"1: Arashiyama"}
+{"tMs":1713,"delta":" and Kinkak"}
+{"tMs":1727,"delta":"uji\", \"stops\": ["}
+{"tMs":1763,"delta":"{\"time\": \"08:30"}
+{"tMs":2074,"delta":"\", \"place\": \"Arash"}
+{"tMs":2074,"delta":"iyama Bamboo"}
+{"tMs":2074,"delta":" Grove\", \"move\": \""}
+{"tMs":2074,"delta":"JR Sagano Line"}
+{"tMs":2074,"delta":"\", \"dur\": \"15 "}
+{"tMs":2074,"delta":"min\", \"note\": \"Qu"}
+{"tMs":2074,"delta":"iet in the morning."}
+{"tMs":2074,"delta":" Continue to Tenryu"}
+{"tMs":2082,"delta":"-ji garden next door.\""}
+{"tMs":2119,"delta":"}, {\"time\": \"11"}
+{"tMs":2154,"delta":":30\", \"place\": \""}
+{"tMs":2195,"delta":"Iwatayama Monk"}
+{"tMs":2437,"delta":"ey Park\", \"move\": \""}
+{"tMs":2437,"delta":"Walk across Togets"}
+{"tMs":2437,"delta":"uk"}
+{"tMs":2437,"delta":"yo Bridge\", \""}
+{"tMs":2437,"delta":"dur\": \"20 min\","}
+{"tMs":2437,"delta":" \"note\": \"Short u"}
+{"tMs":2440,"delta":"phill climb of about 15"}
+{"tMs":2472,"delta":" minutes to see the mac"}
+{"tMs":2510,"delta":"aques.\"}, {\"time"}
+{"tMs":2544,"delta":"\": \"15:00\", \"place"}
+{"tMs":2579,"delta":"\": \"Kinkaku"}
+{"tMs":2617,"delta":"-ji\", \"move\": \""}
+{"tMs":2789,"delta":"Bus 205 from"}
+{"tMs":2789,"delta":" Arashiyama\", \"d"}
+{"tMs":2789,"delta":"ur\": \"45 min\", \""}
+{"tMs":2789,"delta":"note\": \"The golden pav"}
+{"tMs":2791,"delta":"ilion. Last entry is"}
+{"tMs":2827,"delta":" around 16:30.\"},"}
+{"tMs":2863,"delta":" {\"time\": \"19:00"}
+{"tMs":2899,"delta":"\", \"place\": \"Nish"}
+{"tMs":2936,"delta":"iki Market dinner\","}
+{"tMs":2970,"delta":" \"move\": \"Bus "}
+{"tMs":3005,"delta":"12 and walk\", \"d"}
+{"tMs":3041,"delta":"ur\": \"30 min\", \""}
+{"tMs":3150,"delta":"note\": \"Street food and iz"}
+{"tMs":3150,"delta":"akaya. Many stal"}
+{"tMs":3150,"delta":"ls close by 18:00,"}
+{"tMs":3187,"delta":" so eat at a restaur"}
+{"tMs":3217,"delta":"ant.\"}], \"todo\":"}
+{"tMs":3253,"delta":" [{\"t\": \"Re"}
+{"tMs":3289,"delta":"serve Monkey Park"}
+{"tMs":3324,"delta":" slot\", \"done\": false}"}
+{"tMs":3359,"delta":", {\"t\": \"Book"}
+{"tMs":3395,"delta":" dinner near Nishi"}
+{"tMs":3432,"delta":"ki\", \"done\": false},"}
+{"tMs":3466,"delta":" {\"t\": \"Arr"}
+{"tMs":3536,"delta":"ange luggage forwarding"}
+{"tMs":3536,"delta":"\", \"done\": false}]}"}
+{"tMs":3572,"delta":", {\"day\": \"Day"}
+{"tMs":3608,"delta":" 2: Higashiy"}
+{"tMs":3643,"delta":"ama and Gion\", \"st"}
+{"tMs":3679,"delta":"ops\": [{\"time\": \""}
+{"tMs":3714,"delta":"08:00\", \"place\": \""}
+{"tMs":3750,"delta":"Fushimi Inari"}
+{"tMs":3786,"delta":" Shrine\", \"move\":"}
+{"tMs":3821,"delta":" \"JR Nara Line"}
+{"tMs":3856,"delta":" from Kyoto Station"}
+{"tMs":3894,"delta":"\", \"dur\": \"5 "}
+{"tMs":3928,"delta":"min ride, 2 h"}
+{"tMs":3966,"delta":"r visit\", \"note\": \""}
+{"tMs":4001,"delta":"Hike the torii gates"}
+{"tMs":4035,"delta":" early to beat the crowds"}
+{"tMs":4069,"delta":". The summit loop takes"}
+{"tMs":4105,"delta":" about 2 hours.\"}"}
+{"tMs":4141,"delta":", {\"time\": \"11:"}
+{"tMs":4179,"delta":"30\", \"place\": \"K"}
+{"tMs":4211,"delta":"iyomizu-dera"}
+{"tMs":4247,"delta":"\", \"move\": \"Train and"}
+{"tMs":4283,"delta":" bus 206\", \"dur"}
+{"tMs":4318,"delta":"\": \"35 min\", \"note"}
+{"tMs":4355,"delta":"\": \"Wooden stage"}
+{"tMs":4393,"delta":" temple with city views. Wal"}
+{"tMs":4424,"delta":"k down Sannenza"}
+{"tMs":4460,"delta":"ka lane afterwards.\""}
+{"tMs":4498,"delta":"}, {\"time\": \"14"}
+{"tMs":4533,"delta":":00\", \"place\": \""}
+{"tMs":4566,"delta":"Lunch in Gion\","}
+{"tMs":4601,"delta":" \"move\": \"Walk\","}
+{"tMs":4636,"delta":" \"dur\": \"15 min"}
+{"tMs":4672,"delta":"\", \"note\": \"Try so"}
+{"tMs":4709,"delta":"ba or kaiseki l"}
+{"tMs":4747,"delta":"unch sets near Han"}
+{"tMs":4783,"delta":"amikoji street.\"},"}
+{"tMs":4814,"delta":" {\"time\": \"18:00"}
+{"tMs":4849,"delta":"\", \"place\": \"Yas"}
+{"tMs":4884,"delta":"aka Shrine and"}
+{"tMs":4923,"delta":" Pontocho\", \"move\":"}
+{"tMs":4956,"delta":" \"Walk\", \"dur"}
+{"tMs":4996,"delta":"\": \"10 min\", \"note"}
+{"tMs":5027,"delta":"\": \"Lantern-l"}
+{"tMs":5063,"delta":"it shrine, then din"}
+{"tMs":5098,"delta":"ner in the Pontocho"}
+{"tMs":5134,"delta":" alley.\"}], \"todo"}
+{"tMs":5173,"delta":"\": [{\"t\": \""}
+{"tMs":5224,"delta":"Book Gion kaise"}
+{"tMs":5240,"delta":"ki lunch\", \"done\":"}
+{"tMs":5275,"delta":" false}, {\"t\": \""}
+{"tMs":5311,"delta":"Buy JR day tick"}
+{"tMs":5346,"delta":"ets\", \"done\": false}]"}
+{"tMs":5382,"delta":"}]}}}"}
+{"tMs":5417,"delta":"]"}
+{"tMs":5482,"delta":"}"}

@@ -1,0 +1,56 @@
+{
+ "stream": "reservation@claude-sonnet-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1550,
+ "timeToFirstPaintMs": 2063,
+ "timeToFirstTextMs": 2063,
+ "timeToFirstSectionMs": 2063,
+ "timeToCompleteMs": 4032,
+ "outputTokens": 586,
+ "tokensEstimated": false,
+ "chars": 1087,
+ "deltas": 69,
+ "opsApplied": 5,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "dangling_child /nodes/slots/children/0"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 16,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 5,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/slots/children/0",
+   "message": "Child \"slotItem\" of \"slots\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "slots"
+  }
+ ],
+ "nodes": 15,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 10,
+  "max": 10
+ },
+ "frames": 74,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 144,
+ "pumpMsMedian": 0.125,
+ "renderExceptions": [],
+ "warnings": 0
+}

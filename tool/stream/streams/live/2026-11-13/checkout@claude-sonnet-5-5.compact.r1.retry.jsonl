@@ -1,0 +1,133 @@
+{"meta":{"ui":"checkout","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["checkout@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":1128,"usage":{"inputTokens":11526,"outputTokens":1128,"cacheReadInputTokens":19578,"cacheCreationInputTokens":0,"ttftMs":2135,"firstToolDeltaMs":2202,"totalMs":7598,"stopReason":"StopReason.toolUse"},"text":"I'll resend the five pending nodes with valid sizes. The fix is to put `scrollable` in `props` rather than `layout`, and to use a single-key `fill` size on the buttons.","ttftMs":2135,"check":{"ops":5,"opsApplied":5,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":52,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":2202,"delta":"{\"ops\": [{\"op"}
+{"tMs":2236,"delta":"\": \"set\", \"id\": \""}
+{"tMs":2270,"delta":"p2\", \"node\": {\""}
+{"tMs":2304,"delta":"type\": \"column\", \"children\":"}
+{"tMs":2600,"delta":" [\"fName\", \"fN"}
+{"tMs":2600,"delta":"ameE\", \"fAddr"}
+{"tMs":3095,"delta":"\", \"fAddrE\","}
+{"tMs":3095,"delta":" \"fCity\", \"fC"}
+{"tMs":3095,"delta":"ityE\", \"fPost\","}
+{"tMs":3095,"delta":" \"fPostE\", \"f"}
+{"tMs":3095,"delta":"Email\", \"fEm"}
+{"tMs":3095,"delta":"ailE\", \"shipBt"}
+{"tMs":3095,"delta":"ns\"], \"layout\": {"}
+{"tMs":3095,"delta":"\"width\": {\"fill\":"}
+{"tMs":3095,"delta":" 390}, \"height\": {"}
+{"tMs":3095,"delta":"\"fill\": 670},"}
+{"tMs":3095,"delta":" \"padding\": 16},"}
+{"tMs":3095,"delta":" \"props\": {\"crossA"}
+{"tMs":3574,"delta":"xisAlignment\": \""}
+{"tMs":3574,"delta":"stretch\", \"spacing"}
+{"tMs":3574,"delta":"\": 4, \"scroll"}
+{"tMs":3574,"delta":"able\": true}, \"bind"}
+{"tMs":3574,"delta":"\": {\"visible\": \"${"}
+{"tMs":3574,"delta":"= step == 2}\"}"}
+{"tMs":3574,"delta":"},"}
+{"tMs":3574,"delta":" \"parent\": \"main\", \""}
+{"tMs":3574,"delta":"index\": 2}, {\""}
+{"tMs":3574,"delta":"op\": \"set\", \"id\":"}
+{"tMs":3574,"delta":" \"shipBack\", \"node"}
+{"tMs":3574,"delta":"\": {\"type\": \"outl"}
+{"tMs":4043,"delta":"inedButton\", \"layout"}
+{"tMs":4043,"delta":"\": {\"width\": {\"f"}
+{"tMs":4043,"delta":"ill\": 100}, \"fl"}
+{"tMs":4043,"delta":"ex\": 1, \"height\":"}
+{"tMs":4043,"delta":" 48}, \"props\": {"}
+{"tMs":4043,"delta":"\"label\": \"Back\", \""}
+{"tMs":4043,"delta":"style\": {\"foreground"}
+{"tMs":4043,"delta":"Color\": \"#FF111"}
+{"tMs":4043,"delta":"827\"}}, \"actions"}
+{"tMs":4043,"delta":"\": [{\"trigger\":"}
+{"tMs":4043,"delta":" {\"type\": \"click\"}"}
+{"tMs":4043,"delta":", \"actions\": [{\""}
+{"tMs":4612,"delta":"type\": \"setVariable\","}
+{"tMs":4612,"delta":" \"variable\": \"step\", \""}
+{"tMs":4612,"delta":"value\": \"1\"}]}"}
+{"tMs":4612,"delta":"]}},"}
+{"tMs":4612,"delta":" {\"op\": \"set\", \""}
+{"tMs":4612,"delta":"id\": \"shipNext\","}
+{"tMs":4612,"delta":" \"node\": {\"type\": \""}
+{"tMs":4612,"delta":"filledButton\", \"layout"}
+{"tMs":4612,"delta":"\": {\"width\": {\"f"}
+{"tMs":4612,"delta":"ill\": 200}, \"fl"}
+{"tMs":4612,"delta":"ex\": 2, \"height\":"}
+{"tMs":4612,"delta":" 48}, \"props\": {"}
+{"tMs":5105,"delta":"\"label\": \"Continue to"}
+{"tMs":5105,"delta":" payment\", \"style\": {\""}
+{"tMs":5105,"delta":"backgroundColor\": \""}
+{"tMs":5105,"delta":"#FF2563EB\","}
+{"tMs":5105,"delta":" \"foregroundColor\":"}
+{"tMs":5105,"delta":" \"#FFFFFF"}
+{"tMs":5105,"delta":"FF\", \"shape\": {"}
+{"tMs":5105,"delta":"\"type\": \"roundedR"}
+{"tMs":5105,"delta":"ectangle\", \"borderR"}
+{"tMs":5105,"delta":"adius\": 10}}}"}
+{"tMs":5105,"delta":", \"actions\": [{\""}
+{"tMs":5105,"delta":"trigger\": {\"type\":"}
+{"tMs":5612,"delta":" \"click\"}, \"actions"}
+{"tMs":5612,"delta":"\": [{\"type\": \"set"}
+{"tMs":5612,"delta":"Variable\", \"variable\":"}
+{"tMs":5612,"delta":" \"tried\", \"value\": \""}
+{"tMs":5612,"delta":"${= true}\"}, {"}
+{"tMs":5612,"delta":"\"type\": \"if\", \"cond"}
+{"tMs":5612,"delta":"ition\": {\"left\": \"${"}
+{"tMs":5613,"delta":"= valid}\", \"op\":"}
+{"tMs":5613,"delta":" \"isTrue\"},"}
+{"tMs":5613,"delta":" \"then\": [{\"type\":"}
+{"tMs":5613,"delta":" \"setVariable\", \"vari"}
+{"tMs":5613,"delta":"able\": \"step\", \"value\":"}
+{"tMs":6066,"delta":" \"3\"}]}]}"}
+{"tMs":6066,"delta":"]}},"}
+{"tMs":6066,"delta":" {\"op\": \"set\", \""}
+{"tMs":6066,"delta":"id\": \"payBack\", \""}
+{"tMs":6066,"delta":"node\": {\"type\": \"out"}
+{"tMs":6066,"delta":"linedButton\", \"lay"}
+{"tMs":6066,"delta":"out\": {\"width\": {\""}
+{"tMs":6066,"delta":"fill\": 100}, \""}
+{"tMs":6066,"delta":"flex\": 1, \"height"}
+{"tMs":6066,"delta":"\": 48}, \"props\":"}
+{"tMs":6066,"delta":" {\"label\": \"Back\","}
+{"tMs":6066,"delta":" \"style\": {\"foregro"}
+{"tMs":6548,"delta":"undColor\": \"#FF"}
+{"tMs":6548,"delta":"111827\"}}, \"act"}
+{"tMs":6548,"delta":"ions\": [{\"trigger"}
+{"tMs":6548,"delta":"\": {\"type\": \"click\""}
+{"tMs":6548,"delta":"}, \"actions\": [{"}
+{"tMs":6548,"delta":"\"type\": \"setVariable"}
+{"tMs":6548,"delta":"\", \"variable\": \"step\","}
+{"tMs":6548,"delta":" \"value\": \"2\"}]"}
+{"tMs":6548,"delta":"}]}},"}
+{"tMs":6548,"delta":" {\"op\": \"set\", \""}
+{"tMs":6548,"delta":"id\": \"payNow\", \""}
+{"tMs":6548,"delta":"node\": {\"type\": \"fil"}
+{"tMs":7117,"delta":"ledButton\", \"layout\":"}
+{"tMs":7117,"delta":" {\"width\": {\"fill"}
+{"tMs":7117,"delta":"\": 200}, \"flex"}
+{"tMs":7117,"delta":"\": 2, \"height\": "}
+{"tMs":7117,"delta":"48}, \"props\": {\""}
+{"tMs":7117,"delta":"label\": \"Place order\", \""}
+{"tMs":7117,"delta":"style\": {\"background"}
+{"tMs":7117,"delta":"Color\": \"#FF16"}
+{"tMs":7117,"delta":"A34A\", \"foregro"}
+{"tMs":7117,"delta":"undColor\": \"#FF"}
+{"tMs":7117,"delta":"FFFFFF\", \""}
+{"tMs":7117,"delta":"shape\": {\"type\": \""}
+{"tMs":7587,"delta":"roundedRectangle\","}
+{"tMs":7587,"delta":" \"borderRadius\": "}
+{"tMs":7587,"delta":"10}}}, \"actions"}
+{"tMs":7587,"delta":"\": [{\"trigger\":"}
+{"tMs":7587,"delta":" {\"type\": \"click\"}"}
+{"tMs":7587,"delta":", \"actions\": [{\""}
+{"tMs":7587,"delta":"type\": \"setVariable\","}
+{"tMs":7587,"delta":" \"variable\": \"orderN"}
+{"tMs":7587,"delta":"o\", \"value\": \"${="}
+{"tMs":7587,"delta":" 'ORD-' +"}
+{"tMs":7587,"delta":" (100000 + round(random"}
+{"tMs":7587,"delta":"() * 899999))}\""}
+{"tMs":7587,"delta":"}, {\"type\": \"set"}
+{"tMs":7587,"delta":"Variable\", \"variable\":"}
+{"tMs":7587,"delta":" \"step\", \"value\": \"4"}
+{"tMs":7587,"delta":"\"}]}]"}
+{"tMs":7587,"delta":"}}]"}
+{"tMs":7595,"delta":"}"}

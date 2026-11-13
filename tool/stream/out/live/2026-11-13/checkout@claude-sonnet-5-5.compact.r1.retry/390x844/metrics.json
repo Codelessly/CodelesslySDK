@@ -1,0 +1,46 @@
+{
+ "stream": "checkout@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 2135,
+ "timeToFirstPaintMs": 3574,
+ "timeToFirstTextMs": 3574,
+ "timeToFirstSectionMs": 3574,
+ "timeToCompleteMs": 7595,
+ "outputTokens": 1128,
+ "tokensEstimated": false,
+ "chars": 2136,
+ "deltas": 132,
+ "opsApplied": 5,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 49,
+   "rejected": 5
+  }
+ ],
+ "streamedOps": 5,
+ "rejections": [],
+ "nodes": 52,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 3,
+  "p90": 12,
+  "max": 12
+ },
+ "frames": 128,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 261,
+ "pumpMsMedian": 0.117,
+ "renderExceptions": [],
+ "warnings": 0
+}

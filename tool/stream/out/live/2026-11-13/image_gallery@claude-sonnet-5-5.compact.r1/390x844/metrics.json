@@ -1,0 +1,57 @@
+{
+ "stream": "image_gallery@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1285,
+ "timeToFirstPaintMs": 10027,
+ "timeToFirstTextMs": 10027,
+ "timeToFirstSectionMs": 13732,
+ "timeToCompleteMs": 21105,
+ "outputTokens": 3358,
+ "tokensEstimated": false,
+ "chars": 6142,
+ "deltas": 455,
+ "opsApplied": 21,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/counter/bind/props.text",
+  "dangling_child /nodes/topBar/children/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 22,
+ "rejections": [
+  {
+   "op": 13,
+   "code": "expression_syntax",
+   "path": "/nodes/counter/bind/props.text",
+   "message": "The formula \"${= (sel + 1) + ' of ' + len(photos)}\" does not parse: Unknown function \"len\".",
+   "nodeId": "counter"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/topBar/children/0",
+   "message": "Child \"counter\" of \"topBar\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "topBar"
+  }
+ ],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 8,
+  "max": 28
+ },
+ "frames": 180,
+ "frameMs": 122,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 636,
+ "pumpMsMedian": 0.117,
+ "renderExceptions": [],
+ "warnings": 0
+}

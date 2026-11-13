@@ -1,0 +1,43 @@
+{
+ "stream": "question_flow@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 631,
+ "timeToFirstPaintMs": 1497,
+ "timeToFirstTextMs": 2190,
+ "timeToFirstSectionMs": 4558,
+ "timeToCompleteMs": 13055,
+ "outputTokens": 4219,
+ "tokensEstimated": false,
+ "chars": 8789,
+ "deltas": 607,
+ "opsApplied": 29,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "no_size nav"
+ ],
+ "finalDiagnostics": [
+  "no_size /nodes/nav/layout"
+ ],
+ "scripts": 0,
+ "streamedOps": 29,
+ "rejections": [],
+ "nodes": 27,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 5,
+  "max": 9
+ },
+ "frames": 180,
+ "frameMs": 77,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 788,
+ "pumpMsMedian": 0.112,
+ "renderExceptions": [],
+ "warnings": 0
+}

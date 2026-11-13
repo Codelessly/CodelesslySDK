@@ -1,0 +1,108 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 43792,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 19412,
+ "generate": {
+  "inputTokens": 319,
+  "outputTokens": 1110,
+  "cacheReadInputTokens": 19333,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 612,
+  "firstToolDeltaMs": 645,
+  "totalMs": 4146,
+  "stopReason": "StopReason.toolUse",
+  "ops": 10,
+  "opsApplied": 8,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 1,
+  "errors": [
+   "unknown_prop /nodes/grid/props/scrollable",
+   "invalid_parent /ops/9/parent",
+   "dangling_child /nodes/page/children/1"
+  ],
+  "lints": [],
+  "warnings": 1,
+  "nodes": 6,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 2515,
+   "outputTokens": 361,
+   "cacheReadInputTokens": 19333,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 424,
+   "firstToolDeltaMs": 467,
+   "totalMs": 1436,
+   "stopReason": "StopReason.toolUse",
+   "ops": 3,
+   "opsApplied": 1,
+   "opsRejected": 2,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "would_orphan /nodes/gallery/slots/body",
+    "structural_key_in_patch /nodes/gallery/slots"
+   ],
+   "lints": [
+    "low_contrast tileCap"
+   ],
+   "warnings": 1,
+   "nodes": 7,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 3407,
+   "outputTokens": 196,
+   "cacheReadInputTokens": 19333,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 369,
+   "firstToolDeltaMs": 411,
+   "totalMs": 884,
+   "stopReason": "StopReason.toolUse",
+   "ops": 3,
+   "opsApplied": 1,
+   "opsRejected": 2,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "would_orphan /nodes/gallery/slots/body",
+    "unknown_id /ops/1/parent"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 7,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 3,
+  "opsApplied": 1,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "would_orphan /nodes/gallery/slots/body",
+   "unknown_id /ops/1/parent"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 7,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}
