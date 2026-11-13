@@ -65,6 +65,7 @@ class RuntimeActionContext implements ActionHost {
     this.openPaywall,
     this.presentPaywall,
     this.scripts = const [],
+    this.extensions = const [],
     List<VoidCallback>? disposers,
     FailedActions? failed,
   })  : services = services ?? const _NoServices(),
@@ -133,6 +134,18 @@ class RuntimeActionContext implements ActionHost {
   /// The scripts its run script actions run (the layout's).
   final List<ScriptDef> scripts;
 
+  /// What the app shell attaches for its features' handlers, found by type
+  /// ([extension]): the core carries them without reading them.
+  final List<Object> extensions;
+
+  /// The attachment of type [T], if any.
+  T? extension<T extends Object>() {
+    for (final e in extensions) {
+      if (e is T) return e;
+    }
+    return null;
+  }
+
   @override
   RuntimeActionContext withScope(ValueScope scope) => _copy(scope);
 
@@ -157,6 +170,7 @@ class RuntimeActionContext implements ActionHost {
         openPaywall: openPaywall,
         presentPaywall: presentPaywall,
         scripts: scripts,
+        extensions: extensions,
         disposers: _disposers,
         failed: failed,
       );

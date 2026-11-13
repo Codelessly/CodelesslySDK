@@ -1,5 +1,6 @@
 // Runs reactions: a trigger's actions in order, as one chain. Each action
-// type has a typed handler (handlers.dart) over an ActionContext; nothing
+// type has a typed handler over an ActionContext: the core ones in
+// handlers.dart, the rest registered by features (feature.dart); nothing
 // here holds a BuildContext.
 //
 // * A blocking action is awaited before the next; a non-blocking one isn't,
@@ -25,6 +26,7 @@ import '../expressions/scopes.dart';
 import 'context.dart';
 import 'action_error.dart';
 export 'action_error.dart' show ActionFailed;
+import 'feature.dart';
 import 'handlers.dart';
 import 'key_matching.dart';
 import 'ui.dart';
@@ -80,8 +82,12 @@ class ActionsStopped extends ActionsCanceled {
 
 /// One running chain: what its actions read and share.
 class ActionRun {
-  ActionRun._(this.context, this.host, this.scope, this.cancellation, this.node, this.value, [ActionCancellation? stopped])
+  ActionRun._(this.context, this.host, this.scope, this.cancellation, this.node, this.value, this._registry,
+      [ActionCancellation? stopped])
       : _stopped = stopped ?? ActionCancellation();
+
+  /// The handlers and functions its runner was given.
+  final _Registry _registry;
 
   final ActionCancellation _stopped;
 
@@ -136,7 +142,7 @@ class ActionRun {
   /// `${result}` starts as [result]; [names] are more names its actions
   /// read (a for-each turn's `loop`).
   ActionRun nested(Object? result, {Json names = const {}}) =>
-      ActionRun._(context, host, ValuesScope({...names, 'result': result}, scope), cancellation, node, value, _stopped)
+      ActionRun._(context, host, ValuesScope({...names, 'result': result}, scope), cancellation, node, value, _registry, _stopped)
         ..instance = instance;
 
   /// [text] with its `${...}` evaluated (text).
@@ -174,19 +180,44 @@ class ActionRun {
 
   /// Runs [actions] in order in this chain.
   Future<void> run(List<ActionDef> actions) => runActions(actions, this);
+
+  /// The app's service of type [T] (`service<AuthService>()`), when its
+  /// services give one ([ServiceLocator]): how a feature's handler reaches
+  /// its own service without knowing the rest.
+  T? service<T extends Object>() => context.services.lookup<T>();
+
+  /// [service], or a failure saying [what] needs it.
+  T require<T extends Object>(String what) => service<T>() ?? (throw StateError('$what needs the app\'s Services.'));
+
+  /// What the app shell attached to the chain's context for a feature
+  /// ([RuntimeActionContext.extensions]): a paywall's session, say.
+  T? extension<T extends Object>() => switch (host) {
+        final RuntimeActionContext context => context.extension<T>(),
+        _ => null,
+      };
+
+  /// The function a feature registered as [name] for call function actions.
+  FeatureFunction? function(String name) => _registry.function(name);
 }
 
-/// The default [ActionRunner]: runs a node's reactions with the typed
-/// handlers of [handlers] (the built-in ones, which an app can override or
-/// extend by action type: a type the API doesn't declare decodes as an
-/// [UnknownAction], whose handler reads its fields from
-/// [UnknownAction.json]).
-class CodelesslyActions implements ActionRunner {
-  const CodelesslyActions({this.handlers = const {}});
+/// The core [ActionRunner]: runs a node's reactions with the core handlers
+/// (navigation, modals, variables, focus, scroll, animation, scripts...) and
+/// those of [features] and [handlers], by action type. It knows no feature:
+/// a type none of them handles fails its chain saying so (a type the API
+/// doesn't declare, an [UnknownAction], is skipped instead).
+/// `CodelesslyActions` is this with the first-party features installed.
+class CoreActions implements ActionRunner {
+  const CoreActions({this.handlers = const {}, this.features = const []});
 
-  /// Handlers by action type (`setVariable`, `callApi`...), over the
-  /// built-in ones.
+  /// Handlers by action type (`setVariable`, `callApi`...), over the core
+  /// ones and those of [features]: a type the API doesn't declare decodes
+  /// as an [UnknownAction], whose handler reads its fields from
+  /// [UnknownAction.json].
   final Map<String, ActionHandler> handlers;
+
+  /// The feature layers installed: their handlers, functions and scopes. A
+  /// later feature's handler for a type replaces an earlier one's.
+  final List<CodelesslyFeature> features;
 
   @override
   Future<void> trigger(Node node, String trigger, ActionContext context, {Json event = const {}}) =>
@@ -305,6 +336,7 @@ class CodelesslyActions implements ActionRunner {
       cancellation ?? ActionCancellation(),
       node,
       event['value'],
+      _Registry(handlers, features),
     )..instance = instance;
     // A clock can share its node with other clocks: gate each reaction,
     // rather than the whole trigger chain, against the current scope.
@@ -314,11 +346,8 @@ class CodelesslyActions implements ActionRunner {
       return (expression.contains(r'${') ? run.evaluate(expression) : run.expressions.formula(expression,run.scope))==true;
     }
     final actions = [for (final reaction in reactions) if(clockRuns(reaction)) ...reaction.actions];
-    final scoped = handlers.isEmpty ? null : _HandlerOverrides(handlers);
     try {
-      await (scoped == null
-          ? runActions(actions, run)
-          : runZoned(() => runActions(actions, run), zoneValues: {#codelesslyHandlers: scoped}));
+      await runActions(actions, run);
     } on ActionsStopped catch (stop) {
       if (host case final RuntimeActionContext context) {
         context.failed.last = () => _run(node, reactions, context, event, ActionCancellation(), instance);
@@ -345,9 +374,26 @@ class CodelesslyActions implements ActionRunner {
   static String? _failing(Object error) => error is ActionFailed ? error.action : null;
 }
 
-class _HandlerOverrides {
-  const _HandlerOverrides(this.handlers);
+/// The handlers and functions of one runner: the app's handlers over its
+/// features' (each list of features merged once).
+class _Registry {
+  _Registry(this.handlers, this.features);
+
   final Map<String, ActionHandler> handlers;
+  final List<CodelesslyFeature> features;
+
+  static final Expando<({Map<String, ActionHandler> actions, Map<String, FeatureFunction> functions})> _merged =
+      Expando('features');
+
+  ({Map<String, ActionHandler> actions, Map<String, FeatureFunction> functions}) get _features =>
+      _merged[features] ??= (
+        actions: {for (final f in features) ...f.actions},
+        functions: {for (final f in features) ...f.functions},
+      );
+
+  ActionHandler? handler(String type) => handlers[type] ?? (features.isEmpty ? null : _features.actions[type]);
+
+  FeatureFunction? function(String name) => features.isEmpty ? null : _features.functions[name];
 }
 
 /// Runs [actions] in [run]: each enabled one whose `when` holds, blocking
@@ -357,9 +403,9 @@ Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
   for (final a in actions) {
     if (run.isCanceled) throw const ActionsCanceled();
     if (!a.enabled) continue;
-    // A type this SDK doesn't know runs only when the app gave a handler
-    // for it ([CodelesslyActions.handlers]); otherwise it's skipped.
-    if (a is UnknownAction && !_hasHandler(a.type)) continue;
+    // A type this SDK doesn't know runs only when the app (or a feature)
+    // gave a handler for it; otherwise it's skipped.
+    if (a is UnknownAction && run._registry.handler(a.type) == null) continue;
     if (a.when case final w? when !run.expressions.test(w, run.scope)) continue;
     if (a.nonBlocking) {
       unawaited(_perform(a, run).catchError((Object e, StackTrace s) {
@@ -371,12 +417,8 @@ Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
   }
 }
 
-bool _hasHandler(String type) =>
-    (Zone.current[#codelesslyHandlers] as _HandlerOverrides?)?.handlers.containsKey(type) ?? false;
-
 Future<void> _perform(ActionDef a, ActionRun run) async {
-  final overrides = Zone.current[#codelesslyHandlers] as _HandlerOverrides?;
-  final handler = overrides?.handlers[a.type];
+  final handler = run._registry.handler(a.type);
   try {
     if (handler != null) {
       await handler(a, run);

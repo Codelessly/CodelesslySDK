@@ -7,7 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show BuildContext, GlobalKey, Rect;
 
 import '../runtime/actions/app_data_sources.dart';
+import '../features/first_party.dart' show kFirstPartyFeatures;
 import '../runtime/actions/app_events.dart';
+import '../runtime/actions/feature.dart';
+import '../runtime/actions/runner.dart' show CoreActions;
 import '../runtime/actions/context.dart' show AppFunction;
 import '../runtime/contracts.dart';
 import '../runtime/expressions/scopes.dart';
@@ -158,7 +161,18 @@ class Codelessly extends ChangeNotifier {
   /// each screen's own scope, so a value one screen sets the next one reads.
   /// Declared from the publish model's `variables` (and a publish's
   /// `app_variables` scope, [declareAppVariables]).
-  late final VariableScope appVariables = VariableScope(const [], parent: _storage);
+  late final VariableScope appVariables = VariableScope(const [], parent: _featureScopes.build(features, _storage));
+
+  /// The feature layers this instance runs: those of its action runner
+  /// ([CoreActions.features]; `CodelesslyActions` installs the first-party
+  /// ones), or the first-party ones under a runner of another kind. Their
+  /// scopes (`auth`, `storage`, `speech`...) sit under [appVariables].
+  List<CodelesslyFeature> get features => switch (config.actions) {
+        final CoreActions actions => actions.features,
+        _ => kFirstPartyFeatures,
+      };
+
+  late final FeatureScopeHost _featureScopes = FeatureScopeHost(services);
 
   /// The live data the whole app shares: `loadCloudData` actions with
   /// `scope: app` open one subscription here, on first use, and every
@@ -176,9 +190,7 @@ class Codelessly extends ChangeNotifier {
   late final _StorageScope _storage = _StorageScope(services, parent: _usage);
 
   /// `usage`: the per-user counters of [automations].
-  late final ValuesScope _usage = ValuesScope({'usage': CodelesslyAutomations.emptyUsage}, _speech);
-
-  late final _SpeechScope _speech = _SpeechScope(services, parent: _serviceValues);
+  late final ValuesScope _usage = ValuesScope({'usage': CodelesslyAutomations.emptyUsage}, _serviceValues);
   late final _ServiceValuesScope _serviceValues = _ServiceValuesScope(services, parent: data);
 
   /// Makes completed native auth operations visible to the next action in
@@ -535,9 +547,9 @@ class Codelessly extends ChangeNotifier {
       scope.dispose();
     }
     appVariables.dispose();
+    _featureScopes.dispose();
     _storage.dispose();
     _usage.dispose();
-    _speech.dispose();
     _serviceValues.dispose();
     data.dispose();
     // Lazy expression scopes must detach while the service notifiers live.
@@ -680,25 +692,6 @@ class _StorageScope extends NamedScope {
   @override
   void dispose() {
     _store?.removeListener(_storeChanged);
-    super.dispose();
-  }
-}
-
-/// The current utterance, including boundary-driven word highlighting.
-class _SpeechScope extends NamedScope {
-  _SpeechScope(CodelesslyServices services, {super.parent})
-      : _speech = services is Services ? services.speech : null {
-    _speech?.addListener(_changed);
-  }
-  final SpeechService? _speech;
-  void _changed() => changed(const ['speech']);
-  @override
-  bool declares(String name) => name == 'speech';
-  @override
-  Object? valueOf(String name, ValueScope reader) => _speech?.value ?? const <String, Object?>{};
-  @override
-  void dispose() {
-    _speech?.removeListener(_changed);
     super.dispose();
   }
 }

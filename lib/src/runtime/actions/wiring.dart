@@ -120,7 +120,7 @@ class TreeReactions implements NodeInteractions {
     if (trigger == 'changed' && event.containsKey('value')) _writeBack(node, event['value'], ctx);
     final state = _boxes[box];
     final r = runner;
-    if (r is CodelesslyActions) {
+    if (r is CoreActions) {
       await r.run(node, trigger, ctx, event: event, cancellation: state?.cancellation, instance: box.instance);
     } else {
       await r.trigger(node, trigger, ctx, event: event).catchError((Object e, StackTrace s) {
@@ -138,7 +138,7 @@ class TreeReactions implements NodeInteractions {
     final state = _boxes[box];
     final r = runner;
     try {
-      if (r is CodelesslyActions) {
+      if (r is CoreActions) {
         await r.run(node, trigger, ctx, event: event, cancellation: state?.cancellation, instance: box.instance);
       } else {
         await r.trigger(node, trigger, ctx, event: event);

@@ -63,3 +63,19 @@ abstract interface class CodelesslyServices {
   /// Opens [url] (links).
   Future<bool> openUrl(String url);
 }
+
+/// Services that give their parts by type: how a feature reaches its own
+/// service (`service<AuthService>()`) without the runtime knowing which
+/// services there are. `Services` is one.
+abstract interface class ServiceLocator {
+  /// The service of type [T], or null when there is none.
+  T? service<T extends Object>();
+}
+
+/// [ServiceLocator.service] on any services (null when they aren't a locator).
+extension ServiceLookup on CodelesslyServices {
+  T? lookup<T extends Object>() => switch (this) {
+        final ServiceLocator locator => locator.service<T>(),
+        _ => null,
+      };
+}

@@ -132,6 +132,8 @@ export 'src/scripting/sandbox/script_sandbox.dart';
 export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
 export 'src/runtime/actions/actions.dart';
+// The feature layers over the core runtime, and the runner that installs them.
+export 'src/features/first_party.dart';
 // Render objects that paint images, and whether one is still loading (tools wait for them before a capture).
 export 'src/render/paint/image_fill.dart' show ImageClient, PaintImages;
 export 'src/runtime/lists/lists.dart';

@@ -55,31 +55,44 @@ class _AudioTonePlayer implements NativeTonePlayer {
   }
 }
 
-/// One sample of [waveform] at [phase] radians, about −1..1. Instrument
-/// voices are their wave's harmonics (no filters on this path).
-double _wave(String waveform, double phase) {
+/// One sample of [waveform] at [phase] radians, about −1..1. An
+/// [instrument] is its harmonics, summed (no filters on this path).
+double _wave(String waveform, double phase, [SoundInstrument? instrument]) {
+  if (instrument != null) {
+    var sample = 0.0;
+    for (final h in instrument.harmonics) {
+      final at = h.ratio * phase;
+      final cycle = (at / (2 * math.pi)) % 1;
+      sample += h.level *
+          switch (h.wave) {
+            'triangle' => 4 * (cycle - .5).abs() - 1,
+            'square' => cycle < .5 ? 1 : -1,
+            'sawtooth' => 2 * cycle - 1,
+            _ => math.sin(at),
+          };
+    }
+    return sample;
+  }
   final cycle = (phase / (2 * math.pi)) % 1;
   double tri(double c) => 4 * (c - .5).abs() - 1;
   return switch (waveform) {
     'triangle' => tri(cycle),
     'square' => cycle < .5 ? .7 : -.7,
     'sawtooth' => (2 * cycle - 1) * .7,
-    'felt' => .85 * tri(cycle) + .15 * math.sin(2 * phase),
-    'reed' => .5 * (cycle < .5 ? 1 : -1) + .3 * math.sin(phase) + .2 * math.sin(3 * phase),
-    'pluck' => .6 * math.sin(phase) + .25 * math.sin(2 * phase) + .15 * math.sin(3 * phase),
     _ => math.sin(phase),
   };
 }
 
 /// PCM16 mono WAV. An integer number of periods makes a seamless loop.
-Uint8List toneWave(double frequency, double volume, {bool sustained = true, String waveform = 'sine'}) {
+Uint8List toneWave(double frequency, double volume,
+    {bool sustained = true, String waveform = 'sine', SoundInstrument? instrument}) {
   const rate = 48000;
   final hz = frequency.clamp(8, 24000).toDouble();
   final cycles = math.max(1, (hz / 4).round());
-  // A pluck dies away by itself: 1.6 s, not looped.
-  final pluck = waveform == 'pluck';
-  if (pluck) sustained = false;
-  final samples = sustained ? (cycles * rate / hz).round() : (pluck ? rate * 8 ~/ 5 : rate ~/ 12);
+  // An instrument that dies away by itself (a pluck) rings, not looped.
+  final ring = instrument?.ringSeconds;
+  if (ring != null) sustained = false;
+  final samples = sustained ? (cycles * rate / hz).round() : (ring != null ? (rate * ring).round() : rate ~/ 12);
   final radiansPerSample = sustained
       ? 2 * math.pi * cycles / samples
       : 2 * math.pi * hz / rate;
@@ -101,10 +114,10 @@ Uint8List toneWave(double frequency, double volume, {bool sustained = true, Stri
   text(36, 'data');
   data.setUint32(40, samples * 2, Endian.little);
   for (var i = 0; i < samples; i++) {
-    final envelope = sustained ? 1.0 : math.exp(-i / (rate * (pluck ? .55 : .015)));
+    final envelope = sustained ? 1.0 : math.exp(-i / (rate * (ring != null ? instrument!.ringTau : .015)));
     data.setInt16(
       44 + i * 2,
-      (_wave(waveform, radiansPerSample * i) *
+      (_wave(waveform, radiansPerSample * i, instrument) *
               volume.clamp(0, 2) *
               .1 *
               32767 *
@@ -117,11 +130,14 @@ Uint8List toneWave(double frequency, double volume, {bool sustained = true, Stri
 }
 
 class NativeSoundEngine
-    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine, WaveformSoundEngine {
+    implements SoundEngine, SustainedSoundEngine, DisposableSoundEngine, WaveformSoundEngine, InstrumentSoundEngine {
   NativeSoundEngine({NativeTonePlayer Function()? createPlayer})
     : _create = createPlayer ?? _AudioTonePlayer.new;
   final NativeTonePlayer Function() _create;
   final Map<String, NativeTonePlayer> _voices = {};
+  final Map<String, SoundInstrument> _instruments = {};
+  @override
+  void addInstrument(SoundInstrument instrument) => _instruments[instrument.name] = instrument;
   final Stopwatch _clock = Stopwatch()..start();
   bool _available = true;
   bool _disposed = false;
@@ -159,16 +175,18 @@ class NativeSoundEngine
       return;
     }
     _voices[id] = output;
+    final instrument = _instruments[waveform];
+    final rings = instrument?.ringSeconds != null;
     unawaited(() async {
       try {
         await output.load(
-          toneWave(frequency, volume, sustained: loop,waveform:waveform),
-          loop: loop && waveform != 'pluck',
+          toneWave(frequency, volume, sustained: loop, waveform: waveform, instrument: instrument),
+          loop: loop && !rings,
         );
         if (!identical(_voices[id], output)) return;
         _available = true;
         output.play();
-        if (!loop && waveform != 'pluck') {
+        if (!loop && !rings) {
           Timer(const Duration(milliseconds: 150), () {
             if (identical(_voices[id], output)) stopNote(id);
           });

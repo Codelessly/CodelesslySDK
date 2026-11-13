@@ -6,8 +6,8 @@ import 'package:flutter/scheduler.dart';
 
 import '../../render/layout/design_scroll.dart';
 import '../../render/node_tree.dart';
-import '../../services/services.dart';
-import 'runner.dart';
+import '../../runtime/actions/runner.dart';
+import '../../services/printing.dart' show PrintService;
 
 /// Captures one fully visible node. Move a containing viewport first so a
 /// badge larger than the visible part is never silently printed truncated.
@@ -83,8 +83,8 @@ Future<void> printNodeAction(String nodeId, ActionRun run) async {
   if (box == null) {
     throw StateError('There is no rendered print node "$nodeId".');
   }
-  final services = run.context.services;
-  if (services is! Services) throw StateError('Printing needs Services.');
+  final printing = run.service<PrintService>();
+  if (printing == null) throw StateError('Printing needs Services.');
   final png = await capturePrintNode(box);
-  run.result = {'requested': await services.printing.printPng(png)};
+  run.result = {'requested': await printing.printPng(png)};
 }
