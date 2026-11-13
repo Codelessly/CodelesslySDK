@@ -1,6 +1,7 @@
 // The render command (tool/render): strict validation, rendering every
 // screen at each size, interactions, and the runtime checks, run in-process
 // on the fixtures next to this file.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -10,6 +11,7 @@ import 'dart:ui' show Size;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/render/src/args.dart';
+import '../../tool/render/src/compare.dart';
 import '../../tool/render/src/render.dart';
 
 const fixtures = 'test/tool/fixtures';
@@ -442,5 +444,33 @@ void main() {
     expect(await moved(const [Step('type', 'field', 'abc'), Step('key', 'ArrowRight')]), 0, reason: 'the focused field took the key');
     expect(await moved(const [Step('type', 'field', 'abc'), Step('unfocus', ''), Step('key', 'ArrowRight')]), 40);
     expect(parseArgs(['k.json', '--out', 'o', '--unfocus', '--key', 'shift+Tab']).steps.map((s) => s.kind), ['unfocus', 'key']);
+  });
+
+  testWidgets('--compare: the same page matches; one pushed down is found shifted, its height difference said', (tester) async {
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
+        fullPage: true, compare: '$fixtures/fix3-drawer.json'.replaceFirst('fix3-drawer.json', 'none.png')));
+    expect(codes(r), ['compare_failed'], reason: '${r.diagnostics}');
+    final capture = r.images.single;
+    // A reference: the capture 20 px lower under a 20 px band.
+    final reference = '${out.path}/ref.png';
+    await tester.runAsync(() async {
+      final img = await decodePng(File(capture).readAsBytesSync());
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      canvas.drawRect(const ui.Rect.fromLTWH(0, 0, 390, 20), ui.Paint()..color = const ui.Color(0xFF000000));
+      final c = Completer<ui.Image>();
+      ui.decodeImageFromPixels(img.rgba, img.width, img.height, ui.PixelFormat.rgba8888, c.complete);
+      canvas.drawImage(await c.future, const ui.Offset(0, 20), ui.Paint());
+      final out = await recorder.endRecording().toImage(390, img.height + 20);
+      File(reference).writeAsBytesSync((await out.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List());
+    });
+    final same = (await tester.runAsync(() => compareImages(capture, capture)))!;
+    expect(same.matching, 1.0);
+    expect(same.bands, isEmpty);
+    final shifted = (await tester.runAsync(() => compareImages(capture, reference)))!;
+    expect(shifted.referenceHeight - shifted.captureHeight, 20);
+    expect(shifted.bands.any((b) => b.shift == 20), isTrue, reason: shifted.summary());
+    expect(shifted.summary(), contains('20 px shorter than the reference'));
+    expect(File(capture.replaceFirst('.png', '.compare.png')).existsSync() && File(capture.replaceFirst('.png', '.diff.png')).existsSync(), isTrue);
   });
 }
