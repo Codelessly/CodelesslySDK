@@ -1,0 +1,76 @@
+{
+ "ui": "flights",
+ "model": "claude-haiku-5-5",
+ "systemPromptAndToolsTokens": 28768,
+ "generate": {
+  "inputTokens": 192,
+  "outputTokens": 3170,
+  "cacheReadInputTokens": 0,
+  "cacheCreationInputTokens": 28689,
+  "ttftMs": 674,
+  "firstToolDeltaMs": 894,
+  "totalMs": 10215,
+  "stopReason": "StopReason.toolUse",
+  "ops": 6,
+  "opsApplied": 6,
+  "opsRejected": 0,
+  "errors": [
+   "dangling_child /nodes/wrap/children/2",
+   "dangling_child /nodes/wrap/children/3",
+   "dangling_child /nodes/wrap/children/4",
+   "dangling_child /nodes/opt0/children/0",
+   "dangling_child /nodes/opt0/children/1"
+  ],
+  "warnings": 1,
+  "nodes": 4
+ },
+ "retry": {
+  "inputTokens": 893,
+  "outputTokens": 800,
+  "cacheReadInputTokens": 28689,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 539,
+  "firstToolDeltaMs": 939,
+  "totalMs": 3149,
+  "stopReason": "StopReason.toolUse",
+  "ops": 7,
+  "opsApplied": 5,
+  "opsRejected": 2,
+  "errors": [
+   "canvas_as_child /nodes/flights",
+   "would_orphan /nodes/card/children",
+   "dangling_child /nodes/wrap/children/2",
+   "dangling_child /nodes/wrap/children/3",
+   "dangling_child /nodes/wrap/children/4",
+   "dangling_child /nodes/opt0/children/0",
+   "dangling_child /nodes/opt0/children/1",
+   "dangling_child /roots/0"
+  ],
+  "warnings": 6,
+  "nodes": 6
+ },
+ "followup": {
+  "inputTokens": 2209,
+  "outputTokens": 214,
+  "cacheReadInputTokens": 28689,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 507,
+  "firstToolDeltaMs": null,
+  "totalMs": 1635,
+  "stopReason": "StopReason.endTurn",
+  "ops": 0,
+  "opsApplied": 0,
+  "opsRejected": 0,
+  "errors": [
+   "missing_field /ops",
+   "dangling_child /nodes/wrap/children/2",
+   "dangling_child /nodes/wrap/children/3",
+   "dangling_child /nodes/wrap/children/4",
+   "dangling_child /nodes/opt0/children/0",
+   "dangling_child /nodes/opt0/children/1",
+   "dangling_child /roots/0"
+  ],
+  "warnings": 3,
+  "nodes": 6
+ }
+}

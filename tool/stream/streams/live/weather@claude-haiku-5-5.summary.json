@@ -1,0 +1,37 @@
+{
+ "ui": "weather",
+ "model": "claude-haiku-5-5",
+ "systemPromptAndToolsTokens": 28768,
+ "generate": {
+  "inputTokens": 170,
+  "outputTokens": 4886,
+  "cacheReadInputTokens": 28689,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 949,
+  "firstToolDeltaMs": 1134,
+  "totalMs": 14894,
+  "stopReason": "StopReason.toolUse",
+  "ops": 50,
+  "opsApplied": 50,
+  "opsRejected": 0,
+  "errors": [],
+  "warnings": 0,
+  "nodes": 49
+ },
+ "followup": {
+  "inputTokens": 6382,
+  "outputTokens": 217,
+  "cacheReadInputTokens": 28689,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 834,
+  "firstToolDeltaMs": 1298,
+  "totalMs": 1692,
+  "stopReason": "StopReason.toolUse",
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "errors": [],
+  "warnings": 0,
+  "nodes": 49
+ }
+}
