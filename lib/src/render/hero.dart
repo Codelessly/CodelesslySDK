@@ -57,13 +57,13 @@ bool imagesPendingUnder(RenderObject box) {
 
 /// The marks of the shared elements of each tree on screen.
 abstract final class HeroMarks {
-  static final Map<NodeTree, Set<RenderHeroMark>> _byTree = {};
+  static final Map<RenderTree, Set<RenderHeroMark>> _byTree = {};
 
   /// The trees with marks.
-  static Iterable<NodeTree> get trees => _byTree.keys;
+  static Iterable<RenderTree> get trees => _byTree.keys;
 
   /// The attached marks of [tree] with a tag.
-  static Iterable<RenderHeroMark> of(NodeTree tree) =>
+  static Iterable<RenderHeroMark> of(RenderTree tree) =>
       (_byTree[tree] ?? const {}).where((m) => m.attached && m.tag.isNotEmpty);
 
   static void _add(RenderHeroMark m) => (_byTree[m.tree!] ??= {}).add(m);
@@ -77,9 +77,9 @@ abstract final class HeroMarks {
 
 /// A shared element's place in its node's chain.
 class RenderHeroMark extends RenderProxyBox {
-  NodeTree? _tree;
-  NodeTree? get tree => _tree;
-  set tree(NodeTree? v) {
+  RenderTree? _tree;
+  RenderTree? get tree => _tree;
+  set tree(RenderTree? v) {
     if (identical(v, _tree)) return;
     if (attached && _tree != null) HeroMarks._remove(this);
     _tree = v;

@@ -9,8 +9,11 @@ import 'package:codelessly_api/codelessly_api.dart' show Node;
 
 import 'package:flutter/foundation.dart' show Listenable;
 
+import '../../render/behavior_values.dart';
 import '../contracts.dart';
 import 'scopes.dart';
+
+export '../../render/behavior_values.dart' show trackValues;
 
 /// The names a node of a kind declares for the nodes inside it, with the
 /// values they read before its render objects say otherwise ([parent] is
@@ -115,36 +118,12 @@ Map<String, Object?>? trackScopeValues(Node node, ValueScope parent) {
   return {'track': trackValues(track, value)};
 }
 
-/// `${track}` for [track] drawn at [value] (NaN: empty) at [progress]
-/// (its rest place when null).
-Map<String, Object?> trackValues(api.DragTrack track, double value,
-        {double? progress, bool dragging = false, bool fine = false, bool focused = false}) {
-  final shown = progress ?? track.restProgressOf(value);
-  return {
-    'value': value.isNaN ? null : value,
-    // An endless track reports where it is within one turn.
-    'progress': track.unbounded ? shown - shown.floorToDouble() : shown,
-    'dragging': dragging,
-    'fine': fine,
-    'focused': focused,
-  };
-}
-
 /// The value [track] is drawn at, read in [scope]: its bound value
 /// (`drag.track.value`), else its variable's, else its default or start;
 /// NaN (empty) for a track that parks such a value
 /// ([api.DragTrack.parkedProgress]).
-double trackValueIn(api.DragTrack track, ValueScope? scope) {
-  final Object? raw = track.value ?? (track.hasVariable && scope != null ? readPath(scope, track.variable.trim()) : null);
-  final double? value = switch (raw) {
-    final num n when n.isFinite => n.toDouble(),
-    final String s => double.tryParse(s.trim()),
-    _ => null,
-  };
-  if (value != null) return value;
-  if (track.parkedProgress != null) return double.nan;
-  return track.defaultValue ?? track.min;
-}
+double trackValueIn(api.DragTrack track, ValueScope? scope) =>
+    trackValueFrom(track, scope == null ? null : (path) => readPath(scope, path));
 
 /// A flip card's `flip`: on its back or not, and the turn (0 front, 1
 /// back).
@@ -159,14 +138,8 @@ Map<String, Object?>? flipScopeValues(Node node, ValueScope parent) {
 
 /// Whether [flip] shows its back: its variable's value when it has one,
 /// else `flipped` (bindable).
-bool flipWantedIn(api.FlipCard flip, ValueScope? scope) {
-  final name = flip.variable.trim();
-  if (name.isEmpty || scope == null) return flip.flipped;
-  final v = readPath(scope, name);
-  if (v == null) return flip.flipped;
-  if (v is bool) return v;
-  return '$v'.trim().toLowerCase() == 'true';
-}
+bool flipWantedIn(api.FlipCard flip, ValueScope? scope) =>
+    flipWantedFrom(flip, scope == null ? null : (path) => readPath(scope, path));
 
 /// A tilt's `tilt`: where the pointer is over it (-1–1) and whether it's
 /// over it.

@@ -13,7 +13,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show ScrollPosition;
 
-import '../runtime/actions/context.dart' show setVariableIn;
 import 'layout/design_scroll.dart';
 import 'node_tree.dart' show NodeBox;
 
@@ -162,10 +161,10 @@ class RenderViewProgress extends RenderProxyBox with _FollowsScroll {
     _lastVisible = visible;
     onValues?.call({'progress': p, 'visible': visible});
     final name = _model.variable.trim();
-    final scope = _node?.tree.binder?.scopeFor(_node!.tree.source, _node!.id, _node!.instance);
+    final scope = _node?.tree.bindings?.valuesFor(_node!.tree.source, _node!.id, _node!.instance);
     if (_interactive && name.isNotEmpty && scope != null) {
       final key = _model.key.trim();
-      setVariableIn(scope, key.isEmpty ? name : '$name.$key', p);
+      scope.write(key.isEmpty ? name : '$name.$key', p);
     }
   }
 }
@@ -360,9 +359,9 @@ class RenderMeasure extends RenderProxyBox {
     };
     if (mapEquals(value, _last)) return;
     _last = value;
-    final scope = node.tree.binder?.scopeFor(node.tree.source, node.id, node.instance);
+    final scope = node.tree.bindings?.valuesFor(node.tree.source, node.id, node.instance);
     if (scope == null) return;
     final key = _model.key.trim();
-    setVariableIn(scope, key.isEmpty ? name : '$name.$key', value);
+    scope.write(key.isEmpty ? name : '$name.$key', value);
   }
 }

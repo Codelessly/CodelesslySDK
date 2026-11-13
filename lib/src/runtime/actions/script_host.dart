@@ -7,7 +7,7 @@ import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../render/node_tree.dart' show NodeTree;
+import '../../render/node_tree.dart' show RenderTree;
 import '../../render/source.dart';
 import '../../services/scripts.dart';
 import '../contracts.dart' show ValueScope;
@@ -215,7 +215,7 @@ Map<String, Object?> scriptVariables(ValueScope? scope, ValueScope reader, {Set<
 }
 
 /// The values of the inputs on [tree]'s screen, by node id.
-Map<String, Object?> scriptNodeValues(NodeTree? tree) {
+Map<String, Object?> scriptNodeValues(RenderTree? tree) {
   var source = tree?.source;
   if (source is NodeValues) source = source.base;
   if (tree == null || source is! DocumentSource) return const {};

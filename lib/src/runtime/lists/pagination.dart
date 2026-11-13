@@ -589,7 +589,7 @@ class PaginationController extends ChangeNotifier {
   }
 }
 
-/// The pagination controllers of one screen (a [NodeTree]), by name. Each
+/// The pagination controllers of one screen (a [RenderTree]), by name. Each
 /// writes its [PaginationController.publishedState] into the screen's map
 /// variable of its name.
 class PaginationRegistry extends ChangeNotifier {
@@ -598,10 +598,10 @@ class PaginationRegistry extends ChangeNotifier {
   static final Expando<PaginationRegistry> _ofTree = Expando('PaginationRegistry');
 
   /// [tree]'s registry (made on first use).
-  static PaginationRegistry of(NodeTree tree) => _ofTree[tree] ??= PaginationRegistry._();
+  static PaginationRegistry of(RenderTree tree) => _ofTree[tree] ??= PaginationRegistry._();
 
   /// [tree]'s registry, if a list made one.
-  static PaginationRegistry? maybeOf(NodeTree? tree) => tree == null ? null : _ofTree[tree];
+  static PaginationRegistry? maybeOf(RenderTree? tree) => tree == null ? null : _ofTree[tree];
 
   final Map<String, PaginationController> _controllers = {};
   final Map<String, VoidCallback> _publishers = {};

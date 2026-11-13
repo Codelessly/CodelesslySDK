@@ -20,6 +20,7 @@ import 'package:flutter/material.dart';
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
 import '../render/source.dart';
+import '../widgets/tree.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
 import '../runtime/actions/capture.dart' show CaptureRegistry;
 import '../runtime/actions/feedback_theme.dart';

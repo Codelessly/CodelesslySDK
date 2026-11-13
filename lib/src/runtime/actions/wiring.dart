@@ -19,8 +19,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart' show EditableText, FocusManager;
 
 import '../../render/node_tree.dart';
+import '../../render/visible_share.dart';
 import '../../widgets/material.dart' show selfTappedTypes;
 import '../contracts.dart';
+import '../expressions/bindings.dart' show RenderTreeBinder;
 import '../expressions/formula.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
@@ -29,7 +31,9 @@ import 'route_transition.dart' show RevealAnchor;
 import 'runner.dart';
 import 'key_matching.dart';
 
-/// Wires the reactions of a [NodeTree]'s nodes ([NodeTree.interactions]):
+export '../../render/visible_share.dart' show visibleShare;
+
+/// Wires the reactions of a [RenderTree]'s nodes ([RenderTree.interactions]):
 /// each runs with [runner] in [context] (a list item's node in its item's
 /// scope), and stops when its box leaves the tree.
 class TreeReactions implements NodeInteractions {
@@ -751,34 +755,6 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   /// The viewport triggers aren't pointer triggers: [triggers] holds pointer
   /// ones only, so both fire whenever watched.
   Set<TriggerType> get _triggersAll => const {TriggerType.enterViewport, TriggerType.exitViewport};
-}
-
-/// The share (0–1) of [box] visible on screen, inside every clip around it.
-/// A box larger than the view counts as wholly visible when it covers it.
-double visibleShare(RenderBox box) {
-  if (!box.attached || !box.hasSize || box.size.isEmpty) return 0;
-  var rect = MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
-  final full = rect;
-  RenderObject child = box;
-  for (var p = box.parent; p != null; p = p.parent) {
-    final clip = p.describeApproximatePaintClip(child);
-    if (clip != null) {
-      final global = MatrixUtils.transformRect(p.getTransformTo(null), clip);
-      rect = rect.intersect(global);
-      if (rect.isEmpty) return 0;
-    }
-    child = p;
-  }
-  final root = child;
-  if (root is RenderView) {
-    final screen = Offset.zero & root.size;
-    rect = rect.intersect(screen);
-    if (rect.width <= 0 || rect.height <= 0) return 0;
-    final view = full.intersect(screen);
-    if (view.width >= screen.width - 0.5 && view.height >= screen.height - 0.5) return 1;
-  }
-  if (rect.width <= 0 || rect.height <= 0) return 0;
-  return (rect.width * rect.height) / (full.width * full.height);
 }
 
 /// Checks the watched boxes after each frame.
