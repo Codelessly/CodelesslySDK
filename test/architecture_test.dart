@@ -46,39 +46,6 @@ const renderLayers = {'render', 'leaf'};
 /// Imports of render files the rules refuse, kept until they're removed:
 /// file (under lib/src) → the imports it may still have, each with why.
 const Map<String, Map<String, String>> renderExceptions = {
-  'render/view_scroll.dart': {
-    'runtime/actions/context.dart': 'writes scroll progress to a variable',
-  },
-  'render/flip_card.dart': {
-    'runtime/actions/context.dart': 'writes its side to a variable',
-    'runtime/contracts.dart': 'reads its scope',
-    'runtime/expressions/node_scopes.dart': 'reads its scope',
-    'runtime/expressions/scopes.dart': 'reads its scope',
-  },
-  'render/transform_gesture.dart': {
-    'runtime/actions/context.dart': 'writes its pose to variables',
-    'runtime/contracts.dart': 'reads its scope',
-    'runtime/expressions/scopes.dart': 'reads its scope',
-    'runtime/gestures/physics.dart': 'settle simulations',
-  },
-  'render/drag_track.dart': {
-    'runtime/actions/context.dart': 'writes its value to a variable',
-    'runtime/actions/variable_animator.dart': 'stops the animation of the variable it writes',
-    'runtime/contracts.dart': 'reads its scope',
-    'runtime/expressions/node_scopes.dart': 'reads its scope',
-    'runtime/expressions/scopes.dart': 'reads its scope',
-  },
-  'render/behaviors.dart': {
-    'runtime/actions/wiring.dart': 'the visible share of a box',
-  },
-  'render/node_tree.dart': {
-    'runtime/gestures/drag_and_drop.dart': 'drag and drop layers',
-    'runtime/gestures/drag_motion.dart': 'drag layers',
-    'runtime/expressions/bindings.dart': 'the binder',
-    'widgets/collections.dart': 'whether a list can be measured',
-    'widgets/registry.dart': 'the built-in recipes',
-    'widgets/inputs.dart': 'which types are inputs',
-  },
   'render/paint/image_fill.dart': {
     'package:http/http.dart': 'fetches SVG images',
   },

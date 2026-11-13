@@ -25,7 +25,7 @@ class ListRuntime {
   final NodeBuilder b;
   final Node node;
 
-  NodeTree get tree => b.tree;
+  RenderTree get tree => b.tree;
   NodeBinder? get binder => tree.binder;
   ExpressionEngine get engine => _context?.expressions ?? binder?.engine ?? const Expressions();
 

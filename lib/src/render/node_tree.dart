@@ -19,8 +19,7 @@ import 'behaviors.dart';
 import 'typewriter.dart';
 import 'hero.dart';
 import 'play.dart';
-import '../runtime/gestures/drag_and_drop.dart' show dragAndDropLayers;
-import '../runtime/gestures/drag_motion.dart' show RenderDragMotion, dragMotionLayers;
+import 'contracts.dart';
 import 'convert.dart';
 import 'count_up.dart';
 import 'layout/margin_box.dart';
@@ -28,6 +27,7 @@ import 'layout/design_scroll.dart';
 import 'layout/fit_box.dart';
 import 'layout/freeform.dart';
 import 'layout/hug_cross.dart';
+import 'layout/list_measure.dart';
 import 'layout/text_box.dart';
 import 'layout/wrap.dart';
 import 'paint/icon_glyph.dart';
@@ -39,10 +39,6 @@ import 'recipe.dart';
 import 'reveal.dart';
 import 'view_scroll.dart';
 import 'source.dart';
-import '../runtime/expressions/bindings.dart' show BoundNode, NodeBinder;
-import '../widgets/collections.dart' show listBuildsAllItems;
-import '../widgets/registry.dart';
-import '../widgets/inputs.dart' show inputsRecipes;
 
 /// How a node is laid out by its parent.
 enum SlotKind {
@@ -78,8 +74,8 @@ class Slot {
 }
 
 /// A running app's interaction layers: what wires a node's reactions (taps,
-/// hover, viewport, timers...) into its box. Set on [NodeTree.interactions];
-/// used only while the tree is interactive (see [NodeTree.animates]).
+/// hover, viewport, timers...) into its box. Set on [RenderTree.interactions];
+/// used only while the tree is interactive (see [RenderTree.animates]).
 abstract interface class NodeInteractions {
   /// Adds [box]'s interaction layers for node [n] (as shown) to [chain],
   /// between its rotation and its loops.
@@ -99,7 +95,7 @@ abstract interface class NodeInteractions {
 }
 
 /// Reports trigger [trigger] of the node [b] builds (an island's input
-/// changed, a button was pressed), when its tree has [NodeTree.interactions].
+/// changed, a button was pressed), when its tree has [RenderTree.interactions].
 void fireTrigger(NodeBuilder b, String trigger, {Json event = const {}}) {
   if (b is NodeBox && b.tree.animates) b.tree.interactions?.fire(b, trigger, event: event);
 }
@@ -145,18 +141,20 @@ class _TreeIslands extends IslandManager {
 }
 
 /// Owns the boxes built from one [NodeSource].
-class NodeTree {
+class RenderTree {
   bool _preservingActions = false;
 
   /// Conditional hiding retains the node: pause its screen triggers, but
   /// let the reaction that hid it finish. Removing a view still cancels it.
   bool get preservingActions => _preservingActions;
-  NodeTree(this.source,
+  RenderTree(this.source,
       {this.observer,
       IslandEnvironment environment = const IslandEnvironment(),
-      NodeBinder? binder,
+      TreeBindings? binder,
       NodeInteractions? interactions,
-      this.recipes = const {}})
+      this.recipes = const {},
+      this.catalog = RecipeCatalog.none,
+      this.gestures})
       : islands = _TreeIslands(environment) {
     (islands as _TreeIslands).onEnvironment = () {
       for (final box in _boxes.values.toList()) {
@@ -164,9 +162,18 @@ class NodeTree {
         box._apply();
       }
     };
-    _binder = binder;
+    _bindings = binder;
     _interactions = interactions;
   }
+
+  /// The built-in recipes by node type: every widget beyond the core layout
+  /// types. A bare [RenderTree] has none (it draws their boxes, at their
+  /// sizes); the SDK's `NodeTree` gives its whole catalog.
+  final RecipeCatalog catalog;
+
+  /// The gesture layers the runtime adds to its boxes (a node that follows
+  /// the pointer, drag and drop); null: none.
+  final NodeGestures? gestures;
 
   /// The app's own recipes by node type, over the built-in ones: a type the
   /// API doesn't declare (its props are [Props.unknown]), or another build
@@ -298,14 +305,15 @@ class NodeTree {
     }
   }
 
-  NodeBinder? _binder;
+  TreeBindings? _bindings;
 
   /// Applies the nodes' bindings (variables, conditions, `${...}` text) when
   /// set; null renders the nodes as stored. Setting it re-applies every box.
-  NodeBinder? get binder => _binder;
-  set binder(NodeBinder? value) {
-    if (identical(value, _binder)) return;
-    _binder = value;
+  /// (The runtime's `NodeBinder` is read back as `binder`.)
+  TreeBindings? get bindings => _bindings;
+  set bindings(TreeBindings? value) {
+    if (identical(value, _bindings)) return;
+    _bindings = value;
     for (final b in _boxes.values.toList()) {
       b._apply();
     }
@@ -351,7 +359,7 @@ class NodeTree {
   BoundNode? resolveBound(String id, {Object? instance}) {
     var n = _patched(id, instance);
     if (n == null) return null;
-    final binder = _binder;
+    final binder = _bindings;
     if (binder == null) return BoundNode(n);
     var bound = binder.bind(source, n, instance);
     // States driven by data (`selected`, `disabled`): held like hover, so
@@ -485,7 +493,7 @@ class NodeTree {
       for (final b in orphans) {
         if (b.parent == null && identical(_boxes[b.key], b)) release(b);
       }
-    }, debugLabel: 'NodeTree.orphan');
+    }, debugLabel: 'RenderTree.orphan');
     SchedulerBinding.instance.ensureVisualUpdate();
   }
 
@@ -530,12 +538,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   NodeBox._(this.tree, this.id, this._slot, this.instance);
 
   @override
-  final NodeTree tree;
+  final RenderTree tree;
   @override
   final String id;
   @override
   final Object? instance;
-  String get key => NodeTree.keyOf(id, instance);
+  String get key => RenderTree.keyOf(id, instance);
   Slot _slot;
   @override
   Slot get slot => _slot;
@@ -790,7 +798,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final c = child;
     if (c != null && !c.hasSize) return false;
     // A dragged node is hit where it is drawn, outside its layout box.
-    if (child case final RenderDragMotion drag) {
+    if (child case final RenderBox drag when drag is HitTestedWhereDrawn) {
       if (!drag.hitTest(result, position: position)) return false;
       result.add(BoxHitTestEntry(this, position));
       return true;
@@ -953,12 +961,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _parentSideWrappers(n, chain);
     outsideHitTest = null;
     // A node that follows the pointer moves with its margin (outermost).
-    dragMotionLayers(this, n, chain);
+    tree.gestures?.addMotionLayers(this, n, chain);
     // Pinned while its parent is in view (render/view_scroll.dart): the
     // whole node, margin included, moves.
     if (n.behaviors.sticky case final api.Sticky sticky) {
       chain.add(_obtain<RenderSticky>('sticky', RenderSticky.new)
-        ..onStuck = ((stuck) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('sticky', {'stuck': stuck}))
+        ..onStuck = ((stuck) => tree.bindings?.publish(tree.source, id, instance, 'sticky', {'stuck': stuck}))
         ..configure(sticky, interactive: tree.animates));
     }
 
@@ -991,7 +999,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     // `${view.progress}` as it scrolls through its view.
     if (n.behaviors.viewProgress case final api.ViewProgress progress) {
       chain.add(_obtain<RenderViewProgress>('viewProgress', RenderViewProgress.new)
-        ..onValues = ((values) => tree.binder?.nodeScope(tree.source, id, instance: instance)?.update('view', values))
+        ..onValues = ((values) => tree.bindings?.publish(tree.source, id, instance, 'view', values))
         ..configure(this, progress, interactive: tree.animates));
     }
     // Its laid-out box, written to a variable.
@@ -1009,7 +1017,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     heroLayer(this, n, chain, animates: tree.animates);
     // Drag and drop around the reactions (gestures/drag_and_drop.dart).
-    dragAndDropLayers(this, n, chain);
+    tree.gestures?.addDragAndDropLayers(this, n, chain);
     if (tree.animates) tree.interactions?.addLayers(this, n, chain);
     loopLayers(this, n, chain, animates: tree.animates);
     if (n.opacity < 0.99) {
@@ -1083,7 +1091,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   void _notifyDependentAncestors() {
     var p = tree.source.parentOf(id);
     while (p != null) {
-      final box = tree._boxes[NodeTree.keyOf(p, instance)];
+      final box = tree._boxes[RenderTree.keyOf(p, instance)];
       if (box != null && box._dependsOnDescendants) box._reapplySoon();
       p = tree.source.parentOf(p);
     }
@@ -1127,8 +1135,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       case 'icon':
         _icon(n, chain);
       default:
-        final recipe = tree.recipes[n.type] ?? widgetRecipes[n.type];
-        if (recipe != null && _inputInShell(n)) {
+        final recipe = tree.recipes[n.type] ?? tree.catalog.recipes[n.type];
+        if (recipe != null && _inputInShell(tree.catalog, n)) {
           // An input with its own fill, border, shadow or padding: the node's
           // shell around it, the widget filling (or hugging) the padded box.
           _shell(n, chain, content: (inner) => recipe(this, _shellContent(n), inner));
@@ -1144,8 +1152,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// Whether input [n] draws the node shell around its widget: a decorated
   /// input (dropdown, date/time input) with a visible fill, stroke or
   /// shadow, or padding.
-  static bool _inputInShell(Node n) {
-    if (!inputsRecipes.containsKey(n.type) || !(n.spec?.decorated ?? false)) return false;
+  static bool _inputInShell(RecipeCatalog catalog, Node n) {
+    if (!catalog.inputs.contains(n.type) || !(n.spec?.decorated ?? false)) return false;
     final d = n.decoration;
     return d.fills.any((f) => f.visible) ||
         d.strokes.any((s) => s.visible) ||
@@ -2189,7 +2197,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       // ignore: invalid_use_of_protected_member
       final hasLayer = o.layer != null;
       if (hasLayer && SchedulerBinding.instance.schedulerPhase != SchedulerPhase.postFrameCallbacks) {
-        SchedulerBinding.instance.addPostFrameCallback((_) => o.dispose(), debugLabel: 'NodeTree.disposeLayer');
+        SchedulerBinding.instance.addPostFrameCallback((_) => o.dispose(), debugLabel: 'RenderTree.disposeLayer');
         SchedulerBinding.instance.ensureVisualUpdate();
       } else {
         o.dispose();

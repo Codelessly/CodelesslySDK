@@ -22,8 +22,8 @@ import 'flip_card.dart';
 import 'transform_gesture.dart';
 import 'node_tree.dart' show NodeBox;
 import 'paint/svg_path.dart';
-import '../runtime/actions/wiring.dart' show visibleShare;
 import 'recipe.dart';
+import 'visible_share.dart';
 
 /// Track pose, motion and scale: the layers between the constraints and
 /// the rotation.
@@ -34,7 +34,7 @@ void motionLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool a
     // default or start; parked when out of range or empty), and in a
     // running app dragged along the track (render/drag_track.dart).
     final box = b is NodeBox ? b : null;
-    final reads = track.value == null && track.hasVariable && box?.tree.binder?.scope != null;
+    final reads = track.value == null && track.hasVariable && (box?.tree.bindings?.hasValues ?? false);
     final p = track.restProgressOf(track.value ?? track.defaultValue ?? track.min);
     final moves = animates ||
         reads ||
@@ -1457,7 +1457,7 @@ void cardLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
       // `${tilt.*}` for the nodes inside it, as it moves.
       ..onValues = box == null
           ? null
-          : (values) => box.tree.binder?.nodeScope(box.tree.source, box.id, instance: box.instance)?.update('tilt', values);
+          : (values) => box.tree.bindings?.publish(box.tree.source, box.id, box.instance, 'tilt', values);
     if (animates && tilt.hover) {
       chain.add(
         b.obtain<RenderMouseRegion>('tiltHover', RenderMouseRegion.new)
