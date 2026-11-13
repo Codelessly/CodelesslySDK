@@ -14,6 +14,7 @@ export 'auth/auth.dart' show AuthScope, AuthValuesRefresh, authFeature, watchAut
 export 'commerce/commerce.dart' show EntitlementsScope, PaywallHost, PaywallPresentation, commerceFeature;
 export 'context.dart';
 export 'data/app_data_sources.dart';
+export 'data/cloud_list_source.dart';
 export 'data/cloud_loads.dart' show LiveCloudLoad, liveCloudLoadOf;
 export 'data/data.dart' show StorageScope, dataFeature;
 export 'media/media.dart' show SpeechScope, mediaFeature;
