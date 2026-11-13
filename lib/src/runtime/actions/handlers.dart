@@ -315,8 +315,24 @@ Future<void> _animateVariable(AnimateAction a, ActionRun run) async {
           from: number(a.from), to: target, duration: duration(), curve: a.curve ?? AnimationCurve.linear, fromCurrentPlace: true);
     case AnimateCommand.animateTo || AnimateCommand.animateBack:
       if (target == null) return;
-      await VariableAnimator.play(scope, name,
-          from: number(a.from), to: target, duration: duration(), curve: a.curve ?? AnimationCurve.linear);
+      if (variable.type != VariableType.integer && variable.type != VariableType.decimal) {
+        // Not a number: nothing to glide through; it takes the value.
+        setVariableIn(run.context.scope, name, run.evaluate(a.target));
+        return;
+      }
+      // Setting a value stops its timeline (`controller.value =`): a plain
+      // set takes over from an animateTo, as it did from a set's glide.
+      final done = VariableAnimator.play(scope, name,
+          from: number(a.from),
+          to: target,
+          duration: duration(),
+          curve: a.curve ?? AnimationCurve.linear,
+          glide: true,
+          spring: a.spring);
+      // The chain stops (its node left): so does the timeline.
+      final remove = run.onCancel(() => VariableAnimator.stopGlide(scope, name));
+      await done;
+      remove();
     case AnimateCommand.stop:
       VariableAnimator.pause(scope, name);
     case AnimateCommand.set:
