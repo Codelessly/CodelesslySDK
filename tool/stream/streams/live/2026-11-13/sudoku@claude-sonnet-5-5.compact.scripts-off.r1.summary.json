@@ -1,0 +1,214 @@
+{
+ "ui": "sudoku",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 15132,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 7626,
+ "generate": {
+  "inputTokens": 18521,
+  "outputTokens": 574,
+  "cacheReadInputTokens": 45282,
+  "cacheCreationInputTokens": 7547,
+  "ttftMs": 1243,
+  "firstToolDeltaMs": null,
+  "totalMs": 9586,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "scripts"
+    },
+    "ms": 1615,
+    "outputTokens": 76,
+    "resultChars": 1340
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "variables"
+    },
+    "ms": 1158,
+    "outputTokens": 81,
+    "resultChars": 2678
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "timer"
+    },
+    "ms": 1189,
+    "outputTokens": 65,
+    "resultChars": 1532
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "lists"
+    },
+    "ms": 1239,
+    "outputTokens": 77,
+    "resultChars": 2644
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "setValue"
+    },
+    "ms": 1260,
+    "outputTokens": 79,
+    "resultChars": 250
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "formula functions"
+    },
+    "ms": 1938,
+    "outputTokens": 121,
+    "resultChars": 2033
+   }
+  ],
+  "ops": 0,
+  "opsApplied": 0,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "missing_field /ops"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 0,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 5352,
+   "outputTokens": 3997,
+   "cacheReadInputTokens": 7547,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 3226,
+   "firstToolDeltaMs": 3230,
+   "totalMs": 22397,
+   "stopReason": "StopReason.toolUse",
+   "ops": 19,
+   "opsApplied": 15,
+   "opsRejected": 4,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 4,
+   "errors": [
+    "unknown_prop /nodes/grid/props/scrollable",
+    "invalid_condition /nodes/padKey/actions/0/actions/0/condition",
+    "invalid_condition /nodes/padKey/actions/0/actions/0/then/0/condition",
+    "unknown_bind_path /nodes/padKey/actions/0/actions/0/then/0/then/0/values/0/path",
+    "invalid_condition /nodes/undo/actions/0/actions/0/condition",
+    "invalid_condition /nodes/erase/actions/0/actions/0/condition",
+    "dangling_child /nodes/main/children/1",
+    "dangling_child /nodes/pad1/children/0",
+    "dangling_child /nodes/tools/children/0",
+    "dangling_child /nodes/tools/children/2"
+   ],
+   "lints": [],
+   "warnings": 7,
+   "nodes": 12,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 24640,
+   "outputTokens": 1633,
+   "cacheReadInputTokens": 15094,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 2437,
+   "firstToolDeltaMs": 3748,
+   "totalMs": 10564,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_docs",
+     "input": {
+      "topic": "if"
+     },
+     "ms": 2450,
+     "outputTokens": 118,
+     "resultChars": 317
+    }
+   ],
+   "ops": 8,
+   "opsApplied": 5,
+   "opsRejected": 3,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "structural_key_in_patch /nodes/main/children",
+    "structural_key_in_patch /nodes/sudoku/slots",
+    "structural_key_in_patch /nodes/grid/children"
+   ],
+   "lints": [],
+   "warnings": 1,
+   "nodes": 16,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 30493,
+   "outputTokens": 689,
+   "cacheReadInputTokens": 15094,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1282,
+   "firstToolDeltaMs": 3854,
+   "totalMs": 5632,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_read",
+     "input": {
+      "outline": true
+     },
+     "ms": 1416,
+     "outputTokens": 88,
+     "resultChars": 2177
+    }
+   ],
+   "ops": 3,
+   "opsApplied": 2,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "wrong_type /nodes/cellNum/bind/decoration.fills[0].color"
+   ],
+   "lints": [],
+   "warnings": 4,
+   "nodes": 16,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 3,
+  "opsApplied": 2,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "wrong_type /nodes/cellNum/bind/decoration.fills[0].color"
+  ],
+  "lints": [],
+  "warnings": 4,
+  "nodes": 16,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

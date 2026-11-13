@@ -1,0 +1,70 @@
+{"meta":{"ui":"basketball","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["basketball@claude-sonnet-5-5.compact.scripts-off.r1.jsonl","basketball@claude-sonnet-5-5.compact.scripts-off.r1.retry.jsonl"],"source":"live","outputTokens":612,"usage":{"inputTokens":10569,"outputTokens":612,"cacheReadInputTokens":7547,"cacheCreationInputTokens":0,"ttftMs":1741,"firstToolDeltaMs":2310,"totalMs":4493,"stopReason":"StopReason.toolUse"},"text":"The ball never got created because its original set was rejected, so I'm sending it in full now.","ttftMs":1741,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":19,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":2310,"delta":"{\"ops\": [{\"op\": \""}
+{"tMs":2310,"delta":"set\", \"id\": \"ball"}
+{"tMs":2310,"delta":"\", \"node\": {\"type\":"}
+{"tMs":2310,"delta":" \"box\", \"layout\": {"}
+{"tMs":2310,"delta":"\"width\": 40, \"height"}
+{"tMs":2310,"delta":"\": 40, \"x\": "}
+{"tMs":2310,"delta":"175, \"y\": 620}"}
+{"tMs":2310,"delta":", \"decoration\": {\""}
+{"tMs":2310,"delta":"fills\": [{\"color\":"}
+{"tMs":2787,"delta":" \"#FFF97316"}
+{"tMs":2787,"delta":"\"}], \"radius\": "}
+{"tMs":2787,"delta":"20, \"strokes\": ["}
+{"tMs":2788,"delta":"{\"color\": \"#FF"}
+{"tMs":2788,"delta":"7C2D12\"}],"}
+{"tMs":2788,"delta":" \"strokeWidth\":"}
+{"tMs":2788,"delta":" 3}, \"bind\":"}
+{"tMs":2788,"delta":" {\"layout.x\": \""}
+{"tMs":2788,"delta":"${bx}\", \"layout"}
+{"tMs":2788,"delta":".y\": \"${by}\""}
+{"tMs":2788,"delta":"}, \"actions\": [{"}
+{"tMs":2788,"delta":"\"trigger\": {\"type"}
+{"tMs":3266,"delta":"\": \"drag\"}, \""}
+{"tMs":3266,"delta":"actions\": [{\"type\":"}
+{"tMs":3266,"delta":" \"if\", \"condition\": {"}
+{"tMs":3266,"delta":"\"left\": \"${= !f"}
+{"tMs":3266,"delta":"ly && !over}\", \"op"}
+{"tMs":3266,"delta":"\": \"isTrue\"}"}
+{"tMs":3266,"delta":", \"then\": [{\"type"}
+{"tMs":3266,"delta":"\": \"setVariable\", \""}
+{"tMs":3266,"delta":"variable\": \"px\", \"value"}
+{"tMs":3266,"delta":"\": \"${= max(-160"}
+{"tMs":3266,"delta":", min(160, px + result"}
+{"tMs":3266,"delta":".dx))}\"},"}
+{"tMs":3741,"delta":" {\"type\": \"setVari"}
+{"tMs":3741,"delta":"able\", \"variable\": \"py"}
+{"tMs":3741,"delta":"\", \"value\": \"${= max"}
+{"tMs":3741,"delta":"(0, min(200, py"}
+{"tMs":3741,"delta":" + result.dy))}\""}
+{"tMs":3741,"delta":"}]}]}, {\""}
+{"tMs":3741,"delta":"trigger\": {\"type\":"}
+{"tMs":3741,"delta":" \"dragEnd\"}"}
+{"tMs":3741,"delta":", \"actions\": [{\""}
+{"tMs":3741,"delta":"type\": \"if\", \"condition"}
+{"tMs":3741,"delta":"\": {\"left\": \"${="}
+{"tMs":3741,"delta":" !fly && !over && py"}
+{"tMs":4215,"delta":" > 15}\", \"op\":"}
+{"tMs":4215,"delta":" \"isTrue\"},"}
+{"tMs":4215,"delta":" \"then\": [{\"type\":"}
+{"tMs":4215,"delta":" \"setVariable\", \"vari"}
+{"tMs":4215,"delta":"able\": \"vx\", \"value"}
+{"tMs":4215,"delta":"\": \"${= -px * "}
+{"tMs":4215,"delta":"0.0035}\"},"}
+{"tMs":4215,"delta":" {\"type\": \"setVari"}
+{"tMs":4215,"delta":"able\", \"variable\": \"v"}
+{"tMs":4215,"delta":"y\", \"value\": \"${="}
+{"tMs":4215,"delta":" -py * 0.0105"}
+{"tMs":4215,"delta":" - 1.2}\""}
+{"tMs":4489,"delta":"}, {\"type\": \"set"}
+{"tMs":4490,"delta":"Variable\", \"variable\":"}
+{"tMs":4490,"delta":" \"fly\", \"value\": \""}
+{"tMs":4490,"delta":"true\"}]}, {\""}
+{"tMs":4490,"delta":"type\": \"setVariable\","}
+{"tMs":4490,"delta":" \"variable\": \"px\", \""}
+{"tMs":4490,"delta":"value\": \"0\"}, {"}
+{"tMs":4490,"delta":"\"type\": \"setVariable"}
+{"tMs":4490,"delta":"\", \"variable\": \"py\","}
+{"tMs":4490,"delta":" \"value\": \"0\"}]"}
+{"tMs":4490,"delta":"}]}}]"}
+{"tMs":4491,"delta":"}"}
