@@ -6,8 +6,8 @@
 // layout and paint: render objects. A modal shows its trigger in place.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show
         AppBarProps,
         BadgeProps,

@@ -4,8 +4,8 @@
 // box at the node's size and a painter (indicators_paint.dart,
 // indicators_charts.dart). Spinners animate, so they're islands: an island that
 // rebuilds itself becomes its own layer, keeping each frame local.
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show
         ActivityIndicatorProps,
         CircularProgressIndicatorProps,

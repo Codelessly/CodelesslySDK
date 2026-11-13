@@ -1,5 +1,5 @@
 // The API a widget recipe uses to build a node's render objects.
-import 'package:codelessly_api/codelessly_api.dart' show Node, SizeFit;
+import 'package:codelessly_api/core.dart' show Node, SizeFit;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 

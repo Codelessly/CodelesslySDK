@@ -9,8 +9,8 @@
 // `${result.to}`, `${result.item}`, `${result.fromList}`, `${result.toList}`.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart'
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, ListApply, ListReorder, ListViewProps, Node, ReorderPlaceholder, ReorderStart, TriggerType;
 import 'package:flutter/gestures.dart' show ImmediateMultiDragGestureRecognizer;
 import 'package:flutter/material.dart';

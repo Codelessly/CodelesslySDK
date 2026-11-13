@@ -20,11 +20,11 @@ final class DatabaseListSource implements CloudListSource {
   @override
   ({Object key, PageFetcher Function() fetcher}) pages(
     String path,
-    CloudQueryDef def,
+    Json json,
     ExpressionEngine expressions,
     ValueScope scope,
   ) {
-    final query = resolveCloudQuery(def, expressions, scope);
+    final query = resolveCloudQuery(CloudQueryDef.fromJson(json), expressions, scope);
     return (
       key: ('cloud', path, query.filters.toString(), query.orderBy.toString()),
       fetcher: () => cloudPageFetcher(_database, path, query),

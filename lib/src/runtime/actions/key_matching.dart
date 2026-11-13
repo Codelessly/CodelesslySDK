@@ -1,4 +1,4 @@
-import 'package:codelessly_api/codelessly_api.dart' show KeyCombo;
+import 'package:codelessly_api/core.dart' show KeyCombo;
 
 /// Modified letter shortcuts distinguish Mod+Z from Mod+Shift+Z. Printable
 /// punctuation may still require Shift to type its character (for example ?).

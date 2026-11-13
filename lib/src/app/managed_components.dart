@@ -149,6 +149,7 @@ class ManagedComponentResolver {
           ref: current.component!.managed!,
           layout: current.layout,
           theme: theme,
+          catalog: document.catalog,
         );
         document = replaceManagedInstance(document, top.id, build);
         variables = _declare(variables, _canvasOf(document, top.id), build.variables);

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_sdk/src/widgets/embedded_player_web.dart';
+import 'package:codelessly_sdk/src/features/media/embedded_player_web.dart';
 
 void main() => runApp(const MaterialApp(home: PlayerHarness()));
 

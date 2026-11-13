@@ -21,6 +21,7 @@ const CodelesslyFeature authFeature = CodelesslyFeature(
   name: 'auth',
   actions: {AuthAction.typeName: _auth},
   scopes: {'auth': _authScope},
+  catalog: authCatalog,
 );
 
 /// What the app shell attaches to an action context

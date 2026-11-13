@@ -3,8 +3,8 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' as api;
-import 'package:codelessly_api/codelessly_api.dart' show ConfirmAction, Json, ModalPresentation;
+import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_api/core.dart' show ConfirmAction, Json, ModalPresentation;
 import 'package:flutter/material.dart';
 
 import '../../render/convert.dart';

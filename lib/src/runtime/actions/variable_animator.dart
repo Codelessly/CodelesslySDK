@@ -4,7 +4,7 @@
 // every frame writes the variable, so everything bound to it follows.
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' show AnimationCurve, VariableType;
+import 'package:codelessly_api/core.dart' show AnimationCurve, VariableType;
 import 'package:flutter/scheduler.dart';
 
 import '../expressions/scopes.dart';

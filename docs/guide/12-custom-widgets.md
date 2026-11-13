@@ -161,6 +161,47 @@ final codelessly = Codelessly(
 );
 ```
 
+### Declaring them: a feature's catalog and recipes
+
+A feature can also **declare** its types, so layouts decode them typed and the editor generates their panels: its
+`catalog` holds their `WidgetSpec`s and `ActionSpec`s (codelessly_api guide, chapter 9), and its `recipes` build its
+node types. Layouts decode with the catalog of the installed features (`CodelesslyActions().catalog`,
+`CodelesslyConfig.catalog`), and a tree builds with their recipes (`CodelesslyConfig.allRecipes`): a native plugin is
+one `CodelesslyFeature`.
+
+```dart
+const acme = CodelesslyFeature(
+  name: 'acme',
+  catalog: Catalog(id: 'acme', widgets: [RatingProps.spec], actions: [ShareAction.spec]),
+  recipes: {'acme.rating': rating},
+  actions: {ShareAction.typeName: _share},
+);
+
+CodelesslyConfig(slug: 'my-project', actions: const CodelesslyActions(features: [...kFirstPartyFeatures, acme]));
+```
+
+The first-party features are built the same way: `mediaFeature` declares `mediaCatalog` and builds `video`,
+`embeddedVideo`, `audioPlayer` and `webView` with its recipes, so an app with `CoreActions()` (no features) compiles
+neither the players nor any API feature library: the renderer and the core runtime import
+`package:codelessly_api/core.dart` only (`test/core_only_import_test.dart`). A `NodeTree` you build yourself gets the
+media players with `recipes: mediaFeature.recipes`.
+
+### Hosted plugins
+
+A plugin stored on Codelessly's hosting is data (`PluginPackage`): its node types are node trees reading
+`${props.*}`, its action types chains reading `${params.*}`. `loadHostedPlugins` loads the versions a publish lists
+(`PublishModel.plugins`), checks each payload's sha256 against its digest and the SDK against its `minSdk`, checks
+the package against the app's catalog, and gives each as an installed feature (`hostedPluginFeature`) or a skipped
+one with its reason:
+
+```dart
+final loads = await loadHostedPlugins(model.plugins, source: MemoryPluginSource(versions), host: standardCatalog);
+final installed = [for (final l in loads) if (l is HostedPluginInstalled) l.feature];
+final actions = CodelesslyActions(features: [...kFirstPartyFeatures, ...installed]);
+```
+
+`Codelessly` does not call it on its own yet (docs/design/05-plugins-and-layers.md in codelessly_api, "Not done").
+
 ## Wrapping a layout
 
 `layoutBuilder` wraps the loaded layout with any widgets: a `SafeArea`, an overlay, a `RefreshIndicator`, a

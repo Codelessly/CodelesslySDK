@@ -5,7 +5,7 @@ import 'dart:collection';
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:codelessly_api/codelessly_api.dart' show ScriptCapability, ScriptDef, findScript;
+import 'package:codelessly_api/core.dart' show ScriptCapability, ScriptDef, findScript;
 import 'package:flutter/foundation.dart';
 
 import '../runtime/actions/script_host.dart' show scriptVariables;

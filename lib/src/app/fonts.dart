@@ -7,6 +7,9 @@
 import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart' show PublishFont;
+
+import '../runtime/font_loads.dart';
+export '../runtime/font_loads.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, listEquals, visibleForTesting;
 import 'package:http/http.dart' as http;
@@ -174,27 +177,15 @@ class CodelesslyFonts {
   /// Fonts registered (by id).
   Set<String> get loaded => {..._fonts.keys};
 
-  /// Font loads in flight, in any app (the engine's fonts are global).
-  static final Set<Future<void>> _inFlight = {};
-
-  /// Completes once every font load in flight now has finished (or failed):
-  /// text measured after it uses the fonts it asked for. At once when none
-  /// is loading.
-  static Future<void> get settled {
-    if (_inFlight.isEmpty) return Future<void>.value();
-    return Future.wait([for (final f in _inFlight) f.catchError((Object _) {})]).then((_) {});
-  }
+  /// Completes once every font load in flight now has finished (or failed)
+  /// ([FontLoads.settled]).
+  static Future<void> get settled => FontLoads.settled;
 
   /// Whether a font load is in flight.
-  static bool get loading => _inFlight.isNotEmpty;
+  static bool get loading => FontLoads.loading;
 
   /// Tracks [load] in [settled] until it finishes.
-  static Future<T> track<T>(Future<T> load) {
-    final done = load.then<void>((_) {}, onError: (Object _) {});
-    _inFlight.add(done);
-    done.whenComplete(() => _inFlight.remove(done));
-    return load;
-  }
+  static Future<T> track<T>(Future<T> load) => FontLoads.track(load);
 
   /// The characters of [text] that Google Fonts' `latin` subset leaves out
   /// (its `unicode-range`), each once, in order: in a browser the API serves
