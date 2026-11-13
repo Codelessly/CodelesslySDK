@@ -23,6 +23,7 @@ import 'args.dart';
 import 'fonts.dart';
 import 'prepare.dart';
 import 'publish.dart';
+import 'site.dart';
 
 /// A problem found while rendering (validation's [Diagnostic]s have the
 /// same JSON shape).
@@ -74,6 +75,7 @@ const runtimeCodes = <(String, String, String)>[
   ('image_failed', 'error', 'An image could not be loaded or decoded (missing file, bad data: URL).'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
+  ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
 
 /// The result of a run.
@@ -138,7 +140,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   }
 
   Directory(args.out).createSync(recursive: true);
-  final inputs = loadInputs(args.inputs);
+  // A directory with site.json (or components/) is a site: pages and components.
+  final site = loadSite(args.inputs, loadInputs);
+  final inputs = site.inputs;
   if (inputs.isEmpty) {
     issue(RuntimeIssue('no_documents', 'error', 'No .json documents at ${args.inputs.join(', ')}.'));
     return _finish(report, args);
@@ -162,10 +166,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       for (final scope in (api.readMap(d['variables']) ?? const {}).values)
         for (final v in api.readList(scope) ?? const [])
           if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
+    for (final v in api.readList(site.manifest?['variables']) ?? const [])
+      if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
   };
   FormulaReport check(String formula) =>
       (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
-  final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions));
+  final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
+  final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   report.diagnostics.addAll(diagnostics.map((d) => d.toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
 
@@ -189,9 +196,36 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   });
   final codepoints = materialCodepoints(root);
   final pages = <Page>[];
+  // The site's components: what its pages' calls render.
+  final components = ComponentRegistry();
+  // `--component <Type>`: that component alone, on a page of its own per
+  // parameter set (each preview at its size).
+  final alone = <({String name, api.Json page, double? width, double? height})>[];
+  if (args.component case final String type) {
+    final def = docs.values.where((d) => isComponentJson(d) && api.readMap(d[api.kWidgetKey])?['type'] == type).firstOrNull;
+    if (def == null) {
+      issue(RuntimeIssue('unknown_screen_arg', 'error', '--component $type: no component of that type in ${args.inputs.join(', ')}.'));
+      return _finish(report, args);
+    }
+    try {
+      final slots = args.slots == null ? null : jsonDecode(File(args.slots!).readAsStringSync()) as api.Json;
+      alone.addAll(componentPages(type, def, props: args.props, slots: slots));
+    } catch (e) {
+      issue(RuntimeIssue('invalid_json', 'error', '--props or --slots: ${_firstLine('$e')}'));
+      return _finish(report, args);
+    }
+    for (final a in alone) {
+      docs[a.name] = a.page;
+      dirs[a.name] = Directory.current.path;
+    }
+  }
   for (final e in docs.entries) {
     final p = prepare(e.value, dir: dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
-    pages.add((name: e.key, json: p.json));
+    if (isComponentJson(e.value)) {
+      components.define(api.LayoutDocument.fromJson(p.json));
+    } else if (alone.isEmpty || alone.any((a) => a.name == e.key)) {
+      pages.add((name: e.key, json: p.json));
+    }
     for (final img in p.images) {
       if (img.status == 'failed') {
         issue(RuntimeIssue('image_failed', 'error', 'Image ${img.url}: ${img.detail}.', nodeId: img.nodeId, file: e.key, path: img.path));
@@ -215,7 +249,10 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       }
     });
   }
-  final published = publishPages(pages);
+  final published = publishPages(pages,
+      variables: publishVariables(site.manifest),
+      breakpoints: site.manifest?['breakpoints'],
+      components: [for (final t in components.types) components[t]!.document.toJson()]);
   final fileOfNode = <String, String>{
     for (final e in docs.entries)
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
@@ -233,7 +270,21 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
   try {
-    await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report);
+    if (alone.isEmpty) {
+      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report, components: components);
+    }
+    for (final a in alone) {
+      // A preview renders at its own size; ad-hoc parameters at each size.
+      final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
+      await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
+          report, components: components);
+    }
+    for (final e in components.missing.entries) {
+      for (final path in e.value) {
+        issue(RuntimeIssue('component_missing', 'error', 'Call "$path" renders ${e.key}, which no component document of the site defines.',
+            nodeId: path));
+      }
+    }
   } finally {
     debugDisableShadows = true;
     FlutterError.onError = previousOnError;
@@ -253,8 +304,9 @@ Future<void> _renderAll(
   Map<String, String> fileOfNode,
   DirectoryFontFetcher fetcher,
   void Function(RuntimeIssue) issue,
-  RenderReport report,
-) async {
+  RenderReport report, {
+  ComponentRegistry? components,
+}) async {
   // 3. Which screens.
   final screens = _screens(published, docs, args.screens, (s) => issue(s));
   final recorder = _Recorder();
@@ -265,6 +317,7 @@ Future<void> _renderAll(
       final sizeName = '${size.width.round()}x${size.height.round()}';
       final codelessly = Codelessly(
         loader: MemoryPublishLoader(published.bundle),
+        components: components,
         fonts: fetcher,
         config: CodelesslyConfig(services: Services(analytics: recorder), fontTimeout: const Duration(seconds: 5)),
       );
@@ -282,7 +335,7 @@ Future<void> _renderAll(
           if (by != null && (double.tryParse(by[1]!) ?? 1) < 0.01) continue;
           final node = _nodeOfError(_errorDetails.remove(e));
           issue(RuntimeIssue('render_exception', 'error',
-              node == null ? text : 'Node "${node.id}" (${node.node?.type ?? '?'}): $text',
+              node == null ? text : 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
               nodeId: node?.id, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node.id]));
         }
         for (final (err, message) in recorder.errors) {
@@ -421,6 +474,7 @@ Future<void> _renderAll(
             {
               'id': b.id,
               if (b.instance != null) 'instance': '${b.instance}',
+              if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
               'x': _rectOf(b).left.round(),
               'y': _rectOf(b).top.round(),
               'w': double.parse(b.size.width.toStringAsFixed(1)),
@@ -606,6 +660,14 @@ List<NodeBox> _boxes(WidgetsBinding binding) => [
 /// The box of node [id] on screen: the topmost (the last painted), or with
 /// `id#n` the n-th (0-based) of the copies a list repeats.
 NodeBox? _boxOf(WidgetsBinding binding, String id) {
+  // A node inside a component, by path: `plans/card1/cta`.
+  if (id.contains('/')) {
+    for (final b in _boxes(binding)) {
+      final found = b.tree.boxAtPath(id);
+      if (found != null && found.attached && found.hasSize) return found;
+    }
+    return null;
+  }
   final hash = id.lastIndexOf('#');
   final index = hash < 0 ? null : int.tryParse(id.substring(hash + 1));
   final name = index == null ? id : id.substring(0, hash);
@@ -872,6 +934,10 @@ List<RuntimeIssue> _check(
       final n = l.document[id];
       if (n != null) return n;
     }
+    // A node of a component definition (inside an instance).
+    for (final b in boxes) {
+      if (b.id == id) return b.source.node(id);
+    }
     return null;
   }
 
@@ -879,6 +945,9 @@ List<RuntimeIssue> _check(
     for (final l in layouts.values) {
       final p = l.document.parentOf(id);
       if (p != null) return p;
+    }
+    for (final b in boxes) {
+      if (b.id == id) return b.source.parentOf(id);
     }
     return null;
   }

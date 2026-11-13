@@ -1,0 +1,30 @@
+{
+ "schema": 2,
+ "id": "Card",
+ "roots": ["card"],
+ "widget": {
+  "type": "Card",
+  "doc": "A titled card with a button; what the call passes goes under the title.",
+  "children": "list",
+  "props": [
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Title"},
+   {"key": "count", "type": {"kind": "variable", "of": {"kind": "integer", "flutter": "int"}}, "default": ""}
+  ],
+  "events": [{"key": "onPressed", "payload": {"kind": "string", "flutter": "String"}}]
+ },
+ "previews": [{"name": "Hello", "size": [320, 240], "props": {"title": "Hello"}}],
+ "nodes": {
+  "card": {"type": "column", "children": ["title", "body", "btn"], "props": {"spacing": 8},
+           "layout": {"width": {"fill": 320}, "height": {"hug": 200}, "padding": 16},
+           "decoration": {"fills": [{"color": "#FFFFFFFF"}], "radius": 12}},
+  "title": {"type": "text", "props": {"text": "${props.title} (${props.count}) by ${brand.name}", "style": {"fontSize": 20, "color": "#FF111111"}},
+            "layout": {"width": {"hug": 200}, "height": {"hug": 24}}},
+  "body": {"type": "slot", "children": ["none"]},
+  "none": {"type": "text", "props": {"text": "Nothing passed", "style": {"color": "#FF888888"}}, "layout": {"width": {"hug": 100}, "height": {"hug": 20}}},
+  "btn": {"type": "box", "layout": {"width": 120, "height": 36}, "decoration": {"fills": [{"color": "#FF2962FF"}], "radius": 8},
+          "bind": {"decoration.fills[0].color": "${brand.accent}"},
+          "actions": [{"trigger": {"type": "click"}, "actions": [
+            {"type": "setVariable", "variable": "props.count", "op": "add", "value": "1"},
+            {"type": "componentEvent", "event": "onPressed", "value": "${props.title}"}]}]}
+ }
+}

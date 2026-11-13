@@ -1,0 +1,174 @@
+{
+ "schema": 2,
+ "id": "Chip",
+ "roots": [
+  "chip"
+ ],
+ "widget": {
+  "type": "Chip",
+  "doc": "A label with a remove button.",
+  "children": "list",
+  "slots": [
+   "leading"
+  ],
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Chip",
+    "required": true
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "boolean",
+      "flutter": "bool"
+     }
+    },
+    "default": ""
+   }
+  ],
+  "events": [
+   {
+    "key": "onRemove",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "variables": {
+  "chip": [
+   {
+    "name": "hovered",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Selected",
+   "size": [
+    240,
+    48
+   ],
+   "props": {
+    "label": "Design",
+    "selected": true
+   }
+  }
+ ],
+ "nodes": {
+  "chip": {
+   "type": "row",
+   "children": [
+    "lead",
+    "text",
+    "extra",
+    "remove"
+   ],
+   "props": {
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": 36,
+    "padding": [
+     12,
+     0,
+     8,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE8EAF6"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.selected ? '#FF3F51B5' : '#FFE8EAF6'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.selected",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "lead": {
+   "type": "slot",
+   "props": {
+    "name": "leading"
+   }
+  },
+  "text": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF1A237E"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.selected ? '#FFFFFFFF' : '#FF1A237E'}"
+   }
+  },
+  "extra": {
+   "type": "slot"
+  },
+  "remove": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "#FF5C6BC0"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onRemove",
+       "value": "${props.label}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

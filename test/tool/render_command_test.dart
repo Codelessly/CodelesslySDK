@@ -232,4 +232,77 @@ void main() {
     expect(d['content']!.single['w'], 1200);
     expect(d['content']!.single['x'], 120);
   });
+
+  // Sections and components (docs/design/06): a directory with site.json is
+  // a site of pages and components.
+  group('a site with components', () {
+    const site = '$fixtures/components';
+    test('arguments: --component, --props, --slots', () {
+      final a = parseArgs([site, '--out', 'o', '--component', 'Card', '--props', '{"title": "x"}', '--slots', 's.json']);
+      expect([a.component, a.props, a.slots], ['Card', '{"title": "x"}', 's.json']);
+    });
+
+    testWidgets('pages render their calls; steps address nodes inside instances by path', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'card1/btn'), Step('tap', 'card2/btn')], dumpLayout: true));
+      expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List;
+      final paths = {for (final b in boxes) (b as Map)['path'] ?? b['id']};
+      expect(paths, containsAll(['card1', 'card1/title', 'card1/btn', 'card2/none', 'note']));
+      expect(paths, isNot(contains('card1/none')), reason: 'the call passes children: the slot shows them');
+    });
+
+    testWidgets('--component renders each preview at its size, or --props with --slots at each size', (tester) async {
+      var report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, component: 'Card'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.images.map((f) => f.split('/').last), ['Card-hello@320x240.png']);
+      report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, component: 'Card', props: '{"title": "Ad hoc", "count": 5}',
+          slots: '$site/slots.json', sizes: const [Size(390, 844), Size(834, 1112)], dumpLayout: true));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.images.map((f) => f.split('/').last), ['Card@390x844.png', 'Card@834x1112.png']);
+      final boxes = jsonDecode(File('${out.path}/Card@390x844.layout.json').readAsStringSync()) as List;
+      expect(boxes.map((b) => (b as Map)['id']), containsAll(['passed', 'title', 'btn']));
+      report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, component: 'Nope'));
+      expect(codes(report), ['unknown_screen_arg']);
+    });
+
+    testWidgets('a call to a component the site lacks: validation names it, the render reports it', (tester) async {
+      final dir = Directory('${out.path}/site')..createSync();
+      File('${dir.path}/home.json').writeAsStringSync(jsonEncode({
+        'schema': 2,
+        'roots': ['home'],
+        'nodes': {
+          'home': {'type': 'canvas', 'slots': {'body': 'c'}, 'layout': {'width': 390, 'height': 844}},
+          'c': {'type': 'Missing', 'layout': {'width': 100, 'height': 40}},
+        },
+      }));
+      File('${dir.path}/site.json').writeAsStringSync('{"schema": 2}');
+      final report = await runRender(tester, RenderArgs(inputs: [dir.path], out: '${out.path}/o', sizes: const [Size(390, 844)]));
+      expect(codes(report), containsAll(['unknown_component', 'component_missing']));
+      expect(report.diagnostics.firstWhere((d) => d['code'] == 'component_missing')['nodeId'], 'c');
+    });
+
+    // The guide's example (codelessly_api tool/reference/examples/sections,
+    // copied): a chip component, its calls, an event and a list of calls.
+    testWidgets('the guide\'s components example renders clean, and its event reaches the page', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path,
+          sizes: const [Size(390, 844)], steps: const [Step('tap', 'design/remove')], dumpLayout: true));
+      expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List;
+      expect(boxes.where((b) => (b as Map)['id'] == 'text'), hasLength(3), reason: 'one chip called directly, two from the list');
+    });
+
+    // The Relay pricing page (m05 c2, B) as a site of sections and components
+    // (examples/relay-pricing) draws the same pixels as the one-document page.
+    testWidgets('the rewritten Relay pricing page renders pixel-identical to the original', (tester) async {
+      final o = await runRender(tester, RenderArgs(inputs: ['$fixtures/sections/original'], out: '${out.path}/o', sizes: const [Size(390, 844)],
+          fullPage: true, steps: const [Step('tap', 'fq#1')]));
+      final s = await runRender(tester, RenderArgs(inputs: ['examples/relay-pricing'], out: '${out.path}/s', sizes: const [Size(390, 844)],
+          fullPage: true, steps: const [Step('tap', 'faq/fq#1')]));
+      expect(s.errors, 0, reason: '${s.diagnostics}');
+      expect(codes(s, 'error'), codes(o, 'error'));
+      final a = File(o.images.single).readAsBytesSync(), b = File(s.images.single).readAsBytesSync();
+      expect(b, a);
+    });
+  });
 }

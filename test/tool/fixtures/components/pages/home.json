@@ -1,0 +1,19 @@
+{
+ "schema": 2, "id": "home", "roots": ["home"],
+ "variables": {"home": [{"name": "taps", "type": "integer", "value": 0}, {"name": "last", "type": "text", "value": "none"}]},
+ "nodes": {
+  "home": {"type": "canvas", "name": "Home", "slots": {"body": "col"}, "layout": {"width": 390, "height": 844},
+           "decoration": {"fills": [{"color": "#FFEEEEEE"}]}},
+  "col": {"type": "column", "children": ["card1", "card2", "status"], "props": {"spacing": 12},
+          "layout": {"width": {"fill": 390}, "height": {"fill": 844}, "padding": 16}},
+  "card1": {"type": "Card", "props": {"title": "First", "count": "taps"}, "children": ["note"],
+            "layout": {"width": {"fill": 358}, "height": {"hug": 160}},
+            "actions": [{"trigger": {"type": "event", "event": "onPressed"},
+                         "actions": [{"type": "setVariable", "variable": "last", "value": "${result}"}]}]},
+  "note": {"type": "text", "props": {"text": "Passed by the page: ${taps} taps", "style": {"color": "#FF333333"}},
+           "layout": {"width": {"hug": 200}, "height": {"hug": 20}}},
+  "card2": {"type": "Card", "props": {"title": "Second", "count": "taps"}, "layout": {"width": {"fill": 358}, "height": {"hug": 160}}},
+  "status": {"type": "text", "props": {"text": "Last pressed: ${last}", "style": {"color": "#FF333333"}},
+             "layout": {"width": {"hug": 200}, "height": {"hug": 20}}}
+ }
+}

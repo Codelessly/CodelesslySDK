@@ -26,6 +26,9 @@ final class RenderArgs {
     this.label,
     this.validateOnly = false,
     this.dumpLayout = false,
+    this.component,
+    this.props,
+    this.slots,
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -42,6 +45,33 @@ final class RenderArgs {
 
   /// Also write each capture's node boxes (`<png name>.layout.json`).
   final bool dumpLayout;
+
+  /// Render this component alone (its type), not the site's pages.
+  final String? component;
+
+  /// The parameters to render [component] with (a JSON object); null: each
+  /// of its previews, else its defaults.
+  final String? props;
+
+  /// A fixture file with what [component]'s call passes to its slots.
+  final String? slots;
+
+  /// These arguments with other [sizes] and [screens].
+  RenderArgs copyWith({List<Size>? sizes, List<String>? screens}) => RenderArgs(
+        inputs: inputs,
+        out: out,
+        sizes: sizes ?? this.sizes,
+        screens: screens ?? this.screens,
+        fullPage: fullPage,
+        steps: steps,
+        fontDirs: fontDirs,
+        label: label,
+        validateOnly: validateOnly,
+        dumpLayout: dumpLayout,
+        component: component,
+        props: props,
+        slots: slots,
+      );
 }
 
 const usage = '''
@@ -74,6 +104,15 @@ Options:
                           diagnostics go to diagnostics-<text>.json.
   --validate-only         Only validate; render nothing.
   --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h).
+  --component <Type>      Render one component of the site alone: once per preview
+                          (at its size), or with --props at each size.
+  --props '<json>'        The component's parameters, as a call's "props".
+  --slots <file>          What the call passes to the component's slots:
+                          {"children": [ids], "slots": {name: id}, "nodes": {...}}.
+A directory with site.json (or a components/ directory) is a site: its pages
+and its components (one file each, the file named after the component type).
+Steps name nodes inside components by path: --tap plans/card1/cta (the call
+ids from the page down, then the node's id; <segment>#<n> picks a list copy).
 Steps (--tap, --hover, --focus, --type, --set, --scroll, --navigate, --wait) run in the order given.
 ''';
 
@@ -86,7 +125,7 @@ RenderArgs parseArgs(List<String> argv) {
   final steps = <Step>[];
   final fonts = <String>[];
   var fullPage = false, validateOnly = false, dumpLayout = false;
-  String? label;
+  String? label, component, props, slots;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
     return argv[i + 1];
@@ -117,6 +156,12 @@ RenderArgs parseArgs(List<String> argv) {
         fonts.add(next(i++, a));
       case '--label':
         label = next(i++, a);
+      case '--component':
+        component = next(i++, a);
+      case '--props':
+        props = next(i++, a);
+      case '--slots':
+        slots = next(i++, a);
       case '--tap' || '--hover' || '--focus' || '--navigate' || '--wait':
         steps.add(Step(a.substring(2), next(i++, a)));
       case '--set' || '--scroll' || '--type':
@@ -144,5 +189,8 @@ RenderArgs parseArgs(List<String> argv) {
     label: label,
     validateOnly: validateOnly,
     dumpLayout: dumpLayout,
+    component: component,
+    props: props,
+    slots: slots,
   );
 }
