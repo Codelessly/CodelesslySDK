@@ -139,3 +139,59 @@ Map<String, int> materialCodepoints(String flutterRoot) {
   }
   return out;
 }
+
+/// The code points font file [path] has glyphs for (its `cmap` table,
+/// formats 4 and 12), or null when it can't be read.
+Set<int>? fontCoverage(String path) {
+  try {
+    final b = ByteData.sublistView(File(path).readAsBytesSync());
+    final numTables = b.getUint16(4);
+    int? cmapAt;
+    for (var i = 0; i < numTables; i++) {
+      final rec = 12 + 16 * i;
+      final tag = String.fromCharCodes([for (var k = 0; k < 4; k++) b.getUint8(rec + k)]);
+      if (tag == 'cmap') cmapAt = b.getUint32(rec + 8);
+    }
+    if (cmapAt == null) return null;
+    final out = <int>{};
+    final count = b.getUint16(cmapAt + 2);
+    for (var i = 0; i < count; i++) {
+      final rec = cmapAt + 4 + 8 * i;
+      final platform = b.getUint16(rec), encoding = b.getUint16(rec + 2);
+      if (!(platform == 3 && (encoding == 1 || encoding == 10)) && platform != 0) continue;
+      final sub = cmapAt + b.getUint32(rec + 4);
+      final format = b.getUint16(sub);
+      if (format == 4) {
+        final segs = b.getUint16(sub + 6) ~/ 2;
+        final ends = sub + 14, starts = ends + 2 * segs + 2, deltas = starts + 2 * segs, offsets = deltas + 2 * segs;
+        for (var s = 0; s < segs; s++) {
+          final end = b.getUint16(ends + 2 * s), start = b.getUint16(starts + 2 * s);
+          final delta = b.getInt16(deltas + 2 * s), ro = b.getUint16(offsets + 2 * s);
+          for (var c = start; c <= end && c != 0xFFFF; c++) {
+            int glyph;
+            if (ro == 0) {
+              glyph = (c + delta) & 0xFFFF;
+            } else {
+              final at = offsets + 2 * s + ro + 2 * (c - start);
+              glyph = b.getUint16(at);
+              if (glyph != 0) glyph = (glyph + delta) & 0xFFFF;
+            }
+            if (glyph != 0) out.add(c);
+          }
+        }
+      } else if (format == 12) {
+        final groups = b.getUint32(sub + 12);
+        for (var g = 0; g < groups; g++) {
+          final at = sub + 16 + 12 * g;
+          final start = b.getUint32(at), end = b.getUint32(at + 4), glyph = b.getUint32(at + 8);
+          for (var c = start; c <= end; c++) {
+            if (glyph + (c - start) != 0) out.add(c);
+          }
+        }
+      }
+    }
+    return out;
+  } catch (_) {
+    return null;
+  }
+}

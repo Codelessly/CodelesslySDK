@@ -16,10 +16,11 @@ It:
 3. **renders** every screen with `CodelesslyWidget` (bindings, variables, conditions, breakpoints and reactions
    run as in a published app) at each size, writing `<out>/<screen>@<w>x<h>.png`;
 4. **reports** what only rendering shows (below), tied to node ids;
-5. writes everything to `<out>/diagnostics.json` and **exits 1 when there are errors**, 0 when there are only
-   warnings or none, 2 for bad arguments.
+5. writes everything to `<out>/diagnostics.json` (`<out>/diagnostics-<label>.json` with `--label`, so one run per
+   state keeps each state's) and **exits 1 when there are errors**, 0 when there are only warnings or none, 2 for
+   bad arguments.
 
-A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics.json`), as the pages of one
+A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics*.json`), as the pages of one
 site: navigation may name a canvas of another page.
 
 ## Options
@@ -29,19 +30,21 @@ site: navigation may name a canvas of another page.
 | `--out <dir>` | Where PNGs and `diagnostics.json` go (required). |
 | `--sizes <WxH,...>` | Screen sizes, default `390x844,834x1112,1440x900`. |
 | `--screen <id or name>` | Only this screen: a canvas id, a layout id, a `props.screen` name, a canvas name or path. Repeatable. |
-| `--full-page` | Capture the whole scrollable height: the window is made as tall as the page scrolls. |
+| `--full-page` | Capture the whole page: the window is made as tall as the page's own scroll view scrolls (the largest one a user can scroll; lists and decorations that do not scroll add nothing). Content fixed to the window (outside that scroll view: a bar pinned to the bottom of a stack over the page, a canvas's bottom bar or floating button) is drawn where a user first sees it, in the first window, as a browser's full-page screenshot shows it. |
 | `--fonts <dir>` | Font files (`.ttf`, `.otf`), read by the family, weight and style inside each file. Repeatable. |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats. |
 | `--hover <id>` | Move a mouse over the node (hover states, `cursorEnter`). |
+| `--focus <id>` | Focus the text field (a `textField`, or the one inside the node). |
+| `--type <id>=<text>` | Focus the text field and type the text, as a user would: its `changed` reactions run, and a field whose `props.initialValue` is bound to a variable sets it. |
 | `--set <name>=<json>` | Set a variable of the screen: `--set annual=true`, `--set 'email="a@b.co"'`. |
 | `--scroll <id or screen>=<px>` | Scroll a scrolling node, or the page, to an offset. |
 | `--navigate <screen>` | Push a screen (a canvas id, a layout id or a URL path). |
 | `--wait <ms>` | Let time pass (animations, delays, toasts). |
-| `--label <text>` | Add `-<text>` to the PNG names, to keep state screenshots apart. |
+| `--label <text>` | Add `-<text>` to the PNG names and write `diagnostics-<text>.json`, to keep states apart. |
 | `--dump-layout` | Also write `<png name>.layout.json`: every node's box on screen (`id`, `x`, `y`, `w`, `h`). |
 | `--validate-only` | Only validate. |
 
-Steps (`--tap`, `--hover`, `--set`, `--scroll`, `--navigate`, `--wait`) run in the order given, after the screen
+Steps (`--tap`, `--hover`, `--focus`, `--type`, `--set`, `--scroll`, `--navigate`, `--wait`) run in the order given, after the screen
 has loaded and before the capture, at every size. A step that names a node the current canvas does not have (it
 is in another breakpoint's canvas) is a warning, not an error.
 
@@ -64,9 +67,14 @@ step adds:
 | `invalid_json` | error | A file is not valid JSON (with line and column). |
 | `no_documents` | error | No `.json` documents at the paths given. |
 | `unknown_screen_arg` | error | `--screen` names no canvas, screen or layout. |
-| `render_exception` | error | Flutter threw while building, laying out or painting. |
+| `render_exception` | error | Flutter threw while building, laying out or painting; the message names the node (`Node "price-row" (row): ...`). A flex overflow under 0.01 px (rounding) is not reported. |
 | `action_error` | error | An action chain failed (a `load` reaction, or one a step ran). |
-| `interaction_failed` | error | A step could not be applied (no such node on screen, nothing scrolls...). |
+| `interaction_failed` | error | A step could not be applied: no such node on screen, nothing scrolls, the node is covered wherever it shows (the message names what covers it), nothing in it takes a tap (no fill, no reaction), no text field to type into. |
+| `tap_no_reaction` | warning | A `--tap` hit its node, but neither it nor anything around it reacts to a tap: nothing happened. |
+| `missing_glyph` | warning | A text has characters its font has no glyph for (drawn as empty boxes): the message lists them. |
+| `icon_not_drawn` | warning | An icon names no glyph the renderer can draw. |
+| `expression_not_evaluated` | warning | A text shows `${` on screen: an expression that did not evaluate. |
+| `path_overflow` | warning | A `path` (or a box's `path`) draws outside its box; it is not clipped to it, as Flutter's `CustomPaint` is not. |
 | `layout_overflow` | warning | A node extends past its parent's box where the parent does not scroll that way. |
 | `offscreen` | warning | A node extends past the screen's edge where nothing scrolls: on a device it is cut off. |
 | `text_clipped` | warning | A text's lines are taller than its box, or a word is wider than it. |
@@ -107,9 +115,11 @@ several agents can run it at once on different `--out` directories. A run takes 
 compiled the harness (the first run after the SDK changes takes 20 to 30 seconds), plus about half a second per
 screen and size.
 
-Limits: an icon whose name comes from a binding (`"bind": {"props.icon": ...}`) draws nothing, because an app
-fetches its SVG; use icons with fixed names and `visible` bindings. A `--tap` or `--hover` on a node scrolled out
-of view first scrolls its scrolling ancestor to bring it into view.
+A `--tap` or `--hover` puts the pointer on a point of the node that a hit test reaches (its center, else the
+center of what it draws: a text or an icon is smaller than its slot when it is stretched or aligned there, or has a
+margin). A node out of view, or covered where it shows (a header over the page), is first scrolled to the middle of
+its scrolling ancestor. A tap that would land on another node is not made: it is reported with the node that covers
+it. Icons are drawn from the Material Icons font, also when their name comes from a binding.
 
 Differences from an app that matter: the window is exactly the size given, at a pixel ratio of 1; text with no
 font family is drawn in Roboto; there is no network; `openLink` opens nothing; platform services (storage,

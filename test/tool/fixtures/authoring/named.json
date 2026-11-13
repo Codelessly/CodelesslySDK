@@ -1,0 +1,17 @@
+{
+  "schema": 2,
+  "roots": ["m", "d"],
+  "nodes": {
+    "m": {"type": "canvas", "props": {"screen": "home", "breakpoint": "mobile"}, "slots": {"body": "m-col"}, "layout": {"width": 390, "height": 844},
+          "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "m-col": {"type": "column", "children": ["m-go"], "layout": {"width": {"fill": 390}, "height": {"fill": 844}}},
+    "m-go": {"type": "box", "name": "go-button", "layout": {"width": 120, "height": 40}, "decoration": {"fills": [{"color": "#FF16A34A"}]},
+             "actions": [{"trigger": "click", "actions": [{"type": "setVariable", "variable": "n", "op": "add", "value": "1"}]}]},
+    "d": {"type": "canvas", "props": {"screen": "home", "breakpoint": "desktop"}, "slots": {"body": "d-col"}, "layout": {"width": 1440, "height": 900},
+          "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "d-col": {"type": "column", "children": ["d-go"], "layout": {"width": {"fill": 1440}, "height": {"fill": 900}}},
+    "d-go": {"type": "box", "name": "go-button", "layout": {"width": 120, "height": 40}, "decoration": {"fills": [{"color": "#FF16A34A"}]},
+             "actions": [{"trigger": "click", "actions": [{"type": "setVariable", "variable": "n", "op": "add", "value": "1"}]}]}
+  },
+  "variables": {"page_variables": [{"name": "n", "type": "integer", "value": 0}]}
+}
