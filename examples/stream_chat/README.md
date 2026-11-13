@@ -27,7 +27,7 @@ flutter run --dart-define=ANTHROPIC_API_KEY=<key> \
 | `lib/main.dart` | The chat screen. |
 | `lib/src/sources.dart` | `StreamSource`, `RecordedStreamSource` (plays `assets/streams/*.jsonl` at their recorded pace), `LlmStreamSource` (live, compact prompt). |
 | `lib/src/llm.dart` | The live request (pure Dart, shared with the record command): Anthropic's Messages API through `anthropic_sdk_dart`, the tools with `eager_input_streaming`, the `input_json_delta` text of the `ui_apply` call fed straight to `UiSession.applyStream`; `UiModel.turn` answers `ui_docs` and `ui_read` calls before the `ui_apply` call of the same turn; the briefs. |
-| `assets/system_prompt.md` | The **full** system prompt (`dart run tool/system_prompt.dart`: the op rules, the node and action types, and codelessly_api's base in its file form, `docs/reference/STARTER.md`): 48,833 characters. |
+| `assets/system_prompt.md` | The **full** system prompt (`dart run tool/system_prompt.dart`: the op rules, the node and action types, and codelessly_api's base in its file form, `docs/reference/STARTER.md`): 49,442 characters. |
 | `tool/record.dart` | Records one real generation, its retries and its follow-up in the replay format. |
 | `tool/record_all.sh` | The live matrix: records, replays and writes one summary table. |
 
@@ -42,8 +42,8 @@ of which types take children or slots, variables, bindings and reactions, media 
 get wrong, the ops and two examples that apply cleanly, and the index: a task table and the pages, each entry a
 `ui_docs` topic. `ui_docs`, the third tool, answers with the reference's pages, one section at a time (a page's
 "When to use", minimal example and pitfalls; a section by its anchor; any node type, action, trigger or behavior
-by name). 43,343 characters of prompt and 2,126 of tools, against 48,833 and 8,369 for `--prompt full`. Without a
-tokenizer here: ≈ 12,400 tokens at 3.5 characters per token; ≈ 18,300 at the 2.37 characters per token the API
+by name). 43,792 characters of prompt and 2,126 of tools, against 49,442 and 8,391 for `--prompt full`. Without a
+tokenizer here: ≈ 12,500 tokens at 3.5 characters per token; ≈ 18,400 at the 2.37 characters per token the API
 counted for the earlier full prompt. The record command counts both with the API when it runs
 (`systemPromptAndToolsTokens`).
 
