@@ -113,10 +113,15 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
       if (n != null && placed) _checkNode(o, n, document, report, nodePath, nameOf);
       // A leaf that is not a container or a text: an icon, an image, a
       // control, a chart.
-      if (shown && n != null && o.source.node(o.id)?.childIds.isEmpty != false && !_quiet.contains(n.type) && n.type != 'text') {
-        showing++;
+      if (shown && n != null && n.type != 'text') {
+        final leaf = o.source.node(o.id)?.childIds.isEmpty != false;
+        // The view shows a leaf that is content (or a painted leaf); a
+        // component shows any box it paints (a checkbox's box, a track).
+        if (leaf && (!_quiet.contains(n.type) || _paints(n))) showing++;
         final call = callOf(o);
-        if (call != null) calls[call] = (box: calls[call]?.box ?? o, showing: (calls[call]?.showing ?? 0) + 1);
+        if (call != null && ((leaf && !_quiet.contains(n.type)) || _paints(n))) {
+          calls[call] = (box: calls[call]?.box ?? o, showing: (calls[call]?.showing ?? 0) + 1);
+        }
       }
       final call = callOf(o);
       if (call != null && shown && o.tree.isInstanceRoot(o.id, o.instance)) calls.putIfAbsent(call, () => (box: o, showing: 0));
@@ -205,6 +210,12 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
 /// takes for content (a spacer, an empty box or row).
 const _quiet = {'canvas', 'box', 'spacer', 'column', 'row', 'stack', 'wrap', 'listView', 'gridView', 'pageView', 'tableView', 'container', 'divider'};
 
+/// Whether [n] paints a visible fill or stroke (a progress bar's track, a
+/// checkbox's box): a leaf that shows.
+bool _paints(Node n) =>
+    n.type != CanvasProps.spec.type &&
+    [...n.decoration.fills, ...n.decoration.strokes].any((p) => p.visible && p.opacity > 0 && (p.color?.alpha ?? 255) > 0);
+
 const _repeaters = {'listView', 'gridView', 'pageView', 'tableView'};
 
 /// The labels a control or component call shows (the first one it
@@ -276,7 +287,17 @@ void _checkList(NodeBox b, Node shown, Node written, LayoutDocument document,
   final id = b.id;
   final props = readMap(shown.toJson()['props']) ?? const {};
   final count = props[shown.type == 'tableView' ? 'rowCount' : 'itemCount'];
-  if (written.childIds.isEmpty) {
+  if (shown.type == 'tableView') {
+    // Its rows are the data; its columns are declared, its cells templates.
+    if ((readList(props['columns']) ?? const []).isEmpty && !written.bind.containsKey('props.columns')) {
+      report(EditCodes.listEmpty, nodePath(id, 'props/columns'),
+          'Table "$id" has data ($expression) but no columns: nothing of it shows. Declare them, "props": {"columns": '
+          '[{"key": "name", "label": "Name"}, ...]}, and the cell template in its "cell" slot (reading \${item.value}); '
+          'ui_docs "tableView".',
+          nodeId: id);
+      return;
+    }
+  } else if (written.childIds.isEmpty) {
     report(EditCodes.listEmpty, nodePath(id, 'children'),
         'List "$id" has data ($expression) but no item template: its first child is drawn once per item. Add one: '
         '{"op": "set", "id": "<item id>", "parent": "$id", "node": {...}} reading \${item.<field>}.',

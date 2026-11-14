@@ -195,6 +195,30 @@ void main() {
     expect(d.message, contains(r'"go" (Button) shows an empty label: "${= confirmLabel}" gave nothing'));
   });
 
+  testWidgets('a progress bar at zero and an unchecked checkbox show their track and box: no component_empty', (tester) async {
+    final ds = (await tester.runAsync(_ssui))!;
+    final session = _strict(ds: ds);
+    addTearDown(session.dispose);
+    _ok(session, _card({
+      'bar': {'type': 'ProgressBar', 'props': {'value': 0}, 'layout': {'width': {'fill': 336}, 'height': 6}},
+      'tick': {'type': 'Checkbox', 'props': {'value': 'done'}, 'layout': {'width': {'hug': 16}, 'height': {'hug': 16}}},
+    }, vars: {'done': {'type': 'boolean', 'value': false}}));
+    expect(await _shown(tester, session), isEmpty);
+  });
+
+  testWidgets('a table with data and no columns: list_empty says to declare them (dashboard@claude-haiku-5-5)', (tester) async {
+    final session = _strict();
+    addTearDown(session.dispose);
+    _ok(session, _card({
+      'title': {'type': 'text', 'layout': _text, 'props': {'text': 'Top plans', 'style': {'color': '#FF111827'}}},
+      't': {'type': 'tableView', 'layout': {'width': {'fill': 336}, 'height': {'hug': 200}}, 'bind': {'data': r'${plans}'}},
+    }, vars: {
+      'plans': {'type': 'list', 'value': [{'name': 'Pro'}]},
+    }));
+    final d = (await _shown(tester, session)).singleWhere((d) => d.code == 'list_empty');
+    expect(d.message, contains('Table "t" has data (\${plans}) but no columns'));
+  });
+
   group('replayed recordings that showed nothing', () {
     const dir = 'tool/stream/streams/live/2026-11-14-ssui';
 
