@@ -149,7 +149,6 @@ const widgetImportRatchet = {
   'src/widgets/collections_table.dart',
   'src/widgets/indicator_theme.dart',
   'src/widgets/inputs.dart',
-  'src/widgets/inputs_shapes.dart',
   'src/widgets/media.dart',
 };
 

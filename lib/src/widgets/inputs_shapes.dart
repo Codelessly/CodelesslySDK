@@ -2,7 +2,8 @@
 // its own parts: render/controls/slider.dart.)
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 
 /// Where a signature pad's sign line and its mark sit, for its painter and
 /// for an icon mark laid over it.
