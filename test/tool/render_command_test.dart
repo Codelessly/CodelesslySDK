@@ -211,6 +211,14 @@ void main() {
       expect(messages.any((m) => m.contains('"go" has no parts to name with @')), isTrue, reason: '$messages');
     });
 
+    testWidgets('a key reaction on a text field fires while that field is typed in (test 4: ArrowDown in a search field)', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/field_keys.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('focus', 'field'), Step('key', 'ArrowDown')], label: 'keys', dumpLayout: true));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File('${out.path}/s@390x844-keys.layout.json').readAsStringSync()) as List;
+      expect(boxes.any((b) => (b as Map)['id'] == 'picked'), isTrue, reason: 'the field\'s own ArrowDown reaction ran');
+    });
+
     testWidgets('a tap on a covered node names what covers it', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'last')]));
