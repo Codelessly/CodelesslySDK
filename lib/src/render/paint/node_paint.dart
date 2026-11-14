@@ -102,7 +102,7 @@ class RenderNodePaint extends RenderBox with ImageClient {
     if (ruled != null) {
       final (sides, w, inset) = ruled;
       // The band's inner edge `inset` in from the box edge (inside: the
-      // whole width in; centre: half; outside: none), `w` wide.
+      // whole width in; center: half; outside: none), `w` wide.
       final bands = [
         if (sides.contains('top')) Rect.fromLTRB(rect.left, rect.top + inset - w, rect.right, rect.top + inset),
         if (sides.contains('right')) Rect.fromLTRB(rect.right - inset, rect.top, rect.right - inset + w, rect.bottom),
@@ -164,7 +164,7 @@ class RenderNodePaint extends RenderBox with ImageClient {
 
   /// The sides a square box rules with solid, undashed strokes, the
   /// stroke width and its inset (Flutter's BorderSide.strokeInset: the
-  /// whole width inside, half centred, none outside); null otherwise.
+  /// whole width inside, half centered, none outside); null otherwise.
   (List<String>, double, double)? _ruledSides() {
     final d = decoration;
     if (d.strokeSides == api.StrokeSides.all || !d.radius.isZero || d.shape == api.DecorationShape.circle ||

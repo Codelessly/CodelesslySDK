@@ -77,7 +77,7 @@ TextStyle barTextStyle(api.TextStyle own, [api.TextStyle? inherited]) {
     fontStyle: s.fontStyle == null ? null : FontStyle.values.byName(s.fontStyle!.name),
     letterSpacing: s.letterSpacing,
     height: s.height,
-    // The colour is the node's own (not the default text style's): an
+    // The color is the node's own (not the default text style's): an
     // inherited ink would hide the selection.
     color: own.color?.flutter,
     decoration: switch (s.decoration) {
@@ -90,7 +90,7 @@ TextStyle barTextStyle(api.TextStyle own, [api.TextStyle? inherited]) {
 }
 
 /// [own] over the SSUI [base]: a label's style, in [color] unless [own]
-/// has one, its line centred (even leading).
+/// has one, its line centered (even leading).
 TextStyle overBase(TextStyle base, TextStyle own, Color color) => base
     .merge(own.copyWith(color: own.color ?? color))
     .copyWith(leadingDistribution: TextLeadingDistribution.even);
@@ -250,7 +250,7 @@ abstract class RenderItemBar extends RenderControl {
 
   late final IndicatorMotion motion = IndicatorMotion(this);
 
-  /// The glyphs' colours follow the states: set whenever the bar is to be
+  /// The glyphs' colors follow the states: set whenever the bar is to be
   /// painted again (never while painting).
   @override
   void markNeedsPaint() {
@@ -258,7 +258,7 @@ abstract class RenderItemBar extends RenderControl {
     updateGlyphColors();
   }
 
-  /// Sets each glyph's colour for the states now.
+  /// Sets each glyph's color for the states now.
   @protected
   void updateGlyphColors() {}
   late final BarGlyphs glyphs = BarGlyphs(this);

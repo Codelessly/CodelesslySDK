@@ -1,7 +1,7 @@
 // Zero-prop buttons against SSUI's own Flutter widgets: the page
 // design_systems/ssui/tool/ssui_golden renders (every variant at every size,
 // an icon button and two disabled ones; Roboto, light and dark), rebuilt from
-// core button nodes with nothing styled but the variant's colour, rendered
+// core button nodes with nothing styled but the variant's color, rendered
 // by the SDK, compared pixel by pixel with the stored reference
 // (design_systems/ssui/examples/renders/ssui-reference).
 //

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Hyperlink",
-  "doc": "A text link in the brand colour, underlined; it opens its URL. Fires onPressed.",
+  "doc": "A text link in the brand color, underlined; it opens its URL. Fires onPressed.",
   "props": [
    {
     "key": "text",

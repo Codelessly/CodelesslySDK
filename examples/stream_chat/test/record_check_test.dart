@@ -1,7 +1,7 @@
 // What tool/record.dart checks a recorded turn with, offline (no request):
 // with --design-system the ops are applied as UiSession(designSystem:)
 // applies them (its components are types the agent may call, its token
-// names are colours and text styles), and the counts say how much of the UI
+// names are colors and text styles), and the counts say how much of the UI
 // is the design system's.
 import 'dart:convert';
 import 'dart:io';

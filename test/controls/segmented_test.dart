@@ -1,5 +1,5 @@
 // The segmented button as a render object (render/controls/segmented.dart):
-// SSUI's segmented control with nothing styled, each label measured centred
+// SSUI's segmented control with nothing styled, each label measured centered
 // in its segment across and down, tap and arrow keys, single and multi
 // select, the bound selection, screen readers per segment, and a pixel match
 // to soft_saas_ui's own segmented control.
@@ -53,7 +53,7 @@ void main() {
     ('32 high and 300 wide', {'width': 300, 'height': 32}),
     ('xs (24)', {'width': {'hug': 0}, 'height': 24}),
   ]) {
-    testWidgets('each label is centred in its segment, across and down: $name', (tester) async {
+    testWidgets('each label is centered in its segment, across and down: $name', (tester) async {
       final (tree, _) = await _show(tester, {
         'seg': {'type': 'segmentedButton', 'layout': layout, 'props': {'segments': _days, 'selected': ['d']}},
       }, theme: {'fontFamily': 'Roboto'});

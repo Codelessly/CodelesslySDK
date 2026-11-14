@@ -1,0 +1,174 @@
+{
+ "schema": 3,
+ "id": "StatTile",
+ "roots": [
+  "tile"
+ ],
+ "widget": {
+  "type": "StatTile",
+  "doc": "A dashboard figure: a small labeled icon line over a large value, in a bordered tile.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Revenue",
+    "doc": "What is counted.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "$48,200",
+    "doc": "The figure, already formatted.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "trending_up",
+    "doc": "The icon before the label."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Revenue",
+   "size": [
+    170,
+    72
+   ],
+   "props": {
+    "label": "Revenue",
+    "value": "$48,200"
+   }
+  }
+ ],
+ "nodes": {
+  "tile": {
+   "type": "column",
+   "children": [
+    "head",
+    "value"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 170
+    },
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "trending_up",
+    "color": "secondaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${props.value}",
+    "style": {
+     "fontSize": 21,
+     "fontWeight": 600,
+     "height": 1.1,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  }
+ }
+}

@@ -44,7 +44,7 @@ Future<void> _fonts() async {
 
 String _hex(int argb) => '#${argb.toRadixString(16).padLeft(8, '0').toUpperCase()}';
 
-/// SSUI's colour [name] for [dark], as its ARGB value.
+/// SSUI's color [name] for [dark], as its ARGB value.
 int _token(String name, bool dark) => ssuiTokens.forBrightness(dark: dark).color(name)!.value;
 
 Map<String, Object?> _text(String text, Map<String, Object?> style, {Object width = const {'hug': 0}}) => {

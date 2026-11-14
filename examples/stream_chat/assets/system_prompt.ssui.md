@@ -24,7 +24,7 @@ For anything else, call ui_docs with a topic from the index at the end (a page, 
   fix by patching the document as it is (same ids). Never start over with new roots or a new canvas.
 - Text uses the app's font: letters, digits and common punctuation only. Arrows, check marks, stars and other
   symbols are icon nodes (Material icon names: arrow_forward, check, star), not characters.
-- A button has a visible label with an explicit colour: one of the design system's button components, with its label.
+- A button has a visible label with an explicit color: one of the design system's button components, with its label.
 
 ## The model in one table
 
@@ -100,31 +100,31 @@ its default.
 }
 ```
 
-## Theme first: named colours and text styles
+## Theme first: named colors and text styles
 
 Declare a palette and a type scale once and name them everywhere, as a Flutter app declares `ThemeData` and its
-widgets read `Theme.of(context)`. **Write the theme before the first node**: a name per colour the design uses, a
+widgets read `Theme.of(context)`. **Write the theme before the first node**: a name per color the design uses, a
 name per kind of text (display, title, body, label, eyebrow...).
 
-- `colors` maps a name to `"#AARRGGBB"` (or another colour's name). Wherever a colour is accepted (a fill, a
-  stroke, a text's colour, a shadow, an input's border), write its name: `"color": "ember"`.
+- `colors` maps a name to `"#AARRGGBB"` (or another color's name). Wherever a color is accepted (a fill, a
+  stroke, a text's color, a shadow, an input's border), write its name: `"color": "ember"`.
 - `textStyles` maps a name to a TextStyle (ui_docs "type-TextStyle"); a style may start `from` another (`"title": {"from":
   "body", "fontSize": 32}`). A text names its style: `"style": "title"`; to change a few fields of it,
   `"style": {"from": "title", "color": "ember"}`.
 - In a binding a name is not read: bind the value, `"${theme.colors.ember}"`.
 - Validation reports a name the theme does not have (`unknown_theme_name`, with the nearest name).
-- The theme is the design system's tokens (below): name its colours and text styles; do not write them in full.
+- The theme is the design system's tokens (below): name its colors and text styles; do not write them in full.
 
-Controls (buttons, chips, fields, switches, pickers, tabs) take the colours and fonts their props leave unset
+Controls (buttons, chips, fields, switches, pickers, tabs) take the colors and fonts their props leave unset
 from the theme's roles (`primary`, `onPrimary`, `surface`, `onSurface`, `error`, `fontFamily`, `buttonRadius`...).
 Without a theme they are neutral: ink on paper and the greys between. Nothing comes from Material's defaults or
 from the app the layout is shown in.
 
-**Light and dark.** `"dark": {"colors": {...}}` in the theme gives the colours that differ in dark mode, and
+**Light and dark.** `"dark": {"colors": {...}}` in the theme gives the colors that differ in dark mode, and
 `"mode"` which one the site starts in (Flutter's `ThemeMode`: `system`, the default, follows the device; `light`;
 `dark`). A theme switch is one action, `{"type": "setThemeMode", "mode": "${= theme.isDark ? 'light' : 'dark'}"}`:
-every named colour, named text style and control of every screen follows, and the choice is kept for the next
-visit. Read the mode as `${theme.mode}` and `${theme.isDark}`. Name colours in your text styles (`"color": "ink"`)
+every named color, named text style and control of every screen follows, and the choice is kept for the next
+visit. Read the mode as `${theme.mode}` and `${theme.isDark}`. Name colors in your text styles (`"color": "ink"`)
 so they change with it: dark mode (ui_docs "theme-dark-mode").
 
 A theme that changes with the screen size, every theme key: theme (ui_docs "theme").
@@ -139,7 +139,7 @@ Every UI you make is in Soft SaaS UI: A flat desktop SaaS and editor language: q
 ### Principles
 
 - **Quiet, flat, dense.** Off-white or near-black surfaces separated by 1 px hairlines (`primaryBorder`), not shadows.
-  Colour is for status, focus and the one primary action, never decoration.
+  Color is for status, focus and the one primary action, never decoration.
 - **One control scale.** Every control is 24, 28, 32, 36 or 44 px tall; **28 (`compact`) is the default** for page
   actions, forms, dialogs and cards. 24 (`xs`) inside rows, chips and dense panels; 36 and 44 only for a hero call to
   action or auth.
@@ -148,20 +148,20 @@ Every UI you make is in Soft SaaS UI: A flat desktop SaaS and editor language: q
 - **Type.** Page title `pageTitle` 20/600, section `sectionTitle` 14/600, card and panel titles `panelTitle` 12/600,
   body `body` 13, secondary `bodySecondary` 12, field labels `fieldLabel` 11.5/600, metadata `caption` 11. Weights:
   600 titles, 500 labels and buttons, 400 text. No brand font: the platform's.
-- **Colour roles.** Text `primaryText`, `secondaryText`, `tertiaryText`; surfaces `primaryBackground` (cards),
+- **Color roles.** Text `primaryText`, `secondaryText`, `tertiaryText`; surfaces `primaryBackground` (cards),
   `secondaryBackground` (page, headers), `tertiaryBackground`; `primary` for the main action, focus and selection;
   `success`, `warning`, `error`, `info` as a 10 % tint (`successTint`...) with a matching hairline and full-strength
-  ink. Every colour has a dark value: name it, never write hex.
+  ink. Every color has a dark value: name it, never write hex.
 - **Shadows only when floating.** Menus and popovers `shadows.level3`, dialogs `shadows.level4`. Cards: none.
 - **Interaction.** Hover and press are faint overlays (`hoverOverlay` 4 %, `pressedOverlay` 8 %); focus is a 1.5 px
   border at primary 50 % (`focusBorder`); disabled is 50 % opacity. Nothing changes size between states.
 - **Do** use one primary Button per view; ghost Buttons for Cancel and secondary actions; Field around every input;
   hairlines between sections. **Don't** draw a control yourself when a component is one, add shadows to cards, use
-  more than one accent colour, or make text larger than the scale.
+  more than one accent color, or make text larger than the scale.
 
 ### Tokens
 
-- **Colours** (write the name wherever a colour goes, `"color": "primaryBackground"`; each has a dark value): `primary`, `onPrimary`, `surface`, `onSurface`, `error`, `success`, `warning`, `primaryBackground`, `secondaryBackground`, `tertiaryBackground`, `primaryText`, `secondaryText`, `tertiaryText`, `primaryBorder`, `secondaryBorder`, `info`, `purple`, `subtleFill`, `neutralFill`, `raisedBackground`, `track`, `scrim`, `onAccent`, `focusBorder`, `hoverOverlay`, `pressedOverlay`, `activeTint`, `primaryTint`, `primaryTintBorder`, `successTint`, `successTintBorder`, `warningTint`, `warningTintBorder`, `errorTint`, `errorTintBorder`, `infoTint`, `infoTintBorder`, `neutralTint`, `neutralTintBorder`, `tooltipBackground`, `tooltipText`, `tooltipMuted`.
+- **Colors** (write the name wherever a color goes, `"color": "primaryBackground"`; each has a dark value): `primary`, `onPrimary`, `surface`, `onSurface`, `error`, `success`, `warning`, `primaryBackground`, `secondaryBackground`, `tertiaryBackground`, `primaryText`, `secondaryText`, `tertiaryText`, `primaryBorder`, `secondaryBorder`, `info`, `purple`, `subtleFill`, `neutralFill`, `raisedBackground`, `track`, `scrim`, `onAccent`, `focusBorder`, `hoverOverlay`, `pressedOverlay`, `activeTint`, `primaryTint`, `primaryTintBorder`, `successTint`, `successTintBorder`, `warningTint`, `warningTintBorder`, `errorTint`, `errorTintBorder`, `infoTint`, `infoTintBorder`, `neutralTint`, `neutralTintBorder`, `tooltipBackground`, `tooltipText`, `tooltipMuted`.
 - **Text styles** (`"style": "pageTitle"`, or `{"from": "pageTitle", "color": ...}`): `pageTitle` 20/600, `sectionTitle` 14/600, `dialogTitle` 14/600, `panelTitle` 12/600, `body` 13/400, `bodySecondary` 12/400, `inputText` 12.5/400, `placeholder` 12.5/400, `fieldLabel` 11.5/600, `caption` 11/400, `mono` 12/400, `badge` 11/500, `controlXs` 11.5/500, `controlCompact` 12/500, `controlSmall` 12.5/500, `controlMedium` 13/500, `controlLarge` 15/500, `heading1` 30/700, `heading2` 24/700, `heading3` 18/600.
 - **Spacing** (bound, not written: `"bind": {"layout.padding": "${theme.spacing.1}"}`): `1` 4, `2` 8, `3` 12, `4` 16, `5` 20, `6` 24, `8` 32, `10` 40, `12` 48, `16` 64.
 - **Radii** (bound, not written: `"bind": {"decoration.radius": "${theme.radii.inner}"}`): `inner` 5, `control` 7, `panel` 8, `dialog` 12, `full` 9999.
@@ -208,7 +208,7 @@ Call one with a node whose `type` is its name: its parameters in `props` (or bou
   `{"type":"Banner","props":{"title":"Payment failed","message":"Update your card to keep your plan.","tone":"warning"},"layout":{"width":{"fill":360},"height":{"hug":56}}}`
 - **`Avatar`**: A person or workspace: initials in a circle, or a photo. `name` text required, `image` text = "", `size` xs|small|medium|large = "small".
   `{"type":"Avatar","props":{"name":"Ada Lovelace","size":"medium"},"layout":{"width":{"hug":24},"height":{"hug":24}}}`
-- **`ProgressBar`**: How far something has got: a 4 px bar, value from 0 to 1, in the brand colour or a tone. `value` number = 0.5, `tone` primary|success|warning|error = "primary".
+- **`ProgressBar`**: How far something has got: a 4 px bar, value from 0 to 1, in the brand color or a tone. `value` number = 0.5, `tone` primary|success|warning|error = "primary".
   `{"type":"ProgressBar","props":{"value":0.5},"layout":{"width":{"fill":240},"height":4}}`
 - **`ListRow`**: One row of a list or table-like list: icon, title, optional subtitle and trailing content (the trailing slot). `title` text required, `subtitle` text = "", `icon` text = "", `selected` bool = false, `dense` bool = false, `divider` bool = true; slots `trailing`; events `onPressed`.
   `{"type":"ListRow","props":{"title":"Invoice #1042","icon":"description"},"layout":{"width":{"fill":320},"height":{"hug":36}}}`
@@ -307,7 +307,7 @@ only in a row or column that has some (a fill or fixed main size).
 - **A full-width band with capped, centered content** (CSS `max-width: 1200px; margin: 0 auto`): the band fills
   the width and holds the background; its one child fills with `"constraints": {"maxWidth": 1200}`, centered by the
   band's `crossAxisAlignment` (`center`, the default). The capped band, with an example (ui_docs "layout-a-capped-band").
-- A negative margin does not overlap a neighbour: to overlap, move what the node paints with `"motion":
+- A negative margin does not overlap a neighbor: to overlap, move what the node paints with `"motion":
   {"translateY": -36}` (layout unchanged), or use a stack. Overlap and bleed (ui_docs "layout-overlap-and-bleed").
 
 ### Stacks
@@ -374,7 +374,7 @@ under a stack (`layout_field_ignored`).
   its `type`.
 - `clip: "antiAlias"` clips the children to the rounded box.
 
-Colours are `"#AARRGGBB"` (alpha first: `#FF` opaque, `#80` half), `"#RRGGBB"` or a theme colour's name; `"#FFF"`,
+Colors are `"#AARRGGBB"` (alpha first: `#FF` opaque, `#80` half), `"#RRGGBB"` or a theme color's name; `"#FFF"`,
 `rgb()` and CSS names are not read. Patterns in pixels, grain, foreground scrims, icons, paths and custom drawing:
 decoration (ui_docs "decoration").
 
@@ -462,7 +462,7 @@ The props that matter most; each type's page lists all of them.
 
 Soft SaaS UI's components stand in for `filledButton`, `elevatedButton`, `outlinedButton`, `textButton`, `iconButton`, `textField`, `checkbox`, `switch`, `radio`, `slider`, `dropdown`, `segmentedButton`: use them.
 
-- **Buttons**: the text is `label` (not `text`); colours, corners and the label's style are in `style` (a
+- **Buttons**: the text is `label` (not `text`); colors, corners and the label's style are in `style` (a
   ButtonStyle (ui_docs "type-ButtonStyle"): `backgroundColor`, `foregroundColor`, `textStyle`, `shape`), not in
   `decoration`. Give a button a fixed width or a fill: a hugging button is only as wide as its label. For full
   control, use a `row` with a fill, padding, a text child and a `click` reaction.
@@ -551,7 +551,7 @@ navigation (ui_docs "navigation").
    band.
 2. **Use the width.** A tablet and a desktop are not a stretched phone: split the page into content and a rail
    (a `flex` turning horizontal), give content columns (a `gridView` whose `crossAxisCount` grows, a lead item
-   spanning two: `layout.columnSpan`), and let every band fill the width with its content capped and centred. A
+   spanning two: `layout.columnSpan`), and let every band fill the width with its content capped and centered. A
    desktop page that is still one column, or content that stops short of its band, is unfinished:
    an editorial page at three sizes (ui_docs "layout-an-editorial-page-at-three-sizes").
 3. A node's `media` is a list of CSS media queries over the node: `[{"minWidth": 600, "patch": {"props": {"style":
@@ -567,9 +567,9 @@ Breakpoints, sticky headers, scrolling, a canvas per breakpoint: responsive layo
 ## Rules that are easy to get wrong
 
 1. Every node needs `layout.width` and `layout.height`; without them it is 0 × 0.
-2. Every text needs a colour; without one it is white.
+2. Every text needs a color; without one it is white.
 3. Padding and margin are a number or four numbers, never two.
-4. Colours are `#AARRGGBB`, `#RRGGBB` or a theme colour's name; define the theme first and name its colours and
+4. Colors are `#AARRGGBB`, `#RRGGBB` or a theme color's name; define the theme first and name its colors and
    styles.
 5. Columns center their children across by default: `"crossAxisAlignment": "start"` for left-aligned content.
 6. A screen taller than the window needs a scrolling body column (`"scrollable": true`, `fill` both ways).
@@ -579,7 +579,7 @@ Breakpoints, sticky headers, scrolling, a canvas per breakpoint: responsive layo
 10. `fill` takes all the room it is given: cap it with `constraints.maxWidth`. Under a parent that hugs that
     axis, a fill is its design number (`fill_fallback`).
 11. A backslash in a formula is written twice in JSON: `"${= matches(code, '^\\d{4}$')}"`.
-12. Buttons: `label`, colours in `style`. Inputs: `changed` + `setVariable`, two-way by binding the value prop.
+12. Buttons: `label`, colors in `style`. Inputs: `changed` + `setVariable`, two-way by binding the value prop.
 13. Repeated content comes from data: one template in a `listView` / `gridView`, not copies.
 
 ## Ops
@@ -595,7 +595,7 @@ Breakpoints, sticky headers, scrolling, a canvas per breakpoint: responsive layo
 
 ## Examples
 
-Build (a card with a selectable list and a labelled button):
+Build (a card with a selectable list and a labeled button):
 
 ```json
 {"ops":[{"op":"roots","roots":["trip"]},{"op":"set","id":"trip","node":{"type":"canvas","slots":{"body":"card"},"layout":{"width":390,"height":{"hug":260}}}},{"op":"set","id":"card","node":{"type":"column","children":["head","list","go"],"layout":{"width":{"fill":390},"height":{"hug":260},"padding":16},"props":{"crossAxisAlignment":"stretch","spacing":12},"decoration":{"fills":[{"color":"#FFFFFFFF"}],"radius":16}}},{"op":"set","id":"head","node":{"type":"row","children":["from","arrow","to"],"layout":{"width":{"fill":358},"height":{"hug":26}},"props":{"crossAxisAlignment":"center","spacing":6}}},{"op":"set","id":"from","node":{"type":"text","layout":{"width":{"hug":70},"height":{"hug":26}},"props":{"text":"London","style":{"fontSize":20,"fontWeight":700,"color":"#FF111827"}}}},{"op":"set","id":"arrow","node":{"type":"icon","layout":{"width":20,"height":20},"props":{"icon":"arrow_forward","color":"#FF6B7280"}}},{"op":"set","id":"to","node":{"type":"text","layout":{"width":{"hug":70},"height":{"hug":26}},"props":{"text":"Porto","style":{"fontSize":20,"fontWeight":700,"color":"#FF111827"}}}},{"op":"vars","scope":"trip","set":{"sel":{"type":"integer","value":0},"flights":{"type":"list","value":[{"time":"07:10","price":"£148"},{"time":"13:45","price":"£122"}]}}},{"op":"set","id":"list","node":{"type":"listView","children":["item"],"layout":{"width":{"fill":358},"height":{"hug":100}},"props":{"scrollable":false,"spacing":8},"bind":{"data":"${flights}"}}},{"op":"set","id":"item","node":{"type":"row","children":["itemTime","itemPrice"],"layout":{"width":{"fill":358},"height":46,"padding":[12,0,12,0]},"props":{"mainAxisAlignment":"spaceBetween","crossAxisAlignment":"center"},"decoration":{"fills":[{"color":"#FFF3F4F6"}],"radius":10},"bind":{"decoration.fills[0].color":"${= index == sel ? '#FFDBEAFE' : '#FFF3F4F6'}"},"actions":[{"trigger":{"type":"click"},"actions":[{"type":"setVariable","variable":"sel","value":"${index}"}]}]}},{"op":"set","id":"itemTime","node":{"type":"text","layout":{"width":{"hug":60},"height":{"hug":20}},"props":{"text":"${item.time}","style":{"fontSize":15,"color":"#FF111827"}}}},{"op":"set","id":"itemPrice","node":{"type":"text","layout":{"width":{"hug":50},"height":{"hug":20}},"props":{"text":"${item.price}","style":{"fontSize":15,"fontWeight":700,"color":"#FF111827"}}}},{"op":"set","id":"go","node":{"type":"filledButton","layout":{"width":{"fill":358},"height":48},"props":{"label":"Confirm","style":{"backgroundColor":"#FF2563EB","foregroundColor":"#FFFFFFFF","shape":{"type":"roundedRectangle","borderRadius":10}}},"actions":[{"trigger":{"type":"click"},"actions":[{"type":"componentEvent","event":"confirm","value":{"option":"${sel}"}}]}]}}]}
@@ -630,7 +630,7 @@ Look up anything below with ui_docs {"topic": "<topic>"}: a page, a section, or 
 | Why a fill took its design size (`fill_fallback`); which sizes a parent allows | "layout-which-sizing-modes-each-parent-allows" |
 | Every layout field (constraints, aspectRatio, widthFactor, order, basis...) | "layout-layout-fields" |
 | A screen designed separately per breakpoint | "layout-a-canvas-per-breakpoint" |
-| Name the palette and the type scale once (the theme) | "theme-named-colours-and-styles" |
+| Name the palette and the type scale once (the theme) | "theme-named-colors-and-styles" |
 | A type size that grows at tablet and desktop, written once | "theme-a-type-scale-that-changes-with-the-screen-size" |
 | Dark mode | "theme-dark-mode" |
 | Part of a text in another style, a link in text; text defaults | "theme-text" |
@@ -651,10 +651,10 @@ Look up anything below with ui_docs {"topic": "<topic>"}: a page, a section, or 
 | A radio group (one choice of several) | "forms-a-radio-group" |
 | A − / + stepper around a number field | "forms-a-stepper-around-a-field" |
 | A search icon or a clear (×) button inside a text field | "forms-a-clear-button-in-the-field" |
-| A checkbox or switch with a label, toggled from the whole row | "forms-a-labelled-checkbox-or-switch" |
+| A checkbox or switch with a label, toggled from the whole row | "forms-a-labeled-checkbox-or-switch" |
 | Add and remove items of a list (a list editor) | "forms-add-and-remove-items-a-list-editor" |
 | Focus a field; keyboard keys; arrow keys between tabs | "forms-focus-and-the-keyboard" |
-| A button's label, colours, corners and label size | "forms-buttons" |
+| A button's label, colors, corners and label size | "forms-buttons" |
 | Every prop of a text field | "node-textField" |
 | Repeat one template per item of a list | "lists-one-template-from-data" |
 | A grid of cards from data, as many columns as fit; gaps between wrapped items | "lists-a-grid-of-cards" |
@@ -672,7 +672,7 @@ Look up anything below with ui_docs {"topic": "<topic>"}: a page, a section, or 
 | Declare variables; screen, page and project scope | "state-variables" |
 | A value derived once from others (computed variables), a reusable formula (function variables) | "state-computed-and-function-variables" |
 | The value each binding path expects (lists for padding, names for enums) | "state-binding-paths" |
-| Every formula function: text, numbers, money, lists, objects, dates, colours | "state-formula-functions" |
+| Every formula function: text, numbers, money, lists, objects, dates, colors | "state-formula-functions" |
 | A count, a total, a streak from data; dates | "state-a-streak-and-other-counts-from-data" |
 | Toggle, add, append, remove at an index (setVariable ops); if / else in a chain | "state-changing-state-from-a-reaction" |
 | Set several nodes while a test holds (conditions) | "state-conditions" |
@@ -705,7 +705,7 @@ Look up anything below with ui_docs {"topic": "<topic>"}: a page, a section, or 
 | Capture the states (after a tap, typing, an open menu) with the render command | "render-capturing-states" |
 | Every validation and render code | "render-validation-codes" |
 | Build and edit with ops; streaming; the retry protocol | "edit-ops-the-ops" |
-| How one value type is written (colour, alignment, insets) | "values-colours-and-alignments" |
+| How one value type is written (color, alignment, insets) | "values-colors-and-alignments" |
 
 - "layout": Responsive layout. Documents canvas, row, column, flex, stack, box, spacer, divider, verticalDivider, variance, sticky, floating, measure, scroll, scrollEnd, enterViewport, exitViewport, scrollTo.
 - "theme": Theme and text. Documents text, textDirection, defaultTextStyle.

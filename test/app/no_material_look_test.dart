@@ -18,10 +18,10 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/expansion.dart' show RenderExpansion;
 import 'package:codelessly_sdk/src/render/controls/chips.dart' show RenderChip;
-import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl;
 import 'package:codelessly_sdk/src/render/controls/pickers.dart' show RenderPickerField;
 import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
-import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl, RenderControl;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, RenderControl;
 import 'package:codelessly_sdk/src/widgets/collections.dart' show collectionsRecipes;
 import 'package:codelessly_sdk/src/widgets/controls.dart' show controlRecipes;
 import 'package:codelessly_sdk/src/widgets/indicators.dart' show indicatorsRecipes;
@@ -375,7 +375,7 @@ List<(String, String?)> _controlTexts(WidgetTester tester) {
   final out = <(String, String?)>[];
   void visit(RenderObject o, bool inControl) {
     // A control drawn as a render object sets its own text.
-    if (o is LabelledControl) {
+    if (o is LabeledControl) {
       for (final l in o.labels) {
         if (l.text.trim().isNotEmpty) out.add((l.text, l.fontFamily));
       }
@@ -434,19 +434,19 @@ const _renderControls = <String, List<String>>{
   'toggles': ['checkbox', 'switch', 'radio', 'slider', 'segmentedButton'],
 };
 
-/// The labelled controls whose label must sit centred in their box.
-const _labelled = [
+/// The labeled controls whose label must sit centered in their box.
+const _labeled = [
   'filledButton', 'elevatedButton', 'outlinedButton', 'textButton', 'segmentedButton', //
   'chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip', 'tabBar', 'dropdown', 'textField', 'datePicker',
   'timePicker', 'dateTimeInput', 'pagination',
 ];
 
-/// Each labelled control twice: at its default height and 32 px high, with a
+/// Each labeled control twice: at its default height and 32 px high, with a
 /// value (text field: typed text) and once more with only a hint.
 Map<String, Object?> _labelPage() {
   final nodes = <String, Object?>{};
   final ids = <String>[];
-  for (final type in _labelled) {
+  for (final type in _labeled) {
     final spec = Catalog.current.widget(type)!;
     // Pagination as one line of page buttons (its summary is a second line).
     // A field's own text and hint (its label is drawn above it: see
@@ -496,11 +496,11 @@ Map<String, Object?> _labelPage() {
   return {'schema': 3, 'id': 'labels', 'roots': ['canvas'], 'nodes': nodes};
 }
 
-/// The vertical centre of the glyph box of every non-blank text drawn in
+/// The vertical center of the glyph box of every non-blank text drawn in
 /// [box] (its paragraphs' and editable texts' lines, `BoxHeightStyle.tight`:
 /// the font's ascent to descent, as Flutter's Text lays a line out without
 /// its leading), in global coordinates.
-List<(String, double)> _labelCentres(RenderBox box) {
+List<(String, double)> _labelCenters(RenderBox box) {
   final out = <(String, double)>[];
   final area = box.localToGlobal(Offset.zero) & box.size;
   void visit(RenderObject o) {
@@ -521,7 +521,7 @@ List<(String, double)> _labelCentres(RenderBox box) {
         ];
       }
     }
-    if (o is LabelledControl && o.attached) {
+    if (o is LabeledControl && o.attached) {
       for (final l in o.labels) {
         if (l.glyphs.isEmpty || l.text.trim().isEmpty) continue;
         final top = l.glyphs.map((b) => b.top).reduce((a, b) => a < b ? a : b);
@@ -550,7 +550,7 @@ void main() {
   // descent, not drawn as test boxes.
   for (final (name, family) in [('Barlow', 'Barlow'), ('Roboto', 'Roboto')]) {
     for (final dark in [false, true]) {
-      testWidgets('every labelled control centres its label in its box, default and 32 px high: $name ${dark ? 'dark' : 'light'}',
+      testWidgets('every labeled control centers its label in its box, default and 32 px high: $name ${dark ? 'dark' : 'light'}',
           (tester) async {
         addTearDown(tester.view.reset);
         addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
@@ -579,21 +579,21 @@ void main() {
           await _save(tester, await _capture(tester), 'labels-$name-${dark ? 'dark' : 'light'}');
         }
         final off = <String>[];
-        for (final type in _labelled) {
+        for (final type in _labeled) {
           for (final id in ['$type@default', '$type@32', if (type == 'textField') ...['$type@default-text', '$type@32-text']]) {
             final box = controller.tree!.boxOf(id)!;
-            final centre = (box.localToGlobal(Offset.zero) & box.size).center.dy;
-            final labels = _labelCentres(box);
+            final center = (box.localToGlobal(Offset.zero) & box.size).center.dy;
+            final labels = _labelCenters(box);
             if (labels.isEmpty) {
               off.add('$id: no label found');
               continue;
             }
             for (final (text, y) in labels) {
-              if ((y - centre).abs() > 1) off.add('$id "$text": ${(y - centre).toStringAsFixed(1)} px from the box centre');
+              if ((y - center).abs() > 1) off.add('$id "$text": ${(y - center).toStringAsFixed(1)} px from the box center');
             }
           }
         }
-        expect(off, isEmpty, reason: 'labels off centre');
+        expect(off, isEmpty, reason: 'labels off center');
       });
     }
   }

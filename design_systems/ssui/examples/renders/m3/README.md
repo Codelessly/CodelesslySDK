@@ -1,7 +1,7 @@
 # Buttons as render objects (Milestone 3): before and after
 
 The SSUI reference page (`../ssui-reference`, rendered from soft_saas_ui's own Flutter widgets by
-`tool/ssui_golden`) rebuilt from core button nodes with **nothing styled** but the variant's colour, Roboto, light and
+`tool/ssui_golden`) rebuilt from core button nodes with **nothing styled** but the variant's color, Roboto, light and
 dark, 1200 × 760 at 1×. Made by `test/controls/ssui_reference_test.dart` (after) with `CODELESSLY_M3_RENDERS=<dir>`;
 the before renders are the same page through 30.1.0's Material islands.
 
@@ -85,7 +85,7 @@ through the Material islands they replace (`ExpansionTile`, the accordion's `Tex
 
 | File | What |
 |---|---|
-| `tile-accordion-before-{light,dark}.png` | the island accordion: a Material chevron button over the header, centred text, no panel |
+| `tile-accordion-before-{light,dark}.png` | the island accordion: a Material chevron button over the header, centered text, no panel |
 | `tile-accordion-{light,dark}.png` | zero-prop `accordion` nodes (the header and content texts styled as SSUI's Accordion styles its own) |
 | `tile-listtile-before-{light,dark}.png` | the island `ListTile` with hugging nodes: nothing (0 × 0, its design size) |
 | `tile-listtile-{light,dark}.png` | zero-prop `listTile` nodes with an icon, a title and a subtitle in their slots |

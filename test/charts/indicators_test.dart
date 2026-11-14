@@ -70,7 +70,7 @@ void main() {
     final tree = NodeTree(DocumentSource(doc));
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'r'))));
     final view = tester.renderObject(find.byType(NodeView));
-    // A square of its design size less padding (13.5), centred: the node
+    // A square of its design size less padding (13.5), centered: the node
     // takes the row's height.
     expect(tree.boxOf('spin')!.rectIn(view), const Rect.fromLTWH(0, 0, 13.5, 48));
     expect(tree.boxOf('ios')!.rectIn(view), const Rect.fromLTWH(13.5, 14, 20, 20));
@@ -118,7 +118,7 @@ void main() {
 
 }
 
-/// The ARGB colour at ([x], [y]) of [key]'s boundary.
+/// The ARGB color at ([x], [y]) of [key]'s boundary.
 Future<int> _pixel(WidgetTester tester, GlobalKey key, int x, int y) async => (await tester.runAsync(() async {
       final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final image = await boundary.toImage();
@@ -129,7 +129,7 @@ Future<int> _pixel(WidgetTester tester, GlobalKey key, int x, int y) async => (a
     }))!;
 
 void _themeChangeRepaintsIndicators() {
-  testWidgets('a gauge with no colours of its own repaints in the new theme when the theme (or its mode) changes', (tester) async {
+  testWidgets('a gauge with no colors of its own repaints in the new theme when the theme (or its mode) changes', (tester) async {
     final doc = _doc({
       'meter': {
         'type': 'gaugeMeter',

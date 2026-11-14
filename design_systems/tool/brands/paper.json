@@ -1,0 +1,16 @@
+{
+ "id": "paper",
+ "name": "Paper",
+ "description": "A warm editorial language: off-white paper, near-black ink, a deep teal accent and almost square corners.",
+ "primary": "#0F766E",
+ "primaryDark": "#2DD4BF",
+ "ink": "#1C1917",
+ "surface": "#FFFCF7",
+ "inkDark": "#FAFAF9",
+ "surfaceDark": "#1C1917",
+ "radius": 2,
+ "success": "#15803D",
+ "warning": "#B45309",
+ "error": "#B91C1C",
+ "info": "#0E7490"
+}

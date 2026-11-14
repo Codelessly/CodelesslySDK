@@ -165,7 +165,7 @@ void main() {
     });
   });
 
-  testWidgets('a text in a transparent colour: text_no_color', (tester) async {
+  testWidgets('a text in a transparent color: text_no_color', (tester) async {
     final session = _strict();
     addTearDown(session.dispose);
     _ok(session, _card({
@@ -174,7 +174,7 @@ void main() {
     }));
     final d = (await _shown(tester, session)).singleWhere((d) => d.code == 'text_no_color');
     expect((d.nodeId, d.error), ('b', false));
-    expect(d.message, contains('transparent colour'));
+    expect(d.message, contains('transparent color'));
   });
 
   testWidgets('a design system button whose bound label gives nothing: empty_label', (tester) async {

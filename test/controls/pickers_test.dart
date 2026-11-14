@@ -52,7 +52,7 @@ Future<(NodeTree, RecordedInteractions)> _show(WidgetTester tester, Map<String, 
 
 Rect _globalRect(RenderBox box) => box.localToGlobal(Offset.zero) & box.size;
 
-/// The global centre of day [day] of the month the open calendar shows.
+/// The global center of day [day] of the month the open calendar shows.
 Offset _dayAt(RenderCalendar c, int day) {
   for (var i = 0; i < 42; i++) {
     if (c.dayAt(i)?.day == day) return c.localToGlobal(c.cellRect(i).center);
@@ -118,7 +118,7 @@ void main() {
       expect(f.border!.side.color, const Color(0xFF383838));
       final off = _field(tree, 'off');
       expect(off.paintedAlpha, 128);
-      await tester.tapAt(centreOf(tree, 'off'));
+      await tester.tapAt(centerOf(tree, 'off'));
       await tester.pump();
       expect(_root(tester).overlayEntries, isEmpty);
     });
@@ -152,7 +152,7 @@ void main() {
     testWidgets('on a wide view it is a popover in the root\'s overlay layer, under the field and aligned with it',
         (tester) async {
       final (tree, _) = await _show(tester, {'date': hugging('datePicker', {'value': '2026-11-13'})});
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       final popup = _root(tester).overlayEntries.single as RenderPickerPopup;
       expect(popup.sheet, isFalse);
@@ -170,7 +170,7 @@ void main() {
         'spacer': {'type': 'box', 'layout': {'width': 10, 'height': 480}},
         'date': hugging('datePicker'),
       });
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       final popup = _root(tester).overlayEntries.single as RenderPickerPopup;
       expect(_globalRect(popup.child!).bottom, rectOf(tree, 'date').top - 4);
@@ -178,7 +178,7 @@ void main() {
 
     testWidgets('on a narrow view it is a bottom sheet over a scrim', (tester) async {
       final (tree, _) = await _show(tester, {'date': hugging('datePicker')}, width: 390, height: 700);
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       final popup = _root(tester).overlayEntries.single as RenderPickerPopup;
       expect(popup.sheet, isTrue);
@@ -194,14 +194,14 @@ void main() {
         'date': hugging('datePicker'),
         'go': hugging('filledButton', {'label': 'Go'}),
       });
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       expect(_root(tester).overlayEntries, hasLength(1));
       await tester.tapAt(const Offset(700, 500));
       await tester.pump();
       expect(_root(tester).overlayEntries, isEmpty);
       expect(recorded.fired, isEmpty);
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
@@ -223,7 +223,7 @@ void main() {
         },
       }, variables: [lists.v('opened', false, VariableType.boolean)]);
       expect(_field(s.tree, 'd').shown, 'Dec 1, 2026');
-      await tester.tapAt(centreOf(s.tree, 'd'));
+      await tester.tapAt(centerOf(s.tree, 'd'));
       await tester.pumpAndSettle();
       expect(s['opened'], isTrue);
       expect(_root(tester).overlayEntries, isEmpty);
@@ -234,7 +234,7 @@ void main() {
     testWidgets('a month grid: the value selected, today ringed, the locale\'s weekdays from its first day',
         (tester) async {
       final (tree, _) = await _show(tester, {'date': hugging('datePicker', {'value': '2026-11-03'})});
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       final c = _field(tree, 'date').panel!.calendar!;
       expect(c.title, 'November 2026');
@@ -252,7 +252,7 @@ void main() {
       tester.platformDispatcher.localeTestValue = const Locale('de', 'DE');
       addTearDown(tester.platformDispatcher.clearLocaleTestValue);
       final (tree, _) = await _show(tester, {'date': hugging('datePicker', {'value': '2026-03-04'})});
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       final c = _field(tree, 'date').panel!.calendar!;
       expect(c.title, 'März 2026');
@@ -262,7 +262,7 @@ void main() {
 
     testWidgets('the arrows change the month, the title shows the years', (tester) async {
       final (tree, _) = await _show(tester, {'date': hugging('datePicker', {'value': '2026-11-13'})});
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       final c = _field(tree, 'date').panel!.calendar!;
       await tester.tapAt(c.localToGlobal(c.nextRect.center));
@@ -286,7 +286,7 @@ void main() {
       final (tree, recorded) = await _show(tester, {
         'date': hugging('datePicker', {'value': '2024-05-17', 'firstDate': '2024-05-10', 'lastDate': '2024-05-20'}),
       });
-      await tester.tapAt(centreOf(tree, 'date'));
+      await tester.tapAt(centerOf(tree, 'date'));
       await tester.pump();
       final c = _field(tree, 'date').panel!.calendar!;
       expect(c.lookOf(DateTime(2024, 5, 9)).enabled, isFalse);
@@ -377,7 +377,7 @@ void main() {
       final (tree, recorded) = await _show(tester, {
         'time': hugging('timePicker', {'value': '13:00', 'alwaysUse24HourFormat': true}),
       });
-      await tester.tapAt(centreOf(tree, 'time'));
+      await tester.tapAt(centerOf(tree, 'time'));
       await tester.pump();
       var t = _field(tree, 'time').panel!.time!;
       expect(t.columns, 2);
@@ -390,7 +390,7 @@ void main() {
       await tester.pump();
       expect(_root(tester).overlayEntries, isEmpty);
       expect(recorded.fired, isEmpty);
-      await tester.tapAt(centreOf(tree, 'time'));
+      await tester.tapAt(centerOf(tree, 'time'));
       await tester.pump();
       t = _field(tree, 'time').panel!.time!;
       await tester.tapAt(t.localToGlobal(t.rowRect(1, -1).center));
@@ -415,7 +415,7 @@ void main() {
       }, variables: [lists.v('arrival', '2026-11-12T09:05:00')]);
       final f = _field(s.tree, 'dt');
       expect(f.shown, 'Thu, Nov 12 · 9:05 AM');
-      await tester.tapAt(centreOf(s.tree, 'dt'));
+      await tester.tapAt(centerOf(s.tree, 'dt'));
       await tester.pump();
       final panel = f.panel!;
       await tester.tapAt(_dayAt(panel.calendar!, 20));
@@ -442,7 +442,7 @@ void main() {
         'bind': {'props.value': r'${day}'},
       },
     }, variables: [lists.v('day', '2026-11-09')]);
-    await tester.tapAt(centreOf(s.tree, 'date'));
+    await tester.tapAt(centerOf(s.tree, 'date'));
     await tester.pump();
     await tester.tapAt(_dayAt(_field(s.tree, 'date').panel!.calendar!, 24));
     await tester.pumpAndSettle();
@@ -453,7 +453,7 @@ void main() {
     expect(_field(s.tree, 'date').shown, '2027-01-02');
   });
 
-  testWidgets('a node\'s pickerTheme colours the panel and its help text titles it', (tester) async {
+  testWidgets('a node\'s pickerTheme colors the panel and its help text titles it', (tester) async {
     final (tree, _) = await _show(tester, {
       'date': hugging('datePicker', {
         'value': '2026-11-30',
@@ -461,7 +461,7 @@ void main() {
         'pickerTheme': {'backgroundColor': '#FFFDFBF7', 'accentColor': '#FF2F4F46', 'textColor': '#FF23262B', 'radius': 14, 'dayRadius': 8},
       }),
     });
-    await tester.tapAt(centreOf(tree, 'date'));
+    await tester.tapAt(centerOf(tree, 'date'));
     await tester.pump();
     final panel = _field(tree, 'date').panel!;
     final c = panel.calendar!;
@@ -515,10 +515,10 @@ void main() {
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
     addTearDown(mouse.removePointer);
-    await mouse.moveTo(centreOf(tree, 'date'));
+    await mouse.moveTo(centerOf(tree, 'date'));
     await tester.pump();
     expect(_field(tree, 'date').border!.side.color, const Color(0xFFD1D5DB));
-    await tester.tapAt(centreOf(tree, 'date'));
+    await tester.tapAt(centerOf(tree, 'date'));
     await tester.pump();
     final c = _field(tree, 'date').panel!.calendar!;
     final colors = <Color?>[

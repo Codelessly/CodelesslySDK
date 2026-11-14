@@ -46,7 +46,7 @@ void main() {
 
     group('a formula', () {
 
-      test('is recognised as well-formed or not', () {
+      test('is recognized as well-formed or not', () {
         expect(FormulaEvaluator.parses('level > limit'), isTrue);
         expect(FormulaEvaluator.parses('null'), isTrue);
         expect(FormulaEvaluator.parses('level >'), isFalse);

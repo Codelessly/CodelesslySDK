@@ -201,7 +201,7 @@ RenderChip _chip(WidgetTester tester) {
   return found!;
 }
 
-Offset _chipCentre(WidgetTester tester) {
+Offset _chipCenter(WidgetTester tester) {
   final c = _chip(tester);
   return c.localToGlobal(c.size.center(Offset.zero));
 }
@@ -459,7 +459,7 @@ void main() {
         (tester) async {
           final s = await _show(tester, type);
           expect(_selected(tester, type), isFalse);
-          await tester.tapAt(_chipCentre(tester));
+          await tester.tapAt(_chipCenter(tester));
           await tester.pumpAndSettle();
           expect(_selected(tester, type), isTrue);
           expect(s.scope.read('selected'), true);
@@ -471,7 +471,7 @@ void main() {
             true,
             reason: 'writeback and changed precede click',
           );
-          await tester.tapAt(_chipCentre(tester));
+          await tester.tapAt(_chipCenter(tester));
           await tester.pumpAndSettle();
           expect(_selected(tester, type), isFalse);
           expect(s.scope.read('selected'), false);
@@ -484,7 +484,7 @@ void main() {
         'a bound $type shows the bound value, not its own guess',
         (tester) async {
           final s = await _show(tester, type);
-          await tester.tapAt(_chipCentre(tester));
+          await tester.tapAt(_chipCenter(tester));
           await tester.pumpAndSettle();
           s.scope.set('selected', false);
           await tester.pumpAndSettle();
@@ -498,10 +498,10 @@ void main() {
         tester,
       ) async {
         await _show(tester, type, controlled: false, reactions: false);
-        await tester.tapAt(_chipCentre(tester));
+        await tester.tapAt(_chipCenter(tester));
         await tester.pumpAndSettle();
         expect(_selected(tester, type), true);
-        await tester.tapAt(_chipCentre(tester));
+        await tester.tapAt(_chipCenter(tester));
         await tester.pumpAndSettle();
         expect(_selected(tester, type), false);
       });
@@ -515,7 +515,7 @@ void main() {
             enabled: disabled != 'disabled',
             interactive: disabled != 'design',
           );
-          await tester.tapAt(_chipCentre(tester));
+          await tester.tapAt(_chipCenter(tester));
           await tester.pumpAndSettle();
           expect(_selected(tester, type), false);
           expect(s.scope.read('selected'), false);
@@ -674,7 +674,7 @@ void main() {
         final toggle = await _showSwitch(tester, _switch(value: on, props: _border));
         // Thumb 24 across at (15|35, 15): fill, then a 1 px ring inside it.
         final x = on ? 35.0 : 15.0;
-        expect(toggle.thumb, (centre: Offset(x, 15), radius: 12.0));
+        expect(toggle.thumb, (center: Offset(x, 15), radius: 12.0));
         expect(
           toggle,
           paints
@@ -713,7 +713,7 @@ void main() {
       final toggle = controlIn<RenderToggle>(tree, 's');
       expect(toggle.markRect, const Rect.fromLTWH(0, 0, 50, 30), reason: 'its track fills the node');
       expect(toggle.trackColor, const Color(0xFF00AA00));
-      expect(toggle.thumb, (centre: const Offset(35, 15), radius: 12.0));
+      expect(toggle.thumb, (center: const Offset(35, 15), radius: 12.0));
       // The shadow, then the thumb.
       expect(toggle, paints..rrect(color: const Color(0xFF00AA00))..circle(x: 35, y: 16)..circle(x: 35, y: 15, radius: 12));
     });

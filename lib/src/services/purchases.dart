@@ -171,7 +171,7 @@ abstract interface class PurchaseService {
 }
 
 /// An explicit purchase choice. A toggle must not silently fall back to a
-/// different offer. The default keeps existing store-controlled behaviour.
+/// different offer. The default keeps existing store-controlled behavior.
 enum PurchaseOfferPreference { storeDefault, trial, standard }
 
 /// Opt-in seam for adapters that can honor explicit trial/standard choices.

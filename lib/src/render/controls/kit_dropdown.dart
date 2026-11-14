@@ -41,7 +41,7 @@ class StrokeGlyph {
   ]);
 
   /// Paints it in [rect] (a square: the glyph's size) in [color], turned
-  /// [turns] (0.5: upside down) about its centre.
+  /// [turns] (0.5: upside down) about its center.
   void paint(Canvas canvas, Rect rect, Color color, {double turns = 0}) {
     if (color.a == 0 || rect.isEmpty) return;
     final s = math.min(rect.width, rect.height) / 24;

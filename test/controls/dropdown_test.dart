@@ -101,7 +101,7 @@ void main() {
       final (tree, _) = await _show(tester, {'s': _select(value: 'Cherry')});
       final root = _root(tester);
       expect(root.overlayEntries, isEmpty);
-      await tester.tapAt(centreOf(tree, 's'));
+      await tester.tapAt(centerOf(tree, 's'));
       await tester.pump();
       final d = _dropdown(tree, 's');
       expect(d.isOpen, isTrue);
@@ -132,7 +132,7 @@ void main() {
         'gap': {'type': 'box', 'layout': {'width': 10, 'height': 520}},
         's': _select(value: 'Apple', width: 80),
       }, height: 600);
-      await tester.tapAt(centreOf(tree, 's'));
+      await tester.tapAt(centerOf(tree, 's'));
       await tester.pump();
       final d = _dropdown(tree, 's');
       final menu = (_root(tester).overlayEntries.single as RenderPopupLayer).child!;
@@ -144,7 +144,7 @@ void main() {
     testWidgets('a long menu scrolls: 240 high at most, the chosen row revealed, the wheel scrolls it', (tester) async {
       final items = [for (var i = 0; i < 30; i++) 'Item $i'];
       final (tree, _) = await _show(tester, {'s': _select(value: 'Item 20', items: items)}, height: 600);
-      await tester.tapAt(centreOf(tree, 's'));
+      await tester.tapAt(centerOf(tree, 's'));
       await tester.pump();
       final menu = (_root(tester).overlayEntries.single as RenderPopupLayer).child! as RenderMenu;
       expect(menu.size.height, 240);
@@ -160,7 +160,7 @@ void main() {
 
     testWidgets('a tap on a row chooses it: the field shows it, `changed` fires, the menu closes, focus stays', (tester) async {
       final (tree, recorded) = await _show(tester, {'s': _select(value: 'Apple')});
-      await tester.tapAt(centreOf(tree, 's'));
+      await tester.tapAt(centerOf(tree, 's'));
       await tester.pump();
       final menu = (_root(tester).overlayEntries.single as RenderPopupLayer).child! as RenderMenu;
       await tester.tapAt(_global(menu.rows[3]).center);
@@ -179,7 +179,7 @@ void main() {
         's': _select(value: 'Apple'),
         'b': hugging('filledButton', {'label': 'Below'}),
       });
-      await tester.tapAt(centreOf(tree, 's'));
+      await tester.tapAt(centerOf(tree, 's'));
       await tester.pump();
       await tester.tapAt(const Offset(390, 290));
       await tester.pump();
@@ -258,7 +258,7 @@ void main() {
     final (tree, _) = await _show(tester, {'s': _select(value: 'Apple', props: {'enabled': false})});
     final d = _dropdown(tree, 's');
     expect(d.paintedAlpha, 128);
-    await tester.tapAt(centreOf(tree, 's'));
+    await tester.tapAt(centerOf(tree, 's'));
     await tester.pump();
     expect(d.isOpen, isFalse);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -287,7 +287,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('the node\'s props: dropdownColor, borderRadius, item style, alignment, icon colour, no underline', (tester) async {
+  testWidgets('the node\'s props: dropdownColor, borderRadius, item style, alignment, icon color, no underline', (tester) async {
     final (tree, _) = await _show(tester, {
       's': _select(value: 'Apple', props: {
         'dropdownColor': '#FFFEF3C7',
@@ -309,7 +309,7 @@ void main() {
     expect(d.menu.look.textStyle.fontSize, 15);
   });
 
-  testWidgets('the value\'s label is centred in the field at every step of the scale', (tester) async {
+  testWidgets('the value\'s label is centered in the field at every step of the scale', (tester) async {
     final (tree, _) = await _show(tester, {
       for (final h in [24.0, 28.0, 32.0, 36.0, 44.0]) 's$h': _select(value: 'Banana', height: h),
     }, height: 400);

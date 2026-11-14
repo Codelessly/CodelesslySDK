@@ -10,14 +10,14 @@
 // | label | above the box, never floating: `fieldLabel` 11.5/600 in `secondaryText`, 6 px above | `labelText`, `labelStyle` |
 // | box | 28 high when it hugs (the control scale), 240 wide unless its content is wider; `primaryBackground` fill, radius 7 | `filled`, `fillColor`, `constraints` |
 // | border | 1 px `primaryBorder`, `secondaryBorder` hovered, 1.5 px `focusBorder` focused, `error` in error | `border`, `enabledBorder`, `focusedBorder`, `errorBorder`, `focusedErrorBorder`, `disabledBorder` |
-// | content | its line centred in the box, `paddingX` (8) at the sides | `contentPadding` |
+// | content | its line centered in the box, `paddingX` (8) at the sides | `contentPadding` |
 // | hint | the content's metrics in `tertiaryText` | `hintText`, `hintStyle` |
 // | prefix, suffix | an icon at the scale's icon size in `secondaryText`, and/or a text | `prefixIcon`, `prefixText`, `suffixIcon`, `suffixText` |
 // | helper, error | `caption` 11 in `secondaryText` / `error`, 4 px below; the error replaces the helper | `helperText`, `errorText` |
 // | disabled | the whole field at 50 % | `enabled` |
 //
 // The label stays where it is in every state (error included), the box never
-// changes size between states, and every colour is a token: no Material
+// changes size between states, and every color is a token: no Material
 // default reaches it.
 import 'dart:math' as math;
 import 'dart:ui' as ui show BoxHeightStyle;
@@ -112,7 +112,7 @@ class FieldAffix {
   /// Its size (null: the scale's icon size).
   final double? iconSize;
 
-  /// Its colour (null: `secondaryText`).
+  /// Its color (null: `secondaryText`).
   final Color? iconColor;
   final String text;
 
@@ -289,7 +289,7 @@ class FieldDecoration {
   final FieldAffix? prefix, suffix;
 
   /// The decoration's own (null: SSUI's: the scale's side padding, the
-  /// line centred).
+  /// line centered).
   final EdgeInsets? contentPadding;
 
   /// The decoration's `filled` (null: SSUI's field is filled) and fill.
@@ -409,7 +409,7 @@ class FieldDecoration {
     return s;
   }
 
-  // --- colours ---------------------------------------------------------------------
+  // --- colors ---------------------------------------------------------------------
 
   Color _token(String name, Color fallback) => tokens.theme.color(name)?.flutter ?? fallback;
 
@@ -425,7 +425,7 @@ class FieldDecoration {
   Color get errorColor => tokens.error;
 
   /// The border drawn in a state: the decoration's own for the state, else
-  /// its `border` in the state's colour, else SSUI's outline.
+  /// its `border` in the state's color, else SSUI's outline.
   FieldBorder borderFor({required bool focused, required bool hovered, required bool enabled}) {
     if (collapsed) return FieldBorder.none;
     final t = tokens;
@@ -503,9 +503,9 @@ enum FieldFramePart { label, box, prefixIcon, suffixIcon, below, none }
 
 /// A field: [decoration]'s frame (label above, box, hint, affixes, helper
 /// or error below) around content its subclass lays out and paints
-/// ([layoutContent], [paintContent]). The content is one line centred in the
+/// ([layoutContent], [paintContent]). The content is one line centered in the
 /// box, or several from its top ([contentMultiline]).
-abstract class RenderFieldFrame extends RenderControl implements LabelledControl {
+abstract class RenderFieldFrame extends RenderControl implements LabeledControl {
   RenderFieldFrame();
 
   FieldDecoration? _decoration;
@@ -530,7 +530,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabelledControl
 
   TextAlignVertical? _alignVertical;
 
-  /// Where one line sits in a box taller than it (null: centred).
+  /// Where one line sits in a box taller than it (null: centered).
   set alignVertical(TextAlignVertical? v) {
     if (v == _alignVertical) return;
     _alignVertical = v;
@@ -946,7 +946,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabelledControl
       right = boxRect.right - slot;
     }
     final contentWidth = math.max(0.0, right - left);
-    // The content: one line centred (or as aligned), or lines from the
+    // The content: one line centered (or as aligned), or lines from the
     // padding's top.
     final line = contentLineHeight;
     double top, height;
@@ -1016,7 +1016,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabelledControl
     return r.toRRect(boxRect);
   }
 
-  /// The fill now (null: none), its hover or focus colour over it.
+  /// The fill now (null: none), its hover or focus color over it.
   Color? get fillNow {
     final d = decoration;
     var fill = d.fill;
@@ -1026,7 +1026,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabelledControl
     return fill;
   }
 
-  /// The label's colour, the line below's (the error's red in error).
+  /// The label's color, the line below's (the error's red in error).
   Color get labelColor => _labelStyle.color ?? decoration.labelColor;
   Color get belowColor => (decoration.hasError && decoration.errorMessage.isNotEmpty)
       ? (decoration.errorStyle?.color ?? decoration.errorColor)

@@ -277,7 +277,7 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
   var hintStyle = d.hintStyle;
   // No border and no label behavior of its own: the theme's outlined field,
   // whose label never floats. It is the placeholder (as Flutter shows a
-  // label that never floats, over the hint): the line stays centred
+  // label that never floats, over the hint): the line stays centered
   // whether the field is empty or not.
   final themed = d.floatingLabelBehavior == null &&
       [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder]
@@ -373,10 +373,10 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
 /// A one-line input [height] tall. InputDecorator doesn't stretch its
 /// container (fill, border) to a height: a dense 50 px field painted a 20 px
 /// box at its top. So a box paints them at full height and a borderless
-/// decorator of that height sits in it, its line centred (as a Container
-/// around a TextField would). Its icons centre in the whole height too, and
+/// decorator of that height sits in it, its line centered (as a Container
+/// around a TextField would). Its icons center in the whole height too, and
 /// one with no icon gets an empty suffix as wide as its end padding and as
-/// tall as the field, so small text centres as well (the decorator's own
+/// tall as the field, so small text centers as well (the decorator's own
 /// container is otherwise 48 px).
 Widget fullHeightField(
   BuildContext context,
@@ -395,17 +395,17 @@ Widget fullHeightField(
   final InputBorder border = own ?? themeFieldBorder(context, error: error, focused: focused, enabled: decoration.enabled);
   final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
   final padEnd = (decoration.contentPadding ?? EdgeInsets.zero).resolve(Directionality.of(context)).right;
-  // Without a floating label, the line is centred in the box at its own
+  // Without a floating label, the line is centered in the box at its own
   // (dense) height, whatever the box's height: a 28 px field is not laid out
   // for Material's 48 px and cut.
-  final centre = decoration.label == null && decoration.labelText == null;
+  final center = decoration.label == null && decoration.labelText == null;
   final spacer = decoration.prefixIcon == null && decoration.suffixIcon == null;
   return DecoratedBox(
     decoration: ShapeDecoration(color: fill, shape: border),
-    child: _centred(centre, build(
+    child: _centered(center, build(
       decoration.copyWith(
-        contentPadding: centredPadding(context, decoration),
-        isDense: centre ? true : null,
+        contentPadding: centeredPadding(context, decoration),
+        isDense: center ? true : null,
         filled: false,
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
@@ -413,7 +413,7 @@ Widget fullHeightField(
         disabledBorder: InputBorder.none,
         errorBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
-        constraints: centre ? null : BoxConstraints.tightFor(height: height),
+        constraints: center ? null : BoxConstraints.tightFor(height: height),
         prefixIconConstraints:
             decoration.prefixIcon == null ? null : _tallIcon(decoration.prefixIconConstraints, height),
         suffixIcon: spacer ? SizedBox(width: padEnd, height: height) : decoration.suffixIcon,
@@ -428,11 +428,11 @@ Widget fullHeightField(
 }
 
 /// [decoration]'s content padding for a field of a set height whose line
-/// is centred (TextAlignVertical.center): its horizontal padding only, so a
+/// is centered (TextAlignVertical.center): its horizontal padding only, so a
 /// 28 or 32 px field is not laid out for a taller line box and its text and
-/// hint sit on its centre. A field whose label floats keeps its padding (the
+/// hint sit on its center. A field whose label floats keeps its padding (the
 /// label needs the room above the line).
-EdgeInsetsGeometry? centredPadding(BuildContext context, InputDecoration decoration) {
+EdgeInsetsGeometry? centeredPadding(BuildContext context, InputDecoration decoration) {
   final p = decoration.contentPadding;
   if (p == null || decoration.label != null || decoration.labelText != null) return p;
   final r = p.resolve(Directionality.of(context));
@@ -456,7 +456,7 @@ InputBorder themeFieldBorder(BuildContext context, {bool error = false, bool foc
   return shape.copyWith(borderSide: BorderSide(color: color, width: focused && enabled ? 2 : 1));
 }
 
-Widget _centred(bool centre, Widget field) => centre ? Center(child: field) : field;
+Widget _centered(bool center, Widget field) => center ? Center(child: field) : field;
 
 /// An icon box as tall as a fixed-height field.
 BoxConstraints _tallIcon(BoxConstraints? c, double height) =>

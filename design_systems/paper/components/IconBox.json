@@ -1,0 +1,74 @@
+{
+ "schema": 3,
+ "id": "IconBox",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "IconBox",
+  "doc": "A tinted square holding an icon, for a dialog or card header: 30 px, radius 7, the brand color at 10 %.",
+  "props": [
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "settings",
+    "doc": "The icon's name.",
+    "required": true
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Settings",
+   "size": [
+    30,
+    30
+   ],
+   "props": {
+    "icon": "settings"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 2
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "settings",
+    "color": "primary",
+    "size": 15
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  }
+ }
+}

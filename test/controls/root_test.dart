@@ -68,7 +68,7 @@ void main() {
     // Laid out: the filled button hugs at SSUI's 28.
     expect(rectOf(tree, 'save').height, 28);
     // Hit-tested: a tap is the node's click.
-    await tester.tapAt(centreOf(tree, 'save'));
+    await tester.tapAt(centerOf(tree, 'save'));
     await tester.pump();
     expect(recorded.fired, ['save click']);
 

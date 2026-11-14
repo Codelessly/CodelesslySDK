@@ -110,7 +110,7 @@ void main() {
       expect(rectOf(tree, 'title').left - rectOf(tree, 'icon').right, 10);
       expect(row.right - rectOf(tree, 'end').right, 12);
       for (final id in ['icon', 'title', 'end']) {
-        expect(rectOf(tree, id).center.dy, closeTo(row.center.dy, .01), reason: '$id centred on the row');
+        expect(rectOf(tree, id).center.dy, closeTo(row.center.dy, .01), reason: '$id centered on the row');
       }
       final tile = _tile(tree, 'row');
       expect(tile.fillColor, isNull);
@@ -156,7 +156,7 @@ void main() {
       tree.setState('bound', api.WidgetState.selected, true);
       await tester.pump();
       expect(_tile(tree, 'bound').fillColor, const Color(0x242563EB), reason: 'a bound selected state, too');
-      await tester.tapAt(centreOf(tree, 'off'));
+      await tester.tapAt(centerOf(tree, 'off'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       expect(_tile(tree, 'on').focusNode.hasFocus, isTrue, reason: 'Tab skips the disabled tile');
@@ -173,7 +173,7 @@ void main() {
       });
       final row = rectOf(tree, 'row');
       await tester.tapAt(Offset(row.right - 4, row.top + 3));
-      await tester.tapAt(centreOf(tree, 'title'));
+      await tester.tapAt(centerOf(tree, 'title'));
       expect(recorded.fired, ['row click', 'row click']);
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await mouse.addPointer(location: Offset.zero);
@@ -220,7 +220,7 @@ void main() {
       final head = x.headerRect.shift(rectOf(tree, 'more').topLeft);
       expect(head.height, 36, reason: 'a ListRow header');
       expect(rectOf(tree, 'more').height, 36, reason: 'closed: the header only');
-      for (final at in [head.centerLeft + const Offset(3, 0), centreOf(tree, 'title'), head.centerRight - const Offset(14, 0)]) {
+      for (final at in [head.centerLeft + const Offset(3, 0), centerOf(tree, 'title'), head.centerRight - const Offset(14, 0)]) {
         final before = x.expanded;
         await tester.tapAt(at);
         await tester.pumpAndSettle();
@@ -230,7 +230,7 @@ void main() {
       expect(x.expanded, isTrue);
       expect(rectOf(tree, 'more').height, 36 + 80);
       // A tap in the content is the content's, not the header's.
-      await tester.tapAt(centreOf(tree, 'body'));
+      await tester.tapAt(centerOf(tree, 'body'));
       await tester.pumpAndSettle();
       expect(x.expanded, isTrue);
     });
@@ -243,7 +243,7 @@ void main() {
         'body': _box(200, 80),
       });
       final x = _expansion(tree, 'more');
-      await tester.tapAt(centreOf(tree, 'title'));
+      await tester.tapAt(centerOf(tree, 'title'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 75));
       expect(x.animating, isTrue);
@@ -378,11 +378,11 @@ void main() {
         'a2': _box(100, 40),
       });
       expect(rectOf(tree, 'two').height, 46);
-      await tester.tapAt(centreOf(tree, 'q2'));
+      await tester.tapAt(centerOf(tree, 'q2'));
       await tester.pumpAndSettle();
       expect(_expansion(tree, 'one').expanded, isTrue);
       expect(_expansion(tree, 'two').expanded, isTrue);
-      await tester.tapAt(centreOf(tree, 'a1'));
+      await tester.tapAt(centerOf(tree, 'a1'));
       await tester.pumpAndSettle();
       expect(_expansion(tree, 'one').expanded, isTrue);
       await tester.tapAt(rectOf(tree, 'one').topRight + const Offset(-20, 23));
@@ -444,7 +444,7 @@ void main() {
       await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
       expect(_expansion(tree, 'one').expanded, isTrue);
       expect(_expansion(tree, 'two').expanded, isFalse);
-      await tester.tapAt(centreOf(tree, 'q2'));
+      await tester.tapAt(centerOf(tree, 'q2'));
       await tester.pumpAndSettle();
       expect(_expansion(tree, 'two').expanded, isTrue);
       expect(_expansion(tree, 'one').expanded, isFalse, reason: 'its bound expanded changed: it closes');

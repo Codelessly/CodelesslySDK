@@ -1,0 +1,146 @@
+{
+ "schema": 3,
+ "id": "ErrorBar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "ErrorBar",
+  "doc": "A failure under a card or row: a red rule over a one-line message with an alert icon. Fires onPressed.",
+  "props": [
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Sync failed: connection lost",
+    "doc": "What went wrong, one line.",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Failed",
+   "size": [
+    260,
+    26
+   ],
+   "props": {
+    "message": "Sync failed: connection lost"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "column",
+   "children": [
+    "rule",
+    "line"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 26
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "error"
+     }
+    ],
+    "radius": 2
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "message"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "error_outline",
+    "color": "error",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1,
+     "decoration": "underline",
+     "decorationStyle": "dotted"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

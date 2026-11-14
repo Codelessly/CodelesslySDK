@@ -346,7 +346,7 @@ const Map<String, Brief> kBriefs = {
   'restaurant_menu': (
     kind: 'page',
     prompt:
-        'Build the menu page of a neighbourhood restaurant that cooks over fire: a header, a hero with the opening '
+        'Build the menu page of a neighborhood restaurant that cooks over fire: a header, a hero with the opening '
         'times, a featured dish, the menu in tabs (lunch, dinner, drinks, dessert) with prices and dietary tags, a short '
         'footer, and a reserve button pinned to the bottom. It must work on a phone and on a desktop.',
     followup: null,

@@ -24,7 +24,7 @@ RenderSpinner _spinner(RenderTree tree, String id) {
 }
 
 void main() {
-  testWidgets('with no props and no layout: SSUI\'s 16 px spinner in the primary colour, a 20 px wheel in secondary text',
+  testWidgets('with no props and no layout: SSUI\'s 16 px spinner in the primary color, a 20 px wheel in secondary text',
       (tester) async {
     final (tree, _) = runningTree(columnDoc({
       'spin': {'type': 'circularProgressIndicator'},

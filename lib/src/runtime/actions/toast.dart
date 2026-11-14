@@ -535,7 +535,7 @@ class _ToastViewState extends State<_ToastView> {
     );
 
     // A side margin is a number (both sides) or [left, right]: a toast
-    // centred in the part of the screen beside a rail or sidebar.
+    // centered in the part of the screen beside a rail or sidebar.
     final sides = perBreakpointValue(look.map('sideMargins'), width, breakpoints);
     final sideMargin = numberValue(sides) ?? look.numberOr('sideMargin', 16);
     final (leftMargin, rightMargin) = switch (sides) {

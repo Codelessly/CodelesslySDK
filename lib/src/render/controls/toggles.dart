@@ -15,7 +15,7 @@
 // track 52/59 of its width (all of the node with `fillTrack`). Changes ease
 // over SSUI's `durations.control` on the tree's ticker (a switch's
 // `toggleDurationMs` and `toggleCurve` when it sets them); disabled is 50 %
-// opacity; keyboard focus is SSUI's ring. Every colour, side, radius and
+// opacity; keyboard focus is SSUI's ring. Every color, side, radius and
 // thumb prop of the old islands still applies over these.
 import 'dart:math' as math;
 
@@ -99,7 +99,7 @@ void _toggleRecipe(NodeBuilder b, Node n, List<RenderBox> chain, ToggleKind kind
 
 /// A checkbox, a switch or a radio: its value, its look in its states, the
 /// keyboard and screen readers.
-class RenderToggle extends RenderControl implements LabelledControl {
+class RenderToggle extends RenderControl implements LabeledControl {
   RenderToggle() {
     onPressed = _toggle;
     focusNode.onKey = _key;
@@ -375,7 +375,7 @@ class RenderToggle extends RenderControl implements LabelledControl {
   /// Where the mark is: a checkbox's box, a radio's ring, a switch's track.
   Rect get markRect {
     if (_hasLabel) {
-      // Beside its label: SSUI's mark at the start, centred on the line.
+      // Beside its label: SSUI's mark at the start, centered on the line.
       final m = _markNatural;
       return Rect.fromLTWH(0, (size.height - m.height) / 2, m.width, m.height);
     }
@@ -406,7 +406,7 @@ class RenderToggle extends RenderControl implements LabelledControl {
 
   Color? _c(api.Color? c) => c?.flutter;
 
-  /// A switch's track colour now (off to on as its thumb slides).
+  /// A switch's track color now (off to on as its thumb slides).
   Color get trackColor {
     final n = node, t = _tokens;
     final off = _c(n.prop(SwitchProps.inactiveTrackColor)) ?? (hovered ? t.tertiaryText : t.secondaryBorder);
@@ -414,13 +414,13 @@ class RenderToggle extends RenderControl implements LabelledControl {
     return lerpColor(off, on, position);
   }
 
-  /// A switch's thumb: its centre and radius in the box.
-  ({Offset centre, double radius}) get thumb {
+  /// A switch's thumb: its center and radius in the box.
+  ({Offset center, double radius}) get thumb {
     final track = markRect;
     final inset = node.prop(SwitchProps.thumbInset) ?? track.height / 10;
     final d = math.max(0.0, track.height - 2 * inset);
     final start = track.left + inset + d / 2, end = track.right - inset - d / 2;
-    return (centre: Offset(start + (end - start) * position, track.center.dy), radius: d / 2);
+    return (center: Offset(start + (end - start) * position, track.center.dy), radius: d / 2);
   }
 
   /// A checkbox's or radio's fill now.
@@ -493,15 +493,15 @@ class RenderToggle extends RenderControl implements LabelledControl {
     canvas.restore();
   }
 
-  /// A hover or focus colour of the node's own: a halo behind the mark
+  /// A hover or focus color of the node's own: a halo behind the mark
   /// (Material's reaction circle), [radius] across.
-  void _halo(Canvas canvas, Offset centre, double radius, api.Color? hover, api.Color? focus) {
+  void _halo(Canvas canvas, Offset center, double radius, api.Color? hover, api.Color? focus) {
     final c = focusHighlight && focus != null
         ? focus.flutter
         : hovered && hover != null
             ? hover.flutter
             : null;
-    if (c != null && c.a > 0) canvas.drawCircle(centre, radius, Paint()..color = c);
+    if (c != null && c.a > 0) canvas.drawCircle(center, radius, Paint()..color = c);
   }
 
   void _paintCheckbox(Canvas canvas) {
@@ -574,7 +574,7 @@ class RenderToggle extends RenderControl implements LabelledControl {
             ..strokeWidth = outlineWidth
             ..color = outline);
     }
-    final (:centre, :radius) = thumb;
+    final (:center, :radius) = thumb;
     final inset = n.prop(SwitchProps.thumbInset) ?? track.height / 10;
     // A thumb radius makes it a rounded square; none keeps it round.
     final corner = n.prop(SwitchProps.thumbRadius);
@@ -588,22 +588,22 @@ class RenderToggle extends RenderControl implements LabelledControl {
         : hovered && hover != null
             ? hover.flutter
             : null;
-    if (halo != null && halo.a > 0) drawThumb(centre, radius + inset * 2, Paint()..color = halo);
+    if (halo != null && halo.a > 0) drawThumb(center, radius + inset * 2, Paint()..color = halo);
     // Shadows only when the node casts them: SSUI's thumb has none.
     for (final e in n.prop(SwitchProps.thumbShadows)) {
       if (e.type != api.EffectType.dropShadow || !e.visible) continue;
       final shadow = boxShadow(e);
-      drawThumb(centre + shadow.offset, radius + shadow.spreadRadius, shadow.toPaint());
+      drawThumb(center + shadow.offset, radius + shadow.spreadRadius, shadow.toPaint());
     }
     final thumbColor = lerpColor(_c(n.prop(SwitchProps.inactiveThumbColor)) ?? _tokens.onAccent,
         _c(n.prop(SwitchProps.activeThumbColor)) ?? _tokens.onAccent, t);
-    drawThumb(centre, radius, Paint()..color = thumbColor);
+    drawThumb(center, radius, Paint()..color = thumbColor);
     final ring =
         lerpColor(_c(n.prop(SwitchProps.inactiveThumbBorderColor)), _c(n.prop(SwitchProps.activeThumbBorderColor)), t);
     final ringWidth = math.min(n.prop(SwitchProps.thumbBorderWidth) ?? 1, radius);
     if (ringWidth > 0 && ring.a > 0) {
       drawThumb(
-          centre,
+          center,
           radius - ringWidth / 2,
           Paint()
             ..style = PaintingStyle.stroke

@@ -10,7 +10,7 @@ import '../convert.dart';
 import '../paint/icon_names.dart';
 import 'tokens.dart';
 
-/// The SSUI colours the toggles, slider and segmented button draw with
+/// The SSUI colors the toggles, slider and segmented button draw with
 /// beyond [ControlTokens]' own (the document's theme over SSUI's).
 extension ToggleTokens on ControlTokens {
   Color _named(String name, Color fallback) => theme.color(name)?.flutter ?? fallback;
@@ -154,11 +154,11 @@ TextStyle labelStyleOf(api.TextStyle own, api.TextStyle? inherited) {
 
 /// SSUI's check mark (Lucide's `check`: a 24-unit polyline from (20, 6)
 /// through (9, 17) to (4, 12), round caps, stroked as its font draws it at
-/// small sizes: 2.5 units) in a square of [side] centred on [centre];
+/// small sizes: 2.5 units) in a square of [side] centered on [center];
 /// [indeterminate] draws Lucide's `minus`.
-void paintCheckMark(Canvas canvas, Offset centre, double side, Color color, {bool indeterminate = false}) {
+void paintCheckMark(Canvas canvas, Offset center, double side, Color color, {bool indeterminate = false}) {
   final u = side / 24;
-  final o = centre - Offset(side / 2, side / 2);
+  final o = center - Offset(side / 2, side / 2);
   final paint = Paint()
     ..color = color
     ..style = PaintingStyle.stroke

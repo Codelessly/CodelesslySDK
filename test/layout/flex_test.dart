@@ -27,7 +27,7 @@ Map<String, Object?> _box(double w, double h) => {
 // A negative padding in a document (or from a binding) reads as 0: Flutter
 // asserts insets are never negative, and one bad side used to fail the
 // layout of the whole screen. A negative margin overlaps (RenderMargin): the
-// node reaches that far past its place, and its neighbour moves up to it.
+// node reaches that far past its place, and its neighbor moves up to it.
 
 // Runtime of the widgets area's features.
 
@@ -184,7 +184,7 @@ void main() {
   });
 
   group('padding and margin', () {
-    testWidgets('a negative padding lays out as zero and a negative margin overlaps its neighbour', (tester) async {
+    testWidgets('a negative padding lays out as zero and a negative margin overlaps its neighbor', (tester) async {
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
         'roots': ['r'],
         'nodes': {

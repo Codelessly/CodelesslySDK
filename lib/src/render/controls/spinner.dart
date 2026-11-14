@@ -20,7 +20,7 @@ enum SpinnerStyle {
 }
 
 /// A spinner or a determinate ring, in a square of the box's shortest side
-/// (or [diameter] when it hugs), centred. It turns on its own ticker while
+/// (or [diameter] when it hugs), centered. It turns on its own ticker while
 /// attached and [animating].
 class RenderSpinner extends RenderBox {
   RenderSpinner({SpinnerStyle style = SpinnerStyle.arc}) : _style = style; // ignore: prefer_initializing_formals
@@ -74,7 +74,7 @@ class RenderSpinner extends RenderBox {
 
   double _strokeAlign = -1;
 
-  /// -1 inside the box, 0 centred on its edge, 1 outside (Flutter's
+  /// -1 inside the box, 0 centered on its edge, 1 outside (Flutter's
   /// `strokeAlign`); SSUI's arc is inside.
   set strokeAlign(double v) {
     if (v == _strokeAlign) return;
@@ -195,12 +195,12 @@ class RenderSpinner extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     final side = size.shortestSide;
     if (side <= 0) return;
-    final centre = offset + size.center(Offset.zero);
+    final center = offset + size.center(Offset.zero);
     if (_style == SpinnerStyle.ticks) {
-      paintTicks(context.canvas, centre, side / 2, _color, _animating ? _turns : 0);
+      paintTicks(context.canvas, center, side / 2, _color, _animating ? _turns : 0);
       return;
     }
-    paintArc(context.canvas, centre, side,
+    paintArc(context.canvas, center, side,
         color: _color,
         track: _track,
         strokeWidth: _strokeWidth ?? math.max(2.0, side / 8),
@@ -221,10 +221,10 @@ class RenderSpinner extends RenderBox {
   }
 }
 
-/// SSUI's spinner arc in a square of [side] round [centre]: the [track]
+/// SSUI's spinner arc in a square of [side] round [center]: the [track]
 /// ring, then the arc filled to [value] from 12 o'clock, or (null) an arc
 /// over [sweep] of the ring, [turns] of the way round.
-void paintArc(Canvas canvas, Offset centre, double side,
+void paintArc(Canvas canvas, Offset center, double side,
     {required Color color,
     Color? track,
     double strokeWidth = 2,
@@ -234,10 +234,10 @@ void paintArc(Canvas canvas, Offset centre, double side,
     double turns = 0,
     double sweep = .3,
     double trackGap = 0}) {
-  // The stroke's centre line, by its alignment (-1: inside the square).
+  // The stroke's center line, by its alignment (-1: inside the square).
   final d = side + strokeWidth * strokeAlign;
   if (d <= 0) return;
-  final rect = Rect.fromCenter(center: centre, width: d, height: d);
+  final rect = Rect.fromCenter(center: center, width: d, height: d);
   final paint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = strokeWidth
@@ -266,9 +266,9 @@ void paintArc(Canvas canvas, Offset centre, double side,
   if (v > 0) canvas.drawArc(rect, top, arc, false, paint..color = color);
 }
 
-/// Eight ticks round [centre] at [radius], the one [turns] of the way round
+/// Eight ticks round [center] at [radius], the one [turns] of the way round
 /// at full [color] and the rest fading behind it.
-void paintTicks(Canvas canvas, Offset centre, double radius, Color color, double turns) {
+void paintTicks(Canvas canvas, Offset center, double radius, Color color, double turns) {
   const count = 8;
   final lead = (turns * count).floor() % count;
   final width = radius / 4.5;
@@ -281,6 +281,6 @@ void paintTicks(Canvas canvas, Offset centre, double radius, Color color, double
     paint
       ..color = color.withValues(alpha: color.a * alpha)
       ..strokeWidth = width;
-    canvas.drawLine(centre + dir * (radius * .5), centre + dir * (radius - width / 2), paint);
+    canvas.drawLine(center + dir * (radius * .5), center + dir * (radius - width / 2), paint);
   }
 }

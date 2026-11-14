@@ -42,7 +42,7 @@ void main() {
       s.scope.set('playing',false);await tester.pump(const Duration(milliseconds:300));expect(s['ticks'],3);
     });
 
-    testWidgets('a value-changed reaction on one field ignores changes to its neighbours', (tester) async {
+    testWidgets('a value-changed reaction on one field ignores changes to its neighbors', (tester) async {
       final nodes=harness.counter();
       nodes['other']={...nodes['other']!, 'actions':[
         harness.reaction('valueChanged',[harness.add('keySeen'), {'type':'setVariable','variable':'session.key','value':'0'}],extra:{'variable':'fifthIndex'}),
@@ -78,7 +78,7 @@ void main() {
       expect(up['globalX'],point.dx);expect(up['globalY'],point.dy);
     });
 
-    testWidgets('a node with a click reaction is a labelled button to screen readers', (tester) async {
+    testWidgets('a node with a click reaction is a labeled button to screen readers', (tester) async {
       final handle = tester.ensureSemantics();
       final nodes = harness.counter(actions: [harness.reaction('click', [harness.add('count')])]);
       nodes['button'] = {...nodes['button']!, 'type': 'column', 'children': ['buttonLabel']};

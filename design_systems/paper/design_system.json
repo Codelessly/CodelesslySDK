@@ -1,0 +1,489 @@
+{
+ "schema": 3,
+ "id": "paper",
+ "name": "Paper",
+ "version": "1.0.0",
+ "description": "A warm editorial language: off-white paper, near-black ink, a deep teal accent and almost square corners.",
+ "theme": {
+  "primary": "#FF0F766E",
+  "onPrimary": "#FFFFFFFF",
+  "surface": "#FFFFFCF7",
+  "onSurface": "#FF1C1917",
+  "error": "#FFB91C1C",
+  "success": "#FF15803D",
+  "warning": "#FFB45309",
+  "radius": 2,
+  "buttonRadius": 2,
+  "colors": {
+   "primaryBackground": "#FFFFFCF7",
+   "secondaryBackground": "#FFF8F5F0",
+   "tertiaryBackground": "#FFF1EEEA",
+   "primaryText": "#FF1C1917",
+   "secondaryText": "#B81C1917",
+   "tertiaryText": "#731C1917",
+   "primaryBorder": "#FFE4E1DC",
+   "secondaryBorder": "#FFD2CFCA",
+   "info": "#FF0E7490",
+   "purple": "#FF9333EA",
+   "subtleFill": "#FFF1EEEA",
+   "neutralFill": "#FF4E4B48",
+   "raisedBackground": "#FFFFFCF7",
+   "track": "#FFE4E1DC",
+   "scrim": "#66000000",
+   "onAccent": "#FFFFFFFF",
+   "focusBorder": "#800F766E",
+   "hoverOverlay": "#0A1C1917",
+   "pressedOverlay": "#141C1917",
+   "activeTint": "#240F766E",
+   "primaryTint": "#1A0F766E",
+   "primaryTintBorder": "#470F766E",
+   "neutralTint": "#FFF1EEEA",
+   "neutralTintBorder": "#FFE4E1DC",
+   "tooltipBackground": "#FF1C1917",
+   "tooltipText": "#FFFFFCF7",
+   "tooltipMuted": "#99FFFCF7",
+   "successTint": "#1A15803D",
+   "successTintBorder": "#4715803D",
+   "warningTint": "#1AB45309",
+   "warningTintBorder": "#47B45309",
+   "errorTint": "#1AB91C1C",
+   "errorTintBorder": "#47B91C1C",
+   "infoTint": "#1A0E7490",
+   "infoTintBorder": "#470E7490"
+  },
+  "textStyles": {
+   "pageTitle": {
+    "fontSize": 20,
+    "fontWeight": 600,
+    "height": 1.3,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -0.2
+   },
+   "sectionTitle": {
+    "fontSize": 14,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "dialogTitle": {
+    "fontSize": 14,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "panelTitle": {
+    "fontSize": 12,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "body": {
+    "fontSize": 13,
+    "fontWeight": 400,
+    "height": 1.5,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "bodySecondary": {
+    "fontSize": 12,
+    "fontWeight": 400,
+    "height": 1.5,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "inputText": {
+    "fontSize": 12.5,
+    "fontWeight": 400,
+    "height": 1.25,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "placeholder": {
+    "fontSize": 12.5,
+    "fontWeight": 400,
+    "height": 1.25,
+    "color": "tertiaryText",
+    "leadingDistribution": "even"
+   },
+   "fieldLabel": {
+    "fontSize": 11.5,
+    "fontWeight": 600,
+    "height": 1.3,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "caption": {
+    "fontSize": 11,
+    "fontWeight": 400,
+    "height": 1.4,
+    "color": "tertiaryText",
+    "leadingDistribution": "even"
+   },
+   "mono": {
+    "fontSize": 12,
+    "fontWeight": 400,
+    "height": 1.5,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "fontFamily": "monospace"
+   },
+   "badge": {
+    "fontSize": 11,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlXs": {
+    "fontSize": 11.5,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlCompact": {
+    "fontSize": 12,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlSmall": {
+    "fontSize": 12.5,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlMedium": {
+    "fontSize": 13,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlLarge": {
+    "fontSize": 15,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "heading1": {
+    "fontSize": 30,
+    "fontWeight": 700,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "heading2": {
+    "fontSize": 24,
+    "fontWeight": 700,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "heading3": {
+    "fontSize": 18,
+    "fontWeight": 600,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   }
+  },
+  "dark": {
+   "primary": "#FF2DD4BF",
+   "onPrimary": "#FF111827",
+   "surface": "#FF1C1917",
+   "onSurface": "#FFFAFAF9",
+   "error": "#FFCA5555",
+   "success": "#FF50A06E",
+   "warning": "#FFC77E46",
+   "shadows": {
+    "level1": [
+     {
+      "type": "dropShadow",
+      "color": "#4D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ],
+    "level2": [
+     {
+      "type": "dropShadow",
+      "color": "#4D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 4,
+      "spreadRadius": -1
+     }
+    ],
+    "level3": [
+     {
+      "type": "dropShadow",
+      "color": "#80000000",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -4
+     },
+     {
+      "type": "dropShadow",
+      "color": "#40000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ],
+    "level4": [
+     {
+      "type": "dropShadow",
+      "color": "#80000000",
+      "offset": [
+       0,
+       16
+      ],
+      "blurRadius": 40,
+      "spreadRadius": -8
+     },
+     {
+      "type": "dropShadow",
+      "color": "#40000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "colors": {
+    "primaryBackground": "#FF1C1917",
+    "secondaryBackground": "#FF252220",
+    "tertiaryBackground": "#FF3B3837",
+    "primaryText": "#FFFAFAF9",
+    "secondaryText": "#99FAFAF9",
+    "tertiaryText": "#66FAFAF9",
+    "primaryBorder": "#FF403D3B",
+    "secondaryBorder": "#FF514F4D",
+    "info": "#FF4A97AC",
+    "purple": "#FFA855F7",
+    "subtleFill": "#FF2E2B29",
+    "neutralFill": "#FF514F4D",
+    "raisedBackground": "#FF3B3837",
+    "track": "#FF403D3B",
+    "scrim": "#99000000",
+    "onAccent": "#FF111827",
+    "focusBorder": "#802DD4BF",
+    "hoverOverlay": "#14FAFAF9",
+    "pressedOverlay": "#24FAFAF9",
+    "activeTint": "#382DD4BF",
+    "primaryTint": "#292DD4BF",
+    "primaryTintBorder": "#5C2DD4BF",
+    "neutralTint": "#FF2E2B29",
+    "neutralTintBorder": "#FF403D3B",
+    "tooltipBackground": "#FFFAFAF9",
+    "tooltipText": "#FF1C1917",
+    "tooltipMuted": "#991C1917",
+    "successTint": "#2950A06E",
+    "successTintBorder": "#5C50A06E",
+    "warningTint": "#29C77E46",
+    "warningTintBorder": "#5CC77E46",
+    "errorTint": "#29CA5555",
+    "errorTintBorder": "#5CCA5555",
+    "infoTint": "#294A97AC",
+    "infoTintBorder": "#5C4A97AC"
+   }
+  },
+  "spacing": {
+   "1": 4,
+   "2": 8,
+   "3": 12,
+   "4": 16,
+   "5": 20,
+   "6": 24,
+   "8": 32,
+   "10": 40,
+   "12": 48,
+   "16": 64
+  },
+  "radii": {
+   "inner": 1,
+   "control": 2,
+   "panel": 3,
+   "dialog": 3,
+   "full": 9999
+  },
+  "sizes": {
+   "xs": 24,
+   "compact": 28,
+   "small": 32,
+   "medium": 36,
+   "large": 44,
+   "topBar": 44,
+   "panelHeader": 36,
+   "tableRow": 36,
+   "tableRowDense": 28,
+   "tableHeader": 32,
+   "dialogHeader": 48,
+   "dialogFooter": 49,
+   "statusBar": 24,
+   "dialogSmall": 400,
+   "dialogMedium": 520,
+   "dialogLarge": 720
+  },
+  "shadows": {
+   "level1": [
+    {
+     "type": "dropShadow",
+     "color": "#0D000000",
+     "offset": [
+      0,
+      1
+     ],
+     "blurRadius": 2
+    }
+   ],
+   "level2": [
+    {
+     "type": "dropShadow",
+     "color": "#1A000000",
+     "offset": [
+      0,
+      2
+     ],
+     "blurRadius": 4,
+     "spreadRadius": -1
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0D000000",
+     "offset": [
+      0,
+      1
+     ],
+     "blurRadius": 2
+    }
+   ],
+   "level3": [
+    {
+     "type": "dropShadow",
+     "color": "#1F000000",
+     "offset": [
+      0,
+      4
+     ],
+     "blurRadius": 16,
+     "spreadRadius": -2
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0F000000",
+     "offset": [
+      0,
+      1
+     ],
+     "blurRadius": 3
+    }
+   ],
+   "level4": [
+    {
+     "type": "dropShadow",
+     "color": "#24000000",
+     "offset": [
+      0,
+      12
+     ],
+     "blurRadius": 32,
+     "spreadRadius": -6
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0F000000",
+     "offset": [
+      0,
+      2
+     ],
+     "blurRadius": 6
+    }
+   ]
+  },
+  "durations": {
+   "control": 150,
+   "transition": 200,
+   "tooltipDelay": 400
+  },
+  "curves": {
+   "standard": "easeInOut",
+   "enter": "easeOut"
+  }
+ },
+ "components": [
+  "components/Button.json",
+  "components/IconButton.json",
+  "components/TextInput.json",
+  "components/TextArea.json",
+  "components/Select.json",
+  "components/Checkbox.json",
+  "components/Radio.json",
+  "components/Switch.json",
+  "components/Slider.json",
+  "components/SegmentedControl.json",
+  "components/Tabs.json",
+  "components/Badge.json",
+  "components/Chip.json",
+  "components/Card.json",
+  "components/Dialog.json",
+  "components/Banner.json",
+  "components/Avatar.json",
+  "components/ProgressBar.json",
+  "components/ListRow.json",
+  "components/Field.json",
+  "components/SectionHeader.json",
+  "components/EmptyState.json",
+  "components/Tooltip.json",
+  "components/StatusDot.json",
+  "components/CountBadge.json",
+  "components/StatusBadge.json",
+  "components/InlineStat.json",
+  "components/StatTile.json",
+  "components/IconBox.json",
+  "components/ToggleRow.json",
+  "components/Skeleton.json",
+  "components/ErrorBar.json",
+  "components/FeatureBulletItem.json",
+  "components/SectionCard.json",
+  "components/MetaInfo.json",
+  "components/Hyperlink.json",
+  "components/NotificationBadge.json",
+  "components/PulsingDots.json"
+ ],
+ "replaces": [
+  "filledButton",
+  "elevatedButton",
+  "outlinedButton",
+  "textButton",
+  "iconButton",
+  "textField",
+  "checkbox",
+  "switch",
+  "radio",
+  "slider",
+  "dropdown",
+  "segmentedButton"
+ ],
+ "examples": []
+}

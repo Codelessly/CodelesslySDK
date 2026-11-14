@@ -33,7 +33,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "The branch icon in the success colour."
+    "doc": "The branch icon in the success color."
    }
   ]
  },

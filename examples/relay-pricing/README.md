@@ -1,7 +1,7 @@
 # Relay, a small site of sections and components
 
 Three pages (pricing, home, contact) sharing one header, mobile menu, footer, closing call to action, a `Button`,
-cards and a hero, over one theme of named colours and text styles. The pricing page came first (below); home and
+cards and a hero, over one theme of named colors and text styles. The pricing page came first (below); home and
 contact were added with content from the Relay reference (`CodelesslyEditor/experiments/reference/saas-landing/content`).
 
 ```
@@ -13,7 +13,7 @@ components/Button.json         a pill button, filled or outlined; fires onPress 
 components/PageHero.json       eyebrow, headline, intro, an `actions` slot
 components/FeatureCard.json    a numbered feature: title, body, points
 components/Metric.json         a figure and its label
-site.json                      + the theme (colours bg, card, line, ink, muted, lime; styles body, eyebrow,
+site.json                      + the theme (colors bg, card, line, ink, muted, lime; styles body, eyebrow,
                                display, title, button; larger display and title from desktop) and the home and
                                contact content
 measure.py                     bytes with components vs the same pages written out

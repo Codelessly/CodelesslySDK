@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 // A bar chart's plot geometry: bars can keep headroom above a full bar while
 // the grid spans the plot, the label band and the plot's top inset can be set.
 
-/// Whether the bar's colour is at (50, [y]) of a 100 x 100 chart.
+/// Whether the bar's color is at (50, [y]) of a 100 x 100 chart.
 Future<bool> barAt(Map<String, Object?> props, int y) async {
   final node = api.Node.fromJson({
     'type': 'barChart',

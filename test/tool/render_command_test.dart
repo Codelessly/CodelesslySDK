@@ -106,9 +106,9 @@ void main() {
       ]),
     );
     expect(report.errors, greaterThan(0));
-    final colour = report.diagnostics.firstWhere((d) => d['code'] == 'unknown_field');
-    expect(colour['path'], '/nodes/title/props/style/colour');
-    expect(colour['suggestion'], 'color');
+    final color = report.diagnostics.firstWhere((d) => d['code'] == 'unknown_field');
+    expect(color['path'], '/nodes/title/props/style/colour');
+    expect(color['suggestion'], 'color');
     // The formula is parsed by the SDK's own parser.
     final formula = report.diagnostics.firstWhere((d) => d['code'] == 'expression_syntax');
     expect(formula['message'], contains('does not parse'));
@@ -143,7 +143,7 @@ void main() {
     expect(formatReport(report), contains('error(s)'));
   });
 
-  testWidgets('steps for another breakpoint\'s canvas are summarised in one warning', (tester) async {
+  testWidgets('steps for another breakpoint\'s canvas are summarized in one warning', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(390, 844)], screens: const ['home'],
         steps: const [Step('tap', 'd-go'), Step('hover', 'd-go')]));
     final skipped = [for (final d in report.diagnostics) if (d['code'] == 'step_skipped') d];
@@ -171,7 +171,7 @@ void main() {
       final boxes = jsonDecode(File('${out.path}/taps@390x844-two.layout.json').readAsStringSync()) as List;
       final target = boxes.firstWhere((b) => b['id'] == 'target') as Map;
       expect(target['y'] as num, greaterThan(64), reason: 'below the header');
-      expect(File('${out.path}/diagnostics-two.json').existsSync(), isTrue, reason: 'a labelled run keeps its own diagnostics');
+      expect(File('${out.path}/diagnostics-two.json').existsSync(), isTrue, reason: 'a labeled run keeps its own diagnostics');
       expect(File('${out.path}/diagnostics.json').existsSync(), isFalse);
     });
 
@@ -572,7 +572,7 @@ void main() {
     expect(File(capture.replaceFirst('.png', '.compare.png')).existsSync() && File(capture.replaceFirst('.png', '.diff.png')).existsSync(), isTrue);
   });
 
-  testWidgets('overlapping a neighbour: motion moves what is painted, not the layout; a media rule patches it', (tester) async {
+  testWidgets('overlapping a neighbor: motion moves what is painted, not the layout; a media rule patches it', (tester) async {
     final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-overlap.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)]));
     expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
     Future<List<int>> column(String png, int x, List<int> ys) async => (await tester.runAsync(() async {

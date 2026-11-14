@@ -69,7 +69,7 @@ class _Files extends MemoryFileStorage {
   }
 }
 
-const Json _write = {'type': 'cloudDocuments', 'operation': 'add', 'path': 'favourites', 'id': 'sandbox', 'document': '{"owner":"sandbox"}'};
+const Json _write = {'type': 'cloudDocuments', 'operation': 'add', 'path': 'favorites', 'id': 'sandbox', 'document': '{"owner":"sandbox"}'};
 const Json _file = {'type': 'cloudFiles', 'operation': 'delete', 'path': 'sandbox/avatar.png'};
 const Json _load = {
   'type': 'loadCloudData',

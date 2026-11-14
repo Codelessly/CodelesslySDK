@@ -1,7 +1,7 @@
 // What the date and time pickers (render/controls/pickers.dart) need beyond
 // the kit and the overlay layer, with no widget: the popup layer (a barrier
 // over the root holding the picker's panel, anchored under its field on a
-// wide view and a bottom sheet on a narrow one), the colours a picker's
+// wide view and a bottom sheet on a narrow one), the colors a picker's
 // panel draws with (SSUI's, or the node's `pickerTheme`), the locale's
 // month and day names and first weekday (no Material
 // localizations: a [PickerLocale] the widgets layer gives from intl's data),
@@ -138,7 +138,7 @@ class RenderPickerPopup extends RenderOverlayEntry with RenderObjectWithChildMix
   }
 }
 
-// --- colours --------------------------------------------------------------------
+// --- colors --------------------------------------------------------------------
 
 /// What a picker's panel draws with: SSUI's tokens, then the node's
 /// `pickerTheme` (`backgroundColor`, `accentColor`, `onAccentColor`,
@@ -419,8 +419,8 @@ TextPainter pickerText(String text, TextStyle style, {double maxWidth = double.i
     TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr, maxLines: 1, ellipsis: '…', textAlign: align)
       ..layout(maxWidth: maxWidth);
 
-/// Paints [painter] centred in [rect].
-void paintCentred(Canvas canvas, TextPainter painter, Rect rect) =>
+/// Paints [painter] centered in [rect].
+void paintCentered(Canvas canvas, TextPainter painter, Rect rect) =>
     painter.paint(canvas, rect.center - Offset(painter.width / 2, painter.height / 2));
 
 /// A tap handled by a box itself: the up's position (local) goes to [onTap].

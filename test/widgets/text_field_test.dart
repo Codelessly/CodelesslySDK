@@ -215,7 +215,7 @@ void main() {
     expect(tree.boxOf('field')!.rectIn(view)!.height, 40);
     final f = textField(tester);
     expect(f.boxRect.height, 40);
-    expect(f.contentRect.center.dy, closeTo(20, .5), reason: 'the line centred in the box');
+    expect(f.contentRect.center.dy, closeTo(20, .5), reason: 'the line centered in the box');
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });

@@ -2,7 +2,7 @@
 // input deltas with their times, plus usage and every lookup (ui_docs,
 // ui_read) the model made first. Then checks the ops as a session applies
 // them (strict validation per op, the end of the stream, the lints a
-// finished UI gets: a button with no label, text in its background's colour,
+// finished UI gets: a button with no label, text in its background's color,
 // characters the font cannot draw), and while anything is rejected, pending
 // or linted, sends the tool result back (what the document holds, and "fix
 // by patching") and records the retry, at most --retries times; then, if

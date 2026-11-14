@@ -181,7 +181,7 @@ void main() {
 
     test('a white onPrimary never puts white text on a white surface', () {
       // A primary as light as the surface can't mark the controls on it:
-      // they take the surface's ink, labelled in what reads on that.
+      // they take the surface's ink, labeled in what reads on that.
       const pale = ThemeTokens(primary: api.Color(0xFFFFFFFF), onPrimary: api.Color(0xFFFFFFFF), surface: api.Color(0xFFFFFFFF));
       final theme = themeDataOf(pale);
       final text = _resolve(theme.textButtonTheme.style!.foregroundColor)!;
@@ -223,7 +223,7 @@ void main() {
       return tree;
     }
 
-    testWidgets('an unstyled text button on a dark band is labelled light, on paper dark', (tester) async {
+    testWidgets('an unstyled text button on a dark band is labeled light, on paper dark', (tester) async {
       final tree = await show(tester, {
         'band': {
           'type': 'column',
@@ -265,7 +265,7 @@ void main() {
       expect(_contrast(button(tree, 'onLight').labelColor, const Color(0xFFFFFFFF)), greaterThan(4.5));
     });
 
-    testWidgets('a button with a fill but no label color is labelled in what reads on its fill', (tester) async {
+    testWidgets('a button with a fill but no label color is labeled in what reads on its fill', (tester) async {
       final tree = await show(tester, {
         'band': {
           'type': 'filledButton',

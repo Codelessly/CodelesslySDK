@@ -401,7 +401,7 @@ class UiSession implements NodeSource {
   /// What the UI gets wrong that no declaration catches, as warnings in the
   /// result's shape (so a host returns them with validation and the model
   /// fixes them on its retry): a tappable box with no label
-  /// (`empty_button`), text in its background's colour (`low_contrast`),
+  /// (`empty_button`), text in its background's color (`low_contrast`),
   /// with [glyphCoverage] characters the fonts cannot draw
   /// (`missing_glyph`), and, once a [CodelesslyView] has laid it out, nodes
   /// with content laid out with no size (`no_size`, [layoutDiagnostics]).
@@ -448,7 +448,7 @@ class UiSession implements NodeSource {
   /// text, icon, image or control), `list_empty` (a list with no items while
   /// its data is not a list, has no template, or is empty while the list it
   /// reads is not), `empty_label` (a control or component whose label gave
-  /// nothing), `expression_not_evaluated`, `text_no_color` (no colour, or
+  /// nothing), `expression_not_evaluated`, `text_no_color` (no color, or
   /// a transparent one) and `component_empty` (a call that rendered
   /// nothing). A host adds them to the stream's result before it answers
   /// the model (`result.withDiagnostics(session.shownDiagnostics())`), so a

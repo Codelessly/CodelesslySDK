@@ -1,4 +1,4 @@
-// What the guide states about runtime behaviour (index.md sections 10 and 13),
+// What the guide states about runtime behavior (index.md sections 10 and 13),
 // checked: `${result}` along a chain, a tap on a control inside a tappable
 // row, and item/index/parent in nested lists.
 import 'package:codelessly_sdk/codelessly_sdk.dart' show VariableType;

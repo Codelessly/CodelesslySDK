@@ -59,4 +59,4 @@ in its `actions` slot: ghost Cancel + one primary (destructive for a delete). Ev
 - Don't put shadows on cards or rows; don't use a Banner for every message (inline text in `caption` is enough for
   hints).
 - Don't make the page background white: it is `secondaryBackground`; cards are `primaryBackground`.
-- Don't use `primary` for more than one button per view, or colour text for emphasis: use weight 600.
+- Don't use `primary` for more than one button per view, or color text for emphasis: use weight 600.

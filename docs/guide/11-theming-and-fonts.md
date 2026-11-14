@@ -32,13 +32,13 @@ wraps its layout in a `Theme` built from them, where every color role is a token
 | surface | `surface`, else paper (white; near-black in dark mode) |
 | text and marks on it | `onSurface` when it reads there (3:1), else ink |
 | what controls draw on the surface (checks, thumbs, text button labels, focus rings) | `primary` when it reads on the surface, else ink |
-| filled buttons, floating action buttons | `primary` as it is (ink without one), labelled in `onPrimary`, else ink or paper, whichever reads |
+| filled buttons, floating action buttons | `primary` as it is (ink without one), labeled in `onPrimary`, else ink or paper, whichever reads |
 | selected tints, outlines, disabled states | `primary` or ink at low strength over the surface |
 | fonts | `fontFamily`; titles `titleFontFamily` |
 | shapes | `buttonRadius` for every kind of button, chip and segmented button; `radius` for dialogs, menus, pickers and the default text field border |
 
 Controls choose their text and marks for what they sit on: an unstyled text button on a dark band of a light
-page is labelled light, and one with a fill of its own but no label color gets one that reads on that fill.
+page is labeled light, and one with a fill of its own but no label color gets one that reads on that fill.
 Nothing splashes or casts a shadow unless a node asks for it (its `elevation`). Your app's theme is not used
 inside the layout and is not changed outside it.
 

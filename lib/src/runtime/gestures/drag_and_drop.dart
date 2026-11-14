@@ -90,7 +90,7 @@ bool dropLandsBefore(Offset position, Rect rect, {required Axis axis, bool wraps
 
 /// Logical pixels per second for a drag held inside a scroll viewport.
 /// A 48px edge band (at most a third of a small view) ramps smoothly to
-/// 720px/s; the centre and positions outside the viewport do not scroll.
+/// 720px/s; the center and positions outside the viewport do not scroll.
 @visibleForTesting
 double dragEdgeScrollVelocity(double position, double extent) {
   if (extent <= 0 || position < 0 || position > extent) return 0;

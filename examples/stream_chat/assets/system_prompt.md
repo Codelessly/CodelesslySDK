@@ -122,11 +122,11 @@ its default.
 A page is one file. A **site** is a folder with a `site.json` (its pages, components, theme and shared variables);
 see [checking your work](#base-checking-your-work) and [components](components.md#page-components).
 
-<a id="base-theme-first-named-colours-and-text-styles"></a>
-## Theme first: named colours and text styles
+<a id="base-theme-first-named-colors-and-text-styles"></a>
+## Theme first: named colors and text styles
 
 Declare a palette and a type scale once and name them everywhere, as a Flutter app declares `ThemeData` and its
-widgets read `Theme.of(context)`. **Write the theme before the first node**: a name per colour the design uses, a
+widgets read `Theme.of(context)`. **Write the theme before the first node**: a name per color the design uses, a
 name per kind of text (display, title, body, label, eyebrow...).
 
 The theme is the `theme` of the site manifest, `site.json`, next to the pages:
@@ -147,24 +147,24 @@ The theme is the `theme` of the site manifest, `site.json`, next to the pages:
 }
 ```
 
-- `colors` maps a name to `"#AARRGGBB"` (or another colour's name). Wherever a colour is accepted (a fill, a
-  stroke, a text's colour, a shadow, an input's border), write its name: `"color": "ember"`.
+- `colors` maps a name to `"#AARRGGBB"` (or another color's name). Wherever a color is accepted (a fill, a
+  stroke, a text's color, a shadow, an input's border), write its name: `"color": "ember"`.
 - `textStyles` maps a name to a [TextStyle](theme.md#type-TextStyle); a style may start `from` another (`"title": {"from":
   "body", "fontSize": 32}`). A text names its style: `"style": "title"`; to change a few fields of it,
   `"style": {"from": "title", "color": "ember"}`.
 - In a binding a name is not read: bind the value, `"${theme.colors.ember}"`.
 - Validation reports a name the theme does not have (`unknown_theme_name`, with the nearest name).
 
-Controls (buttons, chips, fields, switches, pickers, tabs) take the colours and fonts their props leave unset
+Controls (buttons, chips, fields, switches, pickers, tabs) take the colors and fonts their props leave unset
 from the theme's roles (`primary`, `onPrimary`, `surface`, `onSurface`, `error`, `fontFamily`, `buttonRadius`...).
 Without a theme they are neutral: ink on paper and the greys between. Nothing comes from Material's defaults or
 from the app the layout is shown in.
 
-**Light and dark.** `"dark": {"colors": {...}}` in the theme gives the colours that differ in dark mode, and
+**Light and dark.** `"dark": {"colors": {...}}` in the theme gives the colors that differ in dark mode, and
 `"mode"` which one the site starts in (Flutter's `ThemeMode`: `system`, the default, follows the device; `light`;
 `dark`). A theme switch is one action, `{"type": "setThemeMode", "mode": "${= theme.isDark ? 'light' : 'dark'}"}`:
-every named colour, named text style and control of every screen follows, and the choice is kept for the next
-visit. Read the mode as `${theme.mode}` and `${theme.isDark}`. Name colours in your text styles (`"color": "ink"`)
+every named color, named text style and control of every screen follows, and the choice is kept for the next
+visit. Read the mode as `${theme.mode}` and `${theme.isDark}`. Name colors in your text styles (`"color": "ink"`)
 so they change with it: [dark mode](theme.md#theme-dark-mode).
 
 **Fonts.** Declare the site's fonts in `site.json` as a pubspec does, files beside it: `"fonts": [{"family":
@@ -253,7 +253,7 @@ only in a row or column that has some (a fill or fixed main size).
 - **A full-width band with capped, centered content** (CSS `max-width: 1200px; margin: 0 auto`): the band fills
   the width and holds the background; its one child fills with `"constraints": {"maxWidth": 1200}`, centered by the
   band's `crossAxisAlignment` (`center`, the default). [The capped band, with an example](layout.md#layout-a-capped-band).
-- A negative margin does not overlap a neighbour: to overlap, move what the node paints with `"motion":
+- A negative margin does not overlap a neighbor: to overlap, move what the node paints with `"motion":
   {"translateY": -36}` (layout unchanged), or use a stack. [Overlap and bleed](layout.md#layout-overlap-and-bleed).
 
 <a id="base-stacks"></a>
@@ -322,7 +322,7 @@ under a stack (`layout_field_ignored`).
   its `type`.
 - `clip: "antiAlias"` clips the children to the rounded box.
 
-Colours are `"#AARRGGBB"` (alpha first: `#FF` opaque, `#80` half), `"#RRGGBB"` or a theme colour's name; `"#FFF"`,
+Colors are `"#AARRGGBB"` (alpha first: `#FF` opaque, `#80` half), `"#RRGGBB"` or a theme color's name; `"#FFF"`,
 `rgb()` and CSS names are not read. Patterns in pixels, grain, foreground scrims, icons, paths and custom drawing:
 [decoration](decoration.md#page-decoration).
 
@@ -422,7 +422,7 @@ The props that matter most; each type's page lists all of them.
 | [`listView`](lists.md#node-listView) | children; slots loading, error, end, sectionHeader, reorderPlaceholder; no decoration | `scrollDirection` horizontal|vertical, `spacing` number, `scrollable` bool |
 | [`gridView`](lists.md#node-gridView) | children; slots loading, error, end, reorderPlaceholder; no decoration | `crossAxisCount` int, `minCrossAxisExtent` number, `mainAxisSpacing` number, `crossAxisSpacing` number, `shrinkWrapRows` bool |
 
-- **Buttons**: the text is `label` (not `text`); colours, corners and the label's style are in `style` (a
+- **Buttons**: the text is `label` (not `text`); colors, corners and the label's style are in `style` (a
   [ButtonStyle](forms.md#type-ButtonStyle): `backgroundColor`, `foregroundColor`, `textStyle`, `shape`), not in
   `decoration`. Give a button a fixed width or a fill: a hugging button is only as wide as its label. For full
   control, use a `row` with a fill, padding, a text child and a `click` reaction.
@@ -514,7 +514,7 @@ Hover and pressed styles (`states`), drag, gestures: [interaction](interaction.m
    band.
 2. **Use the width.** A tablet and a desktop are not a stretched phone: split the page into content and a rail
    (a `flex` turning horizontal), give content columns (a `gridView` whose `crossAxisCount` grows, a lead item
-   spanning two: `layout.columnSpan`), and let every band fill the width with its content capped and centred. A
+   spanning two: `layout.columnSpan`), and let every band fill the width with its content capped and centered. A
    desktop page that is still one column, or content that stops short of its band, is unfinished:
    [an editorial page at three sizes](layout.md#layout-an-editorial-page-at-three-sizes).
 3. A node's `media` is a list of CSS media queries over the node: `[{"minWidth": 600, "patch": {"props": {"style":
@@ -531,9 +531,9 @@ Breakpoints, sticky headers, scrolling, a canvas per breakpoint: [responsive lay
 ## Rules that are easy to get wrong
 
 1. Every node needs `layout.width` and `layout.height`; without them it is 0 × 0.
-2. Every text needs a colour; without one it is white.
+2. Every text needs a color; without one it is white.
 3. Padding and margin are a number or four numbers, never two.
-4. Colours are `#AARRGGBB`, `#RRGGBB` or a theme colour's name; define the theme first and name its colours and
+4. Colors are `#AARRGGBB`, `#RRGGBB` or a theme color's name; define the theme first and name its colors and
    styles.
 5. Columns center their children across by default: `"crossAxisAlignment": "start"` for left-aligned content.
 6. A screen taller than the window needs a scrolling body column (`"scrollable": true`, `fill` both ways).
@@ -543,7 +543,7 @@ Breakpoints, sticky headers, scrolling, a canvas per breakpoint: [responsive lay
 10. `fill` takes all the room it is given: cap it with `constraints.maxWidth`. Under a parent that hugs that
     axis, a fill is its design number (`fill_fallback`).
 11. A backslash in a formula is written twice in JSON: `"${= matches(code, '^\\d{4}$')}"`.
-12. Buttons: `label`, colours in `style`. Inputs: `changed` + `setVariable`, two-way by binding the value prop.
+12. Buttons: `label`, colors in `style`. Inputs: `changed` + `setVariable`, two-way by binding the value prop.
 13. Repeated content comes from data: one template in a `listView` / `gridView`, not copies.
 
 <a id="base-checking-your-work"></a>
@@ -605,7 +605,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | Why a fill took its design size (`fill_fallback`); which sizes a parent allows | [layout-which-sizing-modes-each-parent-allows](layout.md#layout-which-sizing-modes-each-parent-allows) |
 | Every layout field (constraints, aspectRatio, widthFactor, order, basis...) | [layout-layout-fields](layout.md#layout-layout-fields) |
 | A screen designed separately per breakpoint | [layout-a-canvas-per-breakpoint](layout.md#layout-a-canvas-per-breakpoint) |
-| Name the palette and the type scale once (the theme) | [theme-named-colours-and-styles](theme.md#theme-named-colours-and-styles) |
+| Name the palette and the type scale once (the theme) | [theme-named-colors-and-styles](theme.md#theme-named-colors-and-styles) |
 | A type size that grows at tablet and desktop, written once | [theme-a-type-scale-that-changes-with-the-screen-size](theme.md#theme-a-type-scale-that-changes-with-the-screen-size) |
 | Dark mode | [theme-dark-mode](theme.md#theme-dark-mode) |
 | Part of a text in another style, a link in text; text defaults | [theme-text](theme.md#theme-text) |
@@ -626,10 +626,10 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | A radio group (one choice of several) | [forms-a-radio-group](forms.md#forms-a-radio-group) |
 | A − / + stepper around a number field | [forms-a-stepper-around-a-field](forms.md#forms-a-stepper-around-a-field) |
 | A search icon or a clear (×) button inside a text field | [forms-a-clear-button-in-the-field](forms.md#forms-a-clear-button-in-the-field) |
-| A checkbox or switch with a label, toggled from the whole row | [forms-a-labelled-checkbox-or-switch](forms.md#forms-a-labelled-checkbox-or-switch) |
+| A checkbox or switch with a label, toggled from the whole row | [forms-a-labeled-checkbox-or-switch](forms.md#forms-a-labeled-checkbox-or-switch) |
 | Add and remove items of a list (a list editor) | [forms-add-and-remove-items-a-list-editor](forms.md#forms-add-and-remove-items-a-list-editor) |
 | Focus a field; keyboard keys; arrow keys between tabs | [forms-focus-and-the-keyboard](forms.md#forms-focus-and-the-keyboard) |
-| A button's label, colours, corners and label size | [forms-buttons](forms.md#forms-buttons) |
+| A button's label, colors, corners and label size | [forms-buttons](forms.md#forms-buttons) |
 | Every prop of a text field | [node-textField](forms.md#node-textField) |
 | Repeat one template per item of a list | [lists-one-template-from-data](lists.md#lists-one-template-from-data) |
 | A grid of cards from data, as many columns as fit; gaps between wrapped items | [lists-a-grid-of-cards](lists.md#lists-a-grid-of-cards) |
@@ -647,7 +647,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | Declare variables; screen, page and project scope | [state-variables](state.md#state-variables) |
 | A value derived once from others (computed variables), a reusable formula (function variables) | [state-computed-and-function-variables](state.md#state-computed-and-function-variables) |
 | The value each binding path expects (lists for padding, names for enums) | [state-binding-paths](state.md#state-binding-paths) |
-| Every formula function: text, numbers, money, lists, objects, dates, colours | [state-formula-functions](state.md#state-formula-functions) |
+| Every formula function: text, numbers, money, lists, objects, dates, colors | [state-formula-functions](state.md#state-formula-functions) |
 | A count, a total, a streak from data; dates | [state-a-streak-and-other-counts-from-data](state.md#state-a-streak-and-other-counts-from-data) |
 | Toggle, add, append, remove at an index (setVariable ops); if / else in a chain | [state-changing-state-from-a-reaction](state.md#state-changing-state-from-a-reaction) |
 | Set several nodes while a test holds (conditions) | [state-conditions](state.md#state-conditions) |
@@ -680,7 +680,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | Capture the states (after a tap, typing, an open menu) with the render command | [render-capturing-states](render.md#render-capturing-states) |
 | Every validation and render code | [render-validation-codes](render.md#render-validation-codes) |
 | Build and edit with ops; streaming; the retry protocol | [edit-ops-the-ops](edit-ops.md#edit-ops-the-ops) |
-| How one value type is written (colour, alignment, insets) | [values-colours-and-alignments](values.md#values-colours-and-alignments) |
+| How one value type is written (color, alignment, insets) | [values-colors-and-alignments](values.md#values-colors-and-alignments) |
 
 - [layout.md](layout.md): Responsive layout. Documents canvas, row, column, flex, stack, box, spacer, divider, verticalDivider, variance, sticky, floating, measure, scroll, scrollEnd, enterViewport, exitViewport, scrollTo.
 - [theme.md](theme.md): Theme and text. Documents text, textDirection, defaultTextStyle, setThemeMode.

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ProgressBar",
-  "doc": "How far something has got: a 4 px bar, value from 0 to 1, in the brand colour or a tone.",
+  "doc": "How far something has got: a 4 px bar, value from 0 to 1, in the brand color or a tone.",
   "props": [
    {
     "key": "value",
@@ -30,7 +30,7 @@
      ]
     },
     "default": "primary",
-    "doc": "The fill's colour."
+    "doc": "The fill's color."
    }
   ]
  },

@@ -2,7 +2,7 @@
 // `navigationBar` and `bottomNavigationBar` with nothing styled are SSUI's
 // tab bar (soft_saas_ui's bottom navigation); the selected item follows the
 // bound `selectedIndex` and a pick fires `changed` (written back); the
-// keyboard, labels centred, screen readers, the props over SSUI's, the
+// keyboard, labels centered, screen readers, the props over SSUI's, the
 // bottom safe area read from the view (no MediaQuery), no Scaffold, and a
 // pixel match to SSUI's own widget.
 import 'dart:io';
@@ -87,7 +87,7 @@ void main() {
         final labels = bar.labels;
         for (var i = 0; i < labels.length; i++) {
           final g = labels[i].glyphs;
-          expect((g.first.left + g.last.right) / 2, closeTo(items[i].center.dx, 1), reason: '${labels[i].text} centred in its item');
+          expect((g.first.left + g.last.right) / 2, closeTo(items[i].center.dx, 1), reason: '${labels[i].text} centered in its item');
         }
       });
 
@@ -164,7 +164,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('the node\'s props are over SSUI\'s: colours, sizes, label behaviour, a shifting bar\'s fill', (tester) async {
+  testWidgets('the node\'s props are over SSUI\'s: colors, sizes, label behavior, a shifting bar\'s fill', (tester) async {
     final (tree, _) = await _show(tester, {
       'a': _nav('navigationBar', {
         'backgroundColor': '#FF101418',

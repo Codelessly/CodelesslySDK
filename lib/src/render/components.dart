@@ -183,8 +183,8 @@ class ComponentRegistry extends ChangeNotifier {
       final written = _written[e.key];
       if (written != null) e.value.source.document = resolveThemeRefs(written, value);
     }
-    // What was drawn with the theme's colours rather than named ones (an
-    // indicator's unset colours) is drawn again.
+    // What was drawn with the theme's colors rather than named ones (an
+    // indicator's unset colors) is drawn again.
     _themeChanged = true;
     try {
       _notify(const {});

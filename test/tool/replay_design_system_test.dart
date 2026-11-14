@@ -4,7 +4,7 @@
 // ssui_card.jsonl, whose meta names the design system) replays with
 // UiSession(designSystem:): every op applies, every component call renders
 // as its definition (not as an empty box of an unknown type), and the
-// token names resolve to SSUI's colours, light by default and dark when
+// token names resolve to SSUI's colors, light by default and dark when
 // asked.
 import 'dart:io';
 import 'dart:ui' as ui;

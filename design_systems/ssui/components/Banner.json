@@ -41,7 +41,7 @@
      ]
     },
     "default": "info",
-    "doc": "The colour and icon."
+    "doc": "The color and icon."
    },
    {
     "key": "dismissible",

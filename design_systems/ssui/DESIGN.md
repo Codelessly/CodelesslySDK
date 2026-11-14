@@ -7,7 +7,7 @@ author reads before composing a screen in it; the tokens are in `design_system.j
 ## In brief
 
 - **Quiet, flat, dense.** Off-white or near-black surfaces separated by 1 px hairlines (`primaryBorder`), not shadows.
-  Colour is for status, focus and the one primary action, never decoration.
+  Color is for status, focus and the one primary action, never decoration.
 - **One control scale.** Every control is 24, 28, 32, 36 or 44 px tall; **28 (`compact`) is the default** for page
   actions, forms, dialogs and cards. 24 (`xs`) inside rows, chips and dense panels; 36 and 44 only for a hero call to
   action or auth.
@@ -16,18 +16,18 @@ author reads before composing a screen in it; the tokens are in `design_system.j
 - **Type.** Page title `pageTitle` 20/600, section `sectionTitle` 14/600, card and panel titles `panelTitle` 12/600,
   body `body` 13, secondary `bodySecondary` 12, field labels `fieldLabel` 11.5/600, metadata `caption` 11. Weights:
   600 titles, 500 labels and buttons, 400 text. No brand font: the platform's.
-- **Colour roles.** Text `primaryText`, `secondaryText`, `tertiaryText`; surfaces `primaryBackground` (cards),
+- **Color roles.** Text `primaryText`, `secondaryText`, `tertiaryText`; surfaces `primaryBackground` (cards),
   `secondaryBackground` (page, headers), `tertiaryBackground`; `primary` for the main action, focus and selection;
   `success`, `warning`, `error`, `info` as a 10 % tint (`successTint`...) with a matching hairline and full-strength
-  ink. Every colour has a dark value: name it, never write hex.
+  ink. Every color has a dark value: name it, never write hex.
 - **Shadows only when floating.** Menus and popovers `shadows.level3`, dialogs `shadows.level4`. Cards: none.
 - **Interaction.** Hover and press are faint overlays (`hoverOverlay` 4 %, `pressedOverlay` 8 %); focus is a 1.5 px
   border at primary 50 % (`focusBorder`); disabled is 50 % opacity. Nothing changes size between states.
 - **Do** use one primary Button per view; ghost Buttons for Cancel and secondary actions; Field around every input;
   hairlines between sections. **Don't** draw a control yourself when a component is one, add shadows to cards, use
-  more than one accent colour, or make text larger than the scale.
+  more than one accent color, or make text larger than the scale.
 
-## Colour
+## Color
 
 | Role | Light | Dark | Use |
 |---|---|---|---|

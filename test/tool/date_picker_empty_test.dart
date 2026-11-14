@@ -1,7 +1,7 @@
 // An empty datePicker (bound to a variable that holds no date) shows no date
 // (restaurant, brief 3: it showed today's while the variable stayed empty,
 // so the available slots that read the variable never appeared). Control
-// behaviour: it shows its hint (render/controls/pickers.dart).
+// behavior: it shows its hint (render/controls/pickers.dart).
 import 'dart:io';
 import 'dart:ui' show Size;
 

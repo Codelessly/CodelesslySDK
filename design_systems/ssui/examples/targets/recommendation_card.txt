@@ -1,0 +1,37 @@
+state status="open"
+Card gap:10
+  Row gap:10 top
+    Box w:30 h:30 radius:7 fill:#1A2563EB center middle
+      Icon "auto_fix_high" {"props": {"size": 15, "color": "#FF2563EB"}}
+    Column gap:1 grow
+      Text.sectionTitle "Raise the API rate limit to 200 requests a minute"
+      Text.bodySecondary "Suggested from 14 days of traffic"
+    Badge.success "92% confident"
+  Text "Peak traffic reached 178 a minute on three days and 6% of requests were refused. The new limit covers the peaks with headroom."
+  Column fill:#FFF9FAFB radius:6 pad:10 gap:6 border:#FFE5E7EB
+    Row between
+      Text.bodySecondary "Now"
+      Text.strong "120 / min"
+    Row between
+      Text.bodySecondary "Proposed"
+      Text.strong "200 / min"
+    Row between
+      Text.bodySecondary "Refused requests"
+      Text.strong "6% to under 1%"
+  Divider
+  if status=="open"
+    Row end gap:6
+      Button.ghost "Not now" -> status="dismissed"; emit dismiss
+      Button.outline "Adjust" -> emit adjust
+      Button "Apply change" -> status="applied"; emit apply
+  if status=="applied"
+    Row gap:8
+      Icon "check_circle" {"props": {"size": 16, "color": "#FF16A34A"}}
+      Text.strong "Applied"
+      Text.bodySecondary "Limit is now 200 / min"
+      Spacer grow
+      Button.ghost "Undo" -> status="open"; emit undo
+  if status=="dismissed"
+    Row gap:8
+      Icon "do_not_disturb_on" {"props": {"size": 16, "color": "#FF9CA3AF"}}
+      Text.bodySecondary "Dismissed. Nothing changed."

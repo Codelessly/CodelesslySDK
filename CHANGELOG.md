@@ -1,6 +1,6 @@
 ## Unreleased
 
-- **A checkbox, radio or switch draws its `label`** beside the mark (8 px away, centred on it, the control hugging
+- **A checkbox, radio or switch draws its `label`** beside the mark (8 px away, centered on it, the control hugging
   both); a tap anywhere on it toggles. A list tile no longer draws a hairline of its own: a list draws the dividers
   between its rows (`separator`).
 
@@ -12,11 +12,11 @@ final validation was clean. The causes, and what changed:
   a host adds to the stream's result (`result.withDiagnostics(session.shownDiagnostics())`): `empty_view` (no canvas
   root, or a canvas showing no text, icon, image or control, with why), `list_empty` (data that is not a list, no item
   template, or empty while the list it reads is not, with the lambda to write), `empty_label`,
-  `expression_not_evaluated`, `text_no_color` (also a transparent colour), `component_empty`, and `no_size`. Views
+  `expression_not_evaluated`, `text_no_color` (also a transparent color), `component_empty`, and `no_size`. Views
   register the check with `attachShownProbe`. The text checks are shared with the render command
   (`paragraphIssues`). The chat example adds them to every reply's result; replays report them in `metrics.json`
   (`shownDiagnostics`).
-- A bound value that names a theme colour or text style resolves against the theme: the reservation card's day
+- A bound value that names a theme color or text style resolves against the theme: the reservation card's day
   labels were bound to `{'from': 'caption', 'color': 'onPrimary'}` and drew transparent (empty day buttons).
 - The formula parser runs without Flutter (`formula_time.dart` holds `ClockTick` and the pinned time;
   `FormulaClock.pinned` forwards to it), and `FormulaEvaluator.report` is what `ValidateOptions.formulas` takes.
@@ -51,7 +51,7 @@ final validation was clean. The causes, and what changed:
   it: the pickers sample's parity golden is re-pinned to the nodes' own 300 × 56).
 - The `dropdown` is a render object (`render/controls/dropdown.dart`, Milestone 3 WS-B): SSUI's Select on the field
   frame (28 high when it hugs, `primaryBackground`, hairline, radius 7, Lucide chevron in `tertiaryText` turned over
-  while open, the value optically centred) opening its menu (`render/controls/menu.dart`) as an entry of the root's
+  while open, the value optically centered) opening its menu (`render/controls/menu.dart`) as an entry of the root's
   overlay layer: under the field or above it when there is no room, at least its width (120 at least), 240 high at
   most and scrolling, SSUI's surface (`level3`, hairline, 4 px inset, 28 px rows, the selected row tinted with a
   check). A press outside or Escape closes it and the field keeps the focus; Enter, Space and the arrows open it,
@@ -90,7 +90,7 @@ and matching no item). The formula engine is right; nothing told the model.
   `state.json` (`UiSession.values`).
 - Tests: the reference's filter, sort and page example works as it says (`test/lists/filter_sort_page_example_test.dart`);
   the recording's end-of-stream errors (`test/session/ui_session_list_formula_test.dart`).
-- A session without a design system draws its gauges and charts in its theme: the colours they leave unset
+- A session without a design system draws its gauges and charts in its theme: the colors they leave unset
   (indicator_theme.dart) come from the theme the tree reads from its component registry, and only a session with a
   design system had one, so a plain session's (`UiSession(theme:)`) were always the neutral set. Every session's view
   now has a registry (empty without a design system), so a site, a session with a design system and a plain session
@@ -102,7 +102,7 @@ and matching no item). The formula engine is right; nothing told the model.
   Material widget; their islands (`widgets/inputs.dart`, `inputs_toggle.dart`, `slider_paint.dart`, the slider
   shapes in `inputs_shapes.dart`) are gone. With nothing styled each is SSUI's control: a 16 px checkbox and radio,
   a 36 × 20 switch whose thumb eases over 150 ms, a 200 × 28 slider with a 6 px rail and a ringed 14 px thumb (no
-  shadow), and SSUI's segmented well with each label measured centred in its segment. Values write back through
+  shadow), and SSUI's segmented well with each label measured centered in its segment. Values write back through
   `changed` and follow their bindings; tristate checkboxes; radio groups with arrow keys; slider drag, tap, arrows,
   Page Up/Down and Home/End, its value indicator in the root's overlay and its custom paint between its parts;
   segmented tap and arrow keys, single and multi select; checked, toggled, slider (increase/decrease) and
@@ -141,15 +141,15 @@ and matching no item). The formula engine is right; nothing told the model.
   (`samples-collections/controls`, the accordion page): the header child sits 16 px inside SSUI's 1 px border and is
   as wide as the room beside the chevron (row `rc17` 300×64 at (20, 38) → 238×64 at (37, 33), its text `t18` with
   it), the content starts under the 46 px header in a 16 px panel (`r20` y 102 → 127), and the collapsed one's header
-  child moves the same way (`r22` (20, 303) → (37, 273)). The `listTile` layout test now expects its slots centred on
+  child moves the same way (`r22` (20, 303) → (37, 273)). The `listTile` layout test now expects its slots centered on
   the tile (36 in a 72 px tile), not on Material's 56 px row.
 - **Size changes of buttons** (parity goldens): a hugging button is 28 high (Material's was 40); the icon beside a
-  label is SSUI's (14–18) with a 6 px gap (Material's 18 and 8), so labelled buttons with an icon are 2 px narrower.
+  label is SSUI's (14–18) with a 6 px gap (Material's 18 and 8), so labeled buttons with an icon are 2 px narrower.
   `samples-material/buttons`: `elev_hug` 186×39 → 184×38.6, `filled_hug` 184 → 182 wide, `text_icon` 118 → 116
   wide. The `static` set goes from 99.06 % to 98.84 % of rects within 1 px: six filled buttons of one fixture 2 px
   narrower (one squeezed by its column from 40 to 37.3 high) and the 43 rects beside them that move with them.
 - The control kit (`lib/src/render/controls`): `RenderControl` (states, tap, hover and cursor, focus, activation,
-  semantics, a 44 × 44 touch target by hit testing only), `ControlLabel` (one line, glyphs centred), `ControlTokens`
+  semantics, a 44 × 44 touch target by hit testing only), `ControlLabel` (one line, glyphs centered), `ControlTokens`
   (SSUI's tokens bundled as data, `ssui_defaults.g.dart`, written by `tool/controls/bundle_ssui.dart` and checked
   against `design_systems/ssui/design_system.json`, the document's theme over them, for the screen's brightness and
   backdrop), `ControlFocusNode`/`ControlFocusScope` (Tab and Shift-Tab in reading order, Enter, Numpad Enter and
@@ -163,11 +163,11 @@ and matching no item). The formula engine is right; nothing told the model.
   theme's `durations.tooltipDelay` of hovering, and names the node to screen readers.
 - `RenderTree.theme` and `RenderTree.dark`: the theme and brightness controls draw with (`CodelesslyWidget` sets the
   mode).
-- Theme roles that name a theme colour (`"primary": "forest"`) now reach controls, dialogs and toasts (they drew
+- Theme roles that name a theme color (`"primary": "forest"`) now reach controls, dialogs and toasts (they drew
   black or white).
 - `test/architecture_test.dart` keeps a ratchet of the files that may import `material.dart`, `cupertino.dart` or
   `widgets.dart` (60 at the start); it only shrinks, and the render-object controls are never on it. The look guard
-  measures labels and fonts of render-object controls too (`LabelledControl`).
+  measures labels and fonts of render-object controls too (`LabeledControl`).
 - Island controls not yet moved (chips, fields, toggles, pickers, tabs, bars, tiles) are unchanged and still draw
   their neutral look.
 
@@ -179,7 +179,7 @@ and matching no item). The formula engine is right; nothing told the model.
   The render command names the SVG in `font_fallback` when a family is not had.
 - `navigate` evaluates a `to` (and `base`) built by a binding (`${item.to}`): it threw "no such screen".
 - A canvas opened as a modal takes the size its media rules give it at the screen's width (the patch was ignored).
-- A `lineChart` with no `axisLabelStyle` colour draws its tick labels and axis title in the axis colour (they were
+- A `lineChart` with no `axisLabelStyle` color draws its tick labels and axis title in the axis color (they were
   white).
 - `gridView.fillGaps` (CSS `grid-auto-flow: dense`).
 - `VariableAnimator.anyPlaying`: whether a number variable's timeline plays anywhere.
@@ -201,7 +201,7 @@ and matching no item). The formula engine is right; nothing told the model.
   - a variable font declared once counts as having every weight of its `wght` axis (no `font_fallback`);
   - a flex overflow names the list copy that overflows and says what its content needs and what to change.
 - Skipped tests for the controls engineer: invalid form fields vanish when the theme's `error` role names a theme
-  colour (`test/tool/form_named_error_role_test.dart`); an empty `datePicker` shows today's date
+  color (`test/tool/form_named_error_role_test.dart`); an empty `datePicker` shows today's date
   (`test/tool/date_picker_empty_test.dart`).
 
 **Generative UI with a design system, recorded and replayed.**
@@ -224,11 +224,11 @@ and matching no item). The formula engine is right; nothing told the model.
 
 **Fixes.**
 
-- Gauges, charts and barcodes drawn with the theme's colours (the ones they leave unset, `indicator_theme.dart`)
+- Gauges, charts and barcodes drawn with the theme's colors (the ones they leave unset, `indicator_theme.dart`)
   repaint when the theme changes at run time (`setThemeMode`, the platform's brightness under `system`): the box
   notes it depends on the theme (`RenderTree.dependOnTheme`) and a theme change (`ComponentRegistry.theme`,
-  `themeChanged`) re-applies it. Before, only nodes naming theme colours re-applied, so an unstyled gauge kept the
-  old mode's colours.
+  `themeChanged`) re-applies it. Before, only nodes naming theme colors re-applied, so an unstyled gauge kept the
+  old mode's colors.
 - The render command with no `--screen` no longer renders a canvas only ever opened as a modal as a screen of its
   own, whether the `openModal` is on a page or inside a component (the site's or its design system's).
 - An image whose path a binding builds (`"bind": {"decoration.fills[0].image.url": "images/${id}.jpg"}`), relative
@@ -265,7 +265,7 @@ general mechanism; its CHANGELOG has the table). The renderer no longer reads th
 test/migration/special_fields_test.dart draws what the migration makes of a node that used each and matches what
 the previous renderer drew from the same node (goldens and recorded texts taken with it): identical; a count, frame
 for frame; the slider's fade within one level but for 12 anti-aliased pixels at the track's rounded end (the fade is
-now the inactive colour laid over the active track). A `ruler` track in a document already at schema 3 draws no
+now the inactive color laid over the active track). A `ruler` track in a document already at schema 3 draws no
 ticks of its own: they are custom paint ops (the migration writes them for a schema-2 document).
 
 - **Radio group: arrow keys move the choice.** Each radio is its own island with its own `RadioGroup`, which saw
@@ -292,16 +292,16 @@ additions).
   before) with a calendar or clock icon. Switches have one thumb size and no outline; check boxes a 4 px radius;
   tabs a square underline; a chip is as wide as its content, so its check mark never cuts its label.
 - **Controls fit their node.** No 48 px tap-target margin or platform density: a 28 or 32 px node shows the whole
-  control, its label centred (segmented buttons take the node's height; fields of a set height centre their line;
-  pagination centres its buttons). Hugging buttons and chips lose the margin (48 to 35-40 px).
-- **Colours from the theme.** Tab bars, pagination, gauges, charts, barcodes and signature pads take the colours
+  control, its label centered (segmented buttons take the node's height; fields of a set height center their line;
+  pagination centers its buttons). Hugging buttons and chips lose the margin (48 to 35-40 px).
+- **Colors from the theme.** Tab bars, pagination, gauges, charts, barcodes and signature pads take the colors
   they leave unset from the theme of what they are drawn on (`indicator_theme.dart`).
 - **The guard** (`test/app/no_material_look_test.dart`) also asserts no stadium button, no underline-only field and
-  no cut chip label, and measures every labelled control's label centred within 1 px at its default height and
+  no cut chip label, and measures every labeled control's label centered within 1 px at its default height and
   32 px, in Barlow and Roboto, light and dark.
 - **Generated UI with a design system or a theme.** `UiSession(designSystem:, theme:)`: the design system's
   components are node types of its catalog, its tokens (with the app's theme over them) the theme `CodelesslyView`
-  resolves named colours and text styles against, reads as `${theme.*}` and draws controls with. A themeless
+  resolves named colors and text styles against, reads as `${theme.*}` and draws controls with. A themeless
   session's field text is in the same family as a text node beside it; the stream replay gives its session the
   render command's default family.
 - **The render command** reads `site.json`'s `designSystem` (`design_system_missing` when it cannot).
@@ -314,7 +314,7 @@ additions).
 
 - **Theme mode.** `Codelessly.themeMode`, `themeModeChoice` and `setThemeMode(mode, persist:)`: the site's
   `ThemeMode` (a choice over the theme's own `mode`, kept in local storage under `codelessly.themeMode` when
-  persisted, so a reload starts in it). Every screen follows it at once: named colours, named text styles, the
+  persisted, so a reload starts in it). Every screen follows it at once: named colors, named text styles, the
   control theme (control_theme.dart, still the single source) and `${theme.isDark}`, `${screen.isDark}` and the new
   `${theme.mode}`. The `setThemeMode` action reaches it through `ThemeModeUi`, which the screen's UI implements.
   `ThemeMode` is hidden from the barrel export (it shares Flutter's name): import codelessly_api with a prefix.
@@ -417,7 +417,7 @@ mapping; a schema-2 document is migrated to the one spelling when it loads).
 - **Controls read what they sit on.** Each island's theme is made for the surface under it (the node's and its
   ancestors' fills, `ControlTheme`): an unstyled text, outlined or icon button, a check or a thumb on a dark band of
   a light page is drawn light. A button, floating action button or chip with a fill of its own but no label color
-  is labelled in ink or paper, whichever reads on it; a button's `style.textStyle.color` is its label color when
+  is labeled in ink or paper, whichever reads on it; a button's `style.textStyle.color` is its label color when
   `foregroundColor` is unset (Flutter drew the theme's over it). Labels Flutter dropped the color of (a chip's, a
   navigation bar's, an input's text in a style of its own) are in the theme's ink instead of white.
 - **The icon button is a plain button** (a `TextButton` around the glyph): no raised lavender tile. A tonal
@@ -505,7 +505,7 @@ out of its findings.
   `Slot.textDefault`.
 - **A schema-2 path a `setValue` names** (not migrated: it is read against its target when it runs) sets nothing
   and is said once, with the schema-3 path to write (`schema2PathHint`); the action's other values apply.
-- **Behaviour changes:** a track with no value is drawn at its minimum (the `drag_misc` parity golden moves
+- **Behavior changes:** a track with no value is drawn at its minimum (the `drag_misc` parity golden moves
   three thumbs: `fader cap`, `knob`, `path track`); the other dropped fields no longer act. Everything else
   renders as before: the 66 parity pages, the m05 experiments' sites (byte-identical PNGs), the Relay site
   (schema 2 through the migration and schema 3 rewritten draw the same boxes).
@@ -547,14 +547,14 @@ out of its findings.
   and in Firestore), the cache, digests, minSdk and the catalog check; `Codelessly.hostedPlugins`,
   `Codelessly.actions` (the runner with the plugins' action types). A plugin node type is a component definition
   (`CodelesslyFeature.components`) rendered as ordinary boxes of the screen's tree: hug and fill through the
-  seam, interaction, slots and events as any component's. **Behaviour change:** the island path for plugin
+  seam, interaction, slots and events as any component's. **Behavior change:** the island path for plugin
   widgets (`_HostedRecipe`, a fixed-size fit box) is gone; `hostedPluginFeature` returns no recipes.
 - Per instance: `setValue` / `setVariant` inside a component instance set that instance's node
   (`RenderTree.setInstanceValue`); slot content inside a list of the definition shows once per item, in the
   caller's scope (`SlotContent`); an instance's scopes are released when it leaves the tree
   (`InstanceBindings.releaseInstance`); `persist` on a component variable is kept per instance path
   (`NodeBinder.persistComponentVariable`, `PersistedVariable.attach(key:)`); a changed declaration decodes the
-  loaded layouts that call it again. **Behaviour change (bug fix):** set value inside an instance changed the
+  loaded layouts that call it again. **Behavior change (bug fix):** set value inside an instance changed the
   page's node of that id.
 - Render command: `--components-all`; a call can be tapped by its id (`--tap send`, `--tap 'sizes#3'`);
   `render_exception` names a node inside an instance by path and its component's file; publishing writes the
@@ -567,15 +567,15 @@ out of its findings.
 - Named colors and text styles resolve against the published theme as the screen shows it (its media rules at
   the screen's size, its dark colors in dark mode), on the page and in components (`ComponentRegistry.theme`); a
   change of theme re-applies only the nodes whose resolved values differ. `${theme.text.*}` reads resolved styles.
-- Icon `size`: the glyph at that size, centred in the node's box; a hugging icon takes it.
+- Icon `size`: the glyph at that size, centered in the node's box; a hugging icon takes it.
 - Actions naming a node from inside a component instance (`scrollTo`, `animate`, `focus`, `editText`) act on that
-  instance's node. **Behaviour change (bug fix):** they acted on every instance's (or none).
+  instance's node. **Behavior change (bug fix):** they acted on every instance's (or none).
 - A node written `visible: false` whose media rule binds `visible` collapses when hidden.
 - `RenderFitBox.designWidthUsed` / `designHeightUsed`: a fill laid out with no room took its design size.
 - Render command: `fill_fallback` (a fill whose size came from its design number, naming the parent and the fix);
   diagnostics find a node's parent in its own document and name component nodes by path (no more false
   `layout_overflow` when a page and a component share an id); `--full-page` captures the whole page while the
-  window keeps its size (**behaviour change:** `screen.height` and anything pinned to the window's top and bottom
+  window keeps its size (**behavior change:** `screen.height` and anything pinned to the window's top and bottom
   are no longer stretched to the page; page content is unchanged), and `--dump-layout` reports boxes where the PNG
   draws them; `--unfocus`, `--key`; `--compare` (side-by-side and diff images, bands, height difference); of a
   font package's subset files the one with Latin text's characters is served; the site manifest's theme is

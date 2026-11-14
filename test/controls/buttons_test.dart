@@ -92,7 +92,7 @@ void main() {
     });
   });
 
-  testWidgets('a button wider than its label centres it; a textAlign the node sets moves it (test 4: "Save changes" sat at the left of a full-width button)',
+  testWidgets('a button wider than its label centers it; a textAlign the node sets moves it (test 4: "Save changes" sat at the left of a full-width button)',
       (tester) async {
     final (tree, _) = await _show(tester, {
       'wide': {'type': 'filledButton', 'props': {'label': 'Save changes'}, 'layout': {'width': 300, 'height': 36}},
@@ -154,7 +154,7 @@ void main() {
       expect(_button(tree, 'go').fontFamily, 'Barlow');
     });
 
-    testWidgets('a role that names a theme colour reaches the button (it drew black before)', (tester) async {
+    testWidgets('a role that names a theme color reaches the button (it drew black before)', (tester) async {
       final (tree, _) = await _show(tester, {'go': hugging('filledButton', {'label': 'Go'})},
           theme: {
             'primary': 'forest',
@@ -174,7 +174,7 @@ void main() {
       expect(_button(tree, 'go').fillColor, _ssuiPrimary);
     });
 
-    testWidgets('a node\'s style is over everything: fill, label colour, side and shape', (tester) async {
+    testWidgets('a node\'s style is over everything: fill, label color, side and shape', (tester) async {
       final (tree, _) = await _show(tester, {
         'go': hugging('outlinedButton', {
           'label': 'Go',
@@ -203,20 +203,20 @@ void main() {
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await mouse.addPointer(location: Offset.zero);
       addTearDown(mouse.removePointer);
-      await mouse.moveTo(centreOf(tree, 'outlined'));
+      await mouse.moveTo(centerOf(tree, 'outlined'));
       await tester.pump();
       final outlined = _button(tree, 'outlined');
       expect(outlined.hovered, isTrue);
       expect(outlined.stateOverlay, const Color(0x0A000000));
       expect(outlined.borderSide?.color, const Color(0xFFD1D5DB), reason: 'the hairline darkens under the pointer');
-      await mouse.down(centreOf(tree, 'outlined'));
+      await mouse.down(centerOf(tree, 'outlined'));
       await tester.pump();
       expect(outlined.stateOverlay, const Color(0x14000000));
       expect(rectOf(tree, 'outlined'), before);
       await mouse.up();
       await tester.pump();
       expect(recorded.fired, ['outlined click']);
-      await mouse.moveTo(centreOf(tree, 'filled'));
+      await mouse.moveTo(centerOf(tree, 'filled'));
       await tester.pump();
       expect(_button(tree, 'filled').stateOverlay, const Color(0x14000000), reason: 'a filled button darkens by SSUI\'s 8 %');
       expect(outlined.hovered, isFalse);
@@ -228,7 +228,7 @@ void main() {
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await mouse.addPointer(location: Offset.zero);
       addTearDown(mouse.removePointer);
-      await mouse.moveTo(centreOf(tree, 'outlined'));
+      await mouse.moveTo(centerOf(tree, 'outlined'));
       await tester.pump();
       expect(b.stateOverlay, const Color(0x0A000000), reason: 'the state itself is at once');
       expect(b.transitioning, isTrue);
@@ -267,7 +267,7 @@ void main() {
         'off': hugging('filledButton', {'label': 'Off', 'enabled': false}),
         'on': hugging('filledButton', {'label': 'On'}),
       });
-      await tester.tapAt(centreOf(tree, 'off'));
+      await tester.tapAt(centerOf(tree, 'off'));
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(recorded.fired, ['on click'], reason: 'Tab skips the disabled button');
@@ -320,7 +320,7 @@ void main() {
       expect(recorded.fired, ['second click']);
     });
 
-    testWidgets('a selected button (a tab, a toggle) is tinted with the primary colour as its ink', (tester) async {
+    testWidgets('a selected button (a tab, a toggle) is tinted with the primary color as its ink', (tester) async {
       final (tree, _) = await _show(tester, {
         'day': hugging('textButton', {'label': 'Day'}),
         'week': hugging('outlinedButton', {'label': 'Week'}),
@@ -357,7 +357,7 @@ void main() {
     final before = spinner.turns;
     await tester.pump(const Duration(milliseconds: 250));
     expect(spinner.turns, isNot(before), reason: 'it turns');
-    await tester.tapAt(centreOf(tree, 'save'));
+    await tester.tapAt(centerOf(tree, 'save'));
     await tester.sendKeyEvent(LogicalKeyboardKey.enter);
     expect(recorded.fired, isEmpty);
     expect(save.focusNode.hasFocus, isTrue, reason: 'it keeps the focus');
@@ -384,7 +384,7 @@ void main() {
     expect(_button(tree, 'save').icon, isNotNull, reason: 'its own icon is back');
     await tester.pump(const Duration(milliseconds: 200));
     expect(_button(tree, 'save').paintedAlpha, 255);
-    await tester.tapAt(centreOf(tree, 'save'));
+    await tester.tapAt(centerOf(tree, 'save'));
     expect(recorded.fired, ['save click']);
   });
 
@@ -432,7 +432,7 @@ void main() {
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
     addTearDown(mouse.removePointer);
-    await mouse.moveTo(centreOf(tree, 'more'));
+    await mouse.moveTo(centerOf(tree, 'more'));
     await tester.pump(const Duration(milliseconds: 200));
     expect(root.overlayEntries, isEmpty, reason: 'not before SSUI\'s 400 ms');
     await tester.pump(const Duration(milliseconds: 250));
@@ -442,7 +442,7 @@ void main() {
     final at = bubble.localToGlobal(Offset.zero) & bubble.size;
     final button = rectOf(tree, 'more');
     expect(at.bottom, lessThanOrEqualTo(button.top), reason: 'above the button');
-    // Centred on the button, kept 8 px inside the root.
+    // Centered on the button, kept 8 px inside the root.
     expect(at.left, closeTo(button.center.dx - at.width / 2 < 8 ? 8 : button.center.dx - at.width / 2, 1));
     await mouse.moveTo(const Offset(390, 290));
     await tester.pump();
@@ -459,7 +459,7 @@ void main() {
     expect(recorded.fired, ['xs click']);
   });
 
-  testWidgets('an icon and a label: the icon before (or after) the label, the pair centred', (tester) async {
+  testWidgets('an icon and a label: the icon before (or after) the label, the pair centered', (tester) async {
     final (tree, _) = await _show(tester, {
       'start': hugging('filledButton', {'label': 'New', 'icon': 'add'}),
       'end': hugging('filledButton', {'label': 'Next', 'icon': 'arrow_forward', 'iconAlignment': 'end'}),
@@ -472,7 +472,7 @@ void main() {
       expect(iconX < label.left, iconFirst, reason: id);
       final left = iconFirst ? iconX : label.left;
       final right = iconFirst ? label.right : iconX + glyph.size.width;
-      expect((left - (b.size.width - right)).abs(), lessThan(1.5), reason: '$id: centred');
+      expect((left - (b.size.width - right)).abs(), lessThan(1.5), reason: '$id: centered');
     }
   });
 }

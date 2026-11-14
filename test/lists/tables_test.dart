@@ -146,7 +146,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     final at = cells(tester);
-    // Rows (texts centred in them): header 60, open 150, ana 70 (no
+    // Rows (texts centered in them): header 60, open 150, ana 70 (no
     // height), bo 70 (not a number).
     expect(at['ana']!.dy - at['open']!.dy, (150 + 70) / 2);
     expect(at['bo']!.dy - at['ana']!.dy, 70);

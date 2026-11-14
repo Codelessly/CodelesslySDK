@@ -3,7 +3,7 @@
 // (render/controls/field_frame.dart) around Flutter's `RenderEditable`,
 // edited by a [FieldEditor] (render/controls/editable.dart) instead of an
 // `EditableText`. No widget, no Material: the label sits above the box, the
-// colours are tokens, and the field takes part in its root's focus order
+// colors are tokens, and the field takes part in its root's focus order
 // (Tab from a button reaches it).
 //
 // The runtime's side (the `focus` and `editText` actions, forms and their

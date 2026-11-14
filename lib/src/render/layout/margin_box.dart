@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 
 /// Space around a child, any side of it negative: a negative side takes the
 /// child that far past this box (a scrim reaching over its parent's
-/// padding, a card overlapping its neighbour). This box keeps the size its
+/// padding, a card overlapping its neighbor). This box keeps the size its
 /// parent gives it; the child is laid out larger by the overhang and placed
 /// out over it. With no negative side it is Flutter's padding.
 class RenderMargin extends RenderShiftedBox {

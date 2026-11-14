@@ -3,7 +3,7 @@
 // slots (leading, title, actions) laid out as Flutter's NavigationToolbar
 // does; placed by the canvas's slots (render/layout/scaffold_slots.dart);
 // the top safe area read from the view, never MediaQuery; the props over
-// SSUI's; the title centred (the label guard's measure) and announced as a
+// SSUI's; the title centered (the label guard's measure) and announced as a
 // header.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/app_bar.dart';
@@ -53,7 +53,7 @@ Future<NodeTree> _show(WidgetTester tester, Map<String, Map<String, Object?>> no
   return tree;
 }
 
-double _centre(List<Rect> glyphs) =>
+double _center(List<Rect> glyphs) =>
     (glyphs.map((g) => g.top).reduce((a, b) => a < b ? a : b) + glyphs.map((g) => g.bottom).reduce((a, b) => a > b ? a : b)) / 2;
 
 void main() {
@@ -64,7 +64,7 @@ void main() {
     expect(bar.backgroundColor, const Color(0xFFFFFFFF));
     expect(bar.titleColor, const Color(0xFF111827));
     expect(bar.slots.title.left, 12, reason: 'SSUI\'s 12 px from the start');
-    expect(_centre(bar.labels.single.glyphs), closeTo(22, .75), reason: 'the title centred in the bar');
+    expect(_center(bar.labels.single.glyphs), closeTo(22, .75), reason: 'the title centered in the bar');
     expect(_hasIsland(tree.boxOf('bar')!), isFalse, reason: 'no AppBar island');
   });
 
@@ -88,8 +88,8 @@ void main() {
     expect(s.actions, hasLength(2));
     expect(s.actions.last.right, 360 - 8);
     expect(s.actions.last.left - s.actions.first.right, 4);
-    expect(_centre(bar.labels.single.glyphs), closeTo(28, .75), reason: 'centred in a 56 bar too');
-    // The glyphs are SSUI's secondary ink, 16 px, centred in their buttons.
+    expect(_center(bar.labels.single.glyphs), closeTo(28, .75), reason: 'centered in a 56 bar too');
+    // The glyphs are SSUI's secondary ink, 16 px, centered in their buttons.
     final glyphs = <RenderBox>[];
     bar.visitChildren((c) => glyphs.add(c as RenderBox));
     expect(glyphs, hasLength(3));
@@ -99,7 +99,7 @@ void main() {
     expect(bar.iconColorOf(const BarIcon({})), const Color(0xFF4B5563));
   });
 
-  testWidgets('centerTitle centres the title on the bar, kept between its slots', (tester) async {
+  testWidgets('centerTitle centers the title on the bar, kept between its slots', (tester) async {
     final tree = await _show(tester, {'bar': _appBar({'title': 'Inbox', 'centerTitle': true, 'leading': _menu})});
     final t = _bar(tree, 'bar').slots.title;
     expect(t.center.dx, closeTo(180, .5));
@@ -147,7 +147,7 @@ void main() {
     expect(controlViewPadding(bar).top, 47, reason: 'from the view, not MediaQuery');
     expect(rectOf(tree, 'bar'), const Rect.fromLTWH(0, 0, 390, 56 + 47));
     expect(rectOf(tree, 'body').top, 56 + 47, reason: 'the body below the bar');
-    expect(_centre(bar.labels.single.glyphs), closeTo(47 + 28, .75), reason: 'the title in the toolbar below the safe area');
+    expect(_center(bar.labels.single.glyphs), closeTo(47 + 28, .75), reason: 'the title in the toolbar below the safe area');
     expect(_hasIsland(tree.boxOf('screen')!), isFalse);
   });
 

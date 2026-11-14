@@ -90,7 +90,7 @@ void main() {
       if (near(at(px, 150, y), red, 90)) dashed++;
     }
     expect(dashed, inInclusiveRange(10, 26), reason: 'a dashed vertical guide');
-    expect(near(at(px, 150, 50), white), isTrue, reason: 'the dot centre');
+    expect(near(at(px, 150, 50), white), isTrue, reason: 'the dot center');
     expect(near(at(px, 155, 50), blue, 90), isTrue, reason: 'the dot ring');
     // The test font draws each glyph as a solid box, so the tag shows as its
     // black padding around white text.
