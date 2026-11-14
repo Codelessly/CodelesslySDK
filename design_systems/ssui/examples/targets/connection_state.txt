@@ -1,0 +1,13 @@
+state status="reconnecting"
+state tries=2
+Card gap:10
+  Row gap:8
+    ConnectionStatus status:=status=="online"?"connected":(status=="offline"?"disconnected":"connecting")
+    Spacer
+    Text.caption "Back online" visible:=status=="online"
+    Text.caption "Offline" visible:=status=="offline"
+    Text.caption "Attempt {tries} of 5" visible:=status=="reconnecting"
+  Text.bodySecondary "{status=="online"?"Everything you wrote while offline was sent.":(status=="offline"?"You can keep writing. Messages will be sent when the connection returns.":"Trying to reach the server. Your draft is kept on this device.")}"
+  Row end gap:6
+    Button.ghost "Work offline" visible:=status=="reconnecting" -> status="offline"
+    Button.outline "Retry now" visible:=status!="online" -> status="online"; emit retry

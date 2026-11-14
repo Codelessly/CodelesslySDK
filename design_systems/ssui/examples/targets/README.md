@@ -70,6 +70,14 @@ it reads as finished beside theirs: alignment, spacing, color, every state.
 | `activity_graph.txt` | one | A count per day as bars, with the busiest and the quietest. Uses `TabToggle`, `InlineStat`. |
 | `trace_waterfall.txt` | one | Where the time of a run went, step by step. Uses `FilterLegend`. |
 | `markdown_text.txt` | one | A heading, a paragraph, bullets, a code block, a note and a link. Uses `FeatureBulletItem`, `CodeBlock`, `Hyperlink`. |
+| `thinking_indicator.txt` | closed, open | Pulsing dots with the time so far; the steps open under it. |
+| `schedule.txt` | on, paused | A repeating run with its next three times, a switch, Edit and Run now. |
+| `stopped_run.txt` | stopped, resumed | What was done before the stop, with Discard and Resume. |
+| `error_state.txt` | closed, details, retrying | What failed in plain words, the technical detail on request, Try again. |
+| `quota_banner.txt` | near, reached | Use against the limit as a bar, when it resets, Upgrade. |
+| `connection_state.txt` | reconnecting, offline, online | The connection with what happens to the draft in each state. |
+| `background_runs.txt` | one | Runs with their state, a bar for the running ones and an action each. |
+| `voice_conversation.txt` | live, muted, ended | A level meter whose bars follow data, the last line heard, Mute and End. |
 The first nineteen are written with core nodes only. The rest call SSUI's components by name, which the notation
 reads when it is given the design system; expand one with
 
@@ -79,5 +87,5 @@ dart run tool/notation/expand.dart design_systems/ssui/examples/targets/handoff.
 
 and render the document with `tool/render/render.sh` from a site whose `site.json` names the design system.
 
-Still to write: heat graph and flow graph; maps; diagrams (Mermaid and others); and the handful that are app shell
-rather than a card.
+Still to write: heat graph and flow graph; math; maps; diagrams (Mermaid and others); the orb. Each needs
+drawing the notation has no words for yet.
