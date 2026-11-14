@@ -357,8 +357,9 @@ void main() {
         final border = find.descendant(of: f, matching: find.byWidgetPredicate((w) => w.runtimeType.toString() == '_BorderContainer'));
         return tester.getSize(border.first).height;
       }
-      final decorators = find.byType(InputDecorator);
-      expect([drawn(decorators.at(0)), drawn(decorators.at(1))]..sort(), [40, 42]);
+      expect(drawn(find.byType(InputDecorator).first), 40);
+      // The time picker is drawn by the SDK (render/controls/pickers.dart).
+      expect(tree.boxOf('time')!.size.height, 42);
     });
   }
 

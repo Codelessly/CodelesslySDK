@@ -4,13 +4,16 @@
 // widgets/registry.dart spreads [controlRecipes] after the island recipes,
 // so a family that lands here replaces its islands by being added, without
 // editing the island files. A family adds one line here.
-import 'package:codelessly_api/core.dart' show ButtonProps, FloatingActionButtonProps, IconButtonProps;
+import 'package:codelessly_api/core.dart'
+    show ButtonProps, DatePickerProps, DateTimeInputProps, FloatingActionButtonProps, IconButtonProps, TimePickerProps;
 
 import '../render/controls/app_bar.dart';
 import '../render/controls/buttons.dart';
 import '../render/controls/navigation_bar.dart';
 import '../render/controls/tab_bar.dart';
+import '../render/controls/pickers.dart';
 import '../render/recipe.dart';
+import 'picker_locale.dart';
 
 /// Buttons (render/controls/buttons.dart).
 final Map<String, WidgetRecipe> buttonRecipes = {
@@ -32,8 +35,16 @@ final Map<String, WidgetRecipe> barRecipes = {
   'appBar': appBarRecipe,
 };
 
+/// Date and time pickers (render/controls/pickers.dart), in the platform
+/// locale's names with the runtime's clock (picker_locale.dart).
+final Map<String, WidgetRecipe> pickerRecipes = {
+  for (final type in [DatePickerProps.spec.type, TimePickerProps.spec.type, DateTimeInputProps.spec.type])
+    type: (b, n, chain) => pickerRecipe(b, n, chain, locale: pickerLocale()),
+};
+
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
   ...barRecipes,
+  ...pickerRecipes,
 };

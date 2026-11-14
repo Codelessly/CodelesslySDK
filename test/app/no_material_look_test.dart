@@ -13,9 +13,11 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:codelessly_api/codelessly_api.dart' as api show InputBorderType;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl;
+import 'package:codelessly_sdk/src/render/controls/pickers.dart' show RenderPickerField;
 import 'package:codelessly_sdk/src/widgets/collections.dart' show collectionsRecipes;
 import 'package:codelessly_sdk/src/widgets/controls.dart' show controlRecipes;
 import 'package:codelessly_sdk/src/widgets/indicators.dart' show indicatorsRecipes;
@@ -417,6 +419,9 @@ String? _inherited(InlineSpan root, InlineSpan target) {
   return found;
 }
 
+/// The pickers drawn as render objects (workstream G).
+const _renderPickers = ['datePicker', 'timePicker', 'dateTimeInput'];
+
 /// The labelled controls whose label must sit centred in their box.
 const _labelled = [
   'filledButton', 'elevatedButton', 'outlinedButton', 'textButton', 'segmentedButton', //
@@ -635,6 +640,20 @@ void main() {
         expect(shape, isA<RoundedRectangleBorder>(), reason: '$type shape');
         final radius = (shape as RoundedRectangleBorder).borderRadius.resolve(TextDirection.ltr).topLeft.x;
         expect(radius, inInclusiveRange(1, 12), reason: '$type radius');
+      }
+
+      // Date and time pickers: render objects with SSUI's outlined field.
+      for (final type in _renderPickers) {
+        final fields = <RenderPickerField>[];
+        void visit(RenderObject o) {
+          if (o is RenderPickerField) fields.add(o);
+          o.visitChildren(visit);
+        }
+
+        visit(controller.tree!.boxOf(type)!);
+        expect(fields, hasLength(1), reason: '$type is a render object on the page, not a Material widget');
+        expect(fields.single.border?.type, api.InputBorderType.outline, reason: '$type border');
+        expect(fields.single.border!.radius.topLeft.x, inInclusiveRange(1, 12), reason: '$type radius');
       }
 
       // Fields: no underline-only border. A field's border is what its
