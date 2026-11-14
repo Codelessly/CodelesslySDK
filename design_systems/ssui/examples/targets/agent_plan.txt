@@ -1,0 +1,23 @@
+state steps=[{"title":"Read the failing test","detail":"checkout_total_test.dart, 3 assertions","state":"done"},{"title":"Trace the rounding","detail":"Money.round is applied per line, then again on the sum","state":"done"},{"title":"Fix the double rounding","detail":"round once, on the total","state":"running"},{"title":"Add a regression test","detail":"three lines at 33.335","state":"todo"},{"title":"Run the suite","detail":"412 tests","state":"todo"}]
+state open=true
+Card gap:10
+  Row between
+    Row gap:8
+      Icon "checklist" {"props": {"size": 16, "color": "#FF2563EB"}}
+      Text.sectionTitle "Plan"
+      Badge.primary "{length(filter(steps, s => s.state=="done"))} of {length(steps)}"
+    Button.ghost "{open?"Hide":"Show"}" -> open=!open
+  Progress =length(filter(steps, s => s.state=="done"))/length(steps)
+  if open
+    Column gap:0
+      each s in steps
+        Row gap:10 pad:[0,7,0,7] border:#FFF3F4F6
+          Box w:18 h:18 radius:9 center fill:=s.state=="done"?"#FF16A34A":(s.state=="running"?"#1A2563EB":"#FFF3F4F6")
+            Icon "{s.state=="done"?"check":(s.state=="running"?"more_horiz":"circle")}" size:11 color:=s.state=="done"?"#FFFFFFFF":(s.state=="running"?"#FF2563EB":"#00000000")
+          Column gap:1 grow
+            Text.strong "{s.title}" color:=s.state=="todo"?"#FF9CA3AF":"#FF111827"
+            Text.caption "{s.detail}"
+          Badge.primary "Now" visible:=s.state=="running"
+  Row end gap:8
+    Button.ghost "Edit plan" -> emit edit_plan
+    Button.outline "Pause" -> emit pause

@@ -1,0 +1,23 @@
+state status="running"
+Card gap:10
+  Row gap:10
+    Box w:32 h:32 radius:8 fill:#1A2563EB center
+      Icon "terminal" {"props": {"size": 16, "color": "#FF2563EB"}}
+    Column gap:1 grow
+      Text.sectionTitle "Migrate users table"
+      Text.caption "Started 2 min ago · worker eu-3"
+    Badge.primary "Running" visible:=status=="running"
+    Badge.success "Done" visible:=status=="done"
+    Badge.neutral "Canceled" visible:=status=="canceled"
+  Column gap:6 pad:10 radius:8 fill:#FFF9FAFB
+    Row between
+      Text.bodySecondary "Rows copied"
+      Text.mono "1,284,000 / 2,100,000"
+    Progress =status=="done"?1:0.61
+    Row between
+      Text.caption "{status=="done"?"Finished in 3 min 12 s":(status=="canceled"?"Stopped at 61 %; nothing was changed":"About 1 min left")}"
+      Text.caption "6,900 rows / s" visible:=status=="running"
+  Row end gap:8
+    Button.ghost "View log" -> emit view_log
+    Button.destructive "Cancel" visible:=status=="running" -> status="canceled"; emit cancel
+    Button "Open table" visible:=status=="done" -> emit open

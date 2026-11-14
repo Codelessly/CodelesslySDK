@@ -1,0 +1,18 @@
+state tries=1
+state fixed=false
+Card gap:10 border:=fixed?"#FFE5E7EB":"#47DC2626"
+  Row gap:8
+    Icon "{fixed?"check_circle":"error_outline"}" size:16 color:=fixed?"#FF16A34A":"#FFDC2626"
+    Text.sectionTitle "{fixed?"send_invoice succeeded":"send_invoice failed"}" grow
+    Text.caption "Attempt {tries} of 3"
+  if !fixed
+    Column gap:4 pad:10 radius:8 fill:#1ADC2626
+      Text.strong "429 Too many requests" color:#FFDC2626
+      Text.bodySecondary "The billing API allows 10 calls a minute. This was the 11th."
+    Row between
+      Text.caption "Retrying on its own in 40 s."
+      Row gap:8
+        Button.ghost "Skip this step" -> emit skip
+        Button.outline "Retry now" -> tries=tries+1; fixed=tries>=2
+  if fixed
+    Text.bodySecondary "Invoice INV-2291 was sent to billing@acme.example on the second attempt."

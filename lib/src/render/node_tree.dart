@@ -2463,7 +2463,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       } else if (isFlexFit(mainFit)) {
         (flex, fit) = (flexValue, mainFit == SizeFit.flexible || mainMax != null ? FlexFit.loose : FlexFit.tight);
       }
-      if (mainFit == SizeFit.hug && n.layout.squeezable && !parentNode.wraps) (flex, fit) = (flexValue, FlexFit.loose);
+      // A hugging child that may be squeezed gives way when the row runs out
+      // of room. Beside a sibling that fills, the room is that sibling's: it
+      // keeps its own size (a label that grows, then its value at the end),
+      // instead of sharing the row with it as a second flexible child.
+      if (mainFit == SizeFit.hug && n.layout.squeezable && !parentNode.wraps && !_siblingFills(parentNode, n.id, isRow)) {
+        (flex, fit) = (flexValue, FlexFit.loose);
+      }
       // Collapsed: no flex, no gaps (flex 0).
       if (_collapsed) (flex, fit) = (null, null);
       // In a wrapping row/column: CSS flex-basis, and flex-grow for a child
@@ -2486,6 +2492,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         p?.markNeedsLayout();
       }
     }
+  }
+
+  /// Whether a child of [parent] other than [id] fills its main axis.
+  bool _siblingFills(Node parent, String id, bool isRow) {
+    for (final other in parent.children) {
+      if (other == id) continue;
+      final o = source.node(other);
+      if (o == null || !o.visible || o.type == 'spacer') continue;
+      if ((isRow ? o.hFit : o.vFit) == SizeFit.fill && (isRow ? o.layout.constraints.maxWidth : o.layout.constraints.maxHeight) == null) return true;
+    }
+    return false;
   }
 
   /// The axis [node]'s children scroll along, if any.

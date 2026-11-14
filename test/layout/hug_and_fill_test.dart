@@ -227,6 +227,26 @@ void main() {
       expect(r['item']!.height, 45);
     });
 
+    testWidgets('a label that grows, then a value that may be squeezed: the value keeps its size at the end of the row', (tester) async {
+      // What the notation writes for `Text "Lint" grow` followed by `Text "12 s"`.
+      final r = await _rectsOf(tester, {
+        'r': {'type': 'row', 'children': ['label', 'value'], 'layout': {'width': 300, 'height': {'hug': 0}}},
+        'label': {
+          'type': 'text',
+          'props': {'text': 'Lint', 'style': {'fontSize': 13, 'color': '#FF000000'}},
+          'layout': {'flex': 1, 'squeezable': true, 'width': {'fill': 0}, 'height': {'hug': 0}},
+        },
+        'value': {
+          'type': 'text',
+          'props': {'text': '12 s', 'style': {'fontSize': 13, 'color': '#FF000000'}},
+          'layout': {'squeezable': true, 'width': {'hug': 0}, 'height': {'hug': 0}},
+        },
+      });
+      expect(r['value']!.right, 300);
+      expect(r['value']!.width, lessThan(60));
+      expect(r['label']!.width, 300 - r['value']!.width);
+    });
+
     testWidgets('fill-width children of a hugging column are as wide as its widest other child', (tester) async {
       final r = await _rectsOf(tester, {
         'r': {
