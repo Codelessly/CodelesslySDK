@@ -462,7 +462,9 @@ class RenderAnimations extends RenderPose {
   void configure(NodeBox? box, Node n, {required bool animates, RenderMotion? motion, RenderShimmer? shimmer}) {
     _box = box;
     final previous = _node;
+    final previousBase = _base;
     _node = n;
+    _base = _patchesOwnPaths(n) && box != null ? box.tree.resolveUnanimated(box.id, instance: box.instance) ?? n : n;
     _motion = motion;
     _shimmer = shimmer;
     final wasAnimating = _animates;
@@ -503,7 +505,7 @@ class RenderAnimations extends RenderPose {
       for (final id in cues) {
         unawaited(play(id));
       }
-      if (previous != null && wasAnimating) _transition(previous, n);
+      if (previous != null && wasAnimating) _transition(previousBase ?? previous, _base!);
     }
     _show();
     _sync();
@@ -894,6 +896,22 @@ class RenderAnimations extends RenderPose {
   Map<String, Map<String, Object?>> _lastPatches = const {};
   Map<String, Object?> _lastState = const {};
 
+  /// The node without what its own tracks patch into it (a path that is
+  /// not its motion, opacity or shimmer): what an omitted end and a
+  /// transition read. [_node] itself when nothing is patched.
+  Node? _base;
+
+  /// Whether [n]'s own tracks or transitions are on paths the player
+  /// patches into the node ([RenderTree.setAnimatedValues]).
+  static bool _patchesOwnPaths(Node n) {
+    bool patched(String path) =>
+        path.isNotEmpty && path != 'opacity' && path != 'shimmer.position' && !path.startsWith('motion') && path != '*';
+    for (final a in n.behaviors.animations) {
+      if (a.tracks.any((t) => t.node.isEmpty && t.variable.isEmpty && patched(t.path))) return true;
+    }
+    return n.behaviors.transitions.any((t) => patched(t.property));
+  }
+
   /// The controller value of [clock] to draw with: its own in a running
   /// app; on a design canvas its `previewAt` (null: not drawn).
   double? _drawn(AnimationClock clock) {
@@ -997,7 +1015,7 @@ class RenderAnimations extends RenderPose {
         if (t.node.isEmpty && eased(path)) continue;
         // Any other path: a patch of the node (or of node [t.node]).
         final target = t.node.isEmpty ? n.id : t.node;
-        final value = t.valueAt(v, own: _ownValue(target, path), begin: _resolved(t.from), end: _resolved(t.to));
+        final value = t.valueAt(v, own: _resolved(_ownValue(target, path)), begin: _resolved(t.from), end: _resolved(t.to));
         if (value != null) (patches[target] ??= {})[path] = value;
       }
       if (dx != 0 || dy != 0 || sc != 1 || sx != 1 || sy != 1 || rot != 0) {
@@ -1034,9 +1052,10 @@ class RenderAnimations extends RenderPose {
     _publish();
   }
 
-  /// The node's own [path] value as stored (an omitted `from` or `to`).
+  /// The node's own [path] value as stored (an omitted `from` or `to`), its
+  /// declared default where the JSON omits it.
   Object? _ownValue(String id, String path, {Node? node}) {
-    node ??= id == _node?.id ? _node : _box?.nodeOf(id);
+    node ??= id == _node?.id ? (_base ?? _node) : _box?.nodeOf(id);
     if (node == null) return null;
     Object? at = node.toJson();
     for (final k in api.BindPaths.parse(path)) {
@@ -1049,7 +1068,8 @@ class RenderAnimations extends RenderPose {
         at = api.readMap(at)?[k];
       }
     }
-    return at;
+    // Omitted from its JSON: the field's declared default.
+    return at ?? api.BindPaths.declaredDefault(node, path);
   }
 
   Object? _resolved(Object? v) => v is String && v.contains(r'${') ? _number(v) ?? (_values?.interpolate(v)) : v;

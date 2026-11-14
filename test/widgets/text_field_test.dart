@@ -251,7 +251,7 @@ void main() {
         'time': {
           'type': 'timePicker',
           'layout': {'width': 160, 'height': 42, 'y': {'start': 100}},
-          'props': {'value': '13:00', 'use24h': true, 'format': 'HH:mm', 'decoration': {'isDense': true, 'border': {'type': 'outline'}}},
+          'props': {'value': '13:00', 'alwaysUse24HourFormat': true, 'format': 'HH:mm', 'decoration': {'isDense': true, 'border': {'type': 'outline'}}},
         },
       })));
       await tester.pumpWidget(MaterialApp(
