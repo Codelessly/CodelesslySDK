@@ -143,7 +143,7 @@ class ChartSeriesPainter extends NodePainter {
   TextStyle _labelStyle(String? family) => TextStyle(
         fontFamily: family,
         fontSize: p(ChartProps.axisFontSize),
-        color: p(ChartProps.axisLabelColor).flutter,
+        color: c(ChartProps.axisLabelColor),
         fontWeight: FontWeight.w500,
       );
 
@@ -277,7 +277,7 @@ class ChartSeriesPainter extends NodePainter {
     final paint = Paint()..style = PaintingStyle.stroke;
     if (total <= 0) {
       canvas.drawArc(rect, 0, 2 * math.pi, false, paint
-        ..color = p(ChartProps.trackColor).flutter
+        ..color = c(ChartProps.trackColor)
         ..strokeWidth = stroke);
       return;
     }
@@ -319,7 +319,7 @@ class ChartSeriesPainter extends NodePainter {
         : isLine
             ? plot.left + plot.width * i / slots
             : plot.left + catW * (i + 0.5);
-    final gridColor = p(ChartProps.gridColor).flutter;
+    final gridColor = c(ChartProps.gridColor);
 
     // Grid and y labels.
     final gridLines = p(ChartProps.gridLines);
@@ -372,7 +372,7 @@ class ChartSeriesPainter extends NodePainter {
 
     // Selection.
     final selected = selectedIndex;
-    final selection = p(ChartProps.selectionColor).flutter;
+    final selection = c(ChartProps.selectionColor);
     if (!isLine && selected >= 0 && selected < n) {
       canvas.drawRect(
         Rect.fromLTWH(plot.left + catW * selected + 2, plot.top, catW - 4, plot.height),
@@ -450,7 +450,7 @@ class ChartSeriesPainter extends NodePainter {
 
     // Totals above the bar groups.
     if (!isLine && p(ChartProps.showTotals)) {
-      final color = p(ChartProps.totalsColor)?.flutter ?? p(ChartProps.axisLabelColor).flutter;
+      final color = p(ChartProps.totalsColor)?.flutter ?? c(ChartProps.axisLabelColor);
       final selectedColor = p(ChartProps.totalsSelectedColor)?.flutter ?? color;
       final base = _labelStyle(p(ChartProps.axisFontFamily)).copyWith(fontWeight: FontWeight.w700);
       final totalsGap = p(ChartProps.totalsGap);
@@ -647,7 +647,7 @@ class ChartSeriesPainter extends NodePainter {
   /// The selected category's box: its title, then a row per series with a
   /// value there (a dot in the series' color, its name, the value).
   void _paintTooltip(Canvas canvas, Size size, Rect plot, Map<String, Object?> item, double centerX) {
-    final text = p(ChartProps.tooltipTextColor).flutter;
+    final text = c(ChartProps.tooltipTextColor);
     final family = p(ChartProps.axisFontFamily);
     final titleField = p(ChartProps.tooltipTitleField);
     final title = '${item[titleField.isEmpty ? p(ChartProps.labelField) : titleField] ?? ''}';
@@ -680,7 +680,7 @@ class ChartSeriesPainter extends NodePainter {
     canvas.drawRRect(box.shift(const Offset(0, 4)), Paint()
       ..color = const Color(0x88000000)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10));
-    canvas.drawRRect(box, Paint()..color = p(ChartProps.tooltipColor).flutter);
+    canvas.drawRRect(box, Paint()..color = c(ChartProps.tooltipColor));
     _label(canvas, title, Offset(left + pad, plot.top + pad + titleH / 2 - 2), align: TextAlign.left, style: titleStyle);
     for (var k = 0; k < rows.length; k++) {
       final (color, name, value) = rows[k];
@@ -719,8 +719,8 @@ class ChartSeriesPainter extends NodePainter {
     final domainMin = p(ChartProps.domainMin), domainMax = p(ChartProps.domainMax);
     final span = domainMax - domainMin;
     double x(double v) => span == 0 ? 0 : band.width * ((v - domainMin) / span).clamp(0.0, 1.0);
-    final gridColor = p(ChartProps.gridColor).flutter;
-    canvas.drawRect(band, Paint()..color = p(ChartProps.trackColor).flutter);
+    final gridColor = c(ChartProps.gridColor);
+    canvas.drawRect(band, Paint()..color = c(ChartProps.trackColor));
     for (final item in data) {
       final from = chartNumber(item, p(ChartProps.startField));
       final to = chartNumber(item, p(ChartProps.endField));
@@ -757,7 +757,7 @@ class ChartSeriesPainter extends NodePainter {
     }
     if (nowValue != null) {
       final nx = x(nowValue);
-      final nowColor = p(ChartProps.nowColor)?.flutter ?? p(ChartProps.axisLabelColor).flutter;
+      final nowColor = p(ChartProps.nowColor)?.flutter ?? c(ChartProps.axisLabelColor);
       canvas.drawRect(Rect.fromLTWH(nx - 1, 0, 2, bandH), Paint()..color = nowColor.withValues(alpha: 1));
     }
     canvas.drawRect(
@@ -884,7 +884,7 @@ class PlotChartPainter extends NodePainter {
     final divisions = p(PlotChartProps.minorDivisions);
     if (divisions > 1) {
       final minor = Paint()
-        ..color = p(PlotChartProps.minorGridColor).flutter
+        ..color = c(PlotChartProps.minorGridColor)
         ..strokeWidth = 1;
       if (gridStep != null && gridStep > 0 && gridStep / divisions * pxPerX >= 6) {
         final m = gridStep / divisions;
@@ -905,7 +905,7 @@ class PlotChartPainter extends NodePainter {
       }
     }
     final grid = Paint()
-      ..color = p(PlotChartProps.gridColor).flutter
+      ..color = c(PlotChartProps.gridColor)
       ..strokeWidth = 1;
     if (gridStep != null && gridStep > 0 && span > 0) {
       if (zeroAnchored) {
@@ -1021,7 +1021,7 @@ class PlotChartPainter extends NodePainter {
         canvas.drawPath(
           line,
           Paint()
-            ..color = p(PlotChartProps.lineColor).flutter
+            ..color = c(PlotChartProps.lineColor)
             ..style = PaintingStyle.stroke
             ..strokeWidth = lineWidth
             ..strokeJoin = StrokeJoin.round,
@@ -1042,10 +1042,10 @@ class PlotChartPainter extends NodePainter {
     }
 
     final hollow = p(PlotChartProps.markerHollow);
-    final ringFill = p(PlotChartProps.selectionDotColor).flutter;
+    final ringFill = c(PlotChartProps.selectionDotColor);
     final endDot = p(PlotChartProps.endDotRadius);
     if (curveEnd != null && endDot > 0) {
-      canvas.drawCircle(curveEnd, endDot, Paint()..color = p(PlotChartProps.lineColor).flutter);
+      canvas.drawCircle(curveEnd, endDot, Paint()..color = c(PlotChartProps.lineColor));
       canvas.drawCircle(curveEnd, endDot, Paint()
         ..color = ringFill
         ..style = PaintingStyle.stroke
@@ -1089,7 +1089,7 @@ class PlotChartPainter extends NodePainter {
     if (p(PlotChartProps.referenceX) case final double referenceX) {
       final dx = x(referenceX);
       final paint = Paint()
-        ..color = p(PlotChartProps.referenceColor).flutter
+        ..color = c(PlotChartProps.referenceColor)
         ..strokeWidth = p(PlotChartProps.referenceWidth);
       if (p(PlotChartProps.referenceDashed)) {
         for (double dy = 0; dy < chartHeight; dy += 6) {
@@ -1105,7 +1105,7 @@ class PlotChartPainter extends NodePainter {
       final step = math.max(0.0, p(PlotChartProps.selectionStep));
       if (step > 0 && guides == PlotChartSelectionGuides.line) {
         canvas.drawRect(Rect.fromLTRB(x(selected), 0, x(selected + step), chartHeight),
-            Paint()..color = p(PlotChartProps.selectionColor).flutter);
+            Paint()..color = c(PlotChartProps.selectionColor));
       }
       final center = guides == PlotChartSelectionGuides.line ? selected + step / 2 : selected;
       final dx = x(center);
@@ -1114,7 +1114,7 @@ class PlotChartPainter extends NodePainter {
       final value = p(PlotChartProps.selectionY) ??
           (selectionId.isEmpty ? valueAt(center) : seriesValueAt(selectionId, center));
       final linePaint = Paint()
-        ..color = p(PlotChartProps.selectionLineColor).flutter
+        ..color = c(PlotChartProps.selectionLineColor)
         ..strokeWidth = lineWidth;
       switch (guides) {
         case PlotChartSelectionGuides.line:
@@ -1139,16 +1139,16 @@ class PlotChartPainter extends NodePainter {
       if (value != null) {
         final dot = Offset(dx, y(value));
         final halo = p(PlotChartProps.selectionHaloRadius);
-        if (halo > 0) canvas.drawCircle(dot, halo, Paint()..color = p(PlotChartProps.selectionHaloColor).flutter);
+        if (halo > 0) canvas.drawCircle(dot, halo, Paint()..color = c(PlotChartProps.selectionHaloColor));
         if (dotRadius > 0) {
-          canvas.drawCircle(dot, dotRadius, Paint()..color = p(PlotChartProps.selectionDotColor).flutter);
+          canvas.drawCircle(dot, dotRadius, Paint()..color = c(PlotChartProps.selectionDotColor));
           final strokeWidth = p(PlotChartProps.selectionDotStrokeWidth);
           if (strokeWidth > 0) {
             canvas.drawCircle(
               dot,
               dotRadius,
               Paint()
-                ..color = p(PlotChartProps.selectionDotStrokeColor).flutter
+                ..color = c(PlotChartProps.selectionDotStrokeColor)
                 ..style = PaintingStyle.stroke
                 ..strokeWidth = strokeWidth,
             );
@@ -1368,7 +1368,7 @@ class PlotChartPainter extends NodePainter {
             (at.dy + 6).clamp(2.0, math.max(2.0, h - th - 2)).toDouble(), w, th)
         : Rect.fromLTWH((at.dx + 6).clamp(2.0, math.max(2.0, size.width - w - 2)).toDouble(),
             (at.dy - painter.height / 2 - 2).clamp(2.0, math.max(2.0, h - th - 2)).toDouble(), w, th);
-    canvas.drawRect(r, Paint()..color = p(PlotChartProps.selectionTagColor).flutter);
+    canvas.drawRect(r, Paint()..color = c(PlotChartProps.selectionTagColor));
     painter.paint(canvas, r.topLeft + const Offset(5, 2));
     painter.dispose();
   }
@@ -1595,8 +1595,8 @@ class LineChartPainter extends NodePainter {
     double px(double x) => plot.left + (x - x0) / (x1 - x0) * plot.width;
     double py(double y) => plot.bottom - (y - y0) / (y1 - y0) * plot.height;
 
-    final lineColor = p(LineChartProps.lineColor).flutter;
-    final axisColor = p(LineChartProps.axisColor).flutter;
+    final lineColor = c(LineChartProps.lineColor);
+    final axisColor = c(LineChartProps.axisColor);
     final axisLabelStyle = textStyle(p(LineChartProps.axisLabelStyle), n.behaviors.defaultTextStyle);
 
     // 1. Bands.
@@ -1617,7 +1617,7 @@ class LineChartPainter extends NodePainter {
       if (ty == null) continue;
       final y = py(ty);
       grid.color = _color(t['color']) ??
-          (ty == 0 ? p(LineChartProps.zeroLineColor).flutter : p(LineChartProps.gridColor).flutter);
+          (ty == 0 ? c(LineChartProps.zeroLineColor) : c(LineChartProps.gridColor));
       canvas.drawLine(Offset(plot.left, y), Offset(plot.right, y), grid);
       if (_text(t['label']) case final String label when label.isNotEmpty) {
         final tp = _layout(label, axisLabelStyle);
@@ -1646,7 +1646,7 @@ class LineChartPainter extends NodePainter {
         area,
         Paint()
           ..shader = ui.Gradient.linear(Offset(0, plot.top), Offset(0, plot.bottom),
-              [p(LineChartProps.areaTopColor).flutter, p(LineChartProps.areaBottomColor).flutter]),
+              [c(LineChartProps.areaTopColor), p(LineChartProps.areaBottomColor).flutter]),
       );
 
       // 4. Area bands.
@@ -1753,7 +1753,7 @@ class LineChartPainter extends NodePainter {
         radius,
         Paint()
           ..color = _color(m['color']) ??
-              (m['filled'] == true ? lineColor : p(LineChartProps.markerHollowColor).flutter),
+              (m['filled'] == true ? lineColor : c(LineChartProps.markerHollowColor)),
       );
       final outlineWidth = _num(m['outlineWidth']) ?? 2;
       if (outlineWidth > 0) {
@@ -1795,7 +1795,7 @@ class LineChartPainter extends NodePainter {
         final tp = _layout(label, tagStyle);
         final box = Rect.fromCenter(center: Offset(x, plot.top - 12), width: tp.width + 10, height: tp.height + 6);
         canvas.drawRRect(RRect.fromRectAndRadius(box, const Radius.circular(2)),
-            Paint()..color = p(LineChartProps.tagBackground).flutter);
+            Paint()..color = c(LineChartProps.tagBackground));
         tp.paint(canvas, Offset(box.left + 5, box.top + 3));
         tp.dispose();
       }
@@ -1835,14 +1835,14 @@ class LineChartPainter extends NodePainter {
   }
 
   void _paintTooltip(Canvas canvas, Size size, Rect plot, List<(double, double, api.Json)> rows, int i, Offset pt) {
-    final lineColor = p(LineChartProps.lineColor).flutter;
+    final lineColor = c(LineChartProps.lineColor);
     canvas.drawLine(
         Offset(pt.dx, plot.top),
         Offset(pt.dx, plot.bottom),
         Paint()
-          ..color = p(LineChartProps.cursorColor).flutter
+          ..color = c(LineChartProps.cursorColor)
           ..strokeWidth = 1);
-    canvas.drawCircle(pt, 6, Paint()..color = p(LineChartProps.cursorRingFill).flutter);
+    canvas.drawCircle(pt, 6, Paint()..color = c(LineChartProps.cursorRingFill));
     canvas.drawCircle(
         pt,
         6,
@@ -1881,7 +1881,7 @@ class LineChartPainter extends NodePainter {
             ..color = shadow
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10));
     }
-    canvas.drawRRect(box, Paint()..color = p(LineChartProps.tooltipBackground).flutter);
+    canvas.drawRRect(box, Paint()..color = c(LineChartProps.tooltipBackground));
     label.paint(canvas, Offset(left + padX, top + padY));
     val.paint(canvas, Offset(left + padX, top + padY + label.height + gap));
     label.dispose();
