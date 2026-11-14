@@ -9,6 +9,10 @@
     {
       "id": "history",
       "prompt": "Training history page: jumps per week as a chart, then the past sessions as a list with date, duration, jumps and best run without a miss."
+    },
+    {
+      "id": "session",
+      "prompt": "Session timer: runs today's session. A countdown that alternates work and rest for the planned rounds (use today's work and rest seconds), the round number, a jump counter the person taps up, pause and resume, and Finish. This screen keeps its own state for the countdown, the phase, the round, the count and whether it is paused."
     }
   ],
   "contract": {
@@ -77,7 +81,8 @@
       "start_session": "Begin today's session",
       "open_history": "Go to the training history page",
       "open_home": "Go to the home screen",
-      "open_session": "Open one past session (pass its date)"
+      "open_session": "Open one past session (pass its date)",
+      "finish_session": "End the session (pass the jump count)"
     }
   },
   "rules": [

@@ -52,5 +52,32 @@
   "outputTokensLast": 510,
   "secondsAll": 3.9,
   "inputTokens": 11407
+ },
+ {
+  "screen": "session.athlete",
+  "turns": 1,
+  "nodes": 26,
+  "outputTokensAll": 589,
+  "outputTokensLast": 589,
+  "secondsAll": 4.2,
+  "inputTokens": 11592
+ },
+ {
+  "screen": "session.beginner",
+  "turns": 1,
+  "nodes": 23,
+  "outputTokensAll": 660,
+  "outputTokensLast": 660,
+  "secondsAll": 4.8,
+  "inputTokens": 11620
+ },
+ {
+  "screen": "session.kid",
+  "turns": 2,
+  "nodes": 19,
+  "outputTokensAll": 1176,
+  "outputTokensLast": 576,
+  "secondsAll": 7.9,
+  "inputTokens": 11606
  }
 ]
