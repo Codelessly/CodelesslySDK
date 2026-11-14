@@ -1,0 +1,539 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "stack1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "stack1": {
+   "type": "stack",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "column1",
+    "column3"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "text2",
+    "grid1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "My trip"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "9 photos"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "listView1",
+    "spacer1",
+    "spacer2"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${photos}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= item.id}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${item.title}"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#EB000000"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "visible": "${= open}"
+   },
+   "children": [
+    "row1",
+    "column4",
+    "text5",
+    "row2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text4",
+    "iconButton1"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= idx+1} of 9"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "height": 260,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= photos[idx].color}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= photos[idx].title}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton2",
+    "iconButton3"
+   ]
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_left"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= idx==0?8:idx-1}"
+      }
+     ]
+    }
+   ]
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= idx==8?0:idx+1}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "photos",
+    "type": "list",
+    "value": [
+     {
+      "id": 0,
+      "title": "Beach",
+      "color": "#FF4FC3F7"
+     },
+     {
+      "id": 1,
+      "title": "Harbour",
+      "color": "#FF4DB6AC"
+     },
+     {
+      "id": 2,
+      "title": "Old town",
+      "color": "#FFFFB74D"
+     },
+     {
+      "id": 3,
+      "title": "Mountain",
+      "color": "#FF9575CD"
+     },
+     {
+      "id": 4,
+      "title": "Market",
+      "color": "#FFE57373"
+     },
+     {
+      "id": 5,
+      "title": "Sunset",
+      "color": "#FFFF8A65"
+     },
+     {
+      "id": 6,
+      "title": "Forest",
+      "color": "#FF81C784"
+     },
+     {
+      "id": 7,
+      "title": "Café",
+      "color": "#FFA1887F"
+     },
+     {
+      "id": 8,
+      "title": "Night sky",
+      "color": "#FF7986CB"
+     }
+    ]
+   },
+   {
+    "name": "idx",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

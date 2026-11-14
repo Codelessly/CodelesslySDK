@@ -1,0 +1,63 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 4298,
+ "turns": [
+  {
+   "input_tokens": 1859,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1464,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 658,
+   "totalMs": 8238,
+   "chars": 3080,
+   "lines": 86,
+   "jsonTails": 0,
+   "nodes": 66,
+   "outputTokensPerNode": "22.2",
+   "notationIssues": [],
+   "errors": [
+    "unknown_bind_path /nodes/lineChart1/bind/props.values: A lineChart has no prop \"values\". Its props: data, xField, yField, xMin, xMax, yMin, yMax, plotPadding, smooth, lineColor, lineWidth, areaTopColor, areaBottomColor, gridColor, zeroLineColor, axisColor, markerHollowColor, tagBackground, cursorColor, cursorRingFill, tooltipBackground, tooltipShadowColor, yAxisTitle, axisLabelStyle, axisTitleStyle, markerLabelStyle, tagTextStyle, tooltipLabelStyle, tooltipValueStyle, tooltipLabelField, selectedX, scrubEnabled, scrubStep, tooltipXFormat, tooltipYScale, tooltipYDecimals, tooltipYSuffix, tooltipTrend, semanticLabel, bands, yTicks, areaBands, referenceLines, xTicks, markers, verticalLines, animateIn, clip, xLabelAnchor, xLabelOffset, animate, animationDuration.",
+    "unknown_bind_path /nodes/lineChart2/bind/props.values: A lineChart has no prop \"values\". Its props: data, xField, yField, xMin, xMax, yMin, yMax, plotPadding, smooth, lineColor, lineWidth, areaTopColor, areaBottomColor, gridColor, zeroLineColor, axisColor, markerHollowColor, tagBackground, cursorColor, cursorRingFill, tooltipBackground, tooltipShadowColor, yAxisTitle, axisLabelStyle, axisTitleStyle, markerLabelStyle, tagTextStyle, tooltipLabelStyle, tooltipValueStyle, tooltipLabelField, selectedX, scrubEnabled, scrubStep, tooltipXFormat, tooltipYScale, tooltipYDecimals, tooltipYSuffix, tooltipTrend, semanticLabel, bands, yTicks, areaBands, referenceLines, xTicks, markers, verticalLines, animateIn, clip, xLabelAnchor, xLabelOffset, animate, animationDuration.",
+    "unknown_bind_path /nodes/lineChart3/bind/props.values: A lineChart has no prop \"values\". Its props: data, xField, yField, xMin, xMax, yMin, yMax, plotPadding, smooth, lineColor, lineWidth, areaTopColor, areaBottomColor, gridColor, zeroLineColor, axisColor, markerHollowColor, tagBackground, cursorColor, cursorRingFill, tooltipBackground, tooltipShadowColor, yAxisTitle, axisLabelStyle, axisTitleStyle, markerLabelStyle, tagTextStyle, tooltipLabelStyle, tooltipValueStyle, tooltipLabelField, selectedX, scrubEnabled, scrubStep, tooltipXFormat, tooltipYScale, tooltipYDecimals, tooltipYSuffix, tooltipTrend, semanticLabel, bands, yTicks, areaBands, referenceLines, xTicks, markers, verticalLines, animateIn, clip, xLabelAnchor, xLabelOffset, animate, animationDuration."
+   ]
+  },
+  {
+   "input_tokens": 4484,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1695,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 808,
+   "totalMs": 7843,
+   "chars": 3392,
+   "lines": 86,
+   "jsonTails": 0,
+   "nodes": 66,
+   "outputTokensPerNode": "25.7",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

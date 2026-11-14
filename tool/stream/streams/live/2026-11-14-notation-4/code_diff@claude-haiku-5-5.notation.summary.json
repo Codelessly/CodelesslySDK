@@ -1,0 +1,63 @@
+{
+ "ui": "code_diff",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 4298,
+ "turns": [
+  {
+   "input_tokens": 1840,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 711,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 514,
+   "totalMs": 3061,
+   "chars": 1332,
+   "lines": 36,
+   "jsonTails": 0,
+   "nodes": 32,
+   "outputTokensPerNode": "22.2",
+   "notationIssues": [
+    "line 16:12: No Button.success. Variants: primary, secondary, tertiary, outline, ghost, elevated, destructive.",
+    "line 25:12: No Button.success. Variants: primary, secondary, tertiary, outline, ghost, elevated, destructive.",
+    "line 33:12: No Button.success. Variants: primary, secondary, tertiary, outline, ghost, elevated, destructive."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 2712,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 714,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 367,
+   "totalMs": 2231,
+   "chars": 1332,
+   "lines": 36,
+   "jsonTails": 0,
+   "nodes": 32,
+   "outputTokensPerNode": "22.3",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

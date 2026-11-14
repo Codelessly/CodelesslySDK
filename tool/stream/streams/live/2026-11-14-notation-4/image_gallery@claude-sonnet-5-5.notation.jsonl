@@ -1,0 +1,92 @@
+{"meta":{"ui":"image_gallery","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"state photos=[{\"id\":0,\"title\":\"Beach\",\"color\":\"#FF4FC3F7\"},{\"id\":1,\"title\":\"Harbour\",\"color\":\"#FF4DB6AC\"},{\"id\":2,\"title\":\"Old town\",\"color\":\"#FFFFB74D\"},{\"id\":3,\"title\":\"Mountain\",\"color\":\"#FF9575CD\"},{\"id\":4,\"title\":\"Market\",\"color\":\"#FFE57373\"},{\"id\":5,\"title\":\"Sunset\",\"color\":\"#FFFF8A65\"},{\"id\":6,\"title\":\"Forest\",\"color\":\"#FF81C784\"},{\"id\":7,\"title\":\"Café\",\"color\":\"#FFA1887F\"},{\"id\":8,\"title\":\"Night sky\",\"color\":\"#FF7986CB\"}]\nstate idx=0\nstate open=false\nStack w:390\n  Card gap:12\n    Text.title \"My trip\"\n    Text.muted \"9 photos\"\n    Grid cols:3 gap:8\n      each p in photos\n        Box fill:=p.color h:100 radius:8 center middle -> idx=p.id; open=true\n          Text.small \"{p.title}\"\n  if open\n    Box fill:#EB000000 radius:12 pad:16 gap:12 h:fill\n      Row between middle\n        Text.strong \"{idx+1} of 9\"\n        IconButton \"close\" -> open=false\n      Box fill:=photos[idx].color h:260 radius:12\n      Text.heading \"{photos[idx].title}\"\n      Row between middle\n        IconButton \"chevron_left\" -> idx=idx==0?8:idx-1\n        IconButton \"chevron_right\" -> idx=idx==8?0:idx+1","usage":{"input_tokens":1836,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1128,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":580}},"ttftMs":5942,"totalMs":8994}}
+{"tMs":5942,"delta":"state"}
+{"tMs":6185,"delta":" photos=[{\"id\":"}
+{"tMs":6185,"delta":"0,\"title\":\"Be"}
+{"tMs":6185,"delta":"ach\",\"color\":\"#FF"}
+{"tMs":6185,"delta":"4F"}
+{"tMs":6185,"delta":"C"}
+{"tMs":6185,"delta":"3F7\"},{\"id"}
+{"tMs":6186,"delta":"\":1,\"title\":\""}
+{"tMs":6208,"delta":"Har"}
+{"tMs":6241,"delta":"bour"}
+{"tMs":6275,"delta":"\",\"color\":\"#FF4"}
+{"tMs":6308,"delta":"D"}
+{"tMs":6342,"delta":"B6AC"}
+{"tMs":6544,"delta":"\"},{\"id\":2,"}
+{"tMs":6544,"delta":"\"title\":\"Old town"}
+{"tMs":6544,"delta":"\",\"color\":\"#FF"}
+{"tMs":6544,"delta":"FFB"}
+{"tMs":6544,"delta":"74D\"},{\"id\":"}
+{"tMs":6544,"delta":"3,\"title\":\"M"}
+{"tMs":6576,"delta":"ountain"}
+{"tMs":6609,"delta":"\",\"color\":\"#FF9"}
+{"tMs":6643,"delta":"575"}
+{"tMs":6675,"delta":"C"}
+{"tMs":6709,"delta":"D\"},{\"id\":4"}
+{"tMs":6743,"delta":",\"title\":\"Market"}
+{"tMs":6940,"delta":"\",\"color\":\"#FFE"}
+{"tMs":6940,"delta":"57"}
+{"tMs":6940,"delta":"373\"},{\"id\":5"}
+{"tMs":6940,"delta":",\"title\":\"S"}
+{"tMs":6940,"delta":"unset\",\"color\":\"#F"}
+{"tMs":6943,"delta":"FFF8A65"}
+{"tMs":6977,"delta":"\"},{\"id\":6,"}
+{"tMs":7011,"delta":"\"title\":\"Forest\",\""}
+{"tMs":7044,"delta":"color\":\"#FF81C"}
+{"tMs":7078,"delta":"784\"},{\"id\":7"}
+{"tMs":7112,"delta":",\"title\":\"Café"}
+{"tMs":7145,"delta":"\",\"color\":\"#FFA"}
+{"tMs":7298,"delta":"1"}
+{"tMs":7298,"delta":"887"}
+{"tMs":7298,"delta":"F\"},{\"id\":8"}
+{"tMs":7298,"delta":",\"title\":\"Night s"}
+{"tMs":7312,"delta":"ky\",\"color\":\"#FF"}
+{"tMs":7345,"delta":"7986"}
+{"tMs":7379,"delta":"CB\"}]\nstate id"}
+{"tMs":7415,"delta":"x=0\nstate open=false"}
+{"tMs":7446,"delta":"\nStack w:390"}
+{"tMs":7480,"delta":"\n  Card gap:12"}
+{"tMs":7513,"delta":"\n    Text.title \"My tr"}
+{"tMs":7547,"delta":"ip\"\n    Text.mu"}
+{"tMs":7661,"delta":"ted \"9"}
+{"tMs":7661,"delta":" photos\""}
+{"tMs":7661,"delta":"\n    Grid cols:"}
+{"tMs":7681,"delta":"3 gap:8\n      "}
+{"tMs":7713,"delta":"each p"}
+{"tMs":7748,"delta":" in photos\n        Box f"}
+{"tMs":7781,"delta":"ill:=p.color h:"}
+{"tMs":7814,"delta":"100 radius:8 center"}
+{"tMs":7850,"delta":" middle -> idx=p"}
+{"tMs":7881,"delta":".id; open=true\n          "}
+{"tMs":7923,"delta":"Text.small \"{p."}
+{"tMs":7948,"delta":"title}\"\n  if open"}
+{"tMs":8040,"delta":"\n    Box fill:#E"}
+{"tMs":8040,"delta":"B"}
+{"tMs":8048,"delta":"000000 rad"}
+{"tMs":8082,"delta":"ius:12 pad:16"}
+{"tMs":8117,"delta":" gap:12"}
+{"tMs":8149,"delta":" h:f"}
+{"tMs":8182,"delta":"ill"}
+{"tMs":8215,"delta":"\n      Row between"}
+{"tMs":8248,"delta":" midd"}
+{"tMs":8281,"delta":"le\n        "}
+{"tMs":8315,"delta":"Text.strong \"{idx"}
+{"tMs":8348,"delta":"+1} of 9\""}
+{"tMs":8737,"delta":"\n        IconButton \"close"}
+{"tMs":8737,"delta":"\" -> open"}
+{"tMs":8737,"delta":"=false\n      Box"}
+{"tMs":8737,"delta":" fill:=photos[id"}
+{"tMs":8737,"delta":"x].color h:260 rad"}
+{"tMs":8737,"delta":"ius:12"}
+{"tMs":8737,"delta":"\n      Text.he"}
+{"tMs":8737,"delta":"ading \"{photos[idx"}
+{"tMs":8737,"delta":"].title}\"\n      Row"}
+{"tMs":8737,"delta":" between middle\n        IconBut"}
+{"tMs":8749,"delta":"ton \"chevron_left\""}
+{"tMs":8786,"delta":" -> idx=idx=="}
+{"tMs":8816,"delta":"0?8:idx-1"}
+{"tMs":8850,"delta":"\n        I"}
+{"tMs":8883,"delta":"conButton \"chevron_"}
+{"tMs":8917,"delta":"right\" -> idx=id"}
+{"tMs":8950,"delta":"x==8?0:idx"}
+{"tMs":8983,"delta":"+1"}

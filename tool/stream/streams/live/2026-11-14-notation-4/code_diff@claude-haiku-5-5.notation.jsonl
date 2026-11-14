@@ -1,0 +1,123 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"Card w:390 gap:10 pad:14\n  Text.heading \"Config changes\"\n  state kept=0\n  state decided=0\n  state d1=\"\"\n  state d2=\"\"\n  state d3=\"\"\n  Text.caption \"Hunk 1 · lines 4-6\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- timeout: 30\"\n    Text.small \"- retries: 2\"\n  Box fill:#FFE8F7EC radius:6 pad:8\n    Text.small \"+ timeout: 60\"\n    Text.small \"+ retries: 3\"\n  Row gap:8\n    Button.success \"Keep\" -> d1=\"keep\"; kept=kept+(d1==\"keep\"?1:0); decided=decided+1\n    Button.destructive \"Discard\" -> d1=\"discard\"; decided=decided+1\n  Text.caption \"Hunk 2 · lines 12-13\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- cache: false\"\n  Box fill:#FFE8F7EC radius:6 pad:8\n    Text.small \"+ cache: true\"\n    Text.small \"+ cache_ttl: 300\"\n  Row gap:8\n    Button.success \"Keep\" -> d2=\"keep\"; kept=kept+(d2==\"keep\"?1:0); decided=decided+1\n    Button.destructive \"Discard\" -> d2=\"discard\"; decided=decided+1\n  Text.caption \"Hunk 3 · lines 21-22\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- log_level: info\"\n  Box fill:#FFE8F7EC radius:6 pad:8\n    Text.small \"+ log_level: debug\"\n  Row gap:8\n    Button.success \"Keep\" -> d3=\"keep\"; kept=kept+(d3==\"keep\"?1:0); decided=decided+1\n    Button.destructive \"Discard\" -> d3=\"discard\"; decided=decided+1\n  Text.strong \"Kept: {kept} of 3\"\n  Button \"Apply\" enabled:=decided==3 -> emit apply","usage":{"input_tokens":1840,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":711,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":514,"totalMs":3061}}
+{"tMs":514,"delta":"Card"}
+{"tMs":638,"delta":" w"}
+{"tMs":638,"delta":":"}
+{"tMs":638,"delta":"390 gap:10"}
+{"tMs":638,"delta":" "}
+{"tMs":638,"delta":"pad:14"}
+{"tMs":653,"delta":"\n  Text.he"}
+{"tMs":677,"delta":"ading \"Config"}
+{"tMs":696,"delta":" changes\"\n  state"}
+{"tMs":715,"delta":" k"}
+{"tMs":738,"delta":"ept=0"}
+{"tMs":757,"delta":"\n  state dec"}
+{"tMs":778,"delta":"ided=0\n  state d1"}
+{"tMs":798,"delta":"=\"\""}
+{"tMs":820,"delta":"\n  state d2=\"\""}
+{"tMs":841,"delta":"\n  state d3=\"\"\n  "}
+{"tMs":862,"delta":"Text.ca"}
+{"tMs":882,"delta":"ption \"H"}
+{"tMs":903,"delta":"unk 1 ·"}
+{"tMs":923,"delta":" lines 4"}
+{"tMs":944,"delta":"-6"}
+{"tMs":964,"delta":"\"\n  "}
+{"tMs":984,"delta":"Box f"}
+{"tMs":1004,"delta":"ill:#F"}
+{"tMs":1024,"delta":"FF"}
+{"tMs":1045,"delta":"D"}
+{"tMs":1065,"delta":"EC"}
+{"tMs":1085,"delta":"E"}
+{"tMs":1105,"delta":"C radius:6 "}
+{"tMs":1126,"delta":"pad:8\n    Text"}
+{"tMs":1147,"delta":".small \"-"}
+{"tMs":1167,"delta":" tim"}
+{"tMs":1188,"delta":"eout:"}
+{"tMs":1207,"delta":" 30\""}
+{"tMs":1229,"delta":"\n    Text.small \"-"}
+{"tMs":1249,"delta":" retries: 2"}
+{"tMs":1271,"delta":"\"\n  Box"}
+{"tMs":1290,"delta":" fill:#FFE"}
+{"tMs":1310,"delta":"8"}
+{"tMs":1331,"delta":"F7"}
+{"tMs":1353,"delta":"E"}
+{"tMs":1371,"delta":"C"}
+{"tMs":1392,"delta":" radius:6 "}
+{"tMs":1413,"delta":"pad:8\n    Text"}
+{"tMs":1433,"delta":".small \"+ timeout"}
+{"tMs":1455,"delta":": 60\"\n    Text"}
+{"tMs":1478,"delta":".small \"+ retries:"}
+{"tMs":1495,"delta":" 3\"\n  Row g"}
+{"tMs":1516,"delta":"ap:8\n    Button."}
+{"tMs":1536,"delta":"success \"Keep\" ->"}
+{"tMs":1556,"delta":" d1=\""}
+{"tMs":1577,"delta":"keep\"; kept=k"}
+{"tMs":1597,"delta":"ept+("}
+{"tMs":1617,"delta":"d1="}
+{"tMs":1638,"delta":"=\"keep\"?1:0"}
+{"tMs":1659,"delta":"); decided=decided+1"}
+{"tMs":1680,"delta":"\n    Button.dest"}
+{"tMs":1700,"delta":"ructive \"Discard\" -"}
+{"tMs":1720,"delta":"> d1=\"discard\";"}
+{"tMs":1740,"delta":" decided=decided+1"}
+{"tMs":1761,"delta":"\n  Text.caption \""}
+{"tMs":1782,"delta":"Hunk 2 · l"}
+{"tMs":1803,"delta":"ines 12-13"}
+{"tMs":1823,"delta":"\"\n  Box fill:"}
+{"tMs":1843,"delta":"#FFF"}
+{"tMs":1863,"delta":"DECEC radius:6"}
+{"tMs":1884,"delta":" pad:8\n    "}
+{"tMs":1905,"delta":"Text.small \"- cache:"}
+{"tMs":1925,"delta":" false"}
+{"tMs":1945,"delta":"\"\n  "}
+{"tMs":1966,"delta":"Box fill:#FF"}
+{"tMs":1986,"delta":"E8F7EC rad"}
+{"tMs":2006,"delta":"ius:6 pad:8"}
+{"tMs":2027,"delta":"\n    Text.small \"+"}
+{"tMs":2048,"delta":" cache: true\"\n    "}
+{"tMs":2068,"delta":"Text"}
+{"tMs":2088,"delta":".small \"+ c"}
+{"tMs":2108,"delta":"ache_ttl:"}
+{"tMs":2129,"delta":" 300\"\n  Row g"}
+{"tMs":2150,"delta":"ap:8\n    Button."}
+{"tMs":2170,"delta":"success \"Keep\" ->"}
+{"tMs":2191,"delta":" d2=\"keep\"; k"}
+{"tMs":2211,"delta":"ept=kept+(d2"}
+{"tMs":2232,"delta":"==\"keep\"?1:"}
+{"tMs":2252,"delta":"0); decided=decided+"}
+{"tMs":2272,"delta":"1\n    Button.destruct"}
+{"tMs":2293,"delta":"ive \"Discard\" ->"}
+{"tMs":2313,"delta":" d2=\"discard\";"}
+{"tMs":2333,"delta":" decided=decided+1"}
+{"tMs":2355,"delta":"\n  Text.caption \""}
+{"tMs":2374,"delta":"Hunk 3 · l"}
+{"tMs":2395,"delta":"ines 21-22"}
+{"tMs":2416,"delta":"\"\n  Box fill:"}
+{"tMs":2436,"delta":"#FFFDECEC"}
+{"tMs":2456,"delta":" radius:6 pad:"}
+{"tMs":2477,"delta":"8\n    Text.small \""}
+{"tMs":2497,"delta":"- log_"}
+{"tMs":2518,"delta":"level: info"}
+{"tMs":2538,"delta":"\"\n  Box fill:"}
+{"tMs":2558,"delta":"#FFE8F7E"}
+{"tMs":2579,"delta":"C radius:6 pad"}
+{"tMs":2599,"delta":":8\n    Text.small"}
+{"tMs":2620,"delta":" \"+ log_level: deb"}
+{"tMs":2641,"delta":"ug\"\n  Row gap"}
+{"tMs":2661,"delta":":8\n    Button.success"}
+{"tMs":2681,"delta":" \"Keep\" -> d"}
+{"tMs":2702,"delta":"3=\"keep\"; kept"}
+{"tMs":2723,"delta":"=kept+(d3="}
+{"tMs":2743,"delta":"=\"keep\"?1:0"}
+{"tMs":2763,"delta":"); decided=decided+1"}
+{"tMs":2784,"delta":"\n    Button.destructive"}
+{"tMs":2804,"delta":" \"Discard\" -> d"}
+{"tMs":2824,"delta":"3=\"discard\"; decided"}
+{"tMs":2845,"delta":"=decided+1\n  "}
+{"tMs":2865,"delta":"Text.str"}
+{"tMs":2886,"delta":"ong \"Kept: {k"}
+{"tMs":2906,"delta":"ept}"}
+{"tMs":2926,"delta":" of 3\"\n  Button"}
+{"tMs":2947,"delta":" \""}
+{"tMs":2967,"delta":"Apply\" en"}
+{"tMs":2987,"delta":"abled:=decided=="}
+{"tMs":3011,"delta":"3 -> emit apply"}

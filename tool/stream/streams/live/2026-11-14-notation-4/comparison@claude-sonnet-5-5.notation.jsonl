@@ -1,0 +1,127 @@
+{"meta":{"ui":"comparison","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"Card w:390 gap:12\n  Text.title \"Compare phone plans\"\n  Row gap:8\n    Spacer w:84\n    Text.strong \"Lite\" grow center\n    Text.strong \"Plus\" grow center\n  Divider\n  Row gap:8 middle\n    Text.muted \"Price\" w:84\n    Column grow center gap:4\n      Text.strong \"$25/mo\"\n      Badge.success \"Better value\"\n    Column grow center gap:4\n      Text.strong \"$40/mo\"\n  Divider\n  Row gap:8 middle\n    Text.muted \"Data\" w:84\n    Column grow center gap:4\n      Text.strong \"10 GB\"\n    Column grow center gap:4\n      Text.strong \"Unlimited\"\n      Badge.success \"Better value\"\n  Divider\n  Row gap:8 middle\n    Text.muted \"Calls\" w:84\n    Column grow center gap:4\n      Text.strong \"300 min\"\n    Column grow center gap:4\n      Text.strong \"Unlimited\"\n      Badge.success \"Better value\"\n  Divider\n  Row gap:8 middle\n    Text.muted \"Roaming\" w:84\n    Column grow center gap:4\n      Text.strong \"None\"\n    Column grow center gap:4\n      Text.strong \"EU included\"\n      Badge.success \"Better value\"\n  Divider\n  Row gap:8 middle\n    Text.muted \"Contract\" w:84\n    Column grow center gap:4\n      Text.strong \"Monthly\"\n      Badge.success \"Better value\"\n    Column grow center gap:4\n      Text.strong \"12 months\"\n  Divider\n  Row gap:8 middle\n    Text.muted \"Extras\" w:84\n    Column grow center gap:4\n      Text.strong \"None\"\n    Column grow center gap:4\n      Text.strong \"Streaming + cloud\"\n      Badge.success \"Better value\"\n  Divider\n  Row gap:8\n    Spacer w:84\n    Button.outline \"Choose Lite\" grow -> pick=\"Lite\"; emit choose \"Lite\"; toast \"You picked Lite\"\n    Button \"Choose Plus\" grow -> pick=\"Plus\"; emit choose \"Plus\"; toast \"You picked Plus\"\n  state pick=\"\"\n  if pick!=\"\"\n    Text.success \"You picked: {pick}\"\n  Divider\n  Text.heading \"Recommendation\"\n  Text \"Plus wins on four of six rows, and for $15 more you get unlimited data and calls, roaming and extras, so it's the better value unless you need a flexible monthly contract.\"","usage":{"input_tokens":1829,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":842,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":687,"totalMs":4895}}
+{"tMs":687,"delta":"Card w"}
+{"tMs":1008,"delta":":390 g"}
+{"tMs":1008,"delta":"ap:12"}
+{"tMs":1009,"delta":"\n  Text.title \"Comp"}
+{"tMs":1009,"delta":"are ph"}
+{"tMs":1009,"delta":"one plans\"\n  Row"}
+{"tMs":1009,"delta":" gap:8\n    Sp"}
+{"tMs":1009,"delta":"acer w"}
+{"tMs":1009,"delta":":84"}
+{"tMs":1018,"delta":"\n    Text.strong \""}
+{"tMs":1050,"delta":"L"}
+{"tMs":1085,"delta":"ite\" grow center"}
+{"tMs":1358,"delta":"\n    Text.strong \""}
+{"tMs":1358,"delta":"Plus\" grow center"}
+{"tMs":1358,"delta":"\n  Divider\n  Row"}
+{"tMs":1358,"delta":" gap:8 "}
+{"tMs":1358,"delta":"middle\n    Text.mu"}
+{"tMs":1358,"delta":"ted \"Price\" w:84"}
+{"tMs":1358,"delta":"\n    Column"}
+{"tMs":1358,"delta":" gr"}
+{"tMs":1391,"delta":"ow center g"}
+{"tMs":1420,"delta":"ap:4"}
+{"tMs":1458,"delta":"\n      Text"}
+{"tMs":1486,"delta":"."}
+{"tMs":1690,"delta":"strong \"$25"}
+{"tMs":1690,"delta":"/mo\"\n      Bad"}
+{"tMs":1690,"delta":"ge.success \"Better"}
+{"tMs":1690,"delta":" value\"\n    Column grow"}
+{"tMs":1690,"delta":" center gap:4\n      "}
+{"tMs":1690,"delta":"Text.strong \"$40"}
+{"tMs":1722,"delta":"/mo\"\n  Div"}
+{"tMs":1757,"delta":"ider\n  Row gap:"}
+{"tMs":1789,"delta":"8 middle\n    Text"}
+{"tMs":1823,"delta":".muted \"Data\" w"}
+{"tMs":1856,"delta":":84\n    Column grow"}
+{"tMs":1889,"delta":" center gap:4\n      "}
+{"tMs":2037,"delta":"Text.strong \"10 G"}
+{"tMs":2037,"delta":"B\"\n    Column grow"}
+{"tMs":2037,"delta":" center gap:4\n      "}
+{"tMs":2037,"delta":"Text.strong \""}
+{"tMs":2057,"delta":"Unlimited\"\n      "}
+{"tMs":2090,"delta":"Badge.success \"Better value"}
+{"tMs":2123,"delta":"\"\n  Divider\n  "}
+{"tMs":2157,"delta":"Row gap:8 midd"}
+{"tMs":2192,"delta":"le\n    Text.muted"}
+{"tMs":2224,"delta":" \"Calls\" w:84"}
+{"tMs":2265,"delta":"\n    Column grow center g"}
+{"tMs":2291,"delta":"ap:4\n      Text."}
+{"tMs":2381,"delta":"strong \"300 min\""}
+{"tMs":2381,"delta":"\n    Column grow center gap"}
+{"tMs":2391,"delta":":"}
+{"tMs":2425,"delta":"4\n      Text.strong"}
+{"tMs":2458,"delta":" \"Unlimited\""}
+{"tMs":2491,"delta":"\n      Badge.success \""}
+{"tMs":2535,"delta":"Better value\"\n  Divider"}
+{"tMs":2571,"delta":"\n  Row gap:8"}
+{"tMs":2591,"delta":" middle\n    Text."}
+{"tMs":2627,"delta":"muted \"Roaming\""}
+{"tMs":2658,"delta":" w:84\n    Column gr"}
+{"tMs":2694,"delta":"ow center gap:4\n      "}
+{"tMs":2726,"delta":"Text.strong \"None"}
+{"tMs":2758,"delta":"\"\n    Column grow center"}
+{"tMs":2802,"delta":" gap:4\n      Text"}
+{"tMs":2837,"delta":".strong \"EU included"}
+{"tMs":2862,"delta":"\"\n      Badge.success"}
+{"tMs":2893,"delta":" \"Better value\"\n  "}
+{"tMs":2925,"delta":"Divider\n  Row gap"}
+{"tMs":2959,"delta":":8 middle\n    "}
+{"tMs":2992,"delta":"Text.muted \"Contract"}
+{"tMs":3027,"delta":"\" w:84\n    Column"}
+{"tMs":3059,"delta":" grow center gap:4"}
+{"tMs":3098,"delta":"\n      Text.strong \""}
+{"tMs":3126,"delta":"Monthly\"\n      Bad"}
+{"tMs":3159,"delta":"ge.success \"Better value\""}
+{"tMs":3193,"delta":"\n    Column grow center g"}
+{"tMs":3228,"delta":"ap:4\n      Text."}
+{"tMs":3260,"delta":"strong \"12 months"}
+{"tMs":3293,"delta":"\"\n  Divider\n  "}
+{"tMs":3326,"delta":"Row gap:8 midd"}
+{"tMs":3359,"delta":"le\n    Text.muted"}
+{"tMs":3393,"delta":" \"Extras\" w:84"}
+{"tMs":3426,"delta":"\n    Column grow center g"}
+{"tMs":3459,"delta":"ap:4\n      Text."}
+{"tMs":3493,"delta":"strong \"None"}
+{"tMs":3526,"delta":"\"\n    Column grow center"}
+{"tMs":3559,"delta":" gap:4\n      Text"}
+{"tMs":3592,"delta":".strong \"Streaming"}
+{"tMs":3626,"delta":" +"}
+{"tMs":3659,"delta":" cloud\"\n      Bad"}
+{"tMs":3693,"delta":"ge.success \"Better value\""}
+{"tMs":3726,"delta":"\n  Divider\n  "}
+{"tMs":3759,"delta":"Row gap:8\n    "}
+{"tMs":3792,"delta":"Spacer w:84\n    "}
+{"tMs":3825,"delta":"Button.outline \"Cho"}
+{"tMs":3860,"delta":"ose Lite\" grow -"}
+{"tMs":3893,"delta":"> p"}
+{"tMs":3926,"delta":"ick=\""}
+{"tMs":3959,"delta":"Lite\"; emit cho"}
+{"tMs":3994,"delta":"ose \"Lite\"; to"}
+{"tMs":4026,"delta":"ast \"You"}
+{"tMs":4059,"delta":" picked Lite\"\n    "}
+{"tMs":4092,"delta":"Button \""}
+{"tMs":4126,"delta":"Choose Plus\" gr"}
+{"tMs":4159,"delta":"ow -> pick=\"Pl"}
+{"tMs":4192,"delta":"us\"; emit choose \""}
+{"tMs":4226,"delta":"Plus\"; toast \""}
+{"tMs":4259,"delta":"You picked Plus\""}
+{"tMs":4292,"delta":"\n  state pick=\"\"\n  "}
+{"tMs":4328,"delta":"if pick!=\"\"\n    "}
+{"tMs":4359,"delta":"Text.success"}
+{"tMs":4393,"delta":" \"You picked: {pick"}
+{"tMs":4426,"delta":"}\"\n  Div"}
+{"tMs":4459,"delta":"ider\n  Text.heading"}
+{"tMs":4493,"delta":" \"Recommendation\""}
+{"tMs":4526,"delta":"\n  Text \""}
+{"tMs":4559,"delta":"Plus wins on"}
+{"tMs":4599,"delta":" four of six rows, and"}
+{"tMs":4626,"delta":" for $15"}
+{"tMs":4658,"delta":" more you get unlimited"}
+{"tMs":4693,"delta":" data and cal"}
+{"tMs":4726,"delta":"ls, ro"}
+{"tMs":4759,"delta":"aming and extras, so it"}
+{"tMs":4792,"delta":"'s the better value unless you need"}
+{"tMs":4825,"delta":" a"}
+{"tMs":4859,"delta":" flexible mon"}
+{"tMs":4892,"delta":"thly contract.\""}

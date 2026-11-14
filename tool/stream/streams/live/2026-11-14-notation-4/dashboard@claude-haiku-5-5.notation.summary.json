@@ -1,0 +1,65 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 4298,
+ "turns": [
+  {
+   "input_tokens": 1858,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 695,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 464,
+   "totalMs": 3049,
+   "chars": 1402,
+   "lines": 35,
+   "jsonTails": 0,
+   "nodes": 36,
+   "outputTokensPerNode": "19.3",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/listView1/props/rows: A listView has no prop \"rows\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, itemSnapping, scrollable, itemExtent, separator, spacing, dividerThickness, dividerColor, dividerIndent, dividerEndIndent, layout, reversePaintOrder, itemPosition, wrap, wrapSpacing, runSpacing, wrapAlignment, wrapCrossAlignment, stretchItems, pagination, reorder, sections, swipeActions, pullToRefresh, stickToEnd.",
+    "unknown_name /nodes/text17/props/text: \"row\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text18/props/text: \"row\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text19/props/text: \"row\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text20/props/text: \"row\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  },
+  {
+   "input_tokens": 3297,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 767,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 363,
+   "totalMs": 2426,
+   "chars": 1537,
+   "lines": 41,
+   "jsonTails": 0,
+   "nodes": 44,
+   "outputTokensPerNode": "17.4",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

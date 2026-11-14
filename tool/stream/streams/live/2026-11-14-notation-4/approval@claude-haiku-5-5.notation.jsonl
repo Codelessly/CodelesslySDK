@@ -1,0 +1,47 @@
+{"meta":{"ui":"approval","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"Card w:390 gap:12 pad:16\n  Text.title \"Confirm deletion\"\n  Text.body \"This will permanently delete 214 old files from your shared drive.\"\n  Text.strong \"Folder: Shared Drive / Archive 2019\"\n  Text.body \"Files: 214 · Space freed: 3.8 GB\"\n  Badge.danger \"This cannot be undone\"\n  Button.ghost \"Preview first few file names\" -> emit preview_files\n  state decision=\"\"\n  if decision==\"\"\n    Row gap:8\n      Button.destructive \"Approve deletion\" -> decision=\"approved\"; emit approve_delete\n      Button.outline \"Deny\" -> decision=\"denied\"; emit deny_delete\n  if decision!=\"\"\n    Badge.neutral \"Decision: {decision}\"","usage":{"input_tokens":1838,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":262,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":683,"totalMs":1723}}
+{"tMs":683,"delta":"Card w"}
+{"tMs":878,"delta":":390 g"}
+{"tMs":878,"delta":"ap:12 "}
+{"tMs":879,"delta":"pad:16\n  Text"}
+{"tMs":879,"delta":".title \"Conf"}
+{"tMs":879,"delta":"irm de"}
+{"tMs":880,"delta":"letion\"\n  Text."}
+{"tMs":880,"delta":"body"}
+{"tMs":880,"delta":" \"This"}
+{"tMs":896,"delta":" will permanently delete 214"}
+{"tMs":917,"delta":" old files from your"}
+{"tMs":940,"delta":" shared drive.\"\n  "}
+{"tMs":962,"delta":"Text.str"}
+{"tMs":1088,"delta":"ong \"Folder:"}
+{"tMs":1088,"delta":" Shared"}
+{"tMs":1088,"delta":" Drive / Archive "}
+{"tMs":1089,"delta":"2019"}
+{"tMs":1089,"delta":"\"\n  Text.body"}
+{"tMs":1091,"delta":" \"Files: 214 ·"}
+{"tMs":1112,"delta":" Space fre"}
+{"tMs":1133,"delta":"ed: 3"}
+{"tMs":1155,"delta":".8 GB\"\n  "}
+{"tMs":1177,"delta":"Badge.danger \"This"}
+{"tMs":1199,"delta":" cannot be undone\""}
+{"tMs":1221,"delta":"\n  Button."}
+{"tMs":1315,"delta":"ghost \"Preview first few"}
+{"tMs":1315,"delta":" file names\" -> emit pre"}
+{"tMs":1315,"delta":"view_files"}
+{"tMs":1328,"delta":"\n  state decision=\"\""}
+{"tMs":1349,"delta":"\n  if"}
+{"tMs":1371,"delta":" decision==\"\"\n    Row"}
+{"tMs":1392,"delta":" gap:8\n      Button"}
+{"tMs":1414,"delta":".destructive \"Approve"}
+{"tMs":1435,"delta":" de"}
+{"tMs":1456,"delta":"letion\" -> dec"}
+{"tMs":1478,"delta":"ision=\"approved\"; emit"}
+{"tMs":1500,"delta":" appro"}
+{"tMs":1682,"delta":"ve_delete\n      Button"}
+{"tMs":1682,"delta":".outline \"Deny\""}
+{"tMs":1682,"delta":" -> decision=\"denied\""}
+{"tMs":1682,"delta":"; emit deny_delete"}
+{"tMs":1682,"delta":"\n  if decision!=\"\""}
+{"tMs":1682,"delta":"\n    Bad"}
+{"tMs":1682,"delta":"ge.ne"}
+{"tMs":1683,"delta":"utral \"Decision: {"}
+{"tMs":1693,"delta":"decision}\""}

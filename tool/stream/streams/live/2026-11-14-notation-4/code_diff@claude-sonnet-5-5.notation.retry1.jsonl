@@ -1,0 +1,123 @@
+{"meta":{"ui":"code_diff","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"state h1=0\nstate h2=0\nstate h3=0\nCard w:390 gap:12\n  Text.title \"Review config changes\"\n  Text.muted \"Decide on each hunk, then apply.\"\n  Card gap:8\n    Row between middle\n      Text.strong \"Hunk 1 · lines 12–14\"\n      if h1==1\n        Badge.success \"Kept\"\n      if h1==2\n        Badge.neutral \"Discarded\"\n    Box fill:#FFF5F5F5 radius:6 pad:8 gap:2\n      Row gap:8\n        Text.caption \"12\"\n        Text.caption \"  timeout = 30\"\n      Row gap:8\n        Text.caption \"13\"\n        Text.danger \"- retries = 1\"\n      Row gap:8\n        Text.caption \"13\"\n        Text.success \"+ retries = 3\"\n    Row gap:8 end\n      Button.outline \"Discard\" -> h1=2\n      Button \"Keep\" -> h1=1\n  Card gap:8\n    Row between middle\n      Text.strong \"Hunk 2 · lines 27–29\"\n      if h2==1\n        Badge.success \"Kept\"\n      if h2==2\n        Badge.neutral \"Discarded\"\n    Box fill:#FFF5F5F5 radius:6 pad:8 gap:2\n      Row gap:8\n        Text.caption \"27\"\n        Text.danger \"- log_level = debug\"\n      Row gap:8\n        Text.caption \"27\"\n        Text.success \"+ log_level = warn\"\n      Row gap:8\n        Text.caption \"28\"\n        Text.caption \"  log_file = app.log\"\n    Row gap:8 end\n      Button.outline \"Discard\" -> h2=2\n      Button \"Keep\" -> h2=1\n  Card gap:8\n    Row between middle\n      Text.strong \"Hunk 3 · lines 41–44\"\n      if h3==1\n        Badge.success \"Kept\"\n      if h3==2\n        Badge.neutral \"Discarded\"\n    Box fill:#FFF5F5F5 radius:6 pad:8 gap:2\n      Row gap:8\n        Text.caption \"41\"\n        Text.danger \"- cache = false\"\n      Row gap:8\n        Text.caption \"42\"\n        Text.danger \"- cache_ttl = 0\"\n      Row gap:8\n        Text.caption \"41\"\n        Text.success \"+ cache = true\"\n      Row gap:8\n        Text.caption \"42\"\n        Text.success \"+ cache_ttl = 600\"\n    Row gap:8 end\n      Button.outline \"Discard\" -> h3=2\n      Button \"Keep\" -> h3=1\n  Row between middle\n    Text.strong \"Kept: {(h1==1?1:0)+(h2==1?1:0)+(h3==1?1:0)} of 3\"\n    Button \"Apply\" enabled:=h1>0&&h2>0&&h3>0 -> emit apply; toast \"Changes applied\"","usage":{"input_tokens":2896,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1338,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":370}},"ttftMs":3976,"totalMs":8056}}
+{"tMs":3976,"delta":"state"}
+{"tMs":4089,"delta":" h1=0"}
+{"tMs":4090,"delta":"\nstate h2=0\nstate h"}
+{"tMs":4090,"delta":"3=0\nCard w:"}
+{"tMs":4110,"delta":"390 gap:12\n  "}
+{"tMs":4143,"delta":"Text.title \"Review config"}
+{"tMs":4177,"delta":" changes\"\n  Text."}
+{"tMs":4211,"delta":"muted \"Decide on each"}
+{"tMs":4245,"delta":" hunk, then apply.\""}
+{"tMs":4278,"delta":"\n  Card gap:8"}
+{"tMs":4311,"delta":"\n    Row between middle"}
+{"tMs":4347,"delta":"\n      Text.strong \""}
+{"tMs":4378,"delta":"Hunk 1 · l"}
+{"tMs":4450,"delta":"ines 12–14\"\n      "}
+{"tMs":4450,"delta":"if h1==1\n        "}
+{"tMs":4479,"delta":"Badge.success \"Kept"}
+{"tMs":4516,"delta":"\"\n      if h1==2"}
+{"tMs":4546,"delta":"\n        Badge.neut"}
+{"tMs":4580,"delta":"ral \"Discarded\""}
+{"tMs":4613,"delta":"\n    Box fill:#F"}
+{"tMs":4646,"delta":"FF5F5F5 "}
+{"tMs":4682,"delta":"radius:6 pad:"}
+{"tMs":4713,"delta":"8 gap:2\n      "}
+{"tMs":4747,"delta":"Row gap:8\n        "}
+{"tMs":4780,"delta":"Text.caption \"12\""}
+{"tMs":4835,"delta":"\n        Text.caption \""}
+{"tMs":4847,"delta":"  timeout = 30\""}
+{"tMs":4880,"delta":"\n      Row gap:8"}
+{"tMs":4915,"delta":"\n        Text.caption \""}
+{"tMs":4947,"delta":"13\"\n        Text.dan"}
+{"tMs":4980,"delta":"ger \"- retries = 1"}
+{"tMs":5014,"delta":"\"\n      Row gap:"}
+{"tMs":5048,"delta":"8\n        Text.caption"}
+{"tMs":5081,"delta":" \"13\"\n        Text."}
+{"tMs":5114,"delta":"success \"+ retries = "}
+{"tMs":5148,"delta":"3\"\n    Row gap"}
+{"tMs":5182,"delta":":8 end\n      Button"}
+{"tMs":5215,"delta":".outline \"Discard\""}
+{"tMs":5248,"delta":" -> h1=2\n      "}
+{"tMs":5282,"delta":"Button \"Keep\" -"}
+{"tMs":5315,"delta":"> h1=1\n  "}
+{"tMs":5349,"delta":"Card gap:8\n    "}
+{"tMs":5382,"delta":"Row between middle\n      Text"}
+{"tMs":5416,"delta":".strong \"Hunk"}
+{"tMs":5449,"delta":" 2 · lines 27"}
+{"tMs":5482,"delta":"–29\"\n      if h2"}
+{"tMs":5515,"delta":"==1\n        Badge."}
+{"tMs":5549,"delta":"success \"Kept\"\n      "}
+{"tMs":5582,"delta":"if h2==2\n        "}
+{"tMs":5616,"delta":"Badge.neutral \""}
+{"tMs":5649,"delta":"Discarded\"\n    Box"}
+{"tMs":5682,"delta":" fill:#FFF5"}
+{"tMs":5721,"delta":"F5F5 radius:"}
+{"tMs":5752,"delta":"6 pad:8 g"}
+{"tMs":5782,"delta":"ap:2\n      Row g"}
+{"tMs":5816,"delta":"ap:8\n        Text."}
+{"tMs":5849,"delta":"caption \"27\"\n        "}
+{"tMs":5883,"delta":"Text.danger \"- log_"}
+{"tMs":5917,"delta":"level = debug\"\n      "}
+{"tMs":5950,"delta":"Row gap:8\n        "}
+{"tMs":5983,"delta":"Text.caption \"27\""}
+{"tMs":6016,"delta":"\n        Text.success \"+"}
+{"tMs":6050,"delta":" log_level = warn\""}
+{"tMs":6083,"delta":"\n      Row gap:8"}
+{"tMs":6116,"delta":"\n        Text.caption \"28"}
+{"tMs":6150,"delta":"\"\n        Text.caption"}
+{"tMs":6183,"delta":" \"  log_file = app."}
+{"tMs":6217,"delta":"log\"\n    Row gap"}
+{"tMs":6250,"delta":":8 end\n      Button"}
+{"tMs":6283,"delta":".outline \"Discard\""}
+{"tMs":6317,"delta":" -> h2=2\n      "}
+{"tMs":6350,"delta":"Button \"Keep\" -"}
+{"tMs":6383,"delta":"> h2=1\n  "}
+{"tMs":6417,"delta":"Card gap:8\n    "}
+{"tMs":6450,"delta":"Row between middle\n      Text"}
+{"tMs":6485,"delta":".strong \"Hunk"}
+{"tMs":6517,"delta":" 3 · lines 41"}
+{"tMs":6551,"delta":"–44\"\n      if h3"}
+{"tMs":6584,"delta":"==1\n        Badge."}
+{"tMs":6617,"delta":"success \"Kept\"\n      "}
+{"tMs":6650,"delta":"if h3==2\n        "}
+{"tMs":6684,"delta":"Badge.neutral \""}
+{"tMs":6717,"delta":"Discarded\"\n    Box"}
+{"tMs":6751,"delta":" fill:#FFF5"}
+{"tMs":6784,"delta":"F5F5 radius:"}
+{"tMs":6817,"delta":"6 pad:8 g"}
+{"tMs":6851,"delta":"ap:2\n      Row g"}
+{"tMs":6885,"delta":"ap:8\n        Text."}
+{"tMs":6918,"delta":"caption \"41\"\n        "}
+{"tMs":6951,"delta":"Text.danger \"- cache"}
+{"tMs":6984,"delta":" = false\"\n      Row g"}
+{"tMs":7018,"delta":"ap:8\n        Text."}
+{"tMs":7051,"delta":"caption \"42\"\n        "}
+{"tMs":7084,"delta":"Text.danger \"- cache"}
+{"tMs":7118,"delta":"_ttl = 0\""}
+{"tMs":7151,"delta":"\n      Row gap:8"}
+{"tMs":7184,"delta":"\n        Text.caption \""}
+{"tMs":7218,"delta":"41\"\n        Text.success"}
+{"tMs":7251,"delta":" \"+ cache = true\""}
+{"tMs":7284,"delta":"\n      Row gap:8"}
+{"tMs":7318,"delta":"\n        Text.caption \""}
+{"tMs":7351,"delta":"42\"\n        Text.success"}
+{"tMs":7385,"delta":" \"+ cache_tt"}
+{"tMs":7418,"delta":"l = 600\"\n    "}
+{"tMs":7451,"delta":"Row gap:8 end"}
+{"tMs":7485,"delta":"\n      Button.outline \""}
+{"tMs":7522,"delta":"Discard\" -> h3="}
+{"tMs":7552,"delta":"2\n      Button \"Ke"}
+{"tMs":7584,"delta":"ep\" -> h3=1"}
+{"tMs":7618,"delta":"\n  Row between middle"}
+{"tMs":7652,"delta":"\n    Text.strong \""}
+{"tMs":7685,"delta":"Kept: {(h1=="}
+{"tMs":7718,"delta":"1?1:0)+("}
+{"tMs":7751,"delta":"h2==1?1:0"}
+{"tMs":7785,"delta":")+(h3==1?"}
+{"tMs":7818,"delta":"1:0)} of 3"}
+{"tMs":7851,"delta":"\"\n    Button \"Ap"}
+{"tMs":7885,"delta":"ply\" enabled:=h"}
+{"tMs":7918,"delta":"1>0&&h2>"}
+{"tMs":7952,"delta":"0&&h3>0 "}
+{"tMs":7985,"delta":"-> emit apply; to"}
+{"tMs":8018,"delta":"ast \"Changes applied\""}

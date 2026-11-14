@@ -1,0 +1,73 @@
+{
+ "ui": "order_summary",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 4298,
+ "turns": [
+  {
+   "input_tokens": 1847,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 728,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 537,
+   "totalMs": 3264,
+   "chars": 1562,
+   "lines": 45,
+   "jsonTails": 0,
+   "nodes": 37,
+   "outputTokensPerNode": "19.7",
+   "notationIssues": [
+    "line 20:31: Unknown action \"item.qty=item.qty-1\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 22:28: Unknown action \"item.qty=item.qty+1\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 2737,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1814,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 516,
+   "totalMs": 5999,
+   "chars": 3831,
+   "lines": 89,
+   "jsonTails": 0,
+   "nodes": 79,
+   "outputTokensPerNode": "23.0",
+   "notationIssues": [
+    "line 21:29: Unknown action \"items[0].qty=max(0,items[0].qty-1)\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 23:26: Unknown action \"items[0].qty=items[0].qty+1\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 32:29: Unknown action \"items[1].qty=max(0,items[1].qty-1)\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 34:26: Unknown action \"items[1].qty=items[1].qty+1\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 43:29: Unknown action \"items[2].qty=max(0,items[2].qty-1)\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 45:26: Unknown action \"items[2].qty=items[2].qty+1\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 54:29: Unknown action \"items[3].qty=max(0,items[3].qty-1)\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 56:26: Unknown action \"items[3].qty=items[3].qty+1\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 65:29: Unknown action \"items[4].qty=max(0,items[4].qty-1)\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON.",
+    "line 67:26: Unknown action \"items[4].qty=items[4].qty+1\". Actions: name=value, emit <event>, toast \"…\", open <id>, close, go <screen>, link <url>, or JSON."
+   ],
+   "errors": []
+  }
+ ]
+}

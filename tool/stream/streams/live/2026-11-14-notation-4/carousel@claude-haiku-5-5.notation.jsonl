@@ -1,0 +1,182 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"state idx=0\nstate view=\"carousel\"\nstate shoes=[{\"name\":\"Velocity Pro\",\"price\":\"$129\",\"rating\":4.8,\"desc\":\"Responsive daily trainer with a lightweight foam midsole.\",\"sizes\":[\"8\",\"9\",\"10\",\"11\"]},{\"name\":\"TrailRunner X\",\"price\":\"$149\",\"rating\":4.6,\"desc\":\"Grippy outsole built for mud, rock and wet trails.\",\"sizes\":[\"8\",\"9\",\"10\",\"11\"]},{\"name\":\"Sprint Air\",\"price\":\"$109\",\"rating\":4.4,\"desc\":\"Breathable mesh upper and a bouncy ride for speed days.\",\"sizes\":[\"7\",\"8\",\"9\",\"10\"]},{\"name\":\"Cushion Max\",\"price\":\"$139\",\"rating\":4.9,\"desc\":\"Maximum cushioning for long miles and recovery runs.\",\"sizes\":[\"9\",\"10\",\"11\",\"12\"]},{\"name\":\"Stability Plus\",\"price\":\"$135\",\"rating\":4.5,\"desc\":\"Supportive guide shoe that keeps your stride on track.\",\"sizes\":[\"8\",\"9\",\"10\",\"11\"]},{\"name\":\"Featherlite\",\"price\":\"$119\",\"rating\":4.3,\"desc\":\"Ultra-light racer for tempo runs and race day.\",\"sizes\":[\"7\",\"8\",\"9\",\"10\"]}]\nstate size=\"\"\nCard w:390 gap:12 pad:16\n  if view==\"carousel\"\n    Row between\n      Text.heading \"Running shoes\"\n      Text.muted \"{idx+1} / 6\"\n    Row gap:8\n      IconButton \"chevron_left\" -> idx=max(0,idx-1)\n      Box grow h:200 fill:#FFEFEFEF radius:12\n        Column center gap:6\n          Icon \"image\"\n          Text.strong \"{shoes[idx].name}\"\n          Text.muted \"{shoes[idx].price}  ★ {shoes[idx].rating}\"\n      IconButton \"chevron_right\" -> idx=min(5,idx+1)\n    Row center gap:6\n      Badge.neutral \"•\" -> idx=0\n      Badge.neutral \"•\" -> idx=1\n      Badge.neutral \"•\" -> idx=2\n      Badge.neutral \"•\" -> idx=3\n      Badge.neutral \"•\" -> idx=4\n      Badge.neutral \"•\" -> idx=5\n    Button.outline \"View details\" -> view=\"detail\"\n  if view==\"detail\"\n    Row\n      IconButton \"arrow_back\" -> view=\"carousel\"\n      Text.heading \"{shoes[idx].name}\"\n    Box h:200 fill:#FFEFEFEF radius:12\n      Column center\n        Icon \"image\"\n    Text.strong \"{shoes[idx].price}  ★ {shoes[idx].rating}\"\n    Text.body \"{shoes[idx].desc}\"\n    SegmentedButton =size items:[\"8\",\"9\",\"10\",\"11\"]\n    Button \"Add to bag\" -> emit addToBag; toast \"Added to bag\"","usage":{"input_tokens":1832,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":979,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":486,"totalMs":4214}}
+{"tMs":486,"delta":"```"}
+{"tMs":609,"delta":"\nstate id"}
+{"tMs":609,"delta":"x=0\nstate view"}
+{"tMs":609,"delta":"=\""}
+{"tMs":609,"delta":"carousel\"\nstate"}
+{"tMs":609,"delta":" shoes=[{\"name"}
+{"tMs":616,"delta":"\":\"Vel"}
+{"tMs":637,"delta":"ocity Pro\",\"price\":"}
+{"tMs":657,"delta":"\"$129"}
+{"tMs":678,"delta":"\",\"rating\":4"}
+{"tMs":698,"delta":".8,\"desc\":\""}
+{"tMs":718,"delta":"Respon"}
+{"tMs":739,"delta":"sive da"}
+{"tMs":760,"delta":"ily tr"}
+{"tMs":779,"delta":"ainer with"}
+{"tMs":802,"delta":" a lightweight foam mid"}
+{"tMs":820,"delta":"sole.\",\"s"}
+{"tMs":841,"delta":"izes\":[\"8"}
+{"tMs":863,"delta":"\",\"9\",\"10\",\""}
+{"tMs":883,"delta":"11\"]},{\"name\":"}
+{"tMs":904,"delta":"\"T"}
+{"tMs":923,"delta":"railRun"}
+{"tMs":943,"delta":"ner X"}
+{"tMs":963,"delta":"\",\"price\":\"$149\",\"r"}
+{"tMs":985,"delta":"ating\":4.6,\"des"}
+{"tMs":1004,"delta":"c\":\"Gripp"}
+{"tMs":1024,"delta":"y out"}
+{"tMs":1045,"delta":"s"}
+{"tMs":1066,"delta":"ole built"}
+{"tMs":1085,"delta":" for m"}
+{"tMs":1106,"delta":"ud"}
+{"tMs":1126,"delta":","}
+{"tMs":1146,"delta":" rock"}
+{"tMs":1167,"delta":" and w"}
+{"tMs":1187,"delta":"et tr"}
+{"tMs":1208,"delta":"ails.\",\"sizes\":[\""}
+{"tMs":1229,"delta":"8\",\"9\",\""}
+{"tMs":1250,"delta":"10\",\"11\"]},{\""}
+{"tMs":1269,"delta":"name\":\"Spr"}
+{"tMs":1290,"delta":"int Air"}
+{"tMs":1310,"delta":"\",\"price\":\"$109"}
+{"tMs":1331,"delta":"\",\"rating\":4.4"}
+{"tMs":1351,"delta":",\"desc\":\"Bre"}
+{"tMs":1372,"delta":"athable m"}
+{"tMs":1392,"delta":"esh up"}
+{"tMs":1412,"delta":"per and a"}
+{"tMs":1432,"delta":" bou"}
+{"tMs":1452,"delta":"ncy "}
+{"tMs":1473,"delta":"ride for spe"}
+{"tMs":1493,"delta":"ed days"}
+{"tMs":1514,"delta":".\",\"sizes\":[\"7"}
+{"tMs":1534,"delta":"\",\"8\",\"9\",\"10\"]"}
+{"tMs":1555,"delta":"},{\"name\":\"C"}
+{"tMs":1575,"delta":"ushion Max"}
+{"tMs":1596,"delta":"\",\"price\":\"$139"}
+{"tMs":1616,"delta":"\",\"rating\":4.9"}
+{"tMs":1637,"delta":",\"desc\":\"Ma"}
+{"tMs":1657,"delta":"ximum cushio"}
+{"tMs":1678,"delta":"ning for long mi"}
+{"tMs":1698,"delta":"les and rec"}
+{"tMs":1718,"delta":"overy run"}
+{"tMs":1739,"delta":"s.\",\"sizes\":[\""}
+{"tMs":1759,"delta":"9"}
+{"tMs":1779,"delta":"\",\"10\",\"11\",\""}
+{"tMs":1801,"delta":"12\"]},{\"name\":"}
+{"tMs":1820,"delta":"\"Stability"}
+{"tMs":1842,"delta":" Plus\",\"price\":\"$"}
+{"tMs":1861,"delta":"135"}
+{"tMs":1881,"delta":"\",\"rating\":4.5"}
+{"tMs":1903,"delta":",\"desc\":\"Sup"}
+{"tMs":1922,"delta":"portive guide sh"}
+{"tMs":1943,"delta":"oe that"}
+{"tMs":1965,"delta":" keeps your st"}
+{"tMs":1984,"delta":"ride on"}
+{"tMs":2004,"delta":" track.\",\"sizes\":[\""}
+{"tMs":2024,"delta":"8\",\"9\",\"10\",\"11\""}
+{"tMs":2045,"delta":"]},{\"name\":\""}
+{"tMs":2067,"delta":"Featherlite"}
+{"tMs":2086,"delta":"\",\"price\":\"$119\",\"r"}
+{"tMs":2109,"delta":"ating\":4.3"}
+{"tMs":2127,"delta":",\"desc\":\""}
+{"tMs":2147,"delta":"Ultra-"}
+{"tMs":2168,"delta":"light racer"}
+{"tMs":2189,"delta":" for tempo run"}
+{"tMs":2208,"delta":"s and race"}
+{"tMs":2229,"delta":" day"}
+{"tMs":2249,"delta":".\",\"sizes\":[\"7"}
+{"tMs":2269,"delta":"\",\"8\",\"9\",\"10\"]"}
+{"tMs":2290,"delta":"}]"}
+{"tMs":2310,"delta":"\nstate size"}
+{"tMs":2330,"delta":"=\"\""}
+{"tMs":2351,"delta":"\nCard w"}
+{"tMs":2372,"delta":":390 gap:12"}
+{"tMs":2392,"delta":" pad:16\n  if"}
+{"tMs":2412,"delta":" view==\"carousel\""}
+{"tMs":2432,"delta":"\n    Row between"}
+{"tMs":2454,"delta":"\n      Text.he"}
+{"tMs":2474,"delta":"ading \"Running"}
+{"tMs":2495,"delta":" shoes\"\n      Text"}
+{"tMs":2515,"delta":".mu"}
+{"tMs":2536,"delta":"ted \"{idx+"}
+{"tMs":2557,"delta":"1}"}
+{"tMs":2576,"delta":" / 6\"\n    Row"}
+{"tMs":2597,"delta":" gap:8\n      Icon"}
+{"tMs":2617,"delta":"Button \"ch"}
+{"tMs":2638,"delta":"evron_left\" -> id"}
+{"tMs":2658,"delta":"x=max(0,idx"}
+{"tMs":2678,"delta":"-1)\n      Box gr"}
+{"tMs":2701,"delta":"ow h"}
+{"tMs":2719,"delta":":200"}
+{"tMs":2739,"delta":" fill:#F"}
+{"tMs":2759,"delta":"FE"}
+{"tMs":2780,"delta":"F"}
+{"tMs":2800,"delta":"EFEF radius:12"}
+{"tMs":2841,"delta":"\n        Column"}
+{"tMs":2861,"delta":" center g"}
+{"tMs":2882,"delta":"ap:6"}
+{"tMs":2902,"delta":"\n          Ic"}
+{"tMs":2923,"delta":"on \"image"}
+{"tMs":2944,"delta":"\"\n          Text.str"}
+{"tMs":2963,"delta":"ong \"{sh"}
+{"tMs":2984,"delta":"oes[idx].name}"}
+{"tMs":3005,"delta":"\"\n          Text.mu"}
+{"tMs":3025,"delta":"ted \"{shoes[id"}
+{"tMs":3045,"delta":"x].price"}
+{"tMs":3065,"delta":"}  "}
+{"tMs":3087,"delta":"★"}
+{"tMs":3106,"delta":" {shoes[idx]."}
+{"tMs":3127,"delta":"rating}\"\n      Icon"}
+{"tMs":3148,"delta":"Button \"chevron_right"}
+{"tMs":3168,"delta":"\" -> idx=min("}
+{"tMs":3189,"delta":"5,idx+1)"}
+{"tMs":3209,"delta":"\n    Row center"}
+{"tMs":3228,"delta":" gap:6"}
+{"tMs":3249,"delta":"\n      Bad"}
+{"tMs":3270,"delta":"ge.neutral \"•\""}
+{"tMs":3290,"delta":" -> idx=0\n      "}
+{"tMs":3310,"delta":"Badge.neutral \""}
+{"tMs":3331,"delta":"•\" -> idx=1"}
+{"tMs":3352,"delta":"\n      Badge.neut"}
+{"tMs":3372,"delta":"ral \"•\" -> idx"}
+{"tMs":3393,"delta":"=2\n      Badge."}
+{"tMs":3413,"delta":"neutral \"•\" ->"}
+{"tMs":3433,"delta":" idx=3\n      Bad"}
+{"tMs":3456,"delta":"ge.neutral \"•\""}
+{"tMs":3474,"delta":" -> idx=4\n      "}
+{"tMs":3502,"delta":"Badge.neutral \""}
+{"tMs":3515,"delta":"•\" -> idx=5"}
+{"tMs":3535,"delta":"\n    Button."}
+{"tMs":3557,"delta":"outline \"View details\" ->"}
+{"tMs":3576,"delta":" view=\"detail\"\n  if"}
+{"tMs":3597,"delta":" view==\"detail\"\n    "}
+{"tMs":3617,"delta":"Row"}
+{"tMs":3637,"delta":"\n      I"}
+{"tMs":3658,"delta":"conButton \"ar"}
+{"tMs":3679,"delta":"row_back"}
+{"tMs":3698,"delta":"\" -> view=\"carousel"}
+{"tMs":3719,"delta":"\"\n      "}
+{"tMs":3739,"delta":"Text.he"}
+{"tMs":3759,"delta":"ading \"{shoes[id"}
+{"tMs":3780,"delta":"x].name}\"\n    "}
+{"tMs":3801,"delta":"Box h:200 fill:"}
+{"tMs":3820,"delta":"#FFEFEFE"}
+{"tMs":3842,"delta":"F radius:12\n      "}
+{"tMs":3862,"delta":"Column center\n        Icon \""}
+{"tMs":3882,"delta":"image\"\n    "}
+{"tMs":3903,"delta":"Text.strong \"{sh"}
+{"tMs":3924,"delta":"oes[idx].price}"}
+{"tMs":3943,"delta":"  ★ {shoes"}
+{"tMs":3964,"delta":"[idx].rating}\""}
+{"tMs":3984,"delta":"\n    Text."}
+{"tMs":4004,"delta":"body \"{shoes[id"}
+{"tMs":4025,"delta":"x].desc}\"\n    "}
+{"tMs":4047,"delta":"S"}
+{"tMs":4066,"delta":"egmentedButton ="}
+{"tMs":4087,"delta":"size items:[\"8\",\"9\",\""}
+{"tMs":4108,"delta":"10\",\"11\"]\n    "}
+{"tMs":4127,"delta":"Button \"Add to bag\""}
+{"tMs":4148,"delta":" -> emit add"}
+{"tMs":4168,"delta":"ToBag; toast \""}
+{"tMs":4188,"delta":"Added to bag\"\n```"}

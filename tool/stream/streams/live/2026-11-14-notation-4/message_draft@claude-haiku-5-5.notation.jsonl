@@ -1,0 +1,71 @@
+{"meta":{"ui":"message_draft","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Draft an email to my landlord about the broken heating and show it as an inline card I can edit before it goes: to, subject and body fields filled in, a tone switch between polite and firm that rewrites the body, and send and discard buttons. Sending needs a recipient and a subject, and afterwards the card shows it as sent.","text":"Card w:390 gap:12\n  Text.heading \"Email to landlord\"\n  Input \"To\" \"landlord@example.com\" =to\n  Input \"Subject\" \"Heating repair needed\" =subject\n  SegmentedButton =tone items:[\"Polite\",\"Firm\"] -> emit tone\n  if tone==\"Polite\"\n    Input \"Body\" =body\n    Text.muted \"Hi, I hope you are well. The heating in my flat has stopped working and it is getting cold. Could you arrange a repair at your earliest convenience? Thank you.\"\n  if tone==\"Firm\"\n    Text.muted \"The heating in my flat has been broken for several days. This needs fixing urgently. Please arrange a repair within 48 hours and confirm when someone will attend.\"\n  Row gap:8 end\n    Button.ghost \"Discard\" -> emit discard\n    Button \"Send\" -> emit send; toast \"Email sent\"\n  if sent\n    Badge.success \"Sent\"","usage":{"input_tokens":1848,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":316,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1657,"totalMs":3097}}
+{"tMs":1657,"delta":"Card"}
+{"tMs":1663,"delta":" w"}
+{"tMs":1854,"delta":":390 g"}
+{"tMs":1855,"delta":"ap:12\n  Text"}
+{"tMs":1855,"delta":".he"}
+{"tMs":1855,"delta":"ading \"Email"}
+{"tMs":1855,"delta":" to land"}
+{"tMs":1855,"delta":"lord\"\n  Input \""}
+{"tMs":1855,"delta":"To\" \"land"}
+{"tMs":1855,"delta":"lord@example.com\" ="}
+{"tMs":1865,"delta":"to\n  Input \"Sub"}
+{"tMs":1886,"delta":"ject\" \"Heating rep"}
+{"tMs":1906,"delta":"air need"}
+{"tMs":1927,"delta":"ed\" =subject\n  S"}
+{"tMs":2022,"delta":"egmentedButton ="}
+{"tMs":2022,"delta":"tone items:[\"Polite"}
+{"tMs":2022,"delta":"\",\"Firm\"] ->"}
+{"tMs":2022,"delta":" em"}
+{"tMs":2029,"delta":"it t"}
+{"tMs":2050,"delta":"one\n  if tone="}
+{"tMs":2071,"delta":"=\"Polite\"\n    "}
+{"tMs":2091,"delta":"Input \"Body\" ="}
+{"tMs":2111,"delta":"body\n    "}
+{"tMs":2131,"delta":"Text"}
+{"tMs":2153,"delta":".muted \"Hi"}
+{"tMs":2172,"delta":","}
+{"tMs":2194,"delta":" I h"}
+{"tMs":2212,"delta":"ope you"}
+{"tMs":2233,"delta":" are"}
+{"tMs":2253,"delta":" well. The heating in"}
+{"tMs":2274,"delta":" my flat has stopped working"}
+{"tMs":2294,"delta":" and"}
+{"tMs":2315,"delta":" it"}
+{"tMs":2334,"delta":" is get"}
+{"tMs":2355,"delta":"ting c"}
+{"tMs":2374,"delta":"old."}
+{"tMs":2395,"delta":" Could you ar"}
+{"tMs":2416,"delta":"range a repair at"}
+{"tMs":2437,"delta":" your"}
+{"tMs":2457,"delta":" earliest convenience?"}
+{"tMs":2477,"delta":" Thank you.\"\n  "}
+{"tMs":2498,"delta":"if tone==\"Firm"}
+{"tMs":2518,"delta":"\"\n    Text"}
+{"tMs":2540,"delta":".muted \"The"}
+{"tMs":2559,"delta":" heating in"}
+{"tMs":2579,"delta":" my flat has been"}
+{"tMs":2600,"delta":" broken for"}
+{"tMs":2620,"delta":" several"}
+{"tMs":2643,"delta":" days. This"}
+{"tMs":2660,"delta":" need"}
+{"tMs":2681,"delta":"s f"}
+{"tMs":2701,"delta":"ixing ur"}
+{"tMs":2722,"delta":"gently. Please arrange"}
+{"tMs":2743,"delta":" a repair within"}
+{"tMs":2764,"delta":" 48 hours and"}
+{"tMs":2784,"delta":" confirm when"}
+{"tMs":2804,"delta":" some"}
+{"tMs":2824,"delta":"one will att"}
+{"tMs":2845,"delta":"end.\"\n  Row gap"}
+{"tMs":2865,"delta":":8 "}
+{"tMs":2885,"delta":"end\n    Button."}
+{"tMs":2907,"delta":"ghost \"Discard\" -"}
+{"tMs":2926,"delta":"> emit discard\n    "}
+{"tMs":2947,"delta":"Button \"Send\" -> em"}
+{"tMs":2967,"delta":"it send; toast \"Email"}
+{"tMs":2988,"delta":" sent\"\n  "}
+{"tMs":3008,"delta":"if s"}
+{"tMs":3030,"delta":"ent"}
+{"tMs":3049,"delta":"\n    Bad"}
+{"tMs":3069,"delta":"ge.success \"Sent\""}

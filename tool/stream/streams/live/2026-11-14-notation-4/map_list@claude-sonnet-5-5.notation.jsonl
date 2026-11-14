@@ -1,0 +1,148 @@
+{"meta":{"ui":"map_list","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"Card w:390 gap:12 pad:12\n  state sel=0\n  state shops=[{\"n\":1,\"name\":\"Bean There\",\"rating\":\"4.7\",\"dist\":\"0.2 km\",\"hours\":\"7:00 - 18:00\",\"x\":40,\"y\":50},{\"n\":2,\"name\":\"Daily Grind\",\"rating\":\"4.5\",\"dist\":\"0.4 km\",\"hours\":\"6:30 - 17:00\",\"x\":150,\"y\":30},{\"n\":3,\"name\":\"Roast & Toast\",\"rating\":\"4.8\",\"dist\":\"0.6 km\",\"hours\":\"8:00 - 20:00\",\"x\":230,\"y\":100},{\"n\":4,\"name\":\"Mocha Corner\",\"rating\":\"4.2\",\"dist\":\"0.8 km\",\"hours\":\"7:30 - 16:00\",\"x\":90,\"y\":140},{\"n\":5,\"name\":\"The Cup\",\"rating\":\"4.6\",\"dist\":\"1.1 km\",\"hours\":\"9:00 - 21:00\",\"x\":270,\"y\":160}]\n  Text.title \"Coffee shops near you\"\n  Stack w:fill h:200 fill:#FFEFEAE0 radius:12\n    Box w:fill h:4 fill:#FFFFFFFF pad:0\n    Box w:4 h:200 fill:#FFFFFFFF\n    Divider\n    Box w:340 h:6 fill:#FFFFFFFF\n    Box w:6 h:200 fill:#FFFFFFFF\n    each s in shops\n      Box w:30 h:30 radius:15 center middle fill:=sel==s.n?\"#FFB3261E\":\"#FF5D4037\"\n        Text.strong \"{s.n}\" -> sel=s.n\n  Column gap:8\n    each s in shops\n      ListTile \"{s.n}. {s.name}\" selected:=sel==s.n -> sel=s.n\n        Text.small \"{s.dist}\"\n  if sel>0\n    Card gap:4 fill:#FFFFF3E0\n      each s in shops\n        if sel==s.n\n          Text.heading \"{s.name}\"\n          Row gap:12\n            Badge.success \"★ {s.rating}\"\n            Text \"{s.dist}\"\n          Text.muted \"Open {s.hours}\"","usage":{"input_tokens":1839,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":727,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":663,"totalMs":5574}}
+{"tMs":663,"delta":"Card w"}
+{"tMs":991,"delta":":390 gap:12"}
+{"tMs":991,"delta":" pad:12"}
+{"tMs":992,"delta":"\n  state"}
+{"tMs":992,"delta":" sel=0"}
+{"tMs":992,"delta":"\n  state shops=[{"}
+{"tMs":992,"delta":"\"n"}
+{"tMs":992,"delta":"\":1,\"name"}
+{"tMs":992,"delta":"\":\"B"}
+{"tMs":992,"delta":"ean There"}
+{"tMs":998,"delta":"\",\"rating\":\""}
+{"tMs":1032,"delta":"4.7"}
+{"tMs":1064,"delta":"\",\""}
+{"tMs":1338,"delta":"d"}
+{"tMs":1338,"delta":"ist\":\"0"}
+{"tMs":1338,"delta":".2 km\",\"hours\":"}
+{"tMs":1339,"delta":"\"7"}
+{"tMs":1339,"delta":":00 -"}
+{"tMs":1339,"delta":" 18"}
+{"tMs":1339,"delta":":00\",\"x\":40"}
+{"tMs":1339,"delta":",\"y\":50"}
+{"tMs":1365,"delta":"},{\"n\":2,\""}
+{"tMs":1398,"delta":"name\":\"Da"}
+{"tMs":1431,"delta":"ily Gr"}
+{"tMs":1465,"delta":"ind\",\"rating\":\"4."}
+{"tMs":1684,"delta":"5\",\"dist\":\"0."}
+{"tMs":1684,"delta":"4 km\",\"hours\":\""}
+{"tMs":1684,"delta":"6:30 - 17"}
+{"tMs":1684,"delta":":00\",\"x\":150"}
+{"tMs":1684,"delta":",\"y\":30},{\""}
+{"tMs":1684,"delta":"n\":3,\"name\":\""}
+{"tMs":1702,"delta":"Roast"}
+{"tMs":1734,"delta":" &"}
+{"tMs":1767,"delta":" To"}
+{"tMs":1801,"delta":"ast\",\"rating\":\"4."}
+{"tMs":1834,"delta":"8"}
+{"tMs":1868,"delta":"\",\"dist\":\"0.6"}
+{"tMs":2032,"delta":" km\",\"hours\":\"8"}
+{"tMs":2032,"delta":":00 - 20:00"}
+{"tMs":2032,"delta":"\",\"x\":230,\"y\":"}
+{"tMs":2032,"delta":"100"}
+{"tMs":2035,"delta":"},{\"n\":4,\""}
+{"tMs":2069,"delta":"name\":\"Moc"}
+{"tMs":2102,"delta":"ha Cor"}
+{"tMs":2135,"delta":"ner\",\"rating\":\"4."}
+{"tMs":2168,"delta":"2"}
+{"tMs":2202,"delta":"\",\"dist\":\"0.8"}
+{"tMs":2236,"delta":" km\",\"hours\":\"7"}
+{"tMs":2268,"delta":":30"}
+{"tMs":2380,"delta":" - 16:00\",\"x"}
+{"tMs":2380,"delta":"\":90"}
+{"tMs":2380,"delta":",\"y\":140},{\""}
+{"tMs":2402,"delta":"n\":5,\"name\":\""}
+{"tMs":2435,"delta":"The"}
+{"tMs":2468,"delta":" C"}
+{"tMs":2502,"delta":"up\",\"rating\":\"4."}
+{"tMs":2535,"delta":"6"}
+{"tMs":2569,"delta":"\",\"dist\":\"1.1"}
+{"tMs":2602,"delta":" km\",\"hours\":\"9"}
+{"tMs":2635,"delta":":00 - 21"}
+{"tMs":2669,"delta":":00\",\"x\":270"}
+{"tMs":2731,"delta":",\"y\":160}]"}
+{"tMs":2735,"delta":"\n  Text.title \"Co"}
+{"tMs":2769,"delta":"ffee shops near you"}
+{"tMs":2802,"delta":"\"\n  St"}
+{"tMs":2836,"delta":"ack w:f"}
+{"tMs":2870,"delta":"ill h:200 f"}
+{"tMs":2903,"delta":"ill:#F"}
+{"tMs":2935,"delta":"FE"}
+{"tMs":2969,"delta":"F"}
+{"tMs":3002,"delta":"E"}
+{"tMs":3035,"delta":"A"}
+{"tMs":3068,"delta":"E0"}
+{"tMs":3102,"delta":" radius:12"}
+{"tMs":3135,"delta":"\n    Box w"}
+{"tMs":3168,"delta":":f"}
+{"tMs":3202,"delta":"ill h:4"}
+{"tMs":3234,"delta":" fill:#FFF"}
+{"tMs":3268,"delta":"FFFFF pad:"}
+{"tMs":3301,"delta":"0"}
+{"tMs":3335,"delta":"\n    Box w:4"}
+{"tMs":3369,"delta":" h:200"}
+{"tMs":3401,"delta":" fill:#FFF"}
+{"tMs":3435,"delta":"FFFFF"}
+{"tMs":3469,"delta":"\n    Div"}
+{"tMs":3501,"delta":"ider"}
+{"tMs":3535,"delta":"\n    Box"}
+{"tMs":3569,"delta":" w:340"}
+{"tMs":3601,"delta":" h:6"}
+{"tMs":3635,"delta":" fill:#FFF"}
+{"tMs":3668,"delta":"FFFFF"}
+{"tMs":3702,"delta":"\n    Box w:6"}
+{"tMs":3735,"delta":" h:200 fill:"}
+{"tMs":3769,"delta":"#FFFFFFF"}
+{"tMs":3802,"delta":"F\n    each"}
+{"tMs":3834,"delta":" s"}
+{"tMs":3868,"delta":" in shops\n      Box w"}
+{"tMs":3902,"delta":":30 h:30 rad"}
+{"tMs":3935,"delta":"ius:15"}
+{"tMs":3968,"delta":" center"}
+{"tMs":4001,"delta":" midd"}
+{"tMs":4036,"delta":"le fill:="}
+{"tMs":4068,"delta":"s"}
+{"tMs":4101,"delta":"el==s.n?\""}
+{"tMs":4134,"delta":"#FF"}
+{"tMs":4168,"delta":"B3"}
+{"tMs":4201,"delta":"261"}
+{"tMs":4234,"delta":"E\":\"#FF"}
+{"tMs":4271,"delta":"5"}
+{"tMs":4301,"delta":"D"}
+{"tMs":4334,"delta":"4037"}
+{"tMs":4368,"delta":"\"\n        "}
+{"tMs":4401,"delta":"Text.strong \"{s."}
+{"tMs":4434,"delta":"n}\" -> s"}
+{"tMs":4467,"delta":"el=s.n\n  "}
+{"tMs":4500,"delta":"Column"}
+{"tMs":4534,"delta":" gap:8\n    each s"}
+{"tMs":4568,"delta":" in shops\n      ListT"}
+{"tMs":4602,"delta":"ile \""}
+{"tMs":4634,"delta":"{s.n"}
+{"tMs":4667,"delta":"}. {s.name}\""}
+{"tMs":4701,"delta":" sel"}
+{"tMs":4734,"delta":"ected:=sel==s."}
+{"tMs":4768,"delta":"n -> sel=s."}
+{"tMs":4801,"delta":"n\n        Text.small \""}
+{"tMs":4835,"delta":"{s.dist}"}
+{"tMs":4868,"delta":"\"\n  if sel>"}
+{"tMs":4902,"delta":"0\n    Card gap:"}
+{"tMs":4935,"delta":"4 fill:#FF"}
+{"tMs":4968,"delta":"FFF3"}
+{"tMs":5002,"delta":"E0"}
+{"tMs":5035,"delta":"\n      each"}
+{"tMs":5068,"delta":" s"}
+{"tMs":5101,"delta":" in shops\n        if s"}
+{"tMs":5134,"delta":"el==s.n\n          "}
+{"tMs":5168,"delta":"Text.he"}
+{"tMs":5202,"delta":"ading \"{s.name}\""}
+{"tMs":5235,"delta":"\n          Row"}
+{"tMs":5269,"delta":" gap:12"}
+{"tMs":5302,"delta":"\n            Badge.success \""}
+{"tMs":5335,"delta":"★"}
+{"tMs":5368,"delta":" {s.rating}\""}
+{"tMs":5402,"delta":"\n            Text \""}
+{"tMs":5436,"delta":"{s.dist}\""}
+{"tMs":5469,"delta":"\n          Text.mu"}
+{"tMs":5502,"delta":"ted \"Open"}
+{"tMs":5535,"delta":" {s.hours}\""}

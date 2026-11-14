@@ -1,0 +1,213 @@
+{"meta":{"ui":"dashboard","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"Card w:390 gap:12\n  state range=\"30 days\"\n  state sortKey=\"revenue\"\n  state revenue7=[{\"x\":1,\"y\":2.1},{\"x\":2,\"y\":2.3},{\"x\":3,\"y\":2.2},{\"x\":4,\"y\":2.6},{\"x\":5,\"y\":2.8},{\"x\":6,\"y\":2.7},{\"x\":7,\"y\":3.0}]\n  state revenue30=[{\"x\":1,\"y\":8},{\"x\":2,\"y\":9},{\"x\":3,\"y\":9.5},{\"x\":4,\"y\":10},{\"x\":5,\"y\":10.8},{\"x\":6,\"y\":11.2},{\"x\":7,\"y\":12.4}]\n  state revenue90=[{\"x\":1,\"y\":22},{\"x\":2,\"y\":25},{\"x\":3,\"y\":27},{\"x\":4,\"y\":30},{\"x\":5,\"y\":33},{\"x\":6,\"y\":36},{\"x\":7,\"y\":38}]\n  state plans=[{\"name\":\"Team\",\"revenue\":14200,\"users\":310,\"churn\":2.1},{\"name\":\"Pro\",\"revenue\":11800,\"users\":520,\"churn\":3.4},{\"name\":\"Business\",\"revenue\":9600,\"users\":84,\"churn\":1.2},{\"name\":\"Starter\",\"revenue\":4300,\"users\":890,\"churn\":5.8},{\"name\":\"Enterprise\",\"revenue\":3900,\"users\":12,\"churn\":0.8}]\n  Text.title \"Product performance\"\n  SegmentedButton =range items:[\"7 days\",\"30 days\",\"90 days\"]\n  Grid cols:2 gap:8\n    Card gap:4\n      Text.caption \"Revenue\"\n      if range==\"7 days\"\n        Text.heading \"$21.4k\"\n        Badge.success \"+3.2%\"\n      if range==\"30 days\"\n        Text.heading \"$84.2k\"\n        Badge.success \"+8.5%\"\n      if range==\"90 days\"\n        Text.heading \"$236k\"\n        Badge.success \"+14.1%\"\n    Card gap:4\n      Text.caption \"Sign-ups\"\n      if range==\"7 days\"\n        Text.heading \"412\"\n        Badge.success \"+2.0%\"\n      if range==\"30 days\"\n        Text.heading \"1,840\"\n        Badge.success \"+6.7%\"\n      if range==\"90 days\"\n        Text.heading \"5,320\"\n        Badge.success \"+11.3%\"\n    Card gap:4\n      Text.caption \"Churn\"\n      if range==\"7 days\"\n        Text.heading \"0.9%\"\n        Badge.danger \"+0.1%\"\n      if range==\"30 days\"\n        Text.heading \"3.4%\"\n        Badge.danger \"+0.3%\"\n      if range==\"90 days\"\n        Text.heading \"9.8%\"\n        Badge.success \"-0.5%\"\n    Card gap:4\n      Text.caption \"Active users\"\n      if range==\"7 days\"\n        Text.heading \"9.1k\"\n        Badge.success \"+1.1%\"\n      if range==\"30 days\"\n        Text.heading \"12.6k\"\n        Badge.success \"+4.9%\"\n      if range==\"90 days\"\n        Text.heading \"13.2k\"\n        Badge.success \"+9.0%\"\n  Text.strong \"Revenue\"\n  if range==\"7 days\"\n    LineChart data:=revenue7 xField:\"x\" yField:\"y\"\n  if range==\"30 days\"\n    LineChart data:=revenue30 xField:\"x\" yField:\"y\"\n  if range==\"90 days\"\n    LineChart data:=revenue90 xField:\"x\" yField:\"y\"\n  Text.strong \"Sign-ups by channel\"\n  if range==\"7 days\"\n    BarChart values:[120,90,80,70,52] labels:[\"Organic\",\"Paid\",\"Referral\",\"Social\",\"Email\"]\n  if range==\"30 days\"\n    BarChart values:[560,430,350,300,200] labels:[\"Organic\",\"Paid\",\"Referral\",\"Social\",\"Email\"]\n  if range==\"90 days\"\n    BarChart values:[1600,1250,1000,850,620] labels:[\"Organic\",\"Paid\",\"Referral\",\"Social\",\"Email\"]\n  Text.strong \"Top plans\"\n  Row gap:6\n    ChoiceChip \"Plan\" selected:=sortKey==\"name\" -> sortKey=\"name\"; plans=sort(plans,\"name\")\n    ChoiceChip \"Revenue\" selected:=sortKey==\"revenue\" -> sortKey=\"revenue\"; plans=sortDesc(plans,\"revenue\")\n    ChoiceChip \"Users\" selected:=sortKey==\"users\" -> sortKey=\"users\"; plans=sortDesc(plans,\"users\")\n    ChoiceChip \"Churn\" selected:=sortKey==\"churn\" -> sortKey=\"churn\"; plans=sort(plans,\"churn\")\n  Row between\n    Text.caption \"Plan\"\n    Text.caption \"Revenue\"\n    Text.caption \"Users\"\n    Text.caption \"Churn\"\n  Divider\n  each p in plans\n    Row between\n      Text.strong \"{p.name}\"\n      Text \"${p.revenue}\"\n      Text \"{p.users}\"\n      Text \"{p.churn}%\"","usage":{"input_tokens":4484,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1695,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":808,"totalMs":7843}}
+{"tMs":808,"delta":"Card w:390 gap"}
+{"tMs":1132,"delta":":12\n  state range=\"30"}
+{"tMs":1132,"delta":" days\"\n  state sort"}
+{"tMs":1132,"delta":"Key=\"revenue\""}
+{"tMs":1132,"delta":"\n  state revenue7=["}
+{"tMs":1132,"delta":"{\"x\":1,\"y"}
+{"tMs":1132,"delta":"\":2.1},{\"x"}
+{"tMs":1132,"delta":"\":2,\"y\":2."}
+{"tMs":1132,"delta":"3},{\"x\":3,"}
+{"tMs":1132,"delta":"\"y\":2.2},{"}
+{"tMs":1142,"delta":"\"x\":4,\"y\":"}
+{"tMs":1174,"delta":"2.6},{\"x\":"}
+{"tMs":1207,"delta":"5,\"y\":2.8"}
+{"tMs":1462,"delta":"},{\"x\":6,\""}
+{"tMs":1462,"delta":"y\":2.7},{\""}
+{"tMs":1462,"delta":"x\":7,\"y\":3"}
+{"tMs":1462,"delta":".0}]\n  state rev"}
+{"tMs":1462,"delta":"enue30=[{\"x"}
+{"tMs":1462,"delta":"\":1,\"y\":8},"}
+{"tMs":1462,"delta":"{\"x\":2,\"y"}
+{"tMs":1474,"delta":"\":9},{\"x\":3"}
+{"tMs":1507,"delta":",\"y\":9.5},"}
+{"tMs":1541,"delta":"{\"x\":4,\"y"}
+{"tMs":1574,"delta":"\":10},{\"x\":5"}
+{"tMs":1607,"delta":",\"y\":10.8},"}
+{"tMs":1798,"delta":"{\"x\":6,\"y"}
+{"tMs":1798,"delta":"\":11.2},{\"x"}
+{"tMs":1798,"delta":"\":7,\"y\":12."}
+{"tMs":1798,"delta":"4}]\n  state reven"}
+{"tMs":1798,"delta":"ue90=[{\"x\":"}
+{"tMs":1807,"delta":"1,\"y\":22},{"}
+{"tMs":1841,"delta":"\"x\":2,\"y\":"}
+{"tMs":1875,"delta":"25},{\"x\":3,"}
+{"tMs":1910,"delta":"\"y\":27},{\"x"}
+{"tMs":1940,"delta":"\":4,\"y\":30},"}
+{"tMs":1974,"delta":"{\"x\":5,\"y"}
+{"tMs":2007,"delta":"\":33},{\"x\":6"}
+{"tMs":2133,"delta":",\"y\":36},{\""}
+{"tMs":2133,"delta":"x\":7,\"y\":38"}
+{"tMs":2133,"delta":"}]\n  state plans="}
+{"tMs":2140,"delta":"[{\"name\":\"Team"}
+{"tMs":2174,"delta":"\",\"revenue\":14200,"}
+{"tMs":2208,"delta":"\"users\":310,\"churn"}
+{"tMs":2240,"delta":"\":2.1},{\"name"}
+{"tMs":2273,"delta":"\":\"Pro\",\"reven"}
+{"tMs":2309,"delta":"ue\":11800,\"users\":"}
+{"tMs":2341,"delta":"520,\"churn\":3."}
+{"tMs":2374,"delta":"4},{\"name\":\""}
+{"tMs":2407,"delta":"Business\",\"revenue\":9600"}
+{"tMs":2465,"delta":",\"users\":84,\"chur"}
+{"tMs":2474,"delta":"n\":1.2},{\""}
+{"tMs":2507,"delta":"name\":\"Starter\",\"rev"}
+{"tMs":2541,"delta":"enue\":4300,\"users"}
+{"tMs":2575,"delta":"\":890,\"churn\":5"}
+{"tMs":2607,"delta":".8},{\"name\":\""}
+{"tMs":2641,"delta":"Enterprise\",\"reven"}
+{"tMs":2675,"delta":"ue\":3900,\"users\":"}
+{"tMs":2708,"delta":"12,\"churn\":0."}
+{"tMs":2741,"delta":"8}]\n  Text."}
+{"tMs":2774,"delta":"title \"Product performance\""}
+{"tMs":2809,"delta":"\n  SegmentedButton"}
+{"tMs":2841,"delta":" =range items:[\"7 days"}
+{"tMs":2874,"delta":"\",\"30 days\",\"90 days"}
+{"tMs":2907,"delta":"\"]\n  Grid c"}
+{"tMs":2941,"delta":"ols:2 gap:8"}
+{"tMs":2975,"delta":"\n    Card gap:4"}
+{"tMs":3007,"delta":"\n      Text.caption \""}
+{"tMs":3040,"delta":"Revenue\"\n      if"}
+{"tMs":3074,"delta":" range==\"7 days\""}
+{"tMs":3107,"delta":"\n        Text.heading \"$"}
+{"tMs":3141,"delta":"21.4k\"\n        "}
+{"tMs":3174,"delta":"Badge.success \"+3."}
+{"tMs":3207,"delta":"2%\"\n      if range="}
+{"tMs":3241,"delta":"=\"30 days\"\n        "}
+{"tMs":3274,"delta":"Text.heading \"$84."}
+{"tMs":3307,"delta":"2k\"\n        Badge"}
+{"tMs":3341,"delta":".success \"+8.5%"}
+{"tMs":3374,"delta":"\"\n      if range==\"90"}
+{"tMs":3407,"delta":" days\"\n        Text."}
+{"tMs":3441,"delta":"heading \"$236k\""}
+{"tMs":3474,"delta":"\n        Badge.success \"+"}
+{"tMs":3507,"delta":"14.1%\"\n    "}
+{"tMs":3542,"delta":"Card gap:4\n      "}
+{"tMs":3574,"delta":"Text.caption \"Sign"}
+{"tMs":3608,"delta":"-ups\"\n      if range"}
+{"tMs":3640,"delta":"==\"7 days\"\n        "}
+{"tMs":3674,"delta":"Text.heading \"412\""}
+{"tMs":3708,"delta":"\n        Badge.success \""}
+{"tMs":3741,"delta":"+2.0%\"\n      "}
+{"tMs":3774,"delta":"if range==\"30 days\""}
+{"tMs":3807,"delta":"\n        Text.heading \""}
+{"tMs":3841,"delta":"1,840\"\n        Bad"}
+{"tMs":3876,"delta":"ge.success \"+6.7"}
+{"tMs":3907,"delta":"%\"\n      if range==\""}
+{"tMs":3941,"delta":"90 days\"\n        Text"}
+{"tMs":3974,"delta":".heading \"5,320\""}
+{"tMs":4008,"delta":"\n        Badge.success \""}
+{"tMs":4042,"delta":"+11.3%\"\n    "}
+{"tMs":4075,"delta":"Card gap:4\n      "}
+{"tMs":4107,"delta":"Text.caption \"Chur"}
+{"tMs":4141,"delta":"n\"\n      if range==\""}
+{"tMs":4174,"delta":"7 days\"\n        Text"}
+{"tMs":4207,"delta":".heading \"0.9%"}
+{"tMs":4241,"delta":"\"\n        Badge.dan"}
+{"tMs":4274,"delta":"ger \"+0.1%\""}
+{"tMs":4307,"delta":"\n      if range==\"30 "}
+{"tMs":4341,"delta":"days\"\n        Text.he"}
+{"tMs":4374,"delta":"ading \"3.4%\""}
+{"tMs":4407,"delta":"\n        Badge.danger \""}
+{"tMs":4440,"delta":"+0.3%\"\n      "}
+{"tMs":4474,"delta":"if range==\"90 days\""}
+{"tMs":4507,"delta":"\n        Text.heading \""}
+{"tMs":4541,"delta":"9.8%\"\n        "}
+{"tMs":4575,"delta":"Badge.success \"-0."}
+{"tMs":4607,"delta":"5%\"\n    Card g"}
+{"tMs":4640,"delta":"ap:4\n      Text."}
+{"tMs":4677,"delta":"caption \"Active users\""}
+{"tMs":4707,"delta":"\n      if range==\"7 days"}
+{"tMs":4741,"delta":"\"\n        Text.heading"}
+{"tMs":4774,"delta":" \"9.1k\"\n        "}
+{"tMs":4808,"delta":"Badge.success \"+1"}
+{"tMs":4841,"delta":".1%\"\n      if range"}
+{"tMs":4886,"delta":"==\"30 days\"\n        "}
+{"tMs":4915,"delta":"Text.heading \"12."}
+{"tMs":4947,"delta":"6k\"\n        Badge"}
+{"tMs":4982,"delta":".success \"+4.9%"}
+{"tMs":5007,"delta":"\"\n      if range==\"90"}
+{"tMs":5041,"delta":" days\"\n        Text."}
+{"tMs":5074,"delta":"heading \"13.2k\""}
+{"tMs":5107,"delta":"\n        Badge.success \""}
+{"tMs":5142,"delta":"+9.0%\"\n  "}
+{"tMs":5176,"delta":"Text.strong \"Rev"}
+{"tMs":5208,"delta":"enue\"\n  if range="}
+{"tMs":5241,"delta":"=\"7 days\"\n    L"}
+{"tMs":5274,"delta":"ineChart data:=reven"}
+{"tMs":5307,"delta":"ue7 xField:\"x"}
+{"tMs":5341,"delta":"\" yField:\"y\""}
+{"tMs":5374,"delta":"\n  if range==\"30 days"}
+{"tMs":5407,"delta":"\"\n    LineChart data"}
+{"tMs":5443,"delta":":=revenue30 x"}
+{"tMs":5474,"delta":"Field:\"x\" yField:"}
+{"tMs":5507,"delta":"\"y\"\n  if range="}
+{"tMs":5541,"delta":"=\"90 days\"\n    L"}
+{"tMs":5574,"delta":"ineChart data:=reven"}
+{"tMs":5607,"delta":"ue90 xField:\"x"}
+{"tMs":5641,"delta":"\" yField:\"y\""}
+{"tMs":5674,"delta":"\n  Text.strong \""}
+{"tMs":5707,"delta":"Sign-ups by channel"}
+{"tMs":5741,"delta":"\"\n  if range==\"7"}
+{"tMs":5774,"delta":" days\"\n    BarCh"}
+{"tMs":5807,"delta":"art values:[120,90,"}
+{"tMs":5841,"delta":"80,70,52] labels"}
+{"tMs":5874,"delta":":[\"Organic\",\"Pa"}
+{"tMs":5908,"delta":"id\",\"Referral\",\"Social"}
+{"tMs":5942,"delta":"\",\"Email\"]\n  if"}
+{"tMs":5974,"delta":" range==\"30 days\""}
+{"tMs":6007,"delta":"\n    BarChart values:["}
+{"tMs":6041,"delta":"560,430,350,300,"}
+{"tMs":6074,"delta":"200] labels:[\"Organ"}
+{"tMs":6108,"delta":"ic\",\"Paid\",\"Refer"}
+{"tMs":6141,"delta":"ral\",\"Social\",\"Email\""}
+{"tMs":6174,"delta":"]\n  if range==\"90"}
+{"tMs":6207,"delta":" days\"\n    BarCh"}
+{"tMs":6241,"delta":"art values:[1600,1"}
+{"tMs":6274,"delta":"250,1000,850,620"}
+{"tMs":6308,"delta":"] labels:[\"Organic"}
+{"tMs":6341,"delta":"\",\"Paid\",\"Referral"}
+{"tMs":6374,"delta":"\",\"Social\",\"Email\"]"}
+{"tMs":6407,"delta":"\n  Text.strong \""}
+{"tMs":6441,"delta":"Top plans\"\n  "}
+{"tMs":6474,"delta":"Row gap:6\n    "}
+{"tMs":6507,"delta":"ChoiceChip \""}
+{"tMs":6540,"delta":"Plan\" selected:=s"}
+{"tMs":6574,"delta":"ortKey==\"name\" -"}
+{"tMs":6607,"delta":"> sortKey=\"name\""}
+{"tMs":6641,"delta":"; plans=sort(pl"}
+{"tMs":6674,"delta":"ans,\"name\")\n    "}
+{"tMs":6708,"delta":"ChoiceChip \""}
+{"tMs":6742,"delta":"Revenue\" selected:="}
+{"tMs":6775,"delta":"sortKey==\"reven"}
+{"tMs":6808,"delta":"ue\" -> sortKey"}
+{"tMs":6841,"delta":"=\"revenue\"; plans"}
+{"tMs":6875,"delta":"=sortDesc(pl"}
+{"tMs":6907,"delta":"ans,\"revenue\")"}
+{"tMs":6941,"delta":"\n    ChoiceChip"}
+{"tMs":6974,"delta":" \"Users\" selected:="}
+{"tMs":7007,"delta":"sortKey==\"users\""}
+{"tMs":7041,"delta":" -> sortKey=\"users"}
+{"tMs":7074,"delta":"\"; plans=sortD"}
+{"tMs":7107,"delta":"esc(plans,\"users"}
+{"tMs":7141,"delta":"\")\n    Choice"}
+{"tMs":7174,"delta":"Chip \"Churn\" sel"}
+{"tMs":7207,"delta":"ected:=sortKey="}
+{"tMs":7241,"delta":"=\"churn\" -> sort"}
+{"tMs":7274,"delta":"Key=\"churn\"; pl"}
+{"tMs":7308,"delta":"ans=sort(plans,"}
+{"tMs":7341,"delta":"\"churn\")\n  Row"}
+{"tMs":7374,"delta":" between\n    Text.caption"}
+{"tMs":7408,"delta":" \"Plan\"\n    "}
+{"tMs":7441,"delta":"Text.caption \"Reven"}
+{"tMs":7474,"delta":"ue\"\n    Text.ca"}
+{"tMs":7507,"delta":"ption \"Users\"\n    "}
+{"tMs":7541,"delta":"Text.caption \"Churn"}
+{"tMs":7575,"delta":"\"\n  Divider\n  "}
+{"tMs":7608,"delta":"each p in plans\n    "}
+{"tMs":7641,"delta":"Row between\n      Text.str"}
+{"tMs":7676,"delta":"ong \"{p.name}\""}
+{"tMs":7708,"delta":"\n      Text \"${p."}
+{"tMs":7741,"delta":"revenue}\"\n      "}
+{"tMs":7774,"delta":"Text \"{p.users}\""}
+{"tMs":7808,"delta":"\n      Text \"{p."}
+{"tMs":7842,"delta":"churn}%\""}

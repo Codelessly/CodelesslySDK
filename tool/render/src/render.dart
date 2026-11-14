@@ -432,6 +432,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   FlutterError.onError = (details) {
     _errorDetails[details.exception] = details;
     _errorLog.add(details);
+    if (Platform.environment['RENDER_DEBUG_STACKS'] != null) {
+      stderr.writeln('--- ${details.exceptionAsString().split('\n').first}\n${'${details.stack}'.split('\n').take(18).join('\n')}');
+    }
     previousOnError?.call(details);
   };
   // The clipboard, in memory (a headless run has none): what is copied is
@@ -541,6 +544,9 @@ Future<void> _renderAll(
         Object? e;
         while ((e = tester.takeException()) != null) {
           taken.add(e!);
+          if (Platform.environment['RENDER_DEBUG_STACKS'] != null && e is Error) {
+            stderr.writeln('--- taken: ${'$e'.split('\n').first}\n${'${e.stackTrace}'.split('\n').take(16).join('\n')}');
+          }
         }
         final reported = [..._errorLog];
         _errorLog.clear();
@@ -1278,8 +1284,25 @@ List<NodeBox> _boxes(WidgetsBinding binding) {
   return [
     for (final view in binding.renderViews)
       for (final o in _descendants(view, skip: skip))
-        if (o is NodeBox && o.attached && o.hasSize) o,
+        if (o is NodeBox && o.attached && o.hasSize && _rooted(o, view)) o,
   ];
+}
+
+/// Whether [o]'s parents lead to [root]. A render object that still visits
+/// a child it no longer holds (a field hidden by a condition, say) would
+/// otherwise be measured from a tree it is not in.
+bool _rooted(RenderObject o, RenderObject root) {
+  for (RenderObject? p = o; p != null; p = p.parent) {
+    if (identical(p, root)) return true;
+  }
+  if (Platform.environment['RENDER_DEBUG_ORPHANS'] != null) {
+    final chain = <String>[];
+    for (RenderObject? p = o; p != null; p = p.parent) {
+      chain.add(p is NodeBox ? 'NodeBox(${p.id})' : '${p.runtimeType}');
+    }
+    stderr.writeln('orphan: ${chain.join(' < ')}');
+  }
+  return false;
 }
 
 /// The box of node [id] on screen: the topmost (the last painted), or with

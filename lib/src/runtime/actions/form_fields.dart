@@ -113,7 +113,9 @@ class FormRegistry {
           e,
     ];
     Offset at(FormFieldEntry e) {
-      if (e.box case final RenderBox box when box.attached) return box.localToGlobal(Offset.zero);
+      // A field hidden by a condition can still be attached while its
+      // parents no longer lead to the view: it has no place, and sorts last.
+      if (e.box case final RenderBox box when box.attached && box.hasSize && _inView(box)) return box.localToGlobal(Offset.zero);
       return Offset.infinite;
     }
 
@@ -123,6 +125,15 @@ class FormRegistry {
       return dy != 0 ? dy : pa.dx.compareTo(pb.dx);
     });
     return out;
+  }
+
+  /// Whether [box]'s parents lead to the root of its pipeline.
+  static bool _inView(RenderObject box) {
+    final root = box.owner?.rootNode;
+    for (RenderObject? p = box; p != null; p = p.parent) {
+      if (identical(p, root)) return true;
+    }
+    return false;
   }
 
   /// Stands for every instance of a form ([fieldsOf], [validate]).

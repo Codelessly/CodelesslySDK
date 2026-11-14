@@ -1,0 +1,114 @@
+{"meta":{"ui":"plan_progress","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"Card w:390 gap:12\n  state step=0\n  state running=false\n  state elapsed=0\n  state steps=[{\"n\":1,\"t\":\"Back up your blog\",\"d\":\"Save a full copy of posts, images and settings.\"},{\"n\":2,\"t\":\"Export content\",\"d\":\"Export posts, pages and comments to a file.\"},{\"n\":3,\"t\":\"Set up the new host\",\"d\":\"Create the site and point it at your domain.\"},{\"n\":4,\"t\":\"Import posts and media\",\"d\":\"Upload the export and check images load.\"},{\"n\":5,\"t\":\"Redirect old URLs\",\"d\":\"Keep links and search rankings working.\"},{\"n\":6,\"t\":\"Verify and go live\",\"d\":\"Test pages, feeds and forms, then switch over.\"}]\n  Text.title \"Blog migration plan\"\n  Progress =step/6\n  Row between middle\n    Text.muted \"{step} of 6 done\"\n    Text.muted \"Elapsed: {elapsed}s\"\n  Divider\n  each s in steps\n    Row gap:12 top\n      if s.n<=step\n        Icon \"check_circle\"\n      if s.n>step\n        if running && s.n==step+1\n          CircularProgressIndicator w:24 h:24\n        if !running || s.n!=step+1\n          Icon \"radio_button_unchecked\"\n      Column gap:2 grow\n        Text.strong \"{s.n}. {s.t}\"\n        Text.muted \"{s.d}\"\n  Row gap:8\n    Button \"Start\" visible:=!running&&step==0 -> running=true; emit start\n    Button \"Resume\" visible:=!running&&step>0&&step<6 -> running=true; emit resume\n    Button.outline \"Pause\" visible:=running -> running=false; emit pause\n  if step>=6\n    Card gap:4\n      Text.heading \"Migration complete\"\n      Text.success \"All 6 steps finished in {elapsed}s.\"\n      Text.muted \"Your blog is live on the new host.\"","usage":{"input_tokens":1836,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1159,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":516}},"ttftMs":5694,"totalMs":9476}}
+{"tMs":5694,"delta":"Card w:390 "}
+{"tMs":5726,"delta":"gap:12\n  state"}
+{"tMs":5759,"delta":" step=0"}
+{"tMs":5793,"delta":"\n  state running=false\n  state"}
+{"tMs":5826,"delta":" elapsed=0\n  "}
+{"tMs":5861,"delta":"state steps=[{\"n"}
+{"tMs":5893,"delta":"\":1,\"t"}
+{"tMs":5927,"delta":"\":\"Back up your bl"}
+{"tMs":5961,"delta":"og\",\"d\":\"Save"}
+{"tMs":5994,"delta":" a full"}
+{"tMs":6027,"delta":" copy of pos"}
+{"tMs":6060,"delta":"ts,"}
+{"tMs":6094,"delta":" images"}
+{"tMs":6127,"delta":" and settings.\"},{\"n"}
+{"tMs":6160,"delta":"\":2,\"t\":\""}
+{"tMs":6194,"delta":"Export content"}
+{"tMs":6227,"delta":"\",\"d\":\"Export"}
+{"tMs":6261,"delta":" posts, pages and comments"}
+{"tMs":6294,"delta":" to"}
+{"tMs":6327,"delta":" a"}
+{"tMs":6361,"delta":" file.\"},{\"n\":3"}
+{"tMs":6394,"delta":",\"t\":\"Set up"}
+{"tMs":6428,"delta":" the new host\",\"d\":\""}
+{"tMs":6462,"delta":"Create the site"}
+{"tMs":6494,"delta":" and point"}
+{"tMs":6528,"delta":" it at your"}
+{"tMs":6563,"delta":" dom"}
+{"tMs":6595,"delta":"ain.\"},{\"n\":4"}
+{"tMs":6629,"delta":",\"t\":\"Import pos"}
+{"tMs":6661,"delta":"ts and media\",\"d\":\""}
+{"tMs":6695,"delta":"Upload the export"}
+{"tMs":6728,"delta":" and check"}
+{"tMs":6761,"delta":" images"}
+{"tMs":6795,"delta":" load"}
+{"tMs":6828,"delta":".\"},{\"n\":5,"}
+{"tMs":6862,"delta":"\"t\":\"Redirect"}
+{"tMs":6895,"delta":" old URLs\",\"d\":\""}
+{"tMs":6928,"delta":"Keep links and"}
+{"tMs":6962,"delta":" search r"}
+{"tMs":6996,"delta":"ankings working.\"},{\"n"}
+{"tMs":7029,"delta":"\":6,\"t\":\""}
+{"tMs":7062,"delta":"Verify and go live\",\"d\":"}
+{"tMs":7096,"delta":"\"Test p"}
+{"tMs":7130,"delta":"ages,"}
+{"tMs":7163,"delta":" feeds and for"}
+{"tMs":7196,"delta":"ms, then switch over"}
+{"tMs":7230,"delta":".\"}]\n  Text."}
+{"tMs":7263,"delta":"title \"Blog migration pl"}
+{"tMs":7297,"delta":"an\"\n  Prog"}
+{"tMs":7335,"delta":"ress ="}
+{"tMs":7371,"delta":"step/"}
+{"tMs":7399,"delta":"6\n  Row between midd"}
+{"tMs":7430,"delta":"le\n    Text.mu"}
+{"tMs":7465,"delta":"ted \"{step} of 6"}
+{"tMs":7496,"delta":" done"}
+{"tMs":7532,"delta":"\"\n    Text.muted"}
+{"tMs":7563,"delta":" \"El"}
+{"tMs":7597,"delta":"apsed: {elaps"}
+{"tMs":7630,"delta":"ed}s\"\n  "}
+{"tMs":7663,"delta":"Divider\n  each s"}
+{"tMs":7697,"delta":" in steps\n    Row g"}
+{"tMs":7730,"delta":"ap:12"}
+{"tMs":7764,"delta":" top"}
+{"tMs":7797,"delta":"\n      if"}
+{"tMs":7830,"delta":" s.n<=step\n        "}
+{"tMs":7864,"delta":"Icon \"check_circle"}
+{"tMs":7898,"delta":"\"\n      if s.n>"}
+{"tMs":7931,"delta":"step\n        if"}
+{"tMs":7969,"delta":" running"}
+{"tMs":8000,"delta":" && s.n==step+1"}
+{"tMs":8032,"delta":"\n          CircularProgress"}
+{"tMs":8066,"delta":"Indicator w:24"}
+{"tMs":8100,"delta":" h:24\n        if"}
+{"tMs":8134,"delta":" !running ||"}
+{"tMs":8165,"delta":" s.n!"}
+{"tMs":8199,"delta":"=step+1\n          Ic"}
+{"tMs":8236,"delta":"on \"radio_button_un"}
+{"tMs":8266,"delta":"checked\"\n      Column"}
+{"tMs":8298,"delta":" g"}
+{"tMs":8332,"delta":"ap:2"}
+{"tMs":8365,"delta":" grow\n        Text."}
+{"tMs":8398,"delta":"strong \""}
+{"tMs":8431,"delta":"{s.n"}
+{"tMs":8466,"delta":"}."}
+{"tMs":8498,"delta":" {s.t}\"\n        "}
+{"tMs":8532,"delta":"Text.muted \"{s"}
+{"tMs":8565,"delta":".d}\"\n  Row"}
+{"tMs":8599,"delta":" gap:8"}
+{"tMs":8633,"delta":"\n    Button \""}
+{"tMs":8665,"delta":"Start\" visible:=!"}
+{"tMs":8705,"delta":"running&"}
+{"tMs":8732,"delta":"&step==0 -> running"}
+{"tMs":8765,"delta":"=true; emit start\n    "}
+{"tMs":8799,"delta":"Button \"Resume\" vis"}
+{"tMs":8832,"delta":"ible:=!"}
+{"tMs":8866,"delta":"running&&step>0&"}
+{"tMs":8899,"delta":"&step<6 -> running"}
+{"tMs":8932,"delta":"=true; emit resume"}
+{"tMs":8966,"delta":"\n    Button.outline \""}
+{"tMs":8999,"delta":"Pause\" visible:=running"}
+{"tMs":9033,"delta":" -> running=false; emit"}
+{"tMs":9067,"delta":" pause\n  if step>"}
+{"tMs":9100,"delta":"=6\n    Card gap"}
+{"tMs":9133,"delta":":4"}
+{"tMs":9200,"delta":"\n      Text.he"}
+{"tMs":9240,"delta":"ading \"Mig"}
+{"tMs":9267,"delta":"ration complete\"\n      Text"}
+{"tMs":9302,"delta":".success"}
+{"tMs":9334,"delta":" \"All 6 steps fin"}
+{"tMs":9366,"delta":"ished in {elapsed}"}
+{"tMs":9401,"delta":"s.\"\n      Text.mu"}
+{"tMs":9434,"delta":"ted \"Your blog is"}
+{"tMs":9468,"delta":" live on the new host.\""}
