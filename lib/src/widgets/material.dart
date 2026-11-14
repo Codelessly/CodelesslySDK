@@ -1,8 +1,9 @@
 // Widget recipes: material. See lib/src/render/recipe.dart.
 //
-// Buttons, chips, app bars, navigation bars, list tiles and floating action
-// buttons need ink and an element tree: they're islands hosting the real
-// Material widgets. A divider and a badge are only
+// Chips, app bars, navigation bars and list tiles are still islands hosting
+// the real Material widgets (Milestone 3 moves them to render objects:
+// codelessly_api docs/design/11-no-widgets.md); buttons are render objects
+// (render/controls/buttons.dart). A divider and a badge are only
 // layout and paint: render objects. A modal shows its trigger in place.
 import 'dart:math' as math;
 
@@ -11,12 +12,9 @@ import 'package:codelessly_api/core.dart'
     show
         AppBarProps,
         BadgeProps,
-        ButtonProps,
         ChipProps,
         ChipVariant,
         DividerProps,
-        FloatingActionButtonProps,
-        IconButtonProps,
         Json,
         ListTileProps,
         NavigationBarProps,
@@ -37,12 +35,6 @@ import '../runtime/http_image_loader.dart';
 
 /// Recipes for the material group, by node type.
 final Map<String, WidgetRecipe> materialRecipes = {
-  'elevatedButton': _button,
-  'filledButton': _button,
-  'textButton': _button,
-  'outlinedButton': _button,
-  'iconButton': _iconButton,
-  'floatingActionButton': _fab,
   'chip': _chip,
   'actionChip': _chip,
   'choiceChip': _chip,
@@ -165,11 +157,8 @@ VoidCallback _press(BuildContext context) => () {
     };
 
 // --- buttons ------------------------------------------------------------------
-
-void _button(NodeBuilder b, Node n, List<RenderBox> chain) {
-  _fit(b, n, chain);
-  chain.add(_pressable(b, 'button', (context) => _buildButton(context, n)));
-}
+//
+// Buttons are render objects: render/controls/buttons.dart.
 
 /// A control's label color when its node sets none: its own text style's,
 /// else one that reads on its own [background] when it has one; null
@@ -179,214 +168,6 @@ Color? labelColor(api.Color? foreground, api.TextStyle? label, api.Color? backgr
   if (own != null) return own;
   final fill = _color(background);
   return fill != null && fill.a > .9 ? onColor(fill) : null;
-}
-
-Widget _buildButton(BuildContext context, Node n) {
-  final s = n.prop(ButtonProps.style);
-  final padding = n.layout.padding.flutter;
-  final shape = s.shape == null ? null : _shape(s.shape!);
-  // An empty style is the base text style, in the theme's font.
-  final text = themeFont(context, textStyle(s.textStyle, n.behaviors.defaultTextStyle));
-  final elevation = s.elevation;
-  final foreground = labelColor(s.foregroundColor, s.textStyle, s.backgroundColor);
-  final ButtonStyle style = switch (n.type) {
-    'elevatedButton' => ElevatedButton.styleFrom(
-        foregroundColor: foreground,
-        backgroundColor: _color(s.backgroundColor),
-        shadowColor: _color(s.shadowColor),
-        elevation: elevation,
-        iconColor: _color(s.iconColor),
-        iconSize: s.iconSize,
-        visualDensity: VisualDensity.standard,
-        padding: padding,
-        textStyle: text,
-        minimumSize: Size.zero,
-        shape: shape,
-      ),
-    'filledButton' => FilledButton.styleFrom(
-        foregroundColor: foreground,
-        backgroundColor: _color(s.backgroundColor),
-        shadowColor: _color(s.shadowColor),
-        elevation: elevation,
-        iconColor: _color(s.iconColor),
-        iconSize: s.iconSize,
-        visualDensity: VisualDensity.standard,
-        padding: padding,
-        textStyle: text,
-        minimumSize: Size.zero,
-        shape: shape,
-      ),
-    'outlinedButton' => OutlinedButton.styleFrom(
-        foregroundColor: foreground,
-        backgroundColor: _color(s.backgroundColor),
-        shadowColor: _color(s.shadowColor),
-        elevation: elevation,
-        iconColor: _color(s.iconColor),
-        iconSize: s.iconSize,
-        side: s.side == null ? null : BorderSide(color: _color(s.side!.color) ?? Colors.black, width: s.side!.width),
-        visualDensity: VisualDensity.standard,
-        padding: padding,
-        textStyle: text,
-        minimumSize: Size.zero,
-        shape: shape,
-      ),
-    _ => TextButton.styleFrom(
-        foregroundColor: foreground,
-        backgroundColor: _color(s.backgroundColor),
-        shadowColor: _color(s.shadowColor),
-        elevation: elevation,
-        iconColor: _color(s.iconColor),
-        iconSize: s.iconSize,
-        visualDensity: VisualDensity.standard,
-        padding: padding,
-        textStyle: text,
-        minimumSize: Size.zero,
-        shape: shape,
-      ),
-  };
-  final effective = elevation == null ? style : style.copyWith(elevation: WidgetStatePropertyAll(elevation));
-  final label = Text(n.prop(ButtonProps.label), textAlign: textAlign(n.prop(ButtonProps.textAlign)));
-  final icon = _icon(n.prop(ButtonProps.icon), size: s.iconSize, color: _color(s.iconColor));
-  Widget child = label;
-  if (icon != null) {
-    final gap = SizedBox(width: n.prop(ButtonProps.spacing));
-    final end = n.prop(ButtonProps.iconAlignment) == api.IconAlignment.end;
-    child = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (!end) ...[icon, gap],
-        Flexible(child: label),
-        if (end) ...[gap, icon],
-      ],
-    );
-  }
-  final onPressed = n.prop(ButtonProps.enabled) ? _press(context) : null;
-  return switch (n.type) {
-    'elevatedButton' => ElevatedButton(onPressed: onPressed, style: effective, child: child),
-    // Tonal: the theme's selected tint, unless the node sets its colors.
-    'filledButton' when n.prop(ButtonProps.tonal) => FilledButton.tonal(
-        onPressed: onPressed,
-        style: effective.merge(FilledButton.styleFrom(
-          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-          foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-        )),
-        child: child),
-    'filledButton' => FilledButton(onPressed: onPressed, style: effective, child: child),
-    'outlinedButton' => OutlinedButton(onPressed: onPressed, style: effective, child: child),
-    _ => TextButton(onPressed: onPressed, style: effective, child: child),
-  };
-}
-
-void _iconButton(NodeBuilder b, Node n, List<RenderBox> chain) {
-  _fit(b, n, chain);
-  chain.add(_pressable(b, 'button', (context) {
-    final s = n.prop(IconButtonProps.style);
-    final elevation = s.elevation;
-    var style = TextButton.styleFrom(
-      foregroundColor: labelColor(s.foregroundColor, null, s.backgroundColor),
-      backgroundColor: _color(s.backgroundColor),
-      shadowColor: _color(s.shadowColor),
-      elevation: elevation,
-      visualDensity: VisualDensity.standard,
-      padding: n.layout.padding.flutter,
-      minimumSize: Size.zero,
-      shape: s.shape == null ? null : _shape(s.shape!),
-      textStyle: const TextStyle(),
-    );
-    if (elevation != null) style = style.copyWith(elevation: WidgetStatePropertyAll(elevation));
-    // A plain button around the glyph: no raised surface, no tint.
-    return TextButton(
-      onPressed: n.prop(IconButtonProps.enabled) ? _press(context) : null,
-      style: style,
-      child: _icon(n.prop(IconButtonProps.icon), size: s.iconSize, color: _color(s.iconColor)) ?? const SizedBox.shrink(),
-    );
-  }));
-}
-
-void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
-  _fixed(b, n, chain);
-  chain.add(_pressable(b, 'fab', (context) {
-    final type = n.prop(FloatingActionButtonProps.type);
-    final shape = n.prop(FloatingActionButtonProps.shape);
-    final background = _color(n.prop(FloatingActionButtonProps.backgroundColor));
-    final foreground = labelColor(
-        n.prop(FloatingActionButtonProps.foregroundColor), null, n.prop(FloatingActionButtonProps.backgroundColor));
-    final icon = _icon(n.prop(FloatingActionButtonProps.icon), color: foreground);
-    final elevation = n.prop(FloatingActionButtonProps.elevation);
-    final focusElevation = n.prop(FloatingActionButtonProps.focusElevation);
-    final hoverElevation = n.prop(FloatingActionButtonProps.hoverElevation);
-    final highlightElevation = n.prop(FloatingActionButtonProps.highlightElevation);
-    final focusColor = _color(n.prop(FloatingActionButtonProps.focusColor));
-    final hoverColor = _color(n.prop(FloatingActionButtonProps.hoverColor));
-    final splashColor = _color(n.prop(FloatingActionButtonProps.splashColor));
-    final s = shape == null ? null : _shape(shape);
-    return switch (type) {
-      api.FloatingActionButtonType.extended => FloatingActionButton.extended(
-          heroTag: null,
-          onPressed: _press(context),
-          extendedPadding: n.prop(FloatingActionButtonProps.extendedPadding)?.flutter,
-          backgroundColor: background,
-          foregroundColor: foreground,
-          elevation: elevation,
-          focusElevation: focusElevation,
-          hoverElevation: hoverElevation,
-          highlightElevation: highlightElevation,
-          focusColor: focusColor,
-          hoverColor: hoverColor,
-          splashColor: splashColor,
-          extendedIconLabelSpacing: n.prop(FloatingActionButtonProps.extendedIconLabelSpacing),
-          extendedTextStyle: themeFont(context, _textStyle(n.prop(FloatingActionButtonProps.extendedTextStyle), n.behaviors.defaultTextStyle)),
-          shape: s,
-          icon: icon,
-          label: Text(n.prop(FloatingActionButtonProps.label)),
-        ),
-      api.FloatingActionButtonType.small => FloatingActionButton.small(
-          heroTag: null,
-          onPressed: _press(context),
-          backgroundColor: background,
-          foregroundColor: foreground,
-          elevation: elevation,
-          focusElevation: focusElevation,
-          hoverElevation: hoverElevation,
-          highlightElevation: highlightElevation,
-          focusColor: focusColor,
-          hoverColor: hoverColor,
-          splashColor: splashColor,
-          shape: s,
-          child: icon,
-        ),
-      api.FloatingActionButtonType.large => FloatingActionButton.large(
-          heroTag: null,
-          onPressed: _press(context),
-          backgroundColor: background,
-          foregroundColor: foreground,
-          elevation: elevation,
-          focusElevation: focusElevation,
-          hoverElevation: hoverElevation,
-          highlightElevation: highlightElevation,
-          focusColor: focusColor,
-          hoverColor: hoverColor,
-          splashColor: splashColor,
-          shape: s,
-          child: icon,
-        ),
-      api.FloatingActionButtonType.regular => FloatingActionButton(
-          heroTag: null,
-          onPressed: _press(context),
-          backgroundColor: background,
-          foregroundColor: foreground,
-          elevation: elevation,
-          focusElevation: focusElevation,
-          hoverElevation: hoverElevation,
-          highlightElevation: highlightElevation,
-          focusColor: focusColor,
-          hoverColor: hoverColor,
-          splashColor: splashColor,
-          shape: s,
-          child: icon,
-        ),
-    };
-  }));
 }
 
 // --- chips --------------------------------------------------------------------

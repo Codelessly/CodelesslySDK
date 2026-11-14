@@ -424,6 +424,29 @@ class RenderTree {
     }
   }
 
+  /// The document's theme the controls draw with (over SSUI's defaults:
+  /// render/controls/tokens.dart): the component registry's theme (the
+  /// project's, as the screen shows it) when the tree has one, else the one
+  /// set here. A change re-applies the boxes that drew with it.
+  api.ThemeTokens get theme => components?.theme ?? _theme;
+  api.ThemeTokens _theme = api.ThemeTokens.none;
+  set theme(api.ThemeTokens value) {
+    if (value == _theme) return;
+    _theme = value;
+    _themeChanged();
+  }
+
+  /// Whether the screen is dark (the site's theme mode, the device's
+  /// setting): the controls take the theme's dark colours. A change
+  /// re-applies the boxes that drew with the theme.
+  bool get dark => _dark;
+  bool _dark = false;
+  set dark(bool value) {
+    if (value == _dark) return;
+    _dark = value;
+    _themeChanged();
+  }
+
   /// Boxes that drew with [ComponentRegistry.theme] itself (colours a node
   /// leaves unset that come from the theme's roles: an indicator's), noted
   /// by [dependOnTheme]: a change of theme (its mode) re-applies them. A

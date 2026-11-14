@@ -4,6 +4,7 @@
 // defaults, nothing of the app's theme.
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -199,6 +200,18 @@ void main() {
   });
 
   group('in a layout', () {
+    /// Node [id]'s button render object.
+    RenderButton button(NodeTree tree, String id) {
+      RenderButton? found;
+      void visit(RenderObject o) {
+        if (o is RenderButton) found ??= o;
+        o.visitChildren(visit);
+      }
+
+      visit(tree.boxOf(id)!);
+      return found!;
+    }
+
     Future<NodeTree> show(WidgetTester tester, Map<String, Json> nodes, {ThemeData? appTheme}) async {
       final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({'roots': ['band'], 'nodes': nodes})));
       addTearDown(tree.dispose);
@@ -211,7 +224,7 @@ void main() {
     }
 
     testWidgets('an unstyled text button on a dark band is labelled light, on paper dark', (tester) async {
-      await show(tester, {
+      final tree = await show(tester, {
         'band': {
           'type': 'column',
           'layout': {'width': 300, 'height': 200},
@@ -248,13 +261,12 @@ void main() {
           'props': {'label': 'Next'},
         },
       });
-      Color labelOf(String text) => DefaultTextStyle.of(tester.element(find.text(text))).style.color!;
-      expect(_contrast(labelOf('Back'), const Color(0xFF101418)), greaterThan(4.5));
-      expect(_contrast(labelOf('Next'), const Color(0xFFFFFFFF)), greaterThan(4.5));
+      expect(_contrast(button(tree, 'onDark').labelColor, const Color(0xFF101418)), greaterThan(4.5));
+      expect(_contrast(button(tree, 'onLight').labelColor, const Color(0xFFFFFFFF)), greaterThan(4.5));
     });
 
     testWidgets('a button with a fill but no label color is labelled in what reads on its fill', (tester) async {
-      await show(tester, {
+      final tree = await show(tester, {
         'band': {
           'type': 'filledButton',
           'layout': {'width': 120, 'height': 40},
@@ -264,12 +276,11 @@ void main() {
           },
         },
       });
-      final label = DefaultTextStyle.of(tester.element(find.text('Go'))).style.color!;
-      expect(_contrast(label, const Color(0xFFFFFFFF)), greaterThan(4.5));
+      expect(_contrast(button(tree, 'band').labelColor, const Color(0xFFFFFFFF)), greaterThan(4.5));
     });
 
     testWidgets('a button\'s label color set in its text style is the label\'s color', (tester) async {
-      await show(tester, {
+      final tree = await show(tester, {
         'band': {
           'type': 'textButton',
           'layout': {'width': 120, 'height': 40},
@@ -281,25 +292,25 @@ void main() {
           },
         },
       });
-      expect(DefaultTextStyle.of(tester.element(find.text('Back'))).style.color, const Color(0xFF244B32));
+      expect(button(tree, 'band').labelColor, const Color(0xFF244B32));
     });
 
     testWidgets('an icon button is a plain glyph: no raised surface', (tester) async {
-      await show(tester, {
+      final tree = await show(tester, {
         'band': {
           'type': 'iconButton',
           'layout': {'width': 48, 'height': 48},
           'props': {'icon': 'close'},
         },
       });
-      expect(find.byType(ElevatedButton), findsNothing);
-      final material = tester.widget<Material>(find.descendant(of: find.byType(TextButton), matching: find.byType(Material)).first);
-      expect(material.elevation, 0);
-      expect(material.color, Colors.transparent);
+      final b = button(tree, 'band');
+      expect(b.shadows, isEmpty);
+      expect(b.fillColor, isNull);
+      expect(b.borderSide, isNull);
     });
 
     testWidgets('the app\'s theme doesn\'t reach a layout\'s controls', (tester) async {
-      await show(
+      final tree = await show(
         tester,
         {
           'band': {
@@ -310,9 +321,9 @@ void main() {
         },
         appTheme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.red), fontFamily: 'Comic'),
       );
-      final context = tester.element(find.text('Go'));
-      expect(Theme.of(context).colorScheme.primary, kInk);
-      expect(DefaultTextStyle.of(context).style.fontFamily, isNot('Comic'));
+      // The default (SSUI) button: SSUI's primary, the platform's font.
+      expect(button(tree, 'band').fillColor, const Color(0xFF2563EB));
+      expect(button(tree, 'band').fontFamily, isNull);
     });
   });
 }

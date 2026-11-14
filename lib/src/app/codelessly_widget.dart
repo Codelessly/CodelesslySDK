@@ -811,6 +811,7 @@ class _LayoutViewState extends State<_LayoutView> {
   }
 
   DocumentSource? _pageSource;
+  NodeTree? _pageTree;
   LayoutDocument? _resolvedFrom;
   ThemeTokens? _resolvedWith;
 
@@ -825,6 +826,9 @@ class _LayoutViewState extends State<_LayoutView> {
     var theme = _tokens;
     if (size != null) theme = theme.atScreen(size.width, size.height, _breakpoints);
     theme = theme.forBrightness(dark: _dark);
+    // The controls the tree draws itself take the mode (and the theme from
+    // the component registry).
+    _pageTree?.dark = _dark;
     final doc = widget.layout.document;
     if (identical(doc, _resolvedFrom) && theme == _resolvedWith) return;
     _resolvedFrom = doc;
@@ -886,7 +890,7 @@ class _LayoutViewState extends State<_LayoutView> {
       source = bound = BoundSource(nodeValues, engine, scope);
     }
     final files = _codelessly.loader;
-    final tree = NodeTree(source,
+    final tree = _pageTree = NodeTree(source,
         binder: binder,
         recipes: config.allRecipes,
         components: _codelessly.components,

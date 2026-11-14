@@ -95,6 +95,77 @@ const widgetsForbiddenLayers = {'services', 'app', 'scripting'};
 /// Imports of widgets files the rule refuses, kept until they're removed.
 const Map<String, Map<String, String>> widgetsExceptions = {};
 
+/// Milestone 3 (codelessly_api docs/design/11-no-widgets.md): the files under
+/// lib that may still import `package:flutter/material.dart`,
+/// `cupertino.dart` or `widgets.dart`. The list only shrinks: a file not on
+/// it may not import them, and a file on it that no longer does fails until
+/// its line is removed. It started at 60 files.
+const widgetImportRatchet = {
+  'src/app/back_guard.dart',
+  'src/app/backdrop_screens.dart',
+  'src/app/codelessly.dart',
+  'src/app/codelessly_widget.dart',
+  'src/app/overlay_screens.dart',
+  'src/app/page_transitions.dart',
+  'src/app/paywalls.dart',
+  'src/app/presenter.dart',
+  'src/app/viewport.dart',
+  'src/features/engage/automations.dart',
+  'src/features/media/embedded_player_native.dart',
+  'src/features/media/embedded_player_web.dart',
+  'src/features/media/players.dart',
+  'src/features/media/recipes.dart',
+  'src/render/control_theme.dart',
+  'src/render/drag_track.dart',
+  'src/render/hero.dart',
+  'src/render/islands.dart',
+  'src/render/layout/freeform.dart',
+  'src/render/node_tree.dart',
+  'src/render/node_view.dart',
+  'src/render/recipe.dart',
+  'src/render/reveal.dart',
+  'src/render/typewriter.dart',
+  'src/render/view_scroll.dart',
+  'src/runtime/actions/capture.dart',
+  'src/runtime/actions/confirm_dialog.dart',
+  'src/runtime/actions/feedback_icon.dart',
+  'src/runtime/actions/feedback_theme.dart',
+  'src/runtime/actions/form_fields.dart',
+  'src/runtime/actions/handlers.dart',
+  'src/runtime/actions/hero_flights.dart',
+  'src/runtime/actions/presentation_route.dart',
+  'src/runtime/actions/presentation_scope.dart',
+  'src/runtime/actions/route_transition.dart',
+  'src/runtime/actions/text_fields.dart',
+  'src/runtime/actions/toast.dart',
+  'src/runtime/actions/ui.dart',
+  'src/runtime/actions/wiring.dart',
+  'src/runtime/expressions/paths.dart',
+  'src/runtime/gestures/drag_and_drop.dart',
+  'src/services/auth.dart',
+  'src/session/view.dart',
+  'src/widgets/collections.dart',
+  'src/widgets/collections_data_list.dart',
+  'src/widgets/collections_islands.dart',
+  'src/widgets/collections_list_runtime.dart',
+  'src/widgets/collections_page_runtime.dart',
+  'src/widgets/collections_pagination.dart',
+  'src/widgets/collections_reorder.dart',
+  'src/widgets/collections_swipe.dart',
+  'src/widgets/collections_table.dart',
+  'src/widgets/indicator_theme.dart',
+  'src/widgets/indicators.dart',
+  'src/widgets/inputs.dart',
+  'src/widgets/inputs_shapes.dart',
+  'src/widgets/inputs_toggle.dart',
+  'src/widgets/material.dart',
+  'src/widgets/media.dart',
+  'src/widgets/slider_paint.dart',
+};
+
+/// The render-object controls: never on the ratchet.
+const widgetFreePaths = ['src/render/controls/', 'src/widgets/controls.dart'];
+
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.
 typedef Directive = ({String file, String target});
@@ -240,5 +311,22 @@ void main() {
       ),
       isEmpty,
     );
+  });
+
+  test('the files importing Flutter\'s widget libraries only shrink (the Milestone 3 ratchet)', () {
+    final widgetLibrary = RegExp(r'''^\s*(?:import|export)\s+['"]package:flutter/(?:material|cupertino|widgets)\.dart['"]''');
+    final importing = <String>{};
+    for (final f in Directory('lib').listSync(recursive: true).whereType<File>()) {
+      if (!f.path.endsWith('.dart')) continue;
+      final file = f.path.replaceAll(r'\', '/').substring('lib/'.length);
+      if (f.readAsLinesSync().any(widgetLibrary.hasMatch)) importing.add(file);
+    }
+    expect(importing.difference(widgetImportRatchet), isEmpty, reason: 'new imports of material/cupertino/widgets');
+    expect(widgetImportRatchet.difference(importing), isEmpty, reason: 'no longer imported: remove from widgetImportRatchet');
+    for (final path in widgetFreePaths) {
+      expect(importing.where((f) => f.startsWith(path)), isEmpty, reason: 'the render-object controls import no widget library');
+    }
+    // ignore: avoid_print
+    print('widget-library imports: ${importing.length} files');
   });
 }

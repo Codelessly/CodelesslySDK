@@ -560,7 +560,7 @@ void main() {
       await tester.tap(find.byType(Checkbox));
       await tester.pump();
       expect(s['on'], true);
-      await tester.tap(find.byType(ElevatedButton));
+      await tester.tapAt(s.center('button'));
       await tester.pump();
       expect(s['count'], 1);
     });

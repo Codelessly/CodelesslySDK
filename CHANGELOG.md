@@ -20,6 +20,45 @@ and matching no item). The formula engine is right; nothing told the model.
   take the same path (`test/session/session_indicator_theme_test.dart`). With no theme they are the neutral ink and
   greys, as before.
 
+- **Milestone 3 begins: buttons are render objects** (codelessly_api `docs/design/11-no-widgets.md`).
+  `filledButton`, `elevatedButton`, `outlinedButton`, `textButton`, `iconButton` and `floatingActionButton` are drawn
+  by `RenderButton` (`lib/src/render/controls/buttons.dart`) with no Material widget in their path. With nothing
+  styled each is SSUI's button: filled = primary, tonal = tertiary, elevated, outlined = outline, text = ghost, icon
+  button = SSUI's ghost icon button, a floating action button = primary with SSUI's floating shadow. A hugging button
+  is 28 px high (SSUI's compact); a sized one takes the padding, font, icon size and radius of the nearest step of
+  the control scale (24/28/32/36/44). Hover and press are SSUI's faint overlays, focus its 1.5 px ring (keyboard
+  only), disabled 50 % opacity; a bound `selected` draws SSUI's active tint with primary ink. Every `ButtonStyle`
+  field, the node's padding and its `states` patches still apply. The zero-prop page matches SSUI's own widgets to
+  0.06 % of the pixels (`test/controls/ssui_reference_test.dart`; renders in
+  `design_systems/ssui/examples/renders/m3`).
+- **Size changes of buttons** (parity goldens): a hugging button is 28 high (Material's was 40); the icon beside a
+  label is SSUI's (14–18) with a 6 px gap (Material's 18 and 8), so labelled buttons with an icon are 2 px narrower.
+  `samples-material/buttons`: `elev_hug` 186×39 → 184×38.6, `filled_hug` 184 → 182 wide, `text_icon` 118 → 116
+  wide. The `static` set goes from 99.06 % to 98.84 % of rects within 1 px: six filled buttons of one fixture 2 px
+  narrower (one squeezed by its column from 40 to 37.3 high) and the 43 rects beside them that move with them.
+- The control kit (`lib/src/render/controls`): `RenderControl` (states, tap, hover and cursor, focus, activation,
+  semantics, a 44 × 44 touch target by hit testing only), `ControlLabel` (one line, glyphs centred), `ControlTokens`
+  (SSUI's tokens bundled as data, `ssui_defaults.g.dart`, written by `tool/controls/bundle_ssui.dart` and checked
+  against `design_systems/ssui/design_system.json`, the document's theme over them, for the screen's brightness and
+  backdrop), `ControlFocusNode`/`ControlFocusScope` (Tab and Shift-Tab in reading order, Enter, Numpad Enter and
+  Space activate, Escape, `autofocus`), and the root `RenderControlRoot` with an overlay layer.
+- `NodeView` is the adapter: its render object (`RenderNodeView`) is now a `RenderControlRoot`; it feeds key events
+  from `FocusManager`'s early handlers (or `HardwareKeyboard` when nothing has Flutter's focus) and bridges the two
+  focuses. A document of buttons lays out, paints, hit-tests and takes the keyboard with no `MaterialApp`,
+  `WidgetsApp`, `Theme` or `Overlay` above it (`test/controls/root_test.dart`); `attachRoot` shows a root in a view
+  with no widget at all (`test/controls/direct_attach_test.dart`).
+- The `tooltip` behavior (declared, never drawn before) shows SSUI's tooltip in the root's overlay layer after the
+  theme's `durations.tooltipDelay` of hovering, and names the node to screen readers.
+- `RenderTree.theme` and `RenderTree.dark`: the theme and brightness controls draw with (`CodelesslyWidget` sets the
+  mode).
+- Theme roles that name a theme colour (`"primary": "forest"`) now reach controls, dialogs and toasts (they drew
+  black or white).
+- `test/architecture_test.dart` keeps a ratchet of the files that may import `material.dart`, `cupertino.dart` or
+  `widgets.dart` (60 at the start); it only shrinks, and the render-object controls are never on it. The look guard
+  measures labels and fonts of render-object controls too (`LabelledControl`).
+- Island controls not yet moved (chips, fields, toggles, pickers, tabs, bars, tiles) are unchanged and still draw
+  their neutral look.
+
 **Generative UI with a design system, recorded and replayed.**
 
 - `UiSession(designSystem:)` allows the design system's components under the session's trust profile

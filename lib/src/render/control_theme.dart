@@ -152,6 +152,8 @@ TextTheme _colorOnly(Color color) {
 }
 
 ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdrop) {
+  // A role that names a theme colour (`"primary": "forest"`) is that colour.
+  tokens = tokens.resolvedRoles();
   final surface = backdrop ?? colorOf(tokens.surface) ?? (requested == Brightness.dark ? kPaperDark : kPaper);
   final brightness = ThemeData.estimateBrightnessForColor(surface);
   final onSurface = onColor(surface, preferred: [colorOf(tokens.onSurface)]);
