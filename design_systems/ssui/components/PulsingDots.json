@@ -1,0 +1,142 @@
+{
+ "schema": 3,
+ "id": "PulsingDots",
+ "roots": [
+  "dots"
+ ],
+ "widget": {
+  "type": "PulsingDots",
+  "doc": "Work in progress with no percentage: three small dots pulsing one after another."
+ },
+ "previews": [
+  {
+   "name": "Working",
+   "size": [
+    20,
+    8
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "dots": {
+   "type": "row",
+   "children": [
+    "d1",
+    "d2",
+    "d3"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 4
+    }
+   }
+  },
+  "d1": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 450,
+     "delay": 0,
+     "curve": "linear",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0.2,
+       "to": 1
+      }
+     ]
+    }
+   ]
+  },
+  "d2": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 450,
+     "delay": 300,
+     "curve": "linear",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0.2,
+       "to": 1
+      }
+     ]
+    }
+   ]
+  },
+  "d3": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 450,
+     "delay": 600,
+     "curve": "linear",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0.2,
+       "to": 1
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

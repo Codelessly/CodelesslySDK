@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colours by token), rendered, and looked at beside the source.
 
-**Here: 41. Still to rebuild: 123.**
+**Here: 44. Still to rebuild: 120.**
 
 ## Here
 
@@ -56,6 +56,9 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | FeatureBulletItem | FeatureBulletItem |  |
 | SectionCard | SectionCard |  |
 | MetaInfo | MetaInfo |  |
+| Hyperlink | Hyperlink |  |
+| NotificationBadge | NotificationBadge |  |
+| PulsingDots | PulsingDots |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
 
@@ -63,13 +66,13 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Status and feedback (11)
+### Status and feedback (9)
 
-StatusIndicator, RunningIndicator, PulsingDots, NotificationBadge, RadialProgress, StackedProgressBar, BatchProgressBar, ConnectionStatus, CloudSyncIndicator, DiffStatsBadge, LoadMore
+StatusIndicator, RunningIndicator, RadialProgress, StackedProgressBar, BatchProgressBar, ConnectionStatus, CloudSyncIndicator, DiffStatsBadge, LoadMore
 
-### Text and small content (15)
+### Text and small content (14)
 
-Hyperlink, TextItem, TextExpandable, TextInputLabel, CodeBlock, CodePreview, CopyButton, DownloadButton, BackButton, AddButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
+TextItem, TextExpandable, TextInputLabel, CodeBlock, CodePreview, CopyButton, DownloadButton, BackButton, AddButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
 
 ### Cards and rows (25)
 

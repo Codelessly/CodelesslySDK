@@ -1369,6 +1369,87 @@ add(component(
 ))
 
 
+# --- batch 4: links, counts on icons, work in progress --------------------------------------------------------
+
+# Hyperlink (Hyperlink.tsx): 14/500 in the primary colour, underlined, 2 px above and below, an optional 14 px
+# "open in new" icon 4 px after; hovered it is 600, pressed 20 % darker. Opens its url.
+add(component(
+    'Hyperlink',
+    'A text link in the brand colour, underlined; it opens its URL. Fires onPressed.',
+    'link',
+    props=[prop('text', STRING, 'Open the docs', 'The words.', required=True),
+           prop('url', STRING, '', 'Where it goes (empty: only onPressed fires).'),
+           prop('showIcon', BOOL, False, 'An "open in new" icon after the text.'),
+           prop('underline', BOOL, True, 'False underlines only while hovered.')],
+    events=['onPressed'],
+    previews=[preview('Link', 110, 24, text='Open the docs'), preview('With icon', 130, 24, text='Open the docs', showIcon=True)],
+    nodes={
+        'link': {'type': 'row', 'children': ['label', 'glyph'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'hug': 100}, 'height': {'hug': 24}, 'padding': [0, 2, 0, 2]},
+                 'states': {'hovered': {'label': {'props': {'style': {'fontWeight': 600, 'decoration': 'underline'}}}},
+                            'pressed': {'label': {'props': {'style': {'color': '#FF1E4FBC'}}}}},
+                 'actions': [{'trigger': 'click', 'actions': [
+                     {'type': 'componentEvent', 'event': 'onPressed', 'value': '${props.url}'},
+                     {'type': 'openLink', 'url': '${props.url}', 'when': {'left': "${= props.url != ''}", 'op': 'isTrue'}}]}]},
+        'label': {**text('${props.text}', style(14, 500, 'primary', 1.4, letterSpacing=-0.14, decoration='underline', decorationColor='primary'),
+                         {'hug': 90}, {'hug': 20}),
+                  'bind': {'props.style.decoration': "${= props.underline ? 'underline' : 'none'}"}},
+        'glyph': {**icon('open_in_new', 'primary', 14), 'bind': {'visible': '${props.showIcon}'}},
+    },
+))
+
+# NotificationBadge (NotificationBadge.tsx): a count pill 18 high (at least 18 wide, 4 px sides, 12/700 white) or an
+# 8 px dot, in the danger colour by default, on the top right corner of what it wraps (4 px out), with a small shadow.
+add(component(
+    'NotificationBadge',
+    'A count or a dot on the corner of what it wraps (an icon button, an avatar): red by default, hidden at zero.',
+    'wrap',
+    props=[prop('count', NUMBER, 3, 'The number (0 hides it unless showZero).'),
+           prop('max', NUMBER, 99, 'Above this it shows "max+".'),
+           prop('dot', BOOL, False, 'A plain 8 px dot instead of the number.'),
+           prop('showZero', BOOL, False, 'Shows at 0 too.'),
+           prop('variant', enum('danger', 'primary', 'success'), 'danger', 'The colour.')],
+    children='list',
+    previews=[preview('Count', 40, 40, count=3)],
+    nodes={
+        # The wrapped thing sits 4 px in from the top and right, so the badge overhangs its corner by that much.
+        'wrap': {'type': 'stack', 'children': ['content', 'badge'], 'layout': {'width': {'hug': 36}, 'height': {'hug': 36}, 'padding': [0, 4, 4, 0]}},
+        'content': {'type': 'slot'},
+        'badge': {'type': 'row', 'children': ['label'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 18}, 'height': 18, 'padding': [4, 0, 4, 0], 'constraints': {'minWidth': 18},
+                             'x': {'end': -4}, 'y': {'start': -4}} if False else {'width': {'hug': 18}, 'height': 18, 'padding': [4, 0, 4, 0], 'constraints': {'minWidth': 18}, 'x': {'end': 0}, 'y': {'start': 0}},
+                  'decoration': {'fills': [{'color': 'error'}], 'radius': 9999, 'effects': SHADOWS_LIGHT['level2']},
+                  'bind': {'visible': '${= props.showZero || props.count > 0}',
+                           'layout.height': '${= props.dot ? 8 : 18}', 'layout.constraints': '${= props.dot ? {minWidth: 8} : {minWidth: 18}}',
+                           'layout.padding': '${= props.dot ? [0, 0, 0, 0] : [4, 0, 4, 0]}',
+                           'decoration.fills[0].color': "${= props.variant == 'primary' ? theme.primary : (props.variant == 'success' ? theme.success : theme.error)}"}},
+        'label': {**text("${= min(props.count, props.max)}${= props.count > props.max ? '+' : ''}", style(12, 700, 'onPrimary', 16 / 12), {'hug': 8}, {'hug': 16}),
+                  'bind': {'visible': '${= !props.dot}'}},
+    },
+))
+
+# PulsingDots (PulsingDots.tsx): three 4 px dots 2 px apart in the primary colour, each fading 0.2 to 1 and back over
+# 0.9 s, a third of the cycle apart.
+def _pulse(delay):
+    return [{'id': 'pulse', 'duration': 450, 'delay': delay, 'curve': 'linear', 'repeat': {'reverse': True},
+             'tracks': [{'path': 'opacity', 'from': 0.2, 'to': 1}]}]
+
+
+add(component(
+    'PulsingDots',
+    'Work in progress with no percentage: three small dots pulsing one after another.',
+    'dots',
+    previews=[preview('Working', 20, 8)],
+    nodes={
+        'dots': {'type': 'row', 'children': ['d1', 'd2', 'd3'], 'props': {'crossAxisAlignment': 'center', 'spacing': 2},
+                 'layout': {'width': {'hug': 16}, 'height': {'hug': 4}}},
+        'd1': {'type': 'box', 'layout': {'width': 4, 'height': 4}, 'decoration': {'fills': [{'color': 'primary'}], 'radius': 2}, 'animations': _pulse(0)},
+        'd2': {'type': 'box', 'layout': {'width': 4, 'height': 4}, 'decoration': {'fills': [{'color': 'primary'}], 'radius': 2}, 'animations': _pulse(300)},
+        'd3': {'type': 'box', 'layout': {'width': 4, 'height': 4}, 'decoration': {'fills': [{'color': 'primary'}], 'radius': 2}, 'animations': _pulse(600)},
+    },
+))
+
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:
