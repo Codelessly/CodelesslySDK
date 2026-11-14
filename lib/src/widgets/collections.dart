@@ -36,8 +36,6 @@ final Map<String, WidgetRecipe> collectionsRecipes = {
   'pageView': _pageView,
   'tabs': tabsRecipe,
   'tabBar': tabBarRecipe,
-  'accordion': accordionRecipe,
-  'expansionTile': expansionTileRecipe,
   'pagination': paginationRecipe,
   'tableView': _tableView,
 };

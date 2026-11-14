@@ -15,7 +15,9 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
+import 'package:codelessly_sdk/src/render/controls/expansion.dart' show RenderExpansion;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl;
+import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
 import 'package:codelessly_sdk/src/widgets/collections.dart' show collectionsRecipes;
 import 'package:codelessly_sdk/src/widgets/controls.dart' show controlRecipes;
 import 'package:codelessly_sdk/src/widgets/indicators.dart' show indicatorsRecipes;
@@ -417,6 +419,9 @@ String? _inherited(InlineSpan root, InlineSpan target) {
   return found;
 }
 
+/// The tile family's types and the render object each draws as.
+const _tileControls = [('listTile', RenderListTile), ('expansionTile', RenderExpansion), ('accordion', RenderExpansion)];
+
 /// The labelled controls whose label must sit centred in their box.
 const _labelled = [
   'filledButton', 'elevatedButton', 'outlinedButton', 'textButton', 'segmentedButton', //
@@ -636,6 +641,21 @@ void main() {
         final radius = (shape as RoundedRectangleBorder).borderRadius.resolve(TextDirection.ltr).topLeft.x;
         expect(radius, inInclusiveRange(1, 12), reason: '$type radius');
       }
+
+      // Tiles (render/controls/{tile,expansion}.dart): render objects, no
+      // Material ListTile or ExpansionTile on the page.
+      for (final (type, kind) in _tileControls) {
+        final found = <RenderObject>[];
+        void visit(RenderObject o) {
+          if (o.runtimeType == kind) found.add(o);
+          o.visitChildren(visit);
+        }
+
+        visit(controller.tree!.boxOf(type)!);
+        expect(found, hasLength(1), reason: '$type is a render object on the page, not a Material widget');
+      }
+      expect(find.byType(ListTile), findsNothing);
+      expect(find.byType(ExpansionTile), findsNothing);
 
       // Fields: no underline-only border. A field's border is what its
       // decorator draws (its decoration over the theme's) or the box a
