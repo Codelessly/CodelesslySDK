@@ -128,4 +128,48 @@ void main() {
     await tester.pump();
     expect(find.text('Enter your email.'), findsOneWidget);
   });
+
+  testWidgets('radios in a radio group share its value, and choosing one runs the group\'s changed reaction', (tester) async {
+    Json radio(String value) => {'type': 'radio', 'layout': {'width': 24, 'height': 24}, 'props': {'value': value}};
+    final s = await harness.show(tester, {
+      'col': {
+        'type': 'column',
+        'children': ['small', 'large'],
+        'layout': {'width': 100, 'height': {'hug': 60}},
+        'radioGroup': {'groupValue': ''},
+        'bind': {'radioGroup.groupValue': r'${budget}'},
+        'actions': [
+          harness.reaction('changed', [
+            {'type': 'setVariable', 'variable': 'budget', 'value': r'${result}'},
+          ]),
+        ],
+      },
+      'small': radio('small'),
+      'large': radio('large'),
+    }, variables: [harness.v('budget', 'small')]);
+    RadioGroup<String> groupOf(String id) => tester.widget<RadioGroup<String>>(find.byType(RadioGroup<String>).at(id == 'small' ? 0 : 1));
+    expect(groupOf('small').groupValue, 'small');
+    expect(groupOf('large').groupValue, 'small');
+    await tester.tapAt(s.center('large'));
+    await tester.pumpAndSettle();
+    expect(s['budget'], 'large');
+    expect(groupOf('small').groupValue, 'large', reason: 'every radio of the group follows its value');
+  });
+
+  testWidgets('an outlined field that sets no padding keeps its text off the border, as Flutter does', (tester) async {
+    final s = await harness.show(tester, {
+      'col': {'type': 'column', 'children': ['email'], 'layout': {'width': 320, 'height': {'hug': 100}}},
+      'email': {
+        'type': 'textField',
+        'layout': {'width': 300, 'height': 56},
+        'props': {
+          'initialValue': 'ada',
+          'decoration': {'border': {'type': 'outline', 'borderRadius': 8}},
+        },
+      },
+    });
+    final field = s.tree.boxOf('email')!.localToGlobal(Offset.zero);
+    final text = tester.getTopLeft(find.byType(EditableText));
+    expect(text.dx - field.dx, closeTo(12, 0.5));
+  });
 }

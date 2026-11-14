@@ -250,6 +250,20 @@ String? previewText(String? text) {
   return s.trim().isEmpty ? null : s;
 }
 
+/// The content padding of a field whose decoration and node set none:
+/// Flutter's `InputDecorator` default for an outlined or filled field (12 px
+/// at the sides, so the text and label clear the border), else the node's
+/// [padding] (an unfilled underline field has no side padding in Flutter
+/// either).
+api.EdgeInsets defaultContentPadding(api.InputDecoration d, api.EdgeInsets padding) {
+  if (d.isCollapsed || padding != api.EdgeInsets.zero) return padding;
+  final outlined = [d.border, d.enabledBorder, d.focusedBorder].any((b) => b?.type == api.InputBorderType.outline);
+  final dense = d.isDense ?? false;
+  if (outlined) return dense ? const api.EdgeInsets.fromLTRB(12, 16, 12, 8) : const api.EdgeInsets.fromLTRB(12, 20, 12, 12);
+  if (d.filled ?? false) return dense ? const api.EdgeInsets.fromLTRB(12, 4, 12, 4) : const api.EdgeInsets.fromLTRB(12, 8, 12, 8);
+  return padding;
+}
+
 /// [padding] grown by the width of the border [d] draws in this state when
 /// it has `paddingIncludesBorder` (an outline on every side, an underline
 /// below): disabled, then error (focused or not), then focused, then enabled.
@@ -347,7 +361,7 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     // the designed one: a platform's compact density (desktop) must not
     // shrink either, or the field is ~8px shorter on desktop than designed.
     visualDensity: d.isCollapsed || d.contentPadding != null ? VisualDensity.standard : null,
-    contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
+    contentPadding: paddingWithBorder((d.contentPadding ?? defaultContentPadding(d, padding)).flutter, d,
         error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
         focused: focused),
     prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
@@ -1017,6 +1031,19 @@ class _SwitchIslandState extends State<_SwitchIsland> {
   }
 }
 
+/// Reports a radio's new [value] to the `changed` reactions of the radio
+/// group around it (Flutter's `RadioGroup.onChanged`).
+void _fireRadioGroup(BuildContext context, Object? value) {
+  final b = _builderOf(context);
+  if (b == null) return;
+  for (var id = b.source.parentOf(b.id); id != null; id = b.source.parentOf(id)) {
+    if (b.source.node(id)?.behaviors.radioGroup == null) continue;
+    final group = b.tree.boxOf(id, instance: b.instance) ?? b.tree.boxesOf(id).firstOrNull;
+    if (group != null) fireTrigger(group, 'changed', event: {'value': value});
+    return;
+  }
+}
+
 class _RadioIsland extends StatefulWidget {
   const _RadioIsland({required this.node});
   final Node node;
@@ -1051,6 +1078,7 @@ class _RadioIslandState extends State<_RadioIsland> {
         onChanged: (v) {
           setState(() => groupValue = v);
           _fire(context, 'changed', v);
+          _fireRadioGroup(context, v);
         },
         child: Radio<String>(
           value: n.prop(RadioProps.value),

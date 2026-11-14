@@ -4,7 +4,7 @@
 // a Form around the fields inside it. The `validate` action
 // (FormState.validate()) checks a form's fields, and each form publishes
 // `form` ({valid, errors}) to the nodes inside it.
-import 'package:codelessly_api/codelessly_api.dart' show AutovalidateMode;
+import 'package:codelessly_api/core.dart' show AutovalidateMode;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart' show FocusNode;
