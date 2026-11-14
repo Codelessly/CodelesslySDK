@@ -116,7 +116,6 @@ const widgetImportRatchet = {
   'src/features/media/players.dart',
   'src/features/media/recipes.dart',
   'src/render/control_theme.dart',
-  'src/render/drag_track.dart',
   'src/render/islands.dart',
   'src/render/node_tree.dart',
   'src/render/node_view.dart',

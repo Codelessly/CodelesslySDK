@@ -170,7 +170,7 @@ void main() {
         },
       },
     );
-    expect(textOf(s.tree, 'label'), '-48.0 false');
+    expect(textOf(s.tree, 'label'), '-48 false');
     final gesture = await tester.startGesture(const Offset(200, 311));
     await gesture.moveBy(const Offset(0, -20));
     await gesture.moveBy(const Offset(0, -105));
@@ -178,13 +178,13 @@ void main() {
     // Followed the pointer 125px up: halfway (the node keeps the point it
     // was grabbed by).
     expect(s['accent'], -21);
-    expect(textOf(s.tree, 'label'), '-21.0 true');
+    expect(textOf(s.tree, 'label'), '-21 true');
     expect(s['changes'], greaterThan(0));
     await gesture.up();
     await tester.pump();
     expect(s['ended'], -21);
     expect(s['settled'], -21);
-    expect(textOf(s.tree, 'label'), '-21.0 false');
+    expect(textOf(s.tree, 'label'), '-21 false');
     expect(s.center('k').dy, closeTo(186, 0.01));
     await tester.pump(const Duration(seconds: 1));
   });
