@@ -66,8 +66,67 @@ class ControlTokens {
   /// the brightness) over them, roles resolved; [backdrop] is what the
   /// control is drawn on, when the document says (an opaque fill under it).
   factory ControlTokens.resolve(api.ThemeTokens theme, {required bool dark, Color? backdrop}) {
-    final merged = ssuiTokens.forBrightness(dark: dark).mergedWith(theme.forBrightness(dark: dark)).resolvedRoles();
+    final own = theme.forBrightness(dark: dark);
+    var merged = ssuiTokens.forBrightness(dark: dark).mergedWith(own).resolvedRoles();
+    final derived = _derived(own, merged);
+    if (derived.isNotEmpty) {
+      merged = merged.mergedWith(api.ThemeTokens(colors: derived));
+      final s = merged.surface;
+      // A theme with its own surface is dark where that surface is.
+      if (own.surface != null && s != null) dark = s.flutter.computeLuminance() < .18;
+    }
     return ControlTokens._(merged, dark: dark, backdrop: backdrop, buttonRadius: theme.buttonRadius);
+  }
+
+  /// SSUI's neutral names follow the document's roles: a theme that gives
+  /// its own `surface`, `onSurface` or `primary` and not SSUI's names (a
+  /// field's `primaryBackground`, a border, a tint) gets those names made
+  /// from its roles, so a control with nothing styled sits in the
+  /// document's palette, not SSUI's white or blue.
+  static Map<String, api.Color> _derived(api.ThemeTokens own, api.ThemeTokens merged) {
+    final out = <String, api.Color>{};
+    void put(String name, Color c) {
+      if (!own.colors.containsKey(name)) out[name] = api.Color(c.toARGB32());
+    }
+
+    if (own.surface != null || own.onSurface != null) {
+      final s = merged.surface?.flutter;
+      if (s != null) {
+        final o = own.onSurface == null ? onColor(s) : (merged.onSurface?.flutter ?? onColor(s));
+        final onDark = s.computeLuminance() < .18;
+        Color mix(double t) => Color.lerp(s, o, t)!;
+        put('primaryBackground', s);
+        put('secondaryBackground', mix(.04));
+        put('subtleFill', mix(.07));
+        put('tertiaryBackground', mix(onDark ? .16 : .08));
+        put('raisedBackground', onDark ? mix(.16) : s);
+        put('track', mix(.14));
+        put('neutralFill', mix(.24));
+        put('neutralTint', mix(.08));
+        put('neutralTintBorder', mix(.16));
+        put('primaryBorder', mix(.16));
+        put('secondaryBorder', mix(.26));
+        put('primaryText', o);
+        put('secondaryText', o.withValues(alpha: .62));
+        put('tertiaryText', o.withValues(alpha: .42));
+        put('hoverOverlay', o.withValues(alpha: onDark ? .08 : .04));
+        put('pressedOverlay', o.withValues(alpha: onDark ? .14 : .08));
+        put('tooltipBackground', o);
+        put('tooltipText', s);
+      }
+    }
+    if (own.primary != null) {
+      final p = merged.primary?.flutter;
+      if (p != null) {
+        put('focusBorder', p.withValues(alpha: .5));
+        put('activeTint', p.withValues(alpha: .16));
+        put('primaryTint', p.withValues(alpha: .12));
+        put('primaryTintBorder', p.withValues(alpha: .3));
+        final on = merged.onPrimary?.flutter;
+        put('onAccent', own.onPrimary != null && on != null ? on : onColor(p));
+      }
+    }
+    return out;
   }
 
   /// The tokens of the control [b] builds: its tree's theme and brightness,
