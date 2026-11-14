@@ -1,0 +1,74 @@
+{
+ "stream": "order_summary@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 915,
+ "timeToFirstPaintMs": 4527,
+ "timeToFirstTextMs": 4988,
+ "timeToFirstSectionMs": 12401,
+ "timeToCompleteMs": 21118,
+ "outputTokens": 4161,
+ "tokensEstimated": false,
+ "chars": 8387,
+ "deltas": 560,
+ "opsApplied": 33,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_enum /nodes/minus/actions/0/actions/0/condition/op",
+  "expression_syntax /nodes/confirm/bind/props.enabled",
+  "dangling_child /nodes/stepper/children/0",
+  "dangling_child /nodes/btns/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 35,
+ "rejections": [
+  {
+   "op": 12,
+   "code": "invalid_enum",
+   "path": "/nodes/minus/actions/0/actions/0/condition/op",
+   "message": "the text \"lessThanOrEqual\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "minus",
+   "suggestion": "lessThan"
+  },
+  {
+   "op": 34,
+   "code": "expression_syntax",
+   "path": "/nodes/confirm/bind/props.enabled",
+   "message": "The formula \"${= len(items) > 0}\" does not parse: Unknown function \"len\".",
+   "nodeId": "confirm"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/stepper/children/0",
+   "message": "Child \"minus\" of \"stepper\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "stepper"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/btns/children/1",
+   "message": "Child \"confirm\" of \"btns\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "btns"
+  }
+ ],
+ "nodes": 31,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 8,
+  "max": 21
+ },
+ "frames": 180,
+ "frameMs": 122,
+ "pumpsOverBudget16ms": 18,
+ "pumps": 741,
+ "pumpMsMedian": 0.119,
+ "renderExceptions": [],
+ "warnings": 0
+}

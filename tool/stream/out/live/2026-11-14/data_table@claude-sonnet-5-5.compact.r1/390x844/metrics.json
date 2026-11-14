@@ -1,0 +1,65 @@
+{
+ "stream": "data_table@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1446,
+ "timeToFirstPaintMs": 8468,
+ "timeToFirstTextMs": 8872,
+ "timeToFirstSectionMs": 19993,
+ "timeToCompleteMs": 24196,
+ "outputTokens": 4802,
+ "tokensEstimated": false,
+ "chars": 9591,
+ "deltas": 653,
+ "opsApplied": 26,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_action_key /nodes/hcheck/actions/0/actions/0/then/0/list",
+  "unknown_action_key /nodes/hcheck/actions/0/actions/0/else/0/list",
+  "dangling_child /nodes/head/children/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 27,
+ "rejections": [
+  {
+   "op": 8,
+   "code": "unknown_action_key",
+   "path": "/nodes/hcheck/actions/0/actions/0/then/0/list",
+   "message": "A forEach action has no \"list\". It takes: items, actions (and enabled, nonBlocking, when).",
+   "nodeId": "hcheck"
+  },
+  {
+   "op": 8,
+   "code": "unknown_action_key",
+   "path": "/nodes/hcheck/actions/0/actions/0/else/0/list",
+   "message": "A forEach action has no \"list\". It takes: items, actions (and enabled, nonBlocking, when).",
+   "nodeId": "hcheck"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/head/children/0",
+   "message": "Child \"hcheck\" of \"head\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "head"
+  }
+ ],
+ "nodes": 24,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 9,
+  "max": 21
+ },
+ "frames": 180,
+ "frameMs": 139,
+ "pumpsOverBudget16ms": 15,
+ "pumps": 834,
+ "pumpMsMedian": 0.097,
+ "renderExceptions": [],
+ "warnings": 0
+}

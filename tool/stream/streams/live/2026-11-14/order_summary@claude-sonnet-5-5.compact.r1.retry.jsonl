@@ -1,0 +1,38 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["order_summary@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":341,"usage":{"inputTokens":5505,"outputTokens":341,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1012,"firstToolDeltaMs":1050,"totalMs":2371,"stopReason":"StopReason.toolUse"},"text":"Resending the rejected minus button with the correct condition op.","ttftMs":1012,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":33,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1050,"delta":"{\"ops\": ["}
+{"tMs":1086,"delta":"{\"op\": \"set\", \""}
+{"tMs":1123,"delta":"id\": \"minus\", \"par"}
+{"tMs":1160,"delta":"ent\": \"stepper\", \""}
+{"tMs":1196,"delta":"index\": 0, \"node\":"}
+{"tMs":1232,"delta":" {\"type\": \"iconBut"}
+{"tMs":1268,"delta":"ton\", \"layout\": {\""}
+{"tMs":1304,"delta":"width\": 32, \"height\":"}
+{"tMs":1340,"delta":" 32}, \"props\": {"}
+{"tMs":1377,"delta":"\"icon\": \"remove\","}
+{"tMs":1412,"delta":" \"style\": {\"backgro"}
+{"tMs":1448,"delta":"undColor\": \"#FF"}
+{"tMs":1484,"delta":"F3F4F6\", \""}
+{"tMs":1561,"delta":"foregroundColor\": \""}
+{"tMs":1561,"delta":"#FF111827\"}}"}
+{"tMs":1591,"delta":", \"actions\": [{\""}
+{"tMs":1626,"delta":"trigger\": {\"type\":"}
+{"tMs":1663,"delta":" \"click\"}, \"actions"}
+{"tMs":1701,"delta":"\": [{\"type\": \"if"}
+{"tMs":1750,"delta":"\", \"condition\": {\"left"}
+{"tMs":1769,"delta":"\": \"${item.qty}"}
+{"tMs":1817,"delta":"\", \"op\": \"lessTh"}
+{"tMs":1842,"delta":"anOrEqualTo"}
+{"tMs":1875,"delta":"\", \"right\": \"1\"}"}
+{"tMs":1911,"delta":", \"then\": [{\"type"}
+{"tMs":1946,"delta":"\": \"setVariable\", \""}
+{"tMs":1982,"delta":"variable\": \"items\", \"op"}
+{"tMs":2017,"delta":"\": \"removeAt\", \""}
+{"tMs":2053,"delta":"index\": \"${index}\"}"}
+{"tMs":2088,"delta":"], \"else\": [{\"type"}
+{"tMs":2124,"delta":"\": \"setVariable\", \""}
+{"tMs":2163,"delta":"variable\": \"items[index]."}
+{"tMs":2195,"delta":"qty\", \"op\": \"sub"}
+{"tMs":2231,"delta":"tract\", \"value\": \"1"}
+{"tMs":2266,"delta":"\"}]}]}]}"}
+{"tMs":2303,"delta":"}]"}
+{"tMs":2368,"delta":"}"}

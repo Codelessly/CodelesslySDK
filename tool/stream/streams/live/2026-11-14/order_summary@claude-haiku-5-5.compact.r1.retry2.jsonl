@@ -1,0 +1,16 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["order_summary@claude-haiku-5-5.compact.r1.jsonl","order_summary@claude-haiku-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":138,"usage":{"inputTokens":6761,"outputTokens":138,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":375,"firstToolDeltaMs":415,"totalMs":717,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":375,"check":{"ops":4,"opsApplied":4,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":35,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":415,"delta":"{\"ops\": [{\"op"}
+{"tMs":436,"delta":"\": \"move\", \"id\": \""}
+{"tMs":456,"delta":"subRow\", \"parent\":"}
+{"tMs":475,"delta":" \"summary\""}
+{"tMs":495,"delta":"}, {\"op\": \"move"}
+{"tMs":516,"delta":"\", \"id\": \"discRow"}
+{"tMs":536,"delta":"\", \"parent\": \"summary"}
+{"tMs":557,"delta":"\"}, {\"op\": \""}
+{"tMs":577,"delta":"move\", \"id\": \"delR"}
+{"tMs":598,"delta":"ow\", \"parent\": \"summ"}
+{"tMs":619,"delta":"ary\"}, {\"op\":"}
+{"tMs":639,"delta":" \"move\", \"id\": \"tot"}
+{"tMs":659,"delta":"Row\", \"parent\": \""}
+{"tMs":680,"delta":"summary\"}]"}
+{"tMs":716,"delta":"}"}

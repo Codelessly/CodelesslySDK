@@ -1,0 +1,202 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 46693,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 20530,
+ "generate": {
+  "inputTokens": 21546,
+  "outputTokens": 542,
+  "cacheReadInputTokens": 122706,
+  "cacheCreationInputTokens": 20451,
+  "ttftMs": 765,
+  "firstToolDeltaMs": null,
+  "totalMs": 8415,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "lineChart"
+    },
+    "ms": 1196,
+    "outputTokens": 76,
+    "resultChars": 2077
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "barChart"
+    },
+    "ms": 830,
+    "outputTokens": 50,
+    "resultChars": 1452
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "node-segmentedButton"
+    },
+    "ms": 1353,
+    "outputTokens": 100,
+    "resultChars": 1368
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "state-formula-functions"
+    },
+    "ms": 1471,
+    "outputTokens": 105,
+    "resultChars": 2978
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "state-formula-functions-lists"
+    },
+    "ms": 1167,
+    "outputTokens": 77,
+    "resultChars": 348
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "lists-a-table-from-one-template"
+    },
+    "ms": 990,
+    "outputTokens": 59,
+    "resultChars": 695
+   }
+  ],
+  "ops": 0,
+  "opsApplied": 0,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "missing_field /ops"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 0,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 5497,
+   "outputTokens": 7061,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1344,
+   "firstToolDeltaMs": 1380,
+   "totalMs": 35496,
+   "stopReason": "StopReason.toolUse",
+   "ops": 45,
+   "opsApplied": 33,
+   "opsRejected": 12,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 12,
+   "errors": [
+    "wrong_type /nodes/tRev/layout/width",
+    "wrong_type /nodes/tSu/layout/width",
+    "wrong_type /nodes/tCh/layout/width",
+    "wrong_type /nodes/tAu/layout/width",
+    "wrong_type /nodes/hName/layout/width",
+    "invalid_enum /nodes/hName/actions/0/actions/0/condition/op",
+    "wrong_type /nodes/hUsers/layout/width",
+    "invalid_enum /nodes/hUsers/actions/0/actions/0/condition/op",
+    "wrong_type /nodes/hMrr/layout/width",
+    "invalid_enum /nodes/hMrr/actions/0/actions/0/condition/op",
+    "wrong_type /nodes/hChurn/layout/width",
+    "invalid_enum /nodes/hChurn/actions/0/actions/0/condition/op",
+    "wrong_type /nodes/pName/layout/width",
+    "wrong_type /nodes/pUsers/layout/width",
+    "wrong_type /nodes/pMrr/layout/width",
+    "wrong_type /nodes/pChurn/layout/width",
+    "dangling_child /nodes/tiles1/children/0",
+    "dangling_child /nodes/tiles1/children/1",
+    "dangling_child /nodes/tiles2/children/0",
+    "dangling_child /nodes/tiles2/children/1",
+    "dangling_child /nodes/tblHead/children/0",
+    "dangling_child /nodes/tblHead/children/1",
+    "dangling_child /nodes/tblHead/children/2",
+    "dangling_child /nodes/tblHead/children/3",
+    "dangling_child /nodes/planRow/children/0",
+    "dangling_child /nodes/planRow/children/1",
+    "dangling_child /nodes/planRow/children/2",
+    "dangling_child /nodes/planRow/children/3"
+   ],
+   "lints": [],
+   "warnings": 12,
+   "nodes": 31,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 17973,
+   "outputTokens": 2718,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1609,
+   "firstToolDeltaMs": 1680,
+   "totalMs": 13384,
+   "stopReason": "StopReason.toolUse",
+   "ops": 12,
+   "opsApplied": 12,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 43,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 12,
+  "opsApplied": 12,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 43,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "followup": {
+  "inputTokens": 20846,
+  "outputTokens": 1036,
+  "cacheReadInputTokens": 20451,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1193,
+  "firstToolDeltaMs": 1265,
+  "totalMs": 5660,
+  "stopReason": "StopReason.toolUse",
+  "ops": 6,
+  "opsApplied": 6,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 48,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

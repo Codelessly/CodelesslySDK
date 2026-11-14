@@ -1,0 +1,85 @@
+{
+ "stream": "dashboard@claude-sonnet-5-5.compact.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1609,
+ "timeToFirstPaintMs": 2357,
+ "timeToFirstTextMs": 2357,
+ "timeToFirstSectionMs": 2357,
+ "timeToCompleteMs": 13383,
+ "outputTokens": 2718,
+ "tokensEstimated": false,
+ "chars": 5125,
+ "deltas": 330,
+ "opsApplied": 10,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/pUsers/props/text",
+  "expression_syntax /nodes/pMrr/props/text",
+  "dangling_child /nodes/planRow/children/1",
+  "dangling_child /nodes/planRow/children/2"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 0,
+   "rejected": 0
+  },
+  {
+   "stream": "retry",
+   "applied": 33,
+   "rejected": 12
+  }
+ ],
+ "streamedOps": 12,
+ "rejections": [
+  {
+   "op": 9,
+   "code": "expression_syntax",
+   "path": "/nodes/pUsers/props/text",
+   "message": "The formula \"${= format(item.users, '#,##0')}\" does not parse: Unknown function \"format\".",
+   "nodeId": "pUsers"
+  },
+  {
+   "op": 10,
+   "code": "expression_syntax",
+   "path": "/nodes/pMrr/props/text",
+   "message": "The formula \"${= '$' + format(item.mrr / 1000, '0.0') + 'k'}\" does not parse: Unknown function \"format\".",
+   "nodeId": "pMrr"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/planRow/children/1",
+   "message": "Child \"pUsers\" of \"planRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "planRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/planRow/children/2",
+   "message": "Child \"pMrr\" of \"planRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "planRow"
+  }
+ ],
+ "nodes": 41,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 5,
+  "p90": 26,
+  "max": 26
+ },
+ "frames": 180,
+ "frameMs": 79,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 511,
+ "pumpMsMedian": 0.11,
+ "renderExceptions": [],
+ "warnings": 0
+}

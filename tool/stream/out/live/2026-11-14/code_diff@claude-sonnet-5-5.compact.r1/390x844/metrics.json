@@ -1,0 +1,62 @@
+{
+ "stream": "code_diff@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1031,
+ "timeToFirstPaintMs": 3962,
+ "timeToFirstTextMs": 4374,
+ "timeToFirstSectionMs": 18052,
+ "timeToCompleteMs": 24657,
+ "outputTokens": 4909,
+ "tokensEstimated": false,
+ "chars": 9142,
+ "deltas": 650,
+ "opsApplied": 32,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_layout_key /nodes/h1head/layout/fill",
+  "dangling_child /nodes/hunk1/children/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 33,
+ "rejections": [
+  {
+   "op": 7,
+   "code": "unknown_layout_key",
+   "path": "/nodes/h1head/layout/fill",
+   "message": "layout has no \"fill\": sizes go under width/height: \"height\": {\"fill\": 358} (a number is a fixed size; {\"hug\": n} fits the content, {\"fill\": n} takes the free space; n is the size you expect). This node has both already: remove \"fill\".",
+   "nodeId": "h1head",
+   "expected": [
+    "width",
+    "height"
+   ],
+   "suggestion": "height"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/hunk1/children/0",
+   "message": "Child \"h1head\" of \"hunk1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "hunk1"
+  }
+ ],
+ "nodes": 30,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 6,
+  "max": 8
+ },
+ "frames": 180,
+ "frameMs": 142,
+ "pumpsOverBudget16ms": 14,
+ "pumps": 831,
+ "pumpMsMedian": 0.102,
+ "renderExceptions": [],
+ "warnings": 10
+}

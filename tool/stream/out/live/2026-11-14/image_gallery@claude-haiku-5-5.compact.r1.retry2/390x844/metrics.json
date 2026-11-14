@@ -1,0 +1,75 @@
+{
+ "stream": "image_gallery@claude-haiku-5-5.compact.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 401,
+ "timeToFirstPaintMs": 768,
+ "timeToFirstTextMs": 768,
+ "timeToFirstSectionMs": 2712,
+ "timeToCompleteMs": 3120,
+ "outputTokens": 1032,
+ "tokensEstimated": false,
+ "chars": 2082,
+ "deltas": 130,
+ "opsApplied": 4,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_parent /ops/0/parent",
+  "unknown_id /ops/5/parent"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 14,
+   "rejected": 3
+  },
+  {
+   "stream": "retry",
+   "applied": 2,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 6,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "invalid_parent",
+   "path": "/ops/0/parent",
+   "message": "A canvas takes no children list: give a \"slot\" (body, appBar, floatingActionButton, bottomNavigationBar).",
+   "nodeId": "gallery",
+   "expected": [
+    "body",
+    "appBar",
+    "floatingActionButton",
+    "bottomNavigationBar"
+   ]
+  },
+  {
+   "op": 5,
+   "code": "unknown_id",
+   "path": "/ops/5/parent",
+   "message": "No node \"lightbox\" to place \"viewer\" under.",
+   "nodeId": "viewer"
+  }
+ ],
+ "nodes": 15,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 10,
+  "p90": 28,
+  "max": 28
+ },
+ "frames": 60,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 191,
+ "pumpMsMedian": 0.137,
+ "renderExceptions": [],
+ "warnings": 6
+}

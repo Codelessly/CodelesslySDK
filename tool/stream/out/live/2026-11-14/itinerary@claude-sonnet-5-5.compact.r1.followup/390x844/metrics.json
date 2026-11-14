@@ -1,0 +1,46 @@
+{
+ "stream": "itinerary@claude-sonnet-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1438,
+ "timeToFirstPaintMs": 6294,
+ "timeToFirstTextMs": 6294,
+ "timeToFirstSectionMs": 6294,
+ "timeToCompleteMs": 6392,
+ "outputTokens": 1183,
+ "tokensEstimated": false,
+ "chars": 2247,
+ "deltas": 137,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 25,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 23,
+ "reappliedBoxesPerOp": {
+  "min": 6,
+  "median": 6,
+  "p90": 6,
+  "max": 6
+ },
+ "frames": 109,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 247,
+ "pumpMsMedian": 0.125,
+ "renderExceptions": [],
+ "warnings": 0
+}

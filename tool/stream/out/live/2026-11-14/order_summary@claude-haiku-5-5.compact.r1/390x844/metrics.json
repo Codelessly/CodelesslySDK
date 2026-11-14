@@ -1,0 +1,73 @@
+{
+ "stream": "order_summary@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 628,
+ "timeToFirstPaintMs": 2652,
+ "timeToFirstTextMs": 2918,
+ "timeToFirstSectionMs": 6327,
+ "timeToCompleteMs": 13107,
+ "outputTokens": 4308,
+ "tokensEstimated": false,
+ "chars": 8777,
+ "deltas": 608,
+ "opsApplied": 35,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/applyBtn/actions/0/actions/0/condition/left",
+  "unknown_node_key /nodes/summary/}",
+  "dangling_child /nodes/card/children/4",
+  "dangling_child /nodes/promoRow/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 37,
+ "rejections": [
+  {
+   "op": 18,
+   "code": "expression_syntax",
+   "path": "/nodes/applyBtn/actions/0/actions/0/condition/left",
+   "message": "The formula \"${= promo.toUpperCase() == 'SAVE10'}\" does not parse: Unexpected \"(\" at 18.",
+   "nodeId": "applyBtn"
+  },
+  {
+   "op": 20,
+   "code": "unknown_node_key",
+   "path": "/nodes/summary/}",
+   "message": "A node has no \"}\". Node keys: type, name, children, slots, visible, opacity, layout, decoration, props, bind, actions, and the behaviors motion, animations, transitions, shimmer, inkWell, states, tooltip, ignorePointer, floating, hero, draggable, dropTarget, track, dismissible, pan, reorderHandle, reveal, typewriter, particles, textDirection, defaultTextStyle, flip, tilt, transformGesture, sticky, viewProgress, measure, customPaint, form, radioGroup.",
+   "nodeId": "summary"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/4",
+   "message": "Child \"summary\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/1",
+   "message": "Child \"applyBtn\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  }
+ ],
+ "nodes": 33,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 10,
+  "max": 31
+ },
+ "frames": 179,
+ "frameMs": 78,
+ "pumpsOverBudget16ms": 15,
+ "pumps": 788,
+ "pumpMsMedian": 0.103,
+ "renderExceptions": [],
+ "warnings": 4
+}

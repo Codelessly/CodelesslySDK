@@ -1,0 +1,82 @@
+{
+ "stream": "question_flow@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 708,
+ "timeToFirstPaintMs": 6760,
+ "timeToFirstTextMs": 8677,
+ "timeToFirstSectionMs": 8677,
+ "timeToCompleteMs": 23639,
+ "outputTokens": 4660,
+ "tokensEstimated": false,
+ "chars": 9260,
+ "deltas": 636,
+ "opsApplied": 34,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/bar/props/activeColor",
+  "dangling_child /nodes/card/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 35,
+ "rejections": [
+  {
+   "op": 7,
+   "code": "unknown_prop",
+   "path": "/nodes/bar/props/activeColor",
+   "message": "A progressBar has no prop \"activeColor\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+   "nodeId": "bar",
+   "expected": [
+    "exactFill",
+    "clipFill",
+    "value",
+    "max",
+    "color",
+    "backgroundColor",
+    "direction",
+    "borderRadius",
+    "animate",
+    "animationDuration",
+    "shape",
+    "arcStartAngle",
+    "arcSweepAngle",
+    "arcStrokeWidth",
+    "needleColor",
+    "tickCount",
+    "tickColor",
+    "bands",
+    "arcFit",
+    "arcRoundCaps",
+    "progressEndColor",
+    "arcGlow",
+    "arcHeadDot"
+   ]
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/1",
+   "message": "Child \"bar\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 32,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 8,
+  "max": 13
+ },
+ "frames": 180,
+ "frameMs": 136,
+ "pumpsOverBudget16ms": 9,
+ "pumps": 817,
+ "pumpMsMedian": 0.121,
+ "renderExceptions": [],
+ "warnings": 0
+}

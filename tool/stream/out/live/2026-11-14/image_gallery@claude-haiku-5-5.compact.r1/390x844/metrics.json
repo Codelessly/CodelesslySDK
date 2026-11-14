@@ -1,0 +1,138 @@
+{
+ "stream": "image_gallery@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 402,
+ "timeToFirstPaintMs": 1261,
+ "timeToFirstTextMs": 1261,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 7279,
+ "outputTokens": 2224,
+ "tokensEstimated": false,
+ "chars": 4418,
+ "deltas": 336,
+ "opsApplied": 14,
+ "opsRejected": 3,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [
+  "empty_button scrim"
+ ],
+ "finalDiagnostics": [
+  "wrong_type /nodes/tile/decoration/fills/0/stops/0",
+  "wrong_type /nodes/tile/decoration/fills/0/stops/0/color",
+  "wrong_type /nodes/tile/decoration/fills/0/stops/1",
+  "wrong_type /nodes/tile/decoration/fills/0/stops/1/color",
+  "invalid_parent /ops/8/parent",
+  "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/0",
+  "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/0/color",
+  "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/1",
+  "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/1/color",
+  "dangling_child /nodes/grid/children/0",
+  "dangling_child /nodes/viewer/children/0",
+  "empty_button /nodes/scrim"
+ ],
+ "scripts": 0,
+ "streamedOps": 17,
+ "rejections": [
+  {
+   "op": 7,
+   "code": "wrong_type",
+   "path": "/nodes/tile/decoration/fills/0/stops/0",
+   "message": "This ColorStop is not read (decoding drops it).",
+   "nodeId": "tile"
+  },
+  {
+   "op": 7,
+   "code": "wrong_type",
+   "path": "/nodes/tile/decoration/fills/0/stops/0/color",
+   "message": "An expression is not a value here: put it in \"bind\": got the text \"${item.from}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first).",
+   "nodeId": "tile"
+  },
+  {
+   "op": 7,
+   "code": "wrong_type",
+   "path": "/nodes/tile/decoration/fills/0/stops/1",
+   "message": "This ColorStop is not read (decoding drops it).",
+   "nodeId": "tile"
+  },
+  {
+   "op": 7,
+   "code": "wrong_type",
+   "path": "/nodes/tile/decoration/fills/0/stops/1/color",
+   "message": "An expression is not a value here: put it in \"bind\": got the text \"${item.to}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first).",
+   "nodeId": "tile"
+  },
+  {
+   "op": 8,
+   "code": "invalid_parent",
+   "path": "/ops/8/parent",
+   "message": "A canvas takes no children list: give a \"slot\" (body, appBar, floatingActionButton, bottomNavigationBar).",
+   "nodeId": "gallery",
+   "expected": [
+    "body",
+    "appBar",
+    "floatingActionButton",
+    "bottomNavigationBar"
+   ]
+  },
+  {
+   "op": 11,
+   "code": "wrong_type",
+   "path": "/nodes/bigPhoto/decoration/fills/0/stops/0",
+   "message": "This ColorStop is not read (decoding drops it).",
+   "nodeId": "bigPhoto"
+  },
+  {
+   "op": 11,
+   "code": "wrong_type",
+   "path": "/nodes/bigPhoto/decoration/fills/0/stops/0/color",
+   "message": "An expression is not a value here: put it in \"bind\": got the text \"${photos[current].from}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first).",
+   "nodeId": "bigPhoto"
+  },
+  {
+   "op": 11,
+   "code": "wrong_type",
+   "path": "/nodes/bigPhoto/decoration/fills/0/stops/1",
+   "message": "This ColorStop is not read (decoding drops it).",
+   "nodeId": "bigPhoto"
+  },
+  {
+   "op": 11,
+   "code": "wrong_type",
+   "path": "/nodes/bigPhoto/decoration/fills/0/stops/1/color",
+   "message": "An expression is not a value here: put it in \"bind\": got the text \"${photos[current].to}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first).",
+   "nodeId": "bigPhoto"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/grid/children/0",
+   "message": "Child \"tile\" of \"grid\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "grid"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/viewer/children/0",
+   "message": "Child \"bigPhoto\" of \"viewer\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "viewer"
+  }
+ ],
+ "nodes": 11,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 1,
+  "max": 4
+ },
+ "frames": 123,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 460,
+ "pumpMsMedian": 0.105,
+ "renderExceptions": [],
+ "warnings": 18
+}

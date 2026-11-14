@@ -1,0 +1,551 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["reservation@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":4311,"usage":{"inputTokens":6965,"outputTokens":4311,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":565,"firstToolDeltaMs":605,"totalMs":11832,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":565,"check":{"ops":22,"opsApplied":22,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":8,"nodes":22,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":605,"delta":"{\"ops\": [{\"op"}
+{"tMs":625,"delta":"\": \"set\", \"id\": \""}
+{"tMs":644,"delta":"booking\", \"node"}
+{"tMs":665,"delta":"\": {\"type\": \"canv"}
+{"tMs":685,"delta":"as\", \"slots\": {\""}
+{"tMs":706,"delta":"body\": \"card\"}, \""}
+{"tMs":726,"delta":"layout\": {\"width\": "}
+{"tMs":748,"delta":"390, \"height\": {\"h"}
+{"tMs":767,"delta":"ug\": 620}}}}"}
+{"tMs":789,"delta":", {\"op\": \"set\","}
+{"tMs":808,"delta":" \"id\": \"card\", \"node"}
+{"tMs":829,"delta":"\": {\"type\": \"column\","}
+{"tMs":849,"delta":" \"children\": [\"title\", \""}
+{"tMs":870,"delta":"dayLabel\", \"d"}
+{"tMs":890,"delta":"ayRow\", \"partyL"}
+{"tMs":911,"delta":"abel\", \"partyRow"}
+{"tMs":931,"delta":"\", \"timeLabel\","}
+{"tMs":951,"delta":" \"timeList\", \"summary"}
+{"tMs":972,"delta":"\", \"confirm\"], \""}
+{"tMs":992,"delta":"layout\": {\"width\": {"}
+{"tMs":1013,"delta":"\"fill\": 390},"}
+{"tMs":1033,"delta":" \"height\": {\"hug\":"}
+{"tMs":1053,"delta":" 620}, \"padding\":"}
+{"tMs":1074,"delta":" 20}, \"props\": {"}
+{"tMs":1094,"delta":"\"crossAxisAl"}
+{"tMs":1115,"delta":"ignment\": \"start\", \"sp"}
+{"tMs":1135,"delta":"acing\": 12}, \""}
+{"tMs":1155,"delta":"decoration\": {\"fills"}
+{"tMs":1176,"delta":"\": [{\"color\": \"#"}
+{"tMs":1196,"delta":"FFFFFFFF"}
+{"tMs":1217,"delta":"\"}], \"radius\": "}
+{"tMs":1237,"delta":"16}}}, {"}
+{"tMs":1257,"delta":"\"op\": \"set\", \"id"}
+{"tMs":1278,"delta":"\": \"title\", \"parent\":"}
+{"tMs":1298,"delta":" \"card\", \"node\": {\""}
+{"tMs":1318,"delta":"type\": \"text\", \"layout"}
+{"tMs":1340,"delta":"\": {\"width\": {\"f"}
+{"tMs":1360,"delta":"ill\": 350}, \"height"}
+{"tMs":1380,"delta":"\": {\"hug\": 30"}
+{"tMs":1400,"delta":"}}, \"props\": {\""}
+{"tMs":1421,"delta":"text\": \"Book a table\","}
+{"tMs":1441,"delta":" \"style\": {\"fontS"}
+{"tMs":1461,"delta":"ize\": 22, \"font"}
+{"tMs":1482,"delta":"Weight\": 700, \""}
+{"tMs":1503,"delta":"color\": \"#FF111827"}
+{"tMs":1523,"delta":"\"}}}}"}
+{"tMs":1543,"delta":", {\"op\": \"set\","}
+{"tMs":1564,"delta":" \"id\": \"dayLab"}
+{"tMs":1584,"delta":"el\", \"parent\": \"card"}
+{"tMs":1605,"delta":"\", \"node\": {\"type\":"}
+{"tMs":1625,"delta":" \"text\", \"layout\": {"}
+{"tMs":1645,"delta":"\"width\": {\"fill\":"}
+{"tMs":1666,"delta":" 350}, \"height\": {"}
+{"tMs":1686,"delta":"\"hug\": 20}}"}
+{"tMs":1707,"delta":", \"props\": {\"text\":"}
+{"tMs":1727,"delta":" \"Day\", \"style\": {"}
+{"tMs":1747,"delta":"\"fontSize\": 14"}
+{"tMs":1767,"delta":", \"fontWeight\":"}
+{"tMs":1788,"delta":" 600, \"color\": \"#"}
+{"tMs":1811,"delta":"FF374151\"}}}"}
+{"tMs":1829,"delta":"}, {\"op\": \"set"}
+{"tMs":1849,"delta":"\", \"id\": \"dayR"}
+{"tMs":1870,"delta":"ow\", \"parent\": \"card"}
+{"tMs":1890,"delta":"\", \"node\": {\"type\":"}
+{"tMs":1911,"delta":" \"row\", \"children\": [\""}
+{"tMs":1931,"delta":"d0\", \"d1\", \""}
+{"tMs":1951,"delta":"d2\", \"d3\", \""}
+{"tMs":1972,"delta":"d4\", \"d5\", \""}
+{"tMs":1994,"delta":"d6\"], \"layout\":"}
+{"tMs":2015,"delta":" {\"width\": {\"fill"}
+{"tMs":2033,"delta":"\": 350}, \"height\":"}
+{"tMs":2053,"delta":" {\"hug\": 52}"}
+{"tMs":2074,"delta":"}, \"props\": {\"sp"}
+{"tMs":2095,"delta":"acing\": 4, \"m"}
+{"tMs":2114,"delta":"ainAxisAlignment"}
+{"tMs":2135,"delta":"\": \"spaceBetween"}
+{"tMs":2156,"delta":"\"}}}, {\"op"}
+{"tMs":2176,"delta":"\": \"set\", \"id\": \""}
+{"tMs":2196,"delta":"d0\", \"parent\": \""}
+{"tMs":2217,"delta":"dayRow\", \"node\":"}
+{"tMs":2237,"delta":" {\"type\": \"text\", \""}
+{"tMs":2258,"delta":"layout\": {\"width\": {"}
+{"tMs":2278,"delta":"\"fill\": 46},"}
+{"tMs":2304,"delta":" \"height\": {\"hug\":"}
+{"tMs":2319,"delta":" 48}}, \"props\":"}
+{"tMs":2339,"delta":" {\"text\": \"${days["}
+{"tMs":2360,"delta":"0].label}\", \"textA"}
+{"tMs":2380,"delta":"lign\": \"center\", \"style"}
+{"tMs":2401,"delta":"\": {\"fontSize\":"}
+{"tMs":2421,"delta":" 12, \"fontWe"}
+{"tMs":2441,"delta":"ight\": 600, \"color\":"}
+{"tMs":2462,"delta":" \"#FF111827\"}"}
+{"tMs":2482,"delta":"},"}
+{"tMs":2502,"delta":" \"bind\": {\"deco"}
+{"tMs":2527,"delta":"ration.fills[0].color"}
+{"tMs":2543,"delta":"\": \"${= day == 0"}
+{"tMs":2563,"delta":" ? '#FFD"}
+{"tMs":2584,"delta":"BEA"}
+{"tMs":2604,"delta":"FE' : '#FF"}
+{"tMs":2624,"delta":"F3F4F6'}"}
+{"tMs":2645,"delta":"\"}, \"decoration\":"}
+{"tMs":2665,"delta":" {\"fills\": [{\""}
+{"tMs":2686,"delta":"color\": \"#FFF3"}
+{"tMs":2706,"delta":"F4F6\"}], \""}
+{"tMs":2727,"delta":"radius\": 10}, \""}
+{"tMs":2747,"delta":"actions\": [{\"trig"}
+{"tMs":2770,"delta":"ger\": {\"type\": \"click"}
+{"tMs":2788,"delta":"\"}, \"actions\": ["}
+{"tMs":2808,"delta":"{\"type\": \"setVari"}
+{"tMs":2829,"delta":"able\", \"variable\": \"day"}
+{"tMs":2849,"delta":"\", \"value\": \"0\"}"}
+{"tMs":2870,"delta":"]}]}}, {\""}
+{"tMs":2890,"delta":"op\": \"set\", \"id\":"}
+{"tMs":2910,"delta":" \"d1\", \"parent\":"}
+{"tMs":2931,"delta":" \"dayRow\", \"node"}
+{"tMs":2952,"delta":"\": {\"type\": \"text\","}
+{"tMs":2972,"delta":" \"layout\": {\"width\":"}
+{"tMs":2992,"delta":" {\"fill\": 46}"}
+{"tMs":3013,"delta":", \"height\": {\"hug"}
+{"tMs":3033,"delta":"\": 48}}, \"props"}
+{"tMs":3055,"delta":"\": {\"text\": \"${days"}
+{"tMs":3074,"delta":"[1].label}\", \"text"}
+{"tMs":3094,"delta":"Align\": \"center\", \""}
+{"tMs":3114,"delta":"style\": {\"fontSize"}
+{"tMs":3135,"delta":"\": 12, \"fontW"}
+{"tMs":3155,"delta":"eight\": 600, \"color"}
+{"tMs":3176,"delta":"\": \"#FF111827\""}
+{"tMs":3196,"delta":"}}, \"bind\": {"}
+{"tMs":3217,"delta":"\"decoration.fills["}
+{"tMs":3237,"delta":"0].color\": \"${= day"}
+{"tMs":3257,"delta":" == 1 ? '#"}
+{"tMs":3278,"delta":"FFDBEAFE"}
+{"tMs":3298,"delta":"' : '#FFF3"}
+{"tMs":3318,"delta":"F4F"}
+{"tMs":3339,"delta":"6'}\"}, \"dec"}
+{"tMs":3359,"delta":"oration\": {\"fills\":"}
+{"tMs":3379,"delta":" [{\"color\": \"#F"}
+{"tMs":3400,"delta":"FF3F4F6\""}
+{"tMs":3421,"delta":"}], \"radius\": 10"}
+{"tMs":3441,"delta":"}, \"actions\": [{"}
+{"tMs":3461,"delta":"\"trigger\": {\"type"}
+{"tMs":3482,"delta":"\": \"click\"}, \"act"}
+{"tMs":3502,"delta":"ions\": [{\"type\": \""}
+{"tMs":3522,"delta":"setVariable\", \"variable"}
+{"tMs":3543,"delta":"\": \"day\", \"value\": \""}
+{"tMs":3563,"delta":"1\"}]}]}}"}
+{"tMs":3583,"delta":", {\"op\": \"set\","}
+{"tMs":3605,"delta":" \"id\": \"d2\", \""}
+{"tMs":3625,"delta":"parent\": \"dayRow"}
+{"tMs":3645,"delta":"\", \"node\": {\"type\":"}
+{"tMs":3668,"delta":" \"text\", \"layout\": {"}
+{"tMs":3686,"delta":"\"width\": {\"fill\":"}
+{"tMs":3706,"delta":" 46}, \"height\": {"}
+{"tMs":3727,"delta":"\"hug\": 48}}"}
+{"tMs":3747,"delta":", \"props\": {\"text\":"}
+{"tMs":3768,"delta":" \"${days[2].label}"}
+{"tMs":3788,"delta":"\", \"textAlign\": \""}
+{"tMs":3808,"delta":"center\", \"style\": {\"f"}
+{"tMs":3829,"delta":"ontSize\": 12, \""}
+{"tMs":3850,"delta":"fontWeight\": 600"}
+{"tMs":3870,"delta":", \"color\": \"#FF"}
+{"tMs":3890,"delta":"111827\"}}, \"b"}
+{"tMs":3910,"delta":"ind\": {\"decoration."}
+{"tMs":3931,"delta":"fills[0].color\": \""}
+{"tMs":3951,"delta":"${= day == 2 "}
+{"tMs":3972,"delta":"? '#FFDBE"}
+{"tMs":3992,"delta":"AFE' : '#F"}
+{"tMs":4015,"delta":"FF3F4F"}
+{"tMs":4033,"delta":"6'}\"}, \"dec"}
+{"tMs":4053,"delta":"oration\": {\"fills\":"}
+{"tMs":4074,"delta":" [{\"color\": \"#F"}
+{"tMs":4094,"delta":"FF3F4F"}
+{"tMs":4115,"delta":"6\"}], \"radius\":"}
+{"tMs":4136,"delta":" 10}, \"actions\":"}
+{"tMs":4155,"delta":" [{\"trigger\": {"}
+{"tMs":4176,"delta":"\"type\": \"click\"},"}
+{"tMs":4196,"delta":" \"actions\": [{\"type"}
+{"tMs":4216,"delta":"\": \"setVariable\", \""}
+{"tMs":4239,"delta":"variable\": \"day\", \"value"}
+{"tMs":4257,"delta":"\": \"2\"}]}]"}
+{"tMs":4278,"delta":"}}, {\"op\": \""}
+{"tMs":4298,"delta":"set\", \"id\": \"d3"}
+{"tMs":4318,"delta":"\", \"parent\": \"day"}
+{"tMs":4340,"delta":"Row\", \"node\": {\""}
+{"tMs":4360,"delta":"type\": \"text\", \"layout"}
+{"tMs":4379,"delta":"\": {\"width\": {\"f"}
+{"tMs":4400,"delta":"ill\": 46}, \"height"}
+{"tMs":4421,"delta":"\": {\"hug\": 48"}
+{"tMs":4444,"delta":"}}, \"props\": {\""}
+{"tMs":4461,"delta":"text\": \"${days[3]."}
+{"tMs":4481,"delta":"label}\", \"textAlign"}
+{"tMs":4503,"delta":"\": \"center\", \"style\": {"}
+{"tMs":4523,"delta":"\"fontSize\": 12"}
+{"tMs":4543,"delta":", \"fontWeight\":"}
+{"tMs":4563,"delta":" 600, \"color\": \"#"}
+{"tMs":4584,"delta":"FF111827\"}},"}
+{"tMs":4604,"delta":" \"bind\": {\"deco"}
+{"tMs":4625,"delta":"ration.fills[0].color"}
+{"tMs":4645,"delta":"\": \"${= day == 3"}
+{"tMs":4666,"delta":" ? '#FFD"}
+{"tMs":4686,"delta":"BEA"}
+{"tMs":4706,"delta":"FE' : '#FF"}
+{"tMs":4727,"delta":"F3F4F6'}"}
+{"tMs":4747,"delta":"\"}, \"decoration\":"}
+{"tMs":4767,"delta":" {\"fills\": [{\""}
+{"tMs":4788,"delta":"color\": \"#FF"}
+{"tMs":4809,"delta":"F3F4F"}
+{"tMs":4829,"delta":"6\"}], \"radius\":"}
+{"tMs":4849,"delta":" 10}, \"actions\":"}
+{"tMs":4870,"delta":" [{\"trigger\": {"}
+{"tMs":4895,"delta":"\"type\": \"click\"},"}
+{"tMs":4910,"delta":" \"actions\": [{\"type"}
+{"tMs":4931,"delta":"\": \"setVariable\", \""}
+{"tMs":4951,"delta":"variable\": \"day\", \"value"}
+{"tMs":4972,"delta":"\": \"3\"}]}]"}
+{"tMs":4993,"delta":"}}, {\"op\": \""}
+{"tMs":5012,"delta":"set\", \"id\": \"d4"}
+{"tMs":5033,"delta":"\", \"parent\": \"day"}
+{"tMs":5053,"delta":"Row\", \"node\": {\""}
+{"tMs":5074,"delta":"type\": \"text\", \"layout"}
+{"tMs":5095,"delta":"\": {\"width\": {\"f"}
+{"tMs":5114,"delta":"ill\": 46}, \"height"}
+{"tMs":5136,"delta":"\": {\"hug\": 48"}
+{"tMs":5155,"delta":"}}, \"props\": {\""}
+{"tMs":5176,"delta":"text\": \"${days[4]."}
+{"tMs":5196,"delta":"label}\", \"textAlign"}
+{"tMs":5216,"delta":"\": \"center\", \"style\": {"}
+{"tMs":5238,"delta":"\"fontSize\": 12"}
+{"tMs":5257,"delta":", \"fontWeight\":"}
+{"tMs":5277,"delta":" 600, \"color\": \"#"}
+{"tMs":5298,"delta":"FF111827\"}},"}
+{"tMs":5318,"delta":" \"bind\": {\"deco"}
+{"tMs":5339,"delta":"ration.fills[0].color"}
+{"tMs":5359,"delta":"\": \"${= day == 4"}
+{"tMs":5379,"delta":" ? '#FFD"}
+{"tMs":5402,"delta":"BEA"}
+{"tMs":5421,"delta":"FE' : '#FF"}
+{"tMs":5441,"delta":"F3F4F6'}"}
+{"tMs":5461,"delta":"\"}, \"decoration\":"}
+{"tMs":5481,"delta":" {\"fills\": [{\""}
+{"tMs":5504,"delta":"color\": \"#FFF3"}
+{"tMs":5523,"delta":"F4F"}
+{"tMs":5543,"delta":"6\"}], \"radius\":"}
+{"tMs":5565,"delta":" 10}, \"actions\":"}
+{"tMs":5585,"delta":" [{\"trigger\": {"}
+{"tMs":5604,"delta":"\"type\": \"click\"},"}
+{"tMs":5625,"delta":" \"actions\": [{\"type"}
+{"tMs":5645,"delta":"\": \"setVariable\", \""}
+{"tMs":5666,"delta":"variable\": \"day\", \"value"}
+{"tMs":5686,"delta":"\": \"4\"}]}]"}
+{"tMs":5707,"delta":"}}, {\"op\": \""}
+{"tMs":5727,"delta":"set\", \"id\": \"d5"}
+{"tMs":5748,"delta":"\", \"parent\": \"day"}
+{"tMs":5767,"delta":"Row\", \"node\": {\""}
+{"tMs":5788,"delta":"type\": \"text\", \"layout"}
+{"tMs":5808,"delta":"\": {\"width\": {\"f"}
+{"tMs":5828,"delta":"ill\": 46}, \"height"}
+{"tMs":5849,"delta":"\": {\"hug\": 48"}
+{"tMs":5869,"delta":"}}, \"props\": {\""}
+{"tMs":5890,"delta":"text\": \"${days[5]."}
+{"tMs":5910,"delta":"label}\", \"textAlign"}
+{"tMs":5931,"delta":"\": \"center\", \"style\": {"}
+{"tMs":5951,"delta":"\"fontSize\": 12"}
+{"tMs":5971,"delta":", \"fontWeight\":"}
+{"tMs":5993,"delta":" 600, \"color\": \"#"}
+{"tMs":6012,"delta":"FF111827\"}},"}
+{"tMs":6033,"delta":" \"bind\": {\"deco"}
+{"tMs":6053,"delta":"ration.fills[0].color"}
+{"tMs":6073,"delta":"\": \"${= day == 5"}
+{"tMs":6094,"delta":" ? '#FFD"}
+{"tMs":6115,"delta":"BEA"}
+{"tMs":6135,"delta":"FE' : '#FF"}
+{"tMs":6155,"delta":"F3F4F6"}
+{"tMs":6176,"delta":"'}\"}, \"deco"}
+{"tMs":6196,"delta":"ration\": {\"fills\": ["}
+{"tMs":6216,"delta":"{\"color\": \"#FF"}
+{"tMs":6237,"delta":"F3F4F6\"}"}
+{"tMs":6261,"delta":"], \"radius\": 10}"}
+{"tMs":6277,"delta":", \"actions\": [{\""}
+{"tMs":6312,"delta":"trigger\": {\"type\":"}
+{"tMs":6326,"delta":" \"click\"}, \"actions"}
+{"tMs":6338,"delta":"\": [{\"type\": \"set"}
+{"tMs":6359,"delta":"Variable\", \"variable\":"}
+{"tMs":6383,"delta":" \"day\", \"value\": \"5"}
+{"tMs":6400,"delta":"\"}]}]}}"}
+{"tMs":6421,"delta":", {\"op\": \"set\","}
+{"tMs":6440,"delta":" \"id\": \"d6\", \""}
+{"tMs":6461,"delta":"parent\": \"dayRow"}
+{"tMs":6482,"delta":"\", \"node\": {\"type\":"}
+{"tMs":6503,"delta":" \"text\", \"layout\": {"}
+{"tMs":6523,"delta":"\"width\": {\"fill\":"}
+{"tMs":6543,"delta":" 46}, \"height\": {"}
+{"tMs":6564,"delta":"\"hug\": 48}}"}
+{"tMs":6584,"delta":", \"props\": {\"text\":"}
+{"tMs":6604,"delta":" \"${days[6].label}"}
+{"tMs":6625,"delta":"\", \"textAlign\": \""}
+{"tMs":6646,"delta":"center\", \"style\": {\"f"}
+{"tMs":6665,"delta":"ontSize\": 12, \""}
+{"tMs":6686,"delta":"fontWeight\": 600"}
+{"tMs":6706,"delta":", \"color\": \"#FF"}
+{"tMs":6727,"delta":"111827\"}}, \"b"}
+{"tMs":6748,"delta":"ind\": {\"decoration."}
+{"tMs":6768,"delta":"fills[0].color\": \""}
+{"tMs":6789,"delta":"${= day == 6 "}
+{"tMs":6808,"delta":"? '#FFDBE"}
+{"tMs":6829,"delta":"AFE"}
+{"tMs":6849,"delta":"' : '#FFF3"}
+{"tMs":6869,"delta":"F4F"}
+{"tMs":6891,"delta":"6'}\"}, \"dec"}
+{"tMs":6910,"delta":"oration\": {\"fills\":"}
+{"tMs":6932,"delta":" [{\"color\": \"#F"}
+{"tMs":6952,"delta":"FF3F4F6\""}
+{"tMs":6972,"delta":"}], \"radius\": 10"}
+{"tMs":6992,"delta":"}, \"actions\": [{"}
+{"tMs":7012,"delta":"\"trigger\": {\"type"}
+{"tMs":7033,"delta":"\": \"click\"}, \"act"}
+{"tMs":7053,"delta":"ions\": [{\"type\": \""}
+{"tMs":7074,"delta":"setVariable\", \"variable"}
+{"tMs":7094,"delta":"\": \"day\", \"value\": \""}
+{"tMs":7114,"delta":"6\"}]}]}}"}
+{"tMs":7135,"delta":", {\"op\": \"set\","}
+{"tMs":7155,"delta":" \"id\": \"partyLab"}
+{"tMs":7176,"delta":"el\", \"parent\": \"card"}
+{"tMs":7196,"delta":"\", \"node\": {\"type\":"}
+{"tMs":7216,"delta":" \"text\", \"layout\": {"}
+{"tMs":7237,"delta":"\"width\": {\"fill\":"}
+{"tMs":7257,"delta":" 350}, \"height\": {"}
+{"tMs":7278,"delta":"\"hug\": 20}}"}
+{"tMs":7298,"delta":", \"props\": {\"text\":"}
+{"tMs":7318,"delta":" \"Party size\", \"style\":"}
+{"tMs":7339,"delta":" {\"fontSize\": "}
+{"tMs":7359,"delta":"14, \"fontWeight"}
+{"tMs":7380,"delta":"\": 600, \"color\": \""}
+{"tMs":7400,"delta":"#FF374151\"}}"}
+{"tMs":7420,"delta":"}}, {\"op\": \""}
+{"tMs":7440,"delta":"set\", \"id\": \"party"}
+{"tMs":7461,"delta":"Row\", \"parent\": \""}
+{"tMs":7481,"delta":"card\", \"node\": {\"type"}
+{"tMs":7502,"delta":"\": \"row\", \"children\": "}
+{"tMs":7522,"delta":"[\"minus\", \"partyVal"}
+{"tMs":7544,"delta":"ue\", \"plus\"], \""}
+{"tMs":7563,"delta":"layout\": {\"width\": {"}
+{"tMs":7583,"delta":"\"fill\": 350},"}
+{"tMs":7605,"delta":" \"height\": {\"hug\":"}
+{"tMs":7624,"delta":" 44}}, \"props\":"}
+{"tMs":7645,"delta":" {\"crossAx"}
+{"tMs":7665,"delta":"isAlignment\": \"center"}
+{"tMs":7685,"delta":"\", \"spacing\": 16"}
+{"tMs":7706,"delta":", \"mainAxisA"}
+{"tMs":7727,"delta":"lignment\": \"center\"}"}
+{"tMs":7747,"delta":"}}, {"}
+{"tMs":7767,"delta":"\"op\": \"set\", \"id"}
+{"tMs":7787,"delta":"\": \"minus\", \"parent"}
+{"tMs":7808,"delta":"\": \"partyRow\", \""}
+{"tMs":7831,"delta":"node\": {\"type\": \"i"}
+{"tMs":7849,"delta":"conButton\", \"layout\":"}
+{"tMs":7869,"delta":" {\"width\": 44, \""}
+{"tMs":7890,"delta":"height\": 44}, \"props"}
+{"tMs":7910,"delta":"\": {\"icon\": \"rem"}
+{"tMs":7930,"delta":"ove\", \"style\": {\"back"}
+{"tMs":7953,"delta":"groundColor\": \"#"}
+{"tMs":7971,"delta":"FF"}
+{"tMs":7992,"delta":"F3F4F6\", \""}
+{"tMs":8012,"delta":"foregroundColor\": \""}
+{"tMs":8033,"delta":"#FF111827\"}}"}
+{"tMs":8053,"delta":","}
+{"tMs":8073,"delta":" \"actions\": [{\"tr"}
+{"tMs":8093,"delta":"igger\": {\"type\": \""}
+{"tMs":8114,"delta":"click\"}, \"actions\":"}
+{"tMs":8134,"delta":" [{\"type\": \"if\","}
+{"tMs":8155,"delta":" \"condition\": {\"left\":"}
+{"tMs":8177,"delta":" \"${party}\", \"op\":"}
+{"tMs":8196,"delta":" \"greaterThan\", \""}
+{"tMs":8216,"delta":"right\": \"1\"}, \""}
+{"tMs":8237,"delta":"then\": [{\"type\": \""}
+{"tMs":8257,"delta":"setVariable\", \"variable"}
+{"tMs":8277,"delta":"\": \"party\", \"op\": \""}
+{"tMs":8299,"delta":"subtract\", \"value\": \""}
+{"tMs":8318,"delta":"1\"}]}]}]"}
+{"tMs":8338,"delta":"}}, {\"op\": \""}
+{"tMs":8359,"delta":"set\", \"id\": \"party"}
+{"tMs":8379,"delta":"Value\", \"parent\": \""}
+{"tMs":8400,"delta":"partyRow\", \"node\":"}
+{"tMs":8420,"delta":" {\"type\": \"text\", \""}
+{"tMs":8441,"delta":"layout\": {\"width\": {"}
+{"tMs":8461,"delta":"\"hug\": 120},"}
+{"tMs":8481,"delta":" \"height\": {\"hug\":"}
+{"tMs":8502,"delta":" 30}}, \"props\":"}
+{"tMs":8522,"delta":" {\"text\": \"${party}"}
+{"tMs":8543,"delta":" guests\", \"textAlign"}
+{"tMs":8563,"delta":"\": \"center\", \"style\": {"}
+{"tMs":8583,"delta":"\"fontSize\": 18"}
+{"tMs":8604,"delta":", \"fontWeight\":"}
+{"tMs":8624,"delta":" 700, \"color\": \"#"}
+{"tMs":8645,"delta":"FF111827\"}}}"}
+{"tMs":8666,"delta":"}, {\"op\": \"set"}
+{"tMs":8686,"delta":"\", \"id\": \"plus\","}
+{"tMs":8706,"delta":" \"parent\": \"partyR"}
+{"tMs":8727,"delta":"ow\", \"node\": {\"type"}
+{"tMs":8747,"delta":"\": \"iconButton\", \""}
+{"tMs":8767,"delta":"layout\": {\"width\": "}
+{"tMs":8788,"delta":"44, \"height\": 44}"}
+{"tMs":8808,"delta":", \"props\": {\"icon"}
+{"tMs":8828,"delta":"\": \"add\", \"style\": {"}
+{"tMs":8849,"delta":"\"backgroundColor\":"}
+{"tMs":8870,"delta":" \"#FFF3F4"}
+{"tMs":8890,"delta":"F6\", \"foreground"}
+{"tMs":8910,"delta":"Color\": \"#FF111"}
+{"tMs":8931,"delta":"827\"}}, \"actions"}
+{"tMs":8951,"delta":"\": [{\"trigger\":"}
+{"tMs":8971,"delta":" {\"type\": \"click\"}"}
+{"tMs":8992,"delta":", \"actions\": [{\""}
+{"tMs":9012,"delta":"type\": \"if\", \"condition"}
+{"tMs":9032,"delta":"\": {\"left\": \"${party"}
+{"tMs":9053,"delta":"}\", \"op\": \"less"}
+{"tMs":9073,"delta":"Than\", \"right\": \"8"}
+{"tMs":9093,"delta":"\"}, \"then\": [{"}
+{"tMs":9115,"delta":"\"type\": \"setVariable"}
+{"tMs":9134,"delta":"\", \"variable\": \"party\","}
+{"tMs":9157,"delta":" \"op\": \"add\", \"value"}
+{"tMs":9175,"delta":"\": \"1\"}]}]"}
+{"tMs":9196,"delta":"}]}}, {\"op"}
+{"tMs":9216,"delta":"\": \"set\", \"id\": \""}
+{"tMs":9241,"delta":"timeLabel\", \"par"}
+{"tMs":9256,"delta":"ent\": \"card\", \"node\":"}
+{"tMs":9277,"delta":" {\"type\": \"text\", \""}
+{"tMs":9297,"delta":"layout\": {\"width\": {"}
+{"tMs":9318,"delta":"\"fill\": 350},"}
+{"tMs":9339,"delta":" \"height\": {\"hug\":"}
+{"tMs":9359,"delta":" 20}}, \"props\":"}
+{"tMs":9380,"delta":" {\"text\": \"Time\","}
+{"tMs":9400,"delta":" \"style\": {\"fontS"}
+{"tMs":9420,"delta":"ize\": 14, \"font"}
+{"tMs":9441,"delta":"Weight\": 600, \""}
+{"tMs":9461,"delta":"color\": \"#FF374151"}
+{"tMs":9481,"delta":"\"}}}}"}
+{"tMs":9502,"delta":", {\"op\": \"set\","}
+{"tMs":9522,"delta":" \"id\": \"timeList\","}
+{"tMs":9543,"delta":" \"parent\": \"card\", \""}
+{"tMs":9563,"delta":"node\": {\"type\": \"list"}
+{"tMs":9583,"delta":"View\", \"children\": [\"sl"}
+{"tMs":9604,"delta":"ot\"], \"layout\": {"}
+{"tMs":9625,"delta":"\"width\": {\"fill\":"}
+{"tMs":9645,"delta":" 350}, \"height\": {"}
+{"tMs":9665,"delta":"\"hug\": 200}}"}
+{"tMs":9685,"delta":", \"props\": {\"scr"}
+{"tMs":9706,"delta":"ollable\": false, \"spac"}
+{"tMs":9730,"delta":"ing\": 8}, \"b"}
+{"tMs":9747,"delta":"ind\": {\"data\": \"${"}
+{"tMs":9769,"delta":"slots}\"}}},"}
+{"tMs":9787,"delta":" {\"op\": \"set\", \""}
+{"tMs":9808,"delta":"id\": \"slot\", \"par"}
+{"tMs":9828,"delta":"ent\": \"timeList\", \""}
+{"tMs":9849,"delta":"node\": {\"type\": \"text"}
+{"tMs":9870,"delta":"\", \"layout\": {\"width"}
+{"tMs":9890,"delta":"\": {\"fill\": 350"}
+{"tMs":9910,"delta":"}, \"height\": {\"h"}
+{"tMs":9930,"delta":"ug\": 44}}, \""}
+{"tMs":9951,"delta":"props\": {\"text\": \"${"}
+{"tMs":9971,"delta":"item.time}${= item."}
+{"tMs":9993,"delta":"free[day] ? ''"}
+{"tMs":10012,"delta":" : '  (full)'}"}
+{"tMs":10034,"delta":"\", \"textAlign\": \""}
+{"tMs":10053,"delta":"center\", \"style\": {\"f"}
+{"tMs":10073,"delta":"ontSize\": 15, \""}
+{"tMs":10097,"delta":"fontWeight\": 600"}
+{"tMs":10114,"delta":", \"color\": \"#FF"}
+{"tMs":10137,"delta":"111827\"}}, \"b"}
+{"tMs":10155,"delta":"ind\": {\"decoration."}
+{"tMs":10175,"delta":"fills[0].color\": \""}
+{"tMs":10214,"delta":"${= !item.free[day"}
+{"tMs":10215,"delta":"] ? '#FFE"}
+{"tMs":10236,"delta":"5E7EB' : ("}
+{"tMs":10257,"delta":"time == item.time ? '"}
+{"tMs":10277,"delta":"#FFBF"}
+{"tMs":10298,"delta":"DBFE' : '#"}
+{"tMs":10318,"delta":"FFF3F4F"}
+{"tMs":10339,"delta":"6')}\", \"props.style"}
+{"tMs":10359,"delta":".color\": \"${= item."}
+{"tMs":10380,"delta":"free[day] ? '#"}
+{"tMs":10400,"delta":"FF111827' : '#"}
+{"tMs":10421,"delta":"FF9CA3A"}
+{"tMs":10441,"delta":"F'}\"}, \"dec"}
+{"tMs":10462,"delta":"oration\": {\"fills\":"}
+{"tMs":10484,"delta":" [{\"color\": \"#F"}
+{"tMs":10503,"delta":"FF3F4F6\""}
+{"tMs":10522,"delta":"}], \"radius\": 10"}
+{"tMs":10543,"delta":"}, \"actions\": [{"}
+{"tMs":10563,"delta":"\"trigger\": {\"type"}
+{"tMs":10584,"delta":"\": \"click\"}, \"act"}
+{"tMs":10605,"delta":"ions\": [{\"type\": \""}
+{"tMs":10625,"delta":"if\", \"condition\": {\""}
+{"tMs":10645,"delta":"left\": \"${= item.free"}
+{"tMs":10666,"delta":"[day]}\", \"op\":"}
+{"tMs":10686,"delta":" \"isTrue\"},"}
+{"tMs":10706,"delta":" \"then\": [{\"type\":"}
+{"tMs":10726,"delta":" \"setVariable\", \"vari"}
+{"tMs":10747,"delta":"able\": \"time\", \"value\":"}
+{"tMs":10768,"delta":" \"${item.time}\"}"}
+{"tMs":10788,"delta":"]}]}]"}
+{"tMs":10809,"delta":"}}, {"}
+{"tMs":10829,"delta":"\"op\": \"set\", \"id"}
+{"tMs":10849,"delta":"\": \"summary\", \"parent"}
+{"tMs":10869,"delta":"\": \"card\", \"node\": {"}
+{"tMs":10891,"delta":"\"type\": \"text\", \"lay"}
+{"tMs":10910,"delta":"out\": {\"width\": {\""}
+{"tMs":10930,"delta":"fill\": 350}, \""}
+{"tMs":10951,"delta":"height\": {\"hug\": "}
+{"tMs":10971,"delta":"20}}, \"props\": {"}
+{"tMs":10992,"delta":"\"text\": \"${= time =="}
+{"tMs":11012,"delta":" '' ? 'P"}
+{"tMs":11032,"delta":"ick a time' : '"}
+{"tMs":11053,"delta":"Selected: ' + days["}
+{"tMs":11073,"delta":"day].label + ', '"}
+{"tMs":11094,"delta":" + party + ' guests at"}
+{"tMs":11114,"delta":" ' + time}\", \"style"}
+{"tMs":11134,"delta":"\": {\"fontSize\":"}
+{"tMs":11155,"delta":" 14, \"color\": \"#"}
+{"tMs":11175,"delta":"FF4B5"}
+{"tMs":11196,"delta":"563\"}}}}"}
+{"tMs":11216,"delta":", {\"op\": \"set\","}
+{"tMs":11236,"delta":" \"id\": \"confirm\","}
+{"tMs":11257,"delta":" \"parent\": \"card\", \""}
+{"tMs":11277,"delta":"node\": {\"type\": \"fil"}
+{"tMs":11298,"delta":"ledButton\", \"layout\":"}
+{"tMs":11318,"delta":" {\"width\": {\"fill"}
+{"tMs":11339,"delta":"\": 350}, \"height\":"}
+{"tMs":11359,"delta":" 48}, \"props\": {"}
+{"tMs":11381,"delta":"\"label\": \"Confirm"}
+{"tMs":11400,"delta":"\", \"style\": {\"backg"}
+{"tMs":11423,"delta":"roundColor\": \"#F"}
+{"tMs":11442,"delta":"F2563EB\", \"fo"}
+{"tMs":11461,"delta":"regroundColor\": \"#"}
+{"tMs":11481,"delta":"FFFFFFFF"}
+{"tMs":11502,"delta":"\", \"shape\": {\"type"}
+{"tMs":11522,"delta":"\": \"roundedRectang"}
+{"tMs":11543,"delta":"le\", \"borderRadius"}
+{"tMs":11563,"delta":"\": 10}}}, \""}
+{"tMs":11583,"delta":"actions\": [{\"trig"}
+{"tMs":11605,"delta":"ger\": {\"type\": \"click"}
+{"tMs":11624,"delta":"\"}, \"actions\": ["}
+{"tMs":11645,"delta":"{\"type\": \"showToast"}
+{"tMs":11665,"delta":"\", \"message\": \"${= "}
+{"tMs":11686,"delta":"'Booked: ' +"}
+{"tMs":11706,"delta":" days[day].label + ',"}
+{"tMs":11726,"delta":" ' + party + ' gu"}
+{"tMs":11749,"delta":"ests at ' + time}\""}
+{"tMs":11768,"delta":"}]}]}}"}
+{"tMs":11788,"delta":"]"}
+{"tMs":11828,"delta":"}"}

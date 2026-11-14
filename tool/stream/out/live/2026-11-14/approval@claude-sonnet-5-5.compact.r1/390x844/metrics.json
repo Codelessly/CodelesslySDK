@@ -1,0 +1,49 @@
+{
+ "stream": "approval@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1109,
+ "timeToFirstPaintMs": 3762,
+ "timeToFirstTextMs": 4996,
+ "timeToFirstSectionMs": 4996,
+ "timeToCompleteMs": 17356,
+ "outputTokens": 3507,
+ "tokensEstimated": false,
+ "chars": 7145,
+ "deltas": 475,
+ "opsApplied": 29,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_parent /ops/29/parent"
+ ],
+ "scripts": 0,
+ "streamedOps": 30,
+ "rejections": [
+  {
+   "op": 29,
+   "code": "invalid_parent",
+   "path": "/ops/29/parent",
+   "message": "A box takes no children: place \"headIconGlyph\" under a column, row, stack, listView. For a filled box with content (a button, a tag), make the box a row or column with the decoration and padding.",
+   "nodeId": "headIcon"
+  }
+ ],
+ "nodes": 27,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 6,
+  "max": 10
+ },
+ "frames": 180,
+ "frameMs": 101,
+ "pumpsOverBudget16ms": 17,
+ "pumps": 656,
+ "pumpMsMedian": 0.135,
+ "renderExceptions": [],
+ "warnings": 0
+}

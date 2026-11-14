@@ -1,0 +1,71 @@
+{
+ "stream": "order_summary@claude-haiku-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 432,
+ "timeToFirstPaintMs": 776,
+ "timeToFirstTextMs": 776,
+ "timeToFirstSectionMs": 776,
+ "timeToCompleteMs": 2410,
+ "outputTokens": 688,
+ "tokensEstimated": false,
+ "chars": 1334,
+ "deltas": 95,
+ "opsApplied": 5,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [
+  "no_size subV",
+  "no_size totV"
+ ],
+ "finalDiagnostics": [
+  "dangling_child /nodes/promoRow/children/1",
+  "no_size /nodes/subV/layout",
+  "no_size /nodes/totV/layout"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 35,
+   "rejected": 2
+  },
+  {
+   "stream": "retry",
+   "applied": 1,
+   "rejected": 1
+  },
+  {
+   "stream": "retry",
+   "applied": 4,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 5,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/1",
+   "message": "Child \"applyBtn\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  }
+ ],
+ "nodes": 38,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 4,
+  "p90": 7,
+  "max": 7
+ },
+ "frames": 49,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 6,
+ "pumps": 145,
+ "pumpMsMedian": 0.142,
+ "renderExceptions": [],
+ "warnings": 3
+}

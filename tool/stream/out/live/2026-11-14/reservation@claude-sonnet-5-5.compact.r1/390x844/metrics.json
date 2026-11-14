@@ -1,0 +1,62 @@
+{
+ "stream": "reservation@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 760,
+ "timeToFirstPaintMs": 2380,
+ "timeToFirstTextMs": 2842,
+ "timeToFirstSectionMs": 10787,
+ "timeToCompleteMs": 15502,
+ "outputTokens": 3043,
+ "tokensEstimated": false,
+ "chars": 5787,
+ "deltas": 401,
+ "opsApplied": 18,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_layout_key /nodes/dayN/layout/hug",
+  "dangling_child /nodes/dayItem/children/0"
+ ],
+ "scripts": 0,
+ "streamedOps": 19,
+ "rejections": [
+  {
+   "op": 8,
+   "code": "unknown_layout_key",
+   "path": "/nodes/dayN/layout/hug",
+   "message": "layout has no \"hug\": sizes go under width/height: \"height\": {\"hug\": 40} (a number is a fixed size; {\"hug\": n} fits the content, {\"fill\": n} takes the free space; n is the size you expect). This node has both already: remove \"hug\".",
+   "nodeId": "dayN",
+   "expected": [
+    "width",
+    "height"
+   ],
+   "suggestion": "height"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/dayItem/children/0",
+   "message": "Child \"dayN\" of \"dayItem\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "dayItem"
+  }
+ ],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 19,
+  "max": 22
+ },
+ "frames": 180,
+ "frameMs": 91,
+ "pumpsOverBudget16ms": 8,
+ "pumps": 582,
+ "pumpMsMedian": 0.133,
+ "renderExceptions": [],
+ "warnings": 2
+}

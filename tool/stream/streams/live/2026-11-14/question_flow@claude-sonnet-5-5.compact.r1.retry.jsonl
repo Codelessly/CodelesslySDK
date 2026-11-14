@@ -1,0 +1,20 @@
+{"meta":{"ui":"question_flow","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["question_flow@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":210,"usage":{"inputTokens":6142,"outputTokens":210,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1044,"firstToolDeltaMs":1113,"totalMs":1778,"stopReason":"StopReason.toolUse"},"text":"I'm resending the progress bar with the correct prop names (`color` and `backgroundColor`).","ttftMs":1044,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":33,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1113,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1146,"delta":"\"set\",\"id\":\"bar"}
+{"tMs":1182,"delta":"\",\"parent\":\"card\",\"index"}
+{"tMs":1233,"delta":"\":1,\"node\":{\""}
+{"tMs":1253,"delta":"type\":\"progressBar\",\""}
+{"tMs":1288,"delta":"layout\":{\"width\":{"}
+{"tMs":1324,"delta":"\"fill\":350},\"height"}
+{"tMs":1365,"delta":"\":8},\"props\":{\""}
+{"tMs":1395,"delta":"value\":0,\"max"}
+{"tMs":1430,"delta":"\":1,\"color\":\"#"}
+{"tMs":1466,"delta":"FF2563EB\",\"back"}
+{"tMs":1501,"delta":"groundColor\":\"#"}
+{"tMs":1537,"delta":"FFE5E7E"}
+{"tMs":1572,"delta":"B\",\"borderRadius\":"}
+{"tMs":1608,"delta":"4},\"bind\":{\""}
+{"tMs":1643,"delta":"props.value\":\"${= step"}
+{"tMs":1679,"delta":" / 3}\"}}}"}
+{"tMs":1715,"delta":"]"}
+{"tMs":1776,"delta":"}"}

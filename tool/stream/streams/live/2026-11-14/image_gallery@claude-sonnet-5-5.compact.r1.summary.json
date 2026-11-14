@@ -1,0 +1,112 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 46693,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 20530,
+ "generate": {
+  "inputTokens": 1232,
+  "outputTokens": 3181,
+  "cacheReadInputTokens": 40902,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1050,
+  "firstToolDeltaMs": 3443,
+  "totalMs": 18081,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "keyDown"
+    },
+    "ms": 2004,
+    "outputTokens": 125,
+    "resultChars": 1556
+   }
+  ],
+  "ops": 21,
+  "opsApplied": 21,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [
+   "low_contrast cellCap"
+  ],
+  "warnings": 1,
+  "nodes": 19,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 4825,
+   "outputTokens": 179,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 2424,
+   "firstToolDeltaMs": 2429,
+   "totalMs": 2436,
+   "stopReason": "StopReason.toolUse",
+   "ops": 1,
+   "opsApplied": 1,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [
+    "low_contrast cellCap"
+   ],
+   "warnings": 2,
+   "nodes": 19,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 5478,
+   "outputTokens": 304,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1731,
+   "firstToolDeltaMs": 1765,
+   "totalMs": 2833,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [
+    "low_contrast cellCap"
+   ],
+   "warnings": 1,
+   "nodes": 20,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [
+   "low_contrast cellCap"
+  ],
+  "warnings": 1,
+  "nodes": 20,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

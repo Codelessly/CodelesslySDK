@@ -1,0 +1,21 @@
+{"meta":{"ui":"plan_progress","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["plan_progress@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":215,"usage":{"inputTokens":5190,"outputTokens":215,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1879,"firstToolDeltaMs":1945,"totalMs":2638,"stopReason":"StopReason.toolUse"},"text":"The progress bar was rejected because `minHeight` isn't one of its props, so I'm re-sending it without that prop.","ttftMs":1879,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":22,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1945,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1979,"delta":"\"set\",\"id\":\"prog"}
+{"tMs":2012,"delta":"\",\"par"}
+{"tMs":2045,"delta":"ent\":\"card\",\"index\":1"}
+{"tMs":2078,"delta":",\"node\":{\"type\":"}
+{"tMs":2113,"delta":"\"progressBar\",\"layout"}
+{"tMs":2149,"delta":"\":{\"width\":{\"f"}
+{"tMs":2179,"delta":"ill\":350},\"height\":8"}
+{"tMs":2516,"delta":"},\"props\":{\"color\":"}
+{"tMs":2516,"delta":"\"#F"}
+{"tMs":2516,"delta":"F2563EB\",\"backg"}
+{"tMs":2516,"delta":"roundColor\":\"#F"}
+{"tMs":2516,"delta":"FE5E7E"}
+{"tMs":2516,"delta":"B\",\"borderRadius\":"}
+{"tMs":2516,"delta":"4"}
+{"tMs":2516,"delta":"},\"bind\":{\"props"}
+{"tMs":2516,"delta":".value\":\"${= min("}
+{"tMs":2516,"delta":"ticks / 90, "}
+{"tMs":2546,"delta":"1)}\"}}}]"}
+{"tMs":2636,"delta":"}"}

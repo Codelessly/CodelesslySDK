@@ -1,0 +1,82 @@
+{
+ "stream": "plan_progress@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1121,
+ "timeToFirstPaintMs": 7473,
+ "timeToFirstTextMs": 8373,
+ "timeToFirstSectionMs": 10112,
+ "timeToCompleteMs": 18830,
+ "outputTokens": 3206,
+ "tokensEstimated": false,
+ "chars": 6229,
+ "deltas": 432,
+ "opsApplied": 23,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/prog/props/minHeight",
+  "dangling_child /nodes/card/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 24,
+ "rejections": [
+  {
+   "op": 5,
+   "code": "unknown_prop",
+   "path": "/nodes/prog/props/minHeight",
+   "message": "A progressBar has no prop \"minHeight\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+   "nodeId": "prog",
+   "expected": [
+    "exactFill",
+    "clipFill",
+    "value",
+    "max",
+    "color",
+    "backgroundColor",
+    "direction",
+    "borderRadius",
+    "animate",
+    "animationDuration",
+    "shape",
+    "arcStartAngle",
+    "arcSweepAngle",
+    "arcStrokeWidth",
+    "needleColor",
+    "tickCount",
+    "tickColor",
+    "bands",
+    "arcFit",
+    "arcRoundCaps",
+    "progressEndColor",
+    "arcGlow",
+    "arcHeadDot"
+   ]
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/1",
+   "message": "Child \"prog\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 21,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 12,
+  "max": 43
+ },
+ "frames": 179,
+ "frameMs": 110,
+ "pumpsOverBudget16ms": 13,
+ "pumps": 612,
+ "pumpMsMedian": 0.111,
+ "renderExceptions": [],
+ "warnings": 0
+}

@@ -1,0 +1,21 @@
+{"meta":{"ui":"map_list","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["map_list@claude-sonnet-5-5.compact.r1.jsonl","map_list@claude-sonnet-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":251,"usage":{"inputTokens":6347,"outputTokens":251,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1633,"firstToolDeltaMs":1697,"totalMs":2392,"stopReason":"StopReason.toolUse"},"text":"The only remaining problem is the dangling `pins` child in `map`. Since patches can't change `children`, I'll re-set `map` with the full child list, keeping its layout and decoration.","ttftMs":1633,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":27,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1697,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1732,"delta":"\"set\",\"id\":\"map\",\""}
+{"tMs":1765,"delta":"node\":{\"type\":\"st"}
+{"tMs":1797,"delta":"ack\",\"children\":[\"st1\",\""}
+{"tMs":2163,"delta":"st2\",\"st3\",\"st4"}
+{"tMs":2163,"delta":"\",\"pin1\",\"pin2"}
+{"tMs":2163,"delta":"\",\"pin3\",\"pin4"}
+{"tMs":2163,"delta":"\",\"pin5\"],\"lay"}
+{"tMs":2163,"delta":"out\":{\"width\":{\""}
+{"tMs":2163,"delta":"fill\":358},\"height\":"}
+{"tMs":2163,"delta":"230,\"constraints\":{"}
+{"tMs":2163,"delta":"\"maxWidth\":420"}
+{"tMs":2163,"delta":"}},\"decoration\":{"}
+{"tMs":2163,"delta":"\"fills\":[{\"color"}
+{"tMs":2165,"delta":"\":\"#FFEEF"}
+{"tMs":2199,"delta":"2F6\"}],\"rad"}
+{"tMs":2232,"delta":"ius\":12,\"clip\":"}
+{"tMs":2275,"delta":"\"antiAlias\"}"}
+{"tMs":2300,"delta":"}}]"}
+{"tMs":2391,"delta":"}"}

@@ -1,0 +1,292 @@
+{
+ "stream": "dashboard@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1344,
+ "timeToFirstPaintMs": 2517,
+ "timeToFirstTextMs": 9111,
+ "timeToFirstSectionMs": 9608,
+ "timeToCompleteMs": 35491,
+ "outputTokens": 7061,
+ "tokensEstimated": false,
+ "chars": 13375,
+ "deltas": 962,
+ "opsApplied": 33,
+ "opsRejected": 12,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 12,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/tRev/layout/width",
+  "wrong_type /nodes/tSu/layout/width",
+  "wrong_type /nodes/tCh/layout/width",
+  "wrong_type /nodes/tAu/layout/width",
+  "wrong_type /nodes/hName/layout/width",
+  "invalid_enum /nodes/hName/actions/0/actions/0/condition/op",
+  "wrong_type /nodes/hUsers/layout/width",
+  "invalid_enum /nodes/hUsers/actions/0/actions/0/condition/op",
+  "wrong_type /nodes/hMrr/layout/width",
+  "invalid_enum /nodes/hMrr/actions/0/actions/0/condition/op",
+  "wrong_type /nodes/hChurn/layout/width",
+  "invalid_enum /nodes/hChurn/actions/0/actions/0/condition/op",
+  "wrong_type /nodes/pName/layout/width",
+  "wrong_type /nodes/pUsers/layout/width",
+  "expression_syntax /nodes/pUsers/props/text",
+  "wrong_type /nodes/pMrr/layout/width",
+  "expression_syntax /nodes/pMrr/props/text",
+  "wrong_type /nodes/pChurn/layout/width",
+  "dangling_child /nodes/tiles1/children/0",
+  "dangling_child /nodes/tiles1/children/1",
+  "dangling_child /nodes/tiles2/children/0",
+  "dangling_child /nodes/tiles2/children/1",
+  "dangling_child /nodes/tblHead/children/0",
+  "dangling_child /nodes/tblHead/children/1",
+  "dangling_child /nodes/tblHead/children/2",
+  "dangling_child /nodes/tblHead/children/3",
+  "dangling_child /nodes/planRow/children/0",
+  "dangling_child /nodes/planRow/children/1",
+  "dangling_child /nodes/planRow/children/2",
+  "dangling_child /nodes/planRow/children/3"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 0,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 45,
+ "rejections": [
+  {
+   "op": 10,
+   "code": "wrong_type",
+   "path": "/nodes/tRev/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "tRev"
+  },
+  {
+   "op": 14,
+   "code": "wrong_type",
+   "path": "/nodes/tSu/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "tSu"
+  },
+  {
+   "op": 18,
+   "code": "wrong_type",
+   "path": "/nodes/tCh/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "tCh"
+  },
+  {
+   "op": 22,
+   "code": "wrong_type",
+   "path": "/nodes/tAu/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "tAu"
+  },
+  {
+   "op": 35,
+   "code": "wrong_type",
+   "path": "/nodes/hName/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "hName"
+  },
+  {
+   "op": 35,
+   "code": "invalid_enum",
+   "path": "/nodes/hName/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hName",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 36,
+   "code": "wrong_type",
+   "path": "/nodes/hUsers/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "hUsers"
+  },
+  {
+   "op": 36,
+   "code": "invalid_enum",
+   "path": "/nodes/hUsers/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hUsers",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 37,
+   "code": "wrong_type",
+   "path": "/nodes/hMrr/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "hMrr"
+  },
+  {
+   "op": 37,
+   "code": "invalid_enum",
+   "path": "/nodes/hMrr/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hMrr",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 38,
+   "code": "wrong_type",
+   "path": "/nodes/hChurn/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "hChurn"
+  },
+  {
+   "op": 38,
+   "code": "invalid_enum",
+   "path": "/nodes/hChurn/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hChurn",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 41,
+   "code": "wrong_type",
+   "path": "/nodes/pName/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "pName"
+  },
+  {
+   "op": 42,
+   "code": "wrong_type",
+   "path": "/nodes/pUsers/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "pUsers"
+  },
+  {
+   "op": 42,
+   "code": "expression_syntax",
+   "path": "/nodes/pUsers/props/text",
+   "message": "The formula \"${= format(item.users, '#,##0')}\" does not parse: Unknown function \"format\".",
+   "nodeId": "pUsers"
+  },
+  {
+   "op": 43,
+   "code": "wrong_type",
+   "path": "/nodes/pMrr/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "pMrr"
+  },
+  {
+   "op": 43,
+   "code": "expression_syntax",
+   "path": "/nodes/pMrr/props/text",
+   "message": "The formula \"${= '$' + format(item.mrr / 1000, '0.0') + 'k'}\" does not parse: Unknown function \"format\".",
+   "nodeId": "pMrr"
+  },
+  {
+   "op": 44,
+   "code": "wrong_type",
+   "path": "/nodes/pChurn/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "pChurn"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles1/children/0",
+   "message": "Child \"tRev\" of \"tiles1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles1"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles1/children/1",
+   "message": "Child \"tSu\" of \"tiles1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles1"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles2/children/0",
+   "message": "Child \"tCh\" of \"tiles2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles2/children/1",
+   "message": "Child \"tAu\" of \"tiles2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tblHead/children/0",
+   "message": "Child \"hName\" of \"tblHead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tblHead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tblHead/children/1",
+   "message": "Child \"hUsers\" of \"tblHead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tblHead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tblHead/children/2",
+   "message": "Child \"hMrr\" of \"tblHead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tblHead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tblHead/children/3",
+   "message": "Child \"hChurn\" of \"tblHead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tblHead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/planRow/children/0",
+   "message": "Child \"pName\" of \"planRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "planRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/planRow/children/1",
+   "message": "Child \"pUsers\" of \"planRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "planRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/planRow/children/2",
+   "message": "Child \"pMrr\" of \"planRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "planRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/planRow/children/3",
+   "message": "Child \"pChurn\" of \"planRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "planRow"
+  }
+ ],
+ "nodes": 31,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 3,
+  "max": 9
+ },
+ "frames": 180,
+ "frameMs": 202,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 1143,
+ "pumpMsMedian": 0.095,
+ "renderExceptions": [],
+ "warnings": 12
+}
