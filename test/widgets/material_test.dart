@@ -116,7 +116,7 @@ void main() {
     expect(r['body'], isNull);
     expect(r['appBar'], const Rect.fromLTWH(0, 200, 400, 56));
     expect(r['nav'], const Rect.fromLTWH(0, 300, 400, 80));
-    expect(r['chip']!.height, greaterThan(24));
+    expect(r['chip']!.height, 24, reason: 'SSUI\'s chip');
     expect(r['fab'], const Rect.fromLTWH(200, 400, 56, 56));
   });
 
