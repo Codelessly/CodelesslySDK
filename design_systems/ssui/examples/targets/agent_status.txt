@@ -1,0 +1,18 @@
+Card gap:8
+  Text.sectionTitle "Agent status"
+  Row gap:8
+    Text.small "Connection" grow
+    ConnectionStatus status:connected
+  Divider
+  Row gap:8
+    Text.small "Workspace sync" grow
+    CloudSyncIndicator state:syncing
+    Text.caption "Syncing"
+  Divider
+  Row gap:8
+    Text.small "Current task" grow
+    StatusIndicator status:running
+  Divider
+  Row gap:8
+    Text.small "Model" grow
+    ProviderPill "Claude"

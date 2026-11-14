@@ -1,0 +1,8 @@
+Card gap:8
+  Image "https://picsum.photos/seed/harbor/700/400" h:200 radius:8
+  Row gap:8
+    Column gap:1 grow
+      Text.strong "Harbor at dawn"
+      Text.caption "1400 × 800 · 240 KB"
+    CopyButton text:"https://picsum.photos/seed/harbor/700/400"
+    DownloadButton -> emit download

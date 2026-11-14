@@ -1,0 +1,10 @@
+state a="pending"
+state b="pending"
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Two changes to review" grow
+    Text.caption "{(a!="pending"?1:0)+(b!="pending"?1:0)} of 2 decided"
+  DiffViewer "src/total.ts" lines:[" const total = items","-  .map((i) => i.cost)","+  .map((i) => i.price)"]
+  SuggestionReviewItem "Use the price field" "The cost field was removed in v4." status:=a -> a="applied"
+  DiffViewer "README.md" status:added lines:["+## Totals","+Totals use the price of each item."]
+  CompactSuggestionReviewItem "Document the change" "Reviewers asked for it." operation:create status:=b -> b="applied"

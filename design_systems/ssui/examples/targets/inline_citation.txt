@@ -1,0 +1,10 @@
+state open=0
+Column gap:8
+  Text "Refunds are issued within 14 days when the seat has not been used, and yearly plans can be changed at renewal."
+  Row gap:6
+    Chip "1 handbook.md" selected:=open==1 -> open=open==1?0:1
+    Chip "2 pricing.md" selected:=open==2 -> open=open==2?0:2
+  if open==1
+    TextItem "handbook.md" value:"Refunds are issued within 14 days of purchase when the seat has not been used." kind:"lines 40 to 46"
+  if open==2
+    TextItem "pricing.md" value:"Yearly plans are billed up front and can be changed at renewal." kind:"lines 12 to 15"

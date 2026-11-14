@@ -1,0 +1,13 @@
+state done=false
+Column gap:8
+  Text "{done?"Business is the better fit: it is the only plan with audit logs, and at 40 seats it costs 12% more than Pro.":"Business is the better fit: it is the only plan with"}"
+  if !done
+    Row gap:8
+      PulsingDots
+      Text.caption "Writing"
+      Spacer grow
+      Button.ghost "Stop" -> done=true; emit stop
+  if done
+    Row gap:2
+      CopyButton text:"Business is the better fit."
+      IconButton "refresh" -> done=false; emit regenerate

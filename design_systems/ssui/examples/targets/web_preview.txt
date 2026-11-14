@@ -1,0 +1,16 @@
+state tab="Preview"
+state url="https://example.com/pricing"
+Card gap:8
+  BrowserTabs tabs:["Preview","Console"] icons:["public","terminal"] =tab closable:false
+  Row gap:6
+    IconButton "arrow_back" -> emit back
+    IconButton "refresh" -> emit reload
+    HeaderSearchInput =url grow
+    IconButton "open_in_new" -> link https://example.com/pricing
+  if tab=="Preview"
+    Box h:160 radius:8 fill:#FFF3F4F6 center
+      Column gap:6 center
+        Icon "web" {"props": {"size": 28, "color": "#FF9CA3AF"}}
+        Text.caption "example.com/pricing"
+  if tab=="Console"
+    Terminal lines:["GET /pricing 200 in 84 ms","Deprecated: use fetch() in place of XMLHttpRequest"] levels:["info","warn"]

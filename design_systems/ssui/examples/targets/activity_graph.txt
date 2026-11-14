@@ -1,0 +1,11 @@
+state range="Week"
+Card gap:10
+  Row gap:8
+    Column gap:1 grow
+      Text.sectionTitle "Messages per day"
+      Text.caption "214 this week, most on Thursday"
+    TabToggle options:["Week","Month"] =range size:sm
+  BarChart values:[18,24,31,52,40,27,22] labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+  Row gap:16
+    InlineStat "Busiest: Thu" icon:"north"
+    InlineStat "Quietest: Mon" icon:"south"

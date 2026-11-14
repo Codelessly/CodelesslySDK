@@ -56,7 +56,20 @@ it reads as finished beside theirs: alignment, spacing, color, every state.
 | `quote.txt` | one | A quoted passage with its source. Uses `ProviderIcon`, `CopyButton`. |
 | `prompt_library.txt` | none picked, one picked | Saved prompts to search and pick. Uses `FullWidthSearchInput`, `SelectableListRow`, `AddButton`. |
 | `speaker_identity.txt` | one | Who is speaking, and their role. Uses `Avatar`, `PersonChip`. |
-| `computer_use.txt` | one | An agent driving a browser: the step, a view of the screen, take over or stop. Uses `StepIndicator`, `StatusIndicator`. |
+| `computer_use.txt` | one | An agent driving a browser: the step, a view of the screen, take over or stop. Uses `StepIndicator`, `StatusIndicator`. || `inline_citation.txt` | closed, a source open | Numbered sources under a sentence; pressing one shows its passage. Uses `TextItem`. |
+| `reviewable_diff.txt` | pending, applied | Each change with its diff and its own Apply and Reject. Uses `DiffViewer`, `SuggestionReviewItem`, `CompactSuggestionReviewItem`. |
+| `syntax_highlighter.txt` | either language | The same code in two languages, switched. Uses `CodeBlock`, `TabToggle`. |
+| `image.txt` | one | A picture with its name, size, copy and download. Uses `CopyButton`, `DownloadButton`. |
+| `image_generation.txt` | generating, done | A prompt, placeholders while it renders, then the pictures. Uses `Skeleton`, `RunningIndicator`, `ImageGallery`. |
+| `media_player.txt` | paused, playing | A recording with play, a scrubber, speed and download. Uses `SegmentedControl`, `DownloadButton`. |
+| `web_preview.txt` | preview, console | A page in a small browser frame with its address and its console. Uses `BrowserTabs`, `HeaderSearchInput`, `Terminal`. |
+| `tool_fallback.txt` | offered, chosen | A tool that failed and what can be done without it. Uses `Banner`. |
+| `agent_status.txt` | one | Connection, sync, task and model, a line each. Uses `ConnectionStatus`, `CloudSyncIndicator`, `StatusIndicator`, `ProviderPill`. |
+| `streaming_text.txt` | writing, done | An answer arriving, with Stop; then copy and regenerate. Uses `PulsingDots`, `CopyButton`. |
+| `read_aloud.txt` | playing, paused | A thin player under a message. Uses `SegmentedControl`. |
+| `activity_graph.txt` | one | A count per day as bars, with the busiest and the quietest. Uses `TabToggle`, `InlineStat`. |
+| `trace_waterfall.txt` | one | Where the time of a run went, step by step. Uses `FilterLegend`. |
+| `markdown_text.txt` | one | A heading, a paragraph, bullets, a code block, a note and a link. Uses `FeatureBulletItem`, `CodeBlock`, `Hyperlink`. |
 The first nineteen are written with core nodes only. The rest call SSUI's components by name, which the notation
 reads when it is given the design system; expand one with
 
@@ -66,6 +79,5 @@ dart run tool/notation/expand.dart design_systems/ssui/examples/targets/handoff.
 
 and render the document with `tool/render/render.sh` from a site whose `site.json` names the design system.
 
-Still to write: heat and activity graphs, trace waterfall, flow graph; inline citation and maps; syntax highlighter,
-diagrams and reviewable diff; image, image generation, media player and web preview; tool fallback and agent status;
-markdown and streaming text, and read aloud.
+Still to write: heat graph and flow graph; maps; diagrams (Mermaid and others); and the handful that are app shell
+rather than a card.

@@ -1,0 +1,18 @@
+state playing=false
+state pos=42
+state speed="1x"
+Card gap:10
+  Row gap:10
+    IconBox "graphic_eq"
+    Column gap:1 grow
+      Text.sectionTitle "Weekly review, 12 November"
+      Text.caption "Recording · 6 min 20 s"
+  Row gap:8
+    IconButton "{playing?"pause":"play_arrow"}" -> playing=!playing; emit toggle
+    Text.mono "2:39"
+    Slider =pos min:0 max:100 grow
+    Text.mono "6:20"
+  Row gap:8
+    SegmentedControl =speed options:["1x","1.5x","2x"]
+    Spacer grow
+    DownloadButton -> emit download
