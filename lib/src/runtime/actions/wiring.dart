@@ -29,7 +29,7 @@ import '../expressions/formula.dart';
 import '../expressions/paths.dart';
 import '../expressions/scopes.dart';
 import 'context.dart';
-import 'route_transition.dart' show RevealAnchor;
+import 'reveal_anchor.dart' show RevealAnchor;
 import 'runner.dart';
 import 'key_matching.dart';
 import '../../render/components.dart' show componentInstanceOf;

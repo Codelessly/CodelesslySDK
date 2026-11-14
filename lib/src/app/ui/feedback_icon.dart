@@ -5,7 +5,7 @@ import 'package:codelessly_api/core.dart' show Json;
 import 'package:flutter/widgets.dart';
 
 import '../../render/paint/icon_glyph.dart';
-import '../http_image_loader.dart';
+import '../../runtime/http_image_loader.dart';
 
 /// Draws [icon] [size] square. A glyph takes its own color, else [color].
 /// An image shows as is (a stamp, a colored check) unless the icon has a

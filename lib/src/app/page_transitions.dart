@@ -5,7 +5,7 @@ import 'package:codelessly_api/codelessly_api.dart' show PageTransition;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
-import '../runtime/actions/hero_flights.dart';
+import 'ui/hero_flights.dart';
 
 /// [transition] where the app runs: the platform's page transition off
 /// Apple platforms is Android's zoom, which a website shouldn't play, so on

@@ -110,6 +110,14 @@ const widgetImportRatchet = {
   'src/app/page_transitions.dart',
   'src/app/paywalls.dart',
   'src/app/presenter.dart',
+  'src/app/ui/confirm_dialog.dart',
+  'src/app/ui/feedback_icon.dart',
+  'src/app/ui/feedback_theme.dart',
+  'src/app/ui/hero_flights.dart',
+  'src/app/ui/presentation_route.dart',
+  'src/app/ui/presentation_scope.dart',
+  'src/app/ui/route_transition.dart',
+  'src/app/ui/toast.dart',
   'src/app/viewport.dart',
   'src/features/engage/automations.dart',
   'src/features/media/embedded_player_native.dart',
@@ -124,15 +132,7 @@ const widgetImportRatchet = {
   'src/render/reveal.dart',
   'src/render/view_scroll.dart',
   'src/runtime/actions/capture.dart',
-  'src/runtime/actions/confirm_dialog.dart',
-  'src/runtime/actions/feedback_icon.dart',
-  'src/runtime/actions/feedback_theme.dart',
   'src/runtime/actions/handlers.dart',
-  'src/runtime/actions/hero_flights.dart',
-  'src/runtime/actions/presentation_route.dart',
-  'src/runtime/actions/presentation_scope.dart',
-  'src/runtime/actions/route_transition.dart',
-  'src/runtime/actions/toast.dart',
   'src/runtime/gestures/drag_and_drop.dart',
   'src/session/view.dart',
   'src/widgets/collections.dart',
@@ -156,7 +156,7 @@ const hostAdapterPaths = ['src/app/', 'src/session/view.dart', 'src/features/med
 
 /// The core files still on the ratchet when this was last counted. It only
 /// goes down: lower it with the list.
-const coreWidgetImports = 27;
+const coreWidgetImports = 19;
 
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.
