@@ -1,0 +1,36 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21168,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1665,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 702,
+   "totalMs": 6291,
+   "chars": 3608,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 18,
+   "outputTokensPerNode": "92.5",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}

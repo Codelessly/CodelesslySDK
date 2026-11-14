@@ -1,0 +1,319 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "column3"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "My Trip Gallery",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${rows}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${item.items}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "textButton1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": ""
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "photo.open",
+       "value": {
+        "index": "${item.index}"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "items": [
+       {
+        "index": 0,
+        "caption": "Sunrise over the bay",
+        "counter": "1 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ff9a8b'/><stop offset='1' stop-color='%23ff6a88'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       },
+       {
+        "index": 1,
+        "caption": "Old town streets",
+        "counter": "2 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f6d365'/><stop offset='1' stop-color='%23fda085'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       },
+       {
+        "index": 2,
+        "caption": "Mountain trail",
+        "counter": "3 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2384fab0'/><stop offset='1' stop-color='%238fd3f4'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       }
+      ]
+     },
+     {
+      "items": [
+       {
+        "index": 3,
+        "caption": "Harbor at dusk",
+        "counter": "4 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23a18cd1'/><stop offset='1' stop-color='%23fbc2eb'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       },
+       {
+        "index": 4,
+        "caption": "Street food market",
+        "counter": "5 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23fa709a'/><stop offset='1' stop-color='%23fee140'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       },
+       {
+        "index": 5,
+        "caption": "Lakeside picnic",
+        "counter": "6 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%2343e97b'/><stop offset='1' stop-color='%2338f9d7'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       }
+      ]
+     },
+     {
+      "items": [
+       {
+        "index": 6,
+        "caption": "Cathedral square",
+        "counter": "7 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%234facfe'/><stop offset='1' stop-color='%2300f2fe'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       },
+       {
+        "index": 7,
+        "caption": "Desert highway",
+        "counter": "8 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23f093fb'/><stop offset='1' stop-color='%23f5576c'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       },
+       {
+        "index": 8,
+        "caption": "Last night, city lights",
+        "counter": "9 of 9",
+        "url": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23667eea'/><stop offset='1' stop-color='%23764ba2'/></linearGradient></defs><rect width='300' height='300' fill='url(%23g)'/></svg>"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

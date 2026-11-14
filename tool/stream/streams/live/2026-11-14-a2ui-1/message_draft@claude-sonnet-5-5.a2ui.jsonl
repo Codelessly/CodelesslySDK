@@ -1,0 +1,188 @@
+{"meta":{"ui":"message_draft","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Draft an email to my landlord about the broken heating and show it as an inline card I can edit before it goes: to, subject and body fields filled in, a tone switch between polite and firm that rewrites the body, and send and discard buttons. Sending needs a recipient and a subject, and afterwards the card shows it as sent.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"heatingEmail\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"sendDataModel\":true,\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"title\",\"toField\",\"subjectField\",\"toneRow\",\"bodyField\",\"status\",\"actions\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Draft email: broken heating\"},{\"id\":\"toField\",\"component\":\"TextField\",\"label\":\"To\",\"value\":{\"@path\":\"/email/to\"},\"placeholder\":\"landlord@example.com\",\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/email/to\"}}},\"message\":\"A recipient is required.\"}]},{\"id\":\"subjectField\",\"component\":\"TextField\",\"label\":\"Subject\",\"value\":{\"@path\":\"/email/subject\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/email/subject\"}}},\"message\":\"A subject is required.\"}]},{\"id\":\"toneRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"toneLabel\",\"politeBtn\",\"firmBtn\"]},{\"id\":\"toneLabel\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Tone: ${/email/tone}\"}},\"weight\":1},{\"id\":\"politeBtnText\",\"component\":\"Text\",\"text\":\"Polite\"},{\"id\":\"politeBtn\",\"component\":\"Button\",\"child\":\"politeBtnText\",\"action\":{\"event\":{\"name\":\"setTone\",\"userMessage\":\"Rewrite the email in a polite tone\",\"context\":{\"tone\":\"polite\"}}}},{\"id\":\"firmBtnText\",\"component\":\"Text\",\"text\":\"Firm\"},{\"id\":\"firmBtn\",\"component\":\"Button\",\"child\":\"firmBtnText\",\"action\":{\"event\":{\"name\":\"setTone\",\"userMessage\":\"Rewrite the email in a firm tone\",\"context\":{\"tone\":\"firm\"}}}},{\"id\":\"bodyField\",\"component\":\"TextField\",\"label\":\"Body\",\"variant\":\"longText\",\"value\":{\"@path\":\"/email/body\"}},{\"id\":\"status\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@path\":\"/email/status\"}},{\"id\":\"actions\",\"component\":\"Row\",\"justify\":\"end\",\"children\":[\"discardBtn\",\"sendBtn\"]},{\"id\":\"discardText\",\"component\":\"Text\",\"text\":\"Discard\"},{\"id\":\"discardBtn\",\"component\":\"Button\",\"variant\":\"borderless\",\"child\":\"discardText\",\"action\":{\"event\":{\"name\":\"discardEmail\",\"userMessage\":\"Discard this draft\"}}},{\"id\":\"sendText\",\"component\":\"Text\",\"text\":\"Send\"},{\"id\":\"sendBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"sendText\",\"action\":{\"event\":{\"name\":\"sendEmail\",\"userMessage\":\"Send the email\",\"context\":{\"to\":{\"@path\":\"/email/to\"},\"subject\":{\"@path\":\"/email/subject\"},\"body\":{\"@path\":\"/email/body\"}}}},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/email/to\"}}},\"message\":\"Add a recipient.\"},{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/email/subject\"}}},\"message\":\"Add a subject.\"}]}],\"dataModel\":{\"email\":{\"to\":\"landlord@example.com\",\"subject\":\"Broken heating in my flat – urgent repair needed\",\"tone\":\"polite\",\"status\":\"Draft – not sent yet\",\"body\":\"Dear Landlord,\\n\\nI hope you are well. I am writing to let you know that the heating in my flat has stopped working. With temperatures dropping, it is becoming quite uncomfortable.\\n\\nCould you please arrange for someone to look at it as soon as possible? I am happy to provide access at any time that suits.\\n\\nThank you very much for your help.\\n\\nKind regards\"}}}}","usage":{"input_tokens":21182,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1814,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":507}},"ttftMs":5295,"totalMs":11498}}
+{"tMs":5295,"delta":"{"}
+{"tMs":5656,"delta":"\"version\":\"1.0\",\""}
+{"tMs":5656,"delta":"createSurface\":{\"sur"}
+{"tMs":5656,"delta":"faceId\":\"he"}
+{"tMs":5656,"delta":"atingE"}
+{"tMs":5656,"delta":"mail\",\"catalogId\":"}
+{"tMs":5656,"delta":"\"https://a2ui."}
+{"tMs":5656,"delta":"org/specification/v1_"}
+{"tMs":5656,"delta":"0/catalogs/bas"}
+{"tMs":5656,"delta":"ic/catalog.json\",\""}
+{"tMs":5656,"delta":"sendDataModel\":true"}
+{"tMs":5657,"delta":",\"components\":[{\"id"}
+{"tMs":5688,"delta":"\":\"root\",\"component\":\""}
+{"tMs":6021,"delta":"Card\",\"child\":\"col"}
+{"tMs":6021,"delta":"\"},{\"id\":\"col"}
+{"tMs":6021,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":6021,"delta":"\":[\"title"}
+{"tMs":6021,"delta":"\",\"to"}
+{"tMs":6021,"delta":"Field\",\"subjectField\",\"to"}
+{"tMs":6021,"delta":"neRow\",\"b"}
+{"tMs":6021,"delta":"odyField\",\"status\",\"act"}
+{"tMs":6021,"delta":"ions\"]},{\"id\":"}
+{"tMs":6022,"delta":"\"title\",\"component\":\"Text"}
+{"tMs":6056,"delta":"\",\"text\":\"Draft email"}
+{"tMs":6089,"delta":": bro"}
+{"tMs":6378,"delta":"ken heating\"},{\"id"}
+{"tMs":6378,"delta":"\":\"toField\",\"component\":\""}
+{"tMs":6378,"delta":"TextField\",\"label\":\"To"}
+{"tMs":6379,"delta":"\",\"value\":{\"@path\":"}
+{"tMs":6379,"delta":"\"/email/to\"},\""}
+{"tMs":6379,"delta":"placeholder\":\"land"}
+{"tMs":6379,"delta":"lord@example.com\",\""}
+{"tMs":6379,"delta":"@checks\":[{\"cond"}
+{"tMs":6389,"delta":"ition\":{\"@call\":\""}
+{"tMs":6424,"delta":"required\",\"args\":{\"value\":"}
+{"tMs":6457,"delta":"{\"@path\":\"/email"}
+{"tMs":6490,"delta":"/to\"}}},\"message"}
+{"tMs":6772,"delta":"\":\"A recipient is required"}
+{"tMs":6772,"delta":".\"}]},{\"id\":"}
+{"tMs":6772,"delta":"\"subjectField\",\"component\":"}
+{"tMs":6773,"delta":"\"TextField\",\"label\":\""}
+{"tMs":6773,"delta":"Subject\",\"value\":{\""}
+{"tMs":6773,"delta":"@path\":\"/email/sub"}
+{"tMs":6773,"delta":"ject\"},\"@checks\":"}
+{"tMs":6773,"delta":"[{\"condition\":{\""}
+{"tMs":6790,"delta":"@call\":\"required\",\"args\":"}
+{"tMs":6825,"delta":"{\"value\":{\"@path"}
+{"tMs":6857,"delta":"\":\"/email/subject\""}
+{"tMs":6891,"delta":"}}},"}
+{"tMs":7133,"delta":"\"message\":\"A subject is"}
+{"tMs":7134,"delta":" required.\"}]},{\"id"}
+{"tMs":7134,"delta":"\":\"toneRow\",\"component"}
+{"tMs":7134,"delta":"\":\"Row\",\"align"}
+{"tMs":7134,"delta":"\":\"center\",\"children\":[\"to"}
+{"tMs":7134,"delta":"neLabel\",\"polit"}
+{"tMs":7134,"delta":"eBtn\",\"firmB"}
+{"tMs":7157,"delta":"tn\"]},{\"id"}
+{"tMs":7191,"delta":"\":\"toneLabel\",\""}
+{"tMs":7224,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":7257,"delta":"{\"@call\":\"format"}
+{"tMs":7291,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":7487,"delta":"\"Tone: ${/"}
+{"tMs":7487,"delta":"email/tone}\"}},"}
+{"tMs":7487,"delta":"\"weight\":1},{\""}
+{"tMs":7487,"delta":"id\":\"politeB"}
+{"tMs":7487,"delta":"tnText\",\"component"}
+{"tMs":7490,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":7525,"delta":"Polite\"},{\"id"}
+{"tMs":7558,"delta":"\":\"politeBtn\",\""}
+{"tMs":7592,"delta":"component\":\"Button\",\"child\":"}
+{"tMs":7624,"delta":"\"politeBtnText\",\""}
+{"tMs":7658,"delta":"action\":{\"event\":{\""}
+{"tMs":7691,"delta":"name\":\"setTone\",\"user"}
+{"tMs":7849,"delta":"Message\":\"Rew"}
+{"tMs":7849,"delta":"rite the email"}
+{"tMs":7849,"delta":" in a"}
+{"tMs":7849,"delta":" polite tone\",\"context\":{"}
+{"tMs":7858,"delta":"\"tone\":\"polite\""}
+{"tMs":7892,"delta":"}}}},{\"id\":"}
+{"tMs":7925,"delta":"\"firmBtnText\",\""}
+{"tMs":7958,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":7991,"delta":"\"Firm\"},{\""}
+{"tMs":8027,"delta":"id\":\"firmBtn"}
+{"tMs":8058,"delta":"\",\"component\":\"Button\",\"child"}
+{"tMs":8092,"delta":"\":\"firmBtnText"}
+{"tMs":8199,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":8199,"delta":"\"name\":\"setTone\",\""}
+{"tMs":8199,"delta":"userMessage\":\"R"}
+{"tMs":8225,"delta":"ewrite the email in a fir"}
+{"tMs":8258,"delta":"m tone\",\"context\":{\""}
+{"tMs":8292,"delta":"tone\":\"firm\"}"}
+{"tMs":8325,"delta":"}}},"}
+{"tMs":8359,"delta":"{\"id\":\"body"}
+{"tMs":8392,"delta":"Field\",\"component\":\"TextField"}
+{"tMs":8425,"delta":"\",\"label\":\"Body\",\"vari"}
+{"tMs":8458,"delta":"ant\":\"longText\",\"value\":"}
+{"tMs":8493,"delta":"{\"@path\":\"/email"}
+{"tMs":8581,"delta":"/body\"}},{\"id"}
+{"tMs":8581,"delta":"\":\"status\",\"component\":\""}
+{"tMs":8593,"delta":"Text\",\"vari"}
+{"tMs":8625,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":8659,"delta":"{\"@path\":\"/email"}
+{"tMs":8692,"delta":"/status\"}},{\"id"}
+{"tMs":8726,"delta":"\":\"actions\",\"component\":\""}
+{"tMs":8767,"delta":"Row\",\"justify\":\"end"}
+{"tMs":8792,"delta":"\",\"children\":[\"discardBt"}
+{"tMs":8825,"delta":"n\",\"sendBtn\""}
+{"tMs":8859,"delta":"]},{\"id\":\"disc"}
+{"tMs":8892,"delta":"ardText"}
+{"tMs":8942,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":8959,"delta":"\":\"Discard\"},{"}
+{"tMs":8992,"delta":"\"id\":\"discardBt"}
+{"tMs":9026,"delta":"n\",\"component\":\"Button\",\""}
+{"tMs":9059,"delta":"variant\":\"borderless\",\""}
+{"tMs":9092,"delta":"child\":\"discardText"}
+{"tMs":9126,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":9159,"delta":"\"name\":\"discard"}
+{"tMs":9192,"delta":"Email\",\"userMessage"}
+{"tMs":9226,"delta":"\":\"Discard this draft"}
+{"tMs":9260,"delta":"\"}}},{\"id\":"}
+{"tMs":9293,"delta":"\"sendText\",\"component\":\""}
+{"tMs":9326,"delta":"Text\",\"text\":\"Send"}
+{"tMs":9364,"delta":"\"},{\"id\":\"s"}
+{"tMs":9397,"delta":"endBtn\",\"component\":\""}
+{"tMs":9426,"delta":"Button\",\"variant\":\"prim"}
+{"tMs":9459,"delta":"ary\",\"child\":\"sendText"}
+{"tMs":9492,"delta":"\",\"action"}
+{"tMs":9526,"delta":"\":{\"event\":{\"name"}
+{"tMs":9560,"delta":"\":\"sendEmail\",\""}
+{"tMs":9593,"delta":"userMessage\":\"Send"}
+{"tMs":9626,"delta":" the email\",\"context\":{\"to"}
+{"tMs":9660,"delta":"\":{\"@path\":\"/"}
+{"tMs":9693,"delta":"email/to\"},\"subject"}
+{"tMs":9726,"delta":"\":{\"@path\":\"/"}
+{"tMs":9759,"delta":"email/subject\"},\"body"}
+{"tMs":9793,"delta":"\":{\"@path\":\"/"}
+{"tMs":9826,"delta":"email/body\"}}}},"}
+{"tMs":9860,"delta":"\"@checks\":[{\""}
+{"tMs":9893,"delta":"condition\":{\"@call\":"}
+{"tMs":9926,"delta":"\"required\",\"args\":{\"value"}
+{"tMs":9961,"delta":"\":{\"@path\":\"/"}
+{"tMs":9998,"delta":"email/to\"}}},\""}
+{"tMs":10026,"delta":"message\":\"Add"}
+{"tMs":10060,"delta":" a recipient.\"},{\""}
+{"tMs":10093,"delta":"condition\":{\"@call\":"}
+{"tMs":10126,"delta":"\"required\",\"args\":{\"value"}
+{"tMs":10159,"delta":"\":{\"@path\":\"/"}
+{"tMs":10193,"delta":"email/subject\"}}},"}
+{"tMs":10230,"delta":"\"message\":\"Add a sub"}
+{"tMs":10259,"delta":"ject.\"}]}],\"d"}
+{"tMs":10293,"delta":"ataModel\":{\"email\":"}
+{"tMs":10327,"delta":"{\"to\":\"landlord"}
+{"tMs":10359,"delta":"@example.com\",\"subject\":"}
+{"tMs":10393,"delta":"\"Bro"}
+{"tMs":10427,"delta":"ken heating in my flat –"}
+{"tMs":10459,"delta":" ur"}
+{"tMs":10498,"delta":"gent repair needed\",\"t"}
+{"tMs":10527,"delta":"one\":\"polite\",\"status"}
+{"tMs":10560,"delta":"\":\"Draft –"}
+{"tMs":10593,"delta":" not sent yet\",\""}
+{"tMs":10626,"delta":"body\":\"D"}
+{"tMs":10662,"delta":"ear Land"}
+{"tMs":10693,"delta":"lord,\\n\\nI"}
+{"tMs":10726,"delta":" hope you are well"}
+{"tMs":10760,"delta":". I am writing to let you"}
+{"tMs":10793,"delta":" know that the heating in my fl"}
+{"tMs":10827,"delta":"at has stopped working. With"}
+{"tMs":10860,"delta":" tem"}
+{"tMs":10893,"delta":"peratures d"}
+{"tMs":11064,"delta":"ropping, it is"}
+{"tMs":11064,"delta":" bec"}
+{"tMs":11064,"delta":"oming qu"}
+{"tMs":11064,"delta":"ite uncomfortable."}
+{"tMs":11064,"delta":"\\n\\nC"}
+{"tMs":11093,"delta":"ould you please arrange for some"}
+{"tMs":11126,"delta":"one to look at it as"}
+{"tMs":11159,"delta":" soon as possible? I am"}
+{"tMs":11193,"delta":" happy to prov"}
+{"tMs":11226,"delta":"ide access at"}
+{"tMs":11259,"delta":" any time that"}
+{"tMs":11293,"delta":" su"}
+{"tMs":11326,"delta":"its."}
+{"tMs":11360,"delta":"\\n\\nTh"}
+{"tMs":11393,"delta":"ank you very"}
+{"tMs":11426,"delta":" much for your help.\\n\\"}
+{"tMs":11460,"delta":"nKind regards\""}
+{"tMs":11493,"delta":"}}}}"}

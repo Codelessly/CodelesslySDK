@@ -1,0 +1,177 @@
+{"meta":{"ui":"plan_progress","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"migration\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"body\"},{\"id\":\"body\",\"component\":\"Column\",\"children\":[\"title\",\"status\",\"progressRow\",\"elapsed\",\"div1\",\"stepList\",\"div2\",\"controls\",\"summary\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Blog migration plan\"},{\"id\":\"status\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@path\":\"/statusText\"}},{\"id\":\"progressRow\",\"component\":\"Slider\",\"label\":\"Progress (%)\",\"min\":0,\"max\":100,\"value\":{\"@path\":\"/progress\"}},{\"id\":\"elapsed\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Time elapsed: ${/elapsed}s\"}}},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"stepList\",\"component\":\"List\",\"children\":{\"path\":\"/steps\",\"componentId\":\"stepRow\"}},{\"id\":\"stepRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"stepIcon\",\"stepText\"]},{\"id\":\"stepIcon\",\"component\":\"Icon\",\"name\":{\"@path\":\"icon\"}},{\"id\":\"stepText\",\"component\":\"Column\",\"weight\":1,\"children\":[\"stepName\",\"stepDesc\"]},{\"id\":\"stepName\",\"component\":\"Text\",\"text\":{\"@path\":\"name\"}},{\"id\":\"stepDesc\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@path\":\"desc\"}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"controls\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"startBtn\",\"pauseBtn\"]},{\"id\":\"startBtnText\",\"component\":\"Text\",\"text\":\"Start migration\"},{\"id\":\"startBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"startBtnText\",\"action\":{\"event\":{\"name\":\"start_migration\",\"userMessage\":\"Start the blog migration\"}}},{\"id\":\"pauseBtnText\",\"component\":\"Text\",\"text\":{\"@path\":\"pauseLabel\"}},{\"id\":\"pauseBtn\",\"component\":\"Button\",\"child\":\"pauseBtnText\",\"action\":{\"event\":{\"name\":\"toggle_pause\",\"userMessage\":\"Pause or resume the migration\"}}},{\"id\":\"summary\",\"component\":\"Text\",\"text\":{\"@path\":\"summaryText\"}}],\"dataModel\":{\"statusText\":\"Ready to start. 6 steps, about 2 seconds each.\",\"progress\":0,\"elapsed\":0,\"pauseLabel\":\"Pause\",\"summaryText\":\"\",\"steps\":[{\"name\":\"1. Back up current blog\",\"desc\":\"Export posts, media and settings as a safe archive.\",\"icon\":\"folder\"},{\"name\":\"2. Export content\",\"desc\":\"Convert posts and pages to portable Markdown.\",\"icon\":\"download\"},{\"name\":\"3. Set up new platform\",\"desc\":\"Create the new site, theme and domain settings.\",\"icon\":\"settings\"},{\"name\":\"4. Import posts and media\",\"desc\":\"Upload content, images and comments.\",\"icon\":\"upload\"},{\"name\":\"5. Redirect old URLs\",\"desc\":\"Add 301 redirects so links and SEO are preserved.\",\"icon\":\"share\"},{\"name\":\"6. Test and go live\",\"desc\":\"Check links, feeds and layout, then switch DNS.\",\"icon\":\"check\"}]}}}","usage":{"input_tokens":21169,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1135,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":776,"totalMs":6601}}
+{"tMs":776,"delta":"{\"version\":\"1.0"}
+{"tMs":1111,"delta":"\",\"createSurface\":{\""}
+{"tMs":1111,"delta":"surfaceId\":\"mig"}
+{"tMs":1111,"delta":"ration"}
+{"tMs":1111,"delta":"\",\"catalogId\":\"https"}
+{"tMs":1111,"delta":"://a2ui.org/"}
+{"tMs":1111,"delta":"specification/v1_0/"}
+{"tMs":1111,"delta":"catalogs/basic/"}
+{"tMs":1111,"delta":"catalog.json\",\"components\":"}
+{"tMs":1111,"delta":"[{\"id\":\"root\",\""}
+{"tMs":1111,"delta":"component\":\"Card\",\"child\":"}
+{"tMs":1130,"delta":"\"body"}
+{"tMs":1164,"delta":"\"},{\"id\":\"body"}
+{"tMs":1453,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1453,"delta":"\":[\"title\",\"status"}
+{"tMs":1453,"delta":"\",\"progress"}
+{"tMs":1453,"delta":"R"}
+{"tMs":1453,"delta":"ow\",\"el"}
+{"tMs":1453,"delta":"apsed\",\"div"}
+{"tMs":1453,"delta":"1\",\"st"}
+{"tMs":1453,"delta":"epList\",\"div2\",\"contro"}
+{"tMs":1458,"delta":"ls\",\"summary\"]},{"}
+{"tMs":1492,"delta":"\"id\":\"title\",\"component\":"}
+{"tMs":1526,"delta":"\"Text\",\"text\":\""}
+{"tMs":1560,"delta":"Blog migration plan\"},"}
+{"tMs":1808,"delta":"{\"id\":\"status\",\"component"}
+{"tMs":1808,"delta":"\":\"Text\",\"vari"}
+{"tMs":1808,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":1808,"delta":"{"}
+{"tMs":1808,"delta":"\"@path\":\"/stat"}
+{"tMs":1808,"delta":"usText"}
+{"tMs":1808,"delta":"\"}},{\"id\":\""}
+{"tMs":1827,"delta":"progressRow\",\"component\":\""}
+{"tMs":1859,"delta":"Slider\",\"label"}
+{"tMs":1892,"delta":"\":\"Progress ("}
+{"tMs":1926,"delta":"%)\",\"min\":0,\""}
+{"tMs":1960,"delta":"max\":100,\"value\":{"}
+{"tMs":2161,"delta":"\"@path\":\"/progress"}
+{"tMs":2161,"delta":"\"}},{\"id\":\""}
+{"tMs":2161,"delta":"elapsed\",\"component\":\""}
+{"tMs":2161,"delta":"Text\",\"variant\":\"ca"}
+{"tMs":2161,"delta":"ption\",\"text\":{\"@call"}
+{"tMs":2162,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":2194,"delta":"{\"value\":\"Time el"}
+{"tMs":2228,"delta":"apsed: ${/el"}
+{"tMs":2262,"delta":"apsed}s\"}}"}
+{"tMs":2296,"delta":"},{\"id\":\"div1"}
+{"tMs":2330,"delta":"\",\"component\":\"Divider\""}
+{"tMs":2362,"delta":"},{\"id\":\"step"}
+{"tMs":2496,"delta":"List\",\"component\":\"List\",\"children"}
+{"tMs":2496,"delta":"\":{\"path\":\"/ste"}
+{"tMs":2497,"delta":"ps\",\"componentId\":\"st"}
+{"tMs":2497,"delta":"epRow\"}"}
+{"tMs":2529,"delta":"},{\"id\":\"step"}
+{"tMs":2565,"delta":"Row\",\"component\":\"Row"}
+{"tMs":2597,"delta":"\",\"align"}
+{"tMs":2630,"delta":"\":\"center\",\"children\":[\"st"}
+{"tMs":2663,"delta":"epIcon\",\"stepText"}
+{"tMs":2696,"delta":"\"]},{\"id\":\""}
+{"tMs":2729,"delta":"stepIcon\",\"component\":"}
+{"tMs":2763,"delta":"\"Icon\",\"name\":{"}
+{"tMs":2867,"delta":"\"@path\":\"icon\""}
+{"tMs":2867,"delta":"}},{\"id\":\"st"}
+{"tMs":2867,"delta":"epText\",\"component\":\"Column"}
+{"tMs":2897,"delta":"\",\"weight\":1,\"children"}
+{"tMs":2931,"delta":"\":[\"stepName\",\"step"}
+{"tMs":2964,"delta":"Desc\"]},{\""}
+{"tMs":2997,"delta":"id\":\"stepName\",\"component"}
+{"tMs":3031,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":3065,"delta":"\"@path\":\"name\"}"}
+{"tMs":3097,"delta":"},{\"id\":\"step"}
+{"tMs":3131,"delta":"Desc\",\"component\":\""}
+{"tMs":3164,"delta":"Text\",\"variant\":\"caption"}
+{"tMs":3204,"delta":"\",\"text\":{\"@path\":"}
+{"tMs":3230,"delta":"\"desc\"}},{\""}
+{"tMs":3264,"delta":"id\":\"div2\",\"component\":"}
+{"tMs":3297,"delta":"\"Divider\"},{\""}
+{"tMs":3331,"delta":"id\":\"controls\",\"component\":"}
+{"tMs":3364,"delta":"\"Row\",\"just"}
+{"tMs":3398,"delta":"ify\":\"spaceBet"}
+{"tMs":3431,"delta":"ween\",\"children\":[\"startBt"}
+{"tMs":3465,"delta":"n\",\"pauseBtn"}
+{"tMs":3498,"delta":"\"]},{\"id\":\""}
+{"tMs":3531,"delta":"startBtnText\",\"component\":"}
+{"tMs":3565,"delta":"\"Text\",\"text\":\""}
+{"tMs":3597,"delta":"Start mig"}
+{"tMs":3633,"delta":"ration\"},{\"id\":\""}
+{"tMs":3676,"delta":"startBtn\",\"component\":\""}
+{"tMs":3702,"delta":"Button\",\"variant\":\"prim"}
+{"tMs":3731,"delta":"ary\",\"child\":\"startBt"}
+{"tMs":3764,"delta":"nText\",\"action\":{\"event"}
+{"tMs":3798,"delta":"\":{\"name\":\"start_"}
+{"tMs":3832,"delta":"migration\",\"userMessage\":"}
+{"tMs":3865,"delta":"\"Start the"}
+{"tMs":3898,"delta":" blog migration\""}
+{"tMs":3931,"delta":"}}},{\"id\":\""}
+{"tMs":3964,"delta":"pauseBtnText\",\""}
+{"tMs":3997,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":4031,"delta":"{"}
+{"tMs":4064,"delta":"\"@path\":\"pause"}
+{"tMs":4098,"delta":"Label\"}},{\""}
+{"tMs":4131,"delta":"id\":\"pauseBt"}
+{"tMs":4164,"delta":"n\",\"component\":\"Button\",\""}
+{"tMs":4198,"delta":"child\":\"pauseBt"}
+{"tMs":4231,"delta":"nText\",\"action\":{\"event"}
+{"tMs":4265,"delta":"\":{\"name\":\"togg"}
+{"tMs":4298,"delta":"le_pause\",\"userMess"}
+{"tMs":4333,"delta":"age\":\"Pause or"}
+{"tMs":4365,"delta":" resume the migration\"}}"}
+{"tMs":4398,"delta":"},{\"id\":\"summary"}
+{"tMs":4431,"delta":"\",\"component\":\"Text"}
+{"tMs":4465,"delta":"\",\"text\":{\"@path\":"}
+{"tMs":4498,"delta":"\"summa"}
+{"tMs":4531,"delta":"ryText\"}}],\"d"}
+{"tMs":4565,"delta":"ataModel\":{\"status"}
+{"tMs":4599,"delta":"Text\":\"Ready to"}
+{"tMs":4631,"delta":" start. 6 steps,"}
+{"tMs":4664,"delta":" about"}
+{"tMs":4697,"delta":" 2"}
+{"tMs":4731,"delta":" "}
+{"tMs":4764,"delta":"seconds each.\",\"progress"}
+{"tMs":4797,"delta":"\":0,\"elapsed"}
+{"tMs":4831,"delta":"\":0,\"pauseL"}
+{"tMs":4865,"delta":"abel\":\"Pause\",\""}
+{"tMs":4897,"delta":"summaryText\":\"\",\"ste"}
+{"tMs":4931,"delta":"ps\":[{\"name\":\""}
+{"tMs":4964,"delta":"1. Back up current"}
+{"tMs":4997,"delta":" bl"}
+{"tMs":5031,"delta":"og\",\"desc\":\"Export"}
+{"tMs":5064,"delta":" posts, media"}
+{"tMs":5097,"delta":" and settings as"}
+{"tMs":5130,"delta":" a safe archive.\",\"ic"}
+{"tMs":5163,"delta":"on\":\"fol"}
+{"tMs":5197,"delta":"der\"},{\"name\":\""}
+{"tMs":5230,"delta":"2. Export content"}
+{"tMs":5282,"delta":"\",\"desc\":\"Conv"}
+{"tMs":5296,"delta":"ert posts and"}
+{"tMs":5330,"delta":" pages to port"}
+{"tMs":5363,"delta":"able"}
+{"tMs":5396,"delta":" Markdown.\",\"icon\":"}
+{"tMs":5429,"delta":"\"download\"},{\"name\":"}
+{"tMs":5463,"delta":"\"3. Set up new plat"}
+{"tMs":5496,"delta":"form\",\"desc\":\"Create"}
+{"tMs":5530,"delta":" the new site"}
+{"tMs":5563,"delta":", the"}
+{"tMs":5596,"delta":"me and dom"}
+{"tMs":5629,"delta":"ain sett"}
+{"tMs":5663,"delta":"ings.\",\"icon\":\"sett"}
+{"tMs":5696,"delta":"ings\"},{\"name\":\""}
+{"tMs":5729,"delta":"4. Import pos"}
+{"tMs":5762,"delta":"ts and media\",\"desc\":\""}
+{"tMs":5797,"delta":"Upload content"}
+{"tMs":5829,"delta":", images"}
+{"tMs":5862,"delta":" and com"}
+{"tMs":5895,"delta":"ments.\",\"icon\":\"up"}
+{"tMs":5929,"delta":"load\"},{\"name\":\""}
+{"tMs":5962,"delta":"5. Red"}
+{"tMs":5995,"delta":"irect old"}
+{"tMs":6029,"delta":" URLs\",\"desc\":\""}
+{"tMs":6062,"delta":"Add"}
+{"tMs":6095,"delta":" "}
+{"tMs":6128,"delta":"301 redirects so links"}
+{"tMs":6162,"delta":" and SEO are"}
+{"tMs":6195,"delta":" preserved.\",\"icon\":"}
+{"tMs":6228,"delta":"\"share"}
+{"tMs":6262,"delta":"\"},{\"name\":\"6"}
+{"tMs":6295,"delta":". Test"}
+{"tMs":6328,"delta":" and go"}
+{"tMs":6362,"delta":" live\",\"desc\":\"Check"}
+{"tMs":6395,"delta":" links, fe"}
+{"tMs":6428,"delta":"eds and lay"}
+{"tMs":6461,"delta":"out"}
+{"tMs":6494,"delta":", then switch D"}
+{"tMs":6528,"delta":"NS."}
+{"tMs":6561,"delta":"\",\"icon\":\"check"}
+{"tMs":6595,"delta":"\"}]}}}"}

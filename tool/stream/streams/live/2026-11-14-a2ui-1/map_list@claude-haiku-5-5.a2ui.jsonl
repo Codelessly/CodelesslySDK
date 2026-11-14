@@ -1,0 +1,171 @@
+{"meta":{"ui":"map_list","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"coffee\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"mainCol\"},{\"id\":\"mainCol\",\"component\":\"Column\",\"children\":[\"title\",\"mapRow\",\"detailCard\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Coffee shops near you\",\"variant\":\"body\",\"weight\":1},{\"id\":\"mapRow\",\"component\":\"Row\",\"children\":[\"mapPanel\",\"shopList\"],\"align\":\"start\"},{\"id\":\"mapPanel\",\"component\":\"Column\",\"children\":[\"mapTitle\"],\"weight\":1},{\"id\":\"mapTitle\",\"component\":\"Text\",\"text\":\"Map (simplified)\",\"variant\":\"caption\"},{\"id\":\"shopList\",\"component\":\"List\",\"children\":[\"shop1\",\"shop2\",\"shop3\",\"shop4\",\"shop5\"],\"direction\":\"vertical\",\"weight\":1},{\"id\":\"shop1\",\"component\":\"Button\",\"variant\":\"borderless\",\"child\":\"shop1Label\",\"action\":{\"event\":{\"name\":\"selectShop\",\"context\":{\"id\":1}}}},{\"id\":\"shop1Label\",\"component\":\"Text\",\"text\":\"1. Bean & Leaf — ★ 4.6\"},{\"id\":\"shop2\",\"component\":\"Button\",\"variant\":\"borderless\",\"child\":\"shop2Label\",\"action\":{\"event\":{\"name\":\"selectShop\",\"context\":{\"id\":2}}}},{\"id\":\"shop2Label\",\"component\":\"Text\",\"text\":\"2. Roast House — ★ 4.4\"},{\"id\":\"shop3\",\"component\":\"Button\",\"variant\":\"borderless\",\"child\":\"shop3Label\",\"action\":{\"event\":{\"name\":\"selectShop\",\"context\":{\"id\":3}}}},{\"id\":\"shop3Label\",\"component\":\"Text\",\"text\":\"3. Corner Espresso — ★ 4.8\"},{\"id\":\"shop4\",\"component\":\"Button\",\"variant\":\"borderless\",\"child\":\"shop4Label\",\"action\":{\"event\":{\"name\":\"selectShop\",\"context\":{\"id\":4}}}},{\"id\":\"shop4Label\",\"component\":\"Text\",\"text\":\"4. Morning Cup — ★ 4.2\"},{\"id\":\"shop5\",\"component\":\"Button\",\"variant\":\"borderless\",\"child\":\"shop5Label\",\"action\":{\"event\":{\"name\":\"selectShop\",\"context\":{\"id\":5}}}},{\"id\":\"shop5Label\",\"component\":\"Text\",\"text\":\"5. Velvet Brew — ★ 4.5\"},{\"id\":\"detailCard\",\"component\":\"Card\",\"child\":\"detailCol\"},{\"id\":\"detailCol\",\"component\":\"Column\",\"children\":[\"detailName\",\"detailRating\",\"detailDistance\",\"detailHours\"]},{\"id\":\"detailName\",\"component\":\"Text\",\"text\":\"${/selected/name}\",\"variant\":\"body\"},{\"id\":\"detailRating\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Rating: ★ ${/selected/rating}\\\")}\",\"variant\":\"caption\"},{\"id\":\"detailDistance\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Distance: ${/selected/distance}\\\")}\",\"variant\":\"caption\"},{\"id\":\"detailHours\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Open: ${/selected/hours}\\\")}\",\"variant\":\"caption\"}]}}\n{\"version\":\"1.0\",\"updateDataModel\":{\"surfaceId\":\"coffee\",\"path\":\"/selected\",\"value\":{\"name\":\"Corner Espresso\",\"rating\":\"4.8\",\"distance\":\"0.3 km\",\"hours\":\"7:00–18:00\"}}}","usage":{"input_tokens":21171,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1148,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":590,"totalMs":4273}}
+{"tMs":590,"delta":"{"}
+{"tMs":810,"delta":"\"version\":\"1.0\",\""}
+{"tMs":810,"delta":"createSurface\":{\"sur"}
+{"tMs":810,"delta":"faceId\":\"co"}
+{"tMs":810,"delta":"ffee"}
+{"tMs":810,"delta":"\",\""}
+{"tMs":811,"delta":"catalogId\":\"https://"}
+{"tMs":811,"delta":"a2ui.org/spec"}
+{"tMs":811,"delta":"ification/v1_0/cat"}
+{"tMs":811,"delta":"alogs/basic/cat"}
+{"tMs":813,"delta":"alog.json\",\"components\":["}
+{"tMs":835,"delta":"{\"id\":\"root\",\"component"}
+{"tMs":856,"delta":"\":\"Card\",\"child\":\""}
+{"tMs":1033,"delta":"m"}
+{"tMs":1033,"delta":"ainCol\"},{\"id"}
+{"tMs":1033,"delta":"\":\"mainCol\",\"component"}
+{"tMs":1034,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":1034,"delta":"title\",\"mapR"}
+{"tMs":1034,"delta":"ow\",\"det"}
+{"tMs":1034,"delta":"ailC"}
+{"tMs":1034,"delta":"ard\"]},{\"id\":"}
+{"tMs":1049,"delta":"\"title\",\"component\":\"Text"}
+{"tMs":1071,"delta":"\",\"text\":\"Coffee"}
+{"tMs":1092,"delta":" shops near you\",\"variant\":"}
+{"tMs":1114,"delta":"\"body\",\""}
+{"tMs":1262,"delta":"weight\":1"}
+{"tMs":1262,"delta":"},{\"id\":\"map"}
+{"tMs":1262,"delta":"Row\",\"component\":\"Row"}
+{"tMs":1262,"delta":"\",\"children\":[\"mapPan"}
+{"tMs":1262,"delta":"el\",\"sh"}
+{"tMs":1262,"delta":"opList\"],\"align"}
+{"tMs":1264,"delta":"\":\"start"}
+{"tMs":1286,"delta":"\"},{\"id\":\"m"}
+{"tMs":1307,"delta":"apPanel\",\"component\":\""}
+{"tMs":1328,"delta":"Column\",\"children\":[\"map"}
+{"tMs":1350,"delta":"Title\""}
+{"tMs":1371,"delta":"],\"weight\":1},{"}
+{"tMs":1485,"delta":"\"id\":\"mapTit"}
+{"tMs":1486,"delta":"le\",\"component\":\"Text\",\""}
+{"tMs":1486,"delta":"text\":\"Map (sim"}
+{"tMs":1486,"delta":"plified)\",\""}
+{"tMs":1486,"delta":"variant\":\"caption\"},"}
+{"tMs":1500,"delta":"{\"id\":\"shopList"}
+{"tMs":1522,"delta":"\",\"component\":\"List\",\"children\":"}
+{"tMs":1543,"delta":"[\"shop"}
+{"tMs":1566,"delta":"1\",\"shop2\",\"shop"}
+{"tMs":1587,"delta":"3\",\"shop4\",\"shop"}
+{"tMs":1607,"delta":"5\"],\"direction\":\""}
+{"tMs":1629,"delta":"vertical\",\"weight\":1"}
+{"tMs":1718,"delta":"},{\"id\":\"shop"}
+{"tMs":1718,"delta":"1\",\"component\":\"Button\",\""}
+{"tMs":1718,"delta":"variant\":\"bor"}
+{"tMs":1718,"delta":"derless\",\"child\":\"sh"}
+{"tMs":1736,"delta":"op1Label"}
+{"tMs":1758,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":1779,"delta":"\"name\":\"sel"}
+{"tMs":1802,"delta":"ectShop\",\"context\":{\""}
+{"tMs":1822,"delta":"id\":1}}}},{"}
+{"tMs":1844,"delta":"\"id\":\"shop1"}
+{"tMs":1865,"delta":"Label\",\"component\":\"Text\",\""}
+{"tMs":1888,"delta":"text\":\"1"}
+{"tMs":1966,"delta":". B"}
+{"tMs":1966,"delta":"ean &"}
+{"tMs":1966,"delta":" Le"}
+{"tMs":1973,"delta":"af —"}
+{"tMs":1995,"delta":" ★"}
+{"tMs":2036,"delta":" 4.6\"},{\""}
+{"tMs":2058,"delta":"id\":\"shop2\",\"component"}
+{"tMs":2079,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":2101,"delta":"\"borderless\",\"child\":\""}
+{"tMs":2122,"delta":"shop2Label\",\"action\":"}
+{"tMs":2144,"delta":"{\"event\":{\"name\":"}
+{"tMs":2166,"delta":"\"selectShop\",\"context\":"}
+{"tMs":2199,"delta":"{\"id\":2}}}"}
+{"tMs":2208,"delta":"},{\"id\":\"shop"}
+{"tMs":2230,"delta":"2Label\",\"component\":\""}
+{"tMs":2251,"delta":"Text\",\"text\":\"2."}
+{"tMs":2273,"delta":" Roast"}
+{"tMs":2294,"delta":" House"}
+{"tMs":2315,"delta":" — ★ 4.4"}
+{"tMs":2337,"delta":"\"},{\"id\":\"sh"}
+{"tMs":2359,"delta":"op3\",\"component\":\"Button"}
+{"tMs":2380,"delta":"\",\"variant\":\"borderless"}
+{"tMs":2402,"delta":"\",\"child\":\"shop3"}
+{"tMs":2423,"delta":"Label\",\"action\":{\"event\":"}
+{"tMs":2445,"delta":"{\"name\":\"selectSh"}
+{"tMs":2466,"delta":"op\",\"context\":{\"id\":"}
+{"tMs":2487,"delta":"3}}}},{\"id"}
+{"tMs":2509,"delta":"\":\"shop3Label\",\""}
+{"tMs":2530,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":2552,"delta":"\"3. Corner Esp"}
+{"tMs":2574,"delta":"resso — ★ 4"}
+{"tMs":2595,"delta":".8\"},{\"id\":"}
+{"tMs":2616,"delta":"\"shop4\",\"component\":\""}
+{"tMs":2638,"delta":"Button\",\"variant\":\"bor"}
+{"tMs":2659,"delta":"derless\",\"child\":\"shop"}
+{"tMs":2680,"delta":"4Label\",\"action\":{\""}
+{"tMs":2702,"delta":"event\":{\"name\":\"sel"}
+{"tMs":2724,"delta":"ectShop\",\"context\":{\""}
+{"tMs":2745,"delta":"id\":4}}}},{"}
+{"tMs":2767,"delta":"\"id\":\"shop4"}
+{"tMs":2789,"delta":"Label\",\"component\":\"Text\",\""}
+{"tMs":2811,"delta":"text\":\"4. Mor"}
+{"tMs":2831,"delta":"ning Cup — ★"}
+{"tMs":2853,"delta":" 4.2\"},{\""}
+{"tMs":2875,"delta":"id\":\"shop5\",\"component"}
+{"tMs":2895,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":2917,"delta":"\"borderless\",\"child\":\""}
+{"tMs":2938,"delta":"shop5Label\",\"action\":"}
+{"tMs":2960,"delta":"{\"event\":{\"name\":"}
+{"tMs":2990,"delta":"\"selectShop\",\"context\":"}
+{"tMs":3009,"delta":"{\"id\":5}}}"}
+{"tMs":3029,"delta":"},"}
+{"tMs":3052,"delta":"{\"id\":\"shop5"}
+{"tMs":3074,"delta":"Label\",\"component\":\"Text"}
+{"tMs":3089,"delta":"\",\"text\":\"5. Vel"}
+{"tMs":3110,"delta":"vet Brew — ★"}
+{"tMs":3132,"delta":" 4.5\"},{"}
+{"tMs":3153,"delta":"\"id\":\"detailCard"}
+{"tMs":3174,"delta":"\",\"component\":\"Card"}
+{"tMs":3196,"delta":"\",\"child\":\"detailC"}
+{"tMs":3217,"delta":"ol\"},{\"id\":\""}
+{"tMs":3238,"delta":"detailCol\",\"component\":\""}
+{"tMs":3261,"delta":"Column\",\"children\":[\"detail"}
+{"tMs":3282,"delta":"Name\",\"detailRating\",\"det"}
+{"tMs":3304,"delta":"ailDistance\",\"detailH"}
+{"tMs":3324,"delta":"ours\"]},{\"id\":"}
+{"tMs":3346,"delta":"\"detailName\",\"component\":\""}
+{"tMs":3367,"delta":"Text\",\"text\":\"${"}
+{"tMs":3389,"delta":"/"}
+{"tMs":3410,"delta":"sel"}
+{"tMs":3432,"delta":"ected/name}\",\"variant\":"}
+{"tMs":3453,"delta":"\"body\"},{\"id\":"}
+{"tMs":3475,"delta":"\"detailRating\",\"component\":"}
+{"tMs":3496,"delta":"\"Text\",\"text\":\"${"}
+{"tMs":3517,"delta":"form"}
+{"tMs":3539,"delta":"atString(\\\"Rating"}
+{"tMs":3562,"delta":": ★ ${/sel"}
+{"tMs":3582,"delta":"ected/rating}\\\")}"}
+{"tMs":3604,"delta":"\",\"variant\":\"caption\""}
+{"tMs":3625,"delta":"},{\"id\":\"detail"}
+{"tMs":3646,"delta":"Distance\",\"component\":\""}
+{"tMs":3668,"delta":"Text\",\"text\":\"${format"}
+{"tMs":3689,"delta":"String(\\\"Distance:"}
+{"tMs":3711,"delta":" ${/selected/distance"}
+{"tMs":3732,"delta":"}\\\")}\",\"variant\":"}
+{"tMs":3754,"delta":"\"caption\"},{\"id"}
+{"tMs":3776,"delta":"\":\"detailHours\",\"component"}
+{"tMs":3796,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":3818,"delta":"${formatString(\\\""}
+{"tMs":3841,"delta":"Open"}
+{"tMs":3861,"delta":": ${/selected/h"}
+{"tMs":3882,"delta":"ours}\\\")}\",\"variant"}
+{"tMs":3904,"delta":"\":\"caption\"}]"}
+{"tMs":3925,"delta":"}"}
+{"tMs":3947,"delta":"}"}
+{"tMs":3968,"delta":"\n{\"version\":\"1."}
+{"tMs":3991,"delta":"0\",\"updateDataModel"}
+{"tMs":4011,"delta":"\":{\"surfaceId"}
+{"tMs":4033,"delta":"\":\"coffee\",\"path\":"}
+{"tMs":4054,"delta":"\"/selected\",\"value\":{"}
+{"tMs":4076,"delta":"\"name\":\"Cor"}
+{"tMs":4097,"delta":"ner Espresso\",\"rating"}
+{"tMs":4119,"delta":"\":\""}
+{"tMs":4140,"delta":"4.8\",\"distance\":\""}
+{"tMs":4161,"delta":"0.3"}
+{"tMs":4183,"delta":" km"}
+{"tMs":4204,"delta":"\",\"hours\":\"7"}
+{"tMs":4227,"delta":":00–"}
+{"tMs":4247,"delta":"18:00\"}}}"}

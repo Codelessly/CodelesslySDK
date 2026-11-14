@@ -1,0 +1,36 @@
+{
+ "ui": "plan_progress",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21169,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1135,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 776,
+   "totalMs": 6601,
+   "chars": 2668,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 22,
+   "outputTokensPerNode": "51.6",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,542 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "column3",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "My Trip Photos",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "row2",
+    "row3"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "textButton1",
+    "textButton2",
+    "textButton3"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Sunrise over the bay"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Old town alleys"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Mountain trail"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "textButton4",
+    "textButton5",
+    "textButton6"
+   ]
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Market stalls"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Lake at dusk"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 5
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton6": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Night train"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 6
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "textButton7",
+    "textButton8",
+    "textButton9"
+   ]
+  },
+  "textButton7": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Harbor boats"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 7
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton8": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Forest path"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 8
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton9": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Last evening"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openPhoto",
+       "value": {
+        "index": 9
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Tap a photo to view it large. Use the arrow keys to move, and Escape to close."
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "lightbox_open",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "lightbox_index",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "lightbox_total",
+    "type": "integer",
+    "value": 9
+   },
+   {
+    "name": "lightbox_counter",
+    "type": "text",
+    "value": "1 of 9"
+   },
+   {
+    "name": "lightbox_caption",
+    "type": "text",
+    "value": "Sunrise over the bay"
+   },
+   {
+    "name": "photos",
+    "type": "list",
+    "value": [
+     {
+      "caption": "Sunrise over the bay",
+      "gradient": "linear-gradient(135deg,#ff9a8b,#ffd194)"
+     },
+     {
+      "caption": "Old town alleys",
+      "gradient": "linear-gradient(135deg,#a1c4fd,#c2e9fb)"
+     },
+     {
+      "caption": "Mountain trail",
+      "gradient": "linear-gradient(135deg,#84fab0,#8fd3f4)"
+     },
+     {
+      "caption": "Market stalls",
+      "gradient": "linear-gradient(135deg,#fccb90,#d57eeb)"
+     },
+     {
+      "caption": "Lake at dusk",
+      "gradient": "linear-gradient(135deg,#667eea,#764ba2)"
+     },
+     {
+      "caption": "Night train",
+      "gradient": "linear-gradient(135deg,#243b55,#141e30)"
+     },
+     {
+      "caption": "Harbor boats",
+      "gradient": "linear-gradient(135deg,#43cea2,#185a9d)"
+     },
+     {
+      "caption": "Forest path",
+      "gradient": "linear-gradient(135deg,#56ab2f,#a8e063)"
+     },
+     {
+      "caption": "Last evening",
+      "gradient": "linear-gradient(135deg,#f093fb,#f5576c)"
+     }
+    ]
+   }
+  ]
+ }
+}

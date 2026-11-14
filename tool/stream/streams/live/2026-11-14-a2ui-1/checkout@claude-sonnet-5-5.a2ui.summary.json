@@ -1,0 +1,38 @@
+{
+ "ui": "checkout",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21184,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 4802,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 1380
+   },
+   "ttftMs": 14037,
+   "totalMs": 29388,
+   "chars": 7532,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 49,
+   "outputTokensPerNode": "98.0",
+   "notationIssues": [],
+   "notes": [
+    "Tabs \"tabs\": each tab is laid out in place, its title above its content."
+   ],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,216 @@
+{"meta":{"ui":"code_diff","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"diff\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"file\",\"summary\",\"d0\",\"h1\",\"d1\",\"h2\",\"d2\",\"h3\",\"d3\",\"apply\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Review proposed changes\"},{\"id\":\"file\",\"component\":\"Text\",\"text\":\"`config/app.yaml`\",\"variant\":\"caption\"},{\"id\":\"summary\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/keptCount} of 3 kept · ${/decidedCount} of 3 decided\"}}},{\"id\":\"d0\",\"component\":\"Divider\"},{\"id\":\"h1\",\"component\":\"Column\",\"children\":[\"h1head\",\"h1r\",\"h1a\",\"h1btns\"]},{\"id\":\"h1head\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"**Hunk 1** · `@@ -4 +4 @@` · ${/h1/status}\"}}},{\"id\":\"h1r\",\"component\":\"Text\",\"text\":\"`4  - port: 8080`\"},{\"id\":\"h1a\",\"component\":\"Text\",\"text\":\"`4  + port: 9090`\"},{\"id\":\"h1btns\",\"component\":\"Row\",\"children\":[\"h1k\",\"h1d\"]},{\"id\":\"h1kt\",\"component\":\"Text\",\"text\":\"Keep\"},{\"id\":\"h1dt\",\"component\":\"Text\",\"text\":\"Discard\"},{\"id\":\"h1k\",\"component\":\"Button\",\"child\":\"h1kt\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"keepHunk\",\"context\":{\"hunk\":\"h1\"}}}},{\"id\":\"h1d\",\"component\":\"Button\",\"child\":\"h1dt\",\"action\":{\"event\":{\"name\":\"discardHunk\",\"context\":{\"hunk\":\"h1\"}}}},{\"id\":\"d1\",\"component\":\"Divider\"},{\"id\":\"h2\",\"component\":\"Column\",\"children\":[\"h2head\",\"h2r\",\"h2a\",\"h2btns\"]},{\"id\":\"h2head\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"**Hunk 2** · `@@ -12 +12 @@` · ${/h2/status}\"}}},{\"id\":\"h2r\",\"component\":\"Text\",\"text\":\"`12 - log_level: debug`\"},{\"id\":\"h2a\",\"component\":\"Text\",\"text\":\"`12 + log_level: info`\"},{\"id\":\"h2btns\",\"component\":\"Row\",\"children\":[\"h2k\",\"h2d\"]},{\"id\":\"h2kt\",\"component\":\"Text\",\"text\":\"Keep\"},{\"id\":\"h2dt\",\"component\":\"Text\",\"text\":\"Discard\"},{\"id\":\"h2k\",\"component\":\"Button\",\"child\":\"h2kt\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"keepHunk\",\"context\":{\"hunk\":\"h2\"}}}},{\"id\":\"h2d\",\"component\":\"Button\",\"child\":\"h2dt\",\"action\":{\"event\":{\"name\":\"discardHunk\",\"context\":{\"hunk\":\"h2\"}}}},{\"id\":\"d2\",\"component\":\"Divider\"},{\"id\":\"h3\",\"component\":\"Column\",\"children\":[\"h3head\",\"h3r\",\"h3a\",\"h3btns\"]},{\"id\":\"h3head\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"**Hunk 3** · `@@ -21 +21 @@` · ${/h3/status}\"}}},{\"id\":\"h3r\",\"component\":\"Text\",\"text\":\"`21 - timeout: 30`\"},{\"id\":\"h3a\",\"component\":\"Text\",\"text\":\"`21 + timeout: 60`\"},{\"id\":\"h3btns\",\"component\":\"Row\",\"children\":[\"h3k\",\"h3d\"]},{\"id\":\"h3kt\",\"component\":\"Text\",\"text\":\"Keep\"},{\"id\":\"h3dt\",\"component\":\"Text\",\"text\":\"Discard\"},{\"id\":\"h3k\",\"component\":\"Button\",\"child\":\"h3kt\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"keepHunk\",\"context\":{\"hunk\":\"h3\"}}}},{\"id\":\"h3d\",\"component\":\"Button\",\"child\":\"h3dt\",\"action\":{\"event\":{\"name\":\"discardHunk\",\"context\":{\"hunk\":\"h3\"}}}},{\"id\":\"d3\",\"component\":\"Divider\"},{\"id\":\"applyt\",\"component\":\"Text\",\"text\":\"Apply changes\"},{\"id\":\"apply\",\"component\":\"Button\",\"child\":\"applyt\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"applyChanges\"}},\"@checks\":[{\"condition\":{\"@path\":\"/allDecided\"},\"message\":\"Decide every hunk before applying.\"}]}],\"dataModel\":{\"h1\":{\"status\":\"pending\"},\"h2\":{\"status\":\"pending\"},\"h3\":{\"status\":\"pending\"},\"keptCount\":0,\"decidedCount\":0,\"allDecided\":false}}}","usage":{"input_tokens":21174,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":2451,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":852}},"ttftMs":9019,"totalMs":16201}}
+{"tMs":9019,"delta":"{"}
+{"tMs":9050,"delta":"\"version\":\"1.0\",\""}
+{"tMs":9083,"delta":"createSurface\":{\"sur"}
+{"tMs":9116,"delta":"faceId\":\"di"}
+{"tMs":9150,"delta":"ff\",\"catalogId\":\""}
+{"tMs":9183,"delta":"https://a2ui.org"}
+{"tMs":9218,"delta":"/specification/v1_0"}
+{"tMs":9250,"delta":"/catalogs/basic"}
+{"tMs":9284,"delta":"/catalog.json\",\"components"}
+{"tMs":9317,"delta":"\":[{\"id\":\"root"}
+{"tMs":9351,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":9384,"delta":"\":\"main"}
+{"tMs":9417,"delta":"\"},{\"id\":\"main"}
+{"tMs":9451,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":9485,"delta":"\":[\"title\",\"file"}
+{"tMs":9518,"delta":"\",\"summary\",\"d"}
+{"tMs":9551,"delta":"0"}
+{"tMs":9585,"delta":"\",\"h1\",\"d"}
+{"tMs":9618,"delta":"1\",\"h2\",\"d2\",\""}
+{"tMs":9654,"delta":"h3\",\"d"}
+{"tMs":9685,"delta":"3\",\"ap"}
+{"tMs":9720,"delta":"ply\"]},{\"id\":"}
+{"tMs":9755,"delta":"\"title\",\"component\":\"Text"}
+{"tMs":9785,"delta":"\",\"text\":\"Review propos"}
+{"tMs":9819,"delta":"ed chang"}
+{"tMs":9852,"delta":"es\"},{\"id\":\""}
+{"tMs":9885,"delta":"file\",\"component\":\"Text\",\""}
+{"tMs":9919,"delta":"text"}
+{"tMs":9952,"delta":"\":\"`config/"}
+{"tMs":9985,"delta":"app.yaml`\",\"vari"}
+{"tMs":10020,"delta":"ant\":\"caption\"},{"}
+{"tMs":10052,"delta":"\"id\":\"summary\",\"component"}
+{"tMs":10086,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":10120,"delta":"\"@call\":\"formatString"}
+{"tMs":10153,"delta":"\",\"args\":{\"value\":\""}
+{"tMs":10186,"delta":"${/keptCount} of"}
+{"tMs":10239,"delta":" 3 kept · ${"}
+{"tMs":10253,"delta":"/decidedCount} of"}
+{"tMs":10287,"delta":" 3 decided\"}}"}
+{"tMs":10320,"delta":"},{\"id\":\"d0"}
+{"tMs":10354,"delta":"\",\"component\":\"Divider\""}
+{"tMs":10388,"delta":"},{\"id\":\"h1"}
+{"tMs":10421,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":10454,"delta":"\":[\"h1head"}
+{"tMs":10488,"delta":"\",\"h1r\",\"h1a"}
+{"tMs":10520,"delta":"\",\"h1bt"}
+{"tMs":10554,"delta":"ns\"]},{\"id\":"}
+{"tMs":10588,"delta":"\"h1head\",\"component\":\""}
+{"tMs":10622,"delta":"Text\",\"text\":{\"@"}
+{"tMs":10655,"delta":"call\":\"formatString\",\"args"}
+{"tMs":10688,"delta":"\":{\"value\":\"**"}
+{"tMs":10721,"delta":"Hunk 1** ·"}
+{"tMs":10755,"delta":" `@@ -"}
+{"tMs":10788,"delta":"4 +4"}
+{"tMs":10821,"delta":" @@` · "}
+{"tMs":10855,"delta":"${/h1/status}\""}
+{"tMs":10888,"delta":"}}},{\"id\":\""}
+{"tMs":10922,"delta":"h1r\",\"component\":\""}
+{"tMs":10955,"delta":"Text\",\"text\":\"`4  "}
+{"tMs":10989,"delta":"- port"}
+{"tMs":11022,"delta":": 8080`\"},{"}
+{"tMs":11056,"delta":"\"id\":\"h1a\",\""}
+{"tMs":11089,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":11123,"delta":"\"`4  + port: "}
+{"tMs":11156,"delta":"9090`\"},{\"id"}
+{"tMs":11189,"delta":"\":\"h1btns\",\"component"}
+{"tMs":11223,"delta":"\":\"Row\",\"children\":[\""}
+{"tMs":11256,"delta":"h1k\",\"h1d"}
+{"tMs":11290,"delta":"\"]"}
+{"tMs":11323,"delta":"},{\"id\":\"h1"}
+{"tMs":11356,"delta":"k"}
+{"tMs":11390,"delta":"t\",\"component\":\"Text"}
+{"tMs":11422,"delta":"\",\"text\":\"Keep\""}
+{"tMs":11456,"delta":"},{\"id\":\"h1"}
+{"tMs":11489,"delta":"d"}
+{"tMs":11523,"delta":"t\",\"component\":\"Text\",\""}
+{"tMs":11556,"delta":"text\":\"Discard\"},"}
+{"tMs":11590,"delta":"{\"id\":\"h1k"}
+{"tMs":11623,"delta":"\",\"component\":\"Button\",\"child"}
+{"tMs":11656,"delta":"\":\"h1kt\",\"vari"}
+{"tMs":11690,"delta":"ant\":\"primary\",\"action\":"}
+{"tMs":11723,"delta":"{\"event\":{\"name\":"}
+{"tMs":11756,"delta":"\"keepHunk\",\"context"}
+{"tMs":11790,"delta":"\":{\"hunk\":\""}
+{"tMs":11823,"delta":"h1\"}}}},{"}
+{"tMs":11857,"delta":"\"id\":\"h1d\",\""}
+{"tMs":11890,"delta":"component\":\"Button\",\"child\":"}
+{"tMs":11924,"delta":"\"h1dt\",\"action\":"}
+{"tMs":11957,"delta":"{\"event\":{\"name\":"}
+{"tMs":11991,"delta":"\"discardHunk\",\"context"}
+{"tMs":12028,"delta":"\":{\"hunk\":\""}
+{"tMs":12057,"delta":"h1\"}}}},{"}
+{"tMs":12091,"delta":"\"id\":\"d1\",\"component"}
+{"tMs":12124,"delta":"\":\"Divider\"},{"}
+{"tMs":12157,"delta":"\"id\":\"h2\",\"component"}
+{"tMs":12191,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":12224,"delta":"h2head\",\"h2r\",\""}
+{"tMs":12258,"delta":"h2a\",\"h2bt"}
+{"tMs":12291,"delta":"ns\"]},{\"id\":"}
+{"tMs":12325,"delta":"\"h2head\",\"component\":\""}
+{"tMs":12358,"delta":"Text\",\"text\":{\"@"}
+{"tMs":12392,"delta":"call\":\"formatString\",\"args"}
+{"tMs":12425,"delta":"\":{\"value\":\"**"}
+{"tMs":12458,"delta":"Hunk 2** · `"}
+{"tMs":12491,"delta":"@@ -12 +12"}
+{"tMs":12528,"delta":" @@` · ${/"}
+{"tMs":12558,"delta":"h2/status}\"}}"}
+{"tMs":12591,"delta":"},{\"id\":\"h2"}
+{"tMs":12625,"delta":"r\",\"component\":\"Text\",\""}
+{"tMs":12659,"delta":"text\":\"`12 - log"}
+{"tMs":12692,"delta":"_level: debug`\"},"}
+{"tMs":12725,"delta":"{\"id\":\"h2a"}
+{"tMs":12759,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":12792,"delta":"\":\"`12 + log_"}
+{"tMs":12826,"delta":"level: info`\"},{\""}
+{"tMs":12859,"delta":"id\":\"h2btns\",\""}
+{"tMs":12893,"delta":"component\":\"Row\",\"children\":"}
+{"tMs":12926,"delta":"[\"h2k\",\"h2d"}
+{"tMs":12959,"delta":"\"]},{\"id\":\""}
+{"tMs":12992,"delta":"h2kt\",\"component\":\""}
+{"tMs":13027,"delta":"Text\",\"text\":\"Ke"}
+{"tMs":13059,"delta":"ep\"},{\"id\":\""}
+{"tMs":13092,"delta":"h2dt\",\"component\":\""}
+{"tMs":13126,"delta":"Text\",\"text\":\"Disc"}
+{"tMs":13160,"delta":"ard\"},{\"id\":\""}
+{"tMs":13193,"delta":"h2k\",\"component\":\""}
+{"tMs":13227,"delta":"Button\",\"child\":\"h2k"}
+{"tMs":13260,"delta":"t\",\"variant\":\"primary"}
+{"tMs":13293,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":13327,"delta":"\"name\":\"keepHun"}
+{"tMs":13361,"delta":"k\",\"context\":{\"hun"}
+{"tMs":13393,"delta":"k\":\"h2\"}}"}
+{"tMs":13426,"delta":"}},{\"id\":\"h"}
+{"tMs":13460,"delta":"2d\",\"component\":\"Button"}
+{"tMs":13493,"delta":"\",\"child\":\"h2dt"}
+{"tMs":13527,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":13560,"delta":"\"name\":\"discardHun"}
+{"tMs":13593,"delta":"k\",\"context\":{\"hun"}
+{"tMs":13627,"delta":"k\":\"h2\"}}"}
+{"tMs":13660,"delta":"}},{\"id\":\"d"}
+{"tMs":13693,"delta":"2\",\"component\":\"Divider"}
+{"tMs":13727,"delta":"\"},{\"id\":\"h"}
+{"tMs":13760,"delta":"3\",\"component\":\"Column\",\""}
+{"tMs":13794,"delta":"children\":[\"h3head\",\"h"}
+{"tMs":13827,"delta":"3r\",\"h3a\",\"h"}
+{"tMs":13861,"delta":"3btns\"]},{\""}
+{"tMs":13894,"delta":"id\":\"h3head\",\"component"}
+{"tMs":13927,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":13960,"delta":"\"@call"}
+{"tMs":13994,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":14028,"delta":"{\"value\":\"**H"}
+{"tMs":14061,"delta":"unk 3** · `@"}
+{"tMs":14094,"delta":"@ -21 +21 "}
+{"tMs":14128,"delta":"@@` · ${/h"}
+{"tMs":14161,"delta":"3/status}\"}}},"}
+{"tMs":14194,"delta":"{\"id\":\"h3r"}
+{"tMs":14228,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":14261,"delta":"\":\"`21 - time"}
+{"tMs":14294,"delta":"out:"}
+{"tMs":14327,"delta":" 30`"}
+{"tMs":14361,"delta":"\"},{\"id\":\"h"}
+{"tMs":14395,"delta":"3a\",\"component\":\"Text"}
+{"tMs":14427,"delta":"\",\"text\":\"`21 +"}
+{"tMs":14461,"delta":" timeout: 60`\""}
+{"tMs":14494,"delta":"},{\"id\":\"h3"}
+{"tMs":14527,"delta":"btns\",\"component\":\"Row"}
+{"tMs":14561,"delta":"\",\"children\":[\"h3k\",\""}
+{"tMs":14595,"delta":"h3d\"]},{\""}
+{"tMs":14627,"delta":"id\":\"h3kt\",\""}
+{"tMs":14661,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":14695,"delta":"\"Keep\"},{\""}
+{"tMs":14728,"delta":"id\":\"h3dt\",\""}
+{"tMs":14762,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":14795,"delta":"\"Discard\"},{\""}
+{"tMs":14828,"delta":"id\":\"h3k\",\"component"}
+{"tMs":14870,"delta":"\":\"Button\",\"child\":\""}
+{"tMs":14899,"delta":"h3kt\",\"variant\":"}
+{"tMs":14928,"delta":"\"primary\",\"action\":{\""}
+{"tMs":14961,"delta":"event\":{\"name\":\"ke"}
+{"tMs":14995,"delta":"epHunk\",\"context\":{"}
+{"tMs":15028,"delta":"\"hunk\":\"h3"}
+{"tMs":15062,"delta":"\"}}}},{\"id"}
+{"tMs":15095,"delta":"\":\"h3d\",\"component\":"}
+{"tMs":15128,"delta":"\"Button\",\"child\":\"h"}
+{"tMs":15162,"delta":"3dt\",\"action\":{\""}
+{"tMs":15195,"delta":"event\":{\"name\":\"disc"}
+{"tMs":15229,"delta":"ardHunk\",\"context\":{"}
+{"tMs":15262,"delta":"\"hunk\":\"h3"}
+{"tMs":15295,"delta":"\"}}}},{\"id"}
+{"tMs":15328,"delta":"\":\"d3\",\"component\":\""}
+{"tMs":15362,"delta":"Divider\"},{\"id"}
+{"tMs":15395,"delta":"\":\"appl"}
+{"tMs":15429,"delta":"yt\",\"component\":\"Text"}
+{"tMs":15463,"delta":"\",\"text\":\"Apply chang"}
+{"tMs":15496,"delta":"es\"},{\"id\":\""}
+{"tMs":15531,"delta":"apply\",\"component\":\"Button"}
+{"tMs":15562,"delta":"\",\"child\":\"applyt"}
+{"tMs":15596,"delta":"\",\"variant\":\"primary\",\""}
+{"tMs":15631,"delta":"action\":{\"event\":{\""}
+{"tMs":15662,"delta":"name\":\"applyChanges"}
+{"tMs":15696,"delta":"\"}},\"@checks\":"}
+{"tMs":15729,"delta":"[{\"condition\":{\""}
+{"tMs":15763,"delta":"@path\":\"/allDec"}
+{"tMs":15795,"delta":"ided\"},\"message\":\""}
+{"tMs":15829,"delta":"Decide every hunk before appl"}
+{"tMs":15862,"delta":"ying.\"}]}],\"d"}
+{"tMs":15895,"delta":"ataModel\":{\"h1"}
+{"tMs":15929,"delta":"\":{\"status\":\"pending"}
+{"tMs":15964,"delta":"\"},\"h2\":{\""}
+{"tMs":15998,"delta":"status\":\"pending\"},\""}
+{"tMs":16029,"delta":"h3\":{\"status\":\""}
+{"tMs":16062,"delta":"pending\"},\"keptC"}
+{"tMs":16096,"delta":"ount\":0,\"decided"}
+{"tMs":16130,"delta":"Count\":0,\"allD"}
+{"tMs":16163,"delta":"ecided\":false}}}"}

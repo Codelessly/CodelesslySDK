@@ -1,0 +1,36 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21165,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2266,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 989,
+   "totalMs": 8118,
+   "chars": 5052,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 31,
+   "outputTokensPerNode": "73.1",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}

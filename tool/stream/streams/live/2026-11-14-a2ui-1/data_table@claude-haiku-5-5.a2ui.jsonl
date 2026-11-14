@@ -1,0 +1,44 @@
+{"meta":{"ui":"data_table","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Show the twelve invoices you found as a table: number, customer, date, amount and status. I can sort by any column, filter by status, type to search the customer, page through five at a time, tick rows (and a tick-all for the page), and a bar appears with the count and total of what I ticked and a button to send reminders for them.","text":"I don't have any invoice data for this conversation. No invoice records, customers, dates, or amounts were provided to me, and I have no tool to look them up, so I can't show twelve invoices I haven't found.\n\nIf you paste the invoice data (for example as JSON or CSV with number, customer, date, amount and status for each row), I'll build the A2UI table with sorting, status filtering, customer search, five-per-page paging, row and page selection, and a selection bar showing count, total, and a \"Send reminders\" button.","usage":{"input_tokens":21177,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":165,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":539,"totalMs":1524}}
+{"tMs":539,"delta":"I don't have any"}
+{"tMs":746,"delta":" invoice"}
+{"tMs":746,"delta":" data for"}
+{"tMs":746,"delta":" this"}
+{"tMs":746,"delta":" con"}
+{"tMs":746,"delta":"versation."}
+{"tMs":746,"delta":" No invoice records, customers"}
+{"tMs":746,"delta":", dates,"}
+{"tMs":746,"delta":" or amounts were prov"}
+{"tMs":746,"delta":"ided to"}
+{"tMs":746,"delta":" me, and I have"}
+{"tMs":761,"delta":" no tool"}
+{"tMs":780,"delta":" to look"}
+{"tMs":966,"delta":" them up, so I can't show"}
+{"tMs":966,"delta":" tw"}
+{"tMs":966,"delta":"elve invoices I"}
+{"tMs":966,"delta":" ha"}
+{"tMs":967,"delta":"ven't found.\n\nIf"}
+{"tMs":967,"delta":" you pa"}
+{"tMs":967,"delta":"ste the invoice data ("}
+{"tMs":967,"delta":"for"}
+{"tMs":975,"delta":" example as J"}
+{"tMs":998,"delta":"SON or CSV with"}
+{"tMs":1018,"delta":" number"}
+{"tMs":1041,"delta":", customer, date, amount"}
+{"tMs":1186,"delta":" and"}
+{"tMs":1186,"delta":" status for"}
+{"tMs":1186,"delta":" each row), I'"}
+{"tMs":1186,"delta":"ll build"}
+{"tMs":1186,"delta":" the A"}
+{"tMs":1186,"delta":"2UI table with sorting"}
+{"tMs":1192,"delta":", status filtering, customer"}
+{"tMs":1214,"delta":" search, five-per-page pa"}
+{"tMs":1235,"delta":"ging, row"}
+{"tMs":1256,"delta":" and"}
+{"tMs":1277,"delta":" page"}
+{"tMs":1298,"delta":" selection, and a"}
+{"tMs":1519,"delta":" selection bar show"}
+{"tMs":1519,"delta":"ing count"}
+{"tMs":1519,"delta":","}
+{"tMs":1519,"delta":" total,"}
+{"tMs":1519,"delta":" and a \""}
+{"tMs":1519,"delta":"Send reminders\" button."}

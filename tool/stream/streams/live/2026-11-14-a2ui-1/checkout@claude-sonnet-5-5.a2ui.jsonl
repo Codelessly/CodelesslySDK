@@ -1,0 +1,461 @@
+{"meta":{"ui":"checkout","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Build a small checkout in three steps: my cart (three items with quantities), a shipping form (name, address, city, postcode, email, all checked, with messages under the fields), then a payment summary with a choice of standard or express delivery changing the total, and a confirmation screen with an order number. I can go back a step without losing what I typed.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"checkout\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"tabs\"},{\"id\":\"tabs\",\"component\":\"Tabs\",\"tabs\":[{\"title\":\"1 Cart\",\"child\":\"cartCol\"},{\"title\":\"2 Shipping\",\"child\":\"shipCol\"},{\"title\":\"3 Payment\",\"child\":\"payCol\"},{\"title\":\"4 Done\",\"child\":\"doneCol\"}]},{\"id\":\"cartCol\",\"component\":\"Column\",\"children\":[\"cartTitle\",\"item1\",\"item2\",\"item3\",\"cartDiv\",\"cartSub\",\"cartNextBtn\"]},{\"id\":\"cartTitle\",\"component\":\"Text\",\"text\":\"Your cart\"},{\"id\":\"item1\",\"component\":\"Column\",\"children\":[\"item1Name\",\"item1Qty\"]},{\"id\":\"item1Name\",\"component\":\"Text\",\"text\":\"Notebook – $12.00 each\"},{\"id\":\"item1Qty\",\"component\":\"TextField\",\"label\":\"Quantity\",\"variant\":\"number\",\"value\":{\"@path\":\"/cart/notebook/qty\"},\"@checks\":[{\"condition\":{\"@call\":\"numeric\",\"args\":{\"value\":{\"@path\":\"/cart/notebook/qty\"},\"min\":0,\"max\":99}},\"message\":\"Enter a quantity from 0 to 99.\"}]},{\"id\":\"item2\",\"component\":\"Column\",\"children\":[\"item2Name\",\"item2Qty\"]},{\"id\":\"item2Name\",\"component\":\"Text\",\"text\":\"Pen set – $8.50 each\"},{\"id\":\"item2Qty\",\"component\":\"TextField\",\"label\":\"Quantity\",\"variant\":\"number\",\"value\":{\"@path\":\"/cart/pens/qty\"},\"@checks\":[{\"condition\":{\"@call\":\"numeric\",\"args\":{\"value\":{\"@path\":\"/cart/pens/qty\"},\"min\":0,\"max\":99}},\"message\":\"Enter a quantity from 0 to 99.\"}]},{\"id\":\"item3\",\"component\":\"Column\",\"children\":[\"item3Name\",\"item3Qty\"]},{\"id\":\"item3Name\",\"component\":\"Text\",\"text\":\"Backpack – $45.00 each\"},{\"id\":\"item3Qty\",\"component\":\"TextField\",\"label\":\"Quantity\",\"variant\":\"number\",\"value\":{\"@path\":\"/cart/backpack/qty\"},\"@checks\":[{\"condition\":{\"@call\":\"numeric\",\"args\":{\"value\":{\"@path\":\"/cart/backpack/qty\"},\"min\":0,\"max\":99}},\"message\":\"Enter a quantity from 0 to 99.\"}]},{\"id\":\"cartDiv\",\"component\":\"Divider\"},{\"id\":\"cartSub\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Subtotal: ${/summary/subtotal}\"}}},{\"id\":\"cartNextBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"cartNextTxt\",\"action\":{\"event\":{\"name\":\"cartContinue\",\"userMessage\":\"Continue to shipping\",\"context\":{\"notebook\":{\"@path\":\"/cart/notebook/qty\"},\"pens\":{\"@path\":\"/cart/pens/qty\"},\"backpack\":{\"@path\":\"/cart/backpack/qty\"}}}}},{\"id\":\"cartNextTxt\",\"component\":\"Text\",\"text\":\"Continue to shipping\"},{\"id\":\"shipCol\",\"component\":\"Column\",\"children\":[\"shipTitle\",\"fName\",\"fAddress\",\"fCity\",\"fPostcode\",\"fEmail\",\"shipBtns\"]},{\"id\":\"shipTitle\",\"component\":\"Text\",\"text\":\"Shipping details\"},{\"id\":\"fName\",\"component\":\"TextField\",\"label\":\"Full name\",\"value\":{\"@path\":\"/shipping/name\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/name\"}}},\"message\":\"Please enter your full name.\"}]},{\"id\":\"fAddress\",\"component\":\"TextField\",\"label\":\"Address\",\"value\":{\"@path\":\"/shipping/address\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/address\"}}},\"message\":\"Please enter your street address.\"}]},{\"id\":\"fCity\",\"component\":\"TextField\",\"label\":\"City\",\"value\":{\"@path\":\"/shipping/city\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/city\"}}},\"message\":\"Please enter your city.\"}]},{\"id\":\"fPostcode\",\"component\":\"TextField\",\"label\":\"Postcode\",\"value\":{\"@path\":\"/shipping/postcode\"},\"@checks\":[{\"condition\":{\"@call\":\"regex\",\"args\":{\"value\":{\"@path\":\"/shipping/postcode\"},\"pattern\":\"^[A-Za-z0-9 -]{3,10}$\"}},\"message\":\"Enter a valid postcode (3–10 letters or digits).\"}]},{\"id\":\"fEmail\",\"component\":\"TextField\",\"label\":\"Email\",\"value\":{\"@path\":\"/shipping/email\"},\"@checks\":[{\"condition\":{\"@call\":\"email\",\"args\":{\"value\":{\"@path\":\"/shipping/email\"}}},\"message\":\"Enter a valid email address.\"}]},{\"id\":\"shipBtns\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"shipBack\",\"shipNext\"]},{\"id\":\"shipBack\",\"component\":\"Button\",\"child\":\"shipBackTxt\",\"action\":{\"event\":{\"name\":\"goToCart\",\"userMessage\":\"Back to cart\"}}},{\"id\":\"shipBackTxt\",\"component\":\"Text\",\"text\":\"Back\"},{\"id\":\"shipNext\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"shipNextTxt\",\"action\":{\"event\":{\"name\":\"shippingContinue\",\"userMessage\":\"Continue to payment\",\"context\":{\"name\":{\"@path\":\"/shipping/name\"},\"address\":{\"@path\":\"/shipping/address\"},\"city\":{\"@path\":\"/shipping/city\"},\"postcode\":{\"@path\":\"/shipping/postcode\"},\"email\":{\"@path\":\"/shipping/email\"}}}},\"@checks\":[{\"condition\":{\"@call\":\"and\",\"args\":{\"values\":[{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/name\"}}},{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/address\"}}},{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/city\"}}},{\"@call\":\"regex\",\"args\":{\"value\":{\"@path\":\"/shipping/postcode\"},\"pattern\":\"^[A-Za-z0-9 -]{3,10}$\"}},{\"@call\":\"email\",\"args\":{\"value\":{\"@path\":\"/shipping/email\"}}}]}},\"message\":\"Complete all shipping fields to continue.\"}]},{\"id\":\"shipNextTxt\",\"component\":\"Text\",\"text\":\"Continue to payment\"},{\"id\":\"payCol\",\"component\":\"Column\",\"children\":[\"payTitle\",\"payItems\",\"payDeliveryLabel\",\"payDeliveryRow\",\"payDiv\",\"payShip\",\"payTotal\",\"payBtns\"]},{\"id\":\"payTitle\",\"component\":\"Text\",\"text\":\"Payment summary\"},{\"id\":\"payItems\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Items: ${/summary/subtotal}\"}}},{\"id\":\"payDeliveryLabel\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Delivery method – Standard $4.00 (3–5 days), Express $12.00 (next day)\"},{\"id\":\"payDeliveryRow\",\"component\":\"Row\",\"children\":[\"stdBtn\",\"expBtn\"]},{\"id\":\"stdBtn\",\"component\":\"Button\",\"child\":\"stdTxt\",\"action\":{\"event\":{\"name\":\"selectDelivery\",\"userMessage\":\"Standard delivery\",\"context\":{\"method\":\"standard\"}}}},{\"id\":\"stdTxt\",\"component\":\"Text\",\"text\":\"Standard\"},{\"id\":\"expBtn\",\"component\":\"Button\",\"child\":\"expTxt\",\"action\":{\"event\":{\"name\":\"selectDelivery\",\"userMessage\":\"Express delivery\",\"context\":{\"method\":\"express\"}}}},{\"id\":\"expTxt\",\"component\":\"Text\",\"text\":\"Express\"},{\"id\":\"payDiv\",\"component\":\"Divider\"},{\"id\":\"payShip\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Delivery (${/summary/method}): ${/summary/shipping}\"}}},{\"id\":\"payTotal\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Total: ${/summary/total}\"}}},{\"id\":\"payBtns\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"payBack\",\"payPlace\"]},{\"id\":\"payBack\",\"component\":\"Button\",\"child\":\"payBackTxt\",\"action\":{\"event\":{\"name\":\"goToShipping\",\"userMessage\":\"Back to shipping\"}}},{\"id\":\"payBackTxt\",\"component\":\"Text\",\"text\":\"Back\"},{\"id\":\"payPlace\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"payPlaceTxt\",\"action\":{\"event\":{\"name\":\"placeOrder\",\"userMessage\":\"Place order\",\"context\":{\"delivery\":{\"@path\":\"/summary/method\"},\"email\":{\"@path\":\"/shipping/email\"}}}}},{\"id\":\"payPlaceTxt\",\"component\":\"Text\",\"text\":\"Place order\"},{\"id\":\"doneCol\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"doneIcon\",\"doneTitle\",\"doneOrder\",\"doneEmail\"]},{\"id\":\"doneIcon\",\"component\":\"Icon\",\"name\":\"check\"},{\"id\":\"doneTitle\",\"component\":\"Text\",\"text\":\"Thank you, your order is confirmed\"},{\"id\":\"doneOrder\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Order number: ${/order/number}\"}}},{\"id\":\"doneEmail\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"A receipt will be sent to ${/shipping/email}\"}}}],\"dataModel\":{\"cart\":{\"notebook\":{\"qty\":2},\"pens\":{\"qty\":1},\"backpack\":{\"qty\":1}},\"shipping\":{\"name\":\"\",\"address\":\"\",\"city\":\"\",\"postcode\":\"\",\"email\":\"\"},\"summary\":{\"subtotal\":\"$77.50\",\"method\":\"standard\",\"shipping\":\"$4.00\",\"total\":\"$81.50\"},\"order\":{\"number\":\"Pending\"}}}}","usage":{"input_tokens":21184,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":4802,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":1380}},"ttftMs":14037,"totalMs":29388}}
+{"tMs":14037,"delta":"{"}
+{"tMs":14071,"delta":"\"version\":\"1.0\",\""}
+{"tMs":14103,"delta":"createSurface\":{\"sur"}
+{"tMs":14136,"delta":"faceId\":\"chec"}
+{"tMs":14169,"delta":"kout\",\"catalogId\":"}
+{"tMs":14203,"delta":"\"https://a2ui."}
+{"tMs":14236,"delta":"org/specification/v1_"}
+{"tMs":14270,"delta":"0/catalogs/bas"}
+{"tMs":14303,"delta":"ic/catalog.json\",\""}
+{"tMs":14337,"delta":"components\":[{\"id\":\""}
+{"tMs":14370,"delta":"root\",\"component\":\"Card\",\""}
+{"tMs":14403,"delta":"child\":\"t"}
+{"tMs":14437,"delta":"abs\"},{\"id\":"}
+{"tMs":14470,"delta":"\"tabs\",\"component"}
+{"tMs":14504,"delta":"\":\"Tabs\",\"t"}
+{"tMs":14537,"delta":"abs\":[{\"title\":"}
+{"tMs":14570,"delta":"\"1 Cart\",\"child"}
+{"tMs":14604,"delta":"\":\"cartC"}
+{"tMs":14637,"delta":"ol\"},{\"title\":\""}
+{"tMs":14671,"delta":"2 Shipping\",\"child"}
+{"tMs":14704,"delta":"\":\"shipCol\"},"}
+{"tMs":14738,"delta":"{\"title\":\"3 "}
+{"tMs":14772,"delta":"Payment\",\"child\":\"payC"}
+{"tMs":14805,"delta":"ol\"},{\"title\":\""}
+{"tMs":14841,"delta":"4 Done\",\"child\":\""}
+{"tMs":14872,"delta":"doneCol\"}]},"}
+{"tMs":14905,"delta":"{\"id\":\"cartC"}
+{"tMs":14938,"delta":"ol\",\"component\":\"Column\",\""}
+{"tMs":14971,"delta":"children\":[\"cartTitle"}
+{"tMs":15005,"delta":"\",\"item"}
+{"tMs":15038,"delta":"1\",\""}
+{"tMs":15072,"delta":"item"}
+{"tMs":15105,"delta":"2\",\"item3\",\"c"}
+{"tMs":15138,"delta":"artDiv\",\"cartS"}
+{"tMs":15171,"delta":"ub\",\"cartN"}
+{"tMs":15205,"delta":"ext"}
+{"tMs":15257,"delta":"Btn\"]},{\""}
+{"tMs":15271,"delta":"id\":\"cartTitle"}
+{"tMs":15305,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":15339,"delta":"\":\""}
+{"tMs":15372,"delta":"Your cart\"},{\"id"}
+{"tMs":15405,"delta":"\":\"item1\",\"component\":\""}
+{"tMs":15439,"delta":"Column\",\"children\":[\"item1"}
+{"tMs":15472,"delta":"Name\",\"item1Qty"}
+{"tMs":15506,"delta":"\"]},{\"id\":\""}
+{"tMs":15539,"delta":"item1Name\",\"component\":\""}
+{"tMs":15572,"delta":"Text\",\"text\":\""}
+{"tMs":15607,"delta":"Notebook – $12.00"}
+{"tMs":15639,"delta":" "}
+{"tMs":15673,"delta":"each\"},{\"id\":\""}
+{"tMs":15706,"delta":"item1Qty\",\"component\":"}
+{"tMs":15740,"delta":"\"TextField\",\"label\":\""}
+{"tMs":15773,"delta":"Quantity\",\"vari"}
+{"tMs":15806,"delta":"ant\":\"number\",\"value\":{"}
+{"tMs":15840,"delta":"\"@path\":\"/cart"}
+{"tMs":15873,"delta":"/not"}
+{"tMs":15906,"delta":"ebook/qty\"},\""}
+{"tMs":15940,"delta":"@checks\":[{\"cond"}
+{"tMs":15973,"delta":"ition\":{\"@call\":\""}
+{"tMs":16007,"delta":"numeric\",\"args\":{\""}
+{"tMs":16040,"delta":"value\":{\"@path\":\""}
+{"tMs":16073,"delta":"/cart/notebook/"}
+{"tMs":16107,"delta":"qty\"},\"min\":0"}
+{"tMs":16140,"delta":",\"max\":99"}
+{"tMs":16173,"delta":"}},\"message\":\"En"}
+{"tMs":16207,"delta":"ter a qu"}
+{"tMs":16240,"delta":"antity from"}
+{"tMs":16274,"delta":" 0 to 99.\"}"}
+{"tMs":16307,"delta":"]},{\"id\":\"item"}
+{"tMs":16341,"delta":"2\",\"component\":\"Column\",\""}
+{"tMs":16374,"delta":"children\":[\"item2Name\",\""}
+{"tMs":16407,"delta":"item2Qty\"]},"}
+{"tMs":16441,"delta":"{\"id\":\"item2"}
+{"tMs":16476,"delta":"Name\",\"component\":\"Text\",\""}
+{"tMs":16507,"delta":"text\":\"Pen set –"}
+{"tMs":16541,"delta":" $8.50 each\"},"}
+{"tMs":16574,"delta":"{\"id\":\"item2"}
+{"tMs":16608,"delta":"Qty\",\"component\":\"Text"}
+{"tMs":16641,"delta":"Field\",\"label\":\"Quant"}
+{"tMs":16674,"delta":"ity\",\"variant\":\"number\",\""}
+{"tMs":16708,"delta":"value\":{\"@path\":\""}
+{"tMs":16741,"delta":"/cart/pens"}
+{"tMs":16774,"delta":"/qty\"},\"@chec"}
+{"tMs":16808,"delta":"ks\":[{\"condition\":"}
+{"tMs":16842,"delta":"{\"@call\":\"nume"}
+{"tMs":16875,"delta":"ric\",\"args\":{\"value\":"}
+{"tMs":16908,"delta":"{\"@path\":\"/c"}
+{"tMs":16941,"delta":"art/pens/qty\""}
+{"tMs":16977,"delta":"},\"min\":0,\"max"}
+{"tMs":17009,"delta":"\":99}},\"message\":\""}
+{"tMs":17042,"delta":"Enter a quantity from"}
+{"tMs":17075,"delta":" 0 to 99.\"}"}
+{"tMs":17109,"delta":"]},{\"id\":\"item"}
+{"tMs":17142,"delta":"3\",\"component\":\"Column\",\""}
+{"tMs":17178,"delta":"children\":[\"item3Name\",\""}
+{"tMs":17209,"delta":"item3Qty\"]},"}
+{"tMs":17242,"delta":"{\"id\":\"item3"}
+{"tMs":17275,"delta":"Name\",\"component\":\"Text\",\""}
+{"tMs":17309,"delta":"text\":\"Backpack –"}
+{"tMs":17342,"delta":" $45.00 each\"},"}
+{"tMs":17376,"delta":"{\"id\":\"item3"}
+{"tMs":17409,"delta":"Qty\",\"component\":\"Text"}
+{"tMs":17442,"delta":"Field\",\"label\":\"Quant"}
+{"tMs":17476,"delta":"ity\",\"variant\":\"number\",\""}
+{"tMs":17509,"delta":"value\":{\"@path\":\""}
+{"tMs":17543,"delta":"/cart/back"}
+{"tMs":17576,"delta":"pack/qty\"},\""}
+{"tMs":17609,"delta":"@checks\":[{\"cond"}
+{"tMs":17643,"delta":"ition\":{\"@call\":\""}
+{"tMs":17676,"delta":"numeric\",\"args\":{\""}
+{"tMs":17710,"delta":"value\":{\"@path\":\""}
+{"tMs":17745,"delta":"/cart/backpack/"}
+{"tMs":17776,"delta":"qty\"},\"min\":0"}
+{"tMs":17810,"delta":",\"max\":99}},\""}
+{"tMs":17844,"delta":"message\":\"Enter a qu"}
+{"tMs":17877,"delta":"antity from 0 to "}
+{"tMs":17910,"delta":"99.\"}]},{\"id"}
+{"tMs":17943,"delta":"\":\"cartDiv\",\""}
+{"tMs":17976,"delta":"component\":\"Divider\"},"}
+{"tMs":18010,"delta":"{\"id\":\"cartS"}
+{"tMs":18043,"delta":"ub\",\"component\":\"Text\",\""}
+{"tMs":18077,"delta":"text\":{\"@call\":\""}
+{"tMs":18110,"delta":"formatString\",\"args\":{\""}
+{"tMs":18145,"delta":"value\":\"Subtotal"}
+{"tMs":18177,"delta":": ${/summary/sub"}
+{"tMs":18211,"delta":"total}\"}}},"}
+{"tMs":18243,"delta":"{\"id\":\"cartN"}
+{"tMs":18277,"delta":"extBtn\",\"component\":\""}
+{"tMs":18311,"delta":"Button\",\"variant\":\"prim"}
+{"tMs":18344,"delta":"ary\",\"child\":\"cartN"}
+{"tMs":18377,"delta":"extT"}
+{"tMs":18410,"delta":"xt\",\"action\":{\"event"}
+{"tMs":18444,"delta":"\":{\"name\":\"c"}
+{"tMs":18477,"delta":"artCont"}
+{"tMs":18510,"delta":"inue\",\"userMessage\":"}
+{"tMs":18544,"delta":"\"Continue to shipping"}
+{"tMs":18577,"delta":"\",\"context\":{\"not"}
+{"tMs":18611,"delta":"ebook\":{\"@path\":"}
+{"tMs":18644,"delta":"\"/cart/notebook"}
+{"tMs":18677,"delta":"/qty\"},\"pens"}
+{"tMs":18711,"delta":"\":{\"@path\":\"/"}
+{"tMs":18744,"delta":"cart/pens/qty"}
+{"tMs":18778,"delta":"\"},\"backpack\":{"}
+{"tMs":18811,"delta":"\"@path\":\"/cart"}
+{"tMs":18844,"delta":"/backpack/qty\""}
+{"tMs":18881,"delta":"}}}}},{\"id"}
+{"tMs":18911,"delta":"\":\"cartNextTx"}
+{"tMs":18945,"delta":"t\",\"component\":\"Text\",\""}
+{"tMs":18978,"delta":"text\":\"Continue to sh"}
+{"tMs":19011,"delta":"ipping\"},{\"id\":"}
+{"tMs":19044,"delta":"\"shipCol\",\"component\":"}
+{"tMs":19078,"delta":"\"Column\",\"children\":[\"sh"}
+{"tMs":19111,"delta":"ipTitle\",\"f"}
+{"tMs":19145,"delta":"Name\",\"fAddress"}
+{"tMs":19178,"delta":"\",\"fCity\",\"fPost"}
+{"tMs":19211,"delta":"code\",\"fEmail\",\""}
+{"tMs":19244,"delta":"shipB"}
+{"tMs":19278,"delta":"tns\"]},{\"id"}
+{"tMs":19312,"delta":"\":\"shipTitle\",\""}
+{"tMs":19345,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":19378,"delta":"\"Shipping details\"},"}
+{"tMs":19411,"delta":"{\"id\":\"fName\",\""}
+{"tMs":19445,"delta":"component\":\"TextField\",\"label"}
+{"tMs":19478,"delta":"\":\"Full name\",\"value\":"}
+{"tMs":19512,"delta":"{\"@path\":\"/sh"}
+{"tMs":19548,"delta":"ipping/name\"},\"@"}
+{"tMs":19578,"delta":"checks\":[{\"condition"}
+{"tMs":19612,"delta":"\":{\"@call\":\"required"}
+{"tMs":19646,"delta":"\",\"args\":{\"value\":{"}
+{"tMs":19678,"delta":"\"@path\":\"/ship"}
+{"tMs":19713,"delta":"ping/name\"}}},\""}
+{"tMs":19745,"delta":"message\":\"Please"}
+{"tMs":19779,"delta":" enter your full"}
+{"tMs":19812,"delta":" name.\"}]},{\"id"}
+{"tMs":19845,"delta":"\":\"fAddress\",\"component"}
+{"tMs":19879,"delta":"\":\"TextField\",\"label\":"}
+{"tMs":19912,"delta":"\"Address\",\"value\":{\""}
+{"tMs":19946,"delta":"@path\":\"/shipping"}
+{"tMs":19979,"delta":"/address\"},\"@checks"}
+{"tMs":20012,"delta":"\":[{\"condition\":{"}
+{"tMs":20046,"delta":"\"@call\":\"required\",\"args"}
+{"tMs":20079,"delta":"\":{\"value\":{\"@"}
+{"tMs":20116,"delta":"path\":\"/shipping/"}
+{"tMs":20146,"delta":"address\"}}},\"message\":"}
+{"tMs":20179,"delta":"\"Please enter your street address"}
+{"tMs":20212,"delta":".\"}]},{\"id\":"}
+{"tMs":20246,"delta":"\"fCity\",\"component\":\""}
+{"tMs":20279,"delta":"TextField\",\"label\":\"City"}
+{"tMs":20312,"delta":"\",\"value\":{\"@path\":"}
+{"tMs":20345,"delta":"\"/shipping/city\""}
+{"tMs":20379,"delta":"},\"@checks\":[{"}
+{"tMs":20413,"delta":"\"condition\":{\"@call"}
+{"tMs":20446,"delta":"\":\"required\",\"args\":{\""}
+{"tMs":20479,"delta":"value\":{\"@path\":\""}
+{"tMs":20514,"delta":"/shipping/city\"}"}
+{"tMs":20546,"delta":"}},\"message\":\""}
+{"tMs":20579,"delta":"Please enter your city.\"}]"}
+{"tMs":20613,"delta":"},{\"id\":\"fP"}
+{"tMs":20646,"delta":"ostcode\",\"component\":\"T"}
+{"tMs":20680,"delta":"extField\",\"label\":\"Post"}
+{"tMs":20713,"delta":"code\",\"value\":{\"@"}
+{"tMs":20746,"delta":"path\":\"/shipping/"}
+{"tMs":20780,"delta":"postcode\"},\"@chec"}
+{"tMs":20813,"delta":"ks\":[{\"condition\":"}
+{"tMs":20846,"delta":"{\"@call\":\"reg"}
+{"tMs":20880,"delta":"ex\",\"args\":{\"value\":"}
+{"tMs":20913,"delta":"{\"@path\":\"/sh"}
+{"tMs":20946,"delta":"ipping/postcode\"},"}
+{"tMs":20980,"delta":"\"pattern\":\"^["}
+{"tMs":21013,"delta":"A-Za-z0-"}
+{"tMs":21046,"delta":"9 -"}
+{"tMs":21080,"delta":"]{3,10}$\""}
+{"tMs":21113,"delta":"}},\"message\":\"En"}
+{"tMs":21147,"delta":"ter a valid postcode ("}
+{"tMs":21180,"delta":"3–10 let"}
+{"tMs":21213,"delta":"ters or dig"}
+{"tMs":21247,"delta":"its).\"}]},{\""}
+{"tMs":21280,"delta":"id\":\"fEmail\",\""}
+{"tMs":21314,"delta":"component\":\"TextField\",\"label"}
+{"tMs":21347,"delta":"\":\"Email\",\"value\":{"}
+{"tMs":21380,"delta":"\"@path\":\"/ship"}
+{"tMs":21414,"delta":"ping/email\"},\"@chec"}
+{"tMs":21447,"delta":"ks\":[{\"condition\":"}
+{"tMs":21485,"delta":"{\"@call\":\"email\",\""}
+{"tMs":21513,"delta":"args\":{\"value\":{\""}
+{"tMs":21547,"delta":"@path\":\"/shipping"}
+{"tMs":21580,"delta":"/email\"}}},\"message"}
+{"tMs":21613,"delta":"\":\"Enter a valid"}
+{"tMs":21647,"delta":" email address.\"}]},{\""}
+{"tMs":21680,"delta":"id\":\"shipBtns"}
+{"tMs":21713,"delta":"\",\"component\":\"Row\",\"just"}
+{"tMs":21747,"delta":"ify\":\"sp"}
+{"tMs":21780,"delta":"aceBetween\",\"children\":"}
+{"tMs":21814,"delta":"[\"shipBack\",\"ship"}
+{"tMs":21847,"delta":"Next\"]},{\"id"}
+{"tMs":21880,"delta":"\":\"shipBack\",\"component"}
+{"tMs":21914,"delta":"\":\"Button\",\"child"}
+{"tMs":21947,"delta":"\":\"shipBackTx"}
+{"tMs":21980,"delta":"t\",\"action\":{\"event\":"}
+{"tMs":22014,"delta":"{\"name\":\"goTo"}
+{"tMs":22048,"delta":"Cart\",\"userMessage\":"}
+{"tMs":22080,"delta":"\"Back to cart\"}"}
+{"tMs":22114,"delta":"}},{\"id\":\"sh"}
+{"tMs":22147,"delta":"ipBackTxt\",\"component"}
+{"tMs":22181,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":22214,"delta":"Back\"},{\"id\":"}
+{"tMs":22247,"delta":"\"shipNext\",\"component\":"}
+{"tMs":22280,"delta":"\"Button\",\"variant\":\""}
+{"tMs":22314,"delta":"primary\",\"child\":\"ship"}
+{"tMs":22347,"delta":"NextTxt\",\"action\":"}
+{"tMs":22381,"delta":"{\"event\":{\"name\":"}
+{"tMs":22414,"delta":"\"shipp"}
+{"tMs":22447,"delta":"ingContinue\",\"userMess"}
+{"tMs":22481,"delta":"age\":\"Continue to pay"}
+{"tMs":22514,"delta":"ment\",\"context\":{\"name"}
+{"tMs":22547,"delta":"\":{\"@path\":\"/"}
+{"tMs":22581,"delta":"shipping/name\"},\""}
+{"tMs":22614,"delta":"address\":{\"@path\":\""}
+{"tMs":22648,"delta":"/shipping/address\"},"}
+{"tMs":22681,"delta":"\"city\":{\"@path\":"}
+{"tMs":22714,"delta":"\"/shipping/city\""}
+{"tMs":22748,"delta":"},\"postcode\":{\""}
+{"tMs":22781,"delta":"@path\":\"/shipping"}
+{"tMs":22815,"delta":"/postcode\"},\"email"}
+{"tMs":22848,"delta":"\":{\"@path\":\"/"}
+{"tMs":22881,"delta":"shipping/email\"}}"}
+{"tMs":22915,"delta":"}},\"@checks\":["}
+{"tMs":22948,"delta":"{\"condition\":{\"@"}
+{"tMs":22981,"delta":"call\":\"and\",\"args\":{"}
+{"tMs":23014,"delta":"\"values\":[{\"@call"}
+{"tMs":23048,"delta":"\":\"required\",\"args\":{\""}
+{"tMs":23081,"delta":"value\":{\"@path\":\""}
+{"tMs":23117,"delta":"/shipping/name\"}"}
+{"tMs":23148,"delta":"}},{\"@call\":\""}
+{"tMs":23181,"delta":"required\",\"args\":{\"value\":"}
+{"tMs":23216,"delta":"{\"@path\":\"/sh"}
+{"tMs":23247,"delta":"ipping/address\"}}},"}
+{"tMs":23281,"delta":"{\"@call\":\"required\",\""}
+{"tMs":23314,"delta":"args\":{\"value\":{\""}
+{"tMs":23348,"delta":"@path\":\"/shipping"}
+{"tMs":23383,"delta":"/city\"}}},{\""}
+{"tMs":23415,"delta":"@call\":\"regex\",\"args"}
+{"tMs":23448,"delta":"\":{\"value\":{\"@"}
+{"tMs":23482,"delta":"path\":\"/shipping/"}
+{"tMs":23515,"delta":"postcode\"},\"patt"}
+{"tMs":23548,"delta":"ern\":\"^[A-"}
+{"tMs":23582,"delta":"Za-z0-9 -"}
+{"tMs":23615,"delta":"]{3,10}$\""}
+{"tMs":23649,"delta":"}},{\"@call\":\""}
+{"tMs":23682,"delta":"email\",\"args\":{\"value\":"}
+{"tMs":23715,"delta":"{\"@path\":\"/sh"}
+{"tMs":23748,"delta":"ipping/email\"}}}"}
+{"tMs":23782,"delta":"]}},\"message\":\""}
+{"tMs":23816,"delta":"Complete all shipping f"}
+{"tMs":23850,"delta":"ields to"}
+{"tMs":23882,"delta":" continue.\"}]},{\""}
+{"tMs":23915,"delta":"id\":\"shipNextT"}
+{"tMs":23948,"delta":"xt\",\"component\":\"Text"}
+{"tMs":23982,"delta":"\",\"text\":\"Continue to"}
+{"tMs":24015,"delta":" payment\"},{\"id\":"}
+{"tMs":24048,"delta":"\"payCol\",\"component\":\""}
+{"tMs":24082,"delta":"Column\",\"children\":[\"payT"}
+{"tMs":24115,"delta":"itle\",\"payIt"}
+{"tMs":24148,"delta":"ems\",\"payD"}
+{"tMs":24182,"delta":"e"}
+{"tMs":24215,"delta":"liveryLabel\",\"pay"}
+{"tMs":24248,"delta":"DeliveryRow\",\""}
+{"tMs":24282,"delta":"payDi"}
+{"tMs":24315,"delta":"v\",\"pay"}
+{"tMs":24349,"delta":"Ship"}
+{"tMs":24381,"delta":"\",\"payTotal\",\"payB"}
+{"tMs":24415,"delta":"tns\"]},{\"id"}
+{"tMs":24448,"delta":"\":\"payTitle\",\"component"}
+{"tMs":24482,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":24515,"delta":"Payment summary\"},{"}
+{"tMs":24549,"delta":"\"id\":\"payItems\",\""}
+{"tMs":24582,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":24615,"delta":"{\"@call\":\"format"}
+{"tMs":24649,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":24682,"delta":"\"Items: ${/summ"}
+{"tMs":24715,"delta":"ary/sub"}
+{"tMs":24748,"delta":"total}\"}}"}
+{"tMs":24782,"delta":"},{\"id\":\"payD"}
+{"tMs":24816,"delta":"eliveryLabel\",\""}
+{"tMs":24849,"delta":"component\":\"Text\",\"vari"}
+{"tMs":24882,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":24915,"delta":"\"Delivery method"}
+{"tMs":24949,"delta":" – Standard $4"}
+{"tMs":24982,"delta":".00"}
+{"tMs":25016,"delta":" (3–5 days),"}
+{"tMs":25049,"delta":" Express $12"}
+{"tMs":25083,"delta":".00 (next"}
+{"tMs":25115,"delta":" day)\"},{\"id\":"}
+{"tMs":25149,"delta":"\"payDeliveryR"}
+{"tMs":25182,"delta":"ow\",\"component\":\"Row\",\""}
+{"tMs":25215,"delta":"children\":[\"stdB"}
+{"tMs":25267,"delta":"tn\",\"expBtn\""}
+{"tMs":25282,"delta":"]},{\"id\":\"st"}
+{"tMs":25316,"delta":"dBtn\",\"component\":\""}
+{"tMs":25349,"delta":"Button\",\"child\":\"std"}
+{"tMs":25382,"delta":"Txt\",\"action\":{\""}
+{"tMs":25416,"delta":"event\":{\"name\":\"sel"}
+{"tMs":25449,"delta":"ectDelivery\",\"userM"}
+{"tMs":25482,"delta":"essage\":\"Standard del"}
+{"tMs":25516,"delta":"ivery\",\"context\":{\"method"}
+{"tMs":25549,"delta":"\":\"standard\"}}}"}
+{"tMs":25582,"delta":"},{\"id\":\"st"}
+{"tMs":25616,"delta":"dTxt\",\"component\":\""}
+{"tMs":25649,"delta":"Text\",\"text\":\"Stand"}
+{"tMs":25682,"delta":"ard\"},{\"id\":\""}
+{"tMs":25716,"delta":"expBtn\",\"component\":\""}
+{"tMs":25749,"delta":"Button\",\"child\":\"expT"}
+{"tMs":25782,"delta":"xt\",\"action\":{\"event"}
+{"tMs":25817,"delta":"\":{\"name\":\"select"}
+{"tMs":25849,"delta":"Delivery\",\"userMess"}
+{"tMs":25884,"delta":"age\":\"Express delivery"}
+{"tMs":25916,"delta":"\",\"context\":{\"method\":\""}
+{"tMs":25949,"delta":"express\"}}}},{\""}
+{"tMs":25982,"delta":"id\":\"expTxt\",\""}
+{"tMs":26016,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":26049,"delta":"\"Express\"},{\"id"}
+{"tMs":26082,"delta":"\":\"payDiv\",\"component"}
+{"tMs":26118,"delta":"\":\"Divider\"},{"}
+{"tMs":26149,"delta":"\"id\":\"payShip\",\""}
+{"tMs":26183,"delta":"component\":\"Text"}
+{"tMs":26216,"delta":"\",\"text\":{\"@call\":"}
+{"tMs":26249,"delta":"\"formatString\",\"args\":{"}
+{"tMs":26283,"delta":"\"value\":\""}
+{"tMs":26316,"delta":"Delivery ("}
+{"tMs":26349,"delta":"${/summary/method}):"}
+{"tMs":26383,"delta":" ${/summary/ship"}
+{"tMs":26416,"delta":"ping}\"}}},{\""}
+{"tMs":26450,"delta":"id\":\"payTotal\",\""}
+{"tMs":26483,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":26517,"delta":"{\"@call\":\"format"}
+{"tMs":26549,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":26584,"delta":"\"Total: ${/summ"}
+{"tMs":26616,"delta":"ary/total}\"}}},"}
+{"tMs":26652,"delta":"{\"id\":\"payBt"}
+{"tMs":26683,"delta":"ns\",\"component\":\"Row\",\""}
+{"tMs":26716,"delta":"justify\":\"spaceB"}
+{"tMs":26749,"delta":"etween\",\"children\":[\"payB"}
+{"tMs":26783,"delta":"ack\",\"payP"}
+{"tMs":26816,"delta":"lace\"]},{\"id"}
+{"tMs":26850,"delta":"\":\"payBack\",\"component\":"}
+{"tMs":26883,"delta":"\"Button\",\"child\":\"pay"}
+{"tMs":26916,"delta":"BackTxt\",\"action\":"}
+{"tMs":26949,"delta":"{\"event\":{\"name\":"}
+{"tMs":26983,"delta":"\"goToShipping\",\"user"}
+{"tMs":27019,"delta":"Message\":\"Back to"}
+{"tMs":27049,"delta":" shipping\"}}},{"}
+{"tMs":27083,"delta":"\"id\":\"payBackT"}
+{"tMs":27116,"delta":"xt\",\"component\":\"Text"}
+{"tMs":27149,"delta":"\",\"text\":\"Back\"},"}
+{"tMs":27183,"delta":"{\"id\":\"payPl"}
+{"tMs":27216,"delta":"ace\",\"component\":\"Button\",\""}
+{"tMs":27250,"delta":"variant\":\"primary\",\"child"}
+{"tMs":27283,"delta":"\":\"payPlaceT"}
+{"tMs":27316,"delta":"xt\",\"action\":{\"event"}
+{"tMs":27350,"delta":"\":{\"name\":\"place"}
+{"tMs":27383,"delta":"Order\",\"userMessage"}
+{"tMs":27418,"delta":"\":\"Place order\",\"context\":"}
+{"tMs":27450,"delta":"{\"delivery\":{\""}
+{"tMs":27483,"delta":"@path\":\"/summary/"}
+{"tMs":27518,"delta":"method\"},\"email\":{\""}
+{"tMs":27550,"delta":"@path\":\"/shipping"}
+{"tMs":27583,"delta":"/email\"}}}}},"}
+{"tMs":27619,"delta":"{\"id\":\"payPl"}
+{"tMs":27650,"delta":"aceTxt\",\"component\":"}
+{"tMs":27683,"delta":"\"Text"}
+{"tMs":27716,"delta":"\",\"text\":\"Place order\""}
+{"tMs":27750,"delta":"},{\"id\":\"done"}
+{"tMs":27783,"delta":"Col\",\"component\":\"Column"}
+{"tMs":27817,"delta":"\",\"align"}
+{"tMs":27850,"delta":"\":\"center\",\"children\":[\"do"}
+{"tMs":27883,"delta":"neIcon\",\"doneT"}
+{"tMs":27917,"delta":"itle\",\"doneO"}
+{"tMs":27950,"delta":"rder\",\"doneEmail"}
+{"tMs":27983,"delta":"\"]},{\"id\":\""}
+{"tMs":28017,"delta":"doneIcon\",\"component\":"}
+{"tMs":28050,"delta":"\"Icon\",\"name\":\""}
+{"tMs":28089,"delta":"check\"},{\"id\":\""}
+{"tMs":28117,"delta":"doneTitle\",\"component\":"}
+{"tMs":28151,"delta":"\"Text\",\"text\":\""}
+{"tMs":28185,"delta":"Thank you,"}
+{"tMs":28216,"delta":" your order is confirmed\""}
+{"tMs":28250,"delta":"},{\"id\":\"done"}
+{"tMs":28283,"delta":"Order\",\"component\":\""}
+{"tMs":28318,"delta":"Text\",\"text\":{\"@call"}
+{"tMs":28350,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":28383,"delta":"{\"value\":\"Order number"}
+{"tMs":28417,"delta":": ${/order/number}"}
+{"tMs":28450,"delta":"\"}}"}
+{"tMs":28483,"delta":"},{\"id\":\"done"}
+{"tMs":28518,"delta":"Email\",\"component\":\""}
+{"tMs":28551,"delta":"Text\",\"vari"}
+{"tMs":28583,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":28616,"delta":"{\"@call\":\"format"}
+{"tMs":28650,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":28683,"delta":"\"A rece"}
+{"tMs":28716,"delta":"ipt will be sent to "}
+{"tMs":28750,"delta":"${/shipping/email}"}
+{"tMs":28783,"delta":"\"}}}],"}
+{"tMs":28816,"delta":"\"dataModel\":{\""}
+{"tMs":28850,"delta":"cart\":{\"notebook"}
+{"tMs":28883,"delta":"\":{\"qty\":2},"}
+{"tMs":28917,"delta":"\"pens\":{\"qty"}
+{"tMs":28950,"delta":"\":1},\"backpack\":"}
+{"tMs":28983,"delta":"{\"qty\":1}},"}
+{"tMs":29016,"delta":"\"shipping\":{\"name"}
+{"tMs":29050,"delta":"\":\"\",\"address\":\"\",\"city"}
+{"tMs":29083,"delta":"\":\"\",\"postcode\":\""}
+{"tMs":29116,"delta":"\",\"email\":\"\"},\"summary"}
+{"tMs":29150,"delta":"\":{\"subtotal\":"}
+{"tMs":29183,"delta":"\"$77.50\",\"method\":"}
+{"tMs":29217,"delta":"\"standard\",\"shipping\":"}
+{"tMs":29250,"delta":"\"$4.00\",\"total\":"}
+{"tMs":29283,"delta":"\"$81.50\"},\""}
+{"tMs":29317,"delta":"order\":{\"number\":\""}
+{"tMs":29350,"delta":"Pending\"}}}}"}

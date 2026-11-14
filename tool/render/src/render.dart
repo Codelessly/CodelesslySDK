@@ -493,6 +493,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       }
     }
   } finally {
+    disposeDecodedFonts();
     debugDisableShadows = true;
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;

@@ -1,0 +1,349 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "row1",
+    "row2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Running Shoes",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${shoes}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "textButton1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": ""
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_shoe",
+       "value": {
+        "shoeId": "${item.id}"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "children": [
+    "outlinedButton1",
+    "text2",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": ""
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "carousel_prev"
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${dots}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": ""
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "carousel_next"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "dots",
+    "type": "text",
+    "value": "● ○ ○ ○ ○ ○"
+   },
+   {
+    "name": "shoes",
+    "type": "list",
+    "value": [
+     {
+      "id": "s1",
+      "name": "Stride Pro",
+      "price": 129,
+      "rating": 4.7,
+      "image": "https://placehold.co/240x240?text=Stride+Pro",
+      "description": "Responsive cushioning for daily road miles.",
+      "size": []
+     },
+     {
+      "id": "s2",
+      "name": "Cloud Runner",
+      "price": 119,
+      "rating": 4.5,
+      "image": "https://placehold.co/240x240?text=Cloud+Runner",
+      "description": "Ultra-soft and light for easy long runs.",
+      "size": []
+     },
+     {
+      "id": "s3",
+      "name": "Tempo Flash",
+      "price": 149,
+      "rating": 4.8,
+      "image": "https://placehold.co/240x240?text=Tempo+Flash",
+      "description": "Carbon-plated speed for race day.",
+      "size": []
+     },
+     {
+      "id": "s4",
+      "name": "Trail Blazer",
+      "price": 139,
+      "rating": 4.6,
+      "image": "https://placehold.co/240x240?text=Trail+Blazer",
+      "description": "Grippy lugs and a rock plate for rough terrain.",
+      "size": []
+     },
+     {
+      "id": "s5",
+      "name": "Daily Glide",
+      "price": 99,
+      "rating": 4.3,
+      "image": "https://placehold.co/240x240?text=Daily+Glide",
+      "description": "Durable, comfortable everyday trainer.",
+      "size": []
+     },
+     {
+      "id": "s6",
+      "name": "Featherlite",
+      "price": 109,
+      "rating": 4.4,
+      "image": "https://placehold.co/240x240?text=Featherlite",
+      "description": "Minimal, breathable and incredibly light.",
+      "size": []
+     }
+    ]
+   }
+  ]
+ }
+}

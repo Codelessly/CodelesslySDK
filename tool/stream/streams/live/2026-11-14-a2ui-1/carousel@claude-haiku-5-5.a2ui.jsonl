@@ -1,0 +1,350 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"shoes\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"view\"]},{\"id\":\"view\",\"component\":\"Column\",\"children\":[\"carouselView\",\"detailView\"]},{\"id\":\"carouselView\",\"component\":\"Column\",\"children\":[\"carouselTitle\",\"carouselSlot\",\"dots\",\"navRow\"]},{\"id\":\"carouselTitle\",\"component\":\"Text\",\"text\":\"Running Shoes\",\"variant\":\"body\",\"weight\":1},{\"id\":\"carouselSlot\",\"component\":\"Column\",\"children\":[\"slideTemplate\"]},{\"id\":\"slideTemplate\",\"component\":\"Column\",\"children\":[\"slideImage\",\"slideName\",\"slidePrice\",\"slideRating\",\"openBtn\"]},{\"id\":\"slideImage\",\"component\":\"Image\",\"url\":{\"@path\":\"/shoes/current/image\"},\"description\":\"Shoe picture placeholder\",\"variant\":\"mediumFeature\",\"fit\":\"cover\"},{\"id\":\"slideName\",\"component\":\"Text\",\"text\":{\"@path\":\"/shoes/current/name\"},\"variant\":\"body\"},{\"id\":\"slidePrice\",\"component\":\"Text\",\"text\":{\"@path\":\"/shoes/current/price\"},\"variant\":\"body\"},{\"id\":\"slideRating\",\"component\":\"Text\",\"text\":{\"@path\":\"/shoes/current/rating\"},\"variant\":\"caption\"},{\"id\":\"openBtn\",\"component\":\"Button\",\"child\":\"openBtnText\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"openShoe\",\"context\":{\"index\":{\"@path\":\"/shoes/index\"}}}}},{\"id\":\"openBtnText\",\"component\":\"Text\",\"text\":\"View details\"},{\"id\":\"dots\",\"component\":\"Row\",\"children\":{\"componentId\":\"dot\",\"path\":\"/shoes/dots\"},\"justify\":\"center\"},{\"id\":\"dot\",\"component\":\"Icon\",\"name\":{\"@path\":\"/shoes/dotIcon\"}},{\"id\":\"navRow\",\"component\":\"Row\",\"children\":[\"prevBtn\",\"nextBtn\"],\"justify\":\"spaceBetween\"},{\"id\":\"prevBtn\",\"component\":\"Button\",\"child\":\"prevIcon\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"prevShoe\"}}},{\"id\":\"prevIcon\",\"component\":\"Icon\",\"name\":\"arrowBack\"},{\"id\":\"nextBtn\",\"component\":\"Button\",\"child\":\"nextIcon\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"nextShoe\"}}},{\"id\":\"nextIcon\",\"component\":\"Icon\",\"name\":\"arrowForward\"},{\"id\":\"detailView\",\"component\":\"Column\",\"children\":[\"detailImage\",\"detailName\",\"detailPrice\",\"detailRating\",\"detailDesc\",\"sizeLabel\",\"sizePicker\",\"bagBtn\",\"backBtn\"]},{\"id\":\"detailImage\",\"component\":\"Image\",\"url\":{\"@path\":\"/shoes/selected/image\"},\"description\":\"Shoe picture placeholder\",\"variant\":\"mediumFeature\",\"fit\":\"cover\"},{\"id\":\"detailName\",\"component\":\"Text\",\"text\":{\"@path\":\"/shoes/selected/name\"},\"variant\":\"body\"},{\"id\":\"detailPrice\",\"component\":\"Text\",\"text\":{\"@path\":\"/shoes/selected/price\"},\"variant\":\"body\"},{\"id\":\"detailRating\",\"component\":\"Text\",\"text\":{\"@path\":\"/shoes/selected/rating\"},\"variant\":\"caption\"},{\"id\":\"detailDesc\",\"component\":\"Text\",\"text\":{\"@path\":\"/shoes/selected/description\"},\"variant\":\"body\"},{\"id\":\"sizeLabel\",\"component\":\"Text\",\"text\":\"Choose size\",\"variant\":\"caption\"},{\"id\":\"sizePicker\",\"component\":\"ChoicePicker\",\"label\":\"Size\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"options\":[{\"label\":\"7\",\"value\":\"7\"},{\"label\":\"8\",\"value\":\"8\"},{\"label\":\"9\",\"value\":\"9\"},{\"label\":\"10\",\"value\":\"10\"},{\"label\":\"11\",\"value\":\"11\"},{\"label\":\"12\",\"value\":\"12\"}],\"value\":{\"@path\":\"/shoes/selected/size\"}},{\"id\":\"bagBtn\",\"component\":\"Button\",\"child\":\"bagBtnText\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"addToBag\",\"context\":{\"index\":{\"@path\":\"/shoes/index\"},\"size\":{\"@path\":\"/shoes/selected/size\"}}}}},{\"id\":\"bagBtnText\",\"component\":\"Text\",\"text\":\"Add to bag\"},{\"id\":\"backBtn\",\"component\":\"Button\",\"child\":\"backBtnText\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"backToCarousel\"}}},{\"id\":\"backBtnText\",\"component\":\"Text\",\"text\":\"Back to carousel\"}],\"dataModel\":{\"shoes\":{\"index\":0,\"dotIcon\":\"\",\"dots\":[{\"dotIcon\":\"star\"},{\"dotIcon\":\"star\"},{\"dotIcon\":\"star\"},{\"dotIcon\":\"star\"},{\"dotIcon\":\"star\"},{\"dotIcon\":\"star\"}],\"current\":{\"name\":\"Swift Runner\",\"price\":\"$89.99\",\"rating\":\"4.5 / 5\",\"image\":\"https://placehold.co/390x220?text=Shoe+1\"},\"selected\":{\"name\":\"\",\"price\":\"\",\"rating\":\"\",\"image\":\"\",\"description\":\"\",\"size\":[]},\"items\":[{\"name\":\"Swift Runner\",\"price\":\"$89.99\",\"rating\":\"4.5 / 5\",\"image\":\"https://placehold.co/390x220?text=Shoe+1\",\"description\":\"Lightweight daily trainer with responsive cushioning.\"},{\"name\":\"Trail Blaze GTX\",\"price\":\"$129.99\",\"rating\":\"4.7 / 5\",\"image\":\"https://placehold.co/390x220?text=Shoe+2\",\"description\":\"Waterproof trail shoe with aggressive grip.\"},{\"name\":\"Road Glide 2\",\"price\":\"$99.99\",\"rating\":\"4.4 / 5\",\"image\":\"https://placehold.co/390x220?text=Shoe+3\",\"description\":\"Smooth road shoe built for long distances.\"},{\"name\":\"Sprint Pro\",\"price\":\"$149.99\",\"rating\":\"4.8 / 5\",\"image\":\"https://placehold.co/390x220?text=Shoe+4\",\"description\":\"Race-day shoe with carbon plate and lightweight mesh.\"},{\"name\":\"Cloud Step\",\"price\":\"$79.99\",\"rating\":\"4.2 / 5\",\"image\":\"https://placehold.co/390x220?text=Shoe+5\",\"description\":\"Plush everyday runner for recovery and easy miles.\"},{\"name\":\"Peak Stability\",\"price\":\"$119.99\",\"rating\":\"4.6 / 5\",\"image\":\"https://placehold.co/390x220?text=Shoe+6\",\"description\":\"Supportive shoe with stable midfoot for overpronators.\"}]}}}}","usage":{"input_tokens":21165,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":2266,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":989,"totalMs":8118}}
+{"tMs":989,"delta":"{\"version"}
+{"tMs":1107,"delta":"\":\"1.0\",\"createS"}
+{"tMs":1107,"delta":"urface\":{\"surfa"}
+{"tMs":1108,"delta":"ceId\":\"shoes\",\""}
+{"tMs":1108,"delta":"catalogId\":\"https://"}
+{"tMs":1108,"delta":"a2ui.org/spec"}
+{"tMs":1115,"delta":"ification/v1_0/cat"}
+{"tMs":1136,"delta":"alogs/basic/cat"}
+{"tMs":1156,"delta":"alog.json\",\"components\":["}
+{"tMs":1177,"delta":"{\"id\":\"root\",\"component"}
+{"tMs":1197,"delta":"\":\"Card\",\"child\":\""}
+{"tMs":1217,"delta":"main"}
+{"tMs":1238,"delta":"\"},{\"id\":\"main"}
+{"tMs":1258,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1278,"delta":"\":[\""}
+{"tMs":1298,"delta":"view"}
+{"tMs":1318,"delta":"\""}
+{"tMs":1338,"delta":"]},{\"id\":\"view"}
+{"tMs":1361,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1380,"delta":"\":[\"carouselView\",\"det"}
+{"tMs":1400,"delta":"ailView\"]},{\"id"}
+{"tMs":1420,"delta":"\":\"carouselView\",\"component"}
+{"tMs":1441,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":1461,"delta":"carouselTitle\",\"car"}
+{"tMs":1482,"delta":"ouselS"}
+{"tMs":1502,"delta":"lot"}
+{"tMs":1522,"delta":"\",\"d"}
+{"tMs":1542,"delta":"ots"}
+{"tMs":1562,"delta":"\",\"nav"}
+{"tMs":1582,"delta":"R"}
+{"tMs":1603,"delta":"ow\"]},{\"id\":"}
+{"tMs":1623,"delta":"\"carouselTitle\",\""}
+{"tMs":1645,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":1664,"delta":"\"Running"}
+{"tMs":1706,"delta":" Shoes\",\"variant\":\""}
+{"tMs":1725,"delta":"body\",\"weight\":1},{"}
+{"tMs":1746,"delta":"\"id\":\"carouselS"}
+{"tMs":1766,"delta":"lot\",\"component\":\"Column"}
+{"tMs":1787,"delta":"\",\"children\":[\"sl"}
+{"tMs":1807,"delta":"ide"}
+{"tMs":1828,"delta":"Template\"]},{"}
+{"tMs":1848,"delta":"\"id\":\"slideTem"}
+{"tMs":1869,"delta":"plate\",\"component\":\"Column"}
+{"tMs":1889,"delta":"\",\"children\":[\"slideIm"}
+{"tMs":1910,"delta":"age\",\"slideName\",\"slid"}
+{"tMs":1930,"delta":"ePrice\",\"slideRating"}
+{"tMs":1951,"delta":"\",\"open"}
+{"tMs":1971,"delta":"Btn\"]},{\""}
+{"tMs":1992,"delta":"id\":\"slideImage\",\""}
+{"tMs":2012,"delta":"component\":\"Image\",\"url\":"}
+{"tMs":2032,"delta":"{\"@path\":\"/sh"}
+{"tMs":2053,"delta":"oes/current/image\"},"}
+{"tMs":2074,"delta":"\"description"}
+{"tMs":2093,"delta":"\":\"Sh"}
+{"tMs":2118,"delta":"oe picture plac"}
+{"tMs":2134,"delta":"eholder\",\"variant\":\""}
+{"tMs":2154,"delta":"m"}
+{"tMs":2175,"delta":"ediumFeature\",\""}
+{"tMs":2195,"delta":"fit\":\"cover\"},"}
+{"tMs":2216,"delta":"{\"id\":\"slideName"}
+{"tMs":2241,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":2258,"delta":"\":{\"@path\":\"/"}
+{"tMs":2278,"delta":"shoes/current/name\""}
+{"tMs":2297,"delta":"},\"variant\":\"body\""}
+{"tMs":2318,"delta":"},{\"id\":\"slid"}
+{"tMs":2338,"delta":"ePrice\",\"component\":\""}
+{"tMs":2359,"delta":"Text\",\"text\":{\"@path"}
+{"tMs":2379,"delta":"\":\"/shoes/current"}
+{"tMs":2404,"delta":"/price\"},\"variant\":"}
+{"tMs":2421,"delta":"\"body\"},{\"id\":"}
+{"tMs":2441,"delta":"\"slideRating\",\"component\":"}
+{"tMs":2474,"delta":"\"Text\",\"text\":{\""}
+{"tMs":2491,"delta":"@path\":\"/shoes"}
+{"tMs":2514,"delta":"/current/rating\"},\""}
+{"tMs":2531,"delta":"variant\":\"caption\"},"}
+{"tMs":2550,"delta":"{\"id\":\"openBt"}
+{"tMs":2575,"delta":"n\",\"component\":\"Button\",\""}
+{"tMs":2598,"delta":"child\":\""}
+{"tMs":2611,"delta":"openB"}
+{"tMs":2635,"delta":"tnText\",\"variant\":\""}
+{"tMs":2653,"delta":"primary\",\"action\":{\"event"}
+{"tMs":2666,"delta":"\":{\"name\":\"openSh"}
+{"tMs":2686,"delta":"oe\",\"context\":{\"index"}
+{"tMs":2706,"delta":"\":{\"@path\":\"/"}
+{"tMs":2727,"delta":"shoes/index"}
+{"tMs":2747,"delta":"\"}}}}},{\""}
+{"tMs":2767,"delta":"id\":\"openBtnText"}
+{"tMs":2788,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":2808,"delta":"\":\"View details\""}
+{"tMs":2843,"delta":"},{\"id\":\"dots"}
+{"tMs":2863,"delta":"\",\"component\":\"Row\",\"children"}
+{"tMs":2880,"delta":"\":{"}
+{"tMs":2901,"delta":"\"compon"}
+{"tMs":2920,"delta":"entId\":\"dot\",\""}
+{"tMs":2939,"delta":"path\":\"/shoes/"}
+{"tMs":2951,"delta":"dots\"},\"justify\":"}
+{"tMs":2971,"delta":"\"center\""}
+{"tMs":2991,"delta":"},{\"id\":\"dot"}
+{"tMs":3017,"delta":"\",\"component\":\"Ic"}
+{"tMs":3033,"delta":"on\",\"name\":{\"@path"}
+{"tMs":3053,"delta":"\":\"/shoes/d"}
+{"tMs":3074,"delta":"otI"}
+{"tMs":3093,"delta":"con\"}},{\"id"}
+{"tMs":3114,"delta":"\":\"navRow\",\"component\":"}
+{"tMs":3134,"delta":"\"Row\",\"children\":[\"pr"}
+{"tMs":3157,"delta":"evBtn\",\"n"}
+{"tMs":3175,"delta":"extBtn\""}
+{"tMs":3196,"delta":"],\"justify\":\"sp"}
+{"tMs":3216,"delta":"aceBetween\"},{"}
+{"tMs":3237,"delta":"\"id\":\"prevBt"}
+{"tMs":3257,"delta":"n\",\"component\":\"Button\",\""}
+{"tMs":3278,"delta":"child\":\"prevI"}
+{"tMs":3298,"delta":"con\",\"variant\":\"bor"}
+{"tMs":3319,"delta":"derless\",\"action\":{\"event"}
+{"tMs":3339,"delta":"\":{\"name\":\"prev"}
+{"tMs":3359,"delta":"Shoe\""}
+{"tMs":3380,"delta":"}}},{\"id\":\""}
+{"tMs":3400,"delta":"prevIcon\",\"component\":"}
+{"tMs":3420,"delta":"\"Icon\",\"name\":\""}
+{"tMs":3441,"delta":"arrowBack\"},{"}
+{"tMs":3463,"delta":"\"id\":\"nextBt"}
+{"tMs":3483,"delta":"n\",\"component\":\"Button\",\""}
+{"tMs":3504,"delta":"child\":\"nextIcon"}
+{"tMs":3524,"delta":"\",\"variant\":\"borderless"}
+{"tMs":3543,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":3564,"delta":"\"name\":\"nextSho"}
+{"tMs":3585,"delta":"e\"}}},{\"id"}
+{"tMs":3605,"delta":"\":\"nextIcon\",\""}
+{"tMs":3626,"delta":"component\":\"Icon\",\"name"}
+{"tMs":3646,"delta":"\":\"arrowForward\""}
+{"tMs":3665,"delta":"},{\"id\":\"detail"}
+{"tMs":3686,"delta":"View\",\"component\":\"Column\",\""}
+{"tMs":3710,"delta":"children\":[\"detailIm"}
+{"tMs":3727,"delta":"age\",\"detailName\",\"detail"}
+{"tMs":3747,"delta":"Price\",\"detailRating"}
+{"tMs":3777,"delta":"\",\"detailDesc\",\"s"}
+{"tMs":3792,"delta":"izeLabel\",\"siz"}
+{"tMs":3808,"delta":"ePicker\",\"b"}
+{"tMs":3829,"delta":"agBtn\",\"back"}
+{"tMs":3851,"delta":"Btn\"]"}
+{"tMs":3870,"delta":"},{\"id\":\"detail"}
+{"tMs":3890,"delta":"Image\",\"component\":\"Image"}
+{"tMs":3911,"delta":"\",\"url\":{\"@path\":"}
+{"tMs":3931,"delta":"\"/shoes/sel"}
+{"tMs":3951,"delta":"ected/image\"},\"description\":"}
+{"tMs":3972,"delta":"\"Shoe picture plac"}
+{"tMs":3992,"delta":"eholder\",\"variant\":\""}
+{"tMs":4015,"delta":"m"}
+{"tMs":4041,"delta":"ediumFeature\",\"fit"}
+{"tMs":4053,"delta":"\":\"cover\"},{\""}
+{"tMs":4073,"delta":"id\":\"detailName\",\"component"}
+{"tMs":4094,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":4114,"delta":"\"@path\":\"/sho"}
+{"tMs":4135,"delta":"es/selected/name\"},"}
+{"tMs":4155,"delta":"\"variant\":\"body\"},"}
+{"tMs":4176,"delta":"{\"id\":\"detailP"}
+{"tMs":4196,"delta":"rice\",\"component\":\"Text"}
+{"tMs":4217,"delta":"\",\"text\":{\"@path\":"}
+{"tMs":4237,"delta":"\"/shoes/selected"}
+{"tMs":4257,"delta":"/price\"},\"variant\":"}
+{"tMs":4279,"delta":"\"body\"},{\"id\":"}
+{"tMs":4298,"delta":"\"detailRating\",\"component\":"}
+{"tMs":4324,"delta":"\"Text\",\"text\":{\""}
+{"tMs":4340,"delta":"@path\":\"/shoes"}
+{"tMs":4360,"delta":"/selected/rating\"},"}
+{"tMs":4381,"delta":"\"variant\":\"caption\""}
+{"tMs":4401,"delta":"},{\"id\":\"detail"}
+{"tMs":4421,"delta":"Desc\",\"component\":\""}
+{"tMs":4442,"delta":"Text\",\"text\":{\"@path"}
+{"tMs":4462,"delta":"\":\"/shoes/sel"}
+{"tMs":4485,"delta":"ected/description\"},\"variant"}
+{"tMs":4502,"delta":"\":\"body\"},{\"id"}
+{"tMs":4523,"delta":"\":\"sizeLabel"}
+{"tMs":4543,"delta":"\",\"component\":\"Text"}
+{"tMs":4564,"delta":"\",\"text\":\"Cho"}
+{"tMs":4584,"delta":"ose size\",\"variant\":\"ca"}
+{"tMs":4605,"delta":"ption\"},{\"id\":\""}
+{"tMs":4625,"delta":"sizePicker\",\"component\":"}
+{"tMs":4646,"delta":"\"ChoicePicker"}
+{"tMs":4667,"delta":"\",\"label\":\""}
+{"tMs":4687,"delta":"Size"}
+{"tMs":4707,"delta":"\",\"vari"}
+{"tMs":4727,"delta":"ant\":\"mutually"}
+{"tMs":4747,"delta":"Exclusive\",\"displ"}
+{"tMs":4768,"delta":"ayStyle\":\"chips"}
+{"tMs":4788,"delta":"\",\"options\":[{\"label\":"}
+{"tMs":4809,"delta":"\"7\",\"value\":\"7\""}
+{"tMs":4830,"delta":"},{\"label\":\"8\",\""}
+{"tMs":4849,"delta":"value\":\"8\"},{\""}
+{"tMs":4870,"delta":"label\":\"9\",\"value\":\""}
+{"tMs":4890,"delta":"9\"},{\"label\":\""}
+{"tMs":4911,"delta":"10\",\"value\":\"10\"},"}
+{"tMs":4932,"delta":"{\"label\":\"11\",\"value"}
+{"tMs":4952,"delta":"\":\"11\"},{\"label"}
+{"tMs":4973,"delta":"\":\"12\",\"value\":\"12"}
+{"tMs":4992,"delta":"\"}],\"value\":{\""}
+{"tMs":5013,"delta":"@path\":\"/shoes"}
+{"tMs":5033,"delta":"/selected/size\"}},"}
+{"tMs":5054,"delta":"{\"id\":\"bagB"}
+{"tMs":5075,"delta":"tn\",\"component\":\"Button"}
+{"tMs":5094,"delta":"\",\"child\":\"b"}
+{"tMs":5115,"delta":"agB"}
+{"tMs":5136,"delta":"tnText\",\"vari"}
+{"tMs":5156,"delta":"ant\":\"primary\",\"action\":"}
+{"tMs":5176,"delta":"{\"event\":{\"name\":"}
+{"tMs":5197,"delta":"\"addToBag\",\"context\":"}
+{"tMs":5217,"delta":"{\"index\":{\"@path"}
+{"tMs":5237,"delta":"\":\"/shoes/index"}
+{"tMs":5258,"delta":"\"},\"size\":{\"@"}
+{"tMs":5278,"delta":"path\":\"/shoes/"}
+{"tMs":5299,"delta":"selected/size\"}}}"}
+{"tMs":5319,"delta":"}},"}
+{"tMs":5340,"delta":"{\"id\":\"bagB"}
+{"tMs":5360,"delta":"tnText\",\"component\":\""}
+{"tMs":5380,"delta":"Text\",\"text\":\"Add to"}
+{"tMs":5401,"delta":" bag\"},{\"id\":"}
+{"tMs":5424,"delta":"\"backBtn\",\"component\":"}
+{"tMs":5441,"delta":"\"Button\",\"child\":\"back"}
+{"tMs":5462,"delta":"B"}
+{"tMs":5482,"delta":"tnText\",\"variant\":\""}
+{"tMs":5503,"delta":"borderless\",\"action\":{\""}
+{"tMs":5523,"delta":"event\":{\"name\":\"back"}
+{"tMs":5544,"delta":"ToCarousel\"}}"}
+{"tMs":5564,"delta":"},{\"id\":\"backB"}
+{"tMs":5584,"delta":"tnText\",\"component\":\""}
+{"tMs":5605,"delta":"Text\",\"text\":\""}
+{"tMs":5625,"delta":"Back to carousel\"}],"}
+{"tMs":5646,"delta":"\"dataModel\":{\""}
+{"tMs":5666,"delta":"shoes\":{\"index\":"}
+{"tMs":5686,"delta":"0,\"dot"}
+{"tMs":5706,"delta":"Icon"}
+{"tMs":5727,"delta":"\":\"\",\""}
+{"tMs":5748,"delta":"dots\":[{\"d"}
+{"tMs":5768,"delta":"otIcon\":\"star"}
+{"tMs":5788,"delta":"\"},{\"dotIc"}
+{"tMs":5809,"delta":"on\":\"star\"},{\""}
+{"tMs":5829,"delta":"dotIcon\":\"star"}
+{"tMs":5849,"delta":"\"},{\"dotIc"}
+{"tMs":5870,"delta":"on\":\"star\"},{\""}
+{"tMs":5891,"delta":"dotIcon\":\"star"}
+{"tMs":5911,"delta":"\"},{\"dotIc"}
+{"tMs":5931,"delta":"on\":\"star\"}],\""}
+{"tMs":5951,"delta":"current\":{\"name"}
+{"tMs":5972,"delta":"\":\""}
+{"tMs":5993,"delta":"Sw"}
+{"tMs":6013,"delta":"ift Run"}
+{"tMs":6033,"delta":"ner\",\""}
+{"tMs":6054,"delta":"price\":\"$89.99\",\""}
+{"tMs":6074,"delta":"rating\":\"4"}
+{"tMs":6094,"delta":".5"}
+{"tMs":6115,"delta":" / 5\",\"image\":\""}
+{"tMs":6135,"delta":"https://plac"}
+{"tMs":6156,"delta":"eh"}
+{"tMs":6176,"delta":"old.co/390"}
+{"tMs":6196,"delta":"x220"}
+{"tMs":6216,"delta":"?"}
+{"tMs":6237,"delta":"text=Sh"}
+{"tMs":6258,"delta":"oe+1\""}
+{"tMs":6278,"delta":"},\"sel"}
+{"tMs":6298,"delta":"ected\":{\"name\":\"\",\""}
+{"tMs":6319,"delta":"price\":\"\",\""}
+{"tMs":6339,"delta":"rating\":\"\",\"image"}
+{"tMs":6359,"delta":"\":\"\",\"description\":\"\",\"size"}
+{"tMs":6379,"delta":"\":["}
+{"tMs":6401,"delta":"]},"}
+{"tMs":6421,"delta":"\"items\":[{\"name\":"}
+{"tMs":6443,"delta":"\"Swift Runner\",\""}
+{"tMs":6461,"delta":"price\":\"$89.99\",\""}
+{"tMs":6482,"delta":"rating\":\"4.5 "}
+{"tMs":6502,"delta":"/ 5\",\"image"}
+{"tMs":6523,"delta":"\":\"https://placehold."}
+{"tMs":6543,"delta":"co/390x220?text="}
+{"tMs":6563,"delta":"Shoe+1\",\"description"}
+{"tMs":6584,"delta":"\":\"Lightweight da"}
+{"tMs":6604,"delta":"ily tr"}
+{"tMs":6625,"delta":"ainer with responsive c"}
+{"tMs":6646,"delta":"ushioning.\""}
+{"tMs":6665,"delta":"},{\"name\":\"Tr"}
+{"tMs":6686,"delta":"ail Bl"}
+{"tMs":6707,"delta":"aze G"}
+{"tMs":6727,"delta":"T"}
+{"tMs":6747,"delta":"X\",\"price\":\"$129"}
+{"tMs":6768,"delta":".99\",\"rating\":\"4"}
+{"tMs":6788,"delta":".7 / 5\",\"image"}
+{"tMs":6808,"delta":"\":\"https://placehold."}
+{"tMs":6829,"delta":"co/390x220?text="}
+{"tMs":6849,"delta":"Shoe+2\",\"description"}
+{"tMs":6870,"delta":"\":\"Waterproof tr"}
+{"tMs":6890,"delta":"ail sh"}
+{"tMs":6910,"delta":"oe with a"}
+{"tMs":6932,"delta":"ggressive grip.\""}
+{"tMs":6951,"delta":"},{\"name\":\"Road"}
+{"tMs":6972,"delta":" Gl"}
+{"tMs":6997,"delta":"ide 2\",\"price\":\"$"}
+{"tMs":7014,"delta":"99.99\",\"rating\":\""}
+{"tMs":7033,"delta":"4.4"}
+{"tMs":7053,"delta":" / 5\",\"image\":\""}
+{"tMs":7073,"delta":"https://placehold.co/"}
+{"tMs":7094,"delta":"390x220?text=Sh"}
+{"tMs":7114,"delta":"oe+3\",\"description\":\""}
+{"tMs":7135,"delta":"Smooth road sh"}
+{"tMs":7155,"delta":"oe built"}
+{"tMs":7176,"delta":" for long"}
+{"tMs":7196,"delta":" distances"}
+{"tMs":7217,"delta":".\"},{\"name\":\""}
+{"tMs":7237,"delta":"Sprint Pro"}
+{"tMs":7259,"delta":"\",\"price\":\"$149"}
+{"tMs":7278,"delta":".99\",\"rating\":\"4"}
+{"tMs":7298,"delta":".8 / 5\",\"image"}
+{"tMs":7319,"delta":"\":\"https://placehold."}
+{"tMs":7340,"delta":"co/390x220?text="}
+{"tMs":7360,"delta":"Shoe+4\",\"description"}
+{"tMs":7380,"delta":"\":\"Race"}
+{"tMs":7400,"delta":"-day"}
+{"tMs":7421,"delta":" sh"}
+{"tMs":7442,"delta":"oe with carbon pl"}
+{"tMs":7461,"delta":"ate and lightweight m"}
+{"tMs":7482,"delta":"esh.\"},{\"name\":"}
+{"tMs":7502,"delta":"\"Clo"}
+{"tMs":7523,"delta":"ud Step"}
+{"tMs":7543,"delta":"\",\"price\":\"$79.99"}
+{"tMs":7564,"delta":"\",\"rating\":\"4.2"}
+{"tMs":7584,"delta":" / 5\",\"image\":\""}
+{"tMs":7604,"delta":"https://placehold.co/"}
+{"tMs":7625,"delta":"390x220?text=Sh"}
+{"tMs":7645,"delta":"oe+5\",\"description\":\""}
+{"tMs":7665,"delta":"Plush ever"}
+{"tMs":7686,"delta":"yday run"}
+{"tMs":7707,"delta":"ner for"}
+{"tMs":7726,"delta":" recovery and"}
+{"tMs":7747,"delta":" eas"}
+{"tMs":7768,"delta":"y mi"}
+{"tMs":7788,"delta":"les.\"},{\"name\":\""}
+{"tMs":7809,"delta":"Peak Stability"}
+{"tMs":7829,"delta":"\",\"price\":\"$119.99"}
+{"tMs":7850,"delta":"\",\"rating\":\"4.6"}
+{"tMs":7869,"delta":" / 5\",\"image\":\""}
+{"tMs":7902,"delta":"https://placehold.co/"}
+{"tMs":7910,"delta":"390x220?text=Sh"}
+{"tMs":7930,"delta":"oe+6\",\"description\":\""}
+{"tMs":7951,"delta":"Sup"}
+{"tMs":7971,"delta":"portive sh"}
+{"tMs":7992,"delta":"oe with st"}
+{"tMs":8012,"delta":"able"}
+{"tMs":8033,"delta":" mid"}
+{"tMs":8053,"delta":"f"}
+{"tMs":8074,"delta":"oot for overp"}
+{"tMs":8094,"delta":"ronators.\"}]}}}"}
+{"tMs":8114,"delta":"}"}
