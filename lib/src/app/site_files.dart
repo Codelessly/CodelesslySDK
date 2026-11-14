@@ -9,6 +9,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart' show ZLibDecoder;
 import 'package:codelessly_api/codelessly_api.dart' show Json, PublishFont, isRelativeAssetPath, readMap;
 
+import '../render/contracts.dart';
 import 'fonts.dart';
 import 'loader.dart';
 
@@ -79,6 +80,28 @@ Future<Json> resolveSiteImages(Json json, PublishAssetSource source, {void Funct
         _ => v,
       };
   return readMap(swap(json)) ?? json;
+}
+
+/// An [ImageBytesLoader] that reads a site image ([isSiteImage]: a path
+/// relative to the site, `images/7.jpg`) through the site's [files] (its
+/// URL when they serve one, else its bytes), and every other URL through
+/// [fallback]. What a site's literal paths get when the layout loads
+/// ([resolveSiteImages]), for a path that only exists at run time: one a
+/// binding builds (`images/${id}.jpg`).
+final class SiteImageLoader implements ImageBytesLoader {
+  const SiteImageLoader(this.fallback, this.files);
+
+  final ImageBytesLoader fallback;
+  final PublishAssetSource files;
+
+  @override
+  Future<Uint8List> load(String url) async {
+    if (!isSiteImage(url)) return fallback.load(url);
+    final path = url.trim();
+    final served = files.assetUrl(path);
+    if (served != null) return fallback.load('$served');
+    return files.loadAsset(path);
+  }
 }
 
 /// A [FontFetcher] that reads a site's declared fonts ([PublishFont.isSiteFile])

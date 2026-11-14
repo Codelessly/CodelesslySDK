@@ -42,12 +42,15 @@ import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart';
 import '../runtime/expressions/perf_scope.dart';
 import '../runtime/expressions/scopes.dart';
+import '../runtime/http_image_loader.dart';
 import '../runtime/lists/pagination.dart' show declarePaginationVariables;
 import '../scripting/formula_scripts.dart';
 import '../services/services.dart' show NoScriptRunner, Services, PaywallSession, PaywallResult;
 import 'backdrop_screens.dart';
 import 'back_guard.dart';
 import 'codelessly.dart';
+import 'loader.dart' show PublishAssetSource;
+import 'site_files.dart' show SiteImageLoader;
 import 'navigation.dart';
 import 'overlay_screens.dart';
 import 'page_transitions.dart';
@@ -882,7 +885,14 @@ class _LayoutViewState extends State<_LayoutView> {
     } else if (engine is! NoopExpressionEngine) {
       source = bound = BoundSource(nodeValues, engine, scope);
     }
-    final tree = NodeTree(source, binder: binder, recipes: config.allRecipes, components: _codelessly.components);
+    final files = _codelessly.loader;
+    final tree = NodeTree(source,
+        binder: binder,
+        recipes: config.allRecipes,
+        components: _codelessly.components,
+        // A site image whose path a binding builds is read from the site's
+        // files when it is drawn (literal paths were resolved at load).
+        imageLoader: files is PublishAssetSource ? SiteImageLoader(const HttpImageLoader(), files as PublishAssetSource) : const HttpImageLoader());
     scripts.nodeValues = () => scriptNodeValues(tree);
     final context = ScreenActionContext(
       scope: scope,

@@ -118,6 +118,50 @@ void main() {
     expect(errors.types.where((t) => t.startsWith('site_file_missing')), [contains('images/gone.png')]);
   });
 
+  testWidgets('an image whose path a binding builds (images/\${name}.png) is read from the site\'s files at run time', (tester) async {
+    setScreen(tester, const Size(390, 844));
+    final layout = PublishLayout.fromJson({
+      'schema': 3,
+      'id': 'home',
+      'roots': ['home'],
+      'variables': {
+        'home': [
+          {'name': 'name', 'type': 'text', 'value': 'photo'},
+        ],
+      },
+      'nodes': {
+        'home': {'type': 'canvas', 'slots': {'body': 'photo'}, 'layout': {'width': 390, 'height': 844}},
+        'photo': {
+          'type': 'box',
+          'layout': {'width': 320, 'height': 200},
+          'decoration': {'fills': [{'type': 'image', 'image': {'url': '', 'fit': 'cover'}}]},
+          'bind': {'decoration.fills[0].image.url': r'images/${name}.png'},
+        },
+      },
+    });
+    final bundle = PublishBundle(
+      model: PublishModel(projectId: 'files', entryLayoutId: 'home', layouts: {'home': PublishLayoutInfo.of(layout)}),
+      layouts: {'home': layout},
+    );
+    final reads = <String>[];
+    final loader = MemoryPublishLoader(bundle, readAsset: (path) async {
+      reads.add(path);
+      return path == 'images/photo.png' ? _png : null;
+    });
+    final app = Codelessly(loader: loader, fonts: const NoFontFetcher());
+    addTearDown(app.dispose);
+    final controller = CodelesslyWidgetController();
+    addTearDown(controller.dispose);
+    await tester.runAsync(() => app.loadLayout('home'));
+    await tester.pumpWidget(MaterialApp(home: CodelesslyWidget(codelessly: app, controller: controller)));
+    await settle(tester);
+    await tester.runAsync(() => PaintImages.settled(timeout: const Duration(seconds: 2)));
+    await settle(tester);
+    expect(controller.tree!.boxOf('photo')!.node!.decoration.fills.single.image!.url, 'images/photo.png');
+    expect(reads, contains('images/photo.png'));
+    expect(imagesPendingUnder(controller.tree!.boxOf('photo')!), isFalse);
+  });
+
   test('a site served over HTTP names its files beside the bundle', () {
     final loader = HttpPublishLoader(projectId: 'my-site', baseUrl: 'https://cdn.example.com', bundle: true);
     expect('${loader.assetUrl('./images/hero.jpg')}', 'https://cdn.example.com/publish/my-site/files/images/hero.jpg');
