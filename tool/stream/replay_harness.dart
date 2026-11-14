@@ -33,6 +33,8 @@ void main() {
           fontDirs: fonts,
           frameMs: int.tryParse(opt('--frame-ms') ?? ''),
           frames: int.tryParse(opt('--frames') ?? ''),
+          designSystem: opt('--design-system'),
+          dark: opt('--theme') == 'dark',
         ));
     File('$argsFile.report').writeAsStringSync(const JsonEncoder.withIndent(' ').convert(metrics));
   }, timeout: const Timeout(Duration(minutes: 30)));

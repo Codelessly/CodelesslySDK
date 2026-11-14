@@ -32,9 +32,16 @@ for summary_path in sorted(glob.glob(os.path.join(streams, '*.summary.json'))):
     total_ms = gen.get('totalMs') or 0
     first_delta = gen.get('firstToolDeltaMs') or 0
     used = m_last.get('worksWhenUsed')
+    ds = s.get('designSystem')
     rows.append({
         'cell': name,
         'ui': s.get('ui'), 'model': s.get('model'), 'prompt': s.get('promptVariant'), 'profile': s.get('profile'),
+        # The design system the cell was made with, and how much of the final UI is its: nodes that call its components,
+        # against nodes of the raw core controls it replaces (record.dart's counts of the last turn before the follow-up).
+        'designSystem': f"{ds.get('id')}@{ds.get('version')}" if ds else None,
+        'designSystemComponents': final.get('designSystemComponents') if ds else None,
+        'replacedControls': final.get('replacedControls') if ds else None,
+        'componentsNotRendered': (m_last.get('designSystem') or {}).get('componentsNotRendered') if ds else None,
         'systemPromptAndToolsTokens': s.get('systemPromptAndToolsTokens'),
         'ttftMs': gen.get('ttftMs'),
         'firstPaintMs': m_gen.get('timeToFirstPaintMs'), 'firstTextMs': m_gen.get('timeToFirstTextMs'),
@@ -56,8 +63,12 @@ for summary_path in sorted(glob.glob(os.path.join(streams, '*.summary.json'))):
         'error': s.get('error'),
     })
 
+for r in rows:
+    if r['designSystem']:
+        r['dsUse'] = f"{r['designSystemComponents']} / {r['replacedControls']}"
 json.dump(rows, open(os.path.join(outs, 'summary.json'), 'w'), indent=1)
-cols = [('cell', 'Cell'), ('systemPromptAndToolsTokens', 'Prompt+tools tok'), ('ttftMs', 'TTFT ms'), ('firstPaintMs', 'First paint ms'),
+cols = [('cell', 'Cell'), ('designSystem', 'Design system'), ('dsUse', 'DS components / raw replaced'),
+        ('componentsNotRendered', 'Components not rendered'), ('systemPromptAndToolsTokens', 'Prompt+tools tok'), ('ttftMs', 'TTFT ms'), ('firstPaintMs', 'First paint ms'),
         ('firstTextMs', 'First text ms'), ('completeMs', 'Complete ms'), ('outputTokens', 'Out tok'), ('tokensPerSecond', 'tok/s'),
         ('ops', 'Ops'), ('opsApplied', 'Applied'), ('opsRejected', 'Rejected'), ('opsRecovered', 'Recovered'), ('lookups', 'Lookups'),
         ('retries', 'Retries'), ('finalErrors', 'Final errors'), ('finalLints', 'Final lints'), ('scripts', 'Scripts'),
@@ -78,5 +89,8 @@ with open(os.path.join(outs, 'summary.md'), 'w') as f:
         f.write('| ' + ' | '.join(cell(r.get(k)).replace('|', '/') for k, _ in cols) + ' |\n')
     f.write('\nTimes are from the request (TTFT, complete: the API stream; first paint and first text: the replay of the '
             'generation on its recorded clock). Lookups are ui_docs topics (or ui_read) before ui_apply, in the generation '
-            'and its retries. "Works when used": the scripted interaction of tool/stream/interactions/<ui>.json on the final UI.\n')
+            'and its retries. "Works when used": the scripted interaction of tool/stream/interactions/<ui>.json on the final UI. '
+            '"DS components / raw replaced": for a cell made with a design system, the final UI\'s nodes that call its components '
+            'against its nodes of a core control type the design system replaces (a raw filledButton where its Button was meant); '
+            '"Components not rendered": calls the replay drew as something other than their definition.\n')
 print(open(os.path.join(outs, 'summary.md')).read())
