@@ -1,0 +1,102 @@
+{"meta":{"ui":"weather","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the weather in Lisbon as an inline card: now (temperature, conditions, high and low), the next five hours, the next three days with a temperature range bar, and a button to alert me before it rains.","text":"Card w:390 gap:16\n  Row between middle\n    Column gap:2\n      Text.heading \"Lisbon\"\n      Text.muted \"Portugal\"\n    Icon \"wb_sunny\"\n  Row gap:16 middle\n    Text.title \"22°\"\n    Column gap:2\n      Text.strong \"Mostly sunny\"\n      Text.muted \"H: 24°  L: 15°\"\n  Divider\n  Text.strong \"Next 5 hours\"\n  Row between\n    Column gap:4 center\n      Text.caption \"1 PM\"\n      Icon \"wb_sunny\"\n      Text.strong \"23°\"\n    Column gap:4 center\n      Text.caption \"2 PM\"\n      Icon \"wb_sunny\"\n      Text.strong \"24°\"\n    Column gap:4 center\n      Text.caption \"3 PM\"\n      Icon \"wb_cloudy\"\n      Text.strong \"24°\"\n    Column gap:4 center\n      Text.caption \"4 PM\"\n      Icon \"cloud\"\n      Text.strong \"23°\"\n    Column gap:4 center\n      Text.caption \"5 PM\"\n      Icon \"grain\"\n      Text.strong \"21°\"\n  Divider\n  Text.strong \"Next 3 days\"\n  Row gap:8 middle\n    Text \"Tue\" w:40\n    Icon \"cloud\"\n    Text.muted \"14°\" w:30\n    Progress 0.5 grow\n    Text.strong \"20°\" w:30\n  Row gap:8 middle\n    Text \"Wed\" w:40\n    Icon \"grain\"\n    Text.muted \"13°\" w:30\n    Progress 0.35 grow\n    Text.strong \"18°\" w:30\n  Row gap:8 middle\n    Text \"Thu\" w:40\n    Icon \"wb_sunny\"\n    Text.muted \"15°\" w:30\n    Progress 0.7 grow\n    Text.strong \"25°\" w:30\n  Divider\n  Button \"Alert me before it rains\" -> toast \"We'll alert you before rain in Lisbon\"","usage":{"input_tokens":2353,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":668,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":699,"totalMs":4054}}
+{"tMs":699,"delta":"Card w:390 gap"}
+{"tMs":1029,"delta":":16"}
+{"tMs":1030,"delta":"\n  Row"}
+{"tMs":1030,"delta":" between midd"}
+{"tMs":1030,"delta":"le\n    Column"}
+{"tMs":1030,"delta":" gap:2"}
+{"tMs":1030,"delta":"\n      Text.heading \""}
+{"tMs":1030,"delta":"Lisbon\"\n      "}
+{"tMs":1030,"delta":"Text.muted \"Port"}
+{"tMs":1030,"delta":"ugal\""}
+{"tMs":1030,"delta":"\n    Ic"}
+{"tMs":1035,"delta":"on \"w"}
+{"tMs":1071,"delta":"b_sunny\"\n  "}
+{"tMs":1365,"delta":"Row gap:16"}
+{"tMs":1365,"delta":" middle\n    Text"}
+{"tMs":1365,"delta":".title \"22°\""}
+{"tMs":1365,"delta":"\n    Column gap:2"}
+{"tMs":1365,"delta":"\n      Text.str"}
+{"tMs":1365,"delta":"ong \"M"}
+{"tMs":1365,"delta":"ostly sunny\"\n      "}
+{"tMs":1365,"delta":"Text.mu"}
+{"tMs":1374,"delta":"ted \"H: 24"}
+{"tMs":1406,"delta":"°  "}
+{"tMs":1439,"delta":"L: 15"}
+{"tMs":1473,"delta":"°\"\n  Divider"}
+{"tMs":1703,"delta":"\n  Text.str"}
+{"tMs":1703,"delta":"ong \"Next "}
+{"tMs":1703,"delta":"5 hours\"\n  "}
+{"tMs":1703,"delta":"Row between\n    Column gap"}
+{"tMs":1703,"delta":":4 center\n      Text"}
+{"tMs":1703,"delta":".ca"}
+{"tMs":1708,"delta":"ption \"1 "}
+{"tMs":1741,"delta":"PM\"\n      Icon"}
+{"tMs":1776,"delta":" \"wb_sunny\""}
+{"tMs":1809,"delta":"\n      Text.str"}
+{"tMs":1842,"delta":"ong \"23°\"\n    "}
+{"tMs":1876,"delta":"Column gap:4 center"}
+{"tMs":2041,"delta":"\n      Text.caption \"2"}
+{"tMs":2041,"delta":" PM\"\n      Ic"}
+{"tMs":2041,"delta":"on \"wb_sunny"}
+{"tMs":2041,"delta":"\"\n      Text.strong"}
+{"tMs":2043,"delta":" \"24"}
+{"tMs":2077,"delta":"°\"\n    Column gap"}
+{"tMs":2114,"delta":":4 center\n      Text"}
+{"tMs":2145,"delta":".caption \"3 PM"}
+{"tMs":2178,"delta":"\"\n      Icon \"w"}
+{"tMs":2213,"delta":"b_cloudy\""}
+{"tMs":2246,"delta":"\n      Text.strong \"24"}
+{"tMs":2279,"delta":"°\"\n    Column gap"}
+{"tMs":2386,"delta":":4 center\n      Text"}
+{"tMs":2386,"delta":".caption \"4 PM"}
+{"tMs":2386,"delta":"\"\n      Icon \"c"}
+{"tMs":2415,"delta":"loud\"\n      Text."}
+{"tMs":2447,"delta":"strong \"23°\"\n    "}
+{"tMs":2482,"delta":"Column gap:4 center"}
+{"tMs":2515,"delta":"\n      Text.caption \""}
+{"tMs":2550,"delta":"5 PM\"\n      "}
+{"tMs":2581,"delta":"Icon \"gr"}
+{"tMs":2613,"delta":"ain"}
+{"tMs":2647,"delta":"\"\n      Text.strong"}
+{"tMs":2680,"delta":" \"21"}
+{"tMs":2733,"delta":"°\"\n  Divider"}
+{"tMs":2747,"delta":"\n  Text.strong \""}
+{"tMs":2781,"delta":"Next 3 days\"\n  "}
+{"tMs":2814,"delta":"Row gap:8 midd"}
+{"tMs":2848,"delta":"le\n    Text \""}
+{"tMs":2881,"delta":"Tue\" w:40"}
+{"tMs":2915,"delta":"\n    Icon \"c"}
+{"tMs":2948,"delta":"loud\"\n    Text."}
+{"tMs":2981,"delta":"muted \"14"}
+{"tMs":3014,"delta":"°\" w:30\n    "}
+{"tMs":3048,"delta":"Progress 0.5"}
+{"tMs":3081,"delta":" grow"}
+{"tMs":3114,"delta":"\n    Text.str"}
+{"tMs":3147,"delta":"ong \"20"}
+{"tMs":3181,"delta":"°\" w:30\n  "}
+{"tMs":3214,"delta":"Row gap:8 middle"}
+{"tMs":3247,"delta":"\n    Text \"Wed"}
+{"tMs":3281,"delta":"\" w:40\n    Ic"}
+{"tMs":3315,"delta":"on \"grain\"\n    "}
+{"tMs":3347,"delta":"Text.muted \"13°\""}
+{"tMs":3381,"delta":" w:30\n    Progress"}
+{"tMs":3415,"delta":" 0.35 grow"}
+{"tMs":3448,"delta":"\n    Text.strong \"18"}
+{"tMs":3482,"delta":"°\" w:30\n  "}
+{"tMs":3515,"delta":"Row gap:8 middle"}
+{"tMs":3549,"delta":"\n    Text \"Thu"}
+{"tMs":3582,"delta":"\" w:40\n    Ic"}
+{"tMs":3616,"delta":"on \"wb_sunny"}
+{"tMs":3649,"delta":"\"\n    Text.muted"}
+{"tMs":3681,"delta":" \"15"}
+{"tMs":3715,"delta":"°\" w:30\n    "}
+{"tMs":3750,"delta":"Progress 0.7 gr"}
+{"tMs":3782,"delta":"ow\n    Text.strong"}
+{"tMs":3815,"delta":" \"25°\" w:30"}
+{"tMs":3849,"delta":"\n  Divider\n  Button"}
+{"tMs":3882,"delta":" \"Alert me"}
+{"tMs":4020,"delta":" before it rains\" -> to"}
+{"tMs":4020,"delta":"ast \"We"}
+{"tMs":4020,"delta":"'ll alert you before rain"}
+{"tMs":4020,"delta":" in Lisbon\""}
