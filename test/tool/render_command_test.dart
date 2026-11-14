@@ -196,6 +196,21 @@ void main() {
       expect(diag(dead, 'tap_no_reaction').map((d) => d['nodeId']), ['bare', 'tile']);
     });
 
+    testWidgets('a part of a control is tapped with @n: the second segment is chosen, and a part that is not there is named (test 4: seven builds)', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'seg@1')], label: 'part', dumpLayout: true));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.diagnostics.where((d) => d['severity'] == 'warning'), isEmpty, reason: '${report.diagnostics}');
+      // The text shown only when the second segment is chosen is laid out.
+      final boxes = jsonDecode(File('${out.path}/s@390x844-part.layout.json').readAsStringSync()) as List;
+      expect(boxes.any((b) => (b as Map)['id'] == 'picked'), isTrue, reason: 'the tap chose segment B');
+      final missing = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'seg@5'), Step('tap', 'go@0')], label: 'nopart'));
+      final messages = [for (final d in missing.diagnostics) '${d['message']}'];
+      expect(messages.any((m) => m.contains('"seg" has 2 parts (@0 to @1)')), isTrue, reason: '$messages');
+      expect(messages.any((m) => m.contains('"go" has no parts to name with @')), isTrue, reason: '$messages');
+    });
+
     testWidgets('a tap on a covered node names what covers it', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'last')]));
