@@ -1,5 +1,28 @@
 ## Unreleased
 
+**Tell the model when its valid UI shows nothing.** Final frames of recorded SSUI generations
+(tool/stream/streams/live/2026-11-14-ssui) showed blank cards or cards missing their content while the summary's
+final validation was clean. The causes, and what changed:
+
+- `UiSession.shownDiagnostics()`: once a view has laid the UI out, what a reader would see wrong, as edit diagnostics
+  a host adds to the stream's result (`result.withDiagnostics(session.shownDiagnostics())`): `empty_view` (no canvas
+  root, or a canvas showing no text, icon, image or control, with why), `list_empty` (data that is not a list, no item
+  template, or empty while the list it reads is not, with the lambda to write), `empty_label`,
+  `expression_not_evaluated`, `text_no_color` (also a transparent colour), `component_empty`, and `no_size`. Views
+  register the check with `attachShownProbe`. The text checks are shared with the render command
+  (`paragraphIssues`). The chat example adds them to every reply's result; replays report them in `metrics.json`
+  (`shownDiagnostics`).
+- A bound value that names a theme colour or text style resolves against the theme: the reservation card's day
+  labels were bound to `{'from': 'caption', 'color': 'onPrimary'}` and drew transparent (empty day buttons).
+- The formula parser runs without Flutter (`formula_time.dart` holds `ClockTick` and the pinned time;
+  `FormulaClock.pinned` forwards to it), and `FormulaEvaluator.report` is what `ValidateOptions.formulas` takes.
+  The chat example's sessions and the recorder (`record_check.dart`, Dart VM) now check formulas with it, and the
+  recorder reports references unresolved at the end of a stream (`unresolvedReferences`), so the formula errors reach
+  the model.
+- `tool/stream/live_summary.py` names each cell's final frame (its last retry's replay) and what that frame shows
+  wrong: the frames read as blank were often a first turn whose retry had fixed it.
+- The chat example's prompts are regenerated (the design system's scales as the binding to write).
+
 **A list that filtered to nothing, explained.** A recorded SSUI data table (data_table@claude-sonnet-5-5) showed
 "No results" over twelve defined invoices: its `filtered` variable was `filter(invoices, (statusF == 'All' || status ==
 statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
