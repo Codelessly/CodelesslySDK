@@ -20,6 +20,7 @@ runApp(MaterialApp(home: CodelesslyWidget(codelessly: codelessly)));
 - [Install](#install)
 - [Quickstart](#quickstart): by [slug](#1-a-published-slug-http), by [project token](#2-a-project-token-firebase-live-updates), or [offline](#3-a-bundle-shipped-with-the-app-offline)
 - [`CodelesslyWidget` essentials](#codelesslywidget-essentials)
+- [UI written by an agent](#ui-written-by-an-agent)
 - [Developer guide](#developer-guide)
 
 ## Install
@@ -220,6 +221,39 @@ controller.setVariable('count', 0);
 controller.trigger('checkout-button', 'click');
 controller.layoutId = 'checkout';         // show another layout
 ```
+
+## UI written by an agent
+
+A layout is data, so an agent can write one. Three things in this repository are for that:
+
+- **Design systems as data** ([`design_systems/`](https://github.com/Codelessly/CodelesslySDK/tree/master/design_systems)).
+  `ssui` is Soft SaaS UI as 160 component documents (buttons and fields through menus, trees, diffs, a terminal and a
+  prompt box), each drawn from the source's own sizes, radii and colors, with a
+  [catalog page](https://github.com/Codelessly/CodelesslySDK/blob/master/design_systems/ssui/examples/renders/catalog/catalog.png)
+  of every one. `paper` and `harbor` are the same components under other brands, written by
+  `design_systems/tool/new_design_system.py` from a short brand file.
+- **A compact notation** (`package:codelessly_api/notation.dart`). One node a line, children indented; a design
+  system's components are called by name:
+
+  ```
+  state seats=2
+  Column gap:12 pad:16
+    StatusBadge "Active" tone:success
+    Stepper =seats min:1 max:9
+    Panel "Billing" subtitle:"Plan and invoices"
+      Text.muted "You have {seats} seats."
+    TrialBanner "7 days left in your trial" -> emit upgrade
+  ```
+
+  `dart run tool/notation/expand.dart <file.txt> --design-system design_systems/ssui` turns that into a layout
+  document, and says on the line what a component does not take.
+- **A render tool** ([`tool/render`](https://github.com/Codelessly/CodelesslySDK/tree/master/tool/render)). It
+  validates a document, draws it at the sizes asked for, and drives it (`--tap`, `--type`, `--drag`, `--scroll`), so
+  what was generated can be checked without an app.
+
+[`design_systems/ssui/examples/targets`](https://github.com/Codelessly/CodelesslySDK/tree/master/design_systems/ssui/examples/targets)
+holds fifty-one cards written this way (approvals, tables, plans, diffs, sources, a handoff), each ten to thirty
+lines.
 
 ## Developer guide
 
