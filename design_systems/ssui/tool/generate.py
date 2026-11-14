@@ -1554,6 +1554,202 @@ add(component(
     },
 ))
 
+# --- batch 6: chips, rows and small status ---------------------------------------------------------------------
+
+# TextInputLabel (TextInputLabel.tsx): a field's label 11.5/600 (-0.1) in secondary text, a description 10.5 in
+# tertiary 4 px under it, then the field (the call's children) 6 px below.
+add(component(
+    'TextInputLabel',
+    'A label over a field: the label, an optional description under it, then the call\'s children.',
+    'group',
+    props=[prop('label', STRING, 'Name', 'The label.', required=True),
+           prop('description', STRING, '', 'A muted line under the label (empty: none).')],
+    children='list',
+    previews=[preview('Label', 240, 40, label='Workspace name', description='Shown in the sidebar.')],
+    nodes={
+        'group': {'type': 'column', 'children': ['label', 'description', 'gap', 'content'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 240}, 'height': {'hug': 40}}},
+        'label': text('${props.label}', style(11.5, 600, 'secondaryText', 1.35, letterSpacing=-0.1), {'fill': 240}, {'hug': 16}),
+        'description': {**text('${props.description}', style(10.5, 400, 'tertiaryText', 1.4, letterSpacing=-0.1), {'fill': 240}, {'hug': 15}),
+                        'layout': {'width': {'fill': 240}, 'height': {'hug': 15}, 'margin': [0, 4, 0, 0]},
+                        'bind': {'visible': "${= props.description != ''}"}},
+        'gap': {'type': 'box', 'layout': {'width': 0, 'height': 6}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# PersonChip (PersonChip.tsx): a person, bot or team as a 24 px pill: an 18 px avatar that fills its circle (photo,
+# else initials 8/650; a bot glyph; a team's accent tile with radius 5), 5 px, the name 11.5 on an 18 px line;
+# padding 2 with 8 after the name (3 with a remove button), a 1 px border, fully round.
+add(component(
+    'PersonChip',
+    'A person, a bot or a team as a small pill: avatar and name. Fires onPressed and onRemove.',
+    'chip',
+    props=[prop('name', STRING, 'Ada Lovelace', 'Whose.', required=True),
+           prop('image', STRING, '', 'A photo URL (empty: initials, or the kind\'s glyph).'),
+           prop('kind', enum('human', 'bot', 'team'), 'human', 'human: photo or initials. bot: a bot glyph. team: an accent tile.'),
+           prop('trailing', STRING, '', 'Muted words after the name ("· git").'),
+           prop('removable', BOOL, False, 'An x at the end that fires onRemove.')],
+    events=['onPressed', 'onRemove'],
+    previews=[preview('Person', 110, 24, name='Ada Lovelace'), preview('Team', 110, 24, name='Platform', kind='team'),
+              preview('Removable', 120, 24, name='Grace Hopper', removable=True)],
+    nodes={
+        'chip': {'type': 'row', 'children': ['avatar', 'name', 'trailing', 'remove'], 'props': {'crossAxisAlignment': 'center', 'spacing': 5},
+                 'layout': {'width': {'hug': 100}, 'height': {'hug': 24}, 'padding': [2, 2, 8, 2]},
+                 'decoration': {'strokes': [{'color': 'primaryBorder'}], 'radius': 9999},
+                 'bind': {'layout.padding': "${= props.removable ? [2, 2, 3, 2] : [2, 2, 8, 2]}"},
+                 'states': {'hovered': {'chip': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed', 'value': '${props.name}'}]}]},
+        'avatar': {'type': 'row', 'children': ['initials', 'glyph'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                   'layout': {'width': 18, 'height': 18},
+                   'decoration': {'fills': [{'color': 'subtleFill'}, {'type': 'image', 'image': {'url': '', 'fit': 'cover'}, 'visible': False}],
+                                  'radius': 9999, 'clip': 'antiAlias'},
+                   'bind': {'decoration.radius': "${= props.kind == 'team' ? 5 : 9999}",
+                            'decoration.fills[0].color': "${= props.kind == 'team' ? theme.colors.primaryTint : theme.colors.subtleFill}",
+                            'decoration.fills[1].image.url': '${props.image}',
+                            'decoration.fills[1].visible': "${= props.image != '' && props.kind != 'team'}"}},
+        'initials': {**text("${= upper(substring(props.name, 0, 1)) + (contains(props.name, ' ') ? upper(substring(split(props.name, ' ')[1], 0, 1)) : '')}",
+                            style(8, 600, 'secondaryText', 1), {'hug': 12}, {'hug': 8}),
+                     'bind': {'visible': "${= props.kind == 'human' && props.image == ''}"}},
+        'glyph': {**icon('smart_toy', 'secondaryText', 13),
+                  'bind': {'visible': "${= props.kind == 'team' || (props.kind == 'bot' && props.image == '')}",
+                           'props.icon': "${= props.kind == 'team' ? 'groups' : 'smart_toy'}",
+                           'props.size': "${= props.kind == 'team' ? 11 : 13}",
+                           'props.color': "${= props.kind == 'team' ? theme.primary : theme.colors.secondaryText}"}},
+        'name': {'type': 'text', 'props': {'text': '${props.name}', 'maxLines': 1, 'overflow': 'ellipsis',
+                                            'style': style(11.5, 400, 'primaryText', 18 / 11.5)},
+                 'layout': {'width': {'hug': 60}, 'height': {'hug': 18}}},
+        'trailing': {**text('${props.trailing}', style(11.5, 400, 'tertiaryText', 18 / 11.5), {'hug': 30}, {'hug': 18}),
+                     'bind': {'visible': "${= props.trailing != ''}"}},
+        'remove': {'type': 'row', 'children': ['x'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                   'layout': {'width': 16, 'height': 16}, 'decoration': {'radius': 9999},
+                   'bind': {'visible': '${props.removable}'},
+                   'states': {'hovered': {'remove': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onRemove', 'value': '${props.name}'}]}]},
+        'x': icon('close', 'tertiaryText', 11),
+    },
+))
+
+# ResourceChip (ResourceChip.tsx): a document, file or link as a bordered chip: a 13 px icon by kind, 6 px, the
+# label 11/500 (+0.11) on a 1.25 line; padding 5 x 8 (3 x 8 and at most 190 wide inline), radius 5, the low shadow.
+KIND_ICON = "${= props.kind == 'file' ? 'insert_drive_file' : (props.kind == 'image' ? 'image' : (props.kind == 'video' ? 'videocam' : (props.kind == 'audio' ? 'music_note' : (props.kind == 'link' ? 'link' : 'description'))))}"
+add(component(
+    'ResourceChip',
+    'A document, file, image, video, audio or link as a small bordered chip. Fires onPressed.',
+    'chip',
+    props=[prop('label', STRING, 'Launch plan', 'Its name.', required=True),
+           prop('kind', enum('document', 'file', 'image', 'video', 'audio', 'link'), 'document', 'Which icon.'),
+           prop('inline', BOOL, False, 'Shorter (3 px above and below) and at most 190 wide, to sit in a line of text.'),
+           prop('enabled', BOOL, True, 'Off: dimmed, no press.')],
+    events=['onPressed'],
+    previews=[preview('Document', 110, 26, label='Launch plan'), preview('Link', 110, 26, label='docs.example.com', kind='link')],
+    nodes={
+        'chip': {'type': 'row', 'children': ['glyph', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                 'layout': {'width': {'hug': 100}, 'height': {'hug': 26}, 'padding': [8, 5, 8, 5]},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 5,
+                                'effects': SHADOWS_LIGHT['level1']},
+                 'bind': {'decoration.effects': '${theme.shadows.level1}',
+                          'layout.padding': '${= props.inline ? [8, 3, 8, 3] : [8, 5, 8, 5]}',
+                          'opacity': '${= props.enabled ? 1 : 0.58}'},
+                 'states': {'hovered': {'chip': HOVER}, 'pressed': {'chip': PRESS}},
+                 'actions': [click('onPressed', value='${props.label}')]},
+        'glyph': {**icon('description', 'primaryText', 13), 'bind': {'props.icon': KIND_ICON}},
+        'label': {'type': 'text', 'props': {'text': '${props.label}', 'maxLines': 1, 'overflow': 'ellipsis',
+                                             'style': style(11, 500, 'primaryText', 1.25, letterSpacing=0.11)},
+                  'layout': {'width': {'hug': 60}, 'height': {'hug': 14}, 'constraints': {'maxWidth': 400}},
+                  'bind': {'layout.constraints': "${= props.inline ? {'maxWidth': 155} : {'maxWidth': 400}}"}},
+    },
+))
+
+# FileListItem (FileListItem.tsx): a file as a full-width row: a 14 px tertiary icon, 7 px, the name 12 on a 1.25
+# line (the path's last part unless named), then meta and actions; padding 5 x 6, radius 4, the subtle fill on hover.
+add(component(
+    'FileListItem',
+    'A file in a list: icon, name, then meta and actions at the end. Fires onPressed with the path.',
+    'row',
+    props=[prop('path', STRING, 'docs/launch-plan.md', 'The file\'s path.', required=True),
+           prop('name', STRING, '', 'What to show (empty: the path\'s last part).'),
+           prop('icon', STRING, 'description', 'The icon.')],
+    events=['onPressed'],
+    slots=['meta', 'actions'],
+    previews=[preview('File', 260, 26, path='docs/launch-plan.md')],
+    nodes={
+        'row': {'type': 'row', 'children': ['glyph', 'name', 'meta', 'actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 7},
+                'layout': {'width': {'fill': 260}, 'height': {'hug': 25}, 'padding': [6, 5, 6, 5]},
+                'decoration': {'radius': 4},
+                'states': {'hovered': {'row': {'decoration': {'fills': [{'color': 'secondaryBackground'}]}}}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed', 'value': '${props.path}'}]}]},
+        'glyph': {**icon('description', 'tertiaryText', 14), 'bind': {'props.icon': '${props.icon}'}},
+        'name': {'type': 'text', 'props': {'text': "${= props.name != '' ? props.name : last(split(props.path, '/'))}", 'maxLines': 1,
+                                            'overflow': 'ellipsis', 'style': style(12, 400, 'primaryText', 1.25)},
+                 'layout': {'width': {'fill': 180}, 'height': {'hug': 15}}},
+        'meta': {'type': 'slot', 'props': {'name': 'meta'}},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+    },
+))
+
+# StatusIndicator (StatusIndicator.tsx): a 15 px glyph for where a job is: a spinner while running or setting up
+# (primary), a check circle when synced or complete (success), an alert when errored (error), a badge when setup
+# is needed (primary), a play triangle when paused (tertiary).
+RUN_STATES = ['setupNeeded', 'settingUp', 'synced', 'completion', 'running', 'paused', 'errored']
+IN_FLIGHT = "(props.status == 'running' || props.status == 'settingUp')"
+add(component(
+    'StatusIndicator',
+    'Where a job is, as one 15 px glyph: spinning while it runs, a check when done, an alert on error. Fires onPressed.',
+    'box',
+    props=[prop('status', enum(*RUN_STATES), 'synced', 'setupNeeded, settingUp, synced, completion, running, paused or errored.')],
+    events=['onPressed'],
+    previews=[preview('Synced', 15, 15, status='synced'), preview('Running', 15, 15, status='running'),
+              preview('Errored', 15, 15, status='errored')],
+    nodes={
+        'box': {'type': 'row', 'children': ['spinner', 'glyph'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                'layout': {'width': 15, 'height': 15},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed', 'value': '${props.status}'}]}]},
+        'spinner': {'type': 'circularProgressIndicator', 'props': {'color': 'primary', 'strokeWidth': 1.5, 'strokeCap': 'round'},
+                    'layout': {'width': 12, 'height': 12},
+                    'bind': {'visible': '${= %s}' % IN_FLIGHT}},
+        'glyph': {**icon('check_circle_outline', 'success', 15),
+                  'bind': {'visible': '${= !%s}' % IN_FLIGHT,
+                           'props.icon': "${= props.status == 'errored' ? 'error_outline' : (props.status == 'setupNeeded' ? 'new_releases' : (props.status == 'paused' ? 'play_arrow' : 'check_circle_outline'))}",
+                           'props.color': "${= props.status == 'errored' ? theme.error : (props.status == 'setupNeeded' ? theme.primary : (props.status == 'paused' ? theme.colors.tertiaryText : theme.success))}"}},
+    },
+))
+
+# DiffStatsBadge (DiffStatsBadge.tsx): an 11 px file icon, 5 px, then a chip per kind of change that happened:
+# +created (success), ~modified (warning), -deleted (error), or one muted 0; each monospace 10/600 on a 1.4 line,
+# padding 1 x 5, radius 4, 4 px apart.
+def _diff_chip(id_, sign, key, ink, tint):
+    return {
+        id_: {'type': 'row', 'children': [id_ + 'Text'], 'layout': {'width': {'hug': 20}, 'height': {'hug': 16}, 'padding': [5, 1, 5, 1]},
+              'decoration': {'fills': [{'color': tint}], 'radius': 4},
+              'bind': {'visible': '${= props.%s > 0}' % key}},
+        id_ + 'Text': text(sign + '${props.%s}' % key, style(10, 600, ink, 1.4, fontFamily='monospace'), {'hug': 14}, {'hug': 14}),
+    }
+
+
+add(component(
+    'DiffStatsBadge',
+    'What a change did to files: +created, ~modified and -deleted counts as small colored chips after a file icon.',
+    'badge',
+    props=[prop('created', NUMBER, 0, 'Files created.'), prop('modified', NUMBER, 0, 'Files modified.'),
+           prop('deleted', NUMBER, 0, 'Files deleted.')],
+    previews=[preview('Mixed', 110, 16, created=3, modified=12, deleted=1), preview('None', 40, 16)],
+    nodes={
+        'badge': {'type': 'row', 'children': ['glyph', 'chips'], 'props': {'crossAxisAlignment': 'center', 'spacing': 5},
+                  'layout': {'width': {'hug': 100}, 'height': {'hug': 16}}},
+        'glyph': icon('insert_drive_file', 'tertiaryText', 11),
+        'chips': {'type': 'row', 'children': ['created', 'modified', 'deleted', 'zero'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                  'layout': {'width': {'hug': 80}, 'height': {'hug': 16}}},
+        **_diff_chip('created', '+', 'created', 'success', 'successTint'),
+        **_diff_chip('modified', '~', 'modified', 'warning', 'warningTint'),
+        **_diff_chip('deleted', '-', 'deleted', 'error', 'errorTint'),
+        'zero': {'type': 'row', 'children': ['zeroText'], 'layout': {'width': {'hug': 16}, 'height': {'hug': 16}, 'padding': [5, 1, 5, 1]},
+                 'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 4},
+                 'bind': {'visible': '${= props.created <= 0 && props.modified <= 0 && props.deleted <= 0}'}},
+        'zeroText': text('0', style(10, 600, 'tertiaryText', 1.4, fontFamily='monospace'), {'hug': 8}, {'hug': 14}),
+    },
+))
+
 
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)

@@ -84,9 +84,23 @@ void main() {
 
   test('a site image is a relative path to an image file, not a URL, an expression or another string', () {
     expect(siteImagesIn({
-      'a': 'images/a.jpg',
-      'b': ['https://x.com/b.png', r'images/${id}.png', 'data:image/png;base64,AA', 'Read more', './c.svg'],
+      'url': 'images/a.jpg',
+      'images': ['https://x.com/b.png', r'images/${id}.png', 'data:image/png;base64,AA', 'Read more', './c.svg'],
     }), {'images/a.jpg', './c.svg'});
+  });
+
+  test('words that end like an image file are words: only a key that holds images names one', () {
+    expect(siteImagesIn({
+      'props': {'text': 'hero.png', 'label': 'docs/shot.jpg', 'path': 'a/b.svg', 'imageUrl': 'images/a.jpg'},
+      'decoration': {
+        'fills': [
+          {'type': 'image', 'image': {'url': 'images/b.png'}},
+        ],
+      },
+    }), {'images/a.jpg', 'images/b.png'});
+    expect(isImageKey('avatar'), isTrue);
+    expect(isImageKey('posterImage'), isTrue);
+    expect(isImageKey('title'), isFalse);
   });
 
   testWidgets('a declared font and a local image are read from the site\'s files; a missing file is logged by name',

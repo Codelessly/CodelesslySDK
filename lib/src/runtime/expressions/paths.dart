@@ -207,11 +207,13 @@ String formatTimeAgo(DateTime date, {DateTime? now}) {
   return formatDay(date);
 }
 
-/// [value] as a `${path}` puts it in a text: lists and maps as JSON, the
-/// rest as Dart prints it.
+/// [value] as a `${path}` puts it in a text: lists and maps as JSON, a
+/// whole number without decimals (3, not 3.0: what a formula and the web
+/// print), the rest as Dart prints it.
 String pathText(Object? value) => switch (value) {
       null => '',
       List() || Map() => _json(value),
+      final double d when d.isFinite && d == d.roundToDouble() && d.abs() < 1e15 => d.toInt().toString(),
       _ => value.toString(),
     };
 

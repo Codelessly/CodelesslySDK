@@ -32,20 +32,39 @@ String? siteImageType(String path) {
 /// Whether [value] names an image file beside the site (`images/hero.jpg`).
 bool isSiteImage(String value) => isRelativeAssetPath(value) && siteImageType(value) != null;
 
+/// Whether a string under [key] can name an image: the key says so (`url`,
+/// `image`, `imageUrl`, `poster`, `avatar`, `logo`...). Words a UI shows
+/// (`text`, `label`, `title`, `path`) never do, so a label reading
+/// `hero.png` stays a label. A path a key outside these holds still loads
+/// when an image draws it ([SiteImageLoader]).
+bool isImageKey(String key) {
+  final k = key.toLowerCase();
+  return _imageKeyEndings.any(k.endsWith);
+}
+
+const List<String> _imageKeyEndings = [
+  'url', 'urls', 'src', 'source', 'image', 'images', 'img', 'icon', 'avatar', 'photo', 'picture', 'poster', //
+  'thumbnail', 'thumb', 'logo', 'cover', 'background', 'banner', 'asset', 'svg',
+];
+
+/// [json] with [swap] applied to each string a key that holds images
+/// ([isImageKey]) carries, directly or in a list.
+Object? mapImageStrings(Object? json, Object? Function(String value) swap, {bool held = false}) => switch (json) {
+      final String s => held ? swap(s) : s,
+      final Map<Object?, Object?> m => {
+          for (final e in m.entries) e.key: mapImageStrings(e.value, swap, held: e.key is String && isImageKey(e.key! as String)),
+        },
+      final List<Object?> l => [for (final x in l) mapImageStrings(x, swap, held: held)],
+      _ => json,
+    };
+
 /// Every site image [json] (a document's or layout's JSON) names, each once.
 Set<String> siteImagesIn(Object? json) {
   final out = <String>{};
-  void walk(Object? v) {
-    if (v is String) {
-      if (isSiteImage(v)) out.add(v.trim());
-    } else if (v is Map) {
-      v.values.forEach(walk);
-    } else if (v is List) {
-      v.forEach(walk);
-    }
-  }
-
-  walk(json);
+  mapImageStrings(json, (v) {
+    if (isSiteImage(v)) out.add(v.trim());
+    return v;
+  });
   return out;
 }
 
@@ -73,13 +92,7 @@ Future<Json> resolveSiteImages(Json json, PublishAssetSource source, {void Funct
         }
       }(),
   ]);
-  Object? swap(Object? v) => switch (v) {
-        final String s => resolved[s.trim()] ?? s,
-        final Map<Object?, Object?> m => {for (final e in m.entries) e.key: swap(e.value)},
-        final List<Object?> l => [for (final x in l) swap(x)],
-        _ => v,
-      };
-  return readMap(swap(json)) ?? json;
+  return readMap(mapImageStrings(json, (v) => resolved[v.trim()] ?? v)) ?? json;
 }
 
 /// An [ImageBytesLoader] that reads a site image ([isSiteImage]: a path
