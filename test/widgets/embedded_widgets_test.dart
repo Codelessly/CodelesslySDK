@@ -1,6 +1,7 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/pickers.dart';
 import 'package:codelessly_sdk/src/widgets/registry.dart';
+import 'package:codelessly_sdk/src/render/controls/dropdown.dart' show RenderDropdown;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -210,13 +211,18 @@ void main() {
     })));
     addTearDown(tree.dispose);
     await tester.pumpWidget(_app(tree));
-    await tester.tap(find.byType(DropdownButton<Object>));
+    // A render object (render/controls/dropdown.dart): its menu is an entry
+    // of the root's overlay layer, not a route.
+    final dropdown = _dropdownIn(tree.boxOf('d')!);
+    await tester.tapAt(dropdown.localToGlobal(dropdown.size.center(Offset.zero)));
     await tester.pumpAndSettle();
-    // The menu is a route on the app's navigator: every item shows.
-    expect(find.text('Cherry'), findsWidgets);
-    await tester.tap(find.text('Cherry').last);
+    expect(dropdown.isOpen, isTrue);
+    expect(dropdown.menu.items.map((i) => i.label), ['Apple', 'Banana', 'Cherry']);
+    final cherry = dropdown.menu.rows[2];
+    await tester.tapAt(cherry.localToGlobal(cherry.size.center(Offset.zero)));
     await tester.pumpAndSettle();
-    expect(tester.widget<DropdownButton<Object>>(find.byType(DropdownButton<Object>)).value, 'Cherry');
+    expect(dropdown.isOpen, isFalse);
+    expect(dropdown.selectedLabel, 'Cherry');
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
@@ -415,5 +421,16 @@ RenderPickerField _picker(RenderTree tree, String id) {
   }
 
   visit(tree.boxOf(id)!);
+  return found!;
+}
+
+RenderDropdown _dropdownIn(RenderObject box) {
+  RenderDropdown? found;
+  void visit(RenderObject o) {
+    if (o is RenderDropdown) found ??= o;
+    o.visitChildren(visit);
+  }
+
+  visit(box);
   return found!;
 }

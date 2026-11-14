@@ -6,12 +6,14 @@
 // editing the island files. A family adds one line here.
 import 'package:codelessly_api/core.dart'
     show ButtonProps, DatePickerProps, DateTimeInputProps, FloatingActionButtonProps, IconButtonProps, TimePickerProps;
+import 'package:codelessly_api/core.dart' show ButtonProps, DropdownProps, FloatingActionButtonProps, IconButtonProps;
 
 import '../render/controls/app_bar.dart';
 import '../render/controls/buttons.dart';
 import '../render/controls/navigation_bar.dart';
 import '../render/controls/tab_bar.dart';
 import '../render/controls/pickers.dart';
+import '../render/controls/dropdown.dart';
 import '../render/recipe.dart';
 import 'picker_locale.dart';
 
@@ -41,10 +43,13 @@ final Map<String, WidgetRecipe> pickerRecipes = {
   for (final type in [DatePickerProps.spec.type, TimePickerProps.spec.type, DateTimeInputProps.spec.type])
     type: (b, n, chain) => pickerRecipe(b, n, chain, locale: pickerLocale()),
 };
+/// The dropdown (render/controls/dropdown.dart; its menu in menu.dart).
+final Map<String, WidgetRecipe> dropdownRecipes = {DropdownProps.spec.type: dropdownRecipe};
 
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
   ...barRecipes,
   ...pickerRecipes,
+  ...dropdownRecipes,
 };
