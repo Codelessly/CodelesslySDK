@@ -184,7 +184,7 @@ class RenderToggle extends RenderControl {
 
   /// Checked (a checkbox's `true` or mixed, a switch on, a radio chosen).
   bool get checked => switch (_kind) {
-        ToggleKind.checkbox => _value != false,
+        ToggleKind.checkbox => _value == true || mixed,
         ToggleKind.switchToggle => _value == true,
         ToggleKind.radio => _value == node.prop(RadioProps.value),
       };
@@ -206,11 +206,12 @@ class RenderToggle extends RenderControl {
     switch (_kind) {
       case ToggleKind.checkbox:
         final tristate = node.prop(CheckboxProps.tristate);
-        // Flutter's order: false, true, then (tristate) null.
+        // Flutter's order: false, true, then (tristate) null; a null value
+        // that is not tristate shows unchecked.
         final next = switch (_value) {
-          false => true,
           true => tristate ? null : false,
-          _ => false,
+          null when tristate => false,
+          _ => true,
         };
         _set(next);
       case ToggleKind.switchToggle:
@@ -248,8 +249,6 @@ class RenderToggle extends RenderControl {
   /// The radio group it is in (radios of one group share arrow keys).
   Object? group;
 
-  static final Set<RenderToggle> _radios = {};
-
   /// Flutter's RadioGroup keys: right and down choose the next radio of the
   /// group in reading order, left and up the previous, wrapping; the focus
   /// moves with the choice.
@@ -264,9 +263,11 @@ class RenderToggle extends RenderControl {
             : null;
     if (forward == null) return false;
     Offset at(RenderToggle r) => r.localToGlobal(Offset.zero);
+    // The radios of the group: the root's focus scope knows every control
+    // under it.
     final peers = [
-      for (final r in _radios)
-        if (r.attached && r.hasSize && r.enabled && r.group == group) r,
+      for (final f in focusNode.scope?.nodes ?? const <Never>[])
+        if (f.owner case final RenderToggle r when r.attached && r.hasSize && r.enabled && r.group == group) r,
     ]..sort((a, b) {
         final p = at(a), q = at(b);
         return (p.dy - q.dy).abs() > 0.5 ? p.dy.compareTo(q.dy) : p.dx.compareTo(q.dx);
@@ -292,12 +293,10 @@ class RenderToggle extends RenderControl {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     if (!_interactive) focusNode.leave();
-    _radios.add(this);
   }
 
   @override
   void detach() {
-    _radios.remove(this);
     _on.detach();
     super.detach();
   }

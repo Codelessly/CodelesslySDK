@@ -157,10 +157,8 @@ const widgetImportRatchet = {
   'src/widgets/indicators.dart',
   'src/widgets/inputs.dart',
   'src/widgets/inputs_shapes.dart',
-  'src/widgets/inputs_toggle.dart',
   'src/widgets/material.dart',
   'src/widgets/media.dart',
-  'src/widgets/slider_paint.dart',
 };
 
 /// The render-object controls: never on the ratchet.
