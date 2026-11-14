@@ -502,14 +502,6 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
   );
 }
 
-/// [style] in the font of the theme at [context] (the tokens' family) when
-/// it names none; null stays null (the widget's theme style applies).
-TextStyle? themeFont(BuildContext context, TextStyle? style) {
-  if (style == null || style.fontFamily != null) return style;
-  final family = Theme.of(context).textTheme.bodyMedium?.fontFamily;
-  return family == null ? style : style.copyWith(fontFamily: family);
-}
-
 /// The theme of the controls under it ([themeDataOf]) for the surface they
 /// sit on: the project's tokens of the theme above (a `CodelesslyWidget`'s),
 /// or none (neutral) when the theme above isn't one of the SDK's: an app's
