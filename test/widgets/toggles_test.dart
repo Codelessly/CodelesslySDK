@@ -1,6 +1,7 @@
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/chips.dart' show RenderChip;
 import 'package:codelessly_sdk/src/widgets/inputs_shapes.dart';
 import 'package:codelessly_sdk/src/widgets/inputs_toggle.dart';
 import 'package:flutter/material.dart';
@@ -185,9 +186,24 @@ Future<_Screen> _show(
   return _Screen(scope, tree);
 }
 
-bool _selected(WidgetTester tester, String type) => type == 'choiceChip'
-    ? tester.widget<ChoiceChip>(find.byType(ChoiceChip)).selected
-    : tester.widget<FilterChip>(find.byType(FilterChip)).selected;
+/// The chip on screen (a render object: render/controls/chips.dart).
+RenderChip _chip(WidgetTester tester) {
+  RenderChip? found;
+  void visit(RenderObject o) {
+    if (o is RenderChip) found ??= o;
+    o.visitChildren(visit);
+  }
+
+  visit(tester.binding.renderViews.first);
+  return found!;
+}
+
+Offset _chipCentre(WidgetTester tester) {
+  final c = _chip(tester);
+  return c.localToGlobal(c.size.center(Offset.zero));
+}
+
+bool _selected(WidgetTester tester, String type) => _chip(tester).selected;
 
 SegmentedButton<String> control(NodeTree tree) {
   SegmentedButton<String>? found;
@@ -470,7 +486,7 @@ void main() {
         (tester) async {
           final s = await _show(tester, type);
           expect(_selected(tester, type), isFalse);
-          await tester.tap(find.text('North'));
+          await tester.tapAt(_chipCentre(tester));
           await tester.pumpAndSettle();
           expect(_selected(tester, type), isTrue);
           expect(s.scope.read('selected'), true);
@@ -482,7 +498,7 @@ void main() {
             true,
             reason: 'writeback and changed precede click',
           );
-          await tester.tap(find.text('North'));
+          await tester.tapAt(_chipCentre(tester));
           await tester.pumpAndSettle();
           expect(_selected(tester, type), isFalse);
           expect(s.scope.read('selected'), false);
@@ -495,7 +511,7 @@ void main() {
         'a bound $type shows the bound value, not its own guess',
         (tester) async {
           final s = await _show(tester, type);
-          await tester.tap(find.text('North'));
+          await tester.tapAt(_chipCentre(tester));
           await tester.pumpAndSettle();
           s.scope.set('selected', false);
           await tester.pumpAndSettle();
@@ -509,10 +525,10 @@ void main() {
         tester,
       ) async {
         await _show(tester, type, controlled: false, reactions: false);
-        await tester.tap(find.text('North'));
+        await tester.tapAt(_chipCentre(tester));
         await tester.pumpAndSettle();
         expect(_selected(tester, type), true);
-        await tester.tap(find.text('North'));
+        await tester.tapAt(_chipCentre(tester));
         await tester.pumpAndSettle();
         expect(_selected(tester, type), false);
       });
@@ -526,7 +542,7 @@ void main() {
             enabled: disabled != 'disabled',
             interactive: disabled != 'design',
           );
-          await tester.tap(find.text('North'), warnIfMissed: false);
+          await tester.tapAt(_chipCentre(tester));
           await tester.pumpAndSettle();
           expect(_selected(tester, type), false);
           expect(s.scope.read('selected'), false);
