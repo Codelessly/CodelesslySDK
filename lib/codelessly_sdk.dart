@@ -143,6 +143,7 @@ export 'src/scripting/script_runner.dart';
 export 'src/scripting/sandbox/script_sandbox.dart';
 export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
+export 'src/app/navigator_ui.dart';
 export 'src/runtime/actions/actions.dart';
 // The feature layers over the core runtime, and the runner that installs them.
 export 'src/features/first_party.dart';

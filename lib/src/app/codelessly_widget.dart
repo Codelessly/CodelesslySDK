@@ -33,6 +33,7 @@ import '../runtime/actions/node_values.dart';
 import '../runtime/actions/route_transition.dart';
 import '../runtime/actions/script_host.dart' show scriptNodeValues;
 import '../runtime/actions/ui.dart';
+import 'navigator_ui.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
 import '../runtime/actions/runner.dart' show ActionCancellation, CoreActions;
