@@ -1,0 +1,357 @@
+{
+ "schema": 3,
+ "id": "SessionRow",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "SessionRow",
+  "doc": "One past session as a card row: the name, a detail line (date and duration), value and unit at the right, and share (0 to 1, against the best session) as a small ring; a tap fires onPressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Intervals",
+    "doc": "The session's name.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet second line: the date and the duration."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The headline figure at the right, e.g. the jumps (empty: none)."
+   },
+   {
+    "key": "unit",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What the figure counts, under it."
+   },
+   {
+    "key": "share",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "From 0 to 1: how this session compares with the best one, drawn as a small ring (0: no ring)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The icon inside the ring (empty: picked from the name: a timer for intervals, a heart for endurance, a runner for footwork, else a bolt)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The row was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "A session",
+   "size": [
+    350,
+    80
+   ],
+   "props": {
+    "title": "Intervals",
+    "detail": "Fri 13 Nov · 8 min",
+    "value": "912",
+    "unit": "jumps",
+    "share": 0.7
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "lead",
+    "texts",
+    "figures",
+    "chev"
+   ],
+   "props": {
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 420,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ],
+   "states": {
+    "pressed": {
+     "row": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "lead": {
+   "type": "row",
+   "children": [
+    "leadIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 48,
+    "height": 48
+   },
+   "customPaint": {
+    "viewBox": [
+     48,
+     48
+    ],
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       24,
+       24
+      ],
+      "radius": 19,
+      "paint": {
+       "color": "${theme.colors.track}",
+       "style": "stroke",
+       "strokeWidth": 4.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "arc",
+      "rect": [
+       5,
+       5,
+       38,
+       38
+      ],
+      "startAngle": -1.5708,
+      "sweepAngle": "${= clamp(props.share, 0, 1) * 2 * pi()}",
+      "when": "${= props.share > 0}",
+      "paint": {
+       "color": "${theme.colors.brand}",
+       "style": "stroke",
+       "strokeWidth": 4.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     }
+    ]
+   }
+  },
+  "leadIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 20,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "bind": {
+    "props.icon": "${= props.icon != '' ? props.icon : contains(lower(props.title), 'interval') ? 'timer_outlined' : contains(lower(props.title), 'endur') ? 'favorite_rounded' : contains(lower(props.title), 'foot') ? 'directions_run_rounded' : 'bolt_rounded'}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "cardTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "figures": {
+   "type": "column",
+   "children": [
+    "value",
+    "unit"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.value != ''}"
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(props.value), '^[0-9.]+$') ? thousands(number(props.value)) : text(props.value)}",
+    "style": "numberSmall"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "unit": {
+   "type": "text",
+   "props": {
+    "text": "${props.unit}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chev": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 22,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   }
+  }
+ }
+}

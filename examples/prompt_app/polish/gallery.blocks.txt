@@ -1,0 +1,15 @@
+Screen
+  TopBar "Every block, once" "The same blocks with other data, and the child's illustration set." eyebrow:"Skip" badge:"12"
+  HeroSession "Double unders" "Ten tries. Count the ones you land." eyebrow:"Next up" minutes:"12" cta:"Let's jump" audience:"kid"
+  Row gap:12
+    StreakFlame "day streak" "Your longest yet." count:12 audience:"kid"
+    ProgressGoal "This week" "Goal reached. Rest well." done:3 goal:3 icon:"check_rounded"
+  WeekStrip done:["Mon","Tue","Thu"] today:"Fri"
+  SectionTitle "When there is nothing yet" action:"Why"
+  EmptyState "No sessions yet" "Your first one takes five minutes." cta:"Start a session"
+  EmptyState "Nothing to see... yet" "Jump once and it shows up here." cta:"Let's jump" audience:"kid"
+  ChartCard "Minutes per day" values:[6,12,0,8,14,9] labels:["Mon","Tue","Wed","Thu","Fri","Sat"] unit:"min" deltaLabel:"vs Friday"
+  StatTrio values:["1:42","96%","7"] labels:["Longest run","Clean jumps","Rounds"] icons:["timer_outlined","verified_rounded","repeat_rounded"]
+  RecordCard "Personal best" "Set on Wed 11 Nov" value:"1304" unit:"jumps in one session"
+  SessionRow "Freestyle" "Sun 15 Nov · 20 min" value:"2210" unit:"jumps" share:1
+  SessionRow "A session with no figure yet" "Planned for tomorrow"

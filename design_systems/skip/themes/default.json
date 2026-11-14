@@ -1,0 +1,255 @@
+{
+ "colors": {
+  "primaryBackground": "#FFFFFFFF",
+  "secondaryBackground": "#FFF8F8F9",
+  "tertiaryBackground": "#FFF1F1F2",
+  "primaryText": "#FF15122E",
+  "secondaryText": "#B815122E",
+  "tertiaryText": "#7315122E",
+  "primaryBorder": "#FFE3E3E6",
+  "secondaryBorder": "#FFD0D0D5",
+  "info": "#FF0284C7",
+  "purple": "#FF9333EA",
+  "subtleFill": "#FFF1F1F2",
+  "neutralFill": "#FF48465C",
+  "raisedBackground": "#FFFFFFFF",
+  "track": "#FFE8E5F7",
+  "scrim": "#66000000",
+  "onAccent": "#FF15122E",
+  "focusBorder": "#805B3DF5",
+  "hoverOverlay": "#0A15122E",
+  "pressedOverlay": "#1415122E",
+  "activeTint": "#245B3DF5",
+  "primaryTint": "#1A5B3DF5",
+  "primaryTintBorder": "#475B3DF5",
+  "neutralTint": "#FFF1F1F2",
+  "neutralTintBorder": "#FFE3E3E6",
+  "tooltipBackground": "#FF15122E",
+  "tooltipText": "#FFFFFFFF",
+  "tooltipMuted": "#99FFFFFF",
+  "successTint": "#1A12A150",
+  "successTintBorder": "#4712A150",
+  "warningTint": "#1AE8590C",
+  "warningTintBorder": "#47E8590C",
+  "errorTint": "#1AE11D48",
+  "errorTintBorder": "#47E11D48",
+  "infoTint": "#1A0284C7",
+  "infoTintBorder": "#470284C7",
+  "page": "#FFF4F3FB",
+  "card": "#FFFFFFFF",
+  "ink": "#FF15122E",
+  "inkSoft": "#FF5E5A7A",
+  "inkFaint": "#FF9793B0",
+  "line": "#FFE9E7F5",
+  "brand": "#FF5B3DF5",
+  "brandDeep": "#FF3A1FC4",
+  "brandBright": "#FF8468FF",
+  "brandTint": "#FFECE8FF",
+  "onBrand": "#FFFFFFFF",
+  "accent": "#FFD6FF3F",
+  "accentDeep": "#FFA8E000",
+  "heroA": "#FF7352FF",
+  "heroB": "#FF3A1FCB",
+  "heroGlow": "#FFA791FF",
+  "heroLine": "#33FFFFFF",
+  "onHero": "#FFFFFFFF",
+  "onHeroSoft": "#FFDCD5FF",
+  "heroChip": "#29FFFFFF",
+  "heroCta": "#FFFFFFFF",
+  "onHeroCta": "#FF15122E",
+  "heroCtaMark": "#FFD6FF3F",
+  "onHeroCtaMark": "#FF15122E",
+  "flame": "#FFFF6B2C",
+  "flameDeep": "#FFF0381B",
+  "flameLight": "#FFFFC53D",
+  "flameTint": "#FFFFF0E6",
+  "panel": "#FF17132F",
+  "panelGlow": "#FF3A2A8F",
+  "onPanel": "#FFFFFFFF",
+  "onPanelSoft": "#FFA9A4C9",
+  "panelBar": "#FF3A3466",
+  "panelTrack": "#801F1A3B",
+  "artSkin": "#FFF6B48F",
+  "artSkinShade": "#FFE39A74",
+  "artHair": "#FF1C1638",
+  "artTop": "#FFD6FF3F",
+  "artBottom": "#FF15122E",
+  "artShoe": "#FFFFFFFF",
+  "artRope": "#FFD6FF3F",
+  "artHandle": "#FF15122E",
+  "artSpark": "#FFFFFFFF",
+  "artShadow": "#3D0B0540",
+  "artBlob": "#FFECE8FF",
+  "artBlobDeep": "#FFDAD2FF",
+  "gold": "#FFFFC53D",
+  "goldDeep": "#FFF59E0B",
+  "goldTint": "#FFFFF6DC",
+  "onGold": "#FF4A2E00"
+ },
+ "radii": {
+  "hero": 32,
+  "card": 24,
+  "tile": 22,
+  "chip": 999,
+  "cta": 999
+ },
+ "shadows": {
+  "card": [
+   {
+    "type": "dropShadow",
+    "color": "#12261A66",
+    "offset": [
+     0,
+     12
+    ],
+    "blurRadius": 28,
+    "spreadRadius": -10
+   },
+   {
+    "type": "dropShadow",
+    "color": "#0A261A66",
+    "offset": [
+     0,
+     2
+    ],
+    "blurRadius": 6
+   }
+  ],
+  "hero": [
+   {
+    "type": "dropShadow",
+    "color": "#735B3DF5",
+    "offset": [
+     0,
+     22
+    ],
+    "blurRadius": 40,
+    "spreadRadius": -16
+   }
+  ],
+  "cta": [
+   {
+    "type": "dropShadow",
+    "color": "#40120A40",
+    "offset": [
+     0,
+     8
+    ],
+    "blurRadius": 18,
+    "spreadRadius": -6
+   }
+  ],
+  "panel": [
+   {
+    "type": "dropShadow",
+    "color": "#5917132F",
+    "offset": [
+     0,
+     20
+    ],
+    "blurRadius": 36,
+    "spreadRadius": -16
+   }
+  ]
+ },
+ "textStyles": {
+  "display": {
+   "fontSize": 42,
+   "fontWeight": 900,
+   "height": 1.02,
+   "letterSpacing": -0.9,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "screenTitle": {
+   "fontSize": 32,
+   "fontWeight": 900,
+   "height": 1.08,
+   "letterSpacing": -1.0,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "number": {
+   "fontSize": 40,
+   "fontWeight": 900,
+   "height": 1.0,
+   "letterSpacing": -1.2,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "numberLarge": {
+   "fontSize": 56,
+   "fontWeight": 900,
+   "height": 1.0,
+   "letterSpacing": -2.0,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "numberSmall": {
+   "fontSize": 22,
+   "fontWeight": 900,
+   "height": 1.05,
+   "letterSpacing": -0.5,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "blockTitle": {
+   "fontSize": 21,
+   "fontWeight": 900,
+   "height": 1.2,
+   "letterSpacing": -0.5,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "cardTitle": {
+   "fontSize": 17,
+   "fontWeight": 700,
+   "height": 1.25,
+   "letterSpacing": -0.2,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "eyebrow": {
+   "fontSize": 11.5,
+   "fontWeight": 700,
+   "height": 1.2,
+   "letterSpacing": 1.3,
+   "color": "inkFaint",
+   "leadingDistribution": "even"
+  },
+  "lead": {
+   "fontSize": 15,
+   "fontWeight": 400,
+   "height": 1.45,
+   "color": "inkSoft",
+   "leadingDistribution": "even"
+  },
+  "meta": {
+   "fontSize": 13,
+   "fontWeight": 500,
+   "height": 1.35,
+   "color": "inkFaint",
+   "leadingDistribution": "even"
+  },
+  "cta": {
+   "fontSize": 16.5,
+   "fontWeight": 700,
+   "height": 1.2,
+   "letterSpacing": -0.1,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "chip": {
+   "fontSize": 12.5,
+   "fontWeight": 700,
+   "height": 1.2,
+   "letterSpacing": 0.2,
+   "color": "ink",
+   "leadingDistribution": "even"
+  }
+ },
+ "primary": "#FF5B3DF5",
+ "onPrimary": "#FFFFFFFF",
+ "surface": "#FFFFFFFF",
+ "onSurface": "#FF15122E"
+}

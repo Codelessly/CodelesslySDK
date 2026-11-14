@@ -1,0 +1,126 @@
+{
+ "schema": 3,
+ "id": "SectionHeader",
+ "roots": [
+  "header"
+ ],
+ "widget": {
+  "type": "SectionHeader",
+  "doc": "A 36 px header over a list or panel: title, optional count badge and trailing actions (the actions slot).",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Section",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A count shown in a badge after the title (empty: none)."
+   }
+  ],
+  "slots": [
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Files",
+   "size": [
+    320,
+    36
+   ],
+   "props": {
+    "title": "Files",
+    "count": "12"
+   }
+  }
+ ],
+ "nodes": {
+  "header": {
+   "type": "row",
+   "children": [
+    "title",
+    "count",
+    "gap",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": 41,
+    "padding": [
+     14,
+     0,
+     9,
+     0
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "panelTitle"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "count": {
+   "type": "Badge",
+   "props": {
+    "label": "0",
+    "pill": true
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.label": "${props.count}",
+    "visible": "${= props.count != ''}"
+   }
+  },
+  "gap": {
+   "type": "spacer"
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  }
+ }
+}

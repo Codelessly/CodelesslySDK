@@ -1,0 +1,191 @@
+{
+ "schema": 3,
+ "id": "SectionTitle",
+ "roots": [
+  "head"
+ ],
+ "widget": {
+  "type": "SectionTitle",
+  "doc": "A heading over a section, with action as an optional link pill at the right that fires onPressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Last session",
+    "doc": "The section heading.",
+    "required": true
+   },
+   {
+    "key": "action",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small link pill at the right, e.g. See all (empty: none); a tap fires onPressed."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The link was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "With a link",
+   "size": [
+    350,
+    44
+   ],
+   "props": {
+    "title": "Last session",
+    "action": "See all"
+   }
+  }
+ ],
+ "nodes": {
+  "head": {
+   "type": "row",
+   "children": [
+    "title",
+    "action"
+   ],
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     2,
+     8,
+     0,
+     0
+    ]
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 350,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "blockTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "action": {
+   "type": "row",
+   "children": [
+    "actionText",
+    "actionIcon"
+   ],
+   "props": {
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     7,
+     8,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= props.action != ''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "actionText": {
+   "type": "text",
+   "props": {
+    "text": "${props.action}",
+    "style": {
+     "from": "chip",
+     "color": "brand"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "actionIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   }
+  }
+ }
+}

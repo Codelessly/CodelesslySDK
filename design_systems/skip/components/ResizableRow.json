@@ -1,0 +1,189 @@
+{
+ "schema": 3,
+ "id": "ResizableRow",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "ResizableRow",
+  "doc": "Two panes side by side with a grip between them. The first pane's width is your number variable: change it to resize.",
+  "props": [
+   {
+    "key": "leftWidth",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 240,
+    "doc": "The first pane's width."
+   }
+  ],
+  "slots": [
+   "left",
+   "right"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    480,
+    120
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "first",
+    "grip",
+    "second"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 480
+    },
+    "height": {
+     "fill": 120
+    }
+   }
+  },
+  "first": {
+   "type": "column",
+   "children": [
+    "left"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "fill": 120
+    }
+   },
+   "bind": {
+    "layout.width": "${= max(0, props.leftWidth)}"
+   }
+  },
+  "left": {
+   "type": "slot",
+   "props": {
+    "name": "left"
+   }
+  },
+  "grip": {
+   "type": "column",
+   "children": [
+    "dot1",
+    "dot2",
+    "dot3"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": 9,
+    "height": {
+     "fill": 120
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "states": {
+    "hovered": {
+     "grip": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "dot1": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryText"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "dot2": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryText"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "dot3": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryText"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "second": {
+   "type": "column",
+   "children": [
+    "right"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "fill": 120
+    }
+   }
+  },
+  "right": {
+   "type": "slot",
+   "props": {
+    "name": "right"
+   }
+  }
+ }
+}

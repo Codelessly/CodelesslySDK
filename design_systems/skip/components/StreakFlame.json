@@ -1,0 +1,234 @@
+{
+ "schema": 3,
+ "id": "StreakFlame",
+ "roots": [
+  "tile"
+ ],
+ "widget": {
+  "type": "StreakFlame",
+  "doc": "The streak as a tile: a drawn flame, count in display type, then the label (what is counted) and a note; put it in a Row with ProgressGoal.",
+  "props": [
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 4,
+    "doc": "The streak: how many in a row.",
+    "required": true
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "day streak",
+    "doc": "What is counted, after the number: \"day streak\", \"sessions in a row\"."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A short nudge under it (empty: none)."
+   },
+   {
+    "key": "audience",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "adult",
+      "kid"
+     ]
+    },
+    "default": "adult",
+    "doc": "Who the drawing is for: adult (lean, calm) or kid (rounder, playful, with confetti)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Four",
+   "size": [
+    169,
+    176
+   ],
+   "props": {
+    "count": 4,
+    "label": "sessions in a row",
+    "note": "Jump today to make it 5."
+   }
+  }
+ ],
+ "nodes": {
+  "tile": {
+   "type": "column",
+   "children": [
+    "top",
+    "texts"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176,
+    "padding": [
+     16,
+     16,
+     16,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 140,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "top": {
+   "type": "row",
+   "children": [
+    "flame",
+    "count"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "flame": {
+   "type": "Illustration",
+   "props": {
+    "role": "streak"
+   },
+   "layout": {
+    "width": 52,
+    "height": 64
+   },
+   "bind": {
+    "props.audience": "${props.audience}"
+   }
+  },
+  "count": {
+   "type": "text",
+   "props": {
+    "text": "${props.count}",
+    "style": "numberLarge"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "label",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "cardTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${props.note}",
+    "style": "meta",
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  }
+ }
+}

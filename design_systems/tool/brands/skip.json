@@ -1,0 +1,18 @@
+{
+ "id": "skip",
+ "name": "Skip",
+ "description": "A consumer fitness language for a jump rope app: an electric indigo brand with a volt accent, heavy display type, big round corners, soft tinted depth, and ready-made screen blocks with drawn illustrations.",
+ "primary": "#5B3DF5",
+ "primaryDark": "#9B87FF",
+ "ink": "#15122E",
+ "surface": "#FFFFFF",
+ "inkDark": "#F4F3FA",
+ "surfaceDark": "#0F0D1C",
+ "radius": 14,
+ "density": "comfortable",
+ "typeScale": 1.15,
+ "success": "#12A150",
+ "warning": "#E8590C",
+ "error": "#E11D48",
+ "info": "#0284C7"
+}

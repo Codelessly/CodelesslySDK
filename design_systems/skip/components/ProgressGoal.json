@@ -1,0 +1,307 @@
+{
+ "schema": 3,
+ "id": "ProgressGoal",
+ "roots": [
+  "tile"
+ ],
+ "widget": {
+  "type": "ProgressGoal",
+  "doc": "Progress toward a small goal as a tile: a ring with one segment per unit of goal, done/goal in display type, a title and a note; put it in a Row with StreakFlame.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "This week",
+    "doc": "What the goal is, e.g. This week.",
+    "required": true
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A short line under it, e.g. how many are left (empty: none)."
+   },
+   {
+    "key": "done",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 3,
+    "doc": "How many are done.",
+    "required": true
+   },
+   {
+    "key": "goal",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 5,
+    "doc": "The goal: the ring has one segment per unit.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "bolt_rounded",
+    "doc": "The icon inside the ring."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three of five",
+   "size": [
+    169,
+    176
+   ],
+   "props": {
+    "title": "This week",
+    "done": 3,
+    "goal": 5,
+    "note": "2 more to reach your goal."
+   }
+  }
+ ],
+ "nodes": {
+  "tile": {
+   "type": "column",
+   "children": [
+    "top",
+    "texts"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176,
+    "padding": [
+     16,
+     16,
+     16,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 210,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "top": {
+   "type": "row",
+   "children": [
+    "ring",
+    "done",
+    "of"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "ring": {
+   "type": "row",
+   "children": [
+    "ringIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 64,
+    "height": 64
+   },
+   "customPaint": {
+    "viewBox": [
+     64,
+     64
+    ],
+    "painter": [
+     {
+      "op": "repeat",
+      "count": "${= max(1, props.goal)}",
+      "ops": [
+       {
+        "op": "arc",
+        "rect": [
+         6,
+         6,
+         52,
+         52
+        ],
+        "startAngle": "${= -pi() / 2 + index * (2 * pi() / max(1, props.goal)) + (props.goal > 1 ? 0.34 : 0) / 2}",
+        "sweepAngle": "${= (2 * pi() / max(1, props.goal)) - (props.goal > 1 ? 0.34 : 0)}",
+        "paint": {
+         "color": "${= index < props.done ? theme.colors.brand : theme.colors.track}",
+         "style": "stroke",
+         "strokeWidth": 8,
+         "strokeCap": "round"
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "ringIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 24,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "done": {
+   "type": "text",
+   "props": {
+    "text": "${props.done}",
+    "style": "numberLarge"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "of": {
+   "type": "text",
+   "props": {
+    "text": "/${props.goal}",
+    "style": {
+     "from": "numberSmall",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     7
+    ]
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "cardTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${props.note}",
+    "style": "meta",
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  }
+ }
+}

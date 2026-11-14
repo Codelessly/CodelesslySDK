@@ -1,0 +1,8 @@
+Screen
+  TopBar "Hi, jumper!" "Today's game takes {today.minutes} minutes." eyebrow:"Skip" badge:"{streak}"
+  HeroSession "{today.name}" "{today.rounds} rounds. Jump {today.work} seconds, rest {today.rest}." eyebrow:"Today's game" minutes:"{today.minutes}" cta:"Let's jump!" audience:"kid" -> emit start_session
+  Row gap:12
+    StreakFlame "days in a row!" "Jump today to make it {streak+1}." count:=streak audience:"kid"
+    ProgressGoal "This week" "{weeklyGoal-sessionsThisWeek} more to win the week!" done:=sessionsThisWeek goal:=weeklyGoal icon:"star_rounded"
+  WeekStrip done:=map(take(sessions,sessionsThisWeek),s=>s.date) today:"Sat"
+  RecordCard "Your record" "Can you beat it?" value:"{first(sortByDesc(sessions,s=>s.best)).best}" unit:"jumps in a row" -> emit open_history

@@ -1,0 +1,278 @@
+{
+ "schema": 3,
+ "id": "RecordCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "RecordCard",
+  "doc": "A personal record as a warm highlight card: a drawn medal, the value in display type with its unit, and where it was set as the detail; a tap fires onPressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Personal best",
+    "doc": "What the record is, small caps.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Where it was set: the session and the date (empty: none)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "210",
+    "doc": "The record, in display type.",
+    "required": true
+   },
+   {
+    "key": "unit",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What it counts, after the number."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The card was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Best run",
+   "size": [
+    350,
+    110
+   ],
+   "props": {
+    "title": "Best run without a miss",
+    "value": "210",
+    "unit": "jumps",
+    "detail": "Endurance · Wed 11 Nov"
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "row",
+   "children": [
+    "medal",
+    "texts"
+   ],
+   "props": {
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     16,
+     18,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goldTint"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 210,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ],
+   "states": {
+    "pressed": {
+     "card": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "medal": {
+   "type": "Illustration",
+   "props": {
+    "role": "record"
+   },
+   "layout": {
+    "width": 60,
+    "height": 72
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "figure",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.title)}",
+    "style": {
+     "from": "eyebrow",
+     "color": "onGold"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "figure": {
+   "type": "row",
+   "children": [
+    "value",
+    "unit"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(props.value), '^[0-9.]+$') ? thousands(number(props.value)) : text(props.value)}",
+    "style": "number"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "unit": {
+   "type": "text",
+   "props": {
+    "text": "${props.unit}",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     4
+    ]
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  }
+ }
+}

@@ -1,0 +1,652 @@
+{
+ "schema": 3,
+ "id": "HeroSession",
+ "roots": [
+  "hero"
+ ],
+ "widget": {
+  "type": "HeroSession",
+  "doc": "The screen's one focal point: today's session on the brand gradient with the jumper illustration, minutes as a chip, the detail sentence and one big cta button that fires onPressed; audience:\"kid\" draws the child.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Intervals",
+    "doc": "The session's name, in display type.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One or two plain sentences on what the session is (empty: none)."
+   },
+   {
+    "key": "eyebrow",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Today",
+    "doc": "A small chip over the art, e.g. Today."
+   },
+   {
+    "key": "minutes",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "How long it takes, shown as an accent chip \"N min\" (empty: none)."
+   },
+   {
+    "key": "cta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Start session",
+    "doc": "The button's label."
+   },
+   {
+    "key": "audience",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "adult",
+      "kid"
+     ]
+    },
+    "default": "adult",
+    "doc": "Who the drawing is for: adult (lean, calm) or kid (rounder, playful, with confetti)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The start button was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Intervals",
+   "size": [
+    350,
+    400
+   ],
+   "props": {
+    "title": "Intervals",
+    "minutes": "8",
+    "detail": "8 easy rounds: jump for 40 seconds, rest for 20."
+   }
+  }
+ ],
+ "nodes": {
+  "hero": {
+   "type": "column",
+   "children": [
+    "stage",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "heroA"
+       },
+       {
+        "position": 1,
+        "color": "heroB"
+       }
+      ]
+     },
+     {
+      "type": "noise",
+      "noise": {
+       "baseFrequency": 0.9,
+       "numOctaves": 2,
+       "seed": 7
+      },
+      "color": "#FFFFFFFF",
+      "opacity": 0.08,
+      "blendMode": "overlay"
+     }
+    ],
+    "radius": 32,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.hero}",
+    "decoration.effects": "${theme.shadows.hero}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 70,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "stage": {
+   "type": "stack",
+   "children": [
+    "glow",
+    "rings",
+    "figure",
+    "chipA",
+    "titleBox"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 244
+   }
+  },
+  "glow": {
+   "type": "box",
+   "layout": {
+    "width": 260,
+    "height": 260,
+    "x": {
+     "end": -40
+    },
+    "y": {
+     "start": -60
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroGlow"
+     }
+    ],
+    "shape": "circle",
+    "effects": [
+     {
+      "type": "layerBlur",
+      "blurRadius": 46
+     }
+    ]
+   },
+   "opacity": 0.55
+  },
+  "rings": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width - 78}",
+       118
+      ],
+      "radius": 158,
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width - 78}",
+       118
+      ],
+      "radius": 206,
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width - 78}",
+       118
+      ],
+      "radius": 258,
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     }
+    ]
+   }
+  },
+  "figure": {
+   "type": "Illustration",
+   "props": {
+    "role": "hero"
+   },
+   "layout": {
+    "width": 236,
+    "height": 236,
+    "x": {
+     "end": -40
+    },
+    "y": {
+     "start": 0
+    }
+   },
+   "bind": {
+    "props.audience": "${props.audience}"
+   },
+   "animations": [
+    {
+     "id": "bob",
+     "duration": 640,
+     "curve": "easeInOutSine",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "motion.translateY",
+       "from": 3,
+       "to": -5
+      }
+     ]
+    }
+   ]
+  },
+  "chipA": {
+   "type": "row",
+   "children": [
+    "chipAText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     11,
+     7,
+     11,
+     7
+    ],
+    "x": {
+     "start": 20
+    },
+    "y": {
+     "start": 20
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= props.eyebrow != ''}"
+   }
+  },
+  "chipAText": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.eyebrow)}",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 1.1,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chipB": {
+   "type": "row",
+   "children": [
+    "chipBIcon",
+    "chipBText"
+   ],
+   "props": {
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     9,
+     6,
+     12,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= props.minutes != ''}"
+   }
+  },
+  "chipBIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "timer_outlined",
+    "size": 15,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   }
+  },
+  "chipBText": {
+   "type": "text",
+   "props": {
+    "text": "${props.minutes} min",
+    "style": {
+     "from": "chip",
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "titleBox": {
+   "type": "column",
+   "children": [
+    "chipB",
+    "title"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "x": {
+     "start": 22,
+     "end": 126
+    },
+    "y": {
+     "end": 2
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "display",
+     "color": "onHero"
+    },
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "detail",
+    "cta"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 18
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     22,
+     8,
+     22,
+     22
+    ]
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "from": "lead",
+     "color": "onHeroSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "cta": {
+   "type": "row",
+   "children": [
+    "ctaMark",
+    "ctaLabel",
+    "ctaArrow"
+   ],
+   "props": {
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 60,
+    "padding": [
+     9,
+     0,
+     20,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroCta"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}",
+    "decoration.effects": "${theme.shadows.cta}"
+   },
+   "states": {
+    "pressed": {
+     "cta": {
+      "opacity": 0.88
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "ctaMark": {
+   "type": "row",
+   "children": [
+    "ctaPlay"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 42,
+    "height": 42
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroCtaMark"
+     }
+    ],
+    "radius": 21
+   },
+   "bind": {
+    "decoration.radius": "${= min(21, theme.radii.cta - 3)}"
+   }
+  },
+  "ctaPlay": {
+   "type": "icon",
+   "props": {
+    "icon": "play_arrow_rounded",
+    "size": 26,
+    "color": "onHeroCtaMark"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   }
+  },
+  "ctaLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.cta}",
+    "style": {
+     "from": "cta",
+     "color": "onHeroCta"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "ctaArrow": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 22,
+    "color": "onHeroCta"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   }
+  }
+ }
+}

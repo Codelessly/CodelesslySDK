@@ -1,0 +1,8 @@
+{
+ "schema": 3,
+ "pages": [
+  "home.json",
+  "history.json"
+ ],
+ "designSystem": "../../../../../design_systems/skip"
+}

@@ -1,0 +1,129 @@
+{
+ "schema": 3,
+ "id": "StatusIndicator",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "StatusIndicator",
+  "doc": "Where a job is, as one 15 px glyph: spinning while it runs, a check when done, an alert on error. Fires onPressed.",
+  "props": [
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "setupNeeded",
+      "settingUp",
+      "synced",
+      "completion",
+      "running",
+      "paused",
+      "errored"
+     ]
+    },
+    "default": "synced",
+    "doc": "setupNeeded, settingUp, synced, completion, running, paused or errored."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Synced",
+   "size": [
+    15,
+    15
+   ],
+   "props": {
+    "status": "synced"
+   }
+  },
+  {
+   "name": "Running",
+   "size": [
+    15,
+    15
+   ],
+   "props": {
+    "status": "running"
+   }
+  },
+  {
+   "name": "Errored",
+   "size": [
+    15,
+    15
+   ],
+   "props": {
+    "status": "errored"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "row",
+   "children": [
+    "spinner",
+    "glyph"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed",
+       "value": "${props.status}"
+      }
+     ]
+    }
+   ]
+  },
+  "spinner": {
+   "type": "circularProgressIndicator",
+   "props": {
+    "color": "primary",
+    "strokeWidth": 1.5,
+    "strokeCap": "round"
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "visible": "${= (props.status == 'running' || props.status == 'settingUp')}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle_outline",
+    "color": "success",
+    "size": 15
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "visible": "${= !(props.status == 'running' || props.status == 'settingUp')}",
+    "props.icon": "${= props.status == 'errored' ? 'error_outline' : (props.status == 'setupNeeded' ? 'new_releases' : (props.status == 'paused' ? 'play_arrow' : 'check_circle_outline'))}",
+    "props.color": "${= props.status == 'errored' ? theme.error : (props.status == 'setupNeeded' ? theme.primary : (props.status == 'paused' ? theme.colors.tertiaryText : theme.success))}"
+   }
+  }
+ }
+}
