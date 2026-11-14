@@ -23,7 +23,13 @@ typedef Page = ({String name, Json json});
 /// shows.
 ({PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) publishPages(
     List<Page> pages,
-    {Json variables = const {}, Object? breakpoints, List<Json> components = const [], Json? theme, int componentVersion = 1, String projectId = 'render'}) {
+    {Json variables = const {},
+    Object? breakpoints,
+    List<Json> components = const [],
+    Json? theme,
+    List<FontFamily> fonts = const [],
+    int componentVersion = 1,
+    String projectId = 'render'}) {
   // The theme as each of its media rules makes it (the fonts its named
   // styles use at every size).
   final tokens = ThemeTokens.fromJson(theme);
@@ -33,7 +39,14 @@ typedef Page = ({String name, Json json});
   ];
   final library = ComponentLibrary.of([for (final c in components) LayoutDocument.fromJson(c)]);
   final rawOf = {for (final c in components) readString(readMap(c['widget'])?['type']) ?? '': c};
-  final fonts = <String, Json>{};
+  final modelFonts = <String, Json>{};
+  // The site's declared families: a layout using one lists all its files,
+  // read from their paths relative to the site (as a pubspec family
+  // registers together).
+  final declared = <String, List<PublishFont>>{};
+  for (final f in PublishFont.ofFamilies(fonts)) {
+    declared.putIfAbsent(f.family.toLowerCase(), () => []).add(f);
+  }
   // The fonts [nodes] (node JSON) use, as ids of the model's `fonts`: their
   // text styles' and those of the theme's named styles they name, at every
   // size the theme has.
@@ -46,8 +59,15 @@ typedef Page = ({String name, Json json});
     ];
     final ids = <String>[];
     for (final f in fontsUsedBy([...nodes, ...named])) {
+      if (declared[f.family.toLowerCase()] case final List<PublishFont> files) {
+        for (final d in files) {
+          modelFonts[d.id] = {'family': d.family, 'weight': d.weight, if (d.italic) 'italic': true, 'url': d.url};
+          if (!ids.contains(d.id)) ids.add(d.id);
+        }
+        continue;
+      }
       final key = '${f.family}/${f.weight}/${f.italic}';
-      fonts[key] = {'family': f.family, 'weight': f.weight, if (f.italic) 'italic': true};
+      modelFonts[key] = {'family': f.family, 'weight': f.weight, if (f.italic) 'italic': true};
       ids.add(key);
     }
     return ids;
@@ -159,7 +179,7 @@ typedef Page = ({String name, Json json});
       for (final e in layouts.entries) e.key: PublishLayoutInfo.of(PublishLayout.fromJson(e.value), components: closures[e.key] ?? const []).toJson(),
     },
     'fonts': {
-      for (final e in fonts.entries) e.key: {'id': e.key, ...e.value},
+      for (final e in modelFonts.entries) e.key: {'id': e.key, ...e.value},
     },
     'breakpoints': ?breakpoints,
     if (variables.isNotEmpty) 'variables': variables,

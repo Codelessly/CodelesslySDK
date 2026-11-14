@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Validate and render Codelessly layout documents. See tool/render/README.md.
 #   tool/render/render.sh <document.json | dir> --out <dir> [--sizes 390x844,...] [--screen id]
-#       [--full-page] [--fonts dir] [--tap id] [--hover id] [--focus id] [--type id=text] [--set name=json]
+#       [--full-page] [--fonts dir] [--theme light|dark|system] [--tap id] [--hover id] [--focus id] [--type id=text] [--set name=json]
 #       [--scroll id=px] [--navigate screen] [--wait ms] [--label text] [--validate-only]
 #       [--component Type [--props json] [--slots file]]
 # Exit status: 0 no errors (warnings allowed), 1 errors, 2 bad arguments or a crash.
@@ -15,7 +15,10 @@ out=""
 expect_path=0
 for a in "$@"; do
   if [ $expect_path = 1 ]; then
-    case "$a" in /*) ;; *) a="$PWD/$a" ;; esac
+    # `--fonts system` names the system's font directories, not a path.
+    if [ "${prev:-}" != "--fonts" ] || [ "$a" != "system" ]; then
+      case "$a" in /*) ;; *) a="$PWD/$a" ;; esac
+    fi
     expect_path=0
     args+=("$a")
     [ "${prev:-}" = "--out" ] && out="$a"
@@ -27,7 +30,7 @@ for a in "$@"; do
     --*) args+=("$a") ;;
     *)
       # A positional argument right after a value-taking option is that option's value.
-      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|navigate|wait|label|component|props)$ ]]; then
+      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|navigate|wait|label|component|props|theme)$ ]]; then
         args+=("$a")
       else
         case "$a" in /*) ;; *) a="$PWD/$a" ;; esac

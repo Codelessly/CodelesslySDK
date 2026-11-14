@@ -10,8 +10,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:codelessly_api/codelessly_api.dart' show PublishFont;
+import 'package:codelessly_api/codelessly_api.dart' show FontFamily, PublishFont;
 import 'package:codelessly_sdk/codelessly_sdk.dart' show FontFetcher;
+import 'package:codelessly_sdk/src/app/site_files.dart' show sfntOf;
+
+export 'package:codelessly_sdk/src/app/site_files.dart' show sfntOf;
 
 /// One font file: its family, weight (100–900) and style.
 typedef FontFace = ({String family, int weight, bool italic, String path});
@@ -90,85 +93,6 @@ typedef UnreadFont = ({String path, String reason});
 /// What [scanFonts] found: the faces, and the font files it could not use.
 final List<UnreadFont> unreadFonts = [];
 
-/// The TrueType/OpenType bytes of font file [bytes]: as they are, or
-/// decoded from WOFF (zlib-compressed tables). Null for anything else
-/// (WOFF2, a collection), with the reason in [why].
-Uint8List? sfntOf(Uint8List bytes, {void Function(String reason)? why}) {
-  if (bytes.length < 12) return null;
-  final sig = String.fromCharCodes(bytes.sublist(0, 4));
-  if (sig == 'wOFF') {
-    try {
-      return _woff(bytes);
-    } catch (e) {
-      why?.call('not a readable WOFF file ($e)');
-      return null;
-    }
-  }
-  if (sig == 'wOF2') {
-    why?.call('WOFF2 (Brotli-compressed): not read by this command. Use the .woff or .ttf of the same face '
-        '(an npm @fontsource package ships a .woff beside each .woff2)');
-    return null;
-  }
-  if (sig == 'ttcf') {
-    why?.call('a font collection (.ttc): not read');
-    return null;
-  }
-  final tag = ByteData.sublistView(bytes).getUint32(0);
-  if (tag == 0x00010000 || sig == 'OTTO' || sig == 'true') return bytes;
-  why?.call('not a font file');
-  return null;
-}
-
-/// A WOFF file's TrueType/OpenType file (W3C WOFF 1.0): its tables
-/// inflated, under an sfnt header and table directory.
-Uint8List _woff(Uint8List bytes) {
-  final b = ByteData.sublistView(bytes);
-  final flavor = b.getUint32(4);
-  final numTables = b.getUint16(12);
-  final tables = <(String, int, Uint8List)>[];
-  for (var i = 0; i < numTables; i++) {
-    final rec = 44 + 20 * i;
-    final tag = String.fromCharCodes(bytes.sublist(rec, rec + 4));
-    final offset = b.getUint32(rec + 4), compLength = b.getUint32(rec + 8), origLength = b.getUint32(rec + 12);
-    final checksum = b.getUint32(rec + 16);
-    final raw = Uint8List.sublistView(bytes, offset, offset + compLength);
-    tables.add((tag, checksum, compLength < origLength ? Uint8List.fromList(zlib.decode(raw)) : Uint8List.fromList(raw)));
-  }
-  tables.sort((a, c) => a.$1.compareTo(c.$1));
-  final n = tables.length;
-  var entrySelector = 0;
-  while ((1 << (entrySelector + 1)) <= n) {
-    entrySelector++;
-  }
-  final searchRange = (1 << entrySelector) * 16;
-  final head = ByteData(12 + 16 * n)
-    ..setUint32(0, flavor)
-    ..setUint16(4, n)
-    ..setUint16(6, searchRange)
-    ..setUint16(8, entrySelector)
-    ..setUint16(10, n * 16 - searchRange);
-  var offset = 12 + 16 * n;
-  for (var i = 0; i < n; i++) {
-    final (tag, checksum, data) = tables[i];
-    final rec = 12 + 16 * i;
-    for (var k = 0; k < 4; k++) {
-      head.setUint8(rec + k, tag.codeUnitAt(k));
-    }
-    head
-      ..setUint32(rec + 4, checksum)
-      ..setUint32(rec + 8, offset)
-      ..setUint32(rec + 12, data.length);
-    offset += (data.length + 3) & ~3;
-  }
-  final out = BytesBuilder(copy: false)..add(head.buffer.asUint8List());
-  for (final (_, _, data) in tables) {
-    out.add(data);
-    final pad = ((data.length + 3) & ~3) - data.length;
-    if (pad > 0) out.add(Uint8List(pad));
-  }
-  return out.takeBytes();
-}
-
 /// Where decoded web fonts are written (a TrueType/OpenType file each).
 final Directory _decoded = Directory.systemTemp.createTempSync('codelessly-render-fonts');
 
@@ -210,6 +134,41 @@ List<FontFace> scanFonts(Iterable<String> dirs) {
         File(path).writeAsBytesSync(sfnt);
       }
       out.add((family: face.family, weight: face.weight, italic: face.italic, path: path));
+    }
+  }
+  return out;
+}
+
+/// A declared font file that could not be used: missing, or not read.
+typedef DeclaredFontProblem = ({String family, String asset, String reason, bool missing});
+
+/// The faces a site declares (`site.json`'s `fonts`, files relative to
+/// [siteDir]), each under its declared family, weight and style (as a
+/// pubspec's fonts are, whatever the file calls itself); a WOFF file is
+/// decoded. Files that are missing or unreadable go to [problems].
+List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<DeclaredFontProblem> problems) {
+  final out = <FontFace>[];
+  for (final f in families) {
+    for (final a in f.fonts) {
+      final file = File('$siteDir/${a.asset}');
+      if (!file.existsSync()) {
+        problems.add((family: f.family, asset: a.asset, reason: 'no file ${file.path}', missing: true));
+        continue;
+      }
+      if (a.asset.toLowerCase().endsWith('.woff2')) continue; // validation reports it (font_format)
+      final bytes = file.readAsBytesSync();
+      String? reason;
+      final sfnt = sfntOf(bytes, why: (r) => reason = r);
+      if (sfnt == null) {
+        problems.add((family: f.family, asset: a.asset, reason: reason ?? 'not read', missing: false));
+        continue;
+      }
+      var path = file.path;
+      if (!identical(sfnt, bytes)) {
+        path = '${_decoded.path}/declared-${out.length}-${file.uri.pathSegments.last}.ttf';
+        File(path).writeAsBytesSync(sfnt);
+      }
+      out.add((family: f.family, weight: a.weight, italic: a.italic, path: path));
     }
   }
   return out;

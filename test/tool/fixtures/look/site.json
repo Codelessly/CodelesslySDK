@@ -1,0 +1,25 @@
+{
+  "schema": 3,
+  "pages": ["home.json"],
+  "fonts": [
+    {"family": "Plain Sans", "fonts": [
+      {"asset": "fonts/dm-sans-latin-400-normal.woff"},
+      {"asset": "fonts/dm-sans-latin-700-normal.woff", "weight": 700}
+    ]}
+  ],
+  "theme": {
+    "fontFamily": "Plain Sans",
+    "surface": "#FFFFFFFF",
+    "onSurface": "#FF1A1A1A",
+    "colors": {"ink": "#FF1A1A1A", "paper": "#FFF7F4EE", "accent": "#FFC2410C"},
+    "textStyles": {
+      "body": {"fontFamily": "Plain Sans", "fontSize": 16, "height": 1.4, "color": "ink"},
+      "title": {"from": "body", "fontSize": 28, "fontWeight": 700}
+    },
+    "dark": {
+      "surface": "#FF141414",
+      "onSurface": "#FFF0F0F0",
+      "colors": {"ink": "#FFF0F0F0", "paper": "#FF101010", "accent": "#FFFB923C"}
+    }
+  }
+}

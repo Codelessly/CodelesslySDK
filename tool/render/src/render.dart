@@ -74,8 +74,9 @@ const runtimeCodes = <(String, String, String)>[
   ('text_clipped', 'warning', 'A text does not fit its box: its lines are taller than the box, or a word is wider.'),
   ('text_truncated', 'warning', 'A text was cut at maxLines with overflow "clip" (an ellipsis or fade is taken as meant).'),
   ('text_no_color', 'warning', 'A text has no color: the engine paints it white (invisible on a light background). Set props.style.color.'),
-  ('font_fallback', 'warning', 'A font family (or weight/style) is not in the fonts directories: the text is drawn in another font.'),
-  ('image_failed', 'error', 'An image could not be loaded or decoded (missing file, bad data: URL).'),
+  ('font_fallback', 'warning', 'A font family (or weight/style) a text style names is neither declared in site.json\'s "fonts" nor in a --fonts directory: the text is drawn in another font. The message names the family and the nodes that use it.'),
+  ('font_missing', 'error', 'A font file site.json\'s "fonts" declares is not there (the path is relative to the site), or is not a font file it can read.'),
+  ('image_failed', 'error', 'An image could not be loaded or decoded: a file named by a path relative to the site that is not there (the message names it), or a bad data: URL.'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
   ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
@@ -186,6 +187,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   report.diagnostics.addAll(validateTheme(themeJson,
           breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
       .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
+  // The fonts it declares: their shape and formats.
+  report.diagnostics.addAll(validateSiteFonts(site.manifest?['fonts']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
@@ -193,7 +196,23 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   FontDemand.handler = null;
   final root = flutterRoot ?? Platform.environment['FLUTTER_ROOT'] ?? '';
   unreadFonts.clear();
-  final faces = [...defaultFonts(root), ...scanFonts(args.fontDirs)];
+  // The site's folder: what its fonts' and images' relative paths start from.
+  final siteDir = [
+    for (final i in args.inputs)
+      if (File('$i/${api.SiteManifest.fileName}').existsSync()) Directory(i).absolute.path,
+  ].firstOrNull;
+  final declared = manifest?.fonts ?? const <api.FontFamily>[];
+  final declaredProblems = <DeclaredFontProblem>[];
+  final faces = [
+    ...defaultFonts(root),
+    if (siteDir != null) ...declaredFonts(declared, siteDir, declaredProblems),
+    ...scanFonts(args.fontDirs),
+  ];
+  for (final p in declaredProblems) {
+    issue(RuntimeIssue('font_missing', 'error',
+        'Font "${p.family}" declares ${p.asset}: ${p.reason}. ${p.missing ? 'Put the file there (paths are relative to site.json)' : 'Declare a .ttf, .otf or .woff file'}; its text falls back meanwhile.',
+        file: api.SiteManifest.fileName));
+  }
   final fetcher = DirectoryFontFetcher(faces);
   await tester.runAsync(() async {
     // The default family and the icon font, registered up front.
@@ -246,7 +265,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     dirs[a.name] = Directory.current.path;
   }
   for (final e in docs.entries) {
-    final p = prepare(e.value, dir: dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
+    // Relative image paths start from the site's folder (as at run time),
+    // else from the document's.
+    final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
     if (isComponentJson(e.value)) {
       components.define(api.LayoutDocument.fromJson(p.json));
     } else if (alone.isEmpty || alone.any((a) => a.name == e.key)) {
@@ -279,7 +300,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       variables: publishVariables(site.manifest),
       breakpoints: site.manifest?['breakpoints'],
       components: [for (final t in components.types) components[t]!.document.toJson()],
-      theme: prepareTheme(themeJson ?? const {}, defaultFamily: 'Roboto'));
+      theme: prepareTheme(themeJson ?? const {}, defaultFamily: 'Roboto'),
+      fonts: declared);
   final fileOfNode = <String, String>{
     for (final e in docs.entries)
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
@@ -299,13 +321,14 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
   try {
     if (alone.isEmpty) {
-      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report, components: components);
+      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report,
+          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), siteDir: siteDir);
     }
     for (final a in alone) {
       // A preview renders at its own size; ad-hoc parameters at each size.
       final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
       await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
-          report, components: components);
+          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), siteDir: siteDir);
     }
     for (final e in components.missing.entries) {
       for (final path in e.value) {
@@ -335,6 +358,8 @@ Future<void> _renderAll(
   void Function(RuntimeIssue) issue,
   RenderReport report, {
   ComponentRegistry? components,
+  Map<String, List<String>> fontUsers = const {},
+  String? siteDir,
 }) async {
   // 3. Which screens.
   final screens = _screens(published, docs, args.screens, (s) => issue(s));
@@ -345,7 +370,11 @@ Future<void> _renderAll(
     for (final size in args.sizes) {
       final sizeName = '${size.width.round()}x${size.height.round()}';
       final codelessly = Codelessly(
-        loader: MemoryPublishLoader(published.bundle),
+        // The site's files (declared fonts), read from its folder.
+        loader: MemoryPublishLoader(published.bundle, readAsset: siteDir == null ? null : (path) async {
+          final f = File('$siteDir/$path');
+          return f.existsSync() ? f.readAsBytesSync() : null;
+        }),
         components: components,
         fonts: fetcher,
         config: CodelesslyConfig(services: Services(analytics: recorder), fontTimeout: const Duration(seconds: 5)),
@@ -353,6 +382,9 @@ Future<void> _renderAll(
       final controller = CodelesslyWidgetController();
       final navigator = GlobalKey<NavigatorState>();
       final boundary = GlobalKey();
+      // `--theme`: the mode the site starts in, as a setThemeMode action
+      // sets it (steps may change it).
+      if (args.theme != null) codelessly.setThemeMode(api.ThemeMode.tryParse(args.theme));
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = ui.Size(size.width, size.height);
       void collect() {
@@ -501,17 +533,22 @@ Future<void> _renderAll(
         ];
         final looked = [
           'the built-in Roboto and Material Icons',
+          if (fontUsers.isNotEmpty) 'site.json\'s fonts',
           if (args.fontDirs.isNotEmpty) fontDirsOf(args.fontDirs).join(', ') else 'no --fonts directory',
         ].join('; ');
+        final users = fontUsers[m.family.toLowerCase()] ?? const <String>[];
         issue(RuntimeIssue('font_fallback', 'warning',
-            'Font "${m.family}" $style (fontFamily "${m.family}", fontWeight ${m.weight}, fontStyle ${m.italic ? 'italic' : 'normal'}) was asked for; '
+            'Font "${m.family}" $style (fontFamily "${m.family}", fontWeight ${m.weight}, fontStyle ${m.italic ? 'italic' : 'normal'}) was asked for'
+            '${users.isEmpty ? '' : ' by ${users.take(8).map((u) => '"$u"').join(', ')}${users.length > 8 ? ' and ${users.length - 8} more' : ''}'}; '
             '${has.isEmpty ? 'no file of that family was found' : 'the family has only ${has.join(', ')}'} in $looked. '
             '${m.substitute == null ? 'Its text is drawn in the default font.' : 'Drawn with ${m.substitute}.'}'
             '${unread.isEmpty ? '' : ' Found but not read: ${unread.take(3).join('; ')}.'}'
-            ' Add its files with --fonts <dir> (.ttf, .otf or .woff: a font package folder such as node_modules/@fontsource/<family>, '
-            'or `--fonts system` for the system\'s fonts).'));
+            ' Declare it in site.json: "fonts": [{"family": "${m.family}", "fonts": [{"asset": "fonts/<file>.ttf", "weight": ${m.weight}${m.italic ? ', "style": "italic"' : ''}}]}] '
+            '(.ttf, .otf or .woff beside site.json), or pass --fonts <dir> (a font package folder such as node_modules/@fontsource/<family>, '
+            'or `--fonts system` for the system\'s fonts).',
+            nodeId: users.isEmpty ? null : users.first));
       }
-      final name = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
+      final name = '${_fileSafe(label)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';
       final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final page = fullPage;
@@ -1471,4 +1508,40 @@ String? _fileOf(NodeBox b, Map<String, String> fileOfNode, Map<String, api.Json>
   final c = componentInstanceOf(b.instance);
   if (c == null) return fileOfNode[b.id];
   return docs.entries.where((e) => api.readMap(e.value[api.kWidgetKey])?['type'] == c.component).firstOrNull?.key;
+}
+
+/// The nodes of [docs] that name each font family (lowercased), as
+/// `file:node`: a text style's `fontFamily`, or a named style of [theme]
+/// whose family it is.
+Map<String, List<String>> _fontUsers(Map<String, api.Json> docs, api.ThemeTokens theme) {
+  final out = <String, List<String>>{};
+  final styleFamily = {
+    for (final k in theme.textStyles.keys)
+      if (theme.textStyle(k)?.fontFamily case final String f) k: f,
+  };
+  for (final d in docs.entries) {
+    for (final n in (api.readMap(d.value['nodes']) ?? const {}).entries) {
+      final families = <String>{};
+      void walk(Object? v) {
+        if (v is Map) {
+          for (final e in v.entries) {
+            if (e.key == 'fontFamily' && e.value is String) families.add(e.value as String);
+            if ((e.key == 'style' || e.key == 'from' || e.key.toString().endsWith('Style')) && e.value is String) {
+              if (styleFamily[e.value] case final String f) families.add(f);
+            }
+            walk(e.value);
+          }
+        } else if (v is List) {
+          v.forEach(walk);
+        }
+      }
+
+      walk(n.value);
+      for (final f in families) {
+        final list = out.putIfAbsent(f.toLowerCase(), () => []);
+        if (!list.contains(n.key)) list.add(n.key);
+      }
+    }
+  }
+  return out;
 }

@@ -105,7 +105,7 @@ Future<CodelesslyWidgetController> _pump(WidgetTester tester, Codelessly app) as
 ({String text, api.Color? ink, api.Color? paper, Brightness control, Color surface}) _look(WidgetTester tester, String id) {
   final tree = tester.widgetList<NodeView>(find.byType(NodeView)).map((v) => v.tree).lastWhere((t) => t.boxOf('$id-label') != null);
   final label = tree.boxOf('$id-label')!.node!;
-  final style = label.prop(TextProps.style) as api.TextStyle;
+  final style = label.prop(TextProps.style);
   final island = find.byWidgetPredicate((w) => w.runtimeType.toString() == '_CheckboxIsland').last;
   final theme = Theme.of(tester.element(island));
   return (

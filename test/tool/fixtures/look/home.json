@@ -1,0 +1,33 @@
+{
+  "schema": 3,
+  "roots": ["home"],
+  "nodes": {
+    "home": {"type": "canvas", "name": "Home", "slots": {"body": "page"}, "layout": {"width": 390, "height": 844}},
+    "page": {
+      "type": "column",
+      "children": ["title", "card", "check", "toggle"],
+      "layout": {"width": {"fill": 390}, "height": {"fill": 844}, "padding": 24},
+      "decoration": {"fills": [{"color": "paper"}]},
+      "props": {"spacing": 16, "crossAxisAlignment": "start"}
+    },
+    "title": {"type": "text", "props": {"text": "Light and dark", "style": "title"}, "layout": {"width": {"fill": 342}, "height": {"hug": 40}}},
+    "card": {
+      "type": "box",
+      "layout": {"width": {"fill": 342}, "height": 200},
+      "decoration": {
+        "radius": 12,
+        "fills": [
+          {"type": "image", "image": {"url": "images/photo.png", "fit": "cover"}},
+          {"type": "linear", "stops": [{"color": "#00000000", "position": 0.4}, {"color": "#B3000000", "position": 1}], "begin": [0, -1], "end": [0, 1]}
+        ]
+      }
+    },
+    "check": {"type": "checkbox", "props": {"value": true}, "layout": {"width": 40, "height": 40}},
+    "toggle": {
+      "type": "box",
+      "layout": {"width": 48, "height": 48},
+      "decoration": {"radius": 24, "fills": [{"color": "accent"}]},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setThemeMode", "mode": "${= theme.isDark ? 'light' : 'dark'}"}]}]
+    }
+  }
+}
