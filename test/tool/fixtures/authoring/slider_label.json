@@ -1,0 +1,3 @@
+{"schema":3,"roots":["s"],"nodes":{"s":{"type":"canvas","slots":{"body":"b"},"layout":{"width":390,"height":300},"decoration":{"fills":[{"color":"#FFFFFFFF"}]}},
+"b":{"type":"column","children":["slider"],"layout":{"width":{"fill":390},"height":{"fill":300},"padding":40}},
+"slider":{"type": "slider", "layout": {"width": 300, "height": 48}, "props": {"min": 0, "max": 100, "value": 50, "label": "Half", "showValueIndicator": "alwaysVisible"}}}}
