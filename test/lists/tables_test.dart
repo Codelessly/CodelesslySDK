@@ -220,7 +220,6 @@ void main() {
         'horizontalPadding': 16,
         'rowHoverColor': '#FF222228',
         'selectedRowColor': '#FF2E2E36',
-        'selectedRowEdgeColor': '#FFFFD400',
         'headerBorderColor': '#FF34343C',
         'headerBorderWidth': 2,
       },

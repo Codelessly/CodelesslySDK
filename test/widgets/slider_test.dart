@@ -117,7 +117,7 @@ void main() {
         's': {'type': 'slider', 'layout': {'width': 200, 'height': 30}, 'props': {
           'min': -10, 'max': 10, 'value': value, 'trackShape': 'ruler', 'thumbShape': 'pointer', 'padding': 0,
           'activeTrackColor': '#FFFF0000', 'inactiveTrackColor': '#FFFFFFFF', 'thumbColor': '#FF0000FF',
-          'overlayColor': '#00000000', 'rulerTickColor': '#FF000000',
+          'overlayColor': '#00000000',
         }},
       }});
       final tree = NodeTree(NodeValues(DocumentSource(doc)));

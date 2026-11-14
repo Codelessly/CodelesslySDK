@@ -123,8 +123,6 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
     final hoverColor = n.prop(TableViewProps.rowHoverColor)?.flutter;
     final selected = n.prop(TableViewProps.selectedRow);
     final selectedColor = n.prop(TableViewProps.selectedRowColor)?.flutter;
-    final selectedEdge = n.prop(TableViewProps.selectedRowEdgeColor)?.flutter;
-    final selectedEdgeWidth = n.prop(TableViewProps.selectedRowEdgeWidth);
     final lastColumn = columns.length + columnOffset - 1;
 
     void tapRow(int rowIndex) => r.fire(TriggerType.rowTap.name, event: {
@@ -228,7 +226,7 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
               final List l => l.elementAtOrNull(columnIndex),
               _ => null,
             };
-            final content = TableViewCell(
+            return TableViewCell(
               child: template(cell, (rowIndex, columnIndex), rowIndex, {
                 'value': value,
                 'row': row,
@@ -236,20 +234,6 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
                 'rowIndex': rowIndex,
                 'columnIndex': columnIndex,
               }),
-            );
-            // The selected row's edge, at the start of its first cell.
-            if (columnIndex != 0 || rowIndex != selected || selectedEdge == null) return content;
-            return TableViewCell(
-              child: Stack(children: [
-                Positioned.fill(child: content.child),
-                Positioned(
-                  left: -edge,
-                  top: 0,
-                  bottom: 0,
-                  width: selectedEdgeWidth,
-                  child: ColoredBox(color: selectedEdge),
-                ),
-              ], clipBehavior: Clip.none),
             );
           },
         ),

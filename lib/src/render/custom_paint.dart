@@ -38,7 +38,8 @@ void customPaintLayers(NodeBuilder b, Node n, List<RenderBox> chain) {
   final values = b.tree.bindings?.valuesFor(b.source, b.id, b.instance);
   chain.add(
     b.obtain<RenderCustomPaintLayer>('customPaint', RenderCustomPaintLayer.new)
-      ..configure(paint, values is ExpressionValues ? values : null, textDefault: n.behaviors.defaultTextStyle),
+      ..configure(paint, values is ExpressionValues ? values : null, textDefault: n.behaviors.defaultTextStyle)
+      ..drawnByContent = false,
   );
 }
 
@@ -960,7 +961,50 @@ class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
         any = true;
       }
     }
-    if (any) markNeedsPaint();
+    if (any) {
+      markNeedsPaint();
+      _drawnIn?.markNeedsPaint();
+    }
+  }
+
+  // --- drawn by a control -------------------------------------------------------------
+
+  /// Whether a control in the node's content draws the lists itself, between
+  /// its parts ([drawFor]): a slider draws `painter` over its track and
+  /// under its thumb, `foregroundPainter` over its thumb. The layer then
+  /// draws only its child. Set by the control's recipe after [configure].
+  bool drawnByContent = false;
+
+  /// The render object that last drew the lists ([drawFor]): repainted when a
+  /// value they read changes.
+  RenderObject? _drawnIn;
+
+  /// Draws [foreground]'s list (else the painter's) on [canvas] at [offset],
+  /// in a box of [size], with [locals] as names of its own (a slider's
+  /// `slider`: its value, track rect and thumb center), for [drawnIn] (a
+  /// control drawing them between its parts, [drawnByContent]). Drawn
+  /// afresh each time, as the control's own parts are; hit regions and a
+  /// view box are not read.
+  void drawFor(RenderObject drawnIn, Canvas canvas, Offset offset, Size size, Map<String, Object?> locals,
+      {required bool foreground}) {
+    _drawnIn = drawnIn;
+    final list = foreground ? _foreground : _painter;
+    if (list.isEmpty) return;
+    final scope = _Scope(_values)
+      ..locals.addAll(locals)
+      ..locals['size'] = {'width': size.width, 'height': size.height};
+    canvas
+      ..save()
+      ..translate(offset.dx, offset.dy);
+    final p = _Painter(canvas, scope, Matrix4.identity(), Offset.zero & size, this);
+    for (final s in list) {
+      try {
+        s.op.draw(p);
+      } catch (e, st) {
+        FlutterError.reportError(FlutterErrorDetails(exception: e, stack: st, library: 'codelessly customPaint'));
+      }
+    }
+    canvas.restore();
   }
 
   @override
@@ -1041,7 +1085,7 @@ class RenderCustomPaintLayer extends RenderProxyBox with ImageClient {
   void paint(PaintingContext context, Offset offset) {
     debugPaintCount++;
     final paint = _paint;
-    if (paint == null || !hasSize) return super.paint(context, offset);
+    if (paint == null || !hasSize || drawnByContent) return super.paint(context, offset);
     if (_recordedSize != size) {
       _clear();
       _recordedSize = size;
