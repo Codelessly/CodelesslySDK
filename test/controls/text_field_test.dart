@@ -395,8 +395,13 @@ void main() {
       await _key(tester, LogicalKeyboardKey.arrowRight);
       await _key(tester, LogicalKeyboardKey.backspace, control: true);
       expect(f.editor.text, 'llo braveworld', reason: 'Ctrl+Backspace deletes back to the word\'s start');
-      await _key(tester, LogicalKeyboardKey.space);
-      expect(f.editor.text, ' llo braveworld', reason: 'Space types, it doesn\'t press the field');
+      // Space is the platform's to type (an IME may compose with it): the
+      // field passes it through, unhandled, and nothing presses the field.
+      final handled = await tester.sendKeyEvent(LogicalKeyboardKey.space);
+      await tester.pump();
+      expect(handled, isFalse, reason: 'Space reaches the platform\'s text input');
+      expect(f.editor.text, 'llo braveworld', reason: 'the field types nothing itself');
+      expect(f.focusNode.hasFocus, isTrue);
     });
 
     testWidgets('select all, copy, cut and paste through the clipboard', (tester) async {
@@ -475,9 +480,14 @@ void main() {
       expect(recorded.fired, ['name focusGained', 'name changed', 'name submitted', 'name focusLost', 'name editingComplete']);
       expect(f.focusNode.hasFocus, isFalse);
       expect(tester.testTextInput.hasAnyClients, isFalse);
-      // A hardware Enter does the same.
+      // A hardware Enter goes to the platform's text input, which sends the
+      // action: nothing presses the field on the way.
       await _focus(tester, tree, 'name');
-      await _key(tester, LogicalKeyboardKey.enter);
+      final handled = await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(handled, isFalse);
+      expect(recorded.fired.where((e) => e == 'name submitted'), hasLength(1));
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
       expect(recorded.fired.where((e) => e == 'name submitted'), hasLength(2));
     });
 
@@ -557,8 +567,10 @@ void main() {
       expect(one, 28);
       tester.testTextInput.enterText('first');
       await tester.pump();
-      await _key(tester, LogicalKeyboardKey.enter);
-      await _key(tester, LogicalKeyboardKey.enter);
+      // Enter passes through to the platform, which types the new lines.
+      expect(await tester.sendKeyEvent(LogicalKeyboardKey.enter), isFalse);
+      tester.testTextInput.enterText('first\n\n');
+      await tester.pump();
       expect(f.editor.text, 'first\n\n');
       expect(rectOf(tree, 'notes').height, greaterThan(one));
     });
