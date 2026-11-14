@@ -3,7 +3,7 @@
 // of every screen at once, `${theme.mode}` and `${theme.isDark}` follow it,
 // the choice survives navigation and (persisted) a reload, and a site
 // without dark colours stays as it was designed.
-import 'package:codelessly_api/codelessly_api.dart' as api show Color, TextStyle, ThemeMode;
+import 'package:codelessly_api/codelessly_api.dart' as api show Color, ThemeMode;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter_test/flutter_test.dart';
