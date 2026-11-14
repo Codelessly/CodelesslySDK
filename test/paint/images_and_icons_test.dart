@@ -271,8 +271,17 @@ void main() {
         final tree = NodeTree(DocumentSource(doc), binder: NodeBinder(scope: vars));
         addTearDown(tree.dispose);
         await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'b'))));
-        RenderIconGlyph glyph() => tester.renderObject<RenderIconGlyph>(find.byWidgetPredicate(
-            (w) => w is LeafRenderObjectWidget && w.runtimeType.toString() == '_Glyph'));
+        // The button is a render object (render/controls/buttons.dart); its icon is its child glyph.
+        RenderIconGlyph glyph() {
+          final found = <RenderIconGlyph>[];
+          void visit(RenderObject o) {
+            if (o is RenderIconGlyph) found.add(o);
+            o.visitChildren(visit);
+          }
+
+          visit(tree.boxOf('b')!);
+          return found.single;
+        }
         // The network is off in tests: the glyph comes from the font, by name.
         expect(glyph(), paints..paragraph());
         expect(IconSources.glyphOf(glyph().icon), 0xe25c);

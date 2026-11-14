@@ -14,7 +14,10 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl;
 import 'package:codelessly_sdk/src/widgets/collections.dart' show collectionsRecipes;
+import 'package:codelessly_sdk/src/widgets/controls.dart' show controlRecipes;
 import 'package:codelessly_sdk/src/widgets/indicators.dart' show indicatorsRecipes;
 import 'package:codelessly_sdk/src/widgets/inputs.dart' show inputsRecipes;
 import 'package:codelessly_sdk/src/widgets/material.dart' show materialRecipes;
@@ -52,6 +55,7 @@ const _brand = {
 
 /// The groups whose types are controls (islands and their kin).
 final _controlTypes = {
+  ...controlRecipes.keys,
   ...inputsRecipes.keys,
   ...materialRecipes.keys,
   ...collectionsRecipes.keys,
@@ -364,6 +368,12 @@ Future<void> _save(WidgetTester tester, ui.Image image, String name) async {
 List<(String, String?)> _controlTexts(WidgetTester tester) {
   final out = <(String, String?)>[];
   void visit(RenderObject o, bool inControl) {
+    // A control drawn as a render object sets its own text.
+    if (o is LabelledControl) {
+      for (final l in o.labels) {
+        if (l.text.trim().isNotEmpty) out.add((l.text, l.fontFamily));
+      }
+    }
     final control = inControl || o is IslandHost;
     if (control && o is RenderParagraph) {
       o.text.visitChildren((span) {
@@ -494,6 +504,15 @@ List<(String, double)> _labelCentres(RenderBox box) {
         ];
       }
     }
+    if (o is LabelledControl && o.attached) {
+      for (final l in o.labels) {
+        if (l.glyphs.isEmpty || l.text.trim().isEmpty) continue;
+        final top = l.glyphs.map((b) => b.top).reduce((a, b) => a < b ? a : b);
+        final bottom = l.glyphs.map((b) => b.bottom).reduce((a, b) => a > b ? a : b);
+        final g = o.localToGlobal(Offset(0, (top + bottom) / 2));
+        if (area.inflate(1).contains(Offset(area.center.dx, g.dy))) out.add((l.text.trim(), g.dy));
+      }
+    }
     if (lines != null && lines.isNotEmpty && o is RenderBox && o.attached) {
       final top = lines.map((b) => b.top).reduce((a, b) => a < b ? a : b);
       final bottom = lines.map((b) => b.bottom).reduce((a, b) => a > b ? a : b);
@@ -602,23 +621,20 @@ void main() {
       });
 
       // Buttons: a rounded rectangle of a small radius, never a stadium.
-      for (final type in ['filledButton', 'elevatedButton', 'outlinedButton', 'textButton']) {
-        final node = controller.tree!.boxOf(type)!;
-        final area = node.localToGlobal(Offset.zero) & node.size;
-        final shapes = [
-          for (final e in find.byType(Material).evaluate())
-            if ((e.widget as Material).shape != null &&
-                e.renderObject is RenderBox &&
-                area.inflate(1).contains((e.renderObject! as RenderBox).localToGlobal(Offset.zero)))
-              (e.widget as Material).shape,
-        ];
-        expect(shapes, isNotEmpty, reason: '$type on the page');
-        for (final shape in shapes) {
-          expect(shape, isNot(isA<StadiumBorder>()), reason: '$type is a stadium');
-          expect(shape, isA<RoundedRectangleBorder>(), reason: '$type shape');
-          final radius = (shape! as RoundedRectangleBorder).borderRadius.resolve(TextDirection.ltr).topLeft.x;
-          expect(radius, inInclusiveRange(1, 12), reason: '$type radius');
+      for (final type in ['filledButton', 'elevatedButton', 'outlinedButton', 'textButton', 'iconButton']) {
+        final buttons = <RenderButton>[];
+        void visit(RenderObject o) {
+          if (o is RenderButton) buttons.add(o);
+          o.visitChildren(visit);
         }
+
+        visit(controller.tree!.boxOf(type)!);
+        expect(buttons, hasLength(1), reason: '$type is a render object on the page, not a Material widget');
+        final shape = buttons.single.shape;
+        expect(shape, isNot(isA<StadiumBorder>()), reason: '$type is a stadium');
+        expect(shape, isA<RoundedRectangleBorder>(), reason: '$type shape');
+        final radius = (shape as RoundedRectangleBorder).borderRadius.resolve(TextDirection.ltr).topLeft.x;
+        expect(radius, inInclusiveRange(1, 12), reason: '$type radius');
       }
 
       // Fields: no underline-only border. A field's border is what its
