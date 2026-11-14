@@ -1,0 +1,56 @@
+[
+ {
+  "screen": "history.athlete",
+  "turns": 2,
+  "nodes": 37,
+  "outputTokensAll": 1356,
+  "outputTokensLast": 681,
+  "secondsAll": 8.1,
+  "inputTokens": 11396
+ },
+ {
+  "screen": "history.beginner",
+  "turns": 1,
+  "nodes": 27,
+  "outputTokensAll": 536,
+  "outputTokensLast": 536,
+  "secondsAll": 4.0,
+  "inputTokens": 11424
+ },
+ {
+  "screen": "history.kid",
+  "turns": 1,
+  "nodes": 34,
+  "outputTokensAll": 501,
+  "outputTokensLast": 501,
+  "secondsAll": 3.7,
+  "inputTokens": 11410
+ },
+ {
+  "screen": "home.athlete",
+  "turns": 2,
+  "nodes": 32,
+  "outputTokensAll": 1130,
+  "outputTokensLast": 574,
+  "secondsAll": 7.2,
+  "inputTokens": 11393
+ },
+ {
+  "screen": "home.beginner",
+  "turns": 1,
+  "nodes": 28,
+  "outputTokensAll": 554,
+  "outputTokensLast": 554,
+  "secondsAll": 4.1,
+  "inputTokens": 11421
+ },
+ {
+  "screen": "home.kid",
+  "turns": 1,
+  "nodes": 28,
+  "outputTokensAll": 510,
+  "outputTokensLast": 510,
+  "secondsAll": 3.9,
+  "inputTokens": 11407
+ }
+]

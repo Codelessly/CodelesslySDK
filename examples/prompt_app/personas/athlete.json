@@ -1,0 +1,10 @@
+{
+  "id": "athlete",
+  "designSystem": "paper",
+  "memory": {
+    "stated": {"goal": "boxing conditioning, five sessions a week", "experience": "six years, competes"},
+    "stage": "advanced",
+    "tone": "terse and exact, numbers first",
+    "notes": ["Wants interval structure and totals visible without tapping.", "Ignores encouragement copy."]
+  }
+}

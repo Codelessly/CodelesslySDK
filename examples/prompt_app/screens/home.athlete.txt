@@ -1,0 +1,30 @@
+Column scroll gap:16 pad:16
+  Row between middle
+    Text.pageTitle "Skip"
+    StatusBadge "Streak {streak}d" tone:success
+  Card gap:12
+    Row between middle
+      Text.sectionTitle "Today: {today.name}"
+      Text.muted "{today.minutes} min"
+    Row gap:8
+      StatTile "Rounds" value:"{today.rounds}" grow
+      StatTile "Work" value:"{today.work}s" grow
+      StatTile "Rest" value:"{today.rest}s" grow
+    Button "Start session" -> emit start_session
+  Card gap:8
+    Row between middle
+      Text.sectionTitle "Week"
+      Text.strong "{sessionsThisWeek}/{weeklyGoal}"
+    Progress value:=sessionsThisWeek/weeklyGoal
+    Text.caption "{weeklyGoal-sessionsThisWeek} sessions left"
+  Card gap:8
+    Row between middle
+      Text.sectionTitle "Jumps per week"
+      Text.strong "{last(weeks).jumps}"
+    BarChart values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+    Text.caption "W42 vs W41: +{last(weeks).jumps-weeks[2].jumps}"
+  Row between middle
+    Text.sectionTitle "Recent"
+    Button.ghost "History" -> emit open_history
+  each s in take(sessions,3)
+    ListRow "{s.name}  {s.jumps} jumps" "{s.date} · {s.minutes} min · best {s.best}" divider:true -> emit open_session s.date

@@ -12,7 +12,9 @@
 // prompt also lists that design system's components and the answer may call
 // them by name; --components A,B,C narrows the list. --brief-file <file>
 // gives a brief of your own (--ui then only names the recording), and
-// --frame says what the answer is ("a phone screen 390 wide").
+// --frame says what the answer is ("a phone screen 390 wide"), and
+// --prelude-file <file> is notation read before the answer (state the host
+// declares).
 //
 // The key is read from the environment only and never written anywhere.
 import 'dart:async';
@@ -45,6 +47,9 @@ Future<void> main(List<String> args) async {
     exit(2);
   }
   final frame = opt('--frame') ?? 'an inline card 390 wide';
+  // --prelude-file <file>: notation the host puts before the model's answer
+  // (the state an app's contract declares), so the model does not restate it.
+  final prelude = switch (opt('--prelude-file')) { final String f => '${File(f).readAsStringSync().trimRight()}\n', _ => '' };
   final model = opt('--model') ?? 'claude-haiku-5-5';
   final out = opt('--out') ?? 'recordings/$ui@$model.notation.jsonl';
   final retries = int.tryParse(opt('--retries') ?? '') ?? 1;
@@ -81,7 +86,7 @@ Future<void> main(List<String> args) async {
   try {
     for (var n = 0; n <= retries; n++) {
       final turn = await _turn(key, model, system, messages);
-      final r = Catalog.run(catalog, () => parseNotation(turn.text, catalog: catalog, options: options));
+      final r = Catalog.run(catalog, () => parseNotation('$prelude${turn.text}', catalog: catalog, options: options));
       final problems = Catalog.run(
               catalog, () => validateDocument(r.document, options: ValidateOptions(components: ds?.components, theme: ds?.tokens)))
           .where((d) => d.severity == Severity.error)
