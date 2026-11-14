@@ -45,6 +45,7 @@ site: navigation may name a canvas of another page.
 | `--screen <id or name>` | Only this screen: a canvas id, a layout id, a `props.screen` name, a canvas name or path. Repeatable. |
 | `--full-page` | Capture the whole page: its own scroll view (the largest one a user can scroll; lists and decorations that do not scroll add nothing) over its whole extent, while the window keeps the size asked for, as a browser's full-page screenshot does. `${screen.height}` and anything sized or pinned to the window (a drawer pinned to the window's top and bottom) stay as on the device; content fixed to the window over the page (a header, a drawer, a bar pinned to the bottom, a canvas's bottom bar or floating button) is drawn where a user first sees it, in the first window, and the page continues below it. The capture always starts at the page's top, whatever a step scrolled it to (a `--tap` scrolls its node into view first); without `--full-page` the capture is the window where the steps left the page. `--dump-layout` gives every box where the PNG draws it. |
 | `--fonts <dir>` | Font files (`.ttf`, `.otf`, `.woff`), searched recursively and read by the family, weight and style inside each file: a font package folder (`node_modules/@fontsource/<family>`, or the whole `node_modules/@fontsource`), a site's fonts folder, or `system` (the system's font directories). Repeatable. Of a package's subset files for one face (`latin`, `latin-ext`, `cyrillic`...), the one with Latin text's characters is used. `.woff2` is not read (it is reported, with the `.woff` to use instead). |
+| `--theme <mode>` | `light`, `dark` or `system`: the theme mode the site starts in, as a `setThemeMode` action sets it (named colours, text styles and controls follow). PNG names end `-<mode>`; a later `--tap` on the site's switch changes it. |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats. |
 | `--hover <id>` | Move a mouse over the node (hover states, `cursorEnter`). |
 | `--focus <id>` | Focus the text field (a `textField`, or the one inside the node). |
@@ -113,6 +114,8 @@ codes"; the reference starts with `docs/reference/STARTER.md`, the base). The re
 ## Fonts
 
 A text style names its family with `fontFamily` and its file with `fontWeight` (100 to 900) and `fontStyle`.
+A site's own fonts need no flag: the families `site.json` declares (`"fonts": [{"family": ..., "fonts": [{"asset": "fonts/..."}]}]`, files beside it) are registered under their declared names and loaded before the page shows; a missing file is `font_missing`. Images a document names by a path relative to the site are read from its folder (`image_failed` names a missing one).
+
 The command registers every font file under `--fonts` directories by the family, weight and style written inside
 the file (its `name` and `OS/2` tables), so file names do not matter. It always has Roboto (all weights the
 Flutter SDK ships: 100, 300, 400, 500, 700, 900) and the Material Icons font, from the Flutter SDK's cache.
