@@ -1,0 +1,32 @@
+Column scroll pad:16 gap:16
+  Row middle gap:8
+    IconButton "arrow_back" -> emit open_home
+    Text.pageTitle "My jumps"
+  Card gap:8
+    Row middle gap:8
+      Icon "emoji_events"
+      Text.strong "Your record"
+    Text.heading1 "{max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best))} jumps"
+    Text.bodySecondary "No miss in a row. Can you beat it?"
+    Button "Try to beat it" -> emit start_session
+  Card gap:8
+    Text.sectionTitle "Jumps each week"
+    BarChart values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+    Text.body "Wow! {last(weeks).jumps} jumps this week. Keep going!"
+  Text.sectionTitle "Your sessions"
+  each s in sessions
+    Card gap:8
+      Row between middle
+        Text.strong "{s.name}"
+        Text.caption "{s.date}"
+      Row between middle
+        Column
+          Text.heading2 "{s.jumps}"
+          Text.caption "jumps"
+        Column
+          Text.heading2 "{s.best}"
+          Text.caption "best run"
+        Column
+          Text.heading2 "{s.minutes}"
+          Text.caption "min"
+      Button.ghost "See it" -> emit open_session s.date

@@ -1,0 +1,6 @@
+state streak=4
+state weeklyGoal=5
+state sessionsThisWeek=3
+state today={"name":"Intervals","rounds":8,"work":40,"rest":20,"minutes":8}
+state weeks=[{"label":"W39","jumps":2100},{"label":"W40","jumps":2650},{"label":"W41","jumps":2400},{"label":"W42","jumps":3180}]
+state sessions=[{"date":"Fri 13 Nov","name":"Intervals","minutes":8,"jumps":912,"best":148},{"date":"Wed 11 Nov","name":"Endurance","minutes":12,"jumps":1304,"best":210},{"date":"Mon 9 Nov","name":"Footwork","minutes":6,"jumps":640,"best":96},{"date":"Sat 7 Nov","name":"Intervals","minutes":8,"jumps":880,"best":131}]

@@ -1,0 +1,28 @@
+Column scroll gap:16 pad:16
+  Text.pageTitle "Ready to jump?"
+  Text.bodySecondary "Short and steady wins. Today takes just {today.minutes} minutes."
+  Card gap:12
+    Row between middle
+      Text.sectionTitle "Today: {today.name}"
+      Badge.info "{today.minutes} min"
+    Text.body "{today.rounds} rounds. In each round, jump for {today.work} seconds (work), then rest for {today.rest} seconds."
+    Text.caption "Not sure about the pace? Jump gently. You can slow down any time."
+    Button "Start today's session" -> emit start_session
+  Card gap:8
+    Row gap:12 middle
+      Icon "local_fire_department"
+      Column
+        Text.sectionTitle "{streak} sessions in a row"
+        Text.bodySecondary "Nice work. Keep it going."
+  Card gap:8
+    Row between
+      Text.sectionTitle "This week"
+      Text.strong "{sessionsThisWeek} of {weeklyGoal}"
+    Progress =weekProgress
+    Text.bodySecondary "{weeklyGoal-sessionsThisWeek} more short sessions to reach your goal."
+  Row between middle
+    Text.sectionTitle "Last session"
+    Button.ghost "See all" -> emit open_history
+  ListRow "{sessions[0].name}" "{sessions[0].date} · {sessions[0].minutes} min · {sessions[0].jumps} jumps" icon:check -> emit open_session sessions[0].date
+
+Wait, the Progress binding needs a value; correcting below.

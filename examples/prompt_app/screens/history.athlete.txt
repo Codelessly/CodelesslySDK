@@ -1,0 +1,35 @@
+Column scroll gap:16 pad:16
+  Row between middle
+    Text.pageTitle "History"
+    Button.ghost "Home" -> emit open_home
+  Row gap:8
+    StatTile "Week" value:"{sessionsThisWeek}/{weeklyGoal}" icon:"event_available" grow
+    StatTile "Streak" value:"{streak} d" icon:"local_fire_department" grow
+    StatTile "4 wk jumps" value:"{sum(weeks,w=>w.jumps)}" icon:"bar_chart" grow
+  Card gap:8
+    Text.sectionTitle "Jumps per week"
+    BarChart values:[2100,2650,2400,3180] labels:["W39","W40","W41","W42"]
+    Row between
+      Text.caption "Last week: {last(weeks).jumps}"
+      Text.caption "Avg: {round(sum(weeks,w=>w.jumps)/length(weeks),0)}"
+  SectionHeader "Sessions" count:4
+  Row gap:8
+    Text.caption "Total min: {sum(sessions,s=>s.minutes)}"
+    Text.caption "Jumps: {sum(sessions,s=>s.jumps)}"
+    Text.caption "Best: {max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best))}"
+  each s in sessions
+    Card gap:8 -> emit open_session s.date
+      Row between
+        Text.strong "{s.name}"
+        Text.caption "{s.date}"
+      Row between
+        Column gap:2
+          Text.caption "Duration"
+          Text.strong "{s.minutes} min"
+        Column gap:2
+          Text.caption "Jumps"
+          Text.strong "{s.jumps}"
+        Column gap:2
+          Text.caption "Best run"
+          Text.strong "{s.best}"
+  Button "Start session: {today.name} {today.rounds}x{today.work}/{today.rest}" -> emit start_session
