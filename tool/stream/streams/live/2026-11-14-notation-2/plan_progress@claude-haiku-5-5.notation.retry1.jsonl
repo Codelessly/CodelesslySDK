@@ -1,0 +1,155 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"I'm sorry, but I can't write this one in the notation. The validator errors describe a different format (JSON nodes with \"slots\" and \"bind\" props), not the line notation I've been asked to use, so I can't map them onto this format.\n\nThe fixes that apply to the notation are these, and I've made them below. ListTile takes no children, so each step's icon, title and description now sit inside a Row/Column instead. Every variable used in a string or binding is declared with `state` first, including `elapsed`, `progress`, `status`, the done flags and `allDone`.\n\nstate status=\"idle\"\nstate elapsed=0\nstate progress=0\nstate done1=false\nstate done2=false\nstate done3=false\nstate done4=false\nstate done5=false\nstate done6=false\nstate allDone=false\nCard gap:12 pad:16 w:390\n  Text.title \"Blog migration\"\n  Row between\n    Text.muted \"Elapsed: {elapsed}s\"\n    Badge.info \"{status}\"\n  Progress =progress\n  Row gap:8\n    Button.primary \"Start\" -> status=\"running\"; emit start\n    Button.secondary \"Pause\" -> status=\"paused\"; emit pause\n  Column gap:8\n    Row gap:8\n      if done1\n        Icon \"check\"\n      if !done1\n        CircularProgressIndicator\n      Column gap:2\n        Text.strong \"1. Back up the current blog\"\n        Text.muted \"Export all posts, pages and media to a safe archive.\"\n    Row gap:8\n      if done2\n        Icon \"check\"\n      if !done2\n        CircularProgressIndicator\n      Column gap:2\n        Text.strong \"2. Export content\"\n        Text.muted \"Convert posts and comments into a portable format.\"\n    Row gap:8\n      if done3\n        Icon \"check\"\n      if !done3\n        CircularProgressIndicator\n      Column gap:2\n        Text.strong \"3. Set up the new host\"\n        Text.muted \"Provision hosting, domain and the blog software.\"\n    Row gap:8\n      if done4\n        Icon \"check\"\n      if !done4\n        CircularProgressIndicator\n      Column gap:2\n        Text.strong \"4. Import content\"\n        Text.muted \"Load posts, pages, media and comments into the new site.\"\n    Row gap:8\n      if done5\n        Icon \"check\"\n      if !done5\n        CircularProgressIndicator\n      Column gap:2\n        Text.strong \"5. Redirects and SEO\"\n        Text.muted \"Map old URLs to new ones so search rankings are kept.\"\n    Row gap:8\n      if done6\n        Icon \"check\"\n      if !done6\n        CircularProgressIndicator\n      Column gap:2\n        Text.strong \"6. Switch DNS and verify\"\n        Text.muted \"Point the domain at the new site and check every page.\"\n  if allDone\n    Card gap:4\n      Text.success \"Migration complete\"\n      Text.body \"All 6 steps finished in {elapsed}s.\"","usage":{"input_tokens":3255,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":958,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":412,"totalMs":3554}}
+{"tMs":412,"delta":"I"}
+{"tMs":546,"delta":"'"}
+{"tMs":546,"delta":"m s"}
+{"tMs":546,"delta":"orry, but I"}
+{"tMs":546,"delta":" can't write this"}
+{"tMs":546,"delta":" one"}
+{"tMs":546,"delta":" in the notation. The valid"}
+{"tMs":567,"delta":"ator err"}
+{"tMs":587,"delta":"ors describ"}
+{"tMs":608,"delta":"e a different format ("}
+{"tMs":629,"delta":"JSON n"}
+{"tMs":650,"delta":"odes with \"sl"}
+{"tMs":671,"delta":"ots\" and \"b"}
+{"tMs":691,"delta":"ind\" props),"}
+{"tMs":711,"delta":" not the line"}
+{"tMs":732,"delta":" notation I've been as"}
+{"tMs":752,"delta":"ked to use, so"}
+{"tMs":773,"delta":" I can't map"}
+{"tMs":793,"delta":" them on"}
+{"tMs":813,"delta":"to this format"}
+{"tMs":835,"delta":".\n\nThe fix"}
+{"tMs":854,"delta":"es that"}
+{"tMs":875,"delta":" apply to the notation are these"}
+{"tMs":895,"delta":","}
+{"tMs":916,"delta":" and I've made"}
+{"tMs":936,"delta":" them below"}
+{"tMs":956,"delta":"."}
+{"tMs":976,"delta":" "}
+{"tMs":998,"delta":"ListTile takes no children,"}
+{"tMs":1018,"delta":" so each step's"}
+{"tMs":1038,"delta":" ic"}
+{"tMs":1058,"delta":"on,"}
+{"tMs":1079,"delta":" title and description"}
+{"tMs":1100,"delta":" now sit"}
+{"tMs":1119,"delta":" inside a"}
+{"tMs":1140,"delta":" Row/"}
+{"tMs":1161,"delta":"Column instead."}
+{"tMs":1181,"delta":" Every variable used"}
+{"tMs":1202,"delta":" in a"}
+{"tMs":1221,"delta":" string"}
+{"tMs":1242,"delta":" or"}
+{"tMs":1262,"delta":" bin"}
+{"tMs":1283,"delta":"ding is declared with"}
+{"tMs":1303,"delta":" `"}
+{"tMs":1323,"delta":"state`"}
+{"tMs":1344,"delta":" first, including `"}
+{"tMs":1365,"delta":"elapsed`"}
+{"tMs":1385,"delta":", `progress`"}
+{"tMs":1405,"delta":", `status`"}
+{"tMs":1426,"delta":", the"}
+{"tMs":1446,"delta":" done fl"}
+{"tMs":1466,"delta":"ags and `allDone`."}
+{"tMs":1487,"delta":"\n\nstate"}
+{"tMs":1508,"delta":" status"}
+{"tMs":1528,"delta":"=\"id"}
+{"tMs":1549,"delta":"le\"\nstate elapsed"}
+{"tMs":1570,"delta":"=0\nstate progress=0"}
+{"tMs":1589,"delta":"\nstate done1=false"}
+{"tMs":1610,"delta":"\nstate done2=false\nstate"}
+{"tMs":1630,"delta":" done3=false\nstate done4"}
+{"tMs":1651,"delta":"=false\nstate done5=false"}
+{"tMs":1671,"delta":"\nstate done6=false\nstate"}
+{"tMs":1692,"delta":" allDone=false\nCard"}
+{"tMs":1713,"delta":" gap:12 "}
+{"tMs":1732,"delta":"pad:16 "}
+{"tMs":1753,"delta":"w:390\n  Text."}
+{"tMs":1773,"delta":"title \"Blog migration\""}
+{"tMs":1794,"delta":"\n  Row between\n    "}
+{"tMs":1815,"delta":"Text.muted \"Elap"}
+{"tMs":1835,"delta":"sed: {elapsed"}
+{"tMs":1855,"delta":"}s\"\n    Badge"}
+{"tMs":1876,"delta":".info \"{status}\""}
+{"tMs":1896,"delta":"\n  Progress =progress"}
+{"tMs":1917,"delta":"\n  Row gap:8"}
+{"tMs":1937,"delta":"\n    Button.primary \""}
+{"tMs":1958,"delta":"Start\" -> status=\"running\""}
+{"tMs":1978,"delta":"; emit start\n    Button"}
+{"tMs":1999,"delta":".secondary \"Pause"}
+{"tMs":2019,"delta":"\" -> status=\"paused\""}
+{"tMs":2039,"delta":"; emit pause\n  "}
+{"tMs":2060,"delta":"Column gap:8\n    "}
+{"tMs":2080,"delta":"Row gap:8\n      if"}
+{"tMs":2103,"delta":" done1\n        Icon \""}
+{"tMs":2121,"delta":"check\"\n      if !done1"}
+{"tMs":2142,"delta":"\n        CircularProgress"}
+{"tMs":2162,"delta":"Indicator\n      Column"}
+{"tMs":2183,"delta":" gap:2"}
+{"tMs":2203,"delta":"\n        Text.strong \""}
+{"tMs":2223,"delta":"1. Back up the current bl"}
+{"tMs":2244,"delta":"og\"\n        Text."}
+{"tMs":2264,"delta":"muted \"Export all posts"}
+{"tMs":2285,"delta":", pages and media to a saf"}
+{"tMs":2305,"delta":"e archive.\"\n    Row"}
+{"tMs":2325,"delta":" gap:8\n      if done"}
+{"tMs":2346,"delta":"2\n        Icon \"check"}
+{"tMs":2366,"delta":"\"\n      if !done2"}
+{"tMs":2387,"delta":"\n        CircularProgressI"}
+{"tMs":2407,"delta":"ndicator\n      Column g"}
+{"tMs":2428,"delta":"ap:2\n        Text."}
+{"tMs":2448,"delta":"strong \"2. Export content"}
+{"tMs":2477,"delta":"\"\n        Text.muted"}
+{"tMs":2489,"delta":" \"Convert posts and com"}
+{"tMs":2509,"delta":"ments into a portable format.\""}
+{"tMs":2530,"delta":"\n    Row gap:8"}
+{"tMs":2552,"delta":"\n      if done3\n        Ic"}
+{"tMs":2571,"delta":"on \"check\"\n      if !"}
+{"tMs":2591,"delta":"done3\n        CircularPro"}
+{"tMs":2611,"delta":"gressIndicator\n      "}
+{"tMs":2632,"delta":"Column gap:2\n        "}
+{"tMs":2653,"delta":"Text.strong \"3."}
+{"tMs":2673,"delta":" Set up the new host\""}
+{"tMs":2693,"delta":"\n        Text.muted \""}
+{"tMs":2714,"delta":"Provision hosting, domain"}
+{"tMs":2734,"delta":" and the blog software.\"\n    "}
+{"tMs":2755,"delta":"Row gap:8\n      "}
+{"tMs":2775,"delta":"if done4\n        Icon"}
+{"tMs":2796,"delta":" \"check\"\n      if !done"}
+{"tMs":2816,"delta":"4\n        CircularProg"}
+{"tMs":2836,"delta":"ressIndicator\n      "}
+{"tMs":2857,"delta":"Column gap:2\n        "}
+{"tMs":2878,"delta":"Text.strong \"4."}
+{"tMs":2897,"delta":" Import content\"\n        Text."}
+{"tMs":2918,"delta":"muted \"Load posts,"}
+{"tMs":2938,"delta":" pages, media and comments into"}
+{"tMs":2959,"delta":" the new site.\"\n    Row"}
+{"tMs":2979,"delta":" gap:8\n      if done"}
+{"tMs":3000,"delta":"5\n        Icon \"check"}
+{"tMs":3020,"delta":"\"\n      if !done5"}
+{"tMs":3040,"delta":"\n        CircularProgressI"}
+{"tMs":3066,"delta":"ndicator\n      Column g"}
+{"tMs":3081,"delta":"ap:2\n        Text."}
+{"tMs":3102,"delta":"strong \"5. Redir"}
+{"tMs":3122,"delta":"ects and SEO\"\n        "}
+{"tMs":3143,"delta":"Text.muted \"Map"}
+{"tMs":3163,"delta":" old URLs to new ones"}
+{"tMs":3183,"delta":" so search rankings are kept"}
+{"tMs":3204,"delta":".\"\n    Row gap:"}
+{"tMs":3224,"delta":"8\n      if done6\n        "}
+{"tMs":3245,"delta":"Icon \"check\"\n      "}
+{"tMs":3265,"delta":"if !done6\n        Circ"}
+{"tMs":3285,"delta":"ularProgressIndicator"}
+{"tMs":3306,"delta":"\n      Column gap:2"}
+{"tMs":3326,"delta":"\n        Text.strong \""}
+{"tMs":3347,"delta":"6. Switch DNS"}
+{"tMs":3367,"delta":" and verify\"\n        Text"}
+{"tMs":3388,"delta":".muted \"Point the dom"}
+{"tMs":3408,"delta":"ain at the new site and check every"}
+{"tMs":3428,"delta":" page.\"\n  if allDone"}
+{"tMs":3449,"delta":"\n    Card gap:4"}
+{"tMs":3469,"delta":"\n      Text.success \""}
+{"tMs":3489,"delta":"Migration complete\"\n      "}
+{"tMs":3510,"delta":"Text.body \"All 6 "}
+{"tMs":3530,"delta":"steps finished in {elap"}
+{"tMs":3551,"delta":"sed}s.\""}

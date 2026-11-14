@@ -1,0 +1,70 @@
+{
+ "ui": "map_list",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1705,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 555,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 502,
+   "totalMs": 2621,
+   "chars": 941,
+   "lines": 21,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "29.2",
+   "notationIssues": [
+    "line 13:1: A listTile has no text of its own.",
+    "line 13:1: A listTile has no text of its own.",
+    "line 14:1: A listTile has no text of its own.",
+    "line 14:1: A listTile has no text of its own.",
+    "line 15:1: A listTile has no text of its own.",
+    "line 15:1: A listTile has no text of its own.",
+    "line 16:1: A listTile has no text of its own.",
+    "line 16:1: A listTile has no text of its own.",
+    "line 17:1: A listTile has no text of its own.",
+    "line 17:1: A listTile has no text of its own."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 2476,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 560,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 451,
+   "totalMs": 1998,
+   "chars": 966,
+   "lines": 21,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "29.5",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

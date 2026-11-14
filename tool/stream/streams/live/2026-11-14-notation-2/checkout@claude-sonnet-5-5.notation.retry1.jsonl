@@ -1,0 +1,175 @@
+{"meta":{"ui":"checkout","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Build a small checkout in three steps: my cart (three items with quantities), a shipping form (name, address, city, postcode, email, all checked, with messages under the fields), then a payment summary with a choice of standard or express delivery changing the total, and a confirmation screen with an order number. I can go back a step without losing what I typed.","text":"state step=1\nstate q1=1\nstate q2=1\nstate q3=1\nstate name=\"\"\nstate address=\"\"\nstate city=\"\"\nstate postcode=\"\"\nstate email=\"\"\nstate delivery=\"standard\"\nstate ship=5\nstate tried=false\nstate p1=12\nstate p2=8\nstate p3=15\nstate order=\"48213\"\nCard w:390 gap:12 pad:16\n  if step<4\n    Row between middle\n      Text.title \"Checkout\"\n      Text.muted \"Step {step} of 3\"\n    Progress =step/3\n  if step==1\n    Text.heading \"My cart\"\n    Row between middle\n      Column\n        Text.strong \"Linen tote bag\"\n        Text.muted \"\\$12 each\"\n      Row gap:8 middle\n        Button.outline \"-\" -> q1=max(0,q1-1)\n        Text.strong \"{q1}\"\n        Button.outline \"+\" -> q1=q1+1\n    Row between middle\n      Column\n        Text.strong \"Ceramic mug\"\n        Text.muted \"\\$8 each\"\n      Row gap:8 middle\n        Button.outline \"-\" -> q2=max(0,q2-1)\n        Text.strong \"{q2}\"\n        Button.outline \"+\" -> q2=q2+1\n    Row between middle\n      Column\n        Text.strong \"Notebook set\"\n        Text.muted \"\\$15 each\"\n      Row gap:8 middle\n        Button.outline \"-\" -> q3=max(0,q3-1)\n        Text.strong \"{q3}\"\n        Button.outline \"+\" -> q3=q3+1\n    Divider\n    Row between\n      Text.strong \"Subtotal\"\n      Text.strong \"\\${q1*p1+q2*p2+q3*p3}\"\n    Button \"Continue to shipping\" enabled:=q1+q2+q3>0 -> step=2\n  if step==2\n    Text.heading \"Shipping\"\n    Column gap:4\n      Input \"Full name\" =name\n      if tried&&len(name)<2\n        Text.danger \"Please enter your full name\"\n    Column gap:4\n      Input \"Address\" =address\n      if tried&&len(address)<5\n        Text.danger \"Please enter your street address\"\n    Column gap:4\n      Input \"City\" =city\n      if tried&&len(city)<2\n        Text.danger \"Please enter your city\"\n    Column gap:4\n      Input \"Postcode\" =postcode\n      if tried&&len(postcode)<4\n        Text.danger \"Postcode looks too short\"\n    Column gap:4\n      Input \"Email\" \"you@example.com\" =email\n      if tried&&!contains(email,\"@\")\n        Text.danger \"Enter a valid email address\"\n    Row gap:8\n      Button.outline \"Back\" -> step=1\n      Spacer grow\n      Button \"Continue to payment\" -> tried=true; step=(len(name)>=2&&len(address)>=5&&len(city)>=2&&len(postcode)>=4&&contains(email,\"@\"))?3:2\n  if step==3\n    Text.heading \"Payment summary\"\n    Row between\n      Text \"Items\"\n      Text \"\\${q1*p1+q2*p2+q3*p3}\"\n    Text.strong \"Delivery\"\n    Row gap:8\n      ChoiceChip \"Standard \\$5\" selected:=ship==5 -> ship=5; delivery=\"standard\"\n      ChoiceChip \"Express \\$15\" selected:=ship==15 -> ship=15; delivery=\"express\"\n    Row between\n      Text \"Shipping\"\n      Text \"\\${ship}\"\n    Divider\n    Row between\n      Text.heading \"Total\"\n      Text.heading \"\\${q1*p1+q2*p2+q3*p3+ship}\"\n    Text.muted \"Shipping to {name}, {address}, {city} {postcode}\"\n    Row gap:8\n      Button.outline \"Back\" -> step=2\n      Spacer grow\n      Button \"Pay now\" -> step=4; emit placeOrder delivery\n  if step==4\n    Column gap:8 center\n      Icon \"check_circle\"\n      Text.title \"Order confirmed\"\n      Text \"Order number #{order}\"\n      Text.muted \"A receipt was sent to {email}\"\n      Text.muted \"Delivery: {delivery}\"","usage":{"input_tokens":3185,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1834,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":449}},"ttftMs":4578,"totalMs":10377}}
+{"tMs":4578,"delta":"state step=1\nstate"}
+{"tMs":4612,"delta":" q1=1\nstate q2"}
+{"tMs":4645,"delta":"=1\nstate q3=1"}
+{"tMs":4679,"delta":"\nstate name=\"\"\nstate address"}
+{"tMs":4713,"delta":"=\"\"\nstate city=\"\""}
+{"tMs":4747,"delta":"\nstate postcode=\"\"\nstate"}
+{"tMs":4781,"delta":" email=\"\"\nstate delivery"}
+{"tMs":4815,"delta":"=\"standard\"\nstate ship"}
+{"tMs":4849,"delta":"=5\nstate tried=false"}
+{"tMs":4882,"delta":"\nstate p1=12\nstate"}
+{"tMs":4917,"delta":" p2=8\nstate p3"}
+{"tMs":4950,"delta":"=15\nstate order=\"48213"}
+{"tMs":4984,"delta":"\"\nCard w:390 "}
+{"tMs":5018,"delta":"gap:12 pad:"}
+{"tMs":5052,"delta":"16\n  if step<4"}
+{"tMs":5086,"delta":"\n    Row between middle\n      "}
+{"tMs":5120,"delta":"Text.title \"Check"}
+{"tMs":5153,"delta":"out\"\n      Text.mu"}
+{"tMs":5186,"delta":"ted \"Step {step} of"}
+{"tMs":5220,"delta":" 3\"\n    Progress"}
+{"tMs":5254,"delta":" =step/3\n  if step"}
+{"tMs":5287,"delta":"==1\n    Text.he"}
+{"tMs":5321,"delta":"ading \"My cart\"\n    "}
+{"tMs":5355,"delta":"Row between middle\n      "}
+{"tMs":5388,"delta":"Column\n        Text.strong"}
+{"tMs":5422,"delta":" \"Linen tote bag"}
+{"tMs":5455,"delta":"\"\n        Text.muted"}
+{"tMs":5489,"delta":" \"\\$12 each\""}
+{"tMs":5523,"delta":"\n      Row gap:8 "}
+{"tMs":5557,"delta":"middle\n        Button.out"}
+{"tMs":5590,"delta":"line \"-\" -> q1"}
+{"tMs":5624,"delta":"=max(0,q1-"}
+{"tMs":5658,"delta":"1)\n        Text.str"}
+{"tMs":5691,"delta":"ong \"{q1}\""}
+{"tMs":5724,"delta":"\n        Button.outline \"+"}
+{"tMs":5758,"delta":"\" -> q1=q1"}
+{"tMs":5792,"delta":"+1\n    Row between midd"}
+{"tMs":5825,"delta":"le\n      Column\n        "}
+{"tMs":5859,"delta":"Text.strong \"Ce"}
+{"tMs":5892,"delta":"ramic mug\"\n        "}
+{"tMs":5926,"delta":"Text.muted \"\\$8"}
+{"tMs":5959,"delta":" each\"\n      Row g"}
+{"tMs":5993,"delta":"ap:8 middle\n        "}
+{"tMs":6027,"delta":"Button.outline \"-\""}
+{"tMs":6060,"delta":" -> q2=max(0"}
+{"tMs":6093,"delta":",q2-1)\n        "}
+{"tMs":6127,"delta":"Text.strong \"{q"}
+{"tMs":6160,"delta":"2}\"\n        Button."}
+{"tMs":6194,"delta":"outline \"+\" -> q"}
+{"tMs":6227,"delta":"2=q2+1\n    "}
+{"tMs":6263,"delta":"Row between middle\n      "}
+{"tMs":6296,"delta":"Column\n        Text.strong"}
+{"tMs":6329,"delta":" \"Notebook set\""}
+{"tMs":6362,"delta":"\n        Text.muted \"\\"}
+{"tMs":6396,"delta":"$15 each\"\n      "}
+{"tMs":6429,"delta":"Row gap:8 middle"}
+{"tMs":6462,"delta":"\n        Button.outline \""}
+{"tMs":6496,"delta":"-\" -> q3=max"}
+{"tMs":6529,"delta":"(0,q3-1)"}
+{"tMs":6563,"delta":"\n        Text.strong \""}
+{"tMs":6596,"delta":"{q3}\"\n        "}
+{"tMs":6630,"delta":"Button.outline \"+\" -"}
+{"tMs":6663,"delta":"> q3=q3+1"}
+{"tMs":6697,"delta":"\n    Divider\n    "}
+{"tMs":6730,"delta":"Row between\n      Text.str"}
+{"tMs":6776,"delta":"ong \"Subtotal\""}
+{"tMs":6797,"delta":"\n      Text.strong \""}
+{"tMs":6830,"delta":"\\${q1*p1+"}
+{"tMs":6864,"delta":"q2*p2+q3"}
+{"tMs":6897,"delta":"*p3}\"\n    "}
+{"tMs":6931,"delta":"Button \"Continue to ship"}
+{"tMs":6964,"delta":"ping\" enabled:=q"}
+{"tMs":6998,"delta":"1+q2+q3>"}
+{"tMs":7031,"delta":"0 -> step=2"}
+{"tMs":7065,"delta":"\n  if step==2\n    "}
+{"tMs":7098,"delta":"Text.heading \"Ship"}
+{"tMs":7131,"delta":"ping\"\n    Column gap"}
+{"tMs":7167,"delta":":4\n      Input \""}
+{"tMs":7199,"delta":"Full name\" =name\n      if"}
+{"tMs":7232,"delta":" tried&&len(name)"}
+{"tMs":7265,"delta":"<2\n        Text.dan"}
+{"tMs":7299,"delta":"ger \"Please enter your full"}
+{"tMs":7332,"delta":" name\"\n    Column gap"}
+{"tMs":7365,"delta":":4\n      Input \""}
+{"tMs":7399,"delta":"Address\" =address\n      if t"}
+{"tMs":7432,"delta":"ried&&len(address)<"}
+{"tMs":7468,"delta":"5\n        Text.danger"}
+{"tMs":7499,"delta":" \"Please enter your street address"}
+{"tMs":7533,"delta":"\"\n    Column gap:"}
+{"tMs":7566,"delta":"4\n      Input \"City\""}
+{"tMs":7600,"delta":" =city\n      if tried&"}
+{"tMs":7634,"delta":"&len(city)<2"}
+{"tMs":7667,"delta":"\n        Text.danger \""}
+{"tMs":7700,"delta":"Please enter your city\"\n    "}
+{"tMs":7733,"delta":"Column gap:4\n      "}
+{"tMs":7767,"delta":"Input \"Postcode\""}
+{"tMs":7800,"delta":" =postcode\n      if t"}
+{"tMs":7835,"delta":"ried&&len(postcode"}
+{"tMs":7867,"delta":")<4\n        Text."}
+{"tMs":7903,"delta":"danger \"Postcode loo"}
+{"tMs":7934,"delta":"ks too short\"\n    Column"}
+{"tMs":7967,"delta":" gap:4\n      Input"}
+{"tMs":8001,"delta":" \"Email\" \"you@example"}
+{"tMs":8035,"delta":".com\" =email\n      if"}
+{"tMs":8067,"delta":" tried&&!contains("}
+{"tMs":8101,"delta":"email,\"@\")\n        "}
+{"tMs":8134,"delta":"Text.danger \"Enter"}
+{"tMs":8168,"delta":" a valid email address\"\n    "}
+{"tMs":8201,"delta":"Row gap:8\n      "}
+{"tMs":8234,"delta":"Button.outline \"Back"}
+{"tMs":8268,"delta":"\" -> step=1\n      "}
+{"tMs":8301,"delta":"Spacer grow\n      "}
+{"tMs":8335,"delta":"Button \"Continue to pay"}
+{"tMs":8368,"delta":"ment\" -> tried=true"}
+{"tMs":8401,"delta":"; step=(len(name)"}
+{"tMs":8435,"delta":">=2&&len(address"}
+{"tMs":8468,"delta":")>=5&&len("}
+{"tMs":8502,"delta":"city)>=2&&len"}
+{"tMs":8535,"delta":"(postcode)>=4"}
+{"tMs":8569,"delta":"&&contains(email,\""}
+{"tMs":8602,"delta":"@\"))?3:2"}
+{"tMs":8635,"delta":"\n  if step==3"}
+{"tMs":8669,"delta":"\n    Text.heading \""}
+{"tMs":8702,"delta":"Payment summary\"\n    "}
+{"tMs":8735,"delta":"Row between\n      Text \""}
+{"tMs":8768,"delta":"Items\"\n      Text \""}
+{"tMs":8815,"delta":"\\${q1*p1+"}
+{"tMs":8843,"delta":"q2*p2+q3"}
+{"tMs":8869,"delta":"*p3}\"\n    "}
+{"tMs":8905,"delta":"Text.strong \"Deliv"}
+{"tMs":8936,"delta":"ery\"\n    Row gap"}
+{"tMs":8969,"delta":":8\n      Choi"}
+{"tMs":9003,"delta":"ceChip \"Standard \\"}
+{"tMs":9036,"delta":"$5\" selected:="}
+{"tMs":9069,"delta":"ship==5 -> ship"}
+{"tMs":9104,"delta":"=5; delivery=\"stand"}
+{"tMs":9136,"delta":"ard\"\n      Choi"}
+{"tMs":9169,"delta":"ceChip \"Express \\$"}
+{"tMs":9203,"delta":"15\" selected:=ship"}
+{"tMs":9236,"delta":"==15 -> ship="}
+{"tMs":9269,"delta":"15; delivery=\"express\""}
+{"tMs":9303,"delta":"\n    Row between\n      "}
+{"tMs":9336,"delta":"Text \"Shipping\""}
+{"tMs":9370,"delta":"\n      Text \"\\${ship"}
+{"tMs":9403,"delta":"}\"\n    Divider"}
+{"tMs":9437,"delta":"\n    Row between\n      Text"}
+{"tMs":9471,"delta":".heading \"Total\""}
+{"tMs":9504,"delta":"\n      Text.heading \"\\"}
+{"tMs":9537,"delta":"${q1*p1+q"}
+{"tMs":9570,"delta":"2*p2+q3*"}
+{"tMs":9604,"delta":"p3+ship}\""}
+{"tMs":9637,"delta":"\n    Text.muted \""}
+{"tMs":9670,"delta":"Shipping to {name},"}
+{"tMs":9710,"delta":" {address}, {city} {"}
+{"tMs":9738,"delta":"postcode}\"\n    "}
+{"tMs":9771,"delta":"Row gap:8\n      "}
+{"tMs":9804,"delta":"Button.outline \"Back\""}
+{"tMs":9838,"delta":" -> step=2\n      "}
+{"tMs":9870,"delta":"Spacer grow\n      "}
+{"tMs":9904,"delta":"Button \"Pay now\" -"}
+{"tMs":9937,"delta":"> step=4; emit plac"}
+{"tMs":9971,"delta":"eOrder delivery"}
+{"tMs":10004,"delta":"\n  if step==4\n    "}
+{"tMs":10039,"delta":"Column gap:8 center"}
+{"tMs":10071,"delta":"\n      Icon \"check_circ"}
+{"tMs":10105,"delta":"le\"\n      Text.title"}
+{"tMs":10138,"delta":" \"Order confirmed\""}
+{"tMs":10191,"delta":"\n      Text \"Order number"}
+{"tMs":10204,"delta":" #{order}\"\n      "}
+{"tMs":10240,"delta":"Text.muted \"A receip"}
+{"tMs":10271,"delta":"t was sent to {email}"}
+{"tMs":10306,"delta":"\"\n      Text.muted"}
+{"tMs":10340,"delta":" \"Delivery: {del"}
+{"tMs":10371,"delta":"ivery}\""}

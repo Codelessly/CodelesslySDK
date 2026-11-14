@@ -1,0 +1,143 @@
+{"meta":{"ui":"reservation","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"Card w:390 gap:12\n  state day=0\n  state size=2\n  state slot=\"\"\n  Text.title \"Book a table\"\n  Text.strong \"Day\"\n  Grid cols:4 gap:8\n    ChoiceChip \"Mon\" selected:=day==0 -> day=0; slot=\"\"\n    ChoiceChip \"Tue\" selected:=day==1 -> day=1; slot=\"\"\n    ChoiceChip \"Wed\" selected:=day==2 -> day=2; slot=\"\"\n    ChoiceChip \"Thu\" selected:=day==3 -> day=3; slot=\"\"\n    ChoiceChip \"Fri\" selected:=day==4 -> day=4; slot=\"\"\n    ChoiceChip \"Sat\" selected:=day==5 -> day=5; slot=\"\"\n    ChoiceChip \"Sun\" selected:=day==6 -> day=6; slot=\"\"\n  Text.strong \"Party size: {size}\"\n  Row gap:8 middle\n    Button.outline \"-\" -> size=max(1,size-1); slot=\"\"\n    Slider =size min:1 max:8 grow -> slot=\"\"\n    Button.outline \"+\" -> size=min(8,size+1); slot=\"\"\n  Text.strong \"Time\"\n  Grid cols:3 gap:8\n    ChoiceChip \"17:30\" selected:=slot==\"17:30\" enabled:=(day+size)%3!=0 -> slot=\"17:30\"\n    ChoiceChip \"18:00\" selected:=slot==\"18:00\" enabled:=(day*2+size)%4!=1 -> slot=\"18:00\"\n    ChoiceChip \"18:30\" selected:=slot==\"18:30\" enabled:=(day+size)%4!=2 -> slot=\"18:30\"\n    ChoiceChip \"19:00\" selected:=slot==\"19:00\" enabled:=(day+size*2)%5!=0 -> slot=\"19:00\"\n    ChoiceChip \"19:30\" selected:=slot==\"19:30\" enabled:=(day*3+size)%5!=1 -> slot=\"19:30\"\n    ChoiceChip \"20:00\" selected:=slot==\"20:00\" enabled:=size+day>3 -> slot=\"20:00\"\n    ChoiceChip \"20:30\" selected:=slot==\"20:30\" enabled:=(size+day)%2==0 -> slot=\"20:30\"\n    ChoiceChip \"21:00\" selected:=slot==\"21:00\" enabled:=size<7 -> slot=\"21:00\"\n    ChoiceChip \"21:30\" selected:=slot==\"21:30\" enabled:=(day+size)%3!=1 -> slot=\"21:30\"\n  Text.muted \"Greyed-out times are fully booked.\"\n  Button \"Confirm booking\" enabled:=slot!=\"\" -> emit book; toast \"Booked for {size} on day {day+1} at {slot}\"","usage":{"input_tokens":1697,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":943,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1448,"totalMs":6192}}
+{"tMs":1448,"delta":"Card w:"}
+{"tMs":1771,"delta":"390 gap:12"}
+{"tMs":1772,"delta":"\n  state"}
+{"tMs":1772,"delta":" day=0"}
+{"tMs":1772,"delta":"\n  state size"}
+{"tMs":1773,"delta":"=2"}
+{"tMs":1773,"delta":"\n  state slot=\"\""}
+{"tMs":1773,"delta":"\n  Text.title \"Book"}
+{"tMs":1773,"delta":" a table\"\n  Text."}
+{"tMs":1773,"delta":"strong \"Day\"\n  "}
+{"tMs":1781,"delta":"Grid cols:4"}
+{"tMs":1815,"delta":" gap:8\n    "}
+{"tMs":1849,"delta":"ChoiceChip \""}
+{"tMs":2106,"delta":"Mon\" selected:=day"}
+{"tMs":2106,"delta":"==0 -> day=0"}
+{"tMs":2106,"delta":"; slot=\"\"\n    "}
+{"tMs":2106,"delta":"ChoiceChip \""}
+{"tMs":2106,"delta":"Tue\" selected:=day"}
+{"tMs":2106,"delta":"==1 -> day=1"}
+{"tMs":2106,"delta":"; slot=\"\"\n    "}
+{"tMs":2118,"delta":"ChoiceChip \""}
+{"tMs":2152,"delta":"Wed\" selected:=day"}
+{"tMs":2185,"delta":"==2 -> day=2"}
+{"tMs":2219,"delta":"; slot=\"\"\n    "}
+{"tMs":2252,"delta":"ChoiceChip \""}
+{"tMs":2444,"delta":"Thu\" selected:=day"}
+{"tMs":2444,"delta":"==3 -> day=3"}
+{"tMs":2444,"delta":"; slot=\"\"\n    "}
+{"tMs":2445,"delta":"ChoiceChip \""}
+{"tMs":2445,"delta":"Fri\" selected:=day"}
+{"tMs":2453,"delta":"==4 -> day=4"}
+{"tMs":2486,"delta":"; slot=\"\"\n    "}
+{"tMs":2520,"delta":"ChoiceChip \""}
+{"tMs":2553,"delta":"Sat\" selected:=day"}
+{"tMs":2587,"delta":"==5 -> day=5"}
+{"tMs":2620,"delta":"; slot=\"\"\n    "}
+{"tMs":2653,"delta":"ChoiceChip \""}
+{"tMs":2801,"delta":"Sun\" selected:=day"}
+{"tMs":2801,"delta":"==6 -> day=6"}
+{"tMs":2801,"delta":"; slot=\"\"\n  "}
+{"tMs":2801,"delta":"Text.strong \"Party size"}
+{"tMs":2819,"delta":":"}
+{"tMs":2853,"delta":" {size}\"\n  Row"}
+{"tMs":2886,"delta":" g"}
+{"tMs":2921,"delta":"ap:8 midd"}
+{"tMs":2952,"delta":"le\n    Button.outline"}
+{"tMs":2986,"delta":" \"-\" -> size=max"}
+{"tMs":3020,"delta":"(1,size-1);"}
+{"tMs":3054,"delta":" slot=\"\"\n    Sl"}
+{"tMs":3136,"delta":"ider =size min"}
+{"tMs":3136,"delta":":1 max:8 gr"}
+{"tMs":3155,"delta":"ow -"}
+{"tMs":3186,"delta":"> slot=\"\"\n    "}
+{"tMs":3219,"delta":"Button.outline \"+\" -"}
+{"tMs":3253,"delta":"> size=min(8,size"}
+{"tMs":3286,"delta":"+1); slot=\"\""}
+{"tMs":3319,"delta":"\n  Text.strong \""}
+{"tMs":3353,"delta":"Time\"\n  Grid c"}
+{"tMs":3389,"delta":"ols:3 gap:8"}
+{"tMs":3420,"delta":"\n    ChoiceCh"}
+{"tMs":3455,"delta":"ip \"17"}
+{"tMs":3486,"delta":":30"}
+{"tMs":3519,"delta":"\" selected:=slot="}
+{"tMs":3553,"delta":"=\"17:30\" enabled"}
+{"tMs":3586,"delta":":=(day+size)"}
+{"tMs":3620,"delta":"%3!=0 ->"}
+{"tMs":3653,"delta":" slot=\"17:30\""}
+{"tMs":3686,"delta":"\n    ChoiceChip"}
+{"tMs":3720,"delta":" \"18:00\" selected:"}
+{"tMs":3753,"delta":"=slot==\"18:00"}
+{"tMs":3786,"delta":"\" enabled:=(day"}
+{"tMs":3820,"delta":"*2+size)%4!"}
+{"tMs":3853,"delta":"=1 -> slot=\""}
+{"tMs":3888,"delta":"18:00\"\n    Ch"}
+{"tMs":3922,"delta":"oiceChip \"18:"}
+{"tMs":3954,"delta":"30\" selected:=slot"}
+{"tMs":3987,"delta":"==\"18:30\" enab"}
+{"tMs":4020,"delta":"led:=(day+size)"}
+{"tMs":4053,"delta":"%4"}
+{"tMs":4086,"delta":"!=2"}
+{"tMs":4119,"delta":" -> slot=\"18:"}
+{"tMs":4154,"delta":"30\"\n    Choi"}
+{"tMs":4187,"delta":"ceChip \"19:00\""}
+{"tMs":4220,"delta":" selected:=slot==\""}
+{"tMs":4253,"delta":"19:00\" enabled:"}
+{"tMs":4286,"delta":"=(day+"}
+{"tMs":4319,"delta":"size*"}
+{"tMs":4353,"delta":"2)%5!=0 "}
+{"tMs":4386,"delta":"-> slot=\"19:00"}
+{"tMs":4419,"delta":"\"\n    Choice"}
+{"tMs":4454,"delta":"Chip \"19:30\" sel"}
+{"tMs":4486,"delta":"ected:=slot==\"19"}
+{"tMs":4519,"delta":":30\" enabled:="}
+{"tMs":4553,"delta":"(day*3+size)%"}
+{"tMs":4586,"delta":"5!=1 -> sl"}
+{"tMs":4620,"delta":"ot=\"19:30\"\n    "}
+{"tMs":4653,"delta":"ChoiceChip \""}
+{"tMs":4687,"delta":"20:00\" selected:="}
+{"tMs":4720,"delta":"slot==\"20:00\""}
+{"tMs":4753,"delta":" enabled:=size+"}
+{"tMs":4788,"delta":"day>"}
+{"tMs":4819,"delta":"3"}
+{"tMs":4853,"delta":" -> slot=\"20:"}
+{"tMs":4886,"delta":"00\"\n    Choi"}
+{"tMs":4919,"delta":"ceChip \"20:30\""}
+{"tMs":4953,"delta":" selected:=slot==\""}
+{"tMs":4986,"delta":"20:30\" enabled:"}
+{"tMs":5019,"delta":"=(size"}
+{"tMs":5053,"delta":"+day)%2"}
+{"tMs":5086,"delta":"=="}
+{"tMs":5119,"delta":"0 -> slot=\"20"}
+{"tMs":5154,"delta":":30\"\n    Cho"}
+{"tMs":5193,"delta":"iceChip \"21:00"}
+{"tMs":5220,"delta":"\" selected:=slot="}
+{"tMs":5272,"delta":"=\"21:00\" enabled"}
+{"tMs":5285,"delta":":=size<7"}
+{"tMs":5319,"delta":" -> slot=\"21:"}
+{"tMs":5353,"delta":"00\"\n    "}
+{"tMs":5386,"delta":"ChoiceChip \""}
+{"tMs":5419,"delta":"21:30\" selected:="}
+{"tMs":5453,"delta":"slot==\"21:30\""}
+{"tMs":5486,"delta":" enabled:=("}
+{"tMs":5519,"delta":"day+size)%3!="}
+{"tMs":5553,"delta":"1 -> slot=\"21"}
+{"tMs":5586,"delta":":30\"\n  Text."}
+{"tMs":5619,"delta":"muted \"Gre"}
+{"tMs":5653,"delta":"yed-"}
+{"tMs":5686,"delta":"out times"}
+{"tMs":5719,"delta":" are f"}
+{"tMs":5752,"delta":"ully booked.\"\n  Button"}
+{"tMs":5786,"delta":" \""}
+{"tMs":5819,"delta":"Confirm boo"}
+{"tMs":5853,"delta":"king\" enabled:=sl"}
+{"tMs":5898,"delta":"ot!=\"\" -> emit"}
+{"tMs":5919,"delta":" book"}
+{"tMs":5952,"delta":";"}
+{"tMs":5985,"delta":" toast \"Boo"}
+{"tMs":6019,"delta":"ked for {size"}
+{"tMs":6052,"delta":"} on"}
+{"tMs":6085,"delta":" day"}
+{"tMs":6118,"delta":" {day+"}
+{"tMs":6152,"delta":"1} at {slot}\""}

@@ -1,0 +1,64 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1564,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2171,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 729
+   },
+   "ttftMs": 7657,
+   "totalMs": 15647,
+   "chars": 2567,
+   "lines": 71,
+   "jsonTails": 0,
+   "nodes": 62,
+   "outputTokensPerNode": "35.0",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/gridView1/props/columns: A gridView has no prop \"columns\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, itemSnapping, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, fillGaps, masonry, masonryPlacement, pagination, reorder.",
+    "unknown_prop /nodes/gridView1/props/spacing: A gridView has no prop \"spacing\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, itemSnapping, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, fillGaps, masonry, masonryPlacement, pagination, reorder.",
+    "unknown_prop /nodes/tableView1/props/sortable: A tableView has no prop \"sortable\". Its props: columns, rowCount, rowHeight, rowHeightKey, headerHeight, columnWidth, rowHeaderWidth, fillWidth, pinHeaderRow, pinHeaderColumn, gridLineColor, gridLineWidth, stripeColor, headerColor, cacheExtent, clipBehavior, horizontalPadding, headerBorderColor, headerBorderWidth, rowHoverColor, selectedRow, selectedRowColor, stretchLastColumn.",
+    "unknown_prop /nodes/tableView1/props/rows: A tableView has no prop \"rows\". Its props: columns, rowCount, rowHeight, rowHeightKey, headerHeight, columnWidth, rowHeaderWidth, fillWidth, pinHeaderRow, pinHeaderColumn, gridLineColor, gridLineWidth, stripeColor, headerColor, cacheExtent, clipBehavior, horizontalPadding, headerBorderColor, headerBorderWidth, rowHoverColor, selectedRow, selectedRowColor, stretchLastColumn."
+   ]
+  },
+  {
+   "input_tokens": 3858,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 3228,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 613
+   },
+   "ttftMs": 6047,
+   "totalMs": 17123,
+   "chars": 5058,
+   "lines": 186,
+   "jsonTails": 0,
+   "nodes": 172,
+   "outputTokensPerNode": "18.8",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

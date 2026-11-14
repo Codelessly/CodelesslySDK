@@ -1,0 +1,227 @@
+{"meta":{"ui":"question_flow","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"state step=1\nstate use=\"\"\nstate detail=\"\"\nstate budget=500\n\nCard w:390 gap:16\n  Row between middle\n    Text.muted \"Step {min(step,3)} of 3\"\n    Text.caption \"Laptop picker\"\n  Progress value:=min(step,4)/4\n  if step==1\n    Text.title \"What will you use it for?\"\n    Column gap:8\n      ChoiceChip \"School or study\" -> use=\"study\"; detail=\"\"\n      ChoiceChip \"Work and office\" -> use=\"work\"; detail=\"\"\n      ChoiceChip \"Gaming\" -> use=\"gaming\"; detail=\"\"\n      ChoiceChip \"Creative projects\" -> use=\"creative\"; detail=\"\"\n    Button \"Next\" visible:=use!=\"\" -> step=2\n  if step==2\n    if use==\"study\"\n      Text.title \"What matters most for school?\"\n      Column gap:8\n        ChoiceChip \"Battery life\" -> detail=\"battery\"\n        ChoiceChip \"Light to carry\" -> detail=\"light\"\n        ChoiceChip \"Lowest price\" -> detail=\"cheap\"\n    if use==\"work\"\n      Text.title \"How do you work?\"\n      Column gap:8\n        ChoiceChip \"Mostly at a desk\" -> detail=\"desk\"\n        ChoiceChip \"Travel a lot\" -> detail=\"travel\"\n        ChoiceChip \"Video calls all day\" -> detail=\"calls\"\n    if use==\"gaming\"\n      Text.title \"What kind of games?\"\n      Column gap:8\n        ChoiceChip \"Esports and indie\" -> detail=\"casual\"\n        ChoiceChip \"Latest AAA titles\" -> detail=\"aaa\"\n        ChoiceChip \"Play on the go\" -> detail=\"portable\"\n    if use==\"creative\"\n      Text.title \"What do you create?\"\n      Column gap:8\n        ChoiceChip \"Photo editing\" -> detail=\"photo\"\n        ChoiceChip \"Video editing\" -> detail=\"video\"\n        ChoiceChip \"Music or design\" -> detail=\"design\"\n    Row gap:8\n      Button.outline \"Back\" -> step=1\n      Spacer grow\n      Button \"Next\" visible:=detail!=\"\" -> step=3\n  if step==3\n    Text.title \"What is your budget?\"\n    Text.heading \"\\${budget}\"\n    Slider =budget min:400 max:3000\n    Row gap:8\n      Button.outline \"Back\" -> step=2\n      Spacer grow\n      Button \"See my match\" -> step=4\n  if step==4\n    Text.title \"Your match\"\n    Card gap:8\n      if use==\"study\"\n        Text.heading \"Slim 14-inch Ultrabook\"\n        Text.body \"Long battery, light body and plenty of speed for notes, research and video lessons.\"\n      if use==\"work\"\n        Text.heading \"Business 15-inch Laptop\"\n        Text.body \"Reliable keyboard, good webcam and ports, built for long workdays and meetings.\"\n      if use==\"gaming\"\n        Text.heading \"Gaming Laptop with dedicated GPU\"\n        Text.body \"A strong graphics card and high refresh screen for smooth play.\"\n      if use==\"creative\"\n        Text.heading \"Creator 16-inch Laptop\"\n        Text.body \"Color-accurate display, fast processor and extra memory for editing.\"\n      Divider\n      Text.strong \"Why it fits\"\n      Text.small \"• Made for {use}, focused on {detail}\"\n      Text.small \"• Fits your budget of \\${budget}\"\n      if budget<800\n        Text.small \"• Entry-level pricing, so expect a solid but simple spec\"\n      if budget>=800\n        Text.small \"• Room in your budget for a better screen and more storage\"\n    Row gap:8\n      Button.outline \"Back\" -> step=3\n      Spacer grow\n      Button \"Start over\" -> step=1; use=\"\"; detail=\"\"; budget=500","usage":{"input_tokens":1526,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1284,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1046,"totalMs":8652}}
+{"tMs":1046,"delta":"state step=1"}
+{"tMs":1354,"delta":"\nstate use=\"\"\nstate det"}
+{"tMs":1354,"delta":"ail=\"\"\nstate budget="}
+{"tMs":1355,"delta":"500"}
+{"tMs":1355,"delta":"\n\nCard w"}
+{"tMs":1355,"delta":":390 gap:16"}
+{"tMs":1355,"delta":"\n  Row between"}
+{"tMs":1355,"delta":" midd"}
+{"tMs":1355,"delta":"le\n    Text.mu"}
+{"tMs":1375,"delta":"ted \"Step"}
+{"tMs":1407,"delta":" {min"}
+{"tMs":1442,"delta":"(step,3)} of "}
+{"tMs":1678,"delta":"3\"\n    Text"}
+{"tMs":1678,"delta":".ca"}
+{"tMs":1678,"delta":"ption \"La"}
+{"tMs":1678,"delta":"ptop picker\"\n  "}
+{"tMs":1678,"delta":"Progress value:"}
+{"tMs":1678,"delta":"=min(step,4"}
+{"tMs":1678,"delta":")/4"}
+{"tMs":1743,"delta":"\n  if step==1\n    "}
+{"tMs":1776,"delta":"Text.title \"What will"}
+{"tMs":1811,"delta":" you use it for?\"\n    "}
+{"tMs":1843,"delta":"Column"}
+{"tMs":2001,"delta":" gap:8\n      Ch"}
+{"tMs":2001,"delta":"oiceChip \"School"}
+{"tMs":2001,"delta":" or"}
+{"tMs":2002,"delta":" study"}
+{"tMs":2010,"delta":"\" -> use=\"study"}
+{"tMs":2043,"delta":"\"; detail="}
+{"tMs":2077,"delta":"\"\""}
+{"tMs":2110,"delta":"\n      ChoiceChip"}
+{"tMs":2143,"delta":" \"Work and"}
+{"tMs":2177,"delta":" office\" -> use=\"work\""}
+{"tMs":2211,"delta":"; detail=\"\"\n      "}
+{"tMs":2245,"delta":"ChoiceChip \""}
+{"tMs":2332,"delta":"Gaming\" -> use=\""}
+{"tMs":2332,"delta":"gaming\"; detail="}
+{"tMs":2346,"delta":"\"\"\n      Choice"}
+{"tMs":2380,"delta":"Chip \"Creative proj"}
+{"tMs":2413,"delta":"ects\" -> use=\"creative"}
+{"tMs":2451,"delta":"\"; detail=\"\"\n    "}
+{"tMs":2480,"delta":"Button \"Next\" vis"}
+{"tMs":2513,"delta":"ible:=use"}
+{"tMs":2547,"delta":"!=\"\" -> step=2"}
+{"tMs":2580,"delta":"\n  if step==2\n    "}
+{"tMs":2614,"delta":"if use==\"study\"\n      "}
+{"tMs":2648,"delta":"Text.title \"What matters"}
+{"tMs":2681,"delta":" most for school"}
+{"tMs":2715,"delta":"?\"\n      Column gap"}
+{"tMs":2748,"delta":":8\n        Choi"}
+{"tMs":2782,"delta":"ceChip \"Battery life"}
+{"tMs":2815,"delta":"\" -> detail=\"battery"}
+{"tMs":2848,"delta":"\"\n        Choice"}
+{"tMs":2882,"delta":"Chip \"Light to"}
+{"tMs":2915,"delta":" carry\" -> detail=\""}
+{"tMs":2948,"delta":"light"}
+{"tMs":2982,"delta":"\"\n        Choice"}
+{"tMs":3015,"delta":"Chip \"L"}
+{"tMs":3048,"delta":"owest price\" -> detail"}
+{"tMs":3082,"delta":"=\"c"}
+{"tMs":3115,"delta":"heap\"\n    if use="}
+{"tMs":3149,"delta":"=\"work\"\n      Text."}
+{"tMs":3182,"delta":"title \"How"}
+{"tMs":3215,"delta":" do"}
+{"tMs":3248,"delta":" you work?\"\n      Column"}
+{"tMs":3282,"delta":" gap:8\n        Ch"}
+{"tMs":3315,"delta":"oiceChip \""}
+{"tMs":3349,"delta":"Mostly at"}
+{"tMs":3382,"delta":" a"}
+{"tMs":3415,"delta":" desk\" -> detail=\""}
+{"tMs":3450,"delta":"desk\"\n        Cho"}
+{"tMs":3482,"delta":"iceChip \""}
+{"tMs":3515,"delta":"Travel a"}
+{"tMs":3549,"delta":" lot\" -> detail=\""}
+{"tMs":3583,"delta":"travel\"\n        Cho"}
+{"tMs":3616,"delta":"iceChip \"Video cal"}
+{"tMs":3648,"delta":"ls all"}
+{"tMs":3683,"delta":" day\" -> detail=\"cal"}
+{"tMs":3715,"delta":"ls\"\n    if use==\""}
+{"tMs":3749,"delta":"gaming\"\n      Text"}
+{"tMs":3782,"delta":".title \"What"}
+{"tMs":3815,"delta":" kind of games?"}
+{"tMs":3849,"delta":"\"\n      Column gap:"}
+{"tMs":3882,"delta":"8\n        Choice"}
+{"tMs":3916,"delta":"Chip \"Esports and"}
+{"tMs":3949,"delta":" ind"}
+{"tMs":3982,"delta":"ie\" -> detail=\"cas"}
+{"tMs":4015,"delta":"ual\"\n        Choi"}
+{"tMs":4050,"delta":"ceChip \"Latest A"}
+{"tMs":4082,"delta":"AA titles\" -> det"}
+{"tMs":4116,"delta":"ail=\"aaa\"\n        "}
+{"tMs":4149,"delta":"ChoiceChip \""}
+{"tMs":4183,"delta":"Play"}
+{"tMs":4216,"delta":" on"}
+{"tMs":4249,"delta":" the go\" -> detail=\""}
+{"tMs":4282,"delta":"portable\"\n    if use="}
+{"tMs":4316,"delta":"=\"creative\"\n      Text"}
+{"tMs":4349,"delta":".title \"What do"}
+{"tMs":4382,"delta":" you create?\"\n      Column"}
+{"tMs":4416,"delta":" gap:8\n        Ch"}
+{"tMs":4450,"delta":"oiceChip \"Phot"}
+{"tMs":4483,"delta":"o editing\" -> detail"}
+{"tMs":4516,"delta":"=\"photo\"\n        Ch"}
+{"tMs":4549,"delta":"oiceChip \"Video"}
+{"tMs":4583,"delta":" edit"}
+{"tMs":4616,"delta":"ing\" -> detail=\"video"}
+{"tMs":4650,"delta":"\"\n        Choice"}
+{"tMs":4683,"delta":"Chip \"Music or"}
+{"tMs":4717,"delta":" design\" -> detail=\"design"}
+{"tMs":4750,"delta":"\"\n    Row gap:"}
+{"tMs":4796,"delta":"8\n      Button."}
+{"tMs":4816,"delta":"outline \"Back\" ->"}
+{"tMs":4850,"delta":" step=1\n      Sp"}
+{"tMs":4883,"delta":"acer grow\n      Button"}
+{"tMs":4917,"delta":" \"Next\" visible:="}
+{"tMs":4951,"delta":"detail!=\"\" -> step"}
+{"tMs":4984,"delta":"=3\n  if step==3"}
+{"tMs":5017,"delta":"\n    Text.title \"What"}
+{"tMs":5050,"delta":" is"}
+{"tMs":5083,"delta":" your budget?\"\n    "}
+{"tMs":5117,"delta":"Text.he"}
+{"tMs":5150,"delta":"ading \"\\"}
+{"tMs":5183,"delta":"${"}
+{"tMs":5237,"delta":"budget}\"\n    Sl"}
+{"tMs":5250,"delta":"ider =budget min:400"}
+{"tMs":5283,"delta":" max:3"}
+{"tMs":5316,"delta":"000"}
+{"tMs":5349,"delta":"\n    Row"}
+{"tMs":5383,"delta":" gap:8\n      Button"}
+{"tMs":5416,"delta":".outline \"Back\" -"}
+{"tMs":5450,"delta":"> step=2\n      Sp"}
+{"tMs":5484,"delta":"acer grow\n      Button"}
+{"tMs":5516,"delta":" \"See my"}
+{"tMs":5549,"delta":" match"}
+{"tMs":5583,"delta":"\" -> step=4\n  "}
+{"tMs":5616,"delta":"if step==4\n    Text"}
+{"tMs":5650,"delta":".title \"Your match"}
+{"tMs":5683,"delta":"\"\n    Card"}
+{"tMs":5716,"delta":" gap:8"}
+{"tMs":5751,"delta":"\n      if"}
+{"tMs":5784,"delta":" use==\"study\"\n        "}
+{"tMs":5816,"delta":"Text.he"}
+{"tMs":5849,"delta":"ading \"Sl"}
+{"tMs":5883,"delta":"im "}
+{"tMs":5916,"delta":"14-inch"}
+{"tMs":5949,"delta":" Ultrabook\"\n        "}
+{"tMs":5983,"delta":"Text.body"}
+{"tMs":6015,"delta":" \""}
+{"tMs":6049,"delta":"Long battery, light"}
+{"tMs":6082,"delta":" body"}
+{"tMs":6115,"delta":" and pl"}
+{"tMs":6149,"delta":"enty of spe"}
+{"tMs":6182,"delta":"ed for not"}
+{"tMs":6215,"delta":"es,"}
+{"tMs":6248,"delta":" research"}
+{"tMs":6282,"delta":" and video"}
+{"tMs":6315,"delta":" l"}
+{"tMs":6348,"delta":"essons.\"\n      "}
+{"tMs":6382,"delta":"if use==\"work"}
+{"tMs":6415,"delta":"\"\n        Text.heading"}
+{"tMs":6448,"delta":" \"Business "}
+{"tMs":6482,"delta":"15-inch Laptop"}
+{"tMs":6516,"delta":"\"\n        Text.body \""}
+{"tMs":6549,"delta":"Reliable keyboard"}
+{"tMs":6582,"delta":", good webcam and "}
+{"tMs":6616,"delta":"ports, built"}
+{"tMs":6648,"delta":" for long"}
+{"tMs":6682,"delta":" work"}
+{"tMs":6715,"delta":"days and"}
+{"tMs":6748,"delta":" meetings.\"\n      if use"}
+{"tMs":6782,"delta":"==\"gaming\"\n        "}
+{"tMs":6816,"delta":"Text.heading \"G"}
+{"tMs":6849,"delta":"aming Laptop with d"}
+{"tMs":6882,"delta":"edicated GPU\""}
+{"tMs":6916,"delta":"\n        Text.body \"A"}
+{"tMs":6948,"delta":" strong gra"}
+{"tMs":6982,"delta":"phics card and high ref"}
+{"tMs":7015,"delta":"resh scre"}
+{"tMs":7048,"delta":"en for"}
+{"tMs":7082,"delta":" smooth play.\"\n      if"}
+{"tMs":7115,"delta":" use==\"creative\"\n        "}
+{"tMs":7149,"delta":"Text.heading \"Cre"}
+{"tMs":7182,"delta":"ator "}
+{"tMs":7215,"delta":"16"}
+{"tMs":7248,"delta":"-inch Laptop\""}
+{"tMs":7282,"delta":"\n        Text.body \""}
+{"tMs":7315,"delta":"Color-accurate display,"}
+{"tMs":7349,"delta":" fast process"}
+{"tMs":7383,"delta":"or and ext"}
+{"tMs":7414,"delta":"ra mem"}
+{"tMs":7448,"delta":"ory for edit"}
+{"tMs":7481,"delta":"ing.\"\n      Divider"}
+{"tMs":7515,"delta":"\n      Text.str"}
+{"tMs":7548,"delta":"ong \"Why it"}
+{"tMs":7582,"delta":" fits\"\n      Text."}
+{"tMs":7618,"delta":"small \"•"}
+{"tMs":7648,"delta":" Made"}
+{"tMs":7681,"delta":" for {use},"}
+{"tMs":7715,"delta":" focused on {detail}\""}
+{"tMs":7748,"delta":"\n      Text.small \"•"}
+{"tMs":7783,"delta":" Fits your"}
+{"tMs":7815,"delta":" budget of \\${budget}"}
+{"tMs":7848,"delta":"\"\n      if budget<"}
+{"tMs":7882,"delta":"800"}
+{"tMs":7915,"delta":"\n        Text.small \"•"}
+{"tMs":7981,"delta":" Entry-level p"}
+{"tMs":8015,"delta":"ricing, so"}
+{"tMs":8048,"delta":" exp"}
+{"tMs":8081,"delta":"ect a"}
+{"tMs":8114,"delta":" solid but"}
+{"tMs":8148,"delta":" sim"}
+{"tMs":8181,"delta":"ple spec\"\n      if bud"}
+{"tMs":8215,"delta":"get>=800\n        Text"}
+{"tMs":8248,"delta":".small \"• Room in"}
+{"tMs":8281,"delta":" your budget for a"}
+{"tMs":8314,"delta":" better scre"}
+{"tMs":8348,"delta":"en and more"}
+{"tMs":8381,"delta":" storage\"\n    Row g"}
+{"tMs":8415,"delta":"ap:8\n      Button."}
+{"tMs":8448,"delta":"outline \"Back\" ->"}
+{"tMs":8481,"delta":" step=3\n      Sp"}
+{"tMs":8514,"delta":"acer grow\n      Button"}
+{"tMs":8549,"delta":" \"Start over\" -> step"}
+{"tMs":8582,"delta":"=1; use="}
+{"tMs":8615,"delta":"\"\"; detail=\"\"; bud"}
+{"tMs":8649,"delta":"get=500"}

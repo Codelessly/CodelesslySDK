@@ -1,0 +1,65 @@
+{
+ "ui": "order_summary",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1714,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 988,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 519,
+   "totalMs": 3760,
+   "chars": 1912,
+   "lines": 64,
+   "jsonTails": 0,
+   "nodes": 65,
+   "outputTokensPerNode": "15.2",
+   "notationIssues": [],
+   "errors": [
+    "unknown_name /nodes/text18/props/text: \"subtotal\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text20/props/text: \"delivery\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text22/props/text: \"total\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  },
+  {
+   "input_tokens": 3090,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1168,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 422,
+   "totalMs": 3770,
+   "chars": 2331,
+   "lines": 75,
+   "jsonTails": 0,
+   "nodes": 65,
+   "outputTokensPerNode": "18.0",
+   "notationIssues": [
+    "line 1:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  }
+ ]
+}

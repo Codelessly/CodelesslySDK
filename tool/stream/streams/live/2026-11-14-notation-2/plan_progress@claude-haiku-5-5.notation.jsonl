@@ -1,0 +1,123 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"Card gap:12 pad:16\n  Text.title \"Blog migration\"\n  Row between\n    Text.muted \"Elapsed: {elapsed}s\"\n    Badge.info \"{status}\"\n  Progress =progress\n  Row gap:8\n    Button.primary \"Start\" -> status=\"running\"; emit start\n    Button.secondary \"Pause\" -> status=\"paused\"; emit pause\n  List gap:8\n    ListTile\n      Row gap:8\n        if done1\n          Icon \"check\"\n        if !done1\n          CircularProgressIndicator\n        Text.strong \"1. Back up the current blog\"\n      Text.muted \"Export all posts, pages and media to a safe archive.\"\n    ListTile\n      Row gap:8\n        if done2\n          Icon \"check\"\n        if !done2\n          CircularProgressIndicator\n        Text.strong \"2. Export content\"\n      Text.muted \"Convert posts and comments into a portable format.\"\n    ListTile\n      Row gap:8\n        if done3\n          Icon \"check\"\n        if !done3\n          CircularProgressIndicator\n        Text.strong \"3. Set up the new host\"\n      Text.muted \"Provision hosting, domain and the blog software.\"\n    ListTile\n      Row gap:8\n        if done4\n          Icon \"check\"\n        if !done4\n          CircularProgressIndicator\n        Text.strong \"4. Import content\"\n      Text.muted \"Load posts, pages, media and comments into the new site.\"\n    ListTile\n      Row gap:8\n        if done5\n          Icon \"check\"\n        if !done5\n          CircularProgressIndicator\n        Text.strong \"5. Redirects and SEO\"\n      Text.muted \"Map old URLs to new ones so search rankings are kept.\"\n    ListTile\n      Row gap:8\n        if done6\n          Icon \"check\"\n        if !done6\n          CircularProgressIndicator\n        Text.strong \"6. Switch DNS and verify\"\n      Text.muted \"Point the domain at the new site and check every page.\"\n  if allDone\n    Card gap:4\n      Text.success \"Migration complete\"\n      Text.body \"All 6 steps finished in {elapsed}s.\"","usage":{"input_tokens":1702,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":701,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":473,"totalMs":3003}}
+{"tMs":473,"delta":"Card"}
+{"tMs":591,"delta":" g"}
+{"tMs":591,"delta":"ap:12 "}
+{"tMs":592,"delta":"pad:16\n  "}
+{"tMs":593,"delta":"Text.title \"Bl"}
+{"tMs":593,"delta":"og migration\""}
+{"tMs":597,"delta":"\n  Row between"}
+{"tMs":620,"delta":"\n    Text.muted \""}
+{"tMs":640,"delta":"Elapsed: {el"}
+{"tMs":661,"delta":"apsed}s\"\n    "}
+{"tMs":681,"delta":"Bad"}
+{"tMs":704,"delta":"ge.info"}
+{"tMs":723,"delta":" \"{status}\"\n  "}
+{"tMs":742,"delta":"Progress ="}
+{"tMs":762,"delta":"prog"}
+{"tMs":783,"delta":"ress\n  Row gap:"}
+{"tMs":803,"delta":"8\n    Button.primary"}
+{"tMs":824,"delta":" \"Start\" -> status"}
+{"tMs":844,"delta":"=\""}
+{"tMs":865,"delta":"running\"; emit start"}
+{"tMs":885,"delta":"\n    Button.secondary \""}
+{"tMs":906,"delta":"Pause\" -> status=\""}
+{"tMs":926,"delta":"paused\"; emit pause"}
+{"tMs":947,"delta":"\n  "}
+{"tMs":967,"delta":"List gap:8\n    "}
+{"tMs":987,"delta":"ListTile\n      Row"}
+{"tMs":1008,"delta":" g"}
+{"tMs":1028,"delta":"ap:8\n        if"}
+{"tMs":1049,"delta":" done"}
+{"tMs":1068,"delta":"1"}
+{"tMs":1109,"delta":"\n          Ic"}
+{"tMs":1138,"delta":"on \"check\"\n        if"}
+{"tMs":1150,"delta":" !"}
+{"tMs":1170,"delta":"done1\n          C"}
+{"tMs":1191,"delta":"ircularProgressIndic"}
+{"tMs":1211,"delta":"ator\n        Text.str"}
+{"tMs":1232,"delta":"ong \"1"}
+{"tMs":1252,"delta":". Back"}
+{"tMs":1276,"delta":" up the"}
+{"tMs":1292,"delta":" current bl"}
+{"tMs":1313,"delta":"og\"\n      Text."}
+{"tMs":1334,"delta":"muted \"Export"}
+{"tMs":1354,"delta":" all"}
+{"tMs":1374,"delta":" posts, p"}
+{"tMs":1395,"delta":"ages and media to a safe arch"}
+{"tMs":1415,"delta":"ive.\"\n    ListTile"}
+{"tMs":1435,"delta":"\n      Row gap:8"}
+{"tMs":1456,"delta":"\n        if done2\n          "}
+{"tMs":1477,"delta":"Icon \"check\"\n        if"}
+{"tMs":1497,"delta":" !done2\n          Circular"}
+{"tMs":1517,"delta":"ProgressIndicator"}
+{"tMs":1538,"delta":"\n        Text.strong \"2"}
+{"tMs":1559,"delta":". Export"}
+{"tMs":1579,"delta":" content\""}
+{"tMs":1599,"delta":"\n      Text"}
+{"tMs":1620,"delta":".muted \"Convert pos"}
+{"tMs":1640,"delta":"ts and comments into a"}
+{"tMs":1661,"delta":" portable format.\"\n    List"}
+{"tMs":1681,"delta":"Tile\n      Row gap"}
+{"tMs":1702,"delta":":8\n        if done3"}
+{"tMs":1722,"delta":"\n          Icon \"check\""}
+{"tMs":1748,"delta":"\n        if !done3\n          C"}
+{"tMs":1765,"delta":"ircularProgressIndic"}
+{"tMs":1783,"delta":"ator\n        Text.strong"}
+{"tMs":1804,"delta":" \"3. Set up the new"}
+{"tMs":1825,"delta":" host"}
+{"tMs":1845,"delta":"\"\n      Text.muted"}
+{"tMs":1865,"delta":" \"Provision h"}
+{"tMs":1885,"delta":"osting,"}
+{"tMs":1907,"delta":" dom"}
+{"tMs":1926,"delta":"ain and the"}
+{"tMs":1946,"delta":" bl"}
+{"tMs":1967,"delta":"og software"}
+{"tMs":1987,"delta":".\"\n    ListTile"}
+{"tMs":2008,"delta":"\n      Row gap:8"}
+{"tMs":2028,"delta":"\n        if done4\n          Ic"}
+{"tMs":2049,"delta":"on \"check\"\n        if !"}
+{"tMs":2069,"delta":"done4\n          CircularPro"}
+{"tMs":2090,"delta":"gressIndicator\n        "}
+{"tMs":2110,"delta":"Text.strong \"4."}
+{"tMs":2132,"delta":" Import content\"\n      Text"}
+{"tMs":2151,"delta":".muted \"Load posts"}
+{"tMs":2171,"delta":", p"}
+{"tMs":2193,"delta":"ages, media and com"}
+{"tMs":2212,"delta":"ments into the new site"}
+{"tMs":2232,"delta":".\"\n    ListTile"}
+{"tMs":2253,"delta":"\n      Row gap:8"}
+{"tMs":2273,"delta":"\n        if done5\n          Ic"}
+{"tMs":2294,"delta":"on \"check\"\n        if !"}
+{"tMs":2314,"delta":"done5\n          CircularPro"}
+{"tMs":2335,"delta":"gressIndicator\n        "}
+{"tMs":2355,"delta":"Text.strong \"5."}
+{"tMs":2377,"delta":" Redirects"}
+{"tMs":2396,"delta":" and SEO\"\n      "}
+{"tMs":2416,"delta":"Text.muted \"Map"}
+{"tMs":2437,"delta":" old URLs to new "}
+{"tMs":2458,"delta":"ones so"}
+{"tMs":2477,"delta":" search r"}
+{"tMs":2498,"delta":"ankings are"}
+{"tMs":2518,"delta":" kept.\"\n    ListT"}
+{"tMs":2539,"delta":"ile\n      Row gap:"}
+{"tMs":2559,"delta":"8\n        if done6\n          "}
+{"tMs":2579,"delta":"Icon \"check\"\n        "}
+{"tMs":2600,"delta":"if !done6\n          Circ"}
+{"tMs":2620,"delta":"ularProgressIndicator"}
+{"tMs":2641,"delta":"\n        Text.strong \""}
+{"tMs":2661,"delta":"6. Swit"}
+{"tMs":2682,"delta":"ch D"}
+{"tMs":2702,"delta":"NS and verify\"\n      "}
+{"tMs":2723,"delta":"Text.muted \"Point"}
+{"tMs":2743,"delta":" the"}
+{"tMs":2764,"delta":" domain at"}
+{"tMs":2784,"delta":" the new site and check every"}
+{"tMs":2804,"delta":" page.\"\n  if all"}
+{"tMs":2828,"delta":"Done\n    Card"}
+{"tMs":2845,"delta":" gap:4"}
+{"tMs":2865,"delta":"\n      Text.success"}
+{"tMs":2886,"delta":" \"Migration complete\""}
+{"tMs":2907,"delta":"\n      Text.body"}
+{"tMs":2927,"delta":" \"All"}
+{"tMs":2947,"delta":" 6 steps finished in"}
+{"tMs":2967,"delta":" {elapsed}s.\""}

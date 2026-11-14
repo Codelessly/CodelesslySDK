@@ -1,0 +1,104 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"Card gap:12 pad:16 w:390\n  Text.heading \"Book a table\"\n  Select =day items:[\"Mon 12\",\"Tue 13\",\"Wed 14\",\"Thu 15\",\"Fri 16\",\"Sat 17\",\"Sun 18\"]\n  Select =size items:[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\"]\n  if day==\"\"\n    Text.muted \"Pick a day to see times.\"\n  if day!=\"\"\n    Text.strong \"Available times\"\n    Grid cols:3 gap:8\n      ChoiceChip \"17:00\" selected:=time==\"17:00\" enabled:=(day!=\"Mon 12\" || size<=2) -> time=\"17:00\"\n      ChoiceChip \"17:30\" selected:=time==\"17:30\" enabled:=(day!=\"Sat 17\" || size<=4) -> time=\"17:30\"\n      ChoiceChip \"18:00\" selected:=time==\"18:00\" enabled:=(size<=6) -> time=\"18:00\"\n      ChoiceChip \"18:30\" selected:=time==\"18:30\" enabled:=(day!=\"Fri 16\" || size<=4) -> time=\"18:30\"\n      ChoiceChip \"19:00\" selected:=time==\"19:00\" enabled:=(day!=\"Sat 17\" && size<=6) -> time=\"19:00\"\n      ChoiceChip \"19:30\" selected:=time==\"19:30\" enabled:=(day!=\"Sun 18\") -> time=\"19:30\"\n      ChoiceChip \"20:00\" selected:=time==\"20:00\" enabled:=(size<=4) -> time=\"20:00\"\n      ChoiceChip \"20:30\" selected:=time==\"20:30\" enabled:=(day!=\"Thu 15\" || size<=2) -> time=\"20:30\"\n      ChoiceChip \"21:00\" selected:=time==\"21:00\" enabled:=(size<=2) -> time=\"21:00\"\n  state time=\"\"\n  Button.primary \"Confirm booking\" enabled:=(day!=\"\"&&time!=\"\"&&size!=\"\") -> emit book; toast \"Booked: {day}, party of {size}, {time}\"","usage":{"input_tokens":1696,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":684,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":662,"totalMs":2771}}
+{"tMs":662,"delta":"Card"}
+{"tMs":746,"delta":" gap:12 "}
+{"tMs":746,"delta":"pad:16 "}
+{"tMs":747,"delta":"w:390\n  Text."}
+{"tMs":747,"delta":"heading \"Book"}
+{"tMs":765,"delta":" a table\"\n  Select ="}
+{"tMs":784,"delta":"day"}
+{"tMs":804,"delta":" items:[\"Mon "}
+{"tMs":825,"delta":"12\",\"Tue 13\",\""}
+{"tMs":847,"delta":"Wed 14\",\"Th"}
+{"tMs":867,"delta":"u 15\",\"Fri "}
+{"tMs":887,"delta":"16\",\"Sat 17\",\""}
+{"tMs":908,"delta":"Sun 18\"]"}
+{"tMs":928,"delta":"\n  Select =size items:[\""}
+{"tMs":949,"delta":"1\",\"2\",\"3\",\"4\",\""}
+{"tMs":970,"delta":"5\",\"6\",\"7\",\"8\""}
+{"tMs":990,"delta":"]\n  if day=="}
+{"tMs":1011,"delta":"\"\"\n    Text.mu"}
+{"tMs":1031,"delta":"ted \"Pick a day to"}
+{"tMs":1052,"delta":" see times"}
+{"tMs":1073,"delta":".\"\n  if day"}
+{"tMs":1092,"delta":"!=\"\"\n    Text."}
+{"tMs":1113,"delta":"strong \"Available"}
+{"tMs":1133,"delta":" times\"\n    Grid c"}
+{"tMs":1153,"delta":"ols:3 gap:8"}
+{"tMs":1173,"delta":"\n      ChoiceCh"}
+{"tMs":1193,"delta":"ip \"17"}
+{"tMs":1215,"delta":":00\" selected:=time"}
+{"tMs":1235,"delta":"="}
+{"tMs":1255,"delta":"=\"17:00\" enabled"}
+{"tMs":1276,"delta":":=("}
+{"tMs":1297,"delta":"day!"}
+{"tMs":1316,"delta":"=\"Mon 12\" ||"}
+{"tMs":1336,"delta":" size<"}
+{"tMs":1356,"delta":"=2) -> time=\""}
+{"tMs":1377,"delta":"17:00\"\n      Ch"}
+{"tMs":1398,"delta":"oiceChip \"17"}
+{"tMs":1420,"delta":":30\" selected:=time"}
+{"tMs":1439,"delta":"==\"17:30\" enab"}
+{"tMs":1459,"delta":"led:=(day!=\""}
+{"tMs":1479,"delta":"Sat 17\" || size<"}
+{"tMs":1500,"delta":"=4) -> time=\"17"}
+{"tMs":1521,"delta":":30\"\n      Cho"}
+{"tMs":1542,"delta":"iceChip \"18:00"}
+{"tMs":1561,"delta":"\" selected:=time==\""}
+{"tMs":1581,"delta":"18:00\" enabled:"}
+{"tMs":1604,"delta":"=(size"}
+{"tMs":1622,"delta":"<=6"}
+{"tMs":1643,"delta":") -> time=\"18:00"}
+{"tMs":1663,"delta":"\"\n      Choice"}
+{"tMs":1686,"delta":"Chip \"18:30\" sel"}
+{"tMs":1704,"delta":"ected:=time==\"18:"}
+{"tMs":1726,"delta":"30\" enabled:=("}
+{"tMs":1745,"delta":"day!=\"Fri 16"}
+{"tMs":1765,"delta":"\" || size<=4) -"}
+{"tMs":1786,"delta":"> time=\"18:30\""}
+{"tMs":1807,"delta":"\n      ChoiceChip"}
+{"tMs":1827,"delta":" \"19:00\" selected:"}
+{"tMs":1847,"delta":"=time==\"19:00\""}
+{"tMs":1867,"delta":" enabled:=(day"}
+{"tMs":1888,"delta":"!=\"Sat 17\""}
+{"tMs":1908,"delta":" &&"}
+{"tMs":1930,"delta":" size<=6) -> time"}
+{"tMs":1950,"delta":"=\"19:00\"\n      "}
+{"tMs":1970,"delta":"ChoiceChip \"19"}
+{"tMs":1990,"delta":":30\" selected:=time"}
+{"tMs":2010,"delta":"==\"19:30\" enab"}
+{"tMs":2031,"delta":"led:=(day!=\""}
+{"tMs":2051,"delta":"Sun"}
+{"tMs":2072,"delta":" 18\")"}
+{"tMs":2094,"delta":" -> time=\"19:30\""}
+{"tMs":2114,"delta":"\n      ChoiceCh"}
+{"tMs":2133,"delta":"ip \"20:00\" selected"}
+{"tMs":2159,"delta":":=time==\"20:00"}
+{"tMs":2174,"delta":"\" enabled:=(size"}
+{"tMs":2195,"delta":"<=4"}
+{"tMs":2214,"delta":") -> time=\"20:00"}
+{"tMs":2234,"delta":"\"\n      Choice"}
+{"tMs":2256,"delta":"Chip \"20:30\" sel"}
+{"tMs":2277,"delta":"ected:=time==\"20:"}
+{"tMs":2296,"delta":"30\" enabled:=("}
+{"tMs":2317,"delta":"day!=\"Th"}
+{"tMs":2337,"delta":"u 15\""}
+{"tMs":2357,"delta":" || size<=2) ->"}
+{"tMs":2378,"delta":" time=\"20:30\"\n      "}
+{"tMs":2399,"delta":"ChoiceChip \""}
+{"tMs":2418,"delta":"21:00\" selected:="}
+{"tMs":2439,"delta":"time==\"21:00\" en"}
+{"tMs":2463,"delta":"abled:=(size<="}
+{"tMs":2480,"delta":"2) -> time=\"21:"}
+{"tMs":2500,"delta":"00\"\n  state time=\"\""}
+{"tMs":2521,"delta":"\n  Button.primary \""}
+{"tMs":2541,"delta":"Confirm boo"}
+{"tMs":2562,"delta":"king\" enabled:=("}
+{"tMs":2583,"delta":"day!="}
+{"tMs":2602,"delta":"\"\"&&time!=\"\"&"}
+{"tMs":2622,"delta":"&size!"}
+{"tMs":2643,"delta":"=\"\") -> emit book"}
+{"tMs":2663,"delta":"; toast \"Booked:"}
+{"tMs":2684,"delta":" {day}"}
+{"tMs":2706,"delta":", party"}
+{"tMs":2725,"delta":" of"}
+{"tMs":2745,"delta":" {size}, {time}\""}

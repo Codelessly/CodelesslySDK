@@ -1,0 +1,1568 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "textField1",
+    "segmentedButton1",
+    "row1",
+    "divider1",
+    "row2",
+    "row3",
+    "row4",
+    "row5",
+    "row6",
+    "text22",
+    "row7",
+    "column2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Invoices"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search customer",
+     "hintText": "Type a name"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "total",
+       "value": "${= count(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.selected": "${= status items:[\"All\",\"Paid\",\"Pending\",\"Overdue\"]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "total",
+       "value": "${= count(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox1",
+    "textButton1",
+    "textButton2",
+    "textButton3",
+    "textButton4",
+    "textButton5"
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= count(rows)>0&&all(map(rows,contains(sel,it.id)))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= all(map(rows,contains(sel,it.id)))?without(sel,map(rows,it.id)):union(sel,map(rows,it.id))}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "No."
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortDir",
+       "value": "${= (sortKey==\"id\"&&sortDir==\"asc\")?\"desc\":\"asc\"}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "id"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Customer"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortDir",
+       "value": "${= (sortKey==\"customer\"&&sortDir==\"asc\")?\"desc\":\"asc\"}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "customer"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Date"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortDir",
+       "value": "${= (sortKey==\"date\"&&sortDir==\"asc\")?\"desc\":\"asc\"}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "date"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Amount"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortDir",
+       "value": "${= (sortKey==\"amount\"&&sortDir==\"asc\")?\"desc\":\"asc\"}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "amount"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Status"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortDir",
+       "value": "${= (sortKey==\"status\"&&sortDir==\"asc\")?\"desc\":\"asc\"}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "status"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= count(rows)>0}"
+   },
+   "children": [
+    "checkbox2",
+    "text2",
+    "text3",
+    "text4",
+    "text5",
+    "badge1"
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= contains(sel,rows[0].id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= contains(sel,rows[0].id)?without(sel,[rows[0].id]):union(sel,[rows[0].id])}"
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[0].id}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[0].customer}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${= rows[0].date}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "\\${rows[0].amount}"
+   }
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFF3F4F6",
+    "textColor": "#FF374151",
+    "label": "${= rows[0].status}"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= count(rows)>1}"
+   },
+   "children": [
+    "checkbox3",
+    "text6",
+    "text7",
+    "text8",
+    "text9",
+    "badge2"
+   ]
+  },
+  "checkbox3": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= contains(sel,rows[1].id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= contains(sel,rows[1].id)?without(sel,[rows[1].id]):union(sel,[rows[1].id])}"
+      }
+     ]
+    }
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[1].id}"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[1].customer}"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${= rows[1].date}"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "\\${rows[1].amount}"
+   }
+  },
+  "badge2": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFF3F4F6",
+    "textColor": "#FF374151",
+    "label": "${= rows[1].status}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= count(rows)>2}"
+   },
+   "children": [
+    "checkbox4",
+    "text10",
+    "text11",
+    "text12",
+    "text13",
+    "badge3"
+   ]
+  },
+  "checkbox4": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= contains(sel,rows[2].id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= contains(sel,rows[2].id)?without(sel,[rows[2].id]):union(sel,[rows[2].id])}"
+      }
+     ]
+    }
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[2].id}"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[2].customer}"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${= rows[2].date}"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "\\${rows[2].amount}"
+   }
+  },
+  "badge3": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFF3F4F6",
+    "textColor": "#FF374151",
+    "label": "${= rows[2].status}"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= count(rows)>3}"
+   },
+   "children": [
+    "checkbox5",
+    "text14",
+    "text15",
+    "text16",
+    "text17",
+    "badge4"
+   ]
+  },
+  "checkbox5": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= contains(sel,rows[3].id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= contains(sel,rows[3].id)?without(sel,[rows[3].id]):union(sel,[rows[3].id])}"
+      }
+     ]
+    }
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[3].id}"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[3].customer}"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${= rows[3].date}"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "\\${rows[3].amount}"
+   }
+  },
+  "badge4": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFF3F4F6",
+    "textColor": "#FF374151",
+    "label": "${= rows[3].status}"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= count(rows)>4}"
+   },
+   "children": [
+    "checkbox6",
+    "text18",
+    "text19",
+    "text20",
+    "text21",
+    "badge5"
+   ]
+  },
+  "checkbox6": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= contains(sel,rows[4].id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= contains(sel,rows[4].id)?without(sel,[rows[4].id]):union(sel,[rows[4].id])}"
+      }
+     ]
+    }
+   ]
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[4].id}"
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${= rows[4].customer}"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${= rows[4].date}"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "\\${rows[4].amount}"
+   }
+  },
+  "badge5": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFF3F4F6",
+    "textColor": "#FF374151",
+    "label": "${= rows[4].status}"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "No invoices match."
+   },
+   "bind": {
+    "visible": "${= total==0}"
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "text23",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Prev"
+   },
+   "bind": {
+    "props.enabled": "${= page>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= page-1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Page ${= page+1} of ${= max(1,ceil(total/5))}"
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next"
+   },
+   "bind": {
+    "props.enabled": "${= (page+1)*5<total}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= page+1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rows",
+       "value": "${= slice(sortBy(filter(invoices,(status==\"All\"||status==it.status)&&contains(lower(it.customer),lower(q))),sortKey,sortDir),page*5,page*5+5)}"
+      }
+     ]
+    }
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "visible": "${= count(sel)>0}"
+   },
+   "children": [
+    "row8",
+    "filledButton1"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text24",
+    "text25"
+   ]
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= count(sel)} selected"
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Total: \\${sum(map(filter(invoices,contains(sel,it.id)),it.amount))}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send reminders"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "remind",
+       "value": "${sel}"
+      },
+      {
+       "type": "showToast",
+       "message": "Reminders sent"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "id": "INV-1001",
+      "customer": "Acme Corp",
+      "date": "2024-01-05",
+      "amount": 1200,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1002",
+      "customer": "Birch & Co",
+      "date": "2024-01-12",
+      "amount": 860,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1003",
+      "customer": "Cobalt Ltd",
+      "date": "2024-01-19",
+      "amount": 2450,
+      "status": "Pending"
+     },
+     {
+      "id": "INV-1004",
+      "customer": "Delta Foods",
+      "date": "2024-02-02",
+      "amount": 310,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1005",
+      "customer": "Evergreen",
+      "date": "2024-02-09",
+      "amount": 1780,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1006",
+      "customer": "Fjord Studio",
+      "date": "2024-02-16",
+      "amount": 940,
+      "status": "Pending"
+     },
+     {
+      "id": "INV-1007",
+      "customer": "Gamma Labs",
+      "date": "2024-02-23",
+      "amount": 3200,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1008",
+      "customer": "Harbor Inn",
+      "date": "2024-03-01",
+      "amount": 525,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1009",
+      "customer": "Iris Design",
+      "date": "2024-03-08",
+      "amount": 1465,
+      "status": "Pending"
+     },
+     {
+      "id": "INV-1010",
+      "customer": "Juniper Bank",
+      "date": "2024-03-15",
+      "amount": 2780,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1011",
+      "customer": "Kite Media",
+      "date": "2024-03-22",
+      "amount": 690,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1012",
+      "customer": "Lumen Energy",
+      "date": "2024-03-29",
+      "amount": 1990,
+      "status": "Pending"
+     }
+    ]
+   },
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "id": "INV-1001",
+      "customer": "Acme Corp",
+      "date": "2024-01-05",
+      "amount": 1200,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1002",
+      "customer": "Birch & Co",
+      "date": "2024-01-12",
+      "amount": 860,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1003",
+      "customer": "Cobalt Ltd",
+      "date": "2024-01-19",
+      "amount": 2450,
+      "status": "Pending"
+     },
+     {
+      "id": "INV-1004",
+      "customer": "Delta Foods",
+      "date": "2024-02-02",
+      "amount": 310,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1005",
+      "customer": "Evergreen",
+      "date": "2024-02-09",
+      "amount": 1780,
+      "status": "Overdue"
+     }
+    ]
+   },
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 12
+   },
+   {
+    "name": "sel",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "sortKey",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "sortDir",
+    "type": "text",
+    "value": "asc"
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

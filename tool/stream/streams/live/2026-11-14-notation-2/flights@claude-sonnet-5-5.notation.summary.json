@@ -1,0 +1,63 @@
+{
+ "ui": "flights",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1699,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 552,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 886,
+   "totalMs": 3805,
+   "chars": 1102,
+   "lines": 37,
+   "jsonTails": 0,
+   "nodes": 37,
+   "outputTokensPerNode": "14.9",
+   "notationIssues": [],
+   "errors": [
+    "unknown_bind_path /nodes/radio1/bind/props.selected: A radio has no prop \"selected\". Its props: label, value, groupValue, toggleable, autofocus, activeColor, inactiveColor, hoverColor, focusColor, splashRadius, side, innerRadius, backgroundColor, compact.",
+    "unknown_bind_path /nodes/radio2/bind/props.selected: A radio has no prop \"selected\". Its props: label, value, groupValue, toggleable, autofocus, activeColor, inactiveColor, hoverColor, focusColor, splashRadius, side, innerRadius, backgroundColor, compact.",
+    "unknown_bind_path /nodes/radio3/bind/props.selected: A radio has no prop \"selected\". Its props: label, value, groupValue, toggleable, autofocus, activeColor, inactiveColor, hoverColor, focusColor, splashRadius, side, innerRadius, backgroundColor, compact."
+   ]
+  },
+  {
+   "input_tokens": 2599,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 509,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 933,
+   "totalMs": 3198,
+   "chars": 1030,
+   "lines": 34,
+   "jsonTails": 0,
+   "nodes": 34,
+   "outputTokensPerNode": "15.0",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

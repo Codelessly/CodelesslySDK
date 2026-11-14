@@ -1,0 +1,104 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"The diff needs red and green text without a color prop, so I'll use Text.danger for removed lines and Text.success for added lines. Text.caption and Text.muted cover the other labels. The apply condition goes into the `enabled:=` form with a single expression, and the broken `I` node is gone.\n\nstate d1=\"\"\nstate d2=\"\"\nstate d3=\"\"\nstate kept=0\nCard w:390 gap:10 pad:12\n  Text.title \"Review changes\"\n  Text.muted \"config.yaml · 3 hunks\"\n  Card gap:6 pad:8 fill:#FFF6F6 radius:6\n    Text.caption \"@@ -12,3 +12,3 @@\"\n    Text.danger \"- timeout: 30\"\n    Text.success \"+ timeout: 60\"\n    Row gap:8\n      ChoiceChip \"Keep\" selected:=d1==\"keep\" -> d1=\"keep\"\n      ChoiceChip \"Discard\" selected:=d1==\"discard\" -> d1=\"discard\"\n  Card gap:6 pad:8 fill:#FFF6F6 radius:6\n    Text.caption \"@@ -40,2 +40,3 @@\"\n    Text.danger \"- retries: 2\"\n    Text.success \"+ retries: 5\"\n    Text.success \"+ backoff: exponential\"\n    Row gap:8\n      ChoiceChip \"Keep\" selected:=d2==\"keep\" -> d2=\"keep\"\n      ChoiceChip \"Discard\" selected:=d2==\"discard\" -> d2=\"discard\"\n  Card gap:6 pad:8 fill:#FFF6F6 radius:6\n    Text.caption \"@@ -88,1 +89,0 @@\"\n    Text.danger \"- debug: true\"\n    Row gap:8\n      ChoiceChip \"Keep\" selected:=d3==\"keep\" -> d3=\"keep\"\n      ChoiceChip \"Discard\" selected:=d3==\"discard\" -> d3=\"discard\"\n  Text.body \"Kept {kept} of 3\"\n  Button \"Apply\" enabled:=d1!=\"\"&&d2!=\"\"&&d3!=\"\" -> emit apply","usage":{"input_tokens":3025,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":699,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":545,"totalMs":2956}}
+{"tMs":545,"delta":"The diff needs red"}
+{"tMs":554,"delta":" and green text"}
+{"tMs":791,"delta":" without"}
+{"tMs":791,"delta":" a"}
+{"tMs":791,"delta":" color"}
+{"tMs":791,"delta":" prop,"}
+{"tMs":791,"delta":" so I'll"}
+{"tMs":791,"delta":" use"}
+{"tMs":791,"delta":" Text.dan"}
+{"tMs":791,"delta":"ger for"}
+{"tMs":791,"delta":" remov"}
+{"tMs":791,"delta":"ed lines and Text.success"}
+{"tMs":791,"delta":" for added lines."}
+{"tMs":791,"delta":" Text.ca"}
+{"tMs":1046,"delta":"ption and Text.muted c"}
+{"tMs":1046,"delta":"over the other"}
+{"tMs":1046,"delta":" labels. The ap"}
+{"tMs":1046,"delta":"ply cond"}
+{"tMs":1046,"delta":"ition go"}
+{"tMs":1046,"delta":"es into the `enabled:"}
+{"tMs":1046,"delta":"=` form"}
+{"tMs":1046,"delta":" with a single exp"}
+{"tMs":1046,"delta":"ression,"}
+{"tMs":1046,"delta":" and the bro"}
+{"tMs":1046,"delta":"ken `I` node is g"}
+{"tMs":1047,"delta":"one.\n\nstate d1=\"\""}
+{"tMs":1262,"delta":"\nstate d2=\"\"\nstate"}
+{"tMs":1262,"delta":" d3=\"\"\nstate kept"}
+{"tMs":1262,"delta":"=0"}
+{"tMs":1262,"delta":"\nCard w:390 gap:"}
+{"tMs":1262,"delta":"10 pad:12\n  "}
+{"tMs":1262,"delta":"Text.title \"Review chang"}
+{"tMs":1262,"delta":"es\"\n  Text.mu"}
+{"tMs":1262,"delta":"ted \"config.yaml ·"}
+{"tMs":1262,"delta":" 3 hunks\""}
+{"tMs":1262,"delta":"\n  Card gap:6 "}
+{"tMs":1271,"delta":"pad:8 fill:"}
+{"tMs":1292,"delta":"#FFF6F6 "}
+{"tMs":1400,"delta":"radius:6\n    Text"}
+{"tMs":1400,"delta":".caption \"@@ -"}
+{"tMs":1400,"delta":"12,3 +12,3"}
+{"tMs":1400,"delta":" @@\"\n    Text"}
+{"tMs":1400,"delta":".danger \"- timeout"}
+{"tMs":1416,"delta":": 30\"\n    Text"}
+{"tMs":1437,"delta":".success \"+ timeout"}
+{"tMs":1458,"delta":": 60\"\n    Row"}
+{"tMs":1478,"delta":" gap:8\n      Ch"}
+{"tMs":1500,"delta":"oiceChip \"Ke"}
+{"tMs":1520,"delta":"ep\" selected:=d1"}
+{"tMs":1540,"delta":"==\"keep\" -> d"}
+{"tMs":1561,"delta":"1=\"keep\"\n      "}
+{"tMs":1581,"delta":"ChoiceChip \""}
+{"tMs":1602,"delta":"Discard\" selected:=d"}
+{"tMs":1624,"delta":"1==\"discard\" ->"}
+{"tMs":1643,"delta":" d1=\"discard\"\n  "}
+{"tMs":1665,"delta":"Card gap:6 p"}
+{"tMs":1683,"delta":"ad:8 fill:#"}
+{"tMs":1704,"delta":"FFF6F6 rad"}
+{"tMs":1725,"delta":"ius:6\n    Text."}
+{"tMs":1748,"delta":"caption \"@@ -40"}
+{"tMs":1766,"delta":",2 +40,3 "}
+{"tMs":1787,"delta":"@@\"\n    Text."}
+{"tMs":1807,"delta":"danger \"- retries: "}
+{"tMs":1827,"delta":"2\"\n    Text.success"}
+{"tMs":1851,"delta":" \"+ retries: 5"}
+{"tMs":1868,"delta":"\"\n    Text.success \""}
+{"tMs":1889,"delta":"+ backoff: expon"}
+{"tMs":1910,"delta":"ential\"\n    Row gap"}
+{"tMs":1931,"delta":":8\n      Choi"}
+{"tMs":1953,"delta":"ceChip \"Keep\""}
+{"tMs":1971,"delta":" selected:=d2==\""}
+{"tMs":1991,"delta":"keep\" -> d2=\""}
+{"tMs":2012,"delta":"keep\"\n      Cho"}
+{"tMs":2032,"delta":"iceChip \"Discard"}
+{"tMs":2054,"delta":"\" selected:=d2="}
+{"tMs":2073,"delta":"=\"discard\" -> d2"}
+{"tMs":2094,"delta":"=\"discard\"\n  Card"}
+{"tMs":2117,"delta":" gap:6 pad:"}
+{"tMs":2134,"delta":"8 fill:#FF"}
+{"tMs":2155,"delta":"F6F6 radius:"}
+{"tMs":2176,"delta":"6\n    Text.caption"}
+{"tMs":2196,"delta":" \"@@ -88,1"}
+{"tMs":2216,"delta":" +89,0 @@"}
+{"tMs":2237,"delta":"\"\n    Text.danger"}
+{"tMs":2257,"delta":" \"- debug: true\""}
+{"tMs":2278,"delta":"\n    Row gap:8"}
+{"tMs":2365,"delta":"\n      ChoiceChip"}
+{"tMs":2365,"delta":" \"Keep\" selected:"}
+{"tMs":2365,"delta":"=d3==\"keep\""}
+{"tMs":2365,"delta":" -> d3=\"keep\""}
+{"tMs":2380,"delta":"\n      ChoiceCh"}
+{"tMs":2402,"delta":"ip \"Discard\" selected"}
+{"tMs":2421,"delta":":=d3==\"discard"}
+{"tMs":2442,"delta":"\" -> d3=\"discard"}
+{"tMs":2464,"delta":"\"\n  Text."}
+{"tMs":2482,"delta":"body \"Kept {kept"}
+{"tMs":2502,"delta":"} of 3\"\n  "}
+{"tMs":2524,"delta":"Button \"Apply\" enab"}
+{"tMs":2952,"delta":"led:=d"}
+{"tMs":2952,"delta":"1!="}
+{"tMs":2952,"delta":"\"\"&&d2!="}
+{"tMs":2952,"delta":"\"\"&&d3!=\"\""}
+{"tMs":2952,"delta":" -> emit apply"}

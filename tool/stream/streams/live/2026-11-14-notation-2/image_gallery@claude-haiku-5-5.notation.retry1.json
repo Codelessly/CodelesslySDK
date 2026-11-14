@@ -1,0 +1,499 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 390,
+    "padding": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "gridView1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Trip photos"
+   }
+  },
+  "gridView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisSpacing": 8,
+    "crossAxisSpacing": 8
+   },
+   "children": [
+    "column2",
+    "column3",
+    "column4",
+    "column5",
+    "column6",
+    "column7",
+    "column8",
+    "column9",
+    "column10"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FF4F7BD9"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Sunrise over the harbour"
+      }
+     ]
+    }
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FF7B5FC9"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 2}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Old town market"
+      }
+     ]
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FFE8905A"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Mountain trail"
+      }
+     ]
+    }
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FF5AB08A"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 4}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Night ferry"
+      }
+     ]
+    }
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FF3E8FC4"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 5}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Coastal road"
+      }
+     ]
+    }
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FFD9775A"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 6}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Cafe terrace"
+      }
+     ]
+    }
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FF8A6BD0"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 7}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Lavender fields"
+      }
+     ]
+    }
+   ]
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FF4AA3A0"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 8}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Fishing boats"
+      }
+     ]
+    }
+   ]
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FFC26AA8"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= 9}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "caption",
+       "value": "Last evening"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "idx",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "open",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "caption",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

@@ -1,0 +1,81 @@
+{
+ "ui": "map_list",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1706,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2141,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 616
+   },
+   "ttftMs": 6719,
+   "totalMs": 14342,
+   "chars": 2735,
+   "lines": 57,
+   "jsonTails": 0,
+   "nodes": 51,
+   "outputTokensPerNode": "42.0",
+   "notationIssues": [
+    "line 13:1: A column has no text of its own.",
+    "line 15:1: A column has no text of its own.",
+    "line 17:1: A column has no text of its own.",
+    "line 19:1: A column has no text of its own.",
+    "line 21:1: A column has no text of its own.",
+    "line 24:1: A column has no text of its own.",
+    "line 28:1: A column has no text of its own.",
+    "line 32:1: A column has no text of its own.",
+    "line 36:1: A column has no text of its own.",
+    "line 40:1: A column has no text of its own."
+   ],
+   "errors": [
+    "unknown_prop /nodes/column6/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column7/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column8/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column9/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column10/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column12/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column13/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column14/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column15/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/column16/props/: A column has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport."
+   ]
+  },
+  {
+   "input_tokens": 4625,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1754,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 624
+   },
+   "ttftMs": 6313,
+   "totalMs": 11100,
+   "chars": 1968,
+   "lines": 37,
+   "jsonTails": 0,
+   "nodes": 31,
+   "outputTokensPerNode": "56.6",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

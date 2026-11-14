@@ -1,0 +1,90 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"Column gap:12 pad:16 w:390\n  state idx=0\n  state picked=-1\n  if picked<0\n    Row between middle\n      Button.ghost \"<\" -> idx=max(0,idx-1)\n      Text.strong \"Running shoes\"\n      Button.ghost \">\" -> idx=min(5,idx+1)\n    Card gap:8 pad:12\n      Image \"https://placehold.co/320x200?text=Shoe\" h:200\n      Text.heading \"{names[idx]}\"\n      Row between middle\n        Text.strong \"{prices[idx]}\"\n        Badge.success \"{ratings[idx]} stars\"\n      Button.primary \"View details\" -> picked=idx\n    Row center gap:6\n      Badge.neutral \"{idx+1} / 6\"\n  if picked>=0\n    Column gap:12\n      Row gap:8 middle\n        IconButton \"arrow_back\" -> picked=-1\n        Text.heading \"{names[picked]}\"\n      Image \"https://placehold.co/320x200?text=Shoe\" h:200\n      Text.body \"{descriptions[picked]}\"\n      Text.strong \"{prices[picked]}\"\n      Text.caption \"Choose a size\"\n      SegmentedButton =size items:[\"7\",\"8\",\"9\",\"10\",\"11\"]\n      Button.primary \"Add to bag\" -> emit addToBag picked; toast \"Added to bag\"","usage":{"input_tokens":1699,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":455,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":563,"totalMs":2377}}
+{"tMs":563,"delta":"Column"}
+{"tMs":585,"delta":" gap:12 "}
+{"tMs":753,"delta":"pad:16 w:390"}
+{"tMs":754,"delta":"\n  state id"}
+{"tMs":754,"delta":"x=0\n  state pic"}
+{"tMs":754,"delta":"ked=-"}
+{"tMs":754,"delta":"1\n  if"}
+{"tMs":754,"delta":" picked<"}
+{"tMs":754,"delta":"0\n    Row"}
+{"tMs":754,"delta":" between"}
+{"tMs":770,"delta":" midd"}
+{"tMs":791,"delta":"le\n      Button"}
+{"tMs":811,"delta":"."}
+{"tMs":832,"delta":"ghost \"<"}
+{"tMs":861,"delta":"\" -> id"}
+{"tMs":873,"delta":"x=max(0,idx"}
+{"tMs":894,"delta":"-1)\n      Text."}
+{"tMs":917,"delta":"strong \"Running shoes"}
+{"tMs":935,"delta":"\"\n      Button.gh"}
+{"tMs":955,"delta":"ost "}
+{"tMs":977,"delta":"\">\" -> idx=min"}
+{"tMs":997,"delta":"(5,idx+1)"}
+{"tMs":1017,"delta":"\n    Card"}
+{"tMs":1039,"delta":" gap:8"}
+{"tMs":1058,"delta":" pad:12\n      "}
+{"tMs":1079,"delta":"Image \"https://plac"}
+{"tMs":1099,"delta":"eh"}
+{"tMs":1119,"delta":"old.co/320x200"}
+{"tMs":1139,"delta":"?"}
+{"tMs":1160,"delta":"text"}
+{"tMs":1180,"delta":"="}
+{"tMs":1201,"delta":"Shoe\" h"}
+{"tMs":1223,"delta":":200\n      Text.he"}
+{"tMs":1242,"delta":"ading \"{names"}
+{"tMs":1262,"delta":"[idx]}\""}
+{"tMs":1282,"delta":"\n      Row"}
+{"tMs":1302,"delta":" between midd"}
+{"tMs":1323,"delta":"le\n        Text.strong"}
+{"tMs":1343,"delta":" \"{"}
+{"tMs":1364,"delta":"prices[idx]}\""}
+{"tMs":1384,"delta":"\n        Badge.success"}
+{"tMs":1405,"delta":" \"{ratings[idx"}
+{"tMs":1426,"delta":"]} st"}
+{"tMs":1446,"delta":"ars\"\n      "}
+{"tMs":1467,"delta":"Button.primary \"View"}
+{"tMs":1486,"delta":" details\" -> pic"}
+{"tMs":1507,"delta":"ked=idx\n    Row"}
+{"tMs":1527,"delta":" center"}
+{"tMs":1547,"delta":" g"}
+{"tMs":1568,"delta":"ap:6"}
+{"tMs":1588,"delta":"\n      Bad"}
+{"tMs":1609,"delta":"ge.ne"}
+{"tMs":1629,"delta":"utral \"{idx+"}
+{"tMs":1650,"delta":"1}"}
+{"tMs":1670,"delta":" / 6\""}
+{"tMs":1690,"delta":"\n  "}
+{"tMs":1711,"delta":"if"}
+{"tMs":1731,"delta":" picked>"}
+{"tMs":1752,"delta":"=0\n    Column"}
+{"tMs":1772,"delta":" gap:12\n      Row"}
+{"tMs":1792,"delta":" g"}
+{"tMs":1812,"delta":"ap:8 "}
+{"tMs":1833,"delta":"middle\n        I"}
+{"tMs":1854,"delta":"conButton \"ar"}
+{"tMs":1874,"delta":"row_back"}
+{"tMs":1894,"delta":"\" -> picked=-1"}
+{"tMs":1915,"delta":"\n        Text.heading \""}
+{"tMs":1945,"delta":"{names[picked]}\""}
+{"tMs":1955,"delta":"\n      Image"}
+{"tMs":1982,"delta":" \"https://placehold.co"}
+{"tMs":1999,"delta":"/320x200?text="}
+{"tMs":2017,"delta":"Shoe\" h:200"}
+{"tMs":2038,"delta":"\n      Text.body"}
+{"tMs":2058,"delta":" \"{descriptions[pic"}
+{"tMs":2078,"delta":"ked]}\"\n      Text"}
+{"tMs":2099,"delta":".strong \"{prices["}
+{"tMs":2120,"delta":"picked]}\"\n      "}
+{"tMs":2140,"delta":"Text.ca"}
+{"tMs":2160,"delta":"ption \"Cho"}
+{"tMs":2181,"delta":"ose a size\"\n      S"}
+{"tMs":2201,"delta":"egmentedButton ="}
+{"tMs":2222,"delta":"size items:[\"7"}
+{"tMs":2242,"delta":"\",\"8\",\"9\",\"10\",\"11"}
+{"tMs":2262,"delta":"\"]\n      Button.prim"}
+{"tMs":2283,"delta":"ary \"Add to bag\""}
+{"tMs":2303,"delta":" -> emit add"}
+{"tMs":2324,"delta":"ToBag pic"}
+{"tMs":2344,"delta":"ked; toast \"Added"}
+{"tMs":2364,"delta":" to bag\""}

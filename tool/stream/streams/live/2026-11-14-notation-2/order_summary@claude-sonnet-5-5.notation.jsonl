@@ -1,0 +1,180 @@
+{"meta":{"ui":"order_summary","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"state q1=1\nstate q2=2\nstate q3=1\nstate q4=3\nstate q5=1\nstate promo=\"\"\nstate applied=false\nstate p1=3.5\nstate p2=4.25\nstate p3=2.99\nstate p4=1.5\nstate p5=6\nCard w:390 gap:12 pad:16\n  Text.title \"Your grocery order\"\n  if q1>0\n    Row gap:8 middle\n      Box w:48 h:48 fill:#FFE0E0E0 radius:8 center middle\n        Icon \"image\"\n      Column grow\n        Text.strong \"Bananas\"\n        Text.muted \"\\${p1}\"\n      Row gap:4 middle\n        IconButton \"remove\" -> q1=max(0,q1-1)\n        Text.strong \"{q1}\"\n        IconButton \"add\" -> q1=q1+1\n  if q2>0\n    Row gap:8 middle\n      Box w:48 h:48 fill:#FFE0E0E0 radius:8 center middle\n        Icon \"image\"\n      Column grow\n        Text.strong \"Whole milk\"\n        Text.muted \"\\${p2}\"\n      Row gap:4 middle\n        IconButton \"remove\" -> q2=max(0,q2-1)\n        Text.strong \"{q2}\"\n        IconButton \"add\" -> q2=q2+1\n  if q3>0\n    Row gap:8 middle\n      Box w:48 h:48 fill:#FFE0E0E0 radius:8 center middle\n        Icon \"image\"\n      Column grow\n        Text.strong \"Sourdough bread\"\n        Text.muted \"\\${p3}\"\n      Row gap:4 middle\n        IconButton \"remove\" -> q3=max(0,q3-1)\n        Text.strong \"{q3}\"\n        IconButton \"add\" -> q3=q3+1\n  if q4>0\n    Row gap:8 middle\n      Box w:48 h:48 fill:#FFE0E0E0 radius:8 center middle\n        Icon \"image\"\n      Column grow\n        Text.strong \"Eggs\"\n        Text.muted \"\\${p4}\"\n      Row gap:4 middle\n        IconButton \"remove\" -> q4=max(0,q4-1)\n        Text.strong \"{q4}\"\n        IconButton \"add\" -> q4=q4+1\n  if q5>0\n    Row gap:8 middle\n      Box w:48 h:48 fill:#FFE0E0E0 radius:8 center middle\n        Icon \"image\"\n      Column grow\n        Text.strong \"Coffee beans\"\n        Text.muted \"\\${p5}\"\n      Row gap:4 middle\n        IconButton \"remove\" -> q5=max(0,q5-1)\n        Text.strong \"{q5}\"\n        IconButton \"add\" -> q5=q5+1\n  Divider\n  Row gap:8 middle\n    Input \"Promo code\" =promo grow\n    Button.outline \"Apply\" -> applied=(promo==\"SAVE10\")\n  if applied\n    Text.success \"SAVE10 applied: 10% off\"\n  Row between\n    Text \"Subtotal\"\n    Text \"\\${round((q1*p1+q2*p2+q3*p3+q4*p4+q5*p5)*(applied?0.9:1)*100)/100}\"\n  Row between\n    Text \"Delivery\"\n    Text \"\\${(q1+q2+q3+q4+q5)>0?4.99:0}\"\n  Row between\n    Text.heading \"Total\"\n    Text.heading \"\\${round(((q1*p1+q2*p2+q3*p3+q4*p4+q5*p5)*(applied?0.9:1)+((q1+q2+q3+q4+q5)>0?4.99:0))*100)/100}\"\n  Row gap:8 end\n    Button.outline \"Cancel\" -> emit cancel; toast \"Order cancelled\"\n    Button.primary \"Confirm order\" -> emit confirm; toast \"Order confirmed\"","usage":{"input_tokens":1715,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1289,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":623,"totalMs":6616}}
+{"tMs":623,"delta":"state"}
+{"tMs":937,"delta":" q1=1"}
+{"tMs":938,"delta":"\nstate q2=2"}
+{"tMs":938,"delta":"\nstate q3=1\nstate"}
+{"tMs":938,"delta":" q4=3\nstate q5"}
+{"tMs":938,"delta":"=1\nstate promo=\"\""}
+{"tMs":938,"delta":"\nstate applied=false\nstate"}
+{"tMs":938,"delta":" p"}
+{"tMs":938,"delta":"1=3"}
+{"tMs":940,"delta":".5"}
+{"tMs":974,"delta":"\nstate p2=4.25"}
+{"tMs":1008,"delta":"\nstate p3=2.99"}
+{"tMs":1041,"delta":"\nstate p4=1"}
+{"tMs":1265,"delta":".5\nstate p5=6"}
+{"tMs":1266,"delta":"\nCard w:390 "}
+{"tMs":1266,"delta":"gap:12"}
+{"tMs":1266,"delta":" "}
+{"tMs":1266,"delta":"pad:16"}
+{"tMs":1274,"delta":"\n  Text.title \""}
+{"tMs":1310,"delta":"Your gr"}
+{"tMs":1341,"delta":"ocery order\"\n  if"}
+{"tMs":1374,"delta":" q1>0\n    Row"}
+{"tMs":1415,"delta":" gap:8 midd"}
+{"tMs":1445,"delta":"le\n      Box w:48"}
+{"tMs":1601,"delta":" h:48 fill:"}
+{"tMs":1601,"delta":"#FFE"}
+{"tMs":1601,"delta":"0E0E0 radius"}
+{"tMs":1602,"delta":":8 center midd"}
+{"tMs":1611,"delta":"le\n        Ic"}
+{"tMs":1644,"delta":"on \"image\"\n      Column"}
+{"tMs":1675,"delta":" grow\n        Text.str"}
+{"tMs":1708,"delta":"ong \"B"}
+{"tMs":1741,"delta":"ananas\"\n        Text."}
+{"tMs":1775,"delta":"muted \"\\${"}
+{"tMs":1809,"delta":"p1}\"\n      Row"}
+{"tMs":1842,"delta":" gap:4 middle"}
+{"tMs":1926,"delta":"\n        IconButton \"rem"}
+{"tMs":1926,"delta":"ove\" -> q1=max"}
+{"tMs":1942,"delta":"(0,q1-1)"}
+{"tMs":1975,"delta":"\n        Text."}
+{"tMs":2009,"delta":"strong \"{q1}\""}
+{"tMs":2042,"delta":"\n        IconButton \"add"}
+{"tMs":2075,"delta":"\" -> q1=q1"}
+{"tMs":2108,"delta":"+1\n  if q2>"}
+{"tMs":2142,"delta":"0\n    Row gap:"}
+{"tMs":2175,"delta":"8 middle\n      Box"}
+{"tMs":2209,"delta":" w:48 h:48 "}
+{"tMs":2242,"delta":"fill:#FFE0"}
+{"tMs":2275,"delta":"E0E0 radius:"}
+{"tMs":2309,"delta":"8 center middle\n        "}
+{"tMs":2343,"delta":"Icon \"image\"\n      "}
+{"tMs":2376,"delta":"Column grow\n        Text."}
+{"tMs":2410,"delta":"strong \"Whole milk"}
+{"tMs":2443,"delta":"\"\n        Text.muted"}
+{"tMs":2476,"delta":" \"\\${p2}\""}
+{"tMs":2510,"delta":"\n      Row gap:4 "}
+{"tMs":2543,"delta":"middle\n        IconButton"}
+{"tMs":2576,"delta":" \"remove\" -> q2"}
+{"tMs":2609,"delta":"=max(0,q2-"}
+{"tMs":2642,"delta":"1)\n        Text.str"}
+{"tMs":2676,"delta":"ong \"{q2}\""}
+{"tMs":2709,"delta":"\n        IconButton \"add\""}
+{"tMs":2742,"delta":" -> q2=q2+"}
+{"tMs":2776,"delta":"1\n  if q3>0"}
+{"tMs":2809,"delta":"\n    Row gap:8"}
+{"tMs":2842,"delta":" middle\n      Box w"}
+{"tMs":2876,"delta":":48 h:48 f"}
+{"tMs":2909,"delta":"ill:#FFE0E"}
+{"tMs":2942,"delta":"0E0 radius:8"}
+{"tMs":2976,"delta":" center middle\n        Ic"}
+{"tMs":3009,"delta":"on \"image\"\n      Column"}
+{"tMs":3043,"delta":" grow\n        Text.str"}
+{"tMs":3076,"delta":"ong \"Sourdough b"}
+{"tMs":3109,"delta":"read\"\n        Text.mu"}
+{"tMs":3143,"delta":"ted \"\\${p3}\""}
+{"tMs":3176,"delta":"\n      Row gap:4"}
+{"tMs":3210,"delta":" middle\n        IconBut"}
+{"tMs":3243,"delta":"ton \"remove\" -> q"}
+{"tMs":3276,"delta":"3=max(0,q3"}
+{"tMs":3309,"delta":"-1)\n        Text."}
+{"tMs":3343,"delta":"strong \"{q3}\""}
+{"tMs":3376,"delta":"\n        IconButton \"add"}
+{"tMs":3410,"delta":"\" -> q3=q3"}
+{"tMs":3443,"delta":"+1\n  if q4>"}
+{"tMs":3476,"delta":"0\n    Row gap:"}
+{"tMs":3509,"delta":"8 middle\n      Box"}
+{"tMs":3544,"delta":" w:48 h:48 "}
+{"tMs":3576,"delta":"fill:#FFE0"}
+{"tMs":3610,"delta":"E0E0 radius:"}
+{"tMs":3643,"delta":"8 center middle\n        "}
+{"tMs":3676,"delta":"Icon \"image\"\n      "}
+{"tMs":3710,"delta":"Column grow\n        Text."}
+{"tMs":3743,"delta":"strong \"Eggs\""}
+{"tMs":3776,"delta":"\n        Text.muted \""}
+{"tMs":3810,"delta":"\\${p4}\"\n      "}
+{"tMs":3843,"delta":"Row gap:4 midd"}
+{"tMs":3876,"delta":"le\n        IconButton \""}
+{"tMs":3910,"delta":"remove\" -> q4="}
+{"tMs":3944,"delta":"max(0,q4-1"}
+{"tMs":3976,"delta":")\n        Text.strong"}
+{"tMs":4009,"delta":" \"{q4}\"\n        "}
+{"tMs":4043,"delta":"IconButton \"add\" -"}
+{"tMs":4076,"delta":"> q4=q4+1"}
+{"tMs":4109,"delta":"\n  if q5>0"}
+{"tMs":4145,"delta":"\n    Row gap:8 "}
+{"tMs":4176,"delta":"middle\n      Box w:"}
+{"tMs":4210,"delta":"48 h:48 fill"}
+{"tMs":4244,"delta":":#FFE0E0"}
+{"tMs":4277,"delta":"E0 radius:8 "}
+{"tMs":4310,"delta":"center middle\n        Icon"}
+{"tMs":4343,"delta":" \"image\"\n      Column gr"}
+{"tMs":4376,"delta":"ow\n        Text.strong"}
+{"tMs":4411,"delta":" \"Co"}
+{"tMs":4443,"delta":"ffee be"}
+{"tMs":4476,"delta":"ans\"\n        Text.mu"}
+{"tMs":4510,"delta":"ted \"\\${p5}\""}
+{"tMs":4543,"delta":"\n      Row gap:4"}
+{"tMs":4576,"delta":" middle\n        IconBut"}
+{"tMs":4609,"delta":"ton \"remove\" -> q"}
+{"tMs":4643,"delta":"5=max(0,q5"}
+{"tMs":4676,"delta":"-1)\n        Text."}
+{"tMs":4715,"delta":"strong \"{q5}\""}
+{"tMs":4743,"delta":"\n        IconButton \"add"}
+{"tMs":4776,"delta":"\" -> q5=q5"}
+{"tMs":4810,"delta":"+1\n  Divider"}
+{"tMs":4843,"delta":"\n  Row gap:8 "}
+{"tMs":4878,"delta":"middle\n    Input \""}
+{"tMs":4910,"delta":"Promo code\" ="}
+{"tMs":4943,"delta":"promo gr"}
+{"tMs":4978,"delta":"ow\n    Button."}
+{"tMs":5010,"delta":"outline \"Apply\" -"}
+{"tMs":5043,"delta":"> applied=("}
+{"tMs":5076,"delta":"promo==\"SAVE"}
+{"tMs":5110,"delta":"10\")\n  if"}
+{"tMs":5143,"delta":" applied\n    Text.success"}
+{"tMs":5176,"delta":" \"S"}
+{"tMs":5210,"delta":"AVE10 applied:"}
+{"tMs":5244,"delta":" 10% off\"\n  "}
+{"tMs":5276,"delta":"Row"}
+{"tMs":5309,"delta":" between\n    Text \""}
+{"tMs":5343,"delta":"Subtotal\"\n    "}
+{"tMs":5376,"delta":"Text \"\\${round(("}
+{"tMs":5410,"delta":"q1*p1+q2"}
+{"tMs":5443,"delta":"*p2+q3*p"}
+{"tMs":5476,"delta":"3+q4*p4+"}
+{"tMs":5511,"delta":"q5*p5)*("}
+{"tMs":5543,"delta":"applied?0"}
+{"tMs":5577,"delta":".9:1)*100)"}
+{"tMs":5610,"delta":"/100}\"\n  Row"}
+{"tMs":5643,"delta":" between\n    Text \"Del"}
+{"tMs":5676,"delta":"ivery\"\n    Text \""}
+{"tMs":5711,"delta":"\\${(q1+"}
+{"tMs":5743,"delta":"q2+q3+q4"}
+{"tMs":5776,"delta":"+q5)>0?4"}
+{"tMs":5810,"delta":"."}
+{"tMs":5846,"delta":"99:0}\"\n  "}
+{"tMs":5876,"delta":"Row between\n    Text.he"}
+{"tMs":5910,"delta":"ading \"Total\"\n    "}
+{"tMs":5943,"delta":"Text.heading \"\\${round"}
+{"tMs":5976,"delta":"(((q1*p1+"}
+{"tMs":6010,"delta":"q2*p2+q3"}
+{"tMs":6043,"delta":"*p3+q4*p"}
+{"tMs":6076,"delta":"4+q5*p5)"}
+{"tMs":6109,"delta":"*(applied?0.9"}
+{"tMs":6171,"delta":":1)+((q1+"}
+{"tMs":6176,"delta":"q2+q3+q4"}
+{"tMs":6212,"delta":"+q5)>0?4"}
+{"tMs":6243,"delta":".99:0))*100)"}
+{"tMs":6276,"delta":"/100}\"\n  Row"}
+{"tMs":6310,"delta":" gap:8 end\n    "}
+{"tMs":6344,"delta":"Button.outline \"C"}
+{"tMs":6377,"delta":"ancel\" -> emit c"}
+{"tMs":6410,"delta":"ancel; toast \"Order"}
+{"tMs":6443,"delta":" cancelled\"\n    "}
+{"tMs":6476,"delta":"Button."}
+{"tMs":6510,"delta":"primary \"Confirm order"}
+{"tMs":6543,"delta":"\" -> emit confirm"}
+{"tMs":6576,"delta":"; toast \"Order conf"}
+{"tMs":6610,"delta":"irmed\""}

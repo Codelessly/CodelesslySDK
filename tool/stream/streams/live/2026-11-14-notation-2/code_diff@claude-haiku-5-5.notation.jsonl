@@ -1,0 +1,143 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"I'll describe this as a notation UI. Since I don't have your config file, I'll use a plausible sample config with three hunks. Each hunk needs decision state, so I'll use per-hunk variables with keep/discard, a count, and an apply button enabled only when all three are decided.\n\nstate d1=\"\"\nstate d2=\"\"\nstate d3=\"\"\nstate kept=0\nstate decided=0\nCard w:390 gap:10 pad:12\n  Text.title \"Review changes\"\n  Text.muted \"config.yaml · 3 hunks\"\n  Card gap:6 pad:8 fill:#FFF6F6 radius:6\n    Text.caption \"@@ -12,3 +12,3 @@\"\n    Text \"- timeout: 30\" color:#FFB00020\n    Text \"+ timeout: 60\" color:#FF1B7F3B\n    Row gap:8\n      ChoiceChip \"Keep\" selected:=d1==\"keep\" -> d1=\"keep\"\n      ChoiceChip \"Discard\" selected:=d1==\"discard\" -> d1=\"discard\"\n  Card gap:6 pad:8 fill:#FFF6F6 radius:6\n    Text.caption \"@@ -40,2 +40,3 @@\"\n    Text \"- retries: 2\" color:#FFB00020\n    Text \"+ retries: 5\" color:#FF1B7F3B\n    Text \"+ backoff: exponential\" color:#FF1B7F3B\n    Row gap:8\n      ChoiceChip \"Keep\" selected:=d2==\"keep\" -> d2=\"keep\"\n      ChoiceChip \"Discard\" selected:=d2==\"discard\" -> d2=\"discard\"\n  Card gap:6 pad:8 fill:#FFF6F6 radius:6\n    Text.caption \"@@ -88,1 +89,0 @@\"\n    Text \"- debug: true\" color:#FFB00020\n    Row gap:8\n      ChoiceChip \"Keep\" selected:=d3==\"keep\" -> d3=\"keep\"\n      ChoiceChip \"Discard\" selected:=d3==\"discard\" -> d3=\"discard\"\n  Text.body \"Kept {kept} of 3\"\n  Button \"Apply\" enabled:=d1!=\"\"&&d2!=\"\"&&d3!=\"\" -> emit apply","usage":{"input_tokens":1707,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":743,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":682,"totalMs":3604}}
+{"tMs":682,"delta":"I'"}
+{"tMs":847,"delta":"ll describ"}
+{"tMs":847,"delta":"e this"}
+{"tMs":847,"delta":" as a not"}
+{"tMs":847,"delta":"ation U"}
+{"tMs":847,"delta":"I."}
+{"tMs":847,"delta":" Since I don't have your"}
+{"tMs":847,"delta":" config file, I'll use"}
+{"tMs":847,"delta":" a"}
+{"tMs":860,"delta":" pl"}
+{"tMs":881,"delta":"ausible sample config"}
+{"tMs":903,"delta":" with three hunks. Each"}
+{"tMs":925,"delta":" hunk needs decision"}
+{"tMs":1022,"delta":" state, so I'll use per"}
+{"tMs":1022,"delta":"-hunk vari"}
+{"tMs":1022,"delta":"ables with"}
+{"tMs":1022,"delta":" ke"}
+{"tMs":1029,"delta":"ep/discard, a"}
+{"tMs":1048,"delta":" count, and an apply button en"}
+{"tMs":1068,"delta":"abled only when all three"}
+{"tMs":1090,"delta":" are decided.\n\nstate"}
+{"tMs":1109,"delta":" d"}
+{"tMs":1130,"delta":"1=\"\"\nstate d2="}
+{"tMs":1151,"delta":"\"\"\nstate d3=\"\""}
+{"tMs":1171,"delta":"\nstate k"}
+{"tMs":1194,"delta":"ept=0\nstate"}
+{"tMs":1212,"delta":" decided=0\nCard w"}
+{"tMs":1232,"delta":":390 gap:10"}
+{"tMs":1252,"delta":" "}
+{"tMs":1273,"delta":"pad:12\n  Text"}
+{"tMs":1294,"delta":".title \"Review"}
+{"tMs":1313,"delta":" chang"}
+{"tMs":1335,"delta":"es\"\n  Text"}
+{"tMs":1354,"delta":"."}
+{"tMs":1375,"delta":"muted \"config"}
+{"tMs":1395,"delta":".y"}
+{"tMs":1416,"delta":"aml ·"}
+{"tMs":1436,"delta":" 3 hunks\""}
+{"tMs":1456,"delta":"\n  Card"}
+{"tMs":1476,"delta":" g"}
+{"tMs":1497,"delta":"ap:6"}
+{"tMs":1517,"delta":" pad:8 fill"}
+{"tMs":1538,"delta":":#F"}
+{"tMs":1558,"delta":"FF6"}
+{"tMs":1579,"delta":"F6 "}
+{"tMs":1599,"delta":"radius:6\n    Text"}
+{"tMs":1620,"delta":".ca"}
+{"tMs":1640,"delta":"ption \"@"}
+{"tMs":1660,"delta":"@ -"}
+{"tMs":1680,"delta":"12"}
+{"tMs":1700,"delta":",3"}
+{"tMs":1721,"delta":" +12,3 @@"}
+{"tMs":1742,"delta":"\"\n    Text \"-"}
+{"tMs":1762,"delta":" tim"}
+{"tMs":1783,"delta":"eout: 30"}
+{"tMs":1803,"delta":"\""}
+{"tMs":1823,"delta":" color"}
+{"tMs":1844,"delta":":#F"}
+{"tMs":1863,"delta":"F"}
+{"tMs":1884,"delta":"B"}
+{"tMs":1904,"delta":"00"}
+{"tMs":1924,"delta":"020"}
+{"tMs":1966,"delta":"\n    Text \"+ time"}
+{"tMs":1986,"delta":"out: 60\" color:#"}
+{"tMs":2006,"delta":"FF1"}
+{"tMs":2026,"delta":"B"}
+{"tMs":2047,"delta":"7"}
+{"tMs":2067,"delta":"F"}
+{"tMs":2087,"delta":"3B"}
+{"tMs":2108,"delta":"\n    Row gap:8"}
+{"tMs":2129,"delta":"\n      "}
+{"tMs":2149,"delta":"ChoiceChip \""}
+{"tMs":2169,"delta":"Keep\" sel"}
+{"tMs":2190,"delta":"ected:=d1="}
+{"tMs":2210,"delta":"=\"keep\" -> d1"}
+{"tMs":2231,"delta":"=\"keep\""}
+{"tMs":2251,"delta":"\n      ChoiceChip"}
+{"tMs":2272,"delta":" \"Discard\" selected:"}
+{"tMs":2293,"delta":"=d1==\"discard\""}
+{"tMs":2313,"delta":" -> d1=\"discard\""}
+{"tMs":2333,"delta":"\n  Card gap:6"}
+{"tMs":2354,"delta":" pad:8 f"}
+{"tMs":2374,"delta":"ill:#FFF6F"}
+{"tMs":2395,"delta":"6 radius:6\n    "}
+{"tMs":2416,"delta":"Text.caption \"@@"}
+{"tMs":2441,"delta":" -40,2"}
+{"tMs":2456,"delta":" +40,3"}
+{"tMs":2477,"delta":" @@\"\n    Text"}
+{"tMs":2498,"delta":" \"- ret"}
+{"tMs":2517,"delta":"ries: 2"}
+{"tMs":2538,"delta":"\" color:#FFB00"}
+{"tMs":2559,"delta":"020\n    Text \"+"}
+{"tMs":2579,"delta":" retries: 5"}
+{"tMs":2600,"delta":"\" color:#FF1B"}
+{"tMs":2620,"delta":"7F3B\n    Text"}
+{"tMs":2643,"delta":" \"+ back"}
+{"tMs":2661,"delta":"off: ex"}
+{"tMs":2681,"delta":"ponential\" color:#FF"}
+{"tMs":2702,"delta":"1B7"}
+{"tMs":2722,"delta":"F3B\n    Row g"}
+{"tMs":2743,"delta":"ap:8\n      Cho"}
+{"tMs":2763,"delta":"iceChip \"Keep"}
+{"tMs":2784,"delta":"\" selected:=d2="}
+{"tMs":2804,"delta":"=\"keep\" -> d2"}
+{"tMs":2825,"delta":"=\"keep\"\n      Ch"}
+{"tMs":2845,"delta":"oiceChip \"Disc"}
+{"tMs":2865,"delta":"ard\" selected:=d2"}
+{"tMs":2886,"delta":"==\"discard\" -> d"}
+{"tMs":2907,"delta":"2=\"discard\"\n  "}
+{"tMs":2927,"delta":"Card gap:6 pad"}
+{"tMs":2947,"delta":":8 fill:#F"}
+{"tMs":2968,"delta":"FF6F6 radius"}
+{"tMs":2988,"delta":":6\n    Text.ca"}
+{"tMs":3009,"delta":"ption \"@@ -88"}
+{"tMs":3029,"delta":",1 +89"}
+{"tMs":3049,"delta":",0"}
+{"tMs":3070,"delta":" @@\"\n    Text"}
+{"tMs":3090,"delta":" \"- deb"}
+{"tMs":3111,"delta":"ug:"}
+{"tMs":3131,"delta":" true\" color:#FFB"}
+{"tMs":3151,"delta":"00020\n    Row"}
+{"tMs":3172,"delta":" gap:8\n      Ch"}
+{"tMs":3192,"delta":"oiceChip \"Ke"}
+{"tMs":3213,"delta":"ep\" selected:=d3"}
+{"tMs":3233,"delta":"==\"keep\" -> d"}
+{"tMs":3253,"delta":"3=\"keep\"\n      "}
+{"tMs":3274,"delta":"ChoiceChip \""}
+{"tMs":3295,"delta":"Discard\" selected:=d"}
+{"tMs":3315,"delta":"3==\"discard\" ->"}
+{"tMs":3336,"delta":" d3=\"discard\"\n  "}
+{"tMs":3356,"delta":"Text"}
+{"tMs":3376,"delta":"."}
+{"tMs":3396,"delta":"body"}
+{"tMs":3417,"delta":" \"Kept {"}
+{"tMs":3437,"delta":"kept}"}
+{"tMs":3458,"delta":" of 3\"\n  Button"}
+{"tMs":3478,"delta":" \"Apply\" en"}
+{"tMs":3498,"delta":"abled:=d1"}
+{"tMs":3519,"delta":"!="}
+{"tMs":3539,"delta":"\"\"&&d2!=\"\""}
+{"tMs":3559,"delta":"&&d3!=\""}
+{"tMs":3580,"delta":"\" -> emit apply"}

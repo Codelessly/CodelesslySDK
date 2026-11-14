@@ -1,0 +1,77 @@
+{
+ "ui": "itinerary",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1535,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1195,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 669,
+   "totalMs": 8711,
+   "chars": 2358,
+   "lines": 57,
+   "jsonTails": 0,
+   "nodes": 52,
+   "outputTokensPerNode": "23.0",
+   "notationIssues": [
+    "line 13:1: A expansionTile has no text of its own.",
+    "line 18:1: A expansionTile has no text of its own.",
+    "line 23:1: A expansionTile has no text of its own.",
+    "line 28:1: A expansionTile has no text of its own.",
+    "line 37:1: A expansionTile has no text of its own.",
+    "line 42:1: A expansionTile has no text of its own.",
+    "line 47:1: A expansionTile has no text of its own.",
+    "line 52:1: A expansionTile has no text of its own."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 2922,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1481,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 276
+   },
+   "ttftMs": 3097,
+   "totalMs": 8202,
+   "chars": 2394,
+   "lines": 57,
+   "jsonTails": 0,
+   "nodes": 52,
+   "outputTokensPerNode": "28.5",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/expansionTile1/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius.",
+    "unknown_prop /nodes/expansionTile2/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius.",
+    "unknown_prop /nodes/expansionTile3/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius.",
+    "unknown_prop /nodes/expansionTile4/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius.",
+    "unknown_prop /nodes/expansionTile5/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius.",
+    "unknown_prop /nodes/expansionTile6/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius.",
+    "unknown_prop /nodes/expansionTile7/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius.",
+    "unknown_prop /nodes/expansionTile8/props/title: A expansionTile has no prop \"title\". Its props: initiallyExpanded, maintainState, backgroundColor, collapsedBackgroundColor, tilePadding, childrenPadding, expandedAlignment, expandedCrossAxisAlignment, iconColor, collapsedIconColor, textColor, collapsedTextColor, controlAffinity, visualDensity, showDividers, showTrailingIcon, shape, collapsedShape, radius."
+   ]
+  }
+ ]
+}

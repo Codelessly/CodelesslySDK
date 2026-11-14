@@ -1,0 +1,81 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1563,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1054,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 652,
+   "totalMs": 4602,
+   "chars": 2429,
+   "lines": 84,
+   "jsonTails": 0,
+   "nodes": 72,
+   "outputTokensPerNode": "14.6",
+   "notationIssues": [
+    "line 1:1: No node type \"Notation\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…).",
+    "line 3:1: A line starts with a node type: Column, Text \"…\", Button \"…\".",
+    "line 85:1: A line starts with a node type: Column, Text \"…\", Button \"…\"."
+   ],
+   "errors": [
+    "children_not_allowed /nodes/tableView1/children: A tableView takes no \"children\": it takes slots (cell, columnHeader, rowHeader, corner). Put the child under \"slots\", e.g. {\"cell\": \"<id>\"}.",
+    "unknown_bind_path /nodes/progressBar1/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_name /nodes/progressBar1/bind/props.text: \"organic_pct\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_bind_path /nodes/progressBar2/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_name /nodes/progressBar2/bind/props.text: \"paid_pct\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_bind_path /nodes/progressBar3/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_name /nodes/progressBar3/bind/props.text: \"referral_pct\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_bind_path /nodes/progressBar4/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_name /nodes/progressBar4/bind/props.text: \"social_pct\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_bind_path /nodes/tableView1/bind/props.text: A tableView has no prop \"text\". Its props: columns, rowCount, rowHeight, rowHeightKey, headerHeight, columnWidth, rowHeaderWidth, fillWidth, pinHeaderRow, pinHeaderColumn, gridLineColor, gridLineWidth, stripeColor, headerColor, cacheExtent, clipBehavior, horizontalPadding, headerBorderColor, headerBorderWidth, rowHoverColor, selectedRow, selectedRowColor, stretchLastColumn."
+   ]
+  },
+  {
+   "input_tokens": 4228,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 979,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 576,
+   "totalMs": 3131,
+   "chars": 2174,
+   "lines": 85,
+   "jsonTails": 0,
+   "nodes": 72,
+   "outputTokensPerNode": "13.6",
+   "notationIssues": [],
+   "errors": [
+    "children_not_allowed /nodes/tableView1/children: A tableView takes no \"children\": it takes slots (cell, columnHeader, rowHeader, corner). Put the child under \"slots\", e.g. {\"cell\": \"<id>\"}.",
+    "unknown_bind_path /nodes/progressBar1/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_bind_path /nodes/progressBar2/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_bind_path /nodes/progressBar3/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_bind_path /nodes/progressBar4/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+    "unknown_bind_path /nodes/tableView1/bind/props.text: A tableView has no prop \"text\". Its props: columns, rowCount, rowHeight, rowHeightKey, headerHeight, columnWidth, rowHeaderWidth, fillWidth, pinHeaderRow, pinHeaderColumn, gridLineColor, gridLineWidth, stripeColor, headerColor, cacheExtent, clipBehavior, horizontalPadding, headerBorderColor, headerBorderWidth, rowHoverColor, selectedRow, selectedRowColor, stretchLastColumn."
+   ]
+  }
+ ]
+}

@@ -1,0 +1,108 @@
+{"meta":{"ui":"data_table","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the twelve invoices you found as a table: number, customer, date, amount and status. I can sort by any column, filter by status, type to search the customer, page through five at a time, tick rows (and a tick-all for the page), and a bar appears with the count and total of what I ticked and a button to send reminders for them.","text":"Column w:390 gap:10 pad:16\n  Text.heading \"Invoices\"\n  Input \"Search customer\" =search\n  Select =status items:[\"All\",\"Paid\",\"Due\",\"Overdue\"]\n  Row gap:8\n    Button.ghost \"Number\" -> sortBy=\"number\"\n    Button.ghost \"Customer\" -> sortBy=\"customer\"\n    Button.ghost \"Date\" -> sortBy=\"date\"\n    Button.ghost \"Amount\" -> sortBy=\"amount\"\n    Button.ghost \"Status\" -> sortBy=\"status\"\n  Row gap:8\n    Checkbox \"All on page\" -> emit toggle_page page\n    Text.caption \"Page {page} of 3\"\n  List\n    Row gap:8\n      Checkbox -> emit pick \"INV-1001\"\n      Text \"INV-1001\"\n      Text \"Acme Ltd\"\n      Text.muted \"2024-05-02\"\n      Text \"\\$1,200.00\"\n      Badge.success \"Paid\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1002\"\n      Text \"INV-1002\"\n      Text \"Brightline Co\"\n      Text.muted \"2024-05-05\"\n      Text \"\\$640.00\"\n      Badge.warning \"Due\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1003\"\n      Text \"INV-1003\"\n      Text \"Corvid Labs\"\n      Text.muted \"2024-05-09\"\n      Text \"\\$2,950.00\"\n      Badge.danger \"Overdue\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1004\"\n      Text \"INV-1004\"\n      Text \"Delta Foods\"\n      Text.muted \"2024-05-12\"\n      Text \"\\$310.00\"\n      Badge.success \"Paid\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1005\"\n      Text \"INV-1005\"\n      Text \"Evergreen Inc\"\n      Text.muted \"2024-05-15\"\n      Text \"\\$875.50\"\n      Badge.warning \"Due\"\n  Row gap:8\n    Button.outline \"Prev\" -> page=max(1,page-1)\n    Text.caption \"{page}\"\n    Button.outline \"Next\" -> page=page+1\n  if picked!=[]\n    Row between pad:12 fill:#FFEFF6FF radius:8\n      Text.strong \"{picked.length} selected, total \\${total}\"\n      Button \"Send reminders\" -> emit remind picked","usage":{"input_tokens":2725,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":827,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":367,"totalMs":2686}}
+{"tMs":367,"delta":"Column"}
+{"tMs":566,"delta":" w"}
+{"tMs":566,"delta":":390 "}
+{"tMs":566,"delta":"gap:10 "}
+{"tMs":566,"delta":"pad:16\n  Text"}
+{"tMs":566,"delta":".heading \"Invoices"}
+{"tMs":566,"delta":"\"\n  Input \"Search"}
+{"tMs":566,"delta":" customer\" ="}
+{"tMs":566,"delta":"search\n  Select =status items"}
+{"tMs":572,"delta":":[\"All\",\"Paid\",\""}
+{"tMs":594,"delta":"Due\",\"Overdue\""}
+{"tMs":616,"delta":"]\n  Row gap:"}
+{"tMs":637,"delta":"8\n    Button.gh"}
+{"tMs":775,"delta":"ost \"Number\" -> s"}
+{"tMs":775,"delta":"ortBy=\"number\"\n    "}
+{"tMs":775,"delta":"Button.ghost \""}
+{"tMs":775,"delta":"Customer\" -> sortB"}
+{"tMs":776,"delta":"y=\"customer\"\n    "}
+{"tMs":776,"delta":"Button.ghost \"Date"}
+{"tMs":789,"delta":"\" -> sortBy=\""}
+{"tMs":810,"delta":"date\"\n    Button."}
+{"tMs":832,"delta":"ghost \"Amount\" -"}
+{"tMs":853,"delta":"> sortBy=\"amount"}
+{"tMs":874,"delta":"\"\n    Button.gh"}
+{"tMs":896,"delta":"ost \"Status\" -> s"}
+{"tMs":976,"delta":"ortBy=\"status\"\n  "}
+{"tMs":976,"delta":"Row"}
+{"tMs":976,"delta":" gap:8\n    Chec"}
+{"tMs":982,"delta":"kbox \"All on page\""}
+{"tMs":1003,"delta":" -> emit toggle_"}
+{"tMs":1025,"delta":"page page\n    Text.ca"}
+{"tMs":1046,"delta":"ption \"Page {page} of"}
+{"tMs":1068,"delta":" 3\"\n  List\n    "}
+{"tMs":1089,"delta":"Row gap:8\n      "}
+{"tMs":1111,"delta":"Checkbox -> em"}
+{"tMs":1135,"delta":"it pick \"INV-1"}
+{"tMs":1154,"delta":"001\"\n      Text \"IN"}
+{"tMs":1182,"delta":"V-1001\"\n      "}
+{"tMs":1197,"delta":"Text \"Acme Lt"}
+{"tMs":1219,"delta":"d\"\n      Text.mu"}
+{"tMs":1240,"delta":"ted \"2024-05-02"}
+{"tMs":1262,"delta":"\"\n      Text \"\\$"}
+{"tMs":1283,"delta":"1,200.00\"\n      "}
+{"tMs":1304,"delta":"Badge.success \"Pa"}
+{"tMs":1326,"delta":"id\"\n    Row gap"}
+{"tMs":1347,"delta":":8\n      Checkb"}
+{"tMs":1370,"delta":"ox -> emit pick \""}
+{"tMs":1390,"delta":"INV-1002\"\n      "}
+{"tMs":1412,"delta":"Text \"INV-1002"}
+{"tMs":1433,"delta":"\"\n      Text \"Br"}
+{"tMs":1455,"delta":"ightline Co\"\n      "}
+{"tMs":1476,"delta":"Text.muted \"2024-"}
+{"tMs":1498,"delta":"05-05\"\n      Text"}
+{"tMs":1519,"delta":" \"\\$640.00\""}
+{"tMs":1540,"delta":"\n      Badge.warning \""}
+{"tMs":1562,"delta":"Due\"\n    Row g"}
+{"tMs":1583,"delta":"ap:8\n      Check"}
+{"tMs":1607,"delta":"box -> emit pick"}
+{"tMs":1626,"delta":" \"INV-1003\""}
+{"tMs":1648,"delta":"\n      Text \"INV-1"}
+{"tMs":1669,"delta":"003\"\n      Text \""}
+{"tMs":1691,"delta":"Corvid Labs\""}
+{"tMs":1712,"delta":"\n      Text.muted \"2"}
+{"tMs":1733,"delta":"024-05-09\"\n      "}
+{"tMs":1755,"delta":"Text \"\\$2,950"}
+{"tMs":1776,"delta":".00\"\n      Badge"}
+{"tMs":1798,"delta":".danger \"Overdue"}
+{"tMs":1819,"delta":"\"\n    Row gap:"}
+{"tMs":1842,"delta":"8\n      Checkbox"}
+{"tMs":1863,"delta":" -> emit pick \"IN"}
+{"tMs":1884,"delta":"V-1004\"\n      "}
+{"tMs":1905,"delta":"Text \"INV-1004\""}
+{"tMs":1927,"delta":"\n      Text \"Delta"}
+{"tMs":1948,"delta":" Foods\"\n      Text"}
+{"tMs":1970,"delta":".muted \"2024-05"}
+{"tMs":1991,"delta":"-12\"\n      Text \""}
+{"tMs":2013,"delta":"\\$310.00\"\n      "}
+{"tMs":2034,"delta":"Badge.success \"Pa"}
+{"tMs":2055,"delta":"id\"\n    Row gap"}
+{"tMs":2077,"delta":":8\n      Checkb"}
+{"tMs":2098,"delta":"ox -> emit pick \""}
+{"tMs":2120,"delta":"INV-1005\"\n      "}
+{"tMs":2142,"delta":"Text \"INV-1005"}
+{"tMs":2163,"delta":"\"\n      Text \"Ev"}
+{"tMs":2184,"delta":"ergreen Inc\""}
+{"tMs":2206,"delta":"\n      Text.muted \"2"}
+{"tMs":2227,"delta":"024-05-15\"\n      "}
+{"tMs":2249,"delta":"Text \"\\$875.50"}
+{"tMs":2270,"delta":"\"\n      Badge.war"}
+{"tMs":2292,"delta":"ning \"Due\"\n  "}
+{"tMs":2313,"delta":"Row gap:8\n    "}
+{"tMs":2335,"delta":"Button.outline \"Prev"}
+{"tMs":2356,"delta":"\" -> page=max(1"}
+{"tMs":2378,"delta":",page-1)\n    "}
+{"tMs":2399,"delta":"Text.caption \"{page}"}
+{"tMs":2421,"delta":"\"\n    Button.outline"}
+{"tMs":2442,"delta":" \"Next\" -> page="}
+{"tMs":2465,"delta":"page+1\n  if picked"}
+{"tMs":2498,"delta":"!=[]\n    Row"}
+{"tMs":2512,"delta":" between pad:12 fill"}
+{"tMs":2535,"delta":":#FFEFF6"}
+{"tMs":2555,"delta":"FF radius:8\n      "}
+{"tMs":2571,"delta":"Text.strong \"{pic"}
+{"tMs":2592,"delta":"ked.length} selected, total"}
+{"tMs":2614,"delta":" \\${total}\"\n      "}
+{"tMs":2635,"delta":"Button \"Send reminders\""}
+{"tMs":2658,"delta":" -> emit remind picked"}

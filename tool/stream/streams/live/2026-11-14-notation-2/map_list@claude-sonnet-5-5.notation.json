@@ -1,0 +1,1422 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "stack1",
+    "column11",
+    "column17",
+    "text21"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Coffee near you"
+   }
+  },
+  "stack1": {
+   "type": "stack",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 200
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEDE7DA"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "column2",
+    "column3",
+    "column4",
+    "column5",
+    "column6",
+    "column7",
+    "column8",
+    "column9",
+    "column10"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "x": 0,
+    "y": 60,
+    "width": {
+     "fill": 0
+    },
+    "height": 8
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "x": 0,
+    "y": 130,
+    "width": {
+     "fill": 0
+    },
+    "height": 8
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "x": 100,
+    "y": 0,
+    "width": 8,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "x": 240,
+    "y": 0,
+    "width": 8,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "x": 60,
+    "y": 20,
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "": "#FF6D4C41"
+   },
+   "decoration": {
+    "radius": 15
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==1?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Bean There"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.7"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.2 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "7:00–18:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "1"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "x": 200,
+    "y": 30,
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "": "#FF6D4C41"
+   },
+   "decoration": {
+    "radius": 15
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==2?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 2}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Daily Grind"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.5"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.4 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "6:30–17:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "2"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "x": 140,
+    "y": 90,
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "": "#FF6D4C41"
+   },
+   "decoration": {
+    "radius": 15
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==3?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Roast & Co"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.8"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.6 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "8:00–20:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "3"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "x": 50,
+    "y": 150,
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "": "#FF6D4C41"
+   },
+   "decoration": {
+    "radius": 15
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==4?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 4}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Café Luna"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.3"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.9 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "7:30–16:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text5"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "4"
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "x": 250,
+    "y": 150,
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "": "#FF6D4C41"
+   },
+   "decoration": {
+    "radius": 15
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==5?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 5}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "The Steam Room"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.6"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "1.1 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "9:00–22:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text6"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "5"
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column12",
+    "column13",
+    "column14",
+    "column15",
+    "column16"
+   ]
+  },
+  "column12": {
+   "type": "column",
+   "layout": {
+    "padding": 10,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "": "#00000000",
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==1?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Bean There"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.7"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.2 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "7:00–18:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "row1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text7",
+    "text8"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "1  Bean There"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "0.2 km"
+   }
+  },
+  "column13": {
+   "type": "column",
+   "layout": {
+    "padding": 10,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "": "#00000000",
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==2?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 2}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Daily Grind"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.5"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.4 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "6:30–17:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "row2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text9",
+    "text10"
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "2  Daily Grind"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "0.4 km"
+   }
+  },
+  "column14": {
+   "type": "column",
+   "layout": {
+    "padding": 10,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "": "#00000000",
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==3?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Roast & Co"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.8"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.6 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "8:00–20:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "row3"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text11",
+    "text12"
+   ]
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "3  Roast & Co"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "0.6 km"
+   }
+  },
+  "column15": {
+   "type": "column",
+   "layout": {
+    "padding": 10,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "": "#00000000",
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==4?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 4}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Café Luna"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.3"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "0.9 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "7:30–16:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "row4"
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text13",
+    "text14"
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "4  Café Luna"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "0.9 km"
+   }
+  },
+  "column16": {
+   "type": "column",
+   "layout": {
+    "padding": 10,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "": "#00000000",
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==5?}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 5}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "The Steam Room"
+      },
+      {
+       "type": "setVariable",
+       "variable": "rating",
+       "value": "4.6"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dist",
+       "value": "1.1 km"
+      },
+      {
+       "type": "setVariable",
+       "variable": "hours",
+       "value": "9:00–22:00"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "row5"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text15",
+    "text16"
+   ]
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "5  The Steam Room"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "1.1 km"
+   }
+  },
+  "column17": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "visible": "${= sel>0}"
+   },
+   "children": [
+    "text17",
+    "row6",
+    "row7",
+    "row8"
+   ]
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${name}"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text18"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${rating} rating",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text19"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "place"
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${dist} away",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text20"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "schedule"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Open ${hours}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "Tap a shop or pin for details."
+   },
+   "bind": {
+    "visible": "${= sel==0}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "rating",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "dist",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "hours",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

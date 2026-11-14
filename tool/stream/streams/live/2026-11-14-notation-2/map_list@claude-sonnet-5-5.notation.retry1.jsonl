@@ -1,0 +1,145 @@
+{"meta":{"ui":"map_list","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"state sel=0\nstate name=\"\"\nstate rating=\"\"\nstate dist=\"\"\nstate hours=\"\"\nCard w:390 gap:12\n  Text.title \"Coffee near you\"\n  Stack w:fill h:200 fill:#FFEDE7DA radius:12\n    Box x:0 y:60 w:fill h:8 fill:#FFFFFFFF\n    Box x:0 y:130 w:fill h:8 fill:#FFFFFFFF\n    Box x:100 y:0 w:8 h:200 fill:#FFFFFFFF\n    Box x:240 y:0 w:8 h:200 fill:#FFFFFFFF\n    ChoiceChip \"1\" x:60 y:20 selected:=sel==1 -> sel=1; name=\"Bean There\"; rating=\"4.7\"; dist=\"0.2 km\"; hours=\"7:00–18:00\"\n    ChoiceChip \"2\" x:200 y:30 selected:=sel==2 -> sel=2; name=\"Daily Grind\"; rating=\"4.5\"; dist=\"0.4 km\"; hours=\"6:30–17:00\"\n    ChoiceChip \"3\" x:140 y:90 selected:=sel==3 -> sel=3; name=\"Roast & Co\"; rating=\"4.8\"; dist=\"0.6 km\"; hours=\"8:00–20:00\"\n    ChoiceChip \"4\" x:50 y:150 selected:=sel==4 -> sel=4; name=\"Café Luna\"; rating=\"4.3\"; dist=\"0.9 km\"; hours=\"7:30–16:00\"\n    ChoiceChip \"5\" x:250 y:150 selected:=sel==5 -> sel=5; name=\"The Steam Room\"; rating=\"4.6\"; dist=\"1.1 km\"; hours=\"9:00–22:00\"\n  Column gap:6\n    ChoiceChip \"1  Bean There · 0.2 km\" selected:=sel==1 -> sel=1; name=\"Bean There\"; rating=\"4.7\"; dist=\"0.2 km\"; hours=\"7:00–18:00\"\n    ChoiceChip \"2  Daily Grind · 0.4 km\" selected:=sel==2 -> sel=2; name=\"Daily Grind\"; rating=\"4.5\"; dist=\"0.4 km\"; hours=\"6:30–17:00\"\n    ChoiceChip \"3  Roast & Co · 0.6 km\" selected:=sel==3 -> sel=3; name=\"Roast & Co\"; rating=\"4.8\"; dist=\"0.6 km\"; hours=\"8:00–20:00\"\n    ChoiceChip \"4  Café Luna · 0.9 km\" selected:=sel==4 -> sel=4; name=\"Café Luna\"; rating=\"4.3\"; dist=\"0.9 km\"; hours=\"7:30–16:00\"\n    ChoiceChip \"5  The Steam Room · 1.1 km\" selected:=sel==5 -> sel=5; name=\"The Steam Room\"; rating=\"4.6\"; dist=\"1.1 km\"; hours=\"9:00–22:00\"\n  if sel>0\n    Card gap:6\n      Text.heading \"{name}\"\n      Row gap:8\n        Icon \"star\"\n        Text \"{rating} rating\"\n      Row gap:8\n        Icon \"place\"\n        Text \"{dist} away\"\n      Row gap:8\n        Icon \"schedule\"\n        Text \"Open {hours}\"\n  if sel==0\n    Text.muted \"Tap a shop or pin for details.\"","usage":{"input_tokens":4625,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1754,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":624}},"ttftMs":6313,"totalMs":11100}}
+{"tMs":6313,"delta":"state"}
+{"tMs":6386,"delta":" s"}
+{"tMs":6386,"delta":"el=0\nstate name=\"\""}
+{"tMs":6413,"delta":"\nstate rating=\"\"\nstate"}
+{"tMs":6448,"delta":" dist=\"\"\nstate hours"}
+{"tMs":6481,"delta":"=\"\"\nCard w:390"}
+{"tMs":6514,"delta":" gap:12\n  "}
+{"tMs":6548,"delta":"Text.title \"Coffee"}
+{"tMs":6582,"delta":" near you\"\n  Stack"}
+{"tMs":6615,"delta":" w:fill h"}
+{"tMs":6648,"delta":":200 fill:#F"}
+{"tMs":6683,"delta":"FEDE7DA rad"}
+{"tMs":6715,"delta":"ius:12\n    Box x"}
+{"tMs":6756,"delta":":0 y:60 w"}
+{"tMs":6783,"delta":":fill h:8 f"}
+{"tMs":6816,"delta":"ill:#FFFFF"}
+{"tMs":6850,"delta":"FFF\n    Box x"}
+{"tMs":6883,"delta":":0 y:130 w"}
+{"tMs":6918,"delta":":fill h:8 f"}
+{"tMs":6951,"delta":"ill:#FFFFF"}
+{"tMs":6984,"delta":"FFF\n    Box x"}
+{"tMs":7018,"delta":":100 y:0 w"}
+{"tMs":7052,"delta":":8 h:200"}
+{"tMs":7085,"delta":" fill:#FFF"}
+{"tMs":7118,"delta":"FFFFF\n    "}
+{"tMs":7152,"delta":"Box x:240 y:0"}
+{"tMs":7186,"delta":" w:8 h:200"}
+{"tMs":7219,"delta":" fill:#FFF"}
+{"tMs":7253,"delta":"FFFFF\n    "}
+{"tMs":7286,"delta":"ChoiceChip \"1"}
+{"tMs":7320,"delta":"\" x:60 y:20"}
+{"tMs":7354,"delta":" selected:=sel=="}
+{"tMs":7387,"delta":"1 -> sel=1"}
+{"tMs":7420,"delta":"; name=\"Bean There\""}
+{"tMs":7454,"delta":"; rating=\"4.7\""}
+{"tMs":7488,"delta":"; dist=\"0.2 "}
+{"tMs":7521,"delta":"km\"; hours=\"7:"}
+{"tMs":7554,"delta":"00–18:00\"\n    "}
+{"tMs":7589,"delta":"ChoiceChip \""}
+{"tMs":7621,"delta":"2\" x:200 y:"}
+{"tMs":7655,"delta":"30 selected:=sel"}
+{"tMs":7688,"delta":"==2 -> sel="}
+{"tMs":7722,"delta":"2; name=\"Daily"}
+{"tMs":7755,"delta":" Grind\"; rating=\"4"}
+{"tMs":7789,"delta":".5\"; dist=\"0"}
+{"tMs":7822,"delta":".4 km\"; hours"}
+{"tMs":7856,"delta":"=\"6:30–17:00"}
+{"tMs":7889,"delta":"\"\n    Choice"}
+{"tMs":7922,"delta":"Chip \"3\" x:140"}
+{"tMs":7956,"delta":" y:90 selected:"}
+{"tMs":7990,"delta":"=sel==3 ->"}
+{"tMs":8023,"delta":" sel=3; name=\""}
+{"tMs":8056,"delta":"Roast & Co\"; r"}
+{"tMs":8090,"delta":"ating=\"4.8\"; d"}
+{"tMs":8123,"delta":"ist=\"0.6 km\""}
+{"tMs":8157,"delta":"; hours=\"8:00–"}
+{"tMs":8190,"delta":"20:00\"\n    Ch"}
+{"tMs":8224,"delta":"oiceChip \"4\""}
+{"tMs":8257,"delta":" x:50 y:150 "}
+{"tMs":8291,"delta":"selected:=sel==4"}
+{"tMs":8324,"delta":" -> sel=4;"}
+{"tMs":8357,"delta":" name=\"Café Luna\""}
+{"tMs":8391,"delta":"; rating=\"4.3\""}
+{"tMs":8424,"delta":"; dist=\"0.9 "}
+{"tMs":8458,"delta":"km\"; hours=\"7"}
+{"tMs":8491,"delta":":30–16:00\""}
+{"tMs":8525,"delta":"\n    ChoiceChip"}
+{"tMs":8558,"delta":" \"5\" x:250 y"}
+{"tMs":8592,"delta":":150 selected:=s"}
+{"tMs":8625,"delta":"el==5 -> sel"}
+{"tMs":8658,"delta":"=5; name=\"The Ste"}
+{"tMs":8692,"delta":"am Room\"; rating=\""}
+{"tMs":8726,"delta":"4.6\"; dist=\""}
+{"tMs":8759,"delta":"1.1 km\"; h"}
+{"tMs":8793,"delta":"ours=\"9:00–22"}
+{"tMs":8832,"delta":":00\"\n  Column g"}
+{"tMs":8859,"delta":"ap:6\n    Cho"}
+{"tMs":8893,"delta":"iceChip \"1  "}
+{"tMs":8926,"delta":"Bean There · 0."}
+{"tMs":8959,"delta":"2 km\" selected:="}
+{"tMs":8993,"delta":"sel==1 -> s"}
+{"tMs":9026,"delta":"el=1; name=\"B"}
+{"tMs":9059,"delta":"ean There\"; rating=\"4"}
+{"tMs":9093,"delta":".7\"; dist=\"0"}
+{"tMs":9126,"delta":".2 km\"; hours"}
+{"tMs":9161,"delta":"=\"7:00–18:00"}
+{"tMs":9193,"delta":"\"\n    Choice"}
+{"tMs":9227,"delta":"Chip \"2  Daily"}
+{"tMs":9260,"delta":" Grind · 0.4"}
+{"tMs":9293,"delta":" km\" selected:=s"}
+{"tMs":9327,"delta":"el==2 -> sel"}
+{"tMs":9360,"delta":"=2; name=\"Daily"}
+{"tMs":9393,"delta":" Grind\"; rating=\""}
+{"tMs":9427,"delta":"4.5\"; dist=\""}
+{"tMs":9460,"delta":"0.4 km\"; h"}
+{"tMs":9494,"delta":"ours=\"6:30–17:"}
+{"tMs":9527,"delta":"00\"\n    Choi"}
+{"tMs":9561,"delta":"ceChip \"3  Ro"}
+{"tMs":9594,"delta":"ast & Co · 0."}
+{"tMs":9627,"delta":"6 km\" selected:="}
+{"tMs":9662,"delta":"sel==3 -> s"}
+{"tMs":9694,"delta":"el=3; name=\"Ro"}
+{"tMs":9728,"delta":"ast & Co\"; rating"}
+{"tMs":9761,"delta":"=\"4.8\"; dist"}
+{"tMs":9794,"delta":"=\"0.6 km\";"}
+{"tMs":9828,"delta":" hours=\"8:00–20"}
+{"tMs":9861,"delta":":00\"\n    Cho"}
+{"tMs":9895,"delta":"iceChip \"4  "}
+{"tMs":9928,"delta":"Café Luna · 0."}
+{"tMs":9962,"delta":"9 km\" selected:="}
+{"tMs":9995,"delta":"sel==4 -> s"}
+{"tMs":10028,"delta":"el=4; name=\"Café"}
+{"tMs":10062,"delta":" Luna\"; rating=\""}
+{"tMs":10095,"delta":"4.3\"; dist=\""}
+{"tMs":10129,"delta":"0.9 km\"; h"}
+{"tMs":10162,"delta":"ours=\"7:30–16:"}
+{"tMs":10195,"delta":"00\"\n    Choi"}
+{"tMs":10229,"delta":"ceChip \"5  The"}
+{"tMs":10289,"delta":" Steam Room · 1."}
+{"tMs":10295,"delta":"1 km\" selected:="}
+{"tMs":10329,"delta":"sel==5 -> s"}
+{"tMs":10458,"delta":"el=5; name=\"The"}
+{"tMs":10458,"delta":" Steam Room\"; rating"}
+{"tMs":10458,"delta":"=\"4.6\"; dist"}
+{"tMs":10462,"delta":"=\"1.1 km\";"}
+{"tMs":10495,"delta":" hours=\"9:00–22"}
+{"tMs":10529,"delta":":00\"\n  if sel"}
+{"tMs":10562,"delta":">0\n    Card gap"}
+{"tMs":10596,"delta":":6\n      Text.he"}
+{"tMs":10629,"delta":"ading \"{name}\"\n      "}
+{"tMs":10663,"delta":"Row gap:8\n        "}
+{"tMs":10696,"delta":"Icon \"star\"\n        "}
+{"tMs":10729,"delta":"Text \"{rating} r"}
+{"tMs":10764,"delta":"ating\"\n      Row gap"}
+{"tMs":10796,"delta":":8\n        Icon \""}
+{"tMs":10830,"delta":"place\"\n        Text \"{"}
+{"tMs":10866,"delta":"dist} away\"\n      "}
+{"tMs":10896,"delta":"Row gap:8\n        "}
+{"tMs":10930,"delta":"Icon \"schedule\""}
+{"tMs":10963,"delta":"\n        Text \"Open {h"}
+{"tMs":10996,"delta":"ours}\"\n  if sel"}
+{"tMs":11030,"delta":"==0\n    Text.mu"}
+{"tMs":11063,"delta":"ted \"Tap a shop"}
+{"tMs":11097,"delta":" or pin for details.\""}

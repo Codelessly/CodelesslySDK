@@ -1,0 +1,96 @@
+{
+ "ui": "map_list",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1544,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2214,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 754
+   },
+   "ttftMs": 7672,
+   "totalMs": 14398,
+   "chars": 2512,
+   "lines": 73,
+   "jsonTails": 0,
+   "nodes": 67,
+   "outputTokensPerNode": "33.0",
+   "notationIssues": [
+    "line 11:39: Unknown word \"center\" on a Box. Props are written key:value.",
+    "line 11:46: Unknown word \"middle\" on a Box. Props are written key:value.",
+    "line 13:40: Unknown word \"center\" on a Box. Props are written key:value.",
+    "line 13:47: Unknown word \"middle\" on a Box. Props are written key:value.",
+    "line 15:40: Unknown word \"center\" on a Box. Props are written key:value.",
+    "line 15:47: Unknown word \"middle\" on a Box. Props are written key:value.",
+    "line 17:40: Unknown word \"center\" on a Box. Props are written key:value.",
+    "line 17:47: Unknown word \"middle\" on a Box. Props are written key:value.",
+    "line 19:41: Unknown word \"center\" on a Box. Props are written key:value.",
+    "line 19:48: Unknown word \"middle\" on a Box. Props are written key:value.",
+    "line 49:1: A row has no text of its own.",
+    "line 54:1: A row has no text of its own.",
+    "line 59:1: A row has no text of its own.",
+    "line 64:1: A row has no text of its own.",
+    "line 69:1: A row has no text of its own."
+   ],
+   "errors": [
+    "children_not_allowed /nodes/box7/children: A box takes no children. Wrap it and its neighbours in a row, column or stack instead.",
+    "children_not_allowed /nodes/box8/children: A box takes no children. Wrap it and its neighbours in a row, column or stack instead.",
+    "children_not_allowed /nodes/box9/children: A box takes no children. Wrap it and its neighbours in a row, column or stack instead.",
+    "children_not_allowed /nodes/box10/children: A box takes no children. Wrap it and its neighbours in a row, column or stack instead.",
+    "children_not_allowed /nodes/box11/children: A box takes no children. Wrap it and its neighbours in a row, column or stack instead.",
+    "unknown_prop /nodes/box7/props/text: A box has no prop \"text\". Its props: (none).",
+    "unknown_prop /nodes/box7/props/: A box has no prop \"\". Its props: (none).",
+    "unknown_prop /nodes/box8/props/text: A box has no prop \"text\". Its props: (none).",
+    "unknown_prop /nodes/box8/props/: A box has no prop \"\". Its props: (none).",
+    "unknown_prop /nodes/box9/props/text: A box has no prop \"text\". Its props: (none).",
+    "unknown_prop /nodes/box9/props/: A box has no prop \"\". Its props: (none).",
+    "unknown_prop /nodes/box10/props/text: A box has no prop \"text\". Its props: (none).",
+    "unknown_prop /nodes/box10/props/: A box has no prop \"\". Its props: (none).",
+    "unknown_prop /nodes/box11/props/text: A box has no prop \"text\". Its props: (none).",
+    "unknown_prop /nodes/box11/props/: A box has no prop \"\". Its props: (none).",
+    "unknown_prop /nodes/row1/props/: A row has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/row2/props/: A row has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/row3/props/: A row has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/row4/props/: A row has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport.",
+    "unknown_prop /nodes/row5/props/: A row has no prop \"\". Its props: mainAxisAlignment, crossAxisAlignment, spacing, wrap, runSpacing, squeezeChildren, scrollable, scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemSnapping, fillViewport."
+   ]
+  },
+  {
+   "input_tokens": 3894,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2044,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 687
+   },
+   "ttftMs": 7285,
+   "totalMs": 13188,
+   "chars": 2406,
+   "lines": 77,
+   "jsonTails": 0,
+   "nodes": 51,
+   "outputTokensPerNode": "40.1",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

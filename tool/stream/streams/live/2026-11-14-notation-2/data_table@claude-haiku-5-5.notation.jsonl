@@ -1,0 +1,171 @@
+{"meta":{"ui":"data_table","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the twelve invoices you found as a table: number, customer, date, amount and status. I can sort by any column, filter by status, type to search the customer, page through five at a time, tick rows (and a tick-all for the page), and a bar appears with the count and total of what I ticked and a button to send reminders for them.","text":"I can't see any invoices in this conversation, so I can't list twelve real ones. Below is a table UI using placeholder rows that you can swap for your data. It has sort, status filter, customer search, paging, row and page selection, and a selection bar with the reminder action.\n\nstate search=\"\"\nstate status=\"All\"\nstate page=1\nstate sortBy=\"number\"\nstate picked=[]\nCard w:390 gap:10\n  Text.heading \"Invoices\"\n  Input \"Search customer\" =search\n  Select =status items:[\"All\",\"Paid\",\"Due\",\"Overdue\"]\n  Row gap:8\n    Button.ghost \"Number\" -> sortBy=\"number\"\n    Button.ghost \"Customer\" -> sortBy=\"customer\"\n    Button.ghost \"Date\" -> sortBy=\"date\"\n    Button.ghost \"Amount\" -> sortBy=\"amount\"\n    Button.ghost \"Status\" -> sortBy=\"status\"\n  Row gap:8\n    Checkbox \"All on page\" -> emit toggle_page page\n    Text.caption \"Page {page} of 3\"\n  List\n    Row gap:8\n      Checkbox -> emit pick \"INV-1001\"\n      Text \"INV-1001\"\n      Text \"Acme Ltd\"\n      Text.muted \"2024-05-02\"\n      Text \"\\$1,200.00\"\n      Badge.success \"Paid\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1002\"\n      Text \"INV-1002\"\n      Text \"Brightline Co\"\n      Text.muted \"2024-05-05\"\n      Text \"\\$640.00\"\n      Badge.warning \"Due\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1003\"\n      Text \"INV-1003\"\n      Text \"Corvid Labs\"\n      Text.muted \"2024-05-09\"\n      Text \"\\$2,950.00\"\n      Badge.danger \"Overdue\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1004\"\n      Text \"INV-1004\"\n      Text \"Delta Foods\"\n      Text.muted \"2024-05-12\"\n      Text \"\\$310.00\"\n      Badge.success \"Paid\"\n    Row gap:8\n      Checkbox -> emit pick \"INV-1005\"\n      Text \"INV-1005\"\n      Text \"Evergreen Inc\"\n      Text.muted \"2024-05-15\"\n      Text \"\\$875.50\"\n      Badge.warning \"Due\"\n  Row gap:8\n    Button.outline \"Prev\" -> page=max(1,page-1)\n    Text.caption \"{page}\"\n    Button.outline \"Next\" -> page=page+1\n  if picked!=[]\n    Row between pad:12 fill:#FFEFF6FF radius:8\n      Text.strong \"{picked.length} selected, total \\${total}\"\n      Button \"Send reminders\" -> emit remind picked","usage":{"input_tokens":1711,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":939,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":472,"totalMs":4128}}
+{"tMs":472,"delta":"I can't see any"}
+{"tMs":680,"delta":" invoices in"}
+{"tMs":680,"delta":" this conversation, so"}
+{"tMs":680,"delta":" I can"}
+{"tMs":680,"delta":"'t list"}
+{"tMs":680,"delta":" tw"}
+{"tMs":680,"delta":"elve real ones. Below"}
+{"tMs":680,"delta":" is a table U"}
+{"tMs":681,"delta":"I using"}
+{"tMs":681,"delta":" plac"}
+{"tMs":681,"delta":"eholder r"}
+{"tMs":690,"delta":"ows that"}
+{"tMs":712,"delta":" you can sw"}
+{"tMs":902,"delta":"ap for your data. It"}
+{"tMs":902,"delta":" has sort, status"}
+{"tMs":902,"delta":" filter, custom"}
+{"tMs":902,"delta":"er search, paging, row"}
+{"tMs":902,"delta":" and"}
+{"tMs":902,"delta":" page"}
+{"tMs":902,"delta":" sel"}
+{"tMs":902,"delta":"ection, and a"}
+{"tMs":906,"delta":" selection bar with"}
+{"tMs":930,"delta":" the reminder action.\n\nstate"}
+{"tMs":949,"delta":" search"}
+{"tMs":972,"delta":"=\"\"\nstate status=\"All"}
+{"tMs":1120,"delta":"\"\nstate page=1\nstate"}
+{"tMs":1120,"delta":" sort"}
+{"tMs":1121,"delta":"By=\"number"}
+{"tMs":1121,"delta":"\"\nstate pic"}
+{"tMs":1121,"delta":"ked=[]"}
+{"tMs":1121,"delta":"\nCard w"}
+{"tMs":1124,"delta":":390 gap:10"}
+{"tMs":1145,"delta":"\n  Text"}
+{"tMs":1166,"delta":".he"}
+{"tMs":1188,"delta":"ading \"Invoices\""}
+{"tMs":1210,"delta":"\n  Input"}
+{"tMs":1231,"delta":" \"Search"}
+{"tMs":1340,"delta":" customer\" ="}
+{"tMs":1340,"delta":"search\n  Select"}
+{"tMs":1340,"delta":" =status items:[\"All\",\""}
+{"tMs":1340,"delta":"Paid\",\"Due"}
+{"tMs":1340,"delta":"\",\"Overdue\"]"}
+{"tMs":1362,"delta":"\n  Row gap:8"}
+{"tMs":1383,"delta":"\n    Button"}
+{"tMs":1405,"delta":".ghost \"Number"}
+{"tMs":1427,"delta":"\" -> sortBy=\""}
+{"tMs":1449,"delta":"number\"\n    Button."}
+{"tMs":1471,"delta":"ghost \"Customer\" -"}
+{"tMs":1493,"delta":"> sortBy=\"customer"}
+{"tMs":1560,"delta":"\"\n    Button.gh"}
+{"tMs":1560,"delta":"ost \"Date\" -> s"}
+{"tMs":1561,"delta":"ortBy=\"date\"\n    "}
+{"tMs":1580,"delta":"Button.ghost \""}
+{"tMs":1603,"delta":"Amount\" -> sortB"}
+{"tMs":1623,"delta":"y=\"amount\"\n    "}
+{"tMs":1645,"delta":"Button.ghost \"Status"}
+{"tMs":1667,"delta":"\" -> sortBy=\""}
+{"tMs":1688,"delta":"status\"\n  Row"}
+{"tMs":1710,"delta":" gap:8\n    Chec"}
+{"tMs":1731,"delta":"kbox \"All"}
+{"tMs":1752,"delta":" on"}
+{"tMs":1784,"delta":" page"}
+{"tMs":1795,"delta":"\" -> em"}
+{"tMs":1816,"delta":"it toggle"}
+{"tMs":1838,"delta":"_page page"}
+{"tMs":1859,"delta":"\n    "}
+{"tMs":1880,"delta":"Text.caption \"Page"}
+{"tMs":1903,"delta":" {page}"}
+{"tMs":1923,"delta":" of 3"}
+{"tMs":1945,"delta":"\"\n  List"}
+{"tMs":1987,"delta":"\n    Row gap:8"}
+{"tMs":2009,"delta":"\n      Checkbox -"}
+{"tMs":2031,"delta":"> emit p"}
+{"tMs":2052,"delta":"ick \""}
+{"tMs":2073,"delta":"IN"}
+{"tMs":2094,"delta":"V-1"}
+{"tMs":2116,"delta":"001\"\n      Text \""}
+{"tMs":2137,"delta":"INV-1001\""}
+{"tMs":2159,"delta":"\n      Text \"Acme"}
+{"tMs":2180,"delta":" "}
+{"tMs":2205,"delta":"Ltd\"\n      Text."}
+{"tMs":2223,"delta":"mu"}
+{"tMs":2244,"delta":"ted \"2"}
+{"tMs":2266,"delta":"024-05"}
+{"tMs":2287,"delta":"-02"}
+{"tMs":2309,"delta":"\"\n      Text \"\\$"}
+{"tMs":2331,"delta":"1"}
+{"tMs":2351,"delta":",200."}
+{"tMs":2373,"delta":"00\"\n      Bad"}
+{"tMs":2395,"delta":"ge.success \"Pa"}
+{"tMs":2416,"delta":"id\"\n    Row gap"}
+{"tMs":2438,"delta":":8\n      Checkb"}
+{"tMs":2459,"delta":"ox -> emit pick \""}
+{"tMs":2481,"delta":"INV-1002\"\n      "}
+{"tMs":2503,"delta":"Text \"INV-1002"}
+{"tMs":2524,"delta":"\"\n      Text \"Br"}
+{"tMs":2545,"delta":"ightline"}
+{"tMs":2567,"delta":" Co\"\n      Text."}
+{"tMs":2588,"delta":"muted \"2024-05-"}
+{"tMs":2610,"delta":"05\"\n      Text \"\\"}
+{"tMs":2632,"delta":"$640"}
+{"tMs":2653,"delta":".00\"\n      Badge"}
+{"tMs":2675,"delta":".war"}
+{"tMs":2696,"delta":"ning \"Due\"\n    "}
+{"tMs":2718,"delta":"Row gap:8\n      "}
+{"tMs":2740,"delta":"Checkbox -> emit"}
+{"tMs":2761,"delta":" pick \"INV-1003"}
+{"tMs":2783,"delta":"\"\n      Text \"INV"}
+{"tMs":2804,"delta":"-1003\"\n      Text"}
+{"tMs":2825,"delta":" \"Cor"}
+{"tMs":2847,"delta":"v"}
+{"tMs":2868,"delta":"id"}
+{"tMs":2890,"delta":" Labs\"\n      Text"}
+{"tMs":2911,"delta":".muted \"2024-05"}
+{"tMs":2932,"delta":"-09"}
+{"tMs":2954,"delta":"\"\n      Text \"\\$"}
+{"tMs":2975,"delta":"2"}
+{"tMs":2997,"delta":",950.00\"\n      "}
+{"tMs":3018,"delta":"Badge.danger \"Over"}
+{"tMs":3041,"delta":"due\"\n    Row g"}
+{"tMs":3062,"delta":"ap:8\n      Check"}
+{"tMs":3084,"delta":"box -> emit pick"}
+{"tMs":3105,"delta":" \"INV-1004\""}
+{"tMs":3126,"delta":"\n      Text \"INV-1"}
+{"tMs":3147,"delta":"004\"\n      Text \""}
+{"tMs":3169,"delta":"Delta Fo"}
+{"tMs":3191,"delta":"ods\"\n      Text.mu"}
+{"tMs":3214,"delta":"ted \"2024-05-12"}
+{"tMs":3234,"delta":"\"\n      Text \"\\$"}
+{"tMs":3255,"delta":"310.00\"\n      Bad"}
+{"tMs":3277,"delta":"ge.success \"Paid\""}
+{"tMs":3298,"delta":"\n    Row gap:8"}
+{"tMs":3320,"delta":"\n      Checkbox -"}
+{"tMs":3341,"delta":"> emit pick \"INV"}
+{"tMs":3364,"delta":"-1005\"\n      Text"}
+{"tMs":3384,"delta":" \"INV-1005\""}
+{"tMs":3406,"delta":"\n      Text \"Ev"}
+{"tMs":3427,"delta":"ergreen In"}
+{"tMs":3449,"delta":"c\"\n      Text.mu"}
+{"tMs":3470,"delta":"ted \"2024-05-15"}
+{"tMs":3491,"delta":"\"\n      Text \"\\$"}
+{"tMs":3514,"delta":"875"}
+{"tMs":3535,"delta":".50"}
+{"tMs":3556,"delta":"\"\n      Badge.war"}
+{"tMs":3578,"delta":"ning \"Due\"\n  "}
+{"tMs":3599,"delta":"Row gap:8\n    "}
+{"tMs":3623,"delta":"Button.outline \"Pr"}
+{"tMs":3642,"delta":"ev\" -> page=max"}
+{"tMs":3664,"delta":"(1,page-1)"}
+{"tMs":3686,"delta":"\n    Text"}
+{"tMs":3707,"delta":".caption \"{page}\""}
+{"tMs":3728,"delta":"\n    Button.outline \""}
+{"tMs":3750,"delta":"Next\" -> page=page"}
+{"tMs":3771,"delta":"+1\n  if picked!"}
+{"tMs":3793,"delta":"=[]\n    Row"}
+{"tMs":3814,"delta":" between p"}
+{"tMs":3837,"delta":"ad:12"}
+{"tMs":3857,"delta":" "}
+{"tMs":3879,"delta":"fill:#FFE"}
+{"tMs":3900,"delta":"FF6FF rad"}
+{"tMs":3922,"delta":"ius:8\n      Text."}
+{"tMs":3943,"delta":"strong \"{picked.length"}
+{"tMs":3966,"delta":"} selected,"}
+{"tMs":3986,"delta":" total \\${"}
+{"tMs":4007,"delta":"total"}
+{"tMs":4028,"delta":"}\"\n      Button \""}
+{"tMs":4050,"delta":"Send reminders\" ->"}
+{"tMs":4071,"delta":" emit rem"}
+{"tMs":4093,"delta":"ind pic"}
+{"tMs":4119,"delta":"ked"}

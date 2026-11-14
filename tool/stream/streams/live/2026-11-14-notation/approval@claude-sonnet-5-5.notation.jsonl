@@ -1,0 +1,95 @@
+{"meta":{"ui":"approval","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"state decision=\"\"\nstate showFiles=false\nCard w:390 gap:12\n  Row gap:8 middle\n    Icon \"alert-triangle\"\n    Text.heading \"Approve file deletion?\"\n  Text \"I'm about to permanently delete old files from your shared drive.\"\n  Column gap:6\n    Row between\n      Text.muted \"Folder\"\n      Text.strong \"Shared Drive / Archive\"\n    Row between\n      Text.muted \"Files\"\n      Text.strong \"214 files\"\n    Row between\n      Text.muted \"Space freed\"\n      Text.strong \"1.8 GB\"\n  Text.danger \"This cannot be undone.\"\n  Button.ghost \"{showFiles ? 'Hide' : 'Show'} first files\" -> showFiles=!showFiles\n  if showFiles\n    Column gap:4\n      Text.small \"budget_2019_final.xlsx\"\n      Text.small \"meeting_notes_2018-03.docx\"\n      Text.small \"logo_draft_v2.png\"\n      Text.small \"old_contract_scan.pdf\"\n      Text.small \"team_photo_2017.jpg\"\n  Divider\n  if decision==\"\"\n    Row gap:8\n      Button.destructive \"Approve\" grow -> decision=\"approved\"; emit approve\n      Button.outline \"Deny\" grow -> decision=\"denied\"; emit deny\n  if decision==\"approved\"\n    Row gap:8 middle\n      Icon \"check\"\n      Text.success \"Approved. Deleting 214 files.\"\n  if decision==\"denied\"\n    Row gap:8 middle\n      Icon \"x\"\n      Text.muted \"Denied. No files were deleted.\"","usage":{"input_tokens":1544,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":541,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":681,"totalMs":3904}}
+{"tMs":681,"delta":"state"}
+{"tMs":985,"delta":" decision="}
+{"tMs":986,"delta":"\"\"\nstate show"}
+{"tMs":986,"delta":"Files=false\nCard"}
+{"tMs":986,"delta":" w:390 gap:12"}
+{"tMs":986,"delta":"\n  Row g"}
+{"tMs":986,"delta":"ap:8 "}
+{"tMs":986,"delta":"middle\n    Icon \""}
+{"tMs":986,"delta":"al"}
+{"tMs":996,"delta":"ert-triangle\"\n    "}
+{"tMs":1030,"delta":"Text.he"}
+{"tMs":1064,"delta":"ading \"Appro"}
+{"tMs":1096,"delta":"ve file"}
+{"tMs":1356,"delta":" deletion?\"\n  "}
+{"tMs":1356,"delta":"Text \""}
+{"tMs":1356,"delta":"I"}
+{"tMs":1356,"delta":"'"}
+{"tMs":1356,"delta":"m about to perm"}
+{"tMs":1356,"delta":"anently delete old"}
+{"tMs":1356,"delta":" files from your shared drive.\""}
+{"tMs":1362,"delta":"\n  Column gap:6"}
+{"tMs":1396,"delta":"\n    Row"}
+{"tMs":1429,"delta":" between"}
+{"tMs":1462,"delta":"\n      Text.mu"}
+{"tMs":1495,"delta":"ted \"Folder\""}
+{"tMs":1679,"delta":"\n      Text.strong \""}
+{"tMs":1679,"delta":"Shared Drive /"}
+{"tMs":1679,"delta":" Arch"}
+{"tMs":1679,"delta":"ive\"\n    Row between"}
+{"tMs":1699,"delta":"\n      Text.muted \""}
+{"tMs":1729,"delta":"Files\"\n      Text.str"}
+{"tMs":1763,"delta":"ong \"214 files\"\n    "}
+{"tMs":1796,"delta":"Row between\n      Text."}
+{"tMs":1830,"delta":"muted \"Space fre"}
+{"tMs":1864,"delta":"ed\"\n      Text.str"}
+{"tMs":1897,"delta":"ong \"1.8 GB"}
+{"tMs":1930,"delta":"\"\n  Text.danger"}
+{"tMs":2008,"delta":" \"This c"}
+{"tMs":2008,"delta":"annot be undone.\"\n  "}
+{"tMs":2035,"delta":"Button.ghost \""}
+{"tMs":2067,"delta":"{"}
+{"tMs":2097,"delta":"showFiles "}
+{"tMs":2130,"delta":"? 'Hide'"}
+{"tMs":2166,"delta":" : 'Show'} first"}
+{"tMs":2198,"delta":" files"}
+{"tMs":2230,"delta":"\" -> showFiles="}
+{"tMs":2263,"delta":"!showFiles\n  if"}
+{"tMs":2297,"delta":" showFiles\n    Column"}
+{"tMs":2330,"delta":" gap:4"}
+{"tMs":2397,"delta":"\n      Text.small"}
+{"tMs":2430,"delta":" \"bud"}
+{"tMs":2463,"delta":"get_2019"}
+{"tMs":2496,"delta":"_final"}
+{"tMs":2530,"delta":".xlsx\"\n      "}
+{"tMs":2563,"delta":"Text.small \"meeting"}
+{"tMs":2597,"delta":"_notes_2018"}
+{"tMs":2632,"delta":"-"}
+{"tMs":2663,"delta":"03.doc"}
+{"tMs":2697,"delta":"x\"\n      Text.small"}
+{"tMs":2730,"delta":" \"logo_draft_v"}
+{"tMs":2763,"delta":"2"}
+{"tMs":2797,"delta":".png\"\n      Text."}
+{"tMs":2830,"delta":"small \"old"}
+{"tMs":2863,"delta":"_cont"}
+{"tMs":2897,"delta":"ract_sc"}
+{"tMs":2930,"delta":"an"}
+{"tMs":2963,"delta":".pdf\"\n      "}
+{"tMs":2997,"delta":"Text.small \"team"}
+{"tMs":3030,"delta":"_photo"}
+{"tMs":3063,"delta":"_2"}
+{"tMs":3096,"delta":"017"}
+{"tMs":3130,"delta":".jpg\"\n  "}
+{"tMs":3163,"delta":"Divider\n  if decision=="}
+{"tMs":3197,"delta":"\"\"\n    Row gap:"}
+{"tMs":3230,"delta":"8\n      Button.destruct"}
+{"tMs":3264,"delta":"ive \"Appro"}
+{"tMs":3296,"delta":"ve\" grow -> decision"}
+{"tMs":3330,"delta":"=\"approved\"; emit appro"}
+{"tMs":3363,"delta":"ve\n      Button.outline"}
+{"tMs":3397,"delta":" \"Deny\" grow -"}
+{"tMs":3456,"delta":"> decision=\"denied\";"}
+{"tMs":3463,"delta":" emit deny\n  if dec"}
+{"tMs":3497,"delta":"ision==\"approved\"\n    "}
+{"tMs":3530,"delta":"Row gap:8 midd"}
+{"tMs":3755,"delta":"le\n      Icon \"check"}
+{"tMs":3755,"delta":"\"\n      Text.success \""}
+{"tMs":3755,"delta":"Approved. Deleting"}
+{"tMs":3755,"delta":" 214 files.\"\n  if"}
+{"tMs":3755,"delta":" decision==\"denied\""}
+{"tMs":3764,"delta":"\n    Row gap:8 "}
+{"tMs":3797,"delta":"middle\n      Icon \""}
+{"tMs":3830,"delta":"x\"\n      Text.mu"}
+{"tMs":3864,"delta":"ted \"Denied. No files"}
+{"tMs":3897,"delta":" were deleted.\""}

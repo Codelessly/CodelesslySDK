@@ -1,0 +1,63 @@
+{
+ "ui": "checkout",
+ "kind": "app",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1555,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1387,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 547,
+   "totalMs": 5109,
+   "chars": 3232,
+   "lines": 99,
+   "jsonTails": 0,
+   "nodes": 74,
+   "outputTokensPerNode": "18.7",
+   "notationIssues": [
+    "line 75:11: No node type \"visible\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 3018,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1491,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 408,
+   "totalMs": 4675,
+   "chars": 3563,
+   "lines": 100,
+   "jsonTails": 0,
+   "nodes": 74,
+   "outputTokensPerNode": "20.1",
+   "notationIssues": [
+    "line 1:1: No node type \"Line\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  }
+ ]
+}

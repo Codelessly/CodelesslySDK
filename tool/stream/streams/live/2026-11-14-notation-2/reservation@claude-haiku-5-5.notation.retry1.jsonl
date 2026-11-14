@@ -1,0 +1,106 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"The errors come from two things: the notation doesn't accept || or && inside prop values written with spaces, and the variables day, size and time must be declared with state. I'll declare them up front, put each expression in a single unspaced token, and use the ternary-free form with key:=expression.\n\nstate day=\"\"\nstate size=\"2\"\nstate time=\"\"\n\nCard gap:12 pad:16 w:390\n  Text.heading \"Book a table\"\n  Select =day items:[\"Mon 12\",\"Tue 13\",\"Wed 14\",\"Thu 15\",\"Fri 16\",\"Sat 17\",\"Sun 18\"]\n  Select =size items:[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\"]\n  if day==\"\"\n    Text.muted \"Pick a day to see times.\"\n  if day!=\"\"\n    Text.strong \"Available times\"\n    Grid cols:3 gap:8\n      ChoiceChip \"17:00\" selected:=time==\"17:00\" enabled:=ok17a -> time=\"17:00\"\n      ChoiceChip \"17:30\" selected:=time==\"17:30\" enabled:=ok17b -> time=\"17:30\"\n      ChoiceChip \"18:00\" selected:=time==\"18:00\" enabled:=ok18 -> time=\"18:00\"\n      ChoiceChip \"18:30\" selected:=time==\"18:30\" enabled:=ok18b -> time=\"18:30\"\n      ChoiceChip \"19:00\" selected:=time==\"19:00\" enabled:=ok19 -> time=\"19:00\"\n      ChoiceChip \"19:30\" selected:=time==\"19:30\" enabled:=ok19b -> time=\"19:30\"\n      ChoiceChip \"20:00\" selected:=time==\"20:00\" enabled:=ok20 -> time=\"20:00\"\n      ChoiceChip \"20:30\" selected:=time==\"20:30\" enabled:=ok20b -> time=\"20:30\"\n      ChoiceChip \"21:00\" selected:=time==\"21:00\" enabled:=ok21 -> time=\"21:00\"\n  Button.primary \"Confirm booking\" enabled:=canBook -> emit book; toast \"Booked: {day}, party of {size}, {time}\"","usage":{"input_tokens":3156,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":694,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":440,"totalMs":2583}}
+{"tMs":440,"delta":"The err"}
+{"tMs":601,"delta":"ors come from two"}
+{"tMs":601,"delta":" things: the not"}
+{"tMs":601,"delta":"ation do"}
+{"tMs":601,"delta":"esn't accept ||"}
+{"tMs":601,"delta":" or && inside pr"}
+{"tMs":601,"delta":"op values written"}
+{"tMs":601,"delta":" with spaces, and the vari"}
+{"tMs":613,"delta":"ables day"}
+{"tMs":633,"delta":","}
+{"tMs":654,"delta":" size and time must be declared with"}
+{"tMs":674,"delta":" state. I"}
+{"tMs":695,"delta":"'ll decl"}
+{"tMs":756,"delta":"are them up"}
+{"tMs":756,"delta":" front, put"}
+{"tMs":756,"delta":" each"}
+{"tMs":776,"delta":" expression in a single un"}
+{"tMs":796,"delta":"sp"}
+{"tMs":816,"delta":"aced token,"}
+{"tMs":837,"delta":" and use the "}
+{"tMs":858,"delta":"ternary-"}
+{"tMs":877,"delta":"free form with key"}
+{"tMs":902,"delta":":=expression."}
+{"tMs":919,"delta":"\n\nstate day=\"\"\nstate size"}
+{"tMs":939,"delta":"=\""}
+{"tMs":959,"delta":"2"}
+{"tMs":980,"delta":"\"\nstate time=\"\""}
+{"tMs":1001,"delta":"\n\nCard gap:12 "}
+{"tMs":1022,"delta":"pad:16 w:390"}
+{"tMs":1042,"delta":"\n  Text.heading \""}
+{"tMs":1063,"delta":"Book a table\"\n  "}
+{"tMs":1083,"delta":"Select =day items:[\"M"}
+{"tMs":1104,"delta":"on 12\",\"Tue "}
+{"tMs":1125,"delta":"13\",\"Wed 14\",\""}
+{"tMs":1145,"delta":"Thu 15\",\"F"}
+{"tMs":1166,"delta":"ri 16\",\"Sat "}
+{"tMs":1186,"delta":"17\",\"Sun 18\""}
+{"tMs":1207,"delta":"]\n  Select =size items"}
+{"tMs":1228,"delta":":[\"1\",\"2\",\"3\",\""}
+{"tMs":1248,"delta":"4\",\"5\",\"6\",\"7\",\""}
+{"tMs":1269,"delta":"8\"]\n  if day=="}
+{"tMs":1289,"delta":"\"\"\n    Text.muted"}
+{"tMs":1310,"delta":" \"Pick a day to see"}
+{"tMs":1332,"delta":" times.\"\n  if day!="}
+{"tMs":1350,"delta":"\"\"\n    Text.strong"}
+{"tMs":1371,"delta":" \"Available times\"\n    "}
+{"tMs":1392,"delta":"Grid cols:3 g"}
+{"tMs":1412,"delta":"ap:8\n      Cho"}
+{"tMs":1433,"delta":"iceChip \"17:00"}
+{"tMs":1453,"delta":"\" selected:=time="}
+{"tMs":1473,"delta":"=\"17:00\" enabled"}
+{"tMs":1493,"delta":":="}
+{"tMs":1514,"delta":"ok17"}
+{"tMs":1534,"delta":"a"}
+{"tMs":1555,"delta":" -"}
+{"tMs":1575,"delta":"> time=\"17:00\""}
+{"tMs":1595,"delta":"\n      ChoiceChip"}
+{"tMs":1616,"delta":" \"17:30\" selected:"}
+{"tMs":1636,"delta":"=time==\"17:30\""}
+{"tMs":1657,"delta":" enabled:=ok17"}
+{"tMs":1677,"delta":"b -> time=\"17:30"}
+{"tMs":1698,"delta":"\"\n      Choice"}
+{"tMs":1718,"delta":"Chip \"18:00\" sel"}
+{"tMs":1739,"delta":"ected:=time==\"18:"}
+{"tMs":1759,"delta":"00\" enabled:="}
+{"tMs":1779,"delta":"ok18 -> time=\"18"}
+{"tMs":1800,"delta":":00\"\n      Cho"}
+{"tMs":1820,"delta":"iceChip \"18:30"}
+{"tMs":1841,"delta":"\" selected:=time==\""}
+{"tMs":1861,"delta":"18:30\" enabled:"}
+{"tMs":1882,"delta":"=ok18b -> time"}
+{"tMs":1902,"delta":"=\"18:30\"\n      "}
+{"tMs":1923,"delta":"ChoiceChip \"19"}
+{"tMs":1943,"delta":":00\" selected:=time"}
+{"tMs":1964,"delta":"==\"19:00\" enab"}
+{"tMs":1984,"delta":"led:=ok19 -"}
+{"tMs":2005,"delta":"> time=\"19:00\""}
+{"tMs":2025,"delta":"\n      ChoiceChip"}
+{"tMs":2047,"delta":" \"19:30\" selected:"}
+{"tMs":2066,"delta":"=time==\"19:30\""}
+{"tMs":2086,"delta":" enabled:=ok19"}
+{"tMs":2107,"delta":"b -> time=\"19:30"}
+{"tMs":2127,"delta":"\"\n      Choice"}
+{"tMs":2147,"delta":"Chip \"20:00\" sel"}
+{"tMs":2168,"delta":"ected:=time==\"20:"}
+{"tMs":2188,"delta":"00\" enabled:="}
+{"tMs":2210,"delta":"ok20 -> time=\"20"}
+{"tMs":2229,"delta":":00\"\n      Cho"}
+{"tMs":2249,"delta":"iceChip \"20:30"}
+{"tMs":2270,"delta":"\" selected:=time==\""}
+{"tMs":2290,"delta":"20:30\" enabled:"}
+{"tMs":2311,"delta":"=ok20b -> time"}
+{"tMs":2331,"delta":"=\"20:30\"\n      "}
+{"tMs":2352,"delta":"ChoiceChip \"21"}
+{"tMs":2372,"delta":":00\" selected:=time"}
+{"tMs":2392,"delta":"==\"21:00\" enab"}
+{"tMs":2413,"delta":"led:=ok21 -"}
+{"tMs":2434,"delta":"> time=\"21:00\""}
+{"tMs":2454,"delta":"\n  Button.primary \""}
+{"tMs":2474,"delta":"Confirm booking\" enab"}
+{"tMs":2495,"delta":"led:=can"}
+{"tMs":2515,"delta":"Book -> emit book;"}
+{"tMs":2535,"delta":" toast \"Booked: {"}
+{"tMs":2556,"delta":"day}, party of {size}"}
+{"tMs":2577,"delta":", {time}\""}

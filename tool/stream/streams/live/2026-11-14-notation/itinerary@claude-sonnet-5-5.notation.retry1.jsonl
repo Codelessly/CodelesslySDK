@@ -1,0 +1,154 @@
+{"meta":{"ui":"itinerary","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Plan two days in Kyoto as an inline itinerary: a timeline per day with times, places, how to get between them and how long it takes. Each stop expands for details, each day has a checklist of things to book that I can tick off, and a line at the top says how many are left.","text":"state d1a=false\nstate d1b=false\nstate d1c=false\nstate d2a=false\nstate d2b=false\nstate d2c=false\nCard w:390 gap:12\n  Text.title \"Kyoto in two days\"\n  Text.muted \"{(d1a?0:1)+(d1b?0:1)+(d1c?0:1)+(d2a?0:1)+(d2b?0:1)+(d2c?0:1)} of 6 bookings left\"\n  Divider\n  Text.heading \"Day 1: Eastern Kyoto\"\n  Column gap:4\n    ExpansionTile title:\"08:00 Fushimi Inari Shrine\"\n      Text.body \"Hike the torii gate trail. Go early to avoid crowds. Allow 2 hours.\"\n    Row gap:8 middle\n      Icon \"train\"\n      Text.small \"JR Nara Line to Kyoto Station, then bus: 25 min\"\n    ExpansionTile title:\"11:00 Kiyomizu-dera\"\n      Text.body \"Wooden temple stage with city views. Walk Matsubara-dori and the Ninenzaka lanes after.\"\n    Row gap:8 middle\n      Icon \"directions_walk\"\n      Text.small \"Walk through Higashiyama: 15 min\"\n    ExpansionTile title:\"13:00 Lunch in Gion\"\n      Text.body \"Soba or kaiseki near Hanamikoji. Reservation recommended.\"\n    Row gap:8 middle\n      Icon \"directions_walk\"\n      Text.small \"Walk along Shirakawa canal: 10 min\"\n    ExpansionTile title:\"15:00 Yasaka Shrine and Maruyama Park\"\n      Text.body \"Relaxed stroll, tea stop, and lanterns at dusk.\"\n  Text.strong \"Book for Day 1\"\n  Checkbox \"Kaiseki lunch in Gion\" =d1a\n  Checkbox \"Tea ceremony at 16:30\" =d1b\n  Checkbox \"Evening Gion walking tour\" =d1c\n  Divider\n  Text.heading \"Day 2: Arashiyama and North\"\n  Column gap:4\n    ExpansionTile title:\"08:30 Arashiyama Bamboo Grove\"\n      Text.body \"Arrive early for quiet paths. Visit Tenryu-ji garden next door. Allow 1.5 hours.\"\n    Row gap:8 middle\n      Icon \"directions_walk\"\n      Text.small \"Walk to Togetsukyo Bridge area: 15 min\"\n    ExpansionTile title:\"11:00 Iwatayama Monkey Park\"\n      Text.body \"Short uphill climb of about 20 min with views over the city.\"\n    Row gap:8 middle\n      Icon \"train\"\n      Text.small \"Randen tram and bus to Kinkaku-ji: 45 min\"\n    ExpansionTile title:\"14:00 Kinkaku-ji (Golden Pavilion)\"\n      Text.body \"Zen temple covered in gold leaf. Allow 1 hour.\"\n    Row gap:8 middle\n      Icon \"directions_bus\"\n      Text.small \"Bus 205 to Nishiki Market: 40 min\"\n    ExpansionTile title:\"17:00 Nishiki Market and Pontocho\"\n      Text.body \"Street snacks, then dinner along the Kamo river.\"\n  Text.strong \"Book for Day 2\"\n  Checkbox \"Sagano scenic train tickets\" =d2a\n  Checkbox \"Monkey park timed entry\" =d2b\n  Checkbox \"Dinner in Pontocho\" =d2c","usage":{"input_tokens":2922,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1481,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":276}},"ttftMs":3097,"totalMs":8202}}
+{"tMs":3097,"delta":"state"}
+{"tMs":3282,"delta":" d1a=false"}
+{"tMs":3283,"delta":"\nstate d1b=false\nstate"}
+{"tMs":3283,"delta":" d1c=false\nstate d"}
+{"tMs":3283,"delta":"2a=false\nstate d2"}
+{"tMs":3283,"delta":"b=false\nstate d2c"}
+{"tMs":3301,"delta":"=false\nCard w:390"}
+{"tMs":3336,"delta":" gap:12\n  "}
+{"tMs":3369,"delta":"Text.title \"Kyo"}
+{"tMs":3403,"delta":"to in two days\"\n  "}
+{"tMs":3437,"delta":"Text.muted \"{(d"}
+{"tMs":3472,"delta":"1a?0:1)+"}
+{"tMs":3505,"delta":"(d1b?0:1"}
+{"tMs":3639,"delta":")+(d1c?0"}
+{"tMs":3639,"delta":":1)+(d2a"}
+{"tMs":3639,"delta":"?0:1)+(d"}
+{"tMs":3640,"delta":"2b?0:1)+"}
+{"tMs":3675,"delta":"(d2c?0:1"}
+{"tMs":3711,"delta":")} of 6 book"}
+{"tMs":3742,"delta":"ings left\"\n  Divider"}
+{"tMs":3776,"delta":"\n  Text.heading \""}
+{"tMs":3810,"delta":"Day 1: East"}
+{"tMs":3844,"delta":"ern Kyoto\""}
+{"tMs":3877,"delta":"\n  Column gap:4"}
+{"tMs":3911,"delta":"\n    ExpansionTile"}
+{"tMs":3992,"delta":" title:\"08:00 "}
+{"tMs":3992,"delta":"Fushimi Inari"}
+{"tMs":4012,"delta":" Shrine\"\n      Text"}
+{"tMs":4046,"delta":".body \"Hike the tor"}
+{"tMs":4079,"delta":"ii gate trail. Go"}
+{"tMs":4113,"delta":" early to avoid crowds"}
+{"tMs":4147,"delta":". Allow 2 h"}
+{"tMs":4180,"delta":"ours.\"\n    Row gap"}
+{"tMs":4215,"delta":":8 middle\n      "}
+{"tMs":4248,"delta":"Icon \"train\"\n      "}
+{"tMs":4281,"delta":"Text.small \"JR N"}
+{"tMs":4315,"delta":"ara Line to Kyo"}
+{"tMs":4349,"delta":"to Station, then bus:"}
+{"tMs":4382,"delta":" 25 min\"\n    "}
+{"tMs":4416,"delta":"ExpansionTile title:"}
+{"tMs":4452,"delta":"\"11:00 Ki"}
+{"tMs":4483,"delta":"yomizu-dera\""}
+{"tMs":4516,"delta":"\n      Text.body \""}
+{"tMs":4550,"delta":"Wooden temple stage with"}
+{"tMs":4583,"delta":" city views. Walk Mat"}
+{"tMs":4617,"delta":"subara-dori and the"}
+{"tMs":4651,"delta":" Ninenzaka l"}
+{"tMs":4684,"delta":"anes after.\"\n    Row"}
+{"tMs":4718,"delta":" gap:8 middle"}
+{"tMs":4751,"delta":"\n      Icon \"directions_"}
+{"tMs":4793,"delta":"walk\"\n      Text."}
+{"tMs":4826,"delta":"small \"Walk through Hig"}
+{"tMs":4859,"delta":"ashiyama: 15 "}
+{"tMs":4885,"delta":"min\"\n    Expans"}
+{"tMs":4919,"delta":"ionTile title:\"13:"}
+{"tMs":4952,"delta":"00 Lunch in"}
+{"tMs":4986,"delta":" Gion\"\n      Text."}
+{"tMs":5019,"delta":"body \"Soba or ka"}
+{"tMs":5052,"delta":"iseki near Hanam"}
+{"tMs":5086,"delta":"ikoji. Reservation"}
+{"tMs":5119,"delta":" recommended.\"\n    Row"}
+{"tMs":5172,"delta":" gap:8 middle"}
+{"tMs":5186,"delta":"\n      Icon \"directions_"}
+{"tMs":5220,"delta":"walk\"\n      Text."}
+{"tMs":5254,"delta":"small \"Walk along Sh"}
+{"tMs":5287,"delta":"irak"}
+{"tMs":5320,"delta":"awa canal: 10 "}
+{"tMs":5354,"delta":"min\"\n    Expans"}
+{"tMs":5387,"delta":"ionTile title:\"15:"}
+{"tMs":5420,"delta":"00 Yasaka"}
+{"tMs":5454,"delta":" Shrine and Maruy"}
+{"tMs":5487,"delta":"ama Park\"\n      Text"}
+{"tMs":5521,"delta":".body \"Relaxed"}
+{"tMs":5554,"delta":" stroll, tea stop"}
+{"tMs":5588,"delta":", and lanterns at d"}
+{"tMs":5621,"delta":"usk.\"\n  Text."}
+{"tMs":5655,"delta":"strong \"Book for Day"}
+{"tMs":5688,"delta":" 1\"\n  Check"}
+{"tMs":5722,"delta":"box \"Kaise"}
+{"tMs":5755,"delta":"ki lunch in Gion"}
+{"tMs":5788,"delta":"\" =d1a\n  "}
+{"tMs":5822,"delta":"Checkbox \"Tea"}
+{"tMs":5855,"delta":" ceremony at 16:"}
+{"tMs":5889,"delta":"30\" =d1b\n  "}
+{"tMs":5922,"delta":"Checkbox \"Ev"}
+{"tMs":5955,"delta":"ening Gion walking tour"}
+{"tMs":5989,"delta":"\" =d1c\n  "}
+{"tMs":6022,"delta":"Divider\n  Text.he"}
+{"tMs":6056,"delta":"ading \"Day 2:"}
+{"tMs":6089,"delta":" Arashiyama and North\""}
+{"tMs":6123,"delta":"\n  Column gap:4"}
+{"tMs":6156,"delta":"\n    ExpansionT"}
+{"tMs":6190,"delta":"ile title:\"08:30 "}
+{"tMs":6223,"delta":"Arashiyama B"}
+{"tMs":6256,"delta":"amboo Grove\""}
+{"tMs":6290,"delta":"\n      Text.body \"Ar"}
+{"tMs":6323,"delta":"rive early for quiet pa"}
+{"tMs":6357,"delta":"ths. Visit Ten"}
+{"tMs":6390,"delta":"ryu-ji garden next"}
+{"tMs":6424,"delta":" door. Allow 1."}
+{"tMs":6457,"delta":"5 hours.\"\n    "}
+{"tMs":6490,"delta":"Row gap:8 middle"}
+{"tMs":6524,"delta":"\n      Icon \"directions"}
+{"tMs":6557,"delta":"_walk\"\n      Text"}
+{"tMs":6590,"delta":".small \"Walk to"}
+{"tMs":6624,"delta":" Togetsukyo B"}
+{"tMs":6657,"delta":"ridge area: 15 min"}
+{"tMs":6690,"delta":"\"\n    Expansion"}
+{"tMs":6724,"delta":"Tile title:\"11:00"}
+{"tMs":6757,"delta":" Iwatayama"}
+{"tMs":6790,"delta":" Monkey Park\"\n      "}
+{"tMs":6824,"delta":"Text.body \"Short u"}
+{"tMs":6857,"delta":"phill climb of about 20"}
+{"tMs":6892,"delta":" min with views over the city.\""}
+{"tMs":6924,"delta":"\n    Row gap:8"}
+{"tMs":6958,"delta":" middle\n      Icon"}
+{"tMs":6991,"delta":" \"train\"\n      Text."}
+{"tMs":7026,"delta":"small \"Randen tram and"}
+{"tMs":7058,"delta":" bus to Kinka"}
+{"tMs":7092,"delta":"ku-ji: 45 "}
+{"tMs":7126,"delta":"min\"\n    Expans"}
+{"tMs":7158,"delta":"ionTile title:\"14:"}
+{"tMs":7192,"delta":"00 Kinkaku"}
+{"tMs":7227,"delta":"-ji (Golden"}
+{"tMs":7258,"delta":" Pavilion)\"\n      "}
+{"tMs":7293,"delta":"Text.body \"Zen"}
+{"tMs":7329,"delta":" temple covered in gold le"}
+{"tMs":7360,"delta":"af. Allow 1"}
+{"tMs":7391,"delta":" hour.\"\n    Row"}
+{"tMs":7428,"delta":" gap:8 middle"}
+{"tMs":7458,"delta":"\n      Icon \"direct"}
+{"tMs":7492,"delta":"ions_bus\"\n      "}
+{"tMs":7525,"delta":"Text.small \"Bus "}
+{"tMs":7558,"delta":"205 to Nishiki"}
+{"tMs":7592,"delta":" Market: 40 min\""}
+{"tMs":7625,"delta":"\n    ExpansionT"}
+{"tMs":7673,"delta":"ile title:\"17:00 "}
+{"tMs":7692,"delta":"Nishiki Market and"}
+{"tMs":7725,"delta":" Pontocho\"\n      "}
+{"tMs":7759,"delta":"Text.body \"Street sn"}
+{"tMs":7792,"delta":"acks, then dinner along"}
+{"tMs":7825,"delta":" the Kamo river.\""}
+{"tMs":7860,"delta":"\n  Text.strong \""}
+{"tMs":7892,"delta":"Book for Day 2\""}
+{"tMs":7925,"delta":"\n  Checkbox \""}
+{"tMs":7982,"delta":"Sagano scenic train t"}
+{"tMs":7993,"delta":"ickets\" =d2a"}
+{"tMs":8026,"delta":"\n  Checkbox \""}
+{"tMs":8059,"delta":"Monkey park timed entry"}
+{"tMs":8092,"delta":"\" =d2b\n  "}
+{"tMs":8126,"delta":"Checkbox \"Din"}
+{"tMs":8160,"delta":"ner in Pontocho\""}
+{"tMs":8193,"delta":" =d2c"}

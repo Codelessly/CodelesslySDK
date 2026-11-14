@@ -1,0 +1,67 @@
+{"meta":{"ui":"flights","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"Card w:390 gap:12\n  state sel=1\n  Text.title \"London to Lisbon\"\n  Text.muted \"Friday · 1 passenger\"\n  Card gap:6 -> sel=1\n    Row between middle\n      Row gap:8 middle\n        Radio value:1 groupValue:=sel -> sel=1\n        Text.strong \"07:15 → 10:20\"\n      Text.strong \"£89\"\n    Text.muted \"TAP Air Portugal · Direct · 2h 05m\"\n    Row gap:8\n      Badge.success \"Cheapest\"\n  Card gap:6 -> sel=2\n    Row between middle\n      Row gap:8 middle\n        Radio value:2 groupValue:=sel -> sel=2\n        Text.strong \"10:40 → 13:50\"\n      Text.strong \"£112\"\n    Text.muted \"British Airways · Direct · 2h 10m\"\n    Row gap:8\n      Badge.info \"Best time\"\n  Card gap:6 -> sel=3\n    Row between middle\n      Row gap:8 middle\n        Radio value:3 groupValue:=sel -> sel=3\n        Text.strong \"16:30 → 19:35\"\n      Text.strong \"£98\"\n    Text.muted \"easyJet · Direct · 2h 05m\"\n  Divider\n  Row between middle\n    Text.muted \"Total\"\n    Text.heading \"{sel==1?89:sel==2?112:98}\"\n  Button \"Confirm flight\" -> emit confirm sel; toast \"Flight confirmed\"","usage":{"input_tokens":2599,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":509,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":933,"totalMs":3198}}
+{"tMs":933,"delta":"Card w:390 gap"}
+{"tMs":1259,"delta":":12\n  "}
+{"tMs":1259,"delta":"state sel=1\n  "}
+{"tMs":1259,"delta":"Text.title \"London to L"}
+{"tMs":1259,"delta":"isbon\"\n  Text"}
+{"tMs":1259,"delta":".muted \"Friday ·"}
+{"tMs":1259,"delta":" 1 passenger\""}
+{"tMs":1259,"delta":"\n  Card gap:6 "}
+{"tMs":1259,"delta":"-> sel=1\n    "}
+{"tMs":1259,"delta":"Row between middle\n      "}
+{"tMs":1263,"delta":"Row gap:8 middle"}
+{"tMs":1298,"delta":"\n        Radio value:1"}
+{"tMs":1331,"delta":" groupValue:="}
+{"tMs":1594,"delta":"sel -> sel=1"}
+{"tMs":1594,"delta":"\n        Text.strong \""}
+{"tMs":1594,"delta":"07:15 → 10:"}
+{"tMs":1594,"delta":"20\"\n      Text.str"}
+{"tMs":1594,"delta":"ong \"£89\"\n    "}
+{"tMs":1594,"delta":"Text.muted \"TAP"}
+{"tMs":1594,"delta":" Air Portugal ·"}
+{"tMs":1598,"delta":" Direct · 2h 05"}
+{"tMs":1632,"delta":"m\"\n    Row gap"}
+{"tMs":1665,"delta":":8\n      Badge."}
+{"tMs":1698,"delta":"success \"Cheapest\""}
+{"tMs":1732,"delta":"\n  Card gap:6"}
+{"tMs":1932,"delta":" -> sel=2"}
+{"tMs":1932,"delta":"\n    Row between middle\n      "}
+{"tMs":1932,"delta":"Row gap:8 midd"}
+{"tMs":1932,"delta":"le\n        Radio value:"}
+{"tMs":1932,"delta":"2 groupValue:="}
+{"tMs":1932,"delta":"sel -> sel=2"}
+{"tMs":1965,"delta":"\n        Text.strong \""}
+{"tMs":1998,"delta":"10:40 → 13:"}
+{"tMs":2033,"delta":"50\"\n      Text.str"}
+{"tMs":2065,"delta":"ong \"£112\"\n    "}
+{"tMs":2098,"delta":"Text.muted \"British Air"}
+{"tMs":2132,"delta":"ways · Direct · 2"}
+{"tMs":2267,"delta":"h 10m\"\n    "}
+{"tMs":2267,"delta":"Row gap:8\n      "}
+{"tMs":2267,"delta":"Badge.info \"Best time"}
+{"tMs":2267,"delta":"\"\n  Card gap:"}
+{"tMs":2298,"delta":"6 -> sel=3"}
+{"tMs":2332,"delta":"\n    Row between middle"}
+{"tMs":2365,"delta":"\n      Row gap:8 "}
+{"tMs":2398,"delta":"middle\n        Radio value"}
+{"tMs":2432,"delta":":3 groupValue:"}
+{"tMs":2465,"delta":"=sel -> sel="}
+{"tMs":2499,"delta":"3\n        Text.strong"}
+{"tMs":2532,"delta":" \"16:30 → 19"}
+{"tMs":2605,"delta":":35\"\n      Text."}
+{"tMs":2605,"delta":"strong \"£98\"\n    "}
+{"tMs":2635,"delta":"Text.muted \"easy"}
+{"tMs":2665,"delta":"Jet · Direct · "}
+{"tMs":2699,"delta":"2h 05m\"\n  "}
+{"tMs":2732,"delta":"Divider\n  Row between"}
+{"tMs":2765,"delta":" middle\n    Text.mu"}
+{"tMs":2798,"delta":"ted \"Total\"\n    "}
+{"tMs":2832,"delta":"Text.heading \"{sel"}
+{"tMs":2868,"delta":"==1?89"}
+{"tMs":2898,"delta":":s"}
+{"tMs":2931,"delta":"el==2?112:98}"}
+{"tMs":3194,"delta":"\"\n  Button \"Conf"}
+{"tMs":3194,"delta":"irm flight\" -> em"}
+{"tMs":3194,"delta":"it confirm sel; to"}
+{"tMs":3194,"delta":"ast \"Flight confirm"}
+{"tMs":3194,"delta":"ed\""}

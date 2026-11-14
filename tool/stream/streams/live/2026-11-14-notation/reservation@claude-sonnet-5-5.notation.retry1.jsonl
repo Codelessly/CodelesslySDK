@@ -1,0 +1,105 @@
+{"meta":{"ui":"reservation","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"Card w:390 gap:12\n  state day=\"\"\n  state dayn=0\n  state size=2\n  state time=\"\"\n  Text.title \"Book a table\"\n  Text.strong \"Day\"\n  Row gap:8\n    ChoiceChip \"Mon\" selected:=day==\"Mon\" -> day=\"Mon\"; dayn=1; time=\"\"\n    ChoiceChip \"Tue\" selected:=day==\"Tue\" -> day=\"Tue\"; dayn=2; time=\"\"\n    ChoiceChip \"Wed\" selected:=day==\"Wed\" -> day=\"Wed\"; dayn=3; time=\"\"\n    ChoiceChip \"Thu\" selected:=day==\"Thu\" -> day=\"Thu\"; dayn=4; time=\"\"\n    ChoiceChip \"Fri\" selected:=day==\"Fri\" -> day=\"Fri\"; dayn=5; time=\"\"\n    ChoiceChip \"Sat\" selected:=day==\"Sat\" -> day=\"Sat\"; dayn=6; time=\"\"\n    ChoiceChip \"Sun\" selected:=day==\"Sun\" -> day=\"Sun\"; dayn=7; time=\"\"\n  Text.strong \"Party size: {size}\"\n  Slider =size min:1 max:8 step:1 -> time=\"\"\n  Text.strong \"Time\"\n  if day==\"\"\n    Text.muted \"Pick a day to see available times.\"\n  if day!=\"\"\n    Row gap:8\n      ChoiceChip \"17:00\" isEnabled:=(dayn+size)%3!=0 selected:=time==\"17:00\" -> time=\"17:00\"\n      ChoiceChip \"18:00\" isEnabled:=(dayn+size)%4!=1 selected:=time==\"18:00\" -> time=\"18:00\"\n      ChoiceChip \"19:00\" isEnabled:=(dayn*2+size)%5!=2 selected:=time==\"19:00\" -> time=\"19:00\"\n      ChoiceChip \"20:00\" isEnabled:=(dayn+size*2)%4!=3 selected:=time==\"20:00\" -> time=\"20:00\"\n      ChoiceChip \"21:00\" isEnabled:=(dayn+size)%5!=4 selected:=time==\"21:00\" -> time=\"21:00\"\n    Text.small \"Greyed-out times are full.\"\n  Button \"Confirm booking\" isEnabled:=time!=\"\" -> toast \"Booked {day}, party of {size}, at {time}\"; emit book time","usage":{"input_tokens":3505,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":797,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":664,"totalMs":4096}}
+{"tMs":664,"delta":"Card w:390 gap"}
+{"tMs":964,"delta":":12\n  state"}
+{"tMs":964,"delta":" day=\"\"\n  state d"}
+{"tMs":964,"delta":"ayn=0\n  state size"}
+{"tMs":964,"delta":"=2\n  state time=\"\""}
+{"tMs":964,"delta":"\n  Text.title \""}
+{"tMs":964,"delta":"Book a table\"\n  Text"}
+{"tMs":964,"delta":".strong \"Day\""}
+{"tMs":964,"delta":"\n  Row gap:8"}
+{"tMs":964,"delta":"\n    ChoiceChip"}
+{"tMs":995,"delta":" \"Mon\" selected:"}
+{"tMs":1026,"delta":"=day="}
+{"tMs":1060,"delta":"=\"Mon\" -> day"}
+{"tMs":1294,"delta":"=\"Mon\"; day"}
+{"tMs":1294,"delta":"n=1; time=\"\""}
+{"tMs":1294,"delta":"\n    ChoiceChip"}
+{"tMs":1295,"delta":" \"Tue\" selected:"}
+{"tMs":1295,"delta":"=day==\"Tue\""}
+{"tMs":1295,"delta":" -> day=\"Tue\""}
+{"tMs":1295,"delta":"; dayn=2; time"}
+{"tMs":1327,"delta":"=\"\"\n    Choi"}
+{"tMs":1361,"delta":"ceChip \"Wed\""}
+{"tMs":1394,"delta":" selected:=day==\""}
+{"tMs":1428,"delta":"Wed\" -> day=\""}
+{"tMs":1462,"delta":"Wed\"; dayn="}
+{"tMs":1641,"delta":"3; time=\"\"\n    "}
+{"tMs":1641,"delta":"ChoiceChip \""}
+{"tMs":1641,"delta":"Thu\" selected:=day"}
+{"tMs":1641,"delta":"==\"Thu\" ->"}
+{"tMs":1641,"delta":" day=\"Thu\"; d"}
+{"tMs":1662,"delta":"ayn=4; time=\"\""}
+{"tMs":1695,"delta":"\n    ChoiceCh"}
+{"tMs":1729,"delta":"ip \"Fri\" selected"}
+{"tMs":1762,"delta":":=day==\"Fri"}
+{"tMs":1795,"delta":"\" -> day=\"Fri"}
+{"tMs":1829,"delta":"\"; dayn=5;"}
+{"tMs":1862,"delta":" time=\"\"\n    Cho"}
+{"tMs":1964,"delta":"iceChip \"Sat"}
+{"tMs":1964,"delta":"\" selected:=day==\""}
+{"tMs":1964,"delta":"Sat\" -> day=\""}
+{"tMs":1995,"delta":"Sat\"; dayn"}
+{"tMs":2029,"delta":"=6; time=\"\"\n    "}
+{"tMs":2062,"delta":"ChoiceChip \""}
+{"tMs":2096,"delta":"Sun\" selected:="}
+{"tMs":2129,"delta":"day==\"Sun\" -"}
+{"tMs":2162,"delta":"> day=\"Sun\";"}
+{"tMs":2196,"delta":" dayn=7; time="}
+{"tMs":2231,"delta":"\"\"\n  Text.strong"}
+{"tMs":2262,"delta":" \"Party size: {size}"}
+{"tMs":2296,"delta":"\"\n  Slider =size"}
+{"tMs":2329,"delta":" min:1 max:8 "}
+{"tMs":2363,"delta":"step:1 -> time="}
+{"tMs":2396,"delta":"\"\"\n  Text.strong"}
+{"tMs":2430,"delta":" \"Time\"\n  if day"}
+{"tMs":2463,"delta":"==\"\"\n    Text.mu"}
+{"tMs":2497,"delta":"ted \"Pick a day to"}
+{"tMs":2529,"delta":" see available times.\"\n  if day"}
+{"tMs":2563,"delta":"!=\"\"\n    Row g"}
+{"tMs":2598,"delta":"ap:8\n      Cho"}
+{"tMs":2629,"delta":"iceChip \"17:00"}
+{"tMs":2668,"delta":"\" is"}
+{"tMs":2696,"delta":"Enabled:=(d"}
+{"tMs":2739,"delta":"ayn+size)%3!"}
+{"tMs":2762,"delta":"=0 selected:=time"}
+{"tMs":2796,"delta":"==\"17:00\" ->"}
+{"tMs":2829,"delta":" time=\"17:00\"\n      "}
+{"tMs":2862,"delta":"ChoiceChip \""}
+{"tMs":2896,"delta":"18:00\" isEnab"}
+{"tMs":2928,"delta":"led:=(dayn+"}
+{"tMs":2962,"delta":"size)%4!=1 "}
+{"tMs":2996,"delta":"selected:=time==\"18"}
+{"tMs":3029,"delta":":00\" -> time=\"18"}
+{"tMs":3062,"delta":":00\"\n      Cho"}
+{"tMs":3095,"delta":"iceChip \"19:00"}
+{"tMs":3129,"delta":"\" isEnabled:="}
+{"tMs":3162,"delta":"(dayn*2+size"}
+{"tMs":3195,"delta":")%5!=2 sel"}
+{"tMs":3229,"delta":"ected:=time==\"19:"}
+{"tMs":3262,"delta":"00\" -> time=\"19:"}
+{"tMs":3296,"delta":"00\"\n      Choi"}
+{"tMs":3329,"delta":"ceChip \"20:00\""}
+{"tMs":3362,"delta":" isEnabled:=("}
+{"tMs":3396,"delta":"dayn+size*2)"}
+{"tMs":3429,"delta":"%4!=3 selected"}
+{"tMs":3463,"delta":":=time==\"20:00"}
+{"tMs":3496,"delta":"\" -> time=\"20:00"}
+{"tMs":3529,"delta":"\"\n      Choice"}
+{"tMs":3564,"delta":"Chip \"21:00\" is"}
+{"tMs":3595,"delta":"Enabled:=(d"}
+{"tMs":3629,"delta":"ayn+size)%5!"}
+{"tMs":3662,"delta":"=4 selected:=time"}
+{"tMs":3696,"delta":"==\"21:00\" ->"}
+{"tMs":3729,"delta":" time=\"21:00\"\n    "}
+{"tMs":3762,"delta":"Text.small \"Grey"}
+{"tMs":3795,"delta":"ed-out times are full.\""}
+{"tMs":3829,"delta":"\n  Button \"Confirm"}
+{"tMs":3862,"delta":" booking\" isEnabled"}
+{"tMs":3947,"delta":":=time!=\"\" ->"}
+{"tMs":3947,"delta":" toast \"Booked {day"}
+{"tMs":3962,"delta":"}"}
+{"tMs":3995,"delta":", party"}
+{"tMs":4029,"delta":" of {size}, at {time"}
+{"tMs":4062,"delta":"}\"; emit book"}
+{"tMs":4095,"delta":" time"}

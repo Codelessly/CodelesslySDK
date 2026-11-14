@@ -1,0 +1,66 @@
+{
+ "ui": "reservation",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1534,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 410,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 975,
+   "totalMs": 2350,
+   "chars": 801,
+   "lines": 16,
+   "jsonTails": 0,
+   "nodes": 17,
+   "outputTokensPerNode": "24.1",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/gridView1/props/cols: A gridView has no prop \"cols\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, itemSnapping, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, fillGaps, masonry, masonryPlacement, pagination, reorder.",
+    "unknown_prop /nodes/gridView1/props/spacing: A gridView has no prop \"spacing\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, itemSnapping, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, fillGaps, masonry, masonryPlacement, pagination, reorder.",
+    "unknown_name /nodes/filledButton1/actions/0/actions/1/message: \"size\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/filledButton1/actions/0/actions/1/message: \"day\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  },
+  {
+   "input_tokens": 2648,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 570,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 504,
+   "totalMs": 2380,
+   "chars": 1277,
+   "lines": 20,
+   "jsonTails": 0,
+   "nodes": 17,
+   "outputTokensPerNode": "33.5",
+   "notationIssues": [
+    "line 1:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  }
+ ]
+}

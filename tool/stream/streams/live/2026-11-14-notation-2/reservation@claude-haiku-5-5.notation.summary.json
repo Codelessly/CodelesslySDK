@@ -1,0 +1,90 @@
+{
+ "ui": "reservation",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1696,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 684,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 662,
+   "totalMs": 2771,
+   "chars": 1316,
+   "lines": 20,
+   "jsonTails": 0,
+   "nodes": 18,
+   "outputTokensPerNode": "38.0",
+   "notationIssues": [
+    "line 10:74: Unknown word \"||\" on a ChoiceChip. Props are written key:value.",
+    "line 10:77: Unknown word \"size<=2)\" on a ChoiceChip. Props are written key:value.",
+    "line 11:74: Unknown word \"||\" on a ChoiceChip. Props are written key:value.",
+    "line 11:77: Unknown word \"size<=4)\" on a ChoiceChip. Props are written key:value.",
+    "line 13:74: Unknown word \"||\" on a ChoiceChip. Props are written key:value.",
+    "line 13:77: Unknown word \"size<=4)\" on a ChoiceChip. Props are written key:value.",
+    "line 14:74: Unknown word \"&&\" on a ChoiceChip. Props are written key:value.",
+    "line 14:77: Unknown word \"size<=6)\" on a ChoiceChip. Props are written key:value.",
+    "line 15:73: Unknown word \")\" on a ChoiceChip. Props are written key:value.",
+    "line 17:74: Unknown word \"||\" on a ChoiceChip. Props are written key:value.",
+    "line 17:77: Unknown word \"size<=2)\" on a ChoiceChip. Props are written key:value.",
+    "line 20:53: Unknown word \"&&time!=\" on a Button. Props are written key:value.",
+    "line 20:63: Unknown word \"&&size!=\" on a Button. Props are written key:value.",
+    "line 20:73: Unknown word \")\" on a Button. Props are written key:value."
+   ],
+   "errors": [
+    "unknown_name /nodes/filledButton1/actions/0/actions/1/message: \"day\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/filledButton1/actions/0/actions/1/message: \"size\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  },
+  {
+   "input_tokens": 3156,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 694,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 440,
+   "totalMs": 2583,
+   "chars": 1495,
+   "lines": 23,
+   "jsonTails": 0,
+   "nodes": 18,
+   "outputTokensPerNode": "38.6",
+   "notationIssues": [
+    "line 1:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": [
+    "unknown_name /nodes/choiceChip1/bind/props.isEnabled: \"ok17a\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip2/bind/props.isEnabled: \"ok17b\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip3/bind/props.isEnabled: \"ok18\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip4/bind/props.isEnabled: \"ok18b\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip5/bind/props.isEnabled: \"ok19\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip6/bind/props.isEnabled: \"ok19b\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip7/bind/props.isEnabled: \"ok20\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip8/bind/props.isEnabled: \"ok20b\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/choiceChip9/bind/props.isEnabled: \"ok21\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/filledButton1/bind/props.enabled: \"canBook\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  }
+ ]
+}

@@ -1,0 +1,257 @@
+{"meta":{"ui":"carousel","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"state idx=0\nstate sel=-1\nstate size=\"\"\nCard w:390 gap:12\n  if sel<0\n    Row between middle\n      Text.heading \"Running shoes\"\n      Text.muted \"{idx+1} / 6\"\n    Row middle gap:8\n      IconButton \"chevron_left\" -> idx=max(0,idx-1)\n      Column grow gap:8\n        if idx==0\n          Card gap:8 -> sel=0\n            Box h:140 fill:#FFE0E0E0 radius:8 center middle\n              Icon \"image\"\n            Text.strong \"Velocity Pro\"\n            Row between\n              Text \"$129\"\n              Text.muted \"★ 4.8\"\n        if idx==1\n          Card gap:8 -> sel=1\n            Box h:140 fill:#FFE0E0E0 radius:8 center middle\n              Icon \"image\"\n            Text.strong \"Cloud Runner\"\n            Row between\n              Text \"$119\"\n              Text.muted \"★ 4.6\"\n        if idx==2\n          Card gap:8 -> sel=2\n            Box h:140 fill:#FFE0E0E0 radius:8 center middle\n              Icon \"image\"\n            Text.strong \"Trail Blazer\"\n            Row between\n              Text \"$139\"\n              Text.muted \"★ 4.7\"\n        if idx==3\n          Card gap:8 -> sel=3\n            Box h:140 fill:#FFE0E0E0 radius:8 center middle\n              Icon \"image\"\n            Text.strong \"Swift Lite\"\n            Row between\n              Text \"$99\"\n              Text.muted \"★ 4.4\"\n        if idx==4\n          Card gap:8 -> sel=4\n            Box h:140 fill:#FFE0E0E0 radius:8 center middle\n              Icon \"image\"\n            Text.strong \"Marathon Elite\"\n            Row between\n              Text \"$159\"\n              Text.muted \"★ 4.9\"\n        if idx==5\n          Card gap:8 -> sel=5\n            Box h:140 fill:#FFE0E0E0 radius:8 center middle\n              Icon \"image\"\n            Text.strong \"Pace Setter\"\n            Row between\n              Text \"$109\"\n              Text.muted \"★ 4.5\"\n      IconButton \"chevron_right\" -> idx=min(5,idx+1)\n    Row center gap:8\n      Icon \"circle\" visible:=idx==0\n      Icon \"circle_outlined\" visible:=idx!=0\n      Icon \"circle\" visible:=idx==1\n      Icon \"circle_outlined\" visible:=idx!=1\n      Icon \"circle\" visible:=idx==2\n      Icon \"circle_outlined\" visible:=idx!=2\n      Icon \"circle\" visible:=idx==3\n      Icon \"circle_outlined\" visible:=idx!=3\n      Icon \"circle\" visible:=idx==4\n      Icon \"circle_outlined\" visible:=idx!=4\n      Icon \"circle\" visible:=idx==5\n      Icon \"circle_outlined\" visible:=idx!=5\n  if sel>=0\n    Button.ghost \"Back to carousel\" -> sel=-1; size=\"\"\n    Box h:160 fill:#FFE0E0E0 radius:8 center middle\n      Icon \"image\"\n    if sel==0\n      Text.title \"Velocity Pro\"\n      Text.strong \"$129  ·  ★ 4.8\"\n      Text.muted \"Lightweight daily trainer with responsive cushioning.\"\n    if sel==1\n      Text.title \"Cloud Runner\"\n      Text.strong \"$119  ·  ★ 4.6\"\n      Text.muted \"Soft, plush ride for easy long miles.\"\n    if sel==2\n      Text.title \"Trail Blazer\"\n      Text.strong \"$139  ·  ★ 4.7\"\n      Text.muted \"Grippy outsole built for rough trails.\"\n    if sel==3\n      Text.title \"Swift Lite\"\n      Text.strong \"$99  ·  ★ 4.4\"\n      Text.muted \"Fast, minimal shoe for tempo days.\"\n    if sel==4\n      Text.title \"Marathon Elite\"\n      Text.strong \"$159  ·  ★ 4.9\"\n      Text.muted \"Carbon-plated racer for race day.\"\n    if sel==5\n      Text.title \"Pace Setter\"\n      Text.strong \"$109  ·  ★ 4.5\"\n      Text.muted \"Balanced stability shoe for everyday training.\"\n    Text.strong \"Select size\"\n    Row gap:8\n      ChoiceChip \"7\" selected:=size==\"7\" -> size=\"7\"\n      ChoiceChip \"8\" selected:=size==\"8\" -> size=\"8\"\n      ChoiceChip \"9\" selected:=size==\"9\" -> size=\"9\"\n      ChoiceChip \"10\" selected:=size==\"10\" -> size=\"10\"\n      ChoiceChip \"11\" selected:=size==\"11\" -> size=\"11\"\n    Button \"Add to bag\" enabled:=size!=\"\" -> emit addToBag sel; toast \"Added to bag\"","usage":{"input_tokens":1700,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1678,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":770,"totalMs":9333}}
+{"tMs":770,"delta":"state"}
+{"tMs":1103,"delta":" id"}
+{"tMs":1104,"delta":"x=0\nstate s"}
+{"tMs":1104,"delta":"el=-1\nstate size"}
+{"tMs":1104,"delta":"=\"\""}
+{"tMs":1104,"delta":"\nCard"}
+{"tMs":1104,"delta":" w:"}
+{"tMs":1104,"delta":"390 gap:12"}
+{"tMs":1104,"delta":"\n  if sel<"}
+{"tMs":1104,"delta":"0\n    Row"}
+{"tMs":1118,"delta":" between"}
+{"tMs":1152,"delta":" middle\n      Text.he"}
+{"tMs":1186,"delta":"ading \"Running sh"}
+{"tMs":1447,"delta":"oes\"\n      "}
+{"tMs":1447,"delta":"Text.mu"}
+{"tMs":1447,"delta":"ted \"{idx+"}
+{"tMs":1447,"delta":"1} /"}
+{"tMs":1447,"delta":" 6\"\n    "}
+{"tMs":1447,"delta":"Row middle g"}
+{"tMs":1447,"delta":"ap:8"}
+{"tMs":1455,"delta":"\n      IconButton \"ch"}
+{"tMs":1486,"delta":"evron_left\" -> id"}
+{"tMs":1520,"delta":"x=max(0,idx"}
+{"tMs":1554,"delta":"-1)\n      Column"}
+{"tMs":1587,"delta":" grow g"}
+{"tMs":1790,"delta":"ap:8"}
+{"tMs":1790,"delta":"\n        if"}
+{"tMs":1790,"delta":" idx==0\n          Card"}
+{"tMs":1790,"delta":" g"}
+{"tMs":1790,"delta":"ap:8 -> sel"}
+{"tMs":1820,"delta":"=0\n            Box h"}
+{"tMs":1853,"delta":":140"}
+{"tMs":1886,"delta":" fill:#FFE"}
+{"tMs":1920,"delta":"0E0E0 radius"}
+{"tMs":1954,"delta":":8 "}
+{"tMs":1987,"delta":"center midd"}
+{"tMs":2134,"delta":"le\n              "}
+{"tMs":2134,"delta":"Icon \"image\"\n            "}
+{"tMs":2134,"delta":"Text.strong \"Vel"}
+{"tMs":2134,"delta":"ocity Pro\"\n            "}
+{"tMs":2154,"delta":"Row between"}
+{"tMs":2188,"delta":"\n              Text \""}
+{"tMs":2220,"delta":"$129"}
+{"tMs":2255,"delta":"\"\n              Text"}
+{"tMs":2293,"delta":"."}
+{"tMs":2321,"delta":"muted \"★ 4."}
+{"tMs":2354,"delta":"8\"\n        if idx=="}
+{"tMs":2387,"delta":"1\n          Card gap:"}
+{"tMs":2481,"delta":"8 -> sel=1"}
+{"tMs":2481,"delta":"\n            Box h:140 "}
+{"tMs":2487,"delta":"fill:#FFE0"}
+{"tMs":2522,"delta":"E0E0 radius:"}
+{"tMs":2554,"delta":"8 center middle\n              "}
+{"tMs":2587,"delta":"Icon \"image\"\n            "}
+{"tMs":2621,"delta":"Text.strong \"C"}
+{"tMs":2656,"delta":"loud Run"}
+{"tMs":2688,"delta":"ner\"\n            Row between"}
+{"tMs":2721,"delta":"\n              Text \"$119"}
+{"tMs":2756,"delta":"\"\n              Text.muted"}
+{"tMs":2788,"delta":" \"★ 4.6"}
+{"tMs":2828,"delta":"\"\n        if idx==2"}
+{"tMs":2855,"delta":"\n          Card gap:8"}
+{"tMs":2888,"delta":" -> sel=2"}
+{"tMs":2922,"delta":"\n            Box h:140 f"}
+{"tMs":2955,"delta":"ill:#FFE0E"}
+{"tMs":2989,"delta":"0E0 radius:8"}
+{"tMs":3021,"delta":" center middle\n              Ic"}
+{"tMs":3054,"delta":"on \"image\"\n            Text"}
+{"tMs":3088,"delta":".strong \"Trail"}
+{"tMs":3121,"delta":" Blazer\"\n            Row"}
+{"tMs":3155,"delta":" between\n              Text \"$139"}
+{"tMs":3188,"delta":"\"\n              Text.muted"}
+{"tMs":3222,"delta":" \"★ 4.7"}
+{"tMs":3255,"delta":"\"\n        if idx==3"}
+{"tMs":3289,"delta":"\n          Card gap:8"}
+{"tMs":3322,"delta":" -> sel=3"}
+{"tMs":3355,"delta":"\n            Box h:140 f"}
+{"tMs":3388,"delta":"ill:#FFE0E"}
+{"tMs":3422,"delta":"0E0 radius:8"}
+{"tMs":3456,"delta":" center middle\n              Ic"}
+{"tMs":3488,"delta":"on \"image\"\n            Text"}
+{"tMs":3522,"delta":".strong \"Swift"}
+{"tMs":3555,"delta":" Lite\"\n            Row between"}
+{"tMs":3588,"delta":"\n              Text \"$99\""}
+{"tMs":3624,"delta":"\n              Text.muted \""}
+{"tMs":3656,"delta":"★ 4.4\""}
+{"tMs":3689,"delta":"\n        if idx==4\n          "}
+{"tMs":3722,"delta":"Card gap:8 -"}
+{"tMs":3757,"delta":"> sel=4\n            "}
+{"tMs":3790,"delta":"Box h:140 fill:"}
+{"tMs":3822,"delta":"#FFE0E0E"}
+{"tMs":3856,"delta":"0 radius:8 center"}
+{"tMs":3889,"delta":" middle\n              Icon \""}
+{"tMs":3922,"delta":"image\"\n            Text.str"}
+{"tMs":3956,"delta":"ong \"Marathon El"}
+{"tMs":3989,"delta":"ite\"\n            Row between"}
+{"tMs":4022,"delta":"\n              Text \"$159\""}
+{"tMs":4055,"delta":"\n              Text.muted \"★"}
+{"tMs":4089,"delta":" 4.9\"\n        "}
+{"tMs":4122,"delta":"if idx==5\n          "}
+{"tMs":4155,"delta":"Card gap:8 ->"}
+{"tMs":4189,"delta":" sel=5\n            Box"}
+{"tMs":4222,"delta":" h:140 fill:#"}
+{"tMs":4256,"delta":"FFE0E0E"}
+{"tMs":4289,"delta":"0 radius:8 center"}
+{"tMs":4322,"delta":" middle\n              Icon \""}
+{"tMs":4356,"delta":"image\"\n            Text.str"}
+{"tMs":4389,"delta":"ong \"Pace"}
+{"tMs":4422,"delta":" Set"}
+{"tMs":4455,"delta":"ter\"\n            Row between"}
+{"tMs":4489,"delta":"\n              Text \"$109"}
+{"tMs":4522,"delta":"\"\n              Text.muted"}
+{"tMs":4555,"delta":" \"★ 4.5\""}
+{"tMs":4589,"delta":"\n      IconButton \"ch"}
+{"tMs":4623,"delta":"evron_right\" -> id"}
+{"tMs":4655,"delta":"x=min(5,idx"}
+{"tMs":4692,"delta":"+1)\n    Row center"}
+{"tMs":4722,"delta":" gap:8"}
+{"tMs":4755,"delta":"\n      "}
+{"tMs":4789,"delta":"Ic"}
+{"tMs":4822,"delta":"on \"circle\" vis"}
+{"tMs":4856,"delta":"ible:=idx==0"}
+{"tMs":4889,"delta":"\n      Icon \"circle_"}
+{"tMs":4923,"delta":"outl"}
+{"tMs":4958,"delta":"ined\" visible:=idx"}
+{"tMs":4989,"delta":"!=0\n      Icon"}
+{"tMs":5022,"delta":" \"circle\""}
+{"tMs":5055,"delta":" visible:=idx==1"}
+{"tMs":5089,"delta":"\n      Icon \"circle"}
+{"tMs":5123,"delta":"_outlined\" visible:"}
+{"tMs":5155,"delta":"=idx!=1\n      "}
+{"tMs":5190,"delta":"Icon \"circle\" vis"}
+{"tMs":5241,"delta":"ible:=idx==2"}
+{"tMs":5255,"delta":"\n      Icon \"circle_"}
+{"tMs":5289,"delta":"outlined\" visible:="}
+{"tMs":5324,"delta":"idx!=2\n      "}
+{"tMs":5358,"delta":"Icon \"circle\" visible"}
+{"tMs":5390,"delta":":=idx==3\n      "}
+{"tMs":5422,"delta":"Icon \"circle_out"}
+{"tMs":5456,"delta":"lined\" visible:=id"}
+{"tMs":5489,"delta":"x!=3\n      Ic"}
+{"tMs":5522,"delta":"on \"circle\" visible:"}
+{"tMs":5555,"delta":"=idx==4\n      "}
+{"tMs":5589,"delta":"Icon \"circle_outl"}
+{"tMs":5623,"delta":"ined\" visible:=idx"}
+{"tMs":5656,"delta":"!=4\n      Icon"}
+{"tMs":5689,"delta":" \"circle\" visible:="}
+{"tMs":5722,"delta":"idx==5\n      Ic"}
+{"tMs":5755,"delta":"on \"circle_outlined"}
+{"tMs":5789,"delta":"\" visible:=idx!"}
+{"tMs":5822,"delta":"=5\n  if sel>"}
+{"tMs":5858,"delta":"=0\n    Button."}
+{"tMs":5889,"delta":"ghost \""}
+{"tMs":5922,"delta":"Back to carousel\" ->"}
+{"tMs":5956,"delta":" sel=-1; size="}
+{"tMs":5989,"delta":"\"\"\n    Box h:160"}
+{"tMs":6024,"delta":" fill:#FFE"}
+{"tMs":6055,"delta":"0E0E0 radius"}
+{"tMs":6089,"delta":":8 center middle\n      "}
+{"tMs":6122,"delta":"Icon \"image\"\n    "}
+{"tMs":6155,"delta":"if sel==0\n      "}
+{"tMs":6189,"delta":"Text.title"}
+{"tMs":6223,"delta":" \"Velocity Pro"}
+{"tMs":6255,"delta":"\"\n      "}
+{"tMs":6289,"delta":"Text.strong \"$129"}
+{"tMs":6322,"delta":"  "}
+{"tMs":6355,"delta":"·"}
+{"tMs":6389,"delta":"  ★ 4.8"}
+{"tMs":6422,"delta":"\"\n      Text.muted"}
+{"tMs":6456,"delta":" \""}
+{"tMs":6490,"delta":"Lightweight da"}
+{"tMs":6522,"delta":"ily tr"}
+{"tMs":6555,"delta":"ainer with respon"}
+{"tMs":6589,"delta":"sive cushioning.\""}
+{"tMs":6622,"delta":"\n    if sel==1"}
+{"tMs":6655,"delta":"\n      Text.title \"C"}
+{"tMs":6689,"delta":"loud Runner\"\n      "}
+{"tMs":6722,"delta":"Text.strong \"$119"}
+{"tMs":6755,"delta":"  ·  ★ "}
+{"tMs":6789,"delta":"4.6\"\n      Text"}
+{"tMs":6822,"delta":".muted \"Soft,"}
+{"tMs":6856,"delta":" plush ride for eas"}
+{"tMs":6889,"delta":"y long"}
+{"tMs":6922,"delta":" mi"}
+{"tMs":6955,"delta":"les.\"\n    if sel=="}
+{"tMs":6989,"delta":"2\n      Text.title \""}
+{"tMs":7022,"delta":"Trail Blazer\""}
+{"tMs":7055,"delta":"\n      Text.strong \""}
+{"tMs":7089,"delta":"$139  ·  ★"}
+{"tMs":7122,"delta":" 4.7\"\n      "}
+{"tMs":7155,"delta":"Text.muted \"Gr"}
+{"tMs":7188,"delta":"ippy out"}
+{"tMs":7222,"delta":"s"}
+{"tMs":7255,"delta":"ole built"}
+{"tMs":7289,"delta":" for r"}
+{"tMs":7322,"delta":"ough trails.\""}
+{"tMs":7355,"delta":"\n    if sel==3"}
+{"tMs":7389,"delta":"\n      Text.title \"Sw"}
+{"tMs":7422,"delta":"ift Lite\"\n      "}
+{"tMs":7455,"delta":"Text.strong \"$99  "}
+{"tMs":7489,"delta":"·  ★ 4"}
+{"tMs":7522,"delta":".4\"\n      Text."}
+{"tMs":7556,"delta":"muted \"Fast,"}
+{"tMs":7589,"delta":" min"}
+{"tMs":7623,"delta":"imal sh"}
+{"tMs":7656,"delta":"oe for t"}
+{"tMs":7689,"delta":"empo days"}
+{"tMs":7722,"delta":".\"\n    if sel==4"}
+{"tMs":7756,"delta":"\n      Text.title \""}
+{"tMs":7789,"delta":"Marathon Elite\""}
+{"tMs":7823,"delta":"\n      Text.strong \"$"}
+{"tMs":7856,"delta":"159  ·  ★"}
+{"tMs":7889,"delta":" 4.9\"\n      "}
+{"tMs":7922,"delta":"Text.muted \"Car"}
+{"tMs":7956,"delta":"bon-pl"}
+{"tMs":7989,"delta":"ated"}
+{"tMs":8022,"delta":" rac"}
+{"tMs":8055,"delta":"er"}
+{"tMs":8089,"delta":" for race day"}
+{"tMs":8122,"delta":".\"\n    if sel==5"}
+{"tMs":8155,"delta":"\n      Text.title \""}
+{"tMs":8189,"delta":"Pace Setter\"\n      "}
+{"tMs":8222,"delta":"Text.strong \"$109"}
+{"tMs":8255,"delta":"  ·  ★ "}
+{"tMs":8289,"delta":"4.5\"\n      Text"}
+{"tMs":8322,"delta":".muted \"Balanced"}
+{"tMs":8355,"delta":" st"}
+{"tMs":8389,"delta":"ability shoe for everyday"}
+{"tMs":8422,"delta":" training.\"\n    Text.str"}
+{"tMs":8456,"delta":"ong \"Select"}
+{"tMs":8489,"delta":" size\"\n    Row gap"}
+{"tMs":8523,"delta":":8"}
+{"tMs":8555,"delta":"\n      ChoiceChip"}
+{"tMs":8589,"delta":" \"7\" selected:=size"}
+{"tMs":8622,"delta":"==\"7\" -> size=\""}
+{"tMs":8655,"delta":"7\"\n      Choi"}
+{"tMs":8689,"delta":"ceChip \"8\" selected"}
+{"tMs":8724,"delta":":=size==\"8\" -"}
+{"tMs":8756,"delta":"> size=\"8\"\n      "}
+{"tMs":8789,"delta":"ChoiceChip \"9"}
+{"tMs":8822,"delta":"\" selected:=size==\""}
+{"tMs":8855,"delta":"9\" -> size=\"9\""}
+{"tMs":8892,"delta":"\n      ChoiceCh"}
+{"tMs":8922,"delta":"ip \"10\" selected:="}
+{"tMs":8955,"delta":"size==\"10\" -> size"}
+{"tMs":8989,"delta":"=\"10\"\n      Cho"}
+{"tMs":9022,"delta":"iceChip \"11\" sel"}
+{"tMs":9055,"delta":"ected:=size==\"11\""}
+{"tMs":9089,"delta":" -> size=\"11\"\n    "}
+{"tMs":9123,"delta":"Button \"Add to bag"}
+{"tMs":9156,"delta":"\" enabled:=size!"}
+{"tMs":9189,"delta":"=\"\" -> emit add"}
+{"tMs":9222,"delta":"To"}
+{"tMs":9255,"delta":"Bag s"}
+{"tMs":9289,"delta":"el; toast \"Added to"}
+{"tMs":9323,"delta":" bag\""}
