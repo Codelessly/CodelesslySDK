@@ -219,6 +219,11 @@ void main() {
       expect(boxes.any((b) => (b as Map)['id'] == 'picked'), isTrue, reason: 'the field\'s own ArrowDown reaction ran');
     });
 
+    testWidgets('a slider whose value label always shows renders and is torn down without an exception (test 4)', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/slider_label.json'], out: out.path, sizes: const [Size(390, 300)], label: 'slider'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+    });
+
     testWidgets('a tap on a covered node names what covers it', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'last')]));
