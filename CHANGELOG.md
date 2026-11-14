@@ -1,3 +1,20 @@
+## Unreleased
+
+- **A migrated stroke path draws itself on again.** codelessly_api's migration now writes `strokePath.drawMs` as an
+  animation of the path op's `trimEnd` and a transition of it; the player draws it frame for frame as 30.0.0's
+  RenderStrokePath did (`test/custom_paint/stroke_draw_on_test.dart`: the drawn share against the old formula and
+  the pixels against the static drawing at that share). Three general fixes made that exact:
+  - a track with no `from` or `to` on a path the player patches into the node (not `motion`, `opacity`) reads the
+    node's own value without the track's last value (`RenderTree.resolveUnanimated`; before, it read back what it
+    had drawn and stayed at its start), the field's declared default where the JSON omits it
+    (`BindPaths.declaredDefault`), and an inline expression there evaluated;
+  - a transition on such a path watches the node's own value, not the animated one, so a bound change under a
+    settled track eases;
+  - a node its animations patch re-applies when a binding changes even if the node as shown did not (a top-level
+    node, or a binding change that left it equal), so its player sees the change.
+- **State patches on `self` and `@<key>`** in schema-2 documents are migrated to the node's id (codelessly_api), so
+  those hover, press and selection styles now apply.
+
 ## 30.1.0
 
 Requires codelessly_api 30.1.0. **The schema stays 3**: every loader reads `"schema": 2` and `3`, migrating 2 in

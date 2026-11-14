@@ -500,6 +500,7 @@ class RenderTree {
   }
 
   BoundNode _withAnimated(String id, Object? instance, BoundNode bound) {
+    if (_unanimated) return bound;
     final values = _animated[(id, instance)] ?? (instance == null ? null : _animated[(id, null)]);
     if (values == null) return bound;
     var n = bound.node;
@@ -590,6 +591,22 @@ class RenderTree {
   /// Node [id] as shown: the source's, patched by the active interaction
   /// states that style it, its bindings applied ([binder]).
   Node? resolve(String id, {Object? instance}) => resolveBound(id, instance: instance)?.node;
+
+  /// [resolve] without the values node [id]'s animations give it
+  /// ([setAnimatedValues]): the value a track with no `from` or `to` starts
+  /// or ends at, and what a transition watches, are the node's own, not
+  /// what the track drew last.
+  Node? resolveUnanimated(String id, {Object? instance}) {
+    final was = _unanimated;
+    _unanimated = true;
+    try {
+      return resolve(id, instance: instance);
+    } finally {
+      _unanimated = was;
+    }
+  }
+
+  bool _unanimated = false;
 
   /// [resolve], with whether a binding hides the node and what it read. The
   /// root of a component instance is seamed with its call (bound in the
@@ -1014,6 +1031,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   List<Listenable> _bindingWatch = const [];
   Listenable? _bindingListenable;
 
+  /// Whether animations patch this node ([RenderTree.setAnimatedValues]).
+  bool get _animatedOver => tree._animated.containsKey((id, instance)) || (instance != null && tree._animated.containsKey((id, null)));
+
   void _watchBindings(List<Listenable> watch) {
     if (listEquals(watch, _bindingWatch)) return;
     _bindingListenable?.removeListener(_bindingsChanged);
@@ -1041,7 +1061,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     final bound = tree.resolveBound(id, instance: instance);
     final n = _withTextDefault(bound?.node);
-    if (bound != null && n != null && bound.collapsed == _collapsed) {
+    // While its animations patch it, the node as shown can stay the same
+    // while what they draw over changed (a bound value a transition eases):
+    // its player must see it, so it re-applies.
+    if (bound != null && n != null && bound.collapsed == _collapsed && !_animatedOver) {
       if (n == old) {
         _watchBindings(bound.watch);
         return;
@@ -1329,8 +1352,11 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _watchBindings(bound?.watch ?? const []);
     final collapsed = bound?.collapsed ?? false;
     // A top-level node that only moved: its content doesn't depend on where
-    // it sits (the host offsets it), so nothing re-applies or repaints.
-    if (collapsed == _collapsed && _slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n)) {
+    // it sits (the host offsets it), so nothing re-applies or repaints. Not
+    // while its animations patch it: what they draw over can change under
+    // the same shown node (a bound value a transition eases).
+    if (collapsed == _collapsed && _slot.kind == SlotKind.root && n != null && _applied != null && _onlyMoved(_applied!, n) &&
+        !_animatedOver) {
       _node = n;
       _applied = n;
       return;
