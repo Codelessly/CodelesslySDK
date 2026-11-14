@@ -17,3 +17,19 @@ Measured against the reference over the button rows (x 24–700, y 24–332): 0.
 SSUI variant → core node: primary `filledButton`; secondary and destructive `filledButton` with that
 `style.backgroundColor`; outline `outlinedButton`; ghost `textButton`. Size → the node's height (24/28/32/36/44); 28
 (compact) is a button with no size: it hugs.
+
+## Date and time pickers (workstream G)
+
+`test/controls/pickers_reference_test.dart` rebuilds SSUI's picker page (`../ssui-reference/ssui-pickers-*.png`,
+rendered from soft_saas_ui's own `SoftSaaSDatePicker`, `SoftSaaSTimePicker` and `SoftSaaSCalendar` by
+`tool/ssui_golden/test/ssui_pickers_test.dart`) from zero-prop `datePicker` / `timePicker` nodes, with the first
+field's calendar open.
+
+| File | What |
+|---|---|
+| `pickers-before-{light,dark}.png` | 30.1.0's Material islands (the empty picker showed today's date; a tap opened Material's dialog) |
+| `pickers-{light,dark}.png` | this SDK: SSUI's field and calendar popover, drawn as render objects |
+
+Measured against the reference: fields 4.2 % (light) / 4.8 % (dark) of the pixels differ by more than 40 in a channel,
+the calendar 6.1 % / 7.0 %; nearly all of it is text spacing (SSUI's own `Text` inherits Material's 0.25 letter
+spacing, which its `inputText` token does not have) and lucide's icon glyphs drawn as paths. The test holds it under 9 %.

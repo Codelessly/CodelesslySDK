@@ -1,5 +1,15 @@
 ## Unreleased
 
+- **Date and time pickers are render objects (Milestone 3, workstream G).** `datePicker`, `timePicker` and
+  `dateTimeInput` draw SSUI's select field (28 high when they hug; calendar or clock icon, value, chevron) and open in
+  the root's overlay layer: a popover under the field on a screen 600 or wider, else a bottom sheet; a tap outside or
+  Escape closes it. Dates in SSUI's calendar (month and year navigation, the range, today ringed, arrows, Page Up/Down,
+  Home/End, Enter), times in hour/minute (and AM/PM) columns; month and day names and the first weekday are the
+  platform locale's (intl, no Material localizations); today follows the formulas' clock (`--now`). An empty picker
+  shows its hint or "Select date" instead of today's date. No `showDatePicker`/`showTimePicker` and no Material
+  dialog: the picker islands in `widgets/inputs.dart` are gone. Size changes: an unstyled hugging picker is 28 high; a `dateTimeInput` takes its node's size (the island ignored
+  it: the pickers sample's parity golden is re-pinned to the nodes' own 300 × 56).
+
 **A list that filtered to nothing, explained.** A recorded SSUI data table (data_table@claude-sonnet-5-5) showed
 "No results" over twelve defined invoices: its `filtered` variable was `filter(invoices, (statusF == 'All' || status ==
 statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
