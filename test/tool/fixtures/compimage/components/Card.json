@@ -1,0 +1,9 @@
+{
+  "schema": 3,
+  "id": "Card",
+  "roots": ["art"],
+  "widget": {"type": "Card"},
+  "nodes": {
+    "art": {"type": "box", "layout": {"width": 100, "height": 100}, "decoration": {"fills": [{"type": "image", "image": {"url": "../images/dot.svg"}}]}}
+  }
+}

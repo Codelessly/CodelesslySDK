@@ -34,8 +34,6 @@ final Map<String, WidgetRecipe> collectionsRecipes = {
   'listView': _listView,
   'gridView': _gridView,
   'pageView': _pageView,
-  'tabs': tabsRecipe,
-  'tabBar': tabBarRecipe,
   'accordion': accordionRecipe,
   'expansionTile': expansionTileRecipe,
   'pagination': paginationRecipe,
@@ -569,6 +567,7 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..childAspectRatio = n.prop(GridViewProps.childAspectRatio)
     ..mainAxisExtent = n.prop(GridViewProps.mainAxisExtent)
     ..shrinkWrapRows = n.prop(GridViewProps.shrinkWrapRows)
+    ..fillGaps = n.prop(GridViewProps.fillGaps)
     ..masonry = n.prop(GridViewProps.masonry)
     ..masonryShortest = n.prop(GridViewProps.masonryPlacement) == api.MasonryPlacement.shortest
     ..intrinsicRows = !_blocksIntrinsics(b, item)

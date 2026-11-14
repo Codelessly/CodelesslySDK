@@ -1,0 +1,16 @@
+{
+  "schema": 3,
+  "id": "navexpr",
+  "roots": ["home", "api", "changelog"],
+  "variables": {"home": [{"name": "results", "type": "list", "value": [{"title": "API", "to": "api"}, {"title": "Changelog", "to": "changelog"}]}]},
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "list"}, "layout": {"width": 390, "height": 400}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "list": {"type": "listView", "children": ["result"], "layout": {"width": {"fill": 390}, "height": {"fill": 400}}, "props": {"spacing": 8}, "bind": {"data": "${results}"}},
+    "result": {"type": "box", "layout": {"width": {"fill": 390}, "height": 48}, "decoration": {"fills": [{"color": "#FFEEEEEE"}]},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "navigate", "to": "${item.to}"}]}]},
+    "api": {"type": "canvas", "slots": {"body": "apiTitle"}, "layout": {"width": 390, "height": 400}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "apiTitle": {"type": "text", "layout": {"width": 200, "height": 30}, "props": {"text": "API", "style": {"fontSize": 20, "color": "#FF000000"}}},
+    "changelog": {"type": "canvas", "slots": {"body": "changelogTitle"}, "layout": {"width": 390, "height": 400}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "changelogTitle": {"type": "text", "layout": {"width": 200, "height": 30}, "props": {"text": "Changelog", "style": {"fontSize": 20, "color": "#FF000000"}}}
+  }
+}

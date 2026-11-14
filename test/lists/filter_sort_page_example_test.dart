@@ -13,6 +13,7 @@ import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledContro
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../support/fields.dart';
 
 Future<UiSession> _show(WidgetTester tester) async {
   final json = jsonDecode(File('test/fixtures/reference/table_filter.json').readAsStringSync());
@@ -89,12 +90,12 @@ void main() {
   testWidgets('the search narrows the list by customer and sends the pager back to the first page', (tester) async {
     await _show(tester);
     await _tap(tester, 'Next');
-    await tester.enterText(find.byType(EditableText), 'o');
+    await typeInto(tester, 'o');
     await tester.pumpAndSettle();
     // Globex, Hooli, Wonka.
     expect(_rows(tester), ['INV-2', 'INV-4', 'INV-5']);
     expect(_shows(tester, '1–3 of 3'), isTrue, reason: '${_texts(tester)}');
-    await tester.enterText(find.byType(EditableText), 'zz');
+    await typeInto(tester, 'zz');
     await tester.pumpAndSettle();
     expect(_rows(tester), isEmpty);
     expect(_shows(tester, 'No invoices match'), isTrue, reason: '${_texts(tester)}');
@@ -103,8 +104,8 @@ void main() {
   testWidgets('the status filter keeps the matching records', (tester) async {
     await _show(tester);
     await _tap(tester, 'All');
-    await tester.tap(find.text('Overdue').last);
-    await tester.pumpAndSettle();
+    // The menu's rows draw their own labels, in the root's overlay layer.
+    await _tap(tester, 'Overdue');
     expect(_rows(tester), ['INV-2', 'INV-4']);
     expect(_shows(tester, '1–2 of 2'), isTrue, reason: '${_texts(tester)}');
   });

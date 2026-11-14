@@ -6,6 +6,9 @@ import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField;
+
+import '../support/fields.dart';
 import '../support/screen.dart' as harness;
 
 const _emailValidator = r"${= value == '' ? 'Enter your email.' : !contains(value, '@') ? 'Enter a valid email.' : ''}";
@@ -58,51 +61,61 @@ Map<String, Json> _form({String? formMode, String? emailMode}) => {
       },
     };
 
-Finder _editable(int i) => find.byType(EditableText).at(i);
+RenderTextField _editable(WidgetTester tester, int i) => textField(tester, i);
 
-bool _focused(WidgetTester tester, int i) => tester.widget<EditableText>(_editable(i)).focusNode.hasFocus;
+bool _focused(WidgetTester tester, int i) => _editable(tester, i).focusNode.hasFocus;
+
+/// How many fields show [message] under them.
+int _shown(WidgetTester tester, String message) => textFields(tester).where((f) => f.belowText == message).length;
+
+Future<void> _type(WidgetTester tester, int i, String text) => typeInto(tester, text, field: _editable(tester, i));
+
+Future<void> _focusField(WidgetTester tester, int i) async {
+  _editable(tester, i).requestFocus();
+  await tester.pump();
+}
 
 void main() {
   testWidgets('a field set to validate on unfocus shows its error when the focus leaves, not while typing', (tester) async {
     await harness.show(tester, _form(emailMode: 'onUnfocus'), variables: [harness.v('sent', false, VariableType.boolean)]);
-    await tester.enterText(_editable(1), 'ada');
+    await _type(tester, 1, 'ada');
     await tester.pump();
-    expect(find.text('Enter a valid email.'), findsNothing);
-    await tester.showKeyboard(_editable(0));
+    expect(_shown(tester, 'Enter a valid email.'), 0);
+    await _focusField(tester, 0);
     await tester.pump();
-    expect(find.text('Enter a valid email.'), findsOneWidget);
+    expect(_shown(tester, 'Enter a valid email.'), 1);
     // It stays until it is validated again (Flutter's onUnfocus).
-    await tester.enterText(_editable(1), 'ada@example.com');
-    await tester.showKeyboard(_editable(0));
+    await _type(tester, 1, 'ada@example.com');
+    await _focusField(tester, 0);
     await tester.pump();
-    expect(find.text('Enter a valid email.'), findsNothing);
+    expect(_shown(tester, 'Enter a valid email.'), 0);
   });
 
   testWidgets('validating the form shows every error, focuses the first invalid field and stops the submit', (tester) async {
     final s = await harness.show(tester, _form(), variables: [harness.v('sent', false, VariableType.boolean)]);
     await tester.pump();
     expect(harness.textOf(s.tree, 'summary'), isNot('ok'), reason: 'the empty fields are not valid yet');
-    expect(find.text('Enter your name.'), findsNothing, reason: 'nothing is shown before validating');
+    expect(_shown(tester, 'Enter your name.'), 0, reason: 'nothing is shown before validating');
     await tester.tapAt(s.center('send'));
     await tester.pumpAndSettle();
-    expect(find.text('Enter your name.'), findsOneWidget);
-    expect(find.text('Enter your email.'), findsOneWidget);
+    expect(_shown(tester, 'Enter your name.'), 1);
+    expect(_shown(tester, 'Enter your email.'), 1);
     expect(harness.textOf(s.tree, 'summary'), '2 to fix');
     expect(_focused(tester, 0), isTrue, reason: 'the first invalid field takes the focus');
     expect(s['sent'], false);
 
-    await tester.enterText(_editable(0), 'Ada');
-    await tester.enterText(_editable(1), 'ada@example.com');
+    await _type(tester, 0, 'Ada');
+    await _type(tester, 1, 'ada@example.com');
     await tester.tapAt(s.center('send'));
     await tester.pumpAndSettle();
-    expect(find.text('Enter your name.'), findsNothing);
+    expect(_shown(tester, 'Enter your name.'), 0);
     expect(harness.textOf(s.tree, 'summary'), 'ok');
     expect(s['sent'], true);
   });
 
   testWidgets('the form\'s errors focus the first field shown, top to bottom, that fails', (tester) async {
     final s = await harness.show(tester, _form(), variables: [harness.v('sent', false, VariableType.boolean)]);
-    await tester.enterText(_editable(0), 'Ada');
+    await _type(tester, 0, 'Ada');
     await tester.tapAt(s.center('send'));
     await tester.pumpAndSettle();
     expect(harness.textOf(s.tree, 'summary'), '1 to fix');
@@ -111,14 +124,14 @@ void main() {
 
   testWidgets('a form validating on user interaction checks a field as it is typed in, and clears the error once fixed', (tester) async {
     await harness.show(tester, _form(formMode: 'onUserInteraction'), variables: [harness.v('sent', false, VariableType.boolean)]);
-    expect(find.text('Enter a valid email.'), findsNothing);
-    await tester.enterText(_editable(1), 'ada');
+    expect(_shown(tester, 'Enter a valid email.'), 0);
+    await _type(tester, 1, 'ada');
     await tester.pump();
-    expect(find.text('Enter a valid email.'), findsOneWidget);
-    expect(find.text('Enter your name.'), findsNothing, reason: 'the name field was not touched');
-    await tester.enterText(_editable(1), 'ada@example.com');
+    expect(_shown(tester, 'Enter a valid email.'), 1);
+    expect(_shown(tester, 'Enter your name.'), 0, reason: 'the name field was not touched');
+    await _type(tester, 1, 'ada@example.com');
     await tester.pump();
-    expect(find.text('Enter a valid email.'), findsNothing);
+    expect(_shown(tester, 'Enter a valid email.'), 0);
   });
 
   testWidgets('a field validating always shows its error from the start', (tester) async {
@@ -127,7 +140,7 @@ void main() {
       'email': _field(_emailValidator, mode: 'always'),
     });
     await tester.pump();
-    expect(find.text('Enter your email.'), findsOneWidget);
+    expect(_shown(tester, 'Enter your email.'), 1);
   });
 
   testWidgets('radios in a radio group share its value, and choosing one runs the group\'s changed reaction', (tester) async {
@@ -218,15 +231,15 @@ void main() {
       'summary': _form()['summary']!,
     }, variables: [harness.v('sent', false, VariableType.boolean)]);
     await tester.pump();
-    expect(find.byType(EditableText), findsNWidgets(3));
+    expect(textFields(tester), hasLength(3));
     await tester.tapAt(s.center('send'));
     await tester.pumpAndSettle();
-    expect(find.text('Enter your name.'), findsNWidgets(3));
+    expect(_shown(tester, 'Enter your name.'), 3);
     expect(harness.textOf(s.tree, 'summary'), '3 to fix');
     expect(s['sent'], false);
     // The form follows its fields as they change, without validating again.
     for (var i = 0; i < 3; i++) {
-      await tester.enterText(_editable(i), 'Guest $i');
+      await _type(tester, i, 'Guest $i');
       await tester.pumpAndSettle();
     }
     expect(harness.textOf(s.tree, 'summary'), 'ok');
@@ -259,7 +272,7 @@ void main() {
     final first = sends.first.localToGlobal(sends.first.size.center(Offset.zero));
     await tester.tapAt(first);
     await tester.pumpAndSettle();
-    expect(find.text('Enter your name.'), findsOneWidget, reason: 'only the first card\'s field is checked');
+    expect(_shown(tester, 'Enter your name.'), 1, reason: 'only the first card\'s field is checked');
   });
 
   testWidgets('an outlined field that sets no padding keeps its text off the border, as Flutter does', (tester) async {
@@ -275,7 +288,8 @@ void main() {
       },
     });
     final field = s.tree.boxOf('email')!.localToGlobal(Offset.zero);
-    final text = tester.getTopLeft(find.byType(EditableText));
+    final f = textField(tester);
+    final text = f.localToGlobal(f.textRect.topLeft);
     expect(text.dx - field.dx, closeTo(12, 0.5));
   });
 }

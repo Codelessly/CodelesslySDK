@@ -1597,7 +1597,10 @@ class LineChartPainter extends NodePainter {
 
     final lineColor = c(LineChartProps.lineColor);
     final axisColor = c(LineChartProps.axisColor);
-    final axisLabelStyle = textStyle(p(LineChartProps.axisLabelStyle), n.behaviors.defaultTextStyle);
+    // Labels with no colour of their own (none set, none inherited) are in
+    // the axis colour: without one the engine drew them white, unseen.
+    TextStyle inked(TextStyle s) => s.color == null && s.foreground == null ? s.copyWith(color: axisColor) : s;
+    final axisLabelStyle = inked(textStyle(p(LineChartProps.axisLabelStyle), n.behaviors.defaultTextStyle));
 
     // 1. Bands.
     for (final b in p(LineChartProps.bands)) {
@@ -1628,7 +1631,7 @@ class LineChartPainter extends NodePainter {
     }
     final title = p(LineChartProps.yAxisTitle);
     if (title.isNotEmpty) {
-      final tp = _layout(title, textStyle(p(LineChartProps.axisTitleStyle), n.behaviors.defaultTextStyle));
+      final tp = _layout(title, inked(textStyle(p(LineChartProps.axisTitleStyle), n.behaviors.defaultTextStyle)));
       tp.paint(canvas, Offset(plot.left - tp.width - 10, plot.top - 20));
       tp.dispose();
     }

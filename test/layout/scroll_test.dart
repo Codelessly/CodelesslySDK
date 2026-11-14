@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../lists/support.dart' as lists;
 import '../support/screen.dart' as harness;
+import '../support/fields.dart';
 
 Map<String, Json> nodes({bool horizontal = false, bool reverse = false}) => {
   'col': {
@@ -601,12 +602,9 @@ void main() {
           home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'col', interactive: true)),
         ));
         await tester.pump();
-        final field = find.byType(TextField);
-        await tester.tap(field);
-        await tester.pump();
+        await tapField(tester, textField(tester));
         // As the MCP's preview.type does: the keyboard's value, a few frames.
-        final editable = tester.state<EditableTextState>(find.byType(EditableText));
-        editable.updateEditingValue(const TextEditingValue(
+        tester.testTextInput.updateEditingValue(const TextEditingValue(
           text: 'Thanks for pairing', selection: TextSelection.collapsed(offset: 18)));
         for (var i = 0; i < 3; i++) {
           await tester.pump(const Duration(milliseconds: 16));
@@ -618,7 +616,7 @@ void main() {
         }
         visit(tester.renderObject(find.byType(NodeView)));
         expect(scroll, isNotNull);
-        expect(FocusManager.instance.primaryFocus, isNotNull, reason: 'the field still has focus');
+        expect(textField(tester).focusNode.hasFocus, isTrue, reason: 'the field still has focus');
         // Scroll the field out of view, as a person reaching the Send button.
         for (var i = 0; i < 3; i++) {
           await tester.pump(const Duration(milliseconds: 16));

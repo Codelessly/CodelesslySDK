@@ -460,13 +460,54 @@ class RenderTree {
   }
 
   void _themeChanged() {
-    for (final b in _themeDependents.toList()) {
+    _themeRefs = null;
+    // Bound values that named the theme resolve against the new one.
+    final named = _boundThemeNames.toList();
+    _boundThemeNames.clear();
+    for (final b in _boxes.values.toList()) {
+      if (!_themeDependents.contains(b) && !named.contains(keyOf(b.id, b.instance))) continue;
       _themeDependents.remove(b);
       if (!identical(_boxes[keyOf(b.id, b.instance)], b)) continue;
       b._applied = null;
       b._apply();
     }
   }
+
+  /// The theme's names resolver for bound values ([components]' theme).
+  api.ThemeRefs? get _refs {
+    final theme = components?.theme;
+    if (theme == null || theme.isEmpty) return null;
+    return _themeRefs ??= api.ThemeRefs(theme);
+  }
+
+  api.ThemeRefs? _themeRefs;
+
+  /// Boxes (by [keyOf]) whose bound values named the theme: drawn again
+  /// when it changes.
+  final Set<Object> _boundThemeNames = {};
+
+  /// [bound] with the theme names its bound values use resolved: a binding
+  /// that gives `"primary"` for a fill, or `{"from": "caption", "color":
+  /// "onPrimary"}` for a text's style, draws as the same value written in
+  /// the node does (written values were resolved by the node's source,
+  /// before the bindings applied). [written]: the node before binding.
+  BoundNode _withBoundThemeNames(String id, Object? instance, Node written, BoundNode bound) {
+    if (identical(bound.node, written) || !written.bind.keys.any(_mayNameTheme)) return bound;
+    final refs = _refs;
+    if (refs == null) return bound;
+    final json = bound.node.toJson();
+    final out = refs.node(json, bound.node.spec);
+    if (identical(out, json)) return bound;
+    _boundThemeNames.add(keyOf(id, instance));
+    final node = Node.fromJson(out, id: bound.node.id, catalog: api.Catalog.current);
+    if (node == null) return bound;
+    return BoundNode(node, collapsed: bound.collapsed, watch: bound.watch, states: bound.states);
+  }
+
+  /// Whether a binding of [path] may give a value that names the theme
+  /// (a colour, a text style): not a text, the visibility or a list's data.
+  static bool _mayNameTheme(String path) =>
+      path != api.BindPaths.visible && path != api.BindPaths.data && path != 'props.text' && !path.startsWith('state');
 
   /// Values set at run time on nodes inside component instances (a set
   /// value action acting in the instance it runs in), by (node id,
@@ -711,7 +752,7 @@ class RenderTree {
       n = _patched(id, instance)!;
       bound = binder.bind(source, n, instance);
     }
-    return _withAnimated(id, instance, bound);
+    return _withAnimated(id, instance, _withBoundThemeNames(id, instance, n, bound));
   }
 
   /// Turns node [id]'s bound [states] on or off without re-applying it

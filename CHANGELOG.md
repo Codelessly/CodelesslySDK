@@ -1,10 +1,75 @@
 ## Unreleased
 
+**Tell the model when its valid UI shows nothing.** Final frames of recorded SSUI generations
+(tool/stream/streams/live/2026-11-14-ssui) showed blank cards or cards missing their content while the summary's
+final validation was clean. The causes, and what changed:
+
+- `UiSession.shownDiagnostics()`: once a view has laid the UI out, what a reader would see wrong, as edit diagnostics
+  a host adds to the stream's result (`result.withDiagnostics(session.shownDiagnostics())`): `empty_view` (no canvas
+  root, or a canvas showing no text, icon, image or control, with why), `list_empty` (data that is not a list, no item
+  template, or empty while the list it reads is not, with the lambda to write), `empty_label`,
+  `expression_not_evaluated`, `text_no_color` (also a transparent colour), `component_empty`, and `no_size`. Views
+  register the check with `attachShownProbe`. The text checks are shared with the render command
+  (`paragraphIssues`). The chat example adds them to every reply's result; replays report them in `metrics.json`
+  (`shownDiagnostics`).
+- A bound value that names a theme colour or text style resolves against the theme: the reservation card's day
+  labels were bound to `{'from': 'caption', 'color': 'onPrimary'}` and drew transparent (empty day buttons).
+- The formula parser runs without Flutter (`formula_time.dart` holds `ClockTick` and the pinned time;
+  `FormulaClock.pinned` forwards to it), and `FormulaEvaluator.report` is what `ValidateOptions.formulas` takes.
+  The chat example's sessions and the recorder (`record_check.dart`, Dart VM) now check formulas with it, and the
+  recorder reports references unresolved at the end of a stream (`unresolvedReferences`), so the formula errors reach
+  the model.
+- A formula that does not parse because it is written as JavaScript (`x.toFixed(2)`, `s.trim().toUpperCase()`,
+  `list.map(...)`, `function (s) { return ... }`) says what to write instead (`fixed(x, 2)`, `upper(trim(s))`,
+  `map(list, x => ...)`, an arrow lambda): a recorded order summary failed three turns on 'Unexpected "(" at 38'.
+- `tool/stream/live_summary.py` names each cell's final frame (its last retry's replay) and what that frame shows
+  wrong: the frames read as blank were often a first turn whose retry had fixed it.
+- The chat example's prompts are regenerated (the design system's scales as the binding to write).
+
+- **Tab bars, navigation bars and the app bar as render objects (Milestone 3, WS-F).** `tabBar`, `tabs`,
+  `navigationBar`, `bottomNavigationBar` and `appBar` no longer host Material's `TabBar`, `NavigationBar`,
+  `BottomNavigationBar`, `BottomAppBar`, `AppBar` or a `Scaffold` (render/controls/{tab_bar,navigation_bar,app_bar}.dart).
+  With nothing styled a tab bar is SSUI's Tabs (36 high when it hugs, pixel-identical to the component), a navigation
+  bar SSUI's tab bar (about 61 high when it hugs), the app bar SSUI's top bar (44). The indicator moves between items
+  over 150 ms; Left/Right/Home/End move the keyboard, Enter/Space pick; tabs scroll when they overflow; picking fires
+  `changed` with the index, written back to a bound `initialIndex` / `selectedIndex`. Size changes: a hugging tab bar
+  is 36 (was Material's tab height), a hugging or unsized navigation bar about 61 (was its design size), an
+  unsized control of these types hugs instead of being 0 × 0; fixed sizes are kept. A canvas's app bar and bottom
+  bar grow by the view's safe area (read from the view, not MediaQuery).
+- **Date and time pickers are render objects (Milestone 3, workstream G).** `datePicker`, `timePicker` and
+  `dateTimeInput` draw SSUI's select field (28 high when they hug; calendar or clock icon, value, chevron) and open in
+  the root's overlay layer: a popover under the field on a screen 600 or wider, else a bottom sheet; a tap outside or
+  Escape closes it. Dates in SSUI's calendar (month and year navigation, the range, today ringed, arrows, Page Up/Down,
+  Home/End, Enter), times in hour/minute (and AM/PM) columns; month and day names and the first weekday are the
+  platform locale's (intl, no Material localizations); today follows the formulas' clock (`--now`). An empty picker
+  shows its hint or "Select date" instead of today's date. No `showDatePicker`/`showTimePicker` and no Material
+  dialog: the picker islands in `widgets/inputs.dart` are gone. Size changes: an unstyled hugging picker is 28 high; a `dateTimeInput` takes its node's size (the island ignored
+  it: the pickers sample's parity golden is re-pinned to the nodes' own 300 × 56).
+- The `dropdown` is a render object (`render/controls/dropdown.dart`, Milestone 3 WS-B): SSUI's Select on the field
+  frame (28 high when it hugs, `primaryBackground`, hairline, radius 7, Lucide chevron in `tertiaryText` turned over
+  while open, the value optically centred) opening its menu (`render/controls/menu.dart`) as an entry of the root's
+  overlay layer: under the field or above it when there is no room, at least its width (120 at least), 240 high at
+  most and scrolling, SSUI's surface (`level3`, hairline, 4 px inset, 28 px rows, the selected row tinted with a
+  check). A press outside or Escape closes it and the field keeps the focus; Enter, Space and the arrows open it,
+  arrows, Home/End, Page Up/Down and type-ahead move, Enter and Space choose (`changed`, written back). Screen readers
+  get a button with its value and expanded state and the rows as buttons. No Material arrow, card, route, ripple or
+  elevation. The popup layer (`ControlPopup`: barrier, placement, dismissal) is for dialogs and sheets to reuse.
+  Matches SSUI's own Select to 0.77 % (light) and 0.73 % (dark) of the pixels (`test/controls/ssui_select_reference_test.dart`).
+  A dropdown that hugs its height is 28 high (was 48; `isDense` 24: the `samples-inputs` parity goldens re-pinned), and
+  one that hugs its width is as wide as its widest item plus the chevron and padding; `isDense` and `isExpanded` no longer change its size; `elevation` maps to SSUI's shadow levels.
+
 **A list that filtered to nothing, explained.** A recorded SSUI data table (data_table@claude-sonnet-5-5) showed
 "No results" over twelve defined invoices: its `filtered` variable was `filter(invoices, (statusF == 'All' || status ==
 statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
 and matching no item). The formula engine is right; nothing told the model.
 
+- `textField` is a render object (Milestone 3, WS-A): SSUI's field frame (`render/controls/field_frame.dart`: label
+  above, never floating; hint in the text's metrics; helper and error below in the theme's `error`, a named role
+  included; border, focus and disabled from tokens; 240 × 28 when it hugs) around `RenderEditable`, edited without
+  `EditableText` (`render/controls/editable.dart`: text input connection with IME composition, keyboard and pointer
+  selection, clipboard, undo/redo, obscuring, `maxLength`, autofill per form, semantics). Tab reaches it from
+  render-object controls. `TextFieldHandle.controller` is now the field's `FieldEditor` and `focusNode` its
+  `ControlFocusNode`; the text field island is gone from `widgets/inputs.dart`.
 - Milestone 3, kit follow-up and workstreams C and I: every render-object control's state changes (hover, press,
   focus, selected, disabled) ease over SSUI's 150 ms (`durations.control`, ease-out) on its own ticker; a control
   node with no layout hugs (a column of zero-prop buttons lays out on the scale); buttons take `loading` (SSUI's
@@ -66,6 +131,39 @@ and matching no item). The formula engine is right; nothing told the model.
   measures labels and fonts of render-object controls too (`LabelledControl`).
 - Island controls not yet moved (chips, fields, toggles, pickers, tabs, bars, tiles) are unchanged and still draw
   their neutral look.
+
+**What ten sites built as data (brief 3) ran into.**
+
+- Text inside an SVG image is drawn in the site's fonts: a generic family (`sans-serif`, `monospace`) and text with
+  no family take the theme's `fontFamily`, a named family is asked for as a text style's is with the theme's font as
+  its fallback, and the picture is recorded once they load (in the render command it was drawn as solid blocks).
+  The render command names the SVG in `font_fallback` when a family is not had.
+- `navigate` evaluates a `to` (and `base`) built by a binding (`${item.to}`): it threw "no such screen".
+- A canvas opened as a modal takes the size its media rules give it at the screen's width (the patch was ignored).
+- A `lineChart` with no `axisLabelStyle` colour draws its tick labels and axis title in the axis colour (they were
+  white).
+- `gridView.fillGaps` (CSS `grid-auto-flow: dense`).
+- `VariableAnimator.anyPlaying`: whether a number variable's timeline plays anywhere.
+- Render command:
+  - every run first prints the SDK and API versions, commits and paths it uses; Flutter is looked for in the usual
+    install places too, and when none is found the message says to set `FLUTTER=/path/to/flutter/bin/flutter` and
+    that the tool and reference are on `master`;
+  - a step on a component's node (by its path) hidden at a size is skipped there, and a skip is its own warning,
+    `step_skipped`, not `interaction_failed`;
+  - `--hover` at several sizes no longer crashes the harness (Flutter's mouse tracker assertion);
+  - full-page captures draw an open dropdown menu or toast once, in the first window, and a page whose content
+    changes height once it scrolls (a header compacting on scroll) is stitched without a doubled line at a seam;
+  - `--type` names the one node with a text field among nodes sharing an id;
+  - a page `site.json` lists but not written yet is one `page_not_written` warning per file, not `unknown_screen`
+    errors;
+  - counters animated in a load reaction (one after another) are captured where they end;
+  - image paths are relative to the site's folder in every document, components included (the README said the
+    document's), and a path written from a component's folder is reported with the path to write;
+  - a variable font declared once counts as having every weight of its `wght` axis (no `font_fallback`);
+  - a flex overflow names the list copy that overflows and says what its content needs and what to change.
+- Skipped tests for the controls engineer: invalid form fields vanish when the theme's `error` role names a theme
+  colour (`test/tool/form_named_error_role_test.dart`); an empty `datePicker` shows today's date
+  (`test/tool/date_picker_empty_test.dart`).
 
 **Generative UI with a design system, recorded and replayed.**
 

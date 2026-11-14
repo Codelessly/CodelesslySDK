@@ -18,7 +18,9 @@ import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, Meth
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
+import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
+import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField, textFieldIn;
 
 import 'args.dart';
 import 'compare.dart';
@@ -58,11 +60,13 @@ final class RuntimeIssue {
 /// severity and meaning (for the README and the reference).
 const runtimeCodes = <(String, String, String)>[
   ('invalid_json', 'error', 'A file is not valid JSON (the message gives the line and column).'),
+  ('page_not_written', 'warning', 'A page site.json lists has no file yet: one note per file, with the links that name its screen (checked once it is written).'),
   ('no_documents', 'error', 'No .json documents were found at the paths given.'),
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
   ('action_error', 'error', 'An action chain failed (a load reaction, or one an interaction ran).'),
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
+  ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
   ('missing_glyph', 'warning', 'A text has characters its font has no glyph for: they are drawn as empty boxes. Use another character, an icon, or a box with a path.'),
   ('icon_not_drawn', 'warning', 'An icon names no glyph the renderer can draw (an unknown Material icon name, or an object without a type or name).'),
@@ -74,7 +78,7 @@ const runtimeCodes = <(String, String, String)>[
   ('offscreen', 'warning', 'A node extends past the screen edge where nothing scrolls: on a device it is cut off.'),
   ('text_clipped', 'warning', 'A text does not fit its box: its lines are taller than the box, or a word is wider.'),
   ('text_truncated', 'warning', 'A text was cut at maxLines with overflow "clip" (an ellipsis or fade is taken as meant).'),
-  ('text_no_color', 'warning', 'A text has no color: the engine paints it white (invisible on a light background). Set props.style.color.'),
+  ('text_no_color', 'warning', 'A text has no color (the engine paints it white: invisible on a light background), or a transparent one. Set props.style.color.'),
   ('font_fallback', 'warning', 'A font family (or weight/style) a text style names is neither declared in site.json\'s "fonts" nor in a --fonts directory: the text is drawn in another font. The message names the family and the nodes that use it.'),
   ('font_missing', 'error', 'A font file site.json\'s "fonts" declares is not there (the path is relative to the site), or is not a font file it can read.'),
   ('design_system_missing', 'error', 'The design system site.json names ("designSystem": a folder relative to it) has no readable design_system.json.'),
@@ -162,17 +166,42 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
 /// One `unknown_screen` per screen that is missing, not one per link to
 /// it: a site whose pages are written before its manifest lists them all
 /// has dozens of links to each page still to come.
-List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics) {
+List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics, {List<String> unwritten = const []}) {
   final byScreen = <String, List<api.Json>>{};
   for (final d in diagnostics) {
     if (d['code'] != 'unknown_screen') continue;
     final to = RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}')?[1];
     if (to != null) (byScreen[to] ??= []).add(d);
   }
+  // A listed page not written yet is the screen its file is named after
+  // (`about.json`: "about"), as its canvas id usually is.
+  String key(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  final fileOfScreen = <String, String>{};
   final out = <api.Json>[];
+  for (final file in unwritten) {
+    final stem = file.split('/').last.replaceFirst(RegExp(r'\.json$'), '');
+    final links = [
+      for (final e in byScreen.entries)
+        if (key(e.key) == key(stem)) ...e.value,
+    ];
+    for (final e in byScreen.keys) {
+      if (key(e) == key(stem)) fileOfScreen[e] = file;
+    }
+    final where = [for (final g in links) '${g['file'] == null ? '' : '${g['file']} '}${g['path']}'];
+    out.add({
+      'code': 'page_not_written',
+      'severity': 'warning',
+      'file': file,
+      'message': '$file is listed in site.json, file not written yet'
+          '${links.isEmpty ? '' : ': ${links.length} link${links.length == 1 ? '' : 's'} name${links.length == 1 ? 's' : ''} its screen "$stem" (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''})'}. '
+          'Links to it are checked once it is written; its canvas id is the screen they name.',
+      if (links.isNotEmpty) 'count': links.length,
+    });
+  }
   for (final d in diagnostics) {
     final match = d['code'] == 'unknown_screen' ? RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}') : null;
     final to = match?[1];
+    if (to != null && fileOfScreen.containsKey(to)) continue;
     final group = to == null ? null : byScreen[to];
     if (group == null || group.length == 1) {
       out.add(d);
@@ -248,7 +277,16 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
   final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   // Notes (a schema-2 document, migrated as it loads) are not findings.
-  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList()));
+  // Pages site.json lists whose files are not there yet (a site written
+  // page by page): one note per file, with the links that name its screen.
+  final unwritten = <String>[
+    for (final i in args.inputs)
+      if (File('$i/${api.SiteManifest.fileName}').existsSync())
+        for (final p in api.SiteManifest.fromJson(site.manifest).pages)
+          if (!File('$i/$p').existsSync()) p,
+  ];
+  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList(),
+      unwritten: unwritten));
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
   report.diagnostics.addAll(validateTheme(themeJson,
@@ -261,6 +299,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
   FontDemand.handler = null;
+  _mouse = null;
   final root = flutterRoot ?? Platform.environment['FLUTTER_ROOT'] ?? '';
   unreadFonts.clear();
   // The site's folder: what its fonts' and images' relative paths start from.
@@ -331,10 +370,18 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     docs[a.name] = a.page;
     dirs[a.name] = Directory.current.path;
   }
+  // SVG images by the data: URL they are inlined as, to name the ones
+  // whose text asks for a family the run has no font for.
+  final svgSources = <String, String>{};
+  final svgUsers = <String, Set<String>>{};
+  SvgFonts.onFamily = (family, url) => svgUsers.putIfAbsent(family.toLowerCase(), () => {}).add(svgSources[url] ?? url);
   for (final e in docs.entries) {
     // Relative image paths start from the site's folder (as at run time),
     // else from the document's.
-    final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
+    final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, docDir: dirs[e.key], defaultFamily: 'Roboto', codepoints: codepoints);
+    for (final img in p.images) {
+      if (_valueAt(p.json, img.path) case final String v when v.startsWith('data:image/svg')) svgSources[v] = img.url;
+    }
     if (isComponentJson(e.value)) {
       components.define(api.LayoutDocument.fromJson(p.json));
     } else if (alone.isEmpty || alone.any((a) => a.name == e.key)) {
@@ -407,13 +454,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   try {
     if (alone.isEmpty) {
       await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report,
-          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), siteDir: siteDir);
+          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
     }
     for (final a in alone) {
       // A preview renders at its own size; ad-hoc parameters at each size.
       final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
       await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
-          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), siteDir: siteDir);
+          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
     }
     for (final e in components.missing.entries) {
       for (final path in e.value) {
@@ -446,6 +493,7 @@ Future<void> _renderAll(
   RenderReport report, {
   ComponentRegistry? components,
   Map<String, List<String>> fontUsers = const {},
+  Map<String, Set<String>> svgUsers = const {},
   String? siteDir,
 }) async {
   // 3. Which screens.
@@ -505,10 +553,11 @@ Future<void> _renderAll(
           if (by != null && (double.tryParse(by[1]!) ?? 1) < 0.01) continue;
           final node = _nodeOfError(details ?? _errorDetails[err]);
           _errorDetails.remove(err);
+          final advice = node == null || by == null ? null : _overflowAdvice(binding, node, double.parse(by[1]!), text);
           issue(RuntimeIssue('render_exception', 'error',
               node == null
                   ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
-                  : 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
+                  : advice ?? 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
               nodeId: node?.tree.pathOf(node.id, node.instance),
               screen: label,
               size: sizeName,
@@ -584,9 +633,10 @@ Future<void> _renderAll(
       if (skipped.isNotEmpty) {
         // One line per size, not one per step: these nodes are on another
         // breakpoint's canvas of the screen.
-        issue(RuntimeIssue('interaction_failed', 'warning',
-            'Skipped at this size, their nodes not being shown here: ${skipped.join(', ')}. The other steps ran. '
-            'A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
+        issue(RuntimeIssue('step_skipped', 'warning',
+            'Skipped at this size, their nodes not being shown here: ${skipped.join(', ')}. The other steps ran and the capture was made; '
+            'nothing is wrong when the node is meant to be hidden at this width.'
+            '${skipped.any((s) => s.endsWith('(not on the canvas shown at this width)')) ? ' A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.' : ''}',
             screen: label, size: sizeName));
       }
       // Full page: the page's own scroll view (the largest one a user can
@@ -609,6 +659,11 @@ Future<void> _renderAll(
         }
         if (page != null && page.maxScrollExtent >= 1) fullPage = page;
       }
+
+      // Counters still counting (animate ... animateTo on a variable, one
+      // after another in a load reaction) end before the capture: it shows
+      // the numbers they arrive at, not a frame on the way.
+      await _countersSettled(tester);
 
       // A --set holds against what no step did: a timer or a load reaction
       // that wrote the variable after it (a clock) is undone, and said.
@@ -657,7 +712,11 @@ Future<void> _renderAll(
           if (fontUsers.isNotEmpty) 'site.json\'s fonts',
           if (args.fontDirs.isNotEmpty) fontDirsOf(args.fontDirs).join(', ') else 'no --fonts directory',
         ].join('; ');
-        final users = fontUsers[m.family.toLowerCase()] ?? const <String>[];
+        final users = [
+          ...?fontUsers[m.family.toLowerCase()],
+          // An SVG image whose <text> names the family.
+          for (final svg in svgUsers[m.family.toLowerCase()] ?? const <String>{}) 'the text of $svg',
+        ];
         issue(RuntimeIssue('font_fallback', 'warning',
             'Font "${m.family}" $style (fontFamily "${m.family}", fontWeight ${m.weight}, fontStyle ${m.italic ? 'italic' : 'normal'}) was asked for'
             '${users.isEmpty ? '' : ' by ${users.take(8).map((u) => '"$u"').join(', ')}${users.length > 8 ? ' and ${users.length - 8} more' : ''}'}; '
@@ -667,7 +726,7 @@ Future<void> _renderAll(
             ' Declare it in site.json: "fonts": [{"family": "${m.family}", "fonts": [{"asset": "fonts/<file>.ttf", "weight": ${m.weight}${m.italic ? ', "style": "italic"' : ''}}]}] '
             '(.ttf, .otf or .woff beside site.json), or pass --fonts <dir> (a font package folder such as node_modules/@fontsource/<family>, '
             'or `--fonts system` for the system\'s fonts).',
-            nodeId: users.isEmpty ? null : users.first));
+            nodeId: fontUsers[m.family.toLowerCase()]?.firstOrNull));
       }
       final name = '${_fileSafe(label)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';
@@ -718,6 +777,10 @@ Future<void> _renderAll(
             .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(boxes));
       }
 
+      // The mouse a --hover step put on the screen leaves with it: the next
+      // size's hover adds it again (Flutter's mouse tracker asserts on a
+      // device added twice).
+      await _removeMouse();
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 10));
       collect();
@@ -725,6 +788,15 @@ Future<void> _renderAll(
       codelessly.dispose();
     }
   }
+}
+
+/// The mouse `--hover` steps move, while a capture is made.
+TestGesture? _mouse;
+
+Future<void> _removeMouse() async {
+  final m = _mouse;
+  _mouse = null;
+  if (m != null) await m.removePointer();
 }
 
 Object? _valueAt(api.Json json, String pointer) {
@@ -759,6 +831,14 @@ Future<void> _settle(WidgetTester tester) async {
     await PaintImages.settled(timeout: const Duration(seconds: 3));
   });
   for (var i = 0; i < 4; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// Pumps (in 100 ms steps, at most 20 s of the screen's time) while a
+/// number variable's timeline plays.
+Future<void> _countersSettled(WidgetTester tester) async {
+  for (var i = 0; i < 200 && VariableAnimator.anyPlaying; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
 }
@@ -906,6 +986,48 @@ final List<FlutterErrorDetails> _errorLog = [];
 
 /// The node box an error came from: the render object its details name
 /// (the overflowing flex, the object being laid out), up to its node.
+/// What a flex overflow means and what to change: the node's own size on
+/// that axis (fixed, hugging, filling), what its content needs and the
+/// children it holds, named with the copy of a list it is (`dish#2`): a
+/// fixed size a longer item outgrows is the usual cause, not rounding.
+String? _overflowAdvice(WidgetsBinding binding, NodeBox box, double by, String text) {
+  final n = box.node;
+  final side = RegExp(r'on the (bottom|right|top|left)').firstMatch(text)?[1];
+  if (n == null || side == null || !box.hasSize) return null;
+  final vertical = side == 'bottom' || side == 'top';
+  final axis = vertical ? 'height' : 'width';
+  String px(double v) => (v - v.roundToDouble()).abs() < 0.05 ? v.round().toString() : v.toStringAsFixed(1);
+  final have = vertical ? box.size.height : box.size.width;
+  final need = have + by;
+  // Its copy in a list: the n-th box of the same node, as `#n` names it.
+  final path = box.tree.pathOf(box.id, box.instance);
+  final copies = [for (final b in _boxes(binding)) if (b.id == box.id && identical(b.tree, box.tree) && b.tree.pathOf(b.id, b.instance) == path) b];
+  final name = copies.length > 1 ? '$path#${copies.indexOf(box)}' : path;
+  final kids = <NodeBox>[];
+  void visit(RenderObject o) {
+    if (o is NodeBox) {
+      if (o.hasSize && o.drawn) kids.add(o);
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  box.visitChildren(visit);
+  final holds = [for (final k in kids.take(8)) '${k.id} ${px(vertical ? k.size.height : k.size.width)}'].join(', ');
+  final field = vertical ? n.layout.height : n.layout.width;
+  final what = switch (field.fit) {
+    api.SizeFit.fixed => 'Its $axis is fixed at ${px(field.value)} and its content needs ${px(need)} ($holds, with its padding and spacing): '
+        'a text in it takes more lines here than where that $axis was chosen (a longer item of a list, a narrower column). '
+        'Let it grow with its content ({"hug": ${px(field.value)}}), make it at least ${px(need.ceilToDouble())}, '
+        'or cap the text (maxLines with an ellipsis).',
+    api.SizeFit.hug => 'It hugs its content, which needs ${px(need)} ($holds, with its padding and spacing), but its parent gives it '
+        'only ${px(have)}: the parent has a fixed $axis or a max $axis. Let the parent hug too, or let it scroll.',
+    _ => 'It fills ${px(have)} of its parent, and its content needs ${px(need)} ($holds, with its padding and spacing). '
+        'Give the parent more room on that axis (hug), or let this node hug its content.',
+  };
+  return 'Node "$name" (${n.type}): its content overflows its $side by ${px(by)} px. $what';
+}
+
 NodeBox? _nodeOfError(FlutterErrorDetails? details) {
   if (details == null) return null;
   final infos = <DiagnosticsNode>[...?details.informationCollector?.call()];
@@ -965,8 +1087,10 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
     if (theaters.contains(p)) break;
     if (p is RenderRepaintBoundary) route = p;
   }
-  // Only when something is open over the page; else the window is the route.
-  final covered = route != null && _boxes(binding).any((b) => !_isInside(b, route!) && !over.contains(b) && all.indexOf(b) > pageIndex);
+  // The slices are of the page's route alone: whatever is open over it (a
+  // modal, a dialog, a dropdown's menu, a toast: node boxes or not) shows
+  // once, in the first window, not again in every slice.
+  final covered = route != null;
   final layer = covered ? route : ro;
   final layerAt = covered ? route.localToGlobal(Offset.zero) - ro.localToGlobal(Offset.zero) : Offset.zero;
   Future<ui.Image> shot(RenderRepaintBoundary b) async => (await tester.runAsync(() => b.toImage(pixelRatio: 1)))!;
@@ -976,25 +1100,45 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   for (final b in over) {
     b.capturePaintShift = hidden;
   }
+  // A page whose content changes height once it scrolls (a header that
+  // shrinks on a scroll reaction) is laid out shorter or taller below the
+  // first window than in it: each slice is placed by that difference
+  // ([shift], what changed above it), so the page below the first window
+  // follows on from it with no rows lost or drawn twice at a seam.
+  Future<void> scrollTo(double offset) async {
+    page.jumpTo(offset.clamp(0.0, page.maxScrollExtent));
+    await _settle(tester);
+    // Sticky nodes in place, as the page lays them out.
+    var unpinned = false;
+    for (final s in _descendants(page).whereType<RenderSticky>()) {
+      if (s.shift == 0) continue;
+      s.shift = 0;
+      s.markNeedsPaint();
+      unpinned = true;
+    }
+    if (unpinned) {
+      page.markNeedsPaint();
+      await tester.pump();
+    }
+  }
+
   try {
-    for (var o = view.height; ; o += view.height) {
-      final at = math.min(o, max);
-      page.jumpTo(at);
-      await _settle(tester);
-      // Sticky nodes in place, as the page lays them out.
-      var unpinned = false;
-      for (final s in _descendants(page).whereType<RenderSticky>()) {
-        if (s.shift == 0) continue;
-        s.shift = 0;
-        s.markNeedsPaint();
-        unpinned = true;
+    var target = view.height;
+    for (var guard = 0; guard < 1000; guard++) {
+      await scrollTo(target);
+      final shift = max - page.maxScrollExtent;
+      final at = page.pixels;
+      // The first slice starts where the first window ends.
+      if (slices.isEmpty && shift.abs() > 0.5 && (at + shift - view.height).abs() > 0.5 && at < page.maxScrollExtent) {
+        final again = view.height - shift;
+        if ((again - at).abs() > 0.5 && guard < 3) {
+          target = again;
+          continue;
+        }
       }
-      if (unpinned) {
-        page.markNeedsPaint();
-        await tester.pump();
-      }
-      slices.add((await shot(layer), at));
-      if (at >= max) break;
+      slices.add((await shot(layer), at + shift));
+      if (at >= page.maxScrollExtent - 0.5) break;
+      target = at + view.height;
     }
   } finally {
     for (final b in over) {
@@ -1153,7 +1297,10 @@ String? _canvasOf(NodeBox b) {
 /// it. [id] is a node id or `name` (`saved`), `<id>#<n>` for a list's n-th
 /// copy, or a path: a component's node by its call ids (`footer/saved`), a
 /// node inside a list's copy (`evCard#0/evReserve`).
-({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id) {
+///
+/// When two different nodes answer to an id and exactly one of them passes
+/// [prefer] (`--type`: the one with a text field in it), that one is meant.
+({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
   final boxes = _boxes(binding);
   (String, int?) split(String segment) {
     final hash = segment.lastIndexOf('#');
@@ -1169,7 +1316,14 @@ String? _canvasOf(NodeBox b) {
   if (byPath) {
     for (final b in boxes) {
       final found = b.tree.boxAtPath(id);
-      if (found != null && found.attached && found.hasSize) return (box: found, problem: null);
+      if (found != null && found.attached && found.hasSize) {
+        // A component's node a media rule or a binding hides here (laid out
+        // with no size, or not drawn) is skipped at this size, as a page's.
+        if (!_shown(found)) {
+          return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
+        }
+        return (box: found, problem: null);
+      }
     }
     if (!id.contains('/')) return (box: null, problem: 'no node "$id" is on screen');
   }
@@ -1208,6 +1362,17 @@ String? _canvasOf(NodeBox b) {
             ..clear()
             ..['own'] = own.single;
           all = [for (final b in all) if (componentInstanceOf(b.instance) == null) b];
+        }
+      }
+      if (kinds.length > 1 && prefer != null) {
+        final preferred = [for (final b in kinds.values) if (prefer(b)) b];
+        if (preferred.length == 1) {
+          final keep = preferred.single;
+          kinds
+            ..clear()
+            ..['preferred'] = keep;
+          final keepPath = keep.tree.pathOf(keep.id, keep.instance);
+          all = [for (final b in all) if (identical(b.tree, keep.tree) && b.tree.pathOf(b.id, b.instance) == keepPath) b];
         }
       }
       if (kinds.length > 1) {
@@ -1387,15 +1552,14 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     return false;
   }
 
-  // The text field ([EditableText]) inside node [id].
-  Element? fieldIn(String id) {
-    final box = _boxOf(binding, id);
-    if (box == null) return null;
-    for (final e in find.byType(EditableText).evaluate()) {
-      final ro = e.renderObject;
-      if (ro != null && _isInside(ro, box)) return e;
-    }
-    return null;
+  // The text field (a [RenderTextField]) inside node [id].
+  RenderTextField? fieldOf(RenderObject box) => box is RenderBox ? textFieldIn(box) : null;
+
+  // The text field [id] names: of two nodes sharing the id (a page's field
+  // and a component's heading), the one with a field in it.
+  RenderTextField? fieldIn(String id) {
+    final box = _locate(binding, id, prefer: (b) => fieldOf(b) != null).box;
+    return box == null ? null : fieldOf(box);
   }
 
   switch (step.kind) {
@@ -1446,8 +1610,12 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'hover':
       final (at, problem) = await pointAt(step.target, 'hover');
       if (at == null) return problem;
-      final g = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await g.addPointer(location: ui.Offset.zero);
+      // One mouse per capture: a later hover moves it on.
+      var g = _mouse;
+      if (g == null) {
+        g = _mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await g.addPointer(location: ui.Offset.zero);
+      }
       await g.moveTo(at);
       return null;
     case 'focus' || 'type':
@@ -1461,15 +1629,16 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
         return '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).';
       }
-      final box = _boxOf(binding, step.target)!;
+      final box = _locate(binding, step.target, prefer: (b) => fieldOf(b) != null).box!;
       if (reachable(box) == null) await centerInView(box);
-      final finder = find.byElementPredicate((e) => identical(e, field));
-      await tester.showKeyboard(finder);
+      field.requestFocus();
       await tester.pump();
       if (verb == 'type') {
         field = fieldIn(step.target);
         if (field == null) return '--type ${step.target}: the text field went away when it was focused.';
-        await tester.enterText(find.byElementPredicate((e) => identical(e, field)), step.value ?? '');
+        if (!field.focusNode.hasFocus) field.requestFocus();
+        tester.testTextInput.enterText(step.value ?? '');
+        await tester.pump();
       }
       return null;
     case 'set':
@@ -1520,9 +1689,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       await tester.pump(Duration(milliseconds: ms));
       return null;
     case 'unfocus':
+      final field = RenderTextField.focused;
       final focused = FocusManager.instance.primaryFocus;
-      if (focused == null || focused.context == null) return null;
-      focused.unfocus();
+      if (field == null && (focused == null || focused.context == null)) return null;
+      field?.focusNode.unfocus();
+      if (focused?.context != null) focused!.unfocus();
       tester.testTextInput.hide();
       await tester.pump();
       return null;
@@ -1563,13 +1734,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 /// blur reactions run first, and nothing is left holding a field the step
 /// removes (a form a submit hides). A step on the field itself keeps it.
 Future<void> _unfocusFieldOutside(WidgetTester tester, NodeBox? target) async {
-  final focus = FocusManager.instance.primaryFocus;
-  if (focus == null || focus.context == null) return;
-  final field = find.byType(EditableText).evaluate().where((e) => (e.widget as EditableText).focusNode.hasFocus).firstOrNull;
+  final field = RenderTextField.focused;
   if (field == null) return;
-  final ro = field.renderObject;
-  if (target != null && ro != null && _isInside(ro, target)) return;
-  focus.unfocus();
+  if (target != null && _isInside(field, target)) return;
+  field.focusNode.unfocus();
   tester.testTextInput.hide();
   await tester.pump();
 }
@@ -1846,11 +2014,9 @@ List<RuntimeIssue> _check(
       final text = p.text.toPlainText();
       if (text.trim().isEmpty) continue;
       final short = text.length > 30 ? '${text.substring(0, 30)}...' : text;
-      if (text.contains(r'${')) {
-        out.add(RuntimeIssue('expression_not_evaluated', 'warning',
-            'Text "${nameOf(b)}" shows "$short" on screen: its expression did not evaluate. Check the formula (names, functions, quotes); '
-            'a binding of "props.text" or "props.runs" must not also be written as text, and a "\${...}" inside a formula is not read.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+      // The checks a session runs on what it shows (shared: paragraphIssues).
+      for (final i in paragraphIssues(p, nameOf(b))) {
+        out.add(RuntimeIssue(i.code, 'warning', i.message, nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final missing = <String>{};
       p.text.visitChildren((span) {
@@ -1868,18 +2034,6 @@ List<RuntimeIssue> _check(
         out.add(RuntimeIssue('missing_glyph', 'warning',
             'Text "${nameOf(b)}" has ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')}, which its font has no glyph for: drawn as an empty box. '
             'Use a character the font has, an icon node, or a box with a "path" for a small mark.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
-      }
-      var colorless = false;
-      p.text.visitChildren((span) {
-        if (span is TextSpan && (span.text?.trim().isNotEmpty ?? false) && span.style?.color == null && span.style?.foreground == null) {
-          colorless = true;
-        }
-        return !colorless;
-      });
-      final rootStyle = p.text.style;
-      if (colorless && (rootStyle?.color == null && rootStyle?.foreground == null)) {
-        out.add(RuntimeIssue('text_no_color', 'warning', 'Text "${nameOf(b)}" ("$short") has no color, so it is painted white: set props.style.color.',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final cut = node.prop(api.TextProps.overflow) != api.TextOverflow.clip;

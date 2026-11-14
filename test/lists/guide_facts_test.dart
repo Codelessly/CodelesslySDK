@@ -5,6 +5,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart' show VariableType;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support.dart';
+import '../support/fields.dart';
 
 void main() {
   testWidgets('the trigger\'s result is still the text field\'s text after a set-variable action', (tester) async {
@@ -16,7 +17,7 @@ void main() {
           {'type': 'setVariable', 'variable': 'b', 'value': r'${result}'},
         ])]},
     }, variables: [v('a', ''), v('b', '')]);
-    await tester.enterText(find.byType(EditableText), 'hey');
+    await typeInto(tester, 'hey');
     await tester.pumpAndSettle();
     expect([s['a'], s['b']], ['hey', 'hey'], reason: 'setVariable gives no result: the next action still reads the text');
   });

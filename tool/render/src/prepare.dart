@@ -39,7 +39,11 @@ String? _mimeOf(String path) {
 
 /// [doc] (a page's JSON) prepared to render: see the file comment. [dir] is
 /// the document's directory; [codepoints] the MaterialIcons codepoints.
-Prepared prepare(Json doc, {required String dir, required String defaultFamily, required Map<String, int> codepoints}) {
+///
+/// In a site, [dir] is the site's folder (image paths start there, as a
+/// published site reads them) and [docDir] the document's own: a path that
+/// names a file only from there is reported with the path to write.
+Prepared prepare(Json doc, {required String dir, String? docDir, required String defaultFamily, required Map<String, int> codepoints}) {
   final images = <ImageRef>[];
   final nodes = readMap(doc['nodes']) ?? const {};
   final out = <String, Object?>{};
@@ -52,7 +56,7 @@ Prepared prepare(Json doc, {required String dir, required String defaultFamily, 
     final spec = Widgets.of(readString(raw['type']) ?? '');
     String at = '/nodes/${e.key}';
     Object? strings(Object? v, String path) {
-      if (v is String) return _image(v, path, e.key, dir, images);
+      if (v is String) return _image(v, path, e.key, dir, images, docDir: docDir);
       if (v is List) return [for (var i = 0; i < v.length; i++) strings(v[i], '$path/$i')];
       if (v is Map) return {for (final x in v.entries) '${x.key}': strings(x.value, '$path/${x.key}')};
       return v;
@@ -135,7 +139,7 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
 }
 
 /// [text] with a local image path made a data: URL; records every image.
-String _image(String text, String path, String nodeId, String dir, List<ImageRef> images) {
+String _image(String text, String path, String nodeId, String dir, List<ImageRef> images, {String? docDir}) {
   final t = text.trim();
   if (t.startsWith('http://') || t.startsWith('https://')) {
     if (_mimeOf(Uri.tryParse(t)?.path ?? '') != null || path.contains('/image')) {
@@ -158,7 +162,19 @@ String _image(String text, String path, String nodeId, String dir, List<ImageRef
   final rel = t.startsWith('file://') ? Uri.parse(t).toFilePath() : t;
   final file = File(rel.startsWith('/') ? rel : '$dir/$rel');
   if (!file.existsSync()) {
-    images.add((nodeId: nodeId, path: path, url: t, status: 'failed', detail: 'no file ${file.path}'));
+    // Written from the document's own folder (a component's
+    // `../images/x.svg`): say what the site-relative path is.
+    final fromDoc = docDir == null || rel.startsWith('/') ? null : File('$docDir/$rel');
+    String? fix;
+    if (fromDoc != null && docDir != dir && fromDoc.existsSync()) {
+      final site = Directory(dir).absolute.uri.normalizePath().path;
+      final at = fromDoc.absolute.uri.normalizePath().path;
+      if (at.startsWith(site)) fix = at.substring(site.length);
+    }
+    images.add((nodeId: nodeId, path: path, url: t, status: 'failed', detail: fix == null
+        ? 'no file ${file.path}'
+        : 'no file ${file.path}. Image paths are relative to the site folder (the one with site.json) in every document, '
+            'components included, as a published site reads them: write "$fix"'));
     return text;
   }
   images.add((nodeId: nodeId, path: path, url: t, status: 'local', detail: file.path));
