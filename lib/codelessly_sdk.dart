@@ -144,6 +144,7 @@ export 'src/scripting/sandbox/script_sandbox.dart';
 export 'src/runtime/contracts.dart';
 export 'src/runtime/expressions/expressions.dart';
 export 'src/app/navigator_ui.dart';
+export 'src/app/ui/capture_scope.dart' show CodelesslyCaptureScope;
 export 'src/app/ui/confirm_dialog.dart' show ConfirmRequest, ThemedConfirmDialog, isConfirmResult, showConfirmDialog;
 export 'src/app/ui/feedback_theme.dart' show FeedbackTheme, FeedbackThemeScope, ResolvedFeedbackTheme;
 export 'src/app/ui/hero_flights.dart' show CodelesslyHeroRoute, HeroArcRectTween, HeroFlights, HeroRoutes;
