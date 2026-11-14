@@ -550,7 +550,12 @@
   "components/CommandPalette.json",
   "components/NavigationMenu.json",
   "components/Sidebar.json",
-  "components/PromptInput.json"
+  "components/PromptInput.json",
+  "components/Tree.json",
+  "components/BrowserTabs.json",
+  "components/Combobox.json",
+  "components/IconSegmentedControl.json",
+  "components/ImageUpload.json"
  ],
  "replaces": [
   "filledButton",

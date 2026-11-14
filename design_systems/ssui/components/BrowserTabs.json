@@ -1,0 +1,423 @@
+{
+ "schema": 3,
+ "id": "BrowserTabs",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "BrowserTabs",
+  "doc": "Tabs as in a browser: open documents side by side, each with an x. The chosen one is kept in your variable. Fires onChanged, onClose with the label, and onAdd.",
+  "props": [
+   {
+    "key": "tabs",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Overview",
+     "Report.pdf",
+     "Notes"
+    ],
+    "doc": "The tabs' labels.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One icon per tab (empty: none)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen label."
+   },
+   {
+    "key": "closable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "An x on each tab."
+   },
+   {
+    "key": "showAdd",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A + after the tabs."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onClose",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onAdd"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    340,
+    30
+   ],
+   "props": {
+    "value": "Report.pdf",
+    "showAdd": true
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "list",
+    "add"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "tab"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": 29
+   },
+   "bind": {
+    "data": "${props.tabs}"
+   }
+  },
+  "tab": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "close"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "fill": 29
+    },
+    "padding": [
+     12,
+     0,
+     8,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "hoverOverlay"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top",
+    "radius": [
+     6,
+     6,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "selected": {
+     "tab": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryBackground"
+        }
+       ]
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primaryText",
+        "fontWeight": 500
+       }
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    },
+    "hovered": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "secondaryText"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "tertiaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index && props.icons[index] != ''}",
+    "props.icon": "${= length(props.icons) > index && props.icons[index] != '' ? props.icons[index] : 'description'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "close": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "decoration": {
+    "radius": 9999
+   },
+   "bind": {
+    "visible": "${props.closable}"
+   },
+   "states": {
+    "hovered": {
+     "close": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     },
+     "x": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClose",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "tertiaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "add": {
+   "type": "row",
+   "children": [
+    "plus"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 24,
+    "height": 24,
+    "margin": [
+     0,
+     0,
+     0,
+     3
+    ]
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "bind": {
+    "visible": "${props.showAdd}"
+   },
+   "tooltip": "New tab",
+   "states": {
+    "hovered": {
+     "add": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "plus": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAdd"
+      }
+     ]
+    }
+   ]
+  },
+  "plus": {
+   "type": "icon",
+   "props": {
+    "icon": "add",
+    "color": "tertiaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   }
+  }
+ }
+}
