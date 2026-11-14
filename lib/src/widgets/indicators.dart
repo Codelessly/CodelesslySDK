@@ -47,7 +47,23 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
   BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(_themed(b, n))),
 };
 
-Size _designSize(Node n) => Size(n.layout.width.value, n.layout.height.value);
+/// The size a drawn indicator has along an axis it hugs: it has no content
+/// to measure, so each type has a size of its own (a bar 6 high, a chart
+/// 140).
+Size _naturalSize(Node n) => switch (n.type) {
+      'progressBar' => const Size(200, 6),
+      'barcode' => const Size(200, 80),
+      'radialGauge' || 'gaugeMeter' => const Size(120, 120),
+      _ => const Size(280, 140),
+    };
+
+/// The fit box of a drawn indicator: an axis that hugs is its natural size.
+RenderBox _indicatorFit(NodeBuilder b, Node n) {
+  final l = n.layout, natural = _naturalSize(n);
+  final hugW = l.width.isHug && l.width.value <= 0, hugH = l.height.isHug && l.height.value <= 0;
+  return b.fitBox('indicatorFit', hugW ? SizeFit.fixed : l.width.fit, hugH ? SizeFit.fixed : l.height.fit,
+      Size(hugW ? natural.width : l.width.value, hugH ? natural.height : l.height.value));
+}
 
 /// The node's box (AdaptiveNodeBox) painted by [painter].
 /// [n] with the colors it leaves unset from the theme, for what it is drawn
@@ -63,7 +79,7 @@ Node _themed(NodeBuilder b, Node n) {
 }
 
 void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painter) {
-  chain.add(b.fitBox('indicatorFit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
+  chain.add(_indicatorFit(b, n));
   chain.add(b.obtain<RenderCustomPaint>('indicatorPaint', RenderCustomPaint.new)
     ..painter = painter
     ..isComplex = true);
@@ -71,7 +87,7 @@ void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painte
 
 /// Data-change animation is isolated to the indicator's paint layer.
 void _transitioned(NodeBuilder b, Node n, List<RenderBox> chain, IndicatorPainterFactory factory) {
-  chain.add(b.fitBox('indicatorFit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
+  chain.add(_indicatorFit(b, n));
   chain.add(b.obtain<RenderIndicatorTransition>('indicatorPaint', RenderIndicatorTransition.new)
     ..update(_themed(b, n), factory, interactive: b.tree.animates));
 }
