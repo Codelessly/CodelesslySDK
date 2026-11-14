@@ -5,6 +5,7 @@ import 'package:codelessly_sdk/src/render/controls/segmented.dart';
 import 'package:codelessly_sdk/src/render/controls/slider.dart';
 import 'package:codelessly_sdk/src/render/controls/toggles.dart';
 import 'package:codelessly_sdk/src/render/controls/chips.dart' show RenderChip;
+import 'package:codelessly_sdk/src/widgets/inputs.dart' show RenderSignaturePad;
 import 'package:codelessly_sdk/src/widgets/inputs_shapes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,9 +33,18 @@ Map<String, Json> _pad(Map<String, Object?> props) => {
   },
 };
 
-Finder get _padPaint => find.byWidgetPredicate((w) => w is CustomPaint && w.painter is SignaturePainter);
-SignaturePainter _painter(WidgetTester tester) => tester.widget<CustomPaint>(_padPaint).painter! as SignaturePainter;
-RenderObject _padRender(WidgetTester tester) => tester.renderObject(_padPaint);
+RenderSignaturePad _padRender(WidgetTester tester) {
+  RenderSignaturePad? found;
+  void visit(RenderObject o) {
+    if (o is RenderSignaturePad) found = o;
+    o.visitChildren(visit);
+  }
+
+  tester.binding.renderViews.first.visitChildren(visit);
+  return found!;
+}
+
+SignaturePainter _painter(WidgetTester tester) => _padRender(tester).painter;
 
 Map<String, Json> _box(Map<String, Object?> props, {double size = 40}) => {
   'col': {
@@ -314,7 +324,7 @@ void main() {
       expect(p.caption, isEmpty);
       // 200 high: the line at 152, across 20 … 280.
       expect(_padRender(tester), paints..line(p1: const Offset(20, 152), p2: const Offset(280, 152)));
-      expect(find.byType(CustomSingleChildLayout), findsNothing);
+      expect(_padRender(tester).markIcon, isNull);
     });
 
     testWidgets('draws its caption under the line', (tester) async {
@@ -347,6 +357,33 @@ void main() {
           ..line()
           ..paragraph(offset: const Offset(24, 160.5)),
       );
+    });
+
+    testWidgets('a drag draws a stroke and reports every stroke; a read-only pad takes none', (tester) async {
+      final nodes = _pad({});
+      nodes['sg']!['actions'] = [
+        lists.reaction('changed', [
+          {'type': 'setVariable', 'variable': 'count', 'value': r'${= length(result)}'},
+        ]),
+      ];
+      final s = await lists.show(tester, nodes, variables: [Variable(name: 'count', type: VariableType.integer, value: 0)]);
+      final pad = _padRender(tester);
+      final origin = pad.localToGlobal(Offset.zero);
+      await tester.dragFrom(origin + const Offset(40, 40), const Offset(60, 30));
+      await tester.pump();
+      expect(pad.painter.strokes, hasLength(1));
+      expect(pad.painter.strokes.single.first, const Offset(40, 40));
+      expect(s.scope.read('count'), 1);
+      await tester.dragFrom(origin + const Offset(40, 90), const Offset(80, 0));
+      await tester.pump();
+      expect(pad.painter.strokes, hasLength(2));
+      expect(s.scope.read('count'), 2);
+
+      await lists.show(tester, _pad({'readOnly': true}));
+      final still = _padRender(tester);
+      await tester.dragFrom(still.localToGlobal(Offset.zero) + const Offset(40, 40), const Offset(60, 30));
+      await tester.pump();
+      expect(still.painter.strokes, isEmpty);
     });
 
     test('draws its strokes as curves, or as straight segments when not smooth', () {

@@ -164,7 +164,11 @@ class SignaturePainter extends CustomPainter {
       );
 
   TextPainter _glyph() => TextPainter(
-        text: TextSpan(text: '×', style: TextStyle(color: markColor ?? signLineColor, fontSize: markSize, height: 1)),
+        // In the pad's own font (its caption's): a mark with no family is the
+        // platform's, which a page with its own fonts may not have.
+        text: TextSpan(
+            text: '×',
+            style: TextStyle(color: markColor ?? signLineColor, fontSize: markSize, height: 1, fontFamily: captionStyle?.fontFamily)),
         textDirection: textDirection,
       )..layout();
 
