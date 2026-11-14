@@ -1,0 +1,60 @@
+{
+ "stream": "dashboard@claude-sonnet-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1568,
+ "timeToFirstPaintMs": 2732,
+ "timeToFirstTextMs": 2732,
+ "timeToFirstSectionMs": 2732,
+ "timeToCompleteMs": 9846,
+ "outputTokens": 2038,
+ "tokensEstimated": false,
+ "chars": 3968,
+ "deltas": 246,
+ "opsApplied": 9,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 8,
+  "componentsRendered": 8,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 33,
+   "rejected": 9
+  }
+ ],
+ "streamedOps": 9,
+ "rejections": [],
+ "nodes": 40,
+ "reappliedBoxesPerOp": {
+  "min": 5,
+  "median": 6,
+  "p90": 63,
+  "max": 63
+ },
+ "frames": 162,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 9,
+ "pumps": 409,
+ "pumpMsMedian": 0.112,
+ "renderExceptions": [
+  {
+   "tMs": 9834,
+   "error": "A RenderCodelesslyFlex overflowed by 0.0698 pixels on the right."
+  }
+ ],
+ "warnings": 0
+}

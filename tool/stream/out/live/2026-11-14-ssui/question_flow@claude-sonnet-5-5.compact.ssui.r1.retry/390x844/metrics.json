@@ -1,0 +1,60 @@
+{
+ "stream": "question_flow@claude-sonnet-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1525,
+ "timeToFirstPaintMs": 2293,
+ "timeToFirstTextMs": 2293,
+ "timeToFirstSectionMs": 2293,
+ "timeToCompleteMs": 2350,
+ "outputTokens": 257,
+ "tokensEstimated": false,
+ "chars": 366,
+ "deltas": 23,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 7,
+  "componentsRendered": 3,
+  "componentsNotRendered": [
+   "q2o (ListRow)",
+   "q3o (ListRow)",
+   "resBadge (Badge)",
+   "resBtn (Button)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 24,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 23,
+ "reappliedBoxesPerOp": {
+  "min": 104,
+  "median": 104,
+  "p90": 104,
+  "max": 104
+ },
+ "frames": 48,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 72,
+ "pumpMsMedian": 0.111,
+ "renderExceptions": [],
+ "warnings": 0
+}

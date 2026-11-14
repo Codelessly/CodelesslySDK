@@ -1,0 +1,89 @@
+{
+ "stream": "checkout@claude-haiku-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 397,
+ "timeToFirstPaintMs": 657,
+ "timeToFirstTextMs": 657,
+ "timeToFirstSectionMs": 657,
+ "timeToCompleteMs": 1642,
+ "outputTokens": 479,
+ "tokensEstimated": false,
+ "chars": 973,
+ "deltas": 59,
+ "opsApplied": 5,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_id /ops/4/parent",
+  "dangling_child /nodes/shipStep/children/5"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 18,
+  "componentsRendered": 4,
+  "componentsNotRendered": [
+   "fName (Field)",
+   "fAddr (Field)",
+   "fCity (Field)",
+   "fPost (Field)",
+   "backCart (Button)",
+   "shipNext (Button)",
+   "standard (Radio)",
+   "express (Radio)",
+   "backShip (Button)",
+   "payNext (Button)",
+   "tName (TextInput)",
+   "tAddr (TextInput)",
+   "tCity (TextInput)",
+   "tPost (TextInput)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 43,
+   "rejected": 6
+  }
+ ],
+ "streamedOps": 6,
+ "rejections": [
+  {
+   "op": 4,
+   "code": "unknown_id",
+   "path": "/ops/4/parent",
+   "message": "No node \"fEmail\" to place \"tEmail\" under (it is listed by \"shipStep\" but has not arrived: set it first).",
+   "nodeId": "tEmail",
+   "suggestion": "tEmail"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/shipStep/children/5",
+   "message": "Child \"fEmail\" of \"shipStep\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "shipStep"
+  }
+ ],
+ "nodes": 45,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 38,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 0,
+ "pumps": 98,
+ "pumpMsMedian": 0.123,
+ "renderExceptions": [],
+ "warnings": 0
+}

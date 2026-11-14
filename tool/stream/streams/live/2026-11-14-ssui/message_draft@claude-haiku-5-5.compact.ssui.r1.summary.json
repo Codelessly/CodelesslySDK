@@ -1,0 +1,133 @@
+{
+ "ui": "message_draft",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 60071,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 26033,
+ "generate": {
+  "inputTokens": 332,
+  "outputTokens": 2304,
+  "cacheReadInputTokens": 25954,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 517,
+  "firstToolDeltaMs": 547,
+  "totalMs": 7432,
+  "stopReason": "StopReason.toolUse",
+  "ops": 21,
+  "opsApplied": 17,
+  "opsRejected": 4,
+  "opsRecoveredFromMalformed": 13,
+  "jsonRepairs": 3,
+  "pending": 4,
+  "errors": [
+   "wrong_type /nodes/toInput/props/error",
+   "wrong_type /nodes/subjectInput/props/error",
+   "wrong_type /nodes/sentBanner/visible",
+   "wrong_type /nodes/send/props/enabled",
+   "dangling_child /nodes/card/children/5",
+   "dangling_child /nodes/toField/children/1",
+   "dangling_child /nodes/subjectField/children/1",
+   "dangling_child /nodes/footer/children/1"
+  ],
+  "lints": [],
+  "warnings": 3,
+  "nodes": 15,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 3,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 1589,
+   "outputTokens": 367,
+   "cacheReadInputTokens": 25954,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 382,
+   "firstToolDeltaMs": 422,
+   "totalMs": 1454,
+   "stopReason": "StopReason.toolUse",
+   "ops": 5,
+   "opsApplied": 4,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "unknown_id /ops/0/id"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 19,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 7,
+   "replacedControls": 0
+  },
+  {
+   "inputTokens": 5168,
+   "outputTokens": 261,
+   "cacheReadInputTokens": 51908,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 388,
+   "firstToolDeltaMs": 991,
+   "totalMs": 1500,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_read",
+     "input": {
+      "outline": true,
+      "variables": true
+     },
+     "ms": 564,
+     "outputTokens": 59,
+     "resultChars": 1080
+    }
+   ],
+   "ops": 3,
+   "opsApplied": 2,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "wrong_type /nodes/send/props/enabled"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 19,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 7,
+   "replacedControls": 0
+  }
+ ],
+ "final": {
+  "ops": 3,
+  "opsApplied": 2,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "wrong_type /nodes/send/props/enabled"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 19,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 7,
+  "replacedControls": 0
+ }
+}

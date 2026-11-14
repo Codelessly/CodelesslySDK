@@ -1,0 +1,41 @@
+{"meta":{"ui":"question_flow","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["question_flow@claude-haiku-5-5.compact.ssui.r1.jsonl","question_flow@claude-haiku-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":326,"usage":{"inputTokens":5033,"outputTokens":326,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":573,"firstToolDeltaMs":615,"totalMs":1431,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":573,"check":{"ops":5,"opsApplied":5,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":14,"scripts":0,"scriptChars":0,"designSystemComponents":1,"replacedControls":0},"assets":null}}
+{"tMs":615,"delta":"{\"ops\": [{\"op"}
+{"tMs":634,"delta":"\": \"set\", \"id\": \""}
+{"tMs":652,"delta":"card\", \"sl"}
+{"tMs":673,"delta":"ot\": \"body\", \"node\":"}
+{"tMs":695,"delta":" {\"type\": \"column\", \""}
+{"tMs":715,"delta":"children\": [\"progress\", \""}
+{"tMs":735,"delta":"question\", \"choices\", \"n"}
+{"tMs":755,"delta":"av\"], \"layout\": {"}
+{"tMs":776,"delta":"\"width\": {\"fill\":"}
+{"tMs":796,"delta":" 390}, \"height\": {"}
+{"tMs":817,"delta":"\"hug\": 420},"}
+{"tMs":837,"delta":" \"padding\": 16},"}
+{"tMs":857,"delta":" \"props\": {\"crossA"}
+{"tMs":878,"delta":"xisAlignment\": \""}
+{"tMs":899,"delta":"stretch\", \"spacing"}
+{"tMs":919,"delta":"\": 12}, \"deco"}
+{"tMs":939,"delta":"ration\": {\"fills\": ["}
+{"tMs":960,"delta":"{\"color\": \"#FF"}
+{"tMs":980,"delta":"FFFFFF\"}"}
+{"tMs":1001,"delta":"], \"strokes\": [{"}
+{"tMs":1021,"delta":"\"color\": \"#FFE"}
+{"tMs":1042,"delta":"5E7EB\"}],"}
+{"tMs":1062,"delta":" \"radius\": 8}}"}
+{"tMs":1082,"delta":"},"}
+{"tMs":1102,"delta":" {\"op\": \"move"}
+{"tMs":1123,"delta":"\", \"id\": \"progress\","}
+{"tMs":1143,"delta":" \"parent\": \"card\", \""}
+{"tMs":1164,"delta":"index\": 0}, {\""}
+{"tMs":1184,"delta":"op\": \"move\", \"id\":"}
+{"tMs":1204,"delta":" \"question\", \"parent\": \""}
+{"tMs":1225,"delta":"card\", \"index\": 1}"}
+{"tMs":1245,"delta":", {\"op\": \"move\","}
+{"tMs":1266,"delta":" \"id\": \"choices\", \""}
+{"tMs":1286,"delta":"parent\": \"card\", \"index"}
+{"tMs":1306,"delta":"\": 2}, {\"op"}
+{"tMs":1327,"delta":"\": \"move\", \"id\": \""}
+{"tMs":1347,"delta":"nav\", \"parent\": \""}
+{"tMs":1368,"delta":"card\", \"index\": 3}"}
+{"tMs":1388,"delta":"]"}
+{"tMs":1430,"delta":"}"}

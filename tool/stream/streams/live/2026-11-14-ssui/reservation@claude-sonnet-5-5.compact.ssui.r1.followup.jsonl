@@ -1,0 +1,49 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Add a field for a note to the restaurant.","base":["reservation@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":401,"usage":{"inputTokens":4244,"outputTokens":401,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1632,"firstToolDeltaMs":1705,"totalMs":3355,"stopReason":"StopReason.toolUse"},"text":"I'll add a note field (label plus text area) above the confirm row, and include the note in the confirmation.","ttftMs":1632,"check":{"ops":4,"opsApplied":4,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":22,"scripts":0,"scriptChars":0,"designSystemComponents":6,"replacedControls":0},"assets":null}}
+{"tMs":1705,"delta":"{\"ops\": [{\"op\": \"v"}
+{"tMs":1741,"delta":"ars\", \"scope\": \"book"}
+{"tMs":1775,"delta":"\", \"set\": {\"note\":"}
+{"tMs":1810,"delta":" {\"type\": \"text\", \""}
+{"tMs":1845,"delta":"value\": \"\"}}},"}
+{"tMs":2009,"delta":" {\"op\": \"set\", \""}
+{"tMs":2009,"delta":"id\": \"noteField\", \""}
+{"tMs":2009,"delta":"par"}
+{"tMs":2009,"delta":"ent\": \"card\", \"index"}
+{"tMs":2392,"delta":"\": 5"}
+{"tMs":2392,"delta":", \"node\": {\"type\":"}
+{"tMs":2392,"delta":" \"Field\", \"props\": {"}
+{"tMs":2392,"delta":"\"label\": \"Note to the"}
+{"tMs":2392,"delta":" restaurant\","}
+{"tMs":2392,"delta":" \"help\": \"Allergies"}
+{"tMs":2392,"delta":", cel"}
+{"tMs":2392,"delta":"ebrations, se"}
+{"tMs":2392,"delta":"ating w"}
+{"tMs":2392,"delta":"ishes.\"}, \"children\":"}
+{"tMs":2392,"delta":" [\"noteIn"}
+{"tMs":2392,"delta":"put\"], \"layout\": {"}
+{"tMs":2776,"delta":"\"width\": {\"fill\":"}
+{"tMs":2776,"delta":" 366}, \"height\": {"}
+{"tMs":2776,"delta":"\"hug\": 110"}
+{"tMs":2776,"delta":"}}}}, {\"op"}
+{"tMs":2776,"delta":"\": \"set\", \"id\": \""}
+{"tMs":2776,"delta":"noteInput\", \"node\":"}
+{"tMs":2776,"delta":" {\"type\": \"TextAr"}
+{"tMs":2776,"delta":"ea\", \"props\": {\"plac"}
+{"tMs":2776,"delta":"eholder\": \"Add a"}
+{"tMs":2776,"delta":" note..."}
+{"tMs":2776,"delta":"\", \"value\": \"note\"}"}
+{"tMs":2783,"delta":", \"layout\": {\"width"}
+{"tMs":3197,"delta":"\": {\"fill\": 366"}
+{"tMs":3197,"delta":"}, \"height\": 60}"}
+{"tMs":3197,"delta":"}}, {\"op\": \""}
+{"tMs":3197,"delta":"patch\", \"id\": \"result"}
+{"tMs":3197,"delta":"\", \"pat"}
+{"tMs":3197,"delta":"ch\": {\"bind\": {"}
+{"tMs":3197,"delta":"\"vis"}
+{"tMs":3197,"delta":"ible\": \"${confirmed"}
+{"tMs":3197,"delta":"}\", \"props.message\": \""}
+{"tMs":3197,"delta":"${= 'Booked:"}
+{"tMs":3198,"delta":" ' + summary + (note"}
+{"tMs":3198,"delta":" != '' ? '."}
+{"tMs":3218,"delta":" Note: ' + note : '"}
+{"tMs":3252,"delta":"')}\"}}}]"}
+{"tMs":3353,"delta":"}"}

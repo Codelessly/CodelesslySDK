@@ -1,0 +1,286 @@
+{
+ "stream": "order_summary@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 572,
+ "timeToFirstPaintMs": 2634,
+ "timeToFirstTextMs": 2893,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 9713,
+ "outputTokens": 3117,
+ "tokensEstimated": false,
+ "chars": 6269,
+ "deltas": 425,
+ "opsApplied": 15,
+ "opsRejected": 11,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 11,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_bind_path /nodes/list/bind/data",
+  "expression_syntax /nodes/price/props/text",
+  "unknown_prop /nodes/qtyMinus/props/variant",
+  "unknown_prop /nodes/qtyPlus/props/variant",
+  "expression_syntax /nodes/qtyPlus/actions/0/actions/0/value",
+  "unknown_prop /nodes/promoField/props/hint",
+  "expression_syntax /nodes/promoApply/actions/0/actions/0/value",
+  "expression_syntax /nodes/sumSub/props/text",
+  "expression_syntax /nodes/sumDisc/props/text",
+  "expression_syntax /nodes/sumDel/props/text",
+  "expression_syntax /nodes/sumTot/props/text",
+  "expression_syntax /nodes/confirm/actions/0/actions/0/value",
+  "dangling_child /nodes/card/children/1",
+  "dangling_child /nodes/card/children/4",
+  "dangling_child /nodes/card/children/5",
+  "dangling_child /nodes/card/children/6",
+  "dangling_child /nodes/card/children/7",
+  "dangling_child /nodes/row/children/2",
+  "dangling_child /nodes/row/children/4",
+  "dangling_child /nodes/info/children/1",
+  "dangling_child /nodes/promoRow/children/0",
+  "dangling_child /nodes/promoRow/children/1",
+  "dangling_child /nodes/actions/children/1"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 0,
+  "componentsRendered": 0,
+  "componentsNotRendered": [],
+  "replacedControls": [
+   "cancel (outlinedButton)"
+  ]
+ },
+ "themeMode": "light",
+ "streamedOps": 26,
+ "rejections": [
+  {
+   "op": 5,
+   "code": "unknown_bind_path",
+   "path": "/nodes/list/bind/data",
+   "message": "\"data\" is read by a listView, gridView, pageView or tableView (the items it repeats its first child for); a column does not read it.",
+   "nodeId": "list"
+  },
+  {
+   "op": 10,
+   "code": "expression_syntax",
+   "path": "/nodes/price/props/text",
+   "message": "The formula \"${= '$' + (item.price * item.qty).toFixed(2)}\" does not parse: Unexpected \"(\" at 38.",
+   "nodeId": "price"
+  },
+  {
+   "op": 11,
+   "code": "unknown_prop",
+   "path": "/nodes/qtyMinus/props/variant",
+   "message": "A iconButton has no prop \"variant\". Its props: icon, enabled, style.",
+   "nodeId": "qtyMinus",
+   "expected": [
+    "icon",
+    "enabled",
+    "style"
+   ]
+  },
+  {
+   "op": 13,
+   "code": "unknown_prop",
+   "path": "/nodes/qtyPlus/props/variant",
+   "message": "A iconButton has no prop \"variant\". Its props: icon, enabled, style.",
+   "nodeId": "qtyPlus",
+   "expected": [
+    "icon",
+    "enabled",
+    "style"
+   ]
+  },
+  {
+   "op": 13,
+   "code": "expression_syntax",
+   "path": "/nodes/qtyPlus/actions/0/actions/0/value",
+   "message": "The formula \"${= items.map((x, i) => i == index ? {...x, qty: x.qty + 1} : x)}\" does not parse: Unexpected \"(\" at 10.",
+   "nodeId": "qtyPlus"
+  },
+  {
+   "op": 15,
+   "code": "unknown_prop",
+   "path": "/nodes/promoField/props/hint",
+   "message": "A textField has no prop \"hint\". Its props: initialValue, decoration, style, textAlign, textAlignVertical, keyboardType, keyboardDecimal, keyboardSigned, textInputAction, textCapitalization, autocorrect, autofocus, enableInteractiveSelection, enabled, obscureText, obscuringCharacter, readOnly, showCursor, cursorColor, cursorHeight, cursorWidth, cursorRadius, maxLength, maxLines, minLines, expands, selectionHeightStyle, selectionWidthStyle, autofillHints, autovalidateMode, selectAllOnFocus, focusRingColor, focusRingWidth, inputFormatter, validator, markdown, runs.",
+   "nodeId": "promoField",
+   "expected": [
+    "initialValue",
+    "decoration",
+    "style",
+    "textAlign",
+    "textAlignVertical",
+    "keyboardType",
+    "keyboardDecimal",
+    "keyboardSigned",
+    "textInputAction",
+    "textCapitalization",
+    "autocorrect",
+    "autofocus",
+    "enableInteractiveSelection",
+    "enabled",
+    "obscureText",
+    "obscuringCharacter",
+    "readOnly",
+    "showCursor",
+    "cursorColor",
+    "cursorHeight",
+    "cursorWidth",
+    "cursorRadius",
+    "maxLength",
+    "maxLines",
+    "minLines",
+    "expands",
+    "selectionHeightStyle",
+    "selectionWidthStyle",
+    "autofillHints",
+    "autovalidateMode",
+    "selectAllOnFocus",
+    "focusRingColor",
+    "focusRingWidth",
+    "inputFormatter",
+    "validator",
+    "markdown",
+    "runs"
+   ],
+   "suggestion": "autofillHints"
+  },
+  {
+   "op": 16,
+   "code": "expression_syntax",
+   "path": "/nodes/promoApply/actions/0/actions/0/value",
+   "message": "The formula \"${= promo.trim().toUpperCase() == 'SAVE10'}\" does not parse: Unexpected \"(\" at 11.",
+   "nodeId": "promoApply"
+  },
+  {
+   "op": 18,
+   "code": "expression_syntax",
+   "path": "/nodes/sumSub/props/text",
+   "message": "The formula \"${= 'Subtotal: $' + subtotal.toFixed(2)}\" does not parse: Unexpected \"(\" at 33.",
+   "nodeId": "sumSub"
+  },
+  {
+   "op": 19,
+   "code": "expression_syntax",
+   "path": "/nodes/sumDisc/props/text",
+   "message": "The formula \"${= 'Discount: -$' + discount.toFixed(2)}\" does not parse: Unexpected \"(\" at 34.",
+   "nodeId": "sumDisc"
+  },
+  {
+   "op": 20,
+   "code": "expression_syntax",
+   "path": "/nodes/sumDel/props/text",
+   "message": "The formula \"${= 'Delivery: ' + (delivery == 0 ? 'Free' : '$' + delivery.toFixed(2))}\" does not parse: Expected \")\" at 64.",
+   "nodeId": "sumDel"
+  },
+  {
+   "op": 21,
+   "code": "expression_syntax",
+   "path": "/nodes/sumTot/props/text",
+   "message": "The formula \"${= 'Total: $' + total.toFixed(2)}\" does not parse: Unexpected \"(\" at 27.",
+   "nodeId": "sumTot"
+  },
+  {
+   "op": 25,
+   "code": "expression_syntax",
+   "path": "/nodes/confirm/actions/0/actions/0/value",
+   "message": "The formula \"${= 'You confirmed the order: $' + total.toFixed(2)}\" does not parse: Unexpected \"(\" at 45.",
+   "nodeId": "confirm"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/1",
+   "message": "Child \"list\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/4",
+   "message": "Child \"sumSub\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/5",
+   "message": "Child \"sumDisc\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/6",
+   "message": "Child \"sumDel\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/7",
+   "message": "Child \"sumTot\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/row/children/2",
+   "message": "Child \"qtyMinus\" of \"row\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "row"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/row/children/4",
+   "message": "Child \"qtyPlus\" of \"row\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "row"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/info/children/1",
+   "message": "Child \"price\" of \"info\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "info"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/0",
+   "message": "Child \"promoField\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/1",
+   "message": "Child \"promoApply\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/actions/children/1",
+   "message": "Child \"confirm\" of \"actions\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "actions"
+  }
+ ],
+ "nodes": 13,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 3,
+  "max": 12
+ },
+ "frames": 160,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 586,
+ "pumpMsMedian": 0.108,
+ "renderExceptions": [],
+ "warnings": 1
+}

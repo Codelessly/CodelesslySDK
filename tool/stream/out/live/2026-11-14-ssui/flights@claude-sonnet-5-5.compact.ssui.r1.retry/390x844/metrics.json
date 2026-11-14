@@ -1,0 +1,80 @@
+{
+ "stream": "flights@claude-sonnet-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1302,
+ "timeToFirstPaintMs": 1866,
+ "timeToFirstTextMs": 1866,
+ "timeToFirstSectionMs": 1866,
+ "timeToCompleteMs": 1966,
+ "outputTokens": 191,
+ "tokensEstimated": false,
+ "chars": 258,
+ "deltas": 17,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 2,
+  "componentsRendered": 2,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "13:45|easyJet|option 2"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "confirm"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   }
+  ]
+ },
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 21,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 20,
+ "reappliedBoxesPerOp": {
+  "min": 6,
+  "median": 6,
+  "p90": 6,
+  "max": 6
+ },
+ "frames": 42,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 60,
+ "pumpMsMedian": 0.13,
+ "renderExceptions": [],
+ "warnings": 0
+}

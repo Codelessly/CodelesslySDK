@@ -1,0 +1,160 @@
+{
+ "ui": "map_list",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 60071,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 26033,
+ "generate": {
+  "inputTokens": 199,
+  "outputTokens": 3482,
+  "cacheReadInputTokens": 25954,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1323,
+  "firstToolDeltaMs": 2135,
+  "totalMs": 19116,
+  "stopReason": "StopReason.toolUse",
+  "ops": 26,
+  "opsApplied": 26,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 23,
+  "jsonRepairs": 1,
+  "pending": 0,
+  "errors": [],
+  "lints": [
+   "empty_button p0",
+   "empty_button p1",
+   "empty_button p2",
+   "empty_button p3",
+   "empty_button p4"
+  ],
+  "warnings": 6,
+  "nodes": 24,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 0,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 5372,
+   "outputTokens": 873,
+   "cacheReadInputTokens": 51908,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1569,
+   "firstToolDeltaMs": 3076,
+   "totalMs": 6365,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_read",
+     "input": {
+      "ids": [
+       "p0",
+       "p1",
+       "pins",
+       "map"
+      ]
+     },
+     "ms": 1765,
+     "outputTokens": 76,
+     "resultChars": 1198
+    }
+   ],
+   "ops": 10,
+   "opsApplied": 0,
+   "opsRejected": 10,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "structural_key_in_patch /nodes/p0/type",
+    "structural_key_in_patch /nodes/p1/type",
+    "structural_key_in_patch /nodes/p2/type",
+    "structural_key_in_patch /nodes/p3/type",
+    "structural_key_in_patch /nodes/p4/type",
+    "invalid_parent /ops/5/parent",
+    "invalid_parent /ops/6/parent",
+    "invalid_parent /ops/7/parent",
+    "invalid_parent /ops/8/parent",
+    "invalid_parent /ops/9/parent"
+   ],
+   "lints": [
+    "empty_button p0",
+    "empty_button p1",
+    "empty_button p2",
+    "empty_button p3",
+    "empty_button p4"
+   ],
+   "warnings": 5,
+   "nodes": 24,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 0,
+   "replacedControls": 0
+  },
+  {
+   "inputTokens": 13884,
+   "outputTokens": 1830,
+   "cacheReadInputTokens": 51908,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1298,
+   "firstToolDeltaMs": 2546,
+   "totalMs": 10067,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_read",
+     "input": {
+      "ids": [
+       "p2",
+       "p3",
+       "p4"
+      ]
+     },
+     "ms": 1457,
+     "outputTokens": 89,
+     "resultChars": 1230
+    }
+   ],
+   "ops": 10,
+   "opsApplied": 10,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 29,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 0,
+   "replacedControls": 0
+  }
+ ],
+ "final": {
+  "ops": 10,
+  "opsApplied": 10,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 29,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 0,
+  "replacedControls": 0
+ }
+}

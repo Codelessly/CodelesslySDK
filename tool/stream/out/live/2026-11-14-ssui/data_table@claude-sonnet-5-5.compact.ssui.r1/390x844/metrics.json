@@ -1,0 +1,88 @@
+{
+ "stream": "data_table@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1006,
+ "timeToFirstPaintMs": 7447,
+ "timeToFirstTextMs": 7851,
+ "timeToFirstSectionMs": 9093,
+ "timeToCompleteMs": 27408,
+ "outputTokens": 5347,
+ "tokensEstimated": false,
+ "chars": 10652,
+ "deltas": 723,
+ "opsApplied": 30,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [
+  "no_size list"
+ ],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/hAll/actions/0/actions/0/value",
+  "expression_syntax /nodes/rChk/actions/0/actions/0/value",
+  "dangling_child /nodes/hdr/children/0",
+  "dangling_child /nodes/row/children/0",
+  "no_size /nodes/list/layout"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 6,
+  "componentsRendered": 4,
+  "componentsNotRendered": [
+   "rStat (Badge)",
+   "barBtn (Button)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 32,
+ "rejections": [
+  {
+   "op": 10,
+   "code": "expression_syntax",
+   "path": "/nodes/hAll/actions/0/actions/0/value",
+   "message": "The formula \"${= result ? union(picked, map(rows, num)) : filter(picked, !contains(map(rows, num), item))}\" does not parse: Unknown function \"union\".",
+   "nodeId": "hAll"
+  },
+  {
+   "op": 18,
+   "code": "expression_syntax",
+   "path": "/nodes/rChk/actions/0/actions/0/value",
+   "message": "The formula \"${= result ? union(picked, [item.num]) : filter(picked, _ != item.num)}\" does not parse: Unknown function \"union\".",
+   "nodeId": "rChk"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/hdr/children/0",
+   "message": "Child \"hAll\" of \"hdr\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "hdr"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/row/children/0",
+   "message": "Child \"rChk\" of \"row\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "row"
+  }
+ ],
+ "nodes": 28,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 6,
+  "max": 9
+ },
+ "frames": 180,
+ "frameMs": 157,
+ "pumpsOverBudget16ms": 12,
+ "pumps": 904,
+ "pumpMsMedian": 0.088,
+ "renderExceptions": [],
+ "warnings": 5
+}

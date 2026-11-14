@@ -1,0 +1,26 @@
+{"meta":{"ui":"image_gallery","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["image_gallery@claude-sonnet-5-5.compact.ssui.r1.jsonl","image_gallery@claude-sonnet-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":279,"usage":{"inputTokens":5764,"outputTokens":279,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1942,"firstToolDeltaMs":2364,"totalMs":2806,"stopReason":"StopReason.toolUse"},"text":"The caption text is still under the tile, and the tileCap patch has already applied. I'll create the caption box under the tile with `set` and `parent`, then move the text into it.","ttftMs":1942,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":19,"scripts":0,"scriptChars":0,"designSystemComponents":4,"replacedControls":0},"assets":null}}
+{"tMs":2364,"delta":"{\"ops\": ["}
+{"tMs":2364,"delta":"{\"op\": \"set\", \""}
+{"tMs":2364,"delta":"id\": \"capBox\", \""}
+{"tMs":2364,"delta":"parent\": \"tile\", \""}
+{"tMs":2364,"delta":"node\": {\"type\": \"column"}
+{"tMs":2364,"delta":"\", \"children\": [], \"lay"}
+{"tMs":2364,"delta":"out\": {\"width\": {\""}
+{"tMs":2364,"delta":"fill\": 116}, \""}
+{"tMs":2364,"delta":"height\": {\"hug\": "}
+{"tMs":2364,"delta":"28}, \"x\": {\""}
+{"tMs":2677,"delta":"start\": 0, \"end\":"}
+{"tMs":2677,"delta":" 0}, \"y\": {"}
+{"tMs":2677,"delta":"\"end\": 0}, \""}
+{"tMs":2677,"delta":"padding\": 6}, \""}
+{"tMs":2677,"delta":"props\": {\"crossAx"}
+{"tMs":2677,"delta":"isAlignment\": \"start"}
+{"tMs":2677,"delta":"\"}, \"decoration\":"}
+{"tMs":2677,"delta":" {\"fills\": [{\""}
+{"tMs":2677,"delta":"color\": \"#59000000\""}
+{"tMs":2677,"delta":"}]}}}, {\""}
+{"tMs":2677,"delta":"op\": \"move\", \"id\":"}
+{"tMs":2680,"delta":" \"tileCap\", \"par"}
+{"tMs":2714,"delta":"ent\": \"capBox\"}"}
+{"tMs":2747,"delta":"]"}
+{"tMs":2806,"delta":"}"}

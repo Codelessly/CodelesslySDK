@@ -1,0 +1,123 @@
+{"meta":{"ui":"itinerary","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Swap the two days.","base":["itinerary@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":1072,"usage":{"inputTokens":4461,"outputTokens":1072,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":2505,"firstToolDeltaMs":2506,"totalMs":6213,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":2505,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":26,"scripts":0,"scriptChars":0,"designSystemComponents":2,"replacedControls":0},"assets":null}}
+{"tMs":2506,"delta":"{\"ops\": [{\"op\": \"vars"}
+{"tMs":2506,"delta":"\", \"scope\": \"ky"}
+{"tMs":2506,"delta":"oto\", \"set\": {\""}
+{"tMs":2506,"delta":"stops1\": {\"type\":"}
+{"tMs":2506,"delta":" \"list\", \"value\": [{"}
+{"tMs":2506,"delta":"\"id\": \"b1\", \""}
+{"tMs":2506,"delta":"time\": \"07:30\", \""}
+{"tMs":2507,"delta":"place\": \"Arashiy"}
+{"tMs":2507,"delta":"ama Bamboo Gr"}
+{"tMs":2507,"delta":"ove\", \"travel\": \"J"}
+{"tMs":2507,"delta":"R Sagano Line,"}
+{"tMs":2526,"delta":" 15 min\", \"dur"}
+{"tMs":2526,"delta":"\": \"1.5 h\","}
+{"tMs":2526,"delta":" \"note\": \"Go at op"}
+{"tMs":2936,"delta":"ening for quiet paths."}
+{"tMs":2936,"delta":" Tenryu-ji"}
+{"tMs":2936,"delta":" garden is next door.\"},"}
+{"tMs":2936,"delta":" {\"id\": \"b2\","}
+{"tMs":2936,"delta":" \"time\": \"10:30\","}
+{"tMs":2936,"delta":" \"place\": \"Kink"}
+{"tMs":2936,"delta":"aku-ji Golden"}
+{"tMs":2936,"delta":" Pavilion\", \"trav"}
+{"tMs":2936,"delta":"el\": \"Bus 59"}
+{"tMs":2936,"delta":", 30 min\", \"d"}
+{"tMs":2936,"delta":"ur\": \"1 h\", \""}
+{"tMs":2936,"delta":"note\": \"A gold-le"}
+{"tMs":3341,"delta":"af covered Zen tem"}
+{"tMs":3341,"delta":"ple beside a mirror p"}
+{"tMs":3341,"delta":"ond.\"}, {\"id\":"}
+{"tMs":3341,"delta":" \"b3\", \"time\": \""}
+{"tMs":3341,"delta":"13:00\", \"place\": \""}
+{"tMs":3341,"delta":"Ramen in Ky"}
+{"tMs":3341,"delta":"oto Station\", \"travel"}
+{"tMs":3341,"delta":"\": \"Bus 205,"}
+{"tMs":3341,"delta":" 35 min\", \"dur"}
+{"tMs":3341,"delta":"\": \"1 h\", \"note"}
+{"tMs":3341,"delta":"\": \"Ramen Al"}
+{"tMs":3341,"delta":"ley on the 10th floor"}
+{"tMs":3831,"delta":" of the station building.\"}, {"}
+{"tMs":3831,"delta":"\"id\": \"b4\", \""}
+{"tMs":3831,"delta":"time\": \"15:00\", \""}
+{"tMs":3831,"delta":"place\": \"Nijo"}
+{"tMs":3831,"delta":" Castle\", \"travel\": \""}
+{"tMs":3831,"delta":"Subway, 10 min"}
+{"tMs":3831,"delta":"\", \"dur\": \"2 "}
+{"tMs":3831,"delta":"h\", \"note\": \"Wal"}
+{"tMs":3831,"delta":"k the nightingale floors"}
+{"tMs":3831,"delta":" of Ninoma"}
+{"tMs":3831,"delta":"ru Palace.\"}]}"}
+{"tMs":3831,"delta":", \"stops2\": {\""}
+{"tMs":4240,"delta":"type\": \"list\", \"value\":"}
+{"tMs":4240,"delta":" [{\"id\": \"a1"}
+{"tMs":4240,"delta":"\", \"time\": \"08:30"}
+{"tMs":4240,"delta":"\", \"place\": \"Fush"}
+{"tMs":4240,"delta":"imi Inari Shr"}
+{"tMs":4240,"delta":"ine\", \"travel\": \"J"}
+{"tMs":4240,"delta":"R Nara Line, "}
+{"tMs":4240,"delta":"5 min\", \"dur\":"}
+{"tMs":4240,"delta":" \"2 h\", \"note\":"}
+{"tMs":4240,"delta":" \"Walk the torii g"}
+{"tMs":4240,"delta":"ates early to beat the crow"}
+{"tMs":4240,"delta":"ds. The summit loop tak"}
+{"tMs":4652,"delta":"es about 2 hours.\""}
+{"tMs":4652,"delta":"}, {\"id\": \"a"}
+{"tMs":4652,"delta":"2\", \"time\": \"11:"}
+{"tMs":4652,"delta":"30\", \"place\": \"N"}
+{"tMs":4652,"delta":"ishiki Market lunch"}
+{"tMs":4652,"delta":"\", \"travel\": \"Train"}
+{"tMs":4652,"delta":" and subway, 25 min"}
+{"tMs":4652,"delta":"\", \"dur\": \"1."}
+{"tMs":4652,"delta":"5 h\", \"note\": \""}
+{"tMs":4652,"delta":"Street food stalls: t"}
+{"tMs":4652,"delta":"amagoyaki, p"}
+{"tMs":4652,"delta":"ickles, matcha swe"}
+{"tMs":5067,"delta":"ets.\"}, {\"id\":"}
+{"tMs":5067,"delta":" \"a3\", \"time\": \""}
+{"tMs":5067,"delta":"14:00\", \"place\": \""}
+{"tMs":5067,"delta":"Kiyomizu-"}
+{"tMs":5067,"delta":"dera Temple\", \"trav"}
+{"tMs":5067,"delta":"el\": \"Bus 206"}
+{"tMs":5067,"delta":", 15 min\", \"d"}
+{"tMs":5067,"delta":"ur\": \"2 h\", \""}
+{"tMs":5067,"delta":"note\": \"Wooden st"}
+{"tMs":5067,"delta":"age with city views. Stro"}
+{"tMs":5067,"delta":"ll down Sannenza"}
+{"tMs":5067,"delta":"ka lane afterwards.\""}
+{"tMs":5490,"delta":"}, {\"id\": \"a"}
+{"tMs":5490,"delta":"4\", \"time\": \"18:"}
+{"tMs":5490,"delta":"00\", \"place\": \"G"}
+{"tMs":5490,"delta":"ion evening walk\", \"trav"}
+{"tMs":5490,"delta":"el\": \"Walk, "}
+{"tMs":5490,"delta":"15 min\", \"dur\":"}
+{"tMs":5490,"delta":" \"1.5 h\", \""}
+{"tMs":5490,"delta":"note\": \"Hanamik"}
+{"tMs":5490,"delta":"oji Street at dusk"}
+{"tMs":5490,"delta":", chance to spot a ge"}
+{"tMs":5490,"delta":"iko.\"}]}, \""}
+{"tMs":5490,"delta":"todos1\": {\"type\":"}
+{"tMs":5961,"delta":" \"list\", \"value\": [{"}
+{"tMs":5961,"delta":"\"label\": \"Reserve"}
+{"tMs":5961,"delta":" Kinkaku-"}
+{"tMs":5961,"delta":"ji timed ticket\", \""}
+{"tMs":5961,"delta":"done\": false}, {\"label"}
+{"tMs":5961,"delta":"\": \"Book Nijo"}
+{"tMs":5961,"delta":" Castle audio guide\","}
+{"tMs":5961,"delta":" \"done\": false}, {\""}
+{"tMs":5961,"delta":"label\": \"Book tea "}
+{"tMs":5961,"delta":"ceremony\", \"done\": false"}
+{"tMs":5961,"delta":"}]}, \"todos2"}
+{"tMs":5961,"delta":"\": {\"type\": \"list\","}
+{"tMs":6203,"delta":" \"value\": [{\"label\":"}
+{"tMs":6203,"delta":" \"Book Fushimi"}
+{"tMs":6203,"delta":" Inari guided tour\","}
+{"tMs":6203,"delta":" \"done\": false}, {\""}
+{"tMs":6203,"delta":"label\": \"Reserve"}
+{"tMs":6203,"delta":" Gion dinner\", \"done"}
+{"tMs":6203,"delta":"\": false}, {\"label\":"}
+{"tMs":6203,"delta":" \"Buy bus day p"}
+{"tMs":6203,"delta":"ass\", \"done\": false}]"}
+{"tMs":6203,"delta":"}}}"}
+{"tMs":6203,"delta":"]"}
+{"tMs":6206,"delta":"}"}

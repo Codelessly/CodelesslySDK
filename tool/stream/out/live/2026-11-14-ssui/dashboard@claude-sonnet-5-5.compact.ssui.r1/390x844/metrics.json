@@ -1,0 +1,211 @@
+{
+ "stream": "dashboard@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1779,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 40752,
+ "outputTokens": 6564,
+ "tokensEstimated": false,
+ "chars": 12126,
+ "deltas": 841,
+ "opsApplied": 33,
+ "opsRejected": 9,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 9,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/card/decoration/radius",
+  "wrong_type /nodes/t1/decoration/radius",
+  "wrong_type /nodes/t2/decoration/radius",
+  "wrong_type /nodes/t3/decoration/radius",
+  "wrong_type /nodes/t4/decoration/radius",
+  "wrong_type /nodes/hName/layout/width",
+  "invalid_enum /nodes/hName/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/hUsers/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/hRev/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/hChurn/actions/0/actions/0/condition/op",
+  "dangling_child /nodes/dash/slots/body",
+  "dangling_child /nodes/tiles1/children/0",
+  "dangling_child /nodes/tiles1/children/1",
+  "dangling_child /nodes/tiles2/children/0",
+  "dangling_child /nodes/tiles2/children/1",
+  "dangling_child /nodes/thead/children/0",
+  "dangling_child /nodes/thead/children/1",
+  "dangling_child /nodes/thead/children/2",
+  "dangling_child /nodes/thead/children/3"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 4,
+  "componentsRendered": 0,
+  "componentsNotRendered": [
+   "seg (SegmentedControl)",
+   "revCard (Card)",
+   "chCard (Card)",
+   "tblCard (Card)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 42,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "wrong_type",
+   "path": "/nodes/card/decoration/radius",
+   "message": "Not a BorderRadius: got the text \"${theme.radii.panel}\". A BorderRadius is a number (every corner), [x, y] (every corner elliptical) or [topLeft, topRight, bottomRight, bottomLeft] (each a number or [x, y]).",
+   "nodeId": "card"
+  },
+  {
+   "op": 10,
+   "code": "wrong_type",
+   "path": "/nodes/t1/decoration/radius",
+   "message": "Not a BorderRadius: got the text \"${theme.radii.panel}\". A BorderRadius is a number (every corner), [x, y] (every corner elliptical) or [topLeft, topRight, bottomRight, bottomLeft] (each a number or [x, y]).",
+   "nodeId": "t1"
+  },
+  {
+   "op": 14,
+   "code": "wrong_type",
+   "path": "/nodes/t2/decoration/radius",
+   "message": "Not a BorderRadius: got the text \"${theme.radii.panel}\". A BorderRadius is a number (every corner), [x, y] (every corner elliptical) or [topLeft, topRight, bottomRight, bottomLeft] (each a number or [x, y]).",
+   "nodeId": "t2"
+  },
+  {
+   "op": 18,
+   "code": "wrong_type",
+   "path": "/nodes/t3/decoration/radius",
+   "message": "Not a BorderRadius: got the text \"${theme.radii.panel}\". A BorderRadius is a number (every corner), [x, y] (every corner elliptical) or [topLeft, topRight, bottomRight, bottomLeft] (each a number or [x, y]).",
+   "nodeId": "t3"
+  },
+  {
+   "op": 22,
+   "code": "wrong_type",
+   "path": "/nodes/t4/decoration/radius",
+   "message": "Not a BorderRadius: got the text \"${theme.radii.panel}\". A BorderRadius is a number (every corner), [x, y] (every corner elliptical) or [topLeft, topRight, bottomRight, bottomLeft] (each a number or [x, y]).",
+   "nodeId": "t4"
+  },
+  {
+   "op": 32,
+   "code": "wrong_type",
+   "path": "/nodes/hName/layout/width",
+   "message": "A size object has exactly one key: got an object. A AxisSize is a number (fixed) or {\"fill\"|\"flexible\"|\"hug\"|\"fixed\": number}.",
+   "nodeId": "hName"
+  },
+  {
+   "op": 32,
+   "code": "invalid_enum",
+   "path": "/nodes/hName/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hName",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 33,
+   "code": "invalid_enum",
+   "path": "/nodes/hUsers/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hUsers",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 34,
+   "code": "invalid_enum",
+   "path": "/nodes/hRev/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hRev",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 35,
+   "code": "invalid_enum",
+   "path": "/nodes/hChurn/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "hChurn",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/dash/slots/body",
+   "message": "Slot \"body\" of \"dash\" names \"card\", which never arrived.",
+   "nodeId": "dash"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles1/children/0",
+   "message": "Child \"t1\" of \"tiles1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles1"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles1/children/1",
+   "message": "Child \"t2\" of \"tiles1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles1"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles2/children/0",
+   "message": "Child \"t3\" of \"tiles2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/tiles2/children/1",
+   "message": "Child \"t4\" of \"tiles2\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "tiles2"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/thead/children/0",
+   "message": "Child \"hName\" of \"thead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "thead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/thead/children/1",
+   "message": "Child \"hUsers\" of \"thead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "thead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/thead/children/2",
+   "message": "Child \"hRev\" of \"thead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "thead"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/thead/children/3",
+   "message": "Child \"hChurn\" of \"thead\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "thead"
+  }
+ ],
+ "nodes": 31,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 1
+ },
+ "frames": 180,
+ "frameMs": 231,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 1022,
+ "pumpMsMedian": 0.083,
+ "renderExceptions": [],
+ "warnings": 19
+}

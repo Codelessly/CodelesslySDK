@@ -1,0 +1,22 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["dashboard@claude-haiku-5-5.compact.ssui.r1.jsonl","dashboard@claude-haiku-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":190,"usage":{"inputTokens":3906,"outputTokens":190,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":641,"firstToolDeltaMs":731,"totalMs":1186,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":641,"check":{"ops":1,"opsApplied":0,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":1,"errors":["wrong_type /nodes/revChart/props/data","dangling_child /nodes/revCard/children/0"],"lints":[],"warnings":0,"nodes":18,"scripts":0,"scriptChars":0,"designSystemComponents":8,"replacedControls":0},"assets":null}}
+{"tMs":731,"delta":"{\"ops\": [{\"op"}
+{"tMs":734,"delta":"\":\"set\",\"id\":\"rev"}
+{"tMs":734,"delta":"Chart\",\"par"}
+{"tMs":741,"delta":"ent\":\"revCard\",\"index"}
+{"tMs":762,"delta":"\":0,\"node\":{\""}
+{"tMs":845,"delta":"type\":\"lineChart\",\""}
+{"tMs":845,"delta":"layout\":{\"width\":{"}
+{"tMs":845,"delta":"\"fill\":342"}
+{"tMs":845,"delta":"},\"height\":160"}
+{"tMs":862,"delta":"},\"props\":{\"data\":"}
+{"tMs":883,"delta":"\"${revSeries}\",\""}
+{"tMs":902,"delta":"xField\":\"x"}
+{"tMs":923,"delta":"\",\"yField\":\"y\",\"l"}
+{"tMs":945,"delta":"ineColor\":\"#FF"}
+{"tMs":964,"delta":"2563EB\",\"l"}
+{"tMs":985,"delta":"ineWidth\":2,\""}
+{"tMs":1006,"delta":"smooth\":true,\"sc"}
+{"tMs":1027,"delta":"rubEnabled\":false"}
+{"tMs":1054,"delta":"}}}]"}
+{"tMs":1130,"delta":", \"baseRev\": 2"}
+{"tMs":1184,"delta":"}"}

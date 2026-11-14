@@ -1,0 +1,153 @@
+{
+ "stream": "order_summary@claude-haiku-5-5.compact.ssui.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 478,
+ "timeToFirstPaintMs": 821,
+ "timeToFirstTextMs": 821,
+ "timeToFirstSectionMs": 2579,
+ "timeToCompleteMs": 2990,
+ "outputTokens": 906,
+ "tokensEstimated": false,
+ "chars": 1792,
+ "deltas": 115,
+ "opsApplied": 5,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 9,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "expression_syntax /nodes/sumTip/props/text",
+  "dangling_child /nodes/card/children/4",
+  "dangling_child /nodes/card/children/5",
+  "dangling_child /nodes/card/children/6",
+  "dangling_child /nodes/card/children/7",
+  "dangling_child /nodes/row/children/2",
+  "dangling_child /nodes/row/children/4",
+  "dangling_child /nodes/info/children/1",
+  "dangling_child /nodes/promoRow/children/1",
+  "dangling_child /nodes/actions/children/1"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 0,
+  "componentsRendered": 0,
+  "componentsNotRendered": [],
+  "replacedControls": [
+   "cancel (outlinedButton)",
+   "promoField (textField)",
+   "tip0 (filledButton)",
+   "tip10 (filledButton)",
+   "tip15 (filledButton)"
+  ]
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 15,
+   "rejected": 11
+  },
+  {
+   "stream": "retry",
+   "applied": 3,
+   "rejected": 4
+  },
+  {
+   "stream": "retry",
+   "applied": 0,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 6,
+ "rejections": [
+  {
+   "op": 5,
+   "code": "expression_syntax",
+   "path": "/nodes/sumTip/props/text",
+   "message": "The formula \"${= 'Tip: $' + tip.toFixed(2)}\" does not parse: Unexpected \"(\" at 23.",
+   "nodeId": "sumTip"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/4",
+   "message": "Child \"sumSub\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/5",
+   "message": "Child \"sumDisc\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/6",
+   "message": "Child \"sumDel\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/7",
+   "message": "Child \"sumTot\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/row/children/2",
+   "message": "Child \"qtyMinus\" of \"row\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "row"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/row/children/4",
+   "message": "Child \"qtyPlus\" of \"row\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "row"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/info/children/1",
+   "message": "Child \"price\" of \"info\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "info"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/1",
+   "message": "Child \"promoApply\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/actions/children/1",
+   "message": "Child \"confirm\" of \"actions\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "actions"
+  }
+ ],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 12,
+  "max": 12
+ },
+ "frames": 58,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 174,
+ "pumpMsMedian": 0.118,
+ "renderExceptions": [],
+ "warnings": 0
+}

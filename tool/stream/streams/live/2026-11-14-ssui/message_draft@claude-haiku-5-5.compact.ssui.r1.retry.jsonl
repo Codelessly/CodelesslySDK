@@ -1,0 +1,51 @@
+{"meta":{"ui":"message_draft","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["message_draft@claude-haiku-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":367,"usage":{"inputTokens":1589,"outputTokens":367,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":382,"firstToolDeltaMs":422,"totalMs":1454,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":382,"check":{"ops":5,"opsApplied":4,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":["unknown_id /ops/0/id"],"lints":[],"warnings":0,"nodes":19,"scripts":0,"scriptChars":0,"designSystemComponents":7,"replacedControls":0},"assets":null}}
+{"tMs":422,"delta":"{\"ops\": [{\"op"}
+{"tMs":439,"delta":"\":\"pat"}
+{"tMs":460,"delta":"ch\",\"id\":\"toInput"}
+{"tMs":480,"delta":"\",\"patch\":{}"}
+{"tMs":500,"delta":"},{\"op\":\"set\",\""}
+{"tMs":522,"delta":"id\":\"toInput\",\"node"}
+{"tMs":542,"delta":"\":{\"type\":\"T"}
+{"tMs":561,"delta":"extInput\",\"props"}
+{"tMs":581,"delta":"\":{\"plac"}
+{"tMs":601,"delta":"eholder\":\"land"}
+{"tMs":622,"delta":"lord@example"}
+{"tMs":641,"delta":".com\",\"value\":\"to"}
+{"tMs":660,"delta":"\""}
+{"tMs":684,"delta":"},\"layout\":{\"width"}
+{"tMs":702,"delta":"\":{\"fill\":342"}
+{"tMs":723,"delta":"},\"height\":28}}},"}
+{"tMs":745,"delta":"{\"op\":\"set"}
+{"tMs":764,"delta":"\",\"id\":\"subjectIn"}
+{"tMs":784,"delta":"put\",\"node\":{\"type\":"}
+{"tMs":805,"delta":"\"TextInput\",\"props\":"}
+{"tMs":826,"delta":"{\"placeholder\":\""}
+{"tMs":847,"delta":"Subject\",\"value\":\"sub"}
+{"tMs":867,"delta":"ject\"},\"layout\":{"}
+{"tMs":888,"delta":"\"width\":{\"fill\":"}
+{"tMs":909,"delta":"342},\"height\":28}}"}
+{"tMs":929,"delta":"},{\"op\":\"set\",\""}
+{"tMs":949,"delta":"id\":\"send\",\"node\":{"}
+{"tMs":970,"delta":"\"type\":\"Button\",\"props"}
+{"tMs":991,"delta":"\":{\"label\":\"Send"}
+{"tMs":1011,"delta":"\",\"variant\":\"primary\",\""}
+{"tMs":1031,"delta":"size\":\"compact\"},\""}
+{"tMs":1052,"delta":"layout\":{\"width\":{"}
+{"tMs":1079,"delta":"\"hug\":72},\"height"}
+{"tMs":1093,"delta":"\":{\"hug\":28}"}
+{"tMs":1113,"delta":"}}"}
+{"tMs":1133,"delta":"},{"}
+{"tMs":1153,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":1174,"delta":"\"sentBanner\",\"node"}
+{"tMs":1194,"delta":"\":{\"type\":\"Ban"}
+{"tMs":1214,"delta":"ner\",\"props\":{\"title"}
+{"tMs":1235,"delta":"\":\"S"}
+{"tMs":1255,"delta":"ent\",\"message\":\"Your"}
+{"tMs":1277,"delta":" email to"}
+{"tMs":1296,"delta":" the landlord has been sent"}
+{"tMs":1319,"delta":".\",\"tone\":\"success"}
+{"tMs":1338,"delta":"\"},\"layout\":{\""}
+{"tMs":1357,"delta":"width\":{\"fill\":342"}
+{"tMs":1385,"delta":"},\"height\":{\"hug"}
+{"tMs":1398,"delta":"\":56}}}}]"}
+{"tMs":1453,"delta":"}"}

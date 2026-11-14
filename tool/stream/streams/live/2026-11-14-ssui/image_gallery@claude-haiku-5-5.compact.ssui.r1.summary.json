@@ -1,0 +1,114 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 60071,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 26033,
+ "generate": {
+  "inputTokens": 319,
+  "outputTokens": 2235,
+  "cacheReadInputTokens": 25954,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 604,
+  "firstToolDeltaMs": 638,
+  "totalMs": 7407,
+  "stopReason": "StopReason.toolUse",
+  "ops": 20,
+  "opsApplied": 19,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "invalid_parent /ops/9/parent"
+  ],
+  "lints": [],
+  "warnings": 6,
+  "nodes": 16,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 3,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 1368,
+   "outputTokens": 322,
+   "cacheReadInputTokens": 25954,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 470,
+   "firstToolDeltaMs": 510,
+   "totalMs": 1501,
+   "stopReason": "StopReason.toolUse",
+   "ops": 4,
+   "opsApplied": 3,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "would_orphan /nodes/panel/children"
+   ],
+   "lints": [],
+   "warnings": 1,
+   "nodes": 16,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 3,
+   "replacedControls": 0
+  },
+  {
+   "inputTokens": 2240,
+   "outputTokens": 212,
+   "cacheReadInputTokens": 25954,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 981,
+   "firstToolDeltaMs": 1021,
+   "totalMs": 1568,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 1,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "wrong_type /nodes/panel/layout/height"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 16,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 3,
+   "replacedControls": 0
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 1,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "wrong_type /nodes/panel/layout/height"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 16,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 3,
+  "replacedControls": 0
+ }
+}

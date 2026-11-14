@@ -1,0 +1,335 @@
+{"meta":{"ui":"flights","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","source":"live","outputTokens":2416,"usage":{"inputTokens":192,"outputTokens":2416,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1385,"firstToolDeltaMs":2179,"totalMs":13699,"stopReason":"StopReason.toolUse"},"text":"I'll build the card with a data-driven list of three flights, a selected index, a computed total and a confirm button.","ttftMs":1385,"check":{"ops":22,"opsApplied":21,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":1,"errors":["unknown_layout_key /nodes/times/layout/hug","dangling_child /nodes/r1/children/0"],"lints":[],"warnings":0,"nodes":19,"scripts":0,"scriptChars":0,"designSystemComponents":2,"replacedControls":0},"assets":null}}
+{"tMs":2179,"delta":"{\"ops\": [{\""}
+{"tMs":2180,"delta":"op\":\"roots\",\"roots"}
+{"tMs":2180,"delta":"\":[\"flights\"]},{"}
+{"tMs":2180,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":2180,"delta":"\"flights\",\"node\":{\""}
+{"tMs":2180,"delta":"type\":\"canvas\",\"sl"}
+{"tMs":2180,"delta":"ots\":{\"body\":\"card"}
+{"tMs":2180,"delta":"\"},\"layout\":{\""}
+{"tMs":2180,"delta":"width\":390,\"height\":{"}
+{"tMs":2180,"delta":"\"hug\":440}}}"}
+{"tMs":2594,"delta":"},{\"op\":\"vars"}
+{"tMs":2594,"delta":"\",\"scope\":\"flights\",\""}
+{"tMs":2594,"delta":"set\":{\"sel\":{"}
+{"tMs":2594,"delta":"\"type\":\"integer\",\"value"}
+{"tMs":2594,"delta":"\":0},\"options\":{"}
+{"tMs":2594,"delta":"\"type\":\"list\",\"value\":"}
+{"tMs":2595,"delta":"[{\"dep\":\"07"}
+{"tMs":2595,"delta":":10\",\"arr\":\"09"}
+{"tMs":2595,"delta":":45\",\"airline\":\"T"}
+{"tMs":2595,"delta":"AP"}
+{"tMs":2595,"delta":" Air"}
+{"tMs":2595,"delta":" Portugal\",\"st"}
+{"tMs":3007,"delta":"ops"}
+{"tMs":3007,"delta":"\":\"Direct\",\"d"}
+{"tMs":3007,"delta":"ur\":\"2h "}
+{"tMs":3007,"delta":"35m\",\"price\":148"}
+{"tMs":3007,"delta":",\"t"}
+{"tMs":3007,"delta":"ag\":\"Best"}
+{"tMs":3007,"delta":" time\",\"tone"}
+{"tMs":3007,"delta":"\":\"prim"}
+{"tMs":3007,"delta":"ary\"},{\"dep\":"}
+{"tMs":3007,"delta":"\"11"}
+{"tMs":3007,"delta":":30"}
+{"tMs":3007,"delta":"\",\"arr\":\"14"}
+{"tMs":3485,"delta":":00"}
+{"tMs":3485,"delta":"\",\"airline\":\"easyJ"}
+{"tMs":3485,"delta":"et\",\"stops\":\"Dire"}
+{"tMs":3485,"delta":"ct\",\"dur\":\"2h"}
+{"tMs":3485,"delta":" 30m\",\"price\":112"}
+{"tMs":3485,"delta":",\"tag\":\"C"}
+{"tMs":3485,"delta":"heapest\",\"tone\":\""}
+{"tMs":3485,"delta":"success\"},{\"dep\":"}
+{"tMs":3485,"delta":"\"17"}
+{"tMs":3485,"delta":":55"}
+{"tMs":3485,"delta":"\",\"arr\":\"22"}
+{"tMs":3485,"delta":":10"}
+{"tMs":3894,"delta":"\",\"airline\":\"British Air"}
+{"tMs":3894,"delta":"ways\",\"stops\":\"1 "}
+{"tMs":3894,"delta":"stop\",\"dur\":\"4"}
+{"tMs":3894,"delta":"h 15m\",\"price\":176"}
+{"tMs":3894,"delta":",\"tag\":\"\",\"t"}
+{"tMs":3894,"delta":"one\":\"neutral\"}"}
+{"tMs":3894,"delta":"]},\""}
+{"tMs":3894,"delta":"total\":{\"type\":\"dec"}
+{"tMs":3894,"delta":"imal\",\"formula\":\"options"}
+{"tMs":3894,"delta":"[sel].price\"}}"}
+{"tMs":3894,"delta":"},{\"op\":\"set\",\""}
+{"tMs":3894,"delta":"id\":\"card\",\"node\":{"}
+{"tMs":4310,"delta":"\"type\":\"column\",\"children\":"}
+{"tMs":4310,"delta":"[\"head\",\"list\",\"foot"}
+{"tMs":4310,"delta":"er\"],\"layout\":{"}
+{"tMs":4310,"delta":"\"width\":{\"fill\":"}
+{"tMs":4310,"delta":"390},\"height\":{\"h"}
+{"tMs":4310,"delta":"ug\":440},\"padding\":"}
+{"tMs":4310,"delta":"12},\"props\":{\"cr"}
+{"tMs":4310,"delta":"ossAxisAlignment"}
+{"tMs":4310,"delta":"\":\"stretch\",\"spac"}
+{"tMs":4310,"delta":"ing\":12},\"decoration"}
+{"tMs":4310,"delta":"\":{\"fills\":[{"}
+{"tMs":4310,"delta":"\"color\":\"primaryB"}
+{"tMs":4711,"delta":"ackground\"}],\"str"}
+{"tMs":4711,"delta":"okes\":[{\"color\":"}
+{"tMs":4711,"delta":"\"primaryBorder\""}
+{"tMs":4711,"delta":"}],\"radius\":8}"}
+{"tMs":4711,"delta":"}},{\"op\":\"set"}
+{"tMs":4711,"delta":"\",\"id\":\"head\",\"node\":"}
+{"tMs":4711,"delta":"{\"type\":\"column\",\"children"}
+{"tMs":4711,"delta":"\":[\"title\",\"s"}
+{"tMs":4711,"delta":"ub\"],\"layout\":{"}
+{"tMs":4711,"delta":"\"width\":{\"fill\":"}
+{"tMs":4711,"delta":"366},\"height\":{\"h"}
+{"tMs":4711,"delta":"ug\":36"}
+{"tMs":5124,"delta":"}},\"props\":{\"cr"}
+{"tMs":5124,"delta":"ossAxisAlignment"}
+{"tMs":5124,"delta":"\":\"start\",\"spacing\":"}
+{"tMs":5125,"delta":"2}}},{\"op\":"}
+{"tMs":5125,"delta":"\"set\",\"id\":\"title\",\""}
+{"tMs":5125,"delta":"node\":{\"type\":\"text"}
+{"tMs":5125,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":5125,"delta":"{\"fill\":366},\""}
+{"tMs":5125,"delta":"height\":{\"hug\":18"}
+{"tMs":5125,"delta":"}},\"props\":{\"text"}
+{"tMs":5125,"delta":"\":\"London to Lisb"}
+{"tMs":5125,"delta":"on\",\""}
+{"tMs":5642,"delta":"style\":{\"from"}
+{"tMs":5642,"delta":"\":\"sectionTitle"}
+{"tMs":5642,"delta":"\",\"color\":\"primaryText"}
+{"tMs":5642,"delta":"\"}}}},{\"op"}
+{"tMs":5642,"delta":"\":\"set\",\"id\":\"s"}
+{"tMs":5642,"delta":"ub\",\"node\":{\"type\":"}
+{"tMs":5642,"delta":"\"text\",\"layout\":{\""}
+{"tMs":5642,"delta":"width\":{\"fill\":366"}
+{"tMs":5642,"delta":"},\"height\":{\"hug"}
+{"tMs":5642,"delta":"\":16}},\"props\":{"}
+{"tMs":5642,"delta":"\"text\":\"Friday,"}
+{"tMs":5642,"delta":" 1 tra"}
+{"tMs":6038,"delta":"veller, one"}
+{"tMs":6038,"delta":" way"}
+{"tMs":6038,"delta":"\",\"style\":{\"from\":\""}
+{"tMs":6038,"delta":"bodySecondary\",\"color"}
+{"tMs":6038,"delta":"\":\"secondaryText\""}
+{"tMs":6038,"delta":"}}}},{\"op\":"}
+{"tMs":6039,"delta":"\"set\",\"id\":\"list\",\""}
+{"tMs":6039,"delta":"node\":{\"type\":\"list"}
+{"tMs":6039,"delta":"View\",\"children\":[\"item\"],"}
+{"tMs":6039,"delta":"\"layout\":{\"width\":"}
+{"tMs":6039,"delta":"{\"fill\":366},\""}
+{"tMs":6039,"delta":"height\":{\"hug\":270"}
+{"tMs":6436,"delta":"}},\"props\":{\"sc"}
+{"tMs":6437,"delta":"rollable\":false,\"sp"}
+{"tMs":6437,"delta":"acing\":8},\"bind"}
+{"tMs":6437,"delta":"\":{\"data\":\"${options"}
+{"tMs":6437,"delta":"}\"}}},{\"op"}
+{"tMs":6437,"delta":"\":\"set\",\"id\":\"item"}
+{"tMs":6437,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":6437,"delta":"column\",\"children\":[\"r"}
+{"tMs":6437,"delta":"1\",\"r2\",\"r3\""}
+{"tMs":6437,"delta":"],\"layout\":{\"width"}
+{"tMs":6437,"delta":"\":{\"fill\":366},"}
+{"tMs":6437,"delta":"\"height\":{\"hug\":"}
+{"tMs":6845,"delta":"82"}
+{"tMs":6845,"delta":"},\"padding\":10"}
+{"tMs":6845,"delta":"},\"props\":{\"cross"}
+{"tMs":6845,"delta":"AxisAlignment\":"}
+{"tMs":6846,"delta":"\"stretch\",\"spacing"}
+{"tMs":6846,"delta":"\":6},\"decoration\":"}
+{"tMs":6846,"delta":"{\"fills\":[{\""}
+{"tMs":6846,"delta":"color\":\"primaryBack"}
+{"tMs":6846,"delta":"ground\"}],\"strokes"}
+{"tMs":6846,"delta":"\":[{\"color\":\"prim"}
+{"tMs":6846,"delta":"aryBorder\"}],"}
+{"tMs":6846,"delta":"\"radius\":8"}
+{"tMs":7257,"delta":"},\"bind\":{\"dec"}
+{"tMs":7257,"delta":"oration.f"}
+{"tMs":7257,"delta":"ills[0].color\":\"${"}
+{"tMs":7257,"delta":"= index == sel ? the"}
+{"tMs":7257,"delta":"me.colors.primary"}
+{"tMs":7257,"delta":"Tint : theme.colors"}
+{"tMs":7257,"delta":".primaryBackground}"}
+{"tMs":7257,"delta":"\",\"decoration.strokes"}
+{"tMs":7257,"delta":"[0].color\":\"${="}
+{"tMs":7257,"delta":" index == sel ? theme"}
+{"tMs":7257,"delta":".colors.primary : the"}
+{"tMs":7257,"delta":"me.colors.primary"}
+{"tMs":7755,"delta":"Border}\"},\"act"}
+{"tMs":7755,"delta":"ions\":[{\"trigger"}
+{"tMs":7755,"delta":"\":{\"type\":\"click\""}
+{"tMs":7755,"delta":"},\"actions\":[{\""}
+{"tMs":7755,"delta":"type\":\"setVariable\",\""}
+{"tMs":7755,"delta":"variable\":\"sel\",\"value"}
+{"tMs":7755,"delta":"\":\"${index}\"}]"}
+{"tMs":7755,"delta":"}]}"}
+{"tMs":7755,"delta":"},{\"op\":\"set\",\""}
+{"tMs":7755,"delta":"id\":\"r1\",\"node\":"}
+{"tMs":7755,"delta":"{\"type\":\"row\",\"children"}
+{"tMs":7755,"delta":"\":[\"times"}
+{"tMs":8157,"delta":"\",\"s"}
+{"tMs":8157,"delta":"p1"}
+{"tMs":8157,"delta":"\",\"price\""}
+{"tMs":8157,"delta":"],\"layout\":{\"width"}
+{"tMs":8157,"delta":"\":{\"fill\":346},"}
+{"tMs":8157,"delta":"\"height\":{\"hug\":"}
+{"tMs":8157,"delta":"20}},\"props\":{\""}
+{"tMs":8157,"delta":"crossAxisAlign"}
+{"tMs":8157,"delta":"ment\":\"center\"}}},"}
+{"tMs":8157,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":8157,"delta":"\":\"times\",\"node\":{\""}
+{"tMs":8157,"delta":"type\":\"text\",\"layout\":"}
+{"tMs":8565,"delta":"{\"h"}
+{"tMs":8565,"delta":"ug\":0"}
+{"tMs":8565,"delta":",\"width\":{\"hug"}
+{"tMs":8565,"delta":"\":120"}
+{"tMs":8565,"delta":"},\"height\":{\"hug"}
+{"tMs":8565,"delta":"\":20}},\"props\":{"}
+{"tMs":8565,"delta":"\"text\":\"${item.d"}
+{"tMs":8565,"delta":"ep} -"}
+{"tMs":8565,"delta":" ${item.arr}\",\""}
+{"tMs":8565,"delta":"style\":{\"from"}
+{"tMs":8565,"delta":"\":\"sectionTitle"}
+{"tMs":8565,"delta":"\",\"color\":\"primaryText"}
+{"tMs":8971,"delta":"\"}}}},{\"op"}
+{"tMs":8971,"delta":"\":\"set\",\"id\":\"s"}
+{"tMs":8971,"delta":"p1\",\"node\":{\"type"}
+{"tMs":8971,"delta":"\":\"spacer\"}},"}
+{"tMs":8971,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":8971,"delta":"\":\"price\",\"node\":{\""}
+{"tMs":8971,"delta":"type\":\"text\",\"layout\":"}
+{"tMs":8971,"delta":"{\"width\":{\"hug"}
+{"tMs":8971,"delta":"\":50"}
+{"tMs":8971,"delta":"},\"height\":{\"hug"}
+{"tMs":8971,"delta":"\":20}},\"props\":{"}
+{"tMs":8971,"delta":"\"text\":\"£"}
+{"tMs":9364,"delta":"${item.price}\",\"style\":"}
+{"tMs":9364,"delta":"{\"from\":\"section"}
+{"tMs":9364,"delta":"Title\",\"color\":\"prim"}
+{"tMs":9364,"delta":"aryText\"}}}},"}
+{"tMs":9364,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":9364,"delta":"\":\"r2\",\"node\":{"}
+{"tMs":9364,"delta":"\"type\":\"text\",\"layout"}
+{"tMs":9364,"delta":"\":{\"width\":{\"f"}
+{"tMs":9364,"delta":"ill\":346},\"height\":{"}
+{"tMs":9364,"delta":"\"hug\":16}},\""}
+{"tMs":9364,"delta":"props\":{\"text\":\"${"}
+{"tMs":9364,"delta":"item.airline} -"}
+{"tMs":9851,"delta":" ${item.stops} -"}
+{"tMs":9851,"delta":" ${item.dur}\",\""}
+{"tMs":9851,"delta":"style\":{\"from\":\"b"}
+{"tMs":9851,"delta":"odySecondary\",\"color\":"}
+{"tMs":9851,"delta":"\"secondaryText\"}"}
+{"tMs":9851,"delta":"}}},{\"op\":\""}
+{"tMs":9851,"delta":"set\",\"id\":\"r3\",\""}
+{"tMs":9851,"delta":"node\":{\"type\":\"row"}
+{"tMs":9851,"delta":"\",\"children\":[\"tagBad"}
+{"tMs":9851,"delta":"ge\"],\"layout\":{"}
+{"tMs":9851,"delta":"\"width\":{\"fill\":"}
+{"tMs":9851,"delta":"346},\"height\":{\"h"}
+{"tMs":10241,"delta":"ug\":20}},\"props\":"}
+{"tMs":10241,"delta":"{\"crossAxisA"}
+{"tMs":10241,"delta":"lignment\":\"center"}
+{"tMs":10241,"delta":"\"},\"bind\":{\""}
+{"tMs":10241,"delta":"visible\":\"${= item."}
+{"tMs":10241,"delta":"tag != ''}\"}"}
+{"tMs":10241,"delta":"}},{\"op\":\"set"}
+{"tMs":10241,"delta":"\",\"id\":\"tagBad"}
+{"tMs":10241,"delta":"ge\",\"node\":{\"type\":"}
+{"tMs":10241,"delta":"\"Badge\",\"props\":{"}
+{"tMs":10241,"delta":"\"label\":\""}
+{"tMs":10241,"delta":"T"}
+{"tMs":10671,"delta":"ag\"},\"lay"}
+{"tMs":10671,"delta":"out\":{\"width\":{\""}
+{"tMs":10671,"delta":"hug\":70"}
+{"tMs":10671,"delta":"},\"height\":{\"hug"}
+{"tMs":10671,"delta":"\":20}},\"bind\":"}
+{"tMs":10671,"delta":"{\"props.label\":\"${"}
+{"tMs":10671,"delta":"item.tag}\",\"props."}
+{"tMs":10671,"delta":"tone\":\"${item"}
+{"tMs":10671,"delta":".tone}\"}}},"}
+{"tMs":10671,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":10671,"delta":"\":\"footer\",\"node\":{"}
+{"tMs":10671,"delta":"\"type\":\"row\",\"children\":"}
+{"tMs":11042,"delta":"[\"totalC"}
+{"tMs":11042,"delta":"ol\",\"s"}
+{"tMs":11042,"delta":"p2\",\"confirm\"],"}
+{"tMs":11042,"delta":"\"layout\":{\"width\":"}
+{"tMs":11042,"delta":"{\"fill\":366},\""}
+{"tMs":11042,"delta":"height\":{\"hug\":36"}
+{"tMs":11042,"delta":"}},\"props\":{\"cr"}
+{"tMs":11042,"delta":"ossAxisAlignment"}
+{"tMs":11042,"delta":"\":\"center\"}}},{"}
+{"tMs":11042,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":11042,"delta":"\"totalCol\",\"node\":"}
+{"tMs":11042,"delta":"{\"type\":\"column\",\"children"}
+{"tMs":11442,"delta":"\":[\"totalLabel\",\""}
+{"tMs":11444,"delta":"totalVal\"],\"lay"}
+{"tMs":11444,"delta":"out\":{\"width\":{\""}
+{"tMs":11444,"delta":"hug\":80"}
+{"tMs":11444,"delta":"},\"height\":{\"hug"}
+{"tMs":11444,"delta":"\":34"}
+{"tMs":11444,"delta":"}},\"props\":{\"cr"}
+{"tMs":11444,"delta":"ossAxisAlignment"}
+{"tMs":11444,"delta":"\":\"start\""}
+{"tMs":11444,"delta":"}}},{\"op\":\""}
+{"tMs":11444,"delta":"set\",\"id\":\"totalL"}
+{"tMs":11444,"delta":"abel\",\"node\":{\"type"}
+{"tMs":11929,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":11929,"delta":"\"width\":{\"hug\":"}
+{"tMs":11929,"delta":"40"}
+{"tMs":11929,"delta":"},\"height\":{\"hug"}
+{"tMs":11929,"delta":"\":14}},\"props\":{"}
+{"tMs":11929,"delta":"\"text\":\"Total\",\"style"}
+{"tMs":11929,"delta":"\":{\"from\":\"caption"}
+{"tMs":11929,"delta":"\",\"color\":\"t"}
+{"tMs":11929,"delta":"ertiaryText\"}}"}
+{"tMs":11929,"delta":"}},{\"op\":\"set"}
+{"tMs":11929,"delta":"\",\"id\":\"totalVal"}
+{"tMs":11929,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":12326,"delta":"text\",\"layout\":{\"width"}
+{"tMs":12326,"delta":"\":{\"hug\":70"}
+{"tMs":12326,"delta":"},\"height\":{\"hug"}
+{"tMs":12326,"delta":"\":20"}
+{"tMs":12326,"delta":"}},\"props"}
+{"tMs":12326,"delta":"\":{\"text\":\"£${"}
+{"tMs":12326,"delta":"total}\",\"style\":{\"from"}
+{"tMs":12326,"delta":"\":\"p"}
+{"tMs":12326,"delta":"ageTitle\",\"color\":\""}
+{"tMs":12326,"delta":"primaryText\"}},\""}
+{"tMs":12326,"delta":"bind\":{\"props.text"}
+{"tMs":12326,"delta":"\":\"${= '"}
+{"tMs":12730,"delta":"£' + total}\"}}"}
+{"tMs":12731,"delta":"},{\"op\":\"set\",\""}
+{"tMs":12731,"delta":"id\":\"sp2\",\"node"}
+{"tMs":12731,"delta":"\":{\"type\":\"spac"}
+{"tMs":12731,"delta":"er\"}},{\"op\":"}
+{"tMs":12731,"delta":"\"set\",\"id\":\"confir"}
+{"tMs":12731,"delta":"m\",\"node\":{\"type\":"}
+{"tMs":12731,"delta":"\"Button\",\"props\":{\""}
+{"tMs":12731,"delta":"label\":\"Confirm fl"}
+{"tMs":12731,"delta":"ight\""}
+{"tMs":12731,"delta":"},\"layout\":{\"width"}
+{"tMs":12731,"delta":"\":{\"hug\":110},"}
+{"tMs":13121,"delta":"\"height\":{\"hug\":"}
+{"tMs":13121,"delta":"28}},\"actions\":["}
+{"tMs":13121,"delta":"{\"trigger\":{\""}
+{"tMs":13121,"delta":"type\":\"click"}
+{"tMs":13121,"delta":"\"},\"actions\":[{"}
+{"tMs":13121,"delta":"\"type\":\"show"}
+{"tMs":13121,"delta":"Toast\",\"message"}
+{"tMs":13121,"delta":"\":\"${"}
+{"tMs":13121,"delta":"= 'Boo"}
+{"tMs":13121,"delta":"ked ' + options[sel"}
+{"tMs":13121,"delta":"].d"}
+{"tMs":13121,"delta":"ep + ' "}
+{"tMs":13676,"delta":"' + options[sel].air"}
+{"tMs":13676,"delta":"line + ' for £"}
+{"tMs":13676,"delta":"' + options"}
+{"tMs":13676,"delta":"[sel].price}\"},"}
+{"tMs":13676,"delta":"{\"type\":\"componentE"}
+{"tMs":13676,"delta":"vent\",\"event\":\"confir"}
+{"tMs":13676,"delta":"m\",\"value\":{\"option\":"}
+{"tMs":13676,"delta":"\"${sel}\",\"flight"}
+{"tMs":13676,"delta":"\":\"${options[sel]"}
+{"tMs":13676,"delta":"}\"}}]}]"}
+{"tMs":13676,"delta":"}}]"}
+{"tMs":13684,"delta":"}"}

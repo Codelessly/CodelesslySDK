@@ -1,0 +1,806 @@
+{"meta":{"ui":"itinerary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"generate","prompt":"Plan two days in Kyoto as an inline itinerary: a timeline per day with times, places, how to get between them and how long it takes. Each stop expands for details, each day has a checklist of things to book that I can tick off, and a line at the top says how many are left.","source":"live","outputTokens":5437,"usage":{"inputTokens":313,"outputTokens":5437,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":442,"firstToolDeltaMs":470,"totalMs":16986,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":442,"check":{"ops":40,"opsApplied":33,"opsRejected":7,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":7,"errors":["wrong_type /nodes/t1aDetail/visible","wrong_type /nodes/t1bDetail/visible","wrong_type /nodes/t1cDetail/visible","wrong_type /nodes/t1dDetail/visible","wrong_type /nodes/t2aDetail/visible","wrong_type /nodes/t2bDetail/visible","wrong_type /nodes/t2cDetail/visible","dangling_child /nodes/t1a/children/1","dangling_child /nodes/t1b/children/1","dangling_child /nodes/t1c/children/1","dangling_child /nodes/t1d/children/1","dangling_child /nodes/t2a/children/1","dangling_child /nodes/t2b/children/1","dangling_child /nodes/t2c/children/1"],"lints":[],"warnings":0,"nodes":31,"scripts":0,"scriptChars":0,"designSystemComponents":6,"replacedControls":0},"assets":null}}
+{"tMs":470,"delta":"{\"ops\": [{\"op"}
+{"tMs":489,"delta":"\":\"roots\",\"roots\":"}
+{"tMs":510,"delta":"[\"kyoto\"]},"}
+{"tMs":530,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":551,"delta":"\":\"kyoto\",\"node"}
+{"tMs":571,"delta":"\":{\"type\":\"canv"}
+{"tMs":591,"delta":"as\",\"slots\":{\"body"}
+{"tMs":615,"delta":"\":\"card\"},\"layout"}
+{"tMs":633,"delta":"\":{\"width\":390,\""}
+{"tMs":654,"delta":"height\":{\"hug\":900"}
+{"tMs":672,"delta":"}}"}
+{"tMs":691,"delta":"}},"}
+{"tMs":711,"delta":"{\"op\":\"v"}
+{"tMs":732,"delta":"ars\",\"scope\":\"ky"}
+{"tMs":752,"delta":"oto\",\"set\":{\"boo"}
+{"tMs":772,"delta":"ked1"}
+{"tMs":792,"delta":"\":{\"type\":\"integer"}
+{"tMs":813,"delta":"\",\"value\":0},\"booked"}
+{"tMs":835,"delta":"2\":{\"type\":\"integ"}
+{"tMs":854,"delta":"er\",\"value\":0},\"open"}
+{"tMs":874,"delta":"1\":{\"type\":\"integ"}
+{"tMs":894,"delta":"er\",\"value\":-"}
+{"tMs":915,"delta":"1},\"open2\":{\""}
+{"tMs":936,"delta":"type\":\"integer\",\"value\":"}
+{"tMs":956,"delta":"-1},\"c1a"}
+{"tMs":977,"delta":"\":{\"type\":\"bool"}
+{"tMs":997,"delta":"ean\",\"value\":false},\"c"}
+{"tMs":1018,"delta":"1b\":{\"type\":\""}
+{"tMs":1038,"delta":"boolean\",\"value\":false},"}
+{"tMs":1058,"delta":"\"c1c\":{\"type"}
+{"tMs":1090,"delta":"\":\"boolean\",\"value\":"}
+{"tMs":1099,"delta":"false},\"c2a\":{"}
+{"tMs":1120,"delta":"\"type\":\"boolean\",\""}
+{"tMs":1147,"delta":"value\":false},\"c2b"}
+{"tMs":1164,"delta":"\":{\"type\":\"bool"}
+{"tMs":1182,"delta":"ean\",\"value\":false},\"c"}
+{"tMs":1202,"delta":"2c\":{\"type\":\""}
+{"tMs":1226,"delta":"boolean\",\"value\":false},"}
+{"tMs":1243,"delta":"\"left\":{\"type\":\""}
+{"tMs":1280,"delta":"integer\",\"form"}
+{"tMs":1294,"delta":"ula\":\"6"}
+{"tMs":1310,"delta":" - (c1a "}
+{"tMs":1328,"delta":"? 1"}
+{"tMs":1344,"delta":" : 0) - (c"}
+{"tMs":1365,"delta":"1b ? 1 :"}
+{"tMs":1385,"delta":" 0) - (c1c"}
+{"tMs":1406,"delta":" ? 1 : 0"}
+{"tMs":1429,"delta":") - (c2a ?"}
+{"tMs":1447,"delta":" 1 : 0) -"}
+{"tMs":1467,"delta":" (c2b ? 1"}
+{"tMs":1488,"delta":" : 0) - (c"}
+{"tMs":1510,"delta":"2c ? 1 :"}
+{"tMs":1533,"delta":" 0)\"}}},{"}
+{"tMs":1548,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":1570,"delta":"\"card\",\"node\":{\"type"}
+{"tMs":1590,"delta":"\":\"column\",\"children\":[\"left"}
+{"tMs":1610,"delta":"\",\"d"}
+{"tMs":1631,"delta":"1\",\"d2\"],\"lay"}
+{"tMs":1650,"delta":"out\":{\"width\":{\""}
+{"tMs":1671,"delta":"fill\":390},\"height\":"}
+{"tMs":1691,"delta":"{\"hug\":900"}
+{"tMs":1712,"delta":"},\"padding\":16},\""}
+{"tMs":1732,"delta":"props\":{\"crossAx"}
+{"tMs":1754,"delta":"isAlignment\":\"st"}
+{"tMs":1776,"delta":"retch\",\"spacing\":16"}
+{"tMs":1798,"delta":"},\"decoration\":{\""}
+{"tMs":1819,"delta":"fills\":[{\"color\":"}
+{"tMs":1834,"delta":"\"#FFFFFF"}
+{"tMs":1855,"delta":"FF\"}],\"radius"}
+{"tMs":1875,"delta":"\":8"}
+{"tMs":1895,"delta":","}
+{"tMs":1916,"delta":"\"strokes\":[{\""}
+{"tMs":1936,"delta":"color\":\"#F"}
+{"tMs":1956,"delta":"FE5"}
+{"tMs":1977,"delta":"E7EB\"}]}"}
+{"tMs":1997,"delta":"}},{\"op\":\"set"}
+{"tMs":2018,"delta":"\",\"id\":\"left\",\"node\":"}
+{"tMs":2039,"delta":"{\"type\":\"text\",\"lay"}
+{"tMs":2058,"delta":"out\":{\"width\":{\""}
+{"tMs":2079,"delta":"fill\":358},\"height\":"}
+{"tMs":2099,"delta":"{\"hug\":20}},"}
+{"tMs":2120,"delta":"\"props\":{\"text\":\""}
+{"tMs":2140,"delta":"${left} bookings left to"}
+{"tMs":2177,"delta":" make"}
+{"tMs":2184,"delta":"\",\"style\":{\"fontS"}
+{"tMs":2201,"delta":"ize\":14"}
+{"tMs":2221,"delta":",\"f"}
+{"tMs":2242,"delta":"ontWeight\":600,\""}
+{"tMs":2262,"delta":"color\":\"#FF111827"}
+{"tMs":2283,"delta":"\"}}}},{\"op"}
+{"tMs":2303,"delta":"\":\"set\",\"id\":\"d"}
+{"tMs":2323,"delta":"1\",\"node\":{\"type\":"}
+{"tMs":2344,"delta":"\"column\",\"children\":[\"d"}
+{"tMs":2364,"delta":"1title"}
+{"tMs":2384,"delta":"\",\"t"}
+{"tMs":2405,"delta":"1a"}
+{"tMs":2426,"delta":"\",\"t1b\",\"t1c"}
+{"tMs":2445,"delta":"\",\"t1d\",\"ch"}
+{"tMs":2466,"delta":"k1\"],\"layout\":"}
+{"tMs":2487,"delta":"{\"width\":{\"fill"}
+{"tMs":2510,"delta":"\":358},\"height\":{\""}
+{"tMs":2527,"delta":"hug\":400"}
+{"tMs":2547,"delta":"},\"padding\":12"}
+{"tMs":2568,"delta":"},\"props\":{\"cr"}
+{"tMs":2589,"delta":"ossAxisAlignment"}
+{"tMs":2610,"delta":"\":\"st"}
+{"tMs":2630,"delta":"retch\",\"spacing\":10"}
+{"tMs":2654,"delta":"},\"decoration\":{\""}
+{"tMs":2670,"delta":"fills\":[{\"color\":"}
+{"tMs":2694,"delta":"\"#FFF9FA"}
+{"tMs":2711,"delta":"FB\"}],\"rad"}
+{"tMs":2733,"delta":"ius\":8}"}
+{"tMs":2752,"delta":"}},{\"op\":\"set"}
+{"tMs":2772,"delta":"\",\"id\":\"d1title\",\""}
+{"tMs":2792,"delta":"node\":{\"type\":\"text"}
+{"tMs":2826,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":2833,"delta":"{\"fill\":334"}
+{"tMs":2854,"delta":"},\"height\":{\"hug"}
+{"tMs":2874,"delta":"\":22"}
+{"tMs":2895,"delta":"}},\"props\":{\"text"}
+{"tMs":2918,"delta":"\":\"Day 1:"}
+{"tMs":2935,"delta":" Hig"}
+{"tMs":2955,"delta":"ashi"}
+{"tMs":2975,"delta":"yama and G"}
+{"tMs":2997,"delta":"ion"}
+{"tMs":3016,"delta":"\",\"style\":{\"fontS"}
+{"tMs":3037,"delta":"ize\":16,\"fontW"}
+{"tMs":3057,"delta":"eight\":700"}
+{"tMs":3079,"delta":",\"color\":\"#FF"}
+{"tMs":3098,"delta":"111827\"}}}},{"}
+{"tMs":3119,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":3139,"delta":"\"t1a\",\"node\":{"}
+{"tMs":3162,"delta":"\"type\":\"column\",\"children\":"}
+{"tMs":3180,"delta":"[\"t1a"}
+{"tMs":3200,"delta":"R"}
+{"tMs":3220,"delta":"ow\",\"t1aD"}
+{"tMs":3241,"delta":"etail\"],\"layout\":"}
+{"tMs":3262,"delta":"{\"width\":{\"fill"}
+{"tMs":3282,"delta":"\":334},\"height\":{\""}
+{"tMs":3302,"delta":"hug\":60"}
+{"tMs":3323,"delta":"}},\"props\":{\"cr"}
+{"tMs":3342,"delta":"ossAxisAlignment"}
+{"tMs":3363,"delta":"\":\"st"}
+{"tMs":3383,"delta":"retch\",\"spacing\":6"}
+{"tMs":3404,"delta":"},\"act"}
+{"tMs":3424,"delta":"ions\":[{\"trigger"}
+{"tMs":3445,"delta":"\":{\"type\":\"click\""}
+{"tMs":3466,"delta":"},\"actions\":[{\""}
+{"tMs":3486,"delta":"type\":\"setVariable\",\""}
+{"tMs":3506,"delta":"variable\":\"open1\",\"value"}
+{"tMs":3526,"delta":"\":\"${="}
+{"tMs":3547,"delta":" open1 =="}
+{"tMs":3567,"delta":" 0 ? -"}
+{"tMs":3590,"delta":"1 : 0}\"}"}
+{"tMs":3608,"delta":"]}]}},{\"op"}
+{"tMs":3628,"delta":"\":\"set\",\"id\":\"t"}
+{"tMs":3654,"delta":"1aRow\",\"node\":{"}
+{"tMs":3669,"delta":"\"type\":\"text\",\"layout"}
+{"tMs":3689,"delta":"\":{\"width\":{\"f"}
+{"tMs":3711,"delta":"ill\":334},\"height\":{"}
+{"tMs":3731,"delta":"\"hug\":20}},\""}
+{"tMs":3751,"delta":"props\":{\"text\":\"09"}
+{"tMs":3777,"delta":":00"}
+{"tMs":3792,"delta":"  "}
+{"tMs":3813,"delta":"Fushimi In"}
+{"tMs":3832,"delta":"ari"}
+{"tMs":3853,"delta":" Shrine  (2"}
+{"tMs":3873,"delta":" h)"}
+{"tMs":3894,"delta":"\",\""}
+{"tMs":3914,"delta":"style\":{\"fontSize"}
+{"tMs":3934,"delta":"\":14"}
+{"tMs":3955,"delta":",\"fontWeight\":"}
+{"tMs":3975,"delta":"600,\"color\":\"#F"}
+{"tMs":3996,"delta":"F111827\"}}}},"}
+{"tMs":4016,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":4038,"delta":"\":\"t1aDetail"}
+{"tMs":4057,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":4082,"delta":"text\",\"layout\":{\"width"}
+{"tMs":4098,"delta":"\":{\"fill\":334},"}
+{"tMs":4118,"delta":"\"height\":{\"hug\":"}
+{"tMs":4138,"delta":"40}},\"vis"}
+{"tMs":4159,"delta":"ible\":\""}
+{"tMs":4180,"delta":"${open"}
+{"tMs":4200,"delta":"1 == 0}\",\"props"}
+{"tMs":4220,"delta":"\":{\"text\":\"Wal"}
+{"tMs":4241,"delta":"k the tor"}
+{"tMs":4260,"delta":"ii g"}
+{"tMs":4281,"delta":"ates up the m"}
+{"tMs":4301,"delta":"ountain. Get"}
+{"tMs":4322,"delta":" there early to"}
+{"tMs":4342,"delta":" avoid crowds."}
+{"tMs":4363,"delta":" Get"}
+{"tMs":4384,"delta":"ting between"}
+{"tMs":4403,"delta":":"}
+{"tMs":4423,"delta":" 10"}
+{"tMs":4450,"delta":" min walk from J"}
+{"tMs":4466,"delta":"R Inari station"}
+{"tMs":4485,"delta":".\",\"style\":{\"font"}
+{"tMs":4505,"delta":"Size\":13,\"height"}
+{"tMs":4530,"delta":"\":1.4"}
+{"tMs":4546,"delta":",\"color\":\"#FF"}
+{"tMs":4566,"delta":"4"}
+{"tMs":4586,"delta":"B5563\"}}}"}
+{"tMs":4608,"delta":"},{\"op\":\"set\",\""}
+{"tMs":4627,"delta":"id\":\"t1b\",\"node"}
+{"tMs":4648,"delta":"\":{\"type\":\"column\",\""}
+{"tMs":4674,"delta":"children\":[\"t1bRow"}
+{"tMs":4689,"delta":"\",\"t1bDetail\""}
+{"tMs":4710,"delta":"],\"layout\":{\"width"}
+{"tMs":4729,"delta":"\":{\"fill\":334},"}
+{"tMs":4750,"delta":"\"height\":{\"hug\":"}
+{"tMs":4770,"delta":"60}},\"props\":{\""}
+{"tMs":4791,"delta":"crossAxisAlign"}
+{"tMs":4811,"delta":"ment\":\"stretch\",\"sp"}
+{"tMs":4832,"delta":"acing\":6},\"actions"}
+{"tMs":4853,"delta":"\":[{\"trigger\":"}
+{"tMs":4873,"delta":"{\"type\":\"click\"},"}
+{"tMs":4893,"delta":"\"actions\":[{\"type"}
+{"tMs":4913,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":4934,"delta":"able\":\"open1\",\"value\":"}
+{"tMs":4954,"delta":"\"${= open1 == "}
+{"tMs":4975,"delta":"1 ? -1 :"}
+{"tMs":4996,"delta":" 1}\"}]}]"}
+{"tMs":5016,"delta":"}},{\"op\":\"set"}
+{"tMs":5036,"delta":"\",\"id\":\"t1bR"}
+{"tMs":5057,"delta":"ow\",\"node\":{\"type\":"}
+{"tMs":5077,"delta":"\"text\",\"layout\":{\""}
+{"tMs":5097,"delta":"width\":{\"fill\":334"}
+{"tMs":5118,"delta":"},\"height\":{\"hug"}
+{"tMs":5138,"delta":"\":20}},\"props\":{"}
+{"tMs":5159,"delta":"\"text\":\"12:00"}
+{"tMs":5179,"delta":"  N"}
+{"tMs":5200,"delta":"ishi"}
+{"tMs":5220,"delta":"ki Market"}
+{"tMs":5240,"delta":" l"}
+{"tMs":5261,"delta":"unch  (1 h)"}
+{"tMs":5281,"delta":"\",\"style\":{\"fontS"}
+{"tMs":5301,"delta":"ize\":14,\"fontW"}
+{"tMs":5322,"delta":"eight\":600,\"color\":"}
+{"tMs":5343,"delta":"\"#FF111827\"}"}
+{"tMs":5363,"delta":"}}},{\"op\":\""}
+{"tMs":5384,"delta":"set\",\"id\":\"t1b"}
+{"tMs":5404,"delta":"Detail\",\"node\":{\""}
+{"tMs":5424,"delta":"type\":\"text\",\"layout\":"}
+{"tMs":5444,"delta":"{\"width\":{\"fill"}
+{"tMs":5465,"delta":"\":334},\"height\":{\""}
+{"tMs":5485,"delta":"hug\":40}},\"vis"}
+{"tMs":5506,"delta":"ible\":\"${open1 =="}
+{"tMs":5526,"delta":" 1}\",\"props\":{\""}
+{"tMs":5546,"delta":"text\":\"Street"}
+{"tMs":5567,"delta":" food and"}
+{"tMs":5587,"delta":" p"}
+{"tMs":5608,"delta":"ickles in"}
+{"tMs":5627,"delta":" a narrow cov"}
+{"tMs":5649,"delta":"ered ar"}
+{"tMs":5668,"delta":"cade. Getting between:"}
+{"tMs":5690,"delta":" train"}
+{"tMs":5709,"delta":" from"}
+{"tMs":5729,"delta":" Inari to"}
+{"tMs":5750,"delta":" K"}
+{"tMs":5774,"delta":"yoto,"}
+{"tMs":5790,"delta":" then"}
+{"tMs":5811,"delta":" 15"}
+{"tMs":5831,"delta":" min wal"}
+{"tMs":5852,"delta":"k,"}
+{"tMs":5873,"delta":" about 25"}
+{"tMs":5892,"delta":" min total"}
+{"tMs":5913,"delta":".\",\"style\":{\"font"}
+{"tMs":5933,"delta":"Size\":13,\"height\":"}
+{"tMs":5954,"delta":"1.4,\"color\":\""}
+{"tMs":5974,"delta":"#F"}
+{"tMs":5994,"delta":"F4B5563\"}}"}
+{"tMs":6015,"delta":"}},{\"op\":\"set"}
+{"tMs":6035,"delta":"\",\"id\":\"t1c\",\""}
+{"tMs":6056,"delta":"node\":{\"type\":\"column"}
+{"tMs":6083,"delta":"\",\"children\":[\"t1cR"}
+{"tMs":6102,"delta":"ow\",\"t1cDetail"}
+{"tMs":6117,"delta":"\"],\"layout\":{\""}
+{"tMs":6138,"delta":"width\":{\"fill\":334"}
+{"tMs":6162,"delta":"},\"height\":{\"hug"}
+{"tMs":6178,"delta":"\":60}},\"props\":{"}
+{"tMs":6199,"delta":"\"crossAxisAl"}
+{"tMs":6219,"delta":"ignment\":\"stretch\",\""}
+{"tMs":6239,"delta":"spacing\":6},\"act"}
+{"tMs":6261,"delta":"ions\":[{\"trigger"}
+{"tMs":6280,"delta":"\":{\"type\":\"click\""}
+{"tMs":6301,"delta":"},\"actions\":[{\""}
+{"tMs":6321,"delta":"type\":\"setVariable\",\""}
+{"tMs":6341,"delta":"variable\":\"open1\",\"value"}
+{"tMs":6362,"delta":"\":\"${= open1 =="}
+{"tMs":6383,"delta":" 2 ? -1 "}
+{"tMs":6404,"delta":": 2}\"}]}"}
+{"tMs":6423,"delta":"]}},{\"op\":\""}
+{"tMs":6444,"delta":"set\",\"id\":\"t1c"}
+{"tMs":6479,"delta":"Row\",\"node\":{\"type"}
+{"tMs":6489,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":6506,"delta":"\"width\":{\"fill\":"}
+{"tMs":6530,"delta":"334},"}
+{"tMs":6546,"delta":"\"height\":{\"hug\":"}
+{"tMs":6567,"delta":"20}},\"props\":{\""}
+{"tMs":6587,"delta":"text\":\"15:00  "}
+{"tMs":6609,"delta":"Kiyomizu-"}
+{"tMs":6628,"delta":"dera"}
+{"tMs":6649,"delta":" Temple  (2 h)"}
+{"tMs":6670,"delta":"\",\"style\":{\"fontS"}
+{"tMs":6690,"delta":"ize\":14,\"fontW"}
+{"tMs":6709,"delta":"eight\":600,\"color\":"}
+{"tMs":6730,"delta":"\"#FF111827"}
+{"tMs":6750,"delta":"\"}}"}
+{"tMs":6771,"delta":"}},{\"op\":\"set"}
+{"tMs":6791,"delta":"\",\"id\":\"t1cD"}
+{"tMs":6812,"delta":"etail\",\"node\":{\"type"}
+{"tMs":6832,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":6856,"delta":"\"width\":{\"fill\":"}
+{"tMs":6881,"delta":"334},"}
+{"tMs":6898,"delta":"\"height\":{\"hug\":"}
+{"tMs":6920,"delta":"40}},\"visible\":\""}
+{"tMs":6939,"delta":"${open1 == 2}"}
+{"tMs":6963,"delta":"\",\"props\":{\"text\":\""}
+{"tMs":6975,"delta":"Wooden st"}
+{"tMs":6995,"delta":"age over"}
+{"tMs":7015,"delta":" the"}
+{"tMs":7036,"delta":" hill"}
+{"tMs":7056,"delta":"side,"}
+{"tMs":7077,"delta":" s"}
+{"tMs":7097,"delta":"unset views"}
+{"tMs":7117,"delta":". Getting between: 20"}
+{"tMs":7138,"delta":" min wal"}
+{"tMs":7158,"delta":"k u"}
+{"tMs":7178,"delta":"phill via"}
+{"tMs":7199,"delta":" S"}
+{"tMs":7219,"delta":"ann"}
+{"tMs":7239,"delta":"en"}
+{"tMs":7260,"delta":"za"}
+{"tMs":7280,"delta":"ka and"}
+{"tMs":7300,"delta":" Ninen"}
+{"tMs":7321,"delta":"zaka l"}
+{"tMs":7341,"delta":"anes.\",\"style\":{\""}
+{"tMs":7362,"delta":"fontSize\":13,\""}
+{"tMs":7390,"delta":"height\":1.4,\"color"}
+{"tMs":7403,"delta":"\":\"#FF4B5"}
+{"tMs":7423,"delta":"563\"}}}},{\""}
+{"tMs":7444,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":7464,"delta":"t1d\",\"node\":{\""}
+{"tMs":7484,"delta":"type\":\"column\",\"children\":[\""}
+{"tMs":7506,"delta":"t1dRow\",\"t1"}
+{"tMs":7525,"delta":"dDetail\"],\"lay"}
+{"tMs":7546,"delta":"out\":{\"width\":{\""}
+{"tMs":7566,"delta":"fill\":334},"}
+{"tMs":7587,"delta":"\"height\":{\"hug\":"}
+{"tMs":7607,"delta":"60"}
+{"tMs":7627,"delta":"}},\"props\":{\"cr"}
+{"tMs":7649,"delta":"ossAxisAlignment"}
+{"tMs":7669,"delta":"\":\"stretch\",\"spac"}
+{"tMs":7688,"delta":"ing\":6},\"actions\":"}
+{"tMs":7715,"delta":"[{\"trigger\":{"}
+{"tMs":7729,"delta":"\"type\":\"click\"},\""}
+{"tMs":7750,"delta":"actions\":[{\"type\":"}
+{"tMs":7770,"delta":"\"setVariable\",\"variable"}
+{"tMs":7803,"delta":"\":\"open1\",\"value\":\""}
+{"tMs":7814,"delta":"${= open1 == 3"}
+{"tMs":7834,"delta":" ? -1 : "}
+{"tMs":7852,"delta":"3}\"}]}]}"}
+{"tMs":7872,"delta":"},{\"op\":\"set\",\""}
+{"tMs":7912,"delta":"id\":\"t1dRow"}
+{"tMs":7913,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":7934,"delta":"text\",\"layout\":{\"width"}
+{"tMs":7954,"delta":"\":{\"fill\":334},"}
+{"tMs":7975,"delta":"\"height\":{\"hug\":"}
+{"tMs":8000,"delta":"20}},\"props\":{\""}
+{"tMs":8015,"delta":"text\":\"19"}
+{"tMs":8035,"delta":":00  Gion"}
+{"tMs":8056,"delta":" ev"}
+{"tMs":8076,"delta":"ening wal"}
+{"tMs":8096,"delta":"k  (2 h)\",\""}
+{"tMs":8117,"delta":"style\":{\"fontSize"}
+{"tMs":8138,"delta":"\":14,\"fontWe"}
+{"tMs":8158,"delta":"ight\":600,\"color\":\""}
+{"tMs":8179,"delta":"#FF111827\"}}"}
+{"tMs":8199,"delta":"}},{\"op\":\"set"}
+{"tMs":8219,"delta":"\",\"id\":\"t1dD"}
+{"tMs":8240,"delta":"etail\",\"node\":{\"type"}
+{"tMs":8261,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":8280,"delta":"\"width\":{\"fill\":"}
+{"tMs":8301,"delta":"334},\"height\":{\"h"}
+{"tMs":8321,"delta":"ug\":40}},\"visible"}
+{"tMs":8341,"delta":"\":\"${open1 == "}
+{"tMs":8362,"delta":"3}\",\"props\":{\"text"}
+{"tMs":8382,"delta":"\":\"Look"}
+{"tMs":8403,"delta":" for geisha in"}
+{"tMs":8424,"delta":" the old stre"}
+{"tMs":8444,"delta":"ets of"}
+{"tMs":8464,"delta":" H"}
+{"tMs":8485,"delta":"an"}
+{"tMs":8505,"delta":"amik"}
+{"tMs":8525,"delta":"o"}
+{"tMs":8546,"delta":"ji. Getting between: "}
+{"tMs":8566,"delta":"15"}
+{"tMs":8586,"delta":" min walk down"}
+{"tMs":8610,"delta":"hill from Kiyom"}
+{"tMs":8627,"delta":"izu.\",\"style\":{\""}
+{"tMs":8647,"delta":"fontSize\":13,\""}
+{"tMs":8669,"delta":"height\":1.4,\"color"}
+{"tMs":8689,"delta":"\":\"#F"}
+{"tMs":8720,"delta":"F4B5563\"}}"}
+{"tMs":8729,"delta":"}},{\"op\":\"set"}
+{"tMs":8750,"delta":"\",\"id\":\"chk1\",\""}
+{"tMs":8771,"delta":"node\":{\"type\":\"column"}
+{"tMs":8791,"delta":"\",\"children\":[\""}
+{"tMs":8813,"delta":"ck1h"}
+{"tMs":8834,"delta":"\",\"ck1a"}
+{"tMs":8852,"delta":"\",\"ck1b\",\"ck"}
+{"tMs":8873,"delta":"1c\"],\"layout\":"}
+{"tMs":8893,"delta":"{\"width\":{\"fill"}
+{"tMs":8914,"delta":"\":334},\"height\":{\""}
+{"tMs":8934,"delta":"hug\":120},\"pad"}
+{"tMs":8953,"delta":"ding\":["}
+{"tMs":8975,"delta":"0"}
+{"tMs":8995,"delta":",8"}
+{"tMs":9017,"delta":",0,0]},\"props"}
+{"tMs":9035,"delta":"\":{\"crossAxis"}
+{"tMs":9056,"delta":"Alignment\":\"start"}
+{"tMs":9079,"delta":"\",\"spacing\":6"}
+{"tMs":9096,"delta":"}}"}
+{"tMs":9130,"delta":"},{\"op\":\"set\",\""}
+{"tMs":9149,"delta":"id\":\"ck1h\",\""}
+{"tMs":9161,"delta":"node\":{\"type\":\"text"}
+{"tMs":9187,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":9198,"delta":"{\"fill\":334},\""}
+{"tMs":9222,"delta":"height\":{\"hug\":18"}
+{"tMs":9239,"delta":"}},\"props\":{\"text"}
+{"tMs":9263,"delta":"\":\"To book ("}
+{"tMs":9314,"delta":"Day 1)\",\"style\":{"}
+{"tMs":9324,"delta":"\"fontSize\":13"}
+{"tMs":9342,"delta":",\"fontWeight\":"}
+{"tMs":9362,"delta":"700,\"color\":\"#F"}
+{"tMs":9382,"delta":"F111"}
+{"tMs":9405,"delta":"827\"}}}},{\""}
+{"tMs":9423,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":9443,"delta":"ck1a\",\"node\":{"}
+{"tMs":9464,"delta":"\"type\":\""}
+{"tMs":9484,"delta":"Checkbox\",\"layout\":"}
+{"tMs":9504,"delta":"{\"width\":{\"fill"}
+{"tMs":9525,"delta":"\":334},\"height\":28"}
+{"tMs":9546,"delta":"},\"props\":{\"label\":"}
+{"tMs":9567,"delta":"\"Ka"}
+{"tMs":9586,"delta":"ise"}
+{"tMs":9607,"delta":"ki d"}
+{"tMs":9627,"delta":"inner in"}
+{"tMs":9648,"delta":" Gion\",\"value\":\"c"}
+{"tMs":9670,"delta":"1a\"},"}
+{"tMs":9688,"delta":"\"act"}
+{"tMs":9709,"delta":"ions\":[{\"trigger"}
+{"tMs":9730,"delta":"\":{\"type\":\"event"}
+{"tMs":9749,"delta":"\",\"event\":\"on"}
+{"tMs":9770,"delta":"Changed\"},\"actions"}
+{"tMs":9790,"delta":"\":[{\"type\":\"set"}
+{"tMs":9811,"delta":"Variable\",\"variable\":\""}
+{"tMs":9832,"delta":"c1a\",\"value\":\"${"}
+{"tMs":9851,"delta":"result}\"}]}]}"}
+{"tMs":9872,"delta":"},{\"op\":\"set\",\""}
+{"tMs":9893,"delta":"id\":\"ck1b\",\""}
+{"tMs":9913,"delta":"node\":{\"type\":\""}
+{"tMs":9934,"delta":"Checkbox\",\"layout\":"}
+{"tMs":9954,"delta":"{\"width\":{\"fill"}
+{"tMs":9974,"delta":"\":334},\"height\":28},"}
+{"tMs":9995,"delta":"\"props\":{\"label\":\""}
+{"tMs":10035,"delta":"Ryokan check"}
+{"tMs":10056,"delta":"-in conf"}
+{"tMs":10076,"delta":"irmation\",\"value\":\"c"}
+{"tMs":10096,"delta":"1b\"},\"actions\":"}
+{"tMs":10117,"delta":"[{\"trigger\":{"}
+{"tMs":10139,"delta":"\"type\":\"event\",\"event\":"}
+{"tMs":10176,"delta":"\"onChanged\"},\""}
+{"tMs":10179,"delta":"actions\":[{\"type\":"}
+{"tMs":10198,"delta":"\"setVariable\",\"variable"}
+{"tMs":10219,"delta":"\":\"c1b\",\"value\":"}
+{"tMs":10240,"delta":"\"${result}\"}]}"}
+{"tMs":10260,"delta":"]}},{\"op\":\""}
+{"tMs":10280,"delta":"set\",\"id\":\"ck1"}
+{"tMs":10301,"delta":"c\",\"node\":{\"type\":"}
+{"tMs":10322,"delta":"\"Checkbox\",\"lay"}
+{"tMs":10341,"delta":"out\":{\"width\":{\""}
+{"tMs":10362,"delta":"fill\":334},\"height\":"}
+{"tMs":10383,"delta":"28},\"props\":{\"label"}
+{"tMs":10403,"delta":"\":\"Tim"}
+{"tMs":10425,"delta":"ed entry for"}
+{"tMs":10444,"delta":" Kiyomizu-"}
+{"tMs":10464,"delta":"dera\",\"value\":\"c1"}
+{"tMs":10485,"delta":"c\"},\"actions\":["}
+{"tMs":10505,"delta":"{\"trigger\":{\""}
+{"tMs":10525,"delta":"type\":\"event\",\"event\":\""}
+{"tMs":10545,"delta":"onChanged\"},"}
+{"tMs":10566,"delta":"\"actions\":[{\"type"}
+{"tMs":10586,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":10609,"delta":"able\":\"c1c\",\"value"}
+{"tMs":10627,"delta":"\":\"${result}\"}]"}
+{"tMs":10649,"delta":"}]}},{\"op\":"}
+{"tMs":10668,"delta":"\"set\",\"id\":\"d2"}
+{"tMs":10689,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":10710,"delta":"column\",\"children\":[\"d2title"}
+{"tMs":10729,"delta":"\",\"t2a\",\"t2b"}
+{"tMs":10750,"delta":"\",\"t2c\",\"ch"}
+{"tMs":10778,"delta":"k2\"],\"layout\":"}
+{"tMs":10792,"delta":"{\"width\":{\"fill"}
+{"tMs":10811,"delta":"\":358},\"height\":{\""}
+{"tMs":10831,"delta":"hug\":400},\"pad"}
+{"tMs":10857,"delta":"ding\":12},\"props\":{"}
+{"tMs":10872,"delta":"\"crossAxisAl"}
+{"tMs":10893,"delta":"ignment\":\"stretch\",\""}
+{"tMs":10913,"delta":"spacing\":10},\"dec"}
+{"tMs":10937,"delta":"oration\":{\"fills\":"}
+{"tMs":10954,"delta":"[{\"color\":\"#F"}
+{"tMs":10975,"delta":"FF9FAFB\""}
+{"tMs":10995,"delta":"}],\"radius\":8}"}
+{"tMs":11015,"delta":"}},{\"op\":\"set"}
+{"tMs":11036,"delta":"\",\"id\":\"d2title\",\""}
+{"tMs":11057,"delta":"node\":{\"type\":\"text"}
+{"tMs":11080,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":11097,"delta":"{\"fill\":334},\""}
+{"tMs":11118,"delta":"height\":{\"hug\":22"}
+{"tMs":11139,"delta":"}},\"props\":{\"text"}
+{"tMs":11158,"delta":"\":\"Day 2:"}
+{"tMs":11179,"delta":" Arash"}
+{"tMs":11199,"delta":"iy"}
+{"tMs":11224,"delta":"ama and North"}
+{"tMs":11240,"delta":"w"}
+{"tMs":11261,"delta":"est\",\"style\":{\"font"}
+{"tMs":11280,"delta":"Size\":16,\"font"}
+{"tMs":11304,"delta":"Weight\":700,\"color"}
+{"tMs":11322,"delta":"\":\"#FF111827"}
+{"tMs":11342,"delta":"\"}}}},{\"op"}
+{"tMs":11362,"delta":"\":\"set\",\"id\":\"t"}
+{"tMs":11383,"delta":"2a\",\"node\":{\"type"}
+{"tMs":11404,"delta":"\":\"column\",\"children\":[\"t"}
+{"tMs":11423,"delta":"2aRow\",\"t2a"}
+{"tMs":11444,"delta":"Detail\"],\"layout"}
+{"tMs":11465,"delta":"\":{\"width\":{\"f"}
+{"tMs":11485,"delta":"ill\":334},\"height\":{"}
+{"tMs":11505,"delta":"\"hug\":60}},\""}
+{"tMs":11526,"delta":"props\":{\"crossAx"}
+{"tMs":11546,"delta":"isAlignment\":\"st"}
+{"tMs":11566,"delta":"retch\",\"spacing\":6"}
+{"tMs":11588,"delta":"},\"actions\":[{\""}
+{"tMs":11607,"delta":"trigger\":{\"type\":"}
+{"tMs":11628,"delta":"\"click\"},\"actions\":"}
+{"tMs":11649,"delta":"[{\"type\":\"setV"}
+{"tMs":11670,"delta":"ariable\",\"variable\":\"open"}
+{"tMs":11690,"delta":"2\",\"value\":\"${= open"}
+{"tMs":11710,"delta":"2 == 0 ?"}
+{"tMs":11730,"delta":" -1 : 0}\""}
+{"tMs":11750,"delta":"}]}]}"}
+{"tMs":11772,"delta":"},{\"op\":\"set\",\""}
+{"tMs":11791,"delta":"id\":\"t2aRow"}
+{"tMs":11812,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":11832,"delta":"text\",\"layout\":{\"width"}
+{"tMs":11852,"delta":"\":{\"fill\":334},"}
+{"tMs":11873,"delta":"\"height\":{\"hug\":"}
+{"tMs":11893,"delta":"20}},\"props\":{\""}
+{"tMs":11915,"delta":"text\":\"08:30"}
+{"tMs":11934,"delta":"  Bamboo Gr"}
+{"tMs":11954,"delta":"ove,"}
+{"tMs":11977,"delta":" Arashiyama  ("}
+{"tMs":11995,"delta":"1 h)\",\"style\":{"}
+{"tMs":12015,"delta":"\"fontSize\":14,"}
+{"tMs":12036,"delta":"\"fontWeight\":600"}
+{"tMs":12057,"delta":",\"color\":\"#FF"}
+{"tMs":12078,"delta":"111827\"}}}},{"}
+{"tMs":12097,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":12118,"delta":"\"t2aDetail\",\""}
+{"tMs":12138,"delta":"node\":{\"type\":\"text"}
+{"tMs":12158,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":12179,"delta":"{\"fill\":334},\""}
+{"tMs":12200,"delta":"height\":{\"hug\":40"}
+{"tMs":12220,"delta":"}},\"visible\":\"${"}
+{"tMs":12241,"delta":"open2 == 0}\",\""}
+{"tMs":12261,"delta":"props\":{\"text\":\""}
+{"tMs":12281,"delta":"Quiet early"}
+{"tMs":12301,"delta":" wal"}
+{"tMs":12326,"delta":"k through t"}
+{"tMs":12342,"delta":"all bamboo. Get"}
+{"tMs":12364,"delta":"ting between: J"}
+{"tMs":12383,"delta":"R S"}
+{"tMs":12403,"delta":"ag"}
+{"tMs":12424,"delta":"ano"}
+{"tMs":12444,"delta":" line"}
+{"tMs":12464,"delta":" from Kyoto"}
+{"tMs":12484,"delta":" Station, about 15 min."}
+{"tMs":12505,"delta":"\",\"style\":{\"fontS"}
+{"tMs":12526,"delta":"ize\":13,\"height\":1"}
+{"tMs":12546,"delta":".4,\"color\":\"#"}
+{"tMs":12566,"delta":"FF4B5563\"}"}
+{"tMs":12587,"delta":"}}},{\"op\":\""}
+{"tMs":12617,"delta":"set\",\"id\":\"t2b"}
+{"tMs":12643,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":12661,"delta":"column\",\"children\":[\"t2b"}
+{"tMs":12688,"delta":"Row\",\"t2bDet"}
+{"tMs":12695,"delta":"ail\"],\"layout\":{"}
+{"tMs":12717,"delta":"\"width\":{\"fill\":"}
+{"tMs":12731,"delta":"334},"}
+{"tMs":12750,"delta":"\"height\":{\"hug\":"}
+{"tMs":12770,"delta":"60}},\"props\":{\""}
+{"tMs":12791,"delta":"crossAxisAlign"}
+{"tMs":12811,"delta":"ment\":\"stretch\",\"sp"}
+{"tMs":12832,"delta":"acing\":6},\"actions"}
+{"tMs":12853,"delta":"\":[{\"trigger\":"}
+{"tMs":12872,"delta":"{\"type\":\"click\"},"}
+{"tMs":12893,"delta":"\"actions\":[{\"type"}
+{"tMs":12913,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":12937,"delta":"able\":\"open2\",\"value\":"}
+{"tMs":12956,"delta":"\"${= open2 == "}
+{"tMs":12975,"delta":"1 ? -1 :"}
+{"tMs":12995,"delta":" 1}\"}]}]"}
+{"tMs":13018,"delta":"}},{\"op\":\"set"}
+{"tMs":13036,"delta":"\",\"id\":\"t2bR"}
+{"tMs":13056,"delta":"ow\",\"node\":{\"type\":"}
+{"tMs":13076,"delta":"\"text\",\"layout\":{\""}
+{"tMs":13098,"delta":"width\":{\"fill\":334"}
+{"tMs":13118,"delta":"},\"height\":{\"hug"}
+{"tMs":13138,"delta":"\":20}},\"props\":{"}
+{"tMs":13158,"delta":"\"text\":\"11:00  "}
+{"tMs":13179,"delta":"Ten"}
+{"tMs":13199,"delta":"ry"}
+{"tMs":13220,"delta":"u"}
+{"tMs":13240,"delta":"-ji and"}
+{"tMs":13260,"delta":" Mon"}
+{"tMs":13281,"delta":"k"}
+{"tMs":13301,"delta":"ey Park"}
+{"tMs":13322,"delta":"  (2"}
+{"tMs":13342,"delta":" h)\",\"style\":{\""}
+{"tMs":13362,"delta":"fontSize\":14,\""}
+{"tMs":13383,"delta":"fontWeight\":600,"}
+{"tMs":13410,"delta":"\"color\":\"#FF111"}
+{"tMs":13423,"delta":"827\"}}}},{\""}
+{"tMs":13444,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":13466,"delta":"t2bDetail\",\"node"}
+{"tMs":13485,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":13505,"delta":"layout\":{\"width\":{"}
+{"tMs":13526,"delta":"\"fill\":334},\"height"}
+{"tMs":13546,"delta":"\":{\"hug\":40}"}
+{"tMs":13567,"delta":"},\"visible\":\"${open"}
+{"tMs":13587,"delta":"2 == 1}\",\"props"}
+{"tMs":13608,"delta":"\":{\"text\":\"U"}
+{"tMs":13628,"delta":"NESCO temple garden"}
+{"tMs":13648,"delta":" with a p"}
+{"tMs":13668,"delta":"ond view"}
+{"tMs":13689,"delta":". Getting between: 5"}
+{"tMs":13724,"delta":" min walk from the"}
+{"tMs":13730,"delta":" bamboo grove.\",\""}
+{"tMs":13750,"delta":"style\":{\"fontSize"}
+{"tMs":13774,"delta":"\":13,\"height\":1."}
+{"tMs":13802,"delta":"4,\"color\":\"#F"}
+{"tMs":13813,"delta":"F4B5563\"}}"}
+{"tMs":13832,"delta":"}},{\"op\":\"set"}
+{"tMs":13853,"delta":"\",\"id\":\"t2c\",\""}
+{"tMs":13873,"delta":"node\":{\"type\":\"column"}
+{"tMs":13893,"delta":"\",\"children\":[\"t2cR"}
+{"tMs":13913,"delta":"ow\",\"t2cDetail"}
+{"tMs":13934,"delta":"\"],\"layout\":{\""}
+{"tMs":13954,"delta":"width\":{\"fill\":334"}
+{"tMs":13975,"delta":"},\"height\":{\"hug"}
+{"tMs":13995,"delta":"\":60}},\"props\":{"}
+{"tMs":14015,"delta":"\"crossAxisAl"}
+{"tMs":14036,"delta":"ignment\":\"stretch\",\""}
+{"tMs":14056,"delta":"spacing\":6},\"act"}
+{"tMs":14077,"delta":"ions\":[{\"trigger"}
+{"tMs":14098,"delta":"\":{\"type\":\"click\""}
+{"tMs":14118,"delta":"},\"actions\":[{\""}
+{"tMs":14138,"delta":"type\":\"setVariable\",\""}
+{"tMs":14160,"delta":"variable\":\"open2\",\"value"}
+{"tMs":14180,"delta":"\":\"${= open2 =="}
+{"tMs":14200,"delta":" 2 ? -1 "}
+{"tMs":14220,"delta":": 2}\"}]}"}
+{"tMs":14241,"delta":"]}"}
+{"tMs":14261,"delta":"},{\"op\":\"set\",\""}
+{"tMs":14282,"delta":"id\":\"t2cRow"}
+{"tMs":14301,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":14330,"delta":"text\",\"layout\":{\"width"}
+{"tMs":14342,"delta":"\":{\"fill\":334},"}
+{"tMs":14363,"delta":"\"height\":{\"hug\":"}
+{"tMs":14383,"delta":"20}},\"props\":{\""}
+{"tMs":14403,"delta":"text\":\"14:00  "}
+{"tMs":14424,"delta":"Kink"}
+{"tMs":14444,"delta":"aku-"}
+{"tMs":14465,"delta":"ji"}
+{"tMs":14485,"delta":" Golden Pavilion  "}
+{"tMs":14506,"delta":"(1 h)\",\"style\":"}
+{"tMs":14526,"delta":"{\"fontSize\":14"}
+{"tMs":14546,"delta":",\"fontWeight\":"}
+{"tMs":14567,"delta":"600,\"color\":\"#F"}
+{"tMs":14588,"delta":"F111827\"}}}},"}
+{"tMs":14608,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":14628,"delta":"\":\"t2cDetail"}
+{"tMs":14650,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":14669,"delta":"text\",\"layout\":{\"width"}
+{"tMs":14689,"delta":"\":{\"fill\":334},"}
+{"tMs":14733,"delta":"\"height\":{\"hug\":"}
+{"tMs":14733,"delta":"40}},\"visible\":\""}
+{"tMs":14750,"delta":"${open2 == 2}"}
+{"tMs":14771,"delta":"\",\"props\":{\"text\":\""}
+{"tMs":14817,"delta":"Gold"}
+{"tMs":14832,"delta":"-leaf temple re"}
+{"tMs":14852,"delta":"flected"}
+{"tMs":14873,"delta":" in"}
+{"tMs":14893,"delta":" a"}
+{"tMs":14914,"delta":" mirror p"}
+{"tMs":14934,"delta":"ond. Getting between: b"}
+{"tMs":14955,"delta":"us 205"}
+{"tMs":14978,"delta":" from Arashiyama"}
+{"tMs":14996,"delta":", about 30"}
+{"tMs":15016,"delta":" min.\",\"style\":{\""}
+{"tMs":15037,"delta":"fontSize\":13,\""}
+{"tMs":15056,"delta":"height\":1.4,\"color"}
+{"tMs":15077,"delta":"\":\"#FF4B5"}
+{"tMs":15097,"delta":"563\"}}}},{\""}
+{"tMs":15118,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":15139,"delta":"chk2\",\"node\":{\""}
+{"tMs":15158,"delta":"type\":\"column\",\"children\":[\""}
+{"tMs":15179,"delta":"ck2h\",\"ck2"}
+{"tMs":15199,"delta":"a\",\"ck2b\",\""}
+{"tMs":15226,"delta":"ck2c\"],\"layout"}
+{"tMs":15243,"delta":"\":{\"width\":{\"f"}
+{"tMs":15261,"delta":"ill\":334},\"height\":{"}
+{"tMs":15282,"delta":"\"hug\":120},\"pad"}
+{"tMs":15317,"delta":"ding\":[0,8,0"}
+{"tMs":15322,"delta":",0]},\"props\":{"}
+{"tMs":15346,"delta":"\"crossAxisAl"}
+{"tMs":15363,"delta":"ignment\":\"start\",\"spac"}
+{"tMs":15383,"delta":"ing\":6}}},{\""}
+{"tMs":15404,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":15424,"delta":"ck2h\",\"node\":{"}
+{"tMs":15444,"delta":"\"type\":\"text\",\"layout"}
+{"tMs":15464,"delta":"\":{\"width\":{\"f"}
+{"tMs":15485,"delta":"ill\":334},\"height\":{"}
+{"tMs":15505,"delta":"\"hug\":18}},\""}
+{"tMs":15526,"delta":"props\":{\"text\":\"To"}
+{"tMs":15546,"delta":" book (Day 2)\",\""}
+{"tMs":15567,"delta":"style\":{\"fontSize"}
+{"tMs":15590,"delta":"\":13,\"fontWe"}
+{"tMs":15607,"delta":"ight\":700,\"color\":\""}
+{"tMs":15628,"delta":"#FF111827"}
+{"tMs":15649,"delta":"\"}}}},{\"op"}
+{"tMs":15669,"delta":"\":\"set\",\"id\":\""}
+{"tMs":15689,"delta":"ck2a\",\"node\":{\""}
+{"tMs":15710,"delta":"type\":\"Checkbox"}
+{"tMs":15730,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":15750,"delta":"{\"fill\":334},\""}
+{"tMs":15771,"delta":"height\":28},\"props\":{"}
+{"tMs":15792,"delta":"\"label\":\"K"}
+{"tMs":15812,"delta":"inkaku-ji tim"}
+{"tMs":15832,"delta":"ed "}
+{"tMs":15852,"delta":"ticket\",\"value\":\"c2"}
+{"tMs":15875,"delta":"a\"},\"actions\":["}
+{"tMs":15893,"delta":"{\"trigger\":{\""}
+{"tMs":15914,"delta":"type\":\"event\",\"event\":\""}
+{"tMs":15934,"delta":"onChanged\"},"}
+{"tMs":15956,"delta":"\"actions\":[{\"type"}
+{"tMs":15976,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":15996,"delta":"able\":\"c2a\",\"value"}
+{"tMs":16016,"delta":"\":\"${result}\"}]"}
+{"tMs":16040,"delta":"}]}},{\"op\":"}
+{"tMs":16062,"delta":"\"set\",\"id\":\"ck"}
+{"tMs":16077,"delta":"2b\",\"node\":{\"type"}
+{"tMs":16097,"delta":"\":\"Checkbox\",\""}
+{"tMs":16118,"delta":"layout\":{\"width\":{"}
+{"tMs":16138,"delta":"\"fill\":334},\"height"}
+{"tMs":16159,"delta":"\":28},\"props\":{\""}
+{"tMs":16180,"delta":"label\":\"Ka"}
+{"tMs":16199,"delta":"iseki l"}
+{"tMs":16220,"delta":"unch near"}
+{"tMs":16240,"delta":" Arashiyama\",\"value"}
+{"tMs":16261,"delta":"\":\"c2b\"},\""}
+{"tMs":16281,"delta":"actions\":[{\"trig"}
+{"tMs":16301,"delta":"ger\":{\"type\":\"event"}
+{"tMs":16322,"delta":"\",\"event\":\"onChanged"}
+{"tMs":16342,"delta":"\"},"}
+{"tMs":16363,"delta":"\"actions\":[{\"type"}
+{"tMs":16383,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":16407,"delta":"able\":\"c2b\",\"value"}
+{"tMs":16424,"delta":"\":\"${result}\"}]"}
+{"tMs":16444,"delta":"}]}"}
+{"tMs":16465,"delta":"},{\"op\":\"set\",\""}
+{"tMs":16485,"delta":"id\":\"ck2c\",\""}
+{"tMs":16506,"delta":"node\":{\"type\":\""}
+{"tMs":16526,"delta":"Checkbox\",\"layout\":"}
+{"tMs":16547,"delta":"{\"width\":{\"fill"}
+{"tMs":16567,"delta":"\":334},\"height\":28},"}
+{"tMs":16587,"delta":"\"props\":{\"label\":\""}
+{"tMs":16608,"delta":"Train tickets"}
+{"tMs":16628,"delta":" Kyoto to"}
+{"tMs":16649,"delta":" Arashiyama\",\"value"}
+{"tMs":16676,"delta":"\":\"c2c\"},\""}
+{"tMs":16694,"delta":"actions\":[{\"trig"}
+{"tMs":16710,"delta":"ger\":{\"type\":\"event"}
+{"tMs":16730,"delta":"\",\"event\":\"onChanged"}
+{"tMs":16750,"delta":"\"},"}
+{"tMs":16772,"delta":"\"actions\":[{\"type"}
+{"tMs":16792,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":16812,"delta":"able\":\"c2c\",\"value"}
+{"tMs":16832,"delta":"\":\"${result}\"}]"}
+{"tMs":16853,"delta":"}]}}]}"}
+{"tMs":16873,"delta":"}"}
+{"tMs":16894,"delta":"]}"}
+{"tMs":16937,"delta":"\n"}
+{"tMs":16974,"delta":"}"}

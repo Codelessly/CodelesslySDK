@@ -1,0 +1,65 @@
+{
+ "stream": "carousel@claude-haiku-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 590,
+ "timeToFirstPaintMs": 1076,
+ "timeToFirstTextMs": 1076,
+ "timeToFirstSectionMs": 1076,
+ "timeToCompleteMs": 3150,
+ "outputTokens": 949,
+ "tokensEstimated": false,
+ "chars": 2017,
+ "deltas": 124,
+ "opsApplied": 6,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 8,
+  "componentsRendered": 2,
+  "componentsNotRendered": [
+   "back (Button)",
+   "s1 (Button)",
+   "s2 (Button)",
+   "s3 (Button)",
+   "s4 (Button)",
+   "s5 (Button)"
+  ],
+  "replacedControls": [
+   "open (filledButton)",
+   "bag (filledButton)"
+  ]
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 30,
+   "rejected": 6
+  }
+ ],
+ "streamedOps": 6,
+ "rejections": [],
+ "nodes": 34,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 6,
+  "p90": 9,
+  "max": 9
+ },
+ "frames": 60,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 185,
+ "pumpMsMedian": 0.117,
+ "renderExceptions": [],
+ "warnings": 0
+}

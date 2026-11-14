@@ -1,0 +1,26 @@
+{"meta":{"ui":"message_draft","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["message_draft@claude-haiku-5-5.compact.ssui.r1.jsonl","message_draft@claude-haiku-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":261,"usage":{"inputTokens":5168,"outputTokens":261,"cacheReadInputTokens":51908,"cacheCreationInputTokens":0,"ttftMs":388,"firstToolDeltaMs":991,"totalMs":1500,"stopReason":"StopReason.toolUse","lookups":[{"tool":"ui_read","input":{"outline":true,"variables":true},"ms":564,"outputTokens":59,"resultChars":1080}]},"text":"","ttftMs":388,"check":{"ops":3,"opsApplied":2,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":["wrong_type /nodes/send/props/enabled"],"lints":[],"warnings":0,"nodes":19,"scripts":0,"scriptChars":0,"designSystemComponents":7,"replacedControls":0},"assets":null}}
+{"tMs":991,"delta":"{\"ops\": [{\"op"}
+{"tMs":1011,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1031,"delta":"toInput\", \"node\": {"}
+{"tMs":1051,"delta":"\"type\": \"TextInput"}
+{"tMs":1072,"delta":"\", \"props\": {\"place"}
+{"tMs":1092,"delta":"holder\": \"landlord@"}
+{"tMs":1113,"delta":"example.com\", \"value\": \""}
+{"tMs":1133,"delta":"to\"}, \"layout\":"}
+{"tMs":1153,"delta":" {\"width\": {\"fill"}
+{"tMs":1174,"delta":"\": 342}, \"height\":"}
+{"tMs":1194,"delta":" 28}}}, {"}
+{"tMs":1216,"delta":"\"op\": \"pat"}
+{"tMs":1234,"delta":"ch\", \"id\": \"s"}
+{"tMs":1255,"delta":"entBanner\", \"patch"}
+{"tMs":1274,"delta":"\": {\"b"}
+{"tMs":1295,"delta":"ind\": {\"visible\": \""}
+{"tMs":1315,"delta":"${= sent}\"}}"}
+{"tMs":1335,"delta":"},"}
+{"tMs":1355,"delta":" {\"op\": \"patch\","}
+{"tMs":1376,"delta":" \"id\": \"send\", \"pat"}
+{"tMs":1396,"delta":"ch\": {\"props"}
+{"tMs":1417,"delta":"\": {\"enabled\": \""}
+{"tMs":1437,"delta":"${= canSend}\"}"}
+{"tMs":1457,"delta":"}}]"}
+{"tMs":1496,"delta":"}"}

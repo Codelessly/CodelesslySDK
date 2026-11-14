@@ -1,0 +1,163 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 60071,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 26033,
+ "generate": {
+  "inputTokens": 342,
+  "outputTokens": 2436,
+  "cacheReadInputTokens": 0,
+  "cacheCreationInputTokens": 25954,
+  "ttftMs": 906,
+  "firstToolDeltaMs": 936,
+  "totalMs": 8910,
+  "stopReason": "StopReason.toolUse",
+  "ops": 21,
+  "opsApplied": 19,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "wrong_type /nodes/revChart/props/data",
+   "unknown_prop /nodes/chanChart/props/data",
+   "dangling_child /nodes/revCard/children/0",
+   "dangling_child /nodes/chanCard/children/0"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 17,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 8,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 1533,
+   "outputTokens": 275,
+   "cacheReadInputTokens": 25954,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1312,
+   "firstToolDeltaMs": 1352,
+   "totalMs": 2258,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 1,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 1,
+   "jsonRepairs": 1,
+   "pending": 1,
+   "errors": [
+    "unknown_prop /nodes/revChart/props/values",
+    "unknown_prop /nodes/revChart/props/color",
+    "unknown_bind_path /nodes/revChart/bind/props.values",
+    "dangling_child /nodes/revCard/children/0"
+   ],
+   "lints": [],
+   "warnings": 1,
+   "nodes": 18,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 8,
+   "replacedControls": 0
+  },
+  {
+   "inputTokens": 3906,
+   "outputTokens": 190,
+   "cacheReadInputTokens": 25954,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 641,
+   "firstToolDeltaMs": 731,
+   "totalMs": 1186,
+   "stopReason": "StopReason.toolUse",
+   "ops": 1,
+   "opsApplied": 0,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 1,
+   "errors": [
+    "wrong_type /nodes/revChart/props/data",
+    "dangling_child /nodes/revCard/children/0"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 18,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 8,
+   "replacedControls": 0
+  }
+ ],
+ "final": {
+  "ops": 1,
+  "opsApplied": 0,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 1,
+  "errors": [
+   "wrong_type /nodes/revChart/props/data",
+   "dangling_child /nodes/revCard/children/0"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 18,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 8,
+  "replacedControls": 0
+ },
+ "followup": {
+  "inputTokens": 9804,
+  "outputTokens": 606,
+  "cacheReadInputTokens": 51908,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 787,
+  "firstToolDeltaMs": 1598,
+  "totalMs": 3086,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_read",
+    "input": {
+     "ids": [
+      "tiles",
+      "revSeries"
+     ],
+     "variables": true
+    },
+    "ms": 987,
+    "outputTokens": 70,
+    "resultChars": 1448
+   }
+  ],
+  "ops": 4,
+  "opsApplied": 4,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 1,
+  "errors": [
+   "dangling_child /nodes/revCard/children/0"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 21,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 8,
+  "replacedControls": 0
+ }
+}

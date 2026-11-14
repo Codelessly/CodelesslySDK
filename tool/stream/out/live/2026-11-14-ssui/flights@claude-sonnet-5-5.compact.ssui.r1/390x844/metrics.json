@@ -1,0 +1,96 @@
+{
+ "stream": "flights@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1385,
+ "timeToFirstPaintMs": 4711,
+ "timeToFirstTextMs": 5642,
+ "timeToFirstSectionMs": 6038,
+ "timeToCompleteMs": 13684,
+ "outputTokens": 2416,
+ "tokensEstimated": false,
+ "chars": 4900,
+ "deltas": 334,
+ "opsApplied": 21,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_layout_key /nodes/times/layout/hug",
+  "dangling_child /nodes/r1/children/0"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 2,
+  "componentsRendered": 2,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "13:45|easyJet|option 2"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "confirm"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 22,
+ "rejections": [
+  {
+   "op": 10,
+   "code": "unknown_layout_key",
+   "path": "/nodes/times/layout/hug",
+   "message": "layout has no \"hug\": sizes go under width/height: \"height\": {\"hug\": 20} (a number is a fixed size; {\"hug\": n} fits the content, {\"fill\": n} takes the free space; n is the size you expect). This node has both already: remove \"hug\".",
+   "nodeId": "times",
+   "expected": [
+    "width",
+    "height"
+   ],
+   "suggestion": "height"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/r1/children/0",
+   "message": "Child \"times\" of \"r1\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "r1"
+  }
+ ],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 8,
+  "max": 25
+ },
+ "frames": 179,
+ "frameMs": 81,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 514,
+ "pumpMsMedian": 0.108,
+ "renderExceptions": [],
+ "warnings": 0
+}

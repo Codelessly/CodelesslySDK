@@ -1,0 +1,186 @@
+{
+ "stream": "question_flow@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 685,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 7961,
+ "outputTokens": 2430,
+ "tokensEstimated": false,
+ "chars": 5161,
+ "deltas": 354,
+ "opsApplied": 10,
+ "opsRejected": 6,
+ "opsRecoveredFromMalformed": 7,
+ "jsonRepairs": 3,
+ "pending": 6,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/card/decoration/fills/0/color",
+  "wrong_type /nodes/card/decoration/strokes/0/color",
+  "wrong_type /nodes/progressBar/props/value",
+  "invalid_enum /nodes/c1/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/c1/actions/0/actions/0/else/0/condition/op",
+  "invalid_enum /nodes/c2/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/c2/actions/0/actions/0/else/0/condition/op",
+  "invalid_enum /nodes/c3/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/c3/actions/0/actions/0/else/0/condition/op",
+  "wrong_type /nodes/back/visible",
+  "dangling_child /nodes/quiz/slots/body",
+  "dangling_child /nodes/progress/children/1",
+  "dangling_child /nodes/choices/children/0",
+  "dangling_child /nodes/choices/children/1",
+  "dangling_child /nodes/choices/children/2",
+  "dangling_child /nodes/nav/children/0"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 0,
+  "componentsNotRendered": [
+   "restart (Button)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 16,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "wrong_type",
+   "path": "/nodes/card/decoration/fills/0/color",
+   "message": "An expression is not a value here: put it in \"bind\": got the text \"${theme.colors.primaryBackground}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first).",
+   "nodeId": "card"
+  },
+  {
+   "op": 3,
+   "code": "wrong_type",
+   "path": "/nodes/card/decoration/strokes/0/color",
+   "message": "An expression is not a value here: put it in \"bind\": got the text \"${theme.colors.primaryBorder}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first).",
+   "nodeId": "card"
+  },
+  {
+   "op": 6,
+   "code": "wrong_type",
+   "path": "/nodes/progressBar/props/value",
+   "message": "Expected a number, got the text \"${= (step + 1) / 3}\" (to compute it, put the expression in \"bind\").",
+   "nodeId": "progressBar"
+  },
+  {
+   "op": 9,
+   "code": "invalid_enum",
+   "path": "/nodes/c1/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "c1",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 9,
+   "code": "invalid_enum",
+   "path": "/nodes/c1/actions/0/actions/0/else/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "c1",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 10,
+   "code": "invalid_enum",
+   "path": "/nodes/c2/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "c2",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 10,
+   "code": "invalid_enum",
+   "path": "/nodes/c2/actions/0/actions/0/else/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "c2",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 11,
+   "code": "invalid_enum",
+   "path": "/nodes/c3/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "c3",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 11,
+   "code": "invalid_enum",
+   "path": "/nodes/c3/actions/0/actions/0/else/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "c3",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": 13,
+   "code": "wrong_type",
+   "path": "/nodes/back/visible",
+   "message": "Expected a boolean (true or false), got the text \"${step > 0}\".",
+   "nodeId": "back"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/quiz/slots/body",
+   "message": "Slot \"body\" of \"quiz\" names \"card\", which never arrived.",
+   "nodeId": "quiz"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/progress/children/1",
+   "message": "Child \"progressBar\" of \"progress\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "progress"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/choices/children/0",
+   "message": "Child \"c1\" of \"choices\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "choices"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/choices/children/1",
+   "message": "Child \"c2\" of \"choices\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "choices"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/choices/children/2",
+   "message": "Child \"c3\" of \"choices\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "choices"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/nav/children/0",
+   "message": "Child \"back\" of \"nav\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "nav"
+  }
+ ],
+ "nodes": 8,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 133,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 488,
+ "pumpMsMedian": 0.102,
+ "renderExceptions": [],
+ "warnings": 7
+}

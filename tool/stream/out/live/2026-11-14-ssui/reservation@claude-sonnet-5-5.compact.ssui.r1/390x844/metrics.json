@@ -1,0 +1,52 @@
+{
+ "stream": "reservation@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1299,
+ "timeToFirstPaintMs": 5430,
+ "timeToFirstTextMs": 5794,
+ "timeToFirstSectionMs": 9537,
+ "timeToCompleteMs": 17750,
+ "outputTokens": 3455,
+ "tokensEstimated": false,
+ "chars": 7006,
+ "deltas": 463,
+ "opsApplied": 22,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "no_size slotGrid"
+ ],
+ "finalDiagnostics": [
+  "no_size /nodes/slotGrid/layout"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 4,
+  "componentsRendered": 4,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 22,
+ "rejections": [],
+ "nodes": 20,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 10,
+  "max": 22
+ },
+ "frames": 179,
+ "frameMs": 104,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 643,
+ "pumpMsMedian": 0.099,
+ "renderExceptions": [],
+ "warnings": 1
+}

@@ -1,0 +1,63 @@
+{
+ "stream": "weather@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 566,
+ "timeToFirstPaintMs": 1223,
+ "timeToFirstTextMs": 2100,
+ "timeToFirstSectionMs": 3140,
+ "timeToCompleteMs": 12452,
+ "outputTokens": 4251,
+ "tokensEstimated": false,
+ "chars": 8395,
+ "deltas": 580,
+ "opsApplied": 48,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 1,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "worksWhenUsed": {
+  "ok": false,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": true,
+    "changed": false,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 48,
+ "rejections": [],
+ "nodes": 47,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 3,
+  "p90": 6,
+  "max": 11
+ },
+ "frames": 180,
+ "frameMs": 74,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 761,
+ "pumpMsMedian": 0.117,
+ "renderExceptions": [],
+ "warnings": 0
+}

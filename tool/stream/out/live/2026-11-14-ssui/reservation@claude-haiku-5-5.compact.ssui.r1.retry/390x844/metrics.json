@@ -1,0 +1,55 @@
+{
+ "stream": "reservation@claude-haiku-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 722,
+ "timeToFirstPaintMs": 1046,
+ "timeToFirstTextMs": 1046,
+ "timeToFirstSectionMs": 1046,
+ "timeToCompleteMs": 2820,
+ "outputTokens": 815,
+ "tokensEstimated": false,
+ "chars": 1619,
+ "deltas": 100,
+ "opsApplied": 7,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 1,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 25,
+   "rejected": 7
+  }
+ ],
+ "streamedOps": 7,
+ "rejections": [],
+ "nodes": 30,
+ "reappliedBoxesPerOp": {
+  "min": 2,
+  "median": 2,
+  "p90": 9,
+  "max": 9
+ },
+ "frames": 55,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 156,
+ "pumpMsMedian": 0.114,
+ "renderExceptions": [],
+ "warnings": 0
+}

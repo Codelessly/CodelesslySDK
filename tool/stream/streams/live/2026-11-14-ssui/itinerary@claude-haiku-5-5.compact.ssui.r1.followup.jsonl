@@ -1,0 +1,20 @@
+{"meta":{"ui":"itinerary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Swap the two days.","base":["itinerary@claude-haiku-5-5.compact.ssui.r1.jsonl","itinerary@claude-haiku-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":202,"usage":{"inputTokens":7630,"outputTokens":202,"cacheReadInputTokens":51908,"cacheCreationInputTokens":0,"ttftMs":413,"firstToolDeltaMs":921,"totalMs":1324,"stopReason":"StopReason.toolUse","lookups":[{"tool":"ui_read","input":{"outline":true},"ms":506,"outputTokens":37,"resultChars":2405}]},"text":"","ttftMs":413,"check":{"ops":3,"opsApplied":3,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":38,"scripts":0,"scriptChars":0,"designSystemComponents":6,"replacedControls":0},"assets":null}}
+{"tMs":921,"delta":"{\"ops\": [{\"op"}
+{"tMs":928,"delta":"\": \"move\", \"id\": \""}
+{"tMs":948,"delta":"d2\", \"parent\": \""}
+{"tMs":968,"delta":"card\", \"index\": 2"}
+{"tMs":993,"delta":"}, {\"op\": \"pat"}
+{"tMs":1017,"delta":"ch\", \"id\": \"d1"}
+{"tMs":1030,"delta":"title\", \"patch\": {\""}
+{"tMs":1052,"delta":"props\": {\"text\": \""}
+{"tMs":1070,"delta":"Day 2: Hig"}
+{"tMs":1097,"delta":"ashiyama and G"}
+{"tMs":1113,"delta":"ion\"}}}"}
+{"tMs":1131,"delta":", {\"op\": \"patch"}
+{"tMs":1153,"delta":"\", \"id\": \"d2title"}
+{"tMs":1172,"delta":"\", \"patch\": {\"props"}
+{"tMs":1202,"delta":"\": {\"text\": \"Day"}
+{"tMs":1213,"delta":" 1: Arashiy"}
+{"tMs":1234,"delta":"ama and Northwest\"}"}
+{"tMs":1253,"delta":"}}]"}
+{"tMs":1320,"delta":"}"}

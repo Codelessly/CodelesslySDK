@@ -1,0 +1,34 @@
+{"meta":{"ui":"flights","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Sort them by price.","base":["flights@claude-haiku-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":268,"usage":{"inputTokens":2831,"outputTokens":268,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":467,"firstToolDeltaMs":510,"totalMs":1180,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":467,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":16,"scripts":0,"scriptChars":0,"designSystemComponents":1,"replacedControls":0},"assets":null}}
+{"tMs":510,"delta":"{\"ops\": [{\"op"}
+{"tMs":538,"delta":"\": \"vars\", \"scope"}
+{"tMs":549,"delta":"\": \"flights\", \"set\":"}
+{"tMs":571,"delta":" {\"options\": {\"type\":"}
+{"tMs":588,"delta":" \"list\", \"value\": [{"}
+{"tMs":606,"delta":"\"time"}
+{"tMs":625,"delta":"\": \"18"}
+{"tMs":645,"delta":":30 - 22"}
+{"tMs":666,"delta":":10\", \"airline\": \""}
+{"tMs":687,"delta":"Ryanair\", \"du"}
+{"tMs":707,"delta":"ration\": \"2h 40m"}
+{"tMs":728,"delta":"\", \"direct\": \"1 "}
+{"tMs":748,"delta":"stop\", \"price\": 96"}
+{"tMs":769,"delta":", \"tag\": \"\"}"}
+{"tMs":790,"delta":", {\"time\": \"13:"}
+{"tMs":810,"delta":"45 - 16:05\","}
+{"tMs":831,"delta":" \"airline\": \"easyJ"}
+{"tMs":853,"delta":"et\", \"duration\": \"2"}
+{"tMs":872,"delta":"h 20m\", \"direct"}
+{"tMs":892,"delta":"\": \"Direct\", \"price"}
+{"tMs":913,"delta":"\": 122, \"tag\":"}
+{"tMs":933,"delta":" \"Best time\"}, {"}
+{"tMs":954,"delta":"\"time\": \"07:10 "}
+{"tMs":974,"delta":"- 09:35\", \"air"}
+{"tMs":995,"delta":"line\": \"TAP Air"}
+{"tMs":1015,"delta":" Portugal\", \"duration"}
+{"tMs":1036,"delta":"\": \"2h 25m\","}
+{"tMs":1056,"delta":" \"direct\": \"Direct"}
+{"tMs":1079,"delta":"\", \"price\": 148, \""}
+{"tMs":1097,"delta":"tag\": \"Cheap"}
+{"tMs":1117,"delta":"est\"}]}}}"}
+{"tMs":1138,"delta":"]"}
+{"tMs":1178,"delta":"}"}

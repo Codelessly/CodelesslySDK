@@ -1,0 +1,44 @@
+{"meta":{"ui":"flights","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Sort them by price.","base":["flights@claude-sonnet-5-5.compact.ssui.r1.jsonl","flights@claude-sonnet-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":396,"usage":{"inputTokens":3739,"outputTokens":396,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1501,"firstToolDeltaMs":1534,"totalMs":2967,"stopReason":"StopReason.toolUse"},"text":"Simplest is to reorder the data by price (cheapest first); the selection stays on the first item.","ttftMs":1501,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":20,"scripts":0,"scriptChars":0,"designSystemComponents":2,"replacedControls":0},"assets":null}}
+{"tMs":1534,"delta":"{\"ops\": [{"}
+{"tMs":1568,"delta":"\"op\": \"vars\", \""}
+{"tMs":1602,"delta":"scope\": \"flights\", \""}
+{"tMs":1636,"delta":"set\": {\"options\": {\""}
+{"tMs":1671,"delta":"type\": \"list\", \"value\":"}
+{"tMs":1702,"delta":" [{\"dep\": \"11"}
+{"tMs":1736,"delta":":30\", \"arr\": \""}
+{"tMs":1770,"delta":"14:00\", \"airline\":"}
+{"tMs":1803,"delta":" \"easyJet\", \"st"}
+{"tMs":1887,"delta":"ops\": \"Direct\", \""}
+{"tMs":2291,"delta":"dur\": \"2h 30"}
+{"tMs":2291,"delta":"m\", \"price\": 112,"}
+{"tMs":2291,"delta":" \"tag\": \"Che"}
+{"tMs":2291,"delta":"apest\", \"tone\": \""}
+{"tMs":2291,"delta":"success\"}, {\"dep"}
+{"tMs":2291,"delta":"\": \"07:10\", \"ar"}
+{"tMs":2291,"delta":"r\": \"09:45\", \""}
+{"tMs":2291,"delta":"airline\": \"TAP"}
+{"tMs":2291,"delta":" Air Portugal\", \"st"}
+{"tMs":2291,"delta":"ops\": \"Direct\", \""}
+{"tMs":2291,"delta":"dur\": \"2h 35"}
+{"tMs":2291,"delta":"m\", \"price\": 148,"}
+{"tMs":2842,"delta":" \"tag\": \"Best time"}
+{"tMs":2842,"delta":"\", \"tone\": \"primary"}
+{"tMs":2842,"delta":"\"}, {\"dep\":"}
+{"tMs":2842,"delta":" \"17:55\", \"arr"}
+{"tMs":2842,"delta":"\": \"22:10\", \"air"}
+{"tMs":2842,"delta":"line\": \"British Airways\","}
+{"tMs":2842,"delta":" \"stops\": \"1 st"}
+{"tMs":2842,"delta":"op\", \"dur\": \"4"}
+{"tMs":2842,"delta":"h 15m\", \"price\":"}
+{"tMs":2842,"delta":" 176, \"tag\": \""}
+{"tMs":2842,"delta":"\", \"tone\": \"neut"}
+{"tMs":2842,"delta":"ral\"}]}}}"}
+{"tMs":2842,"delta":","}
+{"tMs":2842,"delta":" {\"op\": \"patch\","}
+{"tMs":2842,"delta":" \"id\": \"sub\", \""}
+{"tMs":2842,"delta":"patch\": {\"props\": {"}
+{"tMs":2842,"delta":"\"text\": \"Friday,"}
+{"tMs":2842,"delta":" 1 traveller, one"}
+{"tMs":2871,"delta":" way, sorted by price\""}
+{"tMs":2904,"delta":"}}}]"}
+{"tMs":2966,"delta":"}"}

@@ -1,0 +1,55 @@
+{
+ "stream": "weather@claude-haiku-5-5.compact.ssui.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 455,
+ "timeToFirstPaintMs": 637,
+ "timeToFirstTextMs": 637,
+ "timeToFirstSectionMs": 637,
+ "timeToCompleteMs": 822,
+ "outputTokens": 132,
+ "tokensEstimated": false,
+ "chars": 181,
+ "deltas": 16,
+ "opsApplied": 2,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 1,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 48,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 2,
+ "rejections": [],
+ "nodes": 47,
+ "reappliedBoxesPerOp": {
+  "min": 2,
+  "median": 5,
+  "p90": 5,
+  "max": 5
+ },
+ "frames": 25,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 42,
+ "pumpMsMedian": 0.161,
+ "renderExceptions": [],
+ "warnings": 0
+}

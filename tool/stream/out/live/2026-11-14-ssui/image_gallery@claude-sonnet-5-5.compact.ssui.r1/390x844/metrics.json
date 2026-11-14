@@ -1,0 +1,95 @@
+{
+ "stream": "image_gallery@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1274,
+ "timeToFirstPaintMs": 6719,
+ "timeToFirstTextMs": 6719,
+ "timeToFirstSectionMs": 7117,
+ "timeToCompleteMs": 16563,
+ "outputTokens": 3022,
+ "tokensEstimated": false,
+ "chars": 5732,
+ "deltas": 416,
+ "opsApplied": 19,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/grid/props/scrollable",
+  "dangling_child /nodes/card/children/1"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 4,
+  "componentsRendered": 1,
+  "componentsNotRendered": [
+   "lbClose (IconButton)",
+   "prev (IconButton)",
+   "next (IconButton)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 20,
+ "rejections": [
+  {
+   "op": 8,
+   "code": "unknown_prop",
+   "path": "/nodes/grid/props/scrollable",
+   "message": "A gridView has no prop \"scrollable\". Its props: scrollDirection, reverse, physics, alwaysScroll, primary, keyboardDismissBehavior, clipBehavior, itemCount, cacheExtent, query, itemSnapping, crossAxisCount, maxCrossAxisExtent, minCrossAxisExtent, mainAxisSpacing, crossAxisSpacing, childAspectRatio, mainAxisExtent, shrinkWrapRows, masonry, masonryPlacement, pagination, reorder.",
+   "nodeId": "grid",
+   "expected": [
+    "scrollDirection",
+    "reverse",
+    "physics",
+    "alwaysScroll",
+    "primary",
+    "keyboardDismissBehavior",
+    "clipBehavior",
+    "itemCount",
+    "cacheExtent",
+    "query",
+    "itemSnapping",
+    "crossAxisCount",
+    "maxCrossAxisExtent",
+    "minCrossAxisExtent",
+    "mainAxisSpacing",
+    "crossAxisSpacing",
+    "childAspectRatio",
+    "mainAxisExtent",
+    "shrinkWrapRows",
+    "masonry",
+    "masonryPlacement",
+    "pagination",
+    "reorder"
+   ]
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/1",
+   "message": "Child \"grid\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 17,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 8,
+  "max": 9
+ },
+ "frames": 180,
+ "frameMs": 97,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 597,
+ "pumpMsMedian": 0.1,
+ "renderExceptions": [],
+ "warnings": 2
+}

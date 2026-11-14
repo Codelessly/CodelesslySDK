@@ -1,0 +1,24 @@
+{"meta":{"ui":"question_flow","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["question_flow@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":257,"usage":{"inputTokens":5211,"outputTokens":257,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1525,"firstToolDeltaMs":1588,"totalMs":2351,"stopReason":"StopReason.toolUse"},"text":"The card was rejected because the radius was written as a token string, so I'm re-sending it with the numeric radius 8.","ttftMs":1525,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":23,"scripts":0,"scriptChars":0,"designSystemComponents":7,"replacedControls":0},"assets":null}}
+{"tMs":1588,"delta":"{\"ops\": [{\"op\": \"set"}
+{"tMs":1624,"delta":"\", \"id\": \"card\", \""}
+{"tMs":1656,"delta":"node\": {\"type\": \"column"}
+{"tMs":1689,"delta":"\", \"children\": [\"top\","}
+{"tMs":1723,"delta":" \"bar\", \"q1\","}
+{"tMs":1757,"delta":" \"q2\", \"q3\","}
+{"tMs":1926,"delta":" \"res\"], \"layout\":"}
+{"tMs":1926,"delta":" {\"width\": {\"fill"}
+{"tMs":1926,"delta":"\": 390}, \"height\":"}
+{"tMs":2241,"delta":" {\"hug\": 420}"}
+{"tMs":2241,"delta":", \"padding\": 16}"}
+{"tMs":2241,"delta":", \"props\": {\"cross"}
+{"tMs":2241,"delta":"AxisAlignment\":"}
+{"tMs":2241,"delta":" \"stretch\", \"spac"}
+{"tMs":2241,"delta":"ing\": 12}, \"dec"}
+{"tMs":2241,"delta":"oration\": {\"fills\":"}
+{"tMs":2241,"delta":" [{\"color\": \"prima"}
+{"tMs":2241,"delta":"ryBackground\"}], \""}
+{"tMs":2241,"delta":"radius\": 8, \"str"}
+{"tMs":2241,"delta":"okes\": [{\"color\":"}
+{"tMs":2259,"delta":" \"primaryBorder\""}
+{"tMs":2293,"delta":"}]}}}]"}
+{"tMs":2350,"delta":"}"}

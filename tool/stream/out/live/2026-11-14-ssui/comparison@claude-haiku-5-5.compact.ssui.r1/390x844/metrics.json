@@ -1,0 +1,51 @@
+{
+ "stream": "comparison@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 699,
+ "timeToFirstPaintMs": 1480,
+ "timeToFirstTextMs": 1765,
+ "timeToFirstSectionMs": 10053,
+ "timeToCompleteMs": 12940,
+ "outputTokens": 4006,
+ "tokensEstimated": false,
+ "chars": 8064,
+ "deltas": 555,
+ "opsApplied": 39,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 0,
+  "componentsRendered": 0,
+  "componentsNotRendered": [],
+  "replacedControls": [
+   "chooseA (filledButton)",
+   "chooseB (filledButton)"
+  ]
+ },
+ "themeMode": "light",
+ "streamedOps": 39,
+ "rejections": [],
+ "nodes": 37,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 4,
+  "max": 11
+ },
+ "frames": 179,
+ "frameMs": 77,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 735,
+ "pumpMsMedian": 0.103,
+ "renderExceptions": [],
+ "warnings": 0
+}

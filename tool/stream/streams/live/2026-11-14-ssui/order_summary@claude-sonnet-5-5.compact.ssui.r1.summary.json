@@ -1,0 +1,148 @@
+{
+ "ui": "order_summary",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 60071,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 26033,
+ "generate": {
+  "inputTokens": 208,
+  "outputTokens": 4586,
+  "cacheReadInputTokens": 25954,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1151,
+  "firstToolDeltaMs": 1951,
+  "totalMs": 23899,
+  "stopReason": "StopReason.toolUse",
+  "ops": 36,
+  "opsApplied": 34,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 18,
+  "jsonRepairs": 1,
+  "pending": 2,
+  "errors": [
+   "invalid_enum /nodes/minus/actions/0/actions/0/condition/op",
+   "invalid_enum /nodes/promoBtn/actions/0/actions/0/condition/op",
+   "dangling_child /nodes/qtyBox/children/0",
+   "dangling_child /nodes/promoRow/children/1"
+  ],
+  "lints": [],
+  "warnings": 1,
+  "nodes": 32,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 5,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 3972,
+   "outputTokens": 774,
+   "cacheReadInputTokens": 51908,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1410,
+   "firstToolDeltaMs": 3596,
+   "totalMs": 5891,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_read",
+     "input": {
+      "ids": [
+       "plus",
+       "promoField",
+       "promoMsg",
+       "qtyBox",
+       "promoRow",
+       "discV"
+      ],
+      "variables": true
+     },
+     "ms": 1778,
+     "outputTokens": 119,
+     "resultChars": 2340
+    }
+   ],
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 34,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 7,
+   "replacedControls": 0
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 34,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 7,
+  "replacedControls": 0
+ },
+ "followup": {
+  "inputTokens": 7565,
+  "outputTokens": 915,
+  "cacheReadInputTokens": 51908,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1359,
+  "firstToolDeltaMs": 3575,
+  "totalMs": 6435,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_read",
+    "input": {
+     "ids": [
+      "card",
+      "sumDel",
+      "sumTotal",
+      "delL",
+      "delV",
+      "totV"
+     ]
+    },
+    "ms": 1625,
+    "outputTokens": 98,
+    "resultChars": 1254
+   }
+  ],
+  "ops": 7,
+  "opsApplied": 7,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 40,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 8,
+  "replacedControls": 0
+ }
+}

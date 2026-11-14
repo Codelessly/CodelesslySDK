@@ -1,0 +1,84 @@
+{
+ "stream": "order_summary@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1151,
+ "timeToFirstPaintMs": 5751,
+ "timeToFirstTextMs": 6163,
+ "timeToFirstSectionMs": 17155,
+ "timeToCompleteMs": 23883,
+ "outputTokens": 4586,
+ "tokensEstimated": false,
+ "chars": 9451,
+ "deltas": 631,
+ "opsApplied": 34,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 18,
+ "jsonRepairs": 1,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_enum /nodes/minus/actions/0/actions/0/condition/op",
+  "invalid_enum /nodes/promoBtn/actions/0/actions/0/condition/op",
+  "dangling_child /nodes/qtyBox/children/0",
+  "dangling_child /nodes/promoRow/children/1"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 5,
+  "componentsRendered": 5,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 36,
+ "rejections": [
+  {
+   "op": 12,
+   "code": "invalid_enum",
+   "path": "/nodes/minus/actions/0/actions/0/condition/op",
+   "message": "the text \"lessThanOrEquals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "minus",
+   "suggestion": "lessThan"
+  },
+  {
+   "op": 17,
+   "code": "invalid_enum",
+   "path": "/nodes/promoBtn/actions/0/actions/0/condition/op",
+   "message": "the text \"equals\" is not a condition op. Allowed: equalsTo, notEqualsTo, greaterThan, lessThan, greaterThanOrEqualTo, lessThanOrEqualTo, isEmpty, isNotEmpty, contains, isOdd, isEven, isNull, isTrue, isFalse.",
+   "nodeId": "promoBtn",
+   "suggestion": "equalsTo"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/qtyBox/children/0",
+   "message": "Child \"minus\" of \"qtyBox\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "qtyBox"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/promoRow/children/1",
+   "message": "Child \"promoBtn\" of \"promoRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "promoRow"
+  }
+ ],
+ "nodes": 32,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 20,
+  "max": 35
+ },
+ "frames": 179,
+ "frameMs": 138,
+ "pumpsOverBudget16ms": 18,
+ "pumps": 811,
+ "pumpMsMedian": 0.103,
+ "renderExceptions": [],
+ "warnings": 1
+}

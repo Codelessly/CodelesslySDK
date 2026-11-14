@@ -1,0 +1,16 @@
+{"meta":{"ui":"code_diff","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["code_diff@claude-haiku-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":143,"usage":{"inputTokens":4517,"outputTokens":143,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":761,"firstToolDeltaMs":802,"totalMs":1130,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":761,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":26,"scripts":0,"scriptChars":0,"designSystemComponents":7,"replacedControls":0},"assets":null}}
+{"tMs":802,"delta":"{\"ops\": [{\"op"}
+{"tMs":825,"delta":"\": \"set\", \"id\": \""}
+{"tMs":845,"delta":"applyBtn\", \"node"}
+{"tMs":867,"delta":"\": {\"type\": \"Button"}
+{"tMs":891,"delta":"\", \"layout\": {\"width"}
+{"tMs":914,"delta":"\": {\"fill\": 358"}
+{"tMs":930,"delta":"}, \"height\": {\"h"}
+{"tMs":952,"delta":"ug\": 28}}, \""}
+{"tMs":974,"delta":"props\": {\"label\": \""}
+{"tMs":996,"delta":"Apply\", \"variant\": \""}
+{"tMs":1016,"delta":"primary\"}, \"bind"}
+{"tMs":1038,"delta":"\": {\"props.enabled"}
+{"tMs":1059,"delta":"\": \"${= allDecided"}
+{"tMs":1086,"delta":"}\"}}}]"}
+{"tMs":1126,"delta":"}"}

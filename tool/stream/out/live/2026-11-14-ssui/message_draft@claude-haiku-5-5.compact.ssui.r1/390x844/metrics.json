@@ -1,0 +1,114 @@
+{
+ "stream": "message_draft@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 517,
+ "timeToFirstPaintMs": 1358,
+ "timeToFirstTextMs": 2276,
+ "timeToFirstSectionMs": 4461,
+ "timeToCompleteMs": 7418,
+ "outputTokens": 2304,
+ "tokensEstimated": false,
+ "chars": 4868,
+ "deltas": 336,
+ "opsApplied": 17,
+ "opsRejected": 4,
+ "opsRecoveredFromMalformed": 13,
+ "jsonRepairs": 3,
+ "pending": 4,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/toInput/props/error",
+  "wrong_type /nodes/subjectInput/props/error",
+  "wrong_type /nodes/sentBanner/visible",
+  "wrong_type /nodes/send/props/enabled",
+  "dangling_child /nodes/card/children/5",
+  "dangling_child /nodes/toField/children/1",
+  "dangling_child /nodes/subjectField/children/1",
+  "dangling_child /nodes/footer/children/1"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 3,
+  "componentsRendered": 3,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 21,
+ "rejections": [
+  {
+   "op": 7,
+   "code": "wrong_type",
+   "path": "/nodes/toInput/props/error",
+   "message": "Expected a boolean (true or false), got the text \"${= to == ''}\".",
+   "nodeId": "toInput"
+  },
+  {
+   "op": 10,
+   "code": "wrong_type",
+   "path": "/nodes/subjectInput/props/error",
+   "message": "Expected a boolean (true or false), got the text \"${= subject == ''}\".",
+   "nodeId": "subjectInput"
+  },
+  {
+   "op": 17,
+   "code": "wrong_type",
+   "path": "/nodes/sentBanner/visible",
+   "message": "Expected a boolean (true or false), got the text \"${sent}\".",
+   "nodeId": "sentBanner"
+  },
+  {
+   "op": 20,
+   "code": "wrong_type",
+   "path": "/nodes/send/props/enabled",
+   "message": "Expected a boolean (true or false), got the text \"${= canSend}\".",
+   "nodeId": "send"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/5",
+   "message": "Child \"sentBanner\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/toField/children/1",
+   "message": "Child \"toInput\" of \"toField\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "toField"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/subjectField/children/1",
+   "message": "Child \"subjectInput\" of \"subjectField\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "subjectField"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/footer/children/1",
+   "message": "Child \"send\" of \"footer\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "footer"
+  }
+ ],
+ "nodes": 15,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 9,
+  "max": 9
+ },
+ "frames": 125,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 462,
+ "pumpMsMedian": 0.124,
+ "renderExceptions": [],
+ "warnings": 3
+}

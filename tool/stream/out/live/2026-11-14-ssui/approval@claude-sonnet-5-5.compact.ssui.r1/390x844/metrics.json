@@ -1,0 +1,50 @@
+{
+ "stream": "approval@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1301,
+ "timeToFirstPaintMs": 4221,
+ "timeToFirstTextMs": 5516,
+ "timeToFirstSectionMs": 5516,
+ "timeToCompleteMs": 15081,
+ "outputTokens": 2814,
+ "tokensEstimated": false,
+ "chars": 5846,
+ "deltas": 384,
+ "opsApplied": 26,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 6,
+  "componentsRendered": 5,
+  "componentsNotRendered": [
+   "fileItem (ListRow)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 26,
+ "rejections": [],
+ "nodes": 24,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 11,
+  "max": 36
+ },
+ "frames": 179,
+ "frameMs": 89,
+ "pumpsOverBudget16ms": 12,
+ "pumps": 564,
+ "pumpMsMedian": 0.116,
+ "renderExceptions": [],
+ "warnings": 0
+}

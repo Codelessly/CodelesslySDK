@@ -1,0 +1,75 @@
+{
+ "stream": "image_gallery@claude-haiku-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 470,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": 904,
+ "timeToFirstSectionMs": 904,
+ "timeToCompleteMs": 1500,
+ "outputTokens": 322,
+ "tokensEstimated": false,
+ "chars": 600,
+ "deltas": 49,
+ "opsApplied": 3,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "would_orphan /nodes/panel/children"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 3,
+  "componentsRendered": 0,
+  "componentsNotRendered": [
+   "closeBtn (IconButton)",
+   "prevBtn (IconButton)",
+   "nextBtn (IconButton)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 19,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 4,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "would_orphan",
+   "path": "/nodes/panel/children",
+   "message": "Replacing \"panel\" drops its children \"topRow\", \"bigImg\", \"capText\", \"navRow\", which exist: they would be left under no parent. To change \"panel\", patch it ({\"op\": \"patch\", \"id\": \"panel\", \"patch\": {...}}: it keeps its children); to replace it, keep them in \"children\" (or move or remove them first).",
+   "nodeId": "panel",
+   "expected": [
+    "topRow",
+    "bigImg",
+    "capText",
+    "navRow"
+   ]
+  }
+ ],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 3,
+  "max": 3
+ },
+ "frames": 35,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 85,
+ "pumpMsMedian": 0.152,
+ "renderExceptions": [],
+ "warnings": 1
+}

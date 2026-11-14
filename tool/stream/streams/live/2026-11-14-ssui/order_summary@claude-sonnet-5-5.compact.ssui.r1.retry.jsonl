@@ -1,0 +1,80 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["order_summary@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":774,"usage":{"inputTokens":3972,"outputTokens":774,"cacheReadInputTokens":51908,"cacheCreationInputTokens":0,"ttftMs":1410,"firstToolDeltaMs":3596,"totalMs":5891,"stopReason":"StopReason.toolUse","lookups":[{"tool":"ui_read","input":{"ids":["plus","promoField","promoMsg","qtyBox","promoRow","discV"],"variables":true},"ms":1778,"outputTokens":119,"resultChars":2340}]},"text":"I need to see how the existing nodes use variables to write matching actions.The plus button uses the same pattern, so I'll mirror it for minus (removing at zero) and the apply button.","ttftMs":1410,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":34,"scripts":0,"scriptChars":0,"designSystemComponents":7,"replacedControls":0},"assets":null}}
+{"tMs":3596,"delta":"{\"ops\": [{\"op\":\""}
+{"tMs":3596,"delta":"set\",\"id\":\"minus\",\""}
+{"tMs":3596,"delta":"par"}
+{"tMs":3596,"delta":"ent\":\"qtyBox"}
+{"tMs":3596,"delta":"\",\"index\":0,\"node\":"}
+{"tMs":3596,"delta":"{\"type\":\"IconBut"}
+{"tMs":3596,"delta":"ton\",\"layout\":{\"width"}
+{"tMs":3596,"delta":"\":{\"hug\":24},"}
+{"tMs":3596,"delta":"\"height\":{\"hug\":"}
+{"tMs":4002,"delta":"24}},\"props\":{\""}
+{"tMs":4002,"delta":"icon\":\"remove\",\"vari"}
+{"tMs":4002,"delta":"ant\":\"outline\",\"size\":"}
+{"tMs":4002,"delta":"\"xs\"},\"actions"}
+{"tMs":4002,"delta":"\":[{\"trigger\":"}
+{"tMs":4002,"delta":"{\"type\":\"event\",\"event"}
+{"tMs":4002,"delta":"\":\"onPressed\"},"}
+{"tMs":4002,"delta":"\"actions\":[{\"type"}
+{"tMs":4002,"delta":"\":\"if\",\"condition\":{"}
+{"tMs":4002,"delta":"\"left\":\"${item.q"}
+{"tMs":4002,"delta":"ty}\",\"op\":\"less"}
+{"tMs":4002,"delta":"Than"}
+{"tMs":4402,"delta":"OrEqualTo\",\""}
+{"tMs":4402,"delta":"right\":\"1\"},\"then"}
+{"tMs":4402,"delta":"\":[{\"type\":\"set"}
+{"tMs":4402,"delta":"Variable\",\"variable\":\""}
+{"tMs":4402,"delta":"items\",\"value\":\"${= fil"}
+{"tMs":4402,"delta":"ter(items, (i, n"}
+{"tMs":4402,"delta":") => n"}
+{"tMs":4402,"delta":" != index)}\"}],\""}
+{"tMs":4402,"delta":"else\":[{\"type\":\""}
+{"tMs":4402,"delta":"setVariable\",\"variable\":"}
+{"tMs":4402,"delta":"\"items\",\"value\":\"${="}
+{"tMs":4402,"delta":" map(items, (i, n"}
+{"tMs":4801,"delta":") => n == index ? mer"}
+{"tMs":4801,"delta":"ge(i, {qty:"}
+{"tMs":4801,"delta":" i.qty - 1}"}
+{"tMs":4801,"delta":") : i)}\"}]"}
+{"tMs":4801,"delta":"}]}]}"}
+{"tMs":4801,"delta":"},{\"op\":\"set\",\""}
+{"tMs":4801,"delta":"id\":\"promoBtn"}
+{"tMs":4801,"delta":"\",\"parent\":\"promoR"}
+{"tMs":4801,"delta":"ow\",\"index\":1,\"node"}
+{"tMs":4801,"delta":"\":{\"type\":\"Button"}
+{"tMs":4801,"delta":"\",\"lay"}
+{"tMs":4801,"delta":"out\":{\"width\":{\""}
+{"tMs":5200,"delta":"hug\":60"}
+{"tMs":5200,"delta":"},\"height\":{\"hug"}
+{"tMs":5200,"delta":"\":28}},\"props\":{"}
+{"tMs":5200,"delta":"\"label\":\"Apply\",\""}
+{"tMs":5200,"delta":"variant\":\"outline\"},"}
+{"tMs":5200,"delta":"\"actions\":[{\"tr"}
+{"tMs":5200,"delta":"igger\":{\"type\":\""}
+{"tMs":5200,"delta":"event\",\"event\":\"onPress"}
+{"tMs":5200,"delta":"ed\"},\"actions\":["}
+{"tMs":5200,"delta":"{\"type\":\"if\",\"cond"}
+{"tMs":5200,"delta":"ition\":{\"left\":\"${"}
+{"tMs":5200,"delta":"= upper(tr"}
+{"tMs":5883,"delta":"im(promo))}\",\"op"}
+{"tMs":5883,"delta":"\":\"equalsTo\",\""}
+{"tMs":5883,"delta":"right\":\"SAVE10"}
+{"tMs":5883,"delta":"\"},\"then\":[{\""}
+{"tMs":5883,"delta":"type\":\"setVariable\",\""}
+{"tMs":5883,"delta":"variable\":\"applied\",\"value"}
+{"tMs":5883,"delta":"\":\"${"}
+{"tMs":5883,"delta":"= true}\"},{\"type"}
+{"tMs":5883,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":5883,"delta":"able\":\"promoBad\",\""}
+{"tMs":5883,"delta":"value\":\"${= false}\""}
+{"tMs":5883,"delta":"}],"}
+{"tMs":5883,"delta":"\"else\":[{\"type\":"}
+{"tMs":5883,"delta":"\"setVariable\",\"variable"}
+{"tMs":5883,"delta":"\":\"applied\",\"value\":\""}
+{"tMs":5883,"delta":"${= false}\"},{\""}
+{"tMs":5883,"delta":"type\":\"setVariable\",\""}
+{"tMs":5883,"delta":"variable\":\"promoBad"}
+{"tMs":5884,"delta":"\",\"value\":\"${= true}"}
+{"tMs":5884,"delta":"\"}]}]}]}"}
+{"tMs":5884,"delta":"}]"}
+{"tMs":5886,"delta":"}"}
