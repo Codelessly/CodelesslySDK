@@ -1,0 +1,24 @@
+name: playground
+description: Type the compact notation, see it render. A design system switch, the issues the parser reports, and the document it expands to.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  codelessly_sdk:
+    path: ../..
+  codelessly_api: ^30.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/design_systems/
+    - assets/samples/

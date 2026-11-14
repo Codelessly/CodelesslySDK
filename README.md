@@ -224,7 +224,7 @@ controller.layoutId = 'checkout';         // show another layout
 
 ## UI written by an agent
 
-A layout is data, so an agent can write one. Three things in this repository are for that:
+A layout is data, so an agent can write one. Four things in this repository are for that:
 
 - **Design systems as data** ([`design_systems/`](https://github.com/Codelessly/CodelesslySDK/tree/master/design_systems)).
   `ssui` is Soft SaaS UI as 160 component documents (buttons and fields through menus, trees, diffs, a terminal and a
@@ -251,8 +251,12 @@ A layout is data, so an agent can write one. Three things in this repository are
   validates a document, draws it at the sizes asked for, and drives it (`--tap`, `--type`, `--drag`, `--scroll`), so
   what was generated can be checked without an app.
 
+- **A playground** ([`examples/playground`](https://github.com/Codelessly/CodelesslySDK/tree/master/examples/playground)).
+  Type the notation, see it render as you type, switch design system, read what was not understood and the
+  document it became.
+
 [`design_systems/ssui/examples/targets`](https://github.com/Codelessly/CodelesslySDK/tree/master/design_systems/ssui/examples/targets)
-holds sixty-five cards written this way (approvals, tables, plans, diffs, sources, a handoff), each ten to thirty
+holds seventy-three cards written this way (approvals, tables, plans, diffs, sources, a handoff), each ten to thirty
 lines.
 
 ## Developer guide
