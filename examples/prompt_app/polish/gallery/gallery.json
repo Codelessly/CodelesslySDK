@@ -1,0 +1,313 @@
+{
+ "schema": 3,
+ "roots": [
+  "gallery"
+ ],
+ "nodes": {
+  "gallery": {
+   "type": "canvas",
+   "slots": {
+    "body": "Screen1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "Screen1": {
+   "type": "Screen",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "children": [
+    "TopBar1",
+    "HeroSession1",
+    "row1",
+    "WeekStrip1",
+    "SectionTitle1",
+    "EmptyState1",
+    "EmptyState2",
+    "ChartCard1",
+    "StatTrio1",
+    "RecordCard1",
+    "SessionRow1",
+    "SessionRow2"
+   ]
+  },
+  "TopBar1": {
+   "type": "TopBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Every block, once",
+    "subtitle": "The same blocks with other data, and the child's illustration set.",
+    "eyebrow": "Skip",
+    "badge": "12"
+   }
+  },
+  "HeroSession1": {
+   "type": "HeroSession",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Double unders",
+    "detail": "Ten tries. Count the ones you land.",
+    "eyebrow": "Next up",
+    "minutes": "12",
+    "cta": "Let's jump",
+    "audience": "kid"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "StreakFlame1",
+    "ProgressGoal1"
+   ]
+  },
+  "StreakFlame1": {
+   "type": "StreakFlame",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "label": "day streak",
+    "note": "Your longest yet.",
+    "count": 12,
+    "audience": "kid"
+   }
+  },
+  "ProgressGoal1": {
+   "type": "ProgressGoal",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "title": "This week",
+    "note": "Goal reached. Rest well.",
+    "done": 3,
+    "goal": 3,
+    "icon": "check_rounded"
+   }
+  },
+  "WeekStrip1": {
+   "type": "WeekStrip",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "done": [
+     "Mon",
+     "Tue",
+     "Thu"
+    ],
+    "today": "Fri"
+   }
+  },
+  "SectionTitle1": {
+   "type": "SectionTitle",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "When there is nothing yet",
+    "action": "Why"
+   }
+  },
+  "EmptyState1": {
+   "type": "EmptyState",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "No sessions yet",
+    "message": "Your first one takes five minutes.",
+    "cta": "Start a session"
+   }
+  },
+  "EmptyState2": {
+   "type": "EmptyState",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Nothing to see... yet",
+    "message": "Jump once and it shows up here.",
+    "cta": "Let's jump",
+    "audience": "kid"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 356.0
+   },
+   "props": {
+    "title": "Minutes per day",
+    "values": [
+     6,
+     12,
+     0,
+     8,
+     14,
+     9
+    ],
+    "labels": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat"
+    ],
+    "unit": "min",
+    "deltaLabel": "vs Friday"
+   }
+  },
+  "StatTrio1": {
+   "type": "StatTrio",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "values": [
+     "1:42",
+     "96%",
+     "7"
+    ],
+    "labels": [
+     "Longest run",
+     "Clean jumps",
+     "Rounds"
+    ],
+    "icons": [
+     "timer_outlined",
+     "verified_rounded",
+     "repeat_rounded"
+    ]
+   }
+  },
+  "RecordCard1": {
+   "type": "RecordCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Personal best",
+    "detail": "Set on Wed 11 Nov",
+    "value": "1304",
+    "unit": "jumps in one session"
+   }
+  },
+  "SessionRow1": {
+   "type": "SessionRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Freestyle",
+    "detail": "Sun 15 Nov · 20 min",
+    "value": "2210",
+    "unit": "jumps",
+    "share": 1
+   }
+  },
+  "SessionRow2": {
+   "type": "SessionRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "A session with no figure yet",
+    "detail": "Planned for tomorrow"
+   }
+  }
+ }
+}

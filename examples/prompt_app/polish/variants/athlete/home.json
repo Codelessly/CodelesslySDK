@@ -1,0 +1,316 @@
+{
+ "schema": 3,
+ "roots": [
+  "home"
+ ],
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "slots": {
+    "body": "Screen1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "Screen1": {
+   "type": "Screen",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "children": [
+    "TopBar1",
+    "HeroSession1",
+    "row1",
+    "WeekStrip1",
+    "SectionTitle1",
+    "SessionRow1"
+   ]
+  },
+  "TopBar1": {
+   "type": "TopBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Ready to jump?",
+    "eyebrow": "Skip"
+   },
+   "bind": {
+    "props.subtitle": "Short and steady wins. Today takes just ${today.minutes} minutes."
+   }
+  },
+  "HeroSession1": {
+   "type": "HeroSession",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cta": "Start today's session"
+   },
+   "bind": {
+    "props.title": "${today.name}",
+    "props.detail": "${today.rounds} easy rounds: jump for ${today.work} seconds, then rest for ${today.rest}.",
+    "props.minutes": "${today.minutes}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start_session"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "StreakFlame1",
+    "ProgressGoal1"
+   ]
+  },
+  "StreakFlame1": {
+   "type": "StreakFlame",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "label": "sessions in a row"
+   },
+   "bind": {
+    "props.note": "Jump today to make it ${= streak+1}. Keep going.",
+    "props.count": "${streak}"
+   }
+  },
+  "ProgressGoal1": {
+   "type": "ProgressGoal",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "title": "This week"
+   },
+   "bind": {
+    "props.note": "${= weeklyGoal-sessionsThisWeek} more short ones to reach your goal.",
+    "props.done": "${sessionsThisWeek}",
+    "props.goal": "${weeklyGoal}"
+   }
+  },
+  "WeekStrip1": {
+   "type": "WeekStrip",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "today": "Sat"
+   },
+   "bind": {
+    "props.done": "${= map(take(sessions,sessionsThisWeek),s=>s.date)}"
+   }
+  },
+  "SectionTitle1": {
+   "type": "SectionTitle",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Last session",
+    "action": "See all"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_history"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionRow1": {
+   "type": "SessionRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "unit": "jumps"
+   },
+   "bind": {
+    "props.title": "${= sessions[0].name}",
+    "props.detail": "${= sessions[0].date} · ${= sessions[0].minutes} min",
+    "props.value": "${= sessions[0].jumps}",
+    "props.share": "${= sessions[0].jumps/max(map(sessions,s=>s.jumps))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_session",
+       "value": "${= sessions[0].date}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "home": [
+   {
+    "name": "streak",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "weeklyGoal",
+    "type": "integer",
+    "value": 5
+   },
+   {
+    "name": "sessionsThisWeek",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "today",
+    "type": "map",
+    "value": {
+     "name": "Intervals",
+     "rounds": 8,
+     "work": 40,
+     "rest": 20,
+     "minutes": 8
+    }
+   },
+   {
+    "name": "weeks",
+    "type": "list",
+    "value": [
+     {
+      "label": "W39",
+      "jumps": 2100
+     },
+     {
+      "label": "W40",
+      "jumps": 2650
+     },
+     {
+      "label": "W41",
+      "jumps": 2400
+     },
+     {
+      "label": "W42",
+      "jumps": 3180
+     }
+    ]
+   },
+   {
+    "name": "sessions",
+    "type": "list",
+    "value": [
+     {
+      "date": "Fri 13 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 912,
+      "best": 148
+     },
+     {
+      "date": "Wed 11 Nov",
+      "name": "Endurance",
+      "minutes": 12,
+      "jumps": 1304,
+      "best": 210
+     },
+     {
+      "date": "Mon 9 Nov",
+      "name": "Footwork",
+      "minutes": 6,
+      "jumps": 640,
+      "best": 96
+     },
+     {
+      "date": "Sat 7 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 880,
+      "best": 131
+     }
+    ]
+   }
+  ]
+ }
+}

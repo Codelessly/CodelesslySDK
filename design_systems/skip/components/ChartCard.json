@@ -1,0 +1,461 @@
+{
+ "schema": 3,
+ "id": "ChartCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "ChartCard",
+  "doc": "A progress chart as the screen's focal point, on a dark panel: one rounded bar per value (oldest first) with its label, the latest value in display type with its unit, and a chip with the change since the one before (deltaLabel says against what).",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Jumps this week",
+    "doc": "What the chart counts, shown small over the big figure.",
+    "required": true
+   },
+   {
+    "key": "values",
+    "type": {
+     "kind": "list",
+     "flutter": "List<double>",
+     "item": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": [
+     2100,
+     2650,
+     2400,
+     3180
+    ],
+    "doc": "One bar per value, oldest first; the last one is the headline figure and the bright bar.",
+    "required": true
+   },
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "W39",
+     "W40",
+     "W41",
+     "W42"
+    ],
+    "doc": "One label per bar."
+   },
+   {
+    "key": "unit",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "jumps",
+    "doc": "The unit after the big figure."
+   },
+   {
+    "key": "deltaLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "vs last",
+    "doc": "What the change chip compares with: it shows last minus previous, then this."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Four weeks",
+   "size": [
+    350,
+    356
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "stack",
+   "children": [
+    "glow",
+    "content"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 356
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "panel"
+     }
+    ],
+    "radius": 28,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.hero}",
+    "decoration.effects": "${theme.shadows.panel}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 70,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "glow": {
+   "type": "box",
+   "layout": {
+    "width": 280,
+    "height": 280,
+    "x": {
+     "end": -90
+    },
+    "y": {
+     "start": -130
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "panelGlow"
+     }
+    ],
+    "shape": "circle",
+    "effects": [
+     {
+      "type": "layerBlur",
+      "blurRadius": 50
+     }
+    ]
+   },
+   "opacity": 0.9
+  },
+  "content": {
+   "type": "column",
+   "children": [
+    "head",
+    "figure",
+    "gapA",
+    "plot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    },
+    "padding": [
+     22,
+     22,
+     22,
+     18
+    ]
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "title",
+    "delta"
+   ],
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.title)}",
+    "style": {
+     "from": "eyebrow",
+     "color": "onPanelSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "delta": {
+   "type": "row",
+   "children": [
+    "deltaIcon",
+    "deltaText"
+   ],
+   "props": {
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     6,
+     11,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= length(props.values) > 1}"
+   }
+  },
+  "deltaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "north_east_rounded",
+    "size": 15,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.icon": "${= last(props.values) >= at(props.values, max(0, max(1, length(props.values)) - 2)) ? 'north_east_rounded' : 'south_east_rounded'}"
+   }
+  },
+  "deltaText": {
+   "type": "text",
+   "props": {
+    "text": "${= (last(props.values) >= at(props.values, max(0, max(1, length(props.values)) - 2)) ? '+' : '-') + thousands(abs(last(props.values) - at(props.values, max(0, max(1, length(props.values)) - 2))))} ${props.deltaLabel}",
+    "style": {
+     "from": "chip",
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "figure": {
+   "type": "row",
+   "children": [
+    "value",
+    "unit"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     10,
+     0,
+     0
+    ]
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${= thousands(last(props.values))}",
+    "style": {
+     "from": "numberLarge",
+     "color": "onPanel"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "unit": {
+   "type": "text",
+   "props": {
+    "text": "${props.unit}",
+    "style": {
+     "from": "lead",
+     "color": "onPanelSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     7
+    ]
+   }
+  },
+  "gapA": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 22
+   }
+  },
+  "plot": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "repeat",
+      "each": "${props.values}",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 12))}",
+         0,
+         "${= ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))}",
+         148
+        ],
+        "radius": "${= min(theme.radii.tile, ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2)}",
+        "paint": "${theme.colors.panelTrack}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 12))}",
+         "${= 148 - max(26, item / max(1, max(props.values)) * 148)}",
+         "${= ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))}",
+         "${= max(26, item / max(1, max(props.values)) * 148)}"
+        ],
+        "radius": "${= min(theme.radii.tile, ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2)}",
+        "when": "${= !(index == max(1, length(props.values)) - 1)}",
+        "paint": "${theme.colors.panelBar}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 12))}",
+         "${= 148 - max(26, item / max(1, max(props.values)) * 148)}",
+         "${= ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))}",
+         "${= max(26, item / max(1, max(props.values)) * 148)}"
+        ],
+        "radius": "${= min(theme.radii.tile, ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2)}",
+        "when": "${= (index == max(1, length(props.values)) - 1)}",
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.accent}, {'position': 1, 'color': theme.colors.accentDeep}]}}}"
+       },
+       {
+        "op": "paragraph",
+        "text": "${= thousands(item)}",
+        "offset": [
+         "${= (index * (((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 12)) + ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2}",
+         "${= 148 - max(26, item / max(1, max(props.values)) * 148) + 9}"
+        ],
+        "anchor": "topCenter",
+        "style": {
+         "fontSize": 12,
+         "fontWeight": 700
+        },
+        "paint": "${= (index == max(1, length(props.values)) - 1) ? theme.colors.onAccent : theme.colors.onPanelSoft}"
+       },
+       {
+        "op": "paragraph",
+        "text": "${= at(props.labels, index)}",
+        "when": "${= index < length(props.labels)}",
+        "offset": [
+         "${= (index * (((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 12)) + ((size.width - 12 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2}",
+         159
+        ],
+        "anchor": "topCenter",
+        "style": {
+         "fontSize": 12,
+         "fontWeight": 700,
+         "letterSpacing": 0.6
+        },
+        "paint": "${= (index == max(1, length(props.values)) - 1) ? theme.colors.onPanel : theme.colors.onPanelSoft}"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

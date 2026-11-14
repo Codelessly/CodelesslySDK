@@ -1,0 +1,883 @@
+{
+ "schema": 3,
+ "id": "skip",
+ "name": "Skip",
+ "version": "1.0.0",
+ "description": "A consumer fitness language for a jump rope app: an electric indigo brand with a volt accent, heavy display type, big round corners, soft tinted depth, and ready-made screen blocks with drawn illustrations.",
+ "theme": {
+  "primary": "#FF5B3DF5",
+  "onPrimary": "#FFFFFFFF",
+  "surface": "#FFFFFFFF",
+  "onSurface": "#FF15122E",
+  "error": "#FFE11D48",
+  "success": "#FF12A150",
+  "warning": "#FFE8590C",
+  "radius": 14,
+  "buttonRadius": 14,
+  "colors": {
+   "primaryBackground": "#FFFFFFFF",
+   "secondaryBackground": "#FFF8F8F9",
+   "tertiaryBackground": "#FFF1F1F2",
+   "primaryText": "#FF15122E",
+   "secondaryText": "#B815122E",
+   "tertiaryText": "#7315122E",
+   "primaryBorder": "#FFE3E3E6",
+   "secondaryBorder": "#FFD0D0D5",
+   "info": "#FF0284C7",
+   "purple": "#FF9333EA",
+   "subtleFill": "#FFF1F1F2",
+   "neutralFill": "#FF48465C",
+   "raisedBackground": "#FFFFFFFF",
+   "track": "#FFE8E5F7",
+   "scrim": "#66000000",
+   "onAccent": "#FF15122E",
+   "focusBorder": "#805B3DF5",
+   "hoverOverlay": "#0A15122E",
+   "pressedOverlay": "#1415122E",
+   "activeTint": "#245B3DF5",
+   "primaryTint": "#1A5B3DF5",
+   "primaryTintBorder": "#475B3DF5",
+   "neutralTint": "#FFF1F1F2",
+   "neutralTintBorder": "#FFE3E3E6",
+   "tooltipBackground": "#FF15122E",
+   "tooltipText": "#FFFFFFFF",
+   "tooltipMuted": "#99FFFFFF",
+   "successTint": "#1A12A150",
+   "successTintBorder": "#4712A150",
+   "warningTint": "#1AE8590C",
+   "warningTintBorder": "#47E8590C",
+   "errorTint": "#1AE11D48",
+   "errorTintBorder": "#47E11D48",
+   "infoTint": "#1A0284C7",
+   "infoTintBorder": "#470284C7",
+   "page": "#FFF4F3FB",
+   "card": "#FFFFFFFF",
+   "ink": "#FF15122E",
+   "inkSoft": "#FF5E5A7A",
+   "inkFaint": "#FF9793B0",
+   "line": "#FFE9E7F5",
+   "brand": "#FF5B3DF5",
+   "brandDeep": "#FF3A1FC4",
+   "brandBright": "#FF8468FF",
+   "brandTint": "#FFECE8FF",
+   "onBrand": "#FFFFFFFF",
+   "accent": "#FFD6FF3F",
+   "accentDeep": "#FFA8E000",
+   "heroA": "#FF7352FF",
+   "heroB": "#FF3A1FCB",
+   "heroGlow": "#FFA791FF",
+   "heroLine": "#33FFFFFF",
+   "onHero": "#FFFFFFFF",
+   "onHeroSoft": "#FFDCD5FF",
+   "heroChip": "#29FFFFFF",
+   "heroCta": "#FFFFFFFF",
+   "onHeroCta": "#FF15122E",
+   "heroCtaMark": "#FFD6FF3F",
+   "onHeroCtaMark": "#FF15122E",
+   "flame": "#FFFF6B2C",
+   "flameDeep": "#FFF0381B",
+   "flameLight": "#FFFFC53D",
+   "flameTint": "#FFFFF0E6",
+   "panel": "#FF17132F",
+   "panelGlow": "#FF3A2A8F",
+   "onPanel": "#FFFFFFFF",
+   "onPanelSoft": "#FFA9A4C9",
+   "panelBar": "#FF3A3466",
+   "panelTrack": "#801F1A3B",
+   "artSkin": "#FFF6B48F",
+   "artSkinShade": "#FFE39A74",
+   "artHair": "#FF1C1638",
+   "artTop": "#FFD6FF3F",
+   "artBottom": "#FF15122E",
+   "artShoe": "#FFFFFFFF",
+   "artRope": "#FFD6FF3F",
+   "artHandle": "#FF15122E",
+   "artSpark": "#FFFFFFFF",
+   "artShadow": "#3D0B0540",
+   "artBlob": "#FFECE8FF",
+   "artBlobDeep": "#FFDAD2FF",
+   "gold": "#FFFFC53D",
+   "goldDeep": "#FFF59E0B",
+   "goldTint": "#FFFFF6DC",
+   "onGold": "#FF4A2E00"
+  },
+  "textStyles": {
+   "pageTitle": {
+    "fontSize": 23,
+    "fontWeight": 600,
+    "height": 1.3,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -0.2
+   },
+   "sectionTitle": {
+    "fontSize": 16,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "dialogTitle": {
+    "fontSize": 16,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "panelTitle": {
+    "fontSize": 14,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "body": {
+    "fontSize": 15,
+    "fontWeight": 400,
+    "height": 1.5,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "bodySecondary": {
+    "fontSize": 14,
+    "fontWeight": 400,
+    "height": 1.5,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "inputText": {
+    "fontSize": 14.5,
+    "fontWeight": 400,
+    "height": 1.25,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "placeholder": {
+    "fontSize": 14.5,
+    "fontWeight": 400,
+    "height": 1.25,
+    "color": "tertiaryText",
+    "leadingDistribution": "even"
+   },
+   "fieldLabel": {
+    "fontSize": 13,
+    "fontWeight": 600,
+    "height": 1.3,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "caption": {
+    "fontSize": 12.5,
+    "fontWeight": 400,
+    "height": 1.4,
+    "color": "tertiaryText",
+    "leadingDistribution": "even"
+   },
+   "mono": {
+    "fontSize": 14,
+    "fontWeight": 400,
+    "height": 1.5,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "fontFamily": "monospace"
+   },
+   "badge": {
+    "fontSize": 12.5,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlXs": {
+    "fontSize": 13,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlCompact": {
+    "fontSize": 14,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlSmall": {
+    "fontSize": 14.5,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlMedium": {
+    "fontSize": 15,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "controlLarge": {
+    "fontSize": 17,
+    "fontWeight": 500,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "heading1": {
+    "fontSize": 34.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "heading2": {
+    "fontSize": 27.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "heading3": {
+    "fontSize": 20.5,
+    "fontWeight": 600,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "display": {
+    "fontSize": 42,
+    "fontWeight": 900,
+    "height": 1.02,
+    "letterSpacing": -0.9,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "screenTitle": {
+    "fontSize": 32,
+    "fontWeight": 900,
+    "height": 1.08,
+    "letterSpacing": -1.0,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "number": {
+    "fontSize": 40,
+    "fontWeight": 900,
+    "height": 1.0,
+    "letterSpacing": -1.2,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "numberLarge": {
+    "fontSize": 56,
+    "fontWeight": 900,
+    "height": 1.0,
+    "letterSpacing": -2.0,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "numberSmall": {
+    "fontSize": 22,
+    "fontWeight": 900,
+    "height": 1.05,
+    "letterSpacing": -0.5,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "blockTitle": {
+    "fontSize": 21,
+    "fontWeight": 900,
+    "height": 1.2,
+    "letterSpacing": -0.5,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "cardTitle": {
+    "fontSize": 17,
+    "fontWeight": 700,
+    "height": 1.25,
+    "letterSpacing": -0.2,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "eyebrow": {
+    "fontSize": 11.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "letterSpacing": 1.3,
+    "color": "inkFaint",
+    "leadingDistribution": "even"
+   },
+   "lead": {
+    "fontSize": 15,
+    "fontWeight": 400,
+    "height": 1.45,
+    "color": "inkSoft",
+    "leadingDistribution": "even"
+   },
+   "meta": {
+    "fontSize": 13,
+    "fontWeight": 500,
+    "height": 1.35,
+    "color": "inkFaint",
+    "leadingDistribution": "even"
+   },
+   "cta": {
+    "fontSize": 16.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "letterSpacing": -0.1,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "chip": {
+    "fontSize": 12.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "letterSpacing": 0.2,
+    "color": "ink",
+    "leadingDistribution": "even"
+   }
+  },
+  "dark": {
+   "primary": "#FF9B87FF",
+   "onPrimary": "#FFFFFFFF",
+   "surface": "#FF0F0D1C",
+   "onSurface": "#FFF4F3FA",
+   "error": "#FFE85676",
+   "success": "#FF4DB87C",
+   "warning": "#FFEE8249",
+   "shadows": {
+    "level1": [
+     {
+      "type": "dropShadow",
+      "color": "#4D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ],
+    "level2": [
+     {
+      "type": "dropShadow",
+      "color": "#4D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 4,
+      "spreadRadius": -1
+     }
+    ],
+    "level3": [
+     {
+      "type": "dropShadow",
+      "color": "#80000000",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -4
+     },
+     {
+      "type": "dropShadow",
+      "color": "#40000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ],
+    "level4": [
+     {
+      "type": "dropShadow",
+      "color": "#80000000",
+      "offset": [
+       0,
+       16
+      ],
+      "blurRadius": 40,
+      "spreadRadius": -8
+     },
+     {
+      "type": "dropShadow",
+      "color": "#40000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "colors": {
+    "primaryBackground": "#FF0F0D1C",
+    "secondaryBackground": "#FF181625",
+    "tertiaryBackground": "#FF2F2D3B",
+    "primaryText": "#FFF4F3FA",
+    "secondaryText": "#99F4F3FA",
+    "tertiaryText": "#66F4F3FA",
+    "primaryBorder": "#FF343240",
+    "secondaryBorder": "#FF464451",
+    "info": "#FF41A3D5",
+    "purple": "#FFA855F7",
+    "subtleFill": "#FF211F2E",
+    "neutralFill": "#FF464451",
+    "raisedBackground": "#FF2F2D3B",
+    "track": "#FF2B2B31",
+    "scrim": "#99000000",
+    "onAccent": "#FF0A0A0B",
+    "focusBorder": "#809B87FF",
+    "hoverOverlay": "#14F4F3FA",
+    "pressedOverlay": "#24F4F3FA",
+    "activeTint": "#389B87FF",
+    "primaryTint": "#299B87FF",
+    "primaryTintBorder": "#5C9B87FF",
+    "neutralTint": "#FF211F2E",
+    "neutralTintBorder": "#FF343240",
+    "tooltipBackground": "#FFF4F3FA",
+    "tooltipText": "#FF0F0D1C",
+    "tooltipMuted": "#990F0D1C",
+    "successTint": "#294DB87C",
+    "successTintBorder": "#5C4DB87C",
+    "warningTint": "#29EE8249",
+    "warningTintBorder": "#5CEE8249",
+    "errorTint": "#29E85676",
+    "errorTintBorder": "#5CE85676",
+    "infoTint": "#2941A3D5",
+    "infoTintBorder": "#5C41A3D5",
+    "page": "#FF0A0A0B",
+    "card": "#FF18181B",
+    "ink": "#FFFFFFFF",
+    "inkSoft": "#FFA9A9B2",
+    "inkFaint": "#FF6F6F7A",
+    "line": "#FF27272C",
+    "brand": "#FFC8FF00",
+    "brandDeep": "#FF9BD100",
+    "brandBright": "#FFE2FF66",
+    "brandTint": "#FF222A0A",
+    "onBrand": "#FF0A0A0B",
+    "accent": "#FFC8FF00",
+    "accentDeep": "#FF9BD100",
+    "heroA": "#FF2A2A30",
+    "heroB": "#FF121214",
+    "heroGlow": "#FF4A5A12",
+    "heroLine": "#24FFFFFF",
+    "onHero": "#FFFFFFFF",
+    "onHeroSoft": "#FFB9B9C2",
+    "heroChip": "#1FFFFFFF",
+    "heroCta": "#FFC8FF00",
+    "onHeroCta": "#FF0A0A0B",
+    "heroCtaMark": "#FF0A0A0B",
+    "onHeroCtaMark": "#FFC8FF00",
+    "flame": "#FFFF5A1F",
+    "flameDeep": "#FFE0320F",
+    "flameLight": "#FFFFB830",
+    "flameTint": "#FF2A1710",
+    "panel": "#FF18181B",
+    "panelGlow": "#FF2F3A0C",
+    "onPanel": "#FFFFFFFF",
+    "onPanelSoft": "#FF8E8E99",
+    "panelBar": "#FF3A3A42",
+    "panelTrack": "#80202024",
+    "artSkin": "#FFE9A681",
+    "artSkinShade": "#FFCB8662",
+    "artHair": "#FF52525C",
+    "artTop": "#FFC8FF00",
+    "artBottom": "#FFF4F4F5",
+    "artShoe": "#FFC8FF00",
+    "artRope": "#FFC8FF00",
+    "artHandle": "#FFF4F4F5",
+    "artSpark": "#FFFFFFFF",
+    "artShadow": "#66000000",
+    "artBlob": "#FF222226",
+    "artBlobDeep": "#FF2E2E34",
+    "gold": "#FFFFC53D",
+    "goldDeep": "#FFF59E0B",
+    "goldTint": "#FF2A2210",
+    "onGold": "#FFFFE9A8"
+   }
+  },
+  "spacing": {
+   "1": 5,
+   "2": 9,
+   "3": 14,
+   "4": 18,
+   "5": 23,
+   "6": 28,
+   "8": 37,
+   "10": 46,
+   "12": 55,
+   "16": 74
+  },
+  "radii": {
+   "inner": 10,
+   "control": 14,
+   "panel": 17,
+   "dialog": 24,
+   "full": 9999,
+   "hero": 32,
+   "card": 24,
+   "tile": 22,
+   "chip": 999,
+   "cta": 999
+  },
+  "sizes": {
+   "xs": 28,
+   "compact": 32,
+   "small": 37,
+   "medium": 41,
+   "large": 51,
+   "topBar": 51,
+   "panelHeader": 41,
+   "tableRow": 41,
+   "tableRowDense": 32,
+   "tableHeader": 37,
+   "dialogHeader": 55,
+   "dialogFooter": 56,
+   "statusBar": 28,
+   "dialogSmall": 460,
+   "dialogMedium": 598,
+   "dialogLarge": 828
+  },
+  "shadows": {
+   "level1": [
+    {
+     "type": "dropShadow",
+     "color": "#0D000000",
+     "offset": [
+      0,
+      1
+     ],
+     "blurRadius": 2
+    }
+   ],
+   "level2": [
+    {
+     "type": "dropShadow",
+     "color": "#1A000000",
+     "offset": [
+      0,
+      2
+     ],
+     "blurRadius": 4,
+     "spreadRadius": -1
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0D000000",
+     "offset": [
+      0,
+      1
+     ],
+     "blurRadius": 2
+    }
+   ],
+   "level3": [
+    {
+     "type": "dropShadow",
+     "color": "#1F000000",
+     "offset": [
+      0,
+      4
+     ],
+     "blurRadius": 16,
+     "spreadRadius": -2
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0F000000",
+     "offset": [
+      0,
+      1
+     ],
+     "blurRadius": 3
+    }
+   ],
+   "level4": [
+    {
+     "type": "dropShadow",
+     "color": "#24000000",
+     "offset": [
+      0,
+      12
+     ],
+     "blurRadius": 32,
+     "spreadRadius": -6
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0F000000",
+     "offset": [
+      0,
+      2
+     ],
+     "blurRadius": 6
+    }
+   ],
+   "card": [
+    {
+     "type": "dropShadow",
+     "color": "#12261A66",
+     "offset": [
+      0,
+      12
+     ],
+     "blurRadius": 28,
+     "spreadRadius": -10
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0A261A66",
+     "offset": [
+      0,
+      2
+     ],
+     "blurRadius": 6
+    }
+   ],
+   "hero": [
+    {
+     "type": "dropShadow",
+     "color": "#735B3DF5",
+     "offset": [
+      0,
+      22
+     ],
+     "blurRadius": 40,
+     "spreadRadius": -16
+    }
+   ],
+   "cta": [
+    {
+     "type": "dropShadow",
+     "color": "#40120A40",
+     "offset": [
+      0,
+      8
+     ],
+     "blurRadius": 18,
+     "spreadRadius": -6
+    }
+   ],
+   "panel": [
+    {
+     "type": "dropShadow",
+     "color": "#5917132F",
+     "offset": [
+      0,
+      20
+     ],
+     "blurRadius": 36,
+     "spreadRadius": -16
+    }
+   ]
+  },
+  "durations": {
+   "control": 150,
+   "transition": 200,
+   "tooltipDelay": 400,
+   "enter": 520,
+   "stagger": 70
+  },
+  "curves": {
+   "standard": "easeInOut",
+   "enter": "easeOut"
+  }
+ },
+ "components": [
+  "components/Screen.json",
+  "components/TopBar.json",
+  "components/HeroSession.json",
+  "components/StreakFlame.json",
+  "components/ProgressGoal.json",
+  "components/WeekStrip.json",
+  "components/SectionTitle.json",
+  "components/SessionRow.json",
+  "components/ChartCard.json",
+  "components/StatTrio.json",
+  "components/RecordCard.json",
+  "components/EmptyState.json",
+  "components/Illustration.json",
+  "components/Button.json",
+  "components/IconButton.json",
+  "components/TextInput.json",
+  "components/TextArea.json",
+  "components/Select.json",
+  "components/Checkbox.json",
+  "components/Radio.json",
+  "components/Switch.json",
+  "components/Slider.json",
+  "components/SegmentedControl.json",
+  "components/Tabs.json",
+  "components/Badge.json",
+  "components/Chip.json",
+  "components/Card.json",
+  "components/Dialog.json",
+  "components/Banner.json",
+  "components/Avatar.json",
+  "components/ProgressBar.json",
+  "components/ListRow.json",
+  "components/Field.json",
+  "components/SectionHeader.json",
+  "components/Tooltip.json",
+  "components/StatusDot.json",
+  "components/CountBadge.json",
+  "components/StatusBadge.json",
+  "components/InlineStat.json",
+  "components/StatTile.json",
+  "components/IconBox.json",
+  "components/ToggleRow.json",
+  "components/Skeleton.json",
+  "components/ErrorBar.json",
+  "components/FeatureBulletItem.json",
+  "components/SectionCard.json",
+  "components/MetaInfo.json",
+  "components/Hyperlink.json",
+  "components/NotificationBadge.json",
+  "components/PulsingDots.json",
+  "components/AddButton.json",
+  "components/ProviderPill.json",
+  "components/CopyButton.json",
+  "components/BackButton.json",
+  "components/TextInputLabel.json",
+  "components/PersonChip.json",
+  "components/ResourceChip.json",
+  "components/FileListItem.json",
+  "components/StatusIndicator.json",
+  "components/DiffStatsBadge.json",
+  "components/Panel.json",
+  "components/LoadMore.json",
+  "components/ConnectionStatus.json",
+  "components/RadialProgress.json",
+  "components/ProviderIcon.json",
+  "components/OptionIcon.json",
+  "components/ProviderCard.json",
+  "components/CardActions.json",
+  "components/Breadcrumb.json",
+  "components/PageControl.json",
+  "components/StepIndicator.json",
+  "components/Stepper.json",
+  "components/SearchBar.json",
+  "components/ThemeToggle.json",
+  "components/DownloadButton.json",
+  "components/UpgradeButton.json",
+  "components/FilterLegend.json",
+  "components/OnboardingBanner.json",
+  "components/PromptBanner.json",
+  "components/RunningIndicator.json",
+  "components/CloudSyncIndicator.json",
+  "components/TextExpandable.json",
+  "components/StackedProgressBar.json",
+  "components/TabToggle.json",
+  "components/ChipTabs.json",
+  "components/MenuButton.json",
+  "components/SplitButton.json",
+  "components/WindowToolbar.json",
+  "components/DocumentItem.json",
+  "components/TextItem.json",
+  "components/CodeBlock.json",
+  "components/BatchProgressBar.json",
+  "components/AgentChip.json",
+  "components/SelectableListRow.json",
+  "components/ActionListItem.json",
+  "components/FileMetadataCard.json",
+  "components/RunRecordRow.json",
+  "components/TrialBanner.json",
+  "components/AuthPromptBanner.json",
+  "components/FullWidthSearchInput.json",
+  "components/HeaderSearchInput.json",
+  "components/AuthInput.json",
+  "components/NumberInput.json",
+  "components/ColorInput.json",
+  "components/ModelAvatarStack.json",
+  "components/SectionToolbar.json",
+  "components/PaneToolbar.json",
+  "components/CompactAppBar.json",
+  "components/StatusCategoryHeader.json",
+  "components/SectionCategoryHeaderFull.json",
+  "components/ScrollToBottomFAB.json",
+  "components/TabBarWithBadges.json",
+  "components/MenuPopover.json",
+  "components/MenuItem.json",
+  "components/ContextMenu.json",
+  "components/SortMenu.json",
+  "components/UserMenu.json",
+  "components/StatusCard.json",
+  "components/StatusCardList.json",
+  "components/RunHistoryList.json",
+  "components/StatsCarousel.json",
+  "components/HistoryTimeline.json",
+  "components/Terminal.json",
+  "components/DiffViewer.json",
+  "components/FileUploader.json",
+  "components/CommandPalette.json",
+  "components/NavigationMenu.json",
+  "components/Sidebar.json",
+  "components/PromptInput.json",
+  "components/Tree.json",
+  "components/BrowserTabs.json",
+  "components/Combobox.json",
+  "components/IconSegmentedControl.json",
+  "components/ImageUpload.json",
+  "components/CodePreview.json",
+  "components/NotePopover.json",
+  "components/ViewerDialog.json",
+  "components/SlidingPanel.json",
+  "components/DropdownMultiselect.json",
+  "components/IconSelect.json",
+  "components/ResourceCard.json",
+  "components/WorkspaceSwitcher.json",
+  "components/ModelSelectMenu.json",
+  "components/RichTextToolbar.json",
+  "components/CollapsibleSection.json",
+  "components/SplitPaneTabs.json",
+  "components/FileTree.json",
+  "components/ImageGallery.json",
+  "components/SuggestionReviewItem.json",
+  "components/CompactSuggestionReviewItem.json",
+  "components/NestedTaskLedger.json",
+  "components/MultiSelectDropdown.json",
+  "components/AddContextMenu.json",
+  "components/FileTreeContextMenu.json",
+  "components/RichTextField.json",
+  "components/CanvasShell.json",
+  "components/SidebarTogglePattern.json",
+  "components/ResizableRow.json",
+  "components/VariableContractHover.json",
+  "components/FolderCard.json",
+  "components/NumberPresetInput.json",
+  "components/ExtensionChipsInput.json",
+  "components/HierarchicalPicker.json",
+  "components/PromptInputWithBanner.json",
+  "components/TabOverflowScroll.json",
+  "components/Toolbar.json",
+  "components/ProjectSelector.json",
+  "components/DateTimelineAxis.json",
+  "components/ReorderableList.json",
+  "components/ReorderGhost.json",
+  "components/SuggestionActionObject.json",
+  "components/VariableContractList.json"
+ ],
+ "replaces": [
+  "filledButton",
+  "elevatedButton",
+  "outlinedButton",
+  "textButton",
+  "iconButton",
+  "textField",
+  "checkbox",
+  "switch",
+  "radio",
+  "slider",
+  "dropdown",
+  "segmentedButton"
+ ],
+ "examples": [],
+ "design": "DESIGN.md",
+ "patterns": "PATTERNS.md"
+}

@@ -1,0 +1,478 @@
+{
+ "schema": 3,
+ "id": "StatTrio",
+ "roots": [
+  "trio"
+ ],
+ "widget": {
+  "type": "StatTrio",
+  "doc": "Three small figures side by side as tiles: values and labels are lists of three, icons an optional list of Material icon names.",
+  "props": [
+   {
+    "key": "values",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "3736",
+     "34",
+     "4"
+    ],
+    "doc": "Three figures (numbers get thousands separators; text is shown as written).",
+    "required": true
+   },
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Total jumps",
+     "Minutes",
+     "Sessions"
+    ],
+    "doc": "What each figure counts.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "bolt_rounded",
+     "timer_outlined",
+     "event_available_rounded"
+    ],
+    "doc": "A Material icon per figure."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Totals",
+   "size": [
+    350,
+    124
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "trio": {
+   "type": "row",
+   "children": [
+    "t0",
+    "t1",
+    "t2"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 140,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "t0": {
+   "type": "column",
+   "children": [
+    "i0",
+    "g0",
+    "v0",
+    "l0"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${= length(props.values) > 0}"
+   }
+  },
+  "i0": {
+   "type": "row",
+   "children": [
+    "ic0"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 11
+   },
+   "bind": {
+    "decoration.radius": "${= min(11, theme.radii.tile)}"
+   }
+  },
+  "ic0": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${= length(props.icons) > 0 ? at(props.icons, 0) : 'bolt_rounded'}"
+   }
+  },
+  "g0": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 6
+   }
+  },
+  "v0": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(at(props.values, 0)), '^[0-9.]+$') ? thousands(number(at(props.values, 0))) : text(at(props.values, 0))}",
+    "style": "numberSmall",
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "l0": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.labels) > 0 ? at(props.labels, 0) : ''}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "t1": {
+   "type": "column",
+   "children": [
+    "i1",
+    "g1",
+    "v1",
+    "l1"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${= length(props.values) > 1}"
+   }
+  },
+  "i1": {
+   "type": "row",
+   "children": [
+    "ic1"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 11
+   },
+   "bind": {
+    "decoration.radius": "${= min(11, theme.radii.tile)}"
+   }
+  },
+  "ic1": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${= length(props.icons) > 1 ? at(props.icons, 1) : 'bolt_rounded'}"
+   }
+  },
+  "g1": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 6
+   }
+  },
+  "v1": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(at(props.values, 1)), '^[0-9.]+$') ? thousands(number(at(props.values, 1))) : text(at(props.values, 1))}",
+    "style": "numberSmall",
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "l1": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.labels) > 1 ? at(props.labels, 1) : ''}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "t2": {
+   "type": "column",
+   "children": [
+    "i2",
+    "g2",
+    "v2",
+    "l2"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${= length(props.values) > 2}"
+   }
+  },
+  "i2": {
+   "type": "row",
+   "children": [
+    "ic2"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 11
+   },
+   "bind": {
+    "decoration.radius": "${= min(11, theme.radii.tile)}"
+   }
+  },
+  "ic2": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${= length(props.icons) > 2 ? at(props.icons, 2) : 'bolt_rounded'}"
+   }
+  },
+  "g2": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 6
+   }
+  },
+  "v2": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(at(props.values, 2)), '^[0-9.]+$') ? thousands(number(at(props.values, 2))) : text(at(props.values, 2))}",
+    "style": "numberSmall",
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "l2": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.labels) > 2 ? at(props.labels, 2) : ''}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

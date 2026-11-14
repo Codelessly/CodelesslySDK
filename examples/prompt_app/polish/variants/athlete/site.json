@@ -1,0 +1,227 @@
+{
+ "schema": 3,
+ "pages": [
+  "home.json",
+  "history.json"
+ ],
+ "designSystem": "../../../../../design_systems/skip",
+ "theme": {
+  "colors": {
+   "primaryBackground": "#FF0A0A0B",
+   "secondaryBackground": "#FF141415",
+   "tertiaryBackground": "#FF2C2C2D",
+   "primaryText": "#FFFFFFFF",
+   "secondaryText": "#99FFFFFF",
+   "tertiaryText": "#66FFFFFF",
+   "primaryBorder": "#FF313132",
+   "secondaryBorder": "#FF454546",
+   "info": "#FF0284C7",
+   "purple": "#FFA855F7",
+   "subtleFill": "#FF1E1E1F",
+   "neutralFill": "#FF454546",
+   "raisedBackground": "#FF2C2C2D",
+   "track": "#FF2B2B31",
+   "scrim": "#99000000",
+   "onAccent": "#FF0A0A0B",
+   "focusBorder": "#80C8FF00",
+   "hoverOverlay": "#14FFFFFF",
+   "pressedOverlay": "#24FFFFFF",
+   "activeTint": "#38C8FF00",
+   "primaryTint": "#29C8FF00",
+   "primaryTintBorder": "#5CC8FF00",
+   "neutralTint": "#FF1E1E1F",
+   "neutralTintBorder": "#FF313132",
+   "tooltipBackground": "#FFFFFFFF",
+   "tooltipText": "#FF0A0A0B",
+   "tooltipMuted": "#990A0A0B",
+   "successTint": "#2912A150",
+   "successTintBorder": "#5C12A150",
+   "warningTint": "#29E8590C",
+   "warningTintBorder": "#5CE8590C",
+   "errorTint": "#29E11D48",
+   "errorTintBorder": "#5CE11D48",
+   "infoTint": "#290284C7",
+   "infoTintBorder": "#5C0284C7",
+   "page": "#FF0A0A0B",
+   "card": "#FF18181B",
+   "ink": "#FFFFFFFF",
+   "inkSoft": "#FFA9A9B2",
+   "inkFaint": "#FF6F6F7A",
+   "line": "#FF27272C",
+   "brand": "#FFC8FF00",
+   "brandDeep": "#FF9BD100",
+   "brandBright": "#FFE2FF66",
+   "brandTint": "#FF222A0A",
+   "onBrand": "#FF0A0A0B",
+   "accent": "#FFC8FF00",
+   "accentDeep": "#FF9BD100",
+   "heroA": "#FF2A2A30",
+   "heroB": "#FF121214",
+   "heroGlow": "#FF4A5A12",
+   "heroLine": "#24FFFFFF",
+   "onHero": "#FFFFFFFF",
+   "onHeroSoft": "#FFB9B9C2",
+   "heroChip": "#1FFFFFFF",
+   "heroCta": "#FFC8FF00",
+   "onHeroCta": "#FF0A0A0B",
+   "heroCtaMark": "#FF0A0A0B",
+   "onHeroCtaMark": "#FFC8FF00",
+   "flame": "#FFFF5A1F",
+   "flameDeep": "#FFE0320F",
+   "flameLight": "#FFFFB830",
+   "flameTint": "#FF2A1710",
+   "panel": "#FF18181B",
+   "panelGlow": "#FF2F3A0C",
+   "onPanel": "#FFFFFFFF",
+   "onPanelSoft": "#FF8E8E99",
+   "panelBar": "#FF3A3A42",
+   "panelTrack": "#80202024",
+   "artSkin": "#FFE9A681",
+   "artSkinShade": "#FFCB8662",
+   "artHair": "#FF52525C",
+   "artTop": "#FFC8FF00",
+   "artBottom": "#FFF4F4F5",
+   "artShoe": "#FFC8FF00",
+   "artRope": "#FFC8FF00",
+   "artHandle": "#FFF4F4F5",
+   "artSpark": "#FFFFFFFF",
+   "artShadow": "#66000000",
+   "artBlob": "#FF222226",
+   "artBlobDeep": "#FF2E2E34",
+   "gold": "#FFFFC53D",
+   "goldDeep": "#FFF59E0B",
+   "goldTint": "#FF2A2210",
+   "onGold": "#FFFFE9A8"
+  },
+  "radii": {
+   "hero": 18,
+   "card": 14,
+   "tile": 12,
+   "chip": 6,
+   "cta": 12
+  },
+  "shadows": {
+   "card": [],
+   "hero": [
+    {
+     "type": "dropShadow",
+     "color": "#33C8FF00",
+     "offset": [
+      0,
+      18
+     ],
+     "blurRadius": 44,
+     "spreadRadius": -22
+    }
+   ],
+   "cta": [],
+   "panel": []
+  },
+  "textStyles": {
+   "display": {
+    "fontSize": 42,
+    "fontWeight": 900,
+    "height": 1.02,
+    "letterSpacing": -0.9,
+    "color": "ink",
+    "leadingDistribution": "even",
+    "fontStyle": "italic"
+   },
+   "screenTitle": {
+    "fontSize": 32,
+    "fontWeight": 900,
+    "height": 1.08,
+    "letterSpacing": -1.0,
+    "color": "ink",
+    "leadingDistribution": "even",
+    "fontStyle": "italic"
+   },
+   "number": {
+    "fontSize": 40,
+    "fontWeight": 900,
+    "height": 1.0,
+    "letterSpacing": -1.2,
+    "color": "ink",
+    "leadingDistribution": "even",
+    "fontStyle": "italic"
+   },
+   "numberLarge": {
+    "fontSize": 56,
+    "fontWeight": 900,
+    "height": 1.0,
+    "letterSpacing": -2.0,
+    "color": "ink",
+    "leadingDistribution": "even",
+    "fontStyle": "italic"
+   },
+   "numberSmall": {
+    "fontSize": 22,
+    "fontWeight": 900,
+    "height": 1.05,
+    "letterSpacing": -0.5,
+    "color": "ink",
+    "leadingDistribution": "even",
+    "fontStyle": "italic"
+   },
+   "blockTitle": {
+    "fontSize": 21,
+    "fontWeight": 900,
+    "height": 1.2,
+    "letterSpacing": -0.5,
+    "color": "ink",
+    "leadingDistribution": "even",
+    "fontStyle": "italic"
+   },
+   "cardTitle": {
+    "fontSize": 17,
+    "fontWeight": 700,
+    "height": 1.25,
+    "letterSpacing": -0.2,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "eyebrow": {
+    "fontSize": 11.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "letterSpacing": 1.3,
+    "color": "inkFaint",
+    "leadingDistribution": "even"
+   },
+   "lead": {
+    "fontSize": 15,
+    "fontWeight": 400,
+    "height": 1.45,
+    "color": "inkSoft",
+    "leadingDistribution": "even"
+   },
+   "meta": {
+    "fontSize": 13,
+    "fontWeight": 500,
+    "height": 1.35,
+    "color": "inkFaint",
+    "leadingDistribution": "even"
+   },
+   "cta": {
+    "fontSize": 16.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "letterSpacing": -0.1,
+    "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "chip": {
+    "fontSize": 12.5,
+    "fontWeight": 700,
+    "height": 1.2,
+    "letterSpacing": 0.2,
+    "color": "ink",
+    "leadingDistribution": "even"
+   }
+  },
+  "primary": "#FFC8FF00",
+  "onPrimary": "#FF111827",
+  "surface": "#FF0A0A0B",
+  "onSurface": "#FFFFFFFF"
+ }
+}

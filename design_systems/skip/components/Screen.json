@@ -1,0 +1,60 @@
+{
+ "schema": 3,
+ "id": "Screen",
+ "roots": [
+  "screen"
+ ],
+ "widget": {
+  "type": "Screen",
+  "doc": "The page: put it at the root and write the blocks under it (a scrolling column on the page color, with the screen margins and the gap between blocks).",
+  "props": [],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Empty page",
+   "size": [
+    390,
+    200
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "screen": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "scrollable": true,
+    "spacing": 18,
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     20,
+     28,
+     20,
+     36
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}

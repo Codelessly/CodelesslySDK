@@ -1,0 +1,1295 @@
+{
+ "schema": 3,
+ "id": "WeekStrip",
+ "roots": [
+  "strip"
+ ],
+ "widget": {
+  "type": "WeekStrip",
+  "doc": "The week as seven day marks, Monday to Sunday: done lists the days done (weekday names, or dates that start with one such as \"Fri 13 Nov\") and today (a weekday name) gets a ring.",
+  "props": [
+   {
+    "key": "done",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Mon",
+     "Wed"
+    ],
+    "doc": "The days done this week: weekday names, or dates that start with one (\"Fri 13 Nov\").",
+    "required": true
+   },
+   {
+    "key": "today",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Today, as a weekday name: it gets a ring until it is done (empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Mid-week",
+   "size": [
+    350,
+    96
+   ],
+   "props": {
+    "done": [
+     "Mon",
+     "Wed",
+     "Fri"
+    ],
+    "today": "Sat"
+   }
+  }
+ ],
+ "nodes": {
+  "strip": {
+   "type": "row",
+   "children": [
+    "dMon",
+    "dTue",
+    "dWed",
+    "dThu",
+    "dFri",
+    "dSat",
+    "dSun"
+   ],
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 280,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "dMon": {
+   "type": "column",
+   "children": [
+    "lMon",
+    "sMon"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lMon": {
+   "type": "text",
+   "props": {
+    "text": "M",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(lower(props.today), 'mon') ? theme.colors.brand : theme.colors.inkFaint}"
+   }
+  },
+  "sMon": {
+   "type": "stack",
+   "children": [
+    "oMon",
+    "nMon",
+    "cMon"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   }
+  },
+  "oMon": {
+   "type": "box",
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "nMon": {
+   "type": "row",
+   "children": [
+    "ndMon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "brand"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= startsWith(lower(props.today), 'mon') && !any(props.done, x => startsWith(lower(x), 'mon'))}"
+   }
+  },
+  "ndMon": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "cMon": {
+   "type": "row",
+   "children": [
+    "ciMon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "brandBright"
+       },
+       {
+        "position": 1,
+        "color": "brand"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= any(props.done, x => startsWith(lower(x), 'mon'))}"
+   }
+  },
+  "ciMon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "dTue": {
+   "type": "column",
+   "children": [
+    "lTue",
+    "sTue"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lTue": {
+   "type": "text",
+   "props": {
+    "text": "T",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(lower(props.today), 'tue') ? theme.colors.brand : theme.colors.inkFaint}"
+   }
+  },
+  "sTue": {
+   "type": "stack",
+   "children": [
+    "oTue",
+    "nTue",
+    "cTue"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   }
+  },
+  "oTue": {
+   "type": "box",
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "nTue": {
+   "type": "row",
+   "children": [
+    "ndTue"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "brand"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= startsWith(lower(props.today), 'tue') && !any(props.done, x => startsWith(lower(x), 'tue'))}"
+   }
+  },
+  "ndTue": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "cTue": {
+   "type": "row",
+   "children": [
+    "ciTue"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "brandBright"
+       },
+       {
+        "position": 1,
+        "color": "brand"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= any(props.done, x => startsWith(lower(x), 'tue'))}"
+   }
+  },
+  "ciTue": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "dWed": {
+   "type": "column",
+   "children": [
+    "lWed",
+    "sWed"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lWed": {
+   "type": "text",
+   "props": {
+    "text": "W",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(lower(props.today), 'wed') ? theme.colors.brand : theme.colors.inkFaint}"
+   }
+  },
+  "sWed": {
+   "type": "stack",
+   "children": [
+    "oWed",
+    "nWed",
+    "cWed"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   }
+  },
+  "oWed": {
+   "type": "box",
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "nWed": {
+   "type": "row",
+   "children": [
+    "ndWed"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "brand"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= startsWith(lower(props.today), 'wed') && !any(props.done, x => startsWith(lower(x), 'wed'))}"
+   }
+  },
+  "ndWed": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "cWed": {
+   "type": "row",
+   "children": [
+    "ciWed"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "brandBright"
+       },
+       {
+        "position": 1,
+        "color": "brand"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= any(props.done, x => startsWith(lower(x), 'wed'))}"
+   }
+  },
+  "ciWed": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "dThu": {
+   "type": "column",
+   "children": [
+    "lThu",
+    "sThu"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lThu": {
+   "type": "text",
+   "props": {
+    "text": "T",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(lower(props.today), 'thu') ? theme.colors.brand : theme.colors.inkFaint}"
+   }
+  },
+  "sThu": {
+   "type": "stack",
+   "children": [
+    "oThu",
+    "nThu",
+    "cThu"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   }
+  },
+  "oThu": {
+   "type": "box",
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "nThu": {
+   "type": "row",
+   "children": [
+    "ndThu"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "brand"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= startsWith(lower(props.today), 'thu') && !any(props.done, x => startsWith(lower(x), 'thu'))}"
+   }
+  },
+  "ndThu": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "cThu": {
+   "type": "row",
+   "children": [
+    "ciThu"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "brandBright"
+       },
+       {
+        "position": 1,
+        "color": "brand"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= any(props.done, x => startsWith(lower(x), 'thu'))}"
+   }
+  },
+  "ciThu": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "dFri": {
+   "type": "column",
+   "children": [
+    "lFri",
+    "sFri"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lFri": {
+   "type": "text",
+   "props": {
+    "text": "F",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(lower(props.today), 'fri') ? theme.colors.brand : theme.colors.inkFaint}"
+   }
+  },
+  "sFri": {
+   "type": "stack",
+   "children": [
+    "oFri",
+    "nFri",
+    "cFri"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   }
+  },
+  "oFri": {
+   "type": "box",
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "nFri": {
+   "type": "row",
+   "children": [
+    "ndFri"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "brand"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= startsWith(lower(props.today), 'fri') && !any(props.done, x => startsWith(lower(x), 'fri'))}"
+   }
+  },
+  "ndFri": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "cFri": {
+   "type": "row",
+   "children": [
+    "ciFri"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "brandBright"
+       },
+       {
+        "position": 1,
+        "color": "brand"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= any(props.done, x => startsWith(lower(x), 'fri'))}"
+   }
+  },
+  "ciFri": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "dSat": {
+   "type": "column",
+   "children": [
+    "lSat",
+    "sSat"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lSat": {
+   "type": "text",
+   "props": {
+    "text": "S",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(lower(props.today), 'sat') ? theme.colors.brand : theme.colors.inkFaint}"
+   }
+  },
+  "sSat": {
+   "type": "stack",
+   "children": [
+    "oSat",
+    "nSat",
+    "cSat"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   }
+  },
+  "oSat": {
+   "type": "box",
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "nSat": {
+   "type": "row",
+   "children": [
+    "ndSat"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "brand"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= startsWith(lower(props.today), 'sat') && !any(props.done, x => startsWith(lower(x), 'sat'))}"
+   }
+  },
+  "ndSat": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "cSat": {
+   "type": "row",
+   "children": [
+    "ciSat"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "brandBright"
+       },
+       {
+        "position": 1,
+        "color": "brand"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= any(props.done, x => startsWith(lower(x), 'sat'))}"
+   }
+  },
+  "ciSat": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "dSun": {
+   "type": "column",
+   "children": [
+    "lSun",
+    "sSun"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lSun": {
+   "type": "text",
+   "props": {
+    "text": "S",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(lower(props.today), 'sun') ? theme.colors.brand : theme.colors.inkFaint}"
+   }
+  },
+  "sSun": {
+   "type": "stack",
+   "children": [
+    "oSun",
+    "nSun",
+    "cSun"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   }
+  },
+  "oSun": {
+   "type": "box",
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "nSun": {
+   "type": "row",
+   "children": [
+    "ndSun"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "brand"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= startsWith(lower(props.today), 'sun') && !any(props.done, x => startsWith(lower(x), 'sun'))}"
+   }
+  },
+  "ndSun": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "cSun": {
+   "type": "row",
+   "children": [
+    "ciSun"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "brandBright"
+       },
+       {
+        "position": 1,
+        "color": "brand"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}",
+    "visible": "${= any(props.done, x => startsWith(lower(x), 'sun'))}"
+   }
+  },
+  "ciSun": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  }
+ }
+}

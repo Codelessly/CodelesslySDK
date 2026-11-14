@@ -1,0 +1,286 @@
+{
+ "schema": 3,
+ "id": "EmptyState",
+ "roots": [
+  "empty"
+ ],
+ "widget": {
+  "type": "EmptyState",
+  "doc": "What a screen or a list shows when there is nothing yet: a drawn rope at rest, a title, a message and a cta button that fires onPressed; audience:\"kid\" draws the playful one.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "No sessions yet",
+    "doc": "What is missing, said kindly.",
+    "required": true
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One line on what to do next (empty: none)."
+   },
+   {
+    "key": "cta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The button's label (empty: no button); a tap fires onPressed."
+   },
+   {
+    "key": "audience",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "adult",
+      "kid"
+     ]
+    },
+    "default": "adult",
+    "doc": "Who the drawing is for: adult (lean, calm) or kid (rounder, playful, with confetti)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The button was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "No sessions",
+   "size": [
+    350,
+    360
+   ],
+   "props": {
+    "title": "No sessions yet",
+    "message": "Your first one takes five minutes.",
+    "cta": "Start a session"
+   }
+  }
+ ],
+ "nodes": {
+  "empty": {
+   "type": "column",
+   "children": [
+    "art",
+    "gap",
+    "title",
+    "message",
+    "gapB",
+    "cta"
+   ],
+   "props": {
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     22,
+     24,
+     26
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 140,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "art": {
+   "type": "Illustration",
+   "props": {
+    "role": "empty"
+   },
+   "layout": {
+    "width": 200,
+    "height": 160
+   },
+   "bind": {
+    "props.audience": "${props.audience}"
+   }
+  },
+  "gap": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 4
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "blockTitle",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "style": "lead",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.message != ''}"
+   }
+  },
+  "gapB": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 10
+   },
+   "bind": {
+    "visible": "${= props.cta != ''}"
+   }
+  },
+  "cta": {
+   "type": "row",
+   "children": [
+    "ctaLabel",
+    "ctaIcon"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 50,
+    "padding": [
+     24,
+     0,
+     18,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}",
+    "decoration.effects": "${theme.shadows.cta}",
+    "visible": "${= props.cta != ''}"
+   },
+   "states": {
+    "pressed": {
+     "cta": {
+      "opacity": 0.88
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "ctaLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.cta}",
+    "style": {
+     "from": "cta",
+     "color": "onBrand"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "ctaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 20,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  }
+ }
+}

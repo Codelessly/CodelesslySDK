@@ -1,0 +1,3407 @@
+{
+ "schema": 3,
+ "roots": [
+  "history"
+ ],
+ "variables": {
+  "history": [
+   {
+    "name": "streak",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "weeklyGoal",
+    "type": "integer",
+    "value": 5
+   },
+   {
+    "name": "sessionsThisWeek",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "today",
+    "type": "map",
+    "value": {
+     "name": "Intervals",
+     "rounds": 8,
+     "work": 40,
+     "rest": 20,
+     "minutes": 8
+    }
+   },
+   {
+    "name": "weeks",
+    "type": "list",
+    "value": [
+     {
+      "label": "W39",
+      "jumps": 2100
+     },
+     {
+      "label": "W40",
+      "jumps": 2650
+     },
+     {
+      "label": "W41",
+      "jumps": 2400
+     },
+     {
+      "label": "W42",
+      "jumps": 3180
+     }
+    ]
+   },
+   {
+    "name": "sessions",
+    "type": "list",
+    "value": [
+     {
+      "date": "Fri 13 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 912,
+      "best": 148
+     },
+     {
+      "date": "Wed 11 Nov",
+      "name": "Endurance",
+      "minutes": 12,
+      "jumps": 1304,
+      "best": 210
+     },
+     {
+      "date": "Mon 9 Nov",
+      "name": "Footwork",
+      "minutes": 6,
+      "jumps": 640,
+      "best": 96
+     },
+     {
+      "date": "Sat 7 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 880,
+      "best": 131
+     }
+    ]
+   }
+  ]
+ },
+ "nodes": {
+  "history": {
+   "type": "canvas",
+   "name": "Training history",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "top",
+    "chart",
+    "trio",
+    "record",
+    "listTitle",
+    "list"
+   ],
+   "props": {
+    "scrollable": true,
+    "spacing": 18,
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     20,
+     28,
+     20,
+     36
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "top": {
+   "type": "column",
+   "children": [
+    "top_topRow",
+    "top_titles"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     2
+    ]
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 0,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 14,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "top_topRow": {
+   "type": "row",
+   "children": [
+    "top_back",
+    "top_brandRow",
+    "top_topGap",
+    "top_badge"
+   ],
+   "props": {
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= true || '' != '' || '' != ''}"
+   }
+  },
+  "top_back": {
+   "type": "row",
+   "children": [
+    "top_backIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 22
+   },
+   "bind": {
+    "decoration.radius": "${= min(22, theme.radii.cta)}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${= true}"
+   },
+   "states": {
+    "pressed": {
+     "top_back": {
+      "opacity": 0.8
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_home"
+      }
+     ]
+    }
+   ]
+  },
+  "top_backIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_back_rounded",
+    "size": 22,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   }
+  },
+  "top_brandRow": {
+   "type": "row",
+   "children": [
+    "top_mark",
+    "top_eyebrow"
+   ],
+   "props": {
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= '' != ''}"
+   }
+  },
+  "top_mark": {
+   "type": "box",
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "customPaint": {
+    "viewBox": [
+     28,
+     28
+    ],
+    "painter": [
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       0,
+       28,
+       28
+      ],
+      "radius": 9,
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': theme.colors.brandBright}, {'position': 1, 'color': theme.colors.brand}]}}}"
+     },
+     {
+      "op": "path",
+      "d": "M7 17 C 7 5, 21 5, 21 17",
+      "paint": {
+       "color": "${theme.colors.accent}",
+       "style": "stroke",
+       "strokeWidth": 2.6,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       14,
+       18.5
+      ],
+      "radius": 2.6,
+      "paint": "${theme.colors.onBrand}"
+     }
+    ]
+   }
+  },
+  "top_eyebrow": {
+   "type": "text",
+   "props": {
+    "text": "${= upper('')}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 12.5,
+     "letterSpacing": 1.8,
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "top_topGap": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 1
+   }
+  },
+  "top_titles": {
+   "type": "column",
+   "children": [
+    "top_title",
+    "top_subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "top_title": {
+   "type": "text",
+   "props": {
+    "text": "${= 'Your progress'}",
+    "style": "screenTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "top_subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${= 'Your weekly total is climbing. Nice work.'}",
+    "style": "lead"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'Your weekly total is climbing. Nice work.' != ''}"
+   }
+  },
+  "top_badge": {
+   "type": "row",
+   "children": [
+    "top_badgeIcon",
+    "top_badgeText"
+   ],
+   "props": {
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     7,
+     13,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "flameTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= '' != ''}"
+   }
+  },
+  "top_badgeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "local_fire_department",
+    "size": 17,
+    "color": "flame"
+   },
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "bind": {
+    "props.icon": "${= 'local_fire_department'}"
+   }
+  },
+  "top_badgeText": {
+   "type": "text",
+   "props": {
+    "text": "${= ''}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chart": {
+   "type": "stack",
+   "children": [
+    "chart_glow",
+    "chart_content"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 356
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "panel"
+     }
+    ],
+    "radius": 28,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.hero}",
+    "decoration.effects": "${theme.shadows.panel}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 70,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "chart_glow": {
+   "type": "box",
+   "layout": {
+    "width": 280,
+    "height": 280,
+    "x": {
+     "end": -90
+    },
+    "y": {
+     "start": -130
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "panelGlow"
+     }
+    ],
+    "shape": "circle",
+    "effects": [
+     {
+      "type": "layerBlur",
+      "blurRadius": 50
+     }
+    ]
+   },
+   "opacity": 0.9
+  },
+  "chart_content": {
+   "type": "column",
+   "children": [
+    "chart_head",
+    "chart_figure",
+    "chart_gapA",
+    "chart_plot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    },
+    "padding": [
+     22,
+     22,
+     22,
+     18
+    ]
+   }
+  },
+  "chart_head": {
+   "type": "row",
+   "children": [
+    "chart_title",
+    "chart_delta"
+   ],
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chart_title": {
+   "type": "text",
+   "props": {
+    "text": "${= upper('Jumps this week')}",
+    "style": {
+     "from": "eyebrow",
+     "color": "onPanelSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chart_delta": {
+   "type": "row",
+   "children": [
+    "chart_deltaIcon",
+    "chart_deltaText"
+   ],
+   "props": {
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     6,
+     11,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= length((map(weeks, w => w.jumps))) > 1}"
+   }
+  },
+  "chart_deltaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "north_east_rounded",
+    "size": 15,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.icon": "${= last((map(weeks, w => w.jumps))) >= at((map(weeks, w => w.jumps)), max(0, max(1, length((map(weeks, w => w.jumps)))) - 2)) ? 'north_east_rounded' : 'south_east_rounded'}"
+   }
+  },
+  "chart_deltaText": {
+   "type": "text",
+   "props": {
+    "text": "${= (last((map(weeks, w => w.jumps))) >= at((map(weeks, w => w.jumps)), max(0, max(1, length((map(weeks, w => w.jumps)))) - 2)) ? '+' : '-') + thousands(abs(last((map(weeks, w => w.jumps))) - at((map(weeks, w => w.jumps)), max(0, max(1, length((map(weeks, w => w.jumps)))) - 2))))} ${= 'vs last week'}",
+    "style": {
+     "from": "chip",
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chart_figure": {
+   "type": "row",
+   "children": [
+    "chart_value",
+    "chart_unit"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     10,
+     0,
+     0
+    ]
+   }
+  },
+  "chart_value": {
+   "type": "text",
+   "props": {
+    "text": "${= thousands(last((map(weeks, w => w.jumps))))}",
+    "style": {
+     "from": "numberLarge",
+     "color": "onPanel"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chart_unit": {
+   "type": "text",
+   "props": {
+    "text": "${= 'jumps'}",
+    "style": {
+     "from": "lead",
+     "color": "onPanelSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     7
+    ]
+   }
+  },
+  "chart_gapA": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 22
+   }
+  },
+  "chart_plot": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "repeat",
+      "each": "${= (map(weeks, w => w.jumps))}",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) + 12))}",
+         0,
+         "${= ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps)))))}",
+         148
+        ],
+        "radius": "${= min(theme.radii.tile, ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) / 2)}",
+        "paint": "${theme.colors.panelTrack}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) + 12))}",
+         "${= 148 - max(26, item / max(1, max((map(weeks, w => w.jumps)))) * 148)}",
+         "${= ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps)))))}",
+         "${= max(26, item / max(1, max((map(weeks, w => w.jumps)))) * 148)}"
+        ],
+        "radius": "${= min(theme.radii.tile, ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) / 2)}",
+        "when": "${= !(index == max(1, length((map(weeks, w => w.jumps)))) - 1)}",
+        "paint": "${theme.colors.panelBar}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) + 12))}",
+         "${= 148 - max(26, item / max(1, max((map(weeks, w => w.jumps)))) * 148)}",
+         "${= ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps)))))}",
+         "${= max(26, item / max(1, max((map(weeks, w => w.jumps)))) * 148)}"
+        ],
+        "radius": "${= min(theme.radii.tile, ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) / 2)}",
+        "when": "${= (index == max(1, length((map(weeks, w => w.jumps)))) - 1)}",
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.accent}, {'position': 1, 'color': theme.colors.accentDeep}]}}}"
+       },
+       {
+        "op": "paragraph",
+        "text": "${= thousands(item)}",
+        "offset": [
+         "${= (index * (((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) + 12)) + ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) / 2}",
+         "${= 148 - max(26, item / max(1, max((map(weeks, w => w.jumps)))) * 148) + 9}"
+        ],
+        "anchor": "topCenter",
+        "style": {
+         "fontSize": 12,
+         "fontWeight": 700
+        },
+        "paint": "${= (index == max(1, length((map(weeks, w => w.jumps)))) - 1) ? theme.colors.onAccent : theme.colors.onPanelSoft}"
+       },
+       {
+        "op": "paragraph",
+        "text": "${= at((map(weeks, w => w.label)), index)}",
+        "when": "${= index < length((map(weeks, w => w.label)))}",
+        "offset": [
+         "${= (index * (((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) + 12)) + ((size.width - 12 * (max(1, length((map(weeks, w => w.jumps)))) - 1)) / max(1, length((map(weeks, w => w.jumps))))) / 2}",
+         159
+        ],
+        "anchor": "topCenter",
+        "style": {
+         "fontSize": 12,
+         "fontWeight": 700,
+         "letterSpacing": 0.6
+        },
+        "paint": "${= (index == max(1, length((map(weeks, w => w.jumps)))) - 1) ? theme.colors.onPanel : theme.colors.onPanelSoft}"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "trio": {
+   "type": "row",
+   "children": [
+    "trio_t0",
+    "trio_t1",
+    "trio_t2"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 140,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "trio_t0": {
+   "type": "column",
+   "children": [
+    "trio_i0",
+    "trio_g0",
+    "trio_v0",
+    "trio_l0"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${= length(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)])) > 0}"
+   }
+  },
+  "trio_i0": {
+   "type": "row",
+   "children": [
+    "trio_ic0"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 11
+   },
+   "bind": {
+    "decoration.radius": "${= min(11, theme.radii.tile)}"
+   }
+  },
+  "trio_ic0": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${= length(['bolt_rounded', 'timer_outlined', 'event_available_rounded']) > 0 ? at(['bolt_rounded', 'timer_outlined', 'event_available_rounded'], 0) : 'bolt_rounded'}"
+   }
+  },
+  "trio_g0": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 6
+   }
+  },
+  "trio_v0": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 0)), '^[0-9.]+$') ? thousands(number(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 0))) : text(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 0))}",
+    "style": "numberSmall",
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "trio_l0": {
+   "type": "text",
+   "props": {
+    "text": "${= length(['Total jumps', 'Minutes', 'Sessions']) > 0 ? at(['Total jumps', 'Minutes', 'Sessions'], 0) : ''}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "trio_t1": {
+   "type": "column",
+   "children": [
+    "trio_i1",
+    "trio_g1",
+    "trio_v1",
+    "trio_l1"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${= length(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)])) > 1}"
+   }
+  },
+  "trio_i1": {
+   "type": "row",
+   "children": [
+    "trio_ic1"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 11
+   },
+   "bind": {
+    "decoration.radius": "${= min(11, theme.radii.tile)}"
+   }
+  },
+  "trio_ic1": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${= length(['bolt_rounded', 'timer_outlined', 'event_available_rounded']) > 1 ? at(['bolt_rounded', 'timer_outlined', 'event_available_rounded'], 1) : 'bolt_rounded'}"
+   }
+  },
+  "trio_g1": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 6
+   }
+  },
+  "trio_v1": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 1)), '^[0-9.]+$') ? thousands(number(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 1))) : text(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 1))}",
+    "style": "numberSmall",
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "trio_l1": {
+   "type": "text",
+   "props": {
+    "text": "${= length(['Total jumps', 'Minutes', 'Sessions']) > 1 ? at(['Total jumps', 'Minutes', 'Sessions'], 1) : ''}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "trio_t2": {
+   "type": "column",
+   "children": [
+    "trio_i2",
+    "trio_g2",
+    "trio_v2",
+    "trio_l2"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${= length(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)])) > 2}"
+   }
+  },
+  "trio_i2": {
+   "type": "row",
+   "children": [
+    "trio_ic2"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 11
+   },
+   "bind": {
+    "decoration.radius": "${= min(11, theme.radii.tile)}"
+   }
+  },
+  "trio_ic2": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${= length(['bolt_rounded', 'timer_outlined', 'event_available_rounded']) > 2 ? at(['bolt_rounded', 'timer_outlined', 'event_available_rounded'], 2) : 'bolt_rounded'}"
+   }
+  },
+  "trio_g2": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 6
+   }
+  },
+  "trio_v2": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 2)), '^[0-9.]+$') ? thousands(number(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 2))) : text(at(([sum(sessions, s => s.jumps), sum(sessions, s => s.minutes), length(sessions)]), 2))}",
+    "style": "numberSmall",
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "trio_l2": {
+   "type": "text",
+   "props": {
+    "text": "${= length(['Total jumps', 'Minutes', 'Sessions']) > 2 ? at(['Total jumps', 'Minutes', 'Sessions'], 2) : ''}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "record": {
+   "type": "row",
+   "children": [
+    "record_medal",
+    "record_texts"
+   ],
+   "props": {
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     16,
+     18,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goldTint"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 210,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ],
+   "states": {
+    "pressed": {
+     "record": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_session",
+       "value": "${= maxBy(sessions, s => s.best).date}"
+      }
+     ]
+    }
+   ]
+  },
+  "record_medal": {
+   "type": "stack",
+   "children": [
+    "record_medal_hero_adult",
+    "record_medal_hero_kid",
+    "record_medal_streak_adult",
+    "record_medal_streak_kid",
+    "record_medal_empty_adult",
+    "record_medal_empty_kid",
+    "record_medal_record_adult",
+    "record_medal_record_kid"
+   ],
+   "layout": {
+    "width": 60,
+    "height": 72
+   }
+  },
+  "record_medal_hero_adult": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'hero' && 'adult' == 'adult'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     240,
+     240
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M48 122 C 18 176, 66 232, 120 232 C 174 232, 222 176, 192 122",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round",
+         "dashPattern": [
+          1,
+          9
+         ]
+        }
+       }
+      ],
+      "opacity": 0.55
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M48 122 C 4 44, 62 4, 120 4 C 178 4, 236 44, 192 122",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 12,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "opacity": 0.16
+     },
+     {
+      "op": "oval",
+      "rect": [
+       80,
+       220,
+       80,
+       10
+      ],
+      "paint": "${theme.colors.artShadow}"
+     },
+     {
+      "op": "path",
+      "d": "M128 40 C 140 30, 150 34, 155 26 C 159 19, 166 17, 171 21 C 165 24, 165 33, 159 41 C 153 49, 141 52, 133 51 Z",
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M111 150 L102 176 L108 200",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 12,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M129 150 L141 172 L132 194",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 12,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-13 -5 C -13 -9, 6 -10, 13 -2 C 16 2, 14 7, 9 7 L -10 7 C -14 7, -14 0, -13 -5 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-11 7 L10 7",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 2.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       109,
+       205
+      ],
+      "rotate": 0.12
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-13 -5 C -13 -9, 6 -10, 13 -2 C 16 2, 14 7, 9 7 L -10 7 C -14 7, -14 0, -13 -5 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-11 7 L10 7",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 2.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       133,
+       199
+      ],
+      "rotate": 0.42
+     },
+     {
+      "op": "path",
+      "d": "M102 134 L138 134 L142 160 C 136 164, 126 164, 122 160 L120 152 L118 160 C 114 164, 104 164, 98 160 Z",
+      "paint": [
+       "${theme.colors.artBottom}",
+       {
+        "color": "${theme.colors.artBottom}",
+        "style": "stroke",
+        "strokeWidth": 3,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M103 94 L88 118 L64 124",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 9.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M137 94 L152 118 L176 124",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 9.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M104 92 L95 106",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 14,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M136 92 L145 106",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 14,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M100 92 C 100 85, 106 82, 112 82 L128 82 C 134 82, 140 85, 140 92 L138 138 L102 138 Z",
+      "paint": [
+       "${theme.colors.artTop}",
+       {
+        "color": "${theme.colors.artTop}",
+        "style": "stroke",
+        "strokeWidth": 2,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M120 70 L120 84",
+      "paint": {
+       "color": "${theme.colors.artSkinShade}",
+       "style": "stroke",
+       "strokeWidth": 10,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       120,
+       54
+      ],
+      "radius": 18,
+      "paint": "${theme.colors.artSkin}"
+     },
+     {
+      "op": "path",
+      "d": "M101 56 C 97 30, 143 28, 139 56 C 136 46, 128 42, 118 43 C 110 44, 104 49, 101 56 Z",
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M66 126 L50 116",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M174 126 L190 116",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M48 114 C 8 44, 62 6, 120 6 C 178 6, 232 44, 192 114",
+      "paint": {
+       "color": "${theme.colors.artRope}",
+       "style": "stroke",
+       "strokeWidth": 5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M30 152 Q31.76 158.24 38 160 Q31.76 161.76 30 168 Q28.24 161.76 22 160 Q28.24 158.24 30 152 Z",
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "path",
+      "d": "M212 162 Q213.32 166.68 218 168 Q213.32 169.32 212 174 Q210.68 169.32 206 168 Q210.68 166.68 212 162 Z",
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       206,
+       206
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.artRope}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       40,
+       196
+      ],
+      "radius": 2.5,
+      "paint": "${theme.colors.artSpark}"
+     }
+    ]
+   }
+  },
+  "record_medal_hero_kid": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'hero' && 'adult' == 'kid'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     240,
+     240
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M52 132 C 24 182, 68 232, 120 232 C 172 232, 216 182, 188 132",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 3.5,
+         "strokeCap": "round",
+         "strokeJoin": "round",
+         "dashPattern": [
+          1,
+          10
+         ]
+        }
+       }
+      ],
+      "opacity": 0.6
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M52 132 C 6 54, 60 8, 120 8 C 180 8, 234 54, 188 132",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 14,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "opacity": 0.16
+     },
+     {
+      "op": "oval",
+      "rect": [
+       84,
+       222,
+       72,
+       10
+      ],
+      "paint": "${theme.colors.artShadow}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       94,
+       44
+      ],
+      "radius": 12,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       146,
+       44
+      ],
+      "radius": 12,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M111 164 L104 184 L102 200",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 13,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M129 164 L138 182 L140 196",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 13,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-15 -6 C -15 -11, 6 -12, 14 -3 C 18 2, 16 8, 10 8 L -11 8 C -16 8, -16 0, -15 -6 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-12 8 L11 8",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       102,
+       208
+      ],
+      "rotate": -0.1
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-15 -6 C -15 -11, 6 -12, 14 -3 C 18 2, 16 8, 10 8 L -11 8 C -16 8, -16 0, -15 -6 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-12 8 L11 8",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       142,
+       203
+      ],
+      "rotate": 0.3
+     },
+     {
+      "op": "path",
+      "d": "M101 150 L139 150 L143 172 C 137 176, 127 176, 122 172 L120 166 L118 172 C 113 176, 103 176, 97 172 Z",
+      "paint": [
+       "${theme.colors.artBottom}",
+       {
+        "color": "${theme.colors.artBottom}",
+        "style": "stroke",
+        "strokeWidth": 3,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M102 116 L86 134 L68 134",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 10.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M138 116 L154 134 L172 134",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 10.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M103 114 L94 126",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 15,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M137 114 L146 126",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 15,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M98 114 C 98 106, 105 103, 112 103 L128 103 C 135 103, 142 106, 142 114 L140 154 L100 154 Z",
+      "paint": [
+       "${theme.colors.artTop}",
+       {
+        "color": "${theme.colors.artTop}",
+        "style": "stroke",
+        "strokeWidth": 2,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M120 121 Q121.98 128.02 129 130 Q121.98 131.98 120 139 Q118.02 131.98 111 130 Q118.02 128.02 120 121 Z",
+      "paint": "${theme.colors.artBottom}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       120,
+       66
+      ],
+      "radius": 30,
+      "paint": "${theme.colors.artSkin}"
+     },
+     {
+      "op": "path",
+      "d": "M90 66 C 84 22, 156 22, 150 66 C 146 50, 134 42, 120 44 C 106 42, 94 50, 90 66 Z",
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       109,
+       72
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       131,
+       72
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M110 82 Q120 92 130 82",
+      "paint": {
+       "color": "${theme.colors.artHair}",
+       "style": "stroke",
+       "strokeWidth": 3,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         101,
+         81
+        ],
+        "radius": 5,
+        "paint": "${theme.colors.flame}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         139,
+         81
+        ],
+        "radius": 5,
+        "paint": "${theme.colors.flame}"
+       }
+      ],
+      "opacity": 0.35
+     },
+     {
+      "op": "path",
+      "d": "M70 135 L54 124",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 8,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M170 135 L186 124",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 8,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M52 122 C 10 54, 60 10, 120 10 C 180 10, 230 54, 188 122",
+      "paint": {
+       "color": "${theme.colors.artRope}",
+       "style": "stroke",
+       "strokeWidth": 6,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M30 180 Q32.2 187.8 40 190 Q32.2 192.2 30 200 Q27.8 192.2 20 190 Q27.8 187.8 30 180 Z",
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "path",
+      "d": "M214 152 Q215.76 158.24 222 160 Q215.76 161.76 214 168 Q212.24 161.76 206 160 Q212.24 158.24 214 152 Z",
+      "paint": "${theme.colors.artRope}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       210,
+       204
+      ],
+      "radius": 4,
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       24,
+       140
+      ],
+      "radius": 3.5,
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -4,
+         -4,
+         8,
+         8
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.flameLight}"
+       }
+      ],
+      "translate": [
+       40,
+       96
+      ],
+      "rotate": 0.5
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -4,
+         -4,
+         8,
+         8
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.artSpark}"
+       }
+      ],
+      "translate": [
+       204,
+       108
+      ],
+      "rotate": -0.4
+     }
+    ]
+   }
+  },
+  "record_medal_streak_adult": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'streak' && 'adult' == 'adult'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     100,
+     124
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         22,
+         112,
+         56,
+         10
+        ],
+        "paint": "${theme.colors.flame}"
+       }
+      ],
+      "opacity": 0.18
+     },
+     {
+      "op": "path",
+      "d": "M52 6 C 60 30, 90 44, 90 78 C 90 102, 73 118, 50 118 C 27 118, 10 102, 10 78 C 10 62, 17 51, 26 42 C 28 53, 33 58, 39 58 C 34 38, 40 18, 52 6 Z",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.flame}, {'position': 1, 'color': theme.colors.flameDeep}]}}}"
+     },
+     {
+      "op": "path",
+      "d": "M50 64 C 58 76, 70 82, 70 96 C 70 108, 61 114, 50 114 C 39 114, 30 108, 30 96 C 30 84, 42 78, 50 64 Z",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.flameLight}, {'position': 1, 'color': theme.colors.flame}]}}}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M56 20 C 60 32, 74 42, 80 58",
+        "paint": {
+         "color": "#FFFFFFFF",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "opacity": 0.35
+     },
+     {
+      "op": "circle",
+      "c": [
+       88,
+       30
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       12,
+       34
+      ],
+      "radius": 2.2,
+      "paint": "${theme.colors.flame}"
+     },
+     {
+      "op": "path",
+      "d": "M84 7 Q85.1 10.9 89 12 Q85.1 13.1 84 17 Q82.9 13.1 79 12 Q82.9 10.9 84 7 Z",
+      "paint": "${theme.colors.flameLight}"
+     }
+    ]
+   }
+  },
+  "record_medal_streak_kid": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'streak' && 'adult' == 'kid'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     100,
+     124
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         20,
+         114,
+         60,
+         10
+        ],
+        "paint": "${theme.colors.flame}"
+       }
+      ],
+      "opacity": 0.18
+     },
+     {
+      "op": "path",
+      "d": "M52 10 C 62 30, 92 46, 92 80 C 92 104, 74 120, 50 120 C 26 120, 8 104, 8 80 C 8 64, 15 54, 24 46 C 27 56, 33 60, 39 58 C 35 42, 41 24, 52 10 Z",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.flameLight}, {'position': 0.55, 'color': theme.colors.flame}, {'position': 1, 'color': theme.colors.flameDeep}]}}}"
+     },
+     {
+      "op": "oval",
+      "rect": [
+       26,
+       70,
+       48,
+       44
+      ],
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.flameLight}, {'position': 1, 'color': theme.colors.flame}]}}}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       40,
+       88
+      ],
+      "radius": 3.4,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       60,
+       88
+      ],
+      "radius": 3.4,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M42 97 Q50 105 58 97",
+      "paint": {
+       "color": "${theme.colors.artHair}",
+       "style": "stroke",
+       "strokeWidth": 3,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         33,
+         97
+        ],
+        "radius": 4.5,
+        "paint": "${theme.colors.flameDeep}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         67,
+         97
+        ],
+        "radius": 4.5,
+        "paint": "${theme.colors.flameDeep}"
+       }
+      ],
+      "opacity": 0.35
+     },
+     {
+      "op": "path",
+      "d": "M88 15 Q89.54 20.46 95 22 Q89.54 23.54 88 29 Q86.46 23.54 81 22 Q86.46 20.46 88 15 Z",
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "path",
+      "d": "M10 25 Q11.1 28.9 15 30 Q11.1 31.1 10 35 Q8.9 31.1 5 30 Q8.9 28.9 10 25 Z",
+      "paint": "${theme.colors.flame}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       92,
+       44
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.flameLight}"
+     }
+    ]
+   }
+  },
+  "record_medal_empty_adult": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'empty' && 'adult' == 'adult'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     200,
+     160
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "path",
+      "d": "M30 92 C 24 48, 70 18, 112 22 C 160 26, 190 62, 178 100 C 168 134, 118 148, 76 140 C 48 134, 34 118, 30 92 Z",
+      "paint": "${theme.colors.artBlob}"
+     },
+     {
+      "op": "oval",
+      "rect": [
+       52,
+       122,
+       100,
+       12
+      ],
+      "paint": "${theme.colors.artBlobDeep}"
+     },
+     {
+      "op": "path",
+      "d": "M58 112 C 40 70, 78 40, 104 58 C 126 74, 110 104, 92 96 C 76 88, 96 56, 126 60 C 152 64, 158 92, 146 112",
+      "paint": {
+       "color": "${theme.colors.brand}",
+       "style": "stroke",
+       "strokeWidth": 6,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -6,
+         -17,
+         12,
+         34
+        ],
+        "radius": 6,
+        "paint": "${theme.colors.ink}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         -6,
+         -17,
+         12,
+         9
+        ],
+        "radius": 4,
+        "paint": "${theme.colors.accent}"
+       }
+      ],
+      "translate": [
+       55,
+       122
+      ],
+      "rotate": -0.5
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -6,
+         -17,
+         12,
+         34
+        ],
+        "radius": 6,
+        "paint": "${theme.colors.ink}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         -6,
+         -17,
+         12,
+         9
+        ],
+        "radius": 4,
+        "paint": "${theme.colors.accent}"
+       }
+      ],
+      "translate": [
+       150,
+       122
+      ],
+      "rotate": 0.55
+     },
+     {
+      "op": "path",
+      "d": "M160 32 Q161.76 38.24 168 40 Q161.76 41.76 160 48 Q158.24 41.76 152 40 Q158.24 38.24 160 32 Z",
+      "paint": "${theme.colors.brand}"
+     },
+     {
+      "op": "path",
+      "d": "M38 45 Q39.1 48.9 43 50 Q39.1 51.1 38 55 Q36.9 51.1 33 50 Q36.9 48.9 38 45 Z",
+      "paint": "${theme.colors.brandBright}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       176,
+       70
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.accentDeep}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       26,
+       108
+      ],
+      "radius": 2.5,
+      "paint": "${theme.colors.brandBright}"
+     }
+    ]
+   }
+  },
+  "record_medal_empty_kid": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'empty' && 'adult' == 'kid'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     200,
+     160
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "path",
+      "d": "M30 92 C 24 48, 70 18, 112 22 C 160 26, 190 62, 178 100 C 168 134, 118 148, 76 140 C 48 134, 34 118, 30 92 Z",
+      "paint": "${theme.colors.artBlob}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       80,
+       66
+      ],
+      "radius": 7,
+      "paint": "${theme.colors.ink}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       122,
+       66
+      ],
+      "radius": 7,
+      "paint": "${theme.colors.ink}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       82.5,
+       63.5
+      ],
+      "radius": 2.2,
+      "paint": "${theme.colors.card}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       124.5,
+       63.5
+      ],
+      "radius": 2.2,
+      "paint": "${theme.colors.card}"
+     },
+     {
+      "op": "path",
+      "d": "M56 92 C 70 126, 132 126, 146 92",
+      "paint": {
+       "color": "${theme.colors.brand}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -6.5,
+         -16,
+         13,
+         32
+        ],
+        "radius": 6.5,
+        "paint": "${theme.colors.ink}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         -6.5,
+         -16,
+         13,
+         9
+        ],
+        "radius": 4,
+        "paint": "${theme.colors.accent}"
+       }
+      ],
+      "translate": [
+       52,
+       84
+      ],
+      "rotate": -0.35
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -6.5,
+         -16,
+         13,
+         32
+        ],
+        "radius": 6.5,
+        "paint": "${theme.colors.ink}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         -6.5,
+         -16,
+         13,
+         9
+        ],
+        "radius": 4,
+        "paint": "${theme.colors.accent}"
+       }
+      ],
+      "translate": [
+       150,
+       84
+      ],
+      "rotate": 0.35
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         62,
+         104
+        ],
+        "radius": 7,
+        "paint": "${theme.colors.flame}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         140,
+         104
+        ],
+        "radius": 7,
+        "paint": "${theme.colors.flame}"
+       }
+      ],
+      "opacity": 0.3
+     },
+     {
+      "op": "path",
+      "d": "M164 26 Q166.2 33.8 174 36 Q166.2 38.2 164 46 Q161.8 38.2 154 36 Q161.8 33.8 164 26 Z",
+      "paint": "${theme.colors.brand}"
+     },
+     {
+      "op": "path",
+      "d": "M36 37 Q37.54 42.46 43 44 Q37.54 45.54 36 51 Q34.46 45.54 29 44 Q34.46 42.46 36 37 Z",
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       180,
+       72
+      ],
+      "radius": 4,
+      "paint": "${theme.colors.accentDeep}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       22,
+       100
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.brandBright}"
+     }
+    ]
+   }
+  },
+  "record_medal_record_adult": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'record' && 'adult' == 'adult'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     100,
+     120
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "path",
+      "d": "M30 4 L48 4 L58 44 L40 44 Z",
+      "paint": "${theme.colors.brand}"
+     },
+     {
+      "op": "path",
+      "d": "M70 4 L52 4 L42 44 L60 44 Z",
+      "paint": "${theme.colors.brandBright}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         24,
+         106,
+         52,
+         8
+        ],
+        "paint": "${theme.colors.goldDeep}"
+       }
+      ],
+      "opacity": 0.25
+     },
+     {
+      "op": "circle",
+      "c": [
+       50,
+       74
+      ],
+      "radius": 34,
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.gold}, {'position': 1, 'color': theme.colors.goldDeep}]}}}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       50,
+       74
+      ],
+      "radius": 26,
+      "paint": {
+       "color": "#FFFFFFFF",
+       "style": "stroke",
+       "strokeWidth": 2.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M50 56 L55.6 68.2 L69 69.8 L59.1 78.9 L61.8 92.2 L50 85.6 L38.2 92.2 L40.9 78.9 L31 69.8 L44.4 68.2 Z",
+      "paint": [
+       "#FFFFFFFF",
+       {
+        "color": "#FFFFFFFF",
+        "style": "stroke",
+        "strokeWidth": 2,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M88 34 Q89.32 38.68 94 40 Q89.32 41.32 88 46 Q86.68 41.32 82 40 Q86.68 38.68 88 34 Z",
+      "paint": "${theme.colors.gold}"
+     },
+     {
+      "op": "path",
+      "d": "M10 51.5 Q10.99 55.01 14.5 56 Q10.99 56.99 10 60.5 Q9.01 56.99 5.5 56 Q9.01 55.01 10 51.5 Z",
+      "paint": "${theme.colors.goldDeep}"
+     }
+    ]
+   }
+  },
+  "record_medal_record_kid": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'record' && 'adult' == 'kid'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     100,
+     120
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "path",
+      "d": "M30 4 L48 4 L58 44 L40 44 Z",
+      "paint": "${theme.colors.brand}"
+     },
+     {
+      "op": "path",
+      "d": "M70 4 L52 4 L42 44 L60 44 Z",
+      "paint": "${theme.colors.brandBright}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         24,
+         106,
+         52,
+         8
+        ],
+        "paint": "${theme.colors.goldDeep}"
+       }
+      ],
+      "opacity": 0.25
+     },
+     {
+      "op": "circle",
+      "c": [
+       50,
+       74
+      ],
+      "radius": 34,
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.gold}, {'position': 1, 'color': theme.colors.goldDeep}]}}}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       50,
+       74
+      ],
+      "radius": 26,
+      "paint": {
+       "color": "#FFFFFFFF",
+       "style": "stroke",
+       "strokeWidth": 2.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M50 56 L55.6 68.2 L69 69.8 L59.1 78.9 L61.8 92.2 L50 85.6 L38.2 92.2 L40.9 78.9 L31 69.8 L44.4 68.2 Z",
+      "paint": [
+       "#FFFFFFFF",
+       {
+        "color": "#FFFFFFFF",
+        "style": "stroke",
+        "strokeWidth": 2,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M88 34 Q89.32 38.68 94 40 Q89.32 41.32 88 46 Q86.68 41.32 82 40 Q86.68 38.68 88 34 Z",
+      "paint": "${theme.colors.gold}"
+     },
+     {
+      "op": "path",
+      "d": "M10 51.5 Q10.99 55.01 14.5 56 Q10.99 56.99 10 60.5 Q9.01 56.99 5.5 56 Q9.01 55.01 10 51.5 Z",
+      "paint": "${theme.colors.goldDeep}"
+     }
+    ]
+   }
+  },
+  "record_texts": {
+   "type": "column",
+   "children": [
+    "record_title",
+    "record_figure",
+    "record_detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "record_title": {
+   "type": "text",
+   "props": {
+    "text": "${= upper('Best run without a miss')}",
+    "style": {
+     "from": "eyebrow",
+     "color": "onGold"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "record_figure": {
+   "type": "row",
+   "children": [
+    "record_value",
+    "record_unit"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "record_value": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text((maxBy(sessions, s => s.best).best)), '^[0-9.]+$') ? thousands(number((maxBy(sessions, s => s.best).best))) : text((maxBy(sessions, s => s.best).best))}",
+    "style": "number"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "record_unit": {
+   "type": "text",
+   "props": {
+    "text": "${= 'jumps in a row'}",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     4
+    ]
+   }
+  },
+  "record_detail": {
+   "type": "text",
+   "props": {
+    "text": "${= ((maxBy(sessions, s => s.best).name) + ' · ' + (maxBy(sessions, s => s.best).date))}",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= ((maxBy(sessions, s => s.best).name) + ' · ' + (maxBy(sessions, s => s.best).date)) != ''}"
+   }
+  },
+  "listTitle": {
+   "type": "row",
+   "children": [
+    "listTitle_title",
+    "listTitle_action"
+   ],
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     2,
+     8,
+     0,
+     0
+    ]
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 350,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "listTitle_title": {
+   "type": "text",
+   "props": {
+    "text": "${= 'Past sessions'}",
+    "style": "blockTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "listTitle_action": {
+   "type": "row",
+   "children": [
+    "listTitle_actionText",
+    "listTitle_actionIcon"
+   ],
+   "props": {
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     7,
+     8,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brandTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= '' != ''}"
+   }
+  },
+  "listTitle_actionText": {
+   "type": "text",
+   "props": {
+    "text": "${= ''}",
+    "style": {
+     "from": "chip",
+     "color": "brand"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "listTitle_actionIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 18,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "session"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${sessions}"
+   }
+  },
+  "session": {
+   "type": "row",
+   "children": [
+    "session_lead",
+    "session_texts",
+    "session_figures",
+    "session_chev"
+   ],
+   "props": {
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     14,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 420,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ],
+   "states": {
+    "pressed": {
+     "session": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_session",
+       "value": "${item.date}"
+      }
+     ]
+    }
+   ]
+  },
+  "session_lead": {
+   "type": "row",
+   "children": [
+    "session_leadIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 48,
+    "height": 48
+   },
+   "customPaint": {
+    "viewBox": [
+     48,
+     48
+    ],
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       24,
+       24
+      ],
+      "radius": 19,
+      "paint": {
+       "color": "${theme.colors.track}",
+       "style": "stroke",
+       "strokeWidth": 4.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "arc",
+      "rect": [
+       5,
+       5,
+       38,
+       38
+      ],
+      "startAngle": -1.5708,
+      "sweepAngle": "${= clamp((item.jumps / max(map(sessions, s => s.jumps))), 0, 1) * 2 * pi()}",
+      "when": "${= (item.jumps / max(map(sessions, s => s.jumps))) > 0}",
+      "paint": {
+       "color": "${theme.colors.brand}",
+       "style": "stroke",
+       "strokeWidth": 4.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     }
+    ]
+   }
+  },
+  "session_leadIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt_rounded",
+    "size": 20,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "bind": {
+    "props.icon": "${= '' != '' ? '' : contains(lower((item.name)), 'interval') ? 'timer_outlined' : contains(lower((item.name)), 'endur') ? 'favorite_rounded' : contains(lower((item.name)), 'foot') ? 'directions_run_rounded' : 'bolt_rounded'}"
+   }
+  },
+  "session_texts": {
+   "type": "column",
+   "children": [
+    "session_title",
+    "session_detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "session_title": {
+   "type": "text",
+   "props": {
+    "text": "${= (item.name)}",
+    "style": "cardTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "session_detail": {
+   "type": "text",
+   "props": {
+    "text": "${= ((item.date) + ' · ' + (item.minutes) + ' min')}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "session_figures": {
+   "type": "column",
+   "children": [
+    "session_value",
+    "session_unit"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= (item.jumps) != ''}"
+   }
+  },
+  "session_value": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text((item.jumps)), '^[0-9.]+$') ? thousands(number((item.jumps))) : text((item.jumps))}",
+    "style": "numberSmall"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "session_unit": {
+   "type": "text",
+   "props": {
+    "text": "${= 'jumps'}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "session_chev": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 22,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   }
+  }
+ }
+}

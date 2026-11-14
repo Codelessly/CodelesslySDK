@@ -1,0 +1,349 @@
+{
+ "schema": 3,
+ "roots": [
+  "art"
+ ],
+ "nodes": {
+  "art": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 800,
+    "height": 1100
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "r1",
+    "r2",
+    "r3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": 20
+   },
+   "props": {
+    "spacing": 20,
+    "scrollable": true
+   }
+  },
+  "hab": {
+   "type": "row",
+   "children": [
+    "ha"
+   ],
+   "layout": {
+    "width": 370,
+    "height": 370
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "heroA"
+       },
+       {
+        "position": 1,
+        "color": "heroB"
+       }
+      ]
+     }
+    ],
+    "radius": 24
+   }
+  },
+  "ha": {
+   "type": "Illustration",
+   "layout": {
+    "width": 350,
+    "height": 350
+   },
+   "props": {
+    "role": "hero",
+    "audience": "adult"
+   }
+  },
+  "hkb": {
+   "type": "row",
+   "children": [
+    "hk"
+   ],
+   "layout": {
+    "width": 370,
+    "height": 370
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "heroA"
+       },
+       {
+        "position": 1,
+        "color": "heroB"
+       }
+      ]
+     }
+    ],
+    "radius": 24
+   }
+  },
+  "hk": {
+   "type": "Illustration",
+   "layout": {
+    "width": 350,
+    "height": 350
+   },
+   "props": {
+    "role": "hero",
+    "audience": "kid"
+   }
+  },
+  "r1": {
+   "type": "row",
+   "children": [
+    "hab",
+    "hkb"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16
+   }
+  },
+  "sab": {
+   "type": "row",
+   "children": [
+    "sa"
+   ],
+   "layout": {
+    "width": 220,
+    "height": 268
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   }
+  },
+  "sa": {
+   "type": "Illustration",
+   "layout": {
+    "width": 200,
+    "height": 248
+   },
+   "props": {
+    "role": "streak",
+    "audience": "adult"
+   }
+  },
+  "skb": {
+   "type": "row",
+   "children": [
+    "sk"
+   ],
+   "layout": {
+    "width": 220,
+    "height": 268
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   }
+  },
+  "sk": {
+   "type": "Illustration",
+   "layout": {
+    "width": 200,
+    "height": 248
+   },
+   "props": {
+    "role": "streak",
+    "audience": "kid"
+   }
+  },
+  "rab": {
+   "type": "row",
+   "children": [
+    "ra"
+   ],
+   "layout": {
+    "width": 220,
+    "height": 260
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goldTint"
+     }
+    ],
+    "radius": 24
+   }
+  },
+  "ra": {
+   "type": "Illustration",
+   "layout": {
+    "width": 200,
+    "height": 240
+   },
+   "props": {
+    "role": "record",
+    "audience": "adult"
+   }
+  },
+  "r2": {
+   "type": "row",
+   "children": [
+    "sab",
+    "skb",
+    "rab"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16
+   }
+  },
+  "eab": {
+   "type": "row",
+   "children": [
+    "ea"
+   ],
+   "layout": {
+    "width": 370,
+    "height": 300
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   }
+  },
+  "ea": {
+   "type": "Illustration",
+   "layout": {
+    "width": 350,
+    "height": 280
+   },
+   "props": {
+    "role": "empty",
+    "audience": "adult"
+   }
+  },
+  "ekb": {
+   "type": "row",
+   "children": [
+    "ek"
+   ],
+   "layout": {
+    "width": 370,
+    "height": 300
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   }
+  },
+  "ek": {
+   "type": "Illustration",
+   "layout": {
+    "width": 350,
+    "height": 280
+   },
+   "props": {
+    "role": "empty",
+    "audience": "kid"
+   }
+  },
+  "r3": {
+   "type": "row",
+   "children": [
+    "eab",
+    "ekb"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16
+   }
+  }
+ }
+}

@@ -1,0 +1,441 @@
+{
+ "schema": 3,
+ "id": "TopBar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "TopBar",
+  "doc": "The top of a screen: a large title, an optional subtitle, eyebrow (a brand line with the mark), back:true (a round back button that fires onPressed) and badge (a small pill at the right).",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Ready to jump?",
+    "doc": "The screen title, large.",
+    "required": true
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One friendly line under the title (empty: none)."
+   },
+   {
+    "key": "eyebrow",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small caps line over the title with the brand mark, e.g. the app name (empty: none)."
+   },
+   {
+    "key": "back",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Shows a round back button before the title; a tap fires onPressed."
+   },
+   {
+    "key": "badge",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small pill at the right, e.g. the streak count (empty: none)."
+   },
+   {
+    "key": "badgeIcon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "local_fire_department",
+    "doc": "The icon in the badge."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The back button was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Home",
+   "size": [
+    350,
+    150
+   ],
+   "props": {
+    "title": "Ready to jump?",
+    "eyebrow": "Skip",
+    "subtitle": "Today takes just 8 minutes."
+   }
+  },
+  {
+   "name": "Inner page",
+   "size": [
+    350,
+    130
+   ],
+   "props": {
+    "title": "Your progress",
+    "back": true
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "column",
+   "children": [
+    "topRow",
+    "titles"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     2
+    ]
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 0,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 14,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "topRow": {
+   "type": "row",
+   "children": [
+    "back",
+    "brandRow",
+    "topGap",
+    "badge"
+   ],
+   "props": {
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.back || props.eyebrow != '' || props.badge != ''}"
+   }
+  },
+  "back": {
+   "type": "row",
+   "children": [
+    "backIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 22
+   },
+   "bind": {
+    "decoration.radius": "${= min(22, theme.radii.cta)}",
+    "decoration.effects": "${theme.shadows.card}",
+    "visible": "${props.back}"
+   },
+   "states": {
+    "pressed": {
+     "back": {
+      "opacity": 0.8
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "backIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_back_rounded",
+    "size": 22,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   }
+  },
+  "brandRow": {
+   "type": "row",
+   "children": [
+    "mark",
+    "eyebrow"
+   ],
+   "props": {
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.eyebrow != ''}"
+   }
+  },
+  "mark": {
+   "type": "box",
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "customPaint": {
+    "viewBox": [
+     28,
+     28
+    ],
+    "painter": [
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       0,
+       28,
+       28
+      ],
+      "radius": 9,
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': theme.colors.brandBright}, {'position': 1, 'color': theme.colors.brand}]}}}"
+     },
+     {
+      "op": "path",
+      "d": "M7 17 C 7 5, 21 5, 21 17",
+      "paint": {
+       "color": "${theme.colors.accent}",
+       "style": "stroke",
+       "strokeWidth": 2.6,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       14,
+       18.5
+      ],
+      "radius": 2.6,
+      "paint": "${theme.colors.onBrand}"
+     }
+    ]
+   }
+  },
+  "eyebrow": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.eyebrow)}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 12.5,
+     "letterSpacing": 1.8,
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "topGap": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 1
+   }
+  },
+  "titles": {
+   "type": "column",
+   "children": [
+    "title",
+    "subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "screenTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "style": "lead"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "badgeIcon",
+    "badgeText"
+   ],
+   "props": {
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     7,
+     13,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "flameTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= props.badge != ''}"
+   }
+  },
+  "badgeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "local_fire_department",
+    "size": 17,
+    "color": "flame"
+   },
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "bind": {
+    "props.icon": "${props.badgeIcon}"
+   }
+  },
+  "badgeText": {
+   "type": "text",
+   "props": {
+    "text": "${props.badge}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}
