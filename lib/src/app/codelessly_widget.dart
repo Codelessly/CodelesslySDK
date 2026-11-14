@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:codelessly_api/codelessly_api.dart' as api show ThemeMode;
+import 'package:codelessly_api/codelessly_api.dart' as api show TextStyle, ThemeMode;
 import 'package:codelessly_api/codelessly_api.dart'
     show
         Breakpoints,
@@ -1263,6 +1263,9 @@ class _LayoutViewState extends State<_LayoutView> {
       if (canvasId == null || canvas == null) return const SizedBox.shrink();
       _seed(canvasId);
       _shownCanvas(canvasId);
+      // The theme's font is every text's default family, as the controls'.
+      final family = (_resolvedWith ?? _tokens).fontFamily;
+      _screen.tree.textDefault = family == null ? null : api.TextStyle(fontFamily: family);
       final box = CanvasViewport.resolve(canvas, constraints, sizing: sizing);
       Widget view = CanvasViewportBox(
         box: box,

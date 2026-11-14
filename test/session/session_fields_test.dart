@@ -98,4 +98,12 @@ void main() {
     final editable = tester.state<EditableTextState>(find.byType(EditableText).first).renderEditable;
     expect(editable.text?.style?.fontFamily, 'Roboto');
   });
+
+  testWidgets('a theme font is the default family of every text: a text node with none takes it as a control does', (tester) async {
+    await _show(tester, theme: const ThemeTokens(fontFamily: 'Roboto'));
+    final editable = tester.state<EditableTextState>(find.byType(EditableText).first).renderEditable;
+    expect(editable.text?.style?.fontFamily, 'Roboto');
+    expect(_family(_paragraph(tester, 'Draft')), 'Roboto');
+    expect(_family(_paragraph(tester, 'To')), 'Roboto');
+  });
 }

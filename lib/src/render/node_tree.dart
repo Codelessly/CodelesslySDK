@@ -407,6 +407,23 @@ class RenderTree {
     }
   }
 
+  /// The default text style of every text in the tree, under the nearest
+  /// `defaultTextStyle` above a node (Flutter: the `DefaultTextStyle` an
+  /// app's theme gives its text): the theme's font family, so a text with
+  /// none is drawn in it as the controls are. Null: none. A change
+  /// re-applies every box.
+  api.TextStyle? get textDefault => _textDefault;
+  api.TextStyle? _textDefault;
+  set textDefault(api.TextStyle? value) {
+    if (value == _textDefault) return;
+    _textDefault = value;
+    for (final b in _boxes.values.toList()) {
+      if (!identical(_boxes[b.key], b)) continue;
+      b._applied = null;
+      b._apply();
+    }
+  }
+
   /// Boxes that drew with [ComponentRegistry.theme] itself (colours a node
   /// leaves unset that come from the theme's roles: an indicator's), noted
   /// by [dependOnTheme]: a change of theme (its mode) re-applies them. A
@@ -1111,9 +1128,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// replacing it), so every text style it draws (its recipes' too) merges
   /// over it.
   Node? _withTextDefault(Node? n) {
-    final inherited = _slot.textDefault;
-    if (n == null || inherited == null || n.behaviors.defaultTextStyle != null) return n;
-    return n.copyWith(behaviors: n.behaviors.copyWith(defaultTextStyle: inherited));
+    if (n == null) return n;
+    final own = n.behaviors.defaultTextStyle;
+    final chosen = own ?? _slot.textDefault;
+    // The tree's default (the theme's font) under it.
+    final base = tree.textDefault;
+    final style = base == null ? chosen : (chosen == null ? base : base.merge(chosen));
+    if (style == null || style == own) return n;
+    return n.copyWith(behaviors: n.behaviors.copyWith(defaultTextStyle: style));
   }
 
   /// Applies [n] when it is a text that differs from [old] only in its
