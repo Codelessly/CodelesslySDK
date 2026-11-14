@@ -844,8 +844,10 @@ add(component(
         'title': text('${props.title}', 'panelTitle', {'fill': 240}, {'hug': 17}),
         'subtitle': {**text('${props.subtitle}', 'caption', {'fill': 240}, {'hug': 15}), 'bind': {'visible': "${= props.subtitle != ''}"}},
         'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+        # Fills what a card with a height has left (so a list in it can fill and scroll); in a card that hugs
+        # there is nothing to fill and it is as tall as its content.
         'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 8},
-                 'layout': {'width': {'fill': 320}, 'height': {'hug': 80}, 'padding': 12}},
+                 'layout': {'width': {'fill': 320}, 'height': {'fill': 0}, 'padding': 12}},
         'content': {'type': 'slot'},
     },
 ))
@@ -1797,7 +1799,7 @@ add(component(
         'chevron': {**icon('chevron_right', 'tertiaryText', 15),
                     'bind': {'visible': "${= props.variant == 'expandable'}", 'props.icon': "${= (props.open != toggled) ? 'expand_more' : 'chevron_right'}"}},
         'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
-                 'layout': {'width': {'fill': 280}, 'height': {'hug': 40}},
+                 'layout': {'width': {'fill': 280}, 'height': {'fill': 0}},
                  'bind': {'visible': "${= props.variant != 'expandable' || (props.open != toggled)}"}},
         'content': {'type': 'slot'},
     },
