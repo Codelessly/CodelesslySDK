@@ -19,6 +19,9 @@ final validation was clean. The causes, and what changed:
   The chat example's sessions and the recorder (`record_check.dart`, Dart VM) now check formulas with it, and the
   recorder reports references unresolved at the end of a stream (`unresolvedReferences`), so the formula errors reach
   the model.
+- A formula that does not parse because it is written as JavaScript (`x.toFixed(2)`, `s.trim().toUpperCase()`,
+  `list.map(...)`, `function (s) { return ... }`) says what to write instead (`fixed(x, 2)`, `upper(trim(s))`,
+  `map(list, x => ...)`, an arrow lambda): a recorded order summary failed three turns on 'Unexpected "(" at 38'.
 - `tool/stream/live_summary.py` names each cell's final frame (its last retry's replay) and what that frame shows
   wrong: the frames read as blank were often a first turn whose retry had fixed it.
 - The chat example's prompts are regenerated (the design system's scales as the binding to write).
