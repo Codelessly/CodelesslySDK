@@ -197,7 +197,7 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     designSystem: ds,
     profile: apps ? api.TrustProfile.agentApps : api.TrustProfile.agent,
     check: strictEditCheck(ValidateOptions(
-      formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)),
+      formulas: FormulaEvaluator.report,
       components: ds?.components,
       theme: ds == null ? null : theme,
     )),
@@ -399,8 +399,9 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     File('${out.path}/state.json').writeAsStringSync(enc.convert(jsonDecode(jsonEncode(session.values, toEncodable: (o) => '$o'))));
   }
   final usage = ds == null ? null : _designSystemUsage(tester, session.document, ds);
-  // What only layout can tell, after the last frame.
-  final layout = session.layoutDiagnostics();
+  // What only layout can tell, after the last frame: sizes, and whether the
+  // UI shows anything (what a host adds to the tool result).
+  final layout = session.shownDiagnostics();
   final end = session.lastStreamEnd;
   // Works when used: the brief's scripted interaction, on the final UI.
   final script = stream.meta['followup'] == null || stream.meta['turn'] == 'retry' ? interactionsFor('${stream.meta['ui']}') : null;
@@ -432,6 +433,8 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
       for (final d in [...result.warnings.where((d) => const {'empty_button', 'low_contrast', 'missing_glyph'}.contains(d.code)), ...layout])
         '${d.code} ${d.nodeId ?? d.path}',
     ],
+    // What the final frame shows wrong (UiSession.shownDiagnostics), in full.
+    'shownDiagnostics': [for (final d in layout) d.toJson()],
     'finalDiagnostics': [for (final d in [...result.errors, ...layout, ...result.warnings.where((d) => const {'empty_button', 'low_contrast', 'missing_glyph'}.contains(d.code))]) '${d.code} ${d.path}'],
     'scripts': (session.document.extra['scripts'] as List?)?.length ?? 0,
     'designSystem': ?usage,

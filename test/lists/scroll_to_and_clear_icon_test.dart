@@ -5,6 +5,7 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support.dart';
+import '../support/fields.dart';
 
 class _Recorder implements AnalyticsService {
   final errors = <Object>[];
@@ -62,17 +63,16 @@ void main() {
       },
     }, variables: [v('query', '')]);
     await tester.pumpAndSettle();
-    Finder x() => find.descendant(of: find.byType(TextField), matching: find.byType(GestureDetector)).last;
-    expect(find.descendant(of: find.byType(TextField), matching: find.byType(MouseRegion)).evaluate().where((e) => (e.widget as MouseRegion).cursor == SystemMouseCursors.click), isEmpty,
-        reason: 'no text: no ×');
-    await tester.enterText(find.byType(EditableText), 'cauliflower');
+    expect(textField(tester).decoration.suffix?.hasIcon ?? false, isFalse, reason: 'no text: no ×');
+    await typeInto(tester, 'cauliflower');
     await tester.pumpAndSettle();
     expect(s['query'], 'cauliflower');
-    final suffix = tester.getRect(find.byType(TextField));
+    final f = textField(tester);
+    expect(f.decoration.suffix?.tappable, isTrue);
+    final suffix = f.localToGlobal(Offset.zero) & f.size;
     await tester.tapAt(Offset(suffix.right - 20, suffix.center.dy));
-    expect(x(), findsOneWidget);
     await tester.pumpAndSettle();
     expect(s['query'], '');
-    expect(tester.widget<EditableText>(find.byType(EditableText)).controller.text, '');
+    expect(textField(tester).editor.text, '');
   });
 }

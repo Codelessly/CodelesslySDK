@@ -1,21 +1,32 @@
 // The text fields a tree shows, by node: what focus, edit text and submit
-// form actions reach. A text field island registers its controller and
-// focus node on its node's box while it lives.
-import 'package:flutter/widgets.dart';
-
+// form actions reach. A text field (render/controls/text_field.dart)
+// registers itself on its node's box while it is on screen, through the
+// services the widgets layer gives its recipe ([textFieldServices]).
 import '../../render/components.dart' show componentInstanceOf;
+import '../../render/controls/editable.dart' show FieldEditor;
+import '../../render/controls/focus.dart' show ControlFocusNode;
+import '../../render/controls/text_field.dart';
 import '../../render/node_tree.dart';
 import '../../render/recipe.dart';
 import '../expressions/bindings.dart' show ProvidedItem;
+import 'form_fields.dart';
 
-/// A text field's controller and focus node.
+/// A text field's value (its [controller]: text, selection, `clear()`) and
+/// its place in the focus order.
 class TextFieldHandle {
-  TextFieldHandle(this.controller, this.focusNode);
+  TextFieldHandle(this.field);
 
-  final TextEditingController controller;
-  final FocusNode focusNode;
+  /// The field's render object.
+  final RenderTextField field;
+
+  /// Its value, as Flutter's `TextEditingController` holds it.
+  FieldEditor get controller => field.editor;
+
+  /// Its focus (`requestFocus`, `unfocus`, `hasFocus`).
+  ControlFocusNode get focusNode => field.focusNode;
 
   static final Expando<TextFieldHandle> _handles = Expando('TextFieldHandle');
+  static final Set<TextFieldHandle> _live = {};
 
   /// The field node [id] of [tree] shows (its first instance), if any.
   static TextFieldHandle? of(RenderTree tree, String id) {
@@ -50,15 +61,69 @@ class TextFieldHandle {
     return related ?? sameComponent ?? of(tree, id);
   }
 
-  static void register(NodeBuilder box, TextFieldHandle handle) => _handles[box] = handle;
+  static void register(NodeBuilder box, TextFieldHandle handle) {
+    final old = _handles[box];
+    if (old != null) _live.remove(old);
+    _handles[box] = handle;
+    _live.add(handle);
+  }
 
-  static void unregister(NodeBuilder box, TextEditingController controller) {
-    if (identical(_handles[box]?.controller, controller)) _handles[box] = null;
+  static void unregister(NodeBuilder box, RenderTextField field) {
+    final h = _handles[box];
+    if (h == null || !identical(h.field, field)) return;
+    _handles[box] = null;
+    _live.remove(h);
   }
 
   /// Takes the focus from every text field.
-  static void unfocusAll() => FocusManager.instance.primaryFocus?.unfocus();
+  static void unfocusAll() {
+    for (final h in _live.toList()) {
+      h.focusNode.unfocus();
+    }
+  }
 }
 
 /// [box]'s tree's text field handle (for tests and tools).
 TextFieldHandle? textFieldOf(NodeBox box) => TextFieldHandle.of(box.tree, box.id);
+
+/// What the runtime does for the text fields on screen: registers each for
+/// the focus and edit text actions and as its form's field.
+class RuntimeTextFieldServices implements TextFieldServices {
+  const RuntimeTextFieldServices();
+
+  static final Expando<FormFieldEntry> _entries = Expando('FormFieldEntry');
+
+  @override
+  void attachField(NodeBuilder b, RenderTextField field) {
+    if (identical(TextFieldHandle._handles[b]?.field, field) && _entries[field] != null) return;
+    TextFieldHandle.register(b, TextFieldHandle(field));
+    final entry = _entries[field] = FormFieldEntry(
+      box: b,
+      focusNode: field.focusNode,
+      check: field.check,
+      show: field.showError,
+      label: () => field.config.decoration.labelText ?? b.id,
+    )..shown = field.validationError;
+    FormRegistry.of(b.tree).register(entry);
+  }
+
+  @override
+  void detachField(NodeBuilder b, RenderTextField field) {
+    TextFieldHandle.unregister(b, field);
+    final entry = _entries[field];
+    if (entry == null) return;
+    _entries[field] = null;
+    FormRegistry.of(b.tree).unregister(b, entry);
+  }
+
+  @override
+  void fieldChanged(NodeBuilder b) {
+    final field = TextFieldHandle._handles[b]?.field;
+    if (field != null) _entries[field]?.shown = field.validationError;
+    FormRegistry.of(b.tree).changed(b);
+  }
+}
+
+/// The runtime's services for text fields (widgets/controls.dart passes
+/// them to the recipe).
+const TextFieldServices textFieldServices = RuntimeTextFieldServices();

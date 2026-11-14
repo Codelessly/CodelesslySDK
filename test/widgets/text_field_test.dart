@@ -3,12 +3,16 @@ import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show LayoutDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart' hide captureImage;
 import 'package:codelessly_sdk/src/render/node_tree.dart' show RenderNodeDecoration;
-import 'package:codelessly_sdk/src/widgets/inputs.dart';
+import 'package:codelessly_sdk/src/render/controls/field_frame.dart' show FieldBorderKind;
+import 'package:codelessly_sdk/src/render/controls/text_field.dart';
+import 'package:codelessly_sdk/src/render/controls/tokens.dart' show ControlTokens;
+import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lists/support.dart' as lists;
+import '../support/fields.dart';
 import '../support/screen.dart' as harness;
 
 LayoutDocument _doc(Map<String, Object?> nodes) => LayoutDocument.fromJson({
@@ -47,166 +51,6 @@ T _widget<T extends Widget>(NodeTree tree) => _islandWidgets(tree).whereType<T>(
 Offset _center(WidgetTester tester, NodeTree tree, String id) =>
     tester.getTopLeft(find.byType(NodeView)) + tree.boxOf(id)!.rectIn(tester.renderObject(find.byType(NodeView)))!.center;
 
-// A one-line text field with a fixed height draws its border box at that
-// height (a 60 px search field), whatever its padding and font.
-//
-// A one-line text field with a fixed height (a 50 px search box in a stack,
-// the save sheet's name field in a column) is that tall in a running app.
-
-/// The field under a desktop app's theme (compact density).
-Future<void> compact(WidgetTester tester) async {
-  final view = find.byType(NodeView);
-  final widget = tester.widget<NodeView>(view);
-  await tester.pumpWidget(
-    MaterialApp(
-      theme: ThemeData(visualDensity: VisualDensity.compact),
-      home: Scaffold(
-        body: Align(alignment: Alignment.topLeft, child: widget),
-      ),
-    ),
-  );
-}
-
-void _ours() {
-  for (final interactive in [true, false])
-    for (final fit in ['fixed', 'fill', 'hugParent']) {
-      testWidgets(
-        'a $fit-height one-line field is as tall as its box, on desktop too (interactive: $interactive)',
-        variant: TargetPlatformVariant.only(TargetPlatform.linux),
-        (tester) async {
-          final hugParent = fit == 'hugParent';
-          final border = {
-            'borderSide': {'color': '#FF34343C', 'width': 2},
-            'borderRadius': 14,
-          };
-          await lists.show(tester, {
-            'col': {
-              'type': 'column',
-              'children': [hugParent ? 'wrap' : 'field'],
-              'layout': {'width': 390, 'height': 200},
-            },
-            'wrap': {
-              'type': 'column',
-              'children': ['field'],
-              'layout': {
-                'width': {'fill': 100},
-                'height': {'hug': 40},
-                'padding': [16, 0, 16, 0],
-              },
-              'props': {'crossAxisAlignment': 'start'},
-            },
-            'field': {
-              'type': 'textField',
-              'layout': {
-                'width': {'fill': 358},
-                'height': fit == 'fill' ? {'fill': 60} : 60,
-                if (fit == 'fill') 'flex': 1,
-              },
-              'props': {
-                'style': {'fontFamily': 'Archivo', 'fontSize': 18},
-                'decoration': {
-                  'hintText': 'Search',
-                  'prefixIcon': {
-                    'icon': {'type': 'MATERIAL_ICON', 'name': 'search', 'style': 'rounded'},
-                    'size': 26,
-                    'color': '#FF9C9CA6',
-                  },
-                  'filled': true,
-                  'fillColor': '#FF18181C',
-                  'contentPadding': [18, 0, 18, 0],
-                  'border': border,
-                  'enabledBorder': border,
-                  'focusedBorder': border,
-                },
-              },
-            },
-          }, interactive: interactive);
-          await compact(tester);
-          await tester.pumpAndSettle();
-          final decorator = tester.getSize(find.byType(InputDecorator));
-          expect(decorator.height, fit == 'fill' ? 200 : 60);
-          // The outline is drawn around the whole box: its fill reaches the
-          // box's top and bottom rows.
-          final image = await tester.runAsync(() => captureImage(tester.element(find.byType(InputDecorator))));
-          final bytes = (await tester.runAsync(() => image!.toByteData()))!;
-          int alphaAt(int x, int y) => bytes.getUint8((y * image!.width + x) * 4 + 3);
-          final x = image!.width ~/ 2;
-          final painted = [
-            for (var y = 0; y < image.height; y++)
-              if (alphaAt(x, y) > 0) y,
-          ];
-          expect(
-            painted.first,
-            lessThanOrEqualTo(2),
-            reason: 'rows painted: ${painted.first}..${painted.last} of ${image.height}',
-          );
-          expect(painted.last, greaterThanOrEqualTo(image.height - 3));
-        },
-      );
-    }
-}
-
-Map<String, Object?> field() => {
-      'type': 'textField',
-      'layout': {'width': {'fill': 300}, 'height': 50},
-      'props': {
-        'textAlignVertical': 'center',
-        'decoration': {
-          'hintText': 'Search', 'filled': true, 'fillColor': '#FFF6F4EF', 'isDense': true, 'contentPadding': [14, 0, 14, 0],
-          'enabledBorder': {'type': 'outline', 'borderSide': {'color': '#00000000', 'width': 2}, 'borderRadius': 12},
-        },
-      },
-    };
-
-void _master() {
-  _focusTests();
-
-}
-
-void _focusTests() {
-  testWidgets('a fixed-height field shows its focused border when focused', (tester) async {
-    final doc = LayoutDocument.fromJson({
-      'roots': ['p'],
-      'nodes': {
-        'p': {'type': 'stack', 'children': ['f'], 'layout': {'width': 400, 'height': 200}},
-        'f': {
-          ...field(),
-          'props': {
-            ...(field()['props']! as Map<String, Object?>),
-            'decoration': {
-              ...((field()['props']! as Map)['decoration'] as Map<String, Object?>),
-              'focusedBorder': {'type': 'outline', 'borderSide': {'color': '#FF0E2747', 'width': 2}, 'borderRadius': 12},
-            },
-          },
-        },
-      },
-    });
-    final tree = NodeTree(NodeValues(DocumentSource(doc)));
-    addTearDown(tree.dispose);
-    await tester.pumpWidget(MaterialApp(
-      home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'p', interactive: true)),
-    ));
-    Color side() {
-      final box = tester.widget<DecoratedBox>(find.ancestor(
-        of: find.byType(TextField),
-        matching: find.byWidgetPredicate((w) => w is DecoratedBox && w.decoration is ShapeDecoration),
-      ).first);
-      return ((box.decoration as ShapeDecoration).shape as OutlineInputBorder).borderSide.color;
-    }
-    expect(side(), const Color(0x00000000));
-    await tester.tap(find.byType(TextField));
-    await tester.pump();
-    expect(side(), const Color(0xFF0E2747), reason: 'the focused border, without another rebuild');
-  });
-}
-
-// A fixed-height one-line field with nothing tall in it (no prefix icon)
-// still draws its border box at its full height, not a 48 px one.
-
-// A text field whose initialValue is fed back from its own `changed`
-// reaction through a slow action (a script result, a delay) keeps what was
-// typed since; a highlight range draws in its style.
-
 Future<(VariableScope, NodeTree)> show(WidgetTester tester, Map<String, Object?> field, List<Variable> vars) async {
   final doc = LayoutDocument.fromJson({'roots': ['f'], 'nodes': {'f': field}});
   final scope = VariableScope(vars);
@@ -225,9 +69,6 @@ Future<(VariableScope, NodeTree)> show(WidgetTester tester, Map<String, Object?>
   return (scope, tree);
 }
 
-// An input node with its own fill, border and padding draws them around its
-// widget (the node's shell), the widget filling the padded box.
-
 Iterable<RenderObject> _below(RenderObject r) sync* {
   final kids = <RenderObject>[];
   r.visitChildren(kids.add);
@@ -238,6 +79,35 @@ Iterable<RenderObject> _below(RenderObject r) sync* {
 }
 
 void main() {
+  testWidgets('a fixed-height field shows its focused border when focused', (tester) async {
+    final doc = LayoutDocument.fromJson({
+      'roots': ['p'],
+      'nodes': {
+        'p': {'type': 'stack', 'children': ['f'], 'layout': {'width': 400, 'height': 200}},
+        'f': {
+          'type': 'textField',
+          'layout': {'width': {'fill': 300}, 'height': 50},
+          'props': {
+            'textAlignVertical': 'center',
+            'decoration': {
+              'hintText': 'Search', 'filled': true, 'fillColor': '#FFF6F4EF', 'isDense': true, 'contentPadding': [14, 0, 14, 0],
+              'enabledBorder': {'type': 'outline', 'borderSide': {'color': '#00000000', 'width': 2}, 'borderRadius': 12},
+              'focusedBorder': {'type': 'outline', 'borderSide': {'color': '#FF0E2747', 'width': 2}, 'borderRadius': 12},
+            },
+          },
+        },
+      },
+    });
+    final tree = NodeTree(NodeValues(DocumentSource(doc)));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'p', interactive: true)));
+    final f = textField(tester);
+    expect(f.currentBorder.side.color, const Color(0x00000000));
+    await tapField(tester, f);
+    expect(f.currentBorder.side.color, const Color(0xFF0E2747), reason: 'the focused border, without another rebuild');
+    expect(f.boxRect.height, 50);
+  });
+
   group('a focused field that goes away', () {
     Map<String, Json> form() => {
           'col': {'type': 'column', 'children': ['form', 'thanks'], 'layout': {'width': 400, 'height': 400}},
@@ -275,15 +145,14 @@ void main() {
         harness.v('email', ''),
         harness.v('done', false, VariableType.boolean),
       ]);
-      await tester.enterText(find.byType(EditableText), 'a@b.co');
+      await typeInto(tester, 'a@b.co');
       await tester.pump();
       expect(s['email'], 'a@b.co');
       await tester.tapAt(s.center('submit'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(s['done'], true);
-      expect(tester.state<EditableTextState>(find.byType(EditableText)).widget.focusNode.hasFocus, isFalse,
-          reason: 'a hidden field gives the focus back');
+      expect(RenderTextField.focused, isNull, reason: 'a hidden field gives the focus back');
     });
 
     testWidgets('a focused field in a list item that a tap removes goes without an error', (tester) async {
@@ -308,12 +177,12 @@ void main() {
           ],
         },
       }, variables: [harness.v('rows', ['a', 'b'], VariableType.list)]);
-      await tester.enterText(find.byType(EditableText).first, 'xyz');
+      await typeInto(tester, 'xyz');
       await tester.pump();
       await tester.tapAt(s.center('clear'));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(find.byType(EditableText), findsNothing);
+      expect(textFields(tester), isEmpty);
     });
 
     testWidgets('a focused field hidden by a variable change lets the focus go without an error', (tester) async {
@@ -321,72 +190,55 @@ void main() {
         harness.v('email', ''),
         harness.v('done', false, VariableType.boolean),
       ]);
-      await tester.showKeyboard(find.byType(EditableText));
+      textField(tester).requestFocus();
       await tester.pump();
       s.scope.set('done', true);
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
-      expect(FocusManager.instance.primaryFocus?.context?.widget, isNot(isA<EditableText>()));
+      expect(RenderTextField.focused, isNull);
     });
   });
 
-  for (final density in [VisualDensity.standard, VisualDensity.compact]) {
-    testWidgets('a fixed-height field keeps its height under $density density', (tester) async {
-      final tree = NodeTree(DocumentSource(_doc({
-        'field': {
-          'type': 'textField',
-          'layout': {'width': 260, 'height': 40},
-          'props': {
-            'decoration': {'hintText': 'Search', 'isDense': true, 'contentPadding': [12, 11, 12, 11], 'border': {'type': 'outline'}},
-          },
-        },
-        'time': {
-          'type': 'timePicker',
-          'layout': {'width': 160, 'height': 42, 'y': {'start': 100}},
-          'props': {'value': '13:00', 'alwaysUse24HourFormat': true, 'format': 'HH:mm', 'decoration': {'isDense': true, 'border': {'type': 'outline'}}},
-        },
-      })));
-      await tester.pumpWidget(MaterialApp(
-        theme: ThemeData(visualDensity: density, platform: TargetPlatform.linux),
-        home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true))),
-      ));
-      await tester.pumpAndSettle();
-      // The drawn field: the border container inside each decorator (its
-      // box can be the node's height while a compact density draws less).
-      double drawn(Finder f) {
-        final border = find.descendant(of: f, matching: find.byWidgetPredicate((w) => w.runtimeType.toString() == '_BorderContainer'));
-        return tester.getSize(border.first).height;
-      }
-      final decorators = find.byType(InputDecorator);
-      expect([drawn(decorators.at(0)), drawn(decorators.at(1))]..sort(), [40, 42]);
-    });
-  }
-
-  testWidgets('an error bound to yes or no shows the error border without a message', (tester) async {
-    InputDecoration decorationWith(Object errorText) => inputDecoration(
-        api.InputDecoration.fromJson({'errorText': errorText}), api.EdgeInsets.zero);
-    final on = decorationWith(true);
-    expect(on.error, isA<SizedBox>(), reason: 'in error, nothing under the field');
-    expect(decorationWith(false).error, isNull);
-    expect(decorationWith('Give the card a title.').error, isNotNull);
-    // A field in error draws the error border.
-    final source = DocumentSource(_doc({
-      'f': {
+  testWidgets('a fixed-height field keeps its height, whatever its padding', (tester) async {
+    final (tree, view) = await _show(tester, DocumentSource(_doc({
+      'field': {
         'type': 'textField',
-        'layout': {'width': 200, 'height': 48},
+        'layout': {'width': 260, 'height': 40},
         'props': {
-          'decoration': {
-            'errorText': true,
-            'errorBorder': {'type': 'outline', 'borderSide': {'color': '#FFE5484D'}},
-          },
+          'decoration': {'hintText': 'Search', 'isDense': true, 'contentPadding': [12, 11, 12, 11], 'border': {'type': 'outline'}},
         },
       },
-    }));
-    final (tree, _) = await _show(tester, source);
-    expect(_widget<TextField>(tree).decoration!.error, isA<SizedBox>());
-    expect(tester.widget<InputDecorator>(find.byType(InputDecorator)).decoration.errorBorder, isNotNull);
+    })), interactive: true);
+    expect(tree.boxOf('field')!.rectIn(view)!.height, 40);
+    final f = textField(tester);
+    expect(f.boxRect.height, 40);
+    expect(f.contentRect.center.dy, closeTo(20, .5), reason: 'the line centred in the box');
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
+  });
+
+  testWidgets('an error bound to yes or no shows the error border without a message', (tester) async {
+    for (final (error, border, message) in [(true, true, ''), (false, false, ''), ('Give the card a title.', true, 'Give the card a title.')]) {
+      final source = DocumentSource(_doc({
+        'f': {
+          'type': 'textField',
+          'layout': {'width': 200, 'height': 48},
+          'props': {
+            'decoration': {
+              'errorText': error,
+              'errorBorder': {'type': 'outline', 'borderSide': {'color': '#FFE5484D'}},
+            },
+          },
+        },
+      }));
+      final (tree, _) = await _show(tester, source);
+      final f = textField(tester);
+      expect(f.decoration.hasError, border, reason: '$error');
+      expect(f.belowText, message);
+      if (border) expect(f.currentBorder.side.color, const Color(0xFFE5484D));
+      await tester.pumpWidget(const SizedBox());
+      tree.dispose();
+    }
   });
 
   testWidgets('the caret stays at the end of the text when a new value arrives', (tester) async {
@@ -407,40 +259,40 @@ void main() {
       'f': source.document['f']!.withProp(api.TextFieldProps.initialValue, 'Untitled 8'),
     });
     await tester.pump();
-    final controller = _widget<TextField>(tree).controller!;
-    expect(controller.text, 'Untitled 8');
-    expect(controller.selection, const TextSelection.collapsed(offset: 10));
+    final editor = textField(tester).editor;
+    expect(editor.text, 'Untitled 8');
+    expect(editor.selection, const TextSelection.collapsed(offset: 10));
 
     // A caret inside the text keeps its place.
-    controller.selection = const TextSelection.collapsed(offset: 3);
+    editor.selection = const TextSelection.collapsed(offset: 3);
     source.document = source.document.copyWith(nodes: {
       ...source.document.nodes,
       'f': source.document['f']!.withProp(api.TextFieldProps.initialValue, 'Untitled 9'),
     });
     await tester.pump();
-    expect(controller.selection, const TextSelection.collapsed(offset: 3));
+    expect(textField(tester).editor.selection, const TextSelection.collapsed(offset: 3));
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });
 
-  testWidgets('a text field is a real Flutter TextField, sized by its width and height settings', (tester) async {
+  testWidgets('a text field is sized by its width and height settings, and shows its value and hint', (tester) async {
     final source = DocumentSource(_doc({
       'f': {
         'type': 'textField',
-        'layout': {'width': 200, 'height': {'hug': 48}, 'x': {'start': 10}, 'y': {'start': 20}, 'padding': [12, 16, 12, 16]},
+        'layout': {'width': 200, 'height': {'hug': 48}, 'x': {'start': 10}, 'y': {'start': 20}},
         'props': {'initialValue': 'Hi', 'decoration': {'hintText': 'Name', 'errorText': r"${= bad ? 'x' : ''}"}},
       },
     }));
     final (tree, view) = await _show(tester, source);
-    final field = _widget<TextField>(tree);
-    expect(field.controller!.text, 'Hi');
-    expect(field.decoration!.hintText, 'Name');
+    final f = textField(tester);
+    expect(f.editor.text, 'Hi');
+    expect(f.decoration.hint, 'Name');
     // An unevaluated formula is no error.
-    expect(field.decoration!.error, isNull);
+    expect(f.decoration.hasError, isFalse);
     final rect = tree.boxOf('f')!.rectIn(view)!;
     expect(rect.left, 10);
     expect(rect.width, 200);
-    expect(rect.height, greaterThan(40));
+    expect(rect.height, 28, reason: 'SSUI\'s field height when it hugs');
 
     // A new initial value from the document shows.
     source.document = source.document.copyWith(nodes: {
@@ -448,7 +300,7 @@ void main() {
       'f': source.document['f']!.withProp(api.TextFieldProps.initialValue, 'Grace'),
     });
     await tester.pump();
-    expect(_widget<TextField>(tree).controller!.text, 'Grace');
+    expect(textField(tester).editor.text, 'Grace');
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });
@@ -490,34 +342,77 @@ void main() {
   });
 
   test('on the design canvas a field shows variable names and leaves formulas empty', () {
-    expect(previewText(null), isNull);
-    expect(previewText(''), isNull);
-    expect(previewText('Hi'), 'Hi');
-    expect(previewText(r"${= a ? '!' : ''}"), isNull);
-    expect(previewText(r'Total: ${= sum({a: 1})} kg'), 'Total:  kg');
-    expect(previewText(r'${name}'), r'${name}');
+    expect(fieldPreviewText(null), '');
+    expect(fieldPreviewText(''), '');
+    expect(fieldPreviewText('Hi'), 'Hi');
+    expect(fieldPreviewText(r"${= a ? '!' : ''}"), '');
+    expect(fieldPreviewText(r'Total: ${= sum({a: 1})} kg'), 'Total:  kg');
+    expect(fieldPreviewText(r'${name}'), r'${name}');
   });
 
   test('a text field keeps to its minimum and maximum lines', () {
-    expect(textFieldLines(maxLines: 1, minLines: null), (1, null));
-    expect(textFieldLines(maxLines: null, minLines: 3), (null, 3));
-    expect(textFieldLines(maxLines: 2, minLines: 4), (4, 4));
-    expect(textFieldLines(maxLines: 0, minLines: 0), (null, null));
-    expect(textFieldLines(maxLines: 3, minLines: 2, expands: true), (null, null));
+    final tokens = ControlTokens.resolve(api.ThemeTokens.none, dark: false);
+    TextFieldConfig config(Map<String, Object?> props, {Object height = 48}) => TextFieldConfig.of(
+        LayoutDocument.fromJson({
+          'roots': ['f'],
+          'nodes': {'f': {'type': 'textField', 'layout': {'width': 200, 'height': height}, 'props': props}},
+        })['f']!,
+        tokens);
+    final one = config({});
+    expect((one.maxLines, one.minLines, one.oneLine), (1, null, true));
+    final three = config({'maxLines': 0, 'minLines': 3}, height: {'hug': 48});
+    expect((three.maxLines, three.minLines), (null, 3));
+    final raised = config({'maxLines': 2, 'minLines': 4}, height: {'hug': 48});
+    expect((raised.maxLines, raised.minLines), (4, 4));
+    final expands = config({'maxLines': 3, 'minLines': 2});
+    expect((expands.maxLines, expands.minLines, expands.expands), (null, null, true));
   });
 
   group('fixed height', () {
-    _ours();
-    _master();
-
+    for (final interactive in [true, false]) {
+      for (final fit in ['fixed', 'fill', 'hugParent']) {
+        testWidgets('a $fit-height one-line field is as tall as its box (interactive: $interactive)', (tester) async {
+          final hugParent = fit == 'hugParent';
+          final border = {'borderSide': {'color': '#FF34343C', 'width': 2}, 'borderRadius': 14};
+          await lists.show(tester, {
+            'col': {'type': 'column', 'children': [hugParent ? 'wrap' : 'field'], 'layout': {'width': 390, 'height': 200}},
+            'wrap': {
+              'type': 'column',
+              'children': ['field'],
+              'layout': {'width': {'fill': 100}, 'height': {'hug': 40}, 'padding': [16, 0, 16, 0]},
+              'props': {'crossAxisAlignment': 'start'},
+            },
+            'field': {
+              'type': 'textField',
+              'layout': {'width': {'fill': 358}, 'height': fit == 'fill' ? {'fill': 60} : 60, if (fit == 'fill') 'flex': 1},
+              'props': {
+                'style': {'fontSize': 18},
+                'decoration': {
+                  'hintText': 'Search',
+                  'prefixIcon': {'icon': {'type': 'MATERIAL_ICON', 'name': 'search', 'style': 'rounded'}, 'size': 26, 'color': '#FF9C9CA6'},
+                  'filled': true,
+                  'fillColor': '#FF18181C',
+                  'contentPadding': [18, 0, 18, 0],
+                  'border': border,
+                  'enabledBorder': border,
+                  'focusedBorder': border,
+                },
+              },
+            },
+          }, interactive: interactive);
+          await tester.pumpAndSettle();
+          final f = textField(tester);
+          expect(f.boxRect.height, fit == 'fill' ? 200 : 60);
+          expect(f.fillNow, const Color(0xFF18181C));
+          expect(f.currentBorder.kind, FieldBorderKind.outline);
+          expect(f.currentBorder.side.width, 2);
+        });
+      }
+    }
 
     testWidgets('a prefix icon is centered in the field\'s whole height', (tester) async {
       await lists.show(tester, {
-        'col': {
-          'type': 'column',
-          'children': ['field'],
-          'layout': {'width': 390, 'height': 200},
-        },
+        'col': {'type': 'column', 'children': ['field'], 'layout': {'width': 390, 'height': 200}},
         'field': {
           'type': 'textField',
           'layout': {'width': {'fill': 358}, 'height': 68},
@@ -525,27 +420,24 @@ void main() {
             'style': {'fontSize': 21},
             'decoration': {
               'hintText': 'Search',
-              'prefixIcon': {
-                'icon': {'type': 'MATERIAL_ICON', 'name': 'search', 'style': 'rounded'},
-                'size': 26,
-              },
+              'prefixIcon': {'icon': {'type': 'MATERIAL_ICON', 'name': 'search', 'style': 'rounded'}, 'size': 26},
               'prefixIconPadding': [20, 0, 8, 0],
               'contentPadding': [0, 0, 18, 0],
             },
           },
         },
       });
-      await compact(tester);
       await tester.pumpAndSettle();
-      final box = tester.getRect(find.byType(InputDecorator));
-      // The glyph sits in an Align that hugs it (its padding around).
-      final icon = tester.getRect(find
-          .descendant(
-            of: find.byType(InputDecorator),
-            matching: find.byWidgetPredicate((w) => w is Align && w.widthFactor == 1 && w.heightFactor == 1),
-          )
-          .first);
-      expect(icon.center.dy, closeTo(box.center.dy, 1));
+      final f = textField(tester);
+      final icons = <RenderBox>[];
+      f.visitChildren((c) {
+        if (c is! RenderEditable) icons.add(c as RenderBox);
+      });
+      final icon = (icons.single.parentData! as BoxParentData).offset & icons.single.size;
+      expect(icon.size, const Size(26, 26));
+      expect(icon.left, 20);
+      expect(icon.center.dy, closeTo(f.boxRect.center.dy, 1));
+      expect(f.contentRect.left, 20 + 26 + 8 + f.scale.gap);
     });
   });
 
@@ -561,23 +453,22 @@ void main() {
           ]),
         ],
       }, [harness.v('t', 'y = ')]);
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
-      await tester.enterText(find.byType(TextField), 'y = x');
+      await tapField(tester, textField(tester));
+      await typeInto(tester, 'y = x');
       await tester.pump(const Duration(milliseconds: 30));
-      await tester.enterText(find.byType(TextField), 'y = x^');
+      await typeInto(tester, 'y = x^');
       await tester.pump(const Duration(milliseconds: 30));
-      await tester.enterText(find.byType(TextField), 'y = x^2');
+      await typeInto(tester, 'y = x^2');
       // The first echo ('y = x') arrives now, after two newer edits.
       await tester.pump(const Duration(milliseconds: 60));
-      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'y = x^2');
+      expect(textField(tester).editor.text, 'y = x^2');
       await tester.pump(const Duration(milliseconds: 200));
-      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'y = x^2');
+      expect(textField(tester).editor.text, 'y = x^2');
       expect(scope.read('t'), 'y = x^2');
       // A value from elsewhere still replaces the text.
       scope.set('t', 'a = 2');
       await tester.pump();
-      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'a = 2');
+      expect(textField(tester).editor.text, 'a = 2');
     });
 
     testWidgets('a run of the text (a bound range) is drawn in its style', (tester) async {
@@ -586,9 +477,7 @@ void main() {
         'props': {'initialValue': 'y = sin(x*x'},
         'bind': {'props.runs': "\${= [{'start': col, 'end': col + 1, 'style': {'color': '#FFB3261E', 'backgroundColor': '#FFF7E3DC'}}]}"},
       }, [harness.v('col', 7, api.VariableType.integer)]);
-      final controller = tester.widget<TextField>(find.byType(TextField)).controller! as HighlightTextController;
-      final span = controller.buildTextSpan(context: tester.element(find.byType(TextField)), withComposing: false);
-      final parts = span.children!.cast<TextSpan>();
+      final parts = (textField(tester).editable.text! as TextSpan).children!.cast<TextSpan>();
       expect(parts.map((p) => p.text), ['y = sin', '(', 'x*x']);
       expect(parts[1].style!.color, const Color(0xFFB3261E));
     });
@@ -604,14 +493,19 @@ void main() {
           ],
         },
       }, const []);
-      final controller = tester.widget<TextField>(find.byType(TextField)).controller! as HighlightTextController;
-      final span = controller.buildTextSpan(context: tester.element(find.byType(TextField)), withComposing: false);
-      final parts = span.children!.cast<TextSpan>();
+      final parts = (textField(tester).editable.text! as TextSpan).children!.cast<TextSpan>();
       expect(parts.map((p) => p.text), ['a', 'bc', 'd', 'ef']);
       expect(parts[0].style, isNull);
       expect(parts[2].style!.color, const Color(0xFFB3261E));
       expect(parts[2].style!.fontWeight, FontWeight.w700);
       expect(parts[3].style!.color, isNull);
+    });
+
+    testWidgets('the focus action reaches the field\'s handle', (tester) async {
+      final (_, tree) = await show(tester, {'type': 'textField', 'layout': {'width': 200, 'height': 40}}, const []);
+      TextFieldHandle.of(tree, 'f')!.focusNode.requestFocus();
+      await tester.pump();
+      expect(textField(tester).focusNode.hasFocus, isTrue);
     });
   });
 
@@ -643,10 +537,16 @@ void main() {
       final decorations = _below(box).whereType<RenderNodeDecoration>().toList();
       expect(decorations, isNotEmpty);
       expect((decorations.first.decoration as BoxDecoration).borderRadius, BorderRadius.circular(4));
-      // The dropdown widget sits in the padded box: 220 less 10 + 8.
-      final dropdown = tester.getRect(find.byType(DropdownButton<Object>));
-      expect(dropdown.width, 202);
-      expect(dropdown.left - tester.getTopLeft(find.byType(NodeView)).dx - box.localToGlobal(Offset.zero).dx, closeTo(10, 0.5));
+      // The dropdown (a render object) sits in the padded box: 220 less 10 + 8.
+      RenderBox? dropdown;
+      void visit(RenderObject o) {
+        if (o.runtimeType.toString() == 'RenderDropdown') dropdown ??= o as RenderBox;
+        o.visitChildren(visit);
+      }
+
+      visit(box);
+      expect(dropdown!.size.width, 202);
+      expect(dropdown!.localToGlobal(Offset.zero).dx - box.localToGlobal(Offset.zero).dx, closeTo(10, 0.5));
     });
   });
 }

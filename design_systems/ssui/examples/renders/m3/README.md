@@ -18,6 +18,63 @@ SSUI variant → core node: primary `filledButton`; secondary and destructive `f
 `style.backgroundColor`; outline `outlinedButton`; ghost `textButton`. Size → the node's height (24/28/32/36/44); 28
 (compact) is a button with no size: it hugs.
 
+## Bars (WS-F): tab bars, navigation bars, the app bar
+
+One page of an `appBar` (56), a `tabBar` (36), a `tabBar` with icons (48), a `navigationBar` (80) and a
+`bottomNavigationBar` (64, second item selected), nothing styled but the theme's Roboto, 400 × 420 at 1×.
+
+| File | What |
+|---|---|
+| `bars-before-{light,dark}.png` | the working branch before WS-F: Material `AppBar`/`TabBar`/`NavigationBar`/`BottomNavigationBar` islands (their labels in the test font, which is why they show as blocks) |
+| `bars-{light,dark}.png` | this SDK: render-object bars, SSUI defaults |
+| `tabs-ssui-{light,dark}.png` | SSUI's `Tabs` component (components/Tabs.json) rendered by `tool/render/render.sh --component Tabs`: the reference `test/controls/tab_bar_test.dart` matches a zero-prop `tabBar` to (0.00 % of the pixels differ, light and dark) |
+| `navigation-ssui-{light,dark}.png` | soft_saas_ui's own `SoftSaaSTabBar` (`tool/ssui_golden/test/ssui_nav_golden_test.dart`): the reference `test/controls/navigation_bar_test.dart` matches a zero-prop `navigationBar` to (1.24 % light, 0.86 % dark; the rest is the labels' letter spacing, 0.25 inherited from Material's bodyMedium in the reference, none in SSUI's typography) |
+## Date and time pickers (workstream G)
+
+`test/controls/pickers_reference_test.dart` rebuilds SSUI's picker page (`../ssui-reference/ssui-pickers-*.png`,
+rendered from soft_saas_ui's own `SoftSaaSDatePicker`, `SoftSaaSTimePicker` and `SoftSaaSCalendar` by
+`tool/ssui_golden/test/ssui_pickers_test.dart`) from zero-prop `datePicker` / `timePicker` nodes, with the first
+field's calendar open.
+
+| File | What |
+|---|---|
+| `pickers-before-{light,dark}.png` | 30.1.0's Material islands (the empty picker showed today's date; a tap opened Material's dialog) |
+| `pickers-{light,dark}.png` | this SDK: SSUI's field and calendar popover, drawn as render objects |
+
+Measured against the reference: fields 4.2 % (light) / 4.8 % (dark) of the pixels differ by more than 40 in a channel,
+the calendar 6.1 % / 7.0 %; nearly all of it is text spacing (SSUI's own `Text` inherits Material's 0.25 letter
+spacing, which its `inputText` token does not have) and lucide's icon glyphs drawn as paths. The test holds it under 9 %.
+## Dropdown (WS-B): before and after
+
+The SSUI Select reference (`../ssui-reference/ssui-select-{light,dark}.png`, rendered from soft_saas_ui's own
+`SoftSaaSDropdown` by `tool/ssui_golden/test/ssui_select_test.dart`: a select with a value, an empty one with its
+placeholder, and one open on its menu; Roboto, 480 × 300 at 1×) rebuilt from zero-prop `dropdown` nodes (items,
+value, hint only). Made by `test/controls/ssui_select_reference_test.dart` with `CODELESSLY_M3_RENDERS=<dir>`.
+
+| File | What |
+|---|---|
+| `dropdown-before-{light,dark}.png` | 30.1.0's `DropdownButton` island under a bare `MaterialApp` (Material's arrow, its route menu as a card with elevation 8; the test font shows as boxes) |
+| `dropdown-{light,dark}.png` | this SDK: the render-object dropdown and its menu in the root's overlay layer |
+| `dropdown-compare-{light,dark}.png` | before, after and the SSUI reference, stacked |
+
+Measured over the whole page: 0.77 % of the pixels differ in light, 0.73 % in dark (a channel more than 40 apart; the
+test holds it under 1 %). Geometry (boxes, borders, chevron, menu surface, rows, tint, check) matches pixel for pixel;
+what differs is text only: the reference's labels inherit Material's `bodyMedium` letter spacing through the app's
+`DefaultTextStyle` (about 2 px over a word), which SSUI's own spec sets to 0.
+## Text fields (WS-A)
+
+The reference page's field row (an empty field with a hint, one with a value, one with a value and an error) rebuilt
+from zero-prop `textField` nodes (only the texts set), Roboto, light and dark, cropped to y 320–420. Made by
+`test/controls/text_field_reference_test.dart` with `CODELESSLY_M3_RENDERS=<dir>`.
+
+| File | What |
+|---|---|
+| `text-fields-before-{light,dark}.png` | the `_TextFieldIsland` (Material `TextField`) in a `MaterialApp`: Material outline and error red, and its texts in no loaded font (boxes) although the theme names Roboto |
+| `text-fields-{light,dark}.png` | this SDK: `RenderTextField`, SSUI's field frame |
+| `text-fields-compare-{light,dark}.png` | before, after and the SSUI reference, stacked |
+
+Measured against the reference over the field row (x 24–712, y 344–396): 0.00 % of the pixels differ in light and
+in dark (a channel more than 40 apart); the test holds it under 1 %.
 ## Chips and badges (workstream C)
 
 `test/controls/chips_reference_test.dart` rebuilds SSUI's chip and badge page

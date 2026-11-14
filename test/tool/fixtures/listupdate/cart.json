@@ -1,0 +1,15 @@
+{
+  "schema": 3,
+  "id": "cart",
+  "roots": ["cart"],
+  "variables": {"cart": [{"name": "lines", "type": "list", "value": [{"id": "bowl", "qty": 1}, {"id": "mug", "qty": 2}]}]},
+  "nodes": {
+    "cart": {"type": "canvas", "slots": {"body": "list"}, "layout": {"width": 390, "height": 300}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "list": {"type": "listView", "children": ["line"], "layout": {"width": {"fill": 390}, "height": {"fill": 300}}, "props": {"spacing": 8}, "bind": {"data": "${lines}"}},
+    "line": {"type": "row", "children": ["plus", "qtyBar"], "layout": {"width": {"fill": 390}, "height": 40}, "props": {"spacing": 8}},
+    "plus": {"type": "box", "layout": {"width": 40, "height": 40}, "decoration": {"fills": [{"color": "#FF2255FF"}]},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "lines", "op": "update", "index": "${index}", "value": "${= set(item, 'qty', item.qty + 1)}"}]}]},
+    "qtyBar": {"type": "box", "layout": {"width": 10, "height": 20}, "decoration": {"fills": [{"color": "#FF22AA55"}]}, "bind": {"layout.width": "${= item.qty * 20}"}}
+  }
+}

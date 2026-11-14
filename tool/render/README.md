@@ -46,7 +46,7 @@ site: navigation may name a canvas of another page.
 | `--out <dir>` | Where PNGs and `diagnostics.json` go (required). |
 | `--sizes <WxH,...>` | Screen sizes, default `390x844,834x1112,1440x900`. |
 | `--screen <id or name>` | Only this screen: a canvas id, a layout id, a `props.screen` name, a canvas name or path. Repeatable. Without it, every screen but a canvas only ever opened as a modal (an `openModal` names it, in a page or inside a component, and no `navigate` does): name it to render it alone. |
-| `--full-page` | Capture the whole page: its own scroll view (the largest one a user can scroll; lists and decorations that do not scroll add nothing) over its whole extent, while the window keeps the size asked for, as a browser's full-page screenshot does. `${screen.height}` and anything sized or pinned to the window (a drawer pinned to the window's top and bottom) stay as on the device. What a reader sees once is drawn once: content fixed to the window over the page (a header, a drawer, a bar pinned to the bottom, a canvas's bottom bar or floating button) and an open modal, dialog or sheet with its dimmed backdrop are drawn where a user first sees them, in the first window, and the page continues below them undimmed; a `sticky` node is drawn once, in its place in the page (not pinned at the top of every window); after `--navigate` or a tap that navigates, the capture is the page navigated to, at its own height (a page covered by another is never measured or drawn). The capture always starts at the page's top, whatever a step scrolled it to (a `--tap` scrolls its node into view first); without `--full-page` the capture is the window where the steps left the page, which is how to see a sticky header pinned. `--dump-layout` gives every box where the PNG draws it. |
+| `--full-page` | Capture the whole page: its own scroll view (the largest one a user can scroll; lists and decorations that do not scroll add nothing) over its whole extent, while the window keeps the size asked for, as a browser's full-page screenshot does. `${screen.height}` and anything sized or pinned to the window (a drawer pinned to the window's top and bottom) stay as on the device. What a reader sees once is drawn once: content fixed to the window over the page (a header, a drawer, a bar pinned to the bottom, a canvas's bottom bar or floating button) and an open modal, dialog, sheet, dropdown menu or toast (with its dimmed backdrop) are drawn where a user first sees them, in the first window, and the page continues below them undimmed; a page laid out differently once it scrolls (a header that shrinks on a `scroll` reaction) continues below the first window as laid out scrolled, with no rows lost or doubled at a seam; a `sticky` node is drawn once, in its place in the page (not pinned at the top of every window); after `--navigate` or a tap that navigates, the capture is the page navigated to, at its own height (a page covered by another is never measured or drawn). The capture always starts at the page's top, whatever a step scrolled it to (a `--tap` scrolls its node into view first); without `--full-page` the capture is the window where the steps left the page, which is how to see a sticky header pinned. `--dump-layout` gives every box where the PNG draws it. |
 | `--fonts <dir>` | Font files (`.ttf`, `.otf`, `.woff`), searched recursively and read by the family, weight and style inside each file: a font package folder (`node_modules/@fontsource/<family>`, or the whole `node_modules/@fontsource`), a site's fonts folder, or `system` (the system's font directories). Repeatable. Of a package's subset files for one face (`latin`, `latin-ext`, `cyrillic`...), the one with Latin text's characters is used. `.woff2` is not read (it is reported, with the `.woff` to use instead). |
 | `--theme <mode>` | `light`, `dark` or `system`: the theme mode the site starts in, as a `setThemeMode` action sets it (named colours, text styles and controls follow). PNG names end `-<mode>`; a later `--tap` on the site's switch changes it. |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats; `<template>#<n>/<id>` the node inside a list's n-th copy (`evCard#0/evReserve`, the same node as `evReserve#0`). A focused text field elsewhere is unfocused first, as a click outside a field does in a browser (its blur reactions run before the tap's). |
@@ -55,7 +55,7 @@ site: navigation may name a canvas of another page.
 | `--focus <id>` | Focus the text field (a `textField`, or the one inside the node). |
 | `--unfocus` | Take the focus from the focused field: no caret in the capture (an error state after `--type`); its blur reactions run. |
 | `--key <key>` | Press a key on what has the focus, as a keyboard does: `ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`, `Enter`, `Escape`, `Tab`, `Space`, `Home`, `End`, `Backspace`, `Delete`, `PageUp`, `PageDown`, a letter or a digit, with modifiers (`shift+Tab`, `ctrl+a`). A canvas's `keyDown` reactions run when no field has the focus. |
-| `--type <id>=<text>` | Focus the text field and type the text, as a user would: its `changed` reactions run, and a field whose `props.initialValue` is bound to a variable sets it. |
+| `--type <id>=<text>` | Focus the text field and type the text, as a user would: its `changed` reactions run, and a field whose `props.initialValue` is bound to a variable sets it. When two shown nodes share the id and only one has a text field (a form's `company` field and a footer's `company` heading), that one is typed into; else name it by path (`contact/company=Vertex`, `<canvas id>/<id>` for the page's own). |
 | `--set <name>=<json>` | Set a variable of the screen in view (after `--navigate`, of the screen navigated to): `--set annual=true`, `--set 'email="a@b.co"'`. It holds: when nothing but `--wait` and other `--set` steps comes after it, a timer or `load` reaction that writes the variable later does not change the capture (it is set again before the capture, with a `set_overwritten` warning). |
 | `--now <ISO time>` | The time `now()` (and `nowMs()`) returns for the whole run: `--now 2026-11-13T09:00:00Z`. A clock or countdown a timer writes from `now()` shows that time; check before, during and after an event without a test-only variable. |
 | `--scroll <id or screen>=<px>` | Scroll a scrolling node, or the page, to an offset. |
@@ -71,7 +71,8 @@ site: navigation may name a canvas of another page.
 | `--validate-only` | Only validate. |
 
 Steps (`--tap`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--drag`, `--navigate`, `--wait`) run in the order given, after the screen
-has loaded and before the capture, at every size. A step that names a node not shown at a size (hidden there by a
+has loaded and before the capture, at every size. Each step settles about a second; before the capture, number variables still counting (`animate`
+`animateTo` in a `load` reaction) are let arrive (up to 20 s), so counters show the numbers they end at. A step that names a node not shown at a size (hidden there by a
 media rule or a binding, or on another breakpoint's canvas) is skipped at that size, with one warning per size
 listing the skipped steps; the other steps run and the capture is made.
 
@@ -97,18 +98,21 @@ tool/render/render.sh site/ --out shots/ --screen contact --tap submit --label e
 
 Validation codes are listed in the API reference (codelessly_api's `docs/reference/render.md`, "Validation
 codes"; the reference starts with `docs/reference/STARTER.md`, the base). Links to one missing screen are reported
-once per screen (`unknown_screen`, with how many links name it and where), not once per link: list every page in
-`site.json` before writing the pages that link to them. The render step adds:
+once per screen (`unknown_screen`, with how many links name it and where), not once per link. A page `site.json`
+lists whose file is not written yet is one `page_not_written` warning per file (with the links that name its
+screen, the file's name), not an error: write the site page by page. The render step adds:
 
 | Code | Severity | Meaning |
 |---|---|---|
 | `invalid_json` | error | A file is not valid JSON (with line and column). |
+| `page_not_written` | warning | A page `site.json` lists has no file yet: once per file, with how many links name its screen and where (they are checked once it is written). |
 | `design_system_missing` | error | The design system `site.json` names (`"designSystem"`, a folder relative to it) has no readable `design_system.json`. |
 | `no_documents` | error | No `.json` documents at the paths given. |
 | `unknown_screen_arg` | error | `--screen` names no canvas, screen or layout. |
-| `render_exception` | error | Flutter threw while building, laying out or painting; the message names the node (`Node "price-row" (row): ...`). A flex overflow under 0.01 px (rounding) is not reported. |
+| `render_exception` | error | Flutter threw while building, laying out or painting; the message names the node (`Node "price-row" (row): ...`). A flex overflow names the list copy that overflows (`dish#2`) and says what its content needs, the children it holds and what to change (a fixed height a longer item outgrows: hug it, or raise it); one under 0.01 px (rounding) is not reported. |
 | `action_error` | error | An action chain failed (a `load` reaction, or one a step ran). |
-| `interaction_failed` | error | A step could not be applied: no such node on screen, an id two shown nodes have (the message names each by path), nothing scrolls, the node is covered wherever it shows (the message names what covers it), nothing in it takes a tap (no fill, no reaction), no text field to type into, no such screen. A warning when the steps' nodes are not shown at that size (skipped there). |
+| `interaction_failed` | error | A step could not be applied: no such node on screen, an id two shown nodes have (the message names each by path), nothing scrolls, the node is covered wherever it shows (the message names what covers it), nothing in it takes a tap (no fill, no reaction), no text field to type into, no such screen. |
+| `step_skipped` | warning | A step names a node not shown at that size (hidden there by a media rule or a binding, or on another breakpoint's canvas; a component's node named by its path too): skipped there, one note per size listing the steps; the other steps ran and the capture was made. Nothing to fix when the node is meant to be hidden at that width (a menu button shown only on phones). |
 | `tap_no_reaction` | warning | A `--tap` hit its node, but neither it nor anything around it reacts to a tap: nothing happened. |
 | `missing_glyph` | warning | A text has characters its font has no glyph for (drawn as empty boxes): the message lists them. |
 | `icon_not_drawn` | warning | An icon names no glyph the renderer can draw. |
@@ -121,7 +125,7 @@ once per screen (`unknown_screen`, with how many links name it and where), not o
 | `offscreen` | warning | A node extends past the screen's edge where nothing scrolls: on a device it is cut off. |
 | `text_clipped` | warning | A text's lines are taller than its box, or a word is wider than it. |
 | `text_truncated` | warning | A text is cut at `maxLines` with overflow `clip`. |
-| `text_no_color` | warning | A text has no `style.color`: the engine paints it white. |
+| `text_no_color` | warning | A text has no `style.color` (the engine paints it white), or a transparent one (alpha 0). The check is the one a `UiSession` runs on what it shows (`paragraphIssues`). |
 | `font_fallback` | warning | A font family (or a weight far from any it has) is not in the fonts directories. |
 | `image_failed` | error | An image file is missing, or an image does not decode. |
 | `image_network` | warning | An image is on the network: not fetched, so blank in the screenshot. |
@@ -144,7 +148,8 @@ Text that names no family is drawn in Roboto, the default family of a Flutter ap
 an app it is the platform's font). A family the command does not have is drawn in Roboto and reported as
 `font_fallback`, whose message names the family, weight and style asked for, the weights the family has, the
 directories searched and any file of that family found but not read; a missing weight next to one the family has
-(600 when there are 500 and 700) is drawn with the nearest and not reported.
+(600 when there are 500 and 700) is drawn with the nearest and not reported. A variable font (a file with a `wght` axis) has every weight of
+its axis, whether declared once in `site.json` or found under `--fonts`.
 
 Web fonts: a `.woff` file is decoded by the command (its tables are zlib streams) and read as the TrueType or
 OpenType file it wraps. A `.woff2` file (Brotli-compressed) is not read: it is reported, and an npm
@@ -154,10 +159,20 @@ node_modules/@fontsource/<family>` works as it is. `--fonts system` adds the sys
 
 ## Images
 
-The SDK draws `https://` and `data:image/...` URLs. Offline, the command also reads an image path relative to
-the document (`"url": "assets/photo.png"`, or `file://...`) and inlines the file as a `data:` URL. Network images
+The SDK draws `https://` and `data:image/...` URLs. Offline, the command also reads an image path (`"url":
+"images/photo.png"`, or `file://...`) and inlines the file as a `data:` URL. In a site the path is relative to the
+site's folder (the one with `site.json`) in every document, components included (`images/bowl.svg` from
+`components/ProductCard.json` too, never `../images/bowl.svg`), as a published site reads it: its files are served
+from the site's root. A document rendered on its own (no `site.json`) reads paths relative to its own folder. A
+path written from a component's folder is reported (`image_failed`) with the site-relative path to write. Network images
 are not fetched: they are reported (`image_network`) and stay blank. Material icons named without a codepoint
 (an app fetches their SVG) are drawn from the Material Icons font.
+
+Text inside an SVG (`<text>`) is drawn in the site's fonts, as a text node's is: a generic family (`sans-serif`,
+`serif`, `monospace`, `system-ui`) and text naming no family take the theme's `fontFamily`; a named family is
+used when the site declares it (or `--fonts` has it), else drawn in the theme's font and reported as
+`font_fallback` naming the SVG (`by "the text of images/map.svg"`). Declare the family in `site.json` to draw
+it as designed.
 
 ## How it runs, and how fast
 
@@ -166,7 +181,13 @@ real fonts. A run takes about 6 seconds once Flutter has compiled the harness (t
 takes 20 to 30 seconds), plus about half a second per screen and size.
 
 `render.sh` finds Flutter in `$FLUTTER` (the `flutter` command), else `$FLUTTER_ROOT/bin/flutter`, else `flutter`
-on the `PATH`, else `/opt/flutter/bin/flutter`. It resolves the SDK's dependencies itself (`flutter pub get`) when
+on the `PATH`, else the usual install places (`/opt/flutter`, `~/flutter`, `~/.tools/flutter`,
+`/workspace/.tools/flutter`, `/usr/local/flutter`, `~/development/flutter`). When it finds none it says so and exits
+2: set `FLUTTER=/path/to/flutter/bin/flutter` on the command (`FLUTTER=... tool/render/render.sh site/ --out shots/`).
+This command and the reference (codelessly_api's `docs/reference/`) are on the `master` branch of both repositories:
+a checkout without `tool/render` or `docs/reference` is an older branch (`git fetch origin master && git checkout
+master`). Every run first prints what it uses: `Rendering with codelessly_sdk <version> @ <commit> on <branch> at
+<path>, codelessly_api <version> @ <commit> from <path>, Flutter <path>`. It resolves the SDK's dependencies itself (`flutter pub get`) when
 they never were or the pubspec (or its overrides) changed since. `codelessly_api` comes from a sibling checkout
 when there is one (`../CodelesslyAPI` or `../codelessly_api` next to the SDK, or the directory `$CODELESSLY_API`
 names): the script writes a `pubspec_overrides.yaml` saying so on its first line, and removes it when the sibling

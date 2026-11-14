@@ -74,7 +74,8 @@ dark." (five `patch` ops).
 | `renderExceptions` | Flutter errors (overflows above 0.01 px included) during the replay: none in any run. |
 | `timeToFirstTextMs` | When the first text node shows (the first paint may be the card's surface). |
 | `opsRecoveredFromMalformed`, `jsonRepairs` | Ops read after the tool input stopped being valid JSON, and the repairs (`malformed_input`). |
-| `renderDiagnostics`, `finalDiagnostics` | `UiSession.renderDiagnostics` (`empty_button`, `low_contrast`, `missing_glyph` from the loaded fonts' cmaps) and `layoutDiagnostics` (`no_size`); with the errors and pending ids: what the tool result would send back. |
+| `renderDiagnostics`, `finalDiagnostics` | `UiSession.renderDiagnostics` (`empty_button`, `low_contrast`, `missing_glyph` from the loaded fonts' cmaps) and `shownDiagnostics` (`no_size`, and what the final frame shows wrong: `empty_view`, `list_empty`, `empty_label`, `expression_not_evaluated`, `text_no_color`, `component_empty`); with the errors and pending ids: what the tool result would send back. |
+| `shownDiagnostics` | `UiSession.shownDiagnostics()` after the last frame, in full (code, path, message): why a valid UI shows nothing. |
 | `worksWhenUsed` | For a brief with `interactions/<ui>.json`: the scripted interaction on the final UI (`src/interact.dart`): each tap or drag must change the views' variables, texts or layout, or send an event; `ok` when all do and the expected text appears. Scripts run in QuickJS (`tool/build_quickjs.sh`; `TrustProfile.agentApps`). |
 
 All runs (`tool/stream/out/summary.md`, written by `run_all.sh`):

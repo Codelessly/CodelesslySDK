@@ -1,0 +1,5 @@
+{
+  "schema": 3,
+  "pages": ["page.json"],
+  "theme": {"error": "clay", "colors": {"clay": "#FFAE553D"}}
+}

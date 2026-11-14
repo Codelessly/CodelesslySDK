@@ -1,0 +1,11 @@
+{
+  "schema": 3,
+  "id": "home",
+  "roots": ["home"],
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 200}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "col": {"type": "column", "children": ["regular", "bold"], "layout": {"width": {"fill": 390}, "height": {"fill": 200}, "padding": 10}, "props": {"spacing": 10}},
+    "regular": {"type": "text", "layout": {"width": 370, "height": 50}, "props": {"text": "Dinner menu", "style": {"fontFamily": "Roboto Slab", "fontSize": 36, "fontWeight": 400, "color": "#FF000000"}}},
+    "bold": {"type": "text", "layout": {"width": 370, "height": 50}, "props": {"text": "Dinner menu", "style": {"fontFamily": "Roboto Slab", "fontSize": 36, "fontWeight": 700, "color": "#FF000000"}}}
+  }
+}

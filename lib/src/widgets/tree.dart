@@ -13,7 +13,7 @@ import 'inputs.dart' show inputsRecipes;
 import 'registry.dart';
 
 /// The SDK's built-in widgets: every recipe beyond the core layout types.
-final RecipeCatalog builtInCatalog = RecipeCatalog(recipes: widgetRecipes, inputs: inputsRecipes.keys.toSet());
+final RecipeCatalog builtInCatalog = RecipeCatalog(recipes: widgetRecipes, inputs: {...inputsRecipes.keys, 'textField'});
 
 /// Owns the boxes built from one [NodeSource], building every widget type
 /// the SDK has.

@@ -47,7 +47,8 @@ fi
 mkdir -p "$out"
 
 # Flutter: $FLUTTER (the flutter command), else $FLUTTER_ROOT/bin/flutter,
-# else flutter on the PATH, else /opt/flutter/bin/flutter.
+# else flutter on the PATH, else the usual install places.
+places="${CODELESSLY_FLUTTER_PLACES:-/opt/flutter/bin/flutter $HOME/flutter/bin/flutter $HOME/.tools/flutter/bin/flutter /workspace/.tools/flutter/bin/flutter /usr/local/flutter/bin/flutter $HOME/development/flutter/bin/flutter /snap/bin/flutter}"
 flutter_bin=""
 if [ -n "${FLUTTER:-}" ]; then
   flutter_bin="$FLUTTER"
@@ -55,11 +56,24 @@ elif [ -n "${FLUTTER_ROOT:-}" ] && [ -x "$FLUTTER_ROOT/bin/flutter" ]; then
   flutter_bin="$FLUTTER_ROOT/bin/flutter"
 elif command -v flutter >/dev/null 2>&1; then
   flutter_bin="$(command -v flutter)"
-elif [ -x /opt/flutter/bin/flutter ]; then
-  flutter_bin=/opt/flutter/bin/flutter
+else
+  for f in $places; do
+    if [ -x "$f" ]; then flutter_bin="$f"; break; fi
+  done
 fi
 if [ -z "$flutter_bin" ] || [ ! -x "$flutter_bin" ]; then
-  echo "Flutter not found: set FLUTTER to the flutter command, or FLUTTER_ROOT to the Flutter SDK, or put flutter on the PATH." >&2
+  {
+    if [ -n "${FLUTTER:-}" ]; then
+      echo "Flutter not found: FLUTTER is set to $FLUTTER, which is not an executable flutter command."
+    else
+      echo "Flutter not found: FLUTTER is unset, FLUTTER_ROOT${FLUTTER_ROOT:+ ($FLUTTER_ROOT)} has no bin/flutter, the PATH has no flutter, and none of: $places."
+    fi
+    echo "Set FLUTTER to the flutter command on each run, for example:"
+    echo "  FLUTTER=/path/to/flutter/bin/flutter tool/render/render.sh <site> --out <dir>"
+    echo "(or FLUTTER_ROOT=/path/to/flutter, the Flutter SDK's folder). Find one with: ls -d /opt/flutter ~/flutter /workspace/.tools/flutter 2>/dev/null"
+    echo "This command and the reference it follows (codelessly_api's docs/reference/STARTER.md) are on the master branch of"
+    echo "CodelesslySDK and CodelesslyAPI: if tool/render or docs/reference is missing, run git fetch origin master && git checkout master in each."
+  } >&2
   exit 2
 fi
 
@@ -100,6 +114,26 @@ for d in "${CODELESSLY_API:-}" "$sdk/../CodelesslyAPI" "$sdk/../codelessly_api";
     break
   fi
 done
+# What this run uses, first: the SDK and API versions (and their commits).
+version_of() { sed -n 's/^version: *//p' "$1/pubspec.yaml" 2>/dev/null | head -1; }
+commit_of() {
+  local c
+  c="$(git -C "$1" rev-parse --short HEAD 2>/dev/null)" || return 0
+  printf ' @ %s%s' "$c" "$(git -C "$1" symbolic-ref -q --short HEAD 2>/dev/null | sed 's/^/ on /')"
+}
+api_used="$api"
+if [ -f "$overrides" ] && ! head -1 "$overrides" | grep -q "^$marker"; then
+  api_used="$(sed -n '/codelessly_api:/,/path:/s/^ *path: *//p' "$overrides" | head -1)"
+  case "$api_used" in ''|/*) ;; *) api_used="$(cd "$sdk" && cd "$api_used" 2>/dev/null && pwd)" ;; esac
+fi
+if [ -n "$api_used" ] && [ -f "$api_used/pubspec.yaml" ]; then
+  api_desc="codelessly_api $(version_of "$api_used")$(commit_of "$api_used") from $api_used"
+  [ -f "$api_used/docs/reference/STARTER.md" ] || api_desc="$api_desc (no docs/reference here: check out its master branch)"
+else
+  api_desc="codelessly_api published ($(sed -n '/^  codelessly_api:/,/version:/s/^ *version: *//p' "$sdk/pubspec.lock" 2>/dev/null | tr -d '"' | head -1))"
+fi
+echo "Rendering with codelessly_sdk $(version_of "$sdk")$(commit_of "$sdk") at $sdk, $api_desc, Flutter $flutter_bin." >&2
+
 if [ ! -f "$overrides" ] || head -1 "$overrides" | grep -q "^$marker"; then
   if [ -n "$api" ]; then
     want="$(printf '%s: codelessly_api from %s.\ndependency_overrides:\n  codelessly_api:\n    path: %s\n' "$marker" "$api" "$api")"

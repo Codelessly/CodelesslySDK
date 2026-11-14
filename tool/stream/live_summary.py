@@ -54,6 +54,10 @@ for summary_path in sorted(glob.glob(os.path.join(streams, '*.summary.json'))):
         'lookupMs': sum(l.get('ms', 0) for l in lookups), 'lookupTokens': sum(l.get('outputTokens', 0) for l in lookups),
         'retries': len(retries),
         'finalErrors': final.get('errors', []), 'finalLints': final.get('lints', []), 'finalPending': final.get('pending'),
+        # The cell's final UI is its last turn's (a retry's replay applies the turns before it): its frame, and what it
+        # shows wrong (UiSession.shownDiagnostics after the last frame). The generation's own frame is <cell>/.
+        'finalFrame': os.path.join(last[:-len('.jsonl')], '390x844', 'contact.png'),
+        'finalShown': sorted({f"{d.get('code')} {d.get('nodeId') or d.get('path')}" for d in m_last.get('shownDiagnostics', [])}),
         'scripts': final.get('scripts'), 'scriptChars': final.get('scriptChars'),
         'scriptErrors': [e for e in m_last.get('renderExceptions', []) if 'script' in json.dumps(e).lower()],
         'worksWhenUsed': None if used is None else used.get('ok'),
@@ -71,7 +75,8 @@ cols = [('cell', 'Cell'), ('designSystem', 'Design system'), ('dsUse', 'DS compo
         ('componentsNotRendered', 'Components not rendered'), ('systemPromptAndToolsTokens', 'Prompt+tools tok'), ('ttftMs', 'TTFT ms'), ('firstPaintMs', 'First paint ms'),
         ('firstTextMs', 'First text ms'), ('completeMs', 'Complete ms'), ('outputTokens', 'Out tok'), ('tokensPerSecond', 'tok/s'),
         ('ops', 'Ops'), ('opsApplied', 'Applied'), ('opsRejected', 'Rejected'), ('opsRecovered', 'Recovered'), ('lookups', 'Lookups'),
-        ('retries', 'Retries'), ('finalErrors', 'Final errors'), ('finalLints', 'Final lints'), ('scripts', 'Scripts'),
+        ('retries', 'Retries'), ('finalErrors', 'Final errors'), ('finalLints', 'Final lints'),
+        ('finalShown', 'Final UI shows wrong'), ('finalFrame', 'Final frame'), ('scripts', 'Scripts'),
         ('worksWhenUsed', 'Works when used'), ('followupTokens', 'Follow-up tok'), ('followupMs', 'Follow-up ms'),
         ('inputTokens', 'In tok (uncached)'), ('cacheRead', 'Cache read'), ('cacheWrite', 'Cache write')]
 
@@ -92,5 +97,8 @@ with open(os.path.join(outs, 'summary.md'), 'w') as f:
             'and its retries. "Works when used": the scripted interaction of tool/stream/interactions/<ui>.json on the final UI. '
             '"DS components / raw replaced": for a cell made with a design system, the final UI\'s nodes that call its components '
             'against its nodes of a core control type the design system replaces (a raw filledButton where its Button was meant); '
-            '"Components not rendered": calls the replay drew as something other than their definition.\n')
+            '"Components not rendered": calls the replay drew as something other than their definition. '
+            '"Final errors" and "Final lints" are the last turn\'s check (record.dart); "Final UI shows wrong" and "Final frame" '
+            'are the replay of that last turn (a retry applied over the turns before it): a cell\'s own directory shows its '
+            'first generation only, which a retry may have fixed.\n')
 print(open(os.path.join(outs, 'summary.md')).read())
