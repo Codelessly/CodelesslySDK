@@ -11,6 +11,9 @@
 // event_desktop_tip, ninefold_board, strata_tabs), and strata_tabs' document
 // and its diagram_0 node again for its stroke path (a custom paint path op),
 // were taken again with them; the others are as taken before catalogs.
+// After 30.1.0, step `states.target` resolved the state patches that named
+// their node `self` (event_desktop_bound, event_desktop_tip: 8 lines, taken
+// again).
 import 'dart:convert';
 import 'dart:io';
 
