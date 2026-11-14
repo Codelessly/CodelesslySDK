@@ -5,12 +5,23 @@
 // text input channel, the caret and selection by pointer and keys, the
 // clipboard, undo and redo, obscuring, maxLength, submitting, the focus and
 // editText actions, validation and screen readers.
-import 'package:codelessly_api/codelessly_api.dart' as api show InputDecoration, ThemeTokens;
+import 'dart:ui' show Tristate;
+
+import 'package:codelessly_api/codelessly_api.dart' as api show InputDecoration, ThemeTokens, WidgetState;
+import 'package:codelessly_sdk/codelessly_sdk.dart' hide InputDecoration;
+import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
+import 'package:codelessly_sdk/src/render/controls/editable.dart';
 import 'package:codelessly_sdk/src/render/controls/field_frame.dart';
+import 'package:codelessly_sdk/src/render/controls/text_field.dart';
 import 'package:codelessly_sdk/src/render/controls/tokens.dart';
+import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
+import 'package:flutter/gestures.dart' show PointerDeviceKind, kDoubleTapMinTime;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart' hide InputDecoration;
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support.dart';
 
 // --- the frame alone ------------------------------------------------------------------
 
@@ -115,7 +126,58 @@ const _ssuiPrimaryBorder = Color(0xFFE5E7EB);
 const _ssuiError = Color(0xFFDC2626);
 const _materialError = Color(0xFFB3261E);
 
+// --- the text field in a running tree -----------------------------------------------------
+
+RenderTextField _field(RenderTree tree, String id) => textFieldIn(tree.boxOf(id)!)!;
+
+Future<(NodeTree, RecordedInteractions)> _show(WidgetTester tester, Map<String, Map<String, Object?>> nodes,
+    {Map<String, Object?>? theme, bool dark = false, Object? fill}) async {
+  final (tree, recorded) = runningTree(columnDoc(nodes, fill: fill, height: 400),
+      theme: theme == null ? null : ThemeTokens.fromJson(theme), dark: dark);
+  addTearDown(tree.dispose);
+  await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
+  return (tree, recorded);
+}
+
+/// Focuses node [id]'s field with a tap at its text's start.
+Future<RenderTextField> _focus(WidgetTester tester, RenderTree tree, String id) async {
+  final f = _field(tree, id);
+  await tester.tapAt(f.localToGlobal(f.contentRect.centerLeft + const Offset(1, 0)));
+  await tester.pump();
+  expect(f.focusNode.hasFocus, isTrue);
+  return f;
+}
+
+Future<void> _key(WidgetTester tester, LogicalKeyboardKey key, {bool shift = false, bool control = false}) async {
+  if (shift) await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+  if (control) await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+  await tester.sendKeyEvent(key);
+  if (control) await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+  if (shift) await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+  await tester.pump();
+}
+
+/// A clipboard for the test's platform channel.
+String? _clipboard;
+
+void _mockClipboard(WidgetTester tester) {
+  _clipboard = null;
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+    if (call.method == 'Clipboard.setData') _clipboard = (call.arguments as Map)['text'] as String?;
+    if (call.method == 'Clipboard.getData') return _clipboard == null ? null : {'text': _clipboard};
+    if (call.method == 'Clipboard.hasStrings') return {'value': _clipboard != null};
+    return null;
+  });
+  addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+}
+
 void main() {
+  setUp(() => CaretBlink.enabled = false);
+  tearDown(() {
+    CaretBlink.enabled = true;
+    FieldUndoHistory.now = DateTime.now;
+  });
+
   group('the field frame', () {
     testWidgets('with nothing set it is SSUI\'s field: 240 × 28, filled white, a 1 px hairline of radius 7', (
       tester,
@@ -264,6 +326,353 @@ void main() {
       final collapsed = await _frame(tester, _decoration({'isCollapsed': true}));
       expect(collapsed.fillNow, isNull);
       expect(collapsed.currentBorder.kind, FieldBorderKind.none);
+    });
+  });
+
+  group('a text field', () {
+    testWidgets('with nothing set it is SSUI\'s field, a render object with no EditableText or Material', (tester) async {
+      final (tree, _) = await _show(tester, {'name': hugging('textField')});
+      expect(find.byType(EditableText), findsNothing);
+      final f = _field(tree, 'name');
+      expect(rectOf(tree, 'name').size, const Size(240, 28));
+      expect(f.currentBorder.side.color, const Color(0xFFE5E7EB));
+      expect(f.config.valueStyle.fontSize, 12);
+      expect(f.config.valueStyle.color, const Color(0xFF111827));
+      expect(f.decoration.valueStyle.fontFamily, isNull, reason: 'no theme: the platform\'s font, never a missing one');
+    });
+
+    testWidgets('a tap focuses it: the platform\'s text input attaches, the border turns SSUI\'s focus border', (tester) async {
+      final (tree, recorded) = await _show(tester, {'name': hugging('textField')});
+      final f = await _focus(tester, tree, 'name');
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+      expect(f.currentBorder.side, const BorderSide(color: Color(0x802563EB), width: 1.5));
+      expect(recorded.fired, ['name focusGained']);
+    });
+
+    testWidgets('typing reaches it through the text input channel and fires changed', (tester) async {
+      final (tree, recorded) = await _show(tester, {'name': hugging('textField')});
+      final f = await _focus(tester, tree, 'name');
+      tester.testTextInput.enterText('Ada');
+      await tester.pump();
+      expect(f.editor.text, 'Ada');
+      expect(f.editable.text!.toPlainText(), 'Ada');
+      expect(f.hintShown, isFalse);
+      expect(recorded.fired, ['name focusGained', 'name changed']);
+    });
+
+    testWidgets('IME composition: the composing range is underlined until it is committed', (tester) async {
+      final (tree, _) = await _show(tester, {'name': hugging('textField')});
+      final f = await _focus(tester, tree, 'name');
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+          text: 'ni', selection: TextSelection.collapsed(offset: 2), composing: TextRange(start: 0, end: 2)));
+      await tester.pump();
+      final span = f.editable.text! as TextSpan;
+      final composed = span.children!.cast<TextSpan>().firstWhere((c) => c.text == 'ni');
+      expect(composed.style?.decoration, TextDecoration.underline);
+      tester.testTextInput.updateEditingValue(
+          const TextEditingValue(text: '你', selection: TextSelection.collapsed(offset: 1)));
+      await tester.pump();
+      expect(f.editor.text, '你');
+      expect((f.editable.text! as TextSpan).children, isNull);
+    });
+
+    testWidgets('the keyboard moves the caret and edits: arrows, Shift, Home/End, Backspace, Delete, word moves',
+        (tester) async {
+      final (tree, _) = await _show(tester, {'name': hugging('textField', {'initialValue': 'hello brave world'})});
+      final f = await _focus(tester, tree, 'name');
+      await _key(tester, LogicalKeyboardKey.end);
+      expect(f.editor.selection, const TextSelection.collapsed(offset: 17));
+      await _key(tester, LogicalKeyboardKey.arrowLeft, control: true);
+      expect(f.editor.selection.baseOffset, 12, reason: 'a word back');
+      await _key(tester, LogicalKeyboardKey.arrowLeft, shift: true);
+      expect(f.editor.selection, const TextSelection(baseOffset: 12, extentOffset: 11));
+      await _key(tester, LogicalKeyboardKey.backspace);
+      expect(f.editor.text, 'hello braveworld');
+      await _key(tester, LogicalKeyboardKey.home);
+      expect(f.editor.selection.baseOffset, 0);
+      await _key(tester, LogicalKeyboardKey.delete);
+      expect(f.editor.text, 'ello braveworld');
+      await _key(tester, LogicalKeyboardKey.arrowRight);
+      await _key(tester, LogicalKeyboardKey.backspace, control: true);
+      expect(f.editor.text, 'llo braveworld', reason: 'Ctrl+Backspace deletes back to the word\'s start');
+      await _key(tester, LogicalKeyboardKey.space);
+      expect(f.editor.text, ' llo braveworld', reason: 'Space types, it doesn\'t press the field');
+    });
+
+    testWidgets('select all, copy, cut and paste through the clipboard', (tester) async {
+      _mockClipboard(tester);
+      final (tree, recorded) = await _show(tester, {'name': hugging('textField', {'initialValue': 'copy me'})});
+      final f = await _focus(tester, tree, 'name');
+      await _key(tester, LogicalKeyboardKey.keyA, control: true);
+      expect(f.editor.selection, const TextSelection(baseOffset: 0, extentOffset: 7));
+      await _key(tester, LogicalKeyboardKey.keyC, control: true);
+      expect(_clipboard, 'copy me');
+      await _key(tester, LogicalKeyboardKey.keyX, control: true);
+      expect(f.editor.text, '');
+      await _key(tester, LogicalKeyboardKey.keyV, control: true);
+      await _key(tester, LogicalKeyboardKey.keyV, control: true);
+      expect(f.editor.text, 'copy mecopy me');
+      expect(recorded.fired.where((e) => e == 'name changed'), hasLength(3));
+    });
+
+    testWidgets('undo and redo step through the edits', (tester) async {
+      var clock = DateTime(2026);
+      FieldUndoHistory.now = () => clock;
+      final (tree, _) = await _show(tester, {'name': hugging('textField')});
+      final f = await _focus(tester, tree, 'name');
+      tester.testTextInput.enterText('one');
+      await tester.pump();
+      clock = clock.add(const Duration(seconds: 2));
+      tester.testTextInput.enterText('one two');
+      await tester.pump();
+      await _key(tester, LogicalKeyboardKey.keyZ, control: true);
+      expect(f.editor.text, 'one');
+      await _key(tester, LogicalKeyboardKey.keyZ, control: true);
+      expect(f.editor.text, '');
+      await _key(tester, LogicalKeyboardKey.keyZ, control: true, shift: true);
+      expect(f.editor.text, 'one');
+      await _key(tester, LogicalKeyboardKey.keyY, control: true);
+      expect(f.editor.text, 'one two');
+    });
+
+    testWidgets('a double tap selects a word, a drag selects a range, Shift-click extends', (tester) async {
+      final (tree, _) = await _show(tester, {'name': hugging('textField', {'initialValue': 'alpha beta gamma'})});
+      final f = await _focus(tester, tree, 'name');
+      Offset at(int offset) {
+        final caret = f.editable.getLocalRectForCaret(TextPosition(offset: offset));
+        return f.editable.localToGlobal(caret.center);
+      }
+
+      await tester.pump(kDoubleTapMinTime * 10);
+      await tester.tapAt(at(8));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(at(8));
+      await tester.pump();
+      expect(f.editor.selection, const TextSelection(baseOffset: 6, extentOffset: 10));
+      await tester.pump(const Duration(seconds: 1));
+      final mouse = await tester.startGesture(at(0), kind: PointerDeviceKind.mouse);
+      await tester.pump();
+      await mouse.moveTo(at(3));
+      await mouse.moveTo(at(5));
+      await mouse.up();
+      await tester.pump();
+      expect(f.editor.selection, const TextSelection(baseOffset: 0, extentOffset: 5));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.tapAt(at(16), kind: PointerDeviceKind.mouse);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+      expect(f.editor.selection, const TextSelection(baseOffset: 0, extentOffset: 16));
+    });
+
+    testWidgets('Enter submits: submitted fires with the text and the field lets go of the focus', (tester) async {
+      final (tree, recorded) = await _show(tester, {'name': hugging('textField')});
+      final f = await _focus(tester, tree, 'name');
+      tester.testTextInput.enterText('done');
+      await tester.pump();
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pump();
+      expect(recorded.fired, ['name focusGained', 'name changed', 'name submitted', 'name focusLost', 'name editingComplete']);
+      expect(f.focusNode.hasFocus, isFalse);
+      expect(tester.testTextInput.hasAnyClients, isFalse);
+      // A hardware Enter does the same.
+      await _focus(tester, tree, 'name');
+      await _key(tester, LogicalKeyboardKey.enter);
+      expect(recorded.fired.where((e) => e == 'name submitted'), hasLength(2));
+    });
+
+    testWidgets('textInputAction next moves the focus to the next control', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'first': hugging('textField', {'textInputAction': 'next'}),
+        'second': hugging('textField'),
+      });
+      await _focus(tester, tree, 'first');
+      await tester.testTextInput.receiveAction(TextInputAction.next);
+      await tester.pump();
+      expect(_field(tree, 'second').focusNode.hasFocus, isTrue);
+    });
+
+    testWidgets('Tab from a render-object button reaches the field, and Tab leaves it', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'go': hugging('filledButton', {'label': 'Go'}),
+        'name': hugging('textField'),
+        'save': hugging('outlinedButton', {'label': 'Save'}),
+      });
+      await _key(tester, LogicalKeyboardKey.tab);
+      RenderButton button(String id) {
+        RenderButton? b;
+        void visit(RenderObject o) {
+          if (o is RenderButton) b ??= o;
+          o.visitChildren(visit);
+        }
+
+        visit(tree.boxOf(id)!);
+        return b!;
+      }
+
+      expect(button('go').focusNode.hasFocus, isTrue);
+      await _key(tester, LogicalKeyboardKey.tab);
+      expect(_field(tree, 'name').focusNode.hasFocus, isTrue);
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+      await _key(tester, LogicalKeyboardKey.tab);
+      expect(button('save').focusNode.hasFocus, isTrue);
+      expect(_field(tree, 'name').focusNode.hasFocus, isFalse);
+    });
+
+    testWidgets('obscureText hides the text from the screen and from screen readers', (tester) async {
+      final handle = tester.ensureSemantics();
+      final (tree, _) = await _show(tester, {'pw': hugging('textField', {'obscureText': true, 'initialValue': 'secret'})});
+      final f = _field(tree, 'pw');
+      expect(f.editable.obscureText, isTrue);
+      final data = f.debugSemantics!.getSemanticsData();
+      expect(data.value, '••••••');
+      expect(data.flagsCollection.isObscured, isTrue);
+      handle.dispose();
+    });
+
+    testWidgets('maxLength cuts what is typed', (tester) async {
+      final (tree, _) = await _show(tester, {'code': hugging('textField', {'maxLength': 4})});
+      final f = await _focus(tester, tree, 'code');
+      tester.testTextInput.enterText('123456');
+      await tester.pump();
+      expect(f.editor.text, '1234');
+    });
+
+    testWidgets('a long line scrolls to keep the caret in view', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'name': {'type': 'textField', 'layout': {'width': 120, 'height': 28}, 'props': {}},
+      });
+      final f = await _focus(tester, tree, 'name');
+      tester.testTextInput.enterText('a line of text far longer than the field it is typed into');
+      await tester.pump();
+      expect(f.scrollOffset, greaterThan(0));
+      await _key(tester, LogicalKeyboardKey.home);
+      expect(f.scrollOffset, 0);
+    });
+
+    testWidgets('multi-line: Enter types a new line and a hugging field grows with its lines', (tester) async {
+      final (tree, _) = await _show(tester, {'notes': hugging('textField', {'maxLines': 0})});
+      final f = await _focus(tester, tree, 'notes');
+      final one = rectOf(tree, 'notes').height;
+      expect(one, 28);
+      tester.testTextInput.enterText('first');
+      await tester.pump();
+      await _key(tester, LogicalKeyboardKey.enter);
+      await _key(tester, LogicalKeyboardKey.enter);
+      expect(f.editor.text, 'first\n\n');
+      expect(rectOf(tree, 'notes').height, greaterThan(one));
+    });
+
+    testWidgets('the label sits above the field, the error below it in the theme\'s red, in a running app', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'email': hugging('textField', {
+          'decoration': {'labelText': 'Email', 'errorText': 'Enter an email.'},
+        }),
+      });
+      final f = _field(tree, 'email');
+      expect(f.labels.map((l) => l.text), ['Email', 'Enter an email.']);
+      expect(f.boxRect.top, greaterThan(14));
+      expect(f.currentBorder.side.color, const Color(0xFFDC2626));
+    });
+
+    testWidgets('the focus and editText actions reach it through its handle', (tester) async {
+      final (tree, _) = await _show(tester, {'name': hugging('textField')});
+      final handle = TextFieldHandle.of(tree, 'name')!;
+      handle.focusNode.requestFocus();
+      await tester.pump();
+      expect(_field(tree, 'name').focusNode.hasFocus, isTrue);
+      expect(tester.testTextInput.hasAnyClients, isTrue);
+      handle.controller.value = const TextEditingValue(text: 'set', selection: TextSelection.collapsed(offset: 3));
+      await tester.pump();
+      expect(tester.testTextInput.editingState?['text'], 'set', reason: 'the platform hears of it');
+      handle.controller.clear();
+      expect(_field(tree, 'name').editor.text, '');
+      TextFieldHandle.unfocusAll();
+      await tester.pump();
+      expect(_field(tree, 'name').focusNode.hasFocus, isFalse);
+    });
+
+    testWidgets('a new bound value replaces the text, but an echo of what was typed does not', (tester) async {
+      final (tree, _) = await _show(tester, {'name': hugging('textField')});
+      final f = await _focus(tester, tree, 'name');
+      tester.testTextInput.enterText('ab');
+      await tester.pump();
+      tester.testTextInput.enterText('abc');
+      await tester.pump();
+      f.initialValue = 'ab'; // the first keystroke's value comes back late
+      expect(f.editor.text, 'abc');
+      f.initialValue = 'new';
+      expect(f.editor.text, 'new');
+      expect(f.editor.selection, const TextSelection.collapsed(offset: 3));
+    });
+
+    testWidgets('screen readers see a text field with its label, value and actions', (tester) async {
+      final handle = tester.ensureSemantics();
+      final (tree, _) = await _show(tester, {
+        'name': hugging('textField', {'initialValue': 'Ada', 'maxLength': 10, 'decoration': {'labelText': 'Name', 'hintText': 'Full name'}}),
+      });
+      final f = _field(tree, 'name');
+      var data = f.debugSemantics!.getSemanticsData();
+      expect(data.flagsCollection.isTextField, isTrue);
+      expect(data.label, 'Name');
+      expect(data.value, 'Ada');
+      expect(data.hint, 'Full name');
+      expect(data.maxValueLength, 10);
+      expect(data.currentValueLength, 3);
+      expect(data.flagsCollection.isEnabled, Tristate.isTrue);
+      expect(data.hasAction(SemanticsAction.tap), isTrue);
+      expect(data.hasAction(SemanticsAction.setText), isTrue);
+      tester.binding.renderViews.first.owner!.semanticsOwner!.performAction(f.debugSemantics!.id, SemanticsAction.tap);
+      await tester.pump();
+      expect(f.focusNode.hasFocus, isTrue);
+      data = f.debugSemantics!.getSemanticsData();
+      expect(data.flagsCollection.isFocused, Tristate.isTrue);
+      tester.binding.renderViews.first.owner!.semanticsOwner!.performAction(f.debugSemantics!.id, SemanticsAction.setText, 'Grace');
+      await tester.pump();
+      expect(f.editor.text, 'Grace');
+      handle.dispose();
+    });
+
+    testWidgets('disabled: half opacity, no focus by tap or Tab', (tester) async {
+      final (tree, _) = await _show(tester, {'name': hugging('textField', {'enabled': false})});
+      final f = _field(tree, 'name');
+      await tester.tapAt(centreOf(tree, 'name'));
+      await _key(tester, LogicalKeyboardKey.tab);
+      expect(f.focusNode.hasFocus, isFalse);
+      expect(f.paintedAlpha, 128);
+    });
+
+    testWidgets('on a design canvas it draws at rest: its initial value, no focus, no caret', (tester) async {
+      final tree = NodeTree(DocumentSource(LayoutDocument.fromJson(columnDoc({'name': hugging('textField', {'initialValue': 'Ada'})}))));
+      addTearDown(tree.dispose);
+      await tester.pumpWidget(NodeView(tree: tree, rootId: 'col'));
+      final f = _field(tree, 'name');
+      expect(f.interactive, isFalse);
+      expect(f.editor.text, 'Ada');
+      await tester.tapAt(centreOf(tree, 'name'));
+      await tester.pump();
+      expect(f.focusNode.hasFocus, isFalse);
+    });
+
+    testWidgets('a prefix icon with reactions fires its tap, without focusing the field', (tester) async {
+      final (tree, recorded) = await _show(tester, {
+        'search': hugging('textField', {
+          'decoration': {
+            'suffixIcon': {
+              'icon': 'close',
+              'actions': [
+                {'trigger': {'type': 'click'}, 'actions': []},
+              ],
+            },
+          },
+        }),
+      });
+      final f = _field(tree, 'search');
+      final icon = f.localToGlobal(Offset(f.boxRect.right - 8 - 7, f.boxRect.center.dy));
+      await tester.tapAt(icon);
+      await tester.pump();
+      expect(recorded.fired, ['search suffixIconTap']);
+      expect(f.focusNode.hasFocus, isFalse);
     });
   });
 }
