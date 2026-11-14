@@ -3,7 +3,7 @@
 // into it.
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart' show StringCharacters;
+import 'package:characters/characters.dart';
 
 import 'formula.dart';
 import 'formula_clock.dart';
