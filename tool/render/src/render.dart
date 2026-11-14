@@ -20,6 +20,7 @@ import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSource
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
+import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField, textFieldIn;
 
 import 'args.dart';
 import 'compare.dart';
@@ -1551,18 +1552,12 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     return false;
   }
 
-  // The text field ([EditableText]) inside node [id].
-  Element? fieldOf(RenderObject box) {
-    for (final e in find.byType(EditableText).evaluate()) {
-      final ro = e.renderObject;
-      if (ro != null && _isInside(ro, box)) return e;
-    }
-    return null;
-  }
+  // The text field (a [RenderTextField]) inside node [id].
+  RenderTextField? fieldOf(RenderObject box) => box is RenderBox ? textFieldIn(box) : null;
 
   // The text field [id] names: of two nodes sharing the id (a page's field
   // and a component's heading), the one with a field in it.
-  Element? fieldIn(String id) {
+  RenderTextField? fieldIn(String id) {
     final box = _locate(binding, id, prefer: (b) => fieldOf(b) != null).box;
     return box == null ? null : fieldOf(box);
   }
@@ -1636,13 +1631,14 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       }
       final box = _locate(binding, step.target, prefer: (b) => fieldOf(b) != null).box!;
       if (reachable(box) == null) await centerInView(box);
-      final finder = find.byElementPredicate((e) => identical(e, field));
-      await tester.showKeyboard(finder);
+      field.requestFocus();
       await tester.pump();
       if (verb == 'type') {
         field = fieldIn(step.target);
         if (field == null) return '--type ${step.target}: the text field went away when it was focused.';
-        await tester.enterText(find.byElementPredicate((e) => identical(e, field)), step.value ?? '');
+        if (!field.focusNode.hasFocus) field.requestFocus();
+        tester.testTextInput.enterText(step.value ?? '');
+        await tester.pump();
       }
       return null;
     case 'set':
@@ -1693,9 +1689,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       await tester.pump(Duration(milliseconds: ms));
       return null;
     case 'unfocus':
+      final field = RenderTextField.focused;
       final focused = FocusManager.instance.primaryFocus;
-      if (focused == null || focused.context == null) return null;
-      focused.unfocus();
+      if (field == null && (focused == null || focused.context == null)) return null;
+      field?.focusNode.unfocus();
+      if (focused?.context != null) focused!.unfocus();
       tester.testTextInput.hide();
       await tester.pump();
       return null;
@@ -1736,13 +1734,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 /// blur reactions run first, and nothing is left holding a field the step
 /// removes (a form a submit hides). A step on the field itself keeps it.
 Future<void> _unfocusFieldOutside(WidgetTester tester, NodeBox? target) async {
-  final focus = FocusManager.instance.primaryFocus;
-  if (focus == null || focus.context == null) return;
-  final field = find.byType(EditableText).evaluate().where((e) => (e.widget as EditableText).focusNode.hasFocus).firstOrNull;
+  final field = RenderTextField.focused;
   if (field == null) return;
-  final ro = field.renderObject;
-  if (target != null && ro != null && _isInside(ro, target)) return;
-  focus.unfocus();
+  if (target != null && _isInside(field, target)) return;
+  field.focusNode.unfocus();
   tester.testTextInput.hide();
   await tester.pump();
 }
