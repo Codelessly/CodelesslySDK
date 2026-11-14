@@ -201,7 +201,7 @@
      "fill": 320
     },
     "height": {
-     "hug": 80
+     "fill": 0
     },
     "padding": 12
    }
