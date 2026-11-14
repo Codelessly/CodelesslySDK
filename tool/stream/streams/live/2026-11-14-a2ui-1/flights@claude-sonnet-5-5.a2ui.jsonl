@@ -1,0 +1,118 @@
+{"meta":{"ui":"flights","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"flights\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"subtitle\",\"div1\",\"picker\",\"div2\",\"totalRow\",\"confirmBtn\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"London to Lisbon\"},{\"id\":\"subtitle\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Friday, one way. Pick a flight.\"},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"picker\",\"component\":\"ChoicePicker\",\"label\":\"Flight options\",\"variant\":\"mutuallyExclusive\",\"value\":{\"@path\":\"/selected\"},\"options\":[{\"label\":\"06:45 → 09:10 · TAP Air Portugal · Direct · 2h 25m · £89 · Cheapest\",\"value\":\"f1\"},{\"label\":\"10:30 → 12:55 · British Airways · Direct · 2h 25m · £124 · Best time\",\"value\":\"f2\"},{\"label\":\"15:20 → 19:05 · Iberia via Madrid · 1 stop · 4h 45m · £102\",\"value\":\"f3\"}]},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"totalRow\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"align\":\"center\",\"children\":[\"totalLabel\",\"totalValue\"]},{\"id\":\"totalLabel\",\"component\":\"Text\",\"text\":\"Total (1 passenger)\"},{\"id\":\"totalValue\",\"component\":\"Text\",\"text\":{\"@call\":\"formatCurrency\",\"args\":{\"value\":{\"@path\":\"/total\"},\"currency\":\"GBP\",\"decimals\":2}}},{\"id\":\"confirmBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"confirmText\",\"action\":{\"event\":{\"name\":\"confirm_flight\",\"userMessage\":\"Confirmed my flight selection\",\"context\":{\"selectedFlight\":{\"@path\":\"/selected\"},\"total\":{\"@path\":\"/total\"}}}}},{\"id\":\"confirmText\",\"component\":\"Text\",\"text\":\"Confirm flight\"}],\"dataModel\":{\"selected\":[\"f1\"],\"total\":89}}}","usage":{"input_tokens":21165,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":742,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":895,"totalMs":4786}}
+{"tMs":895,"delta":"{\"version\":\"1.0"}
+{"tMs":1217,"delta":"\",\"createSurface\":{\""}
+{"tMs":1217,"delta":"surfaceId\":\"fl"}
+{"tMs":1217,"delta":"ights\",\"catalogId\":\""}
+{"tMs":1217,"delta":"https://a2ui.org"}
+{"tMs":1217,"delta":"/specification/v1_0"}
+{"tMs":1217,"delta":"/catalogs/basic"}
+{"tMs":1217,"delta":"/catalog.json\",\"components"}
+{"tMs":1217,"delta":"\":[{\"id\":\"root"}
+{"tMs":1217,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":1218,"delta":"\":\"main"}
+{"tMs":1249,"delta":"\"},{\"id\":\"main"}
+{"tMs":1284,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1556,"delta":"\":[\"title"}
+{"tMs":1556,"delta":"\",\"sub"}
+{"tMs":1556,"delta":"title\",\"div"}
+{"tMs":1556,"delta":"1\",\"pic"}
+{"tMs":1556,"delta":"ker\",\"div2\",\"tot"}
+{"tMs":1556,"delta":"alRow\",\"confirmB"}
+{"tMs":1556,"delta":"tn\"]},{\"id"}
+{"tMs":1556,"delta":"\":\"title\",\"component\":\""}
+{"tMs":1579,"delta":"Text\",\"text\":\"London to"}
+{"tMs":1613,"delta":" Lisbon\"},{\""}
+{"tMs":1646,"delta":"id\":\"subtitle\",\""}
+{"tMs":1679,"delta":"component\":\"Text\",\"vari"}
+{"tMs":1897,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":1898,"delta":"\"Friday, one"}
+{"tMs":1898,"delta":" way"}
+{"tMs":1898,"delta":"."}
+{"tMs":1898,"delta":" Pick a"}
+{"tMs":1898,"delta":" flight.\"},{\"id\":"}
+{"tMs":1910,"delta":"\"div1\",\"component\":\""}
+{"tMs":1944,"delta":"Divider\"},{\"id\":"}
+{"tMs":1978,"delta":"\"picker\",\"component\":\""}
+{"tMs":2011,"delta":"ChoicePicker\",\"label"}
+{"tMs":2044,"delta":"\":\"Flight"}
+{"tMs":2078,"delta":" options\",\"variant\":\"mut"}
+{"tMs":2237,"delta":"uallyExclusive\",\""}
+{"tMs":2237,"delta":"value"}
+{"tMs":2237,"delta":"\":{"}
+{"tMs":2237,"delta":"\"@path\":\"/selected"}
+{"tMs":2243,"delta":"\"},\"options\":[{\""}
+{"tMs":2276,"delta":"label\":\"06"}
+{"tMs":2310,"delta":":45 →"}
+{"tMs":2343,"delta":" 09"}
+{"tMs":2375,"delta":":10 ·"}
+{"tMs":2408,"delta":" TAP"}
+{"tMs":2442,"delta":" Air"}
+{"tMs":2474,"delta":" Portugal · Direct ·"}
+{"tMs":2577,"delta":" 2h "}
+{"tMs":2577,"delta":"25m · £"}
+{"tMs":2577,"delta":"89"}
+{"tMs":2609,"delta":" · Cheapest\",\""}
+{"tMs":2640,"delta":"value\":\"f1"}
+{"tMs":2674,"delta":"\"},{\"label\":\"10"}
+{"tMs":2708,"delta":":30 → 12"}
+{"tMs":2740,"delta":":55 · British Airways"}
+{"tMs":2774,"delta":" · Direct · 2h"}
+{"tMs":2808,"delta":" 25m · £124"}
+{"tMs":2842,"delta":" · Best time\",\""}
+{"tMs":2875,"delta":"value\":\"f2\"},{"}
+{"tMs":2930,"delta":"\"label\":\"15"}
+{"tMs":2941,"delta":":20 → 19"}
+{"tMs":2973,"delta":":05"}
+{"tMs":3007,"delta":" ·"}
+{"tMs":3040,"delta":" Iberia via"}
+{"tMs":3073,"delta":" Madrid · 1 "}
+{"tMs":3107,"delta":"stop · 4"}
+{"tMs":3140,"delta":"h 45m · £102"}
+{"tMs":3175,"delta":"\",\"value\":\"f3\"}"}
+{"tMs":3207,"delta":"]},{\"id\":\"div"}
+{"tMs":3240,"delta":"2\",\"component\":\"Divider"}
+{"tMs":3274,"delta":"\"},{\"id\":\"tot"}
+{"tMs":3308,"delta":"alRow\",\"component\":\""}
+{"tMs":3342,"delta":"Row\",\"justify\":\"sp"}
+{"tMs":3375,"delta":"aceBetween\",\"align\":"}
+{"tMs":3408,"delta":"\"center\",\"children\":[\"total"}
+{"tMs":3442,"delta":"Label\",\"totalValue"}
+{"tMs":3475,"delta":"\"]},{\"id\":\""}
+{"tMs":3509,"delta":"totalLabel\",\"component\":"}
+{"tMs":3542,"delta":"\"Text\",\"text\":\""}
+{"tMs":3575,"delta":"Total ("}
+{"tMs":3609,"delta":"1 passenger)\"},"}
+{"tMs":3642,"delta":"{\"id\":\"totalVal"}
+{"tMs":3676,"delta":"ue\",\"component\":\"Text\",\""}
+{"tMs":3709,"delta":"text\":{\"@call\":\""}
+{"tMs":3742,"delta":"formatCurrency\",\"args"}
+{"tMs":3776,"delta":"\":{\"value\":{\"@"}
+{"tMs":3809,"delta":"path\":\"/total"}
+{"tMs":3843,"delta":"\"},\"currency\":\"G"}
+{"tMs":3876,"delta":"BP\",\"decimals\":2"}
+{"tMs":3910,"delta":"}}},{\"id\":\""}
+{"tMs":3943,"delta":"confirmBtn\",\"component"}
+{"tMs":3977,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":4011,"delta":"\"primary\",\"child\":\"conf"}
+{"tMs":4043,"delta":"irmText"}
+{"tMs":4077,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":4110,"delta":"\"name\":\"confirm_"}
+{"tMs":4144,"delta":"flight\",\"userMessage\":"}
+{"tMs":4176,"delta":"\""}
+{"tMs":4209,"delta":"Confirm"}
+{"tMs":4243,"delta":"ed my"}
+{"tMs":4276,"delta":" flight sel"}
+{"tMs":4309,"delta":"ection\",\"context\":{\"sel"}
+{"tMs":4342,"delta":"ect"}
+{"tMs":4376,"delta":"edFlight\":{\"@"}
+{"tMs":4409,"delta":"path\":\"/selected\"},"}
+{"tMs":4444,"delta":"\"total\":{\"@path\":"}
+{"tMs":4475,"delta":"\"/total\"}}}}"}
+{"tMs":4672,"delta":"},{\"id\":\"confir"}
+{"tMs":4672,"delta":"mText\",\"component\":\"Text"}
+{"tMs":4672,"delta":"\",\"text\":\"Confirm"}
+{"tMs":4672,"delta":" fl"}
+{"tMs":4672,"delta":"ight\"}],\"dataMod"}
+{"tMs":4675,"delta":"el\":{\"selected\":[\""}
+{"tMs":4709,"delta":"f1\"],\"total\":89"}
+{"tMs":4742,"delta":"}}}"}

@@ -1,0 +1,174 @@
+{"meta":{"ui":"question_flow","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"laptop\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"dataModel\":{\"step\":1,\"use\":[],\"second\":[],\"budget\":[],\"progress\":\"Step 1 of 3\"}}}\n{\"version\":\"1.0\",\"updateComponents\":{\"surfaceId\":\"laptop\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"prog\",\"div\",\"q1\",\"q2a\",\"q2b\",\"q2c\",\"q3\",\"res\",\"nav\"]},{\"id\":\"prog\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@path\":\"/progress\"}},{\"id\":\"div\",\"component\":\"Divider\"},{\"id\":\"q1\",\"component\":\"ChoicePicker\",\"label\":\"What will you mostly use it for?\",\"variant\":\"mutuallyExclusive\",\"options\":[{\"label\":\"Work & study\",\"value\":\"work\"},{\"label\":\"Gaming\",\"value\":\"gaming\"},{\"label\":\"Creative work\",\"value\":\"creative\"}],\"value\":{\"@path\":\"/use\"}},{\"id\":\"q2a\",\"component\":\"ChoicePicker\",\"label\":\"What matters most for work?\",\"options\":[{\"label\":\"Battery life & light weight\",\"value\":\"portable\"},{\"label\":\"Big screen & keyboard\",\"value\":\"desk\"}],\"value\":{\"@path\":\"/second\"}},{\"id\":\"q2b\",\"component\":\"ChoicePicker\",\"label\":\"What kind of games?\",\"options\":[{\"label\":\"Competitive / esports\",\"value\":\"esports\"},{\"label\":\"Big AAA titles\",\"value\":\"aaa\"}],\"value\":{\"@path\":\"/second\"}},{\"id\":\"q2c\",\"component\":\"ChoicePicker\",\"label\":\"What kind of creative work?\",\"options\":[{\"label\":\"Video & 3D\",\"value\":\"video\"},{\"label\":\"Photo & design\",\"value\":\"photo\"}],\"value\":{\"@path\":\"/second\"}},{\"id\":\"q3\",\"component\":\"ChoicePicker\",\"label\":\"What is your budget?\",\"options\":[{\"label\":\"Under $800\",\"value\":\"low\"},{\"label\":\"$800 – $1,500\",\"value\":\"mid\"},{\"label\":\"Over $1,500\",\"value\":\"high\"}],\"value\":{\"@path\":\"/budget\"}},{\"id\":\"res\",\"component\":\"Column\",\"children\":[\"resTitle\",\"resReason\"]},{\"id\":\"resTitle\",\"component\":\"Text\",\"text\":\"Your recommendation: Pick based on your answers\"},{\"id\":\"resReason\",\"component\":\"Text\",\"text\":\"Reasons are based on your use, focus and budget choices.\"},{\"id\":\"nav\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"back\",\"next\",\"restart\"]},{\"id\":\"backT\",\"component\":\"Text\",\"text\":\"Back\"},{\"id\":\"back\",\"component\":\"Button\",\"child\":\"backT\",\"action\":{\"event\":{\"name\":\"back\",\"context\":{\"step\":{\"@path\":\"/step\"}}}}},{\"id\":\"nextT\",\"component\":\"Text\",\"text\":\"Next\"},{\"id\":\"next\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"nextT\",\"action\":{\"event\":{\"name\":\"next\",\"context\":{\"step\":{\"@path\":\"/step\"},\"use\":{\"@path\":\"/use\"},\"second\":{\"@path\":\"/second\"},\"budget\":{\"@path\":\"/budget\"}}}}},{\"id\":\"restartT\",\"component\":\"Text\",\"text\":\"Start over\"},{\"id\":\"restart\",\"component\":\"Button\",\"child\":\"restartT\",\"action\":{\"event\":{\"name\":\"restart\"}}}]}}","usage":{"input_tokens":21154,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1140,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":814,"totalMs":6574}}
+{"tMs":814,"delta":"{\"version\":\"1.0"}
+{"tMs":1145,"delta":"\",\"createSurface\":{\""}
+{"tMs":1145,"delta":"surfaceId\":\"la"}
+{"tMs":1145,"delta":"ptop\",\"catalogId\":"}
+{"tMs":1145,"delta":"\"https://a2ui."}
+{"tMs":1146,"delta":"org/specification/v1_"}
+{"tMs":1146,"delta":"0/catalogs/bas"}
+{"tMs":1146,"delta":"ic/catalog.json\",\""}
+{"tMs":1146,"delta":"d"}
+{"tMs":1146,"delta":"ataModel\":{\"step\":"}
+{"tMs":1146,"delta":"1,\"use\":["}
+{"tMs":1165,"delta":"],\"second"}
+{"tMs":1198,"delta":"\":[],\"budget\":["}
+{"tMs":1491,"delta":"],\"progress\":\"Step"}
+{"tMs":1491,"delta":" 1 of 3"}
+{"tMs":1491,"delta":"\"}}}"}
+{"tMs":1491,"delta":"\n{\"version\":\"1.0"}
+{"tMs":1491,"delta":"\",\"updateComponents\":{"}
+{"tMs":1491,"delta":"\"surfaceId\":\""}
+{"tMs":1491,"delta":"laptop\",\"components\":[{"}
+{"tMs":1491,"delta":"\"id\":\"root\",\"component\":"}
+{"tMs":1499,"delta":"\"Card\",\"child\":\"col"}
+{"tMs":1532,"delta":"\"},"}
+{"tMs":1565,"delta":"{\"id\":\"col\",\"component"}
+{"tMs":1599,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":1838,"delta":"pr"}
+{"tMs":1838,"delta":"og\",\"div"}
+{"tMs":1838,"delta":"\",\""}
+{"tMs":1838,"delta":"q1\",\"q2a"}
+{"tMs":1838,"delta":"\",\"q2b\",\"q2"}
+{"tMs":1838,"delta":"c\",\"q3"}
+{"tMs":1838,"delta":"\",\"res"}
+{"tMs":1859,"delta":"\",\""}
+{"tMs":1893,"delta":"nav\"]},"}
+{"tMs":1927,"delta":"{\"id\":\"prog\",\""}
+{"tMs":1960,"delta":"component\":\"Text\",\"vari"}
+{"tMs":1994,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":2195,"delta":"{"}
+{"tMs":2195,"delta":"\"@path\":\"/prog"}
+{"tMs":2196,"delta":"ress\"}},{\"id\":"}
+{"tMs":2196,"delta":"\"div\",\"component\":\"Div"}
+{"tMs":2196,"delta":"ider\"},{\"id\":\""}
+{"tMs":2196,"delta":"q1\",\"component\":\"Ch"}
+{"tMs":2229,"delta":"oicePicker\",\"label\":"}
+{"tMs":2261,"delta":"\"What will"}
+{"tMs":2295,"delta":" you m"}
+{"tMs":2327,"delta":"ostly use it for?\",\"vari"}
+{"tMs":2360,"delta":"ant\":\"mutually"}
+{"tMs":2394,"delta":"Exclusive\",\"options\":["}
+{"tMs":2533,"delta":"{\"label\":\"Work &"}
+{"tMs":2533,"delta":" study"}
+{"tMs":2533,"delta":"\",\"value\":\"work\"},{"}
+{"tMs":2533,"delta":"\"label\":\"Gaming"}
+{"tMs":2561,"delta":"\",\"value\":\"gaming\""}
+{"tMs":2594,"delta":"},{\"label\":\"Cre"}
+{"tMs":2629,"delta":"ative work\",\"value\":\"creative"}
+{"tMs":2662,"delta":"\"}],\"value\":{\""}
+{"tMs":2695,"delta":"@path\":\"/use\"}"}
+{"tMs":2727,"delta":"},"}
+{"tMs":2761,"delta":"{\"id\":\"q2a"}
+{"tMs":2796,"delta":"\",\"component\":\"Choic"}
+{"tMs":2869,"delta":"ePicker\",\"label\":\"What"}
+{"tMs":2869,"delta":" matters most for"}
+{"tMs":2895,"delta":" work?\",\"options"}
+{"tMs":2928,"delta":"\":[{\"label\":\""}
+{"tMs":2961,"delta":"Battery life &"}
+{"tMs":2994,"delta":" light"}
+{"tMs":3027,"delta":" weight\",\"value\":\"port"}
+{"tMs":3061,"delta":"able\"},{\"label\":\""}
+{"tMs":3094,"delta":"Big screen & keybo"}
+{"tMs":3128,"delta":"ard\",\"value\":\"desk\""}
+{"tMs":3162,"delta":"}],\"value\":{\"@"}
+{"tMs":3195,"delta":"path\":\"/second\"}},"}
+{"tMs":3228,"delta":"{\"id\":\"q2b"}
+{"tMs":3262,"delta":"\",\"component\":\"Choic"}
+{"tMs":3295,"delta":"ePicker\",\"label\":\"What"}
+{"tMs":3328,"delta":" kind of games"}
+{"tMs":3361,"delta":"?"}
+{"tMs":3394,"delta":"\",\"options\":[{\"label\":"}
+{"tMs":3435,"delta":"\"Compet"}
+{"tMs":3460,"delta":"itive /"}
+{"tMs":3494,"delta":" esports\",\"value\":\"esports"}
+{"tMs":3527,"delta":"\"},{\"label\":\""}
+{"tMs":3560,"delta":"Big"}
+{"tMs":3594,"delta":" A"}
+{"tMs":3627,"delta":"AA titles\",\"value\":\""}
+{"tMs":3661,"delta":"aaa\"}],\"value"}
+{"tMs":3694,"delta":"\":{\"@path\":\"/"}
+{"tMs":3728,"delta":"second\"}},{\"id\":"}
+{"tMs":3761,"delta":"\"q2c\",\"component\":\""}
+{"tMs":3794,"delta":"ChoicePicker\",\""}
+{"tMs":3828,"delta":"label\":\"What kind of cre"}
+{"tMs":3862,"delta":"ative work?\",\"options\":[{"}
+{"tMs":3895,"delta":"\"label\":\"Video &"}
+{"tMs":3927,"delta":" "}
+{"tMs":3961,"delta":"3D\",\"value\":\"video\""}
+{"tMs":3994,"delta":"},{\"label\":\"Phot"}
+{"tMs":4027,"delta":"o"}
+{"tMs":4062,"delta":" & design\",\"value\":\"photo"}
+{"tMs":4094,"delta":"\"}],\"value\":{\""}
+{"tMs":4128,"delta":"@path\":\"/second\"}"}
+{"tMs":4165,"delta":"},{\"id\":\"q3"}
+{"tMs":4196,"delta":"\",\"component\":\"Choic"}
+{"tMs":4228,"delta":"ePicker\",\"label\":\"What"}
+{"tMs":4262,"delta":" is your budget?\",\"options\":"}
+{"tMs":4295,"delta":"[{\"label\":\"Under"}
+{"tMs":4328,"delta":" $800"}
+{"tMs":4362,"delta":"\",\"value\":\"low"}
+{"tMs":4395,"delta":"\"},{\"label\":\"$"}
+{"tMs":4430,"delta":"800 –"}
+{"tMs":4462,"delta":" $1,500"}
+{"tMs":4495,"delta":"\",\"value\":\"mid\"},"}
+{"tMs":4529,"delta":"{\"label\":\""}
+{"tMs":4561,"delta":"Over $1,500\",\"value\":"}
+{"tMs":4595,"delta":"\"high\"}],\"value\":"}
+{"tMs":4628,"delta":"{\"@path\":\"/bud"}
+{"tMs":4662,"delta":"get\"}},{\"id\":"}
+{"tMs":4695,"delta":"\"res\",\"component\":\"Column"}
+{"tMs":4729,"delta":"\",\"children\":[\"resT"}
+{"tMs":4762,"delta":"itle\",\"resReason"}
+{"tMs":4795,"delta":"\""}
+{"tMs":4829,"delta":"]},{\"id\":\"res"}
+{"tMs":4863,"delta":"Title\",\"component\":\""}
+{"tMs":4895,"delta":"Text\",\"text\":\"Your"}
+{"tMs":4929,"delta":" recommendation: P"}
+{"tMs":4962,"delta":"ick based"}
+{"tMs":4995,"delta":" on your answ"}
+{"tMs":5028,"delta":"ers\"},{\"id\":\""}
+{"tMs":5061,"delta":"resReason\",\"component\":\""}
+{"tMs":5095,"delta":"Text\",\"text\":\"Reas"}
+{"tMs":5128,"delta":"ons are"}
+{"tMs":5161,"delta":" based on your use"}
+{"tMs":5194,"delta":", foc"}
+{"tMs":5228,"delta":"us and budget choices.\"},"}
+{"tMs":5283,"delta":"{\"id\":\"nav\",\""}
+{"tMs":5294,"delta":"component\":\"Row\",\"just"}
+{"tMs":5328,"delta":"ify\":\"sp"}
+{"tMs":5364,"delta":"aceBetween\",\"children\":"}
+{"tMs":5394,"delta":"[\"back\",\"next\",\"restart\""}
+{"tMs":5429,"delta":"]},{\"id\":\"back"}
+{"tMs":5467,"delta":"T\",\"component\":\"Text"}
+{"tMs":5495,"delta":"\",\"text\":\"Back\"},"}
+{"tMs":5529,"delta":"{\"id\":\"back\",\"component"}
+{"tMs":5563,"delta":"\":\"Button\",\"child\":\""}
+{"tMs":5595,"delta":"backT\",\"action\":{\"event"}
+{"tMs":5628,"delta":"\":{\"name\":\"back\",\""}
+{"tMs":5661,"delta":"context\":{\"step\":{\""}
+{"tMs":5695,"delta":"@path\":\"/step\"}"}
+{"tMs":5728,"delta":"}}}},{\"id\":"}
+{"tMs":5761,"delta":"\"nextT\",\"component"}
+{"tMs":5795,"delta":"\":\"Text"}
+{"tMs":5828,"delta":"\",\"text\":\"Next\"},"}
+{"tMs":5862,"delta":"{\"id\":\"next\",\"component"}
+{"tMs":5895,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":5929,"delta":"\"primary\",\"child\":\"n"}
+{"tMs":5962,"delta":"extT\",\"action\":{\"event"}
+{"tMs":5995,"delta":"\":{\"name\":\"next\",\""}
+{"tMs":6029,"delta":"context\":{\"step"}
+{"tMs":6062,"delta":"\":{\"@path\":\"/"}
+{"tMs":6096,"delta":"step\"},\"use\":{\""}
+{"tMs":6129,"delta":"@path\":\"/use\"},"}
+{"tMs":6162,"delta":"\"second\":{\"@path\":"}
+{"tMs":6197,"delta":"\"/second\"},\"budget"}
+{"tMs":6229,"delta":"\":{\"@path\":\"/"}
+{"tMs":6263,"delta":"budget\"}}}}},"}
+{"tMs":6296,"delta":"{\"id\":\"restartT"}
+{"tMs":6330,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":6363,"delta":"\":\"Start over\"},{"}
+{"tMs":6398,"delta":"\"id\":\"restart\",\"component"}
+{"tMs":6432,"delta":"\":\"Button\",\"child\":\""}
+{"tMs":6466,"delta":"restartT\",\"action\":{\""}
+{"tMs":6497,"delta":"event\":{\"name\":\"rest"}
+{"tMs":6530,"delta":"art\"}}}]}}"}

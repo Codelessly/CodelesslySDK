@@ -1,0 +1,154 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"booking\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"layout\"},{\"id\":\"layout\",\"component\":\"Column\",\"children\":[\"title\",\"dayLabel\",\"dayPicker\",\"sizeLabel\",\"sizePicker\",\"timeLabel\",\"timePicker\",\"confirmBtn\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Book a table\",\"variant\":\"body\",\"weight\":1},{\"id\":\"dayLabel\",\"component\":\"Text\",\"text\":\"Day\",\"variant\":\"caption\"},{\"id\":\"dayPicker\",\"component\":\"ChoicePicker\",\"label\":\"Pick a day\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"options\":[{\"label\":\"Mon 13\",\"value\":\"mon\"},{\"label\":\"Tue 14\",\"value\":\"tue\"},{\"label\":\"Wed 15\",\"value\":\"wed\"},{\"label\":\"Thu 16\",\"value\":\"thu\"},{\"label\":\"Fri 17\",\"value\":\"fri\"},{\"label\":\"Sat 18\",\"value\":\"sat\"},{\"label\":\"Sun 19\",\"value\":\"sun\"}],\"value\":{\"@path\":\"/booking/day\"}},{\"id\":\"sizeLabel\",\"component\":\"Text\",\"text\":\"Party size\",\"variant\":\"caption\"},{\"id\":\"sizePicker\",\"component\":\"Slider\",\"label\":\"Guests (1 to 8)\",\"min\":1,\"max\":8,\"steps\":7,\"value\":{\"@path\":\"/booking/size\"}},{\"id\":\"timeLabel\",\"component\":\"Text\",\"text\":\"Time (full slots are unavailable for this day and size)\",\"variant\":\"caption\"},{\"id\":\"timePicker\",\"component\":\"ChoicePicker\",\"label\":\"Pick a time\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"options\":[{\"label\":\"12:00\",\"value\":\"12:00\"},{\"label\":\"12:30\",\"value\":\"12:30\"},{\"label\":\"13:00 (full)\",\"value\":\"13:00\"},{\"label\":\"18:00\",\"value\":\"18:00\"},{\"label\":\"18:30 (full)\",\"value\":\"18:30\"},{\"label\":\"19:00\",\"value\":\"19:00\"},{\"label\":\"20:30\",\"value\":\"20:30\"}],\"value\":{\"@path\":\"/booking/time\"}},{\"id\":\"confirmBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"confirmText\",\"action\":{\"event\":{\"name\":\"confirmBooking\",\"userMessage\":{\"@path\":\"/booking/summary\"},\"context\":{\"day\":{\"@path\":\"/booking/day\"},\"size\":{\"@path\":\"/booking/size\"},\"time\":{\"@path\":\"/booking/time\"}}}}},{\"id\":\"confirmText\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Confirm: ${/booking/day} for ${/booking/size} guests at ${/booking/time}\"}}}],\"dataModel\":{\"booking\":{\"day\":[\"mon\"],\"size\":2,\"time\":[\"19:00\"],\"summary\":\"Booking request\"}}}}","usage":{"input_tokens":21162,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1009,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":510,"totalMs":3615}}
+{"tMs":510,"delta":"{\"version\":\"1.0"}
+{"tMs":615,"delta":"\",\"createSurface\":{\""}
+{"tMs":615,"delta":"surfaceId\":\"boo"}
+{"tMs":615,"delta":"king\",\"catalogId\":\""}
+{"tMs":615,"delta":"https://a2ui.org"}
+{"tMs":615,"delta":"/specification/v1_0"}
+{"tMs":626,"delta":"/catalogs/basic"}
+{"tMs":646,"delta":"/catalog.json\",\"components"}
+{"tMs":667,"delta":"\":[{\"id\":\"root"}
+{"tMs":686,"delta":"\",\"component\":\"Card"}
+{"tMs":705,"delta":"\",\"child"}
+{"tMs":726,"delta":"\":\"lay"}
+{"tMs":745,"delta":"out\"},{\"id\":\""}
+{"tMs":765,"delta":"layout\",\"component\":\"Column"}
+{"tMs":785,"delta":"\",\"children\":[\"title"}
+{"tMs":805,"delta":"\",\"dayL"}
+{"tMs":825,"delta":"abel\",\"d"}
+{"tMs":845,"delta":"ayP"}
+{"tMs":865,"delta":"icker\",\"sizeLab"}
+{"tMs":886,"delta":"el\",\"sizePicker\",\""}
+{"tMs":906,"delta":"timeLabel\",\"timeP"}
+{"tMs":927,"delta":"icker\",\"confirmBt"}
+{"tMs":947,"delta":"n\""}
+{"tMs":968,"delta":"]},{\"id\":\"title"}
+{"tMs":988,"delta":"\",\"component\":\"Text"}
+{"tMs":1008,"delta":"\",\"text\":\"Book"}
+{"tMs":1029,"delta":" a table\",\"variant\":\"body"}
+{"tMs":1048,"delta":"\",\""}
+{"tMs":1068,"delta":"weight\":1"}
+{"tMs":1093,"delta":"},{\"id\":\"day"}
+{"tMs":1110,"delta":"Label\",\"component\":\""}
+{"tMs":1131,"delta":"Text\",\"text\":\"Day\",\""}
+{"tMs":1151,"delta":"variant\":\"caption\""}
+{"tMs":1171,"delta":"},{\"id\":\"day"}
+{"tMs":1192,"delta":"Picker\",\"component\":\""}
+{"tMs":1213,"delta":"ChoicePicker\",\"label"}
+{"tMs":1233,"delta":"\":\"P"}
+{"tMs":1253,"delta":"ick a day\",\"variant\":\""}
+{"tMs":1274,"delta":"mutuallyExclus"}
+{"tMs":1294,"delta":"ive\",\"displ"}
+{"tMs":1314,"delta":"ayStyle\":\"chips"}
+{"tMs":1335,"delta":"\",\"options\":[{\"label\":"}
+{"tMs":1355,"delta":"\""}
+{"tMs":1375,"delta":"Mon "}
+{"tMs":1395,"delta":"13"}
+{"tMs":1415,"delta":"\",\"value\":\"m"}
+{"tMs":1436,"delta":"on\"},{\"label\":\""}
+{"tMs":1457,"delta":"Tue 14\",\"value\":"}
+{"tMs":1477,"delta":"\"tue\"},{\"label"}
+{"tMs":1497,"delta":"\":\"Wed 15\",\""}
+{"tMs":1518,"delta":"value\":\"wed\"},{"}
+{"tMs":1539,"delta":"\"label\":\"Thu "}
+{"tMs":1559,"delta":"16\",\"value\":\"thu\""}
+{"tMs":1580,"delta":"},{\"label\":\"F"}
+{"tMs":1600,"delta":"ri 17\",\"value\":\"f"}
+{"tMs":1621,"delta":"ri\"},{\"label\":\""}
+{"tMs":1644,"delta":"Sat 18\",\"value\":"}
+{"tMs":1662,"delta":"\"sat\"},{\"label"}
+{"tMs":1682,"delta":"\":\"Sun 19\",\""}
+{"tMs":1703,"delta":"value\":\"sun\"}],"}
+{"tMs":1723,"delta":"\"value\":{\"@"}
+{"tMs":1744,"delta":"path\":\"/boo"}
+{"tMs":1763,"delta":"king/day\"}},{"}
+{"tMs":1785,"delta":"\"id\":\"sizeL"}
+{"tMs":1805,"delta":"abel\",\"component\":\"Text"}
+{"tMs":1825,"delta":"\",\"text\":\"Party size\",\""}
+{"tMs":1845,"delta":"variant\":\"caption\"},"}
+{"tMs":1866,"delta":"{\"id\":\"sizeP"}
+{"tMs":1886,"delta":"icker\",\"component\":\""}
+{"tMs":1910,"delta":"Slider\",\"label\":\"Gu"}
+{"tMs":1927,"delta":"ests (1 "}
+{"tMs":1949,"delta":"to 8)\",\"min\":1"}
+{"tMs":1970,"delta":",\"max\":8,\"ste"}
+{"tMs":1988,"delta":"ps\":7"}
+{"tMs":2009,"delta":",\"value\":{\"@path"}
+{"tMs":2030,"delta":"\":\"/booking/size\""}
+{"tMs":2050,"delta":"}},"}
+{"tMs":2070,"delta":"{\"id\":\"timeL"}
+{"tMs":2090,"delta":"abel\",\"component\":\"Text"}
+{"tMs":2111,"delta":"\",\"text\":\"Time ("}
+{"tMs":2131,"delta":"full"}
+{"tMs":2152,"delta":" slots are"}
+{"tMs":2172,"delta":" unavailable for"}
+{"tMs":2192,"delta":" this day"}
+{"tMs":2213,"delta":" and size"}
+{"tMs":2232,"delta":")\",\"variant\":\"caption"}
+{"tMs":2253,"delta":"\"},{\"id\":\"tim"}
+{"tMs":2273,"delta":"ePicker\",\"component\":\""}
+{"tMs":2294,"delta":"ChoicePicker\",\"label"}
+{"tMs":2314,"delta":"\":\"Pick a time\",\""}
+{"tMs":2336,"delta":"variant\":\"mutuall"}
+{"tMs":2355,"delta":"yExclusive\",\"display"}
+{"tMs":2376,"delta":"Style\":\"chips\",\""}
+{"tMs":2397,"delta":"options\":[{\"label\":\""}
+{"tMs":2417,"delta":"12"}
+{"tMs":2437,"delta":":00\",\"value\":\"12:"}
+{"tMs":2458,"delta":"00\"},{\"label\":\""}
+{"tMs":2478,"delta":"12:30\",\"value\":\"12"}
+{"tMs":2498,"delta":":30\"},{\"label\":"}
+{"tMs":2519,"delta":"\"13:00 "}
+{"tMs":2539,"delta":"(full)\",\"value\":\"13"}
+{"tMs":2560,"delta":":00\""}
+{"tMs":2580,"delta":"},{\"label\":\"18"}
+{"tMs":2600,"delta":":00\",\"value\":\"18:"}
+{"tMs":2621,"delta":"00\"},{\"label\":\""}
+{"tMs":2641,"delta":"18:30 "}
+{"tMs":2676,"delta":"(full)\",\"value\":\"18"}
+{"tMs":2692,"delta":":30\"},{\"label\":"}
+{"tMs":2709,"delta":"\"19:00\",\"value\":\""}
+{"tMs":2735,"delta":"19:00\"},{\"label"}
+{"tMs":2749,"delta":"\":\"20:30"}
+{"tMs":2764,"delta":"\",\"value\":\"20:30\""}
+{"tMs":2787,"delta":"}],\"value\":{\"@"}
+{"tMs":2805,"delta":"path\":\"/booking/time"}
+{"tMs":2825,"delta":"\"}},{\"id\":\""}
+{"tMs":2846,"delta":"confirmBtn\",\"component"}
+{"tMs":2866,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":2886,"delta":"\"primary\",\"child\":\""}
+{"tMs":2907,"delta":"confirmText\",\"action\":{"}
+{"tMs":2928,"delta":"\"event\":{\"name\":\""}
+{"tMs":2948,"delta":"confirm"}
+{"tMs":2968,"delta":"Booking\",\"userMessage"}
+{"tMs":2989,"delta":"\":{"}
+{"tMs":3009,"delta":"\"@"}
+{"tMs":3029,"delta":"path\":\"/booking/summ"}
+{"tMs":3050,"delta":"ary\"},\"context\":{\""}
+{"tMs":3070,"delta":"day\":{\"@path\":\""}
+{"tMs":3091,"delta":"/booking/day\"},\""}
+{"tMs":3111,"delta":"size\":{\"@path\":\""}
+{"tMs":3132,"delta":"/booking/size\"},\""}
+{"tMs":3153,"delta":"time\":{\"@path\":\""}
+{"tMs":3173,"delta":"/booking/time\"}}"}
+{"tMs":3193,"delta":"}}},"}
+{"tMs":3214,"delta":"{\"id\":\"confirm"}
+{"tMs":3234,"delta":"Text\",\"component\":\"Text"}
+{"tMs":3254,"delta":"\",\"text\":{"}
+{"tMs":3275,"delta":"\"@call"}
+{"tMs":3295,"delta":"\":\"formatString\",\"args"}
+{"tMs":3315,"delta":"\":{\"value\":\"Conf"}
+{"tMs":3335,"delta":"irm:"}
+{"tMs":3356,"delta":" ${/"}
+{"tMs":3376,"delta":"booking/day} for"}
+{"tMs":3396,"delta":" ${/booking/size}"}
+{"tMs":3417,"delta":" guests at ${/booking"}
+{"tMs":3438,"delta":"/time}\"}}}],"}
+{"tMs":3458,"delta":"\"dataModel\":{\""}
+{"tMs":3478,"delta":"booking\":{\"day\":[\""}
+{"tMs":3499,"delta":"mon\"],\"size\":2"}
+{"tMs":3519,"delta":",\"time\":[\""}
+{"tMs":3539,"delta":"19"}
+{"tMs":3560,"delta":":00\"],\"summary\":"}
+{"tMs":3581,"delta":"\"Booking request"}
+{"tMs":3600,"delta":"\"}}}}"}

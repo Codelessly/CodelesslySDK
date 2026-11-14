@@ -1,0 +1,99 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"laptop\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"progress\",\"q\",\"nav\"],\"align\":\"stretch\"},{\"id\":\"progress\",\"component\":\"Text\",\"text\":\"Step 1 of 3 · Use case\",\"variant\":\"caption\"},{\"id\":\"q\",\"component\":\"ChoicePicker\",\"label\":\"What will you mainly use it for?\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"checkbox\",\"options\":[{\"label\":\"Everyday browsing & email\",\"value\":\"everyday\"},{\"label\":\"Schoolwork & writing\",\"value\":\"school\"},{\"label\":\"Creative work (photo/video)\",\"value\":\"creative\"},{\"label\":\"Gaming\",\"value\":\"gaming\"},{\"label\":\"Programming & development\",\"value\":\"dev\"}],\"value\":{\"@path\":\"/answers/useCase\"}},\"nav\":{\"id\":\"nav\",\"component\":\"Row\",\"children\":[\"back\",\"next\"],\"justify\":\"spaceBetween\"},\"back\":{\"id\":\"back\",\"component\":\"Button\",\"child\":\"backLbl\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"goBack\"}}},\"backLbl\":{\"id\":\"backLbl\",\"component\":\"Text\",\"text\":\"Back\"},\"next\":{\"id\":\"next\",\"component\":\"Button\",\"child\":\"nextLbl\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"nextStep\",\"context\":{\"useCase\":{\"@path\":\"/answers/useCase\"}}}}},\"nextLbl\":{\"id\":\"nextLbl\",\"component\":\"Text\",\"text\":\"Next\"}}],\"dataModel\":{\"answers\":{\"useCase\":[]}}}}","usage":{"input_tokens":21153,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":594,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":595,"totalMs":2604}}
+{"tMs":595,"delta":"{\"version"}
+{"tMs":670,"delta":"\":\"1.0\",\"createS"}
+{"tMs":670,"delta":"urface\":{\"surfa"}
+{"tMs":670,"delta":"ceId\":\"laptop\",\""}
+{"tMs":678,"delta":"catalogId\":\"https://"}
+{"tMs":699,"delta":"a2ui.org/spec"}
+{"tMs":719,"delta":"ification/v1_0/cat"}
+{"tMs":739,"delta":"alogs/basic/cat"}
+{"tMs":761,"delta":"alog.json\",\"components\":["}
+{"tMs":780,"delta":"{\"id\":\"root\",\"component"}
+{"tMs":800,"delta":"\":\"Card\",\"child\":\""}
+{"tMs":821,"delta":"col\"},{\"id\":\""}
+{"tMs":842,"delta":"col\",\"component\":\"Column\",\""}
+{"tMs":862,"delta":"children\":[\"progress\",\"q"}
+{"tMs":882,"delta":"\",\""}
+{"tMs":902,"delta":"n"}
+{"tMs":925,"delta":"av\""}
+{"tMs":942,"delta":"],\"align"}
+{"tMs":962,"delta":"\":\"st"}
+{"tMs":986,"delta":"retch\"},{\"id\":"}
+{"tMs":1003,"delta":"\"progress\",\"component\":\""}
+{"tMs":1024,"delta":"Text\",\"text\":\"Step "}
+{"tMs":1044,"delta":"1 of 3"}
+{"tMs":1065,"delta":" · Use"}
+{"tMs":1085,"delta":" case"}
+{"tMs":1105,"delta":"\",\"variant\":\"ca"}
+{"tMs":1126,"delta":"ption\"},{\"id\":\""}
+{"tMs":1147,"delta":"q\",\"component\":\""}
+{"tMs":1166,"delta":"ChoicePicker\",\"label"}
+{"tMs":1187,"delta":"\":\"What"}
+{"tMs":1210,"delta":" will"}
+{"tMs":1227,"delta":" you m"}
+{"tMs":1248,"delta":"ain"}
+{"tMs":1268,"delta":"ly use it for?\",\"variant"}
+{"tMs":1288,"delta":"\":\"mutuallyEx"}
+{"tMs":1309,"delta":"clusive\",\"displ"}
+{"tMs":1329,"delta":"ayStyle\":\"chec"}
+{"tMs":1350,"delta":"kbox\",\"options\":[{"}
+{"tMs":1370,"delta":"\"label\":\"Ever"}
+{"tMs":1390,"delta":"yday brow"}
+{"tMs":1411,"delta":"sing & email"}
+{"tMs":1431,"delta":"\",\"value\":\"ever"}
+{"tMs":1451,"delta":"yday\"},{\"label\":"}
+{"tMs":1472,"delta":"\"Sch"}
+{"tMs":1492,"delta":"oolwork &"}
+{"tMs":1513,"delta":" writing\",\"value\":\"school"}
+{"tMs":1536,"delta":"\"},{\"label\":\""}
+{"tMs":1554,"delta":"Cre"}
+{"tMs":1573,"delta":"ative work"}
+{"tMs":1594,"delta":" (photo"}
+{"tMs":1614,"delta":"/video)\",\"value\":\"cre"}
+{"tMs":1635,"delta":"ative\"},{\"label\":\""}
+{"tMs":1656,"delta":"Gaming\",\""}
+{"tMs":1676,"delta":"value\":\"gaming\"},"}
+{"tMs":1696,"delta":"{\"label\":\"Program"}
+{"tMs":1718,"delta":"ming & development"}
+{"tMs":1737,"delta":"\",\"value\":\"d"}
+{"tMs":1757,"delta":"ev\"}],\"value\":{"}
+{"tMs":1777,"delta":"\"@path\":\"/answers"}
+{"tMs":1798,"delta":"/use"}
+{"tMs":1819,"delta":"Case\"}},\"nav"}
+{"tMs":1840,"delta":"\":{"}
+{"tMs":1863,"delta":"\"id\":\"nav\",\"component"}
+{"tMs":1881,"delta":"\":\"Row\",\"children\":[\""}
+{"tMs":1900,"delta":"back\",\"next\"],\"justify"}
+{"tMs":1921,"delta":"\":\"sp"}
+{"tMs":1941,"delta":"aceBetween\"},\""}
+{"tMs":1962,"delta":"back\":{\"id\":\"back"}
+{"tMs":1984,"delta":"\",\"component\":\"Button\",\"child"}
+{"tMs":2003,"delta":"\":\"back"}
+{"tMs":2022,"delta":"L"}
+{"tMs":2043,"delta":"b"}
+{"tMs":2065,"delta":"l\",\"variant\":\"bor"}
+{"tMs":2084,"delta":"derless\",\"action\":{\"event"}
+{"tMs":2104,"delta":"\":{\"name\":\"go"}
+{"tMs":2125,"delta":"Back\"}}},\"back"}
+{"tMs":2150,"delta":"Lbl\":{\"id\":"}
+{"tMs":2174,"delta":"\"backLbl\",\"component\":"}
+{"tMs":2186,"delta":"\"Text\",\"text\":\""}
+{"tMs":2236,"delta":"Back\"},\"next\":{\""}
+{"tMs":2237,"delta":"id\":\"next\",\"component\":\""}
+{"tMs":2248,"delta":"Button\",\"child\":\"next"}
+{"tMs":2269,"delta":"Lbl\",\"variant\":\""}
+{"tMs":2289,"delta":"primary\",\"action\":{\"event"}
+{"tMs":2309,"delta":"\":{\"name\":\"next"}
+{"tMs":2329,"delta":"Step\",\""}
+{"tMs":2352,"delta":"context\":{\"useCase\":"}
+{"tMs":2371,"delta":"{\"@path\":\"/answ"}
+{"tMs":2390,"delta":"ers/useCase\"}}"}
+{"tMs":2411,"delta":"}}},"}
+{"tMs":2432,"delta":"\"nextLbl\":{"}
+{"tMs":2452,"delta":"\"id\":\"nextLb"}
+{"tMs":2473,"delta":"l\",\"component\":\"Text\",\""}
+{"tMs":2493,"delta":"text\":\"Next\"}}"}
+{"tMs":2513,"delta":"],\"dataModel\":{"}
+{"tMs":2534,"delta":"\"answers\":{\"useC"}
+{"tMs":2554,"delta":"ase\":["}
+{"tMs":2575,"delta":"]}}}}"}

@@ -1,0 +1,93 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "now_temperature",
+    "type": "text",
+    "value": "18°C"
+   },
+   {
+    "name": "now_conditions",
+    "type": "text",
+    "value": "Partly cloudy"
+   },
+   {
+    "name": "now_highLow",
+    "type": "text",
+    "value": "H 21°  L 14°"
+   },
+   {
+    "name": "hourly",
+    "type": "list",
+    "value": [
+     {
+      "time": "14:00",
+      "temp": "19°"
+     },
+     {
+      "time": "15:00",
+      "temp": "20°"
+     },
+     {
+      "time": "16:00",
+      "temp": "20°"
+     },
+     {
+      "time": "17:00",
+      "temp": "19°"
+     },
+     {
+      "time": "18:00",
+      "temp": "18°"
+     }
+    ]
+   },
+   {
+    "name": "days",
+    "type": "list",
+    "value": [
+     {
+      "name": "Tomorrow",
+      "low": 14,
+      "high": 21,
+      "conditions": "Sunny"
+     },
+     {
+      "name": "Wed",
+      "low": 13,
+      "high": 19,
+      "conditions": "Light rain"
+     },
+     {
+      "name": "Thu",
+      "low": 12,
+      "high": 18,
+      "conditions": "Showers"
+     }
+    ]
+   }
+  ]
+ }
+}

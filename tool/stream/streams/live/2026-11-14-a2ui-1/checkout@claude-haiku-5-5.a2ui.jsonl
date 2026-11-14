@@ -1,0 +1,337 @@
+{"meta":{"ui":"checkout","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Build a small checkout in three steps: my cart (three items with quantities), a shipping form (name, address, city, postcode, email, all checked, with messages under the fields), then a payment summary with a choice of standard or express delivery changing the total, and a confirmation screen with an order number. I can go back a step without losing what I typed.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"checkout\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"sendDataModel\":true,\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"page\"},{\"id\":\"page\",\"component\":\"Column\",\"children\":[\"stepTitle\",\"cartStep\",\"shipStep\",\"payStep\",\"confirmStep\",\"navRow\"]},{\"id\":\"stepTitle\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Step ${/step} of 3\\\")}\",\"variant\":\"caption\"},{\"id\":\"cartStep\",\"component\":\"Column\",\"children\":[\"cartHeading\",\"item1Row\",\"item2Row\",\"item3Row\",\"cartTotalText\",\"cartNext\"]},{\"id\":\"cartHeading\",\"component\":\"Text\",\"text\":\"My cart\"},{\"id\":\"item1Row\",\"component\":\"Row\",\"children\":[\"item1Name\",\"item1Qty\"],\"justify\":\"spaceBetween\"},{\"id\":\"item1Name\",\"component\":\"Text\",\"text\":\"Wireless headphones\"},{\"id\":\"item1Qty\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Qty ${/cart/0/qty}\\\")}\"},{\"id\":\"item2Row\",\"component\":\"Row\",\"children\":[\"item2Name\",\"item2Qty\"],\"justify\":\"spaceBetween\"},{\"id\":\"item2Name\",\"component\":\"Text\",\"text\":\"USB-C cable\"},{\"id\":\"item2Qty\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Qty ${/cart/1/qty}\\\")}\"},{\"id\":\"item3Row\",\"component\":\"Row\",\"children\":[\"item3Name\",\"item3Qty\"],\"justify\":\"spaceBetween\"},{\"id\":\"item3Name\",\"component\":\"Text\",\"text\":\"Phone case\"},{\"id\":\"item3Qty\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Qty ${/cart/2/qty}\\\")}\"},{\"id\":\"cartTotalText\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Subtotal ${formatCurrency(value:${/subtotal}, currency:'USD')}\\\")}\"},{\"id\":\"cartNext\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"cartNextLabel\",\"action\":{\"event\":{\"name\":\"goToShipping\"}}},{\"id\":\"cartNextLabel\",\"component\":\"Text\",\"text\":\"Continue to shipping\"},{\"id\":\"shipStep\",\"component\":\"Column\",\"children\":[\"shipHeading\",\"nameField\",\"addressField\",\"cityField\",\"postcodeField\",\"emailField\",\"shipButtons\"]},{\"id\":\"shipHeading\",\"component\":\"Text\",\"text\":\"Shipping details\"},{\"id\":\"nameField\",\"component\":\"TextField\",\"label\":\"Full name\",\"value\":{\"@path\":\"/shipping/name\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/name\"}}},\"message\":\"Name is required.\"}]},{\"id\":\"addressField\",\"component\":\"TextField\",\"label\":\"Address\",\"value\":{\"@path\":\"/shipping/address\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/address\"}}},\"message\":\"Address is required.\"}]},{\"id\":\"cityField\",\"component\":\"TextField\",\"label\":\"City\",\"value\":{\"@path\":\"/shipping/city\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/city\"}}},\"message\":\"City is required.\"}]},{\"id\":\"postcodeField\",\"component\":\"TextField\",\"label\":\"Postcode\",\"value\":{\"@path\":\"/shipping/postcode\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/postcode\"}}},\"message\":\"Postcode is required.\"}]},{\"id\":\"emailField\",\"component\":\"TextField\",\"label\":\"Email\",\"value\":{\"@path\":\"/shipping/email\"},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/shipping/email\"}}},\"message\":\"Email is required.\"},{\"condition\":{\"@call\":\"email\",\"args\":{\"value\":{\"@path\":\"/shipping/email\"}}},\"message\":\"Enter a valid email address.\"}]},{\"id\":\"shipButtons\",\"component\":\"Row\",\"children\":[\"shipBack\",\"shipNext\"],\"justify\":\"spaceBetween\"},{\"id\":\"shipBack\",\"component\":\"Button\",\"child\":\"shipBackLabel\",\"action\":{\"event\":{\"name\":\"goToCart\"}}},{\"id\":\"shipBackLabel\",\"component\":\"Text\",\"text\":\"Back\"},{\"id\":\"shipNext\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"shipNextLabel\",\"action\":{\"event\":{\"name\":\"goToPayment\"}}},{\"id\":\"shipNextLabel\",\"component\":\"Text\",\"text\":\"Continue to payment\"},{\"id\":\"payStep\",\"component\":\"Column\",\"children\":[\"payHeading\",\"deliveryPicker\",\"payTotalText\",\"payButtons\"]},{\"id\":\"payHeading\",\"component\":\"Text\",\"text\":\"Payment summary\"},{\"id\":\"deliveryPicker\",\"component\":\"ChoicePicker\",\"label\":\"Delivery\",\"variant\":\"mutuallyExclusive\",\"options\":[{\"label\":\"Standard (3-5 days) - $4.99\",\"value\":\"standard\"},{\"label\":\"Express (1-2 days) - $12.99\",\"value\":\"express\"}],\"value\":{\"@path\":\"/delivery\"}},{\"id\":\"payTotalText\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Total ${formatCurrency(value:${/total}, currency:'USD')}\\\")}\"},{\"id\":\"payButtons\",\"component\":\"Row\",\"children\":[\"payBack\",\"payNext\"],\"justify\":\"spaceBetween\"},{\"id\":\"payBack\",\"component\":\"Button\",\"child\":\"payBackLabel\",\"action\":{\"event\":{\"name\":\"goToShipping\"}}},{\"id\":\"payBackLabel\",\"component\":\"Text\",\"text\":\"Back\"},{\"id\":\"payNext\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"payNextLabel\",\"action\":{\"event\":{\"name\":\"placeOrder\"}}},{\"id\":\"payNextLabel\",\"component\":\"Text\",\"text\":\"Place order\"},{\"id\":\"confirmStep\",\"component\":\"Column\",\"children\":[\"confirmHeading\",\"orderNumberText\",\"confirmBody\"]},{\"id\":\"confirmHeading\",\"component\":\"Text\",\"text\":\"Thank you for your order\"},{\"id\":\"orderNumberText\",\"component\":\"Text\",\"text\":\"${formatString(\\\"Order number: ${/orderNumber}\\\")}\"},{\"id\":\"confirmBody\",\"component\":\"Text\",\"text\":\"A confirmation email is on its way.\",\"variant\":\"caption\"},{\"id\":\"navRow\",\"component\":\"Text\",\"text\":\"Your details are kept when you go back.\"}]}},\n{\"version\":\"1.0\",\"updateDataModel\":{\"surfaceId\":\"checkout\",\"value\":{\"step\":1,\"subtotal\":184.97,\"total\":189.96,\"delivery\":[\"standard\"],\"orderNumber\":\"CHK-204817\",\"cart\":[{\"name\":\"Wireless headphones\",\"qty\":1},{\"name\":\"USB-C cable\",\"qty\":2},{\"name\":\"Phone case\",\"qty\":1}],\"shipping\":{\"name\":\"\",\"address\":\"\",\"city\":\"\",\"postcode\":\"\",\"email\":\"\"}}}}","usage":{"input_tokens":21183,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":2364,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":563,"totalMs":7803}}
+{"tMs":563,"delta":"{"}
+{"tMs":770,"delta":"\"version\":\"1.0\",\""}
+{"tMs":770,"delta":"createSurface\":{\"sur"}
+{"tMs":770,"delta":"faceId\":\"check"}
+{"tMs":770,"delta":"out\",\"catalogId\":\""}
+{"tMs":770,"delta":"https://a2ui.org"}
+{"tMs":770,"delta":"/specification/v1_0"}
+{"tMs":770,"delta":"/catalogs/basic"}
+{"tMs":770,"delta":"/catalog.json\",\"s"}
+{"tMs":770,"delta":"endD"}
+{"tMs":781,"delta":"ataModel\":true,\"components"}
+{"tMs":802,"delta":"\":[{\"id\":\"root"}
+{"tMs":824,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":989,"delta":"\":\"page"}
+{"tMs":989,"delta":"\"},{\"id\":\"page"}
+{"tMs":990,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":990,"delta":"\":[\"stepTitle\",\""}
+{"tMs":990,"delta":"cartSt"}
+{"tMs":990,"delta":"ep\",\"ship"}
+{"tMs":990,"delta":"Step\",\"pay"}
+{"tMs":995,"delta":"Step\",\"confirmStep"}
+{"tMs":1016,"delta":"\",\""}
+{"tMs":1037,"delta":"navR"}
+{"tMs":1059,"delta":"ow\"]},{\"id\":"}
+{"tMs":1081,"delta":"\"stepTitle\",\"component"}
+{"tMs":1223,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":1223,"delta":"${"}
+{"tMs":1223,"delta":"form"}
+{"tMs":1223,"delta":"atString(\\\"Step "}
+{"tMs":1223,"delta":"${/step"}
+{"tMs":1223,"delta":"}"}
+{"tMs":1230,"delta":" of 3\\\")}\",\"vari"}
+{"tMs":1252,"delta":"ant\":\"caption\"},{"}
+{"tMs":1274,"delta":"\"id\":\"cartStep"}
+{"tMs":1295,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1316,"delta":"\":[\"cartHeading"}
+{"tMs":1338,"delta":"\",\"item"}
+{"tMs":1442,"delta":"1"}
+{"tMs":1442,"delta":"Row\",\"item2Row\",\"item"}
+{"tMs":1442,"delta":"3Row\",\""}
+{"tMs":1442,"delta":"cartTotal"}
+{"tMs":1445,"delta":"Text"}
+{"tMs":1466,"delta":"\",\""}
+{"tMs":1488,"delta":"cartNext\"]},{"}
+{"tMs":1509,"delta":"\"id\":\"cartHe"}
+{"tMs":1531,"delta":"ading\",\"component\":\"Text\",\""}
+{"tMs":1553,"delta":"text\":\"My"}
+{"tMs":1574,"delta":" cart\"},{\"id\":"}
+{"tMs":1595,"delta":"\"item1Row\",\"component\":"}
+{"tMs":1672,"delta":"\"Row\",\"children\":[\"item"}
+{"tMs":1672,"delta":"1Name\",\"item1Q"}
+{"tMs":1672,"delta":"ty\"],\"just"}
+{"tMs":1682,"delta":"ify\":\"sp"}
+{"tMs":1703,"delta":"aceBetween\"},{"}
+{"tMs":1724,"delta":"\"id\":\"item1Name"}
+{"tMs":1746,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":1767,"delta":"\":\"Wireless head"}
+{"tMs":1789,"delta":"phones\"},{\"id\":"}
+{"tMs":1810,"delta":"\"item1Qty\",\"component"}
+{"tMs":1831,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":1853,"delta":"${formatString(\\\""}
+{"tMs":1892,"delta":"Qty ${/cart/"}
+{"tMs":1895,"delta":"0"}
+{"tMs":1917,"delta":"/q"}
+{"tMs":1939,"delta":"ty}\\\")}\"},{"}
+{"tMs":1960,"delta":"\"id\":\"item2Row"}
+{"tMs":1982,"delta":"\",\"component\":\"Row\",\"children"}
+{"tMs":2003,"delta":"\":[\"item2Name\",\"item"}
+{"tMs":2025,"delta":"2Qty\"],\"just"}
+{"tMs":2046,"delta":"ify\":\"spaceBet"}
+{"tMs":2068,"delta":"ween\"},{\"id\":\""}
+{"tMs":2089,"delta":"item2Name\",\"component\":\""}
+{"tMs":2111,"delta":"Text\",\"text\":\"USB"}
+{"tMs":2133,"delta":"-C cable\"},{\""}
+{"tMs":2154,"delta":"id\":\"item2Qty"}
+{"tMs":2175,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":2197,"delta":"\":\"${formatString(\\"}
+{"tMs":2220,"delta":"\"Qty ${/c"}
+{"tMs":2240,"delta":"art/1/qty}\\"}
+{"tMs":2261,"delta":"\")}\"},{\"id\":"}
+{"tMs":2282,"delta":"\"item3Row\",\"component\":"}
+{"tMs":2304,"delta":"\"Row\",\"children\":[\"item"}
+{"tMs":2325,"delta":"3Name\",\"item3Q"}
+{"tMs":2347,"delta":"ty\"],\"justify\":\""}
+{"tMs":2368,"delta":"spaceBetween\"},"}
+{"tMs":2390,"delta":"{\"id\":\"item3"}
+{"tMs":2411,"delta":"Name\",\"component\":\"Text\",\""}
+{"tMs":2433,"delta":"text\":\"Phone case\""}
+{"tMs":2454,"delta":"},{\"id\":\"item3"}
+{"tMs":2476,"delta":"Qty\",\"component\":\""}
+{"tMs":2497,"delta":"Text\",\"text\":\"${format"}
+{"tMs":2519,"delta":"String(\\\"Qty "}
+{"tMs":2540,"delta":"${/cart/2/q"}
+{"tMs":2562,"delta":"ty}\\\")}\"},{"}
+{"tMs":2583,"delta":"\"id\":\"cartTot"}
+{"tMs":2605,"delta":"alText\",\"component\":\"Text"}
+{"tMs":2626,"delta":"\",\"text\":\"${formatString"}
+{"tMs":2648,"delta":"(\\\"Subtotal"}
+{"tMs":2669,"delta":" ${formatCurrency"}
+{"tMs":2691,"delta":"(value:${/sub"}
+{"tMs":2712,"delta":"total}, currency:"}
+{"tMs":2733,"delta":"'USD')}\\\")}"}
+{"tMs":2755,"delta":"\"},{\"id\":\"c"}
+{"tMs":2777,"delta":"artNext\",\"component\":\""}
+{"tMs":2798,"delta":"Button\",\"variant\":\"primary"}
+{"tMs":2819,"delta":"\",\"child\":\"cartNext"}
+{"tMs":2840,"delta":"Label\",\"action\":{\""}
+{"tMs":2862,"delta":"event\":{\"name\":\"go"}
+{"tMs":2884,"delta":"ToShipping\""}
+{"tMs":2905,"delta":"}}},{\"id\":\""}
+{"tMs":2926,"delta":"cartNextLabel\",\""}
+{"tMs":2951,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":2976,"delta":"\"Contin"}
+{"tMs":2997,"delta":"ue to shipping\"},{"}
+{"tMs":3016,"delta":"\"id\":\"shipStep"}
+{"tMs":3034,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":3055,"delta":"\":[\"shipHeading\",\""}
+{"tMs":3077,"delta":"n"}
+{"tMs":3097,"delta":"ameField\",\"add"}
+{"tMs":3124,"delta":"ressField\",\"cityField\",\"post"}
+{"tMs":3141,"delta":"codeField\",\"emailField"}
+{"tMs":3169,"delta":"\",\"shipBut"}
+{"tMs":3184,"delta":"tons\"]},{\"id"}
+{"tMs":3205,"delta":"\":\"shipHeading\",\""}
+{"tMs":3229,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":3250,"delta":"\"Shipping details"}
+{"tMs":3269,"delta":"\"},{\"id\":\"n"}
+{"tMs":3292,"delta":"ameField\",\"component\":\"Text"}
+{"tMs":3312,"delta":"Field\",\"label\":\"Full name"}
+{"tMs":3334,"delta":"\",\"value\":{\"@path\":"}
+{"tMs":3356,"delta":"\"/shipping/name\""}
+{"tMs":3377,"delta":"},\"@"}
+{"tMs":3398,"delta":"checks\":[{\"condition"}
+{"tMs":3420,"delta":"\":{\"@call\":\"required"}
+{"tMs":3441,"delta":"\",\"args\":{\"value\":{"}
+{"tMs":3463,"delta":"\"@path\":\"/ship"}
+{"tMs":3485,"delta":"ping/name\"}}},\""}
+{"tMs":3506,"delta":"message\":\"Name is required.\""}
+{"tMs":3527,"delta":"}]},{\"id\":\""}
+{"tMs":3549,"delta":"addressField\",\"component\":\"T"}
+{"tMs":3570,"delta":"extField\",\"label\":\"Address"}
+{"tMs":3594,"delta":"\",\"value\":{\"@path\":"}
+{"tMs":3613,"delta":"\"/shipping/address\""}
+{"tMs":3634,"delta":"},\"@checks\":[{"}
+{"tMs":3656,"delta":"\"condition\":{\"@call"}
+{"tMs":3677,"delta":"\":\"required\",\"args\":{\""}
+{"tMs":3699,"delta":"value\":{\"@path\":\""}
+{"tMs":3721,"delta":"/shipping/address\"}"}
+{"tMs":3742,"delta":"}},\"message\":\"Address"}
+{"tMs":3766,"delta":" is required.\"}]},{\""}
+{"tMs":3785,"delta":"id\":\"cityField\",\"component"}
+{"tMs":3808,"delta":"\":\"TextField\",\"label\":"}
+{"tMs":3828,"delta":"\"City\",\"value\":{\"@"}
+{"tMs":3849,"delta":"path\":\"/shipping/"}
+{"tMs":3871,"delta":"city\"},\"@checks\":"}
+{"tMs":3892,"delta":"[{\"condition\":{\""}
+{"tMs":3913,"delta":"@call\":\"required\",\"args\":"}
+{"tMs":3935,"delta":"{\"value\":{\"@path"}
+{"tMs":3957,"delta":"\":\"/shipping/city"}
+{"tMs":3978,"delta":"\"}}},\"message\":\""}
+{"tMs":3999,"delta":"City is required.\"}]},{"}
+{"tMs":4021,"delta":"\"id\":\"postcode"}
+{"tMs":4042,"delta":"Field\",\"component\":\"TextField"}
+{"tMs":4063,"delta":"\",\"label\":\"Postcode"}
+{"tMs":4085,"delta":"\",\"value\":{\"@path\":"}
+{"tMs":4106,"delta":"\"/shipping/postc"}
+{"tMs":4128,"delta":"ode\"},\"@checks\":"}
+{"tMs":4150,"delta":"[{\"condition\":{\""}
+{"tMs":4171,"delta":"@call\":\"required\",\"args\":"}
+{"tMs":4192,"delta":"{\"value\":{\"@path"}
+{"tMs":4214,"delta":"\":\"/shipping/post"}
+{"tMs":4235,"delta":"code\"}}},\"message"}
+{"tMs":4257,"delta":"\":\"Postcode is required"}
+{"tMs":4278,"delta":".\"}]},{\"id\":"}
+{"tMs":4300,"delta":"\"emailField\",\"component\":\""}
+{"tMs":4321,"delta":"TextField\",\"label\":\""}
+{"tMs":4343,"delta":"Email\",\"value\":{\"@path"}
+{"tMs":4364,"delta":"\":\"/shipping/email"}
+{"tMs":4385,"delta":"\"},\"@"}
+{"tMs":4407,"delta":"checks\":[{\"condition"}
+{"tMs":4429,"delta":"\":{\"@call\":\"required"}
+{"tMs":4450,"delta":"\",\"args\":{\"value\":{"}
+{"tMs":4471,"delta":"\"@path\":\"/ship"}
+{"tMs":4493,"delta":"ping/email\"}}},\""}
+{"tMs":4515,"delta":"message\":\"Email is required.\""}
+{"tMs":4536,"delta":"},{\"condition\":{\""}
+{"tMs":4558,"delta":"@call\":\"email\",\"args\":"}
+{"tMs":4582,"delta":"{\"value\":{\"@path"}
+{"tMs":4601,"delta":"\":\"/shipping/email"}
+{"tMs":4622,"delta":"\"}}},\"message\":\""}
+{"tMs":4643,"delta":"Enter a valid email address"}
+{"tMs":4665,"delta":".\"}]},{\"id\":"}
+{"tMs":4686,"delta":"\"shipButtons\",\"component"}
+{"tMs":4708,"delta":"\":\"Row\",\"children\":[\""}
+{"tMs":4729,"delta":"shipBack\",\"shipN"}
+{"tMs":4750,"delta":"ext\"],\"justify\":\""}
+{"tMs":4772,"delta":"spaceBetween\"},"}
+{"tMs":4793,"delta":"{\"id\":\"shipB"}
+{"tMs":4815,"delta":"ack\",\"component\":\"Button\",\""}
+{"tMs":4837,"delta":"child\":\"shipBackL"}
+{"tMs":4858,"delta":"abel\",\"action\":{\"event"}
+{"tMs":4880,"delta":"\":{\"name\":\"goTo"}
+{"tMs":4900,"delta":"Cart\"}}},{\""}
+{"tMs":4923,"delta":"id\":\"shipBackL"}
+{"tMs":4944,"delta":"abel\",\"component\":\"Text"}
+{"tMs":4965,"delta":"\",\"text\":\"Back\"},"}
+{"tMs":4987,"delta":"{\"id\":\"shipN"}
+{"tMs":5007,"delta":"ext\",\"component\":\"Button\",\""}
+{"tMs":5030,"delta":"variant\":\"primary\",\"child"}
+{"tMs":5051,"delta":"\":\"shipNextLab"}
+{"tMs":5072,"delta":"el\",\"action\":{\"event\":"}
+{"tMs":5093,"delta":"{\"name\":\"goToP"}
+{"tMs":5116,"delta":"ayment\"}}},{\""}
+{"tMs":5137,"delta":"id\":\"shipNextL"}
+{"tMs":5158,"delta":"abel\",\"component\":\"Text"}
+{"tMs":5179,"delta":"\",\"text\":\"Continue to"}
+{"tMs":5201,"delta":" payment\"},{\"id\":"}
+{"tMs":5224,"delta":"\"payStep\",\"component\":\""}
+{"tMs":5244,"delta":"Column\",\"children\":[\"payH"}
+{"tMs":5265,"delta":"eading\",\"de"}
+{"tMs":5287,"delta":"liveryP"}
+{"tMs":5308,"delta":"icker\",\"payTotalText"}
+{"tMs":5330,"delta":"\",\"payBut"}
+{"tMs":5351,"delta":"tons\"]},{\"id"}
+{"tMs":5373,"delta":"\":\"payHeading\",\"component"}
+{"tMs":5394,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":5416,"delta":"Payment summary\"},{"}
+{"tMs":5437,"delta":"\"id\":\"delivery"}
+{"tMs":5458,"delta":"Picker\",\"component\":\""}
+{"tMs":5480,"delta":"ChoicePicker\",\"label"}
+{"tMs":5501,"delta":"\":\"Delivery\",\""}
+{"tMs":5523,"delta":"variant\":\"mutuall"}
+{"tMs":5545,"delta":"yExclusive\",\"options\":"}
+{"tMs":5566,"delta":"[{\"label\":\"Stand"}
+{"tMs":5587,"delta":"ard (3-"}
+{"tMs":5609,"delta":"5 days)"}
+{"tMs":5630,"delta":" - $4"}
+{"tMs":5652,"delta":".99\",\"value\":\"standard"}
+{"tMs":5673,"delta":"\"},{\"label\":\""}
+{"tMs":5695,"delta":"Express (1-2 days)"}
+{"tMs":5717,"delta":" - $12.99\",\"value\":"}
+{"tMs":5738,"delta":"\"express\"}],\"value\":"}
+{"tMs":5759,"delta":"{\"@path\":\"/del"}
+{"tMs":5781,"delta":"ivery\"}"}
+{"tMs":5802,"delta":"},{\"id\":\"payT"}
+{"tMs":5825,"delta":"otalText\",\"component\":\""}
+{"tMs":5845,"delta":"Text\",\"text\":\"${format"}
+{"tMs":5867,"delta":"String(\\\"Total ${"}
+{"tMs":5887,"delta":"formatCurrency(value"}
+{"tMs":5909,"delta":":${/total}, currency"}
+{"tMs":5931,"delta":":'USD')}\\\")"}
+{"tMs":5952,"delta":"}\""}
+{"tMs":5974,"delta":"},{\"id\":\"payBut"}
+{"tMs":5995,"delta":"tons\",\"component\":\"Row"}
+{"tMs":6017,"delta":"\",\"children\":[\"payBack\",\""}
+{"tMs":6039,"delta":"payNext\"],\"justify"}
+{"tMs":6059,"delta":"\":\"spaceBetween"}
+{"tMs":6081,"delta":"\"},{\"id\":\"pay"}
+{"tMs":6102,"delta":"Back\",\"component\":\"Button"}
+{"tMs":6124,"delta":"\",\"child\":\"payBackL"}
+{"tMs":6145,"delta":"abel\",\"action\":{\"event"}
+{"tMs":6167,"delta":"\":{\"name\":\"goTo"}
+{"tMs":6188,"delta":"Shipping\"}}},{"}
+{"tMs":6210,"delta":"\"id\":\"payBackL"}
+{"tMs":6232,"delta":"abel\",\"component\":\"Text"}
+{"tMs":6253,"delta":"\",\"text\":\"Back\"},"}
+{"tMs":6274,"delta":"{\"id\":\"payNext"}
+{"tMs":6296,"delta":"\",\"component\":\"Button\",\"vari"}
+{"tMs":6317,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":6338,"delta":"\"payNextLabel\",\""}
+{"tMs":6361,"delta":"action\":{\"event\":{\""}
+{"tMs":6381,"delta":"name\":\"placeOrder"}
+{"tMs":6403,"delta":"\"}}},{\"id\":"}
+{"tMs":6424,"delta":"\"payNextLabel\",\""}
+{"tMs":6446,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":6469,"delta":"\"Place order\"},{\""}
+{"tMs":6488,"delta":"id\":\"confirmStep"}
+{"tMs":6510,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":6531,"delta":"\":[\"confirmHeading"}
+{"tMs":6554,"delta":"\",\"or"}
+{"tMs":6574,"delta":"derNumberText\",\""}
+{"tMs":6596,"delta":"confirmB"}
+{"tMs":6617,"delta":"ody\"]},{\"id\":"}
+{"tMs":6639,"delta":"\"confirmHeading\",\""}
+{"tMs":6660,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":6682,"delta":"\"Th"}
+{"tMs":6703,"delta":"ank you for"}
+{"tMs":6725,"delta":" your order\""}
+{"tMs":6746,"delta":"},{\"id\":\"order"}
+{"tMs":6769,"delta":"NumberText\",\"component\":\""}
+{"tMs":6789,"delta":"Text\",\"text\":\"${form"}
+{"tMs":6810,"delta":"atString(\\\"Order number"}
+{"tMs":6832,"delta":":"}
+{"tMs":6853,"delta":" "}
+{"tMs":6874,"delta":"${/orderNumber}"}
+{"tMs":6896,"delta":"\\\")}\"},{\"id"}
+{"tMs":6918,"delta":"\":\"confirmBody\",\""}
+{"tMs":6940,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":6960,"delta":"\"A conf"}
+{"tMs":6982,"delta":"irmation email is"}
+{"tMs":7006,"delta":" on its way.\",\"variant\":"}
+{"tMs":7025,"delta":"\"caption\"},{\"id"}
+{"tMs":7046,"delta":"\":\"navRow\",\"component\":"}
+{"tMs":7072,"delta":"\"Text"}
+{"tMs":7089,"delta":"\",\"text\":\"Your"}
+{"tMs":7111,"delta":" details are"}
+{"tMs":7132,"delta":" kept when"}
+{"tMs":7154,"delta":" you go"}
+{"tMs":7176,"delta":" back.\"}]}"}
+{"tMs":7197,"delta":"},"}
+{"tMs":7218,"delta":"\n{\"version\":\"1.0"}
+{"tMs":7240,"delta":"\",\"updateDataModel\":"}
+{"tMs":7261,"delta":"{\"surfaceId\":"}
+{"tMs":7283,"delta":"\"checkout\",\"value\":{"}
+{"tMs":7304,"delta":"\"step\":1,\"subt"}
+{"tMs":7326,"delta":"otal\":184"}
+{"tMs":7347,"delta":".97"}
+{"tMs":7369,"delta":",\"total"}
+{"tMs":7390,"delta":"\":189"}
+{"tMs":7411,"delta":".96"}
+{"tMs":7433,"delta":",\"delivery\":[\""}
+{"tMs":7454,"delta":"standard\"],\"orderN"}
+{"tMs":7477,"delta":"umber\":\"C"}
+{"tMs":7497,"delta":"H"}
+{"tMs":7518,"delta":"K-204817"}
+{"tMs":7540,"delta":"\",\"cart\":[{\"name"}
+{"tMs":7562,"delta":"\":\"Wireless headph"}
+{"tMs":7583,"delta":"ones\",\"qty\":1},{"}
+{"tMs":7605,"delta":"\"name\":\"USB-C"}
+{"tMs":7626,"delta":" cable\",\"qty\":2},"}
+{"tMs":7647,"delta":"{\"name\":\"Phone"}
+{"tMs":7668,"delta":" case\",\"qty\":1}],"}
+{"tMs":7690,"delta":"\"shipping\":{\"name"}
+{"tMs":7712,"delta":"\":\"\",\"address\":\"\",\"city"}
+{"tMs":7733,"delta":"\":\"\",\"postcode\":\""}
+{"tMs":7755,"delta":"\",\"email\":\"\"}}}}"}

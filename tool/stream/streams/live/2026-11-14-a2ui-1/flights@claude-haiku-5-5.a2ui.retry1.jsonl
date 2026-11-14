@@ -1,0 +1,75 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"a2ui","turn":"retry","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"flights\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"title\",\"picker\",\"total\",\"confirm\"]},{\"id\":\"title\",\"component\":\"Text\",\"variant\":\"body\",\"weight\":1,\"text\":\"Flights London to Lisbon, this Friday\"},{\"id\":\"picker\",\"component\":\"ChoicePicker\",\"label\":\"Choose a flight\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"checkbox\",\"options\":[{\"label\":\"TAP TP1234 · 07:15 → 09:55 · Direct · 2h 40m · £118 · Cheapest\",\"value\":\"tp1234\"},{\"label\":\"BA 0488 · 11:30 → 14:05 · Direct · 2h 35m · £164 · Best time\",\"value\":\"ba0488\"},{\"label\":\"Ryanair FR7720 · 18:20 → 20:50 · 1 stop · 4h 30m · £96\",\"value\":\"fr7720\"}],\"value\":{\"@path\":\"/selection\"}},{\"id\":\"total\",\"component\":\"Text\",\"variant\":\"body\",\"text\":{\"@call\":\"formatCurrency\",\"args\":{\"value\":{\"@path\":\"/price\"},\"currency\":\"GBP\"}}},{\"id\":\"confirm\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"confirmText\",\"action\":{\"event\":{\"name\":\"confirmFlight\",\"context\":{\"flight\":{\"@path\":\"/selection\"}}}}},{\"id\":\"confirmText\",\"component\":\"Text\",\"text\":\"Confirm flight\"}],\"dataModel\":{\"selection\":[\"tp1234\"],\"price\":118}}}","usage":{"input_tokens":21914,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":581,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":788,"totalMs":2300}}
+{"tMs":788,"delta":"{\"version\":\"1.0"}
+{"tMs":814,"delta":"\",\"createSurface\":{\""}
+{"tMs":829,"delta":"surfaceId\":\"fl"}
+{"tMs":849,"delta":"ights\",\"catalogId\":\""}
+{"tMs":869,"delta":"https://a2ui.org"}
+{"tMs":890,"delta":"/specification/v1_0"}
+{"tMs":910,"delta":"/catalogs/basic"}
+{"tMs":931,"delta":"/catalog.json\",\"components"}
+{"tMs":951,"delta":"\":[{\"id\":\"root"}
+{"tMs":972,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":993,"delta":"\":\"col\"},{\"id"}
+{"tMs":1012,"delta":"\":\"col\",\"component\":\""}
+{"tMs":1033,"delta":"Column\",\"children\":[\"title\",\"pic"}
+{"tMs":1053,"delta":"ker\",\"total\",\"confirm\""}
+{"tMs":1074,"delta":"]},{\"id\":\"title"}
+{"tMs":1094,"delta":"\",\"component\":\"Text\",\"vari"}
+{"tMs":1114,"delta":"ant\":\"body\",\"we"}
+{"tMs":1135,"delta":"ight\":1,\"text\":\""}
+{"tMs":1155,"delta":"Flights London to Lis"}
+{"tMs":1176,"delta":"bon, this Friday\""}
+{"tMs":1196,"delta":"},{\"id\":\"picker"}
+{"tMs":1216,"delta":"\",\"component\":\"Choic"}
+{"tMs":1237,"delta":"ePicker\",\"label\":\""}
+{"tMs":1257,"delta":"Choose a flight\",\"variant"}
+{"tMs":1278,"delta":"\":\"mutuallyEx"}
+{"tMs":1298,"delta":"clusive\",\"displaySty"}
+{"tMs":1318,"delta":"le\":\"checkbox\",\""}
+{"tMs":1339,"delta":"options\":[{\"label\":\""}
+{"tMs":1359,"delta":"TAP TP1234 "}
+{"tMs":1380,"delta":"· 07:15 → "}
+{"tMs":1400,"delta":"09:55 · Direct"}
+{"tMs":1421,"delta":" · 2h 40m ·"}
+{"tMs":1441,"delta":" £118 · Cheap"}
+{"tMs":1461,"delta":"est\",\"value\":\"tp1"}
+{"tMs":1481,"delta":"234\"},{\"label\":\""}
+{"tMs":1502,"delta":"BA 0488 · "}
+{"tMs":1523,"delta":"11:30 → 14:"}
+{"tMs":1543,"delta":"05 · Direct · "}
+{"tMs":1563,"delta":"2h 35m · £164"}
+{"tMs":1584,"delta":" · Best time\",\"value\":"}
+{"tMs":1605,"delta":"\"ba0488\"},{"}
+{"tMs":1624,"delta":"\"label\":\"Ryan"}
+{"tMs":1645,"delta":"air FR7720 · "}
+{"tMs":1665,"delta":"18:20 → 20:"}
+{"tMs":1686,"delta":"50 · 1 stop"}
+{"tMs":1706,"delta":" · 4h 30m ·"}
+{"tMs":1726,"delta":" £96\",\"value\":\"fr"}
+{"tMs":1747,"delta":"7720\"}],\"value\":"}
+{"tMs":1768,"delta":"{\"@path\":\"/sel"}
+{"tMs":1788,"delta":"ection\"}},{\"id\":"}
+{"tMs":1808,"delta":"\"total\",\"component\":\"Text"}
+{"tMs":1828,"delta":"\",\"variant\":\"body\",\"text"}
+{"tMs":1849,"delta":"\":{\"@call\":\"form"}
+{"tMs":1869,"delta":"atC"}
+{"tMs":1890,"delta":"urrency\",\"args\":{\""}
+{"tMs":1910,"delta":"value\":{\"@path\":\""}
+{"tMs":1930,"delta":"/price\"},\"currency\":"}
+{"tMs":1951,"delta":"\"GBP\"}}},"}
+{"tMs":1971,"delta":"{\"id\":\"confirm"}
+{"tMs":1992,"delta":"\",\"component\":\"Button\",\"vari"}
+{"tMs":2012,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":2032,"delta":"\"confirmText\",\"action\":"}
+{"tMs":2053,"delta":"{\"event\":{\"name\":"}
+{"tMs":2074,"delta":"\"confirmFlight\",\""}
+{"tMs":2094,"delta":"context\":{\"flight\":{"}
+{"tMs":2114,"delta":"\"@path\":\"/selection"}
+{"tMs":2135,"delta":"\"}}}}},{\""}
+{"tMs":2155,"delta":"id\":\"confirmText\",\""}
+{"tMs":2176,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":2195,"delta":"\"Confirm flight\""}
+{"tMs":2216,"delta":"}],\"dataModel\":"}
+{"tMs":2237,"delta":"{\"selection\":[\"tp"}
+{"tMs":2257,"delta":"1234\"],\"price\":118"}
+{"tMs":2277,"delta":"}}}"}

@@ -1,0 +1,98 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "subtotal",
+    "type": "decimal",
+    "value": 184.97
+   },
+   {
+    "name": "total",
+    "type": "decimal",
+    "value": 189.96
+   },
+   {
+    "name": "delivery",
+    "type": "list",
+    "value": [
+     "standard"
+    ]
+   },
+   {
+    "name": "orderNumber",
+    "type": "text",
+    "value": "CHK-204817"
+   },
+   {
+    "name": "cart",
+    "type": "list",
+    "value": [
+     {
+      "name": "Wireless headphones",
+      "qty": 1
+     },
+     {
+      "name": "USB-C cable",
+      "qty": 2
+     },
+     {
+      "name": "Phone case",
+      "qty": 1
+     }
+    ]
+   },
+   {
+    "name": "shipping_name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shipping_address",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shipping_city",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shipping_postcode",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shipping_email",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

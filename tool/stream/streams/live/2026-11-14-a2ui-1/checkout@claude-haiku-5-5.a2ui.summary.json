@@ -1,0 +1,65 @@
+{
+ "ui": "checkout",
+ "kind": "app",
+ "model": "claude-haiku-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21183,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2364,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 563,
+   "totalMs": 7803,
+   "chars": 5409,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 1,
+   "outputTokensPerNode": "2364.0",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 2,
+   "errors": [
+    "No surface with a root component could be read from the answer."
+   ]
+  },
+  {
+   "input_tokens": 23597,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2340,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 487,
+   "totalMs": 6799,
+   "chars": 5343,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 39,
+   "outputTokensPerNode": "60.0",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 2,
+   "errors": []
+  }
+ ]
+}
