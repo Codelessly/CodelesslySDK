@@ -32,7 +32,11 @@ Future<void> main(List<String> args) async {
     exit(2);
   }
   final ui = opt('--ui') ?? 'approval';
-  final brief = kBriefs[ui];
+  // --brief-file <file>: a brief of your own (--ui then only names the
+  // recording); --frame: what the answer is to be.
+  final briefFile = opt('--brief-file');
+  final Brief? brief = briefFile != null ? (kind: 'page', prompt: File(briefFile).readAsStringSync().trim(), followup: null) : kBriefs[ui];
+  final frame = opt('--frame') ?? 'an inline card 390 wide';
   if (brief == null) {
     stderr.writeln('No brief "$ui". Briefs: ${kBriefs.keys.join(', ')}');
     exit(2);
@@ -49,7 +53,7 @@ Future<void> main(List<String> args) async {
       '## Message schema (agent_to_renderer.json)\n${spec('agent_to_renderer.json')}\n\n'
       '## Common types (common_types.json)\n${spec('common_types.json')}\n\n'
       '## Catalog (catalog.json)\n${spec('catalog.json')}';
-  final user = '${brief.prompt}\n\n(Answer with A2UI JSON Lines only: an inline card 390 wide.)';
+  final user = '${brief.prompt}\n\n(Answer with A2UI JSON Lines only: $frame.)';
   final messages = <Map<String, Object?>>[
     {'role': 'user', 'content': user},
   ];

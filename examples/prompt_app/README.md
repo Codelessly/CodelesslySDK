@@ -140,6 +140,36 @@ count down for nine seconds with three taps on the pad, and finished.
   (`audience` on a `TopBar`, a bare word on `Illustration`); the kid's screen writes the dial and controls once
   per phase, which works but repeats.
 
+## Beside A2UI, on the same three screens
+
+![A2UI on its own renderer beside the screens composed from blocks](renders/vs-a2ui.png)
+
+The same model (claude-sonnet-5-5) was given the same app, data, actions and person for Home, Training history
+and Session, once as A2UI v1.0 with its published schemas and basic catalog as instructions, drawn by A2UI's own
+web renderer (`@a2ui/lit` 0.15.0, default styles), and once as the notation over the Skip blocks. The briefs sent
+to A2UI are in `a2ui/briefs/` (the screen prompt with the notation's own rules left out and "make it look like a
+polished consumer fitness app" added); its answers and their shots are in `a2ui/`.
+
+| Screen | | Tokens read | Tokens written | Seconds |
+|---|---|---|---|---|
+| Home | A2UI | 21,676 | 1,462 | 8.0 |
+| | Blocks | 5,012 | 360 | 3.1 |
+| Training history | A2UI | 21,679 | 1,529 | 7.7 |
+| | Blocks | 5,015 | 496 | 3.7 |
+| Session | A2UI | 21,703 | 1,795 | 9.3 |
+| | Blocks | 6,241 | 1,458 (two turns) | 9.2 |
+
+All three A2UI answers were valid and drawn as written. What the images show: A2UI's are a list of facts in
+bordered boxes with default buttons; its Session cannot run (nothing in an A2UI surface counts down or counts a
+tap without the agent sending a new surface), so it shows a "Start session" button and the plan. The block
+screens have a focal object, illustration and depth, and the Session shown is running: it was started and
+tapped.
+
+What this comparison is and is not: it is A2UI as it comes (its basic catalog and default styles) against this
+system with a block set designed for the app. A team using A2UI can write its own catalog of designed
+components and its own styles, which was not done here; the cost and speed columns would not change, the look
+would. One run per screen, one model.
+
 ## Running as an app
 
 ![A run in the shell: Home, a session, finish, Home again, then another person](renders/shell-run.png)

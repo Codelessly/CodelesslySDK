@@ -1,0 +1,208 @@
+{"meta":{"ui":"skip_history","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"APP: Skip. A jump rope training app. People use it to plan and time rope sessions, count jumps, and see their progress over weeks.\n\nSCREEN TO BUILD: Training history page: jumps per week as a chart, then the past sessions as a list with date, duration, jumps and best run without a miss.\n\nDATA the screen shows (use exactly these values):\n  streak = 4\n  weeklyGoal = 5\n  sessionsThisWeek = 3\n  today = {\"name\":\"Intervals\",\"rounds\":8,\"work\":40,\"rest\":20,\"minutes\":8}\n  weeks = [{\"label\":\"W39\",\"jumps\":2100},{\"label\":\"W40\",\"jumps\":2650},{\"label\":\"W41\",\"jumps\":2400},{\"label\":\"W42\",\"jumps\":3180}]\n  sessions = [{\"date\":\"Fri 13 Nov\",\"name\":\"Intervals\",\"minutes\":8,\"jumps\":912,\"best\":148},{\"date\":\"Wed 11 Nov\",\"name\":\"Endurance\",\"minutes\":12,\"jumps\":1304,\"best\":210},{\"date\":\"Mon 9 Nov\",\"name\":\"Footwork\",\"minutes\":6,\"jumps\":640,\"best\":96},{\"date\":\"Sat 7 Nov\",\"name\":\"Intervals\",\"minutes\":8,\"jumps\":880,\"best\":131}]\n\nACTIONS the screen can trigger: start_session (Begin today's session); open_history (Go to the training history page); open_home (Go to the home screen); open_session (Open one past session (pass its date)); finish_session (End the session (pass the jump count))\n\nTHE PERSON IT IS FOR: goal: get fitter, three short sessions a week; experience: started two weeks ago; tone: encouraging and plain, no jargon.\nOne phone screen, the most important thing first. Make it look like a polished consumer fitness app.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"history\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"header\",\"chartCard\",\"listTitle\",\"list\",\"nav\"]},{\"id\":\"header\",\"component\":\"Column\",\"children\":[\"title\",\"sub\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Your training history\"},{\"id\":\"sub\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Nice work! You're on a 4-session streak and did 3 of 5 sessions this week.\"},{\"id\":\"chartCard\",\"component\":\"Card\",\"child\":\"chartCol\"},{\"id\":\"chartCol\",\"component\":\"Column\",\"children\":[\"chartTitle\",\"weekRow\"]},{\"id\":\"chartTitle\",\"component\":\"Text\",\"text\":\"Jumps per week\"},{\"id\":\"weekRow\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"align\":\"end\",\"children\":[\"w1\",\"w2\",\"w3\",\"w4\"]},{\"id\":\"w1\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"w1v\",\"w1l\"]},{\"id\":\"w1v\",\"component\":\"Text\",\"text\":\"2,100\"},{\"id\":\"w1l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"W39\"},{\"id\":\"w2\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"w2v\",\"w2l\"]},{\"id\":\"w2v\",\"component\":\"Text\",\"text\":\"2,650\"},{\"id\":\"w2l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"W40\"},{\"id\":\"w3\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"w3v\",\"w3l\"]},{\"id\":\"w3v\",\"component\":\"Text\",\"text\":\"2,400\"},{\"id\":\"w3l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"W41\"},{\"id\":\"w4\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"w4v\",\"w4l\"]},{\"id\":\"w4v\",\"component\":\"Text\",\"text\":\"3,180\"},{\"id\":\"w4l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"W42 (this week)\"},{\"id\":\"listTitle\",\"component\":\"Text\",\"text\":\"Past sessions\"},{\"id\":\"list\",\"component\":\"List\",\"children\":{\"path\":\"/sessions\",\"componentId\":\"sCard\"}},{\"id\":\"sCard\",\"component\":\"Card\",\"child\":\"sBtn\"},{\"id\":\"sBtn\",\"component\":\"Button\",\"variant\":\"borderless\",\"child\":\"sCol\",\"action\":{\"event\":{\"name\":\"open_session\",\"context\":{\"date\":{\"@path\":\"date\"}}}}},{\"id\":\"sCol\",\"component\":\"Column\",\"children\":[\"sTop\",\"sStats\"]},{\"id\":\"sTop\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"sName\",\"sDate\"]},{\"id\":\"sName\",\"component\":\"Text\",\"text\":{\"@path\":\"name\"}},{\"id\":\"sDate\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@path\":\"date\"}},{\"id\":\"sStats\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"sMin\",\"sJumps\",\"sBest\"]},{\"id\":\"sMin\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${minutes} min\"}}},{\"id\":\"sJumps\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${jumps} jumps\"}}},{\"id\":\"sBest\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Best run ${best} without a miss\"}}},{\"id\":\"nav\",\"component\":\"Row\",\"justify\":\"spaceEvenly\",\"children\":[\"homeBtn\",\"startBtn\"]},{\"id\":\"homeBtn\",\"component\":\"Button\",\"child\":\"homeTxt\",\"action\":{\"event\":{\"name\":\"open_home\"}}},{\"id\":\"homeTxt\",\"component\":\"Text\",\"text\":\"Home\"},{\"id\":\"startBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"startTxt\",\"action\":{\"event\":{\"name\":\"start_session\"}}},{\"id\":\"startTxt\",\"component\":\"Text\",\"text\":\"Start today's Intervals\"}],\"dataModel\":{\"sessions\":[{\"date\":\"Fri 13 Nov\",\"name\":\"Intervals\",\"minutes\":8,\"jumps\":912,\"best\":148},{\"date\":\"Wed 11 Nov\",\"name\":\"Endurance\",\"minutes\":12,\"jumps\":1304,\"best\":210},{\"date\":\"Mon 9 Nov\",\"name\":\"Footwork\",\"minutes\":6,\"jumps\":640,\"best\":96},{\"date\":\"Sat 7 Nov\",\"name\":\"Intervals\",\"minutes\":8,\"jumps\":880,\"best\":131}]}}}","usage":{"input_tokens":21679,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1529,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":865,"totalMs":7725}}
+{"tMs":865,"delta":"{\"version\":\"1.0"}
+{"tMs":1165,"delta":"\",\"createSurface\":{\""}
+{"tMs":1165,"delta":"surfaceId\":\"history"}
+{"tMs":1165,"delta":"\",\"catalogId\":\"https"}
+{"tMs":1165,"delta":"://a2ui.org/"}
+{"tMs":1166,"delta":"specification/v1_0/"}
+{"tMs":1166,"delta":"catalogs/basic/"}
+{"tMs":1166,"delta":"catalog.json\",\"components\":"}
+{"tMs":1166,"delta":"[{\"id\":\"root\",\""}
+{"tMs":1166,"delta":"component\":\"Column\",\"children\":"}
+{"tMs":1189,"delta":"[\"header\",\"chart"}
+{"tMs":1221,"delta":"Card\",\"list"}
+{"tMs":1253,"delta":"Title\",\"list"}
+{"tMs":1479,"delta":"\",\""}
+{"tMs":1479,"delta":"n"}
+{"tMs":1479,"delta":"av\"]"}
+{"tMs":1479,"delta":"},{\"id\":\"header\",\""}
+{"tMs":1479,"delta":"component\":\"Column\",\"children\":"}
+{"tMs":1479,"delta":"[\"title\",\"s"}
+{"tMs":1480,"delta":"ub\"]},{\"id\":"}
+{"tMs":1515,"delta":"\"title\",\"component\":\"Text"}
+{"tMs":1548,"delta":"\",\"text\":\"Your training"}
+{"tMs":1582,"delta":" history\"},{\"id\":\""}
+{"tMs":1616,"delta":"sub\",\"component\":\"Text"}
+{"tMs":1651,"delta":"\",\"vari"}
+{"tMs":1792,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":1792,"delta":"\"Nice work!"}
+{"tMs":1793,"delta":" You're on"}
+{"tMs":1793,"delta":" a 4-session"}
+{"tMs":1813,"delta":" streak and"}
+{"tMs":1845,"delta":" did"}
+{"tMs":1879,"delta":" 3 of "}
+{"tMs":1912,"delta":"5 sessions this week.\""}
+{"tMs":1946,"delta":"},{\"id\":\"chart"}
+{"tMs":1981,"delta":"Card\",\"component\":\"Card"}
+{"tMs":2013,"delta":"\",\"child\":\"chartC"}
+{"tMs":2047,"delta":"ol\"},{\"id\":\""}
+{"tMs":2110,"delta":"chartCol\",\"component\":\""}
+{"tMs":2114,"delta":"Column\",\"children\":[\"chart"}
+{"tMs":2150,"delta":"Title\",\"we"}
+{"tMs":2179,"delta":"ekR"}
+{"tMs":2213,"delta":"ow\"]},{\"id\":"}
+{"tMs":2247,"delta":"\"chartTitle\",\"component"}
+{"tMs":2281,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2314,"delta":"Jumps per week\"},"}
+{"tMs":2348,"delta":"{\"id\":\"weekR"}
+{"tMs":2381,"delta":"ow\",\"component\":\""}
+{"tMs":2414,"delta":"Row\",\"just"}
+{"tMs":2447,"delta":"ify\":\"sp"}
+{"tMs":2480,"delta":"aceBetween\",\"align\":"}
+{"tMs":2514,"delta":"\"end\",\"children\":[\"w"}
+{"tMs":2549,"delta":"1\",\"w2\",\"w3\",\""}
+{"tMs":2581,"delta":"w4\"]},{\"id"}
+{"tMs":2615,"delta":"\":\"w1\",\"component\":\""}
+{"tMs":2648,"delta":"Column\",\"align"}
+{"tMs":2681,"delta":"\":\"center\",\"children\":[\"w"}
+{"tMs":2717,"delta":"1v\",\"w1l\"]"}
+{"tMs":2755,"delta":"},{\"id\":\"w1"}
+{"tMs":2787,"delta":"v\",\"component\":\"Text\",\""}
+{"tMs":2821,"delta":"text\":\"2,100\"},"}
+{"tMs":2848,"delta":"{\"id\":\"w1l"}
+{"tMs":2882,"delta":"\",\"component\":\"Text\",\"vari"}
+{"tMs":2916,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":2949,"delta":"\"W39\"},{\"id"}
+{"tMs":2983,"delta":"\":\"w2\",\"component\":\""}
+{"tMs":3016,"delta":"Column\",\"align\":\"center\",\""}
+{"tMs":3050,"delta":"children\":[\"w2v\",\"w"}
+{"tMs":3087,"delta":"2l\"]},{\"id"}
+{"tMs":3116,"delta":"\":\"w2v\",\"component\":"}
+{"tMs":3151,"delta":"\"Text\",\"text\":\"2"}
+{"tMs":3188,"delta":",650\"},{\"id\":"}
+{"tMs":3217,"delta":"\"w2l\",\"component\":\""}
+{"tMs":3250,"delta":"Text\",\"variant\":\"ca"}
+{"tMs":3283,"delta":"ption\",\"text\":\"W40\""}
+{"tMs":3317,"delta":"},{\"id\":\"w3"}
+{"tMs":3350,"delta":"\",\"component\":\"Column\",\"align"}
+{"tMs":3384,"delta":"\":\"center\",\"children\":[\"w"}
+{"tMs":3417,"delta":"3v\",\"w3l\"]"}
+{"tMs":3451,"delta":"},{\"id\":\"w3"}
+{"tMs":3484,"delta":"v\",\"component\":\"Text\",\""}
+{"tMs":3518,"delta":"text\":\"2,400\"},"}
+{"tMs":3553,"delta":"{\"id\":\"w3l"}
+{"tMs":3585,"delta":"\",\"component\":\"Text\",\"vari"}
+{"tMs":3618,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":3651,"delta":"\"W41\"},{\"id"}
+{"tMs":3685,"delta":"\":\"w4\",\"component\":\""}
+{"tMs":3718,"delta":"Column\",\"align\":\"center\",\""}
+{"tMs":3751,"delta":"children\":[\"w4v\",\"w"}
+{"tMs":3785,"delta":"4l\"]},{\"id"}
+{"tMs":3818,"delta":"\":\"w4v\",\"component\":"}
+{"tMs":3852,"delta":"\"Text\",\"text\":\"3"}
+{"tMs":3885,"delta":",180\"},{\"id\":"}
+{"tMs":3919,"delta":"\"w4l\",\"component\":\""}
+{"tMs":3952,"delta":"Text\",\"variant\":\"ca"}
+{"tMs":3986,"delta":"ption\",\"text\":\"W42 "}
+{"tMs":4018,"delta":"(this week)\"},{\""}
+{"tMs":4055,"delta":"id\":\"listTitle\",\""}
+{"tMs":4085,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":4119,"delta":"\"Past sessions\"},"}
+{"tMs":4152,"delta":"{\"id\":\"list\",\"component"}
+{"tMs":4185,"delta":"\":\"List\",\"children\":{\""}
+{"tMs":4218,"delta":"path\":\"/sessions\",\""}
+{"tMs":4252,"delta":"componentId\":\"sC"}
+{"tMs":4288,"delta":"ard\"}},{\"id\":"}
+{"tMs":4319,"delta":"\"sCard\",\"component\":\""}
+{"tMs":4352,"delta":"Card\",\"child\":\"sB"}
+{"tMs":4386,"delta":"tn\"},{\"id\":"}
+{"tMs":4419,"delta":"\"sBtn\",\"component\":"}
+{"tMs":4453,"delta":"\"Button\",\"vari"}
+{"tMs":4485,"delta":"ant\":\"bor"}
+{"tMs":4519,"delta":"derless\",\"child\":\"sC"}
+{"tMs":4553,"delta":"ol\",\"action\":{\"event\":"}
+{"tMs":4586,"delta":"{\"name\":\"open_session"}
+{"tMs":4619,"delta":"\",\"context\":{\"date\":{"}
+{"tMs":4652,"delta":"\"@path\":\"date\"}"}
+{"tMs":4686,"delta":"}}}},{\"id\":"}
+{"tMs":4719,"delta":"\"sCol\",\"component\":\""}
+{"tMs":4752,"delta":"Column\",\"children\":[\"sT"}
+{"tMs":4786,"delta":"op\",\"sSt"}
+{"tMs":4820,"delta":"ats\"]},{\"id\":"}
+{"tMs":4852,"delta":"\"sTop\",\"component\":\""}
+{"tMs":4885,"delta":"Row\",\"justify\":\"sp"}
+{"tMs":4919,"delta":"aceBetween\",\"children\":"}
+{"tMs":4954,"delta":"[\"sName"}
+{"tMs":4985,"delta":"\",\"sDate\"]},{"}
+{"tMs":5019,"delta":"\"id\":\"sName\",\"component"}
+{"tMs":5052,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":5085,"delta":"\"@path\":\"name\"}"}
+{"tMs":5119,"delta":"},{\"id\":\"sD"}
+{"tMs":5153,"delta":"ate\",\"component\":\"Text\",\""}
+{"tMs":5186,"delta":"variant\":\"caption\",\"text"}
+{"tMs":5219,"delta":"\":{\"@path\":\"date"}
+{"tMs":5253,"delta":"\"}},{\"id\":\""}
+{"tMs":5286,"delta":"sStats\",\"component\":\""}
+{"tMs":5320,"delta":"Row\",\"justify\":\"spa"}
+{"tMs":5353,"delta":"ceBetween\",\"children\":[\""}
+{"tMs":5386,"delta":"sMin\",\"sJumps"}
+{"tMs":5419,"delta":"\",\"sBest\"]},{"}
+{"tMs":5453,"delta":"\"id\":\"sMin\",\""}
+{"tMs":5486,"delta":"component\":\"Text\",\"vari"}
+{"tMs":5519,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":5553,"delta":"{\"@call\":\"format"}
+{"tMs":5587,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":5620,"delta":"\"${minutes} min\""}
+{"tMs":5653,"delta":"}}},{\"id\":\""}
+{"tMs":5687,"delta":"sJumps\",\"component\":\""}
+{"tMs":5723,"delta":"Text\",\"variant\":\"ca"}
+{"tMs":5756,"delta":"ption\",\"text\":{\"@call"}
+{"tMs":5788,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":5824,"delta":"{\"value\":\"${jum"}
+{"tMs":5853,"delta":"ps} jumps\"}}"}
+{"tMs":5886,"delta":"},{\"id\":\"sB"}
+{"tMs":5919,"delta":"est\",\"component\":\"Text\",\""}
+{"tMs":5956,"delta":"variant\":\"caption\",\"text"}
+{"tMs":5986,"delta":"\":{\"@call\":\"form"}
+{"tMs":6019,"delta":"atString\",\"args\":{\"value"}
+{"tMs":6053,"delta":"\":\"Best run "}
+{"tMs":6086,"delta":"${best} without"}
+{"tMs":6119,"delta":" a miss\"}}},{"}
+{"tMs":6153,"delta":"\"id\":\"nav\",\"component"}
+{"tMs":6186,"delta":"\":\"Row\",\"justify\":"}
+{"tMs":6220,"delta":"\"spaceEvenly"}
+{"tMs":6253,"delta":"\",\"children\":[\"homeBt"}
+{"tMs":6286,"delta":"n\",\"start"}
+{"tMs":6319,"delta":"Btn\"]},{\""}
+{"tMs":6352,"delta":"id\":\"homeBtn"}
+{"tMs":6386,"delta":"\",\"component\":\"Button\",\"child"}
+{"tMs":6420,"delta":"\":\"homeT"}
+{"tMs":6453,"delta":"xt\",\"action\":{\"event"}
+{"tMs":6486,"delta":"\":{\"name\":\"open_"}
+{"tMs":6519,"delta":"home\"}}},{\"id"}
+{"tMs":6553,"delta":"\":\"homeTxt\",\""}
+{"tMs":6586,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":6619,"delta":"\"Home\"},{\"id"}
+{"tMs":6653,"delta":"\":\"startBtn\",\"component"}
+{"tMs":6686,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":6721,"delta":"\"primary\",\"child\":\"start"}
+{"tMs":6753,"delta":"Txt\",\"action\":{\""}
+{"tMs":6786,"delta":"event\":{\"name\":\"start"}
+{"tMs":6820,"delta":"_session\"}}},{\""}
+{"tMs":6853,"delta":"id\":\"startTxt\",\""}
+{"tMs":6886,"delta":"component\":\"Text"}
+{"tMs":6919,"delta":"\",\"text\":\"Start today's"}
+{"tMs":6955,"delta":" Intervals\"}],\""}
+{"tMs":6986,"delta":"dataModel\":{\"s"}
+{"tMs":7019,"delta":"essions\":[{\"date\":"}
+{"tMs":7053,"delta":"\"Fri 13 "}
+{"tMs":7086,"delta":"Nov\",\"name\":\"Int"}
+{"tMs":7120,"delta":"ervals\",\"minutes\":8"}
+{"tMs":7153,"delta":",\"jumps\":912,"}
+{"tMs":7186,"delta":"\"best\":148},{\"date"}
+{"tMs":7220,"delta":"\":\"Wed 11 "}
+{"tMs":7253,"delta":"Nov\",\"name\":\""}
+{"tMs":7286,"delta":"Endurance\",\"minutes\":"}
+{"tMs":7320,"delta":"12,\"jumps\":1"}
+{"tMs":7353,"delta":"304,\"best\":210},{"}
+{"tMs":7386,"delta":"\"date\":\"Mon "}
+{"tMs":7419,"delta":"9 Nov\",\"name\":"}
+{"tMs":7453,"delta":"\"Footwork\",\"minut"}
+{"tMs":7486,"delta":"es\":6,\"jumps"}
+{"tMs":7520,"delta":"\":640,\"best\":96},"}
+{"tMs":7553,"delta":"{\"date\":\"Sat"}
+{"tMs":7586,"delta":" 7 Nov\",\"name"}
+{"tMs":7621,"delta":"\":\"Intervals\",\"min"}
+{"tMs":7653,"delta":"utes\":8,\"jum"}
+{"tMs":7687,"delta":"ps\":880,\"best\":131"}
+{"tMs":7720,"delta":"}]}}}"}
