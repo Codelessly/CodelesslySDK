@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 151. Still to rebuild: 13.**
+**Here: 164. Still to rebuild: 0.**
 
 ## Here
 
@@ -49,6 +49,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
 | DatePicker |  | datePicker |
+| DateTimelineAxis | DateTimelineAxis |  |
 | Dialog | Dialog | confirm action / modal |
 | DiffStatsBadge | DiffStatsBadge |  |
 | DiffViewer | DiffViewer |  |
@@ -58,6 +59,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | DropdownMultiselect | DropdownMultiselect |  |
 | EmptyState | EmptyState |  |
 | ErrorBar | ErrorBar |  |
+| ExtensionChipsInput | ExtensionChipsInput |  |
 | FeatureBulletItem | FeatureBulletItem |  |
 | Field | Field |  |
 | FileListItem | FileListItem |  |
@@ -67,8 +69,10 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | FileUploader | FileUploader |  |
 | FilterLegend | FilterLegend |  |
 | FloatingActionButton |  | floatingActionButton |
+| FolderCard | FolderCard |  |
 | FullWidthSearchInput | FullWidthSearchInput |  |
 | HeaderSearchInput | HeaderSearchInput |  |
+| HierarchicalPicker | HierarchicalPicker |  |
 | HistoryTimeline | HistoryTimeline |  |
 | Hyperlink | Hyperlink |  |
 | IconBox | IconBox |  |
@@ -91,6 +95,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | NotePopover | NotePopover |  |
 | NotificationBadge | NotificationBadge |  |
 | NumberInput | NumberInput |  |
+| NumberPresetInput | NumberPresetInput |  |
 | OnboardingBanner | OnboardingBanner |  |
 | OptionIcon | OptionIcon |  |
 | PageControl | PageControl |  |
@@ -99,14 +104,18 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | PaneToolbar | PaneToolbar |  |
 | PersonChip | PersonChip |  |
 | ProgressIndicator | ProgressBar | progressBar |
+| ProjectSelector | ProjectSelector |  |
 | PromptBanner | PromptBanner |  |
 | PromptInput | PromptInput |  |
+| PromptInputWithBanner | PromptInputWithBanner |  |
 | ProviderCard | ProviderCard |  |
 | ProviderIcon | ProviderIcon |  |
 | ProviderPill | ProviderPill |  |
 | PulsingDots | PulsingDots |  |
 | RadialProgress | RadialProgress |  |
 | RadioButton | Radio | radio |
+| ReorderableList | ReorderableList |  |
+| ReorderGhost | ReorderGhost |  |
 | ResizableRow | ResizableRow |  |
 | ResourceCard | ResourceCard |  |
 | ResourceChip | ResourceChip |  |
@@ -141,10 +150,12 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | StatusIndicator | StatusIndicator |  |
 | StepIndicator | StepIndicator |  |
 | Stepper | Stepper |  |
+| SuggestionActionObject | SuggestionActionObject |  |
 | SuggestionReviewItem | SuggestionReviewItem |  |
 | Switch | Switch | switch |
 | TabBarWithBadges | TabBarWithBadges |  |
 | Table |  | tableView |
+| TabOverflowScroll | TabOverflowScroll |  |
 | TabToggle | TabToggle |  |
 | Terminal | Terminal |  |
 | TextArea | TextArea | textField (maxLines) |
@@ -157,38 +168,41 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | TimePicker |  | timePicker |
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
+| Toolbar | Toolbar |  |
 | Tooltip | Tooltip | tooltip behavior |
 | Tree | Tree |  |
 | TrialBanner | TrialBanner |  |
 | UpgradeButton | UpgradeButton |  |
 | UserMenu | UserMenu |  |
 | VariableContractHover | VariableContractHover |  |
+| VariableContractList | VariableContractList |  |
 | ViewerDialog | ViewerDialog |  |
 | WindowToolbar | WindowToolbar |  |
 | WorkspaceSwitcher | WorkspaceSwitcher |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
 
-## Still to rebuild
+## Where a rebuilt component is less than its source
 
-In the order planned: what generated UI reaches for first, then the application chrome.
+All 164 are here. These are not one-to-one, and say so in their own doc lines:
 
-### Cards and rows (1)
-
-FolderCard
-
-### Inputs (4)
-
-NumberPresetInput, ExtensionChipsInput, HierarchicalPicker, PromptInputWithBanner
-
-### Navigation and chrome (2)
-
-TabOverflowScroll, Toolbar
-
-### Menus and overlays (1)
-
-ProjectSelector
-
-### Data and specialized (5)
-
-DateTimelineAxis, ReorderableList, ReorderGhost, SuggestionActionObject, VariableContractList
+- **Menus and pickers open in place.** Combobox, DropdownMultiselect, IconSelect, NumberPresetInput, ProjectSelector and
+  NotePopover open their panel under the trigger, in the layout, where the source floats it over the page. MenuPopover,
+  ContextMenu, SortMenu, UserMenu, WorkspaceSwitcher, ModelSelectMenu, CommandPalette and the two small context menus
+  are the surfaces only: the host shows them (a modal action, a stack).
+- **Rows come from lists of text.** A component's props are text, numbers, booleans and lists of text, so a component
+  that takes a list of objects in the source takes parallel lists here (labels, icons, badges, depths), or is split into
+  a container and a row component (StatusCardList and StatusCard, RunHistoryList and RunRecordRow, MenuPopover and
+  MenuItem). BatchProgressBar is one operation; stack one per operation.
+- **Trees do not fold.** Tree, FileTree, HierarchicalPicker and NestedTaskLedger show every row at its depth; their
+  chevrons mark a row that holds others and do not collapse it.
+- **Parts left out.** FolderCard has no settings rows, menu, triggers or git line. TrialBanner is the compact bar, not
+  the prominent card. ImageGallery is the grid, not the full-screen viewer. Toolbar is one generic bar of tools, not the
+  four editor presets. CollapsibleSection asks its host for the rest of its items rather than hiding rows itself.
+  SuggestionReviewItem has no evidence or details section. VariableContractHover and VariableContractList show no JSON
+  schema.
+- **Dragging.** ResizableRow takes its first pane's width from the call and has no drag of its own. DateTimelineAxis
+  spaces its ticks evenly, not by date, and does not pan. TabOverflowScroll scrolls by hand; its chevron is a hint, not
+  a button. ReorderableList does reorder by its grips.
+- **Monospace** is asked for by name ("monospace"); the render tool has no such font and draws those texts in the sans
+  face, with a `font_fallback` warning. An app that ships a monospace font gets it.

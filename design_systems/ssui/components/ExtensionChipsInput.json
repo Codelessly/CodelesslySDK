@@ -1,0 +1,438 @@
+{
+ "schema": 3,
+ "id": "ExtensionChipsInput",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "ExtensionChipsInput",
+  "doc": "A list of file extensions (.dart, .ts): type one and add it; each shows as a chip with an x. The list is kept in your list variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "list",
+      "flutter": "List<String>",
+      "item": {
+       "kind": "string",
+       "flutter": "String"
+      }
+     }
+    },
+    "default": "",
+    "doc": "The name of your list variable holding the extensions."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Add an extension (.ts)",
+    "doc": "Shown in the empty field."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    }
+   }
+  ]
+ },
+ "variables": {
+  "column": [
+   {
+    "name": "draft",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Two",
+   "size": [
+    280,
+    72
+   ],
+   "props": {
+    "value": [
+     ".dart",
+     ".ts"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "box",
+    "chips"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 72
+    }
+   }
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "strut",
+    "boxContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     10,
+     0,
+     4,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "radius": 8
+   },
+   "states": {
+    "focused": {
+     "box": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "focusBorder"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 34
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 13
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 13
+     }
+    },
+    "cursorColor": "primary"
+   },
+   "bind": {
+    "props.initialValue": "${draft}",
+    "props.decoration.hintText": "${props.placeholder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "draft",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= trim(result) == '' || contains(props.value, lower(trim(result))) ? props.value : append(props.value, lower(trim(result)))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "draft",
+       "value": ""
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "add": {
+   "type": "row",
+   "children": [
+    "plus"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "tooltip": "Add",
+   "states": {
+    "hovered": {
+     "add": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "trim(draft) != ''"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= contains(props.value, lower(trim(draft))) ? props.value : append(props.value, lower(trim(draft)))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "draft",
+       "value": ""
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "plus": {
+   "type": "icon",
+   "props": {
+    "icon": "add",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "chips": {
+   "type": "listView",
+   "children": [
+    "chip"
+   ],
+   "props": {
+    "wrap": true,
+    "wrapSpacing": 6,
+    "runSpacing": 6,
+    "scrollable": false,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 26
+    }
+   },
+   "bind": {
+    "data": "${props.value}",
+    "visible": "${= length(props.value) > 0}"
+   }
+  },
+  "chip": {
+   "type": "row",
+   "children": [
+    "ext",
+    "remove"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 26
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryTintBorder"
+     }
+    ],
+    "radius": 6
+   }
+  },
+  "ext": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "remove": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "layout": {
+    "width": {
+     "hug": 12
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= without(props.value, item)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "secondaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "boxContent": {
+   "type": "row",
+   "children": [
+    "field",
+    "add"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

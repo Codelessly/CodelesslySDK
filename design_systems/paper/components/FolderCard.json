@@ -1,0 +1,783 @@
+{
+ "schema": 3,
+ "id": "FolderCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "FolderCard",
+  "doc": "A folder an automation works in: its name, path and state, how far a run is, when it last ran, a few figures and an error, with the call's actions at the foot. Fires onPressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Folder",
+    "doc": "Its name.",
+    "required": true
+   },
+   {
+    "key": "path",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Where it is."
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "setupNeeded",
+      "running",
+      "synced",
+      "paused",
+      "errored"
+     ]
+    },
+    "default": "synced",
+    "doc": "setupNeeded, running, synced, paused or errored."
+   },
+   {
+    "key": "progress",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "While running: how far, 0 to 100."
+   },
+   {
+    "key": "progressLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "While running: what it is doing."
+   },
+   {
+    "key": "lastRun",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "When it last ran."
+   },
+   {
+    "key": "stats",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A few short figures (\"128 files\", \"3 rules\")."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What went wrong (empty: nothing)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "folder",
+    "doc": "The plate's icon."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ],
+  "slots": [
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Synced",
+   "size": [
+    320,
+    110
+   ],
+   "props": {
+    "title": "Design docs",
+    "path": "~/work/design",
+    "lastRun": "Synced 2h ago",
+    "stats": [
+     "128 files",
+     "3 rules"
+    ]
+   }
+  },
+  {
+   "name": "Running",
+   "size": [
+    320,
+    110
+   ],
+   "props": {
+    "title": "Invoices",
+    "path": "~/finance/invoices",
+    "status": "running",
+    "progress": 40,
+    "progressLabel": "Reading 12 of 30"
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": [
+    "top",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "clip": "antiAlias"
+   }
+  },
+  "top": {
+   "type": "column",
+   "children": [
+    "head",
+    "run",
+    "last",
+    "figures",
+    "fault"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 318
+    },
+    "height": {
+     "hug": 80
+    },
+    "padding": [
+     12,
+     12,
+     12,
+     10
+    ]
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "plate",
+    "names",
+    "state"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.status == 'synced' ? theme.colors.successTint : (props.status == 'errored' ? theme.colors.errorTint : (props.status == 'setupNeeded' ? theme.colors.warningTint : (props.status == 'paused' ? theme.colors.tertiaryBackground : theme.colors.primaryTint)))}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "folder",
+    "color": "primary",
+    "size": 15
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "props.color": "${= props.status == 'synced' ? theme.success : (props.status == 'errored' ? theme.error : (props.status == 'setupNeeded' ? theme.warning : (props.status == 'paused' ? theme.colors.tertiaryText : theme.primary)))}"
+   }
+  },
+  "names": {
+   "type": "column",
+   "children": [
+    "title",
+    "pathRow"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.15,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.2
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.status == 'paused' ? theme.colors.tertiaryText : theme.colors.primaryText}"
+   }
+  },
+  "pathRow": {
+   "type": "row",
+   "children": [
+    "pathIcon",
+    "path"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.path != ''}"
+   }
+  },
+  "pathIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "folder_open",
+    "color": "tertiaryText",
+    "size": 10
+   },
+   "layout": {
+    "width": 10,
+    "height": 10
+   }
+  },
+  "path": {
+   "type": "text",
+   "props": {
+    "text": "${props.path}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "state": {
+   "type": "row",
+   "children": [
+    "stateDot",
+    "stateText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "stateDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.status == 'synced' ? theme.success : (props.status == 'errored' ? theme.error : (props.status == 'setupNeeded' ? theme.warning : (props.status == 'paused' ? theme.colors.tertiaryText : theme.primary)))}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "success"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "stateText": {
+   "type": "text",
+   "props": {
+    "text": "${= props.status == 'synced' ? 'Synced' : (props.status == 'errored' ? 'Error' : (props.status == 'setupNeeded' ? 'Needs setup' : (props.status == 'paused' ? 'Paused' : 'Running')))}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.status == 'synced' ? theme.success : (props.status == 'errored' ? theme.error : (props.status == 'setupNeeded' ? theme.warning : (props.status == 'paused' ? theme.colors.tertiaryText : theme.primary)))}"
+   }
+  },
+  "run": {
+   "type": "column",
+   "children": [
+    "track",
+    "runLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "bind": {
+    "visible": "${= props.status == 'running'}"
+   }
+  },
+  "track": {
+   "type": "row",
+   "children": [
+    "fill",
+    "rest"
+   ],
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "clip": "antiAlias",
+    "radius": 9999
+   }
+  },
+  "fill": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "visible": "${= props.progress > 0}",
+    "layout.flex": "${= max(1, round(clamp(props.progress, 0, 100) * 10))}"
+   }
+  },
+  "rest": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 1
+   },
+   "bind": {
+    "visible": "${= props.progress < 100}",
+    "layout.flex": "${= max(1, round((100 - clamp(props.progress, 0, 100)) * 10))}"
+   }
+  },
+  "runLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.progressLabel}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.progressLabel != ''}"
+   }
+  },
+  "last": {
+   "type": "row",
+   "children": [
+    "clock",
+    "lastText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.lastRun != '' && props.status != 'running'}"
+   }
+  },
+  "clock": {
+   "type": "icon",
+   "props": {
+    "icon": "schedule",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  },
+  "lastText": {
+   "type": "text",
+   "props": {
+    "text": "${props.lastRun}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 270
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "figures": {
+   "type": "listView",
+   "children": [
+    "figure"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": 14
+   },
+   "bind": {
+    "data": "${props.stats}",
+    "visible": "${= length(props.stats) > 0}"
+   }
+  },
+  "figure": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "fill": 14
+    }
+   }
+  },
+  "fault": {
+   "type": "column",
+   "children": [
+    "faultBar",
+    "faultRow"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "bind": {
+    "visible": "${= props.error != ''}"
+   }
+  },
+  "faultBar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "error"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "faultRow": {
+   "type": "row",
+   "children": [
+    "faultIcon",
+    "faultText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 294
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "faultIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "error_outline",
+    "color": "error",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "faultText": {
+   "type": "text",
+   "props": {
+    "text": "${props.error}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1,
+     "decoration": "underline",
+     "decorationStyle": "dotted"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 270
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 318
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     0,
+     8,
+     6
+    ]
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  }
+ }
+}

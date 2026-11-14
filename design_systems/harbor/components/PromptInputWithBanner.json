@@ -1,0 +1,362 @@
+{
+ "schema": 3,
+ "id": "PromptInputWithBanner",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "PromptInputWithBanner",
+  "doc": "A prompt box under a banner that suggests what to ask: a title, a line and a few suggestions to press. Its text is kept in your variable. Fires onSubmitted and onSuggestion with the pressed suggestion.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "What would you like to do?",
+    "doc": "The banner's title."
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The line under it."
+   },
+   {
+    "key": "suggestions",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Summarize this page",
+     "Draft a reply",
+     "Find action items"
+    ],
+    "doc": "What it suggests."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Ask anything...",
+    "doc": "Shown in the empty prompt box."
+   },
+   {
+    "key": "showBanner",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False hides the banner (once a conversation has begun)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSuggestion",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    360,
+    190
+   ],
+   "props": {
+    "description": "Pick a starting point or write your own."
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "banner",
+    "prompt"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 190
+    }
+   }
+  },
+  "banner": {
+   "type": "column",
+   "children": [
+    "title",
+    "description",
+    "chips"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 21
+   },
+   "bind": {
+    "visible": "${props.showBanner}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 15.5,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 328
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 328
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.description != ''}"
+   }
+  },
+  "chips": {
+   "type": "listView",
+   "children": [
+    "chip"
+   ],
+   "props": {
+    "wrap": true,
+    "wrapSpacing": 8,
+    "runSpacing": 9,
+    "scrollable": false,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "fill": 328
+    },
+    "height": {
+     "hug": 29
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "data": "${props.suggestions}",
+    "visible": "${= length(props.suggestions) > 0}"
+   }
+  },
+  "chip": {
+   "type": "row",
+   "children": [
+    "chipText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 29
+    },
+    "padding": [
+     14,
+     7,
+     14,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 12
+   },
+   "states": {
+    "hovered": {
+     "chip": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "chip": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSuggestion",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "chipText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "prompt": {
+   "type": "PromptInput",
+   "props": {
+    "value": "props.value"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 66
+    }
+   },
+   "bind": {
+    "props.placeholder": "${props.placeholder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onSubmitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

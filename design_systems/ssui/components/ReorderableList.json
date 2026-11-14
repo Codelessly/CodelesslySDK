@@ -1,0 +1,530 @@
+{
+ "schema": 3,
+ "id": "ReorderableList",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "ReorderableList",
+  "doc": "A list you put in order by dragging its rows by their grips, with a count, a + and an x per row. The list is kept in your list variable. Fires onChanged, and onAdd when + is pressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Items",
+    "doc": "The header's title."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "list",
+      "flutter": "List<String>",
+      "item": {
+       "kind": "string",
+       "flutter": "String"
+      }
+     }
+    },
+    "default": "",
+    "doc": "The name of your list variable holding the rows."
+   },
+   {
+    "key": "emptyMessage",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Nothing here yet.",
+    "doc": "Shown with no rows."
+   },
+   {
+    "key": "addable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The + in the header."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    }
+   },
+   {
+    "key": "onAdd"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three",
+   "size": [
+    280,
+    130
+   ],
+   "props": {
+    "title": "Steps",
+    "value": [
+     "Fetch",
+     "Transform",
+     "Publish"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "column",
+   "children": [
+    "header",
+    "list",
+    "none"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 130
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "clip": "antiAlias"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "title",
+    "count",
+    "gap",
+    "add"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 278
+    },
+    "height": {
+     "hug": 40
+    },
+    "padding": [
+     14,
+     6,
+     6,
+     6
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "count": {
+   "type": "row",
+   "children": [
+    "countText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": {
+     "hug": 15
+    },
+    "padding": [
+     6,
+     1,
+     6,
+     1
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "countText": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.value)}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 6
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "gap": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 20
+    },
+    "height": 28
+   }
+  },
+  "add": {
+   "type": "row",
+   "children": [
+    "plus"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "tooltip": "Add",
+   "bind": {
+    "visible": "${props.addable}"
+   },
+   "states": {
+    "hovered": {
+     "add": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAdd"
+      }
+     ]
+    }
+   ]
+  },
+  "plus": {
+   "type": "icon",
+   "props": {
+    "icon": "add",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "row"
+   ],
+   "props": {
+    "scrollable": false,
+    "reorder": {
+     "start": "handle"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 278
+    },
+    "height": {
+     "hug": 90
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     4
+    ]
+   },
+   "bind": {
+    "data": "${props.value}",
+    "visible": "${= length(props.value) > 0}"
+   },
+   "actions": [
+    {
+     "trigger": "reorder",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= move(props.value, result.from, result.to)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "row": {
+   "type": "row",
+   "children": [
+    "grip",
+    "label",
+    "remove"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 278
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "radius": 6
+   },
+   "states": {
+    "hovered": {
+     "row": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "grip": {
+   "type": "row",
+   "children": [
+    "gripIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 22
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": 4
+   },
+   "reorderHandle": true
+  },
+  "gripIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "drag_indicator",
+    "color": "tertiaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.35,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "remove": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": 4
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "tooltip": "Remove",
+   "states": {
+    "hovered": {
+     "remove": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= removeAt(props.value, index)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "tertiaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "none": {
+   "type": "text",
+   "props": {
+    "text": "${props.emptyMessage}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 246
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": 16
+   },
+   "bind": {
+    "visible": "${= length(props.value) == 0}"
+   }
+  }
+ }
+}

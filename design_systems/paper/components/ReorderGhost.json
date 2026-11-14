@@ -1,0 +1,80 @@
+{
+ "schema": 3,
+ "id": "ReorderGhost",
+ "roots": [
+  "ghost"
+ ],
+ "widget": {
+  "type": "ReorderGhost",
+  "doc": "The lifted look of something being dragged: its children on a rounded surface with a deep shadow. Use it as a drag's feedback.",
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    220,
+    40
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "ghost": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "opacity": 0.96,
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#2E0F172A",
+      "offset": [
+       0,
+       12
+      ],
+      "blurRadius": 28,
+      "spreadRadius": -6
+     },
+     {
+      "type": "dropShadow",
+      "color": "#1A0F172A",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}
