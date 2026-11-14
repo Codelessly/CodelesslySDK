@@ -2014,6 +2014,116 @@ add(component(
     },
 ))
 
+# --- batch 9: where you are: breadcrumb, page dots, steps ------------------------------------------------------
+
+# Breadcrumb (Breadcrumb.tsx): the path to this page, 14/500, 8 px apart: earlier levels in secondary text (primary
+# on hover), a 16 px tertiary chevron between, the last level in primary text; an optional home icon button first.
+add(component(
+    'Breadcrumb',
+    'The path to this page: each level a link, the last one where you are. Fires onNavigate with the level\'s label ("Home" for the icon).',
+    'nav',
+    props=[prop('items', STRINGS, ['Projects', 'Design system', 'Components'], 'The levels, outermost first.', required=True),
+           prop('showHomeIcon', BOOL, False, 'A home icon before the first level.')],
+    events=[{'key': 'onNavigate', 'payload': STRING}],
+    previews=[preview('Three', 300, 24, items=['Projects', 'Design system', 'Components']),
+              preview('Home', 320, 24, items=['Settings', 'Profile'], showHomeIcon=True)],
+    nodes={
+        'nav': {'type': 'row', 'children': ['home', 'homeSeparator', 'levels'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'hug': 300}, 'height': {'hug': 24}}},
+        'home': {'type': 'row', 'children': ['homeIcon'], 'layout': {'width': {'hug': 24}, 'height': {'hug': 24}, 'padding': 4},
+                 'decoration': {'radius': 6}, 'bind': {'visible': '${props.showHomeIcon}'},
+                 'states': {'hovered': {'home': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}},
+                                        'homeIcon': {'props': {'color': 'primaryText'}}}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onNavigate', 'value': 'Home'}]}]},
+        'homeIcon': icon('home', 'secondaryText', 16),
+        'homeSeparator': {**icon('chevron_right', 'tertiaryText', 16), 'bind': {'visible': '${props.showHomeIcon}'}},
+        'levels': {'type': 'listView', 'children': ['level'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False, 'spacing': 8},
+                   'layout': {'width': {'hug': 260}, 'height': 20}, 'bind': {'data': '${props.items}'}},
+        'level': {'type': 'row', 'children': ['label', 'separator'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                  'layout': {'width': {'hug': 80}, 'height': {'fill': 20}},
+                  'bind': {'selected': '${= index == length(props.items) - 1}'},
+                  'states': {'hovered': {'label': {'props': {'style': {'color': 'primaryText'}}}},
+                             'selected': {'label': {'props': {'style': {'color': 'primaryText'}}}}},
+                  'actions': [{'trigger': {'type': 'click', 'when': 'index < length(props.items) - 1'},
+                               'actions': [{'type': 'componentEvent', 'event': 'onNavigate', 'value': '${item}'}]}]},
+        'label': text('${item}', style(14, 500, 'secondaryText', 1.4), {'hug': 60}, {'hug': 20}),
+        'separator': {**icon('chevron_right', 'tertiaryText', 16), 'bind': {'visible': '${= index < length(props.items) - 1}'}},
+    },
+))
+
+# PageControl (PageControl.tsx): which page of a carousel: a row of 4 px dots 4 px apart on the tertiary
+# background, the current one a 12 px brand bar; all with radius 2.
+add(component(
+    'PageControl',
+    'Which page of several: small dots, the current one a wider brand bar. Fires onPageTapped with the index.',
+    'dots',
+    props=[prop('currentPage', NUMBER, 0, 'The current page, from 0.', required=True),
+           prop('totalPages', NUMBER, 3, 'How many pages.', required=True)],
+    events=[{'key': 'onPageTapped', 'payload': NUMBER}],
+    previews=[preview('Second of five', 48, 4, currentPage=1, totalPages=5)],
+    nodes={
+        'dots': {'type': 'row', 'children': ['list'], 'layout': {'width': {'hug': 40}, 'height': {'hug': 4}}},
+        'list': {'type': 'listView', 'children': ['dot'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False, 'spacing': 4},
+                 'layout': {'width': {'hug': 40}, 'height': 4, 'padding': [2, 0, 2, 0]},
+                 'bind': {'data': '${= range(max(0, props.totalPages))}'}},
+        'dot': {'type': 'box', 'layout': {'width': 4, 'height': {'fill': 4}},
+                'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 2},
+                'bind': {'layout.width': '${= item == props.currentPage ? 12 : 4}',
+                         'decoration.fills[0].color': '${= item == props.currentPage ? theme.primary : theme.colors.tertiaryBackground}'},
+                'transitions': [{'property': 'layout.width', 'duration': 200, 'curve': 'easeInOut'}],
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPageTapped', 'value': '${item}'}]}]},
+    },
+))
+
+# StepIndicator (StepIndicator.tsx, the track): steps across, each at least 120 wide: a 16 px marker (a brand disc
+# with a check when done; a 1.5 px brand ring with a 6 px dot and a 3 px soft halo when current; a bordered ring
+# when upcoming) joined to the next by a 1.5 px line (brand once done), and under it the label 11.5 on a 16 px line
+# (650 in primary text once reached, 500 tertiary before) and a detail 10.5 tertiary.
+add(component(
+    'StepIndicator',
+    'Progress through named steps: done steps checked, the current one ringed, the rest to come. Fires onStepPressed with the index.',
+    'steps',
+    props=[prop('steps', STRINGS, ['Details', 'Review', 'Confirm'], 'The steps\' names, in order.', required=True),
+           prop('current', NUMBER, 1, 'The current step, from 0 (the count: all done).', required=True),
+           prop('details', STRINGS, [], 'A muted line under each name (same order; none: no lines).')],
+    events=[{'key': 'onStepPressed', 'payload': NUMBER}],
+    previews=[preview('Second of three', 380, 44, steps=['Details', 'Review', 'Confirm'], current=1)],
+    nodes={
+        'steps': {'type': 'row', 'children': ['list'], 'layout': {'width': {'hug': 380}, 'height': {'hug': 44}}},
+        'list': {'type': 'listView', 'children': ['step'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False},
+                 'layout': {'width': {'hug': 380}, 'height': 44, 'padding': [0, 3, 0, 3]},
+                 'bind': {'data': '${props.steps}', 'layout.height': '${= length(props.details) > 0 ? 58 : 44}'}},
+        'step': {'type': 'column', 'children': ['rail', 'name', 'detail'], 'props': {'crossAxisAlignment': 'start'},
+                 'layout': {'width': 120, 'height': {'fill': 38}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onStepPressed', 'value': '${index}'}]}]},
+        'rail': {'type': 'row', 'children': ['marker', 'line'], 'props': {'crossAxisAlignment': 'center'},
+                 'layout': {'width': {'fill': 120}, 'height': 16, 'padding': [3, 0, 0, 0]}},
+        'marker': {'type': 'row', 'children': ['check', 'pip'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                   'layout': {'width': 16, 'height': 16},
+                   'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeWidth': 1.5, 'radius': 8,
+                                  'effects': [{'type': 'dropShadow', 'color': 'primaryTint', 'offset': [0, 0], 'blurRadius': 0, 'spreadRadius': 3, 'visible': False}]},
+                   'bind': {'decoration.fills[0].color': '${= index < props.current ? theme.primary : theme.colors.primaryBackground}',
+                            'decoration.strokes[0].color': '${= index <= props.current ? theme.primary : theme.colors.primaryBorder}',
+                            'decoration.effects[0].visible': '${= index == props.current}'}},
+        'check': {**icon('check', 'onAccent', 10), 'bind': {'visible': '${= index < props.current}'}},
+        'pip': {'type': 'box', 'layout': {'width': 6, 'height': 6}, 'decoration': {'fills': [{'color': 'primary'}], 'radius': 3},
+                'bind': {'visible': '${= index == props.current}'}},
+        'line': {'type': 'box', 'layout': {'width': {'fill': 80}, 'height': 1.5, 'margin': [6, 0, 6, 0]},
+                 'decoration': {'fills': [{'color': 'primaryBorder'}], 'radius': 1},
+                 'bind': {'visible': '${= index < length(props.steps) - 1}',
+                          'decoration.fills[0].color': '${= index < props.current ? theme.primary : theme.colors.primaryBorder}'}},
+        'name': {'type': 'text', 'props': {'text': '${item}', 'maxLines': 1, 'overflow': 'ellipsis',
+                                            'style': style(11.5, 500, 'tertiaryText', 16 / 11.5)},
+                 'layout': {'width': {'fill': 108}, 'height': {'hug': 16}, 'margin': [0, 6, 12, 0]},
+                 'bind': {'props.style.color': '${= index <= props.current ? theme.colors.primaryText : theme.colors.tertiaryText}',
+                          'props.style.fontWeight': '${= index <= props.current ? 600 : 500}'}},
+        'detail': {'type': 'text', 'props': {'text': "${= length(props.details) > index ? props.details[index] : ''}", 'maxLines': 1,
+                                              'overflow': 'ellipsis', 'style': style(10.5, 400, 'tertiaryText', 14 / 10.5)},
+                   'layout': {'width': {'fill': 108}, 'height': {'hug': 14}, 'margin': [0, 0, 12, 0]},
+                   'bind': {'visible': '${= length(props.details) > index}'}},
+    },
+))
+
 
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)

@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 62. Still to rebuild: 102.**
+**Here: 65. Still to rebuild: 99.**
 
 ## Here
 
@@ -20,6 +20,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | BackButton | BackButton |  |
 | Badge | Badge |  |
 | Banner | Banner |  |
+| Breadcrumb | Breadcrumb |  |
 | Button | Button | buttons (filled, outlined, text, elevated) |
 | CardActions | CardActions |  |
 | Carousel |  | pageView |
@@ -47,6 +48,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | MetaInfo | MetaInfo |  |
 | NotificationBadge | NotificationBadge |  |
 | OptionIcon | OptionIcon |  |
+| PageControl | PageControl |  |
 | Pagination |  | pagination |
 | Panel | Panel |  |
 | PersonChip | PersonChip |  |
@@ -67,6 +69,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | StatusBadge | StatusBadge |  |
 | StatusDot | StatusDot |  |
 | StatusIndicator | StatusIndicator |  |
+| StepIndicator | StepIndicator |  |
 | Switch | Switch | switch |
 | Table |  | tableView |
 | TextArea | TextArea | textField (maxLines) |
@@ -100,9 +103,9 @@ FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListI
 
 SearchBar, FullWidthSearchInput, HeaderSearchInput, Combobox, NumberInput, NumberPresetInput, Stepper, ColorInput, AuthInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
 
-### Navigation and chrome (23)
+### Navigation and chrome (20)
 
-Breadcrumb, BrowserTabs, ChipTabs, TabBarWithBadges, TabOverflowScroll, SplitPaneTabs, PageControl, StepIndicator, Sidebar, SidebarTogglePattern, NavigationMenu, CompactAppBar, WindowToolbar, SectionToolbar, PaneToolbar, Toolbar, SectionCategoryHeaderFull, StatusCategoryHeader, FilterLegend, CollapsibleSection, ScrollToBottomFAB, CanvasShell, ResizableRow
+BrowserTabs, ChipTabs, TabBarWithBadges, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, CompactAppBar, WindowToolbar, SectionToolbar, PaneToolbar, Toolbar, SectionCategoryHeaderFull, StatusCategoryHeader, FilterLegend, CollapsibleSection, ScrollToBottomFAB, CanvasShell, ResizableRow
 
 ### Menus and overlays (14)
 

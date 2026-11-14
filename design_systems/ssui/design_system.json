@@ -489,7 +489,10 @@
   "components/ProviderIcon.json",
   "components/OptionIcon.json",
   "components/ProviderCard.json",
-  "components/CardActions.json"
+  "components/CardActions.json",
+  "components/Breadcrumb.json",
+  "components/PageControl.json",
+  "components/StepIndicator.json"
  ],
  "replaces": [
   "filledButton",
