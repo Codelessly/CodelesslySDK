@@ -2,10 +2,12 @@
 // its autovalidate mode, a Form around fields, FormState.validate() as the
 // validate action, and the form's errors for a summary.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/toggles.dart' show RenderToggle;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../controls/toggles_support.dart';
 import '../support/screen.dart' as harness;
 
 const _emailValidator = r"${= value == '' ? 'Enter your email.' : !contains(value, '@') ? 'Enter a valid email.' : ''}";
@@ -148,13 +150,13 @@ void main() {
       'small': radio('small'),
       'large': radio('large'),
     }, variables: [harness.v('budget', 'small')]);
-    RadioGroup<String> groupOf(String id) => tester.widget<RadioGroup<String>>(find.byType(RadioGroup<String>).at(id == 'small' ? 0 : 1));
-    expect(groupOf('small').groupValue, 'small');
-    expect(groupOf('large').groupValue, 'small');
+    Object? groupOf(String id) => controlIn<RenderToggle>(s.tree, id).value;
+    expect(groupOf('small'), 'small');
+    expect(groupOf('large'), 'small');
     await tester.tapAt(s.center('large'));
     await tester.pumpAndSettle();
     expect(s['budget'], 'large');
-    expect(groupOf('small').groupValue, 'large', reason: 'every radio of the group follows its value');
+    expect(groupOf('small'), 'large', reason: 'every radio of the group follows its value');
   });
 
   testWidgets('arrow keys move the choice between the radios of a group, wrapping at the ends, as Flutter\'s RadioGroup does',
@@ -180,7 +182,7 @@ void main() {
     // Tab to the first radio.
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pumpAndSettle();
-    expect(Focus.of(tester.element(find.byType(Radio<String>).first)).hasFocus, isTrue);
+    expect(controlIn<RenderToggle>(s.tree, 'small').focusNode.hasFocus, isTrue);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pumpAndSettle();
     expect(s['budget'], 'medium');
@@ -196,7 +198,7 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.pumpAndSettle();
     expect(s['budget'], 'medium');
-    expect(Focus.of(tester.element(find.byType(Radio<String>).at(1))).hasFocus, isTrue, reason: 'the focus moves with the choice');
+    expect(controlIn<RenderToggle>(s.tree, 'medium').focusNode.hasFocus, isTrue, reason: 'the focus moves with the choice');
   });
 
   testWidgets('fields a list repeats inside a form belong to it: validating checks each, and the form counts them', (tester) async {

@@ -2,12 +2,15 @@
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show LayoutDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart' hide captureImage;
+import 'package:codelessly_sdk/src/render/controls/slider.dart' show RenderSlider;
+import 'package:codelessly_sdk/src/render/controls/toggles.dart' show RenderToggle;
 import 'package:codelessly_sdk/src/render/node_tree.dart' show RenderNodeDecoration;
 import 'package:codelessly_sdk/src/widgets/inputs.dart';
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../controls/toggles_support.dart';
 import '../lists/support.dart' as lists;
 import '../support/screen.dart' as harness;
 
@@ -461,7 +464,7 @@ void main() {
     var (tree, _) = await _show(tester, DocumentSource(doc));
     await tester.tapAt(_center(tester, tree, 'c'));
     await tester.pump();
-    expect(_widget<Checkbox>(tree).value, isFalse);
+    expect(controlIn<RenderToggle>(tree, 'c').value, isFalse);
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
 
@@ -469,8 +472,8 @@ void main() {
     await tester.tapAt(_center(tester, tree, 'c'));
     await tester.tapAt(_center(tester, tree, 'w'));
     await tester.pump();
-    expect(_widget<Checkbox>(tree).value, isTrue);
-    expect(_widget<Switch>(tree).value, isTrue);
+    expect(controlIn<RenderToggle>(tree, 'c').value, isTrue);
+    expect(controlIn<RenderToggle>(tree, 'w').value, isTrue);
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });
@@ -484,7 +487,7 @@ void main() {
         })));
     expect(tree.boxOf('sl')!.rectIn(view)!.size, const Size(300, 48));
     expect(tree.boxOf('sg')!.rectIn(view)!.size, const Size(200, 100));
-    expect(_widget<Slider>(tree).value, 0.5);
+    expect(controlIn<RenderSlider>(tree, 'sl').value, 0.5);
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });
