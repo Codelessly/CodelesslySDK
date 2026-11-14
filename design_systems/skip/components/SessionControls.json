@@ -1,0 +1,271 @@
+{
+ "schema": 3,
+ "id": "SessionControls",
+ "roots": [
+  "controls"
+ ],
+ "widget": {
+  "type": "SessionControls",
+  "doc": "The session's control bar: write SessionControls =paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
+  "props": [
+   {
+    "key": "paused",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "boolean",
+      "flutter": "bool"
+     }
+    },
+    "default": "",
+    "doc": "The name of your boolean variable that is true while the session is paused: the big button toggles it."
+   },
+   {
+    "key": "pause",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Pause",
+    "doc": "The big button's label while running."
+   },
+   {
+    "key": "resume",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Resume",
+    "doc": "The big button's label while paused."
+   },
+   {
+    "key": "finish",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Finish",
+    "doc": "The quiet button's label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "Finish was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Running",
+   "size": [
+    350,
+    64
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "controls": {
+   "type": "row",
+   "children": [
+    "toggle",
+    "finish"
+   ],
+   "props": {
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 210,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "toggle": {
+   "type": "row",
+   "children": [
+    "toggleIcon",
+    "toggleText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "ink"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}",
+    "decoration.effects": "${theme.shadows.cta}",
+    "decoration.fills[0].color": "${= props.paused ? theme.colors.brand : theme.colors.ink}"
+   },
+   "states": {
+    "pressed": {
+     "toggle": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.paused",
+       "value": "${= !props.paused}"
+      },
+      {
+       "type": "haptic",
+       "kind": "medium"
+      }
+     ]
+    }
+   ]
+  },
+  "toggleIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "pause_rounded",
+    "size": 26,
+    "color": "card"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "bind": {
+    "props.icon": "${= props.paused ? 'play_arrow_rounded' : 'pause_rounded'}",
+    "props.color": "${= props.paused ? theme.colors.onBrand : theme.colors.card}"
+   }
+  },
+  "toggleText": {
+   "type": "text",
+   "props": {
+    "text": "${= props.paused ? props.resume : props.pause}",
+    "style": "cta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.paused ? theme.colors.onBrand : theme.colors.card}"
+   }
+  },
+  "finish": {
+   "type": "row",
+   "children": [
+    "finishIcon",
+    "finishText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": 124,
+    "height": 64
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}"
+   },
+   "states": {
+    "pressed": {
+     "finish": {
+      "opacity": 0.7
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "finishIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "flag_rounded",
+    "size": 20,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "finishText": {
+   "type": "text",
+   "props": {
+    "text": "${props.finish}",
+    "style": {
+     "from": "cta",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

@@ -9,6 +9,7 @@ blocks/    The same two screens from home.blocks.txt and history.blocks.txt, exp
            rendered under design_systems/skip.
 variants/  The one Home document of blocks/ under three token sets: default, pink, athlete.
 renders/   The captures and the side-by-side pictures. --round keeps the bar captures as bar-<screen>-<round>.png.
+session/   The session timer screen from session.blocks.txt (and the child's), under three token sets: tool/session.py.
 """
 import json
 import os
@@ -257,6 +258,11 @@ def main():
                 ['Before: Home (notation over SSUI)', 'After: Home (notation over Skip blocks)', 'Before: History', 'After: History'],
                 f'{renders}/before-after.png')
     shutil.rmtree(tmp, ignore_errors=True)
+
+    # 5. The session screen: its sites, every state driven by taps and time, the three token sets (tool/session.py).
+    if os.path.exists(f'{POLISH}/session.blocks.txt'):
+        import session
+        session.main(rebuild=False)
 
 
 if __name__ == '__main__':

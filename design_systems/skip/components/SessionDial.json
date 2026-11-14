@@ -1,0 +1,996 @@
+{
+ "schema": 3,
+ "id": "SessionDial",
+ "roots": [
+  "dial"
+ ],
+ "widget": {
+  "type": "SessionDial",
+  "doc": "The session screen's one focal point: a big countdown ring that drains with left (seconds) on a surface that changes with phase (\"ready\" shows the jumper, \"set\" the count-in, \"work\" the bright surface, \"rest\" the calm one), with the round marks (round of rounds), the time to go, and paused:true dimming it; pass work and rest (the phase lengths in seconds).",
+  "props": [
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The line under the round marks (empty: written from the phase, e.g. \"Next: rest for 20 s\")."
+   },
+   {
+    "key": "left",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 40,
+    "doc": "Seconds left in this phase: the big number and the arc.",
+    "required": true
+   },
+   {
+    "key": "phase",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "ready",
+      "set",
+      "work",
+      "rest"
+     ]
+    },
+    "default": "work",
+    "doc": "ready (before the start: the jumper, no clock), set (the short count-in from 3), work or rest.",
+    "required": true
+   },
+   {
+    "key": "round",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "doc": "The round in progress, from 1 (0 before the first).",
+    "required": true
+   },
+   {
+    "key": "rounds",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 8,
+    "doc": "The planned rounds: one mark each.",
+    "required": true
+   },
+   {
+    "key": "work",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 40,
+    "doc": "Seconds of a work phase.",
+    "required": true
+   },
+   {
+    "key": "rest",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 20,
+    "doc": "Seconds of a rest phase.",
+    "required": true
+   },
+   {
+    "key": "paused",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Dims the dial and says Paused."
+   },
+   {
+    "key": "workLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Jump",
+    "doc": "The word over the number while working."
+   },
+   {
+    "key": "restLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Rest",
+    "doc": "The word over the number while resting."
+   },
+   {
+    "key": "setLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Get set",
+    "doc": "The word over the number during the count-in."
+   },
+   {
+    "key": "readyLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Ready",
+    "doc": "The chip over the jumper before the start."
+   },
+   {
+    "key": "audience",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "adult",
+      "kid"
+     ]
+    },
+    "default": "adult",
+    "doc": "Who the drawing is for: adult (lean, calm) or kid (rounder, playful, with confetti)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Work",
+   "size": [
+    350,
+    428
+   ],
+   "props": {
+    "left": 28,
+    "phase": "work",
+    "round": 3
+   }
+  },
+  {
+   "name": "Rest",
+   "size": [
+    350,
+    428
+   ],
+   "props": {
+    "left": 12,
+    "phase": "rest",
+    "round": 3
+   }
+  },
+  {
+   "name": "Ready",
+   "size": [
+    350,
+    428
+   ],
+   "props": {
+    "left": 3,
+    "phase": "ready",
+    "round": 0
+   }
+  },
+  {
+   "name": "Paused",
+   "size": [
+    350,
+    428
+   ],
+   "props": {
+    "left": 28,
+    "phase": "work",
+    "round": 3,
+    "paused": true
+   }
+  }
+ ],
+ "nodes": {
+  "dial": {
+   "type": "stack",
+   "children": [
+    "bgReady",
+    "bgWork",
+    "bgRest",
+    "glow",
+    "content"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 428
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "panel"
+     }
+    ],
+    "radius": 32,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.hero}",
+    "decoration.effects": "${theme.shadows.hero}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 70,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "bgReady": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "heroA"
+       },
+       {
+        "position": 1,
+        "color": "heroB"
+       }
+      ]
+     },
+     {
+      "type": "noise",
+      "noise": {
+       "baseFrequency": 0.9,
+       "numOctaves": 2,
+       "seed": 7
+      },
+      "color": "#FFFFFFFF",
+      "opacity": 0.08,
+      "blendMode": "overlay"
+     }
+    ]
+   },
+   "bind": {
+    "opacity": "${= props.phase == 'ready' ? (props.paused ? 0.18 : 1) : 0}"
+   },
+   "transitions": [
+    {
+     "property": "opacity",
+     "duration": 420,
+     "curve": "easeOutCubic"
+    }
+   ]
+  },
+  "bgWork": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "workA"
+       },
+       {
+        "position": 1,
+        "color": "workB"
+       }
+      ]
+     },
+     {
+      "type": "noise",
+      "noise": {
+       "baseFrequency": 0.9,
+       "numOctaves": 2,
+       "seed": 7
+      },
+      "color": "#FFFFFFFF",
+      "opacity": 0.08,
+      "blendMode": "overlay"
+     }
+    ]
+   },
+   "bind": {
+    "opacity": "${= (props.phase == 'set' || props.phase == 'work') ? (props.paused ? 0.18 : 1) : 0}"
+   },
+   "transitions": [
+    {
+     "property": "opacity",
+     "duration": 420,
+     "curve": "easeOutCubic"
+    }
+   ]
+  },
+  "bgRest": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "restA"
+       },
+       {
+        "position": 1,
+        "color": "restB"
+       }
+      ]
+     },
+     {
+      "type": "noise",
+      "noise": {
+       "baseFrequency": 0.9,
+       "numOctaves": 2,
+       "seed": 7
+      },
+      "color": "#FFFFFFFF",
+      "opacity": 0.08,
+      "blendMode": "overlay"
+     }
+    ]
+   },
+   "bind": {
+    "opacity": "${= props.phase == 'rest' ? (props.paused ? 0.18 : 1) : 0}"
+   },
+   "transitions": [
+    {
+     "property": "opacity",
+     "duration": 420,
+     "curve": "easeOutCubic"
+    }
+   ]
+  },
+  "glow": {
+   "type": "box",
+   "layout": {
+    "width": 280,
+    "height": 280,
+    "x": {
+     "end": -70
+    },
+    "y": {
+     "start": -90
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroGlow"
+     }
+    ],
+    "shape": "circle",
+    "effects": [
+     {
+      "type": "layerBlur",
+      "blurRadius": 50
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.phase == 'rest' ? theme.colors.restGlow : props.phase == 'ready' ? theme.colors.heroGlow : theme.colors.workGlow}",
+    "opacity": "${= props.paused ? 0.12 : 0.5}"
+   }
+  },
+  "content": {
+   "type": "column",
+   "children": [
+    "topRow",
+    "ringRow",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    },
+    "padding": [
+     20,
+     18,
+     20,
+     20
+    ]
+   }
+  },
+  "topRow": {
+   "type": "row",
+   "children": [
+    "roundChip",
+    "timeChip"
+   ],
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "roundChip": {
+   "type": "row",
+   "children": [
+    "roundText"
+   ],
+   "props": {
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30,
+    "padding": [
+     11,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "decoration.fills[0].color": "${= (props.paused ? theme.colors.panelBar : props.phase == 'rest' ? theme.colors.restTrack : props.phase == 'ready' ? theme.colors.heroChip : theme.colors.workTrack)}"
+   }
+  },
+  "roundText": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.phase == 'ready' ? props.readyLabel : props.phase == 'set' ? text(props.rounds) + ' rounds' : 'Round ' + text(props.round) + ' of ' + text(props.rounds))}",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 1.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.paused ? theme.colors.onPanel : props.phase == 'rest' ? theme.colors.onRest : props.phase == 'ready' ? theme.colors.onHero : theme.colors.onWork)}"
+   }
+  },
+  "timeChip": {
+   "type": "row",
+   "children": [
+    "timeIcon",
+    "timeText"
+   ],
+   "props": {
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 30,
+    "padding": [
+     11,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "decoration.fills[0].color": "${= (props.paused ? theme.colors.panelBar : props.phase == 'rest' ? theme.colors.restTrack : props.phase == 'ready' ? theme.colors.heroChip : theme.colors.workTrack)}"
+   }
+  },
+  "timeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "timer_outlined",
+    "size": 15,
+    "color": "onHero"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.color": "${= (props.paused ? theme.colors.onPanel : props.phase == 'rest' ? theme.colors.onRest : props.phase == 'ready' ? theme.colors.onHero : theme.colors.onWork)}"
+   }
+  },
+  "timeText": {
+   "type": "text",
+   "props": {
+    "text": "${= text(floor(((props.phase == 'ready' || props.phase == 'set' ? props.rounds * (props.work + props.rest) - props.rest : props.left + (props.rounds - props.round) * (props.work + props.rest) - (props.phase == 'rest' ? props.rest : 0))) / 60)) + ':' + padLeft(floor(((props.phase == 'ready' || props.phase == 'set' ? props.rounds * (props.work + props.rest) - props.rest : props.left + (props.rounds - props.round) * (props.work + props.rest) - (props.phase == 'rest' ? props.rest : 0))) % 60), 2)}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.paused ? theme.colors.onPanel : props.phase == 'rest' ? theme.colors.onRest : props.phase == 'ready' ? theme.colors.onHero : theme.colors.onWork)}"
+   }
+  },
+  "ringRow": {
+   "type": "row",
+   "children": [
+    "ring"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "ring": {
+   "type": "stack",
+   "children": [
+    "figure",
+    "center"
+   ],
+   "layout": {
+    "width": 264,
+    "height": 264
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       132.0,
+       132.0
+      ],
+      "radius": 104,
+      "when": "${= props.phase == 'ready'}",
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       132.0,
+       132.0
+      ],
+      "radius": 130,
+      "when": "${= props.phase == 'ready'}",
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "repeat",
+      "count": 60,
+      "when": "${= props.phase != 'ready'}",
+      "ops": [
+       {
+        "op": "line",
+        "p1": [
+         "${= 132 + (index % 5 == 0 ? 86 : 90) * cos(index * pi() / 30)}",
+         "${= 132 + (index % 5 == 0 ? 86 : 90) * sin(index * pi() / 30)}"
+        ],
+        "p2": [
+         "${= 132 + 94 * cos(index * pi() / 30)}",
+         "${= 132 + 94 * sin(index * pi() / 30)}"
+        ],
+        "paint": {
+         "color": "${= (props.paused ? theme.colors.panelBar : props.phase == 'rest' ? theme.colors.restTrack : props.phase == 'ready' ? theme.colors.heroChip : theme.colors.workTrack)}",
+         "style": "stroke",
+         "strokeWidth": 2,
+         "strokeCap": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "circle",
+      "c": [
+       132.0,
+       132.0
+      ],
+      "radius": 112,
+      "when": "${= props.phase != 'ready'}",
+      "paint": {
+       "color": "${= (props.paused ? theme.colors.panelBar : props.phase == 'rest' ? theme.colors.restTrack : props.phase == 'ready' ? theme.colors.heroChip : theme.colors.workTrack)}",
+       "style": "stroke",
+       "strokeWidth": 18
+      }
+     },
+     {
+      "op": "group",
+      "opacity": 0.2,
+      "when": "${= props.phase != 'ready' && (props.phase == 'ready' ? 1 : clamp(props.left / max(1, (props.phase == 'work' ? props.work : props.phase == 'rest' ? props.rest : 3)), 0, 1)) > 0}",
+      "ops": [
+       {
+        "op": "arc",
+        "rect": [
+         20.0,
+         20.0,
+         224,
+         224
+        ],
+        "startAngle": "${= -pi() / 2 + (1 - (props.phase == 'ready' ? 1 : clamp(props.left / max(1, (props.phase == 'work' ? props.work : props.phase == 'rest' ? props.rest : 3)), 0, 1))) * 2 * pi()}",
+        "sweepAngle": "${= (props.phase == 'ready' ? 1 : clamp(props.left / max(1, (props.phase == 'work' ? props.work : props.phase == 'rest' ? props.rest : 3)), 0, 1)) * 2 * pi()}",
+        "paint": {
+         "color": "${= (props.paused ? theme.colors.onPanelSoft : props.phase == 'rest' ? theme.colors.restArc : props.phase == 'ready' ? theme.colors.workArc : theme.colors.workArc)}",
+         "style": "stroke",
+         "strokeWidth": 32,
+         "strokeCap": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "arc",
+      "rect": [
+       20.0,
+       20.0,
+       224,
+       224
+      ],
+      "startAngle": "${= -pi() / 2 + (1 - (props.phase == 'ready' ? 1 : clamp(props.left / max(1, (props.phase == 'work' ? props.work : props.phase == 'rest' ? props.rest : 3)), 0, 1))) * 2 * pi()}",
+      "sweepAngle": "${= (props.phase == 'ready' ? 1 : clamp(props.left / max(1, (props.phase == 'work' ? props.work : props.phase == 'rest' ? props.rest : 3)), 0, 1)) * 2 * pi()}",
+      "when": "${= props.phase != 'ready' && (props.phase == 'ready' ? 1 : clamp(props.left / max(1, (props.phase == 'work' ? props.work : props.phase == 'rest' ? props.rest : 3)), 0, 1)) > 0}",
+      "paint": {
+       "color": "${= (props.paused ? theme.colors.onPanelSoft : props.phase == 'rest' ? theme.colors.restArc : props.phase == 'ready' ? theme.colors.workArc : theme.colors.workArc)}",
+       "style": "stroke",
+       "strokeWidth": 18,
+       "strokeCap": "round"
+      }
+     }
+    ]
+   }
+  },
+  "figure": {
+   "type": "Illustration",
+   "props": {
+    "role": "hero"
+   },
+   "layout": {
+    "width": 252,
+    "height": 252,
+    "x": {
+     "start": 6
+    },
+    "y": {
+     "start": 8
+    }
+   },
+   "bind": {
+    "props.audience": "${props.audience}",
+    "visible": "${= props.phase == 'ready'}"
+   },
+   "animations": [
+    {
+     "id": "bob",
+     "duration": 640,
+     "curve": "easeInOutSine",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "motion.translateY",
+       "from": 3,
+       "to": -5
+      }
+     ]
+    }
+   ]
+  },
+  "center": {
+   "type": "column",
+   "children": [
+    "label",
+    "digits",
+    "unit"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.phase != 'ready'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= upper((props.paused ? 'Paused' : props.phase == 'work' ? props.workLabel : props.phase == 'rest' ? props.restLabel : props.phase == 'set' ? props.setLabel : props.readyLabel))}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 17,
+     "fontWeight": 900,
+     "letterSpacing": 3.2
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.paused ? theme.colors.onPanel : (props.paused ? theme.colors.onPanelSoft : props.phase == 'rest' ? theme.colors.restArc : props.phase == 'ready' ? theme.colors.workArc : theme.colors.workArc))}"
+   }
+  },
+  "digits": {
+   "type": "text",
+   "props": {
+    "text": "${props.left}",
+    "style": {
+     "from": "numberLarge",
+     "fontSize": 116,
+     "letterSpacing": -5,
+     "height": 1.04
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.paused ? theme.colors.onPanel : props.phase == 'rest' ? theme.colors.onRest : props.phase == 'ready' ? theme.colors.onHero : theme.colors.onWork)}"
+   }
+  },
+  "unit": {
+   "type": "text",
+   "props": {
+    "text": "${= props.paused ? 'on hold' : props.left == 1 ? 'second' : 'seconds'}",
+    "style": {
+     "from": "meta",
+     "fontSize": 14,
+     "fontWeight": 700
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.paused ? theme.colors.onPanelSoft : props.phase == 'rest' ? theme.colors.onRestSoft : props.phase == 'ready' ? theme.colors.onHeroSoft : theme.colors.onWorkSoft)}"
+   }
+  },
+  "foot": {
+   "type": "column",
+   "children": [
+    "segs",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "segs": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 8
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "repeat",
+      "count": "${= max(1, props.rounds)}",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - (max(1, props.rounds) > 12 ? 3 : 6) * (max(1, props.rounds) - 1)) / max(1, props.rounds)) + (max(1, props.rounds) > 12 ? 3 : 6)))}",
+         0,
+         "${= ((size.width - (max(1, props.rounds) > 12 ? 3 : 6) * (max(1, props.rounds) - 1)) / max(1, props.rounds))}",
+         8
+        ],
+        "radius": 4,
+        "paint": "${= (props.paused ? theme.colors.panelBar : props.phase == 'rest' ? theme.colors.restTrack : props.phase == 'ready' ? theme.colors.heroChip : theme.colors.workTrack)}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         "${= (index * (((size.width - (max(1, props.rounds) > 12 ? 3 : 6) * (max(1, props.rounds) - 1)) / max(1, props.rounds)) + (max(1, props.rounds) > 12 ? 3 : 6)))}",
+         0,
+         "${= ((size.width - (max(1, props.rounds) > 12 ? 3 : 6) * (max(1, props.rounds) - 1)) / max(1, props.rounds)) * (index < props.round - 1 ? 1 : index == props.round - 1 ? max(0.14, (props.phase == 'work' ? (props.work - props.left) / max(1, props.work + props.rest) : props.phase == 'rest' ? (props.work + props.rest - props.left) / max(1, props.work + props.rest) : 0)) : 0)}",
+         8
+        ],
+        "radius": 4,
+        "when": "${= (index < props.round - 1 ? 1 : index == props.round - 1 ? max(0.14, (props.phase == 'work' ? (props.work - props.left) / max(1, props.work + props.rest) : props.phase == 'rest' ? (props.work + props.rest - props.left) / max(1, props.work + props.rest) : 0)) : 0) > 0}",
+        "paint": "${= (props.paused ? theme.colors.onPanel : props.phase == 'rest' ? theme.colors.onRest : props.phase == 'ready' ? theme.colors.onHero : theme.colors.onWork)}"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${= (props.note != '' ? props.note : props.paused ? 'Take your time. Resume when you are ready.' : props.phase == 'ready' ? 'Rope in hand? Start when you are set.' : props.phase == 'set' ? 'Rope in hand. Round 1 is next.' : props.phase == 'rest' ? 'Next: round ' + text(props.round + 1) + ' of ' + text(props.rounds) : props.round >= props.rounds ? 'Last round. Finish strong.' : 'Next: rest for ' + text(props.rest) + ' s')}",
+    "style": {
+     "from": "lead",
+     "fontSize": 14.5,
+     "fontWeight": 500
+    },
+    "textAlign": "center",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.paused ? theme.colors.onPanelSoft : props.phase == 'rest' ? theme.colors.onRestSoft : props.phase == 'ready' ? theme.colors.onHeroSoft : theme.colors.onWorkSoft)}"
+   }
+  }
+ }
+}

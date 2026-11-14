@@ -1,0 +1,23 @@
+state phase="ready"
+state left=3
+state round=0
+state count=0
+state paused=false
+state elapsed=0
+state saved=false
+every 1s when (phase=="set"||phase=="work"||phase=="rest") && !paused -> elapsed=elapsed+(phase=="set"?0:1); phase=left>1?phase:(phase!="work"?"work":(round<today.rounds?"rest":"done")); round=(left<=1&&phase=="work")?round+1:round; left=left>1?left-1:(phase=="work"?today.work:today.rest)
+every 1s when phase=="done" && !saved -> emit finish_session count; saved=true
+Screen
+  if phase!="done"
+    SessionBar "{today.name}" "Today's session" -> emit open_home
+    SessionDial#dial left:=left phase:=phase round:=round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused
+  if phase=="ready"
+    StatTrio values:=[today.rounds,today.work+" s",today.rest+" s"] labels:["Rounds","Jump","Rest"] icons:["repeat_rounded","bolt_rounded","self_improvement_rounded"]
+    BigButton#start "Start, {today.minutes} minutes" -> phase="set"
+  if phase=="set"||phase=="work"||phase=="rest"
+    TapPad#pad =count
+    SessionControls#controls =paused -> phase="done"
+  if phase=="done"
+    SessionSummary "Session complete" "That makes {streak+1} in a row. Rest up, then come back for the next one." eyebrow:"{saved?'Saved':'Saving'}" jumps:=count best:=max(map(sessions,s=>s.jumps)) rounds:=round of:=today.rounds seconds:=elapsed streak:=streak+1 streakLabel:"in a row"
+    BigButton#done "Back to today" icon:"check_rounded" -> emit open_home
+    BigButton#progress "See your progress" icon:"bar_chart_rounded" tone:"quiet" -> emit open_history

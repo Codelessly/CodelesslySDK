@@ -125,11 +125,11 @@ def illustration():
                               customPaint=art.paint(role, audience))
             nodes['art']['children'].append(nid)
     props = [
-        P('role', enum('hero', 'streak', 'empty', 'record'), 'hero',
-          'What the drawing is for: hero (a person mid-jump under the rope), streak (a flame), empty (a rope at rest), record (a medal).'),
+        P('role', enum('hero', 'streak', 'empty', 'record', 'cheer'), 'hero',
+          'What the drawing is for: hero (a person mid-jump under the rope), streak (a flame), empty (a rope at rest), record (a medal), cheer (the jumper with both arms up, for a finished session).'),
         AUDIENCE,
     ]
-    return component('Illustration', "A drawn illustration, colored by the theme: role is hero (a person mid-jump under the rope), streak (a flame), empty (a rope at rest) or record (a medal); audience is adult or kid; size it with w and h.",
+    return component('Illustration', "A drawn illustration, colored by the theme: role is hero (a person mid-jump under the rope), streak (a flame), empty (a rope at rest), record (a medal) or cheer (arms up, for a finished session); audience is adult or kid; size it with w and h.",
                      props, nodes, 'art',
                      previews=[{'name': f'{r} {a}', 'size': [200, 200], 'props': {'role': r, 'audience': a}}
                                for r in ('hero', 'streak', 'empty') for a in ('adult', 'kid')])
@@ -572,6 +572,391 @@ def empty_state():
                          'title': 'No sessions yet', 'message': 'Your first one takes five minutes.', 'cta': 'Start a session'}}])
 
 
+# --- The session screen: SessionBar, SessionDial, TapPad, SessionControls, BigButton, SessionSummary -----------
+#
+# A session screen keeps its own clock (the notation's `every 1s`), so these blocks draw what they are given.
+# The dial takes the phase (ready, set, work, rest), the seconds left and the round; TapPad and SessionControls
+# share one page variable each (`=count`, `=paused`) and change it themselves, so their line needs no action
+# for the common case.
+
+WHOLE = {'width': FILL, 'height': FILL, 'x': {'start': 0, 'end': 0}, 'y': {'start': 0, 'end': 0}}
+
+
+def by_phase(paused, rest, work, ready=None):
+    """A theme color chosen by the dial's state, as a formula."""
+    c = lambda n: 'theme.colors.%s' % n
+    return "(props.paused ? %s : props.phase == 'rest' ? %s : props.phase == 'ready' ? %s : %s)" % (
+        c(paused), c(rest), c(ready or work), c(work))
+
+
+DIAL_ON = by_phase('onPanel', 'onRest', 'onWork', 'onHero')
+DIAL_SOFT = by_phase('onPanelSoft', 'onRestSoft', 'onWorkSoft', 'onHeroSoft')
+DIAL_ARC = by_phase('onPanelSoft', 'restArc', 'workArc')
+DIAL_TRACK = by_phase('panelBar', 'restTrack', 'workTrack', 'heroChip')
+
+
+def mmss(seconds):
+    return "text(floor((%s) / 60)) + ':' + padLeft(floor((%s) %% 60), 2)" % (seconds, seconds)
+
+
+def session_bar():
+    deco, bind = card_deco('card', 'chip', 'card')
+    nodes = {
+        'bar': node('row', {'width': FILL, 'height': 48}, {'spacing': 12}, ['close', 'titles', 'side'], animations=enter(0, 14)),
+        'close': node('row', {'width': 44, 'height': 44}, {'mainAxisAlignment': 'center'}, ['closeIcon'],
+                      decoration={**deco, 'radius': 22},
+                      bind={'decoration.radius': '${= min(22, theme.radii.cta)}', 'decoration.effects': '${theme.shadows.card}'},
+                      states={'pressed': {'close': {'opacity': 0.8}}}, actions=tap()),
+        'closeIcon': icon('close_rounded', 22, 'ink', bind={'props.icon': '${props.icon}'}),
+        'titles': node('column', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'center', 'spacing': 1}, ['title', 'detail']),
+        'title': text('${props.title}', 'cardTitle', FILL, textAlign='center', maxLines=1, overflow='ellipsis'),
+        'detail': text('${props.detail}', 'meta', FILL, textAlign='center', maxLines=1, overflow='ellipsis',
+                       bind={'visible': "${= props.detail != ''}"}),
+        'side': node('row', {'width': 44, 'height': 44}, {'mainAxisAlignment': 'center'}, ['sideIcon']),
+        'sideIcon': icon('volume_up_rounded', 22, 'inkFaint', bind={'props.icon': '${props.sideIcon}', 'visible': "${= props.sideIcon != ''}"}),
+    }
+    props = [
+        P('title', STRING, 'Intervals', "The session's name, centered.", True),
+        P('detail', STRING, '', 'A quiet line under it, e.g. the plan in short (empty: none).'),
+        P('icon', STRING, 'close_rounded', 'The icon of the round button at the left.'),
+        P('sideIcon', STRING, '', 'A quiet icon at the right, for balance (empty: none).'),
+    ]
+    return component('SessionBar', "The slim top of a session screen: a round close button at the left that fires onPressed, the session's title centered and a quiet detail line under it.",
+                     props, nodes, 'bar', events=[('onPressed', 'The close button was tapped.')],
+                     previews=[{'name': 'Intervals', 'size': [350, 48], 'props': {'title': 'Intervals', 'detail': '8 rounds · 8 min'}}])
+
+
+DIAL_H = 428
+RING = 264
+
+
+def session_dial():
+    total = "(props.phase == 'work' ? props.work : props.phase == 'rest' ? props.rest : 3)"
+    frac = "(props.phase == 'ready' ? 1 : clamp(props.left / max(1, %s), 0, 1))" % total
+    cycle = 'max(1, props.work + props.rest)'
+    n = 'max(1, props.rounds)'
+    # seconds of the whole session still to go
+    remaining = ("(props.phase == 'ready' || props.phase == 'set' ? props.rounds * (props.work + props.rest) - props.rest"
+                 " : props.left + (props.rounds - props.round) * (props.work + props.rest) - (props.phase == 'rest' ? props.rest : 0))")
+    running = "(props.phase == 'work' || props.phase == 'rest')"
+    c, r, sw = RING / 2, 112, 18
+    arc_paint = lambda w: {'color': '${= %s}' % DIAL_ARC, 'style': 'stroke', 'strokeWidth': w, 'strokeCap': 'round'}
+    ring = {'painter': [
+        # ready: the hero's hairlines behind the jumper
+        {'op': 'circle', 'c': [c, c], 'radius': 104, 'when': "${= props.phase == 'ready'}", 'paint': stroke('heroLine', 1.2)},
+        {'op': 'circle', 'c': [c, c], 'radius': 130, 'when': "${= props.phase == 'ready'}", 'paint': stroke('heroLine', 1.2)},
+        # sixty fine ticks inside the ring, every fifth longer
+        {'op': 'repeat', 'count': 60, 'when': "${= props.phase != 'ready'}", 'ops': [
+            {'op': 'line',
+             'p1': ['${= %g + (index %% 5 == 0 ? 86 : 90) * cos(index * pi() / 30)}' % c, '${= %g + (index %% 5 == 0 ? 86 : 90) * sin(index * pi() / 30)}' % c],
+             'p2': ['${= %g + 94 * cos(index * pi() / 30)}' % c, '${= %g + 94 * sin(index * pi() / 30)}' % c],
+             'paint': {'color': '${= %s}' % DIAL_TRACK, 'style': 'stroke', 'strokeWidth': 2, 'strokeCap': 'round'}},
+        ]},
+        {'op': 'circle', 'c': [c, c], 'radius': r, 'when': "${= props.phase != 'ready'}",
+         'paint': {'color': '${= %s}' % DIAL_TRACK, 'style': 'stroke', 'strokeWidth': sw}},
+        # what is left: it drains clockwise from the top, with a soft halo like the rope's
+        {'op': 'group', 'opacity': 0.2, 'when': "${= props.phase != 'ready' && %s > 0}" % frac, 'ops': [
+            {'op': 'arc', 'rect': [c - r, c - r, 2 * r, 2 * r], 'startAngle': '${= -pi() / 2 + (1 - %s) * 2 * pi()}' % frac,
+             'sweepAngle': '${= %s * 2 * pi()}' % frac, 'paint': arc_paint(sw + 14)}]},
+        {'op': 'arc', 'rect': [c - r, c - r, 2 * r, 2 * r], 'startAngle': '${= -pi() / 2 + (1 - %s) * 2 * pi()}' % frac,
+         'sweepAngle': '${= %s * 2 * pi()}' % frac, 'when': "${= props.phase != 'ready' && %s > 0}" % frac, 'paint': arc_paint(sw)},
+    ]}
+    gap = '(%s > 12 ? 3 : 6)' % n
+    w = '((size.width - %s * (%s - 1)) / %s)' % (gap, n, n)
+    x = '(index * (%s + %s))' % (w, gap)
+    part = "(props.phase == 'work' ? (props.work - props.left) / %s : props.phase == 'rest' ? (props.work + props.rest - props.left) / %s : 0)" % (cycle, cycle)
+    filled = '(index < props.round - 1 ? 1 : index == props.round - 1 ? max(0.14, %s) : 0)' % part
+    segs = {'painter': [{'op': 'repeat', 'count': '${= %s}' % n, 'ops': [
+        {'op': 'rrect', 'rect': ['${= %s}' % x, 0, '${= %s}' % w, 8], 'radius': 4, 'paint': '${= %s}' % DIAL_TRACK},
+        {'op': 'rrect', 'rect': ['${= %s}' % x, 0, '${= %s * %s}' % (w, filled), 8], 'radius': 4,
+         'when': '${= %s > 0}' % filled, 'paint': '${= %s}' % DIAL_ON},
+    ]}]}
+    label = ("(props.paused ? 'Paused' : props.phase == 'work' ? props.workLabel : props.phase == 'rest' ? props.restLabel"
+             " : props.phase == 'set' ? props.setLabel : props.readyLabel)")
+    note = ("(props.note != '' ? props.note : props.paused ? 'Take your time. Resume when you are ready.'"
+            " : props.phase == 'ready' ? 'Rope in hand? Start when you are set.'"
+            " : props.phase == 'set' ? 'Rope in hand. Round 1 is next.'"
+            " : props.phase == 'rest' ? 'Next: round ' + text(props.round + 1) + ' of ' + text(props.rounds)"
+            " : props.round >= props.rounds ? 'Last round. Finish strong.' : 'Next: rest for ' + text(props.rest) + ' s')")
+    layer = lambda a, b, shown: node(
+        'box', dict(WHOLE), decoration={'fills': [{'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight',
+                                                   'stops': [{'position': 0, 'color': a}, {'position': 1, 'color': b}]}, GRAIN]},
+        bind={'opacity': '${= %s ? (props.paused ? 0.18 : 1) : 0}' % shown},
+        transitions=[{'property': 'opacity', 'duration': 420, 'curve': 'easeOutCubic'}])
+    color = lambda expr: {'props.style.color': '${= %s}' % expr}
+    chip = lambda kids, **more: node('row', {'width': HUG, 'height': 30, 'padding': [11, 0, 12, 0]}, {'spacing': 5}, kids,
+                                     decoration={'fills': [{'color': 'heroChip'}], 'radius': 999},
+                                     bind={'decoration.radius': '${theme.radii.chip}', 'decoration.fills[0].color': '${= %s}' % DIAL_TRACK, **more})
+    nodes = {
+        'dial': node('stack', {'width': FILL, 'height': DIAL_H}, children=['bgReady', 'bgWork', 'bgRest', 'glow', 'content'],
+                     decoration={'fills': [{'color': 'panel'}], 'radius': 32, 'clip': 'antiAlias'},
+                     bind={'decoration.radius': '${theme.radii.hero}', 'decoration.effects': '${theme.shadows.hero}'},
+                     animations=enter(1)),
+        'bgReady': layer('heroA', 'heroB', "props.phase == 'ready'"),
+        'bgWork': layer('workA', 'workB', "(props.phase == 'set' || props.phase == 'work')"),
+        'bgRest': layer('restA', 'restB', "props.phase == 'rest'"),
+        'glow': node('box', {'width': 280, 'height': 280, 'x': {'end': -70}, 'y': {'start': -90}},
+                     decoration={'fills': [{'color': 'heroGlow'}], 'shape': 'circle', 'effects': [{'type': 'layerBlur', 'blurRadius': 50}]},
+                     bind={'decoration.fills[0].color': "${= props.phase == 'rest' ? theme.colors.restGlow : props.phase == 'ready' ? theme.colors.heroGlow : theme.colors.workGlow}",
+                           'opacity': '${= props.paused ? 0.12 : 0.5}'}),
+        'content': node('column', {**WHOLE, 'padding': [20, 18, 20, 20]}, {'crossAxisAlignment': 'stretch', 'mainAxisAlignment': 'spaceBetween'},
+                        ['topRow', 'ringRow', 'foot']),
+        'topRow': node('row', {'width': FILL, 'height': HUG}, {'mainAxisAlignment': 'spaceBetween'}, ['roundChip', 'timeChip']),
+        'roundChip': chip(['roundText']),
+        'roundText': text("${= upper(props.phase == 'ready' ? props.readyLabel : props.phase == 'set' ? text(props.rounds) + ' rounds' : 'Round ' + text(props.round) + ' of ' + text(props.rounds))}",
+                          {'from': 'eyebrow', 'letterSpacing': 1.1}, bind=color(DIAL_ON)),
+        'timeChip': chip(['timeIcon', 'timeText']),
+        'timeIcon': icon('timer_outlined', 15, 'onHero', bind={'props.color': '${= %s}' % DIAL_ON}),
+        'timeText': text('${= %s}' % mmss(remaining), 'chip', bind=color(DIAL_ON)),
+        'ringRow': node('row', {'width': FILL, 'height': HUG}, {'mainAxisAlignment': 'center'}, ['ring']),
+        'ring': node('stack', {'width': RING, 'height': RING}, children=['figure', 'center'], customPaint=ring),
+        'figure': node('Illustration', {'width': 252, 'height': 252, 'x': {'start': 6}, 'y': {'start': 8}}, {'role': 'hero'},
+                       bind={'props.audience': '${props.audience}', 'visible': "${= props.phase == 'ready'}"},
+                       animations=[{'id': 'bob', 'duration': 640, 'curve': 'easeInOutSine', 'repeat': {'reverse': True},
+                                    'tracks': [{'path': 'motion.translateY', 'from': 3, 'to': -5}]}]),
+        'center': node('column', dict(WHOLE), {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center', 'spacing': 0},
+                       ['label', 'digits', 'unit'], bind={'visible': "${= props.phase != 'ready'}"}),
+        'label': text('${= upper(%s)}' % label, {'from': 'eyebrow', 'fontSize': 17, 'fontWeight': 900, 'letterSpacing': 3.2},
+                      bind=color('(props.paused ? theme.colors.onPanel : %s)' % DIAL_ARC)),
+        'digits': text('${props.left}', {'from': 'numberLarge', 'fontSize': 116, 'letterSpacing': -5, 'height': 1.04},
+                       bind=color(DIAL_ON)),
+        'unit': text("${= props.paused ? 'on hold' : props.left == 1 ? 'second' : 'seconds'}", {'from': 'meta', 'fontSize': 14, 'fontWeight': 700}, bind=color(DIAL_SOFT)),
+        'foot': node('column', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'stretch', 'spacing': 12}, ['segs', 'note']),
+        'segs': node('box', {'width': FILL, 'height': 8}, customPaint=segs),
+        'note': text('${= %s}' % note, {'from': 'lead', 'fontSize': 14.5, 'fontWeight': 500}, FILL, textAlign='center', maxLines=1,
+                     overflow='ellipsis', bind=color(DIAL_SOFT)),
+    }
+    props = [
+        P('note', STRING, '', 'The line under the round marks (empty: written from the phase, e.g. "Next: rest for 20 s").'),
+        P('left', INT, 40, 'Seconds left in this phase: the big number and the arc.', True),
+        P('phase', enum('ready', 'set', 'work', 'rest'), 'work', 'ready (before the start: the jumper, no clock), set (the short count-in from 3), work or rest.', True),
+        P('round', INT, 1, 'The round in progress, from 1 (0 before the first).', True),
+        P('rounds', INT, 8, 'The planned rounds: one mark each.', True),
+        P('work', INT, 40, 'Seconds of a work phase.', True),
+        P('rest', INT, 20, 'Seconds of a rest phase.', True),
+        P('paused', BOOL, False, 'Dims the dial and says Paused.'),
+        P('workLabel', STRING, 'Jump', 'The word over the number while working.'),
+        P('restLabel', STRING, 'Rest', 'The word over the number while resting.'),
+        P('setLabel', STRING, 'Get set', 'The word over the number during the count-in.'),
+        P('readyLabel', STRING, 'Ready', 'The chip over the jumper before the start.'),
+        AUDIENCE,
+    ]
+    return component('SessionDial', "The session screen's one focal point: a big countdown ring that drains with left (seconds) on a surface that changes with phase (\"ready\" shows the jumper, \"set\" the count-in, \"work\" the bright surface, \"rest\" the calm one), with the round marks (round of rounds), the time to go, and paused:true dimming it; pass work and rest (the phase lengths in seconds).",
+                     props, nodes, 'dial',
+                     previews=[{'name': 'Work', 'size': [350, DIAL_H], 'props': {'left': 28, 'phase': 'work', 'round': 3}},
+                               {'name': 'Rest', 'size': [350, DIAL_H], 'props': {'left': 12, 'phase': 'rest', 'round': 3}},
+                               {'name': 'Ready', 'size': [350, DIAL_H], 'props': {'left': 3, 'phase': 'ready', 'round': 0}},
+                               {'name': 'Paused', 'size': [350, DIAL_H], 'props': {'left': 28, 'phase': 'work', 'round': 3, 'paused': True}}])
+
+
+PAD_H = 172
+
+
+def tap_pad():
+    deco, bind = card_deco('card', 'card', 'card')
+    count_var = {'kind': 'variable', 'of': INT}
+    step = lambda expr: {'type': 'setVariable', 'variable': 'props.count', 'value': '${= %s}' % expr}
+    nudge = lambda nid, kids, expr: node(
+        'row', {'width': 64, 'height': 40}, {'mainAxisAlignment': 'center'}, kids,
+        decoration={'fills': [{'color': 'track'}], 'radius': 999}, bind={'decoration.radius': '${theme.radii.chip}'},
+        states={'pressed': {nid: {'opacity': 0.6}}},
+        actions=[{'trigger': {'type': 'click'}, 'actions': [step(expr), {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.count}'}]}])
+    nodes = {
+        'pad': node('row', {'width': FILL, 'height': PAD_H, 'padding': [22, 16, 18, 16]}, {'spacing': 12}, ['left', 'target'],
+                    decoration=deco, bind=bind, animations=enter(2),
+                    states={'pressed': {'pad': {'motion': {'scale': 0.975}}, 'disc': {'motion': {'scale': 0.9}}}},
+                    transitions=[{'property': 'motion', 'duration': 110, 'curve': 'easeOut'}],
+                    actions=[{'trigger': {'type': 'click'}, 'actions': [
+                        step('props.count + 1'), {'type': 'haptic', 'kind': 'light'},
+                        {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.count}'}]}]),
+        'left': node('column', {'width': FILL, 'height': FILL}, {'crossAxisAlignment': 'start', 'mainAxisAlignment': 'spaceBetween'},
+                     ['figures', 'nudges']),
+        'figures': node('column', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'start', 'spacing': 2}, ['eyebrow', 'count']),
+        'eyebrow': text('${= upper(props.label)}', 'eyebrow', FILL, maxLines=1, overflow='ellipsis'),
+        'count': text(shown('props.count'), {'from': 'numberLarge', 'fontSize': 72, 'letterSpacing': -2.8}, FILL, maxLines=1, scaleDown=True),
+        'nudges': node('row', {'width': HUG, 'height': HUG}, {'spacing': 8}, ['minus', 'plus']),
+        'minus': nudge('minus', ['minusText'], 'max(0, props.count - 1)'),
+        'minusText': text('−1', 'chip', color='inkSoft'),
+        'plus': nudge('plus', ['plusText'], 'props.count + 10'),
+        'plusText': text('+10', 'chip', color='inkSoft'),
+        'target': node('stack', {'width': 140, 'height': 140}, children=['halo', 'pulse', 'disc']),
+        'halo': node('box', {'width': 140, 'height': 140, 'x': 0, 'y': 0}, decoration={'fills': [{'color': 'accent'}], 'shape': 'circle'},
+                     opacity=0.22),
+        'pulse': node('box', {'width': 140, 'height': 140, 'x': 0, 'y': 0},
+                      decoration={'fills': [{'color': 'accentDeep'}], 'shape': 'circle'}, opacity=0,
+                      bind={'animations[0].playKey': '${props.count}'},
+                      animations=[{'id': 'pulse', 'duration': 420, 'curve': 'easeOutCubic', 'autoplay': False,
+                                   'tracks': [{'path': 'opacity', 'from': 0.5, 'to': 0}, {'path': 'motion.scale', 'from': 0.8, 'to': 1.12}]}]),
+        'disc': node('column', {'width': 114, 'height': 114, 'x': 13, 'y': 13}, {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center', 'spacing': 0},
+                     ['discIcon', 'discText'],
+                     decoration={'fills': [{'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter',
+                                            'stops': [{'position': 0, 'color': 'accent'}, {'position': 1, 'color': 'accentDeep'}]}],
+                                 'shape': 'circle'},
+                     bind={'decoration.effects': '${theme.shadows.cta}'},
+                     transitions=[{'property': 'motion', 'duration': 110, 'curve': 'easeOut'}]),
+        'discIcon': icon('touch_app_rounded', 38, 'onAccent'),
+        'discText': text('${= upper(props.hint)}', {'from': 'eyebrow', 'fontSize': 12.5, 'fontWeight': 900, 'letterSpacing': 1.6}, color='onAccent'),
+    }
+    props = [
+        P('count', count_var, '', 'The name of your number variable holding the jump count: a tap adds 1, the small chips take 1 off or add 10.'),
+        P('label', STRING, 'Jumps', 'What is counted, small caps over the number.'),
+        P('hint', STRING, 'Tap', 'The word on the round target.'),
+    ]
+    return component('TapPad', "The jump counter as one enormous tap target: write TapPad =count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
+                     props, nodes, 'pad', events=[('onChanged', 'The count changed; the value is the new count.')],
+                     previews=[{'name': 'Counting', 'size': [350, PAD_H], 'props': {}}])
+
+
+def session_controls():
+    paused_var = {'kind': 'variable', 'of': BOOL}
+    nodes = {
+        'controls': node('row', {'width': FILL, 'height': 64}, {'spacing': 12}, ['toggle', 'finish'], animations=enter(3)),
+        'toggle': node('row', {'width': FILL, 'height': 64}, {'mainAxisAlignment': 'center', 'spacing': 8}, ['toggleIcon', 'toggleText'],
+                       decoration={'fills': [{'color': 'ink'}], 'radius': 999},
+                       bind={'decoration.radius': '${theme.radii.cta}', 'decoration.effects': '${theme.shadows.cta}',
+                             'decoration.fills[0].color': '${= props.paused ? theme.colors.brand : theme.colors.ink}'},
+                       states={'pressed': {'toggle': {'opacity': 0.85}}},
+                       actions=[{'trigger': {'type': 'click'}, 'actions': [
+                           {'type': 'setVariable', 'variable': 'props.paused', 'value': '${= !props.paused}'}, {'type': 'haptic', 'kind': 'medium'}]}]),
+        'toggleIcon': icon('pause_rounded', 26, 'card',
+                           bind={'props.icon': "${= props.paused ? 'play_arrow_rounded' : 'pause_rounded'}",
+                                 'props.color': '${= props.paused ? theme.colors.onBrand : theme.colors.card}'}),
+        'toggleText': text('${= props.paused ? props.resume : props.pause}', 'cta',
+                           bind={'props.style.color': '${= props.paused ? theme.colors.onBrand : theme.colors.card}'}),
+        'finish': node('row', {'width': 124, 'height': 64}, {'mainAxisAlignment': 'center', 'spacing': 7}, ['finishIcon', 'finishText'],
+                       decoration={'fills': [{'color': 'track'}], 'radius': 999}, bind={'decoration.radius': '${theme.radii.cta}'},
+                       states={'pressed': {'finish': {'opacity': 0.7}}}, actions=tap()),
+        'finishIcon': icon('flag_rounded', 20, 'inkSoft'),
+        'finishText': text('${props.finish}', 'cta', color='inkSoft'),
+    }
+    props = [
+        P('paused', paused_var, '', 'The name of your boolean variable that is true while the session is paused: the big button toggles it.'),
+        P('pause', STRING, 'Pause', "The big button's label while running."),
+        P('resume', STRING, 'Resume', "The big button's label while paused."),
+        P('finish', STRING, 'Finish', "The quiet button's label."),
+    ]
+    return component('SessionControls', "The session's control bar: write SessionControls =paused and its big button pauses and resumes by toggling your paused variable itself, while the quiet Finish button fires onPressed (write -> for what finishing does).",
+                     props, nodes, 'controls', events=[('onPressed', 'Finish was tapped.')],
+                     previews=[{'name': 'Running', 'size': [350, 64], 'props': {}}])
+
+
+def big_button():
+    quiet = "props.tone == 'quiet'"
+    nodes = {
+        'btn': node('row', {'width': FILL, 'height': 64, 'padding': [10, 0, 22, 0]}, {'spacing': 14}, ['mark', 'label', 'arrow'],
+                    decoration={'fills': [{'color': 'brand'}], 'radius': 999},
+                    bind={'decoration.radius': '${theme.radii.cta}',
+                          'decoration.effects': '${= %s ? [] : theme.shadows.cta}' % quiet,
+                          'decoration.fills[0].color': '${= %s ? theme.colors.track : theme.colors.brand}' % quiet},
+                    states={'pressed': {'btn': {'opacity': 0.86}}}, animations=enter(3), actions=tap()),
+        'mark': node('row', {'width': 44, 'height': 44}, {'mainAxisAlignment': 'center'}, ['markIcon'],
+                     decoration={'fills': [{'color': 'onBrand'}], 'radius': 22},
+                     bind={'decoration.radius': '${= min(22, theme.radii.cta - 3)}',
+                           'decoration.fills[0].color': '${= %s ? theme.colors.card : theme.colors.onBrand}' % quiet}),
+        'markIcon': icon('play_arrow_rounded', 26, 'brand',
+                         bind={'props.icon': '${props.icon}', 'props.color': '${= %s ? theme.colors.ink : theme.colors.brand}' % quiet}),
+        'label': text('${props.label}', 'cta', FILL, maxLines=1, overflow='ellipsis',
+                      bind={'props.style.color': '${= %s ? theme.colors.ink : theme.colors.onBrand}' % quiet}),
+        'arrow': icon('arrow_forward_rounded', 22, 'onBrand',
+                      bind={'props.color': '${= %s ? theme.colors.inkSoft : theme.colors.onBrand}' % quiet}),
+    }
+    props = [
+        P('label', STRING, 'Start', "The button's label.", True),
+        P('icon', STRING, 'play_arrow_rounded', 'The icon in the round mark at the left.'),
+        P('tone', enum('primary', 'quiet'), 'primary', 'primary (filled with the brand, the one main action) or quiet (a soft second action).'),
+    ]
+    return component('BigButton', "A full-width, thumb-sized button for a screen's main action below its focal block (Start, Done): the label with icon in a round mark, firing onPressed; tone:\"quiet\" is the soft second action.",
+                     props, nodes, 'btn', events=[('onPressed', 'The button was tapped.')],
+                     previews=[{'name': 'Start', 'size': [350, 64], 'props': {'label': 'Start'}},
+                               {'name': 'Quiet', 'size': [350, 64], 'props': {'label': 'See your progress', 'tone': 'quiet', 'icon': 'bar_chart_rounded'}}])
+
+
+def session_summary():
+    record = '(props.best > 0 && props.jumps > props.best)'
+    cell = lambda i, kids: node('column', {'width': FILL, 'height': HUG, 'padding': [8, 12, 8, 11]}, {'crossAxisAlignment': 'center', 'spacing': 3}, kids,
+                                decoration={'fills': [{'color': 'heroChip'}], 'radius': 18},
+                                bind={'decoration.radius': '${= min(18, theme.radii.tile)}'})
+    figure = lambda value: text(value, 'numberSmall', color='onHero', maxLines=1)
+    caption = lambda value: text(value, {'from': 'meta', 'fontSize': 12}, color='onHeroSoft', maxLines=1)
+    rings = {'painter': [
+        {'op': 'circle', 'c': ['${= size.width / 2}', 112], 'radius': 96, 'paint': stroke('heroLine', 1.2)},
+        {'op': 'circle', 'c': ['${= size.width / 2}', 112], 'radius': 140, 'paint': stroke('heroLine', 1.2)},
+        {'op': 'circle', 'c': ['${= size.width / 2}', 112], 'radius': 190, 'paint': stroke('heroLine', 1.2)},
+    ]}
+    nodes = {
+        'summary': node('column', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'stretch'}, ['stage', 'body'],
+                        decoration={'fills': [{'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight',
+                                               'stops': [{'position': 0, 'color': 'heroA'}, {'position': 1, 'color': 'heroB'}]}, GRAIN],
+                                    'radius': 32, 'clip': 'antiAlias'},
+                        bind={'decoration.radius': '${theme.radii.hero}', 'decoration.effects': '${theme.shadows.hero}'},
+                        animations=enter(0)),
+        'stage': node('stack', {'width': FILL, 'height': 212}, children=['glow', 'rings', 'figureRow', 'chip']),
+        'glow': node('box', {'width': 260, 'height': 260, 'x': {'start': 45}, 'y': {'start': -40}},
+                     decoration={'fills': [{'color': 'heroGlow'}], 'shape': 'circle', 'effects': [{'type': 'layerBlur', 'blurRadius': 46}]},
+                     opacity=0.55),
+        'rings': node('box', dict(WHOLE), customPaint=rings),
+        'figureRow': node('row', {'width': FILL, 'height': 212, 'x': {'start': 0, 'end': 0}, 'y': {'start': 6}}, {'mainAxisAlignment': 'center'}, ['figure']),
+        'figure': node('Illustration', {'width': 212, 'height': 212}, {'role': 'cheer'}, bind={'props.audience': '${props.audience}'},
+                       animations=[{'id': 'bob', 'duration': 640, 'curve': 'easeInOutSine', 'repeat': {'reverse': True},
+                                    'tracks': [{'path': 'motion.translateY', 'from': 3, 'to': -5}]}]),
+        'chip': node('row', {'width': HUG, 'height': HUG, 'padding': [11, 7, 11, 7], 'x': {'start': 20}, 'y': {'start': 20}}, None, ['chipText'],
+                     decoration={'fills': [{'color': 'heroChip'}], 'radius': 999},
+                     bind={'decoration.radius': '${theme.radii.chip}', 'visible': "${= props.eyebrow != ''}"}),
+        'chipText': text('${= upper(props.eyebrow)}', {'from': 'eyebrow', 'letterSpacing': 1.1}, color='onHero'),
+        'body': node('column', {'width': FILL, 'height': HUG, 'padding': [20, 6, 20, 22]}, {'crossAxisAlignment': 'center', 'spacing': 0},
+                     ['title', 'gapA', 'figures', 'gapB', 'badge', 'gapC', 'cells', 'gapD', 'detail']),
+        'title': text('${props.title}', 'blockTitle', FILL, color='onHeroSoft', textAlign='center', maxLines=1, overflow='ellipsis'),
+        'gapA': node('spacer', {'width': 1, 'height': 4}),
+        'figures': node('row', {'width': HUG, 'height': HUG}, {'crossAxisAlignment': 'end', 'spacing': 8}, ['jumps', 'unit']),
+        'jumps': text(shown('props.jumps'), {'from': 'numberLarge', 'fontSize': 76, 'letterSpacing': -3}, color='onHero'),
+        'unit': text('${props.unit}', 'lead', color='onHeroSoft', layout={'padding': [0, 0, 0, 12]}),
+        'gapB': node('spacer', {'width': 1, 'height': 10}),
+        'badge': node('row', {'width': HUG, 'height': 34, 'padding': [10, 0, 14, 0]}, {'spacing': 6}, ['badgeIcon', 'badgeText'],
+                      decoration={'fills': [{'color': 'heroChip'}], 'radius': 999},
+                      bind={'decoration.radius': '${theme.radii.chip}', 'visible': '${= props.best > 0}',
+                            'decoration.fills[0].color': '${= %s ? theme.colors.gold : theme.colors.heroChip}' % record}),
+        'badgeIcon': icon('emoji_events_rounded', 18, 'onHero',
+                          bind={'props.color': '${= %s ? theme.colors.onAccent : theme.colors.onHero}' % record}),
+        'badgeText': text("${= %s ? 'New record, ' + thousands(props.jumps - props.best) + ' more than your best' : 'Your best is ' + thousands(props.best) + '. It will keep.'}" % record,
+                          'chip', bind={'props.style.color': '${= %s ? theme.colors.onAccent : theme.colors.onHero}' % record}),
+        'gapC': node('spacer', {'width': 1, 'height': 18}),
+        'cells': node('row', {'width': FILL, 'height': HUG}, {'spacing': 8, 'crossAxisAlignment': 'start'}, ['cellA', 'cellB', 'cellC']),
+        'cellA': cell(0, ['roundsValue', 'roundsLabel']),
+        'roundsValue': figure("${= props.of > 0 ? text(props.rounds) + '/' + text(props.of) : text(props.rounds)}"),
+        'roundsLabel': caption('rounds'),
+        'cellB': cell(1, ['timeValue', 'timeLabel']),
+        'timeValue': figure('${= %s}' % mmss('props.seconds')),
+        'timeLabel': caption('moving time'),
+        'cellC': cell(2, ['streakRow', 'streakLabel']),
+        'streakRow': node('row', {'width': HUG, 'height': HUG}, {'spacing': 4}, ['streakIcon', 'streakValue']),
+        'streakIcon': icon('local_fire_department_rounded', 20, 'onHero'),
+        'streakValue': figure('${props.streak}'),
+        'streakLabel': caption('${props.streakLabel}'),
+        'gapD': node('spacer', {'width': 1, 'height': 16}, bind={'visible': "${= props.detail != ''}"}),
+        'detail': text('${props.detail}', {'from': 'lead', 'fontSize': 14.5}, FILL, color='onHeroSoft', textAlign='center',
+                       bind={'visible': "${= props.detail != ''}"}),
+    }
+    props = [
+        P('title', STRING, 'Session complete', 'The headline over the number, e.g. Session complete.', True),
+        P('detail', STRING, '', 'One warm line at the bottom: what it means, what comes next (empty: none).'),
+        P('jumps', INT, 0, 'The jumps counted: the big number.', True),
+        P('best', INT, 0, 'The most jumps in a past session: over it the badge says New record, under it how far short (0: no badge).'),
+        P('rounds', INT, 0, 'Rounds reached.'),
+        P('of', INT, 0, 'Rounds planned (0: show only the rounds reached).'),
+        P('seconds', INT, 0, 'Seconds the session ran, shown as m:ss.'),
+        P('streak', INT, 0, 'The streak including this session.'),
+        P('streakLabel', STRING, 'day streak', 'What the streak counts.'),
+        P('unit', STRING, 'jumps', 'The unit after the big number.'),
+        P('eyebrow', STRING, 'Done', 'A small chip over the art.'),
+        AUDIENCE,
+    ]
+    return component('SessionSummary', "The finished session as a celebration on the brand gradient: the cheering jumper, jumps in display type, a badge that says whether best (the past record) fell, then rounds of planned rounds, seconds as time and the streak, and a detail line on what comes next; follow it with BigButton lines.",
+                     props, nodes, 'summary',
+                     previews=[{'name': 'Record', 'size': [350, 520], 'props': {'jumps': 940, 'best': 912, 'rounds': 8, 'of': 8, 'seconds': 460, 'streak': 5,
+                                                                              'detail': 'That is five in a row. Rest up and come back tomorrow.'}}])
+
+
 def all_components():
     return [screen(), top_bar(), hero_session(), streak_flame(), progress_goal(), week_strip(), section_title(), session_row(),
-            chart_card(), stat_trio(), record_card(), empty_state(), illustration()]
+            chart_card(), stat_trio(), record_card(), empty_state(), illustration(),
+            session_bar(), session_dial(), tap_pad(), session_controls(), big_button(), session_summary()]

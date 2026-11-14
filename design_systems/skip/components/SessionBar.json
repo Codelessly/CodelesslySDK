@@ -1,0 +1,255 @@
+{
+ "schema": 3,
+ "id": "SessionBar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "SessionBar",
+  "doc": "The slim top of a session screen: a round close button at the left that fires onPressed, the session's title centered and a quiet detail line under it.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Intervals",
+    "doc": "The session's name, centered.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet line under it, e.g. the plan in short (empty: none)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "close_rounded",
+    "doc": "The icon of the round button at the left."
+   },
+   {
+    "key": "sideIcon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet icon at the right, for balance (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The close button was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Intervals",
+   "size": [
+    350,
+    48
+   ],
+   "props": {
+    "title": "Intervals",
+    "detail": "8 rounds · 8 min"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "close",
+    "titles",
+    "side"
+   ],
+   "props": {
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 0,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 14,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "close": {
+   "type": "row",
+   "children": [
+    "closeIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 22
+   },
+   "bind": {
+    "decoration.radius": "${= min(22, theme.radii.cta)}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "states": {
+    "pressed": {
+     "close": {
+      "opacity": 0.8
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "closeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "close_rounded",
+    "size": 22,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "titles": {
+   "type": "column",
+   "children": [
+    "title",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "cardTitle",
+    "textAlign": "center",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": "meta",
+    "textAlign": "center",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "side": {
+   "type": "row",
+   "children": [
+    "sideIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 44,
+    "height": 44
+   }
+  },
+  "sideIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "volume_up_rounded",
+    "size": 22,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "bind": {
+    "props.icon": "${props.sideIcon}",
+    "visible": "${= props.sideIcon != ''}"
+   }
+  }
+ }
+}

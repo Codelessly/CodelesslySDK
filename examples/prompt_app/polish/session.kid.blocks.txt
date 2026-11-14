@@ -1,0 +1,23 @@
+state phase="ready"
+state left=3
+state round=0
+state count=0
+state paused=false
+state elapsed=0
+state saved=false
+every 1s when (phase=="set"||phase=="work"||phase=="rest") && !paused -> elapsed=elapsed+(phase=="set"?0:1); phase=left>1?phase:(phase!="work"?"work":(round<today.rounds?"rest":"done")); round=(left<=1&&phase=="work")?round+1:round; left=left>1?left-1:(phase=="work"?today.work:today.rest)
+every 1s when phase=="done" && !saved -> emit finish_session count; saved=true
+Screen
+  if phase!="done"
+    SessionBar "{today.name}" "Today's game" -> emit open_home
+    SessionDial#dial "{phase=='ready'?'Grab your rope!':''}" left:=left phase:=phase round:=round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused workLabel:"Jump!" restLabel:"Breathe" setLabel:"Ready..." audience:"kid"
+  if phase=="ready"
+    StatTrio values:=[today.rounds,today.work+" s",today.rest+" s"] labels:["Rounds","Jump","Breathe"] icons:["repeat_rounded","bolt_rounded","favorite_rounded"]
+    BigButton#start "Let's jump!" -> phase="set"
+  if phase=="set"||phase=="work"||phase=="rest"
+    TapPad#pad =count label:"Your jumps" hint:"Tap!"
+    SessionControls#controls =paused finish:"All done" -> phase="done"
+  if phase=="done"
+    SessionSummary "You did it!" "{streak+1} days in a row. High five!" eyebrow:"{saved?'Saved':'Saving'}" jumps:=count best:=max(map(sessions,s=>s.jumps)) rounds:=round of:=today.rounds seconds:=elapsed streak:=streak+1 streakLabel:"days in a row" audience:"kid"
+    BigButton#done "Yay, done!" icon:"check_rounded" -> emit open_home
+    BigButton#progress "See my jumps" icon:"bar_chart_rounded" tone:"quiet" -> emit open_history

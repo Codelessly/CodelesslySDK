@@ -1,0 +1,541 @@
+{
+ "schema": 3,
+ "id": "TapPad",
+ "roots": [
+  "pad"
+ ],
+ "widget": {
+  "type": "TapPad",
+  "doc": "The jump counter as one enormous tap target: write TapPad =count and every tap anywhere on it adds 1 to your count variable, shown in display type; its two quiet chips take 1 off or add 10 (onChanged fires with the new count).",
+  "props": [
+   {
+    "key": "count",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "integer",
+      "flutter": "int"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable holding the jump count: a tap adds 1, the small chips take 1 off or add 10."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Jumps",
+    "doc": "What is counted, small caps over the number."
+   },
+   {
+    "key": "hint",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Tap",
+    "doc": "The word on the round target."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "The count changed; the value is the new count."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Counting",
+   "size": [
+    350,
+    172
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "pad": {
+   "type": "row",
+   "children": [
+    "left",
+    "target"
+   ],
+   "props": {
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 172,
+    "padding": [
+     22,
+     16,
+     18,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 24
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 140,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ],
+   "states": {
+    "pressed": {
+     "pad": {
+      "motion": {
+       "scale": 0.975
+      }
+     },
+     "disc": {
+      "motion": {
+       "scale": 0.9
+      }
+     }
+    }
+   },
+   "transitions": [
+    {
+     "property": "motion",
+     "duration": 110,
+     "curve": "easeOut"
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.count",
+       "value": "${= props.count + 1}"
+      },
+      {
+       "type": "haptic",
+       "kind": "light"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.count}"
+      }
+     ]
+    }
+   ]
+  },
+  "left": {
+   "type": "column",
+   "children": [
+    "figures",
+    "nudges"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "figures": {
+   "type": "column",
+   "children": [
+    "eyebrow",
+    "count"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "eyebrow": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.label)}",
+    "style": "eyebrow",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "count": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(props.count), '^[0-9.]+$') ? thousands(number(props.count)) : text(props.count)}",
+    "style": {
+     "from": "numberLarge",
+     "fontSize": 72,
+     "letterSpacing": -2.8
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "nudges": {
+   "type": "row",
+   "children": [
+    "minus",
+    "plus"
+   ],
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "minus": {
+   "type": "row",
+   "children": [
+    "minusText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 64,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}"
+   },
+   "states": {
+    "pressed": {
+     "minus": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.count",
+       "value": "${= max(0, props.count - 1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.count}"
+      }
+     ]
+    }
+   ]
+  },
+  "minusText": {
+   "type": "text",
+   "props": {
+    "text": "−1",
+    "style": {
+     "from": "chip",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "plus": {
+   "type": "row",
+   "children": [
+    "plusText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 64,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}"
+   },
+   "states": {
+    "pressed": {
+     "plus": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.count",
+       "value": "${= props.count + 10}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.count}"
+      }
+     ]
+    }
+   ]
+  },
+  "plusText": {
+   "type": "text",
+   "props": {
+    "text": "+10",
+    "style": {
+     "from": "chip",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "target": {
+   "type": "stack",
+   "children": [
+    "halo",
+    "pulse",
+    "disc"
+   ],
+   "layout": {
+    "width": 140,
+    "height": 140
+   }
+  },
+  "halo": {
+   "type": "box",
+   "layout": {
+    "width": 140,
+    "height": 140,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "shape": "circle"
+   },
+   "opacity": 0.22
+  },
+  "pulse": {
+   "type": "box",
+   "layout": {
+    "width": 140,
+    "height": 140,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentDeep"
+     }
+    ],
+    "shape": "circle"
+   },
+   "bind": {
+    "animations[0].playKey": "${props.count}"
+   },
+   "opacity": 0,
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 420,
+     "curve": "easeOutCubic",
+     "autoplay": false,
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0.5,
+       "to": 0
+      },
+      {
+       "path": "motion.scale",
+       "from": 0.8,
+       "to": 1.12
+      }
+     ]
+    }
+   ]
+  },
+  "disc": {
+   "type": "column",
+   "children": [
+    "discIcon",
+    "discText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": 114,
+    "height": 114,
+    "x": 13,
+    "y": 13
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "stops": [
+       {
+        "position": 0,
+        "color": "accent"
+       },
+       {
+        "position": 1,
+        "color": "accentDeep"
+       }
+      ]
+     }
+    ],
+    "shape": "circle"
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.cta}"
+   },
+   "transitions": [
+    {
+     "property": "motion",
+     "duration": 110,
+     "curve": "easeOut"
+    }
+   ]
+  },
+  "discIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "touch_app_rounded",
+    "size": 38,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 38,
+    "height": 38
+   }
+  },
+  "discText": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.hint)}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 12.5,
+     "fontWeight": 900,
+     "letterSpacing": 1.6,
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}
