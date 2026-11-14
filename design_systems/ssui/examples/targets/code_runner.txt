@@ -1,0 +1,15 @@
+state ran=false
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Average order value" grow
+    Badge.neutral "python"
+  CodeBlock code:"orders = load('orders.csv')\ntotal = sum(o.amount for o in orders)\nprint(round(total / len(orders), 2))" title:"aov.py" language:"py"
+  if ran
+    Column gap:4 pad:10 radius:8 fill:#FFF9FAFB
+      Text.fieldLabel "OUTPUT"
+      Text.mono "48.72"
+      Text.caption "Ran in 0.31 s · 1,204 rows"
+  Row end gap:8
+    Button.ghost "Edit" -> emit edit
+    Button "Run" visible:=!ran -> ran=true; emit run
+    Button.outline "Run again" visible:=ran -> emit run

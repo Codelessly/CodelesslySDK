@@ -1,0 +1,10 @@
+state picked=""
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Generated options" grow
+    Text.caption "3 images"
+  ImageGallery images:["https://picsum.photos/seed/harbor/300","https://picsum.photos/seed/studio/300","https://picsum.photos/seed/field/300"] titles:["Harbor","Studio","Field"] -> picked=result
+  Row gap:8
+    Text.caption "{picked==""?"Tap one to pick it":"Picked"}" grow
+    DownloadButton -> emit download
+    Button "Use this one" enabled:=picked!="" -> emit use picked

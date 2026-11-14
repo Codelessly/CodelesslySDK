@@ -885,9 +885,11 @@ add(component(
         'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 12},
                  'layout': {'width': {'fill': 400}, 'height': {'hug': 60}, 'padding': [12, 0, 12, 12]}},
         'content': {'type': 'slot'},
+        # The footer shows only when the call puts actions in it.
         'foot': {'type': 'row', 'children': ['actions'], 'props': {'mainAxisAlignment': 'end', 'crossAxisAlignment': 'center', 'spacing': 6},
                  'layout': {'width': {'fill': 400}, 'height': {'hug': 49}, 'padding': [12, 10, 12, 10]},
-                 'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top'}},
+                 'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top'},
+                 'bind': {'visible': '${slots.actions}'}},
         'actions': {'type': 'slot', 'props': {'name': 'actions'}},
     },
 ))
@@ -3077,7 +3079,8 @@ add(component(
                  'layout': {'width': {'fill': 200}, 'height': {'hug': 14}, 'margin': [0, 6, 0, 0]},
                  'bind': {'visible': "${= props.meta != ''}"}},
         'tail': {'type': 'row', 'children': ['actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
-                 'layout': {'width': {'hug': 40}, 'height': {'hug': 40}, 'padding': [0, 6, 8, 6]}},
+                 'layout': {'width': {'hug': 40}, 'height': {'hug': 40}, 'padding': [0, 6, 8, 6]},
+                 'bind': {'visible': '${slots.actions}'}},
         'actions': {'type': 'slot', 'props': {'name': 'actions'}},
     },
 ))
@@ -4389,7 +4392,8 @@ add(component(
         'badgeText': text("${= length(props.badges) > index ? props.badges[index] : ''}", style(10, 400, 'secondaryText', 1.3), {'hug': 8}, {'hug': 13}),
         'foot': {'type': 'column', 'children': ['footer'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 2},
                  'layout': {'width': {'fill': 256}, 'height': {'hug': 20}, 'padding': [8, 10, 8, 10]},
-                 'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top'}},
+                 'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top'},
+                 'bind': {'visible': '${slots.footer}'}},
         'footer': {'type': 'slot', 'props': {'name': 'footer'}},
     },
 ))
@@ -5742,7 +5746,8 @@ add(component(
         'faultIcon': icon('error_outline', 'error', 12),
         'faultText': _one_line('${props.error}', {**style(11, 400, 'secondaryText', 1.25, letterSpacing=-0.1), 'decoration': 'underline', 'decorationStyle': 'dotted'}, {'fill': 270}, {'hug': 14}),
         'foot': {'type': 'row', 'children': ['actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
-                 'layout': {'width': {'fill': 318}, 'height': {'hug': 0}, 'padding': [8, 0, 8, 6]}},
+                 'layout': {'width': {'fill': 318}, 'height': {'hug': 0}, 'padding': [8, 0, 8, 6]},
+                 'bind': {'visible': '${slots.actions}'}},
         'actions': {'type': 'slot', 'props': {'name': 'actions'}},
     },
 ))

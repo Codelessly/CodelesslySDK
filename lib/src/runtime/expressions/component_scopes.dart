@@ -71,11 +71,24 @@ class ComponentProps extends NamedScope implements ReferenceScope {
   Listenable? _listening;
   bool _disposed = false;
 
-  @override
-  bool declares(String name) => name == 'props';
+  /// `slots`: which of the definition's slots the call fills, by name
+  /// (`slots.actions`), and `slots.children` for the call's children. A
+  /// definition hides what only frames a slot (a footer's rule and padding)
+  /// while the slot is empty: `"visible": "${slots.actions}"`.
+  Map<String, Object?>? _slots;
 
   @override
-  Object? valueOf(String name, ValueScope reader) => name == 'props' ? (_values ??= _compute()) : null;
+  bool declares(String name) => name == 'props' || name == 'slots';
+
+  @override
+  Object? valueOf(String name, ValueScope reader) {
+    if (name == 'props') return _values ??= _compute();
+    if (name == 'slots') {
+      _values ??= _compute();
+      return _slots;
+    }
+    return null;
+  }
 
   Map<String, Object?> _compute() {
     final bound = source.resolveCall();
@@ -84,6 +97,10 @@ class ComponentProps extends NamedScope implements ReferenceScope {
     final inputs = <Listenable>[...?bound?.watch, source.callSource.watch(source.instance.call)];
     _references.clear();
     final values = <String, Object?>{};
+    _slots = {
+      for (final name in spec.slots) name: (call?.slots[name] ?? '').isNotEmpty,
+      'children': call?.children.isNotEmpty ?? false,
+    };
     if (call != null) {
       ValueScope? caller;
       for (final PropDef<Object?> p in spec.props) {
@@ -125,10 +142,11 @@ class ComponentProps extends NamedScope implements ReferenceScope {
 
   void _inputChanged() {
     if (_disposed) return;
-    final before = _values;
+    final before = _values, slotsBefore = _slots;
     final next = _compute();
     _values = next;
     if (before == null || !jsonEquality.equals(before, next)) changed(const ['props']);
+    if (!jsonEquality.equals(slotsBefore, _slots)) changed(const ['slots']);
   }
 
   @override

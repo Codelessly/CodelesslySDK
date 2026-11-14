@@ -1,0 +1,18 @@
+state q="render objects without widgets"
+Card gap:10
+  SearchBar =q placeholder:"Search the web" size:sm
+  Row gap:6
+    StatusDot status:success
+    Text.caption "Searched 3 sites in 1.2 s"
+  Column gap:8
+    Column gap:2
+      Hyperlink "RenderObject class - Flutter API" -> link https://api.flutter.dev
+      Text.caption "api.flutter.dev"
+      Text.small "An object in the render tree. The RenderObject class hierarchy is the core of the rendering library."
+    Divider
+    Column gap:2
+      Hyperlink "Inside Flutter" -> link https://docs.flutter.dev
+      Text.caption "docs.flutter.dev"
+      Text.small "How layout, painting and compositing fit together, and why constraints go down and sizes go up."
+  Row end
+    Button.ghost "Search again" -> emit search q

@@ -1,0 +1,9 @@
+state q=""
+Column gap:8
+  Text.caption "Keep going"
+  Row gap:8
+    Chip "Compare the two plans" -> q="Compare the two plans"; emit ask q
+    Chip "Show the cost per seat" -> q="Show the cost per seat"; emit ask q
+  Row gap:8
+    Chip "Draft the email" -> q="Draft the email"; emit ask q
+    Chip "What changed since last week?" -> q="What changed since last week?"; emit ask q

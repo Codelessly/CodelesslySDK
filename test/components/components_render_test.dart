@@ -228,6 +228,24 @@ void main() {
     expect(xs, orderedEquals([...xs]..sort()));
   });
 
+  testWidgets('a definition reads which slots the call fills: slots.<name> and slots.children', (tester) async {
+    Map<String, Object?> leaf(String text) =>
+        {'type': 'text', 'props': {'text': text}, 'layout': {'width': {'hug': 20}, 'height': {'hug': 20}}};
+    final s = await show(
+      tester,
+      page({
+        'a': call('Chip', slots: {'trailing': 't'}),
+        'b': call('Chip', children: ['k']),
+      }, more: {
+        't': leaf('tail'),
+        'k': leaf('kid'),
+      }),
+      [chip(text: r"${= (slots.trailing ? 'T' : '-') + (slots.children ? 'C' : '-')}")],
+    );
+    expect(s.text('a/label'), 'T-');
+    expect(s.text('b/label'), '-C');
+  });
+
   testWidgets('each instance has its own state, variable parameters and events', (tester) async {
     final s = await show(
       tester,

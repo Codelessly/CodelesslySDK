@@ -1,0 +1,24 @@
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Working on it" grow
+    Text.caption "3 of 4 done"
+  StackedProgressBar counts:[3] colors:["#FF16A34A"] total:4
+  Column gap:6
+    Row gap:8
+      AgentChip "Researcher" status:done
+      Text.small "Read 12 pages" grow
+      Text.caption "18 s"
+    Row gap:8
+      AgentChip "Analyst" status:done
+      Text.small "Compared 3 plans" grow
+      Text.caption "9 s"
+    Row gap:8
+      AgentChip "Writer" status:running
+      Text.small "Drafting the summary" grow
+      Text.caption "now"
+    Row gap:8
+      AgentChip "Reviewer" status:done
+      Text.small "Checked the figures" grow
+      Text.caption "4 s"
+  Row end
+    Button.ghost "Stop all" -> emit stop

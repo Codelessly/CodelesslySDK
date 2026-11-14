@@ -1,0 +1,8 @@
+state open=false
+Card gap:8
+  CollapsibleSection "Tool calls" count:3 icon:"build" hiddenCount:=open?0:2 expanded:=open -> open=!open
+    ListRow "search_docs" subtitle:"query: render objects" icon:"search" dense:true
+    if open
+      ListRow "read_file" subtitle:"lib/src/render/node_tree.dart" icon:"description" dense:true
+      ListRow "run_tests" subtitle:"12 passed" icon:"check_circle" dense:true
+  Text.caption "3 tools · 6.4 s · no errors"
