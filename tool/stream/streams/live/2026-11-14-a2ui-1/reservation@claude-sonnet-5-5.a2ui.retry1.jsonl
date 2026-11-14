@@ -1,0 +1,179 @@
+{"meta":{"ui":"reservation","model":"claude-sonnet-5-5","form":"a2ui","turn":"retry","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"booking\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"title\",\"sub\",\"div1\",\"day\",\"size\",\"refresh\",\"div2\",\"slots\",\"hint\",\"div3\",\"summary\",\"confirm\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Book a table\"},{\"id\":\"sub\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Choose a day, party size, then a time.\"},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"day\",\"component\":\"ChoicePicker\",\"label\":\"Day (next 7 days)\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"value\":{\"@path\":\"/booking/day\"},\"options\":[{\"label\":\"Today\",\"value\":\"day0\"},{\"label\":\"Tomorrow\",\"value\":\"day1\"},{\"label\":\"+2 days\",\"value\":\"day2\"},{\"label\":\"+3 days\",\"value\":\"day3\"},{\"label\":\"+4 days\",\"value\":\"day4\"},{\"label\":\"+5 days\",\"value\":\"day5\"},{\"label\":\"+6 days\",\"value\":\"day6\"}]},{\"id\":\"size\",\"component\":\"ChoicePicker\",\"label\":\"Party size\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"value\":{\"@path\":\"/booking/size\"},\"options\":[{\"label\":\"1\",\"value\":\"1\"},{\"label\":\"2\",\"value\":\"2\"},{\"label\":\"3\",\"value\":\"3\"},{\"label\":\"4\",\"value\":\"4\"},{\"label\":\"5\",\"value\":\"5\"},{\"label\":\"6\",\"value\":\"6\"},{\"label\":\"7\",\"value\":\"7\"},{\"label\":\"8\",\"value\":\"8\"}]},{\"id\":\"refreshText\",\"component\":\"Text\",\"text\":\"Check availability\"},{\"id\":\"refresh\",\"component\":\"Button\",\"child\":\"refreshText\",\"action\":{\"event\":{\"name\":\"check_availability\",\"userMessage\":\"Checking times for the selected day and party size\",\"context\":{\"day\":{\"@path\":\"/booking/day\"},\"size\":{\"@path\":\"/booking/size\"}}}}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"slots\",\"component\":\"ChoicePicker\",\"label\":\"Time slots\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"value\":{\"@path\":\"/booking/slot\"},\"options\":[{\"label\":\"5:30 PM\",\"value\":\"open-5:30 PM\"},{\"label\":\"6:00 PM (full)\",\"value\":\"full-6:00 PM\"},{\"label\":\"6:30 PM\",\"value\":\"open-6:30 PM\"},{\"label\":\"7:00 PM (full)\",\"value\":\"full-7:00 PM\"},{\"label\":\"7:30 PM\",\"value\":\"open-7:30 PM\"},{\"label\":\"8:00 PM\",\"value\":\"open-8:00 PM\"},{\"label\":\"8:30 PM (full)\",\"value\":\"full-8:30 PM\"}]},{\"id\":\"hint\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Slots marked full can't be booked. Tap Check availability after changing day or party size.\"},{\"id\":\"div3\",\"component\":\"Divider\"},{\"id\":\"summary\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Party of ${/booking/size/0} · ${/booking/day/0}\"}}},{\"id\":\"confirmText\",\"component\":\"Text\",\"text\":\"Confirm booking\"},{\"id\":\"confirm\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"confirmText\",\"@checks\":[{\"condition\":{\"@call\":\"regex\",\"args\":{\"value\":{\"@path\":\"/booking/slot/0\"},\"pattern\":\"^open-\"}},\"message\":\"Pick an available time slot.\"}],\"action\":{\"event\":{\"name\":\"confirm_booking\",\"userMessage\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Booked: ${/booking/day/0}, party of ${/booking/size/0}, ${/booking/slot/0}\"}},\"context\":{\"day\":{\"@path\":\"/booking/day\"},\"size\":{\"@path\":\"/booking/size\"},\"slot\":{\"@path\":\"/booking/slot\"}}}}}],\"dataModel\":{\"booking\":{\"day\":[\"day0\"],\"size\":[\"2\"],\"slot\":[]}}}}","usage":{"input_tokens":22859,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":2093,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":680}},"ttftMs":8234,"totalMs":14212}}
+{"tMs":8234,"delta":"{"}
+{"tMs":8669,"delta":"\"version\":\"1.0\",\""}
+{"tMs":8669,"delta":"createSurface\":{\"sur"}
+{"tMs":8669,"delta":"faceId\":\"booking"}
+{"tMs":8669,"delta":"\",\"catalogId\":\"https"}
+{"tMs":8669,"delta":"://a2ui.org/"}
+{"tMs":8669,"delta":"specification/v1_0/"}
+{"tMs":8669,"delta":"catalogs/basic/"}
+{"tMs":8669,"delta":"catalog.json\",\"components\":"}
+{"tMs":8669,"delta":"[{\"id\":\"root\",\""}
+{"tMs":8669,"delta":"component\":\"Card\",\"child\":"}
+{"tMs":8669,"delta":"\"col\"},{\"id\":"}
+{"tMs":8669,"delta":"\"col\",\"component\":\"Column"}
+{"tMs":9047,"delta":"\",\"children\":[\"title\",\"sub"}
+{"tMs":9047,"delta":"\",\"div1\",\"day\",\"size\",\""}
+{"tMs":9047,"delta":"refresh\",\"div2\",\"sl"}
+{"tMs":9047,"delta":"ots\",\"hint\",\"div3\",\""}
+{"tMs":9047,"delta":"summary\",\"confirm\"]"}
+{"tMs":9047,"delta":"},{\"id\":\"title\",\""}
+{"tMs":9047,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":9047,"delta":"\"Book a table\"},{"}
+{"tMs":9047,"delta":"\"id\":\"sub\",\"component"}
+{"tMs":9047,"delta":"\":\"Text\",\"variant\":"}
+{"tMs":9047,"delta":"\"caption\",\"text\":\""}
+{"tMs":9047,"delta":"Choose a day, party size,"}
+{"tMs":9436,"delta":" then a time.\"},{\"id"}
+{"tMs":9436,"delta":"\":\"div1\",\"component\":\""}
+{"tMs":9436,"delta":"Divider\"},{\"id"}
+{"tMs":9436,"delta":"\":\"day\",\"component\":\""}
+{"tMs":9436,"delta":"ChoicePicker\",\"label"}
+{"tMs":9436,"delta":"\":\"Day (next 7"}
+{"tMs":9436,"delta":" days)\",\"variant\":\""}
+{"tMs":9436,"delta":"mutuallyExclus"}
+{"tMs":9436,"delta":"ive\",\"displayStyle\":"}
+{"tMs":9436,"delta":"\"chips\",\"value\":{\""}
+{"tMs":9436,"delta":"@path\":\"/booking/"}
+{"tMs":9436,"delta":"day\"},\"options\":[{"}
+{"tMs":9812,"delta":"\"label\":\"Today\",\"value"}
+{"tMs":9812,"delta":"\":\"day0\"},{\""}
+{"tMs":9812,"delta":"label\":\"Tomorr"}
+{"tMs":9812,"delta":"ow\",\"value\":\"day1\""}
+{"tMs":9812,"delta":"},{\"label\":\"+2"}
+{"tMs":9812,"delta":" days\",\"value\":\"day2"}
+{"tMs":9812,"delta":"\"},{\"label\":\"+"}
+{"tMs":9812,"delta":"3 days\",\"value\":\"day"}
+{"tMs":9812,"delta":"3\"},{\"label\":\""}
+{"tMs":9812,"delta":"+4 days\",\"value\":\""}
+{"tMs":9812,"delta":"day4\"},{\"label\":"}
+{"tMs":9812,"delta":"\"+5 days\",\"value\":"}
+{"tMs":10191,"delta":"\"day5\"},{\"label"}
+{"tMs":10191,"delta":"\":\"+6 days\",\"value"}
+{"tMs":10191,"delta":"\":\"day6\"}]},"}
+{"tMs":10192,"delta":"{\"id\":\"size\",\"component"}
+{"tMs":10192,"delta":"\":\"ChoicePic"}
+{"tMs":10192,"delta":"ker\",\"label\":\"Party size"}
+{"tMs":10192,"delta":"\",\"variant\":\"mutu"}
+{"tMs":10192,"delta":"allyExclusive\",\"displ"}
+{"tMs":10192,"delta":"ayStyle\":\"chips"}
+{"tMs":10192,"delta":"\",\"value\":{\"@path\":"}
+{"tMs":10192,"delta":"\"/booking/size\"},"}
+{"tMs":10192,"delta":"\"options\":[{\"label\":"}
+{"tMs":10659,"delta":"\"1\",\"value\":\"1\""}
+{"tMs":10659,"delta":"},{\"label\":\"2\",\""}
+{"tMs":10659,"delta":"value\":\"2\"},{\""}
+{"tMs":10659,"delta":"label\":\"3\",\"value\":\""}
+{"tMs":10659,"delta":"3\"},{\"label\":\""}
+{"tMs":10659,"delta":"4\",\"value\":\"4\"},"}
+{"tMs":10659,"delta":"{\"label\":\"5\",\"value"}
+{"tMs":10659,"delta":"\":\"5\"},{\"label"}
+{"tMs":10659,"delta":"\":\"6\",\"value\":\"6"}
+{"tMs":10659,"delta":"\"},{\"label\":\"7"}
+{"tMs":10659,"delta":"\",\"value\":\"7\"},{"}
+{"tMs":10659,"delta":"\"label\":\"8\",\"value\":"}
+{"tMs":11021,"delta":"\"8\"}]},{\""}
+{"tMs":11021,"delta":"id\":\"refreshText\",\""}
+{"tMs":11021,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":11021,"delta":"\"Check availability\"},{"}
+{"tMs":11021,"delta":"\"id\":\"refresh\",\""}
+{"tMs":11021,"delta":"component\":\"Button\",\"child\":"}
+{"tMs":11021,"delta":"\"refreshText\",\"action\":"}
+{"tMs":11021,"delta":"{\"event\":{\"name\":"}
+{"tMs":11021,"delta":"\"check_availability\",\"userM"}
+{"tMs":11021,"delta":"essage\":\"Checking times"}
+{"tMs":11021,"delta":" for the selected day and party size"}
+{"tMs":11021,"delta":"\",\"context\":{\"day\":{"}
+{"tMs":11407,"delta":"\"@path\":\"/booking"}
+{"tMs":11408,"delta":"/day\"},\"size\":{"}
+{"tMs":11409,"delta":"\"@path\":\"/booking"}
+{"tMs":11409,"delta":"/size\"}}}}},"}
+{"tMs":11409,"delta":"{\"id\":\"div2\",\""}
+{"tMs":11409,"delta":"component\":\"Divider\"},"}
+{"tMs":11409,"delta":"{\"id\":\"slots\",\""}
+{"tMs":11409,"delta":"component\":\"ChoiceP"}
+{"tMs":11409,"delta":"icker\",\"label\":\"Time"}
+{"tMs":11409,"delta":" slots\",\"variant\":\"m"}
+{"tMs":11409,"delta":"utuallyExclusive"}
+{"tMs":11409,"delta":"\",\"displayStyle\":\""}
+{"tMs":11796,"delta":"chips\",\"value\":{\"@"}
+{"tMs":11796,"delta":"path\":\"/booking/sl"}
+{"tMs":11796,"delta":"ot\"},\"options\":[{"}
+{"tMs":11796,"delta":"\"label\":\"5:30 "}
+{"tMs":11796,"delta":"PM\",\"value\":\"open-"}
+{"tMs":11796,"delta":"5:30 PM\"},"}
+{"tMs":11796,"delta":"{\"label\":\"6:00"}
+{"tMs":11796,"delta":" PM (full)\",\"value"}
+{"tMs":11796,"delta":"\":\"full-6:00 "}
+{"tMs":11796,"delta":"PM\"},{\"label\":"}
+{"tMs":11796,"delta":"\"6:30 PM\",\""}
+{"tMs":11796,"delta":"value\":\"open-6:30"}
+{"tMs":12187,"delta":" PM\"},{\"label"}
+{"tMs":12187,"delta":"\":\"7:00 PM"}
+{"tMs":12187,"delta":" (full)\",\"value\":\"full"}
+{"tMs":12187,"delta":"-7:00 PM\""}
+{"tMs":12187,"delta":"},{\"label\":\"7:"}
+{"tMs":12187,"delta":"30 PM\",\"value\":\""}
+{"tMs":12187,"delta":"open-7:30 PM"}
+{"tMs":12187,"delta":"\"},{\"label\":\"8"}
+{"tMs":12187,"delta":":00 PM\",\"value\":"}
+{"tMs":12187,"delta":"\"open-8:00 P"}
+{"tMs":12187,"delta":"M\"},{\"label\":\""}
+{"tMs":12187,"delta":"8:30 PM (full"}
+{"tMs":12641,"delta":")\",\"value\":\"full-8"}
+{"tMs":12641,"delta":":30 PM\"}]"}
+{"tMs":12641,"delta":"},{\"id\":\"hint"}
+{"tMs":12641,"delta":"\",\"component\":\"Text\",\"vari"}
+{"tMs":12641,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":12641,"delta":"\"Slots marked full can"}
+{"tMs":12641,"delta":"'t be booked. Tap"}
+{"tMs":12641,"delta":" Check availability after changing day"}
+{"tMs":12641,"delta":" or party size.\"},{\"id"}
+{"tMs":12641,"delta":"\":\"div3\",\"component\":\""}
+{"tMs":12641,"delta":"Divider\"},{\"id"}
+{"tMs":12642,"delta":"\":\"summary\",\"component\":\""}
+{"tMs":13024,"delta":"Text\",\"text\":{\"@"}
+{"tMs":13024,"delta":"call\":\"formatString\",\"args"}
+{"tMs":13024,"delta":"\":{\"value\":\"Party"}
+{"tMs":13024,"delta":" of ${/booking/size"}
+{"tMs":13024,"delta":"/0} · ${/boo"}
+{"tMs":13024,"delta":"king/day/0}\"}"}
+{"tMs":13024,"delta":"}},{\"id\":\"conf"}
+{"tMs":13024,"delta":"irmText\",\"component\":\""}
+{"tMs":13024,"delta":"Text\",\"text\":\"Confir"}
+{"tMs":13024,"delta":"m booking\"},{\"id"}
+{"tMs":13024,"delta":"\":\"confirm\",\"component\":"}
+{"tMs":13024,"delta":"\"Button\",\"variant\":\""}
+{"tMs":13400,"delta":"primary\",\"child\":\"confir"}
+{"tMs":13400,"delta":"mText\",\"@checks\":["}
+{"tMs":13400,"delta":"{\"condition\":{\"@"}
+{"tMs":13401,"delta":"call\":\"regex\",\"args\":"}
+{"tMs":13401,"delta":"{\"value\":{\"@path"}
+{"tMs":13401,"delta":"\":\"/booking/slot"}
+{"tMs":13401,"delta":"/0\"},\"pattern"}
+{"tMs":13401,"delta":"\":\"^open-\"}},"}
+{"tMs":13401,"delta":"\"message\":\"Pick an"}
+{"tMs":13401,"delta":" available time slot.\"}],\""}
+{"tMs":13401,"delta":"action\":{\"event\":{\""}
+{"tMs":13401,"delta":"name\":\"confirm_boo"}
+{"tMs":14206,"delta":"king\",\"userMessage\":{"}
+{"tMs":14206,"delta":"\"@call\":\"formatString"}
+{"tMs":14206,"delta":"\",\"args\":{\"value\":\""}
+{"tMs":14206,"delta":"Booked: ${/boo"}
+{"tMs":14206,"delta":"king/day/0}, party"}
+{"tMs":14206,"delta":" of ${/booking/size"}
+{"tMs":14206,"delta":"/0}, ${/boo"}
+{"tMs":14206,"delta":"king/slot/0}\""}
+{"tMs":14206,"delta":"}},\"context\":{\"day"}
+{"tMs":14206,"delta":"\":{\"@path\":\"/"}
+{"tMs":14206,"delta":"booking/day\"},\"size"}
+{"tMs":14206,"delta":"\":{\"@path\":\"/"}
+{"tMs":14206,"delta":"booking/size\"},\"sl"}
+{"tMs":14206,"delta":"ot\":{\"@path\":\""}
+{"tMs":14207,"delta":"/booking/slot\"}"}
+{"tMs":14207,"delta":"}}}}],\"data"}
+{"tMs":14207,"delta":"Model\":{\"booking\":"}
+{"tMs":14207,"delta":"{\"day\":[\"day0\""}
+{"tMs":14207,"delta":"],\"size\":[\"2\"],"}
+{"tMs":14207,"delta":"\"slot\":[]}}"}
+{"tMs":14207,"delta":"}}"}

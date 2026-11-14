@@ -1,0 +1,76 @@
+{
+ "ui": "weather",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21143,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1502,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 1050,
+   "totalMs": 8240,
+   "chars": 3254,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 32,
+   "outputTokensPerNode": "46.9",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 1,
+   "errors": [
+    "invalid_variable /variables/screen/8/name: \"item.high\" is not a name expressions can read: use letters, digits and _, not starting with a digit.",
+    "unknown_variable /nodes/slider1/actions/0/actions/0/variable: No variable \"item\" is declared for canvas \"screen\" (declare it under \"variables\": {\"page_variables\" or \"<canvas id>\": [{\"name\": \"item\", \"type\": ..., \"value\": ...}]})."
+   ]
+  },
+  {
+   "input_tokens": 22822,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2778,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 582
+   },
+   "ttftMs": 6799,
+   "totalMs": 16308,
+   "chars": 4750,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 50,
+   "outputTokensPerNode": "55.6",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 1,
+   "errors": [
+    "unknown_name /nodes/text11/props/text: \"days_0_day\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text12/props/text: \"days_0_low\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text16/props/text: \"days_0_high\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text17/props/text: \"days_1_day\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text18/props/text: \"days_1_low\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text22/props/text: \"days_1_high\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text23/props/text: \"days_2_day\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text24/props/text: \"days_2_low\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text28/props/text: \"days_2_high\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  }
+ ]
+}

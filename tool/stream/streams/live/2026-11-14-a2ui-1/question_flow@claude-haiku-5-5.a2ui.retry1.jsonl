@@ -1,0 +1,75 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"a2ui","turn":"retry","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"laptop\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"progress\",\"q\",\"nav\"],\"align\":\"stretch\"},{\"id\":\"progress\",\"component\":\"Text\",\"text\":\"Step 1 of 3 · Use case\",\"variant\":\"caption\"},{\"id\":\"q\",\"component\":\"ChoicePicker\",\"label\":\"What will you mainly use it for?\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"checkbox\",\"options\":[{\"label\":\"Everyday browsing & email\",\"value\":\"everyday\"},{\"label\":\"Schoolwork & writing\",\"value\":\"school\"},{\"label\":\"Creative work (photo/video)\",\"value\":\"creative\"},{\"label\":\"Gaming\",\"value\":\"gaming\"},{\"label\":\"Programming & development\",\"value\":\"dev\"}],\"value\":{\"@path\":\"/answers/useCase\"}},\"nav\":{\"id\":\"nav\",\"component\":\"Row\",\"children\":[\"back\",\"next\"],\"justify\":\"spaceBetween\"},\"back\":{\"id\":\"back\",\"component\":\"Button\",\"child\":\"backLbl\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"goBack\"}}},\"backLbl\":{\"id\":\"backLbl\",\"component\":\"Text\",\"text\":\"Back\"},\"next\":{\"id\":\"next\",\"component\":\"Button\",\"child\":\"nextLbl\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"nextStep\",\"context\":{\"useCase\":{\"@path\":\"/answers/useCase\"}}}}},\"nextLbl\":{\"id\":\"nextLbl\",\"component\":\"Text\",\"text\":\"Next\"}}],\"dataModel\":{\"answers\":{\"useCase\":[]}}}}","usage":{"input_tokens":21797,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":594,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":493,"totalMs":2007}}
+{"tMs":493,"delta":"{\"version\":\"1.0"}
+{"tMs":637,"delta":"\",\"createSurface\":{\""}
+{"tMs":638,"delta":"surfaceId\":\"la"}
+{"tMs":638,"delta":"ptop\",\"catalogId\":"}
+{"tMs":638,"delta":"\"https://a2ui."}
+{"tMs":638,"delta":"org/specification/v1_"}
+{"tMs":638,"delta":"0/catalogs/bas"}
+{"tMs":638,"delta":"ic/catalog.json\",\""}
+{"tMs":655,"delta":"components\":[{\"id\":\""}
+{"tMs":675,"delta":"root\",\"component\":\"Card\",\""}
+{"tMs":696,"delta":"child\":\"col\"},{\""}
+{"tMs":716,"delta":"id\":\"col\",\"component\":\""}
+{"tMs":737,"delta":"Column\",\"children\":[\"progress"}
+{"tMs":757,"delta":"\",\"q\",\"nav\"],\""}
+{"tMs":777,"delta":"align\":\"stretch\"},"}
+{"tMs":798,"delta":"{\"id\":\"progress\",\""}
+{"tMs":818,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":838,"delta":"\"Step 1 of "}
+{"tMs":859,"delta":"3 · Use case\",\"vari"}
+{"tMs":880,"delta":"ant\":\"caption\"},{"}
+{"tMs":899,"delta":"\"id\":\"q\",\"component\":"}
+{"tMs":920,"delta":"\"ChoicePicker"}
+{"tMs":941,"delta":"\",\"label\":\"What will you m"}
+{"tMs":961,"delta":"ainly use it for?\",\"vari"}
+{"tMs":982,"delta":"ant\":\"mutually"}
+{"tMs":1002,"delta":"Exclusive\",\"displaySt"}
+{"tMs":1022,"delta":"yle\":\"checkbox"}
+{"tMs":1043,"delta":"\",\"options\":[{\"label\":"}
+{"tMs":1063,"delta":"\"Everyday browsing"}
+{"tMs":1084,"delta":" & email\",\"value\":\"every"}
+{"tMs":1104,"delta":"day\"},{\"label\":\""}
+{"tMs":1125,"delta":"Schoolwork & writ"}
+{"tMs":1146,"delta":"ing\",\"value\":\"school\"},"}
+{"tMs":1165,"delta":"{\"label\":\"Creative"}
+{"tMs":1186,"delta":" work (photo/video)\",\""}
+{"tMs":1206,"delta":"value\":\"creative\"},{"}
+{"tMs":1227,"delta":"\"label\":\"Gaming"}
+{"tMs":1247,"delta":"\",\"value\":\"gaming\""}
+{"tMs":1267,"delta":"},{\"label\":\"Program"}
+{"tMs":1288,"delta":"ming & development\",\"value\":\"d"}
+{"tMs":1310,"delta":"ev\"}],\"value\":{"}
+{"tMs":1329,"delta":"\"@path\":\"/answers"}
+{"tMs":1350,"delta":"/useCase\"}},\""}
+{"tMs":1370,"delta":"nav\":{\"id\":\""}
+{"tMs":1390,"delta":"nav\",\"component\":\"Row"}
+{"tMs":1410,"delta":"\",\"children\":[\"back\",\"next\""}
+{"tMs":1430,"delta":"],\"justify\":\"spa"}
+{"tMs":1451,"delta":"ceBetween\"},\"back"}
+{"tMs":1471,"delta":"\":{\"id\":\"back\",\""}
+{"tMs":1492,"delta":"component\":\"Button\",\"child\":"}
+{"tMs":1518,"delta":"\"backLbl\",\"variant"}
+{"tMs":1532,"delta":"\":\"borderless\",\"action\":"}
+{"tMs":1553,"delta":"{\"event\":{\"name\":"}
+{"tMs":1573,"delta":"\"goBack\"}}},"}
+{"tMs":1594,"delta":"\"backLbl\":{\""}
+{"tMs":1614,"delta":"id\":\"backLbl\",\""}
+{"tMs":1635,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":1655,"delta":"\"Back\"},\"next\":"}
+{"tMs":1676,"delta":"{\"id\":\"next\",\"component"}
+{"tMs":1696,"delta":"\":\"Button\",\"child\":\""}
+{"tMs":1716,"delta":"nextLbl\",\"variant"}
+{"tMs":1748,"delta":"\":\"primary\",\"action\":{"}
+{"tMs":1764,"delta":"\"event\":{\"name\":\""}
+{"tMs":1794,"delta":"nextStep\",\"context\":{"}
+{"tMs":1807,"delta":"\"useCase\":{\"@"}
+{"tMs":1821,"delta":"path\":\"/answers/use"}
+{"tMs":1838,"delta":"Case\"}}}}},"}
+{"tMs":1859,"delta":"\"nextLbl\":{"}
+{"tMs":1879,"delta":"\"id\":\"nextLb"}
+{"tMs":1900,"delta":"l\",\"component\":\"Text\",\""}
+{"tMs":1920,"delta":"text\":\"Next\"}}"}
+{"tMs":1941,"delta":"],\"dataModel\":{"}
+{"tMs":1961,"delta":"\"answers\":{\"useC"}
+{"tMs":1982,"delta":"ase\":[]}}}}"}

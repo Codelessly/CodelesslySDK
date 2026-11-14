@@ -1,0 +1,67 @@
+{
+ "ui": "weather",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21142,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1747,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 524,
+   "totalMs": 5636,
+   "chars": 3813,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 1,
+   "outputTokensPerNode": "1747.0",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 2,
+   "errors": [
+    "No surface with a root component could be read from the answer."
+   ]
+  },
+  {
+   "input_tokens": 22939,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1739,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 398,
+   "totalMs": 4850,
+   "chars": 3791,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 1,
+   "outputTokensPerNode": "1739.0",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 2,
+   "errors": [
+    "No surface with a root component could be read from the answer."
+   ]
+  }
+ ]
+}

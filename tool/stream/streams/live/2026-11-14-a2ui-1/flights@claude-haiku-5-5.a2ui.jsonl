@@ -1,0 +1,103 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"flights\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"title\",\"picker\",\"total\",\"confirm\"]},{\"id\":\"title\",\"component\":\"Text\",\"variant\":\"body\",\"weight\":1,\"text\":\"Flights London to Lisbon, this Friday\"},{\"id\":\"picker\",\"component\":\"ChoicePicker\",\"label\":\"Choose a flight\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"checkbox\",\"options\":[{\"label\":\"TAP TP1234 · 07:15 → 09:55 · Direct · 2h 40m · £118 · Cheapest\",\"value\":\"tp1234\"},{\"label\":\"BA 0488 · 11:30 → 14:05 · Direct · 2h 35m · £164 · Best time\",\"value\":\"ba0488\"},{\"label\":\"Ryanair FR7720 · 18:20 → 20:50 · 1 stop · 4h 30m · £96\",\"value\":\"fr7720\"}],\"value\":{\"@path\":\"/selection\"}},{\"id\":\"total\",\"component\":\"Text\",\"variant\":\"body\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Total: ${formatCurrency(value:${/price}, currency:'GBP')}\"}}},{\"id\":\"confirm\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"confirmText\",\"action\":{\"event\":{\"name\":\"confirmFlight\",\"context\":{\"flight\":{\"@path\":\"/selection\"}}}}},{\"id\":\"confirmText\",\"component\":\"Text\",\"text\":\"Confirm flight\"}],\"dataModel\":{\"selection\":[\"tp1234\"],\"price\":118}}}","usage":{"input_tokens":21164,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":589,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":795,"totalMs":2886}}
+{"tMs":795,"delta":"{\"version"}
+{"tMs":813,"delta":"\":\"1.0\",\"createS"}
+{"tMs":895,"delta":"urface\":{\"surfa"}
+{"tMs":895,"delta":"ceId\":\"flights"}
+{"tMs":895,"delta":"\",\"catalogId\":\"https"}
+{"tMs":896,"delta":"://a2ui.org/"}
+{"tMs":917,"delta":"specification/v1_0/"}
+{"tMs":938,"delta":"catalogs/basic/"}
+{"tMs":958,"delta":"catalog.json\",\"components\":"}
+{"tMs":979,"delta":"[{\"id\":\"root\",\""}
+{"tMs":1002,"delta":"component\":\"Card"}
+{"tMs":1020,"delta":"\",\"child\":\"col"}
+{"tMs":1041,"delta":"\"},{\"id\":\"col"}
+{"tMs":1060,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1080,"delta":"\":[\"title\",\"pic"}
+{"tMs":1101,"delta":"ker\",\"total"}
+{"tMs":1121,"delta":"\",\"confirm\"]},{"}
+{"tMs":1142,"delta":"\"id\":\"title\",\"component\":"}
+{"tMs":1162,"delta":"\"Text\",\"vari"}
+{"tMs":1183,"delta":"ant\":\"body"}
+{"tMs":1202,"delta":"\",\"we"}
+{"tMs":1223,"delta":"ight\":1"}
+{"tMs":1243,"delta":",\"text\":\""}
+{"tMs":1263,"delta":"Flights London"}
+{"tMs":1283,"delta":" to Lisbon,"}
+{"tMs":1304,"delta":" this"}
+{"tMs":1324,"delta":" Friday\"},{\"id"}
+{"tMs":1345,"delta":"\":\"picker\",\"component\":\""}
+{"tMs":1366,"delta":"ChoicePicker\",\""}
+{"tMs":1386,"delta":"label\":\"Choose a"}
+{"tMs":1406,"delta":" flight\",\"variant\":\"m"}
+{"tMs":1427,"delta":"utuallyExclusive"}
+{"tMs":1448,"delta":"\",\"displayStyle\":\""}
+{"tMs":1468,"delta":"checkbox\",\"options"}
+{"tMs":1491,"delta":"\":[{\"label\":\"T"}
+{"tMs":1510,"delta":"A"}
+{"tMs":1528,"delta":"P T"}
+{"tMs":1551,"delta":"P1234"}
+{"tMs":1569,"delta":" · 07:15"}
+{"tMs":1590,"delta":" → 09"}
+{"tMs":1609,"delta":":55"}
+{"tMs":1630,"delta":" · Direct · "}
+{"tMs":1650,"delta":"2h 40"}
+{"tMs":1695,"delta":"m · £118"}
+{"tMs":1695,"delta":" · Cheapest\",\""}
+{"tMs":1711,"delta":"value\":\"t"}
+{"tMs":1733,"delta":"p1234\"},{\"label"}
+{"tMs":1753,"delta":"\":\"B"}
+{"tMs":1773,"delta":"A 0"}
+{"tMs":1792,"delta":"488"}
+{"tMs":1813,"delta":" · 11"}
+{"tMs":1833,"delta":":30 → 14"}
+{"tMs":1855,"delta":":05 · Direct ·"}
+{"tMs":1875,"delta":" 2h 35m · £"}
+{"tMs":1895,"delta":"164"}
+{"tMs":1915,"delta":" · Best time\",\"value\":"}
+{"tMs":1936,"delta":"\"ba0488\"},{"}
+{"tMs":1956,"delta":"\"label\":\"Ryan"}
+{"tMs":1977,"delta":"air F"}
+{"tMs":1997,"delta":"R7"}
+{"tMs":2017,"delta":"720"}
+{"tMs":2037,"delta":" · 18"}
+{"tMs":2058,"delta":":20"}
+{"tMs":2078,"delta":" → 20"}
+{"tMs":2098,"delta":":50"}
+{"tMs":2119,"delta":" · 1 "}
+{"tMs":2140,"delta":"stop · "}
+{"tMs":2163,"delta":"4h 30m · £96"}
+{"tMs":2181,"delta":"\",\"value\":\"f"}
+{"tMs":2201,"delta":"r7720\"}],\"value"}
+{"tMs":2221,"delta":"\":{\"@path\":\"/"}
+{"tMs":2241,"delta":"selection\""}
+{"tMs":2262,"delta":"}"}
+{"tMs":2282,"delta":"},{"}
+{"tMs":2303,"delta":"\"id\":\"total\",\"component\":"}
+{"tMs":2323,"delta":"\"Text\",\"variant\":\""}
+{"tMs":2343,"delta":"body\",\"text\":{\"@call"}
+{"tMs":2364,"delta":"\":\"formatString\",\""}
+{"tMs":2384,"delta":"args\":{\"value\":\""}
+{"tMs":2405,"delta":"Total: ${formatCur"}
+{"tMs":2425,"delta":"rency(value:${/price"}
+{"tMs":2445,"delta":"}, currency:'G"}
+{"tMs":2466,"delta":"BP')}\"}}"}
+{"tMs":2487,"delta":"},{\"id\":\"confir"}
+{"tMs":2507,"delta":"m\",\"component\":\"Button\",\""}
+{"tMs":2528,"delta":"variant\":\"primary\",\"child"}
+{"tMs":2548,"delta":"\":\""}
+{"tMs":2568,"delta":"confirmText\",\"action\":{"}
+{"tMs":2589,"delta":"\"event\":{\"name\":\""}
+{"tMs":2610,"delta":"confirmFlight\",\"context"}
+{"tMs":2629,"delta":"\":{\"fl"}
+{"tMs":2650,"delta":"ight\":{\"@path\":\""}
+{"tMs":2671,"delta":"/selection\"}}}}"}
+{"tMs":2691,"delta":"},"}
+{"tMs":2711,"delta":"{\"id\":\"confirm"}
+{"tMs":2732,"delta":"Text\",\"component\":\"Text"}
+{"tMs":2752,"delta":"\",\"text"}
+{"tMs":2772,"delta":"\":\"Confirm fl"}
+{"tMs":2793,"delta":"ight\"}],\"d"}
+{"tMs":2814,"delta":"ataModel\":{\"sel"}
+{"tMs":2834,"delta":"ection\":[\"tp1234\""}
+{"tMs":2855,"delta":"],\"price\":118}}}"}

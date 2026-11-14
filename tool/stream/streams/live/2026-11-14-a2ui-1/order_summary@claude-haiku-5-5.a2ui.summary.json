@@ -1,0 +1,80 @@
+{
+ "ui": "order_summary",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21180,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 3793,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 745,
+   "totalMs": 11651,
+   "chars": 8505,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 65,
+   "outputTokensPerNode": "58.4",
+   "notationIssues": [],
+   "notes": [
+    "The function formatCurrency is not evaluated.",
+    "The function formatCurrency is not evaluated.",
+    "The function formatCurrency is not evaluated.",
+    "The function formatCurrency is not evaluated.",
+    "The function formatCurrency is not evaluated.",
+    "The function formatCurrency is not evaluated.",
+    "The function formatCurrency is not evaluated.",
+    "The function formatCurrency is not evaluated."
+   ],
+   "messages": 2,
+   "errors": [
+    "unknown_name /nodes/text4/props/text: \"items_0_quantity\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text7/props/text: \"items_1_quantity\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text10/props/text: \"items_2_quantity\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text13/props/text: \"items_3_quantity\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text16/props/text: \"items_4_quantity\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  },
+  {
+   "input_tokens": 25631,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1975,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 749,
+   "totalMs": 6185,
+   "chars": 4373,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 1,
+   "outputTokensPerNode": "1975.0",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 1,
+   "errors": [
+    "No surface with a root component could be read from the answer."
+   ]
+  }
+ ]
+}

@@ -1189,8 +1189,11 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   final canvas = Canvas(recorder);
   final paint = Paint()..filterQuality = FilterQuality.none;
   // Rows of [img] (a capture of [layer]) in window coordinates.
+  // Only the columns the page view covers: what stands beside it (a rail,
+  // a sidebar that does not scroll) shows once, in the first window, not
+  // again at every seam.
   void rows(ui.Image img, double top, double height, double to) => canvas.drawImageRect(
-      img, Rect.fromLTWH(-layerAt.dx, top - layerAt.dy, window.width, height), Rect.fromLTWH(0, to, window.width, height), paint);
+      img, Rect.fromLTWH(view.left - layerAt.dx, top - layerAt.dy, view.width, height), Rect.fromLTWH(view.left, to, view.width, height), paint);
   for (final (img, at) in slices) {
     // The viewport's rows: the page from offset [at].
     rows(img, view.top, view.height, view.top + at);

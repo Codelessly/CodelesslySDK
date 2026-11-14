@@ -1,0 +1,67 @@
+{
+ "ui": "flights",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21164,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 589,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 795,
+   "totalMs": 2886,
+   "chars": 1263,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 8,
+   "outputTokensPerNode": "73.6",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 1,
+   "errors": [
+    "unknown_name /nodes/text3/props/text: \"formatCurrency_value____price\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  },
+  {
+   "input_tokens": 21914,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 581,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 788,
+   "totalMs": 2300,
+   "chars": 1241,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 8,
+   "outputTokensPerNode": "72.6",
+   "notationIssues": [],
+   "notes": [
+    "The function formatCurrency is not evaluated."
+   ],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}

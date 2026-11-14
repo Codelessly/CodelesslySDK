@@ -1,0 +1,212 @@
+{"meta":{"ui":"approval","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"approval\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"sendDataModel\":true,\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"body\"},{\"id\":\"body\",\"component\":\"Column\",\"children\":[\"header\",\"summary\",\"stats\",\"warnRow\",\"divider\",\"previewToggle\",\"previewList\",\"decisionArea\"]},{\"id\":\"header\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"headerIcon\",\"headerTitle\"]},{\"id\":\"headerIcon\",\"component\":\"Icon\",\"name\":\"warning\"},{\"id\":\"headerTitle\",\"component\":\"Text\",\"text\":\"Approve file deletion?\"},{\"id\":\"summary\",\"component\":\"Text\",\"text\":\"I am about to permanently delete old files from your shared drive. Nothing will be removed until you approve.\"},{\"id\":\"stats\",\"component\":\"Column\",\"children\":[\"statFolder\",\"statCount\",\"statSize\"]},{\"id\":\"statFolder\",\"component\":\"Text\",\"text\":\"**Folder:** /Shared Drive/Archive/Old Files\"},{\"id\":\"statCount\",\"component\":\"Text\",\"text\":\"**Files:** 214 files\"},{\"id\":\"statSize\",\"component\":\"Text\",\"text\":\"**Space freed:** 1.8 GB\"},{\"id\":\"warnRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"warnIcon\",\"warnText\"]},{\"id\":\"warnIcon\",\"component\":\"Icon\",\"name\":\"error\"},{\"id\":\"warnText\",\"component\":\"Text\",\"text\":\"**This cannot be undone.** Deleted files cannot be recovered.\",\"weight\":1},{\"id\":\"divider\",\"component\":\"Divider\"},{\"id\":\"previewToggle\",\"component\":\"CheckBox\",\"label\":\"Show first few file names\",\"value\":{\"@path\":\"/showPreview\"}},{\"id\":\"previewList\",\"component\":\"Column\",\"children\":[\"previewText\"],\"@accessibility\":{\"hidden\":{\"@call\":\"not\",\"args\":{\"value\":{\"@path\":\"/showPreview\"}}}}},{\"id\":\"previewText\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/previewNames}\"}},\"variant\":\"caption\"},{\"id\":\"decisionArea\",\"component\":\"Column\",\"children\":[\"decisionText\",\"buttons\"]},{\"id\":\"decisionText\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/decisionLabel}\"}}},{\"id\":\"buttons\",\"component\":\"Row\",\"justify\":\"end\",\"children\":[\"denyBtn\",\"approveBtn\"],\"@accessibility\":{\"hidden\":{\"@path\":\"/decided\"}}},{\"id\":\"denyLabel\",\"component\":\"Text\",\"text\":\"Deny\"},{\"id\":\"approveLabel\",\"component\":\"Text\",\"text\":\"Approve deletion\"},{\"id\":\"denyBtn\",\"component\":\"Button\",\"child\":\"denyLabel\",\"variant\":\"default\",\"action\":{\"event\":{\"name\":\"deletion_decision\",\"userMessage\":\"Denied deletion of 214 files\",\"context\":{\"decision\":\"denied\",\"folder\":\"/Shared Drive/Archive/Old Files\",\"fileCount\":214}}},\"@checks\":[{\"condition\":{\"@call\":\"not\",\"args\":{\"value\":{\"@path\":\"/decided\"}}},\"message\":\"Decision already made.\"}]},{\"id\":\"approveBtn\",\"component\":\"Button\",\"child\":\"approveLabel\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"deletion_decision\",\"userMessage\":\"Approved deletion of 214 files\",\"context\":{\"decision\":\"approved\",\"folder\":\"/Shared Drive/Archive/Old Files\",\"fileCount\":214}}},\"@checks\":[{\"condition\":{\"@call\":\"not\",\"args\":{\"value\":{\"@path\":\"/decided\"}}},\"message\":\"Decision already made.\"}]}],\"dataModel\":{\"showPreview\":false,\"decided\":false,\"decisionLabel\":\"Awaiting your decision.\",\"previewNames\":\"1. Q1-2019-budget.xlsx\\n2. meeting-notes-2018-03.docx\\n3. old-logo-draft-v2.png\\n4. onboarding-2017.pdf\\n5. team-photo-2016.jpg\\n…and 209 more\"}}}","usage":{"input_tokens":21172,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1368,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":873,"totalMs":7865}}
+{"tMs":873,"delta":"{\"version\":\"1.0"}
+{"tMs":1196,"delta":"\",\"createSurface\":{\""}
+{"tMs":1196,"delta":"surfaceId\":\"appro"}
+{"tMs":1196,"delta":"val\",\"catalogId\":\""}
+{"tMs":1196,"delta":"https://a2ui.org"}
+{"tMs":1196,"delta":"/specification/v1_0"}
+{"tMs":1196,"delta":"/catalogs/basic"}
+{"tMs":1196,"delta":"/catalog.json\",\"s"}
+{"tMs":1196,"delta":"endDataModel\":true,"}
+{"tMs":1196,"delta":"\"components\":[{\"id\":"}
+{"tMs":1200,"delta":"\"root\",\"component\":\"Card"}
+{"tMs":1232,"delta":"\",\"child\":\"body"}
+{"tMs":1265,"delta":"\"},{\"id\":\"body"}
+{"tMs":1539,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1539,"delta":"\":[\"header"}
+{"tMs":1539,"delta":"\",\"summ"}
+{"tMs":1539,"delta":"ary\",\"st"}
+{"tMs":1540,"delta":"ats\",\"war"}
+{"tMs":1540,"delta":"n"}
+{"tMs":1540,"delta":"Row\",\"div"}
+{"tMs":1540,"delta":"ider\",\"previewTo"}
+{"tMs":1557,"delta":"ggle\",\"previewList\",\"dec"}
+{"tMs":1589,"delta":"isionAr"}
+{"tMs":1622,"delta":"ea\""}
+{"tMs":1655,"delta":"]},{\"id\":\"header"}
+{"tMs":1871,"delta":"\",\"component\":\"Row\",\"align"}
+{"tMs":1871,"delta":"\":\"center\",\"children\":[\"head"}
+{"tMs":1871,"delta":"erIcon\",\"head"}
+{"tMs":1871,"delta":"erTitle\"]},{"}
+{"tMs":1871,"delta":"\"id\":\"headerIc"}
+{"tMs":1871,"delta":"on\",\"component\":\"Icon"}
+{"tMs":1890,"delta":"\",\"name\":\"war"}
+{"tMs":1924,"delta":"ning\"},{\"id\":\""}
+{"tMs":1958,"delta":"headerTitle\",\"component\":"}
+{"tMs":1992,"delta":"\"Text\",\"text\":\""}
+{"tMs":2024,"delta":"Approve file"}
+{"tMs":2058,"delta":" deletion?\"},{\""}
+{"tMs":2211,"delta":"id\":\"summary\",\"component\":"}
+{"tMs":2212,"delta":"\"Text\",\"text\":\"I"}
+{"tMs":2212,"delta":" am"}
+{"tMs":2212,"delta":" about"}
+{"tMs":2223,"delta":" to perm"}
+{"tMs":2256,"delta":"anently delete old files from your"}
+{"tMs":2290,"delta":" shared drive."}
+{"tMs":2324,"delta":" Nothing will be removed until"}
+{"tMs":2357,"delta":" you approve.\"},{\"id"}
+{"tMs":2391,"delta":"\":\"stats\",\"component\":\""}
+{"tMs":2423,"delta":"Column\",\"children"}
+{"tMs":2457,"delta":"\":[\"statF"}
+{"tMs":2551,"delta":"older\",\"statC"}
+{"tMs":2551,"delta":"ount\",\"statSize"}
+{"tMs":2556,"delta":"\"]},{\"id\":\""}
+{"tMs":2591,"delta":"statFolder\",\"component\":\""}
+{"tMs":2623,"delta":"Text\",\"text\":\"**"}
+{"tMs":2656,"delta":"Folder:** /"}
+{"tMs":2690,"delta":"Shared Drive/"}
+{"tMs":2723,"delta":"Archive/"}
+{"tMs":2756,"delta":"Old"}
+{"tMs":2790,"delta":" Files\"},{\"id\":\""}
+{"tMs":2823,"delta":"statCount\",\"component\":\""}
+{"tMs":2858,"delta":"Text\",\"text\":\"**Files"}
+{"tMs":2891,"delta":":** 214 "}
+{"tMs":2924,"delta":"files\"},{\"id\":\""}
+{"tMs":2957,"delta":"statSize\",\"component\":\""}
+{"tMs":2991,"delta":"Text\",\"text\":\"**Space"}
+{"tMs":3024,"delta":" fre"}
+{"tMs":3058,"delta":"ed:** 1"}
+{"tMs":3090,"delta":".8 GB\"},{"}
+{"tMs":3124,"delta":"\"id\":\"warnRow"}
+{"tMs":3158,"delta":"\",\"component\":\"Row\",\"align"}
+{"tMs":3192,"delta":"\":\"center\",\"children\":[\"war"}
+{"tMs":3224,"delta":"nIcon\",\"warnText"}
+{"tMs":3259,"delta":"\"]},{\"id\":\""}
+{"tMs":3291,"delta":"warnIcon\",\"component\":"}
+{"tMs":3325,"delta":"\"Icon\",\"name\":\""}
+{"tMs":3358,"delta":"error\"},{\"id\":\""}
+{"tMs":3392,"delta":"warnText\",\"component\":\""}
+{"tMs":3425,"delta":"Text\",\"text\":\"**"}
+{"tMs":3459,"delta":"This cannot be undone."}
+{"tMs":3491,"delta":"**"}
+{"tMs":3528,"delta":" Deleted files c"}
+{"tMs":3562,"delta":"annot be recovered.\",\""}
+{"tMs":3591,"delta":"we"}
+{"tMs":3624,"delta":"ight\":1},{\"id\":"}
+{"tMs":3658,"delta":"\"divider\",\"component\":\""}
+{"tMs":3691,"delta":"Divider\"},{\"id\":"}
+{"tMs":3724,"delta":"\"previewToggle\",\"component"}
+{"tMs":3757,"delta":"\":\"CheckBox\",\""}
+{"tMs":3792,"delta":"label\":\"Show first few file"}
+{"tMs":3825,"delta":" names\",\"value\":{\"@path"}
+{"tMs":3858,"delta":"\":\"/showPreview\""}
+{"tMs":3892,"delta":"}},{\"id\":\"previ"}
+{"tMs":3925,"delta":"ewList\",\"component\":\"Column"}
+{"tMs":3958,"delta":"\",\"children\":[\"previewText"}
+{"tMs":3991,"delta":"\""}
+{"tMs":4025,"delta":"],\"@accessibility\":"}
+{"tMs":4058,"delta":"{\"h"}
+{"tMs":4092,"delta":"idden\":{\"@call"}
+{"tMs":4125,"delta":"\":\"not\",\"args\":{\""}
+{"tMs":4159,"delta":"value\":{\"@path\":\""}
+{"tMs":4192,"delta":"/showPreview\"}}"}
+{"tMs":4234,"delta":"}}"}
+{"tMs":4258,"delta":"},{\"id\":\"preview"}
+{"tMs":4292,"delta":"Text\",\"component\":\"Text\",\""}
+{"tMs":4326,"delta":"text\":{\"@call\":\""}
+{"tMs":4358,"delta":"formatString\",\"args\":{\""}
+{"tMs":4392,"delta":"value\":\"${/previ"}
+{"tMs":4425,"delta":"ewN"}
+{"tMs":4458,"delta":"ames}\"}},"}
+{"tMs":4492,"delta":"\"variant\":\"caption\""}
+{"tMs":4525,"delta":"},{\"id\":\"decis"}
+{"tMs":4560,"delta":"ionArea\",\"component\":\""}
+{"tMs":4592,"delta":"Column\",\"children\":[\"decision"}
+{"tMs":4625,"delta":"Text\",\"buttons"}
+{"tMs":4659,"delta":"\"]},{\"id\":\""}
+{"tMs":4692,"delta":"decisionText\",\"component\":\""}
+{"tMs":4725,"delta":"Text\",\"text\":{\"@"}
+{"tMs":4758,"delta":"call"}
+{"tMs":4791,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":4825,"delta":"{\"value\":\"${"}
+{"tMs":4858,"delta":"/decis"}
+{"tMs":4892,"delta":"ionLabel}\"}}"}
+{"tMs":4925,"delta":"},{\"id\":\"butt"}
+{"tMs":4959,"delta":"ons\",\"component\":\"Row\",\""}
+{"tMs":4991,"delta":"justify\":\"end"}
+{"tMs":5025,"delta":"\",\"children\":[\"den"}
+{"tMs":5059,"delta":"yBtn\",\"approveB"}
+{"tMs":5092,"delta":"tn\"],"}
+{"tMs":5125,"delta":"\"@accessibility\":{"}
+{"tMs":5159,"delta":"\"hidden\":{\"@"}
+{"tMs":5192,"delta":"path\":\"/decided\"}"}
+{"tMs":5225,"delta":"}},{\"id\":\"den"}
+{"tMs":5259,"delta":"yL"}
+{"tMs":5292,"delta":"abel\",\"component\":\"Text"}
+{"tMs":5325,"delta":"\",\"text\":\"Deny\""}
+{"tMs":5359,"delta":"},{\"id\":\"approve"}
+{"tMs":5392,"delta":"Label\",\"component\":\""}
+{"tMs":5425,"delta":"Text\",\"text\":\"Approve"}
+{"tMs":5458,"delta":" de"}
+{"tMs":5492,"delta":"letion\"},{\"id\":"}
+{"tMs":5526,"delta":"\"denyBtn\",\"component"}
+{"tMs":5559,"delta":"\":\"Button\",\"child"}
+{"tMs":5592,"delta":"\":\"denyLabel\",\""}
+{"tMs":5625,"delta":"vari"}
+{"tMs":5658,"delta":"ant\":\"default"}
+{"tMs":5692,"delta":"\",\"action\":{\"event"}
+{"tMs":5725,"delta":"\":{\"name\":\"delet"}
+{"tMs":5758,"delta":"ion_decision\",\"userMess"}
+{"tMs":5793,"delta":"age\":\"Den"}
+{"tMs":5825,"delta":"ied de"}
+{"tMs":5858,"delta":"letion of 214 files\",\""}
+{"tMs":5892,"delta":"context\":{\"decision\":\""}
+{"tMs":5925,"delta":"denied\",\"folder\":\"/"}
+{"tMs":5958,"delta":"Shared Drive/"}
+{"tMs":5992,"delta":"Archive/Old Files\",\""}
+{"tMs":6025,"delta":"fileCount\":214}}"}
+{"tMs":6058,"delta":"},\"@checks\":[{"}
+{"tMs":6092,"delta":"\"condition\":{\"@call"}
+{"tMs":6125,"delta":"\":\"not\",\"args\":{\""}
+{"tMs":6159,"delta":"value\":{\"@path\":\""}
+{"tMs":6192,"delta":"/decided\"}}},\""}
+{"tMs":6228,"delta":"message\":\"Dec"}
+{"tMs":6270,"delta":"ision already made.\"}]},{"}
+{"tMs":6293,"delta":"\"id\":\"approveBt"}
+{"tMs":6326,"delta":"n\",\"component\":\"Button\",\""}
+{"tMs":6375,"delta":"child\":\"approveLabel"}
+{"tMs":6398,"delta":"\",\"variant\":\"primary\",\""}
+{"tMs":6427,"delta":"action\":{\"event\":{\""}
+{"tMs":6460,"delta":"name\":\"deletion_dec"}
+{"tMs":6493,"delta":"ision\",\"userMessage\":\""}
+{"tMs":6526,"delta":"Approved deletion of "}
+{"tMs":6560,"delta":"214 files\",\"context\":{\""}
+{"tMs":6592,"delta":"decision\":\"approved\",\"fol"}
+{"tMs":6626,"delta":"der\":\"/Shared"}
+{"tMs":6659,"delta":" Drive/Archive/"}
+{"tMs":6693,"delta":"Old Files\",\"fileCount"}
+{"tMs":6727,"delta":"\":214}}},\"@chec"}
+{"tMs":6760,"delta":"ks\":[{\"condition\":"}
+{"tMs":6794,"delta":"{\"@call\":\"not\",\""}
+{"tMs":6827,"delta":"args\":{\"value\":{\""}
+{"tMs":6860,"delta":"@path\":\"/decided\""}
+{"tMs":6894,"delta":"}}},\"message\":\""}
+{"tMs":6927,"delta":"Decision already made.\"}]}"}
+{"tMs":6960,"delta":"],\"dataModel\":{"}
+{"tMs":6993,"delta":"\"showPreview\":false,"}
+{"tMs":7028,"delta":"\"decided\":false,\"dec"}
+{"tMs":7060,"delta":"isionLabel\":\""}
+{"tMs":7093,"delta":"Awaiting your decision."}
+{"tMs":7127,"delta":"\",\"previewNames\":\"1"}
+{"tMs":7160,"delta":"."}
+{"tMs":7193,"delta":" Q1"}
+{"tMs":7227,"delta":"-"}
+{"tMs":7260,"delta":"2019"}
+{"tMs":7292,"delta":"-bud"}
+{"tMs":7325,"delta":"get."}
+{"tMs":7359,"delta":"xlsx\\n2."}
+{"tMs":7393,"delta":" meeting-notes-2"}
+{"tMs":7426,"delta":"018-03.docx\\n"}
+{"tMs":7459,"delta":"3. old"}
+{"tMs":7493,"delta":"-logo-draft-"}
+{"tMs":7526,"delta":"v2"}
+{"tMs":7559,"delta":".png\\n4. on"}
+{"tMs":7592,"delta":"boarding-2017"}
+{"tMs":7625,"delta":"."}
+{"tMs":7659,"delta":"pdf\\n5. team"}
+{"tMs":7692,"delta":"-phot"}
+{"tMs":7726,"delta":"o-2"}
+{"tMs":7759,"delta":"016.jpg\\"}
+{"tMs":7792,"delta":"n…"}
+{"tMs":7825,"delta":"and 209"}
+{"tMs":7859,"delta":" more\"}}}"}

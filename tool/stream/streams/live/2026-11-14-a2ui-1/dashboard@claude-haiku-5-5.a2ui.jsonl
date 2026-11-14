@@ -1,0 +1,133 @@
+{"meta":{"ui":"dashboard","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"I can't produce that dashboard with the components this catalog provides: there is no line chart, bar chart, or table component in the basic catalog. Also, the metrics you've asked for (revenue, sign-ups, churn, active users, plan data) aren't in my context, so any numbers I wrote would be invented. I'd rather not fabricate product figures.\n\nWhat I can build now, using only catalog components, is a 390-wide card with the four stat tiles, a 7/30/90-day toggle, and placeholder values you can replace with real data. Charts and sortable tables would need a catalog that includes them, or you could supply the data and I'd render it as text lists.\n\nHere is that version:\n\n{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"dashboard\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"layout\"},{\"id\":\"layout\",\"component\":\"Column\",\"children\":[\"title\",\"range\",\"tiles\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"This month\",\"variant\":\"body\",\"weight\":1},{\"id\":\"range\",\"component\":\"ChoicePicker\",\"label\":\"Period\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"options\":[{\"label\":\"7 days\",\"value\":\"7\"},{\"label\":\"30 days\",\"value\":\"30\"},{\"label\":\"90 days\",\"value\":\"90\"}],\"value\":{\"@path\":\"/range\"}},{\"id\":\"tiles\",\"component\":\"Column\",\"children\":[\"revenueTile\",\"signupsTile\",\"churnTile\",\"activeTile\"]},{\"id\":\"revenueTile\",\"component\":\"Text\",\"text\":\"Revenue: ${/stats/revenue} (${/stats/revenueChange})\"},{\"id\":\"signupsTile\",\"component\":\"Text\",\"text\":\"Sign-ups: ${/stats/signups} (${/stats/signupsChange})\"},{\"id\":\"churnTile\",\"component\":\"Text\",\"text\":\"Churn: ${/stats/churn} (${/stats/churnChange})\"},{\"id\":\"activeTile\",\"component\":\"Text\",\"text\":\"Active users: ${/stats/active} (${/stats/activeChange})\"}],\"dataModel\":{\"range\":[\"30\"],\"stats\":{\"revenue\":\"—\",\"revenueChange\":\"—\",\"signups\":\"—\",\"signupsChange\":\"—\",\"churn\":\"—\",\"churnChange\":\"—\",\"active\":\"—\",\"activeChange\":\"—\"}}}}","usage":{"input_tokens":21191,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":786,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":701,"totalMs":3515}}
+{"tMs":701,"delta":"I can't produ"}
+{"tMs":918,"delta":"ce that"}
+{"tMs":918,"delta":" dashboard with the components"}
+{"tMs":918,"delta":" this"}
+{"tMs":918,"delta":" catalog provides:"}
+{"tMs":918,"delta":" there is"}
+{"tMs":918,"delta":" no line chart,"}
+{"tMs":918,"delta":" bar chart, or table component"}
+{"tMs":918,"delta":" in"}
+{"tMs":918,"delta":" the basic catalog."}
+{"tMs":918,"delta":" Also, the metrics you"}
+{"tMs":930,"delta":"'ve as"}
+{"tMs":951,"delta":"ked for"}
+{"tMs":1151,"delta":" (revenue, sign-"}
+{"tMs":1151,"delta":"ups, churn, active users"}
+{"tMs":1151,"delta":","}
+{"tMs":1151,"delta":" plan data) aren't in"}
+{"tMs":1151,"delta":" my"}
+{"tMs":1151,"delta":" context, so any"}
+{"tMs":1151,"delta":" num"}
+{"tMs":1151,"delta":"bers I w"}
+{"tMs":1151,"delta":"rote would be inv"}
+{"tMs":1166,"delta":"ented. I'"}
+{"tMs":1187,"delta":"d"}
+{"tMs":1220,"delta":" rather not fab"}
+{"tMs":1365,"delta":"ricate product"}
+{"tMs":1365,"delta":" fig"}
+{"tMs":1366,"delta":"ures.\n\nWhat I can build"}
+{"tMs":1366,"delta":" now"}
+{"tMs":1366,"delta":", using"}
+{"tMs":1366,"delta":" only cat"}
+{"tMs":1366,"delta":"alog components, is a "}
+{"tMs":1390,"delta":"390-"}
+{"tMs":1402,"delta":"wide card with"}
+{"tMs":1425,"delta":" the four stat tiles,"}
+{"tMs":1443,"delta":" a "}
+{"tMs":1471,"delta":"7/30/90-day to"}
+{"tMs":1597,"delta":"ggle, and plac"}
+{"tMs":1597,"delta":"eholder"}
+{"tMs":1597,"delta":" values you"}
+{"tMs":1597,"delta":" can repl"}
+{"tMs":1597,"delta":"ace with real"}
+{"tMs":1597,"delta":" data. Char"}
+{"tMs":1615,"delta":"ts and s"}
+{"tMs":1636,"delta":"ortable tables would need a cat"}
+{"tMs":1659,"delta":"alog that"}
+{"tMs":1680,"delta":" includes them, or you could"}
+{"tMs":1703,"delta":" supply the data and"}
+{"tMs":1727,"delta":" I'd render it"}
+{"tMs":1816,"delta":" as text"}
+{"tMs":1816,"delta":" lists."}
+{"tMs":1816,"delta":"\n\nHere is that"}
+{"tMs":1816,"delta":" version"}
+{"tMs":1830,"delta":":\n\n{\"version\":\"1"}
+{"tMs":1852,"delta":".0\",\"createSurface\":"}
+{"tMs":1874,"delta":"{\"surfaceId\":"}
+{"tMs":1895,"delta":"\"d"}
+{"tMs":1916,"delta":"ashboard\",\"cat"}
+{"tMs":1944,"delta":"alogId\":\"https://a"}
+{"tMs":1962,"delta":"2ui.org/specification"}
+{"tMs":1981,"delta":"/v1_0/catal"}
+{"tMs":2035,"delta":"ogs/basic/catal"}
+{"tMs":2036,"delta":"og.json\",\"components\":[{"}
+{"tMs":2046,"delta":"\"id\":\"root\",\"component\":"}
+{"tMs":2068,"delta":"\"Card\",\"child\":\"lay"}
+{"tMs":2096,"delta":"out\"},{\"id\":\""}
+{"tMs":2114,"delta":"layout\",\"component\":\"Column"}
+{"tMs":2135,"delta":"\",\"children\":[\"title"}
+{"tMs":2155,"delta":"\",\"range"}
+{"tMs":2180,"delta":"\",\"t"}
+{"tMs":2202,"delta":"iles\"]},{\"id"}
+{"tMs":2220,"delta":"\":\"title\",\"component\":\""}
+{"tMs":2243,"delta":"Text\",\"text\":\"This month\",\""}
+{"tMs":2263,"delta":"variant\":\"body\",\""}
+{"tMs":2323,"delta":"weight\":1"}
+{"tMs":2323,"delta":"},{\"id\":\"range\",\""}
+{"tMs":2327,"delta":"component\":\"ChoiceP"}
+{"tMs":2349,"delta":"icker\",\"label\":\"Period"}
+{"tMs":2370,"delta":"\",\"variant\":\"mutu"}
+{"tMs":2392,"delta":"allyExclusive\",\"displ"}
+{"tMs":2413,"delta":"ayStyle\":\"chips"}
+{"tMs":2435,"delta":"\",\"options\":[{\"label\":"}
+{"tMs":2457,"delta":"\"7 days\",\"value\":\""}
+{"tMs":2479,"delta":"7\"},{\"label\":\""}
+{"tMs":2500,"delta":"30 days\",\"value\":\"30"}
+{"tMs":2522,"delta":"\"},{\"label\":\"90"}
+{"tMs":2543,"delta":" days\",\"value\":\"90\""}
+{"tMs":2565,"delta":"}],\"value\":{"}
+{"tMs":2586,"delta":"\"@path\":\"/range\""}
+{"tMs":2608,"delta":"}},{\"id\":\"t"}
+{"tMs":2629,"delta":"iles\",\"component\":\"Column"}
+{"tMs":2650,"delta":"\",\"children\":[\"rev"}
+{"tMs":2673,"delta":"enueT"}
+{"tMs":2693,"delta":"ile\",\"sign"}
+{"tMs":2715,"delta":"upsTile\",\"churnT"}
+{"tMs":2736,"delta":"ile\",\"activeTile\"]"}
+{"tMs":2758,"delta":"},{\"id\":\"reven"}
+{"tMs":2779,"delta":"ueTile\",\"component\":\""}
+{"tMs":2802,"delta":"Text\",\"text\":\"Reven"}
+{"tMs":2823,"delta":"ue: ${/st"}
+{"tMs":2844,"delta":"ats/revenue} (${"}
+{"tMs":2865,"delta":"/stats/revenueCh"}
+{"tMs":2888,"delta":"ange})\"},{\"id\":"}
+{"tMs":2908,"delta":"\"signupsTile\",\"component"}
+{"tMs":2930,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2958,"delta":"Sign-ups: "}
+{"tMs":2978,"delta":"${/stats/signups}"}
+{"tMs":2996,"delta":" (${/stats/signup"}
+{"tMs":3016,"delta":"sChange})\"},{\""}
+{"tMs":3038,"delta":"id\":\"churnTile\",\""}
+{"tMs":3069,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":3081,"delta":"\"Churn: ${/"}
+{"tMs":3102,"delta":"stats/churn} (${"}
+{"tMs":3124,"delta":"/stats/churnChange"}
+{"tMs":3147,"delta":"})\"},{\"id\":\""}
+{"tMs":3167,"delta":"activeTile\",\"component\":\""}
+{"tMs":3189,"delta":"Text\",\"text\":\"Active"}
+{"tMs":3210,"delta":" users: ${/stats/"}
+{"tMs":3230,"delta":"active"}
+{"tMs":3252,"delta":"} (${/stats/activ"}
+{"tMs":3274,"delta":"eChange})\"}],\""}
+{"tMs":3331,"delta":"dataModel\":{\"range"}
+{"tMs":3331,"delta":"\":[\"30"}
+{"tMs":3339,"delta":"\"],\"stats\":{\""}
+{"tMs":3361,"delta":"revenue\":\"—\",\"rev"}
+{"tMs":3381,"delta":"enueChange\":\"—\",\""}
+{"tMs":3403,"delta":"signups\":\"—\",\"signup"}
+{"tMs":3426,"delta":"sChange\":\"—\",\"chur"}
+{"tMs":3447,"delta":"n\":\"—\",\"churnCh"}
+{"tMs":3470,"delta":"ange\":\"—\",\"active\":\""}
+{"tMs":3489,"delta":"—\",\"activeChange\":\""}
+{"tMs":3512,"delta":"—\"}}}}"}
