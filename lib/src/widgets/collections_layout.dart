@@ -870,6 +870,11 @@ List<RenderFitBox> _ownFitBoxes(RenderBox item) {
   return found;
 }
 
+/// Where one item of a grid sits: its first cell along the grid's scrolling
+/// axis ([main], a row of a vertical grid) and across it ([cross]), and how
+/// many cells it covers each way.
+typedef GridCell = ({int main, int cross, int mainSpan, int crossSpan});
+
 class RenderGridItems extends RenderCollection implements MeasuresContent {
   /// Rows that shrink-wrap are measured from the items' content: a change
   /// inside an item (laid out stretched, so a relayout boundary) measures
@@ -995,6 +1000,20 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
 
     final fixedRow = mainAxisExtent ?? cellCross / childAspectRatio;
     final endless = itemCount == null && viewportMain.isFinite;
+    final cells = endless ? null : _placements(cols);
+    if (cells != null) {
+      return _layoutPlaced(cells,
+          cols: cols,
+          cellCross: cellCross,
+          fixedRow: fixedRow,
+          crossSize: crossSize,
+          maxMain: maxMain,
+          minMain: minMain,
+          padMain: padMain,
+          padMainStart: padMainStart,
+          padMainEnd: padMainEnd,
+          padCrossStart: padCrossStart);
+    }
     if (endless && !shrinkWrapRows && fixedRow + mainAxisSpacing >= 1) {
       // Rows of a known extent: as many as cover the viewport and cache.
       final rows = ((viewportMain + cacheExtent) / (fixedRow + mainAxisSpacing)).ceil() + 1;
@@ -1084,6 +1103,178 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
         (it.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(mainPos, crossPos, axis);
       }
       rowStart += rowExtents[r] + mainAxisSpacing;
+    }
+    return _anyChildOutside;
+  }
+
+  /// The layout of the node an item shows: its own box, or the first node
+  /// box inside the wrappers around it.
+  api.Layout? _layoutOf(RenderBox item) {
+    RenderObject? o = item;
+    while (o != null) {
+      if (o is NodeBox) return o.node?.layout;
+      RenderObject? only;
+      o.visitChildren((c) => only ??= c);
+      o = only;
+    }
+    return null;
+  }
+
+  /// CSS grid placement of the items (`grid-column: span n`,
+  /// `grid-column-start`...): items with both starts first, then items
+  /// locked to a row, then the rest in order, each in the next cells where
+  /// it fits (CSS's sparse auto-placement). Null when no item spans or
+  /// starts anywhere: the plain row-by-row layout applies.
+  List<GridCell>? _placements(int cols) {
+    final vertical = axis == Axis.vertical;
+    final wants = [
+      for (final it in children)
+        _layoutOf(it).let((l) => l == null
+            ? (mainSpan: 1, crossSpan: 1, main: null, cross: null)
+            : (
+                mainSpan: vertical ? l.rowSpan : l.columnSpan,
+                crossSpan: math.min(cols, vertical ? l.columnSpan : l.rowSpan),
+                main: (vertical ? l.rowStart : l.columnStart)?.let((v) => v - 1),
+                cross: (vertical ? l.columnStart : l.rowStart)?.let((v) => v - 1),
+              )),
+    ];
+    if (wants.every((w) => w.mainSpan == 1 && w.crossSpan == 1 && w.main == null && w.cross == null)) return null;
+    final taken = <int>{};
+    bool fits(int r, int c, int rs, int cs) {
+      if (c < 0 || c + cs > cols) return false;
+      for (var i = r; i < r + rs; i++) {
+        for (var j = c; j < c + cs; j++) {
+          if (taken.contains(i * cols + j)) return false;
+        }
+      }
+      return true;
+    }
+
+    void take(int r, int c, int rs, int cs) {
+      for (var i = r; i < r + rs; i++) {
+        for (var j = c; j < c + cs; j++) {
+          taken.add(i * cols + j);
+        }
+      }
+    }
+
+    final out = List<GridCell?>.filled(wants.length, null);
+    int clampCross(int c, int cs) => math.max(0, math.min(c, cols - cs));
+    // 1. Both starts given: there, overlapping or not (as CSS).
+    for (final (i, w) in wants.indexed) {
+      if (w.main == null || w.cross == null) continue;
+      final c = clampCross(w.cross!, w.crossSpan);
+      take(w.main!, c, w.mainSpan, w.crossSpan);
+      out[i] = (main: w.main!, cross: c, mainSpan: w.mainSpan, crossSpan: w.crossSpan);
+    }
+    // 2. Locked to a row: the first cell of that row where it fits.
+    for (final (i, w) in wants.indexed) {
+      if (w.main == null || w.cross != null) continue;
+      var c = 0;
+      while (c + w.crossSpan <= cols && !fits(w.main!, c, w.mainSpan, w.crossSpan)) {
+        c++;
+      }
+      if (c + w.crossSpan > cols) c = 0;
+      take(w.main!, c, w.mainSpan, w.crossSpan);
+      out[i] = (main: w.main!, cross: c, mainSpan: w.mainSpan, crossSpan: w.crossSpan);
+    }
+    // 3. The rest, in order, from a cursor that only moves forward.
+    var r = 0, col = 0;
+    for (final (i, w) in wants.indexed) {
+      if (out[i] != null) continue;
+      if (w.cross != null) {
+        final c = clampCross(w.cross!, w.crossSpan);
+        if (c < col) r++;
+        while (!fits(r, c, w.mainSpan, w.crossSpan)) {
+          r++;
+        }
+        take(r, c, w.mainSpan, w.crossSpan);
+        out[i] = (main: r, cross: c, mainSpan: w.mainSpan, crossSpan: w.crossSpan);
+        col = c + w.crossSpan;
+        continue;
+      }
+      while (true) {
+        if (col + w.crossSpan > cols) {
+          r++;
+          col = 0;
+        }
+        if (fits(r, col, w.mainSpan, w.crossSpan)) break;
+        col++;
+      }
+      take(r, col, w.mainSpan, w.crossSpan);
+      out[i] = (main: r, cross: col, mainSpan: w.mainSpan, crossSpan: w.crossSpan);
+      col += w.crossSpan;
+    }
+    return out.cast<GridCell>();
+  }
+
+  /// Lays the items out in their [cells]: fixed rows of [fixedRow], or
+  /// with [shrinkWrapRows] each row as long as its longest single-row item,
+  /// a spanning item's rows grown at their last one when it needs more.
+  bool _layoutPlaced(
+    List<GridCell> cells, {
+    required int cols,
+    required double cellCross,
+    required double fixedRow,
+    required double crossSize,
+    required double maxMain,
+    required double minMain,
+    required double padMain,
+    required double padMainStart,
+    required double padMainEnd,
+    required double padCrossStart,
+  }) {
+    final vertical = axis == Axis.vertical;
+    final items = children;
+    final rows = cells.fold<int>(0, (n, c) => math.max(n, c.main + c.mainSpan));
+    double across(GridCell c) => c.crossSpan * cellCross + (c.crossSpan - 1) * crossAxisSpacing;
+    final extents = List<double>.filled(rows, shrinkWrapRows ? 0 : fixedRow);
+    if (shrinkWrapRows) {
+      double natural(RenderBox it, GridCell c) {
+        final w = across(c);
+        it.layout(
+          RenderCollection.constraintsOf(minMain: 0, maxMain: double.infinity, minCross: w, maxCross: w, axis: axis),
+          parentUsesSize: true,
+        );
+        return intrinsicRows
+            ? (vertical ? it.getMaxIntrinsicHeight(w) : it.getMaxIntrinsicWidth(w))
+            : RenderCollection.main(it.size, axis);
+      }
+
+      for (final (i, c) in cells.indexed) {
+        if (c.mainSpan == 1) extents[c.main] = math.max(extents[c.main], natural(items[i], c));
+      }
+      for (final (i, c) in cells.indexed) {
+        if (c.mainSpan == 1) continue;
+        final need = natural(items[i], c);
+        var have = (c.mainSpan - 1) * mainAxisSpacing;
+        for (var r = c.main; r < c.main + c.mainSpan; r++) {
+          have += extents[r];
+        }
+        if (need > have) extents[c.main + c.mainSpan - 1] += need - have;
+      }
+    }
+    final starts = <double>[];
+    var used = 0.0;
+    for (var r = 0; r < rows; r++) {
+      if (r > 0) used += mainAxisSpacing;
+      starts.add(used);
+      used += extents[r];
+    }
+    final mainSize = hugMain || !maxMain.isFinite ? (used + padMain).clamp(minMain, maxMain).toDouble() : maxMain;
+    size = RenderCollection.sizeOf(mainSize, crossSize, axis);
+    for (final (i, c) in cells.indexed) {
+      final it = items[i];
+      var along = (c.mainSpan - 1) * mainAxisSpacing;
+      for (var r = c.main; r < c.main + c.mainSpan; r++) {
+        along += extents[r];
+      }
+      it.layout(BoxConstraints.tight(RenderCollection.sizeOf(along, across(c), axis)), parentUsesSize: true);
+      final mainPos = reverse
+          ? mainSize - math.min(padMainEnd, mainSize) - starts[c.main] - along
+          : math.min(padMainStart, mainSize) + starts[c.main];
+      final crossPos = padCrossStart + c.cross * (cellCross + crossAxisSpacing);
+      (it.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(mainPos, crossPos, axis);
     }
     return _anyChildOutside;
   }
