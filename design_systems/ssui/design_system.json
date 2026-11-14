@@ -538,7 +538,13 @@
   "components/MenuItem.json",
   "components/ContextMenu.json",
   "components/SortMenu.json",
-  "components/UserMenu.json"
+  "components/UserMenu.json",
+  "components/StatusCard.json",
+  "components/StatusCardList.json",
+  "components/RunHistoryList.json",
+  "components/StatsCarousel.json",
+  "components/HistoryTimeline.json",
+  "components/Terminal.json"
  ],
  "replaces": [
   "filledButton",

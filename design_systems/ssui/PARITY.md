@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 110. Still to rebuild: 54.**
+**Here: 115. Still to rebuild: 49.**
 
 ## Here
 
@@ -56,6 +56,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | FloatingActionButton |  | floatingActionButton |
 | FullWidthSearchInput | FullWidthSearchInput |  |
 | HeaderSearchInput | HeaderSearchInput |  |
+| HistoryTimeline | HistoryTimeline |  |
 | Hyperlink | Hyperlink |  |
 | IconBox | IconBox |  |
 | IconButton | IconButton | iconButton |
@@ -84,6 +85,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | RadialProgress | RadialProgress |  |
 | RadioButton | Radio | radio |
 | ResourceChip | ResourceChip |  |
+| RunHistoryList | RunHistoryList |  |
 | RunningIndicator | RunningIndicator |  |
 | RunRecordRow | RunRecordRow |  |
 | ScrollToBottomFAB | ScrollToBottomFAB |  |
@@ -99,8 +101,10 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | SortMenu | SortMenu |  |
 | SplitButton | SplitButton |  |
 | StackedProgressBar | StackedProgressBar |  |
+| StatsCarousel | StatsCarousel |  |
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
 | StatusBadge | StatusBadge |  |
+| StatusCardList | StatusCardList (with StatusCard) |  |
 | StatusCategoryHeader | StatusCategoryHeader |  |
 | StatusDot | StatusDot |  |
 | StatusIndicator | StatusIndicator |  |
@@ -110,6 +114,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | TabBarWithBadges | TabBarWithBadges |  |
 | Table |  | tableView |
 | TabToggle | TabToggle |  |
+| Terminal | Terminal |  |
 | TextArea | TextArea | textField (maxLines) |
 | TextExpandable | TextExpandable |  |
 | TextField | TextInput | textField |
@@ -136,9 +141,9 @@ In the order planned: what generated UI reaches for first, then the application 
 
 CodePreview
 
-### Cards and rows (5)
+### Cards and rows (2)
 
-FolderCard, ResourceCard, RunHistoryList, StatusCardList, StatsCarousel
+FolderCard, ResourceCard
 
 ### Inputs (14)
 
@@ -152,6 +157,6 @@ BrowserTabs, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, Na
 
 AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, CommandPalette, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
 
-### Data and specialized (14)
+### Data and specialized (12)
 
-Tree, FileTree, DiffViewer, Terminal, HistoryTimeline, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList
+Tree, FileTree, DiffViewer, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList

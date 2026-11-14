@@ -77,6 +77,15 @@
     },
     "default": 0,
     "doc": "Files deleted."
+   },
+   {
+    "key": "divider",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A hairline over it (every row of a list but the first)."
    }
   ]
  },
@@ -133,6 +142,18 @@
      14,
      8
     ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder",
+      "visible": false
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "bind": {
+    "decoration.strokes[0].visible": "${props.divider}"
    }
   },
   "texts": {
