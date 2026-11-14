@@ -483,14 +483,18 @@ bool _validate(ValidateAction a, ActionRun run) {
   final tree = run.host.tree;
   if (tree == null) return true;
   String? form;
+  Object? instance = FormRegistry.anyInstance;
   for (final id in [a.node, run.node?.id ?? '']) {
     if (id.isEmpty) continue;
     final source = tree.boxOf(id)?.source ?? tree.boxesOf(id).firstOrNull?.source;
     if (source == null) continue;
     form = FormRegistry.formOf(source, id);
+    // The form around the node whose reaction runs: the instance it is in
+    // (a form a list repeats validates its own item's fields).
+    if (form != null && id == run.node?.id && id != a.node) instance = FormRegistry.formInstanceOf(source, form, run.instance);
     if (form != null || id == a.node) break;
   }
-  return FormRegistry.of(tree).validate(form, focusFirstError: a.focusFirstError);
+  return FormRegistry.of(tree).validate(form, instance: instance, focusFirstError: a.focusFirstError);
 }
 
 Future<void> _focus(FocusAction a, ActionRun run) async {
