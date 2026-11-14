@@ -139,7 +139,6 @@ const widgetImportRatchet = {
   'src/widgets/collections_data_list.dart',
   'src/widgets/collections_list_runtime.dart',
   'src/widgets/collections_page_runtime.dart',
-  'src/widgets/collections_pagination.dart',
   'src/widgets/collections_reorder.dart',
   'src/widgets/collections_swipe.dart',
   'src/widgets/collections_table.dart',
