@@ -54,3 +54,10 @@ Button (primary, secondary, outline, ghost, destructive; every size), IconButton
 Checkbox, Radio, Switch, Slider, SegmentedControl, Tabs, Chip, Badge, Avatar, Tooltip, ProgressBar, Card, ListRow,
 SectionHeader, Field, Banner, EmptyState, Dialog. Each has its purpose, parameters and a call in the prompt, and in
 full with `ui_docs "<name>"`.
+
+## Seeing all of it
+
+`examples/catalog.json` shows every component at each of its previews, in alphabetical order; `tool/catalog.py`
+writes it from the components' own `previews`, so it never falls behind. `examples/renders/catalog/catalog.png` is its
+picture. Render it again with `tool/render/render.sh design_systems/ssui/examples --screen catalog --sizes 1200x900
+--full-page --out <dir>` from the SDK's root.
