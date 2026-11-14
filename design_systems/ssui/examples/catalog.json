@@ -1,0 +1,11660 @@
+{
+ "schema": 3,
+ "id": "catalog",
+ "roots": [
+  "catalog"
+ ],
+ "variables": {
+  "catalog": [
+   {
+    "name": "vAuthInput0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vAuthInput1Value",
+    "type": "text",
+    "value": "nope"
+   },
+   {
+    "name": "vBrowserTabs0Value",
+    "type": "text",
+    "value": "Report.pdf"
+   },
+   {
+    "name": "vCheckbox0Value",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "vCheckbox1Value",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "vChipTabs0Value",
+    "type": "text",
+    "value": "Review"
+   },
+   {
+    "name": "vColorInput0Value",
+    "type": "text",
+    "value": "#2563EB"
+   },
+   {
+    "name": "vColorInput1Value",
+    "type": "text",
+    "value": "#16A34A"
+   },
+   {
+    "name": "vCombobox0Value",
+    "type": "text",
+    "value": "Banana"
+   },
+   {
+    "name": "vCombobox1Value",
+    "type": "text",
+    "value": "Banana"
+   },
+   {
+    "name": "vCommandPalette0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vDateTimelineAxis0Value",
+    "type": "text",
+    "value": "Nov 13"
+   },
+   {
+    "name": "vDropdownMultiselect0Value",
+    "type": "list",
+    "value": [
+     "Design"
+    ]
+   },
+   {
+    "name": "vDropdownMultiselect1Value",
+    "type": "list",
+    "value": [
+     "Design",
+     "Marketing"
+    ]
+   },
+   {
+    "name": "vExtensionChipsInput0Value",
+    "type": "list",
+    "value": [
+     ".dart",
+     ".ts"
+    ]
+   },
+   {
+    "name": "vFileTree0Value",
+    "type": "text",
+    "value": "main.dart"
+   },
+   {
+    "name": "vFullWidthSearchInput0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vFullWidthSearchInput1Value",
+    "type": "text",
+    "value": "invoices"
+   },
+   {
+    "name": "vHeaderSearchInput0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vHeaderSearchInput1Value",
+    "type": "text",
+    "value": "roadmap"
+   },
+   {
+    "name": "vHierarchicalPicker0Value",
+    "type": "text",
+    "value": "Acme"
+   },
+   {
+    "name": "vHistoryTimeline0Value",
+    "type": "text",
+    "value": "Published"
+   },
+   {
+    "name": "vIconSegmentedControl0Value",
+    "type": "text",
+    "value": "view_list"
+   },
+   {
+    "name": "vIconSelect0Value",
+    "type": "text",
+    "value": "Claude"
+   },
+   {
+    "name": "vIconSelect1Value",
+    "type": "text",
+    "value": "Claude"
+   },
+   {
+    "name": "vModelSelectMenu0Value",
+    "type": "list",
+    "value": [
+     "Claude"
+    ]
+   },
+   {
+    "name": "vMultiSelectDropdown0Value",
+    "type": "list",
+    "value": [
+     "Read"
+    ]
+   },
+   {
+    "name": "vNavigationMenu0Value",
+    "type": "text",
+    "value": "Dashboard"
+   },
+   {
+    "name": "vNumberInput0Value",
+    "type": "decimal",
+    "value": 12
+   },
+   {
+    "name": "vNumberInput1Value",
+    "type": "decimal",
+    "value": 24
+   },
+   {
+    "name": "vNumberPresetInput0Value",
+    "type": "decimal",
+    "value": 16
+   },
+   {
+    "name": "vNumberPresetInput1Value",
+    "type": "decimal",
+    "value": 16
+   },
+   {
+    "name": "vProjectSelector0Value",
+    "type": "text",
+    "value": "Website"
+   },
+   {
+    "name": "vPromptInput0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vPromptInput1Value",
+    "type": "text",
+    "value": "Summarize the launch plan"
+   },
+   {
+    "name": "vPromptInputWithBanner0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vRadio0Group",
+    "type": "text",
+    "value": "a"
+   },
+   {
+    "name": "vRadio1Group",
+    "type": "text",
+    "value": "a"
+   },
+   {
+    "name": "vReorderableList0Value",
+    "type": "list",
+    "value": [
+     "Fetch",
+     "Transform",
+     "Publish"
+    ]
+   },
+   {
+    "name": "vRichTextField0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vSearchBar0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vSearchBar1Value",
+    "type": "text",
+    "value": "invoices"
+   },
+   {
+    "name": "vSegmentedControl0Value",
+    "type": "text",
+    "value": "Week"
+   },
+   {
+    "name": "vSelect0Value",
+    "type": "text",
+    "value": "Monthly"
+   },
+   {
+    "name": "vSelect1Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vSidebar0Value",
+    "type": "text",
+    "value": "Home"
+   },
+   {
+    "name": "vSlider0Value",
+    "type": "decimal",
+    "value": 50
+   },
+   {
+    "name": "vSortMenu0Value",
+    "type": "text",
+    "value": "Name"
+   },
+   {
+    "name": "vSortMenu0Direction",
+    "type": "text",
+    "value": "asc"
+   },
+   {
+    "name": "vSplitPaneTabs0Value",
+    "type": "text",
+    "value": "index.ts"
+   },
+   {
+    "name": "vStatsCarousel0Index",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "vStepper0Value",
+    "type": "decimal",
+    "value": 3
+   },
+   {
+    "name": "vStepper1Value",
+    "type": "decimal",
+    "value": 1
+   },
+   {
+    "name": "vSwitch0Value",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "vSwitch1Value",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "vTabBarWithBadges0Value",
+    "type": "text",
+    "value": "Home"
+   },
+   {
+    "name": "vTabOverflowScroll0Value",
+    "type": "text",
+    "value": "Overview"
+   },
+   {
+    "name": "vTabs0Value",
+    "type": "text",
+    "value": "Overview"
+   },
+   {
+    "name": "vTabToggle0Value",
+    "type": "text",
+    "value": "List"
+   },
+   {
+    "name": "vTextArea0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vTextInput0Value",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "vTextInput1Value",
+    "type": "text",
+    "value": "Ada Lovelace"
+   },
+   {
+    "name": "vToggleRow0Value",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "vTree0Value",
+    "type": "text",
+    "value": "Button.tsx"
+   },
+   {
+    "name": "vVariableContractList0Value",
+    "type": "text",
+    "value": "amount"
+   }
+  ]
+ },
+ "nodes": {
+  "ActionListItem0": {
+   "type": "ActionListItem",
+   "props": {
+    "title": "Summarize new tickets",
+    "path": "automations/summarize.yaml",
+    "meta": "Last run 2h ago"
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 66
+    }
+   }
+  },
+  "ActionListItem0L": {
+   "type": "text",
+   "props": {
+    "text": "ActionListItem \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ActionListItem0T": {
+   "type": "column",
+   "children": [
+    "ActionListItem0L",
+    "ActionListItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AddButton0": {
+   "type": "AddButton",
+   "props": {
+    "label": "Add folder"
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "AddButton0L": {
+   "type": "text",
+   "props": {
+    "text": "AddButton \u00b7 Add",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AddButton0T": {
+   "type": "column",
+   "children": [
+    "AddButton0L",
+    "AddButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AddContextMenu0": {
+   "type": "AddContextMenu",
+   "props": {
+    "items": [
+     "File",
+     "Link",
+     "Note"
+    ]
+   },
+   "layout": {
+    "width": 176,
+    "height": {
+     "hug": 90
+    }
+   }
+  },
+  "AddContextMenu0L": {
+   "type": "text",
+   "props": {
+    "text": "AddContextMenu \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AddContextMenu0T": {
+   "type": "column",
+   "children": [
+    "AddContextMenu0L",
+    "AddContextMenu0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 176
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AgentChip0": {
+   "type": "AgentChip",
+   "props": {
+    "label": "Researcher",
+    "status": "running",
+    "dismissible": true
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "AgentChip0L": {
+   "type": "text",
+   "props": {
+    "text": "AgentChip \u00b7 Running",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AgentChip0T": {
+   "type": "column",
+   "children": [
+    "AgentChip0L",
+    "AgentChip0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AgentChip1": {
+   "type": "AgentChip",
+   "props": {
+    "label": "Reviewer",
+    "status": "done"
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "AgentChip1L": {
+   "type": "text",
+   "props": {
+    "text": "AgentChip \u00b7 Done",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AgentChip1T": {
+   "type": "column",
+   "children": [
+    "AgentChip1L",
+    "AgentChip1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AuthInput0": {
+   "type": "AuthInput",
+   "props": {
+    "placeholder": "you@company.com",
+    "kind": "email",
+    "value": "vAuthInput0Value"
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "AuthInput0L": {
+   "type": "text",
+   "props": {
+    "text": "AuthInput \u00b7 Email",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AuthInput0T": {
+   "type": "column",
+   "children": [
+    "AuthInput0L",
+    "AuthInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AuthInput1": {
+   "type": "AuthInput",
+   "props": {
+    "value": "vAuthInput1Value",
+    "error": "Enter a valid email address."
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 50
+    }
+   }
+  },
+  "AuthInput1L": {
+   "type": "text",
+   "props": {
+    "text": "AuthInput \u00b7 Error",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AuthInput1T": {
+   "type": "column",
+   "children": [
+    "AuthInput1L",
+    "AuthInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AuthPromptBanner0": {
+   "type": "AuthPromptBanner",
+   "props": {},
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 92
+    }
+   }
+  },
+  "AuthPromptBanner0L": {
+   "type": "text",
+   "props": {
+    "text": "AuthPromptBanner \u00b7 Blue",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AuthPromptBanner0T": {
+   "type": "column",
+   "children": [
+    "AuthPromptBanner0L",
+    "AuthPromptBanner0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "AuthPromptBanner1": {
+   "type": "AuthPromptBanner",
+   "props": {
+    "accent": "purple",
+    "title": "Connect your team",
+    "icon": "group"
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 92
+    }
+   }
+  },
+  "AuthPromptBanner1L": {
+   "type": "text",
+   "props": {
+    "text": "AuthPromptBanner \u00b7 Purple",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "AuthPromptBanner1T": {
+   "type": "column",
+   "children": [
+    "AuthPromptBanner1L",
+    "AuthPromptBanner1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Avatar0": {
+   "type": "Avatar",
+   "props": {
+    "name": "Ada Lovelace",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 32
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "Avatar0L": {
+   "type": "text",
+   "props": {
+    "text": "Avatar \u00b7 Initials",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Avatar0T": {
+   "type": "column",
+   "children": [
+    "Avatar0L",
+    "Avatar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 32
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "BackButton0": {
+   "type": "BackButton",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 30
+    }
+   }
+  },
+  "BackButton0L": {
+   "type": "text",
+   "props": {
+    "text": "BackButton \u00b7 Back",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "BackButton0T": {
+   "type": "column",
+   "children": [
+    "BackButton0L",
+    "BackButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Badge0": {
+   "type": "Badge",
+   "props": {
+    "label": "Paid",
+    "tone": "success"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "Badge0L": {
+   "type": "text",
+   "props": {
+    "text": "Badge \u00b7 Success",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Badge0T": {
+   "type": "column",
+   "children": [
+    "Badge0L",
+    "Badge0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Badge1": {
+   "type": "Badge",
+   "props": {
+    "label": "Draft"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "Badge1L": {
+   "type": "text",
+   "props": {
+    "text": "Badge \u00b7 Neutral",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Badge1T": {
+   "type": "column",
+   "children": [
+    "Badge1L",
+    "Badge1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Banner0": {
+   "type": "Banner",
+   "props": {
+    "title": "Payment failed",
+    "message": "Update your card to keep your plan.",
+    "tone": "warning"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 56
+    }
+   }
+  },
+  "Banner0L": {
+   "type": "text",
+   "props": {
+    "text": "Banner \u00b7 Warning",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Banner0T": {
+   "type": "column",
+   "children": [
+    "Banner0L",
+    "Banner0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "BatchProgressBar0": {
+   "type": "BatchProgressBar",
+   "props": {
+    "operation": "Uploading images",
+    "completed": 7,
+    "total": 12
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "BatchProgressBar0L": {
+   "type": "text",
+   "props": {
+    "text": "BatchProgressBar \u00b7 Uploading",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "BatchProgressBar0T": {
+   "type": "column",
+   "children": [
+    "BatchProgressBar0L",
+    "BatchProgressBar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "BatchProgressBar1": {
+   "type": "BatchProgressBar",
+   "props": {
+    "operation": "Processing",
+    "status": "error",
+    "completed": 2,
+    "total": 8,
+    "failed": 3
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "BatchProgressBar1L": {
+   "type": "text",
+   "props": {
+    "text": "BatchProgressBar \u00b7 Failed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "BatchProgressBar1T": {
+   "type": "column",
+   "children": [
+    "BatchProgressBar1L",
+    "BatchProgressBar1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Breadcrumb0": {
+   "type": "Breadcrumb",
+   "props": {
+    "items": [
+     "Projects",
+     "Design system",
+     "Components"
+    ]
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Breadcrumb0L": {
+   "type": "text",
+   "props": {
+    "text": "Breadcrumb \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Breadcrumb0T": {
+   "type": "column",
+   "children": [
+    "Breadcrumb0L",
+    "Breadcrumb0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "props": {
+    "items": [
+     "Settings",
+     "Profile"
+    ],
+    "showHomeIcon": true
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Breadcrumb1L": {
+   "type": "text",
+   "props": {
+    "text": "Breadcrumb \u00b7 Home",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Breadcrumb1T": {
+   "type": "column",
+   "children": [
+    "Breadcrumb1L",
+    "Breadcrumb1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "BrowserTabs0": {
+   "type": "BrowserTabs",
+   "props": {
+    "value": "vBrowserTabs0Value",
+    "showAdd": true,
+    "tabs": [
+     "Overview",
+     "Report.pdf",
+     "Notes"
+    ]
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 30
+    }
+   }
+  },
+  "BrowserTabs0L": {
+   "type": "text",
+   "props": {
+    "text": "BrowserTabs \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "BrowserTabs0T": {
+   "type": "column",
+   "children": [
+    "BrowserTabs0L",
+    "BrowserTabs0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Button0": {
+   "type": "Button",
+   "props": {
+    "label": "Save"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Button0L": {
+   "type": "text",
+   "props": {
+    "text": "Button \u00b7 Primary",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Button0T": {
+   "type": "column",
+   "children": [
+    "Button0L",
+    "Button0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Button1": {
+   "type": "Button",
+   "props": {
+    "label": "Cancel",
+    "variant": "outline"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Button1L": {
+   "type": "text",
+   "props": {
+    "text": "Button \u00b7 Outline",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Button1T": {
+   "type": "column",
+   "children": [
+    "Button1L",
+    "Button1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CanvasShell0": {
+   "type": "CanvasShell",
+   "props": {},
+   "layout": {
+    "width": 320,
+    "height": 160
+   }
+  },
+  "CanvasShell0L": {
+   "type": "text",
+   "props": {
+    "text": "CanvasShell \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CanvasShell0T": {
+   "type": "column",
+   "children": [
+    "CanvasShell0L",
+    "CanvasShell0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Card0": {
+   "type": "Card",
+   "props": {
+    "title": "Billing",
+    "subtitle": "Your plan and invoices"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 140
+    }
+   }
+  },
+  "Card0L": {
+   "type": "text",
+   "props": {
+    "text": "Card \u00b7 With header",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Card0T": {
+   "type": "column",
+   "children": [
+    "Card0L",
+    "Card0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CardActions0": {
+   "type": "CardActions",
+   "props": {
+    "actions": [
+     "Open",
+     "Share"
+    ],
+    "icons": [
+     "open_in_new",
+     "ios_share"
+    ]
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "CardActions0L": {
+   "type": "text",
+   "props": {
+    "text": "CardActions \u00b7 Two",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CardActions0T": {
+   "type": "column",
+   "children": [
+    "CardActions0L",
+    "CardActions0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Checkbox0": {
+   "type": "Checkbox",
+   "props": {
+    "label": "Remember me",
+    "value": "vCheckbox0Value"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Checkbox0L": {
+   "type": "text",
+   "props": {
+    "text": "Checkbox \u00b7 Checked",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Checkbox0T": {
+   "type": "column",
+   "children": [
+    "Checkbox0L",
+    "Checkbox0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Checkbox1": {
+   "type": "Checkbox",
+   "props": {
+    "label": "Remember me",
+    "value": "vCheckbox1Value"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Checkbox1L": {
+   "type": "text",
+   "props": {
+    "text": "Checkbox \u00b7 Unchecked",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Checkbox1T": {
+   "type": "column",
+   "children": [
+    "Checkbox1L",
+    "Checkbox1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Chip0": {
+   "type": "Chip",
+   "props": {
+    "label": "Design"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Chip0L": {
+   "type": "text",
+   "props": {
+    "text": "Chip \u00b7 Tag",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Chip0T": {
+   "type": "column",
+   "children": [
+    "Chip0L",
+    "Chip0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Chip1": {
+   "type": "Chip",
+   "props": {
+    "label": "Design",
+    "selected": true
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Chip1L": {
+   "type": "text",
+   "props": {
+    "text": "Chip \u00b7 Selected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Chip1T": {
+   "type": "column",
+   "children": [
+    "Chip1L",
+    "Chip1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Chip2": {
+   "type": "Chip",
+   "props": {
+    "label": "Design",
+    "removable": true
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Chip2L": {
+   "type": "text",
+   "props": {
+    "text": "Chip \u00b7 Removable",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Chip2T": {
+   "type": "column",
+   "children": [
+    "Chip2L",
+    "Chip2"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ChipTabs0": {
+   "type": "ChipTabs",
+   "props": {
+    "tabs": [
+     "Draft",
+     "Review",
+     "Final"
+    ],
+    "value": "vChipTabs0Value",
+    "showAdd": true
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "ChipTabs0L": {
+   "type": "text",
+   "props": {
+    "text": "ChipTabs \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ChipTabs0T": {
+   "type": "column",
+   "children": [
+    "ChipTabs0L",
+    "ChipTabs0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CloudSyncIndicator0": {
+   "type": "CloudSyncIndicator",
+   "props": {},
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "CloudSyncIndicator0L": {
+   "type": "text",
+   "props": {
+    "text": "CloudSyncIndicator \u00b7 Synced",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CloudSyncIndicator0T": {
+   "type": "column",
+   "children": [
+    "CloudSyncIndicator0L",
+    "CloudSyncIndicator0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CloudSyncIndicator1": {
+   "type": "CloudSyncIndicator",
+   "props": {
+    "state": "failed"
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "CloudSyncIndicator1L": {
+   "type": "text",
+   "props": {
+    "text": "CloudSyncIndicator \u00b7 Failed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CloudSyncIndicator1T": {
+   "type": "column",
+   "children": [
+    "CloudSyncIndicator1L",
+    "CloudSyncIndicator1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CodeBlock0": {
+   "type": "CodeBlock",
+   "props": {
+    "code": "const total = items\n  .map((i) => i.price)\n  .reduce((a, b) => a + b, 0);",
+    "title": "total.ts",
+    "language": "ts"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 130
+    }
+   }
+  },
+  "CodeBlock0L": {
+   "type": "text",
+   "props": {
+    "text": "CodeBlock \u00b7 Titled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CodeBlock0T": {
+   "type": "column",
+   "children": [
+    "CodeBlock0L",
+    "CodeBlock0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CodeBlock1": {
+   "type": "CodeBlock",
+   "props": {
+    "code": "npm install\nnpm run build",
+    "embedded": true
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CodeBlock1L": {
+   "type": "text",
+   "props": {
+    "text": "CodeBlock \u00b7 Embedded",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CodeBlock1T": {
+   "type": "column",
+   "children": [
+    "CodeBlock1L",
+    "CodeBlock1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CodePreview0": {
+   "type": "CodePreview",
+   "props": {
+    "code": "name: nightly-export\nschedule: \"0 2 * * *\"\nsteps:\n  - run: export --all"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 90
+    }
+   }
+  },
+  "CodePreview0L": {
+   "type": "text",
+   "props": {
+    "text": "CodePreview \u00b7 Text",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CodePreview0T": {
+   "type": "column",
+   "children": [
+    "CodePreview0L",
+    "CodePreview0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CodePreview1": {
+   "type": "CodePreview",
+   "props": {
+    "emptySubtitle": "Pick a file to see it here.",
+    "code": ""
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "CodePreview1L": {
+   "type": "text",
+   "props": {
+    "text": "CodePreview \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CodePreview1T": {
+   "type": "column",
+   "children": [
+    "CodePreview1L",
+    "CodePreview1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CollapsibleSection0": {
+   "type": "CollapsibleSection",
+   "props": {
+    "title": "Images",
+    "count": 14,
+    "icon": "image",
+    "hiddenCount": 6
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 80
+    }
+   }
+  },
+  "CollapsibleSection0L": {
+   "type": "text",
+   "props": {
+    "text": "CollapsibleSection \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CollapsibleSection0T": {
+   "type": "column",
+   "children": [
+    "CollapsibleSection0L",
+    "CollapsibleSection0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ColorInput0": {
+   "type": "ColorInput",
+   "props": {
+    "value": "vColorInput0Value"
+   },
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "ColorInput0L": {
+   "type": "text",
+   "props": {
+    "text": "ColorInput \u00b7 Blue",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ColorInput0T": {
+   "type": "column",
+   "children": [
+    "ColorInput0L",
+    "ColorInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ColorInput1": {
+   "type": "ColorInput",
+   "props": {
+    "value": "vColorInput1Value",
+    "label": "Accent"
+   },
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 62
+    }
+   }
+  },
+  "ColorInput1L": {
+   "type": "text",
+   "props": {
+    "text": "ColorInput \u00b7 Labeled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ColorInput1T": {
+   "type": "column",
+   "children": [
+    "ColorInput1L",
+    "ColorInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Combobox0": {
+   "type": "Combobox",
+   "props": {
+    "value": "vCombobox0Value",
+    "options": [
+     "Apple",
+     "Banana",
+     "Cherry"
+    ]
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "Combobox0L": {
+   "type": "text",
+   "props": {
+    "text": "Combobox \u00b7 Closed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Combobox0T": {
+   "type": "column",
+   "children": [
+    "Combobox0L",
+    "Combobox0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Combobox1": {
+   "type": "Combobox",
+   "props": {
+    "value": "vCombobox1Value",
+    "open": true,
+    "options": [
+     "Apple",
+     "Banana",
+     "Cherry"
+    ]
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 220
+    }
+   }
+  },
+  "Combobox1L": {
+   "type": "text",
+   "props": {
+    "text": "Combobox \u00b7 Open",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Combobox1T": {
+   "type": "column",
+   "children": [
+    "Combobox1L",
+    "Combobox1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CommandPalette0": {
+   "type": "CommandPalette",
+   "props": {
+    "icons": [
+     "note_add",
+     "settings",
+     "dark_mode"
+    ],
+    "shortcuts": [
+     "Ctrl+N",
+     "Ctrl+,",
+     ""
+    ],
+    "commands": [
+     "New file",
+     "Open settings",
+     "Toggle theme"
+    ],
+    "value": "vCommandPalette0Value"
+   },
+   "layout": {
+    "width": 420,
+    "height": {
+     "hug": 200
+    }
+   }
+  },
+  "CommandPalette0L": {
+   "type": "text",
+   "props": {
+    "text": "CommandPalette \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CommandPalette0T": {
+   "type": "column",
+   "children": [
+    "CommandPalette0L",
+    "CommandPalette0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 420
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CompactAppBar0": {
+   "type": "CompactAppBar",
+   "props": {
+    "title": "Relay",
+    "status": "Connected",
+    "statusColor": "#FF22C55E"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 46
+    }
+   }
+  },
+  "CompactAppBar0L": {
+   "type": "text",
+   "props": {
+    "text": "CompactAppBar \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CompactAppBar0T": {
+   "type": "column",
+   "children": [
+    "CompactAppBar0L",
+    "CompactAppBar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CompactSuggestionReviewItem0": {
+   "type": "CompactSuggestionReviewItem",
+   "props": {
+    "why": "The launch date moved to the 21st.",
+    "title": "Update the brief"
+   },
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CompactSuggestionReviewItem0L": {
+   "type": "text",
+   "props": {
+    "text": "CompactSuggestionReviewItem \u00b7 Pending",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CompactSuggestionReviewItem0T": {
+   "type": "column",
+   "children": [
+    "CompactSuggestionReviewItem0L",
+    "CompactSuggestionReviewItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ConnectionStatus0": {
+   "type": "ConnectionStatus",
+   "props": {
+    "status": "connected"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ConnectionStatus0L": {
+   "type": "text",
+   "props": {
+    "text": "ConnectionStatus \u00b7 Connected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ConnectionStatus0T": {
+   "type": "column",
+   "children": [
+    "ConnectionStatus0L",
+    "ConnectionStatus0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ConnectionStatus1": {
+   "type": "ConnectionStatus",
+   "props": {
+    "status": "reconnecting"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ConnectionStatus1L": {
+   "type": "text",
+   "props": {
+    "text": "ConnectionStatus \u00b7 Reconnecting",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ConnectionStatus1T": {
+   "type": "column",
+   "children": [
+    "ConnectionStatus1L",
+    "ConnectionStatus1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ContextMenu0": {
+   "type": "ContextMenu",
+   "props": {
+    "icons": [
+     "edit",
+     "content_copy",
+     "",
+     "delete"
+    ],
+    "shortcuts": [
+     "F2",
+     "Ctrl+D",
+     "",
+     "Del"
+    ],
+    "items": [
+     "Rename",
+     "Duplicate",
+     "-",
+     "Delete"
+    ]
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "ContextMenu0L": {
+   "type": "text",
+   "props": {
+    "text": "ContextMenu \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ContextMenu0T": {
+   "type": "column",
+   "children": [
+    "ContextMenu0L",
+    "ContextMenu0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CopyButton0": {
+   "type": "CopyButton",
+   "props": {
+    "text": "npm install"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "CopyButton0L": {
+   "type": "text",
+   "props": {
+    "text": "CopyButton \u00b7 Icon",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CopyButton0T": {
+   "type": "column",
+   "children": [
+    "CopyButton0L",
+    "CopyButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CopyButton1": {
+   "type": "CopyButton",
+   "props": {
+    "text": "npm install",
+    "showLabel": true
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "CopyButton1L": {
+   "type": "text",
+   "props": {
+    "text": "CopyButton \u00b7 Labeled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CopyButton1T": {
+   "type": "column",
+   "children": [
+    "CopyButton1L",
+    "CopyButton1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CountBadge0": {
+   "type": "CountBadge",
+   "props": {
+    "count": 3
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "CountBadge0L": {
+   "type": "text",
+   "props": {
+    "text": "CountBadge \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CountBadge0T": {
+   "type": "column",
+   "children": [
+    "CountBadge0L",
+    "CountBadge0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "CountBadge1": {
+   "type": "CountBadge",
+   "props": {
+    "count": 1200
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "CountBadge1L": {
+   "type": "text",
+   "props": {
+    "text": "CountBadge \u00b7 Over",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "CountBadge1T": {
+   "type": "column",
+   "children": [
+    "CountBadge1L",
+    "CountBadge1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DateTimelineAxis0": {
+   "type": "DateTimelineAxis",
+   "props": {
+    "value": "vDateTimelineAxis0Value",
+    "labels": [
+     "Nov 10",
+     "Nov 12",
+     "Nov 13",
+     "Today"
+    ]
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 42
+    }
+   }
+  },
+  "DateTimelineAxis0L": {
+   "type": "text",
+   "props": {
+    "text": "DateTimelineAxis \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DateTimelineAxis0T": {
+   "type": "column",
+   "children": [
+    "DateTimelineAxis0L",
+    "DateTimelineAxis0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Dialog0": {
+   "type": "Dialog",
+   "props": {
+    "title": "Delete project?",
+    "description": "This cannot be undone."
+   },
+   "layout": {
+    "width": 400,
+    "height": {
+     "hug": 200
+    }
+   }
+  },
+  "Dialog0L": {
+   "type": "text",
+   "props": {
+    "text": "Dialog \u00b7 Confirm",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Dialog0T": {
+   "type": "column",
+   "children": [
+    "Dialog0L",
+    "Dialog0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 400
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DiffStatsBadge0": {
+   "type": "DiffStatsBadge",
+   "props": {
+    "created": 3,
+    "modified": 12,
+    "deleted": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "DiffStatsBadge0L": {
+   "type": "text",
+   "props": {
+    "text": "DiffStatsBadge \u00b7 Mixed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DiffStatsBadge0T": {
+   "type": "column",
+   "children": [
+    "DiffStatsBadge0L",
+    "DiffStatsBadge0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DiffStatsBadge1": {
+   "type": "DiffStatsBadge",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "DiffStatsBadge1L": {
+   "type": "text",
+   "props": {
+    "text": "DiffStatsBadge \u00b7 None",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DiffStatsBadge1T": {
+   "type": "column",
+   "children": [
+    "DiffStatsBadge1L",
+    "DiffStatsBadge1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DiffViewer0": {
+   "type": "DiffViewer",
+   "props": {
+    "fileName": "src/total.ts",
+    "lines": [
+     " const total = items",
+     "-  .map((i) => i.cost)",
+     "+  .map((i) => i.price)",
+     "   .reduce((a, b) => a + b, 0);"
+    ]
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "DiffViewer0L": {
+   "type": "text",
+   "props": {
+    "text": "DiffViewer \u00b7 Modified",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DiffViewer0T": {
+   "type": "column",
+   "children": [
+    "DiffViewer0L",
+    "DiffViewer0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DocumentItem0": {
+   "type": "DocumentItem",
+   "props": {
+    "title": "Brief",
+    "description": "Shared with the team"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 90
+    }
+   }
+  },
+  "DocumentItem0L": {
+   "type": "text",
+   "props": {
+    "text": "DocumentItem \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DocumentItem0T": {
+   "type": "column",
+   "children": [
+    "DocumentItem0L",
+    "DocumentItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DownloadButton0": {
+   "type": "DownloadButton",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "DownloadButton0L": {
+   "type": "text",
+   "props": {
+    "text": "DownloadButton \u00b7 Labeled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DownloadButton0T": {
+   "type": "column",
+   "children": [
+    "DownloadButton0L",
+    "DownloadButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DownloadButton1": {
+   "type": "DownloadButton",
+   "props": {
+    "label": ""
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "DownloadButton1L": {
+   "type": "text",
+   "props": {
+    "text": "DownloadButton \u00b7 Icon",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DownloadButton1T": {
+   "type": "column",
+   "children": [
+    "DownloadButton1L",
+    "DownloadButton1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DropdownMultiselect0": {
+   "type": "DropdownMultiselect",
+   "props": {
+    "value": "vDropdownMultiselect0Value",
+    "options": [
+     "Design",
+     "Engineering",
+     "Marketing"
+    ]
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "DropdownMultiselect0L": {
+   "type": "text",
+   "props": {
+    "text": "DropdownMultiselect \u00b7 Closed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DropdownMultiselect0T": {
+   "type": "column",
+   "children": [
+    "DropdownMultiselect0L",
+    "DropdownMultiselect0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "DropdownMultiselect1": {
+   "type": "DropdownMultiselect",
+   "props": {
+    "value": "vDropdownMultiselect1Value",
+    "open": true,
+    "options": [
+     "Design",
+     "Engineering",
+     "Marketing"
+    ]
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 170
+    }
+   }
+  },
+  "DropdownMultiselect1L": {
+   "type": "text",
+   "props": {
+    "text": "DropdownMultiselect \u00b7 Open",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "DropdownMultiselect1T": {
+   "type": "column",
+   "children": [
+    "DropdownMultiselect1L",
+    "DropdownMultiselect1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "EmptyState0": {
+   "type": "EmptyState",
+   "props": {
+    "title": "No invoices yet",
+    "message": "Invoices appear here once you bill a customer."
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 200
+    }
+   }
+  },
+  "EmptyState0L": {
+   "type": "text",
+   "props": {
+    "text": "EmptyState \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "EmptyState0T": {
+   "type": "column",
+   "children": [
+    "EmptyState0L",
+    "EmptyState0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ErrorBar0": {
+   "type": "ErrorBar",
+   "props": {
+    "message": "Sync failed: connection lost"
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "ErrorBar0L": {
+   "type": "text",
+   "props": {
+    "text": "ErrorBar \u00b7 Failed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ErrorBar0T": {
+   "type": "column",
+   "children": [
+    "ErrorBar0L",
+    "ErrorBar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ExtensionChipsInput0": {
+   "type": "ExtensionChipsInput",
+   "props": {
+    "value": "vExtensionChipsInput0Value"
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 72
+    }
+   }
+  },
+  "ExtensionChipsInput0L": {
+   "type": "text",
+   "props": {
+    "text": "ExtensionChipsInput \u00b7 Two",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ExtensionChipsInput0T": {
+   "type": "column",
+   "children": [
+    "ExtensionChipsInput0L",
+    "ExtensionChipsInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FeatureBulletItem0": {
+   "type": "FeatureBulletItem",
+   "props": {
+    "text": "Indexes your files as they change."
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "FeatureBulletItem0L": {
+   "type": "text",
+   "props": {
+    "text": "FeatureBulletItem \u00b7 Feature",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FeatureBulletItem0T": {
+   "type": "column",
+   "children": [
+    "FeatureBulletItem0L",
+    "FeatureBulletItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Field0": {
+   "type": "Field",
+   "props": {
+    "label": "Email",
+    "help": "We never share it."
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 72
+    }
+   }
+  },
+  "Field0L": {
+   "type": "text",
+   "props": {
+    "text": "Field \u00b7 With help",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Field0T": {
+   "type": "column",
+   "children": [
+    "Field0L",
+    "Field0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FileListItem0": {
+   "type": "FileListItem",
+   "props": {
+    "path": "docs/launch-plan.md"
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "FileListItem0L": {
+   "type": "text",
+   "props": {
+    "text": "FileListItem \u00b7 File",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FileListItem0T": {
+   "type": "column",
+   "children": [
+    "FileListItem0L",
+    "FileListItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FileMetadataCard0": {
+   "type": "FileMetadataCard",
+   "props": {
+    "labels": [
+     "Path",
+     "Status",
+     "Updated"
+    ],
+    "values": [
+     "docs/brief.md",
+     "Draft",
+     "Today"
+    ],
+    "callout": "The template changed since this file was written."
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 100
+    }
+   }
+  },
+  "FileMetadataCard0L": {
+   "type": "text",
+   "props": {
+    "text": "FileMetadataCard \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FileMetadataCard0T": {
+   "type": "column",
+   "children": [
+    "FileMetadataCard0L",
+    "FileMetadataCard0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FileTree0": {
+   "type": "FileTree",
+   "props": {
+    "value": "vFileTree0Value",
+    "names": [
+     "lib",
+     "main.dart",
+     "assets",
+     "logo.png",
+     "README.md"
+    ],
+    "depths": [
+     "0",
+     "1",
+     "0",
+     "1",
+     "0"
+    ]
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 175
+    }
+   }
+  },
+  "FileTree0L": {
+   "type": "text",
+   "props": {
+    "text": "FileTree \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FileTree0T": {
+   "type": "column",
+   "children": [
+    "FileTree0L",
+    "FileTree0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FileTreeContextMenu0": {
+   "type": "FileTreeContextMenu",
+   "props": {
+    "items": [
+     "Rename",
+     "Delete"
+    ]
+   },
+   "layout": {
+    "width": 150,
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FileTreeContextMenu0L": {
+   "type": "text",
+   "props": {
+    "text": "FileTreeContextMenu \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FileTreeContextMenu0T": {
+   "type": "column",
+   "children": [
+    "FileTreeContextMenu0L",
+    "FileTreeContextMenu0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FileUploader0": {
+   "type": "FileUploader",
+   "props": {
+    "hint": "PDF or PNG, up to 10 MB"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 160
+    }
+   }
+  },
+  "FileUploader0L": {
+   "type": "text",
+   "props": {
+    "text": "FileUploader \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FileUploader0T": {
+   "type": "column",
+   "children": [
+    "FileUploader0L",
+    "FileUploader0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FileUploader1": {
+   "type": "FileUploader",
+   "props": {
+    "compact": true,
+    "label": "Upload file"
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "FileUploader1L": {
+   "type": "text",
+   "props": {
+    "text": "FileUploader \u00b7 Compact",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FileUploader1T": {
+   "type": "column",
+   "children": [
+    "FileUploader1L",
+    "FileUploader1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FilterLegend0": {
+   "type": "FilterLegend",
+   "props": {
+    "labels": [
+     "All",
+     "Open",
+     "Closed"
+    ],
+    "values": [
+     "42",
+     "12",
+     "30"
+    ],
+    "active": "Open"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "FilterLegend0L": {
+   "type": "text",
+   "props": {
+    "text": "FilterLegend \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FilterLegend0T": {
+   "type": "column",
+   "children": [
+    "FilterLegend0L",
+    "FilterLegend0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FolderCard0": {
+   "type": "FolderCard",
+   "props": {
+    "title": "Design docs",
+    "path": "~/work/design",
+    "lastRun": "Synced 2h ago",
+    "stats": [
+     "128 files",
+     "3 rules"
+    ]
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "FolderCard0L": {
+   "type": "text",
+   "props": {
+    "text": "FolderCard \u00b7 Synced",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FolderCard0T": {
+   "type": "column",
+   "children": [
+    "FolderCard0L",
+    "FolderCard0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FolderCard1": {
+   "type": "FolderCard",
+   "props": {
+    "title": "Invoices",
+    "path": "~/finance/invoices",
+    "status": "running",
+    "progress": 40,
+    "progressLabel": "Reading 12 of 30"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "FolderCard1L": {
+   "type": "text",
+   "props": {
+    "text": "FolderCard \u00b7 Running",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FolderCard1T": {
+   "type": "column",
+   "children": [
+    "FolderCard1L",
+    "FolderCard1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FullWidthSearchInput0": {
+   "type": "FullWidthSearchInput",
+   "props": {
+    "value": "vFullWidthSearchInput0Value"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "FullWidthSearchInput0L": {
+   "type": "text",
+   "props": {
+    "text": "FullWidthSearchInput \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FullWidthSearchInput0T": {
+   "type": "column",
+   "children": [
+    "FullWidthSearchInput0L",
+    "FullWidthSearchInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "FullWidthSearchInput1": {
+   "type": "FullWidthSearchInput",
+   "props": {
+    "value": "vFullWidthSearchInput1Value"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "FullWidthSearchInput1L": {
+   "type": "text",
+   "props": {
+    "text": "FullWidthSearchInput \u00b7 Typed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "FullWidthSearchInput1T": {
+   "type": "column",
+   "children": [
+    "FullWidthSearchInput1L",
+    "FullWidthSearchInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "HeaderSearchInput0": {
+   "type": "HeaderSearchInput",
+   "props": {
+    "value": "vHeaderSearchInput0Value"
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "HeaderSearchInput0L": {
+   "type": "text",
+   "props": {
+    "text": "HeaderSearchInput \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "HeaderSearchInput0T": {
+   "type": "column",
+   "children": [
+    "HeaderSearchInput0L",
+    "HeaderSearchInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "HeaderSearchInput1": {
+   "type": "HeaderSearchInput",
+   "props": {
+    "value": "vHeaderSearchInput1Value"
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "HeaderSearchInput1L": {
+   "type": "text",
+   "props": {
+    "text": "HeaderSearchInput \u00b7 Typed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "HeaderSearchInput1T": {
+   "type": "column",
+   "children": [
+    "HeaderSearchInput1L",
+    "HeaderSearchInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "HierarchicalPicker0": {
+   "type": "HierarchicalPicker",
+   "props": {
+    "value": "vHierarchicalPicker0Value",
+    "labels": [
+     "Work",
+     "Clients",
+     "Acme",
+     "Personal"
+    ],
+    "depths": [
+     "0",
+     "1",
+     "2",
+     "0"
+    ]
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "HierarchicalPicker0L": {
+   "type": "text",
+   "props": {
+    "text": "HierarchicalPicker \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "HierarchicalPicker0T": {
+   "type": "column",
+   "children": [
+    "HierarchicalPicker0L",
+    "HierarchicalPicker0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "HistoryTimeline0": {
+   "type": "HistoryTimeline",
+   "props": {
+    "notes": [
+     "Version 4 went live.",
+     "",
+     "First outline."
+    ],
+    "value": "vHistoryTimeline0Value",
+    "events": [
+     "Published",
+     "Reviewed",
+     "Drafted"
+    ]
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 150
+    }
+   }
+  },
+  "HistoryTimeline0L": {
+   "type": "text",
+   "props": {
+    "text": "HistoryTimeline \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "HistoryTimeline0T": {
+   "type": "column",
+   "children": [
+    "HistoryTimeline0L",
+    "HistoryTimeline0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Hyperlink0": {
+   "type": "Hyperlink",
+   "props": {
+    "text": "Open the docs"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Hyperlink0L": {
+   "type": "text",
+   "props": {
+    "text": "Hyperlink \u00b7 Link",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Hyperlink0T": {
+   "type": "column",
+   "children": [
+    "Hyperlink0L",
+    "Hyperlink0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Hyperlink1": {
+   "type": "Hyperlink",
+   "props": {
+    "text": "Open the docs",
+    "showIcon": true
+   },
+   "layout": {
+    "width": {
+     "hug": 130
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Hyperlink1L": {
+   "type": "text",
+   "props": {
+    "text": "Hyperlink \u00b7 With icon",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Hyperlink1T": {
+   "type": "column",
+   "children": [
+    "Hyperlink1L",
+    "Hyperlink1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 130
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "IconBox0": {
+   "type": "IconBox",
+   "props": {
+    "icon": "settings"
+   },
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 30
+    }
+   }
+  },
+  "IconBox0L": {
+   "type": "text",
+   "props": {
+    "text": "IconBox \u00b7 Settings",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "IconBox0T": {
+   "type": "column",
+   "children": [
+    "IconBox0L",
+    "IconBox0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "IconButton0": {
+   "type": "IconButton",
+   "props": {
+    "icon": "more_horiz"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "IconButton0L": {
+   "type": "text",
+   "props": {
+    "text": "IconButton \u00b7 Ghost",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "IconButton0T": {
+   "type": "column",
+   "children": [
+    "IconButton0L",
+    "IconButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "IconButton1": {
+   "type": "IconButton",
+   "props": {
+    "icon": "add",
+    "variant": "outline"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "IconButton1L": {
+   "type": "text",
+   "props": {
+    "text": "IconButton \u00b7 Outline",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "IconButton1T": {
+   "type": "column",
+   "children": [
+    "IconButton1L",
+    "IconButton1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "IconSegmentedControl0": {
+   "type": "IconSegmentedControl",
+   "props": {
+    "value": "vIconSegmentedControl0Value",
+    "icons": [
+     "view_list",
+     "grid_view"
+    ]
+   },
+   "layout": {
+    "width": {
+     "hug": 62
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "IconSegmentedControl0L": {
+   "type": "text",
+   "props": {
+    "text": "IconSegmentedControl \u00b7 Two",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "IconSegmentedControl0T": {
+   "type": "column",
+   "children": [
+    "IconSegmentedControl0L",
+    "IconSegmentedControl0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 62
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "IconSelect0": {
+   "type": "IconSelect",
+   "props": {
+    "value": "vIconSelect0Value",
+    "options": [
+     "Claude",
+     "Gemini",
+     "Local"
+    ]
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "IconSelect0L": {
+   "type": "text",
+   "props": {
+    "text": "IconSelect \u00b7 Closed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "IconSelect0T": {
+   "type": "column",
+   "children": [
+    "IconSelect0L",
+    "IconSelect0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "IconSelect1": {
+   "type": "IconSelect",
+   "props": {
+    "value": "vIconSelect1Value",
+    "open": true,
+    "options": [
+     "Claude",
+     "Gemini",
+     "Local"
+    ]
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 140
+    }
+   }
+  },
+  "IconSelect1L": {
+   "type": "text",
+   "props": {
+    "text": "IconSelect \u00b7 Open",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "IconSelect1T": {
+   "type": "column",
+   "children": [
+    "IconSelect1L",
+    "IconSelect1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ImageGallery0": {
+   "type": "ImageGallery",
+   "props": {
+    "images": [
+     "a",
+     "b",
+     "c"
+    ],
+    "titles": [
+     "Harbor",
+     "Studio",
+     "Field"
+    ]
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 108
+    }
+   }
+  },
+  "ImageGallery0L": {
+   "type": "text",
+   "props": {
+    "text": "ImageGallery \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ImageGallery0T": {
+   "type": "column",
+   "children": [
+    "ImageGallery0L",
+    "ImageGallery0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ImageUpload0": {
+   "type": "ImageUpload",
+   "props": {
+    "hint": "PNG, JPG or WebP, up to 5 MB each"
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 220
+    }
+   }
+  },
+  "ImageUpload0L": {
+   "type": "text",
+   "props": {
+    "text": "ImageUpload \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ImageUpload0T": {
+   "type": "column",
+   "children": [
+    "ImageUpload0L",
+    "ImageUpload0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "InlineStat0": {
+   "type": "InlineStat",
+   "props": {
+    "icon": "description",
+    "value": "128"
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "InlineStat0L": {
+   "type": "text",
+   "props": {
+    "text": "InlineStat \u00b7 Files",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "InlineStat0T": {
+   "type": "column",
+   "children": [
+    "InlineStat0L",
+    "InlineStat0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ListRow0": {
+   "type": "ListRow",
+   "props": {
+    "title": "Invoice #1042",
+    "icon": "description"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "ListRow0L": {
+   "type": "text",
+   "props": {
+    "text": "ListRow \u00b7 Row",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ListRow0T": {
+   "type": "column",
+   "children": [
+    "ListRow0L",
+    "ListRow0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ListRow1": {
+   "type": "ListRow",
+   "props": {
+    "title": "Ada Lovelace",
+    "subtitle": "ada@example.com",
+    "icon": "person_outline"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 52
+    }
+   }
+  },
+  "ListRow1L": {
+   "type": "text",
+   "props": {
+    "text": "ListRow \u00b7 Two lines",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ListRow1T": {
+   "type": "column",
+   "children": [
+    "ListRow1L",
+    "ListRow1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "LoadMore0": {
+   "type": "LoadMore",
+   "props": {},
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "LoadMore0L": {
+   "type": "text",
+   "props": {
+    "text": "LoadMore \u00b7 More",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "LoadMore0T": {
+   "type": "column",
+   "children": [
+    "LoadMore0L",
+    "LoadMore0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "LoadMore1": {
+   "type": "LoadMore",
+   "props": {
+    "loading": true
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "LoadMore1L": {
+   "type": "text",
+   "props": {
+    "text": "LoadMore \u00b7 Loading",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "LoadMore1T": {
+   "type": "column",
+   "children": [
+    "LoadMore1L",
+    "LoadMore1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "LoadMore2": {
+   "type": "LoadMore",
+   "props": {
+    "error": "timeout"
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "LoadMore2L": {
+   "type": "text",
+   "props": {
+    "text": "LoadMore \u00b7 Error",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "LoadMore2T": {
+   "type": "column",
+   "children": [
+    "LoadMore2L",
+    "LoadMore2"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "MenuButton0": {
+   "type": "MenuButton",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "MenuButton0L": {
+   "type": "text",
+   "props": {
+    "text": "MenuButton \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "MenuButton0T": {
+   "type": "column",
+   "children": [
+    "MenuButton0L",
+    "MenuButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "MenuItem0": {
+   "type": "MenuItem",
+   "props": {
+    "title": "Copy command",
+    "icon": "content_copy",
+    "trailing": "Ctrl+C"
+   },
+   "layout": {
+    "width": 226,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "MenuItem0L": {
+   "type": "text",
+   "props": {
+    "text": "MenuItem \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "MenuItem0T": {
+   "type": "column",
+   "children": [
+    "MenuItem0L",
+    "MenuItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 226
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "MenuPopover0": {
+   "type": "MenuPopover",
+   "props": {
+    "heading": "Automation actions"
+   },
+   "layout": {
+    "width": 228,
+    "height": {
+     "hug": 80
+    }
+   }
+  },
+  "MenuPopover0L": {
+   "type": "text",
+   "props": {
+    "text": "MenuPopover \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "MenuPopover0T": {
+   "type": "column",
+   "children": [
+    "MenuPopover0L",
+    "MenuPopover0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 228
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "MetaInfo0": {
+   "type": "MetaInfo",
+   "props": {
+    "age": "2h ago",
+    "commit": "a1b2c3d"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "MetaInfo0L": {
+   "type": "text",
+   "props": {
+    "text": "MetaInfo \u00b7 Both",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "MetaInfo0T": {
+   "type": "column",
+   "children": [
+    "MetaInfo0L",
+    "MetaInfo0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ModelAvatarStack0": {
+   "type": "ModelAvatarStack",
+   "props": {
+    "labels": [
+     "Ada",
+     "Ben",
+     "Cy"
+    ]
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "ModelAvatarStack0L": {
+   "type": "text",
+   "props": {
+    "text": "ModelAvatarStack \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ModelAvatarStack0T": {
+   "type": "column",
+   "children": [
+    "ModelAvatarStack0L",
+    "ModelAvatarStack0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ModelAvatarStack1": {
+   "type": "ModelAvatarStack",
+   "props": {
+    "labels": [
+     "Ada",
+     "Ben",
+     "Cy",
+     "Di",
+     "Eve",
+     "Flo"
+    ],
+    "max": 3,
+    "size": "large"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "ModelAvatarStack1L": {
+   "type": "text",
+   "props": {
+    "text": "ModelAvatarStack \u00b7 Many",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ModelAvatarStack1T": {
+   "type": "column",
+   "children": [
+    "ModelAvatarStack1L",
+    "ModelAvatarStack1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ModelSelectMenu0": {
+   "type": "ModelSelectMenu",
+   "props": {
+    "value": "vModelSelectMenu0Value",
+    "models": [
+     "Claude",
+     "Gemini",
+     "Local"
+    ]
+   },
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "ModelSelectMenu0L": {
+   "type": "text",
+   "props": {
+    "text": "ModelSelectMenu \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ModelSelectMenu0T": {
+   "type": "column",
+   "children": [
+    "ModelSelectMenu0L",
+    "ModelSelectMenu0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "MultiSelectDropdown0": {
+   "type": "MultiSelectDropdown",
+   "props": {
+    "value": "vMultiSelectDropdown0Value",
+    "options": [
+     "Read",
+     "Write",
+     "Admin"
+    ]
+   },
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "MultiSelectDropdown0L": {
+   "type": "text",
+   "props": {
+    "text": "MultiSelectDropdown \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "MultiSelectDropdown0T": {
+   "type": "column",
+   "children": [
+    "MultiSelectDropdown0L",
+    "MultiSelectDropdown0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NavigationMenu0": {
+   "type": "NavigationMenu",
+   "props": {
+    "badges": [
+     "",
+     "4",
+     "New"
+    ],
+    "value": "vNavigationMenu0Value",
+    "items": [
+     "Dashboard",
+     "Projects",
+     "Team"
+    ]
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 180
+    }
+   }
+  },
+  "NavigationMenu0L": {
+   "type": "text",
+   "props": {
+    "text": "NavigationMenu \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NavigationMenu0T": {
+   "type": "column",
+   "children": [
+    "NavigationMenu0L",
+    "NavigationMenu0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NestedTaskLedger0": {
+   "type": "NestedTaskLedger",
+   "props": {
+    "counts": [
+     "1/2",
+     "",
+     "",
+     ""
+    ],
+    "progress": [
+     "50",
+     "100",
+     "40",
+     ""
+    ],
+    "tasks": [
+     "Build",
+     "Compile",
+     "Bundle",
+     "Deploy"
+    ]
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 140
+    }
+   }
+  },
+  "NestedTaskLedger0L": {
+   "type": "text",
+   "props": {
+    "text": "NestedTaskLedger \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NestedTaskLedger0T": {
+   "type": "column",
+   "children": [
+    "NestedTaskLedger0L",
+    "NestedTaskLedger0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NotePopover0": {
+   "type": "NotePopover",
+   "props": {
+    "label": "Why two keys?",
+    "note": "One signs requests, the other reads results.",
+    "open": true
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NotePopover0L": {
+   "type": "text",
+   "props": {
+    "text": "NotePopover \u00b7 Open",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NotePopover0T": {
+   "type": "column",
+   "children": [
+    "NotePopover0L",
+    "NotePopover0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NotificationBadge0": {
+   "type": "NotificationBadge",
+   "props": {
+    "count": 3
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "NotificationBadge0L": {
+   "type": "text",
+   "props": {
+    "text": "NotificationBadge \u00b7 Count",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NotificationBadge0T": {
+   "type": "column",
+   "children": [
+    "NotificationBadge0L",
+    "NotificationBadge0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NumberInput0": {
+   "type": "NumberInput",
+   "props": {
+    "value": "vNumberInput0Value"
+   },
+   "layout": {
+    "width": 140,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "NumberInput0L": {
+   "type": "text",
+   "props": {
+    "text": "NumberInput \u00b7 Plain",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NumberInput0T": {
+   "type": "column",
+   "children": [
+    "NumberInput0L",
+    "NumberInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NumberInput1": {
+   "type": "NumberInput",
+   "props": {
+    "value": "vNumberInput1Value",
+    "suffix": "px"
+   },
+   "layout": {
+    "width": 140,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "NumberInput1L": {
+   "type": "text",
+   "props": {
+    "text": "NumberInput \u00b7 With units",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NumberInput1T": {
+   "type": "column",
+   "children": [
+    "NumberInput1L",
+    "NumberInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NumberPresetInput0": {
+   "type": "NumberPresetInput",
+   "props": {
+    "value": "vNumberPresetInput0Value",
+    "suffix": "px",
+    "presets": [
+     "8",
+     "12",
+     "16",
+     "24"
+    ]
+   },
+   "layout": {
+    "width": 140,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "NumberPresetInput0L": {
+   "type": "text",
+   "props": {
+    "text": "NumberPresetInput \u00b7 Closed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NumberPresetInput0T": {
+   "type": "column",
+   "children": [
+    "NumberPresetInput0L",
+    "NumberPresetInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "NumberPresetInput1": {
+   "type": "NumberPresetInput",
+   "props": {
+    "value": "vNumberPresetInput1Value",
+    "suffix": "px",
+    "open": true,
+    "presets": [
+     "8",
+     "12",
+     "16",
+     "24"
+    ]
+   },
+   "layout": {
+    "width": 140,
+    "height": {
+     "hug": 170
+    }
+   }
+  },
+  "NumberPresetInput1L": {
+   "type": "text",
+   "props": {
+    "text": "NumberPresetInput \u00b7 Open",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "NumberPresetInput1T": {
+   "type": "column",
+   "children": [
+    "NumberPresetInput1L",
+    "NumberPresetInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "OnboardingBanner0": {
+   "type": "OnboardingBanner",
+   "props": {
+    "title": "Set up your workspace",
+    "subtitle": "Connect a provider to start running agents.",
+    "features": [
+     "Runs on your machine",
+     "Bring your own keys",
+     "Nothing leaves your network"
+    ],
+    "ctaLabel": "Connect a provider"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 380
+    }
+   }
+  },
+  "OnboardingBanner0L": {
+   "type": "text",
+   "props": {
+    "text": "OnboardingBanner \u00b7 Welcome",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "OnboardingBanner0T": {
+   "type": "column",
+   "children": [
+    "OnboardingBanner0L",
+    "OnboardingBanner0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "OptionIcon0": {
+   "type": "OptionIcon",
+   "props": {
+    "icon": "bolt"
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "OptionIcon0L": {
+   "type": "text",
+   "props": {
+    "text": "OptionIcon \u00b7 Icon",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "OptionIcon0T": {
+   "type": "column",
+   "children": [
+    "OptionIcon0L",
+    "OptionIcon0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "OptionIcon1": {
+   "type": "OptionIcon",
+   "props": {
+    "letter": "G"
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "OptionIcon1L": {
+   "type": "text",
+   "props": {
+    "text": "OptionIcon \u00b7 Letter",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "OptionIcon1T": {
+   "type": "column",
+   "children": [
+    "OptionIcon1L",
+    "OptionIcon1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PageControl0": {
+   "type": "PageControl",
+   "props": {
+    "currentPage": 1,
+    "totalPages": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 48
+    },
+    "height": {
+     "hug": 4
+    }
+   }
+  },
+  "PageControl0L": {
+   "type": "text",
+   "props": {
+    "text": "PageControl \u00b7 Second of five",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PageControl0T": {
+   "type": "column",
+   "children": [
+    "PageControl0L",
+    "PageControl0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 48
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Panel0": {
+   "type": "Panel",
+   "props": {
+    "title": "Billing",
+    "subtitle": "Plan and invoices"
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 90
+    }
+   }
+  },
+  "Panel0L": {
+   "type": "text",
+   "props": {
+    "text": "Panel \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Panel0T": {
+   "type": "column",
+   "children": [
+    "Panel0L",
+    "Panel0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Panel1": {
+   "type": "Panel",
+   "props": {
+    "title": "Advanced",
+    "variant": "expandable"
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "Panel1L": {
+   "type": "text",
+   "props": {
+    "text": "Panel \u00b7 Expandable",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Panel1T": {
+   "type": "column",
+   "children": [
+    "Panel1L",
+    "Panel1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PaneToolbar0": {
+   "type": "PaneToolbar",
+   "props": {
+    "title": "Preview",
+    "meta": "main",
+    "icon": "visibility"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "PaneToolbar0L": {
+   "type": "text",
+   "props": {
+    "text": "PaneToolbar \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PaneToolbar0T": {
+   "type": "column",
+   "children": [
+    "PaneToolbar0L",
+    "PaneToolbar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PersonChip0": {
+   "type": "PersonChip",
+   "props": {
+    "name": "Ada Lovelace"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "PersonChip0L": {
+   "type": "text",
+   "props": {
+    "text": "PersonChip \u00b7 Person",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PersonChip0T": {
+   "type": "column",
+   "children": [
+    "PersonChip0L",
+    "PersonChip0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PersonChip1": {
+   "type": "PersonChip",
+   "props": {
+    "name": "Platform",
+    "kind": "team"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "PersonChip1L": {
+   "type": "text",
+   "props": {
+    "text": "PersonChip \u00b7 Team",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PersonChip1T": {
+   "type": "column",
+   "children": [
+    "PersonChip1L",
+    "PersonChip1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PersonChip2": {
+   "type": "PersonChip",
+   "props": {
+    "name": "Grace Hopper",
+    "removable": true
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "PersonChip2L": {
+   "type": "text",
+   "props": {
+    "text": "PersonChip \u00b7 Removable",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PersonChip2T": {
+   "type": "column",
+   "children": [
+    "PersonChip2L",
+    "PersonChip2"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ProgressBar0": {
+   "type": "ProgressBar",
+   "props": {
+    "value": 0.5
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 4
+    }
+   }
+  },
+  "ProgressBar0L": {
+   "type": "text",
+   "props": {
+    "text": "ProgressBar \u00b7 Half",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ProgressBar0T": {
+   "type": "column",
+   "children": [
+    "ProgressBar0L",
+    "ProgressBar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ProjectSelector0": {
+   "type": "ProjectSelector",
+   "props": {
+    "value": "vProjectSelector0Value",
+    "counts": [
+     "3",
+     "",
+     "12"
+    ],
+    "open": true,
+    "projects": [
+     "Website",
+     "Mobile app",
+     "Docs"
+    ]
+   },
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 130
+    }
+   }
+  },
+  "ProjectSelector0L": {
+   "type": "text",
+   "props": {
+    "text": "ProjectSelector \u00b7 Open",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ProjectSelector0T": {
+   "type": "column",
+   "children": [
+    "ProjectSelector0L",
+    "ProjectSelector0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PromptBanner0": {
+   "type": "PromptBanner",
+   "props": {
+    "message": "You have 3 runs left today",
+    "icon": "bolt",
+    "actionLabel": "Upgrade"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "PromptBanner0L": {
+   "type": "text",
+   "props": {
+    "text": "PromptBanner \u00b7 Info",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PromptBanner0T": {
+   "type": "column",
+   "children": [
+    "PromptBanner0L",
+    "PromptBanner0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PromptBanner1": {
+   "type": "PromptBanner",
+   "props": {
+    "message": "Out of credits",
+    "tone": "critical",
+    "icon": "error_outline",
+    "actionLabel": "Add credits"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "PromptBanner1L": {
+   "type": "text",
+   "props": {
+    "text": "PromptBanner \u00b7 Critical",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PromptBanner1T": {
+   "type": "column",
+   "children": [
+    "PromptBanner1L",
+    "PromptBanner1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PromptInput0": {
+   "type": "PromptInput",
+   "props": {
+    "value": "vPromptInput0Value"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 66
+    }
+   }
+  },
+  "PromptInput0L": {
+   "type": "text",
+   "props": {
+    "text": "PromptInput \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PromptInput0T": {
+   "type": "column",
+   "children": [
+    "PromptInput0L",
+    "PromptInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PromptInput1": {
+   "type": "PromptInput",
+   "props": {
+    "value": "vPromptInput1Value",
+    "hint": "Enter to send, Shift+Enter for a new line"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 92
+    }
+   }
+  },
+  "PromptInput1L": {
+   "type": "text",
+   "props": {
+    "text": "PromptInput \u00b7 Hint",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PromptInput1T": {
+   "type": "column",
+   "children": [
+    "PromptInput1L",
+    "PromptInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PromptInputWithBanner0": {
+   "type": "PromptInputWithBanner",
+   "props": {
+    "description": "Pick a starting point or write your own.",
+    "value": "vPromptInputWithBanner0Value"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 190
+    }
+   }
+  },
+  "PromptInputWithBanner0L": {
+   "type": "text",
+   "props": {
+    "text": "PromptInputWithBanner \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PromptInputWithBanner0T": {
+   "type": "column",
+   "children": [
+    "PromptInputWithBanner0L",
+    "PromptInputWithBanner0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ProviderCard0": {
+   "type": "ProviderCard",
+   "props": {
+    "label": "GitHub",
+    "subtitle": "acme-inc \u00b7 14 repositories"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 50
+    }
+   }
+  },
+  "ProviderCard0L": {
+   "type": "text",
+   "props": {
+    "text": "ProviderCard \u00b7 Connected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ProviderCard0T": {
+   "type": "column",
+   "children": [
+    "ProviderCard0L",
+    "ProviderCard0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ProviderCard1": {
+   "type": "ProviderCard",
+   "props": {
+    "label": "Linear",
+    "connected": false,
+    "actionLabel": "Connect"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 50
+    }
+   }
+  },
+  "ProviderCard1L": {
+   "type": "text",
+   "props": {
+    "text": "ProviderCard \u00b7 Not connected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ProviderCard1T": {
+   "type": "column",
+   "children": [
+    "ProviderCard1L",
+    "ProviderCard1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ProviderIcon0": {
+   "type": "ProviderIcon",
+   "props": {
+    "letter": "S"
+   },
+   "layout": {
+    "width": 34,
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "ProviderIcon0L": {
+   "type": "text",
+   "props": {
+    "text": "ProviderIcon \u00b7 Letter",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ProviderIcon0T": {
+   "type": "column",
+   "children": [
+    "ProviderIcon0L",
+    "ProviderIcon0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 34
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ProviderPill0": {
+   "type": "ProviderPill",
+   "props": {
+    "label": "Add key"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "ProviderPill0L": {
+   "type": "text",
+   "props": {
+    "text": "ProviderPill \u00b7 Add key",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ProviderPill0T": {
+   "type": "column",
+   "children": [
+    "ProviderPill0L",
+    "ProviderPill0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ProviderPill1": {
+   "type": "ProviderPill",
+   "props": {
+    "label": "Connected",
+    "icon": "check"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "ProviderPill1L": {
+   "type": "text",
+   "props": {
+    "text": "ProviderPill \u00b7 Connected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ProviderPill1T": {
+   "type": "column",
+   "children": [
+    "ProviderPill1L",
+    "ProviderPill1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "PulsingDots0": {
+   "type": "PulsingDots",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 8
+    }
+   }
+  },
+  "PulsingDots0L": {
+   "type": "text",
+   "props": {
+    "text": "PulsingDots \u00b7 Working",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "PulsingDots0T": {
+   "type": "column",
+   "children": [
+    "PulsingDots0L",
+    "PulsingDots0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RadialProgress0": {
+   "type": "RadialProgress",
+   "props": {
+    "value": 60
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "RadialProgress0L": {
+   "type": "text",
+   "props": {
+    "text": "RadialProgress \u00b7 Sixty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RadialProgress0T": {
+   "type": "column",
+   "children": [
+    "RadialProgress0L",
+    "RadialProgress0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RadialProgress1": {
+   "type": "RadialProgress",
+   "props": {
+    "value": 12
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "RadialProgress1L": {
+   "type": "text",
+   "props": {
+    "text": "RadialProgress \u00b7 Low",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RadialProgress1T": {
+   "type": "column",
+   "children": [
+    "RadialProgress1L",
+    "RadialProgress1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RadialProgress2": {
+   "type": "RadialProgress",
+   "props": {
+    "value": 40,
+    "muted": true
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "RadialProgress2L": {
+   "type": "text",
+   "props": {
+    "text": "RadialProgress \u00b7 Muted",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RadialProgress2T": {
+   "type": "column",
+   "children": [
+    "RadialProgress2L",
+    "RadialProgress2"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Radio0": {
+   "type": "Radio",
+   "props": {
+    "value": "a",
+    "group": "vRadio0Group",
+    "label": "Standard"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Radio0L": {
+   "type": "text",
+   "props": {
+    "text": "Radio \u00b7 Selected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Radio0T": {
+   "type": "column",
+   "children": [
+    "Radio0L",
+    "Radio0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Radio1": {
+   "type": "Radio",
+   "props": {
+    "value": "b",
+    "group": "vRadio1Group",
+    "label": "Express"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Radio1L": {
+   "type": "text",
+   "props": {
+    "text": "Radio \u00b7 Not selected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Radio1T": {
+   "type": "column",
+   "children": [
+    "Radio1L",
+    "Radio1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ReorderableList0": {
+   "type": "ReorderableList",
+   "props": {
+    "title": "Steps",
+    "value": "vReorderableList0Value"
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 130
+    }
+   }
+  },
+  "ReorderableList0L": {
+   "type": "text",
+   "props": {
+    "text": "ReorderableList \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ReorderableList0T": {
+   "type": "column",
+   "children": [
+    "ReorderableList0L",
+    "ReorderableList0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ReorderGhost0": {
+   "type": "ReorderGhost",
+   "props": {},
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "ReorderGhost0L": {
+   "type": "text",
+   "props": {
+    "text": "ReorderGhost \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ReorderGhost0T": {
+   "type": "column",
+   "children": [
+    "ReorderGhost0L",
+    "ReorderGhost0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ResizableRow0": {
+   "type": "ResizableRow",
+   "props": {},
+   "layout": {
+    "width": 480,
+    "height": 120
+   }
+  },
+  "ResizableRow0L": {
+   "type": "text",
+   "props": {
+    "text": "ResizableRow \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ResizableRow0T": {
+   "type": "column",
+   "children": [
+    "ResizableRow0L",
+    "ResizableRow0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 480
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ResourceCard0": {
+   "type": "ResourceCard",
+   "props": {
+    "title": "Launch brief"
+   },
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "ResourceCard0L": {
+   "type": "text",
+   "props": {
+    "text": "ResourceCard \u00b7 Document",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ResourceCard0T": {
+   "type": "column",
+   "children": [
+    "ResourceCard0L",
+    "ResourceCard0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ResourceCard1": {
+   "type": "ResourceCard",
+   "props": {
+    "title": "Moodboard",
+    "kind": "image",
+    "starred": true
+   },
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "ResourceCard1L": {
+   "type": "text",
+   "props": {
+    "text": "ResourceCard \u00b7 Starred",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ResourceCard1T": {
+   "type": "column",
+   "children": [
+    "ResourceCard1L",
+    "ResourceCard1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ResourceChip0": {
+   "type": "ResourceChip",
+   "props": {
+    "label": "Launch plan"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "ResourceChip0L": {
+   "type": "text",
+   "props": {
+    "text": "ResourceChip \u00b7 Document",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ResourceChip0T": {
+   "type": "column",
+   "children": [
+    "ResourceChip0L",
+    "ResourceChip0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ResourceChip1": {
+   "type": "ResourceChip",
+   "props": {
+    "label": "docs.example.com",
+    "kind": "link"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "ResourceChip1L": {
+   "type": "text",
+   "props": {
+    "text": "ResourceChip \u00b7 Link",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ResourceChip1T": {
+   "type": "column",
+   "children": [
+    "ResourceChip1L",
+    "ResourceChip1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RichTextField0": {
+   "type": "RichTextField",
+   "props": {
+    "label": "Description",
+    "helper": "Markdown is supported.",
+    "value": "vRichTextField0Value"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 140
+    }
+   }
+  },
+  "RichTextField0L": {
+   "type": "text",
+   "props": {
+    "text": "RichTextField \u00b7 Labeled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RichTextField0T": {
+   "type": "column",
+   "children": [
+    "RichTextField0L",
+    "RichTextField0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RichTextToolbar0": {
+   "type": "RichTextToolbar",
+   "props": {
+    "active": [
+     "Bold"
+    ]
+   },
+   "layout": {
+    "width": 400,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "RichTextToolbar0L": {
+   "type": "text",
+   "props": {
+    "text": "RichTextToolbar \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RichTextToolbar0T": {
+   "type": "column",
+   "children": [
+    "RichTextToolbar0L",
+    "RichTextToolbar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 400
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RunHistoryList0": {
+   "type": "RunHistoryList",
+   "props": {
+    "empty": true
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "RunHistoryList0L": {
+   "type": "text",
+   "props": {
+    "text": "RunHistoryList \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RunHistoryList0T": {
+   "type": "column",
+   "children": [
+    "RunHistoryList0L",
+    "RunHistoryList0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RunningIndicator0": {
+   "type": "RunningIndicator",
+   "props": {
+    "label": "Indexing files",
+    "progress": 0.4
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "RunningIndicator0L": {
+   "type": "text",
+   "props": {
+    "text": "RunningIndicator \u00b7 Forty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RunningIndicator0T": {
+   "type": "column",
+   "children": [
+    "RunningIndicator0L",
+    "RunningIndicator0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RunRecordRow0": {
+   "type": "RunRecordRow",
+   "props": {
+    "title": "Sync docs",
+    "timestamp": "2h ago",
+    "message": "Updated 3 pages from the handbook.",
+    "created": 1,
+    "modified": 3
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 56
+    }
+   }
+  },
+  "RunRecordRow0L": {
+   "type": "text",
+   "props": {
+    "text": "RunRecordRow \u00b7 Success",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RunRecordRow0T": {
+   "type": "column",
+   "children": [
+    "RunRecordRow0L",
+    "RunRecordRow0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "RunRecordRow1": {
+   "type": "RunRecordRow",
+   "props": {
+    "title": "Rebuild index",
+    "timestamp": "now",
+    "status": "running"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "RunRecordRow1L": {
+   "type": "text",
+   "props": {
+    "text": "RunRecordRow \u00b7 Running",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "RunRecordRow1T": {
+   "type": "column",
+   "children": [
+    "RunRecordRow1L",
+    "RunRecordRow1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ScrollToBottomFAB0": {
+   "type": "ScrollToBottomFAB",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 30
+    }
+   }
+  },
+  "ScrollToBottomFAB0L": {
+   "type": "text",
+   "props": {
+    "text": "ScrollToBottomFAB \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ScrollToBottomFAB0T": {
+   "type": "column",
+   "children": [
+    "ScrollToBottomFAB0L",
+    "ScrollToBottomFAB0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SearchBar0": {
+   "type": "SearchBar",
+   "props": {
+    "value": "vSearchBar0Value"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "SearchBar0L": {
+   "type": "text",
+   "props": {
+    "text": "SearchBar \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SearchBar0T": {
+   "type": "column",
+   "children": [
+    "SearchBar0L",
+    "SearchBar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SearchBar1": {
+   "type": "SearchBar",
+   "props": {
+    "value": "vSearchBar1Value"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "SearchBar1L": {
+   "type": "text",
+   "props": {
+    "text": "SearchBar \u00b7 Typed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SearchBar1T": {
+   "type": "column",
+   "children": [
+    "SearchBar1L",
+    "SearchBar1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SectionCard0": {
+   "type": "SectionCard",
+   "props": {
+    "title": "Details"
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 80
+    }
+   }
+  },
+  "SectionCard0L": {
+   "type": "text",
+   "props": {
+    "text": "SectionCard \u00b7 Titled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SectionCard0T": {
+   "type": "column",
+   "children": [
+    "SectionCard0L",
+    "SectionCard0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SectionCategoryHeaderFull0": {
+   "type": "SectionCategoryHeaderFull",
+   "props": {
+    "title": "Recent"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "SectionCategoryHeaderFull0L": {
+   "type": "text",
+   "props": {
+    "text": "SectionCategoryHeaderFull \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SectionCategoryHeaderFull0T": {
+   "type": "column",
+   "children": [
+    "SectionCategoryHeaderFull0L",
+    "SectionCategoryHeaderFull0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SectionHeader0": {
+   "type": "SectionHeader",
+   "props": {
+    "title": "Files",
+    "count": "12"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "SectionHeader0L": {
+   "type": "text",
+   "props": {
+    "text": "SectionHeader \u00b7 Files",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SectionHeader0T": {
+   "type": "column",
+   "children": [
+    "SectionHeader0L",
+    "SectionHeader0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SectionToolbar0": {
+   "type": "SectionToolbar",
+   "props": {
+    "title": "Files",
+    "icon": "folder"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "SectionToolbar0L": {
+   "type": "text",
+   "props": {
+    "text": "SectionToolbar \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SectionToolbar0T": {
+   "type": "column",
+   "children": [
+    "SectionToolbar0L",
+    "SectionToolbar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SectionToolbar1": {
+   "type": "SectionToolbar",
+   "props": {
+    "title": "Runs",
+    "loading": true
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "SectionToolbar1L": {
+   "type": "text",
+   "props": {
+    "text": "SectionToolbar \u00b7 Loading",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SectionToolbar1T": {
+   "type": "column",
+   "children": [
+    "SectionToolbar1L",
+    "SectionToolbar1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SegmentedControl0": {
+   "type": "SegmentedControl",
+   "props": {
+    "options": [
+     "Day",
+     "Week",
+     "Month"
+    ],
+    "value": "vSegmentedControl0Value"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "SegmentedControl0L": {
+   "type": "text",
+   "props": {
+    "text": "SegmentedControl \u00b7 Week",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SegmentedControl0T": {
+   "type": "column",
+   "children": [
+    "SegmentedControl0L",
+    "SegmentedControl0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Select0": {
+   "type": "Select",
+   "props": {
+    "options": [
+     "Weekly",
+     "Monthly",
+     "Yearly"
+    ],
+    "value": "vSelect0Value"
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Select0L": {
+   "type": "text",
+   "props": {
+    "text": "Select \u00b7 Chosen",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Select0T": {
+   "type": "column",
+   "children": [
+    "Select0L",
+    "Select0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Select1": {
+   "type": "Select",
+   "props": {
+    "options": [
+     "Weekly",
+     "Monthly"
+    ],
+    "value": "vSelect1Value"
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Select1L": {
+   "type": "text",
+   "props": {
+    "text": "Select \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Select1T": {
+   "type": "column",
+   "children": [
+    "Select1L",
+    "Select1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SelectableListRow0": {
+   "type": "SelectableListRow",
+   "props": {
+    "title": "Weekly digest",
+    "subtitle": "Runs every Monday at 9",
+    "trailing": "2h ago",
+    "selected": true
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 54
+    }
+   }
+  },
+  "SelectableListRow0L": {
+   "type": "text",
+   "props": {
+    "text": "SelectableListRow \u00b7 Selected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SelectableListRow0T": {
+   "type": "column",
+   "children": [
+    "SelectableListRow0L",
+    "SelectableListRow0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SelectableListRow1": {
+   "type": "SelectableListRow",
+   "props": {
+    "title": "Nightly export",
+    "subtitle": "jobs/export.yaml",
+    "subtitleMono": true
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 54
+    }
+   }
+  },
+  "SelectableListRow1L": {
+   "type": "text",
+   "props": {
+    "text": "SelectableListRow \u00b7 Plain",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SelectableListRow1T": {
+   "type": "column",
+   "children": [
+    "SelectableListRow1L",
+    "SelectableListRow1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Sidebar0": {
+   "type": "Sidebar",
+   "props": {
+    "sectionLabel": "Workspace",
+    "badges": [
+     "",
+     "12",
+     ""
+    ],
+    "value": "vSidebar0Value",
+    "items": [
+     "Home",
+     "Projects",
+     "Settings"
+    ]
+   },
+   "layout": {
+    "width": 256,
+    "height": 300
+   }
+  },
+  "Sidebar0L": {
+   "type": "text",
+   "props": {
+    "text": "Sidebar \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Sidebar0T": {
+   "type": "column",
+   "children": [
+    "Sidebar0L",
+    "Sidebar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 256
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SidebarTogglePattern0": {
+   "type": "SidebarTogglePattern",
+   "props": {
+    "sideWidth": 200
+   },
+   "layout": {
+    "width": 520,
+    "height": 200
+   }
+  },
+  "SidebarTogglePattern0L": {
+   "type": "text",
+   "props": {
+    "text": "SidebarTogglePattern \u00b7 Open",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SidebarTogglePattern0T": {
+   "type": "column",
+   "children": [
+    "SidebarTogglePattern0L",
+    "SidebarTogglePattern0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 520
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Skeleton0": {
+   "type": "Skeleton",
+   "props": {},
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "Skeleton0L": {
+   "type": "text",
+   "props": {
+    "text": "Skeleton \u00b7 Line",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Skeleton0T": {
+   "type": "column",
+   "children": [
+    "Skeleton0L",
+    "Skeleton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Skeleton1": {
+   "type": "Skeleton",
+   "props": {
+    "variant": "circular"
+   },
+   "layout": {
+    "width": 48,
+    "height": {
+     "hug": 48
+    }
+   }
+  },
+  "Skeleton1L": {
+   "type": "text",
+   "props": {
+    "text": "Skeleton \u00b7 Circle",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Skeleton1T": {
+   "type": "column",
+   "children": [
+    "Skeleton1L",
+    "Skeleton1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 48
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Slider0": {
+   "type": "Slider",
+   "props": {
+    "value": "vSlider0Value"
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Slider0L": {
+   "type": "text",
+   "props": {
+    "text": "Slider \u00b7 Half",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Slider0T": {
+   "type": "column",
+   "children": [
+    "Slider0L",
+    "Slider0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SlidingPanel0": {
+   "type": "SlidingPanel",
+   "props": {
+    "title": "Run log",
+    "subtitle": "42 lines",
+    "icon": "terminal"
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "SlidingPanel0L": {
+   "type": "text",
+   "props": {
+    "text": "SlidingPanel \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SlidingPanel0T": {
+   "type": "column",
+   "children": [
+    "SlidingPanel0L",
+    "SlidingPanel0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SortMenu0": {
+   "type": "SortMenu",
+   "props": {
+    "value": "vSortMenu0Value",
+    "direction": "vSortMenu0Direction",
+    "options": [
+     "Name",
+     "Date modified",
+     "Size"
+    ]
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 118
+    }
+   }
+  },
+  "SortMenu0L": {
+   "type": "text",
+   "props": {
+    "text": "SortMenu \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SortMenu0T": {
+   "type": "column",
+   "children": [
+    "SortMenu0L",
+    "SortMenu0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SplitButton0": {
+   "type": "SplitButton",
+   "props": {
+    "label": "Run"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "SplitButton0L": {
+   "type": "text",
+   "props": {
+    "text": "SplitButton \u00b7 Neutral",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SplitButton0T": {
+   "type": "column",
+   "children": [
+    "SplitButton0L",
+    "SplitButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SplitButton1": {
+   "type": "SplitButton",
+   "props": {
+    "label": "Generate",
+    "tone": "primary"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "SplitButton1L": {
+   "type": "text",
+   "props": {
+    "text": "SplitButton \u00b7 Primary",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SplitButton1T": {
+   "type": "column",
+   "children": [
+    "SplitButton1L",
+    "SplitButton1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SplitPaneTabs0": {
+   "type": "SplitPaneTabs",
+   "props": {
+    "value": "vSplitPaneTabs0Value",
+    "tabs": [
+     "index.ts",
+     "styles.css"
+    ]
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "SplitPaneTabs0L": {
+   "type": "text",
+   "props": {
+    "text": "SplitPaneTabs \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SplitPaneTabs0T": {
+   "type": "column",
+   "children": [
+    "SplitPaneTabs0L",
+    "SplitPaneTabs0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StackedProgressBar0": {
+   "type": "StackedProgressBar",
+   "props": {
+    "counts": [
+     6,
+     3,
+     1
+    ],
+    "colors": [
+     "#FF16A34A",
+     "#FF2563EB",
+     "#FFDC2626"
+    ],
+    "total": 20
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "StackedProgressBar0L": {
+   "type": "text",
+   "props": {
+    "text": "StackedProgressBar \u00b7 Half",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StackedProgressBar0T": {
+   "type": "column",
+   "children": [
+    "StackedProgressBar0L",
+    "StackedProgressBar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatsCarousel0": {
+   "type": "StatsCarousel",
+   "props": {
+    "index": "vStatsCarousel0Index",
+    "stats": [
+     "12 files changed",
+     "3 runs today",
+     "98% passing"
+    ]
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "StatsCarousel0L": {
+   "type": "text",
+   "props": {
+    "text": "StatsCarousel \u00b7 First",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatsCarousel0T": {
+   "type": "column",
+   "children": [
+    "StatsCarousel0L",
+    "StatsCarousel0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatTile0": {
+   "type": "StatTile",
+   "props": {
+    "label": "Revenue",
+    "value": "$48,200"
+   },
+   "layout": {
+    "width": 170,
+    "height": {
+     "hug": 72
+    }
+   }
+  },
+  "StatTile0L": {
+   "type": "text",
+   "props": {
+    "text": "StatTile \u00b7 Revenue",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatTile0T": {
+   "type": "column",
+   "children": [
+    "StatTile0L",
+    "StatTile0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 170
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusBadge0": {
+   "type": "StatusBadge",
+   "props": {
+    "label": "synced",
+    "tone": "success"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "StatusBadge0L": {
+   "type": "text",
+   "props": {
+    "text": "StatusBadge \u00b7 Synced",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusBadge0T": {
+   "type": "column",
+   "children": [
+    "StatusBadge0L",
+    "StatusBadge0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusBadge1": {
+   "type": "StatusBadge",
+   "props": {
+    "label": "failed",
+    "tone": "error"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "StatusBadge1L": {
+   "type": "text",
+   "props": {
+    "text": "StatusBadge \u00b7 Failed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusBadge1T": {
+   "type": "column",
+   "children": [
+    "StatusBadge1L",
+    "StatusBadge1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusCard0": {
+   "type": "StatusCard",
+   "props": {
+    "label": "GitHub",
+    "detail": "2 repositories",
+    "connected": true
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 52
+    }
+   }
+  },
+  "StatusCard0L": {
+   "type": "text",
+   "props": {
+    "text": "StatusCard \u00b7 Connected",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusCard0T": {
+   "type": "column",
+   "children": [
+    "StatusCard0L",
+    "StatusCard0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusCardList0": {
+   "type": "StatusCardList",
+   "props": {
+    "updatedLabel": "Checked 2 minutes ago"
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "StatusCardList0L": {
+   "type": "text",
+   "props": {
+    "text": "StatusCardList \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusCardList0T": {
+   "type": "column",
+   "children": [
+    "StatusCardList0L",
+    "StatusCardList0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusCategoryHeader0": {
+   "type": "StatusCategoryHeader",
+   "props": {
+    "label": "Running",
+    "count": 3
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "StatusCategoryHeader0L": {
+   "type": "text",
+   "props": {
+    "text": "StatusCategoryHeader \u00b7 Running",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusCategoryHeader0T": {
+   "type": "column",
+   "children": [
+    "StatusCategoryHeader0L",
+    "StatusCategoryHeader0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusCategoryHeader1": {
+   "type": "StatusCategoryHeader",
+   "props": {
+    "label": "Failed",
+    "count": 1,
+    "status": "failed",
+    "expanded": false
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "StatusCategoryHeader1L": {
+   "type": "text",
+   "props": {
+    "text": "StatusCategoryHeader \u00b7 Failed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusCategoryHeader1T": {
+   "type": "column",
+   "children": [
+    "StatusCategoryHeader1L",
+    "StatusCategoryHeader1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusDot0": {
+   "type": "StatusDot",
+   "props": {
+    "status": "success",
+    "label": "Online"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "StatusDot0L": {
+   "type": "text",
+   "props": {
+    "text": "StatusDot \u00b7 Online",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusDot0T": {
+   "type": "column",
+   "children": [
+    "StatusDot0L",
+    "StatusDot0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusDot1": {
+   "type": "StatusDot",
+   "props": {
+    "status": "error",
+    "label": "Offline"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "StatusDot1L": {
+   "type": "text",
+   "props": {
+    "text": "StatusDot \u00b7 Error",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusDot1T": {
+   "type": "column",
+   "children": [
+    "StatusDot1L",
+    "StatusDot1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusIndicator0": {
+   "type": "StatusIndicator",
+   "props": {
+    "status": "synced"
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "StatusIndicator0L": {
+   "type": "text",
+   "props": {
+    "text": "StatusIndicator \u00b7 Synced",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusIndicator0T": {
+   "type": "column",
+   "children": [
+    "StatusIndicator0L",
+    "StatusIndicator0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusIndicator1": {
+   "type": "StatusIndicator",
+   "props": {
+    "status": "running"
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "StatusIndicator1L": {
+   "type": "text",
+   "props": {
+    "text": "StatusIndicator \u00b7 Running",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusIndicator1T": {
+   "type": "column",
+   "children": [
+    "StatusIndicator1L",
+    "StatusIndicator1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StatusIndicator2": {
+   "type": "StatusIndicator",
+   "props": {
+    "status": "errored"
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "StatusIndicator2L": {
+   "type": "text",
+   "props": {
+    "text": "StatusIndicator \u00b7 Errored",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StatusIndicator2T": {
+   "type": "column",
+   "children": [
+    "StatusIndicator2L",
+    "StatusIndicator2"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "StepIndicator0": {
+   "type": "StepIndicator",
+   "props": {
+    "steps": [
+     "Details",
+     "Review",
+     "Confirm"
+    ],
+    "current": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "StepIndicator0L": {
+   "type": "text",
+   "props": {
+    "text": "StepIndicator \u00b7 Second of three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "StepIndicator0T": {
+   "type": "column",
+   "children": [
+    "StepIndicator0L",
+    "StepIndicator0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Stepper0": {
+   "type": "Stepper",
+   "props": {
+    "value": "vStepper0Value"
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "Stepper0L": {
+   "type": "text",
+   "props": {
+    "text": "Stepper \u00b7 Three",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Stepper0T": {
+   "type": "column",
+   "children": [
+    "Stepper0L",
+    "Stepper0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Stepper1": {
+   "type": "Stepper",
+   "props": {
+    "value": "vStepper1Value",
+    "label": "Seats"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "Stepper1L": {
+   "type": "text",
+   "props": {
+    "text": "Stepper \u00b7 Labeled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Stepper1T": {
+   "type": "column",
+   "children": [
+    "Stepper1L",
+    "Stepper1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SuggestionActionObject0": {
+   "type": "SuggestionActionObject",
+   "props": {
+    "title": "brief.md",
+    "summary": "Moves the launch date.",
+    "body": "Launch: November 21"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "SuggestionActionObject0L": {
+   "type": "text",
+   "props": {
+    "text": "SuggestionActionObject \u00b7 Edit",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SuggestionActionObject0T": {
+   "type": "column",
+   "children": [
+    "SuggestionActionObject0L",
+    "SuggestionActionObject0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "SuggestionReviewItem0": {
+   "type": "SuggestionReviewItem",
+   "props": {
+    "why": "The launch date moved to the 21st.",
+    "title": "Update the brief"
+   },
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 70
+    }
+   }
+  },
+  "SuggestionReviewItem0L": {
+   "type": "text",
+   "props": {
+    "text": "SuggestionReviewItem \u00b7 Pending",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "SuggestionReviewItem0T": {
+   "type": "column",
+   "children": [
+    "SuggestionReviewItem0L",
+    "SuggestionReviewItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Switch0": {
+   "type": "Switch",
+   "props": {
+    "value": "vSwitch0Value",
+    "label": "Notifications"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Switch0L": {
+   "type": "text",
+   "props": {
+    "text": "Switch \u00b7 On",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Switch0T": {
+   "type": "column",
+   "children": [
+    "Switch0L",
+    "Switch0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Switch1": {
+   "type": "Switch",
+   "props": {
+    "label": "Notifications",
+    "value": "vSwitch1Value"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "Switch1L": {
+   "type": "text",
+   "props": {
+    "text": "Switch \u00b7 Off",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Switch1T": {
+   "type": "column",
+   "children": [
+    "Switch1L",
+    "Switch1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TabBarWithBadges0": {
+   "type": "TabBarWithBadges",
+   "props": {
+    "tabs": [
+     "Home",
+     "Inbox",
+     "Profile"
+    ],
+    "icons": [
+     "home",
+     "inbox",
+     "person"
+    ],
+    "badges": [
+     "",
+     "3",
+     ""
+    ],
+    "value": "vTabBarWithBadges0Value"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 62
+    }
+   }
+  },
+  "TabBarWithBadges0L": {
+   "type": "text",
+   "props": {
+    "text": "TabBarWithBadges \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TabBarWithBadges0T": {
+   "type": "column",
+   "children": [
+    "TabBarWithBadges0L",
+    "TabBarWithBadges0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TabOverflowScroll0": {
+   "type": "TabOverflowScroll",
+   "props": {
+    "value": "vTabOverflowScroll0Value",
+    "tabs": [
+     "Overview",
+     "Activity",
+     "Files",
+     "Members",
+     "Settings",
+     "Billing"
+    ]
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "TabOverflowScroll0L": {
+   "type": "text",
+   "props": {
+    "text": "TabOverflowScroll \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TabOverflowScroll0T": {
+   "type": "column",
+   "children": [
+    "TabOverflowScroll0L",
+    "TabOverflowScroll0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Tabs0": {
+   "type": "Tabs",
+   "props": {
+    "tabs": [
+     "Overview",
+     "Activity",
+     "Settings"
+    ],
+    "value": "vTabs0Value"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "Tabs0L": {
+   "type": "text",
+   "props": {
+    "text": "Tabs \u00b7 Overview",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Tabs0T": {
+   "type": "column",
+   "children": [
+    "Tabs0L",
+    "Tabs0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TabToggle0": {
+   "type": "TabToggle",
+   "props": {
+    "options": [
+     "List",
+     "Grid"
+    ],
+    "value": "vTabToggle0Value"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "TabToggle0L": {
+   "type": "text",
+   "props": {
+    "text": "TabToggle \u00b7 Two",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TabToggle0T": {
+   "type": "column",
+   "children": [
+    "TabToggle0L",
+    "TabToggle0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Terminal0": {
+   "type": "Terminal",
+   "props": {
+    "lines": [
+     "Started watcher",
+     "Scanning src/components",
+     "Skipped generated file",
+     "Build failed"
+    ],
+    "levels": [
+     "info",
+     "debug",
+     "warn",
+     "error"
+    ]
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 110
+    }
+   }
+  },
+  "Terminal0L": {
+   "type": "text",
+   "props": {
+    "text": "Terminal \u00b7 Mixed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Terminal0T": {
+   "type": "column",
+   "children": [
+    "Terminal0L",
+    "Terminal0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 340
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TextArea0": {
+   "type": "TextArea",
+   "props": {
+    "placeholder": "Add a note\u2026",
+    "value": "vTextArea0Value"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 88
+    }
+   }
+  },
+  "TextArea0L": {
+   "type": "text",
+   "props": {
+    "text": "TextArea \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TextArea0T": {
+   "type": "column",
+   "children": [
+    "TextArea0L",
+    "TextArea0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TextExpandable0": {
+   "type": "TextExpandable",
+   "props": {
+    "title": "Advanced options"
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "TextExpandable0L": {
+   "type": "text",
+   "props": {
+    "text": "TextExpandable \u00b7 Closed",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TextExpandable0T": {
+   "type": "column",
+   "children": [
+    "TextExpandable0L",
+    "TextExpandable0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TextInput0": {
+   "type": "TextInput",
+   "props": {
+    "placeholder": "name@company.com",
+    "value": "vTextInput0Value"
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "TextInput0L": {
+   "type": "text",
+   "props": {
+    "text": "TextInput \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TextInput0T": {
+   "type": "column",
+   "children": [
+    "TextInput0L",
+    "TextInput0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TextInput1": {
+   "type": "TextInput",
+   "props": {
+    "value": "vTextInput1Value"
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "TextInput1L": {
+   "type": "text",
+   "props": {
+    "text": "TextInput \u00b7 Filled",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TextInput1T": {
+   "type": "column",
+   "children": [
+    "TextInput1L",
+    "TextInput1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TextInputLabel0": {
+   "type": "TextInputLabel",
+   "props": {
+    "label": "Workspace name",
+    "description": "Shown in the sidebar."
+   },
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "TextInputLabel0L": {
+   "type": "text",
+   "props": {
+    "text": "TextInputLabel \u00b7 Label",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TextInputLabel0T": {
+   "type": "column",
+   "children": [
+    "TextInputLabel0L",
+    "TextInputLabel0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TextItem0": {
+   "type": "TextItem",
+   "props": {
+    "title": "Tone of voice",
+    "value": "Write plainly. Lead with the answer, then the reasons.",
+    "status": "pending",
+    "kind": "rule"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 96
+    }
+   }
+  },
+  "TextItem0L": {
+   "type": "text",
+   "props": {
+    "text": "TextItem \u00b7 Pending",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TextItem0T": {
+   "type": "column",
+   "children": [
+    "TextItem0L",
+    "TextItem0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TextItem1": {
+   "type": "TextItem",
+   "props": {
+    "title": "Blockers",
+    "date": "Nov 14"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 70
+    }
+   }
+  },
+  "TextItem1L": {
+   "type": "text",
+   "props": {
+    "text": "TextItem \u00b7 Empty",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TextItem1T": {
+   "type": "column",
+   "children": [
+    "TextItem1L",
+    "TextItem1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ThemeToggle0": {
+   "type": "ThemeToggle",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "ThemeToggle0L": {
+   "type": "text",
+   "props": {
+    "text": "ThemeToggle \u00b7 Light",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ThemeToggle0T": {
+   "type": "column",
+   "children": [
+    "ThemeToggle0L",
+    "ThemeToggle0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ToggleRow0": {
+   "type": "ToggleRow",
+   "props": {
+    "label": "Watch for changes",
+    "description": "Re-index when a file is saved.",
+    "value": "vToggleRow0Value"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "ToggleRow0L": {
+   "type": "text",
+   "props": {
+    "text": "ToggleRow \u00b7 With description",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ToggleRow0T": {
+   "type": "column",
+   "children": [
+    "ToggleRow0L",
+    "ToggleRow0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Toolbar0": {
+   "type": "Toolbar",
+   "props": {
+    "active": [
+     "near_me"
+    ],
+    "tools": [
+     "near_me",
+     "crop_square",
+     "text_fields",
+     "-",
+     "undo",
+     "redo"
+    ]
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 42
+    }
+   }
+  },
+  "Toolbar0L": {
+   "type": "text",
+   "props": {
+    "text": "Toolbar \u00b7 Row",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Toolbar0T": {
+   "type": "column",
+   "children": [
+    "Toolbar0L",
+    "Toolbar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Tooltip0": {
+   "type": "Tooltip",
+   "props": {
+    "text": "Search",
+    "shortcut": "Ctrl K"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "Tooltip0L": {
+   "type": "text",
+   "props": {
+    "text": "Tooltip \u00b7 With shortcut",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Tooltip0T": {
+   "type": "column",
+   "children": [
+    "Tooltip0L",
+    "Tooltip0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "Tree0": {
+   "type": "Tree",
+   "props": {
+    "value": "vTree0Value",
+    "labels": [
+     "src",
+     "components",
+     "Button.tsx",
+     "README.md"
+    ],
+    "depths": [
+     "0",
+     "1",
+     "2",
+     "0"
+    ]
+   },
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 140
+    }
+   }
+  },
+  "Tree0L": {
+   "type": "text",
+   "props": {
+    "text": "Tree \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "Tree0T": {
+   "type": "column",
+   "children": [
+    "Tree0L",
+    "Tree0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TrialBanner0": {
+   "type": "TrialBanner",
+   "props": {},
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 54
+    }
+   }
+  },
+  "TrialBanner0L": {
+   "type": "text",
+   "props": {
+    "text": "TrialBanner \u00b7 Info",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TrialBanner0T": {
+   "type": "column",
+   "children": [
+    "TrialBanner0L",
+    "TrialBanner0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "TrialBanner1": {
+   "type": "TrialBanner",
+   "props": {
+    "message": "Your trial ends today",
+    "urgent": true
+   },
+   "layout": {
+    "width": 380,
+    "height": {
+     "hug": 54
+    }
+   }
+  },
+  "TrialBanner1L": {
+   "type": "text",
+   "props": {
+    "text": "TrialBanner \u00b7 Urgent",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "TrialBanner1T": {
+   "type": "column",
+   "children": [
+    "TrialBanner1L",
+    "TrialBanner1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "UpgradeButton0": {
+   "type": "UpgradeButton",
+   "props": {},
+   "layout": {
+    "width": {
+     "hug": 180
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "UpgradeButton0L": {
+   "type": "text",
+   "props": {
+    "text": "UpgradeButton \u00b7 Gradient",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "UpgradeButton0T": {
+   "type": "column",
+   "children": [
+    "UpgradeButton0L",
+    "UpgradeButton0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 180
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "UpgradeButton1": {
+   "type": "UpgradeButton",
+   "props": {
+    "variant": "primary",
+    "size": "sm",
+    "icon": "sparkles"
+   },
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "UpgradeButton1L": {
+   "type": "text",
+   "props": {
+    "text": "UpgradeButton \u00b7 Small solid",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "UpgradeButton1T": {
+   "type": "column",
+   "children": [
+    "UpgradeButton1L",
+    "UpgradeButton1"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "UserMenu0": {
+   "type": "UserMenu",
+   "props": {
+    "email": "ada@analytical.io",
+    "name": "Ada Lovelace"
+   },
+   "layout": {
+    "width": 200,
+    "height": {
+     "hug": 150
+    }
+   }
+  },
+  "UserMenu0L": {
+   "type": "text",
+   "props": {
+    "text": "UserMenu \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "UserMenu0T": {
+   "type": "column",
+   "children": [
+    "UserMenu0L",
+    "UserMenu0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "VariableContractHover0": {
+   "type": "VariableContractHover",
+   "props": {
+    "description": "Who the invoice is for.",
+    "labels": [
+     "Validation",
+     "Provided by"
+    ],
+    "values": [
+     "Must match an existing customer.",
+     "The parent workflow"
+    ],
+    "required": true,
+    "name": "customer_id"
+   },
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 150
+    }
+   }
+  },
+  "VariableContractHover0L": {
+   "type": "text",
+   "props": {
+    "text": "VariableContractHover \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "VariableContractHover0T": {
+   "type": "column",
+   "children": [
+    "VariableContractHover0L",
+    "VariableContractHover0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "VariableContractList0": {
+   "type": "VariableContractList",
+   "props": {
+    "descriptions": [
+     "Who the invoice is for.",
+     "In cents.",
+     ""
+    ],
+    "required": [
+     "customer_id",
+     "amount"
+    ],
+    "value": "vVariableContractList0Value",
+    "names": [
+     "customer_id",
+     "amount",
+     "note"
+    ]
+   },
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 140
+    }
+   }
+  },
+  "VariableContractList0L": {
+   "type": "text",
+   "props": {
+    "text": "VariableContractList \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "VariableContractList0T": {
+   "type": "column",
+   "children": [
+    "VariableContractList0L",
+    "VariableContractList0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "ViewerDialog0": {
+   "type": "ViewerDialog",
+   "props": {
+    "title": "brief.pdf"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "ViewerDialog0L": {
+   "type": "text",
+   "props": {
+    "text": "ViewerDialog \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "ViewerDialog0T": {
+   "type": "column",
+   "children": [
+    "ViewerDialog0L",
+    "ViewerDialog0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "WindowToolbar0": {
+   "type": "WindowToolbar",
+   "props": {
+    "title": "Release notes"
+   },
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "WindowToolbar0L": {
+   "type": "text",
+   "props": {
+    "text": "WindowToolbar \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "WindowToolbar0T": {
+   "type": "column",
+   "children": [
+    "WindowToolbar0L",
+    "WindowToolbar0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "WorkspaceSwitcher0": {
+   "type": "WorkspaceSwitcher",
+   "props": {
+    "current": "Acme",
+    "workspaces": [
+     "Personal",
+     "Acme",
+     "Side project"
+    ]
+   },
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 130
+    }
+   }
+  },
+  "WorkspaceSwitcher0L": {
+   "type": "text",
+   "props": {
+    "text": "WorkspaceSwitcher \u00b7 Default",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "WorkspaceSwitcher0T": {
+   "type": "column",
+   "children": [
+    "WorkspaceSwitcher0L",
+    "WorkspaceSwitcher0"
+   ],
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "wrap": {
+   "type": "row",
+   "children": [
+    "ActionListItem0T",
+    "AddButton0T",
+    "AddContextMenu0T",
+    "AgentChip0T",
+    "AgentChip1T",
+    "AuthInput0T",
+    "AuthInput1T",
+    "AuthPromptBanner0T",
+    "AuthPromptBanner1T",
+    "Avatar0T",
+    "BackButton0T",
+    "Badge0T",
+    "Badge1T",
+    "Banner0T",
+    "BatchProgressBar0T",
+    "BatchProgressBar1T",
+    "Breadcrumb0T",
+    "Breadcrumb1T",
+    "BrowserTabs0T",
+    "Button0T",
+    "Button1T",
+    "CanvasShell0T",
+    "Card0T",
+    "CardActions0T",
+    "Checkbox0T",
+    "Checkbox1T",
+    "Chip0T",
+    "Chip1T",
+    "Chip2T",
+    "ChipTabs0T",
+    "CloudSyncIndicator0T",
+    "CloudSyncIndicator1T",
+    "CodeBlock0T",
+    "CodeBlock1T",
+    "CodePreview0T",
+    "CodePreview1T",
+    "CollapsibleSection0T",
+    "ColorInput0T",
+    "ColorInput1T",
+    "Combobox0T",
+    "Combobox1T",
+    "CommandPalette0T",
+    "CompactAppBar0T",
+    "CompactSuggestionReviewItem0T",
+    "ConnectionStatus0T",
+    "ConnectionStatus1T",
+    "ContextMenu0T",
+    "CopyButton0T",
+    "CopyButton1T",
+    "CountBadge0T",
+    "CountBadge1T",
+    "DateTimelineAxis0T",
+    "Dialog0T",
+    "DiffStatsBadge0T",
+    "DiffStatsBadge1T",
+    "DiffViewer0T",
+    "DocumentItem0T",
+    "DownloadButton0T",
+    "DownloadButton1T",
+    "DropdownMultiselect0T",
+    "DropdownMultiselect1T",
+    "EmptyState0T",
+    "ErrorBar0T",
+    "ExtensionChipsInput0T",
+    "FeatureBulletItem0T",
+    "Field0T",
+    "FileListItem0T",
+    "FileMetadataCard0T",
+    "FileTree0T",
+    "FileTreeContextMenu0T",
+    "FileUploader0T",
+    "FileUploader1T",
+    "FilterLegend0T",
+    "FolderCard0T",
+    "FolderCard1T",
+    "FullWidthSearchInput0T",
+    "FullWidthSearchInput1T",
+    "HeaderSearchInput0T",
+    "HeaderSearchInput1T",
+    "HierarchicalPicker0T",
+    "HistoryTimeline0T",
+    "Hyperlink0T",
+    "Hyperlink1T",
+    "IconBox0T",
+    "IconButton0T",
+    "IconButton1T",
+    "IconSegmentedControl0T",
+    "IconSelect0T",
+    "IconSelect1T",
+    "ImageGallery0T",
+    "ImageUpload0T",
+    "InlineStat0T",
+    "ListRow0T",
+    "ListRow1T",
+    "LoadMore0T",
+    "LoadMore1T",
+    "LoadMore2T",
+    "MenuButton0T",
+    "MenuItem0T",
+    "MenuPopover0T",
+    "MetaInfo0T",
+    "ModelAvatarStack0T",
+    "ModelAvatarStack1T",
+    "ModelSelectMenu0T",
+    "MultiSelectDropdown0T",
+    "NavigationMenu0T",
+    "NestedTaskLedger0T",
+    "NotePopover0T",
+    "NotificationBadge0T",
+    "NumberInput0T",
+    "NumberInput1T",
+    "NumberPresetInput0T",
+    "NumberPresetInput1T",
+    "OnboardingBanner0T",
+    "OptionIcon0T",
+    "OptionIcon1T",
+    "PageControl0T",
+    "Panel0T",
+    "Panel1T",
+    "PaneToolbar0T",
+    "PersonChip0T",
+    "PersonChip1T",
+    "PersonChip2T",
+    "ProgressBar0T",
+    "ProjectSelector0T",
+    "PromptBanner0T",
+    "PromptBanner1T",
+    "PromptInput0T",
+    "PromptInput1T",
+    "PromptInputWithBanner0T",
+    "ProviderCard0T",
+    "ProviderCard1T",
+    "ProviderIcon0T",
+    "ProviderPill0T",
+    "ProviderPill1T",
+    "PulsingDots0T",
+    "RadialProgress0T",
+    "RadialProgress1T",
+    "RadialProgress2T",
+    "Radio0T",
+    "Radio1T",
+    "ReorderableList0T",
+    "ReorderGhost0T",
+    "ResizableRow0T",
+    "ResourceCard0T",
+    "ResourceCard1T",
+    "ResourceChip0T",
+    "ResourceChip1T",
+    "RichTextField0T",
+    "RichTextToolbar0T",
+    "RunHistoryList0T",
+    "RunningIndicator0T",
+    "RunRecordRow0T",
+    "RunRecordRow1T",
+    "ScrollToBottomFAB0T",
+    "SearchBar0T",
+    "SearchBar1T",
+    "SectionCard0T",
+    "SectionCategoryHeaderFull0T",
+    "SectionHeader0T",
+    "SectionToolbar0T",
+    "SectionToolbar1T",
+    "SegmentedControl0T",
+    "Select0T",
+    "Select1T",
+    "SelectableListRow0T",
+    "SelectableListRow1T",
+    "Sidebar0T",
+    "SidebarTogglePattern0T",
+    "Skeleton0T",
+    "Skeleton1T",
+    "Slider0T",
+    "SlidingPanel0T",
+    "SortMenu0T",
+    "SplitButton0T",
+    "SplitButton1T",
+    "SplitPaneTabs0T",
+    "StackedProgressBar0T",
+    "StatsCarousel0T",
+    "StatTile0T",
+    "StatusBadge0T",
+    "StatusBadge1T",
+    "StatusCard0T",
+    "StatusCardList0T",
+    "StatusCategoryHeader0T",
+    "StatusCategoryHeader1T",
+    "StatusDot0T",
+    "StatusDot1T",
+    "StatusIndicator0T",
+    "StatusIndicator1T",
+    "StatusIndicator2T",
+    "StepIndicator0T",
+    "Stepper0T",
+    "Stepper1T",
+    "SuggestionActionObject0T",
+    "SuggestionReviewItem0T",
+    "Switch0T",
+    "Switch1T",
+    "TabBarWithBadges0T",
+    "TabOverflowScroll0T",
+    "Tabs0T",
+    "TabToggle0T",
+    "Terminal0T",
+    "TextArea0T",
+    "TextExpandable0T",
+    "TextInput0T",
+    "TextInput1T",
+    "TextInputLabel0T",
+    "TextItem0T",
+    "TextItem1T",
+    "ThemeToggle0T",
+    "ToggleRow0T",
+    "Toolbar0T",
+    "Tooltip0T",
+    "Tree0T",
+    "TrialBanner0T",
+    "TrialBanner1T",
+    "UpgradeButton0T",
+    "UpgradeButton1T",
+    "UserMenu0T",
+    "VariableContractHover0T",
+    "VariableContractList0T",
+    "ViewerDialog0T",
+    "WindowToolbar0T",
+    "WorkspaceSwitcher0T"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 28,
+    "runSpacing": 28,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1160
+    },
+    "height": {
+     "hug": 400
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "Soft SaaS UI: 160 components",
+    "style": "pageTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1160
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "title",
+    "wrap"
+   ],
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start",
+    "scrollable": true
+   },
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "fill": 900
+    },
+    "padding": 20
+   }
+  },
+  "catalog": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 1200,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ]
+   }
+  }
+ }
+}
