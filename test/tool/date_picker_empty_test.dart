@@ -1,7 +1,7 @@
 // An empty datePicker (bound to a variable that holds no date) shows no date
 // (restaurant, brief 3: it showed today's while the variable stayed empty,
 // so the available slots that read the variable never appeared). Control
-// behaviour, owned by the controls engineer: skipped here until fixed there.
+// behaviour: it shows its hint (render/controls/pickers.dart).
 import 'dart:io';
 import 'dart:ui' show Size;
 
@@ -26,5 +26,5 @@ void main() {
       }
     }
     expect(ink, lessThan(10), reason: 'an empty picker drew a date (today\'s) that its variable does not hold');
-  }, skip: true); // controls engineer: datePicker shows today when its value is empty
+  });
 }
