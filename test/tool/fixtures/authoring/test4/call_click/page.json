@@ -1,0 +1,6 @@
+{"schema":3,"roots":["s"],"variables":{"s":[{"name":"count","type":"integer","value":0}]},"nodes":{
+"s":{"type":"canvas","slots":{"body":"col"},"layout":{"width":390,"height":300},"decoration":{"fills":[{"color":"#FFFFFFFF"}]}},
+"col":{"type":"column","children":["tap","shown"],"layout":{"width":{"fill":390},"height":{"fill":300},"padding":20},"props":{"spacing":12}},
+"tap":{"type":"Tiny","layout":{"width":80,"height":40},"actions":[{"trigger":{"type":"click"},"actions":[{"type":"setVariable","variable":"count","value":"${= count + 1}"}]}]},
+"shown":{"type":"text","visible":false,"bind":{"visible":"${= count == 1}"},"layout":{"width":{"hug":0},"height":{"hug":0}},"props":{"text":"Counted","style":{"fontSize":14,"color":"#FF111827"}}}
+}}

@@ -349,11 +349,13 @@ class RenderCodelesslyFlex extends RenderFlex {
   /// app shows.
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_squeeze) {
+    // A child a fraction of a pixel past the end (a label 0.2 px wider than
+    // a ninth of a row) is rounding, not an overflow to stripe.
+    if (_squeeze && _pastEnd >= 0.5) {
       super.paint(context, offset);
       return;
     }
-    if (clipBehavior == Clip.none) {
+    if (clipBehavior == Clip.none || _squeeze) {
       _overflowClip.layer = null;
       defaultPaint(context, offset);
       return;
@@ -363,6 +365,17 @@ class RenderCodelesslyFlex extends RenderFlex {
   }
 
   final LayerHandle<ClipRectLayer> _overflowClip = LayerHandle<ClipRectLayer>();
+
+  /// How far the last child's end is past this box's own, along the main
+  /// axis (0 or less: it fits).
+  double get _pastEnd {
+    var end = 0.0;
+    for (var c = firstChild; c != null; c = childAfter(c)) {
+      final at = (c.parentData! as FlexParentData).offset;
+      end = math.max(end, direction == Axis.horizontal ? at.dx + c.size.width : at.dy + c.size.height);
+    }
+    return end - (direction == Axis.horizontal ? size.width : size.height);
+  }
 
   @override
   void dispose() {

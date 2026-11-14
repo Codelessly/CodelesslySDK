@@ -1,0 +1,24 @@
+{"meta":{"ui":"sudoku","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["sudoku@claude-sonnet-5-5.compact.ssui.r4.jsonl","sudoku@claude-sonnet-5-5.compact.ssui.r4.retry.jsonl"],"source":"live","outputTokens":255,"usage":{"inputTokens":11996,"outputTokens":255,"cacheReadInputTokens":27792,"cacheCreationInputTokens":0,"ttftMs":1883,"firstToolDeltaMs":1950,"totalMs":2744,"stopReason":"StopReason.toolUse"},"text":"A box can't hold children, so I'll make `boardBox` a column with the dark frame fill and padding, then move the grid into it.","ttftMs":1883,"check":{"ops":3,"opsApplied":3,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":25,"scripts":3,"scriptChars":826,"designSystemComponents":14,"replacedControls":0},"assets":null}}
+{"tMs":1950,"delta":"{\"ops\": [{\"op\": \"set"}
+{"tMs":1985,"delta":"\", \"id\": \"boardB"}
+{"tMs":2017,"delta":"ox\", \"node\": {\"type"}
+{"tMs":2051,"delta":"\": \"column\", \"children\": ["}
+{"tMs":2084,"delta":"], \"layout\": {\"width"}
+{"tMs":2117,"delta":"\": 358, \"height\": "}
+{"tMs":2291,"delta":"358, \"padding\": 2"}
+{"tMs":2291,"delta":"}, \"dec"}
+{"tMs":2291,"delta":"oration\": {\"fills\":"}
+{"tMs":2622,"delta":" [{\"color\": \"prima"}
+{"tMs":2622,"delta":"ryText\"}], \"radius"}
+{"tMs":2622,"delta":"\": 4}}}, {"}
+{"tMs":2622,"delta":"\"op\": \"pat"}
+{"tMs":2622,"delta":"ch\", \"id\": \"board\","}
+{"tMs":2622,"delta":" \"patch\": {\"layout"}
+{"tMs":2622,"delta":"\": {\"width\": {"}
+{"tMs":2622,"delta":"\"fill\": 354},"}
+{"tMs":2622,"delta":" \"height\": {\"fill\":"}
+{"tMs":2622,"delta":" 354}}}}, {"}
+{"tMs":2622,"delta":"\"op\": \"move\", \"id"}
+{"tMs":2622,"delta":"\": \"board\", \"parent\":"}
+{"tMs":2652,"delta":" \"boardBox\"}]"}
+{"tMs":2743,"delta":"}"}
