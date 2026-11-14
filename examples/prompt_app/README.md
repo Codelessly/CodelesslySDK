@@ -111,6 +111,35 @@ What was generated is in `screens_skip/`; the sheets are `renders/skip-home.png`
   (`minutes:today.minutes`) and a text written as a binding (`value:="{s.jumps}"`). One it still gets wrong: the
   hero's `minutes` given as "8 min" draws "8 min min".
 
+## The polish pass (render, critique, rewrite)
+
+![The session timer before and after the polish pass, for three people](renders/skip-session-polish-pass.png)
+
+`tool/polish_pass.py` gives a model the screen as drawn (the image), the screen as written, the notation's
+instructions and a six-point rubric (one focal point, three steps of hierarchy, the design system's surfaces and
+colors, one primary action, steady spacing, no literal colors), and takes back a critique and the screen
+rewritten. Run once on each of the three session timers, the weakest screens, since they have no block:
+
+| Screen | Seconds | Output tokens | Its critique of the first answer |
+|---|---|---|---|
+| Session, beginner | 9.7 | 1,330 | The countdown sits on a plain white card; two filled buttons compete; a repeated explainer adds noise |
+| Session, kid | 3.8 | 526 | Two competing big numbers; literal colors on the focal surface; orphan buttons at odd widths |
+| Session, athlete | 3.8 | 584 | Two equal white cards compete; the timer is not on a strong surface; no clear primary action |
+
+All three still render with no errors. Looking at them:
+
+- **It does what the rubric asks first.** The beginner's and the athlete's countdown moved onto a brand-colored
+  focal surface, secondary buttons went quiet, and the repeated copy went.
+- **It also broke things nothing reported.** The kid's lost its colored focal card and its jump count; the
+  athlete's count and its small buttons are now dark on the black page and cannot be read. A rewrite needs the
+  same checks as a first answer, and a contrast check the render tool does not make here.
+- **It did not reach the block-built screens.** Compare with Home above: a pass over a plain screen improves its
+  hierarchy; it does not produce an illustration, a designed tile or a chart card. This is one run per screen,
+  but it agrees with the playground's lesson: designing the parts whole does more than fixing a draft.
+
+So the pass is worth keeping as a cheap second step for screens without blocks, behind checks, and cached; it
+is not the route to a designed screen.
+
 ## Not done
 
 - Nothing here runs as an app: the screens are generated ahead and drawn as images. No navigation between them,

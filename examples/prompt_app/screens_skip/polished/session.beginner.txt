@@ -1,0 +1,27 @@
+Screen
+  TopBar "Today's session" "{today.name} · about {today.minutes} minutes" back:true -> emit open_home
+  Box fill:primary radius:28 pad:24 gap:8
+    Text.eyebrow "{phase==\"work\" ? \"Jump\" : \"Rest\"}" color:onPrimary
+    Text.display "{left}" size:120 weight:700 color:onPrimary
+    Text "{phase==\"work\" ? \"Jump for \" + today.work + \" seconds, then rest.\" : \"Catch your breath. Next round starts soon.\"}" color:onPrimary
+    Progress =frac
+    Text.strong "Round {round} of {today.rounds}" color:onPrimary
+  Card gap:12
+    Row between middle
+      Text.sectionTitle "Jumps so far"
+      Button.ghost "-1" -> count=max(0,count-1)
+    Text.numberLarge "{count}"
+    Button "Tap for each jump" h:56 -> count=count+1
+  Row gap:12
+    Button.secondary "{paused ? \"Resume\" : \"Pause\"}" grow -> paused=!paused
+    Button.outline "Finish" grow -> emit finish_session count
+  Text.caption "Work is when you jump. Rest is a short break. Each round is one of each. Stopping early is fine."
+
+state phase="work"
+state round=1
+state left=40
+state count=0
+state paused=false
+state frac=0
+every 1s when !paused && !done -> left=left>1?left-1:(phase=="work"?today.rest:today.work); frac=left>1?(phase=="work"?(today.work-left+1)/today.work:(today.rest-left+1)/today.rest):0; round=(left<=1&&phase=="rest"&&round<today.rounds)?round+1:round; phase=left<=1?(phase=="work"?"rest":"work"):phase
+state done=false
