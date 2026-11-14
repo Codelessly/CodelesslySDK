@@ -112,6 +112,10 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
   bool _busy = false;
   bool get busy => _busy;
 
+  /// Whether it takes taps, focus and screen readers' actions at all (a
+  /// chip that is only a label does not).
+  bool get takesInput => true;
+
   /// Busy (a loading button): it keeps its focus but takes no press, shows
   /// the arrow cursor, and tells screen readers it is busy (Flutter's
   /// semantics has no busy flag: the value "Busy" in a live region, with no
@@ -387,7 +391,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
         ..value = 'Busy'
         ..liveRegion = true;
     }
-    if (_enabled) {
+    if (_enabled && takesInput) {
       if (!_busy) config.onTap = activate;
       config.onFocus = () => focusNode.requestFocus();
     }
