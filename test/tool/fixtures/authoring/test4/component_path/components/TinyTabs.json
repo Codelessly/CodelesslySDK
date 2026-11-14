@@ -1,0 +1,1 @@
+{"schema":3,"id":"TinyTabs","roots":["tabs"],"widget":{"type":"TinyTabs"},"nodes":{"tabs":{"type":"bottomNavigationBar","layout":{"width":{"fill":390},"height":68},"props":{"destinations":[{"label":"One","icon":"looks_one"},{"label":"Two","icon":"looks_two"}]}}}}
