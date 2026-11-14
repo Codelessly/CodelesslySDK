@@ -7,6 +7,9 @@
 import 'package:codelessly_api/core.dart' show ButtonProps, FloatingActionButtonProps, IconButtonProps;
 
 import '../render/controls/buttons.dart';
+import '../render/controls/segmented.dart';
+import '../render/controls/slider.dart';
+import '../render/controls/toggles.dart';
 import '../render/recipe.dart';
 
 /// Buttons (render/controls/buttons.dart).
@@ -19,7 +22,18 @@ final Map<String, WidgetRecipe> buttonRecipes = {
   FloatingActionButtonProps.spec.type: buttonRecipe,
 };
 
+/// Toggles, slider and segmented button (render/controls/{toggles,slider,
+/// segmented}.dart).
+final Map<String, WidgetRecipe> toggleRecipes = {
+  'checkbox': checkboxRecipe,
+  'switch': switchRecipe,
+  'radio': radioRecipe,
+  'slider': sliderRecipe,
+  'segmentedButton': segmentedRecipe,
+};
+
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
+  ...toggleRecipes,
 };
