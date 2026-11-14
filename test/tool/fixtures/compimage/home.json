@@ -1,0 +1,9 @@
+{
+  "schema": 3,
+  "id": "home",
+  "roots": ["home"],
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "card"}, "layout": {"width": 390, "height": 200}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "card": {"type": "Card", "layout": {"width": 100, "height": 100}}
+  }
+}
