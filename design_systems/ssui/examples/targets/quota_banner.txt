@@ -1,0 +1,13 @@
+state used=47
+state limit=50
+Card gap:10
+  Row gap:8
+    Icon "data_usage" size:16 color:=used>=limit?"#FFDC2626":"#FFEA580C"
+    Text.sectionTitle "{used>=limit?"You have reached today's limit":"Almost at today's limit"}" grow
+    Text.caption "{used} of {limit} messages"
+  Progress =used/limit {"props": {"color": "${= used>=limit?'#FFDC2626':'#FFEA580C'}"}}
+  Row between
+    Text.caption "Resets at midnight, in 5 h 12 min."
+    Row gap:6
+      Button.ghost "Send one more" enabled:=used<limit -> used=used+1
+      Button "Upgrade" -> emit upgrade
