@@ -54,7 +54,7 @@ def main():
     ds_all = opt('--design-system')
     out = here / (opt('--out') or 'generated')
     out.mkdir(exist_ok=True)
-    blocks = 'Screen,TopBar,HeroSession,StreakFlame,ProgressGoal,WeekStrip,SectionTitle,SessionRow,ChartCard,StatTrio,RecordCard,EmptyState,Illustration'
+    blocks = 'Screen,TopBar,HeroSession,StreakFlame,ProgressGoal,WeekStrip,SectionTitle,SessionRow,ChartCard,StatTrio,RecordCard,EmptyState,Illustration,SessionBar,SessionDial,TapPad,SessionControls,BigButton,SessionSummary'
     for pf in sorted((here / 'personas').glob('*.json')):
         persona = json.loads(pf.read_text())
         if opt('--persona') not in (None, persona['id']):
@@ -64,16 +64,20 @@ def main():
                 continue
             name = f"{screen['id']}.{persona['id']}"
             text = brief(app, screen, persona)
+            if screen.get('prelude'):
+                text += '\n\n' + screen['preludeNote'] + '\n' + '\n'.join('  ' + l for l in screen['prelude'])
             if ds_all and persona.get('audience'):
                 text += f"\nOn blocks that take audience, write audience:\"{persona['audience']}\"."
             (out / f'{name}.brief.txt').write_text(text)
             # The contract's state is the host's: it goes before whatever the model writes.
-            (out / 'contract.txt').write_text(''.join(
-                f"state {k}={json.dumps(v, separators=(',', ':'))}\n" for k, v in app['contract']['variables'].items()))
+            contract = ''.join(f"state {k}={json.dumps(v, separators=(',', ':'))}\n" for k, v in app['contract']['variables'].items())
+            (out / 'contract.txt').write_text(contract)
+            # A screen's own constants (its state and clock) go in with the contract's.
+            (out / f'{name}.prelude.txt').write_text(contract + ''.join(l + '\n' for l in screen.get('prelude', [])))
             r = subprocess.run([
                 'dart', 'run', 'tool/record_notation.dart', '--ui', name, '--model', model,
                 '--brief-file', str(out / f'{name}.brief.txt'), '--frame', 'one phone screen 390 wide',
-                '--prelude-file', str(out / 'contract.txt'),
+                '--prelude-file', str(out / f'{name}.prelude.txt'),
                 '--design-system', str(sdk / 'design_systems' / (ds_all or persona['designSystem'])),
                 *(['--components', blocks] if '--blocks-only' in sys.argv else []),
                 '--out', str(out / f'{name}.jsonl'),

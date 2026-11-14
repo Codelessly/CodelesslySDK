@@ -61,32 +61,32 @@
  },
  {
   "screen": "session.athlete",
-  "turns": 2,
-  "nodes": 26,
+  "turns": 1,
+  "nodes": 28,
   "lines": 31,
-  "outputTokensAll": 1087,
-  "secondsAll": 6.7,
-  "firstTokenMs": 733,
-  "inputTokens": 5052
+  "outputTokensAll": 653,
+  "secondsAll": 4.0,
+  "firstTokenMs": 759,
+  "inputTokens": 6219
  },
  {
   "screen": "session.beginner",
-  "turns": 1,
-  "nodes": 21,
-  "lines": 28,
-  "outputTokensAll": 638,
-  "secondsAll": 4.4,
-  "firstTokenMs": 659,
-  "inputTokens": 5074
+  "turns": 2,
+  "nodes": 18,
+  "lines": 21,
+  "outputTokensAll": 1458,
+  "secondsAll": 9.2,
+  "firstTokenMs": 688,
+  "inputTokens": 6241
  },
  {
   "screen": "session.kid",
   "turns": 2,
-  "nodes": 17,
-  "lines": 26,
-  "outputTokensAll": 1116,
-  "secondsAll": 8.0,
-  "firstTokenMs": 790,
-  "inputTokens": 5083
+  "nodes": 19,
+  "lines": 23,
+  "outputTokensAll": 1410,
+  "secondsAll": 8.3,
+  "firstTokenMs": 847,
+  "inputTokens": 6250
  }
 ]
