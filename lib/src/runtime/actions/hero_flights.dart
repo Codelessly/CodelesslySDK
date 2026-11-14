@@ -334,3 +334,20 @@ class HeroArcRectTween extends RectTween {
     return Rect.fromCenter(center: c, width: lerpDouble(b.width, e.width, t)!, height: lerpDouble(b.height, e.height, t)!);
   }
 }
+
+/// Draws [mark]'s node stretched over the box it's given (the flight's box
+/// in between), repainting with [repaint].
+class HeroMarkPaint extends LeafRenderObjectWidget {
+  const HeroMarkPaint({super.key, required this.mark, this.repaint});
+
+  final RenderHeroMark mark;
+  final Listenable? repaint;
+
+  @override
+  RenderHeroMarkPaint createRenderObject(BuildContext context) => RenderHeroMarkPaint(mark, repaint);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderHeroMarkPaint renderObject) => renderObject
+    ..mark = mark
+    ..repaint = repaint;
+}
