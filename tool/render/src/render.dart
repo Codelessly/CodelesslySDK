@@ -553,10 +553,11 @@ Future<void> _renderAll(
           if (by != null && (double.tryParse(by[1]!) ?? 1) < 0.01) continue;
           final node = _nodeOfError(details ?? _errorDetails[err]);
           _errorDetails.remove(err);
+          final advice = node == null || by == null ? null : _overflowAdvice(binding, node, double.parse(by[1]!), text);
           issue(RuntimeIssue('render_exception', 'error',
               node == null
                   ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
-                  : 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
+                  : advice ?? 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
               nodeId: node?.tree.pathOf(node.id, node.instance),
               screen: label,
               size: sizeName,
@@ -985,6 +986,48 @@ final List<FlutterErrorDetails> _errorLog = [];
 
 /// The node box an error came from: the render object its details name
 /// (the overflowing flex, the object being laid out), up to its node.
+/// What a flex overflow means and what to change: the node's own size on
+/// that axis (fixed, hugging, filling), what its content needs and the
+/// children it holds, named with the copy of a list it is (`dish#2`): a
+/// fixed size a longer item outgrows is the usual cause, not rounding.
+String? _overflowAdvice(WidgetsBinding binding, NodeBox box, double by, String text) {
+  final n = box.node;
+  final side = RegExp(r'on the (bottom|right|top|left)').firstMatch(text)?[1];
+  if (n == null || side == null || !box.hasSize) return null;
+  final vertical = side == 'bottom' || side == 'top';
+  final axis = vertical ? 'height' : 'width';
+  String px(double v) => (v - v.roundToDouble()).abs() < 0.05 ? v.round().toString() : v.toStringAsFixed(1);
+  final have = vertical ? box.size.height : box.size.width;
+  final need = have + by;
+  // Its copy in a list: the n-th box of the same node, as `#n` names it.
+  final path = box.tree.pathOf(box.id, box.instance);
+  final copies = [for (final b in _boxes(binding)) if (b.id == box.id && identical(b.tree, box.tree) && b.tree.pathOf(b.id, b.instance) == path) b];
+  final name = copies.length > 1 ? '$path#${copies.indexOf(box)}' : path;
+  final kids = <NodeBox>[];
+  void visit(RenderObject o) {
+    if (o is NodeBox) {
+      if (o.hasSize && o.drawn) kids.add(o);
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  box.visitChildren(visit);
+  final holds = [for (final k in kids.take(8)) '${k.id} ${px(vertical ? k.size.height : k.size.width)}'].join(', ');
+  final field = vertical ? n.layout.height : n.layout.width;
+  final what = switch (field.fit) {
+    api.SizeFit.fixed => 'Its $axis is fixed at ${px(field.value)} and its content needs ${px(need)} ($holds, with its padding and spacing): '
+        'a text in it takes more lines here than where that $axis was chosen (a longer item of a list, a narrower column). '
+        'Let it grow with its content ({"hug": ${px(field.value)}}), make it at least ${px(need.ceilToDouble())}, '
+        'or cap the text (maxLines with an ellipsis).',
+    api.SizeFit.hug => 'It hugs its content, which needs ${px(need)} ($holds, with its padding and spacing), but its parent gives it '
+        'only ${px(have)}: the parent has a fixed $axis or a max $axis. Let the parent hug too, or let it scroll.',
+    _ => 'It fills ${px(have)} of its parent, and its content needs ${px(need)} ($holds, with its padding and spacing). '
+        'Give the parent more room on that axis (hug), or let this node hug its content.',
+  };
+  return 'Node "$name" (${n.type}): its content overflows its $side by ${px(by)} px. $what';
+}
+
 NodeBox? _nodeOfError(FlutterErrorDetails? details) {
   if (details == null) return null;
   final infos = <DiagnosticsNode>[...?details.informationCollector?.call()];

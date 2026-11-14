@@ -394,4 +394,16 @@ void main() {
     expect(failed, hasLength(1), reason: '${report.diagnostics}');
     expect(failed.single['message'], allOf(contains('relative to the site folder'), contains('"images/dot.svg"')));
   });
+
+  testWidgets('a fixed-height card whose content outgrows it in one copy says what it needs and what to change', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/cardoverflow'], out: out.path, sizes: const [Size(390, 400)]));
+    final overflow = report.diagnostics.lastWhere((d) => d['code'] == 'render_exception', orElse: () => const {});
+    expect(overflow['message'], allOf(
+      contains('"dish#1"'),
+      contains('height is fixed at 60'),
+      contains('needs 92'),
+      contains('dishName'),
+      contains('{"hug": 60}'),
+    ), reason: '${report.diagnostics}');
+  });
 }
