@@ -70,4 +70,16 @@ void main() {
   stdout.writeln('compact (generated at run time): ${compact.length} characters; tools: ${compactTools.length} characters');
   stdout.writeln('assets/system_prompt.md: ${text.length} characters (~${(text.length / 4).round()} tokens at 4 per token); '
       'tools: ${tools.length} characters');
+
+  // With the SSUI design system (the SDK's design_systems/ssui, bundled as
+  // assets/design_systems/ssui.json by tool/design_system_bundle.dart).
+  final bundle = File('assets/design_systems/ssui.json');
+  if (bundle.existsSync()) {
+    final ds = DesignSystem.fromJson(jsonDecode(bundle.readAsStringSync()));
+    final withDs = systemPromptFor(PromptVariant.compact, full: '', designSystem: ds);
+    File('assets/system_prompt.ssui.md').writeAsStringSync(withDs);
+    stdout.writeln('compact, no design system: ${compact.length} characters (~${(compact.length / 4).round()} tokens at 4 per token)');
+    stdout.writeln('compact, SSUI (assets/system_prompt.ssui.md): ${withDs.length} characters '
+        '(~${(withDs.length / 4).round()} tokens at 4 per token), ${ds.components.definitions.length} components');
+  }
 }

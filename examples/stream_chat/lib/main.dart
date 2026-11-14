@@ -7,6 +7,7 @@
 //   flutter run                                   # recorded streams, offline
 //   flutter run --dart-define=ANTHROPIC_API_KEY=... [--dart-define=MODEL=claude-sonnet-5-5]   # live
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart'; // ignore: deprecated_member_use
@@ -85,12 +86,24 @@ class ChatScreenState extends State<ChatScreen> {
     if (_source == null) unawaited(_pickSource());
   }
 
+  /// The design system replies are made with: `--dart-define=DESIGN_SYSTEM=ssui`
+  /// (assets/design_systems/<id>.json, made by tool/design_system_bundle.dart).
+  DesignSystem? _designSystem;
+
   Future<void> _pickSource() async {
     const key = String.fromEnvironment('ANTHROPIC_API_KEY');
     const model = String.fromEnvironment('MODEL', defaultValue: kDefaultModel);
+    const ds = String.fromEnvironment('DESIGN_SYSTEM');
+    if (ds.isNotEmpty) {
+      _designSystem = DesignSystem.fromJson(jsonDecode(await rootBundle.loadString('assets/design_systems/$ds.json')));
+    }
     final StreamSource s = key.isEmpty
         ? RecordedStreamSource()
-        : LlmStreamSource(apiKey: key, model: model, systemPrompt: await rootBundle.loadString('assets/system_prompt.md'));
+        : LlmStreamSource(
+            apiKey: key,
+            model: model,
+            systemPrompt: await rootBundle.loadString('assets/system_prompt.md'),
+            designSystem: _designSystem);
     if (mounted) setState(() => _source = s);
   }
 
@@ -119,7 +132,7 @@ class ChatScreenState extends State<ChatScreen> {
     if (ui == null && last != null) {
       await _stream(source.reply(EditTurn(last.ui, text, last.session, last.result)), last, edit: true);
     } else {
-      final reply = ReplyMessage(ui ?? 'flights', UiSession());
+      final reply = ReplyMessage(ui ?? 'flights', UiSession(designSystem: _designSystem));
       _subs.add(reply.session.events.listen((e) => _action(reply, e)));
       setState(() => messages.add(reply));
       _lastUi = reply;

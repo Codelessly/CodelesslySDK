@@ -31,6 +31,35 @@ ticks of its own: they are custom paint ops (the migration writes them for a sch
   shrink-wraps it drew nothing in the room the row made for it.
 
 **A site looks like itself: theme mode, declared fonts, local images** (with codelessly_api's unreleased
+
+**Unstyled controls that are not Material's, and design systems as data** (with codelessly_api's unreleased
+additions).
+
+- **Shapes.** Without a theme radius, buttons, chips and segmented buttons have a 6 px radius (no stadium);
+  dialogs, menus and pickers 8 px with a hairline. A field with no border of its own is outlined (the theme's radius,
+  else 6), padded 12, its label above it (always visible) and its hint inside; no underline, no floating label.
+  Dropdowns draw the same outline; date and time pickers are plain fields of their node's size (they grew past it
+  before) with a calendar or clock icon. Switches have one thumb size and no outline; check boxes a 4 px radius;
+  tabs a square underline; a chip is as wide as its content, so its check mark never cuts its label.
+- **Controls fit their node.** No 48 px tap-target margin or platform density: a 28 or 32 px node shows the whole
+  control, its label centred (segmented buttons take the node's height; fields of a set height centre their line;
+  pagination centres its buttons). Hugging buttons and chips lose the margin (48 to 35-40 px).
+- **Colours from the theme.** Tab bars, pagination, gauges, charts, barcodes and signature pads take the colours
+  they leave unset from the theme of what they are drawn on (`indicator_theme.dart`).
+- **The guard** (`test/app/no_material_look_test.dart`) also asserts no stadium button, no underline-only field and
+  no cut chip label, and measures every labelled control's label centred within 1 px at its default height and
+  32 px, in Barlow and Roboto, light and dark.
+- **Generated UI with a design system or a theme.** `UiSession(designSystem:, theme:)`: the design system's
+  components are node types of its catalog, its tokens (with the app's theme over them) the theme `CodelesslyView`
+  resolves named colours and text styles against, reads as `${theme.*}` and draws controls with. A themeless
+  session's field text is in the same family as a text node beside it; the stream replay gives its session the
+  render command's default family.
+- **The render command** reads `site.json`'s `designSystem` (`design_system_missing` when it cannot).
+- **`design_systems/ssui`**: Soft SaaS UI as data: its tokens, DESIGN.md, PATTERNS.md, 23 components drawn from
+  core nodes (four wrap a styled text field, dropdown or slider), a gallery and three inline cards with raw-control
+  counterparts, and their renders.
+
+**Earlier in this release: a site looks like itself: theme mode, declared fonts, local images** (with codelessly_api's unreleased
 additions).
 
 - **Theme mode.** `Codelessly.themeMode`, `themeModeChoice` and `setThemeMode(mode, persist:)`: the site's

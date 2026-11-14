@@ -393,7 +393,59 @@ void _fab(NodeBuilder b, Node n, List<RenderBox> chain) {
 
 void _chip(NodeBuilder b, Node n, List<RenderBox> chain) {
   _fit(b, n, chain);
-  chain.add(_pressable(b, 'chip', (context) => Material(type: MaterialType.transparency, child: _ChipIsland(node: n))));
+  chain.add(_pressable(
+      b, 'chip', (context) => Material(type: MaterialType.transparency, child: _ContentWidth(child: _ChipIsland(node: n)))));
+}
+
+/// A chip at the width of its content (its check mark, avatar, label and
+/// delete icon), never squeezed by a narrower node box: a selected chip's
+/// check mark would cut its label. Centred in the box when it fits, from
+/// the box's start when it is wider (drawn past the box's end; the node's
+/// box keeps its size).
+class _ContentWidth extends SingleChildRenderObjectWidget {
+  const _ContentWidth({required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderContentWidth(Directionality.of(context));
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderContentWidth renderObject) =>
+      renderObject.textDirection = Directionality.of(context);
+}
+
+class _RenderContentWidth extends RenderShiftedBox {
+  _RenderContentWidth(this.textDirection) : super(null);
+  TextDirection textDirection;
+
+  @override
+  void performLayout() {
+    final c = constraints;
+    final child = this.child;
+    if (child == null) {
+      size = c.smallest;
+      return;
+    }
+    child.layout(BoxConstraints(minHeight: c.minHeight, maxHeight: c.maxHeight), parentUsesSize: true);
+    size = c.constrain(child.size);
+    final spare = size.width - child.size.width;
+    final x = spare >= 0 ? spare / 2 : (textDirection == TextDirection.rtl ? spare : 0.0);
+    (child.parentData! as BoxParentData).offset = Offset(x, (size.height - child.size.height) / 2);
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) => child?.getMinIntrinsicWidth(height) ?? 0;
+  @override
+  double computeMaxIntrinsicWidth(double height) => child?.getMaxIntrinsicWidth(height) ?? 0;
+  @override
+  double computeMinIntrinsicHeight(double width) => child?.getMinIntrinsicHeight(double.infinity) ?? 0;
+  @override
+  double computeMaxIntrinsicHeight(double width) => child?.getMaxIntrinsicHeight(double.infinity) ?? 0;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final s = child?.getDryLayout(BoxConstraints(minHeight: constraints.minHeight, maxHeight: constraints.maxHeight));
+    return constraints.constrain(s ?? Size.zero);
+  }
 }
 
 class _ChipIsland extends StatefulWidget {

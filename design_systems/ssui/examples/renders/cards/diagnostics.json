@@ -1,0 +1,51 @@
+{
+  "errors": 5,
+  "warnings": 0,
+  "images": [
+    "flight_picker@390x844-dark.png",
+    "order_summary@390x844-dark.png",
+    "contact_form@390x844-dark.png"
+  ],
+  "diagnostics": [
+    {
+      "code": "unknown_event",
+      "severity": "error",
+      "path": "/nodes/cancel/actions/0/actions/0/type",
+      "message": "componentEvent fires an event of the component it is in; this document is not a component (it has no \"widget\").",
+      "nodeId": "cancel",
+      "file": "flight_picker"
+    },
+    {
+      "code": "unknown_event",
+      "severity": "error",
+      "path": "/nodes/confirm/actions/0/actions/1/type",
+      "message": "componentEvent fires an event of the component it is in; this document is not a component (it has no \"widget\").",
+      "nodeId": "confirm",
+      "file": "flight_picker"
+    },
+    {
+      "code": "unknown_event",
+      "severity": "error",
+      "path": "/nodes/cancel/actions/0/actions/0/type",
+      "message": "componentEvent fires an event of the component it is in; this document is not a component (it has no \"widget\").",
+      "nodeId": "cancel",
+      "file": "order_summary"
+    },
+    {
+      "code": "unknown_event",
+      "severity": "error",
+      "path": "/nodes/place/actions/0/actions/0/type",
+      "message": "componentEvent fires an event of the component it is in; this document is not a component (it has no \"widget\").",
+      "nodeId": "place",
+      "file": "order_summary"
+    },
+    {
+      "code": "unknown_event",
+      "severity": "error",
+      "path": "/nodes/send/actions/0/actions/3/then/1/type",
+      "message": "componentEvent fires an event of the component it is in; this document is not a component (it has no \"widget\").",
+      "nodeId": "send",
+      "file": "contact_form"
+    }
+  ]
+}

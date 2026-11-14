@@ -23,7 +23,9 @@ import 'package:flutter/cupertino.dart' show CupertinoActivityIndicator;
 import 'package:flutter/material.dart' show CircularProgressIndicator, Theme;
 import 'package:flutter/rendering.dart';
 
+import '../render/control_theme.dart' show backdropOf, themeDataOf;
 import '../render/convert.dart';
+import 'indicator_theme.dart';
 import '../render/recipe.dart';
 import 'indicator_transition.dart';
 import 'indicators_charts.dart';
@@ -40,12 +42,20 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
   PlotChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, PlotChartPainter.new),
   BarChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, BarChartPainter.new),
   LineChartProps.spec.type: (b, n, chain) => _transitioned(b, n, chain, LineChartPainter.new),
-  BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(n)),
+  BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(_themed(b, n))),
 };
 
 Size _designSize(Node n) => Size(n.layout.width.value, n.layout.height.value);
 
 /// The node's box (AdaptiveNodeBox) painted by [painter].
+/// [n] with the colors it leaves unset from the theme, for what it is drawn
+/// on (its ancestors' fills over the project's surface).
+Node _themed(NodeBuilder b, Node n) => withThemeColors(
+    n,
+    themeDataOf(b.tree.components?.theme ?? api.ThemeTokens.none,
+            surface: backdropOf(b.source.node, b.source.parentOf, b.id))
+        .colorScheme);
+
 void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painter) {
   chain.add(b.fitBox('indicatorFit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
   chain.add(b.obtain<RenderCustomPaint>('indicatorPaint', RenderCustomPaint.new)
@@ -57,7 +67,7 @@ void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painte
 void _transitioned(NodeBuilder b, Node n, List<RenderBox> chain, IndicatorPainterFactory factory) {
   chain.add(b.fitBox('indicatorFit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
   chain.add(b.obtain<RenderIndicatorTransition>('indicatorPaint', RenderIndicatorTransition.new)
-    ..update(n, factory, interactive: b.tree.animates));
+    ..update(_themed(b, n), factory, interactive: b.tree.animates));
 }
 
 /// A `CircularProgressIndicator` centred in a square of the box's shortest

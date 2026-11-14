@@ -1,0 +1,367 @@
+{
+ "schema": 3,
+ "id": "flight_picker",
+ "roots": [
+  "flight_picker"
+ ],
+ "variables": {
+  "flight_picker": [
+   {
+    "name": "flights",
+    "type": "list",
+    "value": [
+     {
+      "id": "tp1351",
+      "depart": "07:10",
+      "arrive": "09:45",
+      "airline": "TAP",
+      "duration": "2h 35m",
+      "stops": "Direct",
+      "price": "£84"
+     },
+     {
+      "id": "ba500",
+      "depart": "11:55",
+      "arrive": "14:35",
+      "airline": "British Airways",
+      "duration": "2h 40m",
+      "stops": "Direct",
+      "price": "£112"
+     },
+     {
+      "id": "u2731",
+      "depart": "16:20",
+      "arrive": "20:50",
+      "airline": "easyJet",
+      "duration": "3h 30m",
+      "stops": "1 stop",
+      "price": "£61"
+     }
+    ]
+   },
+   {
+    "name": "chosen",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ },
+ "nodes": {
+  "flight_picker": {
+   "type": "canvas",
+   "name": "flight_picker",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 600
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 600
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
+   }
+  },
+  "card": {
+   "type": "column",
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 400
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE0E0E0"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "title",
+    "sub",
+    "list",
+    "foot"
+   ]
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "Choose your flight",
+    "style": {
+     "fontSize": 18,
+     "fontWeight": 600,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 334
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "sub": {
+   "type": "text",
+   "props": {
+    "text": "London LHR to Lisbon LIS · Fri 21 Nov · 1 adult",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF5F6368"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 334
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "flight"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "bind": {
+    "data": "${flights}"
+   }
+  },
+  "flight": {
+   "type": "row",
+   "children": [
+    "pick",
+    "ftexts",
+    "fprice"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 64,
+    "padding": [
+     4,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFE0E0E0"
+     }
+    ],
+    "radius": 8
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "pick": {
+   "type": "radio",
+   "props": {
+    "value": "x"
+   },
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "bind": {
+    "props.value": "${item.id}",
+    "props.groupValue": "${chosen}"
+   }
+  },
+  "ftexts": {
+   "type": "column",
+   "children": [
+    "ftime",
+    "fdetail"
+   ],
+   "props": {
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "ftime": {
+   "type": "text",
+   "props": {
+    "text": "${item.depart} – ${item.arrive}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "fdetail": {
+   "type": "text",
+   "props": {
+    "text": "${item.airline} · ${item.duration} · ${item.stops}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF5F6368"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "fprice": {
+   "type": "text",
+   "props": {
+    "text": "${item.price}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "cancel",
+    "confirm"
+   ],
+   "props": {
+    "mainAxisAlignment": "end",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "cancel": {
+   "type": "textButton",
+   "props": {
+    "label": "Cancel"
+   },
+   "layout": {
+    "width": 100,
+    "height": 40
+   }
+  },
+  "confirm": {
+   "type": "filledButton",
+   "props": {
+    "label": "Confirm"
+   },
+   "layout": {
+    "width": 100,
+    "height": 40
+   },
+   "bind": {
+    "props.enabled": "${= chosen != ''}"
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirm",
+       "value": {
+        "flight": "${chosen}"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

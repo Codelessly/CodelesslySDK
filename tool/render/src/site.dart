@@ -32,7 +32,36 @@ typedef Input = ({String name, String path, String text});
       plain.add(input);
       continue;
     }
-    final m = file.existsSync() ? _tryJson(file.readAsStringSync()) : null;
+    var m = file.existsSync() ? _tryJson(file.readAsStringSync()) : null;
+    // A design system the manifest names: its components join the site's,
+    // its tokens are the theme the site's own is merged over, its fonts are
+    // declared with paths from the site's folder.
+    final dsRef = readString(m?['designSystem']);
+    if (m != null && dsRef != null) {
+      final dsDir = '$input/$dsRef';
+      final dsFile = File('$dsDir/${DesignSystemManifest.fileName}');
+      final ds = dsFile.existsSync() ? _tryJson(dsFile.readAsStringSync()) : null;
+      if (ds == null) {
+        designSystemProblems.add('designSystem "$dsRef": no readable ${DesignSystemManifest.fileName} at $dsDir');
+      } else {
+        final dsm = DesignSystemManifest.fromJson(ds);
+        m = {
+          ...m,
+          'theme': dsm.theme.mergedWith(ThemeTokens.fromJson(m['theme'])).toJson(),
+          'fonts': [
+            for (final f in dsm.fonts)
+              FontFamily(family: f.family, fonts: [
+                for (final face in f.fonts) FontAsset(asset: '$dsRef/${face.asset}', weight: face.weight, style: face.style),
+              ]).toJson(),
+            ...?readList(m['fonts']),
+          ],
+        };
+        for (final c in load([for (final c in dsm.components) '$dsDir/$c'])) {
+          final rel = c.path.startsWith('$input/') ? c.path.substring(input.length + 1) : c.path;
+          out.add((name: rel, path: c.path, text: c.text));
+        }
+      }
+    }
     if (m != null) manifest = m;
     final listed = SiteManifest.fromJson(m);
     final pages = listed.pages.isEmpty ? load([input]) : load([for (final p in listed.pages) '$input/$p']);
@@ -48,6 +77,10 @@ typedef Input = ({String name, String path, String text});
   out.addAll(load(plain));
   return (inputs: out, manifest: manifest);
 }
+
+/// Design systems a site names that could not be read (the render command
+/// reports them).
+final List<String> designSystemProblems = [];
 
 Json? _tryJson(String text) {
   try {

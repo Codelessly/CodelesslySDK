@@ -40,6 +40,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../render/control_theme.dart' show themeFont;
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
 import '../runtime/actions/text_fields.dart';
@@ -49,6 +50,7 @@ import '../runtime/actions/wiring.dart' show iconTapPrefix, iconTapSuffix;
 import '../runtime/actions/feedback_theme.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
+import 'indicator_theme.dart';
 import 'inputs_shapes.dart';
 import 'inputs_toggle.dart';
 import 'slider_paint.dart';
@@ -81,8 +83,9 @@ final Map<String, WidgetRecipe> inputsRecipes = {
   'radio': (b, n, chain) => _sized(b, n, chain, (context) => _RadioIsland(node: n)),
   'slider': _slider,
   'dropdown': (b, n, chain) => _fitted(b, n, chain, (context) => _DropdownIsland(node: n)),
-  'datePicker': (b, n, chain) => chain.add(_island(b, (context) => _DatePickerIsland(node: n, interactive: _interactive(b)))),
-  'timePicker': (b, n, chain) => chain.add(_island(b, (context) => _TimePickerIsland(node: n, interactive: _interactive(b)))),
+  // A picker's face is a field of the node's size, as a text field's is.
+  'datePicker': (b, n, chain) => _fitted(b, n, chain, (context) => _DatePickerIsland(node: n, interactive: _interactive(b))),
+  'timePicker': (b, n, chain) => _fitted(b, n, chain, (context) => _TimePickerIsland(node: n, interactive: _interactive(b))),
   'dateTimeInput': (b, n, chain) =>
       chain.add(_island(b, (context) => _DateTimeInputIsland(node: n, interactive: _interactive(b)))),
   'segmentedButton': _segmentedButton,
@@ -274,8 +277,14 @@ String? previewText(String? text) {
 /// either).
 api.EdgeInsets defaultContentPadding(api.InputDecoration d, api.EdgeInsets padding) {
   if (d.isCollapsed || padding != api.EdgeInsets.zero) return padding;
-  final outlined = [d.border, d.enabledBorder, d.focusedBorder].any((b) => b?.type == api.InputBorderType.outline);
+  final borders = [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder];
+  final outlined = borders.any((b) => b?.type == api.InputBorderType.outline);
   final dense = d.isDense ?? false;
+  // No border of its own: the theme's outline, the label inside as a hint
+  // (it never floats), so the same padding all round.
+  if (borders.every((b) => b == null) && !(d.filled ?? false)) {
+    return dense ? const api.EdgeInsets.fromLTRB(12, 8, 12, 8) : const api.EdgeInsets.fromLTRB(12, 12, 12, 12);
+  }
   if (outlined) return dense ? const api.EdgeInsets.fromLTRB(12, 16, 12, 8) : const api.EdgeInsets.fromLTRB(12, 20, 12, 12);
   if (d.filled ?? false) return dense ? const api.EdgeInsets.fromLTRB(12, 4, 12, 4) : const api.EdgeInsets.fromLTRB(12, 8, 12, 8);
   return padding;
@@ -317,7 +326,11 @@ Widget _affix(Widget? icon, Widget text, {required bool before}) {
 /// when the decoration sets none. [focused] and [error] pick the border a
 /// padding that includes it grows by.
 InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
-    {bool focused = false, bool? error, void Function(bool prefix)? onIconTap, api.TextStyle? textDefault}) {
+    {bool focused = false,
+    bool? error,
+    void Function(bool prefix)? onIconTap,
+    api.TextStyle? textDefault,
+    bool labelAbove = false}) {
   Widget? affixIcon(api.InputIcon? icon, api.EdgeInsets? iconPadding) {
     var glyph = _icon(icon);
     if (glyph == null) return null;
@@ -333,7 +346,26 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     return iconPadding == null ? aligned : Padding(padding: iconPadding.flutter, child: aligned);
   }
 
-  final label = previewText(d.labelText), errorText = previewText(d.errorText);
+  var label = previewText(d.labelText);
+  final errorText = previewText(d.errorText);
+  var hint = previewText(d.hintText);
+  var hintStyle = d.hintStyle;
+  // No border and no label behavior of its own: the theme's outlined field,
+  // whose label never floats. It is the placeholder (as Flutter shows a
+  // label that never floats, over the hint): the line stays centred
+  // whether the field is empty or not.
+  final themed = d.floatingLabelBehavior == null &&
+      [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder]
+          .every((b) => b == null);
+  // With [labelAbove] the caller draws the label above the field
+  // ([labelAboveField]); otherwise it is the placeholder.
+  if (themed && label != null && label.isNotEmpty) {
+    if (!labelAbove) {
+      hint = label;
+      if (!d.labelStyle.isEmpty) hintStyle = d.labelStyle;
+    }
+    label = null;
+  }
   final prefix = previewText(d.prefixText), suffix = previewText(d.suffixText);
   final counter = d.counterText == '' ? '' : previewText(d.counterText);
   // Units that show before anything is typed go in the icon slots, which
@@ -358,8 +390,8 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     helperText: previewText(d.helperText),
     helperStyle: _styleOrNull(d.helperStyle, textDefault),
     helperMaxLines: d.helperMaxLines,
-    hintText: previewText(d.hintText),
-    hintStyle: _styleOrNull(d.hintStyle, textDefault),
+    hintText: hint,
+    hintStyle: _styleOrNull(hintStyle, textDefault),
     hintMaxLines: d.hintMaxLines,
     // In error without a message (an error text bound to `true`): the
     // error border, nothing under the field.
@@ -368,8 +400,10 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
         : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle, textDefault: textDefault)),
     errorStyle: _styleOrNull(d.errorStyle, textDefault),
     errorMaxLines: d.errorMaxLines,
+    // Unset, a field with a border of its own floats its label as Flutter's
+    // does; one without takes the theme's (the label never floats).
     floatingLabelBehavior: switch (d.floatingLabelBehavior) {
-      null => null,
+      null => [d.border, d.enabledBorder, d.focusedBorder].any((b) => b != null) ? FloatingLabelBehavior.auto : null,
       final b => FloatingLabelBehavior.values.byName(b.name),
     },
     isCollapsed: d.isCollapsed,
@@ -653,7 +687,10 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final expands = fillsHeight && !oneLine;
     final (maxLines, minLines) =
         textFieldLines(maxLines: maxLinesProp == 0 ? null : maxLinesProp, minLines: minLinesProp, expands: expands);
-    final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: focusNode.hasFocus, onIconTap: (prefix) {
+    // A field with a label and no border of its own shows the label above
+    // it, always (the value never hides what the field is).
+    final above = labelAboveText(d);
+    final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: focusNode.hasFocus, labelAbove: above != null, onIconTap: (prefix) {
       final b = _builderOf(context);
       if (b != null) fireTrigger(b, prefix ? iconTapPrefix : iconTapSuffix);
     });
@@ -739,10 +776,11 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
             }
             // A fixed height is known without layout (a design board may
             // lay islands out loosely); a filling one takes the room given.
-            final double? height = vFit == SizeFit.fixed
+            var height = vFit == SizeFit.fixed
                 ? n.layout.height.value
                 : (constraints.hasBoundedHeight ? constraints.maxHeight : null);
             if (height == null) return field(decoration);
+            if (above != null) height = math.max(0.0, height - kLabelAboveExtent);
             return fullHeightField(
               context,
               decoration,
@@ -752,6 +790,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
             );
           })
         : field(decoration);
+    if (above != null) result = labelAboveField(context, above, d.labelStyle, _textDefault(context, n), result, fills: fillsHeight);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
     // A collapsed field sizes to its line on its own; under IntrinsicHeight
     // Flutter's TextField reports the 48 px interactive minimum instead.
@@ -799,18 +838,26 @@ Widget fullHeightField(
   bool focused = false,
 }) {
   final error = decoration.errorText != null || decoration.error != null;
-  final border = (error ? (focused ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
+  final own = (error ? (focused ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
       (focused ? decoration.focusedBorder : null) ??
       decoration.enabledBorder ??
-      decoration.border ??
-      const UnderlineInputBorder();
+      decoration.border;
+  // No border of its own: the theme's field shape, its side by state as
+  // Flutter's InputDecorator draws it.
+  final InputBorder border = own ?? themeFieldBorder(context, error: error, focused: focused, enabled: decoration.enabled);
   final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
   final padEnd = (decoration.contentPadding ?? EdgeInsets.zero).resolve(Directionality.of(context)).right;
+  // Without a floating label, the line is centred in the box at its own
+  // (dense) height, whatever the box's height: a 28 px field is not laid out
+  // for Material's 48 px and cut.
+  final centre = decoration.label == null && decoration.labelText == null;
   final spacer = decoration.prefixIcon == null && decoration.suffixIcon == null;
   return DecoratedBox(
     decoration: ShapeDecoration(color: fill, shape: border),
-    child: build(
+    child: _centred(centre, build(
       decoration.copyWith(
+        contentPadding: centredPadding(context, decoration),
+        isDense: centre ? true : null,
         filled: false,
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
@@ -818,7 +865,7 @@ Widget fullHeightField(
         disabledBorder: InputBorder.none,
         errorBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
-        constraints: BoxConstraints.tightFor(height: height),
+        constraints: centre ? null : BoxConstraints.tightFor(height: height),
         prefixIconConstraints:
             decoration.prefixIcon == null ? null : _tallIcon(decoration.prefixIconConstraints, height),
         suffixIcon: spacer ? SizedBox(width: padEnd, height: height) : decoration.suffixIcon,
@@ -828,9 +875,72 @@ Widget fullHeightField(
                 ? null
                 : _tallIcon(decoration.suffixIconConstraints, height),
       ),
-    ),
+    )),
   );
 }
+
+/// [decoration]'s content padding for a field of a set height whose line
+/// is centred (TextAlignVertical.center): its horizontal padding only, so a
+/// 28 or 32 px field is not laid out for a taller line box and its text and
+/// hint sit on its centre. A field whose label floats keeps its padding (the
+/// label needs the room above the line).
+EdgeInsetsGeometry? centredPadding(BuildContext context, InputDecoration decoration) {
+  final p = decoration.contentPadding;
+  if (p == null || decoration.label != null || decoration.labelText != null) return p;
+  final r = p.resolve(Directionality.of(context));
+  return EdgeInsets.fromLTRB(r.left, 0, r.right, 0);
+}
+
+/// The height a label above a field takes: a 16 px line and a 4 px gap.
+const double kLabelAboveExtent = 20;
+
+/// The label [d] shows above its field: its label text when it has one and
+/// no border or label behavior of its own (the theme's outlined field, whose
+/// label never floats into a notch); else null.
+String? labelAboveText(api.InputDecoration d) {
+  final label = previewText(d.labelText);
+  if (label == null || label.isEmpty || d.floatingLabelBehavior != null) return null;
+  final borders = [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder];
+  return borders.every((b) => b == null) ? label : null;
+}
+
+/// [field] under its [label]: 12 px in the theme's secondary ink (or the
+/// decoration's label style), a 16 px line, 4 px above the field, which
+/// takes the rest of the height when it [fills].
+Widget labelAboveField(BuildContext context, String label, api.TextStyle labelStyle, api.TextStyle? textDefault, Widget field,
+    {required bool fills}) {
+  final scheme = Theme.of(context).colorScheme;
+  final base = TextStyle(fontSize: 12, height: 16 / 12, color: scheme.onSurfaceVariant, leadingDistribution: TextLeadingDistribution.even);
+  final own = labelStyle.isEmpty && textDefault == null ? null : textStyle(labelStyle, textDefault);
+  final text = SizedBox(
+    height: 16,
+    child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: themeFont(context, base.merge(own))),
+  );
+  return Column(
+    mainAxisSize: fills ? MainAxisSize.max : MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [text, const SizedBox(height: 4), if (fills) Expanded(child: field) else field],
+  );
+}
+
+/// The border of a field that sets none: the theme's field shape (an
+/// outline of the control radius; an underline under a theme without one)
+/// with the side Flutter's InputDecorator gives it in this state.
+InputBorder themeFieldBorder(BuildContext context, {bool error = false, bool focused = false, bool enabled = true}) {
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  final shape = theme.inputDecorationTheme.border ?? const UnderlineInputBorder();
+  final color = !enabled
+      ? scheme.onSurface.withValues(alpha: .12)
+      : error
+          ? scheme.error
+          : focused
+              ? scheme.primary
+              : scheme.outline;
+  return shape.copyWith(borderSide: BorderSide(color: color, width: focused && enabled ? 2 : 1));
+}
+
+Widget _centred(bool centre, Widget field) => centre ? Center(child: field) : field;
 
 /// An icon box as tall as a fixed-height field.
 BoxConstraints _tallIcon(BoxConstraints? c, double height) =>
@@ -1431,6 +1541,13 @@ class _DropdownIslandState extends State<_DropdownIsland> {
     final iconSize = n.prop(DropdownProps.iconSize);
     final enabled = n.prop(DropdownProps.enabled);
     final radius = n.prop(DropdownProps.borderRadius);
+    // `underline`: the field's border, the theme's outline around the button
+    // (padded at the sides when the node sets no padding), not Material's
+    // underline.
+    final outlined = n.prop(DropdownProps.underline);
+    final padding = outlined && n.layout.padding == api.EdgeInsets.zero
+        ? const EdgeInsets.symmetric(horizontal: 12)
+        : n.layout.padding.flutter;
     final button = DropdownButton<Object>(
       value: value,
       isDense: n.prop(DropdownProps.isDense),
@@ -1449,14 +1566,14 @@ class _DropdownIslandState extends State<_DropdownIsland> {
       focusColor: _color(n.prop(DropdownProps.focusColor)),
       elevation: n.prop(DropdownProps.elevation),
       borderRadius: radius?.flutter,
-      padding: n.layout.padding.flutter,
+      padding: padding,
       onChanged: enabled
           ? (v) {
               setState(() => selected = v);
               _fire(context, 'changed', v);
             }
           : null,
-      underline: n.prop(DropdownProps.underline) ? null : const SizedBox.shrink(),
+      underline: const SizedBox.shrink(),
       items: [
         for (final item in items)
           DropdownMenuItem<Object>(value: item, alignment: itemAlignment, child: content(item, itemStyle)),
@@ -1478,7 +1595,9 @@ class _DropdownIslandState extends State<_DropdownIsland> {
       ],
     );
     final menuStyle = n.prop(DropdownProps.menuStyle);
-    Widget field = button;
+    Widget field = !outlined
+        ? button
+        : DecoratedBox(decoration: ShapeDecoration(shape: themeFieldBorder(context, enabled: enabled)), child: button);
     if (menuStyle != null) {
       field = _AnchoredMenu(
         node: n,
@@ -1492,7 +1611,7 @@ class _DropdownIslandState extends State<_DropdownIsland> {
           setState(() => selected = v);
           _fire(context, 'changed', v);
         },
-        child: button,
+        child: field,
       );
     }
     if (n.layout.width.fit == SizeFit.hug) field = IntrinsicWidth(child: field);
@@ -1777,7 +1896,7 @@ String _formatted(DateTime value, String pattern, String fallback) {
 /// A picker's face: the outlined button, or with a decoration a read-only
 /// field (hover and press feedback, the decoration's border, icons and
 /// error) that opens the picker.
-Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap, {bool empty = false}) {
+Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap, {bool empty = false, IconData? icon}) {
   var style = n.prop(PickerFieldProps.style);
   final d = n.prop(PickerFieldProps.decoration);
   // No value yet: the decoration's hint (`—`, "Pick a day") in its style.
@@ -1786,10 +1905,15 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
     text = hint;
     if (!d.hintStyle.isEmpty) style = d.hintStyle;
   }
+  // Without a decoration: a plain field (the theme's outline, the value at
+  // the start, a calendar or clock icon at the end) that opens the picker.
+  var decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), error: d.errorText != null && d.errorText!.isNotEmpty);
   if (d.isEmpty) {
-    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style, _textDefault(context, n))));
+    decoration = decoration.copyWith(
+      suffixIcon: Icon(icon ?? Icons.calendar_today_outlined, size: 18),
+      suffixIconConstraints: const BoxConstraints(minWidth: 40),
+    );
   }
-  final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), error: d.errorText != null && d.errorText!.isNotEmpty);
   return MouseRegion(
     cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
     child: GestureDetector(
@@ -1842,6 +1966,9 @@ class _HoverDecoratorState extends State<_HoverDecorator> {
               decoration: widget.decoration.copyWith(
                 enabled: widget.enabled,
                 visualDensity: fills ? VisualDensity.standard : null,
+                // A field of a set height centres its line: no vertical
+                // padding to push it off centre when the height is short.
+                contentPadding: fills ? centredPadding(context, widget.decoration) : null,
               ),
               isHovering: hover && widget.enabled,
               isEmpty: false,
@@ -1936,6 +2063,7 @@ class _TimePickerIslandState extends State<_TimePickerIsland> {
       context,
       n,
       _formatted(DateTime(2000, 1, 1, time.hour, time.minute), n.prop(PickerFieldProps.format), _clock(time)),
+      icon: Icons.schedule,
       empty: _time(picked ?? value) == null,
       !n.prop(TimePickerProps.enabled) || !widget.interactive
           ? null
@@ -2022,18 +2150,19 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     final icon = _icon(n.prop(DateTimeInputProps.icon));
     var decoration = styled
         ? _withHintAndIcon(inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: false), hint, icon)
+        // The theme's outlined field; the label is its placeholder (it never
+        // floats).
         : InputDecoration(
-            labelText: label,
-            hintText: label == null || label.isEmpty
-                ? hint ?? 'Select ${switch (mode) {
+            hintText: label != null && label.isNotEmpty
+                ? label
+                : hint ?? 'Select ${switch (mode) {
                     DateTimeInputMode.date => 'date',
                     DateTimeInputMode.time => 'time',
                     DateTimeInputMode.dateTime => 'date and time',
-                  }}'
-                : null,
-            suffixIcon: icon ?? Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+                  }}',
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            suffixIcon: icon ?? Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 18),
             enabled: enabled,
-            border: const OutlineInputBorder(),
           );
     // A fixed height is the field's, as a text field's, for a field that
     // draws its own decoration (older fields kept their natural height).
@@ -2172,6 +2301,11 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     if (n.prop(SegmentedButtonProps.variant) == SegmentedVariant.track) {
       return _track(context, n, selection, multi);
     }
+    // Without a segment height of its own, the segments are the node's
+    // height (Material's are 40 px, laid out past a shorter node with the
+    // labels off centre).
+    final fixed = n.layout.height.fit == SizeFit.fixed ? n.layout.height.value : null;
+    final height = segmentHeight ?? fixed;
     final button = SegmentedButton<String>(
       segments: segments,
       selected: selection,
@@ -2195,11 +2329,17 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         selectedForegroundColor: _color(n.prop(SegmentedButtonProps.selectedForegroundColor)),
         side: side == null ? null : _side(side),
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
-        padding: n.prop(SegmentedButtonProps.padding)?.flutter,
-        minimumSize: segmentHeight == null ? null : Size(0, segmentHeight),
-        maximumSize: segmentHeight == null ? null : Size(double.infinity, segmentHeight),
-        tapTargetSize: n.prop(SegmentedButtonProps.shrinkTapTarget) ? MaterialTapTargetSize.shrinkWrap : null,
-        visualDensity: segmentHeight == null ? null : VisualDensity.standard,
+        padding: n.prop(SegmentedButtonProps.padding)?.flutter ??
+            (height == null ? null : const EdgeInsets.symmetric(horizontal: 12)),
+        minimumSize: height == null ? null : Size(0, height),
+        maximumSize: height == null ? null : Size(double.infinity, height),
+        tapTargetSize: n.prop(SegmentedButtonProps.shrinkTapTarget) || height != null ? MaterialTapTargetSize.shrinkWrap : null,
+        // Its segments are TextButtons 40 px high plus the density's
+        // adjustment (minimumSize does not reach them): a shorter height is
+        // a vertical density of (height - 40) / 4.
+        visualDensity: height == null
+            ? null
+            : VisualDensity(vertical: ((height - 40) / 4).clamp(VisualDensity.minimumDensity, 0).toDouble()),
       ),
       expandedInsets: n.prop(SegmentedButtonProps.expanded) ? EdgeInsets.zero : null,
     );
@@ -2371,7 +2511,8 @@ class _SignatureIslandState extends State<_SignatureIsland> {
 
   @override
   Widget build(BuildContext context) {
-    final n = widget.node;
+    // Its unset colors (ink, pad, border, placeholder) are the theme's.
+    final n = withThemeColors(widget.node, Theme.of(context).colorScheme);
     final error = n.prop(SignatureProps.error);
     final radius = n.prop(SignatureProps.borderRadius).flutter;
     final borderWidth = error ? n.prop(SignatureProps.errorBorderWidth) : n.prop(SignatureProps.borderWidth);
@@ -2388,16 +2529,16 @@ class _SignatureIslandState extends State<_SignatureIsland> {
     final captionStyle = n.prop(SignatureProps.captionStyle);
     final painter = SignaturePainter(
       strokes: [...strokes, ?current],
-      inkColor: n.prop(SignatureProps.inkColor).flutter,
+      inkColor: themedColor(n, SignatureProps.inkColor),
       inkWidth: n.prop(SignatureProps.inkWidth),
       placeholder: n.prop(SignatureProps.placeholder),
-      placeholderColor: n.prop(SignatureProps.placeholderColor).flutter,
+      placeholderColor: themedColor(n, SignatureProps.placeholderColor),
       placeholderFontSize: placeholderFontSize,
       placeholderStyle: placeholderStyle.isEmpty
           ? null
           : _signatureStyle(placeholderStyle,
               textDefault: _textDefault(context, n),
-              color: n.prop(SignatureProps.placeholderColor).flutter,
+              color: themedColor(n, SignatureProps.placeholderColor),
               fontSize: placeholderFontSize,
               fontWeight: FontWeight.values[((n.prop(SignatureProps.placeholderFontWeight) ~/ 100) - 1).clamp(0, 8)],
               letterSpacing: n.prop(SignatureProps.placeholderLetterSpacing) ??
@@ -2436,12 +2577,12 @@ class _SignatureIslandState extends State<_SignatureIsland> {
         : null;
     final pad = DecoratedBox(
       decoration: BoxDecoration(
-        color: n.prop(SignatureProps.backgroundColor).flutter,
+        color: themedColor(n, SignatureProps.backgroundColor),
         borderRadius: radius,
         border: borderWidth <= 0
             ? null
             : Border.all(
-                color: (error ? n.prop(SignatureProps.errorBorderColor) : n.prop(SignatureProps.borderColor)).flutter,
+                color: themedColor(n, error ? SignatureProps.errorBorderColor : SignatureProps.borderColor),
                 width: borderWidth,
               ),
       ),

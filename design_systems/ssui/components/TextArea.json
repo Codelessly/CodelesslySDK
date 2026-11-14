@@ -1,0 +1,188 @@
+{
+ "schema": 3,
+ "id": "TextArea",
+ "roots": [
+  "field"
+ ],
+ "widget": {
+  "type": "TextArea",
+  "doc": "A multi-line text field (a note, a message), styled as TextInput, its value kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Draws the error border."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 50 % opacity, not editable."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    320,
+    88
+   ],
+   "props": {
+    "placeholder": "Add a note…"
+   }
+  }
+ ],
+ "nodes": {
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": 88
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "height": 1.5
+    },
+    "maxLines": 0,
+    "decoration": {
+     "isDense": true,
+     "filled": true,
+     "fillColor": "primaryBackground",
+     "contentPadding": [
+      8,
+      7,
+      8,
+      7
+     ],
+     "hintStyle": "placeholder",
+     "border": {
+      "type": "outline",
+      "borderRadius": 7,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderRadius": 7,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderRadius": 7,
+      "borderSide": {
+       "color": "focusBorder",
+       "width": 1.5
+      }
+     },
+     "errorBorder": {
+      "type": "outline",
+      "borderRadius": 7,
+      "borderSide": {
+       "color": "error",
+       "width": 1
+      }
+     },
+     "focusedErrorBorder": {
+      "type": "outline",
+      "borderRadius": 7,
+      "borderSide": {
+       "color": "error",
+       "width": 1.5
+      }
+     },
+     "disabledBorder": {
+      "type": "outline",
+      "borderRadius": 7,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "hoverColor": "#00000000"
+    },
+    "keyboardType": "multiline",
+    "textAlignVertical": "top",
+    "cursorColor": "primary"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.errorText": "${= props.error ? '​' : ''}",
+    "props.enabled": "${props.enabled}",
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "disabled": {
+     "field": {
+      "opacity": 0.5
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -92,8 +92,10 @@ class StreamProgress {
 class UiSession implements NodeSource {
   UiSession({
     LayoutDocument? document,
-    this.catalog = Catalog.core,
+    Catalog catalog = Catalog.core,
     TrustProfile? profile,
+    this.designSystem,
+    ThemeTokens? theme,
     this.check = catalogCheck,
     this.placeholderColor = 0x14808080,
     this.arrivalFade,
@@ -101,7 +103,22 @@ class UiSession implements NodeSource {
     this.protectRoots = true,
     this.glyphCoverage,
   })  : profile = profile ?? TrustProfile.agent,
-        _document = document ?? LayoutDocument(catalog: catalog);
+        catalog = designSystem?.catalogOver(catalog) ?? catalog,
+        theme = designSystem?.themeUnder(theme ?? ThemeTokens.none) ?? theme ?? ThemeTokens.none,
+        _document = document ?? LayoutDocument(catalog: designSystem?.catalogOver(catalog) ?? catalog);
+
+  /// The design system the UI is made with: its components are node types
+  /// of [catalog] (a call is checked against its declaration), its tokens are
+  /// [theme], and a model's prompt is generated from it
+  /// (`runtimeStarter(designSystem: ...)`). Null: none; the UI's controls are
+  /// neutral.
+  final DesignSystem? designSystem;
+
+  /// The theme the UI is shown in: the design system's tokens with the
+  /// app's [theme] over them, else that theme, else none (neutral controls,
+  /// no font family: text and control text alike take the platform's).
+  /// Nothing comes from the theme of the app around the view.
+  final ThemeTokens theme;
 
   /// What node and action types decode with.
   final Catalog catalog;

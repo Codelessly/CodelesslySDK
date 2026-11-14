@@ -1,0 +1,14 @@
+name: ssui_golden
+description: Renders soft_saas_ui's own widgets for a side-by-side with the SSUI design system as data.
+publish_to: none
+environment:
+  sdk: ">=3.13.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  material_ui: ^1.1.1
+  soft_saas_ui:
+    path: /home/user/OverlookV2/packages/soft_saas_ui
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

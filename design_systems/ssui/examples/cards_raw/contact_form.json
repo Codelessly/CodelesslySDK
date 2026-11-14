@@ -1,0 +1,353 @@
+{
+ "schema": 3,
+ "id": "contact_form",
+ "roots": [
+  "contact_form"
+ ],
+ "variables": {
+  "contact_form": [
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "message",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "nameError",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "emailError",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "messageError",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "topic",
+    "type": "text",
+    "value": "Billing"
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "nodes": {
+  "contact_form": {
+   "type": "canvas",
+   "name": "contact_form",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 600
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 600
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
+   }
+  },
+  "card": {
+   "type": "column",
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 400
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE0E0E0"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "title",
+    "sub",
+    "inName",
+    "inEmail",
+    "inTopic",
+    "inMsg",
+    "foot"
+   ]
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "Contact us",
+    "style": {
+     "fontSize": 18,
+     "fontWeight": 600,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 334
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "sub": {
+   "type": "text",
+   "props": {
+    "text": "We answer within one working day.",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF5F6368"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 334
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "inName": {
+   "type": "textField",
+   "props": {
+    "decoration": {
+     "labelText": "Name"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 56
+   },
+   "bind": {
+    "props.initialValue": "${name}",
+    "props.decoration.errorText": "${nameError}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "inEmail": {
+   "type": "textField",
+   "props": {
+    "decoration": {
+     "labelText": "Email"
+    },
+    "keyboardType": "emailAddress"
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 56
+   },
+   "bind": {
+    "props.initialValue": "${email}",
+    "props.decoration.errorText": "${emailError}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "inTopic": {
+   "type": "dropdown",
+   "props": {
+    "items": [
+     "Billing",
+     "A bug",
+     "A feature idea",
+     "Something else"
+    ],
+    "value": "Billing",
+    "isExpanded": true
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 48
+   }
+  },
+  "inMsg": {
+   "type": "textField",
+   "props": {
+    "decoration": {
+     "labelText": "Message"
+    },
+    "maxLines": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 120
+   },
+   "bind": {
+    "props.initialValue": "${message}",
+    "props.decoration.errorText": "${messageError}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "message",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "send"
+   ],
+   "props": {
+    "mainAxisAlignment": "end"
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "send": {
+   "type": "filledButton",
+   "props": {
+    "label": "Send message"
+   },
+   "layout": {
+    "width": 140,
+    "height": 40
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "nameError",
+       "value": "${= trim(name) == '' ? 'Enter your name.' : ''}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "emailError",
+       "value": "${= !contains(email, '@') || !contains(email, '.') ? 'Enter an email like name@company.com.' : ''}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "messageError",
+       "value": "${= length(trim(message)) < 10 ? 'Tell us a little more (10 characters or more).' : ''}"
+      },
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= nameError == '' && emailError == '' && messageError == ''}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "sent",
+         "value": "true"
+        },
+        {
+         "type": "componentEvent",
+         "event": "submit",
+         "value": {
+          "name": "${name}",
+          "email": "${email}",
+          "topic": "${topic}",
+          "message": "${message}"
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

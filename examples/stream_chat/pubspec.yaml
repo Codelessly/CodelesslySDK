@@ -24,3 +24,4 @@ flutter:
   assets:
     - assets/streams/
     - assets/system_prompt.md
+    - assets/design_systems/

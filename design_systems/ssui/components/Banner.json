@@ -1,0 +1,239 @@
+{
+ "schema": 3,
+ "id": "Banner",
+ "roots": [
+  "banner"
+ ],
+ "widget": {
+  "type": "Banner",
+  "doc": "An inline message (info, success, warning, error): the tone's tint, icon and an optional action (the actions slot). Fires onDismiss.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A bold first line (empty: none)."
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Message",
+    "doc": "The text.",
+    "required": true
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "info",
+      "success",
+      "warning",
+      "error",
+      "neutral"
+     ]
+    },
+    "default": "info",
+    "doc": "The colour and icon."
+   },
+   {
+    "key": "dismissible",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "An x that fires onDismiss."
+   }
+  ],
+  "events": [
+   {
+    "key": "onDismiss"
+   }
+  ],
+  "slots": [
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Warning",
+   "size": [
+    360,
+    56
+   ],
+   "props": {
+    "title": "Payment failed",
+    "message": "Update your card to keep your plan.",
+    "tone": "warning"
+   }
+  }
+ ],
+ "nodes": {
+  "banner": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "texts",
+    "actions",
+    "dismiss"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 56
+    },
+    "padding": [
+     12,
+     10,
+     10,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "infoTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "infoTintBorder"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.tone == 'neutral' ? theme.colors.neutralTint : (props.tone == 'primary' ? theme.colors.primaryTint : (props.tone == 'success' ? theme.colors.successTint : (props.tone == 'warning' ? theme.colors.warningTint : (props.tone == 'error' ? theme.colors.errorTint : theme.colors.infoTint))))}",
+    "decoration.strokes[0].color": "${= props.tone == 'neutral' ? theme.colors.neutralTintBorder : (props.tone == 'primary' ? theme.colors.primaryTintBorder : (props.tone == 'success' ? theme.colors.successTintBorder : (props.tone == 'warning' ? theme.colors.warningTintBorder : (props.tone == 'error' ? theme.colors.errorTintBorder : theme.colors.infoTintBorder))))}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "info_outline",
+    "color": "info",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16,
+    "margin": [
+     0,
+     1,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "props.icon": "${= props.tone == 'success' ? 'check_circle' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'error' ? 'error_outline' : 'info_outline'))}",
+    "props.color": "${= props.tone == 'neutral' ? theme.colors.secondaryText : (props.tone == 'primary' ? theme.primary : (props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'error' ? theme.error : theme.colors.info))))}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "message"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 250
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "body",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 250
+    },
+    "height": {
+     "hug": 19
+    }
+   },
+   "bind": {
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "style": {
+     "from": "body",
+     "color": "secondaryText"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 250
+    },
+    "height": {
+     "hug": 19
+    }
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "dismiss": {
+   "type": "IconButton",
+   "props": {
+    "icon": "close",
+    "size": "xs"
+   },
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "bind": {
+    "visible": "${props.dismissible}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onDismiss"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
