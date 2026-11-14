@@ -154,7 +154,6 @@ const widgetImportRatchet = {
   'src/widgets/collections_swipe.dart',
   'src/widgets/collections_table.dart',
   'src/widgets/indicator_theme.dart',
-  'src/widgets/indicators.dart',
   'src/widgets/inputs.dart',
   'src/widgets/inputs_shapes.dart',
   'src/widgets/inputs_toggle.dart',

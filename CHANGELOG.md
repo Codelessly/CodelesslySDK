@@ -5,6 +5,14 @@
 statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
 and matching no item). The formula engine is right; nothing told the model.
 
+- Milestone 3, kit follow-up and workstreams C and I: every render-object control's state changes (hover, press,
+  focus, selected, disabled) ease over SSUI's 150 ms (`durations.control`, ease-out) on its own ticker; a control
+  node with no layout hugs (a column of zero-prop buttons lays out on the scale); buttons take `loading` (SSUI's
+  spinner in the icon's place, presses ignored, busy to screen readers); chips (`chip`, `actionChip`, `choiceChip`,
+  `filterChip`, `inputChip`) and `badge` are render objects in SSUI's look (render/controls/chips.dart; the check
+  mark's room kept, an input chip's x fires `deleted`), 0.00 % from soft_saas_ui's own; `circularProgressIndicator`
+  and `activityIndicator` are render objects on their own ticker (render/controls/spinner.dart) and no file imports
+  Cupertino. Parity goldens re-pinned for the new look: samples-material/chips and fab_badge.
 - `UiSession.applyStream` reports, when the stream ends, the references it accepted as warnings while the stream ran
   and that never arrived (codelessly_api's `unresolvedReferences`): an `unknown_name` in a computed variable's
   formula or a binding is an error in the result, with the lambda to write when the name is a field of a list's
