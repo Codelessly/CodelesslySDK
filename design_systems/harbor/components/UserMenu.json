@@ -1,0 +1,564 @@
+{
+ "schema": 3,
+ "id": "UserMenu",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "UserMenu",
+  "doc": "The account menu: who is signed in, a few actions and Sign out. Fires onSelected with the label, and onSignOut.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Ada Lovelace",
+    "doc": "Who is signed in.",
+    "required": true
+   },
+   {
+    "key": "email",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Their email."
+   },
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Settings",
+     "Sync now"
+    ],
+    "doc": "The actions' labels."
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "settings",
+     "sync"
+    ],
+    "doc": "One icon per action."
+   },
+   {
+    "key": "signOutLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Sign out",
+    "doc": "The last, red action (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSignOut"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    200,
+    150
+   ],
+   "props": {
+    "email": "ada@analytical.io"
+   }
+  }
+ ],
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "header",
+    "list",
+    "rule",
+    "signOut"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 150
+    },
+    "padding": [
+     1,
+     1,
+     1,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "plate",
+    "who"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ],
+    "margin": [
+     0,
+     0,
+     0,
+     4
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "letter"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 37
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       -1,
+       -1
+      ],
+      "end": [
+       1,
+       1
+      ],
+      "stops": [
+       {
+        "color": "#FF3B82F6",
+        "position": 0
+       },
+       {
+        "color": "#FF6366F1",
+        "position": 1
+       }
+      ]
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "letter": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(left(props.name, 1))}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.0,
+     "color": "#FFFFFFFF",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 12
+    }
+   }
+  },
+  "who": {
+   "type": "column",
+   "children": [
+    "name",
+    "email"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 130
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 130
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "email": {
+   "type": "text",
+   "props": {
+    "text": "${props.email}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 130
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.email != ''}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "action"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": {
+     "hug": 58
+    }
+   },
+   "bind": {
+    "data": "${props.items}"
+   }
+  },
+  "action": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": {
+     "hug": 29
+    },
+    "padding": [
+     14,
+     8,
+     14,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "action": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "secondaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index}",
+    "props.icon": "${= length(props.icons) > index ? props.icons[index] : 'circle'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": 1,
+    "margin": [
+     0,
+     4,
+     0,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.signOutLabel != ''}"
+   }
+  },
+  "signOut": {
+   "type": "row",
+   "children": [
+    "outGlyph",
+    "outLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": {
+     "hug": 29
+    },
+    "padding": [
+     14,
+     8,
+     14,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.signOutLabel != ''}"
+   },
+   "states": {
+    "hovered": {
+     "signOut": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "errorTint"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSignOut"
+      }
+     ]
+    }
+   ]
+  },
+  "outGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "logout",
+    "color": "error",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "outLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.signOutLabel}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "error",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  }
+ }
+}

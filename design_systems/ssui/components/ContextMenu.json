@@ -1,0 +1,360 @@
+{
+ "schema": 3,
+ "id": "ContextMenu",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "ContextMenu",
+  "doc": "The menu of a right click or a \"more\" button: actions with icons and shortcuts, hairlines between groups. Fires onSelected with the label.",
+  "props": [
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Rename",
+     "Duplicate",
+     "-",
+     "Delete"
+    ],
+    "doc": "The actions' labels; \"-\" is a hairline.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One icon per entry (empty: none)."
+   },
+   {
+    "key": "shortcuts",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One shortcut per entry (empty: none)."
+   },
+   {
+    "key": "destructive",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Delete"
+    ],
+    "doc": "The labels shown in red."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    200,
+    110
+   ],
+   "props": {
+    "icons": [
+     "edit",
+     "content_copy",
+     "",
+     "delete"
+    ],
+    "shortcuts": [
+     "F2",
+     "Ctrl+D",
+     "",
+     "Del"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": [
+     1,
+     5,
+     1,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "entry"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": {
+     "hug": 100
+    }
+   },
+   "bind": {
+    "data": "${props.items}"
+   }
+  },
+  "entry": {
+   "type": "column",
+   "children": [
+    "rule",
+    "action"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": {
+     "hug": 29
+    }
+   }
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": 1,
+    "margin": [
+     0,
+     4,
+     0,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= item == '-'}"
+   }
+  },
+  "action": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "shortcut"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 198
+    },
+    "height": {
+     "hug": 29
+    },
+    "padding": [
+     12,
+     7,
+     12,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= item != '-'}"
+   },
+   "states": {
+    "hovered": {
+     "action": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "primaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index && props.icons[index] != ''}",
+    "props.icon": "${= length(props.icons) > index && props.icons[index] != '' ? props.icons[index] : 'circle'}",
+    "props.color": "${= contains(props.destructive, item) ? theme.error : theme.colors.primaryText}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.color": "${= contains(props.destructive, item) ? theme.error : theme.colors.primaryText}"
+   }
+  },
+  "shortcut": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.shortcuts) > index ? props.shortcuts[index] : ''}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.2
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.shortcuts) > index && props.shortcuts[index] != ''}"
+   }
+  }
+ }
+}

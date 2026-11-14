@@ -533,7 +533,12 @@
   "components/StatusCategoryHeader.json",
   "components/SectionCategoryHeaderFull.json",
   "components/ScrollToBottomFAB.json",
-  "components/TabBarWithBadges.json"
+  "components/TabBarWithBadges.json",
+  "components/MenuPopover.json",
+  "components/MenuItem.json",
+  "components/ContextMenu.json",
+  "components/SortMenu.json",
+  "components/UserMenu.json"
  ],
  "replaces": [
   "filledButton",
