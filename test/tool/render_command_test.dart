@@ -23,6 +23,7 @@ List<String> codes(RenderReport r, [String? severity]) => [
     ];
 
 void main() {
+  _modalScreens();
   late Directory out;
   setUp(() => out = Directory.systemTemp.createTempSync('render_command_test'));
   tearDown(() => out.deleteSync(recursive: true));
@@ -551,5 +552,17 @@ void main() {
     expect(wide.where((b) => b['id'] == 'cell'), hasLength(9), reason: 'three rows of three cells from one cell node');
     final narrow = boxes('390x844').singleWhere((b) => b['id'] == 'rail');
     expect([narrow['x'], narrow['w']], [24, 342.0]);
+  });
+}
+
+void _modalScreens() {
+  testWidgets('with no --screen, canvases opened as modals are not rendered as screens: from a page or from inside a component',
+      (tester) async {
+    final out = Directory.systemTemp.createTempSync('render_modals');
+    addTearDown(() => out.deleteSync(recursive: true));
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/modals'], out: out.path, sizes: const [Size(390, 844)]));
+    expect(report.errors, 0, reason: '${report.diagnostics}');
+    final pngs = out.listSync().map((f) => f.uri.pathSegments.last).where((n) => n.endsWith('.png')).toSet();
+    expect(pngs, {'home@390x844.png'});
   });
 }

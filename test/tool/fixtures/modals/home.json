@@ -1,0 +1,177 @@
+{
+ "schema": 3,
+ "id": "home",
+ "roots": [
+  "home",
+  "pageDlg",
+  "compDlg"
+ ],
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "open",
+    "card"
+   ],
+   "props": {
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF5F5F5"
+     }
+    ]
+   }
+  },
+  "open": {
+   "type": "filledButton",
+   "props": {
+    "label": "Open"
+   },
+   "layout": {
+    "width": 160,
+    "height": 40
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "pageDlg"
+      }
+     ]
+    }
+   ]
+  },
+  "card": {
+   "type": "Opener",
+   "layout": {
+    "width": 160,
+    "height": 40
+   }
+  },
+  "pageDlg": {
+   "type": "canvas",
+   "slots": {
+    "body": "pageDlgBody"
+   },
+   "layout": {
+    "width": 300,
+    "height": 200
+   }
+  },
+  "pageDlgBody": {
+   "type": "column",
+   "children": [
+    "pageDlgText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "fill": 200
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "pageDlgText": {
+   "type": "text",
+   "props": {
+    "text": "Opened from the page",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF000000"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "compDlg": {
+   "type": "canvas",
+   "slots": {
+    "body": "compDlgBody"
+   },
+   "layout": {
+    "width": 300,
+    "height": 200
+   }
+  },
+  "compDlgBody": {
+   "type": "column",
+   "children": [
+    "compDlgText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "fill": 200
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "compDlgText": {
+   "type": "text",
+   "props": {
+    "text": "Opened from a component",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF000000"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  }
+ }
+}
