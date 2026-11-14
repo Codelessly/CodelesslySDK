@@ -58,4 +58,20 @@ void main() {
     });
     expect(plain.glyphRect, Offset.zero & const Size(24, 24));
   });
+
+  testWidgets('an icon that says nothing of its size is the default icon size, not nothing', (tester) async {
+    // What an agent writes: an icon name and no numbers.
+    final g = await glyphOf(tester, {
+      'layout': {'width': {'hug': 0}, 'height': {'hug': 0}},
+      'props': {'icon': 'info'},
+    });
+    expect(g.size, const Size.square(kDefaultIconSize));
+    expect(g.glyphRect, Offset.zero & const Size.square(kDefaultIconSize));
+    // A design size is still the box the glyph fills.
+    final boxed = await glyphOf(tester, {
+      'layout': {'width': {'hug': 20}, 'height': {'hug': 20}},
+      'props': {'icon': 'info'},
+    });
+    expect(boxed.glyphRect, Offset.zero & const Size.square(20));
+  });
 }

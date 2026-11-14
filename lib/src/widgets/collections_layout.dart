@@ -427,7 +427,29 @@ class RenderListItems extends RenderCollection {
     var index = 0;
     while (true) {
       while (child != null) {
-        child.layout(_childConstraints(crossAvail, tightCross: stretchNow ? crossAvail : null), parentUsesSize: true);
+        var itemConstraints = _childConstraints(crossAvail, tightCross: stretchNow ? crossAvail : null);
+        if (hugCross && !stretchNow && crossAvail.isFinite) {
+          // The list is as thick as its items, so an item that fills across
+          // it has nothing to fill: it is as thick as its content (at most
+          // the room there is), not the whole of the room its parent has.
+          final across = axis == Axis.vertical ? Axis.horizontal : Axis.vertical;
+          final fits = [
+            for (final f in _ownFitBoxes(child))
+              if (across == Axis.vertical ? f.fillHeight : f.fillWidth) f,
+          ];
+          if (fits.isNotEmpty) {
+            for (final f in fits) {
+              f.measureContentAlong = across;
+            }
+            child.layout(_childConstraints(double.infinity), parentUsesSize: true);
+            for (final f in fits) {
+              f.measureContentAlong = null;
+            }
+            final content = RenderCollection.cross(child.size, axis);
+            itemConstraints = _childConstraints(crossAvail, tightCross: math.min(content, crossAvail));
+          }
+        }
+        child.layout(itemConstraints, parentUsesSize: true);
         final extent = RenderCollection.main(child.size, axis);
         final count = itemCount;
         final overlaps = overlap > 0 && count != null && index < count - 1;
