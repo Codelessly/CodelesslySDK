@@ -1,0 +1,56 @@
+{
+ "stream": "order_summary@claude-sonnet-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1012,
+ "timeToFirstPaintMs": 2303,
+ "timeToFirstTextMs": 2303,
+ "timeToFirstSectionMs": 2303,
+ "timeToCompleteMs": 2368,
+ "outputTokens": 341,
+ "tokensEstimated": false,
+ "chars": 594,
+ "deltas": 37,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "dangling_child /nodes/btns/children/1"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 33,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/btns/children/1",
+   "message": "Child \"confirm\" of \"btns\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "btns"
+  }
+ ],
+ "nodes": 32,
+ "reappliedBoxesPerOp": {
+  "min": 5,
+  "median": 5,
+  "p90": 5,
+  "max": 5
+ },
+ "frames": 49,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 3,
+ "pumps": 87,
+ "pumpMsMedian": 0.191,
+ "renderExceptions": [],
+ "warnings": 0
+}

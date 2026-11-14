@@ -1,0 +1,51 @@
+{
+ "stream": "reservation@claude-haiku-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 473,
+ "timeToFirstPaintMs": 860,
+ "timeToFirstTextMs": 860,
+ "timeToFirstSectionMs": 860,
+ "timeToCompleteMs": 2179,
+ "outputTokens": 598,
+ "tokensEstimated": false,
+ "chars": 1203,
+ "deltas": 82,
+ "opsApplied": 6,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 3,
+   "rejected": 21
+  },
+  {
+   "stream": "retry",
+   "applied": 22,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 6,
+ "rejections": [],
+ "nodes": 24,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 11,
+  "p90": 12,
+  "max": 12
+ },
+ "frames": 46,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 6,
+ "pumps": 129,
+ "pumpMsMedian": 0.159,
+ "renderExceptions": [],
+ "warnings": 2
+}

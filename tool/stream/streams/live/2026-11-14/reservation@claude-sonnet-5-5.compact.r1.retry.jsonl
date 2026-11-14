@@ -1,0 +1,21 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["reservation@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":231,"usage":{"inputTokens":4292,"outputTokens":231,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1056,"firstToolDeltaMs":1130,"totalMs":1867,"stopReason":"StopReason.toolUse"},"text":"I'm re-sending the one rejected node, `dayN`, without the stray `hug` key in its layout.","ttftMs":1056,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":17,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1130,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1163,"delta":" \"set\", \"id\": \"d"}
+{"tMs":1198,"delta":"ayN\", \"node\": {\""}
+{"tMs":1234,"delta":"type\": \"text\", \"layout"}
+{"tMs":1269,"delta":"\": {\"width\": {\"h"}
+{"tMs":1304,"delta":"ug\": 30}, \"height"}
+{"tMs":1340,"delta":"\": {\"hug\": 16"}
+{"tMs":1376,"delta":"}}, \"props\": {\""}
+{"tMs":1411,"delta":"text\": \"${item.n}"}
+{"tMs":1447,"delta":"\", \"style\": {\"font"}
+{"tMs":1482,"delta":"Size\": 12, \"color"}
+{"tMs":1518,"delta":"\": \"#FF6B7"}
+{"tMs":1554,"delta":"280\"}}, \"bind"}
+{"tMs":1589,"delta":"\": {\"props.style.color"}
+{"tMs":1624,"delta":"\": \"${= index == day"}
+{"tMs":1660,"delta":"Idx ? '#F"}
+{"tMs":1696,"delta":"FDBEAFE'"}
+{"tMs":1732,"delta":" : '#FF6B7"}
+{"tMs":1768,"delta":"280'}\"}}}]"}
+{"tMs":1867,"delta":"}"}

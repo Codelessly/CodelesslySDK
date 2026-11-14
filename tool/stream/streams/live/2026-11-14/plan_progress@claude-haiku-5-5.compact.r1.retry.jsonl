@@ -1,0 +1,19 @@
+{"meta":{"ui":"plan_progress","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["plan_progress@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":148,"usage":{"inputTokens":1142,"outputTokens":148,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":516,"firstToolDeltaMs":553,"totalMs":919,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":516,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":29,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":553,"delta":"{\"ops\": [{\"op"}
+{"tMs":574,"delta":"\":\"set\",\"id\":\"prog"}
+{"tMs":591,"delta":"ress\",\"par"}
+{"tMs":611,"delta":"ent\":\"card\",\"index"}
+{"tMs":633,"delta":"\":3,\"node\":{\""}
+{"tMs":663,"delta":"type\":\"progressBar\",\""}
+{"tMs":673,"delta":"layout\":{\"width\":{"}
+{"tMs":693,"delta":"\"fill\":342"}
+{"tMs":715,"delta":"},\"height\":8"}
+{"tMs":734,"delta":"},\"props\":{\"value\":"}
+{"tMs":754,"delta":"0,\"max\":6"}
+{"tMs":774,"delta":",\"color\":\"#FF"}
+{"tMs":796,"delta":"2563EB\",\"backgro"}
+{"tMs":816,"delta":"undColor\":\"#FF"}
+{"tMs":836,"delta":"E5E7EB\",\"bor"}
+{"tMs":857,"delta":"derRadius\":4"}
+{"tMs":877,"delta":"}}}]"}
+{"tMs":916,"delta":"}"}

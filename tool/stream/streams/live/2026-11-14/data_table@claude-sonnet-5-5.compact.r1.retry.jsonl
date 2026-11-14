@@ -1,0 +1,33 @@
+{"meta":{"ui":"data_table","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["data_table@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":307,"usage":{"inputTokens":6146,"outputTokens":307,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1427,"firstToolDeltaMs":1494,"totalMs":2564,"stopReason":"StopReason.toolUse"},"text":"Simplest robust fix: set the select-all with a single setVariable that computes the new list.","ttftMs":1427,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":25,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1494,"delta":"{\"ops\": [{\"op"}
+{"tMs":1532,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1562,"delta":"hcheck\", \"par"}
+{"tMs":1596,"delta":"ent\": \"head\", \"index"}
+{"tMs":1629,"delta":"\": 0, \"node\": {"}
+{"tMs":1664,"delta":"\"type\": \"checkbox"}
+{"tMs":1696,"delta":"\", \"layout\": {\"width"}
+{"tMs":1730,"delta":"\": 36, \"height\": "}
+{"tMs":1786,"delta":"36}, \"bind\": {"}
+{"tMs":2411,"delta":"\"props.value\": \"${all"}
+{"tMs":2411,"delta":"OnPage}\"},"}
+{"tMs":2411,"delta":" \"actions\": [{\"tr"}
+{"tMs":2411,"delta":"igger\": {\"type\": \""}
+{"tMs":2411,"delta":"changed\"}, \"actions"}
+{"tMs":2411,"delta":"\": [{\"type\": \"set"}
+{"tMs":2411,"delta":"Variable\", \"variable\":"}
+{"tMs":2411,"delta":" \"sel\", \"value\": \""}
+{"tMs":2411,"delta":"${= allOnPage "}
+{"tMs":2411,"delta":"? filter(s"}
+{"tMs":2411,"delta":"el, (x) => !cont"}
+{"tMs":2411,"delta":"ains(map"}
+{"tMs":2411,"delta":"(pageRows, (r"}
+{"tMs":2411,"delta":") => r.id), x)"}
+{"tMs":2411,"delta":") : concat(fil"}
+{"tMs":2411,"delta":"ter(sel, (x)"}
+{"tMs":2411,"delta":" => !contains(map(p"}
+{"tMs":2411,"delta":"ageRows, (r) =>"}
+{"tMs":2411,"delta":" r.id), x)), map"}
+{"tMs":2432,"delta":"(pageRows, (r"}
+{"tMs":2465,"delta":") => r.id))}\""}
+{"tMs":2499,"delta":"}]}]}}]"}
+{"tMs":2563,"delta":"}"}

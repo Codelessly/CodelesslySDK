@@ -1,0 +1,223 @@
+{
+ "stream": "reservation@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 459,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 12610,
+ "outputTokens": 4346,
+ "tokensEstimated": false,
+ "chars": 8729,
+ "deltas": 594,
+ "opsApplied": 3,
+ "opsRejected": 21,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_parent /ops/3/parent",
+  "unknown_id /ops/4/parent",
+  "unknown_id /ops/5/parent",
+  "unknown_id /ops/6/parent",
+  "unknown_id /ops/7/parent",
+  "unknown_id /ops/8/parent",
+  "unknown_id /ops/9/parent",
+  "unknown_id /ops/10/parent",
+  "unknown_id /ops/11/parent",
+  "unknown_id /ops/12/parent",
+  "unknown_id /ops/13/parent",
+  "unknown_id /ops/14/parent",
+  "unknown_id /ops/15/parent",
+  "unknown_id /ops/16/parent",
+  "unknown_id /ops/17/parent",
+  "unknown_id /ops/18/parent",
+  "unknown_id /ops/19/parent",
+  "unknown_id /ops/20/parent",
+  "unknown_id /ops/21/parent",
+  "unknown_id /ops/22/parent",
+  "unknown_id /ops/23/parent",
+  "dangling_child /nodes/booking/slots/body"
+ ],
+ "scripts": 0,
+ "streamedOps": 24,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "invalid_parent",
+   "path": "/ops/3/parent",
+   "message": "A canvas takes no children list: give a \"slot\" (body, appBar, floatingActionButton, bottomNavigationBar).",
+   "nodeId": "booking",
+   "expected": [
+    "body",
+    "appBar",
+    "floatingActionButton",
+    "bottomNavigationBar"
+   ]
+  },
+  {
+   "op": 4,
+   "code": "unknown_id",
+   "path": "/ops/4/parent",
+   "message": "No node \"card\" to place \"title\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "title"
+  },
+  {
+   "op": 5,
+   "code": "unknown_id",
+   "path": "/ops/5/parent",
+   "message": "No node \"card\" to place \"dayLabel\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "dayLabel"
+  },
+  {
+   "op": 6,
+   "code": "unknown_id",
+   "path": "/ops/6/parent",
+   "message": "No node \"card\" to place \"dayRow\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "dayRow"
+  },
+  {
+   "op": 7,
+   "code": "unknown_id",
+   "path": "/ops/7/parent",
+   "message": "No node \"dayRow\" to place \"d0\" under.",
+   "nodeId": "d0"
+  },
+  {
+   "op": 8,
+   "code": "unknown_id",
+   "path": "/ops/8/parent",
+   "message": "No node \"dayRow\" to place \"d1\" under.",
+   "nodeId": "d1"
+  },
+  {
+   "op": 9,
+   "code": "unknown_id",
+   "path": "/ops/9/parent",
+   "message": "No node \"dayRow\" to place \"d2\" under.",
+   "nodeId": "d2"
+  },
+  {
+   "op": 10,
+   "code": "unknown_id",
+   "path": "/ops/10/parent",
+   "message": "No node \"dayRow\" to place \"d3\" under.",
+   "nodeId": "d3"
+  },
+  {
+   "op": 11,
+   "code": "unknown_id",
+   "path": "/ops/11/parent",
+   "message": "No node \"dayRow\" to place \"d4\" under.",
+   "nodeId": "d4"
+  },
+  {
+   "op": 12,
+   "code": "unknown_id",
+   "path": "/ops/12/parent",
+   "message": "No node \"dayRow\" to place \"d5\" under.",
+   "nodeId": "d5"
+  },
+  {
+   "op": 13,
+   "code": "unknown_id",
+   "path": "/ops/13/parent",
+   "message": "No node \"dayRow\" to place \"d6\" under.",
+   "nodeId": "d6"
+  },
+  {
+   "op": 14,
+   "code": "unknown_id",
+   "path": "/ops/14/parent",
+   "message": "No node \"card\" to place \"partyLabel\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "partyLabel"
+  },
+  {
+   "op": 15,
+   "code": "unknown_id",
+   "path": "/ops/15/parent",
+   "message": "No node \"card\" to place \"partyRow\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "partyRow"
+  },
+  {
+   "op": 16,
+   "code": "unknown_id",
+   "path": "/ops/16/parent",
+   "message": "No node \"partyRow\" to place \"minus\" under.",
+   "nodeId": "minus"
+  },
+  {
+   "op": 17,
+   "code": "unknown_id",
+   "path": "/ops/17/parent",
+   "message": "No node \"partyRow\" to place \"partyValue\" under.",
+   "nodeId": "partyValue"
+  },
+  {
+   "op": 18,
+   "code": "unknown_id",
+   "path": "/ops/18/parent",
+   "message": "No node \"partyRow\" to place \"plus\" under.",
+   "nodeId": "plus"
+  },
+  {
+   "op": 19,
+   "code": "unknown_id",
+   "path": "/ops/19/parent",
+   "message": "No node \"card\" to place \"timeLabel\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "timeLabel"
+  },
+  {
+   "op": 20,
+   "code": "unknown_id",
+   "path": "/ops/20/parent",
+   "message": "No node \"card\" to place \"timeList\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "timeList"
+  },
+  {
+   "op": 21,
+   "code": "unknown_id",
+   "path": "/ops/21/parent",
+   "message": "No node \"timeList\" to place \"slot\" under.",
+   "nodeId": "slot"
+  },
+  {
+   "op": 22,
+   "code": "unknown_id",
+   "path": "/ops/22/parent",
+   "message": "No node \"card\" to place \"summary\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "summary"
+  },
+  {
+   "op": 23,
+   "code": "unknown_id",
+   "path": "/ops/23/parent",
+   "message": "No node \"card\" to place \"confirm\" under (it is listed by \"booking\" but has not arrived: set it first).",
+   "nodeId": "confirm"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/booking/slots/body",
+   "message": "Slot \"body\" of \"booking\" names \"card\", which never arrived.",
+   "nodeId": "booking"
+  }
+ ],
+ "nodes": 1,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 179,
+ "frameMs": 75,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 774,
+ "pumpMsMedian": 0.104,
+ "renderExceptions": [],
+ "warnings": 0
+}

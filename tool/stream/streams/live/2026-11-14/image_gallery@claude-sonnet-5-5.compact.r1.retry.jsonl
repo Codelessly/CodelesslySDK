@@ -1,0 +1,13 @@
+{"meta":{"ui":"image_gallery","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["image_gallery@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":179,"usage":{"inputTokens":4825,"outputTokens":179,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":2424,"firstToolDeltaMs":2429,"totalMs":2436,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":2424,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":["low_contrast cellCap"],"warnings":2,"nodes":19,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":2429,"delta":"{\"ops\": [{\"op\": \""}
+{"tMs":2429,"delta":"patch\", \"id\": \"c"}
+{"tMs":2429,"delta":"ellCap\", \"patch\":"}
+{"tMs":2429,"delta":" {\"decoration\": {\""}
+{"tMs":2429,"delta":"fills\": [{\"color\":"}
+{"tMs":2429,"delta":" \"#99"}
+{"tMs":2429,"delta":"000000\"}], \"radius"}
+{"tMs":2429,"delta":"\": 6"}
+{"tMs":2429,"delta":"}, \"layout\": {\""}
+{"tMs":2429,"delta":"padding\": 4}}}"}
+{"tMs":2429,"delta":"]"}
+{"tMs":2435,"delta":"}"}

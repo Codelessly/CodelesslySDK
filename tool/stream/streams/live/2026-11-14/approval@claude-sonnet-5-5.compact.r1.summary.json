@@ -1,0 +1,73 @@
+{
+ "ui": "approval",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 46693,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 20530,
+ "generate": {
+  "inputTokens": 199,
+  "outputTokens": 3507,
+  "cacheReadInputTokens": 20451,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1109,
+  "firstToolDeltaMs": 1852,
+  "totalMs": 17368,
+  "stopReason": "StopReason.toolUse",
+  "ops": 30,
+  "opsApplied": 29,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "invalid_parent /ops/29/parent"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 27,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 4567,
+   "outputTokens": 310,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1786,
+   "firstToolDeltaMs": 1853,
+   "totalMs": 2818,
+   "stopReason": "StopReason.toolUse",
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 28,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 28,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

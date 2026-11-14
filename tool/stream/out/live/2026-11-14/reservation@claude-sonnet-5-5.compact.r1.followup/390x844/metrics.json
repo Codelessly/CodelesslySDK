@@ -1,0 +1,51 @@
+{
+ "stream": "reservation@claude-sonnet-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 974,
+ "timeToFirstPaintMs": 1225,
+ "timeToFirstTextMs": 1225,
+ "timeToFirstSectionMs": 1225,
+ "timeToCompleteMs": 2892,
+ "outputTokens": 471,
+ "tokensEstimated": false,
+ "chars": 831,
+ "deltas": 52,
+ "opsApplied": 3,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 18,
+   "rejected": 1
+  },
+  {
+   "stream": "retry",
+   "applied": 1,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 3,
+ "rejections": [],
+ "nodes": 18,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 10,
+  "max": 10
+ },
+ "frames": 56,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 3,
+ "pumps": 109,
+ "pumpMsMedian": 0.149,
+ "renderExceptions": [],
+ "warnings": 0
+}

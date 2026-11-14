@@ -1,0 +1,138 @@
+{"meta":{"ui":"itinerary","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Swap the two days.","base":["itinerary@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":1183,"usage":{"inputTokens":4383,"outputTokens":1183,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1438,"firstToolDeltaMs":1504,"totalMs":6394,"stopReason":"StopReason.toolUse"},"text":"I'll swap the order of the two day entries in the `days` variable, redeclaring the list with Day 2 first and relabelling the days so they read Day 1 and Day 2 in the new order.","ttftMs":1438,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":23,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1504,"delta":"{\"ops\": [{\"op\": \""}
+{"tMs":1540,"delta":"vars\", \"scope\": \""}
+{"tMs":1576,"delta":"kyoto\", \"set\":"}
+{"tMs":1612,"delta":" {\"days\": {\"type\":"}
+{"tMs":1647,"delta":" \"list\", \"value\": [{"}
+{"tMs":1682,"delta":"\"day\": \"Day 1"}
+{"tMs":1718,"delta":"\", \"title\": \"Arash"}
+{"tMs":1754,"delta":"iyama and North\", \"st"}
+{"tMs":1789,"delta":"ops\": [{\"time\": \""}
+{"tMs":1825,"delta":"08:30\", \"place\": \""}
+{"tMs":1861,"delta":"Arashiyama B"}
+{"tMs":1896,"delta":"amboo Grove\", \""}
+{"tMs":1931,"delta":"travel\": \"JR S"}
+{"tMs":1967,"delta":"agano Line to Saga"}
+{"tMs":2002,"delta":"-Arashiyama\","}
+{"tMs":2039,"delta":" \"dur\": \"17 min"}
+{"tMs":2074,"delta":" train\", \"stay\": \"1"}
+{"tMs":2109,"delta":" hr\", \"detail\":"}
+{"tMs":2145,"delta":" \"Arrive early for qu"}
+{"tMs":2180,"delta":"iet paths. N"}
+{"tMs":2219,"delta":"earby Tenryu-"}
+{"tMs":2250,"delta":"ji garden is worth the"}
+{"tMs":2289,"delta":" entry fee.\"}, {"}
+{"tMs":2322,"delta":"\"time\": \"11:00\","}
+{"tMs":2357,"delta":" \"place\": \"Iwat"}
+{"tMs":2393,"delta":"ayama Monkey Park"}
+{"tMs":2428,"delta":"\", \"travel\": \"Wal"}
+{"tMs":2464,"delta":"k over Togetsuk"}
+{"tMs":2500,"delta":"yo bridge\", \"d"}
+{"tMs":2535,"delta":"ur\": \"15 min walk"}
+{"tMs":2570,"delta":"\", \"stay\": \"1 "}
+{"tMs":2605,"delta":"hr\", \"detail\": \""}
+{"tMs":2641,"delta":"Short uphill climb to"}
+{"tMs":2677,"delta":" a viewpoint over the"}
+{"tMs":2712,"delta":" city with wild macaques.\""}
+{"tMs":2748,"delta":"}, {\"time\": \"14"}
+{"tMs":2783,"delta":":00\", \"place\": \""}
+{"tMs":2818,"delta":"Kinkaku-ji"}
+{"tMs":2854,"delta":"\", \"travel\": \"Rand"}
+{"tMs":2889,"delta":"en tram then Bus "}
+{"tMs":2925,"delta":"59\", \"dur\": \"40"}
+{"tMs":2960,"delta":" min\", \"stay\": \""}
+{"tMs":2997,"delta":"1 hr\", \"detail"}
+{"tMs":3031,"delta":"\": \"The"}
+{"tMs":3066,"delta":" Golden Pavilion"}
+{"tMs":3102,"delta":" reflected in its pond."}
+{"tMs":3138,"delta":" Last entry is around 16"}
+{"tMs":3173,"delta":":45.\"}, {\"time"}
+{"tMs":3209,"delta":"\": \"17:00\", \"place"}
+{"tMs":3244,"delta":"\": \"Nishiki"}
+{"tMs":3280,"delta":" Market\", \"travel\": \""}
+{"tMs":3315,"delta":"Bus 205 to Sh"}
+{"tMs":3351,"delta":"ijo Karasuma"}
+{"tMs":3386,"delta":"\", \"dur\": \"30 "}
+{"tMs":3423,"delta":"min\", \"stay\": \"1"}
+{"tMs":3457,"delta":".5 hrs\", \""}
+{"tMs":3492,"delta":"detail\": \"Kyo"}
+{"tMs":3528,"delta":"to's kitchen: p"}
+{"tMs":3563,"delta":"ickles, tofu dough"}
+{"tMs":3599,"delta":"nuts, skewers."}
+{"tMs":3634,"delta":" Many stalls close by "}
+{"tMs":3670,"delta":"18:00.\"}], \"tod"}
+{"tMs":3705,"delta":"o\": [{\"label\": \""}
+{"tMs":3741,"delta":"Book Kinkaku"}
+{"tMs":3776,"delta":"-ji timed ticket"}
+{"tMs":3811,"delta":"\", \"done\": false}, {"}
+{"tMs":3847,"delta":"\"label\": \"Reserve"}
+{"tMs":3882,"delta":" Arashiyama lun"}
+{"tMs":3918,"delta":"ch\", \"done\": false},"}
+{"tMs":3955,"delta":" {\"label\": \"Book air"}
+{"tMs":3989,"delta":"port shuttle\", \"done"}
+{"tMs":4024,"delta":"\": false}]}, {\""}
+{"tMs":4060,"delta":"day\": \"Day 2\","}
+{"tMs":4096,"delta":" \"title\": \"Eastern"}
+{"tMs":4131,"delta":" Kyoto\", \"st"}
+{"tMs":4166,"delta":"ops\": [{\"time\": \""}
+{"tMs":4202,"delta":"08:00\", \"place\": \""}
+{"tMs":4237,"delta":"Fushimi Inari"}
+{"tMs":4273,"delta":" Shrine\", \"travel"}
+{"tMs":4308,"delta":"\": \"JR Nara"}
+{"tMs":4346,"delta":" Line from Kyoto"}
+{"tMs":4379,"delta":" Station\", \"dur\": \"5"}
+{"tMs":4414,"delta":" min train\", \"stay\":"}
+{"tMs":4450,"delta":" \"2 hrs\", \""}
+{"tMs":4488,"delta":"detail\": \"Walk the"}
+{"tMs":4521,"delta":" torii gate trail early to"}
+{"tMs":4559,"delta":" beat the crowds."}
+{"tMs":4592,"delta":" Hike to the summit loop"}
+{"tMs":4627,"delta":" if you have energy.\"},"}
+{"tMs":4663,"delta":" {\"time\": \"11:00"}
+{"tMs":4698,"delta":"\", \"place\": \"Ki"}
+{"tMs":4738,"delta":"yomizu-dera\","}
+{"tMs":4769,"delta":" \"travel\": \"Bus"}
+{"tMs":4804,"delta":" 100 or 206\", \""}
+{"tMs":4840,"delta":"dur\": \"35 min\","}
+{"tMs":4876,"delta":" \"stay\": \"1.5"}
+{"tMs":4911,"delta":" hrs\", \"detail"}
+{"tMs":4946,"delta":"\": \"Wooden stage"}
+{"tMs":4982,"delta":" over the hillside. St"}
+{"tMs":5017,"delta":"roll down Sannenz"}
+{"tMs":5053,"delta":"aka and Ninenz"}
+{"tMs":5088,"delta":"aka lanes afterw"}
+{"tMs":5124,"delta":"ards.\"}, {\"time\":"}
+{"tMs":5159,"delta":" \"14:00\", \"place\":"}
+{"tMs":5194,"delta":" \"Gion and Han"}
+{"tMs":5230,"delta":"amikoji\", \"travel"}
+{"tMs":5266,"delta":"\": \"Walk downhill"}
+{"tMs":5301,"delta":"\", \"dur\": \"20 "}
+{"tMs":5337,"delta":"min walk\", \"stay\":"}
+{"tMs":5372,"delta":" \"2 hrs\", \""}
+{"tMs":5407,"delta":"detail\": \"Teahou"}
+{"tMs":5443,"delta":"ses and traditional streets."}
+{"tMs":5480,"delta":" Geiko may appear around"}
+{"tMs":5515,"delta":" dusk.\"}, {\""}
+{"tMs":5549,"delta":"time\": \"18:30\", \""}
+{"tMs":5585,"delta":"place\": \"Pontocho"}
+{"tMs":5620,"delta":" dinner\", \"travel\":"}
+{"tMs":5656,"delta":" \"Walk across Shij"}
+{"tMs":5692,"delta":"o bridge\", \"dur"}
+{"tMs":5727,"delta":"\": \"10 min walk\","}
+{"tMs":5762,"delta":" \"stay\": \"2 h"}
+{"tMs":5798,"delta":"rs\", \"detail\": \""}
+{"tMs":5833,"delta":"Narrow lantern-"}
+{"tMs":5868,"delta":"lit alley of restaur"}
+{"tMs":5904,"delta":"ants along the Kamo river"}
+{"tMs":5940,"delta":".\"}], \"todo\": ["}
+{"tMs":5975,"delta":"{\"label\": \"Reser"}
+{"tMs":6010,"delta":"ve Pontocho din"}
+{"tMs":6046,"delta":"ner\", \"done\": false},"}
+{"tMs":6081,"delta":" {\"label\": \"Book"}
+{"tMs":6117,"delta":" Gion tea ceremony"}
+{"tMs":6152,"delta":"\", \"done\": false}, {"}
+{"tMs":6188,"delta":"\"label\": \"Buy "}
+{"tMs":6225,"delta":"ICOCA transit card\","}
+{"tMs":6259,"delta":" \"done\": false}]}]"}
+{"tMs":6294,"delta":"}}}]"}
+{"tMs":6392,"delta":"}"}

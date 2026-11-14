@@ -1,0 +1,43 @@
+{
+ "stream": "image_gallery@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1050,
+ "timeToFirstPaintMs": 9159,
+ "timeToFirstTextMs": 9159,
+ "timeToFirstSectionMs": 12204,
+ "timeToCompleteMs": 18073,
+ "outputTokens": 3181,
+ "tokensEstimated": false,
+ "chars": 5707,
+ "deltas": 421,
+ "opsApplied": 21,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "low_contrast cellCap"
+ ],
+ "finalDiagnostics": [
+  "low_contrast /nodes/cellCap/props/style/color"
+ ],
+ "scripts": 0,
+ "streamedOps": 21,
+ "rejections": [],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 8,
+  "max": 28
+ },
+ "frames": 180,
+ "frameMs": 105,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 602,
+ "pumpMsMedian": 0.11,
+ "renderExceptions": [],
+ "warnings": 1
+}

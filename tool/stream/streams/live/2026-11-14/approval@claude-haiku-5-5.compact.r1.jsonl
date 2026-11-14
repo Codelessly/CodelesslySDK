@@ -1,0 +1,286 @@
+{"meta":{"ui":"approval","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","source":"live","outputTokens":2055,"usage":{"inputTokens":322,"outputTokens":2055,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":576,"firstToolDeltaMs":611,"totalMs":6754,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":576,"check":{"ops":18,"opsApplied":18,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":16,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":611,"delta":"{\"ops\": [{\"op"}
+{"tMs":632,"delta":"\":\"roots\",\"roots\":"}
+{"tMs":649,"delta":"[\"appro"}
+{"tMs":666,"delta":"val"}
+{"tMs":689,"delta":"\"]},{\"op\":\""}
+{"tMs":715,"delta":"set\",\"id\":\"approval\",\""}
+{"tMs":733,"delta":"node\":{\"type\":\"can"}
+{"tMs":754,"delta":"vas\",\"sl"}
+{"tMs":776,"delta":"ots\":{\"body\":\"card"}
+{"tMs":798,"delta":"\"},\"layout\":{\""}
+{"tMs":820,"delta":"width\":390,\"height\":{"}
+{"tMs":842,"delta":"\"hug\":400}}}"}
+{"tMs":864,"delta":"},{\"op\":\"v"}
+{"tMs":885,"delta":"ars\",\"scope\":\"approval"}
+{"tMs":907,"delta":"\",\"set\":{\"decision\":"}
+{"tMs":928,"delta":"{\"type\":\"text"}
+{"tMs":949,"delta":"\",\"value\":\"p"}
+{"tMs":970,"delta":"ending\"},"}
+{"tMs":991,"delta":"\"show"}
+{"tMs":1012,"delta":"Names\":{\"type\":\""}
+{"tMs":1034,"delta":"boolean\",\"value\":false}"}
+{"tMs":1056,"delta":"}},{\"op\":\"set"}
+{"tMs":1077,"delta":"\",\"id\":\"card\",\"node\":"}
+{"tMs":1099,"delta":"{\"type\":\"column\",\"children"}
+{"tMs":1121,"delta":"\":[\"title\",\"what\",\"details\",\""}
+{"tMs":1141,"delta":"names\",\"war"}
+{"tMs":1166,"delta":"ning\",\"actions\",\""}
+{"tMs":1184,"delta":"result\"],\"layout\":{"}
+{"tMs":1211,"delta":"\"width\":{\"fill\":"}
+{"tMs":1228,"delta":"390},\"height\":{\"h"}
+{"tMs":1250,"delta":"ug\":400},\"padding\":"}
+{"tMs":1271,"delta":"20},\"props\":{\"cr"}
+{"tMs":1292,"delta":"ossAxisAlignment"}
+{"tMs":1313,"delta":"\":\"st"}
+{"tMs":1335,"delta":"retch\",\"spacing\":12"}
+{"tMs":1357,"delta":"},\"decoration\":{\""}
+{"tMs":1378,"delta":"fills\":[{\"color\":"}
+{"tMs":1400,"delta":"\"#FFFFFF"}
+{"tMs":1421,"delta":"FF\"}],\"radius"}
+{"tMs":1444,"delta":"\":16,\"strokes\":"}
+{"tMs":1465,"delta":"[{\"color\":\"#F"}
+{"tMs":1486,"delta":"FE5E7EB\""}
+{"tMs":1508,"delta":"}]}}},{\"op"}
+{"tMs":1529,"delta":"\":\"set\",\"id\":\"title"}
+{"tMs":1551,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":1573,"delta":"text\",\"layout\":{\"width"}
+{"tMs":1595,"delta":"\":{\"fill\":350},"}
+{"tMs":1616,"delta":"\"height\":{\"hug\":"}
+{"tMs":1637,"delta":"28"}
+{"tMs":1658,"delta":"}},\"props\":{\"text"}
+{"tMs":1679,"delta":"\":\"Approve deletion"}
+{"tMs":1712,"delta":" of 214 files?\",\"style"}
+{"tMs":1730,"delta":"\":{\"fontSize\":"}
+{"tMs":1751,"delta":"20,\"fontWeight"}
+{"tMs":1766,"delta":"\":700,\"color\":\"#"}
+{"tMs":1788,"delta":"FF111827\"}}}"}
+{"tMs":1810,"delta":"},{\"op\":\"set\",\""}
+{"tMs":1830,"delta":"id\":\"what\",\"node\":{"}
+{"tMs":1852,"delta":"\"type\":\"text\",\"layout"}
+{"tMs":1873,"delta":"\":{\"width\":{\"f"}
+{"tMs":1896,"delta":"ill\":350},\"height\":{"}
+{"tMs":1916,"delta":"\"hug\":40"}
+{"tMs":1937,"delta":"}},\"props\":{\"text"}
+{"tMs":1959,"delta":"\":\"The 214 old files"}
+{"tMs":1982,"delta":" in"}
+{"tMs":2001,"delta":" the shared drive fol"}
+{"tMs":2023,"delta":"der will be permanently dele"}
+{"tMs":2044,"delta":"ted.\",\"style\":{\"f"}
+{"tMs":2066,"delta":"ontSize\":15,\"height"}
+{"tMs":2087,"delta":"\":1.4,\"color\":"}
+{"tMs":2109,"delta":"\"#FF374151\"}"}
+{"tMs":2131,"delta":"}}},{\"op\":\""}
+{"tMs":2152,"delta":"set\",\"id\":\"details\",\"node"}
+{"tMs":2174,"delta":"\":{\"type\":\"column\",\""}
+{"tMs":2196,"delta":"children\":[\"fol"}
+{"tMs":2216,"delta":"der\",\"count"}
+{"tMs":2238,"delta":"\",\"space\"],\"layout\":"}
+{"tMs":2259,"delta":"{\"width\":{\"fill"}
+{"tMs":2281,"delta":"\":350},\"height\":{\""}
+{"tMs":2302,"delta":"hug\":70"}
+{"tMs":2324,"delta":"},\"padding\":12"}
+{"tMs":2345,"delta":"},\"props\":{\"cross"}
+{"tMs":2366,"delta":"AxisAlignment\":"}
+{"tMs":2388,"delta":"\"start\",\"spacing\":4"}
+{"tMs":2409,"delta":"},\"decoration\":{\""}
+{"tMs":2431,"delta":"fills\":[{\"color\":"}
+{"tMs":2452,"delta":"\"#FFF3F4"}
+{"tMs":2474,"delta":"F6\"}],\"radius"}
+{"tMs":2495,"delta":"\":10}}},{\"op"}
+{"tMs":2516,"delta":"\":\"set\",\"id\":\"fol"}
+{"tMs":2539,"delta":"der\",\"node\":{\"type\":"}
+{"tMs":2559,"delta":"\"text\",\"layout\":{\""}
+{"tMs":2581,"delta":"width\":{\"fill\":326"}
+{"tMs":2603,"delta":"},\"height\":{\"hug"}
+{"tMs":2624,"delta":"\":20}},\"props\":{"}
+{"tMs":2646,"delta":"\"text\":\"Folder:"}
+{"tMs":2667,"delta":" Shared Drive /"}
+{"tMs":2696,"delta":" Archive /"}
+{"tMs":2710,"delta":" Old"}
+{"tMs":2731,"delta":" Projects\",\"style\":{\"f"}
+{"tMs":2759,"delta":"ontSize\":14,\"color"}
+{"tMs":2780,"delta":"\":\"#FF111"}
+{"tMs":2796,"delta":"827\"}}}},{\""}
+{"tMs":2818,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":2839,"delta":"count\",\"node\":{\"type\":"}
+{"tMs":2861,"delta":"\"text\",\"layout\":{\""}
+{"tMs":2882,"delta":"width\":{\"fill\":326"}
+{"tMs":2903,"delta":"},\"height\":{\"hug"}
+{"tMs":2925,"delta":"\":20}},\"props\":{"}
+{"tMs":2946,"delta":"\"text\":\"Files: "}
+{"tMs":2968,"delta":"214\",\"style\":{\"font"}
+{"tMs":2989,"delta":"Size\":14,\"color\":"}
+{"tMs":3010,"delta":"\"#FF111827\"}"}
+{"tMs":3032,"delta":"}}},{\"op\":\""}
+{"tMs":3054,"delta":"set\",\"id\":\"space\",\"node"}
+{"tMs":3076,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":3097,"delta":"layout\":{\"width\":{"}
+{"tMs":3119,"delta":"\"fill\":326},\"height"}
+{"tMs":3140,"delta":"\":{\"hug\":20}"}
+{"tMs":3162,"delta":"},\"props\":{\"text\":"}
+{"tMs":3183,"delta":"\"Space freed: about "}
+{"tMs":3204,"delta":"3"}
+{"tMs":3225,"delta":".2 GB\",\"style\":"}
+{"tMs":3247,"delta":"{\"fontSize\":14"}
+{"tMs":3268,"delta":",\"color\":\"#FF"}
+{"tMs":3290,"delta":"111827\"}}}},{"}
+{"tMs":3312,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":3333,"delta":"\"names\",\"node\":{\"type"}
+{"tMs":3354,"delta":"\":\"column\",\"children\":[\"nam"}
+{"tMs":3376,"delta":"esToggle\",\"namesList"}
+{"tMs":3397,"delta":"\"],\"layout\":{\""}
+{"tMs":3419,"delta":"width\":{\"fill\":350"}
+{"tMs":3440,"delta":"},\"height\":{\"hug"}
+{"tMs":3462,"delta":"\":60"}
+{"tMs":3483,"delta":"}"}
+{"tMs":3505,"delta":"},\"props\":{\"cross"}
+{"tMs":3526,"delta":"AxisAlignment\":"}
+{"tMs":3547,"delta":"\"start\",\"spacing\":6"}
+{"tMs":3569,"delta":"}}},{\"op\":\""}
+{"tMs":3591,"delta":"set\",\"id\":\"namesTo"}
+{"tMs":3611,"delta":"ggle\",\"node\":{\"type"}
+{"tMs":3633,"delta":"\":\"textButton\",\"layout"}
+{"tMs":3655,"delta":"\":{\"width\":{\"h"}
+{"tMs":3676,"delta":"ug\":150},\"height\":36"}
+{"tMs":3701,"delta":"},\"props\":{\"label\":"}
+{"tMs":3720,"delta":"\"Show first file"}
+{"tMs":3740,"delta":" names\",\"style\":{\"foreg"}
+{"tMs":3763,"delta":"roundColor\":\"#F"}
+{"tMs":3784,"delta":"F2563EB\"}},"}
+{"tMs":3805,"delta":"\"actions\":[{\"tr"}
+{"tMs":3826,"delta":"igger\":{\"type\":\""}
+{"tMs":3847,"delta":"click\"},\"actions\":["}
+{"tMs":3871,"delta":"{\"type\":\"setVari"}
+{"tMs":3893,"delta":"able\",\"variable\":\"showN"}
+{"tMs":3912,"delta":"ames\",\"value\":\"${"}
+{"tMs":3934,"delta":"= !showNames}\"}"}
+{"tMs":3955,"delta":"]}]}},{\"op"}
+{"tMs":3977,"delta":"\":\"set\",\"id\":\"nam"}
+{"tMs":3998,"delta":"esList\",\"node\":{\"type"}
+{"tMs":4020,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":4041,"delta":"\"width\":{\"fill\":"}
+{"tMs":4063,"delta":"350},\"height\":{\"h"}
+{"tMs":4084,"delta":"ug\":60}},\"visible"}
+{"tMs":4106,"delta":"\":false"}
+{"tMs":4127,"delta":",\"b"}
+{"tMs":4152,"delta":"ind\":{\"visible\":\""}
+{"tMs":4169,"delta":"${= showNames}\""}
+{"tMs":4191,"delta":"},\"props\":{\"text\":"}
+{"tMs":4213,"delta":"\"1"}
+{"tMs":4234,"delta":". "}
+{"tMs":4255,"delta":"2019"}
+{"tMs":4276,"delta":"-"}
+{"tMs":4298,"delta":"bud"}
+{"tMs":4319,"delta":"get-dra"}
+{"tMs":4341,"delta":"ft.xl"}
+{"tMs":4362,"delta":"sx\\n2. old"}
+{"tMs":4384,"delta":"-log"}
+{"tMs":4405,"delta":"o-v1"}
+{"tMs":4426,"delta":".png"}
+{"tMs":4448,"delta":"\\n3. meeting-"}
+{"tMs":4469,"delta":"notes-2018.docx"}
+{"tMs":4491,"delta":"\\n..."}
+{"tMs":4512,"delta":"and 211"}
+{"tMs":4534,"delta":" more\",\"style\":{\"f"}
+{"tMs":4554,"delta":"ontSize\":13,\"height"}
+{"tMs":4576,"delta":"\":1.4,\"color\":"}
+{"tMs":4598,"delta":"\"#FF4"}
+{"tMs":4619,"delta":"B5563\"}}}},"}
+{"tMs":4641,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":4663,"delta":"\":\"warning\",\"node\":{"}
+{"tMs":4684,"delta":"\"type\":\"text\",\"layout"}
+{"tMs":4707,"delta":"\":{\"width\":{\"f"}
+{"tMs":4726,"delta":"ill\":350},\"height\":{"}
+{"tMs":4748,"delta":"\"hug\":36}},\""}
+{"tMs":4769,"delta":"props\":{\"text\":\"This"}
+{"tMs":4791,"delta":" cannot be undone."}
+{"tMs":4813,"delta":" Deleted files c"}
+{"tMs":4834,"delta":"annot be recovered.\",\""}
+{"tMs":4855,"delta":"style\":{\"fontSize"}
+{"tMs":4877,"delta":"\":14,\"fontWe"}
+{"tMs":4899,"delta":"ight\":700,\"color\":\""}
+{"tMs":4920,"delta":"#FFB91C1C"}
+{"tMs":4941,"delta":"\"}}}},{\"op"}
+{"tMs":4963,"delta":"\":\"set\",\"id\":\"act"}
+{"tMs":4985,"delta":"ions\",\"node\":{\"type\":"}
+{"tMs":5006,"delta":"\"row\",\"children\":[\"de"}
+{"tMs":5027,"delta":"ny\",\"approve\"],\"lay"}
+{"tMs":5049,"delta":"out\":{\"width\":{\""}
+{"tMs":5070,"delta":"fill\":350},\"height\":"}
+{"tMs":5092,"delta":"{\"hug\":48"}
+{"tMs":5113,"delta":"}},\"props\":{\"m"}
+{"tMs":5134,"delta":"ainAxisAlignment"}
+{"tMs":5156,"delta":"\":\"spaceBetween"}
+{"tMs":5177,"delta":"\",\"spacing\":12"}
+{"tMs":5199,"delta":"},\"b"}
+{"tMs":5221,"delta":"ind\":{\"visible\":\""}
+{"tMs":5242,"delta":"${= decision == 'p"}
+{"tMs":5263,"delta":"ending'}\"}}},{"}
+{"tMs":5285,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":5307,"delta":"\"deny\",\"node\":{\""}
+{"tMs":5328,"delta":"type\":\"out"}
+{"tMs":5349,"delta":"linedButton\",\"layout"}
+{"tMs":5371,"delta":"\":{\"width\":{\"f"}
+{"tMs":5393,"delta":"ill\":167"}
+{"tMs":5413,"delta":"},\"height\":48},\"props"}
+{"tMs":5435,"delta":"\":{\"label\":\"De"}
+{"tMs":5457,"delta":"ny\",\"style\":{\"fo"}
+{"tMs":5478,"delta":"regroundColor\":\"#"}
+{"tMs":5499,"delta":"FF111827\",\"sh"}
+{"tMs":5521,"delta":"ape\":{\"type\":\"ro"}
+{"tMs":5542,"delta":"undedRectangle\",\"bor"}
+{"tMs":5564,"delta":"derRadius\":10}}"}
+{"tMs":5586,"delta":"},\"actions\":[{\""}
+{"tMs":5607,"delta":"trigger\":{\"type\":"}
+{"tMs":5628,"delta":"\"click\"},\"actions\":"}
+{"tMs":5650,"delta":"[{\"type\":\"setV"}
+{"tMs":5671,"delta":"ariable\",\"variable\":\"dec"}
+{"tMs":5692,"delta":"ision\",\"value\":\"denied\""}
+{"tMs":5715,"delta":"}]}]}},{\""}
+{"tMs":5735,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":5757,"delta":"approve\",\"node\":{\"type"}
+{"tMs":5779,"delta":"\":\"filledButton\",\"lay"}
+{"tMs":5801,"delta":"out\":{\"width\":{\""}
+{"tMs":5821,"delta":"fill\":167},\"height\":"}
+{"tMs":5843,"delta":"48},\"props\":{\"label"}
+{"tMs":5865,"delta":"\":\"Approve\",\"style\":"}
+{"tMs":5886,"delta":"{\"backgroundColor"}
+{"tMs":5909,"delta":"\":\"#FF"}
+{"tMs":5929,"delta":"DC2626\",\"foregro"}
+{"tMs":5950,"delta":"undColor\":\"#FF"}
+{"tMs":5972,"delta":"FFFFFF\",\"sh"}
+{"tMs":5993,"delta":"ape\":{\"type\":\"ro"}
+{"tMs":6015,"delta":"undedRectangle\",\"bor"}
+{"tMs":6036,"delta":"derRadius\":10}}"}
+{"tMs":6058,"delta":"},\"actions\":[{\""}
+{"tMs":6079,"delta":"trigger\":{\"type\":"}
+{"tMs":6101,"delta":"\"click\"},\"actions\":"}
+{"tMs":6122,"delta":"[{\"type\":\"setV"}
+{"tMs":6143,"delta":"ariable\",\"variable\":\"dec"}
+{"tMs":6165,"delta":"ision\",\"value\":\"approved\""}
+{"tMs":6186,"delta":"}]}]}},{\""}
+{"tMs":6207,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":6230,"delta":"result\",\"node\":{\"type\":"}
+{"tMs":6251,"delta":"\"text\",\"layout\":{\""}
+{"tMs":6273,"delta":"width\":{\"fill\":350"}
+{"tMs":6294,"delta":"},\"height\":{\"hug"}
+{"tMs":6315,"delta":"\":24}},\"b"}
+{"tMs":6337,"delta":"ind\":{\"props.text\":"}
+{"tMs":6359,"delta":"\"${= decision == '"}
+{"tMs":6379,"delta":"approved' ? '"}
+{"tMs":6401,"delta":"Dec"}
+{"tMs":6422,"delta":"ision: approved. The"}
+{"tMs":6444,"delta":" files will be deleted.'"}
+{"tMs":6465,"delta":" : decision == 'denied"}
+{"tMs":6489,"delta":"' ? 'Decision"}
+{"tMs":6508,"delta":": denied. No files were de"}
+{"tMs":6530,"delta":"leted.' : "}
+{"tMs":6552,"delta":"''}\""}
+{"tMs":6572,"delta":"},\"props\":{\"text\":"}
+{"tMs":6594,"delta":"\"\",\"style\":{\"font"}
+{"tMs":6615,"delta":"Size\":15,\"font"}
+{"tMs":6637,"delta":"Weight\":700"}
+{"tMs":6658,"delta":",\"color\":\"#FF"}
+{"tMs":6680,"delta":"111827\"}}}}]"}
+{"tMs":6743,"delta":"}"}

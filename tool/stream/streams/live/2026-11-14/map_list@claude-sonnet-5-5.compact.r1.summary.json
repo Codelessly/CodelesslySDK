@@ -1,0 +1,120 @@
+{
+ "ui": "map_list",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 46693,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 20530,
+ "generate": {
+  "inputTokens": 199,
+  "outputTokens": 1675,
+  "cacheReadInputTokens": 20451,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 998,
+  "firstToolDeltaMs": 1711,
+  "totalMs": 9339,
+  "stopReason": "StopReason.toolUse",
+  "ops": 13,
+  "opsApplied": 12,
+  "opsRejected": 1,
+  "opsRecoveredFromMalformed": 10,
+  "jsonRepairs": 1,
+  "pending": 2,
+  "errors": [
+   "unknown_bind_path /nodes/pins/bind/data",
+   "dangling_child /nodes/split/children/1",
+   "dangling_child /nodes/map/children/4"
+  ],
+  "lints": [
+   "empty_button pin"
+  ],
+  "warnings": 5,
+  "nodes": 10,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 4083,
+   "outputTokens": 3103,
+   "cacheReadInputTokens": 40902,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1144,
+   "firstToolDeltaMs": 3765,
+   "totalMs": 16044,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_read",
+     "input": {
+      "ids": [
+       "split",
+       "map",
+       "pin",
+       "card",
+       "cafes"
+      ],
+      "variables": true
+     },
+     "ms": 1527,
+     "outputTokens": 95,
+     "resultChars": 1864
+    }
+   ],
+   "ops": 20,
+   "opsApplied": 19,
+   "opsRejected": 1,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 1,
+   "errors": [
+    "structural_key_in_patch /nodes/map/children",
+    "dangling_child /nodes/map/children/4"
+   ],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 27,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 6347,
+   "outputTokens": 251,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1633,
+   "firstToolDeltaMs": 1697,
+   "totalMs": 2392,
+   "stopReason": "StopReason.toolUse",
+   "ops": 1,
+   "opsApplied": 1,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 27,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 1,
+  "opsApplied": 1,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 27,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

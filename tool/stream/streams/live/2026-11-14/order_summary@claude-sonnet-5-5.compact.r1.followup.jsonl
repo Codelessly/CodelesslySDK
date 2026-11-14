@@ -1,0 +1,129 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Add a tip row with 0, 10 and 15 percent.","base":["order_summary@claude-sonnet-5-5.compact.r1.jsonl","order_summary@claude-sonnet-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":1037,"usage":{"inputTokens":5939,"outputTokens":1037,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1065,"firstToolDeltaMs":1139,"totalMs":5722,"stopReason":"StopReason.toolUse"},"text":"I'll add a tip variable, a segmented selector row, a tip line in the totals, and include the tip in the total.","ttftMs":1065,"check":{"ops":8,"opsApplied":8,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":39,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1139,"delta":"{\"ops\": [{\""}
+{"tMs":1176,"delta":"op\": \"vars\", \"sc"}
+{"tMs":1212,"delta":"ope\": \"order\", \"set\":"}
+{"tMs":1249,"delta":" {\"tipPct\": {"}
+{"tMs":1288,"delta":"\"type\": \"text"}
+{"tMs":1322,"delta":"\", \"value\": \"0\"}"}
+{"tMs":1357,"delta":", \"tip\": {\"type"}
+{"tMs":1393,"delta":"\": \"decimal\", \"form"}
+{"tMs":1427,"delta":"ula\": \"("}
+{"tMs":1463,"delta":"subtotal - discount)"}
+{"tMs":1500,"delta":" * to"}
+{"tMs":1533,"delta":"Number(tipPct"}
+{"tMs":1612,"delta":") / 100\"}, \""}
+{"tMs":1612,"delta":"total\": {\"type\": \"dec"}
+{"tMs":1641,"delta":"imal\", \"formula\": \""}
+{"tMs":1676,"delta":"subtotal - discount +"}
+{"tMs":1712,"delta":" delivery + tip\"}"}
+{"tMs":1748,"delta":"}}, {\"op\": \""}
+{"tMs":1785,"delta":"set\", \"id\": \"tip"}
+{"tMs":1819,"delta":"Row\", \"par"}
+{"tMs":1860,"delta":"ent\": \"card\", \"index\":"}
+{"tMs":1894,"delta":" 3, \"node\": {\""}
+{"tMs":1929,"delta":"type\": \"row\", \"children\":"}
+{"tMs":1962,"delta":" [\"tipL\", \"t"}
+{"tMs":1997,"delta":"ipSeg\"], \"lay"}
+{"tMs":2034,"delta":"out\": {\"width\": {\""}
+{"tMs":2069,"delta":"fill\": 350}, \""}
+{"tMs":2105,"delta":"height\": 44}, \"props"}
+{"tMs":2139,"delta":"\": {\"cr"}
+{"tMs":2175,"delta":"ossAxisAlignment"}
+{"tMs":2211,"delta":"\": \"center\", \"spacing"}
+{"tMs":2246,"delta":"\": 10}}}, {"}
+{"tMs":2282,"delta":"\"op\": \"set\", \"id"}
+{"tMs":2317,"delta":"\": \"tipL\", \"node"}
+{"tMs":2353,"delta":"\": {\"type\": \"text\","}
+{"tMs":2389,"delta":" \"layout\": {\"width\":"}
+{"tMs":2424,"delta":" {\"hug\": 30"}
+{"tMs":2460,"delta":"}, \"height\": {\"h"}
+{"tMs":2496,"delta":"ug\": 20}}, \""}
+{"tMs":2531,"delta":"props\": {\"text\": \""}
+{"tMs":2566,"delta":"Tip\", \"style\": {\""}
+{"tMs":2602,"delta":"fontSize\": 15,"}
+{"tMs":2638,"delta":" \"fontWeight\": "}
+{"tMs":2673,"delta":"600, \"color\": \"#F"}
+{"tMs":2709,"delta":"F111827\"}}}}"}
+{"tMs":2744,"delta":", {\"op\": \"set\","}
+{"tMs":2780,"delta":" \"id\": \"tipSe"}
+{"tMs":2817,"delta":"g\", \"node\": {\"type"}
+{"tMs":2851,"delta":"\": \"segmentedButton"}
+{"tMs":2886,"delta":"\", \"layout\": {\"width"}
+{"tMs":2923,"delta":"\": {\"fill\": 300"}
+{"tMs":2958,"delta":"}, \"height\": 40"}
+{"tMs":2993,"delta":"}, \"props\": {\"seg"}
+{"tMs":3029,"delta":"ments\": [{\"value\": \""}
+{"tMs":3065,"delta":"0\", \"label\": \"0%"}
+{"tMs":3101,"delta":"\"}, {\"value\": \""}
+{"tMs":3135,"delta":"10\", \"label\": \"10%"}
+{"tMs":3170,"delta":"\"}, {\"value\": \""}
+{"tMs":3206,"delta":"15\", \"label\": \"15%"}
+{"tMs":3263,"delta":"\"}], \"selected\": "}
+{"tMs":3277,"delta":"[\"0\"]}, \"b"}
+{"tMs":3313,"delta":"ind\": {\"props.selected"}
+{"tMs":3348,"delta":"\": \"${"}
+{"tMs":3384,"delta":"= [tipPct]}"}
+{"tMs":3419,"delta":"\"}, \"actions\": ["}
+{"tMs":3455,"delta":"{\"trigger\": {\""}
+{"tMs":3490,"delta":"type\": \"changed\"},"}
+{"tMs":3525,"delta":" \"actions\": [{\"type"}
+{"tMs":3561,"delta":"\": \"setVariable\", \""}
+{"tMs":3596,"delta":"variable\": \"tipPct"}
+{"tMs":3636,"delta":"\", \"value\": \"${= result"}
+{"tMs":3667,"delta":"[0]}\"}]}"}
+{"tMs":3703,"delta":"]}}, {\"op\":"}
+{"tMs":3739,"delta":" \"set\", \"id\": \"t"}
+{"tMs":3780,"delta":"ipL"}
+{"tMs":3808,"delta":"ine\", \"par"}
+{"tMs":3844,"delta":"ent\": \"totals\", \"index"}
+{"tMs":3880,"delta":"\": 3"}
+{"tMs":3915,"delta":", \"node\": {\"type\":"}
+{"tMs":3951,"delta":" \"row\", \"children\": [\""}
+{"tMs":3988,"delta":"tipLine"}
+{"tMs":4022,"delta":"L\", \"tipLineV"}
+{"tMs":4057,"delta":"\"], \"layout\": {\""}
+{"tMs":4092,"delta":"width\": {\"fill\": "}
+{"tMs":4128,"delta":"322}, \"height\": {\""}
+{"tMs":4163,"delta":"hug\": 20}},"}
+{"tMs":4199,"delta":" \"props\": {\"mainA"}
+{"tMs":4234,"delta":"xisAlignment\": \""}
+{"tMs":4270,"delta":"spaceBetween\"}"}
+{"tMs":4305,"delta":"}}, {\"op\": \""}
+{"tMs":4341,"delta":"set\", \"id\": \"tip"}
+{"tMs":4376,"delta":"LineL\", \"node\": {"}
+{"tMs":4412,"delta":"\"type\": \"text\", \"lay"}
+{"tMs":4448,"delta":"out\": {\"width\": {\""}
+{"tMs":4483,"delta":"hug\": 70"}
+{"tMs":4519,"delta":"}, \"height\": {\"h"}
+{"tMs":4554,"delta":"ug\": 20}}, \""}
+{"tMs":4589,"delta":"props\": {\"text\": \"\","}
+{"tMs":4624,"delta":" \"style\": {\"fontS"}
+{"tMs":4661,"delta":"ize\": 14, \"color\":"}
+{"tMs":4696,"delta":" \"#FF4B5563"}
+{"tMs":4731,"delta":"\"}}, \"bind\":"}
+{"tMs":4767,"delta":" {\"props.text\": \"${"}
+{"tMs":4802,"delta":"= 'Tip ('"}
+{"tMs":4838,"delta":" + tipPct + '%"}
+{"tMs":4873,"delta":")'}\"}}},"}
+{"tMs":4909,"delta":" {\"op\": \"set\", \""}
+{"tMs":4944,"delta":"id\": \"tipLineV"}
+{"tMs":4980,"delta":"\", \"node\": {\"type\":"}
+{"tMs":5015,"delta":" \"text\", \"layout\": {"}
+{"tMs":5050,"delta":"\"width\": {\"hug\":"}
+{"tMs":5086,"delta":" 70}, \"height\": {"}
+{"tMs":5122,"delta":"\"hug\": 20}}"}
+{"tMs":5177,"delta":", \"props\": {\"text\":"}
+{"tMs":5193,"delta":" \"\", \"style\": {\"f"}
+{"tMs":5228,"delta":"ontSize\": 14, \""}
+{"tMs":5270,"delta":"color\": \"#FF111827"}
+{"tMs":5299,"delta":"\"}}, \"bind\":"}
+{"tMs":5335,"delta":" {\"props.text\": \"${"}
+{"tMs":5370,"delta":"= money(tip, '$"}
+{"tMs":5406,"delta":"')}\"}}}, {"}
+{"tMs":5442,"delta":"\"op\": \"patch\", \""}
+{"tMs":5477,"delta":"id\": \"totals\", \"pat"}
+{"tMs":5513,"delta":"ch\": {\"layout\": {"}
+{"tMs":5547,"delta":"\"height\": {\"hug\":"}
+{"tMs":5584,"delta":" 136"}
+{"tMs":5618,"delta":"}}}}]"}
+{"tMs":5721,"delta":"}"}

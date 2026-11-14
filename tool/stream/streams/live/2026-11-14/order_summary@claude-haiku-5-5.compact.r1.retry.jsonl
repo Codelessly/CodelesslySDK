@@ -1,0 +1,35 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["order_summary@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":262,"usage":{"inputTokens":6212,"outputTokens":262,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":466,"firstToolDeltaMs":507,"totalMs":1195,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":466,"check":{"ops":2,"opsApplied":1,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":["structural_key_in_patch /nodes/card/children"],"lints":[],"warnings":0,"nodes":35,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":507,"delta":"{\"ops\": [{\"op"}
+{"tMs":526,"delta":"\": \"set\", \"id\": \""}
+{"tMs":545,"delta":"summary\", \"par"}
+{"tMs":565,"delta":"ent\": \"card\", \"index"}
+{"tMs":586,"delta":"\": 4, \"node\": {"}
+{"tMs":606,"delta":"\"type\": \"column\", \"children"}
+{"tMs":627,"delta":"\": [\"subRow\", \""}
+{"tMs":647,"delta":"discRow\", \"delRow"}
+{"tMs":668,"delta":"\", \"totRow\"], \""}
+{"tMs":689,"delta":"layout\": {\"width\": {"}
+{"tMs":709,"delta":"\"fill\": 350},"}
+{"tMs":729,"delta":" \"height\": {\"hug\":"}
+{"tMs":750,"delta":" 110"}
+{"tMs":768,"delta":"},"}
+{"tMs":788,"delta":" \"padding\": 12"}
+{"tMs":809,"delta":"}, \"props\": {\"cr"}
+{"tMs":832,"delta":"ossAxisAlignment"}
+{"tMs":850,"delta":"\": \"stretch\", \"sp"}
+{"tMs":871,"delta":"acing\": 8}, \""}
+{"tMs":891,"delta":"decoration\": {\"fills"}
+{"tMs":912,"delta":"\": [{\"color\": \"#"}
+{"tMs":932,"delta":"FFF9FAFB"}
+{"tMs":953,"delta":"\"}], \"radius\": "}
+{"tMs":974,"delta":"10}}}, {\"op"}
+{"tMs":994,"delta":"\": \"patch\", \"id\":"}
+{"tMs":1013,"delta":" \"card"}
+{"tMs":1035,"delta":"\", \"patch\": {\"children"}
+{"tMs":1057,"delta":"\": [\"title"}
+{"tMs":1075,"delta":"\", \"list\", \"promoR"}
+{"tMs":1095,"delta":"ow\", \"promoMsg"}
+{"tMs":1116,"delta":"\", \"summary\", \"butt"}
+{"tMs":1136,"delta":"ons\", \"status\"]}}"}
+{"tMs":1157,"delta":"]"}
+{"tMs":1194,"delta":"}"}

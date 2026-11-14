@@ -1,0 +1,46 @@
+{
+ "stream": "plan_progress@claude-haiku-5-5.compact.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 516,
+ "timeToFirstPaintMs": 877,
+ "timeToFirstTextMs": 877,
+ "timeToFirstSectionMs": 877,
+ "timeToCompleteMs": 916,
+ "outputTokens": 148,
+ "tokensEstimated": false,
+ "chars": 233,
+ "deltas": 18,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 30,
+   "rejected": 1
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 29,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 1,
+  "p90": 1,
+  "max": 1
+ },
+ "frames": 27,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 46,
+ "pumpMsMedian": 0.151,
+ "renderExceptions": [],
+ "warnings": 0
+}

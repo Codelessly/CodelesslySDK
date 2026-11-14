@@ -1,0 +1,82 @@
+{
+ "stream": "plan_progress@claude-haiku-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 524,
+ "timeToFirstPaintMs": 1545,
+ "timeToFirstTextMs": 1812,
+ "timeToFirstSectionMs": 6997,
+ "timeToCompleteMs": 8770,
+ "outputTokens": 2824,
+ "tokensEstimated": false,
+ "chars": 5847,
+ "deltas": 402,
+ "opsApplied": 30,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_prop /nodes/progress/props/min",
+  "dangling_child /nodes/card/children/3"
+ ],
+ "scripts": 0,
+ "streamedOps": 31,
+ "rejections": [
+  {
+   "op": 25,
+   "code": "unknown_prop",
+   "path": "/nodes/progress/props/min",
+   "message": "A progressBar has no prop \"min\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot.",
+   "nodeId": "progress",
+   "expected": [
+    "exactFill",
+    "clipFill",
+    "value",
+    "max",
+    "color",
+    "backgroundColor",
+    "direction",
+    "borderRadius",
+    "animate",
+    "animationDuration",
+    "shape",
+    "arcStartAngle",
+    "arcSweepAngle",
+    "arcStrokeWidth",
+    "needleColor",
+    "tickCount",
+    "tickColor",
+    "bands",
+    "arcFit",
+    "arcRoundCaps",
+    "progressEndColor",
+    "arcGlow",
+    "arcHeadDot"
+   ]
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/3",
+   "message": "Child \"progress\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 28,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 4,
+  "max": 10
+ },
+ "frames": 146,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 15,
+ "pumps": 549,
+ "pumpMsMedian": 0.13,
+ "renderExceptions": [],
+ "warnings": 0
+}

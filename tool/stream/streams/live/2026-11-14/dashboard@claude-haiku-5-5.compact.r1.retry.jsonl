@@ -1,0 +1,37 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["dashboard@claude-haiku-5-5.compact.r1.jsonl"],"source":"live","outputTokens":266,"usage":{"inputTokens":2251,"outputTokens":266,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":497,"firstToolDeltaMs":539,"totalMs":1306,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":497,"check":{"ops":2,"opsApplied":0,"opsRejected":2,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":2,"errors":["wrong_type /nodes/revChart/props/data","wrong_type /nodes/chanChart/props/values","dangling_child /nodes/card/children/4","dangling_child /nodes/card/children/6"],"lints":[],"warnings":2,"nodes":27,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":539,"delta":"{\"ops\": [{\"op"}
+{"tMs":560,"delta":"\":\"set\",\"id\":\"rev"}
+{"tMs":579,"delta":"Chart\",\"par"}
+{"tMs":601,"delta":"ent\":\"card\",\"index\":4"}
+{"tMs":624,"delta":",\"node\":{\"type\":"}
+{"tMs":645,"delta":"\"lineChart\",\"layout"}
+{"tMs":666,"delta":"\":{\"width\":{\"f"}
+{"tMs":688,"delta":"ill\":342},\"height\":160"}
+{"tMs":710,"delta":"},\"props\":{\"data\":"}
+{"tMs":730,"delta":"\"${revenue"}
+{"tMs":752,"delta":"Series}\",\"xField\":"}
+{"tMs":775,"delta":"\"day"}
+{"tMs":794,"delta":"\",\"yField\":\"revenue"}
+{"tMs":816,"delta":"\",\"lineColor\":\"#"}
+{"tMs":837,"delta":"FF2563EB\",\"sm"}
+{"tMs":859,"delta":"ooth\":true},"}
+{"tMs":880,"delta":"\"decoration\":{}"}
+{"tMs":901,"delta":"}},{\"op\":\"set"}
+{"tMs":925,"delta":"\",\"id\":\"chanChart"}
+{"tMs":944,"delta":"\",\"parent\":\"card\",\"index"}
+{"tMs":966,"delta":"\":6,\"node\":{\""}
+{"tMs":988,"delta":"type\":\"barChart\",\"lay"}
+{"tMs":1009,"delta":"out\":{\"width\":{\""}
+{"tMs":1031,"delta":"fill\":342},\"height\":"}
+{"tMs":1051,"delta":"140"}
+{"tMs":1073,"delta":"},\"props\":{\"values\":"}
+{"tMs":1094,"delta":"\""}
+{"tMs":1115,"delta":"${sign"}
+{"tMs":1136,"delta":"upValues}\",\"labels\":"}
+{"tMs":1157,"delta":"[\"Organ"}
+{"tMs":1179,"delta":"ic\",\"Paid\",\"Refer"}
+{"tMs":1201,"delta":"ral\",\"Social\"],\"color"}
+{"tMs":1222,"delta":"\":\"#FF2563E"}
+{"tMs":1243,"delta":"B\",\"showValues\":true}"}
+{"tMs":1266,"delta":"}}]"}
+{"tMs":1304,"delta":"}"}

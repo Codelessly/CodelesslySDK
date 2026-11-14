@@ -1,0 +1,30 @@
+{"meta":{"ui":"approval","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["approval@claude-sonnet-5-5.compact.r1.jsonl"],"source":"live","outputTokens":310,"usage":{"inputTokens":4567,"outputTokens":310,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1786,"firstToolDeltaMs":1853,"totalMs":2818,"stopReason":"StopReason.toolUse"},"text":"The icon badge was a box, which can't hold children. I'll replace it with a centered row that keeps the same fill and shape and holds the icon.","ttftMs":1786,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":28,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1853,"delta":"{\"ops\": [{\"op"}
+{"tMs":1887,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1925,"delta":"headIcon\", \"node\":"}
+{"tMs":1955,"delta":" {\"type\": \"row\", \""}
+{"tMs":1988,"delta":"children\": [\"headIconG"}
+{"tMs":2135,"delta":"lyph\"], \"layout"}
+{"tMs":2135,"delta":"\": {\"width\": 40,"}
+{"tMs":2135,"delta":" \"height\": 40}, \""}
+{"tMs":2135,"delta":"props\": {\"mainAx"}
+{"tMs":2159,"delta":"isAlignment\": \"center"}
+{"tMs":2190,"delta":"\", \"crossAxisA"}
+{"tMs":2222,"delta":"lignment\": \"center\"}"}
+{"tMs":2539,"delta":", \"decoration\": {\""}
+{"tMs":2539,"delta":"fills\": [{\"color\":"}
+{"tMs":2539,"delta":" \"#FFFEE2"}
+{"tMs":2539,"delta":"E2\"}], \"shape"}
+{"tMs":2539,"delta":"\": \"circle\"}}}"}
+{"tMs":2539,"delta":", {\"op\": \"set\","}
+{"tMs":2539,"delta":" \"id\": \"headIconG"}
+{"tMs":2539,"delta":"lyph\", \"node\": {"}
+{"tMs":2539,"delta":"\"type\": \"icon\", \""}
+{"tMs":2556,"delta":"layout\": {\"width\": "}
+{"tMs":2590,"delta":"22, \"height\": 22}"}
+{"tMs":2623,"delta":", \"props\": {\"icon"}
+{"tMs":2656,"delta":"\": \"delete_outline\","}
+{"tMs":2692,"delta":" \"color\": \"#FFD"}
+{"tMs":2723,"delta":"C2626\", \"size\": "}
+{"tMs":2757,"delta":"22}}}]"}
+{"tMs":2815,"delta":"}"}

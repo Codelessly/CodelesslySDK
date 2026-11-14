@@ -1,0 +1,82 @@
+{
+ "stream": "dashboard@claude-haiku-5-5.compact.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 716,
+ "timeToFirstPaintMs": 1185,
+ "timeToFirstTextMs": 1185,
+ "timeToFirstSectionMs": 1850,
+ "timeToCompleteMs": 1909,
+ "outputTokens": 409,
+ "tokensEstimated": false,
+ "chars": 748,
+ "deltas": 53,
+ "opsApplied": 3,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 3,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "dangling_child /nodes/card/children/1",
+  "dangling_child /nodes/card/children/4",
+  "dangling_child /nodes/card/children/6"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 28,
+   "rejected": 3
+  },
+  {
+   "stream": "retry",
+   "applied": 0,
+   "rejected": 2
+  },
+  {
+   "stream": "retry",
+   "applied": 1,
+   "rejected": 2
+  }
+ ],
+ "streamedOps": 3,
+ "rejections": [
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/1",
+   "message": "Child \"range\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/4",
+   "message": "Child \"revChart\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/6",
+   "message": "Child \"chanChart\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 29,
+ "reappliedBoxesPerOp": {
+  "min": 1,
+  "median": 3,
+  "p90": 4,
+  "max": 4
+ },
+ "frames": 42,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 2,
+ "pumps": 96,
+ "pumpMsMedian": 0.115,
+ "renderExceptions": [],
+ "warnings": 0
+}

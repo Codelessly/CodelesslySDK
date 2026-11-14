@@ -1,0 +1,83 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Add a field for a note to the restaurant.","base":["reservation@claude-haiku-5-5.compact.r1.jsonl","reservation@claude-haiku-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":598,"usage":{"inputTokens":12366,"outputTokens":598,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":473,"firstToolDeltaMs":514,"totalMs":2180,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":473,"check":{"ops":6,"opsApplied":6,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":2,"nodes":24,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":514,"delta":"{\"ops\": [{\"op"}
+{"tMs":534,"delta":"\": \"set\", \"id\": \""}
+{"tMs":554,"delta":"noteLabel\", \"par"}
+{"tMs":574,"delta":"ent\": \"card\", \"index"}
+{"tMs":592,"delta":"\": 8"}
+{"tMs":613,"delta":", \"node\": {\"type\":"}
+{"tMs":633,"delta":" \"text\", \"layout\": {"}
+{"tMs":654,"delta":"\"width\": {\"fill\":"}
+{"tMs":675,"delta":" 350}, \"height\": {"}
+{"tMs":696,"delta":"\"hug\": 20}}"}
+{"tMs":719,"delta":", \"props\": {\"text\":"}
+{"tMs":736,"delta":" \"Note for the rest"}
+{"tMs":757,"delta":"aurant\", \"style\": {"}
+{"tMs":777,"delta":"\"fontSize\": 14"}
+{"tMs":798,"delta":", \"fontWeight\":"}
+{"tMs":818,"delta":" 600, \"color\": \"#"}
+{"tMs":839,"delta":"FF374151\"}}}"}
+{"tMs":860,"delta":"}, {\"op\": \"set"}
+{"tMs":879,"delta":"\", \"id\": \"note"}
+{"tMs":900,"delta":"\", \"parent\": \"card\","}
+{"tMs":920,"delta":" \"index\": 9, \"node"}
+{"tMs":940,"delta":"\": {\"type\": \"textField"}
+{"tMs":961,"delta":"\", \"layout\": {\"width"}
+{"tMs":981,"delta":"\": {\"fill\": 350"}
+{"tMs":1002,"delta":"}, \"height\": {\"h"}
+{"tMs":1022,"delta":"ug\": 48"}
+{"tMs":1042,"delta":"}}, \"props\": {\""}
+{"tMs":1070,"delta":"dec"}
+{"tMs":1082,"delta":"oration\": {\"h"}
+{"tMs":1103,"delta":"intText\": \"Allergies"}
+{"tMs":1124,"delta":", birthday,"}
+{"tMs":1143,"delta":" seating pre"}
+{"tMs":1163,"delta":"ference"}
+{"tMs":1184,"delta":"...\", \"labelText\": "}
+{"tMs":1203,"delta":"\"\"},"}
+{"tMs":1224,"delta":" \"maxLines\": 2"}
+{"tMs":1245,"delta":"}, \"bind\": {\""}
+{"tMs":1265,"delta":"props.init"}
+{"tMs":1285,"delta":"ialValue\": \"${note"}
+{"tMs":1306,"delta":"}\"}, \"actions\":"}
+{"tMs":1326,"delta":" [{\"trigger\": {"}
+{"tMs":1346,"delta":"\"type\": \"changed\"}"}
+{"tMs":1367,"delta":", \"actions\": [{\""}
+{"tMs":1388,"delta":"type\": \"setVariable\","}
+{"tMs":1410,"delta":" \"variable\": \"note\", \""}
+{"tMs":1429,"delta":"value\": \"${result}\"}"}
+{"tMs":1449,"delta":"]}]}},"}
+{"tMs":1471,"delta":" {\"op\": \"vars\","}
+{"tMs":1490,"delta":" \"scope\": \"booking\","}
+{"tMs":1510,"delta":" \"set\": {\"note\": {"}
+{"tMs":1531,"delta":"\"type\": \"text\", \"value"}
+{"tMs":1551,"delta":"\": \"\"}}}, {"}
+{"tMs":1573,"delta":"\"op\": \"patch\", \""}
+{"tMs":1592,"delta":"id\": \"card\", \"pat"}
+{"tMs":1612,"delta":"ch\": {\"lay"}
+{"tMs":1634,"delta":"out\": {\"height\": {\""}
+{"tMs":1653,"delta":"hug\": 720"}
+{"tMs":1674,"delta":"}}}},"}
+{"tMs":1694,"delta":" {\"op\": \"patch\","}
+{"tMs":1714,"delta":" \"id\": \"booking\", \""}
+{"tMs":1735,"delta":"patch\": {\"layout\":"}
+{"tMs":1755,"delta":" {\"height\": {\"hug"}
+{"tMs":1776,"delta":"\": 720}}}}"}
+{"tMs":1796,"delta":", {\"op\": \"patch"}
+{"tMs":1817,"delta":"\", \"id\": \"confirm"}
+{"tMs":1837,"delta":"\", \"patch\": {\"act"}
+{"tMs":1857,"delta":"ions\": [{\"tr"}
+{"tMs":1878,"delta":"igger\": {\"type\": \""}
+{"tMs":1898,"delta":"click\"}, \"actions\":"}
+{"tMs":1919,"delta":" [{\"type\": \"showTo"}
+{"tMs":1939,"delta":"ast\", \"message\": \"${="}
+{"tMs":1960,"delta":" 'Booked: '"}
+{"tMs":1981,"delta":" + days[day].label + "}
+{"tMs":2000,"delta":"', ' + party + '"}
+{"tMs":2021,"delta":" guests at ' + time +"}
+{"tMs":2041,"delta":" (note =="}
+{"tMs":2063,"delta":" '' ? '' : '"}
+{"tMs":2082,"delta":". Note: ' + note"}
+{"tMs":2102,"delta":")}\""}
+{"tMs":2122,"delta":"}]}]}}"}
+{"tMs":2144,"delta":"]"}
+{"tMs":2179,"delta":"}"}

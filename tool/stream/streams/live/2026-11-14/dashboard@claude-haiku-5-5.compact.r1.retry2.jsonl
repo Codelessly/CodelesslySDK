@@ -1,0 +1,64 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["dashboard@claude-haiku-5-5.compact.r1.jsonl","dashboard@claude-haiku-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":480,"usage":{"inputTokens":3464,"outputTokens":480,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":511,"firstToolDeltaMs":554,"totalMs":1901,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":511,"check":{"ops":3,"opsApplied":1,"opsRejected":2,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":2,"errors":["wrong_type /nodes/revChart/props/data","wrong_type /nodes/chanChart/props/values","dangling_child /nodes/card/children/4","dangling_child /nodes/card/children/6"],"lints":[],"warnings":0,"nodes":27,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":554,"delta":"{\"ops\": [{\"op"}
+{"tMs":571,"delta":"\": \"v"}
+{"tMs":593,"delta":"ars\", \"scope\": \"d"}
+{"tMs":616,"delta":"ash\", \"set\": {\"rev"}
+{"tMs":639,"delta":"enueSeries\": {\""}
+{"tMs":659,"delta":"type\": \"list\", \"value\":"}
+{"tMs":681,"delta":" [{\"day\": 1,"}
+{"tMs":705,"delta":" \"revenue\": 4"}
+{"tMs":724,"delta":"200}, {\"day\": "}
+{"tMs":746,"delta":"2, \"revenue\": "}
+{"tMs":766,"delta":"4650"}
+{"tMs":788,"delta":"}, {\"day\": 3"}
+{"tMs":809,"delta":", \"revenue\": 4"}
+{"tMs":829,"delta":"480"}
+{"tMs":851,"delta":"}, {\"day\": 4"}
+{"tMs":873,"delta":", \"revenue\": 5"}
+{"tMs":893,"delta":"100"}
+{"tMs":915,"delta":"}, {\"day\": 5"}
+{"tMs":936,"delta":", \"revenue\": 5"}
+{"tMs":957,"delta":"320"}
+{"tMs":979,"delta":"}, {\"day\": 6"}
+{"tMs":1000,"delta":", \"revenue\": 5"}
+{"tMs":1021,"delta":"010"}
+{"tMs":1043,"delta":"}, {\"day\": 7"}
+{"tMs":1064,"delta":", \"revenue\": 5"}
+{"tMs":1085,"delta":"840}]},"}
+{"tMs":1107,"delta":" \"signupValues\": {\""}
+{"tMs":1128,"delta":"type\": \"list\", \"value\":"}
+{"tMs":1153,"delta":" [420, 310, 180"}
+{"tMs":1172,"delta":", 260]}}},"}
+{"tMs":1194,"delta":" {\"op\": \"set\", \""}
+{"tMs":1215,"delta":"id\": \"revChart\", \""}
+{"tMs":1237,"delta":"parent\": \"card\", \"index"}
+{"tMs":1258,"delta":"\": 4, \"node\": {"}
+{"tMs":1280,"delta":"\"type\": \"lineChart"}
+{"tMs":1302,"delta":"\", \"layout\": {\"width"}
+{"tMs":1323,"delta":"\": {\"fill\": 342"}
+{"tMs":1345,"delta":"}, \"height\": 160}"}
+{"tMs":1369,"delta":", \"props\": {\"data\":"}
+{"tMs":1388,"delta":" \"${revenueSeries"}
+{"tMs":1410,"delta":"}\", \"xField\": \"day"}
+{"tMs":1431,"delta":"\", \"yField\": \"reven"}
+{"tMs":1453,"delta":"ue\", \"lineColor\":"}
+{"tMs":1474,"delta":" \"#FF2563EB"}
+{"tMs":1496,"delta":"\", \"smooth\": true}"}
+{"tMs":1517,"delta":"}}, {\"op\": \""}
+{"tMs":1538,"delta":"set\", \"id\": \"chan"}
+{"tMs":1560,"delta":"Chart\", \"parent\": \""}
+{"tMs":1581,"delta":"card\", \"index\": 6,"}
+{"tMs":1603,"delta":" \"node\": {\"type\": \""}
+{"tMs":1625,"delta":"barChart\", \"layout\":"}
+{"tMs":1646,"delta":" {\"width\": {\"fill"}
+{"tMs":1667,"delta":"\": 342}, \"height\":"}
+{"tMs":1689,"delta":" 140}, \"props\": {"}
+{"tMs":1711,"delta":"\"values\": \"${signupVal"}
+{"tMs":1732,"delta":"ues}\", \"labels\": "}
+{"tMs":1754,"delta":"[\"Organic\", \"Pa"}
+{"tMs":1775,"delta":"id\", \"Referral\", \""}
+{"tMs":1796,"delta":"Social\"], \"color\": \""}
+{"tMs":1818,"delta":"#FF2563EB\","}
+{"tMs":1839,"delta":" \"showValues\": true}}"}
+{"tMs":1861,"delta":"}]"}
+{"tMs":1901,"delta":"}"}

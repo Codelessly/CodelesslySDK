@@ -1,0 +1,125 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Add a tile for average order value.","base":["dashboard@claude-sonnet-5-5.compact.r1.jsonl","dashboard@claude-sonnet-5-5.compact.r1.retry.jsonl","dashboard@claude-sonnet-5-5.compact.r1.retry2.jsonl"],"source":"live","outputTokens":1036,"usage":{"inputTokens":20846,"outputTokens":1036,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1193,"firstToolDeltaMs":1265,"totalMs":5660,"stopReason":"StopReason.toolUse"},"text":"I'll add a fifth tile in its own row, plus the average order value figures for each period.","ttftMs":1193,"check":{"ops":6,"opsApplied":6,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":48,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1265,"delta":"{\"ops\": [{\"op\": \""}
+{"tMs":1301,"delta":"vars\", \"scope\": \""}
+{"tMs":1336,"delta":"dash\", \"set\": {\""}
+{"tMs":1372,"delta":"stats\": {\"type\": \""}
+{"tMs":1407,"delta":"map\", \"value\": {\"7"}
+{"tMs":1443,"delta":"\": {\"rev\": \"$"}
+{"tMs":1478,"delta":"18.4k\", \"revd"}
+{"tMs":1514,"delta":"\": \"+4.2%\","}
+{"tMs":1549,"delta":" \"su\": \"312"}
+{"tMs":1585,"delta":"\", \"sud\": \"+6"}
+{"tMs":1620,"delta":".8%\", \"ch\":"}
+{"tMs":1656,"delta":" \"1.1%\", \"ch"}
+{"tMs":1693,"delta":"d\": \"-0.2%"}
+{"tMs":1827,"delta":"\", \"au\": \"8,420"}
+{"tMs":1827,"delta":"\", \"aud\": \"+2"}
+{"tMs":1827,"delta":".1%\", \"aov\":"}
+{"tMs":1833,"delta":" \"$59\", \"aovd"}
+{"tMs":1869,"delta":"\": \"+1.6"}
+{"tMs":1905,"delta":"%\"}, \"30\": {"}
+{"tMs":1940,"delta":"\"rev\": \"$82."}
+{"tMs":1976,"delta":"7k\", \"revd\": \""}
+{"tMs":2011,"delta":"+9.5%\", \"su"}
+{"tMs":2047,"delta":"\": \"1,406\", \"s"}
+{"tMs":2082,"delta":"ud\": \"+12.3%"}
+{"tMs":2118,"delta":"\", \"ch\": \"3."}
+{"tMs":2194,"delta":"4%\", \"chd\": \""}
+{"tMs":2194,"delta":"-0.6%\", \"au"}
+{"tMs":2224,"delta":"\": \"9,870\", \"a"}
+{"tMs":2260,"delta":"ud\": \"+7.4%"}
+{"tMs":2295,"delta":"\", \"aov\": \"$61"}
+{"tMs":2330,"delta":"\", \"aovd\": \"+"}
+{"tMs":2366,"delta":"3.2%\"}, \""}
+{"tMs":2401,"delta":"90\": {\"rev\": \""}
+{"tMs":2437,"delta":"$241.9k\", \"rev"}
+{"tMs":2473,"delta":"d\": \"+21.8%"}
+{"tMs":2508,"delta":"\", \"su\": \"4,012"}
+{"tMs":2543,"delta":"\", \"sud\": \"+18"}
+{"tMs":2579,"delta":".9%\", \"ch\":"}
+{"tMs":2614,"delta":" \"4.1%\", \"ch"}
+{"tMs":2650,"delta":"d\": \"+0.3%"}
+{"tMs":2685,"delta":"\", \"au\": \"11,250"}
+{"tMs":2720,"delta":"\", \"aud\": \"+15"}
+{"tMs":2756,"delta":".2%\", \"aov\":"}
+{"tMs":2792,"delta":" \"$64\", \"aovd"}
+{"tMs":2827,"delta":"\": \"+5.9"}
+{"tMs":2862,"delta":"%\"}}}}},"}
+{"tMs":2898,"delta":" {\"op\": \"set\", \""}
+{"tMs":2933,"delta":"id\": \"tiles3\","}
+{"tMs":2969,"delta":" \"par"}
+{"tMs":3004,"delta":"ent\": \"card\", \"index\":"}
+{"tMs":3040,"delta":" 4, \"node\": {\""}
+{"tMs":3075,"delta":"type\": \"row\", \"children\":"}
+{"tMs":3111,"delta":" [\"tAov\"], \""}
+{"tMs":3146,"delta":"layout\": {\"width\": {"}
+{"tMs":3193,"delta":"\"fill\": 358},"}
+{"tMs":3221,"delta":" \"height\": {\"hug\":"}
+{"tMs":3258,"delta":" 92}}, \"props\":"}
+{"tMs":3288,"delta":" {\"spacing\": 12"}
+{"tMs":3324,"delta":", \"crossAxisA"}
+{"tMs":3359,"delta":"lignment\": \"stretch"}
+{"tMs":3394,"delta":"\"}}}, {\"op"}
+{"tMs":3430,"delta":"\": \"set\", \"id\": \""}
+{"tMs":3465,"delta":"tAov\", \"parent\":"}
+{"tMs":3501,"delta":" \"tiles3\", \"node"}
+{"tMs":3536,"delta":"\": {\"type\": \"column\","}
+{"tMs":3572,"delta":" \"children\": [\"tAov"}
+{"tMs":3607,"delta":"L\", \"tAovV\","}
+{"tMs":3643,"delta":" \"tAovD\"], \""}
+{"tMs":3678,"delta":"layout\": {\"width\": {"}
+{"tMs":3713,"delta":"\"fill\": 358},"}
+{"tMs":3749,"delta":" \"height\": {\"hug\":"}
+{"tMs":3785,"delta":" 92}"}
+{"tMs":3820,"delta":", \"padding\": 14}"}
+{"tMs":3855,"delta":", \"props\": {\"cross"}
+{"tMs":3891,"delta":"AxisAlignment\":"}
+{"tMs":3927,"delta":" \"start\", \"spacing\":"}
+{"tMs":3962,"delta":" 4}, \"decoration"}
+{"tMs":3998,"delta":"\": {\"fills\": [{"}
+{"tMs":4033,"delta":"\"color\": \"#FFF"}
+{"tMs":4068,"delta":"FFFFF\"}],"}
+{"tMs":4104,"delta":" \"radius\": 12}}"}
+{"tMs":4140,"delta":"}, {\"op\": \"set"}
+{"tMs":4175,"delta":"\", \"id\": \"tAov"}
+{"tMs":4210,"delta":"L\", \"node\": {\"type"}
+{"tMs":4246,"delta":"\": \"text\", \"layout\":"}
+{"tMs":4281,"delta":" {\"width\": {\"fill"}
+{"tMs":4317,"delta":"\": 330}, \"height\":"}
+{"tMs":4352,"delta":" {\"hug\": 16}"}
+{"tMs":4389,"delta":"}, \"props\": {\"text"}
+{"tMs":4423,"delta":"\": \"Average order value\", \""}
+{"tMs":4459,"delta":"style\": {\"fontSize"}
+{"tMs":4494,"delta":"\": 12, \"color\": \""}
+{"tMs":4530,"delta":"#FF6B7280\""}
+{"tMs":4565,"delta":"}}}}, {\"op"}
+{"tMs":4602,"delta":"\": \"set\", \"id\": \""}
+{"tMs":4636,"delta":"tAovV\", \"node\":"}
+{"tMs":4671,"delta":" {\"type\": \"text\", \""}
+{"tMs":4707,"delta":"layout\": {\"width\": {"}
+{"tMs":4742,"delta":"\"fill\": 330},"}
+{"tMs":4778,"delta":" \"height\": {\"hug\":"}
+{"tMs":4813,"delta":" 28}}, \"props\":"}
+{"tMs":4849,"delta":" {\"text\": \"${cur"}
+{"tMs":4884,"delta":".aov}\", \"style\":"}
+{"tMs":4919,"delta":" {\"fontSize\": "}
+{"tMs":4955,"delta":"22, \"fontWeight"}
+{"tMs":4990,"delta":"\": 700, \"color\": \""}
+{"tMs":5026,"delta":"#FF111827\"}}"}
+{"tMs":5061,"delta":"}}, {\"op\": \""}
+{"tMs":5103,"delta":"set\", \"id\": \"tA"}
+{"tMs":5132,"delta":"ovD\", \"node\": {\""}
+{"tMs":5168,"delta":"type\": \"text\", \"layout"}
+{"tMs":5204,"delta":"\": {\"width\": {\"f"}
+{"tMs":5239,"delta":"ill\": 330}, \"height"}
+{"tMs":5274,"delta":"\": {\"hug\": 16"}
+{"tMs":5310,"delta":"}}, \"props\": {\""}
+{"tMs":5345,"delta":"text\": \"${= cur."}
+{"tMs":5381,"delta":"aovd + ' vs"}
+{"tMs":5416,"delta":" prior'}\", \"style\":"}
+{"tMs":5451,"delta":" {\"fontSize\": "}
+{"tMs":5487,"delta":"12, \"fontWeight"}
+{"tMs":5522,"delta":"\": 600, \"color\": \""}
+{"tMs":5558,"delta":"#FF16A34A\""}
+{"tMs":5593,"delta":"}}}}]"}
+{"tMs":5659,"delta":"}"}

@@ -1,0 +1,33 @@
+{"meta":{"ui":"image_gallery","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["image_gallery@claude-sonnet-5-5.compact.r1.jsonl","image_gallery@claude-sonnet-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":304,"usage":{"inputTokens":5478,"outputTokens":304,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":1731,"firstToolDeltaMs":1765,"totalMs":2833,"stopReason":"StopReason.toolUse"},"text":"A text can't carry a fill, so I'll undo that and add a real scrim box inside the cell stack, between the image and the caption.","ttftMs":1731,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":["low_contrast cellCap"],"warnings":1,"nodes":20,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1765,"delta":"{\"ops\": ["}
+{"tMs":1799,"delta":"{\"op\": \"patch\","}
+{"tMs":1836,"delta":" \"id\": \"cellCap"}
+{"tMs":1867,"delta":"\", \"patch\": {\"dec"}
+{"tMs":1901,"delta":"oration\": null, \"layout"}
+{"tMs":1934,"delta":"\": {\"padding\": 0"}
+{"tMs":2110,"delta":"}}}, {\"op\":"}
+{"tMs":2110,"delta":" \"set\", \"id\": \"c"}
+{"tMs":2110,"delta":"ellScrim\", \"par"}
+{"tMs":2110,"delta":"ent\": \"cell\", \"index"}
+{"tMs":2703,"delta":"\": 1, \"node\": {"}
+{"tMs":2703,"delta":"\"type\": \"box\", \"lay"}
+{"tMs":2703,"delta":"out\": {\"width\": {\""}
+{"tMs":2703,"delta":"fill\": 110}, \""}
+{"tMs":2703,"delta":"height\": 44, \"x\":"}
+{"tMs":2703,"delta":" 0, \"y\": {\""}
+{"tMs":2703,"delta":"end\": 0}}, \""}
+{"tMs":2703,"delta":"decoration\": {\"fills"}
+{"tMs":2703,"delta":"\": [{\"type\": \"lin"}
+{"tMs":2703,"delta":"ear\", \"beg"}
+{"tMs":2703,"delta":"in\": \""}
+{"tMs":2703,"delta":"topCenter\", \"end\":"}
+{"tMs":2703,"delta":" \"bottomCenter\","}
+{"tMs":2703,"delta":" \"stops\": [{\"position"}
+{"tMs":2703,"delta":"\": 0, \"color\": \""}
+{"tMs":2703,"delta":"#00000000\"}, {"}
+{"tMs":2703,"delta":"\"position\": 1, \"color"}
+{"tMs":2703,"delta":"\": \"#B"}
+{"tMs":2703,"delta":"3"}
+{"tMs":2737,"delta":"000000\"}]}]"}
+{"tMs":2770,"delta":"}}}]"}
+{"tMs":2832,"delta":"}"}

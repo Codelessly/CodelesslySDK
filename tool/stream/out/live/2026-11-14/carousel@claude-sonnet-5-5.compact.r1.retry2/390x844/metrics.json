@@ -1,0 +1,55 @@
+{
+ "stream": "carousel@claude-sonnet-5-5.compact.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1471,
+ "timeToFirstPaintMs": 2581,
+ "timeToFirstTextMs": 2581,
+ "timeToFirstSectionMs": 2581,
+ "timeToCompleteMs": 2645,
+ "outputTokens": 347,
+ "tokensEstimated": false,
+ "chars": 508,
+ "deltas": 34,
+ "opsApplied": 1,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "empty_button dot"
+ ],
+ "finalDiagnostics": [
+  "empty_button /nodes/dot"
+ ],
+ "scripts": 0,
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 28,
+   "rejected": 2
+  },
+  {
+   "stream": "retry",
+   "applied": 6,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 1,
+ "rejections": [],
+ "nodes": 28,
+ "reappliedBoxesPerOp": {
+  "min": 6,
+  "median": 6,
+  "p90": 6,
+  "max": 6
+ },
+ "frames": 53,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 88,
+ "pumpMsMedian": 0.16,
+ "renderExceptions": [],
+ "warnings": 2
+}

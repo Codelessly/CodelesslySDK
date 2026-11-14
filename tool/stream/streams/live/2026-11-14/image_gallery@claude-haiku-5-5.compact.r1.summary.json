@@ -1,0 +1,119 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "systemPromptChars": 46693,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 20530,
+ "generate": {
+  "inputTokens": 319,
+  "outputTokens": 2224,
+  "cacheReadInputTokens": 20451,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 402,
+  "firstToolDeltaMs": 425,
+  "totalMs": 7295,
+  "stopReason": "StopReason.toolUse",
+  "ops": 17,
+  "opsApplied": 14,
+  "opsRejected": 3,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "wrong_type /nodes/tile/decoration/fills/0/stops/0",
+   "wrong_type /nodes/tile/decoration/fills/0/stops/0/color",
+   "wrong_type /nodes/tile/decoration/fills/0/stops/1",
+   "wrong_type /nodes/tile/decoration/fills/0/stops/1/color",
+   "invalid_parent /ops/8/parent",
+   "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/0",
+   "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/0/color",
+   "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/1",
+   "wrong_type /nodes/bigPhoto/decoration/fills/0/stops/1/color",
+   "dangling_child /nodes/grid/children/0",
+   "dangling_child /nodes/viewer/children/0"
+  ],
+  "lints": [
+   "empty_button scrim"
+  ],
+  "warnings": 18,
+  "nodes": 11,
+  "scripts": 0,
+  "scriptChars": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 6160,
+   "outputTokens": 577,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 481,
+   "firstToolDeltaMs": 521,
+   "totalMs": 2036,
+   "stopReason": "StopReason.toolUse",
+   "ops": 4,
+   "opsApplied": 2,
+   "opsRejected": 2,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "unknown_id /ops/1/id",
+    "structural_key_in_patch /nodes/gallery/slots"
+   ],
+   "lints": [
+    "empty_button scrim",
+    "empty_button tile"
+   ],
+   "warnings": 8,
+   "nodes": 13,
+   "scripts": 0,
+   "scriptChars": 0
+  },
+  {
+   "inputTokens": 8296,
+   "outputTokens": 1032,
+   "cacheReadInputTokens": 20451,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 401,
+   "firstToolDeltaMs": 443,
+   "totalMs": 3121,
+   "stopReason": "StopReason.toolUse",
+   "ops": 6,
+   "opsApplied": 4,
+   "opsRejected": 2,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [
+    "invalid_parent /ops/0/parent",
+    "unknown_id /ops/5/parent"
+   ],
+   "lints": [],
+   "warnings": 6,
+   "nodes": 15,
+   "scripts": 0,
+   "scriptChars": 0
+  }
+ ],
+ "final": {
+  "ops": 6,
+  "opsApplied": 4,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [
+   "invalid_parent /ops/0/parent",
+   "unknown_id /ops/5/parent"
+  ],
+  "lints": [],
+  "warnings": 6,
+  "nodes": 15,
+  "scripts": 0,
+  "scriptChars": 0
+ }
+}

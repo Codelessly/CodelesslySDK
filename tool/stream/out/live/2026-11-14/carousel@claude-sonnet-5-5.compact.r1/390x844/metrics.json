@@ -1,0 +1,78 @@
+{
+ "stream": "carousel@claude-sonnet-5-5.compact.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1109,
+ "timeToFirstPaintMs": 5100,
+ "timeToFirstTextMs": 5843,
+ "timeToFirstSectionMs": 19866,
+ "timeToCompleteMs": 19925,
+ "outputTokens": 3980,
+ "tokensEstimated": false,
+ "chars": 7944,
+ "deltas": 552,
+ "opsApplied": 28,
+ "opsRejected": 2,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 2,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_bind_path /nodes/pager/bind/props.currentPage",
+  "unknown_layout_key /nodes/rateTxt/layout/hug",
+  "dangling_child /nodes/carRow/children/1",
+  "dangling_child /nodes/sRate/children/1"
+ ],
+ "scripts": 0,
+ "streamedOps": 30,
+ "rejections": [
+  {
+   "op": 9,
+   "code": "unknown_bind_path",
+   "path": "/nodes/pager/bind/props.currentPage",
+   "message": "A pageView has no prop \"currentPage\". Its props: scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemCount, pageSnapping, padEnds, keepPage, initialPage, viewportFraction, allowImplicitScrolling, animationDuration, animationCurve, pageMotion, pageMotionBefore, paintOrder.",
+   "nodeId": "pager"
+  },
+  {
+   "op": 16,
+   "code": "unknown_layout_key",
+   "path": "/nodes/rateTxt/layout/hug",
+   "message": "layout has no \"hug\": sizes go under width/height: \"height\": {\"hug\": 60} (a number is a fixed size; {\"hug\": n} fits the content, {\"fill\": n} takes the free space; n is the size you expect). This node has both already: remove \"hug\".",
+   "nodeId": "rateTxt",
+   "expected": [
+    "width",
+    "height"
+   ],
+   "suggestion": "height"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/carRow/children/1",
+   "message": "Child \"pager\" of \"carRow\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "carRow"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/sRate/children/1",
+   "message": "Child \"rateTxt\" of \"sRate\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "sRate"
+  }
+ ],
+ "nodes": 26,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 7,
+  "max": 11
+ },
+ "frames": 179,
+ "frameMs": 116,
+ "pumpsOverBudget16ms": 6,
+ "pumps": 732,
+ "pumpMsMedian": 0.101,
+ "renderExceptions": [],
+ "warnings": 4
+}

@@ -1,0 +1,53 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"turn":"followup","followup":"Add a field for a note to the restaurant.","base":["reservation@claude-sonnet-5-5.compact.r1.jsonl","reservation@claude-sonnet-5-5.compact.r1.retry.jsonl"],"source":"live","outputTokens":471,"usage":{"inputTokens":4611,"outputTokens":471,"cacheReadInputTokens":20451,"cacheCreationInputTokens":0,"ttftMs":974,"firstToolDeltaMs":1047,"totalMs":2892,"stopReason":"StopReason.toolUse"},"text":"I'll add a text field above the confirm button, bound to a `note` variable, and include the note in the confirmation toast.","ttftMs":974,"check":{"ops":3,"opsApplied":3,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":18,"scripts":0,"scriptChars":0},"assets":null}}
+{"tMs":1047,"delta":"{\"ops\": [{\""}
+{"tMs":1083,"delta":"op\": \"vars\", \"sc"}
+{"tMs":1120,"delta":"ope\": \"book\", \"set\":"}
+{"tMs":1154,"delta":" {\"note\": {\"type\":"}
+{"tMs":1190,"delta":" \"text\", \"value\": \"\""}
+{"tMs":1225,"delta":"}}}, {\"op\":"}
+{"tMs":1262,"delta":" \"set\", \"id\": \"no"}
+{"tMs":1297,"delta":"teField\", \"parent\": \""}
+{"tMs":1333,"delta":"card\", \"index\": 7,"}
+{"tMs":1369,"delta":" \"node\": {\"type\": \""}
+{"tMs":1404,"delta":"textField\", \"layout\": {"}
+{"tMs":1440,"delta":"\"width\": {\"fill\":"}
+{"tMs":1548,"delta":" 358}, \"height\": "}
+{"tMs":1548,"delta":"56}, \"props\": {\""}
+{"tMs":1548,"delta":"initialValue\": \"\", \""}
+{"tMs":1581,"delta":"decoration\": {\"label"}
+{"tMs":1617,"delta":"Text\": \"Note to the rest"}
+{"tMs":1653,"delta":"aurant\", \"hintText"}
+{"tMs":1688,"delta":"\": \"Allergies, occ"}
+{"tMs":1723,"delta":"asion, se"}
+{"tMs":1757,"delta":"ating.."}
+{"tMs":1793,"delta":".\"}}, \"bind\":"}
+{"tMs":1829,"delta":" {\"props.initialValue"}
+{"tMs":1865,"delta":"\": \"${note}\"},"}
+{"tMs":1900,"delta":" \"actions\": [{\"tr"}
+{"tMs":1936,"delta":"igger\": {\"type\": \""}
+{"tMs":1971,"delta":"changed\"}, \"actions"}
+{"tMs":2011,"delta":"\": [{\"type\": \"set"}
+{"tMs":2044,"delta":"Variable\", \"variable\":"}
+{"tMs":2077,"delta":" \"note\", \"value\": \"${"}
+{"tMs":2114,"delta":"result}\"}]}]}"}
+{"tMs":2149,"delta":"}, {\"op\": \"pat"}
+{"tMs":2186,"delta":"ch\", \"id\": \"confir"}
+{"tMs":2220,"delta":"m\", \"patch\": {\""}
+{"tMs":2256,"delta":"actions\": [{\"trig"}
+{"tMs":2291,"delta":"ger\": {\"type\": \"click"}
+{"tMs":2326,"delta":"\"}, \"actions\": ["}
+{"tMs":2361,"delta":"{\"type\": \"showToast"}
+{"tMs":2397,"delta":"\", \"message\": \"${= "}
+{"tMs":2435,"delta":"'Booked: ' +"}
+{"tMs":2468,"delta":" dayList[dayId"}
+{"tMs":2504,"delta":"x].n + ' '"}
+{"tMs":2539,"delta":" + dayList[dayI"}
+{"tMs":2575,"delta":"dx].d + ', table"}
+{"tMs":2610,"delta":" for ' + party + '"}
+{"tMs":2646,"delta":" at ' + times[slot"}
+{"tMs":2681,"delta":"Sel] + (note == '"}
+{"tMs":2716,"delta":"' ? '' : '"}
+{"tMs":2752,"delta":". Note: ' + note"}
+{"tMs":2788,"delta":")}\"}]}]}"}
+{"tMs":2823,"delta":"}]"}
+{"tMs":2892,"delta":"}"}
