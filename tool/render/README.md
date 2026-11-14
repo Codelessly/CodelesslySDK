@@ -71,7 +71,8 @@ site: navigation may name a canvas of another page.
 | `--validate-only` | Only validate. |
 
 Steps (`--tap`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--drag`, `--navigate`, `--wait`) run in the order given, after the screen
-has loaded and before the capture, at every size. A step that names a node not shown at a size (hidden there by a
+has loaded and before the capture, at every size. Each step settles about a second; before the capture, number variables still counting (`animate`
+`animateTo` in a `load` reaction) are let arrive (up to 20 s), so counters show the numbers they end at. A step that names a node not shown at a size (hidden there by a
 media rule or a binding, or on another breakpoint's canvas) is skipped at that size, with one warning per size
 listing the skipped steps; the other steps run and the capture is made.
 
