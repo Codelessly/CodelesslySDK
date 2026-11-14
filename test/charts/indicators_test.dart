@@ -27,6 +27,7 @@ Iterable<RenderObject> _descendants(RenderObject o) sync* {
 }
 
 void main() {
+  _themeChangeRepaintsIndicators();
   testWidgets('a spinner animates', (tester) async {
     final doc = _doc({
       'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 24, 'height': 24}, 'props': {'color': '#FF2D6CDF'}},
@@ -105,4 +106,40 @@ void main() {
     tree.dispose();
   });
 
+}
+
+/// The ARGB colour at ([x], [y]) of [key]'s boundary.
+Future<int> _pixel(WidgetTester tester, GlobalKey key, int x, int y) async => (await tester.runAsync(() async {
+      final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+      final image = await boundary.toImage();
+      final bytes = (await image.toByteData())!;
+      final at = 4 * (y * image.width + x);
+      image.dispose();
+      return bytes.getUint8(at + 3) << 24 | bytes.getUint8(at) << 16 | bytes.getUint8(at + 1) << 8 | bytes.getUint8(at + 2);
+    }))!;
+
+void _themeChangeRepaintsIndicators() {
+  testWidgets('a gauge with no colours of its own repaints in the new theme when the theme (or its mode) changes', (tester) async {
+    final doc = _doc({
+      'meter': {
+        'type': 'gaugeMeter',
+        'layout': {'width': 120, 'height': 30},
+        'props': {'value': 100, 'min': 0, 'max': 100, 'shape': 'bar', 'ticks': 0},
+      },
+    });
+    final components = ComponentRegistry()..theme = ThemeTokens.fromJson({'primary': '#FFFF0000'});
+    final tree = NodeTree(DocumentSource(doc), components: components);
+    final key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+        home: Align(alignment: Alignment.topLeft, child: RepaintBoundary(key: key, child: NodeView(tree: tree, rootId: 's')))));
+    await tester.pump(const Duration(seconds: 2));
+    Future<int> fill() => _pixel(tester, key, 70, 25);
+    expect((await fill()).toRadixString(16), 'ffff0000');
+    // What a setThemeMode does: the screen's theme is now the dark one.
+    components.theme = ThemeTokens.fromJson({'primary': '#FF0000FF'});
+    await tester.pump(const Duration(seconds: 2));
+    expect((await fill()).toRadixString(16), 'ff0000ff');
+    await tester.pumpWidget(const SizedBox());
+    tree.dispose();
+  });
 }

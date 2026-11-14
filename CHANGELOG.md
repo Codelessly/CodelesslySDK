@@ -18,6 +18,14 @@
   `--design-system <id>` and `--only ssui`, and the live summary has the design system per cell and its components
   against the raw controls it replaces.
 
+**Fixes.**
+
+- Gauges, charts and barcodes drawn with the theme's colours (the ones they leave unset, `indicator_theme.dart`)
+  repaint when the theme changes at run time (`setThemeMode`, the platform's brightness under `system`): the box
+  notes it depends on the theme (`RenderTree.dependOnTheme`) and a theme change (`ComponentRegistry.theme`,
+  `themeChanged`) re-applies it. Before, only nodes naming theme colours re-applied, so an unstyled gauge kept the
+  old mode's colours.
+
 ## 30.1.0
 
 **No special cases left** (with codelessly_api's unreleased removal of the last 21 one-look fields, each now a

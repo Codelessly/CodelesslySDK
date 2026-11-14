@@ -50,11 +50,15 @@ Size _designSize(Node n) => Size(n.layout.width.value, n.layout.height.value);
 /// The node's box (AdaptiveNodeBox) painted by [painter].
 /// [n] with the colors it leaves unset from the theme, for what it is drawn
 /// on (its ancestors' fills over the project's surface).
-Node _themed(NodeBuilder b, Node n) => withThemeColors(
-    n,
-    themeDataOf(b.tree.components?.theme ?? api.ThemeTokens.none,
-            surface: backdropOf(b.source.node, b.source.parentOf, b.id))
-        .colorScheme);
+/// The box is drawn again when the theme changes (its mode).
+Node _themed(NodeBuilder b, Node n) {
+  b.tree.dependOnTheme(b);
+  return withThemeColors(
+      n,
+      themeDataOf(b.tree.components?.theme ?? api.ThemeTokens.none,
+              surface: backdropOf(b.source.node, b.source.parentOf, b.id))
+          .colorScheme);
+}
 
 void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painter) {
   chain.add(b.fitBox('indicatorFit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));

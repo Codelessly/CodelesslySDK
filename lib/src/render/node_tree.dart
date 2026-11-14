@@ -379,6 +379,10 @@ class RenderTree {
   /// A definition arrived, left or changed its declaration: the boxes of
   /// calls to it (and of its instances) are placed again by their parents.
   void _componentsChanged() {
+    if (components?.themeChanged ?? false) {
+      _themeChanged();
+      return;
+    }
     final types = components?.changed ?? const <String>{};
     if (types.isEmpty) return;
     _instanceSources.removeWhere((ci, _) => types.contains(ci.component));
@@ -400,6 +404,27 @@ class RenderTree {
       // placed again.
       p._applied = null;
       p._apply();
+    }
+  }
+
+  /// Boxes that drew with [ComponentRegistry.theme] itself (colours a node
+  /// leaves unset that come from the theme's roles: an indicator's), noted
+  /// by [dependOnTheme]: a change of theme (its mode) re-applies them. A
+  /// node whose own values name the theme re-applies through its source.
+  final Set<NodeBox> _themeDependents = {};
+
+  /// Notes that [builder]'s node is drawn with the theme's colours: it is
+  /// drawn again when the theme changes.
+  void dependOnTheme(NodeBuilder builder) {
+    if (builder is NodeBox) _themeDependents.add(builder);
+  }
+
+  void _themeChanged() {
+    for (final b in _themeDependents.toList()) {
+      _themeDependents.remove(b);
+      if (!identical(_boxes[keyOf(b.id, b.instance)], b)) continue;
+      b._applied = null;
+      b._apply();
     }
   }
 
@@ -875,6 +900,7 @@ class RenderTree {
     components?.removeListener(_componentsChanged);
     _fontNotifications?.removeListener(_fontsChanged);
     _afterFonts.clear();
+    _themeDependents.clear();
     for (final b in _boxes.values.toList()) {
       if (identical(_boxes[b.key], b)) release(b);
     }

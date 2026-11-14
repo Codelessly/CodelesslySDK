@@ -1,7 +1,7 @@
 // SSUI as data (design_systems/ssui): it loads from its folder, every
 // component and the gallery validate against it with no problem, and its
-// three cards only report the events they send to the host (a top-level
-// componentEvent, which a generated UI's session routes to the model).
+// three cards validate with no problem (their top-level componentEvents are
+// events to the host, which a generated UI's session routes to the model).
 import 'dart:convert';
 import 'dart:io';
 
@@ -44,12 +44,12 @@ void main() {
     expect(problems, isEmpty);
   });
 
-  test('the cards use only SSUI components, tokens and core nodes, and only send events to the host', () async {
+  test('the cards validate with SSUI: only its components, tokens and core nodes, and events to the host', () async {
     final ds = await _load([]);
     for (final card in ['flight_picker', 'order_summary', 'contact_form']) {
       final doc = _json('$_dir/examples/cards/$card.json');
       final problems = validateDocument(doc, options: ValidateOptions(theme: ds.tokens, components: ds.components))
-          .where((d) => d.severity != Severity.info && d.code.name != 'unknown_event')
+          .where((d) => d.severity != Severity.info)
           .map((d) => '$d');
       expect(problems, isEmpty, reason: card);
       final types = {for (final n in (doc['nodes']! as Map).values) (n as Map)['type']};
