@@ -83,8 +83,10 @@ void main() {
     expect(r['lead']!.size, const Size(24, 24));
     expect(r['lead']!.left, 16);
     expect(r['title']!.left, greaterThan(r['lead']!.right));
-    // ListTile centers a one-line title in its own (56) height.
-    expect(r['title']!.center.dy, closeTo(28, 1));
+    // The slots are centred on the tile (render/controls/tile.dart), not on
+    // Material's own 56 px row.
+    expect(r['title']!.center.dy, closeTo(36, 1));
+    expect(r['lead']!.center.dy, closeTo(36, 1));
   });
 
   testWidgets('dividers, app bars and navigation bars take their design size', (tester) async {

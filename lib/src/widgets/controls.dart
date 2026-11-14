@@ -6,22 +6,27 @@
 // editing the island files. A family adds one line here.
 import 'package:codelessly_api/core.dart'
     show
+        AccordionProps,
         ButtonProps,
         DatePickerProps,
         DateTimeInputProps,
         DropdownProps,
+        ExpansionTileProps,
         FloatingActionButtonProps,
         IconButtonProps,
+        ListTileProps,
         TextFieldProps,
         TimePickerProps;
 
 import '../render/controls/app_bar.dart';
 import '../render/controls/buttons.dart';
 import '../render/controls/dropdown.dart';
+import '../render/controls/expansion.dart';
 import '../render/controls/navigation_bar.dart';
 import '../render/controls/pickers.dart';
 import '../render/controls/tab_bar.dart';
 import '../render/controls/text_field.dart';
+import '../render/controls/tile.dart';
 import '../render/recipe.dart';
 import '../runtime/actions/text_fields.dart' show textFieldServices;
 import 'picker_locale.dart';
@@ -61,6 +66,13 @@ final Map<String, WidgetRecipe> textFieldRecipes = {
   TextFieldProps.spec.type: (b, n, chain) => textFieldRecipe(b, n, chain, services: textFieldServices),
 };
 
+/// List tiles, accordions and expansion tiles (render/controls/{tile,expansion}.dart).
+final Map<String, WidgetRecipe> tileRecipes = {
+  ListTileProps.spec.type: listTileRecipe,
+  AccordionProps.spec.type: accordionRecipe,
+  ExpansionTileProps.spec.type: expansionTileRecipe,
+};
+
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
@@ -68,4 +80,5 @@ final Map<String, WidgetRecipe> controlRecipes = {
   ...pickerRecipes,
   ...dropdownRecipes,
   ...textFieldRecipes,
+  ...tileRecipes,
 };

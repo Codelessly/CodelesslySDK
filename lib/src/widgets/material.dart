@@ -15,7 +15,6 @@ import 'package:codelessly_api/core.dart'
         ChipVariant,
         DividerProps,
         Json,
-        ListTileProps,
         Node,
         SizeFit,
         readInt,
@@ -39,7 +38,6 @@ final Map<String, WidgetRecipe> materialRecipes = {
   'filterChip': _chip,
   'inputChip': _chip,
   'badge': _badge,
-  'listTile': _listTile,
   'divider': _divider,
   'verticalDivider': _divider,
   'modal': _modal,
@@ -638,61 +636,6 @@ class RenderBadge extends RenderStack {
       t.paint(context.canvas, r.center - Offset(t.width / 2, t.height / 2));
     }
   }
-}
-
-// --- list tile ----------------------------------------------------------------
-
-void _listTile(NodeBuilder b, Node n, List<RenderBox> chain) {
-  _fixed(b, n, chain);
-  chain.add(b.island('tile', (context) {
-    Widget? slot(String name) {
-      final id = n.slots[name];
-      final child = id == null ? null : b.nodeOf(id);
-      if (child == null) return null;
-      return SizedBox(
-        width: child.layout.width.value,
-        height: child.layout.height.value,
-        child: NodeChild(tree: b.tree, id: id!, instance: b.instance),
-      );
-    }
-
-    final shape = n.prop(ListTileProps.shape);
-    final density = n.prop(ListTileProps.visualDensity);
-    return Material(
-      color: Colors.transparent,
-      child: ListTile(
-        onTap: null,
-        dense: n.prop(ListTileProps.dense),
-        autofocus: n.prop(ListTileProps.autofocus),
-        tileColor: _color(n.prop(ListTileProps.tileColor)),
-        isThreeLine: n.prop(ListTileProps.isThreeLine),
-        shape: shape == null ? null : _shape(shape),
-        selected: n.prop(ListTileProps.selected),
-        selectedTileColor: _color(n.prop(ListTileProps.selectedTileColor)),
-        hoverColor: _color(n.prop(ListTileProps.hoverColor)),
-        focusColor: _color(n.prop(ListTileProps.focusColor)),
-        enabled: n.prop(ListTileProps.enabled),
-        contentPadding: n.prop(ListTileProps.contentPadding)?.flutter,
-        visualDensity: density == null ? null : VisualDensity(horizontal: density.horizontal, vertical: density.vertical),
-        selectedColor: _color(n.prop(ListTileProps.selectedColor)),
-        iconColor: _color(n.prop(ListTileProps.iconColor)),
-        textColor: _color(n.prop(ListTileProps.textColor)),
-        enableFeedback: n.prop(ListTileProps.enableFeedback),
-        horizontalTitleGap: n.prop(ListTileProps.horizontalTitleGap),
-        minVerticalPadding: n.prop(ListTileProps.minVerticalPadding),
-        minLeadingWidth: n.prop(ListTileProps.minLeadingWidth),
-        minTileHeight: n.prop(ListTileProps.minTileHeight),
-        titleAlignment: switch (n.prop(ListTileProps.titleAlignment)) {
-          null => null,
-          final a => ListTileTitleAlignment.values.byName(a.name),
-        },
-        leading: slot('leading'),
-        title: slot('title'),
-        subtitle: slot('subtitle'),
-        trailing: slot('trailing'),
-      ),
-    );
-  }));
 }
 
 // --- divider ------------------------------------------------------------------
