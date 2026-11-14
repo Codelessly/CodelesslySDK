@@ -358,7 +358,10 @@ void main() {
 
   testWidgets('a navigate whose "to" is built by a binding goes to the screen it names', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/navexpr'], out: out.path, screens: const ['home'],
-        sizes: const [Size(390, 400)], steps: const [Step('tap', 'result#1')], dumpLayout: true));
+        // The wait: in a process that rendered before, loading the screen
+        // waits out its 2 s timeout (font loads begun under an earlier
+        // test's clock never end under this one).
+        sizes: const [Size(390, 400)], steps: const [Step('tap', 'result#1'), Step('wait', '2500')], dumpLayout: true));
     expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
     final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
     expect(boxes.cast<Map>().map((b) => b['id']), contains('changelogTitle'), reason: 'the second result names changelog');
@@ -405,5 +408,23 @@ void main() {
       contains('dishName'),
       contains('{"hug": 60}'),
     ), reason: '${report.diagnostics}');
+  });
+
+  testWidgets('a grid with fillGaps places a later small item in the hole an earlier span left (grid-auto-flow: dense)', (tester) async {
+    Future<List<Map>> cards(bool dense) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/densegrid'], out: out.path, sizes: const [Size(390, 400)],
+          steps: [Step('set', 'dense', '$dense')], dumpLayout: true, label: 'dense-$dense'));
+      expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+      final boxes = (jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List).cast<Map>();
+      return boxes.where((b) => b['id'] == 'card').toList();
+    }
+
+    // Spans 2, 2, 1 in three columns: sparse puts the 1 after the second 2
+    // (row 2); dense puts it in the first row's free cell.
+    final sparse = await cards(false);
+    expect(sparse.map((b) => b['y']), [0, 60, 60]);
+    final dense = await cards(true);
+    expect(dense.map((b) => b['y']), [0, 60, 0]);
+    expect(dense.last['x'], 260);
   });
 }
