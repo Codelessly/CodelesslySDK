@@ -359,8 +359,19 @@ class RenderButton extends RenderControl implements LabelledControl {
             api.FloatingActionButtonType.large => 96,
             _ => 56,
           },
-        _ => spec.tokens.defaultHeight,
+        // A node's own vertical padding around its content, when that is
+        // taller than the scale's step.
+        _ => spec.padding == null || spec.padding!.vertical == 0
+            ? spec.tokens.defaultHeight
+            : math.max(spec.tokens.defaultHeight, _contentHeight + spec.padding!.vertical),
       };
+
+  /// The label's line (or the icon, when taller) at the default step.
+  double get _contentHeight {
+    final m = _metricsAt(spec.tokens.defaultHeight);
+    final line = _iconOnly ? 0.0 : m.fontSize * (spec.labelStyle.height ?? 1.2);
+    return math.max(line, spec.hasIcon ? m.iconSize : 0);
+  }
 
   _Metrics _metricsAt(double height) {
     final s = spec;
@@ -415,7 +426,8 @@ class RenderButton extends RenderControl implements LabelledControl {
 
   double _naturalWidth(double height) {
     final m = _metricsAt(height);
-    if (_iconOnly) return kind == ButtonKind.fab ? height : height;
+    // Icon only: a square of its height, or the icon in the node's padding.
+    if (_iconOnly) return kind == ButtonKind.fab || spec.padding == null ? height : math.max(height, m.iconSize + spec.padding!.horizontal);
     final pad = spec.padding;
     return (pad == null ? m.padX * 2 : pad.horizontal) + _contentWidth(m);
   }
