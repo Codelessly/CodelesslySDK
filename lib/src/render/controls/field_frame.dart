@@ -1079,6 +1079,8 @@ abstract class RenderFieldFrame extends RenderControl implements LabelledControl
       if (hintShown) _hint.paint(context.canvas, offset + contentRect.topLeft);
       paintContent(context, offset);
     }, oldLayer: _clip.layer);
+    // The clip may have pushed a layer: draw on the canvas after it.
+    final over = context.canvas;
     // The border over the content (it never moves it).
     final b = currentBorder;
     if (b.kind != FieldBorderKind.none && b.side.width > 0 && b.side.color.a > 0) {
@@ -1087,18 +1089,18 @@ abstract class RenderFieldFrame extends RenderControl implements LabelledControl
         ..strokeWidth = b.side.width
         ..color = b.side.color;
       if (b.kind == FieldBorderKind.outline) {
-        canvas.drawRRect(shape.deflate(b.side.width / 2), paint);
+        over.drawRRect(shape.deflate(b.side.width / 2), paint);
       } else {
         final y = shape.bottom - b.side.width / 2;
-        canvas.drawLine(Offset(shape.left, y), Offset(shape.right, y), paint);
+        over.drawLine(Offset(shape.left, y), Offset(shape.right, y), paint);
       }
     }
     if (d.focusRingWidth > 0 && focusNode.hasFocus && d.focusRingColor != null) {
-      paintFocusRing(canvas, shape, d.focusRingColor!, width: d.focusRingWidth);
+      paintFocusRing(over, shape, d.focusRingColor!, width: d.focusRingWidth);
     }
     final below = belowText;
-    if (below.isNotEmpty) _below.paint(canvas, offset + Offset(0, _belowTop));
-    if (d.counter.isNotEmpty) _counter.paint(canvas, offset + Offset(size.width - _counter.width, _belowTop));
+    if (below.isNotEmpty) _below.paint(over, offset + Offset(0, _belowTop));
+    if (d.counter.isNotEmpty) _counter.paint(over, offset + Offset(size.width - _counter.width, _belowTop));
   }
 
   // --- what tools and the guard read --------------------------------------------------------

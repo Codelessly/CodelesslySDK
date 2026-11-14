@@ -6,6 +6,9 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField;
+
+import '../support/fields.dart';
 
 Map<String, Object?> _card(Map<String, Object?> extra) => {
       'schema': 3,
@@ -67,43 +70,46 @@ String? _family(RenderParagraph p) {
   return family;
 }
 
+/// The field showing label [label].
+RenderTextField _field(WidgetTester tester, String label) =>
+    textFields(tester).firstWhere((f) => f.decoration.label == label);
+
 void main() {
   testWidgets('a field\'s label stays visible above it, with a value and without one', (tester) async {
     await _show(tester);
     for (final (label, value) in [('To', 'landlord@example.com'), ('Subject', 'Heating'), ('Promo code', null)]) {
-      final p = _paragraph(tester, label);
-      expect(p.size.height, greaterThan(0), reason: '$label is laid out');
-      final labelRect = p.localToGlobal(Offset.zero) & p.size;
+      final f = _field(tester, label);
+      final drawn = f.labels.firstWhere((l) => l.text == label);
+      expect(drawn.glyphs, isNotEmpty, reason: '$label is laid out');
+      final labelBottom = drawn.glyphs.map((g) => g.bottom).reduce((a, b) => a > b ? a : b);
       if (value != null) {
-        final editable =
-            tester.state<EditableTextState>(find.byWidgetPredicate((w) => w is EditableText && w.controller.text == value)).renderEditable;
-        final valueTop = editable.localToGlobal(Offset.zero).dy;
-        expect(labelRect.bottom, lessThanOrEqualTo(valueTop), reason: '$label sits above its value');
+        expect(f.editor.text, value);
+        expect(labelBottom, lessThanOrEqualTo(f.textRect.top), reason: '$label sits above its value');
+        expect(labelBottom, lessThanOrEqualTo(f.boxRect.top), reason: '$label sits above the box');
       }
     }
     // The empty field's hint is its own, not the label.
-    expect(find.text('SAVE10'), findsOneWidget);
+    expect(_field(tester, 'Promo code').labels.map((l) => l.text), contains('SAVE10'));
   });
 
   testWidgets('a themeless session draws a field\'s text in the family a text node beside it has', (tester) async {
     await _show(tester);
     final note = _family(_paragraph(tester, 'Draft'));
-    final editable = tester.state<EditableTextState>(find.byType(EditableText).first).renderEditable;
-    expect(editable.text?.style?.fontFamily, note);
-    expect(_family(_paragraph(tester, 'To')), note);
+    final f = _field(tester, 'To');
+    expect(f.editable.text?.style?.fontFamily, note);
+    expect(f.labels.first.fontFamily, note);
   });
 
   testWidgets('a session\'s theme font is its controls\' font', (tester) async {
     await _show(tester, theme: const ThemeTokens(fontFamily: 'Roboto'));
-    final editable = tester.state<EditableTextState>(find.byType(EditableText).first).renderEditable;
-    expect(editable.text?.style?.fontFamily, 'Roboto');
+    expect(_field(tester, 'To').editable.text?.style?.fontFamily, 'Roboto');
   });
 
   testWidgets('a theme font is the default family of every text: a text node with none takes it as a control does', (tester) async {
     await _show(tester, theme: const ThemeTokens(fontFamily: 'Roboto'));
-    final editable = tester.state<EditableTextState>(find.byType(EditableText).first).renderEditable;
-    expect(editable.text?.style?.fontFamily, 'Roboto');
+    final f = _field(tester, 'To');
+    expect(f.editable.text?.style?.fontFamily, 'Roboto');
     expect(_family(_paragraph(tester, 'Draft')), 'Roboto');
-    expect(_family(_paragraph(tester, 'To')), 'Roboto');
+    expect(f.labels.first.fontFamily, 'Roboto');
   });
 }
