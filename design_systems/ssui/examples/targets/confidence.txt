@@ -1,0 +1,16 @@
+Card gap:10
+  Row gap:12
+    RadialProgress value:82
+    Column gap:2 grow
+      Text.sectionTitle "Likely correct"
+      Text.small "Three sources agree; one is older than a year."
+  Column gap:6
+    Row gap:8
+      Text.small "Sources agree" grow
+      Badge.success "3 of 4"
+    Row gap:8
+      Text.small "Freshness" grow
+      Badge.warning "1 old"
+    Row gap:8
+      Text.small "Direct quote found" grow
+      Badge.success "Yes"

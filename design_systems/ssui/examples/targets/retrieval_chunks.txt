@@ -1,0 +1,8 @@
+state file="handbook.md"
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Passages used" grow
+    CountBadge count:3
+  TextItem "handbook.md" value:"Refunds are issued within 14 days of purchase when the seat has not been used." kind:"lines 40 to 46" status:confirmed
+  TextItem "pricing.md" value:"Yearly plans are billed up front and can be changed at renewal." kind:"lines 12 to 15"
+  TextItem "faq.md" value:"A plan can be upgraded at any time; the difference is prorated." kind:"lines 88 to 91"

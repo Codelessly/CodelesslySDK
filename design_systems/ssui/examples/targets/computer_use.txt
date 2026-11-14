@@ -1,0 +1,14 @@
+state step=2
+Card gap:10
+  Row gap:8
+    IconBox "desktop_windows"
+    Column gap:1 grow
+      Text.sectionTitle "Using the browser"
+      Text.caption "Step {step} of 3 · filling the form"
+    StatusIndicator status:running
+  Box h:140 radius:8 fill:#FFF3F4F6 center
+    Icon "web" {"props": {"size": 28, "color": "#FF9CA3AF"}}
+  StepIndicator steps:["Open","Fill","Submit"] current:=step-1
+  Row end gap:8
+    Button.ghost "Take over" -> emit take_over
+    Button.destructive "Stop" -> emit stop
