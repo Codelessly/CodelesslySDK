@@ -1,5 +1,18 @@
 ## Unreleased
 
+- The `dropdown` is a render object (`render/controls/dropdown.dart`, Milestone 3 WS-B): SSUI's Select on the field
+  frame (28 high when it hugs, `primaryBackground`, hairline, radius 7, Lucide chevron in `tertiaryText` turned over
+  while open, the value optically centred) opening its menu (`render/controls/menu.dart`) as an entry of the root's
+  overlay layer: under the field or above it when there is no room, at least its width (120 at least), 240 high at
+  most and scrolling, SSUI's surface (`level3`, hairline, 4 px inset, 28 px rows, the selected row tinted with a
+  check). A press outside or Escape closes it and the field keeps the focus; Enter, Space and the arrows open it,
+  arrows, Home/End, Page Up/Down and type-ahead move, Enter and Space choose (`changed`, written back). Screen readers
+  get a button with its value and expanded state and the rows as buttons. No Material arrow, card, route, ripple or
+  elevation. The popup layer (`ControlPopup`: barrier, placement, dismissal) is for dialogs and sheets to reuse.
+  Matches SSUI's own Select to 0.77 % (light) and 0.73 % (dark) of the pixels (`test/controls/ssui_select_reference_test.dart`).
+  A hugging dropdown is now as wide as its widest item plus the chevron and padding (was Flutter's `DropdownButton`'s
+  width); `isDense` and `isExpanded` no longer change its size; `elevation` maps to SSUI's shadow levels.
+
 **A list that filtered to nothing, explained.** A recorded SSUI data table (data_table@claude-sonnet-5-5) showed
 "No results" over twelve defined invoices: its `filtered` variable was `filter(invoices, (statusF == 'All' || status ==
 statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
