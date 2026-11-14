@@ -9,6 +9,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:codelessly_api/validate.dart' show ValidateOptions, strictEditCheck;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart'; // ignore: deprecated_member_use
 import 'package:flutter/services.dart' show rootBundle;
@@ -57,6 +58,15 @@ class ReplyMessage extends ChatMessage {
   String? note;
   EditResult? result;
 }
+
+/// A reply's session: its ops checked as they arrive with the strict
+/// validator, the model's formulas read by the SDK's parser (a formula that
+/// does not parse, an item's field read without its item), against the
+/// design system's components and tokens.
+UiSession newSession(DesignSystem? designSystem) => UiSession(
+    designSystem: designSystem,
+    check: strictEditCheck(
+        ValidateOptions(formulas: FormulaEvaluator.report, components: designSystem?.components, theme: designSystem?.tokens)));
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key, this.source});
@@ -132,7 +142,7 @@ class ChatScreenState extends State<ChatScreen> {
     if (ui == null && last != null) {
       await _stream(source.reply(EditTurn(last.ui, text, last.session, last.result)), last, edit: true);
     } else {
-      final reply = ReplyMessage(ui ?? 'flights', UiSession(designSystem: _designSystem));
+      final reply = ReplyMessage(ui ?? 'flights', newSession(_designSystem));
       _subs.add(reply.session.events.listen((e) => _action(reply, e)));
       setState(() => messages.add(reply));
       _lastUi = reply;
@@ -149,7 +159,7 @@ class ChatScreenState extends State<ChatScreen> {
     answer.text = await r.text;
     // A reply to an action may also edit the UI.
     final result = await reply.session.applyStream(r.toolInput);
-    if (result.appliedOps.isNotEmpty) reply.result = result;
+    if (result.appliedOps.isNotEmpty) reply.result = await _withShown(reply.session, result);
     if (mounted) setState(() => messages.add(_TextReply(answer.text)));
   }
 
@@ -160,7 +170,7 @@ class ChatScreenState extends State<ChatScreen> {
       firstPaint ??= target.session.node(target.session.document.roots.firstOrNull ?? '')?.type == 'canvas' ? clock.elapsedMilliseconds : null;
       _follow();
     });
-    target.result = result;
+    target.result = await _withShown(target.session, result);
     target.text = await r.text;
     final usage = await r.usage;
     final tokens = usage['outputTokens'];
@@ -169,6 +179,15 @@ class ChatScreenState extends State<ChatScreen> {
         : '${result.appliedOps.length} ops · $tokens output tokens · first paint ${firstPaint ?? '-'} ms · ${clock.elapsedMilliseconds} ms'
             '${result.rejected.isEmpty ? '' : ' · ${result.rejected.length} rejected'}';
     if (mounted) setState(() {});
+  }
+
+  /// [result] with what the UI shows wrong once it is drawn
+  /// (UiSession.shownDiagnostics: a valid UI that shows nothing, a list with
+  /// no items, an empty label): the tool result the model reads next says so.
+  Future<EditResult> _withShown(UiSession session, EditResult result) async {
+    if (mounted) setState(() {});
+    await WidgetsBinding.instance.endOfFrame;
+    return result.withDiagnostics(session.shownDiagnostics());
   }
 
   void _follow() {
