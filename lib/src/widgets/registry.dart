@@ -1,8 +1,8 @@
 // Every widget recipe beyond the core layout types (node_tree.dart builds
 // canvas, stack, box, row, column, text, icon, spacer and variance itself).
-import '../render/controls/registry.dart';
 import '../render/recipe.dart';
 import 'collections.dart';
+import 'controls.dart';
 import 'indicators.dart';
 import 'inputs.dart';
 import 'material.dart';
