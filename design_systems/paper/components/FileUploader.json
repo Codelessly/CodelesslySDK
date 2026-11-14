@@ -1,0 +1,580 @@
+{
+ "schema": 3,
+ "id": "FileUploader",
+ "roots": [
+  "uploader"
+ ],
+ "widget": {
+  "type": "FileUploader",
+  "doc": "Where files are dropped or picked, with the picked files listed under it. Fires onPick when pressed and onRemove with a file's name.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Drop files here or click to browse",
+    "doc": "What the drop area says."
+   },
+   {
+    "key": "hint",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under it (accepted types, a size limit)."
+   },
+   {
+    "key": "compact",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A small bordered button in place of the drop area."
+   },
+   {
+    "key": "files",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The picked files' names."
+   },
+   {
+    "key": "sizes",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One size per file (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPick"
+   },
+   {
+    "key": "onRemove",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    320,
+    160
+   ],
+   "props": {
+    "hint": "PDF or PNG, up to 10 MB"
+   }
+  },
+  {
+   "name": "Compact",
+   "size": [
+    200,
+    34
+   ],
+   "props": {
+    "compact": true,
+    "label": "Upload file"
+   }
+  }
+ ],
+ "nodes": {
+  "uploader": {
+   "type": "column",
+   "children": [
+    "drop",
+    "button",
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "bind": {
+    "props.spacing": "${= props.compact ? 8 : 16}"
+   }
+  },
+  "drop": {
+   "type": "column",
+   "children": [
+    "dropIcon",
+    "dropTexts"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 160
+    },
+    "padding": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "radius": 3,
+    "dashPattern": [
+     5,
+     4
+    ]
+   },
+   "bind": {
+    "visible": "${= !props.compact}"
+   },
+   "states": {
+    "hovered": {
+     "drop": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ],
+       "strokes": [
+        {
+         "color": "primary"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPick"
+      }
+     ]
+    }
+   ]
+  },
+  "dropIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "upload",
+    "color": "tertiaryText",
+    "size": 48
+   },
+   "layout": {
+    "width": 48,
+    "height": 48
+   }
+  },
+  "dropLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "dropHint": {
+   "type": "text",
+   "props": {
+    "text": "${props.hint}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.hint != ''}"
+   }
+  },
+  "dropTexts": {
+   "type": "column",
+   "children": [
+    "dropLabel",
+    "dropHint"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "button": {
+   "type": "row",
+   "children": [
+    "buttonInner"
+   ],
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "bind": {
+    "visible": "${props.compact}"
+   }
+  },
+  "buttonInner": {
+   "type": "row",
+   "children": [
+    "buttonIcon",
+    "buttonLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     12,
+     7,
+     12,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "radius": 2
+   },
+   "states": {
+    "hovered": {
+     "buttonInner": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "buttonInner": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPick"
+      }
+     ]
+    }
+   ]
+  },
+  "buttonIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "upload",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "buttonLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "file"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 48
+    }
+   },
+   "bind": {
+    "data": "${props.files}",
+    "visible": "${= length(props.files) > 0}"
+   }
+  },
+  "file": {
+   "type": "row",
+   "children": [
+    "fileIcon",
+    "fileTexts",
+    "remove"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 48
+    },
+    "padding": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "fileIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "secondaryText",
+    "size": 20
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "fileTexts": {
+   "type": "column",
+   "children": [
+    "fileName",
+    "fileSize"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "fileName": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "fileSize": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.sizes) > index ? props.sizes[index] : ''}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.sizes) > index && props.sizes[index] != ''}"
+   }
+  },
+  "remove": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": 4
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "tooltip": "Remove",
+   "states": {
+    "hovered": {
+     "remove": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onRemove",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  }
+ }
+}

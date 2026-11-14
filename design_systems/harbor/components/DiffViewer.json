@@ -1,0 +1,397 @@
+{
+ "schema": 3,
+ "id": "DiffViewer",
+ "roots": [
+  "viewer"
+ ],
+ "widget": {
+  "type": "DiffViewer",
+  "doc": "What changed in a file: a header with the file's name and counts, then the lines, added ones green and removed ones red. A line starts with \"+\", \"-\" or a space.",
+  "props": [
+   {
+    "key": "fileName",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "file.txt",
+    "doc": "The file's name.",
+    "required": true
+   },
+   {
+    "key": "lines",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     " unchanged",
+     "-removed",
+     "+added"
+    ],
+    "doc": "The lines, each starting with \"+\", \"-\" or a space.",
+    "required": true
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "modified",
+      "added",
+      "deleted"
+     ]
+    },
+    "default": "modified",
+    "doc": "What happened to the file: the header's letter."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Modified",
+   "size": [
+    340,
+    110
+   ],
+   "props": {
+    "fileName": "src/total.ts",
+    "lines": [
+     " const total = items",
+     "-  .map((i) => i.cost)",
+     "+  .map((i) => i.price)",
+     "   .reduce((a, b) => a + b, 0);"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "viewer": {
+   "type": "column",
+   "children": [
+    "header",
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9,
+    "clip": "antiAlias"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "strut",
+    "headerContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 338
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 31
+   }
+  },
+  "letterBox": {
+   "type": "row",
+   "children": [
+    "letter"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "warningTint"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.status == 'added' ? theme.colors.successTint : (props.status == 'deleted' ? theme.colors.errorTint : theme.colors.warningTint)}"
+   }
+  },
+  "letter": {
+   "type": "text",
+   "props": {
+    "text": "${= props.status == 'added' ? 'A' : (props.status == 'deleted' ? 'D' : 'M')}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 700,
+     "height": 1.0,
+     "color": "warning",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 7
+    },
+    "height": {
+     "hug": 10
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.status == 'added' ? theme.success : (props.status == 'deleted' ? theme.error : theme.warning)}"
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${props.fileName}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "added": {
+   "type": "text",
+   "props": {
+    "text": "+${= count(props.lines, l => startsWith(l, '+'))}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "success",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "removed": {
+   "type": "text",
+   "props": {
+    "text": "-${= count(props.lines, l => startsWith(l, '-'))}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "error",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "line"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 338
+    },
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     0,
+     5,
+     0,
+     5
+    ]
+   },
+   "bind": {
+    "data": "${props.lines}"
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "sign",
+    "code"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 338
+    },
+    "height": {
+     "hug": 18
+    },
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= startsWith(item, '+') ? theme.colors.successTint : (startsWith(item, '-') ? theme.colors.errorTint : '#00000000')}"
+   }
+  },
+  "sign": {
+   "type": "text",
+   "props": {
+    "text": "${= startsWith(item, '+') ? '+' : (startsWith(item, '-') ? '-' : ' ')}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.7142857142857142,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": 8,
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(item, '+') ? theme.success : (startsWith(item, '-') ? theme.error : theme.colors.tertiaryText)}"
+   }
+  },
+  "code": {
+   "type": "text",
+   "props": {
+    "text": "${= substring(item, 1)}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.7142857142857142,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "headerContent": {
+   "type": "row",
+   "children": [
+    "letterBox",
+    "name",
+    "added",
+    "removed"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}
