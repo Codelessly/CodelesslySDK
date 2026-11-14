@@ -5,6 +5,7 @@
 import 'dart:ui' show Tristate;
 
 import 'package:codelessly_api/codelessly_api.dart' as api show WidgetState;
+import 'package:codelessly_api/validate.dart' show validateDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart';
 import 'package:codelessly_sdk/src/render/controls/overlay.dart';
@@ -28,8 +29,8 @@ RenderButton _button(RenderTree tree, String id) {
 }
 
 Future<(NodeTree, RecordedInteractions)> _show(WidgetTester tester, Map<String, Map<String, Object?>> buttons,
-    {Map<String, Object?>? theme, bool dark = false, Object? fill}) async {
-  final (tree, recorded) = runningTree(columnDoc(buttons, fill: fill),
+    {Map<String, Object?>? theme, bool dark = false, Object? fill, double height = 300}) async {
+  final (tree, recorded) = runningTree(columnDoc(buttons, fill: fill, height: height),
       theme: theme == null ? null : ThemeTokens.fromJson(theme), dark: dark);
   addTearDown(tree.dispose);
   await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
@@ -88,6 +89,48 @@ void main() {
       expect(_button(tree, 'outlined').labelColor, const Color(0xFFFFFFFF));
       expect(_button(tree, 'outlined').borderSide?.color, const Color(0xFF383838));
     });
+  });
+
+  testWidgets('a column of four buttons with no props and no layout: each hugs its content on the scale, none 0 × 0',
+      (tester) async {
+    final (tree, _) = await _show(tester, {
+      'filled': {'type': 'filledButton'},
+      'outlined': {'type': 'outlinedButton'},
+      'text': {'type': 'textButton', 'props': {'label': 'Skip'}},
+      'icon': {'type': 'iconButton'},
+    });
+    final rects = [for (final id in ['filled', 'outlined', 'text', 'icon']) rectOf(tree, id)];
+    for (final r in rects) {
+      expect(r.height, 28);
+      expect(r.width, greaterThanOrEqualTo(20));
+    }
+    expect(rects[3].width, 28, reason: 'an icon button is a square');
+    expect(rects[2].width, greaterThan(rects[0].width), reason: 'a label widens it');
+    for (var i = 1; i < rects.length; i++) {
+      expect(rects[i].top, rects[i - 1].bottom + 12, reason: 'stacked by the column\'s spacing');
+    }
+    final validation = validateDocument(columnDoc({'b': {'type': 'filledButton'}}));
+    expect(validation.where((d) => d.code.name == 'zero_size'), isEmpty);
+  });
+
+  testWidgets('a floating action button is primary, radius 12 (8 small, 18 large), SSUI\'s floating shadow; it hugs to its type\'s size',
+      (tester) async {
+    final (tree, _) = await _show(tester, {
+      'fab': {'type': 'floatingActionButton', 'props': {'icon': 'add'}},
+      'small': {'type': 'floatingActionButton', 'props': {'icon': 'add', 'type': 'small'}},
+      'large': {'type': 'floatingActionButton', 'props': {'icon': 'add', 'type': 'large'}},
+      'sized': {'type': 'floatingActionButton', 'layout': {'width': 64, 'height': 64}, 'props': {'icon': 'add'}},
+    }, height: 500);
+    double radius(String id) => (_button(tree, id).shape as RoundedRectangleBorder).borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    expect(_button(tree, 'fab').fillColor, _ssuiPrimary);
+    expect(_button(tree, 'fab').labelColor, const Color(0xFFFFFFFF));
+    expect([radius('fab'), radius('small'), radius('large')], [12, 8, 18]);
+    expect(_button(tree, 'fab').shadows, isNotEmpty);
+    expect(_button(tree, 'fab').shadows.first.offset.dy, greaterThan(0));
+    expect(rectOf(tree, 'fab').size, const Size(56, 56));
+    expect(rectOf(tree, 'small').size, const Size(40, 40));
+    expect(rectOf(tree, 'large').size, const Size(96, 96));
+    expect(rectOf(tree, 'sized').size, const Size(64, 64), reason: 'a set size is kept');
   });
 
   group('the document\'s theme', () {

@@ -42,8 +42,10 @@ enum ButtonKind { filled, tonal, elevated, outlined, text, icon, fab }
 void buttonRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   final fab = n.type == FloatingActionButtonProps.spec.type;
   final l = n.layout;
-  chain.add(b.fitBox('fit', fab ? SizeFit.fixed : l.width.fit, fab ? SizeFit.fixed : l.height.fit,
-      Size(l.width.value, l.height.value)));
+  // A floating button is its design size (as Flutter's is its own), unless
+  // it hugs: its type's size (56; small 40, large 96).
+  SizeFit fit(api.AxisSize a) => fab && !a.isHug ? SizeFit.fixed : a.fit;
+  chain.add(b.fitBox('fit', fit(l.width), fit(l.height), Size(l.width.value, l.height.value)));
   final interactive = b.tree.animates;
   final states = b.tree.statesOf(b.id, instance: b.instance);
   final patched = n.behaviors.states.patches.keys.toSet();
