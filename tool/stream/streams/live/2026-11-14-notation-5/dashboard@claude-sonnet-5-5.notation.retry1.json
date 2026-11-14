@@ -1,0 +1,1381 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "row1",
+    "segmentedButton1",
+    "grid1",
+    "text10",
+    "lineChart1",
+    "lineChart2",
+    "lineChart3",
+    "text11",
+    "barChart1",
+    "barChart2",
+    "barChart3",
+    "divider1",
+    "text12",
+    "row2",
+    "row3",
+    "divider2",
+    "listView1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "icon1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Product performance"
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "insights"
+   }
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "7 days",
+      "label": "7 days"
+     },
+     {
+      "value": "30 days",
+      "label": "30 days"
+     },
+     {
+      "value": "90 days",
+      "label": "90 days"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [range]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "range",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column2",
+    "column3"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text2",
+    "text3",
+    "badge1"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Revenue"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= revenue[range]}"
+   }
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDCFCE7",
+    "textColor": "#FF15803D"
+   },
+   "bind": {
+    "props.label": "${= revenueChg[range]}"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text4",
+    "text5",
+    "badge2"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Sign-ups"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= signups[range]}"
+   }
+  },
+  "badge2": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDCFCE7",
+    "textColor": "#FF15803D"
+   },
+   "bind": {
+    "props.label": "${= signupsChg[range]}"
+   }
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column4",
+    "column5"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text6",
+    "text7",
+    "badge3"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Churn"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= churn[range]}"
+   }
+  },
+  "badge3": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFFEE2E2",
+    "textColor": "#FFB91C1C"
+   },
+   "bind": {
+    "props.label": "${= churnChg[range]}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text8",
+    "text9",
+    "badge4"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Active users"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= active[range]}"
+   }
+  },
+  "badge4": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDCFCE7",
+    "textColor": "#FF15803D"
+   },
+   "bind": {
+    "props.label": "${= activeChg[range]}"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Revenue"
+   }
+  },
+  "lineChart1": {
+   "type": "lineChart",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "lineColor": "#FF2563EB",
+    "data": [
+     {
+      "x": 0,
+      "y": 2.4
+     },
+     {
+      "x": 1,
+      "y": 2.6
+     },
+     {
+      "x": 2,
+      "y": 2.5
+     },
+     {
+      "x": 3,
+      "y": 2.7
+     },
+     {
+      "x": 4,
+      "y": 2.6
+     },
+     {
+      "x": 5,
+      "y": 2.8
+     },
+     {
+      "x": 6,
+      "y": 2.8
+     }
+    ],
+    "xField": "x",
+    "yField": "y"
+   },
+   "bind": {
+    "visible": "${= range==\"7 days\"}"
+   }
+  },
+  "lineChart2": {
+   "type": "lineChart",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "lineColor": "#FF2563EB",
+    "data": [
+     {
+      "x": 0,
+      "y": 15
+     },
+     {
+      "x": 1,
+      "y": 17
+     },
+     {
+      "x": 2,
+      "y": 18
+     },
+     {
+      "x": 3,
+      "y": 19
+     },
+     {
+      "x": 4,
+      "y": 20
+     },
+     {
+      "x": 5,
+      "y": 21
+     },
+     {
+      "x": 6,
+      "y": 22
+     },
+     {
+      "x": 7,
+      "y": 23
+     }
+    ],
+    "xField": "x",
+    "yField": "y"
+   },
+   "bind": {
+    "visible": "${= range==\"30 days\"}"
+   }
+  },
+  "lineChart3": {
+   "type": "lineChart",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "lineColor": "#FF2563EB",
+    "data": [
+     {
+      "x": 0,
+      "y": 52
+     },
+     {
+      "x": 1,
+      "y": 60
+     },
+     {
+      "x": 2,
+      "y": 68
+     },
+     {
+      "x": 3,
+      "y": 75
+     },
+     {
+      "x": 4,
+      "y": 82
+     },
+     {
+      "x": 5,
+      "y": 90
+     },
+     {
+      "x": 6,
+      "y": 98
+     },
+     {
+      "x": 7,
+      "y": 105
+     }
+    ],
+    "xField": "x",
+    "yField": "y"
+   },
+   "bind": {
+    "visible": "${= range==\"90 days\"}"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Sign-ups by channel"
+   }
+  },
+  "barChart1": {
+   "type": "barChart",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "values": [
+     110,
+     80,
+     60,
+     40,
+     22
+    ],
+    "labels": [
+     "Organic",
+     "Paid",
+     "Referral",
+     "Social",
+     "Email"
+    ],
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "visible": "${= range==\"7 days\"}"
+   }
+  },
+  "barChart2": {
+   "type": "barChart",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "values": [
+     480,
+     360,
+     250,
+     150,
+     100
+    ],
+    "labels": [
+     "Organic",
+     "Paid",
+     "Referral",
+     "Social",
+     "Email"
+    ],
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "visible": "${= range==\"30 days\"}"
+   }
+  },
+  "barChart3": {
+   "type": "barChart",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "values": [
+     1400,
+     1050,
+     720,
+     480,
+     330
+    ],
+    "labels": [
+     "Organic",
+     "Paid",
+     "Referral",
+     "Social",
+     "Email"
+    ],
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "visible": "${= range==\"90 days\"}"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Top plans"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "choiceChip1",
+    "choiceChip2",
+    "choiceChip3",
+    "choiceChip4"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Plan"
+   },
+   "bind": {
+    "props.selected": "${= sortKey==\"name\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "name"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subs"
+   },
+   "bind": {
+    "props.selected": "${= sortKey==\"subs\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "subs"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Revenue"
+   },
+   "bind": {
+    "props.selected": "${= sortKey==\"revenue\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "revenue"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip4": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Churn"
+   },
+   "bind": {
+    "props.selected": "${= sortKey==\"churn\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortKey",
+       "value": "churn"
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text13",
+    "text14",
+    "text15",
+    "text16"
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Plan"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": 50,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Subs"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": 70,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Revenue"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": 50,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Churn"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${plans}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row4"
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= sortKey==\"name\"}"
+   },
+   "children": [
+    "text17",
+    "text18",
+    "text19",
+    "text20"
+   ]
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": 50,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.subs}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": 70,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.revenue}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": 50,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.churn}%",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30 days"
+   },
+   {
+    "name": "sortKey",
+    "type": "text",
+    "value": "revenue"
+   },
+   {
+    "name": "plans",
+    "type": "list",
+    "value": [
+     {
+      "name": "Pro",
+      "subs": 420,
+      "revenue": 12600,
+      "churn": 2.1
+     },
+     {
+      "name": "Team",
+      "subs": 210,
+      "revenue": 16800,
+      "churn": 1.4
+     },
+     {
+      "name": "Starter",
+      "subs": 680,
+      "revenue": 6120,
+      "churn": 4.8
+     },
+     {
+      "name": "Enterprise",
+      "subs": 36,
+      "revenue": 28800,
+      "churn": 0.6
+     },
+     {
+      "name": "Basic",
+      "subs": 910,
+      "revenue": 4550,
+      "churn": 6.2
+     }
+    ]
+   },
+   {
+    "name": "revenue",
+    "type": "map",
+    "value": {
+     "7 days": "$18.4k",
+     "30 days": "$78.9k",
+     "90 days": "$231k"
+    }
+   },
+   {
+    "name": "revenueChg",
+    "type": "map",
+    "value": {
+     "7 days": "+3.2%",
+     "30 days": "+8.5%",
+     "90 days": "+14.1%"
+    }
+   },
+   {
+    "name": "signups",
+    "type": "map",
+    "value": {
+     "7 days": "312",
+     "30 days": "1,340",
+     "90 days": "3,980"
+    }
+   },
+   {
+    "name": "signupsChg",
+    "type": "map",
+    "value": {
+     "7 days": "+5.0%",
+     "30 days": "+11.2%",
+     "90 days": "+19.6%"
+    }
+   },
+   {
+    "name": "churn",
+    "type": "map",
+    "value": {
+     "7 days": "0.9%",
+     "30 days": "3.1%",
+     "90 days": "8.7%"
+    }
+   },
+   {
+    "name": "churnChg",
+    "type": "map",
+    "value": {
+     "7 days": "+0.1%",
+     "30 days": "+0.4%",
+     "90 days": "+0.9%"
+    }
+   },
+   {
+    "name": "active",
+    "type": "map",
+    "value": {
+     "7 days": "9,820",
+     "30 days": "14,260",
+     "90 days": "17,900"
+    }
+   },
+   {
+    "name": "activeChg",
+    "type": "map",
+    "value": {
+     "7 days": "+1.8%",
+     "30 days": "+6.3%",
+     "90 days": "+12.4%"
+    }
+   }
+  ]
+ }
+}

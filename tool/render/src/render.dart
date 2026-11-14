@@ -1998,7 +1998,9 @@ List<RuntimeIssue> _check(
     parentBox ??= pid == null ? null : byKey['$pid|${b.instance}'];
     final parent = parentBox?.node ?? (pid == null ? null : b.source.node(pid));
     final parentName = parentBox == null ? pid : nameOf(parentBox);
-    if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack' && !seen.isEmpty) {
+    // A collapsed accordion or expansion tile clips its content by design.
+    final collapses = parent?.type == 'accordion' || parent?.type == 'expansionTile';
+    if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack' && !collapses && !seen.isEmpty) {
       final pr = _rectOf(parentBox);
       var dx = math.max(pr.left - seen.left, seen.right - pr.right);
       var dy = math.max(pr.top - seen.top, seen.bottom - pr.bottom);
