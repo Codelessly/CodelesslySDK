@@ -41,20 +41,60 @@ class RecordedStream {
 }
 
 class ReplayArgs {
-  ReplayArgs({required this.stream, required this.out, required this.sizes, this.fontDirs = const [], this.frameMs, this.frames});
+  ReplayArgs(
+      {required this.stream,
+      required this.out,
+      required this.sizes,
+      this.fontDirs = const [],
+      this.frameMs,
+      this.frames,
+      this.designSystem,
+      this.dark = false});
   final String stream;
   final String out;
   final List<ui.Size> sizes;
   final List<String> fontDirs;
+
+  /// The design system to replay with: an id (a folder of the SDK's
+  /// `design_systems/`) or a design system folder. Null: the one the
+  /// recording's meta names (`designSystem.id`), else none.
+  final String? designSystem;
+
+  /// Whether the UI is shown in its theme's dark mode (light by default).
+  final bool dark;
 
   /// Virtual ms between captures (null: the stream's length / [frames]).
   final int? frameMs;
   final int? frames;
 }
 
+/// The design system [idOrPath] names: a design system folder, or an id
+/// looked up in the SDK's `design_systems/` (the working directory is the
+/// SDK's root under `flutter test`).
+Future<api.DesignSystem> loadDesignSystem(String idOrPath) async {
+  final dir = [idOrPath, 'design_systems/$idOrPath']
+      .where((d) => File('$d/${api.DesignSystemManifest.fileName}').existsSync())
+      .firstOrNull;
+  if (dir == null) throw StateError('No design system "$idOrPath" (a folder with ${api.DesignSystemManifest.fileName}, or an id in design_systems/).');
+  final problems = <String>[];
+  final ds = await api.DesignSystem.load((ref) async {
+    final f = File('$dir/$ref');
+    return f.existsSync() ? f.readAsStringSync() : null;
+  }, problems: problems);
+  if (problems.isNotEmpty) throw StateError('The design system at $dir does not load cleanly: ${problems.join('; ')}');
+  return ds;
+}
+
+/// The design system a replay of [stream] uses: [arg] when given, else the
+/// one its meta names.
+String? designSystemOf(RecordedStream stream, String? arg) =>
+    arg ?? switch (stream.meta['designSystem']) { final Map m => m['id'] as String?, final String s => s, _ => null };
+
 /// Replays [args.stream] at each size; returns the metrics by size.
 Future<Map<String, Object?>> runReplay(WidgetTester tester, ReplayArgs args) async {
   final stream = RecordedStream.read(args.stream);
+  final dsName = designSystemOf(stream, args.designSystem);
+  final ds = dsName == null ? null : (await tester.runAsync(() => loadDesignSystem(dsName)))!;
   final dir = File(args.stream).parent.path;
   final root = Platform.environment['FLUTTER_ROOT'] ?? '';
   final codepoints = materialCodepoints(root);
@@ -66,7 +106,10 @@ Future<Map<String, Object?>> runReplay(WidgetTester tester, ReplayArgs args) asy
   ];
 
   final families = <String>{'Roboto', 'Material Icons'};
-  for (final m in RegExp(r'"fontFamily":\s*"([^"]+)"').allMatches('${bases.map((b) => b.text).join()}${stream.text}')) {
+  // The families the UI names, and those of the design system's tokens and
+  // components.
+  final dsText = ds == null ? '' : jsonEncode(ds.toJson());
+  for (final m in RegExp(r'"fontFamily":\s*"([^"]+)"').allMatches('${bases.map((b) => b.text).join()}${stream.text}$dsText')) {
     families.add(m[1]!);
   }
   await tester.runAsync(() async {
@@ -111,7 +154,7 @@ Future<Map<String, Object?>> runReplay(WidgetTester tester, ReplayArgs args) asy
   final results = <String, Object?>{};
   try {
     for (final size in args.sizes) {
-      results['${size.width.round()}x${size.height.round()}'] = await _replayAt(tester, stream, bases, size, args, prepareOp, glyphs);
+      results['${size.width.round()}x${size.height.round()}'] = await _replayAt(tester, stream, bases, size, args, prepareOp, glyphs, ds);
     }
   } finally {
     debugDisableShadows = true;
@@ -124,7 +167,7 @@ Future<Map<String, Object?>> runReplay(WidgetTester tester, ReplayArgs args) asy
 }
 
 Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream stream, List<RecordedStream> bases, ui.Size size, ReplayArgs args,
-    api.EditOp Function(api.EditOp) prepareOp, api.GlyphCoverage glyphs) async {
+    api.EditOp Function(api.EditOp) prepareOp, api.GlyphCoverage glyphs, api.DesignSystem? ds) async {
   final sizeName = '${size.width.round()}x${size.height.round()}';
   final out = Directory('${args.out}/$sizeName')..createSync(recursive: true);
   final framesDir = Directory('${out.path}/frames')..createSync(recursive: true);
@@ -133,15 +176,26 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
   }
   final apps = stream.meta['profile'] == 'agentApps';
   if (apps) ReplayServices.useLocalQuickJs();
+  // As the render command does (prepareTheme): the default family is the
+  // theme's, so the controls' text is in the family the prepared text nodes
+  // name, not the test font's boxes. With a design system, its tokens
+  // (their text styles given the family the same way) are the theme, and
+  // its components are node types.
+  final theme = api.ThemeTokens.fromJson(prepareTheme({
+    ...?ds?.tokens.toJson(),
+    if (args.dark) 'mode': 'dark',
+  }, defaultFamily: 'Roboto'));
   final session = UiSession(
     catalog: api.Catalog.core,
+    designSystem: ds,
     profile: apps ? api.TrustProfile.agentApps : api.TrustProfile.agent,
-    check: strictEditCheck(ValidateOptions(formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)))),
+    check: strictEditCheck(ValidateOptions(
+      formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)),
+      components: ds?.components,
+      theme: ds == null ? null : theme,
+    )),
     glyphCoverage: glyphs,
-    // As the render command does (prepareTheme): the default family is the
-    // theme's, so the controls' text is in the family the prepared text
-    // nodes name, not the test font's boxes.
-    theme: const api.ThemeTokens(fontFamily: 'Roboto'),
+    theme: theme,
   );
   final baseRetries = <Map<String, Object?>>[];
   for (final b in bases) {
@@ -332,6 +386,7 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     now += frameMs;
   }
   final result = await done;
+  final usage = ds == null ? null : _designSystemUsage(tester, session.document, ds);
   // What only layout can tell, after the last frame.
   final layout = session.layoutDiagnostics();
   final end = session.lastStreamEnd;
@@ -367,6 +422,8 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     ],
     'finalDiagnostics': [for (final d in [...result.errors, ...layout, ...result.warnings.where((d) => const {'empty_button', 'low_contrast', 'missing_glyph'}.contains(d.code))]) '${d.code} ${d.path}'],
     'scripts': (session.document.extra['scripts'] as List?)?.length ?? 0,
+    'designSystem': ?usage,
+    'themeMode': args.dark ? 'dark' : 'light',
     'worksWhenUsed': ?used,
     if (baseRetries.isNotEmpty) 'bases': baseRetries,
     'streamedOps': times.length,
@@ -387,6 +444,40 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
   await tester.pump(const Duration(seconds: 1));
   session.dispose();
   return metrics;
+}
+
+/// How much of the final UI is the design system's, and whether its
+/// components rendered: nodes whose type is one of its components (each
+/// rendered as its definition, a [ComponentInstance] in the render tree,
+/// unless hidden), and nodes of a base control type it `replaces`.
+Map<String, Object?> _designSystemUsage(WidgetTester tester, api.LayoutDocument doc, api.DesignSystem ds) {
+  final replaces = ds.manifest.replaces.toSet();
+  final calls = [for (final n in doc.nodes.values) if (ds.components[n.type] != null) n.id];
+  final rendered = <String>{};
+  void visit(RenderObject o) {
+    final ci = o is NodeBox ? componentInstanceOf(o.instance) : null;
+    if (ci != null) {
+      // The outermost instance: the call in the UI's own document.
+      var top = ci;
+      for (var outer = componentInstanceOf(top.outer); outer != null; outer = componentInstanceOf(top.outer)) {
+        top = outer;
+      }
+      rendered.add(top.call);
+    }
+    o.visitChildren(visit);
+  }
+
+  for (final v in tester.binding.renderViews) {
+    visit(v);
+  }
+  return {
+    'id': ds.id,
+    'version': ds.manifest.version,
+    'componentNodes': calls.length,
+    'componentsRendered': calls.where(rendered.contains).length,
+    'componentsNotRendered': [for (final id in calls) if (!rendered.contains(id)) '$id (${doc[id]!.type})'],
+    'replacedControls': [for (final n in doc.nodes.values) if (replaces.contains(n.type)) '${n.id} (${n.type})'],
+  };
 }
 
 bool _complete(api.LayoutDocument doc, String id) {

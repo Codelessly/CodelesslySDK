@@ -11,7 +11,7 @@ tool/stream/run_all.sh                                      # every stream into 
 ```
 
 `replay.sh <stream.jsonl> --out <dir> [--sizes 390x844,1440x900] [--fonts dir]... [--frame-ms n | --frames n]
-[--no-video]` replays the stream through `UiSession.applyStream` (the core catalog, `TrustProfile.agent`, the strict
+[--no-video] [--design-system id|folder] [--theme light|dark]` replays the stream through `UiSession.applyStream` (the core catalog, `TrustProfile.agent`, the strict
 validator on each op) on a virtual clock, at each size, and writes `<dir>/<size>/`:
 
 | File | |
@@ -20,6 +20,15 @@ validator on each op) on a virtual clock, at each size, and writes `<dir>/<size>
 | `contact.png` | Frames at 5, 15, 30, 50, 75 and 100% of the time to complete, with the metrics in the title. |
 | `metrics.json` | Below. |
 | `frames.json` | The timeline: per frame its time, tokens and nodes. |
+
+A recording made with a design system (`examples/stream_chat/tool/record.dart --design-system`: its meta's
+`designSystem`) replays with it: `UiSession(designSystem:)`, so its components render as their definitions and its
+token names resolve, with the strict validator given its components and tokens. `--design-system <id|folder>`
+replays with another (an id of `design_systems/`), `--theme dark` in its dark mode (light by default). `metrics.json`
+then has `designSystem`: `componentNodes`, `componentsRendered` (calls drawn as their definition's root),
+`componentsNotRendered`, and `replacedControls` (nodes of a core control type the design system replaces), and
+`themeMode`. `test/tool/replay_design_system_test.dart` replays a hand-written SSUI recording
+(`test/tool/fixtures/replay/ssui_card.jsonl`) in both modes.
 
 Fonts are read from `--fonts` directories (default: the reference apps' font files at `../references`); a family no
 file has is drawn with Roboto. Before an op applies, the harness does what the render command does offline

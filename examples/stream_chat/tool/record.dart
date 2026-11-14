@@ -10,6 +10,14 @@
 //
 //   ANTHROPIC_API_KEY=... dart run tool/record.dart --ui flights --model claude-haiku-5-5 --out <file.jsonl>
 //       [--prompt compact|full] [--scripts on|off] [--retries 2] [--followup] [--brief-text "..."]
+//       [--design-system ssui|<folder>|<bundle.json>]
+//
+// With --design-system (compact prompt only) the UI is made with that design
+// system, as the app's DESIGN_SYSTEM does: the system prompt and the ui_docs
+// answers are generated from it, and each op is validated against its
+// components and tokens (the retries too). The recordings' meta names it
+// (`designSystem`: id, name, version), so the replay renders with it. An id
+// is looked up in the SDK's design_systems/ (ssui: ../../design_systems/ssui).
 //
 // Writes <out> (the generation), <out minus .jsonl>.retry.jsonl,
 // .retry2.jsonl... and .followup.jsonl when they happen, in the format
@@ -20,8 +28,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/core.dart';
-import 'package:codelessly_api/validate.dart';
 import 'package:stream_chat/src/llm.dart';
+import 'package:stream_chat/src/record_check.dart';
 
 Future<void> main(List<String> args) async {
   String? opt(String name) {
@@ -44,16 +52,32 @@ Future<void> main(List<String> args) async {
     return;
   }
   final variant = opt('--prompt') == 'full' ? PromptVariant.full : PromptVariant.compact;
+  final dsArg = opt('--design-system');
+  DesignSystem? ds;
+  if (dsArg != null) {
+    if (variant == PromptVariant.full) {
+      stderr.writeln('--design-system needs --prompt compact: the full prompt is the base\'s file form, without one.');
+      exitCode = 2;
+      return;
+    }
+    try {
+      ds = await loadDesignSystem(dsArg);
+    } on StateError catch (e) {
+      stderr.writeln('--design-system: ${e.message}');
+      exitCode = 2;
+      return;
+    }
+  }
   final scripts = opt('--scripts') != 'off';
   final app = brief.kind == 'app';
   final profile = profileFor(brief.kind, scripts: scripts);
   final model = opt('--model') ?? kDefaultModel;
-  final out = opt('--out') ?? 'recordings/$ui@$model.jsonl';
+  final out = opt('--out') ?? 'recordings/$ui@$model${ds == null ? '' : '.${ds.id}'}.jsonl';
   final prompt = opt('--brief-text') ?? brief.prompt;
   final retries = int.tryParse(opt('--retries') ?? '') ?? (app ? 3 : 2);
   final followup = args.contains('--followup') ? (opt('--followup-text') ?? brief.followup) : null;
-  final system = systemPromptFor(variant, full: File('assets/system_prompt.md').readAsStringSync(), kind: brief.kind, profile: profile);
-  final tools = uiToolsFor(variant, profile: profile);
+  final system = systemPromptFor(variant, full: File('assets/system_prompt.md').readAsStringSync(), kind: brief.kind, profile: profile, designSystem: ds);
+  final tools = uiToolsFor(variant, profile: profile, designSystem: ds);
   final maxTokens = int.tryParse(opt('--max-tokens') ?? '') ?? switch (brief.kind) { 'card' => 16000, 'app' => 64000, _ => 32000 };
   final llm = UiModel(apiKey: key, model: model, systemPrompt: system, tools: tools, maxTokens: maxTokens);
   final base = <String, Object?>{
@@ -63,19 +87,20 @@ Future<void> main(List<String> args) async {
     'promptVariant': variant.name,
     'profile': profile == TrustProfile.agentApps ? 'agentApps' : 'agent',
     'scripts': profile.scripts,
+    if (ds != null) 'designSystem': designSystemMeta(ds),
   };
   final summary = <String, Object?>{...base, 'systemPromptChars': system.length, 'toolsChars': jsonEncode(tools).length};
   final coverage = _robotoCoverage();
-  var doc = LayoutDocument(catalog: Catalog.core);
+  var doc = LayoutDocument(catalog: catalogFor(ds));
   var rev = 0;
   try {
     // The system prompt and tools, counted by the API (no output).
     summary['systemPromptAndToolsTokens'] = await llm.countInputTokens();
-    Object? lookup(String tool, Map<String, Object?> input) => answerLookup(tool, input, document: doc, rev: rev, profile: profile);
+    Object? lookup(String tool, Map<String, Object?> input) => answerLookup(tool, input, document: doc, rev: rev, profile: profile, designSystem: ds);
 
     // 1. The generation.
     var turn = await llm.turn(user: userMessage(prompt, brief.kind), lookup: lookup);
-    var check = _check(doc, turn.toolInput, profile: profile, protect: false, rev: rev + 1, coverage: coverage);
+    var check = checkToolInput(doc, turn.toolInput, profile: profile, protect: false, rev: rev + 1, coverage: coverage, designSystem: ds);
     doc = check.document;
     rev++;
     _save(out, turn, {...base, 'turn': 'generate', 'prompt': prompt}, check);
@@ -92,7 +117,7 @@ Future<void> main(List<String> args) async {
           user: 'The UI has the problems the tool result lists. Fix them by patching it, in one ui_apply call: same ids, '
               'never start over.',
           lookup: lookup);
-      check = _check(doc, turn.toolInput, profile: profile, protect: true, rev: rev + 1, coverage: coverage);
+      check = checkToolInput(doc, turn.toolInput, profile: profile, protect: true, rev: rev + 1, coverage: coverage, designSystem: ds);
       doc = check.document;
       rev++;
       final file = out.replaceFirst(RegExp(r'\.jsonl$'), n == 1 ? '.retry.jsonl' : '.retry$n.jsonl');
@@ -107,7 +132,7 @@ Future<void> main(List<String> args) async {
     // 3. A follow-up edit.
     if (followup != null && turn.toolUseId != null) {
       final edit = await llm.turn(toolResult: check.toolResult(rev), toolUseId: turn.toolUseId, user: followup, lookup: lookup);
-      final checked = _check(doc, edit.toolInput, profile: profile, protect: true, rev: rev + 1, coverage: coverage);
+      final checked = checkToolInput(doc, edit.toolInput, profile: profile, protect: true, rev: rev + 1, coverage: coverage, designSystem: ds);
       _save(out.replaceFirst(RegExp(r'\.jsonl$'), '.followup.jsonl'), edit,
           {...base, 'turn': 'followup', 'followup': followup, 'base': [for (final f in files) _name(f)]}, checked);
       summary['followup'] = {...edit.usageJson(), ...checked.counts()};
@@ -135,88 +160,7 @@ GlyphCoverage? _robotoCoverage() {
   return (family, cp) => cps.contains(cp);
 }
 
-/// The ops of [toolInput] applied to [doc] as a session applies a stream:
-/// one by one (incomplete), strictly validated, then the end of the stream
-/// and the lints.
-_Checked _check(LayoutDocument doc, String toolInput,
-    {required TrustProfile profile, required bool protect, required int rev, GlyphCoverage? coverage}) {
-  final before = doc;
-  final decoder = OpStreamDecoder();
-  final streamed = decoder.add(toolInput);
-  final end = decoder.close();
-  final diagnostics = <EditDiagnostic>[...end.diagnostics];
-  final applied = <int>{}, rejected = <int>{};
-  final appliedOps = <EditOp>[];
-  final check = strictEditCheck();
-  for (final s in streamed) {
-    final r = applyOps(doc, [s.op],
-        catalog: Catalog.core, profile: profile, check: check, incomplete: true, protectRoots: protect && before.roots.isNotEmpty);
-    for (final d in r.diagnostics) {
-      diagnostics.add(d.atOp(s.index));
-    }
-    if (r.applied.isNotEmpty) {
-      applied.add(s.index);
-      appliedOps.add(s.op);
-      doc = r.document;
-    } else {
-      rejected.add(s.index);
-    }
-  }
-  for (final d in end.diagnostics) {
-    if (d.error && d.op >= 0) rejected.add(d.op);
-  }
-  diagnostics.addAll(endOfStream(doc));
-  final lints = uiLints(doc, hasGlyph: coverage);
-  diagnostics.addAll(lints);
-  final result = EditResult(
-    document: doc,
-    applied: applied.difference(rejected).toList()..sort(),
-    rejected: rejected.toList()..sort(),
-    appliedOps: appliedOps,
-    inverse: const [],
-    diagnostics: diagnostics,
-    pending: pendingIds(doc),
-    rev: rev,
-    revisions: const EditRevisions(),
-    changed: const {},
-  );
-  return _Checked(result, streamed.length, end, lints.length);
-}
-
-class _Checked {
-  _Checked(this.result, this.ops, this.end, this.lints);
-  final EditResult result;
-  final int ops;
-  final OpStreamEnd end;
-  final int lints;
-  LayoutDocument get document => result.document;
-
-  /// Rejected, pending or linted: worth a retry.
-  bool get needsFix => result.errors.isNotEmpty || result.pending.isNotEmpty || lints > 0;
-
-  Map<String, Object?> toolResult(int rev) {
-    final j = result.toModelJson();
-    if (lints > 0 && !j.containsKey('next')) j['next'] = fixInstruction(rev: rev, pending: result.pending);
-    return j;
-  }
-
-  Map<String, Object?> counts() => {
-        'ops': ops,
-        'opsApplied': result.applied.length,
-        'opsRejected': result.rejected.length,
-        'opsRecoveredFromMalformed': end.recovered,
-        'jsonRepairs': end.repairs,
-        'pending': result.pending.length,
-        'errors': [for (final d in result.errors) '${d.code} ${d.path}'],
-        'lints': [for (final d in result.warnings) if (const {'empty_button', 'low_contrast', 'missing_glyph'}.contains(d.code)) '${d.code} ${d.nodeId}'],
-        'warnings': result.warnings.length,
-        'nodes': document.nodes.length,
-        'scripts': (document.extra['scripts'] as List?)?.length ?? 0,
-        'scriptChars': [for (final s in (document.extra['scripts'] as List?) ?? const []) '${(s as Map)['source'] ?? ''}'.length].fold<int>(0, (a, b) => a + b),
-      };
-}
-
-void _save(String path, LlmTurn turn, Map<String, Object?> meta, _Checked check) {
+void _save(String path, LlmTurn turn, Map<String, Object?> meta, CheckedTurn check) {
   File(path).parent.createSync(recursive: true);
   final b = StringBuffer()
     ..writeln(jsonEncode({
