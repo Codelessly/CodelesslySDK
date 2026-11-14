@@ -54,6 +54,28 @@ the design system's 160 components.
 - **It found three things the notation got wrong**, now fixed there: a string parameter that reads data
   (`value:"{streak} d"`) drew the raw expression; a number given to a text parameter; a stray `:=`.
 
+## The session timer (a screen with behavior)
+
+![The session timer for three people, after three taps and three seconds](renders/session.png)
+
+A third screen prompt, "Session timer", asks for a countdown that alternates work and rest, a round number, a
+jump counter, pause and Finish. All three were written in the notation alone, using its `every` line for the
+clock, and all three count down and count jumps when driven by the render tool (the image is each one after
+three taps and about three seconds).
+
+| Screen | Turns | Nodes | Output tokens (all turns) | Seconds (all turns) |
+|---|---|---|---|---|
+| Session, beginner | 1 | 23 | 660 | 4.8 |
+| Session, kid | 2 | 19 | about 1,150 | about 7 |
+| Session, athlete | 1 | 26 | 589 | 4.2 |
+
+- The kid's first answer wrote `size:` on a text, which the notation does not have; the retry fixed it.
+- The athlete's started its countdown with `state left=today.work`, which the notation read as the text
+  "today.work", so the screen showed NaN. Fixed in the notation: a state started from declared state takes its
+  value.
+- The athlete's clock loses two seconds a tick: the model wrote `left=left-1` twice in one `every` line. Nothing
+  checks a generated screen's logic; that is a job for the review pass.
+
 ## Not done
 
 - Nothing here runs as an app: the screens are generated ahead and drawn as images. No navigation between them,
@@ -61,7 +83,6 @@ the design system's 160 components.
 - The buttons' actions (`emit start_session`) are not wired to anything.
 - The look differs by a whole design system per person. Changing only theme tokens (pink or black) with the
   document untouched, and illustration sets, are not shown.
-- No screen here needed anything beyond the notation's words; "Session timer" (a countdown) is the next one.
 - The improvement loop (events, a review agent, a changed screen) is not started.
 - One run per screen, one model. The retries on the athlete's screens were for a component's parameters
   (a `StatTile` given two strings).
