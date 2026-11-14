@@ -1,10 +1,11 @@
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:flutter/material.dart';
+import 'package:codelessly_sdk/src/render/controls/slider.dart' show RenderSlider;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../controls/toggles_support.dart';
 import '../support/screen.dart' as harness;
 
 // A slider whose value and range are all bound: the value lands within the
@@ -27,18 +28,7 @@ LayoutDocument doc(double width, Object sliderWidth) =>
         },
       },
     });
-Slider slider(NodeTree tree) {
-  Slider? result;
-  void visit(Element e) {
-    if (e.widget is Slider) result = e.widget as Slider;
-    e.visitChildren(visit);
-  }
-
-  for (final host in tree.islands.hosts) {
-    if (host.element case final e?) visit(e);
-  }
-  return result!;
-}
+RenderSlider slider(NodeTree tree) => controlIn<RenderSlider>(tree, 'slider');
 
 // A slider drawn as a drafting ruler (trackShape: ruler) with a pointer
 // thumb: the ruler spans the whole width, so a tap at a fraction of the
@@ -47,7 +37,7 @@ Slider slider(NodeTree tree) {
 void main() {
   for (final interactive in [true, false]) {
     testWidgets('a slider with a bound value and a bound range shows the value in place (interactive: $interactive)', (tester) async {
-      await harness.show(
+      final screen = await harness.show(
         tester,
         {
           'col': {'type': 'column', 'children': ['s'], 'layout': {'width': 300, 'height': 100}},
@@ -67,7 +57,7 @@ void main() {
         interactive: interactive,
       );
       await tester.pumpAndSettle();
-      final s = tester.widget<Slider>(find.byType(Slider));
+      final s = controlIn<RenderSlider>(screen.tree, 's');
       expect((s.min, s.max, s.value), (2.0, 50.0, 12.0));
     });
   }
@@ -86,14 +76,13 @@ void main() {
             ),
           ),
         );
-        expect(tree.islands.hosts.single.size.width, 600);
-        final host = tree.islands.hosts.single;
-        await tester.tapAt(host.localToGlobal(const Offset(550, 24)));
+        expect(slider(tree).size.width, 600);
+        await tester.tapAt(slider(tree).localToGlobal(const Offset(550, 24)));
         await tester.pump();
         expect(slider(tree).value, greaterThan(.8));
         source.document = doc(450, {'fill': 200});
         await tester.pump();
-        expect(tree.islands.hosts.single.size.width, 450);
+        expect(slider(tree).size.width, 450);
         await tester.pumpWidget(const SizedBox());
         tree.dispose();
       },
@@ -105,7 +94,7 @@ void main() {
           home: NodeView(tree: tree, rootId: 'row'),
         ),
       );
-      expect(tree.islands.hosts.single.size.width, 200);
+      expect(slider(tree).size.width, 200);
       await tester.pumpWidget(const SizedBox());
       tree.dispose();
     });
@@ -129,13 +118,14 @@ void main() {
     }
 
     testWidgets('a tap three quarters along sets three quarters of the range', (tester) async {
-      await show(tester);
+      final tree = await show(tester);
+      RenderSlider s() => controlIn<RenderSlider>(tree, 's');
       await tester.tapAt(const Offset(150, 15));
       await tester.pump();
-      expect(tester.widget<Slider>(find.byType(Slider)).value, closeTo(5, 0.2));
+      expect(s().value, closeTo(5, 0.2));
       await tester.tapAt(const Offset(1, 15));
       await tester.pump();
-      expect(tester.widget<Slider>(find.byType(Slider)).value, closeTo(-10, 0.2));
+      expect(s().value, closeTo(-10, 0.2));
     });
   });
 
@@ -189,8 +179,8 @@ void main() {
       }
 
       final (x0, c0) = await bar();
-      final thumb0 = tester.getRect(find.byType(Slider));
-      expect(x0, greaterThan(thumb0.left));
+      final thumb0 = controlIn<RenderSlider>(tree, 's');
+      expect(x0, greaterThan(thumb0.localToGlobal(Offset.zero).dx));
       expect(c0, const Color(0xFFFF0000));
       await tester.dragFrom(Offset(x0.toDouble(), 20), const Offset(150, 0));
       await tester.pumpAndSettle();

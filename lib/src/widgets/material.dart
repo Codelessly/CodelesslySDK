@@ -1,19 +1,13 @@
 // Widget recipes: material. See lib/src/render/recipe.dart.
 //
-// App bars, navigation bars and list tiles are still islands hosting
-// the real Material widgets (Milestone 3 moves them to render objects:
-// codelessly_api docs/design/11-no-widgets.md); buttons, chips and badges are
-// render objects (render/controls/buttons.dart, chips.dart). A divider is only
-// layout and paint: render objects. A modal shows its trigger in place.
+// Buttons, chips, badges, bars and tiles are render objects
+// (render/controls; codelessly_api docs/design/11-no-widgets.md). A divider
+// is only layout and paint: a render object. A modal shows its trigger in
+// place.
 import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
-import 'package:codelessly_api/core.dart'
-    show
-        DividerProps,
-        ListTileProps,
-        Node,
-        SizeFit;
+import 'package:codelessly_api/core.dart' show DividerProps, Node;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -24,7 +18,6 @@ import '../render/recipe.dart';
 
 /// Recipes for the material group, by node type.
 final Map<String, WidgetRecipe> materialRecipes = {
-  'listTile': _listTile,
   'divider': _divider,
   'verticalDivider': _divider,
   'modal': _modal,
@@ -36,26 +29,7 @@ Size _design(Node n) => Size(n.layout.width.value, n.layout.height.value);
 void _fit(NodeBuilder b, Node n, List<RenderBox> chain) =>
     chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, _design(n)));
 
-/// The node's box at its design size, whatever its fits (StrictNodeBox).
-void _fixed(NodeBuilder b, Node n, List<RenderBox> chain) =>
-    chain.add(b.fitBox('fit', SizeFit.fixed, SizeFit.fixed, _design(n)));
-
 Color? _color(api.Color? c) => c?.flutter;
-
-OutlinedBorder _shape(api.ShapeBorder s, {Color? sideColor}) {
-  final side = s.side == null
-      ? BorderSide.none
-      : BorderSide(color: s.side!.color?.flutter ?? sideColor ?? const Color(0xFF000000), width: s.side!.width);
-  final radius = s.borderRadius.flutter;
-  return switch (s.type) {
-    api.ShapeBorderType.roundedRectangle => RoundedRectangleBorder(borderRadius: radius, side: side),
-    api.ShapeBorderType.circle => CircleBorder(side: side),
-    api.ShapeBorderType.stadium => StadiumBorder(side: side),
-    api.ShapeBorderType.continuousRectangle => ContinuousRectangleBorder(borderRadius: radius, side: side),
-    api.ShapeBorderType.beveledRectangle => BeveledRectangleBorder(borderRadius: radius, side: side),
-    api.ShapeBorderType.roundedSuperellipse => RoundedSuperellipseBorder(borderRadius: radius, side: side),
-  };
-}
 
 /// The types whose island takes a tap itself and reports it as the node's
 /// `click` (the node's own tap layer leaves it to them).
@@ -86,61 +60,6 @@ Color? labelColor(api.Color? foreground, api.TextStyle? label, api.Color? backgr
 /// node is drawn on.
 ColorScheme _neutral(NodeBuilder b) =>
     themeDataOf(api.ThemeTokens.none, surface: backdropOf(b.source.node, b.source.parentOf, b.id)).colorScheme;
-
-// --- list tile ----------------------------------------------------------------
-
-void _listTile(NodeBuilder b, Node n, List<RenderBox> chain) {
-  _fixed(b, n, chain);
-  chain.add(b.island('tile', (context) {
-    Widget? slot(String name) {
-      final id = n.slots[name];
-      final child = id == null ? null : b.nodeOf(id);
-      if (child == null) return null;
-      return SizedBox(
-        width: child.layout.width.value,
-        height: child.layout.height.value,
-        child: NodeChild(tree: b.tree, id: id!, instance: b.instance),
-      );
-    }
-
-    final shape = n.prop(ListTileProps.shape);
-    final density = n.prop(ListTileProps.visualDensity);
-    return Material(
-      color: Colors.transparent,
-      child: ListTile(
-        onTap: null,
-        dense: n.prop(ListTileProps.dense),
-        autofocus: n.prop(ListTileProps.autofocus),
-        tileColor: _color(n.prop(ListTileProps.tileColor)),
-        isThreeLine: n.prop(ListTileProps.isThreeLine),
-        shape: shape == null ? null : _shape(shape),
-        selected: n.prop(ListTileProps.selected),
-        selectedTileColor: _color(n.prop(ListTileProps.selectedTileColor)),
-        hoverColor: _color(n.prop(ListTileProps.hoverColor)),
-        focusColor: _color(n.prop(ListTileProps.focusColor)),
-        enabled: n.prop(ListTileProps.enabled),
-        contentPadding: n.prop(ListTileProps.contentPadding)?.flutter,
-        visualDensity: density == null ? null : VisualDensity(horizontal: density.horizontal, vertical: density.vertical),
-        selectedColor: _color(n.prop(ListTileProps.selectedColor)),
-        iconColor: _color(n.prop(ListTileProps.iconColor)),
-        textColor: _color(n.prop(ListTileProps.textColor)),
-        enableFeedback: n.prop(ListTileProps.enableFeedback),
-        horizontalTitleGap: n.prop(ListTileProps.horizontalTitleGap),
-        minVerticalPadding: n.prop(ListTileProps.minVerticalPadding),
-        minLeadingWidth: n.prop(ListTileProps.minLeadingWidth),
-        minTileHeight: n.prop(ListTileProps.minTileHeight),
-        titleAlignment: switch (n.prop(ListTileProps.titleAlignment)) {
-          null => null,
-          final a => ListTileTitleAlignment.values.byName(a.name),
-        },
-        leading: slot('leading'),
-        title: slot('title'),
-        subtitle: slot('subtitle'),
-        trailing: slot('trailing'),
-      ),
-    );
-  }));
-}
 
 // --- divider ------------------------------------------------------------------
 

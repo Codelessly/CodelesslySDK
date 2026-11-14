@@ -144,7 +144,6 @@ const widgetImportRatchet = {
   'src/session/view.dart',
   'src/widgets/collections.dart',
   'src/widgets/collections_data_list.dart',
-  'src/widgets/collections_islands.dart',
   'src/widgets/collections_list_runtime.dart',
   'src/widgets/collections_page_runtime.dart',
   'src/widgets/collections_pagination.dart',
@@ -154,10 +153,8 @@ const widgetImportRatchet = {
   'src/widgets/indicator_theme.dart',
   'src/widgets/inputs.dart',
   'src/widgets/inputs_shapes.dart',
-  'src/widgets/inputs_toggle.dart',
   'src/widgets/material.dart',
   'src/widgets/media.dart',
-  'src/widgets/slider_paint.dart',
 };
 
 /// The render-object controls: never on the ratchet.

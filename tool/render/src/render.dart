@@ -17,6 +17,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
+import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
@@ -1100,6 +1101,13 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   for (final b in over) {
     b.capturePaintShift = hidden;
   }
+  // What a control shows in its root's overlay layer (a dropdown's menu, a
+  // picker, a tooltip) is part of the page's render tree: left out of the
+  // slices the same way.
+  final roots = _descendants(ro).whereType<RenderControlRoot>().toList();
+  for (final r in roots) {
+    r.paintsOverlay = false;
+  }
   // A page whose content changes height once it scrolls (a header that
   // shrinks on a scroll reaction) is laid out shorter or taller below the
   // first window than in it: each slice is placed by that difference
@@ -1143,6 +1151,9 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   } finally {
     for (final b in over) {
       b.capturePaintShift = Offset.zero;
+    }
+    for (final r in roots) {
+      r.paintsOverlay = true;
     }
     page.jumpTo(0);
     await _settle(tester);

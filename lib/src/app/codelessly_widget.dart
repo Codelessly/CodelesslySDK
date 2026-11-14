@@ -827,8 +827,13 @@ class _LayoutViewState extends State<_LayoutView> {
     if (size != null) theme = theme.atScreen(size.width, size.height, _breakpoints);
     theme = theme.forBrightness(dark: _dark);
     // The controls the tree draws itself take the mode (and the theme from
-    // the component registry).
-    _pageTree?.dark = _dark;
+    // the component registry). A theme that sets colours but no dark ones
+    // keeps them light, as it was designed (the islands' rule); with no
+    // colours of its own they are SSUI's, light or dark.
+    final t = _tokens;
+    final coloured = t.primary != null || t.onPrimary != null || t.surface != null || t.onSurface != null ||
+        t.error != null || t.colors.isNotEmpty;
+    _pageTree?.dark = _dark && (t.hasDark || !coloured);
     final doc = widget.layout.document;
     if (identical(doc, _resolvedFrom) && theme == _resolvedWith) return;
     _resolvedFrom = doc;
