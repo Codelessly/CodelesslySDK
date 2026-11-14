@@ -1,0 +1,152 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"The errors come from the money formulas sitting inside plain string text, where the `\"$\"` quotes end the string early. I've moved every price into a single-quoted-free formula string using `{...}` with the currency symbol built inside the formula, and kept the rest of the design the same.\n\nCard w:390 gap:12 pad:16\n  Text.heading \"Your grocery order\"\n  state cart=[{\"id\":1,\"name\":\"Bananas\",\"price\":2.5,\"qty\":2},{\"id\":2,\"name\":\"Whole milk 1 L\",\"price\":1.8,\"qty\":1},{\"id\":3,\"name\":\"Sourdough loaf\",\"price\":4.2,\"qty\":1},{\"id\":4,\"name\":\"Free-range eggs\",\"price\":3.6,\"qty\":2},{\"id\":5,\"name\":\"Cheddar 250 g\",\"price\":3.9,\"qty\":1}]\n  state promo=\"\"\n  state applied=false\n  state promoError=false\n  state subtotal=sum(cart,r=>r.price*r.qty)\n  state discount=applied?subtotal*0.1:0\n  state delivery=subtotal-discount>=35?0:4.99\n  state total=subtotal-discount+delivery\n  each row in cart\n    Row gap:12 middle\n      Box w:56 h:56 fill:#FFE5E7EB radius:8 center\n        Icon \"image\"\n      Column gap:2 grow\n        Text.strong \"{row.name}\"\n        Text.muted \"{upper('$')}{fixed(row.price,2)} each\"\n      Row gap:4 middle\n        IconButton \"remove\" -> cart=coalesce(updateWhere(cart,r=>r.id==row.id,r=>with(r,\"qty\",row.qty-1)),cart); cart=removeWhere(cart,r=>r.qty<=0)\n        Text.strong \"{row.qty}\"\n        IconButton \"add\" -> cart=updateWhere(cart,r=>r.id==row.id,r=>with(r,\"qty\",row.qty+1))\n  Divider\n  Row gap:8 middle\n    Input \"Promo code\" \"Enter code\" =promo grow\n    Button.outline \"Apply\" -> applied=trim(upper(promo))==\"SAVE10\"; promoError=trim(upper(promo))!=\"SAVE10\"\n  if promoError\n    Text.danger \"That code isn't valid.\"\n  if applied\n    Text.success \"SAVE10 applied: 10% off\"\n  Row between\n    Text \"Subtotal\"\n    Text \"{upper('$')}{fixed(subtotal,2)}\"\n  if applied\n    Row between\n      Text.success \"Discount\"\n      Text.success \"-{upper('$')}{fixed(discount,2)}\"\n  Row between\n    Text \"Delivery\"\n    Text \"{upper('$')}{fixed(delivery,2)}\"\n  Row between\n    Text.title \"Total\"\n    Text.title \"{upper('$')}{fixed(total,2)}\"\n  Row gap:8\n    Button \"Confirm order\" grow -> emit confirmOrder; toast \"Order confirmed\"\n    Button.ghost \"Cancel\" -> emit cancelOrder; toast \"Order cancelled\"","usage":{"input_tokens":3484,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1045,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":545,"totalMs":3650}}
+{"tMs":545,"delta":"The err"}
+{"tMs":687,"delta":"ors come from the money"}
+{"tMs":687,"delta":" formul"}
+{"tMs":687,"delta":"as s"}
+{"tMs":687,"delta":"itting inside pl"}
+{"tMs":687,"delta":"ain string text"}
+{"tMs":687,"delta":","}
+{"tMs":696,"delta":" where the `\"$\"` qu"}
+{"tMs":717,"delta":"otes end"}
+{"tMs":737,"delta":" the string early"}
+{"tMs":757,"delta":". I"}
+{"tMs":776,"delta":"'ve"}
+{"tMs":796,"delta":" moved every"}
+{"tMs":842,"delta":" price"}
+{"tMs":842,"delta":" into a single"}
+{"tMs":858,"delta":"-quoted-"}
+{"tMs":877,"delta":"free"}
+{"tMs":898,"delta":" formula string using"}
+{"tMs":918,"delta":" `{..."}
+{"tMs":940,"delta":"}` with the"}
+{"tMs":961,"delta":" currency symbol built"}
+{"tMs":981,"delta":" inside the formula, and k"}
+{"tMs":1002,"delta":"ept the r"}
+{"tMs":1024,"delta":"est of the design"}
+{"tMs":1042,"delta":" the"}
+{"tMs":1064,"delta":" same.\n\nCard w:390"}
+{"tMs":1085,"delta":" gap:12 pad"}
+{"tMs":1106,"delta":":16\n  Text.he"}
+{"tMs":1126,"delta":"ading \"Your grocery order"}
+{"tMs":1147,"delta":"\"\n  state cart=["}
+{"tMs":1167,"delta":"{\"id\":1,\"name"}
+{"tMs":1188,"delta":"\":\"Bananas\",\"price"}
+{"tMs":1209,"delta":"\":2.5,\"qty"}
+{"tMs":1231,"delta":"\":2},{\"id\":2"}
+{"tMs":1250,"delta":",\"name\":\"Whole"}
+{"tMs":1271,"delta":" milk 1 L\",\"price"}
+{"tMs":1294,"delta":"\":1.8,\"qty"}
+{"tMs":1312,"delta":"\":1},{\"id\":3"}
+{"tMs":1333,"delta":",\"name\":\"Sour"}
+{"tMs":1353,"delta":"dough loaf\",\"price\":"}
+{"tMs":1373,"delta":"4.2,\"qty\":"}
+{"tMs":1394,"delta":"1},{\"id\":4,"}
+{"tMs":1415,"delta":"\"name\":\"Free-range"}
+{"tMs":1435,"delta":" eggs\",\"price\":3."}
+{"tMs":1455,"delta":"6,\"qty\":2},"}
+{"tMs":1476,"delta":"{\"id\":5,\"name"}
+{"tMs":1496,"delta":"\":\"Cheddar "}
+{"tMs":1517,"delta":"250 g\",\"price\":3."}
+{"tMs":1537,"delta":"9,\"qty\":1}"}
+{"tMs":1558,"delta":"]\n  state promo=\"\""}
+{"tMs":1578,"delta":"\n  state applied=false"}
+{"tMs":1599,"delta":"\n  state promoError=false"}
+{"tMs":1619,"delta":"\n  state"}
+{"tMs":1639,"delta":" subtotal=sum("}
+{"tMs":1660,"delta":"cart,r=>r."}
+{"tMs":1680,"delta":"price*r.qty)"}
+{"tMs":1701,"delta":"\n  state discount=applied?"}
+{"tMs":1721,"delta":"subtotal*0.1"}
+{"tMs":1742,"delta":":0\n  state delivery"}
+{"tMs":1763,"delta":"=subtotal-discount"}
+{"tMs":1786,"delta":">=35?0:4."}
+{"tMs":1805,"delta":"99\n  state"}
+{"tMs":1823,"delta":" total=sub"}
+{"tMs":1844,"delta":"total-discount+del"}
+{"tMs":1864,"delta":"ivery\n  each row in c"}
+{"tMs":1886,"delta":"art\n    Row gap:"}
+{"tMs":1905,"delta":"12 middle\n      Box"}
+{"tMs":1926,"delta":" w:56 h:56 "}
+{"tMs":1946,"delta":"fill:#FFE5"}
+{"tMs":1967,"delta":"E7EB radius:8"}
+{"tMs":1987,"delta":" center\n        Icon \""}
+{"tMs":2008,"delta":"image\"\n      Column gap"}
+{"tMs":2028,"delta":":2 grow\n        "}
+{"tMs":2048,"delta":"Text.strong \"{row."}
+{"tMs":2069,"delta":"name}\"\n        Text."}
+{"tMs":2089,"delta":"muted \"{up"}
+{"tMs":2109,"delta":"per('"}
+{"tMs":2132,"delta":"$')}{"}
+{"tMs":2150,"delta":"f"}
+{"tMs":2171,"delta":"ixed(row.price,2"}
+{"tMs":2191,"delta":")}"}
+{"tMs":2212,"delta":" each\"\n      Row gap"}
+{"tMs":2232,"delta":":4 middle\n        I"}
+{"tMs":2252,"delta":"conButton \"remove\" -"}
+{"tMs":2272,"delta":"> cart=coalesce"}
+{"tMs":2293,"delta":"(updateWhere(c"}
+{"tMs":2314,"delta":"art,r=>r.id"}
+{"tMs":2334,"delta":"==row.id,r=>"}
+{"tMs":2355,"delta":"with(r,\"qty\","}
+{"tMs":2375,"delta":"row.qty-1)),"}
+{"tMs":2397,"delta":"cart); cart=remove"}
+{"tMs":2416,"delta":"Where(cart,r"}
+{"tMs":2436,"delta":"=>r.qty<="}
+{"tMs":2456,"delta":"0)\n        "}
+{"tMs":2477,"delta":"Text.strong \"{row."}
+{"tMs":2498,"delta":"qty}\"\n        Icon"}
+{"tMs":2518,"delta":"Button \"add\" -> c"}
+{"tMs":2538,"delta":"art=updateWhere("}
+{"tMs":2559,"delta":"cart,r=>r."}
+{"tMs":2579,"delta":"id==row.id,r="}
+{"tMs":2599,"delta":">with(r,\"qty"}
+{"tMs":2620,"delta":"\",row.qty+1))"}
+{"tMs":2640,"delta":"\n  Divider\n  "}
+{"tMs":2661,"delta":"Row gap:8 middle"}
+{"tMs":2681,"delta":"\n    Input \"Promo"}
+{"tMs":2702,"delta":" code\" \"Enter code\""}
+{"tMs":2722,"delta":" =promo grow\n    "}
+{"tMs":2742,"delta":"Button.outline \"Apply"}
+{"tMs":2763,"delta":"\" -> applied=trim"}
+{"tMs":2783,"delta":"(upper(promo))="}
+{"tMs":2804,"delta":"=\"SAVE10\";"}
+{"tMs":2824,"delta":" promoError=trim(up"}
+{"tMs":2844,"delta":"per(promo))!=\"S"}
+{"tMs":2865,"delta":"AVE10\"\n  if"}
+{"tMs":2885,"delta":" promoError\n    Text."}
+{"tMs":2907,"delta":"danger \"That code isn't"}
+{"tMs":2926,"delta":" valid.\"\n  if applied"}
+{"tMs":2947,"delta":"\n    Text.success \"S"}
+{"tMs":2967,"delta":"AVE10 applied:"}
+{"tMs":2989,"delta":" 10% off\"\n  "}
+{"tMs":3008,"delta":"Row between\n    Text \""}
+{"tMs":3029,"delta":"Subtotal\"\n    "}
+{"tMs":3049,"delta":"Text \"{up"}
+{"tMs":3071,"delta":"per('$')}{fix"}
+{"tMs":3091,"delta":"ed(subtotal,2"}
+{"tMs":3110,"delta":")}\"\n  if applied"}
+{"tMs":3131,"delta":"\n    Row between\n      "}
+{"tMs":3151,"delta":"Text.success \"Discount\""}
+{"tMs":3172,"delta":"\n      Text.success \"-"}
+{"tMs":3192,"delta":"{upper('$')}{"}
+{"tMs":3213,"delta":"fixed(discount,2"}
+{"tMs":3233,"delta":")}\"\n  Row between"}
+{"tMs":3253,"delta":"\n    Text \"Deliv"}
+{"tMs":3274,"delta":"ery\"\n    Text \"{"}
+{"tMs":3294,"delta":"upper('$')}{f"}
+{"tMs":3315,"delta":"ixed(delivery,2"}
+{"tMs":3335,"delta":")}\"\n  Row between"}
+{"tMs":3355,"delta":"\n    Text.title \""}
+{"tMs":3375,"delta":"Total\"\n    Text.title"}
+{"tMs":3396,"delta":" \"{upper('$')}"}
+{"tMs":3416,"delta":"{fixed(total,2"}
+{"tMs":3437,"delta":")}\"\n  Row g"}
+{"tMs":3457,"delta":"ap:8\n    Button \""}
+{"tMs":3477,"delta":"Confirm order\" grow"}
+{"tMs":3498,"delta":" -> emit confirmO"}
+{"tMs":3518,"delta":"rder; toast \"Order"}
+{"tMs":3539,"delta":" confirmed\"\n    "}
+{"tMs":3561,"delta":"Button.ghost \"C"}
+{"tMs":3580,"delta":"ancel\" -> emit c"}
+{"tMs":3600,"delta":"ancelOrder; toast"}
+{"tMs":3620,"delta":" \"Order cancelled\""}

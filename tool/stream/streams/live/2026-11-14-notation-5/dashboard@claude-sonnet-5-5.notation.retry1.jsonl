@@ -1,0 +1,197 @@
+{"meta":{"ui":"dashboard","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"Card w:390 gap:16\n  state range=\"30 days\"\n  state sortKey=\"revenue\"\n  state plans=[{\"name\":\"Pro\",\"subs\":420,\"revenue\":12600,\"churn\":2.1},{\"name\":\"Team\",\"subs\":210,\"revenue\":16800,\"churn\":1.4},{\"name\":\"Starter\",\"subs\":680,\"revenue\":6120,\"churn\":4.8},{\"name\":\"Enterprise\",\"subs\":36,\"revenue\":28800,\"churn\":0.6},{\"name\":\"Basic\",\"subs\":910,\"revenue\":4550,\"churn\":6.2}]\n  state revenue={\"7 days\":\"$18.4k\",\"30 days\":\"$78.9k\",\"90 days\":\"$231k\"}\n  state revenueChg={\"7 days\":\"+3.2%\",\"30 days\":\"+8.5%\",\"90 days\":\"+14.1%\"}\n  state signups={\"7 days\":\"312\",\"30 days\":\"1,340\",\"90 days\":\"3,980\"}\n  state signupsChg={\"7 days\":\"+5.0%\",\"30 days\":\"+11.2%\",\"90 days\":\"+19.6%\"}\n  state churn={\"7 days\":\"0.9%\",\"30 days\":\"3.1%\",\"90 days\":\"8.7%\"}\n  state churnChg={\"7 days\":\"+0.1%\",\"30 days\":\"+0.4%\",\"90 days\":\"+0.9%\"}\n  state active={\"7 days\":\"9,820\",\"30 days\":\"14,260\",\"90 days\":\"17,900\"}\n  state activeChg={\"7 days\":\"+1.8%\",\"30 days\":\"+6.3%\",\"90 days\":\"+12.4%\"}\n  Row between middle\n    Text.title \"Product performance\"\n    Icon \"insights\"\n  SegmentedButton =range items:[\"7 days\",\"30 days\",\"90 days\"]\n  Grid cols:2 gap:8\n    Card gap:4\n      Text.caption \"Revenue\"\n      Text.heading \"{revenue[range]}\"\n      Badge.success \"{revenueChg[range]}\"\n    Card gap:4\n      Text.caption \"Sign-ups\"\n      Text.heading \"{signups[range]}\"\n      Badge.success \"{signupsChg[range]}\"\n    Card gap:4\n      Text.caption \"Churn\"\n      Text.heading \"{churn[range]}\"\n      Badge.danger \"{churnChg[range]}\"\n    Card gap:4\n      Text.caption \"Active users\"\n      Text.heading \"{active[range]}\"\n      Badge.success \"{activeChg[range]}\"\n  Text.strong \"Revenue\"\n  if range==\"7 days\"\n    LineChart values:[2.4,2.6,2.5,2.7,2.6,2.8,2.8] labels:[\"M\",\"T\",\"W\",\"T\",\"F\",\"S\",\"S\"]\n  if range==\"30 days\"\n    LineChart values:[15,17,18,19,20,21,22,23] labels:[\"W1\",\"\",\"W2\",\"\",\"W3\",\"\",\"W4\",\"\"]\n  if range==\"90 days\"\n    LineChart values:[52,60,68,75,82,90,98,105] labels:[\"Wk1\",\"\",\"Wk4\",\"\",\"Wk8\",\"\",\"Wk12\",\"\"]\n  Text.strong \"Sign-ups by channel\"\n  if range==\"7 days\"\n    BarChart values:[110,80,60,40,22] labels:[\"Organic\",\"Paid\",\"Referral\",\"Social\",\"Email\"]\n  if range==\"30 days\"\n    BarChart values:[480,360,250,150,100] labels:[\"Organic\",\"Paid\",\"Referral\",\"Social\",\"Email\"]\n  if range==\"90 days\"\n    BarChart values:[1400,1050,720,480,330] labels:[\"Organic\",\"Paid\",\"Referral\",\"Social\",\"Email\"]\n  Divider\n  Text.strong \"Top plans\"\n  Row gap:4\n    ChoiceChip \"Plan\" selected:=sortKey==\"name\" -> sortKey=\"name\"\n    ChoiceChip \"Subs\" selected:=sortKey==\"subs\" -> sortKey=\"subs\"\n    ChoiceChip \"Revenue\" selected:=sortKey==\"revenue\" -> sortKey=\"revenue\"\n    ChoiceChip \"Churn\" selected:=sortKey==\"churn\" -> sortKey=\"churn\"\n  Row gap:8\n    Text.caption \"Plan\" grow\n    Text.caption \"Subs\" w:50\n    Text.caption \"Revenue\" w:70\n    Text.caption \"Churn\" w:50\n  Divider\n  each p in plans\n    if sortKey==\"name\"\n      Row gap:8 middle\n        Text.strong \"{p.name}\" grow\n        Text \"{p.subs}\" w:50\n        Text \"{p.revenue}\" w:70\n        Text \"{p.churn}%\" w:50","usage":{"input_tokens":5742,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1518,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":626,"totalMs":7155}}
+{"tMs":626,"delta":"Card"}
+{"tMs":983,"delta":" w:390 gap:16"}
+{"tMs":983,"delta":"\n  state range=\"30"}
+{"tMs":983,"delta":" days\"\n  state sort"}
+{"tMs":983,"delta":"Key=\"revenue\""}
+{"tMs":983,"delta":"\n  state plans=[{\""}
+{"tMs":983,"delta":"name\":\"Pro\",\"sub"}
+{"tMs":983,"delta":"s\":420,\"revenue"}
+{"tMs":983,"delta":"\":12600,\"churn\":"}
+{"tMs":983,"delta":"2.1},{\"name\":"}
+{"tMs":983,"delta":"\"Team\",\"subs\":210"}
+{"tMs":1016,"delta":",\"revenue\":16800"}
+{"tMs":1049,"delta":",\"churn\":1.4"}
+{"tMs":1344,"delta":"},{\"name\":\"Star"}
+{"tMs":1344,"delta":"ter\",\"subs\":680,\""}
+{"tMs":1344,"delta":"revenue\":6120,\""}
+{"tMs":1344,"delta":"churn\":4.8},{"}
+{"tMs":1344,"delta":"\"name\":\"Enterpr"}
+{"tMs":1344,"delta":"ise\",\"subs\":36,\""}
+{"tMs":1344,"delta":"revenue\":28800,\""}
+{"tMs":1344,"delta":"churn\":0.6},{"}
+{"tMs":1353,"delta":"\"name\":\"Basic\",\""}
+{"tMs":1386,"delta":"subs\":910,\"reven"}
+{"tMs":1417,"delta":"ue\":4550,\"churn"}
+{"tMs":1450,"delta":"\":6.2}]\n  "}
+{"tMs":1715,"delta":"state revenue={"}
+{"tMs":1715,"delta":"\"7 days\":\"$18"}
+{"tMs":1715,"delta":".4k\",\"30 days\":"}
+{"tMs":1715,"delta":"\"$78.9k\",\"90"}
+{"tMs":1715,"delta":" days\":\"$231k\""}
+{"tMs":1715,"delta":"}\n  state rev"}
+{"tMs":1715,"delta":"en"}
+{"tMs":1722,"delta":"ueCh"}
+{"tMs":1756,"delta":"g={\"7 days\":\""}
+{"tMs":1790,"delta":"+3.2%\",\"30 "}
+{"tMs":1822,"delta":"days\":\"+8.5%"}
+{"tMs":1849,"delta":"\",\"90 days\":\"+14"}
+{"tMs":2079,"delta":".1%\"}\n  state"}
+{"tMs":2079,"delta":" signups={\"7 days\":"}
+{"tMs":2079,"delta":"\"312\",\"30 days\":\""}
+{"tMs":2079,"delta":"1,340\",\"90 days\":"}
+{"tMs":2079,"delta":"\"3,980\"}\n  "}
+{"tMs":2079,"delta":"state signupsChg={\""}
+{"tMs":2082,"delta":"7 days\":\"+5."}
+{"tMs":2116,"delta":"0%\",\"30 days\":\""}
+{"tMs":2149,"delta":"+11.2%\",\"90 "}
+{"tMs":2183,"delta":"days\":\"+19.6%"}
+{"tMs":2216,"delta":"\"}\n  state churn"}
+{"tMs":2249,"delta":"={\"7 days\":\"0"}
+{"tMs":2464,"delta":".9%\",\"30 days\":"}
+{"tMs":2464,"delta":"\"3.1%\",\"90 "}
+{"tMs":2464,"delta":"days\":\"8.7%\""}
+{"tMs":2464,"delta":"}\n  state churnChg"}
+{"tMs":2464,"delta":"={\"7 days\":\"+"}
+{"tMs":2464,"delta":"0.1%\",\"30 days"}
+{"tMs":2482,"delta":"\":\"+0.4%\",\""}
+{"tMs":2516,"delta":"90 days\":\"+0."}
+{"tMs":2550,"delta":"9%\"}\n  state active"}
+{"tMs":2583,"delta":"={\"7 days\":\"9"}
+{"tMs":2616,"delta":",820\",\"30 days\":\""}
+{"tMs":2649,"delta":"14,260\",\"90 days\":"}
+{"tMs":2832,"delta":"\"17,900\"}\n  "}
+{"tMs":2832,"delta":"state activeChg={\"7"}
+{"tMs":2832,"delta":" days\":\"+1.8"}
+{"tMs":2832,"delta":"%\",\"30 days\":\"+"}
+{"tMs":2832,"delta":"6.3%\",\"90 days"}
+{"tMs":2849,"delta":"\":\"+12.4%\""}
+{"tMs":2883,"delta":"}\n  Row between middle"}
+{"tMs":2916,"delta":"\n    Text.title \""}
+{"tMs":2949,"delta":"Product performance\"\n    Ic"}
+{"tMs":2984,"delta":"on \"insights\"\n  S"}
+{"tMs":3016,"delta":"egmentedButton =range"}
+{"tMs":3049,"delta":" items:[\"7 days\",\"30"}
+{"tMs":3193,"delta":" days\",\"90 days\"]"}
+{"tMs":3193,"delta":"\n  Grid cols:"}
+{"tMs":3193,"delta":"2 gap:8\n    "}
+{"tMs":3193,"delta":"Card gap:4\n      "}
+{"tMs":3218,"delta":"Text.caption \"Rev"}
+{"tMs":3250,"delta":"enue\"\n      Text."}
+{"tMs":3284,"delta":"heading \"{revenue["}
+{"tMs":3317,"delta":"range]}\"\n      Bad"}
+{"tMs":3350,"delta":"ge.success \"{revenue"}
+{"tMs":3385,"delta":"Chg[range]}\""}
+{"tMs":3416,"delta":"\n    Card gap:4"}
+{"tMs":3450,"delta":"\n      Text.caption \""}
+{"tMs":3562,"delta":"Sign-ups\"\n      "}
+{"tMs":3562,"delta":"Text.heading \"{sign"}
+{"tMs":3562,"delta":"ups[range]}\"\n      "}
+{"tMs":3583,"delta":"Badge.success \"{sign"}
+{"tMs":3616,"delta":"upsChg[range]}"}
+{"tMs":3650,"delta":"\"\n    Card gap:"}
+{"tMs":3683,"delta":"4\n      Text.caption"}
+{"tMs":3716,"delta":" \"Churn\"\n      "}
+{"tMs":3750,"delta":"Text.heading \"{churn"}
+{"tMs":3783,"delta":"[range]}\"\n      "}
+{"tMs":3816,"delta":"Badge.danger \"{chur"}
+{"tMs":3850,"delta":"nChg[range]}\""}
+{"tMs":3932,"delta":"\n    Card gap:4"}
+{"tMs":3932,"delta":"\n      Text.caption \""}
+{"tMs":3950,"delta":"Active users\"\n      Text"}
+{"tMs":3984,"delta":".heading \"{active[range"}
+{"tMs":4016,"delta":"]}\"\n      Badge"}
+{"tMs":4050,"delta":".success \"{activeChg"}
+{"tMs":4083,"delta":"[range]}\"\n  "}
+{"tMs":4119,"delta":"Text.strong \"Reven"}
+{"tMs":4150,"delta":"ue\"\n  if range==\""}
+{"tMs":4183,"delta":"7 days\"\n    Line"}
+{"tMs":4216,"delta":"Chart values:[2.4"}
+{"tMs":4249,"delta":",2.6,2.5"}
+{"tMs":4342,"delta":",2.7,2.6"}
+{"tMs":4342,"delta":",2.8,2.8"}
+{"tMs":4349,"delta":"] labels:[\"M\",\"T"}
+{"tMs":4383,"delta":"\",\"W\",\"T\",\"F\",\"S"}
+{"tMs":4416,"delta":"\",\"S\"]\n  if range"}
+{"tMs":4450,"delta":"==\"30 days\"\n    "}
+{"tMs":4483,"delta":"LineChart values:[15"}
+{"tMs":4517,"delta":",17,18,19,20"}
+{"tMs":4550,"delta":",21,22,23] lab"}
+{"tMs":4588,"delta":"els:[\"W1\",\"\",\"W"}
+{"tMs":4616,"delta":"2\",\"\",\"W3\",\"\",\"W"}
+{"tMs":4652,"delta":"4\",\"\"]\n  if range"}
+{"tMs":4694,"delta":"==\"90 days\"\n    "}
+{"tMs":4716,"delta":"LineChart values:[52"}
+{"tMs":4750,"delta":",60,68,75,82"}
+{"tMs":4783,"delta":",90,98,105] lab"}
+{"tMs":4817,"delta":"els:[\"Wk1\",\""}
+{"tMs":4851,"delta":"\",\"Wk4\",\"\",\""}
+{"tMs":4883,"delta":"Wk8\",\"\",\"Wk"}
+{"tMs":4919,"delta":"12\",\"\"]\n  Text"}
+{"tMs":4954,"delta":".strong \"Sign-"}
+{"tMs":4983,"delta":"ups by channel\"\n  "}
+{"tMs":5019,"delta":"if range==\"7 days\""}
+{"tMs":5049,"delta":"\n    BarChart values:"}
+{"tMs":5083,"delta":"[110,80,60,40"}
+{"tMs":5117,"delta":",22] labels:[\""}
+{"tMs":5150,"delta":"Organic\",\"Paid\",\""}
+{"tMs":5183,"delta":"Referral\",\"Social\",\"Email"}
+{"tMs":5216,"delta":"\"]\n  if range==\""}
+{"tMs":5250,"delta":"30 days\"\n    Bar"}
+{"tMs":5285,"delta":"Chart values:[480,360"}
+{"tMs":5316,"delta":",250,150,100] lab"}
+{"tMs":5350,"delta":"els:[\"Organic\",\""}
+{"tMs":5384,"delta":"Paid\",\"Referral\",\""}
+{"tMs":5416,"delta":"Social\",\"Email\"]\n  "}
+{"tMs":5450,"delta":"if range==\"90 days\""}
+{"tMs":5483,"delta":"\n    BarChart values:"}
+{"tMs":5517,"delta":"[1400,1050,720"}
+{"tMs":5550,"delta":",480,330] labels:"}
+{"tMs":5583,"delta":"[\"Organic\",\"Paid"}
+{"tMs":5617,"delta":"\",\"Referral\",\"Social\",\""}
+{"tMs":5653,"delta":"Email\"]\n  Div"}
+{"tMs":5683,"delta":"ider\n  Text.strong"}
+{"tMs":5716,"delta":" \"Top plans\"\n  "}
+{"tMs":5751,"delta":"Row gap:4\n    "}
+{"tMs":5783,"delta":"ChoiceChip \""}
+{"tMs":5816,"delta":"Plan\" selected:="}
+{"tMs":5850,"delta":"sortKey="}
+{"tMs":5883,"delta":"=\"name\" -> sortK"}
+{"tMs":5917,"delta":"ey=\"name\"\n    Ch"}
+{"tMs":5950,"delta":"oiceChip \"Sub"}
+{"tMs":5983,"delta":"s\" selected:=sort"}
+{"tMs":6016,"delta":"Key==\"subs\" -"}
+{"tMs":6051,"delta":"> sortKey=\"subs"}
+{"tMs":6095,"delta":"\"\n    Choice"}
+{"tMs":6116,"delta":"Chip \"Revenue\""}
+{"tMs":6157,"delta":" selected:=sortKey"}
+{"tMs":6183,"delta":"==\"revenue\" ->"}
+{"tMs":6218,"delta":" sortKey=\"revenue"}
+{"tMs":6250,"delta":"\"\n    Choice"}
+{"tMs":6283,"delta":"Chip \"Churn\" sel"}
+{"tMs":6317,"delta":"ected:=sortKey="}
+{"tMs":6350,"delta":"=\"churn\" -> sort"}
+{"tMs":6383,"delta":"Key=\"churn\"\n  "}
+{"tMs":6417,"delta":"Row gap:8\n    "}
+{"tMs":6450,"delta":"Text.caption \""}
+{"tMs":6483,"delta":"Plan\" grow\n    "}
+{"tMs":6517,"delta":"Text.caption \"Sub"}
+{"tMs":6550,"delta":"s\" w:50\n    "}
+{"tMs":6583,"delta":"Text.caption \"Reven"}
+{"tMs":6616,"delta":"ue\" w:70\n    "}
+{"tMs":6650,"delta":"Text.caption \"Churn"}
+{"tMs":6683,"delta":"\" w:50\n  Div"}
+{"tMs":6717,"delta":"ider\n  each p in pl"}
+{"tMs":6750,"delta":"ans\n    if"}
+{"tMs":6783,"delta":" sortKey==\"name\""}
+{"tMs":6816,"delta":"\n      Row gap:8"}
+{"tMs":6850,"delta":" middle\n        Text."}
+{"tMs":6883,"delta":"strong \"{p.name}"}
+{"tMs":6919,"delta":"\" grow\n        Text \""}
+{"tMs":6952,"delta":"{p.subs}\" w"}
+{"tMs":6989,"delta":":50\n        Text \"{"}
+{"tMs":7017,"delta":"p"}
+{"tMs":7051,"delta":".revenue}\" w:"}
+{"tMs":7127,"delta":"70\n        Text \"{p"}
+{"tMs":7127,"delta":".churn}%\" w:"}
+{"tMs":7150,"delta":"50"}
