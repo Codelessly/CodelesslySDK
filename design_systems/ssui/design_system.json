@@ -555,7 +555,13 @@
   "components/BrowserTabs.json",
   "components/Combobox.json",
   "components/IconSegmentedControl.json",
-  "components/ImageUpload.json"
+  "components/ImageUpload.json",
+  "components/CodePreview.json",
+  "components/NotePopover.json",
+  "components/ViewerDialog.json",
+  "components/SlidingPanel.json",
+  "components/DropdownMultiselect.json",
+  "components/IconSelect.json"
  ],
  "replaces": [
   "filledButton",

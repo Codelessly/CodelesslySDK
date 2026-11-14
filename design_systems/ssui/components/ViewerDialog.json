@@ -1,0 +1,223 @@
+{
+ "schema": 3,
+ "id": "ViewerDialog",
+ "roots": [
+  "dialog"
+ ],
+ "widget": {
+  "type": "ViewerDialog",
+  "doc": "The frame that shows a document or a picture large: a title bar with a close button over the call's children. Show it with a modal action. Fires onClose.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Preview",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "padded",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: the children reach the frame's edges."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClose"
+   }
+  ],
+  "slots": [
+   "actions"
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    360,
+    120
+   ],
+   "props": {
+    "title": "brief.pdf"
+   }
+  }
+ ],
+ "nodes": {
+  "dialog": {
+   "type": "column",
+   "children": [
+    "header",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "title",
+    "actions",
+    "close"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "close": {
+   "type": "IconButton",
+   "props": {
+    "icon": "close",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 32
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "tooltip": "Close",
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClose"
+      }
+     ]
+    }
+   ]
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": 16
+   },
+   "bind": {
+    "layout.padding": "${= props.padded ? 16 : 0}"
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}
