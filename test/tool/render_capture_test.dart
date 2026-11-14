@@ -378,4 +378,13 @@ void main() {
     final desktop = await searchBox(const Size(1440, 900));
     expect([desktop['w'], desktop['h']], [620, 650], reason: 'the design size: $desktop');
   });
+
+  testWidgets('setVariable with op update and an index replaces that list line, as a quantity stepper does', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/listupdate'], out: out.path,
+        sizes: const [Size(390, 300)], steps: const [Step('tap', 'plus#1'), Step('tap', 'plus#1')], dumpLayout: true));
+    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    final boxes = (jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List).cast<Map>();
+    final bars = boxes.where((b) => b['id'] == 'qtyBar').map((b) => b['w']).toList();
+    expect(bars, [20, 80], reason: 'the second line went from 2 to 4; the first is as it was');
+  });
 }
