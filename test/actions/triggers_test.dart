@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/screen.dart' as harness;
+import '../support/fields.dart';
 
 // Triggers in the render tree: nodes tapped (pressed, hovered, swiped...)
 // in a NodeView(interactive: true) run their reactions; a variable they set
@@ -500,7 +501,7 @@ void main() {
       expect(s['adding'], 'doing');
       // The second column's field has the focus, the first column's doesn't.
       expect(TextFieldHandle.near(s.tree, 'field', second.instance)!.focusNode.hasFocus, isTrue);
-      expect(FocusManager.instance.primaryFocus, TextFieldHandle.near(s.tree, 'field', second.instance)!.focusNode);
+      expect(tester.testTextInput.hasAnyClients, isTrue, reason: 'the keyboard is the field\'s');
       expect(TextFieldHandle.near(s.tree, 'field', adds.first.instance), isNull,
           reason: 'the first column\'s field is hidden, so not built');
     });
@@ -527,7 +528,7 @@ void main() {
         },
         variables: [harness.v('name', ''), harness.v('echo', ''), harness.v('query', ''), harness.v('sent', 0, VariableType.integer)],
       );
-      await tester.enterText(find.byType(TextField), 'Ada');
+      await typeInto(tester, 'Ada');
       await tester.pump();
       expect((s['name'], s['echo']), ('Ada', 'Ada!'));
       expect(s['query'], 'Ada');

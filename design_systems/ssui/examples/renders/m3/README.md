@@ -61,3 +61,17 @@ Measured over the whole page: 0.77 % of the pixels differ in light, 0.73 % in da
 test holds it under 1 %). Geometry (boxes, borders, chevron, menu surface, rows, tint, check) matches pixel for pixel;
 what differs is text only: the reference's labels inherit Material's `bodyMedium` letter spacing through the app's
 `DefaultTextStyle` (about 2 px over a word), which SSUI's own spec sets to 0.
+## Text fields (WS-A)
+
+The reference page's field row (an empty field with a hint, one with a value, one with a value and an error) rebuilt
+from zero-prop `textField` nodes (only the texts set), Roboto, light and dark, cropped to y 320–420. Made by
+`test/controls/text_field_reference_test.dart` with `CODELESSLY_M3_RENDERS=<dir>`.
+
+| File | What |
+|---|---|
+| `text-fields-before-{light,dark}.png` | the `_TextFieldIsland` (Material `TextField`) in a `MaterialApp`: Material outline and error red, and its texts in no loaded font (boxes) although the theme names Roboto |
+| `text-fields-{light,dark}.png` | this SDK: `RenderTextField`, SSUI's field frame |
+| `text-fields-compare-{light,dark}.png` | before, after and the SSUI reference, stacked |
+
+Measured against the reference over the field row (x 24–712, y 344–396): 0.00 % of the pixels differ in light and
+in dark (a channel more than 40 apart); the test holds it under 1 %.

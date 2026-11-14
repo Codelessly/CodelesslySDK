@@ -7,8 +7,8 @@
 import 'package:codelessly_api/core.dart' show AutovalidateMode;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart' show FocusNode;
 
+import '../../render/controls/focus.dart' show ControlFocusNode;
 import '../../render/node_tree.dart';
 import '../../render/recipe.dart';
 import '../../render/source.dart';
@@ -20,7 +20,7 @@ class FormFieldEntry {
 
   /// The field's node box.
   final NodeBuilder box;
-  final FocusNode focusNode;
+  final ControlFocusNode focusNode;
 
   /// The validator's message for the field's value now; null when valid.
   final String? Function() check;
