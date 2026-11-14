@@ -325,6 +325,57 @@ void main() {
     });
   });
 
+  testWidgets('a loading button: a spinner in place of the icon turning on the ticker, taps and keys ignored, busy to screen readers',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    final (tree, recorded) = await _show(tester, {
+      'save': hugging('filledButton', {'label': 'Save', 'loading': true, 'autofocus': true}),
+      'plain': hugging('filledButton', {'label': 'Save'}),
+      'icon': hugging('iconButton', {'icon': 'close', 'loading': true}),
+    });
+    final save = _button(tree, 'save');
+    final spinner = save.spinner!;
+    expect(save.icon, same(spinner));
+    expect(spinner.color, const Color(0xFFFFFFFF), reason: 'the label\'s ink');
+    expect(spinner.size, const Size(14, 14), reason: 'the icon\'s size at 28');
+    expect(rectOf(tree, 'save').width, greaterThan(rectOf(tree, 'plain').width), reason: 'room for the spinner');
+    final label = save.labels.single.glyphs.first;
+    expect(spinner.localToGlobal(Offset.zero).dx, lessThan(rectOf(tree, 'save').left + label.left));
+    expect(save.paintedAlpha, 128, reason: 'drawn as disabled, as SSUI\'s');
+    final before = spinner.turns;
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(spinner.turns, isNot(before), reason: 'it turns');
+    await tester.tapAt(centreOf(tree, 'save'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(recorded.fired, isEmpty);
+    expect(save.focusNode.hasFocus, isTrue, reason: 'it keeps the focus');
+    final data = save.debugSemantics!.getSemanticsData();
+    expect(data.value, 'Busy');
+    expect(data.flagsCollection.isLiveRegion, isTrue);
+    expect(data.hasAction(SemanticsAction.tap), isFalse);
+    expect(_button(tree, 'icon').spinner, isNotNull);
+    handle.dispose();
+  });
+
+  testWidgets('when loading ends the spinner goes, its own icon is back, and it takes presses again', (tester) async {
+    Map<String, Object?> doc(bool loading) =>
+        columnDoc({'save': hugging('filledButton', {'label': 'Save', 'icon': 'check', 'loading': loading})});
+    final source = DocumentSource(LayoutDocument.fromJson(doc(true)));
+    final recorded = RecordedInteractions();
+    final tree = NodeTree(source, environment: const IslandEnvironment(interactive: true), interactions: recorded);
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
+    expect(_button(tree, 'save').spinner, isNotNull);
+    source.document = LayoutDocument.fromJson(doc(false));
+    await tester.pump();
+    expect(_button(tree, 'save').spinner, isNull);
+    expect(_button(tree, 'save').icon, isNotNull, reason: 'its own icon is back');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(_button(tree, 'save').paintedAlpha, 255);
+    await tester.tapAt(centreOf(tree, 'save'));
+    expect(recorded.fired, ['save click']);
+  });
+
   testWidgets('screen readers see a button named by its label, which a tap and focus act on', (tester) async {
     final handle = tester.ensureSemantics();
     final (tree, recorded) = await _show(tester, {'save': hugging('filledButton', {'label': 'Save'})});
