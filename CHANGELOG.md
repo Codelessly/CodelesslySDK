@@ -40,6 +40,9 @@
   name late (named by a binding, so no layout lists it, its file slow to read) was measured in the fallback, so
   `text_clipped` was reported for text the PNG drew in the real font. `DirectoryFontFetcher.debugLatency` simulates a
   slow source in tests.
+- A `dateTimeInput`, `datePicker` or `timePicker` whose width hugs takes its content's width (`IntrinsicWidth`), as a
+  `textField` and a `dropdown` already did: in a wrapping row it took the row's whole width, and in a plain row it
+  failed (an unbounded `InputDecorator`). A picker's field reads its constraints only when its height fills.
 
 ## 30.1.0
 
