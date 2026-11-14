@@ -31,6 +31,11 @@
   to the site, is read from the site's files when it is drawn: the app's tree reads site images through
   `SiteImageLoader` (the loader's file URL, else its bytes), and a raster image whose URL has no scheme is fetched by
   the tree's loader instead of `NetworkImage`. Literal paths were already resolved when the layout loads.
+- A theme's `fontFamily` is the default family of every text, as it is the controls' (Flutter: the `DefaultTextStyle`
+  an app's theme gives): a text node with no family (and no `defaultTextStyle` above it naming one) is drawn in it,
+  in a site (`CodelesslyWidget`) and in a session (`CodelesslyView`). `RenderTree.textDefault` holds it under every
+  node's inherited default text style. Before, controls took the theme's font and text nodes the platform's. No
+  parity golden or render test changed.
 
 ## 30.1.0
 

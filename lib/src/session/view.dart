@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:collection' show ListBase;
 
 import 'package:codelessly_api/core.dart';
+import 'package:codelessly_api/core.dart' as api show TextStyle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' hide NavigationMode;
 
@@ -283,6 +284,8 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     final tokens = _session.theme;
     final dark = tokens.mode.isDark(platformDark: mq?.platformBrightness == Brightness.dark);
     final shown = tokens.forBrightness(dark: dark);
+    // The theme's font is every text's default family, as the controls'.
+    _tree.textDefault = shown.fontFamily == null ? null : api.TextStyle(fontFamily: shown.fontFamily);
     if (dark != _dark) {
       _dark = dark;
       _themed.theme = shown;
