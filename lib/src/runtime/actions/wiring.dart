@@ -459,9 +459,10 @@ class _BoxReactions {
     final down = e is KeyDownEvent || repeat;
     final type = down ? TriggerType.keyDown : TriggerType.keyUp;
     // Keys belong to the field being typed in, except Escape, which leaves
-    // it (`${result.typing}` tells the actions).
+    // it (`${result.typing}` tells the actions), and the field's own key
+    // reactions (ArrowDown in a search field moves through its results).
     final typing = isTyping();
-    if (typing && e.logicalKey != LogicalKeyboardKey.escape) return false;
+    if (typing && e.logicalKey != LogicalKeyboardKey.escape && !_ownsFocusedField()) return false;
     final keys = HardwareKeyboard.instance;
     final meta = keys.isMetaPressed || keys.isControlPressed;
     final label = e.logicalKey.keyLabel;
@@ -494,6 +495,15 @@ class _BoxReactions {
       },
     });
     return true;
+  }
+
+  /// Whether the field being typed in is this node's.
+  bool _ownsFocusedField() {
+    for (RenderObject? at = RenderTextField.focused; at != null; at = at.parent) {
+      if (identical(at, box)) return true;
+      if (at is NodeBox) return false;
+    }
+    return false;
   }
 
   static bool _textFieldFocused() =>

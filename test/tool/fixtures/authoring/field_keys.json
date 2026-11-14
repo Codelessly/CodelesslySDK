@@ -1,0 +1,7 @@
+{"schema":3,"roots":["s"],"variables":{"s":[{"name":"selection","type":"integer","value":0}]},"nodes":{
+"s":{"type":"canvas","slots":{"body":"body"},"layout":{"width":390,"height":300},"decoration":{"fills":[{"color":"#FFFFFFFF"}]}},
+"body":{"type":"column","children":["field","picked"],"layout":{"width":{"fill":390},"height":{"fill":300},"padding":24},"props":{"spacing":18}},
+"field":{"type":"textField","layout":{"width":{"fill":342},"height":56},"props":{"decoration":{"hintText":"Search"}},
+ "actions":[{"trigger":{"type":"keyDown","key":"ArrowDown"},"actions":[{"type":"setVariable","variable":"selection","value":"1"}]}]},
+"picked":{"type":"text","visible":false,"bind":{"visible":"${= selection == 1}"},"layout":{"width":{"fill":342},"height":{"hug":30}},"props":{"text":"Second result","style":{"fontSize":20,"color":"#FF182034"}}}
+}}
