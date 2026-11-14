@@ -8,6 +8,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api show WidgetState;
 import 'package:codelessly_api/validate.dart' show validateDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart';
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show ControlTransition;
 import 'package:codelessly_sdk/src/render/controls/overlay.dart';
 import 'package:codelessly_sdk/src/render/controls/root.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
@@ -374,6 +375,24 @@ void main() {
     expect(_button(tree, 'save').paintedAlpha, 255);
     await tester.tapAt(centreOf(tree, 'save'));
     expect(recorded.fired, ['save click']);
+  });
+
+  testWidgets('ControlTransition: an eased 0-1 value on a ticker for popups and pickers to open and close with',
+      (tester) async {
+    var ticks = 0;
+    final t = ControlTransition(onTick: () => ticks++);
+    addTearDown(t.dispose);
+    t.animateTo(1);
+    expect(t.isAnimating, isTrue);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 75));
+    expect(t.value, inExclusiveRange(.5, 1), reason: 'ease-out: past half at half time');
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(t.value, 1);
+    expect(t.isAnimating, isFalse);
+    t.animateTo(0, animate: false);
+    expect(t.value, 0);
+    expect(ticks, greaterThan(2));
   });
 
   testWidgets('screen readers see a button named by its label, which a tap and focus act on', (tester) async {

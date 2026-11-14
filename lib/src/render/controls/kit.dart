@@ -515,3 +515,67 @@ class ControlLabel {
 
   void dispose() => _painter.dispose();
 }
+
+/// One eased 0–1 value on its own ticker, for what is not a control's state
+/// (a popup's or picker's open and close): SSUI's 150 ms ease-out by
+/// default. [onTick] runs every frame it moves (repaint or relayout there).
+class ControlTransition {
+  ControlTransition({
+    required this.onTick,
+    this.duration = const Duration(milliseconds: 150),
+    this.curve = Curves.easeOut,
+    double value = 0,
+  }) : _t = value;
+
+  final VoidCallback onTick;
+  Duration duration;
+  Curve curve;
+
+  double _t, _target = 0;
+  Ticker? _ticker;
+  Duration _last = Duration.zero;
+
+  /// The eased value now.
+  double get value => _t <= 0 || _t >= 1 ? _t.clamp(0, 1).toDouble() : curve.transform(_t);
+
+  /// Where it is heading.
+  double get target => _target;
+
+  bool get isAnimating => _ticker?.isActive ?? false;
+
+  /// Eases to [target] (0 or 1, or between), or jumps there when [animate]
+  /// is false, the duration is 0 or the platform asks for no animation.
+  void animateTo(double target, {bool animate = true}) {
+    _target = target.clamp(0, 1).toDouble();
+    if (!animate ||
+        duration <= Duration.zero ||
+        RendererBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
+      _ticker?.stop();
+      _t = _target;
+      onTick();
+      return;
+    }
+    if (_t == _target) return;
+    final t = _ticker ??= Ticker(_tick, debugLabel: 'control transition');
+    if (!t.isActive) {
+      _last = Duration.zero;
+      t.start();
+    }
+  }
+
+  void _tick(Duration elapsed) {
+    final step = (elapsed - _last).inMicroseconds / duration.inMicroseconds;
+    _last = elapsed;
+    _t = _target > _t ? (_t + step).clamp(0.0, _target).toDouble() : (_t - step).clamp(_target, 1.0).toDouble();
+    if (_t == _target) _ticker?.stop();
+    onTick();
+  }
+
+  /// Stops where it is (a detached owner).
+  void stop() => _ticker?.stop();
+
+  void dispose() {
+    _ticker?.dispose();
+    _ticker = null;
+  }
+}
