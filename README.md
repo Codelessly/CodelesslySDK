@@ -258,7 +258,7 @@ A layout is data, so an agent can write one. Four things in this repository are 
   document it became.
 
 [`design_systems/ssui/examples/targets`](https://github.com/Codelessly/CodelesslySDK/tree/master/design_systems/ssui/examples/targets)
-holds seventy-seven cards written this way (approvals, tables, plans, diffs, sources, a handoff), each ten to thirty
+holds seventy-four cards written this way (approvals, tables, plans, diffs, sources, a handoff), each ten to thirty
 lines.
 
 ## Developer guide
