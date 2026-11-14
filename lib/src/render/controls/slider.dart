@@ -517,10 +517,10 @@ class RenderSlider extends RenderControl {
         final r = _thumbRadius;
         if (r <= 0) return;
         canvas.drawCircle(c, r, Paint()..color = thumbColor);
-        // A ring of the node's stroke, else SSUI's hairline where a white
-        // thumb would not stand out from a light page.
+        // A ring of the node's stroke, else SSUI's hairline round its white
+        // thumb on a light page (not round a thumb colour of the node's).
         final own = _c(n.prop(SliderProps.thumbStrokeColor));
-        final width = own != null ? math.min(n.prop(SliderProps.thumbStrokeWidth), r) : (thumbColor.a > .9 && !_tokens.dark ? 1.0 : 0.0);
+        final width = own != null ? math.min(n.prop(SliderProps.thumbStrokeWidth), r) : (n.prop(SliderProps.thumbColor) == null && !_tokens.dark ? 1.0 : 0.0);
         final color = own ?? _tokens.secondaryBorder;
         if (width > 0 && color.a > 0) {
           canvas.drawCircle(
