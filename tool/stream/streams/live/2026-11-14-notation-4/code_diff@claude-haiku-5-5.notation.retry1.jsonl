@@ -1,0 +1,93 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"Card w:390 gap:10 pad:14\n  Text.heading \"Config changes\"\n  state kept=0\n  state decided=0\n  state d1=\"\"\n  state d2=\"\"\n  state d3=\"\"\n  Text.caption \"Hunk 1 · lines 4-6\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- timeout: 30\"\n    Text.small \"- retries: 2\"\n  Box fill:#FFE8F7EC radius:6 pad:8\n    Text.small \"+ timeout: 60\"\n    Text.small \"+ retries: 3\"\n  Row gap:8\n    Button.primary \"Keep\" -> d1=\"keep\"; kept=kept+(d1==\"keep\"?1:0); decided=decided+1\n    Button.destructive \"Discard\" -> d1=\"discard\"; decided=decided+1\n  Text.caption \"Hunk 2 · lines 12-13\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- cache: false\"\n  Box fill:#FFE8F7EC radius:6 pad:8\n    Text.small \"+ cache: true\"\n    Text.small \"+ cache_ttl: 300\"\n  Row gap:8\n    Button.primary \"Keep\" -> d2=\"keep\"; kept=kept+(d2==\"keep\"?1:0); decided=decided+1\n    Button.destructive \"Discard\" -> d2=\"discard\"; decided=decided+1\n  Text.caption \"Hunk 3 · lines 21-22\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- log_level: info\"\n  Box fill:#FFE8F7EC radius:6 pad:8\n    Text.small \"+ log_level: debug\"\n  Row gap:8\n    Button.primary \"Keep\" -> d3=\"keep\"; kept=kept+(d3==\"keep\"?1:0); decided=decided+1\n    Button.destructive \"Discard\" -> d3=\"discard\"; decided=decided+1\n  Text.strong \"Kept: {kept} of 3\"\n  Button \"Apply\" enabled:=decided==3 -> emit apply","usage":{"input_tokens":2712,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":714,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":367,"totalMs":2231}}
+{"tMs":367,"delta":"Card w:390 gap"}
+{"tMs":585,"delta":":10"}
+{"tMs":585,"delta":" pad:14\n  "}
+{"tMs":585,"delta":"Text.heading \"Config chang"}
+{"tMs":585,"delta":"es\"\n  state kept="}
+{"tMs":585,"delta":"0\n  state dec"}
+{"tMs":585,"delta":"ided=0\n  state d1"}
+{"tMs":585,"delta":"=\"\"\n  state d2="}
+{"tMs":585,"delta":"\"\"\n  state d3=\"\""}
+{"tMs":585,"delta":"\n  Text.caption \""}
+{"tMs":585,"delta":"Hunk 1 ·"}
+{"tMs":588,"delta":" lines 4-6\""}
+{"tMs":610,"delta":"\n  Box fill:#F"}
+{"tMs":628,"delta":"FF"}
+{"tMs":649,"delta":"DECEC radius:6"}
+{"tMs":669,"delta":" pad:8\n    "}
+{"tMs":690,"delta":"Text.small \"- timeout"}
+{"tMs":711,"delta":": 30\"\n    Text"}
+{"tMs":731,"delta":".small \"- retries: "}
+{"tMs":752,"delta":"2\"\n  Box fill"}
+{"tMs":773,"delta":":#FFE8F7"}
+{"tMs":793,"delta":"EC radius:6 p"}
+{"tMs":813,"delta":"ad:8\n    Text."}
+{"tMs":834,"delta":"small \"+ timeout:"}
+{"tMs":854,"delta":" 60\"\n    Text."}
+{"tMs":875,"delta":"small \"+ retries: "}
+{"tMs":895,"delta":"3\"\n  Row gap"}
+{"tMs":916,"delta":":8\n    Button.prim"}
+{"tMs":936,"delta":"ary \"Keep\" ->"}
+{"tMs":957,"delta":" d1=\"keep\"; k"}
+{"tMs":977,"delta":"ept=kept+(d1"}
+{"tMs":997,"delta":"==\"keep\"?1:"}
+{"tMs":1018,"delta":"0); decided=decided+"}
+{"tMs":1040,"delta":"1\n    Button.destruct"}
+{"tMs":1059,"delta":"ive \"Discard\" ->"}
+{"tMs":1080,"delta":" d1=\"discard\"; dec"}
+{"tMs":1100,"delta":"ided=decided+1\n  "}
+{"tMs":1120,"delta":"Text.caption \"H"}
+{"tMs":1142,"delta":"unk 2 · lines"}
+{"tMs":1161,"delta":" 12-13\"\n  "}
+{"tMs":1183,"delta":"Box fill:#FFF"}
+{"tMs":1202,"delta":"DECEC radius:6"}
+{"tMs":1222,"delta":" pad:8\n    "}
+{"tMs":1242,"delta":"Text.small \"- cache:"}
+{"tMs":1263,"delta":" false\"\n  Box fill"}
+{"tMs":1284,"delta":":#FFE8F7"}
+{"tMs":1304,"delta":"EC radius:6 p"}
+{"tMs":1324,"delta":"ad:8\n    Text."}
+{"tMs":1345,"delta":"small \"+ cache: true"}
+{"tMs":1365,"delta":"\"\n    Text.small \""}
+{"tMs":1386,"delta":"+ cache_ttl"}
+{"tMs":1406,"delta":": 300\"\n  Row"}
+{"tMs":1426,"delta":" gap:8\n    Button"}
+{"tMs":1447,"delta":".primary \"Keep\""}
+{"tMs":1467,"delta":" -> d2=\"keep\""}
+{"tMs":1488,"delta":"; kept=kept+("}
+{"tMs":1511,"delta":"d2==\"keep\"?"}
+{"tMs":1529,"delta":"1:0); decided=dec"}
+{"tMs":1549,"delta":"ided+1\n    Button."}
+{"tMs":1570,"delta":"destructive \"Discard\""}
+{"tMs":1590,"delta":" -> d2=\"discard\""}
+{"tMs":1610,"delta":"; decided=decided+1"}
+{"tMs":1630,"delta":"\n  Text.ca"}
+{"tMs":1651,"delta":"ption \"Hunk 3"}
+{"tMs":1671,"delta":" · lines 21-22"}
+{"tMs":1693,"delta":"\"\n  Box fill:"}
+{"tMs":1713,"delta":"#FFFDECEC"}
+{"tMs":1733,"delta":" radius:6 pad:"}
+{"tMs":1753,"delta":"8\n    Text.small \""}
+{"tMs":1774,"delta":"- log_level: info\""}
+{"tMs":1805,"delta":"\n  Box fill:#F"}
+{"tMs":1819,"delta":"FE8F7EC rad"}
+{"tMs":1843,"delta":"ius:6 pad:8"}
+{"tMs":1855,"delta":"\n    Text.small \"+"}
+{"tMs":1875,"delta":" log_level: debug\""}
+{"tMs":1896,"delta":"\n  Row gap:8"}
+{"tMs":1917,"delta":"\n    Button.primary \""}
+{"tMs":1937,"delta":"Keep\" -> d3"}
+{"tMs":1957,"delta":"=\"keep\"; kept="}
+{"tMs":1978,"delta":"kept+(d3==\""}
+{"tMs":1998,"delta":"keep\"?1:0);"}
+{"tMs":2019,"delta":" decided=decided+1"}
+{"tMs":2040,"delta":"\n    Button.destructive \""}
+{"tMs":2061,"delta":"Discard\" -> d3"}
+{"tMs":2080,"delta":"=\"discard\"; decided="}
+{"tMs":2101,"delta":"decided+1\n  Text"}
+{"tMs":2121,"delta":".strong \"Kept:"}
+{"tMs":2149,"delta":" {kept} of 3\""}
+{"tMs":2161,"delta":"\n  Button \"Apply"}
+{"tMs":2182,"delta":"\" enabled:=decided"}
+{"tMs":2202,"delta":"==3 -> emit ap"}
+{"tMs":2223,"delta":"ply"}

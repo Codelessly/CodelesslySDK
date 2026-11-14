@@ -1,0 +1,212 @@
+{"meta":{"ui":"carousel","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"state idx=0\nstate sel=-1\nstate size=\"\"\nstate shoes=[{\"name\":\"Aero Glide\",\"price\":\"$120\",\"rating\":\"4.8\",\"desc\":\"Lightweight daily trainer with responsive foam.\"},{\"name\":\"Road Runner\",\"price\":\"$135\",\"rating\":\"4.6\",\"desc\":\"Cushioned road shoe built for long miles.\"},{\"name\":\"Trail Blazer\",\"price\":\"$150\",\"rating\":\"4.7\",\"desc\":\"Grippy outsole and rock plate for rough trails.\"},{\"name\":\"Swift Racer\",\"price\":\"$180\",\"rating\":\"4.9\",\"desc\":\"Carbon-plated racer for race day speed.\"},{\"name\":\"Cloud Stride\",\"price\":\"$110\",\"rating\":\"4.5\",\"desc\":\"Soft and plush for recovery runs.\"},{\"name\":\"Tempo Pro\",\"price\":\"$140\",\"rating\":\"4.6\",\"desc\":\"Balanced shoe for tempo and interval sessions.\"}]\nCard w:390 gap:12\n  if sel<0\n    Text.title \"Running shoes\"\n    Row middle gap:8\n      IconButton \"chevron_left\" -> idx=max(0,idx-1)\n      Box grow gap:8 pad:12 radius:12 fill:#FFF1F1F4\n        Box h:160 fill:#FFD9DCE3 radius:8 center middle -> sel=idx\n          Icon \"image\"\n        Text.heading \"{shoes[idx].name}\"\n        Row between\n          Text.strong \"{shoes[idx].price}\"\n          Row gap:4\n            Icon \"star\"\n            Text \"{shoes[idx].rating}\"\n        Button.outline \"View details\" -> sel=idx\n      IconButton \"chevron_right\" -> idx=min(5,idx+1)\n    Row center gap:8\n      Text.caption \"{idx+1} of 6\"\n    Row center gap:12\n      Icon \"circle\" visible:=idx==0\n      Icon \"circle_outlined\" visible:=idx!=0\n      Icon \"circle\" visible:=idx==1\n      Icon \"circle_outlined\" visible:=idx!=1\n      Icon \"circle\" visible:=idx==2\n      Icon \"circle_outlined\" visible:=idx!=2\n      Icon \"circle\" visible:=idx==3\n      Icon \"circle_outlined\" visible:=idx!=3\n      Icon \"circle\" visible:=idx==4\n      Icon \"circle_outlined\" visible:=idx!=4\n      Icon \"circle\" visible:=idx==5\n      Icon \"circle_outlined\" visible:=idx!=5\n  if sel>=0\n    Row middle gap:8\n      IconButton \"arrow_back\" -> sel=-1; size=\"\"\n      Text.title \"{shoes[sel].name}\"\n    Box h:160 fill:#FFD9DCE3 radius:8 center middle\n      Icon \"image\"\n    Row between\n      Text.heading \"{shoes[sel].price}\"\n      Row gap:4\n        Icon \"star\"\n        Text \"{shoes[sel].rating}\"\n    Text.body \"{shoes[sel].desc}\"\n    Text.strong \"Size\"\n    Row gap:8\n      ChoiceChip \"7\" selected:=size==\"7\" -> size=\"7\"\n      ChoiceChip \"8\" selected:=size==\"8\" -> size=\"8\"\n      ChoiceChip \"9\" selected:=size==\"9\" -> size=\"9\"\n      ChoiceChip \"10\" selected:=size==\"10\" -> size=\"10\"\n      ChoiceChip \"11\" selected:=size==\"11\" -> size=\"11\"\n    Button \"Add to bag\" enabled:=size!=\"\" -> emit addToBag; toast \"Added to bag\"\n    Button.ghost \"Back to carousel\" -> sel=-1; size=\"\"","usage":{"input_tokens":1833,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1239,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1006,"totalMs":8097}}
+{"tMs":1006,"delta":"state"}
+{"tMs":1329,"delta":" idx=0"}
+{"tMs":1330,"delta":"\nstate sel=-1\nstate"}
+{"tMs":1331,"delta":" size"}
+{"tMs":1331,"delta":"=\"\"\nstate shoes="}
+{"tMs":1331,"delta":"[{\"name\":\"A"}
+{"tMs":1331,"delta":"ero"}
+{"tMs":1331,"delta":" Gl"}
+{"tMs":1331,"delta":"ide\",\"price\":\"$120"}
+{"tMs":1331,"delta":"\",\"rating\":\""}
+{"tMs":1355,"delta":"4.8\",\"desc\":\""}
+{"tMs":1388,"delta":"Lightweight da"}
+{"tMs":1421,"delta":"ily tr"}
+{"tMs":1666,"delta":"ainer with respon"}
+{"tMs":1666,"delta":"sive fo"}
+{"tMs":1666,"delta":"am.\"},{\"name\":\""}
+{"tMs":1666,"delta":"Road"}
+{"tMs":1667,"delta":" Run"}
+{"tMs":1667,"delta":"ner\",\"price\":\"$135"}
+{"tMs":1667,"delta":"\",\"rating\":\"4.6"}
+{"tMs":1689,"delta":"\",\"desc\":\"Cush"}
+{"tMs":1722,"delta":"ioned road"}
+{"tMs":1755,"delta":" sh"}
+{"tMs":1788,"delta":"oe built"}
+{"tMs":1821,"delta":" for long mi"}
+{"tMs":2001,"delta":"les.\"},{\"name\":\""}
+{"tMs":2001,"delta":"Trail Bl"}
+{"tMs":2001,"delta":"az"}
+{"tMs":2001,"delta":"er\",\"price\":\"$150\",\""}
+{"tMs":2001,"delta":"rating\":\"4.7"}
+{"tMs":2022,"delta":"\",\"desc\":\"Gripp"}
+{"tMs":2057,"delta":"y out"}
+{"tMs":2089,"delta":"s"}
+{"tMs":2121,"delta":"ole and"}
+{"tMs":2155,"delta":" rock"}
+{"tMs":2187,"delta":" pl"}
+{"tMs":2221,"delta":"ate for r"}
+{"tMs":2343,"delta":"ough trails.\"},{\"name"}
+{"tMs":2343,"delta":"\":\"Sw"}
+{"tMs":2343,"delta":"ift Rac"}
+{"tMs":2354,"delta":"er\",\"price\":\"$180"}
+{"tMs":2388,"delta":"\",\"rating\":\"4.9"}
+{"tMs":2422,"delta":"\",\"desc\":\"Carb"}
+{"tMs":2456,"delta":"on-pl"}
+{"tMs":2488,"delta":"ated"}
+{"tMs":2521,"delta":" rac"}
+{"tMs":2555,"delta":"er"}
+{"tMs":2588,"delta":" for"}
+{"tMs":2621,"delta":" race day spe"}
+{"tMs":2678,"delta":"ed.\"},{\"name\":\""}
+{"tMs":2688,"delta":"C"}
+{"tMs":2721,"delta":"loud St"}
+{"tMs":2754,"delta":"ride\",\"price\":\"$110"}
+{"tMs":2788,"delta":"\",\"rating\":\"4.5"}
+{"tMs":2821,"delta":"\",\"desc\":\"So"}
+{"tMs":2857,"delta":"ft and plush for rec"}
+{"tMs":2890,"delta":"overy run"}
+{"tMs":2921,"delta":"s.\"},{\"name\":\""}
+{"tMs":2955,"delta":"Tempo Pro"}
+{"tMs":2988,"delta":"\",\"price\":\"$140\",\"r"}
+{"tMs":3022,"delta":"ating\":\"4.6"}
+{"tMs":3056,"delta":"\",\"desc\":\"Balan"}
+{"tMs":3088,"delta":"ced sh"}
+{"tMs":3125,"delta":"oe for tempo and"}
+{"tMs":3155,"delta":" inter"}
+{"tMs":3188,"delta":"val s"}
+{"tMs":3222,"delta":"essions.\"}]\nCard"}
+{"tMs":3255,"delta":" w:390 gap:12"}
+{"tMs":3289,"delta":"\n  if sel<0"}
+{"tMs":3322,"delta":"\n    Text"}
+{"tMs":3355,"delta":".title \"Running shoes"}
+{"tMs":3389,"delta":"\"\n    Row midd"}
+{"tMs":3422,"delta":"le g"}
+{"tMs":3455,"delta":"ap:8\n      IconBut"}
+{"tMs":3489,"delta":"ton \"chevron_left\""}
+{"tMs":3523,"delta":" -> idx=max(0"}
+{"tMs":3555,"delta":",idx-1)\n      "}
+{"tMs":3589,"delta":"Box grow g"}
+{"tMs":3622,"delta":"ap:8 "}
+{"tMs":3656,"delta":"pad:12"}
+{"tMs":3689,"delta":" "}
+{"tMs":3722,"delta":"radius:12"}
+{"tMs":3755,"delta":" fill:#F"}
+{"tMs":3788,"delta":"FF1"}
+{"tMs":3822,"delta":"F1"}
+{"tMs":3855,"delta":"F4"}
+{"tMs":3921,"delta":"\n        "}
+{"tMs":3955,"delta":"Box"}
+{"tMs":3989,"delta":" h"}
+{"tMs":4022,"delta":":160"}
+{"tMs":4056,"delta":" f"}
+{"tMs":4088,"delta":"ill:#FFD"}
+{"tMs":4122,"delta":"9D"}
+{"tMs":4155,"delta":"C"}
+{"tMs":4188,"delta":"E3"}
+{"tMs":4221,"delta":" radius:8"}
+{"tMs":4255,"delta":" center"}
+{"tMs":4288,"delta":" midd"}
+{"tMs":4321,"delta":"le -> s"}
+{"tMs":4356,"delta":"el=idx\n          Ic"}
+{"tMs":4388,"delta":"on \"image\"\n        Text"}
+{"tMs":4422,"delta":".he"}
+{"tMs":4455,"delta":"ading \"{shoes[id"}
+{"tMs":4488,"delta":"x].name}\"\n        "}
+{"tMs":4521,"delta":"Row between\n          Text.str"}
+{"tMs":4555,"delta":"ong \"{shoes[id"}
+{"tMs":4588,"delta":"x].price}\"\n          "}
+{"tMs":4622,"delta":"Row gap:4\n            "}
+{"tMs":4655,"delta":"Icon \"star\"\n            "}
+{"tMs":4688,"delta":"Text \"{shoes[id"}
+{"tMs":4722,"delta":"x].rating}\"\n        "}
+{"tMs":4755,"delta":"Button."}
+{"tMs":4788,"delta":"outline \"View"}
+{"tMs":4821,"delta":" details\" -> s"}
+{"tMs":4855,"delta":"el=idx\n      Icon"}
+{"tMs":4888,"delta":"Button \"chevron_right"}
+{"tMs":4922,"delta":"\" -> idx=min("}
+{"tMs":4955,"delta":"5,idx+1)"}
+{"tMs":4989,"delta":"\n    Row center g"}
+{"tMs":5029,"delta":"ap:8\n      Text"}
+{"tMs":5055,"delta":".caption \"{idx+"}
+{"tMs":5088,"delta":"1} of 6\"\n    "}
+{"tMs":5122,"delta":"Row center gap:12"}
+{"tMs":5155,"delta":"\n      Icon \"circle"}
+{"tMs":5188,"delta":"\""}
+{"tMs":5223,"delta":" vis"}
+{"tMs":5257,"delta":"ible:=idx=="}
+{"tMs":5288,"delta":"0\n      Icon \"circ"}
+{"tMs":5322,"delta":"le_"}
+{"tMs":5355,"delta":"outl"}
+{"tMs":5389,"delta":"ined\" visible:=idx"}
+{"tMs":5423,"delta":"!=0\n      Icon"}
+{"tMs":5456,"delta":" \"circle\" visible:="}
+{"tMs":5489,"delta":"idx==1\n      Ic"}
+{"tMs":5522,"delta":"on \"circle_outlined"}
+{"tMs":5557,"delta":"\" visible:=idx!"}
+{"tMs":5589,"delta":"=1\n      Icon \""}
+{"tMs":5622,"delta":"circle\" visible:=id"}
+{"tMs":5656,"delta":"x==2\n      Icon"}
+{"tMs":5690,"delta":" \"circle_outlined\""}
+{"tMs":5726,"delta":" visible:=idx!="}
+{"tMs":5756,"delta":"2\n      Icon \"circ"}
+{"tMs":5789,"delta":"le\" visible:=idx"}
+{"tMs":5824,"delta":"==3\n      Icon \""}
+{"tMs":5855,"delta":"circle_outlined\" vis"}
+{"tMs":5890,"delta":"ible:=idx!=3"}
+{"tMs":5924,"delta":"\n      Icon \"circle"}
+{"tMs":5956,"delta":"\" visible:=idx=="}
+{"tMs":5989,"delta":"4\n      Icon \"circ"}
+{"tMs":6023,"delta":"le_outlined\" visible"}
+{"tMs":6055,"delta":":=idx!=4"}
+{"tMs":6089,"delta":"\n      Icon \"circle\""}
+{"tMs":6122,"delta":" visible:=idx==5"}
+{"tMs":6156,"delta":"\n      Icon \"circle"}
+{"tMs":6189,"delta":"_outlined\" visible:"}
+{"tMs":6222,"delta":"=idx!=5\n  "}
+{"tMs":6260,"delta":"if sel>=0"}
+{"tMs":6289,"delta":"\n    Row"}
+{"tMs":6322,"delta":" midd"}
+{"tMs":6356,"delta":"le g"}
+{"tMs":6389,"delta":"ap:8\n      I"}
+{"tMs":6423,"delta":"conButton \"ar"}
+{"tMs":6455,"delta":"row_back\" -> s"}
+{"tMs":6489,"delta":"el=-1; size="}
+{"tMs":6522,"delta":"\"\"\n      Text.title \""}
+{"tMs":6556,"delta":"{shoes[sel]."}
+{"tMs":6589,"delta":"name}\"\n    Box h"}
+{"tMs":6623,"delta":":160 fill:#F"}
+{"tMs":6656,"delta":"FD9DCE3 "}
+{"tMs":6689,"delta":"radius:8 center middle"}
+{"tMs":6723,"delta":"\n      Icon \"image\""}
+{"tMs":6758,"delta":"\n    Row between\n      "}
+{"tMs":6790,"delta":"Text.he"}
+{"tMs":6823,"delta":"ading \"{shoes[s"}
+{"tMs":6856,"delta":"el].price}\"\n      "}
+{"tMs":6893,"delta":"Row gap:4\n        "}
+{"tMs":6923,"delta":"Icon \"star\"\n        "}
+{"tMs":6956,"delta":"Text \"{shoes[s"}
+{"tMs":6989,"delta":"el].rating}\"\n    "}
+{"tMs":7023,"delta":"Text.body"}
+{"tMs":7056,"delta":" \"{shoes[sel"}
+{"tMs":7089,"delta":"].desc}\"\n    "}
+{"tMs":7123,"delta":"Text.strong \"Size\""}
+{"tMs":7156,"delta":"\n    Row gap:8"}
+{"tMs":7223,"delta":"\n      ChoiceChip"}
+{"tMs":7256,"delta":" \"7"}
+{"tMs":7290,"delta":"\" selected:=size="}
+{"tMs":7324,"delta":"=\"7\" -> size=\"7"}
+{"tMs":7358,"delta":"\"\n      Choice"}
+{"tMs":7389,"delta":"Chip \"8\" selected:"}
+{"tMs":7423,"delta":"=size==\"8\" ->"}
+{"tMs":7456,"delta":" size=\"8\"\n      Ch"}
+{"tMs":7490,"delta":"oiceChip \"9\""}
+{"tMs":7523,"delta":" selected:=size==\"9"}
+{"tMs":7556,"delta":"\" -> size=\"9\""}
+{"tMs":7590,"delta":"\n      ChoiceChip"}
+{"tMs":7623,"delta":" \"10\" selected:=size"}
+{"tMs":7657,"delta":"==\"10\" -> size=\""}
+{"tMs":7689,"delta":"10\"\n      Choi"}
+{"tMs":7723,"delta":"ceChip \"11\" selected"}
+{"tMs":7756,"delta":":=size==\"11\" -"}
+{"tMs":7790,"delta":"> size=\"11\"\n    "}
+{"tMs":7823,"delta":"Button \"Add to bag\""}
+{"tMs":7856,"delta":" enabled:=size!=\""}
+{"tMs":7890,"delta":"\" -> emit add"}
+{"tMs":7923,"delta":"ToBag; toast \""}
+{"tMs":7956,"delta":"Added to bag\""}
+{"tMs":7990,"delta":"\n    Button."}
+{"tMs":8026,"delta":"ghost \"Back to carous"}
+{"tMs":8056,"delta":"el\" -> sel=-"}
+{"tMs":8090,"delta":"1; size=\"\""}

@@ -1,0 +1,72 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"Column gap:12 pad:16\n  state photos=[{\"caption\":\"Harbour at dawn\",\"c\":\"#FF1E3A5F\"},{\"caption\":\"Market stalls\",\"c\":\"#FFB5651D\"},{\"caption\":\"Old town alley\",\"c\":\"#FF2E4A3F\"},{\"caption\":\"Mountain lake\",\"c\":\"#FF3D6E8F\"},{\"caption\":\"Street food\",\"c\":\"#FFC0392B\"},{\"caption\":\"Cliffside village\",\"c\":\"#FF8E6C8A\"},{\"caption\":\"Night ferry\",\"c\":\"#FF1B2A41\"},{\"caption\":\"Vineyard rows\",\"c\":\"#FF6B8E23\"},{\"caption\":\"Sunset pier\",\"c\":\"#FFE07A5F\"}]\n  state open=-1\n  Text.heading \"Trip photos\"\n  Grid cols:3 gap:8\n    each row in photos\n      Card pad:0 radius:8 fill:#FF1E3A5F -> open=index; emit open_photo\n        Text.caption \"{row.caption}\"\n  if open>=0\n    Box fill:#E6000000 pad:16 gap:12 h:fill\n      Row between\n        Text.muted \"{open+1} of 9\"\n        IconButton \"close\" -> open=-1\n      Box radius:12 h:360\n        Text.strong \"{photos[open].caption}\"\n      Row between\n        IconButton \"chevron_left\" -> open=max(0,open-1)\n        Text.caption \"{photos[open].caption}\"\n        IconButton \"chevron_right\" -> open=min(8,open+1)","usage":{"input_tokens":2819,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":523,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":767,"totalMs":2534}}
+{"tMs":767,"delta":"Column"}
+{"tMs":903,"delta":" gap:12 "}
+{"tMs":903,"delta":"pad:16\n  state phot"}
+{"tMs":903,"delta":"os=[{\"caption\":"}
+{"tMs":903,"delta":"\"Harbour at daw"}
+{"tMs":903,"delta":"n\",\"c\":\"#FF"}
+{"tMs":903,"delta":"1E3A5F"}
+{"tMs":923,"delta":"\"},{\"caption\":\""}
+{"tMs":944,"delta":"Market stalls\",\"c\":"}
+{"tMs":964,"delta":"\"#FFB5651"}
+{"tMs":984,"delta":"D\"},{\"caption\":"}
+{"tMs":1005,"delta":"\"Old town alley\",\"c"}
+{"tMs":1025,"delta":"\":\"#FF2E4"}
+{"tMs":1090,"delta":"A3F\"},{\"ca"}
+{"tMs":1090,"delta":"ption\":\"Mountain l"}
+{"tMs":1090,"delta":"ake\",\"c\":\"#FF"}
+{"tMs":1107,"delta":"3D6E8F\"},"}
+{"tMs":1127,"delta":"{\"caption\":\"Street"}
+{"tMs":1148,"delta":" food\",\"c\":\"#FF"}
+{"tMs":1169,"delta":"C0392B\"},{\""}
+{"tMs":1188,"delta":"caption\":\"Cliff"}
+{"tMs":1210,"delta":"side village\",\"c\":\"#F"}
+{"tMs":1230,"delta":"F8E6C8A\""}
+{"tMs":1250,"delta":"},{\"caption\":\""}
+{"tMs":1270,"delta":"Night ferry\",\"c\":\""}
+{"tMs":1291,"delta":"#FF1B2"}
+{"tMs":1312,"delta":"A41\"},{\"caption"}
+{"tMs":1332,"delta":"\":\"Vineyard r"}
+{"tMs":1352,"delta":"ows\",\"c\":\"#FF"}
+{"tMs":1372,"delta":"6B8E23\"},{"}
+{"tMs":1393,"delta":"\"caption\":\"Sun"}
+{"tMs":1414,"delta":"set pier\",\"c\":\"#"}
+{"tMs":1434,"delta":"FFE07A"}
+{"tMs":1454,"delta":"5F\"}]\n  state"}
+{"tMs":1475,"delta":" open=-1\n  Text"}
+{"tMs":1495,"delta":".heading \"Trip phot"}
+{"tMs":1516,"delta":"os\"\n  Grid c"}
+{"tMs":1536,"delta":"ols:3 gap:8"}
+{"tMs":1556,"delta":"\n    each row in photos"}
+{"tMs":1577,"delta":"\n      Card pad:0 "}
+{"tMs":1597,"delta":"radius:8 fill:"}
+{"tMs":1618,"delta":"#"}
+{"tMs":1638,"delta":"FF1E3A5F"}
+{"tMs":1659,"delta":" -> open=index"}
+{"tMs":1679,"delta":"; emit open_photo"}
+{"tMs":1700,"delta":"\n        Text.caption \"{"}
+{"tMs":1720,"delta":"row.caption}\"\n  "}
+{"tMs":1740,"delta":"if open>=0\n    "}
+{"tMs":1760,"delta":"Box fill:#E6000"}
+{"tMs":2084,"delta":"000 pad:16 g"}
+{"tMs":2084,"delta":"ap:12 h"}
+{"tMs":2084,"delta":":f"}
+{"tMs":2084,"delta":"ill\n      Row between\n        "}
+{"tMs":2084,"delta":"Text.muted \"{open"}
+{"tMs":2084,"delta":"+1} of 9\""}
+{"tMs":2084,"delta":"\n        IconButton \"close\""}
+{"tMs":2084,"delta":" -> open=-1\n      "}
+{"tMs":2084,"delta":"Box rad"}
+{"tMs":2084,"delta":"ius:12"}
+{"tMs":2084,"delta":" h:360\n        Text"}
+{"tMs":2084,"delta":".strong \"{photos["}
+{"tMs":2527,"delta":"open].caption}\"\n      "}
+{"tMs":2527,"delta":"Row between\n        IconBut"}
+{"tMs":2527,"delta":"ton \"chevron_left\""}
+{"tMs":2527,"delta":" -> open=max(0,"}
+{"tMs":2527,"delta":"open-1)\n        Text"}
+{"tMs":2527,"delta":".caption \"{photos["}
+{"tMs":2527,"delta":"open].caption}\"\n        "}
+{"tMs":2527,"delta":"IconButton \"chevron"}
+{"tMs":2527,"delta":"_right\" -> open=min"}
+{"tMs":2527,"delta":"(8,open+1)"}

@@ -1,0 +1,228 @@
+{"meta":{"ui":"itinerary","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Plan two days in Kyoto as an inline itinerary: a timeline per day with times, places, how to get between them and how long it takes. Each stop expands for details, each day has a checklist of things to book that I can tick off, and a line at the top says how many are left.","text":"Column gap:12 pad:16 w:390\n  Text.title \"Kyoto: 2 days\"\n  state booked=0\n  Text.muted \"{2-booked} things left to book\"\n  Text.heading \"Day 1\"\n  Card gap:8\n    Accordion\n      ListTile \"09:00  Fushimi Inari\" \"Walk 20 min from station\"\n        Text.body \"Thousand torii gates, about 2 hours up the mountain trail. Go early to beat crowds.\"\n        Text.small \"Getting there: JR Nara Line to Inari, 5 min.\"\n      ListTile \"11:30  Nishiki Market\" \"Bus 5 min, about 10 min\"\n        Text.body \"Food alley with pickles, tofu and snacks. Lunch stop.\"\n        Text.small \"Getting there: bus 208 from Inari, about 10 min.\"\n      ListTile \"14:30  Kiyomizu-dera\" \"Bus 15 min, about 20 min\"\n        Text.body \"Wooden stage over the hillside and the old streets below.\"\n        Text.small \"Getting there: bus 206 from Shijo, about 20 min.\"\n      ListTile \"18:00  Gion evening walk\" \"Walk 15 min, about 15 min\"\n        Text.body \"Historic teahouse district, best after dusk.\"\n        Text.small \"Getting there: walk from Kiyomizu-dera, about 15 min.\"\n    Text.strong \"Book before you go\"\n    Checkbox \"Timed entry: Fushimi Inari\" -> booked=booked+1\n    Checkbox \"Kaiseki dinner in Gion\" -> booked=booked+1\n  Text.heading \"Day 2\"\n  Card gap:8\n    Accordion\n      ListTile \"08:30  Arashiyama bamboo grove\" \"Train 10 min, about 15 min\"\n        Text.body \"Quiet bamboo path, go before 9 to avoid crowds.\"\n        Text.small \"Getting there: JR Sagano Line to Saga-Arashiyama, 4 min.\"\n      ListTile \"10:30  Tenryu-ji\" \"Walk 5 min, about 10 min\"\n        Text.body \"Zen garden and temple with a famous pond garden.\"\n        Text.small \"Getting there: walk from the grove, about 10 min.\"\n      ListTile \"13:00  Philosopher's Path\" \"Bus 20 min, about 30 min\"\n        Text.body \"Canal walk lined with cherry trees, ends near temples.\"\n        Text.small \"Getting there: bus 93 from Arashiyama, about 20 min.\"\n      ListTile \"16:00  Nanzen-ji\" \"Walk 10 min, about 10 min\"\n        Text.body \"Large temple grounds and an aqueduct, relaxed end to the day.\"\n        Text.small \"Getting there: walk from the Philosopher's Path, about 10 min.\"\n    Text.strong \"Book before you go\"\n    Checkbox \"Tenryu-ji garden ticket\" -> booked=booked+1\n    Checkbox \"Train pass for Arashiyama\" -> booked=booked+1","usage":{"input_tokens":1829,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1017,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":620,"totalMs":5243}}
+{"tMs":620,"delta":"Column"}
+{"tMs":823,"delta":" gap:12 "}
+{"tMs":824,"delta":"pad:16 "}
+{"tMs":825,"delta":"w:390\n  Text."}
+{"tMs":825,"delta":"title \"K"}
+{"tMs":825,"delta":"yoto:"}
+{"tMs":825,"delta":" 2 days\"\n  state"}
+{"tMs":825,"delta":" boo"}
+{"tMs":825,"delta":"ked=0\n  "}
+{"tMs":825,"delta":"Text.muted \"{"}
+{"tMs":827,"delta":"2"}
+{"tMs":847,"delta":"-"}
+{"tMs":867,"delta":"booked} things left"}
+{"tMs":934,"delta":" to book\"\n  Text"}
+{"tMs":934,"delta":".heading \"Day 1"}
+{"tMs":934,"delta":"\"\n  "}
+{"tMs":950,"delta":"Card gap:8"}
+{"tMs":970,"delta":"\n    Acc"}
+{"tMs":991,"delta":"ordion"}
+{"tMs":1011,"delta":"\n      "}
+{"tMs":1034,"delta":"ListTile \"09"}
+{"tMs":1051,"delta":":00  "}
+{"tMs":1072,"delta":"Fushimi"}
+{"tMs":1093,"delta":" Inari\""}
+{"tMs":1112,"delta":" \"Walk "}
+{"tMs":1133,"delta":"20 min"}
+{"tMs":1153,"delta":" from"}
+{"tMs":1174,"delta":" station"}
+{"tMs":1194,"delta":"\""}
+{"tMs":1215,"delta":"\n        Text."}
+{"tMs":1235,"delta":"body \"Thousand"}
+{"tMs":1256,"delta":" tor"}
+{"tMs":1275,"delta":"ii g"}
+{"tMs":1295,"delta":"ates,"}
+{"tMs":1316,"delta":" about "}
+{"tMs":1338,"delta":"2 hours up"}
+{"tMs":1358,"delta":" the m"}
+{"tMs":1377,"delta":"ountain tr"}
+{"tMs":1398,"delta":"ail. Go"}
+{"tMs":1418,"delta":" early to"}
+{"tMs":1438,"delta":" be"}
+{"tMs":1459,"delta":"at crowds.\"\n        "}
+{"tMs":1479,"delta":"Text.small"}
+{"tMs":1502,"delta":" \"Get"}
+{"tMs":1519,"delta":"ting"}
+{"tMs":1540,"delta":" there: JR"}
+{"tMs":1560,"delta":" N"}
+{"tMs":1580,"delta":"ara"}
+{"tMs":1601,"delta":" Line to"}
+{"tMs":1621,"delta":" In"}
+{"tMs":1642,"delta":"ari, 5 min.\""}
+{"tMs":1662,"delta":"\n      ListTile \"11"}
+{"tMs":1684,"delta":":30  Nishi"}
+{"tMs":1703,"delta":"ki"}
+{"tMs":1723,"delta":" Market\" \"B"}
+{"tMs":1744,"delta":"us 5"}
+{"tMs":1764,"delta":" min, about"}
+{"tMs":1785,"delta":" 10 min\"\n        "}
+{"tMs":1805,"delta":"Text.body \"Food al"}
+{"tMs":1826,"delta":"ley"}
+{"tMs":1846,"delta":" with"}
+{"tMs":1866,"delta":" pickles, tofu and"}
+{"tMs":1887,"delta":" snacks. Lunch"}
+{"tMs":1907,"delta":" st"}
+{"tMs":1928,"delta":"op.\""}
+{"tMs":1948,"delta":"\n        Text.small \""}
+{"tMs":1970,"delta":"Getting there: bus 208"}
+{"tMs":1989,"delta":" from"}
+{"tMs":2010,"delta":" In"}
+{"tMs":2030,"delta":"ari, about"}
+{"tMs":2051,"delta":" 10 min.\"\n      "}
+{"tMs":2071,"delta":"ListTile \"14:30  "}
+{"tMs":2091,"delta":"K"}
+{"tMs":2112,"delta":"i"}
+{"tMs":2132,"delta":"yomizu-"}
+{"tMs":2153,"delta":"dera\" \"Bus "}
+{"tMs":2173,"delta":"15"}
+{"tMs":2193,"delta":" min, about 20 min"}
+{"tMs":2214,"delta":"\"\n        Text.body \""}
+{"tMs":2235,"delta":"Wooden st"}
+{"tMs":2255,"delta":"age over"}
+{"tMs":2275,"delta":" the"}
+{"tMs":2296,"delta":" h"}
+{"tMs":2316,"delta":"ill"}
+{"tMs":2336,"delta":"side and the old"}
+{"tMs":2356,"delta":" stre"}
+{"tMs":2377,"delta":"ets below"}
+{"tMs":2397,"delta":".\"\n        Text.small \""}
+{"tMs":2418,"delta":"Getting there: bus "}
+{"tMs":2438,"delta":"206"}
+{"tMs":2459,"delta":" from Sh"}
+{"tMs":2479,"delta":"ij"}
+{"tMs":2500,"delta":"o, about 20 min.\""}
+{"tMs":2521,"delta":"\n      "}
+{"tMs":2540,"delta":"ListTile \"18"}
+{"tMs":2562,"delta":":00  Gion"}
+{"tMs":2582,"delta":" ev"}
+{"tMs":2602,"delta":"ening wal"}
+{"tMs":2622,"delta":"k\" \"Wal"}
+{"tMs":2643,"delta":"k 15 min, about "}
+{"tMs":2665,"delta":"15 min\"\n        Text"}
+{"tMs":2683,"delta":".body \"Histor"}
+{"tMs":2704,"delta":"ic te"}
+{"tMs":2724,"delta":"ahouse district"}
+{"tMs":2744,"delta":", best"}
+{"tMs":2765,"delta":" after"}
+{"tMs":2785,"delta":" dus"}
+{"tMs":2806,"delta":"k.\"\n        Text.small"}
+{"tMs":2826,"delta":" \"Getting there: wal"}
+{"tMs":2847,"delta":"k from Kiyomiz"}
+{"tMs":2867,"delta":"u-"}
+{"tMs":2887,"delta":"dera, about 15 min"}
+{"tMs":2908,"delta":".\"\n    Text"}
+{"tMs":2928,"delta":".str"}
+{"tMs":2949,"delta":"ong \"Book"}
+{"tMs":2969,"delta":" before you"}
+{"tMs":2989,"delta":" go\"\n    Checkb"}
+{"tMs":3010,"delta":"ox \"Tim"}
+{"tMs":3030,"delta":"ed entry:"}
+{"tMs":3051,"delta":" Fushimi"}
+{"tMs":3072,"delta":" Inari\" -> booked="}
+{"tMs":3095,"delta":"booked+1\n    Chec"}
+{"tMs":3112,"delta":"kbox \"K"}
+{"tMs":3133,"delta":"a"}
+{"tMs":3156,"delta":"i"}
+{"tMs":3173,"delta":"seki d"}
+{"tMs":3194,"delta":"inner in"}
+{"tMs":3214,"delta":" Gion\" -> booked"}
+{"tMs":3236,"delta":"=booked+1\n  "}
+{"tMs":3255,"delta":"Text.heading \"Day "}
+{"tMs":3276,"delta":"2\"\n  Card gap"}
+{"tMs":3296,"delta":":8\n    Accordion"}
+{"tMs":3317,"delta":"\n      ListTile \"08"}
+{"tMs":3337,"delta":":30"}
+{"tMs":3357,"delta":"  Arash"}
+{"tMs":3378,"delta":"iy"}
+{"tMs":3398,"delta":"ama b"}
+{"tMs":3419,"delta":"amboo gr"}
+{"tMs":3439,"delta":"ove\" \"Train"}
+{"tMs":3459,"delta":" 10"}
+{"tMs":3481,"delta":" min, about 15"}
+{"tMs":3500,"delta":" min\"\n        Text."}
+{"tMs":3521,"delta":"body \"Qu"}
+{"tMs":3541,"delta":"iet b"}
+{"tMs":3561,"delta":"amboo path"}
+{"tMs":3582,"delta":", go before"}
+{"tMs":3602,"delta":" "}
+{"tMs":3622,"delta":"9 to"}
+{"tMs":3644,"delta":" avoid crowds.\""}
+{"tMs":3663,"delta":"\n        Text.small \"Get"}
+{"tMs":3684,"delta":"ting there: JR S"}
+{"tMs":3706,"delta":"ag"}
+{"tMs":3724,"delta":"ano"}
+{"tMs":3745,"delta":" Line to Sa"}
+{"tMs":3765,"delta":"ga-"}
+{"tMs":3786,"delta":"Arashiyama, "}
+{"tMs":3806,"delta":"4"}
+{"tMs":3826,"delta":" min.\"\n      ListT"}
+{"tMs":3847,"delta":"ile \"10:30"}
+{"tMs":3867,"delta":"  Ten"}
+{"tMs":3888,"delta":"ry"}
+{"tMs":3908,"delta":"u"}
+{"tMs":3929,"delta":"-ji\" \"Wal"}
+{"tMs":3949,"delta":"k 5"}
+{"tMs":3975,"delta":" min, about 10 min"}
+{"tMs":3990,"delta":"\"\n        Text.body \""}
+{"tMs":4011,"delta":"Z"}
+{"tMs":4031,"delta":"en garden and"}
+{"tMs":4054,"delta":" temple with a fam"}
+{"tMs":4071,"delta":"ous p"}
+{"tMs":4092,"delta":"ond gar"}
+{"tMs":4113,"delta":"den.\"\n        Text.small"}
+{"tMs":4132,"delta":" \"Getting there: walk"}
+{"tMs":4153,"delta":" from the"}
+{"tMs":4173,"delta":" gr"}
+{"tMs":4194,"delta":"ove, about 10 min.\""}
+{"tMs":4215,"delta":"\n      ListTile \"13"}
+{"tMs":4235,"delta":":00  Philos"}
+{"tMs":4256,"delta":"opher's Path\" \""}
+{"tMs":4276,"delta":"Bus 20 min, about"}
+{"tMs":4296,"delta":" 30 min\"\n        "}
+{"tMs":4317,"delta":"Text.body \"Can"}
+{"tMs":4337,"delta":"al wal"}
+{"tMs":4358,"delta":"k l"}
+{"tMs":4380,"delta":"ined with c"}
+{"tMs":4398,"delta":"herry trees, "}
+{"tMs":4419,"delta":"ends near"}
+{"tMs":4439,"delta":" tem"}
+{"tMs":4459,"delta":"ples.\"\n        Text.small"}
+{"tMs":4480,"delta":" \"Getting there: bus"}
+{"tMs":4500,"delta":" 93"}
+{"tMs":4521,"delta":" from Arashiyama"}
+{"tMs":4541,"delta":", about 20"}
+{"tMs":4562,"delta":" min.\"\n      ListT"}
+{"tMs":4582,"delta":"ile \"16"}
+{"tMs":4602,"delta":":00  Nan"}
+{"tMs":4622,"delta":"z"}
+{"tMs":4643,"delta":"en-"}
+{"tMs":4664,"delta":"ji\" \"Wal"}
+{"tMs":4684,"delta":"k 10 min, about "}
+{"tMs":4704,"delta":"10"}
+{"tMs":4725,"delta":" min\"\n        Text."}
+{"tMs":4747,"delta":"body \"Large tem"}
+{"tMs":4767,"delta":"ple gr"}
+{"tMs":4786,"delta":"ounds and"}
+{"tMs":4806,"delta":" an"}
+{"tMs":4827,"delta":" aqueduct,"}
+{"tMs":4847,"delta":" rel"}
+{"tMs":4867,"delta":"axed"}
+{"tMs":4888,"delta":" end to"}
+{"tMs":4909,"delta":" the day.\"\n        Text."}
+{"tMs":4929,"delta":"small \"Getting there: wal"}
+{"tMs":4949,"delta":"k from the Philosopher"}
+{"tMs":4970,"delta":"'s Path, about 10 "}
+{"tMs":4999,"delta":"min.\"\n    Text"}
+{"tMs":5010,"delta":".strong \"Book before you"}
+{"tMs":5031,"delta":" go\"\n    Checkb"}
+{"tMs":5051,"delta":"ox \"Tenry"}
+{"tMs":5072,"delta":"u-ji gar"}
+{"tMs":5092,"delta":"den "}
+{"tMs":5119,"delta":"ticket\" -> booked="}
+{"tMs":5140,"delta":"booked+1\n    Chec"}
+{"tMs":5160,"delta":"kbox \"Train p"}
+{"tMs":5174,"delta":"ass for"}
+{"tMs":5194,"delta":" Ar"}
+{"tMs":5215,"delta":"ashiyama\" -> boo"}
+{"tMs":5235,"delta":"ked=booked+1"}

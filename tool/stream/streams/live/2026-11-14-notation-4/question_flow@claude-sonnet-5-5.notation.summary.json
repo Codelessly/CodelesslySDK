@@ -1,0 +1,61 @@
+{
+ "ui": "question_flow",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 4298,
+ "turns": [
+  {
+   "input_tokens": 1821,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1574,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 785,
+   "totalMs": 9097,
+   "chars": 3646,
+   "lines": 90,
+   "jsonTails": 0,
+   "nodes": 71,
+   "outputTokensPerNode": "22.2",
+   "notationIssues": [],
+   "errors": [
+    "unknown_bind_path /nodes/progressBar1/bind/props.: \"props.\" is not a binding path."
+   ]
+  },
+  {
+   "input_tokens": 3455,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1574,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 743,
+   "totalMs": 7338,
+   "chars": 3652,
+   "lines": 90,
+   "jsonTails": 0,
+   "nodes": 71,
+   "outputTokensPerNode": "22.2",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

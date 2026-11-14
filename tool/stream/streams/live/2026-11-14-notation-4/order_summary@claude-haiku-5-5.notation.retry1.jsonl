@@ -1,0 +1,246 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"The errors come from assigning to a loop element (row.qty), which the notation doesn't allow. Instead I'll keep quantities as a plain list variable and change them by index, and compute the totals from it.\n\nCard w:390 gap:12 pad:16\n  Text.heading \"Your grocery order\"\n  state items=[{\"name\":\"Bananas\",\"price\":3,\"qty\":2},{\"name\":\"Whole milk 1 L\",\"price\":2,\"qty\":1},{\"name\":\"Sourdough loaf\",\"price\":4,\"qty\":1},{\"name\":\"Free-range eggs\",\"price\":5,\"qty\":1},{\"name\":\"Baby spinach\",\"price\":3,\"qty\":1}]\n  state promo=\"\"\n  state applied=false\n  state promoError=false\n  state subtotal=items[0].price*items[0].qty+items[1].price*items[1].qty+items[2].price*items[2].qty+items[3].price*items[3].qty+items[4].price*items[4].qty\n  state discount=applied?subtotal*0.1:0\n  state delivery=4\n  state total=subtotal-discount+delivery\n  Row gap:12 between\n    Image \"https://placehold.co/56x56\" w:56 h:56 radius:8\n    Column gap:2 grow\n      Text.strong \"Bananas\"\n      Text.muted \"$ 3 each\"\n    Column gap:4 right\n      Text.strong \"$ {items[0].price*items[0].qty}\"\n      Row gap:8\n        IconButton \"remove\" -> items[0].qty=max(0,items[0].qty-1); emit qtyChange \"Bananas\"\n        Text \"{items[0].qty}\"\n        IconButton \"add\" -> items[0].qty=items[0].qty+1; emit qtyChange \"Bananas\"\n  Row gap:12 between\n    Image \"https://placehold.co/56x56\" w:56 h:56 radius:8\n    Column gap:2 grow\n      Text.strong \"Whole milk 1 L\"\n      Text.muted \"$ 2 each\"\n    Column gap:4 right\n      Text.strong \"$ {items[1].price*items[1].qty}\"\n      Row gap:8\n        IconButton \"remove\" -> items[1].qty=max(0,items[1].qty-1); emit qtyChange \"Whole milk 1 L\"\n        Text \"{items[1].qty}\"\n        IconButton \"add\" -> items[1].qty=items[1].qty+1; emit qtyChange \"Whole milk 1 L\"\n  Row gap:12 between\n    Image \"https://placehold.co/56x56\" w:56 h:56 radius:8\n    Column gap:2 grow\n      Text.strong \"Sourdough loaf\"\n      Text.muted \"$ 4 each\"\n    Column gap:4 right\n      Text.strong \"$ {items[2].price*items[2].qty}\"\n      Row gap:8\n        IconButton \"remove\" -> items[2].qty=max(0,items[2].qty-1); emit qtyChange \"Sourdough loaf\"\n        Text \"{items[2].qty}\"\n        IconButton \"add\" -> items[2].qty=items[2].qty+1; emit qtyChange \"Sourdough loaf\"\n  Row gap:12 between\n    Image \"https://placehold.co/56x56\" w:56 h:56 radius:8\n    Column gap:2 grow\n      Text.strong \"Free-range eggs\"\n      Text.muted \"$ 5 each\"\n    Column gap:4 right\n      Text.strong \"$ {items[3].price*items[3].qty}\"\n      Row gap:8\n        IconButton \"remove\" -> items[3].qty=max(0,items[3].qty-1); emit qtyChange \"Free-range eggs\"\n        Text \"{items[3].qty}\"\n        IconButton \"add\" -> items[3].qty=items[3].qty+1; emit qtyChange \"Free-range eggs\"\n  Row gap:12 between\n    Image \"https://placehold.co/56x56\" w:56 h:56 radius:8\n    Column gap:2 grow\n      Text.strong \"Baby spinach\"\n      Text.muted \"$ 3 each\"\n    Column gap:4 right\n      Text.strong \"$ {items[4].price*items[4].qty}\"\n      Row gap:8\n        IconButton \"remove\" -> items[4].qty=max(0,items[4].qty-1); emit qtyChange \"Baby spinach\"\n        Text \"{items[4].qty}\"\n        IconButton \"add\" -> items[4].qty=items[4].qty+1; emit qtyChange \"Baby spinach\"\n  Divider\n  Row gap:8\n    Input \"Promo code\" \"SAVE10\" =promo\n    Button.outline \"Apply\" -> applied=(promo==\"SAVE10\"); promoError=(promo!=\"SAVE10\")\n  if promoError\n    Text.danger \"That code isn't valid.\"\n  if applied\n    Text.success \"SAVE10 applied: 10% off\"\n  Row between\n    Text \"Subtotal\"\n    Text.strong \"$ {subtotal}\"\n  Row between\n    Text \"Discount\"\n    Text \"- $ {discount}\"\n  Row between\n    Text \"Delivery\"\n    Text \"$ {delivery}\"\n  Row between\n    Text.heading \"Total\"\n    Text.title \"$ {total}\"\n  Row gap:8\n    Button.secondary \"Cancel\" -> emit orderCancelled; toast \"Order cancelled\"\n    Button \"Confirm order\" -> emit orderConfirmed; toast \"Order confirmed\"","usage":{"input_tokens":2737,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1814,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":516,"totalMs":5999}}
+{"tMs":516,"delta":"The"}
+{"tMs":741,"delta":" errors come"}
+{"tMs":741,"delta":" from ass"}
+{"tMs":741,"delta":"igning to a"}
+{"tMs":741,"delta":" loop element"}
+{"tMs":741,"delta":" (row"}
+{"tMs":741,"delta":".qty),"}
+{"tMs":741,"delta":" which the notation doesn't"}
+{"tMs":741,"delta":" all"}
+{"tMs":741,"delta":"ow. Instead I"}
+{"tMs":741,"delta":"'ll keep quantities as"}
+{"tMs":754,"delta":" a"}
+{"tMs":774,"delta":" pl"}
+{"tMs":1099,"delta":"ain list"}
+{"tMs":1099,"delta":" variable and change them"}
+{"tMs":1099,"delta":" by index, and"}
+{"tMs":1099,"delta":" comp"}
+{"tMs":1100,"delta":"ute the tot"}
+{"tMs":1100,"delta":"als from it"}
+{"tMs":1100,"delta":".\n\nCard w:390"}
+{"tMs":1100,"delta":" gap:12 pad"}
+{"tMs":1100,"delta":":16\n  Text.he"}
+{"tMs":1100,"delta":"ading \"Your grocery order"}
+{"tMs":1100,"delta":"\"\n  state items=[{"}
+{"tMs":1100,"delta":"\"name\":\"Bananas"}
+{"tMs":1374,"delta":"\",\"price\":3,\"qty"}
+{"tMs":1374,"delta":"\":2},{\"name\":\""}
+{"tMs":1374,"delta":"Whole milk 1 "}
+{"tMs":1374,"delta":"L\",\"price\":2,\"q"}
+{"tMs":1374,"delta":"ty\":1},{\"name\":"}
+{"tMs":1374,"delta":"\"Sourdough loa"}
+{"tMs":1374,"delta":"f\",\"price\":4,\"q"}
+{"tMs":1374,"delta":"ty\":1},{\"name\":"}
+{"tMs":1374,"delta":"\"Free-range eggs"}
+{"tMs":1374,"delta":"\",\"price\":5,\"qty"}
+{"tMs":1374,"delta":"\":1},{\"name\":\""}
+{"tMs":1374,"delta":"Baby spinach\",\"price"}
+{"tMs":1616,"delta":"\":3,\"qty\":1"}
+{"tMs":1616,"delta":"}]\n  state prom"}
+{"tMs":1616,"delta":"o=\"\"\n  state applied"}
+{"tMs":1616,"delta":"=false\n  state promoError"}
+{"tMs":1616,"delta":"=false\n  state subtot"}
+{"tMs":1616,"delta":"al=items"}
+{"tMs":1616,"delta":"["}
+{"tMs":1616,"delta":"0].price*items[0]."}
+{"tMs":1616,"delta":"qty+items[1].price"}
+{"tMs":1616,"delta":"*items[1].qty+"}
+{"tMs":1616,"delta":"items[2].price*items["}
+{"tMs":1616,"delta":"2].qty+items[3"}
+{"tMs":1878,"delta":"].price*items[3].q"}
+{"tMs":1878,"delta":"ty+items[4].price*"}
+{"tMs":1878,"delta":"items[4].qty\n  "}
+{"tMs":1878,"delta":"state discount=appl"}
+{"tMs":1878,"delta":"ied?sub"}
+{"tMs":1878,"delta":"total*0.1:"}
+{"tMs":1878,"delta":"0\n  state delivery="}
+{"tMs":1878,"delta":"4\n  state total=subt"}
+{"tMs":1878,"delta":"otal-discount+deliv"}
+{"tMs":1878,"delta":"ery\n  Row gap:"}
+{"tMs":1878,"delta":"12 between\n    Image \""}
+{"tMs":1878,"delta":"https://placehold.co/"}
+{"tMs":2055,"delta":"56x56\" w:56 "}
+{"tMs":2055,"delta":"h:56 radius:8"}
+{"tMs":2055,"delta":"\n    Column gap:2"}
+{"tMs":2055,"delta":" grow\n      Text."}
+{"tMs":2055,"delta":"strong \""}
+{"tMs":2055,"delta":"Bananas\"\n      Text"}
+{"tMs":2055,"delta":".muted \"$ 3"}
+{"tMs":2055,"delta":" each\"\n    Column"}
+{"tMs":2055,"delta":" gap:4 right\n      "}
+{"tMs":2055,"delta":"Text.strong \"$"}
+{"tMs":2055,"delta":" {items[0].price*items"}
+{"tMs":2055,"delta":"[0].qty}\""}
+{"tMs":2381,"delta":"\n      Row gap:8"}
+{"tMs":2381,"delta":"\n        IconButton \"remove"}
+{"tMs":2381,"delta":"\" -> items[0].q"}
+{"tMs":2381,"delta":"ty=max"}
+{"tMs":2381,"delta":"(0,items[0].q"}
+{"tMs":2381,"delta":"ty-1); emit qt"}
+{"tMs":2381,"delta":"yChange \""}
+{"tMs":2381,"delta":"Bananas\"\n        "}
+{"tMs":2381,"delta":"Text \"{items[0].q"}
+{"tMs":2381,"delta":"ty}\"\n        IconBut"}
+{"tMs":2381,"delta":"ton \"add\" -> items["}
+{"tMs":2381,"delta":"0].qty=items[0"}
+{"tMs":2629,"delta":"].qty+1; emit"}
+{"tMs":2629,"delta":" qtyChange \"B"}
+{"tMs":2629,"delta":"ananas\"\n  Row g"}
+{"tMs":2630,"delta":"ap:12 between\n    "}
+{"tMs":2630,"delta":"Image \"https://placehold."}
+{"tMs":2630,"delta":"co/56x56\" w:"}
+{"tMs":2630,"delta":"56 h:56 radius"}
+{"tMs":2630,"delta":":8\n    Column gap"}
+{"tMs":2630,"delta":":2 grow\n      "}
+{"tMs":2630,"delta":"Text.strong \"Whole"}
+{"tMs":2630,"delta":" milk 1 L\""}
+{"tMs":2630,"delta":"\n      Text.muted \"$"}
+{"tMs":2842,"delta":" 2 each\"\n    "}
+{"tMs":2842,"delta":"Column gap:4 right"}
+{"tMs":2842,"delta":"\n      Text.strong \""}
+{"tMs":2842,"delta":"$ {items[1].price"}
+{"tMs":2842,"delta":"*items[1].qty}"}
+{"tMs":2842,"delta":"\"\n      Row gap:"}
+{"tMs":2842,"delta":"8\n        IconButton \""}
+{"tMs":2842,"delta":"remove\" -> items[1"}
+{"tMs":2842,"delta":"].qty=max(0,"}
+{"tMs":2842,"delta":"items[1].qty-1"}
+{"tMs":2842,"delta":"); emit qtyChange"}
+{"tMs":2842,"delta":" \"Whole milk 1"}
+{"tMs":3138,"delta":" L\"\n        Text \""}
+{"tMs":3138,"delta":"{items[1].qty}"}
+{"tMs":3138,"delta":"\"\n        IconButton \""}
+{"tMs":3138,"delta":"add\" -> items[1]."}
+{"tMs":3138,"delta":"qty=items[1].q"}
+{"tMs":3138,"delta":"ty+1; emit qt"}
+{"tMs":3138,"delta":"yChange \"Whole mil"}
+{"tMs":3138,"delta":"k 1 L\"\n  "}
+{"tMs":3138,"delta":"Row gap:12 between"}
+{"tMs":3138,"delta":"\n    Image \"https://plac"}
+{"tMs":3138,"delta":"ehold.co/56x56"}
+{"tMs":3138,"delta":"\" w:56 h:56"}
+{"tMs":3310,"delta":" radius:8\n    "}
+{"tMs":3310,"delta":"Column gap:2 grow"}
+{"tMs":3310,"delta":"\n      Text.strong \""}
+{"tMs":3310,"delta":"Sourdough loaf"}
+{"tMs":3310,"delta":"\"\n      Text.muted"}
+{"tMs":3311,"delta":" \"$ 4 each\""}
+{"tMs":3311,"delta":"\n    Column gap:4"}
+{"tMs":3311,"delta":" right\n      Text.str"}
+{"tMs":3311,"delta":"ong \"$ {items[2"}
+{"tMs":3311,"delta":"].price*items[2].q"}
+{"tMs":3311,"delta":"ty}\"\n      Row g"}
+{"tMs":3311,"delta":"ap:8\n        IconBut"}
+{"tMs":3548,"delta":"ton \"remove\" -> items"}
+{"tMs":3548,"delta":"[2].qty=max("}
+{"tMs":3548,"delta":"0,items[2].qty"}
+{"tMs":3548,"delta":"-1); emit qty"}
+{"tMs":3548,"delta":"Change \"Sourdough"}
+{"tMs":3548,"delta":" loaf\"\n        Text"}
+{"tMs":3548,"delta":" \"{items[2].qty"}
+{"tMs":3548,"delta":"}\"\n        IconButton"}
+{"tMs":3548,"delta":" \"add\" -> items[2"}
+{"tMs":3548,"delta":"].qty=items[2]."}
+{"tMs":3548,"delta":"qty+1; emit q"}
+{"tMs":3548,"delta":"tyChange \"Sour"}
+{"tMs":3740,"delta":"dough loaf\"\n  "}
+{"tMs":3740,"delta":"Row gap:12 between"}
+{"tMs":3740,"delta":"\n    Image \"https://plac"}
+{"tMs":3740,"delta":"ehold.co/56x56"}
+{"tMs":3740,"delta":"\" w:56 h:56"}
+{"tMs":3740,"delta":" "}
+{"tMs":3740,"delta":"radius:8\n    Column"}
+{"tMs":3740,"delta":" gap:2 grow"}
+{"tMs":3741,"delta":"\n      Text.strong \""}
+{"tMs":3741,"delta":"Free-range eggs\""}
+{"tMs":3741,"delta":"\n      Text.muted \"$"}
+{"tMs":3741,"delta":" 5 each\"\n    "}
+{"tMs":4033,"delta":"Column gap:4 right"}
+{"tMs":4034,"delta":"\n      Text.strong \""}
+{"tMs":4034,"delta":"$ {items[3].price"}
+{"tMs":4034,"delta":"*items[3].qty}"}
+{"tMs":4034,"delta":"\"\n      Row gap:"}
+{"tMs":4034,"delta":"8\n        IconButton \""}
+{"tMs":4034,"delta":"remove\" -> items[3"}
+{"tMs":4034,"delta":"].qty=max(0,"}
+{"tMs":4034,"delta":"items[3].qty-1"}
+{"tMs":4034,"delta":"); emit qtyChange"}
+{"tMs":4034,"delta":" \"Free-range eggs"}
+{"tMs":4034,"delta":"\"\n        Text \"{items"}
+{"tMs":4300,"delta":"[3].qty}\""}
+{"tMs":4300,"delta":"\n        IconButton \"add\""}
+{"tMs":4300,"delta":" -> items[3].qty"}
+{"tMs":4300,"delta":"=items[3].qty+"}
+{"tMs":4300,"delta":"1; emit qtyCh"}
+{"tMs":4300,"delta":"ange \"Free-range egg"}
+{"tMs":4300,"delta":"s\"\n  Row gap"}
+{"tMs":4300,"delta":":12 between\n    Image"}
+{"tMs":4300,"delta":" \"https://placehold.co"}
+{"tMs":4300,"delta":"/56x56\" w:56"}
+{"tMs":4300,"delta":" "}
+{"tMs":4300,"delta":"h:56 "}
+{"tMs":4549,"delta":"radius:8\n    Column"}
+{"tMs":4549,"delta":" gap:2 grow"}
+{"tMs":4549,"delta":"\n      Text.strong \""}
+{"tMs":4549,"delta":"Baby spinach\"\n      "}
+{"tMs":4549,"delta":"Text.muted \"$"}
+{"tMs":4549,"delta":" 3 each\"\n    "}
+{"tMs":4549,"delta":"Column gap:4 right"}
+{"tMs":4549,"delta":"\n      Text.strong \"$"}
+{"tMs":4549,"delta":" {items[4].price*"}
+{"tMs":4549,"delta":"items[4].qty}\""}
+{"tMs":4549,"delta":"\n      Row gap:8"}
+{"tMs":4549,"delta":"\n        IconButton \"rem"}
+{"tMs":4821,"delta":"ove\" -> items[4]."}
+{"tMs":4822,"delta":"qty=max(0,items"}
+{"tMs":4822,"delta":"[4].qty-1);"}
+{"tMs":4822,"delta":" emit qtyChange \""}
+{"tMs":4822,"delta":"Baby spinach\""}
+{"tMs":4822,"delta":"\n        Text \"{items[4"}
+{"tMs":4822,"delta":"].qty}\"\n        I"}
+{"tMs":4822,"delta":"conButton \"add\" ->"}
+{"tMs":4822,"delta":" items[4].qty=items"}
+{"tMs":4822,"delta":"[4].qty+1;"}
+{"tMs":4822,"delta":" emit qtyChange \""}
+{"tMs":4822,"delta":"Baby spinach\""}
+{"tMs":5026,"delta":"\n  Divider\n  Row"}
+{"tMs":5026,"delta":" gap:8\n    Input"}
+{"tMs":5026,"delta":" \"Promo code\" \"S"}
+{"tMs":5026,"delta":"AVE10\" =promo"}
+{"tMs":5026,"delta":"\n    Button.outline \""}
+{"tMs":5026,"delta":"Apply\" -> applied"}
+{"tMs":5026,"delta":"=(promo==\"SA"}
+{"tMs":5026,"delta":"VE10\"); promoError"}
+{"tMs":5026,"delta":"=(promo!=\"SA"}
+{"tMs":5026,"delta":"VE10\")\n  if prom"}
+{"tMs":5026,"delta":"oError\n    Text.dan"}
+{"tMs":5026,"delta":"ger \"That code isn't val"}
+{"tMs":5260,"delta":"id.\"\n  if applied"}
+{"tMs":5260,"delta":"\n    Text.success \"SA"}
+{"tMs":5260,"delta":"VE10 applied: "}
+{"tMs":5260,"delta":"10% off\"\n  Row"}
+{"tMs":5260,"delta":" between\n    Text \"Sub"}
+{"tMs":5260,"delta":"total\"\n    Text"}
+{"tMs":5260,"delta":".strong \"$ {sub"}
+{"tMs":5260,"delta":"total}\"\n  "}
+{"tMs":5260,"delta":"Row between\n    Text \""}
+{"tMs":5260,"delta":"Discount\"\n    Text \""}
+{"tMs":5260,"delta":"- $ {discount}\""}
+{"tMs":5260,"delta":"\n  Row between\n    "}
+{"tMs":5738,"delta":"Text \"Delivery\""}
+{"tMs":5738,"delta":"\n    Text \"$ {del"}
+{"tMs":5738,"delta":"ivery}\"\n  Row"}
+{"tMs":5738,"delta":" between\n    Text.heading"}
+{"tMs":5738,"delta":" \"Total\"\n    Text"}
+{"tMs":5738,"delta":".title \"$ {total}"}
+{"tMs":5738,"delta":"\"\n  Row gap:"}
+{"tMs":5738,"delta":"8\n    Button.second"}
+{"tMs":5738,"delta":"ary \"Cancel\" -"}
+{"tMs":5738,"delta":"> emit orderCancel"}
+{"tMs":5738,"delta":"led; toast \"Order c"}
+{"tMs":5738,"delta":"ancelled\"\n    Button"}
+{"tMs":5993,"delta":" \"Confirm order\" -"}
+{"tMs":5993,"delta":"> emit orderConfir"}
+{"tMs":5993,"delta":"med; toast \"Order"}
+{"tMs":5993,"delta":" confirmed\""}

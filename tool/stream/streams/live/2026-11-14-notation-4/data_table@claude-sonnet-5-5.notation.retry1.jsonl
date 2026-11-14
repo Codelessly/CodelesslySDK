@@ -1,0 +1,191 @@
+{"meta":{"ui":"data_table","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show the twelve invoices you found as a table: number, customer, date, amount and status. I can sort by any column, filter by status, type to search the customer, page through five at a time, tick rows (and a tick-all for the page), and a bar appears with the count and total of what I ticked and a button to send reminders for them.","text":"state rows=[{\"no\":\"INV-001\",\"customer\":\"Acme Corp\",\"date\":\"2024-01-05\",\"amount\":1200,\"status\":\"Paid\"},{\"no\":\"INV-002\",\"customer\":\"Globex\",\"date\":\"2024-01-09\",\"amount\":860,\"status\":\"Overdue\"},{\"no\":\"INV-003\",\"customer\":\"Initech\",\"date\":\"2024-01-14\",\"amount\":450,\"status\":\"Pending\"},{\"no\":\"INV-004\",\"customer\":\"Umbrella\",\"date\":\"2024-01-18\",\"amount\":2300,\"status\":\"Paid\"},{\"no\":\"INV-005\",\"customer\":\"Hooli\",\"date\":\"2024-01-22\",\"amount\":975,\"status\":\"Overdue\"},{\"no\":\"INV-006\",\"customer\":\"Stark Industries\",\"date\":\"2024-02-01\",\"amount\":3400,\"status\":\"Pending\"},{\"no\":\"INV-007\",\"customer\":\"Wayne Enterprises\",\"date\":\"2024-02-06\",\"amount\":1580,\"status\":\"Paid\"},{\"no\":\"INV-008\",\"customer\":\"Wonka\",\"date\":\"2024-02-11\",\"amount\":320,\"status\":\"Overdue\"},{\"no\":\"INV-009\",\"customer\":\"Soylent\",\"date\":\"2024-02-15\",\"amount\":740,\"status\":\"Pending\"},{\"no\":\"INV-010\",\"customer\":\"Vandelay\",\"date\":\"2024-02-20\",\"amount\":1100,\"status\":\"Paid\"},{\"no\":\"INV-011\",\"customer\":\"Pied Piper\",\"date\":\"2024-02-25\",\"amount\":680,\"status\":\"Overdue\"},{\"no\":\"INV-012\",\"customer\":\"Cyberdyne\",\"date\":\"2024-03-02\",\"amount\":2750,\"status\":\"Pending\"}]\nstate sortKey=\"no\"\nstate sortDir=\"asc\"\nstate status=\"All\"\nstate q=\"\"\nstate page=0\nstate sel=[]\nCard w:390 gap:10 pad:12\n  Text.heading \"Invoices\"\n  Input \"Search customer\" =q -> page=0\n  SegmentedButton =status items:[\"All\",\"Paid\",\"Pending\",\"Overdue\"] -> page=0\n  Row gap:4 middle\n    Checkbox -> sel=all(pageRows,sel)?without(sel,pageRows):union(sel,pageRows)\n    Button.ghost \"No\" -> sortDir=(sortKey==\"no\"&&sortDir==\"asc\")?\"desc\":\"asc\"; sortKey=\"no\"\n    Button.ghost \"Customer\" -> sortDir=(sortKey==\"customer\"&&sortDir==\"asc\")?\"desc\":\"asc\"; sortKey=\"customer\"\n    Button.ghost \"Date\" -> sortDir=(sortKey==\"date\"&&sortDir==\"asc\")?\"desc\":\"asc\"; sortKey=\"date\"\n    Button.ghost \"Amount\" -> sortDir=(sortKey==\"amount\"&&sortDir==\"asc\")?\"desc\":\"asc\"; sortKey=\"amount\"\n    Button.ghost \"Status\" -> sortDir=(sortKey==\"status\"&&sortDir==\"asc\")?\"desc\":\"asc\"; sortKey=\"status\"\n  Divider\n  each row in slice(sortBy(filterRows(rows,status,q),sortKey,sortDir),page*5,page*5+5)\n    Row gap:4 middle\n      Checkbox selected:=has(sel,row) -> sel=has(sel,row)?without(sel,row):append(sel,row)\n      Text.small \"{row.no}\"\n      Text.small grow \"{row.customer}\"\n      Text.caption \"{row.date}\"\n      Text.strong \"${row.amount}\"\n      if row.status==\"Paid\"\n        Badge.success \"Paid\"\n      if row.status==\"Pending\"\n        Badge.warning \"Pending\"\n      if row.status==\"Overdue\"\n        Badge.danger \"Overdue\"\n  Divider\n  Row between middle\n    Button.outline \"Prev\" enabled:=page>0 -> page=page-1\n    Text.muted \"Page {page+1} of {max(1,ceil(len(filterRows(rows,status,q))/5))}\"\n    Button.outline \"Next\" enabled:=(page+1)*5<len(filterRows(rows,status,q)) -> page=page+1\n  if len(sel)>0\n    Box fill:#FFE8EAF6 radius:8 pad:10\n      Row between middle\n        Text.strong \"{len(sel)} selected · ${sum(sel.amount)}\"\n        Button \"Send reminders\" -> emit sendReminders sel; toast \"Reminders sent\"","usage":{"input_tokens":3394,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":2090,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":603}},"ttftMs":5712,"totalMs":12037}}
+{"tMs":5712,"delta":"state"}
+{"tMs":5745,"delta":" rows=[{"}
+{"tMs":5779,"delta":"\"no\":\"INV-001"}
+{"tMs":5815,"delta":"\",\"customer\":\"Acme"}
+{"tMs":5846,"delta":" Corp\",\"date\":\"2"}
+{"tMs":5880,"delta":"024-01-05\",\"amount"}
+{"tMs":5914,"delta":"\":1200,\"status\":\""}
+{"tMs":5948,"delta":"Paid\"},{\"no"}
+{"tMs":5981,"delta":"\":\"INV-002\",\"custom"}
+{"tMs":6015,"delta":"er\":\"Globex\",\"date"}
+{"tMs":6048,"delta":"\":\"2024-01-09"}
+{"tMs":6082,"delta":"\",\"amount\":860,\"status"}
+{"tMs":6116,"delta":"\":\"Overdue\"},"}
+{"tMs":6150,"delta":"{\"no\":\"INV-"}
+{"tMs":6183,"delta":"003\",\"customer\":\"Init"}
+{"tMs":6217,"delta":"ech\",\"date\":\"2024-"}
+{"tMs":6251,"delta":"01-14\",\"amount\":450"}
+{"tMs":6284,"delta":",\"status\":\"Pending"}
+{"tMs":6318,"delta":"\"},{\"no\":\"IN"}
+{"tMs":6352,"delta":"V-004\",\"customer\":\""}
+{"tMs":6386,"delta":"Umbrella\",\"date\":"}
+{"tMs":6419,"delta":"\"2024-01-18\",\""}
+{"tMs":6453,"delta":"amount\":2300,\"status"}
+{"tMs":6486,"delta":"\":\"Paid\"},{"}
+{"tMs":6520,"delta":"\"no\":\"INV-005"}
+{"tMs":6554,"delta":"\",\"customer\":\"Hoo"}
+{"tMs":6587,"delta":"li\",\"date\":\"2024-"}
+{"tMs":6620,"delta":"01-22\",\"amount\":975"}
+{"tMs":6654,"delta":",\"status\":\"Overd"}
+{"tMs":6688,"delta":"ue\"},{\"no\":\""}
+{"tMs":6721,"delta":"INV-006\",\"customer\":"}
+{"tMs":6755,"delta":"\"Stark Industries\",\""}
+{"tMs":6788,"delta":"date\":\"2024-02-"}
+{"tMs":6824,"delta":"01\",\"amount\":3400,"}
+{"tMs":6856,"delta":"\"status\":\"Pending\""}
+{"tMs":6889,"delta":"},{\"no\":\"INV"}
+{"tMs":6923,"delta":"-007\",\"customer\":\""}
+{"tMs":6956,"delta":"Wayne Enterprises"}
+{"tMs":6991,"delta":"\",\"date\":\"2024-02"}
+{"tMs":7023,"delta":"-06\",\"amount\":1580"}
+{"tMs":7064,"delta":",\"status\":\"Paid"}
+{"tMs":7094,"delta":"\"},{\"no\":\"IN"}
+{"tMs":7131,"delta":"V-008\",\"customer\":\""}
+{"tMs":7157,"delta":"Wonka\",\"date\":\""}
+{"tMs":7191,"delta":"2024-02-11\",\"am"}
+{"tMs":7225,"delta":"ount\":320,\"status\":\""}
+{"tMs":7258,"delta":"Overdue\"},{\""}
+{"tMs":7292,"delta":"no\":\"INV-009\",\""}
+{"tMs":7326,"delta":"customer\":\"Soylent"}
+{"tMs":7359,"delta":"\",\"date\":\"2024-02"}
+{"tMs":7391,"delta":"-15\",\"amount\":740,"}
+{"tMs":7425,"delta":"\"status\":\"Pending\""}
+{"tMs":7459,"delta":"},{\"no\":\"INV"}
+{"tMs":7492,"delta":"-010\",\"customer\":\""}
+{"tMs":7526,"delta":"Vandelay\",\"date\":\""}
+{"tMs":7560,"delta":"2024-02-20\",\"am"}
+{"tMs":7593,"delta":"ount\":1100,\"status\":"}
+{"tMs":7626,"delta":"\"Paid\"},{\""}
+{"tMs":7660,"delta":"no\":\"INV-011\",\""}
+{"tMs":7693,"delta":"customer\":\"Pied"}
+{"tMs":7728,"delta":" Piper\",\"date\":\"2024"}
+{"tMs":7760,"delta":"-02-25\",\"amount\":"}
+{"tMs":7794,"delta":"680,\"status\":\"Over"}
+{"tMs":7827,"delta":"due\"},{\"no\":"}
+{"tMs":7861,"delta":"\"INV-012\",\"customer"}
+{"tMs":7894,"delta":"\":\"Cyberdy"}
+{"tMs":7929,"delta":"ne\",\"date\":\"2024-"}
+{"tMs":7961,"delta":"03-02\",\"amount\":2"}
+{"tMs":7994,"delta":"750,\"status\":\"P"}
+{"tMs":8029,"delta":"ending\"}]\nstate sort"}
+{"tMs":8062,"delta":"Key=\"no\"\nstate s"}
+{"tMs":8095,"delta":"ortDir=\"asc\""}
+{"tMs":8128,"delta":"\nstate status=\"All\"\nstate q"}
+{"tMs":8161,"delta":"=\"\"\nstate page=0"}
+{"tMs":8195,"delta":"\nstate sel=[]"}
+{"tMs":8229,"delta":"\nCard w:390 gap:"}
+{"tMs":8262,"delta":"10 pad:12\n  "}
+{"tMs":8296,"delta":"Text.heading \"Inv"}
+{"tMs":8331,"delta":"oices\"\n  Input \""}
+{"tMs":8363,"delta":"Search customer\" ="}
+{"tMs":8396,"delta":"q -> page=0\n  "}
+{"tMs":8429,"delta":"SegmentedButton ="}
+{"tMs":8462,"delta":"status items:[\"All\",\"Pa"}
+{"tMs":8496,"delta":"id\",\"Pending\",\"Over"}
+{"tMs":8530,"delta":"due\"] -> page="}
+{"tMs":8563,"delta":"0\n  Row gap:"}
+{"tMs":8596,"delta":"4 middle\n    Chec"}
+{"tMs":8629,"delta":"kbox -> sel="}
+{"tMs":8663,"delta":"all"}
+{"tMs":8696,"delta":"(p"}
+{"tMs":8730,"delta":"ageRows,sel)?"}
+{"tMs":8763,"delta":"without(sel,pageR"}
+{"tMs":8796,"delta":"ows):union(sel,p"}
+{"tMs":8830,"delta":"ageRows)\n    Button"}
+{"tMs":8863,"delta":".ghost \"No\" -"}
+{"tMs":8897,"delta":"> sortDir=(s"}
+{"tMs":8930,"delta":"ortKey==\"no\"&"}
+{"tMs":8964,"delta":"&sortDir==\"as"}
+{"tMs":8997,"delta":"c\")?\"desc\":\""}
+{"tMs":9034,"delta":"asc\"; sortKey"}
+{"tMs":9064,"delta":"=\"no\"\n    Button."}
+{"tMs":9097,"delta":"ghost \"Customer\""}
+{"tMs":9131,"delta":" -> sortDir=("}
+{"tMs":9164,"delta":"sortKey==\"customer"}
+{"tMs":9198,"delta":"\"&&sortDir="}
+{"tMs":9231,"delta":"=\"asc\")?\"desc"}
+{"tMs":9264,"delta":"\":\"asc\"; sort"}
+{"tMs":9298,"delta":"Key=\"customer\"\n    "}
+{"tMs":9332,"delta":"Button.ghost \""}
+{"tMs":9366,"delta":"Date\" -> sortDir"}
+{"tMs":9402,"delta":"=(sortKey==\""}
+{"tMs":9435,"delta":"date\"&&sortDir"}
+{"tMs":9465,"delta":"==\"asc\")?\"des"}
+{"tMs":9498,"delta":"c\":\"asc\"; s"}
+{"tMs":9532,"delta":"ortKey=\"date\"\n    "}
+{"tMs":9565,"delta":"Button.ghost \""}
+{"tMs":9600,"delta":"Amount\" -> sortD"}
+{"tMs":9632,"delta":"ir=(sortKey="}
+{"tMs":9665,"delta":"=\"amount\"&&sort"}
+{"tMs":9699,"delta":"Dir==\"asc\")?"}
+{"tMs":9732,"delta":"\"desc\":\"asc\""}
+{"tMs":9769,"delta":"; sortKey=\"amount"}
+{"tMs":9799,"delta":"\"\n    Button.gh"}
+{"tMs":9833,"delta":"ost \"Status\" -> s"}
+{"tMs":9866,"delta":"ortDir=(sortK"}
+{"tMs":9900,"delta":"ey==\"status\"&&s"}
+{"tMs":9935,"delta":"ortDir==\"asc\")"}
+{"tMs":9966,"delta":"?\"desc\":\"asc"}
+{"tMs":10000,"delta":"\"; sortKey=\"status"}
+{"tMs":10033,"delta":"\"\n  Divider\n  "}
+{"tMs":10067,"delta":"each row in sl"}
+{"tMs":10099,"delta":"ice(sortBy(fil"}
+{"tMs":10133,"delta":"terRows(rows,status"}
+{"tMs":10185,"delta":",q),sortKey,"}
+{"tMs":10199,"delta":"sortDir),page*5"}
+{"tMs":10233,"delta":",page*5+5)"}
+{"tMs":10267,"delta":"\n    Row gap:4 "}
+{"tMs":10300,"delta":"middle\n      Checkb"}
+{"tMs":10333,"delta":"ox selected:=has(s"}
+{"tMs":10366,"delta":"el,row) -> sel"}
+{"tMs":10400,"delta":"=has(sel,row)"}
+{"tMs":10433,"delta":"?without(sel,row):"}
+{"tMs":10467,"delta":"append(sel,row)"}
+{"tMs":10500,"delta":"\n      Text.small \"{row"}
+{"tMs":10534,"delta":".no}\"\n      Text"}
+{"tMs":10567,"delta":".small grow \"{row."}
+{"tMs":10600,"delta":"customer}\"\n      Text"}
+{"tMs":10634,"delta":".caption \"{row.date"}
+{"tMs":10667,"delta":"}\"\n      Text.str"}
+{"tMs":10700,"delta":"ong \"${row.amount}"}
+{"tMs":10734,"delta":"\"\n      if row.status="}
+{"tMs":10769,"delta":"=\"Paid\"\n        "}
+{"tMs":10803,"delta":"Badge.success \"Paid"}
+{"tMs":10834,"delta":"\"\n      if row.status="}
+{"tMs":10867,"delta":"=\"Pending\"\n        "}
+{"tMs":10901,"delta":"Badge.warning \"P"}
+{"tMs":10934,"delta":"ending\"\n      if row.status"}
+{"tMs":10969,"delta":"==\"Overdue\""}
+{"tMs":11003,"delta":"\n        Badge.danger \""}
+{"tMs":11037,"delta":"Overdue\"\n  "}
+{"tMs":11068,"delta":"Divider\n  Row between midd"}
+{"tMs":11101,"delta":"le\n    Button.outline"}
+{"tMs":11135,"delta":" \"Prev\" enabled"}
+{"tMs":11168,"delta":":=page>0 ->"}
+{"tMs":11201,"delta":" page=page-1\n    "}
+{"tMs":11235,"delta":"Text.muted \"Page {"}
+{"tMs":11268,"delta":"page+1} of {max("}
+{"tMs":11303,"delta":"1,ceil(len("}
+{"tMs":11335,"delta":"filterRows(rows,"}
+{"tMs":11368,"delta":"status,q))/5))}"}
+{"tMs":11402,"delta":"\"\n    Button.outline"}
+{"tMs":11435,"delta":" \"Next\" enabled:"}
+{"tMs":11469,"delta":"=(page+1)*5"}
+{"tMs":11502,"delta":"<len(filterRows("}
+{"tMs":11535,"delta":"rows,status,q))"}
+{"tMs":11568,"delta":" -> page=page+1"}
+{"tMs":11601,"delta":"\n  if len(sel)>"}
+{"tMs":11635,"delta":"0\n    Box fill:"}
+{"tMs":11668,"delta":"#FFE8EAF"}
+{"tMs":11702,"delta":"6 radius:8 p"}
+{"tMs":11735,"delta":"ad:10\n      Row between"}
+{"tMs":11770,"delta":" middle\n        Text.str"}
+{"tMs":11802,"delta":"ong \"{len(sel)"}
+{"tMs":11836,"delta":"} selected · ${sum"}
+{"tMs":11868,"delta":"(sel.amount)}"}
+{"tMs":11902,"delta":"\"\n        Button \"Send"}
+{"tMs":11935,"delta":" reminders\" -> emit"}
+{"tMs":11969,"delta":" sendReminders sel;"}
+{"tMs":12002,"delta":" toast \"Reminders s"}
+{"tMs":12036,"delta":"ent\""}

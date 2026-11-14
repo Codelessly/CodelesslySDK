@@ -1,0 +1,133 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"Column gap:12 pad:16\n  state running=false\n  state paused=false\n  state done=false\n  state current=0\n  state elapsed=0\n  state s1=\"done\"\n  Text.title \"Blog migration plan\"\n  Row between\n    Text.muted \"Elapsed: {elapsed}s\"\n    Progress =current\n  Card gap:8\n    Row gap:8\n      Icon \"check\" hidden:=current<1\n      CircularProgressIndicator hidden:=current!=1\n      Text.strong \"1. Back up the current site\"\n    Text.muted \"Export the database and all media files to secure storage.\"\n  Card gap:8\n    Row gap:8\n      Icon \"check\" hidden:=current<2\n      CircularProgressIndicator hidden:=current!=2\n      Text.strong \"2. Choose the new platform\"\n    Text.muted \"Confirm the target blog engine and hosting plan.\"\n  Card gap:8\n    Row gap:8\n      Icon \"check\" hidden:=current<3\n      CircularProgressIndicator hidden:=current!=3\n      Text.strong \"3. Convert the content\"\n    Text.muted \"Transform posts and pages into the new format, keeping links intact.\"\n  Card gap:8\n    Row gap:8\n      Icon \"check\" hidden:=current<4\n      CircularProgressIndicator hidden:=current!=4\n      Text.strong \"4. Migrate media and redirects\"\n    Text.muted \"Move images and set up redirects from old URLs to new ones.\"\n  Card gap:8\n    Row gap:8\n      Icon \"check\" hidden:=current<5\n      CircularProgressIndicator hidden:=current!=5\n      Text.strong \"5. Test the new site\"\n    Text.muted \"Check layout, forms, search and performance on staging.\"\n  Card gap:8\n    Row gap:8\n      Icon \"check\" hidden:=current<6\n      CircularProgressIndicator hidden:=current!=6\n      Text.strong \"6. Switch DNS and go live\"\n    Text.muted \"Point the domain to the new site and monitor for errors.\"\n  Row gap:8\n    Button \"Start\" -> running=true; paused=false; current=1; elapsed=0; done=false\n    Button.outline \"Pause\" -> paused=!paused\n  if done\n    Card gap:6\n      Text.success \"Migration complete\"\n      Text \"All 6 steps finished in {elapsed} seconds.\"","usage":{"input_tokens":1835,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":790,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":630,"totalMs":3476}}
+{"tMs":630,"delta":"Column"}
+{"tMs":835,"delta":" gap:12 pad:"}
+{"tMs":835,"delta":"16\n  state running"}
+{"tMs":836,"delta":"=false\n  state pa"}
+{"tMs":836,"delta":"used=false\n  state done="}
+{"tMs":836,"delta":"false\n  state current"}
+{"tMs":836,"delta":"=0\n  state elaps"}
+{"tMs":836,"delta":"ed=0\n  state s"}
+{"tMs":836,"delta":"1=\"done"}
+{"tMs":849,"delta":"\"\n  "}
+{"tMs":870,"delta":"Text"}
+{"tMs":892,"delta":".title \"Blog migration"}
+{"tMs":915,"delta":" plan\"\n  Row between"}
+{"tMs":1052,"delta":"\n    Text.muted \""}
+{"tMs":1053,"delta":"Elapsed: {el"}
+{"tMs":1053,"delta":"apsed}s\"\n    "}
+{"tMs":1053,"delta":"Progress =current\n  "}
+{"tMs":1053,"delta":"Card gap:8\n    "}
+{"tMs":1053,"delta":"Row gap:8\n      "}
+{"tMs":1065,"delta":"Icon \"check\""}
+{"tMs":1087,"delta":" hidden:=current"}
+{"tMs":1108,"delta":"<"}
+{"tMs":1129,"delta":"1\n      C"}
+{"tMs":1152,"delta":"ircularProgressIndic"}
+{"tMs":1172,"delta":"ator hidden:=current!"}
+{"tMs":1273,"delta":"=1\n      Text.str"}
+{"tMs":1273,"delta":"ong \"1. Back"}
+{"tMs":1274,"delta":" up the current"}
+{"tMs":1274,"delta":" site"}
+{"tMs":1283,"delta":"\"\n    Text"}
+{"tMs":1301,"delta":".muted \"Export"}
+{"tMs":1322,"delta":" the"}
+{"tMs":1343,"delta":" database"}
+{"tMs":1364,"delta":" and"}
+{"tMs":1385,"delta":" all"}
+{"tMs":1406,"delta":" media"}
+{"tMs":1428,"delta":" files to"}
+{"tMs":1497,"delta":" sec"}
+{"tMs":1497,"delta":"ure storage.\"\n  Card"}
+{"tMs":1497,"delta":" gap:8\n    Row"}
+{"tMs":1514,"delta":" gap:8\n      Ic"}
+{"tMs":1537,"delta":"on \"check\" hidden:"}
+{"tMs":1563,"delta":"=current<2\n      Circ"}
+{"tMs":1579,"delta":"ularProgressIndicator"}
+{"tMs":1601,"delta":" hidden:=current!="}
+{"tMs":1622,"delta":"2\n      Text.strong"}
+{"tMs":1644,"delta":" \"2. Cho"}
+{"tMs":1665,"delta":"ose the"}
+{"tMs":1688,"delta":" new plat"}
+{"tMs":1724,"delta":"form\"\n    Text.mu"}
+{"tMs":1730,"delta":"ted \"Confirm the target"}
+{"tMs":1751,"delta":" bl"}
+{"tMs":1772,"delta":"og eng"}
+{"tMs":1795,"delta":"ine and h"}
+{"tMs":1815,"delta":"osting plan.\"\n  "}
+{"tMs":1837,"delta":"Card gap:8\n    "}
+{"tMs":1858,"delta":"Row gap:8\n      "}
+{"tMs":1880,"delta":"Icon \"check\" hidden"}
+{"tMs":1902,"delta":":=current<3\n      C"}
+{"tMs":1922,"delta":"ircularProgressIndic"}
+{"tMs":1945,"delta":"ator hidden:=current!"}
+{"tMs":1965,"delta":"=3\n      Text.str"}
+{"tMs":1987,"delta":"ong \"3. Conv"}
+{"tMs":2008,"delta":"ert the"}
+{"tMs":2030,"delta":" content\"\n    Text.mu"}
+{"tMs":2052,"delta":"ted \"Trans"}
+{"tMs":2074,"delta":"form posts and p"}
+{"tMs":2094,"delta":"ages into the new format,"}
+{"tMs":2118,"delta":" keeping links"}
+{"tMs":2137,"delta":" int"}
+{"tMs":2159,"delta":"act.\"\n  Card gap"}
+{"tMs":2181,"delta":":8\n    Row gap"}
+{"tMs":2202,"delta":":8\n      Icon \""}
+{"tMs":2224,"delta":"check\" hidden:=current"}
+{"tMs":2245,"delta":"<4\n      CircularPro"}
+{"tMs":2267,"delta":"gressIndicator hid"}
+{"tMs":2288,"delta":"den:=current!=4"}
+{"tMs":2309,"delta":"\n      Text.strong \"4"}
+{"tMs":2333,"delta":". Migrate media"}
+{"tMs":2352,"delta":" and red"}
+{"tMs":2373,"delta":"irects\"\n    Text"}
+{"tMs":2395,"delta":".muted \"Move images and"}
+{"tMs":2417,"delta":" set up red"}
+{"tMs":2438,"delta":"irects from"}
+{"tMs":2459,"delta":" old URLs to"}
+{"tMs":2481,"delta":" new ones.\"\n  Card"}
+{"tMs":2504,"delta":" gap:8\n    Row"}
+{"tMs":2524,"delta":" gap:8\n      Ic"}
+{"tMs":2546,"delta":"on \"check\" hidden:"}
+{"tMs":2567,"delta":"=current<5\n      Circ"}
+{"tMs":2588,"delta":"ularProgressIndicator"}
+{"tMs":2610,"delta":" hidden:=current!="}
+{"tMs":2631,"delta":"5\n      Text.strong"}
+{"tMs":2653,"delta":" \"5. Test the new site"}
+{"tMs":2675,"delta":"\"\n    Text.muted"}
+{"tMs":2696,"delta":" \"Check layout, for"}
+{"tMs":2717,"delta":"ms, search and"}
+{"tMs":2739,"delta":" perform"}
+{"tMs":2760,"delta":"ance on sta"}
+{"tMs":2781,"delta":"ging.\""}
+{"tMs":2803,"delta":"\n  Card gap:8"}
+{"tMs":2824,"delta":"\n    Row gap:8"}
+{"tMs":2847,"delta":"\n      Icon \"check\""}
+{"tMs":2869,"delta":" hidden:=current<6"}
+{"tMs":2889,"delta":"\n      CircularProgress"}
+{"tMs":2911,"delta":"Indicator hidden:"}
+{"tMs":2931,"delta":"=current!=6\n      "}
+{"tMs":2953,"delta":"Text.strong \"6."}
+{"tMs":2975,"delta":" Switch D"}
+{"tMs":2997,"delta":"NS and go live\"\n    "}
+{"tMs":3018,"delta":"Text.muted \"Point"}
+{"tMs":3039,"delta":" the domain to the new site and"}
+{"tMs":3060,"delta":" monitor for err"}
+{"tMs":3082,"delta":"ors.\"\n  Row gap"}
+{"tMs":3104,"delta":":8\n    Button \""}
+{"tMs":3125,"delta":"Start\" -> running"}
+{"tMs":3147,"delta":"=true; pa"}
+{"tMs":3168,"delta":"used=false; current=1;"}
+{"tMs":3189,"delta":" el"}
+{"tMs":3211,"delta":"apsed=0; done"}
+{"tMs":3232,"delta":"=false\n    Button.out"}
+{"tMs":3254,"delta":"line \"Pause\" ->"}
+{"tMs":3275,"delta":" paused=!paused\n  "}
+{"tMs":3296,"delta":"if done\n    Card"}
+{"tMs":3318,"delta":" gap:6"}
+{"tMs":3339,"delta":"\n      Text.success \""}
+{"tMs":3361,"delta":"Migration complete\""}
+{"tMs":3382,"delta":"\n      Text \""}
+{"tMs":3404,"delta":"All "}
+{"tMs":3425,"delta":"6 steps finished in {"}
+{"tMs":3447,"delta":"elapsed}"}
+{"tMs":3469,"delta":" seconds.\""}

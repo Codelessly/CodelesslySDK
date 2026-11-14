@@ -1,0 +1,133 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"Card w:390 gap:12 pad:16\n  Text.heading \"Your grocery order\"\n  state items=[{\"name\":\"Bananas\",\"price\":3,\"qty\":2},{\"name\":\"Whole milk 1 L\",\"price\":2,\"qty\":1},{\"name\":\"Sourdough loaf\",\"price\":4,\"qty\":1},{\"name\":\"Free-range eggs\",\"price\":5,\"qty\":1},{\"name\":\"Baby spinach\",\"price\":3,\"qty\":1}]\n  state promo=\"\"\n  state applied=false\n  state promoError=false\n  state subtotal=0\n  state discount=0\n  state delivery=4\n  state total=0\n  each row in items\n    Row gap:12 between\n      Image \"https://placehold.co/56x56\" w:56 h:56 radius:8\n      Column gap:2 grow\n        Text.strong \"{row.name}\"\n        Text.muted \"$ {row.price} each\"\n      Column gap:4 right\n        Text.strong \"$ {row.price*row.qty}\"\n        Row gap:8\n          IconButton \"remove\" -> row.qty=row.qty-1; emit qtyChange row.name\n          Text \"{row.qty}\"\n          IconButton \"add\" -> row.qty=row.qty+1; emit qtyChange row.name\n  Divider\n  Row gap:8\n    Input \"Promo code\" \"SAVE10\" =promo\n    Button.outline \"Apply\" -> applied=(promo==\"SAVE10\"); promoError=(promo!=\"SAVE10\")\n  if promoError\n    Text.danger \"That code isn't valid.\"\n  if applied\n    Text.success \"SAVE10 applied: 10% off\"\n  Row between\n    Text \"Subtotal\"\n    Text.strong \"$ {subtotal}\"\n  Row between\n    Text \"Discount\"\n    Text \"- $ {discount}\"\n  Row between\n    Text \"Delivery\"\n    Text \"$ {delivery}\"\n  Row between\n    Text.heading \"Total\"\n    Text.title \"$ {total}\"\n  Row gap:8\n    Button.secondary \"Cancel\" -> emit orderCancelled; toast \"Order cancelled\"\n    Button \"Confirm order\" -> emit orderConfirmed; toast \"Order confirmed\"","usage":{"input_tokens":1847,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":728,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":537,"totalMs":3264}}
+{"tMs":537,"delta":"Card"}
+{"tMs":704,"delta":" w"}
+{"tMs":704,"delta":":390"}
+{"tMs":704,"delta":" gap:12 "}
+{"tMs":705,"delta":"pad:16\n  Text"}
+{"tMs":705,"delta":".he"}
+{"tMs":705,"delta":"ading \"Your"}
+{"tMs":705,"delta":" grocery order\"\n  state"}
+{"tMs":705,"delta":" items="}
+{"tMs":722,"delta":"[{\"name\":\"B"}
+{"tMs":742,"delta":"ananas\",\"price"}
+{"tMs":762,"delta":"\":3"}
+{"tMs":784,"delta":",\"qty\":2"}
+{"tMs":858,"delta":"},{\"name\":\"Wh"}
+{"tMs":858,"delta":"ole milk "}
+{"tMs":858,"delta":"1 "}
+{"tMs":865,"delta":"L\",\"price\":2"}
+{"tMs":886,"delta":",\"qty\":1},{"}
+{"tMs":906,"delta":"\"name\":\"Sourd"}
+{"tMs":926,"delta":"ough lo"}
+{"tMs":947,"delta":"af\",\"price\":4,\""}
+{"tMs":968,"delta":"qty\":1"}
+{"tMs":988,"delta":"},{\"name\":\"Free"}
+{"tMs":1008,"delta":"-"}
+{"tMs":1029,"delta":"range eggs\",\"price\":5"}
+{"tMs":1051,"delta":",\"qty\":1},{"}
+{"tMs":1071,"delta":"\"name\":\"Ba"}
+{"tMs":1090,"delta":"by sp"}
+{"tMs":1111,"delta":"inach\",\"price\":3"}
+{"tMs":1132,"delta":",\"qty\":1}]"}
+{"tMs":1152,"delta":"\n  state promo=\"\""}
+{"tMs":1172,"delta":"\n  state appl"}
+{"tMs":1193,"delta":"ied=false\n  state prom"}
+{"tMs":1216,"delta":"oError=false"}
+{"tMs":1234,"delta":"\n  state sub"}
+{"tMs":1254,"delta":"total=0\n  state"}
+{"tMs":1274,"delta":" discount=0\n  state del"}
+{"tMs":1295,"delta":"ivery=4"}
+{"tMs":1315,"delta":"\n  state total=0"}
+{"tMs":1336,"delta":"\n  each"}
+{"tMs":1356,"delta":" row in"}
+{"tMs":1377,"delta":" items\n    Row gap:"}
+{"tMs":1397,"delta":"12 between\n      Image \""}
+{"tMs":1418,"delta":"https://plac"}
+{"tMs":1437,"delta":"eh"}
+{"tMs":1458,"delta":"old.co/56"}
+{"tMs":1478,"delta":"x56\""}
+{"tMs":1499,"delta":" w"}
+{"tMs":1519,"delta":":56 h:56 "}
+{"tMs":1539,"delta":"radius:8"}
+{"tMs":1560,"delta":"\n      Column"}
+{"tMs":1580,"delta":" gap:2"}
+{"tMs":1601,"delta":" grow"}
+{"tMs":1621,"delta":"\n        Text.str"}
+{"tMs":1641,"delta":"ong \"{row.name}\""}
+{"tMs":1662,"delta":"\n        Text.mu"}
+{"tMs":1682,"delta":"ted \"$"}
+{"tMs":1723,"delta":" {row.price}"}
+{"tMs":1743,"delta":" each\"\n      Column"}
+{"tMs":1764,"delta":" gap:4 "}
+{"tMs":1784,"delta":"right\n        Text"}
+{"tMs":1805,"delta":".strong \"$"}
+{"tMs":1826,"delta":" {row.price*row."}
+{"tMs":1846,"delta":"qty}\"\n        Row"}
+{"tMs":1866,"delta":" gap:8\n          I"}
+{"tMs":1886,"delta":"conButton \"rem"}
+{"tMs":1907,"delta":"ove\" -> row"}
+{"tMs":1927,"delta":".qty=row"}
+{"tMs":1948,"delta":".qty-1; emit"}
+{"tMs":1968,"delta":" q"}
+{"tMs":1989,"delta":"t"}
+{"tMs":2009,"delta":"yChange row"}
+{"tMs":2029,"delta":".name"}
+{"tMs":2051,"delta":"\n          "}
+{"tMs":2070,"delta":"Text \""}
+{"tMs":2091,"delta":"{row.qty}\""}
+{"tMs":2111,"delta":"\n          IconButton \"add\""}
+{"tMs":2132,"delta":" -> row.qty=row"}
+{"tMs":2152,"delta":".qty+1; emit"}
+{"tMs":2173,"delta":" qtyChange row.name"}
+{"tMs":2192,"delta":"\n  Div"}
+{"tMs":2213,"delta":"ider\n  Row gap:"}
+{"tMs":2233,"delta":"8"}
+{"tMs":2254,"delta":"\n    Input \"Promo code"}
+{"tMs":2274,"delta":"\" \"S"}
+{"tMs":2294,"delta":"AVE10\" =promo"}
+{"tMs":2315,"delta":"\n    Button.out"}
+{"tMs":2336,"delta":"line \"Apply\" ->"}
+{"tMs":2356,"delta":" applied=("}
+{"tMs":2377,"delta":"promo==\"SAVE"}
+{"tMs":2397,"delta":"10\"); promoError=("}
+{"tMs":2417,"delta":"promo!=\"SAVE"}
+{"tMs":2438,"delta":"10\")"}
+{"tMs":2459,"delta":"\n  if promoError\n    "}
+{"tMs":2479,"delta":"Text.danger \"That"}
+{"tMs":2499,"delta":" code is"}
+{"tMs":2519,"delta":"n't valid.\"\n  if"}
+{"tMs":2540,"delta":" applied\n    Text.success"}
+{"tMs":2561,"delta":" \"S"}
+{"tMs":2580,"delta":"AVE10 appl"}
+{"tMs":2601,"delta":"ied: 10% off\""}
+{"tMs":2623,"delta":"\n  Row between\n    "}
+{"tMs":2642,"delta":"Text \"Subtotal\""}
+{"tMs":2662,"delta":"\n    Text.str"}
+{"tMs":2683,"delta":"ong \"$ {subtot"}
+{"tMs":2704,"delta":"al}\"\n  Row between"}
+{"tMs":2724,"delta":"\n    Text \"Disc"}
+{"tMs":2744,"delta":"ount\"\n    Text \""}
+{"tMs":2765,"delta":"-"}
+{"tMs":2785,"delta":" $ {discount}\""}
+{"tMs":2806,"delta":"\n  Row between\n    Text"}
+{"tMs":2826,"delta":" \"Delivery\"\n    "}
+{"tMs":2846,"delta":"Text \"$ {deliv"}
+{"tMs":2867,"delta":"ery}\"\n  Row between"}
+{"tMs":2887,"delta":"\n    Text.he"}
+{"tMs":2908,"delta":"ading \"Total\"\n    "}
+{"tMs":2928,"delta":"Text.title \"$ {total"}
+{"tMs":2948,"delta":"}\"\n  Row gap"}
+{"tMs":2969,"delta":":8"}
+{"tMs":3009,"delta":"\n    Button.sec"}
+{"tMs":3031,"delta":"ondary \"Cancel\""}
+{"tMs":3051,"delta":" -> em"}
+{"tMs":3071,"delta":"it or"}
+{"tMs":3091,"delta":"derCancelled; toast"}
+{"tMs":3112,"delta":" \"Order"}
+{"tMs":3132,"delta":" cancelled\"\n    "}
+{"tMs":3152,"delta":"Button \"Confirm order"}
+{"tMs":3173,"delta":"\" -> emit or"}
+{"tMs":3196,"delta":"derConfirmed; to"}
+{"tMs":3215,"delta":"ast \"Order"}
+{"tMs":3234,"delta":" conf"}
+{"tMs":3258,"delta":"irmed\""}

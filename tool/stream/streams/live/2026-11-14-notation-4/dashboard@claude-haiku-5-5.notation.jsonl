@@ -1,0 +1,126 @@
+{"meta":{"ui":"dashboard","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"Card w:390 gap:12 pad:16\n  Text.title \"This month\"\n  SegmentedButton =range items:[\"7d\",\"30d\",\"90d\"]\n  Row gap:8\n    Card grow gap:4\n      Text.caption \"Revenue\"\n      Text.heading \"$48,210\"\n      Text.success \"+12.4%\"\n    Card grow gap:4\n      Text.caption \"Sign-ups\"\n      Text.heading \"1,284\"\n      Text.success \"+8.1%\"\n  Row gap:8\n    Card grow gap:4\n      Text.caption \"Churn\"\n      Text.heading \"2.3%\"\n      Text.danger \"+0.4%\"\n    Card grow gap:4\n      Text.caption \"Active users\"\n      Text.heading \"9,midpoint\"\n      Text.success \"+5.6%\"\n  Text.strong \"Revenue trend\"\n  LineChart values:[10,12,11,14,13,16,18,17,20,22] labels:[\"W1\",\"W2\",\"W3\",\"W4\"]\n  Text.strong \"Sign-ups by channel\"\n  BarChart values:[420,310,250,180,124] labels:[\"Search\",\"Social\",\"Referral\",\"Email\",\"Direct\"]\n  Text.strong \"Top plans\"\n  Row gap:8\n    Select =sortBy items:[\"Plan\",\"Revenue\",\"Users\",\"Churn\"]\n    Select =sortDir items:[\"Ascending\",\"Descending\"]\n  List rows:[{\"plan\":\"Team\",\"revenue\":18420,\"users\":412,\"churn\":\"1.8%\"},{\"plan\":\"Pro\",\"revenue\":14210,\"users\":806,\"churn\":\"2.1%\"},{\"plan\":\"Starter\",\"revenue\":9870,\"users\":1290,\"churn\":\"3.4%\"},{\"plan\":\"Business\",\"revenue\":4330,\"users\":66,\"churn\":\"0.9%\"},{\"plan\":\"Enterprise\",\"revenue\":1380,\"users\":9,\"churn\":\"0.2%\"}]\n    Row between\n      Text.strong \"{row.plan}\"\n      Text.body \"${row.revenue}\"\n      Text.muted \"{row.users} users\"\n      Text.small \"{row.churn}\"","usage":{"input_tokens":1858,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":695,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":464,"totalMs":3049}}
+{"tMs":464,"delta":"Card"}
+{"tMs":585,"delta":" w"}
+{"tMs":585,"delta":":390 gap:12"}
+{"tMs":585,"delta":" "}
+{"tMs":586,"delta":"pad:16\n  Text"}
+{"tMs":586,"delta":".title \"This"}
+{"tMs":587,"delta":" month\"\n  S"}
+{"tMs":609,"delta":"egmentedButton =range"}
+{"tMs":629,"delta":" items:[\"7d"}
+{"tMs":651,"delta":"\",\"30d\",\"90d\"]"}
+{"tMs":672,"delta":"\n  Row gap:8"}
+{"tMs":712,"delta":"\n    Card"}
+{"tMs":731,"delta":" gr"}
+{"tMs":752,"delta":"ow g"}
+{"tMs":772,"delta":"ap:4"}
+{"tMs":793,"delta":"\n      Text.ca"}
+{"tMs":814,"delta":"ption \"Revenue\""}
+{"tMs":834,"delta":"\n      Text.he"}
+{"tMs":858,"delta":"ading \"$48"}
+{"tMs":874,"delta":",210"}
+{"tMs":895,"delta":"\""}
+{"tMs":915,"delta":"\n      Text.success \"+"}
+{"tMs":936,"delta":"12.4"}
+{"tMs":956,"delta":"%\"\n    Card grow"}
+{"tMs":977,"delta":" gap:4\n      Text"}
+{"tMs":997,"delta":".caption \"Sign-"}
+{"tMs":1018,"delta":"ups\"\n      Text."}
+{"tMs":1039,"delta":"heading \"1,284"}
+{"tMs":1060,"delta":"\"\n      Text.success \""}
+{"tMs":1080,"delta":"+8.1%\"\n  "}
+{"tMs":1100,"delta":"Row gap:8\n    "}
+{"tMs":1121,"delta":"Card grow gap:4"}
+{"tMs":1141,"delta":"\n      Text.caption \""}
+{"tMs":1163,"delta":"Churn\"\n      Text"}
+{"tMs":1182,"delta":".heading \"2"}
+{"tMs":1202,"delta":".3"}
+{"tMs":1223,"delta":"%\"\n      Text.dan"}
+{"tMs":1243,"delta":"ger \"+"}
+{"tMs":1264,"delta":"0.4"}
+{"tMs":1284,"delta":"%\"\n    Card grow"}
+{"tMs":1308,"delta":" gap:4\n      Text"}
+{"tMs":1328,"delta":".caption \"Active users\""}
+{"tMs":1347,"delta":"\n      Text.heading \""}
+{"tMs":1366,"delta":"9,mid"}
+{"tMs":1386,"delta":"p"}
+{"tMs":1408,"delta":"o"}
+{"tMs":1427,"delta":"int\"\n      Text.success"}
+{"tMs":1447,"delta":" \"+5"}
+{"tMs":1468,"delta":".6"}
+{"tMs":1488,"delta":"%\"\n  "}
+{"tMs":1508,"delta":"Text.str"}
+{"tMs":1529,"delta":"ong \"Revenue tr"}
+{"tMs":1549,"delta":"end\"\n  LineChart"}
+{"tMs":1570,"delta":" values:[10,12,11"}
+{"tMs":1590,"delta":",14,13"}
+{"tMs":1611,"delta":",16,18"}
+{"tMs":1631,"delta":","}
+{"tMs":1651,"delta":"17"}
+{"tMs":1672,"delta":","}
+{"tMs":1692,"delta":"20,22] labels:[\""}
+{"tMs":1712,"delta":"W"}
+{"tMs":1733,"delta":"1\",\"W2\",\"W3\",\""}
+{"tMs":1753,"delta":"W4\"]\n  Text"}
+{"tMs":1775,"delta":".strong \"Sign-"}
+{"tMs":1795,"delta":"ups by channel\"\n  "}
+{"tMs":1815,"delta":"BarChart values:[420"}
+{"tMs":1835,"delta":",310"}
+{"tMs":1855,"delta":",250"}
+{"tMs":1876,"delta":",180,124"}
+{"tMs":1896,"delta":"] labels:[\"Search\",\""}
+{"tMs":1917,"delta":"Social"}
+{"tMs":1937,"delta":"\",\"Referral\",\"Email"}
+{"tMs":1959,"delta":"\",\"Dire"}
+{"tMs":1978,"delta":"ct\"]\n  Text."}
+{"tMs":1998,"delta":"strong \"Top pl"}
+{"tMs":2018,"delta":"ans\"\n  "}
+{"tMs":2038,"delta":"Row"}
+{"tMs":2060,"delta":" gap:8\n    Select"}
+{"tMs":2079,"delta":" =s"}
+{"tMs":2100,"delta":"ortBy items:[\"Pl"}
+{"tMs":2120,"delta":"an\",\"Revenue\",\""}
+{"tMs":2141,"delta":"Users\",\"Churn\"]"}
+{"tMs":2162,"delta":"\n    Select =s"}
+{"tMs":2184,"delta":"ortDir"}
+{"tMs":2203,"delta":" items:[\"Ascending\",\""}
+{"tMs":2223,"delta":"Descending\"]\n  List"}
+{"tMs":2246,"delta":" r"}
+{"tMs":2263,"delta":"ows:[{\""}
+{"tMs":2284,"delta":"plan\":\"Team"}
+{"tMs":2306,"delta":"\",\"revenue\":18"}
+{"tMs":2325,"delta":"420,\"users\":412"}
+{"tMs":2347,"delta":",\"churn\":\""}
+{"tMs":2366,"delta":"1.8%\"},{\""}
+{"tMs":2386,"delta":"plan\":\"Pro\",\""}
+{"tMs":2410,"delta":"revenue\":14210"}
+{"tMs":2427,"delta":",\"users\":806"}
+{"tMs":2447,"delta":",\"churn\":\"2."}
+{"tMs":2468,"delta":"1%\"},{\"plan"}
+{"tMs":2488,"delta":"\":\"Star"}
+{"tMs":2509,"delta":"ter\",\"revenue\":9870"}
+{"tMs":2529,"delta":",\"users\":1"}
+{"tMs":2550,"delta":"290"}
+{"tMs":2570,"delta":",\"churn\":\"3."}
+{"tMs":2592,"delta":"4"}
+{"tMs":2611,"delta":"%\"},{\"plan\":"}
+{"tMs":2631,"delta":"\"Business"}
+{"tMs":2651,"delta":"\",\"revenue\":4"}
+{"tMs":2672,"delta":"330"}
+{"tMs":2692,"delta":",\"users\":66"}
+{"tMs":2712,"delta":",\"churn\":\"0."}
+{"tMs":2733,"delta":"9%\"},{\"plan"}
+{"tMs":2754,"delta":"\":\"Enterprise\",\""}
+{"tMs":2774,"delta":"revenue\":1380,\""}
+{"tMs":2794,"delta":"users\":9"}
+{"tMs":2814,"delta":",\"churn\":\"0"}
+{"tMs":2835,"delta":".2%\"}]\n    "}
+{"tMs":2855,"delta":"Row between"}
+{"tMs":2877,"delta":"\n      Text.strong \""}
+{"tMs":2896,"delta":"{row.plan}\""}
+{"tMs":2916,"delta":"\n      Text.body \"${"}
+{"tMs":2937,"delta":"row.revenue}\""}
+{"tMs":2957,"delta":"\n      Text.mu"}
+{"tMs":2979,"delta":"ted \"{row.users} users"}
+{"tMs":2999,"delta":"\"\n      Text.small"}
+{"tMs":3019,"delta":" \"{row.churn}\""}

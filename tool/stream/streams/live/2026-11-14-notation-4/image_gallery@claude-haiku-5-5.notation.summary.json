@@ -1,0 +1,75 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 4298,
+ "turns": [
+  {
+   "input_tokens": 1835,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 533,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 463,
+   "totalMs": 3915,
+   "chars": 1032,
+   "lines": 19,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "48.5",
+   "notationIssues": [
+    "line 7:1: Not valid JSON: {item.c}",
+    "line 10:1: A second root: the first line is the root, everything else is indented under it.",
+    "line 11:3: An \"if\" needs a parent: indent it under a node.",
+    "line 12:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 13:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 14:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 15:1: Not valid JSON: {photos[open].c}",
+    "line 15:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 16:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 17:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 18:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 19:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 20:7: A second root: the first line is the root, everything else is indented under it."
+   ],
+   "errors": [
+    "wrong_type /nodes/column2/decoration/fills/0/color: Not a Color: got the text \"{item.c}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first)."
+   ]
+  },
+  {
+   "input_tokens": 2819,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 523,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 767,
+   "totalMs": 2534,
+   "chars": 1027,
+   "lines": 19,
+   "jsonTails": 0,
+   "nodes": 21,
+   "outputTokensPerNode": "24.9",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

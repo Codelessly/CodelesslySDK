@@ -1,0 +1,123 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"Column gap:12 pad:16\n  state photos=[{\"caption\":\"Harbour at dawn\",\"c\":\"#FF1E3A5F\"},{\"caption\":\"Market stalls\",\"c\":\"#FFB5651D\"},{\"caption\":\"Old town alley\",\"c\":\"#FF2E4A3F\"},{\"caption\":\"Mountain lake\",\"c\":\"#FF3D6E8F\"},{\"caption\":\"Street food\",\"c\":\"#FFC0392B\"},{\"caption\":\"Cliffside village\",\"c\":\"#FF8E6C8A\"},{\"caption\":\"Night ferry\",\"c\":\"#FF1B2A41\"},{\"caption\":\"Vineyard rows\",\"c\":\"#FF6B8E23\"},{\"caption\":\"Sunset pier\",\"c\":\"#FFE07A5F\"}]\n  state open=-1\n  Text.heading \"Trip photos\"\n  Grid cols:3 gap:8\n    each row in photos\n      Card pad:0 radius:8 fill:{row.c} -> open=index; emit open_photo\n        Text.caption \"{row.caption}\"\n\nBox fill:#E6000000 pad:16 gap:12 w:390 h:fill\n  if open>=0\n    Row between\n      Text.muted \"{open+1} of 9\"\n      IconButton \"close\" -> open=-1\n    Box fill:{photos[open].c} radius:12 h:360\n      Text.strong \"{photos[open].caption}\"\n    Row between\n      IconButton \"chevron_left\" -> open=max(0,open-1)\n      Text.caption \"{photos[open].caption}\"\n      IconButton \"chevron_right\" -> open=min(8,open+1)","usage":{"input_tokens":1835,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":533,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":463,"totalMs":3915}}
+{"tMs":463,"delta":"Column"}
+{"tMs":1097,"delta":" gap:12 "}
+{"tMs":1098,"delta":"pad:16\n  state"}
+{"tMs":1098,"delta":" photos=[{\"ca"}
+{"tMs":1098,"delta":"ption\":\"Har"}
+{"tMs":1098,"delta":"bour at"}
+{"tMs":1098,"delta":" dawn\",\"c"}
+{"tMs":1098,"delta":"\":\"#F"}
+{"tMs":1098,"delta":"F1"}
+{"tMs":1098,"delta":"E"}
+{"tMs":1098,"delta":"3A5F"}
+{"tMs":1098,"delta":"\"},{\"caption\":\""}
+{"tMs":1098,"delta":"Market st"}
+{"tMs":1237,"delta":"alls\",\"c\":\"#F"}
+{"tMs":1237,"delta":"F"}
+{"tMs":1237,"delta":"B5"}
+{"tMs":1237,"delta":"651"}
+{"tMs":1237,"delta":"D"}
+{"tMs":1237,"delta":"\"},{\"caption\":\""}
+{"tMs":1237,"delta":"Old"}
+{"tMs":1237,"delta":" town al"}
+{"tMs":1237,"delta":"ley"}
+{"tMs":1237,"delta":"\",\"c\":\"#FF2"}
+{"tMs":1237,"delta":"E"}
+{"tMs":1237,"delta":"4"}
+{"tMs":1402,"delta":"A"}
+{"tMs":1402,"delta":"3"}
+{"tMs":1402,"delta":"F\"},{\"caption\":"}
+{"tMs":1402,"delta":"\"Mountain lake"}
+{"tMs":1402,"delta":"\",\"c\":\"#FF3"}
+{"tMs":1402,"delta":"D"}
+{"tMs":1402,"delta":"6"}
+{"tMs":1402,"delta":"E8"}
+{"tMs":1402,"delta":"F\"},{\"caption\":"}
+{"tMs":1402,"delta":"\"Street"}
+{"tMs":1402,"delta":" food\",\"c\":\"#FF"}
+{"tMs":1402,"delta":"C0"}
+{"tMs":1895,"delta":"392"}
+{"tMs":1895,"delta":"B"}
+{"tMs":1896,"delta":"\"},{\"caption\":\""}
+{"tMs":1896,"delta":"Cli"}
+{"tMs":1896,"delta":"ff"}
+{"tMs":1896,"delta":"side village"}
+{"tMs":1896,"delta":"\",\"c\":\"#FF8"}
+{"tMs":1896,"delta":"E"}
+{"tMs":1896,"delta":"6"}
+{"tMs":1896,"delta":"C"}
+{"tMs":1896,"delta":"8"}
+{"tMs":1896,"delta":"A\"},{\"caption\":"}
+{"tMs":2042,"delta":"\"Night"}
+{"tMs":2044,"delta":" "}
+{"tMs":2044,"delta":"ferry\",\"c\":\"#F"}
+{"tMs":2044,"delta":"F1B"}
+{"tMs":2044,"delta":"2A41"}
+{"tMs":2044,"delta":"\"},{\"caption\":\""}
+{"tMs":2044,"delta":"V"}
+{"tMs":2044,"delta":"ineyard r"}
+{"tMs":2044,"delta":"ows\",\"c\":\"#FF"}
+{"tMs":2045,"delta":"6B8"}
+{"tMs":2045,"delta":"E23"}
+{"tMs":2045,"delta":"\"},{\"caption\":\""}
+{"tMs":2384,"delta":"Sunset p"}
+{"tMs":2384,"delta":"ier\",\"c\":\"#FF"}
+{"tMs":2384,"delta":"E07"}
+{"tMs":2384,"delta":"A5"}
+{"tMs":2384,"delta":"F\"}]\n  state open"}
+{"tMs":2384,"delta":"=-"}
+{"tMs":2384,"delta":"1\n  "}
+{"tMs":2384,"delta":"Text."}
+{"tMs":2385,"delta":"he"}
+{"tMs":2385,"delta":"ading \"Trip phot"}
+{"tMs":2385,"delta":"os\"\n  Grid c"}
+{"tMs":2385,"delta":"ols:3 gap:8"}
+{"tMs":2541,"delta":"\n    each row"}
+{"tMs":2541,"delta":" in photos\n      Card"}
+{"tMs":2541,"delta":" p"}
+{"tMs":2542,"delta":"ad:0"}
+{"tMs":2542,"delta":" rad"}
+{"tMs":2542,"delta":"ius:8"}
+{"tMs":2542,"delta":" fill:{"}
+{"tMs":2542,"delta":"row.c} -> open"}
+{"tMs":2542,"delta":"="}
+{"tMs":2542,"delta":"index;"}
+{"tMs":2542,"delta":" emit open_"}
+{"tMs":2542,"delta":"photo\n        Text.ca"}
+{"tMs":2735,"delta":"ption \""}
+{"tMs":2735,"delta":"{row.caption}\""}
+{"tMs":2735,"delta":"\n\nBox"}
+{"tMs":2735,"delta":" f"}
+{"tMs":2735,"delta":"ill:#E"}
+{"tMs":2735,"delta":"6000"}
+{"tMs":2735,"delta":"000 p"}
+{"tMs":2735,"delta":"ad:16"}
+{"tMs":2735,"delta":" g"}
+{"tMs":2735,"delta":"ap:12 w:390"}
+{"tMs":2735,"delta":" h:fill\n  if"}
+{"tMs":2735,"delta":" open>=0\n    Row"}
+{"tMs":3164,"delta":" between"}
+{"tMs":3164,"delta":"\n      Text.mu"}
+{"tMs":3164,"delta":"ted \"{open+"}
+{"tMs":3164,"delta":"1} of "}
+{"tMs":3164,"delta":"9\"\n      IconButton"}
+{"tMs":3164,"delta":" \"close\" -> open"}
+{"tMs":3164,"delta":"=-1\n    Box"}
+{"tMs":3164,"delta":" fill:{"}
+{"tMs":3164,"delta":"phot"}
+{"tMs":3164,"delta":"os[open].c} radius"}
+{"tMs":3164,"delta":":12"}
+{"tMs":3164,"delta":" h:360"}
+{"tMs":3385,"delta":"\n      Text.strong \""}
+{"tMs":3385,"delta":"{photos[open].caption"}
+{"tMs":3386,"delta":"}\"\n    Row between"}
+{"tMs":3386,"delta":"\n      I"}
+{"tMs":3386,"delta":"conButton \"ch"}
+{"tMs":3386,"delta":"evron_left\" -> open"}
+{"tMs":3386,"delta":"=max(0,open-1"}
+{"tMs":3386,"delta":")\n      Text.ca"}
+{"tMs":3386,"delta":"ption \"{photos[open]."}
+{"tMs":3386,"delta":"caption}\"\n      Icon"}
+{"tMs":3386,"delta":"Button \"chevron_right"}
+{"tMs":3386,"delta":"\" -> open=min(8"}
+{"tMs":3906,"delta":",open+1)"}

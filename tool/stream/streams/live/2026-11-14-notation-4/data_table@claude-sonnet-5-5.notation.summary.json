@@ -1,0 +1,61 @@
+{
+ "ui": "data_table",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 4298,
+ "turns": [
+  {
+   "input_tokens": 1845,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2288,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 793
+   },
+   "ttftMs": 8258,
+   "totalMs": 15711,
+   "chars": 3005,
+   "lines": 42,
+   "jsonTails": 0,
+   "nodes": 33,
+   "outputTokensPerNode": "69.3",
+   "notationIssues": [
+    "line 41:55: Unknown word \"amount\" on a Text. Props are written key:value."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 3394,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2090,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 603
+   },
+   "ttftMs": 5712,
+   "totalMs": 12037,
+   "chars": 2989,
+   "lines": 42,
+   "jsonTails": 0,
+   "nodes": 33,
+   "outputTokensPerNode": "63.3",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}
