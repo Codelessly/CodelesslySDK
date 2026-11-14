@@ -32,6 +32,7 @@ import 'feedback_theme.dart' show Look;
 import 'route_transition.dart' show RevealAnchor;
 import 'runner.dart';
 import 'script_host.dart';
+import 'form_fields.dart';
 import 'text_fields.dart';
 import 'values.dart';
 import 'variable_animator.dart';
@@ -145,6 +146,8 @@ Future<void> _handleCore(CoreAction a, ActionRun run) async {
       _editText(a, run);
     case FocusAction():
       await _focus(a, run);
+    case ValidateAction():
+      run.result = _validate(a, run);
     case ScrollToAction():
       await _scrollTo(a, run);
     case ControlTrackAction(command: TrackCommand.step):
@@ -466,6 +469,22 @@ Future<void> _forEach(ForEachAction a, ActionRun run) async {
 }
 
 // --- forms and text fields -------------------------------------------------------------
+
+/// Flutter's `FormState.validate()`: the form [a] names, else the one
+/// around the node whose reaction runs it, else every field shown.
+bool _validate(ValidateAction a, ActionRun run) {
+  final tree = run.host.tree;
+  if (tree == null) return true;
+  String? form;
+  for (final id in [a.node, run.node?.id ?? '']) {
+    if (id.isEmpty) continue;
+    final source = tree.boxOf(id)?.source ?? tree.boxesOf(id).firstOrNull?.source;
+    if (source == null) continue;
+    form = FormRegistry.formOf(source, id);
+    if (form != null || id == a.node) break;
+  }
+  return FormRegistry.of(tree).validate(form, focusFirstError: a.focusFirstError);
+}
 
 Future<void> _focus(FocusAction a, ActionRun run) async {
   final tree = run.host.tree;
