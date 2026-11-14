@@ -79,6 +79,9 @@ class RenderControlRoot extends RenderProxyBox {
     // A control closing its popup as its screen goes away finds the root
     // already disposed: the entry went with it.
     if (_disposed) return;
+    // A control hiding its entry while the root is being detached (the
+    // root is detached before its children): the entry goes the same way.
+    if (!attached && entry.attached) entry.detach();
     dropChild(entry);
     markNeedsLayout();
   }
