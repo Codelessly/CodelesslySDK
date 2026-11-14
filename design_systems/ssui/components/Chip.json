@@ -94,13 +94,11 @@
    "type": "row",
    "children": [
     "strut",
-    "icon",
-    "label",
-    "remove"
+    "chipContent"
    ],
    "props": {
     "crossAxisAlignment": "center",
-    "spacing": 4
+    "spacing": 0
    },
    "layout": {
     "width": {
@@ -285,6 +283,26 @@
    "layout": {
     "width": 12,
     "height": 12
+   }
+  },
+  "chipContent": {
+   "type": "row",
+   "children": [
+    "icon",
+    "label",
+    "remove"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
    }
   }
  }
