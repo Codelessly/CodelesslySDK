@@ -12,6 +12,9 @@
 //             runtime (core-only: test/core_only_import_test.dart).
 //   app       Codelessly, CodelesslyWidget. Over everything.
 //
+// The layers are ordered ([layerOrder]) and a layer imports only the ones
+// under it; each import that goes up is named in [upwardExceptions].
+//
 // The render core is what an app that only draws nodes needs: it imports
 // Flutter, the model (`package:codelessly_api`) and a few pure drawing
 // packages; what it needs from the layers above it takes through the
@@ -31,6 +34,69 @@ import 'package:flutter_test/flutter_test.dart';
 /// the `leaf` layer (small utilities any layer may import).
 const layers = ['render', 'widgets', 'runtime', 'services', 'scripting', 'features', 'session', 'app', 'leaf'];
 
+/// The layers from the bottom up, as the levels of the vocabulary stack
+/// (docs/design/12-agent-first-flutter.md §3 of codelessly_api):
+///
+/// | Layer | Level |
+/// |---|---|
+/// | `leaf`, `render` (but `render/controls`) | 0 core: boxes, text, layout, paint |
+/// | `render/controls` | 1 widgets: the controls, drawn |
+/// | `runtime` | 2 state: variables, formulas, conditions, actions |
+/// | `widgets` | 1 and 4: one recipe per type, bound through the runtime |
+/// | `scripting`, `services`, `features` | 5 features: scripts, data, auth, commerce, media |
+/// | `app`, `session` | the host: a published project, a session an agent writes into |
+///
+/// A file imports only its own layer and the ones before it here.
+const layerOrder = ['leaf', 'render', 'runtime', 'widgets', 'scripting', 'services', 'features', 'app', 'session'];
+
+/// The imports that go up [layerOrder], kept until they are turned around:
+/// file (under lib/src) → the imports it may still have, each with why.
+/// One that is added fails the test, and so does one listed here that is
+/// gone.
+const Map<String, Map<String, String>> upwardExceptions = {
+  // What an action calls is an interface the app can replace; the
+  // interfaces live with their default implementations in services.
+  'runtime/actions/files.dart': {'services/file_picking.dart': 'FilePicker, the interface a pickFiles action calls'},
+  'runtime/actions/script_host.dart': {
+    'services/scripts.dart': 'ScriptRunner and ScriptHost, the interfaces a runScript action calls',
+  },
+  'runtime/actions/context.dart': {'services/analytics.dart': 'AnalyticsService, the interface a track action calls'},
+  'runtime/actions/handlers.dart': {'scripting/formula_scripts.dart': 'ScriptsScope: a formula calls a script by name'},
+  'scripting/formula_scripts.dart': {'services/scripts.dart': 'the script interfaces'},
+  'scripting/script_runner.dart': {'services/scripts.dart': 'the script interfaces'},
+  // The paths these had before the feature folders, still exported.
+  'services/speech.dart': {'features/media/speech.dart': 'the old path, re-exported'},
+  'services/sound.dart': {'features/media/sound.dart': 'the old path, re-exported'},
+  'services/media_probe.dart': {'features/media/media_probe.dart': 'the old path, re-exported'},
+  'services/media_export.dart': {'features/media/media_export.dart': 'the old path, re-exported'},
+  'services/services.dart': {
+    'features/auth/auth.dart': 'Services wires the signed-in user into the scope',
+    'features/data/cloud_list_source.dart': 'Services makes the default list source of a database',
+  },
+  // Codelessly on Firebase is an app entry point (lib/firebase.dart) kept
+  // beside the Firebase services it is made of.
+  'services/firebase/publish_loader.dart': {
+    'app/hosted_plugins.dart': 'a loader of the app, on Firebase',
+    'app/loader.dart': 'a loader of the app, on Firebase',
+  },
+  'services/firebase/codelessly_firebase.dart': {
+    'app/codelessly.dart': 'the Firebase entry point',
+    'app/config.dart': 'the Firebase entry point',
+    'app/fonts.dart': 'the Firebase entry point',
+    'app/loader.dart': 'the Firebase entry point',
+  },
+  'services/firebase/managed_components.dart': {
+    'app/managed_components.dart': 'the app\'s component store, on Firebase',
+  },
+  'services/firebase/codelessly_app.dart': {
+    'app/codelessly.dart': 'the Firebase entry point',
+    'app/config.dart': 'the Firebase entry point',
+    'app/fonts.dart': 'the Firebase entry point',
+    'app/loader.dart': 'the Firebase entry point',
+  },
+  'features/engage/automations.dart': {'app/codelessly.dart': 'automations run against a Codelessly'},
+};
+
 /// The packages a render file may import: Flutter, the model, and pure
 /// drawing or collection helpers. No network, storage or platform plugins.
 const renderPackages = {
@@ -42,7 +108,14 @@ const renderPackages = {
 };
 
 /// The `dart:` libraries a render file may import.
-const renderDartLibraries = {'dart:async', 'dart:collection', 'dart:convert', 'dart:math', 'dart:typed_data', 'dart:ui'};
+const renderDartLibraries = {
+  'dart:async',
+  'dart:collection',
+  'dart:convert',
+  'dart:math',
+  'dart:typed_data',
+  'dart:ui',
+};
 
 /// The layers a render file may import: its own, and leaf utilities (which
 /// obey the render rules themselves).
@@ -61,12 +134,8 @@ const Map<String, Map<String, String>> renderStatics = {
   // Registries: what plays or flies is found by node id or tag from the
   // actions (`ParticlePlayers.play(node, name)` has no tree to ask), and all
   // three are exported API. Per-tree state needs the action side to change.
-  'render/play.dart': {
-    '_records': 'FlightRegistry: where nodes last were, for flights between screens (exported)',
-  },
-  'render/particles.dart': {
-    '_nodes': 'ParticlePlayers: the particle layers on screen by node id, played by an action',
-  },
+  'render/play.dart': {'_records': 'FlightRegistry: where nodes last were, for flights between screens (exported)'},
+  'render/particles.dart': {'_nodes': 'ParticlePlayers: the particle layers on screen by node id, played by an action'},
   'render/hero.dart': {
     '_byTree': 'HeroMarks: the shared elements of every tree on screen; a flight pairs marks of two trees (exported)',
   },
@@ -266,6 +335,30 @@ void main() {
     return renderLayers.contains(layerOf(t));
   }
 
+  test('a layer imports only the layers under it, but for the listed exceptions', () {
+    final up = <String, Set<String>>{};
+    for (final d in directives) {
+      final from = layerOf(d.file)!;
+      final to = layerOf(d.target);
+      if (to == null || to == from) continue;
+      expect(layerOrder, contains(from), reason: '${d.file} is in no ordered layer');
+      expect(layerOrder, contains(to), reason: '${d.target} is in no ordered layer');
+      if (layerOrder.indexOf(to) > layerOrder.indexOf(from)) (up[d.file] ??= {}).add(d.target);
+    }
+    final added = [
+      for (final e in up.entries)
+        for (final t in e.value)
+          if (!(upwardExceptions[e.key]?.containsKey(t) ?? false)) '${e.key} imports $t',
+    ];
+    expect(added, isEmpty, reason: 'imports that go up the layers (${layerOrder.join(' < ')})');
+    final gone = [
+      for (final e in upwardExceptions.entries)
+        for (final t in e.value.keys)
+          if (!(up[e.key]?.contains(t) ?? false)) '${e.key} no longer imports $t: remove it from upwardExceptions',
+    ];
+    expect(gone, isEmpty);
+  });
+
   test('render imports only Flutter, the model, drawing packages and itself', () {
     expect(violations((d) => layerOf(d.file) == 'render', renderAllows, renderExceptions), isEmpty);
   });
@@ -305,7 +398,9 @@ void main() {
   });
 
   test('the files importing Flutter\'s widget libraries only shrink (the Milestone 3 ratchet)', () {
-    final widgetLibrary = RegExp(r'''^\s*(?:import|export)\s+['"]package:flutter/(?:material|cupertino|widgets)\.dart['"]''');
+    final widgetLibrary = RegExp(
+      r'''^\s*(?:import|export)\s+['"]package:flutter/(?:material|cupertino|widgets)\.dart['"]''',
+    );
     final importing = <String>{};
     for (final f in Directory('lib').listSync(recursive: true).whereType<File>()) {
       if (!f.path.endsWith('.dart')) continue;
@@ -313,15 +408,29 @@ void main() {
       if (f.readAsLinesSync().any(widgetLibrary.hasMatch)) importing.add(file);
     }
     expect(importing.difference(widgetImportRatchet), isEmpty, reason: 'new imports of material/cupertino/widgets');
-    expect(widgetImportRatchet.difference(importing), isEmpty, reason: 'no longer imported: remove from widgetImportRatchet');
+    expect(
+      widgetImportRatchet.difference(importing),
+      isEmpty,
+      reason: 'no longer imported: remove from widgetImportRatchet',
+    );
     for (final path in widgetFreePaths) {
-      expect(importing.where((f) => f.startsWith(path)), isEmpty, reason: 'the render-object controls import no widget library');
+      expect(
+        importing.where((f) => f.startsWith(path)),
+        isEmpty,
+        reason: 'the render-object controls import no widget library',
+      );
     }
     final core = importing.where((f) => !hostAdapterPaths.any(f.startsWith)).toList()..sort();
-    expect(core.length, lessThanOrEqualTo(coreWidgetImports), reason: 'the core imports of a widget library only go down');
+    expect(
+      core.length,
+      lessThanOrEqualTo(coreWidgetImports),
+      reason: 'the core imports of a widget library only go down',
+    );
     expect(core.length, coreWidgetImports, reason: 'fewer now: lower coreWidgetImports to ${core.length}');
     // ignore: avoid_print
-    print('widget-library imports: ${importing.length} files (${core.length} in the core, '
-        '${importing.length - core.length} in the host adapter and the plugin players)');
+    print(
+      'widget-library imports: ${importing.length} files (${core.length} in the core, '
+      '${importing.length - core.length} in the host adapter and the plugin players)',
+    );
   });
 }
