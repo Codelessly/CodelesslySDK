@@ -25,9 +25,8 @@ import 'root.dart';
 
 /// The base of a control: its states and their sources, its activation
 /// (tap, Enter, Space, a screen reader's tap), its focus node and its
-/// semantics. Subclasses lay out and paint; the one child (an icon) is
-/// theirs to place.
-abstract class RenderControl extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements MouseTrackerAnnotation {
+/// semantics. Subclasses lay out and paint; its [icon] is theirs to place.
+abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation {
   RenderControl() {
     focusNode = ControlFocusNode(this, onActivate: activate, onFocusChange: (on) {
       _notify(api.WidgetState.focused, on);
@@ -39,6 +38,29 @@ abstract class RenderControl extends RenderBox with RenderObjectWithChildMixin<R
       ..onTapUp = ((_) => _setPressed(false))
       ..onTapCancel = (() => _setPressed(false))
       ..onTap = activate;
+  }
+
+  RenderBox? _icon;
+
+  /// Its icon (a glyph render box), placed and painted by the subclass. Not
+  /// `child`: the tree wires a node's chain through `child`, and a control
+  /// is the chain's leaf.
+  RenderBox? get icon => _icon;
+  set icon(RenderBox? v) {
+    if (identical(v, _icon)) return;
+    if (_icon != null) dropChild(_icon!);
+    _icon = v;
+    if (v != null) adoptChild(v);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    if (_icon != null) visitor(_icon!);
+  }
+
+  @override
+  void redepthChildren() {
+    if (_icon != null) redepthChild(_icon!);
   }
 
   /// Its place in the root's focus order.
@@ -197,6 +219,7 @@ abstract class RenderControl extends RenderBox with RenderObjectWithChildMixin<R
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    _icon?.attach(owner);
     final root = RenderControlRoot.of(this);
     if (root != null) focusNode.join(root.focus);
   }
@@ -206,6 +229,7 @@ abstract class RenderControl extends RenderBox with RenderObjectWithChildMixin<R
     focusNode.leave();
     _hovered = _pressed = false;
     super.detach();
+    _icon?.detach();
   }
 
   @override

@@ -33,20 +33,13 @@ import '../recipe.dart';
 import 'kit.dart';
 import 'tokens.dart';
 
-/// The button recipes, by node type.
-final Map<String, WidgetRecipe> buttonRecipes = {
-  ButtonProps.filled.type: _button,
-  ButtonProps.elevated.type: _button,
-  ButtonProps.outlined.type: _button,
-  ButtonProps.text.type: _button,
-  IconButtonProps.spec.type: _button,
-  FloatingActionButtonProps.spec.type: _button,
-};
-
 /// The kinds of button, as SSUI draws them.
 enum ButtonKind { filled, tonal, elevated, outlined, text, icon, fab }
 
-void _button(NodeBuilder b, Node n, List<RenderBox> chain) {
+/// The recipe of every button type (`filledButton`, `elevatedButton`,
+/// `outlinedButton`, `textButton`, `iconButton`, `floatingActionButton`):
+/// lib/src/widgets/controls.dart registers it.
+void buttonRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   final fab = n.type == FloatingActionButtonProps.spec.type;
   final l = n.layout;
   chain.add(b.fitBox('fit', fab ? SizeFit.fixed : l.width.fit, fab ? SizeFit.fixed : l.height.fit,
@@ -318,12 +311,12 @@ class RenderButton extends RenderControl {
   void _syncIcon() {
     final s = spec;
     if (!s.hasIcon) {
-      if (child != null) child = null;
+      icon = null;
       _glyph = null;
       return;
     }
     final g = _glyph ??= RenderIconGlyph();
-    if (!identical(child, g)) child = g;
+    if (!identical(icon, g)) icon = g;
     g.icon = s.icon;
     g.color = _look().iconInk;
   }
@@ -481,12 +474,8 @@ class RenderButton extends RenderControl {
         _iconRect = Rect.fromLTWH(start + _label.size.width + m.gap, (size.height - m.iconSize) / 2, m.iconSize, m.iconSize);
       }
     }
-    if (g != null) {
-      g
-        ..designSize = _iconRect.size
-        ..glyphSize = m.iconSize;
-      g.layout(BoxConstraints.tight(_iconRect.size));
-    }
+    // The glyph fills its square (its own size is the box's).
+    g?.layout(BoxConstraints.tight(_iconRect.size));
   }
 
   // --- paint -------------------------------------------------------------------------
@@ -534,6 +523,27 @@ class RenderButton extends RenderControl {
     }
     return (fill: fill, ink: ink, iconInk: s.iconColor ?? ink, side: side, filled: filled);
   }
+
+  /// The label's colour now (its states included).
+  Color get labelColor => _look().ink;
+
+  /// The fill now (null: none), before the state layer.
+  Color? get fillColor => _look().fill;
+
+  /// The border now (null: none).
+  BorderSide? get borderSide => _look().side;
+
+  /// The overlay of its state now (hover, press), if any.
+  Color? get stateOverlay => _overlay(_look().filled);
+
+  /// The shadows it casts.
+  List<BoxShadow> get shadows => _shadows();
+
+  /// The label's font family (null: the platform's).
+  String? get fontFamily => spec.labelStyle.fontFamily ?? spec.tokens.fontFamily;
+
+  /// Its outline.
+  OutlinedBorder get shape => _shape;
 
   Color? _overlay(bool filled) {
     final s = spec, t = spec.tokens;
@@ -591,7 +601,7 @@ class RenderButton extends RenderControl {
       _label.paint(canvas, offset.dx + _labelLeft, offset.dy + size.height / 2);
     }
     final g = _glyph;
-    if (g != null && identical(child, g)) context.paintChild(g, offset + _iconRect.topLeft);
+    if (g != null && identical(icon, g)) context.paintChild(g, offset + _iconRect.topLeft);
   }
 
   double get _laidOutLabelWidth {
