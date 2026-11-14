@@ -1,0 +1,149 @@
+{
+ "ui": "kanban",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 64465,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 27871,
+ "generate": {
+  "inputTokens": 3025,
+  "outputTokens": 4021,
+  "cacheReadInputTokens": 111168,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1243,
+  "firstToolDeltaMs": 7127,
+  "totalMs": 24835,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "interaction-drag-and-drop"
+    },
+    "ms": 2575,
+    "outputTokens": 149,
+    "resultChars": 604
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "draggable"
+    },
+    "ms": 1697,
+    "outputTokens": 78,
+    "resultChars": 734
+   },
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "dropTarget"
+    },
+    "ms": 1274,
+    "outputTokens": 52,
+    "resultChars": 449
+   }
+  ],
+  "ops": 30,
+  "opsApplied": 25,
+  "opsRejected": 5,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 5,
+  "errors": [
+   "expression_syntax /variables/app/3/formula",
+   "expression_syntax /variables/app/4/formula",
+   "expression_syntax /variables/app/5/formula",
+   "wrong_type /nodes/titleIn/layout/width",
+   "invalid_enum /nodes/addBtn/actions/0/actions/0/condition/op",
+   "wrong_type /nodes/colTodo/layout/width",
+   "wrong_type /nodes/colDoing/layout/width",
+   "wrong_type /nodes/colDone/layout/width",
+   "dangling_child /nodes/addRow/children/0",
+   "dangling_child /nodes/addRow/children/1",
+   "dangling_child /nodes/board/children/0",
+   "dangling_child /nodes/board/children/1",
+   "dangling_child /nodes/board/children/2"
+  ],
+  "lints": [],
+  "warnings": 6,
+  "nodes": 23,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 3,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 7798,
+   "outputTokens": 1358,
+   "cacheReadInputTokens": 27792,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1719,
+   "firstToolDeltaMs": 1786,
+   "totalMs": 7581,
+   "stopReason": "StopReason.toolUse",
+   "ops": 6,
+   "opsApplied": 6,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 28,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 5,
+   "replacedControls": 0
+  }
+ ],
+ "final": {
+  "ops": 6,
+  "opsApplied": 6,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 28,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 5,
+  "replacedControls": 0
+ },
+ "followup": {
+  "inputTokens": 9415,
+  "outputTokens": 1258,
+  "cacheReadInputTokens": 27792,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 2858,
+  "firstToolDeltaMs": 2860,
+  "totalMs": 7480,
+  "stopReason": "StopReason.toolUse",
+  "ops": 4,
+  "opsApplied": 4,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 28,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 5,
+  "replacedControls": 0
+ }
+}
