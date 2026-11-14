@@ -26,6 +26,17 @@ final validation was clean. The causes, and what changed:
   wrong: the frames read as blank were often a first turn whose retry had fixed it.
 - The chat example's prompts are regenerated (the design system's scales as the binding to write).
 
+- **Tab bars, navigation bars and the app bar as render objects (Milestone 3, WS-F).** `tabBar`, `tabs`,
+  `navigationBar`, `bottomNavigationBar` and `appBar` no longer host Material's `TabBar`, `NavigationBar`,
+  `BottomNavigationBar`, `BottomAppBar`, `AppBar` or a `Scaffold` (render/controls/{tab_bar,navigation_bar,app_bar}.dart).
+  With nothing styled a tab bar is SSUI's Tabs (36 high when it hugs, pixel-identical to the component), a navigation
+  bar SSUI's tab bar (about 61 high when it hugs), the app bar SSUI's top bar (44). The indicator moves between items
+  over 150 ms; Left/Right/Home/End move the keyboard, Enter/Space pick; tabs scroll when they overflow; picking fires
+  `changed` with the index, written back to a bound `initialIndex` / `selectedIndex`. Size changes: a hugging tab bar
+  is 36 (was Material's tab height), a hugging or unsized navigation bar about 61 (was its design size), an
+  unsized control of these types hugs instead of being 0 × 0; fixed sizes are kept. A canvas's app bar and bottom
+  bar grow by the view's safe area (read from the view, not MediaQuery).
+
 **A list that filtered to nothing, explained.** A recorded SSUI data table (data_table@claude-sonnet-5-5) showed
 "No results" over twelve defined invoices: its `filtered` variable was `filter(invoices, (statusF == 'All' || status ==
 statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
