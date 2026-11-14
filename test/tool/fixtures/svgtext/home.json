@@ -1,0 +1,10 @@
+{
+  "schema": 3,
+  "id": "home",
+  "roots": ["home"],
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 400, "height": 180}},
+    "col": {"type": "column", "children": ["art"], "layout": {"width": {"fill": 400}, "height": {"fill": 180}}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "art": {"type": "box", "layout": {"width": 400, "height": 180}, "decoration": {"fills": [{"type": "image", "image": {"url": "images/labels.svg", "fit": "fill"}}]}}
+  }
+}

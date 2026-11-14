@@ -73,11 +73,29 @@ void main() {
     expect(l.callLines.where((c) => c.startsWith('other test')), hasLength(1));
   });
 
-  test('no Flutter anywhere is a clear message and exit status 2', () async {
-    final r = await l.run({});
-    if (File('/opt/flutter/bin/flutter').existsSync()) return; // the last resort exists here
+  test('no Flutter anywhere says exactly what to set, that master is needed, and exits 2', () async {
+    // The usual install places are searched last; none of them here.
+    final r = await l.run({'CODELESSLY_FLUTTER_PLACES': '${l.root}/nowhere/bin/flutter'});
     expect(r.exitCode, 2);
+    expect('${r.stderr}', contains('FLUTTER=/path/to/flutter/bin/flutter tool/render/render.sh'));
     expect('${r.stderr}', contains('FLUTTER_ROOT'));
+    expect('${r.stderr}', contains('master'));
+  });
+
+  test('Flutter in a usual install place outside the PATH is found', () async {
+    final r = await l.run({'CODELESSLY_FLUTTER_PLACES': '${l.root}/nowhere/bin/flutter ${l.flutter}'});
+    expect(r.exitCode, 0, reason: '${r.stderr}');
+    expect(l.callLines.last, startsWith('${l.flutter} test --no-pub'));
+  });
+
+  test('every run first prints the SDK and API versions it uses', () async {
+    File('${l.sdk}/pubspec.yaml').writeAsStringSync('name: codelessly_sdk\nversion: 30.1.0\n');
+    Directory('${l.root}/CodelesslyAPI').createSync();
+    File('${l.root}/CodelesslyAPI/pubspec.yaml').writeAsStringSync('name: codelessly_api\nversion: 30.1.0\n');
+    final r = await l.run({'FLUTTER_ROOT': '${l.root}/flutter'});
+    expect(r.exitCode, 0, reason: '${r.stderr}');
+    final first = '${r.stderr}'.split('\n').first;
+    expect(first, allOf(contains('codelessly_sdk 30.1.0'), contains('codelessly_api 30.1.0'), contains('${l.root}/CodelesslyAPI')));
   });
 
   test('dependencies are resolved when they never were, and not again while they are current', () async {

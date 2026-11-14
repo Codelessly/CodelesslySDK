@@ -1,0 +1,14 @@
+{
+  "schema": 3,
+  "id": "page",
+  "roots": ["page"],
+  "nodes": {
+    "page": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 300}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "col": {"type": "column", "children": ["details", "send"], "layout": {"width": {"fill": 390}, "height": {"fill": 300}, "padding": 20}, "props": {"spacing": 12, "crossAxisAlignment": "stretch"}},
+    "details": {"type": "column", "children": ["first"], "layout": {"width": {"fill": 350}, "height": {"hug": 64}}, "form": true},
+    "first": {"type": "textField", "layout": {"width": {"fill": 350}, "height": {"hug": 64}},
+      "props": {"decoration": {"labelText": "First name", "border": {"type": "outline", "borderRadius": 12}}, "validator": "${= trim(value) == '' ? 'Enter your first name.' : ''}"}},
+    "send": {"type": "filledButton", "layout": {"width": {"fill": 350}, "height": 48}, "props": {"label": "Send"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "validate", "node": "details"}]}]}
+  }
+}

@@ -93,6 +93,11 @@ abstract final class FontDemand {
   /// the first's empty glyph), so they are a family of their own.
   static String glyphFamily(String family) => '$family glyphs';
 
+  /// Completes once the fonts asked for so far have loaded (or failed):
+  /// what something drawn once, as an SVG's text is, waits for. Installed
+  /// by the app's font loader; at once without one.
+  static Future<void> Function() settled = () => Future<void>.value();
+
   static void need(String family, int weight, bool italic) {
     final h = handler;
     if (h == null || family.isEmpty) return;

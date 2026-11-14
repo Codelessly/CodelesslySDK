@@ -22,17 +22,33 @@ typedef FontFace = ({String family, int weight, bool italic, String path});
 
 /// The family, weight and italic flag of the TrueType/OpenType file [bytes],
 /// or null when it can't be read.
-({String family, int weight, bool italic})? readFontFace(Uint8List bytes) {
+///
+/// [weights] is the range of a variable font's `wght` axis (its `fvar`
+/// table): the weights it draws, by a font variation; null for a static font.
+({String family, int weight, bool italic, (int, int)? weights})? readFontFace(Uint8List bytes) {
   try {
     final data = ByteData.sublistView(bytes);
     final numTables = data.getUint16(4);
-    int? nameAt, os2At;
+    int? nameAt, os2At, fvarAt;
     for (var i = 0; i < numTables; i++) {
       final rec = 12 + i * 16;
       final tag = String.fromCharCodes(bytes.sublist(rec, rec + 4));
       final offset = data.getUint32(rec + 8);
       if (tag == 'name') nameAt = offset;
       if (tag == 'OS/2') os2At = offset;
+      if (tag == 'fvar') fvarAt = offset;
+    }
+    (int, int)? weights;
+    if (fvarAt != null) {
+      final axesAt = fvarAt + data.getUint16(fvarAt + 4);
+      final axisCount = data.getUint16(fvarAt + 8);
+      final axisSize = data.getUint16(fvarAt + 10);
+      for (var i = 0; i < axisCount; i++) {
+        final a = axesAt + i * axisSize;
+        if (String.fromCharCodes(bytes.sublist(a, a + 4)) != 'wght') continue;
+        final min = data.getInt32(a + 4) / 65536, max = data.getInt32(a + 12) / 65536;
+        weights = ((min / 100).ceil() * 100, (max / 100).floor() * 100);
+      }
     }
     if (nameAt == null) return null;
     final count = data.getUint16(nameAt + 2);
@@ -65,7 +81,7 @@ typedef FontFace = ({String family, int weight, bool italic, String path});
       weight = data.getUint16(os2At + 4);
       italic = (data.getUint16(os2At + 62) & 1) != 0;
     }
-    return (family: family, weight: ((weight / 100).round() * 100).clamp(100, 900), italic: italic);
+    return (family: family, weight: ((weight / 100).round() * 100).clamp(100, 900), italic: italic, weights: weights);
   } catch (_) {
     return null;
   }
@@ -134,10 +150,25 @@ List<FontFace> scanFonts(Iterable<String> dirs) {
         path = '${_decoded.path}/${out.length}-${f.uri.pathSegments.last}.ttf';
         File(path).writeAsBytesSync(sfnt);
       }
-      out.add((family: face.family, weight: face.weight, italic: face.italic, path: path));
+      for (final w in _weightsOf(face.weight, face.weights)) {
+        out.add((family: face.family, weight: w, italic: face.italic, path: path));
+      }
     }
   }
   return out;
+}
+
+/// The weights a font file draws: its own, or every hundred of a variable
+/// font's `wght` axis (drawn there by a font variation, as the SDK's text
+/// styles set one).
+Iterable<int> _weightsOf(int weight, (int, int)? axis) sync* {
+  if (axis == null || axis.$1 > axis.$2) {
+    yield weight;
+    return;
+  }
+  for (var w = axis.$1.clamp(100, 900); w <= axis.$2.clamp(100, 900); w += 100) {
+    yield w;
+  }
 }
 
 /// A declared font file that could not be used: missing, or not read.
@@ -169,7 +200,11 @@ List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<Dec
         path = '${_decoded.path}/declared-${out.length}-${file.uri.pathSegments.last}.ttf';
         File(path).writeAsBytesSync(sfnt);
       }
-      out.add((family: f.family, weight: a.weight, italic: a.italic, path: path));
+      // A variable font declared once draws every weight of its axis.
+      final axis = readFontFace(sfnt)?.weights;
+      for (final w in axis == null ? [a.weight] : _weightsOf(a.weight, axis)) {
+        out.add((family: f.family, weight: w, italic: a.italic, path: path));
+      }
     }
   }
   return out;

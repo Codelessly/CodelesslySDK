@@ -169,6 +169,7 @@ class CodelesslyFonts {
       final SiteFontFetcher site => site.fallback,
       final other => other,
     };
+    FontDemand.settled = () => FontLoads.settled;
     if (named is! NoFontFetcher) {
       FontDemand.handler ??= (family, weight, italic) => load([
             PublishFont(id: 'demand:$family/$weight/$italic', family: family, weight: weight, italic: italic),
