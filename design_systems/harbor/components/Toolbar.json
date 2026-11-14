@@ -1,0 +1,294 @@
+{
+ "schema": 3,
+ "id": "Toolbar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "Toolbar",
+  "doc": "An editor's tools as icon buttons in a row or a column, in groups parted by hairlines (\"-\"). Fires onAction with the pressed icon's name.",
+  "props": [
+   {
+    "key": "tools",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "near_me",
+     "crop_square",
+     "text_fields",
+     "-",
+     "undo",
+     "redo"
+    ],
+    "doc": "The tools, each an icon; \"-\" parts groups.",
+    "required": true
+   },
+   {
+    "key": "active",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The icons shown as in use."
+   },
+   {
+    "key": "orientation",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "horizontal",
+      "vertical"
+     ]
+    },
+    "default": "horizontal",
+    "doc": "A row or a column."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "sm",
+      "md",
+      "lg"
+     ]
+    },
+    "default": "md",
+    "doc": "sm, md or lg."
+   }
+  ],
+  "events": [
+   {
+    "key": "onAction",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Row",
+   "size": [
+    220,
+    42
+   ],
+   "props": {
+    "active": [
+     "near_me"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 42
+    },
+    "padding": 5
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "tool"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": 37
+   },
+   "bind": {
+    "data": "${props.tools}",
+    "props.scrollDirection": "${= props.orientation == 'vertical' ? 'vertical' : 'horizontal'}",
+    "layout.height": "${= props.orientation == 'vertical' ? length(props.tools) * ((props.size == 'sm' ? 30 : (props.size == 'lg' ? 51 : 37)) + 4) - 4 : (props.size == 'sm' ? 30 : (props.size == 'lg' ? 51 : 37))}"
+   }
+  },
+  "tool": {
+   "type": "stack",
+   "children": [
+    "button",
+    "rule"
+   ],
+   "layout": {
+    "width": {
+     "hug": 32
+    },
+    "height": {
+     "fill": 32
+    }
+   }
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 18,
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= item == '-'}",
+    "layout.width": "${= props.orientation == 'vertical' ? 18 : 1}",
+    "layout.height": "${= props.orientation == 'vertical' ? 1 : 18}"
+   }
+  },
+  "button": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 32
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": 9
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "selected": "${= contains(props.active, item)}",
+    "opacity": "${= item == '-' ? 0 : 1}",
+    "layout.padding": "${= item == '-' ? (props.size == 'sm' ? 2 : 3) : (props.size == 'sm' ? 6 : (props.size == 'lg' ? 12 : 8))}"
+   },
+   "states": {
+    "hovered": {
+     "button": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "button": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "item != '-'"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAction",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "props.icon": "${= item == '-' ? 'circle' : item}",
+    "props.size": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 16 : (20))}",
+    "layout.width": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 16 : (20))}",
+    "layout.height": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 16 : (23))}"
+   }
+  }
+ }
+}

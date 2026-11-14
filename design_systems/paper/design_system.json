@@ -578,7 +578,20 @@
   "components/CanvasShell.json",
   "components/SidebarTogglePattern.json",
   "components/ResizableRow.json",
-  "components/VariableContractHover.json"
+  "components/VariableContractHover.json",
+  "components/FolderCard.json",
+  "components/NumberPresetInput.json",
+  "components/ExtensionChipsInput.json",
+  "components/HierarchicalPicker.json",
+  "components/PromptInputWithBanner.json",
+  "components/TabOverflowScroll.json",
+  "components/Toolbar.json",
+  "components/ProjectSelector.json",
+  "components/DateTimelineAxis.json",
+  "components/ReorderableList.json",
+  "components/ReorderGhost.json",
+  "components/SuggestionActionObject.json",
+  "components/VariableContractList.json"
  ],
  "replaces": [
   "filledButton",

@@ -1,0 +1,348 @@
+{
+ "schema": 3,
+ "id": "SuggestionActionObject",
+ "roots": [
+  "object"
+ ],
+ "widget": {
+  "type": "SuggestionActionObject",
+  "doc": "What a proposed change would do to a file: its name, whether it edits, creates or deletes, a summary and the proposed text.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "notes.md",
+    "doc": "The file or item the change is for.",
+    "required": true
+   },
+   {
+    "key": "action",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "edit",
+      "create",
+      "delete"
+     ]
+    },
+    "default": "edit",
+    "doc": "edit, create or delete."
+   },
+   {
+    "key": "summary",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What the change does, in a line."
+   },
+   {
+    "key": "body",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The proposed text."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Edit",
+   "size": [
+    320,
+    110
+   ],
+   "props": {
+    "title": "brief.md",
+    "summary": "Moves the launch date.",
+    "body": "Launch: November 21"
+   }
+  }
+ ],
+ "nodes": {
+  "object": {
+   "type": "column",
+   "children": [
+    "bar",
+    "surface"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   }
+  },
+  "bar": {
+   "type": "row",
+   "children": [
+    "strut",
+    "barContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 318
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 27
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "difference",
+    "color": "tertiaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 500,
+     "height": 1.2,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "badge": {
+   "type": "Badge",
+   "props": {
+    "label": "Edit",
+    "tone": "primary"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.label": "${= props.action == 'create' ? 'Create' : (props.action == 'delete' ? 'Delete' : 'Edit')}",
+    "props.tone": "${= props.action == 'create' ? 'success' : (props.action == 'delete' ? 'error' : 'primary')}"
+   }
+  },
+  "surface": {
+   "type": "column",
+   "children": [
+    "summary",
+    "block"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 318
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   }
+  },
+  "summary": {
+   "type": "text",
+   "props": {
+    "text": "${props.summary}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.45,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.summary != ''}"
+   }
+  },
+  "block": {
+   "type": "row",
+   "children": [
+    "body"
+   ],
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     9,
+     8,
+     9,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= props.body != ''}",
+    "decoration.fills[0].color": "${= props.action == 'create' ? theme.colors.successTint : (props.action == 'delete' ? theme.colors.errorTint : theme.colors.primaryTint)}"
+   }
+  },
+  "body": {
+   "type": "text",
+   "props": {
+    "text": "${props.body}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.action == 'delete' ? theme.error : theme.colors.primaryText}",
+    "props.style.decoration": "${= props.action == 'delete' ? 'lineThrough' : 'none'}"
+   }
+  },
+  "barContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "title",
+    "badge"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

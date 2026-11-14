@@ -1,0 +1,497 @@
+{
+ "schema": 3,
+ "id": "NumberPresetInput",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "NumberPresetInput",
+  "doc": "A number you type, or pick from a few usual values that open under it. The number is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable."
+   },
+   {
+    "key": "presets",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "8",
+     "12",
+     "16",
+     "24"
+    ],
+    "doc": "The usual values.",
+    "required": true
+   },
+   {
+    "key": "suffix",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "After the value (px, %)."
+   },
+   {
+    "key": "open",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Whether the values show at first."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "number",
+     "flutter": "double"
+    }
+   }
+  ]
+ },
+ "variables": {
+  "column": [
+   {
+    "name": "toggled",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Closed",
+   "size": [
+    140,
+    32
+   ],
+   "props": {
+    "value": 16,
+    "suffix": "px"
+   }
+  },
+  {
+   "name": "Open",
+   "size": [
+    140,
+    170
+   ],
+   "props": {
+    "value": 16,
+    "suffix": "px",
+    "open": true
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "box",
+    "panel"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "field",
+    "suffix",
+    "more"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     12,
+     8,
+     5,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 12
+   },
+   "states": {
+    "focused": {
+     "box": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "focusBorder"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 14.5
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 14.5
+     }
+    },
+    "cursorColor": "primary",
+    "keyboardType": "number"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= number(result)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= number(result)}"
+      }
+     ]
+    }
+   ]
+  },
+  "suffix": {
+   "type": "text",
+   "props": {
+    "text": "${props.suffix}",
+    "style": {
+     "fontSize": 14.5,
+     "fontWeight": 400,
+     "height": 1.0,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.suffix != ''}"
+   }
+  },
+  "more": {
+   "type": "row",
+   "children": [
+    "chevron"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "states": {
+    "hovered": {
+     "more": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= !toggled}"
+      }
+     ]
+    }
+   ]
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more",
+    "color": "tertiaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "props.icon": "${= (props.open != toggled) ? 'expand_less' : 'expand_more'}"
+   }
+  },
+  "panel": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 120
+    },
+    "padding": [
+     1,
+     6,
+     1,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 15,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.open != toggled}",
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "preset"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 138
+    },
+    "height": {
+     "hug": 110
+    }
+   },
+   "bind": {
+    "data": "${props.presets}"
+   }
+  },
+  "preset": {
+   "type": "row",
+   "children": [
+    "presetText",
+    "tick"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 138
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     12,
+     7,
+     12,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "preset": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= number(item)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= props.open}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= number(item)}"
+      }
+     ]
+    }
+   ]
+  },
+  "presetText": {
+   "type": "text",
+   "props": {
+    "text": "${item}${= props.suffix != '' ? ' ' + props.suffix : ''}",
+    "style": {
+     "fontSize": 14.5,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 90
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "tick": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "primary",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= number(item) == props.value}"
+   }
+  }
+ }
+}

@@ -1,0 +1,224 @@
+{
+ "schema": 3,
+ "id": "DateTimelineAxis",
+ "roots": [
+  "axis"
+ ],
+ "widget": {
+  "type": "DateTimelineAxis",
+  "doc": "Moments along a line, each a tick with a label: versions, days, releases. The chosen one is kept in your variable. Fires onSelected.",
+  "props": [
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Nov 10",
+     "Nov 12",
+     "Nov 13",
+     "Today"
+    ],
+    "doc": "The moments, oldest first.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    42
+   ],
+   "props": {
+    "value": "Nov 13"
+   }
+  }
+ ],
+ "nodes": {
+  "axis": {
+   "type": "stack",
+   "children": [
+    "rule",
+    "list"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 42
+    }
+   }
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": 1,
+    "y": {
+     "start": 8
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   }
+  },
+  "list": {
+   "type": "gridView",
+   "children": [
+    "tick"
+   ],
+   "props": {
+    "crossAxisCount": 4,
+    "mainAxisExtent": 42,
+    "physics": "never",
+    "alwaysScroll": false
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": 48
+   },
+   "bind": {
+    "data": "${props.labels}",
+    "props.crossAxisCount": "${= max(1, length(props.labels))}"
+   }
+  },
+  "tick": {
+   "type": "column",
+   "children": [
+    "mark",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 70
+    },
+    "height": {
+     "fill": 42
+    }
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "selected": {
+     "mark": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primary"
+        }
+       ]
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primary",
+        "fontWeight": 600
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "mark": {
+   "type": "box",
+   "layout": {
+    "width": 2,
+    "height": 16
+   },
+   "bind": {
+    "layout.height": "${= item == props.value ? 18 : 16}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryText"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.3333333333333333,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  }
+ }
+}

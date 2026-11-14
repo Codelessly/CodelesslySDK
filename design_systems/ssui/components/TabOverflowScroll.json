@@ -1,0 +1,290 @@
+{
+ "schema": 3,
+ "id": "TabOverflowScroll",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "TabOverflowScroll",
+  "doc": "Tabs in a row that scrolls sideways when there are more than fit. The chosen one is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "tabs",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Overview",
+     "Activity",
+     "Files",
+     "Members",
+     "Settings",
+     "Billing"
+    ],
+    "doc": "The tabs' labels.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    280,
+    34
+   ],
+   "props": {
+    "value": "Overview"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "stack",
+   "children": [
+    "list",
+    "fade"
+   ],
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "tab"
+   ],
+   "props": {
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": 33
+   },
+   "bind": {
+    "data": "${props.tabs}"
+   }
+  },
+  "tab": {
+   "type": "column",
+   "children": [
+    "label",
+    "line"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "fill": 33
+    },
+    "padding": [
+     12,
+     7,
+     12,
+     0
+    ]
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "selected": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "primaryText"
+       }
+      }
+     },
+     "line": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primary"
+        }
+       ]
+      }
+     }
+    },
+    "hovered": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "secondaryText"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "line": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 50
+    },
+    "height": 2
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 1
+   }
+  },
+  "fade": {
+   "type": "row",
+   "children": [
+    "fadeIcon"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "end"
+   },
+   "layout": {
+    "width": 36,
+    "height": 32,
+    "x": {
+     "end": 0
+    },
+    "y": {
+     "start": 0
+    },
+    "padding": [
+     0,
+     0,
+     4,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       -1,
+       0
+      ],
+      "end": [
+       1,
+       0
+      ],
+      "stops": [
+       {
+        "color": "#00FFFFFF",
+        "position": 0
+       },
+       {
+        "color": "#FFFFFFFF",
+        "position": 0.6
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].stops[0].color": "${= alpha(theme.colors.primaryBackground, 0)}",
+    "decoration.fills[0].stops[1].color": "${theme.colors.primaryBackground}"
+   },
+   "ignorePointer": true
+  },
+  "fadeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right",
+    "color": "tertiaryText",
+    "size": 15
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   }
+  }
+ }
+}

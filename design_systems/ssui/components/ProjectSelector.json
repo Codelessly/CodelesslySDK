@@ -1,0 +1,501 @@
+{
+ "schema": 3,
+ "id": "ProjectSelector",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "ProjectSelector",
+  "doc": "Which project is open: press it and the projects open under it, in place, with a count beside each. The choice is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "projects",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Website",
+     "Mobile app",
+     "Docs"
+    ],
+    "doc": "The projects' names.",
+    "required": true
+   },
+   {
+    "key": "counts",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A count per project (empty: none)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the open project."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Select a project",
+    "doc": "Shown with none open."
+   },
+   {
+    "key": "open",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Whether the projects show at first."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "variables": {
+  "column": [
+   {
+    "name": "toggled",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Open",
+   "size": [
+    220,
+    130
+   ],
+   "props": {
+    "value": "Website",
+    "counts": [
+     "3",
+     "",
+     "12"
+    ],
+    "open": true
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "trigger",
+    "panel"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 28
+    },
+    "constraints": {
+     "minWidth": 160,
+     "maxWidth": 240
+    }
+   }
+  },
+  "trigger": {
+   "type": "row",
+   "children": [
+    "folder",
+    "name",
+    "chevron"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     10,
+     6,
+     10,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8
+   },
+   "states": {
+    "hovered": {
+     "trigger": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= !toggled}"
+      }
+     ]
+    }
+   ]
+  },
+  "folder": {
+   "type": "icon",
+   "props": {
+    "icon": "folder",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${= props.value != '' ? props.value : props.placeholder}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 150
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value != '' ? theme.colors.primaryText : theme.colors.tertiaryText}"
+   }
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more",
+    "color": "tertiaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "props.icon": "${= (props.open != toggled) ? 'expand_less' : 'expand_more'}"
+   }
+  },
+  "panel": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 90
+    },
+    "padding": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.open != toggled}",
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "row"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 210
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "bind": {
+    "data": "${props.projects}"
+   }
+  },
+  "row": {
+   "type": "row",
+   "children": [
+    "rowFolder",
+    "rowName",
+    "pill",
+    "tick"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 210
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 5
+   },
+   "states": {
+    "hovered": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= props.open}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "rowFolder": {
+   "type": "icon",
+   "props": {
+    "icon": "folder",
+    "color": "tertiaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "rowName": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 130
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "pill": {
+   "type": "row",
+   "children": [
+    "pillText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 13
+    },
+    "padding": [
+     4,
+     1,
+     4,
+     1
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF3B82F6"
+     }
+    ],
+    "radius": 9999
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > index && props.counts[index] != ''}"
+   }
+  },
+  "pillText": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.counts) > index ? props.counts[index] : ''}",
+    "style": {
+     "fontSize": 9,
+     "fontWeight": 600,
+     "height": 1.2,
+     "color": "#FFFFFFFF",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 6
+    },
+    "height": {
+     "hug": 11
+    }
+   }
+  },
+  "tick": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "#FF3B82F6",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= item == props.value}"
+   }
+  }
+ }
+}

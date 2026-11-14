@@ -1,0 +1,317 @@
+{
+ "schema": 3,
+ "id": "HierarchicalPicker",
+ "roots": [
+  "picker"
+ ],
+ "widget": {
+  "type": "HierarchicalPicker",
+  "doc": "A place picked from nested ones (a folder, a category): give each row its label and how deep it sits. The choice is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Work",
+     "Clients",
+     "Acme",
+     "Personal"
+    ],
+    "doc": "The rows, top to bottom.",
+    "required": true
+   },
+   {
+    "key": "depths",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "0",
+     "1",
+     "2",
+     "0"
+    ],
+    "doc": "How deep each row sits: 0 at the edge.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    240,
+    120
+   ],
+   "props": {
+    "value": "Acme"
+   }
+  }
+ ],
+ "nodes": {
+  "picker": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 120
+    },
+    "padding": [
+     1,
+     6,
+     1,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "row"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 238
+    },
+    "height": {
+     "hug": 112
+    }
+   },
+   "bind": {
+    "data": "${props.labels}"
+   }
+  },
+  "row": {
+   "type": "row",
+   "children": [
+    "indent",
+    "toggle",
+    "glyph",
+    "label",
+    "tick"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 238
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     9,
+     0,
+     9,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "hovered": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "label": {
+      "props": {
+       "style": {
+        "fontWeight": 500
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "indent": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 1
+   },
+   "bind": {
+    "layout.width": "${= 14 * (length(props.depths) > index ? number(props.depths[index]) : 0)}"
+   }
+  },
+  "toggle": {
+   "type": "row",
+   "children": [
+    "chevron"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 24,
+    "height": 32
+   }
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= length(props.depths) > index + 1 && number(props.depths[index + 1]) > number(props.depths[index])}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "sell",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13,
+    "margin": [
+     2,
+     0,
+     6,
+     0
+    ]
+   },
+   "bind": {
+    "props.icon": "${= length(props.depths) > index + 1 && number(props.depths[index + 1]) > number(props.depths[index]) ? 'folder_open' : 'sell'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.35,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "tick": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "#FF3B82F6",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "visible": "${= item == props.value}"
+   }
+  }
+ }
+}
