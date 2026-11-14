@@ -229,6 +229,8 @@ void main() {
         ('component_path', Step('tap', 'mobileNav/tabs@1')),
         ('component_scroll', Step('tap', 'next')),
         ('tab_id', Step('tap', 'stay')),
+        // A node-level tooltip does not take the tap from its button.
+        ('tooltip_click', Step('tap', 'open')),
       ]) {
         final report = await runRender(tester, RenderArgs(inputs: ['$a/test4/$site'], out: out.path, sizes: const [Size(390, 844)], steps: [step], label: site));
         expect(report.errors, 0, reason: '$site: ${report.diagnostics}');

@@ -1,0 +1,84 @@
+{
+  "schema": 3,
+  "id": "tap-diagnostic",
+  "roots": [
+    "page"
+  ],
+  "variables": {
+    "page": [
+      {
+        "name": "shown",
+        "type": "boolean",
+        "value": false
+      }
+    ]
+  },
+  "nodes": {
+    "page": {
+      "type": "canvas",
+      "slots": {
+        "body": "body"
+      },
+      "layout": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    "body": {
+      "type": "column",
+      "children": [
+        "open",
+        "message"
+      ],
+      "layout": {
+        "width": {
+          "fill": 390
+        },
+        "height": {
+          "fill": 844
+        }
+      }
+    },
+    "open": {
+      "type": "filledButton",
+      "layout": {
+        "width": 160,
+        "height": 48
+      },
+      "props": {
+        "label": "Open message"
+      },
+      "actions": [
+        {
+          "trigger": {
+            "type": "click"
+          },
+          "actions": [
+            {
+              "type": "setVariable",
+              "variable": "shown",
+              "value": "true"
+            }
+          ]
+        }
+      ],
+      "tooltip": "Open the message"
+    },
+    "message": {
+      "type": "text",
+      "layout": {
+        "width": 300,
+        "height": 40
+      },
+      "props": {
+        "text": "Action worked",
+        "style": {
+          "color": "#FF182D39"
+        }
+      },
+      "bind": {
+        "visible": "${shown}"
+      }
+    }
+  }
+}
