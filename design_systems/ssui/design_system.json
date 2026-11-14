@@ -468,7 +468,10 @@
   "components/ErrorBar.json",
   "components/FeatureBulletItem.json",
   "components/SectionCard.json",
-  "components/MetaInfo.json"
+  "components/MetaInfo.json",
+  "components/Hyperlink.json",
+  "components/NotificationBadge.json",
+  "components/PulsingDots.json"
  ],
  "replaces": [
   "filledButton",
