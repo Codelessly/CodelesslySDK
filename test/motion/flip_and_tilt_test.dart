@@ -270,7 +270,7 @@ void main() {
         'props': {'text': r'${tilt.x} ${tilt.active}'},
       },
     });
-    expect(textOf(s.tree, 'label'), '0.0 false');
+    expect(textOf(s.tree, 'label'), '0 false');
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: const Offset(390, 290));
     addTearDown(mouse.removePointer);
@@ -281,6 +281,6 @@ void main() {
     await mouse.moveTo(const Offset(390, 290));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
-    expect(textOf(s.tree, 'label'), '0.0 false');
+    expect(textOf(s.tree, 'label'), '0 false');
   });
 }

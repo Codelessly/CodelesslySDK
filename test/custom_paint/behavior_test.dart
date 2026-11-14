@@ -243,7 +243,7 @@ void main() {
     await tester.tapAt(origin + const Offset(30, 10)); // the middle cell: view (15, 5)
     await tester.pumpAndSettle();
     expect(scope.read('picked'), 'cell-b/b/1');
-    expect(scope.read('at'), '15.0,5.0');
+    expect(scope.read('at'), '15,5');
     expect(scope.read('downs'), 1);
 
     await tester.tapAt(origin + const Offset(57, 3)); // the invisible corner, over cell c

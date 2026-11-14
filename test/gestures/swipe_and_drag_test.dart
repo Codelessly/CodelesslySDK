@@ -128,7 +128,9 @@ void main() {
     expect(values.direction, 'right');
     // The nodes inside read it.
     await tester.pump();
-    expect(s.text('label'), '${values.offset.dx}|true|right');
+    // A whole number is shown without decimals (60, not 60.0).
+    expect(s.text('label'), '${values.offset.dx.toInt()}|true|right');
+    expect(values.offset.dx, values.offset.dx.roundToDouble());
     await gesture.up();
     await tester.pumpAndSettle();
   });

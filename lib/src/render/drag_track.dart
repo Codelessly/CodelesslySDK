@@ -20,12 +20,12 @@ import 'physics.dart' show describeSpring;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show BuildContext, FocusAttachment, FocusNode, KeyEventResult;
 
 import 'behavior_values.dart';
 import 'behaviors.dart';
 import 'contracts.dart';
-import 'islands.dart';
+import 'controls/focus.dart';
+import 'controls/root.dart';
 import 'node_tree.dart';
 
 /// One change of a track's value, as `changed` reactions read it in
@@ -884,10 +884,11 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     return _track.snapValue(v + steps * up * by);
   }
 
-  KeyEventResult _onKey(FocusNode node, KeyEvent event) {
+  /// The track's keys while it has the focus; true when it took one.
+  bool _onKey(KeyEvent event) {
     final step = _track.effectiveKeyStep;
-    if (step == null || !_enabled || _dragValue != null) return KeyEventResult.ignored;
-    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+    if (step == null || !_enabled || _dragValue != null) return false;
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
     final v = switch (event.logicalKey) {
       LogicalKeyboardKey.arrowUp || LogicalKeyboardKey.arrowRight => _stepped(step, 1),
       LogicalKeyboardKey.arrowDown || LogicalKeyboardKey.arrowLeft => _stepped(step, -1),
@@ -897,9 +898,9 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
       LogicalKeyboardKey.end => _track.snapValue(_track.max),
       _ => null,
     };
-    if (v == null) return KeyEventResult.ignored;
+    if (v == null) return false;
     _set(v);
-    return KeyEventResult.handled;
+    return true;
   }
 
   void _onWheel(PointerScrollEvent event) {
@@ -1039,27 +1040,20 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
   @override
   bool get validForMouseTracker => attached && _interactive;
 
-  FocusNode? _focus;
-  FocusAttachment? _focusAttachment;
+  ControlFocusNode? _focus;
   bool _focusScheduled = false;
 
-  /// Takes the keys (arrows, page up/down, home, end) through a focus node
-  /// in the app's focus tree, under the view the node is shown in.
+  /// Takes the keys (arrows, page up/down, home, end) as a control does:
+  /// through a focus node in its root's focus order.
   void _syncFocus() {
     final want = attached && _interactive && _keys;
     if (want && _focus == null) {
-      final context = islandContextOf(this);
-      if (context == null) return;
-      final f = _focus = FocusNode(debugLabel: 'drag track', onKeyEvent: _onKey);
-      f.addListener(_focusChanged);
-      _focusAttachment = f.attach(context)..reparent();
+      final root = RenderControlRoot.of(this);
+      if (root == null) return;
+      _focus = ControlFocusNode(this, onKey: _onKey, onFocusChange: (_) => _focusChanged())..join(root.focus);
     } else if (!want && _focus != null) {
-      final f = _focus!;
+      _focus!.leave();
       _focus = null;
-      f.removeListener(_focusChanged);
-      _focusAttachment?.detach();
-      _focusAttachment = null;
-      f.dispose();
       if (_focused) {
         _focused = false;
         _refresh(later: true);
@@ -1157,19 +1151,8 @@ class RenderDragTrack extends RenderTrackPose implements MouseTrackerAnnotation 
     _drag?.dispose();
     _watched?.removeListener(_onVariable);
     _watched = null;
-    final f = _focus;
+    _focus?.leave();
     _focus = null;
-    _focusAttachment?.detach();
-    f?.dispose();
     super.dispose();
   }
-}
-
-/// The element that shows [o]'s node boxes (its [NodeView] or island), for
-/// what needs a place in the element tree (a focus node).
-BuildContext? islandContextOf(RenderObject o) {
-  for (RenderObject? p = o; p != null; p = p.parent) {
-    if (p is IslandParent) return p.islandContext;
-  }
-  return null;
 }

@@ -139,8 +139,8 @@ void main() {
   testWidgets('on the design canvas scroll progress shows its finished state and nothing sticks', (tester) async {
     final screen = await wiring.show(tester, sections(), interactive: false);
     await tester.pump();
-    expect(textOf(screen.tree, 'labelA'), '1.0');
-    expect(textOf(screen.tree, 'labelB'), '1.0');
+    expect(textOf(screen.tree, 'labelA'), '1');
+    expect(textOf(screen.tree, 'labelB'), '1');
     expect(_top(screen.tree, 'headA'), closeTo(screen.tree.boxOf('secA')!.localToGlobal(Offset.zero).dy, .01));
   });
 }
