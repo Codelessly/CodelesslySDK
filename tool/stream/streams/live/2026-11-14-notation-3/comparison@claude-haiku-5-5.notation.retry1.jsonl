@@ -1,0 +1,93 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"The error says \"planA\" and \"planB\" were used as bare names in the emit action, where the notation expects a value. Quoting them makes them literal strings. I'll also declare a choice variable and set it on each button so the choice is tracked in the UI.\n\nstate choice=\"\"\nColumn gap:12 pad:16 w:390\n  Text.title \"Compare plans\"\n  Row gap:12 top\n    Card grow gap:8\n      Text.heading \"Plan A\"\n      Text.strong \"$30/mo\"\n      Text.body \"Data: 20 GB\"\n      Text.body \"Calls: Unlimited\"\n      Text.body \"Roaming: Extra fee per day\"\n      Text.body \"Contract: 24 months\"\n      Text.body \"Extras: Hotspot included\"\n      Badge.success \"Better: price\"\n      Button.primary \"Choose Plan A\" -> choice=\"planA\"; emit choose \"planA\"; toast \"You chose Plan A\"\n    Card grow gap:8\n      Text.heading \"Plan B\"\n      Text.strong \"$38/mo\"\n      Text.body \"Data: Unlimited\"\n      Text.body \"Calls: Unlimited\"\n      Text.body \"Roaming: Included in 60 countries\"\n      Text.body \"Contract: 12 months\"\n      Text.body \"Extras: Hotspot, streaming\"\n      Badge.success \"Better: data, roaming, contract\"\n      Button.primary \"Choose Plan B\" -> choice=\"planB\"; emit choose \"planB\"; toast \"You chose Plan B\"\n  Card gap:6\n    Text.strong \"Recommendation: Plan B\"\n    Text.body \"If you use lots of data or travel abroad, Plan B's unlimited data, included roaming and shorter contract outweigh its $8 higher monthly price; otherwise Plan A is the cheaper choice.\"\n  if choice!=\"\"\n    Text.success \"You chose {choice}.\"","usage":{"input_tokens":2480,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":622,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":513,"totalMs":2367}}
+{"tMs":513,"delta":"The error says \"planA\" and"}
+{"tMs":651,"delta":" \"planB\" were"}
+{"tMs":651,"delta":" used as b"}
+{"tMs":651,"delta":"are names"}
+{"tMs":651,"delta":" in the emit action,"}
+{"tMs":651,"delta":" where"}
+{"tMs":651,"delta":" the"}
+{"tMs":651,"delta":" not"}
+{"tMs":651,"delta":"ation exp"}
+{"tMs":670,"delta":"ects a value. Qu"}
+{"tMs":689,"delta":"oting them"}
+{"tMs":714,"delta":" makes them literal strings."}
+{"tMs":732,"delta":" I"}
+{"tMs":801,"delta":"'ll also decl"}
+{"tMs":801,"delta":"are a"}
+{"tMs":801,"delta":" choice variable and"}
+{"tMs":814,"delta":" set it on"}
+{"tMs":834,"delta":" each button"}
+{"tMs":856,"delta":" so the choice is t"}
+{"tMs":876,"delta":"racked in the"}
+{"tMs":898,"delta":" UI.\n\nstate choice="}
+{"tMs":922,"delta":"\"\"\nColumn gap:12"}
+{"tMs":943,"delta":" pad:16 w:"}
+{"tMs":965,"delta":"390\n  Text.title \""}
+{"tMs":986,"delta":"Compare plans\"\n  "}
+{"tMs":1008,"delta":"Row gap:12 top"}
+{"tMs":1030,"delta":"\n    Card grow gap"}
+{"tMs":1053,"delta":":8\n      Text.he"}
+{"tMs":1072,"delta":"ading \"Plan A\""}
+{"tMs":1093,"delta":"\n      Text.strong \"$"}
+{"tMs":1113,"delta":"30/mo\"\n      "}
+{"tMs":1134,"delta":"Text.body \"Data: "}
+{"tMs":1155,"delta":"20 GB\"\n      "}
+{"tMs":1176,"delta":"Text.body \"Calls:"}
+{"tMs":1197,"delta":" Unlimited\"\n      "}
+{"tMs":1218,"delta":"Text.body \"Roa"}
+{"tMs":1238,"delta":"ming: Extra fee per"}
+{"tMs":1259,"delta":" day\"\n      Text.body"}
+{"tMs":1280,"delta":" \"Contract: 24 "}
+{"tMs":1301,"delta":"months\"\n      Text.body"}
+{"tMs":1323,"delta":" \"Extras: Hot"}
+{"tMs":1342,"delta":"spot included\"\n      Bad"}
+{"tMs":1363,"delta":"ge.success \"Better: price"}
+{"tMs":1383,"delta":"\"\n      Button.primary"}
+{"tMs":1404,"delta":" \"Choose Plan A"}
+{"tMs":1424,"delta":"\" -> choice=\"planA"}
+{"tMs":1445,"delta":"\"; emit choose \"plan"}
+{"tMs":1466,"delta":"A\"; toast \"You ch"}
+{"tMs":1487,"delta":"ose Plan A\"\n    "}
+{"tMs":1506,"delta":"Card grow gap:8"}
+{"tMs":1528,"delta":"\n      Text.heading \""}
+{"tMs":1548,"delta":"Plan B\"\n      "}
+{"tMs":1568,"delta":"Text.strong \"$38/"}
+{"tMs":1589,"delta":"mo\"\n      Text."}
+{"tMs":1609,"delta":"body \"Data: Unl"}
+{"tMs":1630,"delta":"imited\"\n      Text."}
+{"tMs":1650,"delta":"body \"Calls: Un"}
+{"tMs":1671,"delta":"limited\"\n      Text"}
+{"tMs":1692,"delta":".body \"Roaming:"}
+{"tMs":1712,"delta":" Included in 60 countries"}
+{"tMs":1732,"delta":"\"\n      Text.body \""}
+{"tMs":1753,"delta":"Contract: 12 months"}
+{"tMs":1773,"delta":"\"\n      Text.body \""}
+{"tMs":1794,"delta":"Extras: Hotsp"}
+{"tMs":1814,"delta":"ot, streaming\"\n      "}
+{"tMs":1835,"delta":"Badge.success \"Better"}
+{"tMs":1855,"delta":": data, roaming, cont"}
+{"tMs":1876,"delta":"ract\"\n      Button.prim"}
+{"tMs":1896,"delta":"ary \"Choose Plan"}
+{"tMs":1917,"delta":" B\" -> choice=\"plan"}
+{"tMs":1937,"delta":"B\"; emit choose \""}
+{"tMs":1957,"delta":"planB\"; toast \"You"}
+{"tMs":1978,"delta":" chose Plan B\""}
+{"tMs":2000,"delta":"\n  Card gap:6"}
+{"tMs":2019,"delta":"\n    Text.strong \""}
+{"tMs":2040,"delta":"Recommendation: Pl"}
+{"tMs":2060,"delta":"an B\"\n    Text."}
+{"tMs":2080,"delta":"body \"If you use lots of"}
+{"tMs":2101,"delta":" data or travel abroad,"}
+{"tMs":2121,"delta":" Plan B's unlim"}
+{"tMs":2142,"delta":"ited data, included roaming and"}
+{"tMs":2162,"delta":" shorter contract outweig"}
+{"tMs":2183,"delta":"h its $8 higher mon"}
+{"tMs":2203,"delta":"thly price; otherwise"}
+{"tMs":2223,"delta":" Plan A is the che"}
+{"tMs":2244,"delta":"aper choice.\"\n  if"}
+{"tMs":2264,"delta":" choice!=\"\"\n    "}
+{"tMs":2285,"delta":"Text.success"}
+{"tMs":2305,"delta":" \"You"}
+{"tMs":2325,"delta":" ch"}
+{"tMs":2346,"delta":"ose {"}
+{"tMs":2366,"delta":"choice}.\""}

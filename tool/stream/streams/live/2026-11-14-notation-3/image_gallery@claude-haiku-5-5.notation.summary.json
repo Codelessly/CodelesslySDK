@@ -1,0 +1,86 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3958,
+ "turns": [
+  {
+   "input_tokens": 1701,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1145,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 538,
+   "totalMs": 4777,
+   "chars": 2258,
+   "lines": 50,
+   "jsonTails": 0,
+   "nodes": 22,
+   "outputTokensPerNode": "52.0",
+   "notationIssues": [
+    "line 27:1: An \"if\" needs a parent: indent it under a node.",
+    "line 28:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 29:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 30:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 31:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 32:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 33:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 34:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 35:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 36:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 37:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 38:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 39:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 40:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 41:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 42:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 43:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 44:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 45:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 46:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 47:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 48:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 49:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 50:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 51:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 52:7: A second root: the first line is the root, everything else is indented under it."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 3597,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1070,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 434,
+   "totalMs": 3372,
+   "chars": 2076,
+   "lines": 49,
+   "jsonTails": 0,
+   "nodes": 47,
+   "outputTokensPerNode": "22.8",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

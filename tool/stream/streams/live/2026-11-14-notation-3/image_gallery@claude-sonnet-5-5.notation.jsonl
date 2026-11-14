@@ -1,0 +1,158 @@
+{"meta":{"ui":"image_gallery","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"Card w:390 pad:16 gap:12\n  state open=false\n  state idx=1\n  Text.title \"Trip photos\"\n  Stack\n    Grid cols:3 gap:8\n      Column gap:4 -> idx=1; open=true\n        Box fill:#FFF4A261 h:96 radius:8\n        Text.caption \"Sunrise\"\n      Column gap:4 -> idx=2; open=true\n        Box fill:#FF2A9D8F h:96 radius:8\n        Text.caption \"Harbor\"\n      Column gap:4 -> idx=3; open=true\n        Box fill:#FFE76F51 h:96 radius:8\n        Text.caption \"Old town\"\n      Column gap:4 -> idx=4; open=true\n        Box fill:#FFE9C46A h:96 radius:8\n        Text.caption \"Market\"\n      Column gap:4 -> idx=5; open=true\n        Box fill:#FF457B9D h:96 radius:8\n        Text.caption \"Mountain trail\"\n      Column gap:4 -> idx=6; open=true\n        Box fill:#FF48CAE4 h:96 radius:8\n        Text.caption \"Lake\"\n      Column gap:4 -> idx=7; open=true\n        Box fill:#FF8D6E63 h:96 radius:8\n        Text.caption \"Café\"\n      Column gap:4 -> idx=8; open=true\n        Box fill:#FFF77F00 h:96 radius:8\n        Text.caption \"Sunset\"\n      Column gap:4 -> idx=9; open=true\n        Box fill:#FF3D348B h:96 radius:8\n        Text.caption \"Night lights\"\n    if open\n      Box fill:#EE111111 radius:12 pad:12 gap:12 w:fill\n        Row between middle\n          Text.strong \"{idx} of 9\"\n          IconButton \"close\" -> open=false\n        if idx==1\n          Box fill:#FFF4A261 h:240 radius:8\n          Text.strong \"Sunrise\"\n        if idx==2\n          Box fill:#FF2A9D8F h:240 radius:8\n          Text.strong \"Harbor\"\n        if idx==3\n          Box fill:#FFE76F51 h:240 radius:8\n          Text.strong \"Old town\"\n        if idx==4\n          Box fill:#FFE9C46A h:240 radius:8\n          Text.strong \"Market\"\n        if idx==5\n          Box fill:#FF457B9D h:240 radius:8\n          Text.strong \"Mountain trail\"\n        if idx==6\n          Box fill:#FF48CAE4 h:240 radius:8\n          Text.strong \"Lake\"\n        if idx==7\n          Box fill:#FF8D6E63 h:240 radius:8\n          Text.strong \"Café\"\n        if idx==8\n          Box fill:#FFF77F00 h:240 radius:8\n          Text.strong \"Sunset\"\n        if idx==9\n          Box fill:#FF3D348B h:240 radius:8\n          Text.strong \"Night lights\"\n        Row between\n          IconButton \"chevron_left\" -> idx=idx==1?9:idx-1\n          IconButton \"chevron_right\" -> idx=idx==9?1:idx+1","usage":{"input_tokens":1702,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1697,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":621}},"ttftMs":6612,"totalMs":11838}}
+{"tMs":6612,"delta":"Card w"}
+{"tMs":6644,"delta":":390 "}
+{"tMs":6677,"delta":"pad:16 "}
+{"tMs":6712,"delta":"gap:12\n  state"}
+{"tMs":6745,"delta":" open=false"}
+{"tMs":6778,"delta":"\n  state idx=1\n  "}
+{"tMs":6811,"delta":"Text"}
+{"tMs":6846,"delta":".title \"Trip phot"}
+{"tMs":6885,"delta":"os\"\n  St"}
+{"tMs":6911,"delta":"ack"}
+{"tMs":6945,"delta":"\n    Grid cols:3"}
+{"tMs":6979,"delta":" gap:8\n      "}
+{"tMs":7016,"delta":"Column gap:4 "}
+{"tMs":7046,"delta":"-> id"}
+{"tMs":7079,"delta":"x=1; open=true"}
+{"tMs":7113,"delta":"\n        Box fill:#F"}
+{"tMs":7146,"delta":"FF"}
+{"tMs":7179,"delta":"4"}
+{"tMs":7213,"delta":"A"}
+{"tMs":7246,"delta":"261 h:96 radius"}
+{"tMs":7280,"delta":":8\n        Text.ca"}
+{"tMs":7313,"delta":"ption \"Sunrise\""}
+{"tMs":7347,"delta":"\n      Column gap:4"}
+{"tMs":7380,"delta":" -> idx=2;"}
+{"tMs":7414,"delta":" open=true\n        Box f"}
+{"tMs":7451,"delta":"ill:#FF2A"}
+{"tMs":7481,"delta":"9D8F"}
+{"tMs":7515,"delta":" h:96 radius:8"}
+{"tMs":7549,"delta":"\n        Text.caption \""}
+{"tMs":7582,"delta":"Harbor\"\n      "}
+{"tMs":7615,"delta":"Column gap:4 ->"}
+{"tMs":7649,"delta":" idx=3; open=true"}
+{"tMs":7683,"delta":"\n        Box fill:#"}
+{"tMs":7716,"delta":"FFE76"}
+{"tMs":7749,"delta":"F51"}
+{"tMs":7783,"delta":" h:96 radius:"}
+{"tMs":7817,"delta":"8\n        Text.caption"}
+{"tMs":7850,"delta":" \"Old town\"\n      "}
+{"tMs":7884,"delta":"Column gap:4 ->"}
+{"tMs":7917,"delta":" idx=4; open=true"}
+{"tMs":7951,"delta":"\n        Box fill:#"}
+{"tMs":7985,"delta":"FFE9C"}
+{"tMs":8017,"delta":"46A h:96 radius"}
+{"tMs":8051,"delta":":8\n        Text.ca"}
+{"tMs":8085,"delta":"ption \"Market\"\n      "}
+{"tMs":8118,"delta":"Column gap:4 ->"}
+{"tMs":8153,"delta":" idx=5; open=true"}
+{"tMs":8186,"delta":"\n        Box fill:#"}
+{"tMs":8219,"delta":"FF457"}
+{"tMs":8254,"delta":"B9D h:96 rad"}
+{"tMs":8286,"delta":"ius:8\n        Text."}
+{"tMs":8319,"delta":"caption \"Mountain tr"}
+{"tMs":8353,"delta":"ail\"\n      Column gap"}
+{"tMs":8386,"delta":":4 -> idx="}
+{"tMs":8423,"delta":"6; open=true\n        "}
+{"tMs":8453,"delta":"Box fill:#FF48"}
+{"tMs":8487,"delta":"C"}
+{"tMs":8519,"delta":"AE"}
+{"tMs":8553,"delta":"4 h:96 radius"}
+{"tMs":8586,"delta":":8\n        Text.ca"}
+{"tMs":8621,"delta":"ption \"Lake\"\n      "}
+{"tMs":8656,"delta":"Column gap:4 -"}
+{"tMs":8689,"delta":"> idx=7; open="}
+{"tMs":8720,"delta":"true\n        Box fill:"}
+{"tMs":8754,"delta":"#FF8D"}
+{"tMs":8788,"delta":"6"}
+{"tMs":8820,"delta":"E"}
+{"tMs":8854,"delta":"63 h:96 radius"}
+{"tMs":8887,"delta":":8\n        Text.ca"}
+{"tMs":8921,"delta":"ption \"Café\"\n      "}
+{"tMs":8954,"delta":"Column gap:4 ->"}
+{"tMs":8989,"delta":" idx=8; open=true"}
+{"tMs":9021,"delta":"\n        Box fill:#"}
+{"tMs":9055,"delta":"FFF"}
+{"tMs":9088,"delta":"77"}
+{"tMs":9123,"delta":"F00 h:96 rad"}
+{"tMs":9155,"delta":"ius:8\n        Text."}
+{"tMs":9189,"delta":"caption \"Sunset\""}
+{"tMs":9221,"delta":"\n      Column gap:4"}
+{"tMs":9255,"delta":" -> idx=9;"}
+{"tMs":9288,"delta":" open=true\n        Box f"}
+{"tMs":9321,"delta":"ill:#FF3D"}
+{"tMs":9355,"delta":"348"}
+{"tMs":9389,"delta":"B h:96 radius:"}
+{"tMs":9422,"delta":"8\n        Text.caption"}
+{"tMs":9456,"delta":" \"Night lights\"\n    "}
+{"tMs":9489,"delta":"if open\n      Box"}
+{"tMs":9523,"delta":" fill:#E"}
+{"tMs":9555,"delta":"E111"}
+{"tMs":9588,"delta":"111 rad"}
+{"tMs":9623,"delta":"ius:12 pad:12"}
+{"tMs":9656,"delta":" gap:12"}
+{"tMs":9689,"delta":" w:fill"}
+{"tMs":9723,"delta":"\n        Row between midd"}
+{"tMs":9757,"delta":"le\n          Text.strong"}
+{"tMs":9791,"delta":" \"{idx} of 9"}
+{"tMs":9822,"delta":"\"\n          IconButton \""}
+{"tMs":9856,"delta":"close\" -> open"}
+{"tMs":9890,"delta":"=false\n        if idx=="}
+{"tMs":9923,"delta":"1\n          Box fill:"}
+{"tMs":9956,"delta":"#FFF4A261"}
+{"tMs":9990,"delta":" h:240"}
+{"tMs":10023,"delta":" radius:8\n          "}
+{"tMs":10056,"delta":"Text.str"}
+{"tMs":10091,"delta":"ong \"Sunrise\""}
+{"tMs":10123,"delta":"\n        if idx==2"}
+{"tMs":10157,"delta":"\n          Box fill:#F"}
+{"tMs":10191,"delta":"F2A9D8F h"}
+{"tMs":10243,"delta":":240 radius:8"}
+{"tMs":10257,"delta":"\n          Text.strong \""}
+{"tMs":10290,"delta":"Harbor\"\n        if id"}
+{"tMs":10324,"delta":"x==3\n          Box f"}
+{"tMs":10357,"delta":"ill:#FFE76F"}
+{"tMs":10391,"delta":"51 h:240 radius"}
+{"tMs":10425,"delta":":8\n          Text.str"}
+{"tMs":10457,"delta":"ong \"Old town\"\n        "}
+{"tMs":10491,"delta":"if idx==4\n          "}
+{"tMs":10525,"delta":"Box fill:#FFE"}
+{"tMs":10559,"delta":"9C46A h:240 "}
+{"tMs":10591,"delta":"radius:8\n          Text"}
+{"tMs":10625,"delta":".strong \"Market\""}
+{"tMs":10658,"delta":"\n        if idx==5\n          "}
+{"tMs":10692,"delta":"Box fill:#FF"}
+{"tMs":10725,"delta":"457B9D h:240 "}
+{"tMs":10758,"delta":"radius:8\n          Text"}
+{"tMs":10792,"delta":".strong \"Mountain"}
+{"tMs":10825,"delta":" trail\"\n        if idx"}
+{"tMs":10859,"delta":"==6\n          Box fill"}
+{"tMs":10892,"delta":":#FF48CAE"}
+{"tMs":10925,"delta":"4"}
+{"tMs":10959,"delta":" h:240 radius:"}
+{"tMs":10993,"delta":"8\n          Text.strong"}
+{"tMs":11026,"delta":" \"Lake\"\n        if"}
+{"tMs":11059,"delta":" idx==7\n          Box"}
+{"tMs":11094,"delta":" fill:#FF8D"}
+{"tMs":11126,"delta":"6E63 h:240 "}
+{"tMs":11159,"delta":"radius:8\n          Text"}
+{"tMs":11193,"delta":".strong \"Café\""}
+{"tMs":11226,"delta":"\n        if idx==8\n          "}
+{"tMs":11259,"delta":"Box fill:#FF"}
+{"tMs":11293,"delta":"F77F00 h:240"}
+{"tMs":11326,"delta":" radius:8\n          "}
+{"tMs":11359,"delta":"Text.strong \"Sun"}
+{"tMs":11393,"delta":"set\"\n        if idx=="}
+{"tMs":11427,"delta":"9\n          Box fill:"}
+{"tMs":11460,"delta":"#FF3D348B h"}
+{"tMs":11493,"delta":":240 radius:8"}
+{"tMs":11527,"delta":"\n          Text.strong \""}
+{"tMs":11560,"delta":"Night lights\"\n        Row"}
+{"tMs":11596,"delta":" between\n          IconButton \""}
+{"tMs":11627,"delta":"chevron_left\" ->"}
+{"tMs":11660,"delta":" idx=idx==1?"}
+{"tMs":11694,"delta":"9:idx-1\n          "}
+{"tMs":11727,"delta":"IconButton \"chevron"}
+{"tMs":11761,"delta":"_right\" -> idx="}
+{"tMs":11794,"delta":"idx==9?1:id"}
+{"tMs":11827,"delta":"x+1"}

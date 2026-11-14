@@ -1,0 +1,115 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"Column w:390 gap:12 pad:16\n  state idx=0\n  state picked=-1\n  if picked<0\n    Row between\n      Text.heading \"Running shoes\"\n      Text.muted \"{idx+1} of 6\"\n    Row gap:8\n      IconButton \"chevron_left\" -> idx=max(0,idx-1)\n      Card gap:8 grow\n        Image \"https://placehold.co/342x180?text=Shoe\" radius:8\n        Text.strong \"Aero Runner\" \n        Row between\n          Text \"$89\"\n          Text.success \"4.6 star\"\n        Button.primary \"View details\" -> picked=idx\n      IconButton \"chevron_right\" -> idx=min(5,idx+1)\n    Row center gap:6\n      Box w:8 h:8 radius:4 fill:#FF9E9E9E\n      Box w:8 h:8 radius:4 fill:#FF9E9E9E\n      Box w:8 h:8 radius:4 fill:#FF9E9E9E\n      Box w:8 h:8 radius:4 fill:#FF9E9E9E\n      Box w:8 h:8 radius:4 fill:#FF9E9E9E\n      Box w:8 h:8 radius:4 fill:#FF9E9E9E\n  if picked>=0\n    Card gap:12\n      Button.ghost \"Back to carousel\" -> picked=-1\n      Image \"https://placehold.co/342x220?text=Shoe\" radius:8\n      Text.title \"Shoe {picked+1}\"\n      Row between\n        Text \"$89\"\n        Text.success \"4.6 star\"\n      Text.body \"Lightweight everyday trainer with breathable mesh and cushioned midsole.\"\n      Text.strong \"Size\"\n      SegmentedButton =size items:[\"39\",\"40\",\"41\",\"42\",\"43\"]\n      Button.primary \"Add to bag\" -> emit add; toast \"Added to bag\"","usage":{"input_tokens":1698,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":630,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":678,"totalMs":3037}}
+{"tMs":678,"delta":"Column"}
+{"tMs":799,"delta":" w:390"}
+{"tMs":799,"delta":" g"}
+{"tMs":799,"delta":"ap:12 "}
+{"tMs":800,"delta":"pad:16\n  state"}
+{"tMs":801,"delta":" idx=0\n  "}
+{"tMs":820,"delta":"state pic"}
+{"tMs":842,"delta":"ked=-"}
+{"tMs":861,"delta":"1\n  if"}
+{"tMs":882,"delta":" picked<"}
+{"tMs":903,"delta":"0\n    Row between"}
+{"tMs":924,"delta":"\n      Text.he"}
+{"tMs":945,"delta":"ading \"Running shoes\""}
+{"tMs":966,"delta":"\n      "}
+{"tMs":986,"delta":"Text.mu"}
+{"tMs":1007,"delta":"ted \"{idx+"}
+{"tMs":1027,"delta":"1} of 6\"\n    "}
+{"tMs":1048,"delta":"Row gap:8\n      "}
+{"tMs":1069,"delta":"IconButton \"ch"}
+{"tMs":1091,"delta":"evron_left\" -> id"}
+{"tMs":1110,"delta":"x=max(0,idx"}
+{"tMs":1131,"delta":"-1)\n      Card g"}
+{"tMs":1151,"delta":"ap:8"}
+{"tMs":1172,"delta":" grow"}
+{"tMs":1192,"delta":"\n        Image"}
+{"tMs":1212,"delta":" \"https://plac"}
+{"tMs":1232,"delta":"eh"}
+{"tMs":1253,"delta":"old.co/342"}
+{"tMs":1273,"delta":"x180"}
+{"tMs":1293,"delta":"?"}
+{"tMs":1313,"delta":"text"}
+{"tMs":1335,"delta":"="}
+{"tMs":1355,"delta":"Shoe\" rad"}
+{"tMs":1376,"delta":"ius:8\n        Text."}
+{"tMs":1396,"delta":"strong \"Aero"}
+{"tMs":1416,"delta":" Runner\""}
+{"tMs":1436,"delta":" \n        Row"}
+{"tMs":1457,"delta":" between\n          Text \""}
+{"tMs":1477,"delta":"$89"}
+{"tMs":1497,"delta":"\""}
+{"tMs":1518,"delta":"\n          Text.success"}
+{"tMs":1539,"delta":" \"4"}
+{"tMs":1558,"delta":".6"}
+{"tMs":1579,"delta":" star\"\n        Button"}
+{"tMs":1599,"delta":"."}
+{"tMs":1622,"delta":"primary \"View details\" ->"}
+{"tMs":1642,"delta":" picked=idx"}
+{"tMs":1663,"delta":"\n      IconButton \"chev"}
+{"tMs":1682,"delta":"ron_right\" -> idx"}
+{"tMs":1702,"delta":"=min(5"}
+{"tMs":1722,"delta":",idx+1)\n    "}
+{"tMs":1743,"delta":"Row center"}
+{"tMs":1763,"delta":" gap:6"}
+{"tMs":1783,"delta":"\n      "}
+{"tMs":1803,"delta":"Box"}
+{"tMs":1824,"delta":" w"}
+{"tMs":1844,"delta":":8"}
+{"tMs":1864,"delta":" h:8 rad"}
+{"tMs":1886,"delta":"ius:4"}
+{"tMs":1905,"delta":" fill:#F"}
+{"tMs":1926,"delta":"F9"}
+{"tMs":1946,"delta":"E9E9E"}
+{"tMs":1987,"delta":"\n      Box w:8 h"}
+{"tMs":2008,"delta":":8 radius:4 "}
+{"tMs":2028,"delta":"fill:#FF9E"}
+{"tMs":2049,"delta":"9E9E\n      "}
+{"tMs":2070,"delta":"Box w:8 h:"}
+{"tMs":2089,"delta":"8 radius:4 f"}
+{"tMs":2111,"delta":"ill:#FF9E9"}
+{"tMs":2131,"delta":"E9E\n      Box w"}
+{"tMs":2159,"delta":":8 h:8 rad"}
+{"tMs":2172,"delta":"ius:4 fill:#"}
+{"tMs":2192,"delta":"FF9E9E9E"}
+{"tMs":2212,"delta":"\n      Box w:8 "}
+{"tMs":2233,"delta":"h:8 radius:4"}
+{"tMs":2254,"delta":" fill:#FF9"}
+{"tMs":2274,"delta":"E9E9E\n      "}
+{"tMs":2294,"delta":"Box w:8 h:8"}
+{"tMs":2315,"delta":" radius:4 fill"}
+{"tMs":2335,"delta":":#FF9E9E"}
+{"tMs":2356,"delta":"9E\n  if picked>"}
+{"tMs":2376,"delta":"=0\n    Card gap"}
+{"tMs":2397,"delta":":12\n      Button."}
+{"tMs":2417,"delta":"ghost \"Back to"}
+{"tMs":2438,"delta":" carousel\" -> picked"}
+{"tMs":2459,"delta":"=-1\n      Image \""}
+{"tMs":2479,"delta":"https://placehold.co/"}
+{"tMs":2500,"delta":"342x220"}
+{"tMs":2519,"delta":"?text=Shoe\""}
+{"tMs":2540,"delta":" radius:8\n      Text"}
+{"tMs":2560,"delta":".title \"Sh"}
+{"tMs":2581,"delta":"oe {"}
+{"tMs":2601,"delta":"picked+"}
+{"tMs":2622,"delta":"1}\"\n      Row"}
+{"tMs":2642,"delta":" between\n        Text \"$89"}
+{"tMs":2662,"delta":"\"\n        Text.success \""}
+{"tMs":2683,"delta":"4.6 star\"\n      "}
+{"tMs":2703,"delta":"Text.body \"Light"}
+{"tMs":2724,"delta":"weight ever"}
+{"tMs":2744,"delta":"yday tr"}
+{"tMs":2764,"delta":"ainer with breathable mes"}
+{"tMs":2785,"delta":"h and c"}
+{"tMs":2805,"delta":"ushioned mid"}
+{"tMs":2826,"delta":"sole.\"\n      Text."}
+{"tMs":2846,"delta":"strong \"Size\""}
+{"tMs":2866,"delta":"\n      S"}
+{"tMs":2888,"delta":"egmentedButton ="}
+{"tMs":2907,"delta":"size items:[\"39"}
+{"tMs":2928,"delta":"\",\"40\",\"41\",\""}
+{"tMs":2948,"delta":"42\",\"43\"]\n      "}
+{"tMs":2968,"delta":"Button.primary \"Add to"}
+{"tMs":2989,"delta":" bag\" -> emit add"}
+{"tMs":3009,"delta":"; toast \"Added to"}
+{"tMs":3030,"delta":" bag\""}

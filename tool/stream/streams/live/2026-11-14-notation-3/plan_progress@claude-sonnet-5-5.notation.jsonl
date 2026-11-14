@@ -1,0 +1,149 @@
+{"meta":{"ui":"plan_progress","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"Card w:390 gap:12\n  state step=0\n  state running=false\n  state elapsed=0\n  Text.title \"Blog migration plan\"\n  Progress =step/6\n  Row between middle\n    Text.muted \"Step {min(step+1,6)} of 6\"\n    Text.muted \"Elapsed: {elapsed}s\"\n  Divider\n  Row gap:12 middle\n    if step>0\n      Icon \"check_circle\"\n    if step==0\n      Icon \"radio_button_unchecked\"\n    Column grow\n      Text.strong \"1. Back up content\"\n      Text.small \"Export posts, images and settings.\"\n    if running&&step==0\n      CircularProgressIndicator\n  Row gap:12 middle\n    if step>1\n      Icon \"check_circle\"\n    if step<=1\n      Icon \"radio_button_unchecked\"\n    Column grow\n      Text.strong \"2. Set up new host\"\n      Text.small \"Create the site and configure the domain.\"\n    if running&&step==1\n      CircularProgressIndicator\n  Row gap:12 middle\n    if step>2\n      Icon \"check_circle\"\n    if step<=2\n      Icon \"radio_button_unchecked\"\n    Column grow\n      Text.strong \"3. Import posts\"\n      Text.small \"Bring over articles, tags and comments.\"\n    if running&&step==2\n      CircularProgressIndicator\n  Row gap:12 middle\n    if step>3\n      Icon \"check_circle\"\n    if step<=3\n      Icon \"radio_button_unchecked\"\n    Column grow\n      Text.strong \"4. Move media\"\n      Text.small \"Upload images and fix their links.\"\n    if running&&step==3\n      CircularProgressIndicator\n  Row gap:12 middle\n    if step>4\n      Icon \"check_circle\"\n    if step<=4\n      Icon \"radio_button_unchecked\"\n    Column grow\n      Text.strong \"5. Redirect old URLs\"\n      Text.small \"Keep search rankings with 301 redirects.\"\n    if running&&step==4\n      CircularProgressIndicator\n  Row gap:12 middle\n    if step>5\n      Icon \"check_circle\"\n    if step<=5\n      Icon \"radio_button_unchecked\"\n    Column grow\n      Text.strong \"6. Test and launch\"\n      Text.small \"Check pages, then switch DNS.\"\n    if running&&step==5\n      CircularProgressIndicator\n  Divider\n  if step<6\n    Row gap:8\n      if !running\n        Button.primary \"{step==0?'Start':'Resume'}\" -> running=true; emit run\n      if running\n        Button.outline \"Pause\" -> running=false; emit pause\n  if step>=6\n    Card gap:4\n      Text.heading \"Migration complete\"\n      Text.body \"All 6 steps finished in {elapsed}s.\"\n      Badge.success \"Done\"","usage":{"input_tokens":1702,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":937,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1212,"totalMs":6121}}
+{"tMs":1212,"delta":"Card w"}
+{"tMs":1526,"delta":":390 gap:12"}
+{"tMs":1527,"delta":"\n  state step=0"}
+{"tMs":1527,"delta":"\n  state running=false\n  state"}
+{"tMs":1528,"delta":" el"}
+{"tMs":1528,"delta":"apsed=0\n  "}
+{"tMs":1528,"delta":"Text.title \"Bl"}
+{"tMs":1528,"delta":"og migration plan\"\n  "}
+{"tMs":1528,"delta":"Progress ="}
+{"tMs":1528,"delta":"step/6\n  Row between"}
+{"tMs":1544,"delta":" midd"}
+{"tMs":1579,"delta":"le\n    Text.muted"}
+{"tMs":1612,"delta":" \"Step"}
+{"tMs":1858,"delta":" {min"}
+{"tMs":1858,"delta":"(step+"}
+{"tMs":1858,"delta":"1,6)} of 6"}
+{"tMs":1858,"delta":"\"\n    Text.mu"}
+{"tMs":1858,"delta":"ted \"El"}
+{"tMs":1858,"delta":"apsed: {elaps"}
+{"tMs":1858,"delta":"ed}s\"\n  Div"}
+{"tMs":1878,"delta":"ider\n  Row gap:"}
+{"tMs":1912,"delta":"12"}
+{"tMs":1945,"delta":" middle\n    if"}
+{"tMs":1978,"delta":" step>0\n      Icon"}
+{"tMs":2011,"delta":" \"check_"}
+{"tMs":2196,"delta":"circle\"\n    if"}
+{"tMs":2196,"delta":" step==0\n      Icon"}
+{"tMs":2196,"delta":" \"rad"}
+{"tMs":2196,"delta":"io_button_"}
+{"tMs":2196,"delta":"unchecked\"\n    "}
+{"tMs":2212,"delta":"Column gr"}
+{"tMs":2245,"delta":"ow\n      Text.str"}
+{"tMs":2278,"delta":"ong \"1. Back"}
+{"tMs":2311,"delta":" up content"}
+{"tMs":2346,"delta":"\"\n      Text.small \""}
+{"tMs":2377,"delta":"Export pos"}
+{"tMs":2410,"delta":"ts,"}
+{"tMs":2527,"delta":" images"}
+{"tMs":2527,"delta":" and sett"}
+{"tMs":2527,"delta":"ings.\"\n    if running"}
+{"tMs":2544,"delta":"&&step==0"}
+{"tMs":2578,"delta":"\n      CircularProgress"}
+{"tMs":2610,"delta":"Indicator\n  Row"}
+{"tMs":2644,"delta":" gap:12 middle"}
+{"tMs":2677,"delta":"\n    if step>1\n      "}
+{"tMs":2712,"delta":"Icon \"check_circle\""}
+{"tMs":2744,"delta":"\n    if step<="}
+{"tMs":2778,"delta":"1\n      Icon \"rad"}
+{"tMs":2811,"delta":"io_button_unchecked"}
+{"tMs":2856,"delta":"\"\n    Column grow"}
+{"tMs":2878,"delta":"\n      Text.strong \"2"}
+{"tMs":2915,"delta":". Set up new host"}
+{"tMs":2945,"delta":"\"\n      Text.small \""}
+{"tMs":2978,"delta":"Create the site"}
+{"tMs":3011,"delta":" and configure the dom"}
+{"tMs":3045,"delta":"ain.\"\n    if running&&"}
+{"tMs":3078,"delta":"step==1\n      Circular"}
+{"tMs":3112,"delta":"ProgressIndicator"}
+{"tMs":3146,"delta":"\n  Row gap:12 "}
+{"tMs":3179,"delta":"middle\n    if step>2"}
+{"tMs":3212,"delta":"\n      Icon \"check_"}
+{"tMs":3245,"delta":"circle\"\n    if step<"}
+{"tMs":3279,"delta":"=2\n      Icon \""}
+{"tMs":3314,"delta":"radio_button_unchec"}
+{"tMs":3346,"delta":"ked\"\n    Column grow"}
+{"tMs":3380,"delta":"\n      Text.strong \""}
+{"tMs":3414,"delta":"3. Import posts\""}
+{"tMs":3446,"delta":"\n      Text.small \"B"}
+{"tMs":3479,"delta":"ring over"}
+{"tMs":3514,"delta":" articles,"}
+{"tMs":3546,"delta":" tags and comments.\"\n    "}
+{"tMs":3579,"delta":"if running&&step==2"}
+{"tMs":3613,"delta":"\n      CircularProgressI"}
+{"tMs":3646,"delta":"ndicator\n  Row g"}
+{"tMs":3679,"delta":"ap:12 middle\n    "}
+{"tMs":3713,"delta":"if step>3\n      Ic"}
+{"tMs":3746,"delta":"on \"check_circle\""}
+{"tMs":3779,"delta":"\n    if step<=3\n      "}
+{"tMs":3813,"delta":"Icon \"radio_button"}
+{"tMs":3847,"delta":"_unchecked\"\n    "}
+{"tMs":3880,"delta":"Column grow\n      Text"}
+{"tMs":3916,"delta":".strong \"4. Move"}
+{"tMs":3947,"delta":" media\"\n      Text.small"}
+{"tMs":3980,"delta":" \"Upload images and f"}
+{"tMs":4013,"delta":"ix their"}
+{"tMs":4046,"delta":" links.\"\n    if running&&"}
+{"tMs":4082,"delta":"step==3\n      Circular"}
+{"tMs":4114,"delta":"ProgressIndicator"}
+{"tMs":4147,"delta":"\n  Row gap:12 "}
+{"tMs":4180,"delta":"middle\n    if step>4"}
+{"tMs":4213,"delta":"\n      Icon \"check_"}
+{"tMs":4247,"delta":"circle\"\n    if step<"}
+{"tMs":4281,"delta":"=4\n      Icon \""}
+{"tMs":4313,"delta":"radio_button_unchec"}
+{"tMs":4347,"delta":"ked\"\n    Column grow"}
+{"tMs":4381,"delta":"\n      Text.strong \""}
+{"tMs":4413,"delta":"5. Red"}
+{"tMs":4447,"delta":"irect old"}
+{"tMs":4480,"delta":" URLs\"\n      Text"}
+{"tMs":4513,"delta":".small \"Ke"}
+{"tMs":4547,"delta":"ep search r"}
+{"tMs":4580,"delta":"ankings with"}
+{"tMs":4613,"delta":" 301 redirects.\""}
+{"tMs":4646,"delta":"\n    if running&&step==4"}
+{"tMs":4680,"delta":"\n      CircularProgress"}
+{"tMs":4716,"delta":"Indicator\n  Row"}
+{"tMs":4746,"delta":" gap:12 middle"}
+{"tMs":4780,"delta":"\n    if step>5\n      "}
+{"tMs":4813,"delta":"Icon \"check_circle\""}
+{"tMs":4847,"delta":"\n    if"}
+{"tMs":4880,"delta":" step<=5\n      Ic"}
+{"tMs":4913,"delta":"on \"radio_button_un"}
+{"tMs":4948,"delta":"checked\"\n    Column"}
+{"tMs":4980,"delta":" grow\n      Text.str"}
+{"tMs":5013,"delta":"ong \"6. Test"}
+{"tMs":5047,"delta":" and launch\"\n      Text"}
+{"tMs":5080,"delta":".small \"Check p"}
+{"tMs":5113,"delta":"ages, then"}
+{"tMs":5147,"delta":" switch DNS.\"\n    "}
+{"tMs":5180,"delta":"if running&&step==5"}
+{"tMs":5214,"delta":"\n      CircularProgressI"}
+{"tMs":5247,"delta":"ndicator\n  Divider"}
+{"tMs":5280,"delta":"\n  if step<6\n    "}
+{"tMs":5313,"delta":"Row gap:8"}
+{"tMs":5347,"delta":"\n      if"}
+{"tMs":5381,"delta":" !running\n        Button.prim"}
+{"tMs":5416,"delta":"ary \"{"}
+{"tMs":5448,"delta":"step=="}
+{"tMs":5480,"delta":"0?'"}
+{"tMs":5513,"delta":"Start':'Res"}
+{"tMs":5546,"delta":"ume'}\" -> running"}
+{"tMs":5581,"delta":"=true; em"}
+{"tMs":5613,"delta":"it run"}
+{"tMs":5647,"delta":"\n      if running\n        Button"}
+{"tMs":5680,"delta":".outline \"Pause\""}
+{"tMs":5714,"delta":" -> running=false; emit"}
+{"tMs":5748,"delta":" pause\n  "}
+{"tMs":5780,"delta":"if step>=6\n    "}
+{"tMs":5813,"delta":"Card gap:4"}
+{"tMs":5847,"delta":"\n      Text.he"}
+{"tMs":5882,"delta":"ading \"Mig"}
+{"tMs":5913,"delta":"ration complete\"\n      Text"}
+{"tMs":5947,"delta":".body"}
+{"tMs":5980,"delta":" \"All 6 steps fin"}
+{"tMs":6013,"delta":"ished in {elapsed}"}
+{"tMs":6047,"delta":"s.\""}
+{"tMs":6080,"delta":"\n      Badge.success \""}
+{"tMs":6114,"delta":"Done\""}

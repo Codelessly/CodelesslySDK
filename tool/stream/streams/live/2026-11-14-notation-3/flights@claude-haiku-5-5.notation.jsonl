@@ -1,0 +1,103 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"Card w:390 gap:12\n  Text.title \"London to Lisbon, Friday\"\n  state pick=\"a\"\n  Row gap:8\n    ChoiceChip \"Option A\" selected:=pick==\"a\" -> pick=\"a\"\n    ChoiceChip \"Option B\" selected:=pick==\"b\" -> pick=\"b\"\n    ChoiceChip \"Option C\" selected:=pick==\"c\" -> pick=\"c\"\n  Card gap:6 fill:#FFEFF6FF\n    Row between\n      Text.strong \"07:10 to 09:45\"\n      Badge.success \"Cheapest\"\n    Text.body \"TAP Air Portugal · Direct\"\n    Text.caption \"Duration 2h 35m\"\n    Text.strong \"£89\"\n  Card gap:6 fill:#FFF5F5F5\n    Row between\n      Text.strong \"13:20 to 15:55\"\n      Badge.info \"Best time\"\n    Text.body \"easyJet · Direct\"\n    Text.caption \"Duration 2h 35m\"\n    Text.strong \"£112\"\n  Card gap:6 fill:#FFF5F5F5\n    Row between\n      Text.strong \"18:05 to 22:40 (1 stop)\"\n    Text.body \"British Airways · 1 stop in Madrid\"\n    Text.caption \"Duration 4h 35m\"\n    Text.strong \"£134\"\n  Divider\n  Row between\n    Text.strong \"Total\"\n    Text.strong \"£{pick=='a'?89:pick=='b'?112:134}\"\n  Button.primary \"Confirm\" -> emit confirm_flight; toast \"You chose option {pick}\"","usage":{"input_tokens":1697,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":540,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":610,"totalMs":2678}}
+{"tMs":610,"delta":"Card"}
+{"tMs":777,"delta":" w"}
+{"tMs":777,"delta":":390"}
+{"tMs":777,"delta":" g"}
+{"tMs":778,"delta":"ap:12\n  Text"}
+{"tMs":778,"delta":".title \"London"}
+{"tMs":778,"delta":" to Lisbon,"}
+{"tMs":778,"delta":" Friday\"\n  state"}
+{"tMs":778,"delta":" p"}
+{"tMs":790,"delta":"ick=\""}
+{"tMs":810,"delta":"a"}
+{"tMs":832,"delta":"\"\n  Row gap:"}
+{"tMs":853,"delta":"8\n    "}
+{"tMs":874,"delta":"ChoiceChip \""}
+{"tMs":894,"delta":"Option"}
+{"tMs":914,"delta":" A\" sel"}
+{"tMs":935,"delta":"ected:=pick="}
+{"tMs":956,"delta":"=\"a\" -> pick=\""}
+{"tMs":977,"delta":"a\"\n    Choi"}
+{"tMs":997,"delta":"ceChip \"Option B\""}
+{"tMs":1018,"delta":" selected:=pick==\""}
+{"tMs":1039,"delta":"b\" -> pick=\"b"}
+{"tMs":1061,"delta":"\"\n    Choice"}
+{"tMs":1080,"delta":"Chip \"Option C\" sel"}
+{"tMs":1105,"delta":"ected:=pick==\"c"}
+{"tMs":1121,"delta":"\" -> pick=\"c\""}
+{"tMs":1141,"delta":"\n  Card"}
+{"tMs":1162,"delta":" gap:6"}
+{"tMs":1182,"delta":" "}
+{"tMs":1204,"delta":"fill:#F"}
+{"tMs":1222,"delta":"FE"}
+{"tMs":1243,"delta":"FF6"}
+{"tMs":1263,"delta":"F"}
+{"tMs":1284,"delta":"F\n    Row between"}
+{"tMs":1304,"delta":"\n      Text.str"}
+{"tMs":1324,"delta":"ong \"07"}
+{"tMs":1344,"delta":":10"}
+{"tMs":1366,"delta":" to"}
+{"tMs":1385,"delta":" 09"}
+{"tMs":1405,"delta":":45\""}
+{"tMs":1426,"delta":"\n      Bad"}
+{"tMs":1447,"delta":"ge.success \"Cheap"}
+{"tMs":1467,"delta":"est\"\n    Text.body"}
+{"tMs":1488,"delta":" \"T"}
+{"tMs":1508,"delta":"A"}
+{"tMs":1528,"delta":"P Air"}
+{"tMs":1549,"delta":" Portugal ·"}
+{"tMs":1569,"delta":" Direct\""}
+{"tMs":1589,"delta":"\n    Text.ca"}
+{"tMs":1610,"delta":"ption \"Duration 2h"}
+{"tMs":1631,"delta":" 35m\""}
+{"tMs":1650,"delta":"\n    Text"}
+{"tMs":1671,"delta":".strong \"£"}
+{"tMs":1692,"delta":"89\"\n  Card gap"}
+{"tMs":1712,"delta":":6 fill:#F"}
+{"tMs":1732,"delta":"FF5"}
+{"tMs":1753,"delta":"F5"}
+{"tMs":1773,"delta":"F5\n    Row between"}
+{"tMs":1793,"delta":"\n      Text.strong \"13"}
+{"tMs":1814,"delta":":20"}
+{"tMs":1834,"delta":" to 15"}
+{"tMs":1855,"delta":":55"}
+{"tMs":1877,"delta":"\"\n      Badge.info"}
+{"tMs":1896,"delta":" \"Best time\"\n    "}
+{"tMs":1916,"delta":"Text.body \"eas"}
+{"tMs":1939,"delta":"yJet ·"}
+{"tMs":1958,"delta":" Direct\"\n    Text"}
+{"tMs":1977,"delta":".caption \"Duration "}
+{"tMs":1998,"delta":"2h 35m\"\n    "}
+{"tMs":2018,"delta":"Text.strong \"£112"}
+{"tMs":2038,"delta":"\"\n  Card gap:"}
+{"tMs":2059,"delta":"6 fill:#FF"}
+{"tMs":2081,"delta":"F5F5F5\n    "}
+{"tMs":2100,"delta":"Row between\n      Text."}
+{"tMs":2121,"delta":"strong \"18:05 to"}
+{"tMs":2141,"delta":" 22"}
+{"tMs":2161,"delta":":40 "}
+{"tMs":2182,"delta":"(1"}
+{"tMs":2203,"delta":" stop)\"\n    "}
+{"tMs":2223,"delta":"Text.body \"British Air"}
+{"tMs":2243,"delta":"ways · "}
+{"tMs":2264,"delta":"1 stop in"}
+{"tMs":2284,"delta":" Madr"}
+{"tMs":2304,"delta":"id\"\n    Text.ca"}
+{"tMs":2325,"delta":"ption \"Duration 4"}
+{"tMs":2345,"delta":"h 35"}
+{"tMs":2366,"delta":"m\"\n    Text.str"}
+{"tMs":2386,"delta":"ong \"£134"}
+{"tMs":2406,"delta":"\"\n  "}
+{"tMs":2427,"delta":"Divider\n  Row between"}
+{"tMs":2450,"delta":"\n    Text.strong \""}
+{"tMs":2468,"delta":"Total\"\n    Text.str"}
+{"tMs":2488,"delta":"ong \"£{pick="}
+{"tMs":2509,"delta":"='a'?89:p"}
+{"tMs":2529,"delta":"ick=='b'?112:"}
+{"tMs":2550,"delta":"134}\"\n  Button."}
+{"tMs":2570,"delta":"primary \"Confirm\""}
+{"tMs":2590,"delta":" -> emit confirm_"}
+{"tMs":2610,"delta":"flight; toast \"You ch"}
+{"tMs":2631,"delta":"ose option"}
+{"tMs":2651,"delta":" {pick}"}
+{"tMs":2672,"delta":"\""}

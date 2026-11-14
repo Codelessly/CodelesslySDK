@@ -1,0 +1,105 @@
+{
+ "ui": "dashboard",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3958,
+ "turns": [
+  {
+   "input_tokens": 1725,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1866,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 636,
+   "totalMs": 9844,
+   "chars": 3953,
+   "lines": 148,
+   "jsonTails": 0,
+   "nodes": 143,
+   "outputTokensPerNode": "13.0",
+   "notationIssues": [
+    "line 11:30: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 11:34: Unknown word \"$12.4k\" on a Text. Props are written key:value.",
+    "line 11:50: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 11:55: Unknown word \"$52.8k\" on a Text. Props are written key:value.",
+    "line 11:64: Unknown word \"$151k\" on a Text. Props are written key:value.",
+    "line 12:30: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 12:34: Unknown word \"+3.1%\" on a Text. Props are written key:value.",
+    "line 12:49: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 12:54: Unknown word \"+8.4%\" on a Text. Props are written key:value.",
+    "line 12:62: Unknown word \"+14.2%\" on a Text. Props are written key:value.",
+    "line 15:30: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 15:34: Unknown word \"284\" on a Text. Props are written key:value.",
+    "line 15:47: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 15:52: Unknown word \"1,240\" on a Text. Props are written key:value.",
+    "line 15:60: Unknown word \"3,610\" on a Text. Props are written key:value.",
+    "line 16:30: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 16:34: Unknown word \"+2.0%\" on a Text. Props are written key:value.",
+    "line 16:49: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 16:54: Unknown word \"+5.7%\" on a Text. Props are written key:value.",
+    "line 16:62: Unknown word \"+11.3%\" on a Text. Props are written key:value.",
+    "line 19:30: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 19:34: Unknown word \"1.9%\" on a Text. Props are written key:value.",
+    "line 19:48: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 19:53: Unknown word \"2.4%\" on a Text. Props are written key:value.",
+    "line 19:60: Unknown word \"2.8%\" on a Text. Props are written key:value.",
+    "line 20:29: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 20:33: Unknown word \"+0.1%\" on a Text. Props are written key:value.",
+    "line 20:48: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 20:53: Unknown word \"+0.3%\" on a Text. Props are written key:value.",
+    "line 20:61: Unknown word \"+0.5%\" on a Text. Props are written key:value.",
+    "line 23:30: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 23:34: Unknown word \"8.1k\" on a Text. Props are written key:value.",
+    "line 23:48: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 23:53: Unknown word \"9.6k\" on a Text. Props are written key:value.",
+    "line 23:60: Unknown word \"11.2k\" on a Text. Props are written key:value.",
+    "line 24:30: Unknown word \"7\" on a Text. Props are written key:value.",
+    "line 24:34: Unknown word \"+1.2%\" on a Text. Props are written key:value.",
+    "line 24:49: Unknown word \"30\" on a Text. Props are written key:value.",
+    "line 24:54: Unknown word \"+4.6%\" on a Text. Props are written key:value.",
+    "line 24:62: Unknown word \"+9.0%\" on a Text. Props are written key:value."
+   ],
+   "errors": [
+    "unknown_bind_path /nodes/chip1/bind/props.selected: A chip has no prop \"selected\". Its props: label, labelStyle, avatar, avatarSize, avatarColor, backgroundColor, side, shape, elevation, shadowColor, padding, labelPadding, autofocus, variant, spacing.",
+    "unknown_bind_path /nodes/chip2/bind/props.selected: A chip has no prop \"selected\". Its props: label, labelStyle, avatar, avatarSize, avatarColor, backgroundColor, side, shape, elevation, shadowColor, padding, labelPadding, autofocus, variant, spacing.",
+    "unknown_bind_path /nodes/chip3/bind/props.selected: A chip has no prop \"selected\". Its props: label, labelStyle, avatar, avatarSize, avatarColor, backgroundColor, side, shape, elevation, shadowColor, padding, labelPadding, autofocus, variant, spacing.",
+    "unknown_bind_path /nodes/chip4/bind/props.selected: A chip has no prop \"selected\". Its props: label, labelStyle, avatar, avatarSize, avatarColor, backgroundColor, side, shape, elevation, shadowColor, padding, labelPadding, autofocus, variant, spacing."
+   ]
+  },
+  {
+   "input_tokens": 5291,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1948,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 1411,
+   "totalMs": 9558,
+   "chars": 4359,
+   "lines": 176,
+   "jsonTails": 0,
+   "nodes": 159,
+   "outputTokensPerNode": "12.3",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

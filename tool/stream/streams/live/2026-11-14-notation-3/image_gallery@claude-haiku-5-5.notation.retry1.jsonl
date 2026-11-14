@@ -1,0 +1,137 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"Card gap:12 w:390\n  state open=0\n  state idx=1\n  Text.heading \"Trip photos\"\n  Grid cols:3 gap:8\n    Box fill:#FF4F7BAC radius:8 h:100 -> idx=1; open=1\n      Text.small \"Beach sunrise\" pad:6\n    Box fill:#FFF2A65A radius:8 h:100 -> idx=2; open=1\n      Text.small \"Mountain trail\" pad:6\n    Box fill:#FF2A9D8F radius:8 h:100 -> idx=3; open=1\n      Text.small \"Old town market\" pad:6\n    Box fill:#FFE76F51 radius:8 h:100 -> idx=4; open=1\n      Text.small \"Harbour at dusk\" pad:6\n    Box fill:#FF264653 radius:8 h:100 -> idx=5; open=1\n      Text.small \"Desert road\" pad:6\n    Box fill:#FF8AB17D radius:8 h:100 -> idx=6; open=1\n      Text.small \"Forest waterfall\" pad:6\n    Box fill:#FFB5838D radius:8 h:100 -> idx=7; open=1\n      Text.small \"Night street\" pad:6\n    Box fill:#FF6D597A radius:8 h:100 -> idx=8; open=1\n      Text.small \"Lake reflections\" pad:6\n    Box fill:#FFEAC435 radius:8 h:100 -> idx=9; open=1\n      Text.small \"Last supper\" pad:6\n  if open==1\n    Card gap:12 pad:16\n      Row between\n        Text.muted \"{idx} of 9\"\n        IconButton \"close\" -> open=0\n      Box fill:#FF4F7BAC radius:8 h:240 visible:=idx==1\n        Text.small \"Beach sunrise\" pad:8\n      Box fill:#FFF2A65A radius:8 h:240 visible:=idx==2\n        Text.small \"Mountain trail\" pad:8\n      Box fill:#FF2A9D8F radius:8 h:240 visible:=idx==3\n        Text.small \"Old town market\" pad:8\n      Box fill:#FFE76F51 radius:8 h:240 visible:=idx==4\n        Text.small \"Harbour at dusk\" pad:8\n      Box fill:#FF264653 radius:8 h:240 visible:=idx==5\n        Text.small \"Desert road\" pad:8\n      Box fill:#FF8AB17D radius:8 h:240 visible:=idx==6\n        Text.small \"Forest waterfall\" pad:8\n      Box fill:#FFB5838D radius:8 h:240 visible:=idx==7\n        Text.small \"Night street\" pad:8\n      Box fill:#FF6D597A radius:8 h:240 visible:=idx==8\n        Text.small \"Lake reflections\" pad:8\n      Box fill:#FFEAC435 radius:8 h:240 visible:=idx==9\n        Text.small \"Last supper\" pad:8\n      Row between\n        IconButton \"chevron_left\" -> idx=max(1,idx-1)\n        IconButton \"chevron_right\" -> idx=min(9,idx+1)","usage":{"input_tokens":3597,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1070,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":434,"totalMs":3372}}
+{"tMs":434,"delta":"Card"}
+{"tMs":659,"delta":" gap:12 w:390"}
+{"tMs":659,"delta":"\n  state"}
+{"tMs":659,"delta":" open=0\n  state idx"}
+{"tMs":659,"delta":"=1\n  Text.he"}
+{"tMs":659,"delta":"ading \"Trip photos\""}
+{"tMs":659,"delta":"\n  Grid cols:"}
+{"tMs":659,"delta":"3 gap:8\n    "}
+{"tMs":659,"delta":"Box fill:#FF"}
+{"tMs":661,"delta":"4F7BAC radius"}
+{"tMs":684,"delta":":8 h:100 -"}
+{"tMs":705,"delta":"> idx=1; open="}
+{"tMs":729,"delta":"1\n      Text.small \""}
+{"tMs":894,"delta":"Beach sunrise\""}
+{"tMs":894,"delta":" pad:6\n    Box"}
+{"tMs":894,"delta":" fill:#FFF2"}
+{"tMs":894,"delta":"A65A radius:8 "}
+{"tMs":895,"delta":"h:100 -> idx"}
+{"tMs":895,"delta":"=2; open=1\n      "}
+{"tMs":895,"delta":"Text.small \"Mount"}
+{"tMs":898,"delta":"ain trail\" pad:6"}
+{"tMs":920,"delta":"\n    Box fill:#"}
+{"tMs":942,"delta":"FF2A9D8F"}
+{"tMs":963,"delta":" radius:8 h:100"}
+{"tMs":985,"delta":" -> idx=3;"}
+{"tMs":1131,"delta":" open=1\n      Text."}
+{"tMs":1131,"delta":"small \"Old town market\" p"}
+{"tMs":1131,"delta":"ad:6\n    Box f"}
+{"tMs":1131,"delta":"ill:#FFE76F"}
+{"tMs":1131,"delta":"51 radius:8 h"}
+{"tMs":1131,"delta":":100 -> idx="}
+{"tMs":1136,"delta":"4; open=1\n      "}
+{"tMs":1157,"delta":"Text.small \"Harbour"}
+{"tMs":1178,"delta":" at dusk\" pad:"}
+{"tMs":1200,"delta":"6\n    Box fill:"}
+{"tMs":1221,"delta":"#FF264653 radius"}
+{"tMs":1243,"delta":":8 h:100 -"}
+{"tMs":1371,"delta":"> idx=5; open="}
+{"tMs":1371,"delta":"1\n      Text.small \""}
+{"tMs":1371,"delta":"Desert road\" pad:"}
+{"tMs":1371,"delta":"6\n    Box fill:"}
+{"tMs":1371,"delta":"#FF8AB17D"}
+{"tMs":1372,"delta":" radius:8 h:100"}
+{"tMs":1393,"delta":" -> idx=6;"}
+{"tMs":1414,"delta":" open=1\n      Text."}
+{"tMs":1436,"delta":"small \"Forest waterf"}
+{"tMs":1458,"delta":"all\" pad:6\n    "}
+{"tMs":1479,"delta":"Box fill:#FF"}
+{"tMs":1500,"delta":"B5838D radius:8"}
+{"tMs":1631,"delta":" h:100 -> id"}
+{"tMs":1631,"delta":"x=7; open=1"}
+{"tMs":1631,"delta":"\n      Text.small \"Night"}
+{"tMs":1631,"delta":" street\" pad:6\n    "}
+{"tMs":1631,"delta":"Box fill:#FF"}
+{"tMs":1631,"delta":"6D597A radius:8"}
+{"tMs":1650,"delta":" h:100 -> id"}
+{"tMs":1672,"delta":"x=8; open=1"}
+{"tMs":1694,"delta":"\n      Text.small \"L"}
+{"tMs":1715,"delta":"ake reflections\" pad:"}
+{"tMs":1737,"delta":"6\n    Box fill:"}
+{"tMs":1758,"delta":"#FFEAC435 "}
+{"tMs":1867,"delta":"radius:8 h:100"}
+{"tMs":1867,"delta":" -> idx=9;"}
+{"tMs":1867,"delta":" open=1\n      Text."}
+{"tMs":1867,"delta":"small \"Last supper\" p"}
+{"tMs":1867,"delta":"ad:6\n  if open=="}
+{"tMs":1887,"delta":"1\n    Card gap:"}
+{"tMs":1908,"delta":"12 p"}
+{"tMs":1930,"delta":"ad:16\n      Row between"}
+{"tMs":1951,"delta":"\n        Text.muted \""}
+{"tMs":1972,"delta":"{idx} of 9\""}
+{"tMs":1994,"delta":"\n        IconButton \"close"}
+{"tMs":2015,"delta":"\" -> open=0\n      "}
+{"tMs":2108,"delta":"Box fill:#FF"}
+{"tMs":2108,"delta":"4F7BAC radius"}
+{"tMs":2108,"delta":":8 h:240 vis"}
+{"tMs":2108,"delta":"ible:=idx==1"}
+{"tMs":2123,"delta":"\n        Text.small \"Be"}
+{"tMs":2144,"delta":"ach sunrise\" pad"}
+{"tMs":2165,"delta":":8\n      Box fill"}
+{"tMs":2187,"delta":":#FFF2A65"}
+{"tMs":2211,"delta":"A radius:8 h:"}
+{"tMs":2231,"delta":"240 visible:=idx"}
+{"tMs":2252,"delta":"==2\n        Text.small"}
+{"tMs":2273,"delta":" \"Mountain trail\""}
+{"tMs":2351,"delta":" pad:8\n      Box"}
+{"tMs":2351,"delta":" fill:#FF2A"}
+{"tMs":2351,"delta":"9D8F radius:8"}
+{"tMs":2359,"delta":" h:240 visible:"}
+{"tMs":2381,"delta":"=idx==3\n        "}
+{"tMs":2404,"delta":"Text.small \"Old town market"}
+{"tMs":2424,"delta":"\" pad:8\n      "}
+{"tMs":2445,"delta":"Box fill:#FFE"}
+{"tMs":2466,"delta":"76F51 radius:8"}
+{"tMs":2487,"delta":" h:240 visible:"}
+{"tMs":2509,"delta":"=idx==4\n        "}
+{"tMs":2531,"delta":"Text.small \"Harbour"}
+{"tMs":2589,"delta":" at dusk\" pad:"}
+{"tMs":2589,"delta":"8\n      Box fill:"}
+{"tMs":2594,"delta":"#FF264653 radius"}
+{"tMs":2616,"delta":":8 h:240 vis"}
+{"tMs":2638,"delta":"ible:=idx==5"}
+{"tMs":2659,"delta":"\n        Text.small \"Des"}
+{"tMs":2681,"delta":"ert road\" pad:8"}
+{"tMs":2702,"delta":"\n      Box fill:#F"}
+{"tMs":2724,"delta":"F8AB17D radius"}
+{"tMs":2745,"delta":":8 h:240 vis"}
+{"tMs":2766,"delta":"ible:=idx==6"}
+{"tMs":2790,"delta":"\n        Text.small \"For"}
+{"tMs":2852,"delta":"est waterfall\" pad"}
+{"tMs":2852,"delta":":8\n      Box fill"}
+{"tMs":2852,"delta":":#FFB5838D"}
+{"tMs":2874,"delta":" radius:8 h:240"}
+{"tMs":2895,"delta":" visible:=idx=="}
+{"tMs":2917,"delta":"7\n        Text.small \""}
+{"tMs":2938,"delta":"Night street\" pad:8"}
+{"tMs":2960,"delta":"\n      Box fill:#"}
+{"tMs":2981,"delta":"FF6D597A radius"}
+{"tMs":3003,"delta":":8 h:240 vis"}
+{"tMs":3024,"delta":"ible:=idx==8"}
+{"tMs":3046,"delta":"\n        Text.small \"L"}
+{"tMs":3090,"delta":"ake reflections\" pad:"}
+{"tMs":3090,"delta":"8\n      Box fill:"}
+{"tMs":3110,"delta":"#FFEAC435 "}
+{"tMs":3131,"delta":"radius:8 h:240"}
+{"tMs":3153,"delta":" visible:=idx=="}
+{"tMs":3174,"delta":"9\n        Text.small \""}
+{"tMs":3196,"delta":"Last supper\" pad:"}
+{"tMs":3217,"delta":"8\n      Row between\n        "}
+{"tMs":3238,"delta":"IconButton \"chevron"}
+{"tMs":3260,"delta":"_left\" -> idx="}
+{"tMs":3283,"delta":"max(1,idx-1"}
+{"tMs":3305,"delta":")\n        IconButton \""}
+{"tMs":3371,"delta":"chevron_right\" ->"}
+{"tMs":3371,"delta":" idx=min(9,id"}
+{"tMs":3371,"delta":"x+1)"}

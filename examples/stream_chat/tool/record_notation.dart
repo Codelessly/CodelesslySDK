@@ -107,7 +107,17 @@ Future<_Turn> _turn(String key, String model, String system, List<Map<String, Ob
       ..set('content-type', 'application/json')
       ..set('x-api-key', key)
       ..set('anthropic-version', '2023-06-01');
-    request.add(utf8.encode(jsonEncode({'model': model, 'max_tokens': 8000, 'stream': true, 'system': system, 'messages': messages})));
+    // As the ui_apply recorder: low effort, and thinking off where the model
+    // allows it, so the two forms are compared on the same footing.
+    request.add(utf8.encode(jsonEncode({
+      'model': model,
+      'max_tokens': 8000,
+      'stream': true,
+      'system': system,
+      'messages': messages,
+      'output_config': {'effort': 'low'},
+      if (model == 'claude-haiku-5-5') 'thinking': {'type': 'disabled'},
+    })));
     final response = await request.close();
     if (response.statusCode != 200) {
       final body = await utf8.decodeStream(response);
