@@ -1,0 +1,297 @@
+{
+ "schema": 3,
+ "id": "PromptBanner",
+ "roots": [
+  "banner"
+ ],
+ "widget": {
+  "type": "PromptBanner",
+  "doc": "A one-line notice attached to the top of a prompt box: credits left, a limit reached, read-only. Fires onPressed and onAction.",
+  "props": [
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "You have 3 runs left today",
+    "doc": "The notice.",
+    "required": true
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "info",
+      "neutral",
+      "warning",
+      "critical"
+     ]
+    },
+    "default": "info",
+    "doc": "info and neutral: plain. warning and critical: tinted."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An icon before the message (empty: none)."
+   },
+   {
+    "key": "actionLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A link at the end (\"Upgrade\"); empty: none."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   },
+   {
+    "key": "onAction"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Info",
+   "size": [
+    320,
+    32
+   ],
+   "props": {
+    "message": "You have 3 runs left today",
+    "icon": "bolt",
+    "actionLabel": "Upgrade"
+   }
+  },
+  {
+   "name": "Critical",
+   "size": [
+    320,
+    32
+   ],
+   "props": {
+    "message": "Out of credits",
+    "tone": "critical",
+    "icon": "error_outline",
+    "actionLabel": "Add credits"
+   }
+  }
+ ],
+ "nodes": {
+  "banner": {
+   "type": "row",
+   "children": [
+    "left",
+    "action"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": 37,
+    "padding": [
+     18,
+     0,
+     18,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": [
+     21,
+     21,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.tone == 'critical' ? theme.colors.errorTint : (props.tone == 'warning' ? theme.colors.warningTint : theme.colors.secondaryBackground)}",
+    "decoration.strokes[0].color": "${= props.tone == 'critical' ? theme.colors.errorTintBorder : (props.tone == 'warning' ? theme.colors.warningTintBorder : theme.colors.primaryBorder)}"
+   },
+   "states": {
+    "hovered": {
+     "banner": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "left": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "message"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt",
+    "color": "secondaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}",
+    "props.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+   }
+  },
+  "action": {
+   "type": "row",
+   "children": [
+    "actionLabel",
+    "chevron"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "visible": "${= props.actionLabel != ''}"
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAction"
+      }
+     ]
+    }
+   ]
+  },
+  "actionLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.actionLabel}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+   }
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right",
+    "color": "secondaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+   }
+  }
+ }
+}

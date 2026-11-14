@@ -1,0 +1,545 @@
+{
+ "schema": 3,
+ "id": "OnboardingBanner",
+ "roots": [
+  "banner"
+ ],
+ "widget": {
+  "type": "OnboardingBanner",
+  "doc": "The first-run panel: a hero icon, a title and subtitle, what you get as bullets, and one button. Fires onCta.",
+  "props": [
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "rocket_launch",
+    "doc": "The hero icon."
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Welcome",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A sentence under it."
+   },
+   {
+    "key": "features",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "What you get, one line each."
+   },
+   {
+    "key": "featureIcons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "An icon for each line (same order; none: a check)."
+   },
+   {
+    "key": "ctaLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Get started",
+    "doc": "The button's words.",
+    "required": true
+   },
+   {
+    "key": "ctaIcon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An icon in the button (empty: none)."
+   },
+   {
+    "key": "footerHint",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under the button (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onCta"
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Welcome",
+   "size": [
+    320,
+    380
+   ],
+   "props": {
+    "title": "Set up your workspace",
+    "subtitle": "Connect a provider to start running agents.",
+    "features": [
+     "Runs on your machine",
+     "Bring your own keys",
+     "Nothing leaves your network"
+    ],
+    "ctaLabel": "Connect a provider"
+   }
+  }
+ ],
+ "nodes": {
+  "banner": {
+   "type": "column",
+   "children": [
+    "hero",
+    "title",
+    "subtitle",
+    "features",
+    "extra",
+    "cta",
+    "hint"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 380
+    },
+    "padding": [
+     16,
+     20,
+     16,
+     20
+    ]
+   }
+  },
+  "hero": {
+   "type": "row",
+   "children": [
+    "heroIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 64,
+    "height": 64
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryTintBorder"
+     }
+    ],
+    "radius": 16
+   }
+  },
+  "heroIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "rocket_launch",
+    "color": "primary",
+    "size": 28
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "textAlign": "center",
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.3
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 21
+    },
+    "margin": [
+     0,
+     16,
+     0,
+     0
+    ]
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "textAlign": "center",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.55,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 40
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   }
+  },
+  "features": {
+   "type": "column",
+   "children": [
+    "featureList"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 80
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ],
+    "margin": [
+     0,
+     20,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "visible": "${= length(props.features) > 0}"
+   }
+  },
+  "featureList": {
+   "type": "listView",
+   "children": [
+    "feature"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "bind": {
+    "data": "${props.features}"
+   }
+  },
+  "feature": {
+   "type": "row",
+   "children": [
+    "featureIcon",
+    "featureText"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "featureIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "secondaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13,
+    "margin": [
+     0,
+     2,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "props.icon": "${= length(props.featureIcons) > index ? props.featureIcons[index] : 'check'}"
+   }
+  },
+  "featureText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "extra": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 0
+    },
+    "margin": [
+     0,
+     16,
+     0,
+     0
+    ]
+   }
+  },
+  "content": {
+   "type": "slot"
+  },
+  "cta": {
+   "type": "row",
+   "children": [
+    "ctaIcon",
+    "ctaLabel"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": 40,
+    "margin": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 10
+   },
+   "states": {
+    "hovered": {
+     "cta": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "cta": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCta"
+      }
+     ]
+    }
+   ]
+  },
+  "ctaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward",
+    "color": "onAccent",
+    "size": 15
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "visible": "${= props.ctaIcon != ''}",
+    "props.icon": "${props.ctaIcon}"
+   }
+  },
+  "ctaLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.ctaLabel}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "onAccent",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "hint": {
+   "type": "text",
+   "props": {
+    "text": "${props.footerHint}",
+    "textAlign": "center",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 14
+    },
+    "margin": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.footerHint != ''}"
+   }
+  }
+ }
+}

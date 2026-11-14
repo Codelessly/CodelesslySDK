@@ -1,0 +1,244 @@
+{
+ "schema": 3,
+ "id": "FilterLegend",
+ "roots": [
+  "strip"
+ ],
+ "widget": {
+  "type": "FilterLegend",
+  "doc": "A strip of labeled counts that filter the list under it; the active one is underlined. Fires onSelected with the label.",
+  "props": [
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "All",
+     "Open",
+     "Closed"
+    ],
+    "doc": "The filters' names.",
+    "required": true
+   },
+   {
+    "key": "values",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A value after each name (same order)."
+   },
+   {
+    "key": "colors",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A color for each value (same order; none: tertiary text)."
+   },
+   {
+    "key": "active",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The label of the filter in use."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three",
+   "size": [
+    320,
+    28
+   ],
+   "props": {
+    "labels": [
+     "All",
+     "Open",
+     "Closed"
+    ],
+    "values": [
+     "42",
+     "12",
+     "30"
+    ],
+    "active": "Open"
+   }
+  }
+ ],
+ "nodes": {
+  "strip": {
+   "type": "row",
+   "children": [
+    "items"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     14,
+     8,
+     9,
+     8
+    ],
+    "constraints": {
+     "minHeight": 28
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "items": {
+   "type": "listView",
+   "children": [
+    "item"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 18
+   },
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": 14
+   },
+   "bind": {
+    "data": "${props.labels}"
+   }
+  },
+  "item": {
+   "type": "row",
+   "children": [
+    "label",
+    "value"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "fill": 14
+    }
+   },
+   "states": {
+    "hovered": {
+     "item": {
+      "opacity": 0.75
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.values) > index ? item + ': ' : item}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "props.style.decoration": "${= item == props.active ? 'underline' : 'none'}"
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.values) > index ? props.values[index] : ''}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.values) > index}",
+    "props.style.color": "${= length(props.colors) > index ? props.colors[index] : theme.colors.tertiaryText}"
+   }
+  }
+ }
+}
