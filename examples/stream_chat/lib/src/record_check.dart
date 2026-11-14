@@ -10,6 +10,9 @@ import 'dart:io';
 
 import 'package:codelessly_api/core.dart';
 import 'package:codelessly_api/validate.dart';
+// The SDK's formula parser, which imports no Flutter: the formulas a model
+// writes are checked with the parser the runtime uses.
+import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
 
 /// The design system [idOrPath] names: a design system folder (with a
 /// `design_system.json`), a bundle (`.json`, `tool/design_system_bundle.dart`),
@@ -59,10 +62,16 @@ Map<String, Object?> designSystemMeta(DesignSystem ds) => {'id': ds.id, 'name': 
 /// components' declarations.
 Catalog catalogFor(DesignSystem? ds) => ds?.catalogOver(Catalog.core) ?? Catalog.core;
 
+/// The check a recorded turn is validated with: the strict validator, its
+/// formulas read by the SDK's parser, against [designSystem]'s components
+/// and tokens when there is one. What UiSession hosts give their sessions.
+EditCheck recordCheck(DesignSystem? designSystem) =>
+    strictEditCheck(ValidateOptions(formulas: FormulaEvaluator.report, components: designSystem?.components, theme: designSystem?.tokens));
+
 /// The ops of [toolInput] applied to [doc] as a session applies a stream:
-/// one by one (incomplete), strictly validated (against [designSystem]'s
-/// components and tokens when there is one), then the end of the stream and
-/// the lints.
+/// one by one (incomplete), strictly validated ([recordCheck]), then the end
+/// of the stream (references still unresolved are errors, as a session
+/// reports them) and the lints.
 CheckedTurn checkToolInput(LayoutDocument doc, String toolInput,
     {required TrustProfile profile, required bool protect, required int rev, GlyphCoverage? coverage, DesignSystem? designSystem}) {
   final before = doc;
@@ -75,7 +84,7 @@ CheckedTurn checkToolInput(LayoutDocument doc, String toolInput,
   final diagnostics = <EditDiagnostic>[...end.diagnostics];
   final applied = <int>{}, rejected = <int>{};
   final appliedOps = <EditOp>[];
-  final check = strictEditCheck(ValidateOptions(components: designSystem?.components, theme: designSystem?.tokens));
+  final check = recordCheck(designSystem);
   for (final s in streamed) {
     final r = applyOps(doc, [s.op],
         catalog: catalog, profile: allowed, check: check, incomplete: true, protectRoots: protect && before.roots.isNotEmpty);
@@ -94,6 +103,17 @@ CheckedTurn checkToolInput(LayoutDocument doc, String toolInput,
     if (d.error && d.op >= 0) rejected.add(d.op);
   }
   diagnostics.addAll(endOfStream(doc));
+  // What was accepted while the stream ran because it might arrive later
+  // and never did (a variable, a node): errors now, in place of those
+  // warnings (UiSession.applyStream does the same).
+  final unresolved = unresolvedReferences(doc, check,
+      catalog: catalog,
+      nodes: [for (final id in doc.nodes.keys) if (before[id] != doc[id]) id],
+      variables: changedVariables(before, doc));
+  final late = {for (final d in unresolved) (d.code, d.path)};
+  diagnostics
+    ..removeWhere((d) => !d.error && late.contains((d.code, d.path)))
+    ..addAll(unresolved);
   final lints = uiLints(doc, hasGlyph: coverage);
   diagnostics.addAll(lints);
   final result = EditResult(
